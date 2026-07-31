@@ -207,19 +207,19 @@ const PARTNERS = [
 
 export function Partners() {
   return (
-    <section className="py-6 sm:py-8">
+    <section className="py-10 sm:py-14">
       <div className="mx-auto max-w-6xl px-4">
-        <h2 className="text-center font-display text-sm font-semibold tracking-widest text-forest/60 uppercase">
+        <h2 className="text-center font-display text-base font-semibold tracking-widest text-forest/60 uppercase sm:text-lg">
           Spolupracujeme
         </h2>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-5">
           {PARTNERS.map((p) => {
             const inner = (
               <img
                 src={p.logo}
                 alt={p.name}
                 loading="lazy"
-                className="max-h-8 w-auto max-w-[70%] object-contain opacity-80 transition group-hover:opacity-100 sm:max-h-10"
+                className="max-h-10 w-auto max-w-[80%] object-contain opacity-80 transition group-hover:opacity-100 sm:max-h-12"
               />
             );
             return p.href ? (
@@ -228,14 +228,14 @@ export function Partners() {
                 href={p.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex h-16 items-center justify-center rounded-2xl bg-card px-4 shadow-card transition hover:-translate-y-0.5 sm:min-w-40 sm:px-6"
+                className="group flex h-20 items-center justify-center rounded-2xl bg-card px-5 shadow-card transition hover:-translate-y-0.5 sm:min-w-44 sm:px-7"
               >
                 {inner}
               </a>
             ) : (
               <div
                 key={p.name}
-                className="group flex h-16 items-center justify-center rounded-2xl bg-card px-4 shadow-card sm:min-w-40 sm:px-6"
+                className="group flex h-20 items-center justify-center rounded-2xl bg-card px-5 shadow-card sm:min-w-44 sm:px-7"
               >
                 {inner}
               </div>
