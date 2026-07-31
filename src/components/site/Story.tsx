@@ -14,11 +14,11 @@ const whyIcons = [Home, Zap, Dog];
 
 export function Care() {
   return (
-    <section className="py-16 sm:py-20">
+    <section className="py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Ako sa postaráme o psíka</h2>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
           {CARE.map((c) => (
             <article
               key={c.title}
@@ -44,14 +44,14 @@ export function Care() {
 
 export function Why() {
   return (
-    <section className="py-16 sm:py-20">
+    <section className="py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="overflow-hidden rounded-4xl bg-forest px-6 py-12 text-cream sm:px-12">
+        <div className="overflow-hidden rounded-4xl bg-forest px-6 py-10 text-cream sm:px-12 sm:py-12">
           <h2 className="text-center font-display text-3xl text-cream sm:text-4xl">
             Prečo využiť psiu škôlku?
           </h2>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
             {WHY.map((w, i) => {
               const Icon = whyIcons[i]!;
               return (
@@ -69,7 +69,7 @@ export function Why() {
             })}
           </div>
 
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <a href="#kontakt" className="btn-coral">
               Mám záujem o škôlku
             </a>
@@ -88,7 +88,7 @@ export function Why() {
 
 export function About() {
   return (
-    <section id="o-nas" className="py-16 sm:py-20">
+    <section id="o-nas" className="py-12 sm:py-16">
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
         <div>
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
@@ -144,7 +144,7 @@ export function About() {
         </div>
       </div>
 
-      <div className="mx-auto mt-12 max-w-6xl px-4">
+      <div className="mx-auto mt-8 max-w-6xl px-4">
         <div className="grid items-center gap-8 rounded-4xl bg-secondary p-7 sm:p-10 lg:grid-cols-[1fr_auto]">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
@@ -173,7 +173,7 @@ export function About() {
                 src={c.src}
                 alt={c.alt}
                 loading="lazy"
-                className="w-full max-w-44 rounded-2xl object-contain shadow-card sm:max-w-52"
+                className="w-full max-w-36 rounded-2xl object-contain shadow-card sm:max-w-44"
               />
             ))}
           </div>
@@ -207,19 +207,19 @@ const PARTNERS = [
 
 export function Partners() {
   return (
-    <section className="py-10">
+    <section className="py-6 sm:py-8">
       <div className="mx-auto max-w-6xl px-4">
         <h2 className="text-center font-display text-sm font-semibold tracking-widest text-forest/60 uppercase">
           Spolupracujeme
         </h2>
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
           {PARTNERS.map((p) => {
             const inner = (
               <img
                 src={p.logo}
                 alt={p.name}
                 loading="lazy"
-                className="max-h-10 w-auto max-w-[70%] object-contain opacity-80 transition group-hover:opacity-100 sm:max-h-12"
+                className="max-h-8 w-auto max-w-[70%] object-contain opacity-80 transition group-hover:opacity-100 sm:max-h-10"
               />
             );
             return p.href ? (
@@ -228,14 +228,14 @@ export function Partners() {
                 href={p.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex h-20 items-center justify-center rounded-2xl bg-card px-4 shadow-card transition hover:-translate-y-0.5 sm:min-w-40 sm:px-6"
+                className="group flex h-16 items-center justify-center rounded-2xl bg-card px-4 shadow-card transition hover:-translate-y-0.5 sm:min-w-40 sm:px-6"
               >
                 {inner}
               </a>
             ) : (
               <div
                 key={p.name}
-                className="group flex h-20 items-center justify-center rounded-2xl bg-card px-4 shadow-card sm:min-w-40 sm:px-6"
+                className="group flex h-16 items-center justify-center rounded-2xl bg-card px-4 shadow-card sm:min-w-40 sm:px-6"
               >
                 {inner}
               </div>
