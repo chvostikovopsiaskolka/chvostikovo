@@ -145,28 +145,55 @@ export function About() {
       </div>
 
       <div className="mx-auto mt-12 max-w-6xl px-4">
-        <div className="rounded-4xl bg-secondary p-7 sm:p-10">
-          <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
-            <Check className="size-5 text-coral" /> Zdravie a bezpečie vášho psíka je pre nás na
-            prvom mieste!
-          </p>
+        <div className="grid items-center gap-8 rounded-4xl bg-secondary p-7 sm:p-10 lg:grid-cols-[1fr_auto]">
+          <div>
+            <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
+              <Check className="size-5 text-coral" /> Zdravie a bezpečie vášho psíka je pre nás na
+              prvom mieste!
+            </p>
+            <p className="mt-4 max-w-lg text-forest/80">
+              Obaja sme absolvovali workshop prvej pomoci pre psov, takže v prípade potreby vieme
+              zareagovať rýchlo a správne.
+            </p>
+          </div>
 
-          <div className="mt-7 grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-wrap gap-4">
             {[
-              { src: certAdriana.url, alt: "Certifikát – workshop prvej pomoci pre psov, Adriana Konkoľová" },
-              { src: certMarek.url, alt: "Certifikát – workshop prvej pomoci pre psov, Marek Leder" },
+              {
+                src: certAdriana.url,
+                name: "Adriana Konkoľová",
+                alt: "Certifikát – workshop prvej pomoci pre psov, Adriana Konkoľová",
+              },
+              {
+                src: certMarek.url,
+                name: "Marek Leder",
+                alt: "Certifikát – workshop prvej pomoci pre psov, Marek Leder",
+              },
             ].map((c) => (
-              <img
+              <a
                 key={c.src}
-                src={c.src}
-                alt={c.alt}
-                loading="lazy"
-                className="h-96 w-full rounded-3xl bg-card object-contain p-3 shadow-card"
-              />
+                href={c.src}
+                target="_blank"
+                rel="noreferrer"
+                className="group w-40 overflow-hidden rounded-2xl bg-card p-2 shadow-card transition hover:-translate-y-0.5 sm:w-44"
+              >
+                <img
+                  src={c.src}
+                  alt={c.alt}
+                  loading="lazy"
+                  className="h-40 w-full rounded-xl object-cover object-top sm:h-48"
+                />
+                <p className="px-1 py-2 text-center font-display text-xs font-semibold text-forest/70">
+                  Prvá pomoc pre psov
+                  <br />
+                  <span className="text-forest">{c.name}</span>
+                </p>
+              </a>
             ))}
           </div>
         </div>
       </div>
+
 
     </section>
   );
