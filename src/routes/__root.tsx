@@ -84,8 +84,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 import { CookieBanner } from "@/components/site/CookieBanner";
+import { GoogleAnalytics } from "@/components/site/GoogleAnalytics";
 import { GoogleTagManager } from "@/components/site/GoogleTagManager";
-import { MetaPixel } from "@/components/site/MetaPixel";
+
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
@@ -146,19 +147,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           priceRange: "€€",
         }),
       },
-      {
-        type: "text/javascript",
-        children: `
-          !function(f,b,e,v,n,t,s)
-          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-          n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t,s)}(window, document,'script',
-          'https://connect.facebook.net/en_US/fbevents.js');
-        `,
-      },
     ],
   }),
   shellComponent: RootShell,
@@ -189,9 +177,10 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <CookieBanner />
+      <GoogleAnalytics />
       <GoogleTagManager />
-      <MetaPixel />
     </QueryClientProvider>
+
   );
 }
 
