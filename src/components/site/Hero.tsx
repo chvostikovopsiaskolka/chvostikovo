@@ -12,7 +12,8 @@ export function Hero() {
           alt="Psíky v psej škôlke Chvostíkovo v Košiciach"
           className="size-full object-cover"
         />
-        <div className="absolute inset-0 bg-cream/55" />
+        <div className="absolute inset-0 bg-cream/80" />
+        <div className="absolute inset-0 bg-linear-to-r from-cream via-cream/70 to-cream/30" />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-cream to-transparent" />
       </div>
 
@@ -26,13 +27,15 @@ export function Hero() {
             psík zamiluje
           </h1>
 
-          <p className="mt-5 max-w-md font-display text-base font-semibold text-forest/90 sm:text-lg">
+          <p className="mt-5 max-w-md font-display text-base font-bold text-forest sm:text-lg">
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
-          <div className="mt-6 max-w-md space-y-1 text-forest/85">
-            <p className="font-semibold">Váš psík už nemusí tráviť deň sám doma.</p>
-            <p>
+          <div className="mt-6 max-w-md space-y-1 text-forest">
+            <p className="font-display text-lg font-bold">
+              Váš psík už nemusí tráviť deň sám doma.
+            </p>
+            <p className="font-medium text-forest/90">
               Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným
               dohľadom.
             </p>

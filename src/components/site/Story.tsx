@@ -1,12 +1,16 @@
 import { Home, Zap, Dog, Check } from "lucide-react";
-import { CARE, WHY, PHONE, CERTIFICATES } from "@/content/site";
+import { CARE, WHY, PHONE, GARDEN_PHOTO, SUNFLOWERS_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg.asset.json";
+import dogsPair from "@/assets/dogs-pair.jpg.asset.json";
+import certAdriana from "@/assets/cert-adriana.jpg.asset.json";
+import certMarek from "@/assets/cert-marek.png.asset.json";
 import wetpet from "@/assets/partner-wetpet.png";
 import bellacord from "@/assets/partner-bellacord.png";
 import coursing from "@/assets/partner-coursing.png";
 import lolkio from "@/assets/partner-lolkio.png";
 
 const whyIcons = [Home, Zap, Dog];
+
 
 export function Care() {
   return (
@@ -20,7 +24,12 @@ export function Care() {
               key={c.title}
               className="flex flex-col overflow-hidden rounded-4xl bg-card shadow-card"
             >
-              <img src={c.img} alt={c.alt} loading="lazy" className="h-56 w-full object-cover" />
+              <img
+                src={c.img}
+                alt={c.alt}
+                loading="lazy"
+                className={`h-56 w-full object-cover ${c.pos}`}
+              />
               <div className="flex flex-1 flex-col p-6">
                 <h3 className="text-xl text-forest">{c.title}</h3>
                 <p className="mt-3 text-[0.95rem] leading-relaxed text-forest/80">{c.text}</p>
@@ -111,42 +120,60 @@ export function About() {
           </div>
         </div>
 
-        <img
-          src={teamPhoto.url}
-          alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
-          loading="lazy"
-          className="h-80 w-full rounded-4xl object-cover shadow-card lg:h-[30rem]"
-        />
+        <div className="space-y-4">
+          <img
+            src={teamPhoto.url}
+            alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
+            loading="lazy"
+            className="h-60 w-full rounded-4xl object-cover shadow-card sm:h-72"
+          />
+          <div className="grid grid-cols-3 gap-3">
+            <img
+              src={dogsPair.url}
+              alt="Naši psíci – írske vlkodavy"
+              loading="lazy"
+              className="h-32 w-full rounded-3xl object-cover shadow-card sm:h-40"
+            />
+            <img
+              src={GARDEN_PHOTO}
+              alt="Naši psíci oddychujú v záhrade"
+              loading="lazy"
+              className="h-32 w-full rounded-3xl object-cover shadow-card sm:h-40"
+            />
+            <img
+              src={SUNFLOWERS_PHOTO}
+              alt="Majitelia Chvostíkova so svorkou psíkov v slnečnicovom poli"
+              loading="lazy"
+              className="h-32 w-full rounded-3xl object-cover shadow-card sm:h-40"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="mx-auto mt-12 max-w-6xl px-4">
         <div className="rounded-4xl bg-secondary p-7 sm:p-10">
-          <div className="flex flex-col items-start gap-3">
-            <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
-              <Check className="size-5 text-coral" /> Zdravie a bezpečie vášho psíka je pre nás na
-              prvom mieste!
-            </p>
-            <p className="max-w-2xl text-forest/80">
-              Preto sa neustále vzdelávame – absolvovali sme kurzy a školenia zamerané na prvú pomoc,
-              psiu reč a bezpečnú prácu so skupinou psov.
-            </p>
-          </div>
+          <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
+            <Check className="size-5 text-coral" /> Zdravie a bezpečie vášho psíka je pre nás na
+            prvom mieste!
+          </p>
 
-          {CERTIFICATES.length > 0 && (
-            <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {CERTIFICATES.map((c) => (
-                <img
-                  key={c.src}
-                  src={c.src}
-                  alt={c.alt}
-                  loading="lazy"
-                  className="h-64 w-full rounded-3xl bg-card object-contain p-3 shadow-card"
-                />
-              ))}
-            </div>
-          )}
+          <div className="mt-7 grid gap-4 sm:grid-cols-2">
+            {[
+              { src: certAdriana.url, alt: "Certifikát – workshop prvej pomoci pre psov, Adriana Konkoľová" },
+              { src: certMarek.url, alt: "Certifikát – workshop prvej pomoci pre psov, Marek Leder" },
+            ].map((c) => (
+              <img
+                key={c.src}
+                src={c.src}
+                alt={c.alt}
+                loading="lazy"
+                className="h-96 w-full rounded-3xl bg-card object-contain p-3 shadow-card"
+              />
+            ))}
+          </div>
         </div>
       </div>
+
     </section>
   );
 }

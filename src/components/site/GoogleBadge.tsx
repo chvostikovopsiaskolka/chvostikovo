@@ -1,11 +1,13 @@
 export function GoogleBadge({ className = "" }: { className?: string }) {
   return (
-    <div className={`inline-flex flex-wrap items-center gap-x-2 gap-y-1 ${className}`}>
+    <div
+      className={`inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-card/90 px-4 py-2 shadow-soft backdrop-blur-sm ${className}`}
+    >
       <span className="text-base leading-none tracking-tight text-[#F5B301]">★★★★★</span>
       <span className="font-display text-sm font-bold text-forest">5.0</span>
-      <span className="text-sm text-forest/75">hodnotenie na Google</span>
+      <span className="text-sm font-semibold text-forest">hodnotenie na Google</span>
       <span className="text-forest/40">•</span>
-      <span className="text-sm text-forest/75">viac ako 100 spokojných psíkov</span>
+      <span className="text-sm font-semibold text-forest">viac ako 100 spokojných psíkov</span>
       <svg viewBox="0 0 48 48" className="size-4 shrink-0" aria-hidden="true">
         <path
           fill="#EA4335"
