@@ -1,5 +1,5 @@
 import { Home, Zap, Dog, Check } from "lucide-react";
-import { CARE, WHY, PHONE, GARDEN_PHOTO, SUNFLOWERS_PHOTO } from "@/content/site";
+import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg.asset.json";
 import dogsPair from "@/assets/dogs-pair.jpg.asset.json";
 import certAdriana from "@/assets/cert-adriana.jpg.asset.json";
@@ -141,10 +141,10 @@ export function About() {
               className="h-32 w-full rounded-3xl object-cover shadow-card sm:h-40"
             />
             <img
-              src={SUNFLOWERS_PHOTO}
-              alt="Majitelia Chvostíkova so svorkou psíkov v slnečnicovom poli"
+              src={CARE[2]!.img}
+              alt="Psík počas dňa v škôlke Chvostíkovo"
               loading="lazy"
-              className="h-32 w-full rounded-3xl object-cover shadow-card sm:h-40"
+              className="h-32 w-full rounded-3xl object-cover object-[50%_20%] shadow-card sm:h-40"
             />
           </div>
         </div>
