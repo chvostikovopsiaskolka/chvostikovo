@@ -11,7 +11,8 @@ export function Hero() {
           alt="Psíky v psej škôlke Chvostíkovo v Košiciach"
           className="size-full object-cover"
         />
-        <div className="absolute inset-0 bg-linear-to-r from-cream via-cream/85 to-cream/30" />
+        <div className="absolute inset-0 bg-linear-to-r from-cream via-cream/80 to-cream/25" />
+        <div className="absolute inset-0 bg-cream/25" />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-cream to-transparent" />
       </div>
 
