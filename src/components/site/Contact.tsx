@@ -10,7 +10,7 @@ export function Contact() {
       <div className="mx-auto max-w-4xl px-4">
         <div className="text-center">
           <h2 className="section-title text-3xl leading-tight sm:text-4xl">
-            Máte záujem o škôlku alebo sa chcete informovať?
+            Máte záujem o škôlku?
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-forest/80">
             Formulár je nezáväzný – môžete cez neho prihlásiť psíka alebo nám jednoducho napísať
