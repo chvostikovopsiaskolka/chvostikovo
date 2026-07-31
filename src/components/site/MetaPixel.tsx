@@ -10,7 +10,9 @@ type Consent = {
 };
 
 function loadPixel() {
-  if (typeof window === "undefined" || (window as unknown as Record<string, unknown>).fbq) return;
+  if (typeof window === "undefined") return;
+  const w = window as unknown as Record<string, unknown>;
+  if (w.fbq) return;
 
   const script = document.createElement("script");
   script.innerHTML = `
