@@ -1,16 +1,17 @@
 import { Phone } from "lucide-react";
-import { HERO_IMAGE, PHONE, PHONE_PRETTY } from "@/content/site";
+import { PHONE, PHONE_PRETTY } from "@/content/site";
+import heroDogs from "@/assets/hero-dogs.jpg.asset.json";
 import { GoogleBadge } from "./GoogleBadge";
 import { ShortForm } from "./Forms";
 
 export function Hero() {
   return (
     <section id="top" className="relative overflow-hidden pt-24 pb-8 sm:pt-28 lg:pb-14">
-      <div className="absolute -inset-[16.5%] z-0 size-[133%]">
+      <div className="absolute inset-0 z-0">
         <img
-          src={HERO_IMAGE}
+          src={heroDogs.url}
           alt="Psíky v psej škôlke Chvostíkovo v Košiciach"
-          className="size-full object-cover"
+          className="size-full object-cover object-[50%_35%]"
         />
         <div className="absolute inset-0 bg-cream/10" />
         <div className="absolute inset-0 bg-linear-to-r from-cream/95 via-cream/55 via-45% to-transparent" />
