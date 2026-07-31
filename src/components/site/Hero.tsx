@@ -32,7 +32,7 @@ export function Hero() {
           </p>
 
           <div className="mx-auto mt-6 max-w-md space-y-1 rounded-2xl bg-card/95 p-4 shadow-soft text-forest md:mx-0">
-            <p className="font-display text-lg font-bold">
+            <p className="font-display text-lg font-bold whitespace-nowrap">
               Váš psík už nemusí tráviť deň sám doma.
             </p>
             <p className="font-medium text-forest/90">
