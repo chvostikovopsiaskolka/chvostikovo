@@ -31,7 +31,7 @@ export function Hero() {
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
-          <div className="mt-6 max-w-md space-y-1 text-forest [text-shadow:0_1px_8px_oklch(0.98_0.02_90/0.95)]">
+          <div className="mt-6 max-w-md space-y-1 rounded-2xl bg-card/95 p-4 shadow-soft text-forest">
             <p className="font-display text-lg font-bold">
               Váš psík už nemusí tráviť deň sám doma.
             </p>
