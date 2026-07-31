@@ -12,7 +12,7 @@ type Consent = {
 function loadPixel() {
   if (typeof window === "undefined") return;
   const w = window as unknown as Record<string, unknown>;
-  if (w.fbq) return;
+  if (w["fbq"]) return;
 
   const script = document.createElement("script");
   script.innerHTML = `
