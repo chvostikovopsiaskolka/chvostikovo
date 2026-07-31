@@ -4,6 +4,8 @@ import { EMAIL } from "@/content/site";
 const title = "Pravidlá používania cookies | Chvostíkovo";
 const description = "Informácie o používaní súborov cookies na stránke psej škôlky Chvostíkovo.";
 
+const BASE_URL = "https://chvostikovo.sk";
+
 export const Route = createFileRoute("/cookies")({
   head: () => ({
     meta: [
@@ -13,8 +15,10 @@ export const Route = createFileRoute("/cookies")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: `${BASE_URL}/cookies` },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: `${BASE_URL}/cookies` }],
   }),
   component: Cookies,
 });
