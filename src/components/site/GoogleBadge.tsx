@@ -1,9 +1,12 @@
 export function GoogleBadge({ className = "" }: { className?: string }) {
   return (
-    <div
-      className={`inline-flex flex-wrap items-center gap-x-3 gap-y-1 rounded-full bg-card px-4 py-2 shadow-card ${className}`}
-    >
-      <svg viewBox="0 0 48 48" className="size-5 shrink-0" aria-hidden="true">
+    <div className={`inline-flex flex-wrap items-center gap-x-2 gap-y-1 ${className}`}>
+      <span className="text-base leading-none tracking-tight text-[#F5B301]">★★★★★</span>
+      <span className="font-display text-sm font-bold text-forest">5.0</span>
+      <span className="text-sm text-forest/75">hodnotenie na Google</span>
+      <span className="text-forest/40">•</span>
+      <span className="text-sm text-forest/75">viac ako 100 spokojných psíkov</span>
+      <svg viewBox="0 0 48 48" className="size-4 shrink-0" aria-hidden="true">
         <path
           fill="#EA4335"
           d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.2.5 24 .5 14.6.5 6.5 5.9 2.6 13.8l7.8 6.1C12.3 13.7 17.7 9.5 24 9.5z"
@@ -21,9 +24,6 @@ export function GoogleBadge({ className = "" }: { className?: string }) {
           d="M24 47.5c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2.1 1.4-4.8 2.2-7.7 2.2-6.3 0-11.7-4.2-13.6-10l-7.8 6.1C6.5 42.1 14.6 47.5 24 47.5z"
         />
       </svg>
-      <span className="font-display text-lg font-bold text-forest">5.0</span>
-      <span className="text-base tracking-tight text-[#F5B301]">★★★★★</span>
-      <span className="text-sm font-semibold text-forest/80">viac ako 100 spokojných psíkov</span>
     </div>
   );
 }
