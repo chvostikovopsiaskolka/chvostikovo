@@ -76,27 +76,6 @@ export function About() {
   return (
     <section id="o-nas" className="py-16 sm:py-20">
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
-        <div className="grid grid-cols-2 gap-4">
-          <img
-            src={CARE[1]!.img}
-            alt="Opatrovatelia v psej škôlke Chvostíkovo"
-            loading="lazy"
-            className="col-span-2 h-64 w-full rounded-4xl object-cover shadow-card"
-          />
-          <img
-            src={CARE[0]!.img}
-            alt="Aktívny deň v psej škôlke"
-            loading="lazy"
-            className="h-44 w-full rounded-3xl object-cover shadow-card"
-          />
-          <img
-            src={CARE[2]!.img}
-            alt="Individuálny prístup ku psíkom"
-            loading="lazy"
-            className="h-44 w-full rounded-3xl object-cover shadow-card"
-          />
-        </div>
-
         <div>
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             O nás
@@ -125,17 +104,66 @@ export function About() {
               vlastným psom.
             </p>
           </div>
-          <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-secondary px-5 py-3 font-display font-semibold text-forest">
-            <Check className="size-5 text-coral" /> Zdravie a bezpečie vášho psíka je pre nás na
-            prvom mieste!
-          </p>
+        </div>
+
+        <img
+          src={teamPhoto.url}
+          alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
+          loading="lazy"
+          className="h-80 w-full rounded-4xl object-cover shadow-card lg:h-[30rem]"
+        />
+      </div>
+
+      <div className="mx-auto mt-12 max-w-6xl px-4">
+        <div className="rounded-4xl bg-secondary p-7 sm:p-10">
+          <div className="flex flex-col items-start gap-3">
+            <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
+              <Check className="size-5 text-coral" /> Zdravie a bezpečie vášho psíka je pre nás na
+              prvom mieste!
+            </p>
+            <p className="max-w-2xl text-forest/80">
+              Preto sa neustále vzdelávame – absolvovali sme kurzy a školenia zamerané na prvú pomoc,
+              psiu reč a bezpečnú prácu so skupinou psov.
+            </p>
+          </div>
+
+          {CERTIFICATES.length > 0 && (
+            <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {CERTIFICATES.map((c) => (
+                <img
+                  key={c.src}
+                  src={c.src}
+                  alt={c.alt}
+                  loading="lazy"
+                  className="h-64 w-full rounded-3xl bg-card object-contain p-3 shadow-card"
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>
   );
 }
 
-const PARTNERS = ["Veterina", "Krmivo", "Chovateľské potreby", "Psí tréning", "Salón"];
+const PARTNERS = [
+  {
+    name: "wetPet – rehabilitácia pre psov a mačky",
+    logo: wetpet,
+    href: "https://wetpet.sk/",
+  },
+  {
+    name: "Bellacord – handmade vodítka a obojky",
+    logo: bellacord,
+    href: "https://instagram.com/bellacord_handmade",
+  },
+  {
+    name: "Coursing Košice",
+    logo: coursing,
+    href: "https://www.facebook.com/groups/631834420173973/",
+  },
+  { name: "Lolkio – tréner psov", logo: lolkio, href: null },
+];
 
 export function Partners() {
   return (
@@ -145,16 +173,37 @@ export function Partners() {
           Spolupracujeme
         </h2>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-          {PARTNERS.map((p) => (
-            <div
-              key={p}
-              className="flex h-16 min-w-40 items-center justify-center rounded-2xl bg-card px-6 font-display font-semibold text-forest/50 shadow-card"
-            >
-              {p}
-            </div>
-          ))}
+          {PARTNERS.map((p) => {
+            const inner = (
+              <img
+                src={p.logo}
+                alt={p.name}
+                loading="lazy"
+                className="max-h-14 w-auto object-contain opacity-80 transition group-hover:opacity-100"
+              />
+            );
+            return p.href ? (
+              <a
+                key={p.name}
+                href={p.href}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex h-24 min-w-44 items-center justify-center rounded-2xl bg-card px-6 shadow-card transition hover:-translate-y-0.5"
+              >
+                {inner}
+              </a>
+            ) : (
+              <div
+                key={p.name}
+                className="group flex h-24 min-w-44 items-center justify-center rounded-2xl bg-card px-6 shadow-card"
+              >
+                {inner}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
+
