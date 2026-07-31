@@ -6,60 +6,55 @@ import { LongForm } from "./Forms";
 export function Contact() {
   return (
     <section id="kontakt" className="py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <h2 className="section-title text-3xl leading-tight sm:text-4xl">
-              Máte záujem o škôlku alebo sa chcete informovať?
-            </h2>
-            <p className="mt-4 text-forest/80">
-              Formulár je nezáväzný – môžete cez neho prihlásiť psíka alebo nám jednoducho napísať
-              otázku.
-            </p>
+      <div className="mx-auto max-w-4xl px-4">
+        <div className="text-center">
+          <h2 className="section-title text-3xl leading-tight sm:text-4xl">
+            Máte záujem o škôlku alebo sa chcete informovať?
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-forest/80">
+            Formulár je nezáväzný – môžete cez neho prihlásiť psíka alebo nám jednoducho napísať
+            otázku.
+          </p>
+        </div>
 
-            <div className="mt-8 space-y-4">
-              <ContactRow icon={<MapPin className="size-5" />} label="Adresa">
-                <a href={MAP_LINK} target="_blank" rel="noreferrer" className="hover:text-coral">
-                  Poľská 6, 040 01 Košice
-                </a>
-              </ContactRow>
-              <ContactRow icon={<Phone className="size-5" />} label="Telefón">
-                <a href={`tel:${PHONE}`} className="hover:text-coral">
-                  {PHONE_PRETTY}
-                </a>
-              </ContactRow>
-              <ContactRow icon={<Mail className="size-5" />} label="E-mail">
-                <a href={`mailto:${EMAIL}`} className="break-all hover:text-coral">
-                  {EMAIL}
-                </a>
-              </ContactRow>
-              <ContactRow icon={<Clock className="size-5" />} label="Otváracie hodiny">
-                Pondelok – piatok, 7:00 – 17:00
-              </ContactRow>
-            </div>
+        <div className="mt-8 rounded-4xl bg-card p-6 shadow-soft sm:p-9">
+          <LongForm />
+        </div>
 
-            <div className="mt-8 overflow-hidden rounded-4xl shadow-card">
-              <iframe
-                title="Mapa – Chvostíkovo, Poľská 6, Košice"
-                src="https://www.google.com/maps?q=Po%C4%BEsk%C3%A1%206,%20Ko%C5%A1ice&output=embed"
-                loading="lazy"
-                className="h-64 w-full border-0"
-              />
-            </div>
-          </div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          <ContactRow icon={<MapPin className="size-5" />} label="Adresa">
+            <a href={MAP_LINK} target="_blank" rel="noreferrer" className="hover:text-coral">
+              Poľská 6, 040 01 Košice
+            </a>
+          </ContactRow>
+          <ContactRow icon={<Phone className="size-5" />} label="Telefón">
+            <a href={`tel:${PHONE}`} className="hover:text-coral">
+              {PHONE_PRETTY}
+            </a>
+          </ContactRow>
+          <ContactRow icon={<Mail className="size-5" />} label="E-mail">
+            <a href={`mailto:${EMAIL}`} className="break-all hover:text-coral">
+              {EMAIL}
+            </a>
+          </ContactRow>
+          <ContactRow icon={<Clock className="size-5" />} label="Otváracie hodiny">
+            Pondelok – piatok, 7:00 – 17:00
+          </ContactRow>
+        </div>
 
-          <div className="rounded-4xl bg-card p-6 shadow-soft sm:p-8">
-            <h3 className="text-2xl text-forest">Kontaktujte nás</h3>
-            <p className="mt-2 mb-6 text-sm text-muted-foreground">
-              Podrobnejší formulár pre prihlásenie psíka do škôlky.
-            </p>
-            <LongForm />
-          </div>
+        <div className="mt-8 overflow-hidden rounded-4xl shadow-card">
+          <iframe
+            title="Mapa – Chvostíkovo, Poľská 6, Košice"
+            src="https://www.google.com/maps?q=Po%C4%BEsk%C3%A1%206,%20Ko%C5%A1ice&output=embed"
+            loading="lazy"
+            className="h-72 w-full border-0"
+          />
         </div>
       </div>
     </section>
   );
 }
+
 
 function ContactRow({
   icon,
