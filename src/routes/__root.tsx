@@ -9,6 +9,17 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import {
+  ADDRESS,
+  BUSINESS_DESCRIPTION,
+  BUSINESS_NAME,
+  EMAIL,
+  FACEBOOK,
+  INSTAGRAM,
+  MAP_LINK,
+  OPENING_HOURS,
+  PHONE,
+} from "@/content/site";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
