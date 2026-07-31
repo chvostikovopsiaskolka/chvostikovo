@@ -12,7 +12,7 @@ export function PhotoStrip() {
           {photos.map((src) => (
             <div
               key={src}
-              className="h-24 overflow-hidden rounded-xl sm:h-36 md:h-44"
+              className="aspect-[4/5] overflow-hidden rounded-xl sm:rounded-2xl"
             >
               <img
                 src={src}
