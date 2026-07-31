@@ -115,6 +115,38 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     scripts: [
       {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: BUSINESS_NAME,
+          description: BUSINESS_DESCRIPTION,
+          url: "https://chvostikovo.sk",
+          telephone: PHONE,
+          email: EMAIL,
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: ADDRESS.street,
+            addressLocality: ADDRESS.city,
+            postalCode: ADDRESS.postalCode,
+            addressCountry: ADDRESS.countryCode,
+          },
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: "48.7139",
+            longitude: "21.2581",
+          },
+          openingHoursSpecification: OPENING_HOURS.map((h) => ({
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: h.dayOfWeek,
+            opens: h.opens,
+            closes: h.closes,
+          })),
+          sameAs: [FACEBOOK, INSTAGRAM, MAP_LINK],
+          priceRange: "€€",
+        }),
+      },
+      {
         type: "text/javascript",
         children: `
           !function(f,b,e,v,n,t,s)
