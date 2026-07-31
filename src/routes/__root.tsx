@@ -73,6 +73,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 import { CookieBanner } from "@/components/site/CookieBanner";
+import { GoogleTagManager } from "@/components/site/GoogleTagManager";
 import { MetaPixel } from "@/components/site/MetaPixel";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -130,6 +131,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <CookieBanner />
+      <GoogleTagManager />
       <MetaPixel />
     </QueryClientProvider>
   );
