@@ -17,7 +17,9 @@ export function Hero() {
       </div>
 
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-        <div>
+      <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-8 lg:min-h-[34rem] lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+        <div className="lg:py-10">
+
           <h1 className="text-4xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
             Psia škôlka,
             <br />
