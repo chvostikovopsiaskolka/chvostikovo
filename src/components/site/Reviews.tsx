@@ -1,0 +1,39 @@
+import { REVIEWS } from "@/content/site";
+
+export function Reviews() {
+  return (
+    <section className="bg-secondary/50 py-16 sm:py-20">
+      <div className="mx-auto max-w-6xl px-4 text-center">
+        <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
+          Recenzie klientov
+        </span>
+        <h2 className="section-title mt-2 text-3xl sm:text-4xl">100+ spokojných psíkov</h2>
+        <p className="mt-3 text-forest/80">⭐ 5.0 z 5 na Google</p>
+
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {REVIEWS.map((r) => (
+            <figure
+              key={r.name}
+              className="flex h-full flex-col rounded-3xl bg-card p-6 text-left shadow-card"
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex size-11 items-center justify-center rounded-full bg-secondary font-display text-lg font-bold text-forest">
+                  {r.name.charAt(0)}
+                </span>
+                <div>
+                  <figcaption className="font-display text-sm font-bold text-forest">
+                    {r.name}
+                  </figcaption>
+                  <span className="text-sm tracking-tight text-[#F5B301]">★★★★★</span>
+                </div>
+              </div>
+              <blockquote className="mt-4 text-[0.95rem] leading-relaxed text-forest/85">
+                „{r.text}“
+              </blockquote>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
