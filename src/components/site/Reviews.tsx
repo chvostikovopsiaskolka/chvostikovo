@@ -14,13 +14,13 @@ export function Reviews() {
           {REVIEWS.map((r) => (
             <figure
               key={r.name}
-              className="flex h-full flex-col rounded-3xl bg-card p-6 text-left shadow-card"
+              className="flex h-full flex-col items-center rounded-3xl bg-card p-6 text-center shadow-card"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center gap-3">
                 <span className="flex size-11 items-center justify-center rounded-full bg-secondary font-display text-lg font-bold text-forest">
                   {r.name.charAt(0)}
                 </span>
-                <div>
+                <div className="text-left">
                   <figcaption className="font-display text-sm font-bold text-forest">
                     {r.name}
                   </figcaption>
