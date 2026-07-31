@@ -39,7 +39,7 @@ export function Why() {
 
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {WHY.map((w, i) => {
-              const Icon = whyIcons[i];
+              const Icon = whyIcons[i]!;
               return (
                 <div
                   key={w.title}
@@ -78,19 +78,19 @@ export function About() {
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
         <div className="grid grid-cols-2 gap-4">
           <img
-            src={CARE[1].img}
+            src={CARE[1]!.img}
             alt="Opatrovatelia v psej škôlke Chvostíkovo"
             loading="lazy"
             className="col-span-2 h-64 w-full rounded-4xl object-cover shadow-card"
           />
           <img
-            src={CARE[0].img}
+            src={CARE[0]!.img}
             alt="Aktívny deň v psej škôlke"
             loading="lazy"
             className="h-44 w-full rounded-3xl object-cover shadow-card"
           />
           <img
-            src={CARE[2].img}
+            src={CARE[2]!.img}
             alt="Individuálny prístup ku psíkom"
             loading="lazy"
             className="h-44 w-full rounded-3xl object-cover shadow-card"
