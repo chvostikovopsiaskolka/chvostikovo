@@ -1,7 +1,7 @@
-import { MapPin, Mail, Phone, Clock, Instagram } from "lucide-react";
+import { MapPin, Mail, Phone, Clock, Instagram, Facebook } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
-import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM } from "@/content/site";
+import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { LongForm } from "./Forms";
 
 export function Contact() {

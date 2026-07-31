@@ -6,6 +6,7 @@ export const PHONE = "+421951069395";
 export const PHONE_PRETTY = "+421 951 069 395";
 export const EMAIL = "chvostikovo.psiaskolka@gmail.com";
 export const MAP_LINK = "https://maps.app.goo.gl/otDwUKHtjwUdUa2JA";
+export const FACEBOOK = "https://www.facebook.com/profile.php?id=61564093374033";
 export const INSTAGRAM = "https://www.instagram.com/chvostikovo.psiaskolka/";
 
 export const GARDEN_PHOTO = `${M}fdc688_9f12012fbb7c4cb883a62be50c72cd7f~mv2.png/v1/fill/w_1200,h_1200,al_c,q_85,enc_auto/zahrada.png`;
