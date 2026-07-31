@@ -1,5 +1,10 @@
 import { Home, Zap, Dog, Check } from "lucide-react";
-import { CARE, WHY, PHONE } from "@/content/site";
+import { CARE, WHY, PHONE, CERTIFICATES } from "@/content/site";
+import teamPhoto from "@/assets/team-dogs.jpg.asset.json";
+import wetpet from "@/assets/partner-wetpet.png";
+import bellacord from "@/assets/partner-bellacord.png";
+import coursing from "@/assets/partner-coursing.png";
+import lolkio from "@/assets/partner-lolkio.png";
 
 const whyIcons = [Home, Zap, Dog];
 
