@@ -173,7 +173,7 @@ export function About() {
                 src={c.src}
                 alt={c.alt}
                 loading="lazy"
-                className="w-64 rounded-2xl object-contain shadow-card sm:w-72"
+                className="w-44 rounded-2xl object-contain shadow-card sm:w-52"
               />
             ))}
           </div>
