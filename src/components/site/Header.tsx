@@ -13,17 +13,18 @@ export function Header() {
         <div className="flex items-center gap-2 sm:gap-3">
           <a
             href={`tel:${PHONE}`}
-            className="inline-flex items-center gap-2 rounded-full bg-coral-soft/50 px-3 py-2 font-display text-sm font-semibold text-coral transition-colors hover:bg-coral-soft sm:px-4"
+            className="inline-flex items-center gap-1.5 rounded-full bg-coral-soft/50 px-2.5 py-1.5 font-display text-xs font-semibold text-coral transition-colors hover:bg-coral-soft sm:gap-2 sm:px-4 sm:py-2 sm:text-sm"
           >
-            <Phone className="size-4 shrink-0" />
+            <Phone className="size-3.5 shrink-0 sm:size-4" />
             <span className="hidden sm:inline">{PHONE_PRETTY}</span>
           </a>
           <a
             href="#kontakt"
-            className="btn-coral px-4 py-2.5 text-[0.82rem] sm:px-6 sm:text-sm"
+            className="btn-coral px-3 py-2 text-[0.7rem] leading-none whitespace-nowrap sm:px-6 sm:py-3 sm:text-sm"
           >
             Mám záujem o škôlku
           </a>
+
         </div>
       </div>
     </header>

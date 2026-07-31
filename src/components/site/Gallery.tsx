@@ -14,7 +14,7 @@ export function Gallery() {
   }
 
   return (
-    <section id="priestory" className="py-16 sm:py-20">
+    <section id="priestory" className="pt-8 pb-14 sm:pt-14 sm:pb-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>

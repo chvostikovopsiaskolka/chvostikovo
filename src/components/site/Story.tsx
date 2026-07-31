@@ -157,7 +157,7 @@ export function About() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-5">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5">
             {[
               {
                 src: certAdriana.url,
@@ -173,10 +173,11 @@ export function About() {
                 src={c.src}
                 alt={c.alt}
                 loading="lazy"
-                className="w-44 rounded-2xl object-contain shadow-card sm:w-52"
+                className="w-full max-w-44 rounded-2xl object-contain shadow-card sm:max-w-52"
               />
             ))}
           </div>
+
         </div>
       </div>
 
@@ -211,14 +212,14 @@ export function Partners() {
         <h2 className="text-center font-display text-sm font-semibold tracking-widest text-forest/60 uppercase">
           Spolupracujeme
         </h2>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
           {PARTNERS.map((p) => {
             const inner = (
               <img
                 src={p.logo}
                 alt={p.name}
                 loading="lazy"
-                className="max-h-14 w-auto object-contain opacity-80 transition group-hover:opacity-100"
+                className="max-h-10 w-auto max-w-[70%] object-contain opacity-80 transition group-hover:opacity-100 sm:max-h-12"
               />
             );
             return p.href ? (
@@ -227,20 +228,21 @@ export function Partners() {
                 href={p.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex h-24 min-w-44 items-center justify-center rounded-2xl bg-card px-6 shadow-card transition hover:-translate-y-0.5"
+                className="group flex h-20 items-center justify-center rounded-2xl bg-card px-4 shadow-card transition hover:-translate-y-0.5 sm:min-w-40 sm:px-6"
               >
                 {inner}
               </a>
             ) : (
               <div
                 key={p.name}
-                className="group flex h-24 min-w-44 items-center justify-center rounded-2xl bg-card px-6 shadow-card"
+                className="group flex h-20 items-center justify-center rounded-2xl bg-card px-4 shadow-card sm:min-w-40 sm:px-6"
               >
                 {inner}
               </div>
             );
           })}
         </div>
+
       </div>
     </section>
   );
