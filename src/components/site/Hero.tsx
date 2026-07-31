@@ -19,7 +19,7 @@ export function Hero() {
 
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-6 px-4 pb-4 text-center md:grid-cols-[1.05fr_0.95fr] md:gap-8 md:text-left lg:min-h-[34rem] lg:gap-14">
         <div className="lg:py-10">
-          <h1 className="text-3xl leading-[1.05] text-forest [text-shadow:0_1px_10px_oklch(0.98_0.02_90/0.9)] sm:text-5xl lg:text-6xl">
+          <h1 className="text-3xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
             Psia škôlka,
             <br />
             ktorú si váš
