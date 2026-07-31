@@ -4,6 +4,8 @@ import { EMAIL } from "@/content/site";
 const title = "Zásady ochrany osobných údajov | Chvostíkovo";
 const description = "Zásady ochrany osobných údajov psej škôlky Chvostíkovo v Košiciach.";
 
+const BASE_URL = "https://chvostikovo.sk";
+
 export const Route = createFileRoute("/ochrana-osobnych-udajov")({
   head: () => ({
     meta: [
@@ -13,8 +15,10 @@ export const Route = createFileRoute("/ochrana-osobnych-udajov")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: `${BASE_URL}/ochrana-osobnych-udajov` },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: `${BASE_URL}/ochrana-osobnych-udajov` }],
   }),
   component: Privacy,
 });
