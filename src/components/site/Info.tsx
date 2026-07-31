@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ShieldCheck, HeartHandshake, Sparkles, Stethoscope, Check, Plus, Minus, Car } from "lucide-react";
-import { REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE } from "@/content/site";
+import { ShieldCheck, HeartHandshake, Sparkles, Stethoscope, Check, Plus, Minus, Car, Phone } from "lucide-react";
+import { REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
 
 const reqIcons = [ShieldCheck, HeartHandshake, Sparkles, Stethoscope];
 
