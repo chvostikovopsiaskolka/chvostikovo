@@ -16,7 +16,6 @@ export function Hero() {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-cream to-transparent" />
       </div>
 
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-8 lg:min-h-[34rem] lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
         <div className="lg:py-10">
 
