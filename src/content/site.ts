@@ -9,6 +9,25 @@ export const MAP_LINK = "https://maps.app.goo.gl/otDwUKHtjwUdUa2JA";
 export const FACEBOOK = "https://www.facebook.com/profile.php?id=61564093374033";
 export const INSTAGRAM = "https://www.instagram.com/chvostikovo.psiaskolka/";
 
+export const ADDRESS = {
+  street: "Poľská 6",
+  city: "Košice",
+  postalCode: "040 01",
+  country: "Slovakia",
+  countryCode: "SK",
+};
+
+export const BUSINESS_NAME = "Chvostíkovo psia škôlka";
+export const BUSINESS_DESCRIPTION =
+  "Psia škôlka v Košiciach pre stredné a veľké plemená. Individuálny prístup, celodenný dohľad a bezpečné prostredie.";
+export const OPENING_HOURS = [
+  { dayOfWeek: "Monday", opens: "07:00", closes: "17:00" },
+  { dayOfWeek: "Tuesday", opens: "07:00", closes: "17:00" },
+  { dayOfWeek: "Wednesday", opens: "07:00", closes: "17:00" },
+  { dayOfWeek: "Thursday", opens: "07:00", closes: "17:00" },
+  { dayOfWeek: "Friday", opens: "07:00", closes: "17:00" },
+];
+
 export const GARDEN_PHOTO = `${M}fdc688_9f12012fbb7c4cb883a62be50c72cd7f~mv2.png/v1/fill/w_1200,h_1200,al_c,q_85,enc_auto/zahrada.png`;
 export const SUNFLOWERS_PHOTO = `${M}fdc688_cfe63a54df4e4e26bb4d8f40be5b6bf7~mv2.jpg/v1/fill/w_1200,h_900,al_c,q_85,enc_auto/slnecnice.jpg`;
 
