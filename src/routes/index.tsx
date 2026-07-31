@@ -9,6 +9,8 @@ import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
 
+const BASE_URL = "https://chvostikovo-tails-and-trails.lovable.app";
+const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Psia škôlka Košice | Denné stráženie psov | Chvostíkovo";
 const description =
   "Psia škôlka Košice pre stredné a veľké plemená. Denné stráženie psov s individuálnym prístupom, aktívnym dňom a celodenným dohľadom.";
@@ -21,10 +23,35 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: `${BASE_URL}/` },
+      { property: "og:image", content: OG_IMAGE },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Chvostíkovo - psia škôlka Košice" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: description },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: `${BASE_URL}/` }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "Chvostíkovo",
+          description,
+          url: `${BASE_URL}/`,
+          telephone: "+421951069395",
+          image: OG_IMAGE,
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Košice",
+            addressCountry: "SK",
+          },
+        }),
+      },
+    ],
   }),
   component: Index,
 });

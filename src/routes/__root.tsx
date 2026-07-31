@@ -79,13 +79,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Psia škôlka Košice | Denné stráženie psov | Chvostíkovo" },
-      { name: "description", content: "Psia škôlka Košice pre stredné a veľké plemená. Denné stráženie psov s individuálnym prístupom, aktívnym dňom a celodenným dohľadom." },
       { name: "author", content: "Chvostíkovo" },
       { property: "og:site_name", content: "Chvostíkovo" },
-      { property: "og:title", content: "Psia škôlka Košice | Denné stráženie psov | Chvostíkovo" },
-      { property: "og:description", content: "Psia škôlka Košice pre stredné a veľké plemená. Denné stráženie psov s individuálnym prístupom, aktívnym dňom a celodenným dohľadom." },
-      { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
