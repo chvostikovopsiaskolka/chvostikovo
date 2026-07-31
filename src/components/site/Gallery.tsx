@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { GALLERY, MAP_LINK } from "@/content/site";
 
 export function Gallery() {
   const [active, setActive] = useState<number | null>(null);
   const img = active === null ? null : GALLERY[active];
+  const track = useRef<HTMLDivElement>(null);
+
+  function slide(dir: -1 | 1) {
+    const el = track.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * Math.max(el.clientWidth * 0.8, 260), behavior: "smooth" });
+  }
 
   return (
     <section id="priestory" className="py-16 sm:py-20">
@@ -27,27 +34,49 @@ export function Gallery() {
           </a>
         </div>
 
-        <div className="mt-8 grid auto-rows-[11rem] grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {GALLERY.map((item, i) => (
+        <div className="relative mt-8">
+          <div
+            ref={track}
+            className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {GALLERY.map((item, i) => (
+              <button
+                key={item.src}
+                type="button"
+                onClick={() => setActive(i)}
+                className="group relative h-64 w-[78%] shrink-0 snap-start overflow-hidden rounded-4xl shadow-card sm:h-80 sm:w-[46%] lg:w-[31%]"
+              >
+                <img
+                  src={item.src}
+                  alt={item.alt}
+                  loading={i > 2 ? "lazy" : undefined}
+                  className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-forest-deep/85 to-transparent p-4 text-left text-sm font-semibold text-cream">
+                  {item.caption}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-5 flex justify-center gap-3">
             <button
-              key={item.src}
               type="button"
-              onClick={() => setActive(i)}
-              className={`group relative overflow-hidden rounded-3xl ${
-                i === 0 ? "col-span-2 row-span-2" : ""
-              }`}
+              aria-label="Predchádzajúce fotky"
+              onClick={() => slide(-1)}
+              className="flex size-11 items-center justify-center rounded-full bg-card text-forest shadow-card transition hover:bg-secondary"
             >
-              <img
-                src={item.src}
-                alt={item.alt}
-                loading={i > 3 ? "lazy" : undefined}
-                className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-forest-deep/85 to-transparent p-3 text-left text-xs font-semibold text-cream">
-                {item.caption}
-              </span>
+              <ChevronLeft className="size-5" />
             </button>
-          ))}
+            <button
+              type="button"
+              aria-label="Ďalšie fotky"
+              onClick={() => slide(1)}
+              className="flex size-11 items-center justify-center rounded-full bg-card text-forest shadow-card transition hover:bg-secondary"
+            >
+              <ChevronRight className="size-5" />
+            </button>
+          </div>
         </div>
       </div>
 
