@@ -73,6 +73,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 import { CookieBanner } from "@/components/site/CookieBanner";
+import { MetaPixel } from "@/components/site/MetaPixel";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
@@ -129,6 +130,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <CookieBanner />
+      <MetaPixel />
     </QueryClientProvider>
   );
 }
