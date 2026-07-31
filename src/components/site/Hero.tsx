@@ -6,7 +6,7 @@ import { ShortForm } from "./Forms";
 export function Hero() {
   return (
     <section id="top" className="relative overflow-hidden pt-24 pb-8 sm:pt-28 lg:pb-14">
-      <div className="absolute inset-0 z-0">
+      <div className="absolute -inset-[5%] z-0 size-[110%]">
         <img
           src={HERO_IMAGE}
           alt="Psíky v psej škôlke Chvostíkovo v Košiciach"
