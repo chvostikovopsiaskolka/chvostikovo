@@ -148,3 +148,5 @@ export const FAQ = [
     a: "V rámci denného pobytu stravu štandardne nezabezpečujeme, odporúčame však priniesť vlastné maškrty (v prípade alergie) alebo krmivo, ak je váš psík zvyknutý jesť v čase škôlky.",
   },
 ];
+
+export const CERTIFICATES: { src: string; alt: string }[] = [];
