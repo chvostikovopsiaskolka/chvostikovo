@@ -1,7 +1,7 @@
-import { MapPin, Mail, Phone, Clock } from "lucide-react";
+import { MapPin, Mail, Phone, Clock, Instagram } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
-import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK } from "@/content/site";
+import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM } from "@/content/site";
 import { LongForm } from "./Forms";
 
 export function Contact() {
@@ -90,12 +90,23 @@ export function Footer() {
           alt="Chvostíkovo psia škôlka"
           className="h-8 w-auto brightness-0 invert opacity-90"
         />
-        <p className="text-sm">
-          Psia škôlka Chvostíkovo · Poľská 6, Košice ·{" "}
-          <a href={`tel:${PHONE}`} className="font-semibold text-cream hover:text-coral-soft">
-            {PHONE_PRETTY}
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-sm">
+            Psia škôlka Chvostíkovo · Poľská 6, Košice ·{" "}
+            <a href={`tel:${PHONE}`} className="font-semibold text-cream hover:text-coral-soft">
+              {PHONE_PRETTY}
+            </a>
+          </p>
+          <a
+            href={INSTAGRAM}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Instagram Chvostíkovo"
+            className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
+          >
+            <Instagram className="size-5" />
           </a>
-        </p>
+        </div>
         <p className="text-xs">
           © {new Date().getFullYear()} Chvostíkovo ·{" "}
           <Link to="/cookies" className="underline hover:text-cream">
