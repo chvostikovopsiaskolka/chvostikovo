@@ -157,38 +157,24 @@ export function About() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-5">
             {[
               {
                 src: certAdriana.url,
-                name: "Adriana Konkoľová",
                 alt: "Certifikát – workshop prvej pomoci pre psov, Adriana Konkoľová",
               },
               {
                 src: certMarek.url,
-                name: "Marek Leder",
                 alt: "Certifikát – workshop prvej pomoci pre psov, Marek Leder",
               },
             ].map((c) => (
-              <a
+              <img
                 key={c.src}
-                href={c.src}
-                target="_blank"
-                rel="noreferrer"
-                className="group w-40 overflow-hidden rounded-2xl bg-card p-2 shadow-card transition hover:-translate-y-0.5 sm:w-44"
-              >
-                <img
-                  src={c.src}
-                  alt={c.alt}
-                  loading="lazy"
-                  className="h-40 w-full rounded-xl object-cover object-top sm:h-48"
-                />
-                <p className="px-1 py-2 text-center font-display text-xs font-semibold text-forest/70">
-                  Prvá pomoc pre psov
-                  <br />
-                  <span className="text-forest">{c.name}</span>
-                </p>
-              </a>
+                src={c.src}
+                alt={c.alt}
+                loading="lazy"
+                className="w-64 rounded-2xl object-contain shadow-card sm:w-72"
+              />
             ))}
           </div>
         </div>
