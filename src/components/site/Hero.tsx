@@ -12,9 +12,9 @@ export function Hero() {
           alt="Psíky v psej škôlke Chvostíkovo v Košiciach"
           className="size-full object-cover"
         />
-        <div className="absolute inset-0 bg-cream/80" />
-        <div className="absolute inset-0 bg-linear-to-r from-cream via-cream/70 to-cream/30" />
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-cream to-transparent" />
+        <div className="absolute inset-0 bg-cream/25" />
+        <div className="absolute inset-0 bg-linear-to-r from-cream via-cream/85 via-40% to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-cream to-transparent" />
       </div>
 
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 px-4 pb-8 md:grid-cols-[1.05fr_0.95fr] md:gap-8 lg:min-h-[34rem] lg:gap-14">
