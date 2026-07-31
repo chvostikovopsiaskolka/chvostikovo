@@ -1,6 +1,6 @@
 const M = "https://static.wixstatic.com/media/";
 
-export const HERO_IMAGE = `${M}fdc688_6d964e3e1c8b48b6a84a4d5c3cdfd456~mv2.jpg/v1/fill/w_1905,h_1074,fp_0.50_0.50,q_90,enc_auto/hero.jpg`;
+export const HERO_IMAGE = `${M}fdc688_6d964e3e1c8b48b6a84a4d5c3cdfd456~mv2.jpg/v1/fill/w_1905,h_1074,fp_0.50_0.50,q_90,usm_0.66_1.00_0.01,enc_auto/fdc688_6d964e3e1c8b48b6a84a4d5c3cdfd456~mv2.jpg`;
 
 export const PHONE = "+421951069395";
 export const PHONE_PRETTY = "+421 951 069 395";
