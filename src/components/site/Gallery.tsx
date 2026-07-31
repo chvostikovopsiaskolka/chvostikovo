@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { GALLERY, MAP_LINK } from "@/content/site";
 
 export function Gallery() {
-  const [index, setIndex] = useState(0);
+  const [active, setActive] = useState<number | null>(null);
+  const img = active === null ? null : GALLERY[active];
 
   return (
     <section id="priestory" className="py-16 sm:py-20">
@@ -26,83 +27,77 @@ export function Gallery() {
           </a>
         </div>
 
-        <div className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {GALLERY.map((img, i) => (
+        <div className="mt-8 grid auto-rows-[11rem] grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {GALLERY.map((item, i) => (
             <button
-              key={img.src}
+              key={item.src}
               type="button"
-              onClick={() => setIndex(i)}
+              onClick={() => setActive(i)}
               className={`group relative overflow-hidden rounded-3xl ${
-                i === 0 ? "sm:col-span-2 sm:row-span-2" : ""
+                i === 0 ? "col-span-2 row-span-2" : ""
               }`}
             >
               <img
-                src={img.src}
-                alt={img.alt}
+                src={item.src}
+                alt={item.alt}
                 loading={i > 3 ? "lazy" : undefined}
-                className={`w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
-                  i === 0 ? "h-64 sm:h-full sm:min-h-[22rem]" : "h-44"
-                }`}
+                className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-forest-deep/80 to-transparent p-3 text-left text-xs font-semibold text-cream">
-                {img.caption}
+              <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-forest-deep/85 to-transparent p-3 text-left text-xs font-semibold text-cream">
+                {item.caption}
               </span>
             </button>
           ))}
         </div>
       </div>
 
-      {index >= 0 && (
-        <Lightbox index={index} setIndex={setIndex} />
-      )}
-    </section>
-  );
-}
-
-function Lightbox({
-  index,
-  setIndex,
-}: {
-  index: number;
-  setIndex: (i: number) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  // open lightbox whenever index changes via click
-  const img = GALLERY[index];
-
-  return (
-    <>
-      {open && img && (
+      {img && (
         <div
           className="fixed inset-0 z-60 flex items-center justify-center bg-forest-deep/90 p-4"
-          onClick={() => setOpen(false)}
+          onClick={() => setActive(null)}
         >
           <button
             type="button"
-            aria-label="Predchádzajúca"
-            className="absolute left-4 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest"
+            aria-label="Zavrieť"
+            className="absolute top-5 right-5 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest"
+            onClick={() => setActive(null)}
+          >
+            <X />
+          </button>
+          <button
+            type="button"
+            aria-label="Predchádzajúca fotka"
+            className="absolute left-3 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest sm:left-8"
             onClick={(e) => {
               e.stopPropagation();
-              setIndex((index - 1 + GALLERY.length) % GALLERY.length);
+              setActive(((active as number) - 1 + GALLERY.length) % GALLERY.length);
             }}
           >
             <ChevronLeft />
           </button>
-          <img src={img.src} alt={img.alt} className="max-h-[85vh] rounded-3xl object-contain" />
+          <figure onClick={(e) => e.stopPropagation()} className="text-center">
+            <img
+              src={img.src}
+              alt={img.alt}
+              className="max-h-[80vh] rounded-3xl object-contain shadow-soft"
+            />
+            <figcaption className="mt-3 font-display text-sm font-semibold text-cream">
+              {img.caption}
+            </figcaption>
+          </figure>
           <button
             type="button"
-            aria-label="Nasledujúca"
-            className="absolute right-4 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest"
+            aria-label="Nasledujúca fotka"
+            className="absolute right-3 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest sm:right-8"
             onClick={(e) => {
               e.stopPropagation();
-              setIndex((index + 1) % GALLERY.length);
+              setActive(((active as number) + 1) % GALLERY.length);
             }}
           >
             <ChevronRight />
           </button>
         </div>
       )}
-      <span className="hidden" onClick={() => setOpen(true)} />
-    </>
+    </section>
   );
 }
