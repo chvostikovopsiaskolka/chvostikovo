@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ShieldCheck, HeartHandshake, Sparkles, Stethoscope, Check, Plus, Minus, Car } from "lucide-react";
-import { REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE } from "@/content/site";
+import { ShieldCheck, HeartHandshake, Sparkles, Stethoscope, Check, Plus, Minus, Car, Phone } from "lucide-react";
+import { REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
 
 const reqIcons = [ShieldCheck, HeartHandshake, Sparkles, Stethoscope];
 
@@ -34,16 +34,54 @@ export function Requirements() {
   );
 }
 
+const STEPS = [
+  {
+    title: "Prvý kontakt",
+    text: "Zavoláte nám alebo vyplníte formulár. Poviete nám o psíkovi a dohodneme si termín zoznamovacej návštevy.",
+  },
+  {
+    title: "Zoznamovacia návšteva",
+    text: "Zistíme, ako váš psík reaguje na nové prostredie a iných chlpáčov. Prejdeme si spolu priestory, režim dňa aj jeho potreby.",
+  },
+  {
+    title: "Prvý deň v škôlke",
+    text: "Psík nastupuje do svorky pod dohľadom opatrovateľov. Počas dňa vám posielame fotky a videá, aby ste vedeli, ako sa má.",
+  },
+];
+
 export function FirstVisit() {
   return (
-    <section className="py-8 sm:py-12">
+    <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="flex flex-col items-center gap-6 rounded-4xl bg-secondary px-6 py-12 text-center sm:px-12">
-          <h2 className="section-title text-3xl sm:text-4xl">Prvá návšteva škôlky</h2>
-          <p className="max-w-2xl text-forest/85">
-            Pred prvým dňom v škôlke nás čaká zoznamovacia návšteva. Počas nej zistíme, ako váš psík
-            reaguje na nové prostredie a iných chlpáčov, aby sme mu zabezpečili čo najlepší štart.
-          </p>
+        <div className="text-center">
+          <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
+            Ako to funguje
+          </span>
+          <h2 className="section-title mt-2 text-3xl sm:text-4xl">Prvá návšteva v 3 krokoch</h2>
+          <p className="mt-3 text-forest/80">Prehľadný proces bez zbytočných komplikácií.</p>
+        </div>
+
+        <ol className="mt-10 grid gap-5 md:grid-cols-3">
+          {STEPS.map((s, i) => (
+            <li key={s.title} className="relative rounded-4xl bg-card p-7 pt-9 shadow-card">
+              <span className="absolute -top-5 left-7 flex size-11 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-primary-foreground shadow-card">
+                {i + 1}
+              </span>
+              <h3 className="text-xl text-forest">{s.title}</h3>
+              <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{s.text}</p>
+              {i === 0 && (
+                <a
+                  href={`tel:${PHONE}`}
+                  className="mt-4 inline-flex items-center gap-2 font-display text-sm font-semibold text-coral"
+                >
+                  <Phone className="size-4" /> {PHONE_PRETTY}
+                </a>
+              )}
+            </li>
+          ))}
+        </ol>
+
+        <div className="mt-8 flex justify-center">
           <a href="#kontakt" className="btn-coral">
             Mám záujem o prvú návštevu
           </a>
