@@ -1,4 +1,5 @@
 import { MapPin, Mail, Phone, Clock } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
 import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK } from "@/content/site";
 import { LongForm } from "./Forms";
@@ -95,7 +96,17 @@ export function Footer() {
             {PHONE_PRETTY}
           </a>
         </p>
-        <p className="text-xs">© {new Date().getFullYear()} Chvostíkovo</p>
+        <p className="text-xs">
+          © {new Date().getFullYear()} Chvostíkovo ·{" "}
+          <Link to="/cookies" className="underline hover:text-cream">
+            Cookies
+          </Link>{" "}
+          ·{" "}
+          <Link to="/ochrana-osobnych-udajov" className="underline hover:text-cream">
+            Ochrana osobných údajov
+          </Link>
+        </p>
+
       </div>
     </footer>
   );

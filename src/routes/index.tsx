@@ -5,6 +5,7 @@ import { Gallery } from "@/components/site/Gallery";
 import { Reviews } from "@/components/site/Reviews";
 import { Care, Why, About, Partners } from "@/components/site/Story";
 import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
+import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { Contact, Footer } from "@/components/site/Contact";
 
 const title = "Chvostíkovo – psia škôlka v Košiciach pre stredné a veľké psy";
@@ -40,6 +41,7 @@ function Index() {
         <Requirements />
         <FirstVisit />
         <Pricing />
+        <InstagramFeed />
         <Faq />
         <Contact />
       </main>

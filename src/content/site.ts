@@ -6,6 +6,11 @@ export const PHONE = "+421951069395";
 export const PHONE_PRETTY = "+421 951 069 395";
 export const EMAIL = "chvostikovo.psiaskolka@gmail.com";
 export const MAP_LINK = "https://maps.app.goo.gl/otDwUKHtjwUdUa2JA";
+export const INSTAGRAM = "https://www.instagram.com/chvostikovo.psiaskolka/";
+
+export const GARDEN_PHOTO = `${M}fdc688_9f12012fbb7c4cb883a62be50c72cd7f~mv2.png/v1/fill/w_1200,h_1200,al_c,q_85,enc_auto/zahrada.png`;
+export const SUNFLOWERS_PHOTO = `${M}fdc688_cfe63a54df4e4e26bb4d8f40be5b6bf7~mv2.jpg/v1/fill/w_1200,h_900,al_c,q_85,enc_auto/slnecnice.jpg`;
+
 
 const g = (id: string, ext = "png") =>
   `${M}fdc688_${id}~mv2.${ext}/v1/fill/w_900,h_900,al_c,q_85,enc_auto/foto.${ext === "jpeg" ? "jpeg" : "png"}`;
@@ -28,18 +33,21 @@ export const GALLERY = [
 export const CARE = [
   {
     img: g("3922bb32a21642d5b57ed9938ffd256b"),
+    pos: "object-[50%_18%]",
     title: "Aktívny deň",
     alt: "Aktívny deň v psej škôlke",
     text: "Kým pracujete alebo si vybavujete povinnosti, váš psík si u nás užije aktívny deň plný pohybu, hier a kontaktu s inými psami. Do sýtosti si vybije fyzickú aj mentálnu energiu, užije si výbeh a prechádzky na čerstvom vzduchu. Samozrejmosťou je aj oddych a veľa mojkania!",
   },
   {
     img: g("c8799fdc98554252af0a25aa67197faa"),
+    pos: "object-[50%_12%]",
     title: "Celodenný dohľad",
     alt: "Celodenný dohľad v psej škôlke v Košiciach",
     text: "Chvostíkovo je druhým domovom pre vášho psíka. Preto sú bezpečie a komfort našich psích škôlkarov na prvom mieste. Počas celého dňa na psy dohliadajú minimálne dvaja skúsení opatrovatelia, ktorí zabezpečujú pokojné prostredie pre hru, oddych a bezpečné interakcie.",
   },
   {
     img: g("edc3d7299bb443f2ad29502a3d0ea3c6"),
+    pos: "object-[50%_10%]",
     title: "Individuálny prístup",
     alt: "Psia škôlka - weimarský stavač",
     text: "Každý psík je jedinečný, preto ku každému pristupujeme individuálne, s trpezlivosťou a rešpektom k jeho potrebám. Ako majitelia psov vieme, akú dôveru nám zverujete – každému škôlkarovi venujeme rovnakú starostlivosť, akú by sme dopriali aj vlastným psom.",
@@ -149,4 +157,4 @@ export const FAQ = [
   },
 ];
 
-export const CERTIFICATES: { src: string; alt: string }[] = [];
+
