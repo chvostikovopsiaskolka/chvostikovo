@@ -39,7 +39,9 @@ function Index() {
         <Why />
         <About />
         <Partners />
+        <PhotoStrip />
         <Requirements />
+
         <FirstVisit />
         <Pricing />
         <InstagramFeed />
