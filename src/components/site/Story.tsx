@@ -127,24 +127,18 @@ export function About() {
             loading="lazy"
             className="h-60 w-full rounded-4xl object-cover shadow-card sm:h-72"
           />
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <img
               src={dogsPair.url}
               alt="Naši psíci – írske vlkodavy"
               loading="lazy"
-              className="h-32 w-full rounded-3xl object-cover shadow-card sm:h-40"
+              className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
             />
             <img
               src={GARDEN_PHOTO}
               alt="Naši psíci oddychujú v záhrade"
               loading="lazy"
-              className="h-32 w-full rounded-3xl object-cover shadow-card sm:h-40"
-            />
-            <img
-              src={CARE[2]!.img}
-              alt="Psík počas dňa v škôlke Chvostíkovo"
-              loading="lazy"
-              className="h-32 w-full rounded-3xl object-cover object-[50%_20%] shadow-card sm:h-40"
+              className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
             />
           </div>
         </div>
