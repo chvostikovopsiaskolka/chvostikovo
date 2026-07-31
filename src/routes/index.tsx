@@ -9,9 +9,9 @@ import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
 
-const title = "Chvostíkovo – psia škôlka v Košiciach pre stredné a veľké psy";
+const title = "Psia škôlka Košice | Denné stráženie psov | Chvostíkovo";
 const description =
-  "Denná psia škôlka v Košiciach pre stredné a veľké plemená. Celodenný dohľad, výbeh 80 m², individuálny prístup. Hodnotenie 5.0 na Google a 100+ spokojných psíkov.";
+  "Psia škôlka Košice pre stredné a veľké plemená. Denné stráženie psov s individuálnym prístupom, aktívnym dňom a celodenným dohľadom.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
