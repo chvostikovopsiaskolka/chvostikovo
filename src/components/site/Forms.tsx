@@ -75,9 +75,10 @@ export function ShortForm() {
         <input type="checkbox" required className="mt-1 accent-[oklch(0.72_0.108_40)]" />
         Súhlasím so spracovaním osobných údajov.
       </label>
-      <button type="submit" className="btn-coral w-full">
-        Chcem sa informovať o škôlke
+      <button type="submit" className="btn-coral w-full px-4 py-2.5 text-sm">
+        Chcem sa informovať
       </button>
+
     </form>
   );
 }
