@@ -105,61 +105,62 @@ export function Pricing() {
           </p>
         </div>
 
-        <div className="mt-10 grid items-start gap-6 lg:grid-cols-3">
+        <div className="mt-10 grid gap-5 sm:grid-cols-3">
           {PRICING.map((p) => (
             <article
               key={p.name}
-              className={`relative flex h-full flex-col rounded-4xl p-7 shadow-card ${
-                p.highlight ? "bg-forest text-cream" : "bg-card"
+              className={`relative flex flex-col items-center rounded-3xl p-6 text-center shadow-card ${
+                p.highlight ? "bg-forest text-cream ring-2 ring-coral" : "bg-card"
               }`}
             >
               {p.highlight && (
-                <span className="absolute -top-3 left-7 rounded-full bg-coral px-4 py-1 font-display text-xs font-semibold text-primary-foreground">
-                  Najobľúbenejšia voľba
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-4 py-1 font-display text-xs font-semibold whitespace-nowrap text-primary-foreground">
+                  Najvýhodnejšie
                 </span>
               )}
-              <h3
-                className={`text-xl ${p.highlight ? "text-cream" : "text-forest"}`}
-              >
+              <h3 className={`mt-2 text-lg ${p.highlight ? "text-cream" : "text-forest"}`}>
                 {p.name}
               </h3>
               <p
-                className={`mt-3 font-display text-5xl font-bold ${
+                className={`mt-3 font-display text-4xl font-bold ${
                   p.highlight ? "text-cream" : "text-coral"
                 }`}
               >
                 {p.price}
               </p>
-              <p className={`mt-2 text-sm ${p.highlight ? "text-cream/85" : "text-forest/70"}`}>
+              <p
+                className={`mt-2 text-sm ${p.highlight ? "text-cream/85" : "text-forest/70"}`}
+              >
                 {p.note}
               </p>
-
-              <ul className="mt-6 space-y-2.5 border-t pt-6 text-[0.92rem] leading-snug">
-                {INCLUDED.map((item) => (
-                  <li key={item} className="flex gap-2.5">
-                    <Check
-                      className={`mt-0.5 size-4 shrink-0 ${
-                        p.highlight ? "text-coral-soft" : "text-coral"
-                      }`}
-                    />
-                    <span className={p.highlight ? "text-cream/90" : "text-forest/85"}>{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <a
-                href="#kontakt"
-                className={`mt-7 ${p.highlight ? "btn-coral" : "btn-outline-forest"} w-full`}
-              >
-                Mám záujem o škôlku
-              </a>
             </article>
           ))}
         </div>
 
-        <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-secondary px-5 py-3 font-display text-sm font-semibold text-forest">
-          <Car className="size-5 text-coral" /> Vyzdvihnutie a odvoz psíka: 5 € za jednu jazdu
-        </p>
+        <div className="mt-6 rounded-4xl bg-card p-7 shadow-card sm:p-9">
+          <h3 className="text-center text-xl text-forest">
+            Čo je v cene zahrnuté pri každom vstupe
+          </h3>
+          <ul className="mx-auto mt-6 grid max-w-3xl gap-3 text-left text-[0.95rem] sm:grid-cols-2">
+            {INCLUDED.map((item) => (
+              <li key={item} className="flex gap-2.5">
+                <Check className="mt-0.5 size-4 shrink-0 text-coral" />
+                <span className="text-forest/85">{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-6 flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-secondary px-5 py-3 text-center font-display text-sm font-semibold text-forest">
+            <Car className="size-5 text-coral" /> Vyzdvihnutie a odvoz psíka: 5 € za jednu jazdu
+          </p>
+
+          <div className="mt-7 flex justify-center">
+            <a href="#kontakt" className="btn-coral">
+              Mám záujem o škôlku
+            </a>
+          </div>
+        </div>
+
       </div>
     </section>
   );
