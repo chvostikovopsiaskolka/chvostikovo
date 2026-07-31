@@ -1,7 +1,7 @@
-import { MapPin, Mail, Phone, Clock, Instagram } from "lucide-react";
+import { MapPin, Mail, Phone, Clock, Instagram, Facebook } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
-import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM } from "@/content/site";
+import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { LongForm } from "./Forms";
 
 export function Contact() {
@@ -97,15 +97,26 @@ export function Footer() {
               {PHONE_PRETTY}
             </a>
           </p>
-          <a
-            href={INSTAGRAM}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Instagram Chvostíkovo"
-            className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
-          >
-            <Instagram className="size-5" />
-          </a>
+          <div className="flex items-center gap-2">
+            <a
+              href={INSTAGRAM}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Instagram Chvostíkovo"
+              className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
+            >
+              <Instagram className="size-5" />
+            </a>
+            <a
+              href={FACEBOOK}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Facebook Chvostíkovo"
+              className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
+            >
+              <Facebook className="size-5" />
+            </a>
+          </div>
         </div>
         <p className="text-xs">
           © {new Date().getFullYear()} Chvostíkovo ·{" "}
