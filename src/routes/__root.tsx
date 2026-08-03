@@ -125,6 +125,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           url: "https://chvostikovo.sk",
           telephone: PHONE,
           email: EMAIL,
+          image: "https://chvostikovo.sk/og-image.png",
           address: {
             "@type": "PostalAddress",
             streetAddress: ADDRESS.street,
