@@ -56,88 +56,83 @@ export function CookieBanner() {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 p-2 sm:p-4">
-      <div className="mx-auto max-w-3xl rounded-2xl border border-cream/20 bg-forest p-4 text-cream shadow-2xl sm:rounded-3xl sm:p-6">
-        <div className="flex items-start gap-3">
+    <div className="fixed right-0 bottom-0 z-50 p-2 sm:p-4">
+      <div className="w-[calc(100vw-1rem)] max-w-xs rounded-2xl border border-cream/20 bg-forest p-3 text-cream shadow-2xl sm:max-w-sm sm:rounded-3xl sm:p-4">
+        <div className="flex items-start gap-2">
           <div className="flex-1">
-            <p className="font-display text-base font-semibold sm:text-lg">Používame cookies</p>
-            <p className="mt-1 text-sm text-cream/80">
-              Na našej stránke používame cookies, aby sme zabezpečili jej správne fungovanie a
-              mohli zlepšovať vašu skúsenosť.
+            <p className="font-display text-sm font-semibold sm:text-base">Používame cookies</p>
+            <p className="mt-0.5 text-xs text-cream/80 sm:text-sm">
+              Používame cookies na správne fungovanie stránky a zlepšenie vašej skúsenosti.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Zavrieť banner"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
+            className="flex size-6 shrink-0 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral sm:size-8"
           >
-            <X className="size-4" />
+            <X className="size-3 sm:size-4" />
           </button>
         </div>
 
         {showDetails && (
-          <div className="mt-3 space-y-2 rounded-xl bg-cream/10 p-3 sm:mt-4 sm:space-y-3 sm:rounded-2xl sm:p-4">
+          <div className="mt-2 space-y-2 rounded-xl bg-cream/10 p-2 sm:mt-3 sm:space-y-3 sm:rounded-2xl sm:p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold">Nevyhnutné cookies</p>
-                <p className="text-xs text-cream/70">Potrebné na základné fungovanie stránky.</p>
+                <p className="text-xs font-semibold sm:text-sm">Nevyhnutné cookies</p>
+                <p className="text-[0.65rem] text-cream/70 sm:text-xs">Potrebné na základné fungovanie stránky.</p>
               </div>
               <input
                 type="checkbox"
                 checked
                 disabled
                 aria-label="Nevyhnutné cookies – vždy zapnuté"
-                className="size-5 accent-coral"
+                className="size-4 accent-coral sm:size-5"
               />
             </div>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold">Analytické cookies</p>
-                <p className="text-xs text-cream/70">
-                  Pomáhajú nám pochopiť, ako používate našu stránku.
-                </p>
+                <p className="text-xs font-semibold sm:text-sm">Analytické cookies</p>
+                <p className="text-[0.65rem] text-cream/70 sm:text-xs">Pomáhajú nám pochopiť, ako používate stránku.</p>
               </div>
               <input
                 type="checkbox"
                 checked={consent.analytics}
                 onChange={(e) => setConsent((c) => ({ ...c, analytics: e.target.checked }))}
                 aria-label="Analytické cookies"
-                className="size-5 accent-coral"
+                className="size-4 accent-coral sm:size-5"
               />
             </div>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold">Marketingové cookies</p>
-                <p className="text-xs text-cream/70">
-                  Používajú sa na meranie účinnosti reklám a relevantný obsah.
-                </p>
+                <p className="text-xs font-semibold sm:text-sm">Marketingové cookies</p>
+                <p className="text-[0.65rem] text-cream/70 sm:text-xs">Na meranie účinnosti reklám a relevantný obsah.</p>
               </div>
               <input
                 type="checkbox"
                 checked={consent.marketing}
                 onChange={(e) => setConsent((c) => ({ ...c, marketing: e.target.checked }))}
                 aria-label="Marketingové cookies"
-                className="size-5 accent-coral"
+                className="size-4 accent-coral sm:size-5"
               />
             </div>
           </div>
         )}
 
-        <div className="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+        <div className="mt-2 flex flex-col gap-1.5 sm:mt-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
           <button
             type="button"
             onClick={acceptAll}
-            className="rounded-full bg-coral px-4 py-2 font-display text-sm font-semibold text-primary-foreground transition hover:bg-coral/90 sm:px-5 sm:py-2.5"
+            className="rounded-full bg-coral px-3 py-1.5 font-display text-xs font-semibold text-primary-foreground transition hover:bg-coral/90 sm:px-4 sm:py-2 sm:text-sm"
           >
-            Súhlasím so všetkými
+            Súhlasím
           </button>
           <button
             type="button"
             onClick={rejectAll}
-            className="rounded-full border border-cream/30 px-4 py-2 font-display text-sm font-semibold text-cream transition hover:bg-cream/10 sm:px-5 sm:py-2.5"
+            className="rounded-full border border-cream/30 px-3 py-1.5 font-display text-xs font-semibold text-cream transition hover:bg-cream/10 sm:px-4 sm:py-2 sm:text-sm"
           >
-            Odmietnuť voliteľné
+            Odmietnuť
           </button>
           <button
             type="button"
@@ -148,9 +143,9 @@ export function CookieBanner() {
                 setShowDetails(true);
               }
             }}
-            className="rounded-full px-3 py-2 text-sm font-semibold text-cream underline underline-offset-2 transition hover:text-coral sm:py-2.5"
+            className="rounded-full px-2 py-1 text-xs font-semibold text-cream underline underline-offset-2 transition hover:text-coral sm:py-2 sm:text-sm"
           >
-            {showDetails ? "Uložiť nastavenia" : "Upraviť nastavenia"}
+            {showDetails ? "Uložiť" : "Nastavenia"}
           </button>
         </div>
       </div>
