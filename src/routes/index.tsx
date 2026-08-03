@@ -8,6 +8,7 @@ import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
 import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
+import { FAQ } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
