@@ -40,17 +40,15 @@ export const Route = createFileRoute("/")({
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "LocalBusiness",
-          name: "Chvostíkovo",
-          description,
-          url: `${BASE_URL}/`,
-          telephone: "+421951069395",
-          image: OG_IMAGE,
-          address: {
-            "@type": "PostalAddress",
-            addressLocality: "Košice",
-            addressCountry: "SK",
-          },
+          "@type": "FAQPage",
+          mainEntity: FAQ.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.a,
+            },
+          })),
         }),
       },
     ],
