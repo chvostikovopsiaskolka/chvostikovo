@@ -8,6 +8,7 @@ import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
 import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
+import { FAQ } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
@@ -39,17 +40,15 @@ export const Route = createFileRoute("/")({
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "LocalBusiness",
-          name: "Chvostíkovo",
-          description,
-          url: `${BASE_URL}/`,
-          telephone: "+421951069395",
-          image: OG_IMAGE,
-          address: {
-            "@type": "PostalAddress",
-            addressLocality: "Košice",
-            addressCountry: "SK",
-          },
+          "@type": "FAQPage",
+          mainEntity: FAQ.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.a,
+            },
+          })),
         }),
       },
     ],
