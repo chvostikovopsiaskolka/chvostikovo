@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { Home, Zap, Dog, Check } from "lucide-react";
+import { FormDialog } from "./FormDialog";
+import { LongForm } from "./Forms";
 import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg.asset.json";
 import dogsPair from "@/assets/dogs-pair.jpg.asset.json";
@@ -84,6 +87,10 @@ export function Why() {
           </div>
         </div>
       </div>
+
+      <FormDialog open={open} onOpenChange={setOpen} title="Máte záujem o škôlku?">
+        <LongForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
+      </FormDialog>
     </section>
   );
 }

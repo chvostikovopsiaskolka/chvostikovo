@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ShieldCheck, HeartHandshake, Sparkles, Stethoscope, Check, Plus, Minus, Car, Phone } from "lucide-react";
+import { FormDialog } from "./FormDialog";
+import { ShortForm } from "./Forms";
 import { REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
 
 const reqIcons = [ShieldCheck, HeartHandshake, Sparkles, Stethoscope];
@@ -50,6 +52,8 @@ const STEPS = [
 ];
 
 export function FirstVisit() {
+  const [open, setOpen] = useState(false);
+
   return (
     <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-4">
@@ -82,11 +86,19 @@ export function FirstVisit() {
         </ol>
 
         <div className="mt-8 flex justify-center">
-          <a href="#kontakt" className="btn-coral">
+          <button type="button" onClick={() => setOpen(true)} className="btn-coral">
             Mám záujem o prvú návštevu
-          </a>
+          </button>
         </div>
       </div>
+
+      <FormDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Mám záujem o prvú návštevu v psej škôlke"
+      >
+        <ShortForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
+      </FormDialog>
     </section>
   );
 }
