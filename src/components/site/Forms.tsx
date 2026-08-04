@@ -85,12 +85,13 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
   );
 }
 
-export function LongForm() {
+export function LongForm({ onSent }: { onSent?: () => void }) {
   const [sent, setSent] = useState(false);
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     setSent(true);
+    onSent?.();
   }
 
   if (sent) {

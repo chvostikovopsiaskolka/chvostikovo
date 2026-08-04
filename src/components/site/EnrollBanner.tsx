@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormDialog } from "./FormDialog";
 import { ShortForm } from "./Forms";
 
 export function EnrollBanner() {
@@ -27,16 +27,9 @@ export function EnrollBanner() {
         </button>
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] w-[calc(100%-1.5rem)] max-w-lg overflow-y-auto rounded-3xl border-none bg-card p-5 sm:p-7">
-          <DialogHeader>
-            <DialogTitle className="text-left font-display text-lg text-forest sm:text-xl">
-              Máte záujem o škôlku?
-            </DialogTitle>
-          </DialogHeader>
-          <ShortForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
-        </DialogContent>
-      </Dialog>
+      <FormDialog open={open} onOpenChange={setOpen} title="Máte záujem o škôlku?">
+        <ShortForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
+      </FormDialog>
     </section>
   );
 }
