@@ -2,6 +2,24 @@ import { useRef, useState } from "react";
 import { MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { GALLERY, MAP_LINK } from "@/content/site";
 
+const HYGIENE = [
+  {
+    icon: "🧼",
+    title: "Pravidelná dezinfekcia",
+    text: "Naše priestory pravidelne dezinfikujeme, aby boli pre psíkov vždy čisté a bezpečné.",
+  },
+  {
+    icon: "💡",
+    title: "Germicídna lampa",
+    text: "Pravidelne využívame germicídnu lampu na zníženie množstva baktérií a vírusov a udržiavanie zdravého prostredia.",
+  },
+  {
+    icon: "🐾",
+    title: "Každodenná čistota",
+    text: "Po každom dni priestory dôkladne upratujeme a pripravujeme na ďalší deň, aby sa u nás psíkovia cítili príjemne a bezpečne.",
+  },
+];
+
 export function Gallery() {
   const [active, setActive] = useState<number | null>(null);
   const img = active === null ? null : GALLERY[active];
@@ -77,6 +95,23 @@ export function Gallery() {
               <ChevronRight className="size-5" />
             </button>
           </div>
+        </div>
+
+        <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          {HYGIENE.map((h) => (
+            <div
+              key={h.title}
+              className="rounded-3xl bg-card p-5 text-left shadow-card sm:p-6"
+            >
+              <span className="text-2xl" aria-hidden>
+                {h.icon}
+              </span>
+              <h3 className="mt-3 font-display text-base font-bold text-forest sm:text-lg">
+                {h.title}
+              </h3>
+              <p className="mt-2 text-sm text-forest/80">{h.text}</p>
+            </div>
+          ))}
         </div>
       </div>
 
