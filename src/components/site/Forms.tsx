@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 
-export function ShortForm() {
+export function ShortForm({ onSent }: { onSent?: () => void }) {
   const [sent, setSent] = useState(false);
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     setSent(true);
+    onSent?.();
   }
 
   if (sent) {
@@ -17,11 +18,12 @@ export function ShortForm() {
         </div>
         <h3 className="text-xl text-forest">Ďakujeme!</h3>
         <p className="text-sm text-muted-foreground">
-          Ozveme sa vám do 24 hodín. Ak to súri, zavolajte nám.
+          Ozveme sa vám čo najskôr.
         </p>
       </div>
     );
   }
+
 
   return (
     <form onSubmit={onSubmit} className="space-y-3.5">
