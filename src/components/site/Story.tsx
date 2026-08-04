@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { Home, Zap, Dog, Check } from "lucide-react";
+import { FormDialog } from "./FormDialog";
+import { LongForm } from "./Forms";
 import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg.asset.json";
 import dogsPair from "@/assets/dogs-pair.jpg.asset.json";
@@ -43,6 +46,8 @@ export function Care() {
 }
 
 export function Why() {
+  const [open, setOpen] = useState(false);
+
   return (
     <section className="py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4">
@@ -70,9 +75,9 @@ export function Why() {
           </div>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <a href="#kontakt" className="btn-coral">
+            <button type="button" onClick={() => setOpen(true)} className="btn-coral">
               Mám záujem o škôlku
-            </a>
+            </button>
             <a
               href={`tel:${PHONE}`}
               className="inline-flex items-center justify-center rounded-full border-2 border-cream/60 px-6 py-3 font-display font-semibold text-cream transition-colors hover:bg-cream hover:text-forest"
@@ -82,6 +87,10 @@ export function Why() {
           </div>
         </div>
       </div>
+
+      <FormDialog open={open} onOpenChange={setOpen} title="Máte záujem o škôlku?">
+        <LongForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
+      </FormDialog>
     </section>
   );
 }
