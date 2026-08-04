@@ -10,8 +10,8 @@ const HYGIENE = [
   },
   {
     icon: "💡",
-    title: "Germicídna lampa",
-    text: "Pravidelne využívame germicídnu lampu na zníženie množstva baktérií a vírusov a udržiavanie zdravého prostredia.",
+    title: "Germicídna lampa s ozónom",
+    text: "Pravidelne využívame germicídnu lampu s ozónom na dezinfekciu priestorov, hračiek a pomôcok, čím znižujeme množstvo baktérií a vírusov a udržiavame zdravé prostredie.",
   },
   {
     icon: "🐾",
