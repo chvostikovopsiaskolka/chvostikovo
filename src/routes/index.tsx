@@ -63,8 +63,8 @@ function Index() {
       <Header />
       <main>
         <Hero />
-        <EnrollBanner />
         <Gallery />
+        <EnrollBanner />
         <Reviews />
         <Care />
         <Why />
