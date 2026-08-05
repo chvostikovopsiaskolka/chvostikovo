@@ -88,7 +88,12 @@ export function Why() {
         </div>
       </div>
 
-      <FormDialog open={open} onOpenChange={setOpen} title="Máte záujem o škôlku?">
+      <FormDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Máte záujem o škôlku?"
+        subtitle="Formulár je nezáväzný – môžete cez neho prihlásiť psíka alebo nám jednoducho napísať otázku."
+      >
         <LongForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
       </FormDialog>
     </section>
