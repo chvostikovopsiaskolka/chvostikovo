@@ -5,11 +5,13 @@ export function FormDialog({
   open,
   onOpenChange,
   title,
+  subtitle,
   children,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   title: string;
+  subtitle?: string;
   children: ReactNode;
 }) {
   return (
@@ -19,9 +21,13 @@ export function FormDialog({
           <DialogTitle className="pr-6 text-left font-display text-base leading-snug text-forest sm:text-xl">
             {title}
           </DialogTitle>
+          {subtitle && (
+            <p className="pr-6 text-left text-sm text-forest/80">{subtitle}</p>
+          )}
         </DialogHeader>
         {children}
       </DialogContent>
     </Dialog>
   );
 }
+
