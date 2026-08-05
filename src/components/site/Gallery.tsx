@@ -97,21 +97,26 @@ export function Gallery() {
           </div>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          {HYGIENE.map((h) => (
-            <div
-              key={h.title}
-              className="rounded-3xl bg-card p-5 text-left shadow-card sm:p-6"
-            >
-              <span className="text-2xl" aria-hidden>
-                {h.icon}
-              </span>
-              <h3 className="mt-3 font-display text-base font-bold text-forest sm:text-lg">
-                {h.title}
-              </h3>
-              <p className="mt-2 text-sm text-forest/80">{h.text}</p>
-            </div>
-          ))}
+        <div className="mt-10">
+          <h3 className="section-title text-center text-xl sm:text-2xl">
+            Ako zabezpečujeme čistotu priestorov?
+          </h3>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {HYGIENE.map((h) => (
+              <div
+                key={h.title}
+                className="rounded-3xl bg-card p-5 text-left shadow-card sm:p-6"
+              >
+                <span className="text-2xl" aria-hidden>
+                  {h.icon}
+                </span>
+                <h4 className="mt-3 font-display text-base font-bold text-forest sm:text-lg">
+                  {h.title}
+                </h4>
+                <p className="mt-2 text-sm text-forest/80">{h.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
