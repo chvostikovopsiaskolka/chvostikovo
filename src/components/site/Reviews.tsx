@@ -1,4 +1,5 @@
 import { REVIEWS } from "@/content/site";
+import skolkariVideo from "@/assets/skolkari.mp4.asset.json";
 
 export function Reviews() {
   return (
