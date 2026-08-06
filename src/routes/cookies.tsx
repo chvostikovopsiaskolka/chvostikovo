@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { EMAIL } from "@/content/site";
 
 const title = "Pravidlá používania cookies | Chvostíkovo";
-const description = "Informácie o používaní súborov cookies na stránke psej škôlky Chvostíkovo.";
+const description =
+  "Pravidlá používania cookies na stránke psej škôlky Chvostíkovo v Košiciach. Denné stráženie psov s individuálnym prístupom a celodenným dohľadom.";
 
 const BASE_URL = "https://chvostikovo.sk";
 
