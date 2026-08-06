@@ -19,7 +19,7 @@ export const ADDRESS = {
 
 export const BUSINESS_NAME = "Chvostíkovo psia škôlka";
 export const BUSINESS_DESCRIPTION =
-  "Psia škôlka v Košiciach pre stredné a veľké plemená. Individuálny prístup, celodenný dohľad a bezpečné prostredie.";
+  "Psia škôlka Chvostíkovo v Košiciach – denné stráženie psov s individuálnym prístupom, bezpečným výbehom a celodenným dohľadom.";
 export const OPENING_HOURS = [
   { dayOfWeek: "Monday", opens: "07:00", closes: "17:00" },
   { dayOfWeek: "Tuesday", opens: "07:00", closes: "17:00" },

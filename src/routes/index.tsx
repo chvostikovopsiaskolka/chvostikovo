@@ -15,7 +15,7 @@ const BASE_URL = "https://chvostikovo.sk";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Psia škôlka Košice | Denné stráženie psov | Chvostíkovo";
 const description =
-  "Psia škôlka Košice pre stredné a veľké plemená. Denné stráženie psov s individuálnym prístupom, aktívnym dňom a celodenným dohľadom.";
+  "Psia škôlka Chvostíkovo v Košiciach – denné stráženie psov s individuálnym prístupom, bezpečným výbehom a celodenným dohľadom.";
 
 export const Route = createFileRoute("/")({
   head: () => ({

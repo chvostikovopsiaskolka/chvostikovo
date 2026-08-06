@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { EMAIL } from "@/content/site";
 
 const title = "Zásady ochrany osobných údajov | Chvostíkovo";
-const description = "Zásady ochrany osobných údajov psej škôlky Chvostíkovo v Košiciach.";
+const description =
+  "Zásady ochrany osobných údajov psej škôlky Chvostíkovo v Košiciach. Denné stráženie psov s individuálnym prístupom a celodenným dohľadom.";
 
 const BASE_URL = "https://chvostikovo.sk";
 
