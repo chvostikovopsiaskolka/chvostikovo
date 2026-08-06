@@ -7,12 +7,12 @@ const photos = [deco1.url, deco2.url, deco3.url];
 export function PhotoStrip() {
   return (
     <section aria-hidden="true" className="py-6">
-      <div className="container mx-auto px-4">
+      <div className="mx-auto max-w-6xl px-4">
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {photos.map((src) => (
             <div
               key={src}
-              className="aspect-[4/5] overflow-hidden rounded-xl sm:rounded-2xl"
+              className="aspect-[4/3] overflow-hidden rounded-xl sm:rounded-2xl"
             >
               <img
                 src={src}
