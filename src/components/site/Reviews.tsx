@@ -1,4 +1,5 @@
 import { REVIEWS } from "@/content/site";
+import skolkariVideo from "@/assets/skolkari.mp4.asset.json";
 
 export function Reviews() {
   return (
@@ -32,6 +33,27 @@ export function Reviews() {
               </blockquote>
             </figure>
           ))}
+        </div>
+
+        <div className="mt-14 sm:mt-16">
+          <h3 className="section-title text-2xl sm:text-3xl">
+            Ako sa naši škôlkári tešia do škôlky
+          </h3>
+          <div className="mt-6 flex justify-center">
+            <div className="relative w-full max-w-[320px] overflow-hidden rounded-3xl bg-card shadow-card">
+              <video
+                src={skolkariVideo.url}
+                className="aspect-[9/16] w-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls
+                preload="metadata"
+                aria-label="Video zo psiej škôlky Chvostíkovo – škôlkári sa tešia do škôlky"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>
