@@ -43,12 +43,12 @@ export function Header() {
           <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-5 w-auto sm:h-6" />
         </a>
 
-        <nav className="hidden min-w-0 items-center gap-4 lg:flex">
-          {NAV.map((item) => (
+        <nav className="hidden min-w-0 items-center gap-3 lg:flex">
+          {NAV_DESKTOP.map((item) => (
             <a
               key={item.href}
               href={item.href}
-              className="font-display text-sm font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
+              className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
             >
               {item.label}
             </a>
