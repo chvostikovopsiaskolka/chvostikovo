@@ -23,7 +23,7 @@ export function PhotoStrip() {
                 alt=""
                 loading="lazy"
                 className={`h-full w-full object-cover ${
-                  i === 0 ? "object-[center_60%]" : "object-[center_40%]"
+                  i === 0 ? "object-[center_35%]" : "object-[center_40%]"
                 }`}
               />
             </div>
