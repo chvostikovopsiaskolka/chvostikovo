@@ -4,7 +4,7 @@ import logo from "@/assets/logo.png";
 import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
 
-const NAV = [
+const NAV_MOBILE = [
   { href: "#priestory", label: "Priestory" },
   { href: "#recenzie", label: "Recenzie" },
   { href: "#starostlivost", label: "Ako sa postaráme" },
@@ -14,6 +14,15 @@ const NAV = [
   { href: "#cennik", label: "Cenník" },
   { href: "#faq", label: "Časté otázky" },
   { href: "#kontakt", label: "Kontakt" },
+];
+
+const NAV_DESKTOP = [
+  { href: "#starostlivost", label: "Ako sa postaráme" },
+  { href: "#preco", label: "Prečo škôlka" },
+  { href: "#o-nas", label: "O nás" },
+  { href: "#podmienky", label: "Podmienky" },
+  { href: "#cennik", label: "Cenník" },
+  { href: "#faq", label: "Časté otázky" },
 ];
 
 export function Header() {
