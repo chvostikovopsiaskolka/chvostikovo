@@ -4,7 +4,7 @@ import logo from "@/assets/logo.png";
 import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
 
-const NAV = [
+const NAV_MOBILE = [
   { href: "#priestory", label: "Priestory" },
   { href: "#recenzie", label: "Recenzie" },
   { href: "#starostlivost", label: "Ako sa postaráme" },
@@ -14,6 +14,15 @@ const NAV = [
   { href: "#cennik", label: "Cenník" },
   { href: "#faq", label: "Časté otázky" },
   { href: "#kontakt", label: "Kontakt" },
+];
+
+const NAV_DESKTOP = [
+  { href: "#starostlivost", label: "Ako sa postaráme" },
+  { href: "#preco", label: "Prečo škôlka" },
+  { href: "#o-nas", label: "O nás" },
+  { href: "#podmienky", label: "Podmienky" },
+  { href: "#cennik", label: "Cenník" },
+  { href: "#faq", label: "Časté otázky" },
 ];
 
 export function Header() {
@@ -34,12 +43,12 @@ export function Header() {
           <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-5 w-auto sm:h-6" />
         </a>
 
-        <nav className="hidden min-w-0 items-center gap-4 lg:flex">
-          {NAV.map((item) => (
+        <nav className="hidden min-w-0 items-center gap-3 lg:flex">
+          {NAV_DESKTOP.map((item) => (
             <a
               key={item.href}
               href={item.href}
-              className="font-display text-sm font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
+              className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
             >
               {item.label}
             </a>
@@ -69,7 +78,7 @@ export function Header() {
       {menuOpen && (
         <div className="mx-auto mt-2 max-w-6xl rounded-3xl bg-card/98 p-3 shadow-soft backdrop-blur-md lg:hidden">
           <nav className="flex flex-col">
-            {NAV.map((item) => (
+            {NAV_MOBILE.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
