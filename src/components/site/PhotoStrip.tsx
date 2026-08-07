@@ -8,11 +8,15 @@ export function PhotoStrip() {
   return (
     <section aria-hidden="true" className="py-6">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          {photos.map((src) => (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+          {photos.map((src, i) => (
             <div
               key={src}
-              className="aspect-[4/3] overflow-hidden rounded-xl sm:rounded-2xl"
+              className={`overflow-hidden rounded-xl sm:rounded-2xl ${
+                i === 0
+                  ? "col-span-2 aspect-[16/9] sm:col-span-1 sm:aspect-[4/3]"
+                  : "aspect-[4/3]"
+              }`}
             >
               <img
                 src={src}
