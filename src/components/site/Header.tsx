@@ -1,12 +1,30 @@
-import { useState } from "react";
-import { Phone } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
 import logo from "@/assets/logo.png";
-import { PHONE, PHONE_PRETTY } from "@/content/site";
 import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
 
+const NAV = [
+  { href: "#priestory", label: "Priestory" },
+  { href: "#recenzie", label: "Recenzie" },
+  { href: "#preco", label: "Prečo škôlka" },
+  { href: "#o-nas", label: "O nás" },
+  { href: "#podmienky", label: "Podmienky" },
+  { href: "#cennik", label: "Cenník" },
+  { href: "#faq", label: "Časté otázky" },
+  { href: "#kontakt", label: "Kontakt" },
+];
+
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3">
@@ -15,14 +33,19 @@ export function Header() {
           <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-5 w-auto sm:h-6" />
         </a>
 
+        <nav className="hidden min-w-0 items-center gap-4 lg:flex">
+          {NAV.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="font-display text-sm font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
         <div className="flex items-center gap-2 sm:gap-3">
-          <a
-            href={`tel:${PHONE}`}
-            className="inline-flex items-center gap-1.5 rounded-full bg-coral-soft/50 px-2.5 py-1.5 font-display text-xs font-semibold text-coral transition-colors hover:bg-coral-soft sm:gap-2 sm:px-4 sm:py-2 sm:text-sm"
-          >
-            <Phone className="size-3.5 shrink-0 sm:size-4" />
-            <span className="hidden sm:inline">{PHONE_PRETTY}</span>
-          </a>
           <button
             type="button"
             onClick={() => setOpen(true)}
@@ -30,8 +53,35 @@ export function Header() {
           >
             Mám záujem o škôlku
           </button>
+          <button
+            type="button"
+            aria-label="Otvoriť menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition-colors hover:bg-coral-soft lg:hidden"
+          >
+            {menuOpen ? <Menu className="size-5 hidden" /> : null}
+            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
         </div>
       </div>
+
+      {menuOpen && (
+        <div className="mx-auto mt-2 max-w-6xl rounded-3xl bg-card/98 p-3 shadow-soft backdrop-blur-md lg:hidden">
+          <nav className="flex flex-col">
+            {NAV.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      )}
 
       <FormDialog
         open={open}
