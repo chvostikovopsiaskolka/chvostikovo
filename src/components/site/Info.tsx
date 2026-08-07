@@ -8,7 +8,7 @@ const reqIcons = [ShieldCheck, HeartHandshake, Sparkles, Stethoscope];
 
 export function Requirements() {
   return (
-    <section id="podmienky" className="py-16 sm:py-20">
+    <section id="podmienky" className="scroll-mt-24 py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="text-center">
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
@@ -55,7 +55,7 @@ export function FirstVisit() {
   const [open, setOpen] = useState(false);
 
   return (
-    <section className="py-16 sm:py-20">
+    <section id="prva-navsteva" className="scroll-mt-24 py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="text-center">
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
@@ -105,7 +105,7 @@ export function FirstVisit() {
 
 export function Pricing() {
   return (
-    <section id="cennik" className="py-16 sm:py-20">
+    <section id="cennik" className="scroll-mt-24 py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="text-center">
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
@@ -182,7 +182,7 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section className="py-16 sm:py-20">
+    <section id="faq" className="scroll-mt-24 py-16 sm:py-20">
       <div className="mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
 

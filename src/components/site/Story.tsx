@@ -17,7 +17,7 @@ const whyIcons = [Home, Zap, Dog];
 
 export function Care() {
   return (
-    <section className="py-12 sm:py-16">
+    <section id="starostlivost" className="scroll-mt-24 py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Ako sa postaráme o psíka</h2>
 
@@ -49,7 +49,7 @@ export function Why() {
   const [open, setOpen] = useState(false);
 
   return (
-    <section className="py-12 sm:py-16">
+    <section id="preco" className="scroll-mt-24 py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4">
         <div className="overflow-hidden rounded-4xl bg-forest px-6 py-10 text-cream sm:px-12 sm:py-12">
           <h2 className="text-center font-display text-3xl text-cream sm:text-4xl">
@@ -102,7 +102,7 @@ export function Why() {
 
 export function About() {
   return (
-    <section id="o-nas" className="py-12 sm:py-16">
+    <section id="o-nas" className="scroll-mt-24 py-12 sm:py-16">
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
         <div>
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
