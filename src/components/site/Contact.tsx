@@ -6,7 +6,7 @@ import { LongForm } from "./Forms";
 
 export function Contact() {
   return (
-    <section id="kontakt" className="py-16 sm:py-20">
+    <section id="kontakt" className="scroll-mt-24 py-16 sm:py-20">
       <div className="mx-auto max-w-4xl px-4">
         <div className="text-center">
           <h2 className="section-title text-3xl leading-tight sm:text-4xl">
