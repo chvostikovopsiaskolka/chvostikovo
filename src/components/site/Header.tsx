@@ -7,6 +7,7 @@ import { LongForm } from "./Forms";
 const NAV = [
   { href: "#priestory", label: "Priestory" },
   { href: "#recenzie", label: "Recenzie" },
+  { href: "#starostlivost", label: "Ako sa postaráme" },
   { href: "#preco", label: "Prečo škôlka" },
   { href: "#o-nas", label: "O nás" },
   { href: "#podmienky", label: "Podmienky" },
