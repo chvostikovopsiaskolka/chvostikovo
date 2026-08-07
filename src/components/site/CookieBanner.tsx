@@ -125,14 +125,7 @@ export function CookieBanner() {
             onClick={acceptAll}
             className="rounded-full bg-coral px-3 py-1.5 font-display text-xs font-semibold text-primary-foreground transition hover:bg-coral/90 sm:px-4 sm:py-2 sm:text-sm"
           >
-            Súhlasím
-          </button>
-          <button
-            type="button"
-            onClick={rejectAll}
-            className="rounded-full border border-cream/30 px-3 py-1.5 font-display text-xs font-semibold text-cream transition hover:bg-cream/10 sm:px-4 sm:py-2 sm:text-sm"
-          >
-            Odmietnuť
+            Prijať všetky
           </button>
           <button
             type="button"
@@ -145,7 +138,7 @@ export function CookieBanner() {
             }}
             className="rounded-full px-2 py-1 text-xs font-semibold text-cream underline underline-offset-2 transition hover:text-coral sm:py-2 sm:text-sm"
           >
-            {showDetails ? "Uložiť" : "Nastavenia"}
+            {showDetails ? "Uložiť" : "Prispôsobiť"}
           </button>
         </div>
       </div>
