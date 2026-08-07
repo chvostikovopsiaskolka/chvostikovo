@@ -78,7 +78,7 @@ export function Header() {
       {menuOpen && (
         <div className="mx-auto mt-2 max-w-6xl rounded-3xl bg-card/98 p-3 shadow-soft backdrop-blur-md lg:hidden">
           <nav className="flex flex-col">
-            {NAV.map((item) => (
+            {NAV_MOBILE.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
