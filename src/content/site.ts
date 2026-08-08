@@ -70,7 +70,7 @@ export const CARE = [
     pos: "object-[50%_10%]",
     title: "Individuálny prístup",
     alt: "Psia škôlka - weimarský stavač",
-    text: "Každý psík je jedinečný, preto ku každému pristupujeme individuálne, s trpezlivosťou a rešpektom k jeho potrebám. Ako majitelia psov vieme, akú dôveru nám zverujete – každému škôlkarovi venujeme rovnakú starostlivosť, akú by sme dopriali aj vlastným psom.",
+    text: "**Každý psík je jedinečný**, preto ku každému pristupujeme **individuálne**, **s trpezlivosťou a rešpektom** k jeho potrebám. Ako majitelia psov vieme, akú dôveru nám zverujete – každému škôlkarovi venujeme rovnakú starostlivosť, akú by sme dopriali aj **vlastným psom**.",
   },
 ];
 
