@@ -244,7 +244,7 @@ export function Partners() {
                 src={p.logo}
                 alt={p.name}
                 loading="lazy"
-                className="max-h-10 w-auto max-w-[80%] object-contain opacity-80 transition group-hover:opacity-100 sm:max-h-12"
+                className="max-h-10 w-auto max-w-[80%] object-contain opacity-80 transition group-hover:opacity-100 sm:max-h-12 lg:max-h-16"
               />
             );
             return p.href ? (
