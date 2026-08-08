@@ -63,7 +63,7 @@ export const CARE = [
     pos: "object-[50%_12%]",
     title: "Celodenný dohľad",
     alt: "Celodenný dohľad v psej škôlke v Košiciach",
-    text: "Chvostíkovo je druhým domovom pre vášho psíka. Preto sú bezpečie a komfort našich psích škôlkarov na prvom mieste. Počas celého dňa na psy dohliadajú minimálne dvaja skúsení opatrovatelia, ktorí zabezpečujú pokojné prostredie pre hru, oddych a bezpečné interakcie.",
+    text: "Chvostíkovo je **druhým domovom** pre vášho psíka. Preto sú **bezpečie a komfort** našich psích škôlkarov na prvom mieste. Počas celého dňa na psy **dohliadajú minimálne dvaja skúsení opatrovatelia**, ktorí zabezpečujú pokojné prostredie pre hru, oddych a bezpečné interakcie.",
   },
   {
     img: g("edc3d7299bb443f2ad29502a3d0ea3c6"),
