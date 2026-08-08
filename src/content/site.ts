@@ -146,13 +146,8 @@ export const PRICING = [
     note: "10 vstupov – ušetríte 50 €. Permanentka platí 2 mesiace.",
     highlight: true,
   },
-  {
-    name: "Vstup šteniatka",
-    price: "35 €",
-    note: "pes do 6 mesiacov po kompletnej vakcinácii",
-    highlight: false,
-  },
 ];
+
 
 export const FAQ = [
   {
