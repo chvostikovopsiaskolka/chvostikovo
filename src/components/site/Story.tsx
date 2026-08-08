@@ -237,7 +237,7 @@ export function Partners() {
         <h2 className="text-center font-display text-base font-semibold tracking-widest text-forest/60 uppercase sm:text-lg">
           Spolupracujeme
         </h2>
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-5">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-5 md:flex-nowrap">
           {PARTNERS.map((p) => {
             const inner = (
               <img
