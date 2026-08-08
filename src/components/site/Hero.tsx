@@ -18,7 +18,7 @@ export function Hero() {
         <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-cream to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-6 px-4 pb-4 text-center md:grid-cols-[1.05fr_0.95fr] md:gap-8 md:text-left lg:min-h-[34rem] lg:gap-14">
+      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-6 px-4 pb-4 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:text-left lg:min-h-[34rem]">
         <div className="lg:py-10">
           <h1 className="text-3xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
             Psia škôlka,
@@ -28,12 +28,12 @@ export function Hero() {
             psík zamiluje
           </h1>
 
-          <p className="mx-auto mt-5 max-w-md font-display text-base font-bold text-forest sm:text-lg md:mx-0">
+          <p className="mx-auto mt-5 max-w-md font-display text-base font-bold text-forest sm:text-lg lg:mx-0">
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
-          <div className="mx-auto mt-6 max-w-md space-y-1 rounded-2xl bg-card/95 p-4 shadow-soft text-forest md:mx-0">
-            <p className="font-display text-sm font-bold sm:text-base md:text-lg">
+          <div className="mx-auto mt-6 max-w-md space-y-1 rounded-2xl bg-card/95 p-4 shadow-soft text-forest lg:mx-0">
+            <p className="font-display text-sm font-bold sm:text-base lg:text-lg">
               Váš psík už nemusí tráviť deň sám doma.
             </p>
             <p className="font-medium text-forest/90">
@@ -49,7 +49,7 @@ export function Hero() {
             <Phone className="size-4" /> {PHONE_PRETTY}
           </a>
 
-          <GoogleBadge className="mt-4" />
+          <GoogleBadge className="mx-auto mt-4 lg:mx-0" />
         </div>
 
         <div className="rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
