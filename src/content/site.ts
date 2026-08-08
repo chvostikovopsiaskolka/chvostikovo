@@ -56,7 +56,7 @@ export const CARE = [
     pos: "object-[50%_18%]",
     title: "Aktívny deň",
     alt: "Aktívny deň v psej škôlke",
-    text: "Kým pracujete alebo si vybavujete povinnosti, váš psík si u nás užije aktívny deň plný pohybu, hier a kontaktu s inými psami. Do sýtosti si vybije fyzickú aj mentálnu energiu, užije si výbeh a prechádzky na čerstvom vzduchu. Samozrejmosťou je aj oddych a veľa mojkania!",
+    text: "**Kým pracujete**, alebo si vybavujete povinnosti, váš psík si u nás užije **aktívny deň** plný pohybu, hier a kontaktu s inými psami. Do sýtosti si **vybije fyzickú aj mentálnu energiu**, užije si výbeh a prechádzky na čerstvom vzduchu. Samozrejmosťou je aj **oddych** a **veľa mojkania**!",
   },
   {
     img: g("c8799fdc98554252af0a25aa67197faa"),

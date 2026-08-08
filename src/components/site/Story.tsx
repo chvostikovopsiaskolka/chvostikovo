@@ -14,6 +14,17 @@ import lolkio from "@/assets/partner-lolkio.png";
 
 const whyIcons = [Home, Zap, Dog];
 
+function renderText(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
+
 
 export function Care() {
   return (
@@ -35,7 +46,7 @@ export function Care() {
               />
               <div className="flex flex-1 flex-col p-6">
                 <h3 className="text-xl text-forest">{c.title}</h3>
-                <p className="mt-3 text-[0.95rem] leading-relaxed text-forest/80">{c.text}</p>
+                <p className="mt-3 text-[0.95rem] leading-relaxed text-forest/80">{renderText(c.text)}</p>
               </div>
             </article>
           ))}
