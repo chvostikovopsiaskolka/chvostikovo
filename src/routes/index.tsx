@@ -68,12 +68,11 @@ function Index() {
         <Reviews />
         <Care />
         <Why />
+        <FirstVisit />
         <About />
         <Partners />
         <PhotoStrip />
         <Requirements />
-
-        <FirstVisit />
         <Pricing />
         <InstagramFeed />
         <Faq />
