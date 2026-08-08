@@ -237,7 +237,7 @@ export function Partners() {
         <h2 className="text-center font-display text-base font-semibold tracking-widest text-forest/60 uppercase sm:text-lg">
           Spolupracujeme
         </h2>
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-5 md:flex-nowrap">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:flex sm:flex-nowrap sm:items-center sm:justify-center sm:gap-4 lg:gap-5">
           {PARTNERS.map((p) => {
             const inner = (
               <img
@@ -253,14 +253,14 @@ export function Partners() {
                 href={p.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex h-20 items-center justify-center rounded-2xl bg-card px-5 shadow-card transition hover:-translate-y-0.5 sm:min-w-44 sm:px-7"
+                className="group flex h-20 w-full flex-1 items-center justify-center rounded-2xl bg-card px-5 shadow-card transition hover:-translate-y-0.5 sm:min-w-0 sm:max-w-40 sm:px-7 lg:max-w-44"
               >
                 {inner}
               </a>
             ) : (
               <div
                 key={p.name}
-                className="group flex h-20 items-center justify-center rounded-2xl bg-card px-5 shadow-card sm:min-w-44 sm:px-7"
+                className="group flex h-20 w-full flex-1 items-center justify-center rounded-2xl bg-card px-5 shadow-card sm:min-w-0 sm:max-w-40 sm:px-7 lg:max-w-44"
               >
                 {inner}
               </div>
