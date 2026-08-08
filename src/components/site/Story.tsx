@@ -14,6 +14,17 @@ import lolkio from "@/assets/partner-lolkio.png";
 
 const whyIcons = [Home, Zap, Dog];
 
+function renderText(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
+
 
 export function Care() {
   return (
