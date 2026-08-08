@@ -117,7 +117,7 @@ export function Pricing() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-3">
+        <div className="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2">
           {PRICING.map((p) => (
             <article
               key={p.name}
