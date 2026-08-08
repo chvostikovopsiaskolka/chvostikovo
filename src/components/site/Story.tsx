@@ -170,19 +170,19 @@ export function About() {
       </div>
 
       <div className="mx-auto mt-8 max-w-6xl px-4">
-        <div className="grid items-center gap-8 rounded-4xl bg-secondary p-7 sm:p-10 lg:grid-cols-[1fr_auto]">
-          <div>
+        <div className="grid items-center gap-8 rounded-4xl bg-secondary p-7 sm:p-10 md:text-center lg:grid-cols-[1fr_auto] lg:text-left">
+          <div className="md:flex md:flex-col md:items-center lg:items-start">
             <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
               <Check className="size-5 text-coral" /> Zdravie a bezpečie vášho psíka je pre nás na
               prvom mieste!
             </p>
-            <p className="mt-4 max-w-lg text-forest/80">
+            <p className="mt-4 max-w-lg text-forest/80 md:mx-auto lg:mx-0">
               Obaja sme absolvovali workshop prvej pomoci pre psov, takže v prípade potreby vieme
               zareagovať rýchlo a správne.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-5">
+          <div className="grid grid-cols-2 place-items-center gap-3 sm:gap-5">
             {[
               {
                 src: certAdriana.url,
@@ -237,7 +237,7 @@ export function Partners() {
         <h2 className="text-center font-display text-base font-semibold tracking-widest text-forest/60 uppercase sm:text-lg">
           Spolupracujeme
         </h2>
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-5">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-5 md:flex-nowrap">
           {PARTNERS.map((p) => {
             const inner = (
               <img
