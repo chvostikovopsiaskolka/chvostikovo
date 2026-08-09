@@ -28,7 +28,7 @@ export function Hero() {
             psík zamiluje
           </h1>
 
-          <p className="mx-auto mt-3 max-w-md text-sm font-bold text-forest sm:text-base lg:mx-0 lg:text-lg">
+          <p className="mx-auto mt-3 text-sm font-bold whitespace-nowrap text-forest sm:text-base lg:mx-0 lg:text-base">
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
