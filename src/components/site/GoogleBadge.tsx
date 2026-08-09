@@ -1,7 +1,7 @@
 export function GoogleBadge({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`flex w-full items-center justify-between gap-x-1.5 rounded-full bg-card/90 px-3 py-1.5 shadow-soft backdrop-blur-sm sm:gap-x-2 sm:px-4 sm:py-2 ${className}`}
+      className={`inline-flex items-center gap-x-1.5 rounded-full bg-card/90 px-3 py-1.5 shadow-soft backdrop-blur-sm sm:gap-x-2 sm:px-4 sm:py-2 ${className}`}
     >
       <span className="text-xs leading-none tracking-tight text-[#F5B301] sm:text-base">
         ★★★★★
