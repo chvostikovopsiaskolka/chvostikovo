@@ -18,7 +18,7 @@ export function Hero() {
         <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-cream to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-6 px-4 pb-4 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:text-left lg:min-h-[34rem]">
+      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-4 px-4 pb-4 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:text-left lg:min-h-[34rem]">
         <div className="lg:py-10">
           <h1 className="text-3xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
             <span className="text-coral-dark">Psia škôlka</span>,
@@ -28,11 +28,11 @@ export function Hero() {
             psík zamiluje
           </h1>
 
-          <p className="mx-auto mt-5 max-w-md font-display text-base font-bold text-forest sm:text-lg lg:mx-0">
+          <p className="mx-auto mt-3 max-w-md text-sm font-bold text-forest sm:text-base lg:mx-0 lg:text-lg">
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
-          <div className="relative mx-auto mt-6 max-w-md space-y-1 overflow-hidden rounded-2xl bg-white/40 p-4 shadow-soft text-forest ring-1 ring-white/60 backdrop-blur-lg sm:rounded-3xl lg:mx-0">
+          <div className="relative mx-auto mt-4 max-w-md space-y-1 overflow-hidden rounded-2xl bg-white/40 p-4 shadow-soft text-forest ring-1 ring-white/60 backdrop-blur-lg sm:rounded-3xl lg:mx-0">
             <div className="pointer-events-none absolute top-1/2 left-1/2 size-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cream/80 blur-3xl" />
             <div className="pointer-events-none absolute -top-6 -left-6 size-32 rounded-full bg-coral-soft/75 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-8 -right-6 size-36 rounded-full bg-peach/85 blur-3xl" />
@@ -49,12 +49,12 @@ export function Hero() {
 
           <a
             href={`tel:${PHONE}`}
-            className="btn-coral mt-6 inline-flex items-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base"
+            className="btn-coral mt-4 inline-flex items-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base"
           >
             <Phone className="size-4" /> Zavolajte nám
           </a>
 
-          <GoogleBadge className="mx-auto mt-4 lg:mx-0" />
+          <GoogleBadge className="mx-auto mt-3 lg:mx-0" />
         </div>
 
         <div className="rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
