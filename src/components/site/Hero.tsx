@@ -21,7 +21,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-6 px-4 pb-4 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:text-left lg:min-h-[34rem]">
         <div className="lg:py-10">
           <h1 className="text-3xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
-            <span className="text-coral">Psia škôlka</span>,
+            <span className="text-coral-dark">Psia škôlka</span>,
             <br />
             ktorú si váš
             <br />
@@ -51,7 +51,7 @@ export function Hero() {
             href={`tel:${PHONE}`}
             className="btn-coral mt-6 inline-flex items-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base"
           >
-            <Phone className="size-4" /> {PHONE_PRETTY}
+            <Phone className="size-4" /> Zavolajte nám
           </a>
 
           <GoogleBadge className="mx-auto mt-4 max-w-md lg:mx-0" />
