@@ -21,7 +21,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-6 px-4 pb-4 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:text-left lg:min-h-[34rem]">
         <div className="lg:py-10">
           <h1 className="text-3xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
-            Psia škôlka,
+            <span className="text-coral">Psia škôlka</span>,
             <br />
             ktorú si váš
             <br />
