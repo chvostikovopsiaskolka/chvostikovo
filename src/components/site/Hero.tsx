@@ -54,7 +54,7 @@ export function Hero() {
             <Phone className="size-4" /> {PHONE_PRETTY}
           </a>
 
-          <GoogleBadge className="mx-auto mt-4 lg:mx-0" />
+          <GoogleBadge className="mx-auto mt-4 max-w-md lg:mx-0" />
         </div>
 
         <div className="rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
