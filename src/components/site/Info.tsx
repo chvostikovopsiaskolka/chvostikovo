@@ -168,7 +168,7 @@ export function Pricing() {
 
           <div className="mt-7 flex justify-center">
             <a href="#kontakt" className="btn-coral">
-              Mám záujem o škôlku
+              Chcem prihlásiť psíka
             </a>
           </div>
         </div>

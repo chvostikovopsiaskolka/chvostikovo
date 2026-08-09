@@ -62,7 +62,7 @@ export function Hero() {
             Chcete sa informovať o škôlke?
           </h2>
           <p className="mt-2 mb-5 text-center text-sm text-muted-foreground">
-            Vyplňte krátky formulár. Radi vám odpovieme na vaše otázky do 24 hodín.
+            Vyplňte nezáväzný formulár. Radi vám odpovieme na vaše otázky do 24 hodín.
           </p>
           <ShortForm />
         </div>
