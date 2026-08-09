@@ -21,7 +21,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-6 px-4 pb-4 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:text-left lg:min-h-[34rem]">
         <div className="lg:py-10">
           <h1 className="text-3xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
-            Psia škôlka,
+            <span className="text-coral">Psia škôlka</span>,
             <br />
             ktorú si váš
             <br />
@@ -32,10 +32,10 @@ export function Hero() {
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
-          <div className="relative mx-auto mt-6 max-w-md space-y-1 overflow-hidden rounded-2xl bg-card/80 p-4 shadow-soft text-forest backdrop-blur-md lg:mx-0">
-            <div className="pointer-events-none absolute -top-10 -left-10 size-32 rounded-full bg-coral-soft/60 blur-2xl" />
-            <div className="pointer-events-none absolute -bottom-12 -right-6 size-36 rounded-full bg-peach/70 blur-3xl" />
-            <div className="pointer-events-none absolute top-1/2 left-1/2 size-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cream/60 blur-2xl" />
+          <div className="relative mx-auto mt-6 max-w-md space-y-1 overflow-hidden rounded-2xl bg-card/80 p-4 shadow-soft text-forest backdrop-blur-md sm:rounded-3xl lg:mx-0">
+            <div className="pointer-events-none absolute top-1/2 left-1/2 size-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cream/60 blur-3xl" />
+            <div className="pointer-events-none absolute -top-4 -left-4 size-24 rounded-full bg-coral-soft/55 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-6 -right-4 size-28 rounded-full bg-peach/65 blur-3xl" />
             <div className="relative z-10 space-y-1">
               <p className="font-display text-sm font-bold sm:text-base lg:text-lg">
                 Váš psík už nemusí tráviť deň sám doma.
