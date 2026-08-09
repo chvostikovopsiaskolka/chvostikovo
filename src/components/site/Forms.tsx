@@ -124,12 +124,6 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <input id="l-tel" type="tel" required className="field" placeholder="+421" />
         </div>
       </div>
-      <div>
-        <label className="label-sm" htmlFor="l-email">
-          Email *
-        </label>
-        <input id="l-email" type="email" required className="field" placeholder="vas@email.sk" />
-      </div>
       <div className="grid gap-3.5 sm:grid-cols-3">
         <div>
           <label className="label-sm" htmlFor="l-pes">
