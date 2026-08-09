@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ShieldCheck, HeartHandshake, Sparkles, Stethoscope, Check, Plus, Minus, Car, Phone } from "lucide-react";
 import { FormDialog } from "./FormDialog";
-import { ShortForm } from "./Forms";
+import { LongForm } from "./Forms";
 import { REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
 
 const reqIcons = [ShieldCheck, HeartHandshake, Sparkles, Stethoscope];
