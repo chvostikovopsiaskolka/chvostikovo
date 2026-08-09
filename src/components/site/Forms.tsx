@@ -182,7 +182,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         Súhlasím so spracovaním osobných údajov.
       </label>
       <button type="submit" className="btn-coral w-full">
-        Odoslať
+        Prihlásiť psíka
       </button>
     </form>
   );
