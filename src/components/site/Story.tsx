@@ -87,7 +87,7 @@ export function Why() {
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <button type="button" onClick={() => setOpen(true)} className="btn-coral">
-              Mám záujem o škôlku
+              Chcem prihlásiť psíka
             </button>
             <a
               href={`tel:${PHONE}`}
@@ -102,8 +102,8 @@ export function Why() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Máte záujem o škôlku?"
-        subtitle="Formulár je nezáväzný – môžete cez neho prihlásiť psíka alebo nám jednoducho napísať otázku."
+        title="Chcete prihlásiť psíka do škôlky?"
+        subtitle="Vyplňte formulár a povedzte nám niečo viac o svojom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup."
       >
         <LongForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
       </FormDialog>
