@@ -43,6 +43,7 @@
   --color-forest-deep: var(--forest-deep);
   --color-coral: var(--coral);
   --color-coral-soft: var(--coral-soft);
+  --color-coral-dark: var(--coral-dark);
   --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
   --shadow-soft: 0 18px 50px -24px oklch(0.42 0.06 158 / 0.35);
@@ -59,6 +60,7 @@
   --forest-deep: oklch(0.33 0.052 160);
   --coral: oklch(0.72 0.108 40);
   --coral-soft: oklch(0.86 0.055 45);
+  --coral-dark: oklch(0.62 0.128 40);
 
   --background: var(--cream);
   --foreground: var(--forest-deep);
