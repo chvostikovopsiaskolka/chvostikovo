@@ -32,11 +32,8 @@ export function Hero() {
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
-          <div className="relative mx-auto mt-4 max-w-md space-y-1 overflow-hidden rounded-2xl bg-white/40 p-4 shadow-soft text-forest ring-1 ring-white/60 backdrop-blur-lg sm:rounded-3xl lg:mx-0">
-            <div className="pointer-events-none absolute top-1/2 left-1/2 size-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cream/80 blur-3xl" />
-            <div className="pointer-events-none absolute -top-6 -left-6 size-32 rounded-full bg-coral-soft/75 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-8 -right-6 size-36 rounded-full bg-peach/85 blur-3xl" />
-            <div className="relative z-10 space-y-1">
+          <div className="mx-auto mt-4 max-w-md space-y-1 rounded-2xl bg-white/95 p-4 shadow-soft text-forest sm:rounded-3xl lg:mx-0">
+            <div className="space-y-1">
               <p className="font-display text-sm font-bold sm:text-base lg:text-lg">
                 Váš psík už nemusí tráviť deň sám doma.
               </p>
