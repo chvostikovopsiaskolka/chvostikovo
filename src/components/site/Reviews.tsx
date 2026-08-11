@@ -9,7 +9,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   const [open, setOpen] = useState(false);
   const long = text.length > LIMIT;
   return (
-    <figure className="flex h-full w-[85%] shrink-0 flex-col items-center rounded-3xl bg-card p-6 text-center shadow-card sm:w-[46%] lg:w-[31%]">
+    <figure className="flex h-auto min-h-[19rem] w-[85%] shrink-0 flex-col items-center self-stretch rounded-3xl bg-card p-6 text-center shadow-card sm:w-[46%] lg:w-[31%]">
       <div className="flex items-center justify-center gap-3">
         <span className="flex size-11 items-center justify-center rounded-full bg-secondary font-display text-lg font-bold text-forest">
           {name.charAt(0)}
@@ -71,7 +71,7 @@ function ReviewCarousel() {
       onTouchEnd={resume}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="mt-10 flex gap-5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="mt-10 flex items-stretch gap-5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {[...REVIEWS, ...REVIEWS].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />

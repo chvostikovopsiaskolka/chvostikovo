@@ -61,7 +61,7 @@ export function Header() {
             onClick={() => setOpen(true)}
             className="btn-coral px-3 py-2 text-[0.65rem] leading-none whitespace-nowrap sm:px-6 sm:py-3 sm:text-sm"
           >
-            Chcem prihlásiť psíka
+            Prihláška do škôlky
           </button>
           <button
             type="button"
@@ -95,8 +95,8 @@ export function Header() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Chcete prihlásiť psíka do škôlky?"
-        subtitle="Vyplňte formulár a povedzte nám niečo viac o svojom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup."
+        title="Prihlás svojho psíka ešte dnes"
+        subtitle="Vyplňte formulár, v ktorom nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky."
       >
         <LongForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
       </FormDialog>

@@ -63,9 +63,9 @@ function Index() {
       <Header />
       <main>
         <Hero />
-        <Gallery />
-        <EnrollBanner />
         <Reviews />
+        <EnrollBanner />
+        <Gallery />
         <Care />
         <Why />
         <FirstVisit />

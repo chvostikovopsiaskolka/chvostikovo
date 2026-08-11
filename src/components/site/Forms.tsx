@@ -62,7 +62,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
       </div>
       <div>
         <label className="label-sm" htmlFor="s-info">
-          Informácie o psíkovi *
+          Vaše otázky ohľadom škôlky…
         </label>
         <textarea
           id="s-info"
@@ -70,7 +70,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
           required
           rows={3}
           className="field resize-none"
-          placeholder="Vek, povaha, potreby..."
+          placeholder="Napíšte nám, čo by ste chceli vedieť…"
         />
       </div>
       <label className="flex items-start gap-2 text-sm text-forest/80">
@@ -152,17 +152,15 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
       </div>
       <div>
         <label className="label-sm" htmlFor="l-duvod">
-          Čo vás privádza do Chvostíkova? *
+          Ako plánujete využívať škôlku? *
         </label>
         <select id="l-duvod" required className="field" defaultValue="">
           <option value="" disabled>
             Vyberte možnosť
           </option>
-          <option>Psík býva sám doma</option>
-          <option>Nadbytok energie</option>
-          <option>Deň s psími kamarátmi</option>
-          <option>Robím si prieskum</option>
-          <option>Iné</option>
+          <option>Pravidelne – 1 až 2× týždenne</option>
+          <option>Občas podľa potreby</option>
+          <option>Jednorazové stráženie</option>
         </select>
       </div>
       <div>
