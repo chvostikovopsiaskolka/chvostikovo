@@ -44,6 +44,8 @@ export function Hero() {
             </div>
           </div>
 
+          <GoogleBadge className="mx-auto mt-3 lg:mx-0" />
+
           <a
             href={`tel:${PHONE}`}
             className="btn-coral mt-4 inline-flex items-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base"
@@ -51,7 +53,6 @@ export function Hero() {
             <Phone className="size-4" /> Zavolajte nám
           </a>
 
-          <GoogleBadge className="mx-auto mt-3 lg:mx-0" />
         </div>
 
         <div className="rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
