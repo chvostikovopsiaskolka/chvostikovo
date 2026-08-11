@@ -87,7 +87,7 @@ export function FirstVisit() {
 
         <div className="mt-8 flex justify-center">
           <button type="button" onClick={() => setOpen(true)} className="btn-coral">
-            Chcem prihlásiť psíka
+            Prihláška do škôlky
           </button>
         </div>
       </div>
@@ -95,8 +95,8 @@ export function FirstVisit() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Chcete prihlásiť psíka do škôlky?"
-        subtitle="Vyplňte formulár a povedzte nám niečo viac o svojom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup."
+        title="Prihlás svojho psíka ešte dnes"
+        subtitle="Vyplňte formulár, v ktorom nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky."
       >
         <LongForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
       </FormDialog>
@@ -169,7 +169,7 @@ export function Pricing() {
 
           <div className="mt-7 flex justify-center">
             <a href="#kontakt" className="btn-coral">
-              Chcem prihlásiť psíka
+              Prihláška do škôlky
             </a>
           </div>
         </div>
