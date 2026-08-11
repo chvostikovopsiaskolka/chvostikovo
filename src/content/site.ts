@@ -87,7 +87,36 @@ export const REVIEWS = [
     name: "Erik & Gaston",
     text: "Skvelé miesto, skvelí ľudia! Náš psík od radosti nevie obsedieť pred dverami, kým sa konečne otvoria.",
   },
+  {
+    name: "Dagmar & Merlin",
+    text: "Chvostíkovo je najúžasnejšia škôlka akú poznám, úžasný prístup, starostlivosť o môjho miláčika, celý deň sa hrá, má výbeh aj kamarátov, domov príde, navečeria sa a spinká. Mne táto možnosť škôlky úžasne pomáha – keď pracujem, môj psík nie je doma sám, má spoločnosť. Majitelia sú láskaví, psíkom dávajú pohladenie a ❤️ Som veľmi vďačná za všetko, čo robíte pre nás 👍",
+  },
+  {
+    name: "Alžbeta & Eliška",
+    text: "Ak hľadáte miesto, kde bude váš psík spokojný, tak určite navštívte túto škôlku. Majitelia sú milí, veľmi ústretoví a naša Eliška sa do škôlky vždy teší. Po škôlke máme doma šťastného a unaveného psíka. Ďakujeme",
+  },
+  {
+    name: "Richard & Bella",
+    text: "Výborná škôlka, skvelý prístup majiteľov, pes sa tam nešmýka ako na klzisku, odporúčam určite. Bella sa tam stále teší. ❤️👍",
+  },
+  {
+    name: "Helena & Colin",
+    text: "Colin navštevuje Chvostíkovo už zopár mesiacov. Je to border kólia a teda má viac energie ako väčšina psíkov. Tu to ale neprekáža. Zahrá sa s loptičkou aj s ostatnými a domov ho berieme s tým, že má za sebou aktívny, dobre strávený deň... a my pred sebou pokojný večer :D Majitelia sú milí ľudia, ktorým sa nebojím psíka nechať na starosť.",
+  },
+  {
+    name: "Bianka & Monty",
+    text: "Škôlku Chvostíkovo odporúčam všetkými desiatimi. Je vidieť, že majitelia majú psov naozaj radi, môj psík sa do škôlky vždy veľmi teší a domov sa vracia spokojný a unavený z hry – keď pre neho prídeme, ani sa mu nechce domov 😋 Komunikácia je vždy bezproblémová. Super výhodou je aj výbeh!",
+  },
+  {
+    name: "Martina & Belisha",
+    text: "Veľká spokojnosť! Majitelia škôlky majú úžasný prístup, sú milí, starostliví a vždy ochotní pomôcť. Po presťahovaní do nových priestorov dokonca zabezpečili nášmu psíkovi odvoz do škôlky, čo nám veľmi uľahčilo život. Beli sa tam vždy veľmi teší a domov sa vracia šťastná a príjemne unavená. Odporúčame všetkým, ktorí hľadajú kvalitnú a láskyplnú starostlivosť pre svojich psíkov! 🫶",
+  },
+  {
+    name: "Alena & Becky",
+    text: "Po dlhom hľadaní sme konečne našli škôlku a ľudí, ku ktorým mám dôveru. Naša Becky sa veľmi teší na každú návštevu, výborne bolo o ňu postarané aj počas našej dovolenky. Túto škôlku odporúčam každému. 😍🐕",
+  },
 ];
+
 
 export const WHY = [
   {
