@@ -6,7 +6,7 @@ export function EnrollBanner() {
   const [open, setOpen] = useState(false);
 
   return (
-    <section className="px-4 pb-10 sm:pb-14">
+    <section className="px-4 pt-4 pb-10 sm:pt-6 sm:pb-14">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 rounded-4xl bg-secondary/70 px-5 py-6 text-center shadow-soft sm:px-10 sm:py-8 md:flex-row md:justify-between md:text-left">
         <div className="max-w-3xl">
           <h2 className="font-display text-xl font-bold text-forest sm:text-2xl">
