@@ -74,6 +74,11 @@ export function FirstVisit() {
               </span>
               <h3 className="text-xl text-forest">{s.title}</h3>
               <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{s.text}</p>
+              {s.note && (
+                <p className="mt-4 inline-flex items-center gap-2 font-display text-sm font-semibold text-forest">
+                  <Check className="size-5 shrink-0 text-green-600" /> {s.note}
+                </p>
+              )}
               {i === 0 && (
                 <a
                   href={`tel:${PHONE}`}
