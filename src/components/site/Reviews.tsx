@@ -53,11 +53,11 @@ function ReviewCarousel() {
   useEffect(() => {
     const el = track.current;
     if (!el) return;
-    const speed = isMobile ? 18 : 35; // px / s
+    const speed = isMobile ? 14 : 30; // px / s
     let raf = 0;
     let last = performance.now();
     const step = (now: number) => {
-      const dt = (now - last) / 1000;
+      const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
       if (!paused.current) {
         const half = el.scrollWidth / 2;
@@ -79,9 +79,10 @@ function ReviewCarousel() {
       onMouseLeave={resume}
       onTouchStart={pause}
       onTouchEnd={resume}
+      onTouchCancel={resume}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="mt-10 flex items-stretch gap-5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="mt-10 flex w-full max-w-full items-start gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
       {[...REVIEWS, ...REVIEWS].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
@@ -89,6 +90,7 @@ function ReviewCarousel() {
     </div>
   );
 }
+
 
 export function Reviews() {
   return (
