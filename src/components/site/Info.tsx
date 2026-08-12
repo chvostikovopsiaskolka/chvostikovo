@@ -44,6 +44,7 @@ const STEPS = [
   {
     title: "Zoznamovacia návšteva",
     text: "Zistíme, ako váš psík reaguje na nové prostredie a iných chlpáčov. Prejdeme si spolu priestory, režim dňa aj jeho potreby.",
+    note: "Zoznamovacia návšteva je bezplatná",
   },
   {
     title: "Prvý deň v škôlke",
