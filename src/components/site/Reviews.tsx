@@ -15,7 +15,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="flex h-full w-[82%] shrink-0 flex-col items-center rounded-3xl bg-card p-5 text-center shadow-card sm:w-[46%] sm:p-6 lg:w-[31%]">
+    <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card p-5 text-center shadow-card sm:w-[46%] sm:p-6 lg:w-[31%]">
       <div className="flex items-center justify-center gap-3">
         <span className="flex size-10 items-center justify-center rounded-full bg-secondary font-display text-base font-bold text-forest sm:size-11">
           {name.charAt(0)}
@@ -31,15 +31,17 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
       >
         „{text}“
       </blockquote>
-      {(clamped || open) && (
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="mt-2 font-display text-sm font-semibold text-coral underline underline-offset-4"
-        >
-          {open ? "Zobraziť menej" : "Prečítaj si viac"}
-        </button>
-      )}
+      <div className="min-h-[2.25rem] sm:min-h-[2.5rem]">
+        {(clamped || open) && (
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="mt-2 font-display text-sm font-semibold text-coral underline underline-offset-4"
+          >
+            {open ? "Zobraziť menej" : "Prečítaj si viac"}
+          </button>
+        )}
+      </div>
     </figure>
   );
 }
