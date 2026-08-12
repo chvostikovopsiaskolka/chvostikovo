@@ -15,7 +15,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="flex w-[82%] shrink-0 flex-col items-center self-start rounded-3xl bg-card p-5 text-center shadow-card sm:w-[46%] sm:p-6 lg:w-[31%]">
+    <figure className="flex h-full w-[82%] shrink-0 flex-col items-center rounded-3xl bg-card p-5 text-center shadow-card sm:w-[46%] sm:p-6 lg:w-[31%]">
       <div className="flex items-center justify-center gap-3">
         <span className="flex size-10 items-center justify-center rounded-full bg-secondary font-display text-base font-bold text-forest sm:size-11">
           {name.charAt(0)}
@@ -27,7 +27,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
       </div>
       <blockquote
         ref={body}
-        className={`mt-3 text-[0.9rem] leading-relaxed text-forest/85 sm:text-[0.95rem] ${open ? "" : "line-clamp-3"}`}
+        className={`mt-3 min-h-[4.5rem] text-[0.9rem] leading-relaxed text-forest/85 sm:min-h-[4.75rem] sm:text-[0.95rem] ${open ? "" : "line-clamp-3"}`}
       >
         „{text}“
       </blockquote>
@@ -82,7 +82,7 @@ function ReviewCarousel() {
       onTouchCancel={resume}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="mt-10 flex w-full max-w-full items-start gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+      className="mt-10 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
       {[...REVIEWS, ...REVIEWS].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
