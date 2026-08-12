@@ -3,15 +3,21 @@ import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
 import skolkariVideo from "@/assets/skolkari.mp4.asset.json";
 
-const LIMIT = 180;
-
 function ReviewCard({ name, text }: { name: string; text: string }) {
   const [open, setOpen] = useState(false);
-  const long = text.length > LIMIT;
+  const body = useRef<HTMLQuoteElement>(null);
+  const [clamped, setClamped] = useState(false);
+
+  useEffect(() => {
+    const el = body.current;
+    if (!el) return;
+    setClamped(el.scrollHeight - el.clientHeight > 2);
+  }, [text]);
+
   return (
-    <figure className="flex h-auto min-h-[19rem] w-[85%] shrink-0 flex-col items-center self-stretch rounded-3xl bg-card p-6 text-center shadow-card sm:w-[46%] lg:w-[31%]">
+    <figure className="flex w-[82%] shrink-0 flex-col items-center self-start rounded-3xl bg-card p-5 text-center shadow-card sm:w-[46%] sm:p-6 lg:w-[31%]">
       <div className="flex items-center justify-center gap-3">
-        <span className="flex size-11 items-center justify-center rounded-full bg-secondary font-display text-lg font-bold text-forest">
+        <span className="flex size-10 items-center justify-center rounded-full bg-secondary font-display text-base font-bold text-forest sm:size-11">
           {name.charAt(0)}
         </span>
         <div className="text-left">
@@ -19,14 +25,17 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
           <span className="text-sm tracking-tight text-[#F5B301]">★★★★★</span>
         </div>
       </div>
-      <blockquote className="mt-4 text-[0.95rem] leading-relaxed text-forest/85">
-        „{long && !open ? `${text.slice(0, LIMIT).trimEnd()}…` : text}“
+      <blockquote
+        ref={body}
+        className={`mt-3 text-[0.9rem] leading-relaxed text-forest/85 sm:text-[0.95rem] ${open ? "" : "line-clamp-3"}`}
+      >
+        „{text}“
       </blockquote>
-      {long && (
+      {(clamped || open) && (
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="mt-3 font-display text-sm font-semibold text-coral underline underline-offset-4"
+          className="mt-2 font-display text-sm font-semibold text-coral underline underline-offset-4"
         >
           {open ? "Zobraziť menej" : "Prečítaj si viac"}
         </button>
@@ -34,6 +43,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
     </figure>
   );
 }
+
 
 function ReviewCarousel() {
   const track = useRef<HTMLDivElement>(null);
@@ -43,11 +53,11 @@ function ReviewCarousel() {
   useEffect(() => {
     const el = track.current;
     if (!el) return;
-    const speed = isMobile ? 18 : 35; // px / s
+    const speed = isMobile ? 14 : 30; // px / s
     let raf = 0;
     let last = performance.now();
     const step = (now: number) => {
-      const dt = (now - last) / 1000;
+      const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
       if (!paused.current) {
         const half = el.scrollWidth / 2;
@@ -69,9 +79,10 @@ function ReviewCarousel() {
       onMouseLeave={resume}
       onTouchStart={pause}
       onTouchEnd={resume}
+      onTouchCancel={resume}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="mt-10 flex items-stretch gap-5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="mt-10 flex w-full max-w-full items-start gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
       {[...REVIEWS, ...REVIEWS].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
@@ -79,6 +90,7 @@ function ReviewCarousel() {
     </div>
   );
 }
+
 
 export function Reviews() {
   return (
