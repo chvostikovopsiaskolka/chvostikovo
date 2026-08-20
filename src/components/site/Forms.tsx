@@ -1,13 +1,46 @@
 import { useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { sendInquiry } from "@/lib/send-inquiry.functions";
+
+function collect(form: HTMLFormElement, labels: Record<string, string>) {
+  const fd = new FormData(form);
+  return Object.entries(labels).map(([name, label]) => ({
+    label,
+    value: String(fd.get(name) ?? ""),
+  }));
+}
 
 export function ShortForm({ onSent }: { onSent?: () => void }) {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const send = useServerFn(sendInquiry);
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSent(true);
-    onSent?.();
+    const form = e.currentTarget;
+    setLoading(true);
+    setError(null);
+    try {
+      await send({
+        data: {
+          typ: "informacie",
+          fields: collect(form, {
+            meno: "Meno majiteľa",
+            telefon: "Telefón",
+            plemeno: "Plemeno psíka",
+            info: "Otázky",
+          }),
+        },
+      });
+      setSent(true);
+      onSent?.();
+    } catch {
+      setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (sent) {
@@ -77,8 +110,9 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
         <input type="checkbox" required className="mt-1 accent-[oklch(0.72_0.108_40)]" />
         Súhlasím so spracovaním osobných údajov.
       </label>
-      <button type="submit" className="btn-coral w-full px-4 py-2.5 text-sm">
-        Chcem sa informovať
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <button type="submit" disabled={loading} className="btn-coral w-full px-4 py-2.5 text-sm disabled:opacity-60">
+        {loading ? "Odosielam…" : "Chcem sa informovať"}
       </button>
 
     </form>
@@ -87,11 +121,37 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
 
 export function LongForm({ onSent }: { onSent?: () => void }) {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const send = useServerFn(sendInquiry);
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSent(true);
-    onSent?.();
+    const form = e.currentTarget;
+    setLoading(true);
+    setError(null);
+    try {
+      await send({
+        data: {
+          typ: "prihlaska",
+          fields: collect(form, {
+            meno: "Meno a priezvisko majiteľa",
+            telefon: "Telefón",
+            pes: "Meno psa",
+            pohlavie: "Pohlavie psa",
+            vek: "Vek psa",
+            duvod: "Ako plánuje využívať škôlku",
+            viac: "Viac o psíkovi",
+          }),
+        },
+      });
+      setSent(true);
+      onSent?.();
+    } catch {
+      setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (sent) {
@@ -115,13 +175,13 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <label className="label-sm" htmlFor="l-meno">
             Meno a priezvisko majiteľa *
           </label>
-          <input id="l-meno" required className="field" placeholder="Vaše meno" />
+          <input id="l-meno" name="meno" required className="field" placeholder="Vaše meno" />
         </div>
         <div>
           <label className="label-sm" htmlFor="l-tel">
             Telefón *
           </label>
-          <input id="l-tel" type="tel" required className="field" placeholder="+421" />
+          <input id="l-tel" name="telefon" type="tel" required className="field" placeholder="+421" />
         </div>
       </div>
       <div className="grid gap-3.5 sm:grid-cols-3">
@@ -129,13 +189,13 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <label className="label-sm" htmlFor="l-pes">
             Meno psa *
           </label>
-          <input id="l-pes" required className="field" placeholder="Rocky" />
+          <input id="l-pes" name="pes" required className="field" placeholder="Rocky" />
         </div>
         <div>
           <label className="label-sm" htmlFor="l-pohlavie">
             Pohlavie psa *
           </label>
-          <select id="l-pohlavie" required className="field" defaultValue="">
+          <select id="l-pohlavie" name="pohlavie" required className="field" defaultValue="">
             <option value="" disabled>
               Vyberte
             </option>
@@ -147,14 +207,14 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <label className="label-sm" htmlFor="l-vek">
             Vek psa *
           </label>
-          <input id="l-vek" required className="field" placeholder="2 roky" />
+          <input id="l-vek" name="vek" required className="field" placeholder="2 roky" />
         </div>
       </div>
       <div>
         <label className="label-sm" htmlFor="l-duvod">
           Ako plánujete využívať škôlku? *
         </label>
-        <select id="l-duvod" required className="field" defaultValue="">
+        <select id="l-duvod" name="duvod" required className="field" defaultValue="">
           <option value="" disabled>
             Vyberte možnosť
           </option>
@@ -169,6 +229,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         </label>
         <textarea
           id="l-viac"
+          name="viac"
           required
           rows={4}
           className="field resize-none"
@@ -179,8 +240,9 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         <input type="checkbox" required className="mt-1 accent-[oklch(0.72_0.108_40)]" />
         Súhlasím so spracovaním osobných údajov.
       </label>
-      <button type="submit" className="btn-coral w-full">
-        Prihlásiť psíka
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <button type="submit" disabled={loading} className="btn-coral w-full disabled:opacity-60">
+        {loading ? "Odosielam…" : "Prihlásiť psíka"}
       </button>
     </form>
   );
