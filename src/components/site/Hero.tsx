@@ -57,7 +57,7 @@ export function Hero() {
 
         <div className="rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
           <h2 className="text-center text-base whitespace-nowrap text-forest sm:text-xl lg:text-2xl">
-            Informujte sa o škôlke?
+            Informujte sa o škôlke..
           </h2>
           <p className="mt-2 mb-5 text-center text-sm text-muted-foreground">
             Vyplňte nezáväzný formulár. Radi vám odpovieme na vaše otázky do 24 hodín.
