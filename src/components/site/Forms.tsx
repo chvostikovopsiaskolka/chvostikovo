@@ -20,18 +20,21 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
+    const fd = new FormData(form);
     setLoading(true);
     setError(null);
     try {
       await send({
         data: {
           typ: "informacie",
-          fields: collect(form, {
-            meno: "Meno majiteľa",
-            telefon: "Telefón",
-            plemeno: "Plemeno psíka",
-            info: "Otázky",
-          }),
+          fields: [
+            { label: "Meno majiteľa", value: String(fd.get("meno") ?? "") },
+            {
+              label: "Telefón",
+              value: `${fd.get("predvolba") ?? ""} ${fd.get("telefon") ?? ""}`.trim(),
+            },
+            { label: "O čo máte záujem?", value: String(fd.get("zaujem") ?? "") },
+          ],
         },
       });
       setSent(true);
@@ -57,15 +60,29 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
     );
   }
 
-
   return (
     <form onSubmit={onSubmit} className="space-y-3.5">
-      <div className="grid gap-3.5 sm:grid-cols-2">
+      <div>
+        <label className="label-sm" htmlFor="s-meno">
+          Meno majiteľa *
+        </label>
+        <input id="s-meno" name="meno" required className="field" placeholder="Vaše meno" />
+      </div>
+      <div className="grid gap-3.5 grid-cols-[minmax(5rem,0.35fr)_1fr]">
         <div>
-          <label className="label-sm" htmlFor="s-meno">
-            Meno majiteľa *
+          <label className="label-sm" htmlFor="s-predvolba">
+            Predvoľba *
           </label>
-          <input id="s-meno" name="meno" required className="field" placeholder="Vaše meno" />
+          <select id="s-predvolba" name="predvolba" required className="field" defaultValue="+421">
+            <option value="+421">+421</option>
+            <option value="+420">+420</option>
+            <option value="+36">+36</option>
+            <option value="+48">+48</option>
+            <option value="+43">+43</option>
+            <option value="+49">+49</option>
+            <option value="+44">+44</option>
+            <option value="+1">+1</option>
+          </select>
         </div>
         <div>
           <label className="label-sm" htmlFor="s-tel">
@@ -77,34 +94,23 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
             type="tel"
             required
             className="field"
-            placeholder="+421"
+            placeholder="951 069 395"
           />
         </div>
       </div>
       <div>
-        <label className="label-sm" htmlFor="s-plemeno">
-          Plemeno psíka *
+        <label className="label-sm" htmlFor="s-zaujem">
+          O čo máte záujem? *
         </label>
-        <input
-          id="s-plemeno"
-          name="plemeno"
-          required
-          className="field"
-          placeholder="Weimarský stavač"
-        />
-      </div>
-      <div>
-        <label className="label-sm" htmlFor="s-info">
-          Vaše otázky ohľadom škôlky…
-        </label>
-        <textarea
-          id="s-info"
-          name="info"
-          required
-          rows={3}
-          className="field resize-none"
-          placeholder="Napíšte nám, čo by ste chceli vedieť…"
-        />
+        <select id="s-zaujem" name="zaujem" required className="field" defaultValue="">
+          <option value="" disabled>
+            Vyberte možnosť
+          </option>
+          <option>Chcem sa dozvedieť viac o psej škôlke</option>
+          <option>Mám záujem o pravidelné návštevy</option>
+          <option>Potrebujem škôlku občas</option>
+          <option>Potrebujem jednorazové stráženie</option>
+        </select>
       </div>
       <label className="flex items-start gap-2 text-sm text-forest/80">
         <input type="checkbox" required className="mt-1 accent-[oklch(0.72_0.108_40)]" />
@@ -114,7 +120,6 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
       <button type="submit" disabled={loading} className="btn-coral w-full px-4 py-2.5 text-sm disabled:opacity-60">
         {loading ? "Odosielam…" : "Chcem sa informovať"}
       </button>
-
     </form>
   );
 }
