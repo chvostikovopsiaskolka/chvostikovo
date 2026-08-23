@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const STORAGE_KEY = "chvostikovo-cookies";
-const PIXEL_ID = "1344636107865047";
+const PIXEL_ID = "1592305991362085";
 
 type Consent = {
   necessary: true;
