@@ -29,10 +29,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
           typ: "informacie",
           fields: [
             { label: "Meno majiteľa", value: String(fd.get("meno") ?? "") },
-            {
-              label: "Telefón",
-              value: `${fd.get("predvolba") ?? ""} ${fd.get("telefon") ?? ""}`.trim(),
-            },
+            { label: "Telefón", value: String(fd.get("telefon") ?? "").trim() },
             { label: "O čo máte záujem?", value: String(fd.get("zaujem") ?? "") },
           ],
         },
