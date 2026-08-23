@@ -86,6 +86,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 import { CookieBanner } from "@/components/site/CookieBanner";
 import { GoogleAnalytics } from "@/components/site/GoogleAnalytics";
 import { GoogleTagManager } from "@/components/site/GoogleTagManager";
+import { MetaPixel } from "@/components/site/MetaPixel";
+
 
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -180,8 +182,8 @@ function RootComponent() {
       <CookieBanner />
       <GoogleAnalytics />
       <GoogleTagManager />
+      <MetaPixel />
     </QueryClientProvider>
-
   );
 }
 
