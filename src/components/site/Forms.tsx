@@ -114,7 +114,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
       </div>
       <label className="flex items-start gap-2 text-sm text-forest/80">
         <input type="checkbox" required className="mt-1 accent-[oklch(0.72_0.108_40)]" />
-        Súhlasím so spracovaním osobných údajov.
+        Súhlasím so spracovaním osobných údajov. <span className="text-destructive">*</span>
       </label>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <button type="submit" disabled={loading} className="btn-coral w-full px-4 py-2.5 text-sm disabled:opacity-60">
@@ -243,7 +243,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
       </div>
       <label className="flex items-start gap-2 text-sm text-forest/80">
         <input type="checkbox" required className="mt-1 accent-[oklch(0.72_0.108_40)]" />
-        Súhlasím so spracovaním osobných údajov.
+        Súhlasím so spracovaním osobných údajov. <span className="text-destructive">*</span>
       </label>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <button type="submit" disabled={loading} className="btn-coral w-full disabled:opacity-60">
