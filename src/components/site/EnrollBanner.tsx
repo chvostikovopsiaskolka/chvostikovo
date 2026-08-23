@@ -23,7 +23,7 @@ export function EnrollBanner() {
           onClick={() => setOpen(true)}
           className="btn-coral w-full shrink-0 px-6 py-3 text-sm sm:w-auto sm:text-base"
         >
-          Chcem sa informovať
+          Vyplňte nezáväzný formulár
         </button>
       </div>
 
