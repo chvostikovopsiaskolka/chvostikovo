@@ -39,6 +39,9 @@ export function CookieBanner() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     setConsent(next);
     setOpen(false);
+    window.dispatchEvent(
+      new CustomEvent("chvostikovo-consent-changed", { detail: next })
+    );
   }
 
   function acceptAll() {
