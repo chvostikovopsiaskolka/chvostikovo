@@ -29,10 +29,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
           typ: "informacie",
           fields: [
             { label: "Meno majiteľa", value: String(fd.get("meno") ?? "") },
-            {
-              label: "Telefón",
-              value: `${fd.get("predvolba") ?? ""} ${fd.get("telefon") ?? ""}`.trim(),
-            },
+            { label: "Telefón", value: String(fd.get("telefon") ?? "").trim() },
             { label: "O čo máte záujem?", value: String(fd.get("zaujem") ?? "") },
           ],
         },
@@ -68,35 +65,15 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
         </label>
         <input id="s-meno" name="meno" required className="field" placeholder="Vaše meno" />
       </div>
-      <div className="grid gap-3.5 grid-cols-[minmax(5rem,0.35fr)_1fr]">
-        <div>
-          <label className="label-sm" htmlFor="s-predvolba">
-            Predvoľba *
-          </label>
-          <select id="s-predvolba" name="predvolba" required className="field" defaultValue="+421">
-            <option value="+421">+421</option>
-            <option value="+420">+420</option>
-            <option value="+36">+36</option>
-            <option value="+48">+48</option>
-            <option value="+43">+43</option>
-            <option value="+49">+49</option>
-            <option value="+44">+44</option>
-            <option value="+1">+1</option>
-          </select>
-        </div>
-        <div>
-          <label className="label-sm" htmlFor="s-tel">
-            Telefón *
-          </label>
-          <input
-            id="s-tel"
-            name="telefon"
-            type="tel"
-            required
-            className="field"
-            placeholder="951 069 395"
-          />
-        </div>
+      <div>
+        <input
+          id="s-tel"
+          name="telefon"
+          type="tel"
+          required
+          className="field"
+          placeholder="+421 951 069 395"
+        />
       </div>
       <div>
         <label className="label-sm" htmlFor="s-zaujem">
