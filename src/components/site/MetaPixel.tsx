@@ -74,20 +74,29 @@ export function MetaPixel() {
   const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (hasMarketingConsent()) {
-      initPixel();
-      initializedRef.current = true;
-    }
-
-    function handleStorage(event: StorageEvent) {
-      if (event.key === STORAGE_KEY && hasMarketingConsent() && !initializedRef.current) {
+    function tryInit() {
+      if (hasMarketingConsent() && !initializedRef.current) {
         initPixel();
         initializedRef.current = true;
       }
     }
 
+    tryInit();
+
+    function handleStorage(event: StorageEvent) {
+      if (event.key === STORAGE_KEY) tryInit();
+    }
+
+    function handleConsentChanged() {
+      tryInit();
+    }
+
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("chvostikovo-consent-changed", handleConsentChanged);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("chvostikovo-consent-changed", handleConsentChanged);
+    };
   }, []);
 
   return null;
