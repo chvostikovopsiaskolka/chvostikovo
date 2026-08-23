@@ -83,51 +83,50 @@ function ContactRow({
 export function Footer() {
   return (
     <footer className="bg-forest py-10 text-cream/80">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 px-4 text-center sm:flex-row sm:justify-between sm:text-left">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 sm:flex-row sm:items-start sm:justify-between">
         <img
           src={logo}
           alt="Chvostíkovo psia škôlka"
           className="h-8 w-auto brightness-0 invert opacity-90"
         />
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-3 text-center">
           <p className="text-sm">
             Psia škôlka Chvostíkovo · Poľská 6, Košice ·{" "}
             <a href={`tel:${PHONE}`} className="font-semibold text-cream hover:text-coral-soft">
               {PHONE_PRETTY}
             </a>
           </p>
-          <div className="flex items-center gap-2">
-            <a
-              href={INSTAGRAM}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram Chvostíkovo"
-              className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
-            >
-              <Instagram className="size-5" />
-            </a>
-            <a
-              href={FACEBOOK}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Facebook Chvostíkovo"
-              className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
-            >
-              <Facebook className="size-5" />
-            </a>
-          </div>
+          <p className="text-xs">
+            © {new Date().getFullYear()} Chvostíkovo ·{" "}
+            <Link to="/cookies" className="underline hover:text-cream">
+              Cookies
+            </Link>{" "}
+            ·{" "}
+            <Link to="/ochrana-osobnych-udajov" className="underline hover:text-cream">
+              Ochrana osobných údajov
+            </Link>
+          </p>
         </div>
-        <p className="text-xs">
-          © {new Date().getFullYear()} Chvostíkovo ·{" "}
-          <Link to="/cookies" className="underline hover:text-cream">
-            Cookies
-          </Link>{" "}
-          ·{" "}
-          <Link to="/ochrana-osobnych-udajov" className="underline hover:text-cream">
-            Ochrana osobných údajov
-          </Link>
-        </p>
-
+        <div className="flex items-center gap-2">
+          <a
+            href={INSTAGRAM}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Instagram Chvostíkovo"
+            className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
+          >
+            <Instagram className="size-5" />
+          </a>
+          <a
+            href={FACEBOOK}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Facebook Chvostíkovo"
+            className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
+          >
+            <Facebook className="size-5" />
+          </a>
+        </div>
       </div>
     </footer>
   );
