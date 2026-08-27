@@ -3,12 +3,9 @@ import { Check } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { sendInquiry } from "@/lib/send-inquiry.functions";
 
-function collect(form: HTMLFormElement, labels: Record<string, string>) {
-  const fd = new FormData(form);
-  return Object.entries(labels).map(([name, label]) => ({
-    label,
-    value: String(fd.get(name) ?? ""),
-  }));
+function sourceRef() {
+  if (typeof window === "undefined") return "/";
+  return `${window.location.pathname}${window.location.search}` || "/";
 }
 
 export function ShortForm({ onSent }: { onSent?: () => void }) {
@@ -19,6 +16,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading) return;
     const form = e.currentTarget;
     const fd = new FormData(form);
     setLoading(true);
@@ -27,11 +25,11 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
       await send({
         data: {
           typ: "informacie",
-          fields: [
-            { label: "Meno majiteľa", value: String(fd.get("meno") ?? "") },
-            { label: "Telefón", value: String(fd.get("telefon") ?? "").trim() },
-            { label: "O čo máte záujem?", value: String(fd.get("zaujem") ?? "") },
-          ],
+          consent: true,
+          source_ref: sourceRef(),
+          meno: String(fd.get("meno") ?? "").trim(),
+          telefon: String(fd.get("telefon") ?? "").trim(),
+          zaujem: String(fd.get("zaujem") ?? ""),
         },
       });
       setSent(true);
@@ -42,6 +40,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
       setLoading(false);
     }
   }
+
 
   if (sent) {
     return (
@@ -112,25 +111,27 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.currentTarget;
+    if (loading) return;
+    const fd = new FormData(e.currentTarget);
     setLoading(true);
     setError(null);
     try {
       await send({
         data: {
           typ: "prihlaska",
-          fields: collect(form, {
-            meno: "Meno a priezvisko majiteľa",
-            telefon: "Telefón",
-            pes: "Meno psa",
-            pohlavie: "Pohlavie psa",
-            vek: "Vek psa",
-            kastrovana: "Kastrovaný / sterilizovaná",
-            duvod: "Ako plánuje využívať škôlku",
-            viac: "Viac o psíkovi",
-          }),
+          consent: true,
+          source_ref: sourceRef(),
+          meno: String(fd.get("meno") ?? "").trim(),
+          telefon: String(fd.get("telefon") ?? "").trim(),
+          pes: String(fd.get("pes") ?? "").trim(),
+          pohlavie: String(fd.get("pohlavie") ?? ""),
+          vek: String(fd.get("vek") ?? "").trim(),
+          kastrovana: String(fd.get("kastrovana") ?? ""),
+          duvod: String(fd.get("duvod") ?? ""),
+          viac: String(fd.get("viac") ?? "").trim(),
         },
       });
+
       setSent(true);
       onSent?.();
     } catch {
