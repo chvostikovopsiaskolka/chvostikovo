@@ -21,7 +21,7 @@ const longSchema = z.object({
   vek: z.string().min(1).max(100),
   kastrovana: z.string().min(1).max(40),
   duvod: z.string().min(1).max(300),
-  viac: z.string().max(3000),
+  viac: z.string().min(1).max(3000),
 });
 
 const schema = z.discriminatedUnion("typ", [shortSchema, longSchema]);
