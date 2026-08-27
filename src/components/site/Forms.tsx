@@ -3,12 +3,9 @@ import { Check } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { sendInquiry } from "@/lib/send-inquiry.functions";
 
-function collect(form: HTMLFormElement, labels: Record<string, string>) {
-  const fd = new FormData(form);
-  return Object.entries(labels).map(([name, label]) => ({
-    label,
-    value: String(fd.get(name) ?? ""),
-  }));
+function sourceRef() {
+  if (typeof window === "undefined") return "/";
+  return `${window.location.pathname}${window.location.search}` || "/";
 }
 
 export function ShortForm({ onSent }: { onSent?: () => void }) {
@@ -19,6 +16,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading) return;
     const form = e.currentTarget;
     const fd = new FormData(form);
     setLoading(true);
@@ -27,11 +25,11 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
       await send({
         data: {
           typ: "informacie",
-          fields: [
-            { label: "Meno majiteľa", value: String(fd.get("meno") ?? "") },
-            { label: "Telefón", value: String(fd.get("telefon") ?? "").trim() },
-            { label: "O čo máte záujem?", value: String(fd.get("zaujem") ?? "") },
-          ],
+          consent: true,
+          source_ref: sourceRef(),
+          meno: String(fd.get("meno") ?? "").trim(),
+          telefon: String(fd.get("telefon") ?? "").trim(),
+          zaujem: String(fd.get("zaujem") ?? ""),
         },
       });
       setSent(true);
@@ -42,6 +40,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
       setLoading(false);
     }
   }
+
 
   if (sent) {
     return (
