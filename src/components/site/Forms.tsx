@@ -66,6 +66,9 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
         <input id="s-meno" name="meno" required className="field" placeholder="Vaše meno" />
       </div>
       <div>
+        <label className="label-sm" htmlFor="s-tel">
+          Telefón *
+        </label>
         <input
           id="s-tel"
           name="telefon"
