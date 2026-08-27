@@ -111,25 +111,27 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.currentTarget;
+    if (loading) return;
+    const fd = new FormData(e.currentTarget);
     setLoading(true);
     setError(null);
     try {
       await send({
         data: {
           typ: "prihlaska",
-          fields: collect(form, {
-            meno: "Meno a priezvisko majiteľa",
-            telefon: "Telefón",
-            pes: "Meno psa",
-            pohlavie: "Pohlavie psa",
-            vek: "Vek psa",
-            kastrovana: "Kastrovaný / sterilizovaná",
-            duvod: "Ako plánuje využívať škôlku",
-            viac: "Viac o psíkovi",
-          }),
+          consent: true,
+          source_ref: sourceRef(),
+          meno: String(fd.get("meno") ?? "").trim(),
+          telefon: String(fd.get("telefon") ?? "").trim(),
+          pes: String(fd.get("pes") ?? "").trim(),
+          pohlavie: String(fd.get("pohlavie") ?? ""),
+          vek: String(fd.get("vek") ?? "").trim(),
+          kastrovana: String(fd.get("kastrovana") ?? ""),
+          duvod: String(fd.get("duvod") ?? ""),
+          viac: String(fd.get("viac") ?? "").trim(),
         },
       });
+
       setSent(true);
       onSent?.();
     } catch {
