@@ -122,6 +122,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
             pes: "Meno psa",
             pohlavie: "Pohlavie psa",
             vek: "Vek psa",
+            kastrovana: "Kastrovaný / sterilizovaná",
             duvod: "Ako plánuje využívať škôlku",
             viac: "Viac o psíkovi",
           }),
