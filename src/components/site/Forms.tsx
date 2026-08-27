@@ -166,7 +166,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <input id="l-tel" name="telefon" type="tel" required className="field" placeholder="+421" />
         </div>
       </div>
-      <div className="grid gap-3.5 sm:grid-cols-3">
+      <div className="grid gap-3.5 sm:grid-cols-2">
         <div>
           <label className="label-sm" htmlFor="l-pes">
             Meno psa *
@@ -185,11 +185,25 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
             <option>Fenka</option>
           </select>
         </div>
+      </div>
+      <div className="grid gap-3.5 sm:grid-cols-2">
         <div>
           <label className="label-sm" htmlFor="l-vek">
             Vek psa *
           </label>
           <input id="l-vek" name="vek" required className="field" placeholder="2 roky" />
+        </div>
+        <div>
+          <label className="label-sm" htmlFor="l-kastrovana">
+            Kastrovaný / sterilizovaná *
+          </label>
+          <select id="l-kastrovana" name="kastrovana" required className="field" defaultValue="">
+            <option value="" disabled>
+              Vyberte
+            </option>
+            <option>Áno</option>
+            <option>Nie</option>
+          </select>
         </div>
       </div>
       <div>
