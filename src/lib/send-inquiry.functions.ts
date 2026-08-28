@@ -17,6 +17,8 @@ const longSchema = z.object({
   meno: z.string().min(1).max(200),
   telefon: z.string().min(1).max(60),
   pes: z.string().min(1).max(200),
+  plemeno: z.string().min(1).max(200),
+  vaha: z.string().min(1).max(100),
   pohlavie: z.string().min(1).max(40),
   vek: z.string().min(1).max(100),
   kastrovana: z.string().min(1).max(40),
