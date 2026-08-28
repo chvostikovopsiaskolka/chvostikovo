@@ -183,7 +183,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <label className="label-sm" htmlFor="l-plemeno-vaha">
             Plemeno a váha psa *
           </label>
-          <input id="l-plemeno-vaha" name="plemeno_vaha" required className="field" placeholder="Zlatý retriever, približne 25 kg" />
+          <input id="l-plemeno-vaha" name="plemeno_vaha" required className="field" placeholder="Labrador, cca 25 kg" />
         </div>
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">
