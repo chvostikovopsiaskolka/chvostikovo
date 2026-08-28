@@ -181,6 +181,20 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <input id="l-pes" name="pes" required className="field" placeholder="Rocky" />
         </div>
         <div>
+          <label className="label-sm" htmlFor="l-plemeno">
+            Plemeno psa *
+          </label>
+          <input id="l-plemeno" name="plemeno" required className="field" placeholder="Zlatý retriever" />
+        </div>
+      </div>
+      <div className="grid gap-3.5 sm:grid-cols-2">
+        <div>
+          <label className="label-sm" htmlFor="l-vaha">
+            Váha psa *
+          </label>
+          <input id="l-vaha" name="vaha" required className="field" placeholder="približne 25 kg" />
+        </div>
+        <div>
           <label className="label-sm" htmlFor="l-pohlavie">
             Pohlavie psa *
           </label>
