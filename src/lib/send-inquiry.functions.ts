@@ -100,6 +100,8 @@ function buildDbPayload(data: Input) {
     owner_name: data.meno,
     phone: data.telefon,
     dog_name: data.pes,
+    dog_breed: data.plemeno,
+    dog_weight: data.vaha,
     dog_sex: data.pohlavie,
     dog_age_text: data.vek,
     dog_neutered: data.kastrovana,
