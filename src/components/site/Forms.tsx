@@ -180,19 +180,13 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <input id="l-pes" name="pes" required className="field" placeholder="Rocky" />
         </div>
         <div>
-          <label className="label-sm" htmlFor="l-plemeno">
-            Plemeno psa *
+          <label className="label-sm" htmlFor="l-plemeno-vaha">
+            Plemeno a váha psa *
           </label>
-          <input id="l-plemeno" name="plemeno" required className="field" placeholder="Zlatý retriever" />
+          <input id="l-plemeno-vaha" name="plemeno_vaha" required className="field" placeholder="Zlatý retriever, približne 25 kg" />
         </div>
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">
-        <div>
-          <label className="label-sm" htmlFor="l-vaha">
-            Váha psa *
-          </label>
-          <input id="l-vaha" name="vaha" required className="field" placeholder="približne 25 kg" />
-        </div>
         <div>
           <label className="label-sm" htmlFor="l-pohlavie">
             Pohlavie psa *
@@ -204,6 +198,12 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
             <option>Pes</option>
             <option>Fenka</option>
           </select>
+        </div>
+        <div>
+          <label className="label-sm" htmlFor="l-vek">
+            Vek psa *
+          </label>
+          <input id="l-vek" name="vek" required className="field" placeholder="2 roky" />
         </div>
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">
