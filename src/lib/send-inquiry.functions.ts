@@ -66,6 +66,8 @@ function buildFields(data: Input): Array<{ label: string; value: string }> {
     { label: "Meno a priezvisko majiteľa", value: data.meno },
     { label: "Telefón", value: data.telefon },
     { label: "Meno psa", value: data.pes },
+    { label: "Plemeno psa", value: data.plemeno },
+    { label: "Váha psa", value: data.vaha },
     { label: "Pohlavie psa", value: data.pohlavie },
     { label: "Vek psa", value: data.vek },
     { label: "Kastrovaný / sterilizovaná", value: data.kastrovana },
