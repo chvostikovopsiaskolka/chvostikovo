@@ -124,8 +124,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           meno: String(fd.get("meno") ?? "").trim(),
           telefon: String(fd.get("telefon") ?? "").trim(),
           pes: String(fd.get("pes") ?? "").trim(),
-          plemeno: String(fd.get("plemeno") ?? "").trim(),
-          vaha: String(fd.get("vaha") ?? "").trim(),
+          plemeno_vaha: String(fd.get("plemeno_vaha") ?? "").trim(),
           pohlavie: String(fd.get("pohlavie") ?? ""),
           vek: String(fd.get("vek") ?? "").trim(),
           kastrovana: String(fd.get("kastrovana") ?? ""),
@@ -181,19 +180,13 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <input id="l-pes" name="pes" required className="field" placeholder="Rocky" />
         </div>
         <div>
-          <label className="label-sm" htmlFor="l-plemeno">
-            Plemeno psa *
+          <label className="label-sm" htmlFor="l-plemeno-vaha">
+            Plemeno a váha psa *
           </label>
-          <input id="l-plemeno" name="plemeno" required className="field" placeholder="Zlatý retriever" />
+          <input id="l-plemeno-vaha" name="plemeno_vaha" required className="field" placeholder="Zlatý retriever, približne 25 kg" />
         </div>
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">
-        <div>
-          <label className="label-sm" htmlFor="l-vaha">
-            Váha psa *
-          </label>
-          <input id="l-vaha" name="vaha" required className="field" placeholder="približne 25 kg" />
-        </div>
         <div>
           <label className="label-sm" htmlFor="l-pohlavie">
             Pohlavie psa *
@@ -206,26 +199,24 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
             <option>Fenka</option>
           </select>
         </div>
-      </div>
-      <div className="grid gap-3.5 sm:grid-cols-2">
         <div>
           <label className="label-sm" htmlFor="l-vek">
             Vek psa *
           </label>
           <input id="l-vek" name="vek" required className="field" placeholder="2 roky" />
         </div>
-        <div>
-          <label className="label-sm" htmlFor="l-kastrovana">
-            Kastrovaný / sterilizovaná *
-          </label>
-          <select id="l-kastrovana" name="kastrovana" required className="field" defaultValue="">
-            <option value="" disabled>
-              Vyberte
-            </option>
-            <option>Áno</option>
-            <option>Nie</option>
-          </select>
-        </div>
+      </div>
+      <div>
+        <label className="label-sm" htmlFor="l-kastrovana">
+          Kastrovaný / sterilizovaná *
+        </label>
+        <select id="l-kastrovana" name="kastrovana" required className="field" defaultValue="">
+          <option value="" disabled>
+            Vyberte
+          </option>
+          <option>Áno</option>
+          <option>Nie</option>
+        </select>
       </div>
       <div>
         <label className="label-sm" htmlFor="l-duvod">
