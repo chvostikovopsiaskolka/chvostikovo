@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ShieldCheck, HeartHandshake, Sparkles, Stethoscope, Check, Plus, Minus, Car, Phone } from "lucide-react";
 import { FormDialog } from "./FormDialog";
+import { Collapse } from "./Collapse";
 import { LongForm } from "./Forms";
 import { REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
 
@@ -17,7 +18,28 @@ export function Requirements() {
           <h2 className="section-title mt-2 text-3xl sm:text-4xl">Čo musí psík spĺňať</h2>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
+        {/* Mobil – rozbaľovacie karty */}
+        <div className="mt-8 space-y-3 md:hidden">
+          {REQUIREMENTS.map((r, i) => {
+            const Icon = reqIcons[i]!;
+            return (
+              <Collapse
+                key={r.title}
+                title={r.title}
+                icon={
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-forest">
+                    <Icon className="size-5" />
+                  </span>
+                }
+              >
+                {r.text}
+              </Collapse>
+            );
+          })}
+        </div>
+
+        {/* Desktop – pôvodné karty */}
+        <div className="mt-10 hidden gap-5 md:grid md:grid-cols-2">
           {REQUIREMENTS.map((r, i) => {
             const Icon = reqIcons[i]!;
             return (
@@ -75,7 +97,7 @@ export function FirstVisit() {
               <h3 className="text-xl text-forest">{s.title}</h3>
               <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{s.text}</p>
               {s.note && (
-                <p className="mt-4 inline-flex items-center gap-2 font-display text-sm font-semibold whitespace-nowrap text-forest">
+                <p className="mt-4 flex items-start gap-2 font-display text-sm font-semibold text-forest">
                   <Check className="size-5 shrink-0 text-forest" /> {s.note}
                 </p>
               )}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Home, Zap, Dog, Check } from "lucide-react";
 import { FormDialog } from "./FormDialog";
+import { Collapse } from "./Collapse";
 import { LongForm } from "./Forms";
 import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg.asset.json";
@@ -13,6 +14,11 @@ import coursing from "@/assets/partner-coursing.png";
 import lolkio from "@/assets/partner-lolkio.png";
 
 const whyIcons = [Home, Zap, Dog];
+
+const ABOUT_MORE = [
+  "Práve preto vzniklo Chvostíkovo – psia škôlka v Košiciach zameraná na stredné a veľké plemená, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste. Máme dlhoročné skúsenosti s prácou so psami (práca v útulku, starostlivosť o psov v dočasnej opatere, výchova vlastných psíkov). Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.",
+  "Chvostíkovo nie je len miesto na stráženie psov. Je to druhý domov, kde sa o každého člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim vlastným psom.",
+];
 
 function renderText(text: string) {
   const parts = text.split(/(\*\*.*?\*\*)/g);
@@ -67,7 +73,29 @@ export function Why() {
             Prečo využiť psiu škôlku?
           </h2>
 
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {/* Mobil – rozbaľovacie karty */}
+          <div className="mt-6 space-y-3 md:hidden">
+            {WHY.map((w, i) => {
+              const Icon = whyIcons[i]!;
+              return (
+                <Collapse
+                  key={w.title}
+                  title={w.title}
+                  tone="dark"
+                  icon={
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground">
+                      <Icon className="size-5" />
+                    </span>
+                  }
+                >
+                  {w.text}
+                </Collapse>
+              );
+            })}
+          </div>
+
+          {/* Desktop */}
+          <div className="mt-8 hidden gap-6 md:grid md:grid-cols-3">
             {WHY.map((w, i) => {
               const Icon = whyIcons[i]!;
               return (
@@ -130,18 +158,20 @@ export function About() {
               by sme svojich štvornohých spoločníkov nechali s úplnou dôverou počas pracovného dňa
               či nečakaných povinností.
             </p>
-            <p>
-              Práve preto vzniklo Chvostíkovo – psia škôlka v Košiciach zameraná na stredné a veľké
-              plemená, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste. Máme
-              dlhoročné skúsenosti s prácou so psami (práca v útulku, starostlivosť o psov v
-              dočasnej opatere, výchova vlastných psíkov). Tieto skúsenosti nás naučili rozumieť
-              ich potrebám, komunikácii aj správaniu v skupine.
-            </p>
-            <p>
-              Chvostíkovo nie je len miesto na stráženie psov. Je to druhý domov, kde sa o každého
-              člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim
-              vlastným psom.
-            </p>
+            {/* Mobil – zvyšok textu v rozbaľovacom okne */}
+            <div className="md:hidden">
+              <Collapse title="Čítať viac o nás">
+                <div className="space-y-4">
+                  <p>{ABOUT_MORE[0]}</p>
+                  <p>{ABOUT_MORE[1]}</p>
+                </div>
+              </Collapse>
+            </div>
+
+            <div className="hidden space-y-4 md:block">
+              <p>{ABOUT_MORE[0]}</p>
+              <p>{ABOUT_MORE[1]}</p>
+            </div>
           </div>
         </div>
 

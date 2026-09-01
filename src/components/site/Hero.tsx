@@ -28,7 +28,7 @@ export function Hero() {
             psík zamiluje
           </h1>
 
-          <p className="mx-auto mt-3 text-sm font-bold whitespace-nowrap text-forest sm:text-base lg:mx-0 lg:text-base">
+          <p className="mx-auto mt-3 max-w-md text-balance text-sm font-bold text-forest sm:text-base lg:mx-0 lg:whitespace-nowrap lg:text-base">
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
@@ -56,7 +56,7 @@ export function Hero() {
         </div>
 
         <div className="rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
-          <h2 className="text-center text-base whitespace-nowrap text-forest sm:text-xl lg:text-2xl">
+          <h2 className="text-center text-base text-forest sm:whitespace-nowrap sm:text-xl lg:text-2xl">
             Informujte sa o škôlke..
           </h2>
           <p className="mt-2 mb-5 text-center text-sm text-muted-foreground">
