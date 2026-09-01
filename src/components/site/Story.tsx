@@ -152,18 +152,20 @@ export function About() {
               by sme svojich štvornohých spoločníkov nechali s úplnou dôverou počas pracovného dňa
               či nečakaných povinností.
             </p>
-            <p>
-              Práve preto vzniklo Chvostíkovo – psia škôlka v Košiciach zameraná na stredné a veľké
-              plemená, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste. Máme
-              dlhoročné skúsenosti s prácou so psami (práca v útulku, starostlivosť o psov v
-              dočasnej opatere, výchova vlastných psíkov). Tieto skúsenosti nás naučili rozumieť
-              ich potrebám, komunikácii aj správaniu v skupine.
-            </p>
-            <p>
-              Chvostíkovo nie je len miesto na stráženie psov. Je to druhý domov, kde sa o každého
-              člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim
-              vlastným psom.
-            </p>
+            {/* Mobil – zvyšok textu v rozbaľovacom okne */}
+            <div className="md:hidden">
+              <Collapse title="Čítať viac o nás">
+                <div className="space-y-4">
+                  <p>{ABOUT_MORE[0]}</p>
+                  <p>{ABOUT_MORE[1]}</p>
+                </div>
+              </Collapse>
+            </div>
+
+            <div className="hidden space-y-4 md:block">
+              <p>{ABOUT_MORE[0]}</p>
+              <p>{ABOUT_MORE[1]}</p>
+            </div>
           </div>
         </div>
 
