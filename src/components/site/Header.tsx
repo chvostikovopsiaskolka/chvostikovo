@@ -90,6 +90,13 @@ export function Header() {
               </a>
             ))}
           </nav>
+          <a
+            href={`tel:${PHONE}`}
+            onClick={() => setMenuOpen(false)}
+            className="btn-coral mt-2 flex w-full items-center justify-center gap-2 py-3 text-sm"
+          >
+            <Phone className="size-4" /> Zavolajte nám
+          </a>
         </div>
       )}
 
