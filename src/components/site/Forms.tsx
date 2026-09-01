@@ -57,7 +57,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3.5">
+    <form onSubmit={onSubmit} className="space-y-3 text-left sm:space-y-3.5">
       <div>
         <label className="label-sm" htmlFor="s-meno">
           Meno majiteľa *
