@@ -8,6 +8,14 @@ function sourceRef() {
   return `${window.location.pathname}${window.location.search}` || "/";
 }
 
+function trackLead(kind: "informacie" | "prihlaska") {
+  if (typeof window === "undefined") return;
+  const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
+    | ((...args: unknown[]) => void)
+    | undefined;
+  fbq?.("track", "Lead", { content_name: kind });
+}
+
 export function ShortForm({ onSent }: { onSent?: () => void }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
