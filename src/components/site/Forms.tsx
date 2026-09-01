@@ -8,6 +8,14 @@ function sourceRef() {
   return `${window.location.pathname}${window.location.search}` || "/";
 }
 
+function trackLead(kind: "informacie" | "prihlaska") {
+  if (typeof window === "undefined") return;
+  const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
+    | ((...args: unknown[]) => void)
+    | undefined;
+  fbq?.("track", "Lead", { content_name: kind });
+}
+
 export function ShortForm({ onSent }: { onSent?: () => void }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,6 +40,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
           zaujem: String(fd.get("zaujem") ?? ""),
         },
       });
+      trackLead("informacie");
       setSent(true);
       onSent?.();
     } catch {
@@ -57,7 +66,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3.5">
+    <form onSubmit={onSubmit} className="space-y-3 text-left sm:space-y-3.5">
       <div>
         <label className="label-sm" htmlFor="s-meno">
           Meno majiteľa *
@@ -133,6 +142,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         },
       });
 
+      trackLead("prihlaska");
       setSent(true);
       onSent?.();
     } catch {
@@ -157,8 +167,8 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3.5">
-      <div className="grid gap-3.5 sm:grid-cols-2">
+    <form onSubmit={onSubmit} className="space-y-3 text-left sm:space-y-3.5">
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
         <div>
           <label className="label-sm" htmlFor="l-meno">
             Meno a priezvisko majiteľa *
