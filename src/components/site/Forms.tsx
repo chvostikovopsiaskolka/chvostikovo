@@ -142,6 +142,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         },
       });
 
+      trackLead("prihlaska");
       setSent(true);
       onSent?.();
     } catch {
