@@ -28,27 +28,24 @@ export function Hero() {
             psík zamiluje
           </h1>
 
-          <p className="mx-auto mt-3 max-w-md text-balance text-sm font-bold text-forest sm:text-base lg:mx-0 lg:whitespace-nowrap lg:text-base">
+          <p className="mx-auto mt-2 max-w-md text-balance text-sm font-bold text-forest sm:text-base lg:mx-0 lg:whitespace-nowrap lg:text-base">
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
-          <div className="mx-auto mt-4 max-w-md space-y-1 rounded-2xl bg-white/95 p-4 shadow-soft text-forest sm:rounded-3xl lg:mx-0">
-            <div className="space-y-1">
-              <p className="font-display text-sm font-bold sm:text-base lg:text-lg">
-                Váš psík už nemusí tráviť deň sám doma.
-              </p>
-              <p className="font-medium text-forest/90">
-                Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným
-                dohľadom.
-              </p>
-            </div>
+          <div className="mx-auto mt-3 max-w-md rounded-xl bg-white/95 p-3 shadow-soft text-forest sm:rounded-2xl sm:p-4 lg:mx-0">
+            <p className="font-display text-sm font-bold sm:text-base lg:text-lg">
+              Váš psík už nemusí tráviť deň sám doma.
+            </p>
+            <p className="mt-1 text-sm font-medium text-forest/90 sm:text-base">
+              Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným dohľadom.
+            </p>
           </div>
 
           <GoogleBadge className="mx-auto mt-3 lg:mx-0" />
 
           <a
             href={`tel:${PHONE}`}
-            className="btn-coral mt-4 inline-flex items-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base"
+            className="btn-coral mt-4 hidden items-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base lg:inline-flex"
           >
             <Phone className="size-4" /> Zavolajte nám
           </a>
@@ -59,10 +56,17 @@ export function Hero() {
           <h2 className="text-center text-base text-forest sm:whitespace-nowrap sm:text-xl lg:text-2xl">
             Informujte sa o škôlke..
           </h2>
-          <p className="mt-2 mb-5 text-center text-sm text-muted-foreground">
+          <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
             Vyplňte nezáväzný formulár. Radi vám odpovieme na vaše otázky do 24 hodín.
           </p>
           <ShortForm />
+
+          <a
+            href={`tel:${PHONE}`}
+            className="btn-coral mt-5 inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base lg:hidden"
+          >
+            <Phone className="size-4" /> Zavolajte nám
+          </a>
         </div>
       </div>
     </section>
