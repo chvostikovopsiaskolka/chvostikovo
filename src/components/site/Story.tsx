@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Home, Zap, Dog, Check } from "lucide-react";
 import { FormDialog } from "./FormDialog";
+import { Collapse } from "./Collapse";
 import { LongForm } from "./Forms";
 import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg.asset.json";
