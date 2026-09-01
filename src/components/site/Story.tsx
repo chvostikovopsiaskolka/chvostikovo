@@ -14,6 +14,11 @@ import lolkio from "@/assets/partner-lolkio.png";
 
 const whyIcons = [Home, Zap, Dog];
 
+const ABOUT_MORE = [
+  "Práve preto vzniklo Chvostíkovo – psia škôlka v Košiciach zameraná na stredné a veľké plemená, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste. Máme dlhoročné skúsenosti s prácou so psami (práca v útulku, starostlivosť o psov v dočasnej opatere, výchova vlastných psíkov). Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.",
+  "Chvostíkovo nie je len miesto na stráženie psov. Je to druhý domov, kde sa o každého člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim vlastným psom.",
+];
+
 function renderText(text: string) {
   const parts = text.split(/(\*\*.*?\*\*)/g);
   return parts.map((part, i) => {
