@@ -40,6 +40,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
           zaujem: String(fd.get("zaujem") ?? ""),
         },
       });
+      trackLead("informacie");
       setSent(true);
       onSent?.();
     } catch {
