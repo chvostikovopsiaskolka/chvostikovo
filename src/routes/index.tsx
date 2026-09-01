@@ -69,10 +69,10 @@ function Index() {
         <Care />
         <Why />
         <FirstVisit />
+        <Requirements />
         <About />
         <Partners />
         <PhotoStrip />
-        <Requirements />
         <Pricing />
         <InstagramFeed />
         <Faq />
