@@ -67,7 +67,29 @@ export function Why() {
             Prečo využiť psiu škôlku?
           </h2>
 
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {/* Mobil – rozbaľovacie karty */}
+          <div className="mt-6 space-y-3 md:hidden">
+            {WHY.map((w, i) => {
+              const Icon = whyIcons[i]!;
+              return (
+                <Collapse
+                  key={w.title}
+                  title={w.title}
+                  tone="dark"
+                  icon={
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground">
+                      <Icon className="size-5" />
+                    </span>
+                  }
+                >
+                  {w.text}
+                </Collapse>
+              );
+            })}
+          </div>
+
+          {/* Desktop */}
+          <div className="mt-8 hidden gap-6 md:grid md:grid-cols-3">
             {WHY.map((w, i) => {
               const Icon = whyIcons[i]!;
               return (
