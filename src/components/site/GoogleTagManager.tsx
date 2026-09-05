@@ -74,24 +74,26 @@ function loadGTM() {
 
 export function GoogleTagManager() {
   useEffect(() => {
-    const consent = getConsent();
-    if (consent && (consent.analytics || consent.marketing)) {
-      loadGTM();
-      pushConsentToDataLayer(consent);
-    }
-
-    function handleStorage(event: StorageEvent) {
-      if (event.key === STORAGE_KEY) {
-        const next = getConsent();
-        if (next && (next.analytics || next.marketing)) {
-          loadGTM();
-          pushConsentToDataLayer(next);
-        }
+    function tryLoad() {
+      const consent = getConsent();
+      if (consent && (consent.analytics || consent.marketing)) {
+        loadGTM();
+        pushConsentToDataLayer(consent);
       }
     }
 
+    tryLoad();
+
+    function handleStorage(event: StorageEvent) {
+      if (event.key === STORAGE_KEY) tryLoad();
+    }
+
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("chvostikovo-consent-changed", tryLoad);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("chvostikovo-consent-changed", tryLoad);
+    };
   }, []);
 
   return null;
