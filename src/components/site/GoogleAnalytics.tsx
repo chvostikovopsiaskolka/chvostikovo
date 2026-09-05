@@ -45,22 +45,23 @@ function loadGA() {
 
 export function GoogleAnalytics() {
   useEffect(() => {
-    const consent = getConsent();
-    if (consent && consent.analytics) {
-      loadGA();
+    function tryLoad() {
+      const consent = getConsent();
+      if (consent && consent.analytics) loadGA();
     }
 
+    tryLoad();
+
     function handleStorage(event: StorageEvent) {
-      if (event.key === STORAGE_KEY) {
-        const next = getConsent();
-        if (next && next.analytics) {
-          loadGA();
-        }
-      }
+      if (event.key === STORAGE_KEY) tryLoad();
     }
 
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("chvostikovo-consent-changed", tryLoad);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("chvostikovo-consent-changed", tryLoad);
+    };
   }, []);
 
   return null;
