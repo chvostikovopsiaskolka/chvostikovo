@@ -1,6 +1,6 @@
-import deco1 from "@/assets/deco-1.jpg.asset.json";
-import deco2 from "@/assets/deco-2.jpg.asset.json";
-import deco3 from "@/assets/deco-3.jpg.asset.json";
+import deco1 from "@/assets/deco-1.jpg";
+import deco2 from "@/assets/deco-2.jpg";
+import deco3 from "@/assets/deco-3.jpg";
 
 const photos = [deco1.url, deco2.url, deco3.url];
 

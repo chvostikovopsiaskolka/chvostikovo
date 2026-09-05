@@ -1,6 +1,6 @@
 import { Phone } from "lucide-react";
 import { PHONE, PHONE_PRETTY } from "@/content/site";
-import heroDogs from "@/assets/hero-dogs.jpg.asset.json";
+import heroDogs from "@/assets/hero-dogs.jpg";
 import { GoogleBadge } from "./GoogleBadge";
 import { ShortForm } from "./Forms";
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
-import skolkariVideo from "@/assets/skolkari.mp4.asset.json";
+import skolkariVideo from "@/assets/skolkari.mp4";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
   const [open, setOpen] = useState(false);
