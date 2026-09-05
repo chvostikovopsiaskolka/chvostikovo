@@ -31,6 +31,15 @@ export function CookieBanner() {
         setOpen(true);
       }
     }
+
+    function handleOpenSettings() {
+      setShowDetails(true);
+      setOpen(true);
+    }
+
+    window.addEventListener("chvostikovo-open-cookie-settings", handleOpenSettings);
+    return () =>
+      window.removeEventListener("chvostikovo-open-cookie-settings", handleOpenSettings);
   }, []);
 
   if (!mounted) return null;
