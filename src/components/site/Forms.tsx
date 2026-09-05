@@ -34,8 +34,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
           source_ref: sourceRef(),
           meno: String(fd.get("meno") ?? "").trim(),
           telefon: String(fd.get("telefon") ?? "").trim(),
-          zaujem: String(fd.get("zaujem") ?? ""),
-        },
+        zaujem: String(fd.get("zaujem") ?? ""),
       });
       trackLead("informacie");
       setSent(true);
@@ -133,8 +132,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           vek: String(fd.get("vek") ?? "").trim(),
           kastrovana: String(fd.get("kastrovana") ?? ""),
           duvod: String(fd.get("duvod") ?? ""),
-          viac: String(fd.get("viac") ?? "").trim(),
-        },
+        viac: String(fd.get("viac") ?? "").trim(),
       });
 
       trackLead("prihlaska");
