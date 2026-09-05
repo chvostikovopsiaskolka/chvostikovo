@@ -197,7 +197,7 @@ export const FAQ = [
   },
   {
     q: "Zabezpečujete aj stravu?",
-    a: "V rámci denného pobytu stravu štandardne nezabezpečujeme, odporúčame však priniesť vlastné maškrty (v prípade alergie) alebo krmivo, ak je váš psík zvyknutý jesť v čase škôlky.",
+    a: "V rámci denného pobytu psíkom stravu nepodávame. Keďže deň v škôlke zahŕňa pohyb, hry a šantenie, z bezpečnostných dôvodov chceme minimalizovať riziko torzie žalúdka, ktoré môže súvisieť aj s intenzívnou aktivitou po kŕmení. Preto odporúčame psíka nakŕmiť s dostatočným predstihom pred príchodom do škôlky a ďalšie jedlo mu podať až po návrate domov a následnom oddychu.\n\nMaškrty počas dňa používame. Ak má váš psík alergiu alebo špeciálne stravovacie obmedzenia, prineste mu, prosím, vlastné.",
   },
 ];
 
