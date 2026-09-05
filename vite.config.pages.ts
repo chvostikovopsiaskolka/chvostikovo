@@ -9,7 +9,7 @@ export default defineConfig({
   tanstackStart: {
     // SPA + prerender: každá routa dostane vlastný statický HTML súbor,
     // takže priame otvorenie /cookies funguje aj bez servera.
-    spa: { enabled: true },
+    spa: { enabled: true, prerender: { enabled: true, outputPath: "/404.html" } },
     prerender: {
       enabled: true,
       crawlLinks: false,
