@@ -1,6 +1,6 @@
 import { Phone } from "lucide-react";
 import { PHONE, PHONE_PRETTY } from "@/content/site";
-import heroDogs from "@/assets/hero-dogs.jpg.asset.json";
+import heroDogs from "@/assets/hero-dogs.jpg";
 import { GoogleBadge } from "./GoogleBadge";
 import { ShortForm } from "./Forms";
 
@@ -9,7 +9,7 @@ export function Hero() {
     <section id="top" className="relative overflow-hidden pt-24 pb-5 sm:pt-28 lg:pb-10">
       <div className="absolute inset-0 z-0">
         <img
-          src={heroDogs.url}
+          src={heroDogs}
           alt="Psíky v psej škôlke Chvostíkovo v Košiciach"
           className="size-full object-cover object-[50%_35%]"
         />

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
-import skolkariVideo from "@/assets/skolkari.mp4.asset.json";
+import skolkariVideo from "@/assets/skolkari.mp4";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
   const [open, setOpen] = useState(false);
@@ -114,7 +114,7 @@ export function Reviews() {
           <div className="mt-6 flex justify-center">
             <div className="relative w-full max-w-[320px] overflow-hidden rounded-3xl bg-card shadow-card">
               <video
-                src={skolkariVideo.url}
+                src={skolkariVideo}
                 className="aspect-[9/16] w-full object-cover"
                 autoPlay
                 muted

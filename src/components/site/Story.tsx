@@ -4,10 +4,10 @@ import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
 import { LongForm } from "./Forms";
 import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
-import teamPhoto from "@/assets/team-dogs.jpg.asset.json";
-import dogsPair from "@/assets/dogs-pair.jpg.asset.json";
-import certAdriana from "@/assets/cert-adriana.jpg.asset.json";
-import certMarek from "@/assets/cert-marek.png.asset.json";
+import teamPhoto from "@/assets/team-dogs.jpg";
+import dogsPair from "@/assets/dogs-pair.jpg";
+import certAdriana from "@/assets/cert-adriana.jpg";
+import certMarek from "@/assets/cert-marek.png";
 import wetpet from "@/assets/partner-wetpet.png";
 import bellacord from "@/assets/partner-bellacord.png";
 import coursing from "@/assets/partner-coursing.png";
@@ -177,14 +177,14 @@ export function About() {
 
         <div className="space-y-4">
           <img
-            src={teamPhoto.url}
+            src={teamPhoto}
             alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
             loading="lazy"
             className="h-60 w-full rounded-4xl object-cover shadow-card sm:h-72"
           />
           <div className="grid grid-cols-2 gap-3">
             <img
-              src={dogsPair.url}
+              src={dogsPair}
               alt="Naši psíci – írske vlkodavy"
               loading="lazy"
               className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
@@ -215,11 +215,11 @@ export function About() {
           <div className="grid grid-cols-2 place-items-center gap-3 sm:gap-5">
             {[
               {
-                src: certAdriana.url,
+                src: certAdriana,
                 alt: "Certifikát – workshop prvej pomoci pre psov, Adriana Konkoľová",
               },
               {
-                src: certMarek.url,
+                src: certMarek,
                 alt: "Certifikát – workshop prvej pomoci pre psov, Marek Leder",
               },
             ].map((c) => (
