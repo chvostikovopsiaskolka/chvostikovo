@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { sendInquiry } from "@/lib/send-inquiry.functions";
+import { submitInquiry } from "@/lib/submit-inquiry";
 
 function sourceRef() {
   if (typeof window === "undefined") return "/";
@@ -20,7 +19,6 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const send = useServerFn(sendInquiry);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -30,8 +28,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
     setLoading(true);
     setError(null);
     try {
-      await send({
-        data: {
+      await submitInquiry({
           typ: "informacie",
           consent: true,
           source_ref: sourceRef(),
@@ -116,7 +113,6 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const send = useServerFn(sendInquiry);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -125,8 +121,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
     setLoading(true);
     setError(null);
     try {
-      await send({
-        data: {
+      await submitInquiry({
           typ: "prihlaska",
           consent: true,
           source_ref: sourceRef(),
