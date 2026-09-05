@@ -11,7 +11,7 @@ export const shortSchema = z.object({
   consent: z.literal(true),
   source_ref: z.string().max(300).optional(),
   meno: z.string().min(1).max(200),
-  telefon: z.string().min(1).max(60),
+  telefon: z.string().min(7).max(60),
   zaujem: z.string().min(1).max(300),
 });
 
@@ -20,7 +20,7 @@ export const longSchema = z.object({
   consent: z.literal(true),
   source_ref: z.string().max(300).optional(),
   meno: z.string().min(1).max(200),
-  telefon: z.string().min(1).max(60),
+  telefon: z.string().min(7).max(60),
   pes: z.string().min(1).max(200),
   plemeno_vaha: z.string().min(1).max(300),
   pohlavie: z.string().min(1).max(40),
