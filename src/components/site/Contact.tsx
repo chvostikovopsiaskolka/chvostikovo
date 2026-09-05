@@ -104,7 +104,17 @@ export function Footer() {
             ·{" "}
             <Link to="/ochrana-osobnych-udajov" className="underline hover:text-cream">
               Ochrana osobných údajov
-            </Link>
+            </Link>{" "}
+            ·{" "}
+            <button
+              type="button"
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))
+              }
+              className="underline hover:text-cream"
+            >
+              Nastavenia cookies
+            </button>
           </p>
         </div>
         <div className="flex items-center gap-2">
