@@ -74,6 +74,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
           name="telefon"
           type="tel"
           required
+          minLength={7}
           className="field"
           placeholder="+421 951 069 395"
         />
@@ -177,6 +178,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
             name="telefon"
             type="tel"
             required
+            minLength={7}
             className="field"
             placeholder="+421"
           />
