@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as OchranaOsobnychUdajovRouteImport } from './routes/ochrana-osobnych-udajov'
+import { Route as ApiPublicNotifyInquiryRouteImport } from './routes/api/public/notify-inquiry'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,51 @@ const OchranaOsobnychUdajovRoute = OchranaOsobnychUdajovRouteImport.update({
   path: '/ochrana-osobnych-udajov',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNotifyInquiryRoute = ApiPublicNotifyInquiryRouteImport.update({
+  id: '/api/public/notify-inquiry',
+  path: '/api/public/notify-inquiry',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/api/public/notify-inquiry': typeof ApiPublicNotifyInquiryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/api/public/notify-inquiry': typeof ApiPublicNotifyInquiryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/api/public/notify-inquiry': typeof ApiPublicNotifyInquiryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cookies' | '/ochrana-osobnych-udajov'
+  fullPaths:
+    '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/api/public/notify-inquiry'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cookies' | '/ochrana-osobnych-udajov'
-  id: '__root__' | '/' | '/cookies' | '/ochrana-osobnych-udajov'
+  to:
+    '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/api/public/notify-inquiry'
+  id:
+    | '__root__'
+    | '/'
+    | '/cookies'
+    | '/ochrana-osobnych-udajov'
+    | '/api/public/notify-inquiry'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CookiesRoute: typeof CookiesRoute
   OchranaOsobnychUdajovRoute: typeof OchranaOsobnychUdajovRoute
+  ApiPublicNotifyInquiryRoute: typeof ApiPublicNotifyInquiryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +99,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OchranaOsobnychUdajovRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/notify-inquiry': {
+      id: '/api/public/notify-inquiry'
+      path: '/api/public/notify-inquiry'
+      fullPath: '/api/public/notify-inquiry'
+      preLoaderRoute: typeof ApiPublicNotifyInquiryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +113,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CookiesRoute: CookiesRoute,
   OchranaOsobnychUdajovRoute: OchranaOsobnychUdajovRoute,
+  ApiPublicNotifyInquiryRoute: ApiPublicNotifyInquiryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
