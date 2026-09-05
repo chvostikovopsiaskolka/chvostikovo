@@ -34,9 +34,7 @@ async function sendEmail(data: InquiryInput) {
   if (!lovableKey || !gmailKey) throw new Error("Email nie je nakonfigurovaný.");
 
   const subject =
-    data.typ === "prihlaska"
-      ? "Nová prihláška do škôlky (web)"
-      : "Nový záujem o škôlku (web)";
+    data.typ === "prihlaska" ? "Nová prihláška do škôlky (web)" : "Nový záujem o škôlku (web)";
 
   const body = buildFields(data)
     .filter((f) => f.value.trim().length > 0)

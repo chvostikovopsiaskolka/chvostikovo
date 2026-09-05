@@ -10,8 +10,7 @@ function sourceRef() {
 function trackLead(kind: "informacie" | "prihlaska") {
   if (typeof window === "undefined") return;
   const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
-    | ((...args: unknown[]) => void)
-    | undefined;
+    ((...args: unknown[]) => void) | undefined;
   fbq?.("track", "Lead", { content_name: kind });
 }
 
@@ -29,11 +28,11 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
     setError(null);
     try {
       await submitInquiry({
-          typ: "informacie",
-          consent: true,
-          source_ref: sourceRef(),
-          meno: String(fd.get("meno") ?? "").trim(),
-          telefon: String(fd.get("telefon") ?? "").trim(),
+        typ: "informacie",
+        consent: true,
+        source_ref: sourceRef(),
+        meno: String(fd.get("meno") ?? "").trim(),
+        telefon: String(fd.get("telefon") ?? "").trim(),
         zaujem: String(fd.get("zaujem") ?? ""),
       });
       trackLead("informacie");
@@ -46,7 +45,6 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
     }
   }
 
-
   if (sent) {
     return (
       <div className="flex min-h-75 flex-col items-center justify-center gap-3 text-center">
@@ -54,9 +52,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
           <Check className="size-7" />
         </div>
         <h3 className="text-xl text-forest">Ďakujeme!</h3>
-        <p className="text-sm text-muted-foreground">
-          Ozveme sa vám čo najskôr.
-        </p>
+        <p className="text-sm text-muted-foreground">Ozveme sa vám čo najskôr.</p>
       </div>
     );
   }
@@ -101,7 +97,11 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
         Súhlasím so spracovaním osobných údajov. <span className="text-destructive">*</span>
       </label>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <button type="submit" disabled={loading} className="btn-coral w-full px-4 py-2.5 text-sm disabled:opacity-60">
+      <button
+        type="submit"
+        disabled={loading}
+        className="btn-coral w-full px-4 py-2.5 text-sm disabled:opacity-60"
+      >
         {loading ? "Odosielam…" : "Chcem sa informovať"}
       </button>
     </form>
@@ -121,17 +121,17 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
     setError(null);
     try {
       await submitInquiry({
-          typ: "prihlaska",
-          consent: true,
-          source_ref: sourceRef(),
-          meno: String(fd.get("meno") ?? "").trim(),
-          telefon: String(fd.get("telefon") ?? "").trim(),
-          pes: String(fd.get("pes") ?? "").trim(),
-          plemeno_vaha: String(fd.get("plemeno_vaha") ?? "").trim(),
-          pohlavie: String(fd.get("pohlavie") ?? ""),
-          vek: String(fd.get("vek") ?? "").trim(),
-          kastrovana: String(fd.get("kastrovana") ?? ""),
-          duvod: String(fd.get("duvod") ?? ""),
+        typ: "prihlaska",
+        consent: true,
+        source_ref: sourceRef(),
+        meno: String(fd.get("meno") ?? "").trim(),
+        telefon: String(fd.get("telefon") ?? "").trim(),
+        pes: String(fd.get("pes") ?? "").trim(),
+        plemeno_vaha: String(fd.get("plemeno_vaha") ?? "").trim(),
+        pohlavie: String(fd.get("pohlavie") ?? ""),
+        vek: String(fd.get("vek") ?? "").trim(),
+        kastrovana: String(fd.get("kastrovana") ?? ""),
+        duvod: String(fd.get("duvod") ?? ""),
         viac: String(fd.get("viac") ?? "").trim(),
       });
 
@@ -172,7 +172,14 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <label className="label-sm" htmlFor="l-tel">
             Telefón *
           </label>
-          <input id="l-tel" name="telefon" type="tel" required className="field" placeholder="+421" />
+          <input
+            id="l-tel"
+            name="telefon"
+            type="tel"
+            required
+            className="field"
+            placeholder="+421"
+          />
         </div>
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">
@@ -186,7 +193,13 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <label className="label-sm" htmlFor="l-plemeno-vaha">
             Plemeno a váha psa *
           </label>
-          <input id="l-plemeno-vaha" name="plemeno_vaha" required className="field" placeholder="Labrador, cca 25 kg" />
+          <input
+            id="l-plemeno-vaha"
+            name="plemeno_vaha"
+            required
+            className="field"
+            placeholder="Labrador, cca 25 kg"
+          />
         </div>
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">
