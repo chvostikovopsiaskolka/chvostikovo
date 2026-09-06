@@ -50,6 +50,8 @@ export function Hero() {
 
         </div>
 
+        <InfoTicker compact className="lg:hidden -mx-4 my-3" />
+
         <div className="min-w-0 rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
           <h2 className="text-center text-base text-forest sm:whitespace-nowrap sm:text-xl lg:text-2xl">
             Informujte sa o škôlke..
@@ -57,8 +59,6 @@ export function Hero() {
           <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
             Vyplňte nezáväzný formulár. Radi vám odpovieme na vaše otázky do 24 hodín.
           </p>
-
-          <InfoTicker compact className="lg:hidden -mx-5 my-4 sm:-mx-8" />
 
           <ShortForm />
 
