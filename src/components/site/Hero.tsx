@@ -43,7 +43,7 @@ export function Hero() {
 
           <a
             href={`tel:${PHONE}`}
-            className="btn-coral order-4 mt-4 hidden items-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base lg:inline-flex"
+            className="btn-coral order-4 mt-4 hidden items-center gap-2 self-start px-4 py-2 text-sm lg:inline-flex"
           >
             <Phone className="size-4" /> Zavolajte nám
           </a>

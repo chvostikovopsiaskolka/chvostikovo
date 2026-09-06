@@ -96,7 +96,7 @@ function ReviewCarousel() {
 
 export function Reviews() {
   return (
-    <section id="recenzie" className="scroll-mt-24 bg-secondary/50 py-16 sm:py-20">
+    <section id="recenzie" className="scroll-mt-24 bg-secondary/50 pt-12 pb-16 sm:pt-14 sm:pb-20">
       <div className="mx-auto max-w-6xl px-4 text-center">
         <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
           Recenzie klientov
