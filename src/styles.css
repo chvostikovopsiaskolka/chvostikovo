@@ -137,7 +137,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .info-ticker-track {
-    animation-play-state: paused;
+    animation-duration: 60s;
   }
 }
 
