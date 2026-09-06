@@ -5,7 +5,7 @@ import { ShortForm } from "./Forms";
 
 export function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden pt-24 pb-5 sm:pt-28 lg:pb-10">
+    <section id="top" className="relative overflow-hidden pt-20 pb-2 sm:pt-24 lg:pb-4">
       <div className="absolute inset-0 z-0">
         <img
           src={heroDogs}
@@ -17,8 +17,12 @@ export function Hero() {
         <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-cream to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-4 px-4 pb-4 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:text-left lg:min-h-[34rem]">
-        <div className="lg:py-10">
+      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-4 px-4 pb-2 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:text-left">
+        <div className="lg:py-6">
+          <p className="mx-auto mb-2 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm lg:mx-0">
+            Denná starostlivosť o stredných a veľkých psíkov v Košiciach
+          </p>
+
           <h1 className="text-3xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
             <span className="text-coral-dark">Psia škôlka</span>,
             <br />

@@ -38,10 +38,6 @@ function TickerItems({ hidden = false }: { hidden?: boolean }) {
 export function InfoTicker() {
   return (
     <section className="bg-card" aria-label="Výhody psej škôlky Chvostíkovo">
-      <p className="whitespace-nowrap px-2 py-2 text-center text-[0.65rem] font-bold text-forest sm:py-3 sm:text-sm lg:text-base">
-        Denná starostlivosť o stredných a veľkých psíkov v Košiciach
-      </p>
-
       <div className="group overflow-hidden border-y border-border bg-card py-3 shadow-card sm:py-4">
         <div className="info-ticker-track w-max group-hover:[animation-play-state:paused] group-active:[animation-play-state:paused]">
           <TickerItems />
