@@ -57,6 +57,9 @@ export function Hero() {
           <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
             Vyplňte nezáväzný formulár. Radi vám odpovieme na vaše otázky do 24 hodín.
           </p>
+
+          <InfoTicker compact className="lg:hidden -mx-5 my-4 sm:-mx-8" />
+
           <ShortForm />
 
           <a
