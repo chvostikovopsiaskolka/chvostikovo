@@ -137,13 +137,13 @@
 
 @media (max-width: 767px) {
   .info-ticker-track {
-    animation-duration: 12s;
+    animation-duration: 8s;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .info-ticker-track {
-    animation-duration: 60s;
+    animation-duration: 20s;
   }
 }
 
