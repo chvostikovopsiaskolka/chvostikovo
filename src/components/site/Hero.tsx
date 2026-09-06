@@ -42,7 +42,7 @@ export function Hero() {
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
-          <InfoTicker className="my-3 w-screen mx-[calc((100%-100vw)/2)]" />
+          <InfoTicker className="my-2 w-screen mx-[calc((100%-100vw)/2)]" />
 
           <div className="mx-auto min-w-0 max-w-2xl rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
             <h2 className="text-center text-base text-forest sm:whitespace-nowrap sm:text-xl">
