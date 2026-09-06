@@ -3,6 +3,7 @@ const ITEMS = [
   { text: "Viac ako 150 spokojných psíkov" },
   { icon: "🚕", text: "Vyzdvihnutie / dovoz psíka" },
   { icon: "📍", text: "Poľská 6" },
+  { icon: "✅", text: "Úvodná návšteva zadarmo" },
   { text: "Aktívny deň" },
   { text: "Celodenný dohľad" },
   { text: "Vlastný výbeh" },
