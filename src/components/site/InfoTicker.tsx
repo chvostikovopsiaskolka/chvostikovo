@@ -4,7 +4,7 @@ interface InfoTickerProps {
 }
 
 const ITEMS = [
-  { icon: "★★★★★", text: "5.0 na Google z 41 hodnotení", accent: true },
+  { icon: "★★★★★", text: "5.0 na Google zo 41 hodnotení", accent: true },
   { text: "Viac ako 150 spokojných psíkov" },
   { icon: "🚕", text: "Vyzdvihnutie / dovoz psíka" },
   { icon: "📍", text: "Poľská 6" },
