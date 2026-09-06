@@ -2,6 +2,7 @@ import { Phone } from "lucide-react";
 import { PHONE } from "@/content/site";
 import heroDogs from "@/assets/hero-dogs.jpg";
 import { ShortForm } from "./Forms";
+import { InfoTicker } from "./InfoTicker";
 
 export function Hero() {
   return (
