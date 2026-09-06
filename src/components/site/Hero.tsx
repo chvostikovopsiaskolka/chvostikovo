@@ -19,12 +19,8 @@ export function Hero() {
       </div>
 
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-4 px-4 pb-2 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:text-left">
-        <div className="lg:py-6">
-          <p className="mx-auto mb-2 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm lg:mx-0">
-            Denná starostlivosť o stredných a veľkých psíkov v Košiciach
-          </p>
-
-          <h1 className="text-3xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
+        <div className="flex flex-col lg:py-6">
+          <h1 className="order-1 text-3xl leading-[1.05] text-forest sm:text-5xl lg:order-2 lg:text-6xl">
             <span className="text-coral-dark">Psia škôlka</span>,
             <br />
             ktorú si váš
@@ -32,7 +28,11 @@ export function Hero() {
             psík zamiluje
           </h1>
 
-          <div className="mx-auto mt-3 max-w-md rounded-xl bg-white/95 p-3 shadow-soft text-forest sm:rounded-2xl sm:p-4 lg:mx-0">
+          <p className="order-2 mx-auto mb-2 mt-3 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm lg:order-1 lg:mx-0 lg:mb-2 lg:mt-0">
+            Denná starostlivosť o stredných a veľkých psíkov v Košiciach
+          </p>
+
+          <div className="order-3 mx-auto mt-3 max-w-md rounded-xl bg-white/95 p-3 text-forest shadow-soft sm:rounded-2xl sm:p-4 lg:mx-0">
             <p className="font-display text-sm font-bold sm:text-base lg:text-lg">
               Váš psík už nemusí tráviť deň sám doma.
             </p>
@@ -43,7 +43,7 @@ export function Hero() {
 
           <a
             href={`tel:${PHONE}`}
-            className="btn-coral mt-4 hidden items-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base lg:inline-flex"
+            className="btn-coral order-4 mt-4 hidden items-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base lg:inline-flex"
           >
             <Phone className="size-4" /> Zavolajte nám
           </a>
