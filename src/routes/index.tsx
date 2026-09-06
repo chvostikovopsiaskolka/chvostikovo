@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
+import { InfoTicker } from "@/components/site/InfoTicker";
 import { EnrollBanner } from "@/components/site/EnrollBanner";
 import { Gallery } from "@/components/site/Gallery";
 import { Reviews } from "@/components/site/Reviews";
@@ -63,6 +64,9 @@ function Index() {
       <Header />
       <main>
         <Hero />
+        <div className="hidden lg:block">
+          <InfoTicker />
+        </div>
         <Reviews />
         <EnrollBanner />
         <Gallery />
