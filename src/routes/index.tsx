@@ -64,6 +64,9 @@ function Index() {
       <Header />
       <main>
         <Hero />
+        <div className="hidden lg:block">
+          <InfoTicker />
+        </div>
         <Reviews />
         <EnrollBanner />
         <Gallery />
