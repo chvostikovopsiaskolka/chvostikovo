@@ -19,7 +19,7 @@ export function Hero() {
       </div>
 
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-4 px-4 pb-2 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:text-left">
-        <div className="flex flex-col lg:py-6">
+        <div className="flex min-w-0 flex-col lg:py-6">
           <h1 className="order-1 text-3xl leading-[1.05] text-forest sm:text-5xl lg:order-2 lg:text-6xl">
             <span className="text-coral-dark">Psia škôlka</span>,
             <br />
@@ -50,7 +50,7 @@ export function Hero() {
 
         </div>
 
-        <div className="rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
+        <div className="min-w-0 rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
           <h2 className="text-center text-base text-forest sm:whitespace-nowrap sm:text-xl lg:text-2xl">
             Informujte sa o škôlke..
           </h2>
