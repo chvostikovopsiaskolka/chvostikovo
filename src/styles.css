@@ -135,6 +135,12 @@
   will-change: transform;
 }
 
+@media (max-width: 767px) {
+  .info-ticker-track {
+    animation-duration: 18s;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .info-ticker-track {
     animation-duration: 60s;
