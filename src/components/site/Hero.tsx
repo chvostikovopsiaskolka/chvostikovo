@@ -50,7 +50,7 @@ export function Hero() {
 
         </div>
 
-        <InfoTicker compact className="lg:hidden col-span-full my-3 mx-[calc(-50vw+50%)]" />
+        <InfoTicker compact className="lg:hidden col-span-full my-3 w-screen mx-[calc((100%-100vw)/2)]" />
 
         <div className="min-w-0 rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
           <h2 className="text-center text-base text-forest sm:whitespace-nowrap sm:text-xl lg:text-2xl">
