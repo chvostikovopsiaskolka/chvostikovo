@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 
 const STORAGE_KEY = "chvostikovo-cookies";
@@ -85,6 +85,7 @@ function loadGA() {
 
 export function GoogleAnalytics() {
   const pathname = useRouterState({ select: (s) => s.location.href });
+  const firstRun = useRef(true);
 
   useEffect(() => {
     function tryLoad() {
@@ -108,6 +109,10 @@ export function GoogleAnalytics() {
   // Route changes: send an explicit page_view (skips the very first one,
   // which loadGA already sent).
   useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
     const w = window as GtagWindow;
     if (!w._chvGaLoaded) return;
     sendPageView();
