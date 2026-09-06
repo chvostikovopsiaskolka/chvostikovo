@@ -55,7 +55,7 @@ function ReviewCarousel() {
   useEffect(() => {
     const el = track.current;
     if (!el) return;
-    const speed = isMobile ? 14 : 30; // px / s
+    const speed = 30; // px / s
     let raf = 0;
     let last = performance.now();
     const step = (now: number) => {
