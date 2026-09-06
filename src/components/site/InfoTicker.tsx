@@ -23,11 +23,11 @@ function TickerItems({ hidden = false, compact = false }: { hidden?: boolean; co
             •
           </span>
           <span
-            className={`flex items-center gap-2 whitespace-nowrap font-display font-bold ${compact ? "text-[10px]" : "text-xs sm:text-sm"} ${item.accent ? "text-coral-dark" : "text-forest"}`}
+            className={`flex items-center gap-2 whitespace-nowrap font-display font-bold leading-none ${compact ? "text-[10px]" : "text-xs sm:text-sm"} ${item.accent ? "text-coral-dark" : "text-forest"}`}
           >
             {item.icon ? (
               <span
-                className={item.accent ? "text-[0.65rem] tracking-normal sm:text-xs" : "text-sm sm:text-base"}
+                className={`leading-none ${item.accent ? "text-[0.65rem] tracking-normal sm:text-xs" : "text-sm sm:text-base"}`}
                 aria-hidden="true"
               >
                 {item.icon}
