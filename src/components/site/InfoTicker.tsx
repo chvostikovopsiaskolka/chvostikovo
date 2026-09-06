@@ -1,11 +1,11 @@
 const ITEMS = [
   { icon: "★★★★★", text: "5.0 na Google z 41 hodnotení", accent: true },
-  { icon: "🐾", text: "Viac ako 150 spokojných psíkov" },
+  { text: "Viac ako 150 spokojných psíkov" },
   { icon: "🚕", text: "Vyzdvihnutie / dovoz psíka" },
   { icon: "📍", text: "Poľská 6" },
-  { icon: "🐕", text: "Aktívny deň" },
-  { icon: "👀", text: "Celodenný dohľad" },
-  { icon: "🌿", text: "Vlastný výbeh" },
+  { text: "Aktívny deň" },
+  { text: "Celodenný dohľad" },
+  { text: "Vlastný výbeh" },
 ];
 
 function TickerItems({ hidden = false }: { hidden?: boolean }) {
@@ -19,12 +19,14 @@ function TickerItems({ hidden = false }: { hidden?: boolean }) {
           <span
             className={`flex items-center gap-2 whitespace-nowrap font-display text-xs font-bold sm:text-sm ${item.accent ? "text-coral-dark" : "text-forest"}`}
           >
-            <span
-              className={item.accent ? "text-[0.65rem] tracking-normal sm:text-xs" : "text-sm sm:text-base"}
-              aria-hidden="true"
-            >
-              {item.icon}
-            </span>
+            {item.icon ? (
+              <span
+                className={item.accent ? "text-[0.65rem] tracking-normal sm:text-xs" : "text-sm sm:text-base"}
+                aria-hidden="true"
+              >
+                {item.icon}
+              </span>
+            ) : null}
             {item.text}
           </span>
         </div>
