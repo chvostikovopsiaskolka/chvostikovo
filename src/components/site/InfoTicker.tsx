@@ -44,7 +44,7 @@ function TickerItems({ hidden = false, compact = false }: { hidden?: boolean; co
 export function InfoTicker({ className = "", compact = false }: InfoTickerProps) {
   return (
     <section className={`w-full overflow-hidden bg-card ${className}`} aria-label="Výhody psej škôlky Chvostíkovo">
-      <div className={`group flex items-center overflow-hidden border-y border-border bg-card ${compact ? "h-8" : "h-10 sm:h-11"}`}>
+      <div className={`group flex items-center overflow-hidden border-y border-border bg-card ${compact ? "h-9" : "h-11 sm:h-12"}`}>
         <div className="info-ticker-track flex w-max items-center lg:group-hover:[animation-play-state:paused]">
           <TickerItems compact={compact} />
           <TickerItems hidden compact={compact} />
