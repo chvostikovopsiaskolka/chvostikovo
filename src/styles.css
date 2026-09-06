@@ -119,6 +119,28 @@
   }
 }
 
+@keyframes info-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility info-ticker-track {
+  display: flex;
+  animation: info-ticker-scroll 34s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-ticker-track {
+    animation-play-state: paused;
+  }
+}
+
 @utility section-title {
   font-family: var(--font-display);
   font-weight: 700;

@@ -1,7 +1,6 @@
 import { Phone } from "lucide-react";
-import { PHONE, PHONE_PRETTY } from "@/content/site";
+import { PHONE } from "@/content/site";
 import heroDogs from "@/assets/hero-dogs.jpg";
-import { GoogleBadge } from "./GoogleBadge";
 import { ShortForm } from "./Forms";
 
 export function Hero() {
@@ -28,10 +27,6 @@ export function Hero() {
             psík zamiluje
           </h1>
 
-          <p className="mx-auto mt-2 max-w-md text-balance text-sm font-bold text-forest sm:text-base lg:mx-0 lg:whitespace-nowrap lg:text-base">
-            Denná starostlivosť o stredných a veľkých psíkov v Košiciach
-          </p>
-
           <div className="mx-auto mt-3 max-w-md rounded-xl bg-white/95 p-3 shadow-soft text-forest sm:rounded-2xl sm:p-4 lg:mx-0">
             <p className="font-display text-sm font-bold sm:text-base lg:text-lg">
               Váš psík už nemusí tráviť deň sám doma.
@@ -40,8 +35,6 @@ export function Hero() {
               Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným dohľadom.
             </p>
           </div>
-
-          <GoogleBadge className="mx-auto mt-3 lg:mx-0" />
 
           <a
             href={`tel:${PHONE}`}
@@ -70,6 +63,5 @@ export function Hero() {
         </div>
       </div>
     </section>
-
   );
 }
