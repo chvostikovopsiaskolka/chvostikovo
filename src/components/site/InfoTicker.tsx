@@ -1,3 +1,8 @@
+interface InfoTickerProps {
+  className?: string;
+  compact?: boolean;
+}
+
 const ITEMS = [
   { icon: "★★★★★", text: "5.0 na Google z 41 hodnotení", accent: true },
   { text: "Viac ako 150 spokojných psíkov" },
@@ -9,7 +14,7 @@ const ITEMS = [
   { text: "Vlastný výbeh" },
 ];
 
-function TickerItems({ hidden = false }: { hidden?: boolean }) {
+function TickerItems({ hidden = false, compact = false }: { hidden?: boolean; compact?: boolean }) {
   return (
     <div className="flex shrink-0 items-center" aria-hidden={hidden || undefined}>
       {ITEMS.map((item) => (
@@ -18,7 +23,7 @@ function TickerItems({ hidden = false }: { hidden?: boolean }) {
             •
           </span>
           <span
-            className={`flex items-center gap-2 whitespace-nowrap font-display text-xs font-bold sm:text-sm ${item.accent ? "text-coral-dark" : "text-forest"}`}
+            className={`flex items-center gap-2 whitespace-nowrap font-display font-bold ${compact ? "text-[10px]" : "text-xs sm:text-sm"} ${item.accent ? "text-coral-dark" : "text-forest"}`}
           >
             {item.icon ? (
               <span
@@ -36,13 +41,13 @@ function TickerItems({ hidden = false }: { hidden?: boolean }) {
   );
 }
 
-export function InfoTicker() {
+export function InfoTicker({ className = "", compact = false }: InfoTickerProps) {
   return (
-    <section className="bg-card" aria-label="Výhody psej škôlky Chvostíkovo">
-      <div className="group overflow-hidden border-y border-border bg-card py-3 shadow-card sm:py-4">
+    <section className={`bg-card ${className}`} aria-label="Výhody psej škôlky Chvostíkovo">
+      <div className={`group overflow-hidden border-y border-border bg-card ${compact ? "py-2" : "py-3 sm:py-4"}`}>
         <div className="info-ticker-track w-max group-hover:[animation-play-state:paused] group-active:[animation-play-state:paused]">
-          <TickerItems />
-          <TickerItems hidden />
+          <TickerItems compact={compact} />
+          <TickerItems hidden compact={compact} />
         </div>
       </div>
     </section>
