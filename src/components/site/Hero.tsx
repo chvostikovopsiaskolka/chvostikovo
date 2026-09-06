@@ -18,9 +18,9 @@ export function Hero() {
         <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-cream to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-4 px-4 pb-2 text-center lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:text-left">
-        <div className="flex min-w-0 flex-col lg:py-6">
-          <h1 className="order-1 text-3xl leading-[1.05] text-forest sm:text-5xl lg:order-2 lg:text-6xl">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pb-2 text-center lg:text-left">
+        <div className="grid items-start gap-4 lg:grid-cols-2 lg:gap-8">
+          <h1 className="text-3xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
             <span className="text-coral-dark">Psia škôlka</span>,
             <br />
             ktorú si váš
@@ -28,31 +28,32 @@ export function Hero() {
             psík zamiluje
           </h1>
 
-          <p className="order-2 mx-auto mb-2 mt-3 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm lg:order-1 lg:mx-0 lg:mb-2 lg:mt-0">
-            Denná starostlivosť o stredných a veľkých psíkov v Košiciach
-          </p>
+          <div className="flex min-w-0 flex-col gap-3">
+            <div className="mx-auto max-w-md rounded-xl bg-white/95 p-3 text-forest shadow-soft sm:rounded-2xl sm:p-4 lg:mx-0">
+              <p className="font-display text-sm font-bold sm:text-base lg:text-lg">
+                Váš psík už nemusí tráviť deň sám doma.
+              </p>
+              <p className="mt-1 text-sm font-medium text-forest/90 sm:text-base">
+                Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným dohľadom.
+              </p>
+            </div>
 
-          <div className="order-3 mx-auto mt-3 max-w-md rounded-xl bg-white/95 p-3 text-forest shadow-soft sm:rounded-2xl sm:p-4 lg:mx-0">
-            <p className="font-display text-sm font-bold sm:text-base lg:text-lg">
-              Váš psík už nemusí tráviť deň sám doma.
-            </p>
-            <p className="mt-1 text-sm font-medium text-forest/90 sm:text-base">
-              Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným dohľadom.
-            </p>
+            <a
+              href={`tel:${PHONE}`}
+              className="btn-coral hidden items-center gap-2 self-start px-4 py-2 text-sm lg:inline-flex"
+            >
+              <Phone className="size-4" /> Zavolajte nám
+            </a>
           </div>
-
-          <a
-            href={`tel:${PHONE}`}
-            className="btn-coral order-4 mt-4 hidden items-center gap-2 self-start px-4 py-2 text-sm lg:inline-flex"
-          >
-            <Phone className="size-4" /> Zavolajte nám
-          </a>
-
         </div>
 
-        <InfoTicker compact className="lg:hidden col-span-full my-3 w-screen mx-[calc((100%-100vw)/2)]" />
+        <p className="mx-auto mt-4 mb-2 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm lg:mx-0">
+          Denná starostlivosť o stredných a veľkých psíkov v Košiciach
+        </p>
 
-        <div className="min-w-0 rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
+        <InfoTicker className="my-3 w-screen mx-[calc((100%-100vw)/2)]" />
+
+        <div className="mx-auto min-w-0 max-w-2xl rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8 lg:mx-0">
           <h2 className="text-center text-base text-forest sm:whitespace-nowrap sm:text-xl lg:text-2xl">
             Informujte sa o škôlke..
           </h2>
