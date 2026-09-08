@@ -211,7 +211,7 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="scroll-mt-24 py-16 sm:py-20">
+    <section id="faq" className="scroll-mt-24 bg-card py-16 sm:py-20">
       <div className="mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
 
@@ -229,7 +229,9 @@ export function Faq() {
                 </span>
               </button>
               {open === i && (
-                <p className="px-5 pb-5 text-[0.95rem] leading-relaxed text-forest/80">{f.a}</p>
+                <p className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed whitespace-pre-line text-forest/80">
+                  {f.a}
+                </p>
               )}
             </div>
           ))}

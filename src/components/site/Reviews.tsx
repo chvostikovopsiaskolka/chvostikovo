@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Faq } from "@/components/site/Info";
 import skolkariVideo from "@/assets/skolkari.mp4";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
@@ -106,27 +105,32 @@ export function Reviews() {
         <p className="mt-3 text-forest/80">⭐ 5.0 z 5 na Google</p>
 
         <ReviewCarousel />
+      </div>
+    </section>
+  );
+}
 
-        <Faq />
 
-        <div className="mt-14 sm:mt-16">
-          <h3 className="section-title text-2xl sm:text-3xl">
-            Ako sa naši škôlkári tešia do škôlky
-          </h3>
-          <div className="mt-6 flex justify-center">
-            <div className="relative w-full max-w-[320px] overflow-hidden rounded-3xl bg-card shadow-card">
-              <video
-                src={skolkariVideo}
-                className="aspect-[9/16] w-full object-cover"
-                autoPlay
-                muted
-                loop
-                playsInline
-                controls
-                preload="metadata"
-                aria-label="Video zo psiej škôlky Chvostíkovo – škôlkári sa tešia do škôlky"
-              />
-            </div>
+export function VideoSection() {
+  return (
+    <section className="scroll-mt-24 bg-card py-12 sm:py-14">
+      <div className="mx-auto max-w-6xl px-4 text-center">
+        <h3 className="section-title text-2xl sm:text-3xl">
+          Ako sa naši škôlkári tešia do škôlky
+        </h3>
+        <div className="mt-6 flex justify-center">
+          <div className="relative w-full max-w-[320px] overflow-hidden rounded-3xl bg-card shadow-card">
+            <video
+              src={skolkariVideo}
+              className="aspect-[9/16] w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls
+              preload="metadata"
+              aria-label="Video zo psiej škôlky Chvostíkovo – škôlkári sa tešia do škôlky"
+            />
           </div>
         </div>
       </div>
