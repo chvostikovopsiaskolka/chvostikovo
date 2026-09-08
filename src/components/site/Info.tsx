@@ -221,11 +221,11 @@ export function Faq() {
               <button
                 type="button"
                 onClick={() => setOpen(open === i ? null : i)}
-                className="flex w-full items-center justify-between gap-4 p-5 text-left font-display text-base font-semibold text-forest sm:text-lg"
+                className="flex w-full items-center justify-between gap-3 py-3.5 px-4 text-left font-display text-sm font-semibold text-forest sm:text-base"
               >
                 {f.q}
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-forest">
-                  {open === i ? <Minus className="size-4" /> : <Plus className="size-4" />}
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-forest sm:size-8">
+                  {open === i ? <Minus className="size-3.5 sm:size-4" /> : <Plus className="size-3.5 sm:size-4" />}
                 </span>
               </button>
               {open === i && (
