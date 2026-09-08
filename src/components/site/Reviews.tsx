@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Faq } from "@/components/site/Info";
 import skolkariVideo from "@/assets/skolkari.mp4";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
