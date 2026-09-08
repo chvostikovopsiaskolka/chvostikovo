@@ -107,6 +107,7 @@ export function Reviews() {
 
         <ReviewCarousel />
 
+        <Faq />
 
         <div className="mt-14 sm:mt-16">
           <h3 className="section-title text-2xl sm:text-3xl">
