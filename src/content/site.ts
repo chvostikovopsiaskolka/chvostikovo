@@ -193,11 +193,35 @@ export const FAQ = [
   },
   {
     q: "Musím si rezervovať termín vopred?",
-    a: "Áno, vzhľadom na obmedzenú kapacitu a snahu udržať bezpečnú atmosféru je potrebné rezervovať si miesto týždeň dopredu, do nedele 20:00.",
+    a: "Áno, vzhľadom na obmedzenú kapacitu a snahu udržať bezpečnú atmosféru je potrebné rezervovať si miesto týždeň dopredu, do nedele 20:00. Samozrejme, ak máte vzhľadom na prácu problém prihlásiť psíka týždeň dopredu, vieme sa dohodnúť aj individuálne – stačí nám zavolať.",
+  },
+  {
+    q: "Zabezpečujete aj vyzdvihnutie a odvoz psíka?",
+    a: "Áno, ponúkame službu vyzdvihnutia a odvozu psíka za 5 € za jednu jazdu. Ak máte o ňu záujem, dajte nám, prosím, vedieť už spolu s rezerváciou psíka. Podrobnosti vieme doladiť individuálne po telefonickom kontakte.",
   },
   {
     q: "Zabezpečujete aj stravu?",
     a: "V rámci denného pobytu psíkom stravu nepodávame.\u00a0\nKeďže deň v škôlke zahŕňa pohyb, hry a šantenie, z bezpečnostných dôvodov chceme minimalizovať riziko torzie žalúdka, ktoré môže súvisieť aj s intenzívnou aktivitou po kŕmení.\u00a0\nPreto odporúčame psíka nakŕmiť s dostatočným predstihom pred príchodom do škôlky a ďalšie jedlo mu podať až po návrate domov a následnom oddychu.\n\u00a0Ak má váš psík alergiu alebo špeciálne stravovacie obmedzenia, prineste mu, prosím, vlastné maškrty.\n",
+  },
+  {
+    q: "Ako prebieha prvá návšteva psíka v škôlke?",
+    a: "Pred nástupom do škôlky absolvuje každý nový psík vstupnú návštevu. Počas nej sa zoznámime so psíkom, sledujeme jeho správanie a reakcie na nové prostredie, ľudí aj ostatných psov a postupne ho zoznamujeme s kolektívom.\n\u00a0Nie každý psík si zvykne rovnako rýchlo. Šteniatkam, bojazlivejším psíkom alebo psíkom, ktoré potrebujú viac času, môžeme odporučiť ešte 2–3 kratšie návštevy spolu s majiteľom alebo niekoľkohodinový pobyt bez neho. Následne podľa toho, ako psík napreduje, zvolíme ďalší postup. Vo väčšine prípadov si psík postupne zvykne a prirodzene sa začlení do kolektívu.\n\u00a0Veľmi dôležité je, aby nám majiteľ o svojom psíkovi povedal pravdivo všetko – nielen to dobré. Potrebujeme vedieť o jeho povahe, správaní, skúsenostiach s inými psami a ľuďmi, obavách aj problémových situáciách. Čím lepšie psíka poznáme, tým lepšie vieme jeho prvé návštevy prispôsobiť.",
+  },
+  {
+    q: "Čo ak môj psík ešte nikdy nebol v kolektíve psov?",
+    a: "Práve na to slúži vstupná návšteva. Zistíme, ako psík reaguje na nové prostredie, cudzích ľudí a ostatných psov a či sa v kolektíve cíti dobre.\n\u00a0Ak zatiaľ so skupinou psov nemá skúsenosti, nemusí to byť problém. Zoznamovanie prebieha postupne a ku každému psíkovi pristupujeme individuálne. Ak potrebuje viac času, adaptačný proces prispôsobíme jeho tempu.",
+  },
+  {
+    q: "Hrajú sa psíkovia v škôlke celý deň?",
+    a: "Nie. Pohyb, hra a kontakt s ostatnými psami sú dôležitou súčasťou dňa, ale rovnako dôležitý je pre nás oddych. V škôlke máme denný režim, v ktorom sa striedajú aktivity s časom na upokojenie a odpočinok.\n\u00a0Chceme, aby sa psík dokázal nielen hrať s ostatnými, ale aj oddychovať v prostredí, kde sú okolo neho ďalší psi a rôzne podnety.\n\u00a0Pri šteniatkach navyše prispôsobujeme dĺžku a intenzitu aktivít ich veku, aby sme zbytočne nepreťažovali vyvíjajúci sa pohybový aparát a organizmus.",
+  },
+  {
+    q: "Ako zabezpečujete bezpečnosť psíkov v škôlke?",
+    a: "Bezpečnosť začína už vstupnou návštevou. Počas nej zisťujeme, ako psík reaguje na ostatných psov, cudzích ľudí a nové prostredie. Ak sa prejavuje výrazne agresívne alebo jeho správanie nie je vhodné pre pobyt v kolektíve, do škôlky ho neprijmeme.\n\u00a0Chvostíkovo nie je výcvikové centrum, preto v rámci bežných návštev neriešime prevýchovu agresívneho alebo problémového správania s cieľom zaradiť psíka do kolektívu.\n\u00a0Počas pobytu sú psíkovia pod neustálym dohľadom. Sledujeme ich správanie a vzájomné interakcie, aby sme dokázali včas predchádzať nedorozumeniam a situáciám, ktoré by mohli prerásť do konfliktu.",
+  },
+  {
+    q: "Bude môj psík počas dňa niekedy sám bez dozoru?",
+    a: "Nie. Psíkovia sú počas pobytu v škôlke pod celodenným dohľadom a vždy sú s nimi minimálne dvaja skúsení opatrovatelia.",
   },
 ];
 
