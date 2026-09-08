@@ -75,7 +75,13 @@ export function CookieBanner() {
           <div className="flex-1">
             <p className="font-display text-sm font-semibold sm:text-base">Používame cookies</p>
             <p className="mt-0.5 text-xs text-cream/80 sm:text-sm">
-              Používame cookies na správne fungovanie stránky a zlepšenie vašej skúsenosti.
+              Používame cookies na správne fungovanie stránky a zlepšenie vašej skúsenosti.{" "}
+              <Link
+                to="/cookies"
+                className="underline underline-offset-2 hover:text-coral"
+              >
+                Pravidlá používania cookies
+              </Link>
             </p>
           </div>
           <button
