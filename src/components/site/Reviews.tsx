@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Faq } from "@/components/site/Info";
 import skolkariVideo from "@/assets/skolkari.mp4";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
@@ -106,6 +107,7 @@ export function Reviews() {
 
         <ReviewCarousel />
 
+        <Faq />
 
         <div className="mt-14 sm:mt-16">
           <h3 className="section-title text-2xl sm:text-3xl">
