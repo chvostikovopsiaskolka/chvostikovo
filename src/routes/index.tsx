@@ -68,6 +68,7 @@ function Index() {
           <InfoTicker />
         </div>
         <Reviews />
+        <Faq />
         <EnrollBanner />
         <Gallery />
         <Care />
@@ -79,7 +80,6 @@ function Index() {
         <PhotoStrip />
         <Pricing />
         <InstagramFeed />
-        <Faq />
         <Contact />
       </main>
       <Footer />
