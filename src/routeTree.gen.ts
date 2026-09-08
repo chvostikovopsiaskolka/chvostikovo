@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as OchranaOsobnychUdajovRouteImport } from './routes/ochrana-osobnych-udajov'
+import { Route as UdajePrevadzkovatelaRouteImport } from './routes/udaje-prevadzkovatela'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,50 @@ const OchranaOsobnychUdajovRoute = OchranaOsobnychUdajovRouteImport.update({
   path: '/ochrana-osobnych-udajov',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UdajePrevadzkovatelaRoute = UdajePrevadzkovatelaRouteImport.update({
+  id: '/udaje-prevadzkovatela',
+  path: '/udaje-prevadzkovatela',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cookies' | '/ochrana-osobnych-udajov'
+  fullPaths:
+    '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/udaje-prevadzkovatela'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cookies' | '/ochrana-osobnych-udajov'
-  id: '__root__' | '/' | '/cookies' | '/ochrana-osobnych-udajov'
+  to: '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/udaje-prevadzkovatela'
+  id:
+    | '__root__'
+    | '/'
+    | '/cookies'
+    | '/ochrana-osobnych-udajov'
+    | '/udaje-prevadzkovatela'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CookiesRoute: typeof CookiesRoute
   OchranaOsobnychUdajovRoute: typeof OchranaOsobnychUdajovRoute
+  UdajePrevadzkovatelaRoute: typeof UdajePrevadzkovatelaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +98,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OchranaOsobnychUdajovRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/udaje-prevadzkovatela': {
+      id: '/udaje-prevadzkovatela'
+      path: '/udaje-prevadzkovatela'
+      fullPath: '/udaje-prevadzkovatela'
+      preLoaderRoute: typeof UdajePrevadzkovatelaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +112,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CookiesRoute: CookiesRoute,
   OchranaOsobnychUdajovRoute: OchranaOsobnychUdajovRoute,
+  UdajePrevadzkovatelaRoute: UdajePrevadzkovatelaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

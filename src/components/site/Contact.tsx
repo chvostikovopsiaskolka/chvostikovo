@@ -106,6 +106,10 @@ export function Footer() {
               Ochrana osobných údajov
             </Link>{" "}
             ·{" "}
+            <Link to="/udaje-prevadzkovatela" className="underline hover:text-cream">
+              Údaje prevádzkovateľa
+            </Link>{" "}
+            ·{" "}
             <button
               type="button"
               onClick={() =>

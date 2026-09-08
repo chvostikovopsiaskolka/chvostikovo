@@ -13,7 +13,12 @@ export default defineConfig({
       enabled: true,
       crawlLinks: false,
     },
-    pages: [{ path: "/" }, { path: "/cookies" }, { path: "/ochrana-osobnych-udajov" }],
+    pages: [
+      { path: "/" },
+      { path: "/cookies" },
+      { path: "/ochrana-osobnych-udajov" },
+      { path: "/udaje-prevadzkovatela" },
+    ],
   },
   vite: {
     // Ak by web bežal na https://<user>.github.io/<repo>/, nastav BASE_PATH=/<repo>/.
