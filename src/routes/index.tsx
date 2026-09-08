@@ -68,6 +68,8 @@ function Index() {
           <InfoTicker />
         </div>
         <Reviews />
+        <Faq />
+        <VideoSection />
         <EnrollBanner />
         <Gallery />
         <Care />
