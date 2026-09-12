@@ -18,6 +18,7 @@ export default defineConfig({
       { path: "/cookies" },
       { path: "/ochrana-osobnych-udajov" },
       { path: "/udaje-prevadzkovatela" },
+      { path: "/psia-skolka-pre-steniatka" },
     ],
   },
   vite: {

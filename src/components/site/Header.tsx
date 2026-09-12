@@ -26,9 +26,12 @@ const NAV_DESKTOP = [
   { href: "#faq", label: "Časté otázky" },
 ];
 
-export function Header() {
+export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolean }) {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const sectionHref = (href: string) => (homeSectionLinks ? `/${href}` : href);
+  const logoHref = homeSectionLinks ? "/" : "#top";
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -40,7 +43,7 @@ export function Header() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/95 px-4 py-2 shadow-soft backdrop-blur-md sm:px-6">
-        <a href="#top" className="shrink-0">
+        <a href={logoHref} className="shrink-0">
           <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-5 w-auto sm:h-6" />
         </a>
 
@@ -48,7 +51,7 @@ export function Header() {
           {NAV_DESKTOP.map((item) => (
             <a
               key={item.href}
-              href={item.href}
+              href={sectionHref(item.href)}
               className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
             >
               {item.label}
@@ -82,7 +85,7 @@ export function Header() {
             {NAV_MOBILE.map((item) => (
               <a
                 key={item.href}
-                href={item.href}
+                href={sectionHref(item.href)}
                 onClick={() => setMenuOpen(false)}
                 className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
               >

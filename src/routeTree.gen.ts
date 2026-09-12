@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as OchranaOsobnychUdajovRouteImport } from './routes/ochrana-osobnych-udajov'
+import { Route as PsiaSkolkaPreSteniatkaRouteImport } from './routes/psia-skolka-pre-steniatka'
 import { Route as UdajePrevadzkovatelaRouteImport } from './routes/udaje-prevadzkovatela'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const OchranaOsobnychUdajovRoute = OchranaOsobnychUdajovRouteImport.update({
   path: '/ochrana-osobnych-udajov',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PsiaSkolkaPreSteniatkaRoute = PsiaSkolkaPreSteniatkaRouteImport.update({
+  id: '/psia-skolka-pre-steniatka',
+  path: '/psia-skolka-pre-steniatka',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UdajePrevadzkovatelaRoute = UdajePrevadzkovatelaRouteImport.update({
   id: '/udaje-prevadzkovatela',
   path: '/udaje-prevadzkovatela',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
   '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
   '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRoutesById {
@@ -52,19 +60,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
   '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/udaje-prevadzkovatela'
+    '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/udaje-prevadzkovatela'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/udaje-prevadzkovatela'
+  to: '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/udaje-prevadzkovatela'
   id:
     | '__root__'
     | '/'
     | '/cookies'
     | '/ochrana-osobnych-udajov'
+    | '/psia-skolka-pre-steniatka'
     | '/udaje-prevadzkovatela'
   fileRoutesById: FileRoutesById
 }
@@ -72,6 +82,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CookiesRoute: typeof CookiesRoute
   OchranaOsobnychUdajovRoute: typeof OchranaOsobnychUdajovRoute
+  PsiaSkolkaPreSteniatkaRoute: typeof PsiaSkolkaPreSteniatkaRoute
   UdajePrevadzkovatelaRoute: typeof UdajePrevadzkovatelaRoute
 }
 
@@ -98,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OchranaOsobnychUdajovRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/psia-skolka-pre-steniatka': {
+      id: '/psia-skolka-pre-steniatka'
+      path: '/psia-skolka-pre-steniatka'
+      fullPath: '/psia-skolka-pre-steniatka'
+      preLoaderRoute: typeof PsiaSkolkaPreSteniatkaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/udaje-prevadzkovatela': {
       id: '/udaje-prevadzkovatela'
       path: '/udaje-prevadzkovatela'
@@ -112,6 +130,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CookiesRoute: CookiesRoute,
   OchranaOsobnychUdajovRoute: OchranaOsobnychUdajovRoute,
+  PsiaSkolkaPreSteniatkaRoute: PsiaSkolkaPreSteniatkaRoute,
   UdajePrevadzkovatelaRoute: UdajePrevadzkovatelaRoute,
 }
 export const routeTree = rootRouteImport

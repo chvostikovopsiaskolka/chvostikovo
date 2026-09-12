@@ -55,7 +55,6 @@ export function Contact() {
   );
 }
 
-
 function ContactRow({
   icon,
   label,
@@ -83,19 +82,34 @@ function ContactRow({
 export function Footer() {
   return (
     <footer className="bg-forest py-10 text-cream/80">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 sm:flex-row sm:items-start sm:justify-between">
-        <img
-          src={logo}
-          alt="Chvostíkovo psia škôlka"
-          className="h-8 w-auto brightness-0 invert opacity-90"
-        />
-        <div className="flex flex-col items-center gap-3 text-center">
+      <div className="mx-auto grid max-w-6xl gap-7 px-4 text-center sm:grid-cols-[auto_1fr_auto] sm:items-start sm:text-left">
+        <div className="flex justify-center sm:justify-start">
+          <img
+            src={logo}
+            alt="Chvostíkovo psia škôlka"
+            className="h-8 w-auto brightness-0 invert opacity-90"
+          />
+        </div>
+
+        <div className="flex flex-col items-center gap-4 text-center">
           <p className="text-sm">
             Psia škôlka Chvostíkovo · Poľská 6, Košice ·{" "}
             <a href={`tel:${PHONE}`} className="font-semibold text-cream hover:text-coral-soft">
               {PHONE_PRETTY}
             </a>
           </p>
+
+          <div>
+            <p className="font-display text-xs font-semibold tracking-wide text-cream/60 uppercase">
+              Užitočné informácie
+            </p>
+            <div className="mt-2 flex flex-col items-center gap-1.5 text-sm">
+              <Link to="/psia-skolka-pre-steniatka" className="hover:text-cream hover:underline">
+                Psia škôlka pre šteniatka
+              </Link>
+            </div>
+          </div>
+
           <p className="text-xs">
             © {new Date().getFullYear()} Chvostíkovo ·{" "}
             <Link to="/cookies" className="underline hover:text-cream">
@@ -121,7 +135,8 @@ export function Footer() {
             </button>
           </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center justify-center gap-2 sm:justify-end">
           <a
             href={INSTAGRAM}
             target="_blank"
