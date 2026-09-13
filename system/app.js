@@ -11,6 +11,26 @@
     byId('topbarMeta').innerHTML = `Aktualizované <strong>${esc(data.meta.updated)}</strong><br>${esc(data.meta.github)}`;
   }
 
+  function renderStatusOverview() {
+    const items = flatItems();
+    const groups = [
+      { status: 'production', label: 'Spustené', symbol: '✓' },
+      { status: 'testing', label: 'Testujeme', symbol: '●' },
+      { status: 'attention', label: 'Pozor', symbol: '!' },
+      { status: 'planned', label: 'Plánované', symbol: '○' }
+    ];
+
+    byId('statusOverview').innerHTML = `
+      <div class="status-overview-title">Stav systému</div>
+      <div class="status-overview-chips">
+        ${groups.map(group => {
+          const count = items.filter(item => item.status === group.status).length;
+          return `<span class="status-overview-chip ${group.status}"><b>${group.symbol}</b>${esc(group.label)} <strong>${count}</strong></span>`;
+        }).join('')}
+      </div>
+    `;
+  }
+
   function renderFilters() {
     byId('filters').innerHTML = data.filters.map(filter =>
       `<button class="filter-btn ${filter.id === activeFilter ? 'active' : ''}" data-filter="${esc(filter.id)}">${esc(filter.label)}</button>`
@@ -104,6 +124,7 @@
   }
 
   renderMeta();
+  renderStatusOverview();
   renderFilters();
   renderSummary();
   renderSystems();
