@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f47b20" />
+  <meta name="description" content="Interná mapa funkcií Chvostíkovo APP" />
+  <title>Chvostíkovo System</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">CH</div>
+      <div>
+        <strong>Chvostíkovo System</strong>
+        <span>Mapa admin appky a zákazníckeho portálu</span>
+      </div>
+    </div>
+    <div class="topbar-meta" id="topbarMeta"></div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-block">
+        <div class="eyebrow">Navigácia</div>
+        <nav id="sectionNav"></nav>
+      </div>
+      <div class="sidebar-note">
+        <strong>Zdroj pravdy</strong>
+        <p>Funkčný prehľad je verzovaný v GitHube. Zmeny tejto appky nemenia produkčný Supabase ani obe hlavné aplikácie.</p>
+      </div>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Interná dokumentácia</div>
+          <h1>Čo dnes Chvostíkovo APP vie</h1>
+          <p class="lead">Prehľad funkcií, pravidiel, upozornení a technických väzieb od inštalácie zákazníckej PWA až po admin históriu návštev.</p>
+        </div>
+        <div class="hero-actions">
+          <div class="search-wrap">
+            <span>⌕</span>
+            <input id="searchInput" type="search" placeholder="Hľadať funkciu, tabuľku, pravidlo…" autocomplete="off" />
+          </div>
+          <div class="filters" id="filters"></div>
+        </div>
+      </section>
+
+      <section class="summary-grid" id="summaryGrid"></section>
+      <section class="system-grid" id="systemGrid"></section>
+
+      <div id="sections"></div>
+
+      <section class="footer-card">
+        <div>
+          <div class="eyebrow">Ako tento prehľad udržiavať</div>
+          <h2>Pri každej väčšej zmene aktualizovať aj System</h2>
+          <p>Najjednoduchšie je upraviť <code>system/data.js</code>, commitnúť zmenu do GitHubu a Vercel automaticky nasadí novú verziu.</p>
+        </div>
+        <div class="mini-list">
+          <span>1. Úprava funkcie</span>
+          <span>2. Overenie produkcie</span>
+          <span>3. Aktualizácia System</span>
+          <span>4. Commit → Vercel</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
