@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as OchranaOsobnychUdajovRouteImport } from './routes/ochrana-osobnych-udajov'
 import { Route as PsiaSkolkaPreSteniatkaRouteImport } from './routes/psia-skolka-pre-steniatka'
+import { Route as StrazeniePsovKosiceRouteImport } from './routes/strazenie-psov-kosice'
 import { Route as UdajePrevadzkovatelaRouteImport } from './routes/udaje-prevadzkovatela'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const PsiaSkolkaPreSteniatkaRoute = PsiaSkolkaPreSteniatkaRouteImport.update({
   path: '/psia-skolka-pre-steniatka',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StrazeniePsovKosiceRoute = StrazeniePsovKosiceRouteImport.update({
+  id: '/strazenie-psov-kosice',
+  path: '/strazenie-psov-kosice',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UdajePrevadzkovatelaRoute = UdajePrevadzkovatelaRouteImport.update({
   id: '/udaje-prevadzkovatela',
   path: '/udaje-prevadzkovatela',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
   '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
+  '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
   '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
   '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
+  '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
   '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRoutesById {
@@ -61,20 +69,22 @@ export interface FileRoutesById {
   '/cookies': typeof CookiesRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
   '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
+  '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
   '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/udaje-prevadzkovatela'
+    '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/strazenie-psov-kosice' | '/udaje-prevadzkovatela'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/udaje-prevadzkovatela'
+  to: '/' | '/cookies' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/strazenie-psov-kosice' | '/udaje-prevadzkovatela'
   id:
     | '__root__'
     | '/'
     | '/cookies'
     | '/ochrana-osobnych-udajov'
     | '/psia-skolka-pre-steniatka'
+    | '/strazenie-psov-kosice'
     | '/udaje-prevadzkovatela'
   fileRoutesById: FileRoutesById
 }
@@ -83,6 +93,7 @@ export interface RootRouteChildren {
   CookiesRoute: typeof CookiesRoute
   OchranaOsobnychUdajovRoute: typeof OchranaOsobnychUdajovRoute
   PsiaSkolkaPreSteniatkaRoute: typeof PsiaSkolkaPreSteniatkaRoute
+  StrazeniePsovKosiceRoute: typeof StrazeniePsovKosiceRoute
   UdajePrevadzkovatelaRoute: typeof UdajePrevadzkovatelaRoute
 }
 
@@ -116,6 +127,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PsiaSkolkaPreSteniatkaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/strazenie-psov-kosice': {
+      id: '/strazenie-psov-kosice'
+      path: '/strazenie-psov-kosice'
+      fullPath: '/strazenie-psov-kosice'
+      preLoaderRoute: typeof StrazeniePsovKosiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/udaje-prevadzkovatela': {
       id: '/udaje-prevadzkovatela'
       path: '/udaje-prevadzkovatela'
@@ -131,6 +149,7 @@ const rootRouteChildren: RootRouteChildren = {
   CookiesRoute: CookiesRoute,
   OchranaOsobnychUdajovRoute: OchranaOsobnychUdajovRoute,
   PsiaSkolkaPreSteniatkaRoute: PsiaSkolkaPreSteniatkaRoute,
+  StrazeniePsovKosiceRoute: StrazeniePsovKosiceRoute,
   UdajePrevadzkovatelaRoute: UdajePrevadzkovatelaRoute,
 }
 export const routeTree = rootRouteImport

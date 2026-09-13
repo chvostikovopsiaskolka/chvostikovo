@@ -1,4 +1,21 @@
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+
+const articles = [
+  {
+    href: "/psia-skolka-pre-steniatka",
+    Icon: Sparkles,
+    eyebrow: "Pre najmladších škôlkarov",
+    title: "Psia škôlka pre šteniatka",
+    text: "Kedy môže šteniatko začať, ako prebieha prvé zoznámenie, prečo je dôležitá správna socializácia aj oddych a ako nastavujeme prvé návštevy.",
+  },
+  {
+    href: "/strazenie-psov-kosice",
+    Icon: ShieldCheck,
+    eyebrow: "Denná starostlivosť v Košiciach",
+    title: "Psia škôlka a stráženie psov",
+    text: "Ako vyzerá denné stráženie v Chvostíkove, prečo je dôležitý celodenný dohľad, bezpečie, rodinné prostredie, pohyb aj dostatok oddychu.",
+  },
+];
 
 export function UsefulInfo() {
   return (
@@ -14,25 +31,26 @@ export function UsefulInfo() {
           </p>
         </div>
 
-        <div className="mx-auto mt-9 max-w-3xl">
-          <a
-            href="/psia-skolka-pre-steniatka"
-            className="group block rounded-4xl bg-card p-7 shadow-card transition-transform hover:-translate-y-1 sm:p-9"
-          >
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-coral">
-              <Sparkles className="size-6" />
-            </div>
-            <p className="mt-5 font-display text-sm font-semibold tracking-wide text-coral uppercase">
-              Pre najmladších škôlkarov
-            </p>
-            <h3 className="mt-2 text-2xl text-forest sm:text-3xl">Psia škôlka pre šteniatka</h3>
-            <p className="mt-3 leading-relaxed text-forest/80">
-              Kedy môže šteniatko začať, ako prebieha prvé zoznámenie, prečo je dôležitá správna socializácia aj oddych a ako nastavujeme prvé návštevy.
-            </p>
-            <span className="mt-5 inline-flex items-center gap-2 font-display text-sm font-semibold text-coral">
-              Prečítať viac <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-            </span>
-          </a>
+        <div className="mx-auto mt-9 grid max-w-5xl gap-5 md:grid-cols-2">
+          {articles.map(({ href, Icon, eyebrow, title, text }) => (
+            <a
+              key={href}
+              href={href}
+              className="group flex h-full flex-col rounded-4xl bg-card p-7 shadow-card transition-transform hover:-translate-y-1 sm:p-9"
+            >
+              <div className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-coral">
+                <Icon className="size-6" />
+              </div>
+              <p className="mt-5 font-display text-sm font-semibold tracking-wide text-coral uppercase">
+                {eyebrow}
+              </p>
+              <h3 className="mt-2 text-2xl text-forest sm:text-3xl">{title}</h3>
+              <p className="mt-3 flex-1 leading-relaxed text-forest/80">{text}</p>
+              <span className="mt-5 inline-flex items-center gap-2 font-display text-sm font-semibold text-coral">
+                Prečítať viac <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+              </span>
+            </a>
+          ))}
         </div>
       </div>
     </section>
