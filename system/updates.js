@@ -28,6 +28,31 @@
     pass.body = 'Zákazník vidí aktuálny typ vstupu bez negatívneho formulovania: pri jednorazovom režime sa zobrazí Jednorazový vstup; pri permanentke počet vstupov, dátum kúpy, stav platnosti, zostávajúce vstupy a počet použitých vstupov. Cena sa pri už zakúpenej permanentke nezobrazuje. Zákazník môže požiadať o 10-vstupovú permanentku.';
   }
 
+  if (customer) {
+    let pwa = customer.items?.find(item => /PWA|inštal|instal/i.test(String(item.title || '')));
+    if (!pwa) {
+      pwa = {
+        title: 'PWA inštalácia',
+        subtitle: 'Pridanie zákazníckeho portálu na plochu telefónu.',
+        status: 'production',
+        statusLabel: 'Produkcia',
+        categories: ['customer', 'technical'],
+        body: 'Portál sa dá nainštalovať na plochu ako webová aplikácia s vlastnou štvorcovou ikonou Chvostíkovo.',
+        bullets: [],
+        tags: ['pwa', 'ios', 'android']
+      };
+      customer.items = [...(customer.items || []), pwa];
+    }
+    pwa.body = 'Portál sa dá pridať na plochu ako webová aplikácia. iOS aj manifest používajú štvorcovú ikonu s labkou, nie horizontálne logo.';
+    pwa.bullets = [
+      ...(pwa.bullets || []).filter(text => !/Safari|tri bodky|Zobraziť viac|ikonu na ploche|horizontálne logo/i.test(String(text))),
+      'iOS postup: Safari → tri bodky vľavo dole → Zdieľať → Zobraziť viac → Pridať na plochu → Otvoriť ako webovú apku → Pridať.',
+      'Po pridaní aplikácie na plochu má používateľ zavrieť prehliadač a pokračovať cez ikonu Chvostíkovo na ploche; táto informácia je zvýraznená pred tlačidlom Rozumiem.',
+      'Apple touch icon aj PWA manifest používajú štvorcovú ikonu Chvostíkovo s labkou.'
+    ];
+    pwa.tags = [...new Set([...(pwa.tags || []), 'square-icon', 'install-guide'])];
+  }
+
   const admin = data.sections?.find(section =>
     String(section.id || '').toLowerCase().includes('admin') ||
     String(section.title || '').toLowerCase().includes('admin')
@@ -52,7 +77,8 @@
       ...(overview.bullets || []).filter(text => !/živé počítad|záujm|prihlášk|nová správa|čakajúce rezerv/i.test(String(text))),
       'Rezervácie zobrazujú živé číslo iba vtedy, keď existuje čakajúca rezervácia alebo čakajúca zmena taxi.',
       'Majitelia psíkov zobrazujú počet čakajúcich registrácií a samostatný text typu „1 nová správa“ pre neprečítané správy od zákazníkov.',
-      'Záujem o škôlku zobrazuje samostatné badge pre nové záujmy a nové prihlášky; vybavené, reviewed alebo archivované položky sa do počtu nezapočítavajú.'
+      'Záujem o škôlku zobrazuje samostatné badge pre nové záujmy a nové prihlášky; vybavené, reviewed alebo archivované položky sa do počtu nezapočítavajú.',
+      'Počítadlá sa počítajú z dát už načítaných prihlásenou admin aplikáciou, takže ich neblokuje RLS anonymného klienta.'
     ];
     overview.tags = [...new Set([...(overview.tags || []), 'live-badges', 'pending-only'])];
 
