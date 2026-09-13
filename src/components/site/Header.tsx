@@ -65,7 +65,7 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
             href="/en/dog-daycare-kosice"
             lang="en"
             aria-label="English information"
-            className="hidden rounded-full bg-secondary px-3 py-2 font-display text-xs font-semibold text-forest transition-colors hover:bg-coral-soft lg:inline-flex"
+            className="hidden rounded-full bg-secondary px-3 py-2 font-display text-xs font-semibold text-forest transition-colors hover:bg-coral-soft md:inline-flex"
           >
             EN
           </a>
