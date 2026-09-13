@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Heart, Moon, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { Heart, Moon, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { ShortForm } from "@/components/site/Forms";
@@ -31,7 +31,7 @@ const FAQ = [
   },
   {
     q: "Pomôže škôlka so separačnou úzkosťou?",
-    a: "Psia škôlka nenahrádza tréning ani behaviorálnu terapiu a separačnú úzkosť neliečime. Pre niektoré šteniatka však môže byť postupný pobyt bez majiteľa jednou z užitočných skúseností pri učení sa samostatnosti.",
+    a: "Psia škôlka nenahrádza tréning ani behaviorálnu terapiu a separačnú úzkosť neliečime. Ak ju psík má, je vhodné riešiť ju individuálne s odborníkom.",
   },
 ];
 
@@ -109,7 +109,7 @@ function PuppyDaycarePage() {
               <p className="text-center font-display text-sm font-semibold tracking-wide text-coral uppercase">Nezáväzne</p>
               <h2 className="mt-2 text-center text-2xl text-forest">Je už vaše šteniatko pripravené?</h2>
               <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
-                Napíšte nám pár základných informácií. Ozveme sa vám a radi odpovieme na vaše otázky.
+                Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
               </p>
               <ShortForm />
             </div>
@@ -156,60 +156,48 @@ function PuppyDaycarePage() {
           </div>
         </section>
 
-        <section className="bg-card py-14 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4">
-            <div className="text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Prvá návšteva</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Najprv sa jednoducho spoznáme</h2>
-              <p className="mx-auto mt-4 max-w-3xl leading-relaxed text-forest/80">
-                Prvá návšteva neznamená, že nám šteniatko ráno odovzdáte a hneď u nás zostane celý deň. Každý nový psík najskôr absolvuje bezplatnú vstupnú návštevu.
-              </p>
-            </div>
-
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {[
-                ["1", "Zoznámime sa", "Pozrieme sa, ako šteniatko reaguje na nové prostredie, ľudí a ostatných psov."],
-                ["2", "Dáme mu čas", "Niektoré šteniatka sú o chvíľu všade doma. Iné si najskôr všetko radšej obzrú. Obe možnosti sú v poriadku."],
-                ["3", "Dohodneme ďalší krok", "Ak potrebuje viac času, môžeme odporučiť kratšie návštevy s majiteľom alebo pár hodín bez neho."],
-              ].map(([number, heading, text]) => (
-                <article key={number} className="relative rounded-4xl bg-background p-7 pt-9 shadow-card">
-                  <span className="absolute -top-5 left-7 flex size-11 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-white shadow-card">
-                    {number}
-                  </span>
-                  <h3 className="text-xl text-forest">{heading}</h3>
-                  <p className="mt-2 leading-relaxed text-forest/80">{text}</p>
-                </article>
-              ))}
-            </div>
-
-            <p className="mx-auto mt-8 max-w-3xl text-center font-display font-semibold text-forest">
-              Nechceme každého psíka natlačiť do rovnakého scenára. Ďalší postup prispôsobujeme tomu, čo vyhovuje práve jemu.
-            </p>
-          </div>
-        </section>
-
         <section className="py-14 sm:py-20">
           <div className="mx-auto max-w-5xl px-4">
             <div className="rounded-4xl bg-forest p-7 text-cream shadow-soft sm:p-10">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-cream/10">
                 <Sparkles className="size-6 text-coral-soft" />
               </div>
-              <h2 className="mt-5 text-3xl text-cream sm:text-4xl">Psia škôlka nie je iba o hraní sa s inými psami</h2>
-              <div className="mt-5 grid gap-5 text-cream/85 md:grid-cols-2">
-                <div className="space-y-3 leading-relaxed">
+
+              <div className="mt-5">
+                <h2 className="text-3xl text-cream sm:text-4xl">Správna socializácia je pre šteniatka dôležitá</h2>
+                <div className="mt-4 space-y-3 leading-relaxed text-cream/85">
                   <p>
-                    Keď sa povie socializácia šteniatka, veľa ľudí si predstaví hlavne hru s ďalšími psami. Tá je fajn. Ale správna socializácia je oveľa viac.
+                    Keď sa povie socializácia šteniatka, veľa ľudí si predstaví hlavne hru s ďalšími psami. Tá je fajn, ale správna socializácia je oveľa viac.
                   </p>
                   <p>
                     Šteniatko sa postupne učí fungovať medzi inými psami, ľuďmi a rôznymi podnetmi. Nemusí sa s každým psom hrať a nemusí reagovať na všetko, čo sa okolo neho deje.
                   </p>
-                </div>
-                <div className="space-y-3 leading-relaxed">
-                  <p>
-                    Preto ani deň v Chvostíkove nevyzerá tak, že otvoríme dvere a psy sa od rána do večera naháňajú.
-                  </p>
                   <p className="font-semibold text-cream">
-                    Počas dňa sa strieda pohyb, hra, spoločnosť ostatných psov, pokojnejšie chvíle aj oddych.
+                    Preto ani deň v Chvostíkove nevyzerá tak, že otvoríme dvere a psy sa od rána do večera naháňajú. Počas dňa sa strieda pohyb, hra, spoločnosť ostatných psov, pokojnejšie chvíle aj oddych.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 border-t border-cream/15 pt-8">
+                <h3 className="text-2xl text-cream sm:text-3xl">Radšej dobrá skúsenosť ako desať zlých</h3>
+                <div className="mt-4 space-y-3 leading-relaxed text-cream/85">
+                  <p>
+                    Pre malé šteniatko môže byť už samotná návšteva nového miesta veľkým zážitkom. Noví ľudia, cudzie prostredie, viac psov, nové zvuky a k tomu chvíľu bez svojho človeka.
+                  </p>
+                  <p>
+                    Preto nemá zmysel snažiť sa zvládnuť všetko naraz. Sledujeme, ako sa psík cíti, a dávame mu čas. Pre nás je dôležité, aby si Chvostíkovo postupne spojil s miestom, kde sa cíti dobre.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 border-t border-cream/15 pt-8">
+                <h3 className="text-2xl text-cream sm:text-3xl">Aj oddych sa treba naučiť</h3>
+                <div className="mt-4 space-y-3 leading-relaxed text-cream/85">
+                  <p>
+                    Šteniatka potrebujú veľa spánku a oddychu. Preto pre nás dobrý deň v škôlke neznamená, že psík osem hodín nepretržite behá.
+                  </p>
+                  <p>
+                    Rovnako dôležité ako hra je aj to, aby sa šteniatko dokázalo upokojiť a oddýchnuť si, aj keď sú okolo neho ďalší psi. Postupne tak zisťuje, že prítomnosť iného psa nemusí vždy znamenať: „Poďme sa naháňať!“
                   </p>
                 </div>
               </div>
@@ -219,58 +207,15 @@ function PuppyDaycarePage() {
 
         <section className="bg-secondary/55 py-14 sm:py-20">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="grid gap-6 md:grid-cols-2">
-              <article className="rounded-4xl bg-card p-7 shadow-card sm:p-9">
-                <h2 className="text-2xl text-forest sm:text-3xl">Radšej dobrá skúsenosť ako desať zlých</h2>
-                <p className="mt-4 leading-relaxed text-forest/80">
-                  Pre malé šteniatko môže byť už samotná návšteva nového miesta veľkým zážitkom. Noví ľudia, cudzie prostredie, viac psov, nové zvuky a k tomu chvíľu bez svojho človeka.
-                </p>
-                <p className="mt-3 leading-relaxed text-forest/80">
-                  Preto nemá zmysel snažiť sa zvládnuť všetko naraz. Sledujeme, ako sa psík cíti, a dávame mu čas. Pre nás je dôležité, aby si Chvostíkovo postupne spojil s miestom, kde sa cíti dobre.
-                </p>
-              </article>
-
-              <article className="rounded-4xl bg-card p-7 shadow-card sm:p-9">
-                <h2 className="text-2xl text-forest sm:text-3xl">Aj oddych sa treba naučiť</h2>
-                <p className="mt-4 leading-relaxed text-forest/80">
-                  Šteniatka potrebujú veľa spánku a oddychu. Preto pre nás dobrý deň v škôlke neznamená, že psík osem hodín nepretržite behá.
-                </p>
-                <p className="mt-3 leading-relaxed text-forest/80">
-                  Rovnako dôležité ako hra je aj to, aby sa šteniatko dokázalo upokojiť a oddýchnuť si, aj keď sú okolo neho ďalší psi. Postupne tak zisťuje, že prítomnosť iného psa nemusí vždy znamenať: „Poďme sa naháňať!“
-                </p>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto max-w-5xl px-4">
-            <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
-              <div>
-                <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Krok po kroku</p>
-                <h2 className="section-title mt-2 text-3xl sm:text-4xl">Postupne aj bez majiteľa</h2>
-                <p className="mt-4 leading-relaxed text-forest/80">
-                  Pre niektoré šteniatka môže byť škôlka jednou z prvých skúseností, keď zostanú dlhšie bez svojho majiteľa. Preto nemusíme začínať hneď celým dňom.
-                </p>
-                <p className="mt-3 leading-relaxed text-forest/80">
-                  Niekedy je lepšia kratšia návšteva, potom pár hodín bez majiteľa a až následne celý deň. Záleží od konkrétneho psíka.
-                </p>
-                <p className="mt-4 rounded-3xl bg-secondary p-5 text-sm leading-relaxed text-forest/85">
-                  Psia škôlka nenahrádza tréning ani behaviorálnu terapiu a nelieči separačnú úzkosť. Môže však byť jedným z miest, kde šteniatko postupne získava skúsenosť, že vie stráviť určitý čas aj bez svojho človeka.
-                </p>
-              </div>
-
-              <div className="rounded-4xl bg-card p-7 shadow-card sm:p-9">
-                <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Bezpečie</p>
-                <h2 className="mt-2 text-3xl text-forest">Stále na nich dávame pozor</h2>
-                <p className="mt-4 leading-relaxed text-forest/80">
+            <div className="rounded-4xl bg-card p-7 shadow-card sm:p-10">
+              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Bezpečie</p>
+              <h2 className="mt-2 text-3xl text-forest sm:text-4xl">Stále na nich dávame pozor</h2>
+              <div className="mt-5 grid gap-5 md:grid-cols-2">
+                <p className="leading-relaxed text-forest/80">
                   Šteniatka sú zvedavé, rýchle a občas ešte úplne netušia, kedy už má druhý pes ich hry dosť. Preto sú psíkovia počas pobytu v Chvostíkove pod celodenným dohľadom.
                 </p>
-                <p className="mt-3 leading-relaxed text-forest/80">
+                <p className="leading-relaxed text-forest/80">
                   Sledujeme ich hru, vzájomné interakcie aj to, kedy už niekto potrebuje pauzu. Ak treba, hru prerušíme a doprajeme psíkovi pokoj.
-                </p>
-                <p className="mt-4 flex items-start gap-2 font-display font-semibold text-forest">
-                  <Check className="mt-0.5 size-5 shrink-0 text-coral" /> Chvostíkovo je zamerané najmä na stredné a veľké plemená.
                 </p>
               </div>
             </div>
@@ -285,8 +230,8 @@ function PuppyDaycarePage() {
             </div>
             <div className="mt-10 grid gap-5 md:grid-cols-3">
               {[
-                ["1", "Napíšete nám", "Vyplníte krátky nezáväzný formulár a napíšete nám základné informácie o vašom šteniatku."],
-                ["2", "Stretneme sa", "Na vstupnej návšteve sa zoznámime so psíkom a pozrieme sa, ako sa cíti v novom prostredí a medzi ostatnými psami."],
+                ["1", "Napíšete nám", "Vyplníte krátky nezáväzný formulár. Ozveme sa vám späť do 24 hodín a preberieme s vami viac informácií."],
+                ["2", "Stretneme sa", "Na bezplatnej vstupnej návšteve sa zoznámime so psíkom a pozrieme sa, ako sa cíti v novom prostredí a medzi ostatnými psami."],
                 ["3", "Dohodneme, čo ďalej", "Ak je pripravený, môže začať chodiť do škôlky. Ak potrebuje viac času, odporučíme postupnejšiu adaptáciu."],
               ].map(([number, heading, text]) => (
                 <article key={number} className="rounded-4xl bg-background p-7 shadow-card">
@@ -296,7 +241,10 @@ function PuppyDaycarePage() {
                 </article>
               ))}
             </div>
-            <div className="mt-8 flex justify-center">
+            <p className="mx-auto mt-8 max-w-3xl text-center font-display font-semibold text-forest">
+              Nechceme každého psíka natlačiť do rovnakého scenára. Ďalší postup prispôsobujeme tomu, čo vyhovuje práve jemu.
+            </p>
+            <div className="mt-7 flex justify-center">
               <CtaLink />
             </div>
           </div>
@@ -323,7 +271,7 @@ function PuppyDaycarePage() {
             <div className="rounded-4xl bg-secondary p-7 text-center shadow-card sm:p-10">
               <h2 className="text-3xl text-forest">Nie ste si istí, či je už vaše šteniatko pripravené?</h2>
               <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-forest/80">
-                Nemusíte sa hneď rozhodovať pre celý deň v škôlke. Napíšte nám pár základných informácií a ak bude škôlka pre vášho psíka vhodná, dohodneme si bezplatnú vstupnú návštevu v Chvostíkove v Košiciach.
+                Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií o vašom šteniatku aj možnostiach prvých návštev.
               </p>
               <CtaLink className="mt-6" />
             </div>
