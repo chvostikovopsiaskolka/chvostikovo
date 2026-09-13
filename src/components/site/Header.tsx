@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import logo from "@/assets/logo.png";
-import { PHONE, PHONE_PRETTY } from "@/content/site";
+import { PHONE } from "@/content/site";
 import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
 
@@ -43,12 +43,12 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/95 px-4 py-2 shadow-soft backdrop-blur-md sm:px-6">
+      <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/95 px-4 py-2 shadow-soft backdrop-blur-md sm:px-6">
         <a href={logoHref} className="shrink-0">
           <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-5 w-auto sm:h-6" />
         </a>
 
-        <nav className="hidden min-w-0 items-center gap-6 lg:flex">
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 lg:flex">
           {NAV_DESKTOP.map((item) => (
             <a
               key={item.href}
@@ -60,12 +60,12 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <a
             href="/en/dog-daycare-kosice"
             lang="en"
             aria-label="English information"
-            className="hidden rounded-full bg-secondary px-3 py-2 font-display text-xs font-semibold text-forest transition-colors hover:bg-coral-soft md:inline-flex"
+            className="inline-flex rounded-full bg-secondary px-2.5 py-2 font-display text-[0.68rem] font-semibold text-forest transition-colors hover:bg-coral-soft sm:px-3 sm:text-xs"
           >
             EN
           </a>
@@ -102,6 +102,14 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
               </a>
             ))}
           </nav>
+          <a
+            href="/en/dog-daycare-kosice"
+            lang="en"
+            onClick={() => setMenuOpen(false)}
+            className="mt-2 flex w-full items-center justify-center rounded-full bg-secondary px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-coral-soft"
+          >
+            English information
+          </a>
           <a
             href={`tel:${PHONE}`}
             onClick={() => setMenuOpen(false)}
