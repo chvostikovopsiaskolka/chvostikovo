@@ -11,7 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as EnCookiesRouteImport } from './routes/en.cookies'
 import { Route as EnDogDaycareKosiceRouteImport } from './routes/en.dog-daycare-kosice'
+import { Route as EnOperatorDetailsRouteImport } from './routes/en.operator-details'
+import { Route as EnPrivacyRouteImport } from './routes/en.privacy'
 import { Route as OchranaOsobnychUdajovRouteImport } from './routes/ochrana-osobnych-udajov'
 import { Route as PsiaSkolkaPreSteniatkaRouteImport } from './routes/psia-skolka-pre-steniatka'
 import { Route as StrazeniePsovKosiceRouteImport } from './routes/strazenie-psov-kosice'
@@ -27,9 +30,24 @@ const CookiesRoute = CookiesRouteImport.update({
   path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnCookiesRoute = EnCookiesRouteImport.update({
+  id: '/en/cookies',
+  path: '/en/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnDogDaycareKosiceRoute = EnDogDaycareKosiceRouteImport.update({
   id: '/en/dog-daycare-kosice',
   path: '/en/dog-daycare-kosice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnOperatorDetailsRoute = EnOperatorDetailsRouteImport.update({
+  id: '/en/operator-details',
+  path: '/en/operator-details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnPrivacyRoute = EnPrivacyRouteImport.update({
+  id: '/en/privacy',
+  path: '/en/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OchranaOsobnychUdajovRoute = OchranaOsobnychUdajovRouteImport.update({
@@ -56,7 +74,10 @@ const UdajePrevadzkovatelaRoute = UdajePrevadzkovatelaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
+  '/en/cookies': typeof EnCookiesRoute
   '/en/dog-daycare-kosice': typeof EnDogDaycareKosiceRoute
+  '/en/operator-details': typeof EnOperatorDetailsRoute
+  '/en/privacy': typeof EnPrivacyRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
   '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
   '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
@@ -65,7 +86,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
+  '/en/cookies': typeof EnCookiesRoute
   '/en/dog-daycare-kosice': typeof EnDogDaycareKosiceRoute
+  '/en/operator-details': typeof EnOperatorDetailsRoute
+  '/en/privacy': typeof EnPrivacyRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
   '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
   '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
@@ -75,7 +99,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
+  '/en/cookies': typeof EnCookiesRoute
   '/en/dog-daycare-kosice': typeof EnDogDaycareKosiceRoute
+  '/en/operator-details': typeof EnOperatorDetailsRoute
+  '/en/privacy': typeof EnPrivacyRoute
   '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
   '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
   '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
@@ -84,14 +111,17 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/cookies' | '/en/dog-daycare-kosice' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/strazenie-psov-kosice' | '/udaje-prevadzkovatela'
+    '/' | '/cookies' | '/en/cookies' | '/en/dog-daycare-kosice' | '/en/operator-details' | '/en/privacy' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/strazenie-psov-kosice' | '/udaje-prevadzkovatela'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cookies' | '/en/dog-daycare-kosice' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/strazenie-psov-kosice' | '/udaje-prevadzkovatela'
+  to: '/' | '/cookies' | '/en/cookies' | '/en/dog-daycare-kosice' | '/en/operator-details' | '/en/privacy' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/strazenie-psov-kosice' | '/udaje-prevadzkovatela'
   id:
     | '__root__'
     | '/'
     | '/cookies'
+    | '/en/cookies'
     | '/en/dog-daycare-kosice'
+    | '/en/operator-details'
+    | '/en/privacy'
     | '/ochrana-osobnych-udajov'
     | '/psia-skolka-pre-steniatka'
     | '/strazenie-psov-kosice'
@@ -101,7 +131,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CookiesRoute: typeof CookiesRoute
+  EnCookiesRoute: typeof EnCookiesRoute
   EnDogDaycareKosiceRoute: typeof EnDogDaycareKosiceRoute
+  EnOperatorDetailsRoute: typeof EnOperatorDetailsRoute
+  EnPrivacyRoute: typeof EnPrivacyRoute
   OchranaOsobnychUdajovRoute: typeof OchranaOsobnychUdajovRoute
   PsiaSkolkaPreSteniatkaRoute: typeof PsiaSkolkaPreSteniatkaRoute
   StrazeniePsovKosiceRoute: typeof StrazeniePsovKosiceRoute
@@ -124,11 +157,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/cookies': {
+      id: '/en/cookies'
+      path: '/en/cookies'
+      fullPath: '/en/cookies'
+      preLoaderRoute: typeof EnCookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/dog-daycare-kosice': {
       id: '/en/dog-daycare-kosice'
       path: '/en/dog-daycare-kosice'
       fullPath: '/en/dog-daycare-kosice'
       preLoaderRoute: typeof EnDogDaycareKosiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/operator-details': {
+      id: '/en/operator-details'
+      path: '/en/operator-details'
+      fullPath: '/en/operator-details'
+      preLoaderRoute: typeof EnOperatorDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/privacy': {
+      id: '/en/privacy'
+      path: '/en/privacy'
+      fullPath: '/en/privacy'
+      preLoaderRoute: typeof EnPrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ochrana-osobnych-udajov': {
@@ -165,7 +219,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CookiesRoute: CookiesRoute,
+  EnCookiesRoute: EnCookiesRoute,
   EnDogDaycareKosiceRoute: EnDogDaycareKosiceRoute,
+  EnOperatorDetailsRoute: EnOperatorDetailsRoute,
+  EnPrivacyRoute: EnPrivacyRoute,
   OchranaOsobnychUdajovRoute: OchranaOsobnychUdajovRoute,
   PsiaSkolkaPreSteniatkaRoute: PsiaSkolkaPreSteniatkaRoute,
   StrazeniePsovKosiceRoute: StrazeniePsovKosiceRoute,

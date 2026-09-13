@@ -78,7 +78,7 @@ export function CookieBanner() {
               {isEnglish
                 ? "We use cookies to keep the website working properly and to improve your experience. "
                 : "Používame cookies na správne fungovanie stránky a zlepšenie vašej skúsenosti. "}
-              <Link to="/cookies" className="underline underline-offset-2 hover:text-coral">
+              <Link to={isEnglish ? "/en/cookies" : "/cookies"} className="underline underline-offset-2 hover:text-coral">
                 {isEnglish ? "Cookie policy" : "Pravidlá používania cookies"}
               </Link>
             </p>

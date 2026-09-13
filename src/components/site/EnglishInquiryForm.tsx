@@ -111,7 +111,10 @@ export function EnglishInquiryForm() {
       <label className="flex items-start gap-2 text-sm text-forest/80">
         <input type="checkbox" required className="mt-1 accent-[oklch(0.72_0.108_40)]" />
         <span>
-          I agree to the processing of my personal data. <span className="text-destructive">*</span>
+          I agree to the processing of my personal data in accordance with the{" "}
+          <a href="/en/privacy" className="font-semibold text-coral underline underline-offset-2">
+            Privacy Policy
+          </a>. <span className="text-destructive">*</span>
         </span>
       </label>
       {error && <p className="text-sm text-destructive">{error}</p>}

@@ -1,15 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Check,
   Clock3,
+  Facebook,
   HeartHandshake,
+  Instagram,
   MapPin,
+  Menu,
   Moon,
   Phone,
   ShieldCheck,
   Sparkles,
   Users,
+  X,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import heroDogs from "@/assets/hero-dogs.jpg";
@@ -20,6 +25,7 @@ import {
   ADDRESS,
   EMAIL,
   FACEBOOK,
+  GALLERY,
   INSTAGRAM,
   MAP_LINK,
   PHONE,
@@ -34,6 +40,42 @@ const title = "Dog Daycare Košice | Daytime Dog Sitting | Chvostíkovo";
 const description =
   "Dog daycare in Košice with all-day supervision, safe group care, play and rest. Daytime dog sitting Monday to Friday, 7:00–17:00.";
 
+const REVIEWS_EN = [
+  {
+    name: "Heka & Leraie",
+    text: "I can wholeheartedly recommend Chvostíkovo. My Leraie is always excited to see his friends there, and I am happy knowing he is in the hands of great people. ❤️",
+  },
+  {
+    name: "Erik & Gaston",
+    text: "Great place, great people! Our dog can barely sit still with excitement at the door while waiting for it to open.",
+  },
+  {
+    name: "Alžbeta & Eliška",
+    text: "If you are looking for a place where your dog will be happy, definitely visit this daycare. The owners are kind and very helpful, and our Eliška is always excited to go. She comes home happy and pleasantly tired. Thank you.",
+  },
+];
+
+const SPACE_PHOTOS = [
+  {
+    src: GALLERY[0]!.src,
+    alt: "Indoor dog daycare area at Chvostíkovo in Košice",
+    title: "Indoor daycare rooms",
+    text: "Heated indoor space for supervised time, calmer moments and rest throughout the day.",
+  },
+  {
+    src: GALLERY[6]!.src,
+    alt: "Secure outdoor dog run at Chvostíkovo in Košice",
+    title: "Secure outdoor run",
+    text: "An outdoor run of approximately 80 m² gives dogs room to move, explore and spend time outside under supervision.",
+  },
+  {
+    src: GALLERY[5]!.src,
+    alt: "Dogs resting during the day at Chvostíkovo dog daycare",
+    title: "Space to slow down",
+    text: "Rest is part of the routine. Dogs also have time and space to settle, switch off and recover.",
+  },
+];
+
 const FAQ = [
   {
     q: "Is Chvostíkovo dog daycare or pet sitting?",
@@ -44,20 +86,44 @@ const FAQ = [
     a: "No. We provide daytime care only. Dogs are dropped off in the morning and picked up during our opening hours, Monday to Friday from 7:00 to 17:00.",
   },
   {
-    q: "Is my dog supervised all day?",
-    a: "Yes. At least two experienced caregivers are with the dogs during the day. We supervise play, interactions, rest and changes in energy or mood.",
+    q: "Will my dog ever be left alone without supervision?",
+    a: "No. Dogs are under all-day supervision while they are with us, and at least two experienced caregivers are present with them during the day.",
   },
   {
-    q: "Does my dog have to play all day?",
-    a: "No. A good daycare day includes movement and social time, but also calm periods and rest. We do not let dogs play continuously until they are exhausted.",
+    q: "How does the first visit work?",
+    a: "Every new dog starts with an introductory visit. We get to know your dog, observe how they respond to a new environment, people and other dogs, and introduce them to the group gradually. Some puppies, shy dogs or dogs that need more time may benefit from a few shorter visits before a full daycare day. The introductory visit is free.",
   },
   {
-    q: "What happens before the first daycare day?",
-    a: "Every new dog first has a free introductory visit. We get to know the dog, observe how they respond to the environment, people and other dogs, and then recommend the next step.",
+    q: "How do you keep dogs safe at daycare?",
+    a: "Safety starts with the introductory visit, where we assess whether group daycare is suitable for the dog. During the day we continuously supervise behaviour, play, interactions, energy levels and rest. We step in before situations escalate, regulate activity so dogs are not pushed to exhaustion, and contact the owner if we notice a meaningful change in behaviour, comfort or health.",
   },
   {
-    q: "Which dogs can attend?",
-    a: "We mainly care for medium and large dogs. Dogs must meet our vaccination and parasite-prevention requirements and the group setting must be suitable for them.",
+    q: "Do I need to book in advance?",
+    a: "Yes. Because we keep capacity limited to maintain a safe and comfortable environment, places should be booked in advance. Our regular booking deadline is Sunday at 20:00 for the following week, although individual arrangements may be possible when work schedules make this difficult.",
+  },
+  {
+    q: "Do dogs play all day?",
+    a: "No. Movement, play and social contact are important parts of the day, but so is rest. We alternate active periods with calmer time so dogs can settle and recover instead of playing continuously until they are exhausted.",
+  },
+  {
+    q: "What if my dog has never been in a group of dogs before?",
+    a: "That is one of the reasons we start with an introductory visit. We observe how your dog responds to other dogs, people and the new environment. Lack of previous group experience is not automatically a problem — introductions are gradual and we adapt the process to the individual dog.",
+  },
+  {
+    q: "Do you offer dog pick-up and drop-off?",
+    a: "Yes. We offer a dog taxi service for €5 per one-way trip. Please let us know when booking if you are interested so we can arrange the details individually.",
+  },
+  {
+    q: "Do you accept puppies?",
+    a: "Yes, once the required vaccination schedule is complete, including kennel cough vaccination. For puppies we adapt the introduction, activity and rest to their age and individual needs.",
+  },
+  {
+    q: "Do you provide food during the day?",
+    a: "We do not normally feed dogs during daycare. Because the day includes movement and play, we prefer to reduce the risks associated with activity after feeding. We recommend feeding your dog with enough time before arrival and again after they return home and have had time to rest. If your dog has allergies or dietary restrictions, please bring suitable treats.",
+  },
+  {
+    q: "What are your opening hours?",
+    a: "We are open Monday to Friday from 7:00 to 17:00. You can drop your dog off from 7:00 and pick them up during the afternoon before closing.",
   },
 ];
 
@@ -127,6 +193,25 @@ export const Route = createFileRoute("/en/dog-daycare-kosice")({
 });
 
 function EnglishHeader() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
+  const mobileItems = [
+    ["#care", "How we care"],
+    ["#reviews", "Reviews"],
+    ["#safety", "Safety"],
+    ["#spaces", "Our spaces"],
+    ["#about", "About us"],
+    ["#requirements", "Requirements"],
+    ["#faq", "FAQ"],
+  ];
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/95 px-4 py-2 shadow-soft backdrop-blur-md sm:px-6">
@@ -135,16 +220,49 @@ function EnglishHeader() {
         </a>
         <nav className="hidden items-center gap-6 lg:flex">
           <a href="#care" className="font-display text-xs font-semibold text-forest/80 hover:text-coral">How we care</a>
+          <a href="#reviews" className="font-display text-xs font-semibold text-forest/80 hover:text-coral">Reviews</a>
           <a href="#safety" className="font-display text-xs font-semibold text-forest/80 hover:text-coral">Safety</a>
           <a href="#about" className="font-display text-xs font-semibold text-forest/80 hover:text-coral">About us</a>
-          <a href="#requirements" className="font-display text-xs font-semibold text-forest/80 hover:text-coral">Requirements</a>
           <a href="#faq" className="font-display text-xs font-semibold text-forest/80 hover:text-coral">FAQ</a>
         </nav>
         <div className="flex items-center gap-2">
           <a href="/" className="rounded-full bg-secondary px-3 py-2 font-display text-xs font-semibold text-forest">SK</a>
           <a href="#enquiry" className="btn-coral px-3 py-2 text-[0.7rem] sm:px-5 sm:text-sm">Enquire</a>
+          <button
+            type="button"
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((value) => !value)}
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition-colors hover:bg-coral-soft lg:hidden"
+          >
+            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
         </div>
       </div>
+
+      {menuOpen && (
+        <div className="mx-auto mt-2 max-w-6xl rounded-3xl bg-card/98 p-3 shadow-soft backdrop-blur-md lg:hidden">
+          <nav className="flex flex-col">
+            {mobileItems.map(([href, label]) => (
+              <a
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+          <a
+            href={`tel:${PHONE}`}
+            onClick={() => setMenuOpen(false)}
+            className="btn-coral mt-2 flex w-full items-center justify-center gap-2 py-3 text-sm"
+          >
+            <Phone className="size-4" /> Call us
+          </a>
+        </div>
+      )}
     </header>
   );
 }
@@ -188,20 +306,25 @@ function EnglishDogDaycarePage() {
                   <span className="rounded-full bg-card px-4 py-2 text-sm font-semibold text-forest shadow-card">Mon–Fri · 7:00–17:00</span>
                   <span className="rounded-full bg-card px-4 py-2 text-sm font-semibold text-forest shadow-card">Poľská 6 · Košice</span>
                 </div>
+                <a
+                  href={`tel:${PHONE}`}
+                  className="btn-coral mt-4 hidden items-center gap-2 px-4 py-2 text-sm lg:inline-flex"
+                >
+                  <Phone className="size-4" /> Call us
+                </a>
               </div>
 
               <div id="enquiry" className="scroll-mt-28 rounded-4xl bg-card/95 p-6 shadow-soft backdrop-blur-sm sm:p-8">
-                <p className="text-center font-display text-sm font-semibold tracking-wide text-coral uppercase">No obligation</p>
-                <h2 className="mt-2 text-center text-2xl text-forest">Interested in daycare?</h2>
+                <h2 className="text-center text-2xl text-forest">Interested in daycare?</h2>
                 <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
-                  Fill in the short form. We will get back to you within 24 hours and gladly answer your questions.
+                  Fill in our short, no-obligation form. We will get back to you within 24 hours and gladly go through the details with you.
                 </p>
                 <EnglishInquiryForm />
                 <a
                   href={`tel:${PHONE}`}
-                  className="mt-5 inline-flex w-full items-center justify-center gap-2 font-display text-sm font-semibold text-coral"
+                  className="btn-coral mt-5 flex w-full items-center justify-center gap-2 px-5 py-2.5 text-sm lg:hidden"
                 >
-                  <Phone className="size-4" /> Call us: {PHONE_PRETTY}
+                  <Phone className="size-4" /> Call us
                 </a>
               </div>
             </div>
@@ -225,6 +348,25 @@ function EnglishDogDaycarePage() {
                 </article>
               );
             })}
+          </div>
+        </section>
+
+        <section id="reviews" className="scroll-mt-24 pb-14 sm:pb-20">
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="text-center">
+              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">What owners say</p>
+              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Happy dogs, calmer owners</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-sm text-forest/65">Selected reviews translated from Slovak.</p>
+            </div>
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
+              {REVIEWS_EN.map((review) => (
+                <article key={review.name} className="flex h-full flex-col rounded-4xl bg-card p-7 shadow-card">
+                  <p className="text-base tracking-[0.16em] text-coral" aria-label="5 out of 5 stars">★★★★★</p>
+                  <p className="mt-4 flex-1 leading-relaxed text-forest/80">“{review.text}”</p>
+                  <p className="mt-5 font-display text-sm font-semibold text-forest">{review.name}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -262,10 +404,10 @@ function EnglishDogDaycarePage() {
 
         <section id="safety" className="scroll-mt-24 py-14 sm:py-20">
           <div className="mx-auto max-w-5xl px-4">
-            <div className="rounded-4xl bg-forest p-7 text-cream shadow-soft sm:p-10">
-              <ShieldCheck className="size-8 text-coral-soft" />
-              <h2 className="mt-5 text-3xl text-cream sm:text-4xl">Safety is not an extra. It is the foundation of the day.</h2>
-              <div className="mt-5 space-y-4 leading-relaxed text-cream/85">
+            <div className="rounded-4xl bg-forest p-7 text-center text-cream shadow-soft sm:p-10">
+              <ShieldCheck className="mx-auto size-8 text-coral-soft" />
+              <h2 className="mx-auto mt-5 max-w-3xl text-3xl text-cream sm:text-4xl">Safety is not an extra. It is the foundation of the day.</h2>
+              <div className="mx-auto mt-5 max-w-3xl space-y-4 leading-relaxed text-cream/85">
                 <p>
                   Safety starts before the first full daycare day. Every new dog has an introductory visit so we can observe how they respond to the environment, people and other dogs and whether group daycare is a good fit.
                 </p>
@@ -280,28 +422,30 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <section className="bg-secondary/55 py-14 sm:py-20">
+        <section id="spaces" className="scroll-mt-24 bg-secondary/55 py-14 sm:py-20">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">A day at Chvostíkovo</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Play, company and calm moments</h2>
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Our daycare spaces</p>
+              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Where will your dog spend the day?</h2>
+              <p className="mt-4 leading-relaxed text-forest/80">
+                Chvostíkovo combines indoor rooms with a secure outdoor run, so the day can naturally alternate between movement, social time, calmer moments and rest.
+              </p>
             </div>
             <div className="mt-10 grid gap-5 md:grid-cols-3">
-              <article className="rounded-4xl bg-card p-7 shadow-card sm:p-9">
-                <Sparkles className="size-6 text-coral" />
-                <h3 className="mt-4 text-2xl text-forest">Movement & play</h3>
-                <p className="mt-3 leading-relaxed text-forest/80">Dogs have space to move, play and spend time with suitable canine friends.</p>
-              </article>
-              <article className="rounded-4xl bg-card p-7 shadow-card sm:p-9">
-                <Users className="size-6 text-coral" />
-                <h3 className="mt-4 text-2xl text-forest">Social time</h3>
-                <p className="mt-3 leading-relaxed text-forest/80">We supervise group dynamics and do not expect every dog to interact with every other dog.</p>
-              </article>
-              <article className="rounded-4xl bg-card p-7 shadow-card sm:p-9">
-                <Moon className="size-6 text-coral" />
-                <h3 className="mt-4 text-2xl text-forest">Rest</h3>
-                <p className="mt-3 leading-relaxed text-forest/80">Rest is part of the programme, not an afterthought. Dogs need time to switch off and recover.</p>
-              </article>
+              {SPACE_PHOTOS.map((item) => (
+                <article key={item.title} className="overflow-hidden rounded-4xl bg-card shadow-card">
+                  <img src={item.src} alt={item.alt} loading="lazy" className="h-64 w-full object-cover" />
+                  <div className="p-6">
+                    <h3 className="text-xl text-forest">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-forest/75">{item.text}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="mt-7 text-center">
+              <a href={MAP_LINK} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-2.5 text-sm font-semibold text-forest shadow-card transition hover:bg-secondary">
+                <MapPin className="size-4 text-coral" /> Poľská 6, Košice
+              </a>
             </div>
           </div>
         </section>
@@ -409,30 +553,56 @@ function EnglishDogDaycarePage() {
         </section>
       </main>
 
-      <footer className="bg-forest py-10 text-cream">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-3">
-          <div>
-            <img src={logo} alt="Chvostíkovo" className="h-7 w-auto" />
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-cream/75">Daytime dog daycare in Košice with all-day supervision, safe social contact, movement and rest.</p>
+      <footer className="bg-forest py-10 text-cream/80">
+        <div className="mx-auto grid max-w-6xl gap-7 px-4 text-center sm:grid-cols-[auto_1fr_auto] sm:items-start sm:text-left">
+          <div className="flex justify-center sm:justify-start">
+            <img src={logo} alt="Chvostíkovo" className="h-8 w-auto brightness-0 opacity-90" />
           </div>
-          <div>
-            <h2 className="text-lg text-cream">Contact</h2>
-            <div className="mt-3 space-y-2 text-sm text-cream/80">
-              <p><a href={`tel:${PHONE}`} className="hover:text-coral-soft">{PHONE_PRETTY}</a></p>
-              <p><a href={`mailto:${EMAIL}`} className="hover:text-coral-soft">{EMAIL}</a></p>
-              <p><a href={MAP_LINK} target="_blank" rel="noreferrer" className="hover:text-coral-soft">{ADDRESS.street}, {ADDRESS.city}</a></p>
-            </div>
+
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-sm">
+              Chvostíkovo Dog Daycare · Poľská 6, Košice ·{" "}
+              <a href={`tel:${PHONE}`} className="font-semibold text-cream hover:text-coral-soft">{PHONE_PRETTY}</a>
+            </p>
+            <p className="text-xs">
+              © {new Date().getFullYear()} Chvostíkovo ·{" "}
+              <a href="/en/cookies" className="underline hover:text-cream">Cookies</a>{" "}
+              ·{" "}
+              <a href="/en/privacy" className="underline hover:text-cream">Privacy</a>{" "}
+              ·{" "}
+              <a href="/en/operator-details" className="underline hover:text-cream">Operator details</a>{" "}
+              ·{" "}
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))}
+                className="underline hover:text-cream"
+              >
+                Cookie settings
+              </button>
+            </p>
           </div>
-          <div>
-            <h2 className="text-lg text-cream">Opening hours</h2>
-            <p className="mt-3 text-sm text-cream/80">Monday–Friday<br />7:00–17:00</p>
-            <div className="mt-4 flex gap-4 text-sm">
-              <a href={INSTAGRAM} target="_blank" rel="noreferrer" className="text-coral-soft hover:underline">Instagram</a>
-              <a href={FACEBOOK} target="_blank" rel="noreferrer" className="text-coral-soft hover:underline">Facebook</a>
-            </div>
+
+          <div className="flex items-center justify-center gap-2 sm:justify-end">
+            <a
+              href={INSTAGRAM}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Chvostíkovo on Instagram"
+              className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
+            >
+              <Instagram className="size-5" />
+            </a>
+            <a
+              href={FACEBOOK}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Chvostíkovo on Facebook"
+              className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
+            >
+              <Facebook className="size-5" />
+            </a>
           </div>
         </div>
-        <div className="mx-auto mt-8 max-w-6xl border-t border-cream/15 px-4 pt-5 text-xs text-cream/60">© Chvostíkovo · Košice, Slovakia</div>
       </footer>
     </div>
   );

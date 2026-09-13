@@ -21,6 +21,9 @@ export default defineConfig({
       { path: "/psia-skolka-pre-steniatka" },
       { path: "/strazenie-psov-kosice" },
       { path: "/en/dog-daycare-kosice" },
+      { path: "/en/cookies" },
+      { path: "/en/privacy" },
+      { path: "/en/operator-details" },
     ],
   },
   vite: {
