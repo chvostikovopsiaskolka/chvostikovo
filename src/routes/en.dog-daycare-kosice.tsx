@@ -556,13 +556,13 @@ function EnglishDogDaycarePage() {
       <footer className="bg-forest py-10 text-cream/80">
         <div className="mx-auto grid max-w-6xl gap-7 px-4 text-center sm:grid-cols-[auto_1fr_auto] sm:items-start sm:text-left">
           <div className="flex justify-center sm:justify-start">
-            <img src={logo} alt="Chvostíkovo" className="h-8 w-auto brightness-0 opacity-90" />
+            <img src={logo} alt="Chvostíkovo" className="h-8 w-auto brightness-0 invert opacity-90" />
           </div>
 
           <div className="flex flex-col items-center gap-4 text-center">
             <p className="text-sm">
-              Chvostíkovo Dog Daycare · Poľská 6, Košice ·{" "}
-              <a href={`tel:${PHONE}`} className="font-semibold text-cream hover:text-coral-soft">{PHONE_PRETTY}</a>
+              Chvostíkovo Dog Daycare · Poľská 6, Košice
+              <a href={`tel:${PHONE}`} className="mt-1 block whitespace-nowrap font-semibold text-cream hover:text-coral-soft">{PHONE_PRETTY}</a>
             </p>
             <p className="text-xs">
               © {new Date().getFullYear()} Chvostíkovo ·{" "}
