@@ -24,4 +24,34 @@
   if (pass) {
     pass.body = 'Zákazník vidí aktuálny typ vstupu bez negatívneho formulovania: pri jednorazovom režime sa zobrazí Jednorazový vstup; pri permanentke jej stav a počet vstupov. Zákazník môže požiadať o 10-vstupovú permanentku.';
   }
+
+  const admin = data.sections?.find(section =>
+    String(section.id || '').toLowerCase().includes('admin') ||
+    String(section.title || '').toLowerCase().includes('admin')
+  );
+  if (admin) {
+    let week = admin.items?.find(item =>
+      /týždeň|tyzden|week|zatvorené dni|zatvorene dni/i.test(String(item.title || ''))
+    );
+    if (!week) {
+      week = {
+        title: 'Týždeň a nasledujúci týždeň',
+        subtitle: 'Aktuálny týždeň ostáva viditeľný, ďalší je kompaktne rozbaľovací.',
+        status: 'production',
+        statusLabel: 'Produkcia',
+        categories: ['admin'],
+        body: 'Admin stránka Týždeň zobrazuje pracovné dni aktuálneho obdobia a nasledujúci týždeň v samostatnej rozbaľovacej karte.',
+        bullets: [],
+        tags: ['week', 'reservations']
+      };
+      admin.items = [...(admin.items || []), week];
+    }
+    week.body = 'Admin stránka Týždeň ponecháva aktuálny týždeň priamo viditeľný. Nasledujúci týždeň je samostatná rozbaľovacia karta, aby prehľad nezaberal zbytočne veľa vertikálneho priestoru.';
+    week.bullets = [
+      ...(week.bullets || []).filter(text => !/nasledujúci týždeň.*rozbaľ/i.test(String(text))),
+      'Nasledujúci týždeň je predvolene zbalený a otvorí sa kliknutím na jeho hlavičku.',
+      'Po rozbalení zostávajú zachované rovnaké akcie pre jednotlivé dni – rezervácie, + Pridať, kapacita, zatvorené dni a čakajúce zákaznícke požiadavky.'
+    ];
+    week.tags = [...new Set([...(week.tags || []), 'next-week', 'collapse'])];
+  }
 })();
