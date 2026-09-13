@@ -11,18 +11,21 @@
     dogProfile.bullets = [
       'Foto psa + editor fotografie.',
       'Údaje psíka a očkovania sú spolu v jednom rozbaľovacom bloku.',
-      'Súhlasy a podmienky obsahujú GDPR, Podmienky škôlky, nastavenie upozornení a súhlas so zobrazením mena/fotky.',
+      'Súhlasy a podmienky sú predvolene otvorené; preklik na ochranu osobných údajov a preklik na Podmienky škôlky sú umiestnené priamo pod príslušným riadkom.',
+      'Súhlasy a podmienky obsahujú aj nastavenie upozornení a súhlas so zobrazením mena/fotky.',
+      'Mobilné dátumové polia pri dátume narodenia a očkovaniach sú stabilizované tak, aby nepresahovali šírku svojich stĺpcov.',
       'Vstup a permanentka používajú neutrálne označenie Jednorazový vstup alebo zobrazia stav permanentky.',
+      'Pri aktívnej permanentke zákazník vidí počet vstupov, cenu, dátum kúpy, stav platnosti, zostávajúce vstupy a počet použitých vstupov.',
       'Štatistiky návštev sú rozbaľovacie: návštevy celkovo + jednotlivé mesiace.',
       'Budúce rezervácie sa v Môj psík neduplikujú; zostávajú v rezervačnom prehľade.',
       'Moje kontaktné údaje sú posledná sekcia.'
     ];
-    dogProfile.tags = [...new Set([...(dogProfile.tags || []), 'compact-profile', 'monthly-visits'])];
+    dogProfile.tags = [...new Set([...(dogProfile.tags || []), 'compact-profile', 'monthly-visits', 'legal-links', 'mobile-date-fields'])];
   }
 
   const pass = customer?.items?.find(item => item.title === 'Permanentka');
   if (pass) {
-    pass.body = 'Zákazník vidí aktuálny typ vstupu bez negatívneho formulovania: pri jednorazovom režime sa zobrazí Jednorazový vstup; pri permanentke jej stav a počet vstupov. Zákazník môže požiadať o 10-vstupovú permanentku.';
+    pass.body = 'Zákazník vidí aktuálny typ vstupu bez negatívneho formulovania: pri jednorazovom režime sa zobrazí Jednorazový vstup; pri permanentke počet vstupov, cenu, dátum kúpy, stav platnosti, zostávajúce vstupy a počet použitých vstupov. Zákazník môže požiadať o 10-vstupovú permanentku.';
   }
 
   const admin = data.sections?.find(section =>
