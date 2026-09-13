@@ -11,6 +11,7 @@ const NAV_MOBILE = [
   { href: "#starostlivost", label: "Ako sa postaráme" },
   { href: "#preco", label: "Prečo škôlka" },
   { href: "#o-nas", label: "O nás" },
+  { href: "#uzitocne-informacie", label: "Užitočné informácie" },
   { href: "#podmienky", label: "Podmienky" },
   { href: "#cennik", label: "Cenník" },
   { href: "#faq", label: "Časté otázky" },
