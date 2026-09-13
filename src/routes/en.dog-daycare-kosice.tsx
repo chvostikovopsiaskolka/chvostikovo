@@ -288,7 +288,7 @@ function EnglishDogDaycarePage() {
             <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
               <div className="py-4 text-center lg:py-8 lg:text-left">
                 <p className="mx-auto mb-3 max-w-fit rounded-full bg-white/95 px-4 py-1 font-display text-xs font-bold text-coral-dark shadow-soft lg:mx-0 sm:text-sm">
-                  Dog daycare & daytime dog sitting in Košice
+                  Dog daycare for medium and large dog breeds
                 </p>
                 <h1 className="text-4xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
                   <span className="text-coral-dark">Dog daycare</span> in Košice,
