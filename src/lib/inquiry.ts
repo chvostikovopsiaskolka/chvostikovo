@@ -6,6 +6,16 @@ import { z } from "zod";
  * pre statický build (GitHub Pages).
  */
 
+const attributionSchema = z.object({
+  landing_page: z.string().max(500).optional(),
+  referrer: z.string().max(1000).optional(),
+  traffic_source: z.string().max(200).optional(),
+  traffic_medium: z.string().max(200).optional(),
+  utm_campaign: z.string().max(300).optional(),
+  utm_term: z.string().max(300).optional(),
+  utm_content: z.string().max(300).optional(),
+});
+
 export const shortSchema = z.object({
   typ: z.literal("informacie"),
   consent: z.literal(true),
@@ -13,7 +23,7 @@ export const shortSchema = z.object({
   meno: z.string().min(1).max(200),
   telefon: z.string().min(7).max(60),
   zaujem: z.string().min(1).max(300),
-});
+}).merge(attributionSchema);
 
 export const longSchema = z.object({
   typ: z.literal("prihlaska"),
@@ -28,7 +38,7 @@ export const longSchema = z.object({
   kastrovana: z.string().min(1).max(40),
   duvod: z.string().min(1).max(300),
   viac: z.string().min(1).max(3000),
-});
+}).merge(attributionSchema);
 
 export const inquirySchema = z.discriminatedUnion("typ", [shortSchema, longSchema]);
 
@@ -37,13 +47,28 @@ export type InquiryInput = z.infer<typeof inquirySchema>;
 export const SUPABASE_ENDPOINT =
   "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/web-form-submit";
 
+function attributionFields(data: InquiryInput): Array<{ label: string; value: string }> {
+  return [
+    { label: "Landing page", value: data.landing_page || "" },
+    { label: "Referrer", value: data.referrer || "" },
+    { label: "Traffic source", value: data.traffic_source || "" },
+    { label: "Traffic medium", value: data.traffic_medium || "" },
+    { label: "UTM campaign", value: data.utm_campaign || "" },
+    { label: "UTM term", value: data.utm_term || "" },
+    { label: "UTM content", value: data.utm_content || "" },
+  ];
+}
+
 export function buildFields(data: InquiryInput): Array<{ label: string; value: string }> {
+  const attribution = attributionFields(data);
+
   if (data.typ === "informacie") {
     return [
       { label: "Meno majiteľa", value: data.meno },
       { label: "Telefón", value: data.telefon },
       { label: "O čo máte záujem?", value: data.zaujem },
       { label: "Súhlas so spracovaním osobných údajov", value: "Áno" },
+      ...attribution,
     ];
   }
   return [
@@ -57,6 +82,7 @@ export function buildFields(data: InquiryInput): Array<{ label: string; value: s
     { label: "Ako plánujete využívať škôlku?", value: data.duvod },
     { label: "Viac o psíkovi", value: data.viac },
     { label: "Súhlas so spracovaním osobných údajov", value: "Áno" },
+    ...attribution,
   ];
 }
 
