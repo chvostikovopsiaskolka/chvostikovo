@@ -15,7 +15,7 @@
       'Súhlasy a podmienky obsahujú aj nastavenie upozornení a súhlas so zobrazením mena/fotky.',
       'Mobilné dátumové polia pri dátume narodenia a očkovaniach sú stabilizované tak, aby nepresahovali šírku svojich stĺpcov.',
       'Vstup a permanentka používajú neutrálne označenie Jednorazový vstup alebo zobrazia stav permanentky.',
-      'Pri aktívnej permanentke zákazník vidí počet vstupov, cenu, dátum kúpy, stav platnosti, zostávajúce vstupy a počet použitých vstupov.',
+      'Pri aktívnej permanentke zákazník vidí počet vstupov, dátum kúpy, stav platnosti, zostávajúce vstupy a počet použitých vstupov; cenu už pri zakúpenej permanentke nezobrazujeme.',
       'Štatistiky návštev sú rozbaľovacie: návštevy celkovo + jednotlivé mesiace.',
       'Budúce rezervácie sa v Môj psík neduplikujú; zostávajú v rezervačnom prehľade.',
       'Moje kontaktné údaje sú posledná sekcia.'
@@ -25,7 +25,7 @@
 
   const pass = customer?.items?.find(item => item.title === 'Permanentka');
   if (pass) {
-    pass.body = 'Zákazník vidí aktuálny typ vstupu bez negatívneho formulovania: pri jednorazovom režime sa zobrazí Jednorazový vstup; pri permanentke počet vstupov, cenu, dátum kúpy, stav platnosti, zostávajúce vstupy a počet použitých vstupov. Zákazník môže požiadať o 10-vstupovú permanentku.';
+    pass.body = 'Zákazník vidí aktuálny typ vstupu bez negatívneho formulovania: pri jednorazovom režime sa zobrazí Jednorazový vstup; pri permanentke počet vstupov, dátum kúpy, stav platnosti, zostávajúce vstupy a počet použitých vstupov. Cena sa pri už zakúpenej permanentke nezobrazuje. Zákazník môže požiadať o 10-vstupovú permanentku.';
   }
 
   const admin = data.sections?.find(section =>
@@ -33,6 +33,29 @@
     String(section.title || '').toLowerCase().includes('admin')
   );
   if (admin) {
+    let overview = admin.items?.find(item => /prehľad|prehlad|overview/i.test(String(item.title || '')));
+    if (!overview) {
+      overview = {
+        title: 'Prehľad',
+        subtitle: 'Prioritné požiadavky na jednom mieste.',
+        status: 'production',
+        statusLabel: 'Produkcia',
+        categories: ['admin'],
+        body: 'Prehľad sústreďuje prioritné rezervácie, majiteľov psov a záujem o škôlku do troch rozbaľovacích blokov.',
+        bullets: [],
+        tags: ['overview']
+      };
+      admin.items = [...(admin.items || []), overview];
+    }
+    overview.body = 'Prehľad obsahuje tri hlavné rozbaľovacie bloky – Rezervácie, Majitelia psíkov a Záujem o škôlku – priamo na stránke Prehľad, nie v Štatistikách.';
+    overview.bullets = [
+      ...(overview.bullets || []).filter(text => !/živé počítad|záujm|prihlášk|nová správa|čakajúce rezerv/i.test(String(text))),
+      'Rezervácie zobrazujú živé číslo iba vtedy, keď existuje čakajúca rezervácia alebo čakajúca zmena taxi.',
+      'Majitelia psíkov zobrazujú počet čakajúcich registrácií a samostatný text typu „1 nová správa“ pre neprečítané správy od zákazníkov.',
+      'Záujem o škôlku zobrazuje samostatné badge pre nové záujmy a nové prihlášky; vybavené, reviewed alebo archivované položky sa do počtu nezapočítavajú.'
+    ];
+    overview.tags = [...new Set([...(overview.tags || []), 'live-badges', 'pending-only'])];
+
     let week = admin.items?.find(item =>
       /týždeň|tyzden|week|zatvorené dni|zatvorene dni/i.test(String(item.title || ''))
     );
