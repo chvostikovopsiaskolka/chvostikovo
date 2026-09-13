@@ -1,4 +1,4 @@
-import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Languages, ShieldCheck, Sparkles } from "lucide-react";
 
 const articles = [
   {
@@ -7,6 +7,7 @@ const articles = [
     eyebrow: "Pre najmladších škôlkarov",
     title: "Psia škôlka pre šteniatka",
     text: "Kedy môže šteniatko začať, ako prebieha prvé zoznámenie, prečo je dôležitá správna socializácia aj oddych a ako nastavujeme prvé návštevy.",
+    cta: "Prečítať viac",
   },
   {
     href: "/strazenie-psov-kosice",
@@ -14,6 +15,15 @@ const articles = [
     eyebrow: "Denná starostlivosť v Košiciach",
     title: "Psia škôlka a stráženie psov",
     text: "Ako vyzerá denné stráženie v Chvostíkove, prečo je dôležitý celodenný dohľad, bezpečie, rodinné prostredie, pohyb aj dostatok oddychu.",
+    cta: "Prečítať viac",
+  },
+  {
+    href: "/en/dog-daycare-kosice",
+    Icon: Languages,
+    eyebrow: "Information in English",
+    title: "Dog daycare in Košice",
+    text: "English information about our daytime dog daycare, all-day supervision, admission requirements, opening hours and how to get started.",
+    cta: "Read in English",
   },
 ];
 
@@ -31,12 +41,12 @@ export function UsefulInfo() {
           </p>
         </div>
 
-        <div className="mx-auto mt-9 grid max-w-5xl gap-5 md:grid-cols-2">
-          {articles.map(({ href, Icon, eyebrow, title, text }) => (
+        <div className="mx-auto mt-9 grid max-w-6xl gap-5 md:grid-cols-3">
+          {articles.map(({ href, Icon, eyebrow, title, text, cta }) => (
             <a
               key={href}
               href={href}
-              className="group flex h-full flex-col rounded-4xl bg-card p-7 shadow-card transition-transform hover:-translate-y-1 sm:p-9"
+              className="group flex h-full flex-col rounded-4xl bg-card p-7 shadow-card transition-transform hover:-translate-y-1 sm:p-8"
             >
               <div className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-coral">
                 <Icon className="size-6" />
@@ -44,10 +54,10 @@ export function UsefulInfo() {
               <p className="mt-5 font-display text-sm font-semibold tracking-wide text-coral uppercase">
                 {eyebrow}
               </p>
-              <h3 className="mt-2 text-2xl text-forest sm:text-3xl">{title}</h3>
+              <h3 className="mt-2 text-2xl text-forest">{title}</h3>
               <p className="mt-3 flex-1 leading-relaxed text-forest/80">{text}</p>
               <span className="mt-5 inline-flex items-center gap-2 font-display text-sm font-semibold text-coral">
-                Prečítať viac <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                {cta} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </span>
             </a>
           ))}

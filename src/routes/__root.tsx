@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -89,8 +90,6 @@ import { GoogleAnalytics } from "@/components/site/GoogleAnalytics";
 import { GoogleTagManager } from "@/components/site/GoogleTagManager";
 import { MetaPixel } from "@/components/site/MetaPixel";
 
-
-
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -160,8 +159,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const language = pathname.startsWith("/en/") ? "en" : "sk";
+
   return (
-    <html lang="sk">
+    <html lang={language}>
       <head>
         <HeadContent />
       </head>
@@ -191,4 +193,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-
