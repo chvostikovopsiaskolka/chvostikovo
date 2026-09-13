@@ -49,7 +49,7 @@ export function Hero() {
               Informujte sa o škôlke..
             </h2>
             <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-              Vyplňte nezáväzný formulár. Radi vám odpovieme na vaše otázky do 24 hodín.
+              Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
             </p>
 
             <ShortForm />
@@ -100,7 +100,7 @@ export function Hero() {
               Informujte sa o škôlke..
             </h2>
             <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-              Vyplňte nezáväzný formulár. Radi vám odpovieme na vaše otázky do 24 hodín.
+              Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
             </p>
 
             <ShortForm />
