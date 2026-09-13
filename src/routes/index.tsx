@@ -7,6 +7,7 @@ import { Gallery } from "@/components/site/Gallery";
 import { Reviews, VideoSection } from "@/components/site/Reviews";
 import { Care, Why, About, Partners } from "@/components/site/Story";
 import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
+import { UsefulInfo } from "@/components/site/UsefulInfo";
 import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
@@ -77,6 +78,7 @@ function Index() {
         <FirstVisit />
         <Requirements />
         <About />
+        <UsefulInfo />
         <Partners />
         <PhotoStrip />
         <Pricing />
