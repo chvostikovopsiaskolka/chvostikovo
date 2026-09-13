@@ -1,10 +1,25 @@
 import { useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
+import { getTrafficAttribution } from "@/lib/traffic-source";
+import { trackFormSubmit } from "@/lib/analytics";
 
 function sourceRef() {
   if (typeof window === "undefined") return "/";
   return `${window.location.pathname}${window.location.search}` || "/";
+}
+
+function attributionPayload() {
+  const attribution = getTrafficAttribution();
+  return {
+    landing_page: attribution.landing_page,
+    referrer: attribution.referrer,
+    traffic_source: attribution.source,
+    traffic_medium: attribution.medium,
+    utm_campaign: attribution.campaign,
+    utm_term: attribution.term,
+    utm_content: attribution.content,
+  };
 }
 
 function trackLead(kind: "informacie" | "prihlaska") {
@@ -24,16 +39,26 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
     if (loading) return;
     const form = e.currentTarget;
     const fd = new FormData(form);
+    const source_ref = sourceRef();
+    const attribution = attributionPayload();
     setLoading(true);
     setError(null);
     try {
       await submitInquiry({
         typ: "informacie",
         consent: true,
-        source_ref: sourceRef(),
+        source_ref,
+        ...attribution,
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: String(fd.get("telefon") ?? "").trim(),
         zaujem: String(fd.get("zaujem") ?? ""),
+      });
+      trackFormSubmit({
+        formType: "informacie",
+        sourceRef: source_ref,
+        trafficSource: attribution.traffic_source,
+        trafficMedium: attribution.traffic_medium,
+        landingPage: attribution.landing_page,
       });
       trackLead("informacie");
       setSent(true);
@@ -118,13 +143,16 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
     e.preventDefault();
     if (loading) return;
     const fd = new FormData(e.currentTarget);
+    const source_ref = sourceRef();
+    const attribution = attributionPayload();
     setLoading(true);
     setError(null);
     try {
       await submitInquiry({
         typ: "prihlaska",
         consent: true,
-        source_ref: sourceRef(),
+        source_ref,
+        ...attribution,
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: String(fd.get("telefon") ?? "").trim(),
         pes: String(fd.get("pes") ?? "").trim(),
@@ -136,6 +164,13 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         viac: String(fd.get("viac") ?? "").trim(),
       });
 
+      trackFormSubmit({
+        formType: "prihlaska",
+        sourceRef: source_ref,
+        trafficSource: attribution.traffic_source,
+        trafficMedium: attribution.traffic_medium,
+        landingPage: attribution.landing_page,
+      });
       trackLead("prihlaska");
       setSent(true);
       onSent?.();
