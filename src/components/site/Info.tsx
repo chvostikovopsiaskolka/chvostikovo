@@ -229,9 +229,17 @@ export function Faq() {
                 </span>
               </button>
               {open === i && (
-                <p className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed whitespace-pre-line text-forest/80">
-                  {f.a}
-                </p>
+                <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80">
+                  <p className="whitespace-pre-line">{f.a}</p>
+                  {f.q === "Prijímate aj šteniatka?" && (
+                    <a
+                      href="/psia-skolka-pre-steniatka"
+                      className="mt-4 inline-flex font-display text-sm font-semibold text-coral underline-offset-4 hover:underline"
+                    >
+                      Viac o psej škôlke pre šteniatka →
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           ))}
