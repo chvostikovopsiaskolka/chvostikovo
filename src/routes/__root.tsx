@@ -22,6 +22,7 @@ import {
 } from "@/content/site";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { captureTrafficAttribution } from "@/lib/traffic-source";
 
 function NotFoundComponent() {
   return (
@@ -174,6 +175,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    captureTrafficAttribution();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
