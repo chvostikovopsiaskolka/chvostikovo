@@ -99,17 +99,6 @@ export function Footer() {
             </a>
           </p>
 
-          <div>
-            <p className="font-display text-xs font-semibold tracking-wide text-cream/60 uppercase">
-              Užitočné informácie
-            </p>
-            <div className="mt-2 flex flex-col items-center gap-1.5 text-sm">
-              <Link to="/psia-skolka-pre-steniatka" className="hover:text-cream hover:underline">
-                Psia škôlka pre šteniatka
-              </Link>
-            </div>
-          </div>
-
           <p className="text-xs">
             © {new Date().getFullYear()} Chvostíkovo ·{" "}
             <Link to="/cookies" className="underline hover:text-cream">
