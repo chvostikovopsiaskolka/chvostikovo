@@ -137,8 +137,7 @@ function DogDaycarePage() {
             </div>
 
             <div id="informacie" className="scroll-mt-28 rounded-4xl bg-card p-6 shadow-soft sm:p-8">
-              <p className="text-center font-display text-sm font-semibold tracking-wide text-coral uppercase">Nezáväzne</p>
-              <h2 className="mt-2 text-center text-2xl text-forest">Chcete vedieť, či je škôlka vhodná pre vášho psíka?</h2>
+              <h2 className="text-center text-2xl text-forest">Chcete vedieť, či je škôlka vhodná pre vášho psíka?</h2>
               <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
                 Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
               </p>
@@ -254,9 +253,9 @@ function DogDaycarePage() {
               <ul className="mt-5 space-y-4 text-forest/80">
                 {[
                   "Keď ste v práci alebo vás čaká dlhší deň mimo domu.",
-                  "Keď nechcete, aby psík trávil celý deň sám doma.",
-                  "Keď chcete škôlku využívať pravidelne alebo iba podľa potreby.",
-                  "Keď hľadáte dennú starostlivosť – nie pobytový hotel alebo stráženie cez noc.",
+                  "Keď nechcete, aby psík trávil celý deň sám doma a chcete mu dopriať deň s psími kamarátmi.",
+                  "Keď sa doma nudí, kňučí, vyje alebo ničí veci a počas dňa mu chýba pohyb či podnety.",
+                  "Keď ťažko znáša samotu alebo má separačnú úzkosť – škôlka mu môže zabezpečiť dohľad počas dňa, nenahrádza však individuálnu prácu s odborníkom.",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <Check className="mt-0.5 size-5 shrink-0 text-coral" />
@@ -268,10 +267,10 @@ function DogDaycarePage() {
                 Chvostíkovo je zamerané najmä na stredné a veľké plemená. Vhodnosť pobytu vždy posudzujeme individuálne počas vstupnej návštevy.
               </p>
               <p className="mt-4 text-sm leading-relaxed text-forest/75">
-                Máte doma šteniatko?{" "}
+                Máte doma šteniatko?
                 <a
                   href="/psia-skolka-pre-steniatka"
-                  className="font-display font-semibold text-coral underline-offset-4 hover:underline"
+                  className="mt-1 block font-display font-semibold text-coral underline-offset-4 hover:underline"
                 >
                   Pozrite si, ako nastavujeme prvé návštevy a škôlku pre šteniatka →
                 </a>
