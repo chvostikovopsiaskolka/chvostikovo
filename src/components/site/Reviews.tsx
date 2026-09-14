@@ -46,7 +46,6 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   );
 }
 
-
 function ReviewCarousel() {
   const track = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
@@ -93,7 +92,6 @@ function ReviewCarousel() {
   );
 }
 
-
 export function Reviews() {
   return (
     <section id="recenzie" className="scroll-mt-24 bg-secondary/50 pt-12 pb-16 sm:pt-14 sm:pb-20">
@@ -110,8 +108,29 @@ export function Reviews() {
   );
 }
 
-
 export function VideoSection() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+        if (entry.isIntersecting) {
+          void video.play().catch(() => undefined);
+        } else {
+          video.pause();
+        }
+      },
+      { rootMargin: "200px 0px" },
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="scroll-mt-24 bg-card py-12 sm:py-14">
       <div className="mx-auto max-w-6xl px-4 text-center">
@@ -121,14 +140,14 @@ export function VideoSection() {
         <div className="mt-6 flex justify-center">
           <div className="relative w-full max-w-[320px] overflow-hidden rounded-3xl bg-card shadow-card">
             <video
+              ref={videoRef}
               src={skolkariVideo}
               className="aspect-[9/16] w-full object-cover"
-              autoPlay
               muted
               loop
               playsInline
               controls
-              preload="metadata"
+              preload="none"
               aria-label="Video zo psiej škôlky Chvostíkovo – škôlkári sa tešia do škôlky"
             />
           </div>
