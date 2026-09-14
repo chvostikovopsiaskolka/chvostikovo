@@ -11,6 +11,9 @@ export function Hero() {
         <img
           src={heroDogs}
           alt="Psíky v psej škôlke Chvostíkovo v Košiciach"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
           className="size-full object-cover object-[50%_35%]"
         />
         <div className="absolute inset-0 bg-cream/10" />
