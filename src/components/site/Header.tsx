@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { Menu, X, Phone } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, Package, Phone, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { PHONE } from "@/content/site";
 import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
 
-const NAV_MOBILE = [
+const NAV_MOBILE_BEFORE_ABOUT = [
   { href: "#priestory", label: "Priestory" },
   { href: "#recenzie", label: "Recenzie" },
   { href: "#starostlivost", label: "Ako sa postaráme" },
   { href: "#preco", label: "Prečo škôlka" },
-  { href: "#o-nas", label: "O nás" },
+];
+
+const NAV_MOBILE_AFTER_ABOUT = [
   { href: "#uzitocne-informacie", label: "Užitočné informácie" },
   { href: "#podmienky", label: "Podmienky" },
   { href: "#cennik", label: "Cenník" },
@@ -18,10 +20,12 @@ const NAV_MOBILE = [
   { href: "#kontakt", label: "Kontakt" },
 ];
 
-const NAV_DESKTOP = [
+const NAV_DESKTOP_BEFORE_ABOUT = [
   { href: "#starostlivost", label: "Ako sa postaráme" },
   { href: "#preco", label: "Prečo škôlka" },
-  { href: "#o-nas", label: "O nás" },
+];
+
+const NAV_DESKTOP_AFTER_ABOUT = [
   { href: "#podmienky", label: "Podmienky" },
   { href: "#cennik", label: "Cenník" },
   { href: "#faq", label: "Časté otázky" },
@@ -30,6 +34,8 @@ const NAV_DESKTOP = [
 export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolean }) {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
 
   const sectionHref = (href: string) => (homeSectionLinks ? `/${href}` : href);
   const logoHref = homeSectionLinks ? "/" : "#top";
@@ -41,6 +47,12 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
     };
   }, [menuOpen]);
 
+  const closeMobileMenu = () => {
+    setMenuOpen(false);
+    setAboutOpen(false);
+    setProductsOpen(false);
+  };
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3">
       <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/95 px-4 py-2 shadow-soft backdrop-blur-md sm:px-6">
@@ -49,7 +61,50 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
         </a>
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 lg:flex">
-          {NAV_DESKTOP.map((item) => (
+          {NAV_DESKTOP_BEFORE_ABOUT.map((item) => (
+            <a
+              key={item.href}
+              href={sectionHref(item.href)}
+              className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
+            >
+              {item.label}
+            </a>
+          ))}
+
+          <div className="group relative">
+            <a
+              href={sectionHref("#o-nas")}
+              className="flex items-center gap-1 font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
+            >
+              O nás <ChevronDown className="size-3.5 transition-transform group-hover:rotate-180" />
+            </a>
+            <div className="invisible absolute top-full left-1/2 z-50 w-56 -translate-x-1/2 pt-4 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+              <div className="rounded-3xl bg-card p-2 shadow-soft ring-1 ring-forest/5">
+                <a
+                  href={sectionHref("#o-nas")}
+                  className="block rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
+                >
+                  O nás
+                </a>
+                <a
+                  href="/produkty"
+                  className="flex items-center gap-2 rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
+                >
+                  <Package className="size-4 text-coral" /> Naše produkty
+                </a>
+                <div className="mx-3 my-1 h-px bg-border" />
+                <p className="px-4 pt-2 pb-1 text-[0.65rem] font-bold tracking-widest text-forest/45 uppercase">Vybrať produkt</p>
+                <a
+                  href="/stojan-na-misky-pre-psa"
+                  className="flex items-center justify-between gap-2 rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
+                >
+                  Stojany na misky <ChevronRight className="size-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {NAV_DESKTOP_AFTER_ABOUT.map((item) => (
             <a
               key={item.href}
               href={sectionHref(item.href)}
@@ -89,13 +144,70 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
       </div>
 
       {menuOpen && (
-        <div className="mx-auto mt-2 max-w-6xl rounded-3xl bg-card/98 p-3 shadow-soft backdrop-blur-md lg:hidden">
+        <div className="mx-auto mt-2 max-h-[calc(100vh-5.5rem)] max-w-6xl overflow-y-auto rounded-3xl bg-card/98 p-3 shadow-soft backdrop-blur-md lg:hidden">
           <nav className="flex flex-col">
-            {NAV_MOBILE.map((item) => (
+            {NAV_MOBILE_BEFORE_ABOUT.map((item) => (
               <a
                 key={item.href}
                 href={sectionHref(item.href)}
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMobileMenu}
+                className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
+              >
+                {item.label}
+              </a>
+            ))}
+
+            <button
+              type="button"
+              aria-expanded={aboutOpen}
+              onClick={() => setAboutOpen((value) => !value)}
+              className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
+            >
+              O nás <ChevronDown className={`size-4 transition-transform ${aboutOpen ? "rotate-180" : ""}`} />
+            </button>
+            {aboutOpen && (
+              <div className="mx-2 mb-2 rounded-2xl bg-secondary/45 p-2">
+                <a
+                  href={sectionHref("#o-nas")}
+                  onClick={closeMobileMenu}
+                  className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest hover:bg-card"
+                >
+                  O nás
+                </a>
+                <a
+                  href="/produkty"
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest hover:bg-card"
+                >
+                  <Package className="size-4 text-coral" /> Naše produkty
+                </a>
+                <button
+                  type="button"
+                  aria-expanded={productsOpen}
+                  onClick={() => setProductsOpen((value) => !value)}
+                  className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left font-display text-sm font-semibold text-forest hover:bg-card"
+                >
+                  Vybrať produkt <ChevronDown className={`size-4 transition-transform ${productsOpen ? "rotate-180" : ""}`} />
+                </button>
+                {productsOpen && (
+                  <div className="ml-3 border-l-2 border-coral/20 pl-2">
+                    <a
+                      href="/stojan-na-misky-pre-psa"
+                      onClick={closeMobileMenu}
+                      className="flex items-center justify-between rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest hover:bg-card"
+                    >
+                      Stojany na misky <ChevronRight className="size-4" />
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {NAV_MOBILE_AFTER_ABOUT.map((item) => (
+              <a
+                key={item.href}
+                href={sectionHref(item.href)}
+                onClick={closeMobileMenu}
                 className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
               >
                 {item.label}
@@ -105,14 +217,14 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
           <a
             href="/en/dog-daycare-kosice"
             lang="en"
-            onClick={() => setMenuOpen(false)}
+            onClick={closeMobileMenu}
             className="mt-2 flex w-full items-center justify-center rounded-full bg-secondary px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-coral-soft"
           >
             English information
           </a>
           <a
             href={`tel:${PHONE}`}
-            onClick={() => setMenuOpen(false)}
+            onClick={closeMobileMenu}
             className="btn-coral mt-2 flex w-full items-center justify-center gap-2 py-3 text-sm"
           >
             <Phone className="size-4" /> Zavolajte nám
