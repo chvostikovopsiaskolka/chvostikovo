@@ -248,10 +248,10 @@ function PuppyDaycarePage() {
               <CtaLink />
             </div>
             <p className="mx-auto mt-5 max-w-2xl text-center text-sm leading-relaxed text-forest/75">
-              Chcete si pozrieť aj to, ako funguje bežný deň v Chvostíkove?{" "}
+              Chcete si pozrieť aj to, ako funguje bežný deň v Chvostíkove?
               <a
                 href="/strazenie-psov-kosice"
-                className="font-display font-semibold text-coral underline-offset-4 hover:underline"
+                className="mt-1 block font-display font-semibold text-coral underline-offset-4 hover:underline"
               >
                 Viac o psej škôlke a dennom strážení psov v Košiciach →
               </a>
