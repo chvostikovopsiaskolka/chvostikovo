@@ -67,7 +67,8 @@ export function Gallery() {
                 <img
                   src={item.src}
                   alt={item.alt}
-                  loading={i > 2 ? "lazy" : undefined}
+                  loading="lazy"
+                  decoding="async"
                   className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-forest-deep/85 to-transparent p-4 text-left text-sm font-semibold text-cream">
@@ -148,6 +149,7 @@ export function Gallery() {
             <img
               src={img.src}
               alt={img.alt}
+              decoding="async"
               className="max-h-[80vh] rounded-3xl object-contain shadow-soft"
             />
             <figcaption className="mt-3 font-display text-sm font-semibold text-cream">
