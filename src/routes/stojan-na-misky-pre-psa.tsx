@@ -5,17 +5,16 @@ import {
   Check,
   ChevronRight,
   Droplets,
-  Mail,
   Paintbrush,
-  Phone,
   Ruler,
+  ShoppingBag,
   Sparkles,
-  Type,
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { Collapse } from "@/components/site/Collapse";
-import { EMAIL, PHONE, PHONE_PRETTY } from "@/content/site";
+import { CartDrawer } from "@/components/site/CartDrawer";
+import { addToCart, type LetterColor, type StandColor, type StandSize } from "@/lib/shop";
 import standAloy from "@/assets/products/stand-aloy-dog.webp";
 import standMia from "@/assets/products/stand-mia.webp";
 import standWoody from "@/assets/products/stand-woody-white.webp";
@@ -55,18 +54,28 @@ const FAQ = [
 ];
 
 const GALLERY = [
-  {
-    src: standAloy,
-    alt: "Väčší drevený stojan na misky pre psa pri používaní",
-  },
-  {
-    src: standMia,
-    alt: "Menší drevený stojan na misky pre psa",
-  },
-  {
-    src: standWoody,
-    alt: "Biely drevený stojan na misky s personalizáciou",
-  },
+  { src: standAloy, alt: "Väčší drevený stojan na misky pre psa pri používaní" },
+  { src: standMia, alt: "Menší drevený stojan na misky pre psa" },
+  { src: standWoody, alt: "Biely drevený stojan na misky s personalizáciou" },
+];
+
+const SIZE_OPTIONS: Array<{ value: StandSize; label: string; detail: string }> = [
+  { value: "small", label: "Menší", detail: "cca 40 × 20 cm · menšie misky" },
+  { value: "large", label: "Väčší", detail: "cca 60 × 30 cm · väčšie misky" },
+];
+
+const COLOR_OPTIONS: Array<{ value: StandColor; label: string }> = [
+  { value: "natural", label: "Prírodné drevo" },
+  { value: "dark", label: "Tmavé drevo" },
+  { value: "white", label: "Biela" },
+  { value: "custom", label: "Iná podľa dohody" },
+];
+
+const LETTER_OPTIONS: Array<{ value: LetterColor; label: string }> = [
+  { value: "light", label: "Svetlé drevo" },
+  { value: "black", label: "Čierna" },
+  { value: "white", label: "Biela" },
+  { value: "custom", label: "Iná podľa dohody" },
 ];
 
 export const Route = createFileRoute("/stojan-na-misky-pre-psa")({
@@ -129,12 +138,7 @@ function ProductGallery() {
   return (
     <div>
       <div className="overflow-hidden rounded-4xl bg-secondary shadow-soft">
-        <img
-          src={current.src}
-          alt={current.alt}
-          className="aspect-[4/3] w-full object-cover sm:aspect-[5/4]"
-          fetchPriority="high"
-        />
+        <img src={current.src} alt={current.alt} className="aspect-[4/3] w-full object-cover sm:aspect-[5/4]" fetchPriority="high" />
       </div>
       <div className="mt-3 grid grid-cols-3 gap-3">
         {GALLERY.map((image, index) => (
@@ -144,9 +148,7 @@ function ProductGallery() {
             onClick={() => setActive(index)}
             aria-label={`Zobraziť fotografiu ${index + 1}`}
             aria-pressed={active === index}
-            className={`overflow-hidden rounded-2xl border-2 bg-card transition ${
-              active === index ? "border-coral shadow-card" : "border-transparent opacity-75 hover:opacity-100"
-            }`}
+            className={`overflow-hidden rounded-2xl border-2 bg-card transition ${active === index ? "border-coral shadow-card" : "border-transparent opacity-75 hover:opacity-100"}`}
           >
             <img src={image.src} alt="" className="aspect-[4/3] w-full object-cover" />
           </button>
@@ -157,54 +159,125 @@ function ProductGallery() {
 }
 
 function BowlStandPage() {
+  const [size, setSize] = useState<StandSize>("small");
+  const [color, setColor] = useState<StandColor>("dark");
+  const [dogHeight, setDogHeight] = useState("");
+  const [nameOnStand, setNameOnStand] = useState("");
+  const [letterColor, setLetterColor] = useState<LetterColor>("light");
+  const [cartOpen, setCartOpen] = useState(false);
+  const [configError, setConfigError] = useState("");
+
+  const sizeOption = SIZE_OPTIONS.find((option) => option.value === size)!;
+  const colorOption = COLOR_OPTIONS.find((option) => option.value === color)!;
+  const letterOption = LETTER_OPTIONS.find((option) => option.value === letterColor)!;
+
+  function orderStand() {
+    const height = Number(dogHeight.replace(",", "."));
+    if (!Number.isFinite(height) || height < 10 || height > 120) {
+      setConfigError("Zadajte, prosím, výšku psíka v kohútiku v centimetroch.");
+      return;
+    }
+
+    setConfigError("");
+    addToCart({
+      product_slug: "stojan-na-misky-pre-psa",
+      product_name: "Drevený stojan na misky pre psa",
+      unit_price_eur: 40,
+      quantity: 1,
+      configuration: {
+        size,
+        size_label: `${sizeOption.label} · ${sizeOption.detail}`,
+        color,
+        color_label: colorOption.label,
+        dog_height_cm: height,
+        name_on_stand: nameOnStand.trim(),
+        letter_color: letterColor,
+        letter_color_label: letterOption.label,
+      },
+    });
+    setCartOpen(true);
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
       <main>
-        <section className="relative overflow-hidden pt-28 pb-14 sm:pt-32 sm:pb-20">
+        <section id="konfigurator" className="scroll-mt-24 relative overflow-hidden pt-28 pb-14 sm:pt-32 sm:pb-20">
           <div className="absolute -top-24 -right-24 size-80 rounded-full bg-coral-soft/40 blur-3xl" aria-hidden="true" />
           <div className="absolute -bottom-28 -left-20 size-72 rounded-full bg-secondary blur-3xl" aria-hidden="true" />
           <div className="relative mx-auto max-w-6xl px-4">
             <a href="/produkty" className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-forest/65 transition-colors hover:text-coral">
               <ArrowLeft className="size-4" /> Späť na produkty
             </a>
-            <div className="grid gap-9 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-12">
+            <div className="grid gap-9 lg:grid-cols-[1.02fr_0.98fr] lg:items-start lg:gap-12">
               <ProductGallery />
 
-              <div className="lg:pt-3">
+              <div>
                 <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
                   Drevený stojan na <span className="text-coral-dark">misky pre psa</span>
                 </h1>
-                <p className="mt-5 text-lg leading-relaxed text-forest/80">
-                  Stabilný stojan na dve nerezové misky, ktorý vyrábame ručne a prispôsobujeme konkrétnemu psíkovi. Farebné prevedenie aj personalizáciu doladíme podľa vášho želania a výšku nastavíme podľa výšky psa v kohútiku.
+                <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
+                  Dve nerezové misky, výška prispôsobená psíkovi a prevedenie podľa vášho želania. Vyberte si variant a pridajte stojan do košíka.
                 </p>
-
-                <div className="mt-6 flex items-end gap-3">
+                <div className="mt-5 flex items-end gap-3">
                   <span className="text-sm text-forest/60">Cena</span>
                   <span className="font-display text-4xl font-bold text-forest">40 €</span>
                 </div>
 
-                <div className="mt-6 grid gap-2 sm:grid-cols-2">
-                  {[
-                    [Sparkles, "Misky", "2 nerezové misky sú v cene"],
-                    [Ruler, "Výška na mieru", "Podľa výšky psa v kohútiku"],
-                    [Paintbrush, "Farebné prevedenie", "Farba stojana podľa želania"],
-                    [Type, "Personalizácia", "Meno psíka a farba písmen podľa želania"],
-                  ].map(([Icon, heading, text]) => {
-                    const CardIcon = Icon as typeof Ruler;
-                    return (
-                      <div key={String(heading)} className="rounded-2xl bg-card p-4 shadow-card">
-                        <CardIcon className="size-5 text-coral" />
-                        <h2 className="mt-2 text-base text-forest">{String(heading)}</h2>
-                        <p className="mt-1 text-sm leading-relaxed text-forest/70">{String(text)}</p>
-                      </div>
-                    );
-                  })}
-                </div>
+                <div className="mt-7 rounded-4xl bg-card p-5 shadow-soft sm:p-6">
+                  <div>
+                    <p className="font-display text-sm font-bold text-forest">1. Rozmer stojana</p>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {SIZE_OPTIONS.map((option) => (
+                        <button key={option.value} type="button" onClick={() => setSize(option.value)} className={`rounded-2xl border-2 p-3 text-left transition ${size === option.value ? "border-coral bg-coral-soft/25" : "border-forest/10 bg-background"}`}>
+                          <span className="font-display text-sm font-bold text-forest">{option.label}</span>
+                          <span className="mt-1 block text-xs leading-relaxed text-forest/60">{option.detail}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-                <a href="#objednat" className="btn-coral mt-7 inline-flex items-center gap-2">
-                  Mám záujem o stojan <ChevronRight className="size-4" />
-                </a>
+                  <div className="mt-5">
+                    <p className="font-display text-sm font-bold text-forest">2. Farba stojana</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {COLOR_OPTIONS.map((option) => (
+                        <button key={option.value} type="button" onClick={() => setColor(option.value)} className={`rounded-full border-2 px-3 py-2 text-xs font-semibold transition ${color === option.value ? "border-coral bg-coral-soft/25 text-forest" : "border-forest/10 bg-background text-forest/70"}`}>
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <label className="mt-5 block font-display text-sm font-bold text-forest">
+                    3. Výška psíka v kohútiku *
+                    <div className="relative mt-2">
+                      <input value={dogHeight} onChange={(event) => setDogHeight(event.target.value)} inputMode="decimal" placeholder="napr. 58" className="w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 pr-12 font-sans font-normal outline-none focus:border-coral" />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-forest/50">cm</span>
+                    </div>
+                  </label>
+
+                  <label className="mt-5 block font-display text-sm font-bold text-forest">
+                    4. Meno na stojane
+                    <input value={nameOnStand} onChange={(event) => setNameOnStand(event.target.value.slice(0, 24))} placeholder="napr. Bella" className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral" />
+                    <span className="mt-1 block font-sans text-xs font-normal text-forest/50">Ak personalizáciu nechcete, nechajte pole prázdne.</span>
+                  </label>
+
+                  <div className="mt-5">
+                    <p className="font-display text-sm font-bold text-forest">5. Farba písmen</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {LETTER_OPTIONS.map((option) => (
+                        <button key={option.value} type="button" onClick={() => setLetterColor(option.value)} className={`rounded-full border-2 px-3 py-2 text-xs font-semibold transition ${letterColor === option.value ? "border-coral bg-coral-soft/25 text-forest" : "border-forest/10 bg-background text-forest/70"}`}>
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {configError && <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{configError}</p>}
+                  <button type="button" onClick={orderStand} className="btn-coral mt-6 flex w-full items-center justify-center gap-2">
+                    <ShoppingBag className="size-4" /> Objednať stojan
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -215,9 +288,7 @@ function BowlStandPage() {
             <div className="mx-auto max-w-3xl text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Dve veľkosti</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Pre menších aj väčších psíkov</h2>
-              <p className="mt-4 leading-relaxed text-forest/80">
-                Nechceme jednou univerzálnou veľkosťou riešiť každého psa. Vyberieme vhodný pôdorys a samotnú výšku stojana potom prispôsobíme podľa psíka.
-              </p>
+              <p className="mt-4 leading-relaxed text-forest/80">Nechceme jednou univerzálnou veľkosťou riešiť každého psa. Vyberiete vhodný pôdorys a samotnú výšku stojana prispôsobíme podľa psíka.</p>
             </div>
 
             <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -226,9 +297,7 @@ function BowlStandPage() {
                 <div className="p-7">
                   <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">Menšia verzia</p>
                   <h3 className="mt-2 text-2xl text-forest">cca 40 × 20 cm</h3>
-                  <p className="mt-3 leading-relaxed text-forest/75">
-                    Menší stojan s menšími nerezovými miskami. Výšku nôh prispôsobujeme konkrétnemu psíkovi.
-                  </p>
+                  <p className="mt-3 leading-relaxed text-forest/75">Menší stojan s menšími nerezovými miskami. Výšku nôh prispôsobujeme konkrétnemu psíkovi.</p>
                 </div>
               </article>
               <article className="overflow-hidden rounded-4xl bg-card shadow-card">
@@ -236,9 +305,7 @@ function BowlStandPage() {
                 <div className="p-7">
                   <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">Väčšia verzia</p>
                   <h3 className="mt-2 text-2xl text-forest">cca 60 × 30 cm</h3>
-                  <p className="mt-3 leading-relaxed text-forest/75">
-                    Väčší pôdorys a väčšie nerezové misky pre stredné a veľké plemená. Aj tu je výška individuálna.
-                  </p>
+                  <p className="mt-3 leading-relaxed text-forest/75">Väčší pôdorys a väčšie nerezové misky pre stredné a veľké plemená. Aj tu je výška individuálna.</p>
                 </div>
               </article>
             </div>
@@ -251,9 +318,7 @@ function BowlStandPage() {
               <div>
                 <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Praktický každý deň</p>
                 <h2 className="section-title mt-2 text-3xl sm:text-4xl">Prečo stojan na misky?</h2>
-                <p className="mt-4 leading-relaxed text-forest/80">
-                  Stojan drží misky stabilne na jednom mieste a pomáha udržať kŕmny kút prehľadnejší. Výška sa dá prispôsobiť konkrétnemu psíkovi a vyberateľné nerezové misky sa jednoducho čistia.
-                </p>
+                <p className="mt-4 leading-relaxed text-forest/80">Stojan drží misky stabilne na jednom mieste a pomáha udržať kŕmny kút prehľadnejší. Výška sa dá prispôsobiť konkrétnemu psíkovi a vyberateľné nerezové misky sa jednoducho čistia.</p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 {[
@@ -282,12 +347,8 @@ function BowlStandPage() {
               <p className="font-display text-sm font-semibold tracking-wide text-coral-soft uppercase">Ručná výroba</p>
               <h2 className="mt-2 text-3xl text-cream sm:text-4xl">Každý stojan prejde našimi rukami</h2>
               <div className="mt-5 space-y-4 leading-relaxed text-cream/85">
-                <p>
-                  Stojany nevyrábame ako anonymný sériový produkt. Každý kus skladáme a dokončujeme ručne, preto vieme upraviť jeho výšku, farebné prevedenie aj personalizáciu.
-                </p>
-                <p>
-                  Používame drevo a povrch stojana ošetrujeme tak, aby sa dal jednoducho udržiavať pri bežnom používaní okolo vody a krmiva. Dve nerezové misky sú súčasťou stojana.
-                </p>
+                <p>Stojany nevyrábame ako anonymný sériový produkt. Každý kus skladáme a dokončujeme ručne, preto vieme upraviť jeho výšku, farebné prevedenie aj personalizáciu.</p>
+                <p>Používame drevo a povrch stojana ošetrujeme tak, aby sa dal jednoducho udržiavať pri bežnom používaní okolo vody a krmiva. Dve nerezové misky sú súčasťou stojana.</p>
               </div>
             </div>
             <img src={standWoody} alt="Biely ručne vyrábaný stojan na misky" loading="lazy" className="h-80 w-full rounded-4xl object-cover shadow-soft" />
@@ -299,9 +360,7 @@ function BowlStandPage() {
             <div className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Naše realizácie</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Spokojní štvornohí klienti</h2>
-              <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-forest/75">
-                Niekoľko hotových prevedení. Ďalšie farby a realizácie budeme postupne dopĺňať.
-              </p>
+              <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-forest/75">Niekoľko hotových prevedení. Ďalšie farby a realizácie budeme postupne dopĺňať.</p>
             </div>
             <div className="mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {GALLERY.map((image) => (
@@ -313,48 +372,12 @@ function BowlStandPage() {
           </div>
         </section>
 
-        <section id="objednat" className="scroll-mt-28 bg-secondary/55 py-14 sm:py-20">
-          <div className="mx-auto max-w-5xl px-4">
-            <div className="rounded-4xl bg-card p-7 shadow-soft sm:p-10">
-              <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-                <div>
-                  <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Máte záujem?</p>
-                  <h2 className="section-title mt-2 text-3xl sm:text-4xl">Stojan vyrobíme pre vášho psíka</h2>
-                  <p className="mt-4 leading-relaxed text-forest/80">
-                    Pri objednávke nám napíšte, o akú veľkosť máte záujem, výšku psíka v kohútiku, želanú farbu stojana, meno a prípadne farbu písmen. Prevedenie a termín si spolu potvrdíme pred výrobou.
-                  </p>
-                  <div className="mt-5 grid gap-2 text-sm text-forest/75 sm:grid-cols-2">
-                    {[
-                      "Výška psa v kohútiku",
-                      "Menšia alebo väčšia verzia",
-                      "Farba stojana",
-                      "Meno a farba písmen",
-                    ].map((item) => (
-                      <span key={item} className="flex items-center gap-2 rounded-2xl bg-secondary px-4 py-3">
-                        <Check className="size-4 shrink-0 text-coral" /> {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="rounded-4xl bg-background p-6 text-center shadow-card sm:p-8">
-                  <p className="font-display text-lg font-bold text-forest">Objednávku zatiaľ dohodneme osobne</p>
-                  <p className="mt-2 text-sm leading-relaxed text-forest/65">
-                    Napíšte nám e-mail alebo zavolajte. Následne si potvrdíme všetky rozmery a prevedenie.
-                  </p>
-                  <div className="mt-5 space-y-3">
-                    <a href={`mailto:${EMAIL}?subject=Stojan%20na%20misky`} className="btn-coral flex w-full items-center justify-center gap-2">
-                      <Mail className="size-4" /> Napísať e-mail
-                    </a>
-                    <a href={`tel:${PHONE}`} className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-forest/15 px-5 py-3 font-display text-sm font-semibold text-forest transition-colors hover:border-coral hover:text-coral">
-                      <Phone className="size-4" /> {PHONE_PRETTY}
-                    </a>
-                  </div>
-                  <p className="mt-4 text-xs leading-relaxed text-forest/55">
-                    Vlastný objednávkový systém s konfiguráciou produktu pripravujeme ako ďalší krok.
-                  </p>
-                </div>
-              </div>
-            </div>
+        <section className="bg-secondary/55 py-12 sm:py-16">
+          <div className="mx-auto max-w-4xl px-4 text-center">
+            <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Vytvorte si svoj stojan</p>
+            <h2 className="section-title mt-2 text-3xl sm:text-4xl">Vyberte si prevedenie a objednajte</h2>
+            <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-forest/75">Rozmer, farbu, výšku psíka aj personalizáciu si nastavíte priamo hore pri produkte.</p>
+            <a href="#konfigurator" className="btn-coral mt-6 inline-flex items-center gap-2">Objednať <ChevronRight className="size-4" /></a>
           </div>
         </section>
 
@@ -366,15 +389,14 @@ function BowlStandPage() {
             </div>
             <div className="mt-9 space-y-3">
               {FAQ.map((item) => (
-                <Collapse key={item.q} title={item.q}>
-                  <p>{item.a}</p>
-                </Collapse>
+                <Collapse key={item.q} title={item.q}><p>{item.a}</p></Collapse>
               ))}
             </div>
           </div>
         </section>
       </main>
       <Footer />
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   );
 }
