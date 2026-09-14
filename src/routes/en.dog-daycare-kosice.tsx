@@ -21,6 +21,7 @@ import heroDogs from "@/assets/hero-dogs.jpg";
 import teamDogs from "@/assets/team-dogs.jpg";
 import { EnglishInquiryForm } from "@/components/site/EnglishInquiryForm";
 import { Collapse } from "@/components/site/Collapse";
+import { InfoTicker } from "@/components/site/InfoTicker";
 import {
   ADDRESS,
   EMAIL,
@@ -330,6 +331,10 @@ function EnglishDogDaycarePage() {
             </div>
           </div>
         </section>
+
+        <div className="hidden lg:block">
+          <InfoTicker language="en" />
+        </div>
 
         <section className="py-10 sm:py-14">
           <div className="mx-auto grid max-w-6xl gap-3 px-4 sm:grid-cols-2 lg:grid-cols-4">
