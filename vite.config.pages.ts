@@ -20,6 +20,8 @@ export default defineConfig({
       { path: "/udaje-prevadzkovatela" },
       { path: "/psia-skolka-pre-steniatka" },
       { path: "/strazenie-psov-kosice" },
+      { path: "/produkty" },
+      { path: "/stojan-na-misky-pre-psa" },
       { path: "/en/dog-daycare-kosice" },
       { path: "/en/cookies" },
       { path: "/en/privacy" },
