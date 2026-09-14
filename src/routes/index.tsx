@@ -48,10 +48,7 @@ export const Route = createFileRoute("/")({
           mainEntity: FAQ.map((f) => ({
             "@type": "Question",
             name: f.q,
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: f.a,
-            },
+            acceptedAnswer: { "@type": "Answer", text: f.a },
           })),
         }),
       },
@@ -79,12 +76,12 @@ function Index() {
         <FirstVisit />
         <Requirements />
         <About />
-        <ProductSection />
-        <UsefulInfo />
-        <Partners />
-        <PhotoStrip />
         <Pricing />
         <InstagramFeed />
+        <Partners />
+        <ProductSection />
+        <UsefulInfo />
+        <PhotoStrip />
         <Contact />
       </main>
       <Footer />
