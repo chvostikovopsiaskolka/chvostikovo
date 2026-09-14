@@ -5,7 +5,8 @@ export function ProductPageEnhancements() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   useEffect(() => {
-    if (pathname !== "/stojan-na-misky-pre-psa") return;
+    const normalizedPathname = pathname.replace(/\/+$/, "") || "/";
+    if (normalizedPathname !== "/stojan-na-misky-pre-psa") return;
 
     let cancelled = false;
     let retryTimer: number | undefined;
@@ -24,7 +25,7 @@ export function ProductPageEnhancements() {
       const options = orderButton?.parentElement as HTMLElement | null;
 
       if (!section || !options) {
-        if (attempts++ < 20) retryTimer = window.setTimeout(setup, 100);
+        if (attempts++ < 30) retryTimer = window.setTimeout(setup, 100);
         return;
       }
 
