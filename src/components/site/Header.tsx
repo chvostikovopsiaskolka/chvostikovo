@@ -4,7 +4,6 @@ import logo from "@/assets/logo.png";
 import { PHONE } from "@/content/site";
 import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
-import { CartLink } from "./CartLink";
 
 const NAV_MOBILE_BEFORE_ABOUT = [
   { href: "#priestory", label: "Priestory" },
@@ -97,7 +96,6 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-3">
-          <CartLink />
           <a href="/en/dog-daycare-kosice" lang="en" aria-label="English information" className="inline-flex rounded-full bg-secondary px-2.5 py-2 font-display text-[0.68rem] font-semibold text-forest transition-colors hover:bg-coral-soft sm:px-3 sm:text-xs">EN</a>
           <button type="button" onClick={() => setOpen(true)} className="btn-coral px-3 py-2 text-[0.65rem] leading-none whitespace-nowrap sm:px-6 sm:py-3 sm:text-sm">Prihláška do škôlky</button>
           <button type="button" aria-label="Otvoriť menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition-colors hover:bg-coral-soft lg:hidden">
@@ -147,7 +145,6 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
             {NAV_MOBILE_AFTER_INFO.map((item) => (
               <a key={item.href} href={sectionHref(item.href)} onClick={closeMobileMenu} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
             ))}
-            <CartLink mobile />
           </nav>
           <a href={`tel:${PHONE}`} onClick={closeMobileMenu} className="btn-coral mt-2 flex w-full items-center justify-center gap-2 py-3 text-sm"><Phone className="size-4" /> Zavolajte nám</a>
         </div>
