@@ -267,6 +267,15 @@ function DogDaycarePage() {
               <p className="mt-6 rounded-3xl bg-secondary p-5 text-sm leading-relaxed text-forest/85">
                 Chvostíkovo je zamerané najmä na stredné a veľké plemená. Vhodnosť pobytu vždy posudzujeme individuálne počas vstupnej návštevy.
               </p>
+              <p className="mt-4 text-sm leading-relaxed text-forest/75">
+                Máte doma šteniatko?{" "}
+                <a
+                  href="/psia-skolka-pre-steniatka"
+                  className="font-display font-semibold text-coral underline-offset-4 hover:underline"
+                >
+                  Pozrite si, ako nastavujeme prvé návštevy a škôlku pre šteniatka →
+                </a>
+              </p>
             </div>
           </div>
         </section>
