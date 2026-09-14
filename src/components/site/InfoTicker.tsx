@@ -1,23 +1,44 @@
 interface InfoTickerProps {
   className?: string;
   compact?: boolean;
+  language?: "sk" | "en";
 }
 
-const ITEMS = [
-  { icon: "★★★★★", text: "5.0 na Google zo 41 hodnotení", accent: true },
-  { text: "Viac ako 150 spokojných psíkov" },
-  { icon: "🚕", text: "Vyzdvihnutie / dovoz psíka" },
-  { icon: "📍", text: "Poľská 6" },
-  { icon: "✅", text: "Úvodná návšteva zadarmo" },
-  { text: "Aktívny deň" },
-  { text: "Celodenný dohľad" },
-  { text: "Vlastný výbeh" },
-];
+const ITEMS = {
+  sk: [
+    { icon: "★★★★★", text: "5.0 na Google zo 41 hodnotení", accent: true },
+    { text: "Viac ako 150 spokojných psíkov" },
+    { icon: "🚕", text: "Vyzdvihnutie / dovoz psíka" },
+    { icon: "📍", text: "Poľská 6" },
+    { icon: "✅", text: "Úvodná návšteva zadarmo" },
+    { text: "Aktívny deň" },
+    { text: "Celodenný dohľad" },
+    { text: "Vlastný výbeh" },
+  ],
+  en: [
+    { icon: "★★★★★", text: "5.0 on Google from 41 reviews", accent: true },
+    { text: "More than 150 happy dogs" },
+    { icon: "🚕", text: "Dog pick-up / drop-off" },
+    { icon: "📍", text: "Poľská 6" },
+    { icon: "✅", text: "Free introductory visit" },
+    { text: "Active day" },
+    { text: "All-day supervision" },
+    { text: "Private outdoor run" },
+  ],
+} as const;
 
-function TickerItems({ hidden = false, compact = false }: { hidden?: boolean; compact?: boolean }) {
+function TickerItems({
+  items,
+  hidden = false,
+  compact = false,
+}: {
+  items: readonly { icon?: string; text: string; accent?: boolean }[];
+  hidden?: boolean;
+  compact?: boolean;
+}) {
   return (
     <div className="flex shrink-0 items-center" aria-hidden={hidden || undefined}>
-      {ITEMS.map((item) => (
+      {items.map((item) => (
         <div key={item.text} className="flex shrink-0 items-center">
           <span className="mx-4 text-coral/60" aria-hidden="true">
             •
@@ -41,13 +62,16 @@ function TickerItems({ hidden = false, compact = false }: { hidden?: boolean; co
   );
 }
 
-export function InfoTicker({ className = "", compact = false }: InfoTickerProps) {
+export function InfoTicker({ className = "", compact = false, language = "sk" }: InfoTickerProps) {
+  const items = ITEMS[language];
+  const ariaLabel = language === "en" ? "Chvostíkovo dog daycare highlights" : "Výhody psej škôlky Chvostíkovo";
+
   return (
-    <section className={`w-full overflow-hidden bg-card ${className}`} aria-label="Výhody psej škôlky Chvostíkovo">
+    <section className={`w-full overflow-hidden bg-card ${className}`} aria-label={ariaLabel}>
       <div className={`group flex items-center overflow-hidden border-y border-border bg-card ${compact ? "h-9" : "h-11 sm:h-12"}`}>
         <div className="info-ticker-track flex w-max items-center lg:group-hover:[animation-play-state:paused]">
-          <TickerItems compact={compact} />
-          <TickerItems hidden compact={compact} />
+          <TickerItems items={items} compact={compact} />
+          <TickerItems items={items} hidden compact={compact} />
         </div>
       </div>
     </section>
