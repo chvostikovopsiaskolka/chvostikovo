@@ -28,7 +28,6 @@ export function ProductPageEnhancements() {
         return;
       }
 
-      // Keep every product photo in exactly the same 4:3 frame on mobile and desktop.
       const mainImage = section.querySelector<HTMLImageElement>('img[fetchpriority="high"]');
       const mainFrame = mainImage?.parentElement as HTMLElement | null;
       if (mainImage && mainFrame) {
