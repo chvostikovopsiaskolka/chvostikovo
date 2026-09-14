@@ -5,12 +5,12 @@ import {
   Check,
   ChevronRight,
   Droplets,
-  Hammer,
   Mail,
   Paintbrush,
   Phone,
   Ruler,
   Sparkles,
+  Type,
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
@@ -57,18 +57,15 @@ const FAQ = [
 const GALLERY = [
   {
     src: standAloy,
-    alt: "Veľký drevený stojan na misky pre psa Aloy pri používaní",
-    label: "Aloy – väčšia verzia",
+    alt: "Väčší drevený stojan na misky pre psa pri používaní",
   },
   {
     src: standMia,
-    alt: "Menší drevený stojan na misky pre psa Mia",
-    label: "Mia – menšia verzia",
+    alt: "Menší drevený stojan na misky pre psa",
   },
   {
     src: standWoody,
-    alt: "Biely drevený stojan na misky s menom Woody",
-    label: "Woody – biele prevedenie",
+    alt: "Biely drevený stojan na misky s personalizáciou",
   },
 ];
 
@@ -105,7 +102,7 @@ export const Route = createFileRoute("/stojan-na-misky-pre-psa")({
                 "@type": "Offer",
                 url: PAGE_URL,
                 priceCurrency: "EUR",
-                price: "35",
+                price: "40",
                 availability: "https://schema.org/InStock",
               },
             },
@@ -142,10 +139,10 @@ function ProductGallery() {
       <div className="mt-3 grid grid-cols-3 gap-3">
         {GALLERY.map((image, index) => (
           <button
-            key={image.label}
+            key={image.alt}
             type="button"
             onClick={() => setActive(index)}
-            aria-label={`Zobraziť: ${image.label}`}
+            aria-label={`Zobraziť fotografiu ${index + 1}`}
             aria-pressed={active === index}
             className={`overflow-hidden rounded-2xl border-2 bg-card transition ${
               active === index ? "border-coral shadow-card" : "border-transparent opacity-75 hover:opacity-100"
@@ -155,7 +152,6 @@ function ProductGallery() {
           </button>
         ))}
       </div>
-      <p className="mt-3 text-center text-sm font-semibold text-forest/65">{current.label}</p>
     </div>
   );
 }
@@ -176,32 +172,30 @@ function BowlStandPage() {
               <ProductGallery />
 
               <div className="lg:pt-3">
-                <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Ručná výroba Chvostíkovo</p>
-                <h1 className="mt-2 text-4xl leading-[1.06] text-forest sm:text-5xl">
+                <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
                   Drevený stojan na <span className="text-coral-dark">misky pre psa</span>
                 </h1>
                 <p className="mt-5 text-lg leading-relaxed text-forest/80">
-                  Stabilný stojan na dve nerezové misky, ktorý vyrábame ručne a prispôsobujeme konkrétnemu psíkovi. Vyberiete si veľkosť, farebné prevedenie a meno – výšku nastavíme podľa výšky psa v kohútiku.
+                  Stabilný stojan na dve nerezové misky, ktorý vyrábame ručne a prispôsobujeme konkrétnemu psíkovi. Farebné prevedenie aj personalizáciu doladíme podľa vášho želania a výšku nastavíme podľa výšky psa v kohútiku.
                 </p>
 
                 <div className="mt-6 flex items-end gap-3">
-                  <span className="text-sm text-forest/60">Cena od</span>
-                  <span className="font-display text-4xl font-bold text-forest">35 €</span>
+                  <span className="text-sm text-forest/60">Cena</span>
+                  <span className="font-display text-4xl font-bold text-forest">40 €</span>
                 </div>
-                <p className="mt-1 text-sm text-forest/60">Konečná cena závisí od veľkosti a zvoleného prevedenia.</p>
 
-                <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                <div className="mt-6 grid gap-2 sm:grid-cols-2">
                   {[
-                    [Ruler, "Rozmery", "Menší cca 40 × 20 cm · väčší cca 60 × 30 cm"],
                     [Sparkles, "Misky", "2 nerezové misky sú v cene"],
-                    [Paintbrush, "Prevedenie", "Farba stojana aj písmen podľa dohody"],
-                    [Hammer, "Výška", "Na mieru podľa výšky psa v kohútiku"],
+                    [Ruler, "Výška na mieru", "Podľa výšky psa v kohútiku"],
+                    [Paintbrush, "Farebné prevedenie", "Farba stojana podľa želania"],
+                    [Type, "Personalizácia", "Meno psíka a farba písmen podľa želania"],
                   ].map(([Icon, heading, text]) => {
                     const CardIcon = Icon as typeof Ruler;
                     return (
-                      <div key={String(heading)} className="rounded-3xl bg-card p-5 shadow-card">
+                      <div key={String(heading)} className="rounded-2xl bg-card p-4 shadow-card">
                         <CardIcon className="size-5 text-coral" />
-                        <h2 className="mt-3 text-base text-forest">{String(heading)}</h2>
+                        <h2 className="mt-2 text-base text-forest">{String(heading)}</h2>
                         <p className="mt-1 text-sm leading-relaxed text-forest/70">{String(text)}</p>
                       </div>
                     );
@@ -228,20 +222,20 @@ function BowlStandPage() {
 
             <div className="mt-10 grid gap-6 md:grid-cols-2">
               <article className="overflow-hidden rounded-4xl bg-card shadow-card">
-                <img src={standMia} alt="Mia - menšia verzia stojana na misky" loading="lazy" className="h-72 w-full object-cover" />
+                <img src={standMia} alt="Menšia verzia dreveného stojana na misky" loading="lazy" className="h-72 w-full object-cover" />
                 <div className="p-7">
                   <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">Menšia verzia</p>
-                  <h3 className="mt-2 text-2xl text-forest">Mia · cca 40 × 20 cm</h3>
+                  <h3 className="mt-2 text-2xl text-forest">cca 40 × 20 cm</h3>
                   <p className="mt-3 leading-relaxed text-forest/75">
                     Menší stojan s menšími nerezovými miskami. Výšku nôh prispôsobujeme konkrétnemu psíkovi.
                   </p>
                 </div>
               </article>
               <article className="overflow-hidden rounded-4xl bg-card shadow-card">
-                <img src={standAloy} alt="Aloy - väčšia verzia stojana na misky" loading="lazy" className="h-72 w-full object-cover" />
+                <img src={standAloy} alt="Väčšia verzia dreveného stojana na misky" loading="lazy" className="h-72 w-full object-cover" />
                 <div className="p-7">
                   <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">Väčšia verzia</p>
-                  <h3 className="mt-2 text-2xl text-forest">Aloy · cca 60 × 30 cm</h3>
+                  <h3 className="mt-2 text-2xl text-forest">cca 60 × 30 cm</h3>
                   <p className="mt-3 leading-relaxed text-forest/75">
                     Väčší pôdorys a väčšie nerezové misky pre stredné a veľké plemená. Aj tu je výška individuálna.
                   </p>
@@ -266,7 +260,7 @@ function BowlStandPage() {
                   [Check, "Stabilné misky", "Pevná drevená konštrukcia obmedzuje posúvanie misiek pri jedení a pití."],
                   [Droplets, "Jednoduchšia údržba", "Povrch je ošetrený pre jednoduchšie utieranie bežnej vody a nečistôt okolo misiek."],
                   [Ruler, "Výška podľa psa", "Pri výrobe vychádzame z výšky psíka v kohútiku, nie z jedného univerzálneho rozmeru."],
-                  [Sparkles, "Vlastný originál", "Farbu stojana, meno aj farbu písmen vieme zladiť podľa dohody."],
+                  [Sparkles, "Vlastný originál", "Farbu stojana, meno aj farbu písmen vieme zladiť podľa vášho želania."],
                 ].map(([Icon, heading, text]) => {
                   const CardIcon = Icon as typeof Check;
                   return (
@@ -296,7 +290,7 @@ function BowlStandPage() {
                 </p>
               </div>
             </div>
-            <img src={standWoody} alt="Biely ručne vyrábaný stojan na misky Woody" loading="lazy" className="h-80 w-full rounded-4xl object-cover shadow-soft" />
+            <img src={standWoody} alt="Biely ručne vyrábaný stojan na misky" loading="lazy" className="h-80 w-full rounded-4xl object-cover shadow-soft" />
           </div>
         </section>
 
@@ -311,9 +305,8 @@ function BowlStandPage() {
             </div>
             <div className="mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {GALLERY.map((image) => (
-                <figure key={image.label} className="w-[82%] shrink-0 snap-center overflow-hidden rounded-4xl bg-card shadow-card sm:w-[46%] lg:w-[31.5%]">
+                <figure key={image.alt} className="w-[82%] shrink-0 snap-center overflow-hidden rounded-4xl bg-card shadow-card sm:w-[46%] lg:w-[31.5%]">
                   <img src={image.src} alt={image.alt} loading="lazy" className="h-72 w-full object-cover" />
-                  <figcaption className="p-5 font-display font-semibold text-forest">{image.label}</figcaption>
                 </figure>
               ))}
             </div>
