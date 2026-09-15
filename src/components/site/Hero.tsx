@@ -25,7 +25,7 @@ export function Hero() {
         {/* Mobile layout */}
         <div className="lg:hidden">
           <p className="mx-auto mb-4 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm">
-            Denná starostlivosť o stredných a veľkých psíkov v Košiciach
+            Denná starostlivosť o stredných a veľkých psíkov
           </p>
 
           <h1 className="text-[34px] leading-[1.05] text-forest sm:text-5xl">
@@ -70,7 +70,7 @@ export function Hero() {
         <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
           <div className="flex min-w-0 flex-col lg:py-6">
             <h1 className="order-2 text-6xl leading-[1.05] text-forest">
-              <span className="text-coral-dark">Psia škôlka</span>,
+              <span className="text-coral-dark">Psia škôlka</span> v Košiciach,
               <br />
               ktorú si váš
               <br />
@@ -78,7 +78,7 @@ export function Hero() {
             </h1>
 
             <p className="order-1 mx-0 mb-2 mt-0 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-4 py-1 text-sm font-bold text-coral-dark shadow-soft">
-              Denná starostlivosť o stredných a veľkých psíkov v Košiciach
+              Denná starostlivosť o stredných a veľkých psíkov
             </p>
 
             <div className="order-3 mx-0 mt-3 max-w-md rounded-2xl bg-white/95 p-4 text-forest shadow-soft">
