@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { MapPin, Mail, Phone, Clock, Instagram, Facebook } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
 import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { LongForm } from "./Forms";
+import { LegalDialog, type LegalDialogType } from "./LegalDialog";
 
 export function Contact() {
   return (
@@ -80,72 +81,85 @@ function ContactRow({
 }
 
 export function Footer() {
+  const [legalDialog, setLegalDialog] = useState<LegalDialogType | null>(null);
+
   return (
-    <footer className="bg-forest py-10 text-cream/80">
-      <div className="mx-auto grid max-w-6xl gap-7 px-4 text-center sm:grid-cols-[auto_1fr_auto] sm:items-start sm:text-left">
-        <div className="flex justify-center sm:justify-start">
-          <img
-            src={logo}
-            alt="Chvostíkovo psia škôlka"
-            className="h-8 w-auto brightness-0 invert opacity-90"
-          />
-        </div>
+    <>
+      <footer className="bg-forest py-10 text-cream/80">
+        <div className="mx-auto grid max-w-6xl gap-7 px-4 text-center sm:grid-cols-[auto_1fr_auto] sm:items-start sm:text-left">
+          <div className="flex justify-center sm:justify-start">
+            <img
+              src={logo}
+              alt="Chvostíkovo psia škôlka"
+              className="h-8 w-auto brightness-0 invert opacity-90"
+            />
+          </div>
 
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-sm">
-            Psia škôlka Chvostíkovo · Poľská 6, Košice ·{" "}
-            <a href={`tel:${PHONE}`} className="font-semibold text-cream hover:text-coral-soft">
-              {PHONE_PRETTY}
-            </a>
-          </p>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-sm">
+              Psia škôlka Chvostíkovo · Poľská 6, Košice ·{" "}
+              <a href={`tel:${PHONE}`} className="font-semibold text-cream hover:text-coral-soft">
+                {PHONE_PRETTY}
+              </a>
+            </p>
 
-          <p className="text-xs">
-            © {new Date().getFullYear()} Chvostíkovo ·{" "}
-            <Link to="/cookies" className="underline hover:text-cream">
-              Cookies
-            </Link>{" "}
-            ·{" "}
-            <Link to="/ochrana-osobnych-udajov" className="underline hover:text-cream">
-              Ochrana osobných údajov
-            </Link>{" "}
-            ·{" "}
-            <Link to="/udaje-prevadzkovatela" className="underline hover:text-cream">
-              Údaje prevádzkovateľa
-            </Link>{" "}
-            ·{" "}
-            <button
-              type="button"
-              onClick={() =>
-                window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))
-              }
-              className="underline hover:text-cream"
+            <p className="text-xs">
+              © {new Date().getFullYear()} Chvostíkovo ·{" "}
+              <button type="button" onClick={() => setLegalDialog("cookies")} className="underline hover:text-cream">
+                Cookies
+              </button>{" "}
+              ·{" "}
+              <button type="button" onClick={() => setLegalDialog("privacy")} className="underline hover:text-cream">
+                Ochrana osobných údajov
+              </button>{" "}
+              ·{" "}
+              <button type="button" onClick={() => setLegalDialog("operator")} className="underline hover:text-cream">
+                Údaje prevádzkovateľa
+              </button>{" "}
+              ·{" "}
+              <button
+                type="button"
+                onClick={() =>
+                  window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))
+                }
+                className="underline hover:text-cream"
+              >
+                Nastavenia cookies
+              </button>
+            </p>
+          </div>
+
+          <div className="flex items-center justify-center gap-2 sm:justify-end">
+            <a
+              href={INSTAGRAM}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Instagram Chvostíkovo"
+              className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
             >
-              Nastavenia cookies
-            </button>
-          </p>
+              <Instagram className="size-5" />
+            </a>
+            <a
+              href={FACEBOOK}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Facebook Chvostíkovo"
+              className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
+            >
+              <Facebook className="size-5" />
+            </a>
+          </div>
         </div>
+      </footer>
 
-        <div className="flex items-center justify-center gap-2 sm:justify-end">
-          <a
-            href={INSTAGRAM}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Instagram Chvostíkovo"
-            className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
-          >
-            <Instagram className="size-5" />
-          </a>
-          <a
-            href={FACEBOOK}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Facebook Chvostíkovo"
-            className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
-          >
-            <Facebook className="size-5" />
-          </a>
-        </div>
-      </div>
-    </footer>
+      <LegalDialog
+        kind={legalDialog ?? "cookies"}
+        open={legalDialog !== null}
+        onOpenChange={(open) => {
+          if (!open) setLegalDialog(null);
+        }}
+        onSelect={setLegalDialog}
+      />
+    </>
   );
 }
