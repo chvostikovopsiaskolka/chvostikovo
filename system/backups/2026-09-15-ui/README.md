@@ -68,6 +68,12 @@ Produkčné UI patche:
   - `História návštev` používa existujúci detail mesiac → týždeň → deň → konkrétni psi,
   - výpočty a databázová logika sa nemenili; v35 iba rozdeľuje existujúce bloky do troch UI pohľadov.
 
+- `admin-fixes-v36.html`
+  - dashboard Záujem o škôlku počíta iba formuláre so stavom `new`, takže vybavené záujmy sa nezapočítavajú,
+  - počet sa načítava priamo cez autentifikovaný PostgREST a stabilizuje živé badge hodnoty,
+  - Týždeň používa vlastný stabilný dátumový label vytvorený priamo z `data-date`,
+  - navigačná ikona Psy používa presne znak `🐾`, rovnaký ako fallback pri profile psa bez fotografie.
+
 ## Produkčné rollbacky v Supabase
 
 Pred zásahmi boli vytvorené rollbacky:
@@ -77,6 +83,7 @@ Pred zásahmi boli vytvorené rollbacky:
 - Admin pred v33: `stable-v9-before-admin-ui-v33-20260915-1152`
 - Admin pred opravou v34: `stable-v9-before-admin-ui-v34-20260915-1250`
 - Admin pred štatistickými kartami v35: `stable-v9-before-admin-stats-tabs-v35-20260915-1258`
+- Admin pred opravami v36: `stable-v9-before-admin-fixes-v36-20260915-1254`
 - Pred odstránením textu zatvoreného dňa: `stable-v9-before-closed-day-text-cleanup-20260915-0821`
 
 ## Dôležité
