@@ -1,0 +1,210 @@
+/* v35: cleaner customer messages + compact owner contact card */
+#messagesTab .section-head{margin-bottom:8px}
+#messagesTab .call-card{
+  width:min(100%,520px);
+  margin:12px auto 18px;
+  justify-content:center;
+  padding:13px 18px;
+  border-radius:22px;
+}
+#messagesTab .call-card>span:last-child{text-align:left}
+#messagesTab .message-thread{
+  min-height:170px;
+  max-height:46vh;
+  padding:16px;
+  gap:8px;
+  border-radius:24px;
+  align-content:start;
+}
+#messagesTab .message-bubble{
+  max-width:80%;
+  padding:10px 14px;
+  line-height:1.35;
+  border-radius:18px 18px 18px 6px;
+}
+#messagesTab .message-bubble.mine{border-radius:18px 18px 6px 18px}
+#messagesTab .message-bubble small{margin-top:4px;font-size:11px}
+#messagesTab #messageForm{
+  margin-top:14px;
+  padding:18px;
+  gap:14px;
+  border-radius:24px;
+}
+#messagesTab #messageForm label{font-size:15px}
+#messagesTab #messageBody{min-height:116px}
+#messagesTab #messageForm .btn{min-height:54px;border-radius:18px}
+#dogTab .account-card{
+  width:calc(100% - 36px);
+  max-width:660px;
+  margin-left:auto;
+  margin-right:auto;
+  min-height:80px;
+  padding-left:22px;
+  padding-right:22px;
+  border-radius:22px;
+}
+#dogTab .account-card .collapse-btn{font-size:18px}
+@media(max-width:520px){
+  #messagesTab .message-thread{padding:14px 12px;min-height:150px}
+  #messagesTab .message-bubble{max-width:84%}
+  #messagesTab #messageForm{padding:16px}
+  #dogTab .account-card{width:calc(100% - 28px)}
+}
+
+
+/* v36: app-style bottom navigation + reservation dog hero + settings */
+.app{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+.bottom-nav{
+  left:50%!important;right:auto!important;bottom:max(12px,env(safe-area-inset-bottom))!important;
+  transform:translateX(-50%);width:min(520px,calc(100% - 24px))!important;max-width:none!important;
+  grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:unset;grid-auto-columns:unset;
+  gap:5px;padding:6px!important;background:rgba(255,255,255,.9)!important;
+  border:1px solid rgba(209,213,219,.8)!important;border-radius:30px!important;
+  box-shadow:0 14px 40px rgba(17,24,39,.16)!important;
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)
+}
+.bottom-nav button{
+  position:relative;min-height:70px!important;border-radius:24px!important;padding:7px 5px!important;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-size:12px!important;line-height:1.05;color:#697180!important;background:transparent!important
+}
+.bottom-nav button.active{background:#fff7ed!important;color:#d95700!important}
+.nav-icon-v36{width:28px;height:28px;display:grid;place-items:center}
+.nav-icon-v36 svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-dog-avatar-v36{width:31px;height:31px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff1f8;border:1.5px solid #f2a9d1;font-size:15px}
+.nav-dog-avatar-v36 img{width:100%;height:100%;object-fit:cover;display:block}
+.bottom-nav .nav-badge{position:absolute;top:8px;right:calc(50% - 23px);width:8px;height:8px;margin:0;border:2px solid rgba(255,255,255,.95)}
+
+#bookingTab .hero{min-height:112px;padding:20px 22px;border-radius:28px;margin-bottom:22px;align-items:center}
+.hero-dog-v36{display:flex;align-items:center;gap:13px;min-width:0}
+.hero-dog-avatar-v36{width:62px;height:62px;flex:0 0 62px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.94);border:3px solid rgba(255,255,255,.72);font-size:25px;color:#d95700;box-shadow:0 5px 14px rgba(154,52,18,.15)}
+.hero-dog-avatar-v36 img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-dog-copy-v36{min-width:0}
+.hero-dog-copy-v36 span{display:block;font-size:13px;font-weight:750;opacity:.86;margin-bottom:3px}
+.hero-dog-copy-v36 strong{display:block;font-size:23px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+#bookingTab .hero-pass{max-width:42%;text-align:right}
+#bookingTab .hero-pass span{font-size:12px;opacity:.82}
+#bookingTab .hero-pass strong{font-size:27px;margin-top:4px}
+#bookingTab .hero-pass.single-v36 strong{font-size:17px;line-height:1.15;max-width:110px;white-space:normal}
+.booking-section-head{align-items:center!important}
+.booking-section-head>div{display:flex;align-items:center;gap:9px;min-width:0;flex-wrap:wrap}
+.week-range-v36{margin:0!important;padding:5px 9px;border-radius:999px;background:#eef0f3;color:#6b7280;font-size:11px!important;line-height:1!important;font-weight:800!important;white-space:nowrap}
+
+#dogTab>.section-head{align-items:center;margin-right:0}
+.dog-settings-btn-v36{margin-left:auto;width:44px;height:44px;flex:0 0 44px;border:1px solid var(--line);border-radius:50%;background:#fff;color:#4b5563;display:grid;place-items:center;padding:10px;box-shadow:0 2px 8px rgba(17,24,39,.05)}
+.dog-settings-btn-v36 svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.settings-open-v36{overflow:hidden}
+.settings-modal-v36{position:fixed;inset:0;z-index:560;background:rgba(17,24,39,.52);display:grid;place-items:end center;padding:12px 12px max(12px,env(safe-area-inset-bottom));overflow:auto}
+.settings-card-v36{width:min(560px,100%);max-height:88dvh;overflow:auto;background:#f5f6f8;border-radius:28px;padding:18px;box-shadow:0 28px 80px rgba(0,0,0,.28)}
+.settings-head-v36{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:2px 2px 13px}
+.settings-head-v36 small{display:block;color:#ea580c;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.settings-head-v36 h2{margin:3px 0 0;font-size:25px}
+.settings-head-v36 p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.settings-close-v36{width:40px;height:40px;flex:0 0 40px;border:0;border-radius:50%;background:#fff;color:#4b5563;font-size:27px;line-height:1;display:grid;place-items:center;padding:0}
+.settings-content-v36{display:grid;gap:10px}
+.settings-content-v36 .account-card,.settings-content-v36 #customerLegalSectionV23{width:100%!important;max-width:none!important;margin:0!important;background:#fff}
+.settings-content-v36 .account-card{min-height:76px!important;padding:0 21px!important;border-radius:22px!important}
+.settings-content-v36 .account-card .collapse-btn{font-size:17px!important;min-height:76px}
+.settings-content-v36 #customerLegalSectionV23{border-radius:22px}
+
+@media(max-width:520px){
+  .bottom-nav{width:calc(100% - 18px)!important;bottom:max(8px,env(safe-area-inset-bottom))!important;border-radius:27px!important}
+  .bottom-nav button{min-height:66px!important;font-size:11px!important;border-radius:21px!important}
+  .nav-icon-v36{width:26px;height:26px}.nav-icon-v36 svg{width:25px;height:25px}.nav-dog-avatar-v36{width:29px;height:29px}
+  #bookingTab .hero{padding:18px 19px;min-height:104px;border-radius:26px}
+  .hero-dog-avatar-v36{width:56px;height:56px;flex-basis:56px}
+  .hero-dog-copy-v36 strong{font-size:20px;max-width:145px}.hero-dog-copy-v36 span{font-size:12px}
+  #bookingTab .hero-pass strong{font-size:24px}#bookingTab .hero-pass.single-v36 strong{font-size:15px;max-width:92px}
+  .booking-section-head>div{gap:7px}.week-range-v36{font-size:10px!important;padding:5px 7px}
+  .dog-settings-btn-v36{width:40px;height:40px;flex-basis:40px;padding:9px}
+  .settings-modal-v36{padding-left:8px;padding-right:8px;place-items:end center}
+  .settings-card-v36{padding:15px;border-radius:25px;max-height:91dvh}.settings-head-v36 h2{font-size:23px}
+}
+
+
+/* v37: refined settings, pass card and compact reservation picker */
+.dog-settings-btn-v36{display:grid!important;place-items:center!important;line-height:0!important;padding:0!important}
+.dog-settings-btn-v36 svg{display:block;margin:auto}
+.settings-head-v36>div>small{display:none!important}
+.settings-head-v36 h2{margin-top:0!important}
+.settings-quick-v37{background:#fff;border:1px solid var(--line);border-radius:22px;padding:17px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.settings-quick-v37 strong{display:block;font-size:17px}
+.settings-quick-v37 small{display:block;color:var(--muted);font-size:12px;line-height:1.35;margin-top:4px}
+.v37-hide-notification{display:none!important}
+.settings-content-v36 #customerLegalSectionV23[open]>summary .details-chevron{transform:rotate(90deg)}
+
+.v23-pass-box.active{position:relative;overflow:hidden;background:linear-gradient(135deg,#ecfff3 0%,#f8fffa 100%)!important;border:1.5px solid #78e6a1!important;border-radius:22px!important;padding:20px!important;box-shadow:0 8px 24px rgba(22,101,52,.08)}
+.v23-pass-box.active:after{content:'';position:absolute;left:0;top:18px;bottom:18px;width:4px;border-radius:0 5px 5px 0;background:#22c55e}
+.v23-pass-box.active .pass-top{gap:14px;align-items:center}
+.v23-pass-box.active .pass-top>div{padding-left:5px}
+.v23-pass-box.active .pass-top strong{font-size:20px!important;letter-spacing:-.01em}
+.v23-pass-box.active .pass-top small{color:#667085!important;line-height:1.35}
+.v23-pass-box.active .v24-pass-remaining{color:#16733a!important;font-weight:850!important}
+.v23-pass-box.active .v24-pass-count{background:rgba(255,255,255,.72);border:1px solid rgba(34,197,94,.26);border-radius:17px;padding:10px 12px;min-width:78px;align-items:center!important;box-shadow:0 3px 10px rgba(22,101,52,.06)}
+.v23-pass-box.active .v24-pass-count b{font-size:29px!important;line-height:1}
+.v23-pass-box.active .v24-pass-count small{font-size:10px!important;margin-top:4px!important}
+
+#bookingTab .hero{padding-top:18px;padding-bottom:18px}
+.hero-dog-avatar-v36{width:70px!important;height:70px!important;flex-basis:70px!important}
+.hero-dog-copy-v36 strong{font-size:24px}
+#bookingTab .date-search-btn{display:none!important}
+#bookingTab .booking-section-head{margin-top:19px!important;margin-bottom:10px!important}
+#bookingTab .booking-section-head h2{font-size:20px!important}
+#bookingTab .deadline-card{margin-bottom:14px}
+.booking-launch-v37{width:100%;border:1px solid #fed7aa;background:linear-gradient(135deg,#fff8f1,#fff);border-radius:24px;padding:16px 18px;margin:0 0 14px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:13px;text-align:left;color:var(--ink);box-shadow:0 4px 16px rgba(249,115,22,.05)}
+.booking-launch-icon-v37{width:46px;height:46px;border-radius:15px;background:#fff1e7;color:#e75d00;display:grid;place-items:center}
+.booking-launch-icon-v37 svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.booking-launch-v37 strong{display:block;font-size:18px;line-height:1.15}
+.booking-launch-v37 small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+.booking-launch-v37>b{font-size:29px;color:#9ca3af;font-weight:500}
+
+.booking-picker-open-v37{overflow:hidden}
+.booking-picker-v37{position:fixed;inset:0;z-index:570;background:rgba(17,24,39,.55);display:grid;place-items:end center;padding:10px 10px max(10px,env(safe-area-inset-bottom));overflow:auto}
+.booking-picker-card-v37{width:min(610px,100%);background:#f7f8fa;border-radius:28px;padding:17px;box-shadow:0 28px 90px rgba(0,0,0,.3)}
+.booking-picker-head-v37{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:1px 2px 13px}
+.booking-picker-head-v37 small{display:block;color:#ea580c;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.booking-picker-head-v37 h2{margin:3px 0 0;font-size:24px;line-height:1.1}
+.booking-picker-head-v37 p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.booking-picker-close-v37{width:40px;height:40px;flex:0 0 40px;border:0;border-radius:50%;background:#fff;color:#4b5563;font-size:27px;line-height:1;display:grid;place-items:center;padding:0}
+.booking-picker-dog-v37{margin:0 0 12px}.booking-picker-dog-v37 label{margin-left:2px}
+.booking-picker-days-v37{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.booking-day-v37{min-height:76px;border:1px solid #dfe3e8;background:#fff;border-radius:15px;padding:8px 3px;color:var(--ink);display:grid;align-content:center;justify-items:center;gap:3px;line-height:1}
+.booking-day-v37 small{font-size:10px;color:var(--muted);font-weight:800;text-transform:capitalize}
+.booking-day-v37 strong{font-size:16px}
+.booking-day-v37 span{font-size:9px;color:#76808f;white-space:nowrap}
+.booking-day-v37.selected{background:#fff1e7;border-color:#fb923c;box-shadow:0 0 0 2px rgba(249,115,22,.1);color:#c94f00}
+.booking-day-v37.selected span{color:#c94f00}
+.booking-day-v37.booked{background:#effaf3;border-color:#b7e7c8;color:#166534}
+.booking-day-v37.disabled:not(.booked){background:#eef0f3;color:#9ca3af;border-color:#e5e7eb}
+.booking-day-v37:disabled{cursor:default;opacity:1}
+.booking-picker-taxi-title-v37{font-size:12px;font-weight:850;color:#4b5563;margin:14px 2px 7px}
+.booking-picker-taxi-v37{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.booking-picker-taxi-v37 button{min-height:45px;border:1px solid #dfe3e8;border-radius:13px;background:#fff;color:#4b5563;padding:7px 5px;font-size:11px;font-weight:800}
+.booking-picker-taxi-v37 button.active{background:#fff1e7;color:#d95700;border-color:#fdba74}
+.booking-picker-submit-v37{margin-top:13px;min-height:54px;border-radius:18px;font-size:17px}
+
+.reserved-empty-v37{text-align:center;color:var(--muted);padding:24px 18px;border-style:dashed}
+.reserved-day-card-v37{padding:0!important;overflow:hidden;border-radius:24px!important;margin-bottom:13px!important}
+.reserved-day-top-v37{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 19px}
+.reserved-day-top-v37>div strong{display:block;font-size:18px;text-transform:capitalize}
+.reserved-day-top-v37>div span{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+.reserved-day-meta-v37{border-top:1px solid #eef0f2;padding:12px 19px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.reserved-roster-count-v37,.reserved-roster-v37 summary{font-size:12px;font-weight:800;color:#5f6875}
+.reserved-roster-v37 summary{cursor:pointer;list-style:none}.reserved-roster-v37 summary::-webkit-details-marker{display:none}
+.reserved-roster-v37 summary:before{content:'›';display:inline-block;margin-right:6px;transition:transform .15s}.reserved-roster-v37[open] summary:before{transform:rotate(90deg)}
+.reserved-roster-v37>div{display:grid;gap:7px;margin-top:10px}.reserved-roster-v37>div>span{display:flex;align-items:center;gap:8px;font-size:12px}
+.reserved-roster-avatar-v37{width:28px;height:28px;flex:0 0 28px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff1f8;font-style:normal;font-size:13px}.reserved-roster-avatar-v37 img{width:100%;height:100%;object-fit:cover}
+.reserved-taxi-v37{font-size:11px;color:#6b7280;background:#f3f4f6;border-radius:999px;padding:6px 9px}
+.reserved-note-v37{margin:0 19px 10px;padding:9px 11px;border-radius:12px;background:#fef3c7;color:#92400e;font-size:12px}
+.cancel-booking-v37{margin:0 14px 12px auto;display:block;font-size:12px}
+
+@media(max-width:520px){
+  .settings-quick-v37{padding:15px 17px}.settings-quick-v37 strong{font-size:16px}
+  .v23-pass-box.active{padding:17px!important}.v23-pass-box.active .pass-top strong{font-size:18px!important}.v23-pass-box.active .v24-pass-count{min-width:72px;padding:9px 10px}.v23-pass-box.active .v24-pass-count b{font-size:27px!important}
+  .hero-dog-avatar-v36{width:62px!important;height:62px!important;flex-basis:62px!important}.hero-dog-copy-v36 strong{font-size:21px}
+  .booking-launch-v37{padding:14px 15px;border-radius:21px}.booking-launch-icon-v37{width:42px;height:42px;border-radius:14px}.booking-launch-v37 strong{font-size:16px}.booking-launch-v37 small{font-size:11px}
+  .booking-picker-v37{padding-left:7px;padding-right:7px}.booking-picker-card-v37{padding:14px;border-radius:25px}.booking-picker-head-v37 h2{font-size:22px}
+  .booking-picker-days-v37{gap:5px}.booking-day-v37{min-height:70px;border-radius:13px;padding:7px 2px}.booking-day-v37 strong{font-size:14px}.booking-day-v37 span{font-size:8px}
+  .booking-picker-taxi-v37{gap:5px}.booking-picker-taxi-v37 button{font-size:10px;padding:6px 3px}
+  .reserved-day-top-v37{padding:15px 16px}.reserved-day-meta-v37{padding:11px 16px}.reserved-day-top-v37>div strong{font-size:17px}
+}
