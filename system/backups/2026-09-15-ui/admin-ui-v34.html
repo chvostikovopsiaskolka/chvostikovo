@@ -1,0 +1,45 @@
+<style id="admin-ui-v34-style">
+/* v34: corrective pass for dashboard order, week labels and nav icons */
+.week-day-card-v32 .day-title>strong{display:block!important}
+.week-date-v33{display:none!important}
+.week-day-card-v32.v33-closed .day-body>.muted.small{display:none!important}
+</style>
+<script id="admin-ui-v34">
+(function(){
+  if(window.__chvostikovoAdminUiV34)return;
+  window.__chvostikovoAdminUiV34=true;
+  const q=id=>document.getElementById(id);
+  const paw=`<span class="admin-nav-icon-v32"><svg viewBox="0 0 32 32" aria-hidden="true" style="fill:currentColor;stroke:none"><ellipse cx="9" cy="8" rx="3.1" ry="4"></ellipse><ellipse cx="23" cy="8" rx="3.1" ry="4"></ellipse><ellipse cx="5.7" cy="15" rx="2.8" ry="3.6" transform="rotate(-18 5.7 15)"></ellipse><ellipse cx="26.3" cy="15" rx="2.8" ry="3.6" transform="rotate(18 26.3 15)"></ellipse><path d="M16 14c-5.15 0-9.15 4.75-9.15 9.05 0 3.55 3.45 5.65 9.15 5.65s9.15-2.1 9.15-5.65C25.15 18.75 21.15 14 16 14Z"></path></svg></span><span class="admin-nav-label-v32">Psy</span>`;
+  const stats=`<span class="admin-nav-icon-v32"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V14m5.3 5.5V9.5m5.4 10V5m5.3 14.5H2.5"></path><path d="m4 10 5.3-3.5 5.4 2.2 5.3-5"></path></svg></span><span class="admin-nav-label-v32">Štatistiky</span>`;
+  const closeIcon=`<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"></rect><path d="M8 3v4M16 3v4M4 10h16M9 13l6 4M15 13l-6 4"></path></svg>`;
+  let timer=0;
+  function num(text){const m=String(text||'').match(/\d+/);return m?Number(m[0]):0}
+  function headers(){try{const s=JSON.parse(localStorage.getItem('chvostikovo_supabase_session')||sessionStorage.getItem('chvostikovo_supabase_session')||'null');if(!s?.access_token)return null;return {apikey:'sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_',Authorization:'Bearer '+s.access_token,'Content-Type':'application/json'}}catch(_){return null}}
+  async function closeDate(date,count){if(count>0&&!confirm('Na tento deň už sú rezervácie. Deň sa označí ako zatvorený, existujúce rezervácie zostanú zachované. Pokračovať?'))return;if(count===0&&!confirm('Zatvoriť tento deň?'))return;const h=headers();if(!h){alert('Prihlásenie vypršalo.');return}try{const r=await fetch('https://tlhcqwsluyqpywymjoxn.supabase.co/rest/v1/rpc/portal_set_day_closed',{method:'POST',headers:h,body:JSON.stringify({p_day:date,p_closed:true,p_note:'Zatvorené'}),cache:'no-store'});if(!r.ok)throw new Error(await r.text());location.reload()}catch(e){console.error(e);alert('Deň sa nepodarilo zatvoriť.')}}
+  function liveInterest(){let leads=0,apps=0;document.querySelectorAll('#overviewInterestV22 .v25-live-badge').forEach(el=>{const t=(el.textContent||'').trim();if(/^Záujmy/i.test(t))leads=num(t);if(/^Prihlášky/i.test(t))apps=num(t)});if(!leads&&!apps){leads=num(q('webLeadsCount')?.textContent);apps=num(q('webApplicationsCount')?.textContent)}return {leads,apps}}
+  function fixDashboard(){
+    const today=q('todaySection'),dash=q('adminDashboardV33'),groups=q('overviewGroupsV22'),hero=today?.querySelector('.card.hero');if(!today||!dash)return;
+    if(groups){if(dash.nextElementSibling!==groups)groups.insertAdjacentElement('beforebegin',dash);if(!groups.dataset.v34Collapsed){groups.dataset.v34Collapsed='1';groups.querySelectorAll(':scope>.dashboard-group').forEach(g=>{g.querySelector(':scope>.dashboard-group-body')?.classList.add('hidden');g.querySelector(':scope>.dashboard-group-head .chevron')?.classList.remove('open');g.dataset.open='0'})}}
+    else if(hero&&dash.previousElementSibling!==hero)hero.insertAdjacentElement('afterend',dash);
+    const interest=dash.querySelector('[data-dash-target="interest"]');if(interest){const {leads,apps}=liveInterest(),total=leads+apps,small=interest.querySelector('small'),strong=interest.querySelector(':scope>strong'),txt=`Záujmy ${leads} · Prihlášky ${apps}`;if(small&&small.textContent!==txt)small.textContent=txt;if(strong&&strong.textContent!==String(total))strong.textContent=String(total)}
+  }
+  function fixNav(){const dogs=document.querySelector('#bottomNav button[data-tab="dogs"]'),stat=document.querySelector('#bottomNav button[data-tab="stats"]');if(dogs&&!dogs.querySelector('[data-v34-paw]')){dogs.innerHTML=paw;dogs.querySelector('svg')?.setAttribute('data-v34-paw','1')}if(stat&&!stat.querySelector('[data-v34-stats]')){stat.innerHTML=stats;stat.querySelector('svg')?.setAttribute('data-v34-stats','1')}}
+  function closed(card){return !!card.querySelector('.day-open')||[...card.querySelectorAll('.pill')].some(p=>/zatvorené/i.test(p.textContent||''))}
+  function decorateWeek(root){
+    if(!root)return;
+    root.querySelectorAll('.day-toggle[data-date]').forEach(title=>{
+      const card=title.closest('.card'),actions=card?.querySelector('.day-actions'),date=title.dataset.date;if(!card||!actions)return;
+      title.querySelector('strong')?.style.removeProperty('display');title.querySelector('.week-date-v33')?.remove();
+      actions.querySelectorAll('.day-close-v33:not(.day-close-v34)').forEach(el=>el.remove());
+      const isClosed=closed(card);card.classList.toggle('v33-closed',isClosed);
+      if(isClosed){actions.querySelector('.day-close-v34')?.remove();card.querySelectorAll('.day-body>.muted.small').forEach(el=>{if(/Bez schválených rezervácií/i.test(el.textContent||''))el.remove()})}
+      else if(!actions.querySelector('.day-close-v34')){const btn=document.createElement('button');btn.type='button';btn.className='day-close-v33 day-close-v34';btn.title='Zatvoriť deň';btn.setAttribute('aria-label','Zatvoriť deň');btn.innerHTML=closeIcon;btn.addEventListener('click',e=>{e.stopPropagation();closeDate(date,num(title.querySelector('.pill:not(.warn)')?.textContent||'0'))});actions.appendChild(btn)}
+    });
+    q('closedDayDate')?.closest('.card')?.remove();
+  }
+  function run(){fixDashboard();fixNav();decorateWeek(q('weekList'));decorateWeek(q('nextWeekList'))}
+  function schedule(){clearTimeout(timer);timer=setTimeout(run,40)}
+  function start(){run();const today=q('todaySection');if(today)new MutationObserver(schedule).observe(today,{childList:true,subtree:true,characterData:true});['weekList','nextWeekList'].forEach(id=>{const root=q(id);if(root)new MutationObserver(schedule).observe(root,{childList:true,subtree:true})});const nav=q('bottomNav');if(nav)new MutationObserver(schedule).observe(nav,{childList:true,subtree:true});document.addEventListener('click',e=>{if(e.target.closest('[data-tab]'))setTimeout(run,90)},true);window.addEventListener('focus',()=>setTimeout(run,60));setInterval(()=>{if(!document.hidden)run()},2500)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+</script>
