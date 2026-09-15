@@ -60,6 +60,14 @@ Produkčné UI patche:
   - navigačná položka Psy dostala novú výraznejšiu plnú labku,
   - dashboard Záujem o škôlku používa živé badge počty.
 
+- `admin-stats-v35.html`
+  - Štatistiky sú rozdelené na tri samostatné pohľady: `Návštevy`, `Tržby`, `História návštev`,
+  - pri každom otvorení spodnej karty Štatistiky sa predvolene otvorí `Návštevy`,
+  - `Návštevy` obsahujú vstupy a mesačné/ročné štatistiky návštev,
+  - `Tržby` obsahujú všetky finančné bloky vrátane reálnej tržby, hotela, permanentiek, taxi a jednorazových vstupov,
+  - `História návštev` používa existujúci detail mesiac → týždeň → deň → konkrétni psi,
+  - výpočty a databázová logika sa nemenili; v35 iba rozdeľuje existujúce bloky do troch UI pohľadov.
+
 ## Produkčné rollbacky v Supabase
 
 Pred zásahmi boli vytvorené rollbacky:
@@ -68,6 +76,7 @@ Pred zásahmi boli vytvorené rollbacky:
 - Admin pred v32: `stable-v9-before-admin-ui-v32-20260915-0825`
 - Admin pred v33: `stable-v9-before-admin-ui-v33-20260915-1152`
 - Admin pred opravou v34: `stable-v9-before-admin-ui-v34-20260915-1250`
+- Admin pred štatistickými kartami v35: `stable-v9-before-admin-stats-tabs-v35-20260915-1258`
 - Pred odstránením textu zatvoreného dňa: `stable-v9-before-closed-day-text-cleanup-20260915-0821`
 
 ## Dôležité
