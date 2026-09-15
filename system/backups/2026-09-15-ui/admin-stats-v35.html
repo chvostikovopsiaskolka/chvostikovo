@@ -1,0 +1,61 @@
+<style id="admin-stats-v35-style">
+/* v35: three clear statistics views */
+#adminStatsHeadV33{margin:6px 0 14px!important}
+#adminStatsHeadV33 h2{margin-bottom:11px!important}
+.admin-stats-tabs-v35{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.admin-stats-tabs-v35 button{border:1px solid #e5e7eb;background:#fff;color:#6b7280;border-radius:16px;min-height:48px;padding:8px 7px;font-size:12px;font-weight:850;line-height:1.15}
+.admin-stats-tabs-v35 button.active{background:#fff7ed;color:#d95700;border-color:#fed7aa}
+#statsSummary>.v35-hidden,#visitHistoryWrap.v35-hidden{display:none!important}
+@media(max-width:520px){.admin-stats-tabs-v35{gap:6px}.admin-stats-tabs-v35 button{font-size:11px;min-height:45px;padding:7px 5px}}
+</style>
+<script id="admin-stats-v35">
+(function(){
+  if(window.__chvostikovoAdminStatsV35)return;
+  window.__chvostikovoAdminStatsV35=true;
+  let active='visits',timer=0,mutating=false;
+  const q=id=>document.getElementById(id);
+  const norm=s=>String(s||'').trim().toLowerCase();
+  function ensureHead(){
+    const section=q('statsSection');if(!section)return null;
+    let head=q('adminStatsHeadV33');
+    if(!head){head=document.createElement('div');head.id='adminStatsHeadV33';head.className='admin-stats-head-v33';section.insertBefore(head,section.firstChild)}
+    if(head.dataset.v35!=='1'){
+      head.dataset.v35='1';
+      head.innerHTML='<h2>Štatistiky</h2><div class="admin-stats-tabs-v35"><button type="button" data-stats-view="visits">Návštevy</button><button type="button" data-stats-view="revenue">Tržby</button><button type="button" data-stats-view="history">História návštev</button></div>';
+      head.querySelectorAll('[data-stats-view]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.statsView,true)));
+    }
+    return head;
+  }
+  function classify(){
+    const summary=q('statsSummary');if(!summary)return;
+    let revenue=false;
+    [...summary.children].forEach(el=>{
+      const text=norm(el.textContent);
+      if(el.classList.contains('section-title')&&text==='tržby')revenue=true;
+      el.dataset.statsGroup=revenue?'revenue':'visits';
+    });
+  }
+  function apply(){
+    if(mutating)return;mutating=true;
+    try{
+      const head=ensureHead(),summary=q('statsSummary'),history=q('visitHistoryWrap');
+      if(!head||!summary)return;
+      classify();
+      summary.querySelectorAll(':scope > [data-stats-group]').forEach(el=>el.classList.toggle('v35-hidden',el.dataset.statsGroup!==active));
+      if(history)history.classList.toggle('v35-hidden',active!=='history');
+      summary.classList.toggle('v35-hidden',active==='history');
+      head.querySelectorAll('[data-stats-view]').forEach(b=>b.classList.toggle('active',b.dataset.statsView===active));
+    }finally{mutating=false}
+  }
+  function show(view,scroll){active=['visits','revenue','history'].includes(view)?view:'visits';apply();if(scroll)setTimeout(()=>q('adminStatsHeadV33')?.scrollIntoView({behavior:'smooth',block:'start'}),20)}
+  function schedule(){clearTimeout(timer);timer=setTimeout(apply,40)}
+  function start(){
+    ensureHead();show('visits',false);
+    const summary=q('statsSummary');if(summary)new MutationObserver(schedule).observe(summary,{childList:true,subtree:false});
+    const section=q('statsSection');if(section)new MutationObserver(schedule).observe(section,{childList:true,subtree:false});
+    document.addEventListener('click',e=>{if(e.target.closest('#bottomNav [data-tab="stats"]'))setTimeout(()=>show('visits',false),100)},true);
+    window.addEventListener('focus',()=>{if(!q('statsSection')?.classList.contains('hidden'))setTimeout(apply,80)});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+</script>
