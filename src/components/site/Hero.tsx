@@ -28,7 +28,7 @@ export function Hero() {
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
-          <h1 className="text-4xl leading-[1.05] text-forest sm:text-5xl">
+          <h1 className="text-[34px] leading-[1.05] text-forest sm:text-5xl">
             <span className="text-coral-dark">Psia škôlka</span> v
             <br />
             Košiciach, ktorú si váš
