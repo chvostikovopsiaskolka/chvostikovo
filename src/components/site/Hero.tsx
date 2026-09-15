@@ -41,7 +41,7 @@ export function Hero() {
             </p>
           </div>
 
-          <p className="mx-auto mt-8 mb-2 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm">
+          <p className="mx-auto mt-10 mb-2 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm">
             Denná starostlivosť o stredných a veľkých psíkov v Košiciach
           </p>
 
