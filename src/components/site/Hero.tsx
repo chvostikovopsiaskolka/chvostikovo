@@ -29,11 +29,11 @@ export function Hero() {
           </p>
 
           <h1 className="text-[34px] leading-[1.05] text-forest sm:text-5xl">
-            <span className="text-coral-dark">Psia škôlka</span> v
+            <span className="text-coral-dark">Psia škôlka</span>
             <br />
-            Košiciach, ktorú si váš
+            v Košiciach, ktorú si
             <br />
-            psík zamiluje
+            váš psík zamiluje
           </h1>
 
           <div className="mx-auto mt-5 max-w-xl rounded-2xl bg-white/95 p-4 text-forest shadow-soft">
