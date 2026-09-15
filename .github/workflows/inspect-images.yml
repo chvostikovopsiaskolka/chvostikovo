@@ -1,0 +1,21 @@
+name: Inspect image blobs
+on:
+  push:
+    branches: [inspect-image-blobs]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect files
+        run: |
+          set -eux
+          ls -lh .image-test || true
+          file .image-test/* || true
+          sha256sum .image-test/* || true
+          for f in .image-test/*; do
+            echo "--- $f"
+            xxd -l 32 "$f" || true
+          done
