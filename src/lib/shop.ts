@@ -1,6 +1,6 @@
 export type StandSize = "small" | "large";
 export type StandColor = "natural" | "dark" | "white" | "custom";
-export type LetterColor = "light" | "black" | "white" | "custom";
+export type LetterColor = "light" | "dark" | "black" | "custom";
 
 export type StandConfiguration = {
   size: StandSize;
