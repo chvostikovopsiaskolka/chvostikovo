@@ -38,17 +38,24 @@ function ProductsPage() {
       <main>
         <section className="bg-background pt-28 pb-12 sm:pt-32 sm:pb-16">
           <div className="mx-auto max-w-5xl px-4 text-center">
-            <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Vyrobené u nás</p>
-            <h1 className="mx-auto mt-3 max-w-4xl text-4xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
+            <h1 className="mx-auto max-w-4xl text-4xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
               Naše <span className="text-coral-dark">produkty pre psov</span>
             </h1>
             <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-forest/80">
-              Praktické produkty, ktoré vznikajú priamo v Chvostíkove. Vyrábame ich ručne, s dôrazom na funkčnosť, kvalitné spracovanie a individuálne prevedenie.
+              Praktické produkty, ktoré vznikajú priamo v Chvostíkove. Vyrábame ich ručne, s dôrazom
+              na funkčnosť, kvalitné spracovanie a individuálne prevedenie.
             </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-semibold text-forest shadow-card"><Hammer className="size-4 text-coral" /> Ručná výroba</span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-semibold text-forest shadow-card"><Ruler className="size-4 text-coral" /> Výška na mieru</span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-semibold text-forest shadow-card"><Paintbrush className="size-4 text-coral" /> Individuálne prevedenie</span>
+            <div className="mt-6 grid grid-cols-3 gap-1.5 sm:flex sm:justify-center sm:gap-2">
+              <span className="inline-flex min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-card px-1.5 py-2 text-[9px] font-semibold text-forest shadow-card sm:gap-2 sm:px-4 sm:text-sm">
+                <Hammer className="size-3 shrink-0 text-coral sm:size-4" /> Ručná výroba
+              </span>
+              <span className="inline-flex min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-card px-1.5 py-2 text-[9px] font-semibold text-forest shadow-card sm:gap-2 sm:px-4 sm:text-sm">
+                <Ruler className="size-3 shrink-0 text-coral sm:size-4" /> Výška na mieru
+              </span>
+              <span className="inline-flex min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-card px-1 py-2 text-[8px] font-semibold text-forest shadow-card sm:gap-2 sm:px-4 sm:text-sm">
+                <Paintbrush className="size-3 shrink-0 text-coral sm:size-4" /> Individuálne
+                prevedenie
+              </span>
             </div>
           </div>
         </section>
@@ -56,8 +63,7 @@ function ProductsPage() {
         <section className="bg-secondary/45 py-12 sm:py-16">
           <div className="mx-auto max-w-6xl px-4">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Aktuálna ponuka</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Vyberte si produkt</h2>
+              <h2 className="section-title text-3xl sm:text-4xl">Vyberte si produkt</h2>
             </div>
 
             <article className="mx-auto mt-9 grid max-w-4xl overflow-hidden rounded-4xl bg-card shadow-soft lg:grid-cols-[1fr_0.95fr]">
@@ -70,23 +76,39 @@ function ProductsPage() {
                 />
               </a>
               <div className="flex flex-col justify-center p-6 sm:p-8">
-                <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">Stojany na misky</p>
-                <h2 className="mt-2 text-2xl text-forest sm:text-3xl">Drevený stojan na misky pre psa</h2>
+                <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">
+                  Stojany na misky
+                </p>
+                <h2 className="mt-2 text-2xl text-forest sm:text-3xl">
+                  Drevený stojan na misky pre psa
+                </h2>
                 <p className="mt-3 leading-relaxed text-forest/80">
-                  Stabilný stojan na dve nerezové misky. Výšku prispôsobíme psíkovi a farebné prevedenie aj meno doladíme podľa vášho želania, aby mal každý psík svoj originál.
+                  Stabilný stojan na dve nerezové misky. Výšku prispôsobíme psíkovi a farebné
+                  prevedenie aj meno doladíme podľa vášho želania, aby mal každý psík svoj originál.
                 </p>
                 <div className="mt-5 grid gap-2 text-sm text-forest/80 sm:grid-cols-2">
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5"><Sparkles className="size-4 shrink-0 text-coral" /> 2 nerezové misky v cene</span>
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5"><Ruler className="size-4 shrink-0 text-coral" /> Výška na mieru podľa psíka</span>
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5"><Paintbrush className="size-4 shrink-0 text-coral" /> Farba podľa želania</span>
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5"><Type className="size-4 shrink-0 text-coral" /> Personalizácia menom</span>
+                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
+                    <Sparkles className="size-4 shrink-0 text-coral" /> 2 nerezové misky v cene
+                  </span>
+                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
+                    <Ruler className="size-4 shrink-0 text-coral" /> Výška na mieru podľa psíka
+                  </span>
+                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
+                    <Paintbrush className="size-4 shrink-0 text-coral" /> Farba podľa želania
+                  </span>
+                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
+                    <Type className="size-4 shrink-0 text-coral" /> Personalizácia menom
+                  </span>
                 </div>
                 <div className="mt-6 flex items-end justify-between gap-4">
                   <div>
                     <p className="text-xs text-forest/60">Cena</p>
                     <p className="font-display text-2xl font-bold text-forest">40 €</p>
                   </div>
-                  <a href="/stojan-na-misky-pre-psa" className="btn-coral inline-flex items-center gap-2">
+                  <a
+                    href="/stojan-na-misky-pre-psa"
+                    className="btn-coral inline-flex items-center gap-2"
+                  >
                     Detail produktu <ArrowRight className="size-4" />
                   </a>
                 </div>
