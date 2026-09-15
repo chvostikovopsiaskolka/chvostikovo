@@ -46,15 +46,19 @@ Produkčné UI patche:
   - rýchly súhrn na Prehľade.
 
 - `admin-ui-v33.html`
-  - oranžový hero na Prehľade nahradený klikateľným dashboardom,
-  - karty Psíkov dnes / Zajtra / Čakajúce rezervácie / Správy / Záujem o škôlku otvárajú príslušné rozbaľovacie bloky,
-  - dátum zostáva kompaktným textom hore,
-  - opravené stabilné názvy dní a dátumy v Týždni,
-  - horná karta Zatvorené dni odstránená,
-  - zatvorenie konkrétneho dňa je dostupné priamo pri jeho `+`,
-  - pri zatvorenom dni sa nezobrazuje prázdny text „Bez schválených rezervácií“,
-  - krajšia labka pre Psy a nová ikona Štatistiky,
-  - Štatistiky majú kompaktnú hlavičku Prehľad / História návštev a história je vizuálne súčasťou tejto sekcie.
+  - klikateľný dashboard namiesto oranžového hero,
+  - dashboardové karty Psíkov dnes / Zajtra / Čakajúce rezervácie / Správy / Záujem o škôlku,
+  - kompaktné ovládanie zatvorených dní priamo pri jednotlivom dni,
+  - Štatistiky majú hlavičku Prehľad / História návštev.
+
+- `admin-ui-v34.html`
+  - opravuje poradie dashboardu tak, aby bol nad pôvodnými rozbaľovacími blokmi,
+  - pôvodné dashboardové skupiny sa po načítaní predvolene zbalia a zostávajú cieľom po kliknutí na kartu,
+  - obnovuje pôvodné názvy dní a dátumy v Týždni namiesto nespoľahlivého runtime labelu,
+  - odstraňuje text „Bez schválených rezervácií“ pri zatvorenom dni,
+  - zatvorenie dňa používa priamy autentifikovaný RPC call a nepotrebuje horný formulár Zatvorené dni,
+  - navigačná položka Psy dostala novú výraznejšiu plnú labku,
+  - dashboard Záujem o škôlku používa živé badge počty.
 
 ## Produkčné rollbacky v Supabase
 
@@ -63,10 +67,11 @@ Pred zásahmi boli vytvorené rollbacky:
 - Customer portal: `before-customer-booking-sheet-settings-v37-20260915`
 - Admin pred v32: `stable-v9-before-admin-ui-v32-20260915-0825`
 - Admin pred v33: `stable-v9-before-admin-ui-v33-20260915-1152`
+- Admin pred opravou v34: `stable-v9-before-admin-ui-v34-20260915-1250`
 - Pred odstránením textu zatvoreného dňa: `stable-v9-before-closed-day-text-cleanup-20260915-0821`
 
 ## Dôležité
 
 Tieto súbory sú záloha dnešných UI patchov. Produkčný admin sa skladá z `frontend_snapshots.stable-v9` a transformácií Edge Function `chvostikovo-frontend`. Zákaznícky portál sa servuje z `customer_portal_frontend_assets`.
 
-Pri obnove sa patche nemajú aplikovať naslepo na inú verziu. Najprv treba overiť aktuálnu produkčnú verziu a až potom doplniť chýbajúce bloky podľa markerov `v35`, `v36`, `v37`, `v31`, `v32`, `v33`.
+Pri obnove sa patche nemajú aplikovať naslepo na inú verziu. Najprv treba overiť aktuálnu produkčnú verziu a až potom doplniť chýbajúce bloky podľa markerov `v35`, `v36`, `v37`, `v31`, `v32`, `v33`, `v34`.
