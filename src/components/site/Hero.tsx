@@ -70,7 +70,8 @@ export function Hero() {
         <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
           <div className="flex min-w-0 flex-col lg:py-6">
             <h1 className="order-2 text-6xl leading-[1.05] text-forest">
-              <span className="text-coral-dark">Psia škôlka</span> v Košiciach,
+              <span className="text-coral-dark">Psia škôlka</span>{" "}
+              <span className="whitespace-nowrap">v Košiciach,</span>
               <br />
               ktorú si váš
               <br />
@@ -92,7 +93,7 @@ export function Hero() {
 
             <a
               href={`tel:${PHONE}`}
-              className="btn-coral order-4 mt-4 inline-flex items-center gap-2 self-start px-4 py-2 text-sm"
+              className="btn-coral order-4 mt-4 inline-flex min-w-44 items-center justify-center gap-2 self-start px-4 py-2 text-sm"
             >
               <Phone className="size-4" /> Zavolajte nám
             </a>
