@@ -15,9 +15,10 @@ import { Footer } from "@/components/site/Contact";
 import { Collapse } from "@/components/site/Collapse";
 import { CartDrawer } from "@/components/site/CartDrawer";
 import { addToCart, type LetterColor, type StandColor, type StandSize } from "@/lib/shop";
-import standAloy from "@/assets/products/stand-aloy-dog.webp";
-import standMia from "@/assets/products/stand-mia.webp";
-import standWoody from "@/assets/products/stand-woody-white.webp";
+import standDark from "@/assets/products/stand-dark.webp";
+import standLight from "@/assets/products/stand-light.webp";
+import standWhite from "@/assets/products/stand-white.webp";
+import standMia from "@/assets/products/stand-small-mia.webp";
 
 const BASE_URL = "https://chvostikovo.sk";
 const PAGE_URL = `${BASE_URL}/stojan-na-misky-pre-psa`;
@@ -54,9 +55,30 @@ const FAQ = [
 ];
 
 const GALLERY = [
-  { src: standAloy, alt: "Väčší drevený stojan na misky pre psa pri používaní" },
-  { src: standMia, alt: "Menší drevený stojan na misky pre psa" },
-  { src: standWoody, alt: "Biely drevený stojan na misky s personalizáciou" },
+  {
+    src: standDark,
+    alt: "Tmavý drevený stojan na misky pre psa s personalizáciou",
+    position: "50% 63%",
+  },
+  {
+    src: standLight,
+    alt: "Svetlý drevený stojan na misky pre psa s personalizáciou",
+    position: "50% 62%",
+  },
+  {
+    src: standWhite,
+    alt: "Biely drevený stojan na misky pre psa s čiernym menom",
+    position: "50% 62%",
+  },
+];
+
+const REALIZATIONS = [
+  ...GALLERY,
+  {
+    src: standMia,
+    alt: "Menší drevený stojan na misky pre menšieho psa",
+    position: "50% 58%",
+  },
 ];
 
 const SIZE_OPTIONS: Array<{ value: StandSize; label: string; detail: string }> = [
@@ -65,17 +87,17 @@ const SIZE_OPTIONS: Array<{ value: StandSize; label: string; detail: string }> =
 ];
 
 const COLOR_OPTIONS: Array<{ value: StandColor; label: string }> = [
-  { value: "natural", label: "Prírodné drevo" },
-  { value: "dark", label: "Tmavé drevo" },
+  { value: "natural", label: "Svetlé" },
+  { value: "dark", label: "Tmavé" },
   { value: "white", label: "Biela" },
-  { value: "custom", label: "Iná podľa dohody" },
+  { value: "custom", label: "Iná" },
 ];
 
 const LETTER_OPTIONS: Array<{ value: LetterColor; label: string }> = [
-  { value: "light", label: "Svetlé drevo" },
-  { value: "black", label: "Čierna" },
-  { value: "white", label: "Biela" },
-  { value: "custom", label: "Iná podľa dohody" },
+  { value: "light", label: "Svetlé" },
+  { value: "dark", label: "Tmavé" },
+  { value: "black", label: "Čierne" },
+  { value: "custom", label: "Iné" },
 ];
 
 export const Route = createFileRoute("/stojan-na-misky-pre-psa")({
@@ -141,7 +163,8 @@ function ProductGallery() {
         <img
           src={current.src}
           alt={current.alt}
-          className="h-full w-full object-cover object-center"
+          className="h-full w-full object-cover"
+          style={{ objectPosition: current.position }}
           fetchPriority="high"
         />
       </div>
@@ -157,10 +180,44 @@ function ProductGallery() {
               active === index ? "border-coral shadow-card" : "border-transparent opacity-75 hover:opacity-100"
             }`}
           >
-            <img src={image.src} alt="" className="h-full w-full object-cover object-center" />
+            <img
+              src={image.src}
+              alt=""
+              className="h-full w-full object-cover"
+              style={{ objectPosition: image.position }}
+            />
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+function ChoiceGrid({
+  options,
+  value,
+  onChange,
+}: {
+  options: Array<{ value: string; label: string }>;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2">
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onChange(option.value)}
+          className={`min-w-0 rounded-xl border-2 px-1 py-2 text-center text-[10px] font-semibold leading-tight transition sm:rounded-full sm:px-3 sm:text-xs ${
+            value === option.value
+              ? "border-coral bg-coral-soft/25 text-forest"
+              : "border-forest/10 bg-background text-forest/70"
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -278,22 +335,12 @@ function BowlStandPage() {
 
                       <div className="mt-5">
                         <p className="font-display text-sm font-bold text-forest">2. Farba stojana</p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {COLOR_OPTIONS.map((option) => (
-                            <button
-                              key={option.value}
-                              type="button"
-                              onClick={() => setColor(option.value)}
-                              className={`rounded-full border-2 px-3 py-2 text-xs font-semibold transition ${
-                                color === option.value
-                                  ? "border-coral bg-coral-soft/25 text-forest"
-                                  : "border-forest/10 bg-background text-forest/70"
-                              }`}
-                            >
-                              {option.label}
-                            </button>
-                          ))}
-                        </div>
+                        <ChoiceGrid
+                          options={COLOR_OPTIONS}
+                          value={color}
+                          onChange={(value) => setColor(value as StandColor)}
+                        />
+                        <p className="mt-1.5 text-[11px] text-forest/50">Iné farebné prevedenie vieme dohodnúť individuálne.</p>
                       </div>
 
                       <label className="mt-5 block font-display text-sm font-bold text-forest">
@@ -306,7 +353,7 @@ function BowlStandPage() {
                             placeholder="napr. 58"
                             className="w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 pr-12 font-sans font-normal outline-none focus:border-coral"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-forest/50">cm</span>
+                          <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-forest/50">cm</span>
                         </div>
                       </label>
 
@@ -323,22 +370,12 @@ function BowlStandPage() {
 
                       <div className="mt-5">
                         <p className="font-display text-sm font-bold text-forest">5. Farba písmen</p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {LETTER_OPTIONS.map((option) => (
-                            <button
-                              key={option.value}
-                              type="button"
-                              onClick={() => setLetterColor(option.value)}
-                              className={`rounded-full border-2 px-3 py-2 text-xs font-semibold transition ${
-                                letterColor === option.value
-                                  ? "border-coral bg-coral-soft/25 text-forest"
-                                  : "border-forest/10 bg-background text-forest/70"
-                              }`}
-                            >
-                              {option.label}
-                            </button>
-                          ))}
-                        </div>
+                        <ChoiceGrid
+                          options={LETTER_OPTIONS}
+                          value={letterColor}
+                          onChange={(value) => setLetterColor(value as LetterColor)}
+                        />
+                        <p className="mt-1.5 text-[11px] text-forest/50">Inú farbu písmen vieme dohodnúť individuálne.</p>
                       </div>
 
                       {configError && <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{configError}</p>}
@@ -366,7 +403,13 @@ function BowlStandPage() {
 
             <div className="mt-10 grid gap-6 md:grid-cols-2">
               <article className="overflow-hidden rounded-4xl bg-card shadow-card">
-                <img src={standMia} alt="Menšia verzia dreveného stojana na misky" loading="lazy" className="h-72 w-full object-cover object-center" />
+                <img
+                  src={standMia}
+                  alt="Menšia verzia dreveného stojana na misky"
+                  loading="lazy"
+                  className="h-72 w-full object-cover"
+                  style={{ objectPosition: "50% 58%" }}
+                />
                 <div className="p-7">
                   <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">Menšia verzia</p>
                   <h3 className="mt-2 text-2xl text-forest">cca 40 × 20 cm</h3>
@@ -375,7 +418,13 @@ function BowlStandPage() {
               </article>
 
               <article className="overflow-hidden rounded-4xl bg-card shadow-card">
-                <img src={standAloy} alt="Väčšia verzia dreveného stojana na misky" loading="lazy" className="h-72 w-full object-cover object-center" />
+                <img
+                  src={standDark}
+                  alt="Väčšia verzia dreveného stojana na misky"
+                  loading="lazy"
+                  className="h-72 w-full object-cover"
+                  style={{ objectPosition: "50% 63%" }}
+                />
                 <div className="p-7">
                   <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">Väčšia verzia</p>
                   <h3 className="mt-2 text-2xl text-forest">cca 60 × 30 cm</h3>
@@ -428,7 +477,13 @@ function BowlStandPage() {
                 <p>Používame drevo a povrch stojana ošetrujeme tak, aby sa dal jednoducho udržiavať pri bežnom používaní okolo vody a krmiva. Dve nerezové misky sú súčasťou stojana.</p>
               </div>
             </div>
-            <img src={standWoody} alt="Biely ručne vyrábaný stojan na misky" loading="lazy" className="h-80 w-full rounded-4xl object-cover object-center shadow-soft" />
+            <img
+              src={standWhite}
+              alt="Biely ručne vyrábaný stojan na misky"
+              loading="lazy"
+              className="h-80 w-full rounded-4xl object-cover shadow-soft"
+              style={{ objectPosition: "50% 62%" }}
+            />
           </div>
         </section>
 
@@ -440,9 +495,15 @@ function BowlStandPage() {
               <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-forest/75">Niekoľko hotových prevedení. Ďalšie farby a realizácie budeme postupne dopĺňať.</p>
             </div>
             <div className="mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {GALLERY.map((image) => (
+              {REALIZATIONS.map((image) => (
                 <figure key={image.alt} className="w-[82%] shrink-0 snap-center overflow-hidden rounded-4xl bg-card shadow-card sm:w-[46%] lg:w-[31.5%]">
-                  <img src={image.src} alt={image.alt} loading="lazy" className="h-72 w-full object-cover object-center" />
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    loading="lazy"
+                    className="h-72 w-full object-cover"
+                    style={{ objectPosition: image.position }}
+                  />
                 </figure>
               ))}
             </div>
