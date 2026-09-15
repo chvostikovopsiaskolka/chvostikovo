@@ -219,6 +219,7 @@ function ChoiceGrid({
 
 function BowlStandPage() {
   const submissionId = useRef(crypto.randomUUID());
+  const submissionInFlight = useRef(false);
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -235,7 +236,7 @@ function BowlStandPage() {
 
   async function sendInquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (isSubmitting || isSubmitted) return;
+    if (submissionInFlight.current || isSubmitted) return;
 
     const height = Number(dogHeight.replace(",", "."));
     if (!Number.isFinite(height) || height < 10 || height > 120) {
@@ -244,6 +245,7 @@ function BowlStandPage() {
     }
 
     setConfigError("");
+    submissionInFlight.current = true;
     setIsSubmitting(true);
     try {
       await submitProductInquiry({
@@ -266,6 +268,7 @@ function BowlStandPage() {
     } catch {
       setConfigError("Dopyt sa nepodarilo odoslať. Skúste to, prosím, znova o chvíľu.");
     } finally {
+      submissionInFlight.current = false;
       setIsSubmitting(false);
     }
   }
