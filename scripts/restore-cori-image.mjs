@@ -85,6 +85,13 @@ await restoreImage({
   output: "stand-planetky.avif",
   expectedBytes: 9_735,
 });
+await restoreImage({
+  label: "ALOY",
+  dataDir: galleryDataDir,
+  prefix: "stand-aloy",
+  output: "stand-aloy.avif",
+  expectedBytes: 33_594,
+});
 
 const routePath = path.join(root, "src", "routes", "stojan-na-misky-pre-psa.tsx");
 let routeSource = await readFile(routePath, "utf8");
@@ -103,7 +110,7 @@ for (const [oldImport, newImport] of routeImportReplacements) {
 }
 
 const galleryImportAnchor = 'import standMia from "@/assets/products/stand-mia.avif";';
-const galleryImports = `${galleryImportAnchor}\nimport standMlyncek from "@/assets/products/stand-mlyncek.avif";\nimport standAron from "@/assets/products/stand-aron.avif";\nimport standLoki from "@/assets/products/stand-loki.avif";\nimport standPlanetky from "@/assets/products/stand-planetky.avif";`;
+const galleryImports = `${galleryImportAnchor}\nimport standMlyncek from "@/assets/products/stand-mlyncek.avif";\nimport standAron from "@/assets/products/stand-aron.avif";\nimport standLoki from "@/assets/products/stand-loki.avif";\nimport standPlanetky from "@/assets/products/stand-planetky.avif";\nimport standAloy from "@/assets/products/stand-aloy.avif";`;
 
 if (!routeSource.includes(galleryImportAnchor)) {
   throw new Error("Expected MIA import anchor was not found in product route");
@@ -111,7 +118,7 @@ if (!routeSource.includes(galleryImportAnchor)) {
 routeSource = routeSource.replace(galleryImportAnchor, galleryImports);
 
 const oldRealizations = "const REALIZATIONS = GALLERY;";
-const newRealizations = `const REALIZATIONS = [\n  ...GALLERY,\n  {\n    src: standMlyncek,\n    alt: "Svetlý drevený stojan na misky pre psa MLYNČEK",\n    position: "50% 58%",\n  },\n  {\n    src: standAron,\n    alt: "Tmavý drevený stojan na misky pre psa ARON",\n    position: "50% 58%",\n  },\n  {\n    src: standLoki,\n    alt: "Tmavý drevený stojan na misky pre psa LOKI",\n    position: "50% 56%",\n  },\n  {\n    src: standPlanetky,\n    alt: "Biely drevený stojan na misky pre psa PLANÉTKY",\n    position: "50% 58%",\n  },\n];`;
+const newRealizations = `const REALIZATIONS = [\n  ...GALLERY,\n  {\n    src: standMlyncek,\n    alt: "Svetlý drevený stojan na misky pre psa MLYNČEK",\n    position: "50% 58%",\n  },\n  {\n    src: standAron,\n    alt: "Tmavý drevený stojan na misky pre psa ARON",\n    position: "50% 58%",\n  },\n  {\n    src: standLoki,\n    alt: "Tmavý drevený stojan na misky pre psa LOKI",\n    position: "50% 56%",\n  },\n  {\n    src: standPlanetky,\n    alt: "Biely drevený stojan na misky pre psa PLANÉTKY",\n    position: "50% 58%",\n  },\n  {\n    src: standAloy,\n    alt: "Tmavý drevený stojan na misky pre psa ALOY",\n    position: "50% 55%",\n  },\n];`;
 
 if (!routeSource.includes(oldRealizations)) {
   throw new Error("Expected REALIZATIONS declaration was not found in product route");
@@ -168,5 +175,5 @@ for (const item of listingReplacements) {
 }
 
 console.log(
-  "Product images restored; realizations extended with MLYNČEK / ARON / LOKI / PLANÉTKY; mobile spacing tightened.",
+  "Product images restored; realizations extended with MLYNČEK / ARON / LOKI / PLANÉTKY / ALOY; mobile spacing tightened.",
 );
