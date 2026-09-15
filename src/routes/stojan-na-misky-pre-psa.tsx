@@ -16,7 +16,6 @@ import { Collapse } from "@/components/site/Collapse";
 import { CartDrawer } from "@/components/site/CartDrawer";
 import { addToCart, type LetterColor, type StandColor, type StandSize } from "@/lib/shop";
 import standDark from "@/assets/products/stand-dark.webp";
-import standLight from "@/assets/products/stand-light.webp";
 import standWhite from "@/assets/products/stand-white.webp";
 import standMia from "@/assets/products/stand-small-mia.webp";
 
@@ -57,29 +56,22 @@ const FAQ = [
 const GALLERY = [
   {
     src: standDark,
-    alt: "Tmavý drevený stojan na misky pre psa s personalizáciou",
+    alt: "Tmavý drevený stojan na misky pre psa CORI",
     position: "50% 63%",
   },
   {
-    src: standLight,
-    alt: "Svetlý drevený stojan na misky pre psa s personalizáciou",
-    position: "50% 62%",
-  },
-  {
     src: standWhite,
-    alt: "Biely drevený stojan na misky pre psa s čiernym menom",
+    alt: "Biely drevený stojan na misky pre psa WOODY",
     position: "50% 62%",
   },
-];
-
-const REALIZATIONS = [
-  ...GALLERY,
   {
     src: standMia,
-    alt: "Menší drevený stojan na misky pre menšieho psa",
+    alt: "Menší drevený stojan na misky pre psa MIA",
     position: "50% 58%",
   },
 ];
+
+const REALIZATIONS = GALLERY;
 
 const SIZE_OPTIONS: Array<{ value: StandSize; label: string; detail: string }> = [
   { value: "small", label: "Menší", detail: "cca 40 × 20 cm · menšie misky" },

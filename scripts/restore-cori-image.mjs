@@ -4,39 +4,71 @@ import path from "node:path";
 const root = process.cwd();
 const dataDir = path.join(root, "scripts", "product-image-data");
 const outputDir = path.join(root, "src", "assets", "products");
-const routePath = path.join(root, "src", "routes", "stojan-na-misky-pre-psa.tsx");
 
 await mkdir(outputDir, { recursive: true });
 
-const chunks = (await readdir(dataDir))
-  .filter((name) => name.startsWith("stand-dark.") && name.endsWith(".b64"))
-  .sort();
+const images = [
+  { label: "CORI", prefix: "stand-dark", output: "stand-cori.avif", minBytes: 20_000 },
+  { label: "WOODY", prefix: "stand-woody", output: "stand-woody.avif", minBytes: 15_000 },
+  { label: "MIA", prefix: "stand-mia", output: "stand-mia.avif", minBytes: 20_000 },
+];
 
-if (!chunks.length) {
-  throw new Error("Missing CORI AVIF data chunks");
+const dataFiles = await readdir(dataDir);
+
+for (const definition of images) {
+  const chunks = dataFiles
+    .filter((name) => name.startsWith(`${definition.prefix}.`) && name.endsWith(".b64"))
+    .sort();
+
+  if (!chunks.length) {
+    throw new Error(`Missing ${definition.label} AVIF data chunks`);
+  }
+
+  const encoded = (
+    await Promise.all(chunks.map(async (name) => (await readFile(path.join(dataDir, name), "utf8")).trim()))
+  ).join("");
+  const image = Buffer.from(encoded, "base64");
+  const header = image.subarray(0, 32).toString("ascii");
+
+  if (image.length < definition.minBytes || !header.includes("ftypavif")) {
+    throw new Error(`Invalid ${definition.label} AVIF (${image.length} bytes)`);
+  }
+
+  await writeFile(path.join(outputDir, definition.output), image);
+  console.log(`Restored ${definition.label} AVIF: ${image.length} bytes.`);
 }
 
-const encoded = (
-  await Promise.all(chunks.map(async (name) => (await readFile(path.join(dataDir, name), "utf8")).trim()))
-).join("");
+const sourceReplacements = [
+  {
+    file: "src/routes/stojan-na-misky-pre-psa.tsx",
+    replacements: [
+      ['@/assets/products/stand-dark.webp', '@/assets/products/stand-cori.avif'],
+      ['@/assets/products/stand-white.webp', '@/assets/products/stand-woody.avif'],
+      ['@/assets/products/stand-small-mia.webp', '@/assets/products/stand-mia.avif'],
+    ],
+  },
+  {
+    file: "src/components/site/ProductSection.tsx",
+    replacements: [['@/assets/products/stand-small-mia.webp', '@/assets/products/stand-mia.avif']],
+  },
+  {
+    file: "src/routes/produkty.tsx",
+    replacements: [['@/assets/products/stand-small-mia.webp', '@/assets/products/stand-mia.avif']],
+  },
+];
 
-const image = Buffer.from(encoded, "base64");
-const header = image.subarray(0, 32).toString("ascii");
+for (const item of sourceReplacements) {
+  const filePath = path.join(root, item.file);
+  let source = await readFile(filePath, "utf8");
 
-if (image.length < 20_000 || !header.includes("ftypavif")) {
-  throw new Error(`Invalid CORI AVIF (${image.length} bytes)`);
+  for (const [oldImport, newImport] of item.replacements) {
+    if (!source.includes(oldImport)) {
+      throw new Error(`Expected ${oldImport} import was not found in ${item.file}`);
+    }
+    source = source.replace(oldImport, newImport);
+  }
+
+  await writeFile(filePath, source);
 }
 
-const outputPath = path.join(outputDir, "stand-cori.avif");
-await writeFile(outputPath, image);
-
-const source = await readFile(routePath, "utf8");
-const oldImport = '@/assets/products/stand-dark.webp';
-const newImport = '@/assets/products/stand-cori.avif';
-
-if (!source.includes(oldImport)) {
-  throw new Error("Expected stand-dark.webp import was not found in product route");
-}
-
-await writeFile(routePath, source.replace(oldImport, newImport));
-console.log(`Restored CORI AVIF: ${image.length} bytes and set it as the main product image.`);
+console.log("Product images set to CORI / WOODY / MIA; MIA is used for listing thumbnails.");

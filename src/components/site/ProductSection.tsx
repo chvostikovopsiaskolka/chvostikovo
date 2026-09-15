@@ -1,10 +1,10 @@
 import { ArrowRight } from "lucide-react";
-import standDark from "@/assets/products/stand-dark.webp";
+import standMia from "@/assets/products/stand-small-mia.webp";
 
 const PRODUCTS = [
   {
     href: "/stojan-na-misky-pre-psa",
-    image: standDark,
+    image: standMia,
     alt: "Drevený stojan na misky pre psa",
     title: "Drevený stojan na misky pre psa",
     description: "Dve nerezové misky, výška podľa psíka a prevedenie s personalizáciou podľa vášho želania.",

@@ -23,7 +23,7 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      - name: Restore CORI AVIF
+      - name: Restore product AVIF images
         run: node scripts/restore-cori-image.mjs
       - name: Build static site
         run: bun run build:pages

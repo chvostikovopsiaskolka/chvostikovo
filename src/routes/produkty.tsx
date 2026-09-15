@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Hammer, Paintbrush, Ruler, Sparkles, Type } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
-import standDark from "@/assets/products/stand-dark.webp";
+import standMia from "@/assets/products/stand-small-mia.webp";
 
 const BASE_URL = "https://chvostikovo.sk";
 const PAGE_URL = `${BASE_URL}/produkty`;
@@ -63,7 +63,7 @@ function ProductsPage() {
             <article className="mx-auto mt-9 grid max-w-4xl overflow-hidden rounded-4xl bg-card shadow-soft lg:grid-cols-[1fr_0.95fr]">
               <a href="/stojan-na-misky-pre-psa" className="group block overflow-hidden">
                 <img
-                  src={standDark}
+                  src={standMia}
                   alt="Drevený stojan na misky pre psa s personalizáciou"
                   className="h-72 w-full object-cover transition duration-500 group-hover:scale-[1.02] sm:h-80 lg:h-full"
                   style={{ objectPosition: "50% 63%" }}
