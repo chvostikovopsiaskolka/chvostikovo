@@ -24,34 +24,34 @@ export function Hero() {
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-2 text-center lg:text-left">
         {/* Mobile layout */}
         <div className="lg:hidden">
-          <h1 className="text-3xl leading-[1.05] text-forest sm:text-5xl">
-            <span className="text-coral-dark">Psia škôlka</span>,
+          <p className="mx-auto mb-4 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm">
+            Denná starostlivosť o stredných a veľkých psíkov v Košiciach
+          </p>
+
+          <h1 className="text-4xl leading-[1.05] text-forest sm:text-5xl">
+            <span className="text-coral-dark">Psia škôlka</span> v
             <br />
-            ktorú si váš
+            Košiciach, ktorú si váš
             <br />
             psík zamiluje
           </h1>
 
-          <div className="mx-auto mt-4 max-w-md rounded-xl bg-white/95 p-3 text-forest shadow-soft sm:rounded-2xl sm:p-4">
-            <p className="font-display text-sm font-bold sm:text-base">
+          <div className="mx-auto mt-5 max-w-xl rounded-2xl bg-white/95 p-4 text-forest shadow-soft">
+            <p className="font-display text-base font-bold sm:text-lg">
               Váš psík už nemusí tráviť deň sám doma.
             </p>
-            <p className="mt-1 text-sm font-medium text-forest/90 sm:text-base">
+            <p className="mt-2 text-base font-medium leading-relaxed text-forest/90">
               Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným dohľadom.
             </p>
           </div>
 
-          <p className="mx-auto mt-10 mb-2 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm">
-            Denná starostlivosť o stredných a veľkých psíkov v Košiciach
-          </p>
+          <InfoTicker className="mt-7 mb-5 w-screen mx-[calc((100%-100vw)/2)]" />
 
-          <InfoTicker className="my-2 w-screen mx-[calc((100%-100vw)/2)]" />
-
-          <div className="mx-auto min-w-0 max-w-2xl rounded-4xl bg-card/95 p-5 shadow-soft backdrop-blur-sm sm:p-8">
-            <h2 className="text-center text-base text-forest sm:whitespace-nowrap sm:text-xl">
+          <div className="mx-auto min-w-0 max-w-2xl rounded-4xl bg-card/95 p-6 shadow-soft backdrop-blur-sm sm:p-8">
+            <h2 className="text-center text-2xl text-forest">
               Informujte sa o škôlke..
             </h2>
-            <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
+            <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
               Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
             </p>
 
