@@ -169,11 +169,12 @@ export function Pricing() {
               >
                 {p.price}
               </p>
-              <p
-                className={`mt-2 text-sm ${p.highlight ? "text-cream/85" : "text-forest/70"}`}
-              >
-                {p.note}
-              </p>
+              {p.name === "Permanentka" ? (
+                <p className={`mt-2 text-sm ${p.highlight ? "text-cream/85" : "text-forest/70"}`}>
+                  10 vstupov – ušetríte 50 €.
+                  <strong className="mt-1 block font-bold">Permanentka platí 2 mesiace.</strong>
+                </p>
+              ) : null}
             </article>
           ))}
         </div>
