@@ -33,50 +33,27 @@ Zálohované patche:
 
 ## Admin aplikácia
 
-Produkčné UI patche:
+### Aktuálna konsolidovaná verzia
 
-- `admin-ui-v31-v32.html`
-  - odstránenie zbytočného textu pri zatvorenom dni,
-  - plávajúca spodná navigácia s ikonami,
-  - kompaktnejšie karty Týždňa,
-  - počet psov a kapacita spojené do pomeru `počet / kapacita`,
-  - plná/preplnená kapacita farebne zvýraznená,
-  - malé kruhové `+ Pridať`,
-  - čistejšie rozbalené rezervácie,
-  - rýchly súhrn na Prehľade.
+- `admin-ui-v40-consolidated.html`
+  - nahrádza dnešné vrstvené UI patche v31–v36 jednou stabilnou UI vrstvou,
+  - Prehľad sa zobrazí až po zostavení finálneho dashboardu, takže pri načítaní nepreskakuje,
+  - dashboardové počty sa načítavajú priamo zo Supabase: dnes, zajtra, čakajúce rezervácie, neprečítané správy a iba nové záujmy/prihlášky,
+  - nový záujem a nová prihláška sa počítajú iba so stavom `new`; `reviewed`/vybavené sa nezapočítavajú,
+  - dashboard je jediný zdroj rozloženia Prehľadu; staré re-order skripty `admin-v21-overview-order-pending`, `overview-live-badges-v26` a `overview-live-badges-v28` boli z produkcie odstránené,
+  - `admin-ui-v22` si zachováva ostatné funkcie, ale už nenúti `overviewGroupsV22` späť za pôvodný hero,
+  - spodná navigácia je skrytá do dokončenia finálnej ikonovej podoby, aby pri štarte neblikala stará verzia,
+  - Psy používajú presne fallback znak `🐾`, rovnaký ako pri psovi bez fotografie,
+  - Týždeň používa pôvodný dátum/názov dňa generovaný samotnou appkou; v40 ho iba štýluje a ak by chýbal, doplní ho z `data-date`,
+  - zatvorenie dňa je priamo pri konkrétnom dni; horný formulár Zatvorené dni sa nepoužíva,
+  - pri zatvorenom dni sa nezobrazuje prázdne „Bez schválených rezervácií“,
+  - Štatistiky majú pohľady `Návštevy`, `Tržby`, `História návštev` a pri každom otvorení sa predvolene zobrazia `Návštevy`.
 
-- `admin-ui-v33.html`
-  - klikateľný dashboard namiesto oranžového hero,
-  - dashboardové karty Psíkov dnes / Zajtra / Čakajúce rezervácie / Správy / Záujem o škôlku,
-  - kompaktné ovládanie zatvorených dní priamo pri jednotlivom dni,
-  - Štatistiky majú hlavičku Prehľad / História návštev.
+### Historické dnešné patche
 
-- `admin-ui-v34.html`
-  - opravuje poradie dashboardu tak, aby bol nad pôvodnými rozbaľovacími blokmi,
-  - pôvodné dashboardové skupiny sa po načítaní predvolene zbalia a zostávajú cieľom po kliknutí na kartu,
-  - obnovuje pôvodné názvy dní a dátumy v Týždni namiesto nespoľahlivého runtime labelu,
-  - odstraňuje text „Bez schválených rezervácií“ pri zatvorenom dni,
-  - zatvorenie dňa používa priamy autentifikovaný RPC call a nepotrebuje horný formulár Zatvorené dni,
-  - navigačná položka Psy dostala novú výraznejšiu plnú labku,
-  - dashboard Záujem o škôlku používa živé badge počty.
-
-- `admin-stats-v35.html`
-  - Štatistiky sú rozdelené na tri samostatné pohľady: `Návštevy`, `Tržby`, `História návštev`,
-  - pri každom otvorení spodnej karty Štatistiky sa predvolene otvorí `Návštevy`,
-  - `Návštevy` obsahujú vstupy a mesačné/ročné štatistiky návštev,
-  - `Tržby` obsahujú všetky finančné bloky vrátane reálnej tržby, hotela, permanentiek, taxi a jednorazových vstupov,
-  - `História návštev` používa existujúci detail mesiac → týždeň → deň → konkrétni psi,
-  - výpočty a databázová logika sa nemenili; v35 iba rozdeľuje existujúce bloky do troch UI pohľadov.
-
-- `admin-fixes-v36.html`
-  - dashboard Záujem o škôlku počíta iba formuláre so stavom `new`, takže vybavené záujmy sa nezapočítavajú,
-  - počet sa načítava priamo cez autentifikovaný PostgREST a stabilizuje živé badge hodnoty,
-  - Týždeň používa vlastný stabilný dátumový label vytvorený priamo z `data-date`,
-  - navigačná ikona Psy používa presne znak `🐾`, rovnaký ako fallback pri profile psa bez fotografie.
+Súbory `admin-ui-v31-v32.html`, `admin-ui-v33.html`, `admin-ui-v34.html`, `admin-stats-v35.html` a `admin-fixes-v36.html` ostávajú iba ako história postupných zmien. Pri obnove produkcie sa už nemajú vrstviť na seba; preferovaná je konsolidovaná v40.
 
 ## Produkčné rollbacky v Supabase
-
-Pred zásahmi boli vytvorené rollbacky:
 
 - Customer portal: `before-customer-booking-sheet-settings-v37-20260915`
 - Admin pred v32: `stable-v9-before-admin-ui-v32-20260915-0825`
@@ -84,10 +61,12 @@ Pred zásahmi boli vytvorené rollbacky:
 - Admin pred opravou v34: `stable-v9-before-admin-ui-v34-20260915-1250`
 - Admin pred štatistickými kartami v35: `stable-v9-before-admin-stats-tabs-v35-20260915-1258`
 - Admin pred opravami v36: `stable-v9-before-admin-fixes-v36-20260915-1254`
+- Admin pred konsolidáciou: `stable-v9-before-consolidated-ui-v40-20260915-1302`
+- Admin pred odstránením starých konfliktujúcich runtime skriptov: `stable-v9-before-v40-legacy-cleanup-20260915-1310`
 - Pred odstránením textu zatvoreného dňa: `stable-v9-before-closed-day-text-cleanup-20260915-0821`
 
 ## Dôležité
 
-Tieto súbory sú záloha dnešných UI patchov. Produkčný admin sa skladá z `frontend_snapshots.stable-v9` a transformácií Edge Function `chvostikovo-frontend`. Zákaznícky portál sa servuje z `customer_portal_frontend_assets`.
+Produkčný admin sa skladá z `frontend_snapshots.stable-v9` a transformácií Edge Function `chvostikovo-frontend`. Zákaznícky portál sa servuje z `customer_portal_frontend_assets`.
 
-Pri obnove sa patche nemajú aplikovať naslepo na inú verziu. Najprv treba overiť aktuálnu produkčnú verziu a až potom doplniť chýbajúce bloky podľa markerov `v35`, `v36`, `v37`, `v31`, `v32`, `v33`, `v34`.
+Pri obnove admin UI po 15. 9. 2026 sa má ako východisko používať `admin-ui-v40-consolidated.html`, nie postupne vrstviť v31–v36. Najprv vždy over aktuálny produkčný snapshot a Edge Function transformácie.
