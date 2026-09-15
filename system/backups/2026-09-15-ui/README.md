@@ -33,7 +33,7 @@ Zálohované patche:
 
 ## Admin aplikácia
 
-Produkčný UI patch:
+Produkčné UI patche:
 
 - `admin-ui-v31-v32.html`
   - odstránenie zbytočného textu pri zatvorenom dni,
@@ -43,18 +43,30 @@ Produkčný UI patch:
   - plná/preplnená kapacita farebne zvýraznená,
   - malé kruhové `+ Pridať`,
   - čistejšie rozbalené rezervácie,
-  - rýchly súhrn na Prehľade: Dnes / Čaká / Správy.
+  - rýchly súhrn na Prehľade.
+
+- `admin-ui-v33.html`
+  - oranžový hero na Prehľade nahradený klikateľným dashboardom,
+  - karty Psíkov dnes / Zajtra / Čakajúce rezervácie / Správy / Záujem o škôlku otvárajú príslušné rozbaľovacie bloky,
+  - dátum zostáva kompaktným textom hore,
+  - opravené stabilné názvy dní a dátumy v Týždni,
+  - horná karta Zatvorené dni odstránená,
+  - zatvorenie konkrétneho dňa je dostupné priamo pri jeho `+`,
+  - pri zatvorenom dni sa nezobrazuje prázdny text „Bez schválených rezervácií“,
+  - krajšia labka pre Psy a nová ikona Štatistiky,
+  - Štatistiky majú kompaktnú hlavičku Prehľad / História návštev a história je vizuálne súčasťou tejto sekcie.
 
 ## Produkčné rollbacky v Supabase
 
 Pred zásahmi boli vytvorené rollbacky:
 
 - Customer portal: `before-customer-booking-sheet-settings-v37-20260915`
-- Admin: `stable-v9-before-admin-ui-v32-20260915-0825`
+- Admin pred v32: `stable-v9-before-admin-ui-v32-20260915-0825`
+- Admin pred v33: `stable-v9-before-admin-ui-v33-20260915-1152`
 - Pred odstránením textu zatvoreného dňa: `stable-v9-before-closed-day-text-cleanup-20260915-0821`
 
 ## Dôležité
 
 Tieto súbory sú záloha dnešných UI patchov. Produkčný admin sa skladá z `frontend_snapshots.stable-v9` a transformácií Edge Function `chvostikovo-frontend`. Zákaznícky portál sa servuje z `customer_portal_frontend_assets`.
 
-Pri obnove sa patche nemajú aplikovať naslepo na inú verziu. Najprv treba overiť aktuálnu produkčnú verziu a až potom doplniť chýbajúce bloky podľa markerov `v35`, `v36`, `v37`, `v31`, `v32`.
+Pri obnove sa patche nemajú aplikovať naslepo na inú verziu. Najprv treba overiť aktuálnu produkčnú verziu a až potom doplniť chýbajúce bloky podľa markerov `v35`, `v36`, `v37`, `v31`, `v32`, `v33`.
