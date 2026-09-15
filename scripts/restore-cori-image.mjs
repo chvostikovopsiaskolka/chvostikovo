@@ -117,6 +117,13 @@ if (!routeSource.includes(galleryImportAnchor)) {
 }
 routeSource = routeSource.replace(galleryImportAnchor, galleryImports);
 
+const dialogImportAnchor = 'import { Collapse } from "@/components/site/Collapse";';
+const dialogImports = `${dialogImportAnchor}\nimport { ContentDialog } from "@/components/site/ContentDialog";`;
+if (!routeSource.includes(dialogImportAnchor)) {
+  throw new Error("Expected Collapse import anchor was not found in product route");
+}
+routeSource = routeSource.replace(dialogImportAnchor, dialogImports);
+
 const oldRealizations = "const REALIZATIONS = GALLERY;";
 const newRealizations = `const REALIZATIONS = [\n  ...GALLERY,\n  {\n    src: standMlyncek,\n    alt: "Svetlý drevený stojan na misky pre psa MLYNČEK",\n    position: "50% 58%",\n  },\n  {\n    src: standAron,\n    alt: "Tmavý drevený stojan na misky pre psa ARON",\n    position: "50% 58%",\n  },\n  {\n    src: standLoki,\n    alt: "Tmavý drevený stojan na misky pre psa LOKI",\n    position: "50% 56%",\n  },\n  {\n    src: standPlanetky,\n    alt: "Biely drevený stojan na misky pre psa PLANÉTKY",\n    position: "50% 58%",\n  },\n  {\n    src: standAloy,\n    alt: "Tmavý drevený stojan na misky pre psa ALOY",\n    position: "50% 55%",\n  },\n];`;
 
@@ -140,6 +147,41 @@ if (!routeSource.includes(oldSizesSection)) {
   throw new Error("Expected sizes section spacing was not found in product route");
 }
 routeSource = routeSource.replace(oldSizesSection, newSizesSection);
+
+const oldOpenOrderOptions = `  function openOrderOptions() {\n    setOrderOpen(true);\n    window.setTimeout(() => {\n      document\n        .getElementById("objednavka-stojana")\n        ?.scrollIntoView({ behavior: "smooth", block: "center" });\n    }, 50);\n  }`;
+const newOpenOrderOptions = `  function openOrderOptions() {\n    setOrderOpen(true);\n  }`;
+if (!routeSource.includes(oldOpenOrderOptions)) {
+  throw new Error("Expected openOrderOptions function was not found in product route");
+}
+routeSource = routeSource.replace(oldOpenOrderOptions, newOpenOrderOptions);
+
+const oldInquiryTrigger = `                    onClick={() => setOrderOpen((open) => !open)}\n                    aria-expanded={orderOpen}\n                    aria-controls="moznosti-objednavky-stojana"`;
+const newInquiryTrigger = `                    onClick={openOrderOptions}\n                    aria-haspopup="dialog"`;
+if (!routeSource.includes(oldInquiryTrigger)) {
+  throw new Error("Expected stand inquiry trigger was not found in product route");
+}
+routeSource = routeSource.replace(oldInquiryTrigger, newInquiryTrigger);
+
+const oldInquiryIcon = `                    <ChevronDown\n                      className={\`size-5 shrink-0 text-forest/65 transition-transform \${orderOpen ? "rotate-180" : ""}\`}\n                    />`;
+const newInquiryIcon = `                    <ChevronRight className="size-5 shrink-0 text-forest/65" />`;
+if (!routeSource.includes(oldInquiryIcon)) {
+  throw new Error("Expected stand inquiry chevron was not found in product route");
+}
+routeSource = routeSource.replace(oldInquiryIcon, newInquiryIcon);
+
+const oldInquiryOpen = `                  {orderOpen && (\n                    <div\n                      id="moznosti-objednavky-stojana"\n                      className="mt-3 rounded-4xl bg-card p-5 shadow-soft sm:p-6"\n                    >`;
+const newInquiryOpen = `                  <ContentDialog\n                    open={orderOpen}\n                    onOpenChange={setOrderOpen}\n                    title="Mám záujem o stojan"\n                    subtitle="Vyberte rozmer, farbu, výšku a personalizáciu"\n                  >`;
+if (!routeSource.includes(oldInquiryOpen)) {
+  throw new Error("Expected inline stand inquiry opening was not found in product route");
+}
+routeSource = routeSource.replace(oldInquiryOpen, newInquiryOpen);
+
+const oldInquiryClose = `                      )}\n                    </div>\n                  )}\n                </div>\n              </div>`;
+const newInquiryClose = `                      )}\n                  </ContentDialog>\n                </div>\n              </div>`;
+if (!routeSource.includes(oldInquiryClose)) {
+  throw new Error("Expected inline stand inquiry closing was not found in product route");
+}
+routeSource = routeSource.replace(oldInquiryClose, newInquiryClose);
 
 const oldRealizationsHeading = `            <div className="text-center">\n              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">\n                Naše realizácie\n              </p>\n              <h2 className="section-title mt-2 text-3xl sm:text-4xl">\n                Spokojní štvornohí klienti\n              </h2>\n              <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-forest/75">\n                Niekoľko hotových prevedení. Ďalšie farby a realizácie budeme postupne dopĺňať.\n              </p>\n            </div>\n            <div className="mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">`;
 const newRealizationsHeading = `            <div className="text-center">\n              <h2 className="section-title text-3xl sm:text-4xl">\n                Spokojní štvornohí klienti\n              </h2>\n            </div>\n            <div className="mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">`;
@@ -187,5 +229,5 @@ englishReviewsSource = englishReviewsSource.replace(oldEnglishReviewsCopy, newEn
 await writeFile(englishReviewsPath, englishReviewsSource);
 
 console.log(
-  "Product images restored; realizations extended with MLYNČEK / ARON / LOKI / PLANÉTKY / ALOY; mobile spacing tightened; English Google review summary updated.",
+  "Product images restored; realizations extended; stand inquiry moved to modal; English Google review summary updated.",
 );
