@@ -4,13 +4,14 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "build:dev": "vite build --mode development",
+    "prepare:product-images": "node scripts/prepare-product-images.mjs",
+    "dev": "bun run prepare:product-images && vite dev",
+    "build": "bun run prepare:product-images && vite build",
+    "build:dev": "bun run prepare:product-images && vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "build:pages": "vite build --config vite.config.pages.ts && node scripts/finalize-pages.mjs"
+    "build:pages": "bun run prepare:product-images && vite build --config vite.config.pages.ts && node scripts/finalize-pages.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -63,7 +64,6 @@
     "tailwindcss": "^4.2.1",
     "tw-animate-css": "^1.3.4",
     "vaul": "^1.1.2",
-    "vite-tsconfig-paths": "^6.0.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
