@@ -2,6 +2,10 @@
   const data = window.SYSTEM_DATA;
   const $ = (id) => document.getElementById(id);
   const NOTES_KEY = 'chvostikovo-system-prepared-notes-v1';
+  const WORKSPACE_KEY = 'chvostikovo-system-workspace-token-v1';
+  const SUPABASE_URL = 'https://tlhcqwsluyqpywymjoxn.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
+  const workspaceToken = getWorkspaceToken();
   let preparedNotes = loadPreparedNotes();
   let editingNoteId = null;
 
@@ -10,6 +14,16 @@
   }[char]));
 
   const badge = (label, tone) => `<span class="badge ${esc(tone)}">${esc(label)}</span>`;
+
+  function getWorkspaceToken() {
+    let token = localStorage.getItem(WORKSPACE_KEY);
+    if (token && token.length >= 32) return token;
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    token = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+    localStorage.setItem(WORKSPACE_KEY, token);
+    return token;
+  }
 
   function loadPreparedNotes() {
     try {
@@ -20,8 +34,78 @@
     }
   }
 
-  function savePreparedNotes() {
+  function cachePreparedNotes() {
     localStorage.setItem(NOTES_KEY, JSON.stringify(preparedNotes));
+  }
+
+  async function rpc(name, body) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || `RPC ${name} zlyhalo`);
+    }
+    const text = await response.text();
+    return text ? JSON.parse(text) : null;
+  }
+
+  function normalizeRemoteNote(item) {
+    return {
+      id: item.id,
+      title: item.title,
+      text: item.body || '',
+      area: item.area || 'Obe appky',
+      kind: item.kind || 'Nápad',
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    };
+  }
+
+  async function syncPreparedNotes() {
+    try {
+      const remote = await rpc('system_notes_list', { p_token: workspaceToken });
+      if (Array.isArray(remote) && remote.length) {
+        preparedNotes = remote.map(normalizeRemoteNote);
+        cachePreparedNotes();
+        renderNext();
+        return;
+      }
+
+      if (preparedNotes.length) {
+        const migrated = [];
+        for (const note of preparedNotes) {
+          const saved = await saveNoteRemote({ ...note, id: null });
+          migrated.push(normalizeRemoteNote(saved));
+        }
+        preparedNotes = migrated;
+        cachePreparedNotes();
+        renderNext();
+      }
+    } catch (error) {
+      console.warn('System notes sync unavailable, using local cache.', error);
+    }
+  }
+
+  async function saveNoteRemote(note) {
+    return rpc('system_notes_save', {
+      p_token: workspaceToken,
+      p_id: note.id || null,
+      p_title: note.title,
+      p_body: note.text || '',
+      p_area: note.area || 'Obe appky',
+      p_kind: note.kind || 'Nápad'
+    });
+  }
+
+  async function deleteNoteRemote(id) {
+    return rpc('system_notes_delete', { p_token: workspaceToken, p_id: id });
   }
 
   function formatDate(value) {
@@ -177,13 +261,19 @@
     });
 
     document.querySelectorAll('[data-delete-note]').forEach(button => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', async () => {
         const note = preparedNotes.find(item => item.id === button.dataset.deleteNote);
         if (!note) return;
         if (!window.confirm(`Vymazať poznámku „${note.title}“?`)) return;
-        preparedNotes = preparedNotes.filter(item => item.id !== note.id);
-        savePreparedNotes();
-        renderNext();
+        try {
+          await deleteNoteRemote(note.id);
+          preparedNotes = preparedNotes.filter(item => item.id !== note.id);
+          cachePreparedNotes();
+          renderNext();
+        } catch (error) {
+          console.error(error);
+          window.alert('Poznámku sa nepodarilo vymazať. Skús to ešte raz.');
+        }
       });
     });
   }
@@ -221,35 +311,43 @@
       if (outside) closeNoteModal();
     });
 
-    $('noteForm').addEventListener('submit', (event) => {
+    $('noteForm').addEventListener('submit', async (event) => {
       event.preventDefault();
       const title = $('noteTitle').value.trim();
       if (!title) return;
 
-      if (editingNoteId) {
-        preparedNotes = preparedNotes.map(item => item.id === editingNoteId ? {
-          ...item,
-          title,
-          text: $('noteText').value.trim(),
-          area: $('noteArea').value,
-          kind: $('noteKind').value,
-          updatedAt: new Date().toISOString()
-        } : item);
-      } else {
-        preparedNotes.unshift({
-          id: self.crypto?.randomUUID?.() || `note-${Date.now()}`,
-          title,
-          text: $('noteText').value.trim(),
-          area: $('noteArea').value,
-          kind: $('noteKind').value,
-          createdAt: new Date().toISOString()
-        });
-      }
+      const submitButton = $('noteForm').querySelector('.button-primary');
+      const originalLabel = submitButton.textContent;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Ukladám…';
 
-      savePreparedNotes();
-      closeNoteModal();
-      renderNext();
-      document.querySelector('#dalej')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const existing = editingNoteId ? preparedNotes.find(item => item.id === editingNoteId) : null;
+      const draft = {
+        id: existing?.id || null,
+        title,
+        text: $('noteText').value.trim(),
+        area: $('noteArea').value,
+        kind: $('noteKind').value
+      };
+
+      try {
+        const saved = normalizeRemoteNote(await saveNoteRemote(draft));
+        if (existing) {
+          preparedNotes = preparedNotes.map(item => item.id === existing.id ? saved : item);
+        } else {
+          preparedNotes.unshift(saved);
+        }
+        cachePreparedNotes();
+        closeNoteModal();
+        renderNext();
+        document.querySelector('#dalej')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (error) {
+        console.error(error);
+        window.alert('Poznámku sa nepodarilo uložiť. Skús to ešte raz.');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = originalLabel;
+      }
     });
   }
 
@@ -263,4 +361,5 @@
   renderTechnical();
   bindTabs();
   bindNotes();
+  syncPreparedNotes();
 })();
