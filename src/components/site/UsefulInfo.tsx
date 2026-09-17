@@ -10,7 +10,7 @@ const articles = [
     cta: "Prečítať viac",
   },
   {
-    href: "/strazenie-psov-kosice",
+    href: "/strazenie-psov-kosice/",
     Icon: ShieldCheck,
     eyebrow: "Denná starostlivosť v Košiciach",
     title: "Psia škôlka a stráženie psov",
@@ -18,7 +18,7 @@ const articles = [
     cta: "Prečítať viac",
   },
   {
-    href: "/en/dog-daycare-kosice",
+    href: "/en/dog-daycare-kosice/",
     Icon: Languages,
     eyebrow: "Information in English",
     title: "Dog daycare in Košice",
