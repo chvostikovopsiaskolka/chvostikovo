@@ -6,20 +6,21 @@ window.SYSTEM_DATA = {
   },
 
   now: {
-    title: "Live aktualizácie + push notifikácie / branding",
-    status: "Rozpracované",
-    statusTone: "progress",
-    note: "Práca bola prerušená, pretože Work chat narazil na limit. Pokračovať v existujúcom Work chate.",
-    bullets: [
-      "live aktualizácie aplikácie",
-      "push notifikácie",
-      "Android ikonky notifikácií",
-      "texty notifikácií",
-      "dokončenie súvisiacich úprav z pripraveného promptu"
-    ]
+    title: "Momentálne nič nerozpracované",
+    status: "Voľné",
+    statusTone: "done",
+    note: "Live aktualizácie + push branding boli dokončené a nasadené do produkcie 17. 9. 2026.",
+    bullets: []
   },
 
   next: [
+    {
+      title: "Notifikácie – „od Chvostíkova“",
+      status: "Pripravené",
+      tone: "ready",
+      text: "Preveriť a upraviť názov/atribúciu notifikácie tak, aby výsledok pôsobil prirodzene ako „od Chvostíkova“.",
+      detail: "Systémové „from“ na iOS/Chrome nemusí byť upraviteľné; cieľ je nájsť najprirodzenejšie zobrazenie cez názov aplikácie. Branded doménu zatiaľ neriešime a chvostikovo-portal.vercel.app zostáva."
+    },
     {
       title: "Narodeniny + očkovania",
       status: "Pripravené",
@@ -44,18 +45,17 @@ window.SYSTEM_DATA = {
   ],
 
   waiting: [
-    { title: "Pokračovať v Work chate", text: "Dokončiť rozpracované live aktualizácie a push branding.", status: "Teraz", tone: "progress" },
     { title: "Dokončiť podmienky škôlky", text: "Potvrdiť finálne znenie, ktoré pôjde zákazníkom.", status: "Čaká", tone: "waiting" },
-    { title: "Otestovať Android", text: "Skontrolovať push notifikácie, ikonky a PWA správanie.", status: "Neskôr", tone: "planned" },
-    { title: "Otestovať iPhone / iOS", text: "Skontrolovať PWA, upozornenia a hlavné používateľské kroky.", status: "Neskôr", tone: "planned" }
+    { title: "Otestovať Android", text: "Na fyzickom telefóne skontrolovať výsledné maskovanie monochromatického badge a vzhľad push notifikácie.", status: "Neskôr", tone: "planned" },
+    { title: "Otestovať iPhone / iOS", text: "Na fyzickom zariadení overiť PWA notifikáciu a systémové zobrazenie atribúcie aplikácie.", status: "Neskôr", tone: "planned" }
   ],
 
   recent: [
+    { date: "17. 9. 2026", app: "Obe", title: "Live aktualizácie + push branding", text: "Admin aj zákaznícka PWA teraz dostávajú live zmeny cez Realtime. Zákaznícky 30-sekundový full polling bol odstránený a push badge dostal monochromatickú ikonu." },
     { date: "17. 9. 2026", app: "Zákaznícka", title: "Prehľad rezervovaného dňa a privacy", text: "Zväčšili a upravili sme zoznam prihlásených psíkov a zobrazenie anonymných psíkov podľa súhlasu." },
     { date: "16. 9. 2026", app: "Admin", title: "Permanentky a rezervácie", text: "Doladili sme správanie permanentiek pri rezerváciách a oddelili zmeny, ktoré ešte čakajú." },
     { date: "12. 9. 2026", app: "Admin", title: "Telefónne čísla", text: "Do detailu psa sme doplnili telefón a automatické upratanie čísla pre SMS." },
-    { date: "september 2026", app: "Obe", title: "Správy a zákaznícke účty", text: "Prepojili sme zákaznícke účty, psov a komunikáciu medzi klientom a škôlkou." },
-    { date: "august–september 2026", app: "Obe", title: "Rezervácie, taxi a permanentky", text: "Postupne sme spojili rezervácie so stavom permanentky, taxi a interným prehľadom admina." }
+    { date: "september 2026", app: "Obe", title: "Správy a zákaznícke účty", text: "Prepojili sme zákaznícke účty, psov a komunikáciu medzi klientom a škôlkou." }
   ],
 
   apps: {
@@ -69,8 +69,8 @@ window.SYSTEM_DATA = {
         { title: "Taxi", text: "Pri rezervácii vidíš, či treba vyzdvihnutie alebo vyzdvihnutie aj dovoz." },
         { title: "Denné návštevy", text: "Máš prehľad, kto v daný deň prišiel a čo sa má započítať." },
         { title: "Štatistiky", text: "Vidíš návštevy a mesačné prehľady, ktoré sa používajú pri vyhodnocovaní škôlky." },
-        { title: "Správy", text: "Vieš komunikovať so zákazníkom priamo cez jeho účet." },
-        { title: "Upozornenia a push", text: "Admin appka vie pracovať s upozorneniami a push notifikáciami. Aktuálne ich ešte dolaďujeme." },
+        { title: "Správy", text: "Vieš komunikovať so zákazníkom priamo cez jeho účet a nové správy sa môžu prejaviť bez reloadu." },
+        { title: "Live aktualizácie a push", text: "Admin dostáva live zmeny rezervácií, taxi, správ, permanentiek, zatvorených dní, účtov a formulárov. Pri návrate z pozadia alebo po výpadku sa spojenie obnoví a spraví jeden resync." },
         { title: "Očkovania", text: "Pri psovi evidujeme očkovania. Automatické upozornenia na koniec platnosti sú ďalšia plánovaná funkcia." },
         { title: "Fotky", text: "Pri psovi môže byť fotografia používaná v admin aj zákazníckej časti podľa nastavení." },
         { title: "Neaktívni psi", text: "Psíkov, ktorí už škôlku nenavštevujú, vieš oddeliť od aktívnych." },
@@ -83,15 +83,15 @@ window.SYSTEM_DATA = {
       intro: "Jednoduché miesto pre klienta – jeho pes, rezervácie, permanentka, taxi, správy a upozornenia.",
       features: [
         { title: "Registrácia a prihlásenie", text: "Klient si vytvorí účet a po schválení ho admin prepojí s jeho psom." },
-        { title: "Môj psík", text: "Klient vidí profil svojho psa a dôležité informácie na jednom mieste." },
+        { title: "Môj psík", text: "Klient vidí profil svojho psa a dôležité informácie na jednom mieste; zmeny údajov psíka sa môžu prejaviť live." },
         { title: "Fotka psa", text: "Majiteľ môže pracovať s profilovou fotkou psa a jej zobrazením." },
-        { title: "Rezervácie", text: "Klient pošle žiadosť o konkrétny deň a následne vidí jej stav." },
+        { title: "Rezervácie", text: "Klient pošle žiadosť o konkrétny deň a schválenie alebo zamietnutie sa môže zobraziť live bez ručného refreshu." },
         { title: "Kto príde do škôlky", text: "Pri rezervovanom dni môže vidieť prihlásených psíkov; bez súhlasu sa cudzí pes zobrazí anonymne." },
         { title: "Taxi", text: "Pri rezervácii si klient vyberie, či potrebuje dopravu." },
-        { title: "Permanentka", text: "Vidí svoju permanentku, použité a zostávajúce vstupy." },
-        { title: "Správy", text: "Môže napísať Chvostíkovu a dostať odpoveď priamo v appke." },
-        { title: "Push notifikácie", text: "Appka vie posielať upozornenia do zariadenia. Branding a Android ikonky práve dolaďujeme." },
-        { title: "Oznamy", text: "Dôležité informácie od škôlky sa môžu zobraziť priamo v appke." },
+        { title: "Permanentka", text: "Vidí svoju permanentku, použité a zostávajúce vstupy; zmeny permanentky sa môžu prejaviť live." },
+        { title: "Správy", text: "Môže napísať Chvostíkovu a dostať odpoveď priamo v appke; nové správy sa zobrazujú live." },
+        { title: "Live aktualizácie a push", text: "Zákaznícka PWA dostáva live zmeny rezervácií, správ, oznamov, zatvorených dní, permanentiek a údajov psíka. Starý 30-sekundový full polling bol odstránený." },
+        { title: "Oznamy", text: "Dôležité informácie od škôlky sa môžu zobraziť priamo v appke a ich zmeny sa môžu prejaviť live." },
         { title: "GDPR a súhlasy", text: "Klient môže potvrdiť potrebné súhlasy a nastavenie zdieľania mena/fotky psa." },
         { title: "Podmienky škôlky", text: "Systém je pripravený evidovať potvrdenie podmienok; finálne znenie ešte čaká na dokončenie." },
         { title: "Prepojenie majiteľa so psom", text: "Účet nevidí cudzie interné dáta – admin ho priradí ku konkrétnemu majiteľovi a psovi." }
@@ -109,13 +109,15 @@ window.SYSTEM_DATA = {
     { date: "september 2026", title: "Rezervácie zo zákazníckej appky", app: "Obe", text: "Klient pošle žiadosť, admin ju spracuje a zákazník vidí výsledný stav." },
     { date: "september 2026", title: "Správy", app: "Obe", text: "Pribudla komunikácia medzi klientom a Chvostíkovom priamo v aplikáciách." },
     { date: "september 2026", title: "Oznamy, súhlasy a súkromie", app: "Zákaznícka", text: "Pridali sme oznamy, GDPR/súhlasy a pravidlá zobrazenia mena a fotografie psa." },
-    { date: "september 2026", title: "Push notifikácie", app: "Obe", text: "Aplikácie dostali základ pre push upozornenia. Aktuálne dolaďujeme live správanie, texty a Android branding." }
+    { date: "17. 9. 2026", title: "Live aktualizácie + push branding", app: "Obe", text: "Nasadili sme Supabase Realtime pre admin aj zákaznícku PWA, bezpečný zákaznícky signalizačný kanál, resync po návrate z pozadia/výpadku a nový monochromatický push badge. Starý 30-sekundový full polling zákazníckej appky bol odstránený." }
   ],
 
   technical: [
     { label: "Zdroj aktuálneho stavu", value: "Produkcia + Supabase" },
     { label: "Admin", value: "Produkčná admin aplikácia používa spoločný Supabase backend." },
     { label: "Zákaznícka appka", value: "Produkčná PWA používa spoločný Supabase backend a vlastné zákaznícke rozhranie." },
+    { label: "Live aktualizácie", value: "Supabase Realtime je nasadený pre obe appky. Zákaznícka signalizácia používa bezpečný kanál bez citlivého payloadu; RLS zostalo zachované." },
+    { label: "Push branding", value: "Veľká stará ikona bola zo showNotification odstránená. Badge používa transparentnú monochromatickú 96×96 verziu; farebná PWA ikona zostala nezmenená." },
     { label: "System", value: "Táto stránka je iba čitateľný projektový prehľad. Nemení dáta klientov ani logiku oboch aplikácií." },
     { label: "Poznámka", value: "Technické názvy tabuliek, API a deployov sú zámerne skryté z hlavnej obrazovky." }
   ]
