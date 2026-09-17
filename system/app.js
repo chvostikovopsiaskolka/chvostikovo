@@ -1,134 +1,115 @@
 (() => {
   const data = window.SYSTEM_DATA;
-  let activeFilter = 'all';
+  const $ = (id) => document.getElementById(id);
+  const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+  }[char]));
 
-  const byId = (id) => document.getElementById(id);
-  const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-
-  const flatItems = () => data.sections.flatMap(section => section.items.map(item => ({...item, sectionId: section.id})));
+  const badge = (label, tone) => `<span class="badge ${esc(tone)}">${esc(label)}</span>`;
 
   function renderMeta() {
-    byId('topbarMeta').innerHTML = `Aktualizované <strong>${esc(data.meta.updated)}</strong><br>${esc(data.meta.github)}`;
+    $('updated').textContent = `Aktualizované ${data.meta.updated}`;
   }
 
-  function renderStatusOverview() {
-    const items = flatItems();
-    const groups = [
-      { status: 'production', label: 'Spustené', symbol: '✓' },
-      { status: 'testing', label: 'Testujeme', symbol: '●' },
-      { status: 'attention', label: 'Pozor', symbol: '!' },
-      { status: 'planned', label: 'Plánované', symbol: '○' }
-    ];
-
-    byId('statusOverview').innerHTML = `
-      <div class="status-overview-title">Stav systému</div>
-      <div class="status-overview-chips">
-        ${groups.map(group => {
-          const count = items.filter(item => item.status === group.status).length;
-          return `<span class="status-overview-chip ${group.status}"><b>${group.symbol}</b>${esc(group.label)} <strong>${count}</strong></span>`;
-        }).join('')}
-      </div>
-    `;
-  }
-
-  function renderFilters() {
-    byId('filters').innerHTML = data.filters.map(filter =>
-      `<button class="filter-btn ${filter.id === activeFilter ? 'active' : ''}" data-filter="${esc(filter.id)}">${esc(filter.label)}</button>`
-    ).join('');
-    document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
-      activeFilter = button.dataset.filter;
-      renderFilters();
-      applyFilter();
-    }));
-  }
-
-  function renderSummary() {
-    const items = flatItems();
-    const stats = [
-      [2, 'produkčné aplikácie'],
-      [items.length, 'zdokumentovaných funkcií'],
-      [items.filter(i => i.categories.includes('notification')).length, 'blokov upozornení'],
-      [data.sections.length, 'hlavných oblastí']
-    ];
-    byId('summaryGrid').innerHTML = stats.map(([value, label]) => `<article class="summary-card"><div class="value">${value}</div><div class="label">${esc(label)}</div></article>`).join('');
-  }
-
-  function renderSystems() {
-    byId('systemGrid').innerHTML = data.systems.map(system => `
-      <article class="system-card">
-        <div class="row"><h3>${esc(system.name)}</h3><span class="status ${esc(system.status)}">${esc(system.statusLabel)}</span></div>
-        <p>${esc(system.detail)}</p>
-      </article>
-    `).join('');
-  }
-
-  function renderNav() {
-    byId('sectionNav').innerHTML = data.sections.map(section => `<a href="#${esc(section.id)}">${esc(section.title)}</a>`).join('');
-  }
-
-  function renderSections() {
-    byId('sections').innerHTML = data.sections.map(section => `
-      <section class="section" id="${esc(section.id)}">
-        <div class="section-head">
-          <div><div class="eyebrow">${section.items.length} položiek</div><h2>${esc(section.title)}</h2></div>
-          <div class="section-desc">${esc(section.description)}</div>
-        </div>
-        <div class="feature-grid">
-          ${section.items.map((item, index) => featureCard(item, section.id, index)).join('')}
-        </div>
-      </section>
-    `).join('') + `<div class="empty-state" id="emptyState">Nenašiel som nič pre tento filter alebo hľadaný výraz.</div>`;
-  }
-
-  function featureCard(item, sectionId, index) {
-    const searchable = [item.title, item.subtitle, item.body, ...(item.bullets || []), ...(item.tags || []), ...(item.categories || [])].join(' ').toLowerCase();
-    return `
-      <article class="feature-card" data-card data-search="${esc(searchable)}" data-categories="${esc(item.categories.join(','))}" data-section="${esc(sectionId)}">
-        <details ${index === 0 ? 'open' : ''}>
-          <summary>
-            <div class="feature-title-row">
-              <div>
-                <div class="feature-title">${esc(item.title)}</div>
-                <div class="feature-subtitle">${esc(item.subtitle)}</div>
-              </div>
-              <span class="status ${esc(item.status)}">${esc(item.statusLabel)}</span>
-            </div>
-            <div class="tags">${(item.tags || []).map(tag => `<span class="tag">${esc(tag)}</span>`).join('')}</div>
-          </summary>
-          <div class="feature-body">
-            <p>${esc(item.body)}</p>
-            ${item.bullets?.length ? `<ul>${item.bullets.map(bullet => `<li>${esc(bullet)}</li>`).join('')}</ul>` : ''}
+  function renderNow() {
+    $('nowCard').innerHTML = `
+      <article class="now-card">
+        <div class="now-top">
+          <div>
+            <div class="mini-label">AKTUÁLNA ÚLOHA</div>
+            <h2>${esc(data.now.title)}</h2>
           </div>
-        </details>
-      </article>
-    `;
+          ${badge(data.now.status, data.now.statusTone)}
+        </div>
+        <p class="now-note">${esc(data.now.note)}</p>
+        <div class="check-list">
+          ${data.now.bullets.map(item => `<div><span>→</span><p>${esc(item)}</p></div>`).join('')}
+        </div>
+      </article>`;
   }
 
-  function applyFilter() {
-    const query = byId('searchInput').value.trim().toLowerCase();
-    let visibleCards = 0;
-    document.querySelectorAll('[data-card]').forEach(card => {
-      const matchesText = !query || card.dataset.search.includes(query);
-      const categories = card.dataset.categories.split(',');
-      const matchesFilter = activeFilter === 'all' || categories.includes(activeFilter);
-      const visible = matchesText && matchesFilter;
-      card.classList.toggle('hidden', !visible);
-      if (visible) visibleCards++;
-    });
+  function renderNext() {
+    $('nextList').innerHTML = data.next.map(item => `
+      <article class="task-card">
+        <div class="task-head"><h3>${esc(item.title)}</h3>${badge(item.status, item.tone)}</div>
+        <p>${esc(item.text)}</p>
+        <small>${esc(item.detail)}</small>
+      </article>`).join('');
+  }
 
-    document.querySelectorAll('.section').forEach(section => {
-      const anyVisible = [...section.querySelectorAll('[data-card]')].some(card => !card.classList.contains('hidden'));
-      section.style.display = anyVisible ? '' : 'none';
+  function renderWaiting() {
+    $('waitingList').innerHTML = data.waiting.map(item => `
+      <article class="waiting-card">
+        <div>
+          <h3>${esc(item.title)}</h3>
+          <p>${esc(item.text)}</p>
+        </div>
+        ${badge(item.status, item.tone)}
+      </article>`).join('');
+  }
+
+  function renderRecent() {
+    $('recentList').innerHTML = data.recent.map(item => `
+      <article class="recent-card">
+        <div class="recent-meta"><span>${esc(item.date)}</span><span>${esc(item.app)}</span></div>
+        <h3>${esc(item.title)}</h3>
+        <p>${esc(item.text)}</p>
+      </article>`).join('');
+  }
+
+  function renderFeatures(appKey = 'admin') {
+    const app = data.apps[appKey];
+    $('featureGrid').innerHTML = `
+      <article class="feature-intro">
+        <span class="mini-label">${esc(app.label).toUpperCase()}</span>
+        <h2>${esc(app.label)}</h2>
+        <p>${esc(app.intro)}</p>
+      </article>
+      ${app.features.map(item => `
+        <article class="feature-card">
+          <span class="feature-dot">✓</span>
+          <div><h3>${esc(item.title)}</h3><p>${esc(item.text)}</p></div>
+        </article>`).join('')}`;
+  }
+
+  function bindTabs() {
+    document.querySelectorAll('.app-tab').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.app-tab').forEach(tab => tab.classList.remove('active'));
+        button.classList.add('active');
+        renderFeatures(button.dataset.app);
+      });
     });
-    byId('emptyState').style.display = visibleCards ? 'none' : 'block';
+  }
+
+  function renderHistory() {
+    $('historyList').innerHTML = data.history.map(item => `
+      <article class="timeline-item">
+        <div class="timeline-marker"></div>
+        <div class="timeline-card">
+          <div class="timeline-meta"><span>${esc(item.date)}</span><span>${esc(item.app)}</span></div>
+          <h3>${esc(item.title)}</h3>
+          <p>${esc(item.text)}</p>
+        </div>
+      </article>`).join('');
+  }
+
+  function renderTechnical() {
+    $('technicalInfo').innerHTML = `
+      <p class="source-note">${esc(data.meta.note)}</p>
+      <div class="tech-grid">
+        ${data.technical.map(item => `
+          <div class="tech-row"><strong>${esc(item.label)}</strong><span>${esc(item.value)}</span></div>`).join('')}
+      </div>`;
   }
 
   renderMeta();
-  renderStatusOverview();
-  renderFilters();
-  renderSummary();
-  renderSystems();
-  renderNav();
-  renderSections();
-  byId('searchInput').addEventListener('input', applyFilter);
+  renderNow();
+  renderNext();
+  renderWaiting();
+  renderRecent();
+  renderFeatures();
+  renderHistory();
+  renderTechnical();
+  bindTabs();
 })();

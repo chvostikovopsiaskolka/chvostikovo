@@ -1,109 +1,122 @@
 window.SYSTEM_DATA = {
   meta: {
-    name: "Chvostíkovo System",
-    updated: "13. 9. 2026",
-    supabaseProject: "tlhcqwsluyqpywymjoxn",
-    github: "chvostikovopsiaskolka/chvostikovo",
-    note: "Funkčný stav podľa produkcie a aktuálnej databázovej schémy."
+    updated: "17. 9. 2026",
+    source: "Aktuálny stav podľa produkcie a Supabase",
+    note: "System je iba prehľad. Admin ani zákaznícka appka sa z tejto stránky nemenia."
   },
-  filters: [
-    { id: "all", label: "Všetko" },
-    { id: "customer", label: "Zákazník" },
-    { id: "admin", label: "Admin" },
-    { id: "notification", label: "Upozornenia" },
-    { id: "legal", label: "Súhlasy" },
-    { id: "technical", label: "Technika" }
+
+  now: {
+    title: "Live aktualizácie + push notifikácie / branding",
+    status: "Rozpracované",
+    statusTone: "progress",
+    note: "Práca bola prerušená, pretože Work chat narazil na limit. Pokračovať v existujúcom Work chate.",
+    bullets: [
+      "live aktualizácie aplikácie",
+      "push notifikácie",
+      "Android ikonky notifikácií",
+      "texty notifikácií",
+      "dokončenie súvisiacich úprav z pripraveného promptu"
+    ]
+  },
+
+  next: [
+    {
+      title: "Narodeniny + očkovania",
+      status: "Pripravené",
+      tone: "ready",
+      text: "Prompt je pripravený, ale zatiaľ ho neimplementujeme.",
+      detail: "Dátum narodenia, automatický vek, narodeninové upozornenie a upozornenia na očkovania približne 14 dní pred koncom platnosti."
+    },
+    {
+      title: "Podmienky škôlky",
+      status: "Čaká na mňa",
+      tone: "waiting",
+      text: "Treba potvrdiť finálne znenie podmienok.",
+      detail: "Až po finálnom texte má zmysel dokončiť ich nasadenie a testovanie."
+    },
+    {
+      title: "Finálne testovanie",
+      status: "Plánované",
+      tone: "planned",
+      text: "Prejsť celý admin aj zákaznícky proces pred väčším používaním klientmi.",
+      detail: "Android, iPhone, rezervácie, správy, permanentky, taxi, upozornenia a základné hraničné situácie."
+    }
   ],
-  systems: [
-    { name: "Admin APP", status: "production", statusLabel: "Produkcia", detail: "Vercel projekt chvostikovo-app. Interné riadenie psov, rezervácií, permanentiek, taxi, správ, oznamov a štatistík." },
-    { name: "Zákaznícky portál / PWA", status: "production", statusLabel: "Produkcia", detail: "Vercel projekt chvostikovo-portal. Registrácia, priradený pes, rezervácie, Môj psík, správy, push, oznamy a súhlasy." },
-    { name: "Supabase", status: "production", statusLabel: "Produkcia", detail: "Spoločná databáza a autentifikácia. Projekt tlhcqwsluyqpywymjoxn. Dokumentačná appka doň nezapisuje." }
+
+  waiting: [
+    { title: "Pokračovať v Work chate", text: "Dokončiť rozpracované live aktualizácie a push branding.", status: "Teraz", tone: "progress" },
+    { title: "Dokončiť podmienky škôlky", text: "Potvrdiť finálne znenie, ktoré pôjde zákazníkom.", status: "Čaká", tone: "waiting" },
+    { title: "Otestovať Android", text: "Skontrolovať push notifikácie, ikonky a PWA správanie.", status: "Neskôr", tone: "planned" },
+    { title: "Otestovať iPhone / iOS", text: "Skontrolovať PWA, upozornenia a hlavné používateľské kroky.", status: "Neskôr", tone: "planned" }
   ],
-  sections: [
-    {
-      id: "customer-journey",
-      title: "Cesta zákazníka",
-      description: "Od prvého otvorenia portálu až po bežné rezervovanie a komunikáciu so škôlkou.",
-      items: [
-        { title: "PWA inštalácia", subtitle: "Android aj iPhone, s návodom pred prihlásením.", status: "production", statusLabel: "Produkcia", categories: ["customer","technical"], body: "Portál funguje ako PWA. Android manifest používa štvorcové ikony 192×192 a 512×512; po inštalácii používateľ zavrie Chrome a otvorí Chvostíkovo cez ikonu na ploche.", bullets: ["Web nevie automaticky prepnúť používateľa na domovskú obrazovku Androidu.", "Návod už nepoužíva text „Pokračovať na prihlásenie“.", "PWA je oddelená od interného admin rozhrania."], tags: ["manifest","Android","iOS","PWA"] },
-        { title: "Registrácia zákazníka", subtitle: "Nový účet začína ako čakajúci.", status: "production", statusLabel: "Produkcia", categories: ["customer"], body: "Používateľ sa zaregistruje do zákazníckeho portálu. Profil má stav pending / active / suspended. Samotná registrácia ešte nedáva prístup ku konkrétnemu psovi.", bullets: ["Zákazník si sám nevytvára psa.", "Po registrácii nasleduje schválenie adminom."], tags: ["customer_profiles","Auth"] },
-        { title: "Schválenie a priradenie psa", subtitle: "Admin priradí účet k existujúcemu majiteľovi a psovi.", status: "production", statusLabel: "Produkcia", categories: ["customer","admin"], body: "Po schválení sa účet prepojí s existujúcimi údajmi. Až potom zákazník vidí svojho priradeného psa a nadväzujúce povinnosti.", bullets: ["Priradenie je kontrolované adminom.", "Existujúci pes sa neduplikuje.", "Po priradení sa v portáli sprístupní profil psa, rezervácie a súhlasy."], tags: ["customer_owner_links","owners","dogs"] },
-        { title: "GDPR a Podmienky škôlky", subtitle: "Súhlasy sa zobrazujú až po priradení psa.", status: "testing", statusLabel: "Podmienky testujeme", categories: ["customer","legal"], body: "Podmienky škôlky sú viazané na konkrétneho používateľa a konkrétneho psa.", bullets: ["Aktuálna testovacia verzia: preview-2026-09-13.", "Testovací profil: Chvostíkovo, priradená Bella.", "Finálny text ešte nie je uzavretý, najmä bod o zodpovednosti.", "Admin nesmie potvrdiť Podmienky za zákazníka."], tags: ["GDPR","portal_terms_documents","portal_terms_acceptances"] },
-        { title: "Bežné používanie po aktivácii", subtitle: "Pes → rezervácia → taxi → správy → upozornenia.", status: "production", statusLabel: "Produkcia", categories: ["customer","notification"], body: "Po aktivácii účtu má majiteľ na jednom mieste profil svojho psa, plánovanie škôlky a komunikáciu s Chvostíkovom.", bullets: ["Vidí priradeného psa, jeho fotografiu, očkovania, permanentku a plánované dni.", "Odošle žiadosť o rezerváciu na konkrétny deň.", "Pri rezervácii môže zvoliť taxi alebo rezervovať bez taxi.", "Po rozhodnutí admina vidí výsledný stav rezervácie.", "Môže písať správy Chvostíkovu a dostávať odpovede a upozornenia."], tags: ["flow","rezervácia","taxi","správy"] }
+
+  recent: [
+    { date: "17. 9. 2026", app: "Zákaznícka", title: "Prehľad rezervovaného dňa a privacy", text: "Zväčšili a upravili sme zoznam prihlásených psíkov a zobrazenie anonymných psíkov podľa súhlasu." },
+    { date: "16. 9. 2026", app: "Admin", title: "Permanentky a rezervácie", text: "Doladili sme správanie permanentiek pri rezerváciách a oddelili zmeny, ktoré ešte čakajú." },
+    { date: "12. 9. 2026", app: "Admin", title: "Telefónne čísla", text: "Do detailu psa sme doplnili telefón a automatické upratanie čísla pre SMS." },
+    { date: "september 2026", app: "Obe", title: "Správy a zákaznícke účty", text: "Prepojili sme zákaznícke účty, psov a komunikáciu medzi klientom a škôlkou." },
+    { date: "august–september 2026", app: "Obe", title: "Rezervácie, taxi a permanentky", text: "Postupne sme spojili rezervácie so stavom permanentky, taxi a interným prehľadom admina." }
+  ],
+
+  apps: {
+    admin: {
+      label: "Admin appka",
+      intro: "Interné riadenie škôlky – kto príde, akú má permanentku, taxi, správy a ďalšie údaje.",
+      features: [
+        { title: "Psíkovia a majitelia", text: "Vidíš profil psa, majiteľa, telefón, plemeno, vek, povahu, alergie a poznámky." },
+        { title: "Rezervácie", text: "Vidíš plánované dni, pridávaš rezervácie a spracúvaš žiadosti zo zákazníckej appky." },
+        { title: "Permanentky", text: "Spravuješ 10/20-vstupové permanentky, zostávajúce vstupy, dátum kúpy a platnosť." },
+        { title: "Taxi", text: "Pri rezervácii vidíš, či treba vyzdvihnutie alebo vyzdvihnutie aj dovoz." },
+        { title: "Denné návštevy", text: "Máš prehľad, kto v daný deň prišiel a čo sa má započítať." },
+        { title: "Štatistiky", text: "Vidíš návštevy a mesačné prehľady, ktoré sa používajú pri vyhodnocovaní škôlky." },
+        { title: "Správy", text: "Vieš komunikovať so zákazníkom priamo cez jeho účet." },
+        { title: "Upozornenia a push", text: "Admin appka vie pracovať s upozorneniami a push notifikáciami. Aktuálne ich ešte dolaďujeme." },
+        { title: "Očkovania", text: "Pri psovi evidujeme očkovania. Automatické upozornenia na koniec platnosti sú ďalšia plánovaná funkcia." },
+        { title: "Fotky", text: "Pri psovi môže byť fotografia používaná v admin aj zákazníckej časti podľa nastavení." },
+        { title: "Neaktívni psi", text: "Psíkov, ktorí už škôlku nenavštevujú, vieš oddeliť od aktívnych." },
+        { title: "Zákaznícke účty", text: "Schvaľuješ účet klienta a prepájaš ho s existujúcim majiteľom a psom." },
+        { title: "Oznamy", text: "Vieš pripraviť dôležitú informáciu, ktorá sa zobrazí zákazníkom v portáli." }
       ]
     },
-    {
-      id: "customer-app",
-      title: "Zákaznícky portál",
-      description: "Čo majiteľ po aktivácii účtu reálne vidí a môže robiť.",
-      items: [
-        { title: "Čo zákazník vidí po prihlásení", subtitle: "Obsah je naviazaný na schválený účet a priradeného psa.", status: "production", statusLabel: "Produkcia", categories: ["customer"], body: "Portál nezobrazuje ľubovoľné interné dáta. Zákazník pracuje so svojím schváleným účtom a psom, ktorého mu priradil admin.", bullets: ["Profil Môj psík.", "Aktuálne a plánované rezervácie.", "Stav permanentky a zostávajúce vstupy.", "Správy, oznamy a notifikačné centrum.", "Nastavenia fotografie, súhlasov a upozornení."], tags: ["customer_profiles","customer_owner_links"] },
-        { title: "Môj psík", subtitle: "Profil konkrétneho priradeného psa.", status: "production", statusLabel: "Produkcia", categories: ["customer"], body: "Sekcia združuje údaje psa a informácie používané počas starostlivosti a rezervácií.", bullets: ["Foto psa + editor fotografie.", "Základné údaje psa.", "Očkovania.", "Permanentka a zostávajúce vstupy.", "Plánované rezervácie.", "GDPR a stav Podmienok škôlky."], tags: ["dogs","vaccinations","passes","photo"] },
-        { title: "Viditeľnosť mena a fotky psa", subtitle: "Zdieľanie je viazané na súhlas.", status: "production", statusLabel: "Produkcia", categories: ["customer","legal"], body: "Meno a fotografia psa sa môžu používať v zákazníckej časti iba podľa nastaveného súhlasu so zdieľaním.", bullets: ["Súhlas sa eviduje pre konkrétneho psa.", "dogs.share_name_photo drží aktuálny stav zdieľania.", "dog_visibility_consents uchováva zmenu súhlasu a jeho verziu.", "Bez potvrdeného zdieľania sa meno/fotka psa nemajú sprístupňovať ostatným zákazníkom."], tags: ["share_name_photo","dog_visibility_consents","foto psa"] },
-        { title: "Rezervačný proces", subtitle: "Výber psa a dňa → taxi → žiadosť → schválenie.", status: "production", statusLabel: "Produkcia", categories: ["customer","admin"], body: "Zákazník vytvára žiadosť o rezerváciu. Až rozhodnutie admina z nej urobí schválenú rezerváciu.", bullets: ["1. Zvolí priradeného psa a dostupný dátum.", "2. Môže použiť rýchly výber dátumu cez lupu.", "3. Zvolí taxi alebo pokračuje bez taxi.", "4. Odošle žiadosť – stav je čakajúci.", "5. Admin ju schváli alebo zamietne.", "6. Zákazník následne vidí aktuálny stav rezervácie.", "Deadline pre rezervácie: nedeľa 20:00.", "Zatvorené dni nie je možné štandardne rezervovať."], tags: ["customer_booking_requests","reservations","portal_day_settings"] },
-        { title: "Taxi pri rezervácii", subtitle: "Voliteľná doprava priamo v rezervačnom flow.", status: "production", statusLabel: "Produkcia", categories: ["customer","admin"], body: "Taxi nie je povinné. Zákazník si pri rezervácii vyberie, či dopravu potrebuje, a zvolený režim sa prenesie do žiadosti aj rezervácie.", bullets: ["Bez taxi = 0 €.", "Vyzdvihnúť / odvoz = 5 €.", "Vyzdvihnúť aj doviezť = 10 €.", "Podporovaná je aj neskoršia žiadosť o zmenu taxi, ktorú spracuje admin."], tags: ["taxi_mode","taxi_amount","taxi_change_status"] },
-        { title: "Permanentka", subtitle: "Zákazník vidí svoj stav a môže pracovať s 10-vstupovou ponukou.", status: "production", statusLabel: "Produkcia", categories: ["customer","admin"], body: "Zákaznícka permanentka má 10 vstupov za 200 € a platnosť 2 mesiace od prvého použitia.", bullets: ["Viditeľný počet použitých a zostávajúcich vstupov.", "10 vstupov = 200 €.", "Jednorazový vstup = 25 €.", "20-vstupová permanentka sa zákazníkovi neponúka."], tags: ["passes","200 €","25 €"] },
-        { title: "Správy", subtitle: "Zákazník môže priamo písať Chvostíkovu.", status: "production", statusLabel: "Produkcia", categories: ["customer","admin","notification"], body: "Zákaznícky účet má vlastnú konverzáciu so Chvostíkovom. Majiteľ môže odoslať správu, vidieť odpoveď a systém eviduje stav prečítania.", bullets: ["Správy môžu posielať zákazník aj personál.", "Admin vidí konverzáciu konkrétneho zákazníka.", "Správa môže byť previazaná aj s rezervačnou požiadavkou.", "Eviduje sa odosielateľ, rola, čas a read_at.", "Nová komunikácia môže byť podporená notifikáciou/pushom."], tags: ["portal_conversations","portal_messages"] },
-        { title: "Oznamy v popup okne", subtitle: "Časovo platné informácie od Chvostíkova.", status: "production", statusLabel: "Produkcia", categories: ["customer","admin","notification"], body: "Admin vytvára oznamy s platnosťou. Portál ich zobrazuje a eviduje, keď ich používateľ zavrie.", bullets: ["title, body, active, valid_from, valid_until.", "Dismissal sa eviduje pre konkrétneho používateľa.", "Dôležitý oznam môže byť zákazníkovi zobrazený ako popup."], tags: ["portal_announcements","portal_announcement_dismissals"] }
-      ]
-    },
-    {
-      id: "notifications",
-      title: "Upozornenia a push",
-      description: "Notifikačné centrum a push odbery zákazníkov aj admina.",
-      items: [
-        { title: "Notifikačné centrum portálu", subtitle: "Interné upozornenia a stav prečítania.", status: "production", statusLabel: "Produkcia", categories: ["customer","notification"], body: "Portál eviduje upozornenia pre konkrétneho používateľa a môže ich previazať na konkrétny objekt systému.", bullets: ["recipient_user_id určuje príjemcu.", "notification_type rozlišuje typ.", "read_at eviduje prečítanie.", "entity_type + entity_id umožňujú väzbu na obsah."], tags: ["portal_notifications"] },
-        { title: "Push zákazníkov", subtitle: "Web Push odbery zákazníckej PWA.", status: "production", statusLabel: "Produkcia", categories: ["customer","notification","technical"], body: "PWA eviduje push subscription endpoint a kryptografické údaje zariadenia používateľa.", bullets: ["Viazané na user_id.", "Eviduje sa active, user_agent a last_seen_at.", "Používateľ môže mať viac zariadení."], tags: ["portal_push_subscriptions","Web Push"] },
-        { title: "Push admina", subtitle: "Oddelené od zákazníckych odberov.", status: "production", statusLabel: "Produkcia", categories: ["admin","notification","technical"], body: "Interná admin appka má samostatnú evidenciu push subscription.", bullets: ["Zákaznícke a interné odbery sa nemiešajú."], tags: ["admin_push_subscriptions"] },
-        { title: "Notifikačné udalosti", subtitle: "Rezervácie, správy, oznamy a ďalšie budúce typy.", status: "production", statusLabel: "Infraštruktúra aktívna", categories: ["customer","admin","notification"], body: "Pri ďalších úpravách treba v tomto prehľade držať aj presné znenia a spúšťače konkrétnych notifikácií.", bullets: ["Rozhodnutie o rezervácii.", "Nová správa.", "Dôležitý oznam.", "Ďalšie typy dopĺňať spolu s implementáciou."], tags: ["rezervácie","správy","oznamy"] }
-      ]
-    },
-    {
-      id: "admin-app",
-      title: "Admin appka",
-      description: "Interné obrazovky a prevádzkové funkcie Chvostíkova.",
-      items: [
-        { title: "Prehľad", subtitle: "Domovská prevádzková obrazovka.", status: "production", statusLabel: "Produkcia", categories: ["admin"], body: "Rýchly pohľad na aktuálnu prevádzku a nadväzujúce moduly.", bullets: ["Čakajúce rezervácie.", "Správy od majiteľov.", "Oznamy.", "Týždenný kontext."], tags: ["dashboard"] },
-        { title: "Čakajúce rezervácie", subtitle: "Schváliť alebo zamietnuť.", status: "production", statusLabel: "Produkcia", categories: ["admin","customer"], body: "Admin spracuje customer_booking_requests a pri schválení sa request prepojí s reálnou rezerváciou.", bullets: ["Schváliť / Zamietnuť.", "Rozhodnutie má čas a používateľa.", "Podporované sú aj zrušenia a zmeny taxi."], tags: ["customer_booking_requests","reservations"] },
-        { title: "Týždeň a zatvorené dni", subtitle: "Obsadenosť a dostupnosť dní.", status: "production", statusLabel: "Produkcia", categories: ["admin"], body: "Admin má týždenný prehľad a zatvorené dni ako rozbaľovaciu kartu.", bullets: ["Predvolená kapacita day settings je 8.", "bookings_open riadi dostupnosť.", "note vysvetľuje konkrétny deň."], tags: ["portal_day_settings","kapacita"] },
-        { title: "Psy a detail psa", subtitle: "Centrálny profil psa, majiteľa, permanentky a súhlasov.", status: "production", statusLabel: "Produkcia", categories: ["admin","legal"], body: "Detail psa združuje prevádzkové údaje aj stav zákazníckych súhlasov.", bullets: ["Meno, plemeno, vek, pohlavie, kastrácia, hmotnosť.", "Alergie, povaha, poznámky, očkovania.", "Foto psa.", "Permanentka a plánované dni.", "Ochrana osobných údajov – potvrdené.", "Podmienky škôlky – odsúhlasené + dátum.", "Telefón majiteľa je normalizovaný pre SMS."], tags: ["dogs","owners","vaccinations","súhlasy"] },
-        { title: "Permanentky", subtitle: "Aktívne, čakajúce, minuté a expirované.", status: "production", statusLabel: "Produkcia", categories: ["admin"], body: "Permanentky evidujú počet vstupov, použité vstupy, platnosť, cenu, nákup a stav.", bullets: ["Stavy: active, queued, used_up, expired, cancelled.", "Možnosť no_expiry pre výnimky.", "Rezervácia môže mať uzamknutú konkrétnu permanentku."], tags: ["passes","reservations"] },
-        { title: "História návštev", subtitle: "Mesiac → týždeň → deň → psi.", status: "production", statusLabel: "Detailná od 24. 8. 2026", categories: ["admin"], body: "História používa reálne návštevy a uchováva typ vstupu, číslo vstupu permanentky, taxi a finančnú hodnotu.", bullets: ["Príklad: 10. 9. 2026 · 8 psov → Cory · 3/10, Bebe · Jednorazový…", "visit_date, entry_type a pass_entry_number tvoria detail návštevy."], tags: ["visits","monthly_visit_totals"] },
-        { title: "Štatistiky a denné financie", subtitle: "Návštevnosť, typy vstupov a taxi.", status: "production", statusLabel: "Produkcia", categories: ["admin"], body: "Systém drží mesačné súčty návštev a denné finančné agregácie.", bullets: ["Mesačné návštevy po psovi.", "single_count, pass10_count, pass20_count a taxi_amount."], tags: ["monthly_visit_totals","daily_financials"] },
-        { title: "Správy a oznamy", subtitle: "Interná obsluha komunikácie.", status: "production", statusLabel: "Produkcia", categories: ["admin","notification"], body: "Admin číta a odosiela správy a spravuje oznamy pre zákaznícku PWA.", bullets: ["Správy majú read_at.", "Oznamy môžu mať časovú platnosť."], tags: ["portal_messages","portal_announcements"] }
-      ]
-    },
-    {
-      id: "legal",
-      title: "GDPR a Podmienky",
-      description: "Čo sa eviduje ako potvrdenie a čo admin nesmie urobiť za zákazníka.",
-      items: [
-        { title: "Ochrana osobných údajov", subtitle: "Stav potvrdenia pri zákazníckom profile.", status: "production", statusLabel: "Produkcia", categories: ["legal","customer","admin"], body: "Profil eviduje verziu privacy notice a čas potvrdenia; admin má stav iba zobraziť.", bullets: ["privacy_notice_version", "privacy_notice_acknowledged_at"], tags: ["customer_profiles","GDPR"] },
-        { title: "Dokument Podmienok škôlky", subtitle: "Verzovaný dokument s hashom.", status: "testing", statusLabel: "Testujeme", categories: ["legal","technical"], body: "Každá verzia je samostatný dokument s verziou, názvom, textom, SHA-256 hashom, active a effective_from.", bullets: ["Aktuálny test: preview-2026-09-13.", "Finálny právny text ešte nie je uzavretý."], tags: ["portal_terms_documents","SHA-256"] },
-        { title: "Akceptácia Podmienok", subtitle: "Dôkaz súhlasu viazaný na používateľa a psa.", status: "testing", statusLabel: "Testujeme", categories: ["legal","customer","admin"], body: "Akceptácia eviduje user_id, dog_id, terms_version, serverový accepted_at, text akceptácie a hash dokumentu.", bullets: ["Súhlas patrí konkrétnemu používateľovi a psovi.", "Admin stav iba číta – nesmie ho vytvoriť za zákazníka."], tags: ["portal_terms_acceptances","serverový čas"] },
-        { title: "Prevádzkovateľ pre GDPR", subtitle: "Údaje používané v právnych textoch.", status: "production", statusLabel: "Aktuálne údaje", categories: ["legal"], body: "Marek Leder – Bellaris, IČO 56447001. Miesto podnikania: Miškovecká 1023/2, 040 11 Košice-Juh. Prevádzkareň Chvostíkovo: Poľská 2207/6, 040 01 Košice-Juh.", bullets: ["Živnostenský register: Okresný úrad Košice, č. 820-106266.", "E-mail: chvostikovo.psiaskolka@gmail.com.", "Telefón: +421 951 069 395."], tags: ["prevádzkovateľ"] }
-      ]
-    },
-    {
-      id: "technical",
-      title: "Technická mapa",
-      description: "Hlavné dátové celky a hranice medzi produkčnými systémami.",
-      items: [
-        { title: "Architektúra", subtitle: "Dve produkčné appky + spoločný Supabase + táto dokumentácia.", status: "production", statusLabel: "Aktuálne", categories: ["technical"], body: "Admin a zákaznícky portál sú samostatné Vercel projekty. Spoločné dáta a autentifikácia sú v Supabase. Chvostíkovo System je informačná vrstva bez zápisu do produkčných dát.", bullets: ["chvostikovo-app = admin.", "chvostikovo-portal = zákaznícky portál / PWA.", "Supabase = tlhcqwsluyqpywymjoxn."], tags: ["Vercel","Supabase","GitHub"] },
-        { title: "Kľúčové tabuľky – prevádzka", subtitle: "Majitelia, psy, rezervácie, návštevy a permanentky.", status: "production", statusLabel: "Produkcia", categories: ["technical","admin"], body: "Jadro prevádzky tvorí sada RLS tabuliek pre majiteľov a psy, rezervácie, návštevy, permanentky a financie.", bullets: ["owners", "dogs", "passes", "reservations", "visits", "monthly_visit_totals", "daily_financials", "vaccinations"], tags: ["RLS","Postgres"] },
-        { title: "Kľúčové tabuľky – portál", subtitle: "Účty, requesty, správy, push, oznamy a súhlasy.", status: "production", statusLabel: "Produkcia", categories: ["technical","customer"], body: "Zákaznícka vrstva oddeľuje používateľský účet od interných dát a používa vlastné request / notification tabuľky.", bullets: ["customer_profiles", "customer_owner_links", "customer_booking_requests", "portal_notifications", "portal_push_subscriptions", "portal_conversations", "portal_messages", "portal_announcements", "portal_day_settings", "portal_terms_documents", "portal_terms_acceptances"], tags: ["RLS","Auth"] },
-        { title: "Zálohy frontendu portálu", subtitle: "Snapshot / backup tabuľky vyžadujú bezpečnostnú kontrolu.", status: "attention", statusLabel: "Pozor na RLS", categories: ["technical"], body: "Pri kontrole 13. 9. 2026 mali customer_portal_frontend_snapshots a customer_portal_frontend_backups vypnuté RLS.", bullets: ["Teraz do nich nič nemeníme.", "Pred zapnutím RLS treba pripraviť správne policies, aby sa nerozbila cesta nasadenia / záloh."], tags: ["customer_portal_frontend_snapshots","customer_portal_frontend_backups","RLS"] }
-      ]
-    },
-    {
-      id: "rules",
-      title: "Prevádzkové pravidlá",
-      description: "Hodnoty, ktoré ovplyvňujú funkčné správanie oboch appiek.",
-      items: [
-        { title: "Cenník a permanentky", subtitle: "Zákaznícka ponuka.", status: "production", statusLabel: "Platné", categories: ["customer","admin"], body: "Zákaznícky portál pracuje s jednorazovým vstupom a 10-vstupovou permanentkou.", bullets: ["Jednorazový vstup: 25 €.", "10 vstupov: 200 €.", "Platnosť: 2 mesiace od prvého použitia.", "20-vstupová permanentka sa zákazníkovi neponúka."], tags: ["cenník"] },
-        { title: "Taxi", subtitle: "Dva zákaznícke režimy.", status: "production", statusLabel: "Platné", categories: ["customer","admin"], body: "Taxi sa vyberá pri rezervácii a suma sa eviduje spolu s rezerváciou / návštevou.", bullets: ["Vyzdvihnúť / odvoz: 5 €.", "Vyzdvihnúť aj doviezť: 10 €."], tags: ["taxi"] },
-        { title: "Deadline rezervácií", subtitle: "Nedeľa o 20:00.", status: "production", statusLabel: "Platné", categories: ["customer","admin"], body: "Rezervačný flow musí rešpektovať deadline v nedeľu o 20:00.", bullets: ["Pri zmenách kalendára alebo rezervácií toto pravidlo nerozbiť."], tags: ["nedeľa 20:00"] }
+    customer: {
+      label: "Zákaznícka appka",
+      intro: "Jednoduché miesto pre klienta – jeho pes, rezervácie, permanentka, taxi, správy a upozornenia.",
+      features: [
+        { title: "Registrácia a prihlásenie", text: "Klient si vytvorí účet a po schválení ho admin prepojí s jeho psom." },
+        { title: "Môj psík", text: "Klient vidí profil svojho psa a dôležité informácie na jednom mieste." },
+        { title: "Fotka psa", text: "Majiteľ môže pracovať s profilovou fotkou psa a jej zobrazením." },
+        { title: "Rezervácie", text: "Klient pošle žiadosť o konkrétny deň a následne vidí jej stav." },
+        { title: "Kto príde do škôlky", text: "Pri rezervovanom dni môže vidieť prihlásených psíkov; bez súhlasu sa cudzí pes zobrazí anonymne." },
+        { title: "Taxi", text: "Pri rezervácii si klient vyberie, či potrebuje dopravu." },
+        { title: "Permanentka", text: "Vidí svoju permanentku, použité a zostávajúce vstupy." },
+        { title: "Správy", text: "Môže napísať Chvostíkovu a dostať odpoveď priamo v appke." },
+        { title: "Push notifikácie", text: "Appka vie posielať upozornenia do zariadenia. Branding a Android ikonky práve dolaďujeme." },
+        { title: "Oznamy", text: "Dôležité informácie od škôlky sa môžu zobraziť priamo v appke." },
+        { title: "GDPR a súhlasy", text: "Klient môže potvrdiť potrebné súhlasy a nastavenie zdieľania mena/fotky psa." },
+        { title: "Podmienky škôlky", text: "Systém je pripravený evidovať potvrdenie podmienok; finálne znenie ešte čaká na dokončenie." },
+        { title: "Prepojenie majiteľa so psom", text: "Účet nevidí cudzie interné dáta – admin ho priradí ku konkrétnemu majiteľovi a psovi." }
       ]
     }
+  },
+
+  history: [
+    { date: "august 2026", title: "Vznik interného admin systému", app: "Admin", text: "Základné profily psov, majitelia, rezervácie a interný denný prehľad." },
+    { date: "august 2026", title: "Permanentky", app: "Admin", text: "Pribudli 10/20-vstupové permanentky, zostávajúce vstupy, dátum kúpy a možnosť manuálnej úpravy." },
+    { date: "august 2026", title: "Taxi", app: "Admin", text: "K rezerváciám sa pridalo vyzdvihnutie za 5 € a vyzdvihnutie + dovoz za 10 €." },
+    { date: "august 2026", title: "Štatistiky a denné uzatváranie", app: "Admin", text: "Začali sme sledovať denné návštevy, mesačné štatistiky a finančný prehľad." },
+    { date: "koniec augusta 2026", title: "Zákaznícka PWA", app: "Zákaznícka", text: "Vznikla zákaznícka aplikácia, ktorú si klient môže pridať na plochu telefónu." },
+    { date: "september 2026", title: "Registrácia a prepojenie účtu", app: "Obe", text: "Klient sa vie zaregistrovať, admin ho schváli a priradí k existujúcemu psovi." },
+    { date: "september 2026", title: "Rezervácie zo zákazníckej appky", app: "Obe", text: "Klient pošle žiadosť, admin ju spracuje a zákazník vidí výsledný stav." },
+    { date: "september 2026", title: "Správy", app: "Obe", text: "Pribudla komunikácia medzi klientom a Chvostíkovom priamo v aplikáciách." },
+    { date: "september 2026", title: "Oznamy, súhlasy a súkromie", app: "Zákaznícka", text: "Pridali sme oznamy, GDPR/súhlasy a pravidlá zobrazenia mena a fotografie psa." },
+    { date: "september 2026", title: "Push notifikácie", app: "Obe", text: "Aplikácie dostali základ pre push upozornenia. Aktuálne dolaďujeme live správanie, texty a Android branding." }
+  ],
+
+  technical: [
+    { label: "Zdroj aktuálneho stavu", value: "Produkcia + Supabase" },
+    { label: "Admin", value: "Produkčná admin aplikácia používa spoločný Supabase backend." },
+    { label: "Zákaznícka appka", value: "Produkčná PWA používa spoločný Supabase backend a vlastné zákaznícke rozhranie." },
+    { label: "System", value: "Táto stránka je iba čitateľný projektový prehľad. Nemení dáta klientov ani logiku oboch aplikácií." },
+    { label: "Poznámka", value: "Technické názvy tabuliek, API a deployov sú zámerne skryté z hlavnej obrazovky." }
   ]
 };

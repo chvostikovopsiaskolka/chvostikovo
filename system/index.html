@@ -4,76 +4,102 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#f47b20" />
-  <meta name="description" content="Interná mapa funkcií Chvostíkovo APP" />
+  <meta name="description" content="Jednoduchý interný prehľad Chvostíkovo APP" />
   <title>Chvostíkovo System</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">
-      <div class="brand-mark">CH</div>
-      <div>
+    <a class="brand" href="#top" aria-label="Chvostíkovo System – domov">
+      <span class="brand-mark">CH</span>
+      <span class="brand-copy">
         <strong>Chvostíkovo System</strong>
-        <span>Mapa admin appky a zákazníckeho portálu</span>
-      </div>
-    </div>
-    <div class="topbar-meta" id="topbarMeta"></div>
+        <small>Jednoduchý prehľad projektu</small>
+      </span>
+    </a>
+    <span class="updated" id="updated"></span>
   </header>
 
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="sidebar-block">
-        <div class="eyebrow">Navigácia</div>
-        <nav id="sectionNav"></nav>
+  <main id="top" class="page">
+    <section class="hero">
+      <div>
+        <span class="kicker">PREHĽAD NA JEDEN POHĽAD</span>
+        <h1>Čo máme, čo robíme a čo bude ďalej.</h1>
+        <p>Bez technického chaosu. Aktuálny stav admin appky a zákazníckej appky podľa produkcie a Supabase.</p>
       </div>
-      <div class="sidebar-note">
-        <strong>Zdroj pravdy</strong>
-        <p>Funkčný prehľad je verzovaný v GitHube. Zmeny tejto appky nemenia produkčný Supabase ani obe hlavné aplikácie.</p>
+      <nav class="jump-nav" aria-label="Rýchla navigácia">
+        <a href="#teraz">Teraz</a>
+        <a href="#dalej">Ďalej</a>
+        <a href="#funkcie">Čo appky vedia</a>
+        <a href="#historia">História</a>
+      </nav>
+    </section>
+
+    <section id="teraz" class="section-block">
+      <div class="section-title">
+        <div><span class="emoji">🟠</span><span>TERAZ</span></div>
+        <p>Jedna vec, na ktorej práve pracujeme.</p>
       </div>
-    </aside>
+      <div id="nowCard"></div>
+    </section>
 
-    <main>
-      <section class="status-overview" id="statusOverview"></section>
-
-      <section class="hero">
-        <div>
-          <div class="eyebrow">Interná dokumentácia</div>
-          <h1>Čo dnes Chvostíkovo APP vie</h1>
-          <p class="lead">Prehľad funkcií, pravidiel, upozornení a technických väzieb od inštalácie zákazníckej PWA až po admin históriu návštev.</p>
+    <section id="dalej" class="section-block two-col">
+      <div>
+        <div class="section-title compact">
+          <div><span class="emoji">🔵</span><span>ĎALEJ</span></div>
+          <p>Najbližšie úlohy.</p>
         </div>
-        <div class="hero-actions">
-          <div class="search-wrap">
-            <span>⌕</span>
-            <input id="searchInput" type="search" placeholder="Hľadať funkciu, tabuľku, pravidlo…" autocomplete="off" />
-          </div>
-          <div class="filters" id="filters"></div>
+        <div id="nextList" class="stack"></div>
+      </div>
+      <div>
+        <div class="section-title compact">
+          <div><span class="emoji">🟡</span><span>ČAKÁ NA MŇA</span></div>
+          <p>Veci, ktoré potrebujú tvoju akciu.</p>
         </div>
-      </section>
+        <div id="waitingList" class="stack"></div>
+      </div>
+    </section>
 
-      <section class="summary-grid" id="summaryGrid"></section>
-      <section class="system-grid" id="systemGrid"></section>
+    <section class="section-block">
+      <div class="section-title">
+        <div><span class="emoji">🟢</span><span>HOTOVO NAPOSLEDY</span></div>
+        <p>Len posledné väčšie dokončené veci.</p>
+      </div>
+      <div id="recentList" class="recent-grid"></div>
+    </section>
 
-      <div id="sections"></div>
+    <section id="funkcie" class="section-block">
+      <div class="section-title">
+        <div><span class="emoji">🐶</span><span>ČO UŽ APLIKÁCIE VEDIA</span></div>
+        <p>Ľudsky, bez názvov tabuliek a API.</p>
+      </div>
+      <div class="app-switch" role="tablist" aria-label="Výber aplikácie">
+        <button class="app-tab active" data-app="admin" role="tab">Admin appka</button>
+        <button class="app-tab" data-app="customer" role="tab">Zákaznícka appka</button>
+      </div>
+      <div id="featureGrid" class="feature-grid"></div>
+    </section>
 
-      <section class="footer-card">
-        <div>
-          <div class="eyebrow">Ako tento prehľad udržiavať</div>
-          <h2>Pri každej väčšej zmene aktualizovať aj System</h2>
-          <p>Najjednoduchšie je upraviť <code>system/data.js</code>, commitnúť zmenu do GitHubu a Vercel automaticky nasadí novú verziu.</p>
-        </div>
-        <div class="mini-list">
-          <span>1. Úprava funkcie</span>
-          <span>2. Overenie produkcie</span>
-          <span>3. Aktualizácia System</span>
-          <span>4. Commit → Vercel</span>
-        </div>
-      </section>
-    </main>
-  </div>
+    <section id="historia" class="section-block">
+      <div class="section-title">
+        <div><span class="emoji">🕘</span><span>HISTÓRIA VÝVOJA</span></div>
+        <p>Čo sme postupne pridávali – nie technický Git log.</p>
+      </div>
+      <div id="historyList" class="timeline"></div>
+    </section>
+
+    <section class="section-block advanced-wrap">
+      <details class="advanced">
+        <summary>
+          <span>⚙️ Technické informácie</span>
+          <small>Otvor iba keď ich naozaj potrebuješ</small>
+        </summary>
+        <div id="technicalInfo" class="advanced-body"></div>
+      </details>
+    </section>
+  </main>
 
   <script src="./data.js"></script>
-  <script src="./updates.js"></script>
-  <script src="./integrations.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
