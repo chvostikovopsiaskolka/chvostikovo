@@ -17,7 +17,10 @@
         <small>Jednoduchý prehľad projektu</small>
       </span>
     </a>
-    <span class="updated" id="updated"></span>
+    <div class="topbar-actions">
+      <span class="updated" id="updated"></span>
+      <button class="add-button add-button-main" id="globalAddButton" type="button" aria-label="Pridať nový bod" title="Pridať nový bod">+</button>
+    </div>
   </header>
 
   <main id="top" class="page">
@@ -45,10 +48,14 @@
 
     <section id="dalej" class="section-block two-col">
       <div>
-        <div class="section-title compact">
+        <div class="section-title compact section-title-actions">
           <div><span class="emoji">🔵</span><span>ĎALEJ</span></div>
-          <p>Najbližšie úlohy.</p>
+          <div class="section-buttons">
+            <button class="copy-notes-button" id="copyNotesButton" type="button" hidden>Kopírovať poznámky</button>
+            <button class="add-button add-button-section" id="nextAddButton" type="button" aria-label="Pridať nový bod do ĎALEJ" title="Pridať nový bod">+</button>
+          </div>
         </div>
+        <p class="section-helper">Najbližšie úlohy a tvoje rýchle poznámky.</p>
         <div id="nextList" class="stack"></div>
       </div>
       <div>
@@ -98,6 +105,54 @@
       </details>
     </section>
   </main>
+
+  <dialog class="note-modal" id="noteModal" aria-labelledby="noteModalTitle">
+    <form method="dialog" id="noteForm" class="note-form">
+      <div class="modal-head">
+        <div>
+          <span class="mini-label">PRIPRAVOVANÉ VECI</span>
+          <h2 id="noteModalTitle">Pridať nový bod</h2>
+        </div>
+        <button class="modal-close" id="closeNoteModal" type="button" aria-label="Zavrieť">×</button>
+      </div>
+
+      <label class="field">
+        <span>Názov</span>
+        <input id="noteTitle" name="title" type="text" placeholder="Napr. pripomienka na koniec permanentky" maxlength="120" required />
+      </label>
+
+      <label class="field">
+        <span>Poznámka</span>
+        <textarea id="noteText" name="text" rows="4" placeholder="Napíš si sem všetko, čo nechceš zabudnúť…" maxlength="1200"></textarea>
+      </label>
+
+      <div class="field-grid">
+        <label class="field">
+          <span>Týka sa</span>
+          <select id="noteArea" name="area">
+            <option value="Obe appky">Obe appky</option>
+            <option value="Admin">Admin appka</option>
+            <option value="Zákaznícka">Zákaznícka appka</option>
+            <option value="System">System</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Typ</span>
+          <select id="noteKind" name="kind">
+            <option value="Nápad">Nápad</option>
+            <option value="Funkcia">Nová funkcia</option>
+            <option value="Úprava">Úprava</option>
+            <option value="Test">Test / overiť</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="button-secondary" id="cancelNoteButton" type="button">Zrušiť</button>
+        <button class="button-primary" type="submit">Uložiť do ĎALEJ</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="./data.js"></script>
   <script src="./app.js"></script>
