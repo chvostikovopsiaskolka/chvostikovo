@@ -9,7 +9,7 @@ window.SYSTEM_DATA = {
     title: "Momentálne nič nerozpracované",
     status: "Voľné",
     statusTone: "done",
-    note: "Produkčné appky sú momentálne stabilné. Ďalšie plánované práce sú resume po návrate z pozadia, upratanie kódu a bezpečný preview/release proces; zatiaľ bez zásahu do produkcie.",
+    note: "Produkčné appky sú momentálne stabilné. Live/Realtime aj návrat z pozadia boli fyzicky overené na zákazníckej aj admin appke. Ďalšie plánované práce sú upratanie kódu, podmienky a finálne testovanie.",
     bullets: []
   },
 
@@ -20,13 +20,6 @@ window.SYSTEM_DATA = {
       tone: "planned",
       text: "Do budúcna navrhnúť jednoduchý odmeňovací systém v zákazníckej appke, ktorý motivuje k pravidelnejším návštevám a vie prepojiť škôlku s vlastnými produktmi alebo partnermi.",
       detail: "Možné príklady: navštív škôlku 5× za mesiac a získaj benefit, zľava v petshope/partnerovi, zľava na vodítko alebo obojok, zľava na stojan, bonusový vstup k permanentke. Zatiaľ nič neimplementovať ani nepridávať DB tabuľky; najprv vymyslieť pravidlá, aby systém dával obchodný zmysel a nebol ľahko zneužiteľný."
-    },
-    {
-      title: "Návrat appky z pozadia – vždy čerstvé dáta",
-      status: "Na preverenie",
-      tone: "ready",
-      text: "Overiť a doladiť správanie admin aj zákazníckej PWA po dlhšom pobyte na pozadí bez úplného vypnutia.",
-      detail: "Po návrate má appka obnoviť Realtime spojenie a spraviť jeden bezpečný full resync, aby používateľ videl nové rezervácie, psov, oznamy, správy, permanentky a ďalšie zmeny. Push musí prísť aj keď appka nie je aktívne otvorená. Zákaznícka appka už má focus/online/visibility resume resync; admin má rovnaký základ. Treba to fyzicky otestovať po dlhšom uspání na iPhone aj Androide a prípadne iba doladiť hraničné situácie."
     },
     {
       title: "Upratanie kódu a starších vrstiev",
@@ -65,6 +58,8 @@ window.SYSTEM_DATA = {
   ],
 
   recent: [
+    { date: "18. 9. 2026", app: "Zákaznícka", title: "Stabilné fotky a oznamy v59", text: "Profilová fotka sa pri resyncu identifikuje podľa photo_path + photo_updated_at, takže nová dočasná podpísaná URL už nespôsobí znovunačítanie tej istej fotky v Rezerváciách, spodnej lište ani Môj psík. Odstránené boli aj staré oneskorené rendery po 900/1050 ms. Zatvorený notification modal sa v rovnakej relácii znovu neotvorí počas serverového mark-read resyncu. Deadline oznam je presunutý priamo nad Moje rezervácie." },
+    { date: "18. 9. 2026", app: "Obe", title: "Live a návrat z pozadia fyzicky overené", text: "Produkčný test so schválením Bellinej rezervácie potvrdil zákaznícky push, Realtime/live zmenu rezervácie a obnovu po návrate z pozadia. Admin aj zákaznícka appka sa po návrate synchronizujú bez ručného reloadu; samostatný bod na preverenie resume bol preto uzavretý." },
     { date: "18. 9. 2026", app: "Zákaznícka", title: "Ružová ikona push notifikácie v57", text: "Veľká farebná ikonka vpravo v Android notifikácii používa ružovú Chvostíkovo labku. Malý systémový monochromatický badge ostal bez zmeny. Zmenila sa aj verzia URL ikonky v service workeri, aby Android nepoužíval starú oranžovú ikonku z immutable cache." },
     { date: "18. 9. 2026", app: "Admin", title: "Detail psa v36 – stabilný legal blok bez blokovania otvorenia", text: "Opravená regresia v35, pri ktorej sa detail psa mohol neotvoriť, ak sa načítanie súhlasov alebo podmienok oneskorilo alebo zlyhalo. V36 vytvorí kartu Súhlasy a podmienky okamžite na správnom mieste pred revealom detailu a jej stav sa doplní asynchrónne iba do existujúceho kontajnera bez posunu layoutu." },
     { date: "18. 9. 2026", app: "Obe", title: "Stabilné obrazovky bez dodatočného preskakovania", text: "Zákaznícka PWA v56 zachováva rovnaké avatarové DOM prvky pri nezmenenej fotke, pred prvým zobrazením fotku predecodeuje a odstránila druhý oneskorený render. Pravidlá sa načítajú vopred a modal sa otvorí až s hotovým dokumentom. Admin v35 odstránil starý samostatný legal-status script; Súhlasy a podmienky sa načítajú spolu s detailom psa ešte pred jeho zobrazením." },
@@ -100,7 +95,7 @@ window.SYSTEM_DATA = {
         { title: "Stabilné prepínanie", text: "Pri prepínaní hlavných kariet sa obrazovka drží v správnej polohe a nezostáva náhodne posunutá." },
         { title: "Štatistiky", text: "Vidíš návštevy a mesačné prehľady, ktoré sa používajú pri vyhodnocovaní škôlky." },
         { title: "Správy", text: "Vieš komunikovať so zákazníkom priamo cez jeho účet a nové správy sa môžu prejaviť bez reloadu." },
-        { title: "Live aktualizácie a push", text: "Admin dostáva live zmeny rezervácií, taxi, správ, permanentiek, zatvorených dní, účtov a formulárov. Pri návrate z pozadia alebo po výpadku sa spojenie obnoví a spraví jeden resync." },
+        { title: "Live aktualizácie a push", text: "Admin dostáva live zmeny rezervácií, taxi, správ, permanentiek, zatvorených dní, účtov a formulárov. Návrat z pozadia aj následný resync boli fyzicky overené v produkčnom teste." },
         { title: "Narodeniny a vek", text: "Používa sa dátum narodenia psa a vek sa počíta automaticky podľa aktuálneho dátumu, vrátane mesiacov pri mladých psoch. Admin vidí narodeninové upozornenie v správny deň." },
         { title: "Očkovania", text: "Pri psovi evidujeme očkovania a admin dostane upozornenie približne 14 dní pred koncom platnosti. Po zmene dátumu sa staré upozornenie deaktivuje." },
         { title: "Fotky", text: "Pri psovi môže byť fotografia používaná v admin aj zákazníckej časti podľa nastavení." },
@@ -117,7 +112,7 @@ window.SYSTEM_DATA = {
         { title: "Registrácia a prihlásenie", text: "Klient si vytvorí účet a po schválení ho admin prepojí s jeho psom." },
         { title: "Môj psík", text: "Klient vidí kompaktný profil psa, tlačidlo Údaje psíka, kartu Pravidlá škôlky a návštevné štatistiky. Pravidlá sa otvárajú z aktuálne aktívneho dokumentu. Účet, upozornenia, súhlasy, zdieľanie mena/fotky a odhlásenie sú dostupné cez hamburger Menu." },
         { title: "Fotka psa", text: "Majiteľ môže pracovať s profilovou fotkou psa a jej zobrazením." },
-        { title: "Rezervácie", text: "Klient pošle žiadosť o konkrétny deň a schválenie alebo zamietnutie sa môže zobraziť live bez ručného refreshu. Pri odoslaní už neprekryje celú appku obrazovka „Načítavam Chvostíkovo“ – synchronizácia prebehne na pozadí." },
+        { title: "Rezervácie", text: "Klient pošle žiadosť o konkrétny deň a schválenie alebo zamietnutie sa zobrazí live bez ručného refreshu; tento tok bol fyzicky overený produkčným testom. Pri odoslaní už neprekryje celú appku obrazovka „Načítavam Chvostíkovo“ – synchronizácia prebehne na pozadí." },
         { title: "Kto príde do škôlky", text: "Pri rezervovanom dni môže vidieť prihlásených psíkov; bez súhlasu sa cudzí pes zobrazí anonymne." },
         { title: "Taxi", text: "Pri rezervácii si klient vyberie, či potrebuje dopravu." },
         { title: "Permanentka", text: "Stav permanentky je súčasťou obrazovky Rezervácie, vrátane použitých vstupov a dátumu platnosti, ak ho permanentka má. Duplicitná permanentková karta bola z Môj psík odstránená." },
