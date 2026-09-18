@@ -15,6 +15,13 @@ window.SYSTEM_DATA = {
 
   next: [
     {
+      title: "Odmeny a bonusy pre zákazníkov",
+      status: "Nápad",
+      tone: "planned",
+      text: "Do budúcna navrhnúť jednoduchý odmeňovací systém v zákazníckej appke, ktorý motivuje k pravidelnejším návštevám a vie prepojiť škôlku s vlastnými produktmi alebo partnermi.",
+      detail: "Možné príklady: navštív škôlku 5× za mesiac a získaj benefit, zľava v petshope/partnerovi, zľava na vodítko alebo obojok, zľava na stojan, bonusový vstup k permanentke. Zatiaľ nič neimplementovať ani nepridávať DB tabuľky; najprv vymyslieť pravidlá, aby systém dával obchodný zmysel a nebol ľahko zneužiteľný."
+    },
+    {
       title: "Môj psík – Pravidlá škôlky a Menu",
       status: "Nápad",
       tone: "planned",
