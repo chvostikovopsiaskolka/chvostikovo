@@ -9,11 +9,32 @@ window.SYSTEM_DATA = {
     title: "Momentálne nič nerozpracované",
     status: "Voľné",
     statusTone: "done",
-    note: "Profil psa, stabilné rozloženie zákazníckej appky a presun odhlásenia do Nastavení boli dokončené a nasadené v produkcii 18. 9. 2026.",
+    note: "Produkčné appky sú momentálne stabilné. Ďalšie plánované práce sú resume po návrate z pozadia, upratanie kódu a bezpečný preview/release proces; zatiaľ bez zásahu do produkcie.",
     bullets: []
   },
 
   next: [
+    {
+      title: "Návrat appky z pozadia – vždy čerstvé dáta",
+      status: "Na preverenie",
+      tone: "ready",
+      text: "Overiť a doladiť správanie admin aj zákazníckej PWA po dlhšom pobyte na pozadí bez úplného vypnutia.",
+      detail: "Po návrate má appka obnoviť Realtime spojenie a spraviť jeden bezpečný full resync, aby používateľ videl nové rezervácie, psov, oznamy, správy, permanentky a ďalšie zmeny. Push musí prísť aj keď appka nie je aktívne otvorená. Zákaznícka appka už má focus/online/visibility resume resync; admin má rovnaký základ. Treba to fyzicky otestovať po dlhšom uspání na iPhone aj Androide a prípadne iba doladiť hraničné situácie."
+    },
+    {
+      title: "Upratanie kódu a starších vrstiev",
+      status: "Na plán",
+      tone: "planned",
+      text: "Spraviť bezpečný audit starších verzií, runtime patchov a prekrývajúcich sa UI vrstiev bez zmeny správania aplikácií.",
+      detail: "Cieľ nie je prepisovať architektúru. Najprv zmapovať, ktoré vXX vrstvy a patche sú ešte reálne potrebné, potom ich postupne zlúčiť do jedného zdroja pravdy, odstrániť mŕtvy kód a zachovať rollback aj testy. Robiť až keď je aktuálna produkcia stabilná."
+    },
+    {
+      title: "Bezpečný preview a release proces",
+      status: "Na plán",
+      tone: "planned",
+      text: "Nastaviť spôsob, ako si pozrieť budúcu verziu admin alebo zákazníckej appky bez zásahu do produkcie.",
+      detail: "Každú väčšiu zmenu najprv nasadiť na samostatný Vercel preview deployment, otestovať na reálnom telefóne a až potom ju vedome povýšiť na produkciu. Produkčná verzia ostane nedotknutá počas testovania a posledný stabilný deploy musí zostať pripravený na okamžitý rollback. Súčasťou má byť aj kontrola service workera/cache, aby klientom neostala zmiešaná stará a nová verzia."
+    },
     {
       title: "Podmienky škôlky",
       status: "Čaká na mňa",
