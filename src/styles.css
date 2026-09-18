@@ -56,11 +56,11 @@
   --cream: oklch(0.985 0.012 85);
   --peach: oklch(0.932 0.032 68);
   --sand: oklch(0.955 0.022 76);
-  --forest: oklch(0.47 0.080 157);
-  --forest-deep: oklch(0.35 0.060 159);
-  --coral: oklch(0.72 0.140 48);
-  --coral-soft: oklch(0.87 0.070 50);
-  --coral-dark: oklch(0.63 0.150 45);
+  --forest: oklch(0.49 0.088 157);
+  --forest-deep: oklch(0.36 0.064 159);
+  --coral: oklch(0.73 0.155 50);
+  --coral-soft: oklch(0.88 0.080 52);
+  --coral-dark: oklch(0.64 0.165 47);
 
   --background: var(--cream);
   --foreground: var(--forest-deep);
