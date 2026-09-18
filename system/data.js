@@ -9,25 +9,11 @@ window.SYSTEM_DATA = {
     title: "Momentálne nič nerozpracované",
     status: "Voľné",
     statusTone: "done",
-    note: "Narodeniny, upozornenia na koniec platnosti očkovaní a preverenie push atribúcie boli dokončené a nasadené v produkcii 18. 9. 2026.",
+    note: "Profil psa, stabilné rozloženie zákazníckej appky a presun odhlásenia do Nastavení boli dokončené a nasadené v produkcii 18. 9. 2026.",
     bullets: []
   },
 
   next: [
-    {
-      title: "Údaje psa – Meno do SMS",
-      status: "Pripravené",
-      tone: "ready",
-      text: "Upratať pole Meno do SMS tak, aby sa vždy načítala už uložená hodnota z dogs.sms_name a nič existujúce sa neprepisovalo.",
-      detail: "Existujúce sms_name sa zachovajú. Pri null hodnote zostane pole prázdne a SMS používa fallback dogs.name. Aktuálne má sms_name 49 zo 76 psov; 27 ho nemá, z toho 9 aktívnych."
-    },
-    {
-      title: "Admin – dátum narodenia + vek",
-      status: "Pripravené",
-      tone: "ready",
-      text: "V detaile psa upraviť Dátum narodenia a Vek rovnako kompaktne ako v zákazníckej appke.",
-      detail: "Obe kolónky majú byť v jednom riadku. Vek sa má automaticky dopočítať z dogs.birth_date a nemá sa ručne udržiavať."
-    },
     {
       title: "Podmienky škôlky",
       status: "Čaká na mňa",
@@ -51,6 +37,7 @@ window.SYSTEM_DATA = {
   ],
 
   recent: [
+    { date: "18. 9. 2026", app: "Obe", title: "Profil psa + Nastavenia bez preskakovania", text: "V admin detaile sú Vek a Dátum narodenia vedľa seba aj na mobile a vek sa počíta z dogs.birth_date. Existujúce Meno do SMS sa načítava z dogs.sms_name bez hromadného prepisovania. V zákazníckej appke sa už pri otvorení Môj psík ani po uložení údajov na chvíľu nevracajú staré sekcie Súhlasy a podmienky; právne a účtové položky patria priamo do Nastavení. Odhlásenie je v Nastaveniach v admin aj zákazníckej appke." },
     { date: "18. 9. 2026", app: "Obe", title: "Narodeniny + očkovania v produkcii", text: "Používa sa existujúce dogs.birth_date a vaccinations.valid_until. Vek sa počíta automaticky, admin vidí narodeniny a blížiace sa expirácie, zákazník dostane vlastný in-app oznam a pri povolených notifikáciách jednorazový push. Deduplikácia je podľa psa a roka, resp. psa, typu očkovania a dátumu platnosti. PWA zostala pomenovaná Chvostíkovo; systémové „from“ riadi iOS a oddeliť ho od názvu aplikácie sa nedá." },
     { date: "17. 9. 2026", app: "Zákaznícka", title: "Bezpečný Realtime CSP na iPhone", text: "Zákaznícka PWA povoľuje pre Realtime iba konkrétny Supabase WebSocket origin. Hláška „This operation is insecure“ sa po aktualizácii service workera pri opätovnom otvorení už nezobrazila a CSP nebol rozšírený wildcardom." },
     { date: "17. 9. 2026", app: "Admin", title: "Opravené počty na dashboarde", text: "Horné kartičky už nečítajú počty skôr, než sa načítajú rezervácie. Dnešný a zajtrajší počet sa počíta priamo z aktuálnych dát." },
@@ -65,7 +52,7 @@ window.SYSTEM_DATA = {
       label: "Admin appka",
       intro: "Interné riadenie škôlky – kto príde, akú má permanentku, taxi, správy a ďalšie údaje.",
       features: [
-        { title: "Psíkovia a majitelia", text: "Vidíš profil psa, majiteľa, telefón, plemeno, vek, povahu, alergie a poznámky." },
+        { title: "Psíkovia a majitelia", text: "Vidíš profil psa, majiteľa, telefón, plemeno, dátum narodenia, automaticky vypočítaný vek, povahu, alergie a poznámky. Vek a dátum narodenia sú v detaile kompaktne vedľa seba aj na mobile." },
         { title: "Rezervácie", text: "Vidíš plánované dni, pridávaš rezervácie a spracúvaš žiadosti zo zákazníckej appky." },
         { title: "Permanentky", text: "Spravuješ 10/20-vstupové permanentky, zostávajúce vstupy, dátum kúpy a platnosť." },
         { title: "Taxi", text: "Pri rezervácii vidíš, či treba vyzdvihnutie alebo vyzdvihnutie aj dovoz." },
@@ -88,7 +75,7 @@ window.SYSTEM_DATA = {
       intro: "Jednoduché miesto pre klienta – jeho pes, rezervácie, permanentka, taxi, správy a upozornenia.",
       features: [
         { title: "Registrácia a prihlásenie", text: "Klient si vytvorí účet a po schválení ho admin prepojí s jeho psom." },
-        { title: "Môj psík", text: "Klient vidí profil svojho psa a dôležité informácie na jednom mieste; zmeny údajov psíka sa môžu prejaviť live." },
+        { title: "Môj psík", text: "Klient vidí profil svojho psa a dôležité informácie na jednom mieste; hlavná obrazovka zostáva stabilná aj pri opätovnom renderovaní a uložení údajov. Súhlasy, kontaktné údaje a odhlásenie patria do Nastavení." },
         { title: "Fotka psa", text: "Majiteľ môže pracovať s profilovou fotkou psa a jej zobrazením." },
         { title: "Rezervácie", text: "Klient pošle žiadosť o konkrétny deň a schválenie alebo zamietnutie sa môže zobraziť live bez ručného refreshu. Pri odoslaní už neprekryje celú appku obrazovka „Načítavam Chvostíkovo“ – synchronizácia prebehne na pozadí." },
         { title: "Kto príde do škôlky", text: "Pri rezervovanom dni môže vidieť prihlásených psíkov; bez súhlasu sa cudzí pes zobrazí anonymne." },
@@ -118,7 +105,8 @@ window.SYSTEM_DATA = {
     { date: "17. 9. 2026", title: "Live aktualizácie + push branding", app: "Obe", text: "Nasadili sme Supabase Realtime pre admin aj zákaznícku PWA, bezpečný zákaznícky signalizačný kanál, resync po návrate z pozadia/výpadku a nový monochromatický push badge. Starý 30-sekundový full polling zákazníckej appky bol odstránený." },
     { date: "17. 9. 2026", title: "Dashboard a plynulejšie ovládanie", app: "Obe", text: "Admin dostal opravu počtov na úvodnom dashboarde a stabilnú polohu obrazovky pri prepínaní kariet. Zákaznícka rezervácia sa odosiela bez celoobrazovkového načítavania." },
     { date: "17. 9. 2026", title: "Bezpečný CSP pre zákaznícky Realtime", app: "Zákaznícka", text: "CSP povoľuje Realtime iba cez konkrétny Supabase WSS origin. Service worker v47 zachováva bezpečnostnú politiku bez wildcardu a Realtime bootstrap už nenechá WebKit SecurityError zhodiť používateľské rozhranie." },
-    { date: "18. 9. 2026", title: "Narodeniny, očkovania a push atribúcia", app: "Obe", text: "Nasadili sme automatický vek z dogs.birth_date, narodeninové admin aj zákaznícke oznamy, jednorazové push notifikácie, 14-dňové upozornenia na koniec platnosti očkovaní a deduplikáciu v databáze. PWA názov zostal Chvostíkovo, pretože systémové „from“ na iOS sa nedá oddeliť od názvu nainštalovanej aplikácie." }
+    { date: "18. 9. 2026", title: "Narodeniny, očkovania a push atribúcia", app: "Obe", text: "Nasadili sme automatický vek z dogs.birth_date, narodeninové admin aj zákaznícke oznamy, jednorazové push notifikácie, 14-dňové upozornenia na koniec platnosti očkovaní a deduplikáciu v databáze. PWA názov zostal Chvostíkovo, pretože systémové „from“ na iOS sa nedá oddeliť od názvu nainštalovanej aplikácie." },
+    { date: "18. 9. 2026", title: "Profil psa a stabilné Nastavenia", app: "Obe", text: "Admin dostal mobilný dvojstĺpec Vek + Dátum narodenia a zachované individuálne Meno do SMS. Zákaznícka PWA už pri renderovaní nepresúva Súhlasy a podmienky cez hlavnú obrazovku Môj psík; účet, súhlasy a odhlásenie sú priamo v Nastaveniach. Odhlásenie bolo presunuté do kolieska Nastavenia aj v admine." }
   ],
 
   technical: [
