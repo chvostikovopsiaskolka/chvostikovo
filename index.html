@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Chvostíkovo">
+  <meta name="description" content="Zákaznícky portál psej škôlky Chvostíkovo">
+  <link rel="apple-touch-icon" href="/Store-v2.png?v=20260917-care-v48">
+  <link rel="icon" type="image/png" href="/Store-v2.png?v=20260917-care-v48">
+  <link rel="manifest" href="/manifest.webmanifest?v=20260918-customer-nav-v64">
+  <link rel="stylesheet" href="/styles.css?v=20260918-customer-nav-v64">
+  <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}</style>
+  <title>Chvostíkovo</title>
+</head>
+<body>
+<a class="skip-link" href="#mainContent">Preskočiť na obsah</a>
+<div id="loading" class="loading-screen" role="status" aria-live="polite"><img class="loading-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAABFCAMAAADHLythAAAAwFBMVEXYaKq/P3/ocMPba8y4WKCxZGT/mQB/H3//zQAA/wBVVVX/AH/dN6X/qqqqqqr/VQD/qv8AAP/gbL7/nwAAAAD/pgDTZrH/qQD/fwD//wD/pAD/AP/QZK/QZK//pADPZK/QZK/QZK//pADQZK//AADSZ7D/pAD/sgD/pAD/pAD/mQB/f3+qVar/vQDPWKwmJiYnJyf/f38mJib///8mJib/f/+/P78mJibhbb0mJib9VaomJiY6OjomJiYdHR29f7373nmpAAAAQHRSTlMQBP8FBwMhAwUBAwIEAwMDAwGWSAD8/AwCAXIBTJLPLc+wLm8BFpD+sE4JAgMFDNARApAB7gIEsP4tA3EESwoEtsRwKQAADrtJREFUeNrtWwl3o8gRxh7vXHtkk7QMCBA3Qggd6LAsycf//1epqj6RkK1JPGvvi+rNGwPdNPRHHV9Vtyx2kbPFukBwAev/HKys4fLRwXJIJvbHQM27Q3m+umjWaZmGKFaYf2jNclkyIkmc93vP7yy95RJOfS7TjwiWw/o9koHN/jq43Kr1rDsWc6wC5gvUcuZdwOLu/MBPsU+RUKwLWIdis6oYGU/7k4VSsS5gHblJuxyWbKIufJIuK/cuYB1g5VZlr2eCtVxyl5UCbBew2li5Ra8F1pjlUrF+Nlhe/WxZ1t3aOw+szHVcNzsNVgbyw/7ahUGzE03tx6HDQqzaYE0DFJ81V+eB5Y2X/w2U9Vod7savgeXarj7MjsGyZbtrKy0gOdAM85prK33MbOfgcfqTyEPX4Vj1Sufr0dBjdgRW1izHKEvVZ5fpQ4nYmPdZmoMt+Y0KVALKCv00Tf3wim56CSycim0nIJjbOM4hWDjXalLZdgX93HMDG2MTGrSq8PCgqbKTUZLgwGJA9biyc7jXNCvDGeU5kP385g515Wyt2kGWkEaCodxGMbLe3Umw4CPa/y4G4lX7CZ9NS7PcEW8fYKsD/ftcRo5J+MXFBI5BT+BcjDkoRjZ2UJ+mGsnH0YAuASieBpe4IMQMPzd+cWCnbbC8G96SBiFbIiFjuR+IGUdpCPriAWkLRafQpG5izJQGgn9WcNuWdMqaE2DBPEbi1VGGvTIhcqjBqkalbi0AOsceDPmZ8v2u4xTymotmBvcM9agDmLvsyfRwNGDFbP0wukT/IeYsvsa3v44Pwfqdpfd0dg101WO/sJs0Mucb+wwuAkujXteR/qbrPBJj1utvoIC1zKeiKJb6FfktemwZGlEZ787fsw/e3ACrMKc9LCdgU3JqI9eR6mKLSwWq1eeidyCDhOuWbcCiWio2OuwvwJKctA3WWpJVpPYNuLQwOtCO2+AGQQ1UL0/mT3IcH4ytYRZ/Qhzm+XSX55YfiQc22TFYDksGR+8J6uNkztGsFFpAtHvSwQjrcjI53STrHrNH1NztgGXQhdVLYP36qyXBCdgu+1W1tZQrZ1bmq27P/D2bfwZcJSNrCVjlNE5gJudhzG/QLMLSWHUiUqCb7warB4rnuFJzPitfJPSzhEBmDzrvSxAtuwP+Iun9EFhrpTHRroazLqygbcqWEtQo5xHRE/DgkBAPp3gShRQ1PZDlePlFJFYBOwTLcauWuzLVoG0vQ6N5UDlKFfrcFbkKdLjRMX3SsDX/r3rQQVkO1OHwCED+GTrBqk0j9JZeeNst8dRSFR6fUdVwrHQtZLvmJuYa+MkDtoE+vQbOsX5mBHGqIqqluJR+zVK/PQhEdAOsQdHvFwMDSak85WcnI2bQ10Ca98Gg+qx0JvLjgKOCu2TPAsPfoB0N7ZNg/SG1gya0lJ0Inzg2vFfKdiIFuA84nWpk57j2akIytjAStOoeNXeBIRubYLmGURQJxCQ7KbWtGZPuE5lQ1lUYLj7BcKotD9y7NsIigfhfJX1TXwcab7hRRNAChxfHLZ7VAVboKSOM1zuYsjbCFOup01BRgSgfy75RjgxjmeVK0yzSz4hoQsN8jJ9XgojwMaNxS7MkaaaXF0yor71u3wCuqqqvytQGYL8C5iHZ4UQ1JYZCjjiJY9rfl47qxyoHKMhoQFJUlV1xsHplxSU7BZY6AgDGYDVSsdD3MMp2fK1aykb9bIzTTuWt3tqLpXlyu/bHAY2J1IswTr3GBEt5rBHDJM7FtEe883CkZl0Sx2SZYwvfggmQxBlAdbU5Q1fFRPqYJWWQA2ooe8oMkcxRYXRSVRPMeSbywSWrXtSsXBmhD6a10/4rZ781XpYt12vlqWLQFml3CEJzpwa0KEmPeZSsyXmFHF8ANfOwMRI+3uKUJ1FwqOQPCCeXvkGmeAJXSUgQrCzRVAu4mrQu7elLvC55rxqKKRuFXAENkQmmdj5YgWYNZhqUsjuVF7NIAWhGUR0ZQlEqC5cAzS9rHhV5FPQsD5PRlL7GnQLL5JaT0yUa7pY4WNL7A7hSg0qwSYUczDMxaZVcU9OMtcVHyoLSHYwRZ4OlGHdeoxdSDizXOXWTaebpSUVMmdVI3g9qtsSCtWT2z5xC8G40ApovRIXfFVhKUzgD0mUVkuN61sQAyzFOVMFgWADoI9VHVzLYZKBUeNBmCL1yRCHobLA0a6AolokukVlxURrkg5kJNONPY1ZH0oGtmUVqhAD7PoJ4HeQRQBnmkEl6nILF38gQrZbmk995vfjXAstRUQ99k3bbRh9Xh2O3lKGhgwVjuvnDYMWcC8h85Tb2dH6isyFQJ0+bnrwMIZAXE33WEKWNpkEEfCuMotSiSNEQ7+UhlIPlKLAmZl3PsUleAUuF0mGpspWy0voIfbIusMDbl0cJVOVkP6xZPieNtQQr05WbxgCrloPcpypVDFht0Xghq7nmYb8poHnDeIi8s8hiOdU6MEOzcKxhexks7agSJqIk6JjTbYa2dnCQco/Ko7TRPhsslenkX9ZGl1NmuG48X96Qq3W1KwnGesepKcuBzUapN+XtNScZIdVqrLbDHpnFOaoCgrwClkoHh31bK5MGa6SLna6rHHzmOPgoe9Q304USUvOzo2GsoiGBJcGbas2qPe3gm7FKB0OJGvvCFFgZNN+jvxIZEp6APh2BZVKHSlUPNBd/BSxVQCj7ir0bmTkoUXYUWEfG968SrWEGWAOzBt3Js24NG6tlgKMVIKVZEtAplUKl9YmCA973LM0QwQgC6fkgCYipBsHBzLUZugoYmMRXWRIv1KVXwHJUZBtoimGUx0byC0xURadn22L/hE0KZrATBVavciYvpjuKcqJL0RYHXptTbc9SfWM8/8IOMu0pxDhOZn1ZEk2NIMsL9UzReTGsRgZyfPRWmZEQ2q+a4YS1Snzg3l3qNFQICBeovkkpGocD8G6OXTl2B1jFK7lho9Qgzne/jG/0GdVgGNPgpLwEbabaovhSEzfgdZgrzzIKO3Xd4C2iWYOVGXGc58oqUg0L51Ww7DYN6JPjayXn5H2qkVGuGLXtcaTIrJGKQk4Pedep3DA3wICw9kWHycinaeVGIk1mpFy8Ks5gsQbDaMRapQjJNvAWi0ip1SrRFCadNn2uzohPO3ibmWHNdkVpq2+OWbRKNCqC9kZ2BTbZ06tthwSMMoBOsJ611ZAd6aJMFAdBbM5bVF+syKygUh3wSiQ0tVEQJIZB6SJPDDisCiz7RFETWcDrYDlmObhgck3x1JhgbBMNr1H8GxZIRVh5JlieLmFFefM7O1n8y8eZWHaUUYAQFBVmZAnx7u7btxaW11iBHhOTVbz3B8rKp8HKVBpDtXf3pbI+n/6J51FoyJJzwWp0cTRmuz9PlZXVCuPaxDMXTHIp2KjFRJUiSGNBdr1nzk1bJRqQf3StFQzLyau5obhbefOBZux2N1pU+cq6Kvt9UsqDphfAgrNUK4pRkmlhZam6sDfWXilgS4mgJKAwYJiSv5um/hTe40oQ1exwKaxLDwqezpwES10xHE2fGWvyR8trVEemopjNig41Jj113P6ZYLF6p2ZvsfGS+VHH4o5elX7WyqeKxeDPUl4y/MRByQSKY1F8DSWvsFqbovrGasSwNxhR0RQzR5KeAZa4oqoUjlvKS5lrJuEYAo0xMTBy9oQcv/V14HFqewT7XNIiBwqBFV3fg/BFVn7IlwBBF27p/P4arO3XL2zaXlaO/DvW2rFwJ0aKapVDZhzxCNmatyNk4Y93JUpgKfuja/keonu/FCsxA6yYUNUOJlWQ9CdiNi5L+JVC5X2OvNRv1y1wzYsSGlrdKZGX2KoEhE0cEngcLkxI+81o0b/PR6SlsDQQ22jA7fDDwBLcyRfnAWoATNUil3MPnjwK0ilrr8AvRfd/+cZ1GQaxhOWt63WzRoolqIcy14ONIfiOLEk4sxZl8/91NyiNafMxEybwN/ahiMd9FqdM76U5d0PV4V4jJKMhbmemXeDjc8aQi6yxry025/sAgMFlp7YcTdRL2tr18FKNXR1Vb6rM3D5EclxpzfSvDdzKPXiccege/lKh+ipKROhspiS0EYgffpLP3k2FCFVZWgq/q+eOzTK8c32A1pT7vijwab+9r4o4nnd6M1vm2ICEY7/pHj/C1rE7VNWVj3Pf8HHeene12+3qH/jpyvrQ2alqdPZ3/IXFT5YxO2ZpQDp2GbuA1bWZ9HALTjDV60QXsA43lLK8nUgfbhv8+4D1/eGnP6Jh69jAqvEYu2jWC9tKc3O/F3t/sM7QkD3IAUOaLzbbv8ISZXl+6nnsncF6enhSh3PzD3tq4blYzFXjnJoe9/tHjprsSX/F3fO3esEli9o7BN8PrPliNpvtn8TRBg6+L/bUsp09GpBiI+oRNu43sv+CVGu/YN/pDugx3/C7Fpunt2IQophqdSjWXw3WavG4X+3BEjez7Ra152G24NNdbbR5LrARkYHG/QrxmM9mj4+b1Zbu5Ib8uNrOZxtSqe1qtX8zzcrVAsd7g4X6s5jBEYDFDY6DtV09GqolG9lmAZCQOq3mHLsnttkIsGZbOBSKtZ+9lWoxL729j8Jm+QHA2s8fVwuY7Xa2mi0eBFgPMF38J2W7gcYnQm21oZAA6gT+a7Hhh3OuWTNQurn4BHD4ZtTC8nOWfQTNWs2E6bA52iOB9QDmOVtsVka0441ss9qvOJgrvDrbADhSnbarzQJveQC1WyxWmzeMiAdlnffTrC2Hav8435JSEVgAzX4PR4It7B+f5mSe8N8j91mrDbgxwGZO3g4HQQOdofWB59rvF6u3IBbjmkpktDyxrL0P4LOEQwcLkw7+abYnu5IEYC8awWfhyVaYLb8Z7pwhMggWQcrv27yVatW/3dzc/Na8v2YBz1JUamvwrDl7eABjVI1PrUbuu+eSUqE8SHI7p3a4+U2oVugHccQlDvyjn51d0h2TNojljnu56Xl9AesFucmtkEs+fXcz/Og1rRfOLmAdoTVumma9XjdN12+sL2D9CFu9QHAB66fIfwAM0EYECiJzDQAAAABJRU5ErkJggg==" alt="Chvostíkovo"><div class="loading-paw" aria-hidden="true">🐾</div><small>Načítavam Chvostíkovo…</small></div>
+
+<main id="authView" class="auth-shell">
+  <section class="auth-card">
+    <div class="auth-brand"><img src="https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-logo?v=20260913-v17" alt="Chvostíkovo"><p>Portál pre majiteľov psíkov</p></div>
+    <div class="auth-switch"><button id="showLogin" class="active" type="button">Prihlásenie</button><button id="showSignup" type="button">Vytvoriť účet</button></div>
+    <form id="loginForm" class="form-stack">
+      <div><label for="loginEmail">E-mail</label><input id="loginEmail" class="input" type="email" autocomplete="email" required></div>
+      <div><label for="loginPassword">Heslo</label><input id="loginPassword" class="input" type="password" autocomplete="current-password" required></div>
+      <label class="remember-row"><input id="rememberLogin" type="checkbox" checked><span>Zapamätať prihlásenie</span></label>
+      <button class="btn full" type="submit">Prihlásiť sa</button>
+      <button id="forgotPasswordBtn" class="text-btn" type="button">Zabudli ste heslo?</button>
+    </form>
+    <form id="signupForm" class="form-stack hidden">
+      <div><label for="signupName">Meno a priezvisko</label><input id="signupName" class="input" autocomplete="name" required></div>
+      <div><label for="signupEmail">E-mail</label><input id="signupEmail" class="input" type="email" autocomplete="email" required></div>
+      <div><label for="signupPhone">Telefón</label><input id="signupPhone" class="input" type="tel" autocomplete="tel" placeholder="09xx xxx xxx" required></div>
+      <div><label for="signupDogName">Meno psíka</label><input id="signupDogName" class="input" autocomplete="off" required><p class="hint">Podľa mena ho priradíme k vášmu účtu.</p></div>
+      <div><label for="signupPassword">Heslo</label><input id="signupPassword" class="input" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Heslo musí mať minimálne 8 znakov.</p></div>
+      <button class="btn full" type="submit">Vytvoriť účet</button>
+    </form>
+    <form id="forgotForm" class="form-stack hidden">
+      <div><label for="forgotEmail">E-mail k účtu</label><input id="forgotEmail" class="input" type="email" autocomplete="email" required><p class="hint">Pošleme vám odkaz na vytvorenie nového hesla.</p></div>
+      <button class="btn full" type="submit">Poslať odkaz na obnovu</button><button id="backToLogin" class="btn secondary full" type="button">Späť na prihlásenie</button>
+    </form>
+    <form id="newPasswordForm" class="form-stack hidden">
+      <div><label for="newPassword">Nové heslo</label><input id="newPassword" class="input" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Heslo musí mať minimálne 8 znakov.</p></div>
+      <div><label for="newPasswordAgain">Zopakujte nové heslo</label><input id="newPasswordAgain" class="input" type="password" autocomplete="new-password" minlength="8" required></div>
+      <button class="btn full" type="submit">Uložiť nové heslo</button>
+    </form>
+    <div id="authMessage"></div>
+  </section>
+</main>
+
+<div id="appView" class="app hidden">
+  <button id="logoutBtn" class="icon-btn hidden" type="button">Odhlásiť sa</button>
+  <div id="mainContent"></div>
+  <div id="notificationList"></div>
+  <section id="bookingTab" class="tab-page">
+    <div class="hero"><div><p>Rezervácie</p><h1 id="weekTitle">Nasledujúce dni</h1></div><div id="passSummary" class="hero-pass"></div></div>
+    <div class="section-head"><div><h2>Vyberte deň</h2><p id="deadlineText"><span>Prosíme o rezerváciu miesta na nasledujúci týždeň do <strong>nedele 20:00</strong>. V prípade individuálnej potreby rezervácie miesta v škôlke nás prosím kontaktujte.</span></p></div></div>
+    <div id="bookingNotice"></div>
+    <div id="announcementNotice"></div>
+    <div id="upcomingBookings"></div>
+    <div id="weekDays" class="list"></div>
+  </section>
+
+  <section id="messagesTab" class="tab-page hidden">
+    <div class="section-head"><div><h1>Správy</h1><p>Napíšte nám otázku k rezervácii alebo čokoľvek iné.</p></div></div>
+    <a class="call-card" href="tel:+421951069395"><span class="call-icon">☎</span><span><strong>Zavolať do Chvostíkova</strong><small>+421 951 069 395</small></span></a>
+    <div id="messageThread" class="card message-thread"></div>
+    <form id="messageForm" class="card form-stack"><div><label for="messageBooking">Súvisiaca rezervácia (nepovinné)</label><select id="messageBooking" class="input"><option value="">Bez konkrétnej rezervácie</option></select></div><div><label for="messageBody">Správa</label><textarea id="messageBody" class="input" rows="4" maxlength="2000" placeholder="Napíšte správu pre Chvostíkovo…" required></textarea></div><button class="btn full" type="submit">Odoslať správu</button></form>
+  </section>
+
+  <section id="dogTab" class="tab-page hidden">
+    <div class="section-head"><div><h1>Môj psík</h1><p>Údaje môžete kedykoľvek doplniť alebo upraviť.</p></div></div>
+    <div id="dogProfilePhoto"></div>
+    <div id="dogProfileSettings"></div>
+    <div id="dogStatus"></div>
+    <div id="dogSelectorWrap" class="card hidden"><label for="dogSelector">Vyberte psíka</label><select id="dogSelector" class="input"></select></div>
+    <div id="dogStats"></div>
+    <div class="card account-card"><button id="accountToggle" class="collapse-btn" type="button"><span>Moje kontaktné údaje</span><span>›</span></button><form id="profileForm" class="form-stack hidden"><div><label>Meno a priezvisko</label><input id="profileName" class="input" required></div><div><label>E-mail</label><input id="profileEmail" class="input" type="email" disabled></div><div><label>Telefón</label><input id="profilePhone" class="input" type="tel" required></div><button class="btn secondary full" type="submit">Uložiť kontaktné údaje</button></form></div>
+  </section>
+
+  <section id="staffTab" class="tab-page hidden"><div class="section-head"><div><h1>Žiadosti zákazníkov</h1><p>Táto karta je viditeľná iba pracovníkom Chvostíkova.</p></div></div><div id="staffSummary"></div></section>
+  <nav class="bottom-nav"><button id="navBooking" class="active" type="button">Kalendár</button><button id="navDog" type="button">Môj psík</button><button id="navMessages" type="button">Správy <i id="messageUnread" class="nav-badge hidden"></i></button><button id="navStaff" class="hidden" type="button">Žiadosti</button></nav>
+</div>
+<div id="dogDetailsModal" class="legal-modal dog-details-modal hidden" role="dialog" aria-modal="true" aria-labelledby="dogDetailsTitle">
+  <div class="legal-card dog-details-card">
+    <button id="dogDetailsClose" class="legal-close" type="button" aria-label="Zavrieť">×</button>
+    <div class="legal-kicker">Môj psík</div>
+    <h2 id="dogDetailsTitle">Údaje psíka</h2>
+    <form id="dogForm" class="form-stack">
+      <input id="dogId" type="hidden"><input id="submissionId" type="hidden">
+      <div><label for="dogName">Meno psíka</label><input id="dogName" class="input" required></div>
+      <div class="grid2"><div><label for="dogBirthDate">Dátum narodenia</label><input id="dogBirthDate" class="input" type="date"></div><div><label for="dogAge">Vek</label><input id="dogAge" class="input" readonly></div></div>
+      <div><label for="dogBreed">Plemeno</label><input id="dogBreed" class="input"></div>
+      <div class="grid2"><div><label for="dogSex">Pohlavie</label><select id="dogSex" class="input"><option value="">Neuvedené</option><option value="male">Pes</option><option value="female">Suka</option></select></div><div><label for="dogNeutered">Kastrovaný / sterilizovaná</label><select id="dogNeutered" class="input"><option value="">Neuvedené</option><option value="true">Áno</option><option value="false">Nie</option></select></div></div>
+      <div class="dog-vaccinations-heading">Očkovania</div>
+      <div class="vaccine-box"><strong>Besnota</strong><div class="grid2"><div><label>Očkovaný</label><input id="rabiesOn" class="input" type="date"></div><div><label>Platí do</label><input id="rabiesUntil" class="input" type="date"></div></div></div>
+      <div class="vaccine-box"><strong>Infekčné ochorenia</strong><div class="grid2"><div><label>Očkovaný</label><input id="infectiousOn" class="input" type="date"></div><div><label>Platí do</label><input id="infectiousUntil" class="input" type="date"></div></div></div>
+      <div class="vaccine-box"><strong>Kotercový kašeľ</strong><div class="grid2"><div><label>Očkovaný</label><input id="kennelOn" class="input" type="date"></div><div><label>Platí do</label><input id="kennelUntil" class="input" type="date"></div></div></div>
+      <button class="btn full" type="submit">Uložiť údaje psíka</button>
+      <div id="dogMessage"></div>
+    </form>
+  </div>
+</div>
+<div id="toast" class="toast hidden"></div>
+<script src="/app.js?v=20260918-customer-nav-v64"></script>
+</body>
+</html>
