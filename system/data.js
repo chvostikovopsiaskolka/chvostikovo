@@ -15,6 +15,13 @@ window.SYSTEM_DATA = {
 
   next: [
     {
+      title: "Môj psík – Pravidlá škôlky a Menu",
+      status: "Nápad",
+      tone: "planned",
+      text: "Sprístupniť Pravidlá škôlky priamo z obrazovky Môj psík bez toho, aby sa profil znovu zaplnil právnymi detailmi.",
+      detail: "Odporúčaný smer: pod štatistiky pridať jednoduchý riadok/kartu „Pravidlá škôlky“ s otvorením existujúceho dokumentu v modale alebo samostatnom view. Stav súhlasov, účet, notifikácie a odhlásenie ponechať v menu. Zvážiť nahradenie ozubeného kolieska všeobecnejším tlačidlom „Menu“ (hamburger/tri bodky + text), pretože obsahuje viac než len nastavenia. Neimplementovať, kým nebude finálne znenie podmienok."
+    },
+    {
       title: "Správy – plávajúci chat namiesto samostatnej záložky",
       status: "Nápad",
       tone: "planned",
