@@ -72,6 +72,7 @@ window.SYSTEM_DATA = {
   ],
 
   recent: [
+    { date: "18. 9. 2026", app: "Obe", title: "Admin detail psa v31 + väčšie fotky v54", text: "Admin detail psa má tri hlavné sekcie Štatistiky, Info o psíkovi a Rezervácie. Núdzový kontakt s telefónom ostáva stále viditeľný hore mimo tabov. Rezervácie zhromažďujú čakajúce a plánované rezervácie, aktuálnu/nasledujúcu permanentku, správu permanentiek aj kúpu novej. V zákazníckej PWA sa zväčšili kruhové fotky psa v Rezerváciách aj Môj psík, aby viac vynikla personalizácia." },
     { date: "18. 9. 2026", app: "Zákaznícka", title: "Môj psík v53 – chat, spodná lišta a Android push ikona", text: "Výzva na doplnenie údajov je centrovaná, spodná navigácia má pre bežného zákazníka iba dve rovnako široké položky Rezervácie a Môj psík. Plávajúci chat je väčší a oranžový; pri prvom otvorení Môj psík v relácii sa zobrazí krátka nápoveda „Máte otázku? Napíšte nám správu“. Android push používa Chvostíkovo PWA ikonu ako hlavný icon a monochromatický badge zostáva zachovaný." },
     { date: "18. 9. 2026", app: "Zákaznícka", title: "Plávajúci chat + kompaktnejší Môj psík", text: "Výzva na doplnenie údajov psa je kratšia a centrovaná, návštevy celkovo sú v jednom riadku s číslom vpravo. Samostatná spodná záložka Správy bola skrytá a komunikácia je dostupná cez plávajúce chat tlačidlo na obrazovke Môj psík. Chat sa otvára v modale, zachováva existujúce správy a umožňuje zvoliť rezerváciu, správu bez predmetu alebo vlastný predmet." },
     { date: "18. 9. 2026", app: "Zákaznícka", title: "Môj psík uprataný + opravená cache verzií", text: "Zákaznícka PWA má kompaktnú hlavičku psa s tlačidlom Údaje psíka, údaje sa upravujú v jednom modale, zobrazujú sa návštevy celkovo s mesačným rozbalením a permanentka ostáva v Rezerváciách vrátane dátumu platnosti. Odstránené customer polia váhy a interných poznámok sa pri ukladaní neprepisujú. Opravený bol aj service worker: nová v51 používa vlastný cache namespace a network-first načítanie JS/CSS bez ignoreSearch, aby sa nemiešala stará a nová verzia." },
@@ -91,7 +92,7 @@ window.SYSTEM_DATA = {
       label: "Admin appka",
       intro: "Interné riadenie škôlky – kto príde, akú má permanentku, taxi, správy a ďalšie údaje.",
       features: [
-        { title: "Psíkovia a majitelia", text: "Vidíš profil psa, majiteľa, telefón, plemeno, dátum narodenia, automaticky vypočítaný vek, povahu, alergie a poznámky. Vek a dátum narodenia sú v detaile kompaktne vedľa seba aj na mobile." },
+        { title: "Psíkovia a majitelia", text: "Detail psa je rozdelený na Štatistiky, Info o psíkovi a Rezervácie. Telefón majiteľa ostáva stále viditeľný hore pre núdzový kontakt. V profile vidíš plemeno, dátum narodenia, automatický vek, povahu, alergie a poznámky." },
         { title: "Rezervácie", text: "Vidíš plánované dni, pridávaš rezervácie a spracúvaš žiadosti zo zákazníckej appky." },
         { title: "Permanentky", text: "Spravuješ 10/20-vstupové permanentky, zostávajúce vstupy, dátum kúpy a platnosť." },
         { title: "Taxi", text: "Pri rezervácii vidíš, či treba vyzdvihnutie alebo vyzdvihnutie aj dovoz." },
@@ -115,7 +116,7 @@ window.SYSTEM_DATA = {
       intro: "Jednoduché miesto pre klienta – jeho pes, rezervácie, permanentka, taxi, správy a upozornenia.",
       features: [
         { title: "Registrácia a prihlásenie", text: "Klient si vytvorí účet a po schválení ho admin prepojí s jeho psom." },
-        { title: "Môj psík", text: "Klient vidí kompaktný profil psa, fotku a tlačidlo Údaje psíka. Údaje sa upravujú v jednom modale; hlavná obrazovka zobrazuje prehľad návštev a mesačné štatistiky. Súhlasy, kontaktné údaje a odhlásenie patria do Nastavení." },
+        { title: "Môj psík", text: "Klient vidí kompaktný profil psa s výraznejšou kruhovou fotkou a tlačidlom Údaje psíka. Údaje sa upravujú v jednom modale; hlavná obrazovka zobrazuje prehľad návštev a mesačné štatistiky. Súhlasy, kontaktné údaje a odhlásenie patria do Nastavení." },
         { title: "Fotka psa", text: "Majiteľ môže pracovať s profilovou fotkou psa a jej zobrazením." },
         { title: "Rezervácie", text: "Klient pošle žiadosť o konkrétny deň a schválenie alebo zamietnutie sa môže zobraziť live bez ručného refreshu. Pri odoslaní už neprekryje celú appku obrazovka „Načítavam Chvostíkovo“ – synchronizácia prebehne na pozadí." },
         { title: "Kto príde do škôlky", text: "Pri rezervovanom dni môže vidieť prihlásených psíkov; bez súhlasu sa cudzí pes zobrazí anonymne." },
