@@ -22,13 +22,6 @@ window.SYSTEM_DATA = {
       detail: "Možné príklady: navštív škôlku 5× za mesiac a získaj benefit, zľava v petshope/partnerovi, zľava na vodítko alebo obojok, zľava na stojan, bonusový vstup k permanentke. Zatiaľ nič neimplementovať ani nepridávať DB tabuľky; najprv vymyslieť pravidlá, aby systém dával obchodný zmysel a nebol ľahko zneužiteľný."
     },
     {
-      title: "Môj psík – Pravidlá škôlky a Menu",
-      status: "Nápad",
-      tone: "planned",
-      text: "Sprístupniť Pravidlá škôlky priamo z obrazovky Môj psík bez toho, aby sa profil znovu zaplnil právnymi detailmi.",
-      detail: "Odporúčaný smer: pod štatistiky pridať jednoduchý riadok/kartu „Pravidlá škôlky“ s otvorením existujúceho dokumentu v modale alebo samostatnom view. Stav súhlasov, účet, notifikácie a odhlásenie ponechať v menu. Zvážiť nahradenie ozubeného kolieska všeobecnejším tlačidlom „Menu“ (hamburger/tri bodky + text), pretože obsahuje viac než len nastavenia. Neimplementovať, kým nebude finálne znenie podmienok."
-    },
-    {
       title: "Návrat appky z pozadia – vždy čerstvé dáta",
       status: "Na preverenie",
       tone: "ready",
@@ -72,6 +65,7 @@ window.SYSTEM_DATA = {
   ],
 
   recent: [
+    { date: "18. 9. 2026", app: "Zákaznícka", title: "Pravidlá, Menu a stabilnejšie fotky v55", text: "Na obrazovke Môj psík pribudla karta Pravidlá škôlky medzi profilom a štatistikami; otvára aktuálne aktívny dokument z databázy. Ozubené koliesko bolo nahradené hamburger Menu. Pri prvom potvrdení podmienok je samostatná dobrovoľná voľba, či zobraziť meno a fotku psíka ostatným majiteľom prihláseným na ten istý deň; rovnaké nastavenie zostáva dostupné aj v Menu. Fotka v oranžovej rezervačnej karte je väčšia bez zväčšenia karty a opakované renderovanie avatarov pri štarte/resyncu bolo obmedzené, aby nepreblikávali." },
     { date: "18. 9. 2026", app: "Obe", title: "Admin detail psa v31 + väčšie fotky v54", text: "Admin detail psa má tri hlavné sekcie Štatistiky, Info o psíkovi a Rezervácie. Núdzový kontakt s telefónom ostáva stále viditeľný hore mimo tabov. Rezervácie zhromažďujú čakajúce a plánované rezervácie, aktuálnu/nasledujúcu permanentku, správu permanentiek aj kúpu novej. V zákazníckej PWA sa zväčšili kruhové fotky psa v Rezerváciách aj Môj psík, aby viac vynikla personalizácia." },
     { date: "18. 9. 2026", app: "Zákaznícka", title: "Môj psík v53 – chat, spodná lišta a Android push ikona", text: "Výzva na doplnenie údajov je centrovaná, spodná navigácia má pre bežného zákazníka iba dve rovnako široké položky Rezervácie a Môj psík. Plávajúci chat je väčší a oranžový; pri prvom otvorení Môj psík v relácii sa zobrazí krátka nápoveda „Máte otázku? Napíšte nám správu“. Android push používa Chvostíkovo PWA ikonu ako hlavný icon a monochromatický badge zostáva zachovaný." },
     { date: "18. 9. 2026", app: "Zákaznícka", title: "Plávajúci chat + kompaktnejší Môj psík", text: "Výzva na doplnenie údajov psa je kratšia a centrovaná, návštevy celkovo sú v jednom riadku s číslom vpravo. Samostatná spodná záložka Správy bola skrytá a komunikácia je dostupná cez plávajúce chat tlačidlo na obrazovke Môj psík. Chat sa otvára v modale, zachováva existujúce správy a umožňuje zvoliť rezerváciu, správu bez predmetu alebo vlastný predmet." },
@@ -116,7 +110,7 @@ window.SYSTEM_DATA = {
       intro: "Jednoduché miesto pre klienta – jeho pes, rezervácie, permanentka, taxi, správy a upozornenia.",
       features: [
         { title: "Registrácia a prihlásenie", text: "Klient si vytvorí účet a po schválení ho admin prepojí s jeho psom." },
-        { title: "Môj psík", text: "Klient vidí kompaktný profil psa s výraznejšou kruhovou fotkou a tlačidlom Údaje psíka. Údaje sa upravujú v jednom modale; hlavná obrazovka zobrazuje prehľad návštev a mesačné štatistiky. Súhlasy, kontaktné údaje a odhlásenie patria do Nastavení." },
+        { title: "Môj psík", text: "Klient vidí kompaktný profil psa, tlačidlo Údaje psíka, kartu Pravidlá škôlky a návštevné štatistiky. Pravidlá sa otvárajú z aktuálne aktívneho dokumentu. Účet, upozornenia, súhlasy, zdieľanie mena/fotky a odhlásenie sú dostupné cez hamburger Menu." },
         { title: "Fotka psa", text: "Majiteľ môže pracovať s profilovou fotkou psa a jej zobrazením." },
         { title: "Rezervácie", text: "Klient pošle žiadosť o konkrétny deň a schválenie alebo zamietnutie sa môže zobraziť live bez ručného refreshu. Pri odoslaní už neprekryje celú appku obrazovka „Načítavam Chvostíkovo“ – synchronizácia prebehne na pozadí." },
         { title: "Kto príde do škôlky", text: "Pri rezervovanom dni môže vidieť prihlásených psíkov; bez súhlasu sa cudzí pes zobrazí anonymne." },
@@ -150,7 +144,8 @@ window.SYSTEM_DATA = {
     { date: "18. 9. 2026", title: "Profil psa a stabilné Nastavenia", app: "Obe", text: "Admin dostal mobilný dvojstĺpec Vek + Dátum narodenia a zachované individuálne Meno do SMS. Zákaznícka PWA už pri renderovaní nepresúva Súhlasy a podmienky cez hlavnú obrazovku Môj psík; účet, súhlasy a odhlásenie sú priamo v Nastaveniach. Odhlásenie bolo presunuté do kolieska Nastavenia aj v admine." },
     { date: "18. 9. 2026", title: "Môj psík v51 + web formuláre do úvodných návštev", app: "Obe", text: "Customer profil bol zjednodušený na kompaktnú hlavičku, modal Údaje psíka a návštevné štatistiky; permanentka zostáva v Rezerváciách. Service worker v51 už nemieša staré JS/CSS verzie. Admin vie z webového záujmu alebo prihlášky vytvoriť predvyplnenú úvodnú návštevu, prípadne psa prihlásiť rovno." },
     { date: "18. 9. 2026", title: "Plávajúci zákaznícky chat v52", app: "Zákaznícka", text: "Samostatná záložka Správy bola nahradená plávajúcim chat tlačidlom na obrazovke Môj psík. Správy sa otvárajú v modale so zachovaným vláknom, výberom rezervácie alebo vlastného predmetu. Súčasne sa skompaktnila výzva na doplnenie údajov a karta návštev." },
-    { date: "18. 9. 2026", title: "Doladenie zákazníckeho UI v53", app: "Zákaznícka", text: "Onboarding je vycentrovaný, spodná navigácia sa pre zákazníka skladá z dvoch rovnako širokých položiek, chat je väčší a oranžový a pri prvom vstupe na Môj psík ukáže krátku nápovedu. Push na Androide dostal PWA ikonu Chvostíkova ako hlavný icon pri zachovaní monochromatického badge." }
+    { date: "18. 9. 2026", title: "Doladenie zákazníckeho UI v53", app: "Zákaznícka", text: "Onboarding je vycentrovaný, spodná navigácia sa pre zákazníka skladá z dvoch rovnako širokých položiek, chat je väčší a oranžový a pri prvom vstupe na Môj psík ukáže krátku nápovedu. Push na Androide dostal PWA ikonu Chvostíkova ako hlavný icon pri zachovaní monochromatického badge." },
+    { date: "18. 9. 2026", title: "Pravidlá + Menu + photo stability v55", app: "Zákaznícka", text: "Môj psík dostal samostatnú kartu Pravidlá škôlky a hamburger Menu. Pri potvrdení podmienok sa dá dobrovoľne povoliť meno a fotka pre ostatných majiteľov prihlásených v rovnaký deň. Oranžová rezervačná karta má väčší avatar bez rastu samotnej karty a avatar sa pri nezmenených dátach zbytočne neprestavuje." }
   ],
 
   technical: [
