@@ -15,6 +15,13 @@ window.SYSTEM_DATA = {
 
   next: [
     {
+      title: "Správy – plávajúci chat namiesto samostatnej záložky",
+      status: "Nápad",
+      tone: "planned",
+      text: "Prepracovať zákaznícke správy na plávajúcu kruhovú ikonku chatu podobnú webovej podpore a časom zrušiť samostatnú spodnú záložku Správy.",
+      detail: "Mechanizmus správ má zostať rovnaký. Po otvorení chatu si používateľ vyberie konkrétnu rezerváciu alebo všeobecnú správu. Najprv vyriešiť umiestnenie ikonky a UX tak, aby bola dostupná bez toho, aby zavadzala v navigácii."
+    },
+    {
       title: "Návrat appky z pozadia – vždy čerstvé dáta",
       status: "Na preverenie",
       tone: "ready",
