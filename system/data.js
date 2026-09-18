@@ -15,6 +15,20 @@ window.SYSTEM_DATA = {
 
   next: [
     {
+      title: "Údaje psa – Meno do SMS",
+      status: "Pripravené",
+      tone: "ready",
+      text: "Upratať pole Meno do SMS tak, aby sa vždy načítala už uložená hodnota z dogs.sms_name a nič existujúce sa neprepisovalo.",
+      detail: "Existujúce sms_name sa zachovajú. Pri null hodnote zostane pole prázdne a SMS používa fallback dogs.name. Aktuálne má sms_name 49 zo 76 psov; 27 ho nemá, z toho 9 aktívnych."
+    },
+    {
+      title: "Admin – dátum narodenia + vek",
+      status: "Pripravené",
+      tone: "ready",
+      text: "V detaile psa upraviť Dátum narodenia a Vek rovnako kompaktne ako v zákazníckej appke.",
+      detail: "Obe kolónky majú byť v jednom riadku. Vek sa má automaticky dopočítať z dogs.birth_date a nemá sa ručne udržiavať."
+    },
+    {
       title: "Podmienky škôlky",
       status: "Čaká na mňa",
       tone: "waiting",
