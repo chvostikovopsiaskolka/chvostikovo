@@ -228,7 +228,7 @@ async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);a
 async function uploadPhoto(e){return openPhotoEditor(e)}
 function imageToJpeg(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{try{const size=512,scale=Math.max(size/img.width,size/img.height),w=img.width*scale,h=img.height*scale,c=document.createElement('canvas');c.width=c.height=size;c.getContext('2d').drawImage(img,(size-w)/2,(size-h)/2,w,h);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',.82))}catch(e){reject(e)}};img.onerror=()=>reject(new Error('Fotku sa nepodarilo načítať.'));img.src=url})}
 function urlBase64ToUint8Array(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(b);return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
-async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js?v=20260919-android-install-v68')}catch(e){console.warn(e)}}
+async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js')}catch(e){console.warn(e)}}
 async function pushSubscription(){if(!('serviceWorker'in navigator))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
 function applyPushToggle(){const b=$('pushToggle');if(!b)return;b.classList.toggle('active',!!state.pushEnabled);b.classList.remove('syncing');b.setAttribute('aria-checked',state.pushEnabled?'true':'false')}
 async function ensurePushState(force=false){if(state.pushChecked&&!force)return state.pushEnabled;let on=false;try{const sub=await pushSubscription();on=!!sub&&typeof Notification!=='undefined'&&Notification.permission==='granted'}catch(_){}state.pushChecked=true;state.pushEnabled=on;localStorage.setItem('chvostikovo_push_enabled',on?'1':'0');return on}
@@ -346,21 +346,21 @@ loadAnnouncements=async function(){
     const steps=p==='ios'
       ?`<div class="install-step"><b>1</b><span>Klepnite dole na tlačidlo <strong>Zdieľať</strong> – štvorec so šípkou nahor.</span></div><div class="install-step"><b>2</b><span>Klepnite na <strong>Zobraziť viac</strong>.</span></div><div class="install-step"><b>3</b><span>Vyberte <strong>Pridať na plochu</strong>.</span></div><div class="install-step"><b>4</b><span>Zapnite <strong>Otvoriť ako webovú apku</strong> a klepnite na <strong>Pridať</strong>.</span></div><div class="install-step"><b>5</b><span>Zavrite aktuálne okno a otvorte <strong>Chvostíkovo cez ikonu na ploche</strong>. Tam pokračujte prihlásením.</span></div>`
       :p==='android'
-      ?`<div class="install-step"><b>1</b><span>Otvorte Chvostíkovo v <strong>Chrome</strong>.</span></div><div class="install-step"><b>2</b><span>Klepnite na menu <strong>⋮</strong> vpravo hore.</span></div><div class="install-step"><b>3</b><span>Vyberte <strong>Inštalovať aplikáciu</strong> alebo <strong>Inštalovať a vytvoriť skratku</strong>.</span></div><div class="install-step"><b>4</b><span>Potvrďte inštaláciu. Potom <strong>zavrite Chrome a otvorte Chvostíkovo cez novú ikonu na ploche</strong>. Tam pokračujte prihlásením.</span></div>`
+      ?`<div class="install-step"><b>1</b><span>Klepnite na menu <strong>⋮</strong> vpravo hore.</span></div><div class="install-step"><b>2</b><span>Vyberte <strong>Nainštalovať aplikáciu</strong>.</span></div><div class="install-step"><b>3</b><span>Potvrďte inštaláciu.</span></div><div class="install-step"><b>4</b><span>Otvorte <strong>Chvostíkovo cez novú ikonu na ploche</strong> a pokračujte prihlásením.</span></div>`
       :`<div class="install-step"><b>1</b><span>Otvorte menu prehliadača.</span></div><div class="install-step"><b>2</b><span>Vyberte možnosť <strong>Inštalovať aplikáciu</strong> alebo <strong>Pridať na plochu</strong>.</span></div>`;
     document.body.insertAdjacentHTML('beforeend',`<div id="installGuideModal" class="install-guide-modal hidden" role="dialog" aria-modal="true" aria-labelledby="installGuideTitle"><div class="install-guide-card"><button id="installGuideClose" class="install-guide-close" type="button" aria-label="Zavrieť">×</button><div class="install-guide-logo">Chvostíkovo</div><h2 id="installGuideTitle">Pridajte si Chvostíkovo ako aplikáciu</h2><p>Je to najjednoduchší spôsob, ako mať rezervácie, správy a upozornenia vždy poruke.</p><div class="install-steps">${steps}</div><button id="installGuideInstallBtn" class="btn full hidden" type="button">Nainštalovať aplikáciu</button><button id="installGuideContinue" class="btn secondary full" type="button">Rozumiem, otvorím aplikáciu z plochy</button></div></div>`);
     if(deferredPrompt)document.getElementById('installGuideInstallBtn')?.classList.remove('hidden');
     const close=()=>{sessionStorage.setItem(KEY,'1');document.getElementById('installGuideModal')?.classList.add('hidden')};
     document.getElementById('installGuideClose')?.addEventListener('click',close);
     document.getElementById('installGuideContinue')?.addEventListener('click',close);
-    document.getElementById('installGuideInstallBtn')?.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();const choice=await deferredPrompt.userChoice.catch(()=>null);if(choice?.outcome==='accepted'){const steps=document.querySelector('#installGuideModal .install-steps');if(steps)steps.innerHTML='<div class="install-step"><b>✓</b><span><strong>Aplikácia je nainštalovaná.</strong><br>Zavrite Chrome a otvorte Chvostíkovo cez novú ikonu na ploche. Tam pokračujte prihlásením.</span></div>';const ib=document.getElementById('installGuideInstallBtn');if(ib)ib.classList.add('hidden');const cb=document.getElementById('installGuideContinue');if(cb)cb.textContent='Rozumiem, otvorím aplikáciu z plochy';const note=document.querySelector('#installGuideModal .install-guide-note');if(note)note.textContent='Prehliadač nás z bezpečnostných dôvodov nevie automaticky prepnúť na plochu telefónu.';}deferredPrompt=null});
+    document.getElementById('installGuideInstallBtn')?.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();const choice=await deferredPrompt.userChoice.catch(()=>null);if(choice?.outcome==='accepted'){const steps=document.querySelector('#installGuideModal .install-steps');if(steps)steps.innerHTML='<div class="install-step"><b>✓</b><span><strong>Aplikácia je nainštalovaná.</strong><br>Zavrite prehliadač a otvorte Chvostíkovo cez novú ikonu na ploche. Tam pokračujte prihlásením.</span></div>';const ib=document.getElementById('installGuideInstallBtn');if(ib)ib.classList.add('hidden');const cb=document.getElementById('installGuideContinue');if(cb)cb.textContent='Rozumiem, otvorím aplikáciu z plochy';const note=document.querySelector('#installGuideModal .install-guide-note');if(note)note.textContent='Prehliadač nás z bezpečnostných dôvodov nevie automaticky prepnúť na plochu telefónu.';}deferredPrompt=null});
   }
   function openGuide(){ensureGuide();document.getElementById('installGuideModal')?.classList.remove('hidden')}
   function mountHelpLink(){const card=document.querySelector('.auth-card');if(!card||document.getElementById('installHelpLink'))return;const b=document.createElement('button');b.id='installHelpLink';b.type='button';b.className='install-help-link';b.textContent='Ako si nainštalovať aplikáciu?';b.addEventListener('click',openGuide);card.appendChild(b)}
   const start=()=>{mountHelpLink();if(!standalone()&&!currentSession()&&sessionStorage.getItem(KEY)!=='1')setTimeout(openGuide,180)};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
-registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker.register('/sw.js?v=20260919-android-install-v68')}catch(e){console.warn(e)}};
+registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker.register('/sw.js')}catch(e){console.warn(e)}};
 
 
 /* v20: privacy acknowledgement + school terms gate */
@@ -775,7 +775,7 @@ registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker
     applyBrand();
     try{
       if('serviceWorker' in navigator){
-        await navigator.serviceWorker.register('/sw.js?v=20260919-android-install-v68');
+        await navigator.serviceWorker.register('/sw.js');
         await navigator.serviceWorker.ready;
         if(!navigator.serviceWorker.controller){
           await new Promise(resolve=>{
