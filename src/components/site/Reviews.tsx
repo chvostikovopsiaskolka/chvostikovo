@@ -114,45 +114,49 @@ const REVIEW_REASONS = [
 
 export function ReviewReasons() {
   return (
-    <section className="bg-forest pt-10 pb-0 text-cream sm:pt-12">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="text-center">
-          <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
-          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-cream/80 sm:text-base">
-            Najlepšie o nás hovoria samotní majitelia psíkov. Toto sa v ich recenziách opakuje najčastejšie.
-          </p>
-        </div>
-
-        <div className="mt-7 grid gap-4 md:grid-cols-3 md:gap-5">
-          {REVIEW_REASONS.map(({ title, text, icon: Icon }) => (
-            <article
-              key={title}
-              className="flex items-start gap-3 rounded-2xl bg-cream/10 px-4 py-4 ring-1 ring-cream/15 md:block md:p-5"
-            >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground md:size-11">
-                <Icon className="size-5" />
-              </span>
-              <div className="min-w-0 md:mt-3">
-                <h3 className="font-display text-base font-bold text-cream md:text-lg">{title}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-cream/80">{text}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="-mx-4 mt-5 overflow-hidden sm:mx-0 sm:mt-7" aria-hidden="true">
+    <>
+      <div className="bg-card pt-5 pb-5 sm:pt-7 sm:pb-7" aria-hidden="true">
+        <div className="mx-auto max-w-6xl px-4">
           <img
             src={schoolmatesLineup}
             alt=""
             loading="lazy"
             decoding="async"
             width={1092}
-            height={304}
-            className="mx-auto block w-full object-contain object-bottom sm:max-w-[860px]"
+            height={401}
+            className="mx-auto block w-full max-w-[760px] object-contain object-bottom sm:max-w-[820px]"
           />
         </div>
       </div>
-    </section>
+
+      <section className="bg-forest py-10 text-cream sm:py-12">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="text-center">
+            <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-cream/80 sm:text-base">
+              Najlepšie o nás hovoria samotní majitelia psíkov. Toto sa v ich recenziách opakuje najčastejšie.
+            </p>
+          </div>
+
+          <div className="mt-7 grid gap-4 md:grid-cols-3 md:gap-5">
+            {REVIEW_REASONS.map(({ title, text, icon: Icon }) => (
+              <article
+                key={title}
+                className="flex items-start gap-3 rounded-2xl bg-cream/10 px-4 py-4 ring-1 ring-cream/15 md:block md:p-5"
+              >
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground md:size-11">
+                  <Icon className="size-5" />
+                </span>
+                <div className="min-w-0 md:mt-3">
+                  <h3 className="font-display text-base font-bold text-cream md:text-lg">{title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-cream/80">{text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
 
