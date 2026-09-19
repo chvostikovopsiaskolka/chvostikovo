@@ -14,7 +14,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section id="top" className="relative overflow-hidden pt-20 pb-2 sm:pt-24 lg:pb-4">
+    <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pb-4">
       <div className="absolute inset-0 z-0">
         <img
           src={heroDogs}
@@ -22,14 +22,14 @@ export function Hero() {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="size-full object-cover object-[50%_42%] lg:object-[50%_35%]"
+          className="size-full object-cover object-[50%_54%] lg:object-[50%_35%]"
         />
         <div className="absolute inset-0 bg-cream/10" />
         <div className="absolute inset-0 bg-linear-to-r from-cream/95 via-cream/55 via-45% to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-cream to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-6xl px-4 pb-2 text-center lg:text-left">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
         <div
           className={`pointer-events-none absolute -top-6 left-1/2 hidden -translate-x-1/2 transition-all duration-700 lg:block ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"}`}
           aria-hidden={!announcementVisible}
@@ -71,10 +71,7 @@ export function Hero() {
             </p>
           </div>
 
-          <InfoTicker className="mt-7 mb-5 w-screen mx-[calc((100%-100vw)/2)]" />
-
-          {/* Fotka ostáva viditeľná, no kratší Hero pustí recenzie ešte vyššie. */}
-          <div className="h-[60px] sm:h-[120px]" aria-hidden="true" />
+          <InfoTicker className="mt-7 mb-0 w-screen mx-[calc((100%-100vw)/2)]" />
         </div>
 
         {/* Desktop layout */}

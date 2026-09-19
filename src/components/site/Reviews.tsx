@@ -51,7 +51,7 @@ function ReviewCarousel() {
   useEffect(() => {
     const el = track.current;
     if (!el) return;
-    const speed = 30; // px / s
+    const speed = isMobile ? 48 : 30; // px / s
     let raf = 0;
     let last = performance.now();
     const step = (now: number) => {
@@ -75,9 +75,6 @@ function ReviewCarousel() {
       ref={track}
       onMouseEnter={pause}
       onMouseLeave={resume}
-      onTouchStart={pause}
-      onTouchEnd={resume}
-      onTouchCancel={resume}
       onFocusCapture={pause}
       onBlurCapture={resume}
       className="mt-10 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] sm:gap-5 [&::-webkit-scrollbar]:hidden"
