@@ -116,27 +116,27 @@ export const REVIEWS = [
     text: "Po dlhom hľadaní sme konečne našli škôlku a ľudí, ku ktorým mám dôveru. Naša Becky sa veľmi teší na každú návštevu, výborne bolo o ňu postarané aj počas našej dovolenky. Túto škôlku odporúčam každému. 😍🐕",
   },
   {
-    name: "Ján Líška & Max",
+    name: "Ján & Max",
     text: "Náš Max navštevuje škôlku od svojich šteniatkovských čias a bolo to naše najlepšie rozhodnutie. Spoznal kopec kamarátov, na ktorých sa stále teší a vzhľadom na to, že má veľa energie, mu škôlka poskytuje dostatočné vybláznenie a interakcie s ostatnými chlpáčmi. Pre nášho Maxa ako člena rodiny chceme to najlepšie, čo nám Chvostíkovo so svojimi úžasnými majiteľmi poskytuje. Škôlku vrelo odporúčame ako to naj miesto pre každého štvornohého nezbedníka.",
   },
   {
-    name: "Gabriela Ileninova",
+    name: "Gabriela",
     text: "Psia škôlka Chvostíkovo je skvelé miesto, kde bude o vášho psíka veľmi dobre postarané. Personál je úplne super – milí, ochotní a vidno, že psy fakt milujú. Prostredie je čisté, bezpečné a psíci majú kopec priestoru na hranie aj oddych. Odporúčam všetkým, ktorí hľadajú miesto, kde sa o ich psa postarajú ako o vlastného. 🥰🐾",
   },
   {
-    name: "Zuzana Salzerova & Bullo",
+    name: "Zuzana & Bullo",
     text: "Chvostíkovo je výborná škôlka. Náš Bullo sa krásne socializuje, našiel si veľa nových kamarátov. Majitelia sú úžasní ľudia, ktorým môžeme dôverovať. Viem, že lepšiu škôlku sme ani vybrať nemohli. Určite škôlku odporúčame. 😉🐾🐾🐾 A ďakujeme, že môže Bullo chodiť k Vám. 🐾😉",
   },
   {
-    name: "Anita Bolechová",
+    name: "Anita",
     text: "Super starostlivosť o psíka :) Milí majitelia, dostatok štvornohých nezbedníkov na vyšantenie sa. Určite odporúčam, nebol problém i s jednorazovou návštevou :) Keby bývame bližšie, v Chvostíkove sme určite častejšie. 👍🏻",
   },
   {
-    name: "Martin Takáč",
+    name: "Martin",
     text: "Profesionálny prístup majiteľov. Ideálne miesto pre psíkov na socializáciu, hranie sa a vybitie energie. Náš pes to tu zbožňuje. Odporúčam 😊",
   },
   {
-    name: "Dominika Faix & Eros",
+    name: "Dominika & Eros",
     text: "Toto miesto odporúčam všetkými desiatimi! Do škôlky nosím pravidelne šteniatko dalmatínca, ktoré len tak hocikomu nezverím. Majitelia sú neskutočne milí, ľudskí a psíky vyslovene majú radi. Erosko je aj vďaka nim socializovaný, naučil sa kamošiť s veľkými plemenami. Eros sa do škôlky vždy veľmi teší a skučí v aute, keď ho beriem preč, že sa chce ešte vrátiť. Som veľmi rada, že som Chvostíkovo objavila! Silno odporúčam! 🐾",
   },
 ];
