@@ -99,18 +99,6 @@
   ],
   "rewrites": [
     {
-      "source": "/app-icon.png",
-      "destination": "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-app-icon"
-    },
-    {
-      "source": "/Store-v2.png",
-      "destination": "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-app-icon"
-    },
-    {
-      "source": "/notification-icon-v64.png",
-      "destination": "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-app-icon"
-    },
-    {
       "source": "/notification-badge-v64.png",
       "destination": "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-app-icon?badge=1"
     }
