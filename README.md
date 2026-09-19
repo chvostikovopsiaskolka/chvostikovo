@@ -9,4 +9,4 @@ Táto vetva obsahuje produkčný statický zdroj zákazníckej PWA Chvostíkovo.
 
 Vetva je oddelená od `main`, ktorý zostáva pre ostatné časti projektu.
 
-Git deploy trigger: 19. 9. 2026.
+Git deploy trigger: 19. 9. 2026 – production branch confirmed.
