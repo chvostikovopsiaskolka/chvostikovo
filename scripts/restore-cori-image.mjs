@@ -19,6 +19,7 @@ async function restoreImage({
   minBytes = 8_000,
   expectedBytes,
   targetDir = outputDir,
+  format = "avif",
 }) {
   const dataFiles = await readdir(dataDir);
   const chunks = dataFiles
@@ -34,17 +35,21 @@ async function restoreImage({
   ).join("");
   const image = Buffer.from(encoded, "base64");
   const header = image.subarray(0, 32).toString("ascii");
+  const validFormat =
+    format === "webp"
+      ? header.startsWith("RIFF") && header.includes("WEBP")
+      : header.includes("ftypavif");
 
   if (
     image.length < minBytes ||
-    !header.includes("ftypavif") ||
+    !validFormat ||
     (expectedBytes && image.length !== expectedBytes)
   ) {
-    throw new Error(`Invalid ${label} AVIF (${image.length} bytes)`);
+    throw new Error(`Invalid ${label} ${format.toUpperCase()} (${image.length} bytes)`);
   }
 
   await writeFile(path.join(targetDir, output), image);
-  console.log(`Restored ${label} AVIF: ${image.length} bytes.`);
+  console.log(`Restored ${label} ${format.toUpperCase()}: ${image.length} bytes.`);
 }
 
 await restoreImage({
@@ -102,6 +107,17 @@ await restoreImage({
   prefix: "stand-aloy",
   output: "stand-aloy.avif",
   expectedBytes: 33_594,
+});
+
+await restoreImage({
+  label: "ŠKÔLKÁRI",
+  dataDir: siteDataDir,
+  prefix: "skolkari-green-exact",
+  output: "skolkari-lineup.webp",
+  expectedBytes: 297_522,
+  minBytes: 250_000,
+  targetDir: siteOutputDir,
+  format: "webp",
 });
 const routePath = path.join(root, "src", "routes", "stojan-na-misky-pre-psa.tsx");
 let routeSource = await readFile(routePath, "utf8");
