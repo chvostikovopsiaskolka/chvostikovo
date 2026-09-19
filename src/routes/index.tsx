@@ -3,7 +3,7 @@ import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
-import { Reviews, VideoSection } from "@/components/site/Reviews";
+import { ReviewReasons, Reviews, VideoSection } from "@/components/site/Reviews";
 import { Care, Why, About, Partners } from "@/components/site/Story";
 import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
 import { UsefulInfo } from "@/components/site/UsefulInfo";
@@ -12,7 +12,6 @@ import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
 import { FAQ } from "@/content/site";
-import schoolmatesLineup from "@/assets/skolkari-lineup.avif";
 
 const BASE_URL = "https://chvostikovo.sk";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
@@ -66,23 +65,10 @@ function Index() {
         <div className="hidden lg:block">
           <InfoTicker />
         </div>
+        <ReviewReasons />
         <Reviews />
         <Faq />
         <VideoSection />
-        <div className="overflow-hidden bg-card" aria-hidden="true">
-          <div className="mx-auto max-w-6xl">
-            <img
-              src={schoolmatesLineup}
-              alt=""
-              loading="eager"
-              decoding="async"
-              fetchPriority="low"
-              width={1983}
-              height={793}
-              className="mx-auto block w-full max-w-[820px] object-contain object-bottom"
-            />
-          </div>
-        </div>
         <Gallery />
         <Care />
         <Why />
