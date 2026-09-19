@@ -140,15 +140,15 @@ export function ReviewReasons() {
           ))}
         </div>
 
-        <div className="-mx-4 mt-5 overflow-hidden sm:mx-0 sm:mt-7" aria-hidden="true">
+        <div className="-mx-4 mt-5 overflow-hidden sm:mx-auto sm:mt-7 sm:h-[230px] sm:max-w-[820px] h-[150px]" aria-hidden="true">
           <img
             src={schoolmatesLineup}
             alt=""
             loading="lazy"
             decoding="async"
-            width={1000}
-            height={326}
-            className="mx-auto block w-full max-w-[760px] object-contain object-bottom sm:max-w-[820px]"
+            width={1200}
+            height={630}
+            className="block h-full w-full object-cover object-bottom"
           />
         </div>
       </div>
