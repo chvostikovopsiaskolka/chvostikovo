@@ -360,9 +360,6 @@ loadAnnouncements=async function(){
   const start=()=>{mountHelpLink();if(!standalone()&&!currentSession()&&sessionStorage.getItem(KEY)!=='1')setTimeout(openGuide,180)};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
-registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker.register('/sw.js')}catch(e){console.warn(e)}};
-
-
 /* v20: privacy acknowledgement + school terms gate */
 (function legalGateV20(){
   if(window.__chvostikovoLegalGateV20)return;
@@ -1556,10 +1553,6 @@ registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker
   if(window.__chvostikovoCustomerPushHealV71)return;
   window.__chvostikovoCustomerPushHealV71=true;
 
-  function removeLegacyLegalDuplicatesV71(){
-    document.getElementById('customerLegalDocsV64')?.remove();
-  }
-
   async function healPushV71(){
     if(!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
     try{
@@ -1603,18 +1596,16 @@ registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker
   const previousBootstrapV71=bootstrap;
   bootstrap=async function(...args){
     const result=await previousBootstrapV71.apply(this,args);
-    removeLegacyLegalDuplicatesV71();
     setTimeout(healPushV71,80);
     return result;
   };
 
   function startV71(){
-    removeLegacyLegalDuplicatesV71();
     setTimeout(healPushV71,900);
     setTimeout(healPushV71,2600);
   }
 
-  window.addEventListener('pageshow',()=>{removeLegacyLegalDuplicatesV71();setTimeout(healPushV71,250)});
+  window.addEventListener('pageshow',()=>setTimeout(healPushV71,250));
   window.addEventListener('focus',()=>setTimeout(healPushV71,350));
   document.addEventListener('visibilitychange',()=>{
     if(document.visibilityState==='visible')setTimeout(healPushV71,350);
