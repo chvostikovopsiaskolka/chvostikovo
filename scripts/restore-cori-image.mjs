@@ -103,15 +103,6 @@ await restoreImage({
   output: "stand-aloy.avif",
   expectedBytes: 33_594,
 });
-await restoreImage({
-  label: "ŠKÔLKÁRI",
-  dataDir: siteDataDir,
-  prefix: "skolkari-lineup-v2",
-  output: "skolkari-lineup.avif",
-  expectedBytes: 62_839,
-  targetDir: siteOutputDir,
-});
-
 const routePath = path.join(root, "src", "routes", "stojan-na-misky-pre-psa.tsx");
 let routeSource = await readFile(routePath, "utf8");
 
