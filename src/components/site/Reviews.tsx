@@ -96,17 +96,17 @@ function ReviewCarousel() {
 const REVIEW_REASONS = [
   {
     title: "Psíkovia sa k nám tešia",
-    text: "Tešia sa na kamarátov a do škôlky sa radi vracajú.",
+    text: "Tešia sa na kamarátov a do škôlky sa radi vracajú. Často presne vedia, kam idú, ešte skôr než vojdú dnu.",
     icon: PawPrint,
   },
   {
     title: "V dobrých rukách",
-    text: "Majitelia oceňujú láskavý prístup a pokoj, že je o ich psíka dobre postarané.",
+    text: "Majitelia oceňujú láskavý prístup a pokoj, že je o ich psíka dobre postarané. Dôvera a osobná starostlivosť sa v recenziách opakujú veľmi často.",
     icon: HeartHandshake,
   },
   {
     title: "Spokojní a príjemne unavení",
-    text: "Pohyb, hry, kamaráti aj oddych – domov sa vracajú po dobre strávenom dni.",
+    text: "Pohyb, hry, kamaráti aj oddych – domov sa vracajú po dobre strávenom dni. Spokojní, vybehaní a pripravení na zaslúžený oddych.",
     icon: Sparkles,
   },
 ];
@@ -116,9 +116,9 @@ export function ReviewReasons() {
     <section className="bg-forest py-10 text-cream sm:py-12">
       <div className="mx-auto max-w-6xl px-4">
         <div className="text-center">
-          <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo Chvostíkovo?</h2>
+          <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-cream/80 sm:text-base">
-            Najlepšie o nás hovoria samotní majitelia psíkov. Toto sa v ich Google recenziách opakuje najčastejšie.
+            Najlepšie o nás hovoria samotní majitelia psíkov. Toto sa v ich recenziách opakuje najčastejšie.
           </p>
         </div>
 
