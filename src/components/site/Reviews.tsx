@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { HeartHandshake, PawPrint, Sparkles } from "lucide-react";
 import skolkariVideo from "@/assets/skolkari.mp4";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
@@ -89,6 +90,56 @@ function ReviewCarousel() {
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
       ))}
     </div>
+  );
+}
+
+const REVIEW_REASONS = [
+  {
+    title: "Psíkovia sa k nám tešia",
+    text: "Tešia sa na kamarátov a do škôlky sa radi vracajú.",
+    icon: PawPrint,
+  },
+  {
+    title: "V dobrých rukách",
+    text: "Majitelia oceňujú láskavý prístup a pokoj, že je o ich psíka dobre postarané.",
+    icon: HeartHandshake,
+  },
+  {
+    title: "Spokojní a príjemne unavení",
+    text: "Pohyb, hry, kamaráti aj oddych – domov sa vracajú po dobre strávenom dni.",
+    icon: Sparkles,
+  },
+];
+
+export function ReviewReasons() {
+  return (
+    <section className="bg-forest py-10 text-cream sm:py-12">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="text-center">
+          <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo Chvostíkovo?</h2>
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-cream/80 sm:text-base">
+            Najlepšie o nás hovoria samotní majitelia psíkov. Toto sa v ich Google recenziách opakuje najčastejšie.
+          </p>
+        </div>
+
+        <div className="mt-7 grid gap-4 md:grid-cols-3 md:gap-5">
+          {REVIEW_REASONS.map(({ title, text, icon: Icon }) => (
+            <article
+              key={title}
+              className="flex items-start gap-3 rounded-2xl bg-cream/10 px-4 py-4 ring-1 ring-cream/15 md:block md:p-5"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground md:size-11">
+                <Icon className="size-5" />
+              </span>
+              <div className="min-w-0 md:mt-3">
+                <h3 className="font-display text-base font-bold text-cream md:text-lg">{title}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-cream/80">{text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
