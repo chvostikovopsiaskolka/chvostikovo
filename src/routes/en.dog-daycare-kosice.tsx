@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -22,6 +22,7 @@ import teamDogs from "@/assets/team-dogs.jpg";
 import { EnglishInquiryForm } from "@/components/site/EnglishInquiryForm";
 import { Collapse } from "@/components/site/Collapse";
 import { InfoTicker } from "@/components/site/InfoTicker";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   ADDRESS,
   EMAIL,
@@ -47,14 +48,136 @@ const REVIEWS_EN = [
     text: "I can wholeheartedly recommend Chvostíkovo. My Leraie is always excited to see his friends there, and I am happy knowing he is in the hands of great people. ❤️",
   },
   {
+    name: "Ľubka & Aron",
+    text: "Highly recommended ❤️ The owners are wonderful people who truly love dogs, and it shows. If you do not want to leave your dog home alone, you will be hard-pressed to find a better place. Aron is happy there and always has a great time.",
+  },
+  {
     name: "Erik & Gaston",
     text: "Great place, great people! Our dog can barely sit still with excitement at the door while waiting for it to open.",
+  },
+  {
+    name: "Dagmar & Merlin",
+    text: "Chvostíkovo is the most wonderful daycare I know. The care for my dog is amazing — he gets to play, enjoy the outdoor run and spend time with his friends. He comes home, has dinner and falls asleep. It helps me enormously to know that while I am at work, he is not home alone and has company. The owners are kind and give the dogs plenty of affection. I am very grateful for everything you do for us. ❤️",
   },
   {
     name: "Alžbeta & Eliška",
     text: "If you are looking for a place where your dog will be happy, definitely visit this daycare. The owners are kind and very helpful, and our Eliška is always excited to go. She comes home happy and pleasantly tired. Thank you.",
   },
+  {
+    name: "Richard & Bella",
+    text: "Excellent daycare and a great approach from the owners. The flooring is safe and not slippery, which we really appreciate. Bella is always excited to go. Definitely recommended. ❤️👍",
+  },
+  {
+    name: "Helena & Colin",
+    text: "Colin has been going to Chvostíkovo for several months. He is a Border Collie, so he has more energy than most dogs, but that is never a problem here. He plays with the ball and with the other dogs, and we pick him up after an active, well-spent day — while we get a peaceful evening. The owners are lovely people I feel completely comfortable leaving my dog with.",
+  },
+  {
+    name: "Bianka & Monty",
+    text: "I recommend Chvostíkovo without hesitation. You can really see that the owners genuinely love dogs. My dog is always very excited to go and comes home happy and tired from playing — when we arrive to pick him up, he barely wants to leave. Communication is always easy, and the outdoor run is a great bonus.",
+  },
+  {
+    name: "Martina & Belisha",
+    text: "We are extremely happy with Chvostíkovo. The owners are kind, caring and always willing to help. After moving to the new premises, they even arranged transport to daycare for our dog, which made life much easier for us. Beli is always excited to go and comes home happy and pleasantly tired. We recommend Chvostíkovo to anyone looking for high-quality, loving care for their dog. 🫶",
+  },
+  {
+    name: "Alena & Becky",
+    text: "After a long search, we finally found a daycare and people we truly trust. Our Becky looks forward to every visit and was also very well cared for while we were away on holiday. I would recommend this daycare to anyone. 😍🐕",
+  },
 ];
+
+function EnglishReviewCard({ name, text }: { name: string; text: string }) {
+  const [open, setOpen] = useState(false);
+  const body = useRef<HTMLQuoteElement>(null);
+  const [clamped, setClamped] = useState(false);
+
+  useEffect(() => {
+    const el = body.current;
+    if (!el) return;
+    setClamped(el.scrollHeight - el.clientHeight > 2);
+  }, [text]);
+
+  return (
+    <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card p-5 text-center shadow-card sm:w-[46%] sm:p-6 lg:w-[31%]">
+      <div className="flex items-center justify-center gap-3">
+        <span className="flex size-10 items-center justify-center rounded-full bg-secondary font-display text-base font-bold text-forest sm:size-11">
+          {name.charAt(0)}
+        </span>
+        <div className="text-left">
+          <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
+          <span className="text-sm tracking-tight text-[#F5B301]" aria-label="5 out of 5 stars">★★★★★</span>
+        </div>
+      </div>
+      <blockquote
+        ref={body}
+        className={`mt-3 min-h-[4.5rem] text-[0.9rem] leading-relaxed text-forest/85 sm:min-h-[4.75rem] sm:text-[0.95rem] ${open ? "" : "line-clamp-3"}`}
+      >
+        “{text}”
+      </blockquote>
+      <div className="min-h-[2.25rem] sm:min-h-[2.5rem]">
+        {(clamped || open) && (
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            className="mt-2 font-display text-sm font-semibold text-coral underline underline-offset-4"
+          >
+            {open ? "Show less" : "Read more"}
+          </button>
+        )}
+      </div>
+    </figure>
+  );
+}
+
+function EnglishReviewCarousel() {
+  const track = useRef<HTMLDivElement>(null);
+  const paused = useRef(false);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+
+    const speed = 30;
+    let raf = 0;
+    let last = performance.now();
+
+    const step = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 0.1);
+      last = now;
+
+      if (!paused.current) {
+        const half = el.scrollWidth / 2;
+        el.scrollLeft = el.scrollLeft >= half ? el.scrollLeft - half : el.scrollLeft + speed * dt;
+      }
+
+      raf = requestAnimationFrame(step);
+    };
+
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [isMobile]);
+
+  const pause = () => (paused.current = true);
+  const resume = () => (paused.current = false);
+
+  return (
+    <div
+      ref={track}
+      onMouseEnter={pause}
+      onMouseLeave={resume}
+      onTouchStart={pause}
+      onTouchEnd={resume}
+      onTouchCancel={resume}
+      onFocusCapture={pause}
+      onBlurCapture={resume}
+      className="mt-10 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+    >
+      {[...REVIEWS_EN, ...REVIEWS_EN].map((review, index) => (
+        <EnglishReviewCard key={`${review.name}-${index}`} name={review.name} text={review.text} />
+      ))}
+    </div>
+  );
+}
 
 const SPACE_PHOTOS = [
   {
@@ -356,22 +479,12 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <section id="reviews" className="scroll-mt-24 pb-14 sm:pb-20">
-          <div className="mx-auto max-w-6xl px-4">
-            <div className="text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">What owners say</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Happy dogs, calmer owners</h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm text-forest/65">Selected reviews translated from Slovak.</p>
-            </div>
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {REVIEWS_EN.map((review) => (
-                <article key={review.name} className="flex h-full flex-col rounded-4xl bg-card p-7 shadow-card">
-                  <p className="text-base tracking-[0.16em] text-coral" aria-label="5 out of 5 stars">★★★★★</p>
-                  <p className="mt-4 flex-1 leading-relaxed text-forest/80">“{review.text}”</p>
-                  <p className="mt-5 font-display text-sm font-semibold text-forest">{review.name}</p>
-                </article>
-              ))}
-            </div>
+        <section id="reviews" className="scroll-mt-24 bg-secondary/50 pt-12 pb-16 sm:pt-14 sm:pb-20">
+          <div className="mx-auto max-w-6xl px-4 text-center">
+            <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">What owners say</p>
+            <h2 className="section-title mt-2 text-3xl sm:text-4xl">Happy dogs, calmer owners</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-forest/65">Selected reviews translated from Slovak.</p>
+            <EnglishReviewCarousel />
           </div>
         </section>
 
@@ -465,14 +578,21 @@ function EnglishDogDaycarePage() {
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">A small dog daycare with a personal approach</h2>
               <div className="mt-5 space-y-4 leading-relaxed text-forest/80">
                 <p>
-                  Chvostíkovo is an independent daytime dog daycare in Košice. We created it as a place where dogs can spend the day safely, with people who notice the individual dog rather than treating the group as one big pack.
+                  Chvostíkovo is an independent daytime dog daycare in Košice, created by two dog owners who know how important it is to find a place you genuinely trust with your dog.
                 </p>
-                <p>
-                  During the day, at least two experienced caregivers supervise the dogs. We focus on safe interactions, individual needs, movement, rest and a calm routine that makes sense for the dogs in front of us.
-                </p>
-                <p className="font-semibold text-forest">
-                  We mainly care for medium and large dogs and keep the number of dogs limited so we can maintain personal supervision.
-                </p>
+                <Collapse title="Read more about us">
+                  <div className="space-y-4">
+                    <p>
+                      We wanted to create the kind of daycare we would feel comfortable leaving our own dogs in: a smaller group, constant supervision, enough room to move and a daily routine that also leaves space for calm time and proper rest.
+                    </p>
+                    <p>
+                      At least two experienced caregivers are with the dogs throughout the day. We get to know each dog individually — their temperament, play style, energy level and when they need a break — rather than treating the group as one big pack.
+                    </p>
+                    <p className="font-semibold text-forest">
+                      We mainly care for medium and large dogs and intentionally keep the number of dogs limited so we can maintain personal supervision and a comfortable atmosphere.
+                    </p>
+                  </div>
+                </Collapse>
               </div>
             </div>
           </div>
@@ -543,6 +663,24 @@ function EnglishDogDaycarePage() {
                 <Collapse key={item.q} title={item.q}>{item.a}</Collapse>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section id="instagram" className="py-14 sm:py-20">
+          <div className="mx-auto max-w-6xl px-4 text-center">
+            <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Instagram</p>
+            <h2 className="section-title mt-2 text-3xl sm:text-4xl">See everyday life at Chvostíkovo</h2>
+            <p className="mx-auto mt-3 max-w-xl leading-relaxed text-forest/80">
+              We regularly share photos and videos from our daycare days, so you can get a real feel for life at Chvostíkovo.
+            </p>
+            <a
+              href={INSTAGRAM}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-coral mt-8 inline-flex items-center gap-2.5"
+            >
+              <Instagram className="size-4.5" /> Follow us on Instagram
+            </a>
           </div>
         </section>
 
