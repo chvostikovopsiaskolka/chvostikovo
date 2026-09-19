@@ -20,6 +20,13 @@ window.SYSTEM_DATA = {
 
   next: [
     {
+      title: "Úprava webu – formulár, dizajn a 3 body z recenzií",
+      status: "Plánované",
+      tone: "planned",
+      text: "Prejsť a doladiť web Chvostíkova – najmä formulár, celkový dizajn a zapracovanie 3 hlavných bodov, ktoré sa opakujú v recenziách.",
+      detail: "Pri ďalšej úprave webu nezabudnúť skontrolovať formulár a jeho používateľský priebeh, doladiť vizuál/dizajn stránky a vybrať 3 najsilnejšie opakujúce sa benefity alebo skúsenosti z recenzií, ktoré sa použijú priamo v komunikácii na webe."
+    },
+    {
       title: "Odmeny a bonusy pre zákazníkov",
       status: "Nápad",
       tone: "planned",
