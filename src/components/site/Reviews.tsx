@@ -3,7 +3,7 @@ import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeartHandshake, PawPrint, Sparkles } from "lucide-react";
 import skolkariVideo from "@/assets/skolkari.mp4";
-import schoolmatesLineup from "@/assets/skolkari-lineup.avif";
+import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
   const [open, setOpen] = useState(false);
