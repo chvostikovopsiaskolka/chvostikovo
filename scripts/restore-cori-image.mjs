@@ -4,11 +4,22 @@ import path from "node:path";
 const root = process.cwd();
 const productDataDir = path.join(root, "scripts", "product-image-data");
 const galleryDataDir = path.join(root, "scripts", "gallery-image-data");
+const siteDataDir = path.join(root, "scripts", "site-image-data");
 const outputDir = path.join(root, "src", "assets", "products");
+const siteOutputDir = path.join(root, "src", "assets");
 
 await mkdir(outputDir, { recursive: true });
+await mkdir(siteOutputDir, { recursive: true });
 
-async function restoreImage({ label, dataDir, prefix, output, minBytes = 8_000, expectedBytes }) {
+async function restoreImage({
+  label,
+  dataDir,
+  prefix,
+  output,
+  minBytes = 8_000,
+  expectedBytes,
+  targetDir = outputDir,
+}) {
   const dataFiles = await readdir(dataDir);
   const chunks = dataFiles
     .filter((name) => name.startsWith(`${prefix}.`) && name.endsWith(".b64"))
@@ -32,7 +43,7 @@ async function restoreImage({ label, dataDir, prefix, output, minBytes = 8_000, 
     throw new Error(`Invalid ${label} AVIF (${image.length} bytes)`);
   }
 
-  await writeFile(path.join(outputDir, output), image);
+  await writeFile(path.join(targetDir, output), image);
   console.log(`Restored ${label} AVIF: ${image.length} bytes.`);
 }
 
@@ -91,6 +102,14 @@ await restoreImage({
   prefix: "stand-aloy",
   output: "stand-aloy.avif",
   expectedBytes: 33_594,
+});
+await restoreImage({
+  label: "ŠKÔLKÁRI",
+  dataDir: siteDataDir,
+  prefix: "skolkari-lineup-avif",
+  output: "skolkari-lineup.avif",
+  expectedBytes: 29_435,
+  targetDir: siteOutputDir,
 });
 
 const routePath = path.join(root, "src", "routes", "stojan-na-misky-pre-psa.tsx");
