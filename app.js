@@ -228,7 +228,7 @@ async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);a
 async function uploadPhoto(e){return openPhotoEditor(e)}
 function imageToJpeg(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{try{const size=512,scale=Math.max(size/img.width,size/img.height),w=img.width*scale,h=img.height*scale,c=document.createElement('canvas');c.width=c.height=size;c.getContext('2d').drawImage(img,(size-w)/2,(size-h)/2,w,h);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',.82))}catch(e){reject(e)}};img.onerror=()=>reject(new Error('Fotku sa nepodarilo načítať.'));img.src=url})}
 function urlBase64ToUint8Array(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(b);return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
-async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js?v=20260919-install-guide-v65')}catch(e){console.warn(e)}}
+async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js?v=20260919-android-install-v68')}catch(e){console.warn(e)}}
 async function pushSubscription(){if(!('serviceWorker'in navigator))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
 function applyPushToggle(){const b=$('pushToggle');if(!b)return;b.classList.toggle('active',!!state.pushEnabled);b.classList.remove('syncing');b.setAttribute('aria-checked',state.pushEnabled?'true':'false')}
 async function ensurePushState(force=false){if(state.pushChecked&&!force)return state.pushEnabled;let on=false;try{const sub=await pushSubscription();on=!!sub&&typeof Notification!=='undefined'&&Notification.permission==='granted'}catch(_){}state.pushChecked=true;state.pushEnabled=on;localStorage.setItem('chvostikovo_push_enabled',on?'1':'0');return on}
@@ -255,7 +255,17 @@ $('loginForm').addEventListener('submit',async e=>{e.preventDefault();try{loadin
 $('signupForm').addEventListener('submit',async e=>{e.preventDefault();const password=$('signupPassword').value;if(password.length<8){authMessage('error',PASSWORD_MIN_MESSAGE);$('signupPassword').focus();return}try{loading(true);const data=await authFetch('/auth/v1/signup',{method:'POST',body:JSON.stringify({email:$('signupEmail').value.trim(),password,data:{full_name:$('signupName').value.trim(),phone:$('signupPhone').value.trim(),dog_name:$('signupDogName').value.trim(),privacy_notice_version:'privacy-v1',privacy_notice_acknowledged_at:new Date().toISOString()}})});if(data?.access_token){saveSession(data,true);await bootstrap(false)}else{showAuth('login');authMessage('success','Účet je vytvorený. Ak vám prišiel potvrdzovací e-mail, potvrďte ho a prihláste sa.')}}catch(e){authMessage('error',e.message)}finally{loading(false)}});
 $('forgotForm').addEventListener('submit',async e=>{e.preventDefault();try{await authFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(location.origin+'/' ),{method:'POST',body:JSON.stringify({email:$('forgotEmail').value.trim()})});authMessage('success','Odkaz na obnovu hesla sme poslali na váš e-mail.')}catch(e){authMessage('error',e.message)}});
 $('newPasswordForm').addEventListener('submit',async e=>{e.preventDefault();const password=$('newPassword').value;if(password.length<8){authMessage('error',PASSWORD_MIN_MESSAGE);$('newPassword').focus();return}if(password!==$('newPasswordAgain').value){authMessage('error','Heslá sa nezhodujú.');return}try{await authFetch('/auth/v1/user',{method:'PUT',headers:{Authorization:'Bearer '+state.session.access_token},body:JSON.stringify({password})});authMessage('success','Heslo je zmenené.');await bootstrap()}catch(e){authMessage('error',e.message)}});
-$('logoutBtn').addEventListener('click',async()=>{try{if(state.session)await authFetch('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+state.session.access_token}})}catch(_){}clearSession();showAuth('login')});
+$('logoutBtn').addEventListener('click',async()=>{
+  ['dogSettingsModalV36','privacyInfoModal','schoolTermsModal','dogDetailsModal'].forEach(id=>$(id)?.classList.add('hidden'));
+  document.documentElement.classList.remove('settings-open-v36');
+  try{if(state.session)await authFetch('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+state.session.access_token}})}catch(_){}
+  clearSession();showAuth('login');
+  const standalone=window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  if(!standalone){
+    sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
+    setTimeout(()=>document.getElementById('installHelpLink')?.click(),180);
+  }
+});
 $('navBooking').addEventListener('click',()=>switchTab('booking'));$('navDog').addEventListener('click',()=>switchTab('dog'));$('navMessages').addEventListener('click',()=>switchTab('messages'));$('navStaff').addEventListener('click',()=>switchTab('staff'));
 $('dogSelector').addEventListener('change',e=>{state.selectedDogId=Number(e.target.value);renderPassSummary();renderDog()});$('dogBirthDate').addEventListener('change',()=>syncDogAgeField());$('dogForm').addEventListener('submit',saveDog);$('dogDetailsClose').addEventListener('click',closeDogDetails);$('dogDetailsModal').addEventListener('click',e=>{if(e.target===$('dogDetailsModal'))closeDogDetails()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dogDetailsModal').classList.contains('hidden'))closeDogDetails()});$('profileForm').addEventListener('submit',saveProfile);$('accountToggle').addEventListener('click',()=>$('profileForm').classList.toggle('hidden'));$('messageForm').addEventListener('submit',sendMessage);
 window.addEventListener('pageshow',()=>setTimeout(repairCustomerScrollV60,0));
@@ -339,6 +349,7 @@ loadAnnouncements=async function(){
       ?`<div class="install-step"><b>1</b><span>Otvorte Chvostíkovo v <strong>Chrome</strong>.</span></div><div class="install-step"><b>2</b><span>Klepnite na menu <strong>⋮</strong> vpravo hore.</span></div><div class="install-step"><b>3</b><span>Vyberte <strong>Inštalovať aplikáciu</strong> alebo <strong>Inštalovať a vytvoriť skratku</strong>.</span></div><div class="install-step"><b>4</b><span>Potvrďte inštaláciu. Potom <strong>zavrite Chrome a otvorte Chvostíkovo cez novú ikonu na ploche</strong>. Tam pokračujte prihlásením.</span></div>`
       :`<div class="install-step"><b>1</b><span>Otvorte menu prehliadača.</span></div><div class="install-step"><b>2</b><span>Vyberte možnosť <strong>Inštalovať aplikáciu</strong> alebo <strong>Pridať na plochu</strong>.</span></div>`;
     document.body.insertAdjacentHTML('beforeend',`<div id="installGuideModal" class="install-guide-modal hidden" role="dialog" aria-modal="true" aria-labelledby="installGuideTitle"><div class="install-guide-card"><button id="installGuideClose" class="install-guide-close" type="button" aria-label="Zavrieť">×</button><div class="install-guide-logo">Chvostíkovo</div><h2 id="installGuideTitle">Pridajte si Chvostíkovo ako aplikáciu</h2><p>Je to najjednoduchší spôsob, ako mať rezervácie, správy a upozornenia vždy poruke.</p><div class="install-steps">${steps}</div><button id="installGuideInstallBtn" class="btn full hidden" type="button">Nainštalovať aplikáciu</button><button id="installGuideContinue" class="btn secondary full" type="button">Rozumiem, otvorím aplikáciu z plochy</button></div></div>`);
+    if(deferredPrompt)document.getElementById('installGuideInstallBtn')?.classList.remove('hidden');
     const close=()=>{sessionStorage.setItem(KEY,'1');document.getElementById('installGuideModal')?.classList.add('hidden')};
     document.getElementById('installGuideClose')?.addEventListener('click',close);
     document.getElementById('installGuideContinue')?.addEventListener('click',close);
@@ -349,7 +360,7 @@ loadAnnouncements=async function(){
   const start=()=>{mountHelpLink();if(!standalone()&&!currentSession()&&sessionStorage.getItem(KEY)!=='1')setTimeout(openGuide,180)};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
-registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker.register('/sw.js?v=20260919-install-guide-v65')}catch(e){console.warn(e)}};
+registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker.register('/sw.js?v=20260919-android-install-v68')}catch(e){console.warn(e)}};
 
 
 /* v20: privacy acknowledgement + school terms gate */
@@ -764,7 +775,7 @@ registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker
     applyBrand();
     try{
       if('serviceWorker' in navigator){
-        await navigator.serviceWorker.register('/sw.js?v=20260919-install-guide-v65');
+        await navigator.serviceWorker.register('/sw.js?v=20260919-android-install-v68');
         await navigator.serviceWorker.ready;
         if(!navigator.serviceWorker.controller){
           await new Promise(resolve=>{
@@ -880,6 +891,20 @@ registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker
     const logout=$('logoutBtn');
     if(account&&account.parentElement!==content)content.appendChild(account);
     if(legal&&legal.parentElement!==content){content.appendChild(legal);if(!legal.dataset.v36SettingsCollapsed){legal.open=false;legal.dataset.v36SettingsCollapsed='1'}}
+    const standalone=window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
+    let installBtn=$('settingsInstallAppV68');
+    if(!standalone){
+      if(!installBtn){
+        installBtn=document.createElement('button');installBtn.id='settingsInstallAppV68';installBtn.type='button';
+        installBtn.className='btn secondary full';installBtn.textContent='Nainštalovať aplikáciu';
+        installBtn.addEventListener('click',()=>{
+          $('dogSettingsModalV36')?.classList.add('hidden');document.documentElement.classList.remove('settings-open-v36');
+          sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
+          setTimeout(()=>document.getElementById('installHelpLink')?.click(),60);
+        });
+      }
+      if(logout&&installBtn.parentElement!==content)content.insertBefore(installBtn,logout);
+    }else installBtn?.remove();
     if(logout){logout.classList.remove('hidden','icon-btn');logout.classList.add('btn','secondary','full');logout.textContent='Odhlásiť sa';logout.style.marginTop='14px';content.appendChild(logout)}
   }
 
