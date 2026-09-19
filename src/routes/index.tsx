@@ -13,6 +13,7 @@ import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
 import { FAQ } from "@/content/site";
+import schoolmatesLineup from "@/assets/skolkari-lineup.avif";
 
 const BASE_URL = "https://chvostikovo.sk";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
@@ -69,6 +70,17 @@ function Index() {
         <Reviews />
         <Faq />
         <VideoSection />
+        <div className="overflow-hidden bg-card" aria-hidden="true">
+          <div className="mx-auto max-w-6xl">
+            <img
+              src={schoolmatesLineup}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="mx-auto block w-full max-w-[1000px] object-contain object-bottom"
+            />
+          </div>
+        </div>
         <EnrollBanner />
         <Gallery />
         <Care />
