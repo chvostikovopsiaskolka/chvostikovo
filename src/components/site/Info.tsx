@@ -212,7 +212,7 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="scroll-mt-24 bg-card py-16 sm:py-20">
+    <section id="faq" className="scroll-mt-24 bg-card pt-16 pb-12 sm:pt-20 sm:pb-14">
       <div className="mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
 
