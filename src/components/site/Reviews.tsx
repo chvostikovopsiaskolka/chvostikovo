@@ -51,18 +51,32 @@ function ReviewCarousel() {
   useEffect(() => {
     const el = track.current;
     if (!el) return;
-    const speed = isMobile ? 48 : 30; // px / s
+    const speed = isMobile ? 60 : 42; // px / s
     let raf = 0;
     let last = performance.now();
+    let carry = 0;
+
     const step = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
+
       if (!paused.current) {
-        const half = el.scrollWidth / 2;
-        el.scrollLeft = el.scrollLeft >= half ? el.scrollLeft - half : el.scrollLeft + speed * dt;
+        carry += speed * dt;
+        const delta = Math.floor(carry);
+
+        if (delta > 0) {
+          carry -= delta;
+          const half = el.scrollWidth / 2;
+          const next = el.scrollLeft + delta;
+          el.scrollLeft = half > 0 && next >= half ? next - half : next;
+        }
+      } else {
+        carry = 0;
       }
+
       raf = requestAnimationFrame(step);
     };
+
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
   }, [isMobile]);
@@ -77,7 +91,7 @@ function ReviewCarousel() {
       onMouseLeave={resume}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="mt-10 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+      className="mt-10 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
       {[...REVIEWS, ...REVIEWS].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
