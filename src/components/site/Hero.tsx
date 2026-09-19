@@ -6,10 +6,10 @@ import { ShortForm } from "./Forms";
 import { InfoTicker } from "./InfoTicker";
 
 export function Hero() {
-  const [announcementVisible, setAnnouncementVisible] = useState(true);
+  const [announcementVisible, setAnnouncementVisible] = useState(false);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setAnnouncementVisible(false), 5200);
+    const timer = window.setTimeout(() => setAnnouncementVisible(true), 220);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -31,7 +31,7 @@ export function Hero() {
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-2 text-center lg:text-left">
         <div
-          className={`pointer-events-none absolute top-1 left-1/2 hidden -translate-x-1/2 transition-all duration-700 lg:block ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"}`}
+          className={`pointer-events-none absolute -top-3 left-1/2 hidden -translate-x-1/2 transition-all duration-700 lg:block ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"}`}
           aria-hidden={!announcementVisible}
         >
           <p className="whitespace-nowrap rounded-full bg-white/95 px-5 py-2 font-display text-sm font-bold text-coral-dark shadow-soft">
@@ -43,7 +43,7 @@ export function Hero() {
         <div className="lg:hidden">
           <div className="mb-4 h-7 sm:h-8">
             <p
-              className={`mx-auto max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft transition-all duration-700 sm:px-4 sm:text-sm ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"}`}
+              className={`mx-auto max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft transition-all duration-700 sm:px-4 sm:text-sm ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"}`}
               aria-hidden={!announcementVisible}
             >
               🐾 Prijímame nových škôlkarov
