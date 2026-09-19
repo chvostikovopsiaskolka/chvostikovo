@@ -75,9 +75,12 @@ function Index() {
             <img
               src={schoolmatesLineup}
               alt=""
-              loading="lazy"
+              loading="eager"
               decoding="async"
-              className="mx-auto block w-full max-w-[1000px] object-contain object-bottom"
+              fetchPriority="low"
+              width={1983}
+              height={793}
+              className="mx-auto block w-full max-w-[820px] object-contain object-bottom"
             />
           </div>
         </div>
