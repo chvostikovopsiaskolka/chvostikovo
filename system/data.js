@@ -6,13 +6,14 @@ window.SYSTEM_DATA = {
   },
 
   now: {
-    title: "Stabilizácia po Git/Vercel prepojení",
+    title: "Stabilizácia PWA a release procesu",
     status: "Kontrola",
     statusTone: "ready",
-    note: "Zákaznícka V64 je už produkčne nasadená z vetvy customer-portal-production. Admin ostáva na Supabase stable-v9 a posledné UI opravy sú nasadené. Ešte sledujeme správanie PWA po obnove cache a neobvyklý Vercel traffic na Store-v2.png.",
+    note: "Zákaznícka PWA v71 je produkčne nasadená z vetvy customer-portal-production a Android inštalácia bola fyzicky overená. Edge request slučka okolo starej ikonky je odstránená. Ostáva upratať Vercel preview spúšťaný z main, ktorý generuje neúspešné preview deploye a e-mailové upozornenia.",
     bullets: [
-      "Zákaznícky portál: GitHub → Vercel production branch funguje.",
-      "Admin: dashboard modaly, narodeniny a floating vyhľadávanie psa boli opravené.",
+      "Zákaznícky portál: customer-portal-production → production funguje a v71 je READY.",
+      "Android PWA: inštalácia overená; manifest, statické ikony a service worker majú zdokumentovaný stabilný postup.",
+      "Admin: produkcia ostáva na Supabase stable-v9.",
       "System: dôležité zmeny zapisujeme samostatným commitom do main ako projektový prehľad."
     ]
   },
@@ -27,14 +28,14 @@ window.SYSTEM_DATA = {
     },
     {
       title: "Upratanie kódu a starších vrstiev",
-      status: "Na plán",
+      status: "Rozpracované",
       tone: "planned",
-      text: "Spraviť bezpečný audit starších verzií, runtime patchov a prekrývajúcich sa UI vrstiev bez zmeny správania aplikácií.",
-      detail: "Cieľ nie je prepisovať architektúru. Najprv zmapovať, ktoré vXX vrstvy a patche sú ešte reálne potrebné, potom ich postupne zlúčiť do jedného zdroja pravdy, odstrániť mŕtvy kód a zachovať rollback aj testy. Robiť až keď je aktuálna produkcia stabilná."
+      text: "Bezpečný audit starších verzií, runtime patchov a prekrývajúcich sa UI vrstiev bez zmeny správania aplikácií.",
+      detail: "Prvá časť bola urobená vo v70–v71: odstránený Store-v2 legacy odkaz, duplicitná registrácia service workera a duplicitná v64 vrstva právnych odkazov; push self-heal bol oddelený. Kompletný bod však ešte nie je hotový. Zostáva zmapovať všetky staršie vXX vrstvy zákazníckej appky a samostatne admin stable-v9, postupne zlúčiť aktívne vrstvy do jedného zdroja pravdy a odstrániť mŕtvy kód až po testoch a s rollbackom."
     },
     {
       title: "Bezpečný preview a release proces",
-      status: "Na plán",
+      status: "Priorita",
       tone: "planned",
       text: "Nastaviť spôsob, ako si pozrieť budúcu verziu admin alebo zákazníckej appky bez zásahu do produkcie.",
       detail: "Každú väčšiu zmenu najprv nasadiť na samostatný Vercel preview deployment, otestovať na reálnom telefóne a až potom ju vedome povýšiť na produkciu. Produkčná verzia ostane nedotknutá počas testovania a posledný stabilný deploy musí zostať pripravený na okamžitý rollback. Súčasťou má byť aj kontrola service workera/cache, aby klientom neostala zmiešaná stará a nová verzia."
