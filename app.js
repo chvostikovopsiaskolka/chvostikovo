@@ -72,7 +72,17 @@ function bootstrap(showSpinner=true){
     await preloadDogVisualV56(d);showApp();renderAll();registerSW();startCustomerLive();
     const secondary=[loadAnnouncements()];if(typeof ensurePushState==='function')secondary.push(ensurePushState());
     Promise.allSettled(secondary).then(()=>{if(state.data&&typeof applyPushToggle==='function')applyPushToggle()});
-  }catch(e){if(/prihl|vypršalo/i.test(e.message)){clearSession();showAuth('login');authMessage('error',e.message)}else toast(e.message)}})();
+  }catch(e){
+    const message=String(e?.message||'');
+    const staleAuth=/prihl|vypršalo|refresh\s*token|invalid\s+(?:refresh\s+)?token|jwt|token\s+not\s+found|unauthorized/i.test(message);
+    if(staleAuth){
+      clearSession();
+      showAuth('login');
+      if($('authMessage'))$('authMessage').innerHTML='';
+      sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
+      setTimeout(()=>document.getElementById('installHelpLink')?.click(),220);
+    }else toast(message||'Aplikáciu sa nepodarilo načítať.');
+  }})();
   bootstrapInFlight=run.finally(()=>{if(showSpinner)loading(false);bootstrapInFlight=null});
   return bootstrapInFlight;
 }
