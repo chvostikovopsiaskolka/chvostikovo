@@ -18,14 +18,9 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
 
   return (
     <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card p-5 text-center shadow-card sm:w-[46%] sm:p-6 lg:w-[31%]">
-      <div className="flex items-center justify-center gap-3">
-        <span className="flex size-10 items-center justify-center rounded-full bg-secondary font-display text-base font-bold text-forest sm:size-11">
-          {name.charAt(0)}
-        </span>
-        <div className="text-left">
-          <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
-          <span className="text-sm tracking-tight text-[#F5B301]">★★★★★</span>
-        </div>
+      <div className="text-center">
+        <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
+        <span className="text-sm tracking-tight text-[#F5B301]">★★★★★</span>
       </div>
       <blockquote
         ref={body}

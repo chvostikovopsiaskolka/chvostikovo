@@ -73,8 +73,8 @@ export function Hero() {
 
           <InfoTicker className="mt-7 mb-5 w-screen mx-[calc((100%-100vw)/2)]" />
 
-          {/* Kratší priestor ponechá fotku viditeľnú, no pustí sociálny dôkaz vyššie. */}
-          <div className="h-[180px] sm:h-[220px]" aria-hidden="true" />
+          {/* Fotka ostáva viditeľná, no kratší Hero pustí recenzie ešte vyššie. */}
+          <div className="h-[110px] sm:h-[160px]" aria-hidden="true" />
         </div>
 
         {/* Desktop layout */}
