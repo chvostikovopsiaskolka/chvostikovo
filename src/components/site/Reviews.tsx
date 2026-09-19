@@ -132,7 +132,7 @@ export function VideoSection() {
   }, []);
 
   return (
-    <section className="scroll-mt-24 bg-card py-12 sm:py-14">
+    <section className="scroll-mt-24 bg-card pt-8 pb-12 sm:pt-10 sm:pb-14">
       <div className="mx-auto max-w-6xl px-4 text-center">
         <h3 className="section-title text-2xl sm:text-3xl">
           Ako sa naši škôlkári tešia do škôlky
