@@ -5,7 +5,7 @@ import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
 import { ReviewReasons, Reviews, VideoSection } from "@/components/site/Reviews";
 import { Care, Why, About, Partners } from "@/components/site/Story";
-import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
+import { Requirements, FirstVisit, Pricing, Faq, PracticalFaq } from "@/components/site/Info";
 import { UsefulInfo } from "@/components/site/UsefulInfo";
 import { ProductSection } from "@/components/site/ProductSection";
 import { InstagramFeed } from "@/components/site/InstagramFeed";
@@ -72,6 +72,7 @@ function Index() {
         <Gallery />
         <Care />
         <Why />
+        <PracticalFaq />
         <FirstVisit />
         <Requirements />
         <About />

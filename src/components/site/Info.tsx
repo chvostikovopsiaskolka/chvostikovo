@@ -208,43 +208,71 @@ export function Pricing() {
   );
 }
 
-export function Faq() {
+const PRIMARY_FAQ_QUESTIONS = new Set([
+  "Bude môj psík počas dňa niekedy sám bez dozoru?",
+  "Ako prebieha prvá návšteva psíka v škôlke?",
+  "Ako zabezpečujete bezpečnosť psíkov v škôlke?",
+  "Čo ak môj psík ešte nikdy nebol v kolektíve psov?",
+  "Prijímate aj šteniatka?",
+  "Hrajú sa psíkovia v škôlke celý deň?",
+]);
+
+const PRIMARY_FAQ = FAQ.filter((item) => PRIMARY_FAQ_QUESTIONS.has(item.q));
+const PRACTICAL_FAQ = FAQ.filter((item) => !PRIMARY_FAQ_QUESTIONS.has(item.q));
+
+function FaqList({ items }: { items: Array<(typeof FAQ)[number]> }) {
   const [open, setOpen] = useState<number | null>(0);
 
+  return (
+    <div className="mt-8 space-y-3">
+      {items.map((f, i) => (
+        <div key={f.q} className="overflow-hidden rounded-3xl bg-card shadow-card">
+          <button
+            type="button"
+            onClick={() => setOpen(open === i ? null : i)}
+            className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left font-display text-sm font-semibold text-forest sm:text-base"
+          >
+            {f.q}
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-forest sm:size-8">
+              {open === i ? <Minus className="size-3.5 sm:size-4" /> : <Plus className="size-3.5 sm:size-4" />}
+            </span>
+          </button>
+          {open === i && (
+            <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80">
+              <p className="whitespace-pre-line">{f.a}</p>
+              {f.q === "Prijímate aj šteniatka?" && (
+                <a
+                  href="/psia-skolka-pre-steniatka"
+                  className="mt-4 inline-flex font-display text-sm font-semibold text-coral underline-offset-4 hover:underline"
+                >
+                  Viac o psej škôlke pre šteniatka →
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function Faq() {
   return (
     <section id="faq" className="scroll-mt-24 bg-card pt-16 pb-12 sm:pt-20 sm:pb-14">
       <div className="mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
+        <FaqList items={PRIMARY_FAQ} />
+      </div>
+    </section>
+  );
+}
 
-        <div className="mt-10 space-y-3">
-          {FAQ.map((f, i) => (
-            <div key={f.q} className="overflow-hidden rounded-3xl bg-card shadow-card">
-              <button
-                type="button"
-                onClick={() => setOpen(open === i ? null : i)}
-                className="flex w-full items-center justify-between gap-3 py-3.5 px-4 text-left font-display text-sm font-semibold text-forest sm:text-base"
-              >
-                {f.q}
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-forest sm:size-8">
-                  {open === i ? <Minus className="size-3.5 sm:size-4" /> : <Plus className="size-3.5 sm:size-4" />}
-                </span>
-              </button>
-              {open === i && (
-                <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80">
-                  <p className="whitespace-pre-line">{f.a}</p>
-                  {f.q === "Prijímate aj šteniatka?" && (
-                    <a
-                      href="/psia-skolka-pre-steniatka"
-                      className="mt-4 inline-flex font-display text-sm font-semibold text-coral underline-offset-4 hover:underline"
-                    >
-                      Viac o psej škôlke pre šteniatka →
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+export function PracticalFaq() {
+  return (
+    <section className="bg-secondary/45 py-12 sm:py-14">
+      <div className="mx-auto max-w-4xl px-4">
+        <h2 className="section-title text-center text-3xl sm:text-4xl">Ďalšie časté otázky</h2>
+        <FaqList items={PRACTICAL_FAQ} />
 
         <p className="mt-8 text-center text-forest/80">
           Nenašli ste odpoveď?{" "}
