@@ -1012,3 +1012,34 @@ html,body,#appView.app,#appView .tab-page{
     padding-right:17px!important;
   }
 }
+
+
+/* v74: reliable Android auth/signup scrolling */
+@media(max-width:720px){
+  html,body{
+    height:auto!important;
+    min-height:100%!important;
+    min-height:100dvh!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    touch-action:pan-y!important;
+  }
+  #authView.auth-shell{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:100dvh!important;
+    overflow:visible!important;
+    padding:calc(14px + env(safe-area-inset-top)) 14px calc(32px + env(safe-area-inset-bottom))!important;
+    touch-action:pan-y!important;
+  }
+  #authView .auth-card{
+    width:min(460px,100%)!important;
+    margin:0 auto!important;
+    overflow:visible!important;
+  }
+  #authView form{
+    overflow:visible!important;
+  }
+}
