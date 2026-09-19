@@ -74,7 +74,7 @@ export function Hero() {
           <InfoTicker className="mt-7 mb-5 w-screen mx-[calc((100%-100vw)/2)]" />
 
           {/* Fotka ostáva viditeľná, no kratší Hero pustí recenzie ešte vyššie. */}
-          <div className="h-[110px] sm:h-[160px]" aria-hidden="true" />
+          <div className="h-[60px] sm:h-[120px]" aria-hidden="true" />
         </div>
 
         {/* Desktop layout */}
