@@ -65,8 +65,8 @@ function Index() {
         <div className="hidden lg:block">
           <InfoTicker />
         </div>
-        <ReviewReasons />
         <Reviews />
+        <ReviewReasons />
         <Faq />
         <VideoSection />
         <Gallery />
