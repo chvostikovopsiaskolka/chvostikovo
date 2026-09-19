@@ -248,6 +248,14 @@ function FaqList({ items }: { items: Array<(typeof FAQ)[number]> }) {
                   Viac o psej škôlke pre šteniatka →
                 </a>
               )}
+              {f.q === "Aký je cenník služieb?" && (
+                <a
+                  href="/#cennik"
+                  className="mt-4 inline-flex font-display text-sm font-semibold text-coral underline-offset-4 hover:underline"
+                >
+                  Prejsť na cenník →
+                </a>
+              )}
             </div>
           )}
         </div>
