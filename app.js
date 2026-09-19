@@ -228,7 +228,7 @@ async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);a
 async function uploadPhoto(e){return openPhotoEditor(e)}
 function imageToJpeg(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{try{const size=512,scale=Math.max(size/img.width,size/img.height),w=img.width*scale,h=img.height*scale,c=document.createElement('canvas');c.width=c.height=size;c.getContext('2d').drawImage(img,(size-w)/2,(size-h)/2,w,h);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',.82))}catch(e){reject(e)}};img.onerror=()=>reject(new Error('Fotku sa nepodarilo načítať.'));img.src=url})}
 function urlBase64ToUint8Array(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(b);return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
-async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js?v=20260918-customer-nav-v64')}catch(e){console.warn(e)}}
+async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js?v=20260919-install-guide-v65')}catch(e){console.warn(e)}}
 async function pushSubscription(){if(!('serviceWorker'in navigator))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
 function applyPushToggle(){const b=$('pushToggle');if(!b)return;b.classList.toggle('active',!!state.pushEnabled);b.classList.remove('syncing');b.setAttribute('aria-checked',state.pushEnabled?'true':'false')}
 async function ensurePushState(force=false){if(state.pushChecked&&!force)return state.pushEnabled;let on=false;try{const sub=await pushSubscription();on=!!sub&&typeof Notification!=='undefined'&&Notification.permission==='granted'}catch(_){}state.pushChecked=true;state.pushEnabled=on;localStorage.setItem('chvostikovo_push_enabled',on?'1':'0');return on}
@@ -334,7 +334,7 @@ loadAnnouncements=async function(){
     if(document.getElementById('installGuideModal'))return;
     const p=platform();
     const steps=p==='ios'
-      ?`<div class="install-step"><b>1</b><span>Otvorte Chvostíkovo v <strong>Safari</strong>.</span></div><div class="install-step"><b>2</b><span>Klepnite na <strong>tri bodky •••</strong> vľavo dole.</span></div><div class="install-step"><b>3</b><span>V ponuke klepnite na <strong>Zdieľať</strong>.</span></div><div class="install-step"><b>4</b><span>Klepnite na <strong>Zobraziť viac</strong>.</span></div><div class="install-step"><b>5</b><span>Vyberte <strong>Pridať na plochu</strong>.</span></div><div class="install-step"><b>6</b><span>Zapnite <strong>Otvoriť ako webovú apku</strong> a klepnite na <strong>Pridať</strong>.</span></div><div class="install-step"><b>7</b><span>Zavrite Safari, otvorte <strong>Chvostíkovo cez ikonu na ploche</strong> a tam pokračujte prihlásením.</span></div>`
+      ?`<div class="install-step"><b>1</b><span>Klepnite dole na tlačidlo <strong>Zdieľať</strong> – štvorec so šípkou nahor.</span></div><div class="install-step"><b>2</b><span>Klepnite na <strong>Zobraziť viac</strong>.</span></div><div class="install-step"><b>3</b><span>Vyberte <strong>Pridať na plochu</strong>.</span></div><div class="install-step"><b>4</b><span>Zapnite <strong>Otvoriť ako webovú apku</strong> a klepnite na <strong>Pridať</strong>.</span></div><div class="install-step"><b>5</b><span>Zavrite aktuálne okno a otvorte <strong>Chvostíkovo cez ikonu na ploche</strong>. Tam pokračujte prihlásením.</span></div>`
       :p==='android'
       ?`<div class="install-step"><b>1</b><span>Otvorte Chvostíkovo v <strong>Chrome</strong>.</span></div><div class="install-step"><b>2</b><span>Klepnite na menu <strong>⋮</strong> vpravo hore.</span></div><div class="install-step"><b>3</b><span>Vyberte <strong>Inštalovať aplikáciu</strong> alebo <strong>Inštalovať a vytvoriť skratku</strong>.</span></div><div class="install-step"><b>4</b><span>Potvrďte inštaláciu. Potom <strong>zavrite Chrome a otvorte Chvostíkovo cez novú ikonu na ploche</strong>. Tam pokračujte prihlásením.</span></div>`
       :`<div class="install-step"><b>1</b><span>Otvorte menu prehliadača.</span></div><div class="install-step"><b>2</b><span>Vyberte možnosť <strong>Inštalovať aplikáciu</strong> alebo <strong>Pridať na plochu</strong>.</span></div>`;
@@ -349,7 +349,7 @@ loadAnnouncements=async function(){
   const start=()=>{mountHelpLink();if(!standalone()&&!currentSession()&&sessionStorage.getItem(KEY)!=='1')setTimeout(openGuide,180)};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
-registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker.register('/sw.js?v=20260918-customer-nav-v64')}catch(e){console.warn(e)}};
+registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker.register('/sw.js?v=20260919-install-guide-v65')}catch(e){console.warn(e)}};
 
 
 /* v20: privacy acknowledgement + school terms gate */
@@ -764,7 +764,7 @@ registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker
     applyBrand();
     try{
       if('serviceWorker' in navigator){
-        await navigator.serviceWorker.register('/sw.js?v=20260918-customer-nav-v64');
+        await navigator.serviceWorker.register('/sw.js?v=20260919-install-guide-v65');
         await navigator.serviceWorker.ready;
         if(!navigator.serviceWorker.controller){
           await new Promise(resolve=>{
