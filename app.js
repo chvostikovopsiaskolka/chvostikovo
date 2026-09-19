@@ -760,33 +760,17 @@ registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker
 
 
 
-/* v32: iOS same-origin Add to Home Screen icon */
+/* v32 cleanup: static home icon; service worker is registered only by init() */
 (function portalHomeIconV32(){
   const brand='https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-brand-logo?v=20260914-v31';
-  const sameOrigin='/Store-v2.png?v=20260918-profile-v49';
   const applyBrand=()=>document.querySelectorAll('img[src*="/chvostikovo-logo"]').forEach(img=>{img.src=brand});
   const applyIcon=()=>{
     let apple=document.querySelector('link[rel="apple-touch-icon"]');
     if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';document.head.appendChild(apple)}
-    apple.href=sameOrigin;
-    apple.setAttribute('sizes','192x192');
+    apple.href='/apple-touch-icon.png';
+    apple.setAttribute('sizes','180x180');
   };
-  const mount=async()=>{
-    applyBrand();
-    try{
-      if('serviceWorker' in navigator){
-        await navigator.serviceWorker.register('/sw.js');
-        await navigator.serviceWorker.ready;
-        if(!navigator.serviceWorker.controller){
-          await new Promise(resolve=>{
-            const timer=setTimeout(resolve,1600);
-            navigator.serviceWorker.addEventListener('controllerchange',()=>{clearTimeout(timer);resolve()},{once:true});
-          });
-        }
-      }
-    }catch(_){ }
-    applyIcon();
-  };
+  const mount=()=>{applyBrand();applyIcon()};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
 

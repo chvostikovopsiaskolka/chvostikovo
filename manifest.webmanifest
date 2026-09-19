@@ -3,7 +3,6 @@
   "name": "Chvostíkovo",
   "short_name": "Chvostíkovo",
   "description": "Zákaznícka aplikácia Chvostíkovo",
-  "lang": "sk",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -22,12 +21,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }

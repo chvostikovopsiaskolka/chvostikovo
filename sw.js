@@ -1,9 +1,9 @@
 
-const CACHE='chvostikovo-portal-shell-20260919-pwa-install-v69';
+const CACHE='chvostikovo-portal-shell-20260919-pwa-clean-v70';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/styles.css?v=20260918-customer-nav-v64','/app.js?v=20260919-pwa-install-v69','/apple-touch-icon.png','/icon-192.png','/icon-512.png','/notification-badge-v64.png?v=20260918-v64'];
+const SHELL=['/','/styles.css?v=20260918-customer-nav-v64','/app.js?v=20260919-pwa-install-v69'];
 
 function withPortalCsp(response){
   if(!response)return response;
@@ -12,7 +12,11 @@ function withPortalCsp(response){
   return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }
 self.addEventListener('install',event=>{
-  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(cache=>Promise.allSettled(SHELL.map(url=>cache.add(url))))
+      .then(()=>self.skipWaiting())
+  );
 });
 self.addEventListener('activate',event=>{
   event.waitUntil(Promise.all([
