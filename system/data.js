@@ -1,16 +1,20 @@
 window.SYSTEM_DATA = {
   meta: {
-    updated: "18. 9. 2026",
-    source: "Aktuálny stav podľa produkcie a Supabase",
+    updated: "19. 9. 2026",
+    source: "Aktuálny stav podľa produkcie, GitHubu a Supabase",
     note: "System je iba prehľad. Admin ani zákaznícka appka sa z tejto stránky nemenia."
   },
 
   now: {
-    title: "Momentálne nič nerozpracované",
-    status: "Voľné",
-    statusTone: "done",
-    note: "Produkčné appky sú momentálne stabilné. Live/Realtime aj návrat z pozadia boli fyzicky overené na zákazníckej aj admin appke. Ďalšie plánované práce sú upratanie kódu, podmienky a finálne testovanie.",
-    bullets: []
+    title: "Stabilizácia po Git/Vercel prepojení",
+    status: "Kontrola",
+    statusTone: "ready",
+    note: "Zákaznícka V64 je už produkčne nasadená z vetvy customer-portal-production. Admin ostáva na Supabase stable-v9 a posledné UI opravy sú nasadené. Ešte sledujeme správanie PWA po obnove cache a neobvyklý Vercel traffic na Store-v2.png.",
+    bullets: [
+      "Zákaznícky portál: GitHub → Vercel production branch funguje.",
+      "Admin: dashboard modaly, narodeniny a floating vyhľadávanie psa boli opravené.",
+      "System: dôležité zmeny zapisujeme samostatným commitom do main ako projektový prehľad."
+    ]
   },
 
   next: [
@@ -58,6 +62,9 @@ window.SYSTEM_DATA = {
   ],
 
   recent: [
+    { date: "19. 9. 2026", app: "Zákaznícka", title: "V64 na GitHub → Vercel produkcii", text: "Zákaznícky portál bol presunutý na samostatnú vetvu customer-portal-production. Vercel Production Branch teraz sleduje túto vetvu, takže každý ďalší commit je zároveň verzovaná GitHub záloha aj automatický production deploy. V64 bola úspešne nasadená ako production a verejná URL už vracia zákaznícku PWA namiesto hlavného webu." },
+    { date: "19. 9. 2026", app: "Admin", title: "Dashboard modaly + narodeniny opravené", text: "Dashboard karty znovu otvárajú pracovný modal v strede obrazovky. Opravené bolo prepojenie dashboard runtime na existujúce admin dáta, takže akcie pri rezerváciách a ďalších kartách môžu používať reálny stav appky. Narodeniny a očkovania sa po renderi dashboardu znovu vykreslia a karta je umiestnená pod dashboardom." },
+    { date: "19. 9. 2026", app: "Admin", title: "Floating vyhľadávanie psa", text: "V sekcii Psy bol odstránený pevný horný vyhľadávací riadok. Namiesto neho je pri spodnej lište plávajúca lupa; otvorí modal s vyhľadávaním podľa psa, majiteľa alebo telefónu a tlačidlom + Pridať psa. Výsledky sú zjednodušené bez štítkov Aktívny/Neaktívny a kliknutím sa otvorí profil psa." },
     { date: "18. 9. 2026", app: "Zákaznícka", title: "Správna brand ikona Android pushu v62", text: "Generická ružová labka bola odstránená. Veľká farebná ikonka Android notifikácie teraz používa reálny Chvostíkovo brand asset cez samostatný /notification-icon.png endpoint s novou cache verziou. Malý monochromatický badge zostal bez zmeny. Produkčný alias aj service worker v62 boli overené." },
     { date: "18. 9. 2026", app: "Admin", title: "Dashboard v42 ako pracovný inbox", text: "Dashboard modaly už nie sú iba read-only náhľad. Z Čakajúcich rezervácií sa dá priamo schváliť alebo zamietnuť rezervácia/zmena taxi, pri Čakajúcich majiteľoch vybrať psíka a schváliť priradenie, Záujem o škôlku a Úvodné návštevy sa dajú priamo otvoriť a pri Záujme o permanentku ostal iba text „Má záujem o X-vstupovú permanentku“ + tlačidlo Vybavené. Dnes/Zajtra umožňuje rovno otvoriť profil psa. Modaly sa na mobile otvárajú v strede obrazovky, nie ako spodný sheet. Pôvodné bloky pod Dashboardom zostali zachované." },
     { date: "18. 9. 2026", app: "Admin", title: "Dashboard v41 s modálnymi detailmi", text: "Dashboard admin appky má nové stabilné poradie: Dnes/Zajtra, Čakajúce rezervácie/Záujem o permanentku, Záujem o škôlku/Správy, Čakajúci majitelia/Úvodné návštevy. Čakajúce rezervácie majú zelený zvýraznený štýl. Kliknutie na každú kartu otvorí prehľadový modal s údajmi; pôvodné pracovné bloky pod Dashboardom zostali zachované." },
@@ -154,8 +161,9 @@ window.SYSTEM_DATA = {
   ],
 
   technical: [
-    { label: "Zdroj aktuálneho stavu", value: "Produkcia + Supabase" },
-    { label: "Admin", value: "Produkčná admin aplikácia používa spoločný Supabase backend." },
+    { label: "Zdroj aktuálneho stavu", value: "Produkcia + GitHub + Supabase" },
+    { label: "Git workflow", value: "Zákaznícky frontend je verzovaný vo vetve customer-portal-production a Vercel ju používa ako Production Branch. Commit do tejto vetvy zároveň vytvorí GitHub históriu aj production deploy. Chvostikovo System ostáva na main." },
+    { label: "Admin", value: "Produkčná admin aplikácia používa Supabase backend a frontend stable-v9 načítaný cez Edge Function chvostikovo-frontend. Dôležité admin zmeny sa zároveň zaznamenávajú do System appky v GitHub main, ale plný admin frontend zatiaľ nie je zdrojovaný z GitHubu." },
     { label: "Zákaznícka appka", value: "Produkčná PWA používa spoločný Supabase backend a vlastné zákaznícke rozhranie." },
     { label: "Live aktualizácie", value: "Supabase Realtime je nasadený pre obe appky. Zákaznícka signalizácia používa bezpečný kanál bez citlivého payloadu; RLS zostalo zachované." },
     { label: "CSP zákazníckej PWA", value: "Realtime WebSocket je povolený iba pre wss://tlhcqwsluyqpywymjoxn.supabase.co. Nebol pridaný žiadny všeobecný WSS wildcard; ostatné CSP obmedzenia zostali zachované." },
