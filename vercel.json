@@ -99,6 +99,10 @@
   ],
   "rewrites": [
     {
+      "source": "/app-icon.png",
+      "destination": "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-app-icon?pink=1"
+    },
+    {
       "source": "/Store-v2.png",
       "destination": "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-app-icon"
     },
