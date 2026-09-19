@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Phone } from "lucide-react";
 import { PHONE } from "@/content/site";
 import heroDogs from "@/assets/hero-dogs.jpg";
@@ -5,6 +6,13 @@ import { ShortForm } from "./Forms";
 import { InfoTicker } from "./InfoTicker";
 
 export function Hero() {
+  const [announcementVisible, setAnnouncementVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setAnnouncementVisible(false), 5200);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   return (
     <section id="top" className="relative overflow-hidden pt-20 pb-2 sm:pt-24 lg:pb-4">
       <div className="absolute inset-0 z-0">
@@ -22,11 +30,25 @@ export function Hero() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-2 text-center lg:text-left">
+        <div
+          className={`pointer-events-none absolute top-1 left-1/2 hidden -translate-x-1/2 transition-all duration-700 lg:block ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"}`}
+          aria-hidden={!announcementVisible}
+        >
+          <p className="whitespace-nowrap rounded-full bg-white/95 px-5 py-2 font-display text-sm font-bold text-coral-dark shadow-soft">
+            🐾 Prijímame nových škôlkarov
+          </p>
+        </div>
+
         {/* Mobile layout */}
         <div className="lg:hidden">
-          <p className="mx-auto mb-4 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm">
-            Denná starostlivosť o stredných a veľkých psíkov
-          </p>
+          <div className="mb-4 h-7 sm:h-8">
+            <p
+              className={`mx-auto max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft transition-all duration-700 sm:px-4 sm:text-sm ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"}`}
+              aria-hidden={!announcementVisible}
+            >
+              🐾 Prijímame nových škôlkarov
+            </p>
+          </div>
 
           <h1 className="text-[34px] leading-[1.05] text-forest sm:text-5xl">
             <span className="text-coral-dark">Psia škôlka</span>
@@ -35,6 +57,10 @@ export function Hero() {
             <br />
             váš psík zamiluje
           </h1>
+
+          <p className="mx-auto mt-4 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm">
+            Denná starostlivosť o stredných a veľkých psíkov
+          </p>
 
           <div className="mx-auto mt-5 max-w-xl rounded-2xl bg-white/95 p-4 text-forest shadow-soft">
             <p className="font-display text-base font-bold sm:text-lg">
