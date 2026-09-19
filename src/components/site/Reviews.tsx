@@ -3,6 +3,7 @@ import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeartHandshake, PawPrint, Sparkles } from "lucide-react";
 import skolkariVideo from "@/assets/skolkari.mp4";
+import schoolmatesLineup from "@/assets/skolkari-lineup.avif";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
   const [open, setOpen] = useState(false);
@@ -106,14 +107,14 @@ const REVIEW_REASONS = [
   },
   {
     title: "Spokojní a príjemne unavení",
-    text: "Pohyb, hry, kamaráti aj oddych – domov sa vracajú po dobre strávenom dni. Spokojní, vybehaní a pripravení na zaslúžený oddych.",
+    text: "Pohyb, aktivity, kamaráti, oddych aj mojkanie – domov sa psíkovia vracajú po dobre strávenom dni spokojní, vybehaní a pripravení na oddych a čas s majiteľom.",
     icon: Sparkles,
   },
 ];
 
 export function ReviewReasons() {
   return (
-    <section className="bg-forest py-10 text-cream sm:py-12">
+    <section className="bg-forest pt-10 pb-0 text-cream sm:pt-12">
       <div className="mx-auto max-w-6xl px-4">
         <div className="text-center">
           <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
@@ -137,6 +138,18 @@ export function ReviewReasons() {
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="-mx-4 mt-5 overflow-hidden sm:mx-0 sm:mt-7" aria-hidden="true">
+          <img
+            src={schoolmatesLineup}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            width={1092}
+            height={304}
+            className="mx-auto block w-full object-contain object-bottom sm:max-w-[860px]"
+          />
         </div>
       </div>
     </section>
