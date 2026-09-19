@@ -15,7 +15,7 @@ const NAV_MOBILE_BEFORE_ABOUT = [
 const NAV_MOBILE_AFTER_INFO = [
   { href: "#podmienky", label: "Podmienky" },
   { href: "#cennik", label: "Cenník" },
-  { href: "#faq", label: "Časté otázky" },
+  { href: "/caste-otazky", label: "Časté otázky" },
   { href: "#kontakt", label: "Kontakt" },
 ];
 
@@ -27,7 +27,7 @@ const NAV_DESKTOP_BEFORE_ABOUT = [
 const NAV_DESKTOP_AFTER_ABOUT = [
   { href: "#podmienky", label: "Podmienky" },
   { href: "#cennik", label: "Cenník" },
-  { href: "#faq", label: "Časté otázky" },
+  { href: "/caste-otazky", label: "Časté otázky" },
 ];
 
 export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolean }) {
@@ -37,7 +37,7 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
   const [productsOpen, setProductsOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
 
-  const sectionHref = (href: string) => (homeSectionLinks ? `/${href}` : href);
+  const sectionHref = (href: string) => (href.startsWith("/") ? href : homeSectionLinks ? `/${href}` : href);
   const logoHref = homeSectionLinks ? "/" : "#top";
 
   useEffect(() => {
