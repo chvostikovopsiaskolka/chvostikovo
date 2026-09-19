@@ -579,15 +579,19 @@ loadAnnouncements=async function(){
   if(window.__chvostikovoLegalPhoneV22)return;
   window.__chvostikovoLegalPhoneV22=true;
 
-  function phoneDigits(raw){
+  function phonePrefixDigits(raw){
+    return String(raw||'').replace(/\D/g,'').slice(0,4);
+  }
+  function phoneDigits(raw,prefixDigits='421'){
     let d=String(raw||'').replace(/\D/g,'');
-    if(d.startsWith('421'))d=d.slice(3);
+    if(prefixDigits&&d.startsWith(prefixDigits))d=d.slice(prefixDigits.length);
     if(d.startsWith('0'))d=d.slice(1);
-    return d.slice(0,9);
+    return d.slice(0,14);
   }
   function phoneDisplay(d){
-    d=String(d||'').slice(0,9);
-    return [d.slice(0,3),d.slice(3,6),d.slice(6,9)].filter(Boolean).join(' ');
+    d=String(d||'').slice(0,14);
+    if(d.length<=9)return [d.slice(0,3),d.slice(3,6),d.slice(6,9)].filter(Boolean).join(' ');
+    return d.replace(/(\d{3})(?=\d)/g,'$1 ').trim();
   }
   function mountSignupPhone(){
     const input=document.getElementById('signupPhone');
@@ -597,31 +601,54 @@ loadAnnouncements=async function(){
     input.inputMode='tel';
     input.autocomplete='tel-national';
     input.placeholder='951 123 456';
+    let prefix=document.getElementById('signupPhonePrefix');
     if(!input.closest('.signup-phone-field')){
       const wrap=document.createElement('div');wrap.className='signup-phone-field';
-      const prefix=document.createElement('span');prefix.className='signup-phone-prefix';prefix.textContent='+421';
+      prefix=document.createElement('input');
+      prefix.id='signupPhonePrefix';
+      prefix.className='signup-phone-prefix';
+      prefix.type='text';
+      prefix.inputMode='tel';
+      prefix.autocomplete='tel-country-code';
+      prefix.value='+421';
+      prefix.setAttribute('aria-label','Medzinárodná telefónna predvoľba');
+      prefix.setAttribute('maxlength','5');
       input.parentNode.insertBefore(wrap,input);wrap.append(prefix,input);
     }
-    const clean=()=>{
-      const d=phoneDigits(input.value);
-      input.value=phoneDisplay(d);
-      input.setCustomValidity(d.length===9?'':'Zadajte 9 číslic telefónneho čísla.');
+    const cleanPrefix=()=>{
+      const d=phonePrefixDigits(prefix.value);
+      prefix.value='+'+(d||'421');
+      prefix.setCustomValidity(d.length>=1&&d.length<=4?'':'Zadajte platnú telefónnu predvoľbu.');
     };
+    const clean=()=>{
+      const p=phonePrefixDigits(prefix.value)||'421';
+      const d=phoneDigits(input.value,p);
+      input.value=phoneDisplay(d);
+      const valid=p==='421'?d.length===9:(d.length>=6&&p.length+d.length<=15);
+      input.setCustomValidity(valid?'':p==='421'?'Zadajte 9 číslic telefónneho čísla.':'Skontrolujte dĺžku telefónneho čísla.');
+    };
+    prefix.addEventListener('focus',()=>prefix.select());
+    prefix.addEventListener('input',()=>{const caret=prefix.selectionStart;const d=phonePrefixDigits(prefix.value);prefix.value='+'+d;try{prefix.setSelectionRange(Math.max(1,caret||1),Math.max(1,caret||1))}catch(_){}});
+    prefix.addEventListener('blur',()=>{cleanPrefix();clean()});
+    prefix.addEventListener('paste',()=>setTimeout(()=>{cleanPrefix();clean()},0));
     input.addEventListener('input',clean);
     input.addEventListener('paste',()=>setTimeout(clean,0));
     input.addEventListener('blur',clean);
     form.addEventListener('submit',e=>{
-      const d=phoneDigits(input.value);
-      if(d.length!==9){
-        input.setCustomValidity('Zadajte 9 číslic telefónneho čísla.');
+      cleanPrefix();
+      const p=phonePrefixDigits(prefix.value)||'421';
+      const d=phoneDigits(input.value,p);
+      const valid=p==='421'?d.length===9:(d.length>=6&&p.length+d.length<=15);
+      if(!valid){
+        input.setCustomValidity(p==='421'?'Zadajte 9 číslic telefónneho čísla.':'Skontrolujte dĺžku telefónneho čísla.');
         input.reportValidity();
         e.preventDefault();e.stopImmediatePropagation();return;
       }
       input.setCustomValidity('');
-      input.value='+421'+d;
+      input.value='+'+p+d;
       queueMicrotask(()=>{input.value=phoneDisplay(d)});
     },true);
-    clean();
+    cleanPrefix();clean();
   }
 
   function enforceLegalOrder(){
