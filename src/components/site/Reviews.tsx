@@ -153,7 +153,7 @@ export function ReviewReasons() {
 
 export function Reviews() {
   return (
-    <section id="recenzie" className="scroll-mt-24 bg-secondary/50 pt-0 pb-16 sm:pt-14 sm:pb-20">
+    <section id="recenzie" className="scroll-mt-24 bg-secondary/50 pt-6 pb-16 sm:pt-14 sm:pb-20">
       <div className="mx-auto max-w-6xl px-4 text-center">
         <h2 className="section-title text-3xl sm:text-4xl">100+ spokojných psíkov</h2>
         <p className="mt-3 text-forest/80">⭐ 5.0 z 5 na Google</p>

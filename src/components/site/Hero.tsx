@@ -22,7 +22,7 @@ export function Hero() {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="size-full object-cover object-[50%_35%]"
+          className="size-full object-cover object-[50%_42%] lg:object-[50%_35%]"
         />
         <div className="absolute inset-0 bg-cream/10" />
         <div className="absolute inset-0 bg-linear-to-r from-cream/95 via-cream/55 via-45% to-transparent" />
