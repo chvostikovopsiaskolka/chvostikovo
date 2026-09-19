@@ -100,7 +100,7 @@
   "rewrites": [
     {
       "source": "/app-icon.png",
-      "destination": "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-app-icon?pink=1"
+      "destination": "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-app-icon"
     },
     {
       "source": "/Store-v2.png",
