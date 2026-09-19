@@ -1551,60 +1551,16 @@ registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker
 })();
 
 
-/* v64: legal documents in Menu + push subscription self-heal */
-(function customerLegalDocsAndPushHealV64(){
-  if(window.__chvostikovoLegalDocsAndPushHealV64)return;
-  window.__chvostikovoLegalDocsAndPushHealV64=true;
+/* v71: push subscription self-heal; duplicate legal-document layer removed */
+(function customerPushHealV71(){
+  if(window.__chvostikovoCustomerPushHealV71)return;
+  window.__chvostikovoCustomerPushHealV71=true;
 
-  function closeSettingsV64(){
-    document.getElementById('dogSettingsModalV36')?.classList.add('hidden');
-    document.documentElement.classList.remove('settings-open-v36');
+  function removeLegacyLegalDuplicatesV71(){
+    document.getElementById('customerLegalDocsV64')?.remove();
   }
 
-  function openPrivacyV64(){
-    closeSettingsV64();
-    const trigger=document.getElementById('privacyInfoBtn');
-    if(trigger){trigger.click();return}
-    document.getElementById('privacyInfoModal')?.classList.remove('hidden');
-  }
-
-  function openTermsV64(){
-    closeSettingsV64();
-    const rules=document.getElementById('schoolRulesCardV55');
-    if(rules){rules.click();return}
-    document.getElementById('customerTermsReadBtn')?.click();
-  }
-
-  function ensureLegalDocsV64(){
-    const root=document.getElementById('customerLegalControlsV23');
-    if(!root)return;
-    let docs=document.getElementById('customerLegalDocsV64');
-    if(!docs){
-      docs=document.createElement('div');
-      docs.id='customerLegalDocsV64';
-      docs.className='customer-legal-docs-v64';
-      docs.innerHTML=
-        '<button id="privacyDocumentV64" class="customer-legal-doc-v64" type="button">'+
-          '<span><strong>Ochrana osobných údajov</strong><small>Informácie o spracúvaní osobných údajov</small></span><b aria-hidden="true">›</b>'+
-        '</button>'+
-        '<button id="termsDocumentV64" class="customer-legal-doc-v64" type="button">'+
-          '<span><strong>Podmienky psej škôlky</strong><small>Prečítať aktuálne podmienky Chvostíkova</small></span><b aria-hidden="true">›</b>'+
-        '</button>';
-      root.prepend(docs);
-      document.getElementById('privacyDocumentV64')?.addEventListener('click',openPrivacyV64);
-      document.getElementById('termsDocumentV64')?.addEventListener('click',openTermsV64);
-    }else if(root.firstElementChild!==docs){
-      root.prepend(docs);
-    }
-  }
-
-  let legalTimerV64=0;
-  function queueLegalDocsV64(){
-    clearTimeout(legalTimerV64);
-    legalTimerV64=setTimeout(ensureLegalDocsV64,25);
-  }
-
-  async function healPushV64(){
+  async function healPushV71(){
     if(!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
     try{
       const reg=await navigator.serviceWorker.ready;
@@ -1644,42 +1600,26 @@ registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker
     }
   }
 
-  const previousRenderDogV64=renderDog;
-  renderDog=function(...args){
-    const result=previousRenderDogV64.apply(this,args);
-    queueLegalDocsV64();
-    setTimeout(queueLegalDocsV64,120);
-    return result;
-  };
-
-  const previousBootstrapV64=bootstrap;
+  const previousBootstrapV71=bootstrap;
   bootstrap=async function(...args){
-    const result=await previousBootstrapV64.apply(this,args);
-    setTimeout(healPushV64,80);
-    setTimeout(queueLegalDocsV64,100);
+    const result=await previousBootstrapV71.apply(this,args);
+    removeLegacyLegalDuplicatesV71();
+    setTimeout(healPushV71,80);
     return result;
   };
 
-  function startV64(){
-    queueLegalDocsV64();
-    setTimeout(queueLegalDocsV64,350);
-    setTimeout(healPushV64,900);
-    setTimeout(healPushV64,2600);
-    const settings=document.getElementById('dogSettingsModalV36');
-    if(settings){
-      new MutationObserver(queueLegalDocsV64).observe(settings,{childList:true,subtree:true});
-    }
+  function startV71(){
+    removeLegacyLegalDuplicatesV71();
+    setTimeout(healPushV71,900);
+    setTimeout(healPushV71,2600);
   }
 
-  document.addEventListener('click',e=>{
-    if(e.target.closest?.('#dogSettingsBtnV36,#customerLegalSectionV23'))setTimeout(queueLegalDocsV64,20);
-  },true);
-  window.addEventListener('pageshow',()=>{setTimeout(healPushV64,250);setTimeout(queueLegalDocsV64,50)});
-  window.addEventListener('focus',()=>setTimeout(healPushV64,350));
+  window.addEventListener('pageshow',()=>{removeLegacyLegalDuplicatesV71();setTimeout(healPushV71,250)});
+  window.addEventListener('focus',()=>setTimeout(healPushV71,350));
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='visible')setTimeout(healPushV64,350);
+    if(document.visibilityState==='visible')setTimeout(healPushV71,350);
   });
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startV64,{once:true});
-  else startV64();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startV71,{once:true});
+  else startV71();
 })();
