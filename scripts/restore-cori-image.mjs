@@ -106,9 +106,9 @@ await restoreImage({
 await restoreImage({
   label: "ŠKÔLKÁRI",
   dataDir: siteDataDir,
-  prefix: "skolkari-lineup-avif",
+  prefix: "skolkari-lineup-v2",
   output: "skolkari-lineup.avif",
-  expectedBytes: 29_435,
+  expectedBytes: 62_839,
   targetDir: siteOutputDir,
 });
 
