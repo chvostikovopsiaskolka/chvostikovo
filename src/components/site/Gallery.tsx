@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
-import { MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { GALLERY, MAP_LINK } from "@/content/site";
+import { MapPin, ChevronLeft, ChevronRight, Phone, X } from "lucide-react";
+import { GALLERY, MAP_LINK, PHONE } from "@/content/site";
+import { ShortForm } from "./Forms";
 
 const HYGIENE = [
   {
@@ -118,6 +119,22 @@ export function Gallery() {
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="mx-auto mt-10 min-w-0 max-w-2xl rounded-4xl bg-card p-6 shadow-soft sm:p-8 lg:hidden">
+          <h3 className="text-center text-2xl text-forest">Informujte sa o škôlke..</h3>
+          <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
+            Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
+          </p>
+
+          <ShortForm />
+
+          <a
+            href={`tel:${PHONE}`}
+            className="btn-coral mt-5 inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base"
+          >
+            <Phone className="size-4" /> Zavolajte nám
+          </a>
         </div>
       </div>
 

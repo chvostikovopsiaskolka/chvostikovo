@@ -73,23 +73,9 @@ export function Hero() {
 
           <InfoTicker className="mt-7 mb-5 w-screen mx-[calc((100%-100vw)/2)]" />
 
-          <div className="mx-auto min-w-0 max-w-2xl rounded-4xl bg-card/95 p-6 shadow-soft backdrop-blur-sm sm:p-8">
-            <h2 className="text-center text-2xl text-forest">
-              Informujte sa o škôlke..
-            </h2>
-            <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
-              Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
-            </p>
-
-            <ShortForm />
-
-            <a
-              href={`tel:${PHONE}`}
-              className="btn-coral mt-5 inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base"
-            >
-              <Phone className="size-4" /> Zavolajte nám
-            </a>
-          </div>
+          {/* Zachováva približne rovnakú výšku mobilného Hero po presune formulára,
+              aby sa fotografia nezmenšila ani výrazne neprekrojila. */}
+          <div className="h-[520px] sm:h-[540px]" aria-hidden="true" />
         </div>
 
         {/* Desktop layout */}
