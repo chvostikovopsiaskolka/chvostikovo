@@ -891,20 +891,6 @@ registerSW=function(){if('serviceWorker'in navigator)try{navigator.serviceWorker
     const logout=$('logoutBtn');
     if(account&&account.parentElement!==content)content.appendChild(account);
     if(legal&&legal.parentElement!==content){content.appendChild(legal);if(!legal.dataset.v36SettingsCollapsed){legal.open=false;legal.dataset.v36SettingsCollapsed='1'}}
-    const standalone=window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
-    let installBtn=$('settingsInstallAppV68');
-    if(!standalone){
-      if(!installBtn){
-        installBtn=document.createElement('button');installBtn.id='settingsInstallAppV68';installBtn.type='button';
-        installBtn.className='btn secondary full';installBtn.textContent='Nainštalovať aplikáciu';
-        installBtn.addEventListener('click',()=>{
-          $('dogSettingsModalV36')?.classList.add('hidden');document.documentElement.classList.remove('settings-open-v36');
-          sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
-          setTimeout(()=>document.getElementById('installHelpLink')?.click(),60);
-        });
-      }
-      if(logout&&installBtn.parentElement!==content)content.insertBefore(installBtn,logout);
-    }else installBtn?.remove();
     if(logout){logout.classList.remove('hidden','icon-btn');logout.classList.add('btn','secondary','full');logout.textContent='Odhlásiť sa';logout.style.marginTop='14px';content.appendChild(logout)}
   }
 
