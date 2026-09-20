@@ -551,6 +551,7 @@ const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');
 (function customerSignupPasswordV19(){
   if(window.__customerSignupPasswordV19)return;window.__customerSignupPasswordV19=true;
   const first=$('signupPassword');if(!first)return;
+  const firstGroup=first.parentElement;
   const style=document.createElement('style');style.id='customer-signup-password-v19-style';style.textContent='.password-field-v19{position:relative}.password-field-v19 .input{padding-right:52px}.password-eye-v19{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:40px;height:38px;border:0;border-radius:10px;background:transparent;font-size:18px;cursor:pointer}.password-eye-v19[aria-pressed="true"]{background:#f3f4f6}.booking-picker-error-v95{margin:10px 0 12px;padding:12px 13px;border:1px solid #fdba74;border-radius:14px;background:#fff7ed;color:#9a3412;font-size:13px;line-height:1.4}.booking-picker-error-v95 strong{display:block;margin-bottom:5px}.booking-picker-error-v95 button{margin-top:9px}';document.head.appendChild(style);
   function wrap(input){
     if(!input||input.parentElement?.classList.contains('password-field-v19'))return;
@@ -561,7 +562,7 @@ const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');
   wrap(first);
   if(!$('signupPasswordAgain')){
     const group=document.createElement('div');group.innerHTML='<label for="signupPasswordAgain">Zopakujte heslo</label><input id="signupPasswordAgain" class="input" type="password" autocomplete="new-password" minlength="8" required>';
-    first.closest('div')?.insertAdjacentElement('afterend',group);wrap($('signupPasswordAgain'));
+    firstGroup?.insertAdjacentElement('afterend',group);wrap($('signupPasswordAgain'));
   }
   const infectious=[...document.querySelectorAll('.vaccine-box strong')].find(el=>el.textContent.trim()==='Infekčné ochorenia');
   if(infectious&&!document.getElementById('infectiousInfoV19')){infectious.textContent='Infekčné ochorenia (DHPPi+L)';infectious.insertAdjacentHTML('afterend','<div id="infectiousInfoV19" class="hint" style="margin-top:5px">Psinka · infekčný zápal pečene · parvoviróza · psia parainfluenza · leptospiróza</div>')}
