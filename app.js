@@ -80,8 +80,11 @@ function bootstrap(showSpinner=true){
       clearSession();
       showAuth('login');
       if($('authMessage'))$('authMessage').innerHTML='';
-      sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
-      setTimeout(()=>document.getElementById('installHelpLink')?.click(),220);
+      const standalone=window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
+      if(!standalone){
+        sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
+        setTimeout(()=>document.getElementById('installHelpLink')?.click(),220);
+      }
     }else toast(message||'Aplikáciu sa nepodarilo načítať.');
   }})();
   bootstrapInFlight=run.finally(()=>{if(showSpinner)loading(false);bootstrapInFlight=null});
