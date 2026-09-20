@@ -16,9 +16,9 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260920-preview-brat-test-fixes-v19';
-const SUPABASE_URL='https://jgzabminzgbfhsrgqedt.supabase.co';
-const SUPABASE_KEY='sb_publishable_SxAm6NUsZ8699ienaT8fzw_6bWt5cPq';
+const APP_BUILD='20260920-customer-consolidated-v95';
+const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
+const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
 const PUSH_API=SUPABASE_URL+'/functions/v1/admin-push';
 const VAPID='BCFhf2kRc1P8blGDHKugmyBhCOfa-x8qbYSMo_qeO-650GSxg3I6naMHVqFTs7UOrTXotemfg9LhNElm56Zhv6k';
@@ -1009,7 +1009,7 @@ placeDeadlineV59();
 
 /* v32 cleanup: static home icon; service worker is registered only by init() */
 (function portalHomeIconV32(){
-  const brand='https://jgzabminzgbfhsrgqedt.supabase.co/functions/v1/chvostikovo-brand-logo?v=20260914-v31';
+  const brand='https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-brand-logo?v=20260914-v31';
   const applyBrand=()=>document.querySelectorAll('img[src*="/chvostikovo-logo"]').forEach(img=>{img.src=brand});
   const applyIcon=()=>{
     let apple=document.querySelector('link[rel="apple-touch-icon"]');
