@@ -1070,3 +1070,8 @@ html,body,#appView.app,#appView .tab-page{
 .terms-scroll-hint-v85.done{color:#166534}
 .terms-ack-row:has(input:disabled){opacity:.48}
 .terms-ack-row input:disabled{cursor:not-allowed}
+
+
+/* v87: customer-facing dog name and centered registration confirmation */
+.waiting-dog-card-v75 h2{margin-left:0!important;margin-right:0!important;text-align:center!important}
+#dogName.dog-name-locked-v87{background:#f3f4f6!important;color:#374151!important;cursor:not-allowed}
