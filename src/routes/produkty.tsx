@@ -39,25 +39,13 @@ function ProductsPage() {
       <main>
         <section className="bg-background pt-28 pb-12 sm:pt-32 sm:pb-16">
           <div className="mx-auto max-w-5xl px-4 text-center">
-            <h1 className="mx-auto max-w-4xl text-4xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
+            <h1 className="mx-auto max-w-4xl whitespace-nowrap text-[1.75rem] leading-[1.05] text-forest sm:whitespace-normal sm:text-5xl lg:text-6xl">
               Naše <span className="text-coral-dark">produkty pre psov</span>
             </h1>
             <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-forest/80">
               Praktické produkty, ktoré vznikajú priamo v Chvostíkove. Vyrábame ich ručne, s dôrazom
               na funkčnosť, kvalitné spracovanie a individuálne prevedenie.
             </p>
-            <div className="mt-6 grid grid-cols-3 gap-1.5 sm:flex sm:justify-center sm:gap-2">
-              <span className="inline-flex min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-card px-1.5 py-2 text-[9px] font-semibold text-forest shadow-card sm:gap-2 sm:px-4 sm:text-sm">
-                <Hammer className="size-3 shrink-0 text-coral sm:size-4" /> Ručná výroba
-              </span>
-              <span className="inline-flex min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-card px-1.5 py-2 text-[9px] font-semibold text-forest shadow-card sm:gap-2 sm:px-4 sm:text-sm">
-                <Ruler className="size-3 shrink-0 text-coral sm:size-4" /> Výška na mieru
-              </span>
-              <span className="inline-flex min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-card px-1 py-2 text-[8px] font-semibold text-forest shadow-card sm:gap-2 sm:px-4 sm:text-sm">
-                <Paintbrush className="size-3 shrink-0 text-coral sm:size-4" /> Individuálne
-                prevedenie
-              </span>
-            </div>
           </div>
         </section>
 
