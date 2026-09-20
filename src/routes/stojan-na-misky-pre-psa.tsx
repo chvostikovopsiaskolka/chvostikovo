@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   Check,
@@ -148,11 +148,6 @@ export const Route = createFileRoute("/stojan-na-misky-pre-psa")({
 
 function ProductGallery({ size }: { size: StandSize }) {
   const [active, setActive] = useState(size === "small" ? 2 : 0);
-
-  useEffect(() => {
-    setActive(size === "small" ? 2 : 0);
-  }, [size]);
-
   const current = GALLERY[active]!;
 
   return (
@@ -312,7 +307,7 @@ function BowlStandPage() {
             </a>
 
             <div className="grid gap-9 lg:grid-cols-[1.02fr_0.98fr] lg:items-start lg:gap-12">
-              <ProductGallery size={size} />
+              <ProductGallery key={size} size={size} />
 
               <div>
                 <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
@@ -330,7 +325,7 @@ function BowlStandPage() {
                         key={option.value}
                         type="button"
                         onClick={() => setSize(option.value)}
-                        className={`rounded-2xl border-2 p-3 text-left transition ${
+                        className={`rounded-2xl border-2 p-3 text-left transition-colors duration-75 ${
                           size === option.value
                             ? "border-coral bg-coral-soft/25"
                             : "border-forest/10 bg-card"
@@ -452,7 +447,7 @@ function BowlStandPage() {
                                   key={option.value}
                                   type="button"
                                   onClick={() => setSize(option.value)}
-                                  className={`rounded-2xl border-2 p-3 text-left transition ${
+                                  className={`rounded-2xl border-2 p-3 text-left transition-colors duration-75 ${
                                     size === option.value
                                       ? "border-coral bg-coral-soft/25"
                                       : "border-forest/10 bg-background"

@@ -121,8 +121,8 @@ function ProductsPage() {
                 <img
                   src={targetLargeDog}
                   alt="Pes stojaci na targete na cvičenie"
-                  className="h-72 w-full bg-secondary/35 object-contain p-3 transition duration-500 group-hover:scale-[1.01] sm:h-80 lg:h-full"
-                  style={{ objectPosition: "50% 50%" }}
+                  className="h-72 w-full object-cover transition duration-500 group-hover:scale-[1.02] sm:h-80 lg:h-full"
+                  style={{ objectPosition: "50% 58%" }}
                 />
               </a>
               <div className="flex flex-col justify-center p-6 sm:p-8">

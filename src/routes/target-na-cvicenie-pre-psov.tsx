@@ -64,7 +64,11 @@ export const Route = createFileRoute("/target-na-cvicenie-pre-psov")({
       { name: "twitter:description", content: description },
       { name: "twitter:image", content: OG_IMAGE },
     ],
-    links: [{ rel: "canonical", href: PAGE_URL }],
+    links: [
+      { rel: "canonical", href: PAGE_URL },
+      { rel: "preload", as: "image", href: targetLargeDog },
+      { rel: "preload", as: "image", href: targetSmallDog },
+    ],
     scripts: [
       {
         type: "application/ld+json",
@@ -303,7 +307,7 @@ function TargetPage() {
                         key={option.value}
                         type="button"
                         onClick={() => setSize(option.value)}
-                        className={`rounded-2xl border-2 p-3 text-left transition ${
+                        className={`rounded-2xl border-2 p-3 text-left transition-colors duration-75 ${
                           size === option.value
                             ? "border-coral bg-coral-soft/25"
                             : "border-forest/10 bg-card"
@@ -472,7 +476,7 @@ function TargetPage() {
                     key={option.value}
                     type="button"
                     onClick={() => setSize(option.value)}
-                    className={`rounded-2xl border-2 p-3 text-left transition ${
+                    className={`rounded-2xl border-2 p-3 text-left transition-colors duration-75 ${
                       size === option.value
                         ? "border-coral bg-coral-soft/25"
                         : "border-forest/10 bg-background"
