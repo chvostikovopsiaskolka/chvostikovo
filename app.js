@@ -496,7 +496,45 @@ placeDeadlineV59();
   async function acknowledgePrivacy(){if(!privacyMandatory){closePrivacyInfo();return}const btn=$('privacyInfoOk');if(btn)btn.disabled=true;try{const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_acknowledge_privacy_notice',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_version:PRIVACY_VERSION})});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.message||data?.error||'Potvrdenie sa nepodarilo uložiť.');if(state.data?.profile){state.data.profile.privacy_notice_version=PRIVACY_VERSION;state.data.profile.privacy_notice_acknowledged_at=new Date().toISOString()}privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden');runCustomerOnboardingV75()}catch(e){toast(e.message||'Potvrdenie sa nepodarilo uložiť.')}finally{if(btn)btn.disabled=false}}
   async function activeTermsDocument(){const now=new Date().toISOString(),r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',{headers:authHeaders(),cache:'no-store'});if(!r.ok)return null;const rows=await r.json();return rows?.[0]||null}
   async function acceptedTerms(version){const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_acceptances?terms_version=eq.'+encodeURIComponent(version)+'&select=dog_id,terms_version,accepted_at',{headers:authHeaders(),cache:'no-store'});if(!r.ok)return[];return await r.json()}
-  function showSchoolTerms(dog,doc){const modal=$('schoolTermsModal');if(!modal)return false;hideFlow('schoolTermsModal');modal.dataset.dogId=String(dog.id);modal.dataset.version=String(doc.version);$('schoolTermsTitle').textContent=doc.title||'Podmienky škôlky';$('schoolTermsDog').textContent='Psík: '+(dog.name||'');$('schoolTermsBody').textContent=doc.body||'';$('schoolTermsAck').checked=false;$('schoolTermsConfirm').disabled=true;modal.classList.remove('hidden');return true}
+  function showSchoolTerms(dog,doc){
+    const modal=$('schoolTermsModal');if(!modal)return false;
+    hideFlow('schoolTermsModal');
+    modal.dataset.dogId=String(dog.id);
+    modal.dataset.version=String(doc.version);
+    $('schoolTermsTitle').textContent=doc.title||'Podmienky škôlky';
+    $('schoolTermsDog').textContent='Psík: '+(dog.name||'');
+    const body=$('schoolTermsBody'),ack=$('schoolTermsAck'),confirm=$('schoolTermsConfirm');
+    body.textContent=doc.body||'';
+    ack.checked=false;
+    ack.disabled=true;
+    confirm.disabled=true;
+    let hint=$('schoolTermsScrollHintV85');
+    if(!hint){
+      hint=document.createElement('div');
+      hint.id='schoolTermsScrollHintV85';
+      hint.className='terms-scroll-hint-v85';
+      body.insertAdjacentElement('afterend',hint);
+    }
+    const checkBottom=()=>{
+      const atBottom=body.scrollTop+body.clientHeight>=body.scrollHeight-6;
+      if(atBottom){
+        ack.disabled=false;
+        hint.textContent='Podmienky ste prešli až na koniec. Teraz ich môžete potvrdiť.';
+        hint.classList.add('done');
+        body.removeEventListener('scroll',checkBottom);
+      }else{
+        hint.textContent='Prejdite podmienky až na koniec, aby sa sprístupnilo potvrdenie.';
+        hint.classList.remove('done');
+      }
+    };
+    body.scrollTop=0;
+    body.removeEventListener('scroll',body.__termsScrollV85);
+    body.__termsScrollV85=checkBottom;
+    body.addEventListener('scroll',checkBottom,{passive:true});
+    modal.classList.remove('hidden');
+    requestAnimationFrame(checkBottom);
+    return true
+  }
   async function acceptSchoolTerms(){const modal=$('schoolTermsModal'),dogId=Number(modal?.dataset.dogId||0),version=String(modal?.dataset.version||'');if(!dogId||!version||!$('schoolTermsAck')?.checked)return;const btn=$('schoolTermsConfirm');if(btn)btn.disabled=true;try{const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_accept_school_terms',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_dog_id:dogId,p_terms_version:version})});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.message||data?.error||'Podmienky sa nepodarilo potvrdiť.');modal.classList.add('hidden');toast('Podmienky škôlky boli potvrdené.');runCustomerOnboardingV75()}catch(e){toast(e.message||'Podmienky sa nepodarilo potvrdiť.')}finally{if(btn)btn.disabled=false}}
   function visibilityDecided(dogId){return (state.data?.visibility_consents||[]).some(x=>Number(x.dog_id)===Number(dogId))}
   function detailsPromptAnswered(dogId){return (state.data?.dog_onboarding||[]).some(x=>Number(x.dog_id)===Number(dogId))}
@@ -526,7 +564,7 @@ placeDeadlineV59();
   if(!document.getElementById('schoolTermsModal')){
     document.body.insertAdjacentHTML('beforeend','<div id="schoolTermsModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="schoolTermsTitle"><div class="legal-card terms-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="schoolTermsTitle">Podmienky škôlky</h2><div id="schoolTermsDog" class="legal-dog"></div><div id="schoolTermsBody" class="legal-body terms-body"></div><label class="terms-ack-row"><input id="schoolTermsAck" type="checkbox"><span>Prečítal/a som si podmienky škôlky a súhlasím s nimi.</span></label><button id="schoolTermsConfirm" class="btn full" type="button" disabled>Potvrdiť podmienky</button><button id="schoolTermsLogout" class="btn secondary full" type="button">Odhlásiť sa</button></div></div>');
   }
-  document.getElementById('schoolTermsAck')?.addEventListener('change',e=>{const b=document.getElementById('schoolTermsConfirm');if(b)b.disabled=!e.target.checked});
+  document.getElementById('schoolTermsAck')?.addEventListener('change',e=>{const b=document.getElementById('schoolTermsConfirm');if(b)b.disabled=e.target.disabled||!e.target.checked});
 })();
 
 

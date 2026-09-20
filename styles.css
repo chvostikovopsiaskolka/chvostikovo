@@ -1063,3 +1063,10 @@ html,body,#appView.app,#appView .tab-page{
 
 /* v81: dog age is always derived from birth date */
 #dogAge.dog-age-locked-v81{background:#f3f4f6!important;color:#6b7280!important;cursor:not-allowed}
+
+
+/* v85: school terms must be scrolled to the end before acceptance */
+.terms-scroll-hint-v85{margin:9px 2px 0;font-size:12px;line-height:1.4;color:#92400e;font-weight:750}
+.terms-scroll-hint-v85.done{color:#166534}
+.terms-ack-row:has(input:disabled){opacity:.48}
+.terms-ack-row input:disabled{cursor:not-allowed}
