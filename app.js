@@ -903,10 +903,69 @@ placeDeadlineV59();
 
 
 
-/* v23: compact My dog layout */
-(function dogProfileLayoutV23(){
-  if(window.__chvostikovoDogProfileLayoutV23)return;
+/* v32 cleanup: static home icon; service worker is registered only by init() */
+(function portalHomeIconV32(){
+  const brand='https://jgzabminzgbfhsrgqedt.supabase.co/functions/v1/chvostikovo-brand-logo?v=20260914-v31';
+  const applyBrand=()=>document.querySelectorAll('img[src*="/chvostikovo-logo"]').forEach(img=>{img.src=brand});
+  const applyIcon=()=>{
+    let apple=document.querySelector('link[rel="apple-touch-icon"]');
+    if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';document.head.appendChild(apple)}
+    apple.href='/apple-touch-icon.png';
+    apple.setAttribute('sizes','180x180');
+  };
+  const mount=()=>{applyBrand();applyIcon()};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+})();
+
+/* v79: press-and-hold password eye on all auth password fields */
+(function authPasswordVisibilityV79(){
+  if(window.__chvostikovoAuthPasswordVisibilityV79)return;
+  window.__chvostikovoAuthPasswordVisibilityV79=true;
+  const eyeSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>';
+  function mountOne(inputId){
+    const input=document.getElementById(inputId);
+    if(!input)return;
+    const eyeId=inputId+'EyeV79';
+    if(document.getElementById(eyeId))return;
+    if(inputId==='loginPassword')document.getElementById('loginPasswordEye')?.remove();
+    let wrap=input.closest('.password-input-shell-v80');
+    if(!wrap){
+      const shell=document.createElement('div');
+      shell.className='password-input-shell-v80 password-field-wrap';
+      input.parentNode?.insertBefore(shell,input);
+      shell.appendChild(input);
+      wrap=shell;
+    }else wrap.classList.add('password-field-wrap');
+    const eye=document.createElement('button');
+    eye.id=eyeId;
+    eye.type='button';
+    eye.className='password-eye-btn';
+    eye.setAttribute('aria-label','Podržte pre zobrazenie hesla');
+    eye.setAttribute('title','Podržte pre zobrazenie hesla');
+    eye.innerHTML=eyeSvg;
+    input.insertAdjacentElement('afterend',eye);
+    const show=()=>{input.type='text';eye.classList.add('pressed')};
+    const hide=()=>{input.type='password';eye.classList.remove('pressed')};
+    eye.addEventListener('pointerdown',e=>{e.preventDefault();show()});
+    ['pointerup','pointercancel','pointerleave'].forEach(type=>eye.addEventListener(type,hide));
+    eye.addEventListener('contextmenu',e=>e.preventDefault());
+    eye.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();show()}});
+    eye.addEventListener('keyup',hide);
+    eye.addEventListener('blur',hide);
+    window.addEventListener('blur',hide);
+  }
+  function mount(){['loginPassword','signupPassword','newPassword','newPasswordAgain'].forEach(mountOne)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
+})();
+
+
+/* preview consolidated: dog profile layout + app chrome */
+(function customerDogProfilePreview(){
+  if(window.__chvostikovoDogProfilePreview)return;
+  window.__chvostikovoDogProfilePreview=true;
   window.__chvostikovoDogProfileLayoutV23=true;
+  window.__chvostikovoCustomerAppChromeV36=true;
+
 
   const monthLabel=value=>{try{return new Intl.DateTimeFormat('sk-SK',{month:'long',year:'numeric'}).format(new Date(String(value).slice(0,10)+'T12:00:00'))}catch(_){return String(value||'')}};
 
@@ -1016,75 +1075,8 @@ placeDeadlineV59();
     ensureOrder(layout,[stats,gradebook]);
   }
 
-  const originalRenderDogV23=renderDog;
-  renderDog=function(...args){const result=originalRenderDogV23.apply(this,args);requestAnimationFrame(apply);return result};
-  const stats=$('dogStats');if(stats)new MutationObserver(()=>setTimeout(apply,20)).observe(stats,{childList:true});
-  const settings=$('dogProfileSettings');if(settings)new MutationObserver(()=>setTimeout(apply,20)).observe(settings,{childList:true});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(apply,100));else setTimeout(apply,100);
-})();
 
 
-
-/* v32 cleanup: static home icon; service worker is registered only by init() */
-(function portalHomeIconV32(){
-  const brand='https://jgzabminzgbfhsrgqedt.supabase.co/functions/v1/chvostikovo-brand-logo?v=20260914-v31';
-  const applyBrand=()=>document.querySelectorAll('img[src*="/chvostikovo-logo"]').forEach(img=>{img.src=brand});
-  const applyIcon=()=>{
-    let apple=document.querySelector('link[rel="apple-touch-icon"]');
-    if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';document.head.appendChild(apple)}
-    apple.href='/apple-touch-icon.png';
-    apple.setAttribute('sizes','180x180');
-  };
-  const mount=()=>{applyBrand();applyIcon()};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
-})();
-
-/* v79: press-and-hold password eye on all auth password fields */
-(function authPasswordVisibilityV79(){
-  if(window.__chvostikovoAuthPasswordVisibilityV79)return;
-  window.__chvostikovoAuthPasswordVisibilityV79=true;
-  const eyeSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>';
-  function mountOne(inputId){
-    const input=document.getElementById(inputId);
-    if(!input)return;
-    const eyeId=inputId+'EyeV79';
-    if(document.getElementById(eyeId))return;
-    if(inputId==='loginPassword')document.getElementById('loginPasswordEye')?.remove();
-    let wrap=input.closest('.password-input-shell-v80');
-    if(!wrap){
-      const shell=document.createElement('div');
-      shell.className='password-input-shell-v80 password-field-wrap';
-      input.parentNode?.insertBefore(shell,input);
-      shell.appendChild(input);
-      wrap=shell;
-    }else wrap.classList.add('password-field-wrap');
-    const eye=document.createElement('button');
-    eye.id=eyeId;
-    eye.type='button';
-    eye.className='password-eye-btn';
-    eye.setAttribute('aria-label','Podržte pre zobrazenie hesla');
-    eye.setAttribute('title','Podržte pre zobrazenie hesla');
-    eye.innerHTML=eyeSvg;
-    input.insertAdjacentElement('afterend',eye);
-    const show=()=>{input.type='text';eye.classList.add('pressed')};
-    const hide=()=>{input.type='password';eye.classList.remove('pressed')};
-    eye.addEventListener('pointerdown',e=>{e.preventDefault();show()});
-    ['pointerup','pointercancel','pointerleave'].forEach(type=>eye.addEventListener(type,hide));
-    eye.addEventListener('contextmenu',e=>e.preventDefault());
-    eye.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();show()}});
-    eye.addEventListener('keyup',hide);
-    eye.addEventListener('blur',hide);
-    window.addEventListener('blur',hide);
-  }
-  function mount(){['loginPassword','signupPassword','newPassword','newPasswordAgain'].forEach(mountOne)}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
-})();
-
-
-/* v36: app-style navigation, dog reservation hero and settings */
-(function customerAppChromeV36(){
-  if(window.__chvostikovoCustomerAppChromeV36)return;
-  window.__chvostikovoCustomerAppChromeV36=true;
 
   const calendarSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M7 3v4M17 3v4M3 10h18"></path></svg>';
   const messageSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path><path d="M7.5 10h9M7.5 13.5h6"></path></svg>';
@@ -1157,19 +1149,34 @@ placeDeadlineV59();
 
   function applyAll(){applyNav();applyHero();ensureSettings();setTimeout(relocateSettings,0)}
 
-  const oldPass=renderPassSummary;
-  renderPassSummary=function(...args){const out=oldPass.apply(this,args);setTimeout(()=>{applyHero();applyNav()},0);return out};
-  const oldDog=renderDog;
-  renderDog=function(...args){const out=oldDog.apply(this,args);requestAnimationFrame(applyAll);return out};
+
+  const basePassProfilePreview=renderPassSummary;
+  renderPassSummary=function(...args){
+    const out=basePassProfilePreview.apply(this,args);
+    setTimeout(()=>{applyHero();applyNav()},0);
+    return out;
+  };
+
+  const baseDogProfilePreview=renderDog;
+  renderDog=function(...args){
+    const out=baseDogProfilePreview.apply(this,args);
+    requestAnimationFrame(()=>{apply();applyAll()});
+    return out;
+  };
 
   const start=()=>{
+    apply();
     applyAll();
+    const stats=$('dogStats');
+    if(stats)new MutationObserver(()=>setTimeout(apply,20)).observe(stats,{childList:true});
+    const settings=$('dogProfileSettings');
+    if(settings)new MutationObserver(()=>setTimeout(apply,20)).observe(settings,{childList:true});
     const tab=$('dogTab');
     if(tab)new MutationObserver(()=>{clearTimeout(window.__v36SettingsMoveTimer);window.__v36SettingsMoveTimer=setTimeout(relocateSettings,25)}).observe(tab,{childList:true,subtree:true});
-    document.addEventListener('change',e=>{if(e.target?.id==='dogSelector')setTimeout(applyAll,50)});
+    document.addEventListener('change',e=>{if(e.target?.id==='dogSelector')setTimeout(()=>{apply();applyAll()},50)});
     document.addEventListener('click',e=>{if(e.target?.closest('#navBooking')||e.target?.closest('#navDog')||e.target?.closest('#navMessages'))setTimeout(()=>{applyNav();applyHero()},0)});
   };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,120));else setTimeout(start,120);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,120),{once:true});else setTimeout(start,120);
 })();
 
 
