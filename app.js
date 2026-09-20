@@ -146,6 +146,7 @@ function renderWeekHeader(){const days=state.data?.availability?.days||[];const 
 function careNotificationIsCurrent(n,today=bratislavaToday()){if(n.visible_from&&n.visible_from>today)return false;if(n.visible_until&&n.visible_until<today)return false;if(n.notification_type==='vaccination_expiry'){const vaccination=(state.data?.vaccinations||[]).find(v=>Number(v.id)===Number(n.entity_id));return !!vaccination?.valid_until&&vaccination.valid_until>=today&&n.event_key===`vaccination:${vaccination.dog_id}:${vaccination.vaccination_type}:${vaccination.valid_until}`}if(n.notification_type==='dog_birthday'){const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(n.entity_id));return !!dog?.birth_date&&String(dog.birth_date).slice(5)===today.slice(5)}return true}
 const customerClosedNotificationIdsV59=new Set();
 function renderNotifications(){
+  if(window.__customerOnboardingCompleteV75!==true){$('notificationPopup')?.classList.add('hidden');return}
   const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&n.notification_type!=='pass_interest_registered'&&careNotificationIsCurrent(n)).slice(0,5);
   $('notificationList').innerHTML='';
   let modal=$('notificationPopup');
@@ -196,7 +197,9 @@ function renderDogHeaderV56(dog){
   if(!header||root.dataset.dogVisualKey!==key){
     root.innerHTML=`<div class="card dog-profile-header"><div class="dog-profile-identity"><div class="profile-photo-wrap"><span class="dog-avatar profile">${dog.photo_url?`<img src="${esc(dog.photo_url)}" alt="${esc(dog.name)}">`:'🐾'}</span><label class="photo-pencil" title="Zmeniť fotku" aria-label="Zmeniť fotku">✎<input id="dogPhotoInput" type="file" accept="image/*"></label></div><h2 class="dog-photo-name">${esc(dog.name)}</h2></div><button id="dogDetailsOpen" class="btn secondary dog-details-open" type="button"><span aria-hidden="true">✎</span> Údaje psíka</button></div>`;
     root.dataset.dogVisualKey=key;
-    $('dogPhotoInput')?.addEventListener('change',openPhotoEditor);
+    const photoInput=$('dogPhotoInput');
+    photoInput?.addEventListener('click',()=>{window.__customerPhotoPickerV88=true;setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},15000)});
+    photoInput?.addEventListener('change',openPhotoEditor);
     $('dogDetailsOpen')?.addEventListener('click',openDogDetails);
   }
 }
@@ -242,10 +245,42 @@ async function togglePrivacy(){
   finally{button.disabled=false}
 }
 function ensurePhotoEditor(){if($('photoCropModal'))return;document.body.insertAdjacentHTML('beforeend',`<div id="photoCropModal" class="photo-modal hidden"><div class="photo-modal-card"><div class="photo-modal-head"><div><strong>Upraviť fotku</strong><small>Posuňte fotku prstom a nastavte priblíženie.</small></div><button id="photoCropClose" class="icon-btn" type="button">✕</button></div><div class="crop-shell"><canvas id="photoCropCanvas" width="640" height="640"></canvas></div><label class="zoom-label">Priblíženie<input id="photoZoom" type="range" min="1" max="3" step="0.01" value="1"></label><div class="photo-modal-actions"><button id="photoCropCancel" class="btn secondary" type="button">Zrušiť</button><button id="photoCropSave" class="btn" type="button">Použiť fotku</button></div></div></div>`);$('photoCropClose').onclick=$('photoCropCancel').onclick=closePhotoEditor;$('photoCropSave').onclick=saveCroppedPhoto;$('photoZoom').addEventListener('input',e=>{if(!state.photoEdit)return;state.photoEdit.zoom=Number(e.target.value);clampPhotoOffset();drawPhotoCrop()});const c=$('photoCropCanvas');let dragging=false,lastX=0,lastY=0;c.addEventListener('pointerdown',e=>{if(!state.photoEdit)return;dragging=true;lastX=e.clientX;lastY=e.clientY;c.setPointerCapture(e.pointerId)});c.addEventListener('pointermove',e=>{if(!dragging||!state.photoEdit)return;const rect=c.getBoundingClientRect(),ratio=640/rect.width;state.photoEdit.ox+=(e.clientX-lastX)*ratio;state.photoEdit.oy+=(e.clientY-lastY)*ratio;lastX=e.clientX;lastY=e.clientY;clampPhotoOffset();drawPhotoCrop()});c.addEventListener('pointerup',()=>dragging=false);c.addEventListener('pointercancel',()=>dragging=false)}
-async function openPhotoEditor(e){const file=e.target.files?.[0];if(!file)return;ensurePhotoEditor();try{const url=URL.createObjectURL(file),img=new Image();await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url});state.photoEdit={img,url,zoom:1,ox:0,oy:0};$('photoZoom').value='1';clampPhotoOffset(true);drawPhotoCrop();$('photoCropModal').classList.remove('hidden')}catch(_){toast('Fotku sa nepodarilo načítať.')}finally{e.target.value=''}}
+function fileDataUrlV88(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(reader.error||new Error('read failed'));reader.readAsDataURL(file)})}
+function imageFromDataUrlV88(dataUrl){return new Promise((resolve,reject)=>{const img=new Image();let done=false;const finish=(ok)=>{if(done)return;done=true;clearTimeout(timer);ok?resolve(img):reject(new Error('decode failed'))};const timer=setTimeout(()=>finish(false),15000);img.onload=()=>finish(true);img.onerror=()=>finish(false);img.src=dataUrl})}
+async function decodePhotoFileV88(file){
+  if(typeof createImageBitmap==='function'){
+    try{const bitmap=await createImageBitmap(file);if(bitmap?.width&&bitmap?.height)return bitmap}catch(_){}
+  }
+  const dataUrl=await fileDataUrlV88(file);
+  const img=await imageFromDataUrlV88(dataUrl);
+  if(!img.width||!img.height)throw new Error('decode failed');
+  return img
+}
+async function openPhotoEditor(e){
+  const file=e.target.files?.[0];
+  window.__customerPhotoPickerV88=false;
+  if(!file)return;
+  window.__customerPhotoDecodeV88=true;
+  ensurePhotoEditor();
+  try{
+    const img=await decodePhotoFileV88(file);
+    state.photoEdit={img,url:null,zoom:1,ox:0,oy:0};
+    $('photoZoom').value='1';
+    clampPhotoOffset(true);
+    drawPhotoCrop();
+    $('photoCropModal').classList.remove('hidden')
+  }catch(_){
+    const heic=/hei[cf]/i.test(String(file.type||''))||/\.hei[cf]$/i.test(String(file.name||''));
+    toast(heic?'Túto HEIC fotku iPhone nevedel spracovať. Skúste inú fotku alebo screenshot.':'Fotku sa nepodarilo načítať. Skúste ju vybrať znova.')
+  }finally{
+    window.__customerPhotoDecodeV88=false;
+    window.__customerPhotoPickerV88=false;
+    e.target.value=''
+  }
+}
 function clampPhotoOffset(reset=false){const e=state.photoEdit;if(!e)return;const base=Math.max(640/e.img.width,640/e.img.height),scale=base*e.zoom,w=e.img.width*scale,h=e.img.height*scale;if(reset){e.ox=(640-w)/2;e.oy=(640-h)/2}e.ox=Math.min(0,Math.max(640-w,e.ox));e.oy=Math.min(0,Math.max(640-h,e.oy))}
 function drawPhotoCrop(){const e=state.photoEdit;if(!e)return;const c=$('photoCropCanvas'),ctx=c.getContext('2d'),base=Math.max(640/e.img.width,640/e.img.height),scale=base*e.zoom;ctx.clearRect(0,0,640,640);ctx.drawImage(e.img,e.ox,e.oy,e.img.width*scale,e.img.height*scale)}
-function closePhotoEditor(){if(state.photoEdit?.url)URL.revokeObjectURL(state.photoEdit.url);state.photoEdit=null;$('photoCropModal')?.classList.add('hidden')}
+function closePhotoEditor(){if(state.photoEdit?.url)URL.revokeObjectURL(state.photoEdit.url);try{state.photoEdit?.img?.close?.()}catch(_){}state.photoEdit=null;$('photoCropModal')?.classList.add('hidden')}
 function photoJpegData(){const c=$('photoCropCanvas');for(const q of [.9,.84,.78,.72]){const data=c.toDataURL('image/jpeg',q),bytes=Math.ceil((data.length-data.indexOf(',')-1)*3/4);if(bytes<900000)return data}return c.toDataURL('image/jpeg',.68)}
 async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);await api({action:'upload_dog_photo',dog_id:Number(state.selectedDogId),image_data:photoJpegData()});closePhotoEditor();toast('Fotka je uložená.');await bootstrap(false)}catch(e){toast(e.message)}finally{loading(false)}}
 async function uploadPhoto(e){return openPhotoEditor(e)}
@@ -356,7 +391,7 @@ $('navBooking').addEventListener('click',()=>switchTab('booking'));$('navDog').a
 $('dogSelector').addEventListener('change',e=>{state.selectedDogId=Number(e.target.value);renderPassSummary();renderDog()});$('dogBirthDate').addEventListener('change',()=>syncDogAgeField());$('dogForm').addEventListener('submit',saveDog);$('dogDetailsClose').addEventListener('click',closeDogDetails);$('dogDetailsModal').addEventListener('click',e=>{if(e.target===$('dogDetailsModal'))closeDogDetails()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dogDetailsModal').classList.contains('hidden'))closeDogDetails()});$('profileForm').addEventListener('submit',saveProfile);$('accountToggle').addEventListener('click',()=>$('profileForm').classList.toggle('hidden'));$('messageForm').addEventListener('submit',sendMessage);
 window.addEventListener('pageshow',()=>setTimeout(repairCustomerScrollV60,0));
 window.visualViewport?.addEventListener('resize',()=>requestAnimationFrame(repairCustomerScrollV60));
-function refreshOnResume(){const now=Date.now();if(!state.session||document.visibilityState==='hidden'||now-lastResumeRefresh<1500)return;lastResumeRefresh=now;startCustomerLive(true);queueCustomerSync('all',40)}
+function refreshOnResume(){const now=Date.now();if(window.__customerPhotoPickerV88===true||window.__customerPhotoDecodeV88===true)return;if(!state.session||document.visibilityState==='hidden'||now-lastResumeRefresh<1500)return;lastResumeRefresh=now;startCustomerLive(true);queueCustomerSync('all',40)}
 window.addEventListener('focus',refreshOnResume);window.addEventListener('online',refreshOnResume);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshOnResume();else stopCustomerLive()});
 (function betaUiV75Runtime(){
   const badge=$('betaVersionBadge'),modal=$('betaVersionModal'),close=$('betaVersionClose'),messages=$('betaVersionMessages');if(!badge||!modal)return;
@@ -545,11 +580,11 @@ placeDeadlineV59();
       const atBottom=body.scrollTop+body.clientHeight>=body.scrollHeight-6;
       if(atBottom){
         ack.disabled=false;
-        hint.textContent='Podmienky ste prešli až na koniec. Teraz ich môžete potvrdiť.';
+        hint.textContent='Teraz môžete potvrdiť, že ste si podmienky prečítali.';
         hint.classList.add('done');
         body.removeEventListener('scroll',checkBottom);
       }else{
-        hint.textContent='Prejdite podmienky až na koniec, aby sa sprístupnilo potvrdenie.';
+        hint.textContent='Prečítajte si podmienky. Až potom sa sprístupní potvrdenie o prečítaní podmienok.';
         hint.classList.remove('done');
       }
     };
@@ -568,7 +603,7 @@ placeDeadlineV59();
   function showPushPrompt(){hideFlow('pushOnboardingModalV75');const modal=ensurePushModal();modal.classList.remove('hidden');$('pushOnboardingEnableV75').onclick=async()=>{const yes=$('pushOnboardingEnableV75'),no=$('pushOnboardingSkipV75');yes.disabled=true;no.disabled=true;try{await enablePushForCurrentUserV75();modal.classList.add('hidden');toast('Upozornenia sú zapnuté.');runCustomerOnboardingV75()}catch(e){toast(e.message||'Upozornenia sa nepodarilo zapnúť.')}finally{yes.disabled=false;no.disabled=false}};$('pushOnboardingSkipV75').onclick=async()=>{const yes=$('pushOnboardingEnableV75'),no=$('pushOnboardingSkipV75');yes.disabled=true;no.disabled=true;try{await completePushPromptV75();modal.classList.add('hidden');runCustomerOnboardingV75()}catch(e){toast(e.message||'Nastavenie sa nepodarilo uložiť.')}finally{yes.disabled=false;no.disabled=false}}}
   function showSharePrompt(dog){hideFlow('shareOnboardingModalV75');const modal=ensureShareModal();modal.dataset.dogId=String(dog.id);$('shareOnboardingTitleV75').textContent='Chcete, aby ostatní používatelia videli meno a fotku '+(dog.name||'vášho psíka')+'?';const finish=async granted=>{const yes=$('shareOnboardingYesV75'),no=$('shareOnboardingNoV75');yes.disabled=true;no.disabled=true;try{await api({action:'set_photo_visibility',dog_id:Number(dog.id),granted});dog.share_name_photo=granted;state.data.visibility_consents=state.data.visibility_consents||[];state.data.visibility_consents.unshift({dog_id:Number(dog.id),granted,consent_version:'2026-09-09',created_at:new Date().toISOString()});modal.classList.add('hidden');renderDog();runCustomerOnboardingV75()}catch(e){toast(e.message||'Nastavenie sa nepodarilo uložiť.')}finally{yes.disabled=false;no.disabled=false}};$('shareOnboardingYesV75').onclick=()=>finish(true);$('shareOnboardingNoV75').onclick=()=>finish(false);modal.classList.remove('hidden')}
   function showDetailsPrompt(dog){hideFlow('dogDetailsOnboardingModalV75');const modal=ensureDetailsModal();modal.dataset.dogId=String(dog.id);$('dogDetailsOnboardingFillV75').onclick=()=>{modal.classList.add('hidden');state.selectedDogId=Number(dog.id);renderDogSelector();renderDog();switchTab('dog');openDogDetails()};$('dogDetailsOnboardingSkipV75').onclick=async()=>{const fill=$('dogDetailsOnboardingFillV75'),skip=$('dogDetailsOnboardingSkipV75');fill.disabled=true;skip.disabled=true;try{const result=await api({action:'set_dog_details_prompt',dog_id:Number(dog.id),skipped:true});state.data.dog_onboarding=state.data.dog_onboarding||[];state.data.dog_onboarding.push({dog_id:Number(dog.id),details_prompt_answered_at:result?.data?.answered_at||new Date().toISOString(),details_prompt_skipped:true});modal.classList.add('hidden');runCustomerOnboardingV75()}catch(e){toast(e.message||'Nastavenie sa nepodarilo uložiť.')}finally{fill.disabled=false;skip.disabled=false}};modal.classList.remove('hidden')}
-  async function evaluate(){if(!state.session||!state.data)return;window.__customerOnboardingCompleteV75=false;try{await ensurePushState(true)}catch(_){}if(!state.data.profile?.privacy_notice_acknowledged_at){openPrivacyInfo(true);return}if(privacyMandatory){privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden')}if(!state.data.profile?.push_prompt_answered_at){showPushPrompt();return}const dogs=state.data?.dogs||[];if(!dogs.length){hideFlow('waitingDogAssignmentModalV75');ensureWaiting().classList.remove('hidden');return}ensureWaiting().classList.add('hidden');const doc=await activeTermsDocument();if(doc){const accepted=await acceptedTerms(doc.version),acceptedIds=new Set((accepted||[]).map(x=>Number(x.dog_id))),missing=dogs.find(d=>!acceptedIds.has(Number(d.id)));if(missing){showSchoolTerms(missing,doc);return}}$('schoolTermsModal')?.classList.add('hidden');const shareDog=dogs.find(d=>!visibilityDecided(d.id));if(shareDog){showSharePrompt(shareDog);return}const detailsDog=dogs.find(d=>!detailsPromptAnswered(d.id)&&!detailsAlreadyComplete(d));if(detailsDog){showDetailsPrompt(detailsDog);return}hideFlow();window.__customerOnboardingCompleteV75=true;if(typeof loadAnnouncements==='function')loadAnnouncements()}
+  async function evaluate(){if(!state.session||!state.data)return;window.__customerOnboardingCompleteV75=false;try{await ensurePushState(true)}catch(_){}if(!state.data.profile?.privacy_notice_acknowledged_at){openPrivacyInfo(true);return}if(privacyMandatory){privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden')}if(!state.data.profile?.push_prompt_answered_at){showPushPrompt();return}const dogs=state.data?.dogs||[];if(!dogs.length){hideFlow('waitingDogAssignmentModalV75');ensureWaiting().classList.remove('hidden');return}ensureWaiting().classList.add('hidden');const doc=await activeTermsDocument();if(doc){const accepted=await acceptedTerms(doc.version),acceptedIds=new Set((accepted||[]).map(x=>Number(x.dog_id))),missing=dogs.find(d=>!acceptedIds.has(Number(d.id)));if(missing){showSchoolTerms(missing,doc);return}}$('schoolTermsModal')?.classList.add('hidden');const shareDog=dogs.find(d=>!visibilityDecided(d.id));if(shareDog){showSharePrompt(shareDog);return}const detailsDog=dogs.find(d=>!detailsPromptAnswered(d.id)&&!detailsAlreadyComplete(d));if(detailsDog){showDetailsPrompt(detailsDog);return}hideFlow();window.__customerOnboardingCompleteV75=true;renderNotifications();if(typeof loadAnnouncements==='function')loadAnnouncements()}
   async function runCustomerOnboardingV75(){if(running){rerun=true;return}running=true;try{await evaluate()}catch(e){console.warn('Customer onboarding',e)}finally{running=false;if(rerun){rerun=false;setTimeout(runCustomerOnboardingV75,20)}}}
   window.runCustomerOnboardingV75=runCustomerOnboardingV75;
   document.addEventListener('click',e=>{if(e.target.closest('#privacyInfoBtn')){e.preventDefault();openPrivacyInfo(false)}if(e.target.closest('#privacyInfoClose'))closePrivacyInfo();if(e.target.closest('#privacyInfoOk'))acknowledgePrivacy();if(e.target.closest('#schoolTermsConfirm'))acceptSchoolTerms();if(e.target.closest('#schoolTermsLogout'))$('logoutBtn')?.click()});
