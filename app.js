@@ -404,30 +404,81 @@ placeDeadlineV59();
     }catch(e){console.warn('Oznamy sa nepodarilo načítať',e)}
   };
 })();
-(function installGuideV19(){
+(function installGuideV83(){
   const KEY='chvostikovo_install_guide_seen_v1';
-  let deferredPrompt=null;
+  let deferredPrompt=null,installTimer=null,installConfirmed=false;
   const standalone=()=>window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const platform=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)?'ios':/android/i.test(navigator.userAgent)?'android':'other';
-  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;ensureGuide();const b=document.getElementById('installGuideInstallBtn');if(b)b.classList.remove('hidden');if(!standalone())setTimeout(openGuide,0)});
+
+  function installedUi(){
+    installConfirmed=true;
+    if(installTimer){clearTimeout(installTimer);installTimer=null}
+    ensureGuide();
+    const steps=document.querySelector('#installGuideModal .install-steps');
+    if(steps)steps.innerHTML='<div class="install-step"><b>✓</b><span><strong>Aplikácia je nainštalovaná.</strong><br>Otvorte Chvostíkovo cez ikonu aplikácie v telefóne.</span></div>';
+    const ib=document.getElementById('installGuideInstallBtn');
+    if(ib){ib.classList.add('hidden');ib.disabled=false;ib.textContent='Nainštalovať aplikáciu'}
+    const cb=document.getElementById('installGuideContinue');
+    if(cb)cb.textContent='Rozumiem';
+    sessionStorage.setItem(KEY,'1');
+  }
+
+  function pendingUi(){
+    const steps=document.querySelector('#installGuideModal .install-steps');
+    if(steps)steps.innerHTML='<div class="install-step"><b>…</b><span><strong>Android prijal inštaláciu.</strong><br>Čakám, kým telefón potvrdí jej dokončenie.</span></div>';
+    const ib=document.getElementById('installGuideInstallBtn');
+    if(ib){ib.disabled=true;ib.textContent='Inštaluje sa…'}
+    if(installTimer)clearTimeout(installTimer);
+    installTimer=setTimeout(()=>{
+      if(installConfirmed||standalone())return installedUi();
+      const target=document.querySelector('#installGuideModal .install-steps');
+      if(target)target.innerHTML='<div class="install-step"><b>!</b><span><strong>Android zatiaľ nepotvrdil dokončenie inštalácie.</strong><br>Skontrolujte zoznam aplikácií v telefóne. Ak tam Chvostíkovo nie je, zavrite Chrome, znovu ho otvorte a skúste menu <strong>⋮ → Nainštalovať aplikáciu</strong>. Ak telefón ponúka <strong>Pridať na plochu</strong>, môžete použiť aj túto možnosť.</span></div>';
+      const b=document.getElementById('installGuideInstallBtn');
+      if(b){b.classList.add('hidden');b.disabled=false;b.textContent='Nainštalovať aplikáciu'}
+      const cb=document.getElementById('installGuideContinue');
+      if(cb)cb.textContent='Zavrieť';
+    },20000);
+  }
+
+  window.addEventListener('appinstalled',installedUi);
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();
+    deferredPrompt=e;
+    ensureGuide();
+    const b=document.getElementById('installGuideInstallBtn');
+    if(b){b.classList.remove('hidden');b.disabled=false;b.textContent='Nainštalovať aplikáciu'}
+    if(!standalone())setTimeout(openGuide,0);
+  });
+
   function ensureGuide(){
     if(document.getElementById('installGuideModal'))return;
     const p=platform();
     const steps=p==='ios'
-      ?`<div class="install-step"><b>1</b><span>Klepnite dole na tlačidlo <strong>Zdieľať</strong> – štvorec so šípkou nahor.</span></div><div class="install-step"><b>2</b><span>Klepnite na <strong>Zobraziť viac</strong>.</span></div><div class="install-step"><b>3</b><span>Vyberte <strong>Pridať na plochu</strong>.</span></div><div class="install-step"><b>4</b><span>Zapnite <strong>Otvoriť ako webovú apku</strong> a klepnite na <strong>Pridať</strong>.</span></div><div class="install-step"><b>5</b><span>Zavrite aktuálne okno a otvorte <strong>Chvostíkovo cez ikonu na ploche</strong>. Tam pokračujte prihlásením.</span></div>`
+      ?'<div class="install-step"><b>1</b><span>Klepnite dole na tlačidlo <strong>Zdieľať</strong> – štvorec so šípkou nahor.</span></div><div class="install-step"><b>2</b><span>Klepnite na <strong>Zobraziť viac</strong>.</span></div><div class="install-step"><b>3</b><span>Vyberte <strong>Pridať na plochu</strong>.</span></div><div class="install-step"><b>4</b><span>Zapnite <strong>Otvoriť ako webovú apku</strong> a klepnite na <strong>Pridať</strong>.</span></div><div class="install-step"><b>5</b><span>Zavrite aktuálne okno a otvorte <strong>Chvostíkovo cez ikonu na ploche</strong>. Tam pokračujte prihlásením.</span></div>'
       :p==='android'
-      ?`<div class="install-step"><b>1</b><span>Klepnite na menu <strong>⋮</strong> vpravo hore.</span></div><div class="install-step"><b>2</b><span>Vyberte <strong>Nainštalovať aplikáciu</strong>.</span></div><div class="install-step"><b>3</b><span>Potvrďte inštaláciu.</span></div><div class="install-step"><b>4</b><span>Otvorte <strong>Chvostíkovo cez novú ikonu na ploche</strong> a pokračujte prihlásením.</span></div>`
-      :`<div class="install-step"><b>1</b><span>Otvorte menu prehliadača.</span></div><div class="install-step"><b>2</b><span>Vyberte možnosť <strong>Inštalovať aplikáciu</strong> alebo <strong>Pridať na plochu</strong>.</span></div>`;
-    document.body.insertAdjacentHTML('beforeend',`<div id="installGuideModal" class="install-guide-modal hidden" role="dialog" aria-modal="true" aria-labelledby="installGuideTitle"><div class="install-guide-card"><button id="installGuideClose" class="install-guide-close" type="button" aria-label="Zavrieť">×</button><div class="install-guide-logo">Chvostíkovo</div><h2 id="installGuideTitle">Pridajte si Chvostíkovo ako aplikáciu</h2><p>Je to najjednoduchší spôsob, ako mať rezervácie, správy a upozornenia vždy poruke.</p><div class="install-steps">${steps}</div><button id="installGuideInstallBtn" class="btn full hidden" type="button">Nainštalovať aplikáciu</button><button id="installGuideContinue" class="btn secondary full" type="button">Rozumiem, otvorím aplikáciu z plochy</button></div></div>`);
+      ?'<div class="install-step"><b>1</b><span>Klepnite na <strong>Nainštalovať aplikáciu</strong> nižšie alebo cez menu <strong>⋮</strong> vpravo hore.</span></div><div class="install-step"><b>2</b><span>Potvrďte inštaláciu.</span></div><div class="install-step"><b>3</b><span>Počkajte na potvrdenie dokončenia a potom otvorte <strong>Chvostíkovo zo zoznamu aplikácií alebo z plochy</strong>.</span></div>'
+      :'<div class="install-step"><b>1</b><span>Otvorte menu prehliadača.</span></div><div class="install-step"><b>2</b><span>Vyberte možnosť <strong>Inštalovať aplikáciu</strong> alebo <strong>Pridať na plochu</strong>.</span></div>';
+    document.body.insertAdjacentHTML('beforeend','<div id="installGuideModal" class="install-guide-modal hidden" role="dialog" aria-modal="true" aria-labelledby="installGuideTitle"><div class="install-guide-card"><button id="installGuideClose" class="install-guide-close" type="button" aria-label="Zavrieť">×</button><div class="install-guide-logo">Chvostíkovo</div><h2 id="installGuideTitle">Pridajte si Chvostíkovo ako aplikáciu</h2><p>Je to najjednoduchší spôsob, ako mať rezervácie, správy a upozornenia vždy poruke.</p><div class="install-steps">'+steps+'</div><button id="installGuideInstallBtn" class="btn full hidden" type="button">Nainštalovať aplikáciu</button><button id="installGuideContinue" class="btn secondary full" type="button">Zavrieť</button></div></div>');
     if(deferredPrompt)document.getElementById('installGuideInstallBtn')?.classList.remove('hidden');
     const close=()=>{sessionStorage.setItem(KEY,'1');document.getElementById('installGuideModal')?.classList.add('hidden')};
     document.getElementById('installGuideClose')?.addEventListener('click',close);
     document.getElementById('installGuideContinue')?.addEventListener('click',close);
-    document.getElementById('installGuideInstallBtn')?.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();const choice=await deferredPrompt.userChoice.catch(()=>null);if(choice?.outcome==='accepted'){const steps=document.querySelector('#installGuideModal .install-steps');if(steps)steps.innerHTML='<div class="install-step"><b>✓</b><span><strong>Aplikácia je nainštalovaná.</strong><br>Zavrite prehliadač a otvorte Chvostíkovo cez novú ikonu na ploche. Tam pokračujte prihlásením.</span></div>';const ib=document.getElementById('installGuideInstallBtn');if(ib)ib.classList.add('hidden');const cb=document.getElementById('installGuideContinue');if(cb)cb.textContent='Rozumiem, otvorím aplikáciu z plochy';const note=document.querySelector('#installGuideModal .install-guide-note');if(note)note.textContent='Prehliadač nás z bezpečnostných dôvodov nevie automaticky prepnúť na plochu telefónu.';}deferredPrompt=null});
+    document.getElementById('installGuideInstallBtn')?.addEventListener('click',async()=>{
+      if(!deferredPrompt)return;
+      const prompt=deferredPrompt;
+      deferredPrompt=null;
+      prompt.prompt();
+      const choice=await prompt.userChoice.catch(()=>null);
+      if(choice?.outcome==='accepted')pendingUi();
+      else{
+        const b=document.getElementById('installGuideInstallBtn');
+        if(b){b.classList.add('hidden');b.disabled=false;b.textContent='Nainštalovať aplikáciu'}
+      }
+    });
   }
   function openGuide(){ensureGuide();document.getElementById('installGuideModal')?.classList.remove('hidden')}
   function mountHelpLink(){const card=document.querySelector('.auth-card');if(!card||document.getElementById('installHelpLink'))return;const b=document.createElement('button');b.id='installHelpLink';b.type='button';b.className='install-help-link';b.textContent='Ako si nainštalovať aplikáciu?';b.addEventListener('click',openGuide);card.appendChild(b)}
-  const start=()=>{mountHelpLink();if(!standalone()&&sessionStorage.getItem(KEY)!=='1')setTimeout(openGuide,180)};
+  const start=()=>{mountHelpLink();if(standalone())installedUi();else if(sessionStorage.getItem(KEY)!=='1')setTimeout(openGuide,180)};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
 /* v75: Supabase-backed customer onboarding state machine */
