@@ -277,11 +277,11 @@ function TargetPage() {
             </a>
 
             <div className="grid gap-9 lg:grid-cols-[1.02fr_0.98fr] lg:items-start lg:gap-12">
-              <div className="aspect-[4/3] overflow-hidden rounded-4xl bg-secondary shadow-soft">
+              <div className="aspect-[3/4] overflow-hidden rounded-4xl bg-secondary shadow-soft">
                 <img
                   src={size === "small" ? targetSmallDog : targetLargeDog}
                   alt={size === "small" ? "Pes stojaci na malom targete na cvičenie" : "Pes stojaci na veľkom targete na cvičenie"}
-                  className="h-full w-full object-contain p-2 sm:p-4"
+                  className="h-full w-full object-cover"
                   fetchPriority="high"
                 />
               </div>

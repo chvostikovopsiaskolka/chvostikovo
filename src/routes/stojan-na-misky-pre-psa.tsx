@@ -317,6 +317,31 @@ function BowlStandPage() {
                   Dve nerezové misky, výška prispôsobená psíkovi a prevedenie podľa vášho želania.
                   Vyberte si variant a objednajte si vlastný stojan.
                 </p>
+                <div className="mt-6">
+                  <p className="font-display text-sm font-bold text-forest">Vyberte veľkosť stojana</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {SIZE_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setSize(option.value)}
+                        className={`rounded-2xl border-2 p-3 text-left transition ${
+                          size === option.value
+                            ? "border-coral bg-coral-soft/25"
+                            : "border-forest/10 bg-card"
+                        }`}
+                      >
+                        <span className="font-display text-sm font-bold text-forest">
+                          {option.label}
+                        </span>
+                        <span className="mt-1 block text-xs leading-relaxed text-forest/60">
+                          {option.detail}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="mt-5 flex items-end gap-3">
                   <span className="text-sm text-forest/60">Cena</span>
                   <span className="font-display text-4xl font-bold text-forest">40 €</span>
