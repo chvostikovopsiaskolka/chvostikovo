@@ -1171,7 +1171,7 @@ placeDeadlineV59();
   window.__chvostikovoCustomerBookingAndSettingsV37=true;
 
   let selectedDatesV37=new Set();
-  let selectedTaxiV37='none';
+  let selectedTaxiByDateV91=new Map();
   let submittingV37=false;
 
   const shortDayV37=date=>{try{return new Intl.DateTimeFormat('sk-SK',{weekday:'short'}).format(new Date(date+'T12:00:00')).replace('.','')}catch(_){return''}};
@@ -1215,22 +1215,19 @@ placeDeadlineV59();
 
   function ensurePickerV37(){
     if($('bookingPickerV37'))return;
-    document.body.insertAdjacentHTML('beforeend',`<div id="bookingPickerV37" class="booking-picker-v37 hidden" role="dialog" aria-modal="true" aria-labelledby="bookingPickerTitleV37"><div class="booking-picker-card-v37"><div class="booking-picker-head-v37"><div><small>Rezervácia škôlky</small><h2 id="bookingPickerTitleV37">Vyberte deň alebo dni</h2><p id="bookingPickerRangeV37"></p></div><button id="bookingPickerCloseV37" class="booking-picker-close-v37" type="button" aria-label="Zavrieť">×</button></div><div id="bookingPickerDogWrapV37" class="booking-picker-dog-v37 hidden"><label for="bookingPickerDogV37">Psík</label><select id="bookingPickerDogV37" class="input"></select></div><div id="bookingPickerDaysV37" class="booking-picker-days-v37"></div><div class="booking-picker-taxi-title-v37">Taxi pre vybrané dni</div><div id="bookingPickerTaxiV37" class="booking-picker-taxi-v37"><button type="button" data-taxi="none" class="active">Bez taxi</button><button type="button" data-taxi="pickup">Vyzdvihnúť · 5 €</button><button type="button" data-taxi="pickup_dropoff">Tam aj späť · 10 €</button></div><button id="bookingPickerSubmitV37" class="btn full booking-picker-submit-v37" type="button" disabled>Vyberte deň</button></div></div>`);
+    document.body.insertAdjacentHTML('beforeend',`<div id="bookingPickerV37" class="booking-picker-v37 hidden" role="dialog" aria-modal="true" aria-labelledby="bookingPickerTitleV37"><div class="booking-picker-card-v37"><div class="booking-picker-head-v37"><div><small>Rezervácia škôlky</small><h2 id="bookingPickerTitleV37">Vyberte deň alebo dni</h2><p id="bookingPickerRangeV37"></p></div><button id="bookingPickerCloseV37" class="booking-picker-close-v37" type="button" aria-label="Zavrieť">×</button></div><div id="bookingPickerDogWrapV37" class="booking-picker-dog-v37 hidden"><label for="bookingPickerDogV37">Psík</label><select id="bookingPickerDogV37" class="input"></select></div><div id="bookingPickerDaysV37" class="booking-picker-days-v37"></div><div id="bookingPickerTaxiSectionV91" class="booking-picker-taxi-section-v91 hidden"><div class="booking-picker-taxi-title-v37">Taxi podľa vybraného dňa</div><div id="bookingPickerTaxiByDayV91" class="booking-picker-taxi-by-day-v91"></div></div><button id="bookingPickerSubmitV37" class="btn full booking-picker-submit-v37" type="button" disabled>Vyberte deň</button></div></div>`);
     $('bookingPickerCloseV37').addEventListener('click',closePickerV37);
     $('bookingPickerV37').addEventListener('click',e=>{if(e.target===$('bookingPickerV37'))closePickerV37()});
     $('bookingPickerDogV37').addEventListener('change',e=>{
       state.selectedDogId=Number(e.target.value);
       selectedDatesV37.clear();
+      selectedTaxiByDateV91.clear();
       renderPassSummary();
       renderDog();
       renderUpcoming();
       renderDays();
       renderPickerV37();
     });
-    $('bookingPickerTaxiV37').querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{
-      selectedTaxiV37=btn.dataset.taxi||'none';
-      $('bookingPickerTaxiV37').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===btn));
-    }));
     $('bookingPickerSubmitV37').addEventListener('click',submitPickerV37);
   }
 
@@ -1252,18 +1249,38 @@ placeDeadlineV59();
     }).join('');
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',()=>{
       const date=btn.dataset.date;
-      if(selectedDatesV37.has(date))selectedDatesV37.delete(date);else selectedDatesV37.add(date);
+      if(selectedDatesV37.has(date)){
+        selectedDatesV37.delete(date);
+        selectedTaxiByDateV91.delete(date);
+      }else{
+        selectedDatesV37.add(date);
+        if(!selectedTaxiByDateV91.has(date))selectedTaxiByDateV91.set(date,'none');
+      }
       renderPickerV37();
     }));
 
-    $('bookingPickerTaxiV37').querySelectorAll('button').forEach(x=>x.classList.toggle('active',(x.dataset.taxi||'none')===selectedTaxiV37));
+    const taxiSection=$('bookingPickerTaxiSectionV91'),taxiRoot=$('bookingPickerTaxiByDayV91');
+    const selected=[...selectedDatesV37].sort();
+    taxiSection?.classList.toggle('hidden',selected.length===0);
+    if(taxiRoot){
+      taxiRoot.innerHTML=selected.map(date=>{
+        const mode=selectedTaxiByDateV91.get(date)||'none';
+        return `<div class="booking-taxi-day-v91" data-date="${esc(date)}"><div class="booking-taxi-day-head-v91"><strong>${esc(skDay(date))}</strong><span>${esc(skDate(date))}</span></div><div class="booking-picker-taxi-v37 booking-taxi-buttons-v91"><button type="button" data-taxi="none" class="${mode==='none'?'active':''}">Bez taxi</button><button type="button" data-taxi="pickup" class="${mode==='pickup'?'active':''}">Vyzdvihnúť · 5 €</button><button type="button" data-taxi="pickup_dropoff" class="${mode==='pickup_dropoff'?'active':''}">Tam aj späť · 10 €</button></div></div>`;
+      }).join('');
+      taxiRoot.querySelectorAll('.booking-taxi-day-v91 button').forEach(button=>button.addEventListener('click',()=>{
+        const row=button.closest('.booking-taxi-day-v91'),date=row?.dataset?.date;
+        if(!date)return;
+        selectedTaxiByDateV91.set(date,button.dataset.taxi||'none');
+        row.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===button));
+      }));
+    }
     const submit=$('bookingPickerSubmitV37'),count=selectedDatesV37.size;
     submit.disabled=!count||submittingV37;
     submit.textContent=count?`Rezervovať ${count===1?'1 deň':count<5?count+' dni':count+' dní'}`:'Vyberte deň';
   }
 
   function openPickerV37(){
-    selectedDatesV37.clear();selectedTaxiV37='none';
+    selectedDatesV37.clear();selectedTaxiByDateV91.clear();
     renderPickerV37();
     $('bookingPickerV37').classList.remove('hidden');
     document.documentElement.classList.add('booking-picker-open-v37');
@@ -1276,7 +1293,8 @@ placeDeadlineV59();
     submittingV37=true;renderPickerV37();
     let ok=0;const failed=[];
     for(const date of dates){
-      try{const result=await api({action:'request_booking',dog_id:Number(dog.id),reservation_date:date,taxi_mode:selectedTaxiV37});applyLocalBooking(result,{id:-(Date.now()+ok),dog_id:Number(dog.id),reservation_date:date,taxi_mode:selectedTaxiV37,status:'pending',can_manage:true});ok++}
+      const taxiMode=selectedTaxiByDateV91.get(date)||'none';
+      try{const result=await api({action:'request_booking',dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode});applyLocalBooking(result,{id:-(Date.now()+ok),dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode,status:'pending',can_manage:true});ok++}
       catch(e){failed.push({date,error:e.message||'Nepodarilo sa rezervovať.'})}
     }
     try{if(ok)queueCustomerSync('bookings',80)}finally{submittingV37=false}
