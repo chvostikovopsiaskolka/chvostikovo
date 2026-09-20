@@ -1100,3 +1100,12 @@ html,body,#appView.app,#appView .tab-page{
   .booking-taxi-day-v91{padding:10px}
   .booking-taxi-buttons-v91 button{font-size:11px!important;padding:9px 7px!important}
 }
+
+
+/* v92: placeholder for future dog progress journal */
+.customer-gradebook-v92{padding:16px 17px}
+.customer-gradebook-head-v92{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.customer-gradebook-head-v92>div{min-width:0}
+.customer-gradebook-head-v92 strong{display:block;font-size:17px}
+.customer-gradebook-head-v92 small{display:block;margin-top:4px;color:var(--muted);font-size:12px;line-height:1.35}
+.customer-gradebook-head-v92>span{flex:0 0 auto;padding:6px 10px;border-radius:999px;background:#f3f4f6;color:#6b7280;font-size:11px;font-weight:850}

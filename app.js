@@ -992,6 +992,14 @@ placeDeadlineV59();
     return section;
   }
 
+  function renderGradebookV92(layout){
+    let section=$('customerGradebookV92');
+    if(!section){section=document.createElement('div');section.id='customerGradebookV92';section.className='card customer-gradebook-v92'}
+    section.innerHTML='<div class="customer-gradebook-head-v92"><div><strong>Žiacka knižka</strong><small>Prehľad pokroku a poznámok zo škôlky.</small></div><span>Pripravujeme</span></div>';
+    if(section.parentElement!==layout)layout.appendChild(section);
+    return section;
+  }
+
   function ensureOrder(layout,nodes){
     nodes.filter(Boolean).forEach((node,index)=>{if(layout.children[index]!==node)layout.insertBefore(node,layout.children[index]||null)});
   }
@@ -1003,9 +1011,9 @@ placeDeadlineV59();
     $('dogStats')?.classList.add('v23-hidden-source');
     let layout=$('dogProfileLayoutV23');
     if(!layout){layout=document.createElement('div');layout.id='dogProfileLayoutV23';layout.className='v23-profile-layout';($('dogSelectorWrap')||$('dogProfilePhoto')).insertAdjacentElement('afterend',layout)}
-    const legal=mountLegal(layout),stats=renderVisitStats(layout),account=document.querySelector('.account-card');
+    const legal=mountLegal(layout),stats=renderVisitStats(layout),gradebook=renderGradebookV92(layout),account=document.querySelector('.account-card');
     const settingsHome=settingsHomeV49();if(account&&settingsHome&&account.parentElement!==settingsHome)settingsHome.appendChild(account);
-    ensureOrder(layout,[stats]);
+    ensureOrder(layout,[stats,gradebook]);
   }
 
   const originalRenderDogV23=renderDog;
@@ -1019,7 +1027,7 @@ placeDeadlineV59();
 
 /* v32 cleanup: static home icon; service worker is registered only by init() */
 (function portalHomeIconV32(){
-  const brand='https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-brand-logo?v=20260914-v31';
+  const brand='https://jgzabminzgbfhsrgqedt.supabase.co/functions/v1/chvostikovo-brand-logo?v=20260914-v31';
   const applyBrand=()=>document.querySelectorAll('img[src*="/chvostikovo-logo"]').forEach(img=>{img.src=brand});
   const applyIcon=()=>{
     let apple=document.querySelector('link[rel="apple-touch-icon"]');
@@ -1505,10 +1513,14 @@ async function togglePushDirect(btn){
 })();
 
 
-/* v52: compact profile stats + floating support chat modal */
-(function customerSupportChatV52(){
-  if(window.__chvostikovoSupportChatV52)return;
+/* preview consolidated: profile support, hint and school rules */
+(function customerProfileExperiencePreview(){
+  if(window.__chvostikovoProfileExperiencePreview)return;
+  window.__chvostikovoProfileExperiencePreview=true;
   window.__chvostikovoSupportChatV52=true;
+  window.__chvostikovoCustomerProfilePolishV53=true;
+  window.__chvostikovoRulesMenuV55=true;
+
 
   const chatSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path><path d="M7.5 10h9M7.5 13.5h6"></path></svg>';
 
@@ -1628,46 +1640,8 @@ async function togglePushDirect(btn){
     btn.classList.toggle('hidden',!appVisible||state.activeTab!=='dog');
   }
 
-  const originalRenderMessagesV52=renderMessages;
-  renderMessages=function(...args){
-    const result=originalRenderMessagesV52.apply(this,args);
-    refreshSubjectOptions();
-    renderSupportThread();
-    return result;
-  };
-
-  const originalUpdateUnreadV52=updateUnread;
-  updateUnread=function(...args){
-    const result=originalUpdateUnreadV52.apply(this,args);
-    const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);
-    $('supportChatUnreadV52')?.classList.toggle('hidden',!unread);
-    return result;
-  };
-
-  const originalSwitchTabV52=switchTab;
-  switchTab=function(tab){
-    if(tab==='messages')tab='dog';
-    const result=originalSwitchTabV52(tab);
-    updateButton();
-    return result;
-  };
-
-  const originalRenderDogV52=renderDog;
-  renderDog=function(...args){
-    const result=originalRenderDogV52.apply(this,args);
-    updateButton();
-    return result;
-  };
-
-  const start=()=>{mount();updateUnread();updateButton()};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-})();
 
 
-/* v53: polish My dog onboarding, two-item nav and discoverable support chat */
-(function customerProfilePolishV53(){
-  if(window.__chvostikovoCustomerProfilePolishV53)return;
-  window.__chvostikovoCustomerProfilePolishV53=true;
 
   function ensureHint(){
     if($('supportChatHintV53'))return;
@@ -1704,42 +1678,8 @@ async function togglePushDirect(btn){
     $('navMessages')?.setAttribute('tabindex','-1');
   }
 
-  const prevSwitchTabV53=switchTab;
-  switchTab=function(tab){
-    const result=prevSwitchTabV53(tab);
-    refreshNav();
-    if(state.activeTab==='dog'){
-      setTimeout(()=>{
-        const btn=$('supportChatBtnV52');
-        if(btn&&!btn.classList.contains('hidden'))showHint();
-      },220);
-    }else hideHint();
-    return result;
-  };
-
-  const prevRenderStaffV53=renderStaff;
-  renderStaff=function(...args){
-    const result=prevRenderStaffV53.apply(this,args);
-    refreshNav();
-    return result;
-  };
-
-  const prevRenderDogV53=renderDog;
-  renderDog=function(...args){
-    const result=prevRenderDogV53.apply(this,args);
-    ensureHint();
-    refreshNav();
-    return result;
-  };
-
-  const start=()=>{ensureHint();refreshNav()};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-})();
 
 
-/* v55: school rules card, terms sharing choice and menu polish */
-(function customerRulesAndMenuV55(){
-  if(window.__chvostikovoRulesMenuV55)return;window.__chvostikovoRulesMenuV55=true;
 
   function authHeadersV55(){return {apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token}}
   let activeTermsCacheV56=null,activeTermsPromiseV56=null;
@@ -1799,14 +1739,65 @@ async function togglePushDirect(btn){
     const title=$('dogSettingsTitleV36');if(title)title.textContent='Menu';
   }
 
-  const oldRenderDogV55=renderDog;
+
+  const baseRenderMessagesPreview=renderMessages;
+  renderMessages=function(...args){
+    const result=baseRenderMessagesPreview.apply(this,args);
+    refreshSubjectOptions();
+    renderSupportThread();
+    return result;
+  };
+
+  const baseUpdateUnreadPreview=updateUnread;
+  updateUnread=function(...args){
+    const result=baseUpdateUnreadPreview.apply(this,args);
+    const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);
+    $('supportChatUnreadV52')?.classList.toggle('hidden',!unread);
+    return result;
+  };
+
+  const baseSwitchTabPreview=switchTab;
+  switchTab=function(tab){
+    if(tab==='messages')tab='dog';
+    const result=baseSwitchTabPreview(tab);
+    updateButton();
+    refreshNav();
+    if(state.activeTab==='dog'){
+      setTimeout(()=>{
+        const btn=$('supportChatBtnV52');
+        if(btn&&!btn.classList.contains('hidden'))showHint();
+      },220);
+    }else hideHint();
+    return result;
+  };
+
+  const baseRenderStaffPreview=renderStaff;
+  renderStaff=function(...args){
+    const result=baseRenderStaffPreview.apply(this,args);
+    refreshNav();
+    return result;
+  };
+
+  const baseRenderDogPreview=renderDog;
   renderDog=function(...args){
-    const result=oldRenderDogV55.apply(this,args);
+    const result=baseRenderDogPreview.apply(this,args);
+    updateButton();
+    ensureHint();
+    refreshNav();
     setTimeout(()=>{ensureRulesUiV55();polishMenuV55()},0);
     return result;
   };
 
-  const start=()=>{ensureRulesUiV55();polishMenuV55();activeTermsV55().catch(()=>{})};
+  const start=()=>{
+    mount();
+    updateUnread();
+    updateButton();
+    ensureHint();
+    refreshNav();
+    ensureRulesUiV55();
+    polishMenuV55();
+    activeTermsV55().catch(()=>{});
+  };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 
