@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Chvostíkovo",
-  "short_name": "Chvostíkovo",
-  "description": "Zákaznícka aplikácia Chvostíkovo",
+  "name": "Chvostíkovo Preview",
+  "short_name": "Chvostíkovo Preview",
+  "description": "Testovacia zákaznícka aplikácia Chvostíkovo Preview",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
