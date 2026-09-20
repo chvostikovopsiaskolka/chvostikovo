@@ -1,75 +1,138 @@
 window.SYSTEM_DATA = {
   meta: {
-    updated: "19. 9. 2026",
-    source: "Aktuálny stav podľa produkcie, GitHubu a Supabase",
+    updated: "20. 9. 2026",
+    source: "Aktuálny stav LIVE + PREVIEW podľa produkcie, GitHubu, Vercelu a Supabase",
     note: "System je iba prehľad. Admin ani zákaznícka appka sa z tejto stránky nemenia."
   },
 
+  environments: [
+    {
+      label: "LIVE",
+      tone: "live",
+      title: "Zákaznícka appka",
+      version: "V94 · READY",
+      note: "Produkčná verzia, ktorú používajú reálni zákazníci. Túto vetvu pri čistení nemeníme.",
+      bullets: [
+        "Git vetva: customer-portal-production.",
+        "Frontend: V94 – opravený posledný vstup z permanentky + kompaktný loading počas akcií v appke.",
+        "Backend: produkčný Supabase; customer-portal-api v20.",
+        "Obsahuje multi-day rezervácie, taxi podľa jednotlivých dní, Žiacku knižku – Pripravujeme, foto editor a Realtime."
+      ]
+    },
+    {
+      label: "PREVIEW",
+      tone: "preview",
+      title: "Customer Preview",
+      version: "Cleanup v16 + V94 fix · READY",
+      note: "Samostatná testovacia verzia. Tu prebieha audit a čistenie kódu bez zásahu do zákazníkov.",
+      bullets: [
+        "Git vetva: customer-portal-preview.",
+        "Frontend je funkčne odvodený od LIVE, ale staré runtime vrstvy sa postupne konsolidujú.",
+        "app.js: približne 165,5 kB LIVE → 146,7 kB PREVIEW; priame runtime prepisy hlavných funkcií: 0.",
+        "Pred povýšením na LIVE musí prejsť regresným testom na telefóne."
+      ]
+    },
+    {
+      label: "STAGING",
+      tone: "staging",
+      title: "Chvostikovo staging",
+      version: "Izolovaný backend",
+      note: "Backend iba pre Preview. Produkčné účty, psy ani rezervácie sa sem nekopírujú.",
+      bullets: [
+        "Samostatný Supabase projekt jgzabminzgbfhsrgqedt.",
+        "Google Calendar sync, cron a automatické produkčné push odosielanie sú odpojené.",
+        "Testovacia Bella PREVIEW je nastavená na 9/10 pre test posledného vstupu.",
+        "Preview customer-portal-api obsahuje rovnaký V94 fix permanentky ako produkcia."
+      ]
+    },
+    {
+      label: "ADMIN LIVE",
+      tone: "admin",
+      title: "Admin appka",
+      version: "Produkcia",
+      note: "Interná aplikácia zostáva produkčná. Dnešné security úpravy boli nasadené priamo LIVE.",
+      bullets: [
+        "Po login-e sa povinne overuje aktívny staff účet.",
+        "Vytvorenie nového admin účtu bolo odstránené z verejnej prihlasovačky.",
+        "Tržby a interné tabuľky zostávajú chránené RLS/staff pravidlami.",
+        "Zbytočné klientské databázové práva a verejný EXECUTE interných triggerov boli odobraté."
+      ]
+    }
+  ],
+
   now: {
-    title: "Stabilizácia PWA a release procesu",
-    status: "Kontrola",
-    statusTone: "ready",
-    note: "Zákaznícka PWA v71 je produkčne nasadená z vetvy customer-portal-production a Android inštalácia bola fyzicky overená. Edge request slučka okolo starej ikonky je odstránená. Ostáva upratať Vercel preview spúšťaný z main, ktorý generuje neúspešné preview deploye a e-mailové upozornenia.",
+    title: "Regresný test vyčisteného Customer Preview",
+    status: "Rozpracované",
+    statusTone: "planned",
+    note: "LIVE zákaznícka appka je stabilná na V94. Ďalšie čistenie už robíme iba v Preview/stagingu. Cieľom je zjednodušiť kód bez zmeny správania a až po dôkladnom teste rozhodnúť, či sa vyčistená verzia povýši do produkcie.",
     bullets: [
-      "Zákaznícky portál: customer-portal-production → production funguje a v71 je READY.",
-      "Android PWA: inštalácia overená; manifest, statické ikony a service worker majú zdokumentovaný stabilný postup.",
-      "Admin: produkcia ostáva na Supabase stable-v9.",
-      "System: dôležité zmeny zapisujeme samostatným commitom do main ako projektový prehľad."
+      "LIVE: V94 je READY a ostáva nedotknutá počas ďalšieho auditu.",
+      "PREVIEW: odstránené staré renderery, single-day rezervovanie, nefunkčný V18 date-search, zbytočné observery, mŕtve helpery a veľká časť starého CSS.",
+      "PREVIEW: hlavné render/api/bootstrap vrstvy už používajú centrálne hooky/registry namiesto reťazenia runtime patchov.",
+      "Ďalší krok: test registrácie → Bella PREVIEW → rezervácie → taxi → posledný vstup → permanentka → foto → správy → onboarding."
     ]
   },
 
   next: [
     {
+      title: "Regresný test vyčisteného Preview",
+      status: "Rozpracované",
+      tone: "planned",
+      text: "Prejsť celý zákaznícky flow na izolovanom Preview/stagingu a potvrdiť, že cleanup nezmenil správanie.",
+      detail: "Registrácia a login, Bella PREVIEW, Môj psík, foto, údaje, podmienky, multi-day rezervácia, taxi po dňoch, zrušenie rezervácie, 9/10 → posledný vstup → záujem o permanentku, správy, push/onboarding a návrat z pozadia."
+    },
+    {
+      title: "Stabilná verejná Preview URL",
+      status: "Čaká na nastavenie",
+      tone: "waiting",
+      text: "Preview branch URL existuje, ale Vercel Deployment Protection stále vyžaduje share bypass.",
+      detail: "Vo Vercel projekte chvostikovo-portal vypnúť Vercel Authentication pre Preview deployments. Potom zostane jedna stabilná branch URL bez dočasného _vercel_share tokenu."
+    },
+    {
+      title: "Žiacka knižka – navrhnúť obsah",
+      status: "Plánované",
+      tone: "planned",
+      text: "Karta už je v LIVE aj PREVIEW pod návštevami a zatiaľ zobrazuje iba názov Žiacka knižka + Pripravujeme.",
+      detail: "Neskôr navrhnúť, čo sa tam bude zapisovať: pokrok, správanie, socializácia, tréning, poznámky zo škôlky alebo fotografie. Najprv návrh, až potom databáza."
+    },
+    {
       title: "Úprava webu – formulár, dizajn a 3 body z recenzií",
       status: "Plánované",
       tone: "planned",
-      text: "Prejsť a doladiť web Chvostíkova – najmä formulár, celkový dizajn a zapracovanie 3 hlavných bodov, ktoré sa opakujú v recenziách.",
-      detail: "Pri ďalšej úprave webu nezabudnúť skontrolovať formulár a jeho používateľský priebeh, doladiť vizuál/dizajn stránky a vybrať 3 najsilnejšie opakujúce sa benefity alebo skúsenosti z recenzií, ktoré sa použijú priamo v komunikácii na webe."
+      text: "Prejsť a doladiť web Chvostíkova – najmä formulár, celkový dizajn a zapracovanie 3 hlavných bodov z recenzií.",
+      detail: "Pri ďalšej úprave webu skontrolovať formulár, používateľský priebeh a vybrať 3 najsilnejšie opakujúce sa benefity alebo skúsenosti z recenzií."
     },
     {
       title: "Odmeny a bonusy pre zákazníkov",
       status: "Nápad",
       tone: "planned",
-      text: "Do budúcna navrhnúť jednoduchý odmeňovací systém v zákazníckej appke, ktorý motivuje k pravidelnejším návštevám a vie prepojiť škôlku s vlastnými produktmi alebo partnermi.",
-      detail: "Možné príklady: navštív škôlku 5× za mesiac a získaj benefit, zľava v petshope/partnerovi, zľava na vodítko alebo obojok, zľava na stojan, bonusový vstup k permanentke. Zatiaľ nič neimplementovať ani nepridávať DB tabuľky; najprv vymyslieť pravidlá, aby systém dával obchodný zmysel a nebol ľahko zneužiteľný."
+      text: "Navrhnúť jednoduchý odmeňovací systém pre pravidelnejšie návštevy a prepojenie škôlky s produktmi alebo partnermi.",
+      detail: "Najprv obchodné pravidlá a ochrana proti zneužitiu; zatiaľ bez implementácie."
     },
     {
-      title: "Upratanie kódu a starších vrstiev",
-      status: "Rozpracované",
-      tone: "planned",
-      text: "Bezpečný audit starších verzií, runtime patchov a prekrývajúcich sa UI vrstiev bez zmeny správania aplikácií.",
-      detail: "Prvá časť bola urobená vo v70–v71: odstránený Store-v2 legacy odkaz, duplicitná registrácia service workera a duplicitná v64 vrstva právnych odkazov; push self-heal bol oddelený. Kompletný bod však ešte nie je hotový. Zostáva zmapovať všetky staršie vXX vrstvy zákazníckej appky a samostatne admin stable-v9, postupne zlúčiť aktívne vrstvy do jedného zdroja pravdy a odstrániť mŕtvy kód až po testoch a s rollbackom."
-    },
-    {
-      title: "Bezpečný preview a release proces",
-      status: "Čiastočne hotové",
-      tone: "planned",
-      text: "Portal už ignoruje vetvu main; ďalší krok je vytvoriť samostatnú preview vetvu pre testovanie väčších customer zmien pred produkciou.",
-      detail: "Každú väčšiu zmenu najprv nasadiť na samostatný Vercel preview deployment, otestovať na reálnom telefóne a až potom ju vedome povýšiť na produkciu. Produkčná verzia ostane nedotknutá počas testovania a posledný stabilný deploy musí zostať pripravený na okamžitý rollback. Súčasťou má byť aj kontrola service workera/cache, aby klientom neostala zmiešaná stará a nová verzia."
-    },
-    {
-      title: "Podmienky škôlky",
-      status: "Čaká na mňa",
-      tone: "waiting",
-      text: "Treba potvrdiť finálne znenie podmienok.",
-      detail: "Až po finálnom texte má zmysel dokončiť ich nasadenie a testovanie."
-    },
-    {
-      title: "Finálne testovanie",
+      title: "Podmienky škôlky – finálne potvrdenie",
       status: "Plánované",
       tone: "planned",
-      text: "Prejsť celý admin aj zákaznícky proces pred väčším používaním klientmi.",
-      detail: "Android, iPhone, rezervácie, správy, permanentky, taxi, upozornenia a základné hraničné situácie."
+      text: "Po posledných textových úpravách ešte potvrdiť finálnu podobu pre appku aj tlačenú verziu.",
+      detail: "Až potom považovať text podmienok za uzavretý dokument."
     }
   ],
 
   waiting: [
-    { title: "Dokončiť podmienky škôlky", text: "Potvrdiť finálne znenie, ktoré pôjde zákazníkom.", status: "Čaká", tone: "waiting" },
-    { title: "Otestovať Android", text: "Na fyzickom telefóne skontrolovať výsledné maskovanie monochromatického badge a vzhľad push notifikácie.", status: "Neskôr", tone: "planned" },
-    { title: "Otestovať iPhone / iOS", text: "Na fyzickom zariadení overiť PWA notifikáciu a systémové zobrazenie atribúcie aplikácie.", status: "Neskôr", tone: "planned" }
+    { title: "Otestovať LIVE V94 na Belle 9/10", text: "Vytvoriť jednu rezerváciu a potvrdiť, že sa hneď zobrazí okno Posledný vstup z permanentky a tlačidlo Mám záujem prejde bez chyby.", status: "Čaká", tone: "waiting" },
+    { title: "Vytvoriť Preview testovací účet", text: "Zaregistrovať samostatný účet v Preview/staging Auth a prepojiť ho na Bella PREVIEW 9/10.", status: "Čaká", tone: "waiting" },
+    { title: "Sprístupniť stabilný Preview link", text: "Vo Verceli vypnúť Preview Deployment Protection, aby branch URL fungovala bez dočasného share tokenu.", status: "Čaká", tone: "waiting" },
+    { title: "Otestovať iPhone / Android po finálnom release", text: "Pred širším spustením prejsť inštaláciu, push, foto editor, scroll a návrat z pozadia na fyzických telefónoch.", status: "Neskôr", tone: "planned" }
   ],
 
   recent: [
+    { date: "20. 9. 2026", app: "Zákaznícka LIVE", title: "V94 – posledný vstup z permanentky + kompaktný loading", text: "Opravený flow pre psa na poslednom zostávajúcom vstupe. Backend pri rezervácii vracia projected_entry_number / projected_pass_total a frontend teraz otvorí okno Posledný vstup z permanentky okamžite po úspešnej rezervácii, bez čakania na ďalší bootstrap. customer-portal-api v20 navyše povolí žiadosť o novú 10-vstupovú permanentku, ak sú všetky zostávajúce vstupy aktuálnej permanentky už rezervované. Pri vnútro-app operáciách sa namiesto celej bielej obrazovky ukáže iba malý loading box s labkou; úvodný startup splash s logom zostáva." },
+    { date: "20. 9. 2026", app: "Preview", title: "Audit a konsolidácia zákazníckeho frontendu", text: "Cleanup prebieha iba vo vetve customer-portal-preview. app.js klesol približne z 165,5 kB LIVE na 146,7 kB PREVIEW. Odstránené boli mŕtve helpery, staré legacy renderery, nefunkčný V18 date-search, single-day booking handler, staré profile/onboarding/reservation CSS a zbytočné observery. Hlavné render/api/bootstrap vrstvy používajú centrálne hooky/registry; priame runtime prepisy hlavných funkcií sú na nule. V94 fix bol následne synchronizovaný aj do Preview." },
+    { date: "20. 9. 2026", app: "System", title: "Oddelené LIVE / PREVIEW / STAGING prostredia", text: "Vznikla vetva customer-portal-preview a samostatný Supabase projekt Chvostikovo staging. Preview už nepoužíva produkčnú databázu. Staging má vlastný Auth/backend, bez produkčných zákazníckych dát; Google Calendar sync, cron a automatické produkčné push odosielanie sú odpojené. Testovacia Bella PREVIEW je pripravená na 9/10. Produkčná vetva customer-portal-production zostáva samostatná." },
+    { date: "20. 9. 2026", app: "Admin / Security", title: "Staff gate a databázové hardening úpravy", text: "Admin appka po prihlásení najprv overí aktívny staff účet; zákaznícky účet sa do admin rozhrania nepustí. Z admin loginu bola odstránená registrácia nového účtu. Na produkčnej databáze sa zaplo RLS pre starú frontend snapshot tabuľku, odobrali sa nepotrebné TRUNCATE/REFERENCES/TRIGGER oprávnenia a dve interné trigger funkcie už nie sú verejne spustiteľné ako RPC." },
+    { date: "20. 9. 2026", app: "Zákaznícka LIVE", title: "V91 – taxi sa vyberá zvlášť pre každý rezervovaný deň", text: "Pri multi-day rezervácii už taxi nie je jedna spoločná voľba pre všetky dni. Každý vybraný deň má vlastné Bez taxi / Vyzdvihnúť 5 € / Tam aj späť 10 € a do backendu sa ukladá samostatne ku každej rezervácii." },
+    { date: "20. 9. 2026", app: "Zákaznícka LIVE", title: "V92–V93 – Žiacka knižka", text: "Na stránke Môj psík pod návštevami pribudla karta Žiacka knižka. Zatiaľ zobrazuje iba názov a stav Pripravujeme; obsah a funkcie budú navrhnuté neskôr." },
+    { date: "20. 9. 2026", app: "Zákaznícka LIVE", title: "V89–V90 – foto editor a práca s existujúcou fotkou", text: "Profilová fotografia podporuje posúvanie jedným prstom a pinch zoom dvoma prstami, úpravu aktuálnej fotky, nahratie novej aj vymazanie. Existujúca už orezaná fotka sa pri editovaní otvorí s miernym zoomom, aby sa dala hneď posúvať v rámci dostupných pixelov. Zachované sú iOS decode/picker ochrany." },
     { date: "19. 9. 2026", app: "Zákaznícka", title: "Android čistý návrat po zmazanom účte v72", text: "Opravený doslovný text \\n v index.html a zvýšená cache verzia na v72. Pri starej session z vymazaného alebo neplatného účtu sa teraz rozpoznajú aj chyby Invalid Refresh Token / Token Not Found / JWT, session sa vyčistí bez technického toastu, zobrazí sa čistý login a resetuje sa stav install guide, aby sa návod na inštaláciu otvoril automaticky. Produkcia overená: root, app.js v72 a sw.js vracajú 200 a root už neobsahuje viditeľný \\n." },
     { date: "19. 9. 2026", app: "System", title: "Portal preview z main vypnutý", text: "V projekte chvostikovo-portal je Ignored Build Step nastavený tak, aby vetva main vrátila skip (exit 0). customer-portal-production sa ďalej buildí ako produkcia a budúce samostatné testovacie vetvy sa môžu normálne buildiť ako Preview. Cieľ: žiadne zbytočné preview deploye a chybové e-maily pri commitovaní Systemu alebo webu do main." },
     { date: "19. 9. 2026", app: "Zákaznícka", title: "UI cleanup + Android splash v71", text: "Konzervatívne upratanie bez zásahu do rezervácií, loginu, Realtime alebo databázy. Odstránená duplicitná v64 vrstva, ktorá do Menu vkladala druhú dvojicu odkazov Ochrana osobných údajov / Podmienky psej škôlky; zostáva iba hlavný stavový blok s Potvrdené/Odsúhlasené a tlačidlami na otvorenie dokumentov. V64 push self-heal bol oddelený a zachovaný ako čistý v71 push self-heal. Opravený viditeľný literál \\n v hlavičke Android appky. Karta Doplňte údaje psíka a Menu dostali kompaktnejšiu typografiu a padding. Launcher ikony 192/512 zostali nezmenené; pridaná samostatná statická maskable 512 ikona s menším vizuálnym logom pre Android splash, bez Edge Function alebo rewrite. Malý monochromatický Android notification badge ostal nezmenený. Produkčný commit cfb81fff je READY." },
@@ -139,27 +202,32 @@ window.SYSTEM_DATA = {
     },
     customer: {
       label: "Zákaznícka appka",
-      intro: "Jednoduché miesto pre klienta – jeho pes, rezervácie, permanentka, taxi, správy a upozornenia.",
+      intro: "Jednoduché miesto pre klienta – jeho pes, rezervácie, permanentka, taxi, správy a upozornenia. LIVE a PREVIEW sú od 20. 9. oddelené.",
       features: [
-        { title: "Registrácia a prihlásenie", text: "Klient si vytvorí účet a po schválení ho admin prepojí s jeho psom." },
-        { title: "Môj psík", text: "Klient vidí kompaktný profil psa, tlačidlo Údaje psíka, kartu Pravidlá škôlky a návštevné štatistiky. Po prvom potvrdení podmienok nasleduje samostatná dobrovoľná voľba zdieľania mena/fotky; rovnaké nastavenie je neskôr dostupné aj cez hamburger Menu." },
-        { title: "Fotka psa", text: "Majiteľ môže pracovať s profilovou fotkou psa a jej zobrazením." },
-        { title: "Rezervácie", text: "Klient pošle žiadosť o konkrétny deň a schválenie alebo zamietnutie sa zobrazí live bez ručného refreshu; tento tok bol fyzicky overený produkčným testom. Po schválení oznam klienta priamo navádza, aby si pozrel, kto bude v ten deň s jeho psíkom v škôlke." },
-        { title: "Kto príde do škôlky", text: "Pri rezervovanom dni môže vidieť prihlásených psíkov; bez súhlasu sa cudzí pes zobrazí anonymne." },
-        { title: "Taxi", text: "Pri rezervácii si klient vyberie, či potrebuje dopravu." },
-        { title: "Permanentka", text: "Stav permanentky je súčasťou obrazovky Rezervácie, vrátane použitých vstupov a dátumu platnosti, ak ho permanentka má. Duplicitná permanentková karta bola z Môj psík odstránená." },
-        { title: "Správy", text: "Komunikácia je dostupná cez väčšie oranžové plávajúce chat tlačidlo na obrazovke Môj psík namiesto samostatnej spodnej záložky. Pri prvom otvorení profilu v relácii sa zobrazí krátka nápoveda. Chat sa otvorí v modale a používateľ môže zvoliť konkrétnu rezerváciu, správu bez predmetu alebo vlastný predmet; existujúci backend a live synchronizácia správ zostali zachované." },
-        { title: "Live aktualizácie a push", text: "Zákaznícka PWA dostáva live zmeny rezervácií, správ, oznamov, zatvorených dní, permanentiek a údajov psíka. Realtime WebSocket je v CSP povolený iba pre konkrétny Supabase origin; appka nepoužíva všeobecný WSS wildcard. Starý 30-sekundový full polling bol odstránený." },
-        { title: "Narodeniny a očkovania", text: "Majiteľ dostane v deň narodenín svojho psa osobný oznam a pri povolených notifikáciách aj jednorazový push. Približne 14 dní pred koncom platnosti očkovania dostane detailný oznam v appke a jednoduchý push." },
-        { title: "Oznamy", text: "Dôležité informácie od škôlky sa môžu zobraziť priamo v appke a ich zmeny sa môžu prejaviť live." },
-        { title: "GDPR a súhlasy", text: "Klient môže potvrdiť potrebné súhlasy a nastavenie zdieľania mena/fotky psa." },
-        { title: "Podmienky škôlky", text: "Systém je pripravený evidovať potvrdenie podmienok; finálne znenie ešte čaká na dokončenie." },
-        { title: "Prepojenie majiteľa so psom", text: "Účet nevidí cudzie interné dáta – admin ho priradí ku konkrétnemu majiteľovi a psovi." }
+        { title: "Registrácia a prihlásenie", text: "Klient si vytvorí účet, potvrdí e-mail a admin ho prepojí s existujúcim majiteľom/psom. Zákaznícky účet nemá prístup k interným admin dátam." },
+        { title: "Môj psík", text: "Kompaktný profil obsahuje fotku, Údaje psíka, pravidlá/podmienky, návštevy, nastavenia a kartu Žiacka knižka – zatiaľ označenú Pripravujeme." },
+        { title: "Fotka psa", text: "Majiteľ môže nahrať novú fotku, upraviť existujúcu alebo ju vymazať. Editor podporuje posun jedným prstom a pinch zoom; iOS picker/decode má samostatnú ochranu proti nechcenému reloadu." },
+        { title: "Multi-day rezervácie", text: "Majiteľ otvorí jeden picker, vyberie jeden alebo viac voľných pracovných dní a odošle ich naraz. Zatvorené, plné alebo už rezervované dni nie je možné znovu zvoliť." },
+        { title: "Taxi podľa dňa", text: "Každý vybraný deň má vlastnú voľbu Bez taxi / Vyzdvihnúť za 5 € / Tam aj späť za 10 €. Voľba sa ukladá samostatne ku konkrétnej rezervácii." },
+        { title: "Posledný vstup z permanentky", text: "Ak rezervácia použije posledný zostávajúci vstup, V94 hneď zobrazí okno s ponukou novej 10-vstupovej permanentky. Žiadosť je povolená až keď sú všetky zostávajúce vstupy aktuálnej permanentky už rezervované." },
+        { title: "Permanentka", text: "Na obrazovke Rezervácie klient vidí stav aktívnej permanentky, použité/zostávajúce vstupy a platnosť, ak ju permanentka má. Vie poslať záujem o ďalšiu 10-vstupovú permanentku." },
+        { title: "Kto príde do škôlky", text: "Pri rezervovanom dni sa zobrazuje roster ďalších psíkov; meno/fotka sa zobrazí iba podľa súhlasu, inak je pes anonymný ako Prihlásený škôlkar." },
+        { title: "Správy", text: "Plávajúce chat tlačidlo na Môj psík otvorí konverzáciu v modale. Správa môže byť naviazaná na konkrétnu rezerváciu alebo vlastný predmet a nové správy sa prejavujú live." },
+        { title: "Realtime a návrat z pozadia", text: "Rezervácie, správy, oznamy, zatvorené dni a permanentky sa synchronizujú cez Realtime/resync bez ručného reloadu. Návrat z pozadia bol produkčne testovaný." },
+        { title: "Push notifikácie", text: "Zákazník môže povoliť upozornenia na rezervácie, správy a ďalšie udalosti. PWA používa Chvostíkovo branding a samostatný monochromatický badge podľa pravidiel Android/iOS." },
+        { title: "Plynulé načítanie", text: "Pri samotnom spustení ostáva branded startup splash. Pri operáciách už v otvorenej appke V94 používa iba malý biely loading box s rotujúcou labkou namiesto celej bielej obrazovky." },
+        { title: "Narodeniny a očkovania", text: "Majiteľ môže dostať osobný narodeninový oznam a upozornenia na blížiaci sa koniec platnosti očkovania." },
+        { title: "GDPR, podmienky a zdieľanie", text: "Systém eviduje súhlasy, podmienky a dobrovoľné zdieľanie mena/fotky psa ostatným majiteľom prihláseným v rovnaký deň." },
+        { title: "Izolovaný Preview", text: "Väčšie zmeny a cleanup sa už robia vo vetve customer-portal-preview napojenej na samostatný staging Supabase. Produkcia sa nemení, kým Preview neprejde regresným testom." }
       ]
     }
   },
 
   history: [
+    { date: "20. 9. 2026", title: "LIVE / PREVIEW / STAGING oddelené", app: "System", text: "Customer produkcia zostala na customer-portal-production. Pre väčšie zmeny vznikla customer-portal-preview a samostatný Supabase staging bez produkčných klientskych dát a externých automatizácií." },
+    { date: "20. 9. 2026", title: "Bezpečnostné spevnenie adminu", app: "Admin", text: "Admin login dostal povinný staff gate, verejná registrácia bola odstránená a produkčné databázové oprávnenia/RLS boli sprísnené bez otvorenia prístupu zákazníckym účtom." },
+    { date: "20. 9. 2026", title: "Customer V89–V94", app: "Zákaznícka", text: "Dokončený dotykový foto editor, posun existujúcej fotky, taxi podľa jednotlivých dní, Žiacka knižka – Pripravujeme, spoľahlivé upozornenie na posledný vstup z permanentky a kompaktnejší loading počas operácií v appke." },
+    { date: "20. 9. 2026", title: "Preview cleanup bez zásahu do LIVE", app: "Preview", text: "Začal sa konzervatívny audit zákazníckeho frontendu. Odstránili sa mŕtve a nefunkčné legacy vrstvy, runtime monkey-patche sa nahradili hookmi/renderer registry a veľkosť JS/CSS sa znížila bez úmyselnej zmeny funkčnosti." },
     { date: "august 2026", title: "Vznik interného admin systému", app: "Admin", text: "Základné profily psov, majitelia, rezervácie a interný denný prehľad." },
     { date: "august 2026", title: "Permanentky", app: "Admin", text: "Pribudli 10/20-vstupové permanentky, zostávajúce vstupy, dátum kúpy a možnosť manuálnej úpravy." },
     { date: "august 2026", title: "Taxi", app: "Admin", text: "K rezerváciám sa pridalo vyzdvihnutie za 5 € a vyzdvihnutie + dovoz za 10 €." },
@@ -181,16 +249,16 @@ window.SYSTEM_DATA = {
   ],
 
   technical: [
-    { label: "Zdroj aktuálneho stavu", value: "Produkcia + GitHub + Supabase" },
-    { label: "Git workflow", value: "Zákaznícky frontend je verzovaný vo vetve customer-portal-production a Vercel ju používa ako Production Branch. Commit do tejto vetvy zároveň vytvorí GitHub históriu aj production deploy. Chvostikovo System ostáva na main." },
-    { label: "Admin", value: "Produkčná admin aplikácia používa Supabase backend a frontend stable-v9 načítaný cez Edge Function chvostikovo-frontend. Dôležité admin zmeny sa zároveň zaznamenávajú do System appky v GitHub main, ale plný admin frontend zatiaľ nie je zdrojovaný z GitHubu." },
-    { label: "Zákaznícka appka", value: "Produkčná PWA používa spoločný Supabase backend a vlastné zákaznícke rozhranie." },
-    { label: "Live aktualizácie", value: "Supabase Realtime je nasadený pre obe appky. Zákaznícka signalizácia používa bezpečný kanál bez citlivého payloadu; RLS zostalo zachované." },
-    { label: "CSP zákazníckej PWA", value: "Realtime WebSocket je povolený iba pre wss://tlhcqwsluyqpywymjoxn.supabase.co. Nebol pridaný žiadny všeobecný WSS wildcard; ostatné CSP obmedzenia zostali zachované." },
-    { label: "Push branding", value: "PWA aj push title zostávajú Chvostíkovo. Systémové „from“ na iOS riadi operačný systém a samostatne ho nevieme premenovať. Malý systémový badge zostáva monochromatický; od v57 používa veľká farebná ikona Android pushu ružovú Chvostíkovo labku s vlastnou verziou URL, aby sa nevracala stará oranžová ikona z cache. Výsledný spôsob vykreslenia stále čiastočne riadi Android/iOS." },
-    { label: "Narodeniny a očkovania", value: "Spracovanie beží raz za hodinu podľa Europe/Bratislava. Push je deduplikovaný: narodeniny podľa pes + rok, očkovanie podľa pes + typ + dátum platnosti. Zákaznícke oznamy používajú existujúce portal_notifications, RLS a Realtime." },
-    { label: "UI stabilita", value: "Pri ďalších UI úpravách sa obrazovka nemá zobraziť skôr, než sú všetky jej karty a ovládacie prvky na správnom mieste. Dáta sa majú načítať pred revealom alebo dopĺňať iba do už existujúceho stabilného kontajnera. Fotky a avatary sa pri nezmenenom zdroji nesmú zbytočne vyhadzovať z DOM a vytvárať nanovo." },
-    { label: "System", value: "Táto stránka je iba čitateľný projektový prehľad. Nemení dáta klientov ani logiku oboch aplikácií." },
-    { label: "Poznámka", value: "Technické názvy tabuliek, API a deployov sú zámerne skryté z hlavnej obrazovky." }
+    { label: "Zdroj aktuálneho stavu", value: "LIVE produkcia + customer Preview + GitHub + Vercel + produkčný/staging Supabase" },
+    { label: "Customer LIVE", value: "Vetva customer-portal-production. Aktuálne V94, commit cccccaa84f9036cf90c176886401c8c21a7eeda9, Vercel Production READY. Backend: produkčný Supabase tlhcqwsluyqpywymjoxn; customer-portal-api v20." },
+    { label: "Customer PREVIEW", value: "Vetva customer-portal-preview. Aktuálne commit a4cae23683daebd94a5e5231dee7d4b8aaa49b94, Vercel Preview READY. Obsahuje cleanup aj synchronizovaný V94 fix." },
+    { label: "Staging backend", value: "Supabase projekt jgzabminzgbfhsrgqedt. Bez produkčných klientskych dát; Google Calendar sync, cron a automatické produkčné push odosielanie sú vypnuté. Bella PREVIEW: 9/10." },
+    { label: "Release pravidlo", value: "LIVE sa počas väčšieho vývoja nemení. Zmena ide najprv do Preview/stagingu, nasleduje regresný test na reálnom zariadení a až potom vedomé povýšenie do produkcie." },
+    { label: "Preview cleanup", value: "app.js: 165 529 znakov LIVE vs. 146 725 PREVIEW. CSS Preview: 73 717 znakov. Priame runtime prepisovanie hlavných funkcií bolo odstránené; aktívne vrstvy používajú hooky/renderer registry." },
+    { label: "Admin LIVE", value: "Admin frontend ostáva produkčný v Supabase snapshot/Edge Function architektúre. Login overuje aktívny staff účet ešte pred otvorením dashboardu; verejná registrácia admin účtu je odstránená." },
+    { label: "Admin bezpečnosť", value: "RLS chráni interné dáta vrátane tržieb. Odobraté boli nepotrebné klientské DDL práva a verejný EXECUTE dvoch interných trigger funkcií. Customer frontend neobsahuje service-role key." },
+    { label: "Realtime", value: "Supabase Realtime je nasadený pre admin aj zákaznícku PWA. Customer signalizácia používa autentifikované dáta/kanály a po návrate z pozadia sa robí resync." },
+    { label: "Leaked password protection", value: "Supabase HaveIBeenPwned leaked-password kontrola je dostupná až na Pro. Free projekt ju nemá; klientské heslo má minimálne 8 znakov + malé/veľké písmeno + číslo. Pre admin účty má do budúcna väčší zmysel zvážiť MFA." },
+    { label: "System", value: "Táto stránka je interný projektový prehľad. Je na GitHub main v priečinku system/ a nemení dáta klientov ani logiku admin/customer aplikácií." }
   ]
 };

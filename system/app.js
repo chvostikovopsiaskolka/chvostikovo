@@ -120,6 +120,23 @@
     $('updated').textContent = `Aktualizované ${data.meta.updated}`;
   }
 
+  function renderEnvironments() {
+    const root = $('environmentGrid');
+    if (!root) return;
+    root.innerHTML = (data.environments || []).map(item => `
+      <article class="environment-card ${esc(item.tone)}">
+        <div class="environment-top">
+          <span class="environment-label">${esc(item.label)}</span>
+          <strong>${esc(item.version)}</strong>
+        </div>
+        <h3>${esc(item.title)}</h3>
+        <p>${esc(item.note)}</p>
+        <div class="environment-list">
+          ${(item.bullets || []).map(line => `<div><span>→</span><p>${esc(line)}</p></div>`).join('')}
+        </div>
+      </article>`).join('');
+  }
+
   function renderNow() {
     $('nowCard').innerHTML = `
       <article class="now-card">
@@ -352,6 +369,7 @@
   }
 
   renderMeta();
+  renderEnvironments();
   renderNow();
   renderNext();
   renderWaiting();

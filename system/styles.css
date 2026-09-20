@@ -297,3 +297,93 @@ button { cursor: pointer; }
   .note-form { padding: 20px; }
   .modal-actions { display: grid; grid-template-columns: 1fr 1fr; }
 }
+
+
+/* LIVE / PREVIEW / STAGING overview */
+.environment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.environment-card {
+  position: relative;
+  overflow: hidden;
+  padding: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.environment-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: #9aa0a6;
+}
+.environment-card.live::before { background: #22a06b; }
+.environment-card.preview::before { background: #3b82f6; }
+.environment-card.staging::before { background: #8b5cf6; }
+.environment-card.admin::before { background: var(--accent); }
+.environment-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.environment-top strong {
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+.environment-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  background: var(--grey-soft);
+}
+.environment-card.live .environment-label { background: var(--green-soft); color: var(--green); }
+.environment-card.preview .environment-label { background: var(--blue-soft); color: var(--blue); }
+.environment-card.staging .environment-label { background: #f1ecff; color: #6842b8; }
+.environment-card.admin .environment-label { background: var(--accent-soft); color: #b9540b; }
+.environment-card h3 {
+  margin: 0 0 7px;
+  font-size: 20px;
+  letter-spacing: -.025em;
+}
+.environment-card > p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.environment-list {
+  display: grid;
+  gap: 7px;
+}
+.environment-list > div {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 7px;
+  align-items: start;
+}
+.environment-list span {
+  color: var(--accent);
+  font-weight: 900;
+}
+.environment-list p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .environment-grid { grid-template-columns: 1fr; }
+  .environment-card { padding: 16px; }
+}
