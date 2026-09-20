@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   Check,
@@ -146,8 +146,13 @@ export const Route = createFileRoute("/stojan-na-misky-pre-psa")({
   component: BowlStandPage,
 });
 
-function ProductGallery() {
-  const [active, setActive] = useState(0);
+function ProductGallery({ size }: { size: StandSize }) {
+  const [active, setActive] = useState(size === "small" ? 2 : 0);
+
+  useEffect(() => {
+    setActive(size === "small" ? 2 : 0);
+  }, [size]);
+
   const current = GALLERY[active]!;
 
   return (
@@ -307,7 +312,7 @@ function BowlStandPage() {
             </a>
 
             <div className="grid gap-9 lg:grid-cols-[1.02fr_0.98fr] lg:items-start lg:gap-12">
-              <ProductGallery />
+              <ProductGallery size={size} />
 
               <div>
                 <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
