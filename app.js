@@ -25,6 +25,16 @@ const SESSION_KEY='chvostikovo_customer_session';
 const PASSWORD_MIN_MESSAGE='Minimálne 8 znakov, malé a veľké písmeno a aspoň 1 číslica.';
 const PASSWORD_STRONG_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 let state={data:null,session:null,storage:localStorage,selectedDogId:null,activeTab:'booking',pushChecked:false,pushEnabled:false};
+const customerHooks={
+  afterRenderPassSummary:[],
+  afterRenderDog:[],
+  afterRenderMessages:[],
+  afterUpdateUnread:[],
+  afterRenderStaff:[]
+};
+function addCustomerHook(name,fn){if(typeof fn==='function'&&customerHooks[name])customerHooks[name].push(fn)}
+function runCustomerHooks(name,...args){for(const fn of customerHooks[name]||[]){try{fn(...args)}catch(error){console.warn('Customer hook failed',name,error)}}}
+
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const skDate=v=>{if(!v)return'';try{return new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',year:'numeric'}).format(new Date(String(v).slice(0,10)+'T12:00:00'))}catch(_){return String(v)}};
@@ -169,7 +179,8 @@ function renderNotifications(){
   modal.classList.remove('hidden');
 }
 function activePassFor(dogId){const today=new Date().toISOString().slice(0,10);return (state.data?.passes||[]).find(p=>Number(p.dog_id)===Number(dogId)&&p.status==='active'&&Number(p.used_entries)<Number(p.total_entries)&&(!p.valid_until||p.valid_until>=today))||(state.data?.passes||[]).find(p=>Number(p.dog_id)===Number(dogId)&&p.status==='queued')||null}
-function renderPassSummary(){const d=selectedDog(),p=d?activePassFor(d.id):null;$('passSummary').innerHTML=p?`<span>Permanentka</span><strong>${Number(p.used_entries)||0}/${Number(p.total_entries)||0}</strong>${p.valid_until?`<small>Platí do ${skDate(p.valid_until)}</small>`:''}`:'<span>Vstup</span><strong class="single-entry-label-v75">Jednorazový</strong>'}
+function renderPassSummaryCore(){const d=selectedDog(),p=d?activePassFor(d.id):null;$('passSummary').innerHTML=p?`<span>Permanentka</span><strong>${Number(p.used_entries)||0}/${Number(p.total_entries)||0}</strong>${p.valid_until?`<small>Platí do ${skDate(p.valid_until)}</small>`:''}`:'<span>Vstup</span><strong class="single-entry-label-v75">Jednorazový</strong>'}
+function renderPassSummary(){const out=renderPassSummaryCore();runCustomerHooks('afterRenderPassSummary',out);return out}
 function futureItems(){const today=new Date().toISOString().slice(0,10);const requests=(state.data?.requests||[]).filter(r=>r.reservation_date>=today&&['pending','approved'].includes(r.status));const covered=new Set(requests.map(r=>Number(r.reservation_id)).filter(Boolean));const legacy=(state.data?.reservations||[]).filter(r=>r.reservation_date>=today&&!covered.has(Number(r.id))).map(r=>({...r,status:'approved',_legacy:true,reservation_id:r.id}));return [...requests,...legacy].sort((a,b)=>String(a.reservation_date).localeCompare(String(b.reservation_date)))}
 function renderUpcoming(){const items=futureItems();$('upcomingBookings').innerHTML=`<details class="card my-bookings-card"><summary><strong>Moje rezervácie</strong><span class="my-bookings-count">${items.length}</span></summary>${items.length?`<div class="upcoming-list">${items.map(r=>{const taxi=taxiLabel(r.taxi_mode);return `<div class="upcoming-row"><div><strong>${esc(dogName(r.dog_id))} · ${skDate(r.reservation_date)}</strong><small>${esc(statusLabel(r.status))}${taxi?' · '+esc(taxi):''}</small></div><div class="upcoming-actions">${['pending','approved'].includes(r.status)&&r.can_manage!==false?`<button class="text-btn cancel-booking" data-request="${r._legacy?'':r.id||''}" data-reservation="${r._legacy?r.reservation_id||r.id:''}">Zrušiť</button>`:''}</div></div>`}).join('')}</div>`:'<div class="hint empty-bookings">Zatiaľ nemáte ďalšiu rezerváciu.</div>'}</details>`;$('upcomingBookings').querySelectorAll('.cancel-booking').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();cancelBooking(b)}));if(typeof placeDeadlineV59==='function')placeDeadlineV59()}
 async function cancelBooking(btn){if(!confirm('Naozaj chcete zrušiť túto rezerváciu?'))return;try{loading(true);const requestId=Number(btn.dataset.request)||0,reservationId=Number(btn.dataset.reservation)||0;await api({action:'cancel_booking',request_id:requestId,reservation_id:reservationId,reason:null});const request=(state.data?.requests||[]).find(r=>Number(r.id)===requestId),reservation=(state.data?.reservations||[]).find(r=>Number(r.id)===reservationId);if(request)request.status='cancelled';if(reservation)reservation.status='cancelled';renderUpcoming();renderDays();renderMessages();toast('Rezervácia bola zrušená.');queueCustomerSync('bookings',80)}catch(e){toast(e.message)}finally{loading(false)}}
@@ -178,8 +189,10 @@ function renderDays(){const days=state.data?.availability?.days||[],dogs=state.d
 function applyLocalBooking(result,fallback){const row=result?.data||result?.booking||result?.request||fallback;if(!row)return;const rows=state.data?.requests||(state.data.requests=[]),index=rows.findIndex(r=>Number(r.id)===Number(row.id));if(index>=0)rows[index]={...rows[index],...row};else rows.push({...fallback,...row});renderUpcoming();renderDays();renderMessages()}
 async function reserveDay(btn){const card=btn.closest('.day-card'),dog=Number(card.querySelector('.day-dog-select').value),taxi=btn.dataset.taxi||'none';const date=card?.dataset?.date;if(!date)return toast('Deň rezervácie sa nepodarilo načítať.');try{card.querySelectorAll('button').forEach(b=>b.disabled=true);const result=await api({action:'request_booking',dog_id:dog,reservation_date:date,taxi_mode:taxi});applyLocalBooking(result,{id:-Date.now(),dog_id:dog,reservation_date:date,taxi_mode:taxi,status:'pending',can_manage:true});toast('Rezervácia bola odoslaná na schválenie.');queueCustomerSync('bookings',80)}catch(e){toast(e.message)}finally{card.querySelectorAll('button').forEach(b=>b.disabled=false)}}
 async function loadAnnouncements(){if(!state.session)return;try{const r=await fetch(SUPABASE_URL+'/rest/v1/portal_announcements?active=eq.true&select=id,title,body,valid_until,created_at&order=created_at.desc&limit=5',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token},cache:'no-store'});if(!r.ok)return;const rows=await r.json();$('announcementNotice').innerHTML=rows.length?`<div class="portal-announcements">${rows.map(a=>`<div class="portal-announcement"><div class="portal-announcement-head">📣 <strong>${esc(a.title)}</strong></div><div class="portal-announcement-body">${esc(a.body)}</div>${a.valid_until?`<div class="portal-announcement-until">Platí do ${skDate(a.valid_until)}</div>`:''}</div>`).join('')}</div>`:''}catch(_){}}
-function renderMessages(){const rows=state.data?.messages||[];$('messageThread').innerHTML=rows.length?rows.map(m=>`<div class="message-bubble ${m.sender_role==='customer'?'mine':''}"><p>${esc(m.body)}</p><small>${skTime(m.created_at)}</small></div>`).join(''):'<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';setTimeout(()=>{$('messageThread').scrollTop=$('messageThread').scrollHeight},0);const opts=futureItems();$('messageBooking').innerHTML='<option value="">Bez konkrétnej rezervácie</option>'+opts.map(r=>`<option value="${r.id||''}">${esc(dogName(r.dog_id))} · ${skDate(r.reservation_date)}</option>`).join('')}
-function updateUnread(){const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);$('messageUnread').classList.toggle('hidden',!unread)}
+function renderMessagesCore(){const rows=state.data?.messages||[];$('messageThread').innerHTML=rows.length?rows.map(m=>`<div class="message-bubble ${m.sender_role==='customer'?'mine':''}"><p>${esc(m.body)}</p><small>${skTime(m.created_at)}</small></div>`).join(''):'<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';setTimeout(()=>{$('messageThread').scrollTop=$('messageThread').scrollHeight},0);const opts=futureItems();$('messageBooking').innerHTML='<option value="">Bez konkrétnej rezervácie</option>'+opts.map(r=>`<option value="${r.id||''}">${esc(dogName(r.dog_id))} · ${skDate(r.reservation_date)}</option>`).join('')}
+function renderMessages(){const out=renderMessagesCore();runCustomerHooks('afterRenderMessages',out);return out}
+function updateUnreadCore(){const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);$('messageUnread').classList.toggle('hidden',!unread)}
+function updateUnread(){const out=updateUnreadCore();runCustomerHooks('afterUpdateUnread',out);return out}
 function renderDogSelector(){const dogs=state.data?.dogs||[];$('dogSelectorWrap').classList.toggle('hidden',dogs.length<=1);$('dogSelector').innerHTML=dogs.map(d=>`<option value="${d.id}" ${Number(d.id)===Number(state.selectedDogId)?'selected':''}>${esc(d.name)}</option>`).join('')}
 function totalVisits(dog){const visits=(state.data?.visits||[]).filter(v=>Number(v.dog_id)===Number(dog.id)).length;const monthly=(state.data?.monthly_totals||[]).filter(m=>Number(m.dog_id)===Number(dog.id)).reduce((s,m)=>s+Number(m.visits||0),0);return Math.max(Number(dog.legacy_total_visits)||0,visits,monthly)}
 function ensureDogFormInModalV51(){
@@ -203,7 +216,8 @@ function renderDogHeaderV56(dog){
     $('dogDetailsOpen')?.addEventListener('click',openDogDetails);
   }
 }
-function renderDog(){ensureDogFormInModalV51();const dog=selectedDog();if(!dog){$('dogProfilePhoto').innerHTML='';$('dogProfilePhoto').removeAttribute('data-dog-visual-key');$('dogProfileSettings').innerHTML='';$('dogStats').innerHTML=box('info','Psíka najprv priradí Chvostíkovo k vášmu účtu.');$('dogForm').classList.add('hidden');renderDogProfilePrompt();return}$('dogForm').classList.remove('hidden');state.selectedDogId=Number(dog.id);renderDogHeaderV56(dog);const cachedPush=state.pushChecked?!!state.pushEnabled:(typeof Notification!=='undefined'&&Notification.permission==='granted'&&localStorage.getItem('chvostikovo_push_enabled')==='1');$('dogProfileSettings').innerHTML=`<div class="card profile-settings"><div class="privacy-row"><div><strong>Upozornenia</strong><small>Rezervácie, správy a oznamy z Chvostíkova.</small></div><button id="pushToggle" class="push-switch syncing ${cachedPush?'active':''}" type="button" aria-label="Upozornenia"><span></span></button></div><div class="privacy-row"><div><strong>Zobraziť meno psa a fotku ostatným</strong><small>Súhlas môžete kedykoľvek vypnúť.</small></div><button id="privacyToggle" class="push-switch ${dog.share_name_photo?'active':''}" type="button" aria-label="Zdieľanie"><span></span></button></div></div>`;$('pushToggle').addEventListener('click',togglePush);$('privacyToggle').addEventListener('click',togglePrivacy);applyPushToggle();$('dogStats').innerHTML='';fillDogForm(dog);renderDogProfilePrompt()}
+function renderDogCore(){ensureDogFormInModalV51();const dog=selectedDog();if(!dog){$('dogProfilePhoto').innerHTML='';$('dogProfilePhoto').removeAttribute('data-dog-visual-key');$('dogProfileSettings').innerHTML='';$('dogStats').innerHTML=box('info','Psíka najprv priradí Chvostíkovo k vášmu účtu.');$('dogForm').classList.add('hidden');renderDogProfilePrompt();return}$('dogForm').classList.remove('hidden');state.selectedDogId=Number(dog.id);renderDogHeaderV56(dog);const cachedPush=state.pushChecked?!!state.pushEnabled:(typeof Notification!=='undefined'&&Notification.permission==='granted'&&localStorage.getItem('chvostikovo_push_enabled')==='1');$('dogProfileSettings').innerHTML=`<div class="card profile-settings"><div class="privacy-row"><div><strong>Upozornenia</strong><small>Rezervácie, správy a oznamy z Chvostíkova.</small></div><button id="pushToggle" class="push-switch syncing ${cachedPush?'active':''}" type="button" aria-label="Upozornenia"><span></span></button></div><div class="privacy-row"><div><strong>Zobraziť meno psa a fotku ostatným</strong><small>Súhlas môžete kedykoľvek vypnúť.</small></div><button id="privacyToggle" class="push-switch ${dog.share_name_photo?'active':''}" type="button" aria-label="Zdieľanie"><span></span></button></div></div>`;$('pushToggle').addEventListener('click',togglePush);$('privacyToggle').addEventListener('click',togglePrivacy);applyPushToggle();$('dogStats').innerHTML='';fillDogForm(dog);renderDogProfilePrompt()}
+function renderDog(){const out=renderDogCore();runCustomerHooks('afterRenderDog',out);return out}
 function combinedDogInfoV81(d){const parts=[d?.allergies,d?.temperament].map(v=>String(v||'').trim()).filter(Boolean),out=[];for(const part of parts){if(out.some(existing=>existing===part||existing.includes(part)))continue;out.push(part)}return out.join('\n\n')}
 function syncDogAgeField(){const birth=$('dogBirthDate').value,age=$('dogAge'),automatic=dogAgeText(birth);age.value=automatic||'';age.readOnly=true;age.setAttribute('aria-readonly','true');age.placeholder=automatic?'Vypočítané z dátumu narodenia':'Vyplní sa po zadaní dátumu narodenia';age.title='Vek sa automaticky počíta z dátumu narodenia.'}
 function fillDogForm(d){
@@ -433,7 +447,8 @@ async function togglePush(){
     }else{await enablePushForCurrentUserV75();toast('Upozornenia sú zapnuté.')}
   }catch(e){await ensurePushState(true);applyPushToggle();toast(e.message||'Upozornenia sa nepodarilo zmeniť.')}finally{b.disabled=false}
 }
-function renderStaff(){const is=!!state.data?.is_staff;$('navStaff').classList.toggle('hidden',!is);if(!is)return;const s=state.data?.staff||{};$('staffSummary').innerHTML=`<div class="stats-grid"><div class="stat-card"><span>Nové účty</span><strong>${(s.profiles||[]).filter(x=>x.status==='pending').length}</strong></div><div class="stat-card"><span>Rezervácie</span><strong>${(s.bookings||[]).length}</strong></div></div><div class="card"><strong>Správa žiadostí</strong><p class="hint">Kompletné schvaľovanie zostáva v internej Chvostíkovo aplikácii.</p></div>`}
+function renderStaffCore(){const is=!!state.data?.is_staff;$('navStaff').classList.toggle('hidden',!is);if(!is)return;const s=state.data?.staff||{};$('staffSummary').innerHTML=`<div class="stats-grid"><div class="stat-card"><span>Nové účty</span><strong>${(s.profiles||[]).filter(x=>x.status==='pending').length}</strong></div><div class="stat-card"><span>Rezervácie</span><strong>${(s.bookings||[]).length}</strong></div></div><div class="card"><strong>Správa žiadostí</strong><p class="hint">Kompletné schvaľovanie zostáva v internej Chvostíkovo aplikácii.</p></div>`}
+function renderStaff(){const out=renderStaffCore();runCustomerHooks('afterRenderStaff',out);return out}
 function repairCustomerScrollV60(){
   const html=document.documentElement;
   const pairs=[
@@ -1099,19 +1114,8 @@ placeDeadlineV59();
   function applyAll(){applyNav();applyHero();ensureSettings();setTimeout(relocateSettings,0)}
 
 
-  const basePassProfilePreview=renderPassSummary;
-  renderPassSummary=function(...args){
-    const out=basePassProfilePreview.apply(this,args);
-    setTimeout(()=>{applyHero();applyNav()},0);
-    return out;
-  };
-
-  const baseDogProfilePreview=renderDog;
-  renderDog=function(...args){
-    const out=baseDogProfilePreview.apply(this,args);
-    requestAnimationFrame(()=>{apply();applyAll()});
-    return out;
-  };
+  addCustomerHook('afterRenderPassSummary',()=>{setTimeout(()=>{applyHero();applyNav()},0)});
+  addCustomerHook('afterRenderDog',()=>{requestAnimationFrame(()=>{apply();applyAll()})});
 
   const start=()=>{
     apply();
@@ -1739,21 +1743,11 @@ async function togglePushDirect(btn){
   }
 
 
-  const baseRenderMessagesPreview=renderMessages;
-  renderMessages=function(...args){
-    const result=baseRenderMessagesPreview.apply(this,args);
-    refreshSubjectOptions();
-    renderSupportThread();
-    return result;
-  };
-
-  const baseUpdateUnreadPreview=updateUnread;
-  updateUnread=function(...args){
-    const result=baseUpdateUnreadPreview.apply(this,args);
+  addCustomerHook('afterRenderMessages',()=>{refreshSubjectOptions();renderSupportThread()});
+  addCustomerHook('afterUpdateUnread',()=>{
     const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);
     $('supportChatUnreadV52')?.classList.toggle('hidden',!unread);
-    return result;
-  };
+  });
 
   const baseSwitchTabPreview=switchTab;
   switchTab=function(tab){
@@ -1770,22 +1764,13 @@ async function togglePushDirect(btn){
     return result;
   };
 
-  const baseRenderStaffPreview=renderStaff;
-  renderStaff=function(...args){
-    const result=baseRenderStaffPreview.apply(this,args);
-    refreshNav();
-    return result;
-  };
-
-  const baseRenderDogPreview=renderDog;
-  renderDog=function(...args){
-    const result=baseRenderDogPreview.apply(this,args);
+  addCustomerHook('afterRenderStaff',()=>{refreshNav()});
+  addCustomerHook('afterRenderDog',()=>{
     updateButton();
     ensureHint();
     refreshNav();
     setTimeout(()=>{ensureRulesUiV55();polishMenuV55()},0);
-    return result;
-  };
+  });
 
   const start=()=>{
     mount();
