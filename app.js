@@ -426,7 +426,7 @@ placeDeadlineV59();
   }
   function openGuide(){ensureGuide();document.getElementById('installGuideModal')?.classList.remove('hidden')}
   function mountHelpLink(){const card=document.querySelector('.auth-card');if(!card||document.getElementById('installHelpLink'))return;const b=document.createElement('button');b.id='installHelpLink';b.type='button';b.className='install-help-link';b.textContent='Ako si nainštalovať aplikáciu?';b.addEventListener('click',openGuide);card.appendChild(b)}
-  const start=()=>{mountHelpLink();if(!standalone()&&!currentSession()&&sessionStorage.getItem(KEY)!=='1')setTimeout(openGuide,180)};
+  const start=()=>{mountHelpLink();if(!standalone()&&sessionStorage.getItem(KEY)!=='1')setTimeout(openGuide,180)};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
 /* v75: Supabase-backed customer onboarding state machine */

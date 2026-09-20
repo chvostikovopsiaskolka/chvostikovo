@@ -1025,7 +1025,7 @@ html,body,#appView.app,#appView .tab-page{
     -webkit-overflow-scrolling:touch!important;
     touch-action:pan-y!important;
   }
-  #authView.auth-shell{
+  #authView.auth-shell:not(.hidden){
     display:block!important;
     width:100%!important;
     height:auto!important;
