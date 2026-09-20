@@ -4,9 +4,9 @@ import { ShortForm } from "./Forms";
 
 export function InquirySection() {
   return (
-    <section className="bg-card pb-10 lg:hidden">
+    <section id="informujte-sa" className="scroll-mt-24 bg-card pb-10 lg:hidden">
       <div className="mx-auto max-w-2xl px-4">
-        <div className="min-w-0 rounded-4xl bg-card p-6 shadow-soft sm:p-8">
+        <div className="min-w-0 rounded-4xl bg-secondary/70 p-6 shadow-soft ring-1 ring-coral/15 sm:p-8">
           <h3 className="text-center text-2xl text-forest">Informujte sa o škôlke..</h3>
           <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
             Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.

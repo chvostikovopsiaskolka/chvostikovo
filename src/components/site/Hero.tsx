@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Phone } from "lucide-react";
+import { ChevronDown, Phone } from "lucide-react";
 import { PHONE } from "@/content/site";
 import heroDogs from "@/assets/hero-dogs.jpg";
 import { ShortForm } from "./Forms";
@@ -71,7 +71,15 @@ export function Hero() {
             </p>
           </div>
 
-          <InfoTicker className="mt-7 mb-0 w-screen mx-[calc((100%-100vw)/2)]" />
+          <a
+            href="#informujte-sa"
+            className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full border border-coral/30 bg-white/90 px-5 py-2.5 font-display text-sm font-semibold text-coral-dark shadow-card backdrop-blur-sm transition hover:bg-white"
+          >
+            Chcem sa informovať o škôlke
+            <ChevronDown className="size-4" />
+          </a>
+
+          <InfoTicker className="mt-5 mb-0 w-screen mx-[calc((100%-100vw)/2)]" />
         </div>
 
         {/* Desktop layout */}
