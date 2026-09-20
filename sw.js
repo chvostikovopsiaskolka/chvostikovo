@@ -1,9 +1,9 @@
 
-const CACHE='chvostikovo-portal-shell-20260920-preview-pass-renewal-loading-v16';
+const CACHE='chvostikovo-portal-shell-20260920-preview-resume-version-guard-v17';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
-const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/styles.css?v=20260920-preview-pass-renewal-loading-v16','/app.js?v=20260920-preview-pass-renewal-loading-v16'];
+const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://jgzabminzgbfhsrgqedt.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://jgzabminzgbfhsrgqedt.supabase.co wss://jgzabminzgbfhsrgqedt.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
+const SHELL=['/','/styles.css?v=20260920-preview-resume-version-guard-v17','/app.js?v=20260920-preview-resume-version-guard-v17'];
 
 function withPortalCsp(response){
   if(!response)return response;
@@ -28,6 +28,10 @@ self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
   const url=new URL(event.request.url);
   if(url.origin!==self.location.origin)return;
+  if(url.pathname==='/version.json'){
+    event.respondWith(fetch(event.request,{cache:'no-store'}));
+    return;
+  }
   if(event.request.mode==='navigate'){
     event.respondWith(
       fetch(event.request,{cache:'no-store'})
