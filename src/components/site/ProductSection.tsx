@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import standMia from "@/assets/products/stand-small-mia.webp";
+import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
 
 const PRODUCTS = [
   {
@@ -10,6 +11,15 @@ const PRODUCTS = [
     description: "Dve nerezové misky, výška podľa psíka a prevedenie s personalizáciou podľa vášho želania.",
     price: "40 €",
     cta: "Pozrieť stojan",
+  },
+  {
+    href: "/target-na-cvicenie-pre-psov",
+    image: targetLargeDog,
+    alt: "Pes stojaci na drevenom targete na cvičenie",
+    title: "Target na cvičenie pre psov",
+    description: "Ručne vyrábaný drevený target s protišmykovým povrchom na tréning labiek, koordinácie a rovnováhy.",
+    price: "20 €",
+    cta: "Pozrieť target",
   },
 ];
 

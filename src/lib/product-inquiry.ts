@@ -20,10 +20,32 @@ export const standInquirySchema = z.object({
   }),
 });
 
-export type StandInquiryInput = z.infer<typeof standInquirySchema>;
+export const targetInquirySchema = z.object({
+  client_submission_id: z.string().uuid(),
+  product_type: z.literal("target"),
+  customer_name: z.string().trim().min(2).max(160),
+  phone: z.string().trim().min(7).max(40),
+  email: z.string().trim().email().max(200),
+  source_ref: z.string().max(500),
+  company: z.string().max(200).optional(),
+  configuration: z.object({
+    size: z.enum(["small", "large"]),
+    height_cm: z.number().min(3).max(60).nullable(),
+    note: z.string().trim().max(1000),
+  }),
+});
 
-export async function submitProductInquiry(input: StandInquiryInput) {
-  const payload = standInquirySchema.parse(input);
+export const productInquirySchema = z.discriminatedUnion("product_type", [
+  standInquirySchema,
+  targetInquirySchema,
+]);
+
+export type StandInquiryInput = z.infer<typeof standInquirySchema>;
+export type TargetInquiryInput = z.infer<typeof targetInquirySchema>;
+export type ProductInquiryInput = z.infer<typeof productInquirySchema>;
+
+export async function submitProductInquiry(input: ProductInquiryInput) {
+  const payload = productInquirySchema.parse(input);
   const response = await fetch(PRODUCT_INQUIRY_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

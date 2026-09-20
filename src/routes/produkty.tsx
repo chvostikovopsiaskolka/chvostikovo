@@ -1,15 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, Hammer, Paintbrush, Ruler, Sparkles, Type } from "lucide-react";
+import { ArrowRight, Hammer, Paintbrush, Ruler, ShieldCheck, Sparkles, Type } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import standMia from "@/assets/products/stand-small-mia.webp";
+import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
 
 const BASE_URL = "https://chvostikovo.sk";
 const PAGE_URL = `${BASE_URL}/produkty`;
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Produkty pre psov | Ručná výroba | Chvostíkovo";
 const description =
-  "Ručne vyrábané produkty pre psov od Chvostíkova. Drevené stojany na misky na mieru s dvoma miskami a personalizáciou.";
+  "Ručne vyrábané produkty pre psov od Chvostíkova. Drevené stojany na misky a tréningové targety v praktickom prevedení.";
 
 export const Route = createFileRoute("/produkty")({
   head: () => ({
@@ -107,6 +108,55 @@ function ProductsPage() {
                   </div>
                   <a
                     href="/stojan-na-misky-pre-psa"
+                    className="btn-coral inline-flex items-center gap-2"
+                  >
+                    Detail produktu <ArrowRight className="size-4" />
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <article className="mx-auto mt-6 grid max-w-4xl overflow-hidden rounded-4xl bg-card shadow-soft lg:grid-cols-[1fr_0.95fr]">
+              <a href="/target-na-cvicenie-pre-psov" className="group block overflow-hidden">
+                <img
+                  src={targetLargeDog}
+                  alt="Pes stojaci na targete na cvičenie"
+                  className="h-72 w-full object-cover transition duration-500 group-hover:scale-[1.02] sm:h-80 lg:h-full"
+                  style={{ objectPosition: "50% 58%" }}
+                />
+              </a>
+              <div className="flex flex-col justify-center p-6 sm:p-8">
+                <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">
+                  Tréningové pomôcky
+                </p>
+                <h2 className="mt-2 text-2xl text-forest sm:text-3xl">
+                  Target na cvičenie pre psov
+                </h2>
+                <p className="mt-3 leading-relaxed text-forest/80">
+                  Pevný drevený target s protišmykovým povrchom na nácvik správneho umiestnenia
+                  labiek, koordinácie, rovnováhy a kondičného tréningu.
+                </p>
+                <div className="mt-5 grid gap-2 text-sm text-forest/80 sm:grid-cols-2">
+                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
+                    <ShieldCheck className="size-4 shrink-0 text-coral" /> Protišmykový povrch
+                  </span>
+                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
+                    <Ruler className="size-4 shrink-0 text-coral" /> Veľký aj malý variant
+                  </span>
+                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
+                    <Hammer className="size-4 shrink-0 text-coral" /> Ručná výroba
+                  </span>
+                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
+                    <Sparkles className="size-4 shrink-0 text-coral" /> Výška podľa dohody
+                  </span>
+                </div>
+                <div className="mt-6 flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-xs text-forest/60">Cena</p>
+                    <p className="font-display text-2xl font-bold text-forest">20 €</p>
+                  </div>
+                  <a
+                    href="/target-na-cvicenie-pre-psov"
                     className="btn-coral inline-flex items-center gap-2"
                   >
                     Detail produktu <ArrowRight className="size-4" />

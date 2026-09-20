@@ -83,6 +83,7 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
                   <div className="invisible absolute top-0 left-full z-50 w-48 pl-2 opacity-0 transition group-hover/products:visible group-hover/products:opacity-100 group-focus-within/products:visible group-focus-within/products:opacity-100">
                     <div className="rounded-2xl bg-card p-1.5 shadow-soft ring-1 ring-forest/5">
                       <a href="/stojan-na-misky-pre-psa" className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">Stojany na misky</a>
+                      <a href="/target-na-cvicenie-pre-psov" className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">Target na cvičenie</a>
                     </div>
                   </div>
                 </div>
@@ -126,6 +127,7 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
                 {productsOpen && (
                   <div className="ml-3 border-l-2 border-coral/20 pl-2">
                     <a href="/stojan-na-misky-pre-psa" onClick={closeMobileMenu} className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest hover:bg-card">Stojany na misky</a>
+                    <a href="/target-na-cvicenie-pre-psov" onClick={closeMobileMenu} className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest hover:bg-card">Target na cvičenie</a>
                   </div>
                 )}
               </div>

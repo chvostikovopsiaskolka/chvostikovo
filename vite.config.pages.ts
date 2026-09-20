@@ -22,6 +22,7 @@ export default defineConfig({
       { path: "/strazenie-psov-kosice" },
       { path: "/produkty" },
       { path: "/stojan-na-misky-pre-psa" },
+      { path: "/target-na-cvicenie-pre-psov" },
       { path: "/kosik" },
       { path: "/objednavka" },
       { path: "/en/dog-daycare-kosice" },
