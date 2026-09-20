@@ -48,7 +48,7 @@ function bratislavaToday(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone
 function dogAgeParts(birthDate,today=bratislavaToday()){if(!birthDate)return null;const b=String(birthDate).slice(0,10).split('-').map(Number),t=String(today).slice(0,10).split('-').map(Number);if(b.length!==3||t.length!==3||b.some(Number.isNaN)||t.some(Number.isNaN))return null;let months=(t[0]-b[0])*12+t[1]-b[1]-(t[2]<b[2]?1:0);if(months<0)return null;return{months,years:Math.floor(months/12)}}
 function dogAgeText(birthDate,today){const age=dogAgeParts(birthDate,today);if(!age)return'';if(age.months<12){if(age.months===0)return'menej ako mesiac';if(age.months===1)return'1 mesiac';if(age.months>=2&&age.months<=4)return age.months+' mesiace';return age.months+' mesiacov'}if(age.years===1)return'1 rok';if(age.years>=2&&age.years<=4)return age.years+' roky';return age.years+' rokov'}
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add('hidden'),3300)}
-function loading(on){$('loading')?.classList.toggle('hidden',!on)}
+function loading(on){const el=$('loading');if(!el)return;const inApp=!!on&&!$('appView')?.classList.contains('hidden');el.classList.toggle('in-app',inApp);el.classList.toggle('hidden',!on);if(!on)el.classList.remove('in-app')}
 function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
@@ -1255,15 +1255,22 @@ placeDeadlineV59();
     const dog=selectedDog(),dates=[...selectedDatesV37].sort();
     if(!dog||!dates.length||submittingV37)return;
     submittingV37=true;renderPickerV37();
-    let ok=0;const failed=[];
+    let ok=0,shouldPromptPassRenewalV94=false;const failed=[];
     for(const date of dates){
       const taxiMode=selectedTaxiByDateV91.get(date)||'none';
-      try{const result=await api({action:'request_booking',dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode});applyLocalBooking(result,{id:-(Date.now()+ok),dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode,status:'pending',can_manage:true});ok++}
-      catch(e){failed.push({date,error:e.message||'Nepodarilo sa rezervovať.'})}
+      try{
+        const result=await api({action:'request_booking',dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode});
+        const bookingRow=result?.data||result?.booking||result?.request||null;
+        if(bookingRow&&Number(bookingRow.projected_pass_total)>0&&Number(bookingRow.projected_entry_number)>=Number(bookingRow.projected_pass_total))shouldPromptPassRenewalV94=true;
+        applyLocalBooking(result,{id:-(Date.now()+ok),dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode,status:'pending',can_manage:true});ok++;
+      }catch(e){failed.push({date,error:e.message||'Nepodarilo sa rezervovať.'})}
     }
     try{if(ok)queueCustomerSync('bookings',80)}finally{submittingV37=false}
-    if(ok){closePickerV37();toast(ok===dates.length?(ok===1?'Rezervácia bola odoslaná na schválenie.':`${ok} rezervácie boli odoslané na schválenie.`):`Odoslané ${ok} z ${dates.length} rezervácií.`)}
-    else{renderPickerV37();toast(failed[0]?.error||'Rezerváciu sa nepodarilo odoslať.')}
+    if(ok){
+      closePickerV37();
+      toast(ok===dates.length?(ok===1?'Rezervácia bola odoslaná na schválenie.':`${ok} rezervácie boli odoslané na schválenie.`):`Odoslané ${ok} z ${dates.length} rezervácií.`);
+      if(shouldPromptPassRenewalV94)setTimeout(()=>window.showPassRenewalAfterBookingV94?.(Number(dog.id)),140);
+    }else{renderPickerV37();toast(failed[0]?.error||'Rezerváciu sa nepodarilo odoslať.')}
   }
 
   function bookingRosterV37(day){
@@ -1346,6 +1353,7 @@ placeDeadlineV59();
     button.onclick=async()=>{button.disabled=true;try{await requestPass(10);modal.classList.add('hidden')}finally{button.disabled=false}};
     modal.classList.remove('hidden');
   }
+  window.showPassRenewalAfterBookingV94=(dogId)=>{bookingDogV38=0;showPromptV38(Number(dogId)||0)};
 
 
 
