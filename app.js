@@ -30,7 +30,9 @@ const customerHooks={
   afterRenderDog:[],
   afterRenderMessages:[],
   afterUpdateUnread:[],
-  afterRenderStaff:[]
+  afterRenderStaff:[],
+  afterApi:[],
+  afterBootstrap:[]
 };
 function addCustomerHook(name,fn){if(typeof fn==='function'&&customerHooks[name])customerHooks[name].push(fn)}
 function runCustomerHooks(name,...args){for(const fn of customerHooks[name]||[]){try{fn(...args)}catch(error){console.warn('Customer hook failed',name,error)}}}
@@ -52,7 +54,8 @@ function saveSession(s,remember=true){localStorage.removeItem(SESSION_KEY);sessi
 function clearSession(){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;stopCustomerLive();['waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
 async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');return data}
 async function refreshSession(){if(!state.session?.refresh_token)throw new Error('Prihlásenie vypršalo.');const s=await authFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:state.session.refresh_token})});saveSession(s,state.storage===localStorage);startCustomerLive(true);return s}
-async function api(body=null,retry=true){if(!state.session)throw new Error('Najprv sa prihláste.');const opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const r=await fetch(API,opts);const txt=await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(r.status===401&&retry){await refreshSession();return api(body,false)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
+async function apiCore(body=null,retry=true){if(!state.session)throw new Error('Najprv sa prihláste.');const opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const r=await fetch(API,opts);const txt=await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(r.status===401&&retry){await refreshSession();return apiCore(body,false)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
+async function api(body=null,retry=true){const result=await apiCore(body,retry);runCustomerHooks('afterApi',body,result);return result}
 function showAuth(mode='login'){$('appView').classList.add('hidden');$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
 function showApp(){$('authView').classList.add('hidden');$('appView').classList.remove('hidden')}
 function pluralDogs(n){return n===1?'1 prihlásený psík':n+' prihlásených psíkov'}
@@ -75,7 +78,7 @@ async function preloadDogVisualV56(data=state.data){
   }catch(_){}
 }
 let bootstrapInFlight=null,lastResumeRefresh=0;
-function bootstrap(showSpinner=true){
+function bootstrapCore(showSpinner=true){
   if(bootstrapInFlight)return bootstrapInFlight;
   if(showSpinner)loading(true);
   const run=(async()=>{try{
@@ -100,6 +103,7 @@ function bootstrap(showSpinner=true){
   bootstrapInFlight=run.finally(()=>{if(showSpinner)loading(false);bootstrapInFlight=null});
   return bootstrapInFlight;
 }
+async function bootstrap(showSpinner=true){const result=await bootstrapCore(showSpinner);runCustomerHooks('afterBootstrap',result);return result}
 function renderAll(){renderWeekHeader();renderNotifications();renderPassSummary();renderUpcoming();renderDays();renderMessages();renderDogSelector();renderDog();renderProfile();renderStaff();updateUnread()}
 
 /* v45: one authenticated Realtime socket, coalesced component resyncs, and resume recovery. */
@@ -706,7 +710,7 @@ placeDeadlineV59();
   window.runCustomerOnboardingV75=runCustomerOnboardingV75;
   document.addEventListener('click',e=>{if(e.target.closest('#privacyInfoBtn')){e.preventDefault();openPrivacyInfo(false)}if(e.target.closest('#privacyInfoClose'))closePrivacyInfo();if(e.target.closest('#privacyInfoOk'))acknowledgePrivacy();if(e.target.closest('#schoolTermsConfirm'))acceptSchoolTerms();if(e.target.closest('#schoolTermsLogout'))$('logoutBtn')?.click()});
   document.addEventListener('change',e=>{if(e.target?.id==='schoolTermsAck'&&$('schoolTermsConfirm'))$('schoolTermsConfirm').disabled=!e.target.checked});
-  const originalBootstrapV75=bootstrap;bootstrap=async function(...args){const result=await originalBootstrapV75.apply(this,args);setTimeout(runCustomerOnboardingV75,60);return result};
+  addCustomerHook('afterBootstrap',()=>{setTimeout(runCustomerOnboardingV75,60)});
   setTimeout(()=>{if(state.session&&state.data)runCustomerOnboardingV75()},800);
 })();
 /* v20b: mount legal UI into stable Vercel shell */
@@ -1397,21 +1401,14 @@ placeDeadlineV59();
   }
 
 
-  const baseApiLifecyclePreview=api;
-  api=async function(body=null,...rest){
-    const result=await baseApiLifecyclePreview.call(this,body,...rest);
+  addCustomerHook('afterApi',(body)=>{
     if(body?.action==='request_booking')bookingDogV38=Number(body.dog_id)||0;
-    return result;
-  };
-
-  const baseBootstrapLifecyclePreview=bootstrap;
-  bootstrap=async function(...args){
-    const result=await baseBootstrapLifecyclePreview.apply(this,args);
+  });
+  addCustomerHook('afterBootstrap',()=>{
     const dogId=bookingDogV38;bookingDogV38=0;
     if(dogId)setTimeout(()=>showPromptV38(dogId),120);
     setTimeout(healPushV71,80);
-    return result;
-  };
+  });
 
   window.addEventListener('pageshow',()=>setTimeout(healPushV71,250));
   window.addEventListener('focus',()=>setTimeout(healPushV71,350));
