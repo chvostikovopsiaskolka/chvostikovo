@@ -1,9 +1,9 @@
 
-const CACHE='chvostikovo-portal-shell-20260920-preview-cleanup-v14';
+const CACHE='chvostikovo-portal-shell-20260920-preview-cleanup-v15';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/styles.css?v=20260920-preview-cleanup-v14','/app.js?v=20260920-preview-cleanup-v14'];
+const SHELL=['/','/styles.css?v=20260920-preview-cleanup-v15','/app.js?v=20260920-preview-cleanup-v15'];
 
 function withPortalCsp(response){
   if(!response)return response;

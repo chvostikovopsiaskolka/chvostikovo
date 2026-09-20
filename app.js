@@ -960,8 +960,6 @@ placeDeadlineV59();
 (function customerDogProfilePreview(){
   if(window.__chvostikovoDogProfilePreview)return;
   window.__chvostikovoDogProfilePreview=true;
-  window.__chvostikovoDogProfileLayoutV23=true;
-  window.__chvostikovoCustomerAppChromeV36=true;
 
 
   const monthLabel=value=>{try{return new Intl.DateTimeFormat('sk-SK',{month:'long',year:'numeric'}).format(new Date(String(value).slice(0,10)+'T12:00:00'))}catch(_){return String(value||'')}};
@@ -1312,8 +1310,6 @@ placeDeadlineV59();
 (function customerLifecyclePreview(){
   if(window.__chvostikovoCustomerLifecyclePreview)return;
   window.__chvostikovoCustomerLifecyclePreview=true;
-  window.__chvostikovoCustomerPassRenewalV38=true;
-  window.__chvostikovoCustomerPushHealV71=true;
 
   let bookingDogV38=0;
 
@@ -1511,9 +1507,6 @@ async function togglePushDirect(btn){
 (function customerProfileExperiencePreview(){
   if(window.__chvostikovoProfileExperiencePreview)return;
   window.__chvostikovoProfileExperiencePreview=true;
-  window.__chvostikovoSupportChatV52=true;
-  window.__chvostikovoCustomerProfilePolishV53=true;
-  window.__chvostikovoRulesMenuV55=true;
 
 
   const chatSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path><path d="M7.5 10h9M7.5 13.5h6"></path></svg>';
