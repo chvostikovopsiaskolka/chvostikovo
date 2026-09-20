@@ -46,12 +46,13 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
 function ReviewCarousel() {
   const track = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
+  const resumeTimer = useRef<number | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
     const el = track.current;
     if (!el) return;
-    const speed = isMobile ? 60 : 42; // px / s
+    const speed = isMobile ? 50 : 36; // px / s
     let raf = 0;
     let last = performance.now();
     let carry = 0;
@@ -78,17 +79,44 @@ function ReviewCarousel() {
     };
 
     raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+    };
   }, [isMobile]);
 
-  const pause = () => (paused.current = true);
-  const resume = () => (paused.current = false);
+  const pause = () => {
+    if (resumeTimer.current) {
+      window.clearTimeout(resumeTimer.current);
+      resumeTimer.current = null;
+    }
+    paused.current = true;
+  };
+
+  const resume = () => {
+    if (resumeTimer.current) {
+      window.clearTimeout(resumeTimer.current);
+      resumeTimer.current = null;
+    }
+    paused.current = false;
+  };
+
+  const pauseForReading = () => {
+    pause();
+    resumeTimer.current = window.setTimeout(() => {
+      paused.current = false;
+      resumeTimer.current = null;
+    }, 8000);
+  };
 
   return (
     <div
       ref={track}
       onMouseEnter={pause}
       onMouseLeave={resume}
+      onTouchStart={pause}
+      onTouchEnd={pauseForReading}
+      onTouchCancel={pauseForReading}
       onFocusCapture={pause}
       onBlurCapture={resume}
       className="mt-10 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
