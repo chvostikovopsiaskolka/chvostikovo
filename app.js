@@ -329,9 +329,10 @@ async function decodePhotoFileV88(file){
   if(!img.width||!img.height)throw new Error('decode failed');
   return img
 }
-function beginPhotoEditV89(img){
+function beginPhotoEditV89(img,options={}){
   ensurePhotoEditor();
-  state.photoEdit={img,url:null,zoom:1,ox:0,oy:0};
+  const startZoom=Math.max(1,Math.min(3,Number(options.startZoom)||1));
+  state.photoEdit={img,url:null,zoom:startZoom,ox:0,oy:0};
   clampPhotoOffset(true);
   drawPhotoCrop();
   $('photoCropModal').classList.remove('hidden');
@@ -361,7 +362,9 @@ async function openExistingPhotoEditorV89(dog){
     if(!response.ok)throw new Error('download failed');
     const blob=await response.blob();
     const img=await decodePhotoFileV88(blob);
-    beginPhotoEditV89(img);
+    // The stored profile image is already square-cropped. Start slightly zoomed
+    // so there is immediately room to reposition it with one finger.
+    beginPhotoEditV89(img,{startZoom:1.12});
   }catch(_){
     toast('Aktuálnu fotku sa nepodarilo otvoriť na úpravu. Skúste nahrať novú.')
   }finally{loading(false)}
