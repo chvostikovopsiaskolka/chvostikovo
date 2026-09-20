@@ -1057,7 +1057,7 @@ html,body,#appView.app,#appView .tab-page{
 .deadline-card{padding:9px 12px!important;margin:8px 0 12px!important;border-radius:14px!important;display:grid!important;gap:3px!important}
 .deadline-card strong{font-size:11.5px!important;line-height:1.22!important;letter-spacing:-.15px}.deadline-card span{font-size:11px!important;line-height:1.25!important}
 .hero-pass .single-entry-label-v75{font-size:18px!important;line-height:1.05!important}
-.beta-version-badge-v75{position:fixed;left:50%;bottom:calc(65px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:79;border:1.5px solid #dc2626;background:#fff;color:#b91c1c;border-radius:999px;padding:4px 10px;font-size:10px;font-weight:850;line-height:1.15;box-shadow:0 2px 10px rgba(127,29,29,.08)}
+.beta-version-badge-v75{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:79;border:1.5px solid #dc2626;background:#fff;color:#b91c1c;border-radius:999px;padding:4px 10px;font-size:10px;font-weight:850;line-height:1.15;box-shadow:0 2px 10px rgba(127,29,29,.08)}
 .app{padding-bottom:calc(116px + env(safe-area-inset-bottom))!important}
 @media(max-width:520px){.deadline-card strong{font-size:10.5px!important;white-space:nowrap}.deadline-card span{font-size:10.5px!important}.hero-pass .single-entry-label-v75{font-size:16px!important}}
 
