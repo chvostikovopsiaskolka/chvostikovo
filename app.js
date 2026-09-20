@@ -1333,10 +1333,6 @@ placeDeadlineV59();
       return (projectedTotal===total&&projectedEntry>=total)||(plannedTotal===total&&plannedEntry>=total);
     });
   }
-  function requestCopyV38(dogId){
-    if(pendingPassV38(dogId))return '<div class="pending-pass pass-interest-copy"><strong>Záujem o novú permanentku sme zaregistrovali.</strong><small>Nákup novej permanentky dokončíme pri najbližšej návšteve v škôlke.</small></div>';
-    return '<div class="buy-pass pass-renewal-v38"><strong>Posledný vstup z permanentky je už rezervovaný</strong><small>Môžete si pripraviť ďalšiu 10-vstupovú permanentku za 200 €.</small><small><b>Platnosť novej permanentky začne až jej prvým použitím.</b></small><button class="btn full request-pass-renewal-v38" type="button">Mám záujem o novú permanentku</button></div>';
-  }
   function ensureModalV38(){
     if(document.getElementById('passRenewalModalV38'))return;
     document.body.insertAdjacentHTML('beforeend','<div id="passRenewalModalV38" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passRenewalTitleV38"><div class="legal-card"><button id="passRenewalCloseV38" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="passRenewalTitleV38">Posledný vstup z permanentky</h2><div class="legal-body"><p>Práve rezervovaný deň využije posledný voľný vstup z aktuálnej permanentky.</p><p><strong>Nová 10-vstupová permanentka stojí 200 €.</strong></p><p class="hint">Platnosť novej permanentky začne až jej prvým použitím.</p><p class="hint pass-interest-disclaimer-v44">Odoslaním záujmu nevzniká povinnosť platby ani automatický nákup permanentky. Ide iba o informáciu pre Chvostíkovo, že máte o novú permanentku záujem.</p></div><button id="passRenewalRequestV38" class="btn full" type="button">Mám záujem o novú permanentku</button><button id="passRenewalLaterV38" class="btn secondary full" type="button">Neskôr</button></div></div>');

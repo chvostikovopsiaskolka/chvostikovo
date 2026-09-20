@@ -364,29 +364,6 @@ html.settings-open-v36,html.booking-picker-open-v37{overflow-y:auto!important}
 .settings-modal-v36,.booking-picker-v37,.legal-modal{overscroll-behavior:contain;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important}
 
 
-/* Permanentka and the recorded interest are separate blocks in normal flow. */
-#customerEntrySectionV23 .details-content{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr);
-  gap:14px!important;
-  width:100%;
-  height:auto!important;
-  min-height:0;
-  overflow:visible!important;
-}
-#customerEntrySectionV23[open]{overflow:visible!important}
-.pass-interest-block{display:block;width:100%;height:auto!important;min-height:0;margin:0;padding:16px;background:#fff;border:1px solid #dfe6e2;border-radius:18px;overflow:visible}
-.pass-interest-block .pass-renewal-v38,.pass-interest-block .pass-interest-copy{display:grid;gap:7px;min-width:0}
-.pass-interest-block .pass-renewal-v38>strong,.pass-interest-block .pass-interest-copy>strong{display:block;font-size:17px;line-height:1.28}
-.pass-interest-block .pass-renewal-v38>small,.pass-interest-block .pass-interest-copy>small{display:block;margin:0;font-size:13px;line-height:1.42;color:var(--muted)}
-.pass-interest-block .pass-renewal-v38 .btn{margin-top:5px;min-height:48px;border-radius:15px}
-@media(max-width:520px){
-  #customerEntrySectionV23 .details-content{gap:12px!important}
-  .pass-interest-block{padding:14px}
-  .pass-interest-block .pass-renewal-v38>strong,.pass-interest-block .pass-interest-copy>strong{font-size:16px}
-  .pass-interest-block .pass-renewal-v38>small,.pass-interest-block .pass-interest-copy>small{font-size:12px}
-}
-
 /* v44: permanentka interest clarity */
 .pass-interest-disclaimer-v44{font-size:12px!important;line-height:1.45!important;color:#7b8493!important;margin-top:12px!important}
 
