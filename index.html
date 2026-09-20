@@ -12,7 +12,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="stylesheet" href="/styles.css?v=20260920-password-eye-v80">
+  <link rel="stylesheet" href="/styles.css?v=20260920-dog-info-v81">
   <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}</style>
   <title>Chvostíkovo</title>
 </head>
@@ -95,11 +95,10 @@
     <form id="dogForm" class="form-stack">
       <input id="dogId" type="hidden"><input id="submissionId" type="hidden">
       <div><label for="dogName">Meno psíka</label><input id="dogName" class="input" required></div>
-      <div class="grid2"><div><label for="dogBirthDate">Dátum narodenia</label><input id="dogBirthDate" class="input" type="date"></div><div><label for="dogAge">Vek</label><input id="dogAge" class="input" readonly></div></div>
+      <div class="grid2"><div><label for="dogBirthDate">Dátum narodenia</label><input id="dogBirthDate" class="input" type="date"></div><div><label for="dogAge">Vek</label><input id="dogAge" class="input dog-age-locked-v81" readonly aria-readonly="true" tabindex="-1" placeholder="Vyplní sa automaticky"></div></div>
       <div><label for="dogBreed">Plemeno</label><input id="dogBreed" class="input"></div>
       <div class="grid2"><div><label for="dogSex">Pohlavie</label><select id="dogSex" class="input"><option value="">Neuvedené</option><option value="male">Pes</option><option value="female">Suka</option></select></div><div><label for="dogNeutered">Kastrovaný / sterilizovaná</label><select id="dogNeutered" class="input"><option value="">Neuvedené</option><option value="true">Áno</option><option value="false">Nie</option></select></div></div>
-      <div><label for="dogAllergies">Alergie a zdravotné obmedzenia</label><textarea id="dogAllergies" class="input" rows="3" maxlength="1000" placeholder="Alergie, lieky alebo zdravotné obmedzenia"></textarea></div>
-      <div><label for="dogTemperament">Povaha a dôležité informácie</label><textarea id="dogTemperament" class="input" rows="3" maxlength="1000" placeholder="Povaha, správanie a dôležité informácie"></textarea></div>
+      <div><label for="dogAllergies">Alergie, zdravotné obmedzenia a iné informácie</label><textarea id="dogAllergies" class="input" rows="5" maxlength="3000" placeholder="Alergie, lieky, zdravotné obmedzenia, povaha alebo iné dôležité informácie"></textarea></div>
       <div class="dog-vaccinations-heading">Očkovania</div>
       <div class="vaccine-box"><strong>Besnota</strong><div class="grid2"><div><label>Očkovaný</label><input id="rabiesOn" class="input" type="date"></div><div><label>Platí do</label><input id="rabiesUntil" class="input" type="date"></div></div></div>
       <div class="vaccine-box"><strong>Infekčné ochorenia</strong><div class="grid2"><div><label>Očkovaný</label><input id="infectiousOn" class="input" type="date"></div><div><label>Platí do</label><input id="infectiousUntil" class="input" type="date"></div></div></div>
@@ -110,6 +109,6 @@
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/app.js?v=20260920-password-eye-v80"></script>
+<script src="/app.js?v=20260920-dog-info-v81"></script>
 </body>
 </html>
