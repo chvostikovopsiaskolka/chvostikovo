@@ -61,9 +61,7 @@ async function api(body=null,retry=true){const result=await apiCore(body,retry);
 function showAuth(mode='login'){$('appView').classList.add('hidden');$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
 function showApp(){$('authView').classList.add('hidden');$('appView').classList.remove('hidden')}
 function pluralDogs(n){return n===1?'1 prihlásený psík':n+' prihlásených psíkov'}
-function freePlaces(n){n=Number(n)||0;if(n===1)return'1 voľné miesto';if(n>=2&&n<=4)return n+' voľné miesta';return n+' voľných miest'}
 function taxiLabel(mode){if(mode==='pickup')return'🚕 vyzdvihnutie/odvoz';if(mode==='pickup_dropoff')return'🚕 vyzdvihnutie aj dovoz';return''}
-function statusLabel(s){return {pending:'Čaká na schválenie',approved:'Schválené',cancelled:'Zrušené',rejected:'Zamietnuté'}[s]||s||''}
 function selectedDog(){const dogs=state.data?.dogs||[];return dogs.find(d=>Number(d.id)===Number(state.selectedDogId))||dogs[0]||null}
 function dogName(id){return (state.data?.dogs||[]).find(d=>Number(d.id)===Number(id))?.name||'Psík'}
 
@@ -519,15 +517,16 @@ window.addEventListener('focus',refreshOnResume);window.addEventListener('online
   badge.addEventListener('click',()=>modal.classList.remove('hidden'));close?.addEventListener('click',()=>modal.classList.add('hidden'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});messages?.addEventListener('click',()=>{modal.classList.add('hidden');switchTab('messages')});
 })();
 init();
-/* v18 runtime patch: compact calendar UI + quick date search */
-function bindDayCardActions(root){if(!root)return;root.querySelectorAll('.reserve-open-btn').forEach(btn=>btn.addEventListener('click',()=>{const opts=btn.parentElement.querySelector('.reserve-options');opts.classList.toggle('hidden');btn.classList.toggle('secondary',!opts.classList.contains('hidden'))}));root.querySelectorAll('.taxi-choice').forEach(btn=>btn.addEventListener('click',()=>reserveDay(btn)))}
-function dateSearchDayLabel(date){try{return new Intl.DateTimeFormat('sk-SK',{weekday:'short'}).format(new Date(date+'T12:00:00')).replace('.','')}catch(_){return''}}
-function renderDateSearchCalendar(){const root=$('dateSearchGrid');if(!root)return;const days=(state.data?.availability?.days||[]).slice(0,10);root.innerHTML=days.map(d=>{const parts=String(d.date).split('-');return `<button class="date-search-day" type="button" data-date="${d.date}"><small>${esc(dateSearchDayLabel(d.date))}</small><strong>${Number(parts[2])}</strong><span>${Number(parts[1])}.</span></button>`}).join('');root.querySelectorAll('.date-search-day').forEach(b=>b.addEventListener('click',()=>showSearchedDay(b.dataset.date)))}
-function openDateSearch(){renderDateSearchCalendar();$('dateSearchResult').innerHTML='';$('dateSearchModal').classList.remove('hidden')}
-function closeDateSearch(){$('dateSearchModal').classList.add('hidden');$('dateSearchResult').innerHTML=''}
-function showSearchedDay(date){const source=$('weekDays')?.querySelector(`.day-card[data-date="${date}"]`),target=$('dateSearchResult');if(!source||!target){toast('Tento deň nie je dostupný na rezerváciu.');return}const clone=source.cloneNode(true);target.innerHTML='<div class="date-search-selected-label">Vybraný deň</div>';target.appendChild(clone);bindDayCardActions(target);target.scrollIntoView({behavior:'smooth',block:'nearest'})}
-function upgradeBookingLayoutV18(){const booking=$('bookingTab'),week=$('weekDays');if(!booking||!week)return;const oldHead=[...booking.querySelectorAll('.section-head')].find(x=>x.querySelector('h2')?.textContent?.trim()==='Vyberte deň');if(oldHead)oldHead.remove();if(!booking.querySelector('.booking-section-head'))week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2></div><button id="dateSearchBtn" class="date-search-btn" type="button" aria-label="Vyhľadať konkrétny deň" title="Vyhľadať deň"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.2 4.2"></path></svg></button></div><div id="deadlineText" class="deadline-card"><strong>Prosíme o rezerváciu na nasledujúci týždeň do nedele 20:00.</strong><span>Ak potrebujete individuálny termín, kontaktujte nás.</span></div>');if(!$('dateSearchModal'))document.body.insertAdjacentHTML('beforeend','<div id="dateSearchModal" class="date-search-modal hidden" role="dialog" aria-modal="true" aria-labelledby="dateSearchTitle"><div class="date-search-card"><div class="date-search-head"><div><strong id="dateSearchTitle">Vyberte konkrétny deň</strong><small>Najbližšie dva týždne</small></div><button id="dateSearchClose" class="icon-btn" type="button" aria-label="Zavrieť">✕</button></div><div id="dateSearchGrid" class="date-search-grid"></div><div id="dateSearchResult"></div></div></div>');$('dateSearchBtn')?.addEventListener('click',openDateSearch);$('dateSearchClose')?.addEventListener('click',closeDateSearch);$('dateSearchModal')?.addEventListener('click',e=>{if(e.target===$('dateSearchModal'))closeDateSearch()})}
-upgradeBookingLayoutV18();
+/* consolidated booking layout: section heading + reservation deadline */
+function ensureBookingLayout(){
+  const booking=$('bookingTab'),week=$('weekDays');if(!booking||!week)return;
+  const oldHead=[...booking.querySelectorAll('.section-head')].find(x=>x.querySelector('h2')?.textContent?.trim()==='Vyberte deň');
+  if(oldHead)oldHead.remove();
+  if(!booking.querySelector('.booking-section-head')){
+    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme o rezerváciu na nasledujúci týždeň do nedele 20:00.</strong><span>Ak potrebujete individuálny termín, kontaktujte nás.</span></div>');
+  }
+}
+ensureBookingLayout();
 function placeDeadlineV59(){
   const deadline=$('deadlineText'),upcoming=$('upcomingBookings');
   if(deadline&&upcoming&&deadline.nextElementSibling!==upcoming)upcoming.parentElement?.insertBefore(deadline,upcoming);
