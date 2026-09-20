@@ -186,7 +186,6 @@ function ensureDogFormInModalV51(){
   const modal=$('dogDetailsModal'),form=$('dogForm'),card=modal?.querySelector('.dog-details-card');
   if(form&&card&&form.parentElement!==card)card.appendChild(form);
 }
-function dogProfileComplete(dog){return !!dog?.birth_date&&['male','female'].includes(dog?.sex)&&typeof dog?.neutered==='boolean'}
 function openDogDetails(){ensureDogFormInModalV51();const dog=selectedDog();if(!dog)return;fillDogForm(dog);$('dogDetailsModal').classList.remove('hidden');document.documentElement.classList.add('dog-details-open')}
 function closeDogDetails(){$('dogDetailsModal').classList.add('hidden');document.documentElement.classList.remove('dog-details-open')}
 function renderDogProfilePrompt(){for(const id of ['bookingNotice','dogStatus']){const root=$(id);if(root)root.innerHTML=''}}
@@ -387,8 +386,6 @@ function drawPhotoCrop(){const e=state.photoEdit;if(!e)return;const c=$('photoCr
 function closePhotoEditor(){if(state.photoEdit?.url)URL.revokeObjectURL(state.photoEdit.url);try{state.photoEdit?.img?.close?.()}catch(_){}state.photoEdit=null;$('photoCropModal')?.classList.add('hidden')}
 function photoJpegData(){const c=$('photoCropCanvas');for(const q of [.9,.84,.78,.72]){const data=c.toDataURL('image/jpeg',q),bytes=Math.ceil((data.length-data.indexOf(',')-1)*3/4);if(bytes<900000)return data}return c.toDataURL('image/jpeg',.68)}
 async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);await api({action:'upload_dog_photo',dog_id:Number(state.selectedDogId),image_data:photoJpegData()});closePhotoEditor();toast('Fotka je uložená.');await bootstrap(false)}catch(e){toast(e.message)}finally{loading(false)}}
-async function uploadPhoto(e){return openPhotoEditor(e)}
-function imageToJpeg(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{try{const size=512,scale=Math.max(size/img.width,size/img.height),w=img.width*scale,h=img.height*scale,c=document.createElement('canvas');c.width=c.height=size;c.getContext('2d').drawImage(img,(size-w)/2,(size-h)/2,w,h);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',.82))}catch(e){reject(e)}};img.onerror=()=>reject(new Error('Fotku sa nepodarilo načítať.'));img.src=url})}
 function urlBase64ToUint8Array(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(b);return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
 async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js')}catch(e){console.warn(e)}}
 async function pushSubscription(){if(!('serviceWorker'in navigator))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
@@ -960,19 +957,6 @@ placeDeadlineV59();
     return el;
   }
 
-  function mergeVaccinations(){
-    const form=$('dogForm');if(!form||form.dataset.v23Merged==='1')return;
-    const sections=[...form.querySelectorAll(':scope > details.profile-details')];
-    if(sections.length<2)return;
-    const info=sections[0],vacc=sections[1],infoBody=info.querySelector('.details-content'),vaccBody=vacc.querySelector('.details-content');
-    if(!infoBody||!vaccBody)return;
-    const save=infoBody.querySelector('button[type="submit"]');if(save)save.remove();
-    const title=document.createElement('div');title.className='v23-subsection-title';title.textContent='Očkovania';infoBody.appendChild(title);
-    [...vaccBody.children].forEach(node=>{if(node.matches?.('button[type="submit"]'))return;infoBody.appendChild(node)});
-    if(save){save.textContent='Uložiť údaje psíka';infoBody.appendChild(save)}
-    vacc.remove();form.dataset.v23Merged='1';
-  }
-
   function renderConsentControls(){
     const dog=selectedDog();if(!dog)return;
     const root=$('customerLegalControlsV23');if(!root)return;
@@ -999,23 +983,6 @@ placeDeadlineV59();
     const home=settingsHomeV49();if(home&&section.parentElement!==home)home.appendChild(section);
     if(!section.dataset.defaultOpened){section.open=true;section.dataset.defaultOpened='1'}
     renderConsentControls();
-    return section;
-  }
-
-  function renderEntry(layout){
-    const dog=selectedDog();if(!dog)return null;
-    const section=detailsShell('customerEntrySectionV23','Vstup a permanentka'),content=section.querySelector('.details-content');
-    const pass=activePassFor(dog.id),pendingPass=(state.data?.pass_requests||[]).find(r=>Number(r.dog_id)===Number(dog.id)&&r.status==='pending');
-    if(pass){
-      const total=Number(pass.total_entries)||10,used=Number(pass.used_entries)||0,remaining=Math.max(0,total-used),price=Number(pass.purchase_price)||(total===20?320:200),purchased=pass.purchased_on?skDate(pass.purchased_on):'';
-      const validity=pass.valid_until?'Platí do '+skDate(pass.valid_until):'Platnosť začne prvým použitím';
-      content.innerHTML='<div class="v23-pass-box active"><div class="pass-top"><div><strong>Permanentka</strong><small>'+total+' vstupov'+(purchased?' · kúpená '+purchased:'')+'</small><small class="v24-pass-validity">'+validity+'</small><small class="v24-pass-remaining">Zostáva '+remaining+' vstupov</small></div><div class="v24-pass-count"><b>'+used+'/'+total+'</b><small>použité</small></div></div></div>';
-    }else{
-      content.innerHTML='<div class="v23-pass-box"><div class="pass-top"><div><strong>Jednorazový vstup</strong><small>Cena za jednu návštevu</small></div><b>25 €</b></div>'+
-        (pendingPass?'<div class="pass-divider"></div><div class="pending-pass"><strong>Záujem o novú permanentku sme zaregistrovali.</strong><small>Nákup novej permanentky dokončíme pri najbližšej návšteve v škôlke.</small></div>':'<div class="pass-divider"></div><div class="buy-pass"><strong>Záujem o permanentku</strong><small>10 vstupov · platnosť začne prvým použitím.</small><button class="btn full request-pass-v23" type="button">10 vstupov · 200 €</button></div>')+'</div>';
-      content.querySelector('.request-pass-v23')?.addEventListener('click',()=>requestPass(10));
-    }
-    if(section.parentElement!==layout)layout.appendChild(section);
     return section;
   }
 
@@ -1370,13 +1337,6 @@ placeDeadlineV59();
     if(pendingPassV38(dogId))return '<div class="pending-pass pass-interest-copy"><strong>Záujem o novú permanentku sme zaregistrovali.</strong><small>Nákup novej permanentky dokončíme pri najbližšej návšteve v škôlke.</small></div>';
     return '<div class="buy-pass pass-renewal-v38"><strong>Posledný vstup z permanentky je už rezervovaný</strong><small>Môžete si pripraviť ďalšiu 10-vstupovú permanentku za 200 €.</small><small><b>Platnosť novej permanentky začne až jej prvým použitím.</b></small><button class="btn full request-pass-renewal-v38" type="button">Mám záujem o novú permanentku</button></div>';
   }
-  function renderInlineV38(){
-    const dog=selectedDog(),content=document.querySelector('#customerEntrySectionV23 .details-content');
-    document.getElementById('passRenewalInlineV38')?.remove();
-    if(!dog||!content||!lastEntryReservedV38(dog.id))return;
-    const box=document.createElement('div');box.id='passRenewalInlineV38';box.className='pass-interest-block';box.innerHTML=requestCopyV38(dog.id);content.appendChild(box);
-    box.querySelector('.request-pass-renewal-v38')?.addEventListener('click',async()=>{state.selectedDogId=Number(dog.id);await requestPass(10)});
-  }
   function ensureModalV38(){
     if(document.getElementById('passRenewalModalV38'))return;
     document.body.insertAdjacentHTML('beforeend','<div id="passRenewalModalV38" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passRenewalTitleV38"><div class="legal-card"><button id="passRenewalCloseV38" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="passRenewalTitleV38">Posledný vstup z permanentky</h2><div class="legal-body"><p>Práve rezervovaný deň využije posledný voľný vstup z aktuálnej permanentky.</p><p><strong>Nová 10-vstupová permanentka stojí 200 €.</strong></p><p class="hint">Platnosť novej permanentky začne až jej prvým použitím.</p><p class="hint pass-interest-disclaimer-v44">Odoslaním záujmu nevzniká povinnosť platby ani automatický nákup permanentky. Ide iba o informáciu pre Chvostíkovo, že máte o novú permanentku záujem.</p></div><button id="passRenewalRequestV38" class="btn full" type="button">Mám záujem o novú permanentku</button><button id="passRenewalLaterV38" class="btn secondary full" type="button">Neskôr</button></div></div>');
@@ -1389,7 +1349,7 @@ placeDeadlineV59();
     if(!dogId||!lastEntryReservedV38(dogId)||pendingPassV38(dogId))return;
     state.selectedDogId=Number(dogId);ensureModalV38();
     const modal=document.getElementById('passRenewalModalV38'),button=document.getElementById('passRenewalRequestV38');
-    button.onclick=async()=>{button.disabled=true;try{await requestPass(10);modal.classList.add('hidden');renderInlineV38()}finally{button.disabled=false}};
+    button.onclick=async()=>{button.disabled=true;try{await requestPass(10);modal.classList.add('hidden')}finally{button.disabled=false}};
     modal.classList.remove('hidden');
   }
 
@@ -1447,27 +1407,17 @@ placeDeadlineV59();
   const baseBootstrapLifecyclePreview=bootstrap;
   bootstrap=async function(...args){
     const result=await baseBootstrapLifecyclePreview.apply(this,args);
-    setTimeout(renderInlineV38,0);
     const dogId=bookingDogV38;bookingDogV38=0;
     if(dogId)setTimeout(()=>showPromptV38(dogId),120);
     setTimeout(healPushV71,80);
     return result;
   };
 
-  const baseRenderDogLifecyclePreview=renderDog;
-  renderDog=function(...args){
-    const result=baseRenderDogLifecyclePreview.apply(this,args);
-    requestAnimationFrame(renderInlineV38);
-    return result;
-  };
-
-  document.addEventListener('change',e=>{if(e.target?.id==='dogSelector')setTimeout(renderInlineV38,120)});
   window.addEventListener('pageshow',()=>setTimeout(healPushV71,250));
   window.addEventListener('focus',()=>setTimeout(healPushV71,350));
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(healPushV71,350)});
 
   const start=()=>{
-    setTimeout(renderInlineV38,500);
     setTimeout(healPushV71,900);
     setTimeout(healPushV71,2600);
   };
