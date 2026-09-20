@@ -227,13 +227,13 @@ export function VideoSection() {
   }, []);
 
   return (
-    <section className="scroll-mt-24 bg-card pt-8 pb-12 sm:pt-10 sm:pb-14">
+    <section className="scroll-mt-24 bg-card pt-6 pb-8 sm:pt-10 sm:pb-12">
       <div className="mx-auto max-w-6xl px-4 text-center">
-        <h3 className="section-title text-2xl sm:text-3xl">
+        <h3 className="section-title whitespace-nowrap text-[18px] sm:text-3xl">
           Ako sa naši škôlkári tešia do škôlky
         </h3>
-        <div className="mt-6 flex justify-center">
-          <div className="relative w-full max-w-[320px] overflow-hidden rounded-3xl bg-card shadow-card">
+        <div className="mt-4 flex justify-center sm:mt-6">
+          <div className="relative w-full max-w-[250px] overflow-hidden rounded-3xl bg-card shadow-card sm:max-w-[300px] lg:max-w-[320px]">
             <video
               ref={videoRef}
               src={skolkariVideo}
