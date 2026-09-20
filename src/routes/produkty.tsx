@@ -121,8 +121,8 @@ function ProductsPage() {
                 <img
                   src={targetLargeDog}
                   alt="Pes stojaci na targete na cvičenie"
-                  className="h-72 w-full object-cover transition duration-500 group-hover:scale-[1.02] sm:h-80 lg:h-full"
-                  style={{ objectPosition: "50% 58%" }}
+                  className="h-72 w-full bg-secondary/35 object-contain p-3 transition duration-500 group-hover:scale-[1.01] sm:h-80 lg:h-full"
+                  style={{ objectPosition: "50% 50%" }}
                 />
               </a>
               <div className="flex flex-col justify-center p-6 sm:p-8">
@@ -133,8 +133,8 @@ function ProductsPage() {
                   Target na cvičenie pre psov
                 </h2>
                 <p className="mt-3 leading-relaxed text-forest/80">
-                  Pevný drevený target s protišmykovým povrchom na nácvik správneho umiestnenia
-                  labiek, koordinácie, rovnováhy a kondičného tréningu.
+                  Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho
+                  postoja, koordinácie a rovnováhy.
                 </p>
                 <div className="mt-5 grid gap-2 text-sm text-forest/80 sm:grid-cols-2">
                   <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">

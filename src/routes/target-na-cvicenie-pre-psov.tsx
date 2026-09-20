@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   Check,
@@ -29,7 +29,7 @@ const PAGE_URL = `${BASE_URL}/target-na-cvicenie-pre-psov`;
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Target na cvičenie pre psov | Ručná výroba | Chvostíkovo";
 const description =
-  "Ručne vyrábaný drevený target na cvičenie pre psov s protišmykovým povrchom. Veľký 40 × 20 cm alebo malý 25 × 25 cm, cena 20 €.";
+  "Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho postoja, koordinácie a rovnováhy. Veľký 40 × 20 cm alebo malý 25 × 25 cm, cena 20 €.";
 
 type TargetSize = "large" | "small";
 
@@ -89,6 +89,116 @@ export const Route = createFileRoute("/target-na-cvicenie-pre-psov")({
   }),
   component: TargetPage,
 });
+
+function TargetGalleryLoop() {
+  const track = useRef<HTMLDivElement>(null);
+  const firstSet = useRef<HTMLDivElement>(null);
+  const paused = useRef(false);
+  const resumeTimer = useRef<number | null>(null);
+
+  const clearResumeTimer = () => {
+    if (resumeTimer.current !== null) {
+      window.clearTimeout(resumeTimer.current);
+      resumeTimer.current = null;
+    }
+  };
+
+  const pause = () => {
+    clearResumeTimer();
+    paused.current = true;
+  };
+
+  const resume = () => {
+    clearResumeTimer();
+    paused.current = false;
+  };
+
+  const resumeAfterPause = () => {
+    clearResumeTimer();
+    resumeTimer.current = window.setTimeout(() => {
+      paused.current = false;
+      resumeTimer.current = null;
+    }, 2600);
+  };
+
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+
+    const speed = window.matchMedia("(max-width: 639px)").matches ? 20 : 25;
+    let raf = 0;
+    let last = performance.now();
+    let carry = 0;
+
+    const step = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 0.1);
+      last = now;
+
+      if (!paused.current) {
+        carry += speed * dt;
+        const delta = Math.floor(carry);
+        if (delta > 0) {
+          carry -= delta;
+          const loopWidth = firstSet.current?.scrollWidth ?? 0;
+          const next = el.scrollLeft + delta;
+          el.scrollLeft = loopWidth > 0 && next >= loopWidth ? next - loopWidth : next;
+        }
+      } else {
+        carry = 0;
+      }
+
+      raf = requestAnimationFrame(step);
+    };
+
+    raf = requestAnimationFrame(step);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearResumeTimer();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={track}
+      onMouseEnter={pause}
+      onMouseLeave={resume}
+      onPointerDown={pause}
+      onPointerUp={resumeAfterPause}
+      onPointerCancel={resumeAfterPause}
+      onFocusCapture={pause}
+      onBlurCapture={resumeAfterPause}
+      className="mt-9 flex w-full max-w-full overflow-x-auto overscroll-x-contain [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] [&::-webkit-scrollbar]:hidden"
+      aria-label="Fotogaléria targetov na cvičenie pre psov"
+    >
+      {[0, 1].map((setIndex) => (
+        <div
+          key={setIndex}
+          ref={setIndex === 0 ? firstSet : undefined}
+          className="flex shrink-0 gap-4 pr-4 sm:gap-5 sm:pr-5"
+          aria-hidden={setIndex === 1}
+        >
+          {INSPIRATION.map((image, index) => (
+            <figure
+              key={`${setIndex}-${image.alt}`}
+              className="h-80 w-[78vw] max-w-[390px] shrink-0 overflow-hidden rounded-4xl bg-card shadow-card sm:h-96 sm:w-[44vw] sm:max-w-[430px] lg:w-[31vw] lg:max-w-[350px]"
+            >
+              <img
+                src={image.src}
+                alt={setIndex === 0 ? image.alt : ""}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+                className="size-full select-none object-cover"
+                style={{ objectPosition: "50% 58%" }}
+              />
+            </figure>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function TargetPage() {
   const submissionId = useRef(crypto.randomUUID());
@@ -169,10 +279,9 @@ function TargetPage() {
             <div className="grid gap-9 lg:grid-cols-[1.02fr_0.98fr] lg:items-start lg:gap-12">
               <div className="aspect-[4/3] overflow-hidden rounded-4xl bg-secondary shadow-soft">
                 <img
-                  src={targetLargeDog}
-                  alt="Pes stojaci na veľkom targete na cvičenie"
-                  className="h-full w-full object-cover"
-                  style={{ objectPosition: "50% 58%" }}
+                  src={size === "small" ? targetSmallDog : targetLargeDog}
+                  alt={size === "small" ? "Pes stojaci na malom targete na cvičenie" : "Pes stojaci na veľkom targete na cvičenie"}
+                  className="h-full w-full object-contain p-2 sm:p-4"
                   fetchPriority="high"
                 />
               </div>
@@ -182,8 +291,8 @@ function TargetPage() {
                   Target na cvičenie <span className="text-coral-dark">pre psov</span>
                 </h1>
                 <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
-                  Ručne vyrábaný drevený target s protišmykovým povrchom. Vhodný na nácvik
-                  správneho umiestnenia labiek, koordinácie, rovnováhy, fitness aj poslušnosti.
+                  Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho
+                  postoja, koordinácie a rovnováhy.
                 </p>
 
                 <div className="mt-6">
@@ -262,38 +371,19 @@ function TargetPage() {
 
         <section className="py-14 sm:py-20">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
-                Pre inšpiráciu
-              </p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">
-                Target pri tréningu aj zblízka
+            <div className="mx-auto max-w-4xl text-center">
+              <h2 className="section-title text-3xl sm:text-4xl">
+                Targety, ktoré už pomáhajú psíkom pri tréningu
               </h2>
             </div>
 
-            <div className="mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {INSPIRATION.map((image) => (
-                <figure
-                  key={image.alt}
-                  className="w-[78%] shrink-0 snap-center overflow-hidden rounded-4xl bg-card shadow-card sm:w-[44%] lg:w-[31%]"
-                >
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-80 w-full object-cover sm:h-96"
-                    style={{ objectPosition: "50% 58%" }}
-                  />
-                </figure>
-              ))}
-            </div>
+            <TargetGalleryLoop />
           </div>
         </section>
 
         <section className="bg-forest py-12 text-cream sm:py-16">
           <div className="mx-auto max-w-4xl px-4 text-center">
-            <h2 className="text-3xl text-cream sm:text-4xl">Target vyrobíme podľa vášho tréningu</h2>
+            <h2 className="text-3xl text-cream sm:text-4xl">Máte záujem o target?</h2>
             <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-cream/80">
               Vyberte si veľký alebo malý variant. Ak potrebujete inú výšku než bežných 5 cm,
               uveďte ju do formulára a dohodneme sa podľa možností výroby.

@@ -17,9 +17,10 @@ const PRODUCTS = [
     image: targetLargeDog,
     alt: "Pes stojaci na drevenom targete na cvičenie",
     title: "Target na cvičenie pre psov",
-    description: "Ručne vyrábaný drevený target s protišmykovým povrchom na tréning labiek, koordinácie a rovnováhy.",
+    description: "Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho postoja, koordinácie a rovnováhy.",
     price: "20 €",
     cta: "Pozrieť target",
+    imageFit: "contain",
   },
 ];
 
@@ -42,7 +43,7 @@ export function ProductSection() {
             <article key={product.href} className="w-[92%] shrink-0 snap-start rounded-4xl bg-card p-4 shadow-card sm:w-[720px] sm:p-5">
               <div className="flex items-start gap-4 sm:items-center sm:gap-5">
                 <a href={product.href} className="block size-24 shrink-0 overflow-hidden rounded-3xl bg-secondary sm:size-28">
-                  <img src={product.image} alt={product.alt} loading="lazy" className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]" style={{ objectPosition: "50% 63%" }} />
+                  <img src={product.image} alt={product.alt} loading="lazy" className={`h-full w-full transition duration-500 hover:scale-[1.03] ${product.imageFit === "contain" ? "object-contain p-1" : "object-cover"}`} style={product.imageFit === "contain" ? undefined : { objectPosition: "50% 63%" }} />
                 </a>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
