@@ -12,7 +12,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="stylesheet" href="/styles.css?v=20260919-auth-scroll-v74">
+  <link rel="stylesheet" href="/styles.css?v=20260920-onboarding-v75">
   <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}</style>
   <title>Chvostíkovo</title>
 </head>
@@ -36,7 +36,7 @@
       <div><label for="signupEmail">E-mail</label><input id="signupEmail" class="input" type="email" autocomplete="email" required></div>
       <div><label for="signupPhone">Telefón</label><input id="signupPhone" class="input" type="tel" autocomplete="tel" placeholder="09xx xxx xxx" required></div>
       <div><label for="signupDogName">Meno psíka</label><input id="signupDogName" class="input" autocomplete="off" required><p class="hint">Podľa mena ho priradíme k vášmu účtu.</p></div>
-      <div><label for="signupPassword">Heslo</label><input id="signupPassword" class="input" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Heslo musí mať minimálne 8 znakov.</p></div>
+      <div><label for="signupPassword">Heslo</label><input id="signupPassword" class="input" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Minimálne 8 znakov, malé a veľké písmeno a aspoň 1 číslica.</p></div>
       <button class="btn full" type="submit">Vytvoriť účet</button>
     </form>
     <form id="forgotForm" class="form-stack hidden">
@@ -44,7 +44,7 @@
       <button class="btn full" type="submit">Poslať odkaz na obnovu</button><button id="backToLogin" class="btn secondary full" type="button">Späť na prihlásenie</button>
     </form>
     <form id="newPasswordForm" class="form-stack hidden">
-      <div><label for="newPassword">Nové heslo</label><input id="newPassword" class="input" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Heslo musí mať minimálne 8 znakov.</p></div>
+      <div><label for="newPassword">Nové heslo</label><input id="newPassword" class="input" type="password" autocomplete="new-password" minlength="8" required><p class="hint">Minimálne 8 znakov, malé a veľké písmeno a aspoň 1 číslica.</p></div>
       <div><label for="newPasswordAgain">Zopakujte nové heslo</label><input id="newPasswordAgain" class="input" type="password" autocomplete="new-password" minlength="8" required></div>
       <button class="btn full" type="submit">Uložiť nové heslo</button>
     </form>
@@ -83,6 +83,8 @@
   </section>
 
   <section id="staffTab" class="tab-page hidden"><div class="section-head"><div><h1>Žiadosti zákazníkov</h1><p>Táto karta je viditeľná iba pracovníkom Chvostíkova.</p></div></div><div id="staffSummary"></div></section>
+  <button id="betaVersionBadge" class="beta-version-badge-v75" type="button">Beta verzia</button>
+  <div id="betaVersionModal" class="legal-modal beta-version-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="betaVersionTitle"><div class="legal-card"><button id="betaVersionClose" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="betaVersionTitle">Beta verzia</h2><div class="legal-body"><p>Aplikácia je momentálne v beta verzii. Ak narazíte na chybu, napíšte nám cez Správy alebo nám pošlite správu na Instagrame.</p></div><button id="betaVersionMessages" class="btn full" type="button">Otvoriť Správy</button></div></div>
   <nav class="bottom-nav"><button id="navBooking" class="active" type="button">Kalendár</button><button id="navDog" type="button">Môj psík</button><button id="navMessages" type="button">Správy <i id="messageUnread" class="nav-badge hidden"></i></button><button id="navStaff" class="hidden" type="button">Žiadosti</button></nav>
 </div>
 <div id="dogDetailsModal" class="legal-modal dog-details-modal hidden" role="dialog" aria-modal="true" aria-labelledby="dogDetailsTitle">
@@ -96,6 +98,8 @@
       <div class="grid2"><div><label for="dogBirthDate">Dátum narodenia</label><input id="dogBirthDate" class="input" type="date"></div><div><label for="dogAge">Vek</label><input id="dogAge" class="input" readonly></div></div>
       <div><label for="dogBreed">Plemeno</label><input id="dogBreed" class="input"></div>
       <div class="grid2"><div><label for="dogSex">Pohlavie</label><select id="dogSex" class="input"><option value="">Neuvedené</option><option value="male">Pes</option><option value="female">Suka</option></select></div><div><label for="dogNeutered">Kastrovaný / sterilizovaná</label><select id="dogNeutered" class="input"><option value="">Neuvedené</option><option value="true">Áno</option><option value="false">Nie</option></select></div></div>
+      <div><label for="dogAllergies">Alergie a zdravotné obmedzenia</label><textarea id="dogAllergies" class="input" rows="3" maxlength="1000" placeholder="Alergie, lieky alebo zdravotné obmedzenia"></textarea></div>
+      <div><label for="dogTemperament">Povaha a dôležité informácie</label><textarea id="dogTemperament" class="input" rows="3" maxlength="1000" placeholder="Povaha, správanie a dôležité informácie"></textarea></div>
       <div class="dog-vaccinations-heading">Očkovania</div>
       <div class="vaccine-box"><strong>Besnota</strong><div class="grid2"><div><label>Očkovaný</label><input id="rabiesOn" class="input" type="date"></div><div><label>Platí do</label><input id="rabiesUntil" class="input" type="date"></div></div></div>
       <div class="vaccine-box"><strong>Infekčné ochorenia</strong><div class="grid2"><div><label>Očkovaný</label><input id="infectiousOn" class="input" type="date"></div><div><label>Platí do</label><input id="infectiousUntil" class="input" type="date"></div></div></div>
@@ -106,6 +110,6 @@
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/app.js?v=20260919-auth-scroll-v74"></script>
+<script src="/app.js?v=20260920-onboarding-v75"></script>
 </body>
 </html>
