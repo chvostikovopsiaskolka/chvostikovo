@@ -195,11 +195,12 @@ function renderDogHeaderV56(dog){
   const key=String(dog.id||'')+'|'+String(dog.photo_path||'')+'|'+String(dog.photo_updated_at||'')+'|'+String(dog.name||'');
   let header=root.querySelector('.dog-profile-header');
   if(!header||root.dataset.dogVisualKey!==key){
-    root.innerHTML=`<div class="card dog-profile-header"><div class="dog-profile-identity"><div class="profile-photo-wrap"><span class="dog-avatar profile">${dog.photo_url?`<img src="${esc(dog.photo_url)}" alt="${esc(dog.name)}">`:'🐾'}</span><label class="photo-pencil" title="Zmeniť fotku" aria-label="Zmeniť fotku">✎<input id="dogPhotoInput" type="file" accept="image/*"></label></div><h2 class="dog-photo-name">${esc(dog.name)}</h2></div><button id="dogDetailsOpen" class="btn secondary dog-details-open" type="button"><span aria-hidden="true">✎</span> Údaje psíka</button></div>`;
+    root.innerHTML=`<div class="card dog-profile-header"><div class="dog-profile-identity"><div class="profile-photo-wrap"><span class="dog-avatar profile">${dog.photo_url?`<img src="${esc(dog.photo_url)}" alt="${esc(dog.name)}">`:'🐾'}</span><button id="dogPhotoActionBtnV89" class="photo-pencil" type="button" title="${dog.photo_url?'Upraviť fotku':'Pridať fotku'}" aria-label="${dog.photo_url?'Upraviť fotku':'Pridať fotku'}">✎</button><input id="dogPhotoInput" class="hidden" type="file" accept="image/*"></div><h2 class="dog-photo-name">${esc(dog.name)}</h2></div><button id="dogDetailsOpen" class="btn secondary dog-details-open" type="button"><span aria-hidden="true">✎</span> Údaje psíka</button></div>`;
     root.dataset.dogVisualKey=key;
     const photoInput=$('dogPhotoInput');
     photoInput?.addEventListener('click',()=>{window.__customerPhotoPickerV88=true;setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},15000)});
     photoInput?.addEventListener('change',openPhotoEditor);
+    $('dogPhotoActionBtnV89')?.addEventListener('click',()=>{dog.photo_url?showPhotoActionsV89(dog):selectNewDogPhotoV89()});
     $('dogDetailsOpen')?.addEventListener('click',openDogDetails);
   }
 }
@@ -244,7 +245,79 @@ async function togglePrivacy(){
   catch(e){d.share_name_photo=previous;button.classList.toggle('active',previous);button.setAttribute('aria-checked',previous?'true':'false');toast(e.message)}
   finally{button.disabled=false}
 }
-function ensurePhotoEditor(){if($('photoCropModal'))return;document.body.insertAdjacentHTML('beforeend',`<div id="photoCropModal" class="photo-modal hidden"><div class="photo-modal-card"><div class="photo-modal-head"><div><strong>Upraviť fotku</strong><small>Posuňte fotku prstom a nastavte priblíženie.</small></div><button id="photoCropClose" class="icon-btn" type="button">✕</button></div><div class="crop-shell"><canvas id="photoCropCanvas" width="640" height="640"></canvas></div><label class="zoom-label">Priblíženie<input id="photoZoom" type="range" min="1" max="3" step="0.01" value="1"></label><div class="photo-modal-actions"><button id="photoCropCancel" class="btn secondary" type="button">Zrušiť</button><button id="photoCropSave" class="btn" type="button">Použiť fotku</button></div></div></div>`);$('photoCropClose').onclick=$('photoCropCancel').onclick=closePhotoEditor;$('photoCropSave').onclick=saveCroppedPhoto;$('photoZoom').addEventListener('input',e=>{if(!state.photoEdit)return;state.photoEdit.zoom=Number(e.target.value);clampPhotoOffset();drawPhotoCrop()});const c=$('photoCropCanvas');let dragging=false,lastX=0,lastY=0;c.addEventListener('pointerdown',e=>{if(!state.photoEdit)return;dragging=true;lastX=e.clientX;lastY=e.clientY;c.setPointerCapture(e.pointerId)});c.addEventListener('pointermove',e=>{if(!dragging||!state.photoEdit)return;const rect=c.getBoundingClientRect(),ratio=640/rect.width;state.photoEdit.ox+=(e.clientX-lastX)*ratio;state.photoEdit.oy+=(e.clientY-lastY)*ratio;lastX=e.clientX;lastY=e.clientY;clampPhotoOffset();drawPhotoCrop()});c.addEventListener('pointerup',()=>dragging=false);c.addEventListener('pointercancel',()=>dragging=false)}
+function ensurePhotoEditor(){
+  if($('photoCropModal'))return;
+  document.body.insertAdjacentHTML('beforeend',`<div id="photoCropModal" class="photo-modal hidden"><div class="photo-modal-card"><div class="photo-modal-head"><div><strong>Upraviť fotku</strong><small>Jedným prstom fotku posuňte, dvoma prstami ju priblížte alebo oddiaľte.</small></div><button id="photoCropClose" class="icon-btn" type="button">✕</button></div><div class="crop-shell"><canvas id="photoCropCanvas" width="640" height="640"></canvas></div><div class="photo-gesture-hint-v89">Posun: 1 prst · Priblíženie: 2 prsty</div><div class="photo-modal-actions"><button id="photoCropCancel" class="btn secondary" type="button">Zrušiť</button><button id="photoCropSave" class="btn" type="button">Použiť fotku</button></div></div></div>`);
+  $('photoCropClose').onclick=$('photoCropCancel').onclick=closePhotoEditor;
+  $('photoCropSave').onclick=saveCroppedPhoto;
+  bindPhotoGesturesV89($('photoCropCanvas'));
+}
+function bindPhotoGesturesV89(canvas){
+  if(!canvas||canvas.__photoGesturesV89)return;
+  canvas.__photoGesturesV89=true;
+  const pointers=new Map();
+  let pinch=null;
+  const point=e=>{const r=canvas.getBoundingClientRect(),ratio=640/r.width;return{x:(e.clientX-r.left)*ratio,y:(e.clientY-r.top)*ratio}};
+  const startPinch=()=>{
+    if(pointers.size<2||!state.photoEdit){pinch=null;return}
+    const [a,b]=[...pointers.values()].slice(0,2),mid={x:(a.x+b.x)/2,y:(a.y+b.y)/2},dist=Math.hypot(a.x-b.x,a.y-b.y)||1,e=state.photoEdit;
+    const base=Math.max(640/e.img.width,640/e.img.height),scale=base*e.zoom;
+    pinch={dist,startZoom:e.zoom,imgX:(mid.x-e.ox)/scale,imgY:(mid.y-e.oy)/scale};
+  };
+  canvas.addEventListener('pointerdown',e=>{
+    if(!state.photoEdit)return;
+    e.preventDefault();
+    const p=point(e);pointers.set(e.pointerId,p);
+    try{canvas.setPointerCapture(e.pointerId)}catch(_){}
+    if(pointers.size===2)startPinch();
+  });
+  canvas.addEventListener('pointermove',e=>{
+    if(!state.photoEdit||!pointers.has(e.pointerId))return;
+    e.preventDefault();
+    const prev=pointers.get(e.pointerId),next=point(e);
+    pointers.set(e.pointerId,next);
+    if(pointers.size>=2){
+      if(!pinch)startPinch();
+      const [a,b]=[...pointers.values()].slice(0,2),dist=Math.hypot(a.x-b.x,a.y-b.y)||1,mid={x:(a.x+b.x)/2,y:(a.y+b.y)/2},edit=state.photoEdit;
+      const nextZoom=Math.max(1,Math.min(3,pinch.startZoom*(dist/pinch.dist)));
+      const base=Math.max(640/edit.img.width,640/edit.img.height),scale=base*nextZoom;
+      edit.zoom=nextZoom;
+      edit.ox=mid.x-pinch.imgX*scale;
+      edit.oy=mid.y-pinch.imgY*scale;
+      clampPhotoOffset();
+      drawPhotoCrop();
+    }else{
+      const edit=state.photoEdit;
+      edit.ox+=next.x-prev.x;
+      edit.oy+=next.y-prev.y;
+      clampPhotoOffset();
+      drawPhotoCrop();
+    }
+  });
+  const release=e=>{
+    pointers.delete(e.pointerId);
+    if(pointers.size<2)pinch=null;
+    else startPinch();
+  };
+  canvas.addEventListener('pointerup',release);
+  canvas.addEventListener('pointercancel',release);
+}
+function ensurePhotoActionsV89(){
+  if($('photoActionsModalV89'))return;
+  document.body.insertAdjacentHTML('beforeend',`<div id="photoActionsModalV89" class="photo-modal photo-actions-modal-v89 hidden"><div class="photo-actions-card-v89"><div class="photo-modal-head"><div><strong>Fotka psíka</strong><small>Vyberte, čo chcete s fotkou urobiť.</small></div><button id="photoActionsCloseV89" class="icon-btn" type="button">✕</button></div><div class="photo-actions-list-v89"><button id="photoEditCurrentV89" class="btn secondary" type="button">Upraviť aktuálnu fotku</button><button id="photoReplaceV89" class="btn secondary" type="button">Nahrať novú fotku</button><button id="photoDeleteV89" class="btn danger" type="button">Zmazať fotku</button></div></div></div>`);
+  $('photoActionsCloseV89').onclick=closePhotoActionsV89;
+  $('photoActionsModalV89').addEventListener('click',e=>{if(e.target===$('photoActionsModalV89'))closePhotoActionsV89()});
+}
+function closePhotoActionsV89(){$('photoActionsModalV89')?.classList.add('hidden')}
+function selectNewDogPhotoV89(){closePhotoActionsV89();$('dogPhotoInput')?.click()}
+function showPhotoActionsV89(dog){
+  ensurePhotoActionsV89();
+  $('photoActionsModalV89').dataset.dogId=String(dog.id);
+  $('photoEditCurrentV89').onclick=()=>{closePhotoActionsV89();openExistingPhotoEditorV89(dog)};
+  $('photoReplaceV89').onclick=selectNewDogPhotoV89;
+  $('photoDeleteV89').onclick=()=>deleteCurrentDogPhotoV89(dog);
+  $('photoActionsModalV89').classList.remove('hidden');
+}
 function fileDataUrlV88(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(reader.error||new Error('read failed'));reader.readAsDataURL(file)})}
 function imageFromDataUrlV88(dataUrl){return new Promise((resolve,reject)=>{const img=new Image();let done=false;const finish=(ok)=>{if(done)return;done=true;clearTimeout(timer);ok?resolve(img):reject(new Error('decode failed'))};const timer=setTimeout(()=>finish(false),15000);img.onload=()=>finish(true);img.onerror=()=>finish(false);img.src=dataUrl})}
 async function decodePhotoFileV88(file){
@@ -256,19 +329,21 @@ async function decodePhotoFileV88(file){
   if(!img.width||!img.height)throw new Error('decode failed');
   return img
 }
+function beginPhotoEditV89(img){
+  ensurePhotoEditor();
+  state.photoEdit={img,url:null,zoom:1,ox:0,oy:0};
+  clampPhotoOffset(true);
+  drawPhotoCrop();
+  $('photoCropModal').classList.remove('hidden');
+}
 async function openPhotoEditor(e){
   const file=e.target.files?.[0];
   window.__customerPhotoPickerV88=false;
   if(!file)return;
   window.__customerPhotoDecodeV88=true;
-  ensurePhotoEditor();
   try{
     const img=await decodePhotoFileV88(file);
-    state.photoEdit={img,url:null,zoom:1,ox:0,oy:0};
-    $('photoZoom').value='1';
-    clampPhotoOffset(true);
-    drawPhotoCrop();
-    $('photoCropModal').classList.remove('hidden')
+    beginPhotoEditV89(img);
   }catch(_){
     const heic=/hei[cf]/i.test(String(file.type||''))||/\.hei[cf]$/i.test(String(file.name||''));
     toast(heic?'Túto HEIC fotku iPhone nevedel spracovať. Skúste inú fotku alebo screenshot.':'Fotku sa nepodarilo načítať. Skúste ju vybrať znova.')
@@ -277,6 +352,32 @@ async function openPhotoEditor(e){
     window.__customerPhotoPickerV88=false;
     e.target.value=''
   }
+}
+async function openExistingPhotoEditorV89(dog){
+  if(!dog?.photo_url)return;
+  try{
+    loading(true);
+    const response=await fetch(dog.photo_url,{cache:'no-store'});
+    if(!response.ok)throw new Error('download failed');
+    const blob=await response.blob();
+    const img=await decodePhotoFileV88(blob);
+    beginPhotoEditV89(img);
+  }catch(_){
+    toast('Aktuálnu fotku sa nepodarilo otvoriť na úpravu. Skúste nahrať novú.')
+  }finally{loading(false)}
+}
+async function deleteCurrentDogPhotoV89(dog){
+  if(!dog?.photo_url)return closePhotoActionsV89();
+  if(!confirm('Naozaj chcete zmazať profilovú fotku psíka?'))return;
+  try{
+    loading(true);
+    await api({action:'delete_dog_photo',dog_id:Number(dog.id)});
+    closePhotoActionsV89();
+    dog.photo_url=null;dog.photo_path=null;dog.photo_updated_at=new Date().toISOString();
+    toast('Fotka bola zmazaná.');
+    await bootstrap(false);
+  }catch(e){toast(e.message||'Fotku sa nepodarilo zmazať.')}
+  finally{loading(false)}
 }
 function clampPhotoOffset(reset=false){const e=state.photoEdit;if(!e)return;const base=Math.max(640/e.img.width,640/e.img.height),scale=base*e.zoom,w=e.img.width*scale,h=e.img.height*scale;if(reset){e.ox=(640-w)/2;e.oy=(640-h)/2}e.ox=Math.min(0,Math.max(640-w,e.ox));e.oy=Math.min(0,Math.max(640-h,e.oy))}
 function drawPhotoCrop(){const e=state.photoEdit;if(!e)return;const c=$('photoCropCanvas'),ctx=c.getContext('2d'),base=Math.max(640/e.img.width,640/e.img.height),scale=base*e.zoom;ctx.clearRect(0,0,640,640);ctx.drawImage(e.img,e.ox,e.oy,e.img.width*scale,e.img.height*scale)}
