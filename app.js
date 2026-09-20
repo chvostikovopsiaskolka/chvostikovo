@@ -995,7 +995,7 @@ placeDeadlineV59();
   function renderGradebookV92(layout){
     let section=$('customerGradebookV92');
     if(!section){section=document.createElement('div');section.id='customerGradebookV92';section.className='card customer-gradebook-v92'}
-    section.innerHTML='<div class="customer-gradebook-head-v92"><div><strong>Žiacka knižka</strong><small>Prehľad pokroku a poznámok zo škôlky.</small></div><span>Pripravujeme</span></div>';
+    section.innerHTML='<div class="customer-gradebook-head-v92"><div><strong>Žiacka knižka</strong></div><span>Pripravujeme</span></div>';
     if(section.parentElement!==layout)layout.appendChild(section);
     return section;
   }
