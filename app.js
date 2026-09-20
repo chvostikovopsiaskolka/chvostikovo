@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260920-preview-resume-version-guard-v17';
+const APP_BUILD='20260920-preview-stable-resume-v18';
 const SUPABASE_URL='https://jgzabminzgbfhsrgqedt.supabase.co';
 const SUPABASE_KEY='sb_publishable_SxAm6NUsZ8699ienaT8fzw_6bWt5cPq';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -107,6 +107,19 @@ function bootstrapCore(showSpinner=true){
 async function bootstrap(showSpinner=true){const result=await bootstrapCore(showSpinner);runCustomerHooks('afterBootstrap',result);return result}
 function renderAll(){renderWeekHeader();renderNotifications();renderPassSummary();renderUpcoming();renderDays();renderMessages();renderDogSelector();renderDog();renderProfile();renderStaff();updateUnread()}
 
+/* consolidated stability: unchanged resume data does not touch the DOM */
+function customerDataFingerprintV18(data){
+  try{
+    return JSON.stringify(data??null,(key,value)=>{
+      if(key==='photo_url'||key==='signed_url'||key==='signedUrl')return undefined;
+      return value;
+    });
+  }catch(_){return ''}
+}
+function nextPaintV18(fn){
+  return new Promise(resolve=>requestAnimationFrame(()=>{try{fn()}finally{resolve()}}));
+}
+
 /* v45: one authenticated Realtime socket, coalesced component resyncs, and resume recovery. */
 let customerLiveSocket=null,customerLiveHeartbeat=0,customerLiveReconnect=0,customerLiveAttempt=0,customerSyncTimer=0,customerSyncInFlight=null;
 const customerPendingScopes=new Set();
@@ -117,20 +130,60 @@ async function flushCustomerSync(){
   if(!state.session||document.visibilityState==='hidden')return;
   const scopes=new Set(customerPendingScopes);customerPendingScopes.clear();
   customerSyncInFlight=(async()=>{try{
-    const previousDogs=new Map((state.data?.dogs||[]).map(d=>[Number(d.id),d]));
+    const previousData=state.data;
+    const previousFingerprint=customerDataFingerprintV18(previousData);
+    const previousDogs=new Map((previousData?.dogs||[]).map(d=>[Number(d.id),d]));
     const next=await api();
-    for(const dog of (next.dogs||[])){const previous=previousDogs.get(Number(dog.id));const samePhoto=previous&&String(previous.photo_path||'')===String(dog.photo_path||'')&&String(previous.photo_updated_at||'')===String(dog.photo_updated_at||'');if(samePhoto&&previous?.photo_url)dog.photo_url=previous.photo_url;else if(!dog.photo_url&&previous?.photo_url)dog.photo_url=previous.photo_url}
-    state.data=next;if(!state.selectedDogId&&next.dogs?.length)state.selectedDogId=Number(next.dogs[0].id);renderNotifications();
-    const all=scopes.has('all'),renderDogNeeded=all||scopes.has('passes')||scopes.has('dog');
-    if(all||scopes.has('bookings')){renderWeekHeader();renderUpcoming();renderDays();renderMessages()}
-    if(all||scopes.has('messages')){renderMessages();updateUnread()}
-    if(all||scopes.has('passes'))renderPassSummary();
-    if(all||scopes.has('dog')){renderDogSelector();renderProfile()}
-    if(renderDogNeeded){await preloadDogVisualV56(next);renderDog();}
-    if(all||scopes.has('notifications'))renderNotifications();
+
+    for(const dog of (next.dogs||[])){
+      const previous=previousDogs.get(Number(dog.id));
+      const samePhoto=previous&&String(previous.photo_path||'')===String(dog.photo_path||'')&&String(previous.photo_updated_at||'')===String(dog.photo_updated_at||'');
+      if(samePhoto&&previous?.photo_url)dog.photo_url=previous.photo_url;
+      else if(!dog.photo_url&&previous?.photo_url)dog.photo_url=previous.photo_url;
+    }
+
+    const nextFingerprint=customerDataFingerprintV18(next);
+    state.data=next;
+    if(!state.selectedDogId&&next.dogs?.length)state.selectedDogId=Number(next.dogs[0].id);
+
+    // Same build + same data = keep the existing DOM exactly as it is.
+    if(previousData&&previousFingerprint===nextFingerprint){
+      return;
+    }
+
+    const all=scopes.has('all');
+    const renderDogNeeded=all||scopes.has('passes')||scopes.has('dog');
+    if(renderDogNeeded)await preloadDogVisualV56(next);
+
+    await nextPaintV18(()=>{
+      if(all||scopes.has('bookings')){
+        renderWeekHeader();
+        renderUpcoming();
+        renderDays();
+        renderMessages();
+      }
+      if(all||scopes.has('messages')){
+        renderMessages();
+        updateUnread();
+      }
+      if(all||scopes.has('passes'))renderPassSummary();
+      if(all||scopes.has('dog')){
+        renderDogSelector();
+        renderProfile();
+      }
+      if(renderDogNeeded)renderDog();
+      if(all||scopes.has('notifications'))renderNotifications();
+      renderStaff();
+      if(typeof window.runCustomerOnboardingV75==='function')window.runCustomerOnboardingV75();
+    });
+
     if(all||scopes.has('announcements'))await loadAnnouncements();
-    renderStaff();if(typeof window.runCustomerOnboardingV75==='function')window.runCustomerOnboardingV75();
-  }catch(error){if(navigator.onLine)console.warn('Live resync zlyhal',error)}finally{customerSyncInFlight=null;if(customerPendingScopes.size)queueCustomerSync('all',80)}})();
+  }catch(error){
+    if(navigator.onLine)console.warn('Live resync zlyhal',error)
+  }finally{
+    customerSyncInFlight=null;
+    if(customerPendingScopes.size)queueCustomerSync('all',80)
+  }})();
   return customerSyncInFlight;
 }
 function customerScopeForMessage(message){
