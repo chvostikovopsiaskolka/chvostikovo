@@ -12,6 +12,16 @@ import photo09 from "@/assets/daycare-carousel-09.avif";
 import photo10 from "@/assets/daycare-carousel-10.avif";
 import photo11 from "@/assets/daycare-carousel-11.avif";
 import photo12 from "@/assets/daycare-carousel-12.avif";
+import photo13 from "@/assets/daycare-carousel-13.avif";
+import photo14 from "@/assets/daycare-carousel-14.avif";
+import photo15 from "@/assets/daycare-carousel-15.avif";
+import photo16 from "@/assets/daycare-carousel-16.avif";
+import photo17 from "@/assets/daycare-carousel-17.avif";
+import photo18 from "@/assets/daycare-carousel-18.avif";
+import photo19 from "@/assets/daycare-carousel-19.avif";
+import photo20 from "@/assets/daycare-carousel-20.avif";
+import photo21 from "@/assets/daycare-carousel-21.avif";
+import photo22 from "@/assets/daycare-carousel-22.avif";
 
 const PHOTOS = [
   photo01,
@@ -26,6 +36,16 @@ const PHOTOS = [
   photo10,
   photo11,
   photo12,
+  photo13,
+  photo14,
+  photo15,
+  photo16,
+  photo17,
+  photo18,
+  photo19,
+  photo20,
+  photo21,
+  photo22,
 ];
 
 const RESUME_DELAY = 2800;

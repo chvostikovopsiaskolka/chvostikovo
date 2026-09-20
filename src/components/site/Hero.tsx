@@ -14,7 +14,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pb-4">
+    <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-28 lg:pb-4">
       <div className="absolute inset-0 z-0">
         <img
           src={heroDogs}
