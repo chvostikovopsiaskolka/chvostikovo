@@ -25,7 +25,7 @@ export function Hero() {
           className="size-full object-cover object-[50%_54%] lg:object-[50%_35%]"
         />
         <div className="absolute inset-0 bg-cream/25 lg:bg-cream/10" />
-        <div className="absolute inset-0 bg-linear-to-r from-cream/95 via-cream/55 via-45% to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-cream/95 via-cream/55 via-45% to-cream/35 lg:to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-cream to-transparent" />
       </div>
 
