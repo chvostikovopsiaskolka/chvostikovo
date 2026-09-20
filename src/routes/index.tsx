@@ -12,6 +12,7 @@ import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
 import { InquirySection } from "@/components/site/InquirySection";
+import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FAQ } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
@@ -69,6 +70,7 @@ function Index() {
         <ReviewReasons />
         <Reviews />
         <Faq />
+        <DaycarePhotoCarousel />
         <VideoSection />
         <InquirySection />
         <Gallery />

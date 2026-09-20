@@ -1,5 +1,6 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import "./restore-daycare-carousel.mjs";
 
 const root = process.cwd();
 const productDataDir = path.join(root, "scripts", "product-image-data");
