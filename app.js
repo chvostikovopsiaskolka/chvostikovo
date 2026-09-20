@@ -787,9 +787,14 @@ placeDeadlineV59();
     const eyeId=inputId+'EyeV79';
     if(document.getElementById(eyeId))return;
     if(inputId==='loginPassword')document.getElementById('loginPasswordEye')?.remove();
-    const wrap=input.parentElement;
-    if(!wrap)return;
-    wrap.classList.add('password-field-wrap');
+    let wrap=input.closest('.password-input-shell-v80');
+    if(!wrap){
+      const shell=document.createElement('div');
+      shell.className='password-input-shell-v80 password-field-wrap';
+      input.parentNode?.insertBefore(shell,input);
+      shell.appendChild(input);
+      wrap=shell;
+    }else wrap.classList.add('password-field-wrap');
     const eye=document.createElement('button');
     eye.id=eyeId;
     eye.type='button';
