@@ -47,7 +47,7 @@ function showAuth(mode='login'){$('appView').classList.add('hidden');$('authView
 function showApp(){$('authView').classList.add('hidden');$('appView').classList.remove('hidden')}
 function pluralDogs(n){return n===1?'1 prihlásený psík':n+' prihlásených psíkov'}
 function freePlaces(n){n=Number(n)||0;if(n===1)return'1 voľné miesto';if(n>=2&&n<=4)return n+' voľné miesta';return n+' voľných miest'}
-function taxiLabel(mode){if(mode==='pickup')return'🚕 vyzdvihnutie';if(mode==='pickup_dropoff')return'🚕 vyzdvihnutie aj dovoz';return''}
+function taxiLabel(mode){if(mode==='pickup')return'🚕 vyzdvihnutie/odvoz';if(mode==='pickup_dropoff')return'🚕 vyzdvihnutie aj dovoz';return''}
 function statusLabel(s){return {pending:'Čaká na schválenie',approved:'Schválené',cancelled:'Zrušené',rejected:'Zamietnuté'}[s]||s||''}
 function selectedDog(){const dogs=state.data?.dogs||[];return dogs.find(d=>Number(d.id)===Number(state.selectedDogId))||dogs[0]||null}
 function dogName(id){return (state.data?.dogs||[]).find(d=>Number(d.id)===Number(id))?.name||'Psík'}
@@ -503,7 +503,6 @@ window.addEventListener('focus',refreshOnResume);window.addEventListener('online
 })();
 init();
 /* v18 runtime patch: compact calendar UI + quick date search */
-taxiLabel=function(mode){if(mode==='pickup')return'🚕 vyzdvihnutie/odvoz';if(mode==='pickup_dropoff')return'🚕 vyzdvihnutie aj dovoz';return''};
 function bindDayCardActions(root){if(!root)return;root.querySelectorAll('.reserve-open-btn').forEach(btn=>btn.addEventListener('click',()=>{const opts=btn.parentElement.querySelector('.reserve-options');opts.classList.toggle('hidden');btn.classList.toggle('secondary',!opts.classList.contains('hidden'))}));root.querySelectorAll('.taxi-choice').forEach(btn=>btn.addEventListener('click',()=>reserveDay(btn)))}
 function dateSearchDayLabel(date){try{return new Intl.DateTimeFormat('sk-SK',{weekday:'short'}).format(new Date(date+'T12:00:00')).replace('.','')}catch(_){return''}}
 function renderDateSearchCalendar(){const root=$('dateSearchGrid');if(!root)return;const days=(state.data?.availability?.days||[]).slice(0,10);root.innerHTML=days.map(d=>{const parts=String(d.date).split('-');return `<button class="date-search-day" type="button" data-date="${d.date}"><small>${esc(dateSearchDayLabel(d.date))}</small><strong>${Number(parts[2])}</strong><span>${Number(parts[1])}.</span></button>`}).join('');root.querySelectorAll('.date-search-day').forEach(b=>b.addEventListener('click',()=>showSearchedDay(b.dataset.date)))}
