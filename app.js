@@ -23,7 +23,7 @@ const PUSH_API=SUPABASE_URL+'/functions/v1/admin-push';
 const VAPID='BCFhf2kRc1P8blGDHKugmyBhCOfa-x8qbYSMo_qeO-650GSxg3I6naMHVqFTs7UOrTXotemfg9LhNElm56Zhv6k';
 const SESSION_KEY='chvostikovo_customer_session';
 const PASSWORD_MIN_MESSAGE='Minimálne 8 znakov, malé a veľké písmeno a aspoň 1 číslica.';
-const PASSWORD_STRONG_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/;
+const PASSWORD_STRONG_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 let state={data:null,session:null,storage:localStorage,selectedDogId:null,activeTab:'booking',pushChecked:false,pushEnabled:false};
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -776,24 +776,27 @@ placeDeadlineV59();
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
 
-/* v31: press-and-hold password eye */
-(function loginPasswordVisibilityV31(){
-  if(window.__chvostikovoLoginPasswordVisibilityV31)return;
-  window.__chvostikovoLoginPasswordVisibilityV31=true;
-  function mount(){
-    const input=document.getElementById('loginPassword');
-    if(!input||document.getElementById('loginPasswordEye'))return;
-    document.getElementById('loginPasswordVisibility')?.remove();
+/* v79: press-and-hold password eye on all auth password fields */
+(function authPasswordVisibilityV79(){
+  if(window.__chvostikovoAuthPasswordVisibilityV79)return;
+  window.__chvostikovoAuthPasswordVisibilityV79=true;
+  const eyeSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>';
+  function mountOne(inputId){
+    const input=document.getElementById(inputId);
+    if(!input)return;
+    const eyeId=inputId+'EyeV79';
+    if(document.getElementById(eyeId))return;
+    if(inputId==='loginPassword')document.getElementById('loginPasswordEye')?.remove();
     const wrap=input.parentElement;
     if(!wrap)return;
     wrap.classList.add('password-field-wrap');
     const eye=document.createElement('button');
-    eye.id='loginPasswordEye';
+    eye.id=eyeId;
     eye.type='button';
     eye.className='password-eye-btn';
     eye.setAttribute('aria-label','Podržte pre zobrazenie hesla');
     eye.setAttribute('title','Podržte pre zobrazenie hesla');
-    eye.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>';
+    eye.innerHTML=eyeSvg;
     input.insertAdjacentElement('afterend',eye);
     const show=()=>{input.type='text';eye.classList.add('pressed')};
     const hide=()=>{input.type='password';eye.classList.remove('pressed')};
@@ -805,6 +808,7 @@ placeDeadlineV59();
     eye.addEventListener('blur',hide);
     window.addEventListener('blur',hide);
   }
+  function mount(){['loginPassword','signupPassword','newPassword','newPasswordAgain'].forEach(mountOne)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
 

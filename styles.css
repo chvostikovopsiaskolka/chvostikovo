@@ -85,7 +85,7 @@ input[type="date"],input[type="time"]{max-inline-size:100%!important;-webkit-min
 /* v31: install guide spacing + press-and-hold password eye */
 .install-guide-subnote{margin-top:7px}
 .password-field-wrap{position:relative}
-.password-field-wrap #loginPassword{padding-right:52px}
+.password-field-wrap .input{padding-right:52px}
 .password-eye-btn{position:absolute;right:10px;bottom:8px;width:38px;height:38px;border:0;border-radius:10px;background:transparent;color:#6b7280;display:grid;place-items:center;padding:7px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .password-eye-btn svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .password-eye-btn.pressed{color:var(--primary-dark);background:#fff7ed}
