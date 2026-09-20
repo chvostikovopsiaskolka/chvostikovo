@@ -1350,10 +1350,13 @@ placeDeadlineV59();
 })();
 
 
-/* v38: offer a new 10-entry pass when the last current entry is reserved */
-(function customerPassRenewalV38(){
-  if(window.__chvostikovoCustomerPassRenewalV38)return;
+/* preview consolidated: pass renewal + push lifecycle */
+(function customerLifecyclePreview(){
+  if(window.__chvostikovoCustomerLifecyclePreview)return;
+  window.__chvostikovoCustomerLifecyclePreview=true;
   window.__chvostikovoCustomerPassRenewalV38=true;
+  window.__chvostikovoCustomerPushHealV71=true;
+
   let bookingDogV38=0;
 
   function currentActivePassV38(dogId){
@@ -1401,24 +1404,85 @@ placeDeadlineV59();
     modal.classList.remove('hidden');
   }
 
-  const oldApiV38=api;
+
+
+
+  async function healPushV71(){
+    if(!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
+    try{
+      const reg=await navigator.serviceWorker.ready;
+      try{await reg.update()}catch(_){}
+      let sub=await reg.pushManager.getSubscription();
+      const remembered=localStorage.getItem('chvostikovo_push_enabled')==='1';
+      if(!sub&&remembered){
+        sub=await reg.pushManager.subscribe({
+          userVisibleOnly:true,
+          applicationServerKey:urlBase64ToUint8Array(VAPID)
+        });
+      }
+      if(!sub)return false;
+      const r=await fetch(PUSH_API,{
+        method:'POST',
+        headers:{
+          apikey:SUPABASE_KEY,
+          Authorization:'Bearer '+state.session.access_token,
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({
+          audience:'customer',
+          action:'subscribe',
+          subscription:sub.toJSON()
+        }),
+        cache:'no-store'
+      });
+      if(!r.ok)return false;
+      state.pushChecked=true;
+      state.pushEnabled=true;
+      localStorage.setItem('chvostikovo_push_enabled','1');
+      applyPushToggle();
+      return true;
+    }catch(error){
+      console.warn('Push subscription refresh failed',error);
+      return false;
+    }
+  }
+
+
+  const baseApiLifecyclePreview=api;
   api=async function(body=null,...rest){
-    const result=await oldApiV38.call(this,body,...rest);
+    const result=await baseApiLifecyclePreview.call(this,body,...rest);
     if(body?.action==='request_booking')bookingDogV38=Number(body.dog_id)||0;
     return result;
   };
-  const oldBootstrapV38=bootstrap;
+
+  const baseBootstrapLifecyclePreview=bootstrap;
   bootstrap=async function(...args){
-    const result=await oldBootstrapV38.apply(this,args);
+    const result=await baseBootstrapLifecyclePreview.apply(this,args);
     setTimeout(renderInlineV38,0);
     const dogId=bookingDogV38;bookingDogV38=0;
     if(dogId)setTimeout(()=>showPromptV38(dogId),120);
+    setTimeout(healPushV71,80);
     return result;
   };
-  const oldRenderDogV38=renderDog;
-  renderDog=function(...args){const result=oldRenderDogV38.apply(this,args);requestAnimationFrame(renderInlineV38);return result};
+
+  const baseRenderDogLifecyclePreview=renderDog;
+  renderDog=function(...args){
+    const result=baseRenderDogLifecyclePreview.apply(this,args);
+    requestAnimationFrame(renderInlineV38);
+    return result;
+  };
+
   document.addEventListener('change',e=>{if(e.target?.id==='dogSelector')setTimeout(renderInlineV38,120)});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(renderInlineV38,500));else setTimeout(renderInlineV38,500);
+  window.addEventListener('pageshow',()=>setTimeout(healPushV71,250));
+  window.addEventListener('focus',()=>setTimeout(healPushV71,350));
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(healPushV71,350)});
+
+  const start=()=>{
+    setTimeout(renderInlineV38,500);
+    setTimeout(healPushV71,900);
+    setTimeout(healPushV71,2600);
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 
 
@@ -1802,69 +1866,3 @@ async function togglePushDirect(btn){
 })();
 
 
-/* v71: push subscription self-heal; duplicate legal-document layer removed */
-(function customerPushHealV71(){
-  if(window.__chvostikovoCustomerPushHealV71)return;
-  window.__chvostikovoCustomerPushHealV71=true;
-
-  async function healPushV71(){
-    if(!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
-    try{
-      const reg=await navigator.serviceWorker.ready;
-      try{await reg.update()}catch(_){}
-      let sub=await reg.pushManager.getSubscription();
-      const remembered=localStorage.getItem('chvostikovo_push_enabled')==='1';
-      if(!sub&&remembered){
-        sub=await reg.pushManager.subscribe({
-          userVisibleOnly:true,
-          applicationServerKey:urlBase64ToUint8Array(VAPID)
-        });
-      }
-      if(!sub)return false;
-      const r=await fetch(PUSH_API,{
-        method:'POST',
-        headers:{
-          apikey:SUPABASE_KEY,
-          Authorization:'Bearer '+state.session.access_token,
-          'Content-Type':'application/json'
-        },
-        body:JSON.stringify({
-          audience:'customer',
-          action:'subscribe',
-          subscription:sub.toJSON()
-        }),
-        cache:'no-store'
-      });
-      if(!r.ok)return false;
-      state.pushChecked=true;
-      state.pushEnabled=true;
-      localStorage.setItem('chvostikovo_push_enabled','1');
-      applyPushToggle();
-      return true;
-    }catch(error){
-      console.warn('Push subscription refresh failed',error);
-      return false;
-    }
-  }
-
-  const previousBootstrapV71=bootstrap;
-  bootstrap=async function(...args){
-    const result=await previousBootstrapV71.apply(this,args);
-    setTimeout(healPushV71,80);
-    return result;
-  };
-
-  function startV71(){
-    setTimeout(healPushV71,900);
-    setTimeout(healPushV71,2600);
-  }
-
-  window.addEventListener('pageshow',()=>setTimeout(healPushV71,250));
-  window.addEventListener('focus',()=>setTimeout(healPushV71,350));
-  document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='visible')setTimeout(healPushV71,350);
-  });
-
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startV71,{once:true});
-  else startV71();
-})();
