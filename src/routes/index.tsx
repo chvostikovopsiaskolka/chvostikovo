@@ -11,6 +11,7 @@ import { ProductSection } from "@/components/site/ProductSection";
 import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
+import { InquirySection } from "@/components/site/InquirySection";
 import { FAQ } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
@@ -69,6 +70,7 @@ function Index() {
         <Reviews />
         <Faq />
         <VideoSection />
+        <InquirySection />
         <Gallery />
         <Care />
         <Why />
