@@ -1123,13 +1123,8 @@ placeDeadlineV59();
   const start=()=>{
     apply();
     applyAll();
-    const stats=$('dogStats');
-    if(stats)new MutationObserver(()=>setTimeout(apply,20)).observe(stats,{childList:true});
-    const settings=$('dogProfileSettings');
-    if(settings)new MutationObserver(()=>setTimeout(apply,20)).observe(settings,{childList:true});
     const tab=$('dogTab');
     if(tab)new MutationObserver(()=>{clearTimeout(window.__v36SettingsMoveTimer);window.__v36SettingsMoveTimer=setTimeout(relocateSettings,25)}).observe(tab,{childList:true,subtree:true});
-    document.addEventListener('change',e=>{if(e.target?.id==='dogSelector')setTimeout(()=>{apply();applyAll()},50)});
     document.addEventListener('click',e=>{if(e.target?.closest('#navBooking')||e.target?.closest('#navDog')||e.target?.closest('#navMessages'))setTimeout(()=>{applyNav();applyHero()},0)});
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,120),{once:true});else setTimeout(start,120);
