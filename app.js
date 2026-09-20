@@ -408,7 +408,7 @@ placeDeadlineV59();
   let deferredPrompt=null;
   const standalone=()=>window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const platform=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)?'ios':/android/i.test(navigator.userAgent)?'android':'other';
-  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('installGuideInstallBtn');if(b)b.classList.remove('hidden')});
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;ensureGuide();const b=document.getElementById('installGuideInstallBtn');if(b)b.classList.remove('hidden');if(!standalone())setTimeout(openGuide,0)});
   function ensureGuide(){
     if(document.getElementById('installGuideModal'))return;
     const p=platform();
