@@ -11,7 +11,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+          "value": "default-src 'self'; img-src 'self' data: https://jgzabminzgbfhsrgqedt.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://jgzabminzgbfhsrgqedt.supabase.co wss://jgzabminzgbfhsrgqedt.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
         },
         {
           "key": "X-Content-Type-Options",
@@ -28,7 +28,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+          "value": "default-src 'self'; img-src 'self' data: https://jgzabminzgbfhsrgqedt.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://jgzabminzgbfhsrgqedt.supabase.co wss://jgzabminzgbfhsrgqedt.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
         },
         {
           "key": "X-Content-Type-Options",
@@ -100,7 +100,7 @@
   "rewrites": [
     {
       "source": "/notification-badge-v64.png",
-      "destination": "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-app-icon?badge=1"
+      "destination": "https://jgzabminzgbfhsrgqedt.supabase.co/functions/v1/chvostikovo-app-icon?badge=1"
     }
   ]
 }
