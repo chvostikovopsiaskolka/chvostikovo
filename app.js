@@ -504,22 +504,6 @@ window.addEventListener('focus',refreshOnResume);window.addEventListener('online
 init();
 /* v18 runtime patch: compact calendar UI + quick date search */
 taxiLabel=function(mode){if(mode==='pickup')return'🚕 vyzdvihnutie/odvoz';if(mode==='pickup_dropoff')return'🚕 vyzdvihnutie aj dovoz';return''};
-renderDays=function(){
-  const days=state.data?.availability?.days||[],dogs=state.data?.dogs||[];
-  $('weekDays').innerHTML=days.map(d=>{
-    const full=Number(d.available)<=0,closed=d.bookings_open===false;
-    const bookedDogs=dogs.filter(x=>bookingFor(x.id,d.date));
-    const bookableDogs=dogs.filter(x=>!bookingFor(x.id,d.date));
-    const rosterCount=(d.dogs?.length||0)+(Number(d.anonymous_dogs)||0);
-    const reserveLabel=bookableDogs.length===1?`Rezervovať • ${esc(bookableDogs[0].name)}`:'Rezervovať miesto';
-    const roster=d.roster_visible&&rosterCount?`<details class="day-dog-roster"><summary>${pluralDogs(rosterCount)}</summary><div class="day-dog-list">${(d.dogs||[]).map(x=>`<div class="day-dog-item"><span class="dog-avatar small">${x.photo_url?`<img src="${esc(x.photo_url)}" alt="">`:'🐾'}</span><strong>${esc(x.name)}</strong></div>`).join('')}${Array.from({length:Number(d.anonymous_dogs)||0},()=>`<div class="day-dog-item"><span class="dog-avatar small anonymous">🐾</span><strong>Prihlásený škôlkar</strong></div>`).join('')}</div></details>`:'';
-    const ownRows=bookedDogs.map(x=>{const r=bookingFor(x.id,d.date)||{};const taxi=taxiLabel(r.taxi_mode);return `<div class="own-booking-row"><div><strong>${esc(x.name)}</strong>${taxi?`<small>${esc(taxi)}</small>`:''}</div><span class="pill approved">${r.status==='pending'?'Čaká na schválenie':'Schválená'}</span></div>`}).join('');
-    const reserve=!closed&&!full&&bookableDogs.length?`<div class="reserve-block"><button class="btn full reserve-open-btn" type="button">${reserveLabel}</button><div class="reserve-options hidden"><div class="reserve-options-title">${bookableDogs.length>1?'<strong>Vyberte psíka</strong>':''}${bookableDogs.length>1?`<select class="input day-dog-select">${bookableDogs.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select>`:`<input class="day-dog-select" type="hidden" value="${bookableDogs[0].id}">`}<strong>Potrebujete taxi?</strong></div><div class="taxi-choice-grid"><button class="taxi-choice" type="button" data-taxi="none">Bez taxi</button><button class="taxi-choice" type="button" data-taxi="pickup">Vyzdvihnúť/odvoz · 5 €</button><button class="taxi-choice" type="button" data-taxi="pickup_dropoff">Vyzdvihnúť aj doviezť · 10 €</button></div></div></div>`:'';
-    return `<div class="card day-card" data-date="${d.date}"><div class="day-main"><div><div class="day-name">${esc(skDay(d.date))},</div><div class="day-date">${skDate(d.date)}</div></div><span class="availability ${closed?'closed':full?'full':''}">${closed?'Zatvorené':full?'Plno':freePlaces(d.available)}</span></div><div class="day-actions">${d.note && !(closed && /^zatvorené$/i.test(String(d.note).trim()))?`<div class="warning-box">${esc(d.note)}</div>`:''}${ownRows}${roster}${reserve}</div></div>`
-  }).join('');
-  bindDayCardActions($('weekDays'));
-  renderDateSearchCalendar();
-};
 function bindDayCardActions(root){if(!root)return;root.querySelectorAll('.reserve-open-btn').forEach(btn=>btn.addEventListener('click',()=>{const opts=btn.parentElement.querySelector('.reserve-options');opts.classList.toggle('hidden');btn.classList.toggle('secondary',!opts.classList.contains('hidden'))}));root.querySelectorAll('.taxi-choice').forEach(btn=>btn.addEventListener('click',()=>reserveDay(btn)))}
 function dateSearchDayLabel(date){try{return new Intl.DateTimeFormat('sk-SK',{weekday:'short'}).format(new Date(date+'T12:00:00')).replace('.','')}catch(_){return''}}
 function renderDateSearchCalendar(){const root=$('dateSearchGrid');if(!root)return;const days=(state.data?.availability?.days||[]).slice(0,10);root.innerHTML=days.map(d=>{const parts=String(d.date).split('-');return `<button class="date-search-day" type="button" data-date="${d.date}"><small>${esc(dateSearchDayLabel(d.date))}</small><strong>${Number(parts[2])}</strong><span>${Number(parts[1])}.</span></button>`}).join('');root.querySelectorAll('.date-search-day').forEach(b=>b.addEventListener('click',()=>showSearchedDay(b.dataset.date)))}
@@ -534,7 +518,6 @@ function placeDeadlineV59(){
 }
 placeDeadlineV59();
 
-/* v19: dismissible announcements + first-open install guide */
 /* v75: persistent announcement cards + read-on-close modal */
 (function customerAnnouncementsV75Runtime(){
   async function markAnnouncementModalReadV75(id){
