@@ -992,6 +992,14 @@ placeDeadlineV59();
     return section;
   }
 
+  function renderGradebookV92(layout){
+    let section=$('customerGradebookV92');
+    if(!section){section=document.createElement('div');section.id='customerGradebookV92';section.className='card customer-gradebook-v92'}
+    section.innerHTML='<div class="customer-gradebook-head-v92"><div><strong>Žiacka knižka</strong><small>Prehľad pokroku a poznámok zo škôlky.</small></div><span>Pripravujeme</span></div>';
+    if(section.parentElement!==layout)layout.appendChild(section);
+    return section;
+  }
+
   function ensureOrder(layout,nodes){
     nodes.filter(Boolean).forEach((node,index)=>{if(layout.children[index]!==node)layout.insertBefore(node,layout.children[index]||null)});
   }
@@ -1003,9 +1011,9 @@ placeDeadlineV59();
     $('dogStats')?.classList.add('v23-hidden-source');
     let layout=$('dogProfileLayoutV23');
     if(!layout){layout=document.createElement('div');layout.id='dogProfileLayoutV23';layout.className='v23-profile-layout';($('dogSelectorWrap')||$('dogProfilePhoto')).insertAdjacentElement('afterend',layout)}
-    const legal=mountLegal(layout),stats=renderVisitStats(layout),account=document.querySelector('.account-card');
+    const legal=mountLegal(layout),stats=renderVisitStats(layout),gradebook=renderGradebookV92(layout),account=document.querySelector('.account-card');
     const settingsHome=settingsHomeV49();if(account&&settingsHome&&account.parentElement!==settingsHome)settingsHome.appendChild(account);
-    ensureOrder(layout,[stats]);
+    ensureOrder(layout,[stats,gradebook]);
   }
 
   const originalRenderDogV23=renderDog;
