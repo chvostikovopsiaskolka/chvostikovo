@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260921-customer-doghub-v100';
+const APP_BUILD='20260921-customer-usagefix-v101';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -212,7 +212,7 @@ function startCustomerLive(force=false){
   stopCustomerLive();
   const url=SUPABASE_URL.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(SUPABASE_KEY)+'&vsn=1.0.0';
   let socket;try{socket=new WebSocket(url)}catch(error){console.warn('Realtime spojenie sa nepodarilo otvoriť',error);scheduleCustomerReconnect();return}customerLiveSocket=socket;
-  socket.onopen=()=>{if(socket!==customerLiveSocket)return;customerLiveAttempt=0;const changes=['customer_booking_requests','customer_pass_requests','portal_notifications','portal_announcements','portal_day_settings','portal_live_events','customer_dog_submissions','customer_owner_links','dogs','vaccinations'].map(table=>({event:'*',schema:'public',table}));socket.send(JSON.stringify({topic:'realtime:customer-portal',event:'phx_join',payload:{config:{broadcast:{ack:false,self:false},presence:{enabled:false},postgres_changes:changes,private:false},access_token:state.session.access_token},ref:'1',join_ref:'1'}));customerLiveHeartbeat=setInterval(()=>{if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(Date.now()),join_ref:null}))},20000);queueCustomerSync('all',40)};
+  socket.onopen=()=>{if(socket!==customerLiveSocket)return;customerLiveAttempt=0;const changes=['customer_booking_requests','customer_pass_requests','portal_notifications','portal_announcements','portal_day_settings','portal_live_events','customer_dog_submissions','customer_owner_links','dogs','vaccinations'].map(table=>({event:'*',schema:'public',table}));socket.send(JSON.stringify({topic:'realtime:customer-portal',event:'phx_join',payload:{config:{broadcast:{ack:false,self:false},presence:{enabled:false},postgres_changes:changes,private:false},access_token:state.session.access_token},ref:'1',join_ref:'1'}));customerLiveHeartbeat=setInterval(()=>{if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(Date.now()),join_ref:null}))},20000);scheduleWaitingDogFallbackV101()};
   socket.onmessage=event=>{try{const message=JSON.parse(event.data);if(message.event==='postgres_changes')queueCustomerSync(customerScopeForMessage(message))}catch(_){}};
   socket.onerror=()=>{};socket.onclose=()=>{if(socket!==customerLiveSocket)return;customerLiveSocket=null;clearInterval(customerLiveHeartbeat);customerLiveHeartbeat=0;scheduleCustomerReconnect()};
 }
@@ -736,7 +736,20 @@ async function refreshOnResume(){
   queueCustomerSync('all',40);
 }
 window.addEventListener('focus',refreshOnResume);window.addEventListener('online',refreshOnResume);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshOnResume();else stopCustomerLive()});
-setInterval(()=>{if(state.session&&document.visibilityState==='visible'&&!(state.data?.dogs||[]).length)queueCustomerSync('all',0)},5000);
+let waitingDogFallbackV101=0;
+function scheduleWaitingDogFallbackV101(){
+  clearTimeout(waitingDogFallbackV101);
+  if(!state.session||document.visibilityState==='hidden'||(state.data?.dogs||[]).length)return;
+  waitingDogFallbackV101=setTimeout(()=>{
+    waitingDogFallbackV101=0;
+    if(state.session&&document.visibilityState==='visible'&&!(state.data?.dogs||[]).length){
+      queueCustomerSync('all',0);
+      scheduleWaitingDogFallbackV101();
+    }
+  },60000);
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')scheduleWaitingDogFallbackV101();else{clearTimeout(waitingDogFallbackV101);waitingDogFallbackV101=0}});
+setTimeout(scheduleWaitingDogFallbackV101,1500);
 (function betaUiV75Runtime(){
   const badge=$('betaVersionBadge'),modal=$('betaVersionModal'),close=$('betaVersionClose'),messages=$('betaVersionMessages');if(!badge||!modal)return;
   badge.addEventListener('click',()=>modal.classList.remove('hidden'));close?.addEventListener('click',()=>modal.classList.add('hidden'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});messages?.addEventListener('click',()=>{modal.classList.add('hidden');switchTab('messages')});
@@ -1140,17 +1153,14 @@ placeDeadlineV59();
 
 
 
-/* v32 cleanup: static home icon; service worker is registered only by init() */
-(function portalHomeIconV32(){
-  const brand='https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-brand-logo?v=20260914-v31';
-  const applyBrand=()=>document.querySelectorAll('img[src*="/chvostikovo-logo"]').forEach(img=>{img.src=brand});
-  const applyIcon=()=>{
+/* v101: all customer shell images are static assets; no Edge Function is used for branding. */
+(function portalHomeIconV101(){
+  const mount=()=>{
+    document.querySelectorAll('img[src*="/chvostikovo-logo"],img[src*="/chvostikovo-brand-logo"]').forEach(img=>{img.src='/icon-192.png'});
     let apple=document.querySelector('link[rel="apple-touch-icon"]');
     if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';document.head.appendChild(apple)}
-    apple.href='/apple-touch-icon.png';
-    apple.setAttribute('sizes','180x180');
+    apple.href='/apple-touch-icon.png';apple.setAttribute('sizes','180x180');
   };
-  const mount=()=>{applyBrand();applyIcon()};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
 

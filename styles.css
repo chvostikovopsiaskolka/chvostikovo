@@ -1167,3 +1167,6 @@ html,body,#appView.app,#appView .tab-page{
  .dog-hub-tile-v99 strong{font-size:11.6px!important}
  .dog-hub-visits-v100 strong{font-size:10.3px!important}
 }
+
+/* v101: brand image is a local static asset */
+.auth-brand img[src="/icon-192.png"]{visibility:visible!important}
