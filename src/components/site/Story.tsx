@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Home, Zap, Dog, Check } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
-import { LongForm } from "./Forms";
-import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
+import { ShortForm } from "./Forms";
+import { CARE, WHY, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import dogsPair from "@/assets/dogs-pair.jpg";
 import certAdriana from "@/assets/cert-adriana.jpg";
@@ -113,16 +113,15 @@ export function Why() {
             })}
           </div>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <button type="button" onClick={() => setOpen(true)} className="btn-coral">
-              Prihláška do škôlky
-            </button>
-            <a
-              href={`tel:${PHONE}`}
-              className="inline-flex items-center justify-center rounded-full border-2 border-cream/60 px-6 py-3 font-display font-semibold text-cream transition-colors hover:bg-cream hover:text-forest"
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="btn-coral inline-flex min-h-12 w-full max-w-[290px] items-center justify-center px-6 py-3 text-center leading-tight sm:w-auto sm:max-w-none sm:px-8"
             >
-              Zavolajte nám
-            </a>
+              <span className="block sm:inline">Presne toto hľadám</span>
+              <span className="block sm:ml-1 sm:inline">pre môjho psíka</span>
+            </button>
           </div>
         </div>
       </div>
@@ -130,10 +129,10 @@ export function Why() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Prihlás svojho psíka ešte dnes"
-        subtitle="Vyplňte formulár, v ktorom nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky."
+        title="Informujte sa o škôlke"
+        subtitle="Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií."
       >
-        <LongForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
+        <ShortForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
       </FormDialog>
     </section>
   );
