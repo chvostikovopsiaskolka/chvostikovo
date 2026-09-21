@@ -78,6 +78,9 @@ export const Route = createFileRoute("/target-na-cvicenie-pre-psov")({
           name: "Target na cvičenie pre psov",
           description,
           url: PAGE_URL,
+          image: [targetLargeDog, targetSmallDog, targetLargeProduct, targetSmallProduct].map(
+            (src) => (src.startsWith("http") ? src : `${BASE_URL}${src}`),
+          ),
           brand: { "@type": "Brand", name: "Chvostíkovo" },
           material: "Drevo a protišmykový gumový povrch",
           offers: {

@@ -120,6 +120,9 @@ export const Route = createFileRoute("/stojan-na-misky-pre-psa")({
               name: "Drevený stojan na misky pre psa",
               description,
               url: PAGE_URL,
+              image: [standDark, standWhite, standMia].map((src) =>
+                src.startsWith("http") ? src : `${BASE_URL}${src}`,
+              ),
               brand: { "@type": "Brand", name: "Chvostíkovo" },
               material: "Drevo",
               offers: {
