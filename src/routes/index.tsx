@@ -70,6 +70,16 @@ function Index() {
         <ReviewReasons />
         <Reviews />
         <Faq />
+        <section className="bg-forest py-6 text-cream sm:py-8">
+          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-center sm:flex-row sm:text-left">
+            <h2 className="font-display text-2xl text-cream sm:text-3xl">
+              Prečo využiť psiu škôlku?
+            </h2>
+            <a href="#preco" className="btn-coral shrink-0">
+              Zisti viac
+            </a>
+          </div>
+        </section>
         <DaycarePhotoCarousel />
         <VideoSection />
         <InquirySection />
