@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260921-customer-patch-v96';
+const APP_BUILD='20260921-customer-patch-v96r1';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -268,6 +268,7 @@ function ensureDogFormInModalV51(){
 let dogDetailsModeV96='details',dogDetailsMandatoryV96=false,dogDetailsSnapshotV96='';
 function customerVaccinationsCompleteV96(dog){
   if(!dog)return false;
+  if(dog.vaccination_requirements_verified===true)return true;
   const required=['rabies','infectious','kennel_cough'];
   const rows=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(dog.id));
   return required.every(type=>rows.some(v=>v.vaccination_type===type&&v.vaccinated_on&&v.valid_until));
