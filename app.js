@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260921-customer-ui-v98';
+const APP_BUILD='20260921-customer-doghub-v99';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -328,9 +328,16 @@ function renderDogProfilePrompt(){for(const id of ['bookingNotice','dogStatus'])
 function renderDogHeaderV56(dog){
   const root=$('dogProfilePhoto');if(!root)return;
   const key=String(dog.id||'')+'|'+String(dog.photo_path||'')+'|'+String(dog.photo_updated_at||'')+'|'+String(dog.name||'');
-  let header=root.querySelector('.dog-profile-header');
-  if(!header||root.dataset.dogVisualKey!==key){
-    root.innerHTML=`<div class="card dog-profile-header"><div class="dog-profile-identity"><div class="profile-photo-wrap"><span class="dog-avatar profile">${dog.photo_url?`<img src="${esc(dog.photo_url)}" alt="${esc(dog.name)}">`:'🐾'}</span><button id="dogPhotoActionBtnV89" class="photo-pencil" type="button" title="${dog.photo_url?'Upraviť fotku':'Pridať fotku'}" aria-label="${dog.photo_url?'Upraviť fotku':'Pridať fotku'}">✎</button><input id="dogPhotoInput" class="hidden" type="file" accept="image/*"></div><h2 class="dog-photo-name">${esc(dog.name)}</h2></div><div class="dog-profile-actions-v96"><button id="schoolRulesCardV55" class="btn secondary dog-details-open school-rules-inline-v98" type="button"><span class="school-rules-icon-inline-v98"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h8l3 3V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"></path><path d="M14.5 3.5V7H18M9 11h6M9 14h6M9 17h4"></path></svg></span><span>Pravidlá škôlky</span></button><button id="dogDataOpenV96" class="btn secondary dog-details-open" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path><path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path></svg><span>Údaje</span></button><button id="dogVaccinationsOpenV96" class="btn secondary dog-details-open" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.7 2.9 8.1 7 10 4.1-1.9 7-5.3 7-10V6l-7-3Z"></path><path d="M9 12h6M12 9v6"></path></svg><span>Očkovania</span></button></div></div>`;
+  if(!root.querySelector('.dog-hub-v99')||root.dataset.dogVisualKey!==key){
+    root.innerHTML=`<div class="card dog-hub-v99"><div class="dog-hub-grid-v99">
+      <button id="dogDataOpenV96" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">📝</span><strong>Údaje</strong></button>
+      <button id="dogVaccinationsOpenV96" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">💉</span><strong>Očkovania</strong></button>
+      <button id="schoolRulesCardV55" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">📄</span><strong>Pravidlá škôlky</strong></button>
+      <button id="dogVisitsOpenV99" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">🐾</span><strong>Návštevy</strong></button>
+      <button class="dog-hub-tile-v99 dog-hub-gradebook-v99" type="button" disabled><span class="dog-hub-emoji-v99">📚</span><span><strong>Žiacka knižka</strong><small>Pripravujeme</small></span></button>
+      <button id="dogMenuOpenV99" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">⚙️</span><strong>Menu</strong></button>
+    </div></div>
+    <div class="card dog-photo-feature-v99"><div class="dog-photo-paws-v99" aria-hidden="true"></div><div class="dog-photo-feature-inner-v99"><div class="profile-photo-wrap"><span class="dog-avatar profile">${dog.photo_url?`<img src="${esc(dog.photo_url)}" alt="${esc(dog.name)}">`:'🐾'}</span><button id="dogPhotoActionBtnV89" class="photo-pencil" type="button" title="${dog.photo_url?'Upraviť fotku':'Pridať fotku'}" aria-label="${dog.photo_url?'Upraviť fotku':'Pridať fotku'}">✎</button><input id="dogPhotoInput" class="hidden" type="file" accept="image/*"></div><h2 class="dog-photo-name">${esc(dog.name)}</h2></div></div>`;
     root.dataset.dogVisualKey=key;
     const photoInput=$('dogPhotoInput');
     photoInput?.addEventListener('click',()=>{window.__customerPhotoPickerV88=true;setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},15000)});
@@ -338,6 +345,8 @@ function renderDogHeaderV56(dog){
     $('dogPhotoActionBtnV89')?.addEventListener('click',()=>{dog.photo_url?showPhotoActionsV89(dog):selectNewDogPhotoV89()});
     $('dogDataOpenV96')?.addEventListener('click',()=>openDogDetails('details',false));
     $('dogVaccinationsOpenV96')?.addEventListener('click',()=>openDogDetails('vaccinations',false));
+    $('dogVisitsOpenV99')?.addEventListener('click',()=>window.openDogVisitsV99?.());
+    $('dogMenuOpenV99')?.addEventListener('click',()=>openSettings());
   }
 }
 function renderDogCore(){ensureDogFormInModalV51();const dog=selectedDog();if(!dog){$('dogProfilePhoto').innerHTML='';$('dogProfilePhoto').removeAttribute('data-dog-visual-key');$('dogProfileSettings').innerHTML='';$('dogStats').innerHTML=box('info','Psíka najprv priradí Chvostíkovo k vášmu účtu.');$('dogForm').classList.add('hidden');renderDogProfilePrompt();return}$('dogForm').classList.remove('hidden');state.selectedDogId=Number(dog.id);renderDogHeaderV56(dog);const cachedPush=state.pushChecked?!!state.pushEnabled:(typeof Notification!=='undefined'&&Notification.permission==='granted'&&localStorage.getItem('chvostikovo_push_enabled')==='1');$('dogProfileSettings').innerHTML=`<div class="card profile-settings"><div class="privacy-row"><div><strong>Upozornenia</strong><small>Rezervácie, správy a oznamy z Chvostíkova.</small></div><button id="pushToggle" class="push-switch syncing ${cachedPush?'active':''}" type="button" aria-label="Upozornenia"><span></span></button></div><div class="privacy-row"><div><strong>Zobraziť meno psa a fotku ostatným</strong><small>Súhlas môžete kedykoľvek vypnúť.</small></div><button id="privacyToggle" class="push-switch ${dog.share_name_photo?'active':''}" type="button" aria-label="Zdieľanie"><span></span></button></div></div>`;$('pushToggle').addEventListener('click',togglePush);$('privacyToggle').addEventListener('click',togglePrivacy);applyPushToggle();$('dogStats').innerHTML='';fillDogForm(dog);renderDogProfilePrompt()}
@@ -1231,51 +1240,28 @@ placeDeadlineV59();
     return section;
   }
 
-  function renderVisitStats(layout){
-    const dog=selectedDog();if(!dog)return null;
-    let section=$('customerVisitStatsV23');
-    if(!section||section.tagName==='DETAILS'){section?.remove();section=document.createElement('div');section.id='customerVisitStatsV23';section.className='card visit-summary-card'}
-    const visitCount=totalVisits(dog);
-    const grouped=new Map();
+  function ensureVisitsModalV99(){
+    let modal=$('dogVisitsModalV99');if(modal)return modal;
+    document.body.insertAdjacentHTML('beforeend','<div id="dogVisitsModalV99" class="dog-visits-modal-v99 hidden" role="dialog" aria-modal="true" aria-labelledby="dogVisitsTitleV99"><div class="dog-visits-card-v99"><div class="dog-visits-head-v99"><div><small>Chvostíkovo</small><h2 id="dogVisitsTitleV99">Návštevy v škôlke</h2></div><button id="dogVisitsCloseV99" class="dog-visits-close-v99" type="button" aria-label="Zavrieť">×</button></div><div id="dogVisitsBodyV99"></div></div></div>');
+    modal=$('dogVisitsModalV99');const close=()=>{modal.classList.add('hidden');document.documentElement.classList.remove('dog-visits-open-v99')};
+    $('dogVisitsCloseV99')?.addEventListener('click',close);modal.addEventListener('click',e=>{if(e.target===modal)close()});return modal;
+  }
+  function renderVisitStats(){
+    const dog=selectedDog();if(!dog)return null;const modal=ensureVisitsModalV99(),body=$('dogVisitsBodyV99'),grouped=new Map(),visitCount=totalVisits(dog);
     (state.data?.monthly_totals||[]).filter(m=>Number(m.dog_id)===Number(dog.id)).forEach(m=>{const key=String(m.month||'').slice(0,7);if(key)grouped.set(key,(grouped.get(key)||0)+Number(m.visits||0))});
     const months=[...grouped.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
-    section.innerHTML='<button class="visit-summary-toggle-v98" type="button" aria-expanded="false"><strong>Návštevy v škôlke</strong><span class="details-chevron">›</span></button><div class="visit-summary-body-v98 hidden"><div class="visit-summary-total"><span>Návštevy celkovo</span><strong>'+visitCount+'</strong></div><details class="monthly-visits"><summary>Mesačné návštevy <span class="details-chevron">›</span></summary><div class="monthly-visits-list">'+
-      (months.length?months.map(([month,count])=>'<div class="v23-month-row"><span>'+esc(monthLabel(month+'-01'))+'</span><strong>'+count+' '+(count===1?'návšteva':count>1&&count<5?'návštevy':'návštev')+'</strong></div>').join(''):'<div class="hint v23-empty-months">Mesačné štatistiky zatiaľ nie sú k dispozícii.</div>')+'</div></details></div>';
-    const toggle=section.querySelector('.visit-summary-toggle-v98'),body=section.querySelector('.visit-summary-body-v98');
-    toggle?.addEventListener('click',()=>{
-      const willOpen=body?.classList.contains('hidden');
-      body?.classList.toggle('hidden',!willOpen);
-      toggle.setAttribute('aria-expanded',willOpen?'true':'false');
-    });
-    if(section.parentElement!==layout)layout.appendChild(section);
-    return section;
+    body.innerHTML='<div class="dog-visits-total-v99"><span>Návštevy celkovo</span><strong>'+visitCount+'</strong></div><div class="dog-visits-month-title-v99">Mesačné návštevy</div><div class="dog-visits-months-v99">'+(months.length?months.map(([month,count])=>'<div class="v23-month-row"><span>'+esc(monthLabel(month+'-01'))+'</span><strong>'+count+' '+(count===1?'návšteva':count>1&&count<5?'návštevy':'návštev')+'</strong></div>').join(''):'<div class="hint v23-empty-months">Mesačné štatistiky zatiaľ nie sú k dispozícii.</div>')+'</div>';return modal;
   }
-
-  function renderGradebookV92(layout){
-    let section=$('customerGradebookV92');
-    if(!section){section=document.createElement('div');section.id='customerGradebookV92';section.className='card customer-gradebook-v92'}
-    section.innerHTML='<div class="customer-gradebook-head-v92"><div><strong>Žiacka knižka</strong></div><span>Pripravujeme</span></div>';
-    if(section.parentElement!==layout)layout.appendChild(section);
-    return section;
-  }
-
-  function ensureOrder(layout,nodes){
-    nodes.filter(Boolean).forEach((node,index)=>{if(layout.children[index]!==node)layout.insertBefore(node,layout.children[index]||null)});
-  }
-
+  window.openDogVisitsV99=()=>{const modal=renderVisitStats();if(!modal)return;modal.classList.remove('hidden');document.documentElement.classList.add('dog-visits-open-v99')};
+  function renderGradebookV92(){return null}
+  function ensureOrder(){return}
   function apply(){
-    const tab=$('dogTab'),dog=selectedDog();if(!tab||!dog)return;
-    tab.querySelector('.section-head p')?.remove();
-    $('dogProfileSettings')?.classList.add('v23-hidden-source');
-    $('dogStats')?.classList.add('v23-hidden-source');
-    let layout=$('dogProfileLayoutV23');
-    if(!layout){layout=document.createElement('div');layout.id='dogProfileLayoutV23';layout.className='v23-profile-layout';($('dogSelectorWrap')||$('dogProfilePhoto')).insertAdjacentElement('afterend',layout)}
-    const legal=mountLegal(layout),stats=renderVisitStats(layout),gradebook=renderGradebookV92(layout),account=document.querySelector('.account-card');
-    const settingsHome=settingsHomeV49();if(account&&settingsHome&&account.parentElement!==settingsHome)settingsHome.appendChild(account);
-    ensureOrder(layout,[stats,gradebook]);
+    const tab=$('dogTab'),dog=selectedDog();if(!tab||!dog)return;const head=tab.querySelector(':scope>.section-head');if(head)head.classList.add('dog-section-head-hidden-v99');
+    $('dogProfileSettings')?.classList.add('v23-hidden-source');$('dogStats')?.classList.add('v23-hidden-source');
+    const oldLayout=$('dogProfileLayoutV23');if(oldLayout)oldLayout.innerHTML='';
+    mountLegal(oldLayout||tab);renderVisitStats();
+    const account=document.querySelector('.account-card'),settingsHome=settingsHomeV49();if(account&&settingsHome&&account.parentElement!==settingsHome)settingsHome.appendChild(account);
   }
-
-
 
 
   const calendarSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M7 3v4M17 3v4M3 10h18"></path></svg>';
@@ -1321,12 +1307,7 @@ placeDeadlineV59();
 
   function ensureSettings(){
     const tab=$('dogTab');if(!tab)return;
-    const head=tab.querySelector(':scope>.section-head');
-    if(head&&!$('dogSettingsBtnV36')){
-      const btn=document.createElement('button');btn.id='dogSettingsBtnV36';btn.className='dog-settings-btn-v36';btn.type='button';btn.setAttribute('aria-label','Menu');btn.title='Menu';btn.innerHTML=gearSvg+'<span>Menu</span>';
-      head.appendChild(btn);
-      btn.addEventListener('click',openSettings);
-    }
+    $('dogSettingsBtnV36')?.remove();
     if(!$('dogSettingsModalV36')){
       document.body.insertAdjacentHTML('beforeend','<div id="dogSettingsModalV36" class="settings-modal-v36 hidden" role="dialog" aria-modal="true" aria-labelledby="dogSettingsTitleV36"><div class="settings-card-v36"><div class="settings-head-v36"><div><small>Chvostíkovo</small><h2 id="dogSettingsTitleV36">Menu</h2><p>Účet, upozornenia a súhlasy</p></div><button id="dogSettingsCloseV36" class="settings-close-v36" type="button" aria-label="Zavrieť">×</button></div><div id="dogSettingsContentV36" class="settings-content-v36"></div></div></div>');
       $('dogSettingsCloseV36').addEventListener('click',closeSettings);
@@ -1397,7 +1378,7 @@ placeDeadlineV59();
       quick=document.createElement('div');
       quick.id='settingsNotificationsV37';
       quick.className='settings-quick-v37';
-      quick.innerHTML='<div><strong>Upozornenia</strong><small>Rezervácie, správy a oznamy z Chvostíkova.</small></div><button id="settingsPushToggleV37" class="push-switch" type="button" role="switch" aria-label="Upozornenia"><span></span></button>';
+      quick.innerHTML='<div class="settings-paired-v99"><div class="settings-paired-row-v99"><div><strong>Upozornenia</strong><small>Rezervácie, správy a oznamy z Chvostíkova.</small></div><button id="settingsPushToggleV37" class="push-switch" type="button" role="switch" aria-label="Upozornenia"><span></span></button></div><div class="settings-paired-row-v99"><div><strong>Zobraziť meno psa a fotku ostatným</strong><small>Súhlas môžete kedykoľvek vypnúť.</small></div><button id="settingsPrivacyToggleV99" class="push-switch" type="button" role="switch" aria-label="Zdieľanie mena psa a fotky"><span></span></button></div></div>';
       content.insertBefore(quick,content.firstChild||null);
       $('settingsPushToggleV37')?.addEventListener('click',()=>{
         const source=$('pushToggle');
@@ -1405,15 +1386,13 @@ placeDeadlineV59();
         setTimeout(prepareSettingsV37,120);
         setTimeout(prepareSettingsV37,700);
       });
+      $('settingsPrivacyToggleV99')?.addEventListener('click',()=>{const source=$('privacyToggle');if(source&&!source.disabled)source.click();setTimeout(prepareSettingsV37,120);setTimeout(prepareSettingsV37,700)});
     }else if(content.firstElementChild!==quick){content.insertBefore(quick,content.firstChild||null)}
 
-    const direct=$('settingsPushToggleV37');
-    const on=pushOnV37();
+    const direct=$('settingsPushToggleV37'),on=pushOnV37();
     if(direct){direct.classList.toggle('active',on);direct.setAttribute('aria-checked',on?'true':'false')}
-
-    const controls=$('customerLegalControlsV23');
-    const notificationRow=controls?.querySelector('.v23-consent-row:first-child');
-    notificationRow?.classList.add('v37-hide-notification');
+    const dog=selectedDog(),privacy=$('settingsPrivacyToggleV99');if(privacy){const sharing=!!dog?.share_name_photo;privacy.classList.toggle('active',sharing);privacy.setAttribute('aria-checked',sharing?'true':'false')}
+    const controls=$('customerLegalControlsV23');controls?.querySelectorAll('.v23-consent-row').forEach(row=>row.classList.add('v37-hide-notification'));
 
     const legal=$('customerLegalSectionV23');
     if(legal&&!legal.dataset.v98MenuReady){legal.open=false;legal.dataset.v98MenuReady='1'}
