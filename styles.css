@@ -1054,3 +1054,61 @@ html,body,#appView.app,#appView .tab-page{
   #bookingTab .hero .hero-paws-v96{width:180px!important;height:94px!important;right:54px!important;bottom:-10px!important;opacity:.20!important}
   .terms-point-v97{padding:11px}
 }
+
+
+/* v98 – compact visits, inline rules and decorative paw polish */
+#bookingTab,#dogTab{position:relative;isolation:isolate;overflow-x:clip}
+#bookingTab::before,#dogTab::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cg fill='%23f472b6'%3E%3Cellipse cx='40' cy='38' rx='15' ry='12'/%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Ccircle cx='34' cy='15' r='6'/%3E%3Ccircle cx='49' cy='16' r='6'/%3E%3Ccircle cx='61' cy='27' r='6'/%3E%3C/g%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cg fill='%23f472b6'%3E%3Cellipse cx='40' cy='38' rx='15' ry='12'/%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Ccircle cx='34' cy='15' r='6'/%3E%3Ccircle cx='49' cy='16' r='6'/%3E%3Ccircle cx='61' cy='27' r='6'/%3E%3C/g%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cg fill='%23f472b6'%3E%3Cellipse cx='40' cy='38' rx='15' ry='12'/%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Ccircle cx='34' cy='15' r='6'/%3E%3Ccircle cx='49' cy='16' r='6'/%3E%3Ccircle cx='61' cy='27' r='6'/%3E%3C/g%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cg fill='%23f472b6'%3E%3Cellipse cx='40' cy='38' rx='15' ry='12'/%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Ccircle cx='34' cy='15' r='6'/%3E%3Ccircle cx='49' cy='16' r='6'/%3E%3Ccircle cx='61' cy='27' r='6'/%3E%3C/g%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cg fill='%23f472b6'%3E%3Cellipse cx='40' cy='38' rx='15' ry='12'/%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Ccircle cx='34' cy='15' r='6'/%3E%3Ccircle cx='49' cy='16' r='6'/%3E%3Ccircle cx='61' cy='27' r='6'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-size:88px 66px,48px 36px,72px 54px,38px 29px,56px 42px;
+  background-position:calc(100% - 6px) 190px,8px 330px,94% 61%,4% 78%,81% 92%;
+  opacity:.035;
+}
+#bookingTab>* ,#dogTab>*{position:relative;z-index:1}
+
+.dog-profile-header{position:relative!important;overflow:hidden!important}
+.dog-profile-header::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cg fill='%23f472b6'%3E%3Cellipse cx='40' cy='38' rx='15' ry='12'/%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Ccircle cx='34' cy='15' r='6'/%3E%3Ccircle cx='49' cy='16' r='6'/%3E%3Ccircle cx='61' cy='27' r='6'/%3E%3C/g%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cg fill='%23f472b6'%3E%3Cellipse cx='40' cy='38' rx='15' ry='12'/%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Ccircle cx='34' cy='15' r='6'/%3E%3Ccircle cx='49' cy='16' r='6'/%3E%3Ccircle cx='61' cy='27' r='6'/%3E%3C/g%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cg fill='%23f472b6'%3E%3Cellipse cx='40' cy='38' rx='15' ry='12'/%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Ccircle cx='34' cy='15' r='6'/%3E%3Ccircle cx='49' cy='16' r='6'/%3E%3Ccircle cx='61' cy='27' r='6'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-size:74px 56px,42px 32px,54px 41px;
+  background-position:96% 10%,58% 8%,72% 88%;
+  opacity:.075;
+}
+.dog-profile-header>*{position:relative;z-index:1}
+.dog-profile-actions-v96{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch}
+.school-rules-inline-v98{grid-column:2;grid-row:1;white-space:normal!important;line-height:1.15!important;color:#374151!important}
+#dogDataOpenV96{grid-column:1;grid-row:2}
+#dogVaccinationsOpenV96{grid-column:2;grid-row:2}
+.school-rules-icon-inline-v98{width:18px;height:18px;display:grid;place-items:center;color:#ea580c;flex:0 0 18px}
+.school-rules-icon-inline-v98 svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.school-rules-card-v55:not(.school-rules-inline-v98){display:none!important}
+
+.visit-summary-card{padding:0!important;overflow:hidden!important}
+.visit-summary-toggle-v98{
+  width:100%;min-height:58px;border:0;background:#fff;color:#111827;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:15px 20px;text-align:left;cursor:pointer;
+}
+.visit-summary-toggle-v98 strong{font-size:16px;font-weight:850}
+.visit-summary-toggle-v98 .details-chevron{transition:transform .18s}
+.visit-summary-toggle-v98[aria-expanded="true"] .details-chevron{transform:rotate(90deg)}
+.visit-summary-body-v98{border-top:1px solid var(--line);padding:15px 20px 16px}
+.visit-summary-body-v98.hidden{display:none!important}
+.visit-summary-body-v98 .visit-summary-total{padding:0 0 13px!important}
+
+#customerLegalSectionV23>summary{width:100%;user-select:none;-webkit-user-select:none}
+#customerLegalSectionV23[open]>summary .details-chevron{transform:rotate(90deg)}
+
+@media(max-width:520px){
+  #bookingTab::before,#dogTab::before{
+    background-size:72px 54px,40px 30px,62px 47px,32px 24px,48px 36px;
+    background-position:calc(100% - 4px) 175px,6px 305px,96% 60%,3% 79%,84% 91%;
+  }
+  .dog-profile-header::before{background-size:62px 47px,36px 27px,46px 35px;opacity:.07}
+  .school-rules-inline-v98{font-size:11.5px!important;padding:8px 7px!important}
+  .visit-summary-toggle-v98{padding:14px 18px}
+  .visit-summary-body-v98{padding:14px 18px 15px}
+}
