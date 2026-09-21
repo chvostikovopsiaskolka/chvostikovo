@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260921-customer-testfix-v97';
+const APP_BUILD='20260921-customer-testfix-v97r1';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -212,7 +212,7 @@ function startCustomerLive(force=false){
   stopCustomerLive();
   const url=SUPABASE_URL.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(SUPABASE_KEY)+'&vsn=1.0.0';
   let socket;try{socket=new WebSocket(url)}catch(error){console.warn('Realtime spojenie sa nepodarilo otvoriť',error);scheduleCustomerReconnect();return}customerLiveSocket=socket;
-  socket.onopen=()=>{if(socket!==customerLiveSocket)return;customerLiveAttempt=0;const changes=['customer_booking_requests','customer_pass_requests','portal_notifications','portal_announcements','portal_day_settings','portal_live_events','customer_dog_submissions','customer_owner_links','dogs','vaccinations','portal_dog_onboarding','portal_terms_acceptances'].map(table=>({event:'*',schema:'public',table}));socket.send(JSON.stringify({topic:'realtime:customer-portal',event:'phx_join',payload:{config:{broadcast:{ack:false,self:false},presence:{enabled:false},postgres_changes:changes,private:false},access_token:state.session.access_token},ref:'1',join_ref:'1'}));customerLiveHeartbeat=setInterval(()=>{if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(Date.now()),join_ref:null}))},20000);queueCustomerSync('all',40)};
+  socket.onopen=()=>{if(socket!==customerLiveSocket)return;customerLiveAttempt=0;const changes=['customer_booking_requests','customer_pass_requests','portal_notifications','portal_announcements','portal_day_settings','portal_live_events','customer_dog_submissions','customer_owner_links','dogs','vaccinations'].map(table=>({event:'*',schema:'public',table}));socket.send(JSON.stringify({topic:'realtime:customer-portal',event:'phx_join',payload:{config:{broadcast:{ack:false,self:false},presence:{enabled:false},postgres_changes:changes,private:false},access_token:state.session.access_token},ref:'1',join_ref:'1'}));customerLiveHeartbeat=setInterval(()=>{if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(Date.now()),join_ref:null}))},20000);queueCustomerSync('all',40)};
   socket.onmessage=event=>{try{const message=JSON.parse(event.data);if(message.event==='postgres_changes')queueCustomerSync(customerScopeForMessage(message))}catch(_){}};
   socket.onerror=()=>{};socket.onclose=()=>{if(socket!==customerLiveSocket)return;customerLiveSocket=null;clearInterval(customerLiveHeartbeat);customerLiveHeartbeat=0;scheduleCustomerReconnect()};
 }
@@ -877,11 +877,12 @@ placeDeadlineV59();
     const chunks=String(text||'').split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);
     let html='';
     for(let i=0;i<chunks.length;i++){
-      const heading=/^\d+\.\s+/.test(chunks[i]);
-      if(heading){
-        const body=(i+1<chunks.length&&!/^\d+\.\s+/.test(chunks[i+1]))?chunks[++i]:'';
-        html+='<section class="terms-point-v97"><strong>'+esc(chunks[i-1]||chunks[i])+'</strong>'+(body?'<p>'+esc(body)+'</p>':'')+'</section>';
-      }else html+='<p class="terms-loose-v97">'+esc(chunks[i])+'</p>';
+      const headingText=chunks[i];
+      if(/^\d+\.\s+/.test(headingText)){
+        let body='';
+        if(i+1<chunks.length&&!/^\d+\.\s+/.test(chunks[i+1]))body=chunks[++i];
+        html+='<section class="terms-point-v97"><strong>'+esc(headingText)+'</strong>'+(body?'<p>'+esc(body)+'</p>':'')+'</section>';
+      }else html+='<p class="terms-loose-v97">'+esc(headingText)+'</p>';
     }
     return html;
   }
