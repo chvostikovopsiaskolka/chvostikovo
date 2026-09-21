@@ -1005,3 +1005,32 @@ html,body,#appView.app,#appView .tab-page{
 .customer-gradebook-head-v92 strong{display:block;font-size:17px}
 .customer-gradebook-head-v92 small{display:block;margin-top:4px;color:var(--muted);font-size:12px;line-height:1.35}
 .customer-gradebook-head-v92>span{flex:0 0 auto;padding:6px 10px;border-radius:999px;background:#f3f4f6;color:#6b7280;font-size:11px;font-weight:850}
+
+
+/* v96 – customer onboarding, vaccinations, free entry and light visual polish */
+#bookingTab .hero{position:relative;overflow:hidden}
+#bookingTab .hero>div,#bookingTab .hero>.hero-pass{position:relative;z-index:1}
+.hero-paws-v96{position:absolute;inset:auto -8px -8px auto;width:190px;height:100px;fill:#fff;opacity:.13;pointer-events:none;transform:rotate(-4deg)}
+.free-entry-label-v96{font-size:24px!important}
+.dog-profile-actions-v96{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;flex:0 0 auto}
+.dog-profile-actions-v96 .dog-details-open{min-width:0;padding:9px 10px;font-size:12px}
+.dog-profile-actions-v96 svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.dog-details-section-v96{display:grid;gap:14px}
+.optional-label-v96{font-weight:650;color:var(--muted);font-size:11px;margin-left:4px}
+.vaccine-box{min-width:0;overflow:hidden}
+.vaccine-box strong,.vaccine-disease-hint-v96{max-width:100%;overflow-wrap:anywhere;word-break:normal}
+.vaccine-disease-hint-v96{color:var(--muted);font-size:12px;line-height:1.42;margin:-4px 0 11px}
+.vaccine-validity-v96{margin-top:10px;padding:9px 11px;border-radius:11px;font-size:12px;font-weight:850;border:1px solid #e5e7eb;background:#f9fafb;color:#6b7280}
+.vaccine-validity-v96.valid{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+.vaccine-validity-v96.warning{border-color:#fde68a;background:#fffbeb;color:#a16207}
+.vaccine-validity-v96.expired{border-color:#fecaca;background:#fef2f2;color:#b91c1c}
+.booking-gate-v96{margin-bottom:14px}
+.booking-launch-disabled-v96{opacity:.52;filter:saturate(.55);margin-bottom:8px;pointer-events:none}
+.booking-vaccinations-v96{border:1px solid #fed7aa!important;background:#fff7ed!important;color:#d95700!important}
+@media(max-width:520px){
+  .dog-profile-header{align-items:center!important;flex-wrap:wrap}
+  .dog-profile-identity{flex:1 1 150px}
+  .dog-profile-actions-v96{flex:1 1 100%;width:100%}
+  .dog-profile-actions-v96 .dog-details-open{width:100%;font-size:13px}
+  .hero-paws-v96{width:160px;height:86px;right:-22px;bottom:-10px;opacity:.11}
+}

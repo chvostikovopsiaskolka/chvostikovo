@@ -11,8 +11,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
-  <link rel="manifest" href="/manifest.webmanifest?v=20260920-customer-consolidated-v95">
-  <link rel="stylesheet" href="/styles.css?v=20260920-customer-consolidated-v95">
+  <link rel="manifest" href="/manifest.webmanifest?v=20260921-customer-patch-v96">
+  <link rel="stylesheet" href="/styles.css?v=20260921-customer-patch-v96">
   <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}.loading-screen.in-app{background:transparent;pointer-events:none;padding:0}.loading-screen.in-app .loading-logo,.loading-screen.in-app small{display:none}.loading-screen.in-app .loading-paw{width:68px;height:68px;border:0;border-radius:18px;background:#fff;box-shadow:0 10px 34px rgba(17,24,39,.16);font-size:0;animation:none}.loading-screen.in-app .loading-paw::before{content:'🐾';width:42px;height:42px;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;display:grid;place-items:center;font-size:18px;animation:loadingSpin .8s linear infinite}</style>
   <title>Chvostíkovo</title>
 </head>
@@ -57,7 +57,7 @@
   <div id="mainContent"></div>
   <div id="notificationList"></div>
   <section id="bookingTab" class="tab-page">
-    <div class="hero"><div><p>Rezervácie</p><h1 id="weekTitle">Nasledujúce dni</h1></div><div id="passSummary" class="hero-pass"></div></div>
+    <div class="hero"><svg class="hero-paws-v96" viewBox="0 0 190 100" aria-hidden="true"><g transform="translate(12 16) rotate(-18)"><ellipse cx="24" cy="29" rx="13" ry="11"></ellipse><circle cx="9" cy="15" r="5"></circle><circle cx="20" cy="9" r="5"></circle><circle cx="32" cy="10" r="5"></circle><circle cx="41" cy="20" r="5"></circle></g><g transform="translate(115 48) scale(.72) rotate(18)"><ellipse cx="24" cy="29" rx="13" ry="11"></ellipse><circle cx="9" cy="15" r="5"></circle><circle cx="20" cy="9" r="5"></circle><circle cx="32" cy="10" r="5"></circle><circle cx="41" cy="20" r="5"></circle></g></svg><div><p>Rezervácie</p><h1 id="weekTitle">Nasledujúce dni</h1></div><div id="passSummary" class="hero-pass"></div></div>
     <div class="section-head"><div><h2>Vyberte deň</h2><p id="deadlineText"><span>Prosíme o rezerváciu miesta na nasledujúci týždeň do <strong>nedele 20:00</strong>. V prípade individuálnej potreby rezervácie miesta v škôlke nás prosím kontaktujte.</span></p></div></div>
     <div id="bookingNotice"></div>
     <div id="announcementNotice"></div>
@@ -94,21 +94,24 @@
     <h2 id="dogDetailsTitle">Údaje psíka</h2>
     <form id="dogForm" class="form-stack">
       <input id="dogId" type="hidden"><input id="submissionId" type="hidden">
-      <div><label for="dogName">Meno psíka</label><input id="dogName" class="input dog-name-locked-v87" readonly aria-readonly="true" tabindex="-1" required><p class="hint">Meno je prevzaté z registrácie a nie je možné ho meniť.</p></div>
-      <div class="grid2"><div><label for="dogBirthDate">Dátum narodenia</label><input id="dogBirthDate" class="input" type="date"></div><div><label for="dogAge">Vek</label><input id="dogAge" class="input dog-age-locked-v81" readonly aria-readonly="true" tabindex="-1" placeholder="Vyplní sa automaticky"></div></div>
-      <div><label for="dogBreed">Plemeno</label><input id="dogBreed" class="input"></div>
-      <div class="grid2"><div><label for="dogSex">Pohlavie</label><select id="dogSex" class="input"><option value="">Neuvedené</option><option value="male">Pes</option><option value="female">Suka</option></select></div><div><label for="dogNeutered">Kastrovaný / sterilizovaná</label><select id="dogNeutered" class="input"><option value="">Neuvedené</option><option value="true">Áno</option><option value="false">Nie</option></select></div></div>
-      <div><label for="dogAllergies">Alergie, zdravotné obmedzenia a iné informácie</label><textarea id="dogAllergies" class="input" rows="5" maxlength="3000" placeholder="Alergie, lieky, zdravotné obmedzenia, povaha alebo iné dôležité informácie"></textarea></div>
-      <div class="dog-vaccinations-heading">Očkovania</div>
-      <div class="vaccine-box"><strong>Besnota</strong><div class="grid2"><div><label>Očkovaný</label><input id="rabiesOn" class="input" type="date"></div><div><label>Platí do</label><input id="rabiesUntil" class="input" type="date"></div></div></div>
-      <div class="vaccine-box"><strong>Infekčné ochorenia</strong><div class="grid2"><div><label>Očkovaný</label><input id="infectiousOn" class="input" type="date"></div><div><label>Platí do</label><input id="infectiousUntil" class="input" type="date"></div></div></div>
-      <div class="vaccine-box"><strong>Kotercový kašeľ</strong><div class="grid2"><div><label>Očkovaný</label><input id="kennelOn" class="input" type="date"></div><div><label>Platí do</label><input id="kennelUntil" class="input" type="date"></div></div></div>
-      <button class="btn full" type="submit">Uložiť údaje psíka</button>
+      <div id="dogBasicFieldsV96" class="dog-details-section-v96">
+        <div><label for="dogName">Meno psíka</label><input id="dogName" class="input dog-name-locked-v87" readonly aria-readonly="true" tabindex="-1" required></div>
+        <div class="grid2"><div><label for="dogBirthDate">Dátum narodenia <span class="optional-label-v96">nepovinné</span></label><input id="dogBirthDate" class="input" type="date"></div><div><label for="dogAge">Vek</label><input id="dogAge" class="input dog-age-locked-v81" readonly aria-readonly="true" tabindex="-1" placeholder="Vyplní sa automaticky"></div></div>
+        <div><label for="dogBreed">Plemeno</label><input id="dogBreed" class="input"></div>
+        <div class="grid2"><div><label for="dogSex">Pohlavie</label><select id="dogSex" class="input"><option value="">Neuvedené</option><option value="male">Pes</option><option value="female">Suka</option></select></div><div><label for="dogNeutered">Kastrovaný / sterilizovaná</label><select id="dogNeutered" class="input"><option value="">Neuvedené</option><option value="true">Áno</option><option value="false">Nie</option></select></div></div>
+        <div><label for="dogAllergies">Alergie, zdravotné obmedzenia a iné informácie</label><textarea id="dogAllergies" class="input" rows="5" maxlength="3000" placeholder="Alergie, lieky, zdravotné obmedzenia, povaha alebo iné dôležité informácie"></textarea></div>
+      </div>
+      <div id="dogVaccinationFieldsV96" class="dog-details-section-v96">
+        <div class="vaccine-box"><strong>Besnota</strong><div class="grid2"><div><label>Očkovaný</label><input id="rabiesOn" class="input" type="date"></div><div><label>Platí do</label><input id="rabiesUntil" class="input" type="date"></div></div><div id="rabiesStatusV96" class="vaccine-validity-v96 neutral"></div></div>
+        <div class="vaccine-box"><strong>Infekčné ochorenia (DHPPi+L)</strong><div class="vaccine-disease-hint-v96">Psinka · infekčný zápal pečene · parvoviróza · psia parainfluenza · leptospiróza</div><div class="grid2"><div><label>Očkovaný</label><input id="infectiousOn" class="input" type="date"></div><div><label>Platí do</label><input id="infectiousUntil" class="input" type="date"></div></div><div id="infectiousStatusV96" class="vaccine-validity-v96 neutral"></div></div>
+        <div class="vaccine-box"><strong>Kotercový kašeľ</strong><div class="grid2"><div><label>Očkovaný</label><input id="kennelOn" class="input" type="date"></div><div><label>Platí do</label><input id="kennelUntil" class="input" type="date"></div></div><div id="kennelStatusV96" class="vaccine-validity-v96 neutral"></div></div>
+      </div>
+      <button class="btn full" type="submit">Uložiť</button>
       <div id="dogMessage"></div>
     </form>
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/app.js?v=20260920-customer-consolidated-v95"></script>
+<script src="/app.js?v=20260921-customer-patch-v96"></script>
 </body>
 </html>
