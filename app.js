@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260921-customer-patch-v96r1';
+const APP_BUILD='20260921-customer-testfix-v97';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -105,6 +105,8 @@ function bootstrapCore(showSpinner=true){
   return bootstrapInFlight;
 }
 async function bootstrap(showSpinner=true){const result=await bootstrapCore(showSpinner);runCustomerHooks('afterBootstrap',result);return result}
+function renderUpcoming(){return typeof customerRenderers.upcoming==='function'?customerRenderers.upcoming():undefined}
+function renderDays(){return typeof customerRenderers.days==='function'?customerRenderers.days():undefined}
 function renderAll(){renderWeekHeader();renderNotifications();renderPassSummary();renderUpcoming();renderDays();renderMessages();renderDogSelector();renderDog();renderProfile();renderStaff();updateUnread()}
 
 /* consolidated stability: unchanged resume data does not touch the DOM */
@@ -144,14 +146,16 @@ async function flushCustomerSync(){
 
     const nextFingerprint=customerDataFingerprintV18(next);
     state.data=next;
-    if(!state.selectedDogId&&next.dogs?.length)state.selectedDogId=Number(next.dogs[0].id);
+    const nextDogs=next.dogs||[];
+    if(!state.selectedDogId&&nextDogs.length)state.selectedDogId=Number(nextDogs[0].id);
+    if(state.selectedDogId&&!nextDogs.some(d=>Number(d.id)===Number(state.selectedDogId)))state.selectedDogId=nextDogs.length?Number(nextDogs[0].id):null;
 
     // Same build + same data = keep the existing DOM exactly as it is.
     if(previousData&&previousFingerprint===nextFingerprint){
       return;
     }
 
-    const all=scopes.has('all');
+    const all=scopes.has('all')||previousDogs.size!==nextDogs.length;
     const renderDogNeeded=all||scopes.has('passes')||scopes.has('dog');
     if(renderDogNeeded)await preloadDogVisualV56(next);
 
@@ -194,8 +198,10 @@ function customerScopeForMessage(message){
   if(table==='portal_announcements')return 'announcements';
   if(table==='portal_notifications'){
     const type=String(customerLiveRecord(message)?.notification_type||'');
+    if(type==='dog_approved')return 'all';
     if(type.includes('message'))return 'messages';if(type.includes('pass'))return 'passes';if(type.includes('announcement'))return 'announcements';return 'bookings';
   }
+  if(['customer_dog_submissions','customer_owner_links','dogs','vaccinations','portal_dog_onboarding','portal_terms_acceptances'].includes(table))return 'all';
   return 'all';
 }
 function scheduleCustomerReconnect(){if(!state.session||customerLiveReconnect)return;const wait=[1000,2000,5000,10000,20000,30000][Math.min(customerLiveAttempt++,5)];customerLiveReconnect=setTimeout(()=>{customerLiveReconnect=0;startCustomerLive(true)},wait)}
@@ -206,7 +212,7 @@ function startCustomerLive(force=false){
   stopCustomerLive();
   const url=SUPABASE_URL.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(SUPABASE_KEY)+'&vsn=1.0.0';
   let socket;try{socket=new WebSocket(url)}catch(error){console.warn('Realtime spojenie sa nepodarilo otvoriť',error);scheduleCustomerReconnect();return}customerLiveSocket=socket;
-  socket.onopen=()=>{if(socket!==customerLiveSocket)return;customerLiveAttempt=0;const changes=['customer_booking_requests','customer_pass_requests','portal_notifications','portal_announcements','portal_day_settings','portal_live_events'].map(table=>({event:'*',schema:'public',table}));socket.send(JSON.stringify({topic:'realtime:customer-portal',event:'phx_join',payload:{config:{broadcast:{ack:false,self:false},presence:{enabled:false},postgres_changes:changes,private:false},access_token:state.session.access_token},ref:'1',join_ref:'1'}));customerLiveHeartbeat=setInterval(()=>{if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(Date.now()),join_ref:null}))},20000);queueCustomerSync('all',40)};
+  socket.onopen=()=>{if(socket!==customerLiveSocket)return;customerLiveAttempt=0;const changes=['customer_booking_requests','customer_pass_requests','portal_notifications','portal_announcements','portal_day_settings','portal_live_events','customer_dog_submissions','customer_owner_links','dogs','vaccinations','portal_dog_onboarding','portal_terms_acceptances'].map(table=>({event:'*',schema:'public',table}));socket.send(JSON.stringify({topic:'realtime:customer-portal',event:'phx_join',payload:{config:{broadcast:{ack:false,self:false},presence:{enabled:false},postgres_changes:changes,private:false},access_token:state.session.access_token},ref:'1',join_ref:'1'}));customerLiveHeartbeat=setInterval(()=>{if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(Date.now()),join_ref:null}))},20000);queueCustomerSync('all',40)};
   socket.onmessage=event=>{try{const message=JSON.parse(event.data);if(message.event==='postgres_changes')queueCustomerSync(customerScopeForMessage(message))}catch(_){}};
   socket.onerror=()=>{};socket.onclose=()=>{if(socket!==customerLiveSocket)return;customerLiveSocket=null;clearInterval(customerLiveHeartbeat);customerLiveHeartbeat=0;scheduleCustomerReconnect()};
 }
@@ -280,14 +286,14 @@ function dogFormSnapshotV96(){
 }
 function vaccinationDaysWordV96(n){return n===1?'deň':n>=2&&n<=4?'dni':'dní'}
 function vaccinationValidityV96(validUntil){
-  if(!validUntil)return {kind:'neutral',text:'Platnosť nie je zadaná'};
+  if(!validUntil)return {kind:'neutral',text:'Platnosť: dátum konca zatiaľ nebol zadaný'};
   const todayIso=typeof bratislavaClockV95==='function'?bratislavaClockV95().date:new Date().toISOString().slice(0,10);
   const today=new Date(todayIso+'T12:00:00'),until=new Date(String(validUntil).slice(0,10)+'T12:00:00');
   const days=Math.round((until-today)/86400000);
-  if(!Number.isFinite(days))return {kind:'neutral',text:''};
-  if(days<0){const n=Math.abs(days);return {kind:'expired',text:'Platnosť skončila pred '+n+' '+vaccinationDaysWordV96(n)}}
-  if(days===0)return {kind:'warning',text:'Platí do dnes'};
-  return {kind:days<=14?'warning':'valid',text:'Platné ešte '+days+' '+vaccinationDaysWordV96(days)};
+  if(!Number.isFinite(days))return {kind:'neutral',text:'Platnosť: dátum konca zatiaľ nebol zadaný'};
+  if(days<0){const n=Math.abs(days);return {kind:'expired',text:'Platnosť: skončila pred '+n+' '+vaccinationDaysWordV96(n)}}
+  if(days===0)return {kind:'warning',text:'Platnosť: končí dnes'};
+  return {kind:days<=14?'warning':'valid',text:'Platnosť: ešte '+days+' '+vaccinationDaysWordV96(days)};
 }
 function updateVaccinationStatusesV96(){
   for(const [inputId,statusId] of [['rabiesUntil','rabiesStatusV96'],['infectiousUntil','infectiousStatusV96'],['kennelUntil','kennelStatusV96']]){
@@ -349,14 +355,14 @@ function fillDogForm(d){
 }
 async function saveDog(e){
   e.preventDefault();
-  const savedMode=dogDetailsModeV96,neut=$('dogNeutered').value,birthDate=$('dogBirthDate').value,sex=$('dogSex').value,ageText=dogAgeText(birthDate)||'';
+  const savedMode=dogDetailsModeV96,mandatoryFlow=dogDetailsMandatoryV96,neut=$('dogNeutered').value,birthDate=$('dogBirthDate').value,sex=$('dogSex').value,ageText=dogAgeText(birthDate)||'';
   const vaccinations=[
     {type:'rabies',vaccinated_on:$('rabiesOn').value,valid_until:$('rabiesUntil').value},
     {type:'infectious',vaccinated_on:$('infectiousOn').value,valid_until:$('infectiousUntil').value},
     {type:'kennel_cough',vaccinated_on:$('kennelOn').value,valid_until:$('kennelUntil').value}
   ];
   const missingVacc=vaccinations.find(v=>!v.vaccinated_on||!v.valid_until);
-  if((savedMode==='vaccinations'||dogDetailsMandatoryV96)&&missingVacc){
+  if(savedMode==='vaccinations'&&missingVacc){
     toast('Doplňte dátum očkovania aj platnosť pri všetkých troch očkovaniach.');
     const ids=missingVacc.type==='rabies'?['rabiesOn','rabiesUntil']:missingVacc.type==='infectious'?['infectiousOn','infectiousUntil']:['kennelOn','kennelUntil'];
     $(missingVacc.vaccinated_on?ids[1]:ids[0])?.focus();return;
@@ -379,9 +385,16 @@ async function saveDog(e){
       }
     }
     dogDetailsSnapshotV96=dogFormSnapshotV96();
+    if(savedMode==='details'&&mandatoryFlow){
+      applyDogDetailsModeV96('vaccinations',true);
+      updateVaccinationStatusesV96();
+      dogDetailsSnapshotV96=dogFormSnapshotV96();
+      toast('Údaje sú uložené. Teraz doplňte očkovania.');
+      return;
+    }
     closeDogDetails(true);renderDog();renderPassSummary();renderUpcoming();renderDays();
     toast(savedMode==='vaccinations'?'Očkovania sú uložené.':'Údaje psíka sú uložené.');
-    queueCustomerSync('dog',80);window.runCustomerOnboardingV75?.();
+    queueCustomerSync('all',80);window.runCustomerOnboardingV75?.();
   }catch(e){toast(e.message)}finally{loading(false)}
 }
 function ensurePassInterestConfirmation(){
@@ -712,6 +725,7 @@ async function refreshOnResume(){
   queueCustomerSync('all',40);
 }
 window.addEventListener('focus',refreshOnResume);window.addEventListener('online',refreshOnResume);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshOnResume();else stopCustomerLive()});
+setInterval(()=>{if(state.session&&document.visibilityState==='visible'&&!(state.data?.dogs||[]).length)queueCustomerSync('all',0)},5000);
 (function betaUiV75Runtime(){
   const badge=$('betaVersionBadge'),modal=$('betaVersionModal'),close=$('betaVersionClose'),messages=$('betaVersionMessages');if(!badge||!modal)return;
   badge.addEventListener('click',()=>modal.classList.remove('hidden'));close?.addEventListener('click',()=>modal.classList.add('hidden'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});messages?.addEventListener('click',()=>{modal.classList.add('hidden');switchTab('messages')});
@@ -852,13 +866,25 @@ placeDeadlineV59();
   function hideFlow(except=''){for(const id of flowIds())if(id!==except)$(id)?.classList.add('hidden');if(except!=='schoolTermsModal')$('schoolTermsModal')?.classList.add('hidden');$('notificationPopup')?.classList.add('hidden')}
   function ensureWaiting(){if(!$('waitingDogAssignmentModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="waitingDogAssignmentModalV75" class="legal-modal onboarding-modal-v75 waiting-dog-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="waitingDogAssignmentTitleV75"><div class="legal-card waiting-dog-card-v75"><div class="legal-kicker">Chvostíkovo</div><h2 id="waitingDogAssignmentTitleV75">Registrácia je úspešná</h2><div class="legal-body"><p>Počkajte, prosím, na pridelenie psíka k vášmu profilu.</p><p class="hint">Po pridelení vám pošleme upozornenie a aplikácia sa aktualizuje automaticky.</p></div></div></div>');return $('waitingDogAssignmentModalV75')}
   function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="pushOnboardingModalV75" class="legal-modal onboarding-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="pushOnboardingTitleV75"><div class="legal-card"><div class="legal-kicker">Upozornenia</div><h2 id="pushOnboardingTitleV75">Zapnúť upozornenia?</h2><div class="legal-body"><p>Upozorníme vás napríklad na schválenie alebo zmenu rezervácie, dôležité oznamy, nové správy a blížiaci sa koniec platnosti očkovania.</p></div><button id="pushOnboardingEnableV75" class="btn full" type="button">Zapnúť upozornenia</button><button id="pushOnboardingSkipV75" class="btn secondary full onboarding-secondary-v75" type="button">Teraz nie</button></div></div>');return $('pushOnboardingModalV75')}
-  function ensureShareModal(){if(!$('shareOnboardingModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="shareOnboardingModalV75" class="legal-modal onboarding-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="shareOnboardingTitleV75"><div class="legal-card"><div class="legal-kicker">Súkromie psíka</div><h2 id="shareOnboardingTitleV75">Zobraziť meno a fotku psíka?</h2><div class="legal-body"><p>Ak to povolíte, meno a fotku vášho psíka uvidia ostatní majitelia, ktorí majú psíka prihláseného v rovnaký deň. Nastavenie môžete neskôr zmeniť.</p></div><button id="shareOnboardingYesV75" class="btn full" type="button">Áno, zobrazovať</button><button id="shareOnboardingNoV75" class="btn secondary full onboarding-secondary-v75" type="button">Nie, ponechať anonymne</button></div></div>');return $('shareOnboardingModalV75')}
-  function ensureDetailsModal(){if(!$('dogDetailsOnboardingModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="dogDetailsOnboardingModalV75" class="legal-modal onboarding-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="dogDetailsOnboardingTitleV75"><div class="legal-card"><div class="legal-kicker">Údaje psíka</div><h2 id="dogDetailsOnboardingTitleV75">Doplňte očkovania psíka</h2><div class="legal-body"><p>Pred prvou rezerváciou potrebujeme doplniť údaje o všetkých povinných očkovaniach.</p><p>Dátum narodenia je nepovinný. Ak ho vyplníte, vieme psíkovi pripraviť malé narodeninové prekvapenie a aplikácia vás upozorní aj na jeho narodeniny. Na koniec platnosti očkovania vás upozorníme 14 dní vopred.</p></div><button id="dogDetailsOnboardingFillV75" class="btn full" type="button">Doplniť očkovania</button></div></div>');return $('dogDetailsOnboardingModalV75')}
+  function ensureShareModal(){if(!$('shareOnboardingModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="shareOnboardingModalV75" class="legal-modal onboarding-modal-v75 centered-onboarding-v97 hidden" role="dialog" aria-modal="true" aria-labelledby="shareOnboardingTitleV75"><div class="legal-card"><div class="legal-kicker">Súkromie psíka</div><h2 id="shareOnboardingTitleV75">Zobraziť meno a fotku psíka?</h2><div class="legal-body"><p>Ak to povolíte, meno a fotku vášho psíka uvidia ostatní majitelia, ktorí majú psíka prihláseného v rovnaký deň. Toto nastavenie môžete kedykoľvek neskôr zmeniť.</p></div><button id="shareOnboardingYesV75" class="btn full" type="button">Áno, zobrazovať</button><button id="shareOnboardingNoV75" class="btn secondary full onboarding-secondary-v75" type="button">Nie, ponechať anonymne</button></div></div>');return $('shareOnboardingModalV75')}
+  function ensureDetailsModal(){if(!$('dogDetailsOnboardingModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="dogDetailsOnboardingModalV75" class="legal-modal onboarding-modal-v75 centered-onboarding-v97 hidden" role="dialog" aria-modal="true" aria-labelledby="dogDetailsOnboardingTitleV75"><div class="legal-card"><div class="legal-kicker">Môj psík</div><h2 id="dogDetailsOnboardingTitleV75">Doplňte údaje o psíkovi</h2><div class="legal-body"><p>Najprv doplňte pár základných údajov o psíkovi. Dátum narodenia nie je povinný, no ak ho uvediete, pripomenieme vám jeho narodeniny a možno ho čaká aj malé prekvapenie. 🐾</p><p>Potom doplníte povinné očkovania. Bez nich nie je možné používať rezervácie.</p></div><button id="dogDetailsOnboardingFillV75" class="btn full" type="button">Doplniť údaje</button></div></div>');return $('dogDetailsOnboardingModalV75')}
   function openPrivacyInfo(mandatory=false){privacyMandatory=!!mandatory;const modal=$('privacyInfoModal');if(!modal)return;hideFlow();$('privacyInfoClose')?.classList.toggle('hidden',privacyMandatory);if($('privacyInfoOk'))$('privacyInfoOk').textContent=privacyMandatory?'Potvrdiť a pokračovať':'Rozumiem';modal.classList.remove('hidden')}
   function closePrivacyInfo(){if(privacyMandatory)return;$('privacyInfoModal')?.classList.add('hidden')}
   async function acknowledgePrivacy(){if(!privacyMandatory){closePrivacyInfo();return}const btn=$('privacyInfoOk');if(btn)btn.disabled=true;try{const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_acknowledge_privacy_notice',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_version:PRIVACY_VERSION})});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.message||data?.error||'Potvrdenie sa nepodarilo uložiť.');if(state.data?.profile){state.data.profile.privacy_notice_version=PRIVACY_VERSION;state.data.profile.privacy_notice_acknowledged_at=new Date().toISOString()}privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden');runCustomerOnboardingV75()}catch(e){toast(e.message||'Potvrdenie sa nepodarilo uložiť.')}finally{if(btn)btn.disabled=false}}
   async function activeTermsDocument(){const now=new Date().toISOString(),r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',{headers:authHeaders(),cache:'no-store'});if(!r.ok)return null;const rows=await r.json();return rows?.[0]||null}
   async function acceptedTerms(version){const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_acceptances?terms_version=eq.'+encodeURIComponent(version)+'&select=dog_id,terms_version,accepted_at',{headers:authHeaders(),cache:'no-store'});if(!r.ok)return[];return await r.json()}
+  function formatSchoolTermsV97(text){
+    const chunks=String(text||'').split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);
+    let html='';
+    for(let i=0;i<chunks.length;i++){
+      const heading=/^\d+\.\s+/.test(chunks[i]);
+      if(heading){
+        const body=(i+1<chunks.length&&!/^\d+\.\s+/.test(chunks[i+1]))?chunks[++i]:'';
+        html+='<section class="terms-point-v97"><strong>'+esc(chunks[i-1]||chunks[i])+'</strong>'+(body?'<p>'+esc(body)+'</p>':'')+'</section>';
+      }else html+='<p class="terms-loose-v97">'+esc(chunks[i])+'</p>';
+    }
+    return html;
+  }
   function showSchoolTerms(dog,doc){
     const modal=$('schoolTermsModal');if(!modal)return false;
     hideFlow('schoolTermsModal');
@@ -867,7 +893,7 @@ placeDeadlineV59();
     $('schoolTermsTitle').textContent=doc.title||'Podmienky škôlky';
     $('schoolTermsDog').textContent='Psík: '+(dog.name||'');
     const body=$('schoolTermsBody'),ack=$('schoolTermsAck'),confirm=$('schoolTermsConfirm');
-    body.textContent=doc.body||'';
+    body.innerHTML=formatSchoolTermsV97(doc.body||'');
     ack.checked=false;
     ack.disabled=true;
     confirm.disabled=true;
@@ -905,7 +931,7 @@ placeDeadlineV59();
   window.customerDogDetailsCompleteV95=detailsAlreadyComplete;
   function showPushPrompt(){hideFlow('pushOnboardingModalV75');const modal=ensurePushModal();modal.classList.remove('hidden');$('pushOnboardingEnableV75').onclick=async()=>{const yes=$('pushOnboardingEnableV75'),no=$('pushOnboardingSkipV75');yes.disabled=true;no.disabled=true;try{await enablePushForCurrentUserV75();modal.classList.add('hidden');toast('Upozornenia sú zapnuté.');runCustomerOnboardingV75()}catch(e){toast(e.message||'Upozornenia sa nepodarilo zapnúť.')}finally{yes.disabled=false;no.disabled=false}};$('pushOnboardingSkipV75').onclick=async()=>{const yes=$('pushOnboardingEnableV75'),no=$('pushOnboardingSkipV75');yes.disabled=true;no.disabled=true;try{await completePushPromptV75();modal.classList.add('hidden');runCustomerOnboardingV75()}catch(e){toast(e.message||'Nastavenie sa nepodarilo uložiť.')}finally{yes.disabled=false;no.disabled=false}}}
   function showSharePrompt(dog){hideFlow('shareOnboardingModalV75');const modal=ensureShareModal();modal.dataset.dogId=String(dog.id);$('shareOnboardingTitleV75').textContent='Chcete, aby ostatní používatelia videli meno a fotku '+(dog.name||'vášho psíka')+'?';const finish=async granted=>{const yes=$('shareOnboardingYesV75'),no=$('shareOnboardingNoV75');yes.disabled=true;no.disabled=true;try{await api({action:'set_photo_visibility',dog_id:Number(dog.id),granted});dog.share_name_photo=granted;state.data.visibility_consents=state.data.visibility_consents||[];state.data.visibility_consents.unshift({dog_id:Number(dog.id),granted,consent_version:'2026-09-09',created_at:new Date().toISOString()});modal.classList.add('hidden');renderDog();runCustomerOnboardingV75()}catch(e){toast(e.message||'Nastavenie sa nepodarilo uložiť.')}finally{yes.disabled=false;no.disabled=false}};$('shareOnboardingYesV75').onclick=()=>finish(true);$('shareOnboardingNoV75').onclick=()=>finish(false);modal.classList.remove('hidden')}
-  function showDetailsPrompt(dog){hideFlow('dogDetailsOnboardingModalV75');const modal=ensureDetailsModal();modal.dataset.dogId=String(dog.id);$('dogDetailsOnboardingFillV75').onclick=()=>{modal.classList.add('hidden');state.selectedDogId=Number(dog.id);renderDogSelector();renderDog();switchTab('dog');setTimeout(()=>openDogDetails('vaccinations',true),40)};modal.classList.remove('hidden')}
+  function showDetailsPrompt(dog){hideFlow('dogDetailsOnboardingModalV75');const modal=ensureDetailsModal();modal.dataset.dogId=String(dog.id);$('dogDetailsOnboardingFillV75').onclick=()=>{modal.classList.add('hidden');state.selectedDogId=Number(dog.id);renderDogSelector();renderDog();switchTab('dog');setTimeout(()=>openDogDetails('details',true),40)};modal.classList.remove('hidden')}
   async function evaluate(){if(!state.session||!state.data)return;window.__customerOnboardingCompleteV75=false;try{await ensurePushState(true)}catch(_){}if(!state.data.profile?.privacy_notice_acknowledged_at){openPrivacyInfo(true);return}if(privacyMandatory){privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden')}if(!state.data.profile?.push_prompt_answered_at){showPushPrompt();return}const dogs=state.data?.dogs||[];if(!dogs.length){hideFlow('waitingDogAssignmentModalV75');ensureWaiting().classList.remove('hidden');return}ensureWaiting().classList.add('hidden');const doc=await activeTermsDocument();if(doc){const accepted=await acceptedTerms(doc.version),acceptedIds=new Set((accepted||[]).map(x=>Number(x.dog_id))),missing=dogs.find(d=>!acceptedIds.has(Number(d.id)));if(missing){showSchoolTerms(missing,doc);return}}$('schoolTermsModal')?.classList.add('hidden');const shareDog=dogs.find(d=>!visibilityDecided(d.id));if(shareDog){showSharePrompt(shareDog);return}const detailsDog=dogs.find(d=>!detailsPromptAnswered(d.id)&&!detailsAlreadyComplete(d));if(detailsDog){showDetailsPrompt(detailsDog);return}hideFlow();window.__customerOnboardingCompleteV75=true;renderNotifications();if(typeof loadAnnouncements==='function')loadAnnouncements()}
   async function runCustomerOnboardingV75(){if(running){rerun=true;return}running=true;try{await evaluate()}catch(e){console.warn('Customer onboarding',e)}finally{running=false;if(rerun){rerun=false;setTimeout(runCustomerOnboardingV75,20)}}}
   window.runCustomerOnboardingV75=runCustomerOnboardingV75;
@@ -1271,11 +1297,12 @@ placeDeadlineV59();
     if(!hero||!head||!dog)return;
     const range=$('weekTitle');
     if(range&&range.parentElement!==head){head.appendChild(range);range.classList.add('week-range-v36')}
+    const legacyCopy=[...hero.children].find(el=>el.tagName==='DIV'&&!el.classList.contains('hero-dog-v36')&&el.querySelector('p'));
+    legacyCopy?.remove();
     let info=hero.querySelector('.hero-dog-v36');
     if(!info){
       info=document.createElement('div');info.className='hero-dog-v36';
-      const first=hero.firstElementChild;
-      if(first)hero.replaceChild(info,first);else hero.prepend(info);
+      hero.prepend(info);
     }
     const heroDogKey=String(dog.id||'')+'|'+String(dog.photo_path||'')+'|'+String(dog.photo_updated_at||'')+'|'+String(dog.name||'');if(info.dataset.dogKey!==heroDogKey){info.innerHTML=dogAvatarMarkup(dog,'hero-dog-avatar-v36')+'<div class="hero-dog-copy-v36"><span>Rezervácie</span><strong>'+esc(dog.name||'Psík')+'</strong></div>';info.dataset.dogKey=heroDogKey}
     const summary=$('passSummary');
