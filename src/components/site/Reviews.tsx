@@ -133,7 +133,7 @@ function ReviewCarousel() {
 const REVIEW_REASONS = [
   {
     title: "Psíkovia sa k nám tešia",
-    text: "Tešia sa na kamošov, pohyb aj spoločný deň v škôlke. Často už cestou presne vedia, kam idú, a do Chvostíkova sa radi vracajú.",
+    text: "Tešia sa na kamošov, pohyb aj akčný deň v škôlke. Často už cestou do škôlky presne vedia, kam idú a do Chvostíkova sa radi vracajú.",
     icon: PawPrint,
   },
   {
@@ -143,7 +143,7 @@ const REVIEW_REASONS = [
   },
   {
     title: "Spokojní a príjemne unavení",
-    text: "Pohyb, aktivity, kamaráti, oddych aj mojkanie – psíkovia od nás odchádzajú spokojní, vybehaní a príjemne unavení, pripravení doma oddychovať so svojimi ľuďmi.",
+    text: "Pohyb, aktivity, kamaráti, oddych aj mojkanie – psíkovia od nás odchádzajú spokojní, vybehaní a príjemne unavení, pripravení doma oddychovať so svojimi rodičmi.",
     icon: Sparkles,
   },
 ];
