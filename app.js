@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260921-customer-doghub-v99';
+const APP_BUILD='20260921-customer-doghub-v100';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -325,19 +325,21 @@ function closeDogDetails(force=false){
   dogDetailsMandatoryV96=false;dogDetailsModeV96='details';return true;
 }
 function renderDogProfilePrompt(){for(const id of ['bookingNotice','dogStatus']){const root=$(id);if(root)root.innerHTML=''}}
+function dogSexClassV100(dog){return dog?.sex==='male'?'dog-male-v100':dog?.sex==='female'?'dog-female-v100':'dog-neutral-v100'}
 function renderDogHeaderV56(dog){
   const root=$('dogProfilePhoto');if(!root)return;
-  const key=String(dog.id||'')+'|'+String(dog.photo_path||'')+'|'+String(dog.photo_updated_at||'')+'|'+String(dog.name||'');
+  const sexClass=dogSexClassV100(dog);
+  const key=String(dog.id||'')+'|'+String(dog.photo_path||'')+'|'+String(dog.photo_updated_at||'')+'|'+String(dog.name||'')+'|'+String(dog.sex||'');
   if(!root.querySelector('.dog-hub-v99')||root.dataset.dogVisualKey!==key){
-    root.innerHTML=`<div class="card dog-hub-v99"><div class="dog-hub-grid-v99">
-      <button id="dogDataOpenV96" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">📝</span><strong>Údaje</strong></button>
+    root.innerHTML=`<div class="card dog-photo-feature-v99 ${sexClass}"><div class="dog-photo-paws-v99" aria-hidden="true"></div><div class="dog-photo-feature-inner-v99"><div class="profile-photo-wrap"><span class="dog-avatar profile">${dog.photo_url?`<img src="${esc(dog.photo_url)}" alt="${esc(dog.name)}">`:'🐾'}</span><button id="dogPhotoActionBtnV89" class="photo-pencil" type="button" title="${dog.photo_url?'Upraviť fotku':'Pridať fotku'}" aria-label="${dog.photo_url?'Upraviť fotku':'Pridať fotku'}">✎</button><input id="dogPhotoInput" class="hidden" type="file" accept="image/*"></div><h2 class="dog-photo-name">${esc(dog.name)}</h2></div></div>
+    <div class="card dog-hub-v99"><div class="dog-hub-grid-v99">
+      <button id="dogDataOpenV96" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">📝</span><strong>Údaje psíka</strong></button>
       <button id="dogVaccinationsOpenV96" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">💉</span><strong>Očkovania</strong></button>
       <button id="schoolRulesCardV55" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">📄</span><strong>Pravidlá škôlky</strong></button>
-      <button id="dogVisitsOpenV99" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">🐾</span><strong>Návštevy</strong></button>
+      <button id="dogVisitsOpenV99" class="dog-hub-tile-v99 dog-hub-visits-v100" type="button"><span class="dog-hub-emoji-v99">🐾</span><strong>Návštevy psíka v škôlke</strong></button>
       <button class="dog-hub-tile-v99 dog-hub-gradebook-v99" type="button" disabled><span class="dog-hub-emoji-v99">📚</span><span><strong>Žiacka knižka</strong><small>Pripravujeme</small></span></button>
-      <button id="dogMenuOpenV99" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">⚙️</span><strong>Menu</strong></button>
-    </div></div>
-    <div class="card dog-photo-feature-v99"><div class="dog-photo-paws-v99" aria-hidden="true"></div><div class="dog-photo-feature-inner-v99"><div class="profile-photo-wrap"><span class="dog-avatar profile">${dog.photo_url?`<img src="${esc(dog.photo_url)}" alt="${esc(dog.name)}">`:'🐾'}</span><button id="dogPhotoActionBtnV89" class="photo-pencil" type="button" title="${dog.photo_url?'Upraviť fotku':'Pridať fotku'}" aria-label="${dog.photo_url?'Upraviť fotku':'Pridať fotku'}">✎</button><input id="dogPhotoInput" class="hidden" type="file" accept="image/*"></div><h2 class="dog-photo-name">${esc(dog.name)}</h2></div></div>`;
+      <button id="dogMenuOpenV99" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">⚙️</span><strong>Nastavenia</strong></button>
+    </div></div>`;
     root.dataset.dogVisualKey=key;
     const photoInput=$('dogPhotoInput');
     photoInput?.addEventListener('click',()=>{window.__customerPhotoPickerV88=true;setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},15000)});
@@ -1269,8 +1271,9 @@ placeDeadlineV59();
   const gearSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>';
 
   function dogAvatarMarkup(dog,cls){
-    if(dog?.photo_url)return '<span class="'+cls+'"><img src="'+esc(dog.photo_url)+'" alt=""></span>';
-    return '<span class="'+cls+' fallback">🐾</span>';
+    const sex=dog?.sex==='male'?' dog-male-v100':dog?.sex==='female'?' dog-female-v100':' dog-neutral-v100';
+    if(dog?.photo_url)return '<span class="'+cls+sex+'"><img src="'+esc(dog.photo_url)+'" alt=""></span>';
+    return '<span class="'+cls+' fallback'+sex+'">🐾</span>';
   }
 
   function applyNav(){
@@ -1279,7 +1282,7 @@ placeDeadlineV59();
     const dog=selectedDog();
     const unreadEl=$('messageUnread'),hasUnread=unreadEl&&!unreadEl.classList.contains('hidden');
     booking.innerHTML='<span class="nav-icon-v36">'+calendarSvg+'</span><span>Rezervácie</span>';
-    const dogNavKey=String(dog?.id||'')+'|'+String(dog?.photo_path||'')+'|'+String(dog?.photo_updated_at||'')+'|'+String(dog?.name||'');if(dogBtn.dataset.dogNavKey!==dogNavKey){dogBtn.innerHTML=dogAvatarMarkup(dog,'nav-dog-avatar-v36')+'<span>Môj psík</span>';dogBtn.dataset.dogNavKey=dogNavKey}
+    const dogNavKey=String(dog?.id||'')+'|'+String(dog?.photo_path||'')+'|'+String(dog?.photo_updated_at||'')+'|'+String(dog?.name||'')+'|'+String(dog?.sex||'');if(dogBtn.dataset.dogNavKey!==dogNavKey){dogBtn.innerHTML=dogAvatarMarkup(dog,'nav-dog-avatar-v36')+'<span>Môj psík</span>';dogBtn.dataset.dogNavKey=dogNavKey}
     messages.innerHTML='<span class="nav-icon-v36">'+messageSvg+'</span><span>Správy</span><i id="messageUnread" class="nav-badge '+(hasUnread?'':'hidden')+'"></i>';
     booking.classList.add('nav-item-v36');dogBtn.classList.add('nav-item-v36');messages.classList.add('nav-item-v36');
     if(typeof updateUnread==='function')updateUnread();
@@ -1297,7 +1300,7 @@ placeDeadlineV59();
       info=document.createElement('div');info.className='hero-dog-v36';
       hero.prepend(info);
     }
-    const heroDogKey=String(dog.id||'')+'|'+String(dog.photo_path||'')+'|'+String(dog.photo_updated_at||'')+'|'+String(dog.name||'');if(info.dataset.dogKey!==heroDogKey){info.innerHTML=dogAvatarMarkup(dog,'hero-dog-avatar-v36')+'<div class="hero-dog-copy-v36"><strong>'+esc(dog.name||'Psík')+'</strong></div>';info.dataset.dogKey=heroDogKey}
+    const heroDogKey=String(dog.id||'')+'|'+String(dog.photo_path||'')+'|'+String(dog.photo_updated_at||'')+'|'+String(dog.name||'')+'|'+String(dog.sex||'');if(info.dataset.dogKey!==heroDogKey){info.innerHTML=dogAvatarMarkup(dog,'hero-dog-avatar-v36')+'<div class="hero-dog-copy-v36"><strong>'+esc(dog.name||'Psík')+'</strong></div>';info.dataset.dogKey=heroDogKey}
     const summary=$('passSummary');
     if(summary){
       const text=summary.querySelector('strong')?.textContent||'';
@@ -1309,7 +1312,7 @@ placeDeadlineV59();
     const tab=$('dogTab');if(!tab)return;
     $('dogSettingsBtnV36')?.remove();
     if(!$('dogSettingsModalV36')){
-      document.body.insertAdjacentHTML('beforeend','<div id="dogSettingsModalV36" class="settings-modal-v36 hidden" role="dialog" aria-modal="true" aria-labelledby="dogSettingsTitleV36"><div class="settings-card-v36"><div class="settings-head-v36"><div><small>Chvostíkovo</small><h2 id="dogSettingsTitleV36">Menu</h2><p>Účet, upozornenia a súhlasy</p></div><button id="dogSettingsCloseV36" class="settings-close-v36" type="button" aria-label="Zavrieť">×</button></div><div id="dogSettingsContentV36" class="settings-content-v36"></div></div></div>');
+      document.body.insertAdjacentHTML('beforeend','<div id="dogSettingsModalV36" class="settings-modal-v36 hidden" role="dialog" aria-modal="true" aria-labelledby="dogSettingsTitleV36"><div class="settings-card-v36"><div class="settings-head-v36"><div><small>Chvostíkovo</small><h2 id="dogSettingsTitleV36">Nastavenia</h2><p>Účet, upozornenia a súhlasy</p></div><button id="dogSettingsCloseV36" class="settings-close-v36" type="button" aria-label="Zavrieť">×</button></div><div id="dogSettingsContentV36" class="settings-content-v36"></div></div></div>');
       $('dogSettingsCloseV36').addEventListener('click',closeSettings);
       $('dogSettingsModalV36').addEventListener('click',e=>{if(e.target===$('dogSettingsModalV36'))closeSettings()});
     }
@@ -1326,7 +1329,7 @@ placeDeadlineV59();
     if(logout){logout.classList.remove('hidden','icon-btn');logout.classList.add('btn','secondary','full');logout.textContent='Odhlásiť sa';logout.style.marginTop='14px';content.appendChild(logout)}
   }
 
-  function openSettings(){relocateSettings();$('dogSettingsModalV36')?.classList.remove('hidden');document.documentElement.classList.add('settings-open-v36')}
+  function openSettings(){relocateSettings();if(typeof prepareSettingsV37==='function')prepareSettingsV37();$('dogSettingsModalV36')?.classList.remove('hidden');document.documentElement.classList.add('settings-open-v36')}
   function closeSettings(){$('dogSettingsModalV36')?.classList.add('hidden');document.documentElement.classList.remove('settings-open-v36')}
 
   function applyAll(){applyNav();applyHero();ensureSettings();setTimeout(relocateSettings,0)}
@@ -1513,7 +1516,7 @@ placeDeadlineV59();
     const count=(day?.dogs?.length||0)+(Number(day?.anonymous_dogs)||0);
     if(!count)return '<span class="reserved-roster-count-v37">Zatiaľ bez ďalších psíkov</span>';
     if(!day?.roster_visible)return `<span class="reserved-roster-count-v37">${esc(pluralDogs(count))}</span>`;
-    return `<details class="reserved-roster-v37"><summary>${esc(pluralDogs(count))}</summary><div>${(day.dogs||[]).map(x=>`<span>${x.photo_url?`<i class="reserved-roster-avatar-v37"><img src="${esc(x.photo_url)}" alt=""></i>`:'<i class="reserved-roster-avatar-v37">🐾</i>'}<b>${esc(x.name)}</b></span>`).join('')}${Array.from({length:Number(day.anonymous_dogs)||0},()=>'<span><i class="reserved-roster-avatar-v37">🐾</i><b>Prihlásený škôlkar</b></span>').join('')}</div></details>`;
+    return `<details class="reserved-roster-v37"><summary>${esc(pluralDogs(count))}</summary><div>${(day.dogs||[]).map(x=>{const sex=x.sex==='male'?' dog-male-v100':x.sex==='female'?' dog-female-v100':' dog-neutral-v100';return `<span>${x.photo_url?`<i class="reserved-roster-avatar-v37${sex}"><img src="${esc(x.photo_url)}" alt=""></i>`:`<i class="reserved-roster-avatar-v37${sex}">🐾</i>`}<b>${esc(x.name)}</b></span>`}).join('')}${Array.from({length:Number(day.anonymous_dogs)||0},()=>'<span><i class="reserved-roster-avatar-v37 dog-neutral-v100">🐾</i><b>Prihlásený škôlkar</b></span>').join('')}</div></details>`;
   }
 
   customerRenderers.upcoming=()=>{
@@ -1955,18 +1958,18 @@ async function togglePushDirect(btn){
     try{
       const doc=await activeTermsV55();
       title.textContent=doc?.title||'Pravidlá škôlky';
-      body.textContent=doc?.body||'Pravidlá škôlky momentálne nie sú dostupné.';
+      body.innerHTML=formatSchoolTermsV97(doc?.body||'Pravidlá škôlky momentálne nie sú dostupné.');
     }catch(e){
       title.textContent='Pravidlá škôlky';
-      body.textContent=e.message||'Pravidlá sa nepodarilo načítať.';
+      body.innerHTML='<p class="terms-loose-v97">'+esc(e.message||'Pravidlá sa nepodarilo načítať.')+'</p>';
     }
     modal.classList.remove('hidden');
   }
 
   function polishMenuV55(){
     const btn=$('dogSettingsBtnV36');
-    if(btn){btn.setAttribute('aria-label','Menu');btn.title='Menu'}
-    const title=$('dogSettingsTitleV36');if(title)title.textContent='Menu';
+    if(btn){btn.setAttribute('aria-label','Nastavenia');btn.title='Nastavenia'}
+    const title=$('dogSettingsTitleV36');if(title)title.textContent='Nastavenia';
   }
 
 
