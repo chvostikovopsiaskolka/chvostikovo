@@ -7,20 +7,16 @@
   const customer = data.sections?.find(section => section.id === 'customer-app');
   const dogProfile = customer?.items?.find(item => item.title === 'Môj psík');
   if (dogProfile) {
-    dogProfile.body = 'Sekcia Môj psík je po produkčnom redizajne hlavný rozcestník profilu psa. Hore je výrazná fotka a meno psa, pod nimi šesť kompaktných dlaždíc pre Údaje psíka, Očkovania, Pravidlá škôlky, Návštevy psíka v škôlke, Žiacku knižku a Nastavenia.';
+    dogProfile.body = 'Sekcia Môj psík je produkčný rozcestník profilu psa: foto a meno hore, dlaždice pre Údaje psíka, Očkovania, Pravidlá škôlky, Návštevy, Žiacku knižku a Nastavenia.';
     dogProfile.bullets = [
-      'Fotka psa je hore ako samostatný vizuálny blok; avatar a akcenty rozlišujú pohlavie psa.',
-      'Údaje psíka a Očkovania sa otvárajú samostatne; Pravidlá škôlky majú vlastný modal.',
-      'Návštevy psíka v škôlke sa zobrazujú v modale s celkovým počtom a mesačným prehľadom.',
-      'Žiacka knižka zostáva zatiaľ ako Pripravujeme.',
-      'Menu bolo premenované na Nastavenia; účet, upozornenia a súhlasy zostávajú oddelené od hlavného profilu.',
-      'Spodná navigácia ostáva Rezervácie, Môj psík s reálnou fotkou psa a Správy.'
+      'Očkovania sú oddelené od základných údajov a po novom pracujú s platnosťou troch povinných očkovaní a fotografiami očkovacieho preukazu.',
+      'Používateľ môže nahrať 1 až 3 fotografie; iOS spracovanie fotiek bolo upravené na bezpečnejší decode/resize/JPEG flow.',
+      'Pravidlá a ochrana osobných údajov sú v Nastaveniach oddelené a majú vlastné otvorenie dokumentu.',
+      'Návštevy zostávajú v samostatnom modale; Žiacka knižka je zatiaľ Pripravujeme.',
+      'Spodná navigácia ostáva Rezervácie, Môj psík a Správy.'
     ];
-    dogProfile.tags = [...new Set([...(dogProfile.tags || []), 'dog-hub', 'settings', 'visits-modal', 'gender-accent', 'app-nav'])];
+    dogProfile.tags = [...new Set([...(dogProfile.tags || []), 'dog-hub', 'vaccination-proofs', 'ios-photo-flow', 'settings'])];
   }
-
-  const pass = customer?.items?.find(item => item.title === 'Permanentka');
-  if (pass) pass.body = 'Zákazník vidí aktuálny typ vstupu bez negatívneho formulovania. Aktívna permanentka má kompaktnú zelenú kartu s počtom použitých a zostávajúcich vstupov, dátumom kúpy a platnosťou. Cena sa pri už zakúpenej permanentke nezobrazuje. Zákazník môže požiadať o 10-vstupovú permanentku.';
 
   if (customer) {
     let booking = customer.items?.find(item => /rezerv/i.test(String(item.title || '')));
@@ -28,30 +24,26 @@
       booking = {title:'Rezervácie',subtitle:'Kompaktný výber jedného alebo viacerých dní.',status:'production',statusLabel:'Produkcia',categories:['customer'],body:'',bullets:[],tags:['booking']};
       customer.items = [...(customer.items || []), booking];
     }
-    booking.body = 'Majiteľ otvorí výber cez Chcem prihlásiť psíka, označí jeden alebo viac dní na najbližšie dva týždne, vyberie taxi a odošle rezervácie naraz.';
+    booking.body = 'Rezervácie zachovávajú multi-day výber, taxi a existujúcu schvaľovaciu logiku. Nová ochrana blokuje rezervovanie, ak povinné očkovanie už nie je platné.';
     booking.bullets = [
-      'Oranžová hlavička zobrazuje fotku a meno vybraného psíka a stav vstupu/permanentky.',
-      'Zatvorené, plné a už rezervované dni nie je možné znovu vybrať.',
-      'Každá rezervácia zobrazuje stav, počet prihlásených psíkov, taxi a možnosť zrušenia.',
-      'Avatar psíka v rezerváciách používa rovnaké pohlavné akcenty ako profil.'
+      'Platnosť očkovania sa porovnáva s aktuálnym dňom; expirované očkovanie sa nepovažuje za kompletné.',
+      'Rezervačná obrazovka dostala iba vizuálne doladenie pozadia/labiek, bez zmeny jadra rezervácií.',
+      'Zatvorené, plné a už rezervované dni zostávajú nevyberateľné.'
     ];
-    booking.tags = [...new Set([...(booking.tags || []), 'multi-day', 'booking-sheet', 'two-weeks'])];
-
-    let messages = customer.items?.find(item => /správ|sprav|message/i.test(String(item.title || '')));
-    if (messages) messages.body = 'Správy majú kompaktný chatový vzhľad, menšie bubliny a nižší formulár. Blok Zavolať do Chvostíkova je vycentrovaný.';
+    booking.tags = [...new Set([...(booking.tags || []), 'vaccination-gate', 'multi-day'])];
 
     let pwa = customer.items?.find(item => /PWA|inštal|instal/i.test(String(item.title || '')));
     if (!pwa) {
       pwa = {title:'PWA inštalácia',subtitle:'Pridanie zákazníckeho portálu na plochu telefónu.',status:'production',statusLabel:'Produkcia',categories:['customer','technical'],body:'',bullets:[],tags:['pwa','ios','android']};
       customer.items = [...(customer.items || []), pwa];
     }
-    pwa.body = 'Portál používa lokálne statické launcher/brand assety. Customer shell už kvôli logu nevolá Supabase Edge Function.';
+    pwa.body = 'Produkčný customer shell je v105. Login logo je vložené priamo ako statický data asset, takže jeho zobrazenie nezávisí od ďalšieho requestu na Edge Function ani samostatný obrázkový endpoint.';
     pwa.bullets = [
-      'Launcher ikony ostávajú statické a service worker používa nový cache build v101.',
-      'Branding na login obrazovke používa /icon-192.png namiesto Edge Function URL.',
-      'Notification badge zostal zachovaný bez zmeny.'
+      'Service worker/cache build: 20260922-customer-iosproof-v105.',
+      'Launcher ikony a notification badge zostávajú statické.',
+      'Posledná oprava loga nemenila build identifikátor v105, iba spôsob vykreslenia login loga.'
     ];
-    pwa.tags = [...new Set([...(pwa.tags || []), 'static-assets', 'usage-fix', 'pwa'])];
+    pwa.tags = [...new Set([...(pwa.tags || []), 'v105', 'static-logo', 'ios'])];
   }
 
   const admin = data.sections?.find(section => String(section.id || '').toLowerCase().includes('admin') || String(section.title || '').toLowerCase().includes('admin'));
@@ -61,17 +53,12 @@
       overview = {title:'Prehľad',subtitle:'Prioritné požiadavky na jednom mieste.',status:'production',statusLabel:'Produkcia',categories:['admin'],body:'',bullets:[],tags:['overview']};
       admin.items = [...(admin.items || []), overview];
     }
-    overview.body = 'Prehľad obsahuje hlavné operatívne bloky a živé súhrny rezervácií, majiteľov, správ a záujmu o škôlku.';
+    overview.body = 'Admin frontend zostáva na Supabase mimo customer Vercel deployov.';
     overview.bullets = [
-      'Admin frontend na Supabase je aktuálne Edge Function chvostikovo-frontend v41.',
-      'Admin zostáva mimo Vercel customer deployov; jeho frontend sa spravuje cez Supabase snapshot/frontend mechanizmus.'
+      'chvostikovo-frontend je ACTIVE v41.',
+      'customer-portal-api je ACTIVE v26 a admin-push ACTIVE v11.',
+      'Admin frontend sa naďalej spravuje cez Supabase snapshot/frontend mechanizmus.'
     ];
-
-    let nav = admin.items?.find(item => /navig/i.test(String(item.title || '')));
-    if (!nav) {
-      nav = {title:'Admin navigácia',subtitle:'App-style spodná lišta.',status:'production',statusLabel:'Produkcia',categories:['admin'],body:'Spodná navigácia admin aplikácie je plávajúca lišta s ikonou nad textom.',bullets:[],tags:['navigation','app-style']};
-      admin.items = [...(admin.items || []), nav];
-    }
   }
 })();
 
@@ -79,48 +66,49 @@
 (() => {
   const data = window.SYSTEM_DATA;
   if (!data) return;
-  data.meta.updated = '21. 9. 2026 · 23:40';
+  data.meta.updated = '22. 9. 2026 · 23:40';
 
   const live = data.environments?.find(item => item.label === 'LIVE');
   if (live) {
-    live.version = 'v101 · READY';
-    live.note = 'Zákaznícka PWA je v produkcii na builde 20260921-customer-usagefix-v101. Posledný production deployment je READY a zodpovedá HEAD vetvy customer-portal-production.';
+    live.version = 'v105 · READY';
+    live.note = 'Zákaznícka PWA je v produkcii na builde 20260922-customer-iosproof-v105. Verejná production URL vracia tento build a posledný Vercel production deployment je READY na aktuálnom HEAD customer-portal-production.';
     live.bullets = [
-      'Vercel production: dpl_DfqwzVcdmYedkfFRRJvHoZgWbtvp · READY.',
-      'Git customer-portal-production: c65de62921e36907ea4e3515566d2ff190116991.',
-      'Produkčný build: 20260921-customer-usagefix-v101.',
-      'Supabase customer-portal-api je ACTIVE v24; admin-push je ACTIVE v11; admin frontend chvostikovo-frontend je ACTIVE v41.'
+      'Vercel production: dpl_Ho4TrEeiU6e7tW61CxA1D3J9FCZT · READY.',
+      'Git customer-portal-production: db88da2d75a3584de3430ea77b223eae606eeccb.',
+      'Produkčný build: 20260922-customer-iosproof-v105.',
+      'Supabase: customer-portal-api ACTIVE v26; admin-push ACTIVE v11; chvostikovo-frontend ACTIVE v41.'
     ];
   }
 
   const preview = data.environments?.find(item => item.label === 'PREVIEW');
   if (preview) {
-    preview.version = 'staging/preview · pripravené';
-    preview.note = 'Preview zostáva určené na testovanie väčších customer zmien pred vedomým produkčným release; dnešný finálny stav je už v customer produkcii v101.';
-    preview.bullets = ['Ďalšie väčšie zmeny najprv zoskupiť a otestovať, potom spraviť jeden production deploy.'];
+    preview.version = 'staging/preview · používať pred väčšími zmenami';
+    preview.note = 'Dnešný iOS vaccination flow bol pred produkciou skúšaný cez pracovnú preview vetvu. Ďalšie väčšie customer balíky opäť najprv otestovať a potom publikovať jedným produkčným release.';
+    preview.bullets = ['Nevytvárať sériu drobných produkčných deployov; vizuálne a funkčné úpravy zoskupiť do jedného testovaného balíka.'];
   }
 
   data.now = {
-    title: 'Stabilizácia customer v101 a pokračovanie konsolidácie',
-    status: 'Produkcia stabilizovaná',
+    title: 'Customer v105 – očkovania a iOS foto flow',
+    status: 'Produkcia READY',
     statusTone: 'production',
-    note: 'Dnešný customer balík prešiel cez redizajn Môj psík až po technický usage fix. Najdôležitejšie je teraz sledovať Supabase Edge Function spotrebu a ďalšie zmeny opäť zoskupovať, aby sa neopakovali zbytočné requesty ani séria Vercel deployov.',
+    note: 'Hlavnou dnešnou zmenou je nový praktický flow očkovaní: zákazník zadáva platnosť troch povinných očkovaní a prikladá fotografie očkovacieho preukazu. Rezervácia sa pri expirovanom očkovaní zablokuje. iOS výber a spracovanie fotografií bol následne stabilizovaný a produkcia je na v105.',
     bullets: [
-      'Môj psík je v produkcii ako feature hub: foto hore, dlaždice Údaje psíka, Očkovania, Pravidlá škôlky, Návštevy, Žiacka knižka a Nastavenia.',
-      'Doplnené pohlavné vizuálne akcenty avatarov a doladené názvy/rozloženie profilu.',
-      'v101 odstránila zbytočný customer Edge Function traffic: okamžitý bootstrap sync po Realtime open bol odstránený, fallback pri čakaní na pridelenie psa je 60 s a brand obrázky sú lokálne statické assety.',
-      'Rozhodnutie: ďalšie customer úpravy robiť ako konsolidovaný balík a až po kontrole requestov spraviť jeden produkčný deploy.',
-      'Ďalší krok: skontrolovať Supabase usage po v101, dokončiť zostávajúce onboarding/push testy na iOS/Android a pokračovať v Žiackej knižke až po potvrdení stability.'
+      'Očkovania: pridané 1–3 fotografie preukazu, náhľady a jednoduchšie zadávanie platnosti bez zbytočného dátumu aplikácie.',
+      'Bezpečnostná logika rezervácie: expirované povinné očkovanie už nespĺňa podmienku pre rezervovanie.',
+      'iOS: foto flow používa bezpečnejší decode/resize/JPEG postup a je chránený proti duplicitnému renewal modalu počas práce s očkovaniami.',
+      'Nastavenia/pravidlá boli vizuálne a funkčne upratané; rezervácie dostali len jemný vizuálny polish.',
+      'Login logo bolo opravené vloženým statickým assetom, aby sa spoľahlivo zobrazilo bez ďalšieho sieťového requestu.',
+      'Ďalší krok: manuálne potvrdiť upload/nahradenie 1–3 fotiek na reálnom iPhone a Androide, blokáciu rezervácie po expirácii a sledovať customer-portal-api usage po v26.'
     ]
   };
 
   data.recent = [
     {
-      date: '21. 9. 2026',
+      date: '22. 9. 2026',
       app: 'Denný súhrn',
-      title: 'Customer v101 + web – konsolidovaný stav',
-      text: 'Customer PWA bola dnes posunutá cez redizajn Môj psík do produkčného v101: profil psa je feature hub s fotkou hore, samostatnými dlaždicami pre údaje, očkovania, pravidlá, návštevy, pripravovanú Žiacku knižku a Nastavenia; pribudli pohlavné akcenty avatarov. Po zistení vysokej Supabase Edge Function spotreby bol odstránený zbytočný sync pri otvorení Realtime, waiting fallback sa spomalil na 60 sekúnd a login branding sa presunul na lokálny statický asset. Produkčný Vercel deployment dpl_DfqwzVcdmYedkfFRRJvHoZgWbtvp je READY na commite c65de629 a builde 20260921-customer-usagefix-v101. Web Chvostíkovo dostal sekciu/CTA Prečo využiť psiu škôlku a doladené texty benefitov. Ďalší krok je sledovať Supabase usage po v101 a ďalšie customer zmeny zoskupovať do jedného testovaného release.'
+      title: 'Customer v105 – očkovania, iOS fotografie a produkčný stav',
+      text: 'Customer PWA je na produkčnom builde 20260922-customer-iosproof-v105. Očkovania boli zjednodušené na platnosť troch povinných vakcín a 1–3 fotografie očkovacieho preukazu; expirované očkovanie teraz blokuje rezerváciu. Po prvom nasadení foto flow bol opravený pre iOS spracovanie obrázkov a doladený upload/náhľad, Nastavenia a pravidlá. Login logo je vložené priamo ako statický asset. Aktuálny HEAD customer-portal-production je db88da2d a Vercel deployment dpl_Ho4TrEeiU6e7tW61CxA1D3J9FCZT je READY. Supabase customer-portal-api je ACTIVE v26, admin-push v11 a admin frontend v41. Web Chvostíkovo dostal kompaktný CTA pás Prečo využiť psiu škôlku. Ďalší krok je potvrdiť očkovací foto flow na reálnom iOS/Android zariadení a ďalšie customer zmeny opäť zoskupiť do jedného release.'
     },
-    ...(data.recent || []).filter(item => item.date !== '21. 9. 2026')
+    ...(data.recent || []).filter(item => item.date !== '22. 9. 2026')
   ];
 })();
