@@ -277,7 +277,8 @@ function customerVaccinationsCompleteV96(dog){
   const required=['rabies','infectious','kennel_cough'];
   const rows=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(dog.id));
   const proofs=(state.data?.vaccination_proofs||[]).filter(p=>Number(p.dog_id)===Number(dog.id));
-  return proofs.length>0&&required.every(type=>rows.some(v=>v.vaccination_type===type&&v.valid_until));
+  const today=typeof bratislavaClockV95==='function'?bratislavaClockV95().date:new Date().toISOString().slice(0,10);
+  return proofs.length>0&&required.every(type=>rows.some(v=>v.vaccination_type===type&&v.valid_until&&String(v.valid_until)>=today));
 }
 window.customerVaccinationsCompleteV96=customerVaccinationsCompleteV96;
 function dogFormSnapshotV96(){
