@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260922-customer-polish-v102';
+const APP_BUILD='20260922-customer-settingspaw-v103';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -1036,6 +1036,7 @@ placeDeadlineV59();
     document.getElementById('customerPrivacyReadBtn')?.addEventListener('click',()=>document.getElementById('privacyInfoBtn')?.click());
     document.getElementById('customerTermsReadBtn')?.addEventListener('click',()=>openRead(doc));
   }
+  window.renderCustomerLegalStatusV103=render;
   function start(){
     const stats=document.getElementById('dogStats');if(stats)new MutationObserver(()=>setTimeout(render,0)).observe(stats,{childList:true,subtree:false});
     document.addEventListener('change',e=>{if(e.target?.id==='dogSelector')setTimeout(render,100)});
@@ -1224,13 +1225,8 @@ placeDeadlineV59();
   }
 
   function renderConsentControls(){
-    const dog=selectedDog();if(!dog)return;
-    const root=$('customerLegalControlsV23');if(!root)return;
-    const pushOn=state.pushChecked?!!state.pushEnabled:(typeof Notification!=='undefined'&&Notification.permission==='granted'&&localStorage.getItem('chvostikovo_push_enabled')==='1');
-    root.innerHTML='<div class="v23-consent-row"><strong>Upozornenia</strong><button id="pushToggleV23" class="push-switch '+(pushOn?'active':'')+'" type="button" role="switch" aria-checked="'+(pushOn?'true':'false')+'"><span></span></button></div>'+ 
-      '<div class="v23-consent-row"><strong>Zobraziť meno psa a fotku ostatným</strong><button id="privacyToggleV23" class="push-switch '+(dog.share_name_photo?'active':'')+'" type="button" role="switch" aria-checked="'+(dog.share_name_photo?'true':'false')+'"><span></span></button></div>';
-    $('pushToggleV23')?.addEventListener('click',()=>{const b=$('pushToggle');if(b)b.click();setTimeout(apply,350)});
-    $('privacyToggleV23')?.addEventListener('click',()=>{const b=$('privacyToggle');if(b)b.click();setTimeout(apply,350)});
+    const root=$('customerLegalControlsV23');
+    if(root)root.innerHTML='';
   }
 
   function settingsHomeV49(){
@@ -1342,6 +1338,7 @@ placeDeadlineV59();
   function openSettings(){
     relocateSettings();
     if(typeof window.prepareCustomerSettingsV102==='function')window.prepareCustomerSettingsV102();
+    window.renderCustomerLegalStatusV103?.();
     $('dogSettingsModalV36')?.classList.remove('hidden');
     document.documentElement.classList.add('settings-open-v36');
   }
@@ -1415,6 +1412,11 @@ placeDeadlineV59();
 
     const legal=$('customerLegalSectionV23');
     if(legal&&!legal.dataset.v98MenuReady){legal.open=false;legal.dataset.v98MenuReady='1'}
+    if(legal&&!legal.dataset.v103LegalBound){
+      legal.dataset.v103LegalBound='1';
+      legal.addEventListener('toggle',()=>{if(legal.open)window.renderCustomerLegalStatusV103?.()});
+    }
+    window.renderCustomerLegalStatusV103?.();
   }
   window.prepareCustomerSettingsV102=prepareSettingsV37;
 
