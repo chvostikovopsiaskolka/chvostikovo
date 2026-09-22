@@ -1291,3 +1291,22 @@ html,body,#appView.app,#appView .tab-page{
     opacity:.125!important;
   }
 }
+
+/* v104 vaccination proof photos */
+.vacc-proof-box-v104{border:1px solid #fed7aa;background:#fffaf5;border-radius:18px;padding:14px;display:grid;gap:11px}
+.vacc-proof-head-v104{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.vacc-proof-head-v104 strong{display:block;font-size:15px}.vacc-proof-head-v104 small{display:block;color:var(--muted);font-size:11px;line-height:1.4;margin-top:3px}
+.vacc-proof-count-v104{min-width:28px;height:28px;border-radius:999px;background:#ffedd5;color:#c2410c;display:grid;place-items:center;font-size:12px;font-weight:900}
+.vacc-proof-grid-v104{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.vacc-proof-thumb-v104{position:relative;min-width:0;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden;background:#fff;padding:0;color:#374151;text-align:center}
+.vacc-proof-thumb-v104 img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}.vacc-proof-thumb-v104 span{display:block;padding:6px;font-size:10px;font-weight:800}
+.vacc-proof-thumb-v104.staged button{position:absolute;right:4px;top:4px;width:27px;height:27px;border:0;border-radius:50%;background:rgba(17,24,39,.76);color:#fff;font-size:18px;line-height:1}
+.vacc-proof-empty-v104{grid-column:1/-1;padding:12px;border:1px dashed #fdba74;border-radius:13px;color:#9a3412;font-size:12px;text-align:center}
+.vacc-proof-staged-v104{display:grid;gap:7px}.vacc-proof-stage-title-v104{font-size:11px;font-weight:850;color:#9a3412}
+.vacc-proof-actions-v104{display:grid;grid-template-columns:1fr 1fr;gap:8px}.vacc-proof-picker-v104{display:flex!important;justify-content:center!important;text-align:center!important;font-size:12px!important;padding:10px 8px!important}
+.vacc-proof-message-v104{font-size:11px;line-height:1.4;color:#6b7280}
+.vacc-proof-viewer-v104{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.88);display:grid;place-items:center;padding:18px}.vacc-proof-viewer-v104.hidden{display:none!important}
+.vacc-proof-viewer-v104 img{max-width:100%;max-height:88dvh;object-fit:contain;border-radius:12px}.vacc-proof-viewer-close-v104{position:fixed;top:max(18px,env(safe-area-inset-top));right:18px;width:44px;height:44px;border:0;border-radius:50%;background:#fff;color:#111827;font-size:28px;z-index:2}
+.vacc-renewal-card-v104{text-align:center}.vacc-renewal-icon-v104{font-size:38px;margin:3px 0 10px}.vacc-renewal-card-v104 h2{margin-left:0!important;margin-right:0!important}.vacc-renewal-card-v104 .legal-body{margin-bottom:14px}
+#dogVaccinationFieldsV96>.vaccine-box>label{display:block;margin:2px 0 6px;font-size:12px;font-weight:800;color:#4b5563}
+@media(max-width:390px){.vacc-proof-actions-v104{grid-template-columns:1fr}.vacc-proof-grid-v104{gap:6px}}

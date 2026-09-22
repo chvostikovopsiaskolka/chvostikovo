@@ -11,8 +11,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
-  <link rel="manifest" href="/manifest.webmanifest?v=20260922-customer-settingspaw-v103">
-  <link rel="stylesheet" href="/styles.css?v=20260922-customer-settingspaw-v103">
+  <link rel="manifest" href="/manifest.webmanifest?v=20260922-customer-vaccproof-v104">
+  <link rel="stylesheet" href="/styles.css?v=20260922-customer-vaccproof-v104">
   <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}.loading-screen.in-app{background:transparent;pointer-events:none;padding:0}.loading-screen.in-app .loading-logo,.loading-screen.in-app small{display:none}.loading-screen.in-app .loading-paw{width:68px;height:68px;border:0;border-radius:18px;background:#fff;box-shadow:0 10px 34px rgba(17,24,39,.16);font-size:0;animation:none}.loading-screen.in-app .loading-paw::before{content:'🐾';width:42px;height:42px;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;display:grid;place-items:center;font-size:18px;animation:loadingSpin .8s linear infinite}</style>
   <title>Chvostíkovo</title>
 </head>
@@ -102,9 +102,22 @@
         <div><label for="dogAllergies">Alergie, zdravotné obmedzenia a iné informácie</label><textarea id="dogAllergies" class="input" rows="5" maxlength="3000" placeholder="Alergie, lieky, zdravotné obmedzenia, povaha alebo iné dôležité informácie"></textarea></div>
       </div>
       <div id="dogVaccinationFieldsV96" class="dog-details-section-v96">
-        <div class="vaccine-box"><strong>Besnota</strong><div class="grid2"><div><label>Očkovaný</label><input id="rabiesOn" class="input" type="date"></div><div><label>Platí do</label><input id="rabiesUntil" class="input" type="date"></div></div><div id="rabiesStatusV96" class="vaccine-validity-v96 neutral"></div></div>
-        <div class="vaccine-box"><strong>Infekčné ochorenia (DHPPi+L)</strong><div class="vaccine-disease-hint-v96"><span>Psinka · infekčný zápal pečene · parvoviróza</span><span>Psia parainfluenza · leptospiróza</span></div><div class="grid2"><div><label>Očkovaný</label><input id="infectiousOn" class="input" type="date"></div><div><label>Platí do</label><input id="infectiousUntil" class="input" type="date"></div></div><div id="infectiousStatusV96" class="vaccine-validity-v96 neutral"></div></div>
-        <div class="vaccine-box"><strong>Kotercový kašeľ</strong><div class="grid2"><div><label>Očkovaný</label><input id="kennelOn" class="input" type="date"></div><div><label>Platí do</label><input id="kennelUntil" class="input" type="date"></div></div><div id="kennelStatusV96" class="vaccine-validity-v96 neutral"></div></div>
+        <div class="vacc-proof-box-v104">
+          <div class="vacc-proof-head-v104"><div><strong>Fotografie očkovacieho preukazu</strong><small>Nahrajte 1 až 3 fotografie strán s platnosťou očkovaní.</small></div><span id="vaccProofCountV104" class="vacc-proof-count-v104">0</span></div>
+          <div id="vaccProofCurrentV104" class="vacc-proof-grid-v104"></div>
+          <div id="vaccProofStagedV104" class="vacc-proof-staged-v104 hidden"></div>
+          <div class="vacc-proof-actions-v104">
+            <label class="btn secondary vacc-proof-picker-v104" for="vaccProofLibraryV104">🖼️ Knižnica fotiek</label>
+            <input id="vaccProofLibraryV104" type="file" accept="image/*" multiple hidden>
+            <label class="btn secondary vacc-proof-picker-v104" for="vaccProofCameraV104">📷 Fotoaparát</label>
+            <input id="vaccProofCameraV104" type="file" accept="image/*" capture="environment" hidden>
+          </div>
+          <button id="vaccProofUploadV104" class="btn full hidden" type="button">Nahrať vybrané fotografie</button>
+          <div id="vaccProofMessageV104" class="vacc-proof-message-v104"></div>
+        </div>
+        <div class="vaccine-box"><strong>Besnota</strong><label>Platí do</label><input id="rabiesUntil" class="input" type="date"><div id="rabiesStatusV96" class="vaccine-validity-v96 neutral"></div></div>
+        <div class="vaccine-box"><strong>Infekčné ochorenia (DHPPi+L)</strong><div class="vaccine-disease-hint-v96"><span>Psinka · infekčný zápal pečene · parvoviróza</span><span>Psia parainfluenza · leptospiróza</span></div><label>Platí do</label><input id="infectiousUntil" class="input" type="date"><div id="infectiousStatusV96" class="vaccine-validity-v96 neutral"></div></div>
+        <div class="vaccine-box"><strong>Kotercový kašeľ</strong><label>Platí do</label><input id="kennelUntil" class="input" type="date"><div id="kennelStatusV96" class="vaccine-validity-v96 neutral"></div></div>
       </div>
       <button class="btn full" type="submit">Uložiť</button>
       <div id="dogMessage"></div>
@@ -112,6 +125,6 @@
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/app.js?v=20260922-customer-settingspaw-v103"></script>
+<script src="/app.js?v=20260922-customer-vaccproof-v104"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260922-customer-settingspaw-v103';
+const APP_BUILD='20260922-customer-vaccproof-v104';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -274,10 +274,10 @@ function ensureDogFormInModalV51(){
 let dogDetailsModeV96='details',dogDetailsMandatoryV96=false,dogDetailsSnapshotV96='';
 function customerVaccinationsCompleteV96(dog){
   if(!dog)return false;
-  if(dog.vaccination_requirements_verified===true)return true;
   const required=['rabies','infectious','kennel_cough'];
   const rows=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(dog.id));
-  return required.every(type=>rows.some(v=>v.vaccination_type===type&&v.vaccinated_on&&v.valid_until));
+  const proofs=(state.data?.vaccination_proofs||[]).filter(p=>Number(p.dog_id)===Number(dog.id));
+  return proofs.length>0&&required.every(type=>rows.some(v=>v.vaccination_type===type&&v.valid_until));
 }
 window.customerVaccinationsCompleteV96=customerVaccinationsCompleteV96;
 function dogFormSnapshotV96(){
@@ -314,7 +314,8 @@ function applyDogDetailsModeV96(mode='details',mandatory=false){
 }
 function openDogDetails(mode='details',mandatory=false){
   ensureDogFormInModalV51();const dog=selectedDog();if(!dog)return;
-  fillDogForm(dog);applyDogDetailsModeV96(mode,mandatory);updateVaccinationStatusesV96();
+  if(mode!=='vaccinations')clearVaccinationProofStageV104();
+  fillDogForm(dog);applyDogDetailsModeV96(mode,mandatory);updateVaccinationStatusesV96();bindVaccinationProofInputsV104();renderVaccinationProofsV104(dog.id);
   dogDetailsSnapshotV96=dogFormSnapshotV96();
   $('dogDetailsModal').classList.remove('hidden');document.documentElement.classList.add('dog-details-open');
 }
@@ -359,49 +360,136 @@ function fillDogForm(d){
   $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=d.breed||'';$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';
   if($('dogAllergies'))$('dogAllergies').value=combinedDogInfoV81(d);
   const vs=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(d.id));
-  for(const [type,a,b] of [['rabies','rabiesOn','rabiesUntil'],['infectious','infectiousOn','infectiousUntil'],['kennel_cough','kennelOn','kennelUntil']]){
-    const v=vs.find(x=>x.vaccination_type===type)||{};$(a).value=v.vaccinated_on||'';$(b).value=v.valid_until||'';
+  for(const [type,inputId] of [['rabies','rabiesUntil'],['infectious','infectiousUntil'],['kennel_cough','kennelUntil']]){
+    const v=vs.find(x=>x.vaccination_type===type)||{};$(inputId).value=v.valid_until||'';
   }
   updateVaccinationStatusesV96();
+  renderVaccinationProofsV104(d.id);
 }
+let vaccinationProofFilesV104=[];
+let vaccinationProofPreviewUrlsV104=[];
+
+function vaccinationProofsForDogV104(dogId){
+  return (state.data?.vaccination_proofs||[]).filter(p=>Number(p.dog_id)===Number(dogId));
+}
+function clearVaccinationProofStageV104(){
+  vaccinationProofPreviewUrlsV104.forEach(url=>{try{URL.revokeObjectURL(url)}catch(_){}});
+  vaccinationProofPreviewUrlsV104=[];vaccinationProofFilesV104=[];
+}
+function ensureVaccinationProofViewerV104(){
+  let modal=$('vaccProofViewerV104');if(modal)return modal;
+  document.body.insertAdjacentHTML('beforeend','<div id="vaccProofViewerV104" class="vacc-proof-viewer-v104 hidden" role="dialog" aria-modal="true"><button id="vaccProofViewerCloseV104" class="vacc-proof-viewer-close-v104" type="button" aria-label="Zavrieť">×</button><img id="vaccProofViewerImgV104" alt="Fotografia očkovacieho preukazu"></div>');
+  modal=$('vaccProofViewerV104');
+  const close=()=>modal.classList.add('hidden');
+  $('vaccProofViewerCloseV104').onclick=close;modal.addEventListener('click',e=>{if(e.target===modal)close()});
+  return modal;
+}
+function openVaccinationProofViewerV104(url){
+  if(!url)return;const modal=ensureVaccinationProofViewerV104();$('vaccProofViewerImgV104').src=url;modal.classList.remove('hidden');
+}
+function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
+  const current=$('vaccProofCurrentV104'),staged=$('vaccProofStagedV104'),count=$('vaccProofCountV104'),upload=$('vaccProofUploadV104'),msg=$('vaccProofMessageV104');
+  if(!current||!staged||!count||!upload)return;
+  const proofs=vaccinationProofsForDogV104(dogId);
+  count.textContent=String(proofs.length);
+  current.innerHTML=proofs.length?proofs.map((p,i)=>'<button class="vacc-proof-thumb-v104" type="button" data-proof-index="'+i+'"><img src="'+esc(p.image_url||'')+'" alt="Očkovací preukaz '+(i+1)+'"><span>Foto '+(i+1)+'</span></button>').join(''):'<div class="vacc-proof-empty-v104">Zatiaľ nie je nahratá žiadna fotografia.</div>';
+  current.querySelectorAll('[data-proof-index]').forEach(button=>button.addEventListener('click',()=>openVaccinationProofViewerV104(proofs[Number(button.dataset.proofIndex)]?.image_url)));
+  vaccinationProofPreviewUrlsV104.forEach(url=>{try{URL.revokeObjectURL(url)}catch(_){}});
+  vaccinationProofPreviewUrlsV104=vaccinationProofFilesV104.map(file=>URL.createObjectURL(file));
+  staged.classList.toggle('hidden',!vaccinationProofFilesV104.length);
+  staged.innerHTML=vaccinationProofFilesV104.length?'<div class="vacc-proof-stage-title-v104">Vybrané nové fotografie</div><div class="vacc-proof-grid-v104">'+vaccinationProofPreviewUrlsV104.map((url,i)=>'<div class="vacc-proof-thumb-v104 staged"><img src="'+url+'" alt="Vybraná fotografia '+(i+1)+'"><button type="button" data-remove-proof="'+i+'" aria-label="Odstrániť">×</button></div>').join('')+'</div>':'';
+  staged.querySelectorAll('[data-remove-proof]').forEach(button=>button.addEventListener('click',()=>{vaccinationProofFilesV104.splice(Number(button.dataset.removeProof),1);renderVaccinationProofsV104(dogId)}));
+  upload.classList.toggle('hidden',!vaccinationProofFilesV104.length);
+  upload.textContent=proofs.length?'Nahradiť fotografiami ('+vaccinationProofFilesV104.length+')':'Nahrať fotografie ('+vaccinationProofFilesV104.length+')';
+  if(msg&&!vaccinationProofFilesV104.length)msg.textContent=proofs.length?'Fotografie sú bezpečne uložené. Pri ďalšom očkovaní ich môžete nahradiť novými.':'Na dokončenie očkovaní nahrajte aspoň jednu fotografiu.';
+}
+function addVaccinationProofFilesV104(files){
+  const incoming=[...(files||[])].filter(file=>file&&String(file.type||'').startsWith('image/'));
+  for(const file of incoming){
+    if(vaccinationProofFilesV104.length>=3)break;
+    vaccinationProofFilesV104.push(file);
+  }
+  if(incoming.length&&vaccinationProofFilesV104.length>=3&&incoming.length>3)toast('Naraz môžete nahrať najviac 3 fotografie.');
+  renderVaccinationProofsV104();
+}
+function bindVaccinationProofInputsV104(){
+  const library=$('vaccProofLibraryV104'),camera=$('vaccProofCameraV104'),upload=$('vaccProofUploadV104');
+  if(library&&!library.dataset.boundV104){library.dataset.boundV104='1';library.addEventListener('change',()=>{addVaccinationProofFilesV104(library.files);library.value=''})}
+  if(camera&&!camera.dataset.boundV104){camera.dataset.boundV104='1';camera.addEventListener('change',()=>{addVaccinationProofFilesV104(camera.files);camera.value=''})}
+  if(upload&&!upload.dataset.boundV104){upload.dataset.boundV104='1';upload.addEventListener('click',()=>uploadVaccinationProofsV104(false))}
+}
+async function vaccinationProofFileToJpegV104(file){
+  const url=URL.createObjectURL(file);
+  try{
+    const img=new Image();
+    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});
+    const maxSide=1500,ratio=Math.min(1,maxSide/Math.max(img.naturalWidth||1,img.naturalHeight||1));
+    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.naturalWidth*ratio));canvas.height=Math.max(1,Math.round(img.naturalHeight*ratio));
+    const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    let quality=.82,data=canvas.toDataURL('image/jpeg',quality);
+    while(data.length>1050000&&quality>.52){quality-=.08;data=canvas.toDataURL('image/jpeg',quality)}
+    if(data.length>1700000)throw new Error('Fotografia je príliš veľká. Skúste ju odfotiť znova.');
+    return data;
+  }finally{URL.revokeObjectURL(url)}
+}
+async function uploadVaccinationProofsV104(silent=false){
+  const dog=selectedDog();if(!dog)throw new Error('Psík sa nenašiel.');
+  if(!vaccinationProofFilesV104.length)return vaccinationProofsForDogV104(dog.id);
+  const button=$('vaccProofUploadV104'),msg=$('vaccProofMessageV104');
+  if(button)button.disabled=true;if(msg)msg.textContent='Pripravujem fotografie…';
+  try{
+    const images=[];for(const file of vaccinationProofFilesV104)images.push(await vaccinationProofFileToJpegV104(file));
+    if(msg)msg.textContent='Nahrávam fotografie…';
+    const result=await api({action:'upload_vaccination_proofs',dog_id:Number(dog.id),images});
+    const proofs=result?.data?.proofs||[];
+    state.data.vaccination_proofs=(state.data.vaccination_proofs||[]).filter(p=>Number(p.dog_id)!==Number(dog.id));
+    state.data.vaccination_proofs.push(...proofs);
+    clearVaccinationProofStageV104();renderVaccinationProofsV104(dog.id);
+    if(!silent)toast('Fotografie očkovacieho preukazu sú uložené.');
+    return proofs;
+  }catch(error){if(msg)msg.textContent=error.message||'Fotografie sa nepodarilo nahrať.';throw error}
+  finally{if(button)button.disabled=false}
+}
+
 async function saveDog(e){
   e.preventDefault();
-  const savedMode=dogDetailsModeV96,mandatoryFlow=dogDetailsMandatoryV96,neut=$('dogNeutered').value,birthDate=$('dogBirthDate').value,sex=$('dogSex').value,ageText=dogAgeText(birthDate)||'';
+  const savedMode=dogDetailsModeV96,mandatoryFlow=dogDetailsMandatoryV96,neut=$('dogNeutered').value,birthDate=$('dogBirthDate').value,sex=$('dogSex').value,ageText=dogAgeText(birthDate)||'',dogId=Number($('dogId').value);
   const vaccinations=[
-    {type:'rabies',vaccinated_on:$('rabiesOn').value,valid_until:$('rabiesUntil').value},
-    {type:'infectious',vaccinated_on:$('infectiousOn').value,valid_until:$('infectiousUntil').value},
-    {type:'kennel_cough',vaccinated_on:$('kennelOn').value,valid_until:$('kennelUntil').value}
+    {type:'rabies',valid_until:$('rabiesUntil').value},
+    {type:'infectious',valid_until:$('infectiousUntil').value},
+    {type:'kennel_cough',valid_until:$('kennelUntil').value}
   ];
-  const missingVacc=vaccinations.find(v=>!v.vaccinated_on||!v.valid_until);
-  if(savedMode==='vaccinations'&&missingVacc){
-    toast('Doplňte dátum očkovania aj platnosť pri všetkých troch očkovaniach.');
-    const ids=missingVacc.type==='rabies'?['rabiesOn','rabiesUntil']:missingVacc.type==='infectious'?['infectiousOn','infectiousUntil']:['kennelOn','kennelUntil'];
-    $(missingVacc.vaccinated_on?ids[1]:ids[0])?.focus();return;
+  if(savedMode==='vaccinations'){
+    const missingVacc=vaccinations.find(v=>!v.valid_until);
+    if(missingVacc){
+      toast('Doplňte platnosť všetkých troch očkovaní.');
+      const id=missingVacc.type==='rabies'?'rabiesUntil':missingVacc.type==='infectious'?'infectiousUntil':'kennelUntil';$(id)?.focus();return;
+    }
   }
-  const body={action:'save_dog',dog_id:Number($('dogId').value),dog_name:$('dogName').value,age_text:ageText,birth_date:birthDate||null,breed:$('dogBreed').value,sex,neutered:neut===''?null:neut==='true',allergies:$('dogAllergies')?.value||'',temperament:'',vaccinations};
+  const body={action:'save_dog',dog_id:dogId,dog_name:$('dogName').value,age_text:ageText,birth_date:birthDate||null,breed:$('dogBreed').value,sex,neutered:neut===''?null:neut==='true',allergies:$('dogAllergies')?.value||'',temperament:''};
+  if(savedMode==='vaccinations'){body.vaccinations=vaccinations;body.require_vaccination_proof=true}
   try{
     loading(true);
+    if(savedMode==='vaccinations'&&vaccinationProofFilesV104.length)await uploadVaccinationProofsV104(true);
+    if(savedMode==='vaccinations'&&!vaccinationProofsForDogV104(dogId).length){
+      toast('Nahrajte aspoň jednu fotografiu očkovacieho preukazu.');return;
+    }
     const result=await api(body);
     const dog=selectedDog();
     if(dog)Object.assign(dog,{name:body.dog_name,age_text:body.age_text,birth_date:body.birth_date||null,breed:body.breed||null,sex:body.sex||null,neutered:body.neutered,allergies:body.allergies||null,temperament:null});
-    if(state.data){
-      const other=(state.data.vaccinations||[]).filter(v=>Number(v.dog_id)!==Number(body.dog_id)||!['rabies','infectious','kennel_cough'].includes(v.vaccination_type));
-      state.data.vaccinations=[...other,...vaccinations.filter(v=>v.vaccinated_on||v.valid_until).map(v=>({dog_id:Number(body.dog_id),vaccination_type:v.type,vaccinated_on:v.vaccinated_on||null,valid_until:v.valid_until||null}))];
-      const complete=dog?customerVaccinationsCompleteV96(dog):false;
-      if(complete||result?.data?.onboarding_complete){
+    if(state.data&&savedMode==='vaccinations'){
+      const other=(state.data.vaccinations||[]).filter(v=>Number(v.dog_id)!==dogId||!['rabies','infectious','kennel_cough'].includes(v.vaccination_type));
+      state.data.vaccinations=[...other,...vaccinations.map(v=>({dog_id:dogId,vaccination_type:v.type,vaccinated_on:null,valid_until:v.valid_until}))];
+      if(result?.data?.onboarding_complete){
         state.data.dog_onboarding=state.data.dog_onboarding||[];
-        const row=state.data.dog_onboarding.find(x=>Number(x.dog_id)===Number(body.dog_id));
+        const row=state.data.dog_onboarding.find(x=>Number(x.dog_id)===dogId);
         if(row){row.details_prompt_answered_at=new Date().toISOString();row.details_prompt_skipped=false}
-        else state.data.dog_onboarding.push({dog_id:Number(body.dog_id),details_prompt_answered_at:new Date().toISOString(),details_prompt_skipped:false});
+        else state.data.dog_onboarding.push({dog_id:dogId,details_prompt_answered_at:new Date().toISOString(),details_prompt_skipped:false});
       }
     }
     dogDetailsSnapshotV96=dogFormSnapshotV96();
     if(savedMode==='details'&&mandatoryFlow){
-      applyDogDetailsModeV96('vaccinations',true);
-      updateVaccinationStatusesV96();
-      dogDetailsSnapshotV96=dogFormSnapshotV96();
-      toast('Údaje sú uložené. Teraz doplňte očkovania.');
-      return;
+      applyDogDetailsModeV96('vaccinations',true);fillDogForm(dog);bindVaccinationProofInputsV104();dogDetailsSnapshotV96=dogFormSnapshotV96();toast('Údaje sú uložené. Teraz doplňte platnosť očkovaní a fotografie preukazu.');return;
     }
     closeDogDetails(true);renderDog();renderPassSummary();renderUpcoming();renderDays();
     toast(savedMode==='vaccinations'?'Očkovania sú uložené.':'Údaje psíka sú uložené.');
@@ -974,7 +1062,7 @@ placeDeadlineV59();
     submit?.insertAdjacentHTML('beforebegin','<label class="privacy-ack-row"><input id="signupPrivacyAck" type="checkbox" required><span>Potvrdzujem, že som sa oboznámil/a s <button id="privacyInfoBtn" class="inline-link" type="button">informáciami o spracúvaní osobných údajov</button>.</span></label>');
   }
   if(!document.getElementById('privacyInfoModal')){
-    document.body.insertAdjacentHTML('beforeend','<div id="privacyInfoModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="privacyInfoTitle"><div class="legal-card"><button id="privacyInfoClose" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="privacyInfoTitle">Informácie o spracúvaní osobných údajov</h2><div class="legal-body"><p><strong>Prevádzkovateľ:</strong> Marek Leder – Bellaris, IČO: 56447001, miesto podnikania: Miškovecká 1023/2, 040 11 Košice-Juh. Prevádzkareň Chvostíkovo: Poľská 2207/6, 040 01 Košice-Juh. Zapísaný v Živnostenskom registri Okresného úradu Košice, č. 820-106266. Kontakt: chvostikovo.psiaskolka@gmail.com, +421 951 069 395.</p><p>V zákazníckom portáli spracúvame údaje potrebné na poskytovanie služieb škôlky, najmä meno a priezvisko, e-mail, telefónne číslo, údaje o psíkovi, rezervácie, návštevy, permanentky, taxi službu, komunikáciu so škôlkou, údaje o očkovaniach a fotografiu psíka, ak ju nahráte.</p><p>Údaje používame na správu účtu, organizáciu rezervácií a návštev, bezpečnú starostlivosť o psíka, komunikáciu a plnenie povinností súvisiacich s prevádzkou škôlky.</p><p><strong>Nepoužívame reklamné nástroje ani údaje nepredávame.</strong> Na technickú prevádzku portálu využívame poskytovateľov infraštruktúry potrebných na fungovanie aplikácie.</p><p>Údaje uchovávame počas trvania zákazníckeho vzťahu a následne po dobu potrebnú na splnenie zákonných povinností a ochranu právnych nárokov. V súvislosti so svojimi údajmi môžete požiadať o prístup, opravu, vymazanie alebo obmedzenie spracúvania, ak sú splnené zákonné podmienky.</p><p>Potvrdením pri registrácii neudeľujete marketingový súhlas. Potvrdzujete, že ste sa s týmito informáciami oboznámili.</p><p class="legal-version"></p></div><button id="privacyInfoOk" class="btn full" type="button">Rozumiem</button></div></div>');
+    document.body.insertAdjacentHTML('beforeend','<div id="privacyInfoModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="privacyInfoTitle"><div class="legal-card"><button id="privacyInfoClose" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="privacyInfoTitle">Informácie o spracúvaní osobných údajov</h2><div class="legal-body"><p><strong>Prevádzkovateľ:</strong> Marek Leder – Bellaris, IČO: 56447001, miesto podnikania: Miškovecká 1023/2, 040 11 Košice-Juh. Prevádzkareň Chvostíkovo: Poľská 2207/6, 040 01 Košice-Juh. Zapísaný v Živnostenskom registri Okresného úradu Košice, č. 820-106266. Kontakt: chvostikovo.psiaskolka@gmail.com, +421 951 069 395.</p><p>V zákazníckom portáli spracúvame údaje potrebné na poskytovanie služieb škôlky, najmä meno a priezvisko, e-mail, telefónne číslo, údaje o psíkovi, rezervácie, návštevy, permanentky, taxi službu, komunikáciu so škôlkou, údaje o očkovaniach, fotografie očkovacieho preukazu a fotografiu psíka, ak ju nahráte.</p><p>Údaje používame na správu účtu, organizáciu rezervácií a návštev, bezpečnú starostlivosť o psíka, komunikáciu a plnenie povinností súvisiacich s prevádzkou škôlky.</p><p><strong>Nepoužívame reklamné nástroje ani údaje nepredávame.</strong> Na technickú prevádzku portálu využívame poskytovateľov infraštruktúry potrebných na fungovanie aplikácie.</p><p>Údaje uchovávame počas trvania zákazníckeho vzťahu a následne po dobu potrebnú na splnenie zákonných povinností a ochranu právnych nárokov. V súvislosti so svojimi údajmi môžete požiadať o prístup, opravu, vymazanie alebo obmedzenie spracúvania, ak sú splnené zákonné podmienky.</p><p>Potvrdením pri registrácii neudeľujete marketingový súhlas. Potvrdzujete, že ste sa s týmito informáciami oboznámili.</p><p class="legal-version"></p></div><button id="privacyInfoOk" class="btn full" type="button">Rozumiem</button></div></div>');
   }
   if(!document.getElementById('schoolTermsModal')){
     document.body.insertAdjacentHTML('beforeend','<div id="schoolTermsModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="schoolTermsTitle"><div class="legal-card terms-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="schoolTermsTitle">Podmienky škôlky</h2><div id="schoolTermsDog" class="legal-dog"></div><div id="schoolTermsBody" class="legal-body terms-body"></div><label class="terms-ack-row"><input id="schoolTermsAck" type="checkbox"><span>Prečítal/a som si podmienky škôlky a súhlasím s nimi.</span></label><button id="schoolTermsConfirm" class="btn full" type="button" disabled>Potvrdiť podmienky</button><button id="schoolTermsLogout" class="btn secondary full" type="button">Odhlásiť sa</button></div></div>');
@@ -2046,3 +2134,41 @@ async function togglePushDirect(btn){
 })();
 
 
+
+
+/* v104: vaccination renewal reminder and proof-photo flow */
+(function vaccinationRenewalV104(){
+  function daysUntilV104(iso){
+    if(!iso)return null;
+    const todayIso=typeof bratislavaClockV95==='function'?bratislavaClockV95().date:new Date().toISOString().slice(0,10);
+    return Math.round((new Date(String(iso).slice(0,10)+'T12:00:00')-new Date(todayIso+'T12:00:00'))/86400000);
+  }
+  function candidateV104(){
+    const dogs=state.data?.dogs||[],rows=state.data?.vaccinations||[],onboarding=state.data?.dog_onboarding||[];
+    for(const dog of dogs){
+      if(!onboarding.some(x=>Number(x.dog_id)===Number(dog.id)))continue;
+      const own=rows.filter(v=>Number(v.dog_id)===Number(dog.id)&&v.valid_until);
+      const values=own.map(v=>({v,days:daysUntilV104(v.valid_until)})).filter(x=>Number.isFinite(x.days)).sort((a,b)=>a.days-b.days);
+      if(values.length&&values[0].days<=14)return {dog,item:values[0]};
+    }
+    return null;
+  }
+  function ensureV104(){
+    let modal=$('vaccRenewalModalV104');if(modal)return modal;
+    document.body.insertAdjacentHTML('beforeend','<div id="vaccRenewalModalV104" class="legal-modal hidden" role="dialog" aria-modal="true"><div class="legal-card vacc-renewal-card-v104"><button id="vaccRenewalCloseV104" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="vacc-renewal-icon-v104">💉</div><h2 id="vaccRenewalTitleV104">Boli ste už zaočkovať svojho psíka?</h2><div id="vaccRenewalTextV104" class="legal-body"></div><button id="vaccRenewalUpdateV104" class="btn full" type="button">Nahrať fotky a platnosť</button><button id="vaccRenewalLaterV104" class="btn secondary full" type="button">Neskôr</button></div></div>');
+    modal=$('vaccRenewalModalV104');const close=()=>modal.classList.add('hidden');$('vaccRenewalCloseV104').onclick=close;$('vaccRenewalLaterV104').onclick=close;return modal;
+  }
+  function showV104(){
+    if(window.__customerOnboardingCompleteV75!==true)return;
+    const found=candidateV104();if(!found)return;
+    const key='chvostikovo_vacc_renewal_v104_'+found.dog.id+'_'+String(found.item.v.valid_until||'');
+    try{if(sessionStorage.getItem(key)==='1')return;sessionStorage.setItem(key,'1')}catch(_){}
+    const modal=ensureV104(),days=found.item.days,name=found.dog.name||'psíka';
+    $('vaccRenewalTitleV104').textContent='Boli ste už zaočkovať '+name+'?';
+    $('vaccRenewalTextV104').innerHTML=days<0?'<p>Platnosť jedného z očkovaní už skončila. Nahrajte nové fotografie očkovacieho preukazu a zadajte novú platnosť.</p>':days===0?'<p>Platnosť jedného z očkovaní končí dnes. Nahrajte nové fotografie očkovacieho preukazu a zadajte novú platnosť.</p>':'<p>Jedno z očkovaní bude platné už len <strong>'+days+' '+vaccinationDaysWordV96(days)+'</strong>. Po preočkovaní nahrajte nové fotografie a novú platnosť.</p>';
+    $('vaccRenewalUpdateV104').onclick=()=>{modal.classList.add('hidden');state.selectedDogId=Number(found.dog.id);renderDogSelector();renderDog();switchTab('dog');setTimeout(()=>openDogDetails('vaccinations',false),60)};
+    modal.classList.remove('hidden');
+  }
+  addCustomerHook('afterBootstrap',()=>setTimeout(showV104,700));
+  window.showVaccinationRenewalV104=showV104;
+})();
