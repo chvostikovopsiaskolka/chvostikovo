@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260921-customer-usagefix-v101';
+const APP_BUILD='20260922-customer-polish-v102';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -348,7 +348,7 @@ function renderDogHeaderV56(dog){
     $('dogDataOpenV96')?.addEventListener('click',()=>openDogDetails('details',false));
     $('dogVaccinationsOpenV96')?.addEventListener('click',()=>openDogDetails('vaccinations',false));
     $('dogVisitsOpenV99')?.addEventListener('click',()=>window.openDogVisitsV99?.());
-    $('dogMenuOpenV99')?.addEventListener('click',()=>openSettings());
+    $('dogMenuOpenV99')?.addEventListener('click',()=>window.openCustomerSettingsV102?.());
   }
 }
 function renderDogCore(){ensureDogFormInModalV51();const dog=selectedDog();if(!dog){$('dogProfilePhoto').innerHTML='';$('dogProfilePhoto').removeAttribute('data-dog-visual-key');$('dogProfileSettings').innerHTML='';$('dogStats').innerHTML=box('info','Psíka najprv priradí Chvostíkovo k vášmu účtu.');$('dogForm').classList.add('hidden');renderDogProfilePrompt();return}$('dogForm').classList.remove('hidden');state.selectedDogId=Number(dog.id);renderDogHeaderV56(dog);const cachedPush=state.pushChecked?!!state.pushEnabled:(typeof Notification!=='undefined'&&Notification.permission==='granted'&&localStorage.getItem('chvostikovo_push_enabled')==='1');$('dogProfileSettings').innerHTML=`<div class="card profile-settings"><div class="privacy-row"><div><strong>Upozornenia</strong><small>Rezervácie, správy a oznamy z Chvostíkova.</small></div><button id="pushToggle" class="push-switch syncing ${cachedPush?'active':''}" type="button" aria-label="Upozornenia"><span></span></button></div><div class="privacy-row"><div><strong>Zobraziť meno psa a fotku ostatným</strong><small>Súhlas môžete kedykoľvek vypnúť.</small></div><button id="privacyToggle" class="push-switch ${dog.share_name_photo?'active':''}" type="button" aria-label="Zdieľanie"><span></span></button></div></div>`;$('pushToggle').addEventListener('click',togglePush);$('privacyToggle').addEventListener('click',togglePrivacy);applyPushToggle();$('dogStats').innerHTML='';fillDogForm(dog);renderDogProfilePrompt()}
@@ -1339,7 +1339,13 @@ placeDeadlineV59();
     if(logout){logout.classList.remove('hidden','icon-btn');logout.classList.add('btn','secondary','full');logout.textContent='Odhlásiť sa';logout.style.marginTop='14px';content.appendChild(logout)}
   }
 
-  function openSettings(){relocateSettings();if(typeof prepareSettingsV37==='function')prepareSettingsV37();$('dogSettingsModalV36')?.classList.remove('hidden');document.documentElement.classList.add('settings-open-v36')}
+  function openSettings(){
+    relocateSettings();
+    if(typeof window.prepareCustomerSettingsV102==='function')window.prepareCustomerSettingsV102();
+    $('dogSettingsModalV36')?.classList.remove('hidden');
+    document.documentElement.classList.add('settings-open-v36');
+  }
+  window.openCustomerSettingsV102=openSettings;
   function closeSettings(){$('dogSettingsModalV36')?.classList.add('hidden');document.documentElement.classList.remove('settings-open-v36')}
 
   function applyAll(){applyNav();applyHero();ensureSettings();setTimeout(relocateSettings,0)}
@@ -1410,6 +1416,7 @@ placeDeadlineV59();
     const legal=$('customerLegalSectionV23');
     if(legal&&!legal.dataset.v98MenuReady){legal.open=false;legal.dataset.v98MenuReady='1'}
   }
+  window.prepareCustomerSettingsV102=prepareSettingsV37;
 
   function ensurePickerV37(){
     if($('bookingPickerV37'))return;
@@ -1790,7 +1797,6 @@ async function togglePushDirect(btn){
         '<div id="supportChatModalV52" class="legal-modal support-chat-modal-v52 hidden" role="dialog" aria-modal="true" aria-labelledby="supportChatTitleV52">'+
           '<div class="legal-card support-chat-card-v52">'+
             '<button id="supportChatCloseV52" class="legal-close" type="button" aria-label="Zavrieť">×</button>'+
-            '<div class="legal-kicker">Chvostíkovo</div>'+
             '<h2 id="supportChatTitleV52">Napíšte nám správu</h2>'+
             '<div id="supportMessageThreadV52" class="message-thread support-message-thread-v52"></div>'+
             '<form id="supportMessageFormV52" class="form-stack support-message-form-v52">'+
@@ -1962,13 +1968,29 @@ async function togglePushDirect(btn){
     }
   }
 
+  function formatSchoolTermsV102(text){
+    const chunks=String(text||'').split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);
+    let html='';
+    for(let i=0;i<chunks.length;i++){
+      const heading=chunks[i];
+      if(/^\d+\.\s+/.test(heading)){
+        let body='';
+        if(i+1<chunks.length&&!/^\d+\.\s+/.test(chunks[i+1]))body=chunks[++i];
+        html+='<section class="terms-point-v97"><strong>'+esc(heading)+'</strong>'+(body?'<p>'+esc(body)+'</p>':'')+'</section>';
+      }else{
+        html+='<p class="terms-loose-v97">'+esc(heading)+'</p>';
+      }
+    }
+    return html;
+  }
+
   async function openRulesV55(){
     ensureRulesUiV55();
     const modal=$('schoolRulesModalV55'),body=$('schoolRulesBodyV55'),title=$('schoolRulesTitleV55');
     try{
       const doc=await activeTermsV55();
       title.textContent=doc?.title||'Pravidlá škôlky';
-      body.innerHTML=formatSchoolTermsV97(doc?.body||'Pravidlá škôlky momentálne nie sú dostupné.');
+      body.innerHTML=formatSchoolTermsV102(doc?.body||'Pravidlá škôlky momentálne nie sú dostupné.');
     }catch(e){
       title.textContent='Pravidlá škôlky';
       body.innerHTML='<p class="terms-loose-v97">'+esc(e.message||'Pravidlá sa nepodarilo načítať.')+'</p>';
