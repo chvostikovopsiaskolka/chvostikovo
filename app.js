@@ -2339,3 +2339,32 @@ async function uploadVaccinationProofsV104(silent=false){
     if(msg)msg.textContent=message;if(!silent)toast(message);throw error;
   }finally{if(button)button.disabled=false}
 }
+
+/* v105 runtime-only visual/text patch to keep existing HTML/CSS architecture untouched */
+(function customerVisualV105(){
+  const pinkPaw="url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cg fill='%23f472b6'%3E%3Cellipse cx='40' cy='38' rx='15' ry='12'/%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Ccircle cx='34' cy='15' r='6'/%3E%3Ccircle cx='49' cy='16' r='6'/%3E%3Ccircle cx='61' cy='27' r='6'/%3E%3C/g%3E%3C/svg%3E\")";
+  const style=document.createElement('style');
+  style.id='customer-v105-runtime-style';
+  style.textContent=`
+  .vacc-proof-empty-wrap-v105{grid-template-columns:1fr!important}
+  .vacc-proof-empty-v105{position:relative;width:100%;min-height:76px;border:1.5px dashed #fb923c;border-radius:14px;background:rgba(255,255,255,.45);color:#9a3412;padding:16px 52px 14px 14px;display:grid;gap:3px;align-content:center;text-align:left;cursor:pointer}
+  .vacc-proof-empty-v105>span:not(.vacc-proof-plus-v105){font-size:12px;font-weight:750}
+  .vacc-proof-empty-v105 small{font-size:10px;color:#9a3412;opacity:.72}
+  .vacc-proof-plus-v105{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#ffedd5;color:#ea580c;font-size:25px;line-height:1}
+  .vacc-proof-thumb-v104 img{background:#f3f4f6}.vacc-proof-thumb-v104.staged img{object-fit:cover!important}.vacc-proof-message-v104{min-height:16px}
+  #customerLegalStatusCard .customer-legal-doc-v105{padding:2px 0 12px;border-bottom:1px solid var(--line)}
+  #customerLegalStatusCard .customer-legal-doc-v105:last-child{border-bottom:0;padding-bottom:2px}
+  #customerLegalStatusCard .customer-legal-doc-v105 .customer-legal-row{border-top:0!important;padding:10px 0 7px!important}
+  #customerLegalStatusCard .customer-legal-doc-action-v105{width:100%!important;min-height:36px!important;margin:0!important;padding:8px 10px!important;justify-content:center!important;text-align:center!important;border-radius:11px!important;font-size:12px!important}
+  .dog-hub-tile-v99 .dog-hub-emoji-v99{opacity:.23!important;font-size:54px!important;filter:saturate(.95) contrast(.98)!important;transform:scale(1.06);transform-origin:bottom right}
+  #bookingTab::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background-image:${pinkPaw},${pinkPaw},${pinkPaw},${pinkPaw},${pinkPaw},${pinkPaw},${pinkPaw},${pinkPaw};background-repeat:no-repeat;background-size:108px 81px,54px 41px,82px 62px,46px 35px,96px 72px,60px 45px,74px 56px,42px 32px;background-position:-18px 24%,94% 36%,8% 52%,78% 58%,96% 69%,18% 76%,72% 88%,5% 94%;opacity:.055}
+  #bookingTab>*{position:relative;z-index:1}
+  @media(max-width:520px){.dog-hub-tile-v99 .dog-hub-emoji-v99{opacity:.22!important;font-size:52px!important}#bookingTab::after{background-size:94px 71px,48px 36px,72px 54px,40px 30px,84px 63px,52px 39px,66px 50px,38px 29px;background-position:-15px 23%,96% 35%,6% 51%,80% 59%,97% 69%,16% 77%,74% 88%,3% 95%;opacity:.052}}
+  `;
+  const mount=()=>{
+    if(!document.getElementById(style.id))document.head.appendChild(style);
+    const hint=document.querySelector('.vacc-proof-head-v104 small');
+    if(hint)hint.textContent='Nahrajte alebo odfoťte 1 až 3 fotografie strán s platnosťou očkovaní.';
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+})();
