@@ -73,7 +73,7 @@ export function Hero() {
 
           <a
             href="#informujte-sa"
-            className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full border border-coral/30 bg-white/90 px-5 py-2.5 font-display text-sm font-semibold text-coral-dark shadow-card backdrop-blur-sm transition hover:bg-white"
+            className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full border border-coral bg-coral px-5 py-2.5 font-display text-sm font-semibold text-primary-foreground shadow-card transition-colors hover:bg-coral-dark"
           >
             Chcem sa informovať o škôlke
             <ChevronDown className="size-4" />
