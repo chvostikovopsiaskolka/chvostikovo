@@ -73,7 +73,7 @@ function Index() {
         <Reviews />
         <Faq />
         <div className="bg-card">
-          <div className="mx-auto h-[150px] max-w-[820px] overflow-hidden sm:h-[230px]" aria-hidden="true">
+          <div className="mx-auto h-[120px] max-w-[820px] overflow-hidden sm:h-[165px] lg:h-[180px]" aria-hidden="true">
             <img
               src={schoolmatesCta}
               alt=""
@@ -102,7 +102,7 @@ function Index() {
             aria-hidden="true"
             className="pointer-events-none absolute right-[6%] bottom-1 size-7 -rotate-[20deg] text-cream/10 sm:size-8"
           />
-          <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 text-left sm:gap-5 lg:justify-center lg:gap-10">
+          <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 text-left sm:gap-5 lg:justify-center lg:gap-20">
             <h2 className="min-w-0 font-display text-lg leading-tight text-cream sm:text-xl lg:text-2xl">
               Prečo využiť psiu škôlku?
             </h2>
