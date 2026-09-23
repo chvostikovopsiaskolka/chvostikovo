@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
-import { trackFormSubmit } from "@/lib/analytics";
+import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
 
 function sourceRef() {
   if (typeof window === "undefined") return "/";
@@ -20,13 +20,6 @@ function attributionPayload() {
     utm_term: attribution.term,
     utm_content: attribution.content,
   };
-}
-
-function trackLead(kind: "informacie" | "prihlaska") {
-  if (typeof window === "undefined") return;
-  const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
-    ((...args: unknown[]) => void) | undefined;
-  fbq?.("track", "Lead", { content_name: kind });
 }
 
 export function ShortForm({ onSent }: { onSent?: () => void }) {
@@ -60,7 +53,7 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
         trafficMedium: attribution.traffic_medium,
         landingPage: attribution.landing_page,
       });
-      trackLead("informacie");
+      trackMetaFormConversion("informacie");
       setSent(true);
       onSent?.();
     } catch {
@@ -171,7 +164,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         trafficMedium: attribution.traffic_medium,
         landingPage: attribution.landing_page,
       });
-      trackLead("prihlaska");
+      trackMetaFormConversion("prihlaska");
       setSent(true);
       onSent?.();
     } catch {

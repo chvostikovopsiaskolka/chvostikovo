@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { trackMarketingInteraction } from "@/lib/analytics";
 
 const STORAGE_KEY = "chvostikovo-cookies";
 const PIXEL_ID = "1592305991362085";
@@ -70,6 +71,41 @@ function initPixel() {
   tryInit();
 }
 
+function clickSource(anchor: HTMLAnchorElement) {
+  if (anchor.closest("#informujte-sa")) return "inquiry_section";
+  if (anchor.closest("#top")) return "hero";
+  if (anchor.closest("#prva-navsteva")) return "first_visit";
+  if (anchor.closest("#preco")) return "why_daycare";
+  if (anchor.closest("#kontakt")) return "contact";
+  if (anchor.closest("header")) return "header";
+  if (anchor.closest("footer")) return "footer";
+  return "site";
+}
+
+function handleTrackedClick(event: MouseEvent) {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+
+  const anchor = target.closest("a");
+  if (!(anchor instanceof HTMLAnchorElement)) return;
+
+  const href = anchor.getAttribute("href") ?? "";
+
+  if (href.startsWith("tel:")) {
+    trackMarketingInteraction("phone_click", clickSource(anchor));
+    return;
+  }
+
+  if (href === "#informujte-sa" || href === "/#informujte-sa") {
+    trackMarketingInteraction("inquiry_cta", clickSource(anchor));
+    return;
+  }
+
+  if ((href === "#cennik" || href === "/#cennik") && anchor.closest("header")) {
+    trackMarketingInteraction("view_pricing", "header_menu");
+  }
+}
+
 export function MetaPixel() {
   const initializedRef = useRef(false);
 
@@ -93,9 +129,12 @@ export function MetaPixel() {
 
     window.addEventListener("storage", handleStorage);
     window.addEventListener("chvostikovo-consent-changed", handleConsentChanged);
+    document.addEventListener("click", handleTrackedClick);
+
     return () => {
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("chvostikovo-consent-changed", handleConsentChanged);
+      document.removeEventListener("click", handleTrackedClick);
     };
   }, []);
 
