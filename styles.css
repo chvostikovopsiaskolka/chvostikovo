@@ -1310,3 +1310,45 @@ html,body,#appView.app,#appView .tab-page{
 .vacc-renewal-card-v104{text-align:center}.vacc-renewal-icon-v104{font-size:38px;margin:3px 0 10px}.vacc-renewal-card-v104 h2{margin-left:0!important;margin-right:0!important}.vacc-renewal-card-v104 .legal-body{margin-bottom:14px}
 #dogVaccinationFieldsV96>.vaccine-box>label{display:block;margin:2px 0 6px;font-size:12px;font-weight:800;color:#4b5563}
 @media(max-width:390px){.vacc-proof-actions-v104{grid-template-columns:1fr}.vacc-proof-grid-v104{gap:6px}}
+
+
+/* v106 – focused onboarding and vaccination polish */
+html.email-confirmed-v106 #authView.auth-shell:not(.hidden){
+  display:grid!important;
+  place-items:center!important;
+  align-content:center!important;
+  min-height:100dvh!important;
+  height:100dvh!important;
+  padding:calc(18px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom))!important;
+  overflow-y:auto!important;
+}
+html.email-confirmed-v106 #authView .auth-card{margin:auto!important}
+html.email-confirmed-v106 #installHelpLink{display:none!important}
+
+/* Long rules remain verbatim but are broken into readable paragraphs. */
+.terms-point-v97 p+p{margin-top:10px!important}
+.school-rules-body-v55 .terms-point-v97 p+p{margin-top:10px!important}
+
+/* Vaccination editor: keep every child inside the mobile modal width. */
+#dogDetailsModal .dog-details-card,
+#dogDetailsModal #dogForm,
+#dogVaccinationFieldsV96,
+#dogVaccinationFieldsV96>*,
+.vacc-proof-box-v104,
+.vacc-proof-head-v104,
+.vacc-proof-grid-v104,
+.vacc-proof-staged-v104{
+  min-width:0!important;
+  max-width:100%!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+.vacc-proof-box-v104{overflow:hidden!important}
+.vacc-proof-head-v104>div{min-width:0!important;flex:1 1 auto!important}
+.vacc-proof-head-v104 small{white-space:normal!important;overflow-wrap:anywhere!important}
+.vacc-proof-count-v104{flex:0 0 28px!important}
+.vacc-proof-actions-v104{display:none!important}
+@media(max-width:520px){
+  #dogDetailsModal .dog-details-card{width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important;padding-left:16px!important;padding-right:16px!important}
+  .vacc-proof-box-v104{padding:13px!important}
+}
