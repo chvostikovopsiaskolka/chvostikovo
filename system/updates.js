@@ -66,49 +66,48 @@
 (() => {
   const data = window.SYSTEM_DATA;
   if (!data) return;
-  data.meta.updated = '22. 9. 2026 · 23:40';
+  data.meta.updated = '23. 9. 2026 · 23:42';
 
   const live = data.environments?.find(item => item.label === 'LIVE');
   if (live) {
     live.version = 'v105 · READY';
-    live.note = 'Zákaznícka PWA je v produkcii na builde 20260922-customer-iosproof-v105. Verejná production URL vracia tento build a posledný Vercel production deployment je READY na aktuálnom HEAD customer-portal-production.';
+    live.note = 'Zákaznícka PWA zostáva stabilná na produkčnom builde 20260922-customer-iosproof-v105. Za posledných 24 hodín nebol vytvorený nový customer production deployment.';
     live.bullets = [
       'Vercel production: dpl_Ho4TrEeiU6e7tW61CxA1D3J9FCZT · READY.',
       'Git customer-portal-production: db88da2d75a3584de3430ea77b223eae606eeccb.',
       'Produkčný build: 20260922-customer-iosproof-v105.',
-      'Supabase: customer-portal-api ACTIVE v26; admin-push ACTIVE v11; chvostikovo-frontend ACTIVE v41.'
+      'Dnešné zmeny sa týkali verejného webu; customer PWA sa zbytočne nedeployovala.'
     ];
   }
 
   const preview = data.environments?.find(item => item.label === 'PREVIEW');
   if (preview) {
     preview.version = 'staging/preview · používať pred väčšími zmenami';
-    preview.note = 'Dnešný iOS vaccination flow bol pred produkciou skúšaný cez pracovnú preview vetvu. Ďalšie väčšie customer balíky opäť najprv otestovať a potom publikovať jedným produkčným release.';
-    preview.bullets = ['Nevytvárať sériu drobných produkčných deployov; vizuálne a funkčné úpravy zoskupiť do jedného testovaného balíka.'];
+    preview.note = 'Preview zostáva určené na zoskupenie a otestovanie väčších customer zmien pred jedným vedomým produkčným release.';
+    preview.bullets = ['Pokračovať v pravidle: najprv testovací balík, potom jeden production deploy; nevytvárať drobné customer deploye bez potreby.'];
   }
 
   data.now = {
-    title: 'Customer v105 – očkovania a iOS foto flow',
-    status: 'Produkcia READY',
+    title: 'Web Chvostíkovo – silnejšie CTA a vizuálne prepojenie sekcií',
+    status: 'Nasadené',
     statusTone: 'production',
-    note: 'Hlavnou dnešnou zmenou je nový praktický flow očkovaní: zákazník zadáva platnosť troch povinných očkovaní a prikladá fotografie očkovacieho preukazu. Rezervácia sa pri expirovanom očkovaní zablokuje. iOS výber a spracovanie fotografií bol následne stabilizovaný a produkcia je na v105.',
+    note: 'Za posledných 24 hodín sa nemenila zákaznícka PWA ani jej produkčný backend. Podstatná práca prebehla na verejnom webe Chvostíkovo: mobilné CTA v hero je výraznejšie a medzi FAQ a pásom Prečo využiť psiu škôlku pribudla fotografia škôlkarov, následne kompaktnejšie orezaná a doladená pre desktop.',
     bullets: [
-      'Očkovania: pridané 1–3 fotografie preukazu, náhľady a jednoduchšie zadávanie platnosti bez zbytočného dátumu aplikácie.',
-      'Bezpečnostná logika rezervácie: expirované povinné očkovanie už nespĺňa podmienku pre rezervovanie.',
-      'iOS: foto flow používa bezpečnejší decode/resize/JPEG postup a je chránený proti duplicitnému renewal modalu počas práce s očkovaniami.',
-      'Nastavenia/pravidlá boli vizuálne a funkčne upratané; rezervácie dostali len jemný vizuálny polish.',
-      'Login logo bolo opravené vloženým statickým assetom, aby sa spoľahlivo zobrazilo bez ďalšieho sieťového requestu.',
-      'Ďalší krok: manuálne potvrdiť upload/nahradenie 1–3 fotiek na reálnom iPhone a Androide, blokáciu rezervácie po expirácii a sledovať customer-portal-api usage po v26.'
+      'Hero CTA „Chcem sa informovať o škôlke“ má na mobile výraznejší oranžový vzhľad.',
+      'Pod FAQ pribudla fotografia škôlkarov, ktorá vizuálne prepája recenzie/FAQ s CTA „Prečo využiť psiu škôlku?“.',
+      'Fotografia bola následne znížená a orezaná na kompaktnejšiu výšku; desktop CTA dostalo väčší rozostup medzi nadpisom a tlačidlom.',
+      'Verejný web aktuálne zobrazuje CTA pás aj galériu škôlkarov; customer produkcia ostala na v105 bez nového Vercel deployu.',
+      'Ďalší krok: vizuálne skontrolovať nový webový blok na mobile a desktope a ďalšie customer zmeny opäť zoskupiť pred nasadením.'
     ]
   };
 
   data.recent = [
     {
-      date: '22. 9. 2026',
+      date: '23. 9. 2026',
       app: 'Denný súhrn',
-      title: 'Customer v105 – očkovania, iOS fotografie a produkčný stav',
-      text: 'Customer PWA je na produkčnom builde 20260922-customer-iosproof-v105. Očkovania boli zjednodušené na platnosť troch povinných vakcín a 1–3 fotografie očkovacieho preukazu; expirované očkovanie teraz blokuje rezerváciu. Po prvom nasadení foto flow bol opravený pre iOS spracovanie obrázkov a doladený upload/náhľad, Nastavenia a pravidlá. Login logo je vložené priamo ako statický asset. Aktuálny HEAD customer-portal-production je db88da2d a Vercel deployment dpl_Ho4TrEeiU6e7tW61CxA1D3J9FCZT je READY. Supabase customer-portal-api je ACTIVE v26, admin-push v11 a admin frontend v41. Web Chvostíkovo dostal kompaktný CTA pás Prečo využiť psiu škôlku. Ďalší krok je potvrdiť očkovací foto flow na reálnom iOS/Android zariadení a ďalšie customer zmeny opäť zoskupiť do jedného release.'
+      title: 'Web – hero CTA, fotografia škôlkarov a stabilný customer v105',
+      text: 'Verejný web dostal výraznejšie mobilné CTA v hero a nový vizuálny prechod pod FAQ: fotografiu škôlkarov pred pásom Prečo využiť psiu škôlku. Následne sa fotografia kompaktnejšie orezala a na desktope sa doladil rozostup CTA. Customer PWA sa za posledných 24 hodín nemenila: customer-portal-production zostáva na db88da2d, build 20260922-customer-iosproof-v105 a Vercel deployment dpl_Ho4TrEeiU6e7tW61CxA1D3J9FCZT je READY. Rozhodnutie ostáva zoskupovať ďalšie customer zmeny a nerobiť zbytočné priebežné produkčné deploye.'
     },
-    ...(data.recent || []).filter(item => item.date !== '22. 9. 2026')
+    ...(data.recent || []).filter(item => item.date !== '23. 9. 2026')
   ];
 })();
