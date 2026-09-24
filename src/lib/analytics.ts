@@ -81,15 +81,12 @@ export function trackMetaFormConversion(formType: "informacie" | "prihlaska") {
     page_path: pagePath(),
   };
 
-  trackMetaStandard("Lead", params);
-
-  if (formType === "prihlaska") {
-    trackMetaStandard("CompleteRegistration", params);
-    pushAnalyticsEvent("application_submit", {
-      form_type: formType,
-      page_path: params.page_path,
-    });
+  if (formType === "informacie") {
+    trackMetaStandard("Lead", params);
+    return;
   }
+
+  trackMetaStandard("CompleteRegistration", params);
 }
 
 export function trackFormSubmit(params: {
@@ -109,5 +106,10 @@ export function trackFormSubmit(params: {
     landing_page: params.landingPage || "",
   };
 
-  pushAnalyticsEvent("generate_lead", eventParams);
+  if (params.formType === "informacie") {
+    pushAnalyticsEvent("generate_lead", eventParams);
+    return;
+  }
+
+  pushAnalyticsEvent("application_submit", eventParams);
 }
