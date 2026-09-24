@@ -61,6 +61,10 @@ function initPixel() {
     const fbq = w["fbq"] as ((...args: unknown[]) => void) | undefined;
     if (fbq) {
       fbq("init", PIXEL_ID);
+      // We track meaningful actions explicitly in our own code.
+      // Disable Meta's automatic/codeless button events (e.g. SubscribedButtonClick)
+      // so they do not pollute Events Manager or duplicate our Contact/CTA events.
+      fbq("set", "autoConfig", false, PIXEL_ID);
       fbq("track", "PageView");
       return;
     }
