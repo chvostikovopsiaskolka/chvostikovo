@@ -6,7 +6,7 @@ import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
 import { ReviewReasons, Reviews, VideoSection } from "@/components/site/Reviews";
 import { Care, Why, About, Partners } from "@/components/site/Story";
-import { Requirements, FirstVisit, Pricing, Faq, PracticalFaq } from "@/components/site/Info";
+import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
 import { UsefulInfo } from "@/components/site/UsefulInfo";
 import { ProductSection } from "@/components/site/ProductSection";
 import { InstagramFeed } from "@/components/site/InstagramFeed";
@@ -22,6 +22,17 @@ const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Psia škôlka Košice | Denné stráženie psov | Chvostíkovo";
 const description =
   "Psia škôlka Chvostíkovo v Košiciach – denné stráženie psov s individuálnym prístupom, bezpečným výbehom a celodenným dohľadom.";
+
+const HOME_FAQ_QUESTIONS = new Set([
+  "Bude môj psík počas dňa niekedy sám bez dozoru?",
+  "Ako prebieha prvá návšteva psíka v škôlke?",
+  "Ako zabezpečujete bezpečnosť psíkov v škôlke?",
+  "Čo ak môj psík ešte nikdy nebol v kolektíve psov?",
+  "Prijímate aj šteniatka?",
+  "Hrajú sa psíkovia v škôlke celý deň?",
+]);
+
+const HOME_FAQ = FAQ.filter((item) => HOME_FAQ_QUESTIONS.has(item.q));
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -48,7 +59,7 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          mainEntity: FAQ.map((f) => ({
+          mainEntity: HOME_FAQ.map((f) => ({
             "@type": "Question",
             name: f.q,
             acceptedAnswer: { "@type": "Answer", text: f.a },
@@ -71,7 +82,6 @@ function Index() {
         </div>
         <ReviewReasons />
         <Reviews />
-        <Faq />
         <div className="bg-card">
           <div className="mx-auto h-[120px] max-w-[820px] overflow-hidden sm:h-[165px] lg:h-[180px]" aria-hidden="true">
             <img
@@ -121,11 +131,11 @@ function Index() {
         <Care />
         <InquirySection />
         <Why />
-        <PracticalFaq />
+        <Faq />
         <FirstVisit />
         <Requirements />
-        <About />
         <Pricing />
+        <About />
         <InstagramFeed />
         <Partners />
         <ProductSection />

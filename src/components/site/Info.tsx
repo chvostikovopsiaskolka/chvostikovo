@@ -279,8 +279,8 @@ export function Faq() {
         <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
         <FaqList items={PRIMARY_FAQ} />
         <div className="mt-7 flex justify-center">
-          <a href="#dalsie-otazky" className="btn-coral">
-            Ďalšie časté otázky
+          <a href="/caste-otazky" className="btn-coral">
+            Viac častých otázok
           </a>
         </div>
       </div>
