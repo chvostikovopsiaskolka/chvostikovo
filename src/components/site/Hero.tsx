@@ -4,9 +4,12 @@ import { PHONE } from "@/content/site";
 import heroDogs from "@/assets/hero-dogs.jpg";
 import { ShortForm } from "./Forms";
 import { InfoTicker } from "./InfoTicker";
+import { FormDialog } from "./FormDialog";
+import { trackMarketingInteraction } from "@/lib/analytics";
 
 export function Hero() {
   const [announcementVisible, setAnnouncementVisible] = useState(false);
+  const [inquiryOpen, setInquiryOpen] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setAnnouncementVisible(true), 220);
@@ -71,13 +74,17 @@ export function Hero() {
             </p>
           </div>
 
-          <a
-            href="#informujte-sa"
+          <button
+            type="button"
+            onClick={() => {
+              trackMarketingInteraction("inquiry_cta", "hero_mobile");
+              setInquiryOpen(true);
+            }}
             className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full border border-coral bg-coral px-5 py-2.5 font-display text-sm font-semibold text-primary-foreground shadow-card transition-colors hover:bg-coral-dark"
           >
             Chcem sa informovať o škôlke
             <ChevronDown className="size-4" />
-          </a>
+          </button>
 
           <InfoTicker className="mt-5 mb-0 w-screen mx-[calc((100%-100vw)/2)]" />
         </div>
@@ -123,10 +130,22 @@ export function Hero() {
               Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
             </p>
 
-            <ShortForm />
+            <ShortForm trackingSource="hero_desktop_inline" />
           </div>
         </div>
       </div>
+
+      <FormDialog
+        open={inquiryOpen}
+        onOpenChange={setInquiryOpen}
+        title="Informujte sa o škôlke"
+        subtitle="Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií."
+      >
+        <ShortForm
+          trackingSource="hero_mobile"
+          onSent={() => setTimeout(() => setInquiryOpen(false), 2200)}
+        />
+      </FormDialog>
     </section>
   );
 }

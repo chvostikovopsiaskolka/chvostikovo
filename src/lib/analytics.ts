@@ -75,10 +75,14 @@ export function trackMarketingInteraction(
   pushAnalyticsEvent("view_pricing", params);
 }
 
-export function trackMetaFormConversion(formType: "informacie" | "prihlaska") {
+export function trackMetaFormConversion(
+  formType: "informacie" | "prihlaska",
+  source?: string,
+) {
   const params = {
     content_name: formType,
     page_path: pagePath(),
+    ...(source ? { source } : {}),
   };
 
   if (formType === "informacie") {
@@ -95,6 +99,7 @@ export function trackFormSubmit(params: {
   trafficSource?: string;
   trafficMedium?: string;
   landingPage?: string;
+  ctaSource?: string;
 }) {
   if (typeof window === "undefined") return;
 
@@ -104,6 +109,7 @@ export function trackFormSubmit(params: {
     traffic_source: params.trafficSource || "unknown",
     traffic_medium: params.trafficMedium || "unknown",
     landing_page: params.landingPage || "",
+    cta_source: params.ctaSource || "",
   };
 
   if (params.formType === "informacie") {

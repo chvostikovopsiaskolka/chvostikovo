@@ -6,6 +6,7 @@ import { FormDialog } from "./FormDialog";
 import { ShortForm } from "./Forms";
 import skolkariVideo from "@/assets/skolkari.mp4";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
+import { trackMarketingInteraction } from "@/lib/analytics";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
   const [open, setOpen] = useState(false);
@@ -178,7 +179,10 @@ export function ReviewReasons() {
         <div className="mt-7 flex justify-center">
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              trackMarketingInteraction("inquiry_cta", "why_chvostikovo");
+              setOpen(true);
+            }}
             className="btn-coral inline-flex w-auto max-w-[245px] items-center justify-center px-5 py-3 text-center leading-tight sm:max-w-none sm:px-7"
           >
             Presne toto hľadám pre môjho psíka
@@ -204,7 +208,7 @@ export function ReviewReasons() {
         title="Informujte sa o škôlke"
         subtitle="Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií."
       >
-        <ShortForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
+        <ShortForm trackingSource="why_chvostikovo" onSent={() => setTimeout(() => setOpen(false), 2200)} />
       </FormDialog>
     </section>
   );

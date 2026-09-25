@@ -22,7 +22,13 @@ function attributionPayload() {
   };
 }
 
-export function ShortForm({ onSent }: { onSent?: () => void }) {
+export function ShortForm({
+  onSent,
+  trackingSource,
+}: {
+  onSent?: () => void;
+  trackingSource?: string;
+}) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,8 +58,9 @@ export function ShortForm({ onSent }: { onSent?: () => void }) {
         trafficSource: attribution.traffic_source,
         trafficMedium: attribution.traffic_medium,
         landingPage: attribution.landing_page,
+        ctaSource: trackingSource,
       });
-      trackMetaFormConversion("informacie");
+      trackMetaFormConversion("informacie", trackingSource);
       setSent(true);
       onSent?.();
     } catch {
