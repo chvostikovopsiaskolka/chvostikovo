@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { trackMarketingInteraction } from "@/lib/analytics";
 
 const STORAGE_KEY = "chvostikovo-cookies";
@@ -76,6 +77,7 @@ function initPixel() {
 }
 
 function clickSource(anchor: HTMLAnchorElement) {
+  if (anchor.dataset.trackingSource) return anchor.dataset.trackingSource;
   if (anchor.closest("#informujte-sa")) return "inquiry_section";
   if (anchor.closest("#top")) return "hero";
   if (anchor.closest("#prva-navsteva")) return "first_visit";
@@ -94,6 +96,17 @@ function handleTrackedClick(event: MouseEvent) {
   if (!(anchor instanceof HTMLAnchorElement)) return;
 
   const href = anchor.getAttribute("href") ?? "";
+  const explicitEvent = anchor.dataset.marketingEvent;
+
+  if (explicitEvent === "inquiry_cta") {
+    trackMarketingInteraction("inquiry_cta", clickSource(anchor));
+    return;
+  }
+
+  if (explicitEvent === "view_pricing") {
+    trackMarketingInteraction("view_pricing", clickSource(anchor));
+    return;
+  }
 
   if (href.startsWith("tel:")) {
     trackMarketingInteraction("phone_click", clickSource(anchor));
@@ -112,6 +125,8 @@ function handleTrackedClick(event: MouseEvent) {
 
 export function MetaPixel() {
   const initializedRef = useRef(false);
+  const firstRouteRef = useRef(true);
+  const routeHref = useRouterState({ select: (state) => state.location.href });
 
   useEffect(() => {
     function tryInit() {
@@ -141,6 +156,18 @@ export function MetaPixel() {
       document.removeEventListener("click", handleTrackedClick);
     };
   }, []);
+
+  useEffect(() => {
+    if (firstRouteRef.current) {
+      firstRouteRef.current = false;
+      return;
+    }
+    if (!initializedRef.current || !hasMarketingConsent()) return;
+
+    const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
+      ((...args: unknown[]) => void) | undefined;
+    fbq?.("track", "PageView");
+  }, [routeHref]);
 
   return null;
 }

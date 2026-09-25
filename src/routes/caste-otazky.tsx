@@ -99,11 +99,13 @@ function FrequentlyAskedQuestionsPage() {
                 prihlášku do škôlky.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <a href={`tel:${PHONE}`} className="btn-coral">
+                <a href={`tel:${PHONE}`} data-tracking-source="faq_page" className="btn-coral">
                   {PHONE_PRETTY}
                 </a>
                 <a
                   href="/#kontakt"
+                  data-marketing-event="inquiry_cta"
+                  data-tracking-source="faq_page_contact"
                   className="inline-flex items-center justify-center rounded-full border-2 border-cream/60 px-6 py-3 font-display font-semibold text-cream transition-colors hover:bg-cream hover:text-forest"
                 >
                   Kontaktovať nás

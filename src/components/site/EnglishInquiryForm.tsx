@@ -2,14 +2,18 @@ import { useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
-import { trackFormSubmit } from "@/lib/analytics";
+import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
 
 function sourceRef() {
   if (typeof window === "undefined") return "/en/dog-daycare-kosice";
   return `${window.location.pathname}${window.location.search}` || "/en/dog-daycare-kosice";
 }
 
-export function EnglishInquiryForm() {
+export function EnglishInquiryForm({
+  trackingSource = "english_page",
+}: {
+  trackingSource?: string;
+}) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,11 +54,9 @@ export function EnglishInquiryForm() {
         trafficSource: attribution.source,
         trafficMedium: attribution.medium,
         landingPage: attribution.landing_page,
+        ctaSource: trackingSource,
       });
-
-      const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
-        ((...args: unknown[]) => void) | undefined;
-      fbq?.("track", "Lead", { content_name: "dog_daycare_en" });
+      trackMetaFormConversion("informacie", trackingSource);
 
       setSent(true);
     } catch {

@@ -102,7 +102,12 @@ export const Route = createFileRoute("/strazenie-psov-kosice")({
 
 function CtaLink({ className = "" }: { className?: string }) {
   return (
-    <a href="#informacie" className={`btn-coral ${className}`}>
+    <a
+      href="#informacie"
+      data-marketing-event="inquiry_cta"
+      data-tracking-source="dog_sitting_page_cta"
+      className={`btn-coral ${className}`}
+    >
       Chcem sa informovať o škôlke
     </a>
   );
@@ -141,7 +146,7 @@ function DogDaycarePage() {
               <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
                 Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
               </p>
-              <ShortForm />
+              <ShortForm trackingSource="dog_sitting_page_inline" />
             </div>
           </div>
         </section>

@@ -71,7 +71,12 @@ export const Route = createFileRoute("/psia-skolka-pre-steniatka")({
 
 function CtaLink({ className = "" }: { className?: string }) {
   return (
-    <a href="#informacie" className={`btn-coral ${className}`}>
+    <a
+      href="#informacie"
+      data-marketing-event="inquiry_cta"
+      data-tracking-source="puppy_page_cta"
+      className={`btn-coral ${className}`}
+    >
       Chcem sa informovať o škôlke
     </a>
   );
@@ -111,7 +116,7 @@ function PuppyDaycarePage() {
               <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
                 Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
               </p>
-              <ShortForm />
+              <ShortForm trackingSource="puppy_page_inline" />
             </div>
           </div>
         </section>
