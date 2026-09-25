@@ -6,16 +6,16 @@ import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
 
 const NAV_MOBILE_BEFORE_ABOUT = [
-  { href: "#priestory", label: "Priestory" },
   { href: "#recenzie", label: "Recenzie" },
+  { href: "/caste-otazky", label: "Časté otázky" },
+  { href: "#priestory", label: "Priestory" },
   { href: "#starostlivost", label: "Ako sa postaráme" },
   { href: "#preco", label: "Prečo škôlka" },
+  { href: "#podmienky", label: "Podmienky" },
 ];
 
 const NAV_MOBILE_AFTER_INFO = [
-  { href: "#podmienky", label: "Podmienky" },
   { href: "#cennik", label: "Cenník" },
-  { href: "/caste-otazky", label: "Časté otázky" },
   { href: "#kontakt", label: "Kontakt" },
 ];
 
@@ -33,8 +33,6 @@ const NAV_DESKTOP_AFTER_ABOUT = [
 export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolean }) {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const [productsOpen, setProductsOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
 
   const sectionHref = (href: string) => (href.startsWith("/") ? href : homeSectionLinks ? `/${href}` : href);
@@ -49,8 +47,6 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
 
   const closeMobileMenu = () => {
     setMenuOpen(false);
-    setAboutOpen(false);
-    setProductsOpen(false);
     setInfoOpen(false);
   };
 
@@ -112,26 +108,25 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
               <a key={item.href} href={sectionHref(item.href)} onClick={closeMobileMenu} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
             ))}
 
-            <button type="button" aria-expanded={aboutOpen} onClick={() => setAboutOpen((value) => !value)} className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">
-              O nás <ChevronDown className={`size-4 transition-transform ${aboutOpen ? "rotate-180" : ""}`} />
-            </button>
-            {aboutOpen && (
-              <div className="mx-2 mb-2 rounded-2xl bg-secondary/45 p-2">
-                <a href={sectionHref("#o-nas")} onClick={closeMobileMenu} className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest hover:bg-card">O nás</a>
-                <div className="flex items-center rounded-xl hover:bg-card">
-                  <a href="/produkty" onClick={closeMobileMenu} className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2.5 font-display text-sm font-semibold text-forest"><Package className="size-4 shrink-0 text-coral" /> Naše produkty</a>
-                  <button type="button" aria-label="Rozbaliť produkty" aria-expanded={productsOpen} onClick={() => setProductsOpen((value) => !value)} className="flex size-10 shrink-0 items-center justify-center text-forest">
-                    <ChevronDown className={`size-4 transition-transform ${productsOpen ? "rotate-180" : ""}`} />
-                  </button>
-                </div>
-                {productsOpen && (
-                  <div className="ml-3 border-l-2 border-coral/20 pl-2">
-                    <a href="/stojan-na-misky-pre-psa" onClick={closeMobileMenu} className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest hover:bg-card">Stojany na misky</a>
-                    <a href="/target-na-cvicenie-pre-psov" onClick={closeMobileMenu} className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest hover:bg-card">Target na cvičenie</a>
-                  </div>
-                )}
-              </div>
-            )}
+            <a
+              href={sectionHref("#o-nas")}
+              onClick={closeMobileMenu}
+              className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
+            >
+              O nás
+            </a>
+
+            {NAV_MOBILE_AFTER_INFO.slice(0, 1).map((item) => (
+              <a key={item.href} href={sectionHref(item.href)} onClick={closeMobileMenu} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
+            ))}
+
+            <a
+              href="/produkty"
+              onClick={closeMobileMenu}
+              className="flex items-center gap-2 rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
+            >
+              <Package className="size-4 shrink-0 text-coral" /> Naše produkty
+            </a>
 
             <button type="button" aria-expanded={infoOpen} onClick={() => setInfoOpen((value) => !value)} className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">
               Užitočné informácie <ChevronDown className={`size-4 transition-transform ${infoOpen ? "rotate-180" : ""}`} />
@@ -144,7 +139,7 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
               </div>
             )}
 
-            {NAV_MOBILE_AFTER_INFO.map((item) => (
+            {NAV_MOBILE_AFTER_INFO.slice(1).map((item) => (
               <a key={item.href} href={sectionHref(item.href)} onClick={closeMobileMenu} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
             ))}
           </nav>
@@ -152,7 +147,7 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
         </div>
       )}
 
-      <FormDialog open={open} onOpenChange={setOpen} title="Prihlás svojho psíka ešte dnes" subtitle="Vyplňte formulár, v ktorom nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky.">
+      <FormDialog open={open} onOpenChange={setOpen} title="Prihlás svojho psíka ešte dnes" subtitle="Vyplňte prihlášku do škôlky, v ktorej nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky.">
         <LongForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
       </FormDialog>
     </header>
