@@ -12,7 +12,7 @@ import { ProductSection } from "@/components/site/ProductSection";
 import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
-import { InquirySection } from "@/components/site/InquirySection";
+import { InquiryCtaSection, InquirySection } from "@/components/site/InquirySection";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import schoolmatesCta from "@/assets/skolkari-web-4.png";
 import { FAQ } from "@/content/site";
@@ -116,9 +116,10 @@ function Index() {
         </section>
         <DaycarePhotoCarousel />
         <VideoSection />
-        <InquirySection />
+        <InquiryCtaSection />
         <Gallery />
         <Care />
+        <InquirySection />
         <Why />
         <PracticalFaq />
         <FirstVisit />

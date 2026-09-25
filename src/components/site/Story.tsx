@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Home, Zap, Dog, Check } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
-import { LongForm } from "./Forms";
+import { LongForm, ShortForm } from "./Forms";
 import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import dogsPair from "@/assets/dogs-pair.jpg";
@@ -12,6 +12,7 @@ import wetpet from "@/assets/partner-wetpet.png";
 import bellacord from "@/assets/partner-bellacord.png";
 import coursing from "@/assets/partner-coursing.png";
 import lolkio from "@/assets/partner-lolkio.png";
+import { trackMarketingInteraction } from "@/lib/analytics";
 
 const whyIcons = [Home, Zap, Dog];
 
@@ -33,6 +34,8 @@ function renderText(text: string) {
 
 
 export function Care() {
+  const [infoOpen, setInfoOpen] = useState(false);
+
   return (
     <section id="starostlivost" className="scroll-mt-24 py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4">
@@ -57,7 +60,32 @@ export function Care() {
             </article>
           ))}
         </div>
+
+        <div className="mt-7 hidden justify-center lg:flex">
+          <button
+            type="button"
+            onClick={() => {
+              trackMarketingInteraction("inquiry_cta", "care_desktop");
+              setInfoOpen(true);
+            }}
+            className="btn-coral"
+          >
+            Chcem zistiť viac o škôlke
+          </button>
+        </div>
       </div>
+
+      <FormDialog
+        open={infoOpen}
+        onOpenChange={setInfoOpen}
+        title="Informujte sa o škôlke"
+        subtitle="Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií."
+      >
+        <ShortForm
+          trackingSource="care_desktop"
+          onSent={() => setTimeout(() => setInfoOpen(false), 2200)}
+        />
+      </FormDialog>
     </section>
   );
 }

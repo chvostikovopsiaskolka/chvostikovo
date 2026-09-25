@@ -240,6 +240,14 @@ function FaqList({ items }: { items: Array<(typeof FAQ)[number]> }) {
           {open === i && (
             <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80">
               <p className="whitespace-pre-line">{f.a}</p>
+              {f.q === "Bude môj psík počas dňa niekedy sám bez dozoru?" && (
+                <a
+                  href="#starostlivost"
+                  className="mt-4 inline-flex font-display text-sm font-semibold text-coral underline-offset-4 hover:underline"
+                >
+                  Pozrieť, ako sa o psíkov staráme počas dňa →
+                </a>
+              )}
               {f.q === "Prijímate aj šteniatka?" && (
                 <a
                   href="/psia-skolka-pre-steniatka"
@@ -270,6 +278,11 @@ export function Faq() {
       <div className="mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
         <FaqList items={PRIMARY_FAQ} />
+        <div className="mt-7 flex justify-center">
+          <a href="#dalsie-otazky" className="btn-coral">
+            Ďalšie časté otázky
+          </a>
+        </div>
       </div>
     </section>
   );
@@ -277,7 +290,7 @@ export function Faq() {
 
 export function PracticalFaq() {
   return (
-    <section className="bg-secondary/45 py-12 sm:py-14">
+    <section id="dalsie-otazky" className="scroll-mt-24 bg-secondary/45 py-12 sm:py-14">
       <div className="mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Ďalšie časté otázky</h2>
         <FaqList items={PRACTICAL_FAQ} />

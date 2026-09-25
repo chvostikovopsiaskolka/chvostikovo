@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
-import { MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Car, MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { GALLERY, MAP_LINK } from "@/content/site";
+import { Collapse } from "./Collapse";
 
 const HYGIENE = [
   {
@@ -42,14 +43,19 @@ export function Gallery() {
               vonkajší výbeh s rozlohou približne 80 m² na hry, šantenie a oddych.
             </p>
           </div>
-          <a
-            href={MAP_LINK}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 self-start rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-forest"
-          >
-            <MapPin className="size-4" /> Poľská 6, Košice
-          </a>
+          <div className="flex flex-wrap items-center gap-2 self-start sm:justify-end">
+            <a
+              href={MAP_LINK}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-forest"
+            >
+              <MapPin className="size-4" /> Poľská 6, Košice
+            </a>
+            <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-forest">
+              <Car className="size-4 text-coral" /> Bezplatné parkovanie pri škôlke
+            </span>
+          </div>
         </div>
 
         <div className="relative mt-8">
@@ -104,18 +110,17 @@ export function Gallery() {
           </h3>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {HYGIENE.map((h) => (
-              <div
+              <Collapse
                 key={h.title}
-                className="rounded-3xl bg-card p-5 text-left shadow-card sm:p-6"
+                title={h.title}
+                icon={
+                  <span className="text-xl" aria-hidden>
+                    {h.icon}
+                  </span>
+                }
               >
-                <span className="text-2xl" aria-hidden>
-                  {h.icon}
-                </span>
-                <h4 className="mt-3 font-display text-base font-bold text-forest sm:text-lg">
-                  {h.title}
-                </h4>
-                <p className="mt-2 text-sm text-forest/80">{h.text}</p>
-              </div>
+                {h.text}
+              </Collapse>
             ))}
           </div>
         </div>
