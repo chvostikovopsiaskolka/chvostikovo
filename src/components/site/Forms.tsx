@@ -48,6 +48,7 @@ export function ShortForm({
         consent: true,
         source_ref,
         ...attribution,
+        cta_source: trackingSource,
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: String(fd.get("telefon") ?? "").trim(),
         zaujem: String(fd.get("zaujem") ?? ""),

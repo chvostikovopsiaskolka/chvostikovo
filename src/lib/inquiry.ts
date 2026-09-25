@@ -14,6 +14,7 @@ const attributionSchema = z.object({
   utm_campaign: z.string().max(300).optional(),
   utm_term: z.string().max(300).optional(),
   utm_content: z.string().max(300).optional(),
+  cta_source: z.string().max(200).optional(),
 });
 
 export const shortSchema = z.object({
@@ -56,6 +57,7 @@ function attributionFields(data: InquiryInput): Array<{ label: string; value: st
     { label: "UTM campaign", value: data.utm_campaign || "" },
     { label: "UTM term", value: data.utm_term || "" },
     { label: "UTM content", value: data.utm_content || "" },
+    { label: "CTA source", value: data.cta_source || "" },
   ];
 }
 
@@ -98,6 +100,14 @@ export function buildDbPayload(data: InquiryInput) {
       interest_reason: data.zaujem,
       consent: true,
       source_ref,
+      landing_page: data.landing_page || "",
+      referrer: data.referrer || "",
+      traffic_source: data.traffic_source || "",
+      traffic_medium: data.traffic_medium || "",
+      utm_campaign: data.utm_campaign || "",
+      utm_term: data.utm_term || "",
+      utm_content: data.utm_content || "",
+      cta_source: data.cta_source || "",
       raw_payload,
     };
   }
