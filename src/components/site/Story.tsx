@@ -131,7 +131,7 @@ export function Why() {
         open={open}
         onOpenChange={setOpen}
         title="Prihlás svojho psíka ešte dnes"
-        subtitle="Vyplňte formulár, v ktorom nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky."
+        subtitle="Vyplňte prihlášku do škôlky, v ktorej nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky."
       >
         <LongForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
       </FormDialog>
