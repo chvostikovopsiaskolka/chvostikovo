@@ -249,11 +249,17 @@ const oldEnglishReviewsCopy =
   '<p className="mx-auto mt-3 max-w-2xl text-sm text-forest/65">Selected reviews translated from Slovak.</p>';
 const newEnglishReviewsCopy = `<p className="mx-auto mt-3 flex max-w-2xl flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-forest/65">\n                <span className="tracking-[0.12em] text-coral" aria-hidden="true">★★★★★</span>\n                <span>5.0 · 5-star reviews from 41 customers on Google</span>\n              </p>`;
 
-if (!englishReviewsSource.includes(oldEnglishReviewsCopy)) {
-  throw new Error("Expected English reviews subtitle was not found");
+if (englishReviewsSource.includes(oldEnglishReviewsCopy)) {
+  englishReviewsSource = englishReviewsSource.replace(oldEnglishReviewsCopy, newEnglishReviewsCopy);
+  await writeFile(englishReviewsPath, englishReviewsSource);
+} else if (
+  englishReviewsSource.includes("5.0 on Google") ||
+  englishReviewsSource.includes("5-star reviews")
+) {
+  console.log("English Google review summary is already current.");
+} else {
+  throw new Error("Expected English reviews summary was not found");
 }
-englishReviewsSource = englishReviewsSource.replace(oldEnglishReviewsCopy, newEnglishReviewsCopy);
-await writeFile(englishReviewsPath, englishReviewsSource);
 
 console.log(
   "Product images restored; realizations extended; stand inquiry moved to modal; English Google review summary updated.",
