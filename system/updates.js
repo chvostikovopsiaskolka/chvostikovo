@@ -66,7 +66,7 @@
 (() => {
   const data = window.SYSTEM_DATA;
   if (!data) return;
-  data.meta.updated = '23. 9. 2026 · 23:42';
+  data.meta.updated = '24. 9. 2026 · konsolidovaný update';
 
   const live = data.environments?.find(item => item.label === 'LIVE');
   if (live) {
@@ -88,20 +88,26 @@
   }
 
   data.now = {
-    title: 'Web Chvostíkovo – silnejšie CTA a vizuálne prepojenie sekcií',
+    title: 'Marketingové meranie webu + customer v107',
     status: 'Nasadené',
     statusTone: 'production',
-    note: 'Za posledných 24 hodín sa nemenila zákaznícka PWA ani jej produkčný backend. Podstatná práca prebehla na verejnom webe Chvostíkovo: mobilné CTA v hero je výraznejšie a medzi FAQ a pásom Prečo využiť psiu škôlku pribudla fotografia škôlkarov, následne kompaktnejšie orezaná a doladená pre desktop.',
+    note: 'Za posledných 24 hodín sa konsolidovali dve podstatné oblasti: customer PWA postúpila na v107 s bezpečnejším onboardingom nového účtu a verejný web dostal presnejšie meranie marketingového funnelu bez duplicitných Meta udalostí.',
     bullets: [
-      'Hero CTA „Chcem sa informovať o škôlke“ má na mobile výraznejší oranžový vzhľad.',
-      'Pod FAQ pribudla fotografia škôlkarov, ktorá vizuálne prepája recenzie/FAQ s CTA „Prečo využiť psiu škôlku?“.',
-      'Fotografia bola následne znížená a orezaná na kompaktnejšiu výšku; desktop CTA dostalo väčší rozostup medzi nadpisom a tlačidlom.',
-      'Verejný web aktuálne zobrazuje CTA pás aj galériu škôlkarov; customer produkcia ostala na v105 bez nového Vercel deployu.',
-      'Ďalší krok: vizuálne skontrolovať nový webový blok na mobile a desktope a ďalšie customer zmeny opäť zoskupiť pred nasadením.'
+      'Customer production: v107 · READY; nový účet bez prideleného psíka zostáva v blokujúcom čakacom stave namiesto sprístupnenia rezervácií.',
+      'Predchádzajúca v106 upravila pravidlá, mobilný editor očkovaní a kontrolu expirovaného povinného očkovania.',
+      'Web: informačný formulár sa meria oddelene ako Lead / generate_lead a prihláška ako CompleteRegistration / application_submit.',
+      'Automatické Meta button eventy boli vypnuté, aby sa predišlo duplicitnému meraniu; sledovanie CTA/telefónu/cenníka a formulárov ostáva explicitné.',
+      'Ďalší krok: regresný test v107 na Android/iPhone cez registráciu → čakanie → pridelenie psa → onboarding a kontrola Meta/GA4 eventov bez duplicít.'
     ]
   };
 
   data.recent = [
+    {
+      date: '24. 9. 2026',
+      app: 'Denný súhrn',
+      title: 'Customer v107 + oddelené webové konverzie',
+      text: 'Customer produkcia postúpila na v107: onboarding nového účtu bez prideleného psa je blokovaný čakacím stavom; v106 predtým upravila pravidlá, mobilný editor očkovaní a expirované povinné očkovania. Na verejnom webe sa marketingový funnel meria explicitne a oddelene: informačný formulár ako Lead / generate_lead, prihláška ako CompleteRegistration / application_submit; automatické Meta button eventy sú vypnuté kvôli duplicitám. Ďalší krok je regresný test onboarding flow na Android/iPhone a overenie Meta/GA4 eventov.'
+    },
     {
       date: '23. 9. 2026',
       app: 'Denný súhrn',
