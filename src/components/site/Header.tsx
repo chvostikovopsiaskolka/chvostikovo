@@ -51,10 +51,10 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3">
-      <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/95 px-4 py-2 shadow-soft backdrop-blur-md sm:px-6">
+    <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2.5 min-[390px]:px-3 min-[390px]:pt-3">
+      <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-1 rounded-full bg-card/95 px-2.5 py-2 shadow-soft backdrop-blur-md min-[390px]:gap-1.5 min-[390px]:px-4 sm:gap-3 sm:px-6">
         <a href={logoHref} className="shrink-0">
-          <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-5 w-auto sm:h-6" />
+          <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-[17px] w-auto min-[390px]:h-5 sm:h-6" />
         </a>
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 lg:flex">
@@ -92,10 +92,10 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
           ))}
         </nav>
 
-        <div className="flex items-center gap-1.5 sm:gap-3">
-          <a href="/en/dog-daycare-kosice" lang="en" aria-label="English information" className="inline-flex rounded-full bg-secondary px-2.5 py-2 font-display text-[0.68rem] font-semibold text-forest transition-colors hover:bg-coral-soft sm:px-3 sm:text-xs">EN</a>
-          <button type="button" onClick={() => setOpen(true)} className="btn-coral px-3 py-2 text-[0.65rem] leading-none whitespace-nowrap sm:px-6 sm:py-3 sm:text-sm">Prihláška do škôlky</button>
-          <button type="button" aria-label="Otvoriť menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition-colors hover:bg-coral-soft lg:hidden">
+        <div className="flex items-center gap-1 min-[390px]:gap-1.5 sm:gap-3">
+          <a href="/en/dog-daycare-kosice" lang="en" aria-label="English information" className="inline-flex rounded-full bg-secondary px-2 py-1.5 font-display text-[0.6rem] font-semibold text-forest transition-colors hover:bg-coral-soft min-[390px]:px-2.5 min-[390px]:py-2 min-[390px]:text-[0.68rem] sm:px-3 sm:text-xs">EN</a>
+          <button type="button" onClick={() => setOpen(true)} className="btn-coral px-2.5 py-2 text-[0.58rem] leading-none whitespace-nowrap min-[390px]:px-3 min-[390px]:text-[0.65rem] sm:px-6 sm:py-3 sm:text-sm">Prihláška do škôlky</button>
+          <button type="button" aria-label="Otvoriť menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition-colors hover:bg-coral-soft min-[390px]:size-9 lg:hidden">
             {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>

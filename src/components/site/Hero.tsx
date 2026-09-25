@@ -44,32 +44,30 @@ export function Hero() {
 
         {/* Mobile layout */}
         <div className="lg:hidden">
-          <div className="mb-4 h-7 sm:h-8">
+          <div className="mb-2.5 h-6 min-[390px]:mb-4 min-[390px]:h-7 sm:h-8">
             <p
-              className={`mx-auto max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft transition-all duration-700 sm:px-4 sm:text-sm ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"}`}
+              className={`mx-auto max-w-fit whitespace-nowrap rounded-full bg-white/95 px-2.5 py-0.5 text-[10px] font-bold text-coral-dark shadow-soft transition-all duration-700 min-[390px]:px-3 min-[390px]:py-1 min-[390px]:text-xs sm:px-4 sm:text-sm ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"}`}
               aria-hidden={!announcementVisible}
             >
               🐾 Prijímame nových škôlkarov
             </p>
           </div>
 
-          <h1 className="text-[34px] leading-[1.05] text-forest sm:text-5xl">
-            <span className="text-coral-dark">Psia škôlka</span>
-            <br />
-            v Košiciach, ktorú si
-            <br />
-            váš psík zamiluje
+          <h1 className="text-[26px] leading-[1.03] tracking-[-0.02em] text-forest min-[350px]:text-[29px] min-[390px]:text-[34px] sm:text-5xl">
+            <span className="block whitespace-nowrap text-coral-dark">Psia škôlka</span>
+            <span className="block whitespace-nowrap">v Košiciach, ktorú si</span>
+            <span className="block whitespace-nowrap">váš psík zamiluje</span>
           </h1>
 
-          <p className="mx-auto mt-4 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:px-4 sm:text-sm">
+          <p className="mx-auto mt-3 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-2.5 py-0.5 text-[10px] font-bold text-coral-dark shadow-soft min-[390px]:mt-4 min-[390px]:px-3 min-[390px]:py-1 min-[390px]:text-xs sm:px-4 sm:text-sm">
             Denná starostlivosť o stredných a veľkých psíkov
           </p>
 
-          <div className="mx-auto mt-5 max-w-xl rounded-2xl bg-white/95 p-4 text-forest shadow-soft">
-            <p className="font-display text-base font-bold sm:text-lg">
+          <div className="mx-auto mt-3.5 max-w-xl rounded-2xl bg-white/95 p-3 text-forest shadow-soft min-[390px]:mt-5 min-[390px]:p-4">
+            <p className="font-display text-sm font-bold min-[390px]:text-base sm:text-lg">
               Váš psík už nemusí tráviť deň sám doma.
             </p>
-            <p className="mt-2 text-base font-medium leading-relaxed text-forest/90">
+            <p className="mt-1.5 text-sm font-medium leading-snug text-forest/90 min-[390px]:mt-2 min-[390px]:text-base min-[390px]:leading-relaxed">
               Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným dohľadom.
             </p>
           </div>
@@ -80,13 +78,13 @@ export function Hero() {
               trackMarketingInteraction("inquiry_cta", "hero_mobile");
               setInquiryOpen(true);
             }}
-            className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full border border-coral bg-coral px-5 py-2.5 font-display text-sm font-semibold text-primary-foreground shadow-card transition-colors hover:bg-coral-dark"
+            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full border border-coral bg-coral px-4 py-2 font-display text-xs font-semibold text-primary-foreground shadow-card transition-colors hover:bg-coral-dark min-[390px]:mt-4 min-[390px]:px-5 min-[390px]:py-2.5 min-[390px]:text-sm"
           >
             Chcem sa informovať o škôlke
             <ChevronDown className="size-4" />
           </button>
 
-          <InfoTicker className="mt-5 mb-0 w-screen mx-[calc((100%-100vw)/2)]" />
+          <InfoTicker className="mt-3.5 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-5" compact />
         </div>
 
         {/* Desktop layout */}

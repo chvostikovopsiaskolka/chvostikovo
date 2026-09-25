@@ -240,14 +240,6 @@ function FaqList({ items }: { items: Array<(typeof FAQ)[number]> }) {
           {open === i && (
             <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80">
               <p className="whitespace-pre-line">{f.a}</p>
-              {f.q === "Bude môj psík počas dňa niekedy sám bez dozoru?" && (
-                <a
-                  href="#starostlivost"
-                  className="mt-4 inline-flex font-display text-sm font-semibold text-coral underline-offset-4 hover:underline"
-                >
-                  Pozrieť, ako sa o psíkov staráme počas dňa →
-                </a>
-              )}
               {f.q === "Prijímate aj šteniatka?" && (
                 <a
                   href="/psia-skolka-pre-steniatka"
