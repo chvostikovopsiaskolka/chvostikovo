@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260924-customer-pending-v107';
+const APP_BUILD='20260925-customer-pending-v108';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -83,7 +83,10 @@ function bootstrapCore(showSpinner=true){
   if(bootstrapInFlight)return bootstrapInFlight;
   if(showSpinner)loading(true);
   const run=(async()=>{try{
-    const d=await api();state.data=d;if(!state.selectedDogId&&d.dogs?.length)state.selectedDogId=Number(d.dogs[0].id);
+    const d=await api();state.data=d;
+    const hasAssignedDog=!!d.dogs?.length;
+    document.documentElement.classList.toggle('customer-awaiting-dog-v107',!hasAssignedDog);
+    if(!state.selectedDogId&&hasAssignedDog)state.selectedDogId=Number(d.dogs[0].id);
     await preloadDogVisualV56(d);showApp();renderAll();registerSW();startCustomerLive();
     const secondary=[loadAnnouncements()];if(typeof ensurePushState==='function')secondary.push(ensurePushState());
     Promise.allSettled(secondary).then(()=>{if(state.data&&typeof applyPushToggle==='function')applyPushToggle()});

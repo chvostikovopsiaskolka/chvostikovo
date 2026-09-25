@@ -1383,3 +1383,38 @@ html.customer-awaiting-dog-v107 #appView{
   .waiting-dog-modal-v75{padding:calc(18px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom))!important}
   .waiting-dog-modal-v75 .waiting-dog-card-v75{padding:24px 18px 22px!important}
 }
+
+
+/* v108 – no-flash pending shell + soft paw background */
+.waiting-dog-modal-v75{
+  isolation:isolate!important;
+  overflow:hidden!important;
+}
+.waiting-dog-modal-v75::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background-repeat:no-repeat;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23efb2d0'%3E%3Cellipse cx='32' cy='39' rx='16' ry='13'/%3E%3Ccircle cx='14' cy='23' r='7'/%3E%3Ccircle cx='27' cy='14' r='7'/%3E%3Ccircle cx='41' cy='14' r='7'/%3E%3Ccircle cx='52' cy='25' r='7'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23efb2d0'%3E%3Cellipse cx='32' cy='39' rx='16' ry='13'/%3E%3Ccircle cx='14' cy='23' r='7'/%3E%3Ccircle cx='27' cy='14' r='7'/%3E%3Ccircle cx='41' cy='14' r='7'/%3E%3Ccircle cx='52' cy='25' r='7'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23efb2d0'%3E%3Cellipse cx='32' cy='39' rx='16' ry='13'/%3E%3Ccircle cx='14' cy='23' r='7'/%3E%3Ccircle cx='27' cy='14' r='7'/%3E%3Ccircle cx='41' cy='14' r='7'/%3E%3Ccircle cx='52' cy='25' r='7'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23efb2d0'%3E%3Cellipse cx='32' cy='39' rx='16' ry='13'/%3E%3Ccircle cx='14' cy='23' r='7'/%3E%3Ccircle cx='27' cy='14' r='7'/%3E%3Ccircle cx='41' cy='14' r='7'/%3E%3Ccircle cx='52' cy='25' r='7'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23efb2d0'%3E%3Cellipse cx='32' cy='39' rx='16' ry='13'/%3E%3Ccircle cx='14' cy='23' r='7'/%3E%3Ccircle cx='27' cy='14' r='7'/%3E%3Ccircle cx='41' cy='14' r='7'/%3E%3Ccircle cx='52' cy='25' r='7'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23efb2d0'%3E%3Cellipse cx='32' cy='39' rx='16' ry='13'/%3E%3Ccircle cx='14' cy='23' r='7'/%3E%3Ccircle cx='27' cy='14' r='7'/%3E%3Ccircle cx='41' cy='14' r='7'/%3E%3Ccircle cx='52' cy='25' r='7'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:78px 78px,52px 52px,92px 92px,44px 44px,68px 68px,48px 48px;
+  background-position:
+    7% 15%,
+    88% 10%,
+    83% 72%,
+    12% 77%,
+    18% 48%,
+    92% 42%;
+  opacity:.18;
+}
+.waiting-dog-modal-v75 .waiting-dog-card-v75{
+  position:relative!important;
+  z-index:1!important;
+}
