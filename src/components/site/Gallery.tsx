@@ -108,7 +108,7 @@ export function Gallery() {
           <h3 className="section-title text-center text-xl sm:text-2xl">
             Ako zabezpečujeme čistotu priestorov?
           </h3>
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="mt-6 grid items-start gap-4 sm:grid-cols-3">
             {HYGIENE.map((h) => (
               <Collapse
                 key={h.title}
