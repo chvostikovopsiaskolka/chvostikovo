@@ -57,7 +57,7 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
           <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-[17px] w-auto min-[390px]:h-5 sm:h-6" />
         </a>
 
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 lg:flex">
+        <nav className="absolute left-[48%] hidden -translate-x-1/2 items-center gap-6 lg:flex">
           {NAV_DESKTOP_BEFORE_ABOUT.map((item) => (
             <a key={item.href} href={sectionHref(item.href)} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">
               {item.label}
