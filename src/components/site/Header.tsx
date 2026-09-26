@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronRight, Menu, Package, Phone, X } from "lucide-react";
+import { ChevronDown, Menu, Package, Phone, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { PHONE } from "@/content/site";
 import { FormDialog } from "./FormDialog";
@@ -64,28 +64,19 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
             </a>
           ))}
 
-          <div className="group relative">
-            <a href={sectionHref("#o-nas")} className="flex items-center gap-1 font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">
-              O nás <ChevronDown className="size-3.5 transition-transform group-hover:rotate-180" />
-            </a>
-            <div className="invisible absolute top-full left-1/2 z-50 w-40 -translate-x-1/2 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-              <div className="rounded-2xl bg-card p-1.5 shadow-soft ring-1 ring-forest/5">
-                <a href={sectionHref("#o-nas")} className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">O nás</a>
-                <div className="group/products relative">
-                  <a href="/produkty" className="flex items-center justify-between gap-1 rounded-xl px-3 py-2 font-display text-xs font-semibold whitespace-nowrap text-forest transition-colors hover:bg-secondary hover:text-coral">
-                    <span>Naše produkty</span>
-                    <ChevronRight className="size-3.5 shrink-0" />
-                  </a>
-                  <div className="invisible absolute top-0 left-full z-50 w-48 pl-2 opacity-0 transition group-hover/products:visible group-hover/products:opacity-100 group-focus-within/products:visible group-focus-within/products:opacity-100">
-                    <div className="rounded-2xl bg-card p-1.5 shadow-soft ring-1 ring-forest/5">
-                      <a href="/stojan-na-misky-pre-psa" className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">Stojany na misky</a>
-                      <a href="/target-na-cvicenie-pre-psov" className="block rounded-xl px-3 py-2.5 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">Target na cvičenie</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <a
+            href={sectionHref("#o-nas")}
+            className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
+          >
+            O nás
+          </a>
+
+          <a
+            href="/produkty"
+            className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
+          >
+            Produkty
+          </a>
 
           {NAV_DESKTOP_AFTER_ABOUT.map((item) => (
             <a key={item.href} href={sectionHref(item.href)} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">{item.label}</a>

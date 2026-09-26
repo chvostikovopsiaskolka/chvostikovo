@@ -67,18 +67,18 @@ export function CookieBanner() {
   if (!open) return null;
 
   return (
-    <div className="fixed right-0 bottom-0 z-50 p-2 sm:p-4">
-      <div className="w-[calc(100vw-1rem)] max-w-xs rounded-2xl border border-cream/20 bg-forest p-3 text-cream shadow-2xl sm:max-w-sm sm:rounded-3xl sm:p-4">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-2 pb-2 sm:px-5 sm:pb-6">
+      <div className="pointer-events-auto max-h-[calc(100vh-1rem)] w-full max-w-4xl overflow-y-auto rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:p-6">
         <div className="flex items-start gap-2">
-          <div className="flex-1">
-            <p className="font-display text-sm font-semibold sm:text-base">
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-lg font-bold sm:text-xl">
               {isEnglish ? "We use cookies" : "Používame cookies"}
             </p>
-            <p className="mt-0.5 text-xs text-cream/80 sm:text-sm">
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-forest/75 sm:text-base">
               {isEnglish
                 ? "We use cookies to keep the website working properly and to improve your experience. "
                 : "Používame cookies na správne fungovanie stránky a zlepšenie vašej skúsenosti. "}
-              <Link to={isEnglish ? "/en/cookies" : "/cookies"} className="underline underline-offset-2 hover:text-coral">
+              <Link to={isEnglish ? "/en/cookies" : "/cookies"} className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark">
                 {isEnglish ? "Cookie policy" : "Pravidlá používania cookies"}
               </Link>
             </p>
@@ -87,20 +87,20 @@ export function CookieBanner() {
             type="button"
             onClick={() => setOpen(false)}
             aria-label={isEnglish ? "Close cookie banner" : "Zavrieť banner"}
-            className="flex size-6 shrink-0 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral sm:size-8"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition hover:bg-coral hover:text-white sm:size-9"
           >
-            <X className="size-3 sm:size-4" />
+            <X className="size-4" />
           </button>
         </div>
 
         {showDetails && (
-          <div className="mt-2 space-y-2 rounded-xl bg-cream/10 p-2 sm:mt-3 sm:space-y-3 sm:rounded-2xl sm:p-3">
+          <div className="mt-4 grid gap-3 rounded-2xl bg-secondary/70 p-3 sm:grid-cols-3 sm:p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold sm:text-sm">
+                <p className="text-sm font-semibold text-forest">
                   {isEnglish ? "Necessary cookies" : "Nevyhnutné cookies"}
                 </p>
-                <p className="text-[0.65rem] text-cream/70 sm:text-xs">
+                <p className="mt-0.5 text-xs text-forest/65">
                   {isEnglish ? "Required for the basic operation of the website." : "Potrebné na základné fungovanie stránky."}
                 </p>
               </div>
@@ -114,10 +114,10 @@ export function CookieBanner() {
             </div>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold sm:text-sm">
+                <p className="text-sm font-semibold text-forest">
                   {isEnglish ? "Analytics cookies" : "Analytické cookies"}
                 </p>
-                <p className="text-[0.65rem] text-cream/70 sm:text-xs">
+                <p className="mt-0.5 text-xs text-forest/65">
                   {isEnglish ? "Help us understand how visitors use the website." : "Pomáhajú nám pochopiť, ako používate stránku."}
                 </p>
               </div>
@@ -131,10 +131,10 @@ export function CookieBanner() {
             </div>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold sm:text-sm">
+                <p className="text-sm font-semibold text-forest">
                   {isEnglish ? "Marketing cookies" : "Marketingové cookies"}
                 </p>
-                <p className="text-[0.65rem] text-cream/70 sm:text-xs">
+                <p className="mt-0.5 text-xs text-forest/65">
                   {isEnglish ? "Used to measure advertising performance and relevant content." : "Na meranie účinnosti reklám a relevantný obsah."}
                 </p>
               </div>
@@ -149,11 +149,11 @@ export function CookieBanner() {
           </div>
         )}
 
-        <div className="mt-2 flex flex-col gap-1.5 sm:mt-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+        <div className="mt-4 flex flex-col gap-2 sm:mt-5 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
           <button
             type="button"
             onClick={acceptAll}
-            className="rounded-full bg-coral px-3 py-1.5 font-display text-xs font-semibold text-primary-foreground transition hover:bg-coral/90 sm:px-4 sm:py-2 sm:text-sm"
+            className="order-1 rounded-full bg-coral px-6 py-3 font-display text-sm font-semibold text-primary-foreground shadow-card transition hover:bg-coral-dark sm:order-2 sm:min-w-40 sm:text-base"
           >
             {isEnglish ? "Accept all" : "Prijať všetky"}
           </button>
@@ -166,7 +166,7 @@ export function CookieBanner() {
                 setShowDetails(true);
               }
             }}
-            className="rounded-full px-2 py-1 text-xs font-semibold text-cream underline underline-offset-2 transition hover:text-coral sm:py-2 sm:text-sm"
+            className="order-2 rounded-full border border-forest/20 bg-card px-6 py-3 font-display text-sm font-semibold text-forest transition hover:bg-secondary sm:order-1 sm:min-w-40 sm:text-base"
           >
             {showDetails
               ? isEnglish ? "Save" : "Uložiť"

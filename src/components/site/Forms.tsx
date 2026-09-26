@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
 import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
+import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 
 function sourceRef() {
   if (typeof window === "undefined") return "/";
@@ -119,10 +120,7 @@ export function ShortForm({
           <option>Potrebujem jednorazové stráženie</option>
         </select>
       </div>
-      <label className="flex items-start gap-2 text-sm text-forest/80">
-        <input type="checkbox" required className="mt-1 accent-[oklch(0.72_0.108_40)]" />
-        Súhlasím so spracovaním osobných údajov. <span className="text-destructive">*</span>
-      </label>
+      <PrivacyConsentCheckbox />
       {error && <p className="text-sm text-destructive">{error}</p>}
       <button
         type="submit"
@@ -298,10 +296,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           placeholder="Povaha, skúsenosti s inými psami, zdravotný stav..."
         />
       </div>
-      <label className="flex items-start gap-2 text-sm text-forest/80">
-        <input type="checkbox" required className="mt-1 accent-[oklch(0.72_0.108_40)]" />
-        Súhlasím so spracovaním osobných údajov. <span className="text-destructive">*</span>
-      </label>
+      <PrivacyConsentCheckbox />
       {error && <p className="text-sm text-destructive">{error}</p>}
       <button type="submit" disabled={loading} className="btn-coral w-full disabled:opacity-60">
         {loading ? "Odosielam…" : "Prihlásiť psíka"}
