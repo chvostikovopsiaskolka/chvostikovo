@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260926-customer-menu-v110';
+const APP_BUILD='20260926-customer-visual-v111';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -1447,8 +1447,9 @@ placeDeadlineV59();
     });
     const vaccination=$('bookingVaccinationStatus');
     vaccination.className='dog-overview-status '+(!complete?'invalid':nearExpiry?'warning':'valid');
-    vaccination.textContent=!complete?'🔴 Očkovania nie sú platné':nearExpiry?'🟠 Blíži sa koniec platnosti':'🟢 Očkovania platné';
-    $('bookingVisitCount').textContent='Celkové návštevy: '+totalVisits(dog);
+    const vaccinationLabel=!complete?'Očkovania nie sú platné':nearExpiry?'Blížiaci sa koniec platnosti očkovania':'Očkovania platné';
+    vaccination.innerHTML='<span class="overview-icon vacc-icon"><svg aria-hidden="true"><use href="#ci-'+(complete&&!nearExpiry?'check':'alert')+'"/></svg></span><span>'+vaccinationLabel+'</span>';
+    $('bookingVisitCount').querySelector('.overview-label').textContent='Celkové návštevy: '+totalVisits(dog);
   }
 
   function ensureSettings(){
