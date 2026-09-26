@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260926-customer-profile-v115';
+const APP_BUILD='20260926-customer-menu-v116';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -1691,7 +1691,7 @@ placeDeadlineV59();
     const root=$('weekDays'),dog=selectedDog();if(!root)return;
     const days=state.data?.availability?.days||[],byDate=new Map(days.map(d=>[d.date,d]));
     const items=futureItems().filter(r=>dog&&Number(r.dog_id)===Number(dog.id));
-    if(!items.length){root.innerHTML='<div class="card reserved-empty-v37">Zatiaľ nemáte rezervovaný žiadny deň.</div>';return}
+    if(!items.length){root.innerHTML='<div class="card reserved-empty-v37"><svg class="reserved-empty-icon" aria-hidden="true"><use href="#ci-calendar"/></svg><span>Zatiaľ nemáte rezervovaný žiadny deň.</span><small>Kliknite na tlačidlo vyššie a vyberte si termín<br>pre vášho psíka.</small></div>';return}
     root.innerHTML=items.map(r=>{
       const day=byDate.get(r.reservation_date)||{},taxi=taxiLabel(r.taxi_mode),pending=r.status==='pending';
       const note=day.note&&!(day.bookings_open===false&&/^zatvorené$/i.test(String(day.note).trim()))?`<div class="reserved-note-v37">${esc(day.note)}</div>`:'';
