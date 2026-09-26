@@ -7,9 +7,10 @@ export const standInquirySchema = z.object({
   client_submission_id: z.string().uuid(),
   product_type: z.literal("stand"),
   customer_name: z.string().trim().min(2).max(160),
-  phone: z.string().trim().min(7).max(40),
+  phone: z.string().trim().regex(/^\\+\\d{7,15}$/),
   email: z.string().trim().email().max(200),
   source_ref: z.string().max(500),
+  consent: z.literal(true),
   company: z.string().max(200).optional(),
   configuration: z.object({
     size: z.enum(["small", "large"]),
@@ -24,9 +25,10 @@ export const targetInquirySchema = z.object({
   client_submission_id: z.string().uuid(),
   product_type: z.literal("target"),
   customer_name: z.string().trim().min(2).max(160),
-  phone: z.string().trim().min(7).max(40),
+  phone: z.string().trim().regex(/^\\+\\d{7,15}$/),
   email: z.string().trim().email().max(200),
   source_ref: z.string().max(500),
+  consent: z.literal(true),
   company: z.string().max(200).optional(),
   configuration: z.object({
     size: z.enum(["small", "large"]),

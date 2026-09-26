@@ -4,6 +4,7 @@ import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
 import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
+import { PhoneField } from "./PhoneField";
 
 function sourceRef() {
   if (typeof window === "undefined") return "/";
@@ -92,20 +93,7 @@ export function ShortForm({
         </label>
         <input id="s-meno" name="meno" required className="field" placeholder="Vaše meno" />
       </div>
-      <div>
-        <label className="label-sm" htmlFor="s-tel">
-          Telefón *
-        </label>
-        <input
-          id="s-tel"
-          name="telefon"
-          type="tel"
-          required
-          minLength={7}
-          className="field"
-          placeholder="+421 951 069 395"
-        />
-      </div>
+      <PhoneField id="s-tel" name="telefon" />
       <div>
         <label className="label-sm" htmlFor="s-zaujem">
           O čo máte záujem? *
@@ -203,20 +191,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           </label>
           <input id="l-meno" name="meno" required className="field" placeholder="Vaše meno" />
         </div>
-        <div>
-          <label className="label-sm" htmlFor="l-tel">
-            Telefón *
-          </label>
-          <input
-            id="l-tel"
-            name="telefon"
-            type="tel"
-            required
-            minLength={7}
-            className="field"
-            placeholder="+421"
-          />
-        </div>
+        <PhoneField id="l-tel" name="telefon" />
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">
         <div>

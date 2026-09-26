@@ -13,6 +13,8 @@ import {
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { FormDialog } from "@/components/site/FormDialog";
+import { PhoneField } from "@/components/site/PhoneField";
+import { PrivacyConsentCheckbox } from "@/components/site/PrivacyConsentCheckbox";
 import { submitProductInquiry } from "@/lib/product-inquiry";
 import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
 import targetLargeDetail from "@/assets/products/target-large-detail.jpeg";
@@ -244,6 +246,7 @@ function TargetPage() {
         phone,
         email,
         source_ref: "/target-na-cvicenie-pre-psov",
+        consent: true,
         company,
         configuration: {
           size,
@@ -434,19 +437,11 @@ function TargetPage() {
                   className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
                 />
               </label>
-              <label className="block font-display text-sm font-bold text-forest">
-                Telefón *
-                <input
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  type="tel"
-                  autoComplete="tel"
-                  required
-                  minLength={7}
-                  maxLength={40}
-                  className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
-                />
-              </label>
+              <PhoneField
+                id="target-phone"
+                value={phone}
+                onChange={setPhone}
+              />
               <label className="block font-display text-sm font-bold text-forest">
                 E-mail *
                 <input
@@ -517,6 +512,10 @@ function TargetPage() {
                 placeholder="Čokoľvek, čo máme pri výrobe vedieť."
               />
             </label>
+
+            <div className="mt-5">
+              <PrivacyConsentCheckbox />
+            </div>
 
             {formError && (
               <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">

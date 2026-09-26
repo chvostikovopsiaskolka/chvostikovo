@@ -4,6 +4,7 @@ import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
 import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
+import { PhoneField } from "./PhoneField";
 
 function sourceRef() {
   if (typeof window === "undefined") return "/en/dog-daycare-kosice";
@@ -86,18 +87,7 @@ export function EnglishInquiryForm({
         <label className="label-sm" htmlFor="en-name">Your name *</label>
         <input id="en-name" name="name" required className="field" placeholder="Your name" />
       </div>
-      <div>
-        <label className="label-sm" htmlFor="en-phone">Phone / WhatsApp *</label>
-        <input
-          id="en-phone"
-          name="phone"
-          type="tel"
-          required
-          minLength={7}
-          className="field"
-          placeholder="+421 ..."
-        />
-      </div>
+      <PhoneField id="en-phone" name="phone" label="Phone / WhatsApp *" language="en" />
       <div>
         <label className="label-sm" htmlFor="en-dog-name">Dog's name</label>
         <input id="en-dog-name" name="dog_name" className="field" placeholder="Rocky" />

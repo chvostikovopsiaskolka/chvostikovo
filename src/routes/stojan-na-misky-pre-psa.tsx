@@ -14,6 +14,8 @@ import {
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { Collapse } from "@/components/site/Collapse";
+import { PhoneField } from "@/components/site/PhoneField";
+import { PrivacyConsentCheckbox } from "@/components/site/PrivacyConsentCheckbox";
 import { submitProductInquiry } from "@/lib/product-inquiry";
 import type { LetterColor, StandColor, StandSize } from "@/lib/shop";
 import standDark from "@/assets/products/stand-dark.webp";
@@ -258,6 +260,7 @@ function BowlStandPage() {
         phone,
         email,
         source_ref: "/stojan-na-misky-pre-psa",
+        consent: true,
         company,
         configuration: {
           size,
@@ -400,19 +403,11 @@ function BowlStandPage() {
                                 className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
                               />
                             </label>
-                            <label className="block font-display text-sm font-bold text-forest">
-                              Telefón *
-                              <input
-                                value={phone}
-                                onChange={(event) => setPhone(event.target.value)}
-                                type="tel"
-                                autoComplete="tel"
-                                required
-                                minLength={7}
-                                maxLength={40}
-                                className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
-                              />
-                            </label>
+                            <PhoneField
+                              id="stand-phone"
+                              value={phone}
+                              onChange={setPhone}
+                            />
                             <label className="block font-display text-sm font-bold text-forest">
                               E-mail *
                               <input
@@ -522,6 +517,10 @@ function BowlStandPage() {
                             <p className="mt-1.5 text-[11px] text-forest/50">
                               Inú farbu písmen vieme dohodnúť individuálne.
                             </p>
+                          </div>
+
+                          <div className="mt-5">
+                            <PrivacyConsentCheckbox />
                           </div>
 
                           {configError && (
