@@ -29,14 +29,30 @@ function pushAnalyticsEvent(eventName: string, params: EventParams) {
 
 function trackMetaStandard(eventName: string, params: EventParams, eventId?: string) {
   if (typeof window === "undefined") return;
-  const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
-    ((...args: unknown[]) => void) | undefined;
-  if (!fbq) return;
-  if (eventId) {
-    fbq("track", eventName, params, { eventID: eventId });
-    return;
-  }
-  fbq("track", eventName, params);
+
+  const send = (attempt = 0) => {
+    const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
+      ((...args: unknown[]) => void) | undefined;
+
+    if (!fbq) {
+      // Form submissions can finish before the Pixel bootstrap has completed,
+      // especially in Safari. Retry briefly instead of silently dropping the
+      // browser-side event; the server CAPI event is still sent independently.
+      if (attempt < 20) {
+        window.setTimeout(() => send(attempt + 1), 100);
+      }
+      return;
+    }
+
+    if (eventId) {
+      fbq("track", eventName, params, { eventID: eventId });
+      return;
+    }
+
+    fbq("track", eventName, params);
+  };
+
+  send();
 }
 
 function trackMetaCustom(eventName: string, params: EventParams) {
