@@ -27,11 +27,16 @@ function pushAnalyticsEvent(eventName: string, params: EventParams) {
   }
 }
 
-function trackMetaStandard(eventName: string, params: EventParams) {
+function trackMetaStandard(eventName: string, params: EventParams, eventId?: string) {
   if (typeof window === "undefined") return;
   const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
     ((...args: unknown[]) => void) | undefined;
-  fbq?.("track", eventName, params);
+  if (!fbq) return;
+  if (eventId) {
+    fbq("track", eventName, params, { eventID: eventId });
+    return;
+  }
+  fbq("track", eventName, params);
 }
 
 function trackMetaCustom(eventName: string, params: EventParams) {
@@ -78,6 +83,7 @@ export function trackMarketingInteraction(
 export function trackMetaFormConversion(
   formType: "informacie" | "prihlaska",
   source?: string,
+  eventId?: string,
 ) {
   const params = {
     content_name: formType,
@@ -86,11 +92,11 @@ export function trackMetaFormConversion(
   };
 
   if (formType === "informacie") {
-    trackMetaStandard("Lead", params);
+    trackMetaStandard("Lead", params, eventId);
     return;
   }
 
-  trackMetaStandard("CompleteRegistration", params);
+  trackMetaStandard("CompleteRegistration", params, eventId);
 }
 
 export function trackFormSubmit(params: {

@@ -43,7 +43,7 @@ export function ShortForm({
     setLoading(true);
     setError(null);
     try {
-      await submitInquiry({
+      const submission = await submitInquiry({
         typ: "informacie",
         consent: true,
         source_ref,
@@ -61,7 +61,7 @@ export function ShortForm({
         landingPage: attribution.landing_page,
         ctaSource: trackingSource,
       });
-      trackMetaFormConversion("informacie", trackingSource);
+      trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
       setSent(true);
       onSent?.();
     } catch {
@@ -149,7 +149,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
     setLoading(true);
     setError(null);
     try {
-      await submitInquiry({
+      const submission = await submitInquiry({
         typ: "prihlaska",
         consent: true,
         source_ref,
@@ -172,7 +172,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         trafficMedium: attribution.traffic_medium,
         landingPage: attribution.landing_page,
       });
-      trackMetaFormConversion("prihlaska");
+      trackMetaFormConversion("prihlaska", undefined, submission.metaEventId);
       setSent(true);
       onSent?.();
     } catch {

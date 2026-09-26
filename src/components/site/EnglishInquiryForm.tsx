@@ -32,7 +32,7 @@ export function EnglishInquiryForm({
     setError(null);
 
     try {
-      await submitInquiry({
+      const submission = await submitInquiry({
         typ: "informacie",
         consent: true,
         source_ref,
@@ -57,7 +57,7 @@ export function EnglishInquiryForm({
         landingPage: attribution.landing_page,
         ctaSource: trackingSource,
       });
-      trackMetaFormConversion("informacie", trackingSource);
+      trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
 
       setSent(true);
     } catch {
