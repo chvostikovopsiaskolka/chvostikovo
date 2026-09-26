@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260926-customer-visual-v111';
+const APP_BUILD='20260926-customer-polish-v112';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -57,8 +57,16 @@ function currentSession(){for(const s of [localStorage,sessionStorage]){try{cons
 function saveSession(s,remember=true){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));state.session=s}
 function clearSession(){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;stopCustomerLive();['waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
 async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');return data}
-async function refreshSession(){if(!state.session?.refresh_token)throw new Error('Prihlásenie vypršalo.');const s=await authFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:state.session.refresh_token})});saveSession(s,state.storage===localStorage);startCustomerLive(true);return s}
-async function apiCore(body=null,retry=true){if(!state.session)throw new Error('Najprv sa prihláste.');const opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const r=await fetch(API,opts);const txt=await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(r.status===401&&retry){await refreshSession();return apiCore(body,false)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
+let sessionRefreshInFlight=null;
+async function refreshSession(){
+  if(sessionRefreshInFlight)return sessionRefreshInFlight;
+  if(!state.session?.refresh_token)throw new Error('Prihlásenie vypršalo.');
+  const token=state.session.refresh_token,remember=state.storage===localStorage;
+  const run=(async()=>{const s=await authFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:token})});saveSession(s,remember);startCustomerLive(true);return s})();
+  sessionRefreshInFlight=run;
+  try{return await run}finally{sessionRefreshInFlight=null}
+}
+async function apiCore(body=null,retry=true){if(!state.session)throw new Error('Najprv sa prihláste.');const token=state.session.access_token,opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const r=await fetch(API,opts);const txt=await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
 async function api(body=null,retry=true){const result=await apiCore(body,retry);runCustomerHooks('afterApi',body,result);return result}
 function showAuth(mode='login'){document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').classList.add('hidden');$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
 function showApp(){$('authView').classList.add('hidden');$('appView').classList.remove('hidden')}
@@ -337,7 +345,8 @@ function renderDetailsPhoto(dog=selectedDog()){
   if(!preview||!button)return;
   preview.innerHTML=dog?.photo_url?`<img src="${esc(dog.photo_url)}" alt="Fotka psíka">`:'🐾';
   preview.className='dog-details-photo-preview '+dogSexClassV100(dog);
-  button.textContent=dog?.photo_url?'Upraviť / zmeniť / zmazať fotku':'Pridať fotku';
+  button.setAttribute('aria-label',dog?.photo_url?'Upraviť, zmeniť alebo zmazať fotku':'Pridať fotku');
+  button.title=button.getAttribute('aria-label');
 }
 function dogSexClassV100(dog){return dog?.sex==='male'?'dog-male-v100':dog?.sex==='female'?'dog-female-v100':'dog-neutral-v100'}
 function renderDogHeaderV56(dog){
@@ -809,7 +818,7 @@ $('logoutBtn').addEventListener('click',async()=>{
 $('navBooking').addEventListener('click',()=>switchTab('booking'));$('navDog').addEventListener('click',()=>switchTab('menu'));$('navMessages').addEventListener('click',()=>switchTab('messages'));$('navStaff').addEventListener('click',()=>switchTab('staff'));
 $('dogSelector').addEventListener('change',e=>{state.selectedDogId=Number(e.target.value);renderPassSummary();renderDog()});$('dogBirthDate').addEventListener('change',()=>syncDogAgeField());['rabiesUntil','infectiousUntil','kennelUntil'].forEach(id=>$(id)?.addEventListener('input',updateVaccinationStatusesV96));$('dogForm').addEventListener('submit',saveDog);$('dogDetailsClose').addEventListener('click',()=>closeDogDetails(false));$('dogDetailsModal').addEventListener('click',e=>{if(e.target===$('dogDetailsModal'))e.preventDefault()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dogDetailsModal').classList.contains('hidden'))closeDogDetails(false)});$('profileForm').addEventListener('submit',saveProfile);$('accountToggle').addEventListener('click',()=>$('profileForm').classList.toggle('hidden'));$('messageForm').addEventListener('submit',sendMessage);
 $('bookingDogSelector').addEventListener('change',e=>{state.selectedDogId=Number(e.target.value);renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays()});
-$('dogDetailsPhotoButton').addEventListener('click',()=>$('dogPhotoActionBtnV89')?.click());
+$('dogDetailsPhotoButton').addEventListener('click',()=>{const dog=selectedDog();if(dog?.photo_url)showPhotoActionsV89(dog);else selectNewDogPhotoV89()});
 $('dogPhotoInput').addEventListener('click',()=>{window.__customerPhotoPickerV88=true;setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},15000)});
 $('dogPhotoInput').addEventListener('change',openPhotoEditor);
 $('bookingVaccinationStatus').addEventListener('click',()=>openDogDetails('vaccinations'));
@@ -829,42 +838,19 @@ $('menuMessage').addEventListener('click',openCustomerChat);
 $('menuContact').addEventListener('click',()=>{const card=document.querySelector('.account-card');if(card)$('customerContactContent').appendChild(card);$('profileForm').classList.remove('hidden');$('customerContactModal').classList.remove('hidden');document.documentElement.classList.add('customer-modal-open')});
 $('customerContactClose').addEventListener('click',()=>closeCustomerSmallModal('customerContactModal'));
 $('customerContactModal').addEventListener('click',e=>{if(e.target===$('customerContactModal'))closeCustomerSmallModal('customerContactModal')});
-function openMenuSettings(section){window.openCustomerSettingsV102?.();if(section==='legal'){const legal=$('customerLegalSectionV23');if(legal)legal.open=true;window.renderCustomerLegalStatusV103?.();legal?.scrollIntoView({block:'nearest'})}}
+function openMenuSettings(section){window.openCustomerSettingsV102?.(section)}
 $('menuNotifications').addEventListener('click',()=>openMenuSettings('notifications'));
-$('menuPrivacy').addEventListener('click',()=>openMenuSettings('privacy'));
 $('menuLegal').addEventListener('click',()=>openMenuSettings('legal'));
 $('menuLogout').addEventListener('click',()=>$('logoutBtn').click());
 $('menuBuildVersion').textContent='Verzia appky v.'+APP_BUILD;
 window.addEventListener('pageshow',()=>setTimeout(repairCustomerScrollV60,0));
 window.visualViewport?.addEventListener('resize',()=>requestAnimationFrame(repairCustomerScrollV60));
-let lastBuildCheckV17=0;
-async function reloadIfNewBuildV17(){
-  const now=Date.now();
-  if(now-lastBuildCheckV17<5000)return false;
-  lastBuildCheckV17=now;
-  try{
-    const response=await fetch('/version.json?ts='+now,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
-    if(!response.ok)return false;
-    const info=await response.json();
-    const nextBuild=String(info?.build||'');
-    if(!nextBuild||nextBuild===APP_BUILD){
-      if(sessionStorage.getItem('chvostikovo_build_reload_target')===APP_BUILD)sessionStorage.removeItem('chvostikovo_build_reload_target');
-      return false;
-    }
-    if(sessionStorage.getItem('chvostikovo_build_reload_target')===nextBuild)return false;
-    sessionStorage.setItem('chvostikovo_build_reload_target',nextBuild);
-    loading(true);
-    location.reload();
-    return true;
-  }catch(_){return false}
-}
 async function refreshOnResume(){
   const now=Date.now();
   if(window.__customerPhotoPickerV88===true||window.__customerPhotoDecodeV88===true)return;
-  if(!state.session||document.visibilityState==='hidden'||now-lastResumeRefresh<1500)return;
+  if(!state.session||document.visibilityState==='hidden'||now-lastResumeRefresh<5000)return;
   lastResumeRefresh=now;
-  if(await reloadIfNewBuildV17())return;
-  startCustomerLive(true);
+  startCustomerLive();
   queueCustomerSync('all',40);
 }
 window.addEventListener('focus',refreshOnResume);window.addEventListener('online',refreshOnResume);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshOnResume();else stopCustomerLive()});
@@ -893,7 +879,7 @@ function ensureBookingLayout(){
   const oldHead=[...booking.querySelectorAll('.section-head')].find(x=>x.querySelector('h2')?.textContent?.trim()==='Vyberte deň');
   if(oldHead)oldHead.remove();
   if(!booking.querySelector('.booking-section-head')){
-    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme o rezerváciu na nasledujúci týždeň do nedele 20:00.</strong><span>Ak potrebujete individuálny termín, kontaktujte nás.</span></div>');
+    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Rezervácie na ďalší týždeň do nedele 20:00.</strong><span>Ak potrebujete individuálny termín, kontaktujte nás.</span></div>');
   }
 }
 ensureBookingLayout();
@@ -1447,7 +1433,7 @@ placeDeadlineV59();
     });
     const vaccination=$('bookingVaccinationStatus');
     vaccination.className='dog-overview-status '+(!complete?'invalid':nearExpiry?'warning':'valid');
-    const vaccinationLabel=!complete?'Očkovania nie sú platné':nearExpiry?'Blížiaci sa koniec platnosti očkovania':'Očkovania platné';
+    const vaccinationLabel=!complete?'Očkovania nie sú platné':nearExpiry?'Blížiaci sa koniec<br>platnosti očkovania':'Platné očkovania';
     vaccination.innerHTML='<span class="overview-icon vacc-icon"><svg aria-hidden="true"><use href="#ci-'+(complete&&!nearExpiry?'check':'alert')+'"/></svg></span><span>'+vaccinationLabel+'</span>';
     $('bookingVisitCount').querySelector('.overview-label').textContent='Celkové návštevy: '+totalVisits(dog);
   }
@@ -1473,10 +1459,17 @@ placeDeadlineV59();
     if(logout){logout.classList.remove('hidden','icon-btn');logout.classList.add('btn','secondary','full');logout.textContent='Odhlásiť sa';logout.style.marginTop='14px';content.appendChild(logout)}
   }
 
-  function openSettings(){
+  function openSettings(section='notifications'){
     relocateSettings();
     if(typeof window.prepareCustomerSettingsV102==='function')window.prepareCustomerSettingsV102();
-    window.renderCustomerLegalStatusV103?.();
+    const modal=$('dogSettingsModalV36'),legal=$('customerLegalSectionV23');
+    modal.dataset.section=section;
+    $('dogSettingsTitleV36').textContent=section==='legal'?'Súhlasy a podmienky':'Upozornenia';
+    const settingsIntro=modal.querySelector('.settings-head-v36 p');
+    if(settingsIntro)settingsIntro.textContent=section==='legal'?'Fotka a meno psíka, ochrana údajov a pravidlá škôlky.':'Rezervácie, správy a oznamy z Chvostíkova.';
+    const legalWasOpen=legal?.open;
+    if(legal)legal.open=section==='legal';
+    if(section==='legal'&&legalWasOpen)window.renderCustomerLegalStatusV103?.();
     $('dogSettingsModalV36')?.classList.remove('hidden');
     document.documentElement.classList.add('settings-open-v36');
   }
@@ -1549,12 +1542,14 @@ placeDeadlineV59();
     const controls=$('customerLegalControlsV23');controls?.querySelectorAll('.v23-consent-row').forEach(row=>row.classList.add('v37-hide-notification'));
 
     const legal=$('customerLegalSectionV23');
+    const privacyRow=$('settingsPrivacyToggleV99')?.closest('.settings-paired-row-v99');
+    const legalContent=legal?.querySelector('.details-content');
+    if(privacyRow&&legalContent&&privacyRow.parentElement!==legalContent)legalContent.insertBefore(privacyRow,legalContent.firstChild);
     if(legal&&!legal.dataset.v98MenuReady){legal.open=false;legal.dataset.v98MenuReady='1'}
     if(legal&&!legal.dataset.v103LegalBound){
       legal.dataset.v103LegalBound='1';
       legal.addEventListener('toggle',()=>{if(legal.open)window.renderCustomerLegalStatusV103?.()});
     }
-    window.renderCustomerLegalStatusV103?.();
   }
   window.prepareCustomerSettingsV102=prepareSettingsV37;
 
@@ -2101,7 +2096,7 @@ async function togglePushDirect(btn){
       card.addEventListener('click',openRulesV55);
     }
     if(!$('schoolRulesModalV55')){
-      document.body.insertAdjacentHTML('beforeend','<div id="schoolRulesModalV55" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="schoolRulesTitleV55"><div class="legal-card terms-card"><button id="schoolRulesCloseV55" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="schoolRulesTitleV55">Pravidlá škôlky</h2><div id="schoolRulesBodyV55" class="legal-body terms-body school-rules-body-v55"></div><button id="schoolRulesDoneV55" class="btn full" type="button">Zavrieť</button></div></div>');
+      document.body.insertAdjacentHTML('beforeend','<div id="schoolRulesModalV55" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="schoolRulesTitleV55"><div class="legal-card terms-card"><button id="schoolRulesCloseV55" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="schoolRulesTitleV55">Pravidlá škôlky</h2><div id="schoolRulesBodyV55" class="legal-body terms-body school-rules-body-v55"></div><p id="schoolRulesAcceptedV55" class="school-rules-accepted-v55 hidden"></p><button id="schoolRulesDoneV55" class="btn full" type="button">Zavrieť</button></div></div>');
       const close=()=>$('schoolRulesModalV55')?.classList.add('hidden');
       $('schoolRulesCloseV55').addEventListener('click',close);
       $('schoolRulesDoneV55').addEventListener('click',close);
@@ -2128,14 +2123,25 @@ async function togglePushDirect(btn){
 
   async function openRulesV55(){
     ensureRulesUiV55();
-    const modal=$('schoolRulesModalV55'),body=$('schoolRulesBodyV55'),title=$('schoolRulesTitleV55');
+    const modal=$('schoolRulesModalV55'),body=$('schoolRulesBodyV55'),title=$('schoolRulesTitleV55'),accepted=$('schoolRulesAcceptedV55');
+    body.innerHTML='';accepted.textContent='';accepted.classList.add('hidden');
+    const request=String(Number(modal.dataset.request||0)+1);modal.dataset.request=request;
     try{
       const doc=await activeTermsV55();
       title.textContent=doc?.title||'Pravidlá škôlky';
       body.innerHTML=formatSchoolTermsV102(doc?.body||'Pravidlá škôlky momentálne nie sú dostupné.');
+      modal.classList.remove('hidden');
+      const dogId=Number(selectedDog()?.id||0);
+      if(doc?.version&&dogId&&state.session){
+        const url=SUPABASE_URL+'/rest/v1/portal_terms_acceptances?dog_id=eq.'+dogId+'&terms_version=eq.'+encodeURIComponent(doc.version)+'&select=accepted_at&order=accepted_at.desc&limit=1';
+        const response=await fetch(url,{headers:authHeadersV55(),cache:'no-store'});
+        if(response.ok&&modal.dataset.request===request){
+          const rows=await response.json();
+          if(rows?.[0]?.accepted_at){accepted.textContent='Pravidlá potvrdené '+new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(rows[0].accepted_at));accepted.classList.remove('hidden')}
+        }
+      }
     }catch(e){
-      title.textContent='Pravidlá škôlky';
-      body.innerHTML='<p class="terms-loose-v97">'+esc(e.message||'Pravidlá sa nepodarilo načítať.')+'</p>';
+      if(!body.innerHTML){title.textContent='Pravidlá škôlky';body.innerHTML='<p class="terms-loose-v97">'+esc(e.message||'Pravidlá sa nepodarilo načítať.')+'</p>'}
     }
     modal.classList.remove('hidden');
   }

@@ -11,8 +11,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
-  <link rel="manifest" href="/manifest.webmanifest?v=20260926-customer-visual-v111">
-  <link rel="stylesheet" href="/styles.css?v=20260926-customer-visual-v111">
+  <link rel="manifest" href="/manifest.webmanifest?v=20260926-customer-polish-v112">
+  <link rel="stylesheet" href="/styles.css?v=20260926-customer-polish-v112">
   <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}.loading-screen.in-app{background:transparent;pointer-events:none;padding:0}.loading-screen.in-app .loading-logo,.loading-screen.in-app small{display:none}.loading-screen.in-app .loading-paw{width:68px;height:68px;border:0;border-radius:18px;background:#fff;box-shadow:0 10px 34px rgba(17,24,39,.16);font-size:0;animation:none}.loading-screen.in-app .loading-paw::before{content:'🐾';width:42px;height:42px;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;display:grid;place-items:center;font-size:18px;animation:loadingSpin .8s linear infinite}</style>
   <title>Chvostíkovo</title>
 </head>
@@ -90,10 +90,10 @@
 
   <section id="menuTab" class="tab-page customer-menu hidden">
     <h1>Menu</h1>
-    <details id="menuDogGroup" class="customer-menu-group" open><summary><span class="menu-icon"><svg><use href="#ci-paw"/></svg></span><span class="menu-heading"><strong>Môj psík</strong><small>Správa údajov a informácií o psíkovi</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuDogDetails" type="button"><svg><use href="#ci-dog"/></svg><span>Údaje psíka</span><b>›</b></button><button id="menuVaccinations" type="button"><svg><use href="#ci-syringe"/></svg><span>Očkovania</span><b>›</b></button><button id="menuRules" type="button"><svg><use href="#ci-file"/></svg><span>Pravidlá škôlky</span><b>›</b></button><button id="menuGradebook" type="button"><svg><use href="#ci-book"/></svg><span>Žiacka knižka <small>Pripravujeme</small></span><b>›</b></button></div></details>
+    <details id="menuDogGroup" class="customer-menu-group" open><summary><span class="menu-icon"><svg><use href="#ci-paw"/></svg></span><span class="menu-heading"><strong>Môj psík</strong><small>Správa údajov a informácií o psíkovi</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuDogDetails" type="button"><svg class="menu-paw-icon"><use href="#ci-paw"/></svg><span>Údaje psíka</span><b>›</b></button><button id="menuVaccinations" type="button"><svg><use href="#ci-syringe"/></svg><span>Očkovania</span><b>›</b></button><button id="menuRules" type="button"><svg><use href="#ci-file"/></svg><span>Pravidlá škôlky</span><b>›</b></button><button id="menuGradebook" type="button"><svg><use href="#ci-book"/></svg><span>Žiacka knižka <small>Pripravujeme</small></span><b>›</b></button></div></details>
     <button id="menuMessage" class="customer-menu-group customer-menu-direct" type="button"><span class="menu-icon message"><svg><use href="#ci-message"/></svg></span><span class="menu-heading"><strong>Napíšte nám správu</strong><small>Otázky a správy pre Chvostíkovo</small></span><i id="menuMessageUnread" class="menu-unread hidden"></i><span class="menu-chevron">›</span></button>
     <button id="menuContact" class="customer-menu-group customer-menu-direct" type="button"><span class="menu-icon"><svg><use href="#ci-user"/></svg></span><span class="menu-heading"><strong>Moje kontaktné údaje</strong><small>Vaše osobné údaje a kontakty</small></span><span class="menu-chevron">›</span></button>
-    <details id="menuSettingsGroup" class="customer-menu-group" open><summary><span class="menu-icon"><svg><use href="#ci-settings"/></svg></span><span class="menu-heading"><strong>Nastavenia</strong><small>Upozornenia, vzhľad a ďalšie možnosti</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuNotifications" type="button"><svg><use href="#ci-bell"/></svg><span>Upozornenia</span><b>›</b></button><button id="menuPrivacy" type="button"><svg><use href="#ci-image"/></svg><span>Fotka a meno psa</span><b>›</b></button><button id="menuLegal" type="button"><svg><use href="#ci-shield"/></svg><span>Súhlasy a podmienky</span><b>›</b></button><button id="menuLogout" type="button"><svg><use href="#ci-logout"/></svg><span>Odhlásiť sa</span><b>›</b></button></div></details>
+    <details id="menuSettingsGroup" class="customer-menu-group" open><summary><span class="menu-icon"><svg><use href="#ci-settings"/></svg></span><span class="menu-heading"><strong>Nastavenia</strong><small>Upozornenia a súhlasy</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuNotifications" type="button"><svg><use href="#ci-bell"/></svg><span>Upozornenia</span><b>›</b></button><button id="menuLegal" type="button"><svg><use href="#ci-shield"/></svg><span>Súhlasy a podmienky</span><b>›</b></button><button id="menuLogout" type="button"><svg><use href="#ci-logout"/></svg><span>Odhlásiť sa</span><b>›</b></button></div></details>
     <p id="menuBuildVersion" class="menu-build-version"></p>
   </section>
 
@@ -126,7 +126,7 @@
     <button id="dogDetailsClose" class="legal-close" type="button" aria-label="Zavrieť">×</button>
     <div class="legal-kicker">Môj psík</div>
     <h2 id="dogDetailsTitle">Údaje psíka</h2>
-    <div id="dogDetailsPhotoControl" class="dog-details-photo-control"><span id="dogDetailsPhotoPreview" class="dog-details-photo-preview">🐾</span><button id="dogDetailsPhotoButton" class="btn secondary" type="button">Pridať fotku</button><input id="dogPhotoInput" class="hidden" type="file" accept="image/*"></div>
+    <div id="dogDetailsPhotoControl" class="dog-details-photo-control"><div class="dog-details-photo-wrap"><span id="dogDetailsPhotoPreview" class="dog-details-photo-preview">🐾</span><button id="dogDetailsPhotoButton" class="photo-pencil" type="button" aria-label="Upraviť fotku" title="Upraviť fotku">✎</button></div><input id="dogPhotoInput" class="hidden" type="file" accept="image/*"></div>
     <form id="dogForm" class="form-stack">
       <input id="dogId" type="hidden"><input id="submissionId" type="hidden">
       <div id="dogBasicFieldsV96" class="dog-details-section-v96">
@@ -155,6 +155,6 @@
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/app.js?v=20260926-customer-visual-v111"></script>
+<script src="/app.js?v=20260926-customer-polish-v112"></script>
 </body>
 </html>
