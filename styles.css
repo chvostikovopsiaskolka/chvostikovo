@@ -1514,10 +1514,11 @@ html.customer-awaiting-dog-v107 #appView{
 .dog-overview-avatar{width:123px;height:123px;flex-basis:123px}
 .dog-overview-status>span:last-child{line-height:1.32}
 .customer-menu-rows .menu-paw-icon{fill:currentColor;stroke:none}
-#bookingTab .deadline-card{align-items:center;justify-content:center;min-height:70px!important;padding:11px 10px 11px 52px!important;text-align:center!important}
+#bookingTab .deadline-card{align-items:flex-start;justify-content:center;min-height:70px!important;padding:11px 10px 11px 52px!important;text-align:left!important}
 #bookingTab .deadline-card::before{position:absolute;left:11px;top:50%;transform:translateY(-50%);margin:0;flex:0 0 32px;width:32px;height:32px;background-size:21px}
-#bookingTab .deadline-card strong{font-size:clamp(9px,2.65vw,12px)!important;text-align:center!important;white-space:nowrap!important}
-#bookingTab .deadline-card span{text-align:center!important}
+#bookingTab .deadline-card strong{font-size:clamp(9px,2.65vw,12px)!important;text-align:left!important;white-space:nowrap!important}
+#bookingTab .deadline-card span{text-align:left!important}
+.loading-screen>small{display:none!important}
 .school-rules-accepted-v55{margin:10px 0 12px;padding:10px 13px;border-radius:13px;background:#e9f9ef;color:#147642;text-align:center;font-size:13px;font-weight:800}
 .dog-details-photo-control{justify-content:center;padding:14px!important}
 .dog-details-photo-control{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(135deg,#fff7fb,#fff0f8)!important;border-color:#f7c9e2!important}
