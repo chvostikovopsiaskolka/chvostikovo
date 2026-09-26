@@ -1509,17 +1509,23 @@ html.customer-awaiting-dog-v107 #appView{
 }
 
 /* Profile and focused settings refinements */
-#bookingTab .hero.dog-overview{grid-template-columns:132px minmax(0,1fr)!important}
+#bookingTab .hero.dog-overview{grid-template-columns:140px minmax(0,1fr)!important;column-gap:14px!important}
 .dog-overview-identity{justify-content:flex-start}
-.dog-overview-avatar{width:116px;height:116px;flex-basis:116px}
+.dog-overview-avatar{width:123px;height:123px;flex-basis:123px}
 .dog-overview-status>span:last-child{line-height:1.32}
 .customer-menu-rows .menu-paw-icon{fill:currentColor;stroke:none}
-#bookingTab .deadline-card{align-items:center;justify-content:center;padding:12px 15px!important;text-align:center!important}
-#bookingTab .deadline-card::before{position:relative;left:auto;top:auto;transform:none;margin:0 auto 6px;flex:0 0 37px}
-#bookingTab .deadline-card strong{font-size:clamp(10px,3vw,13px)!important;text-align:center!important;white-space:nowrap!important}
+#bookingTab .deadline-card{align-items:center;justify-content:center;min-height:70px!important;padding:11px 10px 11px 52px!important;text-align:center!important}
+#bookingTab .deadline-card::before{position:absolute;left:11px;top:50%;transform:translateY(-50%);margin:0;flex:0 0 32px;width:32px;height:32px;background-size:21px}
+#bookingTab .deadline-card strong{font-size:clamp(9px,2.65vw,12px)!important;text-align:center!important;white-space:nowrap!important}
 #bookingTab .deadline-card span{text-align:center!important}
 .school-rules-accepted-v55{margin:10px 0 12px;padding:10px 13px;border-radius:13px;background:#e9f9ef;color:#147642;text-align:center;font-size:13px;font-weight:800}
 .dog-details-photo-control{justify-content:center;padding:14px!important}
+.dog-details-photo-control{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(135deg,#fff7fb,#fff0f8)!important;border-color:#f7c9e2!important}
+.dog-details-photo-control.dog-male-v100{background:linear-gradient(135deg,#f7fbff,#eaf5ff)!important;border-color:#b4d8f8!important}
+.dog-details-photo-control.dog-neutral-v100{background:linear-gradient(135deg,#fffcf8,#fff3e7)!important;border-color:#f7d1b1!important}
+.dog-details-photo-control::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.13;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23ed87bc'%3E%3Cellipse cx='32' cy='39' rx='16' ry='13'/%3E%3Ccircle cx='14' cy='23' r='7'/%3E%3Ccircle cx='27' cy='14' r='7'/%3E%3Ccircle cx='41' cy='14' r='7'/%3E%3Ccircle cx='52' cy='25' r='7'/%3E%3C/g%3E%3C/svg%3E");background-repeat:no-repeat;background-size:78px;background-position:12% 21%}
+.dog-details-photo-control.dog-male-v100::before{filter:hue-rotate(245deg)}
+.dog-details-photo-control>.dog-details-photo-wrap{z-index:1}
 .dog-details-photo-wrap{position:relative;width:max-content;margin:auto}
 .dog-details-photo-control .dog-details-photo-preview{width:118px;height:118px;flex-basis:118px;font-size:42px}
 .dog-details-photo-control .photo-pencil{right:-3px;bottom:-3px;width:38px;height:38px;font-size:20px;z-index:1}
@@ -1528,17 +1534,20 @@ html.customer-awaiting-dog-v107 #appView{
 #dogSettingsModalV36[data-section="legal"] #customerLegalSectionV23>summary{display:none!important}
 #dogSettingsModalV36[data-section="legal"] #customerLegalSectionV23{padding-top:13px!important;padding-bottom:13px!important}
 #customerLegalSectionV23 .details-content>.settings-paired-row-v99{border-bottom:1px solid var(--line);margin-bottom:10px}
+#dogSettingsModalV36 .settings-quick-v37>.settings-paired-v99{width:100%;min-width:0}
+#dogSettingsModalV36 .settings-paired-row-v99>div{min-width:0;flex:1}
+#dogSettingsModalV36 .settings-paired-row-v99>.push-switch{margin-left:auto;flex:0 0 auto}
 @media(max-width:520px){
-  #bookingTab .hero.dog-overview{grid-template-columns:122px minmax(0,1fr)!important;column-gap:9px!important}
+  #bookingTab .hero.dog-overview{grid-template-columns:132px minmax(0,1fr)!important;column-gap:12px!important}
   .dog-overview-identity{padding-right:8px}
-  .dog-overview-avatar{width:108px;height:108px;flex-basis:108px}
+  .dog-overview-avatar{width:116px;height:116px;flex-basis:116px}
   .dog-overview-content{gap:8px}
   .dog-overview-status{font-size:11.5px}
   .dog-overview-pass-row,.dog-overview-status,.dog-overview-visits{gap:7px}
 }
 @media(max-width:360px){
-  #bookingTab .hero.dog-overview{grid-template-columns:101px minmax(0,1fr)!important;column-gap:7px!important}
-  .dog-overview-avatar{width:91px;height:91px;flex-basis:91px}
+  #bookingTab .hero.dog-overview{grid-template-columns:110px minmax(0,1fr)!important;column-gap:8px!important}
+  .dog-overview-avatar{width:99px;height:99px;flex-basis:99px}
   .dog-overview-status{font-size:10.5px}
   #bookingTab .deadline-card strong{font-size:10px!important}
 }
