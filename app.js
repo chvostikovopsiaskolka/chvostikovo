@@ -16,7 +16,8 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260925-customer-pending-v108';
+const APP_BUILD='20260926-customer-email-confirm-v109';
+const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -739,22 +740,21 @@ function repairCustomerScrollV60(){
 function switchTabCore(tab){repairCustomerScrollV60();state.activeTab=tab;for(const t of ['booking','messages','dog','staff'])$(t+'Tab').classList.toggle('hidden',t!==tab);for(const t of ['Booking','Messages','Dog','Staff'])$('nav'+t)?.classList.toggle('active',t.toLowerCase()===tab);if(tab==='messages'&&state.data?.conversation_id){api({action:'mark_messages_read',conversation_id:Number(state.data.conversation_id)}).then(()=>{(state.data.messages||[]).forEach(m=>{if(m.sender_role==='staff')m.read_at=new Date().toISOString()});updateUnread()}).catch(()=>{})}}
 function switchTab(tab){if(tab==='messages')tab='dog';const out=switchTabCore(tab);runCustomerHooks('afterSwitchTab',tab,out);return out}
 async function sendMessage(e){e.preventDefault();const body=$('messageBody').value.trim();if(!body)return;try{const btn=e.submitter;btn.disabled=true;const result=await api({action:'send_message',message:body,booking_request_id:Number($('messageBooking').value)||null}),row=result?.data||result?.message||{id:-Date.now(),body,sender_role:'customer',created_at:new Date().toISOString()};(state.data.messages||(state.data.messages=[])).push(row);$('messageBody').value='';renderMessages();updateUnread();switchTab('messages');toast('Správa bola odoslaná.');queueCustomerSync('messages',80)}catch(e){toast(e.message)}finally{e.submitter&&(e.submitter.disabled=false)}}
-function showIosEmailConfirmedV87(){
+function showEmailConfirmedV109(){
   sessionStorage.setItem('chvostikovo_install_guide_seen_v1','1');
   document.documentElement.classList.add('email-confirmed-v106');
   showAuth('login');
   document.querySelector('.auth-switch')?.classList.add('hidden');
   ['loginForm','signupForm','forgotForm','newPasswordForm'].forEach(id=>$(id)?.classList.add('hidden'));
   document.getElementById('installHelpLink')?.classList.add('hidden');
-  authMessage('success','E-mail je potvrdený. Teraz zatvorte Safari a otvorte nainštalovanú aplikáciu Chvostíkovo cez ikonu na ploche. V aplikácii sa prihláste.');
+  authMessage('success','E-mail je potvrdený. Vráťte sa do nainštalovanej aplikácie Chvostíkovo a prihláste sa.');
 }
 function handleRecoveryHash(){
   const hash=new URLSearchParams(location.hash.replace(/^#/,'')),access=hash.get('access_token'),refresh=hash.get('refresh_token'),type=hash.get('type');
   if(access&&refresh){
-    const iosBrowser=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!(window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true);
-    if(type==='signup'&&iosBrowser){
+    if(type==='signup'){
       history.replaceState(null,'',location.pathname);
-      showIosEmailConfirmedV87();
+      showEmailConfirmedV109();
       return true;
     }
     saveSession({access_token:access,refresh_token:refresh,expires_in:Number(hash.get('expires_in'))||3600,token_type:'bearer'},true);
@@ -786,7 +786,7 @@ const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');
   if(infectious&&!document.getElementById('infectiousInfoV19')){infectious.textContent='Infekčné ochorenia (DHPPi+L)';infectious.insertAdjacentHTML('afterend','<div id="infectiousInfoV19" class="hint" style="margin-top:5px">Psinka · infekčný zápal pečene · parvoviróza · psia parainfluenza · leptospiróza</div>')}
 })();
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();try{loading(true);const s=await authFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:$('loginEmail').value.trim(),password:$('loginPassword').value})});saveSession(s,$('rememberLogin').checked);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}catch(e){authMessage('error',e.message)}finally{loading(false)}});
-$('signupForm').addEventListener('submit',async e=>{e.preventDefault();const password=$('signupPassword').value,passwordAgain=$('signupPasswordAgain')?.value||'',signupEmail=$('signupEmail').value.trim();if(!PASSWORD_STRONG_RE.test(password)){authMessage('error',PASSWORD_MIN_MESSAGE);$('signupPassword').focus();return}if(password!==passwordAgain){authMessage('error','Heslá sa nezhodujú.');$('signupPasswordAgain')?.focus();return}try{loading(true);localStorage.setItem('chvostikovo_pending_login_email',signupEmail);const data=await authFetch('/auth/v1/signup',{method:'POST',body:JSON.stringify({email:signupEmail,password,data:{full_name:$('signupName').value.trim(),phone:$('signupPhone').value.trim(),dog_name:$('signupDogName').value.trim(),privacy_notice_version:'privacy-v1',privacy_notice_acknowledged_at:new Date().toISOString()}})});if(data?.access_token){saveSession(data,true);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}else{showAuth('login');$('loginEmail').value=signupEmail;authMessage('success','Účet je vytvorený. Potvrďte e-mail a potom sa vráťte do nainštalovanej aplikácie Chvostíkovo. E-mail máte pri prihlásení už predvyplnený.')}}catch(e){authMessage('error',e.message)}finally{loading(false)}});
+$('signupForm').addEventListener('submit',async e=>{e.preventDefault();const password=$('signupPassword').value,passwordAgain=$('signupPasswordAgain')?.value||'',signupEmail=$('signupEmail').value.trim();if(!PASSWORD_STRONG_RE.test(password)){authMessage('error',PASSWORD_MIN_MESSAGE);$('signupPassword').focus();return}if(password!==passwordAgain){authMessage('error','Heslá sa nezhodujú.');$('signupPasswordAgain')?.focus();return}try{loading(true);localStorage.setItem('chvostikovo_pending_login_email',signupEmail);const data=await authFetch('/auth/v1/signup?redirect_to='+encodeURIComponent(CUSTOMER_PUBLIC_URL),{method:'POST',body:JSON.stringify({email:signupEmail,password,data:{full_name:$('signupName').value.trim(),phone:$('signupPhone').value.trim(),dog_name:$('signupDogName').value.trim(),privacy_notice_version:'privacy-v1',privacy_notice_acknowledged_at:new Date().toISOString()}})});if(data?.access_token){saveSession(data,true);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}else{showAuth('login');$('loginEmail').value=signupEmail;authMessage('success','Účet je vytvorený. Na e-mail sme poslali potvrdzovací odkaz. E-mail zatiaľ nie je potvrdený. Po potvrdení sa vráťte do nainštalovanej aplikácie Chvostíkovo a prihláste sa.')}}catch(e){authMessage('error',e.message)}finally{loading(false)}});
 $('forgotForm').addEventListener('submit',async e=>{e.preventDefault();try{await authFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(location.origin+'/' ),{method:'POST',body:JSON.stringify({email:$('forgotEmail').value.trim()})});authMessage('success','Odkaz na obnovu hesla sme poslali na váš e-mail.')}catch(e){authMessage('error',e.message)}});
 $('newPasswordForm').addEventListener('submit',async e=>{e.preventDefault();const password=$('newPassword').value;if(!PASSWORD_STRONG_RE.test(password)){authMessage('error',PASSWORD_MIN_MESSAGE);$('newPassword').focus();return}if(password!==$('newPasswordAgain').value){authMessage('error','Heslá sa nezhodujú.');return}try{await authFetch('/auth/v1/user',{method:'PUT',headers:{Authorization:'Bearer '+state.session.access_token},body:JSON.stringify({password})});authMessage('success','Heslo je zmenené.');await bootstrap()}catch(e){authMessage('error',e.message)}});
 $('logoutBtn').addEventListener('click',async()=>{
