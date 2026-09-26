@@ -1,14 +1,14 @@
 import { useState } from "react";
 
 const COUNTRY_CODES = [
-  { value: "+421", label: "SK +421" },
-  { value: "+420", label: "CZ +420" },
-  { value: "+36", label: "HU +36" },
-  { value: "+48", label: "PL +48" },
-  { value: "+43", label: "AT +43" },
-  { value: "+380", label: "UA +380" },
-  { value: "+49", label: "DE +49" },
-  { value: "+44", label: "UK +44" },
+  { value: "+421", label: "+421" },
+  { value: "+420", label: "+420" },
+  { value: "+36", label: "+36" },
+  { value: "+48", label: "+48" },
+  { value: "+43", label: "+43" },
+  { value: "+380", label: "+380" },
+  { value: "+49", label: "+49" },
+  { value: "+44", label: "+44" },
 ] as const;
 
 function splitPhone(value: string) {
@@ -74,7 +74,7 @@ export function PhoneField({
           aria-label={language === "en" ? "Country calling code" : "Predvoľba krajiny"}
           value={prefix}
           onChange={(event) => update(event.target.value, digits)}
-          className="shrink-0 border-r border-border bg-secondary/55 px-2.5 text-sm font-semibold text-forest outline-none sm:px-3"
+          className="shrink-0 border-r border-border bg-secondary/55 px-2 text-sm font-semibold text-forest outline-none sm:px-2.5"
         >
           {COUNTRY_CODES.map((item) => (
             <option key={item.value} value={item.value}>
@@ -97,7 +97,7 @@ export function PhoneField({
             update(prefix, event.target.value);
           }}
           onInvalid={(event) => event.currentTarget.setCustomValidity(invalidMessage)}
-          placeholder={language === "en" ? "Phone number" : "Telefónne číslo"}
+          placeholder="912 345 678"
           className="min-w-0 flex-1 bg-transparent px-3 py-[0.65rem] text-base leading-[1.35] text-foreground outline-none"
         />
       </div>
