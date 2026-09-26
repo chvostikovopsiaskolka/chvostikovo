@@ -1418,3 +1418,51 @@ html.customer-awaiting-dog-v107 #appView{
   position:relative!important;
   z-index:1!important;
 }
+/* Customer booking overview and Menu */
+#bookingTab .hero.dog-overview{--dog-accent:#ed96c4;--dog-ink:#993f74;display:grid!important;grid-template-columns:92px minmax(0,1fr)!important;align-items:start!important;justify-content:initial!important;column-gap:16px!important;row-gap:10px!important;min-height:0!important;padding:17px!important;margin:8px 0 12px!important;border:1px solid #f3bddb!important;border-radius:25px!important;background:linear-gradient(135deg,#fff1f8,#fce5f2)!important;color:#3d2c39!important;box-shadow:0 10px 24px rgba(150,74,110,.10)!important}
+#bookingTab .hero.dog-overview.dog-male-v100{--dog-accent:#85b9ef;--dog-ink:#32699e;border-color:#b8d8f8!important;background:linear-gradient(135deg,#eef7ff,#e1f1ff)!important;color:#253c53!important}
+#bookingTab .hero.dog-overview.dog-neutral-v100{--dog-accent:#f4a870;--dog-ink:#98521d;border-color:#f7d1b1!important;background:linear-gradient(135deg,#fff7ed,#ffeedc)!important;color:#3d3129!important}
+#bookingTab .hero.dog-overview::after{opacity:.085!important}
+.dog-overview-avatar{width:86px;height:86px;border-radius:50%;background:#fff;border:3px solid var(--dog-accent);display:grid;place-items:center;font-size:32px;color:var(--dog-ink);overflow:hidden;box-shadow:0 4px 12px rgba(55,36,48,.12)}
+.dog-overview-avatar img,.dog-details-photo-preview img{width:100%;height:100%;display:block;object-fit:cover}
+.dog-overview-content{min-width:0;display:grid;gap:5px}
+.dog-overview-name{display:block;font-size:20px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dog-overview-selector{width:100%;min-height:36px;border:1px solid var(--dog-accent);border-radius:11px;background:#fff;color:#374151;padding:5px 8px;font-size:14px}
+#bookingTab .hero-pass.dog-overview-pass{max-width:none!important;text-align:left!important;display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 8px;font-weight:700;font-size:13px;line-height:1.2;color:inherit}
+#bookingTab .hero-pass.dog-overview-pass span{font-size:13px;opacity:1}
+#bookingTab .hero-pass.dog-overview-pass strong,#bookingTab .hero-pass.dog-overview-pass.single-v36 strong,#bookingTab .hero-pass.dog-overview-pass .single-entry-label-v75{font-size:16px!important;line-height:1.2!important;margin:0;max-width:none!important;color:var(--dog-ink)}
+#bookingTab .hero-pass.dog-overview-pass small{flex-basis:100%;font-size:12px!important;line-height:1.25;opacity:.82;margin:0;white-space:normal}
+.dog-overview-status,.dog-overview-visits{border:0;background:transparent;color:inherit;text-align:left;padding:2px 0;min-height:27px;font-size:13px;font-weight:650;line-height:1.25}
+.dog-overview-status.invalid{color:#9f2929}.dog-overview-status.warning{color:#925516}.dog-overview-status.valid{color:#18643a}
+.dog-overview-visits{font-weight:600}
+.dog-overview-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dog-overview-actions button{min-width:0;min-height:39px;border:1px solid color-mix(in srgb,var(--dog-accent),white 30%);border-radius:12px;background:rgba(255,255,255,.82);color:#403943;font-size:12px;font-weight:750;padding:7px 5px;white-space:nowrap}
+.customer-menu{display:flex;flex-direction:column;padding:8px 2px 32px;min-height:calc(100dvh - 126px)}
+.customer-menu h1{font-size:26px;line-height:1.2;margin:9px 8px 19px;color:#26232a}
+.customer-menu-group{display:block;width:100%;padding:0;background:#fff;border:1px solid #ede8e4;border-radius:22px;box-shadow:0 6px 20px rgba(44,36,34,.045);margin:0 0 12px;overflow:hidden;text-align:left;color:#2a2b31}
+.customer-menu-group>summary,.customer-menu-direct{display:flex;align-items:center;gap:13px;min-height:72px;padding:14px 17px;list-style:none;cursor:pointer;font-size:16px}
+.customer-menu-group>summary::-webkit-details-marker{display:none}
+.customer-menu-direct{font:inherit;font-size:16px;border:1px solid #ede8e4}
+.customer-menu-group strong{flex:1;min-width:0;font-weight:750}
+.menu-icon{width:41px;height:41px;flex:0 0 41px;display:grid;place-items:center;border-radius:14px;background:#fff4e9;font-size:21px}
+.menu-chevron{font-size:25px;color:#a19b96;line-height:1;transition:transform .15s}
+.customer-menu-group[open] .menu-chevron{transform:rotate(180deg)}
+.customer-menu-rows{padding:0 14px 12px 70px;display:grid}
+.customer-menu-rows button{display:flex;align-items:center;gap:11px;min-height:54px;border:0;border-top:1px solid #f3f0ee;padding:9px 4px;background:#fff;color:#373840;text-align:left;font-size:18px}
+.customer-menu-rows button span{flex:1;font-size:14px;font-weight:650;line-height:1.25}
+.customer-menu-rows button small{display:block;font-size:12px;color:#8a8990;font-weight:500;margin-top:2px}
+.customer-menu-rows button b{font-size:20px;font-weight:500;color:#afa9a4}
+.menu-unread{width:9px;height:9px;border-radius:50%;background:#f97316}
+.menu-build-version{margin:auto 0 8px;padding-top:25px;text-align:center;color:#96969e;font-size:12px;overflow-wrap:anywhere}
+.dog-details-photo-control{display:flex;align-items:center;gap:15px;margin:0 0 18px;padding:10px;border:1px solid #eee9e4;border-radius:18px;background:#fcfaf8}
+.dog-details-photo-control .btn{flex:1;min-height:46px;font-size:13px;padding:8px}
+.dog-details-photo-preview{width:68px;height:68px;flex:0 0 68px;display:grid;place-items:center;overflow:hidden;border-radius:50%;border:3px solid #eac3ad;background:#fff;font-size:28px}
+.dog-details-photo-preview.dog-female-v100{border-color:#eeadd1!important}.dog-details-photo-preview.dog-male-v100{border-color:#9ccbf3!important}
+#dogDetailsModal[data-mode="vaccinations"] .dog-details-photo-control{display:none}
+#customerContactModal .account-card{margin:0;padding:0;border:0;box-shadow:none}
+#customerContactModal .account-card .collapse-btn{display:none}
+#customerContactModal .account-card form{padding:4px 0}
+#supportChatBtnV52,#supportChatHintV53{display:none!important}
+.photo-modal{z-index:700}
+.customer-modal-open{overflow:hidden}
+@media(max-width:520px){#bookingTab .hero.dog-overview{grid-template-columns:76px minmax(0,1fr)!important;column-gap:11px!important;padding:13px!important}.dog-overview-avatar{width:72px;height:72px;font-size:27px}.dog-overview-name{font-size:18px}.dog-overview-actions button{font-size:11px}.customer-menu-rows{padding-left:66px}.customer-menu-group>summary,.customer-menu-direct{min-height:68px;padding:11px 14px}}
