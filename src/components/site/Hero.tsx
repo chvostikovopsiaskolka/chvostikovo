@@ -64,7 +64,7 @@ export function Hero() {
           </p>
 
           <div className="mx-auto mt-3.5 max-w-xl rounded-2xl bg-white/95 p-3 text-forest shadow-soft min-[390px]:mt-5 min-[390px]:p-4">
-            <p className="font-display text-sm font-bold min-[390px]:text-base sm:text-lg">
+            <p className="whitespace-nowrap font-display text-[12px] font-bold tracking-[-0.02em] min-[350px]:text-[13px] sm:text-[15px]">
               Váš psík už nemusí tráviť deň sám doma.
             </p>
             <p className="mt-1.5 text-sm font-medium leading-snug text-forest/90 min-[390px]:mt-2 min-[390px]:text-base min-[390px]:leading-relaxed">
