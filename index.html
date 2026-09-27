@@ -12,7 +12,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
   <link rel="manifest" href="/manifest.webmanifest?v=20260926-customer-layout-v119">
-  <link rel="stylesheet" href="/styles.css?v=20260927-customer-vacc-booking-v124">
+  <link rel="stylesheet" href="/styles.css?v=20260927-customer-ui-v126">
   <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}.loading-screen.in-app{background:transparent;pointer-events:none;padding:0}.loading-screen.in-app .loading-logo,.loading-screen.in-app small{display:none}.loading-screen.in-app .loading-paw{width:68px;height:68px;border:0;border-radius:18px;background:#fff;box-shadow:0 10px 34px rgba(17,24,39,.16);font-size:0;animation:none}.loading-screen.in-app .loading-paw::before{content:'🐾';width:42px;height:42px;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;display:grid;place-items:center;font-size:18px;animation:loadingSpin .8s linear infinite}</style>
   <title>Chvostíkovo</title>
 </head>
@@ -78,10 +78,9 @@
   <section id="bookingTab" class="tab-page">
     <div class="hero dog-overview" id="bookingDogProfile">
       <div class="dog-overview-identity"><div id="bookingDogAvatar" class="dog-overview-avatar" aria-hidden="true">🐾</div><strong id="bookingDogName" class="dog-overview-name">Môj psík</strong><select id="bookingDogSelector" class="dog-overview-selector hidden" aria-label="Vyberte psíka"></select></div>
-      <div class="dog-overview-content"><div class="dog-overview-pass-row"><span class="overview-icon pass-icon"><svg><use href="#ci-ticket"/></svg></span><div id="passSummary" class="hero-pass dog-overview-pass"></div></div><button id="bookingVaccinationStatus" class="dog-overview-status" type="button"></button><button id="bookingVisitCount" class="dog-overview-visits" type="button"><span class="overview-icon"><svg><use href="#ci-chart"/></svg></span><span class="overview-label"></span></button></div>
-      <div class="dog-overview-actions"><button id="bookingGradebook" type="button"><svg><use href="#ci-book"/></svg><span>Žiacka knižka</span></button><button id="bookingRules" type="button"><svg><use href="#ci-file"/></svg><span>Pravidlá škôlky</span></button></div>
+      <div class="dog-overview-content"><div class="dog-overview-pass-row"><span class="overview-icon pass-icon"><svg><use href="#ci-ticket"/></svg></span><div id="passSummary" class="hero-pass dog-overview-pass"></div></div><button id="bookingVaccinationStatus" class="dog-overview-status" type="button"></button><button id="bookingVisitCount" class="dog-overview-visits" type="button"><span class="overview-icon"><svg><use href="#ci-chart"/></svg></span><span class="overview-label"></span></button><button id="bookingGradebook" class="dog-overview-gradebook" type="button"><svg><use href="#ci-book"/></svg><span>Žiacka knižka</span></button></div>
     </div>
-    <div class="section-head"><div><h2>Vyberte deň</h2><p id="deadlineText"><span>Prosíme o rezerváciu miesta na nasledujúci týždeň do <strong>nedele 20:00</strong>. V prípade individuálnej potreby rezervácie miesta v škôlke nás prosím kontaktujte.</span></p></div></div>
+    <div class="section-head"><div><h2>Vyberte deň</h2><p id="deadlineText"><strong>Rezervácie na ďalší týždeň do nedele 20:00.</strong><span>Ak potrebujete individuálny termín, kontaktujte nás.</span></p></div></div>
     <div id="bookingNotice"></div>
     <div id="announcementNotice"></div>
     <div id="upcomingBookings"></div>
@@ -132,7 +131,7 @@
       <div id="dogBasicFieldsV96" class="dog-details-section-v96">
         <div><label for="dogName">Meno psíka</label><input id="dogName" class="input dog-name-locked-v87" readonly aria-readonly="true" tabindex="-1" required></div>
         <div class="grid2"><div><label for="dogBirthDate">Dátum narodenia</label><small class="birthdate-recommend-v100">Odporúčame vyplniť – psíka bude čakať narodeninové prekvapenie. 🎂🐾</small><input id="dogBirthDate" class="input" type="date"></div><div><label for="dogAge">Vek</label><input id="dogAge" class="input dog-age-locked-v81" readonly aria-readonly="true" tabindex="-1" placeholder="Vyplní sa automaticky"></div></div>
-        <div><label for="dogBreed">Plemeno a váha</label><input id="dogBreed" class="input" placeholder="Plemeno a približná váha, napr. weimarský stavač, 30 kg" autocomplete="off"></div>
+        <div><label for="dogBreed">Plemeno a váha</label><input id="dogBreed" class="input" autocomplete="off"></div>
         <div class="grid2"><div><label for="dogSex">Pohlavie</label><select id="dogSex" class="input"><option value="">Neuvedené</option><option value="male">Pes</option><option value="female">Suka</option></select></div><div><label for="dogNeutered">Kastrovaný / sterilizovaná</label><select id="dogNeutered" class="input"><option value="">Neuvedené</option><option value="true">Áno</option><option value="false">Nie</option></select></div></div>
         <div><label for="dogAllergies">Alergie, zdravotné obmedzenia a iné informácie</label><textarea id="dogAllergies" class="input" rows="5" maxlength="3000" placeholder="Alergie, lieky, zdravotné obmedzenia, povaha alebo iné dôležité informácie"></textarea></div>
       </div>
@@ -161,6 +160,6 @@
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/app.js?v=20260927-tech-cleanup-v125"></script>
+<script src="/app.js?v=20260927-customer-ui-v126"></script>
 </body>
 </html>

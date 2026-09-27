@@ -790,7 +790,6 @@ $('bookingVisitCount').addEventListener('click',()=>window.openDogVisitsV99?.())
 function openCustomerRules(){if(window.openCustomerRulesV55)window.openCustomerRulesV55();else $('schoolRulesCardV55')?.click()}
 function closeCustomerSmallModal(id){$(id).classList.add('hidden');document.documentElement.classList.remove('customer-modal-open')}
 function openCustomerGradebook(){$('customerGradebookModal').classList.remove('hidden');document.documentElement.classList.add('customer-modal-open')}
-$('bookingRules').addEventListener('click',openCustomerRules);
 $('menuRules').addEventListener('click',openCustomerRules);
 $('bookingGradebook').addEventListener('click',openCustomerGradebook);
 $('menuGradebook').addEventListener('click',openCustomerGradebook);
@@ -1483,7 +1482,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   let selectedDatesV37=new Set();
   let selectedTaxiByDateV91=new Map();
   let submittingV37=false;
-  let pendingPassRenewalV95=0;
+  let pendingPassRenewalV95=null;
 
   function bratislavaClockV95(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()),m=Object.fromEntries(parts.map(x=>[x.type,x.value]));return{date:m.year+'-'+m.month+'-'+m.day,minutes:Number(m.hour)*60+Number(m.minute)}}
   function previousIsoDayV95(iso){const d=new Date(String(iso)+'T12:00:00Z');d.setUTCDate(d.getUTCDate()-1);return d.toISOString().slice(0,10)}
@@ -1567,7 +1566,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const existing=bookingFor(dog.id,d.date),deadlineClosed=bookingDeadlineClosedV95(d.date),closed=d.bookings_open===false||deadlineClosed,full=Number(d.available)<=0;
       const disabled=!!existing||closed||full;
       const selected=selectedDatesV37.has(d.date);
-      const stateText=existing?'Rezervované':deadlineClosed?'Uzavreté o 21:00':closed?'Zatvorené':full?'Plno':`${Math.max(0,Number(d.available)||0)} voľné`;
+      const stateText=existing?'Rezervované':deadlineClosed?'Uzavreté o 20:00':closed?'Zatvorené':full?'Plno':`${Math.max(0,Number(d.available)||0)} voľné`;
       return `<button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${disabled?'disabled':''}" data-date="${d.date}" ${disabled?'disabled':''}><small>${esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${esc(stateText)}</span></button>`;
     }).join('');
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',()=>{
@@ -1610,7 +1609,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     document.documentElement.classList.add('booking-picker-open-v37');
   }
   window.openBookingPickerV37=openPickerV37;
-  function closePickerV37(){if(submittingV37)return;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');pickerErrorV95('');if(pendingPassRenewalV95){const dogId=pendingPassRenewalV95;pendingPassRenewalV95=0;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(dogId),100)}}
+  function closePickerV37(){if(submittingV37)return;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');pickerErrorV95('');if(pendingPassRenewalV95){const renewal=pendingPassRenewalV95;pendingPassRenewalV95=null;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(renewal.dogId,renewal.date),100)}}
 
   async function submitPickerV37(){
     const dog=selectedDog(),dates=[...selectedDatesV37].sort();
@@ -1622,20 +1621,20 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       renderPickerV37();pickerErrorV95('Rezervácie na '+deadlineDates.map(skDate).join(', ')+' sa uzavreli deň vopred o 21:00.',true);queueCustomerSync('bookings',0);return;
     }
     submittingV37=true;pickerErrorV95('');renderPickerV37();
-    let ok=0,shouldPromptPassRenewalV94=false;const failed=[],successDates=[];
+    let ok=0,renewalDate=null;const failed=[],successDates=[];
     for(const date of dates){
       const taxiMode=selectedTaxiByDateV91.get(date)||'none';
       try{
         const result=await api({action:'request_booking',dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode});
         const bookingRow=result?.data||result?.booking||result?.request||null;
-        if(bookingRow&&Number(bookingRow.projected_pass_total)>0&&Number(bookingRow.projected_entry_number)>=Number(bookingRow.projected_pass_total))shouldPromptPassRenewalV94=true;
+        if(bookingRow&&!bookingRow.planned_pass_request_id&&Number(bookingRow.projected_pass_total)>0&&Number(bookingRow.projected_entry_number)===Number(bookingRow.projected_pass_total))renewalDate=date;
         applyLocalBooking(result,{id:-(Date.now()+ok),dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode,status:'pending',can_manage:true});ok++;successDates.push(date);
       }catch(e){failed.push({date,error:e.message||'Nepodarilo sa rezervovať.'})}
     }
     try{if(ok)queueCustomerSync('bookings',80)}finally{submittingV37=false}
     if(failed.length){
       successDates.forEach(date=>{selectedDatesV37.delete(date);selectedTaxiByDateV91.delete(date)});
-      if(shouldPromptPassRenewalV94)pendingPassRenewalV95=Number(dog.id);
+      if(renewalDate)pendingPassRenewalV95={dogId:Number(dog.id),date:renewalDate};
       renderPickerV37();
       const deadlineFailure=failed.some(x=>/21:00|uzavrela deň vopred|zatvorené/i.test(x.error));
       const details=failed.map(x=>skDate(x.date)+' – '+x.error).join(' | ');
@@ -1645,7 +1644,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     }
     closePickerV37();
     toast(ok===1?'Rezervácia bola odoslaná na schválenie.':`${ok} rezervácie boli odoslané na schválenie.`);
-    if(shouldPromptPassRenewalV94)setTimeout(()=>window.showPassRenewalAfterBookingV94?.(Number(dog.id)),140);
+    if(renewalDate)setTimeout(()=>window.showPassRenewalAfterBookingV94?.(Number(dog.id),renewalDate),140);
   }
 
   function bookingRosterV37(day){
@@ -1678,11 +1677,16 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const day=byDate.get(r.reservation_date)||{},taxi=taxiLabel(r.taxi_mode),pending=r.status==='pending';
       const interest=(state.data?.pass_requests||[]).find(x=>Number(x.id)===Number(r.planned_pass_request_id)&&x.status==='pending');
       const planned=Number(r.projected_entry_number||r.planned_entry_number)||0,plannedTotal=Number(r.projected_pass_total||r.planned_pass_total)||0;
-      const passState=interest&&planned&&plannedTotal?`<div class="hint">Plánovaný ${planned}/${plannedTotal} vstup nasledujúcej permanentky · čaká na kúpu</div>`:planned&&plannedTotal?`<div class="hint">Plánovaný vstup ${planned}/${plannedTotal}</div>`:'';
+      const reservation=(state.data?.reservations||[]).find(x=>Number(x.id)===Number(r.reservation_id));
+      const passId=Number(r.pass_id||reservation?.pass_id)||0;
+      const upcomingPass=passId&&(state.data?.passes||[]).some(p=>Number(p.id)===passId&&p.status==='queued');
+      const passState=planned&&plannedTotal?`<span class="reserved-pass-v37">${r.planned_pass_request_id||upcomingPass?`Plánovaný vstup ${planned}/${plannedTotal} z novej permanentky${interest?' · čaká na kúpu':''}`:`Vstup z permanentky ${planned}/${plannedTotal}`}</span>`:'';
       const note=day.note&&!(day.bookings_open===false&&/^zatvorené$/i.test(String(day.note).trim()))?`<div class="reserved-note-v37">${esc(day.note)}</div>`:'';
       const sharedNote=r.can_manage===false?`<div class="hint">${esc(dog.name)} už má na tento deň rezerváciu alebo žiadosť čakajúcu na potvrdenie.</div>`:'';
-      const cancel=r.can_manage!==false?`<button class="text-btn cancel-booking-v37" type="button" data-request="${r._legacy?'':r.id||''}" data-reservation="${r._legacy?r.reservation_id||r.id:''}">Zrušiť rezerváciu</button>`:'';
-      return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div><strong>${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span></div><div class="reserved-day-meta-v37">${bookingRosterV37(day)}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}</div>${passState}${sharedNote}${note}${cancel}</div>`;
+      const cancel=r.can_manage!==false?`<button class="cancel-booking-v37" type="button" data-request="${r._legacy?'':r.id||''}" data-reservation="${r._legacy?r.reservation_id||r.id:''}">Zrušiť rezerváciu</button>`:'';
+      const detail=passState||taxi?`<div class="reserved-day-detail-v37">${passState}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}</div>`:'';
+      const approvedRoster=pending?'':`<div class="reserved-day-meta-v37">${bookingRosterV37(day)}</div>`;
+      return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div class="reserved-day-date-v37"><strong>${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><div class="reserved-day-controls-v37"><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span>${cancel}</div></div>${approvedRoster}${detail}${sharedNote}${note}</div>`;
     }).join('');
     root.querySelectorAll('.cancel-booking-v37').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();cancelBooking(btn)}));
   };
@@ -1724,20 +1728,23 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
   function ensureModalV38(){
     if(document.getElementById('passRenewalModalV38'))return;
-    document.body.insertAdjacentHTML('beforeend','<div id="passRenewalModalV38" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passRenewalTitleV38"><div class="legal-card"><button id="passRenewalCloseV38" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="passRenewalTitleV38">Posledný vstup z permanentky</h2><div class="legal-body"><p>Práve rezervovaný deň využije posledný voľný vstup z aktuálnej permanentky.</p><p><strong>Nová 10-vstupová permanentka stojí 200 €.</strong></p><p class="hint">Platnosť novej permanentky začne až jej prvým použitím.</p><p class="hint pass-interest-disclaimer-v44">Odoslaním záujmu nevzniká povinnosť platby ani automatický nákup permanentky. Ide iba o informáciu pre Chvostíkovo, že máte o novú permanentku záujem.</p></div><button id="passRenewalRequestV38" class="btn full" type="button">Mám záujem o novú permanentku</button><button id="passRenewalLaterV38" class="btn secondary full" type="button">Neskôr</button></div></div>');
+    document.body.insertAdjacentHTML('beforeend','<div id="passRenewalModalV38" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passRenewalTitleV38"><div class="legal-card"><button id="passRenewalCloseV38" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="passRenewalTitleV38">Posledný vstup z permanentky</h2><div class="legal-body"><p id="passRenewalDayV38"></p><p class="hint pass-renewal-validity-v38">Platnosť novej permanentky začne až jej prvým použitím.</p><p class="hint pass-interest-disclaimer-v44">Odoslaním záujmu nevzniká povinnosť platby ani automatický nákup permanentky. Ide iba o informáciu pre Chvostíkovo, že máte o novú permanentku záujem.</p></div><button id="passRenewalRequestV38" class="btn full" type="button">Mám záujem o novú permanentku</button><button id="passRenewalLaterV38" class="btn secondary full" type="button">Neskôr</button></div></div>');
     const close=()=>document.getElementById('passRenewalModalV38')?.classList.add('hidden');
     document.getElementById('passRenewalCloseV38').addEventListener('click',close);
     document.getElementById('passRenewalLaterV38').addEventListener('click',close);
     document.getElementById('passRenewalModalV38').addEventListener('click',e=>{if(e.target===document.getElementById('passRenewalModalV38'))close()});
   }
-  function showPromptV38(dogId){
+  function showPromptV38(dogId,reservationDate){
     if(!dogId||!lastEntryReservedV38(dogId)||pendingPassV38(dogId))return;
+    const lastDay=futureItems().find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===reservationDate&&!r.planned_pass_request_id&&Number(r.projected_entry_number||r.planned_entry_number)===Number(r.projected_pass_total||r.planned_pass_total)&&Number(r.projected_pass_total||r.planned_pass_total)>0);
+    if(!lastDay)return;
     state.selectedDogId=Number(dogId);ensureModalV38();
     const modal=document.getElementById('passRenewalModalV38'),button=document.getElementById('passRenewalRequestV38');
+    $('passRenewalDayV38').textContent=`Rezervovaný deň ${skDay(reservationDate)} ${skDate(reservationDate)} využije posledný voľný vstup z aktuálnej permanentky.`;
     button.onclick=async()=>{button.disabled=true;try{await requestPass(10);modal.classList.add('hidden')}finally{button.disabled=false}};
     modal.classList.remove('hidden');
   }
-  window.showPassRenewalAfterBookingV94=(dogId)=>{bookingDogV38=0;showPromptV38(Number(dogId)||0)};
+  window.showPassRenewalAfterBookingV94=(dogId,date)=>{bookingDogV38=0;showPromptV38(Number(dogId)||0,date)};
 
 
 
