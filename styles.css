@@ -1571,3 +1571,19 @@ html.customer-awaiting-dog-v107 #appView{
   .dog-overview-status{font-size:10.5px}
   #bookingTab .deadline-card strong{font-size:10px!important}
 }
+/* v123: compact notices + remove iOS tap highlight without hiding keyboard focus */
+#appView button,#appView a,#appView summary,#appView [role="button"]{-webkit-tap-highlight-color:transparent}
+#appView button:focus:not(:focus-visible),#appView a:focus:not(:focus-visible),#appView summary:focus:not(:focus-visible),#appView [role="button"]:focus:not(:focus-visible){outline:none}
+#appView button:focus-visible,#appView a:focus-visible,#appView summary:focus-visible,#appView [role="button"]:focus-visible{outline:2px solid rgba(249,115,22,.72);outline-offset:2px}
+.care-notice{padding:10px 12px!important;border-radius:14px!important}
+.care-notice strong{font-size:15px!important;line-height:1.25}
+.care-notice p{font-size:13px!important;line-height:1.35!important;margin:4px 0 7px!important}
+.care-notice button{min-height:34px!important;padding:6px 12px!important;border-radius:11px!important;font-size:13px!important}
+.portal-announcement{padding:10px 12px!important;border-radius:14px!important}
+.portal-announcement-head{font-size:14px;line-height:1.25}
+.portal-announcement-body{font-size:12.5px!important;line-height:1.35!important;margin-top:4px!important}
+.notification-popup-list{gap:8px!important}
+.notification-popup-item{padding:10px 12px!important;border-radius:14px!important}
+.notification-popup-item strong{font-size:14px!important}
+.notification-popup-item div{font-size:13px!important;line-height:1.35!important;margin-top:4px!important}
+.notification-popup-item button{min-height:34px!important;margin-top:8px!important;padding:6px 12px!important;font-size:13px!important}
