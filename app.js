@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260927-customer-ui-fix-v123';
+const APP_BUILD='20260927-customer-vacc-booking-v124';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -229,7 +229,7 @@ function startCustomerLive(force=false){
   socket.onerror=()=>{};socket.onclose=()=>{if(socket!==customerLiveSocket)return;customerLiveSocket=null;clearInterval(customerLiveHeartbeat);customerLiveHeartbeat=0;scheduleCustomerReconnect()};
 }
 function renderWeekHeader(){const days=state.data?.availability?.days||[];const el=$('weekTitle');if(!el)return;if(!days.length){el.textContent='Nasledujúce dni';return}const a=String(days[0].date||''),b=String(days[days.length-1].date||'');const pa=a.split('-').map(Number),pb=b.split('-').map(Number);if(pa.length<3||pb.length<3){el.textContent='Nasledujúce dni';return}el.textContent=pa[0]===pb[0]?`${pa[2]}. ${pa[1]}. – ${pb[2]}. ${pb[1]}. ${pb[0]}`:`${pa[2]}. ${pa[1]}. ${pa[0]} – ${pb[2]}. ${pb[1]}. ${pb[0]}`}
-function careNotificationIsCurrent(n,today=bratislavaToday()){if(n.visible_from&&n.visible_from>today)return false;if(n.visible_until&&n.visible_until<today)return false;if(n.notification_type==='vaccination_expiry'){const vaccination=(state.data?.vaccinations||[]).find(v=>Number(v.id)===Number(n.entity_id));return !!vaccination?.valid_until&&vaccination.valid_until>=today&&n.event_key===`vaccination:${vaccination.dog_id}:${vaccination.vaccination_type}:${vaccination.valid_until}`}if(n.notification_type==='pass_expiry'){const pass=(state.data?.passes||[]).find(p=>Number(p.id)===Number(n.entity_id));return !!pass&&pass.status==='active'&&pass.no_expiry!==true&&Number(pass.used_entries)<Number(pass.total_entries)&&pass.valid_until>=today&&n.event_key===`pass_expiry:${pass.id}:${pass.valid_until}:14`}if(n.notification_type==='dog_birthday'){const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(n.entity_id));return !!dog?.birth_date&&String(dog.birth_date).slice(5)===today.slice(5)}return true}
+function careNotificationIsCurrent(n,today=bratislavaToday()){if(n.visible_from&&n.visible_from>today)return false;if(n.visible_until&&n.visible_until<today)return false;if(n.notification_type==='vaccination_expiry'){const vaccination=(state.data?.vaccinations||[]).find(v=>Number(v.id)===Number(n.entity_id));return !!vaccination?.valid_until&&vaccination.valid_until>=today&&n.event_key===`vaccination:${vaccination.dog_id}:${vaccination.vaccination_type}:${vaccination.valid_until}`}if(n.notification_type==='pass_expiry'){const pass=(state.data?.passes||[]).find(p=>Number(p.id)===Number(n.entity_id));const remaining=pass?Number(pass.total_entries)-Number(pass.used_entries):0;return !!pass&&pass.status==='active'&&pass.no_expiry!==true&&remaining>2&&pass.valid_until>=today&&n.event_key===`pass_expiry:${pass.id}:${pass.valid_until}:14`}if(n.notification_type==='dog_birthday'){const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(n.entity_id));return !!dog?.birth_date&&String(dog.birth_date).slice(5)===today.slice(5)}return true}
 const customerClosedNotificationIdsV59=new Set();
 function customerCareAction(n){
   $('notificationPopup')?.classList.add('hidden');
@@ -403,9 +403,21 @@ function renderDogHeaderV56(dog){
 function renderDogCore(){ensureDogFormInModalV51();const dog=selectedDog();if(!dog){$('dogProfilePhoto').innerHTML='';$('dogProfilePhoto').removeAttribute('data-dog-visual-key');$('dogProfileSettings').innerHTML='';$('dogStats').innerHTML=box('info','Psíka najprv priradí Chvostíkovo k vášmu účtu.');$('dogForm').classList.add('hidden');renderDogProfilePrompt();return}$('dogForm').classList.remove('hidden');state.selectedDogId=Number(dog.id);renderDogHeaderV56(dog);renderDetailsPhoto(dog);const cachedPush=state.pushChecked?!!state.pushEnabled:(typeof Notification!=='undefined'&&Notification.permission==='granted'&&localStorage.getItem('chvostikovo_push_enabled')==='1');$('dogProfileSettings').innerHTML=`<div class="card profile-settings"><div class="privacy-row"><div><strong>Upozornenia</strong><small>Rezervácie, správy a oznamy z Chvostíkova.</small></div><button id="pushToggle" class="push-switch syncing ${cachedPush?'active':''}" type="button" aria-label="Upozornenia"><span></span></button></div><div class="privacy-row"><div><strong>Zobraziť meno psa a fotku ostatným</strong><small>Súhlas môžete kedykoľvek vypnúť.</small></div><button id="privacyToggle" class="push-switch ${dog.share_name_photo?'active':''}" type="button" aria-label="Zdieľanie"><span></span></button></div></div>`;$('pushToggle').addEventListener('click',togglePush);$('privacyToggle').addEventListener('click',togglePrivacy);applyPushToggle();$('dogStats').innerHTML='';fillDogForm(dog);renderDogProfilePrompt()}
 function renderDog(){const out=renderDogCore();runCustomerHooks('afterRenderDog',out);return out}
 function combinedDogInfoV81(d){const parts=[d?.allergies,d?.temperament].map(v=>String(v||'').trim()).filter(Boolean),out=[];for(const part of parts){if(out.some(existing=>existing===part||existing.includes(part)))continue;out.push(part)}return out.join('\n\n')}
-function syncDogAgeField(){const birth=$('dogBirthDate').value,age=$('dogAge'),automatic=dogAgeText(birth),reported=selectedDog()?.age_text||'';age.value=automatic||reported;age.readOnly=true;age.setAttribute('aria-readonly','true');age.placeholder=automatic?'Vypočítané z dátumu narodenia':'Vek z prihlášky alebo po zadaní dátumu narodenia';age.title=automatic?'Vek sa automaticky počíta z dátumu narodenia.':'Vek z prihlášky zostane uložený, kým nezadáte dátum narodenia.'}
+function dogBreedWeightValueV124(d){
+  const breed=String(d?.breed||'').trim(),rawWeight=Number(d?.weight_kg);
+  if(!Number.isFinite(rawWeight)||rawWeight<=0||/\d+(?:[.,]\d+)?\s*kg\b/i.test(breed))return breed;
+  const weight=Number.isInteger(rawWeight)?String(rawWeight):String(rawWeight).replace('.',',');
+  return (breed?breed+', ':'')+weight+' kg';
+}
+function parseDogBreedWeightV124(value){
+  const text=String(value||'').trim(),match=text.match(/^(.*?)(?:\s*[,;|\/-]?\s*)(\d+(?:[.,]\d+)?)\s*kg\s*$/i);
+  if(!match)return {breed:text,weight_kg:null};
+  const breed=String(match[1]||'').replace(/[\s,;|\/-]+$/,'').trim(),weight=Number(String(match[2]).replace(',','.'));
+  return {breed,weight_kg:Number.isFinite(weight)&&weight>0?weight:null};
+}
+function syncDogAgeField(){const birth=$('dogBirthDate').value,age=$('dogAge'),automatic=dogAgeText(birth),reported=selectedDog()?.age_text||'';age.value=automatic||reported;age.readOnly=true;age.setAttribute('aria-readonly','true');age.placeholder=automatic?'Vypočítané z dátumu narodenia':'Vek po zadaní dátumu narodenia';age.title='Vek sa automaticky vypočíta po zadaní dátumu narodenia.'}
 function fillDogForm(d){
-  $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=d.breed||'';$('dogWeight').value=d.weight_kg??'';$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';
+  $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=dogBreedWeightValueV124(d);$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';
   if($('dogAllergies'))$('dogAllergies').value=combinedDogInfoV81(d);
   const vs=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(d.id));
   for(const [type,inputId] of [['rabies','rabiesUntil'],['infectious','infectiousUntil'],['kennel_cough','kennelUntil']]){
@@ -522,7 +534,8 @@ async function saveDog(e){
       const id=expiredVacc.type==='rabies'?'rabiesUntil':expiredVacc.type==='infectious'?'infectiousUntil':'kennelUntil';$(id)?.focus();return;
     }
   }
-  const body={action:'save_dog',dog_id:dogId,dog_name:$('dogName').value,age_text:ageText,birth_date:birthDate||null,breed:$('dogBreed').value,weight_kg:$('dogWeight').value||null,sex,neutered:neut===''?null:neut==='true',allergies:$('dogAllergies')?.value||'',temperament:''};
+  const breedWeight=parseDogBreedWeightV124($('dogBreed').value);
+  const body={action:'save_dog',dog_id:dogId,dog_name:$('dogName').value,age_text:ageText,birth_date:birthDate||null,breed:breedWeight.breed,weight_kg:breedWeight.weight_kg,sex,neutered:neut===''?null:neut==='true',allergies:$('dogAllergies')?.value||'',temperament:''};
   if(savedMode==='vaccinations'){body.vaccinations=vaccinations;body.require_vaccination_proof=true}
   try{
     loading(true);
