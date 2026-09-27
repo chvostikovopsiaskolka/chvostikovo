@@ -400,9 +400,9 @@ function renderDogHeaderV56(dog){
 function renderDogCore(){ensureDogFormInModalV51();const dog=selectedDog();if(!dog){$('dogProfilePhoto').innerHTML='';$('dogProfilePhoto').removeAttribute('data-dog-visual-key');$('dogProfileSettings').innerHTML='';$('dogStats').innerHTML=box('info','Psíka najprv priradí Chvostíkovo k vášmu účtu.');$('dogForm').classList.add('hidden');renderDogProfilePrompt();return}$('dogForm').classList.remove('hidden');state.selectedDogId=Number(dog.id);renderDogHeaderV56(dog);renderDetailsPhoto(dog);const cachedPush=state.pushChecked?!!state.pushEnabled:(typeof Notification!=='undefined'&&Notification.permission==='granted'&&localStorage.getItem('chvostikovo_push_enabled')==='1');$('dogProfileSettings').innerHTML=`<div class="card profile-settings"><div class="privacy-row"><div><strong>Upozornenia</strong><small>Rezervácie, správy a oznamy z Chvostíkova.</small></div><button id="pushToggle" class="push-switch syncing ${cachedPush?'active':''}" type="button" aria-label="Upozornenia"><span></span></button></div><div class="privacy-row"><div><strong>Zobraziť meno psa a fotku ostatným</strong><small>Súhlas môžete kedykoľvek vypnúť.</small></div><button id="privacyToggle" class="push-switch ${dog.share_name_photo?'active':''}" type="button" aria-label="Zdieľanie"><span></span></button></div></div>`;$('pushToggle').addEventListener('click',togglePush);$('privacyToggle').addEventListener('click',togglePrivacy);applyPushToggle();$('dogStats').innerHTML='';fillDogForm(dog);renderDogProfilePrompt()}
 function renderDog(){const out=renderDogCore();runCustomerHooks('afterRenderDog',out);return out}
 function combinedDogInfoV81(d){const parts=[d?.allergies,d?.temperament].map(v=>String(v||'').trim()).filter(Boolean),out=[];for(const part of parts){if(out.some(existing=>existing===part||existing.includes(part)))continue;out.push(part)}return out.join('\n\n')}
-function syncDogAgeField(){const birth=$('dogBirthDate').value,age=$('dogAge'),automatic=dogAgeText(birth);age.value=automatic||'';age.readOnly=true;age.setAttribute('aria-readonly','true');age.placeholder=automatic?'Vypočítané z dátumu narodenia':'Vyplní sa po zadaní dátumu narodenia';age.title='Vek sa automaticky počíta z dátumu narodenia.'}
+function syncDogAgeField(){const birth=$('dogBirthDate').value,age=$('dogAge'),automatic=dogAgeText(birth),reported=selectedDog()?.age_text||'';age.value=automatic||reported;age.readOnly=true;age.setAttribute('aria-readonly','true');age.placeholder=automatic?'Vypočítané z dátumu narodenia':'Vek z prihlášky alebo po zadaní dátumu narodenia';age.title=automatic?'Vek sa automaticky počíta z dátumu narodenia.':'Vek z prihlášky zostane uložený, kým nezadáte dátum narodenia.'}
 function fillDogForm(d){
-  $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=d.breed||'';$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';
+  $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=d.breed||'';$('dogWeight').value=d.weight_kg??'';$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';
   if($('dogAllergies'))$('dogAllergies').value=combinedDogInfoV81(d);
   const vs=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(d.id));
   for(const [type,inputId] of [['rabies','rabiesUntil'],['infectious','infectiousUntil'],['kennel_cough','kennelUntil']]){
@@ -500,7 +500,7 @@ async function uploadVaccinationProofsV104(silent=false){
 
 async function saveDog(e){
   e.preventDefault();
-  const savedMode=dogDetailsModeV96,mandatoryFlow=dogDetailsMandatoryV96,neut=$('dogNeutered').value,birthDate=$('dogBirthDate').value,sex=$('dogSex').value,ageText=dogAgeText(birthDate)||'',dogId=Number($('dogId').value);
+  const savedMode=dogDetailsModeV96,mandatoryFlow=dogDetailsMandatoryV96,neut=$('dogNeutered').value,birthDate=$('dogBirthDate').value,sex=$('dogSex').value,ageText=dogAgeText(birthDate)||selectedDog()?.age_text||'',dogId=Number($('dogId').value);
   const vaccinations=[
     {type:'rabies',valid_until:$('rabiesUntil').value},
     {type:'infectious',valid_until:$('infectiousUntil').value},
@@ -519,7 +519,7 @@ async function saveDog(e){
       const id=expiredVacc.type==='rabies'?'rabiesUntil':expiredVacc.type==='infectious'?'infectiousUntil':'kennelUntil';$(id)?.focus();return;
     }
   }
-  const body={action:'save_dog',dog_id:dogId,dog_name:$('dogName').value,age_text:ageText,birth_date:birthDate||null,breed:$('dogBreed').value,sex,neutered:neut===''?null:neut==='true',allergies:$('dogAllergies')?.value||'',temperament:''};
+  const body={action:'save_dog',dog_id:dogId,dog_name:$('dogName').value,age_text:ageText,birth_date:birthDate||null,breed:$('dogBreed').value,weight_kg:$('dogWeight').value||null,sex,neutered:neut===''?null:neut==='true',allergies:$('dogAllergies')?.value||'',temperament:''};
   if(savedMode==='vaccinations'){body.vaccinations=vaccinations;body.require_vaccination_proof=true}
   try{
     loading(true);
@@ -529,7 +529,7 @@ async function saveDog(e){
     }
     const result=await api(body);
     const dog=selectedDog();
-    if(dog)Object.assign(dog,{name:body.dog_name,age_text:body.age_text,birth_date:body.birth_date||null,breed:body.breed||null,sex:body.sex||null,neutered:body.neutered,allergies:body.allergies||null,temperament:null});
+    if(dog)Object.assign(dog,{name:body.dog_name,age_text:body.age_text,birth_date:body.birth_date||null,breed:body.breed||null,weight_kg:body.weight_kg?Number(body.weight_kg):null,sex:body.sex||null,neutered:body.neutered,allergies:body.allergies||null,temperament:null});
     if(state.data&&savedMode==='vaccinations'){
       const other=(state.data.vaccinations||[]).filter(v=>Number(v.dog_id)!==dogId||!['rabies','infectious','kennel_cough'].includes(v.vaccination_type));
       state.data.vaccinations=[...other,...vaccinations.map(v=>({dog_id:dogId,vaccination_type:v.type,vaccinated_on:null,valid_until:v.valid_until}))];
@@ -551,7 +551,7 @@ async function saveDog(e){
 }
 function ensurePassInterestConfirmation(){
   if($('passInterestConfirmationV44'))return;
-  document.body.insertAdjacentHTML('beforeend','<div id="passInterestConfirmationV44" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passInterestConfirmationTitleV44"><div class="legal-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="passInterestConfirmationTitleV44">Záujem sme zaregistrovali</h2><div class="legal-body"><p>Ďakujeme, záujem o novú permanentku sme zaregistrovali. Nákup novej permanentky dokončíme pri najbližšej návšteve v škôlke – platbou v hotovosti alebo kartou.</p></div><button id="passInterestConfirmationCloseV44" class="btn full" type="button">Ďakujem</button></div></div>');
+  document.body.insertAdjacentHTML('beforeend','<div id="passInterestConfirmationV44" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passInterestConfirmationTitleV44"><div class="legal-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="passInterestConfirmationTitleV44">Záujem sme zaregistrovali</h2><div class="legal-body"><p>Ďakujeme, záujem o novú permanentku sme zaregistrovali. Ďalšie rezervované dni uvidíte ako plánované vstupy. Permanentku potvrdíme až pri kúpe v škôlke, platbou v hotovosti alebo kartou.</p></div><button id="passInterestConfirmationCloseV44" class="btn full" type="button">Ďakujem</button></div></div>');
   $('passInterestConfirmationCloseV44').onclick=()=>$('passInterestConfirmationV44').classList.add('hidden');
 }
 function showPassInterestConfirmation(){ensurePassInterestConfirmation();$('passInterestConfirmationV44').classList.remove('hidden')}
@@ -564,7 +564,7 @@ async function requestPass(totalEntries){
     if(!r.ok)throw new Error(data?.message||data?.error||'Záujem sa nepodarilo odoslať.');
     const row=Array.isArray(data)?data[0]:data;
     if(row&&typeof row==='object'){state.data.pass_requests=state.data.pass_requests||[];if(!state.data.pass_requests.some(x=>Number(x.id)===Number(row.id)))state.data.pass_requests.unshift(row)}
-    renderDog();showPassInterestConfirmation();
+    renderDog();queueCustomerSync('bookings',0);showPassInterestConfirmation();
   }catch(e){toast(e.message)}finally{loading(false)}
 }
 function renderProfile(){const p=state.data?.profile||{};$('profileName').value=p.full_name||'';$('profileEmail').value=p.email||'';$('profilePhone').value=p.phone||''}
@@ -1034,7 +1034,7 @@ placeDeadlineV59();
   function authHeaders(){return {apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'}}
   function flowIds(){return ['waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75']}
   function hideFlow(except=''){for(const id of flowIds())if(id!==except)$(id)?.classList.add('hidden');if(except!=='schoolTermsModal')$('schoolTermsModal')?.classList.add('hidden');$('notificationPopup')?.classList.add('hidden')}
-  function ensureWaiting(){if(!$('waitingDogAssignmentModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="waitingDogAssignmentModalV75" class="legal-modal onboarding-modal-v75 waiting-dog-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="waitingDogAssignmentTitleV75"><div class="legal-card waiting-dog-card-v75"><div class="legal-kicker">Chvostíkovo</div><h2 id="waitingDogAssignmentTitleV75">Registrácia je úspešná</h2><div class="legal-body"><p>Účet je pripravený. Teraz čakáme na priradenie vášho psíka k profilu.</p><p class="hint">Po priradení vám pošleme upozornenie a aplikácia sa automaticky sprístupní.</p></div></div></div>');return $('waitingDogAssignmentModalV75')}
+  function ensureWaiting(){if(!$('waitingDogAssignmentModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="waitingDogAssignmentModalV75" class="legal-modal onboarding-modal-v75 waiting-dog-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="waitingDogAssignmentTitleV75"><div class="legal-card waiting-dog-card-v75"><div class="legal-kicker">Chvostíkovo</div><h2 id="waitingDogAssignmentTitleV75">Registrácia je úspešná</h2><div class="legal-body"><p>Účet je pripravený. Teraz čakáme na priradenie vášho psíka k profilu.</p><p class="hint">Po priradení vám pošleme upozornenie a aplikácia sa automaticky sprístupní.</p><p class="hint">Potom si vyhraďte približne 5 minút na pravidlá škôlky, kontrolu údajov psíka a doplnenie platnosti očkovaní aj fotografií očkovacieho preukazu.</p></div></div></div>');return $('waitingDogAssignmentModalV75')}
 function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="pushOnboardingModalV75" class="legal-modal onboarding-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="pushOnboardingTitleV75"><div class="legal-card"><div class="legal-kicker">Upozornenia</div><h2 id="pushOnboardingTitleV75">Zapnúť upozornenia?</h2><div class="legal-body"><p>Upozorníme vás na dôležité zmeny, rezervácie, správy a blížiaci sa koniec platnosti očkovania či permanentky.</p></div><button id="pushOnboardingEnableV75" class="btn full" type="button">Zapnúť upozornenia</button><button id="pushOnboardingSkipV75" class="btn secondary full onboarding-secondary-v75" type="button">Teraz nie</button></div></div>');return $('pushOnboardingModalV75')}
   function ensureShareModal(){if(!$('shareOnboardingModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="shareOnboardingModalV75" class="legal-modal onboarding-modal-v75 centered-onboarding-v97 hidden" role="dialog" aria-modal="true" aria-labelledby="shareOnboardingTitleV75"><div class="legal-card"><div class="legal-kicker">Súkromie psíka</div><h2 id="shareOnboardingTitleV75">Zobraziť meno a fotku psíka?</h2><div class="legal-body"><p>Ak to povolíte, meno a fotku vášho psíka uvidia ostatní majitelia, ktorí majú psíka prihláseného v rovnaký deň. Toto nastavenie môžete kedykoľvek neskôr zmeniť.</p></div><button id="shareOnboardingYesV75" class="btn full" type="button">Áno, zobrazovať</button><button id="shareOnboardingNoV75" class="btn secondary full onboarding-secondary-v75" type="button">Nie, ponechať anonymne</button></div></div>');return $('shareOnboardingModalV75')}
   function ensureDetailsModal(){if(!$('dogDetailsOnboardingModalV75'))document.body.insertAdjacentHTML('beforeend','<div id="dogDetailsOnboardingModalV75" class="legal-modal onboarding-modal-v75 centered-onboarding-v97 hidden" role="dialog" aria-modal="true" aria-labelledby="dogDetailsOnboardingTitleV75"><div class="legal-card"><div class="legal-kicker">Môj psík</div><h2 id="dogDetailsOnboardingTitleV75">Doplňte údaje o psíkovi</h2><div class="legal-body"><p>Najprv doplňte pár základných údajov o psíkovi.</p><p>Potom doplníte povinné očkovania. Bez nich nie je možné používať rezervácie.</p></div><button id="dogDetailsOnboardingFillV75" class="btn full" type="button">Doplniť údaje</button></div></div>');return $('dogDetailsOnboardingModalV75')}
@@ -1721,10 +1721,13 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(!items.length){root.innerHTML='<div class="card reserved-empty-v37"><svg class="reserved-empty-icon" aria-hidden="true"><use href="#ci-calendar"/></svg><span>Zatiaľ nemáte rezervovaný žiadny deň.</span><small>Kliknite na tlačidlo vyššie a vyberte si termín<br>pre vášho psíka.</small></div>';return}
     root.innerHTML=items.map(r=>{
       const day=byDate.get(r.reservation_date)||{},taxi=taxiLabel(r.taxi_mode),pending=r.status==='pending';
+      const interest=(state.data?.pass_requests||[]).find(x=>Number(x.id)===Number(r.planned_pass_request_id)&&x.status==='pending');
+      const planned=Number(r.projected_entry_number||r.planned_entry_number)||0,plannedTotal=Number(r.projected_pass_total||r.planned_pass_total)||0;
+      const passState=interest&&planned&&plannedTotal?`<div class="hint">Plánovaný ${planned}/${plannedTotal} vstup nasledujúcej permanentky · čaká na kúpu</div>`:planned&&plannedTotal?`<div class="hint">Plánovaný vstup ${planned}/${plannedTotal}</div>`:'';
       const note=day.note&&!(day.bookings_open===false&&/^zatvorené$/i.test(String(day.note).trim()))?`<div class="reserved-note-v37">${esc(day.note)}</div>`:'';
       const sharedNote=r.can_manage===false?`<div class="hint">${esc(dog.name)} už má na tento deň rezerváciu alebo žiadosť čakajúcu na potvrdenie.</div>`:'';
       const cancel=r.can_manage!==false?`<button class="text-btn cancel-booking-v37" type="button" data-request="${r._legacy?'':r.id||''}" data-reservation="${r._legacy?r.reservation_id||r.id:''}">Zrušiť rezerváciu</button>`:'';
-      return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div><strong>${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span></div><div class="reserved-day-meta-v37">${bookingRosterV37(day)}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}</div>${sharedNote}${note}${cancel}</div>`;
+      return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div><strong>${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span></div><div class="reserved-day-meta-v37">${bookingRosterV37(day)}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}</div>${passState}${sharedNote}${note}${cancel}</div>`;
     }).join('');
     root.querySelectorAll('.cancel-booking-v37').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();cancelBooking(btn)}));
   };
