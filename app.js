@@ -413,13 +413,14 @@ function fillDogForm(d){
 }
 let vaccinationProofFilesV104=[];
 let vaccinationProofPreviewUrlsV104=[];
+let vaccinationProofReplaceModeV104=false;
 
 function vaccinationProofsForDogV104(dogId){
   return (state.data?.vaccination_proofs||[]).filter(p=>Number(p.dog_id)===Number(dogId));
 }
 function clearVaccinationProofStageV104(){
   vaccinationProofPreviewUrlsV104.forEach(url=>{try{URL.revokeObjectURL(url)}catch(_){}});
-  vaccinationProofPreviewUrlsV104=[];vaccinationProofFilesV104=[];
+  vaccinationProofPreviewUrlsV104=[];vaccinationProofFilesV104=[];vaccinationProofReplaceModeV104=false;
 }
 function ensureVaccinationProofViewerV104(){
   let modal=$('vaccProofViewerV104');if(modal)return modal;
@@ -436,7 +437,8 @@ function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
   const current=$('vaccProofCurrentV104'),staged=$('vaccProofStagedV104'),count=$('vaccProofCountV104'),upload=$('vaccProofUploadV104'),msg=$('vaccProofMessageV104');
   if(!current||!staged||!count||!upload)return;
   const proofs=vaccinationProofsForDogV104(dogId);
-  count.textContent=String(proofs.length);
+  const combined=proofs.length+vaccinationProofFilesV104.length;
+  count.textContent=String(vaccinationProofReplaceModeV104?vaccinationProofFilesV104.length:combined);
   current.innerHTML=proofs.length?proofs.map((p,i)=>'<button class="vacc-proof-thumb-v104" type="button" data-proof-index="'+i+'"><img src="'+esc(p.image_url||'')+'" alt="Očkovací preukaz '+(i+1)+'"><span>Foto '+(i+1)+'</span></button>').join(''):'<div class="vacc-proof-empty-v104">Zatiaľ nie je nahratá žiadna fotografia.</div>';
   current.querySelectorAll('[data-proof-index]').forEach(button=>button.addEventListener('click',()=>openVaccinationProofViewerV104(proofs[Number(button.dataset.proofIndex)]?.image_url)));
   vaccinationProofPreviewUrlsV104.forEach(url=>{try{URL.revokeObjectURL(url)}catch(_){}});
@@ -1632,7 +1634,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(taxiRoot){
       taxiRoot.innerHTML=selected.map(date=>{
         const mode=selectedTaxiByDateV91.get(date)||'none';
-        return `<div class="booking-taxi-day-v91" data-date="${esc(date)}"><div class="booking-taxi-day-head-v91"><strong>${esc(skDay(date))}</strong><span>${esc(skDate(date))}</span></div><div class="booking-picker-taxi-v37 booking-taxi-buttons-v91"><button type="button" data-taxi="none" class="${mode==='none'?'active':''}">Bez taxi</button><button type="button" data-taxi="pickup" class="${mode==='pickup'?'active':''}">Vyzdvihnúť · 5 €</button><button type="button" data-taxi="pickup_dropoff" class="${mode==='pickup_dropoff'?'active':''}">Tam aj späť · 10 €</button></div></div>`;
+        return `<div class="booking-taxi-day-v91" data-date="${esc(date)}"><div class="booking-taxi-day-head-v91"><strong>${esc(skDay(date))}</strong><span>${esc(skDate(date))}</span></div><div class="booking-picker-taxi-v37 booking-taxi-buttons-v91"><button type="button" data-taxi="none" class="${mode==='none'?'active':''}">Bez taxi</button><button type="button" data-taxi="pickup" class="${mode==='pickup'?'active':''}">Vyzdvihnúť · <span class="booking-taxi-price-v91">5&nbsp;€</span></button><button type="button" data-taxi="pickup_dropoff" class="${mode==='pickup_dropoff'?'active':''}">Tam aj späť · <span class="booking-taxi-price-v91">10&nbsp;€</span></button></div></div>`;
       }).join('');
       taxiRoot.querySelectorAll('.booking-taxi-day-v91 button').forEach(button=>button.addEventListener('click',()=>{
         const row=button.closest('.booking-taxi-day-v91'),date=row?.dataset?.date;
@@ -2352,20 +2354,23 @@ function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
   }
   current.querySelectorAll('[data-proof-index]').forEach(button=>button.addEventListener('click',()=>openVaccinationProofViewerV104(proofs[Number(button.dataset.proofIndex)]?.image_url)));
   $('vaccProofEmptyV105')?.addEventListener('click',()=>$('vaccProofLibraryV104')?.click());
+  $('vaccProofActionsV104')?.classList.toggle('hidden',window.__vaccinationProofProcessingV105===true||(!vaccinationProofReplaceModeV104&&combined>=3));
+  $('vaccProofReplaceV104')?.classList.toggle('hidden',!proofs.length||window.__vaccinationProofProcessingV105===true||vaccinationProofReplaceModeV104);
   staged.classList.toggle('hidden',!vaccinationProofFilesV104.length);
   staged.innerHTML=vaccinationProofFilesV104.length?'<div class="vacc-proof-stage-title-v104">Vybrané nové fotografie</div><div class="vacc-proof-grid-v104">'+vaccinationProofFilesV104.map((item,i)=>'<div class="vacc-proof-thumb-v104 staged"><img src="'+item.dataUrl+'" alt="Vybraná fotografia '+(i+1)+'"><button type="button" data-remove-proof="'+i+'" aria-label="Odstrániť">×</button></div>').join('')+'</div>':'';
   staged.querySelectorAll('[data-remove-proof]').forEach(button=>button.addEventListener('click',()=>{vaccinationProofFilesV104.splice(Number(button.dataset.removeProof),1);renderVaccinationProofsV104(dogId)}));
   const busy=window.__vaccinationProofProcessingV105===true;
   upload.classList.toggle('hidden',!vaccinationProofFilesV104.length);
   upload.disabled=busy;
-  upload.textContent=busy?'Spracúvam fotografie…':(proofs.length?'Nahradiť fotografiami ('+vaccinationProofFilesV104.length+')':'Nahrať fotografie ('+vaccinationProofFilesV104.length+')');
-  if(msg&&!vaccinationProofFilesV104.length&&!busy)msg.textContent=proofs.length?'Fotografie sú bezpečne uložené. Pri ďalšom očkovaní ich môžete nahradiť novými.':'Na dokončenie očkovaní nahrajte aspoň jednu fotografiu.';
+  upload.textContent=busy?'Spracúvam fotografie…':(vaccinationProofReplaceModeV104?'Nahradiť fotografiami ('+vaccinationProofFilesV104.length+')':proofs.length?'Pridať fotografie ('+vaccinationProofFilesV104.length+')':'Nahrať fotografie ('+vaccinationProofFilesV104.length+')');
+  if(msg&&!vaccinationProofFilesV104.length&&!busy)msg.textContent=vaccinationProofReplaceModeV104?'Vyberte 1 až 3 nové fotografie.':proofs.length?'Uložené '+proofs.length+' z 3 fotografií.':'Na dokončenie očkovaní nahrajte aspoň jednu fotografiu.';
 }
 async function addVaccinationProofFilesV104(files){
   const incoming=[...(files||[])].filter(Boolean);
   if(!incoming.length)return;
-  const remaining=Math.max(0,3-vaccinationProofFilesV104.length);
-  if(!remaining){toast('Naraz môžete nahrať najviac 3 fotografie.');return}
+  const existing=vaccinationProofReplaceModeV104?0:vaccinationProofsForDogV104(Number(selectedDog()?.id||0)).length;
+  const remaining=Math.max(0,3-existing-vaccinationProofFilesV104.length);
+  if(!remaining){toast('Na jedného psíka možno uložiť najviac 3 fotografie.');return}
   window.__vaccinationProofProcessingV105=true;
   const msg=$('vaccProofMessageV104');if(msg)msg.textContent='Spracúvam vybrané fotografie…';
   renderVaccinationProofsV104();
@@ -2377,7 +2382,7 @@ async function addVaccinationProofFilesV104(files){
         if(msg)msg.textContent=message;toast(message);
       }
     }
-    if(incoming.length>remaining)toast('Naraz môžete nahrať najviac 3 fotografie.');
+    if(incoming.length>remaining)toast('Na jedného psíka možno uložiť najviac 3 fotografie.');
   }finally{
     window.__vaccinationProofProcessingV105=false;
     window.__customerPhotoPickerV88=false;
@@ -2390,6 +2395,12 @@ function v105PickerGuard(){
 }
 function bindVaccinationProofInputsV104(){
   const library=$('vaccProofLibraryV104'),camera=$('vaccProofCameraV104'),upload=$('vaccProofUploadV104');
+  const chooseLibrary=$('vaccProofChooseLibraryV104'),chooseCamera=$('vaccProofChooseCameraV104'),replace=$('vaccProofReplaceV104');
+  if(chooseLibrary&&!chooseLibrary.dataset.boundV104){chooseLibrary.dataset.boundV104='1';chooseLibrary.addEventListener('click',()=>library?.click())}
+  if(chooseCamera&&!chooseCamera.dataset.boundV104){chooseCamera.dataset.boundV104='1';chooseCamera.addEventListener('click',()=>camera?.click())}
+  if(replace&&!replace.dataset.boundV104){replace.dataset.boundV104='1';replace.addEventListener('click',()=>{
+    vaccinationProofFilesV104=[];vaccinationProofReplaceModeV104=true;renderVaccinationProofsV104();library?.click();
+  })}
   if(library&&!library.dataset.boundV105){
     library.dataset.boundV105='1';library.addEventListener('click',v105PickerGuard);
     library.addEventListener('change',async()=>{try{await addVaccinationProofFilesV104(library.files)}finally{library.value='';setTimeout(()=>{window.__customerPhotoPickerV88=false},250)}});
@@ -2411,7 +2422,7 @@ async function uploadVaccinationProofsV104(silent=false){
   if(button)button.disabled=true;if(msg)msg.textContent='Nahrávam fotografie…';
   try{
     const images=vaccinationProofFilesV104.map(item=>item.dataUrl);
-    const result=await api({action:'upload_vaccination_proofs',dog_id:Number(dog.id),images});
+    const result=await api({action:'upload_vaccination_proofs',dog_id:Number(dog.id),images,append:!vaccinationProofReplaceModeV104&&vaccinationProofsForDogV104(dog.id).length>0});
     const proofs=result?.data?.proofs||[];
     state.data.vaccination_proofs=(state.data.vaccination_proofs||[]).filter(p=>Number(p.dog_id)!==Number(dog.id));
     state.data.vaccination_proofs.push(...proofs);
