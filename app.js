@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260927-customer-vacc-booking-v124';
+const APP_BUILD='20260927-tech-cleanup-v125';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -96,7 +96,7 @@ function bootstrapCore(showSpinner=true){
     const hasAssignedDog=!!d.dogs?.length;
     document.documentElement.classList.toggle('customer-awaiting-dog-v107',!hasAssignedDog);
     if(!state.selectedDogId&&hasAssignedDog)state.selectedDogId=Number(d.dogs[0].id);
-    await preloadDogVisualV56(d);showApp();renderAll();registerSW();startCustomerLive();
+    await preloadDogVisualV56(d);showApp();renderAll();startCustomerLive();
     const secondary=[loadAnnouncements()];if(typeof ensurePushState==='function')secondary.push(ensurePushState());
     Promise.allSettled(secondary).then(()=>{if(state.data&&typeof applyPushToggle==='function')applyPushToggle()});
   }catch(e){
@@ -125,7 +125,7 @@ function renderAll(){renderWeekHeader();renderNotifications();renderPassSummary(
 function customerDataFingerprintV18(data){
   try{
     return JSON.stringify(data??null,(key,value)=>{
-      if(key==='photo_url'||key==='signed_url'||key==='signedUrl')return undefined;
+      if(key==='photo_url'||key==='image_url'||key==='imageUrl'||key==='signed_url'||key==='signedUrl')return undefined;
       return value;
     });
   }catch(_){return ''}
@@ -176,7 +176,6 @@ async function flushCustomerSync(){
         renderWeekHeader();
         renderUpcoming();
         renderDays();
-        renderMessages();
       }
       if(all||scopes.has('messages')){
         renderMessages();
@@ -344,15 +343,6 @@ function updateVaccinationStatusesV96(){
     box.textContent=value.text;
   }
 }
-function applyDogDetailsModeV96(mode='details',mandatory=false){
-  dogDetailsModeV96=mode==='vaccinations'?'vaccinations':'details';
-  dogDetailsMandatoryV96=!!mandatory;
-  $('dogBasicFieldsV96')?.classList.toggle('hidden',dogDetailsModeV96!=='details');
-  $('dogVaccinationFieldsV96')?.classList.toggle('hidden',dogDetailsModeV96!=='vaccinations');
-  if($('dogDetailsTitle'))$('dogDetailsTitle').textContent=dogDetailsModeV96==='vaccinations'?'Očkovania':'Údaje psíka';
-  $('dogDetailsClose')?.classList.toggle('hidden',dogDetailsMandatoryV96);
-  $('dogDetailsModal')?.setAttribute('data-mode',dogDetailsModeV96);
-}
 function openDogDetails(mode='details',mandatory=false){
   ensureDogFormInModalV51();const dog=selectedDog();if(!dog)return;
   if(mode!=='vaccinations')clearVaccinationProofStageV104();
@@ -415,7 +405,7 @@ function parseDogBreedWeightV124(value){
   const breed=String(match[1]||'').replace(/[\s,;|\/-]+$/,'').trim(),weight=Number(String(match[2]).replace(',','.'));
   return {breed,weight_kg:Number.isFinite(weight)&&weight>0?weight:null};
 }
-function syncDogAgeField(){const birth=$('dogBirthDate').value,age=$('dogAge'),automatic=dogAgeText(birth),reported=selectedDog()?.age_text||'';age.value=automatic||reported;age.readOnly=true;age.setAttribute('aria-readonly','true');age.placeholder=automatic?'Vypočítané z dátumu narodenia':'Vek po zadaní dátumu narodenia';age.title='Vek sa automaticky vypočíta po zadaní dátumu narodenia.'}
+function syncDogAgeField(){const birth=$('dogBirthDate').value,age=$('dogAge'),automatic=dogAgeText(birth);age.value=automatic;age.readOnly=true;age.setAttribute('aria-readonly','true');age.placeholder=automatic?'Vypočítané z dátumu narodenia':'Vek po zadaní dátumu narodenia';age.title='Vek sa automaticky vypočíta po zadaní dátumu narodenia.'}
 function fillDogForm(d){
   $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=dogBreedWeightValueV124(d);$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';
   if($('dogAllergies'))$('dogAllergies').value=combinedDogInfoV81(d);
@@ -427,15 +417,10 @@ function fillDogForm(d){
   renderVaccinationProofsV104(d.id);
 }
 let vaccinationProofFilesV104=[];
-let vaccinationProofPreviewUrlsV104=[];
 let vaccinationProofReplaceModeV104=false;
 
 function vaccinationProofsForDogV104(dogId){
   return (state.data?.vaccination_proofs||[]).filter(p=>Number(p.dog_id)===Number(dogId));
-}
-function clearVaccinationProofStageV104(){
-  vaccinationProofPreviewUrlsV104.forEach(url=>{try{URL.revokeObjectURL(url)}catch(_){}});
-  vaccinationProofPreviewUrlsV104=[];vaccinationProofFilesV104=[];vaccinationProofReplaceModeV104=false;
 }
 function ensureVaccinationProofViewerV104(){
   let modal=$('vaccProofViewerV104');if(modal)return modal;
@@ -448,71 +433,6 @@ function ensureVaccinationProofViewerV104(){
 function openVaccinationProofViewerV104(url){
   if(!url)return;const modal=ensureVaccinationProofViewerV104();$('vaccProofViewerImgV104').src=url;modal.classList.remove('hidden');
 }
-function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
-  const current=$('vaccProofCurrentV104'),staged=$('vaccProofStagedV104'),count=$('vaccProofCountV104'),upload=$('vaccProofUploadV104'),msg=$('vaccProofMessageV104');
-  if(!current||!staged||!count||!upload)return;
-  const proofs=vaccinationProofsForDogV104(dogId);
-  const combined=proofs.length+vaccinationProofFilesV104.length;
-  count.textContent=String(vaccinationProofReplaceModeV104?vaccinationProofFilesV104.length:combined);
-  current.innerHTML=proofs.length?proofs.map((p,i)=>'<button class="vacc-proof-thumb-v104" type="button" data-proof-index="'+i+'"><img src="'+esc(p.image_url||'')+'" alt="Očkovací preukaz '+(i+1)+'"><span>Foto '+(i+1)+'</span></button>').join(''):'<div class="vacc-proof-empty-v104">Zatiaľ nie je nahratá žiadna fotografia.</div>';
-  current.querySelectorAll('[data-proof-index]').forEach(button=>button.addEventListener('click',()=>openVaccinationProofViewerV104(proofs[Number(button.dataset.proofIndex)]?.image_url)));
-  vaccinationProofPreviewUrlsV104.forEach(url=>{try{URL.revokeObjectURL(url)}catch(_){}});
-  vaccinationProofPreviewUrlsV104=vaccinationProofFilesV104.map(file=>URL.createObjectURL(file));
-  staged.classList.toggle('hidden',!vaccinationProofFilesV104.length);
-  staged.innerHTML=vaccinationProofFilesV104.length?'<div class="vacc-proof-stage-title-v104">Vybrané nové fotografie</div><div class="vacc-proof-grid-v104">'+vaccinationProofPreviewUrlsV104.map((url,i)=>'<div class="vacc-proof-thumb-v104 staged"><img src="'+url+'" alt="Vybraná fotografia '+(i+1)+'"><button type="button" data-remove-proof="'+i+'" aria-label="Odstrániť">×</button></div>').join('')+'</div>':'';
-  staged.querySelectorAll('[data-remove-proof]').forEach(button=>button.addEventListener('click',()=>{vaccinationProofFilesV104.splice(Number(button.dataset.removeProof),1);renderVaccinationProofsV104(dogId)}));
-  upload.classList.toggle('hidden',!vaccinationProofFilesV104.length);
-  upload.textContent=proofs.length?'Nahradiť fotografiami ('+vaccinationProofFilesV104.length+')':'Nahrať fotografie ('+vaccinationProofFilesV104.length+')';
-  if(msg&&!vaccinationProofFilesV104.length)msg.textContent=proofs.length?'Fotografie sú bezpečne uložené. Pri ďalšom očkovaní ich môžete nahradiť novými.':'Na dokončenie očkovaní nahrajte aspoň jednu fotografiu.';
-}
-function addVaccinationProofFilesV104(files){
-  const incoming=[...(files||[])].filter(file=>file&&String(file.type||'').startsWith('image/'));
-  for(const file of incoming){
-    if(vaccinationProofFilesV104.length>=3)break;
-    vaccinationProofFilesV104.push(file);
-  }
-  if(incoming.length&&vaccinationProofFilesV104.length>=3&&incoming.length>3)toast('Naraz môžete nahrať najviac 3 fotografie.');
-  renderVaccinationProofsV104();
-}
-function bindVaccinationProofInputsV104(){
-  const library=$('vaccProofLibraryV104'),camera=$('vaccProofCameraV104'),upload=$('vaccProofUploadV104');
-  if(library&&!library.dataset.boundV104){library.dataset.boundV104='1';library.addEventListener('change',()=>{addVaccinationProofFilesV104(library.files);library.value=''})}
-  if(camera&&!camera.dataset.boundV104){camera.dataset.boundV104='1';camera.addEventListener('change',()=>{addVaccinationProofFilesV104(camera.files);camera.value=''})}
-  if(upload&&!upload.dataset.boundV104){upload.dataset.boundV104='1';upload.addEventListener('click',()=>uploadVaccinationProofsV104(false))}
-}
-async function vaccinationProofFileToJpegV104(file){
-  const url=URL.createObjectURL(file);
-  try{
-    const img=new Image();
-    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});
-    const maxSide=1500,ratio=Math.min(1,maxSide/Math.max(img.naturalWidth||1,img.naturalHeight||1));
-    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.naturalWidth*ratio));canvas.height=Math.max(1,Math.round(img.naturalHeight*ratio));
-    const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);
-    let quality=.82,data=canvas.toDataURL('image/jpeg',quality);
-    while(data.length>1050000&&quality>.52){quality-=.08;data=canvas.toDataURL('image/jpeg',quality)}
-    if(data.length>1700000)throw new Error('Fotografia je príliš veľká. Skúste ju odfotiť znova.');
-    return data;
-  }finally{URL.revokeObjectURL(url)}
-}
-async function uploadVaccinationProofsV104(silent=false){
-  const dog=selectedDog();if(!dog)throw new Error('Psík sa nenašiel.');
-  if(!vaccinationProofFilesV104.length)return vaccinationProofsForDogV104(dog.id);
-  const button=$('vaccProofUploadV104'),msg=$('vaccProofMessageV104');
-  if(button)button.disabled=true;if(msg)msg.textContent='Pripravujem fotografie…';
-  try{
-    const images=[];for(const file of vaccinationProofFilesV104)images.push(await vaccinationProofFileToJpegV104(file));
-    if(msg)msg.textContent='Nahrávam fotografie…';
-    const result=await api({action:'upload_vaccination_proofs',dog_id:Number(dog.id),images});
-    const proofs=result?.data?.proofs||[];
-    state.data.vaccination_proofs=(state.data.vaccination_proofs||[]).filter(p=>Number(p.dog_id)!==Number(dog.id));
-    state.data.vaccination_proofs.push(...proofs);
-    clearVaccinationProofStageV104();renderVaccinationProofsV104(dog.id);
-    if(!silent)toast('Fotografie očkovacieho preukazu sú uložené.');
-    return proofs;
-  }catch(error){if(msg)msg.textContent=error.message||'Fotografie sa nepodarilo nahrať.';throw error}
-  finally{if(button)button.disabled=false}
-}
-
 async function saveDog(e){
   e.preventDefault();
   const savedMode=dogDetailsModeV96,mandatoryFlow=dogDetailsMandatoryV96,neut=$('dogNeutered').value,birthDate=$('dogBirthDate').value,sex=$('dogSex').value,ageText=dogAgeText(birthDate)||selectedDog()?.age_text||'',dogId=Number($('dogId').value);
@@ -548,7 +468,7 @@ async function saveDog(e){
     if(dog)Object.assign(dog,{name:body.dog_name,age_text:body.age_text,birth_date:body.birth_date||null,breed:body.breed||null,weight_kg:body.weight_kg?Number(body.weight_kg):null,sex:body.sex||null,neutered:body.neutered,allergies:body.allergies||null,temperament:null});
     if(state.data&&savedMode==='vaccinations'){
       const other=(state.data.vaccinations||[]).filter(v=>Number(v.dog_id)!==dogId||!['rabies','infectious','kennel_cough'].includes(v.vaccination_type));
-      state.data.vaccinations=[...other,...vaccinations.map(v=>({dog_id:dogId,vaccination_type:v.type,vaccinated_on:null,valid_until:v.valid_until}))];
+      state.data.vaccinations=[...other,...vaccinations.map(v=>({dog_id:dogId,vaccination_type:v.type,valid_until:v.valid_until}))];
       if(result?.data?.onboarding_complete){
         state.data.dog_onboarding=state.data.dog_onboarding||[];
         const row=state.data.dog_onboarding.find(x=>Number(x.dog_id)===dogId);
@@ -1150,24 +1070,38 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 })();
 
 
-/* v21: customer legal status + readable terms */
+/* consolidated customer legal status: cached reads, explicit refresh only */
 (function customerLegalStatusV21(){
   if(window.__chvostikovoCustomerLegalStatusV21)return;
   window.__chvostikovoCustomerLegalStatusV21=true;
-  let renderSeq=0;
+  let renderSeq=0,activeDocCache=null,activeDocPromise=null;
+  const acceptanceCache=new Map(),acceptancePromises=new Map();
   const headers=()=>({apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'});
   const skDateTime=v=>{try{return new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}catch(_){return String(v||'')}};
-  async function activeDoc(){
+  async function activeDoc(force=false){
     if(!state?.session)return null;
-    const now=new Date().toISOString();
-    const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',{headers:headers(),cache:'no-store'});
-    if(!r.ok)return null;const rows=await r.json();return rows?.[0]||null;
+    if(activeDocCache&&!force)return activeDocCache;
+    if(activeDocPromise&&!force)return activeDocPromise;
+    activeDocPromise=(async()=>{
+      const now=new Date().toISOString();
+      const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',{headers:headers(),cache:'no-store'});
+      if(!r.ok)return null;const rows=await r.json();return rows?.[0]||null;
+    })();
+    try{activeDocCache=await activeDocPromise;return activeDocCache}finally{activeDocPromise=null}
   }
-  async function acceptance(dogId,version){
+  async function acceptance(dogId,version,force=false){
     if(!state?.session||!dogId||!version)return null;
-    const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_acceptances?dog_id=eq.'+dogId+'&terms_version=eq.'+encodeURIComponent(version)+'&select=dog_id,terms_version,accepted_at,acceptance_text,document_hash&order=accepted_at.desc&limit=1',{headers:headers(),cache:'no-store'});
-    if(!r.ok)return null;const rows=await r.json();return rows?.[0]||null;
+    const key=String(dogId)+'|'+String(version);
+    if(acceptanceCache.has(key)&&!force)return acceptanceCache.get(key);
+    if(acceptancePromises.has(key)&&!force)return acceptancePromises.get(key);
+    const promise=(async()=>{
+      const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_acceptances?dog_id=eq.'+dogId+'&terms_version=eq.'+encodeURIComponent(version)+'&select=dog_id,terms_version,accepted_at,acceptance_text,document_hash&order=accepted_at.desc&limit=1',{headers:headers(),cache:'no-store'});
+      if(!r.ok)return null;const rows=await r.json();return rows?.[0]||null;
+    })();
+    acceptancePromises.set(key,promise);
+    try{const row=await promise;acceptanceCache.set(key,row);return row}finally{acceptancePromises.delete(key)}
   }
+  function invalidateAcceptance(dogId,version){if(dogId&&version)acceptanceCache.delete(String(dogId)+'|'+String(version))}
   function ensureReadModal(){
     let modal=document.getElementById('schoolTermsReadModal');if(modal)return modal;
     document.body.insertAdjacentHTML('beforeend','<div id="schoolTermsReadModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="schoolTermsReadTitle"><div class="legal-card terms-card terms-read-card"><button id="schoolTermsReadClose" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="schoolTermsReadTitle">Podmienky psej škôlky Chvostíkovo</h2><div id="schoolTermsReadMeta" class="terms-read-meta"></div><div id="schoolTermsReadBody" class="legal-body terms-read-body"></div><button id="schoolTermsReadDone" class="btn secondary full" type="button">Zavrieť</button></div></div>');
@@ -1184,35 +1118,41 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     document.getElementById('schoolTermsReadBody').textContent=doc.body||'';
     modal.classList.remove('hidden');
   }
-  async function render(){
+  async function render(force=false){
     const seq=++renderSeq;
     const stats=document.getElementById('dogStats');
     const dogId=Number(state?.selectedDogId||0);
     if(!stats||!state?.session||!dogId){document.getElementById('customerLegalStatusCard')?.remove();return}
-    const [doc]=await Promise.all([activeDoc()]);
+    const doc=await activeDoc(force);
     if(seq!==renderSeq)return;
-    const accepted=doc?await acceptance(dogId,doc.version):null;
+    const accepted=doc?await acceptance(dogId,doc.version,force):null;
     if(seq!==renderSeq)return;
     const privacyAt=state.data?.profile?.privacy_notice_acknowledged_at||null;
     let card=document.getElementById('customerLegalStatusCard');
-    if(!card){card=document.createElement('div');card.id='customerLegalStatusCard';card.className='card customer-legal-card'}const v23Target=document.querySelector('#customerLegalSectionV23 .details-content');if(v23Target){card.classList.remove('card');card.classList.add('v23-legal-inner');const controls=document.getElementById('customerLegalControlsV23');if(controls)v23Target.insertBefore(card,controls);else v23Target.appendChild(card)}else{const legalAnchor=stats.querySelector('.stats-grid.old-stats')||stats.querySelector('.visit-stats-card');if(legalAnchor)stats.insertBefore(card,legalAnchor);else stats.appendChild(card)}
+    if(!card){card=document.createElement('div');card.id='customerLegalStatusCard';card.className='card customer-legal-card'}
+    const v23Target=document.querySelector('#customerLegalSectionV23 .details-content');
+    if(v23Target){card.classList.remove('card');card.classList.add('v23-legal-inner');const controls=document.getElementById('customerLegalControlsV23');if(controls)v23Target.insertBefore(card,controls);else v23Target.appendChild(card)}
+    else{const legalAnchor=stats.querySelector('.stats-grid.old-stats')||stats.querySelector('.visit-stats-card');if(legalAnchor)stats.insertBefore(card,legalAnchor);else stats.appendChild(card)}
     card.innerHTML=
       '<div class="customer-legal-doc-v105"><div class="customer-legal-row"><div class="customer-legal-main"><strong>Ochrana údajov</strong><small>'+(privacyAt?'Potvrdené '+skDateTime(privacyAt):'Informácie o spracúvaní osobných údajov')+'</small></div><span class="customer-legal-status '+(privacyAt?'ok':'warn')+'">'+(privacyAt?'Potvrdené':'Nepotvrdené')+'</span></div><button id="customerPrivacyReadBtn" class="btn secondary customer-legal-doc-action-v105" type="button">Otvoriť súhlas</button></div>'+
       '<div class="customer-legal-doc-v105"><div class="customer-legal-row"><div class="customer-legal-main"><strong>Pravidlá škôlky</strong><small>'+(accepted?'Odsúhlasené '+skDateTime(accepted.accepted_at):(doc?'Čakajú na potvrdenie':'Dokument zatiaľ nie je aktívny'))+'</small></div><span class="customer-legal-status '+(accepted?'ok':'warn')+'">'+(accepted?'Odsúhlasené':'Nepotvrdené')+'</span></div>'+(doc?'<button id="customerTermsReadBtn" class="btn secondary customer-legal-doc-action-v105" type="button">Otvoriť pravidlá škôlky</button>':'')+'</div>';
     document.getElementById('customerPrivacyReadBtn')?.addEventListener('click',()=>document.getElementById('privacyInfoBtn')?.click());
     document.getElementById('customerTermsReadBtn')?.addEventListener('click',()=>openRead(doc));
   }
-  window.renderCustomerLegalStatusV103=render;
+  window.renderCustomerLegalStatusV103=(force=false)=>render(force===true);
   function start(){
-    const stats=document.getElementById('dogStats');if(stats)new MutationObserver(()=>setTimeout(render,0)).observe(stats,{childList:true,subtree:false});
-    document.addEventListener('change',e=>{if(e.target?.id==='dogSelector')setTimeout(render,100)});
-    document.addEventListener('click',e=>{if(e.target?.closest('#schoolTermsConfirm')||e.target?.closest('#privacyInfoOk')||e.target?.closest('[data-tab="dog"]')){setTimeout(render,700);setTimeout(render,1500)}});
-    setTimeout(render,800);
+    document.addEventListener('change',e=>{if(e.target?.id==='dogSelector')setTimeout(()=>render(false),80)});
+    document.addEventListener('click',e=>{
+      if(e.target?.closest('#schoolTermsConfirm')){
+        const modal=document.getElementById('schoolTermsModal'),dogId=Number(modal?.dataset.dogId||state?.selectedDogId||0),version=String(modal?.dataset.version||'');
+        setTimeout(()=>{invalidateAcceptance(dogId,version);render(false)},900);
+      }
+      if(e.target?.closest('#privacyInfoOk'))setTimeout(()=>render(false),500);
+    });
+    setTimeout(()=>render(false),800);
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
-  window.addEventListener('focus',()=>setTimeout(render,100));
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
-
 
 /* v22: registration phone + legal modal sequencing */
 (function legalPhoneV22(){
@@ -1427,8 +1367,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     body.innerHTML='<div class="dog-visits-total-v99"><span>Návštevy celkovo</span><strong>'+visitCount+'</strong></div><div class="dog-visits-month-title-v99">Mesačné návštevy</div><div class="dog-visits-months-v99">'+(months.length?months.map(([month,count])=>'<div class="v23-month-row"><span>'+esc(monthLabel(month+'-01'))+'</span><strong>'+count+' '+(count===1?'návšteva':count>1&&count<5?'návštevy':'návštev')+'</strong></div>').join(''):'<div class="hint v23-empty-months">Mesačné štatistiky zatiaľ nie sú k dispozícii.</div>')+'</div>';return modal;
   }
   window.openDogVisitsV99=()=>{const modal=renderVisitStats();if(!modal)return;modal.classList.remove('hidden');document.documentElement.classList.add('dog-visits-open-v99')};
-  function renderGradebookV92(){return null}
-  function ensureOrder(){return}
   function apply(){
     const tab=$('dogTab'),dog=selectedDog();if(!tab||!dog)return;const head=tab.querySelector(':scope>.section-head');if(head)head.classList.add('dog-section-head-hidden-v99');
     $('dogProfileSettings')?.classList.add('v23-hidden-source');$('dogStats')?.classList.add('v23-hidden-source');
@@ -2285,8 +2223,8 @@ async function togglePushDirect(btn){
 
 /* v105: iOS-safe vaccination proof selection and upload */
 function clearVaccinationProofStageV104(){
-  vaccinationProofPreviewUrlsV104=[];
   vaccinationProofFilesV104=[];
+  vaccinationProofReplaceModeV104=false;
   window.__vaccinationProofProcessingV105=false;
 }
 function applyDogDetailsModeV96(mode='details',mandatory=false){
@@ -2431,10 +2369,6 @@ function bindVaccinationProofInputsV104(){
     camera.addEventListener('change',async()=>{try{await addVaccinationProofFilesV104(camera.files)}finally{camera.value='';setTimeout(()=>{window.__customerPhotoPickerV88=false},250)}});
   }
   if(upload&&!upload.dataset.boundV105){upload.dataset.boundV105='1';upload.addEventListener('click',()=>uploadVaccinationProofsV104(false))}
-}
-async function vaccinationProofFileToJpegV104(item){
-  if(item?.dataUrl&&/^data:image\/jpeg;base64,/.test(item.dataUrl))return item.dataUrl;
-  throw new Error('Fotografiu sa nepodarilo pripraviť. Vyberte ju znova.');
 }
 async function uploadVaccinationProofsV104(silent=false){
   const dog=selectedDog();if(!dog)throw new Error('Psík sa nenašiel.');
