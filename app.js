@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260928-customer-late-booking-v128';
+const APP_BUILD='20260928-customer-notice-v129';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -842,7 +842,7 @@ function ensureBookingLayout(){
   const oldHead=[...booking.querySelectorAll('.section-head')].find(x=>x.querySelector('h2')?.textContent?.trim()==='Vyberte deň');
   if(oldHead)oldHead.remove();
   if(!booking.querySelector('.booking-section-head')){
-    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme, rezervujte si dni na nasledujúci týždeň do nedele 20:00.</strong></div>');
+    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme, rezervujte si dni na nasledujúci týždeň do nedele 20:00.</strong><span class="hidden"></span></div>');
   }
 }
 ensureBookingLayout();
@@ -1498,9 +1498,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const dog=selectedDog(),days=state.data?.availability?.days||[];
     const current=days[0],closed=current&&bookingDeadlineClosedV95(current.date,dog);
     const weekday=new Date(bratislavaClockV95().date+'T12:00:00Z').getUTCDay();
-    box.querySelector('strong').textContent=closed&&(weekday===0||weekday===1)
-      ? 'Prihlasovanie na tento týždeň sa uzavrelo v nedeľu o 20:00. Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.'
+    const showClosed=closed&&(weekday===0||weekday===1);
+    box.querySelector('strong').textContent=showClosed
+      ? 'Prihlasovanie na tento týždeň sa uzavrelo v nedeľu o 20:00.'
       : 'Prosíme, rezervujte si dni na nasledujúci týždeň do nedele 20:00.';
+    const detail=box.querySelector('span');
+    if(detail){detail.textContent=showClosed?'Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.':'';detail.classList.toggle('hidden',!showClosed)}
   }
   function pickerErrorV95(message,deadline=false){const box=$('bookingPickerErrorV95');if(!box)return;box.classList.toggle('hidden',!message);if(!message){box.innerHTML='';return}box.innerHTML='<strong>'+esc(message)+'</strong>'+(deadline?'<div>Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.</div>':'')}
 
