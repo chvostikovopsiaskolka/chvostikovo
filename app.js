@@ -2010,6 +2010,12 @@ async function togglePushDirect(btn){
   }
 
   function open(){
+    // A late booking prefill belongs only to that selected day, not to the general message form.
+    if(!lateBookingContext){
+      $('supportMessageBodyV52').value='';
+      $('supportCustomSubjectV52').value='';
+      $('supportSubjectV52').value='';
+    }
     refreshSubjectOptions();
     renderSupportThread();
     $('supportChatModalV52').classList.remove('hidden');
@@ -2021,6 +2027,7 @@ async function togglePushDirect(btn){
     $('supportChatModalV52').classList.add('hidden');
     document.documentElement.classList.remove('support-chat-open-v52');
     lateBookingContext=null;
+    $('supportMessageBodyV52').value='';
   }
   window.openCustomerLateBookingMessage=(dogId,date,body)=>{
     mount();
