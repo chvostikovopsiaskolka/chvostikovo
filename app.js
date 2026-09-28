@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260927-tech-cleanup-v125';
+const APP_BUILD='20260928-customer-late-booking-v128';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -259,7 +259,7 @@ function renderNotifications(){
   }
   notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(n.body)).join('<br>')}</p><button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
   notice.querySelectorAll('[data-care-notice]').forEach(b=>b.addEventListener('click',()=>{const row=careRows.find(n=>Number(n.id)===Number(b.dataset.careNotice));if(row)customerCareAction(row)}));
-  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&n.notification_type!=='pass_interest_registered'&&n.notification_type!=='dog_approved'&&careNotificationIsCurrent(n)).slice(0,5);
+  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
   let modal=$('notificationPopup');
   if(!rows.length){modal?.classList.add('hidden');return}
   if(!modal){
@@ -1497,9 +1497,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const box=$('deadlineText');if(!box)return;
     const dog=selectedDog(),days=state.data?.availability?.days||[];
     const current=days[0],closed=current&&bookingDeadlineClosedV95(current.date,dog);
-    box.querySelector('strong').textContent=closed?'Rezervácie na tento týždeň sa uzavreli v nedeľu o 20:00. Ak potrebujete termín, napíšte nám správu.':'Prosíme, rezervujte si dni na nasledujúci týždeň do nedele 20:00.';
+    const weekday=new Date(bratislavaClockV95().date+'T12:00:00Z').getUTCDay();
+    box.querySelector('strong').textContent=closed&&(weekday===0||weekday===1)
+      ? 'Prihlasovanie na tento týždeň sa uzavrelo v nedeľu o 20:00. Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.'
+      : 'Prosíme, rezervujte si dni na nasledujúci týždeň do nedele 20:00.';
   }
-  function pickerErrorV95(message,deadline=false){const box=$('bookingPickerErrorV95');if(!box)return;box.classList.toggle('hidden',!message);if(!message){box.innerHTML='';return}box.innerHTML='<strong>'+esc(message)+'</strong>'+(deadline?'<div>Ak chcete psíka prihlásiť aj po uzávierke, napíšte nám cez aplikáciu.</div><button id="bookingPickerMessageV95" class="btn secondary full" type="button">Napísať správu</button>':'');$('bookingPickerMessageV95')?.addEventListener('click',()=>{closePickerV37();switchTab('dog');setTimeout(()=>$('supportChatBtnV52')?.click(),80)})}
+  function pickerErrorV95(message,deadline=false){const box=$('bookingPickerErrorV95');if(!box)return;box.classList.toggle('hidden',!message);if(!message){box.innerHTML='';return}box.innerHTML='<strong>'+esc(message)+'</strong>'+(deadline?'<div>Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.</div>':'')}
 
   const shortDayV37=date=>{try{return new Intl.DateTimeFormat('sk-SK',{weekday:'short'}).format(new Date(date+'T12:00:00')).replace('.','')}catch(_){return''}};
   const compactDateV37=date=>{const p=String(date||'').split('-').map(Number);return p.length===3?`${p[2]}.${p[1]}.`:skDate(date)};
@@ -1586,14 +1589,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const selected=selectedDatesV37.has(d.date);
         const stateText=existing?'Rezervované':deadlineClosed?'Uzavreté':past?'Uplynulo':closed?'Zatvorené':full?'Plno':`${Math.max(0,Number(d.available)||0)} voľné`;
         return `<button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" ${disabled?'disabled':''}><small>${esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${esc(stateText)}</span></button>`;
-      }).join('')}</div>${week.some(d=>bookingDeadlineClosedV95(d.date,dog))?'<small class="booking-week-closed-note-v127">Prihlasovanie uzavreté · pre dodatočný termín nám napíšte.</small>':''}</div>`);
+      }).join('')}</div>${week.some(d=>bookingDeadlineClosedV95(d.date,dog))?'<small class="booking-week-closed-note-v127">Prihlasovanie uzavreté. Pre dodatočné prihlásenie kliknite na požadovaný deň.</small>':''}</div>`);
     }
     $('bookingPickerDaysV37').innerHTML=groups.join('');
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',()=>{
       const date=btn.dataset.date;
       if(bookingDeadlineClosedV95(date,dog)){
-        closePickerV37();switchTab('dog');
-        setTimeout(()=>{$('supportChatBtnV52')?.click();const message=$('supportMessageBodyV52');if(message&&!message.value.trim())message.value=`Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`},100);
+        closePickerV37();
+        window.openCustomerLateBookingMessage?.(Number(dog.id),date,`Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`);
         return;
       }
       if(selectedDatesV37.has(date)){
@@ -1932,6 +1935,7 @@ async function togglePushDirect(btn){
   if(window.__chvostikovoProfileExperiencePreview)return;
   window.__chvostikovoProfileExperiencePreview=true;
 
+  let lateBookingContext=null;
 
   const chatSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path><path d="M7.5 10h9M7.5 13.5h6"></path></svg>';
 
@@ -2013,7 +2017,15 @@ async function togglePushDirect(btn){
   function close(){
     $('supportChatModalV52').classList.add('hidden');
     document.documentElement.classList.remove('support-chat-open-v52');
+    lateBookingContext=null;
   }
+  window.openCustomerLateBookingMessage=(dogId,date,body)=>{
+    mount();
+    lateBookingContext={dogId,date};
+    $('supportMessageBodyV52').value=body;
+    $('supportSubjectV52').value='';
+    open();
+  };
 
   async function send(e){
     e.preventDefault();
@@ -2028,8 +2040,12 @@ async function togglePushDirect(btn){
     const btn=e.submitter;
     try{
       if(btn)btn.disabled=true;
-      const result=await api({action:'send_message',message,booking_request_id:bookingId});
-      const row=result?.data||result?.message||{id:-Date.now(),body:message,sender_role:'customer',created_at:new Date().toISOString()};
+      const late=lateBookingContext;
+      const result=late
+        ? await api({action:'request_late_booking',dog_id:late.dogId,reservation_date:late.date,message})
+        : await api({action:'send_message',message,booking_request_id:bookingId});
+      const row=late?result?.data?.message:(result?.data||result?.message||{id:-Date.now(),body:message,sender_role:'customer',created_at:new Date().toISOString()});
+      if(!row)throw new Error('Správa sa nepodarila priradiť k rezervácii.');
       (state.data.messages||(state.data.messages=[])).push(row);
       $('supportMessageBodyV52').value='';
       $('supportCustomSubjectV52').value='';
@@ -2038,8 +2054,8 @@ async function togglePushDirect(btn){
       renderMessages();
       renderSupportThread();
       updateUnread();
-      toast('Správa bola odoslaná.');
-      queueCustomerSync('messages',80);
+      if(late){lateBookingContext=null;close();toast('Žiadosť o rezerváciu a správa boli odoslané na schválenie.');queueCustomerSync('bookings',80)}
+      else{toast('Správa bola odoslaná.');queueCustomerSync('messages',80)}
     }catch(error){toast(error.message)}
     finally{if(btn)btn.disabled=false}
   }
