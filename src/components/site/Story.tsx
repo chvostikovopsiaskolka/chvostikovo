@@ -3,6 +3,7 @@ import { Home, Zap, Dog, Check } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
 import { LongForm, ShortForm } from "./Forms";
+import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import dogsPair from "@/assets/dogs-pair.jpg";
@@ -33,16 +34,43 @@ function renderText(text: string) {
 
 
 
-export function Care() {
+export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const isEnglish = language === "en";
+  const careEn = [
+    {
+      img: CARE[0]!.img,
+      pos: CARE[0]!.pos,
+      alt: "Active day at Chvostíkovo dog daycare",
+      title: "Active day",
+      text: "**While you are at work** or taking care of everyday responsibilities, your dog can enjoy an **active day** full of movement, games and contact with other dogs. There is time for the outdoor run, fresh air and plenty of opportunities to use both **physical and mental energy**. Of course, the day also includes **rest** and **lots of affection**.",
+    },
+    {
+      img: CARE[1]!.img,
+      pos: CARE[1]!.pos,
+      alt: "All-day supervision at Chvostíkovo dog daycare in Košice",
+      title: "All-day supervision",
+      text: "Chvostíkovo is a **second home** for your dog. That is why the **safety and comfort** of our daycare dogs come first. Throughout the day, the dogs are **supervised by at least two experienced caregivers**, helping maintain a calm environment for play, rest and safe interactions.",
+    },
+    {
+      img: CARE[2]!.img,
+      pos: CARE[2]!.pos,
+      alt: "Individual care for dogs at Chvostíkovo",
+      title: "Individual approach",
+      text: "**Every dog is unique**, so we approach each one **individually**, with **patience and respect** for their needs. As dog owners ourselves, we understand the trust you place in us — every daycare dog receives the same care and attention we would want for **our own dogs**.",
+    },
+  ];
+  const items = isEnglish ? careEn : CARE;
 
   return (
-    <section id="starostlivost" className="scroll-mt-24 py-12 sm:py-16">
+    <section id={isEnglish ? "care" : "starostlivost"} className="scroll-mt-24 py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4">
-        <h2 className="section-title text-center text-3xl sm:text-4xl">Ako sa postaráme o psíka</h2>
+        <h2 className="section-title text-center text-3xl sm:text-4xl">
+          {isEnglish ? "How we care for your dog" : "Ako sa postaráme o psíka"}
+        </h2>
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {CARE.map((c) => (
+          {items.map((c) => (
             <article
               key={c.title}
               className="flex flex-col overflow-hidden rounded-4xl bg-card shadow-card"
@@ -65,12 +93,12 @@ export function Care() {
           <button
             type="button"
             onClick={() => {
-              trackMarketingInteraction("inquiry_cta", "care_desktop");
+              trackMarketingInteraction("inquiry_cta", isEnglish ? "en_care_desktop" : "care_desktop");
               setInfoOpen(true);
             }}
             className="btn-coral"
           >
-            Chcem zistiť viac o škôlke
+            {isEnglish ? "I want to know more about daycare" : "Chcem zistiť viac o škôlke"}
           </button>
         </div>
       </div>
@@ -78,13 +106,21 @@ export function Care() {
       <FormDialog
         open={infoOpen}
         onOpenChange={setInfoOpen}
-        title="Informujte sa o škôlke"
-        subtitle="Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií."
+        title={isEnglish ? "Enquire about dog daycare" : "Informujte sa o škôlke"}
+        subtitle={
+          isEnglish
+            ? "Fill in the short, non-binding form. We will get back to you and talk through the options for your dog."
+            : "Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií."
+        }
       >
-        <ShortForm
-          trackingSource="care_desktop"
-          onSent={() => setTimeout(() => setInfoOpen(false), 2200)}
-        />
+        {isEnglish ? (
+          <EnglishInquiryForm trackingSource="en_care_desktop" />
+        ) : (
+          <ShortForm
+            trackingSource="care_desktop"
+            onSent={() => setTimeout(() => setInfoOpen(false), 2200)}
+          />
+        )}
       </FormDialog>
     </section>
   );
@@ -167,38 +203,59 @@ export function Why() {
   );
 }
 
-export function About() {
+export function About({ language = "sk" }: { language?: "sk" | "en" }) {
+  const isEnglish = language === "en";
+
   return (
-    <section id="o-nas" className="scroll-mt-24 py-12 sm:py-16">
+    <section id={isEnglish ? "about" : "o-nas"} className="scroll-mt-24 py-12 sm:py-16">
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
         <div>
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
-            O nás
+            {isEnglish ? "About us" : "O nás"}
           </span>
-          <h2 className="section-title mt-2 text-3xl sm:text-4xl">Kto stojí za Chvostíkovom?</h2>
+          <h2 className="section-title mt-2 text-3xl sm:text-4xl">
+            {isEnglish ? "Who is behind Chvostíkovo?" : "Kto stojí za Chvostíkovom?"}
+          </h2>
           <div className="mt-5 space-y-4 text-forest/85">
             <p>
-              Sme starostlivá mladá dvojica, ktorú spája láska k psom, najmä k stredným a veľkým
-              plemenám.
+              {isEnglish
+                ? "We are a caring young couple brought together by our love of dogs, especially medium and large breeds."
+                : "Sme starostlivá mladá dvojica, ktorú spája láska k psom, najmä k stredným a veľkým plemenám."}
             </p>
             <p>
-              Ako majitelia väčších psíkov sme si uvedomili, aké náročné môže byť nájsť miesto, kde
-              by sme svojich štvornohých spoločníkov nechali s úplnou dôverou počas pracovného dňa
-              či nečakaných povinností.
+              {isEnglish
+                ? "As owners of larger dogs ourselves, we realised how difficult it can be to find a place where we would leave our four-legged companions with complete confidence during a workday or unexpected responsibilities."
+                : "Ako majitelia väčších psíkov sme si uvedomili, aké náročné môže byť nájsť miesto, kde by sme svojich štvornohých spoločníkov nechali s úplnou dôverou počas pracovného dňa či nečakaných povinností."}
             </p>
-            {/* Mobil – zvyšok textu v rozbaľovacom okne */}
+
             <div className="md:hidden">
-              <Collapse title="Čítať viac o nás">
+              <Collapse title={isEnglish ? "Read more about us" : "Čítať viac o nás"}>
                 <div className="space-y-4">
-                  <p>{ABOUT_MORE[0]}</p>
-                  <p>{ABOUT_MORE[1]}</p>
+                  <p>
+                    {isEnglish
+                      ? "That is why Chvostíkovo was created — a dog daycare in Košice focused on medium and large breeds, where safety, wellbeing and an individual approach come first. We have years of experience working with dogs, including shelter work, temporary foster care and raising our own dogs. These experiences taught us to understand their needs, communication and behaviour in a group."
+                      : ABOUT_MORE[0]}
+                  </p>
+                  <p>
+                    {isEnglish
+                      ? "Chvostíkovo is more than a place for daytime care. It is a second home where every member of the pack receives the same responsibility, attention and care we give our own dogs."
+                      : ABOUT_MORE[1]}
+                  </p>
                 </div>
               </Collapse>
             </div>
 
             <div className="hidden space-y-4 md:block">
-              <p>{ABOUT_MORE[0]}</p>
-              <p>{ABOUT_MORE[1]}</p>
+              <p>
+                {isEnglish
+                  ? "That is why Chvostíkovo was created — a dog daycare in Košice focused on medium and large breeds, where safety, wellbeing and an individual approach come first. We have years of experience working with dogs, including shelter work, temporary foster care and raising our own dogs. These experiences taught us to understand their needs, communication and behaviour in a group."
+                  : ABOUT_MORE[0]}
+              </p>
+              <p>
+                {isEnglish
+                  ? "Chvostíkovo is more than a place for daytime care. It is a second home where every member of the pack receives the same responsibility, attention and care we give our own dogs."
+                  : ABOUT_MORE[1]}
+              </p>
             </div>
           </div>
         </div>
@@ -206,20 +263,20 @@ export function About() {
         <div className="space-y-4">
           <img
             src={teamPhoto}
-            alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
+            alt={isEnglish ? "The owners of Chvostíkovo dog daycare with their dogs" : "Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"}
             loading="lazy"
             className="h-60 w-full rounded-4xl object-cover shadow-card sm:h-72"
           />
           <div className="grid grid-cols-2 gap-3">
             <img
               src={dogsPair}
-              alt="Naši psíci – írske vlkodavy"
+              alt={isEnglish ? "Our Irish Wolfhounds" : "Naši psíci – írske vlkodavy"}
               loading="lazy"
               className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
             />
             <img
               src={GARDEN_PHOTO}
-              alt="Naši psíci oddychujú v záhrade"
+              alt={isEnglish ? "Our dogs relaxing in the garden" : "Naši psíci oddychujú v záhrade"}
               loading="lazy"
               className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
             />
@@ -231,12 +288,15 @@ export function About() {
         <div className="grid items-center gap-8 rounded-4xl bg-secondary p-7 sm:p-10 md:text-center lg:grid-cols-[1fr_auto] lg:text-left">
           <div className="md:flex md:flex-col md:items-center lg:items-start">
             <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
-              <Check className="size-5 text-coral" /> Zdravie a bezpečie vášho psíka je pre nás na
-              prvom mieste!
+              <Check className="size-5 text-coral" />
+              {isEnglish
+                ? "Your dog's health and safety come first!"
+                : "Zdravie a bezpečie vášho psíka je pre nás na prvom mieste!"}
             </p>
             <p className="mt-4 max-w-lg text-forest/80 md:mx-auto lg:mx-0">
-              Obaja sme absolvovali workshop prvej pomoci pre psov, takže v prípade potreby vieme
-              zareagovať rýchlo a správne.
+              {isEnglish
+                ? "We have both completed a canine first-aid workshop, so if needed we know how to respond quickly and appropriately."
+                : "Obaja sme absolvovali workshop prvej pomoci pre psov, takže v prípade potreby vieme zareagovať rýchlo a správne."}
             </p>
           </div>
 
@@ -244,11 +304,15 @@ export function About() {
             {[
               {
                 src: certAdriana,
-                alt: "Certifikát – workshop prvej pomoci pre psov, Adriana Konkoľová",
+                alt: isEnglish
+                  ? "Canine first-aid workshop certificate – Adriana Konkoľová"
+                  : "Certifikát – workshop prvej pomoci pre psov, Adriana Konkoľová",
               },
               {
                 src: certMarek,
-                alt: "Certifikát – workshop prvej pomoci pre psov, Marek Leder",
+                alt: isEnglish
+                  ? "Canine first-aid workshop certificate – Marek Leder"
+                  : "Certifikát – workshop prvej pomoci pre psov, Marek Leder",
               },
             ].map((c) => (
               <img
@@ -260,11 +324,8 @@ export function About() {
               />
             ))}
           </div>
-
         </div>
       </div>
-
-
     </section>
   );
 }
