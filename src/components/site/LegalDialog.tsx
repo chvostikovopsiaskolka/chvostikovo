@@ -2,11 +2,19 @@ import { EMAIL, PHONE, PHONE_PRETTY } from "@/content/site";
 import { ContentDialog } from "./ContentDialog";
 
 export type LegalDialogType = "cookies" | "privacy" | "operator";
+type Language = "sk" | "en";
 
-const TITLES: Record<LegalDialogType, string> = {
-  cookies: "Pravidlá používania cookies",
-  privacy: "Ochrana osobných údajov",
-  operator: "Údaje prevádzkovateľa",
+const TITLES: Record<Language, Record<LegalDialogType, string>> = {
+  sk: {
+    cookies: "Pravidlá používania cookies",
+    privacy: "Ochrana osobných údajov",
+    operator: "Údaje prevádzkovateľa",
+  },
+  en: {
+    cookies: "Cookie Policy",
+    privacy: "Privacy Policy",
+    operator: "Operator details",
+  },
 };
 
 function H2({ children }: { children: React.ReactNode }) {
@@ -18,22 +26,83 @@ export function LegalDialog({
   open,
   onOpenChange,
   onSelect,
+  language = "sk",
 }: {
   kind: LegalDialogType;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect?: (kind: LegalDialogType) => void;
+  language?: Language;
 }) {
   return (
-    <ContentDialog open={open} onOpenChange={onOpenChange} title={TITLES[kind]}>
-      {kind === "cookies" && <CookiesContent />}
-      {kind === "privacy" && <PrivacyContent onSelectCookies={() => onSelect?.("cookies")} />}
-      {kind === "operator" && <OperatorContent />}
+    <ContentDialog open={open} onOpenChange={onOpenChange} title={TITLES[language][kind]}>
+      {kind === "cookies" && <CookiesContent language={language} />}
+      {kind === "privacy" && (
+        <PrivacyContent
+          language={language}
+          onSelectCookies={() => onSelect?.("cookies")}
+        />
+      )}
+      {kind === "operator" && <OperatorContent language={language} />}
     </ContentDialog>
   );
 }
 
-function CookiesContent() {
+function CookiesContent({ language }: { language: Language }) {
+  if (language === "en") {
+    return (
+      <div className="space-y-4 text-sm leading-relaxed text-forest/80 sm:text-base">
+        <H2>1. What are cookies?</H2>
+        <p>
+          Cookies are small text files stored on your device when you visit our website. They help us
+          keep the website working properly, understand traffic and improve the user experience.
+        </p>
+
+        <H2>2. Types of cookies we use</H2>
+        <ul className="list-disc space-y-2 pl-5">
+          <li><strong>Necessary cookies:</strong> required for the basic and secure operation of the website. They cannot be disabled through our cookie settings because they are needed for essential website functions.</li>
+          <li><strong>Analytics cookies:</strong> help us understand how visitors use the website and measure traffic. We use them only with your consent.</li>
+          <li><strong>Functional cookies:</strong> can provide additional features and remember selected preferences. Where consent is required, they are used only after consent has been given.</li>
+          <li><strong>Marketing cookies:</strong> are used to measure advertising performance and marketing conversions. We use them only with your consent.</li>
+        </ul>
+        <p>
+          <strong>Third-party services:</strong> we use services including Google Analytics and Meta
+          Pixel to analyse website traffic and measure advertising performance. These services are
+          activated only after the relevant consent has been given.
+        </p>
+
+        <H2>3. Consent and cookie settings</H2>
+        <p>
+          On your first visit you can choose which optional cookies you allow. Necessary cookies are
+          used without consent because they are required for the website to function. You may reject
+          optional cookies without losing access to the basic website.
+        </p>
+
+        <H2>4. Changing or withdrawing consent</H2>
+        <p>
+          You can change your cookie preferences or withdraw consent at any time by selecting
+          “Cookie settings” in the website footer. You can also manage or delete cookies in your
+          browser settings.
+        </p>
+
+        <H2>5. Cookie retention</H2>
+        <p>
+          Retention depends on the cookie, its purpose and provider. Some cookies are removed when
+          the browser is closed, while others may remain on your device for a defined period.
+        </p>
+
+        <H2>6. Changes to this policy</H2>
+        <p>
+          We may update this policy when technologies, third-party services or legal requirements
+          change. The current version will remain available on this website.
+        </p>
+
+        <H2>7. Contact</H2>
+        <p>If you have questions about our use of cookies, contact us at: {EMAIL}.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 text-sm leading-relaxed text-forest/80 sm:text-base">
       <H2>1. Čo sú cookies?</H2>
@@ -123,7 +192,82 @@ function CookiesContent() {
   );
 }
 
-function PrivacyContent({ onSelectCookies }: { onSelectCookies: () => void }) {
+function PrivacyContent({
+  onSelectCookies,
+  language,
+}: {
+  onSelectCookies: () => void;
+  language: Language;
+}) {
+  if (language === "en") {
+    return (
+      <div className="space-y-4 text-sm leading-relaxed text-forest/80 sm:text-base">
+        <H2>1. Introduction</H2>
+        <p>
+          This Privacy Policy explains how we process personal data you provide through
+          www.chvostikovo.sk.
+        </p>
+        <p>
+          The operator of this website is Marek Leder - Bellaris, Miškovecká 2, Košice,
+          Company ID: 56 447 001.
+        </p>
+
+        <H2>2. Personal data we process</H2>
+        <ul className="list-disc space-y-2 pl-5">
+          <li><strong>Contact details:</strong> name, surname, email address and telephone number.</li>
+          <li><strong>Visit data:</strong> IP address, website activity, cookies and browser/device information, according to your cookie settings.</li>
+        </ul>
+
+        <H2>3. Why we process personal data</H2>
+        <ul className="list-disc space-y-2 pl-5">
+          <li><strong>Providing services:</strong> to handle your enquiries, communicate with you and provide website functionality.</li>
+          <li><strong>Marketing communications:</strong> where you have given the required consent.</li>
+          <li><strong>Improving our services:</strong> to analyse and improve our website, products and services where legally permitted.</li>
+        </ul>
+
+        <H2>4. Legal basis</H2>
+        <p>
+          Depending on the purpose, processing may be based on consent, performance of a contract,
+          compliance with legal obligations or our legitimate interests where applicable.
+        </p>
+
+        <H2>5. Retention</H2>
+        <p>
+          We keep personal data only for as long as necessary for the purpose for which it was
+          collected or for the period required by applicable law.
+        </p>
+
+        <H2>6. Your rights</H2>
+        <p>
+          Subject to applicable law, you may have rights to access, correct, erase, restrict or
+          receive your data and to object to certain processing. You can contact us at {EMAIL}.
+        </p>
+
+        <H2>7. Sharing and security</H2>
+        <p>
+          We do not share your data with third parties except where necessary to provide our
+          services, meet legal obligations or use service providers acting on our behalf. We apply
+          appropriate technical and organisational measures to protect personal data.
+        </p>
+
+        <H2>8. Cookies</H2>
+        <p>
+          For details about cookies and analytics/marketing technologies, see our{" "}
+          <button type="button" onClick={onSelectCookies} className="font-semibold text-coral underline">
+            Cookie Policy
+          </button>
+          .
+        </p>
+
+        <H2>9. Contact</H2>
+        <p>
+          For privacy questions, contact us at {EMAIL} or by post at Miškovecká 2, 040 11 Košice,
+          Slovakia.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 text-sm leading-relaxed text-forest/80 sm:text-base">
       <H2>1. Úvod</H2>
@@ -211,7 +355,30 @@ function PrivacyContent({ onSelectCookies }: { onSelectCookies: () => void }) {
   );
 }
 
-function OperatorContent() {
+function OperatorContent({ language }: { language: Language }) {
+  if (language === "en") {
+    return (
+      <div className="space-y-5 text-sm leading-relaxed text-forest/80 sm:text-base">
+        <p>Identification and contact details of the operator of chvostikovo.sk and Chvostíkovo dog daycare.</p>
+        <div><H2>Operator</H2><p className="mt-1">Marek Leder – Bellaris</p></div>
+        <div><H2>Company ID</H2><p className="mt-1">56447001</p></div>
+        <div><H2>Registered place of business</H2><p className="mt-1">Miškovecká 1023/2, 040 11 Košice-Juh, Slovakia</p></div>
+        <div><H2>Chvostíkovo premises</H2><p className="mt-1">Poľská 2207/6, 040 01 Košice-Juh, Slovakia</p></div>
+        <div>
+          <H2>Trade register</H2>
+          <p className="mt-1">Registered in the Trade Register of the District Office Košice, no. 820-106266.</p>
+        </div>
+        <div>
+          <H2>Contact</H2>
+          <ul className="mt-1 list-none space-y-1">
+            <li>Email: <a href={`mailto:${EMAIL}`} className="font-semibold text-coral hover:underline">{EMAIL}</a></li>
+            <li>Phone: <a href={`tel:${PHONE}`} className="font-semibold text-coral hover:underline">{PHONE_PRETTY}</a></li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5 text-sm leading-relaxed text-forest/80 sm:text-base">
       <p>
