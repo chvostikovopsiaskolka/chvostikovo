@@ -3,6 +3,7 @@ import { MapPin, Mail, Phone, Clock, Instagram, Facebook } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { LongForm } from "./Forms";
+import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { LegalDialog, type LegalDialogType } from "./LegalDialog";
 
 export function Contact() {
@@ -22,37 +23,70 @@ export function Contact() {
           <LongForm />
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          <ContactRow icon={<MapPin className="size-5" />} label="Adresa">
-            <a href={MAP_LINK} target="_blank" rel="noreferrer" className="hover:text-coral">
-              Poľská 6, 040 01 Košice
-            </a>
-          </ContactRow>
-          <ContactRow icon={<Phone className="size-5" />} label="Telefón">
-            <a href={`tel:${PHONE}`} className="hover:text-coral">
-              {PHONE_PRETTY}
-            </a>
-          </ContactRow>
-          <ContactRow icon={<Mail className="size-5" />} label="E-mail">
-            <a href={`mailto:${EMAIL}`} className="break-all hover:text-coral">
-              {EMAIL}
-            </a>
-          </ContactRow>
-          <ContactRow icon={<Clock className="size-5" />} label="Otváracie hodiny">
-            Pondelok – piatok, 7:00 – 17:00
-          </ContactRow>
-        </div>
-
-        <div className="mt-8 overflow-hidden rounded-4xl shadow-card">
-          <iframe
-            title="Mapa – Chvostíkovo, Poľská 6, Košice"
-            src="https://www.google.com/maps?q=Po%C4%BEsk%C3%A1%206,%20Ko%C5%A1ice&output=embed"
-            loading="lazy"
-            className="h-72 w-full border-0"
-          />
-        </div>
+        <ContactDetails language="sk" />
       </div>
     </section>
+  );
+}
+
+export function EnglishContact() {
+  return (
+    <section id="contact" className="scroll-mt-24 py-16 sm:py-20">
+      <div className="mx-auto max-w-4xl px-4">
+        <div className="text-center">
+          <h2 className="section-title text-3xl leading-tight sm:text-4xl">
+            Enquire about dog daycare
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-forest/80">
+            Fill in the short, non-binding form. We will get back to you and talk through how Chvostíkovo works and whether daycare is a good fit for your dog.
+          </p>
+        </div>
+
+        <div className="mt-8 rounded-4xl bg-card p-6 shadow-soft sm:p-9">
+          <EnglishInquiryForm trackingSource="en_contact" />
+        </div>
+
+        <ContactDetails language="en" />
+      </div>
+    </section>
+  );
+}
+
+function ContactDetails({ language }: { language: "sk" | "en" }) {
+  const isEnglish = language === "en";
+
+  return (
+    <>
+      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        <ContactRow icon={<MapPin className="size-5" />} label={isEnglish ? "Address" : "Adresa"}>
+          <a href={MAP_LINK} target="_blank" rel="noreferrer" className="hover:text-coral">
+            Poľská 6, 040 01 Košice
+          </a>
+        </ContactRow>
+        <ContactRow icon={<Phone className="size-5" />} label={isEnglish ? "Phone" : "Telefón"}>
+          <a href={`tel:${PHONE}`} className="hover:text-coral">
+            {PHONE_PRETTY}
+          </a>
+        </ContactRow>
+        <ContactRow icon={<Mail className="size-5" />} label={isEnglish ? "Email" : "E-mail"}>
+          <a href={`mailto:${EMAIL}`} className="break-all hover:text-coral">
+            {EMAIL}
+          </a>
+        </ContactRow>
+        <ContactRow icon={<Clock className="size-5" />} label={isEnglish ? "Opening hours" : "Otváracie hodiny"}>
+          {isEnglish ? "Monday – Friday, 7:00 – 17:00" : "Pondelok – piatok, 7:00 – 17:00"}
+        </ContactRow>
+      </div>
+
+      <div className="mt-8 overflow-hidden rounded-4xl shadow-card">
+        <iframe
+          title={isEnglish ? "Map – Chvostíkovo, Poľská 6, Košice" : "Mapa – Chvostíkovo, Poľská 6, Košice"}
+          src="https://www.google.com/maps?q=Po%C4%BEsk%C3%A1%206,%20Ko%C5%A1ice&output=embed"
+          loading="lazy"
+          className="h-72 w-full border-0"
+        />
+      </div>
+    </>
   );
 }
 
@@ -80,8 +114,9 @@ function ContactRow({
   );
 }
 
-export function Footer() {
+export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
   const [legalDialog, setLegalDialog] = useState<LegalDialogType | null>(null);
+  const isEnglish = language === "en";
 
   return (
     <>
@@ -90,14 +125,14 @@ export function Footer() {
           <div className="flex justify-center sm:justify-start">
             <img
               src={logo}
-              alt="Chvostíkovo psia škôlka"
+              alt={isEnglish ? "Chvostíkovo dog daycare" : "Chvostíkovo psia škôlka"}
               className="h-8 w-auto brightness-0 invert opacity-90"
             />
           </div>
 
           <div className="flex flex-col items-center gap-4 text-center">
             <p className="text-sm">
-              Psia škôlka Chvostíkovo · Poľská 6, Košice ·{" "}
+              {isEnglish ? "Chvostíkovo dog daycare" : "Psia škôlka Chvostíkovo"} · Poľská 6, Košice ·{" "}
               <a href={`tel:${PHONE}`} className="font-semibold text-cream hover:text-coral-soft">
                 {PHONE_PRETTY}
               </a>
@@ -106,15 +141,15 @@ export function Footer() {
             <p className="text-xs">
               © {new Date().getFullYear()} Chvostíkovo ·{" "}
               <button type="button" onClick={() => setLegalDialog("cookies")} className="underline hover:text-cream">
-                Cookies
+                {isEnglish ? "Cookies" : "Cookies"}
               </button>{" "}
               ·{" "}
               <button type="button" onClick={() => setLegalDialog("privacy")} className="underline hover:text-cream">
-                Ochrana osobných údajov
+                {isEnglish ? "Privacy" : "Ochrana osobných údajov"}
               </button>{" "}
               ·{" "}
               <button type="button" onClick={() => setLegalDialog("operator")} className="underline hover:text-cream">
-                Údaje prevádzkovateľa
+                {isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}
               </button>{" "}
               ·{" "}
               <button
@@ -124,7 +159,7 @@ export function Footer() {
                 }
                 className="underline hover:text-cream"
               >
-                Nastavenia cookies
+                {isEnglish ? "Cookie settings" : "Nastavenia cookies"}
               </button>
             </p>
           </div>
@@ -159,6 +194,7 @@ export function Footer() {
           if (!open) setLegalDialog(null);
         }}
         onSelect={setLegalDialog}
+        language={language}
       />
     </>
   );
