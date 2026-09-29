@@ -983,6 +983,16 @@ html,body,#appView.app,#appView .tab-page{
 .terms-scroll-hint-v85.done{color:#166534}
 .terms-ack-row:has(input:disabled){opacity:.48}
 .terms-ack-row input:disabled{cursor:not-allowed}
+.terms-ack-row,.terms-ack-row span{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+/* Reservation labels stay close to the information they describe. */
+.reserved-day-top-v37 .reserved-day-controls-v37 .pill.approved,.reserved-day-top-v37 .cancel-booking-v37{width:100px;max-width:100px;flex:0 0 100px;min-height:40px}
+.reserved-day-top-v37 .reserved-day-controls-v37 .pill.approved{padding:5px 8px;border:1px solid #86efac;border-radius:12px;background:#ecfdf3;color:#166534}
+.reserved-day-detail-pending-v37 .reserved-pass-v37{display:inline-flex;align-items:center;min-height:32px;border-radius:10px;padding:6px 9px;background:#fff7ed;color:#9a3412;font-weight:850}
+.reserved-roster-row-v37{min-width:0;width:100%}
+.reserved-roster-row-v37 b{min-width:0}
+.reserved-roster-row-v37 .reserved-pass-v37{margin-left:auto;max-width:55%;text-align:right;line-height:1.25;font-size:12px;color:#6b3d9a;font-weight:850}
+@media(max-width:390px){.reserved-roster-row-v37 .reserved-pass-v37{max-width:52%;font-size:11px}.reserved-day-top-v37 .reserved-day-controls-v37 .pill.approved,.reserved-day-top-v37 .cancel-booking-v37{width:82px;max-width:82px;flex-basis:82px}}
 
 
 /* v87: customer-facing dog name and centered registration confirmation */

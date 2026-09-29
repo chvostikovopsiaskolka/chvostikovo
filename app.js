@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260928-customer-notice-v129';
+const APP_BUILD='20260929-customer-auth-booking-v133';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -726,7 +726,7 @@ function showEmailConfirmedV109(){
   document.querySelector('.auth-switch')?.classList.add('hidden');
   ['loginForm','signupForm','forgotForm','newPasswordForm'].forEach(id=>$(id)?.classList.add('hidden'));
   document.getElementById('installHelpLink')?.classList.add('hidden');
-  authMessage('success','E-mail je potvrdený. Vráťte sa do nainštalovanej aplikácie Chvostíkovo a prihláste sa.');
+  authMessage('success','E-mail je potvrdený. Teraz otvorte Chvostíkovo cez ikonu na ploche a prihláste sa.');
 }
 function handleRecoveryHash(){
   const hash=new URLSearchParams(location.hash.replace(/^#/,'')),access=hash.get('access_token'),refresh=hash.get('refresh_token'),type=hash.get('type');
@@ -842,7 +842,7 @@ function ensureBookingLayout(){
   const oldHead=[...booking.querySelectorAll('.section-head')].find(x=>x.querySelector('h2')?.textContent?.trim()==='Vyberte deň');
   if(oldHead)oldHead.remove();
   if(!booking.querySelector('.booking-section-head')){
-    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme, rezervujte si dni na nasledujúci týždeň do nedele 20:00.</strong><span class="hidden"></span></div>');
+    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme o rezerváciu miesta pre vášho psíka na ďalší týždeň do nedele 20:00.</strong><span class="hidden"></span></div>');
   }
 }
 ensureBookingLayout();
@@ -959,7 +959,7 @@ placeDeadlineV59();
     });
   }
   function openGuide(){ensureGuide();document.getElementById('installGuideModal')?.classList.remove('hidden')}
-  function mountHelpLink(){const card=document.querySelector('.auth-card');if(!card||document.getElementById('installHelpLink'))return;const b=document.createElement('button');b.id='installHelpLink';b.type='button';b.className='install-help-link';b.textContent='Ako si nainštalovať aplikáciu?';b.addEventListener('click',openGuide);card.appendChild(b)}
+  function mountHelpLink(){const login=document.getElementById('loginForm');if(!login||document.getElementById('installHelpLink')||standalone())return;const b=document.createElement('button');b.id='installHelpLink';b.type='button';b.className='install-help-link';b.textContent='Ako si nainštalovať aplikáciu?';b.addEventListener('click',openGuide);login.appendChild(b)}
   const start=()=>{mountHelpLink();const emailReturn=/type=signup/i.test(location.hash);if(standalone())installedUi();else if(!emailReturn&&sessionStorage.getItem(KEY)!=='1')setTimeout(()=>{if(sessionStorage.getItem(KEY)!=='1')openGuide()},180)};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
@@ -1501,7 +1501,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const showClosed=closed&&(weekday===0||weekday===1);
     box.querySelector('strong').textContent=showClosed
       ? 'Prihlasovanie na tento týždeň sa uzavrelo v nedeľu o 20:00.'
-      : 'Prosíme, rezervujte si dni na nasledujúci týždeň do nedele 20:00.';
+      : 'Prosíme o rezerváciu miesta pre vášho psíka na ďalší týždeň do nedele 20:00.';
     const detail=box.querySelector('span');
     if(detail){detail.textContent=showClosed?'Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.':'';detail.classList.toggle('hidden',!showClosed)}
   }
@@ -1678,11 +1678,19 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(renewalDate)setTimeout(()=>window.showPassRenewalAfterBookingV94?.(Number(dog.id),renewalDate),140);
   }
 
-  function bookingRosterV37(day){
+  function bookingRosterV37(day,ownDog,passState){
     const count=(day?.dogs?.length||0)+(Number(day?.anonymous_dogs)||0);
     if(!count)return '<span class="reserved-roster-count-v37">Zatiaľ bez ďalších psíkov</span>';
     if(!day?.roster_visible)return `<span class="reserved-roster-count-v37">${esc(pluralDogs(count))}</span>`;
-    return `<details class="reserved-roster-v37"><summary>${esc(pluralDogs(count))}</summary><div>${(day.dogs||[]).map(x=>{const sex=x.sex==='male'?' dog-male-v100':x.sex==='female'?' dog-female-v100':' dog-neutral-v100';return `<span>${x.photo_url?`<i class="reserved-roster-avatar-v37${sex}"><img src="${esc(x.photo_url)}" alt=""></i>`:`<i class="reserved-roster-avatar-v37${sex}">🐾</i>`}<b>${esc(x.name)}</b></span>`}).join('')}${Array.from({length:Number(day.anonymous_dogs)||0},()=>'<span><i class="reserved-roster-avatar-v37 dog-neutral-v100">🐾</i><b>Prihlásený škôlkar</b></span>').join('')}</div></details>`;
+    const ownName=String(ownDog?.customer_name||ownDog?.name||'').trim();
+    const ownPhoto=String(ownDog?.photo_url||'');
+    const visible=day.dogs||[];
+    const ownIndex=visible.findIndex(x=>String(x.name||'').trim()===ownName);
+    const own=ownIndex>=0?visible[ownIndex]:{name:ownName||'Váš psík',sex:ownDog?.sex,photo_url:ownPhoto};
+    const otherVisible=visible.filter((_,index)=>index!==ownIndex);
+    const anonymous=Math.max(0,Number(day.anonymous_dogs||0)-(ownIndex<0?1:0));
+    const row=(x,badge='')=>{const sex=x.sex==='male'?' dog-male-v100':x.sex==='female'?' dog-female-v100':' dog-neutral-v100';return `<span class="reserved-roster-row-v37">${x.photo_url?`<i class="reserved-roster-avatar-v37${sex}"><img src="${esc(x.photo_url)}" alt=""></i>`:`<i class="reserved-roster-avatar-v37${sex}">🐾</i>`}<b>${esc(x.name)}</b>${badge}</span>`};
+    return `<details class="reserved-roster-v37"><summary>${esc(pluralDogs(count))}</summary><div>${row(own,passState)}${otherVisible.map(x=>row(x)).join('')}${Array.from({length:anonymous},()=>'<span class="reserved-roster-row-v37"><i class="reserved-roster-avatar-v37 dog-neutral-v100">🐾</i><b>Prihlásený škôlkar</b></span>').join('')}</div></details>`;
   }
 
   customerRenderers.upcoming=()=>{
@@ -1715,8 +1723,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const note=day.note&&!(day.bookings_open===false&&/^zatvorené$/i.test(String(day.note).trim()))?`<div class="reserved-note-v37">${esc(day.note)}</div>`:'';
       const sharedNote=r.can_manage===false?`<div class="hint">${esc(dog.name)} už má na tento deň rezerváciu alebo žiadosť čakajúcu na potvrdenie.</div>`:'';
       const cancel=r.can_manage!==false?`<button class="cancel-booking-v37" type="button" data-request="${r._legacy?'':r.id||''}" data-reservation="${r._legacy?r.reservation_id||r.id:''}">Zrušiť rezerváciu</button>`:'';
-      const detail=passState||taxi?`<div class="reserved-day-detail-v37">${passState}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}</div>`:'';
-      const approvedRoster=pending?'':`<div class="reserved-day-meta-v37">${bookingRosterV37(day)}</div>`;
+      const detail=(pending&&passState)||taxi?`<div class="reserved-day-detail-v37${pending?' reserved-day-detail-pending-v37':''}">${pending?passState:''}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}</div>`:'';
+      const approvedRoster=pending?'':`<div class="reserved-day-meta-v37">${bookingRosterV37(day,dog,passState)}</div>`;
       return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div class="reserved-day-date-v37"><strong>${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><div class="reserved-day-controls-v37"><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span>${cancel}</div></div>${approvedRoster}${detail}${sharedNote}${note}</div>`;
     }).join('');
     root.querySelectorAll('.cancel-booking-v37').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();cancelBooking(btn)}));
