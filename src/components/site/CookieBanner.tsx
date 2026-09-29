@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
 
 type Consent = {
@@ -14,6 +13,7 @@ export function CookieBanner() {
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [hasSavedConsent, setHasSavedConsent] = useState(false);
   const [consent, setConsent] = useState<Consent>({
     necessary: true,
     analytics: false,
@@ -28,6 +28,7 @@ export function CookieBanner() {
     } else {
       try {
         setConsent(JSON.parse(saved));
+        setHasSavedConsent(true);
       } catch {
         setOpen(true);
       }
@@ -35,6 +36,7 @@ export function CookieBanner() {
 
     function handleOpenSettings() {
       setShowDetails(true);
+      setHasSavedConsent(true);
       setOpen(true);
     }
 
@@ -43,6 +45,17 @@ export function CookieBanner() {
       window.removeEventListener("chvostikovo-open-cookie-settings", handleOpenSettings);
   }, []);
 
+  useEffect(() => {
+    if (!open || typeof document === "undefined") return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   if (!mounted) return null;
 
   const isEnglish = window.location.pathname.startsWith("/en/");
@@ -50,6 +63,7 @@ export function CookieBanner() {
   function save(next: Consent) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     setConsent(next);
+    setHasSavedConsent(true);
     setOpen(false);
     window.dispatchEvent(
       new CustomEvent("chvostikovo-consent-changed", { detail: next })
@@ -60,6 +74,10 @@ export function CookieBanner() {
     save({ necessary: true, analytics: true, marketing: true });
   }
 
+  function rejectAll() {
+    save({ necessary: true, analytics: false, marketing: false });
+  }
+
   function savePreferences() {
     save({ ...consent, necessary: true });
   }
@@ -67,30 +85,43 @@ export function CookieBanner() {
   if (!open) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-2 pb-2 sm:px-5 sm:pb-6">
-      <div className="pointer-events-auto max-h-[calc(100vh-1rem)] w-full max-w-4xl overflow-y-auto rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:p-6">
+    <div
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-forest/45 px-2 pb-2 pt-16 backdrop-blur-[2px] sm:items-center sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cookie-consent-title"
+    >
+      <div className="max-h-[calc(100vh-1rem)] w-full max-w-4xl overflow-y-auto rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:p-6">
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
-            <p className="font-display text-lg font-bold sm:text-xl">
+            <p id="cookie-consent-title" className="font-display text-lg font-bold sm:text-xl">
               {isEnglish ? "We use cookies" : "Používame cookies"}
             </p>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-forest/75 sm:text-base">
+            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-forest/75 sm:text-base">
               {isEnglish
-                ? "We use cookies to keep the website working properly and to improve your experience. "
-                : "Používame cookies na správne fungovanie stránky a zlepšenie vašej skúsenosti. "}
-              <Link to={isEnglish ? "/en/cookies" : "/cookies"} className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark">
+                ? "Necessary cookies keep the website working properly. Analytics and marketing cookies are used only with your consent. They help us improve the website and measure the effectiveness of our advertising. "
+                : "Nevyhnutné cookies zabezpečujú správne fungovanie stránky. Analytické a marketingové cookies používame iba s vaším súhlasom. Pomáhajú nám zlepšovať web a vyhodnocovať účinnosť našej reklamy. "}
+              <a
+                href={isEnglish ? "/en/cookies" : "/cookies"}
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
+              >
                 {isEnglish ? "Cookie policy" : "Pravidlá používania cookies"}
-              </Link>
+              </a>
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label={isEnglish ? "Close cookie banner" : "Zavrieť banner"}
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition hover:bg-coral hover:text-white sm:size-9"
-          >
-            <X className="size-4" />
-          </button>
+
+          {hasSavedConsent && (
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label={isEnglish ? "Close cookie settings" : "Zavrieť nastavenia cookies"}
+              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition hover:bg-coral hover:text-white sm:size-9"
+            >
+              <X className="size-4" />
+            </button>
+          )}
         </div>
 
         {showDetails && (
@@ -101,7 +132,9 @@ export function CookieBanner() {
                   {isEnglish ? "Necessary cookies" : "Nevyhnutné cookies"}
                 </p>
                 <p className="mt-0.5 text-xs text-forest/65">
-                  {isEnglish ? "Required for the basic operation of the website." : "Potrebné na základné fungovanie stránky."}
+                  {isEnglish
+                    ? "Required for basic website functions and to remember your cookie choice."
+                    : "Potrebné na základné fungovanie webu a uloženie vašej voľby cookies."}
                 </p>
               </div>
               <input
@@ -112,13 +145,16 @@ export function CookieBanner() {
                 className="size-4 accent-coral sm:size-5"
               />
             </div>
+
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-forest">
                   {isEnglish ? "Analytics cookies" : "Analytické cookies"}
                 </p>
                 <p className="mt-0.5 text-xs text-forest/65">
-                  {isEnglish ? "Help us understand how visitors use the website." : "Pomáhajú nám pochopiť, ako používate stránku."}
+                  {isEnglish
+                    ? "Help us understand website traffic and how visitors use the site."
+                    : "Pomáhajú nám merať návštevnosť a pochopiť, ako návštevníci používajú web."}
                 </p>
               </div>
               <input
@@ -129,13 +165,16 @@ export function CookieBanner() {
                 className="size-4 accent-coral sm:size-5"
               />
             </div>
+
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-forest">
                   {isEnglish ? "Marketing cookies" : "Marketingové cookies"}
                 </p>
                 <p className="mt-0.5 text-xs text-forest/65">
-                  {isEnglish ? "Used to measure advertising performance and relevant content." : "Na meranie účinnosti reklám a relevantný obsah."}
+                  {isEnglish
+                    ? "Help us measure advertising performance and marketing conversions."
+                    : "Pomáhajú nám merať účinnosť reklám a marketingové konverzie."}
                 </p>
               </div>
               <input
@@ -149,14 +188,23 @@ export function CookieBanner() {
           </div>
         )}
 
-        <div className="mt-4 flex flex-col gap-2 sm:mt-5 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+        <div className="mt-4 grid gap-2 sm:mt-5 sm:grid-cols-3 sm:gap-3">
           <button
             type="button"
             onClick={acceptAll}
-            className="order-1 rounded-full bg-coral px-6 py-3 font-display text-sm font-semibold text-primary-foreground shadow-card transition hover:bg-coral-dark sm:order-2 sm:min-w-40 sm:text-base"
+            className="rounded-full bg-coral px-5 py-3 font-display text-sm font-semibold text-primary-foreground shadow-card transition hover:bg-coral-dark sm:text-base"
           >
             {isEnglish ? "Accept all" : "Prijať všetky"}
           </button>
+
+          <button
+            type="button"
+            onClick={rejectAll}
+            className="rounded-full border border-forest/25 bg-card px-5 py-3 font-display text-sm font-semibold text-forest transition hover:bg-secondary sm:text-base"
+          >
+            {isEnglish ? "Reject all" : "Odmietnuť všetky"}
+          </button>
+
           <button
             type="button"
             onClick={() => {
@@ -166,10 +214,10 @@ export function CookieBanner() {
                 setShowDetails(true);
               }
             }}
-            className="order-2 rounded-full border border-forest/20 bg-card px-6 py-3 font-display text-sm font-semibold text-forest transition hover:bg-secondary sm:order-1 sm:min-w-40 sm:text-base"
+            className="rounded-full border border-forest/25 bg-secondary px-5 py-3 font-display text-sm font-semibold text-forest transition hover:bg-coral-soft sm:text-base"
           >
             {showDetails
-              ? isEnglish ? "Save" : "Uložiť"
+              ? isEnglish ? "Save preferences" : "Uložiť nastavenia"
               : isEnglish ? "Customize" : "Prispôsobiť"}
           </button>
         </div>
