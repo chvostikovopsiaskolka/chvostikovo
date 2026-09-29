@@ -27,7 +27,6 @@ export function EnglishInquiryForm({
     const fd = new FormData(e.currentTarget);
     const source_ref = sourceRef();
     const attribution = getTrafficAttribution();
-    const dogName = String(fd.get("dog_name") ?? "").trim();
     const interest = String(fd.get("interest") ?? "").trim();
 
     setLoading(true);
@@ -48,7 +47,7 @@ export function EnglishInquiryForm({
         cta_source: trackingSource,
         meno: String(fd.get("name") ?? "").trim(),
         telefon: String(fd.get("phone") ?? "").trim(),
-        zaujem: `EN – Dog daycare enquiry | ${interest}${dogName ? ` | Dog: ${dogName}` : ""}`,
+        zaujem: `EN – Dog daycare enquiry | ${interest}`,
       });
 
       trackFormSubmit({
@@ -88,10 +87,6 @@ export function EnglishInquiryForm({
         <input id="en-name" name="name" required className="field" placeholder="Your name" />
       </div>
       <PhoneField id="en-phone" name="phone" label="Phone / WhatsApp *" language="en" />
-      <div>
-        <label className="label-sm" htmlFor="en-dog-name">Dog's name</label>
-        <input id="en-dog-name" name="dog_name" className="field" placeholder="Rocky" />
-      </div>
       <div>
         <label className="label-sm" htmlFor="en-interest">What are you looking for? *</label>
         <select id="en-interest" name="interest" required className="field" defaultValue="">
