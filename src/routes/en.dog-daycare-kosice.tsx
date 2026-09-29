@@ -2,12 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
-  Check,
-  Clock3,
-  Facebook,
   HeartHandshake,
-  Instagram,
-  MapPin,
   Menu,
   Moon,
   Phone,
@@ -18,22 +13,20 @@ import {
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import heroDogs from "@/assets/hero-dogs.jpg";
-import teamDogs from "@/assets/team-dogs.jpg";
 import { EnglishInquiryForm } from "@/components/site/EnglishInquiryForm";
 import { FormDialog } from "@/components/site/FormDialog";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { Collapse } from "@/components/site/Collapse";
 import { InfoTicker } from "@/components/site/InfoTicker";
+import { Gallery } from "@/components/site/Gallery";
+import { Care, About } from "@/components/site/Story";
+import { PhotoStrip } from "@/components/site/PhotoStrip";
+import { EnglishContact, Footer } from "@/components/site/Contact";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   ADDRESS,
   EMAIL,
-  FACEBOOK,
-  GALLERY,
-  INSTAGRAM,
-  MAP_LINK,
   PHONE,
-  PHONE_PRETTY,
 } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
@@ -181,27 +174,6 @@ function EnglishReviewCarousel() {
   );
 }
 
-const SPACE_PHOTOS = [
-  {
-    src: GALLERY[0]!.src,
-    alt: "Indoor dog daycare area at Chvostíkovo in Košice",
-    title: "Indoor daycare rooms",
-    text: "Heated indoor space for supervised time, calmer moments and rest throughout the day.",
-  },
-  {
-    src: GALLERY[6]!.src,
-    alt: "Secure outdoor dog run at Chvostíkovo in Košice",
-    title: "Secure outdoor run",
-    text: "An outdoor run of approximately 80 m² gives dogs room to move, explore and spend time outside under supervision.",
-  },
-  {
-    src: GALLERY[5]!.src,
-    alt: "Dogs resting during the day at Chvostíkovo dog daycare",
-    title: "Space to slow down",
-    text: "Rest is part of the routine. Dogs also have time and space to settle, switch off and recover.",
-  },
-];
-
 const FAQ = [
   {
     q: "Is Chvostíkovo dog daycare or pet sitting?",
@@ -319,27 +291,6 @@ export const Route = createFileRoute("/en/dog-daycare-kosice")({
 });
 
 
-const CARE_EN = [
-  {
-    src: GALLERY[3]!.src,
-    alt: "Dogs enjoying an active day at Chvostíkovo dog daycare",
-    title: "An active, balanced day",
-    text: "Movement, play, fresh air and social contact are balanced with calmer periods, so the day is fun without becoming overwhelming.",
-  },
-  {
-    src: GALLERY[2]!.src,
-    alt: "Dogs under supervision at Chvostíkovo dog daycare",
-    title: "All-day supervision",
-    text: "At least two experienced caregivers are with the dogs during the day. We watch play, interactions, energy levels and when someone needs a break.",
-  },
-  {
-    src: GALLERY[5]!.src,
-    alt: "A dog resting during the day at Chvostíkovo",
-    title: "Individual approach",
-    text: "Every dog is different. We adjust activity, introductions and rest to the dog in front of us instead of forcing every dog into the same routine.",
-  },
-];
-
 const WHY_EN = [
   {
     title: "Company instead of a day alone",
@@ -376,6 +327,7 @@ function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
     ["#faq", "FAQ"],
     ["#requirements", "Requirements"],
     ["#about", "About us"],
+    ["/produkty", "Our products"],
   ];
 
   const openEnquiry = (source: string) => {
@@ -397,6 +349,7 @@ function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
           <a href="#why-daycare" className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">Why daycare</a>
           <a href="#requirements" className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">Requirements</a>
           <a href="#faq" className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">FAQ</a>
+          <a href="/produkty" className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">Our products</a>
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-3">
@@ -613,77 +566,15 @@ function EnglishDogDaycarePage() {
 
         <section id="reviews" className="scroll-mt-24 bg-secondary/50 py-14 sm:py-18">
           <div className="mx-auto max-w-6xl px-4 text-center">
-            <h2 className="section-title text-3xl sm:text-4xl">150+ happy daycare dogs</h2>
+            <h2 className="section-title text-3xl sm:text-4xl">100+ happy daycare dogs</h2>
             <p className="mt-3 text-forest/80">⭐ 5.0 on Google</p>
             <EnglishReviewCarousel />
           </div>
         </section>
 
-        <section id="spaces" className="scroll-mt-24 py-12 sm:py-16">
-          <div className="mx-auto max-w-6xl px-4">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="section-title text-3xl sm:text-4xl">Where will your dog spend the day?</h2>
-                <p className="mt-3 max-w-2xl text-forest/80">
-                  Heated indoor rooms and a secure outdoor run of approximately 80 m² give dogs space for activity, calmer moments and rest.
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 self-start sm:justify-end">
-                <a
-                  href={MAP_LINK}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-forest"
-                >
-                  <MapPin className="size-4" /> Poľská 6, Košice
-                </a>
-                <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-forest">
-                  <Check className="size-4 text-coral" /> Free parking by the daycare
-                </span>
-              </div>
-            </div>
+        <Gallery language="en" />
 
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {SPACE_PHOTOS.map((item) => (
-                <article key={item.title} className="overflow-hidden rounded-4xl bg-card shadow-card">
-                  <img src={item.src} alt={item.alt} loading="lazy" className="h-64 w-full object-cover" />
-                  <div className="p-5">
-                    <h3 className="text-xl text-forest">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-forest/80">{item.text}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="care" className="scroll-mt-24 bg-card py-12 sm:py-16">
-          <div className="mx-auto max-w-6xl px-4">
-            <h2 className="section-title text-center text-3xl sm:text-4xl">How we care for your dog</h2>
-
-            <div className="mt-8 grid gap-6 md:grid-cols-3">
-              {CARE_EN.map((item) => (
-                <article key={item.title} className="flex flex-col overflow-hidden rounded-4xl bg-background shadow-card">
-                  <img src={item.src} alt={item.alt} loading="lazy" className="h-56 w-full object-cover" />
-                  <div className="flex flex-1 flex-col p-6">
-                    <h3 className="text-xl text-forest">{item.title}</h3>
-                    <p className="mt-3 text-[0.95rem] leading-relaxed text-forest/80">{item.text}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            <div className="mt-7 hidden justify-center lg:flex">
-              <button
-                type="button"
-                onClick={() => openInquiry("en_care_desktop")}
-                className="btn-coral"
-              >
-                I want to know more
-              </button>
-            </div>
-          </div>
-        </section>
+        <Care language="en" />
 
         <section className="bg-card py-10 lg:hidden">
           <div className="mx-auto max-w-2xl px-4">
@@ -825,106 +716,12 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <section id="about" className="scroll-mt-24 py-14 sm:py-18">
-          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
-            <div>
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">About Chvostíkovo</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">A small daycare with a personal approach</h2>
-              <div className="mt-5 space-y-4 text-forest/85">
-                <p>
-                  Chvostíkovo was created because, as owners of larger dogs ourselves, we know how important it is to have a place where you can leave your dog with real confidence.
-                </p>
-                <p>
-                  We focus on medium and large breeds and keep the daycare personal. We want to know the dogs who come to us — their personalities, needs, friendships and the things that help them feel comfortable.
-                </p>
-                <p>
-                  Safety, movement, rest and respectful handling matter more to us than simply filling the day with constant activity.
-                </p>
-              </div>
-            </div>
-
-            <img
-              src={teamDogs}
-              alt="The people and dogs behind Chvostíkovo dog daycare"
-              loading="lazy"
-              className="h-72 w-full rounded-4xl object-cover shadow-card sm:h-96"
-            />
-          </div>
-        </section>
-
-        <section className="bg-card pb-14 sm:pb-18">
-          <div className="mx-auto max-w-5xl px-4">
-            <div className="rounded-4xl bg-forest p-7 text-center text-cream shadow-soft sm:p-10">
-              <h2 className="text-3xl text-cream sm:text-4xl">Want to know if Chvostíkovo is right for your dog?</h2>
-              <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-cream/85">
-                Send us a short enquiry or call us. We will be happy to explain how daycare works and arrange a free introductory visit.
-              </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <button type="button" onClick={() => openInquiry("en_final_cta")} className="btn-coral">
-                  Enquire about daycare
-                </button>
-                <a
-                  href={"tel:" + PHONE}
-                  data-tracking-source="en_final_cta"
-                  className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-cream/60 px-6 py-3 font-display font-semibold text-cream transition-colors hover:bg-cream hover:text-forest"
-                >
-                  <Phone className="size-4" /> {PHONE_PRETTY}
-                </a>
-              </div>
-
-              <div className="mx-auto mt-8 grid max-w-3xl gap-3 text-left sm:grid-cols-3">
-                <a href={MAP_LINK} target="_blank" rel="noreferrer" className="rounded-2xl bg-cream/10 p-4 text-cream hover:bg-cream/15">
-                  <MapPin className="mb-2 size-5 text-coral-soft" />
-                  <span className="block text-xs text-cream/65">Address</span>
-                  <strong className="text-sm">{ADDRESS.street}, {ADDRESS.city}</strong>
-                </a>
-                <div className="rounded-2xl bg-cream/10 p-4">
-                  <Clock3 className="mb-2 size-5 text-coral-soft" />
-                  <span className="block text-xs text-cream/65">Opening hours</span>
-                  <strong className="text-sm">Mon–Fri · 7:00–17:00</strong>
-                </div>
-                <div className="rounded-2xl bg-cream/10 p-4">
-                  <Check className="mb-2 size-5 text-coral-soft" />
-                  <span className="block text-xs text-cream/65">First meeting</span>
-                  <strong className="text-sm">Free introductory visit</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <About language="en" />
+        <PhotoStrip />
+        <EnglishContact />
       </main>
 
-      <footer className="bg-forest py-10 text-cream/80">
-        <div className="mx-auto grid max-w-6xl gap-7 px-4 text-center sm:grid-cols-[auto_1fr_auto] sm:items-start sm:text-left">
-          <div className="flex justify-center sm:justify-start">
-            <img src={logo} alt="Chvostíkovo dog daycare" className="h-8 w-auto brightness-0 invert opacity-90" />
-          </div>
-
-          <div className="flex flex-col items-center gap-4 text-center">
-            <p className="text-sm">
-              Chvostíkovo dog daycare · Poľská 6, Košice ·{" "}
-              <a href={"tel:" + PHONE} data-tracking-source="en_footer" className="font-semibold text-cream hover:text-coral-soft">
-                {PHONE_PRETTY}
-              </a>
-            </p>
-            <p className="text-xs">
-              © {new Date().getFullYear()} Chvostíkovo ·{" "}
-              <a href="/en/cookies" className="underline hover:text-cream">Cookies</a>{" "}·{" "}
-              <a href="/en/privacy" className="underline hover:text-cream">Privacy</a>{" "}·{" "}
-              <a href="/en/operator-details" className="underline hover:text-cream">Operator details</a>
-            </p>
-          </div>
-
-          <div className="flex items-center justify-center gap-2 sm:justify-end">
-            <a href={INSTAGRAM} target="_blank" rel="noreferrer" aria-label="Instagram Chvostíkovo" className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral">
-              <Instagram className="size-5" />
-            </a>
-            <a href={FACEBOOK} target="_blank" rel="noreferrer" aria-label="Facebook Chvostíkovo" className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral">
-              <Facebook className="size-5" />
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer language="en" />
 
       <FormDialog
         open={inquiryOpen}
