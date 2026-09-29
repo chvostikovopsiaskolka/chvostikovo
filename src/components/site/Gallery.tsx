@@ -3,7 +3,7 @@ import { Car, MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { GALLERY, MAP_LINK } from "@/content/site";
 import { Collapse } from "./Collapse";
 
-const HYGIENE = [
+const HYGIENE_SK = [
   {
     icon: "🧼",
     title: "Pravidelná dezinfekcia",
@@ -21,10 +21,45 @@ const HYGIENE = [
   },
 ];
 
-export function Gallery() {
+const HYGIENE_EN = [
+  {
+    icon: "🧼",
+    title: "Regular disinfection",
+    text: "We regularly disinfect our spaces so they stay clean and safe for the dogs in our care.",
+  },
+  {
+    icon: "💡",
+    title: "Germicidal ozone lamp",
+    text: "We regularly use a germicidal ozone lamp to disinfect rooms, toys and equipment, helping reduce bacteria and viruses and maintain a healthy environment.",
+  },
+  {
+    icon: "🐾",
+    title: "Cleaned every day",
+    text: "At the end of each day we thoroughly clean and prepare the daycare for the next day so dogs can enjoy a pleasant, safe environment.",
+  },
+];
+
+const GALLERY_EN = [
+  "Indoor spaces",
+  "Outdoor run",
+  "Daycare dogs during the day",
+  "Playtime in the outdoor run",
+  "Our pack",
+  "Rest during the day",
+  "80 m² outdoor run",
+  "A well-earned break",
+  "Secure outdoor run",
+  "Resting on the sofa",
+  "Bella, Stella and Bebe",
+  "Dante and Ceresia",
+];
+
+export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
   const [active, setActive] = useState<number | null>(null);
   const img = active === null ? null : GALLERY[active];
   const track = useRef<HTMLDivElement>(null);
+  const isEnglish = language === "en";
+  const hygiene = isEnglish ? HYGIENE_EN : HYGIENE_SK;
 
   function slide(dir: -1 | 1) {
     const el = track.current;
@@ -33,14 +68,17 @@ export function Gallery() {
   }
 
   return (
-    <section id="priestory" className="scroll-mt-24 pt-8 pb-14 sm:pt-14 sm:pb-20">
+    <section id={isEnglish ? "spaces" : "priestory"} className="scroll-mt-24 pt-8 pb-14 sm:pt-14 sm:pb-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="section-title text-3xl sm:text-4xl">Kde bude váš psík počas dňa?</h2>
+            <h2 className="section-title text-3xl sm:text-4xl">
+              {isEnglish ? "Where will your dog spend the day?" : "Kde bude váš psík počas dňa?"}
+            </h2>
             <p className="mt-3 max-w-2xl text-forest/80">
-              V Chvostíkove má váš psík k dispozícii vykurované vnútorné miestnosti a bezpečný
-              vonkajší výbeh s rozlohou približne 80 m² na hry, šantenie a oddych.
+              {isEnglish
+                ? "At Chvostíkovo your dog has heated indoor rooms and a secure outdoor run of approximately 80 m² for movement, play and rest."
+                : "V Chvostíkove má váš psík k dispozícii vykurované vnútorné miestnosti a bezpečný vonkajší výbeh s rozlohou približne 80 m² na hry, šantenie a oddych."}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 self-start sm:justify-end">
@@ -53,7 +91,7 @@ export function Gallery() {
               <MapPin className="size-4" /> Poľská 6, Košice
             </a>
             <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-forest">
-              <Car className="size-4 text-coral" /> Bezplatné parkovanie pri škôlke
+              <Car className="size-4 text-coral" /> {isEnglish ? "Free parking by the daycare" : "Bezplatné parkovanie pri škôlke"}
             </span>
           </div>
         </div>
@@ -72,13 +110,13 @@ export function Gallery() {
               >
                 <img
                   src={item.src}
-                  alt={item.alt}
+                  alt={isEnglish ? `Chvostíkovo dog daycare in Košice – photo ${i + 1}` : item.alt}
                   loading="lazy"
                   decoding="async"
                   className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-forest-deep/85 to-transparent p-4 text-left text-sm font-semibold text-cream">
-                  {item.caption}
+                  {isEnglish ? GALLERY_EN[i] : item.caption}
                 </span>
               </button>
             ))}
@@ -87,7 +125,7 @@ export function Gallery() {
           <div className="mt-5 flex justify-center gap-3">
             <button
               type="button"
-              aria-label="Predchádzajúce fotky"
+              aria-label={isEnglish ? "Previous photos" : "Predchádzajúce fotky"}
               onClick={() => slide(-1)}
               className="flex size-11 items-center justify-center rounded-full bg-card text-forest shadow-card transition hover:bg-secondary"
             >
@@ -95,7 +133,7 @@ export function Gallery() {
             </button>
             <button
               type="button"
-              aria-label="Ďalšie fotky"
+              aria-label={isEnglish ? "Next photos" : "Ďalšie fotky"}
               onClick={() => slide(1)}
               className="flex size-11 items-center justify-center rounded-full bg-card text-forest shadow-card transition hover:bg-secondary"
             >
@@ -106,10 +144,10 @@ export function Gallery() {
 
         <div className="mt-10">
           <h3 className="section-title text-center text-xl sm:text-2xl">
-            Ako zabezpečujeme čistotu priestorov?
+            {isEnglish ? "How do we keep the daycare clean?" : "Ako zabezpečujeme čistotu priestorov?"}
           </h3>
           <div className="mt-6 grid items-start gap-4 sm:grid-cols-3">
-            {HYGIENE.map((h) => (
+            {hygiene.map((h) => (
               <Collapse
                 key={h.title}
                 title={h.title}
@@ -124,7 +162,6 @@ export function Gallery() {
             ))}
           </div>
         </div>
-
       </div>
 
       {img && (
@@ -134,7 +171,7 @@ export function Gallery() {
         >
           <button
             type="button"
-            aria-label="Zavrieť"
+            aria-label={isEnglish ? "Close" : "Zavrieť"}
             className="absolute top-5 right-5 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest"
             onClick={() => setActive(null)}
           >
@@ -142,7 +179,7 @@ export function Gallery() {
           </button>
           <button
             type="button"
-            aria-label="Predchádzajúca fotka"
+            aria-label={isEnglish ? "Previous photo" : "Predchádzajúca fotka"}
             className="absolute left-3 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest sm:left-8"
             onClick={(e) => {
               e.stopPropagation();
@@ -154,17 +191,17 @@ export function Gallery() {
           <figure onClick={(e) => e.stopPropagation()} className="text-center">
             <img
               src={img.src}
-              alt={img.alt}
+              alt={isEnglish ? `Chvostíkovo dog daycare in Košice – photo ${(active as number) + 1}` : img.alt}
               decoding="async"
               className="max-h-[80vh] rounded-3xl object-contain shadow-soft"
             />
             <figcaption className="mt-3 font-display text-sm font-semibold text-cream">
-              {img.caption}
+              {isEnglish ? GALLERY_EN[active as number] : img.caption}
             </figcaption>
           </figure>
           <button
             type="button"
-            aria-label="Nasledujúca fotka"
+            aria-label={isEnglish ? "Next photo" : "Nasledujúca fotka"}
             className="absolute right-3 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest sm:right-8"
             onClick={(e) => {
               e.stopPropagation();
