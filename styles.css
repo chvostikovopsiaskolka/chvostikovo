@@ -1644,3 +1644,22 @@ html.customer-awaiting-dog-v107 #appView{
 html.phone-portrait-layout body{width:100%;max-width:var(--phone-portrait-width);margin-left:auto;margin-right:auto}
 html.phone-portrait-layout .bottom-nav{width:calc(var(--phone-portrait-width) - 22px)!important;max-width:calc(100% - 22px)!important}
 html.phone-portrait-layout :is(.legal-card,.booking-picker-card-v37,.support-chat-card-v52,.dog-visits-card-v99){max-width:calc(var(--phone-portrait-width) - 28px)!important}
+
+/* Compact reservation heading: weekday and date share one line. */
+.reserved-day-top-v37{padding:8px 12px;gap:6px}
+.reserved-day-top-v37>.reserved-day-date-v37{display:flex;align-items:center;gap:6px;white-space:nowrap;min-width:0}
+.reserved-day-top-v37>.reserved-day-date-v37 strong{font-size:13px;line-height:1.2}
+.reserved-day-top-v37>.reserved-day-date-v37 span{font-size:9px;line-height:1.2;margin-top:0}
+.reserved-day-top-v37 .reserved-day-controls-v37{gap:9px}
+.reserved-day-top-v37 .reserved-day-controls-v37 .pill{min-height:26px;font-size:8px;padding:3px 7px;line-height:1.15}
+.reserved-day-top-v37 .reserved-day-controls-v37 .pill.approved{min-height:26px;font-size:8px;padding:3px 7px}
+.reserved-day-top-v37 .reserved-day-controls-v37 .cancel-booking-v37{width:26px;max-width:26px;flex:0 0 26px;min-height:26px;height:26px;border-radius:8px}
+.reserved-day-top-v37 .cancel-booking-v37 svg{width:18px;height:18px}
+.reserved-day-top-v37 .cancel-booking-v37::after{inset:-9px}
+.terms-history-container{margin:12px 0;font-size:12px}
+.terms-history>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:750;color:#9a3412}
+.terms-history-row{border-top:1px solid #e5e7eb;padding:12px 0}
+.terms-history-row>strong,.terms-history-row>small{display:block;margin-bottom:6px}
+.terms-history-actions{display:flex;gap:6px;flex-wrap:wrap}
+.terms-history-actions>.btn{min-height:40px;font-size:11px}
+.reserved-day-top-v37 .reserved-day-controls-v37 .pill.pending{max-width:72px;flex:0 1 72px;font-size:7.5px}
