@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260930-customer-compact-labels-v138';
+const APP_BUILD='20260930-customer-full-day-contact-v139';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -1587,19 +1587,22 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       groups.push(`<div class="booking-picker-week-v127"><div class="booking-picker-week-label-v127">${['Tento týždeň','Budúci týždeň','O dva týždne'][start/5]||'Ďalší týždeň'}</div><div class="booking-picker-week-days-v127">${week.map(d=>{
         const existing=bookingFor(dog.id,d.date),deadlineClosed=bookingDeadlineClosedV95(d.date,dog),closed=d.bookings_open===false,full=Number(d.available)<=0;
         const past=d.date<=bratislavaClockV95().date;
-        const lateContact=deadlineClosed&&!existing&&!past&&!closed&&!full;
-        const disabled=!!existing||closed||full||past;
+        const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;
+        const disabled=!!existing||closed||past;
         const selected=selectedDatesV37.has(d.date);
-        const stateText=existing?'Rezervované':deadlineClosed?'Uzavreté':past?'Uplynulo':closed?'Zatvorené':full?'Plno':`${Math.max(0,Number(d.available)||0)} voľné`;
-        return `<button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" ${disabled?'disabled':''}><small>${esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${esc(stateText)}</span></button>`;
-      }).join('')}</div>${week.some(d=>bookingDeadlineClosedV95(d.date,dog))?'<small class="booking-week-closed-note-v127">Prihlasovanie uzavreté. Pre dodatočné prihlásenie kliknite na požadovaný deň.</small>':''}</div>`);
+        const stateText=existing?'Rezervované':past?'Uplynulo':closed?'Zatvorené':full?'Plno':deadlineClosed?'Uzavreté':`${Math.max(0,Number(d.available)||0)} voľné`;
+        return `<button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" data-contact="${lateContact?'true':'false'}" data-full="${full?'true':'false'}" ${disabled?'disabled':''}><small>${esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${esc(stateText)}</span></button>`;
+      }).join('')}</div>${week.some(d=>bookingDeadlineClosedV95(d.date,dog))?'<small class="booking-week-closed-note-v127">Prihlasovanie uzavreté. Kliknutím na deň nám môžete napísať aj pri plnej kapacite.</small>':week.some(d=>Number(d.available)<=0)?'<small class="booking-week-closed-note-v127">Pri plnej kapacite kliknite na deň a napíšte nám záujem o miesto.</small>':''}</div>`);
     }
     $('bookingPickerDaysV37').innerHTML=groups.join('');
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',()=>{
       const date=btn.dataset.date;
-      if(bookingDeadlineClosedV95(date,dog)){
+      if(btn.dataset.contact==='true'){
         closePickerV37();
-        window.openCustomerLateBookingMessage?.(Number(dog.id),date,`Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`);
+        const message=btn.dataset.full==='true'
+          ? `Dobrý deň, mám záujem o rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}, aj keď je aktuálne plná kapacita. Prosím, dajte mi vedieť, ak sa uvoľní miesto.`
+          : `Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`;
+        window.openCustomerLateBookingMessage?.(Number(dog.id),date,message,btn.dataset.full==='true');
         return;
       }
       if(selectedDatesV37.has(date)){
@@ -2037,9 +2040,9 @@ async function togglePushDirect(btn){
     lateBookingContext=null;
     $('supportMessageBodyV52').value='';
   }
-  window.openCustomerLateBookingMessage=(dogId,date,body)=>{
+  window.openCustomerLateBookingMessage=(dogId,date,body,messageOnly=false)=>{
     mount();
-    lateBookingContext={dogId,date};
+    lateBookingContext={dogId,date,messageOnly};
     $('supportMessageBodyV52').value=body;
     $('supportSubjectV52').value='';
     open();
@@ -2058,7 +2061,7 @@ async function togglePushDirect(btn){
     const btn=e.submitter;
     try{
       if(btn)btn.disabled=true;
-      const late=lateBookingContext;
+      const late=lateBookingContext?.messageOnly?null:lateBookingContext;
       const result=late
         ? await api({action:'request_late_booking',dog_id:late.dogId,reservation_date:late.date,message})
         : await api({action:'send_message',message,booking_request_id:bookingId});
@@ -2072,7 +2075,8 @@ async function togglePushDirect(btn){
       renderMessages();
       renderSupportThread();
       updateUnread();
-      if(late){lateBookingContext=null;close();toast('Žiadosť o rezerváciu a správa boli odoslané na schválenie.');queueCustomerSync('bookings',80)}
+      lateBookingContext=null;
+      if(late){close();toast('Žiadosť o rezerváciu a správa boli odoslané na schválenie.');queueCustomerSync('bookings',80)}
       else{toast('Správa bola odoslaná.');queueCustomerSync('messages',80)}
     }catch(error){toast(error.message)}
     finally{if(btn)btn.disabled=false}
