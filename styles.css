@@ -1621,3 +1621,9 @@ html.customer-awaiting-dog-v107 #appView{
 .reserved-roster-row-v37 .reserved-pass-v37{max-width:none;flex:0 1 auto;white-space:nowrap;font-size:11px;letter-spacing:-.2px}
 .reserved-roster-row-v37 .reserved-pass-new-v134{white-space:normal;text-wrap:balance;text-align:right}
 @media(max-width:390px){.reserved-roster-row-v37 .reserved-pass-v37{max-width:none;font-size:10px;letter-spacing:-.35px}.reserved-roster-row-v37{gap:7px!important}.reserved-roster-row-v37 b{font-size:15px!important}}
+
+/* Orange entry badge, separated from the dog name without squeezing it. */
+.reserved-roster-row-v37 .reserved-pass-v37{display:inline-flex;align-items:center;justify-content:center;flex:0 1 auto;max-width:60%;min-height:32px;margin-left:auto;padding:6px 9px;border:1px solid #fed7aa;border-radius:10px;background:#fff2e8;color:#b84b09;text-align:center;line-height:1.2;white-space:normal;font-weight:850}
+.reserved-roster-row-v37{column-gap:14px!important}
+.reserved-roster-row-v37 .reserved-pass-new-v134{text-align:center}
+@media(max-width:390px){.reserved-roster-row-v37{column-gap:12px!important}.reserved-roster-row-v37 .reserved-pass-v37{max-width:58%;padding:6px 8px}}
