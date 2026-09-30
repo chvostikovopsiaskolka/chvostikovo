@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260930-customer-full-day-contact-v139';
+const APP_BUILD='20260930-customer-portrait-ui-v140';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -842,7 +842,7 @@ function ensureBookingLayout(){
   const oldHead=[...booking.querySelectorAll('.section-head')].find(x=>x.querySelector('h2')?.textContent?.trim()==='Vyberte deň');
   if(oldHead)oldHead.remove();
   if(!booking.querySelector('.booking-section-head')){
-    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.</strong><span class="hidden"></span></div>');
+    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme o rezerváciu miesta na ďalší týždeň do nedele 20:00.</strong><span class="hidden"></span></div>');
   }
 }
 ensureBookingLayout();
@@ -1501,7 +1501,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const showClosed=closed&&(weekday===0||weekday===1);
     box.querySelector('strong').textContent=showClosed
       ? 'Prihlasovanie na tento týždeň sa uzavrelo v nedeľu o 20:00.'
-      : 'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
+      : 'Prosíme o rezerváciu miesta na ďalší týždeň do nedele 20:00.';
     const detail=box.querySelector('span');
     if(detail){detail.textContent=showClosed?'Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.':'';detail.classList.toggle('hidden',!showClosed)}
   }
@@ -1599,9 +1599,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const date=btn.dataset.date;
       if(btn.dataset.contact==='true'){
         closePickerV37();
-        const message=btn.dataset.full==='true'
-          ? `Dobrý deň, mám záujem o rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}, aj keď je aktuálne plná kapacita. Prosím, dajte mi vedieť, ak sa uvoľní miesto.`
-          : `Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`;
+        const message=`Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`;
         window.openCustomerLateBookingMessage?.(Number(dog.id),date,message,btn.dataset.full==='true');
         return;
       }
@@ -1725,7 +1723,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const passState=planned&&plannedTotal?`<span class="reserved-pass-v37${r.planned_pass_request_id||upcomingPass?' reserved-pass-new-v134':''}">${r.planned_pass_request_id||upcomingPass?`Plánovaný vstup ${planned}/${plannedTotal} z novej permanentky`:`Vstup z permanentky ${planned}/${plannedTotal}`}</span>`:'';
       const note=day.note&&!(day.bookings_open===false&&/^zatvorené$/i.test(String(day.note).trim()))?`<div class="reserved-note-v37">${esc(day.note)}</div>`:'';
       const sharedNote=r.can_manage===false?`<div class="hint">${esc(dog.name)} už má na tento deň rezerváciu alebo žiadosť čakajúcu na potvrdenie.</div>`:'';
-      const cancel=r.can_manage!==false?`<button class="cancel-booking-v37" type="button" aria-label="Zrušiť rezerváciu na ${esc(skDay(r.reservation_date))} ${esc(skDate(r.reservation_date))}" title="Zrušiť rezerváciu" data-request="${r._legacy?'':r.id||''}" data-reservation="${r._legacy?r.reservation_id||r.id:''}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M9 13l6 6M15 13l-6 6"/></svg></button>`:'';
+      const cancel=r.can_manage!==false?`<button class="cancel-booking-v37" type="button" aria-label="Zrušiť rezerváciu na ${esc(skDay(r.reservation_date))} ${esc(skDate(r.reservation_date))}" title="Zrušiť rezerváciu" data-request="${r._legacy?'':r.id||''}" data-reservation="${r._legacy?r.reservation_id||r.id:''}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M9 13l6 4M15 13l-6 4"/></svg></button>`:'';
       const detail=(pending&&passState)||taxi?`<div class="reserved-day-detail-v37${pending?' reserved-day-detail-pending-v37':''}">${pending?passState:''}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}</div>`:'';
       const approvedRoster=pending?'':`<div class="reserved-day-meta-v37">${bookingRosterV37(day,dog,passState)}</div>`;
       return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div class="reserved-day-date-v37"><strong>${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><div class="reserved-day-controls-v37"><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span>${cancel}</div></div>${approvedRoster}${detail}${sharedNote}${note}</div>`;

@@ -1,9 +1,9 @@
 
-const CACHE='chvostikovo-portal-shell-20260930-customer-full-day-contact-v139';
+const CACHE='chvostikovo-portal-shell-20260930-customer-portrait-ui-v140';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/styles.css?v=20260930-customer-full-day-contact-v139','/app.js?v=20260930-customer-full-day-contact-v139','/back-swipe.js?v=20260930-customer-full-day-contact-v139'];
+const SHELL=['/','/styles.css?v=20260930-customer-portrait-ui-v140','/app.js?v=20260930-customer-portrait-ui-v140','/back-swipe.js?v=20260930-customer-portrait-ui-v140'];
 
 function withPortalCsp(response){
   if(!response)return response;
