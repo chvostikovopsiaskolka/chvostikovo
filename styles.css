@@ -1511,7 +1511,7 @@ html.customer-awaiting-dog-v107 #appView{
 .menu-build-version{margin:auto 0 8px;padding-top:25px;text-align:center;color:#96969e;font-size:12px;overflow-wrap:anywhere}
 .dog-details-photo-control{display:flex;align-items:center;gap:15px;margin:0 0 18px;padding:10px;border:1px solid #eee9e4;border-radius:18px;background:#fcfaf8}
 .dog-details-photo-control .btn{flex:1;min-height:46px;font-size:13px;padding:8px}
-.dog-details-photo-preview{width:68px;height:68px;flex:0 0 68px;display:grid;place-items:center;overflow:hidden;border-radius:50%;border:3px solid #eac3ad;background:#fff;font-size:28px}
+.dog-details-photo-preview{width:68px;height:68px;flex:0 0 68px;display:grid;place-items:center;overflow:hidden;border-radius:25px;border:3px solid #eac3ad;background:#fff;font-size:28px}
 .dog-details-photo-preview.dog-female-v100{border-color:#eeadd1!important}.dog-details-photo-preview.dog-male-v100{border-color:#9ccbf3!important}
 #dogDetailsModal[data-mode="vaccinations"] .dog-details-photo-control{display:none}
 #customerContactModal .account-card{margin:0;padding:0;border:0;box-shadow:none}
@@ -1562,7 +1562,7 @@ html.customer-awaiting-dog-v107 #appView{
 .customer-menu-rows .menu-paw-icon{fill:currentColor;stroke:none}
 #bookingTab .deadline-card{align-items:stretch;justify-content:center;min-height:70px!important;padding:11px 10px 11px 52px!important;text-align:center!important}
 #bookingTab .deadline-card::before{position:absolute;left:11px;top:50%;transform:translateY(-50%);margin:0;flex:0 0 32px;width:32px;height:32px;background-size:21px}
-#bookingTab .deadline-card strong{display:block;width:100%;min-width:0;font-size:clamp(11px,2.9vw,13px)!important;text-align:center!important;white-space:normal!important;overflow-wrap:break-word}
+#bookingTab .deadline-card strong{display:block;width:100%;min-width:0;font-size:clamp(10px,2.6vw,11.5px)!important;text-align:center!important;white-space:normal!important;overflow-wrap:break-word}
 #bookingTab .deadline-card span{text-align:center!important}
 .loading-screen>small{display:none!important}
 .school-rules-accepted-v55{margin:10px 0 12px;padding:10px 13px;border-radius:13px;background:#e9f9ef;color:#147642;text-align:center;font-size:13px;font-weight:800}
@@ -1622,8 +1622,9 @@ html.customer-awaiting-dog-v107 #appView{
 .reserved-roster-row-v37 .reserved-pass-new-v134{white-space:normal;text-wrap:balance;text-align:right}
 @media(max-width:390px){.reserved-roster-row-v37 .reserved-pass-v37{max-width:none;font-size:10px;letter-spacing:-.35px}.reserved-roster-row-v37{gap:7px!important}.reserved-roster-row-v37 b{font-size:15px!important}}
 
-/* Orange entry badge, separated from the dog name without squeezing it. */
-.reserved-roster-row-v37 .reserved-pass-v37{display:inline-flex;align-items:center;justify-content:center;flex:0 1 auto;max-width:60%;min-height:32px;margin-left:auto;padding:6px 9px;border:1px solid #fed7aa;border-radius:10px;background:#fff2e8;color:#b84b09;text-align:center;line-height:1.2;white-space:normal;font-weight:850}
+/* Orange entry badge aligned to the right edge of the full-width roster. */
+.reserved-day-meta-v37>.reserved-roster-v37{width:100%;flex:1 1 100%;min-width:0}
+.reserved-roster-row-v37 .reserved-pass-v37{display:inline-flex;align-items:center;justify-content:center;flex:0 1 auto;max-width:60%;min-height:32px;margin-left:auto;font-size:10px;padding:6px 8px;border:1px solid #fed7aa;border-radius:10px;background:#fff2e8;color:#b84b09;text-align:center;line-height:1.2;white-space:normal;font-weight:850}
 .reserved-roster-row-v37{column-gap:14px!important}
 .reserved-roster-row-v37 .reserved-pass-new-v134{text-align:center}
-@media(max-width:390px){.reserved-roster-row-v37{column-gap:12px!important}.reserved-roster-row-v37 .reserved-pass-v37{max-width:58%;padding:6px 8px}}
+@media(max-width:390px){.reserved-roster-row-v37{column-gap:12px!important}.reserved-roster-row-v37 .reserved-pass-v37{max-width:58%;font-size:9.5px;padding:6px 8px}}
