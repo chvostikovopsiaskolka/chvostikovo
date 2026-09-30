@@ -994,6 +994,12 @@ html,body,#appView.app,#appView .tab-page{
 .reserved-roster-row-v37 .reserved-pass-v37{margin-left:auto;max-width:55%;text-align:right;line-height:1.25;font-size:12px;color:#6b3d9a;font-weight:850}
 @media(max-width:390px){.reserved-roster-row-v37 .reserved-pass-v37{max-width:52%;font-size:11px}.reserved-day-top-v37 .reserved-day-controls-v37 .pill.approved,.reserved-day-top-v37 .cancel-booking-v37{width:82px;max-width:82px;flex-basis:82px}}
 
+/* Keep cancellation compact while retaining the existing action and a 44px touch target. */
+.reserved-day-top-v37 .reserved-day-controls-v37 .cancel-booking-v37{width:44px;max-width:44px;flex:0 0 44px;min-height:44px;height:44px;padding:0;border-radius:12px}
+.reserved-day-top-v37 .cancel-booking-v37 svg{display:block;flex:none}
+.reserved-day-top-v37 .cancel-booking-v37:focus-visible{outline:3px solid #ea580c;outline-offset:2px}
+@media(max-width:390px){.reserved-day-top-v37 .reserved-day-controls-v37 .cancel-booking-v37{width:44px;max-width:44px;flex-basis:44px}}
+
 
 /* v87: customer-facing dog name and centered registration confirmation */
 .waiting-dog-card-v75 h2{margin-left:0!important;margin-right:0!important;text-align:center!important}
