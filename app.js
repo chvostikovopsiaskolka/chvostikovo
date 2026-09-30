@@ -16,7 +16,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260930-customer-visual-spacing-v137';
+const APP_BUILD='20260930-customer-compact-labels-v138';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
@@ -842,7 +842,7 @@ function ensureBookingLayout(){
   const oldHead=[...booking.querySelectorAll('.section-head')].find(x=>x.querySelector('h2')?.textContent?.trim()==='Vyberte deň');
   if(oldHead)oldHead.remove();
   if(!booking.querySelector('.booking-section-head')){
-    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme o rezerváciu miesta pre vášho psíka na ďalší týždeň do nedele 20:00.</strong><span class="hidden"></span></div>');
+    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.</strong><span class="hidden"></span></div>');
   }
 }
 ensureBookingLayout();
@@ -1501,7 +1501,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const showClosed=closed&&(weekday===0||weekday===1);
     box.querySelector('strong').textContent=showClosed
       ? 'Prihlasovanie na tento týždeň sa uzavrelo v nedeľu o 20:00.'
-      : 'Prosíme o rezerváciu miesta pre vášho psíka na ďalší týždeň do nedele 20:00.';
+      : 'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
     const detail=box.querySelector('span');
     if(detail){detail.textContent=showClosed?'Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.':'';detail.classList.toggle('hidden',!showClosed)}
   }
