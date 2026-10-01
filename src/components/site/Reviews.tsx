@@ -186,13 +186,13 @@ export function ReviewReasons() {
                 block: "start",
               });
             }}
-            className="btn-coral inline-flex w-auto max-w-[245px] items-center justify-center px-5 py-3 text-center leading-tight sm:max-w-none sm:px-7"
+            className="btn-coral inline-flex w-auto max-w-[330px] items-center justify-center whitespace-nowrap px-5 py-3 text-center text-sm leading-none sm:max-w-none sm:px-7 sm:text-base"
           >
             Pozrite si, ako to u nás vyzerá
           </button>
         </div>
 
-        <div className="mx-auto mt-2 h-[160px] w-full max-w-[820px] overflow-hidden sm:mt-4 sm:h-[220px]" aria-hidden="true">
+        <div className="mx-auto -mt-1 h-[170px] w-full max-w-[820px] overflow-hidden sm:mt-2 sm:h-[225px]" aria-hidden="true">
           <img
             src={schoolmatesLineup}
             alt=""
@@ -200,7 +200,7 @@ export function ReviewReasons() {
             decoding="async"
             width={1200}
             height={630}
-            className="block h-full w-full object-cover object-bottom"
+            className="block h-full w-full scale-[1.08] object-cover object-bottom sm:scale-[1.04]"
           />
         </div>
       </div>
