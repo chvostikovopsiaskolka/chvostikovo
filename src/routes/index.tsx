@@ -84,8 +84,8 @@ function Index() {
         <Gallery />
         <VideoSection />
         <Care />
-        <InquirySection />
         <Why />
+        <InquirySection />
         <Faq />
         <FirstVisit />
         <Requirements />
