@@ -4,6 +4,7 @@ import { PHONE } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { ShortForm } from "./Forms";
 import { FormDialog } from "./FormDialog";
+import schoolmatesCta from "@/assets/skolkari-web-4.png";
 
 const INFO_TITLE = "Informujte sa o škôlke";
 const INFO_SUBTITLE =
@@ -40,9 +41,24 @@ export function InquiryCtaSection() {
 
 export function InquirySection() {
   return (
-    <section id="informujte-sa" className="scroll-mt-24 bg-card py-10 lg:hidden">
+    <section id="informujte-sa" className="scroll-mt-24 bg-card pt-0 pb-10 lg:hidden">
       <div className="mx-auto max-w-2xl px-4">
-        <div className="min-w-0 rounded-4xl bg-secondary/70 p-6 shadow-soft ring-1 ring-coral/15 sm:p-8">
+        <div
+          className="relative z-10 mx-auto -mb-8 h-[150px] w-full max-w-[520px] overflow-hidden sm:h-[175px]"
+          aria-hidden="true"
+        >
+          <img
+            src={schoolmatesCta}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            width={1200}
+            height={630}
+            className="absolute inset-x-0 bottom-[-18px] h-[195px] w-full scale-[1.18] object-cover object-bottom sm:h-[225px] sm:scale-[1.12]"
+          />
+        </div>
+
+        <div className="relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8">
           <h3 className="text-center text-2xl text-forest">Informujte sa o škôlke..</h3>
           <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
             {INFO_SUBTITLE}
