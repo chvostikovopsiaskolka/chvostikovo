@@ -120,7 +120,7 @@ function ReviewCarousel() {
       onTouchCancel={pauseForReading}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="mt-5 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+      className="mt-3 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
       {[...REVIEWS, ...REVIEWS].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
@@ -149,7 +149,7 @@ const REVIEW_REASONS = [
 
 export function ReviewReasons() {
   return (
-    <section id="preco-chvostikovo" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12">
+    <section id="preco-chvostikovo" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-7 text-cream sm:pt-12 sm:pb-10">
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-8 left-[6%] size-9 -rotate-12 text-cream/10 sm:size-12" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-[34%] right-[8%] size-7 rotate-[20deg] text-cream/10 sm:size-10" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute bottom-24 left-[14%] size-8 rotate-12 text-cream/10 sm:size-11" />
@@ -188,11 +188,11 @@ export function ReviewReasons() {
             }}
             className="btn-coral inline-flex w-auto max-w-[245px] items-center justify-center px-5 py-3 text-center leading-tight sm:max-w-none sm:px-7"
           >
-            Pozrieť, ako to u nás vyzerá
+            Pozrite si, ako to u nás vyzerá
           </button>
         </div>
 
-        <div className="-mx-4 mt-5 overflow-hidden sm:mx-auto sm:mt-7 sm:h-[230px] sm:max-w-[820px] h-[150px]" aria-hidden="true">
+        <div className="mx-auto mt-5 h-[135px] w-[94%] max-w-[760px] overflow-hidden sm:mt-7 sm:h-[205px] sm:w-full" aria-hidden="true">
           <img
             src={schoolmatesLineup}
             alt=""
@@ -200,7 +200,7 @@ export function ReviewReasons() {
             decoding="async"
             width={1200}
             height={630}
-            className="block h-full w-full object-cover object-bottom"
+            className="block h-full w-full object-contain object-bottom"
           />
         </div>
       </div>
@@ -211,10 +211,10 @@ export function ReviewReasons() {
 
 export function Reviews() {
   return (
-    <section id="recenzie" className="scroll-mt-24 bg-secondary/50 pt-5 pb-10 sm:pt-10 sm:pb-16">
+    <section id="recenzie" className="scroll-mt-24 bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14">
       <div className="mx-auto max-w-6xl px-4 text-center">
-        <h2 className="section-title text-3xl sm:text-4xl">100+ spokojných psíkov</h2>
-        <p className="mt-1 text-forest/80">⭐ 5.0 z 5 na Google</p>
+        <h2 className="section-title text-[27px] leading-tight sm:text-4xl">100+ spokojných psíkov</h2>
+        <p className="mt-0.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 z 5 na Google</p>
 
         <ReviewCarousel />
       </div>
