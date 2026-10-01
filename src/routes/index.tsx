@@ -12,7 +12,7 @@ import { ProductSection } from "@/components/site/ProductSection";
 import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
-import { InquiryCtaSection, InquirySection } from "@/components/site/InquirySection";
+import { InquirySection } from "@/components/site/InquirySection";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import schoolmatesCta from "@/assets/skolkari-web-4.png";
 import { FAQ } from "@/content/site";
@@ -80,21 +80,8 @@ function Index() {
         <div className="hidden lg:block">
           <InfoTicker />
         </div>
-        <ReviewReasons />
         <Reviews />
-        <div className="bg-card">
-          <div className="mx-auto h-[120px] max-w-[820px] overflow-hidden sm:h-[165px] lg:h-[180px]" aria-hidden="true">
-            <img
-              src={schoolmatesCta}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              width={1200}
-              height={630}
-              className="block h-full w-full object-cover object-bottom"
-            />
-          </div>
-        </div>
+        <ReviewReasons />
         <section className="relative mb-7 overflow-hidden bg-forest py-4 text-cream sm:mb-8 sm:py-5">
           <PawPrint
             aria-hidden="true"
@@ -126,9 +113,21 @@ function Index() {
         </section>
         <DaycarePhotoCarousel />
         <VideoSection />
-        <InquiryCtaSection />
         <Gallery />
         <Care />
+        <div className="bg-card">
+          <div className="mx-auto h-[120px] max-w-[820px] overflow-hidden sm:h-[165px] lg:h-[180px]" aria-hidden="true">
+            <img
+              src={schoolmatesCta}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              width={1200}
+              height={630}
+              className="block h-full w-full object-cover object-bottom"
+            />
+          </div>
+        </div>
         <InquirySection />
         <Why />
         <Faq />
