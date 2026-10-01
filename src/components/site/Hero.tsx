@@ -74,14 +74,14 @@ export function Hero() {
             type="button"
             onClick={() => {
               trackMarketingInteraction("hero_learn_more", "hero_mobile");
-              document.getElementById("recenzie")?.scrollIntoView({
+              document.getElementById("preco-chvostikovo")?.scrollIntoView({
                 behavior: "smooth",
                 block: "start",
               });
             }}
             className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full border border-coral bg-coral px-4 py-2 font-display text-xs font-semibold text-primary-foreground shadow-card transition-colors hover:bg-coral-dark min-[390px]:mt-4 min-[390px]:px-5 min-[390px]:py-2.5 min-[390px]:text-sm"
           >
-            Zistiť viac o škôlke
+            Pozrite si, ako to u nás vyzerá
             <ChevronDown className="size-4" />
           </button>
 
