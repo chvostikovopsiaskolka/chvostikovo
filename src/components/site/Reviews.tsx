@@ -18,23 +18,23 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card p-5 text-center shadow-card sm:w-[46%] sm:p-6 lg:w-[31%]">
+    <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
       <div className="text-center">
         <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
         <span className="text-sm tracking-tight text-[#F5B301]">★★★★★</span>
       </div>
       <blockquote
         ref={body}
-        className={`mt-3 min-h-[4.5rem] text-[0.9rem] leading-relaxed text-forest/85 sm:min-h-[4.75rem] sm:text-[0.95rem] ${open ? "" : "line-clamp-3"}`}
+        className={`mt-2 min-h-[3.75rem] text-[0.88rem] leading-[1.4] text-forest/85 sm:min-h-[4rem] sm:text-[0.93rem] ${open ? "" : "line-clamp-3"}`}
       >
         „{text}“
       </blockquote>
-      <div className="min-h-[2.25rem] sm:min-h-[2.5rem]">
+      <div className="min-h-[1.75rem] sm:min-h-[2rem]">
         {(clamped || open) && (
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="mt-2 font-display text-sm font-semibold text-coral underline underline-offset-4"
+            className="mt-1 font-display text-sm font-semibold text-coral underline underline-offset-4"
           >
             {open ? "Zobraziť menej" : "Prečítaj si viac"}
           </button>
@@ -149,7 +149,7 @@ const REVIEW_REASONS = [
 
 export function ReviewReasons() {
   return (
-    <section id="preco-chvostikovo" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-7 text-cream sm:pt-12 sm:pb-10">
+    <section id="preco-chvostikovo" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0">
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-8 left-[6%] size-9 -rotate-12 text-cream/10 sm:size-12" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-[34%] right-[8%] size-7 rotate-[20deg] text-cream/10 sm:size-10" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute bottom-24 left-[14%] size-8 rotate-12 text-cream/10 sm:size-11" />
@@ -192,7 +192,7 @@ export function ReviewReasons() {
           </button>
         </div>
 
-        <div className="mx-auto mt-5 h-[135px] w-[94%] max-w-[760px] overflow-hidden sm:mt-7 sm:h-[205px] sm:w-full" aria-hidden="true">
+        <div className="mx-auto mt-6 h-[145px] w-full max-w-[820px] overflow-hidden sm:mt-7 sm:h-[210px]" aria-hidden="true">
           <img
             src={schoolmatesLineup}
             alt=""
