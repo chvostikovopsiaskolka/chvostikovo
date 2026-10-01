@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeartHandshake, PawPrint, Sparkles } from "lucide-react";
-import { FormDialog } from "./FormDialog";
-import { ShortForm } from "./Forms";
 import skolkariVideo from "@/assets/skolkari.mp4";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -150,8 +148,6 @@ const REVIEW_REASONS = [
 ];
 
 export function ReviewReasons() {
-  const [open, setOpen] = useState(false);
-
   return (
     <section className="bg-forest pt-10 pb-0 text-cream sm:pt-12">
       <div className="mx-auto max-w-6xl px-4">
@@ -180,12 +176,15 @@ export function ReviewReasons() {
           <button
             type="button"
             onClick={() => {
-              trackMarketingInteraction("inquiry_cta", "why_chvostikovo");
-              setOpen(true);
+              trackMarketingInteraction("explore_daycare", "why_chvostikovo");
+              document.getElementById("priestory")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
             }}
             className="btn-coral inline-flex w-auto max-w-[245px] items-center justify-center px-5 py-3 text-center leading-tight sm:max-w-none sm:px-7"
           >
-            Presne toto hľadám pre môjho psíka
+            Pozrieť, ako to u nás vyzerá
           </button>
         </div>
 
@@ -202,14 +201,6 @@ export function ReviewReasons() {
         </div>
       </div>
 
-      <FormDialog
-        open={open}
-        onOpenChange={setOpen}
-        title="Informujte sa o škôlke"
-        subtitle="Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií."
-      >
-        <ShortForm trackingSource="why_chvostikovo" onSent={() => setTimeout(() => setOpen(false), 2200)} />
-      </FormDialog>
     </section>
   );
 }
