@@ -27,10 +27,11 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261001-customer-terms-labels-v142';
+const APP_BUILD='20261001-customer-registration-audit-v143';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
+const CUSTOMER_EMAIL_CONFIRM_URL=CUSTOMER_PUBLIC_URL+'email-confirmed.html';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -68,7 +69,7 @@ function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
 function saveSession(s,remember=true){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));state.session=s}
-function clearSession(){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;stopCustomerLive();['waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
+function clearSession(){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
 async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');return data}
 let sessionRefreshInFlight=null;
 async function refreshSession(){
@@ -124,7 +125,7 @@ function bootstrapCore(showSpinner=true){
         sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
         setTimeout(()=>document.getElementById('installHelpLink')?.click(),220);
       }
-    }else toast(message||'Aplikáciu sa nepodarilo načítať.');
+    }else{if($('appView')?.classList.contains('hidden'))showAuth('login');toast(message||'Aplikáciu sa nepodarilo načítať.');}
   }})();
   bootstrapInFlight=run.finally(()=>{if(showSpinner)loading(false);bootstrapInFlight=null});
   return bootstrapInFlight;
@@ -732,21 +733,12 @@ function switchTabCore(tab){repairCustomerScrollV60();if(tab==='menu'&&state.act
 function switchTab(tab){const openChat=tab==='messages';if(tab==='dog'||openChat)tab='menu';const out=switchTabCore(tab);runCustomerHooks('afterSwitchTab',tab,out);if(openChat)openCustomerChat();return out}
 function openCustomerChat(){$('supportChatBtnV52')?.click()}
 async function sendMessage(e){e.preventDefault();const body=$('messageBody').value.trim();if(!body)return;try{const btn=e.submitter;btn.disabled=true;const result=await api({action:'send_message',message:body,booking_request_id:Number($('messageBooking').value)||null}),row=result?.data||result?.message||{id:-Date.now(),body,sender_role:'customer',created_at:new Date().toISOString()};(state.data.messages||(state.data.messages=[])).push(row);$('messageBody').value='';renderMessages();updateUnread();switchTab('messages');toast('Správa bola odoslaná.');queueCustomerSync('messages',80)}catch(e){toast(e.message)}finally{e.submitter&&(e.submitter.disabled=false)}}
-function showEmailConfirmedV109(){
-  sessionStorage.setItem('chvostikovo_install_guide_seen_v1','1');
-  document.documentElement.classList.add('email-confirmed-v106');
-  showAuth('login');
-  document.querySelector('.auth-switch')?.classList.add('hidden');
-  ['loginForm','signupForm','forgotForm','newPasswordForm'].forEach(id=>$(id)?.classList.add('hidden'));
-  document.getElementById('installHelpLink')?.classList.add('hidden');
-  authMessage('success','E-mail je potvrdený. Teraz otvorte Chvostíkovo cez ikonu na ploche a prihláste sa.');
-}
 function handleRecoveryHash(){
   const hash=new URLSearchParams(location.hash.replace(/^#/,'')),access=hash.get('access_token'),refresh=hash.get('refresh_token'),type=hash.get('type');
+  if(hash.get('error')||hash.get('error_code')){history.replaceState(null,'',location.pathname);showAuth('login');authMessage('error','Odkaz je neplatný alebo jeho platnosť vypršala. Vyžiadajte si nový potvrdzovací e-mail alebo obnovenie hesla.');return true}
   if(access&&refresh){
     if(type==='signup'){
-      history.replaceState(null,'',location.pathname);
-      showEmailConfirmedV109();
+      location.replace(CUSTOMER_EMAIL_CONFIRM_URL+location.hash);
       return true;
     }
     saveSession({access_token:access,refresh_token:refresh,expires_in:Number(hash.get('expires_in'))||3600,token_type:'bearer'},true);
@@ -777,9 +769,9 @@ const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');
   const infectious=[...document.querySelectorAll('.vaccine-box strong')].find(el=>el.textContent.trim()==='Infekčné ochorenia');
   if(infectious&&!document.getElementById('infectiousInfoV19')){infectious.textContent='Infekčné ochorenia (DHPPi+L)';infectious.insertAdjacentHTML('afterend','<div id="infectiousInfoV19" class="hint" style="margin-top:5px">Psinka · infekčný zápal pečene · parvoviróza · psia parainfluenza · leptospiróza</div>')}
 })();
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();try{loading(true);const s=await authFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:$('loginEmail').value.trim(),password:$('loginPassword').value})});saveSession(s,$('rememberLogin').checked);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}catch(e){authMessage('error',e.message)}finally{loading(false)}});
-$('signupForm').addEventListener('submit',async e=>{e.preventDefault();const password=$('signupPassword').value,passwordAgain=$('signupPasswordAgain')?.value||'',signupEmail=$('signupEmail').value.trim();if(!PASSWORD_STRONG_RE.test(password)){authMessage('error',PASSWORD_MIN_MESSAGE);$('signupPassword').focus();return}if(password!==passwordAgain){authMessage('error','Heslá sa nezhodujú.');$('signupPasswordAgain')?.focus();return}try{loading(true);localStorage.setItem('chvostikovo_pending_login_email',signupEmail);const data=await authFetch('/auth/v1/signup?redirect_to='+encodeURIComponent(CUSTOMER_PUBLIC_URL),{method:'POST',body:JSON.stringify({email:signupEmail,password,data:{full_name:$('signupName').value.trim(),phone:$('signupPhone').value.trim(),dog_name:$('signupDogName').value.trim(),privacy_notice_version:'privacy-v1',privacy_notice_acknowledged_at:new Date().toISOString()}})});if(data?.access_token){saveSession(data,true);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}else{showAuth('login');$('loginEmail').value=signupEmail;authMessage('success','Účet je vytvorený. Na e-mail sme poslali potvrdzovací odkaz. E-mail zatiaľ nie je potvrdený. Po potvrdení sa vráťte do nainštalovanej aplikácie Chvostíkovo a prihláste sa.')}}catch(e){authMessage('error',e.message)}finally{loading(false)}});
-$('forgotForm').addEventListener('submit',async e=>{e.preventDefault();try{await authFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(location.origin+'/' ),{method:'POST',body:JSON.stringify({email:$('forgotEmail').value.trim()})});authMessage('success','Odkaz na obnovu hesla sme poslali na váš e-mail.')}catch(e){authMessage('error',e.message)}});
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();if(e.submitter?.disabled)return;try{if(e.submitter)e.submitter.disabled=true;loading(true);const s=await authFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:$('loginEmail').value.trim(),password:$('loginPassword').value})});saveSession(s,$('rememberLogin').checked);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}catch(e){authMessage('error',e.message)}finally{if(e.submitter)e.submitter.disabled=false;loading(false)}});
+$('signupForm').addEventListener('submit',async e=>{e.preventDefault();if(e.submitter?.disabled)return;const password=$('signupPassword').value,passwordAgain=$('signupPasswordAgain')?.value||'',signupEmail=$('signupEmail').value.trim();if(!PASSWORD_STRONG_RE.test(password)){authMessage('error',PASSWORD_MIN_MESSAGE);$('signupPassword').focus();return}if(password!==passwordAgain){authMessage('error','Heslá sa nezhodujú.');$('signupPasswordAgain')?.focus();return}try{if(e.submitter)e.submitter.disabled=true;loading(true);localStorage.setItem('chvostikovo_pending_login_email',signupEmail);const data=await authFetch('/auth/v1/signup?redirect_to='+encodeURIComponent(CUSTOMER_PUBLIC_URL),{method:'POST',body:JSON.stringify({email:signupEmail,password,data:{full_name:$('signupName').value.trim(),phone:$('signupPhone').value.trim(),dog_name:$('signupDogName').value.trim(),privacy_notice_version:'privacy-v1',privacy_notice_acknowledged_at:new Date().toISOString()}})});if(data?.access_token){saveSession(data,true);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}else{showAuth('login');$('loginEmail').value=signupEmail;authMessage('info','Potvrdzovací e-mail bol odoslaný na '+signupEmail+'. Skontrolujte, či je adresa správna, a potvrďte e-mail cez odkaz v správe.')}}catch(e){authMessage('error',e.message)}finally{if(e.submitter)e.submitter.disabled=false;loading(false)}});
+$('forgotForm').addEventListener('submit',async e=>{e.preventDefault();try{await authFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(CUSTOMER_PUBLIC_URL),{method:'POST',body:JSON.stringify({email:$('forgotEmail').value.trim()})});authMessage('success','Odkaz na obnovu hesla sme poslali na váš e-mail.')}catch(e){authMessage('error',e.message)}});
 $('newPasswordForm').addEventListener('submit',async e=>{e.preventDefault();const password=$('newPassword').value;if(!PASSWORD_STRONG_RE.test(password)){authMessage('error',PASSWORD_MIN_MESSAGE);$('newPassword').focus();return}if(password!==$('newPasswordAgain').value){authMessage('error','Heslá sa nezhodujú.');return}try{await authFetch('/auth/v1/user',{method:'PUT',headers:{Authorization:'Bearer '+state.session.access_token},body:JSON.stringify({password})});authMessage('success','Heslo je zmenené.');await bootstrap()}catch(e){authMessage('error',e.message)}});
 $('logoutBtn').addEventListener('click',async()=>{
   ['dogSettingsModalV36','privacyInfoModal','schoolTermsModal','dogDetailsModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal','customerContactModal','customerGradebookModal'].forEach(id=>$(id)?.classList.add('hidden'));
@@ -793,7 +785,7 @@ $('logoutBtn').addEventListener('click',async()=>{
   }
 });
 $('navBooking').addEventListener('click',()=>switchTab('booking'));$('navDog').addEventListener('click',()=>switchTab('menu'));$('navMessages').addEventListener('click',()=>switchTab('messages'));$('navStaff').addEventListener('click',()=>switchTab('staff'));
-$('dogSelector').addEventListener('change',e=>{state.selectedDogId=Number(e.target.value);renderPassSummary();renderDog()});$('dogBirthDate').addEventListener('change',()=>syncDogAgeField());['rabiesUntil','infectiousUntil','kennelUntil'].forEach(id=>$(id)?.addEventListener('input',updateVaccinationStatusesV96));$('dogForm').addEventListener('submit',saveDog);$('dogDetailsClose').addEventListener('click',()=>closeDogDetails(false));$('dogDetailsModal').addEventListener('click',e=>{if(e.target===$('dogDetailsModal'))e.preventDefault()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dogDetailsModal').classList.contains('hidden'))closeDogDetails(false)});$('profileForm').addEventListener('submit',saveProfile);$('accountToggle').addEventListener('click',()=>$('profileForm').classList.toggle('hidden'));$('messageForm').addEventListener('submit',sendMessage);
+$('dogSelector').addEventListener('change',e=>{clearVaccinationProofStageV104();state.selectedDogId=Number(e.target.value);renderPassSummary();renderDog()});$('dogBirthDate').addEventListener('change',()=>syncDogAgeField());['rabiesUntil','infectiousUntil','kennelUntil'].forEach(id=>$(id)?.addEventListener('input',updateVaccinationStatusesV96));$('dogForm').addEventListener('submit',saveDog);$('dogDetailsClose').addEventListener('click',()=>closeDogDetails(false));$('dogDetailsModal').addEventListener('click',e=>{if(e.target===$('dogDetailsModal'))e.preventDefault()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dogDetailsModal').classList.contains('hidden'))closeDogDetails(false)});$('profileForm').addEventListener('submit',saveProfile);$('accountToggle').addEventListener('click',()=>$('profileForm').classList.toggle('hidden'));$('messageForm').addEventListener('submit',sendMessage);
 $('bookingDogSelector').addEventListener('change',e=>{state.selectedDogId=Number(e.target.value);renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays()});
 $('dogDetailsPhotoButton').addEventListener('click',()=>{const dog=selectedDog();if(dog?.photo_url)showPhotoActionsV89(dog);else selectNewDogPhotoV89()});
 $('dogPhotoInput').addEventListener('click',()=>{window.__customerPhotoPickerV88=true;setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},15000)});
@@ -2333,7 +2325,10 @@ async function togglePushDirect(btn){
 })();
 
 /* v105: iOS-safe vaccination proof selection and upload */
+let vaccinationProofStageEpochV143=0;
+let vaccinationProofUploadInFlightV143=null;
 function clearVaccinationProofStageV104(){
+  vaccinationProofStageEpochV143++;
   vaccinationProofFilesV104=[];
   vaccinationProofReplaceModeV104=false;
   window.__vaccinationProofProcessingV105=false;
@@ -2424,36 +2419,40 @@ function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
   }
   current.querySelectorAll('[data-proof-index]').forEach(button=>button.addEventListener('click',()=>openVaccinationProofViewerV104(proofs[Number(button.dataset.proofIndex)]?.image_url)));
   $('vaccProofEmptyV105')?.addEventListener('click',()=>$('vaccProofLibraryV104')?.click());
-  $('vaccProofActionsV104')?.classList.toggle('hidden',window.__vaccinationProofProcessingV105===true||(!vaccinationProofReplaceModeV104&&combined>=3));
+  $('vaccProofActionsV104')?.classList.toggle('hidden',window.__vaccinationProofProcessingV105===true||(!vaccinationProofReplaceModeV104&&combined>=5));
   $('vaccProofReplaceV104')?.classList.toggle('hidden',!proofs.length||window.__vaccinationProofProcessingV105===true||vaccinationProofReplaceModeV104);
   staged.classList.toggle('hidden',!vaccinationProofFilesV104.length);
   staged.innerHTML=vaccinationProofFilesV104.length?'<div class="vacc-proof-stage-title-v104">Vybrané nové fotografie</div><div class="vacc-proof-grid-v104">'+vaccinationProofFilesV104.map((item,i)=>'<div class="vacc-proof-thumb-v104 staged"><img src="'+item.dataUrl+'" alt="Vybraná fotografia '+(i+1)+'"><button type="button" data-remove-proof="'+i+'" aria-label="Odstrániť">×</button></div>').join('')+'</div>':'';
   staged.querySelectorAll('[data-remove-proof]').forEach(button=>button.addEventListener('click',()=>{vaccinationProofFilesV104.splice(Number(button.dataset.removeProof),1);renderVaccinationProofsV104(dogId)}));
   const busy=window.__vaccinationProofProcessingV105===true;
   upload.classList.toggle('hidden',!vaccinationProofFilesV104.length);
-  upload.disabled=busy;
+  upload.disabled=busy||!!vaccinationProofUploadInFlightV143;
   upload.textContent=busy?'Spracúvam fotografie…':(vaccinationProofReplaceModeV104?'Nahradiť fotografiami ('+vaccinationProofFilesV104.length+')':proofs.length?'Pridať fotografie ('+vaccinationProofFilesV104.length+')':'Nahrať fotografie ('+vaccinationProofFilesV104.length+')');
-  if(msg&&!vaccinationProofFilesV104.length&&!busy)msg.textContent=vaccinationProofReplaceModeV104?'Vyberte 1 až 3 nové fotografie.':proofs.length?'Uložené '+proofs.length+' z 3 fotografií.':'Na dokončenie očkovaní nahrajte aspoň jednu fotografiu.';
+  if(msg&&!vaccinationProofFilesV104.length&&!busy)msg.textContent=vaccinationProofReplaceModeV104?'Vyberte 1 až 5 nových fotografií.':proofs.length?'Uložené '+proofs.length+' z 5 fotografií.':'Na dokončenie očkovaní nahrajte aspoň jednu fotografiu.';
 }
 async function addVaccinationProofFilesV104(files){
   const incoming=[...(files||[])].filter(Boolean);
-  if(!incoming.length)return;
+  if(!incoming.length||window.__vaccinationProofProcessingV105||vaccinationProofUploadInFlightV143)return;
+  const epoch=vaccinationProofStageEpochV143,account=state.session?.user?.id,dogId=Number(selectedDog()?.id||0);
+  const current=()=>epoch===vaccinationProofStageEpochV143&&account===state.session?.user?.id&&dogId===Number(selectedDog()?.id||0);
   const existing=vaccinationProofReplaceModeV104?0:vaccinationProofsForDogV104(Number(selectedDog()?.id||0)).length;
-  const remaining=Math.max(0,3-existing-vaccinationProofFilesV104.length);
-  if(!remaining){toast('Na jedného psíka možno uložiť najviac 3 fotografie.');return}
+  const remaining=Math.max(0,5-existing-vaccinationProofFilesV104.length);
+  if(!remaining){toast('Na jedného psíka možno uložiť najviac 5 fotografií.');return}
   window.__vaccinationProofProcessingV105=true;
   const msg=$('vaccProofMessageV104');if(msg)msg.textContent='Spracúvam vybrané fotografie…';
   renderVaccinationProofsV104();
   try{
     for(const file of incoming.slice(0,remaining)){
-      try{vaccinationProofFilesV104.push(await v105PrepareProof(file))}
+      try{const prepared=await v105PrepareProof(file);if(!current())return;vaccinationProofFilesV104.push(prepared)}
       catch(error){
+        if(!current())return;
         const message=(String(file?.name||'Fotografia')+': '+String(error?.message||'Fotografiu sa nepodarilo spracovať.'));
         if(msg)msg.textContent=message;toast(message);
       }
     }
-    if(incoming.length>remaining)toast('Na jedného psíka možno uložiť najviac 3 fotografie.');
+    if(current()&&incoming.length>remaining)toast('Na jedného psíka možno uložiť najviac 5 fotografií.');
   }finally{
+    if(!current())return;
     window.__vaccinationProofProcessingV105=false;
     window.__customerPhotoPickerV88=false;
     renderVaccinationProofsV104();
@@ -2469,7 +2468,7 @@ function bindVaccinationProofInputsV104(){
   if(chooseLibrary&&!chooseLibrary.dataset.boundV104){chooseLibrary.dataset.boundV104='1';chooseLibrary.addEventListener('click',()=>library?.click())}
   if(chooseCamera&&!chooseCamera.dataset.boundV104){chooseCamera.dataset.boundV104='1';chooseCamera.addEventListener('click',()=>camera?.click())}
   if(replace&&!replace.dataset.boundV104){replace.dataset.boundV104='1';replace.addEventListener('click',()=>{
-    vaccinationProofFilesV104=[];vaccinationProofReplaceModeV104=true;renderVaccinationProofsV104();library?.click();
+    clearVaccinationProofStageV104();vaccinationProofReplaceModeV104=true;renderVaccinationProofsV104();library?.click();
   })}
   if(library&&!library.dataset.boundV105){
     library.dataset.boundV105='1';library.addEventListener('click',v105PickerGuard);
@@ -2479,26 +2478,36 @@ function bindVaccinationProofInputsV104(){
     camera.dataset.boundV105='1';camera.addEventListener('click',v105PickerGuard);
     camera.addEventListener('change',async()=>{try{await addVaccinationProofFilesV104(camera.files)}finally{camera.value='';setTimeout(()=>{window.__customerPhotoPickerV88=false},250)}});
   }
-  if(upload&&!upload.dataset.boundV105){upload.dataset.boundV105='1';upload.addEventListener('click',()=>uploadVaccinationProofsV104(false))}
+  if(upload&&!upload.dataset.boundV105){upload.dataset.boundV105='1';upload.addEventListener('click',()=>uploadVaccinationProofsV104(false).catch(()=>{}))}
 }
-async function uploadVaccinationProofsV104(silent=false){
+function uploadVaccinationProofsV104(silent=false){
+  if(vaccinationProofUploadInFlightV143)return vaccinationProofUploadInFlightV143;
+  const task=uploadVaccinationProofsCoreV143(silent);
+  vaccinationProofUploadInFlightV143=task;
+  task.finally(()=>{if(vaccinationProofUploadInFlightV143===task){vaccinationProofUploadInFlightV143=null;renderVaccinationProofsV104()}}).catch(()=>{});
+  return task;
+}
+async function uploadVaccinationProofsCoreV143(silent=false){
   const dog=selectedDog();if(!dog)throw new Error('Psík sa nenašiel.');
   if(!vaccinationProofFilesV104.length)return vaccinationProofsForDogV104(dog.id);
+  const account=state.session?.user?.id,epoch=vaccinationProofStageEpochV143;
+  const current=()=>account===state.session?.user?.id&&epoch===vaccinationProofStageEpochV143&&Number(dog.id)===Number(selectedDog()?.id||0);
   const button=$('vaccProofUploadV104'),msg=$('vaccProofMessageV104');
   if(button)button.disabled=true;if(msg)msg.textContent='Nahrávam fotografie…';
   try{
     const images=vaccinationProofFilesV104.map(item=>item.dataUrl);
     const result=await api({action:'upload_vaccination_proofs',dog_id:Number(dog.id),images,append:!vaccinationProofReplaceModeV104&&vaccinationProofsForDogV104(dog.id).length>0});
     const proofs=result?.data?.proofs||[];
+    if(account!==state.session?.user?.id||!state.data)return proofs;
     state.data.vaccination_proofs=(state.data.vaccination_proofs||[]).filter(p=>Number(p.dog_id)!==Number(dog.id));
     state.data.vaccination_proofs.push(...proofs);
-    clearVaccinationProofStageV104();renderVaccinationProofsV104(dog.id);
-    if(msg)msg.textContent='Fotografie sú bezpečne uložené.';
+    if(current()){clearVaccinationProofStageV104();renderVaccinationProofsV104(dog.id);
+    if(msg)msg.textContent='Fotografie sú bezpečne uložené.';}
     if(!silent)toast('Fotografie očkovacieho preukazu sú uložené.');
     return proofs;
   }catch(error){
     const message=String(error?.message||'Fotografie sa nepodarilo nahrať.');
-    if(msg)msg.textContent=message;if(!silent)toast(message);throw error;
+    if(current()&&msg)msg.textContent=message;if(!silent)toast(message);throw error;
   }finally{if(button)button.disabled=false}
 }
 
@@ -2526,7 +2535,7 @@ async function uploadVaccinationProofsV104(silent=false){
   const mount=()=>{
     if(!document.getElementById(style.id))document.head.appendChild(style);
     const hint=document.querySelector('.vacc-proof-head-v104 small');
-    if(hint)hint.textContent='Nahrajte alebo odfoťte 1 až 3 fotografie strán s platnosťou očkovaní.';
+    if(hint)hint.textContent='Nahrajte alebo odfoťte 1 až 5 fotografií strán s platnosťou očkovaní.';
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();

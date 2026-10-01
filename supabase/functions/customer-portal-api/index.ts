@@ -759,7 +759,7 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
   }
   const images = Array.isArray(payload.images) ? payload.images : [];
   if (!images.length) throw new Error('Vyberte aspoň jednu fotografiu očkovacieho preukazu.');
-  if (images.length > 3) throw new Error('Naraz môžete nahrať najviac 3 fotografie.');
+  if (images.length > 5) throw new Error('Naraz môžete nahrať najviac 5 fotografií.');
 
   const decoded: Uint8Array[] = [];
   for (const value of images) {
@@ -783,8 +783,8 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
   const existing = append ? await rest(
     'vaccination_proofs?dog_id=eq.' + dogId + '&is_current=eq.true&select=id,dog_id,batch_id,storage_path,source,uploaded_at&order=uploaded_at.desc',
   ) as Array<Json> : [];
-  if (existing.length + images.length > 3) {
-    throw new Error('Na jedného psíka možno uložiť najviac 3 fotografie.');
+  if (existing.length + images.length > 5) {
+    throw new Error('Na jedného psíka možno uložiť najviac 5 fotografií.');
   }
   const batchId = append && existing.length ? String(existing[0].batch_id) : crypto.randomUUID();
   const uploadedAt = new Date().toISOString();

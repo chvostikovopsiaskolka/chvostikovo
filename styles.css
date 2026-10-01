@@ -1664,3 +1664,25 @@ html.phone-portrait-layout :is(.legal-card,.booking-picker-card-v37,.support-cha
 .terms-history-actions{display:flex;gap:6px;flex-wrap:wrap}
 .terms-history-actions>.btn{min-height:40px;font-size:11px}
 .reserved-day-top-v37 .reserved-day-controls-v37 .pill.pending{max-width:72px;flex:0 1 72px;font-size:7.5px}
+
+/* Registration messages and a quiet white startup screen. */
+.info-box{padding:12px 14px;border:1px solid #e5e7eb;border-radius:12px;background:#f9fafb;color:#374151;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.loading-screen:not(.in-app){isolation:isolate;background:#fff}
+.loading-paws{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.loading-paws svg{position:absolute;width:56px;height:56px;fill:#fb923c;opacity:.16;transform:rotate(-18deg)}
+.loading-paws svg:nth-child(even){fill:#ed87bc;transform:rotate(22deg)}
+.loading-paws svg:nth-child(1){left:7%;top:9%;width:70px;height:70px}
+.loading-paws svg:nth-child(2){right:12%;top:18%}
+.loading-paws svg:nth-child(3){left:22%;top:32%;width:35px;height:35px}
+.loading-paws svg:nth-child(4){right:5%;top:47%;width:78px;height:78px}
+.loading-paws svg:nth-child(5){left:6%;top:62%}
+.loading-paws svg:nth-child(6){right:27%;top:75%;width:38px;height:38px}
+.loading-paws svg:nth-child(7){left:29%;top:88%}
+.loading-paws svg:nth-child(8){right:8%;top:94%;width:34px;height:34px}
+.loading-screen.in-app .loading-paws{display:none}
+@media(prefers-reduced-motion:reduce){.loading-paw,.loading-screen.in-app .loading-paw::before{animation:none}}
+.email-confirmation-page{min-height:100dvh;display:grid;place-items:center;padding:24px;background:#fff;color:#172033}
+.email-confirmation-card{max-width:440px;width:100%;text-align:center}
+.email-confirmation-card h1{font-size:25px}
+.email-confirmation-card p{font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.email-confirmation-card .btn{margin-top:14px;display:block;text-decoration:none}

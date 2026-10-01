@@ -1,9 +1,9 @@
 
-const CACHE='chvostikovo-portal-shell-20261001-customer-terms-labels-v142';
+const CACHE='chvostikovo-portal-shell-20261001-customer-registration-audit-v143';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/terms-pdf.js?v=20261001-customer-terms-labels-v142','/terms-pdf-font.js?v=20261001-customer-terms-labels-v142','/styles.css?v=20261001-customer-terms-labels-v142','/app.js?v=20261001-customer-terms-labels-v142','/back-swipe.js?v=20261001-customer-terms-labels-v142'];
+const SHELL=['/','/terms-pdf.js?v=20261001-customer-registration-audit-v143','/terms-pdf-font.js?v=20261001-customer-registration-audit-v143','/styles.css?v=20261001-customer-registration-audit-v143','/app.js?v=20261001-customer-registration-audit-v143','/back-swipe.js?v=20261001-customer-registration-audit-v143'];
 
 function withPortalCsp(response){
   if(!response)return response;
@@ -32,12 +32,16 @@ self.addEventListener('fetch',event=>{
     event.respondWith(fetch(event.request,{cache:'no-store'}));
     return;
   }
+  if(url.pathname==='/email-confirmed.html'||url.pathname==='/email-confirmed.js'){
+    event.respondWith(fetch(event.request,{cache:'no-store'}));
+    return;
+  }
   if(event.request.mode==='navigate'){
     event.respondWith(
       fetch(event.request,{cache:'no-store'})
         .then(response=>{
           const secured=withPortalCsp(response);
-          caches.open(CACHE).then(cache=>cache.put('/',secured.clone()));
+          if(response.ok&&['/','/index.html'].includes(url.pathname))caches.open(CACHE).then(cache=>cache.put('/',secured.clone())).catch(()=>{});
           return secured;
         })
         .catch(async()=>{
