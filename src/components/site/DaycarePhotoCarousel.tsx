@@ -164,7 +164,7 @@ export function DaycarePhotoCarousel() {
   };
 
   return (
-    <section className="bg-card pb-8 sm:pb-12" aria-label="Fotogaléria zo psiej škôlky Chvostíkovo">
+    <section className="bg-card pt-6 pb-8 sm:pt-8 sm:pb-12" aria-label="Fotogaléria zo psiej škôlky Chvostíkovo">
       <div className="mx-auto max-w-6xl px-4">
         <div
           ref={track}
