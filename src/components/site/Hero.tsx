@@ -4,12 +4,10 @@ import { PHONE } from "@/content/site";
 import heroDogs from "@/assets/hero-dogs.jpg";
 import { ShortForm } from "./Forms";
 import { InfoTicker } from "./InfoTicker";
-import { FormDialog } from "./FormDialog";
 import { trackMarketingInteraction } from "@/lib/analytics";
 
 export function Hero() {
   const [announcementVisible, setAnnouncementVisible] = useState(false);
-  const [inquiryOpen, setInquiryOpen] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setAnnouncementVisible(true), 220);
@@ -75,12 +73,15 @@ export function Hero() {
           <button
             type="button"
             onClick={() => {
-              trackMarketingInteraction("inquiry_cta", "hero_mobile");
-              setInquiryOpen(true);
+              trackMarketingInteraction("hero_learn_more", "hero_mobile");
+              document.getElementById("recenzie")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
             }}
             className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full border border-coral bg-coral px-4 py-2 font-display text-xs font-semibold text-primary-foreground shadow-card transition-colors hover:bg-coral-dark min-[390px]:mt-4 min-[390px]:px-5 min-[390px]:py-2.5 min-[390px]:text-sm"
           >
-            Chcem sa informovať o škôlke
+            Zistiť viac o škôlke
             <ChevronDown className="size-4" />
           </button>
 
@@ -133,17 +134,6 @@ export function Hero() {
         </div>
       </div>
 
-      <FormDialog
-        open={inquiryOpen}
-        onOpenChange={setInquiryOpen}
-        title="Informujte sa o škôlke"
-        subtitle="Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií."
-      >
-        <ShortForm
-          trackingSource="hero_mobile"
-          onSent={() => setTimeout(() => setInquiryOpen(false), 2200)}
-        />
-      </FormDialog>
     </section>
   );
 }
