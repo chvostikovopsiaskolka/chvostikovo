@@ -63,7 +63,7 @@ function trackMetaCustom(eventName: string, params: EventParams) {
 }
 
 export function trackMarketingInteraction(
-  kind: "inquiry_cta" | "phone_click" | "view_pricing",
+  kind: "inquiry_cta" | "phone_click" | "view_pricing" | "hero_learn_more" | "explore_daycare",
   source: string,
 ) {
   const params = {
@@ -86,6 +86,24 @@ export function trackMarketingInteraction(
       content_name: "informacie",
     });
     pushAnalyticsEvent("inquiry_cta_click", params);
+    return;
+  }
+
+  if (kind === "hero_learn_more") {
+    trackMetaCustom("HeroLearnMore", {
+      ...params,
+      content_name: "daycare_info",
+    });
+    pushAnalyticsEvent("hero_learn_more", params);
+    return;
+  }
+
+  if (kind === "explore_daycare") {
+    trackMetaCustom("ExploreDaycare", {
+      ...params,
+      content_name: "daycare_spaces",
+    });
+    pushAnalyticsEvent("explore_daycare", params);
     return;
   }
 
