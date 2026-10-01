@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PawPrint } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
 import { InfoTicker } from "@/components/site/InfoTicker";
@@ -14,7 +13,6 @@ import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
 import { InquirySection } from "@/components/site/InquirySection";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
-import schoolmatesCta from "@/assets/skolkari-web-4.png";
 import { FAQ } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
@@ -82,52 +80,10 @@ function Index() {
         </div>
         <Reviews />
         <ReviewReasons />
-        <section className="relative mb-7 overflow-hidden bg-forest py-4 text-cream sm:mb-8 sm:py-5">
-          <PawPrint
-            aria-hidden="true"
-            className="pointer-events-none absolute top-2 left-[8%] size-7 -rotate-12 text-cream/10 sm:size-8"
-          />
-          <PawPrint
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-1 left-[34%] size-6 rotate-12 text-cream/10 sm:size-7"
-          />
-          <PawPrint
-            aria-hidden="true"
-            className="pointer-events-none absolute top-1 right-[28%] size-5 rotate-[24deg] text-cream/10 sm:size-6"
-          />
-          <PawPrint
-            aria-hidden="true"
-            className="pointer-events-none absolute right-[6%] bottom-1 size-7 -rotate-[20deg] text-cream/10 sm:size-8"
-          />
-          <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 text-left sm:gap-5 lg:justify-center lg:gap-20">
-            <h2 className="min-w-0 font-display text-lg leading-tight text-cream sm:text-xl lg:text-2xl">
-              Prečo využiť psiu škôlku?
-            </h2>
-            <a
-              href="#preco"
-              className="btn-coral shrink-0 px-4 py-2.5 text-sm sm:px-5 sm:text-base"
-            >
-              Zisti viac
-            </a>
-          </div>
-        </section>
         <DaycarePhotoCarousel />
-        <VideoSection />
         <Gallery />
+        <VideoSection />
         <Care />
-        <div className="bg-card">
-          <div className="mx-auto h-[120px] max-w-[820px] overflow-hidden sm:h-[165px] lg:h-[180px]" aria-hidden="true">
-            <img
-              src={schoolmatesCta}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              width={1200}
-              height={630}
-              className="block h-full w-full object-cover object-bottom"
-            />
-          </div>
-        </div>
         <InquirySection />
         <Why />
         <Faq />
