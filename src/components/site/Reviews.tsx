@@ -120,7 +120,7 @@ function ReviewCarousel() {
       onTouchCancel={pauseForReading}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="mt-10 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+      className="mt-5 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
       {[...REVIEWS, ...REVIEWS].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
@@ -149,8 +149,12 @@ const REVIEW_REASONS = [
 
 export function ReviewReasons() {
   return (
-    <section className="bg-forest pt-10 pb-0 text-cream sm:pt-12">
-      <div className="mx-auto max-w-6xl px-4">
+    <section id="preco-chvostikovo" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12">
+      <PawPrint aria-hidden="true" className="pointer-events-none absolute top-8 left-[6%] size-9 -rotate-12 text-cream/10 sm:size-12" />
+      <PawPrint aria-hidden="true" className="pointer-events-none absolute top-[34%] right-[8%] size-7 rotate-[20deg] text-cream/10 sm:size-10" />
+      <PawPrint aria-hidden="true" className="pointer-events-none absolute bottom-24 left-[14%] size-8 rotate-12 text-cream/10 sm:size-11" />
+      <PawPrint aria-hidden="true" className="pointer-events-none absolute right-[18%] bottom-8 size-6 -rotate-[18deg] text-cream/10 sm:size-9" />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
           <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
         </div>
@@ -207,10 +211,10 @@ export function ReviewReasons() {
 
 export function Reviews() {
   return (
-    <section id="recenzie" className="scroll-mt-24 bg-secondary/50 pt-6 pb-16 sm:pt-14 sm:pb-20">
+    <section id="recenzie" className="scroll-mt-24 bg-secondary/50 pt-5 pb-10 sm:pt-10 sm:pb-16">
       <div className="mx-auto max-w-6xl px-4 text-center">
         <h2 className="section-title text-3xl sm:text-4xl">100+ spokojných psíkov</h2>
-        <p className="mt-3 text-forest/80">⭐ 5.0 z 5 na Google</p>
+        <p className="mt-1 text-forest/80">⭐ 5.0 z 5 na Google</p>
 
         <ReviewCarousel />
       </div>
