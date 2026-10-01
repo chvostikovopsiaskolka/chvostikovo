@@ -79,13 +79,13 @@ export function Hero() {
                 block: "start",
               });
             }}
-            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full border border-coral bg-coral px-4 py-2 font-display text-xs font-semibold text-primary-foreground shadow-card transition-colors hover:bg-coral-dark min-[390px]:mt-4 min-[390px]:px-5 min-[390px]:py-2.5 min-[390px]:text-sm"
+            className="mt-2.5 inline-flex items-center justify-center gap-1.5 rounded-full border border-coral bg-coral px-4 py-2 font-display text-xs font-semibold text-primary-foreground shadow-card transition-colors hover:bg-coral-dark min-[390px]:mt-4 min-[390px]:px-5 min-[390px]:py-2.5 min-[390px]:text-sm"
           >
-            Pozrite si, ako to u nás vyzerá
+            Zistiť viac o škôlke
             <ChevronDown className="size-4" />
           </button>
 
-          <InfoTicker className="mt-3.5 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-5" compact />
+          <InfoTicker className="mt-2.5 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-4" compact />
         </div>
 
         {/* Desktop layout */}
