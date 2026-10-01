@@ -44,7 +44,7 @@ export function InquirySection() {
     <section id="informujte-sa" className="scroll-mt-24 bg-card pt-0 pb-10 lg:hidden">
       <div className="mx-auto max-w-2xl px-4">
         <div
-          className="relative z-10 mx-auto -mb-8 h-[150px] w-full max-w-[520px] overflow-hidden sm:h-[175px]"
+          className="relative z-10 mx-auto -mb-8 h-[142px] w-full max-w-[500px] overflow-hidden sm:h-[165px]"
           aria-hidden="true"
         >
           <img
@@ -54,7 +54,7 @@ export function InquirySection() {
             decoding="async"
             width={1200}
             height={630}
-            className="absolute inset-x-0 bottom-[-18px] h-[195px] w-full scale-[1.18] object-cover object-bottom sm:h-[225px] sm:scale-[1.12]"
+            className="absolute inset-x-0 bottom-[-14px] h-[185px] w-full scale-[1.07] object-cover object-bottom sm:h-[210px] sm:scale-[1.06]"
           />
         </div>
 
