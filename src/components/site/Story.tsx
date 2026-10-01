@@ -89,16 +89,16 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
           ))}
         </div>
 
-        <div className="mt-7 hidden justify-center lg:flex">
+        <div className="mt-7 flex justify-center">
           <button
             type="button"
             onClick={() => {
-              trackMarketingInteraction("inquiry_cta", isEnglish ? "en_care_desktop" : "care_desktop");
+              trackMarketingInteraction("inquiry_cta", isEnglish ? "en_care_cta" : "care_cta");
               setInfoOpen(true);
             }}
             className="btn-coral"
           >
-            {isEnglish ? "I want to know more about daycare" : "Chcem zistiť viac o škôlke"}
+            {isEnglish ? "Enquire about daycare" : "Chcem sa informovať o škôlke"}
           </button>
         </div>
       </div>
@@ -114,10 +114,10 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
         }
       >
         {isEnglish ? (
-          <EnglishInquiryForm trackingSource="en_care_desktop" />
+          <EnglishInquiryForm trackingSource="en_care_cta" />
         ) : (
           <ShortForm
-            trackingSource="care_desktop"
+            trackingSource="care_cta"
             onSent={() => setTimeout(() => setInfoOpen(false), 2200)}
           />
         )}
