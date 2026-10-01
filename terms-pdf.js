@@ -1,5 +1,11 @@
 /* PDFs are built only from server-authorized, immutable acceptance history. */
 (function(){
+  // Customer labels do not change immutable server version identifiers.
+  window.customerTermsVersionLabel=version=>{
+    const value=String(version||'');
+    const labels={'preview-2026-09-13':'0.1','2026-09-20':'0.9','2026-09-30':'1.0'};
+    return labels[value]||(/^\d+(?:\.\d+)*$/.test(value)?value:'archívna');
+  };
   const encode=s=>new TextEncoder().encode(s);
   const concat=parts=>{const size=parts.reduce((n,p)=>n+p.length,0),out=new Uint8Array(size);let at=0;for(const p of parts){out.set(p,at);at+=p.length}return out};
   const date=v=>new Intl.DateTimeFormat('sk-SK',{timeZone:'Europe/Bratislava',day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date(v));
@@ -14,7 +20,7 @@
     const newPage=()=>{if(content.length)pages.push(content.join('\n'));content=[];y=796};
     const paragraph=(text,size=10.8)=>{const rows=lines(text,size),leading=size*1.42;if(size>12&&y<90)newPage();for(const line of rows){if(y<55)newPage();content.push(`BT /F1 ${size} Tf 1 0 0 1 42 ${y.toFixed(2)} Tm <${hex(line)}> Tj ET`);y-=leading}y-=8};
     paragraph('Podmienky psej škôlky Chvostíkovo',18);
-    paragraph('Verzia dokumentu: '+record.terms_version,11);
+    paragraph('Verzia dokumentu: '+window.customerTermsVersionLabel(record.terms_version),11);
     paragraph('Psík: '+(record.dog_name||'Neuvedené'),11);
     if(record.owner_name)paragraph('Majiteľ: '+record.owner_name,11);
     paragraph('Elektronicky potvrdené: '+date(record.accepted_at)+' (Europe/Bratislava)',10);
@@ -36,7 +42,7 @@
     const unicode=add(stream(encode('/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n/CMapName /ChvostikovoUnicode def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <ffff>\nendcodespacerange\n'+chunks.join('\n')+'\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend')));
     const font=add(`<< /Type /Font /Subtype /Type0 /BaseFont /ChvostikovoSans /Encoding /Identity-H /DescendantFonts [${cid} 0 R] /ToUnicode ${unicode} 0 R >>`);
     const tree=add(''),kids=[];
-    pages.forEach((text,index)=>{const footer=`BT /F1 9 Tf 1 0 0 1 42 28 Tm <${hex('Chvostíkovo - '+record.terms_version+' - '+(index+1)+' / '+pages.length)}> Tj ET`;const streamId=add(stream(encode(text+'\n'+footer)));kids.push(add(`<< /Type /Page /Parent ${tree} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${font} 0 R >> >> /Contents ${streamId} 0 R >>`))});
+    pages.forEach((text,index)=>{const footer=`BT /F1 9 Tf 1 0 0 1 42 28 Tm <${hex('Chvostíkovo - '+window.customerTermsVersionLabel(record.terms_version)+' - '+(index+1)+' / '+pages.length)}> Tj ET`;const streamId=add(stream(encode(text+'\n'+footer)));kids.push(add(`<< /Type /Page /Parent ${tree} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${font} 0 R >> >> /Contents ${streamId} 0 R >>`))});
     objects[tree]=encode(`<< /Type /Pages /Count ${kids.length} /Kids [${kids.map(id=>id+' 0 R').join(' ')}] >>`);
     const catalog=add(`<< /Type /Catalog /Pages ${tree} 0 R >>`),parts=[encode('%PDF-1.7\n')],offsets=[0];let length=parts[0].length;
     for(let i=1;i<objects.length;i++){offsets.push(length);const item=concat([encode(i+' 0 obj\n'),objects[i],encode('\nendobj\n')]);parts.push(item);length+=item.length}

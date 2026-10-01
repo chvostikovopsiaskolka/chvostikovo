@@ -27,7 +27,8 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20260930-customer-terms-history-v141';
+const APP_BUILD='20261001-customer-terms-labels-v142';
+const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
@@ -1015,7 +1016,7 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
     modal.dataset.version=String(doc.version);
     modal.dataset.documentHash=String(doc.document_hash||'');
     $('schoolTermsTitle').textContent=doc.title||'Podmienky škôlky';
-    $('schoolTermsDog').textContent='Psík: '+(dog.name||'')+' · Verzia '+doc.version;
+    $('schoolTermsDog').textContent='Psík: '+(dog.name||'')+' · Verzia '+termsVersionLabel(doc.version);
     const body=$('schoolTermsBody'),ack=$('schoolTermsAck'),confirm=$('schoolTermsConfirm');
     body.innerHTML=formatSchoolTermsV97(doc.body||'');
     ack.checked=false;
@@ -1059,7 +1060,7 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
 async function evaluate(){if(!state.session||!state.data)return;window.__customerOnboardingCompleteV75=false;const dogs=state.data?.dogs||[];document.documentElement.classList.toggle('customer-awaiting-dog-v107',!dogs.length);try{await ensurePushState(true)}catch(_){}if(!state.data.profile?.privacy_notice_acknowledged_at){openPrivacyInfo(true);return}if(privacyMandatory){privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden')}if(!state.data.profile?.push_prompt_answered_at){showPushPrompt();return}if(!dogs.length){hideFlow('waitingDogAssignmentModalV75');ensureWaiting().classList.remove('hidden');return}ensureWaiting().classList.add('hidden');const doc=await activeTermsDocument();if(doc){const accepted=await acceptedTerms(doc.version),acceptedIds=new Set((accepted||[]).map(x=>Number(x.dog_id))),missing=dogs.find(d=>!acceptedIds.has(Number(d.id)));if(missing){showSchoolTerms(missing,doc);return}}$('schoolTermsModal')?.classList.add('hidden');const shareDog=dogs.find(d=>!visibilityDecided(d.id));if(shareDog){showSharePrompt(shareDog);return}const detailsDog=dogs.find(d=>!detailsPromptAnswered(d.id)&&!detailsAlreadyComplete(d));if(detailsDog){showDetailsPrompt(detailsDog);return}hideFlow();window.__customerOnboardingCompleteV75=true;if(typeof loadAnnouncements==='function')await loadAnnouncements();renderNotifications()}
   async function runCustomerOnboardingV75(){if(running){rerun=true;return}running=true;try{await evaluate()}catch(e){console.warn('Customer onboarding',e)}finally{running=false;if(rerun){rerun=false;setTimeout(runCustomerOnboardingV75,20)}}}
   window.runCustomerOnboardingV75=runCustomerOnboardingV75;
-  document.addEventListener('click',e=>{if(e.target.closest('#privacyInfoBtn')){e.preventDefault();openPrivacyInfo(false)}if(e.target.closest('#privacyInfoClose'))closePrivacyInfo();if(e.target.closest('#privacyInfoOk'))acknowledgePrivacy();if(e.target.closest('#schoolTermsConfirm'))acceptSchoolTerms();if(e.target.closest('#schoolTermsHistoryBtn'))window.openCustomerTermsHistory?.(Number($('schoolTermsModal')?.dataset.dogId));if(e.target.closest('#schoolTermsLogout'))$('logoutBtn')?.click()});
+  document.addEventListener('click',e=>{if(e.target.closest('#privacyInfoBtn')){e.preventDefault();openPrivacyInfo(false)}if(e.target.closest('#privacyInfoClose'))closePrivacyInfo();if(e.target.closest('#privacyInfoOk'))acknowledgePrivacy();if(e.target.closest('#schoolTermsConfirm'))acceptSchoolTerms();if(e.target.closest('#schoolTermsLogout'))$('logoutBtn')?.click()});
   document.addEventListener('change',e=>{if(e.target?.id==='schoolTermsAck'&&$('schoolTermsConfirm'))$('schoolTermsConfirm').disabled=e.target.disabled||!e.target.checked});
   addCustomerHook('afterBootstrap',()=>{setTimeout(runCustomerOnboardingV75,60)});
   setTimeout(()=>{if(state.session&&state.data)runCustomerOnboardingV75()},800);
@@ -1076,7 +1077,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     document.body.insertAdjacentHTML('beforeend','<div id="privacyInfoModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="privacyInfoTitle"><div class="legal-card"><button id="privacyInfoClose" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="privacyInfoTitle">Informácie o spracúvaní osobných údajov</h2><div class="legal-body"><p><strong>Prevádzkovateľ:</strong> Marek Leder – Bellaris, IČO: 56447001, miesto podnikania: Miškovecká 1023/2, 040 11 Košice-Juh. Prevádzkareň Chvostíkovo: Poľská 2207/6, 040 01 Košice-Juh. Zapísaný v Živnostenskom registri Okresného úradu Košice, č. 820-106266. Kontakt: chvostikovo.psiaskolka@gmail.com, +421 951 069 395.</p><p>V zákazníckom portáli spracúvame údaje potrebné na poskytovanie služieb škôlky, najmä meno a priezvisko, e-mail, telefónne číslo, údaje o psíkovi, rezervácie, návštevy, permanentky, taxi službu, komunikáciu so škôlkou, údaje o očkovaniach, fotografie očkovacieho preukazu a fotografiu psíka, ak ju nahráte.</p><p>Údaje používame na správu účtu, organizáciu rezervácií a návštev, bezpečnú starostlivosť o psíka, komunikáciu a plnenie povinností súvisiacich s prevádzkou škôlky.</p><p><strong>Nepoužívame reklamné nástroje ani údaje nepredávame.</strong> Na technickú prevádzku portálu využívame poskytovateľov infraštruktúry potrebných na fungovanie aplikácie.</p><p>Údaje uchovávame počas trvania zákazníckeho vzťahu a následne po dobu potrebnú na splnenie zákonných povinností a ochranu právnych nárokov. V súvislosti so svojimi údajmi môžete požiadať o prístup, opravu, vymazanie alebo obmedzenie spracúvania, ak sú splnené zákonné podmienky.</p><p>Potvrdením pri registrácii neudeľujete marketingový súhlas. Potvrdzujete, že ste sa s týmito informáciami oboznámili.</p><p class="legal-version"></p></div><button id="privacyInfoOk" class="btn full" type="button">Rozumiem</button></div></div>');
   }
   if(!document.getElementById('schoolTermsModal')){
-    document.body.insertAdjacentHTML('beforeend','<div id="schoolTermsModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="schoolTermsTitle"><div class="legal-card terms-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="schoolTermsTitle">Podmienky škôlky</h2><div id="schoolTermsDog" class="legal-dog"></div><div id="schoolTermsBody" class="legal-body terms-body"></div><label class="terms-ack-row"><input id="schoolTermsAck" type="checkbox"><span>Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.</span></label><button id="schoolTermsConfirm" class="btn full" type="button" disabled>Potvrdiť a prijať podmienky</button><button id="schoolTermsHistoryBtn" class="btn secondary full" type="button">Moje potvrdené verzie</button><button id="schoolTermsLogout" class="btn secondary full" type="button">Odhlásiť sa</button></div></div>');
+    document.body.insertAdjacentHTML('beforeend','<div id="schoolTermsModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="schoolTermsTitle"><div class="legal-card terms-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="schoolTermsTitle">Podmienky škôlky</h2><div id="schoolTermsDog" class="legal-dog"></div><div id="schoolTermsBody" class="legal-body terms-body"></div><label class="terms-ack-row"><input id="schoolTermsAck" type="checkbox"><span>Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.</span></label><button id="schoolTermsConfirm" class="btn full" type="button" disabled>Potvrdiť a prijať podmienky</button><button id="schoolTermsLogout" class="btn secondary full" type="button">Odhlásiť sa</button></div></div>');
   }
   document.getElementById('schoolTermsAck')?.addEventListener('change',e=>{const b=document.getElementById('schoolTermsConfirm');if(b)b.disabled=e.target.disabled||!e.target.checked});
 })();
@@ -1126,7 +1127,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(!doc)return;
     const modal=ensureReadModal();
     document.getElementById('schoolTermsReadTitle').textContent=doc.title||'Podmienky psej škôlky Chvostíkovo';
-    document.getElementById('schoolTermsReadMeta').textContent='Verzia: '+String(doc.version||'');
+    document.getElementById('schoolTermsReadMeta').textContent='Verzia: '+termsVersionLabel(doc.version);
     document.getElementById('schoolTermsReadBody').textContent=doc.body||'';
     modal.classList.remove('hidden');
   }
@@ -1138,8 +1139,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_terms_acceptance_history',{method:'POST',headers:headers(),body:JSON.stringify({p_dog_id:dogId}),cache:'no-store'});
       if(!response.ok)throw new Error('Potvrdené verzie sa nepodarilo načítať.');
       const rows=await response.json();if(root.dataset.request!==request||state.session?.user?.id!==account)return;
-      root.innerHTML=rows.length?'<details class="terms-history"><summary>Moje potvrdené verzie ('+rows.length+')</summary>'+rows.map((row,i)=>'<div class="terms-history-row"><strong>Verzia '+esc(row.terms_version)+'</strong><small>✓ Potvrdené dňa '+esc(skDateTime(row.accepted_at))+'</small><div class="terms-history-actions"><button type="button" class="btn secondary small" data-terms-view="'+i+'">Zobraziť podmienky</button><button type="button" class="btn secondary small" data-terms-pdf="'+i+'" data-open="true">Otvoriť PDF</button><button type="button" class="btn secondary small" data-terms-pdf="'+i+'">Stiahnuť PDF</button></div></div>').join('')+'</details>':'<small>Zatiaľ nemáte potvrdenú verziu podmienok.</small>';
-      root.querySelectorAll('[data-terms-view]').forEach(btn=>btn.onclick=()=>{const row=rows[Number(btn.dataset.termsView)];openRead({title:row.title,version:row.terms_version,body:row.body});document.getElementById('schoolTermsReadMeta').textContent='Verzia '+row.terms_version+' · Potvrdené dňa '+skDateTime(row.accepted_at)});
+      root.innerHTML=rows.length?'<details class="terms-history"><summary><span>Moje potvrdené verzie ('+rows.length+')</span><small>Otvoriť alebo stiahnuť PDF</small></summary>'+rows.map((row,i)=>'<div class="terms-history-row"><strong>Verzia '+esc(termsVersionLabel(row.terms_version))+'</strong><small>✓ Potvrdené dňa '+esc(skDateTime(row.accepted_at))+'</small><div class="terms-history-actions"><button type="button" class="btn secondary small" data-terms-view="'+i+'">Zobraziť podmienky</button><button type="button" class="btn secondary small" data-terms-pdf="'+i+'" data-open="true">Otvoriť PDF</button><button type="button" class="btn secondary small" data-terms-pdf="'+i+'">Stiahnuť PDF</button></div></div>').join('')+'</details>':'<small>Zatiaľ nemáte potvrdenú verziu podmienok.</small>';
+      root.querySelectorAll('[data-terms-view]').forEach(btn=>btn.onclick=()=>{const row=rows[Number(btn.dataset.termsView)];openRead({title:row.title,version:row.terms_version,body:row.body});document.getElementById('schoolTermsReadMeta').textContent='Verzia '+termsVersionLabel(row.terms_version)+' · Potvrdené dňa '+skDateTime(row.accepted_at)});
       root.querySelectorAll('[data-terms-pdf]').forEach(btn=>btn.onclick=async()=>{
         const row=rows[Number(btn.dataset.termsPdf)],open=btn.dataset.open==='true';
         const preview=open?window.open('about:blank','_blank'):null;
@@ -1150,7 +1151,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
           if(hash!==row.document_hash)throw new Error('Kontrola historického dokumentu zlyhala.');
           const url=URL.createObjectURL(window.createCustomerTermsPdf(row));
           if(preview){preview.location.replace(url)}else{
-            const a=document.createElement('a');a.href=url;a.download='Chvostikovo-podmienky-'+row.terms_version+'.pdf';a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
+            const a=document.createElement('a');a.href=url;a.download='Chvostikovo-podmienky-'+termsVersionLabel(row.terms_version)+'.pdf';a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
           }
           setTimeout(()=>URL.revokeObjectURL(url),300000);
         }catch(error){preview?.close();toast(error.message||'PDF sa nepodarilo vytvoriť.')}finally{btn.disabled=false}
@@ -1158,10 +1159,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     }catch(error){if(root.dataset.request===request)root.textContent=error.message}
   }
   window.renderCustomerTermsHistory=renderTermsHistory;
-  window.openCustomerTermsHistory=dogId=>{
-    const modal=ensureReadModal();document.getElementById('schoolTermsReadTitle').textContent='Moje potvrdené verzie';document.getElementById('schoolTermsReadMeta').textContent='';
-    const root=document.getElementById('schoolTermsReadBody');root.innerHTML='';modal.classList.remove('hidden');renderTermsHistory(root,dogId);
-  };
   async function render(force=false){
     const seq=++renderSeq;
     const stats=document.getElementById('dogStats');
@@ -1179,10 +1176,9 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     else{const legalAnchor=stats.querySelector('.stats-grid.old-stats')||stats.querySelector('.visit-stats-card');if(legalAnchor)stats.insertBefore(card,legalAnchor);else stats.appendChild(card)}
     card.innerHTML=
       '<div class="customer-legal-doc-v105"><div class="customer-legal-row"><div class="customer-legal-main"><strong>Ochrana údajov</strong><small>'+(privacyAt?'Potvrdené '+skDateTime(privacyAt):'Informácie o spracúvaní osobných údajov')+'</small></div><span class="customer-legal-status '+(privacyAt?'ok':'warn')+'">'+(privacyAt?'Potvrdené':'Nepotvrdené')+'</span></div><button id="customerPrivacyReadBtn" class="btn secondary customer-legal-doc-action-v105" type="button">Otvoriť súhlas</button></div>'+
-      '<div class="customer-legal-doc-v105"><div class="customer-legal-row"><div class="customer-legal-main"><strong>Pravidlá škôlky</strong><small>'+(accepted?'✓ Potvrdené dňa '+skDateTime(accepted.accepted_at)+' · Verzia '+doc.version:(doc?'Čakajú na potvrdenie':'Dokument zatiaľ nie je aktívny'))+'</small></div><span class="customer-legal-status '+(accepted?'ok':'warn')+'">'+(accepted?'Odsúhlasené':'Nepotvrdené')+'</span></div>'+(doc?'<button id="customerTermsReadBtn" class="btn secondary customer-legal-doc-action-v105" type="button">Otvoriť pravidlá škôlky</button>':'')+'</div>';
+      '<div class="customer-legal-doc-v105"><div class="customer-legal-row"><div class="customer-legal-main"><strong>Pravidlá škôlky</strong><small>'+(accepted?'✓ Potvrdené dňa '+skDateTime(accepted.accepted_at)+' · Verzia '+termsVersionLabel(doc.version):(doc?'Čakajú na potvrdenie':'Dokument zatiaľ nie je aktívny'))+'</small></div><span class="customer-legal-status '+(accepted?'ok':'warn')+'">'+(accepted?'Odsúhlasené':'Nepotvrdené')+'</span></div>'+(doc?'<button id="customerTermsReadBtn" class="btn secondary customer-legal-doc-action-v105" type="button">Otvoriť pravidlá škôlky</button>':'')+'</div>';
     document.getElementById('customerPrivacyReadBtn')?.addEventListener('click',()=>document.getElementById('privacyInfoBtn')?.click());
     document.getElementById('customerTermsReadBtn')?.addEventListener('click',()=>openRead(doc));
-    const history=document.createElement('div');history.className='terms-history-container';card.appendChild(history);renderTermsHistory(history,dogId);
   }
   window.renderCustomerLegalStatusV103=(force=false)=>render(force===true);
   function start(){
@@ -2238,7 +2234,7 @@ async function togglePushDirect(btn){
         const response=await fetch(url,{headers:authHeadersV55(),cache:'no-store'});
         if(response.ok&&modal.dataset.request===request){
           const rows=await response.json();
-          if(rows?.[0]?.accepted_at){accepted.textContent='Pravidlá potvrdené '+new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(rows[0].accepted_at));accepted.classList.remove('hidden')}
+          if(rows?.[0]?.accepted_at){accepted.textContent='Pravidlá potvrdené '+new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(rows[0].accepted_at))+' · Verzia '+termsVersionLabel(doc.version);accepted.classList.remove('hidden')}
         }
       }
     }catch(e){
