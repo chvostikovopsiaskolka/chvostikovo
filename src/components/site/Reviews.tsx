@@ -192,7 +192,7 @@ export function ReviewReasons() {
           </button>
         </div>
 
-        <div className="mx-auto mt-6 h-[145px] w-full max-w-[820px] overflow-hidden sm:mt-7 sm:h-[210px]" aria-hidden="true">
+        <div className="mx-auto mt-2 h-[160px] w-full max-w-[820px] overflow-hidden sm:mt-4 sm:h-[220px]" aria-hidden="true">
           <img
             src={schoolmatesLineup}
             alt=""
@@ -200,7 +200,7 @@ export function ReviewReasons() {
             decoding="async"
             width={1200}
             height={630}
-            className="block h-full w-full object-contain object-bottom"
+            className="block h-full w-full object-cover object-bottom"
           />
         </div>
       </div>
