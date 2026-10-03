@@ -4,6 +4,7 @@ import { PHONE } from "@/content/site";
 import heroDogs from "@/assets/hero-dogs.jpg";
 import { ShortForm } from "./Forms";
 import { InfoTicker } from "./InfoTicker";
+import { trackMarketingInteraction } from "@/lib/analytics";
 
 export function Hero() {
   const [announcementVisible, setAnnouncementVisible] = useState(false);
@@ -56,8 +57,8 @@ export function Hero() {
 
           <h1 className="mt-3 text-[29px] leading-[1.01] tracking-[-0.035em] text-forest min-[350px]:text-[31px] min-[390px]:text-[36px] sm:text-5xl">
             <span className="block">Psia škôlka v Košiciach,</span>
-            <span className="block text-coral-dark">ktorú si váš psík</span>
-            <span className="block">zamiluje</span>
+            <span className="block">ktorú si váš psík</span>
+            <span className="block text-coral-dark">zamiluje</span>
           </h1>
 
           <div className="mx-auto mt-3.5 max-w-xl text-forest min-[390px]:mt-4">
@@ -69,25 +70,31 @@ export function Hero() {
             </p>
           </div>
 
-          <div className="mx-auto mt-3 flex max-w-[360px] flex-wrap justify-center gap-1.5 min-[390px]:mt-4 min-[390px]:gap-2">
+          <div className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 min-[390px]:mt-4 min-[390px]:gap-1.5">
             {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
               <span
                 key={item}
-                className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold text-forest shadow-card min-[390px]:px-3 min-[390px]:py-1.5 min-[390px]:text-xs"
+                className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-white/95 px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-forest shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px]"
               >
-                <CheckCircle2 className="size-3.5 text-coral" />
+                <CheckCircle2 className="size-3 shrink-0 text-coral min-[390px]:size-3.5" />
                 {item}
               </span>
             ))}
           </div>
 
-          <a
-            href={`tel:${PHONE}`}
-            className="btn-coral mt-3 inline-flex min-w-[190px] items-center justify-center gap-2 px-5 py-2.5 text-sm min-[390px]:mt-4 min-[390px]:min-w-[220px] min-[390px]:py-3 min-[390px]:text-[15px]"
+          <button
+            type="button"
+            onClick={() => {
+              trackMarketingInteraction("hero_learn_more", "hero_mobile");
+              document.getElementById("preco-chvostikovo")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }}
+            className="btn-coral mt-3 inline-flex min-w-[190px] items-center justify-center px-5 py-2.5 text-sm min-[390px]:mt-4 min-[390px]:min-w-[220px] min-[390px]:py-3 min-[390px]:text-[15px]"
           >
-            <Phone className="size-4" />
-            Zavolajte nám
-          </a>
+            Zistiť viac o škôlke
+          </button>
 
           <InfoTicker className="mt-3 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-4" compact />
         </div>
@@ -101,8 +108,8 @@ export function Hero() {
 
             <h1 className="order-2 text-[56px] leading-[1.01] tracking-[-0.035em] text-forest xl:text-[62px]">
               <span className="block">Psia škôlka v Košiciach,</span>
-              <span className="block text-coral-dark">ktorú si váš psík</span>
-              <span className="block">zamiluje</span>
+              <span className="block">ktorú si váš psík</span>
+              <span className="block text-coral-dark">zamiluje</span>
             </h1>
 
             <div className="order-3 mx-0 mt-4 max-w-xl text-forest">
