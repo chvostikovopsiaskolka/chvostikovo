@@ -166,7 +166,7 @@ function EnglishReviewCarousel() {
       onTouchCancel={resume}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="mt-10 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+      className="relative left-1/2 mt-10 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
       {[...REVIEWS_EN, ...REVIEWS_EN].map((review, index) => (
         <EnglishReviewCard key={`${review.name}-${index}`} name={review.name} text={review.text} />
@@ -565,7 +565,7 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <section id="reviews" className="scroll-mt-24 bg-secondary/50 py-14 sm:py-18">
+        <section id="reviews" className="scroll-mt-24 overflow-x-clip bg-secondary/50 py-14 sm:py-18">
           <div className="mx-auto max-w-6xl px-4 text-center">
             <h2 className="section-title text-3xl sm:text-4xl">100+ happy daycare dogs</h2>
             <p className="mt-3 text-forest/80">⭐ 5.0 on Google</p>
