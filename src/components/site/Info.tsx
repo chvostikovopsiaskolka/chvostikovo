@@ -114,7 +114,11 @@ export function FirstVisit() {
         </ol>
 
         <div className="mt-8 flex justify-center">
-          <button type="button" onClick={() => setOpen(true)} className="btn-coral">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="btn-coral inline-flex min-w-[220px] items-center justify-center px-7 py-3.5 text-[15px] sm:min-w-[310px] sm:px-10 sm:py-4 sm:text-lg"
+          >
             Prihláška do škôlky
           </button>
         </div>
