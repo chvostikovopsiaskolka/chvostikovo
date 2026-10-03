@@ -19,6 +19,7 @@ import { trackMarketingInteraction } from "@/lib/analytics";
 import { Collapse } from "@/components/site/Collapse";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
+import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { Care, About } from "@/components/site/Story";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { EnglishContact, Footer } from "@/components/site/Contact";
@@ -571,6 +572,8 @@ function EnglishDogDaycarePage() {
             <EnglishReviewCarousel />
           </div>
         </section>
+
+        <DaycarePhotoCarousel />
 
         <Gallery language="en" />
 
