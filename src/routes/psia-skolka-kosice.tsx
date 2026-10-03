@@ -145,9 +145,9 @@ function LeadLandingPage() {
             <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-cream to-transparent" />
           </div>
 
-          <div className="relative mx-auto grid min-h-[600px] max-w-6xl items-center gap-8 px-4 py-10 sm:min-h-[620px] sm:py-14 lg:min-h-[620px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-16">
+          <div className="relative mx-auto grid min-h-[560px] max-w-6xl items-center gap-8 px-4 pt-8 pb-4 sm:min-h-[590px] sm:pt-12 sm:pb-8 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
-              <h1 className="text-[38px] leading-[1.02] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
+              <h1 className="text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
                 Kým ste v práci,
                 <span className="block text-coral-dark">váš psík môže mať aktívny deň</span>
                 s kamarátmi
