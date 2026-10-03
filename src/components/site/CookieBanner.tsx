@@ -195,8 +195,8 @@ export function CookieBanner() {
             {!showDetails && (
               <p className="mt-1 max-w-3xl text-sm leading-relaxed text-forest/75 sm:text-base">
                 {isEnglish
-                  ? "Necessary cookies keep the website working properly. Analytics, functional and marketing cookies are used only with your consent. They help us improve the website and measure the effectiveness of our advertising. "
-                  : "Nevyhnutné cookies zabezpečujú správne fungovanie stránky. Analytické, funkčné a marketingové cookies používame iba s vaším súhlasom. Pomáhajú nám zlepšovať web a vyhodnocovať účinnosť našej reklamy. "}
+                  ? "Necessary cookies keep the website working. With your consent, we also use functional, analytics and marketing cookies to improve the website and measure our advertising. "
+                  : "Nevyhnutné cookies zabezpečujú fungovanie webu. S vaším súhlasom používame aj funkčné, analytické a marketingové cookies na zlepšovanie webu a meranie reklamy. "}
                 <a
                   href={isEnglish ? "/en/cookies" : "/cookies"}
                   target="_blank"
@@ -342,23 +342,23 @@ export function CookieBanner() {
 
           <button
             type="button"
-            onClick={rejectAll}
-            className="rounded-full border border-forest/25 bg-card px-5 py-3 font-display text-sm font-semibold text-forest transition hover:bg-secondary sm:text-base"
-          >
-            {isEnglish ? "Reject" : "Odmietnuť"}
-          </button>
-
-          <button
-            type="button"
             onClick={() => {
               if (showDetails) savePreferences();
               else setShowDetails(true);
             }}
-            className="rounded-full border border-forest/25 bg-secondary px-4 py-3 font-display text-[13px] font-semibold text-forest whitespace-nowrap transition hover:bg-coral-soft sm:text-sm"
+            className="rounded-full border border-forest/25 bg-secondary px-4 py-3 font-display text-sm font-semibold text-forest whitespace-nowrap transition hover:bg-coral-soft sm:text-base"
           >
             {showDetails
               ? isEnglish ? "Save settings" : "Uložiť nastavenia"
-              : isEnglish ? "Cookie settings" : "Nastavenia cookies"}
+              : isEnglish ? "Customize" : "Prispôsobiť"}
+          </button>
+
+          <button
+            type="button"
+            onClick={rejectAll}
+            className="rounded-full border border-forest/25 bg-card px-5 py-3 font-display text-sm font-semibold text-forest transition hover:bg-secondary sm:text-base"
+          >
+            {isEnglish ? "Necessary only" : "Len nevyhnutné"}
           </button>
         </div>
 
