@@ -50,7 +50,12 @@ function EnglishCookies() {
           <li><strong>Advertising cookies:</strong> are used to measure advertising performance and provide more relevant advertising content. They are used only with your consent.</li>
         </ul>
         <p>
-          <strong>Third-party services:</strong> We use third-party services, in particular Google Analytics and Meta Pixel, to analyse website traffic and measure advertising performance. These services are activated only after the relevant consent has been given.
+          <strong>Services used on this website:</strong> necessary consent storage by Chvostíkovo;
+          Google Maps as an optional functional service; Google Analytics 4 and Google Tag Manager
+          for analytics; and Meta Pixel together with Meta Conversions API for marketing
+          measurement. Optional services are activated only after the relevant consent has been
+          given. Detailed purpose, processed data and retention information is available in Cookie
+          settings in the website footer.
         </p>
 
         <H2>3. Consent and cookie settings</H2>
