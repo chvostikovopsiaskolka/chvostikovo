@@ -68,10 +68,11 @@ function Cookies() {
           </li>
         </ul>
         <p>
-          <strong>Služby tretích strán:</strong> Na našej webovej stránke využívame služby tretích
-          strán, najmä Google Analytics a Meta Pixel, ktoré používame na analýzu návštevnosti webu a
-          meranie účinnosti reklamných kampaní. Tieto služby sa aktivujú až po udelení príslušného
-          súhlasu používateľa.
+          <strong>Služby používané na webe:</strong> nevyhnutné uloženie cookie voľby Chvostíkovo;
+          Google Maps ako voliteľná funkčná služba; Google Analytics 4 a Google Tag Manager pre
+          analytiku; Meta Pixel spolu s Meta Conversions API pre marketingové meranie. Voliteľné
+          služby sa aktivujú až po udelení príslušného súhlasu. Detailný účel, spracúvané údaje a
+          informácie o uchovávaní sú dostupné v Nastaveniach cookies v pätičke webu.
         </p>
 
         <H2>3. Súhlas a nastavenie cookies</H2>
