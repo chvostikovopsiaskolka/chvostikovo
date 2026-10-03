@@ -225,24 +225,24 @@ const PRIMARY_FAQ = FAQ.filter((item) => PRIMARY_FAQ_QUESTIONS.has(item.q));
 const PRACTICAL_FAQ = FAQ.filter((item) => !PRIMARY_FAQ_QUESTIONS.has(item.q));
 
 function FaqList({ items }: { items: Array<(typeof FAQ)[number]> }) {
-  const [open, setOpen] = useState<number | null>(0);
+  const [open, setOpen] = useState<number | null>(null);
 
   return (
     <div className="mt-8 space-y-3">
       {items.map((f, i) => (
-        <div key={f.q} className="overflow-hidden rounded-3xl bg-card shadow-card">
+        <div key={f.q} className="overflow-hidden rounded-[2rem] bg-card shadow-card">
           <button
             type="button"
             onClick={() => setOpen(open === i ? null : i)}
-            className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left font-display text-sm font-semibold text-forest sm:text-base"
+            className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left font-display text-[1.05rem] font-bold leading-snug text-forest sm:px-6 sm:py-5 sm:text-lg"
           >
             {f.q}
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-forest sm:size-8">
-              {open === i ? <Minus className="size-3.5 sm:size-4" /> : <Plus className="size-3.5 sm:size-4" />}
+            <span className="flex shrink-0 items-center justify-center text-coral">
+              {open === i ? <Minus className="size-5" /> : <Plus className="size-5" />}
             </span>
           </button>
           {open === i && (
-            <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80">
+            <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80 sm:px-6 sm:pb-6">
               <p className="whitespace-pre-line">{f.a}</p>
               {f.q === "Prijímate aj šteniatka?" && (
                 <a
@@ -270,7 +270,7 @@ function FaqList({ items }: { items: Array<(typeof FAQ)[number]> }) {
 
 export function Faq() {
   return (
-    <section id="faq" className="scroll-mt-24 bg-card pt-16 pb-12 sm:pt-20 sm:pb-14">
+    <section id="faq" className="scroll-mt-24 bg-secondary/40 pt-16 pb-12 sm:pt-20 sm:pb-14">
       <div className="mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
         <FaqList items={PRIMARY_FAQ} />
