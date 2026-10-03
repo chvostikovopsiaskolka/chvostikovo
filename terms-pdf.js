@@ -3,7 +3,7 @@
   // Customer labels do not change immutable server version identifiers.
   window.customerTermsVersionLabel=version=>{
     const value=String(version||'');
-    const labels={'preview-2026-09-13':'0.1','2026-09-20':'0.9','2026-09-30':'1.0'};
+    const labels={'preview-2026-09-13':'0.1','2026-09-20':'0.9','2026-09-30':'1.0','2026-10-03':'1.0'};
     return labels[value]||(/^\d+(?:\.\d+)*$/.test(value)?value:'archívna');
   };
   const encode=s=>new TextEncoder().encode(s);

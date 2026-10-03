@@ -1,0 +1,16 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict'),{JSDOM}=require('jsdom');
+const source=fs.readFileSync('app.js','utf8'),html=fs.readFileSync('index.html','utf8');
+const section=(a,b)=>source.slice(source.indexOf(a),source.indexOf(b,source.indexOf(a)));
+const dom=new JSDOM(html,{url:'https://app.chvostikovo.sk',runScripts:'outside-only'}),w=dom.window;
+w.$=id=>w.document.getElementById(id);w.selectedDog=()=>({id:77});w.esc=s=>String(s);w.proofs=[];w.vaccinationProofsForDogV104=()=>w.proofs;
+w.openVaccinationProofViewerV104=()=>{};
+w.eval('var vaccinationProofFilesV104=[],vaccinationProofReplaceModeV104=false,vaccinationProofUploadInFlightV143=null;'+section('function renderVaccinationProofsV104','async function addVaccinationProofFilesV104'));
+w.renderVaccinationProofsV104();assert(w.$('vaccProofEmptyV105'));assert(w.$('vaccProofReplaceV104').classList.contains('hidden'));
+assert(!w.$('vaccProofChooseLibraryV104'));assert(!w.$('vaccProofChooseCameraV104'));assert(!w.$('vaccProofCameraV104'));
+w.proofs=[{image_url:'data:image/jpeg;base64,test'}];w.renderVaccinationProofsV104();assert(!w.$('vaccProofEmptyV105'));assert(!w.$('vaccProofReplaceV104').classList.contains('hidden'));assert.equal(w.$('vaccProofReplaceV104').textContent,'Nahradiť fotky');
+w.eval('vaccinationProofReplaceModeV104=true');w.renderVaccinationProofsV104();assert(!w.$('vaccProofReplaceV104').classList.contains('hidden'));
+w.eval("vaccinationProofFilesV104=[{dataUrl:'data:image/jpeg;base64,test'}]");w.renderVaccinationProofsV104();assert(w.$('vaccProofReplaceV104').classList.contains('hidden'));assert(!w.$('vaccProofUploadV104').classList.contains('hidden'));
+w.eval(fs.readFileSync('terms-pdf.js','utf8'));assert.equal(w.customerTermsVersionLabel('2026-10-03'),'1.0');assert.equal(w.customerTermsVersionLabel('2026-09-30'),'1.0');
+const old=fs.readFileSync('docs/terms-2026-09-30.txt','utf8').trimEnd().split(/(?=^\d+\. )/m),now=fs.readFileSync('docs/terms-2026-10-03.txt','utf8').trimEnd().split(/(?=^\d+\. )/m);assert.deepEqual(old.map((s,i)=>s===now[i]?null:i+1).filter(Boolean),[2,4]);
+assert(!fs.readFileSync('email-confirmed.html','utf8').includes('<a '));assert(!source.includes('už má na tento deň rezerváciu alebo žiadosť čakajúcu na potvrdenie.'));
+w.close();console.log('PASS: empty/existing/replacement photo UI; 1.0 labels; only terms sections 2/4 changed; no Safari return link or redundant booking hint');

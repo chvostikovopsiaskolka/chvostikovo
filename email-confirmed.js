@@ -12,7 +12,6 @@
     if(!user.email_confirmed_at)throw new Error('E-mail zatiaľ nie je potvrdený. Otvorte odkaz v potvrdzovacom e-maile.');
     title.textContent='Váš e-mail je potvrdený';
     message.textContent='Vráťte sa do aplikácie Chvostíkovo a prihláste sa.';
-    document.getElementById('confirmationEmail').textContent=user.email||'';
   }catch(error){
     title.textContent='Potvrdenie e-mailu';
     message.textContent=error.name==='TimeoutError'||error.name==='TypeError'?'Potvrdenie sa nepodarilo overiť pre problém s pripojením. Skúste odkaz otvoriť znovu alebo sa prihlásiť do aplikácie.':error.message;

@@ -27,7 +27,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261001-customer-registration-audit-v143';
+const APP_BUILD='20261003-customer-onboarding-polish-v144';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -310,7 +310,7 @@ function renderPassSummaryCore(){
 }
 function renderPassSummary(){const out=renderPassSummaryCore();runCustomerHooks('afterRenderPassSummary',out);return out}
 function futureItems(){const today=new Date().toISOString().slice(0,10);const requests=(state.data?.requests||[]).filter(r=>r.reservation_date>=today&&['pending','approved'].includes(r.status));const covered=new Set(requests.map(r=>Number(r.reservation_id)).filter(Boolean));const legacy=(state.data?.reservations||[]).filter(r=>r.reservation_date>=today&&!covered.has(Number(r.id))).map(r=>({...r,status:'approved',_legacy:true,reservation_id:r.id}));return [...requests,...legacy].sort((a,b)=>String(a.reservation_date).localeCompare(String(b.reservation_date)))}
-async function cancelBooking(btn){if(!confirm('Naozaj chcete zrušiť túto rezerváciu?'))return;try{loading(true);const requestId=Number(btn.dataset.request)||0,reservationId=Number(btn.dataset.reservation)||0;await api({action:'cancel_booking',request_id:requestId,reservation_id:reservationId,reason:null});const request=(state.data?.requests||[]).find(r=>Number(r.id)===requestId),reservation=(state.data?.reservations||[]).find(r=>Number(r.id)===reservationId);if(request)request.status='cancelled';if(reservation)reservation.status='cancelled';renderUpcoming();renderDays();renderMessages();toast('Rezervácia bola zrušená.');queueCustomerSync('bookings',80)}catch(e){toast(e.message)}finally{loading(false)}}
+async function cancelBooking(btn){if(!confirm('Naozaj chcete zrušiť túto rezerváciu?'))return;try{loading(true);const requestId=Number(btn.dataset.request)||0,reservationId=Number(btn.dataset.reservation)||0;await api({action:'cancel_booking',request_id:requestId,reservation_id:reservationId,reason:null});const request=(state.data?.requests||[]).find(r=>Number(r.id)===requestId),reservation=(state.data?.reservations||[]).find(r=>Number(r.id)===reservationId);if(request)request.status='cancelled';if(reservation)reservation.status='cancelled';if(reservationId)for(const row of state.data?.requests||[])if(Number(row.reservation_id)===reservationId)row.status='cancelled';renderUpcoming();renderDays();renderMessages();toast('Rezervácia bola zrušená.');queueCustomerSync('bookings',80)}catch(e){toast(e.message)}finally{loading(false)}}
 function bookingFor(dogId,date){return (state.data?.requests||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date&&['pending','approved'].includes(r.status))||(state.data?.reservations||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date)}
 function applyLocalBooking(result,fallback){const row=result?.data||result?.booking||result?.request||fallback;if(!row)return;const rows=state.data?.requests||(state.data.requests=[]),index=rows.findIndex(r=>Number(r.id)===Number(row.id));if(index>=0)rows[index]={...rows[index],...row};else rows.push({...fallback,...row});renderUpcoming();renderDays();renderMessages()}
 async function loadAnnouncements(){return customerRenderers.announcements?customerRenderers.announcements():undefined}
@@ -1756,8 +1756,9 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const upcomingPass=passId&&(state.data?.passes||[]).some(p=>Number(p.id)===passId&&p.status==='queued');
       const passState=planned&&plannedTotal?`<span class="reserved-pass-v37${r.planned_pass_request_id||upcomingPass?' reserved-pass-new-v134':''}">${r.planned_pass_request_id||upcomingPass?`Plánovaný vstup ${planned}/${plannedTotal} z novej permanentky`:`Vstup z permanentky ${planned}/${plannedTotal}`}</span>`:'';
       const note=day.note&&!(day.bookings_open===false&&/^zatvorené$/i.test(String(day.note).trim()))?`<div class="reserved-note-v37">${esc(day.note)}</div>`:'';
-      const sharedNote=r.can_manage===false?`<div class="hint">${esc(dog.name)} už má na tento deň rezerváciu alebo žiadosť čakajúcu na potvrdenie.</div>`:'';
-      const cancel=r.can_manage!==false?`<button class="cancel-booking-v37" type="button" aria-label="Zrušiť rezerváciu na ${esc(skDay(r.reservation_date))} ${esc(skDate(r.reservation_date))}" title="Zrušiť rezerváciu" data-request="${r._legacy?'':r.id||''}" data-reservation="${r._legacy?r.reservation_id||r.id:''}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M9 13l6 4M15 13l-6 4"/></svg></button>`:'';
+      const sharedNote='';
+      const linkedReservation=r.can_manage===false&&r.status==='approved'&&Number(r.reservation_id)>0;
+      const cancel=(r.can_manage!==false||linkedReservation)?`<button class="cancel-booking-v37" type="button" aria-label="Zrušiť rezerváciu na ${esc(skDay(r.reservation_date))} ${esc(skDate(r.reservation_date))}" title="Zrušiť rezerváciu" data-request="${r._legacy||linkedReservation?'':r.id||''}" data-reservation="${r._legacy||linkedReservation?r.reservation_id||r.id:''}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M9 13l6 4M15 13l-6 4"/></svg></button>`:'';
       const detail=(pending&&passState)||taxi?`<div class="reserved-day-detail-v37${pending?' reserved-day-detail-pending-v37':''}">${pending?passState:''}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}</div>`:'';
       const approvedRoster=pending?'':`<div class="reserved-day-meta-v37">${bookingRosterV37(day,dog,passState)}</div>`;
       return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div class="reserved-day-date-v37"><strong>${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><div class="reserved-day-controls-v37"><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span>${cancel}</div></div>${approvedRoster}${detail}${sharedNote}${note}</div>`;
@@ -2408,19 +2409,17 @@ function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
   const current=$('vaccProofCurrentV104'),staged=$('vaccProofStagedV104'),count=$('vaccProofCountV104'),upload=$('vaccProofUploadV104'),msg=$('vaccProofMessageV104');
   if(!current||!staged||!count||!upload)return;
   const proofs=vaccinationProofsForDogV104(dogId);
-  const combined=vaccinationProofReplaceModeV104?vaccinationProofFilesV104.length:proofs.length+vaccinationProofFilesV104.length;
   count.textContent=String(proofs.length);
   if(proofs.length){
     current.classList.remove('vacc-proof-empty-wrap-v105');
     current.innerHTML=proofs.map((p,i)=>'<button class="vacc-proof-thumb-v104" type="button" data-proof-index="'+i+'"><img src="'+esc(p.image_url||'')+'" alt="Očkovací preukaz '+(i+1)+'"><span>Foto '+(i+1)+'</span></button>').join('');
   }else{
     current.classList.add('vacc-proof-empty-wrap-v105');
-    current.innerHTML='<button id="vaccProofEmptyV105" class="vacc-proof-empty-v105" type="button"><span class="vacc-proof-plus-v105">+</span><span>Zatiaľ nie je nahratá žiadna fotografia.</span><small>Kliknite a vyberte fotografie</small></button>';
+    current.innerHTML='<button id="vaccProofEmptyV105" class="vacc-proof-empty-v105" type="button"><span class="vacc-proof-plus-v105">+</span><span>Nahrať fotky</span><small>Kliknite a vyberte fotografie</small></button>';
   }
   current.querySelectorAll('[data-proof-index]').forEach(button=>button.addEventListener('click',()=>openVaccinationProofViewerV104(proofs[Number(button.dataset.proofIndex)]?.image_url)));
   $('vaccProofEmptyV105')?.addEventListener('click',()=>$('vaccProofLibraryV104')?.click());
-  $('vaccProofActionsV104')?.classList.toggle('hidden',window.__vaccinationProofProcessingV105===true||(!vaccinationProofReplaceModeV104&&combined>=5));
-  $('vaccProofReplaceV104')?.classList.toggle('hidden',!proofs.length||window.__vaccinationProofProcessingV105===true||vaccinationProofReplaceModeV104);
+  $('vaccProofReplaceV104')?.classList.toggle('hidden',!proofs.length||window.__vaccinationProofProcessingV105===true||vaccinationProofFilesV104.length>0);
   staged.classList.toggle('hidden',!vaccinationProofFilesV104.length);
   staged.innerHTML=vaccinationProofFilesV104.length?'<div class="vacc-proof-stage-title-v104">Vybrané nové fotografie</div><div class="vacc-proof-grid-v104">'+vaccinationProofFilesV104.map((item,i)=>'<div class="vacc-proof-thumb-v104 staged"><img src="'+item.dataUrl+'" alt="Vybraná fotografia '+(i+1)+'"><button type="button" data-remove-proof="'+i+'" aria-label="Odstrániť">×</button></div>').join('')+'</div>':'';
   staged.querySelectorAll('[data-remove-proof]').forEach(button=>button.addEventListener('click',()=>{vaccinationProofFilesV104.splice(Number(button.dataset.removeProof),1);renderVaccinationProofsV104(dogId)}));
@@ -2463,20 +2462,13 @@ function v105PickerGuard(){
   setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},20000);
 }
 function bindVaccinationProofInputsV104(){
-  const library=$('vaccProofLibraryV104'),camera=$('vaccProofCameraV104'),upload=$('vaccProofUploadV104');
-  const chooseLibrary=$('vaccProofChooseLibraryV104'),chooseCamera=$('vaccProofChooseCameraV104'),replace=$('vaccProofReplaceV104');
-  if(chooseLibrary&&!chooseLibrary.dataset.boundV104){chooseLibrary.dataset.boundV104='1';chooseLibrary.addEventListener('click',()=>library?.click())}
-  if(chooseCamera&&!chooseCamera.dataset.boundV104){chooseCamera.dataset.boundV104='1';chooseCamera.addEventListener('click',()=>camera?.click())}
+  const library=$('vaccProofLibraryV104'),upload=$('vaccProofUploadV104'),replace=$('vaccProofReplaceV104');
   if(replace&&!replace.dataset.boundV104){replace.dataset.boundV104='1';replace.addEventListener('click',()=>{
     clearVaccinationProofStageV104();vaccinationProofReplaceModeV104=true;renderVaccinationProofsV104();library?.click();
   })}
   if(library&&!library.dataset.boundV105){
     library.dataset.boundV105='1';library.addEventListener('click',v105PickerGuard);
     library.addEventListener('change',async()=>{try{await addVaccinationProofFilesV104(library.files)}finally{library.value='';setTimeout(()=>{window.__customerPhotoPickerV88=false},250)}});
-  }
-  if(camera&&!camera.dataset.boundV105){
-    camera.dataset.boundV105='1';camera.addEventListener('click',v105PickerGuard);
-    camera.addEventListener('change',async()=>{try{await addVaccinationProofFilesV104(camera.files)}finally{camera.value='';setTimeout(()=>{window.__customerPhotoPickerV88=false},250)}});
   }
   if(upload&&!upload.dataset.boundV105){upload.dataset.boundV105='1';upload.addEventListener('click',()=>uploadVaccinationProofsV104(false).catch(()=>{}))}
 }

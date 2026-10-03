@@ -13,7 +13,7 @@ async function confirmation(hash,user,ok=true){
 }
 (async()=>{
  let r=await confirmation('#access_token=test&type=signup',{email:'owner@example.test',email_confirmed_at:'2026-10-01'});
- assert.equal(r.title,'Váš e-mail je potvrdený');assert(r.body.includes('owner@example.test'));assert.equal(r.hash,'');
+ assert.equal(r.title,'Váš e-mail je potvrdený');assert(!r.body.includes('owner@example.test'));assert(!r.body.includes('Vrátiť sa do aplikácie'));assert.equal(r.hash,'');
  r=await confirmation('#error=access_denied&error_code=otp_expired',null);assert.equal(r.calls,0);assert(!r.body.includes('Váš e-mail je potvrdený'));
  r=await confirmation('',null);assert.equal(r.calls,0);
  r=await confirmation('#access_token=test&type=signup',{email_confirmed_at:null});assert(!r.body.includes('Váš e-mail je potvrdený'));
