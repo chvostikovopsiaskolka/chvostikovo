@@ -23,6 +23,8 @@ import photo19 from "@/assets/daycare-carousel-19.avif";
 import photo20 from "@/assets/daycare-carousel-20.avif";
 import photo21 from "@/assets/daycare-carousel-21.avif";
 import photo22 from "@/assets/daycare-carousel-22.avif";
+import photo23 from "@/assets/daycare-carousel-23.jpg";
+import photo24 from "@/assets/daycare-carousel-24.jpg";
 
 const PHOTOS = [
   { src: photo01, alt: "Psí škôlkari v Chvostíkove – fotografia 1" },
@@ -47,6 +49,8 @@ const PHOTOS = [
   { src: photo20, alt: "Psí škôlkari v Chvostíkove – fotografia 20" },
   { src: photo21, alt: "Psí škôlkari v Chvostíkove – fotografia 21" },
   { src: photo22, alt: "Psí škôlkari v Chvostíkove – fotografia 22" },
+  { src: photo23, alt: "Psí škôlkari oddychujú vo vnútorných priestoroch Chvostíkova" },
+  { src: photo24, alt: "Psí škôlkari oddychujú spolu na gauči v Chvostíkove" },
   ...DAYCARE_GALLERY_EXTRAS,
 ];
 
