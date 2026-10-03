@@ -56,7 +56,8 @@ const PHOTOS = [
 
 const RESUME_DELAY = 2800;
 
-export function DaycarePhotoCarousel() {
+export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "en" }) {
+  const isEnglish = language === "en";
   const track = useRef<HTMLDivElement>(null);
   const firstSet = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
@@ -170,7 +171,7 @@ export function DaycarePhotoCarousel() {
   };
 
   return (
-    <section className="overflow-x-clip bg-card pt-6 pb-8 sm:pt-8 sm:pb-12" aria-label="Fotogaléria zo psiej škôlky Chvostíkovo">
+    <section className="overflow-x-clip bg-card pt-6 pb-8 sm:pt-8 sm:pb-12" aria-label={isEnglish ? "Photo gallery from Chvostíkovo dog daycare" : "Fotogaléria zo psiej škôlky Chvostíkovo"}>
       <div className="w-full">
         <div
           ref={track}
@@ -215,11 +216,11 @@ export function DaycarePhotoCarousel() {
                   tabIndex={setIndex === 1 ? -1 : 0}
                   onClick={() => openPhoto(index)}
                   className="group h-[320px] w-[78vw] max-w-[390px] shrink-0 overflow-hidden rounded-4xl bg-secondary/30 shadow-card sm:h-[360px] sm:w-[46vw] sm:max-w-[430px] lg:h-[390px] lg:w-[31vw] lg:max-w-[350px]"
-                  aria-label={`Otvoriť fotografiu ${index + 1}`}
+                  aria-label={isEnglish ? `Open photo ${index + 1}` : `Otvoriť fotografiu ${index + 1}`}
                 >
                   <img
                     src={photo.src}
-                    alt={setIndex === 0 ? photo.alt : ""}
+                    alt={setIndex === 0 ? (isEnglish ? `Dogs at Chvostíkovo daycare – photo ${index + 1}` : photo.alt) : ""}
                     loading="lazy"
                     decoding="async"
                     draggable={false}
@@ -237,12 +238,12 @@ export function DaycarePhotoCarousel() {
           className="fixed inset-0 z-60 flex items-center justify-center bg-forest-deep/95 p-3 sm:p-6"
           role="dialog"
           aria-modal="true"
-          aria-label={`Fotografia ${active + 1} z ${PHOTOS.length}`}
+          aria-label={isEnglish ? `Photo ${active + 1} of ${PHOTOS.length}` : `Fotografia ${active + 1} z ${PHOTOS.length}`}
           onClick={closePhoto}
         >
           <button
             type="button"
-            aria-label="Zavrieť galériu"
+            aria-label={isEnglish ? "Close gallery" : "Zavrieť galériu"}
             className="absolute top-4 right-4 z-10 flex size-12 items-center justify-center rounded-full bg-cream/95 text-forest shadow-soft sm:top-6 sm:right-6"
             onClick={(event) => {
               event.stopPropagation();
@@ -254,7 +255,7 @@ export function DaycarePhotoCarousel() {
 
           <button
             type="button"
-            aria-label="Predchádzajúca fotografia"
+            aria-label={isEnglish ? "Previous photo" : "Predchádzajúca fotografia"}
             className="absolute left-2 z-10 flex size-12 items-center justify-center rounded-full bg-cream/95 text-forest shadow-soft sm:left-6"
             onClick={(event) => {
               event.stopPropagation();
@@ -266,7 +267,7 @@ export function DaycarePhotoCarousel() {
 
           <img
             src={PHOTOS[active]!.src}
-            alt={PHOTOS[active]!.alt}
+            alt={isEnglish ? `Dogs at Chvostíkovo daycare – photo ${active + 1}` : PHOTOS[active]!.alt}
             decoding="async"
             className="max-h-[88vh] max-w-[92vw] rounded-3xl object-contain shadow-soft sm:max-w-[86vw]"
             onClick={(event) => event.stopPropagation()}
@@ -274,7 +275,7 @@ export function DaycarePhotoCarousel() {
 
           <button
             type="button"
-            aria-label="Nasledujúca fotografia"
+            aria-label={isEnglish ? "Next photo" : "Nasledujúca fotografia"}
             className="absolute right-2 z-10 flex size-12 items-center justify-center rounded-full bg-cream/95 text-forest shadow-soft sm:right-6"
             onClick={(event) => {
               event.stopPropagation();
