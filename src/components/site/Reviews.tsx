@@ -186,7 +186,7 @@ export function ReviewReasons() {
                 block: "start",
               });
             }}
-            className="btn-coral inline-flex w-auto max-w-[330px] items-center justify-center whitespace-nowrap px-5 py-3 text-center text-sm leading-none sm:max-w-none sm:px-7 sm:text-base"
+            className="btn-coral inline-flex w-auto max-w-[340px] items-center justify-center whitespace-nowrap px-6 py-3.5 text-center text-[15px] leading-none sm:min-w-[360px] sm:max-w-none sm:px-10 sm:py-4 sm:text-lg"
           >
             Pozrite si, ako to u nás vyzerá
           </button>
