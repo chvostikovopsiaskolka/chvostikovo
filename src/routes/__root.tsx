@@ -90,6 +90,7 @@ import { GoogleAnalytics } from "@/components/site/GoogleAnalytics";
 import { GoogleTagManager } from "@/components/site/GoogleTagManager";
 import { MetaPixel } from "@/components/site/MetaPixel";
 import { ProductPageEnhancements } from "@/components/site/ProductPageEnhancements";
+import { CookielessLandingTracker } from "@/components/site/CookielessLandingTracker";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
@@ -188,6 +189,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <ProductPageEnhancements />
+      <CookielessLandingTracker />
       <CookieBanner />
       <GoogleAnalytics />
       <GoogleTagManager />
