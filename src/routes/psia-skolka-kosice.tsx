@@ -43,7 +43,7 @@ const LANDING_FAQ = FAQ.filter((item) => LANDING_FAQ_QUESTIONS.has(item.q));
 const BENEFITS = [
   {
     icon: PawPrint,
-    title: "Aktívny deň namiesto samoty doma",
+    title: "Aktívny deň",
     text: "Pohyb, hry, kamaráti aj oddych v bezpečnom dennom režime.",
   },
   {
@@ -58,7 +58,7 @@ const BENEFITS = [
   },
   {
     icon: Sparkles,
-    title: "Socializácia a nové zážitky",
+    title: "Socializácia",
     text: "Bezpečný kontakt s inými psami, nové podnety a deň plný zážitkov.",
   },
   {
@@ -220,7 +220,7 @@ function LeadLandingPage() {
                   <span className="flex size-10 items-center justify-center rounded-2xl bg-coral text-white">
                     <Icon className="size-5" />
                   </span>
-                  <h3 className="mt-3 font-display text-base font-bold text-forest lg:min-h-[4.5rem]">{benefitTitle}</h3>
+                  <h3 className="mt-3 font-display text-base font-bold text-forest">{benefitTitle}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-forest/70">{text}</p>
                 </article>
               ))}
