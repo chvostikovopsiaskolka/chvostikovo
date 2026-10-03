@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { CheckCircle2, Phone } from "lucide-react";
 import { PHONE } from "@/content/site";
 import heroDogs from "@/assets/hero-dogs.jpg";
@@ -7,13 +6,6 @@ import { InfoTicker } from "./InfoTicker";
 import { trackMarketingInteraction } from "@/lib/analytics";
 
 export function Hero() {
-  const [announcementVisible, setAnnouncementVisible] = useState(false);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setAnnouncementVisible(true), 220);
-    return () => window.clearTimeout(timer);
-  }, []);
-
   return (
     <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-28 lg:pb-4">
       <div className="absolute inset-0 z-0">
@@ -31,27 +23,9 @@ export function Hero() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
-        <div
-          className={`pointer-events-none absolute -top-10 left-1/2 hidden -translate-x-1/2 transition-all duration-700 lg:block ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"}`}
-          aria-hidden={!announcementVisible}
-        >
-          <p className="whitespace-nowrap rounded-full bg-white/95 px-5 py-2 font-display text-sm font-bold text-coral-dark shadow-soft">
-            🐾 Prijímame nových škôlkarov
-          </p>
-        </div>
-
         {/* Mobile layout */}
         <div className="lg:hidden">
-          <div className="mb-2.5 h-6 min-[390px]:mb-3 min-[390px]:h-7 sm:h-8">
-            <p
-              className={`mx-auto max-w-fit whitespace-nowrap rounded-full bg-white/95 px-2.5 py-0.5 text-[10px] font-bold text-coral-dark shadow-soft transition-all duration-700 min-[390px]:px-3 min-[390px]:py-1 min-[390px]:text-xs sm:px-4 sm:text-sm ${announcementVisible ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"}`}
-              aria-hidden={!announcementVisible}
-            >
-              🐾 Prijímame nových škôlkarov
-            </p>
-          </div>
-
-          <p className="mx-auto max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-coral-dark shadow-soft min-[390px]:text-xs sm:text-sm">
+          <p className="mx-auto mt-1 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-coral-dark shadow-soft min-[390px]:mt-2 min-[390px]:text-xs sm:text-sm">
             Denná starostlivosť o stredných a veľkých psíkov
           </p>
 
