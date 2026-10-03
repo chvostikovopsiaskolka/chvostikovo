@@ -47,11 +47,7 @@ const GALLERY_EN = [
   "Our pack",
   "Rest during the day",
   "80 m² outdoor run",
-  "A well-earned break",
   "Secure outdoor run",
-  "Resting on the sofa",
-  "Bella, Stella and Bebe",
-  "Dante and Ceresia",
 ];
 
 export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
