@@ -68,7 +68,7 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
   }
 
   return (
-    <section id={isEnglish ? "spaces" : "priestory"} className="scroll-mt-24 pt-8 pb-14 sm:pt-14 sm:pb-20">
+    <section id={isEnglish ? "spaces" : "priestory"} className="scroll-mt-24 overflow-x-clip pt-8 pb-14 sm:pt-14 sm:pb-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -96,17 +96,17 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
           </div>
         </div>
 
-        <div className="relative mt-8">
+        <div className="relative left-1/2 mt-8 w-screen -translate-x-1/2">
           <div
             ref={track}
-            className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex w-screen snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {GALLERY.map((item, i) => (
               <button
                 key={item.src}
                 type="button"
                 onClick={() => setActive(i)}
-                className="group relative h-64 w-[78%] shrink-0 snap-start overflow-hidden rounded-4xl shadow-card sm:h-80 sm:w-[46%] lg:w-[31%]"
+                className="group relative h-64 w-[82vw] shrink-0 snap-start overflow-hidden rounded-4xl shadow-card sm:h-80 sm:w-[46vw] lg:w-[31vw]"
               >
                 <img
                   src={item.src}
