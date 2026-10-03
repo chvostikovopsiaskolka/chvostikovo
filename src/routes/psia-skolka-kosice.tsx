@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   ArrowDown,
   Car,
@@ -14,6 +15,7 @@ import {
 import logo from "@/assets/logo.png";
 import heroDogs from "@/assets/hero-dogs.jpg";
 import { ShortForm } from "@/components/site/Forms";
+import { FormDialog } from "@/components/site/FormDialog";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews, ReviewReasons, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
@@ -85,12 +87,21 @@ export const Route = createFileRoute("/psia-skolka-kosice")({
   component: LeadLandingPage,
 });
 
-function scrollToForm(source: string) {
-  trackMarketingInteraction("inquiry_cta", source);
-  document.getElementById("lead-form")?.scrollIntoView({ behavior: "smooth", block: "center" });
+function scrollToBenefits(source: string) {
+  trackMarketingInteraction("explore_daycare", source);
+  document.getElementById("lead-benefits")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function LeadLandingPage() {
+  const [leadModalOpen, setLeadModalOpen] = useState(false);
+  const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
+
+  function openLeadModal(source: string) {
+    trackMarketingInteraction("inquiry_cta", source);
+    setLeadModalSource(source);
+    setLeadModalOpen(true);
+  }
+
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
       <header className="fixed inset-x-0 top-0 z-40 border-b border-forest/10 bg-cream/95 backdrop-blur">
@@ -102,17 +113,17 @@ function LeadLandingPage() {
           <div className="flex items-center gap-2">
             <a
               href={`tel:${PHONE}`}
-              className="hidden items-center gap-2 rounded-full px-3 py-2 font-display text-sm font-semibold text-forest transition hover:bg-secondary sm:inline-flex"
+              className="btn-coral hidden items-center gap-2 px-5 py-2 text-sm sm:inline-flex"
             >
-              <Phone className="size-4 text-coral" />
-              {PHONE_PRETTY}
+              <Phone className="size-4" />
+              Zavolajte nám
             </a>
             <button
               type="button"
-              onClick={() => scrollToForm("lead_landing_header")}
-              className="btn-coral px-4 py-2 text-sm sm:px-5"
+              onClick={() => scrollToBenefits("lead_landing_header_mobile")}
+              className="btn-coral inline-flex px-4 py-2 text-sm sm:hidden"
             >
-              Chcem to pre svojho psíka
+              Zistiť viac
             </button>
           </div>
         </div>
@@ -164,10 +175,10 @@ function LeadLandingPage() {
 
               <button
                 type="button"
-                onClick={() => scrollToForm("lead_landing_hero")}
+                onClick={() => scrollToBenefits("lead_landing_hero")}
                 className="btn-coral mt-6 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3.5 text-[15px] sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
               >
-                Chcem to pre svojho psíka
+                Zistiť viac
                 <ArrowDown className="size-5" />
               </button>
 
@@ -179,7 +190,7 @@ function LeadLandingPage() {
 
             <div
               id="lead-form"
-              className="mx-auto w-full max-w-md scroll-mt-24 rounded-4xl border border-white/60 bg-white/95 p-5 shadow-soft backdrop-blur sm:p-7 lg:mx-0"
+              className="mx-auto hidden w-full max-w-md scroll-mt-24 rounded-4xl border border-white/60 bg-white/95 p-5 shadow-soft backdrop-blur lg:mx-0 lg:block lg:p-7"
             >
               <p className="text-center font-display text-2xl font-bold text-forest">
                 Zistite, či je Chvostíkovo vhodné aj pre vášho psíka
@@ -194,7 +205,7 @@ function LeadLandingPage() {
 
         <InfoTicker />
 
-        <section className="bg-card py-10 sm:py-14">
+        <section id="lead-benefits" className="scroll-mt-28 bg-card py-10 sm:scroll-mt-32 sm:py-14">
           <div className="mx-auto max-w-6xl px-4 text-center">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Prečo Chvostíkovo
@@ -205,11 +216,11 @@ function LeadLandingPage() {
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               {BENEFITS.map(({ icon: Icon, title: benefitTitle, text }) => (
-                <article key={benefitTitle} className="rounded-3xl bg-secondary/55 p-4 text-left ring-1 ring-forest/8 sm:p-5">
+                <article key={benefitTitle} className="flex h-full flex-col rounded-3xl bg-secondary/55 p-4 text-left ring-1 ring-forest/8 sm:p-5">
                   <span className="flex size-10 items-center justify-center rounded-2xl bg-coral text-white">
                     <Icon className="size-5" />
                   </span>
-                  <h3 className="mt-3 font-display text-base font-bold text-forest">{benefitTitle}</h3>
+                  <h3 className="mt-3 font-display text-base font-bold text-forest lg:min-h-[4.5rem]">{benefitTitle}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-forest/70">{text}</p>
                 </article>
               ))}
@@ -217,10 +228,10 @@ function LeadLandingPage() {
 
             <button
               type="button"
-              onClick={() => scrollToForm("lead_landing_benefits")}
+              onClick={() => openLeadModal("lead_landing_benefits")}
               className="btn-coral mt-7 inline-flex min-w-[270px] justify-center px-7 py-3.5 text-[15px] sm:min-w-[330px] sm:text-lg"
             >
-              Zistiť viac pre môjho psíka
+              Chcem to pre svojho psíka
             </button>
           </div>
         </section>
@@ -249,14 +260,14 @@ function LeadLandingPage() {
         </section>
 
         <Reviews />
-        <ReviewReasons />
+        <ReviewReasons
+          ctaLabel="Toto chcem pre môjho psíka"
+          onCtaClick={() => openLeadModal("lead_landing_why_chvostikovo")}
+        />
 
         <section className="bg-card pt-8 text-center sm:pt-12">
           <div className="mx-auto max-w-6xl px-4">
-            <h2 className="section-title text-3xl sm:text-4xl">Takto vyzerá deň našich škôlkarov</h2>
-            <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-forest/70 sm:text-base">
-              Reálne fotky z bežných dní v Chvostíkove. Žiadne fotobanky – naši skutoční škôlkari, kamaráti, pohyb aj oddych.
-            </p>
+            <h2 className="section-title text-3xl sm:text-4xl">Pozrite si zopár fotiek zo škôlky</h2>
           </div>
         </section>
 
@@ -306,7 +317,23 @@ function LeadLandingPage() {
                       <span className="text-xl text-coral transition group-open:rotate-45">+</span>
                     </span>
                   </summary>
-                  <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-forest/75">{item.a}</p>
+                  <div className="mt-4 space-y-3 text-sm leading-relaxed text-forest/75">
+                    {item.q === "Aký je cenník služieb?" ? (
+                      <p>
+                        Viac o cenníku za služby psej škôlky nájdete v sekcii{" "}
+                        <a href="/#cennik" className="font-semibold text-coral underline underline-offset-2">
+                          Cenník
+                        </a>
+                        {" "}na hlavnom webe.
+                      </p>
+                    ) : (
+                      item.a
+                        .split(/\n+/)
+                        .map((paragraph) => paragraph.trim())
+                        .filter(Boolean)
+                        .map((paragraph, index) => <p key={index}>{paragraph}</p>)
+                    )}
+                  </div>
                 </details>
               ))}
             </div>
@@ -332,6 +359,18 @@ function LeadLandingPage() {
       </main>
 
       <Footer />
+
+      <FormDialog
+        open={leadModalOpen}
+        onOpenChange={setLeadModalOpen}
+        title="Zistite, či je Chvostíkovo vhodné aj pre vášho psíka"
+        subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám späť a radi s vami preberieme viac informácií."
+      >
+        <ShortForm
+          trackingSource={leadModalSource}
+          onSent={() => setTimeout(() => setLeadModalOpen(false), 2200)}
+        />
+      </FormDialog>
     </div>
   );
 }
