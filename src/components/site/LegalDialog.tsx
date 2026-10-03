@@ -66,9 +66,12 @@ function CookiesContent({ language }: { language: Language }) {
           <li><strong>Marketing cookies:</strong> are used to measure advertising performance and marketing conversions. We use them only with your consent.</li>
         </ul>
         <p>
-          <strong>Third-party services:</strong> we use services including Google Analytics and Meta
-          Pixel to analyse website traffic and measure advertising performance. These services are
-          activated only after the relevant consent has been given.
+          <strong>Services used on this website:</strong> necessary consent storage by Chvostíkovo;
+          Google Maps as an optional functional service; Google Analytics 4 and Google Tag Manager
+          for analytics; and Meta Pixel together with Meta Conversions API for marketing
+          measurement. Optional services are activated only after the relevant consent has been
+          given. Detailed purpose, processed data and retention information is available directly
+          in Cookie settings.
         </p>
 
         <H2>3. Consent and cookie settings</H2>
@@ -136,10 +139,11 @@ function CookiesContent({ language }: { language: Language }) {
         </li>
       </ul>
       <p>
-        <strong>Služby tretích strán:</strong> Na našej webovej stránke využívame služby tretích
-        strán, najmä Google Analytics a Meta Pixel, ktoré používame na analýzu návštevnosti webu a
-        meranie účinnosti reklamných kampaní. Tieto služby sa aktivujú až po udelení príslušného
-        súhlasu používateľa.
+        <strong>Služby používané na webe:</strong> nevyhnutné uloženie cookie voľby Chvostíkovo;
+        Google Maps ako voliteľná funkčná služba; Google Analytics 4 a Google Tag Manager pre
+        analytiku; Meta Pixel spolu s Meta Conversions API pre marketingové meranie. Voliteľné
+        služby sa aktivujú až po udelení príslušného súhlasu. Podrobný účel, spracúvané údaje a
+        informácie o uchovávaní nájdete priamo v Nastaveniach cookies.
       </p>
 
       <H2>3. Súhlas a nastavenie cookies</H2>
