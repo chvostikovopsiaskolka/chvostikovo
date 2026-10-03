@@ -96,10 +96,10 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
           </div>
         </div>
 
-        <div className="relative left-1/2 mt-8 w-screen -translate-x-1/2">
+        <div className="relative left-1/2 mt-8 w-[calc(100vw-24px)] -translate-x-1/2 sm:w-[calc(100vw-48px)]">
           <div
             ref={track}
-            className="flex w-screen snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex w-full snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {GALLERY.map((item, i) => (
               <button
