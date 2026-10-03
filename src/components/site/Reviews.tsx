@@ -147,7 +147,13 @@ const REVIEW_REASONS = [
   },
 ];
 
-export function ReviewReasons() {
+export function ReviewReasons({
+  ctaLabel = "Pozrite si, ako to u nás vyzerá",
+  onCtaClick,
+}: {
+  ctaLabel?: string;
+  onCtaClick?: () => void;
+} = {}) {
   return (
     <section id="preco-chvostikovo" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0">
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-8 left-[6%] size-9 -rotate-12 text-cream/10 sm:size-12" />
@@ -180,6 +186,10 @@ export function ReviewReasons() {
           <button
             type="button"
             onClick={() => {
+              if (onCtaClick) {
+                onCtaClick();
+                return;
+              }
               trackMarketingInteraction("explore_daycare", "why_chvostikovo");
               document.getElementById("priestory")?.scrollIntoView({
                 behavior: "smooth",
@@ -188,7 +198,7 @@ export function ReviewReasons() {
             }}
             className="btn-coral inline-flex w-auto max-w-[340px] items-center justify-center whitespace-nowrap px-6 py-3.5 text-center text-[15px] leading-none sm:min-w-[360px] sm:max-w-none sm:px-10 sm:py-4 sm:text-lg"
           >
-            Pozrite si, ako to u nás vyzerá
+            {ctaLabel}
           </button>
         </div>
 
