@@ -1,3 +1,5 @@
+import { hasAnalyticsConsent, hasMarketingConsent } from "./consent";
+
 type Gtag = (...args: unknown[]) => void;
 
 declare global {
@@ -15,7 +17,7 @@ function pagePath() {
 }
 
 function pushAnalyticsEvent(eventName: string, params: EventParams) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !hasAnalyticsConsent()) return;
 
   window.gtag?.("event", eventName, params);
 
@@ -28,7 +30,7 @@ function pushAnalyticsEvent(eventName: string, params: EventParams) {
 }
 
 function trackMetaStandard(eventName: string, params: EventParams, eventId?: string) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !hasMarketingConsent()) return;
 
   const send = (attempt = 0) => {
     const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
@@ -56,7 +58,7 @@ function trackMetaStandard(eventName: string, params: EventParams, eventId?: str
 }
 
 function trackMetaCustom(eventName: string, params: EventParams) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !hasMarketingConsent()) return;
   const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
     ((...args: unknown[]) => void) | undefined;
   fbq?.("trackCustom", eventName, params);
