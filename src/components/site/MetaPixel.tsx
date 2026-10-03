@@ -1,38 +1,16 @@
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { trackMarketingInteraction } from "@/lib/analytics";
+import { clearMarketingCookies, hasMarketingConsent } from "@/lib/consent";
 
-const STORAGE_KEY = "chvostikovo-cookies";
 const PIXEL_ID = "1592305991362085";
-
-type Consent = {
-  necessary: true;
-  analytics: boolean;
-  marketing: boolean;
-};
-
-function hasMarketingConsent(): boolean {
-  if (typeof window === "undefined") return false;
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) return false;
-  try {
-    const consent = JSON.parse(raw) as Consent;
-    return consent.marketing === true;
-  } catch {
-    return false;
-  }
-}
 
 function loadPixelBaseCode(): boolean {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
 
   const w = window as unknown as Record<string, unknown>;
-  if (w["fbq"] && document.getElementById("facebook-pixel-script")) {
-    return true;
-  }
-
-  const existing = document.getElementById("facebook-pixel-script");
-  if (existing) return true;
+  if (w["fbq"] && document.getElementById("facebook-pixel-script")) return true;
+  if (document.getElementById("facebook-pixel-script")) return true;
 
   const script = document.createElement("script");
   script.id = "facebook-pixel-script";
@@ -51,27 +29,22 @@ function loadPixelBaseCode(): boolean {
   return true;
 }
 
-function initPixel() {
+function initPixel(onReady?: () => void) {
   if (typeof window === "undefined") return;
-
   loadPixelBaseCode();
 
   const w = window as unknown as Record<string, unknown>;
-  // fbq might not be ready immediately after script injection, so retry briefly
   const tryInit = (attempts = 0) => {
     const fbq = w["fbq"] as ((...args: unknown[]) => void) | undefined;
     if (fbq) {
+      fbq("consent", "grant");
       fbq("init", PIXEL_ID);
-      // We track meaningful actions explicitly in our own code.
-      // Disable Meta's automatic/codeless button events (e.g. SubscribedButtonClick)
-      // so they do not pollute Events Manager or duplicate our Contact/CTA events.
       fbq("set", "autoConfig", false, PIXEL_ID);
       fbq("track", "PageView");
+      onReady?.();
       return;
     }
-    if (attempts < 10) {
-      setTimeout(() => tryInit(attempts + 1), 100);
-    }
+    if (attempts < 10) setTimeout(() => tryInit(attempts + 1), 100);
   };
   tryInit();
 }
@@ -89,6 +62,8 @@ function clickSource(anchor: HTMLAnchorElement) {
 }
 
 function handleTrackedClick(event: MouseEvent) {
+  if (!hasMarketingConsent()) return;
+
   const target = event.target;
   if (!(target instanceof Element)) return;
 
@@ -102,22 +77,18 @@ function handleTrackedClick(event: MouseEvent) {
     trackMarketingInteraction("inquiry_cta", clickSource(anchor));
     return;
   }
-
   if (explicitEvent === "view_pricing") {
     trackMarketingInteraction("view_pricing", clickSource(anchor));
     return;
   }
-
   if (href.startsWith("tel:")) {
     trackMarketingInteraction("phone_click", clickSource(anchor));
     return;
   }
-
   if (href === "#informujte-sa" || href === "/#informujte-sa") {
     trackMarketingInteraction("inquiry_cta", clickSource(anchor));
     return;
   }
-
   if ((href === "#cennik" || href === "/#cennik") && anchor.closest("header")) {
     trackMarketingInteraction("view_pricing", "header_menu");
   }
@@ -129,30 +100,32 @@ export function MetaPixel() {
   const routeHref = useRouterState({ select: (state) => state.location.href });
 
   useEffect(() => {
-    function tryInit() {
-      if (hasMarketingConsent() && !initializedRef.current) {
-        initPixel();
-        initializedRef.current = true;
+    function applyConsent() {
+      const allowed = hasMarketingConsent();
+      const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
+        ((...args: unknown[]) => void) | undefined;
+
+      if (allowed) {
+        if (!initializedRef.current) {
+          initPixel(() => {
+            initializedRef.current = true;
+          });
+        } else {
+          fbq?.("consent", "grant");
+          fbq?.("track", "PageView");
+        }
+      } else {
+        fbq?.("consent", "revoke");
+        clearMarketingCookies();
       }
     }
 
-    tryInit();
-
-    function handleStorage(event: StorageEvent) {
-      if (event.key === STORAGE_KEY) tryInit();
-    }
-
-    function handleConsentChanged() {
-      tryInit();
-    }
-
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener("chvostikovo-consent-changed", handleConsentChanged);
+    applyConsent();
+    window.addEventListener("chvostikovo-consent-changed", applyConsent);
     document.addEventListener("click", handleTrackedClick);
 
     return () => {
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("chvostikovo-consent-changed", handleConsentChanged);
+      window.removeEventListener("chvostikovo-consent-changed", applyConsent);
       document.removeEventListener("click", handleTrackedClick);
     };
   }, []);
