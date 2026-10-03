@@ -1,46 +1,22 @@
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
+import { clearAnalyticsCookies, hasAnalyticsConsent } from "@/lib/consent";
 
-const STORAGE_KEY = "chvostikovo-cookies";
 const GA_ID = "G-0VM48RXZV9";
-
-type Consent = {
-  necessary: true;
-  analytics: boolean;
-  marketing: boolean;
-};
 
 type GtagWindow = Window & {
   dataLayer?: IArguments[] | unknown[];
   gtag?: (...args: unknown[]) => void;
   _chvGaLoaded?: boolean;
+  [key: `ga-disable-${string}`]: boolean | IArguments[] | unknown[] | ((...args: unknown[]) => void) | undefined;
 };
 
-function getConsent(): Consent | null {
-  if (typeof window === "undefined") return null;
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as Consent;
-  } catch {
-    return null;
-  }
-}
-
-function hasAnalyticsConsent(): boolean {
-  return getConsent()?.analytics === true;
-}
-
-/**
- * gtag MUST push the native `arguments` object (not an array) – gtag.js only
- * interprets arguments-shaped entries as commands.
- */
 function ensureGtag(): (...args: unknown[]) => void {
   const w = window as GtagWindow;
   w.dataLayer = w.dataLayer || [];
   if (!w.gtag) {
-    // eslint-disable-next-line prefer-rest-params
     w.gtag = function gtag() {
+      // eslint-disable-next-line prefer-rest-params
       (w.dataLayer as unknown[]).push(arguments);
     } as (...args: unknown[]) => void;
   }
@@ -48,9 +24,10 @@ function ensureGtag(): (...args: unknown[]) => void {
 }
 
 function sendPageView() {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !hasAnalyticsConsent()) return;
   const w = window as GtagWindow;
   if (!w._chvGaLoaded || !w.gtag) return;
+
   w.gtag("event", "page_view", {
     page_location: window.location.href,
     page_path: window.location.pathname + window.location.search,
@@ -62,25 +39,34 @@ function sendPageView() {
 function loadGA() {
   if (typeof window === "undefined") return;
   const w = window as GtagWindow;
-  if (w._chvGaLoaded) return;
+  w[`ga-disable-${GA_ID}`] = false;
 
   const gtag = ensureGtag();
 
-  if (!document.getElementById("ga4-script")) {
-    const script = document.createElement("script");
-    script.id = "ga4-script";
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
-    document.head.appendChild(script);
+  if (!w._chvGaLoaded) {
+    if (!document.getElementById("ga4-script")) {
+      const script = document.createElement("script");
+      script.id = "ga4-script";
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+      document.head.appendChild(script);
+    }
+
+    gtag("js", new Date());
+    gtag("config", GA_ID, { send_page_view: false, anonymize_ip: true });
+    w._chvGaLoaded = true;
   }
 
-  gtag("js", new Date());
   gtag("consent", "update", { analytics_storage: "granted" });
-  // page_view is sent manually so route changes are tracked exactly once
-  gtag("config", GA_ID, { send_page_view: false, anonymize_ip: true });
-
-  w._chvGaLoaded = true;
   sendPageView();
+}
+
+function revokeGA() {
+  if (typeof window === "undefined") return;
+  const w = window as GtagWindow;
+  w[`ga-disable-${GA_ID}`] = true;
+  w.gtag?.("consent", "update", { analytics_storage: "denied" });
+  clearAnalyticsCookies();
 }
 
 export function GoogleAnalytics() {
@@ -88,35 +74,22 @@ export function GoogleAnalytics() {
   const firstRun = useRef(true);
 
   useEffect(() => {
-    function tryLoad() {
+    function applyConsent() {
       if (hasAnalyticsConsent()) loadGA();
+      else revokeGA();
     }
 
-    tryLoad();
-
-    function handleStorage(event: StorageEvent) {
-      if (event.key === STORAGE_KEY) tryLoad();
-    }
-
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener("chvostikovo-consent-changed", tryLoad);
-    return () => {
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("chvostikovo-consent-changed", tryLoad);
-    };
+    applyConsent();
+    window.addEventListener("chvostikovo-consent-changed", applyConsent);
+    return () => window.removeEventListener("chvostikovo-consent-changed", applyConsent);
   }, []);
 
-  // Route changes: send an explicit page_view (skips the very first one,
-  // which loadGA already sent).
   useEffect(() => {
     if (firstRun.current) {
       firstRun.current = false;
       return;
     }
-    const w = window as GtagWindow;
-    if (!w._chvGaLoaded) return;
     sendPageView();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   return null;
