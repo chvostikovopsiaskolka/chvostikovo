@@ -20,7 +20,7 @@ import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews, ReviewReasons, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { Footer } from "@/components/site/Contact";
-import { FAQ, PHONE, PHONE_PRETTY, REVIEWS } from "@/content/site";
+import { FAQ, PHONE, REVIEWS } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 
 const BASE_URL = "https://chvostikovo.sk";
