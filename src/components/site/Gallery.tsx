@@ -77,16 +77,16 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
                 : "V Chvostíkove má váš psík k dispozícii vykurované vnútorné miestnosti a bezpečný vonkajší výbeh s rozlohou približne 80 m² na hry, šantenie a oddych."}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 self-start sm:justify-end">
+          <div className="flex flex-nowrap items-center gap-1.5 self-start whitespace-nowrap sm:justify-end sm:gap-2">
             <a
               href={MAP_LINK}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-forest"
+              className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1.5 text-[11px] font-semibold text-forest min-[390px]:px-3 min-[390px]:text-xs sm:gap-2 sm:px-4 sm:py-2 sm:text-sm"
             >
               <MapPin className="size-4" /> Poľská 6, Košice
             </a>
-            <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-forest">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1.5 text-[11px] font-semibold text-forest min-[390px]:px-3 min-[390px]:text-xs sm:gap-2 sm:px-4 sm:py-2 sm:text-sm">
               <Car className="size-4 text-coral" /> {isEnglish ? "Free parking by the daycare" : "Bezplatné parkovanie pri škôlke"}
             </span>
           </div>
