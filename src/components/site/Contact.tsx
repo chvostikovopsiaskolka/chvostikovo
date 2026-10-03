@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MapPin, Mail, Phone, Clock, Instagram, Facebook } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { LongForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { LegalDialog, type LegalDialogType } from "./LegalDialog";
+import { hasFunctionalConsent } from "@/lib/consent";
 
 export function Contact() {
   return (
@@ -78,15 +79,59 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
         </ContactRow>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-4xl shadow-card">
-        <iframe
-          title={isEnglish ? "Map – Chvostíkovo, Poľská 6, Košice" : "Mapa – Chvostíkovo, Poľská 6, Košice"}
-          src="https://www.google.com/maps?q=Po%C4%BEsk%C3%A1%206,%20Ko%C5%A1ice&output=embed"
-          loading="lazy"
-          className="h-72 w-full border-0"
-        />
-      </div>
+      <FunctionalMap language={language} />
     </>
+  );
+}
+
+function FunctionalMap({ language }: { language: "sk" | "en" }) {
+  const [allowed, setAllowed] = useState(false);
+  const isEnglish = language === "en";
+
+  useEffect(() => {
+    function syncConsent() {
+      setAllowed(hasFunctionalConsent());
+    }
+
+    syncConsent();
+    window.addEventListener("chvostikovo-consent-changed", syncConsent);
+    return () => window.removeEventListener("chvostikovo-consent-changed", syncConsent);
+  }, []);
+
+  if (!allowed) {
+    return (
+      <div className="mt-8 flex h-72 flex-col items-center justify-center rounded-4xl bg-secondary/60 px-6 text-center shadow-card">
+        <MapPin className="size-8 text-coral" />
+        <p className="mt-3 font-display text-lg font-bold text-forest">
+          {isEnglish ? "Google Map is disabled" : "Google mapa je vypnutá"}
+        </p>
+        <p className="mt-1 max-w-md text-sm text-forest/70">
+          {isEnglish
+            ? "Allow functional cookies to load the interactive Google map."
+            : "Pre načítanie interaktívnej Google mapy povoľte funkčné cookies."}
+        </p>
+        <button
+          type="button"
+          onClick={() =>
+            window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))
+          }
+          className="btn-coral mt-4"
+        >
+          {isEnglish ? "Open cookie settings" : "Otvoriť nastavenia cookies"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-8 overflow-hidden rounded-4xl shadow-card">
+      <iframe
+        title={isEnglish ? "Map – Chvostíkovo, Poľská 6, Košice" : "Mapa – Chvostíkovo, Poľská 6, Košice"}
+        src="https://www.google.com/maps?q=Po%C4%BEsk%C3%A1%206,%20Ko%C5%A1ice&output=embed"
+        loading="lazy"
+        className="h-72 w-full border-0"
+      />
+    </div>
   );
 }
 
