@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { DAYCARE_GALLERY_EXTRAS } from "@/content/site";
 import photo01 from "@/assets/daycare-carousel-01.avif";
 import photo02 from "@/assets/daycare-carousel-02.avif";
 import photo03 from "@/assets/daycare-carousel-03.avif";
@@ -24,28 +25,29 @@ import photo21 from "@/assets/daycare-carousel-21.avif";
 import photo22 from "@/assets/daycare-carousel-22.avif";
 
 const PHOTOS = [
-  photo01,
-  photo02,
-  photo03,
-  photo04,
-  photo05,
-  photo06,
-  photo07,
-  photo08,
-  photo09,
-  photo10,
-  photo11,
-  photo12,
-  photo13,
-  photo14,
-  photo15,
-  photo16,
-  photo17,
-  photo18,
-  photo19,
-  photo20,
-  photo21,
-  photo22,
+  { src: photo01, alt: "Psí škôlkari v Chvostíkove – fotografia 1" },
+  { src: photo02, alt: "Psí škôlkari v Chvostíkove – fotografia 2" },
+  { src: photo03, alt: "Psí škôlkari v Chvostíkove – fotografia 3" },
+  { src: photo04, alt: "Psí škôlkari v Chvostíkove – fotografia 4" },
+  { src: photo05, alt: "Psí škôlkari v Chvostíkove – fotografia 5" },
+  { src: photo06, alt: "Psí škôlkari v Chvostíkove – fotografia 6" },
+  { src: photo07, alt: "Psí škôlkari v Chvostíkove – fotografia 7" },
+  { src: photo08, alt: "Psí škôlkari v Chvostíkove – fotografia 8" },
+  { src: photo09, alt: "Psí škôlkari v Chvostíkove – fotografia 9" },
+  { src: photo10, alt: "Psí škôlkari v Chvostíkove – fotografia 10" },
+  { src: photo11, alt: "Psí škôlkari v Chvostíkove – fotografia 11" },
+  { src: photo12, alt: "Psí škôlkari v Chvostíkove – fotografia 12" },
+  { src: photo13, alt: "Psí škôlkari v Chvostíkove – fotografia 13" },
+  { src: photo14, alt: "Psí škôlkari v Chvostíkove – fotografia 14" },
+  { src: photo15, alt: "Psí škôlkari v Chvostíkove – fotografia 15" },
+  { src: photo16, alt: "Psí škôlkari v Chvostíkove – fotografia 16" },
+  { src: photo17, alt: "Psí škôlkari v Chvostíkove – fotografia 17" },
+  { src: photo18, alt: "Psí škôlkari v Chvostíkove – fotografia 18" },
+  { src: photo19, alt: "Psí škôlkari v Chvostíkove – fotografia 19" },
+  { src: photo20, alt: "Psí škôlkari v Chvostíkove – fotografia 20" },
+  { src: photo21, alt: "Psí škôlkari v Chvostíkove – fotografia 21" },
+  { src: photo22, alt: "Psí škôlkari v Chvostíkove – fotografia 22" },
+  ...DAYCARE_GALLERY_EXTRAS,
 ];
 
 const RESUME_DELAY = 2800;
@@ -202,9 +204,9 @@ export function DaycarePhotoCarousel() {
               className="flex shrink-0 gap-4 pr-4 sm:gap-5 sm:pr-5"
               aria-hidden={setIndex === 1}
             >
-              {PHOTOS.map((src, index) => (
+              {PHOTOS.map((photo, index) => (
                 <button
-                  key={`${setIndex}-${src}`}
+                  key={`${setIndex}-${photo.src}`}
                   type="button"
                   tabIndex={setIndex === 1 ? -1 : 0}
                   onClick={() => openPhoto(index)}
@@ -212,8 +214,8 @@ export function DaycarePhotoCarousel() {
                   aria-label={`Otvoriť fotografiu ${index + 1}`}
                 >
                   <img
-                    src={src}
-                    alt={setIndex === 0 ? `Psí škôlkari v Chvostíkove – fotografia ${index + 1}` : ""}
+                    src={photo.src}
+                    alt={setIndex === 0 ? photo.alt : ""}
                     loading="lazy"
                     decoding="async"
                     draggable={false}
@@ -259,8 +261,8 @@ export function DaycarePhotoCarousel() {
           </button>
 
           <img
-            src={PHOTOS[active]}
-            alt={`Psí škôlkari v Chvostíkove – fotografia ${active + 1}`}
+            src={PHOTOS[active]!.src}
+            alt={PHOTOS[active]!.alt}
             decoding="async"
             className="max-h-[88vh] max-w-[92vw] rounded-3xl object-contain shadow-soft sm:max-w-[86vw]"
             onClick={(event) => event.stopPropagation()}
