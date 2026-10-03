@@ -120,7 +120,7 @@ function ReviewCarousel() {
       onTouchCancel={pauseForReading}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="mt-3 flex w-full max-w-full items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+      className="relative left-1/2 mt-3 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
       {[...REVIEWS, ...REVIEWS].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
@@ -176,7 +176,7 @@ export function ReviewReasons() {
           ))}
         </div>
 
-        <div className="mt-7 flex justify-center">
+        <div className="relative z-20 mt-7 flex justify-center">
           <button
             type="button"
             onClick={() => {
@@ -192,7 +192,7 @@ export function ReviewReasons() {
           </button>
         </div>
 
-        <div className="mx-auto -mt-1 h-[170px] w-full max-w-[820px] overflow-hidden sm:mt-2 sm:h-[225px]" aria-hidden="true">
+        <div className="mx-auto -mt-1 h-[138px] w-full max-w-[820px] overflow-hidden sm:mt-2 sm:h-[225px]" aria-hidden="true">
           <img
             src={schoolmatesLineup}
             alt=""
