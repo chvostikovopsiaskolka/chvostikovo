@@ -145,13 +145,9 @@ function LeadLandingPage() {
             <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-cream to-transparent" />
           </div>
 
-          <div className="relative mx-auto grid min-h-[660px] max-w-6xl items-center gap-8 px-4 py-10 sm:min-h-[650px] sm:py-14 lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-16">
+          <div className="relative mx-auto grid min-h-[600px] max-w-6xl items-center gap-8 px-4 py-10 sm:min-h-[620px] sm:py-14 lg:min-h-[620px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-16">
             <div className="max-w-2xl text-center lg:text-left">
-              <p className="mx-auto inline-flex rounded-full bg-white/95 px-4 py-1.5 font-display text-sm font-bold text-coral-dark shadow-soft lg:mx-0">
-                🐾 Prijímame nových škôlkarov
-              </p>
-
-              <h1 className="mt-4 text-[38px] leading-[1.02] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
+              <h1 className="text-[38px] leading-[1.02] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
                 Kým ste v práci,
                 <span className="block text-coral-dark">váš psík môže mať aktívny deň</span>
                 s kamarátmi
@@ -161,13 +157,13 @@ function LeadLandingPage() {
                 Pohyb, hry, socializácia, oddych a celodenný dohľad v psej škôlke Chvostíkovo v Košiciach.
               </p>
 
-              <div className="mt-5 flex flex-wrap justify-center gap-2 lg:justify-start">
+              <div className="mx-auto mt-5 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
                 {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-forest shadow-card sm:text-sm"
+                    className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-white/95 px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-forest shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px] lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-xs"
                   >
-                    <CheckCircle2 className="size-4 text-coral" />
+                    <CheckCircle2 className="size-3 shrink-0 text-coral min-[390px]:size-3.5 lg:size-4" />
                     {item}
                   </span>
                 ))}
@@ -240,7 +236,7 @@ function LeadLandingPage() {
           <div className="mx-auto max-w-6xl px-4 text-center">
             <h2 className="section-title text-3xl sm:text-4xl">Majitelia nám zverujú to najcennejšie</h2>
             <p className="mt-2 text-sm font-semibold text-forest/70 sm:text-base">
-              ⭐ 5.0 z 5 na Google · 43 hodnotení · viac ako 150 spokojných psíkov
+              ⭐ 5.0 z 5 na Google · 43 hodnotení
             </p>
 
             <div className="mt-6 grid gap-4 md:grid-cols-3">
