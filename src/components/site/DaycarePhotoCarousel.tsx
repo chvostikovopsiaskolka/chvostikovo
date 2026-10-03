@@ -164,8 +164,8 @@ export function DaycarePhotoCarousel() {
   };
 
   return (
-    <section className="bg-card pt-6 pb-8 sm:pt-8 sm:pb-12" aria-label="Fotogaléria zo psiej škôlky Chvostíkovo">
-      <div className="mx-auto max-w-6xl px-4">
+    <section className="overflow-x-clip bg-card pt-6 pb-8 sm:pt-8 sm:pb-12" aria-label="Fotogaléria zo psiej škôlky Chvostíkovo">
+      <div className="w-full">
         <div
           ref={track}
           onMouseEnter={pause}
@@ -193,7 +193,7 @@ export function DaycarePhotoCarousel() {
           onBlurCapture={() => {
             if (active === null) resumeAfterPause();
           }}
-          className="flex w-full max-w-full overflow-x-auto overscroll-x-contain [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] [&::-webkit-scrollbar]:hidden"
+          className="flex w-screen max-w-none overflow-x-auto overscroll-x-contain [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] [&::-webkit-scrollbar]:hidden"
         >
           {[0, 1].map((setIndex) => (
             <div
