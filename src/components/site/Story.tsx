@@ -98,7 +98,7 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
             }}
             className="btn-coral inline-flex min-w-[250px] items-center justify-center px-7 py-3.5 text-[15px] sm:min-w-[330px] sm:px-10 sm:py-4 sm:text-lg"
           >
-            {isEnglish ? "Enquire about daycare" : "Chcem sa informovať o škôlke"}
+            {isEnglish ? "This is what I want for my dog" : "Toto chcem pre svojho psíka"}
           </button>
         </div>
       </div>
