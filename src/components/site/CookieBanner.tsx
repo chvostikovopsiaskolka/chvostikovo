@@ -345,7 +345,7 @@ export function CookieBanner() {
             onClick={rejectAll}
             className="rounded-full border border-forest/25 bg-card px-5 py-3 font-display text-sm font-semibold text-forest transition hover:bg-secondary sm:text-base"
           >
-            {isEnglish ? "Reject all" : "Odmietnuť všetky"}
+            {isEnglish ? "Reject" : "Odmietnuť"}
           </button>
 
           <button
@@ -354,11 +354,11 @@ export function CookieBanner() {
               if (showDetails) savePreferences();
               else setShowDetails(true);
             }}
-            className="rounded-full border border-forest/25 bg-secondary px-5 py-3 font-display text-sm font-semibold text-forest transition hover:bg-coral-soft sm:text-base"
+            className="rounded-full border border-forest/25 bg-secondary px-4 py-3 font-display text-[13px] font-semibold text-forest whitespace-nowrap transition hover:bg-coral-soft sm:text-sm"
           >
             {showDetails
               ? isEnglish ? "Save settings" : "Uložiť nastavenia"
-              : isEnglish ? "Details / settings" : "Detaily / nastavenia"}
+              : isEnglish ? "Cookie settings" : "Nastavenia cookies"}
           </button>
         </div>
 
