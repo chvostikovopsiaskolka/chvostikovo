@@ -1,28 +1,5 @@
 import { buildDbPayload, inquirySchema, SUPABASE_ENDPOINT, type InquiryInput } from "./inquiry";
-
-const COOKIE_CONSENT_KEY = "chvostikovo-cookies";
-
-function getCookie(name: string) {
-  if (typeof document === "undefined") return "";
-  const prefix = `${name}=`;
-  const item = document.cookie
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(prefix));
-  return item ? decodeURIComponent(item.slice(prefix.length)) : "";
-}
-
-function hasMarketingConsent() {
-  if (typeof window === "undefined") return false;
-  try {
-    const raw = window.localStorage.getItem(COOKIE_CONSENT_KEY);
-    if (!raw) return false;
-    const consent = JSON.parse(raw) as { marketing?: boolean };
-    return consent.marketing === true;
-  } catch {
-    return false;
-  }
-}
+import { hasMarketingConsent } from "./consent";
 
 function buildFbcFromCurrentUrl() {
   if (typeof window === "undefined") return "";
