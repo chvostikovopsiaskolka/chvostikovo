@@ -4,6 +4,8 @@ import { trackMarketingInteraction } from "@/lib/analytics";
 import { clearMarketingCookies, hasMarketingConsent } from "@/lib/consent";
 
 const PIXEL_ID = "1592305991362085";
+const META_PAGEVIEW_ENDPOINT =
+  "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/meta-pageview";
 
 function loadPixelBaseCode(): boolean {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
@@ -29,6 +31,59 @@ function loadPixelBaseCode(): boolean {
   return true;
 }
 
+function getCookie(name: string) {
+  if (typeof document === "undefined") return "";
+  const prefix = `${name}=`;
+  const match = document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(prefix));
+  return match ? decodeURIComponent(match.slice(prefix.length)) : "";
+}
+
+function buildFbcFromCurrentUrl() {
+  if (typeof window === "undefined") return "";
+  try {
+    const fbclid = new URL(window.location.href).searchParams.get("fbclid");
+    if (!fbclid) return "";
+    return `fb.1.${Date.now()}.${fbclid}`;
+  } catch {
+    return "";
+  }
+}
+
+function createPageViewEventId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return `pv-${crypto.randomUUID()}`;
+  }
+  return `pv-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function sendServerPageView(eventId: string) {
+  if (typeof window === "undefined" || !hasMarketingConsent()) return;
+
+  const payload = {
+    marketing_consent: true,
+    event_id: eventId,
+    event_source_url: window.location.href,
+    fbp: getCookie("_fbp"),
+    fbc: getCookie("_fbc") || buildFbcFromCurrentUrl(),
+  };
+
+  void fetch(META_PAGEVIEW_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  }).catch(() => undefined);
+}
+
+function trackPageView(fbq: (...args: unknown[]) => void) {
+  const eventId = createPageViewEventId();
+  fbq("track", "PageView", {}, { eventID: eventId });
+  sendServerPageView(eventId);
+}
+
 function initPixel(onReady?: () => void) {
   if (typeof window === "undefined") return;
   loadPixelBaseCode();
@@ -40,7 +95,7 @@ function initPixel(onReady?: () => void) {
       fbq("consent", "grant");
       fbq("init", PIXEL_ID);
       fbq("set", "autoConfig", false, PIXEL_ID);
-      fbq("track", "PageView");
+      trackPageView(fbq);
       onReady?.();
       return;
     }
@@ -112,7 +167,7 @@ export function MetaPixel() {
           });
         } else {
           fbq?.("consent", "grant");
-          fbq?.("track", "PageView");
+          if (fbq) trackPageView(fbq);
         }
       } else {
         fbq?.("consent", "revoke");
@@ -139,7 +194,7 @@ export function MetaPixel() {
 
     const fbq = (window as unknown as Record<string, unknown>)["fbq"] as
       ((...args: unknown[]) => void) | undefined;
-    fbq?.("track", "PageView");
+    if (fbq) trackPageView(fbq);
   }, [routeHref]);
 
   return null;
