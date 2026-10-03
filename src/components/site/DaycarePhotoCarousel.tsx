@@ -1,18 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { DAYCARE_GALLERY_EXTRAS } from "@/content/site";
-import photo01 from "@/assets/daycare-carousel-01.avif";
-import photo02 from "@/assets/daycare-carousel-02.avif";
-import photo03 from "@/assets/daycare-carousel-03.avif";
-import photo04 from "@/assets/daycare-carousel-04.avif";
-import photo05 from "@/assets/daycare-carousel-05.avif";
-import photo06 from "@/assets/daycare-carousel-06.avif";
-import photo07 from "@/assets/daycare-carousel-07.avif";
-import photo08 from "@/assets/daycare-carousel-08.avif";
-import photo09 from "@/assets/daycare-carousel-09.avif";
-import photo10 from "@/assets/daycare-carousel-10.avif";
-import photo11 from "@/assets/daycare-carousel-11.avif";
-import photo12 from "@/assets/daycare-carousel-12.avif";
 import photo13 from "@/assets/daycare-carousel-13.avif";
 import photo14 from "@/assets/daycare-carousel-14.avif";
 import photo15 from "@/assets/daycare-carousel-15.avif";
@@ -27,28 +15,16 @@ import photo23 from "@/assets/daycare-carousel-23.jpg";
 import photo24 from "@/assets/daycare-carousel-24.jpg";
 
 const PHOTOS = [
-  { src: photo01, alt: "Psí škôlkari v Chvostíkove – fotografia 1" },
-  { src: photo02, alt: "Psí škôlkari v Chvostíkove – fotografia 2" },
-  { src: photo03, alt: "Psí škôlkari v Chvostíkove – fotografia 3" },
-  { src: photo04, alt: "Psí škôlkari v Chvostíkove – fotografia 4" },
-  { src: photo05, alt: "Psí škôlkari v Chvostíkove – fotografia 5" },
-  { src: photo06, alt: "Psí škôlkari v Chvostíkove – fotografia 6" },
-  { src: photo07, alt: "Psí škôlkari v Chvostíkove – fotografia 7" },
-  { src: photo08, alt: "Psí škôlkari v Chvostíkove – fotografia 8" },
-  { src: photo09, alt: "Psí škôlkari v Chvostíkove – fotografia 9" },
-  { src: photo10, alt: "Psí škôlkari v Chvostíkove – fotografia 10" },
-  { src: photo11, alt: "Psí škôlkari v Chvostíkove – fotografia 11" },
-  { src: photo12, alt: "Psí škôlkari v Chvostíkove – fotografia 12" },
-  { src: photo13, alt: "Psí škôlkari v Chvostíkove – fotografia 13" },
-  { src: photo14, alt: "Psí škôlkari v Chvostíkove – fotografia 14" },
-  { src: photo15, alt: "Psí škôlkari v Chvostíkove – fotografia 15" },
-  { src: photo16, alt: "Psí škôlkari v Chvostíkove – fotografia 16" },
-  { src: photo17, alt: "Psí škôlkari v Chvostíkove – fotografia 17" },
-  { src: photo18, alt: "Psí škôlkari v Chvostíkove – fotografia 18" },
-  { src: photo19, alt: "Psí škôlkari v Chvostíkove – fotografia 19" },
-  { src: photo20, alt: "Psí škôlkari v Chvostíkove – fotografia 20" },
-  { src: photo21, alt: "Psí škôlkari v Chvostíkove – fotografia 21" },
-  { src: photo22, alt: "Psí škôlkari v Chvostíkove – fotografia 22" },
+  { src: photo13, alt: "Psí škôlkari v Chvostíkove – fotografia 1" },
+  { src: photo14, alt: "Psí škôlkari v Chvostíkove – fotografia 2" },
+  { src: photo15, alt: "Psí škôlkari v Chvostíkove – fotografia 3" },
+  { src: photo16, alt: "Psí škôlkari v Chvostíkove – fotografia 4" },
+  { src: photo17, alt: "Psí škôlkari v Chvostíkove – fotografia 5" },
+  { src: photo18, alt: "Psí škôlkari v Chvostíkove – fotografia 6" },
+  { src: photo19, alt: "Psí škôlkari v Chvostíkove – fotografia 7" },
+  { src: photo20, alt: "Psí škôlkari v Chvostíkove – fotografia 8" },
+  { src: photo21, alt: "Psí škôlkari v Chvostíkove – fotografia 9" },
+  { src: photo22, alt: "Psí škôlkari v Chvostíkove – fotografia 10" },
   { src: photo23, alt: "Psí škôlkari oddychujú vo vnútorných priestoroch Chvostíkova" },
   { src: photo24, alt: "Psí škôlkari oddychujú spolu na gauči v Chvostíkove" },
   ...DAYCARE_GALLERY_EXTRAS,
