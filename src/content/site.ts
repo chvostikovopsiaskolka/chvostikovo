@@ -35,6 +35,25 @@ export const SUNFLOWERS_PHOTO = `${M}fdc688_cfe63a54df4e4e26bb4d8f40be5b6bf7~mv2
 const g = (id: string, ext = "png") =>
   `${M}fdc688_${id}~mv2.${ext}/v1/fill/w_900,h_900,al_c,q_85,enc_auto/foto.${ext === "jpeg" ? "jpeg" : "png"}`;
 
+export const DAYCARE_GALLERY_EXTRAS = [
+  {
+    src: g("b6593ef189ca4412b33245449e4a37b3"),
+    alt: "Rocky odpočíva v psej škôlke Chvostíkovo",
+  },
+  {
+    src: g("31234cf8269446f1b61673fcbb080139", "jpeg"),
+    alt: "Iris a Gael oddychujú na gauči v psej škôlke Chvostíkovo",
+  },
+  {
+    src: g("b932db1fd86c444aa1c985dc3ed1ac92"),
+    alt: "Bella, Stella a Bebe v psej škôlke Chvostíkovo",
+  },
+  {
+    src: g("2f4ca3a74b5445668e8de7cba425e0ad"),
+    alt: "Dante a Ceresia v psej škôlke Chvostíkovo",
+  },
+];
+
 export const GALLERY = [
   { src: g("a425c61c8c23451cbac0b8a33dd2a8bc"), alt: "Vnútorné priestory psej škôlky Chvostíkovo v Košiciach", caption: "Vnútorné priestory" },
   { src: g("623a001b7b884ca9b8475276ba28a74b"), alt: "Vonkajší výbeh pre psíkov v psej škôlke Chvostíkovo", caption: "Výbeh pre psíkov" },
@@ -43,11 +62,7 @@ export const GALLERY = [
   { src: g("98ef8646ebfa4ecdaa1a2d6234f42cd3"), alt: "Vnútorné priestory a naša svorka", caption: "Naša svorka" },
   { src: g("905946bdfc024a439515d21869b28341"), alt: "Oddych počas dňa v psej škôlke", caption: "Oddych nesmie chýbať" },
   { src: g("9f0c76ca6f8f4411a0feaf1aae3728e2"), alt: "Výbeh pre psíkov s rozlohou 80 m2", caption: "Výbeh 80 m²" },
-  { src: g("b6593ef189ca4412b33245449e4a37b3"), alt: "Rocky odpočíva v psej škôlke", caption: "Rocky a jeho „mám dosť“" },
   { src: g("0b04e4eb6c3640d39780b89f8a4967cd"), alt: "Škôlka pre psov v Košiciach s vlastným výbehom", caption: "Bezpečný výbeh" },
-  { src: g("31234cf8269446f1b61673fcbb080139", "jpeg"), alt: "Iris a Gael na gauči počas dňa v škôlke", caption: "Oddych na gauči" },
-  { src: g("b932db1fd86c444aa1c985dc3ed1ac92"), alt: "Dievčatá Bella, Stella a Bebe", caption: "Bella, Stella a Bebe" },
-  { src: g("2f4ca3a74b5445668e8de7cba425e0ad"), alt: "Dante a Ceresia - barzoje", caption: "Dante a Ceresia" },
 ];
 
 export const CARE = [
