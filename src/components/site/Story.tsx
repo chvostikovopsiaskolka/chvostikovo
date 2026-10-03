@@ -96,7 +96,7 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
               trackMarketingInteraction("inquiry_cta", isEnglish ? "en_care_cta" : "care_cta");
               setInfoOpen(true);
             }}
-            className="btn-coral"
+            className="btn-coral inline-flex min-w-[250px] items-center justify-center px-7 py-3.5 text-[15px] sm:min-w-[330px] sm:px-10 sm:py-4 sm:text-lg"
           >
             {isEnglish ? "Enquire about daycare" : "Chcem sa informovať o škôlke"}
           </button>
