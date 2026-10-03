@@ -222,6 +222,15 @@ function PrivacyContent({
           <li><strong>Visit data:</strong> IP address, website activity, cookies and browser/device information, according to your cookie settings.</li>
         </ul>
 
+        <p>
+          <strong>Cookieless landing measurement:</strong> we also count first page loads using our
+          own first-party endpoint without setting analytics or advertising cookies. We store only
+          the page path, campaign parameters when present, whether a Meta click identifier was
+          present, the referrer host and a broad browser context such as Facebook/Instagram in-app
+          browser or an external browser. We do not store the raw IP address, raw user-agent, exact
+          fbclid value or a persistent visitor identifier for this measurement.
+        </p>
+
         <H2>3. Why we process personal data</H2>
         <ul className="list-disc space-y-2 pl-5">
           <li><strong>Providing services:</strong> to handle your enquiries, communicate with you and provide website functionality.</li>
@@ -293,6 +302,16 @@ function PrivacyContent({
           stránke, cookies, informácie o prehliadači a zariadení.
         </li>
       </ul>
+
+      <p>
+        <strong>Meranie príchodov bez cookies:</strong> počet prvých načítaní stránky meriame aj
+        vlastným first-party riešením bez nastavovania analytických alebo reklamných cookies.
+        Ukladáme iba cestu stránky, prípadné UTM parametre kampane, informáciu či bol prítomný Meta
+        click identifikátor, doménu referrera a všeobecný typ prostredia prehliadača, napríklad
+        Facebook/Instagram in-app prehliadač alebo externý prehliadač. Na tento účel neukladáme
+        surovú IP adresu, celý user-agent, presnú hodnotu fbclid ani trvalý identifikátor
+        návštevníka.
+      </p>
 
       <H2>3. Účely spracovania osobných údajov</H2>
       <p>Vaše osobné údaje spracovávame na tieto účely:</p>
