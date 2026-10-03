@@ -573,7 +573,7 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <DaycarePhotoCarousel />
+        <DaycarePhotoCarousel language="en" />
 
         <Gallery language="en" />
 
