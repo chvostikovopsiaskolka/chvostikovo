@@ -1,0 +1,14 @@
+const fs=require('fs'),assert=require('node:assert/strict'),{JSDOM}=require('jsdom');
+const source=fs.readFileSync('app.js','utf8'),html=fs.readFileSync('index.html','utf8');
+const section=(a,b)=>source.slice(source.indexOf(a),source.indexOf(b,source.indexOf(a)));
+(async()=>{
+ const dom=new JSDOM(html,{url:'https://app.chvostikovo.sk',runScripts:'outside-only'}),w=dom.window;
+ Object.defineProperty(w.navigator,'userAgent',{value:'Android Chrome'});w.matchMedia=()=>({matches:false});w.eval(section('(function installGuideV83()', '/* v75:'));
+ const event=new w.Event('beforeinstallprompt',{cancelable:true});let prompted=0;event.prompt=()=>prompted++;event.userChoice=Promise.resolve({outcome:'dismissed'});w.dispatchEvent(event);
+ assert.equal(w.document.querySelectorAll('#installGuideModal .install-step').length,1);assert(w.document.querySelector('.install-steps').textContent.includes('tlačidlo'));w.document.getElementById('installGuideInstallBtn').click();await new Promise(setImmediate);assert.equal(prompted,1);assert(w.document.querySelector('.install-steps').textContent.includes('menu prehliadača'));w.close();
+ const d=new JSDOM(html,{url:'https://app.chvostikovo.sk',runScripts:'outside-only'}),v=d.window;v.$=id=>v.document.getElementById(id);v.state={data:{dogs:[{id:77}],vaccinations:[],vaccination_proofs:[{dog_id:77}]}};v.selectedDog=()=>v.state.data.dogs[0];v.toast=()=>{};v.loading=()=>{};v.dogAgeText=()=>'';v.parseDogBreedWeightV124=()=>({breed:'test',weight_kg:10});v.vaccinationProofsForDogV104=()=>v.state.data.vaccination_proofs;v.dogFormSnapshotV96=()=>'';v.closeDogDetails=()=>v.$('dogDetailsModal').classList.add('hidden');for(const name of ['renderDog','renderPassSummary','renderUpcoming','renderDays','queueCustomerSync'])v[name]=()=>{};
+ let release,saves=0,checks=0;v.api=()=>{saves++;return new Promise(resolve=>release=resolve)};v.runCustomerOnboardingV75=()=>{checks++;assert.equal(v.eval('dogSaveInFlightV145'),false);assert.equal(v.state.data.dog_onboarding.length,1)};
+ v.eval("var dogDetailsModeV96='vaccinations',dogDetailsMandatoryV96=true,dogDetailsSnapshotV96='',dogSaveInFlightV145=false,customerMutationRevisionV145=0,vaccinationProofFilesV104=[],vaccinationProofUploadInFlightV143=null;"+section('async function saveDog(e)', 'function ensurePassInterestConfirmation'));
+ v.$('dogId').value='77';for(const id of ['rabiesUntil','infectiousUntil','kennelUntil'])v.$(id).value='2099-01-01';const e={preventDefault(){}};const save=v.saveDog(e);await v.saveDog(e);assert.equal(saves,1);assert.equal(checks,0);release({data:{onboarding_complete:true}});await save;assert.equal(checks,1);assert.equal(v.state.data.vaccinations.length,3);v.close();
+ console.log('PASS: Android native install single instruction + dismissal fallback; vaccination save deduplication, completion saved before onboarding rerun');
+})().catch(e=>{console.error(e);process.exit(1)});

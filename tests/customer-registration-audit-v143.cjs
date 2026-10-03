@@ -36,10 +36,10 @@ async function confirmation(hash,user,ok=true){
  assert(payload.path.includes(encodeURIComponent(w.CUSTOMER_PUBLIC_URL)));dom.window.close();
  // Photo selection: 5 allowed, sixth rejected, old processing cannot enter another dog.
  const ctx=vm.createContext({state:{session:{user:{id:'a'}},data:{vaccination_proofs:[]}},dog:{id:1},window:{},console,Promise,Number,Math});
- ctx.$=()=>null;ctx.selectedDog=()=>ctx.dog;ctx.vaccinationProofsForDogV104=()=>[];ctx.toast=()=>{};ctx.renderVaccinationProofsV104=()=>{};
- vm.runInContext('let vaccinationProofFilesV104=[],vaccinationProofReplaceModeV104=false;'+section('let vaccinationProofStageEpochV143=0;','function applyDogDetailsModeV96')+section('async function addVaccinationProofFilesV104','function v105PickerGuard'),ctx);
+ ctx.autoUploads=0;ctx.uploadVaccinationProofsV104=async()=>{ctx.autoUploads++};ctx.$=()=>null;ctx.selectedDog=()=>ctx.dog;ctx.vaccinationProofsForDogV104=()=>[];ctx.toast=()=>{};ctx.renderVaccinationProofsV104=()=>{};
+ vm.runInContext('let customerMutationRevisionV145=0,vaccinationProofFilesV104=[],vaccinationProofReplaceModeV104=false;'+section('let vaccinationProofStageEpochV143=0;','function applyDogDetailsModeV96')+section('async function addVaccinationProofFilesV104','function v105PickerGuard'),ctx);
  ctx.v105PrepareProof=async f=>({dataUrl:f});await ctx.addVaccinationProofFilesV104(['1','2','3','4','5','6']);
- assert.equal(vm.runInContext('vaccinationProofFilesV104.length',ctx),5);
+ assert.equal(vm.runInContext('vaccinationProofFilesV104.length',ctx),5);assert.equal(ctx.autoUploads,1);
  ctx.clearVaccinationProofStageV104();let resolvePhoto;ctx.v105PrepareProof=()=>new Promise(resolve=>resolvePhoto=resolve);
  const pending=ctx.addVaccinationProofFilesV104(['old']);ctx.clearVaccinationProofStageV104();ctx.dog={id:2};resolvePhoto({dataUrl:'old'});await pending;
  assert.equal(vm.runInContext('vaccinationProofFilesV104.length',ctx),0);
