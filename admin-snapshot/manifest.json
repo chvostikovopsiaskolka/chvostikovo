@@ -3,10 +3,10 @@
   "project_id": "tlhcqwsluyqpywymjoxn",
   "snapshot_table": "public.frontend_snapshots",
   "snapshot_key": "stable-v10-clean",
-  "snapshot_db_length": 360584,
-  "snapshot_md5": "55c2a5ce10f75393c8cadd264a522870",
+  "snapshot_db_length": 360637,
+  "snapshot_md5": "687e9e5f89e064a27b71a255e000f926",
   "serving_edge_function": "chvostikovo-frontend",
   "serving_edge_function_version": 46,
-  "captured_on": "2026-10-03",
+  "captured_on": "2026-10-04",
   "note": "Git backup only. Production is served from Supabase, not from this Git branch."
 }

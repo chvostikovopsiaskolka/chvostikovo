@@ -2388,7 +2388,8 @@ function nav(){const cfg={today:[svg.home,'Prehľad'],week:[svg.week,'Týždeň'
 
     let strong=t.querySelector(':scope>strong');
     if(!strong){strong=document.createElement('strong');t.appendChild(strong)}
-    strong.textContent=weekLabel(date);
+    const label=weekLabel(date);
+    if(strong.textContent!==label)strong.textContent=label;
 
     let pills=[...t.querySelectorAll(':scope>.pill')];
     const closed=!!card.querySelector('.day-open')||pills.some(p=>/zatvorené/i.test(p.textContent||''));
