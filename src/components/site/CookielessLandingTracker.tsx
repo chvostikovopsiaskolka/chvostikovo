@@ -25,6 +25,23 @@ async function sha256Hex(value: string) {
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+function normalizeUtm(value: string) {
+  const plusNormalized = value.replace(/\+/g, " ");
+  try {
+    return decodeURIComponent(plusNormalized).replace(/\+/g, " ");
+  } catch {
+    return plusNormalized;
+  }
+}
+
+function landingPath(url: URL, metaClickHash: string) {
+  const cleanPath = `${url.pathname}${url.hash || ""}`.slice(0, 500);
+  if (!metaClickHash) return cleanPath;
+
+  const marker = `|chv2h:${metaClickHash}`;
+  return `${cleanPath.slice(0, 500 - marker.length)}${marker}`;
+}
+
 function sessionGuardKey(url: URL, metaClickHash: string) {
   if (metaClickHash) return `chvostikovo:landing:meta-click:${metaClickHash}`;
 
@@ -78,16 +95,15 @@ export function CookielessLandingTracker() {
       if (!claimSessionGuard(guardKey)) return;
 
       const payload = {
-        path: `${url.pathname}${url.hash || ""}`.slice(0, 500),
+        path: landingPath(url, metaClickHash),
         language: url.pathname.startsWith("/en/") ? "en" : "sk",
         utm_source: params.get("utm_source") || "",
         utm_medium: params.get("utm_medium") || "",
-        utm_campaign: params.get("utm_campaign") || "",
-        utm_content: params.get("utm_content") || "",
-        utm_term: params.get("utm_term") || "",
+        utm_campaign: normalizeUtm(params.get("utm_campaign") || ""),
+        utm_content: normalizeUtm(params.get("utm_content") || ""),
+        utm_term: normalizeUtm(params.get("utm_term") || ""),
         utm_id: params.get("utm_id") || "",
         has_fbclid: Boolean(fbclid),
-        meta_click_hash: metaClickHash || undefined,
         referrer_host: safeReferrerHost(),
         navigation_type: navigationType(),
       };
