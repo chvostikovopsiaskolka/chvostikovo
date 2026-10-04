@@ -11,8 +11,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
-  <link rel="manifest" href="/manifest.webmanifest?v=20261004-customer-cleanup-v146">
-  <link rel="stylesheet" href="/styles.css?v=20261004-customer-cleanup-v146">
+  <link rel="manifest" href="/manifest.webmanifest?v=20261004-customer-loading-paws-v147">
+  <link rel="stylesheet" href="/styles.css?v=20261004-customer-loading-paws-v147">
   <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}.loading-screen.in-app{background:transparent;pointer-events:none;padding:0}.loading-screen.in-app .loading-logo,.loading-screen.in-app small{display:none}.loading-screen.in-app .loading-paw{width:68px;height:68px;border:0;border-radius:18px;background:#fff;box-shadow:0 10px 34px rgba(17,24,39,.16);font-size:0;animation:none}.loading-screen.in-app .loading-paw::before{content:'🐾';width:42px;height:42px;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;display:grid;place-items:center;font-size:18px;animation:loadingSpin .8s linear infinite}</style>
   <title>Chvostíkovo</title>
 </head>
@@ -37,7 +37,8 @@
   <symbol id="ci-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-9 3v5m-2.5-2.5h5"/></symbol>
 </svg>
 <a class="skip-link" href="#mainContent">Preskočiť na obsah</a>
-<div id="loading" class="loading-screen" role="status" aria-live="polite"><div class="loading-paws" aria-hidden="true"><svg><use href="#ci-paw"/></svg><svg><use href="#ci-paw"/></svg><svg><use href="#ci-paw"/></svg><svg><use href="#ci-paw"/></svg><svg><use href="#ci-paw"/></svg><svg><use href="#ci-paw"/></svg><svg><use href="#ci-paw"/></svg><svg><use href="#ci-paw"/></svg></div><div class="loading-paw" aria-hidden="true">🐾</div><small>Načítavam Chvostíkovo…</small></div>
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><defs><symbol id="ci-loading-paw" viewBox="0 0 64 64"><ellipse cx="32" cy="39" rx="16" ry="13"/><circle cx="14" cy="23" r="7"/><circle cx="27" cy="14" r="7"/><circle cx="41" cy="14" r="7"/><circle cx="52" cy="25" r="7"/></symbol></defs></svg>
+<div id="loading" class="loading-screen" role="status" aria-live="polite"><div class="loading-paws" aria-hidden="true"><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg></div><div class="loading-paw" aria-hidden="true">🐾</div><small>Načítavam Chvostíkovo…</small></div>
 
 <main id="authView" class="auth-shell hidden" inert>
   <section class="auth-card">
@@ -154,9 +155,9 @@
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/terms-pdf-font.js?v=20261004-customer-cleanup-v146"></script>
-<script src="/terms-pdf.js?v=20261004-customer-cleanup-v146"></script>
-<script src="/app.js?v=20261004-customer-cleanup-v146"></script>
-<script src="/back-swipe.js?v=20261004-customer-cleanup-v146"></script>
+<script src="/terms-pdf-font.js?v=20261004-customer-loading-paws-v147"></script>
+<script src="/terms-pdf.js?v=20261004-customer-loading-paws-v147"></script>
+<script src="/app.js?v=20261004-customer-loading-paws-v147"></script>
+<script src="/back-swipe.js?v=20261004-customer-loading-paws-v147"></script>
 </body>
 </html>
