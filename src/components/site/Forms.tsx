@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
 import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 
@@ -34,6 +35,14 @@ export function ShortForm({
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formStarted = useRef(false);
+  const isLeadLanding = trackingSource?.startsWith("lead_landing_") === true;
+
+  function onFormFocus() {
+    if (!isLeadLanding || formStarted.current) return;
+    formStarted.current = true;
+    void trackCookielessInteraction("form_start", trackingSource || "lead_landing_form");
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -64,6 +73,9 @@ export function ShortForm({
         ctaSource: trackingSource,
       });
       trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
+      if (isLeadLanding) {
+        void trackCookielessInteraction("form_submit", trackingSource || "lead_landing_form");
+      }
       setSent(true);
       onSent?.();
     } catch {
@@ -80,13 +92,38 @@ export function ShortForm({
           <Check className="size-7" />
         </div>
         <h3 className="text-xl text-forest">Ďakujeme!</h3>
-        <p className="text-sm text-muted-foreground">Ozveme sa vám čo najskôr.</p>
+        <p className="text-sm text-muted-foreground">
+          Váš záujem sme prijali. Ozveme sa vám čo najskôr.
+        </p>
+        {isLeadLanding && (
+          <div className="mt-2 w-full max-w-sm rounded-2xl bg-secondary/55 p-4">
+            <p className="text-sm leading-relaxed text-forest/75">
+              Kým sa vám ozveme, môžete si pozrieť podmienky prijatia psíka alebo náš cenník.
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-center">
+              <a
+                href="/#podmienky"
+                onClick={() => void trackCookielessInteraction("success_conditions_click", trackingSource || "lead_landing_form")}
+                className="rounded-xl border border-forest/15 bg-card px-3 py-2 text-sm font-bold text-forest transition hover:border-coral/40"
+              >
+                Podmienky prijatia
+              </a>
+              <a
+                href="/#cennik"
+                onClick={() => void trackCookielessInteraction("success_pricing_click", trackingSource || "lead_landing_form")}
+                className="rounded-xl border border-forest/15 bg-card px-3 py-2 text-sm font-bold text-forest transition hover:border-coral/40"
+              >
+                Pozrieť cenník
+              </a>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3 text-left sm:space-y-3.5">
+    <form onSubmit={onSubmit} onFocusCapture={onFormFocus} className="space-y-3 text-left sm:space-y-3.5">
       <div>
         <label className="label-sm" htmlFor="s-meno">
           Meno majiteľa *

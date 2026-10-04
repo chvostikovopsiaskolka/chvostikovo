@@ -20,8 +20,9 @@ import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews, ReviewReasons, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { Footer } from "@/components/site/Contact";
-import { FAQ, PHONE, REVIEWS } from "@/content/site";
+import { FAQ, PHONE, PHONE_PRETTY, REVIEWS } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 const BASE_URL = "https://chvostikovo.sk";
 const URL = `${BASE_URL}/psia-skolka-kosice`;
@@ -89,6 +90,7 @@ export const Route = createFileRoute("/psia-skolka-kosice")({
 
 function scrollToBenefits(source: string) {
   trackMarketingInteraction("explore_daycare", source);
+  void trackCookielessInteraction("explore_daycare", source);
   document.getElementById("lead-benefits")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -98,6 +100,7 @@ function LeadLandingPage() {
 
   function openLeadModal(source: string) {
     trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
     setLeadModalSource(source);
     setLeadModalOpen(true);
   }
@@ -113,18 +116,28 @@ function LeadLandingPage() {
           <div className="flex items-center gap-2">
             <a
               href={`tel:${PHONE}`}
-              className="btn-coral hidden items-center gap-2 px-5 py-2 text-sm sm:inline-flex"
+              onClick={() => {
+                trackMarketingInteraction("phone_click", "lead_landing_header_desktop");
+                void trackCookielessInteraction("phone_click", "lead_landing_header_desktop");
+              }}
+              className="btn-coral hidden items-center gap-2 px-4 py-2 text-sm sm:inline-flex"
+              aria-label={`Zavolajte nám na ${PHONE_PRETTY}`}
             >
               <Phone className="size-4" />
-              Zavolajte nám
+              {PHONE_PRETTY}
             </a>
-            <button
-              type="button"
-              onClick={() => scrollToBenefits("lead_landing_header_mobile")}
-              className="btn-coral inline-flex px-4 py-2 text-sm sm:hidden"
+            <a
+              href={`tel:${PHONE}`}
+              onClick={() => {
+                trackMarketingInteraction("phone_click", "lead_landing_header_mobile");
+                void trackCookielessInteraction("phone_click", "lead_landing_header_mobile");
+              }}
+              className="btn-coral inline-flex items-center gap-1.5 px-3 py-2 text-[11px] min-[390px]:text-xs sm:hidden"
+              aria-label={`Zavolajte nám na ${PHONE_PRETTY}`}
             >
-              Zistiť viac
-            </button>
+              <Phone className="size-3.5" />
+              {PHONE_PRETTY}
+            </a>
           </div>
         </div>
       </header>
@@ -148,13 +161,12 @@ function LeadLandingPage() {
           <div className="relative mx-auto grid min-h-[560px] max-w-6xl items-center gap-8 px-4 pt-8 pb-4 sm:min-h-[590px] sm:pt-12 sm:pb-8 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <h1 className="text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
-                Kým ste v práci,
-                <span className="block text-coral-dark">váš psík môže mať aktívny deň</span>
-                s kamarátmi
+                Miesto, kam sa psíkovia
+                <span className="block text-coral-dark">radi vracajú</span>
               </h1>
 
               <p className="mx-auto mt-5 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg lg:mx-0">
-                Pohyb, hry, socializácia, oddych a celodenný dohľad v psej škôlke Chvostíkovo v Košiciach.
+                Váš psík si môže užiť aktívny deň s kamošmi, kým vy pracujete. Pohyb, hry, socializácia, oddych a celodenný dohľad v psej škôlke Chvostíkovo v Košiciach.
               </p>
 
               <div className="mx-auto mt-5 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
@@ -362,10 +374,7 @@ function LeadLandingPage() {
         title="Zistite, či je Chvostíkovo vhodné aj pre vášho psíka"
         subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám späť a radi s vami preberieme viac informácií."
       >
-        <ShortForm
-          trackingSource={leadModalSource}
-          onSent={() => setTimeout(() => setLeadModalOpen(false), 2200)}
-        />
+        <ShortForm trackingSource={leadModalSource} />
       </FormDialog>
     </div>
   );
