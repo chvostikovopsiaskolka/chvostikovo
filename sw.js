@@ -1,9 +1,9 @@
 
-const CACHE='chvostikovo-portal-shell-20261003-customer-auto-upload-v145';
+const CACHE='chvostikovo-portal-shell-20261004-customer-cleanup-v146';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/terms-pdf.js?v=20261003-customer-auto-upload-v145','/terms-pdf-font.js?v=20261003-customer-auto-upload-v145','/styles.css?v=20261003-customer-auto-upload-v145','/app.js?v=20261003-customer-auto-upload-v145','/back-swipe.js?v=20261003-customer-auto-upload-v145'];
+const SHELL=['/','/terms-pdf.js?v=20261004-customer-cleanup-v146','/terms-pdf-font.js?v=20261004-customer-cleanup-v146','/styles.css?v=20261004-customer-cleanup-v146','/app.js?v=20261004-customer-cleanup-v146','/back-swipe.js?v=20261004-customer-cleanup-v146'];
 
 function withPortalCsp(response){
   if(!response)return response;
@@ -20,7 +20,7 @@ self.addEventListener('install',event=>{
 });
 self.addEventListener('activate',event=>{
   event.waitUntil(Promise.all([
-    caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))),
+    caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('chvostikovo-portal-shell-')&&key!==CACHE).map(key=>caches.delete(key)))),
     self.clients.claim()
   ]));
 });
@@ -56,12 +56,15 @@ self.addEventListener('fetch',event=>{
   }
   if(['/app.js','/styles.css','/back-swipe.js','/terms-pdf.js','/terms-pdf-font.js'].includes(url.pathname)){
     event.respondWith((async()=>{
+      // Build-stamped assets are immutable: reuse only this release's cache.
+      const cache=await caches.open(CACHE);
+      if(url.searchParams.has('v')){const cached=await cache.match(event.request);if(cached)return cached}
       try{
         const response=await fetch(event.request,{cache:'no-store'});
-        if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));
+        if(response.ok)await cache.put(event.request,response.clone()).catch(()=>{});
         return response;
       }catch(_){
-        return (await caches.match(event.request))||new Response('Offline',{status:503});
+        return (await cache.match(event.request))||new Response('Offline',{status:503});
       }
     })());
   }

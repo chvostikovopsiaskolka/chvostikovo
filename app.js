@@ -27,7 +27,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261003-customer-auto-upload-v145';
+const APP_BUILD='20261004-customer-cleanup-v146';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -41,6 +41,23 @@ const SESSION_KEY='chvostikovo_customer_session';
 const PASSWORD_MIN_MESSAGE='Minimálne 8 znakov, malé a veľké písmeno a aspoň 1 číslica.';
 const PASSWORD_STRONG_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 let state={data:null,session:null,storage:localStorage,selectedDogId:null,activeTab:'booking',pushChecked:false,pushEnabled:false};
+// One concurrent read for onboarding, settings and rules; never share account state.
+let customerTermsReadV146=null;
+async function readActiveCustomerTermsV146(force=false){
+  const session=state.session;if(!session)return null;
+  const key=String(session.user?.id||'')+'|'+session.access_token;
+  const current=customerTermsReadV146;
+  if(current?.key===key&&(current.pending||(!force&&Date.now()-current.at<60000)))return current.promise;
+  const entry={key,at:Date.now(),pending:true,promise:null};
+  entry.promise=(async()=>{
+    const now=new Date().toISOString();
+    const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token},cache:'no-store'});
+    if(!r.ok)throw new Error('Pravidlá sa nepodarilo načítať.');
+    const rows=await r.json();return rows?.[0]||null;
+  })();
+  customerTermsReadV146=entry;
+  try{return await entry.promise}catch(error){if(customerTermsReadV146===entry)customerTermsReadV146=null;throw error}finally{entry.pending=false}
+}
 const customerHooks={
   afterRenderPassSummary:[],
   afterRenderDog:[],
@@ -991,7 +1008,7 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
   function openPrivacyInfo(mandatory=false){privacyMandatory=!!mandatory;const modal=$('privacyInfoModal');if(!modal)return;hideFlow();$('privacyInfoClose')?.classList.toggle('hidden',privacyMandatory);if($('privacyInfoOk'))$('privacyInfoOk').textContent=privacyMandatory?'Potvrdiť a pokračovať':'Rozumiem';modal.classList.remove('hidden')}
   function closePrivacyInfo(){if(privacyMandatory)return;$('privacyInfoModal')?.classList.add('hidden')}
   async function acknowledgePrivacy(){if(!privacyMandatory){closePrivacyInfo();return}const btn=$('privacyInfoOk');if(btn)btn.disabled=true;try{const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_acknowledge_privacy_notice',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_version:PRIVACY_VERSION})});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.message||data?.error||'Potvrdenie sa nepodarilo uložiť.');if(state.data?.profile){state.data.profile.privacy_notice_version=PRIVACY_VERSION;state.data.profile.privacy_notice_acknowledged_at=new Date().toISOString()}privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden');runCustomerOnboardingV75()}catch(e){toast(e.message||'Potvrdenie sa nepodarilo uložiť.')}finally{if(btn)btn.disabled=false}}
-  async function activeTermsDocument(){const now=new Date().toISOString(),r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',{headers:authHeaders(),cache:'no-store'});if(!r.ok)return null;const rows=await r.json();return rows?.[0]||null}
+  async function activeTermsDocument(){try{return await readActiveCustomerTermsV146()}catch(_){return null}}
   async function acceptedTerms(version){const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_acceptances?user_id=eq.'+encodeURIComponent(state.session.user.id)+'&terms_version=eq.'+encodeURIComponent(version)+'&select=dog_id,terms_version,accepted_at',{headers:authHeaders(),cache:'no-store'});if(!r.ok)return[];return await r.json()}
   function termParagraphsV106(body){
     const split=String(body||'').replace(/\. (?=(?:Majiteľ|Fenky|Ak|Chvostíkovo|Aj pri|Psia škôlka|Psík|Do kolektívu|Pri závažných|Pri úvodnej|V prípade|Náklady|Kapacita|Bez včasného|Pri závažných dôvodoch|Permanentka|10-vstupová|Platnosť permanentky|Nevyužité vstupy|Služba|Aktuálna cena|Podmienky sa)\b)/g,'.\n');
@@ -1089,20 +1106,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 (function customerLegalStatusV21(){
   if(window.__chvostikovoCustomerLegalStatusV21)return;
   window.__chvostikovoCustomerLegalStatusV21=true;
-  let renderSeq=0,activeDocCache=null,activeDocPromise=null;
+  let renderSeq=0;
   const acceptanceCache=new Map(),acceptancePromises=new Map();
   const headers=()=>({apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'});
   const skDateTime=v=>{try{return new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}catch(_){return String(v||'')}};
   async function activeDoc(force=false){
-    if(!state?.session)return null;
-    if(activeDocCache&&!force)return activeDocCache;
-    if(activeDocPromise&&!force)return activeDocPromise;
-    activeDocPromise=(async()=>{
-      const now=new Date().toISOString();
-      const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',{headers:headers(),cache:'no-store'});
-      if(!r.ok)return null;const rows=await r.json();return rows?.[0]||null;
-    })();
-    try{activeDocCache=await activeDocPromise;return activeDocCache}finally{activeDocPromise=null}
+    try{return await readActiveCustomerTermsV146(force)}catch(_){return null}
   }
   async function acceptance(dogId,version,force=false){
     if(!state?.session||!dogId||!version)return null;
@@ -1476,12 +1485,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function relocateSettings(){
     ensureSettings();
     const content=$('dogSettingsContentV36'),tab=$('dogTab');if(!content||!tab)return;
-    const account=document.querySelector('.account-card');
     const legal=$('customerLegalSectionV23');
     const logout=$('logoutBtn');
     // Contact details are presented separately from settings.
     if(legal&&legal.parentElement!==content){content.appendChild(legal);if(!legal.dataset.v36SettingsCollapsed){legal.open=false;legal.dataset.v36SettingsCollapsed='1'}}
-    if(logout){logout.classList.remove('hidden','icon-btn');logout.classList.add('btn','secondary','full');logout.textContent='Odhlásiť sa';logout.style.marginTop='14px';content.appendChild(logout)}
+    if(logout){logout.classList.remove('hidden','icon-btn');logout.classList.add('btn','secondary','full');if(logout.textContent!=='Odhlásiť sa')logout.textContent='Odhlásiť sa';logout.style.marginTop='14px';if(content.lastElementChild!==logout)content.appendChild(logout)}
   }
 
   function openSettings(section='notifications'){
@@ -1492,7 +1500,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('dogSettingsTitleV36').textContent=section==='legal'?'Súhlasy a podmienky':'Upozornenia';
     const settingsIntro=modal.querySelector('.settings-head-v36 p');
     if(settingsIntro)settingsIntro.textContent=section==='legal'?'Ochrana údajov a pravidlá škôlky.':'Rezervácie, správy a oznamy z Chvostíkova.';
-    const legalWasOpen=legal?.open;
     if(legal)legal.open=section==='legal';
     if(section==='legal')window.renderCustomerLegalStatusV103?.();
     $('dogSettingsModalV36')?.classList.remove('hidden');
@@ -2173,19 +2180,8 @@ async function togglePushDirect(btn){
 
 
   function authHeadersV55(){return {apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token}}
-  let activeTermsCacheV56=null,activeTermsPromiseV56=null;
   async function activeTermsV55(force=false){
-    if(!state.session)return null;
-    if(activeTermsCacheV56&&!force)return activeTermsCacheV56;
-    if(activeTermsPromiseV56&&!force)return activeTermsPromiseV56;
-    activeTermsPromiseV56=(async()=>{
-      const now=new Date().toISOString();
-      const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,effective_from&order=effective_from.desc&limit=1',{headers:authHeadersV55(),cache:'no-store'});
-      if(!r.ok)throw new Error('Pravidlá sa nepodarilo načítať.');
-      const rows=await r.json();return rows?.[0]||null;
-    })();
-    try{activeTermsCacheV56=await activeTermsPromiseV56;return activeTermsCacheV56}
-    finally{activeTermsPromiseV56=null}
+    return readActiveCustomerTermsV146(force);
   }
 
   function ensureRulesUiV55(){
@@ -2515,31 +2511,4 @@ async function uploadVaccinationProofsCoreV143(silent=false){
   }
 }
 
-/* v105 runtime-only visual/text patch to keep existing HTML/CSS architecture untouched */
-(function customerVisualV105(){
-  const pinkPaw="url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cg fill='%23f472b6'%3E%3Cellipse cx='40' cy='38' rx='15' ry='12'/%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Ccircle cx='34' cy='15' r='6'/%3E%3Ccircle cx='49' cy='16' r='6'/%3E%3Ccircle cx='61' cy='27' r='6'/%3E%3C/g%3E%3C/svg%3E\")";
-  const style=document.createElement('style');
-  style.id='customer-v105-runtime-style';
-  style.textContent=`
-  .vacc-proof-empty-wrap-v105{grid-template-columns:1fr!important}
-  .vacc-proof-empty-v105{position:relative;width:100%;min-height:76px;border:1.5px dashed #fb923c;border-radius:14px;background:rgba(255,255,255,.45);color:#9a3412;padding:16px 52px 14px 14px;display:grid;gap:3px;align-content:center;text-align:left;cursor:pointer}
-  .vacc-proof-empty-v105>span:not(.vacc-proof-plus-v105){font-size:12px;font-weight:750}
-  .vacc-proof-empty-v105 small{font-size:10px;color:#9a3412;opacity:.72}
-  .vacc-proof-plus-v105{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#ffedd5;color:#ea580c;font-size:25px;line-height:1}
-  .vacc-proof-thumb-v104 img{background:#f3f4f6}.vacc-proof-thumb-v104.staged img{object-fit:cover!important}.vacc-proof-message-v104{min-height:16px}
-  #customerLegalStatusCard .customer-legal-doc-v105{padding:2px 0 12px;border-bottom:1px solid var(--line)}
-  #customerLegalStatusCard .customer-legal-doc-v105:last-child{border-bottom:0;padding-bottom:2px}
-  #customerLegalStatusCard .customer-legal-doc-v105 .customer-legal-row{border-top:0!important;padding:10px 0 7px!important}
-  #customerLegalStatusCard .customer-legal-doc-action-v105{width:100%!important;min-height:36px!important;margin:0!important;padding:8px 10px!important;justify-content:center!important;text-align:center!important;border-radius:11px!important;font-size:12px!important}
-  .dog-hub-tile-v99 .dog-hub-emoji-v99{opacity:.23!important;font-size:54px!important;filter:saturate(.95) contrast(.98)!important;transform:scale(1.06);transform-origin:bottom right}
-  #bookingTab::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background-image:${pinkPaw},${pinkPaw},${pinkPaw},${pinkPaw},${pinkPaw},${pinkPaw},${pinkPaw},${pinkPaw};background-repeat:no-repeat;background-size:108px 81px,54px 41px,82px 62px,46px 35px,96px 72px,60px 45px,74px 56px,42px 32px;background-position:-18px 24%,94% 36%,8% 52%,78% 58%,96% 69%,18% 76%,72% 88%,5% 94%;opacity:.055}
-  #bookingTab>*{position:relative;z-index:1}
-  @media(max-width:520px){.dog-hub-tile-v99 .dog-hub-emoji-v99{opacity:.22!important;font-size:52px!important}#bookingTab::after{background-size:94px 71px,48px 36px,72px 54px,40px 30px,84px 63px,52px 39px,66px 50px,38px 29px;background-position:-15px 23%,96% 35%,6% 51%,80% 59%,97% 69%,16% 77%,74% 88%,3% 95%;opacity:.052}}
-  `;
-  const mount=()=>{
-    if(!document.getElementById(style.id))document.head.appendChild(style);
-    const hint=document.querySelector('.vacc-proof-head-v104 small');
-    if(hint)hint.textContent='Nahrajte alebo odfoťte 1 až 5 fotografií strán s platnosťou očkovaní.';
-  };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
-})();
+/* v105 runtime-only styles consolidated into styles.css; upload test boundary. */
