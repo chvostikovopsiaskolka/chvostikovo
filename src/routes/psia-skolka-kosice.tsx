@@ -164,18 +164,18 @@ function LeadLandingPage() {
             <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-cream to-transparent" />
           </div>
 
-          <div className="relative mx-auto grid min-h-[535px] max-w-6xl items-center gap-8 px-4 pt-7 pb-3 sm:min-h-[590px] sm:pt-12 sm:pb-8 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative mx-auto grid min-h-[495px] max-w-6xl items-center gap-6 px-4 pt-4 pb-1 sm:min-h-[565px] sm:pt-9 sm:pb-5 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <h1 className="text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
                 Miesto, kam sa psíkovia
                 <span className="block text-coral-dark">radi vracajú</span>
               </h1>
 
-              <p className="mx-auto mt-5 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg lg:mx-0">
+              <p className="mx-auto mt-3.5 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg lg:mx-0">
                 Váš psík si môže užiť aktívny deň s kamošmi, kým vy pracujete. Pohyb, hry, socializácia, oddych a celodenný dohľad v psej škôlke Chvostíkovo v Košiciach.
               </p>
 
-              <div className="mx-auto mt-5 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
+              <div className="mx-auto mt-3.5 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
                 {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
@@ -190,13 +190,13 @@ function LeadLandingPage() {
               <button
                 type="button"
                 onClick={() => scrollToBenefits("lead_landing_hero")}
-                className="btn-coral mt-6 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3.5 text-[15px] sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
+                className="btn-coral mt-4.5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
               >
                 Zistiť viac
                 <ArrowDown className="size-5" />
               </button>
 
-              <div className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-semibold text-forest/80 lg:justify-start">
+              <div className="mt-3.5 flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-sm font-semibold text-forest/80 sm:mt-5 lg:justify-start">
                 <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 text-coral" /> Poľská 6, Košice</span>
                 <span className="inline-flex items-center gap-1.5"><Clock3 className="size-4 text-coral" /> Po–Pia 7:00–17:00</span>
               </div>
@@ -219,8 +219,8 @@ function LeadLandingPage() {
 
         <InfoTicker />
 
-        <section className="bg-card px-4 py-5 sm:py-7 lg:hidden">
-          <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 p-4 shadow-card ring-1 ring-forest/8 sm:p-5">
+        <section className="bg-card px-4 pt-3 pb-5 sm:pt-5 sm:pb-7 lg:hidden">
+          <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 p-3.5 shadow-card ring-1 ring-forest/8 sm:p-5">
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">
                 Zaujíma vás škôlka?
