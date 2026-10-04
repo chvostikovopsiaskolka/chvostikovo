@@ -91,7 +91,13 @@ export const Route = createFileRoute("/psia-skolka-kosice")({
 function scrollToBenefits(source: string) {
   trackMarketingInteraction("explore_daycare", source);
   void trackCookielessInteraction("explore_daycare", source);
-  document.getElementById("lead-benefits")?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  const target = document.getElementById("lead-benefits");
+  if (!target) return;
+
+  const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 64;
+  const top = window.scrollY + target.getBoundingClientRect().top - headerHeight - 8;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
 }
 
 function LeadLandingPage() {
@@ -151,14 +157,14 @@ function LeadLandingPage() {
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className="size-full object-cover object-[52%_52%] lg:object-[52%_38%]"
+              className="size-full scale-[1.14] object-cover object-[54%_50%] sm:scale-[1.08] sm:object-[52%_48%] lg:scale-100 lg:object-[52%_38%]"
             />
             <div className="absolute inset-0 bg-cream/30" />
             <div className="absolute inset-0 bg-linear-to-r from-cream/98 via-cream/80 via-48% to-cream/25" />
             <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-cream to-transparent" />
           </div>
 
-          <div className="relative mx-auto grid min-h-[560px] max-w-6xl items-center gap-8 px-4 pt-8 pb-4 sm:min-h-[590px] sm:pt-12 sm:pb-8 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative mx-auto grid min-h-[535px] max-w-6xl items-center gap-8 px-4 pt-7 pb-3 sm:min-h-[590px] sm:pt-12 sm:pb-8 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <h1 className="text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
                 Miesto, kam sa psíkovia
@@ -213,8 +219,22 @@ function LeadLandingPage() {
 
         <InfoTicker />
 
-        <section id="lead-benefits" className="scroll-mt-28 bg-card py-10 sm:scroll-mt-32 sm:py-14">
-          <div className="mx-auto max-w-6xl px-4 text-center">
+        <section className="bg-card px-4 py-5 sm:py-7 lg:hidden">
+          <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 p-4 shadow-card ring-1 ring-forest/8 sm:p-5">
+            <div className="mb-4 text-center">
+              <p className="font-display text-xl font-bold text-forest">
+                Zaujíma vás škôlka?
+              </p>
+              <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
+                Nechajte nám kontakt a vyberte, čo hľadáte. Ozveme sa vám a radi poradíme.
+              </p>
+            </div>
+            <ShortForm trackingSource="lead_landing_mobile_below_hero" />
+          </div>
+        </section>
+
+        <section className="bg-card py-10 sm:py-14">
+          <div id="lead-benefits" className="mx-auto max-w-6xl px-4 text-center">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Prečo Chvostíkovo
             </p>
