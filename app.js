@@ -27,7 +27,8 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261005-customer-closed-days-v152';
+const APP_BUILD='20261005-customer-beta1-v153';
+const APP_VERSION='1.0.0';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -843,7 +844,7 @@ function openMenuSettings(section){window.openCustomerSettingsV102?.(section)}
 $('menuNotifications').addEventListener('click',()=>openMenuSettings('notifications'));
 $('menuLegal').addEventListener('click',()=>openMenuSettings('legal'));
 $('menuLogout').addEventListener('click',()=>$('logoutBtn').click());
-$('menuBuildVersion').textContent='Verzia appky v.'+APP_BUILD;
+$('menuBuildVersion').textContent='Beta 1 · Verzia '+APP_VERSION;
 window.addEventListener('pageshow',()=>setTimeout(repairCustomerScrollV60,0));
 window.visualViewport?.addEventListener('resize',()=>requestAnimationFrame(repairCustomerScrollV60));
 async function refreshOnResume(){

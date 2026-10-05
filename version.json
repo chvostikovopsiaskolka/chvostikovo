@@ -1,3 +1,5 @@
 {
-  "build": "20261005-customer-closed-days-v152"
+  "build": "20261005-customer-beta1-v153",
+  "version": "1.0.0",
+  "channel": "beta"
 }
