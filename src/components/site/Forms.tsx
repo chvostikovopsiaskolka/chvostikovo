@@ -28,8 +28,8 @@ function attributionPayload() {
 export function ShortForm({
   onSent,
   trackingSource,
-  hideInterest = false,
-  interestValue = "Chcem sa dozvedieť viac o psej škôlke",
+  hideInterest = true,
+  interestValue = "Informačný formulár – záujem o psiu škôlku",
 }: {
   onSent?: () => void;
   trackingSource?: string;
