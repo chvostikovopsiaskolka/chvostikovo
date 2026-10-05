@@ -27,8 +27,8 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261005-customer-beta1-v153';
-const APP_VERSION='1.0.0';
+const APP_BUILD='20261005-customer-beta1-v154';
+const APP_VERSION='1.0.1';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -263,7 +263,7 @@ function startCustomerLive(force=false){
   if(!state.session?.access_token||document.visibilityState==='hidden')return;
   if(customerLiveSocket&&!force&&[WebSocket.OPEN,WebSocket.CONNECTING].includes(customerLiveSocket.readyState))return;
   stopCustomerLive();
-  const url=SUPABASE_URL.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(SUPABASE_KEY)+'&vsn=1.0.0';
+  const url=SUPABASE_URL.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(SUPABASE_KEY)+'&vsn=1.0.1';
   let socket;try{socket=new WebSocket(url)}catch(error){console.warn('Realtime spojenie sa nepodarilo otvoriť',error);scheduleCustomerReconnect();return}customerLiveSocket=socket;
   socket.onopen=()=>{if(socket!==customerLiveSocket)return;customerLiveAttempt=0;const changes=['customer_booking_requests','customer_pass_requests','portal_notifications','portal_announcements','portal_day_settings','portal_live_events','customer_dog_submissions','customer_owner_links','dogs','vaccinations'].map(table=>({event:'*',schema:'public',table}));socket.send(JSON.stringify({topic:'realtime:customer-portal',event:'phx_join',payload:{config:{broadcast:{ack:false,self:false},presence:{enabled:false},postgres_changes:changes,private:false},access_token:state.session.access_token},ref:'1',join_ref:'1'}));customerLiveHeartbeat=setInterval(()=>{if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(Date.now()),join_ref:null}))},20000);scheduleWaitingDogFallbackV101()};
   socket.onmessage=event=>{try{const message=JSON.parse(event.data);if(message.event==='postgres_changes')queueCustomerSync(customerScopeForMessage(message))}catch(_){}};
@@ -1554,6 +1554,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const cutoff=sunday.toISOString().slice(0,10);
     return now.date>cutoff||(now.date===cutoff&&now.minutes>=20*60);
   }
+  function fitBookingDeadlineTitle(){
+    const title=$('deadlineText')?.querySelector('strong');
+    if(!title||!title.clientWidth)return;
+    title.style.setProperty('font-size','13px','important');
+    if(title.scrollWidth>title.clientWidth)title.style.setProperty('font-size',(13*title.clientWidth/title.scrollWidth).toFixed(2)+'px','important');
+  }
+  window.addEventListener('resize',()=>requestAnimationFrame(fitBookingDeadlineTitle));
+
   function updateBookingDeadlineNoticeV127(){
     const box=$('deadlineText');if(!box)return;
     const dog=selectedDog(),days=state.data?.availability?.days||[];
@@ -1563,6 +1571,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     box.querySelector('strong').textContent=showClosed
       ? 'Prihlasovanie bolo na tento týždeň uzavreté v nedeľu o 20:00.'
       : 'Prosíme o rezerváciu miesta na ďalší týždeň do nedele 20:00.';
+    requestAnimationFrame(fitBookingDeadlineTitle);
     const detail=box.querySelector('span');
     if(detail){detail.textContent=showClosed?'Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.':'';detail.classList.toggle('hidden',!showClosed)}
   }
@@ -2015,15 +2024,6 @@ async function togglePushDirect(btn){
 
   const chatSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path><path d="M7.5 10h9M7.5 13.5h6"></path></svg>';
 
-  function supportBookingOptions(){
-    const rows=futureItems();
-    return rows.map(r=>{
-      const id=Number(r.id)||0;
-      const label='Rezervácia · '+dogName(r.dog_id)+' · '+skDate(r.reservation_date);
-      return '<option value="booking:'+id+'">'+esc(label)+'</option>';
-    }).join('');
-  }
-
   function mount(){
     if(!$('supportChatBtnV52')){
       document.body.insertAdjacentHTML('beforeend',
@@ -2034,8 +2034,6 @@ async function togglePushDirect(btn){
             '<h2 id="supportChatTitleV52">Napíšte nám správu</h2>'+
             '<div id="supportMessageThreadV52" class="message-thread support-message-thread-v52"></div>'+
             '<form id="supportMessageFormV52" class="form-stack support-message-form-v52">'+
-              '<div><label for="supportSubjectV52">Predmet</label><select id="supportSubjectV52" class="input"><option value="">Bez predmetu</option></select></div>'+
-              '<div id="supportCustomSubjectWrapV52" class="hidden"><label for="supportCustomSubjectV52">Vlastný predmet</label><input id="supportCustomSubjectV52" class="input" maxlength="120" placeholder="Napíšte predmet"></div>'+
               '<div><label for="supportMessageBodyV52">Správa</label><textarea id="supportMessageBodyV52" class="input" rows="4" maxlength="2000" placeholder="Napíšte správu pre Chvostíkovo…" required></textarea></div>'+
               '<button class="btn full" type="submit">Odoslať správu</button>'+
             '</form>'+
@@ -2044,23 +2042,10 @@ async function togglePushDirect(btn){
       $('supportChatBtnV52').addEventListener('click',open);
       $('supportChatCloseV52').addEventListener('click',close);
       $('supportChatModalV52').addEventListener('click',e=>{if(e.target===$('supportChatModalV52'))close()});
-      $('supportSubjectV52').addEventListener('change',()=>{
-        $('supportCustomSubjectWrapV52').classList.toggle('hidden',$('supportSubjectV52').value!=='custom');
-        if($('supportSubjectV52').value==='custom')$('supportCustomSubjectV52').focus();
-      });
       $('supportMessageFormV52').addEventListener('submit',send);
     }
-    refreshSubjectOptions();
     renderSupportThread();
     updateButton();
-  }
-
-  function refreshSubjectOptions(){
-    const select=$('supportSubjectV52');if(!select)return;
-    const current=select.value;
-    select.innerHTML='<option value="">Bez predmetu</option>'+supportBookingOptions()+'<option value="custom">Iný predmet</option>';
-    if([...select.options].some(o=>o.value===current))select.value=current;
-    $('supportCustomSubjectWrapV52')?.classList.toggle('hidden',select.value!=='custom');
   }
 
   function renderSupportThread(){
@@ -2086,10 +2071,7 @@ async function togglePushDirect(btn){
     // A late booking prefill belongs only to that selected day, not to the general message form.
     if(!lateBookingContext){
       $('supportMessageBodyV52').value='';
-      $('supportCustomSubjectV52').value='';
-      $('supportSubjectV52').value='';
     }
-    refreshSubjectOptions();
     renderSupportThread();
     $('supportChatModalV52').classList.remove('hidden');
     document.documentElement.classList.add('support-chat-open-v52');
@@ -2106,34 +2088,24 @@ async function togglePushDirect(btn){
     mount();
     lateBookingContext={dogId,date,messageOnly};
     $('supportMessageBodyV52').value=body;
-    $('supportSubjectV52').value='';
     open();
   };
 
   async function send(e){
     e.preventDefault();
-    const select=$('supportSubjectV52'),value=select.value,body=$('supportMessageBodyV52').value.trim();
-    if(!body)return;
-    let bookingId=null,message=body;
-    if(value.startsWith('booking:'))bookingId=Number(value.slice(8))||null;
-    if(value==='custom'){
-      const subject=$('supportCustomSubjectV52').value.trim();
-      if(subject)message='Predmet: '+subject+'\n\n'+body;
-    }
+    const message=$('supportMessageBodyV52').value.trim();
+    if(!message)return;
     const btn=e.submitter;
     try{
       if(btn)btn.disabled=true;
       const late=lateBookingContext?.messageOnly?null:lateBookingContext;
       const result=late
         ? await api({action:'request_late_booking',dog_id:late.dogId,reservation_date:late.date,message})
-        : await api({action:'send_message',message,booking_request_id:bookingId});
+        : await api({action:'send_message',message,booking_request_id:null});
       const row=late?result?.data?.message:(result?.data||result?.message||{id:-Date.now(),body:message,sender_role:'customer',created_at:new Date().toISOString()});
       if(!row)throw new Error('Správa sa nepodarila priradiť k rezervácii.');
       (state.data.messages||(state.data.messages=[])).push(row);
       $('supportMessageBodyV52').value='';
-      $('supportCustomSubjectV52').value='';
-      select.value='';
-      $('supportCustomSubjectWrapV52').classList.add('hidden');
       renderMessages();
       renderSupportThread();
       updateUnread();
@@ -2262,7 +2234,7 @@ async function togglePushDirect(btn){
   }
 
 
-  addCustomerHook('afterRenderMessages',()=>{refreshSubjectOptions();renderSupportThread()});
+  addCustomerHook('afterRenderMessages',renderSupportThread);
   addCustomerHook('afterUpdateUnread',()=>{
     const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);
     $('supportChatUnreadV52')?.classList.toggle('hidden',!unread);
