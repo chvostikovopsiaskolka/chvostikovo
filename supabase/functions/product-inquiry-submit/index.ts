@@ -147,7 +147,7 @@ Deno.serve(async (req: Request) => {
     if (!isUuid(submissionId) || !["stand", "target"].includes(productType)) {
       return response(origin, 400, { ok: false, error: "invalid_product" });
     }
-    if (!customerName || !/^\\+\\d{7,15}$/.test(phone) || !email.includes("@") || input.consent !== true) {
+    if (!customerName || !/^\+\d{7,15}$/.test(phone) || !email.includes("@") || input.consent !== true) {
       return response(origin, 400, { ok: false, error: "missing_customer_fields" });
     }
 
