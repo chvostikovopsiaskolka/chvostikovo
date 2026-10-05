@@ -59,7 +59,7 @@ export function InquirySection() {
         </div>
 
         <div className="relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8">
-          <h3 className="text-center text-2xl text-forest">Informujte sa o škôlke..</h3>
+          <h3 className="text-center text-2xl text-forest">Informujte sa o škôlke</h3>
           <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
             {INFO_SUBTITLE}
           </p>
