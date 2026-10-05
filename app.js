@@ -27,7 +27,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261005-customer-breed-weight-v151';
+const APP_BUILD='20261005-customer-closed-days-v152';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -1560,7 +1560,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const weekday=new Date(bratislavaClockV95().date+'T12:00:00Z').getUTCDay();
     const showClosed=closed&&(weekday===0||weekday===1);
     box.querySelector('strong').textContent=showClosed
-      ? 'Prihlasovanie na tento týždeň sa uzavrelo v nedeľu o 20:00.'
+      ? 'Prihlasovanie bolo na tento týždeň uzavreté v nedeľu o 20:00.'
       : 'Prosíme o rezerváciu miesta na ďalší týždeň do nedele 20:00.';
     const detail=box.querySelector('span');
     if(detail){detail.textContent=showClosed?'Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.':'';detail.classList.toggle('hidden',!showClosed)}
@@ -1651,7 +1651,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const disabled=!!existing||closed||past;
         const selected=selectedDatesV37.has(d.date);
         const stateText=existing?'Rezervované':past?'Uplynulo':closed?'Zatvorené':full?'Plno':deadlineClosed?'Uzavreté':`${Math.max(0,Number(d.available)||0)} voľné`;
-        return `<button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" data-contact="${lateContact?'true':'false'}" data-full="${full?'true':'false'}" ${disabled?'disabled':''}><small>${esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${esc(stateText)}</span></button>`;
+        return `<button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" data-contact="${lateContact?'true':'false'}" data-full="${full?'true':'false'}" ${disabled?'disabled':''}><small>${closed?'❌':esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${closed?'Zatvorené':esc(stateText)}</span></button>`;
       }).join('')}</div>${week.some(d=>bookingDeadlineClosedV95(d.date,dog))?'<small class="booking-week-closed-note-v127">Prihlasovanie uzavreté. Kliknutím na deň nám môžete napísať aj pri plnej kapacite.</small>':week.some(d=>Number(d.available)<=0)?'<small class="booking-week-closed-note-v127">Pri plnej kapacite kliknite na deň a napíšte nám záujem o miesto.</small>':''}</div>`);
     }
     $('bookingPickerDaysV37').innerHTML=groups.join('');

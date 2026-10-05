@@ -1,9 +1,9 @@
 
-const CACHE='chvostikovo-portal-shell-20261005-customer-breed-weight-v151';
+const CACHE='chvostikovo-portal-shell-20261005-customer-closed-days-v152';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/terms-pdf.js?v=20261005-customer-breed-weight-v151','/terms-pdf-font.js?v=20261005-customer-breed-weight-v151','/styles.css?v=20261005-customer-breed-weight-v151','/app.js?v=20261005-customer-breed-weight-v151','/back-swipe.js?v=20261005-customer-breed-weight-v151'];
+const SHELL=['/','/terms-pdf.js?v=20261005-customer-closed-days-v152','/terms-pdf-font.js?v=20261005-customer-closed-days-v152','/styles.css?v=20261005-customer-closed-days-v152','/app.js?v=20261005-customer-closed-days-v152','/back-swipe.js?v=20261005-customer-closed-days-v152'];
 
 function withPortalCsp(response){
   if(!response)return response;
