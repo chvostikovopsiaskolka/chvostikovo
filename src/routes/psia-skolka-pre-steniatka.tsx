@@ -11,7 +11,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import heroDogs from "@/assets/hero-dogs.jpg";
+import heroDogs from "@/assets/puppy-hero.webp";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { ShortForm } from "@/components/site/Forms";
