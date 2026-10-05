@@ -96,7 +96,7 @@ Deno.serve(async (req: Request) => {
     const dogMap = new Map<number, any>(dogs.map(d => [Number(d.id), d]));
 
     // Staff opts each dog in. Keep SMS when no active customer push recipient exists.
-    const pushOwnerIds = [...new Set(dogs.filter(d => d.visit_reminder_channel === 'push').map(d => Number(d.owner_id)).filter(Boolean))];
+    const pushOwnerIds = [...new Set(dogs.filter(d => ['auto', 'push'].includes(d.visit_reminder_channel)).map(d => Number(d.owner_id)).filter(Boolean))];
     const pushOwners = new Set<number>();
     if (pushOwnerIds.length) {
       const links = await fetchJsonWithRetry(`${supabaseUrl}/rest/v1/customer_owner_links?owner_id=${encodeURIComponent(inList(pushOwnerIds))}&select=owner_id,user_id`, headers, 'Customer links') as any[];
@@ -136,7 +136,7 @@ Deno.serve(async (req: Request) => {
 
     const result = rows.filter((x: any) => {
       const dog = dogMap.get(Number(x.dog_id));
-      return !(dog?.visit_reminder_channel === 'push' && pushOwners.has(Number(dog.owner_id)));
+      return !(['auto', 'push'].includes(dog?.visit_reminder_channel) && pushOwners.has(Number(dog.owner_id)));
     }).map((x: any) => {
       const dog = dogMap.get(Number(x.dog_id));
       if (!dog) throw new Error(`Dog ${x.dog_id} not found`);
