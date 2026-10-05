@@ -164,7 +164,7 @@ function LeadLandingPage() {
             <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-cream to-transparent" />
           </div>
 
-          <div className="relative mx-auto grid min-h-[455px] max-w-6xl items-start gap-5 px-4 pt-8 pb-0 sm:min-h-[535px] sm:items-center sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative mx-auto grid min-h-[455px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <h1 className="text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
                 Miesto, kam sa psíkovia
@@ -223,10 +223,11 @@ function LeadLandingPage() {
           <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 p-3.5 shadow-card ring-1 ring-forest/8 sm:p-5">
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">
-                Zaujíma vás škôlka?
+                Chcete sa informovať o škôlke?
               </p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
-                Nechajte nám meno a telefón. Ozveme sa vám a radi poradíme.
+                <span className="block">Nechajte nám meno a telefón.</span>
+                <span className="block">Ozveme sa vám a radi poradíme.</span>
               </p>
             </div>
             <ShortForm trackingSource="lead_landing_mobile_below_hero" />
