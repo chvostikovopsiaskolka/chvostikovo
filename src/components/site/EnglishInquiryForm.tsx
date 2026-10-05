@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
 import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 
@@ -19,6 +20,13 @@ export function EnglishInquiryForm({
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formStarted = useRef(false);
+
+  function onFormFocus() {
+    if (formStarted.current) return;
+    formStarted.current = true;
+    void trackCookielessInteraction("form_start", trackingSource, "en");
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -59,9 +67,11 @@ export function EnglishInquiryForm({
         ctaSource: trackingSource,
       });
       trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
+      void trackCookielessInteraction("form_submit", trackingSource, "en");
 
       setSent(true);
     } catch {
+      void trackCookielessInteraction("form_error", trackingSource, "en");
       setError("Something went wrong. Please try again or call us.");
     } finally {
       setLoading(false);
@@ -81,7 +91,7 @@ export function EnglishInquiryForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3 text-left sm:space-y-3.5">
+    <form onSubmit={onSubmit} onFocusCapture={onFormFocus} className="space-y-3 text-left sm:space-y-3.5">
       <div>
         <label className="label-sm" htmlFor="en-name">Your name *</label>
         <input id="en-name" name="name" required className="field" placeholder="Your name" />
