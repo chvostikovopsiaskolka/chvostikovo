@@ -32,6 +32,8 @@ input[type="date"],input[type="time"]{max-inline-size:100%!important;-webkit-min
 
 /* v19: dismissible announcements + install guide */
 /* Compact iPhone guide stays near the top, above the browser's share sheet. */
+.dog-breed-weight-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:10px}
+.dog-breed-weight-row>div{min-width:0}
 .install-step>span:only-child{grid-column:1/-1}
 .install-guide-modal.install-guide-ios{place-items:start center}
 .install-guide-ios .install-guide-card{padding:18px 16px 14px}

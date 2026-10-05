@@ -27,7 +27,7 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261005-customer-install-guide-v150';
+const APP_BUILD='20261005-customer-breed-weight-v151';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -449,7 +449,7 @@ function parseDogBreedWeightV124(value){
 }
 function syncDogAgeField(){const birth=$('dogBirthDate').value,age=$('dogAge'),automatic=dogAgeText(birth);age.value=automatic;age.readOnly=true;age.setAttribute('aria-readonly','true');age.placeholder=automatic?'Vypočítané z dátumu narodenia':'Vek po zadaní dátumu narodenia';age.title='Vek sa automaticky vypočíta po zadaní dátumu narodenia.'}
 function fillDogForm(d){
-  $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=dogBreedWeightValueV124(d);$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';
+  $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=d.breed||'';$('dogWeight').value=d.weight_kg??'';$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';
   if($('dogAllergies'))$('dogAllergies').value=combinedDogInfoV81(d);
   const vs=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(d.id));
   for(const [type,inputId] of [['rabies','rabiesUntil'],['infectious','infectiousUntil'],['kennel_cough','kennelUntil']]){
@@ -497,7 +497,7 @@ async function saveDog(e){
       const id=expiredVacc.type==='rabies'?'rabiesUntil':expiredVacc.type==='infectious'?'infectiousUntil':'kennelUntil';$(id)?.focus();return;
     }
   }
-  const breedWeight=parseDogBreedWeightV124($('dogBreed').value);
+  const breedWeight={breed:$('dogBreed').value.trim(),weight_kg:$('dogWeight').value.trim()?Number($('dogWeight').value.replace(',','.')):null};
   const body={action:'save_dog',dog_id:dogId,dog_name:$('dogName').value,age_text:ageText,birth_date:birthDate||null,breed:breedWeight.breed,weight_kg:breedWeight.weight_kg,sex,neutered:neut===''?null:neut==='true',allergies:$('dogAllergies')?.value||'',temperament:''};
   if(savedMode==='vaccinations'){body.vaccinations=vaccinations;body.require_vaccination_proof=true}
   try{
@@ -2363,6 +2363,10 @@ function applyDogDetailsModeV96(mode='details',mandatory=false){
   if($('dogDetailsTitle'))$('dogDetailsTitle').textContent=dogDetailsModeV96==='vaccinations'?'Očkovania':'Údaje psíka';
   $('dogDetailsClose')?.classList.toggle('hidden',dogDetailsMandatoryV96);
   $('dogDetailsModal')?.setAttribute('data-mode',dogDetailsModeV96);
+  const modal=$('dogDetailsModal');
+  if(modal?.contains(document.activeElement))document.activeElement.blur();
+  const resetScroll=()=>{if(!modal)return;modal.scrollTop=0;const card=modal.querySelector('.dog-details-card');if(card)card.scrollTop=0;const form=$('dogForm');if(form)form.scrollTop=0};
+  resetScroll();requestAnimationFrame(resetScroll);
 }
 function v105BlobToDataUrl(blob){
   return new Promise((resolve,reject)=>{
