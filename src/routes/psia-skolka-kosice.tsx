@@ -8,11 +8,9 @@ import {
   Heart,
   MapPin,
   PawPrint,
-  Phone,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import logo from "@/assets/logo.png";
 import heroDogs from "@/assets/hero-dogs.jpg";
 import { ShortForm } from "@/components/site/Forms";
 import { FormDialog } from "@/components/site/FormDialog";
@@ -20,7 +18,8 @@ import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews, ReviewReasons, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { Footer } from "@/components/site/Contact";
-import { FAQ, PHONE, PHONE_PRETTY, REVIEWS } from "@/content/site";
+import { Header } from "@/components/site/Header";
+import { FAQ, REVIEWS } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
@@ -113,43 +112,10 @@ function LeadLandingPage() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-forest/10 bg-cream/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:h-18">
-          <a href="/" aria-label="Chvostíkovo – domov" className="shrink-0">
-            <img src={logo} alt="Chvostíkovo" className="h-7 w-auto sm:h-8" />
-          </a>
-
-          <div className="flex items-center gap-2">
-            <a
-              href={`tel:${PHONE}`}
-              onClick={() => {
-                trackMarketingInteraction("phone_click", "lead_landing_header_desktop");
-                void trackCookielessInteraction("phone_click", "lead_landing_header_desktop");
-              }}
-              className="btn-coral hidden items-center gap-2 px-4 py-2 text-sm sm:inline-flex"
-              aria-label={`Zavolajte nám na ${PHONE_PRETTY}`}
-            >
-              <Phone className="size-4" />
-              {PHONE_PRETTY}
-            </a>
-            <a
-              href={`tel:${PHONE}`}
-              onClick={() => {
-                trackMarketingInteraction("phone_click", "lead_landing_header_mobile");
-                void trackCookielessInteraction("phone_click", "lead_landing_header_mobile");
-              }}
-              className="btn-coral inline-flex items-center gap-1.5 px-3 py-2 text-[11px] min-[390px]:text-xs sm:hidden"
-              aria-label={`Zavolajte nám na ${PHONE_PRETTY}`}
-            >
-              <Phone className="size-3.5" />
-              {PHONE_PRETTY}
-            </a>
-          </div>
-        </div>
-      </header>
+      <Header homeSectionLinks />
 
       <main>
-        <section className="relative overflow-hidden pt-16 sm:pt-18">
+        <section className="relative overflow-hidden pt-20 sm:pt-24">
           <div className="absolute inset-0">
             <img
               src={heroDogs}
