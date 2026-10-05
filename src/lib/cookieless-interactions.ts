@@ -7,6 +7,7 @@ export type CookielessInteractionName =
   | "inquiry_cta"
   | "form_start"
   | "form_submit"
+  | "form_error"
   | "success_conditions_click"
   | "success_pricing_click";
 
@@ -62,15 +63,21 @@ function releaseSessionGuard(key: string) {
 export async function trackCookielessInteraction(
   eventName: CookielessInteractionName,
   eventSource: string,
+  language: "sk" | "en" = "sk",
 ) {
   if (typeof window === "undefined") return;
 
   const url = new URL(window.location.href);
   const trackedPaths = new Set([
+    "/",
     "/psia-skolka-kosice",
     "/psia-skolka-kosice/",
     "/psia-skolka-pre-steniatka",
     "/psia-skolka-pre-steniatka/",
+    "/strazenie-psov-kosice",
+    "/strazenie-psov-kosice/",
+    "/en/dog-daycare-kosice",
+    "/en/dog-daycare-kosice/",
   ]);
   if (!trackedPaths.has(url.pathname)) return;
 
@@ -88,7 +95,7 @@ export async function trackCookielessInteraction(
     path: `${url.pathname}${url.hash || ""}`.slice(0, 500),
     event_name: eventName,
     event_source: source,
-    language: "sk",
+    language,
     utm_source: params.get("utm_source") || "",
     utm_medium: params.get("utm_medium") || "",
     utm_campaign: normalizeUtm(params.get("utm_campaign") || ""),
