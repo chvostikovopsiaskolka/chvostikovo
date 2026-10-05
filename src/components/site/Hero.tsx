@@ -5,6 +5,15 @@ import { ShortForm } from "./Forms";
 import { InfoTicker } from "./InfoTicker";
 import { trackMarketingInteraction } from "@/lib/analytics";
 
+function scrollToWhyChvostikovo() {
+  const target = document.getElementById("preco-chvostikovo");
+  if (!target) return;
+
+  const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 64;
+  const top = window.scrollY + target.getBoundingClientRect().top - headerHeight - 8;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
 export function Hero() {
   return (
     <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-28 lg:pb-4">
@@ -60,10 +69,7 @@ export function Hero() {
             type="button"
             onClick={() => {
               trackMarketingInteraction("hero_learn_more", "hero_mobile");
-              document.getElementById("preco-chvostikovo")?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
+              scrollToWhyChvostikovo();
             }}
             className="btn-coral mt-3 inline-flex min-w-[190px] items-center justify-center px-5 py-2.5 text-sm min-[390px]:mt-4 min-[390px]:min-w-[220px] min-[390px]:py-3 min-[390px]:text-[15px]"
           >
