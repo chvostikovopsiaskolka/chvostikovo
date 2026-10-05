@@ -40,14 +40,15 @@ export function ShortForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
+  const shouldTrackForm = Boolean(trackingSource);
   const isTrackedLanding =
     trackingSource?.startsWith("lead_landing_") === true ||
     trackingSource?.startsWith("puppy_landing_") === true;
 
   function onFormFocus() {
-    if (!isTrackedLanding || formStarted.current) return;
+    if (!shouldTrackForm || formStarted.current) return;
     formStarted.current = true;
-    void trackCookielessInteraction("form_start", trackingSource || "landing_form");
+    void trackCookielessInteraction("form_start", trackingSource || "informational_form");
   }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -79,12 +80,15 @@ export function ShortForm({
         ctaSource: trackingSource,
       });
       trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
-      if (isTrackedLanding) {
-        void trackCookielessInteraction("form_submit", trackingSource || "landing_form");
+      if (shouldTrackForm) {
+        void trackCookielessInteraction("form_submit", trackingSource || "informational_form");
       }
       setSent(true);
       onSent?.();
     } catch {
+      if (shouldTrackForm) {
+        void trackCookielessInteraction("form_error", trackingSource || "informational_form");
+      }
       setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
     } finally {
       setLoading(false);
@@ -170,6 +174,14 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formStarted = useRef(false);
+  const trackingSource = "application_form";
+
+  function onFormFocus() {
+    if (formStarted.current) return;
+    formStarted.current = true;
+    void trackCookielessInteraction("form_start", trackingSource);
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -204,9 +216,11 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         landingPage: attribution.landing_page,
       });
       trackMetaFormConversion("prihlaska", undefined, submission.metaEventId);
+      void trackCookielessInteraction("form_submit", trackingSource);
       setSent(true);
       onSent?.();
     } catch {
+      void trackCookielessInteraction("form_error", trackingSource);
       setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
     } finally {
       setLoading(false);
@@ -228,7 +242,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3 text-left sm:space-y-3.5">
+    <form onSubmit={onSubmit} onFocusCapture={onFormFocus} className="space-y-3 text-left sm:space-y-3.5">
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
         <div>
           <label className="label-sm" htmlFor="l-meno">
