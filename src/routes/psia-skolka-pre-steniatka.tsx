@@ -7,17 +7,15 @@ import {
   MapPin,
   Moon,
   PawPrint,
-  Phone,
   ShieldCheck,
   Sparkles,
   Users,
 } from "lucide-react";
-import logo from "@/assets/logo.png";
 import heroDogs from "@/assets/hero-dogs.jpg";
 import { Footer } from "@/components/site/Contact";
+import { Header } from "@/components/site/Header";
 import { ShortForm } from "@/components/site/Forms";
 import { FormDialog } from "@/components/site/FormDialog";
-import { PHONE, PHONE_PRETTY } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
@@ -156,29 +154,10 @@ function PuppyDaycarePage() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-forest/10 bg-cream/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:h-18">
-          <a href="/" aria-label="Chvostíkovo – domov" className="shrink-0">
-            <img src={logo} alt="Chvostíkovo" className="h-7 w-auto sm:h-8" />
-          </a>
-
-          <a
-            href={"tel:" + PHONE}
-            onClick={() => {
-              trackMarketingInteraction("phone_click", "puppy_landing_header");
-              void trackCookielessInteraction("phone_click", "puppy_landing_header");
-            }}
-            className="btn-coral inline-flex items-center gap-1.5 px-3 py-2 text-[11px] min-[390px]:text-xs sm:px-4 sm:text-sm"
-            aria-label={"Zavolajte nám na " + PHONE_PRETTY}
-          >
-            <Phone className="size-3.5 sm:size-4" />
-            {PHONE_PRETTY}
-          </a>
-        </div>
-      </header>
+      <Header homeSectionLinks />
 
       <main>
-        <section className="relative overflow-hidden pt-16 sm:pt-18">
+        <section className="relative overflow-hidden pt-20 sm:pt-24">
           <div className="absolute inset-0">
             <img
               src={heroDogs}
@@ -193,7 +172,7 @@ function PuppyDaycarePage() {
             <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-cream to-transparent" />
           </div>
 
-          <div className="relative mx-auto grid min-h-[470px] max-w-6xl items-start gap-5 px-4 pt-4 pb-1 sm:min-h-[540px] sm:items-center sm:pt-8 sm:pb-5 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative mx-auto grid min-h-[470px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-coral-dark sm:text-sm">
                 Psia škôlka pre šteniatka v Košiciach
