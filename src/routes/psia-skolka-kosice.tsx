@@ -226,7 +226,7 @@ function LeadLandingPage() {
                 Zaujíma vás škôlka?
               </p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
-                Nechajte nám kontakt a vyberte, čo hľadáte. Ozveme sa vám a radi poradíme.
+                Nechajte nám meno a telefón. Ozveme sa vám a radi poradíme.
               </p>
             </div>
             <ShortForm trackingSource="lead_landing_mobile_below_hero" />
@@ -311,7 +311,7 @@ function LeadLandingPage() {
 
             <div className="mt-7 grid gap-4 md:grid-cols-3">
               {[
-                ["1", "Vyplníte krátky formulár", "Napíšete nám pár základných informácií a necháte telefónny kontakt."],
+                ["1", "Vyplníte krátky formulár", "Necháte nám meno a telefónny kontakt."],
                 ["2", "Ozveme sa vám", "Preberieme vášho psíka, vaše potreby a odpovieme na otázky."],
                 ["3", "Dohodneme úvodnú návštevu", "Psík sa zoznámi s prostredím, nami aj kolektívom. Úvodná návšteva je zadarmo."],
               ].map(([number, stepTitle, text]) => (
