@@ -1370,13 +1370,13 @@ async function removeOwnerAlternatePhoneV60(dogId,ownerId,button){
 }
 
 function visitReminderControlHtml(d){
- const mode=d.visit_reminder_channel||'sms';
- return `<details class="pass-manager" style="margin:8px 0"><summary style="cursor:pointer;padding:12px 6px;font-weight:800">Pripomienka návštevy</summary><label for="dogVisitReminderChannel" class="muted small">Deň pred návštevou o 19:15</label><select id="dogVisitReminderChannel" class="input" style="margin-top:6px"><option value="sms" ${mode==='sms'?'selected':''}>SMS</option><option value="both" ${mode==='both'?'selected':''}>SMS aj push na testovanie</option><option value="push" ${mode==='push'?'selected':''}>Push namiesto SMS</option></select><div class="muted small" style="margin-top:7px">Push dostanú priradené aktívne zákaznícke účty so zapnutými upozorneniami. Bez aktívneho push odberu sa SMS ponechá. Úvodné návštevy zostávajú cez SMS.</div><div id="dogVisitReminderMessage" role="status"></div></details>`;
+ const mode=d.visit_reminder_channel||'auto';
+ return `<details class="pass-manager" style="margin:8px 0"><summary style="cursor:pointer;padding:12px 6px;font-weight:800">Pripomienka návštevy</summary><label for="dogVisitReminderChannel" class="muted small">Deň pred návštevou o 19:15</label><select id="dogVisitReminderChannel" class="input" style="margin-top:6px"><option value="auto" ${mode==='auto'?'selected':''}>Automaticky podľa push odberu</option><option value="sms" ${mode==='sms'?'selected':''}>Vždy SMS</option><option value="both" ${mode==='both'?'selected':''}>SMS aj push na testovanie</option><option value="push" ${mode==='push'?'selected':''}>Push namiesto SMS</option></select><div class="muted small" style="margin-top:7px">Push dostanú priradené aktívne zákaznícke účty so zapnutými upozorneniami. Bez aktívneho push odberu sa SMS ponechá. Úvodné návštevy zostávajú cez SMS.</div><div id="dogVisitReminderMessage" role="status"></div></details>`;
 }
 async function saveVisitReminderChannel(id,select){
- const d=dogById(id),previous=d?.visit_reminder_channel||'sms',next=select.value,msg=$('dogVisitReminderMessage');select.disabled=true;
+ const d=dogById(id),previous=d?.visit_reminder_channel||'auto',next=select.value,msg=$('dogVisitReminderMessage');select.disabled=true;
  try{
-  if(!['sms','both','push'].includes(next))throw new Error('Neplatná voľba.');
+  if(!['auto','sms','both','push'].includes(next))throw new Error('Neplatná voľba.');
   const {data,error}=await withJwtRetry(()=>supabase.from('dogs').update({visit_reminder_channel:next}).eq('id',id).select('visit_reminder_channel').single());
   if(error||!data)throw error||new Error('Zmena sa neuložila.');
   d.visit_reminder_channel=data.visit_reminder_channel;if(msg)msg.innerHTML='<div class="success">Pripomienka bola nastavená.</div>';
