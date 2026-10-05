@@ -66,7 +66,13 @@ export async function trackCookielessInteraction(
   if (typeof window === "undefined") return;
 
   const url = new URL(window.location.href);
-  if (url.pathname !== "/psia-skolka-kosice" && url.pathname !== "/psia-skolka-kosice/") return;
+  const trackedPaths = new Set([
+    "/psia-skolka-kosice",
+    "/psia-skolka-kosice/",
+    "/psia-skolka-pre-steniatka",
+    "/psia-skolka-pre-steniatka/",
+  ]);
+  if (!trackedPaths.has(url.pathname)) return;
 
   const params = url.searchParams;
   const fbclid = params.get("fbclid") || "";
