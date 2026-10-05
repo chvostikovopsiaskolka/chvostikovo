@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "check:critical-forms": "bun scripts/critical-form-checks.ts",
+    "smoke:forms": "node scripts/smoke-live-form-backend.mjs",
     "build:pages": "vite build --config vite.config.pages.ts && node scripts/finalize-pages.mjs"
   },
   "dependencies": {
