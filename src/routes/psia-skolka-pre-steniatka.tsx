@@ -251,7 +251,7 @@ function PuppyDaycarePage() {
         <section className="bg-card px-4 pt-2 pb-6 lg:hidden">
           <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 p-4 shadow-card ring-1 ring-forest/8">
             <div className="mb-4 text-center">
-              <p className="font-display text-xl font-bold text-forest">Máte doma šteniatko?</p>
+              <p className="font-display text-xl font-bold text-forest">Chcete sa informovať o škôlke pre šteniatko?</p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
                 Stačí meno a telefón. Ozveme sa a povieme vám, či už môže prísť na úvodnú návštevu.
               </p>
