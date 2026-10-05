@@ -28,20 +28,26 @@ function attributionPayload() {
 export function ShortForm({
   onSent,
   trackingSource,
+  hideInterest = false,
+  interestValue = "Chcem sa dozvedieť viac o psej škôlke",
 }: {
   onSent?: () => void;
   trackingSource?: string;
+  hideInterest?: boolean;
+  interestValue?: string;
 }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
-  const isLeadLanding = trackingSource?.startsWith("lead_landing_") === true;
+  const isTrackedLanding =
+    trackingSource?.startsWith("lead_landing_") === true ||
+    trackingSource?.startsWith("puppy_landing_") === true;
 
   function onFormFocus() {
-    if (!isLeadLanding || formStarted.current) return;
+    if (!isTrackedLanding || formStarted.current) return;
     formStarted.current = true;
-    void trackCookielessInteraction("form_start", trackingSource || "lead_landing_form");
+    void trackCookielessInteraction("form_start", trackingSource || "landing_form");
   }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -62,7 +68,7 @@ export function ShortForm({
         cta_source: trackingSource,
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: String(fd.get("telefon") ?? "").trim(),
-        zaujem: String(fd.get("zaujem") ?? ""),
+        zaujem: hideInterest ? interestValue : String(fd.get("zaujem") ?? ""),
       });
       trackFormSubmit({
         formType: "informacie",
@@ -73,8 +79,8 @@ export function ShortForm({
         ctaSource: trackingSource,
       });
       trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
-      if (isLeadLanding) {
-        void trackCookielessInteraction("form_submit", trackingSource || "lead_landing_form");
+      if (isTrackedLanding) {
+        void trackCookielessInteraction("form_submit", trackingSource || "landing_form");
       }
       setSent(true);
       onSent?.();
@@ -95,7 +101,7 @@ export function ShortForm({
         <p className="text-sm text-muted-foreground">
           Váš záujem sme prijali. Ozveme sa vám čo najskôr.
         </p>
-        {isLeadLanding && (
+        {isTrackedLanding && (
           <div className="mt-2 w-full max-w-sm rounded-2xl bg-secondary/55 p-4">
             <p className="text-sm leading-relaxed text-forest/75">
               Kým sa vám ozveme, môžete si pozrieť podmienky prijatia psíka alebo náš cenník.
@@ -131,20 +137,22 @@ export function ShortForm({
         <input id="s-meno" name="meno" required className="field" placeholder="Vaše meno" />
       </div>
       <PhoneField id="s-tel" name="telefon" />
-      <div>
-        <label className="label-sm" htmlFor="s-zaujem">
-          O čo máte záujem? *
-        </label>
-        <select id="s-zaujem" name="zaujem" required className="field" defaultValue="">
-          <option value="" disabled>
-            Vyberte možnosť
-          </option>
-          <option>Chcem sa dozvedieť viac o psej škôlke</option>
-          <option>Mám záujem o pravidelné návštevy</option>
-          <option>Potrebujem škôlku občas</option>
-          <option>Potrebujem jednorazové stráženie</option>
-        </select>
-      </div>
+      {!hideInterest && (
+        <div>
+          <label className="label-sm" htmlFor="s-zaujem">
+            O čo máte záujem? *
+          </label>
+          <select id="s-zaujem" name="zaujem" required className="field" defaultValue="">
+            <option value="" disabled>
+              Vyberte možnosť
+            </option>
+            <option>Chcem sa dozvedieť viac o psej škôlke</option>
+            <option>Mám záujem o pravidelné návštevy</option>
+            <option>Potrebujem škôlku občas</option>
+            <option>Potrebujem jednorazové stráženie</option>
+          </select>
+        </div>
+      )}
       <PrivacyConsentCheckbox />
       {error && <p className="text-sm text-destructive">{error}</p>}
       <button
