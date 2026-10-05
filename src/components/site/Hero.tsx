@@ -1,4 +1,4 @@
-import { CheckCircle2, Phone } from "lucide-react";
+import { ArrowDown, CheckCircle2, Phone } from "lucide-react";
 import { PHONE } from "@/content/site";
 import heroDogs from "@/assets/hero-dogs.jpg";
 import { ShortForm } from "./Forms";
@@ -71,9 +71,10 @@ export function Hero() {
               trackMarketingInteraction("hero_learn_more", "hero_mobile");
               scrollToWhyChvostikovo();
             }}
-            className="btn-coral mt-3 inline-flex min-w-[190px] items-center justify-center px-5 py-2.5 text-sm min-[390px]:mt-4 min-[390px]:min-w-[220px] min-[390px]:py-3 min-[390px]:text-[15px]"
+            className="btn-coral mt-3 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-4 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
           >
-            Zistiť viac o škôlke
+            Zistiť viac
+            <ArrowDown className="size-5" />
           </button>
 
           <InfoTicker className="mt-3 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-4" compact />
@@ -123,7 +124,7 @@ export function Hero() {
 
           <div className="min-w-0 rounded-4xl bg-card/95 p-8 shadow-soft backdrop-blur-sm">
             <h2 className="text-center text-2xl text-forest sm:whitespace-nowrap">
-              Informujte sa o škôlke..
+              Informujte sa o škôlke
             </h2>
             <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
               Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.

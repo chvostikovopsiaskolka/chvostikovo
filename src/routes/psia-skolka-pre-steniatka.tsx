@@ -268,7 +268,7 @@ function PuppyDaycarePage() {
               onClick={() => openForm("puppy_landing_benefits")}
               className="btn-coral mt-7 inline-flex min-w-[270px] justify-center px-7 py-3.5 text-[15px] sm:min-w-[330px] sm:text-lg"
             >
-              Chcem sa informovať o šteniatku
+              Chcem sa informovať o škôlke
             </button>
           </div>
         </section>

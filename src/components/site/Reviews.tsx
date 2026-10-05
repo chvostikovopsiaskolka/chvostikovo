@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { HeartHandshake, PawPrint, Sparkles } from "lucide-react";
+import { ArrowDown, HeartHandshake, PawPrint, Sparkles } from "lucide-react";
 import skolkariVideo from "@/assets/skolkari.mp4";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -196,9 +196,10 @@ export function ReviewReasons({
                 block: "start",
               });
             }}
-            className="btn-coral inline-flex w-auto max-w-[340px] items-center justify-center whitespace-nowrap px-6 py-3.5 text-center text-[15px] leading-none sm:min-w-[360px] sm:max-w-none sm:px-10 sm:py-4 sm:text-lg"
+            className="btn-coral inline-flex w-auto max-w-[340px] items-center justify-center gap-2 whitespace-nowrap px-6 py-3.5 text-center text-[15px] leading-none sm:min-w-[360px] sm:max-w-none sm:px-10 sm:py-4 sm:text-lg"
           >
             {ctaLabel}
+            <ArrowDown className="size-5 shrink-0" />
           </button>
         </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { ChevronDown, Menu, Package, Phone, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { PHONE } from "@/content/site";
@@ -50,6 +50,37 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
     setInfoOpen(false);
   };
 
+  const handleSectionClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (homeSectionLinks || !href.startsWith("#")) {
+      closeMobileMenu();
+      return;
+    }
+
+    const target = document.getElementById(href.slice(1));
+    if (!target) return;
+
+    event.preventDefault();
+    closeMobileMenu();
+
+    // Wait until the mobile menu is removed before measuring the floating header.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const headerBar = document.querySelector<HTMLElement>("header > div");
+        const headerBottom = headerBar?.getBoundingClientRect().bottom ?? 72;
+        const heading = target.querySelector<HTMLElement>("h1, h2");
+        const previous = heading?.previousElementSibling;
+        const anchor =
+          previous instanceof HTMLElement && previous.classList.contains("uppercase")
+            ? previous
+            : heading ?? target;
+        const top = window.scrollY + anchor.getBoundingClientRect().top - headerBottom - 12;
+
+        window.history.replaceState(null, "", href);
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      });
+    });
+  };
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2.5 min-[390px]:px-3 min-[390px]:pt-3">
       <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-1 rounded-full bg-card/95 px-2.5 py-2 shadow-soft backdrop-blur-md min-[390px]:gap-1.5 min-[390px]:px-4 sm:gap-3 sm:px-6">
@@ -59,13 +90,14 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
 
         <nav className="absolute left-[48%] hidden -translate-x-1/2 items-center gap-6 lg:flex">
           {NAV_DESKTOP_BEFORE_ABOUT.map((item) => (
-            <a key={item.href} href={sectionHref(item.href)} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">
+            <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">
               {item.label}
             </a>
           ))}
 
           <a
             href={sectionHref("#o-nas")}
+            onClick={(event) => handleSectionClick(event, "#o-nas")}
             className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
           >
             O nás
@@ -79,7 +111,7 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
           </a>
 
           {NAV_DESKTOP_AFTER_ABOUT.map((item) => (
-            <a key={item.href} href={sectionHref(item.href)} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">{item.label}</a>
+            <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">{item.label}</a>
           ))}
         </nav>
 
@@ -96,19 +128,19 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
         <div className="mx-auto mt-2 max-h-[calc(100vh-5.5rem)] max-w-6xl overflow-y-auto rounded-3xl bg-card/98 p-3 shadow-soft backdrop-blur-md lg:hidden">
           <nav className="flex flex-col">
             {NAV_MOBILE_BEFORE_ABOUT.map((item) => (
-              <a key={item.href} href={sectionHref(item.href)} onClick={closeMobileMenu} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
+              <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
             ))}
 
             <a
               href={sectionHref("#o-nas")}
-              onClick={closeMobileMenu}
+              onClick={(event) => handleSectionClick(event, "#o-nas")}
               className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral"
             >
               O nás
             </a>
 
             {NAV_MOBILE_AFTER_INFO.slice(0, 1).map((item) => (
-              <a key={item.href} href={sectionHref(item.href)} onClick={closeMobileMenu} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
+              <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
             ))}
 
             <a
@@ -131,7 +163,7 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
             )}
 
             {NAV_MOBILE_AFTER_INFO.slice(1).map((item) => (
-              <a key={item.href} href={sectionHref(item.href)} onClick={closeMobileMenu} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
+              <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
             ))}
           </nav>
           <a href={`tel:${PHONE}`} onClick={closeMobileMenu} className="btn-coral mt-2 flex w-full items-center justify-center gap-2 py-3 text-sm"><Phone className="size-4" /> Zavolajte nám</a>

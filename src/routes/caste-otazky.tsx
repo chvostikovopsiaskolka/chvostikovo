@@ -56,10 +56,7 @@ function FrequentlyAskedQuestionsPage() {
 
           <div className="relative mx-auto max-w-4xl px-4">
             <div className="text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
-                Chvostíkovo
-              </p>
-              <h1 className="mt-3 text-4xl leading-tight text-forest sm:text-5xl">Časté otázky</h1>
+              <h1 className="text-4xl leading-tight text-forest sm:text-5xl">Časté otázky</h1>
               <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-forest/80 sm:text-lg">
                 Všetky najčastejšie otázky o fungovaní psej škôlky, prvej návšteve, bezpečnosti,
                 rezerváciách aj praktických veciach na jednom mieste.
