@@ -12,6 +12,16 @@ function sourceRef() {
   return `${window.location.pathname}${window.location.search}` || "/en/dog-daycare-kosice";
 }
 
+function normalizedEnglishPhoneFromForm(form: HTMLFormElement) {
+  const input = form.querySelector<HTMLInputElement>("#en-phone");
+  const prefix = input?.parentElement?.querySelector<HTMLSelectElement>("select")?.value || "+421";
+  let digits = String(input?.value ?? "").split("").filter((ch) => ch >= "0" && ch <= "9").join("");
+  const prefixDigits = prefix.slice(1);
+  if (digits.startsWith(prefixDigits)) return `+${digits}`;
+  if (prefix === "+421" && digits.startsWith("0")) digits = digits.slice(1);
+  return digits ? `${prefix}${digits}` : "";
+}
+
 export function EnglishInquiryForm({
   trackingSource = "english_page",
 }: {
@@ -32,7 +42,8 @@ export function EnglishInquiryForm({
     e.preventDefault();
     if (loading) return;
 
-    const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     const source_ref = sourceRef();
     const attribution = getTrafficAttribution();
     const interest = String(fd.get("interest") ?? "").trim();
@@ -54,7 +65,7 @@ export function EnglishInquiryForm({
         utm_content: attribution.content,
         cta_source: trackingSource,
         meno: String(fd.get("name") ?? "").trim(),
-        telefon: String(fd.get("phone") ?? "").trim(),
+        telefon: normalizedEnglishPhoneFromForm(form) || String(fd.get("phone") ?? "").trim(),
         zaujem: `EN – Dog daycare enquiry | ${interest}`,
       });
 
