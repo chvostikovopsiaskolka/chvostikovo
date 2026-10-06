@@ -85,12 +85,9 @@ export function PhoneField({
         <input
           id={id}
           type="tel"
-          inputMode="numeric"
-          autoComplete="tel-national"
+          inputMode="tel"
+          autoComplete="tel"
           required
-          minLength={6}
-          maxLength={15}
-          pattern="[0-9]{6,15}"
           value={digits}
           onChange={(event) => {
             event.currentTarget.setCustomValidity("");
