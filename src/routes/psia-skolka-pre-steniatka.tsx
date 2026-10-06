@@ -167,9 +167,9 @@ function PuppyDaycarePage() {
               decoding="async"
               className="size-full scale-[1.14] object-cover object-[54%_50%] sm:scale-[1.08] lg:scale-100 lg:object-[52%_38%]"
             />
-            <div className="absolute inset-0 bg-cream/35" />
-            <div className="absolute inset-0 bg-linear-to-r from-cream/98 via-cream/82 via-50% to-cream/28" />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-cream to-transparent" />
+            <div className="absolute inset-0 bg-cream/25 lg:bg-cream/10" />
+            <div className="absolute inset-0 bg-linear-to-r from-cream/95 via-cream/55 via-45% to-cream/35 lg:to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-cream to-transparent" />
           </div>
 
           <div className="relative mx-auto grid min-h-[470px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
