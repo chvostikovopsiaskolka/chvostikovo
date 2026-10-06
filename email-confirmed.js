@@ -10,6 +10,15 @@
     if(!response.ok)throw new Error('Potvrdenie sa nepodarilo overiť. Otvorte najnovší potvrdzovací e-mail alebo sa skúste prihlásiť, ak už bol potvrdený.');
     const user=await response.json();
     if(!user.email_confirmed_at)throw new Error('E-mail zatiaľ nie je potvrdený. Otvorte odkaz v potvrdzovacom e-maile.');
+    const installed=window.matchMedia?.('(display-mode: standalone)').matches||navigator.standalone===true;
+    if(installed){
+      // Carry only verified display data, never callback tokens, into the login screen.
+      sessionStorage.setItem('chvostikovo_verified_email_return',JSON.stringify({email:user.email||'',at:Date.now()}));
+      localStorage.removeItem('chvostikovo_customer_session');
+      sessionStorage.removeItem('chvostikovo_customer_session');
+      location.replace('/?email_confirmed=1');
+      return;
+    }
     title.textContent='Váš e-mail je potvrdený';
     message.textContent='Vráťte sa do aplikácie Chvostíkovo a prihláste sa.';
   }catch(error){

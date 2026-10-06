@@ -27,8 +27,8 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261005-customer-beta1-v154';
-const APP_VERSION='1.0.1';
+const APP_BUILD='20261006-customer-confirm-return-v155';
+const APP_VERSION='1.0.2';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -263,7 +263,7 @@ function startCustomerLive(force=false){
   if(!state.session?.access_token||document.visibilityState==='hidden')return;
   if(customerLiveSocket&&!force&&[WebSocket.OPEN,WebSocket.CONNECTING].includes(customerLiveSocket.readyState))return;
   stopCustomerLive();
-  const url=SUPABASE_URL.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(SUPABASE_KEY)+'&vsn=1.0.1';
+  const url=SUPABASE_URL.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(SUPABASE_KEY)+'&vsn=1.0.2';
   let socket;try{socket=new WebSocket(url)}catch(error){console.warn('Realtime spojenie sa nepodarilo otvoriť',error);scheduleCustomerReconnect();return}customerLiveSocket=socket;
   socket.onopen=()=>{if(socket!==customerLiveSocket)return;customerLiveAttempt=0;const changes=['customer_booking_requests','customer_pass_requests','portal_notifications','portal_announcements','portal_day_settings','portal_live_events','customer_dog_submissions','customer_owner_links','dogs','vaccinations'].map(table=>({event:'*',schema:'public',table}));socket.send(JSON.stringify({topic:'realtime:customer-portal',event:'phx_join',payload:{config:{broadcast:{ack:false,self:false},presence:{enabled:false},postgres_changes:changes,private:false},access_token:state.session.access_token},ref:'1',join_ref:'1'}));customerLiveHeartbeat=setInterval(()=>{if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(Date.now()),join_ref:null}))},20000);scheduleWaitingDogFallbackV101()};
   socket.onmessage=event=>{try{const message=JSON.parse(event.data);if(message.event==='postgres_changes')queueCustomerSync(customerScopeForMessage(message))}catch(_){}};
@@ -781,7 +781,21 @@ function handleRecoveryHash(){
   }
   return false
 }
-async function init(){registerSW();if(handleRecoveryHash()){loading(false);return}state.session=currentSession();if(state.session)await bootstrap();else{showAuth('login');loading(false)}}
+function handleVerifiedEmailReturn(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('email_confirmed')!=='1')return false;
+  let verified=null;
+  try{verified=JSON.parse(sessionStorage.getItem('chvostikovo_verified_email_return')||'null');sessionStorage.removeItem('chvostikovo_verified_email_return')}catch(_){}
+  params.delete('email_confirmed');
+  history.replaceState(null,'',location.pathname+(params.size?'?'+params.toString():''));
+  if(!verified||typeof verified.email!=='string'||typeof verified.at!=='number'||Date.now()-verified.at>300000||verified.at>Date.now())return false;
+  showAuth('login');
+  $('loginEmail').value=verified.email;
+  authMessage('info','E-mail je potvrdený. Môžete sa prihlásiť.');
+  loading(false);
+  return true;
+}
+async function init(){registerSW();if(handleRecoveryHash()||handleVerifiedEmailReturn()){loading(false);return}state.session=currentSession();if(state.session)await bootstrap();else{showAuth('login');loading(false)}}
 $('showLogin').addEventListener('click',()=>showAuth('login'));$('showSignup').addEventListener('click',()=>showAuth('signup'));$('forgotPasswordBtn').addEventListener('click',()=>showAuth('forgot'));$('backToLogin').addEventListener('click',()=>showAuth('login'));
 const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');if(pendingLoginEmail&&!$('loginEmail').value)$('loginEmail').value=pendingLoginEmail;
 (function customerSignupPasswordV19(){
