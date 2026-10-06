@@ -100,7 +100,7 @@ export function PhoneField({
           placeholder="912 345 678"
           className="min-w-0 flex-1 bg-transparent px-3 py-[0.65rem] text-base leading-[1.35] text-foreground outline-none"
         />
-
+      </div>
     </div>
   );
 }
