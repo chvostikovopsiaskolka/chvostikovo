@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
@@ -38,6 +38,7 @@ export function ShortForm({
   hideInterest?: boolean;
   interestValue?: string;
 }) {
+  const formId = useId();
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +71,7 @@ export function ShortForm({
         ...attribution,
         cta_source: trackingSource,
         meno: String(fd.get("meno") ?? "").trim(),
-        telefon: phoneFromForm(form, "s-tel"),
+        telefon: phoneFromForm(form, `s-${formId}-tel`),
         zaujem: hideInterest ? interestValue : String(fd.get("zaujem") ?? ""),
       });
       if (shouldTrackForm) {
@@ -140,18 +141,18 @@ export function ShortForm({
   return (
     <form onSubmit={onSubmit} onFocusCapture={onFormFocus} className="space-y-3 text-left sm:space-y-3.5">
       <div>
-        <label className="label-sm" htmlFor="s-meno">
+        <label className="label-sm" htmlFor={`s-${formId}-meno`}>
           Meno majiteľa *
         </label>
-        <input id="s-meno" name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
+        <input id={`s-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
       </div>
-      <PhoneField id="s-tel" name="telefon" />
+      <PhoneField id={`s-${formId}-tel`} name="telefon" />
       {!hideInterest && (
         <div>
-          <label className="label-sm" htmlFor="s-zaujem">
+          <label className="label-sm" htmlFor={`s-${formId}-zaujem`}>
             O čo máte záujem? *
           </label>
-          <select id="s-zaujem" name="zaujem" required className="field" defaultValue="">
+          <select id={`s-${formId}-zaujem`} name="zaujem" required className="field" defaultValue="">
             <option value="" disabled>
               Vyberte možnosť
             </option>
@@ -176,6 +177,7 @@ export function ShortForm({
 }
 
 export function LongForm({ onSent }: { onSent?: () => void }) {
+  const formId = useId();
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -204,7 +206,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         source_ref,
         ...attribution,
         meno: String(fd.get("meno") ?? "").trim(),
-        telefon: phoneFromForm(form, "l-tel"),
+        telefon: phoneFromForm(form, `l-${formId}-tel`),
         pes: String(fd.get("pes") ?? "").trim(),
         plemeno_vaha: String(fd.get("plemeno_vaha") ?? "").trim(),
         pohlavie: String(fd.get("pohlavie") ?? ""),
@@ -254,26 +256,26 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
     <form onSubmit={onSubmit} onFocusCapture={onFormFocus} className="space-y-3 text-left sm:space-y-3.5">
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
         <div>
-          <label className="label-sm" htmlFor="l-meno">
+          <label className="label-sm" htmlFor={`l-${formId}-meno`}>
             Meno a priezvisko majiteľa *
           </label>
-          <input id="l-meno" name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
+          <input id={`l-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
         </div>
-        <PhoneField id="l-tel" name="telefon" />
+        <PhoneField id={`l-${formId}-tel`} name="telefon" />
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">
         <div>
-          <label className="label-sm" htmlFor="l-pes">
+          <label className="label-sm" htmlFor={`l-${formId}-pes`}>
             Meno psa *
           </label>
-          <input id="l-pes" name="pes" required className="field" placeholder="Rocky" />
+          <input id={`l-${formId}-pes`} name="pes" required className="field" placeholder="Rocky" />
         </div>
         <div>
-          <label className="label-sm" htmlFor="l-plemeno-vaha">
+          <label className="label-sm" htmlFor={`l-${formId}-plemeno-vaha`}>
             Plemeno a váha psa *
           </label>
           <input
-            id="l-plemeno-vaha"
+            id={`l-${formId}-plemeno-vaha`}
             name="plemeno_vaha"
             required
             className="field"
@@ -283,10 +285,10 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">
         <div>
-          <label className="label-sm" htmlFor="l-pohlavie">
+          <label className="label-sm" htmlFor={`l-${formId}-pohlavie`}>
             Pohlavie psa *
           </label>
-          <select id="l-pohlavie" name="pohlavie" required className="field" defaultValue="">
+          <select id={`l-${formId}-pohlavie`} name="pohlavie" required className="field" defaultValue="">
             <option value="" disabled>
               Vyberte
             </option>
@@ -295,17 +297,17 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           </select>
         </div>
         <div>
-          <label className="label-sm" htmlFor="l-vek">
+          <label className="label-sm" htmlFor={`l-${formId}-vek`}>
             Vek psa *
           </label>
-          <input id="l-vek" name="vek" required className="field" placeholder="2 roky" />
+          <input id={`l-${formId}-vek`} name="vek" required className="field" placeholder="2 roky" />
         </div>
       </div>
       <div>
-        <label className="label-sm" htmlFor="l-kastrovana">
+        <label className="label-sm" htmlFor={`l-${formId}-kastrovana`}>
           Kastrovaný / sterilizovaná *
         </label>
-        <select id="l-kastrovana" name="kastrovana" required className="field" defaultValue="">
+        <select id={`l-${formId}-kastrovana`} name="kastrovana" required className="field" defaultValue="">
           <option value="" disabled>
             Vyberte
           </option>
@@ -314,10 +316,10 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         </select>
       </div>
       <div>
-        <label className="label-sm" htmlFor="l-duvod">
+        <label className="label-sm" htmlFor={`l-${formId}-duvod`}>
           Ako plánujete využívať škôlku? *
         </label>
-        <select id="l-duvod" name="duvod" required className="field" defaultValue="">
+        <select id={`l-${formId}-duvod`} name="duvod" required className="field" defaultValue="">
           <option value="" disabled>
             Vyberte možnosť
           </option>
@@ -327,11 +329,11 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         </select>
       </div>
       <div>
-        <label className="label-sm" htmlFor="l-viac">
+        <label className="label-sm" htmlFor={`l-${formId}-viac`}>
           Viac o psíkovi *
         </label>
         <textarea
-          id="l-viac"
+          id={`l-${formId}-viac`}
           name="viac"
           required
           rows={4}

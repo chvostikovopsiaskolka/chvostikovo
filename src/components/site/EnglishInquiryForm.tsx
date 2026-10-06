@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
@@ -19,6 +19,7 @@ export function EnglishInquiryForm({
 }: {
   trackingSource?: string;
 }) {
+  const formId = useId();
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +58,7 @@ export function EnglishInquiryForm({
         utm_content: attribution.content,
         cta_source: trackingSource,
         meno: String(fd.get("name") ?? "").trim(),
-        telefon: phoneFromForm(form, "en-phone"),
+        telefon: phoneFromForm(form, `en-${formId}-phone`),
         zaujem: `EN – Dog daycare enquiry | ${interest}`,
       });
 
@@ -98,13 +99,13 @@ export function EnglishInquiryForm({
   return (
     <form onSubmit={onSubmit} onFocusCapture={onFormFocus} className="space-y-3 text-left sm:space-y-3.5">
       <div>
-        <label className="label-sm" htmlFor="en-name">Your name *</label>
-        <input id="en-name" name="name" autoComplete="name" required className="field" placeholder="Your name" />
+        <label className="label-sm" htmlFor={`en-${formId}-name`}>Your name *</label>
+        <input id={`en-${formId}-name`} name="name" autoComplete="name" required className="field" placeholder="Your name" />
       </div>
-      <PhoneField id="en-phone" name="phone" label="Phone / WhatsApp *" language="en" />
+      <PhoneField id={`en-${formId}-phone`} name="phone" label="Phone / WhatsApp *" language="en" />
       <div>
-        <label className="label-sm" htmlFor="en-interest">What are you looking for? *</label>
-        <select id="en-interest" name="interest" required className="field" defaultValue="">
+        <label className="label-sm" htmlFor={`en-${formId}-interest`}>What are you looking for? *</label>
+        <select id={`en-${formId}-interest`} name="interest" required className="field" defaultValue="">
           <option value="" disabled>Select an option</option>
           <option>Regular daycare visits</option>
           <option>Occasional daycare</option>

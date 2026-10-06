@@ -70,7 +70,7 @@ try {
       } else if (el instanceof dom.HTMLInputElement && el.type === "checkbox") el.checked = true;
       else (el as any).value = "TEST – autofill regression";
     }
-    const input = form.querySelector<HTMLInputElement>(`#${test.phoneId}`)!;
+    const input = form.querySelector<HTMLInputElement>(`input[type="tel"]`)!;
     input.value = raw;
     if (mode === "input-event") await React.act(async () => input.dispatchEvent(new dom.Event("input", { bubbles: true }) as any));
     // Force React to render again after browser-only filling. Its state must not
@@ -78,7 +78,7 @@ try {
     await React.act(async () => root.render(test.component));
     assert.equal(input.value, raw, `${test.name}: React overwrote autofill`);
     assert.equal(new dom.FormData(form).get(input.name), raw);
-    assert.equal(phoneFromForm(form as any, test.phoneId), "+421915349028");
+    assert.equal(phoneFromForm(form as any, input.id), "+421915349028");
     assert.equal(form.checkValidity(), true);
     await React.act(async () => { form.requestSubmit(); await new Promise((resolve) => setTimeout(resolve, 0)); });
     const submission = requests.filter((r) => r.url.endsWith("/web-form-submit"));
@@ -94,6 +94,21 @@ try {
     await React.act(async () => root.unmount());
     container.remove();
     passed++;
+  }
+
+  // Multiple responsive/modal instances must never share label target IDs.
+  {
+    const container = dom.document.createElement("div");
+    dom.document.body.append(container);
+    const root = createRoot(container as any);
+    await React.act(async () => root.render(<><ShortForm /><ShortForm /><LongForm /><LongForm /><EnglishInquiryForm /><EnglishInquiryForm /></>));
+    const ids = [...container.querySelectorAll("[id]")].map((el) => el.id);
+    assert.equal(new Set(ids).size, ids.length, "Duplicate IDs break label/autofill association");
+    for (const form of container.querySelectorAll("form")) for (const label of form.querySelectorAll("label[for]")) {
+      assert(form.querySelector(`[id="${label.getAttribute("for")}"]`), "A label points outside its form");
+    }
+    await React.act(async () => root.unmount());
+    container.remove();
   }
 
   // Shared PhoneField callback and selected-prefix changes (product forms).
