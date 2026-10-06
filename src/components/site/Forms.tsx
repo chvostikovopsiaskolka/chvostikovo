@@ -271,7 +271,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
       <div className="grid grid-cols-2 gap-3.5">
         <div>
           <label className="label-sm" htmlFor={`l-${formId}-plemeno`}>
-            Plemeno psa *
+            Plemeno *
           </label>
           <input
             id={`l-${formId}-plemeno`}
