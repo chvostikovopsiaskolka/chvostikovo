@@ -30,7 +30,7 @@ function buildFbcFromCurrentUrl() {
  * `web-form-submit`, ktorá zapíše dáta do DB a odošle e-mailovú notifikáciu.
  * Pri marketingovom súhlase posielame aj Meta attribution údaje pre CAPI.
  */
-export async function submitInquiry(input: InquiryInput) {
+export async function submitInquiry(input: InquiryInput, attemptId?: string) {
   const normalized = { ...input, telefon: normalizePhone(input.telefon) };
   const parsed = inquirySchema.safeParse(normalized);
   if (!parsed.success) throw new InquirySubmissionError("zod_validation");
@@ -54,6 +54,7 @@ export async function submitInquiry(input: InquiryInput) {
   }
   const payload = {
     ...dbPayload,
+    ...(attemptId ? { form_attempt_id: attemptId } : {}),
     marketing_consent: marketingConsent,
     meta_event_id: metaEventId,
     meta_fbp: marketingConsent ? getCookie("_fbp") : "",

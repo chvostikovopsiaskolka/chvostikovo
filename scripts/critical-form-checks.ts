@@ -83,5 +83,6 @@ const productBackend = readFileSync(new URL("../supabase/functions/product-inqui
 assert(productBackend.includes("/^\\+\\d{7,15}$/"), "Critical form check failed: product inquiry phone regex is not the expected E.164 validation.");
 
 await import("./form-autofill-checks");
+await import("./form-alert-checks");
 
 console.log("Critical form checks passed.");

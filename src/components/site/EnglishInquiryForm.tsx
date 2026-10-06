@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
 import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
-import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
+import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { phoneFromForm } from "@/lib/phone";
@@ -36,6 +36,7 @@ export function EnglishInquiryForm({
     if (loading) return;
 
     const form = e.currentTarget;
+    const attemptId = startFormAttempt(trackingSource, "en");
 
     setLoading(true);
     setError(null);
@@ -60,9 +61,9 @@ export function EnglishInquiryForm({
         meno: String(fd.get("name") ?? "").trim(),
         telefon: phoneFromForm(form, `en-${formId}-phone`),
         zaujem: `EN – Dog daycare enquiry | ${interest}`,
-      });
+      }, attemptId);
 
-      void trackCookielessInteraction("form_submit", trackingSource, "en");
+      void trackCookielessInteraction("form_submit", trackingSource, "en", attemptId);
       runFormTelemetry(() => {
         trackFormSubmit({
           formType: "informacie",
@@ -77,7 +78,7 @@ export function EnglishInquiryForm({
       setSent(true);
     } catch (error) {
       const diagnostic = reportInquiryError(error);
-      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`, "en");
+      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`, "en", attemptId);
       setError("Something went wrong. Please try again or call us.");
     } finally {
       setLoading(false);

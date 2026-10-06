@@ -6,6 +6,7 @@ export type CookielessInteractionName =
   | "explore_daycare"
   | "inquiry_cta"
   | "form_start"
+  | "form_attempt"
   | "form_submit"
   | "form_error"
   | "success_conditions_click"
@@ -64,6 +65,7 @@ export async function trackCookielessInteraction(
   eventName: CookielessInteractionName,
   eventSource: string,
   language: "sk" | "en" = "sk",
+  attemptId?: string,
 ) {
   if (typeof window === "undefined") return;
 
@@ -83,13 +85,13 @@ export async function trackCookielessInteraction(
 
   const params = url.searchParams;
   const fbclid = params.get("fbclid") || "";
-  const metaClickHash = fbclid ? await sha256Hex(fbclid) : "";
+  const metaClickHash = !attemptId && fbclid ? await sha256Hex(fbclid) : "";
   const source = eventSource.slice(0, 200);
   const guardKey = metaClickHash
     ? `chvostikovo:interaction:meta:${metaClickHash}:${eventName}:${source}`
     : `chvostikovo:interaction:session:${url.pathname}:${eventName}:${source}`;
 
-  if (!claimSessionGuard(guardKey)) return;
+  if (!attemptId && !claimSessionGuard(guardKey)) return;
 
   const payload = {
     path: `${url.pathname}${url.hash || ""}`.slice(0, 500),
@@ -103,7 +105,9 @@ export async function trackCookielessInteraction(
     utm_term: normalizeUtm(params.get("utm_term") || ""),
     utm_id: params.get("utm_id") || "",
     has_fbclid: Boolean(fbclid),
-    meta_click_hash: metaClickHash || null,
+    // Form attempts are counted individually, including retries from one ad click.
+    meta_click_hash: attemptId ? null : metaClickHash || null,
+    ...(attemptId ? { attempt_id: attemptId } : {}),
     referrer_host: safeReferrerHost(),
     navigation_type: navigationType(),
   };
@@ -118,5 +122,16 @@ export async function trackCookielessInteraction(
     if (!result.ok) releaseSessionGuard(guardKey);
   } catch {
     releaseSessionGuard(guardKey);
+  }
+}
+
+export function startFormAttempt(source: string, language: "sk" | "en" = "sk") {
+  // Monitoring is optional: even restricted browser APIs must not block a form.
+  try {
+    const attemptId = globalThis.crypto.randomUUID();
+    void trackCookielessInteraction("form_attempt", source, language, attemptId).catch(() => {});
+    return attemptId;
+  } catch {
+    return undefined;
   }
 }

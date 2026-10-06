@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
 import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
-import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
+import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { phoneFromForm } from "@/lib/phone";
@@ -58,6 +58,7 @@ export function ShortForm({
     e.preventDefault();
     if (loading) return;
     const form = e.currentTarget;
+    const attemptId = startFormAttempt(trackingSource || "informational_form");
     setLoading(true);
     setError(null);
     try {
@@ -73,10 +74,8 @@ export function ShortForm({
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: phoneFromForm(form, `s-${formId}-tel`),
         zaujem: hideInterest ? interestValue : String(fd.get("zaujem") ?? ""),
-      });
-      if (shouldTrackForm) {
-        void trackCookielessInteraction("form_submit", trackingSource || "informational_form");
-      }
+      }, attemptId);
+      void trackCookielessInteraction("form_submit", trackingSource || "informational_form", "sk", attemptId);
       runFormTelemetry(() => {
         trackFormSubmit({
           formType: "informacie",
@@ -92,9 +91,7 @@ export function ShortForm({
       runFormTelemetry(() => onSent?.());
     } catch (error) {
       const diagnostic = reportInquiryError(error);
-      if (shouldTrackForm) {
-        void trackCookielessInteraction("form_error", `${trackingSource || "informational_form"}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`);
-      }
+      void trackCookielessInteraction("form_error", `${trackingSource || "informational_form"}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`, "sk", attemptId);
       setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
     } finally {
       setLoading(false);
@@ -194,6 +191,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
     e.preventDefault();
     if (loading) return;
     const form = e.currentTarget;
+    const attemptId = startFormAttempt(trackingSource);
     setLoading(true);
     setError(null);
     try {
@@ -214,9 +212,9 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         kastrovana: String(fd.get("kastrovana") ?? ""),
         duvod: String(fd.get("duvod") ?? ""),
         viac: String(fd.get("viac") ?? "").trim(),
-      });
+      }, attemptId);
 
-      void trackCookielessInteraction("form_submit", trackingSource);
+      void trackCookielessInteraction("form_submit", trackingSource, "sk", attemptId);
       runFormTelemetry(() => {
         trackFormSubmit({
           formType: "prihlaska",
@@ -231,7 +229,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
       runFormTelemetry(() => onSent?.());
     } catch (error) {
       const diagnostic = reportInquiryError(error);
-      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`);
+      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`, "sk", attemptId);
       setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
     } finally {
       setLoading(false);

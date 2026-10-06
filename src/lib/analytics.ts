@@ -121,6 +121,7 @@ export function trackMetaFormConversion(
   source?: string,
   eventId?: string,
 ) {
+  if (typeof window !== "undefined" && new URL(window.location.href).searchParams.get("utm_source") === "qa") return;
   const params = {
     content_name: formType,
     page_path: pagePath(),
@@ -144,6 +145,8 @@ export function trackFormSubmit(params: {
   ctaSource?: string;
 }) {
   if (typeof window === "undefined") return;
+
+  if (new URL(window.location.href).searchParams.get("utm_source") === "qa") return;
 
   const eventParams = {
     form_type: params.formType,

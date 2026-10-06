@@ -88,7 +88,11 @@ try {
     assert.equal(submission[0]!.body.marketing_consent, marketing);
     assert.equal(submission[0]!.body.meta_fbp, marketing ? "fb.1.123.test" : "");
     const events = requests.filter((r) => r.url.endsWith("/website-landing-event"));
+    const attempt = events.find((r) => r.body.event_name === "form_attempt");
+    assert(attempt?.body.attempt_id, `${test.name}: submission attempt not recorded`);
+    assert.equal(submission[0]!.body.form_attempt_id, attempt.body.attempt_id, "Attempt ID must reach Supabase raw_payload");
     assert(events.some((r) => r.body.event_name === "form_submit"), `${test.name}: form_submit missing`);
+    assert.equal(events.find((r) => r.body.event_name === "form_submit")!.body.attempt_id, attempt.body.attempt_id);
     assert(!events.some((r) => r.body.event_name === "form_error"));
     assert(!container.querySelector("form"), `${test.name}: success UI missing`);
     await React.act(async () => root.unmount());
@@ -133,6 +137,47 @@ try {
     container.remove();
   }
 
+  // Caught errors, including repeated attempts, must notify without personal data.
+  for (const component of [<ShortForm />, <LongForm />, <EnglishInquiryForm />]) {
+    dom.happyDOM.setURL("https://chvostikovo.sk/?fbclid=qa-test");
+    dom.sessionStorage.clear();
+    requests = [];
+    globalThis.fetch = (async (url: any, init: any) => {
+      requests.push({ url: String(url), body: JSON.parse(init.body) });
+      return new Response(JSON.stringify({ ok: !String(url).endsWith("/web-form-submit") }), { status: String(url).endsWith("/web-form-submit") ? 500 : 201 });
+    }) as typeof fetch;
+    const container = dom.document.createElement("div");
+    dom.document.body.append(container);
+    const root = createRoot(container as any);
+    await React.act(async () => root.render(component));
+    const form = container.querySelector("form")!;
+    for (const el of form.querySelectorAll("input, textarea, select")) {
+      if (el instanceof dom.HTMLSelectElement) {
+        if (!el.hasAttribute("data-phone-prefix")) el.value = el.options[1]!.value;
+      } else if (el instanceof dom.HTMLInputElement && el.type === "checkbox") el.checked = true;
+      else (el as any).value = "PRIVATE NAME";
+    }
+    form.querySelector<HTMLInputElement>('input[type="tel"]')!.value = "+421915349028";
+    const consoleError = console.error;
+    console.error = () => {};
+    try {
+      for (let i = 0; i < 2; i++) await React.act(async () => { form.requestSubmit(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    } finally { console.error = consoleError; }
+    const events = requests.filter((r) => r.url.endsWith("/website-landing-event"));
+    const attempts = events.filter((r) => r.body.event_name === "form_attempt");
+    const errors = events.filter((r) => r.body.event_name === "form_error");
+    assert.equal(attempts.length, 2);
+    assert.equal(errors.length, 2);
+    assert.notEqual(attempts[0]!.body.attempt_id, attempts[1]!.body.attempt_id);
+    assert.deepEqual(attempts.map((r) => r.body.attempt_id), errors.map((r) => r.body.attempt_id));
+    assert(errors.every((r) => r.body.event_source.endsWith(":backend_http:500")));
+    assert(!JSON.stringify(events).includes("PRIVATE NAME"));
+    assert(!JSON.stringify(events).includes("915349028"));
+    assert(!events.some((r) => r.body.event_name === "form_submit"));
+    await React.act(async () => root.unmount());
+    container.remove();
+  }
+
   const valid = { typ: "informacie" as const, consent: true as const, meno: "TEST", telefon: "+421915349028", zaujem: "Test" };
   assert.equal(buildDbPayload(inquirySchema.parse(valid)).phone, valid.telefon);
   for (const [fetcher, input, stage, status] of [
@@ -153,6 +198,20 @@ try {
   reportInquiryError(new Error("Sensitive name and phone"));
   console.error = consoleError;
   assert(!JSON.stringify(errors).includes("Sensitive"));
+  // Internal QA never emits Google or browser Meta conversion events.
+  const analytics = await import("../src/lib/analytics");
+  let conversions = 0;
+  (dom as any).gtag = () => conversions++;
+  (dom as any).fbq = () => conversions++;
+  consent(true);
+  dom.happyDOM.setURL("https://chvostikovo.sk/?utm_source=qa");
+  analytics.trackMetaFormConversion("informacie", "test", "test-only");
+  analytics.trackFormSubmit({ formType: "informacie", sourceRef: "/?utm_source=qa" });
+  assert.equal(conversions, 0);
+  dom.happyDOM.setURL("https://chvostikovo.sk/");
+  analytics.trackMetaFormConversion("informacie", "test", "test-only");
+  analytics.trackFormSubmit({ formType: "informacie", sourceRef: "/" });
+  assert.equal(conversions, 2, "Real conversions must remain enabled");
   console.log(`Autofill regression checks passed: ${passed} complete React form submissions; 8 foreign-prefix cases; normalization and safe error diagnostics.`);
 } finally {
   globalThis.fetch = originalFetch;

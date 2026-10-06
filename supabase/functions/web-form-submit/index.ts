@@ -392,7 +392,10 @@ Deno.serve(async (req: Request) => {
 
     await Promise.allSettled([
       sendNotificationEmail(payload, input),
-      sendMetaConversion(payload, input, req),
+      // Internal QA submissions must not become paid-ad conversions.
+      input.traffic_source === 'qa' || /[?&]utm_source=qa(?:&|$)/.test(String(input.source_ref || ''))
+        ? Promise.resolve()
+        : sendMetaConversion(payload, input, req),
     ]);
 
     return response(origin, 201, { ok: true });
