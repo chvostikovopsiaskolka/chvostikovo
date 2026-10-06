@@ -256,6 +256,7 @@ img[src*="/chvostikovo-logo"]{visibility:hidden}
 
 .booking-picker-open-v37{overflow:hidden}
 .booking-picker-v37{position:fixed;inset:0;z-index:570;background:rgba(17,24,39,.55);display:grid;place-items:end center;padding:10px 10px max(10px,env(safe-area-inset-bottom));overflow:auto}
+#recentPassRenewalV157,#passInterestConfirmationV44{z-index:620}
 .booking-picker-card-v37{width:min(610px,100%);background:#f7f8fa;border-radius:28px;padding:17px;box-shadow:0 28px 90px rgba(0,0,0,.3)}
 .booking-picker-head-v37{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:1px 2px 13px}
 .booking-picker-head-v37 small{display:block;color:#ea580c;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
