@@ -84,25 +84,23 @@ export function PhoneField({
         </select>
         <input
           id={id}
+          name={name}
           type="tel"
           inputMode="tel"
           autoComplete="tel"
           required
-          value={digits}
+          defaultValue={digits}
           onInput={(event) => {
             event.currentTarget.setCustomValidity("");
-            update(prefix, event.currentTarget.value);
           }}
           onChange={(event) => {
             event.currentTarget.setCustomValidity("");
-            update(prefix, event.currentTarget.value);
           }}
           onInvalid={(event) => event.currentTarget.setCustomValidity(invalidMessage)}
           placeholder="912 345 678"
           className="min-w-0 flex-1 bg-transparent px-3 py-[0.65rem] text-base leading-[1.35] text-foreground outline-none"
         />
-      </div>
-      {name ? <input type="hidden" name={name} value={digits ? `${prefix}${digits}` : ""} /> : null}
+
     </div>
   );
 }
