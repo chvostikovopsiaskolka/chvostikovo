@@ -203,7 +203,8 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (loading) return;
-    const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     const source_ref = sourceRef();
     const attribution = attributionPayload();
     setLoading(true);
