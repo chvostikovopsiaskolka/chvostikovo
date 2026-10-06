@@ -25,6 +25,23 @@ function attributionPayload() {
   };
 }
 
+function normalizedPhoneFromForm(form: HTMLFormElement, inputId: string) {
+  const input = form.querySelector<HTMLInputElement>(`#${inputId}`);
+  const prefix =
+    input?.parentElement?.querySelector<HTMLSelectElement>("select")?.value || "+421";
+
+  let digits = String(input?.value ?? "").replace(/\D/g, "");
+  if (digits.startsWith("00")) digits = digits.slice(2);
+
+  const prefixDigits = prefix.replace(/\D/g, "");
+  if (digits.startsWith(prefixDigits)) return `+${digits}`;
+
+  // Slovak autofill often provides the national 09xx... format.
+  if (prefix === "+421" && digits.startsWith("0")) digits = digits.slice(1);
+
+  return digits ? `${prefix}${digits}` : "";
+}
+
 export function ShortForm({
   onSent,
   trackingSource,
@@ -68,7 +85,7 @@ export function ShortForm({
         ...attribution,
         cta_source: trackingSource,
         meno: String(fd.get("meno") ?? "").trim(),
-        telefon: String(fd.get("telefon") ?? "").trim(),
+        telefon: normalizedPhoneFromForm(form, "s-tel") || String(fd.get("telefon") ?? "").trim(),
         zaujem: hideInterest ? interestValue : String(fd.get("zaujem") ?? ""),
       });
       trackFormSubmit({
@@ -198,7 +215,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         source_ref,
         ...attribution,
         meno: String(fd.get("meno") ?? "").trim(),
-        telefon: String(fd.get("telefon") ?? "").trim(),
+        telefon: normalizedPhoneFromForm(form, "l-tel") || String(fd.get("telefon") ?? "").trim(),
         pes: String(fd.get("pes") ?? "").trim(),
         plemeno_vaha: String(fd.get("plemeno_vaha") ?? "").trim(),
         pohlavie: String(fd.get("pohlavie") ?? ""),
