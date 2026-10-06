@@ -89,9 +89,13 @@ export function PhoneField({
           autoComplete="tel"
           required
           value={digits}
+          onInput={(event) => {
+            event.currentTarget.setCustomValidity("");
+            update(prefix, event.currentTarget.value);
+          }}
           onChange={(event) => {
             event.currentTarget.setCustomValidity("");
-            update(prefix, event.target.value);
+            update(prefix, event.currentTarget.value);
           }}
           onInvalid={(event) => event.currentTarget.setCustomValidity(invalidMessage)}
           placeholder="912 345 678"
