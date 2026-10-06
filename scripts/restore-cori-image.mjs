@@ -120,6 +120,17 @@ await restoreImage({
   targetDir: siteOutputDir,
   format: "webp",
 });
+
+await restoreImage({
+  label: "PUPPY HERO",
+  dataDir: siteDataDir,
+  prefix: "puppy-hero",
+  output: "puppy-hero.webp",
+  expectedBytes: 101_174,
+  minBytes: 90_000,
+  targetDir: siteOutputDir,
+  format: "webp",
+});
 const routePath = path.join(root, "src", "routes", "stojan-na-misky-pre-psa.tsx");
 let routeSource = await readFile(routePath, "utf8");
 
