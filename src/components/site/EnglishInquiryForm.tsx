@@ -6,20 +6,12 @@ import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
+import { phoneFromForm } from "@/lib/phone";
+import { reportInquiryError, runFormTelemetry } from "@/lib/form-errors";
 
 function sourceRef() {
   if (typeof window === "undefined") return "/en/dog-daycare-kosice";
   return `${window.location.pathname}${window.location.search}` || "/en/dog-daycare-kosice";
-}
-
-function normalizedEnglishPhoneFromForm(form: HTMLFormElement) {
-  const input = form.querySelector<HTMLInputElement>("#en-phone");
-  const prefix = input?.parentElement?.querySelector<HTMLSelectElement>("select")?.value || "+421";
-  let digits = String(input?.value ?? "").split("").filter((ch) => ch >= "0" && ch <= "9").join("");
-  const prefixDigits = prefix.slice(1);
-  if (digits.startsWith(prefixDigits)) return `+${digits}`;
-  if (prefix === "+421" && digits.startsWith("0")) digits = digits.slice(1);
-  return digits ? `${prefix}${digits}` : "";
 }
 
 export function EnglishInquiryForm({
@@ -43,15 +35,15 @@ export function EnglishInquiryForm({
     if (loading) return;
 
     const form = e.currentTarget;
-    const fd = new FormData(form);
-    const source_ref = sourceRef();
-    const attribution = getTrafficAttribution();
-    const interest = String(fd.get("interest") ?? "").trim();
 
     setLoading(true);
     setError(null);
 
     try {
+      const fd = new FormData(form);
+      const source_ref = sourceRef();
+      const attribution = getTrafficAttribution();
+      const interest = String(fd.get("interest") ?? "").trim();
       const submission = await submitInquiry({
         typ: "informacie",
         consent: true,
@@ -65,24 +57,26 @@ export function EnglishInquiryForm({
         utm_content: attribution.content,
         cta_source: trackingSource,
         meno: String(fd.get("name") ?? "").trim(),
-        telefon: normalizedEnglishPhoneFromForm(form) || String(fd.get("phone") ?? "").trim(),
+        telefon: phoneFromForm(form, "en-phone"),
         zaujem: `EN – Dog daycare enquiry | ${interest}`,
       });
 
-      trackFormSubmit({
-        formType: "informacie",
-        sourceRef: source_ref,
-        trafficSource: attribution.source,
-        trafficMedium: attribution.medium,
-        landingPage: attribution.landing_page,
-        ctaSource: trackingSource,
-      });
-      trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
       void trackCookielessInteraction("form_submit", trackingSource, "en");
-
+      runFormTelemetry(() => {
+        trackFormSubmit({
+          formType: "informacie",
+          sourceRef: source_ref,
+          trafficSource: attribution.source,
+          trafficMedium: attribution.medium,
+          landingPage: attribution.landing_page,
+          ...(trackingSource ? { ctaSource: trackingSource } : {}),
+        });
+        trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
+      });
       setSent(true);
-    } catch {
-      void trackCookielessInteraction("form_error", trackingSource, "en");
+    } catch (error) {
+      const diagnostic = reportInquiryError(error);
+      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`, "en");
       setError("Something went wrong. Please try again or call us.");
     } finally {
       setLoading(false);
@@ -105,7 +99,7 @@ export function EnglishInquiryForm({
     <form onSubmit={onSubmit} onFocusCapture={onFormFocus} className="space-y-3 text-left sm:space-y-3.5">
       <div>
         <label className="label-sm" htmlFor="en-name">Your name *</label>
-        <input id="en-name" name="name" required className="field" placeholder="Your name" />
+        <input id="en-name" name="name" autoComplete="name" required className="field" placeholder="Your name" />
       </div>
       <PhoneField id="en-phone" name="phone" label="Phone / WhatsApp *" language="en" />
       <div>

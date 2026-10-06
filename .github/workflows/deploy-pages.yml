@@ -34,6 +34,8 @@ jobs:
         env:
           # Pri hostovaní na https://<user>.github.io/<repo>/ nastav BASE_PATH=/<repo>/
           BASE_PATH: ${{ vars.BASE_PATH }}
+      - name: TypeScript validation
+        run: bun run check:types
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

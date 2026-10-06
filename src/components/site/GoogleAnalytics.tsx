@@ -12,7 +12,7 @@ type GtagWindow = Window & {
 };
 
 function ensureGtag(): (...args: unknown[]) => void {
-  const w = window as GtagWindow;
+  const w = window as unknown as GtagWindow;
   w.dataLayer = w.dataLayer || [];
   if (!w.gtag) {
     w.gtag = function gtag() {
@@ -25,7 +25,7 @@ function ensureGtag(): (...args: unknown[]) => void {
 
 function sendPageView() {
   if (typeof window === "undefined" || !hasAnalyticsConsent()) return;
-  const w = window as GtagWindow;
+  const w = window as unknown as GtagWindow;
   if (!w._chvGaLoaded || !w.gtag) return;
 
   w.gtag("event", "page_view", {
@@ -38,7 +38,7 @@ function sendPageView() {
 
 function loadGA() {
   if (typeof window === "undefined") return;
-  const w = window as GtagWindow;
+  const w = window as unknown as GtagWindow;
   w[`ga-disable-${GA_ID}`] = false;
 
   const gtag = ensureGtag();
@@ -63,7 +63,7 @@ function loadGA() {
 
 function revokeGA() {
   if (typeof window === "undefined") return;
-  const w = window as GtagWindow;
+  const w = window as unknown as GtagWindow;
   w[`ga-disable-${GA_ID}`] = true;
   w.gtag?.("consent", "update", { analytics_storage: "denied" });
   clearAnalyticsCookies();

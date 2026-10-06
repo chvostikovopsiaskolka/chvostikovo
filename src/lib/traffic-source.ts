@@ -67,9 +67,8 @@ export function getTrafficAttribution(): TrafficAttribution {
     };
   }
 
-  captureTrafficAttribution();
-
   try {
+    captureTrafficAttribution();
     const stored = window.sessionStorage.getItem(STORAGE_KEY);
     if (stored) return JSON.parse(stored) as TrafficAttribution;
   } catch {

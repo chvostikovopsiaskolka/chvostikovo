@@ -6,6 +6,8 @@ import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
+import { phoneFromForm } from "@/lib/phone";
+import { reportInquiryError, runFormTelemetry } from "@/lib/form-errors";
 
 function sourceRef() {
   if (typeof window === "undefined") return "/";
@@ -23,23 +25,6 @@ function attributionPayload() {
     utm_term: attribution.term,
     utm_content: attribution.content,
   };
-}
-
-function normalizedPhoneFromForm(form: HTMLFormElement, inputId: string) {
-  const input = form.querySelector<HTMLInputElement>(`#${inputId}`);
-  const prefix =
-    input?.parentElement?.querySelector<HTMLSelectElement>("select")?.value || "+421";
-
-  let digits = String(input?.value ?? "").replace(/\D/g, "");
-  if (digits.startsWith("00")) digits = digits.slice(2);
-
-  const prefixDigits = prefix.replace(/\D/g, "");
-  if (digits.startsWith(prefixDigits)) return `+${digits}`;
-
-  // Slovak autofill often provides the national 09xx... format.
-  if (prefix === "+421" && digits.startsWith("0")) digits = digits.slice(1);
-
-  return digits ? `${prefix}${digits}` : "";
 }
 
 export function ShortForm({
@@ -72,12 +57,12 @@ export function ShortForm({
     e.preventDefault();
     if (loading) return;
     const form = e.currentTarget;
-    const fd = new FormData(form);
-    const source_ref = sourceRef();
-    const attribution = attributionPayload();
     setLoading(true);
     setError(null);
     try {
+      const fd = new FormData(form);
+      const source_ref = sourceRef();
+      const attribution = attributionPayload();
       const submission = await submitInquiry({
         typ: "informacie",
         consent: true,
@@ -85,26 +70,29 @@ export function ShortForm({
         ...attribution,
         cta_source: trackingSource,
         meno: String(fd.get("meno") ?? "").trim(),
-        telefon: normalizedPhoneFromForm(form, "s-tel") || String(fd.get("telefon") ?? "").trim(),
+        telefon: phoneFromForm(form, "s-tel"),
         zaujem: hideInterest ? interestValue : String(fd.get("zaujem") ?? ""),
       });
-      trackFormSubmit({
-        formType: "informacie",
-        sourceRef: source_ref,
-        trafficSource: attribution.traffic_source,
-        trafficMedium: attribution.traffic_medium,
-        landingPage: attribution.landing_page,
-        ctaSource: trackingSource,
-      });
-      trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
       if (shouldTrackForm) {
         void trackCookielessInteraction("form_submit", trackingSource || "informational_form");
       }
+      runFormTelemetry(() => {
+        trackFormSubmit({
+          formType: "informacie",
+          sourceRef: source_ref,
+          trafficSource: attribution.traffic_source,
+          trafficMedium: attribution.traffic_medium,
+          landingPage: attribution.landing_page,
+          ...(trackingSource ? { ctaSource: trackingSource } : {}),
+        });
+        trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
+      });
       setSent(true);
-      onSent?.();
-    } catch {
+      runFormTelemetry(() => onSent?.());
+    } catch (error) {
+      const diagnostic = reportInquiryError(error);
       if (shouldTrackForm) {
-        void trackCookielessInteraction("form_error", trackingSource || "informational_form");
+        void trackCookielessInteraction("form_error", `${trackingSource || "informational_form"}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`);
       }
       setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
     } finally {
@@ -155,7 +143,7 @@ export function ShortForm({
         <label className="label-sm" htmlFor="s-meno">
           Meno majiteľa *
         </label>
-        <input id="s-meno" name="meno" required className="field" placeholder="Vaše meno" />
+        <input id="s-meno" name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
       </div>
       <PhoneField id="s-tel" name="telefon" />
       {!hideInterest && (
@@ -204,19 +192,19 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
     e.preventDefault();
     if (loading) return;
     const form = e.currentTarget;
-    const fd = new FormData(form);
-    const source_ref = sourceRef();
-    const attribution = attributionPayload();
     setLoading(true);
     setError(null);
     try {
+      const fd = new FormData(form);
+      const source_ref = sourceRef();
+      const attribution = attributionPayload();
       const submission = await submitInquiry({
         typ: "prihlaska",
         consent: true,
         source_ref,
         ...attribution,
         meno: String(fd.get("meno") ?? "").trim(),
-        telefon: normalizedPhoneFromForm(form, "l-tel") || String(fd.get("telefon") ?? "").trim(),
+        telefon: phoneFromForm(form, "l-tel"),
         pes: String(fd.get("pes") ?? "").trim(),
         plemeno_vaha: String(fd.get("plemeno_vaha") ?? "").trim(),
         pohlavie: String(fd.get("pohlavie") ?? ""),
@@ -226,19 +214,22 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         viac: String(fd.get("viac") ?? "").trim(),
       });
 
-      trackFormSubmit({
-        formType: "prihlaska",
-        sourceRef: source_ref,
-        trafficSource: attribution.traffic_source,
-        trafficMedium: attribution.traffic_medium,
-        landingPage: attribution.landing_page,
-      });
-      trackMetaFormConversion("prihlaska", undefined, submission.metaEventId);
       void trackCookielessInteraction("form_submit", trackingSource);
+      runFormTelemetry(() => {
+        trackFormSubmit({
+          formType: "prihlaska",
+          sourceRef: source_ref,
+          trafficSource: attribution.traffic_source,
+          trafficMedium: attribution.traffic_medium,
+          landingPage: attribution.landing_page,
+        });
+        trackMetaFormConversion("prihlaska", undefined, submission.metaEventId);
+      });
       setSent(true);
-      onSent?.();
-    } catch {
-      void trackCookielessInteraction("form_error", trackingSource);
+      runFormTelemetry(() => onSent?.());
+    } catch (error) {
+      const diagnostic = reportInquiryError(error);
+      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`);
       setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
     } finally {
       setLoading(false);
@@ -266,7 +257,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <label className="label-sm" htmlFor="l-meno">
             Meno a priezvisko majiteľa *
           </label>
-          <input id="l-meno" name="meno" required className="field" placeholder="Vaše meno" />
+          <input id="l-meno" name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
         </div>
         <PhoneField id="l-tel" name="telefon" />
       </div>

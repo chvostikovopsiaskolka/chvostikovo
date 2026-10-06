@@ -1,34 +1,5 @@
-import { useState } from "react";
-
-const COUNTRY_CODES = [
-  { value: "+421", label: "+421" },
-  { value: "+420", label: "+420" },
-  { value: "+36", label: "+36" },
-  { value: "+48", label: "+48" },
-  { value: "+43", label: "+43" },
-  { value: "+380", label: "+380" },
-  { value: "+49", label: "+49" },
-  { value: "+44", label: "+44" },
-] as const;
-
-function splitPhone(value: string) {
-  const normalized = value.replace(/[^\d+]/g, "");
-  const match = [...COUNTRY_CODES]
-    .sort((a, b) => b.value.length - a.value.length)
-    .find((item) => normalized.startsWith(item.value));
-
-  if (match) {
-    return {
-      prefix: match.value,
-      digits: normalized.slice(match.value.length).replace(/\D/g, ""),
-    };
-  }
-
-  return {
-    prefix: "+421",
-    digits: normalized.replace(/\D/g, ""),
-  };
-}
+import { useRef } from "react";
+import { COUNTRY_CODES, normalizePhone, splitInitialPhone } from "@/lib/phone";
 
 export function PhoneField({
   id,
@@ -47,22 +18,18 @@ export function PhoneField({
   onChange?: (value: string) => void;
   className?: string;
 }) {
-  const [internalValue, setInternalValue] = useState("");
-  const currentValue = value ?? internalValue;
-  const { prefix, digits } = splitPhone(currentValue);
+  const initial = useRef(splitInitialPhone(value ?? ""));
+  const inputRef = useRef<HTMLInputElement>(null);
+  const prefixRef = useRef<HTMLSelectElement>(null);
 
-  const update = (nextPrefix: string, nextDigits: string) => {
-    const cleanDigits = nextDigits.replace(/\D/g, "").slice(0, 15);
-    const combined = cleanDigits ? `${nextPrefix}${cleanDigits}` : nextPrefix;
-
-    if (value === undefined) setInternalValue(combined);
-    onChange?.(combined);
-  };
-
-  const invalidMessage =
-    language === "en"
-      ? "Enter the phone number using digits only."
-      : "Zadajte telefónne číslo iba pomocou číslic.";
+  function notifyChange() {
+    if (!onChange) return;
+    try {
+      onChange(normalizePhone(inputRef.current?.value ?? "", prefixRef.current?.value ?? "+421"));
+    } catch {
+      onChange("");
+    }
+  }
 
   return (
     <div className={className}>
@@ -71,32 +38,31 @@ export function PhoneField({
       </label>
       <div className="flex w-full overflow-hidden rounded-[0.85rem] border border-border bg-card transition-colors focus-within:border-coral">
         <select
+          ref={prefixRef}
+          data-phone-prefix
           aria-label={language === "en" ? "Country calling code" : "Predvoľba krajiny"}
-          value={prefix}
-          onChange={(event) => update(event.target.value, digits)}
+          defaultValue={initial.current.prefix}
+          onChange={notifyChange}
           className="shrink-0 border-r border-border bg-secondary/55 px-2 text-sm font-semibold text-forest outline-none sm:px-2.5"
         >
-          {COUNTRY_CODES.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
+          {COUNTRY_CODES.map((code) => (
+            <option key={code} value={code}>
+              {code}
             </option>
           ))}
         </select>
         <input
+          ref={inputRef}
           id={id}
-          name={name}
+          name={name ?? id}
           type="tel"
           inputMode="tel"
           autoComplete="tel"
           required
-          defaultValue={digits}
-          onInput={(event) => {
-            event.currentTarget.setCustomValidity("");
-          }}
-          onChange={(event) => {
-            event.currentTarget.setCustomValidity("");
-          }}
-          onInvalid={(event) => event.currentTarget.setCustomValidity(invalidMessage)}
+          defaultValue={initial.current.number}
+          onInput={notifyChange}
+          onChange={notifyChange}
+          onBlur={notifyChange}
           placeholder="912 345 678"
           className="min-w-0 flex-1 bg-transparent px-3 py-[0.65rem] text-base leading-[1.35] text-foreground outline-none"
         />

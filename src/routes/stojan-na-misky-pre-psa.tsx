@@ -15,6 +15,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { Collapse } from "@/components/site/Collapse";
 import { PhoneField } from "@/components/site/PhoneField";
+import { phoneFromForm } from "@/lib/phone";
 import { PrivacyConsentCheckbox } from "@/components/site/PrivacyConsentCheckbox";
 import { submitProductInquiry } from "@/lib/product-inquiry";
 import type { LetterColor, StandColor, StandSize } from "@/lib/shop";
@@ -253,12 +254,13 @@ function BowlStandPage() {
     submissionInFlight.current = true;
     setIsSubmitting(true);
     try {
+      const fd = new FormData(event.currentTarget);
       await submitProductInquiry({
         client_submission_id: submissionId.current,
         product_type: "stand",
-        customer_name: customerName,
-        phone,
-        email,
+        customer_name: String(fd.get("customer_name") ?? "").trim(),
+        phone: phoneFromForm(event.currentTarget, "stand-phone"),
+        email: String(fd.get("email") ?? "").trim(),
         source_ref: "/stojan-na-misky-pre-psa",
         consent: true,
         company,
@@ -395,7 +397,8 @@ function BowlStandPage() {
                             <label className="block font-display text-sm font-bold text-forest sm:col-span-2">
                               Meno a priezvisko *
                               <input
-                                value={customerName}
+                                name="customer_name"
+                                defaultValue={customerName}
                                 onChange={(event) => setCustomerName(event.target.value)}
                                 autoComplete="name"
                                 required
@@ -411,7 +414,8 @@ function BowlStandPage() {
                             <label className="block font-display text-sm font-bold text-forest">
                               E-mail *
                               <input
-                                value={email}
+                                name="email"
+                                defaultValue={email}
                                 onChange={(event) => setEmail(event.target.value)}
                                 type="email"
                                 autoComplete="email"

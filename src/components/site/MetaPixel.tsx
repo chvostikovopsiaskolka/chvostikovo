@@ -105,7 +105,7 @@ function initPixel(onReady?: () => void) {
 }
 
 function clickSource(anchor: HTMLAnchorElement) {
-  if (anchor.dataset.trackingSource) return anchor.dataset.trackingSource;
+  if (anchor.dataset["trackingSource"]) return anchor.dataset["trackingSource"];
   if (anchor.closest("#informujte-sa")) return "inquiry_section";
   if (anchor.closest("#top")) return "hero";
   if (anchor.closest("#prva-navsteva")) return "first_visit";
@@ -126,7 +126,7 @@ function handleTrackedClick(event: MouseEvent) {
   if (!(anchor instanceof HTMLAnchorElement)) return;
 
   const href = anchor.getAttribute("href") ?? "";
-  const explicitEvent = anchor.dataset.marketingEvent;
+  const explicitEvent = anchor.dataset["marketingEvent"];
 
   if (explicitEvent === "inquiry_cta") {
     trackMarketingInteraction("inquiry_cta", clickSource(anchor));
