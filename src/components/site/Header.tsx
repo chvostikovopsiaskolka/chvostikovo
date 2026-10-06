@@ -1,9 +1,10 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import { ChevronDown, Menu, Package, Phone, X } from "lucide-react";
 import logo from "@/assets/logo.png";
-import { PHONE } from "@/content/site";
+import { PHONE, PHONE_PRETTY } from "@/content/site";
 import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
+import { trackMarketingInteraction } from "@/lib/analytics";
 
 const NAV_MOBILE_BEFORE_ABOUT = [
   { href: "#recenzie", label: "Recenzie" },
@@ -30,7 +31,15 @@ const NAV_DESKTOP_AFTER_ABOUT = [
   { href: "/caste-otazky", label: "Časté otázky" },
 ];
 
-export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolean }) {
+export function Header({
+  homeSectionLinks = false,
+  landingMinimal = false,
+  landingTrackingSource = "landing_header",
+}: {
+  homeSectionLinks?: boolean;
+  landingMinimal?: boolean;
+  landingTrackingSource?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
@@ -80,6 +89,27 @@ export function Header({ homeSectionLinks = false }: { homeSectionLinks?: boolea
       });
     });
   };
+
+  if (landingMinimal) {
+    return (
+      <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2.5 min-[390px]:px-3 min-[390px]:pt-3">
+        <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/95 px-4 py-2.5 shadow-soft backdrop-blur-md min-[390px]:px-5 sm:px-6">
+          <a href="/" className="shrink-0" aria-label="Chvostíkovo - domov">
+            <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-5 w-auto sm:h-6" />
+          </a>
+
+          <a
+            href={`tel:${PHONE}`}
+            onClick={() => trackMarketingInteraction("phone_click", landingTrackingSource)}
+            className="btn-coral inline-flex items-center justify-center gap-2 px-4 py-2.5 text-[12px] leading-none whitespace-nowrap min-[390px]:px-5 min-[390px]:text-[13px] sm:px-6 sm:py-3 sm:text-sm"
+          >
+            <Phone className="size-4" />
+            {PHONE_PRETTY}
+          </a>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2.5 min-[390px]:px-3 min-[390px]:pt-3">

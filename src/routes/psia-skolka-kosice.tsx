@@ -112,7 +112,7 @@ function LeadLandingPage() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
-      <Header homeSectionLinks />
+      <Header landingMinimal landingTrackingSource="lead_landing_header_phone" />
 
       <main>
         <section className="relative overflow-hidden pt-20 sm:pt-24">
