@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseDogWeightKg } from "./dog-weight";
 
 /**
  * Zdieľaná (prehliadač + server) definícia formulárových dát a payloadov.
@@ -33,7 +34,8 @@ export const longSchema = z.object({
   meno: z.string().min(1).max(200),
   telefon: z.string().regex(/^\+\d{7,15}$/),
   pes: z.string().min(1).max(200),
-  plemeno_vaha: z.string().min(1).max(300),
+  plemeno: z.string().trim().min(1).max(200),
+  vaha: z.string().transform(parseDogWeightKg).refine((value): value is number => value !== null, "Zadajte platnú váhu v kilogramoch."),
   pohlavie: z.string().min(1).max(40),
   vek: z.string().min(1).max(100),
   kastrovana: z.string().min(1).max(40),
@@ -43,12 +45,13 @@ export const longSchema = z.object({
 
 export const inquirySchema = z.discriminatedUnion("typ", [shortSchema, longSchema]);
 
-export type InquiryInput = z.infer<typeof inquirySchema>;
+export type InquiryInput = z.input<typeof inquirySchema>;
+export type InquiryData = z.output<typeof inquirySchema>;
 
 export const SUPABASE_ENDPOINT =
   "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/web-form-submit";
 
-function attributionFields(data: InquiryInput): Array<{ label: string; value: string }> {
+function attributionFields(data: InquiryData): Array<{ label: string; value: string }> {
   return [
     { label: "Landing page", value: data.landing_page || "" },
     { label: "Referrer", value: data.referrer || "" },
@@ -61,7 +64,7 @@ function attributionFields(data: InquiryInput): Array<{ label: string; value: st
   ];
 }
 
-export function buildFields(data: InquiryInput): Array<{ label: string; value: string }> {
+export function buildFields(data: InquiryData): Array<{ label: string; value: string }> {
   const attribution = attributionFields(data);
 
   if (data.typ === "informacie") {
@@ -77,7 +80,8 @@ export function buildFields(data: InquiryInput): Array<{ label: string; value: s
     { label: "Meno a priezvisko majiteľa", value: data.meno },
     { label: "Telefón", value: data.telefon },
     { label: "Meno psa", value: data.pes },
-    { label: "Plemeno a váha psa", value: data.plemeno_vaha },
+    { label: "Plemeno psa", value: data.plemeno },
+    { label: "Váha psa", value: `${data.vaha} kg` },
     { label: "Pohlavie psa", value: data.pohlavie },
     { label: "Vek psa", value: data.vek },
     { label: "Kastrovaný / sterilizovaná", value: data.kastrovana },
@@ -88,7 +92,7 @@ export function buildFields(data: InquiryInput): Array<{ label: string; value: s
   ];
 }
 
-export function buildDbPayload(data: InquiryInput) {
+export function buildDbPayload(data: InquiryData) {
   const source_ref = data.source_ref && data.source_ref.length > 0 ? data.source_ref : "/";
   const raw_payload = Object.fromEntries(buildFields(data).map((f) => [f.label, f.value]));
 
@@ -117,7 +121,8 @@ export function buildDbPayload(data: InquiryInput) {
     owner_name: data.meno,
     phone: data.telefon,
     dog_name: data.pes,
-    dog_breed_weight: data.plemeno_vaha,
+    dog_breed: data.plemeno,
+    dog_weight_kg: data.vaha,
     dog_sex: data.pohlavie,
     dog_age_text: data.vek,
     dog_neutered: data.kastrovana,

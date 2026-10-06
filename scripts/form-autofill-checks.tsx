@@ -71,6 +71,8 @@ try {
       else (el as any).value = "TEST – autofill regression";
     }
     const input = form.querySelector<HTMLInputElement>(`input[type="tel"]`)!;
+    const weight = form.querySelector<HTMLInputElement>('input[name="vaha"]');
+    if (weight) weight.value = "25,5 kg";
     input.value = raw;
     if (mode === "input-event") await React.act(async () => input.dispatchEvent(new dom.Event("input", { bubbles: true }) as any));
     // Force React to render again after browser-only filling. Its state must not
@@ -85,6 +87,11 @@ try {
     assert.equal(submission.length, 1, `${test.name}: missing or duplicate browser request`);
     assert.equal(submission[0]!.body.phone, "+421915349028");
     assert.equal(submission[0]!.body.owner_name, "TEST – autofill regression");
+    if (weight) {
+      assert.equal(submission[0]!.body.dog_weight_kg, 25.5);
+      assert.equal(submission[0]!.body.dog_breed, "TEST – autofill regression");
+      assert(!("dog_breed_weight" in submission[0]!.body));
+    }
     assert.equal(submission[0]!.body.marketing_consent, marketing);
     assert.equal(submission[0]!.body.meta_fbp, marketing ? "fb.1.123.test" : "");
     const events = requests.filter((r) => r.url.endsWith("/website-landing-event"));
@@ -158,6 +165,8 @@ try {
       else (el as any).value = "PRIVATE NAME";
     }
     form.querySelector<HTMLInputElement>('input[type="tel"]')!.value = "+421915349028";
+    const weight = form.querySelector<HTMLInputElement>('input[name="vaha"]');
+    if (weight) weight.value = "25";
     const consoleError = console.error;
     console.error = () => {};
     try {

@@ -206,7 +206,8 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: phoneFromForm(form, `l-${formId}-tel`),
         pes: String(fd.get("pes") ?? "").trim(),
-        plemeno_vaha: String(fd.get("plemeno_vaha") ?? "").trim(),
+        plemeno: String(fd.get("plemeno") ?? "").trim(),
+        vaha: String(fd.get("vaha") ?? "").trim(),
         pohlavie: String(fd.get("pohlavie") ?? ""),
         vek: String(fd.get("vek") ?? "").trim(),
         kastrovana: String(fd.get("kastrovana") ?? ""),
@@ -261,24 +262,28 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         </div>
         <PhoneField id={`l-${formId}-tel`} name="telefon" />
       </div>
-      <div className="grid gap-3.5 sm:grid-cols-2">
-        <div>
+      <div>
           <label className="label-sm" htmlFor={`l-${formId}-pes`}>
             Meno psa *
           </label>
           <input id={`l-${formId}-pes`} name="pes" required className="field" placeholder="Rocky" />
-        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3.5">
         <div>
-          <label className="label-sm" htmlFor={`l-${formId}-plemeno-vaha`}>
-            Plemeno a váha psa *
+          <label className="label-sm" htmlFor={`l-${formId}-plemeno`}>
+            Plemeno psa *
           </label>
           <input
-            id={`l-${formId}-plemeno-vaha`}
-            name="plemeno_vaha"
+            id={`l-${formId}-plemeno`}
+            name="plemeno"
             required
             className="field"
-            placeholder="Labrador, cca 25 kg"
+            placeholder="Labrador"
           />
+        </div>
+        <div>
+          <label className="label-sm" htmlFor={`l-${formId}-vaha`}>Váha psa *</label>
+          <input id={`l-${formId}-vaha`} name="vaha" inputMode="decimal" required className="field" placeholder="25 kg" />
         </div>
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">

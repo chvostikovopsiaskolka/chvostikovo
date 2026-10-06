@@ -22,7 +22,8 @@ longSchema.parse({
   meno: "Test",
   telefon: phone,
   pes: "Rocky",
-  plemeno_vaha: "Labrador, 25 kg",
+  plemeno: "Labrador",
+  vaha: "25 kg",
   pohlavie: "Pes",
   vek: "2 roky",
   kastrovana: "Áno",
@@ -84,5 +85,6 @@ assert(productBackend.includes("/^\\+\\d{7,15}$/"), "Critical form check failed:
 
 await import("./form-autofill-checks");
 await import("./form-alert-checks");
+await import("./application-dog-details-checks");
 
 console.log("Critical form checks passed.");

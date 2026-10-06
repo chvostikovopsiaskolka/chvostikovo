@@ -199,7 +199,8 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
 
   if (isApplication) {
     lines.push(`Meno psa: ${String(payload.dog_name ?? '')}`);
-    lines.push(`Plemeno a váha psa: ${String(payload.dog_breed ?? '')}`);
+    lines.push(`Plemeno psa: ${String(payload.dog_breed ?? '')}`);
+    lines.push(`Váha psa: ${payload.dog_weight_kg == null ? 'neuvedené' : `${payload.dog_weight_kg} kg`}`);
     lines.push(`Pohlavie psa: ${String(payload.dog_sex ?? '')}`);
     lines.push(`Vek psa: ${String(payload.dog_age_text ?? '')}`);
     lines.push(
@@ -349,7 +350,22 @@ Deno.serve(async (req: Request) => {
       const dogName = text(input.dog_name ?? input.pes, 160);
       const dogSex = sex(input.dog_sex ?? input.pohlavie);
       const dogAge = text(input.dog_age_text ?? input.vek, 80);
-      const dogBreed = text(input.dog_breed_weight ?? input.dog_breed ?? input.plemeno, 200);
+      let dogBreed = text(input.dog_breed ?? input.plemeno ?? input.dog_breed_weight, 200);
+      let dogWeight: number | null = null;
+      if (input.dog_weight_kg != null) {
+        const rawWeight = String(input.dog_weight_kg).trim().replace(/\s*kg\s*$/i, '').trim();
+        if (!/^\d+(?:[.,]\d+)?$/.test(rawWeight)) return response(origin, 400, { ok: false, error: 'invalid_dog_weight' });
+        dogWeight = Number(rawWeight.replace(',', '.'));
+        if (!Number.isFinite(dogWeight) || dogWeight <= 0 || dogWeight > 150) return response(origin, 400, { ok: false, error: 'invalid_dog_weight' });
+      } else if (input.dog_breed_weight != null) {
+        // Older open browser tabs still submit the former combined field.
+        const legacy = dogBreed.match(/^(.*?)(\d+(?:[.,]\d+)?)\s*kg\s*$/i);
+        const weight = legacy ? Number(legacy[2].replace(',', '.')) : NaN;
+        if (legacy && weight > 0 && weight <= 150) {
+          dogBreed = legacy[1].replace(/[\s,;|\/-]+$/, '').replace(/\s+cca\.?$/i, '').replace(/[\s,;|\/-]+$/, '').trim();
+          dogWeight = weight;
+        }
+      }
       const dogNeutered = yesNo(input.dog_neutered ?? input.kastrovana);
       const usage = text(input.interest_reason ?? input.usage_plan ?? input.duvod, 250);
       const dogInfo = text(input.dog_info ?? input.viac, 3000);
@@ -362,6 +378,7 @@ Deno.serve(async (req: Request) => {
         dog_sex: dogSex,
         dog_age_text: dogAge,
         dog_breed: dogBreed || null,
+        dog_weight_kg: dogWeight,
         dog_neutered: dogNeutered,
         interest_reason: usage,
         dog_info: dogInfo,

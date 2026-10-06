@@ -67,11 +67,13 @@ try {
   } finally { console.error = consoleError; }
   // QA conversions are skipped on the server; real conversions keep working.
   const calls: string[] = [];
+  const databasePayloads: any[] = [];
   (globalThis as any).Deno.env.get = (name: string) => ({ SUPABASE_URL: "https://test.invalid", SUPABASE_SERVICE_ROLE_KEY: "test-only", RESEND_API_KEY: "test-only", META_CAPI_ACCESS_TOKEN: "test-only" })[name];
-  globalThis.fetch = (async (url: any) => {
+  globalThis.fetch = (async (url: any, init: any) => {
     calls.push(String(url));
     if (String(url).includes("web_form_submissions?")) return Response.json([]);
     if (String(url).includes("graph.facebook.com")) return Response.json({ events_received: 1 });
+    if (String(url).endsWith("/rest/v1/web_form_submissions") && init?.method === "POST") databasePayloads.push(JSON.parse(init.body));
     return Response.json({ id: "test-only", ok: true }, { status: 201 });
   }) as typeof fetch;
   await import("../supabase/functions/web-form-submit/index");
@@ -81,6 +83,13 @@ try {
   calls.length = 0;
   assert.equal((await send({ ...lead, source_ref: "/" })).status, 201);
   assert(calls.some((url) => url.includes("graph.facebook.com")), "Real Meta conversions must remain enabled");
+  const application = { ...lead, form_type: "application", marketing_consent: false, source_ref: "/?utm_source=qa", dog_name: "TEST DOG", dog_sex: "Pes", dog_age_text: "2 roky", dog_neutered: "Nie", interest_reason: "Občas podľa potreby", dog_info: "TEST" };
+  for (const details of [{ dog_breed: "Labrador", dog_weight_kg: 25.5 }, { dog_breed: "Labrador", dog_weight_kg: "25,5 kg" }, { dog_breed_weight: "Labrador, cca 25,5 kg" }]) {
+    assert.equal((await send({ ...application, ...details })).status, 201);
+    assert.equal(databasePayloads.at(-1).dog_breed, "Labrador");
+    assert.equal(databasePayloads.at(-1).dog_weight_kg, 25.5);
+  }
+  for (const weight of [0, -25, 151, "invalid", ""]) assert.equal((await send({ ...application, dog_breed: "Labrador", dog_weight_kg: weight })).status, 400);
   console.log("Form alert checks passed: CORS, per-attempt deduplication, mail delivery receipts, safe diagnostics, rate limiting, and isolated notification failure.");
 } finally {
   globalThis.fetch = originalFetch;
