@@ -11,7 +11,6 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import heroDogs from "@/assets/puppy-hero.webp";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { ShortForm } from "@/components/site/Forms";
@@ -158,19 +157,7 @@ function PuppyDaycarePage() {
 
       <main>
         <section className="relative overflow-hidden pt-20 sm:pt-24">
-          <div className="absolute inset-0">
-            <img
-              src={heroDogs}
-              alt="Psíky v psej škôlke Chvostíkovo"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              className="size-full scale-[1.14] object-cover object-[54%_50%] sm:scale-[1.08] lg:scale-100 lg:object-[52%_38%]"
-            />
-            <div className="absolute inset-0 bg-cream/14 lg:bg-cream/6" />
-            <div className="absolute inset-0 bg-linear-to-r from-cream/88 via-cream/38 via-45% to-cream/20 lg:to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-cream/92 to-transparent" />
-          </div>
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-white" />
 
           <div className="relative mx-auto grid min-h-[470px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">

@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import heroDogs from "@/assets/hero-dogs.jpg";
 import { ShortForm } from "@/components/site/Forms";
 import { FormDialog } from "@/components/site/FormDialog";
 import { InfoTicker } from "@/components/site/InfoTicker";
@@ -116,19 +115,7 @@ function LeadLandingPage() {
 
       <main>
         <section className="relative overflow-hidden pt-20 sm:pt-24">
-          <div className="absolute inset-0">
-            <img
-              src={heroDogs}
-              alt="Psíky v psej škôlke Chvostíkovo v Košiciach"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              className="size-full scale-[1.14] object-cover object-[54%_50%] sm:scale-[1.08] sm:object-[52%_48%] lg:scale-100 lg:object-[52%_38%]"
-            />
-            <div className="absolute inset-0 bg-cream/30" />
-            <div className="absolute inset-0 bg-linear-to-r from-cream/98 via-cream/80 via-48% to-cream/25" />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-cream to-transparent" />
-          </div>
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-white" />
 
           <div className="relative mx-auto grid min-h-[455px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">

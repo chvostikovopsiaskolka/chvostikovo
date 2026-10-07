@@ -1,0 +1,41 @@
+.paw-trail-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #fff;
+}
+
+.paw-trail-print {
+  position: absolute;
+  width: clamp(17px, 2.1vw, 29px);
+  height: auto;
+  fill: var(--color-coral, #ee8749);
+  opacity: 0;
+  animation: paw-trail-step 36s linear infinite;
+}
+
+@keyframes paw-trail-step {
+  0% { opacity: 0; }
+  1.2% { opacity: .3; }
+  7% { opacity: .25; }
+  19% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.paw-trail-reading-space {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, #ffffffb8 15%, #ffffffd9 43%, transparent 72%);
+}
+
+@media (max-width: 1023px) {
+  .paw-trail-print { width: 19px; }
+  .paw-trail-reading-space {
+    background: linear-gradient(90deg, transparent, #ffffffd9 18%, #fffffff0 50%, #ffffffd9 82%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paw-trail-print { animation: none; opacity: .12; }
+}

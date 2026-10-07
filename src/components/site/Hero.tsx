@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import { ArrowDown, CheckCircle2, Phone } from "lucide-react";
 import { PHONE } from "@/content/site";
-import heroDogs from "@/assets/hero-dogs.jpg";
 import { ShortForm } from "./Forms";
 import { InfoTicker } from "./InfoTicker";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -14,22 +14,10 @@ function scrollToWhyChvostikovo() {
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
 }
 
-export function Hero() {
+export function Hero({ background, learnMoreHref }: { background?: ReactNode; learnMoreHref?: string }) {
   return (
     <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-28 lg:pb-4">
-      <div className="absolute inset-0 z-0">
-        <img
-          src={heroDogs}
-          alt="Psíky v psej škôlke Chvostíkovo v Košiciach"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          className="size-full object-cover object-[50%_54%] lg:object-[50%_35%]"
-        />
-        <div className="absolute inset-0 bg-cream/25 lg:bg-cream/10" />
-        <div className="absolute inset-0 bg-linear-to-r from-cream/95 via-cream/55 via-45% to-cream/35 lg:to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-cream to-transparent" />
-      </div>
+      {background ?? <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-white" />}
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
         {/* Mobile layout */}
@@ -68,6 +56,10 @@ export function Hero() {
           <button
             type="button"
             onClick={() => {
+              if (learnMoreHref) {
+                window.location.assign(learnMoreHref);
+                return;
+              }
               trackMarketingInteraction("hero_learn_more", "hero_mobile");
               scrollToWhyChvostikovo();
             }}

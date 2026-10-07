@@ -10,24 +10,92 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CasteOtazkyRouteImport } from './routes/caste-otazky'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as HeroTestRouteImport } from './routes/hero-test'
+import { Route as KosikRouteImport } from './routes/kosik'
+import { Route as ObjednavkaRouteImport } from './routes/objednavka'
+import { Route as OchranaOsobnychUdajovRouteImport } from './routes/ochrana-osobnych-udajov'
+import { Route as ProduktyRouteImport } from './routes/produkty'
+import { Route as PsiaSkolkaKosiceRouteImport } from './routes/psia-skolka-kosice'
+import { Route as PsiaSkolkaPreSteniatkaRouteImport } from './routes/psia-skolka-pre-steniatka'
+import { Route as StojanNaMiskyPrePsaRouteImport } from './routes/stojan-na-misky-pre-psa'
+import { Route as StrazeniePsovKosiceRouteImport } from './routes/strazenie-psov-kosice'
+import { Route as TargetNaCviceniePrePsovRouteImport } from './routes/target-na-cvicenie-pre-psov'
+import { Route as UdajePrevadzkovatelaRouteImport } from './routes/udaje-prevadzkovatela'
 import { Route as EnCookiesRouteImport } from './routes/en.cookies'
 import { Route as EnDogDaycareKosiceRouteImport } from './routes/en.dog-daycare-kosice'
 import { Route as EnOperatorDetailsRouteImport } from './routes/en.operator-details'
 import { Route as EnPrivacyRouteImport } from './routes/en.privacy'
-import { Route as OchranaOsobnychUdajovRouteImport } from './routes/ochrana-osobnych-udajov'
-import { Route as PsiaSkolkaPreSteniatkaRouteImport } from './routes/psia-skolka-pre-steniatka'
-import { Route as StrazeniePsovKosiceRouteImport } from './routes/strazenie-psov-kosice'
-import { Route as UdajePrevadzkovatelaRouteImport } from './routes/udaje-prevadzkovatela'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CasteOtazkyRoute = CasteOtazkyRouteImport.update({
+  id: '/caste-otazky',
+  path: '/caste-otazky',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HeroTestRoute = HeroTestRouteImport.update({
+  id: '/hero-test',
+  path: '/hero-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KosikRoute = KosikRouteImport.update({
+  id: '/kosik',
+  path: '/kosik',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ObjednavkaRoute = ObjednavkaRouteImport.update({
+  id: '/objednavka',
+  path: '/objednavka',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OchranaOsobnychUdajovRoute = OchranaOsobnychUdajovRouteImport.update({
+  id: '/ochrana-osobnych-udajov',
+  path: '/ochrana-osobnych-udajov',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProduktyRoute = ProduktyRouteImport.update({
+  id: '/produkty',
+  path: '/produkty',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PsiaSkolkaKosiceRoute = PsiaSkolkaKosiceRouteImport.update({
+  id: '/psia-skolka-kosice',
+  path: '/psia-skolka-kosice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PsiaSkolkaPreSteniatkaRoute = PsiaSkolkaPreSteniatkaRouteImport.update({
+  id: '/psia-skolka-pre-steniatka',
+  path: '/psia-skolka-pre-steniatka',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StojanNaMiskyPrePsaRoute = StojanNaMiskyPrePsaRouteImport.update({
+  id: '/stojan-na-misky-pre-psa',
+  path: '/stojan-na-misky-pre-psa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StrazeniePsovKosiceRoute = StrazeniePsovKosiceRouteImport.update({
+  id: '/strazenie-psov-kosice',
+  path: '/strazenie-psov-kosice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TargetNaCviceniePrePsovRoute = TargetNaCviceniePrePsovRouteImport.update({
+  id: '/target-na-cvicenie-pre-psov',
+  path: '/target-na-cvicenie-pre-psov',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UdajePrevadzkovatelaRoute = UdajePrevadzkovatelaRouteImport.update({
+  id: '/udaje-prevadzkovatela',
+  path: '/udaje-prevadzkovatela',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnCookiesRoute = EnCookiesRouteImport.update({
@@ -50,95 +118,150 @@ const EnPrivacyRoute = EnPrivacyRouteImport.update({
   path: '/en/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OchranaOsobnychUdajovRoute = OchranaOsobnychUdajovRouteImport.update({
-  id: '/ochrana-osobnych-udajov',
-  path: '/ochrana-osobnych-udajov',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PsiaSkolkaPreSteniatkaRoute = PsiaSkolkaPreSteniatkaRouteImport.update({
-  id: '/psia-skolka-pre-steniatka',
-  path: '/psia-skolka-pre-steniatka',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StrazeniePsovKosiceRoute = StrazeniePsovKosiceRouteImport.update({
-  id: '/strazenie-psov-kosice',
-  path: '/strazenie-psov-kosice',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UdajePrevadzkovatelaRoute = UdajePrevadzkovatelaRouteImport.update({
-  id: '/udaje-prevadzkovatela',
-  path: '/udaje-prevadzkovatela',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/caste-otazky': typeof CasteOtazkyRoute
   '/cookies': typeof CookiesRoute
+  '/hero-test': typeof HeroTestRoute
+  '/kosik': typeof KosikRoute
+  '/objednavka': typeof ObjednavkaRoute
+  '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/produkty': typeof ProduktyRoute
+  '/psia-skolka-kosice': typeof PsiaSkolkaKosiceRoute
+  '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
+  '/stojan-na-misky-pre-psa': typeof StojanNaMiskyPrePsaRoute
+  '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
+  '/target-na-cvicenie-pre-psov': typeof TargetNaCviceniePrePsovRoute
+  '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
   '/en/cookies': typeof EnCookiesRoute
   '/en/dog-daycare-kosice': typeof EnDogDaycareKosiceRoute
   '/en/operator-details': typeof EnOperatorDetailsRoute
   '/en/privacy': typeof EnPrivacyRoute
-  '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
-  '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
-  '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
-  '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/caste-otazky': typeof CasteOtazkyRoute
   '/cookies': typeof CookiesRoute
+  '/hero-test': typeof HeroTestRoute
+  '/kosik': typeof KosikRoute
+  '/objednavka': typeof ObjednavkaRoute
+  '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/produkty': typeof ProduktyRoute
+  '/psia-skolka-kosice': typeof PsiaSkolkaKosiceRoute
+  '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
+  '/stojan-na-misky-pre-psa': typeof StojanNaMiskyPrePsaRoute
+  '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
+  '/target-na-cvicenie-pre-psov': typeof TargetNaCviceniePrePsovRoute
+  '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
   '/en/cookies': typeof EnCookiesRoute
   '/en/dog-daycare-kosice': typeof EnDogDaycareKosiceRoute
   '/en/operator-details': typeof EnOperatorDetailsRoute
   '/en/privacy': typeof EnPrivacyRoute
-  '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
-  '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
-  '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
-  '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/caste-otazky': typeof CasteOtazkyRoute
   '/cookies': typeof CookiesRoute
+  '/hero-test': typeof HeroTestRoute
+  '/kosik': typeof KosikRoute
+  '/objednavka': typeof ObjednavkaRoute
+  '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
+  '/produkty': typeof ProduktyRoute
+  '/psia-skolka-kosice': typeof PsiaSkolkaKosiceRoute
+  '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
+  '/stojan-na-misky-pre-psa': typeof StojanNaMiskyPrePsaRoute
+  '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
+  '/target-na-cvicenie-pre-psov': typeof TargetNaCviceniePrePsovRoute
+  '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
   '/en/cookies': typeof EnCookiesRoute
   '/en/dog-daycare-kosice': typeof EnDogDaycareKosiceRoute
   '/en/operator-details': typeof EnOperatorDetailsRoute
   '/en/privacy': typeof EnPrivacyRoute
-  '/ochrana-osobnych-udajov': typeof OchranaOsobnychUdajovRoute
-  '/psia-skolka-pre-steniatka': typeof PsiaSkolkaPreSteniatkaRoute
-  '/strazenie-psov-kosice': typeof StrazeniePsovKosiceRoute
-  '/udaje-prevadzkovatela': typeof UdajePrevadzkovatelaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/cookies' | '/en/cookies' | '/en/dog-daycare-kosice' | '/en/operator-details' | '/en/privacy' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/strazenie-psov-kosice' | '/udaje-prevadzkovatela'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cookies' | '/en/cookies' | '/en/dog-daycare-kosice' | '/en/operator-details' | '/en/privacy' | '/ochrana-osobnych-udajov' | '/psia-skolka-pre-steniatka' | '/strazenie-psov-kosice' | '/udaje-prevadzkovatela'
-  id:
-    | '__root__'
     | '/'
+    | '/caste-otazky'
     | '/cookies'
+    | '/hero-test'
+    | '/kosik'
+    | '/objednavka'
+    | '/ochrana-osobnych-udajov'
+    | '/produkty'
+    | '/psia-skolka-kosice'
+    | '/psia-skolka-pre-steniatka'
+    | '/stojan-na-misky-pre-psa'
+    | '/strazenie-psov-kosice'
+    | '/target-na-cvicenie-pre-psov'
+    | '/udaje-prevadzkovatela'
     | '/en/cookies'
     | '/en/dog-daycare-kosice'
     | '/en/operator-details'
     | '/en/privacy'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/caste-otazky'
+    | '/cookies'
+    | '/hero-test'
+    | '/kosik'
+    | '/objednavka'
     | '/ochrana-osobnych-udajov'
+    | '/produkty'
+    | '/psia-skolka-kosice'
     | '/psia-skolka-pre-steniatka'
+    | '/stojan-na-misky-pre-psa'
     | '/strazenie-psov-kosice'
+    | '/target-na-cvicenie-pre-psov'
     | '/udaje-prevadzkovatela'
+    | '/en/cookies'
+    | '/en/dog-daycare-kosice'
+    | '/en/operator-details'
+    | '/en/privacy'
+  id:
+    | '__root__'
+    | '/'
+    | '/caste-otazky'
+    | '/cookies'
+    | '/hero-test'
+    | '/kosik'
+    | '/objednavka'
+    | '/ochrana-osobnych-udajov'
+    | '/produkty'
+    | '/psia-skolka-kosice'
+    | '/psia-skolka-pre-steniatka'
+    | '/stojan-na-misky-pre-psa'
+    | '/strazenie-psov-kosice'
+    | '/target-na-cvicenie-pre-psov'
+    | '/udaje-prevadzkovatela'
+    | '/en/cookies'
+    | '/en/dog-daycare-kosice'
+    | '/en/operator-details'
+    | '/en/privacy'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CasteOtazkyRoute: typeof CasteOtazkyRoute
   CookiesRoute: typeof CookiesRoute
+  HeroTestRoute: typeof HeroTestRoute
+  KosikRoute: typeof KosikRoute
+  ObjednavkaRoute: typeof ObjednavkaRoute
+  OchranaOsobnychUdajovRoute: typeof OchranaOsobnychUdajovRoute
+  ProduktyRoute: typeof ProduktyRoute
+  PsiaSkolkaKosiceRoute: typeof PsiaSkolkaKosiceRoute
+  PsiaSkolkaPreSteniatkaRoute: typeof PsiaSkolkaPreSteniatkaRoute
+  StojanNaMiskyPrePsaRoute: typeof StojanNaMiskyPrePsaRoute
+  StrazeniePsovKosiceRoute: typeof StrazeniePsovKosiceRoute
+  TargetNaCviceniePrePsovRoute: typeof TargetNaCviceniePrePsovRoute
+  UdajePrevadzkovatelaRoute: typeof UdajePrevadzkovatelaRoute
   EnCookiesRoute: typeof EnCookiesRoute
   EnDogDaycareKosiceRoute: typeof EnDogDaycareKosiceRoute
   EnOperatorDetailsRoute: typeof EnOperatorDetailsRoute
   EnPrivacyRoute: typeof EnPrivacyRoute
-  OchranaOsobnychUdajovRoute: typeof OchranaOsobnychUdajovRoute
-  PsiaSkolkaPreSteniatkaRoute: typeof PsiaSkolkaPreSteniatkaRoute
-  StrazeniePsovKosiceRoute: typeof StrazeniePsovKosiceRoute
-  UdajePrevadzkovatelaRoute: typeof UdajePrevadzkovatelaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -150,11 +273,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/caste-otazky': {
+      id: '/caste-otazky'
+      path: '/caste-otazky'
+      fullPath: '/caste-otazky'
+      preLoaderRoute: typeof CasteOtazkyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cookies': {
       id: '/cookies'
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hero-test': {
+      id: '/hero-test'
+      path: '/hero-test'
+      fullPath: '/hero-test'
+      preLoaderRoute: typeof HeroTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kosik': {
+      id: '/kosik'
+      path: '/kosik'
+      fullPath: '/kosik'
+      preLoaderRoute: typeof KosikRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/objednavka': {
+      id: '/objednavka'
+      path: '/objednavka'
+      fullPath: '/objednavka'
+      preLoaderRoute: typeof ObjednavkaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ochrana-osobnych-udajov': {
+      id: '/ochrana-osobnych-udajov'
+      path: '/ochrana-osobnych-udajov'
+      fullPath: '/ochrana-osobnych-udajov'
+      preLoaderRoute: typeof OchranaOsobnychUdajovRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produkty': {
+      id: '/produkty'
+      path: '/produkty'
+      fullPath: '/produkty'
+      preLoaderRoute: typeof ProduktyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/psia-skolka-kosice': {
+      id: '/psia-skolka-kosice'
+      path: '/psia-skolka-kosice'
+      fullPath: '/psia-skolka-kosice'
+      preLoaderRoute: typeof PsiaSkolkaKosiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/psia-skolka-pre-steniatka': {
+      id: '/psia-skolka-pre-steniatka'
+      path: '/psia-skolka-pre-steniatka'
+      fullPath: '/psia-skolka-pre-steniatka'
+      preLoaderRoute: typeof PsiaSkolkaPreSteniatkaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stojan-na-misky-pre-psa': {
+      id: '/stojan-na-misky-pre-psa'
+      path: '/stojan-na-misky-pre-psa'
+      fullPath: '/stojan-na-misky-pre-psa'
+      preLoaderRoute: typeof StojanNaMiskyPrePsaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/strazenie-psov-kosice': {
+      id: '/strazenie-psov-kosice'
+      path: '/strazenie-psov-kosice'
+      fullPath: '/strazenie-psov-kosice'
+      preLoaderRoute: typeof StrazeniePsovKosiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/target-na-cvicenie-pre-psov': {
+      id: '/target-na-cvicenie-pre-psov'
+      path: '/target-na-cvicenie-pre-psov'
+      fullPath: '/target-na-cvicenie-pre-psov'
+      preLoaderRoute: typeof TargetNaCviceniePrePsovRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/udaje-prevadzkovatela': {
+      id: '/udaje-prevadzkovatela'
+      path: '/udaje-prevadzkovatela'
+      fullPath: '/udaje-prevadzkovatela'
+      preLoaderRoute: typeof UdajePrevadzkovatelaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/cookies': {
@@ -185,48 +392,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnPrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ochrana-osobnych-udajov': {
-      id: '/ochrana-osobnych-udajov'
-      path: '/ochrana-osobnych-udajov'
-      fullPath: '/ochrana-osobnych-udajov'
-      preLoaderRoute: typeof OchranaOsobnychUdajovRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/psia-skolka-pre-steniatka': {
-      id: '/psia-skolka-pre-steniatka'
-      path: '/psia-skolka-pre-steniatka'
-      fullPath: '/psia-skolka-pre-steniatka'
-      preLoaderRoute: typeof PsiaSkolkaPreSteniatkaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/strazenie-psov-kosice': {
-      id: '/strazenie-psov-kosice'
-      path: '/strazenie-psov-kosice'
-      fullPath: '/strazenie-psov-kosice'
-      preLoaderRoute: typeof StrazeniePsovKosiceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/udaje-prevadzkovatela': {
-      id: '/udaje-prevadzkovatela'
-      path: '/udaje-prevadzkovatela'
-      fullPath: '/udaje-prevadzkovatela'
-      preLoaderRoute: typeof UdajePrevadzkovatelaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CasteOtazkyRoute: CasteOtazkyRoute,
   CookiesRoute: CookiesRoute,
+  HeroTestRoute: HeroTestRoute,
+  KosikRoute: KosikRoute,
+  ObjednavkaRoute: ObjednavkaRoute,
+  OchranaOsobnychUdajovRoute: OchranaOsobnychUdajovRoute,
+  ProduktyRoute: ProduktyRoute,
+  PsiaSkolkaKosiceRoute: PsiaSkolkaKosiceRoute,
+  PsiaSkolkaPreSteniatkaRoute: PsiaSkolkaPreSteniatkaRoute,
+  StojanNaMiskyPrePsaRoute: StojanNaMiskyPrePsaRoute,
+  StrazeniePsovKosiceRoute: StrazeniePsovKosiceRoute,
+  TargetNaCviceniePrePsovRoute: TargetNaCviceniePrePsovRoute,
+  UdajePrevadzkovatelaRoute: UdajePrevadzkovatelaRoute,
   EnCookiesRoute: EnCookiesRoute,
   EnDogDaycareKosiceRoute: EnDogDaycareKosiceRoute,
   EnOperatorDetailsRoute: EnOperatorDetailsRoute,
   EnPrivacyRoute: EnPrivacyRoute,
-  OchranaOsobnychUdajovRoute: OchranaOsobnychUdajovRoute,
-  PsiaSkolkaPreSteniatkaRoute: PsiaSkolkaPreSteniatkaRoute,
-  StrazeniePsovKosiceRoute: StrazeniePsovKosiceRoute,
-  UdajePrevadzkovatelaRoute: UdajePrevadzkovatelaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -12,7 +12,6 @@ import {
   X,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
-import heroDogs from "@/assets/hero-dogs.jpg";
 import { EnglishInquiryForm } from "@/components/site/EnglishInquiryForm";
 import { FormDialog } from "@/components/site/FormDialog";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -425,19 +424,7 @@ function EnglishDogDaycarePage() {
 
       <main>
         <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-28 lg:pb-4">
-          <div className="absolute inset-0 z-0">
-            <img
-              src={heroDogs}
-              alt="Dogs at Chvostíkovo dog daycare in Košice"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              className="size-full object-cover object-[50%_54%] lg:object-[50%_35%]"
-            />
-            <div className="absolute inset-0 bg-cream/25 lg:bg-cream/10" />
-            <div className="absolute inset-0 bg-linear-to-r from-cream/95 via-cream/55 via-45% to-cream/35 lg:to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-cream to-transparent" />
-          </div>
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-white" />
 
           <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
             <div className="lg:hidden">
