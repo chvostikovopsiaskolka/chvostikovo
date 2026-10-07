@@ -27,8 +27,8 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261007-customer-booking-no-summary-v158';
-const APP_VERSION='1.0.5';
+const APP_BUILD='20261007-customer-late-pass-renewal-v159';
+const APP_VERSION='1.0.6';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -544,7 +544,6 @@ async function requestPass(totalEntries,{dogId=Number(state.selectedDogId),showC
   }catch(e){toast(e.message);return null}finally{loading(false)}
 }
 async function offerRecentPassRenewalV157(dogId,isCurrent=()=>true){
-  if((state.data?.pass_requests||[]).some(r=>Number(r.dog_id)===dogId&&r.status==='pending'))return true;
   const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_pass_renewal_eligible',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'},body:JSON.stringify({p_dog_id:dogId})});
   if(!response.ok)throw new Error('Nepodarilo sa overiť permanentku. Skúste to znova.');
   if(await response.json()!==true)return true;
@@ -1705,6 +1704,17 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',async()=>{
       if(checkingRenewalV157||submittingV37)return;
       const date=btn.dataset.date;
+      if(!selectedDatesV37.has(date)&&renewalCheckedDogV157!==Number(dog.id)){
+        checkingRenewalV157=true;
+        const epoch=pickerEpochV157;
+        try{
+          const isCurrent=()=>epoch===pickerEpochV157&&!$('bookingPickerV37')?.classList.contains('hidden');
+          const proceed=await offerRecentPassRenewalV157(Number(dog.id),isCurrent);
+          if(!proceed||Number(state.selectedDogId)!==Number(dog.id)||!isCurrent())return;
+          renewalCheckedDogV157=Number(dog.id);
+        }catch(error){pickerErrorV95(error.message);return}
+        finally{checkingRenewalV157=false}
+      }
       if(btn.dataset.contact==='true'){
         closePickerV37();
         const message=`Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`;
@@ -1715,17 +1725,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         selectedDatesV37.delete(date);
         selectedTaxiByDateV91.delete(date);
       }else{
-        if(renewalCheckedDogV157!==Number(dog.id)){
-          checkingRenewalV157=true;
-          const epoch=pickerEpochV157;
-          try{
-            const isCurrent=()=>epoch===pickerEpochV157&&!$('bookingPickerV37')?.classList.contains('hidden');
-            const proceed=await offerRecentPassRenewalV157(Number(dog.id),isCurrent);
-            if(!proceed||Number(state.selectedDogId)!==Number(dog.id)||!isCurrent())return;
-            renewalCheckedDogV157=Number(dog.id);
-          }catch(error){pickerErrorV95(error.message);return}
-          finally{checkingRenewalV157=false}
-        }
         selectedDatesV37.add(date);
         if(!selectedTaxiByDateV91.has(date))selectedTaxiByDateV91.set(date,'none');
       }
