@@ -27,8 +27,8 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261006-customer-recent-pass-renewal-v157b';
-const APP_VERSION='1.0.4';
+const APP_BUILD='20261007-customer-booking-no-summary-v158';
+const APP_VERSION='1.0.5';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -73,14 +73,6 @@ const customerRenderers={announcements:null,upcoming:null,days:null};
 function addCustomerHook(name,fn){if(typeof fn==='function'&&customerHooks[name])customerHooks[name].push(fn)}
 function runCustomerHooks(name,...args){for(const fn of customerHooks[name]||[]){try{fn(...args)}catch(error){console.warn('Customer hook failed',name,error)}}}
 
-function showBookingEntrySummaryV148(rows,dogId,renewalDate){
- let modal=document.getElementById('bookingEntrySummaryV148');
- if(!modal){document.body.insertAdjacentHTML('beforeend','<div id="bookingEntrySummaryV148" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="bookingEntrySummaryTitleV148"><div class="legal-card"><button id="bookingEntrySummaryCloseV148" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="bookingEntrySummaryTitleV148">Prehľad rezervovaných vstupov</h2><p>Žiadosť bola odoslaná na schválenie. Po schválení sa pri návštevách použijú tieto plánované vstupy:</p><div id="bookingEntrySummaryRowsV148" class="stack"></div><p class="hint">Prehľad zostávajúcich vstupov a platnosť permanentky nájdete v aplikácii.</p><button id="bookingEntrySummaryDoneV148" class="btn full" type="button">Rozumiem</button></div></div>');modal=document.getElementById('bookingEntrySummaryV148')}
- document.getElementById('bookingEntrySummaryRowsV148').innerHTML=rows.map(row=>'<div class="note"><strong>'+esc(skDay(row.date)+' '+skDate(row.date))+'</strong><div>'+esc(row.number>0&&row.total>0?(row.newPass?'Plánovaný vstup '+row.number+'/'+row.total+' z novej permanentky.':'Použije sa '+row.number+'. vstup z '+row.total+'.'):'Typ vstupu nájdete v detaile rezervácie.')+'</div></div>').join('');
- let dismissed=false;
- const close=()=>{if(dismissed)return;dismissed=true;modal.classList.add('hidden');modal.onclick=null;if(renewalDate)window.showPassRenewalAfterBookingV94?.(dogId,renewalDate)};
- document.getElementById('bookingEntrySummaryCloseV148').onclick=close;document.getElementById('bookingEntrySummaryDoneV148').onclick=close;modal.onclick=e=>{if(e.target===modal)close()};modal.classList.remove('hidden');
-}
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const skDate=v=>{if(!v)return'';try{return new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',year:'numeric'}).format(new Date(String(v).slice(0,10)+'T12:00:00'))}catch(_){return String(v)}};
@@ -1781,13 +1773,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       renderPickerV37();pickerErrorV95('Rezervácie na '+deadlineDates.map(skDate).join(', ')+' sa uzavreli v nedeľu o 20:00.',true);queueCustomerSync('bookings',0);return;
     }
     submittingV37=true;pickerErrorV95('');renderPickerV37();
-    let ok=0,renewalDate=null;const failed=[],successDates=[],entrySummary=[];
+    let ok=0,renewalDate=null;const failed=[],successDates=[];
     for(const date of dates){
       const taxiMode=selectedTaxiByDateV91.get(date)||'none';
       try{
         const result=await api({action:'request_booking',dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode});
         const bookingRow=result?.data||result?.booking||result?.request||null;
-        entrySummary.push({date,newPass:Boolean(bookingRow?.planned_pass_request_id),number:Number(bookingRow?.projected_entry_number||bookingRow?.planned_entry_number)||0,total:Number(bookingRow?.projected_pass_total||bookingRow?.planned_pass_total)||0});
         if(bookingRow&&!bookingRow.planned_pass_request_id&&Number(bookingRow.projected_pass_total)>0&&Number(bookingRow.projected_entry_number)===Number(bookingRow.projected_pass_total))renewalDate=date;
         applyLocalBooking(result,{id:-(Date.now()+ok),dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode,status:'pending',can_manage:true});ok++;successDates.push(date);
       }catch(e){failed.push({date,error:e.message||'Nepodarilo sa rezervovať.'})}
@@ -1805,8 +1796,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     }
     closePickerV37();
     toast(ok===1?'Rezervácia bola odoslaná na schválenie.':`${ok} rezervácie boli odoslané na schválenie.`);
-    if(entrySummary.some(row=>row.number>0&&row.total>0))showBookingEntrySummaryV148(entrySummary,Number(dog.id),renewalDate);
-    else if(renewalDate)setTimeout(()=>window.showPassRenewalAfterBookingV94?.(Number(dog.id),renewalDate),140);
+    if(renewalDate)setTimeout(()=>window.showPassRenewalAfterBookingV94?.(Number(dog.id),renewalDate),140);
   }
 
   function bookingRosterV37(day,ownDog,passState){

@@ -15,8 +15,5 @@ const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict'),{st
   const response=await handler(new Request('https://test.invalid?date=2026-10-08',{headers:{'x-sms-secret':'test-only'}}));assert.equal(response.status,200);return response.json();
  }
  for(const channel of ['auto','push']){assert.deepEqual((await feed(true,true,channel)).map(r=>r.dog_id),[1,2]);assert.equal((await feed(false,true,channel)).length,3);assert.equal((await feed(true,false,channel)).length,3);}
- const app=fs.readFileSync('app.js','utf8'),start=app.indexOf('function showBookingEntrySummaryV148('),end=app.indexOf('const $=',start),dom=new JSDOM('<body></body>',{runScripts:'outside-only'}),w=dom.window;
- w.esc=x=>String(x).replace(/</g,'&lt;');w.skDay=()=> 'Štvrtok';w.skDate=x=>x;let renewals=0;w.showPassRenewalAfterBookingV94=()=>renewals++;w.eval(app.slice(start,end));
- w.showBookingEntrySummaryV148([{date:'2026-10-08',number:5,total:10},{date:'2026-10-09',number:6,total:10}],77,'2026-10-09');assert(w.document.body.textContent.includes('5. vstup z 10.'));assert(w.document.body.textContent.includes('6. vstup z 10.'));assert.equal(renewals,0);w.document.getElementById('bookingEntrySummaryDoneV148').click();w.document.getElementById('bookingEntrySummaryDoneV148').click();assert.equal(renewals,1);w.close();
- console.log('PASS: SMS unchanged by default/dual mode; push-only suppression with active profile+subscription; missing push fallback; unauthorized feed; multi-day entry summary and one-time renewal dismissal');
+ console.log('PASS: SMS unchanged by default/dual mode; push-only suppression with active profile+subscription; missing push fallback; unauthorized feed');
 })().catch(error=>{console.error(error);process.exit(1)});
