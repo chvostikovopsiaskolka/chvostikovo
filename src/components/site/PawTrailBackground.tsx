@@ -32,9 +32,9 @@ const AMBIENT_PAWS = [
   { x: 91, y: 72, size: 18, rotate: -12, tone: "coral", mobile: true },
   { x: 14, y: 52, size: 14, rotate: 30, tone: "forest", mobile: false },
   { x: 86, y: 10, size: 15, rotate: -28, tone: "coral", mobile: false },
-  { x: 18, y: 46, size: 19, rotate: -31, tone: "coral", mobile: true },
-  { x: 49, y: 68, size: 16, rotate: 17, tone: "forest", mobile: true },
-  { x: 70, y: 55, size: 18, rotate: -11, tone: "coral", mobile: true },
+  { x: 18, y: 46, size: 22, rotate: -31, tone: "coral", mobile: true },
+  { x: 49, y: 68, size: 20, rotate: 17, tone: "forest", mobile: true },
+  { x: 70, y: 55, size: 21, rotate: -11, tone: "coral", mobile: true },
 ] as const;
 
 const LEFT_ROUTES: ReadonlyArray<readonly [Point, Point, Point]> = [
