@@ -30,14 +30,9 @@
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261007-customer-android-list-scroll-halloween-v168';
-const APP_VERSION='1.0.15';
-(function applyCustomerHalloweenV168(){
-  const now=new Date();
-  const month=now.getMonth()+1;
-  const day=now.getDate();
-  document.documentElement.classList.toggle('customer-halloween-v168',month===10||(month===11&&day<=2));
-})();
+const APP_BUILD='20261007-customer-android-list-scroll-clean-v169';
+const APP_VERSION='1.0.16';
+
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -1171,7 +1166,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   document.getElementById('schoolTermsAck')?.addEventListener('change',e=>{const b=document.getElementById('schoolTermsConfirm');if(b)b.disabled=e.target.disabled||!e.target.checked});
 })();
 
-
 /* consolidated customer legal status: cached reads, explicit refresh only */
 (function customerLegalStatusV21(){
   if(window.__chvostikovoCustomerLegalStatusV21)return;
@@ -1378,10 +1372,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
 
-
-
-
-
 /* v101: all customer shell images are static assets; no Edge Function is used for branding. */
 (function portalHomeIconV101(){
   const mount=()=>{
@@ -1434,12 +1424,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
 
-
 /* preview consolidated: dog profile layout + app chrome */
 (function customerDogProfilePreview(){
   if(window.__chvostikovoDogProfilePreview)return;
   window.__chvostikovoDogProfilePreview=true;
-
 
   const monthLabel=value=>{try{return new Intl.DateTimeFormat('sk-SK',{month:'long',year:'numeric'}).format(new Date(String(value).slice(0,10)+'T12:00:00'))}catch(_){return String(value||'')}};
 
@@ -1496,7 +1484,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     mountLegal(oldLayout||tab);renderVisitStats();
     // The contact form lives in its dedicated Menu modal.
   }
-
 
   const calendarSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M7 3v4M17 3v4M3 10h18"></path></svg>';
   const messageSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path><path d="M7.5 10h9M7.5 13.5h6"></path></svg>';
@@ -1580,7 +1567,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
   function applyAll(){applyNav();applyHero();ensureSettings();setTimeout(relocateSettings,0)}
 
-
   addCustomerHook('afterRenderPassSummary',()=>{setTimeout(()=>{applyHero();applyNav()},0)});
   addCustomerHook('afterRenderDog',()=>{requestAnimationFrame(()=>{apply();applyAll()})});
 
@@ -1593,7 +1579,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,120),{once:true});else setTimeout(start,120);
 })();
-
 
 /* v37: direct settings notification + compact multi-day booking flow */
 (function customerBookingAndSettingsV37(){
@@ -1888,7 +1873,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(startV37,180));else setTimeout(startV37,180);
 })();
 
-
 /* preview consolidated: pass renewal + push lifecycle */
 (function customerLifecyclePreview(){
   if(window.__chvostikovoCustomerLifecyclePreview)return;
@@ -1934,9 +1918,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
   window.showPassRenewalAfterBookingV94=(dogId,date)=>{bookingDogV38=0;showPromptV38(Number(dogId)||0,date)};
 
-
-
-
   async function healPushV71(){
     if(!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
     try{
@@ -1977,7 +1958,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     }
   }
 
-
   addCustomerHook('afterApi',(body)=>{
     if(body?.action==='request_booking')bookingDogV38=Number(body.dog_id)||0;
   });
@@ -1997,7 +1977,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
-
 
 /* v40: Android settings cleanup, reliable push toggle and scroll recovery */
 (function customerAndroidSettingsV40(){
@@ -2088,7 +2067,6 @@ async function togglePushDirect(btn){
   window.addEventListener('pageshow',()=>{repairScrollLocks();setTimeout(refreshPushState,50)});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(observeSettings,180));else setTimeout(observeSettings,180);
 })();
-
 
 /* preview consolidated: profile support, hint and school rules */
 (function customerProfileExperiencePreview(){
@@ -2199,9 +2177,6 @@ async function togglePushDirect(btn){
     btn.classList.toggle('hidden',!appVisible||state.activeTab!=='dog');
   }
 
-
-
-
   function ensureHint(){
     if($('supportChatHintV53'))return;
     const btn=$('supportChatBtnV52');if(!btn)return;
@@ -2236,9 +2211,6 @@ async function togglePushDirect(btn){
     $('navMessages')?.setAttribute('aria-hidden','true');
     $('navMessages')?.setAttribute('tabindex','-1');
   }
-
-
-
 
   function authHeadersV55(){return {apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token}}
   async function activeTermsV55(force=false){
@@ -2310,7 +2282,6 @@ async function togglePushDirect(btn){
     const title=$('dogSettingsTitleV36');if(title)title.textContent='Nastavenia';
   }
 
-
   addCustomerHook('afterRenderMessages',renderSupportThread);
   addCustomerHook('afterUpdateUnread',()=>{
     const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);
@@ -2348,9 +2319,6 @@ async function togglePushDirect(btn){
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
-
-
-
 
 /* v104: vaccination renewal reminder and proof-photo flow */
 (function vaccinationRenewalV104(){
