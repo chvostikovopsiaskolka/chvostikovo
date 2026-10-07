@@ -236,14 +236,6 @@ function PuppyDaycarePage() {
           </div>
         </section>
 
-        <section className="bg-card pt-8 text-center sm:pt-12">
-          <div className="mx-auto max-w-6xl px-4">
-            <h2 className="section-title text-3xl sm:text-4xl">Pozrite si zopár fotiek zo škôlky</h2>
-          </div>
-        </section>
-
-        <DaycarePhotoCarousel />
-
         <section id="puppy-benefits" className="scroll-mt-20 bg-card py-10 sm:py-14">
           <div className="mx-auto max-w-6xl px-4 text-center">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
@@ -277,6 +269,14 @@ function PuppyDaycarePage() {
             </button>
           </div>
         </section>
+
+        <section className="bg-card pt-8 text-center sm:pt-12">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="section-title text-3xl sm:text-4xl">Pozrite si zopár fotiek zo škôlky</h2>
+          </div>
+        </section>
+
+        <DaycarePhotoCarousel />
 
         <section className="bg-secondary/35 py-10 sm:py-14">
           <div className="mx-auto max-w-5xl px-4">
