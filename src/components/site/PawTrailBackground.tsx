@@ -24,7 +24,7 @@ const MAX_OPACITY = 0.48;
 const AMBIENT_PAWS = [
   { x: 9, y: 14, size: 22, rotate: -18, tone: "coral", mobile: true },
   { x: 23, y: 79, size: 17, rotate: 24, tone: "forest", mobile: true },
-  { x: 36, y: 20, size: 15, rotate: 12, tone: "forest", mobile: true },
+  { x: 36, y: 20, size: 15, rotate: 12, tone: "forest", mobile: false },
   { x: 44, y: 88, size: 20, rotate: -8, tone: "coral", mobile: false },
   { x: 58, y: 16, size: 18, rotate: 20, tone: "coral", mobile: false },
   { x: 66, y: 82, size: 16, rotate: -24, tone: "forest", mobile: true },
@@ -32,6 +32,9 @@ const AMBIENT_PAWS = [
   { x: 91, y: 72, size: 18, rotate: -12, tone: "coral", mobile: true },
   { x: 14, y: 52, size: 14, rotate: 30, tone: "forest", mobile: false },
   { x: 86, y: 10, size: 15, rotate: -28, tone: "coral", mobile: false },
+  { x: 18, y: 46, size: 19, rotate: -31, tone: "coral", mobile: true },
+  { x: 49, y: 68, size: 16, rotate: 17, tone: "forest", mobile: true },
+  { x: 70, y: 55, size: 18, rotate: -11, tone: "coral", mobile: true },
 ] as const;
 
 const LEFT_ROUTES: ReadonlyArray<readonly [Point, Point, Point]> = [
