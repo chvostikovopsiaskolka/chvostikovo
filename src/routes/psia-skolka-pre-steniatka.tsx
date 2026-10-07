@@ -161,7 +161,7 @@ function PuppyDaycarePage() {
 
       <main>
         <section className="relative overflow-hidden pt-20 sm:pt-24">
-          <PawTrailBackground />
+          <PawTrailBackground landingBottomPaws />
 
           <div className="relative z-10 mx-auto grid min-h-[440px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
@@ -169,8 +169,8 @@ function PuppyDaycarePage() {
                 Psia škôlka pre šteniatka v Košiciach
               </p>
               <h1 className="mt-2 text-[37px] leading-[1.06] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
-                Vaše šteniatko <span className="whitespace-nowrap">si môže</span>
-                <span className="block text-coral-dark">škôlku zamilovať</span>
+                Vaše šteniatko <span className="whitespace-nowrap">si určite</span>
+                <span className="block text-coral-dark">škôlku zamiluje</span>
               </h1>
 
               <p className="mx-auto mt-3 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg lg:mx-0">
@@ -212,9 +212,6 @@ function PuppyDaycarePage() {
                 <p className="text-center font-display text-2xl font-bold text-forest">
                   Je Chvostíkovo vhodné pre vaše šteniatko?
                 </p>
-                <p className="mx-auto mt-2 mb-5 max-w-sm text-center text-sm leading-relaxed text-forest/65">
-                  Nechajte nám meno a telefón. Ozveme sa vám a prejdeme spolu vek, očkovania aj prvú návštevu.
-                </p>
                 <PuppyForm source="puppy_landing_top" />
               </div>
             </div>
@@ -228,9 +225,6 @@ function PuppyDaycarePage() {
           <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-4 pt-12 pb-4 shadow-card ring-1 ring-forest/8 sm:pt-14">
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">Chcete sa informovať o škôlke pre šteniatko?</p>
-              <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
-                Stačí meno a telefón. Ozveme sa a povieme vám, či už môže prísť na úvodnú návštevu.
-              </p>
             </div>
             <PuppyForm source="puppy_landing_mobile_below_hero" />
           </div>
@@ -417,7 +411,6 @@ function PuppyDaycarePage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         title="Je Chvostíkovo vhodné pre vaše šteniatko?"
-        subtitle="Nechajte nám meno a telefón. Ozveme sa vám a prejdeme spolu ďalší postup."
       >
         <PuppyForm source={formSource} />
       </FormDialog>
