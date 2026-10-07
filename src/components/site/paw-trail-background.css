@@ -43,7 +43,7 @@
 
 .hero-outline-dog {
   position: absolute;
-  width: clamp(76px, 8vw, 116px);
+  width: clamp(68px, 7vw, 100px);
   color: var(--color-coral, #ee8749);
   animation: hero-dog-walk 32s linear -4s infinite;
 }
@@ -57,16 +57,16 @@
 @keyframes hero-dog-stride { from { transform: rotate(-13deg); } to { transform: rotate(13deg); } }
 @keyframes hero-dog-tail { from { transform: rotate(-10deg); } to { transform: rotate(12deg); } }
 @keyframes hero-dog-walk {
-  0% { left: -14%; top: 20%; transform: scaleX(1); opacity: .8; }
-  23% { left: 48%; top: 13%; transform: scaleX(1); opacity: .8; }
-  46% { left: 110%; top: 22%; transform: scaleX(1); opacity: .8; }
-  47% { left: 110%; top: 22%; transform: scaleX(1); opacity: 0; }
+  0% { left: -14%; top: 80px; transform: scaleX(1); opacity: .8; }
+  23% { left: 48%; top: 74px; transform: scaleX(1); opacity: .8; }
+  46% { left: 110%; top: 80px; transform: scaleX(1); opacity: .8; }
+  47% { left: 110%; top: 80px; transform: scaleX(1); opacity: 0; }
   49% { left: 110%; top: 85%; transform: scaleX(-1); opacity: 0; }
   50% { left: 110%; top: 85%; transform: scaleX(-1); opacity: .8; }
   73% { left: 48%; top: 88%; transform: scaleX(-1); opacity: .8; }
   96% { left: -14%; top: 85%; transform: scaleX(-1); opacity: .8; }
   97% { left: -14%; top: 85%; transform: scaleX(-1); opacity: 0; }
-  100% { left: -14%; top: 20%; transform: scaleX(1); opacity: 0; }
+  100% { left: -14%; top: 80px; transform: scaleX(1); opacity: 0; }
 }
 
 @media (max-width: 1023px) {
