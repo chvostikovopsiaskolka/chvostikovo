@@ -163,7 +163,7 @@ function LeadLandingPage() {
             <div id="lead-form" className="mx-auto hidden w-full max-w-md scroll-mt-24 lg:mx-0 lg:block">
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/70 bg-white/75 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-sm lg:px-7 lg:pb-7">
-                <p className="text-center font-display text-2xl font-bold text-forest">
+                <p className="mb-4 text-center font-display text-2xl font-bold text-forest">
                   Zistite, či je Chvostíkovo vhodné aj pre vášho psíka
                 </p>
                 <ShortForm trackingSource="lead_landing_top" />
