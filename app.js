@@ -27,8 +27,8 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261007-customer-late-pass-renewal-v159';
-const APP_VERSION='1.0.6';
+const APP_BUILD='20261007-customer-chat-polish-v160';
+const APP_VERSION='1.0.7';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -2080,6 +2080,7 @@ async function togglePushDirect(btn){
             '<button id="supportChatCloseV52" class="legal-close" type="button" aria-label="Zavrieť">×</button>'+
             '<h2 id="supportChatTitleV52">Napíšte nám správu</h2>'+
             '<div id="supportMessageThreadV52" class="message-thread support-message-thread-v52"></div>'+
+            '<p class="hint">Správy sa automaticky vymažú po 7 dňoch bez novej správy.</p>'+
             '<form id="supportMessageFormV52" class="form-stack support-message-form-v52">'+
               '<div><label for="supportMessageBodyV52">Správa</label><textarea id="supportMessageBodyV52" class="input" rows="4" maxlength="2000" placeholder="Napíšte správu pre Chvostíkovo…" required></textarea></div>'+
               '<button class="btn full" type="submit">Odoslať správu</button>'+
@@ -2098,7 +2099,8 @@ async function togglePushDirect(btn){
   function renderSupportThread(){
     const root=$('supportMessageThreadV52');if(!root)return;
     const rows=state.data?.messages||[];
-    root.innerHTML=rows.length?rows.map(m=>'<div class="message-bubble '+(m.sender_role==='customer'?'mine':'')+'"><p>'+esc(m.body)+'</p><small>'+skTime(m.created_at)+'</small></div>').join(''):'<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';
+    root.classList.toggle('hidden',rows.length===0);
+    root.innerHTML=rows.length?rows.map(m=>'<div class="message-bubble '+(m.sender_role==='customer'?'mine':'')+'"><p>'+esc(m.body)+'</p><small>'+skTime(m.created_at)+'</small></div>').join(''):'';
     requestAnimationFrame(()=>{root.scrollTop=root.scrollHeight});
   }
 
