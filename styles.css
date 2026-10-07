@@ -1720,34 +1720,28 @@ html.phone-portrait-layout :is(.legal-card,.booking-picker-card-v37,.support-cha
   #bookingTab>*{position:relative;z-index:1}
   @media(max-width:520px){.dog-hub-tile-v99 .dog-hub-emoji-v99{opacity:.22!important;font-size:52px!important}#bookingTab::after{background-size:94px 71px,48px 36px,72px 54px,40px 30px,84px 63px,52px 39px,66px 50px,38px 29px;background-position:-15px 23%,96% 35%,6% 51%,80% 59%,97% 69%,16% 77%,74% 88%,3% 95%;opacity:.052}}
 
-/* v166: clean mobile scrolling, centered booking modal and seasonal Halloween polish. */
+/* v167: restore the v165 booking appearance; only fix scroll ownership and modal centering. */
 .booking-picker-v37{
   height:100dvh!important;
   max-height:100dvh!important;
-  min-height:100dvh!important;
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr);
-  align-items:start!important;
-  justify-items:center!important;
-  padding:max(12px,env(safe-area-inset-top)) 10px max(18px,env(safe-area-inset-bottom))!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
   touch-action:pan-y!important;
   -webkit-overflow-scrolling:touch!important;
   overscroll-behavior-y:contain!important;
 }
+.booking-picker-v37:not(.hidden){
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+}
 .booking-picker-card-v37{
-  width:min(610px,100%)!important;
   display:block!important;
+  flex:0 0 auto!important;
   overflow:visible!important;
   max-height:none!important;
-  margin:0 auto!important;
-  align-self:start!important;
+  margin:auto!important;
   touch-action:pan-y!important;
-}
-@supports (align-items:safe center){
-  .booking-picker-v37{align-items:safe center!important}
-  .booking-picker-card-v37{align-self:safe center!important}
 }
 html.booking-picker-open-v37,
 html.booking-picker-open-v37 body{
@@ -1755,8 +1749,7 @@ html.booking-picker-open-v37 body{
   overscroll-behavior:none!important;
 }
 
-/* The document remains the only scroll owner for the main Reservations screen.
-   This avoids the v165 nested 100dvh scroll container on Android PWA. */
+/* One scroll owner for the main Reservations screen. */
 @media (max-width:900px) and (pointer:coarse){
   #appView.app:not(.hidden){
     height:auto!important;
@@ -1781,7 +1774,7 @@ html.booking-picker-open-v37 body{
   }
 }
 
-/* iOS only: keep the long closed-booking note away from modal edges. */
+/* iOS only: long closed-booking note gets a little more breathing room. */
 @supports (-webkit-touch-callout:none){
   @media (max-width:520px){
     .booking-week-closed-note-v127{
@@ -1793,44 +1786,34 @@ html.booking-picker-open-v37 body{
   }
 }
 
-/* Halloween is active in October and through 2 November via app.js.
-   Embedded SVG only: no network requests and no layout-affecting elements. */
-html.customer-halloween-v166{
-  --halloween-bat-v166:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 34'%3E%3Cpath fill='%23343a46' d='M36 15c-5-7-10-10-16-8l2 7C14 10 7 11 2 17c7-1 11 2 13 8 4-3 8-4 13-2 2-5 5-8 8-8s6 3 8 8c5-2 9-1 13 2 2-6 6-9 13-8-5-6-12-7-20-3l2-7c-6-2-11 1-16 8z'/%3E%3C/svg%3E");
-  --halloween-pumpkin-v166:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M23 11c0-4 2-6 5-7' fill='none' stroke='%236b7a39' stroke-width='3' stroke-linecap='round'/%3E%3Cellipse cx='24' cy='29' rx='18' ry='14' fill='%23f97316'/%3E%3Cellipse cx='18' cy='29' rx='7' ry='13' fill='%23fb923c'/%3E%3Cellipse cx='30' cy='29' rx='7' ry='13' fill='%23ea580c' opacity='.34'/%3E%3Cpath d='M14 25l5 3-5 3zm20 0l-5 3 5 3zM19 35h10l-2 3h-6z' fill='%23532916' opacity='.82'/%3E%3C/svg%3E");
-  --halloween-garland-v166:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 36'%3E%3Cpath d='M4 6c72 24 232 24 312 0' fill='none' stroke='%23745b4c' stroke-width='2' opacity='.55'/%3E%3Cg fill='%23f97316' stroke='%23c45112' stroke-width='1'%3E%3Ccircle cx='42' cy='17' r='8'/%3E%3Ccircle cx='96' cy='24' r='8'/%3E%3Ccircle cx='160' cy='27' r='8'/%3E%3Ccircle cx='224' cy='24' r='8'/%3E%3Ccircle cx='278' cy='17' r='8'/%3E%3C/g%3E%3Cg stroke='%236b7a39' stroke-width='2'%3E%3Cpath d='M42 8v4M96 15v4M160 18v4M224 15v4M278 8v4'/%3E%3C/g%3E%3C/svg%3E");
+/* Stored Halloween direction from 30 Sep: small pumpkin on the photo corner,
+   subtle pumpkin chain over the booking launch card, and a few bats outside text. */
+html.customer-halloween-v167{
+  --halloween-bat-v167:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 76 34'%3E%3Cpath fill='%23383b43' d='M38 16c-5-7-11-10-17-8l2 7C15 11 8 12 2 18c8-1 12 2 14 8 5-3 9-4 14-2 2-5 5-8 8-8s6 3 8 8c5-2 9-1 14 2 2-6 6-9 14-8-6-6-13-7-21-3l2-7c-6-2-12 1-17 8z'/%3E%3C/svg%3E");
+  --halloween-pumpkin-v167:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cpath d='M24 12c0-4 2-7 6-8' fill='none' stroke='%236b7a39' stroke-width='3' stroke-linecap='round'/%3E%3Cellipse cx='25' cy='30' rx='18' ry='14' fill='%23f97316'/%3E%3Cellipse cx='19' cy='30' rx='7' ry='13' fill='%23fb923c'/%3E%3Cellipse cx='31' cy='30' rx='7' ry='13' fill='%23ea580c' opacity='.30'/%3E%3Cpath d='M15 26l5 3-5 3zm20 0l-5 3 5 3zM20 36h10l-2 3h-6z' fill='%23532916' opacity='.78'/%3E%3C/svg%3E");
+  --halloween-chain-v167:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 340 34'%3E%3Cpath d='M5 6c78 21 249 21 330 0' fill='none' stroke='%23846b5b' stroke-width='1.5' opacity='.46'/%3E%3Cg%3E%3Cg transform='translate(44 10)'%3E%3Cellipse cx='0' cy='8' rx='7' ry='6' fill='%23f97316'/%3E%3Cpath d='M0 0v3' stroke='%236b7a39' stroke-width='2'/%3E%3C/g%3E%3Cg transform='translate(104 17)'%3E%3Cellipse cx='0' cy='8' rx='7' ry='6' fill='%23fb923c'/%3E%3Cpath d='M0 0v3' stroke='%236b7a39' stroke-width='2'/%3E%3C/g%3E%3Cg transform='translate(170 20)'%3E%3Cellipse cx='0' cy='8' rx='7' ry='6' fill='%23f97316'/%3E%3Cpath d='M0 0v3' stroke='%236b7a39' stroke-width='2'/%3E%3C/g%3E%3Cg transform='translate(236 17)'%3E%3Cellipse cx='0' cy='8' rx='7' ry='6' fill='%23fb923c'/%3E%3Cpath d='M0 0v3' stroke='%236b7a39' stroke-width='2'/%3E%3C/g%3E%3Cg transform='translate(296 10)'%3E%3Cellipse cx='0' cy='8' rx='7' ry='6' fill='%23f97316'/%3E%3Cpath d='M0 0v3' stroke='%236b7a39' stroke-width='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
-html.customer-halloween-v166 #bookingTab .dog-overview-identity{position:relative}
-html.customer-halloween-v166 #bookingTab .dog-overview-identity::after{
-  content:"";position:absolute;top:66px;right:1px;width:30px;height:30px;z-index:4;
-  pointer-events:none;background:var(--halloween-pumpkin-v166) center/contain no-repeat;
-  transform:rotate(7deg);filter:drop-shadow(0 3px 4px rgba(87,48,23,.12));
+html.customer-halloween-v167 #bookingTab .dog-overview-identity{position:relative}
+html.customer-halloween-v167 #bookingTab .dog-overview-identity::after{
+  content:"";position:absolute;top:69px;right:0;width:29px;height:29px;z-index:4;
+  pointer-events:none;background:var(--halloween-pumpkin-v167) center/contain no-repeat;
+  transform:rotate(7deg);filter:drop-shadow(0 2px 3px rgba(82,48,25,.12));
 }
-html.customer-halloween-v166 .booking-section-head{position:relative}
-html.customer-halloween-v166 .booking-section-head::after{
-  content:"";position:absolute;right:8px;top:-5px;width:66px;height:29px;pointer-events:none;opacity:.55;
-  background-image:var(--halloween-bat-v166),var(--halloween-bat-v166);
-  background-repeat:no-repeat;background-size:34px 16px,24px 12px;background-position:0 10px,40px 0;
+html.customer-halloween-v167 #bookingTab .hero.dog-overview::before{
+  content:"";position:absolute;right:10px;top:8px;width:70px;height:35px;z-index:2;pointer-events:none;opacity:.23;
+  background-image:var(--halloween-bat-v167),var(--halloween-bat-v167);
+  background-repeat:no-repeat;background-size:34px 15px,24px 11px;background-position:0 13px,44px 0;
 }
-html.customer-halloween-v166 .booking-launch-v37{position:relative}
-html.customer-halloween-v166 .booking-launch-v37::after{
-  content:"";position:absolute;right:18px;top:-11px;width:46px;height:24px;pointer-events:none;opacity:.34;
-  background:var(--halloween-bat-v166) center/contain no-repeat;
+html.customer-halloween-v167 .booking-launch-v37{position:relative;overflow:visible!important}
+html.customer-halloween-v167 .booking-launch-v37::before{
+  content:"";position:absolute;left:14px;right:14px;top:-16px;height:25px;z-index:2;pointer-events:none;opacity:.67;
+  background:var(--halloween-chain-v167) center top/100% 25px no-repeat;
 }
-html.customer-halloween-v166 .customer-menu{position:relative}
-html.customer-halloween-v166 .customer-menu::after{
-  content:"";position:absolute;left:5%;right:5%;top:45px;height:30px;z-index:0;pointer-events:none;opacity:.72;
-  background:var(--halloween-garland-v166) center top/100% 30px no-repeat;
+html.customer-halloween-v167 .booking-launch-v37::after{
+  content:"";position:absolute;right:10px;bottom:-15px;width:42px;height:20px;z-index:2;pointer-events:none;opacity:.28;
+  background:var(--halloween-bat-v167) center/contain no-repeat;
 }
-html.customer-halloween-v166 .customer-menu h1{position:relative;z-index:1}
-html.customer-halloween-v166 .customer-menu h1::after{
-  content:"";position:absolute;right:3px;top:-5px;width:58px;height:27px;pointer-events:none;opacity:.48;
-  background-image:var(--halloween-bat-v166),var(--halloween-bat-v166);
-  background-repeat:no-repeat;background-size:30px 14px,20px 10px;background-position:0 10px,37px 0;
-}
-html.customer-halloween-v166 .customer-menu-group,
-html.customer-halloween-v166 .customer-menu-direct{position:relative;z-index:1}
 @media(max-width:390px){
-  html.customer-halloween-v166 .customer-menu::after{left:3%;right:3%;opacity:.62}
-  html.customer-halloween-v166 #bookingTab .dog-overview-identity::after{width:27px;height:27px;top:63px}
+  html.customer-halloween-v167 #bookingTab .dog-overview-identity::after{width:26px;height:26px;top:66px}
+  html.customer-halloween-v167 .booking-launch-v37::before{left:9px;right:9px;opacity:.58}
 }
