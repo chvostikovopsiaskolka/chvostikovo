@@ -1788,13 +1788,14 @@ html.booking-picker-open-v37 body{
 }
 
 
-/* v170: iOS-only compact green weekly reservation reminder. Android stays unchanged. */
-@supports (-webkit-touch-callout:none){
-  @media (max-width:520px){
-    #bookingTab .deadline-card strong{
-      font-size:8.7px!important;
-      line-height:1.24!important;
-      letter-spacing:-.08px!important;
-    }
+/* v171: explicit iOS-only compact weekly reservation reminder. Android stays unchanged. */
+@media (max-width:520px){
+  html.customer-ios-v171 #bookingTab .deadline-card{
+    padding-right:15px!important;
+  }
+  html.customer-ios-v171 #bookingTab .deadline-card strong{
+    font-size:8px!important;
+    line-height:1.22!important;
+    letter-spacing:-.08px!important;
   }
 }

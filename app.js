@@ -30,8 +30,30 @@
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261007-customer-ios-deadline-taxi-reminders-v170';
-const APP_VERSION='1.0.17';
+const APP_BUILD='20261007-customer-ios-badge-deadline-v171';
+const APP_VERSION='1.0.18';
+const CUSTOMER_IOS_V171=(()=>{
+  const ua=navigator.userAgent||'';
+  const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  document.documentElement.classList.toggle('customer-ios-v171',iOS);
+  return iOS;
+})();
+async function clearCustomerAppBadgeV171(){
+  if(!CUSTOMER_IOS_V171||!('serviceWorker' in navigator))return;
+  try{
+    if('clearAppBadge' in navigator)await navigator.clearAppBadge();
+    else if('setAppBadge' in navigator)await navigator.setAppBadge(0);
+  }catch(_){}
+  try{
+    const message={type:'SET_CUSTOMER_BADGE_COUNT_V171',count:0};
+    if(navigator.serviceWorker.controller)navigator.serviceWorker.controller.postMessage(message);
+    else{
+      const reg=await navigator.serviceWorker.ready;
+      reg.active?.postMessage(message);
+    }
+  }catch(_){}
+}
+
 
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
@@ -91,7 +113,7 @@ function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
 function saveSession(s,remember=true){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));state.session=s}
-function clearSession(){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
+function clearSession(){void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
 async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok){const error=new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');error.code=data?.code||data?.error_code||'';throw error}return data}
 let sessionRefreshInFlight=null;
 async function refreshSession(){
@@ -314,6 +336,7 @@ function renderNotifications(){
     const stamp=new Date().toISOString();
     (state.data?.notifications||[]).forEach(n=>{if(visibleIds.includes(Number(n.id)))n.read_at=stamp});
     try{await api({action:'mark_notifications_read'})}catch(_){}
+    await clearCustomerAppBadgeV171();
   };
   $('notificationPopupClose').onclick=close;
   const hasOtherModal=[...document.querySelectorAll('[aria-modal="true"]')].some(el=>el!==modal&&!el.classList.contains('hidden'));

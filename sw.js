@@ -1,9 +1,46 @@
 
-const CACHE='chvostikovo-portal-shell-20261007-customer-ios-deadline-taxi-reminders-v170';
+const CACHE='chvostikovo-portal-shell-20261007-customer-ios-badge-deadline-v171';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
+const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
+const BADGE_STATE_URL=new URL('/__chvostikovo_customer_badge_count__',self.location.origin).href;
+
+function isIOSBadgeTargetV171(){
+  const ua=self.navigator?.userAgent||'';
+  return /iPhone|iPad|iPod/i.test(ua)||(/Macintosh/i.test(ua)&&Number(self.navigator?.maxTouchPoints||0)>1);
+}
+async function readCustomerBadgeCountV171(){
+  try{
+    const cache=await caches.open(BADGE_STATE_CACHE);
+    const response=await cache.match(BADGE_STATE_URL);
+    const value=response?Number(await response.text()):0;
+    return Number.isFinite(value)&&value>0?Math.floor(value):0;
+  }catch(_){return 0}
+}
+async function writeCustomerBadgeCountV171(count){
+  const safe=Math.max(0,Math.floor(Number(count)||0));
+  try{
+    const cache=await caches.open(BADGE_STATE_CACHE);
+    if(safe>0)await cache.put(BADGE_STATE_URL,new Response(String(safe),{headers:{'Content-Type':'text/plain'}}));
+    else await cache.delete(BADGE_STATE_URL);
+  }catch(_){}
+  if(!isIOSBadgeTargetV171())return safe;
+  try{
+    if(safe>0&&'setAppBadge' in self.navigator)await self.navigator.setAppBadge(safe);
+    else if(safe===0&&'clearAppBadge' in self.navigator)await self.navigator.clearAppBadge();
+    else if(safe===0&&'setAppBadge' in self.navigator)await self.navigator.setAppBadge(0);
+  }catch(_){}
+  return safe;
+}
+async function incrementCustomerBadgeV171(){
+  return writeCustomerBadgeCountV171((await readCustomerBadgeCountV171())+1);
+}
+async function decrementCustomerBadgeV171(){
+  return writeCustomerBadgeCountV171(Math.max(0,(await readCustomerBadgeCountV171())-1));
+}
+
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/terms-pdf.js?v=20261007-customer-ios-deadline-taxi-reminders-v170','/terms-pdf-font.js?v=20261007-customer-ios-deadline-taxi-reminders-v170','/styles.css?v=20261007-customer-ios-deadline-taxi-reminders-v170','/app.js?v=20261007-customer-ios-deadline-taxi-reminders-v170','/back-swipe.js?v=20261007-customer-ios-deadline-taxi-reminders-v170'];
+const SHELL=['/','/terms-pdf.js?v=20261007-customer-ios-badge-deadline-v171','/terms-pdf-font.js?v=20261007-customer-ios-badge-deadline-v171','/styles.css?v=20261007-customer-ios-badge-deadline-v171','/app.js?v=20261007-customer-ios-badge-deadline-v171','/back-swipe.js?v=20261007-customer-ios-badge-deadline-v171'];
 
 function withPortalCsp(response){
   if(!response)return response;
@@ -73,21 +110,35 @@ self.addEventListener('push',event=>{
   let data={};
   try{data=event.data?event.data.json():{}}
   catch(_){data={body:event.data?event.data.text():''}}
-  event.waitUntil(self.registration.showNotification(data.title||'Chvostíkovo',{
-    body:data.body||'',
-    icon:APP_ICON,
-    badge:NOTIFICATION_BADGE,
-    tag:data.tag||'chvostikovo',
-    renotify:true,
-    data:data.data||{url:'/'}
-  }));
+  event.waitUntil((async()=>{
+    const tasks=[self.registration.showNotification(data.title||'Chvostíkovo',{
+      body:data.body||'',
+      icon:APP_ICON,
+      badge:NOTIFICATION_BADGE,
+      tag:data.tag||'chvostikovo',
+      renotify:true,
+      data:data.data||{url:'/'}
+    })];
+    if(isIOSBadgeTargetV171())tasks.push(incrementCustomerBadgeV171());
+    await Promise.allSettled(tasks);
+  })());
 });
 self.addEventListener('notificationclick',event=>{
   event.notification.close();
   const target=new URL(event.notification.data?.url||'/',self.location.origin).href;
-  event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(wins=>{
+  event.waitUntil((async()=>{
+    if(isIOSBadgeTargetV171())await decrementCustomerBadgeV171();
+    const wins=await self.clients.matchAll({type:'window',includeUncontrolled:true});
     const existing=wins.find(client=>client.url.startsWith(self.location.origin));
-    if(existing){existing.focus();return existing.navigate(target)}
+    if(existing){await existing.focus();return existing.navigate(target)}
     return self.clients.openWindow(target);
-  }));
+  })());
+});
+self.addEventListener('notificationclose',event=>{
+  if(isIOSBadgeTargetV171())event.waitUntil(decrementCustomerBadgeV171());
+});
+self.addEventListener('message',event=>{
+  if(event.data?.type!=='SET_CUSTOMER_BADGE_COUNT_V171')return;
+  const count=Math.max(0,Math.floor(Number(event.data.count)||0));
+  event.waitUntil(writeCustomerBadgeCountV171(count));
 });
