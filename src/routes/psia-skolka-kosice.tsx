@@ -117,11 +117,14 @@ function LeadLandingPage() {
 
       <main>
         <section className="relative overflow-hidden pt-20 sm:pt-24">
-          <PawTrailBackground />
+          <PawTrailBackground landingBottomPaws />
 
           <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
-              <h1 className="text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
+              <p className="whitespace-nowrap font-display text-[9px] font-bold uppercase tracking-[0.09em] text-coral-dark min-[390px]:text-[9.5px] min-[390px]:tracking-[0.11em] sm:text-sm sm:tracking-[0.16em]">
+                Denné stráženie stredných a veľkých psíkov
+              </p>
+              <h1 className="mt-2 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
                 Miesto, kam sa psíkovia
                 <span className="block text-coral-dark">radi vracajú</span>
               </h1>
@@ -163,9 +166,6 @@ function LeadLandingPage() {
                 <p className="text-center font-display text-2xl font-bold text-forest">
                   Zistite, či je Chvostíkovo vhodné aj pre vášho psíka
                 </p>
-                <p className="mx-auto mt-2 mb-5 max-w-sm text-center text-sm leading-relaxed text-forest/65">
-                  Vyplňte krátky nezáväzný formulár. Ozveme sa vám späť a preberieme s vami ďalší postup.
-                </p>
                 <ShortForm trackingSource="lead_landing_top" />
               </div>
             </div>
@@ -180,10 +180,6 @@ function LeadLandingPage() {
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">
                 Chcete sa informovať o škôlke?
-              </p>
-              <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
-                <span className="block">Nechajte nám meno a telefón.</span>
-                <span className="block">Ozveme sa vám a radi poradíme.</span>
               </p>
             </div>
             <ShortForm trackingSource="lead_landing_mobile_below_hero" />
@@ -349,7 +345,6 @@ function LeadLandingPage() {
         open={leadModalOpen}
         onOpenChange={setLeadModalOpen}
         title="Zistite, či je Chvostíkovo vhodné aj pre vášho psíka"
-        subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám späť a radi s vami preberieme viac informácií."
       >
         <ShortForm trackingSource={leadModalSource} />
       </FormDialog>
