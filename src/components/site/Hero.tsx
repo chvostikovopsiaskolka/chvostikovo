@@ -47,9 +47,9 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
             {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
               <span
                 key={item}
-                className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-white/95 px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-forest shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px]"
+                className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px]"
               >
-                <CheckCircle2 className="size-3 shrink-0 text-coral min-[390px]:size-3.5" />
+                <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5" />
                 {item}
               </span>
             ))}
@@ -100,9 +100,9 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
               {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                 <span
                   key={item}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-forest shadow-card"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-forest px-3 py-1.5 text-xs font-bold text-white shadow-card"
                 >
-                  <CheckCircle2 className="size-4 text-coral" />
+                  <CheckCircle2 className="size-4 text-white" />
                   {item}
                 </span>
               ))}
