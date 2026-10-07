@@ -53,7 +53,9 @@ function tangentOnCurve(start: Point, control: Point, end: Point, t: number): Po
 }
 
 function createTrail(zone: number, generation: number, startedAt: number): Trail {
-  const [minX, maxX] = TRAIL_ZONES[zone];
+  const bounds = TRAIL_ZONES[zone] ?? ([4, 29] as const);
+  const minX = bounds[0];
+  const maxX = bounds[1];
   const downward = Math.random() > 0.5;
   const start: Point = [between(minX, maxX), downward ? -5 : 105];
   const end: Point = [between(minX, maxX), downward ? 105 : -5];
