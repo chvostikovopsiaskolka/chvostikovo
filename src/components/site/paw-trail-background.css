@@ -8,6 +8,28 @@
   background: #fff;
 }
 
+.paw-ambient-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.paw-ambient-print {
+  position: absolute;
+  height: auto;
+  opacity: 0.065;
+  filter: saturate(0.9);
+}
+
+.paw-ambient-coral {
+  fill: var(--color-coral, #ee8749);
+}
+
+.paw-ambient-forest {
+  fill: var(--color-forest, #32734d);
+}
+
 .paw-trail-print {
   position: absolute;
   z-index: 1;
@@ -25,6 +47,14 @@
 }
 
 @media (max-width: 639px) {
+  .paw-ambient-desktop {
+    display: none;
+  }
+
+  .paw-ambient-print {
+    opacity: 0.05;
+  }
+
   .paw-trail-print {
     width: 19px;
   }

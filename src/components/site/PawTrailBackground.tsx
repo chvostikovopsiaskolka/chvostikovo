@@ -21,6 +21,19 @@ const STEP_COUNT = 16;
 const CLOCK_TICK_MS = 90;
 const MAX_OPACITY = 0.48;
 
+const AMBIENT_PAWS = [
+  { x: 9, y: 14, size: 22, rotate: -18, tone: "coral", mobile: true },
+  { x: 23, y: 79, size: 17, rotate: 24, tone: "forest", mobile: false },
+  { x: 36, y: 20, size: 15, rotate: 12, tone: "forest", mobile: true },
+  { x: 44, y: 88, size: 20, rotate: -8, tone: "coral", mobile: false },
+  { x: 58, y: 16, size: 18, rotate: 20, tone: "coral", mobile: false },
+  { x: 66, y: 82, size: 16, rotate: -24, tone: "forest", mobile: true },
+  { x: 78, y: 31, size: 21, rotate: 14, tone: "forest", mobile: false },
+  { x: 91, y: 72, size: 18, rotate: -12, tone: "coral", mobile: true },
+  { x: 14, y: 52, size: 14, rotate: 30, tone: "forest", mobile: false },
+  { x: 86, y: 10, size: 15, rotate: -28, tone: "coral", mobile: false },
+] as const;
+
 const LEFT_ROUTES: ReadonlyArray<readonly [Point, Point, Point]> = [
   [[-6, 22], [17, 32], [42, 94]],
   [[30, -6], [13, 35], [-6, 79]],
@@ -250,6 +263,24 @@ export function PawTrailBackground() {
 
   return (
     <div aria-hidden="true" className="paw-trail-background">
+      <div className="paw-ambient-layer">
+        {AMBIENT_PAWS.map((paw, index) => (
+          <svg
+            key={`ambient-${index}`}
+            className={`paw-ambient-print paw-ambient-${paw.tone} ${paw.mobile ? "" : "paw-ambient-desktop"}`}
+            viewBox="0 0 32 36"
+            style={{
+              left: `${paw.x}%`,
+              top: `${paw.y}%`,
+              width: `${paw.size}px`,
+              transform: `translate(-50%, -50%) rotate(${paw.rotate}deg)`,
+            }}
+          >
+            <PawPrint />
+          </svg>
+        ))}
+      </div>
+
       {renderedPrints.map((print) => (
         <svg
           key={print.key}
