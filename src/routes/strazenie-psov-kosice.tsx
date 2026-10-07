@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Check, HeartHandshake, Moon, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { Header } from "@/components/site/Header";
+import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { Footer } from "@/components/site/Contact";
 import { ShortForm } from "@/components/site/Forms";
 import { Collapse } from "@/components/site/Collapse";
@@ -119,9 +120,8 @@ function DogDaycarePage() {
       <Header homeSectionLinks />
       <main>
         <section id="top" className="relative overflow-hidden pt-28 pb-14 sm:pt-32 sm:pb-20">
-          <div className="absolute -top-24 -right-24 size-80 rounded-full bg-coral-soft/45 blur-3xl" aria-hidden="true" />
-          <div className="absolute -bottom-28 -left-20 size-72 rounded-full bg-secondary blur-3xl" aria-hidden="true" />
-          <div className="relative mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
+          <PawTrailBackground />
+          <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
             <div>
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Psia škôlka & denné stráženie</p>
               <h1 className="mt-3 text-4xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
