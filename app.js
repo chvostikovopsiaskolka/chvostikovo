@@ -30,8 +30,14 @@
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261007-customer-booking-list-scroll-v165';
-const APP_VERSION='1.0.12';
+const APP_BUILD='20261007-customer-modal-scroll-halloween-v166';
+const APP_VERSION='1.0.13';
+(function applyCustomerHalloweenV166(){
+  const now=new Date();
+  const month=now.getMonth()+1;
+  const day=now.getDate();
+  document.documentElement.classList.toggle('customer-halloween-v166',month===10||(month===11&&day<=2));
+})();
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
