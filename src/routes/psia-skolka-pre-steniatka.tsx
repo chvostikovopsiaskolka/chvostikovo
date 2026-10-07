@@ -209,8 +209,11 @@ function PuppyDaycarePage() {
             <div className="mx-auto hidden w-full max-w-md lg:mx-0 lg:block">
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/70 bg-white/75 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-sm lg:px-7 lg:pb-7">
-                <p className="mb-4 text-center font-display text-2xl font-bold text-forest">
+                <p className="text-center font-display text-2xl font-bold text-forest">
                   Je Chvostíkovo vhodné pre vaše šteniatko?
+                </p>
+                <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/65">
+                  Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií.
                 </p>
                 <PuppyForm source="puppy_landing_top" />
               </div>
@@ -225,6 +228,9 @@ function PuppyDaycarePage() {
           <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-4 pt-12 pb-4 shadow-card ring-1 ring-forest/8 sm:pt-14">
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">Chcete sa informovať o škôlke pre šteniatko?</p>
+              <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
+                Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií.
+              </p>
             </div>
             <PuppyForm source="puppy_landing_mobile_below_hero" />
           </div>
@@ -411,6 +417,7 @@ function PuppyDaycarePage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         title="Je Chvostíkovo vhodné pre vaše šteniatko?"
+        subtitle="Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií."
       >
         <PuppyForm source={formSource} />
       </FormDialog>
