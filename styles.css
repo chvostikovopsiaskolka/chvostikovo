@@ -1740,3 +1740,27 @@ html.phone-portrait-layout :is(.legal-card,.booking-picker-card-v37,.support-cha
 }
 html.booking-picker-open-v37{overflow:hidden!important}
 html.booking-picker-open-v37 body{overflow-y:auto!important}
+
+/* v165: Android/mobile reservation list must scroll independently from the document root.
+   This is the main Reservations tab (approved/pending days + roster), not the booking picker modal. */
+@media (max-width:900px) and (pointer:coarse){
+  #bookingTab:not(.hidden){
+    display:block!important;
+    height:calc(100dvh - max(8px, env(safe-area-inset-top)))!important;
+    max-height:calc(100dvh - max(8px, env(safe-area-inset-top)))!important;
+    min-height:0!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    touch-action:pan-y!important;
+    padding-bottom:calc(122px + env(safe-area-inset-bottom))!important;
+    scroll-behavior:auto!important;
+  }
+  #bookingTab:not(.hidden) #upcomingBookings,
+  #bookingTab:not(.hidden) #weekDays{
+    overflow:visible!important;
+    max-height:none!important;
+    touch-action:pan-y!important;
+  }
+}

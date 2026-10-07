@@ -8,3 +8,13 @@ w.matchMedia=()=>({matches:true});Object.defineProperty(w.navigator,'userAgent',
 function touch(type,x,y){const e=new w.Event(type,{bubbles:true,cancelable:true});Object.defineProperty(e,'touches',{value:type==='touchend'?[]:[{clientX:x,clientY:y}]});w.document.dispatchEvent(e);return e.defaultPrevented;}
 for(let i=0;i<2;i++){touch('touchstart',50,300);assert(!touch('touchmove',50,180));assert(!touch('touchend',50,180));}touch('touchstart',50,180);touch('touchend',50,180);touch('touchstart',50,180);assert(touch('touchend',50,180));
 const css=fs.readFileSync('styles.css','utf8');assert(css.includes('display:block;padding:max(10px,env(safe-area-inset-top))'));assert(css.includes('overflow-x:hidden;overflow-y:scroll;overscroll-behavior-y:contain'));assert(css.includes('max-height:none;overflow:visible'));assert(css.includes('html.booking-picker-open-v37{overflow:hidden!important}'));assert(css.includes('html.booking-picker-open-v37 body{overflow-y:auto!important}'));assert(app.includes("$('bookingPickerV37').scrollTop=0"));assert(app.includes("scopes.has('passes')||scopes.has('bookings')"));w.close();console.log('PASS: committed 0/10 pass with Oct9-Dec9 validity; Android booking overlay owns vertical scroll without flex/body lock; double tap zoom guarded');
+
+assert(css.includes('#bookingTab:not(.hidden){'));
+assert(css.includes('height:calc(100dvh - max(8px, env(safe-area-inset-top)))!important'));
+assert(css.includes('overflow-y:auto!important'));
+assert(css.includes('padding-bottom:calc(122px + env(safe-area-inset-bottom))!important'));
+assert(css.includes('#bookingTab:not(.hidden) #upcomingBookings'));
+assert(css.includes('#bookingTab:not(.hidden) #weekDays'));
+assert(css.includes('#authView.auth-shell:not(.hidden)'));
+assert(css.includes('overflow-y:auto!important'));
+console.log('v165 reservation list owns mobile scroll; Android signup scroll rule remains present');
