@@ -361,7 +361,11 @@ async function customerBootstrap(user: Json) {
   });
   const notifications = results[3] as Array<Json>;
   const availability = results[4] as Json;
-  const passRequests = results[5] as Array<Json>;
+  const [sharedPassRequests, otherDogOnboarding] = dogIds.length ? await Promise.all([
+    rest('customer_pass_requests?dog_id=' + encodeURIComponent(inFilter(dogIds)) + '&status=eq.pending&select=id,dog_id,total_entries,status,requested_at'),
+    rest('portal_dog_onboarding?dog_id=' + encodeURIComponent(inFilter(dogIds)) + '&user_id=neq.' + encodeURIComponent(userId) + '&select=dog_id,details_prompt_answered_at'),
+  ]) as [Array<Json>,Array<Json>] : [[],[]];
+  const passRequests = [...new Map([...(results[5] as Array<Json>),...sharedPassRequests].map(row => [Number(row.id),row])).values()];
   const visibilityConsents = results[6] as Array<Json>;
   const dogOnboarding = results[7] as Array<Json>;
   const pushSubscriptions = results[8] as Array<Json>;
@@ -405,6 +409,7 @@ async function customerBootstrap(user: Json) {
     pass_requests: passRequests,
     visibility_consents: visibilityConsents,
     dog_onboarding: dogOnboarding,
+    other_owner_onboarded_dog_ids: [...new Set(otherDogOnboarding.filter(row => row.details_prompt_answered_at).map(row => Number(row.dog_id)))],
     push_subscription_active: pushSubscriptions.length > 0,
     passes,
     vaccinations,
