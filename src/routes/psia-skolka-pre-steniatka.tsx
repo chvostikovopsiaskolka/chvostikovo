@@ -181,9 +181,9 @@ function PuppyDaycarePage() {
                 {["Postupná socializácia", "Hra aj oddych", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
-                    className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-white/95 px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-forest shadow-card min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9px] lg:px-3 lg:py-1.5 lg:text-xs"
+                    className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9px] lg:px-3 lg:py-1.5 lg:text-xs"
                   >
-                    <CheckCircle2 className="size-3 shrink-0 text-coral min-[390px]:size-3.5 lg:size-4" />
+                    <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5 lg:size-4" />
                     {item}
                   </span>
                 ))}
