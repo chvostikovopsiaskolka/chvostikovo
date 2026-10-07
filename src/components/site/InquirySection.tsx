@@ -4,7 +4,7 @@ import { PHONE } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { ShortForm } from "./Forms";
 import { FormDialog } from "./FormDialog";
-import schoolmatesCta from "@/assets/skolkari-web-4.png";
+import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 
 const INFO_TITLE = "Informujte sa o škôlke";
 const INFO_SUBTITLE =
@@ -43,20 +43,7 @@ export function InquirySection() {
   return (
     <section id="informujte-sa" className="scroll-mt-24 bg-card pt-0 pb-10 lg:hidden">
       <div className="mx-auto max-w-2xl px-4">
-        <div
-          className="relative z-10 mx-auto -mb-8 h-[142px] w-full max-w-[500px] overflow-hidden sm:h-[165px]"
-          aria-hidden="true"
-        >
-          <img
-            src={schoolmatesCta}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            width={1200}
-            height={630}
-            className="absolute inset-x-0 bottom-[-14px] h-[185px] w-full scale-[1.07] object-cover object-bottom sm:h-[210px] sm:scale-[1.06]"
-          />
-        </div>
+        <SchoolmatesFormCrown />
 
         <div className="relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8">
           <h3 className="text-center text-2xl text-forest">Informujte sa o škôlke</h3>

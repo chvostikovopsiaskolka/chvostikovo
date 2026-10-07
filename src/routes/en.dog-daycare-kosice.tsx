@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { EnglishInquiryForm } from "@/components/site/EnglishInquiryForm";
+import { PawTrailBackground } from "@/components/site/PawTrailBackground";
+import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { FormDialog } from "@/components/site/FormDialog";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { Collapse } from "@/components/site/Collapse";
@@ -424,7 +426,7 @@ function EnglishDogDaycarePage() {
 
       <main>
         <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-28 lg:pb-4">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-white" />
+          <PawTrailBackground />
 
           <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
             <div className="lg:hidden">
@@ -498,12 +500,15 @@ function EnglishDogDaycarePage() {
                 </a>
               </div>
 
-              <div className="min-w-0 rounded-4xl bg-card/95 p-8 shadow-soft backdrop-blur-sm">
-                <h2 className="text-center text-2xl text-forest">Enquire about daycare</h2>
-                <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-                  Fill in the short, non-binding form. We will get back to you and talk through the options for your dog.
-                </p>
-                <EnglishInquiryForm trackingSource="en_hero_desktop" />
+              <div className="min-w-0">
+                <SchoolmatesFormCrown compact />
+                <div className="rounded-4xl bg-card/95 px-8 pt-9 pb-8 shadow-soft backdrop-blur-sm">
+                  <h2 className="text-center text-2xl text-forest">Enquire about daycare</h2>
+                  <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
+                    Fill in the short, non-binding form. We will get back to you and talk through the options for your dog.
+                  </p>
+                  <EnglishInquiryForm trackingSource="en_hero_desktop" />
+                </div>
               </div>
             </div>
           </div>

@@ -13,6 +13,9 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
+import { InfoTicker } from "@/components/site/InfoTicker";
+import { PawTrailBackground } from "@/components/site/PawTrailBackground";
+import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { ShortForm } from "@/components/site/Forms";
 import { FormDialog } from "@/components/site/FormDialog";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -157,9 +160,9 @@ function PuppyDaycarePage() {
 
       <main>
         <section className="relative overflow-hidden pt-20 sm:pt-24">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-white" />
+          <PawTrailBackground />
 
-          <div className="relative mx-auto grid min-h-[470px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative mx-auto grid min-h-[440px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-coral-dark sm:text-sm">
                 Psia škôlka pre šteniatka v Košiciach
@@ -202,20 +205,26 @@ function PuppyDaycarePage() {
               </div>
             </div>
 
-            <div className="mx-auto hidden w-full max-w-md rounded-4xl border border-white/60 bg-white/95 p-5 shadow-soft backdrop-blur lg:mx-0 lg:block lg:p-7">
-              <p className="text-center font-display text-2xl font-bold text-forest">
-                Je Chvostíkovo vhodné pre vaše šteniatko?
-              </p>
-              <p className="mx-auto mt-2 mb-5 max-w-sm text-center text-sm leading-relaxed text-forest/65">
-                Nechajte nám meno a telefón. Ozveme sa vám a prejdeme spolu vek, očkovania aj prvú návštevu.
-              </p>
-              <PuppyForm source="puppy_landing_top" />
+            <div className="mx-auto hidden w-full max-w-md lg:mx-0 lg:block">
+              <SchoolmatesFormCrown compact />
+              <div className="rounded-4xl border border-white/60 bg-white/95 px-5 pt-9 pb-5 shadow-soft backdrop-blur lg:px-7 lg:pb-7">
+                <p className="text-center font-display text-2xl font-bold text-forest">
+                  Je Chvostíkovo vhodné pre vaše šteniatko?
+                </p>
+                <p className="mx-auto mt-2 mb-5 max-w-sm text-center text-sm leading-relaxed text-forest/65">
+                  Nechajte nám meno a telefón. Ozveme sa vám a prejdeme spolu vek, očkovania aj prvú návštevu.
+                </p>
+                <PuppyForm source="puppy_landing_top" />
+              </div>
             </div>
           </div>
         </section>
 
+        <InfoTicker />
+
         <section className="bg-card px-4 pt-2 pb-6 lg:hidden">
-          <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 p-4 shadow-card ring-1 ring-forest/8">
+          <SchoolmatesFormCrown />
+          <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-4 pt-12 pb-4 shadow-card ring-1 ring-forest/8 sm:pt-14">
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">Chcete sa informovať o škôlke pre šteniatko?</p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">

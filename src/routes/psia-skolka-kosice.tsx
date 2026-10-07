@@ -18,6 +18,8 @@ import { Reviews, ReviewReasons, VideoSection } from "@/components/site/Reviews"
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
+import { PawTrailBackground } from "@/components/site/PawTrailBackground";
+import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { FAQ, REVIEWS } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -115,9 +117,9 @@ function LeadLandingPage() {
 
       <main>
         <section className="relative overflow-hidden pt-20 sm:pt-24">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-white" />
+          <PawTrailBackground />
 
-          <div className="relative mx-auto grid min-h-[455px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <h1 className="text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
                 Miesto, kam sa psíkovia
@@ -155,25 +157,26 @@ function LeadLandingPage() {
               </div>
             </div>
 
-            <div
-              id="lead-form"
-              className="mx-auto hidden w-full max-w-md scroll-mt-24 rounded-4xl border border-white/60 bg-white/95 p-5 shadow-soft backdrop-blur lg:mx-0 lg:block lg:p-7"
-            >
-              <p className="text-center font-display text-2xl font-bold text-forest">
-                Zistite, či je Chvostíkovo vhodné aj pre vášho psíka
-              </p>
-              <p className="mx-auto mt-2 mb-5 max-w-sm text-center text-sm leading-relaxed text-forest/65">
-                Vyplňte krátky nezáväzný formulár. Ozveme sa vám späť a preberieme s vami ďalší postup.
-              </p>
-              <ShortForm trackingSource="lead_landing_top" />
+            <div id="lead-form" className="mx-auto hidden w-full max-w-md scroll-mt-24 lg:mx-0 lg:block">
+              <SchoolmatesFormCrown compact />
+              <div className="rounded-4xl border border-white/60 bg-white/95 px-5 pt-9 pb-5 shadow-soft backdrop-blur lg:px-7 lg:pb-7">
+                <p className="text-center font-display text-2xl font-bold text-forest">
+                  Zistite, či je Chvostíkovo vhodné aj pre vášho psíka
+                </p>
+                <p className="mx-auto mt-2 mb-5 max-w-sm text-center text-sm leading-relaxed text-forest/65">
+                  Vyplňte krátky nezáväzný formulár. Ozveme sa vám späť a preberieme s vami ďalší postup.
+                </p>
+                <ShortForm trackingSource="lead_landing_top" />
+              </div>
             </div>
           </div>
         </section>
 
         <InfoTicker />
 
-        <section className="bg-card px-4 pt-4 pb-5 sm:pt-5 sm:pb-7 lg:hidden">
-          <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 p-3.5 shadow-card ring-1 ring-forest/8 sm:p-5">
+        <section className="bg-card px-4 pt-2 pb-5 sm:pt-4 sm:pb-7 lg:hidden">
+          <SchoolmatesFormCrown />
+          <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-3.5 pt-12 pb-3.5 shadow-card ring-1 ring-forest/8 sm:px-5 sm:pt-14 sm:pb-5">
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">
                 Chcete sa informovať o škôlke?

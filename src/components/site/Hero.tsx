@@ -3,6 +3,8 @@ import { ArrowDown, CheckCircle2, Phone } from "lucide-react";
 import { PHONE } from "@/content/site";
 import { ShortForm } from "./Forms";
 import { InfoTicker } from "./InfoTicker";
+import { PawTrailBackground } from "./PawTrailBackground";
+import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 import { trackMarketingInteraction } from "@/lib/analytics";
 
 function scrollToWhyChvostikovo() {
@@ -17,7 +19,7 @@ function scrollToWhyChvostikovo() {
 export function Hero({ background, learnMoreHref }: { background?: ReactNode; learnMoreHref?: string }) {
   return (
     <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-28 lg:pb-4">
-      {background ?? <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-white" />}
+      {background ?? <PawTrailBackground />}
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
         {/* Mobile layout */}
@@ -114,15 +116,18 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
             </a>
           </div>
 
-          <div className="min-w-0 rounded-4xl bg-card/95 p-8 shadow-soft backdrop-blur-sm">
-            <h2 className="text-center text-2xl text-forest sm:whitespace-nowrap">
-              Informujte sa o škôlke
-            </h2>
-            <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-              Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
-            </p>
+          <div className="min-w-0">
+            <SchoolmatesFormCrown compact />
+            <div className="rounded-4xl bg-card/95 px-8 pt-9 pb-8 shadow-soft backdrop-blur-sm">
+              <h2 className="text-center text-2xl text-forest sm:whitespace-nowrap">
+                Informujte sa o škôlke
+              </h2>
+              <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
+                Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
+              </p>
 
-            <ShortForm trackingSource="hero_desktop_inline" />
+              <ShortForm trackingSource="hero_desktop_inline" />
+            </div>
           </div>
         </div>
       </div>
