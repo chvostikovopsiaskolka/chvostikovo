@@ -123,11 +123,15 @@ async function signedPhotoUrl(pathValue: unknown) {
   return signed.startsWith('http') ? signed : SUPABASE_URL + '/storage/v1' + signed;
 }
 
-async function withSignedPhotos(rows: Array<Json>) {
-  return await Promise.all(rows.map(async (row) => ({
-    ...row,
-    photo_url: await signedPhotoUrl(row.photo_path),
-  })));
+async function withSignedPhotos(rows: Array<Json>, userId?: string) {
+  const photos = userId && rows.length ? await rest('customer_dog_photos?user_id=eq.' + encodeURIComponent(userId) + '&dog_id=' + encodeURIComponent(inFilter(rows.map(row => Number(row.id)))) + '&select=dog_id,photo_path,updated_at') as Array<Json> : [];
+  const own = new Map(photos.map(photo => [Number(photo.dog_id), photo]));
+  return await Promise.all(rows.map(async (row) => {
+    const personal = own.get(Number(row.id));
+    const path = personal ? personal.photo_path : row.photo_path;
+    return {...row, photo_path: path, photo_updated_at: personal ? personal.updated_at : row.photo_updated_at,
+      personal_photo: !!personal, photo_url: await signedPhotoUrl(path)};
+  }));
 }
 
 async function signedVaccinationProofUrl(pathValue: unknown) {
@@ -346,7 +350,7 @@ async function customerBootstrap(user: Json) {
       (linkedDogRows.length === 1 ? registrationDogName : null) ||
       cleanText(dog.customer_name, 100) ||
       dog.name,
-  })));
+  })), userId);
   const ownRequests = results[1] as Array<Json>;
   const dogRequests = results[2] as Array<Json>;
   const requests = [...new Map(
@@ -867,6 +871,13 @@ async function adminVaccinationProofs(dogId: number) {
   return await withSignedVaccinationProofs(rows);
 }
 
+async function removeProfilePhoto(path: string) {
+  await fetch(SUPABASE_URL + '/storage/v1/object/dog-profile-photos', {
+    method:'DELETE', headers:{apikey:SERVICE_KEY,Authorization:'Bearer ' + SERVICE_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({prefixes:[path]}),
+  }).catch(() => undefined);
+}
+
 async function uploadDogPhoto(userId: string, staff: boolean, payload: Json) {
   const dogId = Number(payload.dog_id || 0);
   if (!dogId) throw new Error('Psík sa nenašiel.');
@@ -889,11 +900,11 @@ async function uploadDogPhoto(userId: string, staff: boolean, payload: Json) {
   }
 
   const currentRows = await rest(
-    'dogs?id=eq.' + dogId + '&select=photo_path&limit=1',
+    staff ? 'dogs?id=eq.' + dogId + '&select=photo_path&limit=1' : 'customer_dog_photos?dog_id=eq.' + dogId + '&user_id=eq.' + encodeURIComponent(userId) + '&select=photo_path&limit=1',
   ) as Array<Json>;
-  if (!currentRows.length) throw new Error('Psík sa nenašiel.');
-  const previousPath = cleanText(currentRows[0].photo_path, 500);
-  const path = 'dogs/' + crypto.randomUUID() + '.jpg';
+  if (staff && !currentRows.length) throw new Error('Psík sa nenašiel.');
+  const previousPath = cleanText(currentRows[0]?.photo_path, 500);
+  const path = (staff ? 'dogs/' : 'customers/' + userId + '/' + dogId + '/') + crypto.randomUUID() + '.jpg';
   const objectPath = path.split('/').map(encodeURIComponent).join('/');
   const response = await fetch(
     SUPABASE_URL + '/storage/v1/object/dog-profile-photos/' + objectPath,
@@ -915,21 +926,18 @@ async function uploadDogPhoto(userId: string, staff: boolean, payload: Json) {
   }
 
   const updatedAt = new Date().toISOString();
-  await rest('dogs?id=eq.' + dogId, {
-    method: 'PATCH',
-    body: { photo_path: path, photo_updated_at: updatedAt },
-  });
-  if (previousPath && previousPath.startsWith('dogs/')) {
-    await fetch(SUPABASE_URL + '/storage/v1/object/dog-profile-photos', {
-      method: 'DELETE',
-      headers: {
-        apikey: SERVICE_KEY,
-        Authorization: 'Bearer ' + SERVICE_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prefixes: [previousPath] }),
-    }).catch(() => undefined);
+  try {
+    await rest(staff ? 'dogs?id=eq.' + dogId : 'customer_dog_photos?on_conflict=dog_id,user_id', {
+      method: staff ? 'PATCH' : 'POST',
+      prefer: staff ? undefined : 'resolution=merge-duplicates,return=representation',
+      body: staff ? {photo_path:path,photo_updated_at:updatedAt} : {dog_id:dogId,user_id:userId,photo_path:path},
+    });
+  } catch (error) {
+    await removeProfilePhoto(path);
+    throw error;
   }
+  if (previousPath && previousPath.startsWith(staff ? 'dogs/' : 'customers/' + userId + '/' + dogId + '/')) await removeProfilePhoto(previousPath);
+
   return { dog_id: dogId, photo_path: path, photo_updated_at: updatedAt };
 }
 
@@ -941,28 +949,20 @@ async function deleteDogPhoto(userId: string, staff: boolean, payload: Json) {
   }
 
   const currentRows = await rest(
-    'dogs?id=eq.' + dogId + '&select=photo_path&limit=1',
+    staff ? 'dogs?id=eq.' + dogId + '&select=photo_path&limit=1' : 'customer_dog_photos?dog_id=eq.' + dogId + '&user_id=eq.' + encodeURIComponent(userId) + '&select=photo_path&limit=1',
   ) as Array<Json>;
-  if (!currentRows.length) throw new Error('Psík sa nenašiel.');
+  if (staff && !currentRows.length) throw new Error('Psík sa nenašiel.');
 
-  const previousPath = cleanText(currentRows[0].photo_path, 500);
+  const previousPath = cleanText(currentRows[0]?.photo_path, 500);
   const updatedAt = new Date().toISOString();
-  await rest('dogs?id=eq.' + dogId, {
-    method: 'PATCH',
-    body: { photo_path: null, photo_updated_at: updatedAt },
+  await rest(staff ? 'dogs?id=eq.' + dogId : 'customer_dog_photos?on_conflict=dog_id,user_id', {
+    method: staff ? 'PATCH' : 'POST',
+    prefer: staff ? undefined : 'resolution=merge-duplicates,return=representation',
+    body: staff ? {photo_path:null,photo_updated_at:updatedAt} : {dog_id:dogId,user_id:userId,photo_path:null},
   });
 
-  if (previousPath && previousPath.startsWith('dogs/')) {
-    await fetch(SUPABASE_URL + '/storage/v1/object/dog-profile-photos', {
-      method: 'DELETE',
-      headers: {
-        apikey: SERVICE_KEY,
-        Authorization: 'Bearer ' + SERVICE_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prefixes: [previousPath] }),
-    }).catch(() => undefined);
-  }
+  if (previousPath && previousPath.startsWith(staff ? 'dogs/' : 'customers/' + userId + '/' + dogId + '/')) await removeProfilePhoto(previousPath);
+
   return { dog_id: dogId, photo_path: null, photo_updated_at: updatedAt };
 }
 
@@ -1057,10 +1057,10 @@ Deno.serve(async (req: Request) => {
       return json({ data: await uploadVaccinationProofs(String(user.id), staff, body) });
     }
     if (action === 'upload_dog_photo') {
-      return json({ data: await uploadDogPhoto(String(user.id), staff, body) });
+      return json({ data: await uploadDogPhoto(String(user.id), staff && body.photo_scope !== 'account', body) });
     }
     if (action === 'delete_dog_photo') {
-      return json({ data: await deleteDogPhoto(String(user.id), staff, body) });
+      return json({ data: await deleteDogPhoto(String(user.id), staff && body.photo_scope !== 'account', body) });
     }
     if (action === 'set_photo_visibility') {
       return json({ data: await setPhotoVisibility(String(user.id), staff, body) });
@@ -1156,12 +1156,18 @@ Deno.serve(async (req: Request) => {
         ? body.dog_ids.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0).slice(0, 500)
         : [];
       const dogs = ids.length
-        ? await rest('dogs?id=' + encodeURIComponent(inFilter(ids)) + '&select=id,photo_path,photo_updated_at') as Array<Json>
+        ? await rest('dogs?id=' + encodeURIComponent(inFilter(ids)) + '&select=id,owner_id,photo_path,photo_updated_at') as Array<Json>
         : [];
+      const photos = ids.length ? await rest('customer_dog_photos?dog_id=' + encodeURIComponent(inFilter(ids)) + '&select=dog_id,user_id,photo_path,updated_at') as Array<Json> : [];
+      const userIds = [...new Set(photos.map(photo => String(photo.user_id)))];
+      const profiles = userIds.length ? await rest('customer_profiles?user_id=' + encodeURIComponent(inFilter(userIds)) + '&select=user_id,full_name') as Array<Json> : [];
+      const links = userIds.length ? await rest('customer_owner_links?user_id=' + encodeURIComponent(inFilter(userIds)) + '&select=user_id,owner_id') as Array<Json> : [];
+      const names = new Map(profiles.map(profile => [String(profile.user_id), profile.full_name]));
       return json({ data: await Promise.all(dogs.map(async (dog) => ({
-        id: Number(dog.id),
-        photo_url: await signedPhotoUrl(dog.photo_path),
-        photo_updated_at: dog.photo_updated_at || null,
+        id:Number(dog.id), photo_url:await signedPhotoUrl(dog.photo_path), photo_updated_at:dog.photo_updated_at || null,
+        owner_photos:await Promise.all(photos.filter(photo => Number(photo.dog_id)===Number(dog.id) && photo.photo_path && links.some(link => String(link.user_id)===String(photo.user_id) && Number(link.owner_id)===Number(dog.owner_id))).map(async photo => ({
+          owner_name:names.get(String(photo.user_id)) || 'Majiteľ', photo_url:await signedPhotoUrl(photo.photo_path), updated_at:photo.updated_at,
+        }))),
       }))) });
     }
     if (action === 'admin_approve_booking') {

@@ -1,9 +1,9 @@
 
-const CACHE='chvostikovo-portal-shell-20261007-customer-chat-polish-v160';
+const CACHE='chvostikovo-portal-shell-20261007-customer-personal-photos-v161';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/terms-pdf.js?v=20261007-customer-chat-polish-v160','/terms-pdf-font.js?v=20261007-customer-chat-polish-v160','/styles.css?v=20261007-customer-chat-polish-v160','/app.js?v=20261007-customer-chat-polish-v160','/back-swipe.js?v=20261007-customer-chat-polish-v160'];
+const SHELL=['/','/terms-pdf.js?v=20261007-customer-personal-photos-v161','/terms-pdf-font.js?v=20261007-customer-personal-photos-v161','/styles.css?v=20261007-customer-personal-photos-v161','/app.js?v=20261007-customer-personal-photos-v161','/back-swipe.js?v=20261007-customer-personal-photos-v161'];
 
 function withPortalCsp(response){
   if(!response)return response;

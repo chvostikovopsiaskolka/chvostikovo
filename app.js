@@ -27,8 +27,8 @@
   let lastTouchEnd=0;
   document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<280)e.preventDefault();lastTouchEnd=now},{passive:false,capture:true});
 })();
-const APP_BUILD='20261007-customer-chat-polish-v160';
-const APP_VERSION='1.0.7';
+const APP_BUILD='20261007-customer-personal-photos-v161';
+const APP_VERSION='1.0.8';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -187,7 +187,7 @@ async function flushCustomerSync(){
       const previous=previousDogs.get(Number(dog.id));
       const samePhoto=previous&&String(previous.photo_path||'')===String(dog.photo_path||'')&&String(previous.photo_updated_at||'')===String(dog.photo_updated_at||'');
       if(samePhoto&&previous?.photo_url)dog.photo_url=previous.photo_url;
-      else if(!dog.photo_url&&previous?.photo_url)dog.photo_url=previous.photo_url;
+      else if(dog.photo_path&&!dog.photo_url&&previous?.photo_url&&String(dog.photo_path)===String(previous.photo_path))dog.photo_url=previous.photo_url;
     }
 
     const nextFingerprint=customerDataFingerprintV18(next);
@@ -703,7 +703,7 @@ async function deleteCurrentDogPhotoV89(dog){
   if(!confirm('Naozaj chcete zmazať profilovú fotku psíka?'))return;
   try{
     loading(true);
-    await api({action:'delete_dog_photo',dog_id:Number(dog.id)});
+    await api({action:'delete_dog_photo',photo_scope:'account',dog_id:Number(dog.id)});
     closePhotoActionsV89();
     dog.photo_url=null;dog.photo_path=null;dog.photo_updated_at=new Date().toISOString();
     toast('Fotka bola zmazaná.');
@@ -715,7 +715,7 @@ function clampPhotoOffset(reset=false){const e=state.photoEdit;if(!e)return;cons
 function drawPhotoCrop(){const e=state.photoEdit;if(!e)return;const c=$('photoCropCanvas'),ctx=c.getContext('2d'),base=Math.max(640/e.img.width,640/e.img.height),scale=base*e.zoom;ctx.clearRect(0,0,640,640);ctx.drawImage(e.img,e.ox,e.oy,e.img.width*scale,e.img.height*scale)}
 function closePhotoEditor(){if(state.photoEdit?.url)URL.revokeObjectURL(state.photoEdit.url);try{state.photoEdit?.img?.close?.()}catch(_){}state.photoEdit=null;$('photoCropModal')?.classList.add('hidden')}
 function photoJpegData(){const c=$('photoCropCanvas');for(const q of [.9,.84,.78,.72]){const data=c.toDataURL('image/jpeg',q),bytes=Math.ceil((data.length-data.indexOf(',')-1)*3/4);if(bytes<900000)return data}return c.toDataURL('image/jpeg',.68)}
-async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);await api({action:'upload_dog_photo',dog_id:Number(state.selectedDogId),image_data:photoJpegData()});closePhotoEditor();toast('Fotka je uložená.');await bootstrap(false)}catch(e){toast(e.message)}finally{loading(false)}}
+async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);await api({action:'upload_dog_photo',photo_scope:'account',dog_id:Number(state.selectedDogId),image_data:photoJpegData()});closePhotoEditor();toast('Fotka je uložená.');await bootstrap(false)}catch(e){toast(e.message)}finally{loading(false)}}
 function urlBase64ToUint8Array(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(b);return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
 async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js')}catch(e){console.warn(e)}}
 async function pushSubscription(){if(!('serviceWorker'in navigator))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
