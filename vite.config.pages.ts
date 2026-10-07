@@ -15,7 +15,6 @@ export default defineConfig({
     },
     pages: [
       { path: "/" },
-      { path: "/hero-test" },
       { path: "/cookies" },
       { path: "/ochrana-osobnych-udajov" },
       { path: "/udaje-prevadzkovatela" },
