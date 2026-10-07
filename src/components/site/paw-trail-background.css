@@ -26,64 +26,6 @@
   fill: color-mix(in srgb, var(--color-coral, #ee8749) 88%, white);
 }
 
-.hero-outline-dog {
-  position: absolute;
-  z-index: 2;
-  width: clamp(72px, 7vw, 102px);
-  color: var(--color-coral, #ee8749);
-  transition:
-    left 100ms linear,
-    top 100ms linear,
-    transform 100ms linear,
-    opacity 220ms linear;
-  will-change: left, top, transform, opacity;
-}
-
-.hero-outline-dog-fluffy {
-  width: clamp(62px, 6.2vw, 88px);
-  color: var(--color-forest, #32734d);
-}
-
-.hero-outline-dog-drawing {
-  display: block;
-  width: 100%;
-  overflow: visible;
-}
-
-.hero-dog-leg {
-  transform-box: fill-box;
-  transform-origin: top center;
-}
-
-.hero-dog-leg-a {
-  animation: hero-dog-step-a .64s ease-in-out infinite alternate;
-}
-
-.hero-dog-leg-b {
-  animation: hero-dog-step-b .64s ease-in-out infinite alternate;
-}
-
-.hero-dog-tail {
-  transform-box: fill-box;
-  transform-origin: right bottom;
-  animation: hero-dog-tail .52s ease-in-out infinite alternate;
-}
-
-@keyframes hero-dog-step-a {
-  from { transform: translateY(-1px) rotate(-3deg); }
-  to { transform: translateY(1.5px) rotate(4deg); }
-}
-
-@keyframes hero-dog-step-b {
-  from { transform: translateY(1.5px) rotate(4deg); }
-  to { transform: translateY(-1px) rotate(-3deg); }
-}
-
-@keyframes hero-dog-tail {
-  from { transform: rotate(-8deg); }
-  to { transform: rotate(10deg); }
-}
-
 @media (max-width: 639px) {
   .paw-trail-print {
     width: 17px;
@@ -91,21 +33,5 @@
 
   .paw-trail-zone-2 {
     display: none;
-  }
-
-  .hero-outline-dog {
-    width: 64px;
-  }
-
-  .hero-outline-dog-fluffy {
-    width: 56px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-dog-leg-a,
-  .hero-dog-leg-b,
-  .hero-dog-tail {
-    animation-duration: 1.25s;
   }
 }

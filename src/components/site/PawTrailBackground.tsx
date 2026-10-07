@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import "./paw-trail-background.css";
 
 type Point = readonly [number, number];
@@ -16,16 +16,6 @@ type Trail = {
   generation: number;
 };
 
-type DogJourney = {
-  start: Point;
-  control: Point;
-  end: Point;
-  startedAt: number;
-  durationMs: number;
-  pauseMs: number;
-  generation: number;
-  variant: 0 | 1;
-};
 
 const STEP_COUNT = 19;
 const TRAIL_ZONES: ReadonlyArray<readonly [number, number]> = [
@@ -116,118 +106,6 @@ function initialTrails(): Trail[] {
   ];
 }
 
-function randomEdgePoint(edge: number): Point {
-  if (edge === 0) return [-8, between(8, 92)];
-  if (edge === 1) return [108, between(8, 92)];
-  if (edge === 2) return [between(8, 92), -8];
-  return [between(8, 92), 108];
-}
-
-function createDogJourney(variant: 0 | 1, generation: number, startedAt: number): DogJourney {
-  const startEdge = Math.floor(Math.random() * 4);
-  let endEdge = Math.floor(Math.random() * 4);
-  while (endEdge === startEdge) endEdge = Math.floor(Math.random() * 4);
-
-  return {
-    start: randomEdgePoint(startEdge),
-    control: [between(12, 88), between(12, 88)],
-    end: randomEdgePoint(endEdge),
-    startedAt,
-    durationMs: between(18000, 28500),
-    pauseMs: between(1400, 4200),
-    generation,
-    variant,
-  };
-}
-
-function initialDogs(): DogJourney[] {
-  return [
-    {
-      start: [-8, 22],
-      control: [48, 6],
-      end: [108, 46],
-      startedAt: -5200,
-      durationMs: 23500,
-      pauseMs: 2200,
-      generation: 0,
-      variant: 0,
-    },
-    {
-      start: [86, 108],
-      control: [66, 56],
-      end: [18, -8],
-      startedAt: -10600,
-      durationMs: 26800,
-      pauseMs: 3000,
-      generation: 0,
-      variant: 1,
-    },
-  ];
-}
-
-function HoundDog() {
-  return (
-    <svg className="hero-outline-dog-drawing" viewBox="0 0 136 78">
-      <g fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <g className="hero-dog-leg hero-dog-leg-a">
-          <path d="M38 43Q37 53 39 60L45 67H54" />
-        </g>
-        <g className="hero-dog-leg hero-dog-leg-b" opacity=".55">
-          <path d="M49 44Q48 54 51 61L57 68H66" />
-        </g>
-        <g className="hero-dog-leg hero-dog-leg-b">
-          <path d="M79 43Q78 53 80 60L86 67H95" />
-        </g>
-        <g className="hero-dog-leg hero-dog-leg-a" opacity=".55">
-          <path d="M89 42Q89 53 91 60L97 67H106" />
-        </g>
-
-        <path
-          d="M24 35Q22 21 40 19L72 20Q79 20 84 15L90 8Q94 4 101 10L108 18L121 21Q127 23 123 27L110 30L102 39Q96 47 80 46L41 46Q26 45 24 35Z"
-          fill="white"
-        />
-        <path d="M94 9Q84 7 86 21Q88 29 94 27L99 13" />
-        <path className="hero-dog-tail" d="M25 29Q13 25 10 13Q9 9 13 11" />
-        <circle cx="104" cy="20" r="1.5" fill="currentColor" stroke="none" />
-        <path d="M121 21L126 24L122 26Z" fill="currentColor" />
-      </g>
-    </svg>
-  );
-}
-
-function FluffyDog() {
-  return (
-    <svg className="hero-outline-dog-drawing" viewBox="0 0 132 82">
-      <g fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <g className="hero-dog-leg hero-dog-leg-b">
-          <path d="M38 47Q37 56 40 63L46 70H55" />
-        </g>
-        <g className="hero-dog-leg hero-dog-leg-a" opacity=".55">
-          <path d="M50 48Q50 57 53 64L59 71H68" />
-        </g>
-        <g className="hero-dog-leg hero-dog-leg-a">
-          <path d="M76 47Q76 56 79 63L85 70H94" />
-        </g>
-        <g className="hero-dog-leg hero-dog-leg-b" opacity=".55">
-          <path d="M87 46Q88 55 91 62L97 69H106" />
-        </g>
-
-        <path
-          d="M27 39Q25 24 42 20Q52 16 63 20L76 22Q82 21 86 15Q90 8 99 11Q107 13 111 20L119 24Q124 27 120 31L108 34Q105 44 95 48Q85 52 72 48L43 49Q30 48 27 39Z"
-          fill="white"
-        />
-        <path d="M91 14Q83 16 84 28Q86 35 91 31L96 16" />
-        <path d="M102 13Q108 8 113 15" />
-        <path className="hero-dog-tail" d="M29 31Q16 32 14 22Q13 16 18 17Q25 18 22 24" />
-        <path d="M109 35Q105 39 101 38" />
-        <circle cx="106" cy="22" r="1.5" fill="currentColor" stroke="none" />
-        <path d="M119 24L124 27L120 30Z" fill="currentColor" />
-        <path d="M39 21L35 17M46 20L44 15M74 23L77 18" opacity=".65" />
-      </g>
-    </svg>
-  );
-}
-
 function PawPrint() {
   return (
     <>
@@ -252,7 +130,6 @@ function printOpacity(age: number, holdMs: number, fadeMs: number) {
 export function PawTrailBackground() {
   const [clock, setClock] = useState(3600);
   const [trails, setTrails] = useState<Trail[]>(initialTrails);
-  const [dogs, setDogs] = useState<DogJourney[]>(initialDogs);
 
   useEffect(() => {
     let last = performance.now();
@@ -284,31 +161,7 @@ export function PawTrailBackground() {
       return changed ? next : current;
     });
 
-    setDogs((current) => {
-      let changed = false;
-      const next = current.map((dog) => {
-        if (clock <= dog.startedAt + dog.durationMs + dog.pauseMs) return dog;
-        changed = true;
-        return createDogJourney(dog.variant, dog.generation + 1, clock);
-      });
-      return changed ? next : current;
-    });
   }, [clock]);
-
-  const renderedDogs = useMemo(
-    () =>
-      dogs.map((dog) => {
-        const elapsed = clock - dog.startedAt;
-        const rawT = elapsed / dog.durationMs;
-        const active = rawT >= 0 && rawT <= 1;
-        const t = Math.max(0, Math.min(1, rawT));
-        const [x, y] = pointOnCurve(dog.start, dog.control, dog.end, t);
-        const [dx] = tangentOnCurve(dog.start, dog.control, dog.end, t);
-        const edgeFade = Math.min(1, t / 0.07, (1 - t) / 0.07);
-        return { dog, x, y, facing: dx >= 0 ? 1 : -1, opacity: active ? Math.max(0, edgeFade) : 0 };
-      }),
-    [dogs, clock],
-  );
 
   return (
     <div aria-hidden="true" className="paw-trail-background">
@@ -342,21 +195,6 @@ export function PawTrailBackground() {
           );
         }),
       )}
-
-      {renderedDogs.map(({ dog, x, y, facing, opacity }) => (
-        <div
-          key={`${dog.variant}-${dog.generation}`}
-          className={`hero-outline-dog ${dog.variant === 1 ? "hero-outline-dog-fluffy" : "hero-outline-dog-hound"}`}
-          style={{
-            left: `${x}%`,
-            top: `${y}%`,
-            opacity,
-            transform: `translate(-50%, -50%) scaleX(${facing})`,
-          }}
-        >
-          {dog.variant === 0 ? <HoundDog /> : <FluffyDog />}
-        </div>
-      ))}
     </div>
   );
 }
