@@ -14,6 +14,7 @@ import {
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { InfoTicker } from "@/components/site/InfoTicker";
+import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { ShortForm } from "@/components/site/Forms";
@@ -168,7 +169,7 @@ function PuppyDaycarePage() {
                 Psia škôlka pre šteniatka v Košiciach
               </p>
               <h1 className="mt-2 text-[37px] leading-[1.06] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
-                Vaše šteniatko si môže
+                Vaše šteniatko <span className="whitespace-nowrap">si môže</span>
                 <span className="block text-coral-dark">škôlku zamilovať</span>
               </h1>
 
@@ -234,6 +235,14 @@ function PuppyDaycarePage() {
             <PuppyForm source="puppy_landing_mobile_below_hero" />
           </div>
         </section>
+
+        <section className="bg-card pt-8 text-center sm:pt-12">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="section-title text-3xl sm:text-4xl">Pozrite si zopár fotiek zo škôlky</h2>
+          </div>
+        </section>
+
+        <DaycarePhotoCarousel />
 
         <section id="puppy-benefits" className="scroll-mt-20 bg-card py-10 sm:py-14">
           <div className="mx-auto max-w-6xl px-4 text-center">
