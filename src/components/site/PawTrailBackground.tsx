@@ -38,6 +38,12 @@ const AMBIENT_PAWS = [
   { x: 70, y: 55, size: 21, rotate: -11, tone: "coral", mobile: true },
 ] as const;
 
+const LANDING_BOTTOM_PAWS = [
+  { x: 11, y: 90, size: 21, rotate: -22, tone: "coral" },
+  { x: 52, y: 96, size: 18, rotate: 16, tone: "forest" },
+  { x: 89, y: 91, size: 20, rotate: 27, tone: "coral" },
+] as const;
+
 const LEFT_ROUTES: ReadonlyArray<readonly [Point, Point, Point]> = [
   [[-6, 22], [17, 32], [42, 94]],
   [[30, -6], [13, 35], [-6, 79]],
@@ -200,7 +206,7 @@ function PawPrint() {
   );
 }
 
-export function PawTrailBackground() {
+export function PawTrailBackground({ landingBottomPaws = false }: { landingBottomPaws?: boolean } = {}) {
   const [clock, setClock] = useState(0);
   const [trails, setTrails] = useState<Trail[]>(initialTrails);
 
@@ -283,6 +289,22 @@ export function PawTrailBackground() {
             <PawPrint />
           </svg>
         ))}
+        {landingBottomPaws &&
+          LANDING_BOTTOM_PAWS.map((paw, index) => (
+            <svg
+              key={`landing-bottom-${index}`}
+              className={`paw-ambient-print paw-ambient-${paw.tone} sm:hidden`}
+              viewBox="0 0 32 36"
+              style={{
+                left: `${paw.x}%`,
+                top: `${paw.y}%`,
+                width: `${paw.size}px`,
+                transform: `translate(-50%, -50%) rotate(${paw.rotate}deg)`,
+              }}
+            >
+              <PawPrint />
+            </svg>
+          ))}
       </div>
 
       {renderedPrints.map((print) => (
