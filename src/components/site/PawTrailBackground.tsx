@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import "./paw-trail-background.css";
 
 type Point = readonly [number, number];
-type Lane = 0 | 1;
+type Lane = 0 | 1 | 2;
 
 type Trail = {
   lane: Lane;
@@ -35,6 +35,13 @@ const RIGHT_ROUTES: ReadonlyArray<readonly [Point, Point, Point]> = [
   [[106, 67], [81, 55], [62, -6]],
 ];
 
+const CENTER_ROUTES: ReadonlyArray<readonly [Point, Point, Point]> = [
+  [[48, -6], [46, 34], [54, 106]],
+  [[55, 106], [52, 65], [47, -6]],
+  [[44, 8], [50, 48], [56, 94]],
+  [[56, 12], [49, 54], [45, 100]],
+];
+
 function between(min: number, max: number) {
   return min + Math.random() * (max - min);
 }
@@ -55,11 +62,12 @@ function tangentOnCurve(start: Point, control: Point, end: Point, t: number): Po
 
 function jitterPoint(point: Point, lane: Lane): Point {
   const [x, y] = point;
-  const minX = lane === 0 ? -8 : 56;
-  const maxX = lane === 0 ? 44 : 108;
+  const minX = lane === 0 ? -8 : lane === 1 ? 56 : 44;
+  const maxX = lane === 0 ? 44 : lane === 1 ? 108 : 56;
+  const xJitter = lane === 2 ? between(-1.8, 1.8) : between(-3.5, 3.5);
 
   return [
-    Math.min(maxX, Math.max(minX, x + between(-3.5, 3.5))),
+    Math.min(maxX, Math.max(minX, x + xJitter)),
     Math.min(108, Math.max(-8, y + between(-4, 4))),
   ];
 }
@@ -70,7 +78,7 @@ function makeTrail(
   startedAt: number,
   previousVariant = -1,
 ): Trail {
-  const routes = lane === 0 ? LEFT_ROUTES : RIGHT_ROUTES;
+  const routes = lane === 0 ? LEFT_ROUTES : lane === 1 ? RIGHT_ROUTES : CENTER_ROUTES;
   let variant = Math.floor(Math.random() * routes.length);
   if (routes.length > 1) {
     while (variant === previousVariant) variant = Math.floor(Math.random() * routes.length);
@@ -130,6 +138,18 @@ function initialTrails(): Trail[] {
       holdMs: 2550,
       fadeMs: 1200,
       variant: 3,
+    },
+    {
+      lane: 2,
+      id: 3,
+      start: [49, -6],
+      control: [47, 37],
+      end: [53, 106],
+      startedAt: -850,
+      stepGap: 228,
+      holdMs: 2450,
+      fadeMs: 1150,
+      variant: 0,
     },
   ];
 }
@@ -217,6 +237,7 @@ export function PawTrailBackground() {
 
           return {
             key: `${trail.lane}-${trail.id}-${step}`,
+            lane: trail.lane,
             x: x + xOffset,
             y: y + yOffset,
             angle,
@@ -232,7 +253,7 @@ export function PawTrailBackground() {
       {renderedPrints.map((print) => (
         <svg
           key={print.key}
-          className="paw-trail-print"
+          className={`paw-trail-print paw-trail-lane-${print.lane}`}
           viewBox="0 0 32 36"
           style={{
             left: `${print.x}%`,

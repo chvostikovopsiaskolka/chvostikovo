@@ -208,7 +208,7 @@ function PuppyDaycarePage() {
 
             <div className="mx-auto hidden w-full max-w-md lg:mx-0 lg:block">
               <SchoolmatesFormCrown compact />
-              <div className="rounded-4xl border border-white/60 bg-white/95 px-5 pt-9 pb-5 shadow-soft backdrop-blur lg:px-7 lg:pb-7">
+              <div className="rounded-4xl border border-white/70 bg-white/75 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-sm lg:px-7 lg:pb-7">
                 <p className="text-center font-display text-2xl font-bold text-forest">
                   Je Chvostíkovo vhodné pre vaše šteniatko?
                 </p>

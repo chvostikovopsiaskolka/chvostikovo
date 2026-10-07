@@ -18,7 +18,7 @@ function scrollToWhyChvostikovo() {
 
 export function Hero({ background, learnMoreHref }: { background?: ReactNode; learnMoreHref?: string }) {
   return (
-    <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-28 lg:pb-4">
+    <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-24 lg:pb-1">
       {background ?? <PawTrailBackground />}
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
@@ -76,7 +76,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
 
         {/* Desktop layout */}
         <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
-          <div className="flex min-w-0 flex-col lg:py-6">
+          <div className="flex min-w-0 flex-col lg:py-2">
             <p className="order-1 mx-0 mb-3 mt-0 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-4 py-1.5 text-sm font-bold text-coral-dark shadow-soft">
               Denná starostlivosť o stredných a veľkých psíkov
             </p>
@@ -108,17 +108,32 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
               ))}
             </div>
 
-            <a
-              href={`tel:${PHONE}`}
-              className="btn-coral order-5 mt-5 inline-flex min-w-48 items-center justify-center gap-2 self-start px-5 py-2.5 text-sm"
-            >
-              <Phone className="size-4" /> Zavolajte nám
-            </a>
+            <div className="order-5 mt-4 flex items-center gap-3">
+              <a
+                href={`tel:${PHONE}`}
+                aria-label="Zavolajte nám"
+                title="Zavolajte nám"
+                className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-coral text-primary-foreground shadow-card transition-colors hover:bg-coral-dark"
+              >
+                <Phone className="size-5" />
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  trackMarketingInteraction("hero_learn_more", "hero_desktop");
+                  scrollToWhyChvostikovo();
+                }}
+                className="btn-coral inline-flex min-w-44 items-center justify-center gap-2 px-5 py-2.5 text-sm"
+              >
+                Zistiť viac
+                <ArrowDown className="size-4" />
+              </button>
+            </div>
           </div>
 
           <div className="min-w-0">
             <SchoolmatesFormCrown compact />
-            <div className="rounded-4xl bg-card/95 px-8 pt-9 pb-8 shadow-soft backdrop-blur-sm">
+            <div className="rounded-4xl border border-white/70 bg-card/75 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-sm">
               <h2 className="text-center text-2xl text-forest sm:whitespace-nowrap">
                 Informujte sa o škôlke
               </h2>
