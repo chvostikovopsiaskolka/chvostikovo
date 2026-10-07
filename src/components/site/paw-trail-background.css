@@ -18,7 +18,7 @@
 .paw-ambient-print {
   position: absolute;
   height: auto;
-  opacity: 0.065;
+  opacity: 0.08;
   filter: saturate(0.9);
 }
 
@@ -52,7 +52,7 @@
   }
 
   .paw-ambient-print {
-    opacity: 0.12;
+    opacity: 0.14;
   }
 
   .paw-trail-print {
