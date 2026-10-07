@@ -11,15 +11,15 @@
 .paw-trail-print {
   position: absolute;
   z-index: 1;
-  width: clamp(17px, 2vw, 27px);
+  width: clamp(19px, 2.15vw, 30px);
   height: auto;
   fill: var(--color-coral, #ee8749);
-  transition: opacity 220ms linear;
+  transition: opacity 160ms linear;
   will-change: opacity;
 }
 
 @media (max-width: 639px) {
   .paw-trail-print {
-    width: 17px;
+    width: 19px;
   }
 }

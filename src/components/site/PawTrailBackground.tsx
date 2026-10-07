@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import "./paw-trail-background.css";
 
 type Point = readonly [number, number];
+type Lane = 0 | 1;
 
 type Trail = {
+  lane: Lane;
   id: number;
   start: Point;
   control: Point;
@@ -12,13 +14,26 @@ type Trail = {
   stepGap: number;
   holdMs: number;
   fadeMs: number;
+  variant: number;
 };
 
-const STEP_COUNT = 18;
+const STEP_COUNT = 16;
 const CLOCK_TICK_MS = 90;
-const SPAWN_EVERY_MS = 4300;
-const MAX_TRAILS = 3;
-const AMBIENT_OPACITY = 0.055;
+const MAX_OPACITY = 0.48;
+
+const LEFT_ROUTES: ReadonlyArray<readonly [Point, Point, Point]> = [
+  [[-6, 22], [17, 32], [42, 94]],
+  [[30, -6], [13, 35], [-6, 79]],
+  [[40, 106], [20, 70], [-6, 53]],
+  [[-6, 67], [19, 55], [38, -6]],
+];
+
+const RIGHT_ROUTES: ReadonlyArray<readonly [Point, Point, Point]> = [
+  [[106, 22], [83, 32], [58, 94]],
+  [[70, -6], [87, 35], [106, 79]],
+  [[60, 106], [80, 70], [106, 53]],
+  [[106, 67], [81, 55], [62, -6]],
+];
 
 function between(min: number, max: number) {
   return min + Math.random() * (max - min);
@@ -38,149 +53,102 @@ function tangentOnCurve(start: Point, control: Point, end: Point, t: number): Po
   ];
 }
 
-function edgePoint(edge: number): Point {
-  const position = between(10, 90);
-  if (edge === 0) return [-6, position];
-  if (edge === 1) return [106, position];
-  if (edge === 2) return [position, -6];
-  return [position, 106];
+function jitterPoint(point: Point, lane: Lane): Point {
+  const [x, y] = point;
+  const minX = lane === 0 ? -8 : 56;
+  const maxX = lane === 0 ? 44 : 108;
+
+  return [
+    Math.min(maxX, Math.max(minX, x + between(-3.5, 3.5))),
+    Math.min(108, Math.max(-8, y + between(-4, 4))),
+  ];
 }
 
-function routeSamples(trail: Pick<Trail, "start" | "control" | "end">) {
-  return Array.from({ length: 11 }, (_, index) =>
-    pointOnCurve(trail.start, trail.control, trail.end, index / 10),
-  );
-}
-
-function routeSeparation(
-  candidate: Pick<Trail, "start" | "control" | "end">,
-  existing: Trail[],
-) {
-  if (!existing.length) return 100;
-
-  const candidatePoints = routeSamples(candidate);
-  let closest = Infinity;
-
-  for (const trail of existing) {
-    const existingPoints = routeSamples(trail);
-    for (const [x1, y1] of candidatePoints) {
-      for (const [x2, y2] of existingPoints) {
-        const distance = Math.hypot(x1 - x2, y1 - y2);
-        if (distance < closest) closest = distance;
-      }
-    }
+function makeTrail(
+  lane: Lane,
+  id: number,
+  startedAt: number,
+  previousVariant = -1,
+): Trail {
+  const routes = lane === 0 ? LEFT_ROUTES : RIGHT_ROUTES;
+  let variant = Math.floor(Math.random() * routes.length);
+  if (routes.length > 1) {
+    while (variant === previousVariant) variant = Math.floor(Math.random() * routes.length);
   }
 
-  return closest;
-}
-
-function randomRoute(existing: Trail[]) {
-  let best:
-    | {
-        start: Point;
-        control: Point;
-        end: Point;
-        score: number;
-      }
-    | undefined;
-
-  for (let attempt = 0; attempt < 14; attempt += 1) {
-    const startEdge = Math.floor(Math.random() * 4);
-    let endEdge = Math.floor(Math.random() * 4);
-    while (endEdge === startEdge) endEdge = Math.floor(Math.random() * 4);
-
-    const start = edgePoint(startEdge);
-    const end = edgePoint(endEdge);
-
-    // Keep the bend away from the exact centre so the paths feel organic
-    // instead of repeatedly crossing in the middle of the hero.
-    const control: Point = [
-      Math.random() < 0.5 ? between(16, 43) : between(57, 84),
-      Math.random() < 0.5 ? between(16, 43) : between(57, 84),
-    ];
-
-    const score = routeSeparation({ start, control, end }, existing);
-    if (!best || score > best.score) best = { start, control, end, score };
+  const route = routes[variant] ?? routes[0];
+  if (!route) {
+    throw new Error("Paw trail route is missing");
   }
 
-  return (
-    best ?? {
-      start: [-6, 22] as Point,
-      control: [35, 18] as Point,
-      end: [106, 34] as Point,
-      score: 0,
-    }
-  );
-}
-
-function createTrail(id: number, startedAt: number, existing: Trail[]): Trail {
-  const route = randomRoute(existing);
+  const reverse = Math.random() < 0.5;
+  const [baseStart, baseControl, baseEnd] = route;
+  const start = jitterPoint(reverse ? baseEnd : baseStart, lane);
+  const control = jitterPoint(baseControl, lane);
+  const end = jitterPoint(reverse ? baseStart : baseEnd, lane);
 
   return {
+    lane,
     id,
-    start: route.start,
-    control: route.control,
-    end: route.end,
+    start,
+    control,
+    end,
     startedAt,
-    stepGap: between(245, 330),
-    holdMs: between(6200, 7600),
-    fadeMs: between(2300, 3300),
+    stepGap: between(205, 245),
+    holdMs: between(2350, 2850),
+    fadeMs: between(1050, 1450),
+    variant,
   };
+}
+
+function trailLifetime(trail: Trail) {
+  return (STEP_COUNT - 1) * trail.stepGap + trail.holdMs + trail.fadeMs;
 }
 
 function initialTrails(): Trail[] {
-  const first: Trail = {
-    id: 1,
-    start: [-6, 24],
-    control: [31, 13],
-    end: [76, 106],
-    startedAt: -9300,
-    stepGap: 285,
-    holdMs: 7100,
-    fadeMs: 2900,
-  };
-
-  const second: Trail = {
-    id: 2,
-    start: [84, -6],
-    control: [77, 34],
-    end: [106, 77],
-    startedAt: -5200,
-    stepGap: 270,
-    holdMs: 6800,
-    fadeMs: 2800,
-  };
-
-  const third: Trail = {
-    id: 3,
-    start: [106, 53],
-    control: [65, 72],
-    end: [21, 106],
-    startedAt: -950,
-    stepGap: 275,
-    holdMs: 7000,
-    fadeMs: 3000,
-  };
-
-  return [first, second, third];
+  return [
+    {
+      lane: 0,
+      id: 1,
+      start: [-6, 25],
+      control: [18, 37],
+      end: [41, 96],
+      startedAt: -2200,
+      stepGap: 225,
+      holdMs: 2600,
+      fadeMs: 1250,
+      variant: 0,
+    },
+    {
+      lane: 1,
+      id: 2,
+      start: [106, 65],
+      control: [82, 55],
+      end: [64, -6],
+      startedAt: 900,
+      stepGap: 220,
+      holdMs: 2550,
+      fadeMs: 1200,
+      variant: 3,
+    },
+  ];
 }
 
 function printOpacity(age: number, holdMs: number, fadeMs: number) {
-  if (age < 0) return AMBIENT_OPACITY;
+  if (age < 0) return 0;
 
-  const fadeInMs = 360;
+  const fadeInMs = 260;
   if (age < fadeInMs) {
-    return AMBIENT_OPACITY + (age / fadeInMs) * (0.5 - AMBIENT_OPACITY);
+    return (age / fadeInMs) * MAX_OPACITY;
   }
 
-  if (age < holdMs) return 0.5;
+  if (age < holdMs) return MAX_OPACITY;
 
   if (age < holdMs + fadeMs) {
-    const progress = (age - holdMs) / fadeMs;
-    return Math.max(AMBIENT_OPACITY, 0.5 * (1 - progress));
+    return MAX_OPACITY * (1 - (age - holdMs) / fadeMs);
   }
 
-  return AMBIENT_OPACITY;
+  return 0;
 }
 
 function PawPrint() {
@@ -198,32 +166,40 @@ function PawPrint() {
 export function PawTrailBackground() {
   const [clock, setClock] = useState(0);
   const [trails, setTrails] = useState<Trail[]>(initialTrails);
-  const [nextId, setNextId] = useState(4);
 
   useEffect(() => {
     let last = performance.now();
 
-    const clockTimer = window.setInterval(() => {
+    const timer = window.setInterval(() => {
       const now = performance.now();
-      const delta = Math.min(250, now - last);
+      const delta = Math.min(240, now - last);
       last = now;
       setClock((value) => value + delta);
     }, CLOCK_TICK_MS);
 
-    return () => window.clearInterval(clockTimer);
+    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
-    const spawnTimer = window.setInterval(() => {
-      setTrails((current) => {
-        const newest = createTrail(nextId, clock, current.slice(-2));
-        return [...current.slice(-(MAX_TRAILS - 1)), newest];
-      });
-      setNextId((value) => value + 1);
-    }, SPAWN_EVERY_MS);
+    setTrails((current) => {
+      let changed = false;
 
-    return () => window.clearInterval(spawnTimer);
-  }, [clock, nextId]);
+      const next = current.map((trail) => {
+        const elapsed = clock - trail.startedAt;
+        if (elapsed <= trailLifetime(trail)) return trail;
+
+        changed = true;
+        return makeTrail(
+          trail.lane,
+          trail.id + 2,
+          clock,
+          trail.variant,
+        );
+      });
+
+      return changed ? next : current;
+    });
+  }, [clock]);
 
   const renderedPrints = useMemo(
     () =>
@@ -233,14 +209,14 @@ export function PawTrailBackground() {
           const [x, y] = pointOnCurve(trail.start, trail.control, trail.end, t);
           const [dx, dy] = tangentOnCurve(trail.start, trail.control, trail.end, t);
           const length = Math.hypot(dx, dy) || 1;
-          const stride = (step % 2 ? 1 : -1) * 1.25;
+          const stride = (step % 2 ? 1 : -1) * 1.35;
           const xOffset = (-dy / length) * stride;
           const yOffset = (dx / length) * stride;
           const angle = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
           const age = clock - trail.startedAt - step * trail.stepGap;
 
           return {
-            key: `${trail.id}-${step}`,
+            key: `${trail.lane}-${trail.id}-${step}`,
             x: x + xOffset,
             y: y + yOffset,
             angle,
