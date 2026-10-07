@@ -30,8 +30,8 @@
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261007-customer-planned-pass-onboarding-v162';
-const APP_VERSION='1.0.9';
+const APP_BUILD='20261007-customer-booking-scroll-pass-v163';
+const APP_VERSION='1.0.10';
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
@@ -333,7 +333,7 @@ function plannedPassSummaryV162(dogId){
 }
 function renderPassSummaryCore(){
   const d=selectedDog(),p=d?activePassFor(d.id):null,planned=d?plannedPassSummaryV162(d.id):null;
-  if(planned){$('passSummary').innerHTML=`<span>Plánovaná permanentka</span><strong>0/${planned.total}</strong>${planned.start?`<small>Predpokladaná platnosť<br>${skDate(planned.start)} – ${skDate(planned.until)}</small>`:'<small>Platnosť od prvej návštevy</small>'}`;return}
+  if(planned){$('passSummary').innerHTML=`<span>Permanentka</span><strong>0/${planned.total}</strong>${planned.until?`<small>Platí do ${skDate(planned.until)}</small>`:'<small>Platí 2 mesiace od prvého rezervovaného vstupu</small>'}`;return}
   if(p){
     $('passSummary').innerHTML=`<span>Permanentka</span><strong>${Number(p.used_entries)||0}/${Number(p.total_entries)||0}</strong>${p.valid_until?`<small>Platí do ${skDate(p.valid_until)}</small>`:''}`;
     return;
@@ -543,7 +543,7 @@ async function saveDog(e){
 }
 function ensurePassInterestConfirmation(){
   if($('passInterestConfirmationV44'))return;
-  document.body.insertAdjacentHTML('beforeend','<div id="passInterestConfirmationV44" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passInterestConfirmationTitleV44"><div class="legal-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="passInterestConfirmationTitleV44">Záujem sme zaregistrovali</h2><div class="legal-body"><p>Ďakujeme, záujem o novú permanentku sme zaregistrovali. Ďalšie rezervované dni uvidíte ako plánované vstupy. Permanentku potvrdíme až pri kúpe v škôlke, platbou v hotovosti alebo kartou.</p></div><button id="passInterestConfirmationCloseV44" class="btn full" type="button">Ďakujem</button></div></div>');
+  document.body.insertAdjacentHTML('beforeend','<div id="passInterestConfirmationV44" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passInterestConfirmationTitleV44"><div class="legal-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="passInterestConfirmationTitleV44">Permanentka je pripravená</h2><div class="legal-body"><p>Novú 10-vstupovú permanentku sme zaradili k vášmu psíkovi. V prehľade ju uvidíte ako 0/10 a jej platnosť sa počíta na 2 mesiace od prvého naplánovaného vstupu. Uhradíte ju pri návšteve škôlky.</p></div><button id="passInterestConfirmationCloseV44" class="btn full" type="button">Ďakujem</button></div></div>');
   $('passInterestConfirmationCloseV44').onclick=()=>$('passInterestConfirmationV44').classList.add('hidden');
 }
 function showPassInterestConfirmation(){ensurePassInterestConfirmation();$('passInterestConfirmationV44').classList.remove('hidden')}
@@ -566,7 +566,7 @@ async function offerRecentPassRenewalV157(dogId,isCurrent=()=>true){
   if(Number(state.selectedDogId)!==dogId||!isCurrent())return false;
   return new Promise(resolve=>{
     const modal=document.createElement('div');modal.className='legal-modal';modal.id='recentPassRenewalV157';modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','recentPassTitleV157');
-    modal.innerHTML='<div class="legal-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="recentPassTitleV157">Máte záujem o novú permanentku?</h2><p>Predchádzajúca permanentka sa skončila alebo už má rezervované všetky vstupy. Chcete pokračovať s novou 10-vstupovou permanentkou?</p><p>Rezervácie budú zatiaľ plánované vstupy z novej permanentky. Kúpu a platbu vyriešime pri návšteve škôlky.</p><div class="stack"><button type="button" class="btn full" data-renewal="yes">Áno, mám záujem</button><button type="button" class="btn secondary full" data-renewal="single">Pokračovať jednorazovo</button><button type="button" class="btn secondary full" data-renewal="cancel">Späť</button></div></div>';
+    modal.innerHTML='<div class="legal-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="recentPassTitleV157">Máte záujem o novú permanentku?</h2><p>Predchádzajúca permanentka sa skončila alebo už má rezervované všetky vstupy. Chcete pokračovať s novou 10-vstupovou permanentkou?</p><p>Rezervácie sa budú počítať ako vstupy z novej 10-vstupovej permanentky. Permanentku uhradíte pri najbližšej návšteve škôlky.</p><div class="stack"><button type="button" class="btn full" data-renewal="yes">Áno, mám záujem</button><button type="button" class="btn secondary full" data-renewal="single">Pokračovať jednorazovo</button><button type="button" class="btn secondary full" data-renewal="cancel">Späť</button></div></div>';
     const finish=result=>{modal.remove();resolve(result)};
     modal.querySelector('[data-renewal="single"]').onclick=()=>finish(true);
     modal.querySelector('[data-renewal="cancel"]').onclick=()=>finish(false);
@@ -1779,7 +1779,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     renderPickerV37();
     $('bookingPickerV37').classList.remove('hidden');
     document.documentElement.classList.add('booking-picker-open-v37');
-    $('bookingPickerV37').querySelector('.booking-picker-card-v37').scrollTop=0;
+    $('bookingPickerV37').scrollTop=0;
   }
   window.openBookingPickerV37=openPickerV37;
   function closePickerV37(){if(submittingV37)return;pickerEpochV157++;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');pickerErrorV95('');if(pendingPassRenewalV95){const renewal=pendingPassRenewalV95;pendingPassRenewalV95=null;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(renewal.dogId,renewal.date),100)}}
