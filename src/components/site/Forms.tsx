@@ -104,9 +104,9 @@ export function ShortForm({
         <div className="flex size-14 items-center justify-center rounded-full bg-secondary text-forest">
           <Check className="size-7" />
         </div>
-        <h3 className="text-xl text-forest">Ďakujeme!</h3>
-        <p className="text-sm text-muted-foreground">
-          Váš záujem sme prijali. Ozveme sa vám čo najskôr.
+        <h3 className="text-xl text-forest">Ďakujeme za váš záujem.</h3>
+        <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+          Ozveme sa vám späť do 24 hodín a radi s vami preberieme všetky potrebné informácie.
         </p>
         {isTrackedLanding && (
           <div className="mt-2 w-full max-w-sm rounded-2xl bg-secondary/55 p-4">
@@ -119,7 +119,7 @@ export function ShortForm({
                 onClick={() => void trackCookielessInteraction("success_conditions_click", trackingSource || "lead_landing_form")}
                 className="rounded-xl border border-forest/15 bg-card px-3 py-2 text-sm font-bold text-forest transition hover:border-coral/40"
               >
-                Podmienky prijatia
+                Pozrieť podmienky
               </a>
               <a
                 href="/#cennik"
@@ -244,8 +244,8 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <Check className="size-7" />
         </div>
         <h3 className="text-xl text-forest">Prihláška odoslaná</h3>
-        <p className="text-sm text-muted-foreground">
-          Ozveme sa vám a dohodneme zoznamovaciu návštevu.
+        <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+          Ozveme sa vám do 24 hodín a preberieme s vami detaily úvodnej návštevy.
         </p>
       </div>
     );
