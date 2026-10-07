@@ -12,14 +12,13 @@
   height: auto;
   fill: var(--color-coral, #ee8749);
   opacity: 0;
-  animation: paw-trail-step 36s linear infinite;
+  animation: paw-trail-step 6s linear both;
 }
 
 @keyframes paw-trail-step {
   0% { opacity: 0; }
-  1.2% { opacity: .3; }
-  7% { opacity: .25; }
-  19% { opacity: 0; }
+  6% { opacity: .65; }
+  38% { opacity: .55; }
   100% { opacity: 0; }
 }
 
@@ -27,15 +26,54 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(90deg, transparent, #ffffffb8 15%, #ffffffd9 43%, transparent 72%);
+  mask-image: linear-gradient(transparent 18%, #000 34%, #000 76%, transparent 92%);
 }
 
 @media (max-width: 1023px) {
   .paw-trail-print { width: 19px; }
   .paw-trail-reading-space {
     background: linear-gradient(90deg, transparent, #ffffffd9 18%, #fffffff0 50%, #ffffffd9 82%, transparent);
+    mask-image: linear-gradient(transparent 22%, #000 36%, #000 75%, transparent 91%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .paw-trail-print { animation: none; opacity: .12; }
+}
+
+.hero-outline-dog {
+  position: absolute;
+  width: clamp(76px, 8vw, 116px);
+  color: var(--color-coral, #ee8749);
+  animation: hero-dog-walk 32s linear -4s infinite;
+}
+
+.hero-outline-dog-drawing { display: block; width: 100%; }
+.hero-dog-leg { transform-box: fill-box; transform-origin: top center; }
+.hero-dog-leg-back { animation: hero-dog-stride .65s ease-in-out infinite alternate; }
+.hero-dog-leg-front { animation: hero-dog-stride .65s ease-in-out -.65s infinite alternate; }
+.hero-dog-tail { transform-box: fill-box; transform-origin: right bottom; animation: hero-dog-tail .5s ease-in-out infinite alternate; }
+
+@keyframes hero-dog-stride { from { transform: rotate(-13deg); } to { transform: rotate(13deg); } }
+@keyframes hero-dog-tail { from { transform: rotate(-10deg); } to { transform: rotate(12deg); } }
+@keyframes hero-dog-walk {
+  0% { left: -14%; top: 20%; transform: scaleX(1); opacity: .8; }
+  23% { left: 48%; top: 13%; transform: scaleX(1); opacity: .8; }
+  46% { left: 110%; top: 22%; transform: scaleX(1); opacity: .8; }
+  47% { left: 110%; top: 22%; transform: scaleX(1); opacity: 0; }
+  49% { left: 110%; top: 85%; transform: scaleX(-1); opacity: 0; }
+  50% { left: 110%; top: 85%; transform: scaleX(-1); opacity: .8; }
+  73% { left: 48%; top: 88%; transform: scaleX(-1); opacity: .8; }
+  96% { left: -14%; top: 85%; transform: scaleX(-1); opacity: .8; }
+  97% { left: -14%; top: 85%; transform: scaleX(-1); opacity: 0; }
+  100% { left: -14%; top: 20%; transform: scaleX(1); opacity: 0; }
+}
+
+@media (max-width: 1023px) {
+  .hero-outline-dog { width: 68px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-outline-dog { animation: none; left: 86%; top: 18%; opacity: .65; }
+  .hero-dog-leg, .hero-dog-tail { animation: none; }
 }
