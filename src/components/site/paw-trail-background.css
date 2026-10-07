@@ -1,6 +1,8 @@
 .paw-trail-background {
   position: absolute;
   inset: 0;
+  z-index: 0;
+  isolation: isolate;
   overflow: hidden;
   pointer-events: none;
   background: #fff;
@@ -9,54 +11,43 @@
 .paw-trail-print {
   position: absolute;
   z-index: 1;
-  width: clamp(17px, 2.1vw, 29px);
+  width: clamp(17px, 2vw, 27px);
   height: auto;
   fill: var(--color-coral, #ee8749);
-  opacity: 0;
-  animation: paw-trail-step 5.2s linear both;
+  transition: opacity 180ms linear;
+  will-change: opacity;
 }
 
-@keyframes paw-trail-step {
-  0% { opacity: 0; }
-  7% { opacity: .58; }
-  42% { opacity: .48; }
-  100% { opacity: 0; }
+.paw-trail-zone-1 {
+  fill: color-mix(in srgb, var(--color-coral, #ee8749) 78%, white);
 }
 
-.paw-trail-reading-space {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: linear-gradient(90deg, transparent, #ffffffb8 15%, #ffffffd9 43%, transparent 72%);
-  mask-image: linear-gradient(transparent 18%, #000 34%, #000 76%, transparent 92%);
+.paw-trail-zone-2 {
+  fill: color-mix(in srgb, var(--color-coral, #ee8749) 88%, white);
 }
 
 .hero-outline-dog {
   position: absolute;
-  z-index: 3;
-  width: clamp(72px, 7vw, 100px);
+  z-index: 2;
+  width: clamp(72px, 7vw, 102px);
   color: var(--color-coral, #ee8749);
-  opacity: 0;
-  animation-timing-function: linear;
-  animation-fill-mode: both;
+  transition:
+    left 100ms linear,
+    top 100ms linear,
+    transform 100ms linear,
+    opacity 220ms linear;
+  will-change: left, top, transform, opacity;
 }
 
-.hero-outline-dog-secondary {
-  width: clamp(60px, 6vw, 84px);
+.hero-outline-dog-fluffy {
+  width: clamp(62px, 6.2vw, 88px);
   color: var(--color-forest, #32734d);
-}
-
-.hero-outline-dog-forward {
-  animation-name: hero-dog-walk-forward;
-}
-
-.hero-outline-dog-reverse {
-  animation-name: hero-dog-walk-reverse;
 }
 
 .hero-outline-dog-drawing {
   display: block;
   width: 100%;
+  overflow: visible;
 }
 
 .hero-dog-leg {
@@ -65,73 +56,56 @@
 }
 
 .hero-dog-leg-a {
-  animation: hero-dog-stride .72s ease-in-out infinite alternate;
+  animation: hero-dog-step-a .64s ease-in-out infinite alternate;
 }
 
 .hero-dog-leg-b {
-  animation: hero-dog-stride .72s ease-in-out -.72s infinite alternate;
+  animation: hero-dog-step-b .64s ease-in-out infinite alternate;
 }
 
 .hero-dog-tail {
   transform-box: fill-box;
   transform-origin: right bottom;
-  animation: hero-dog-tail .55s ease-in-out infinite alternate;
+  animation: hero-dog-tail .52s ease-in-out infinite alternate;
 }
 
-@keyframes hero-dog-stride {
-  from { transform: rotate(-9deg) translateX(-1px); }
-  to { transform: rotate(9deg) translateX(1px); }
+@keyframes hero-dog-step-a {
+  from { transform: translateY(-1px) rotate(-3deg); }
+  to { transform: translateY(1.5px) rotate(4deg); }
+}
+
+@keyframes hero-dog-step-b {
+  from { transform: translateY(1.5px) rotate(4deg); }
+  to { transform: translateY(-1px) rotate(-3deg); }
 }
 
 @keyframes hero-dog-tail {
-  from { transform: rotate(-9deg); }
-  to { transform: rotate(11deg); }
+  from { transform: rotate(-8deg); }
+  to { transform: rotate(10deg); }
 }
 
-@keyframes hero-dog-walk-forward {
-  0% { left: -15%; transform: translateY(-50%) scaleX(1); opacity: 0; }
-  4% { opacity: .78; }
-  96% { opacity: .78; }
-  100% { left: 115%; transform: translateY(-50%) scaleX(1); opacity: 0; }
-}
-
-@keyframes hero-dog-walk-reverse {
-  0% { left: 115%; transform: translateY(-50%) scaleX(-1); opacity: 0; }
-  4% { opacity: .72; }
-  96% { opacity: .72; }
-  100% { left: -15%; transform: translateY(-50%) scaleX(-1); opacity: 0; }
-}
-
-@media (max-width: 1023px) {
-  .paw-trail-print { width: 18px; }
-
-  .paw-trail-reading-space {
-    background: linear-gradient(90deg, transparent, #ffffffd9 18%, #fffffff0 50%, #ffffffd9 82%, transparent);
-    mask-image: linear-gradient(transparent 22%, #000 36%, #000 75%, transparent 91%);
+@media (max-width: 639px) {
+  .paw-trail-print {
+    width: 17px;
   }
 
-  .hero-outline-dog { width: 66px; }
-  .hero-outline-dog-secondary { width: 56px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .paw-trail-print {
-    animation: none;
-    opacity: .1;
+  .paw-trail-zone-2 {
+    display: none;
   }
 
   .hero-outline-dog {
-    animation: none;
-    opacity: .58;
-    left: 82%;
+    width: 64px;
   }
 
-  .hero-outline-dog:nth-of-type(2) {
-    left: 8%;
+  .hero-outline-dog-fluffy {
+    width: 56px;
   }
+}
 
-  .hero-dog-leg,
+@media (prefers-reduced-motion: reduce) {
+  .hero-dog-leg-a,
+  .hero-dog-leg-b,
   .hero-dog-tail {
-    animation: none;
+    animation-duration: 1.25s;
   }
 }

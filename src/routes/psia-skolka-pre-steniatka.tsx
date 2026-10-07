@@ -162,7 +162,7 @@ function PuppyDaycarePage() {
         <section className="relative overflow-hidden pt-20 sm:pt-24">
           <PawTrailBackground />
 
-          <div className="relative mx-auto grid min-h-[440px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative z-10 mx-auto grid min-h-[440px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-coral-dark sm:text-sm">
                 Psia škôlka pre šteniatka v Košiciach
