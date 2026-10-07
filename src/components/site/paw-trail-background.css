@@ -14,24 +14,12 @@
   width: clamp(17px, 2vw, 27px);
   height: auto;
   fill: var(--color-coral, #ee8749);
-  transition: opacity 180ms linear;
+  transition: opacity 220ms linear;
   will-change: opacity;
-}
-
-.paw-trail-zone-1 {
-  fill: color-mix(in srgb, var(--color-coral, #ee8749) 78%, white);
-}
-
-.paw-trail-zone-2 {
-  fill: color-mix(in srgb, var(--color-coral, #ee8749) 88%, white);
 }
 
 @media (max-width: 639px) {
   .paw-trail-print {
     width: 17px;
-  }
-
-  .paw-trail-zone-2 {
-    display: none;
   }
 }
