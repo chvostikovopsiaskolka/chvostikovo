@@ -30,13 +30,13 @@
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261007-customer-modal-restore-halloween-v167';
-const APP_VERSION='1.0.14';
-(function applyCustomerHalloweenV167(){
+const APP_BUILD='20261007-customer-android-list-scroll-halloween-v168';
+const APP_VERSION='1.0.15';
+(function applyCustomerHalloweenV168(){
   const now=new Date();
   const month=now.getMonth()+1;
   const day=now.getDate();
-  document.documentElement.classList.toggle('customer-halloween-v167',month===10||(month===11&&day<=2));
+  document.documentElement.classList.toggle('customer-halloween-v168',month===10||(month===11&&day<=2));
 })();
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
