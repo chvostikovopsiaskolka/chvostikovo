@@ -183,7 +183,7 @@ function LeadLandingPage() {
           <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-3.5 pt-12 pb-3.5 shadow-card ring-1 ring-forest/8 sm:px-5 sm:pt-14 sm:pb-5">
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">
-                Chcete sa informovať o škôlke?
+                Zistite, či je Chvostíkovo vhodné aj pre vášho psíka
               </p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
                 Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií.
