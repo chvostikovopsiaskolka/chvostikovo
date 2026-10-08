@@ -1,4 +1,4 @@
-import schoolmatesCta from "@/assets/skolkari-web-4.png";
+import schoolmatesCta from "@/assets/skolkari-lineup.webp";
 
 export function SchoolmatesFormCrown({ compact = false }: { compact?: boolean }) {
   if (compact) {
