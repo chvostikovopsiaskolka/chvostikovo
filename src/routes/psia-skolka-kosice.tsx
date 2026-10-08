@@ -20,6 +20,7 @@ import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
+import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { FAQ, REVIEWS } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -192,8 +193,9 @@ function LeadLandingPage() {
           </div>
         </section>
 
-        <section className="bg-card py-10 sm:py-14">
-          <div id="lead-benefits" className="mx-auto max-w-6xl px-4 text-center">
+        <section className="relative overflow-hidden bg-card py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div id="lead-benefits" className="relative z-10 mx-auto max-w-6xl px-4 text-center">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Prečo Chvostíkovo
             </p>
@@ -261,8 +263,9 @@ function LeadLandingPage() {
         <DaycarePhotoCarousel />
         <VideoSection />
 
-        <section className="bg-forest py-10 text-cream sm:py-14">
-          <div className="mx-auto max-w-5xl px-4 text-center">
+        <section className="relative overflow-hidden bg-forest py-10 text-cream sm:py-14">
+          <SectionAmbientPaws tone="dark" />
+          <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-soft">
               Ako to funguje
             </p>
@@ -286,8 +289,9 @@ function LeadLandingPage() {
           </div>
         </section>
 
-        <section className="bg-secondary/40 py-10 sm:py-14">
-          <div className="mx-auto max-w-4xl px-4">
+        <section className="relative overflow-hidden bg-secondary/40 py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4">
             <div className="text-center">
               <h2 className="section-title text-3xl sm:text-4xl">Najčastejšie otázky</h2>
               <p className="mt-2 text-sm text-forest/65 sm:text-base">
