@@ -357,8 +357,9 @@ const PARTNERS = [
 
 export function Partners() {
   return (
-    <section className="py-10 sm:py-14">
-      <div className="mx-auto max-w-6xl px-4">
+    <section className="relative overflow-hidden py-10 sm:py-14">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
         <h2 className="text-center font-display text-base font-semibold tracking-widest text-forest/60 uppercase sm:text-lg">
           Spolupracujeme
         </h2>
