@@ -141,7 +141,7 @@ function DogDaycarePage() {
               </div>
             </div>
 
-            <div id="informacie" className="scroll-mt-28 rounded-4xl bg-card p-6 shadow-soft sm:p-8">
+            <div id="informacie" className="scroll-mt-28 rounded-4xl bg-card p-6 shadow-soft sm:p-8 lg:border lg:border-white/50 lg:bg-card/20 lg:backdrop-blur-[1px]">
               <h2 className="text-center text-2xl text-forest">Chcete vedieť, či je škôlka vhodná pre vášho psíka?</h2>
               <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
                 Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií.
