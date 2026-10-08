@@ -17,6 +17,7 @@ import { InfoTicker } from "@/components/site/InfoTicker";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
+import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { ShortForm } from "@/components/site/Forms";
 import { FormDialog } from "@/components/site/FormDialog";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -236,8 +237,9 @@ function PuppyDaycarePage() {
           </div>
         </section>
 
-        <section id="puppy-benefits" className="scroll-mt-20 bg-card py-10 sm:py-14">
-          <div className="mx-auto max-w-6xl px-4 text-center">
+        <section id="puppy-benefits" className="relative scroll-mt-20 overflow-hidden bg-card py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Prečo šteniatku prospieva
             </p>
@@ -278,8 +280,9 @@ function PuppyDaycarePage() {
 
         <DaycarePhotoCarousel />
 
-        <section className="bg-secondary/35 py-10 sm:py-14">
-          <div className="mx-auto max-w-5xl px-4">
+        <section className="relative overflow-hidden bg-secondary/35 py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-5xl px-4">
             <div className="text-center">
               <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
                 Čo sa učí
@@ -324,8 +327,9 @@ function PuppyDaycarePage() {
           </div>
         </section>
 
-        <section className="bg-card py-10 sm:py-14">
-          <div className="mx-auto grid max-w-5xl gap-6 px-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <section className="relative overflow-hidden bg-card py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto grid max-w-5xl gap-6 px-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
               <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
                 Kedy môže začať?
@@ -365,8 +369,9 @@ function PuppyDaycarePage() {
           </div>
         </section>
 
-        <section className="bg-secondary/40 py-10 sm:py-14">
-          <div className="mx-auto max-w-4xl px-4">
+        <section className="relative overflow-hidden bg-secondary/40 py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4">
             <div className="text-center">
               <h2 className="section-title text-3xl sm:text-4xl">Najčastejšie otázky o šteniatkach</h2>
               <p className="mt-2 text-sm text-forest/65 sm:text-base">
