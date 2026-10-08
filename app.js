@@ -30,8 +30,8 @@
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261008-customer-ios-fixed-bottom-nav-v172';
-const APP_VERSION='1.0.19';
+const APP_BUILD='20261008-customer-admin-direct-chat-v173';
+const APP_VERSION='1.0.20';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -126,7 +126,7 @@ async function refreshSession(){
 }
 async function apiCore(body=null,retry=true){if(!state.session)throw new Error('Najprv sa prihláste.');const token=state.session.access_token,opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const r=await fetch(API,opts);const txt=await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
 async function api(body=null,retry=true){const result=await apiCore(body,retry);runCustomerHooks('afterApi',body,result);return result}
-function showAuth(mode='login'){document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
+function showAuth(mode='login'){$('supportChatBtnV52')?.classList.add('hidden');$('supportChatModalV52')?.classList.add('hidden');document.documentElement.classList.remove('support-chat-open-v52');document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
 function showApp(){$('authView').classList.add('hidden');$('authView').inert=true;$('appView').classList.remove('hidden')}
 function pluralDogs(n){return n===1?'1 prihlásený psík':n+' prihlásených psíkov'}
 function taxiLabel(mode){if(mode==='pickup')return'🚕 vyzdvihnutie/odvoz';if(mode==='pickup_dropoff')return'🚕 vyzdvihnutie aj dovoz';return''}
@@ -2097,6 +2097,23 @@ async function togglePushDirect(btn){
   window.__chvostikovoProfileExperiencePreview=true;
 
   let lateBookingContext=null;
+  let supportReadInFlight=false;
+  function resizeSupportInput(){
+    const input=$('supportMessageBodyV52');if(!input)return;
+    input.style.height='auto';
+    const max=24*4+22;
+    input.style.height=Math.min(input.scrollHeight+2,max)+'px';
+    input.style.overflowY=input.scrollHeight+2>max?'auto':'hidden';
+  }
+  function resizeSupportViewport(){
+    const modal=$('supportChatModalV52');if(!modal||modal.classList.contains('hidden'))return;
+    const viewport=window.visualViewport;
+    modal.style.setProperty('--chat-height',(viewport?.height||window.innerHeight)+'px');
+    modal.style.setProperty('--chat-top',(viewport?.offsetTop||0)+'px');
+  }
+  window.visualViewport?.addEventListener('resize',resizeSupportViewport);
+  window.visualViewport?.addEventListener('scroll',resizeSupportViewport);
+  window.addEventListener('resize',resizeSupportViewport);
 
   const chatSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path><path d="M7.5 10h9M7.5 13.5h6"></path></svg>';
 
@@ -2107,11 +2124,10 @@ async function togglePushDirect(btn){
         '<div id="supportChatModalV52" class="legal-modal support-chat-modal-v52 hidden" role="dialog" aria-modal="true" aria-labelledby="supportChatTitleV52">'+
           '<div class="legal-card support-chat-card-v52">'+
             '<button id="supportChatCloseV52" class="legal-close" type="button" aria-label="Zavrieť">×</button>'+
-            '<h2 id="supportChatTitleV52">Napíšte nám správu</h2>'+
+            '<h2 id="supportChatTitleV52">Správy</h2>'+
             '<div id="supportMessageThreadV52" class="message-thread support-message-thread-v52"></div>'+
-            '<p class="hint">Správy sa automaticky vymažú po 7 dňoch bez novej správy.</p>'+
             '<form id="supportMessageFormV52" class="form-stack support-message-form-v52">'+
-              '<div><label for="supportMessageBodyV52">Správa</label><textarea id="supportMessageBodyV52" class="input" rows="4" maxlength="2000" placeholder="Napíšte správu pre Chvostíkovo…" required></textarea></div>'+
+              '<div><label for="supportMessageBodyV52">Správa</label><textarea id="supportMessageBodyV52" class="input" rows="1" maxlength="2000" placeholder="Napíšte správu pre Chvostíkovo…" required></textarea></div>'+
               '<button class="btn full" type="submit">Odoslať správu</button>'+
             '</form>'+
           '</div>'+
@@ -2120,6 +2136,7 @@ async function togglePushDirect(btn){
       $('supportChatCloseV52').addEventListener('click',close);
       $('supportChatModalV52').addEventListener('click',e=>{if(e.target===$('supportChatModalV52'))close()});
       $('supportMessageFormV52').addEventListener('submit',send);
+      $('supportMessageBodyV52').addEventListener('input',resizeSupportInput);
     }
     renderSupportThread();
     updateButton();
@@ -2128,21 +2145,24 @@ async function togglePushDirect(btn){
   function renderSupportThread(){
     const root=$('supportMessageThreadV52');if(!root)return;
     const rows=state.data?.messages||[];
-    root.classList.toggle('hidden',rows.length===0);
-    root.innerHTML=rows.length?rows.map(m=>'<div class="message-bubble '+(m.sender_role==='customer'?'mine':'')+'"><p>'+esc(m.body)+'</p><small>'+skTime(m.created_at)+'</small></div>').join(''):'';
-    requestAnimationFrame(()=>{root.scrollTop=root.scrollHeight});
+    const nearBottom=root.scrollHeight-root.scrollTop-root.clientHeight<90;
+    root.classList.remove('hidden');
+    root.innerHTML=rows.length?rows.map(m=>'<div class="message-bubble '+(m.sender_role==='customer'?'mine':'')+'"><p>'+esc(m.body)+'</p><small>'+skTime(m.created_at)+'</small></div>').join(''):'<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';
+    if(nearBottom)requestAnimationFrame(()=>{root.scrollTop=root.scrollHeight});
   }
 
   async function markRead(){
-    if(!state.data?.conversation_id)return;
+    if(supportReadInFlight||!state.data?.conversation_id)return;
     const unread=(state.data.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);
     if(!unread)return;
+    const ids=new Set((state.data.messages||[]).filter(m=>m.sender_role==='staff'&&!m.read_at).map(m=>m.id));
+    supportReadInFlight=true;
     try{
       await api({action:'mark_messages_read',conversation_id:Number(state.data.conversation_id)});
       const stamp=new Date().toISOString();
-      (state.data.messages||[]).forEach(m=>{if(m.sender_role==='staff'&&!m.read_at)m.read_at=stamp});
+      (state.data.messages||[]).forEach(m=>{if(ids.has(m.id))m.read_at=stamp});
       updateUnread();
-    }catch(_){}
+    }catch(_){}finally{supportReadInFlight=false}
   }
 
   function open(){
@@ -2153,6 +2173,8 @@ async function togglePushDirect(btn){
     renderSupportThread();
     $('supportChatModalV52').classList.remove('hidden');
     document.documentElement.classList.add('support-chat-open-v52');
+    resizeSupportViewport();resizeSupportInput();
+    requestAnimationFrame(()=>{const root=$('supportMessageThreadV52');root.scrollTop=root.scrollHeight});
     markRead();
   }
 
@@ -2180,10 +2202,12 @@ async function togglePushDirect(btn){
       const result=late
         ? await api({action:'request_late_booking',dog_id:late.dogId,reservation_date:late.date,message})
         : await api({action:'send_message',message,booking_request_id:null});
-      const row=late?result?.data?.message:(result?.data||result?.message||{id:-Date.now(),body:message,sender_role:'customer',created_at:new Date().toISOString()});
+      const row=late?result?.data?.message:(result?.data?.message||result?.message||{id:-Date.now(),body:message,sender_role:'customer',created_at:new Date().toISOString()});
       if(!row)throw new Error('Správa sa nepodarila priradiť k rezervácii.');
+      if(result?.data?.conversation_id)state.data.conversation_id=result.data.conversation_id;
       (state.data.messages||(state.data.messages=[])).push(row);
       $('supportMessageBodyV52').value='';
+      resizeSupportInput();
       renderMessages();
       renderSupportThread();
       updateUnread();
@@ -2196,8 +2220,8 @@ async function togglePushDirect(btn){
 
   function updateButton(){
     const btn=$('supportChatBtnV52');if(!btn)return;
-    const appVisible=$('appShell')?!$('appShell').classList.contains('hidden'):true;
-    btn.classList.toggle('hidden',!appVisible||state.activeTab!=='dog');
+    const appVisible=!!state.session&&!$('appView')?.classList.contains('hidden');
+    btn.classList.toggle('hidden',!appVisible);
   }
 
   function ensureHint(){
@@ -2305,10 +2329,13 @@ async function togglePushDirect(btn){
     const title=$('dogSettingsTitleV36');if(title)title.textContent='Nastavenia';
   }
 
-  addCustomerHook('afterRenderMessages',renderSupportThread);
+  addCustomerHook('afterRenderMessages',()=>{renderSupportThread();if(!$('supportChatModalV52')?.classList.contains('hidden')&&document.visibilityState==='visible')markRead()});
   addCustomerHook('afterUpdateUnread',()=>{
-    const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);
-    $('supportChatUnreadV52')?.classList.toggle('hidden',!unread);
+    const count=(state.data?.messages||[]).filter(m=>m.sender_role==='staff'&&!m.read_at).length;
+    const badge=$('supportChatUnreadV52');
+    if(badge){badge.textContent=count>99?'99+':String(count);badge.classList.toggle('hidden',!count)}
+    $('supportChatBtnV52')?.setAttribute('aria-label',count?'Správy, neprečítané: '+count:'Správy');
+    updateButton();
   });
 
   addCustomerHook('afterSwitchTab',()=>{
@@ -2568,3 +2595,4 @@ async function uploadVaccinationProofsCoreV143(silent=false){
 }
 
 /* v105 runtime-only styles consolidated into styles.css; upload test boundary. */
+
