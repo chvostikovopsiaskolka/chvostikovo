@@ -106,7 +106,7 @@ export function ShortForm({
         </div>
         <h3 className="text-xl text-forest">Ďakujeme za váš záujem.</h3>
         <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Ozveme sa vám späť do 24 hodín a radi s vami preberieme všetky potrebné informácie.
+          Ozveme sa vám späť do 24 hodín.
         </p>
         {isTrackedLanding && (
           <div className="mt-2 w-full max-w-sm rounded-2xl bg-secondary/55 p-4">
