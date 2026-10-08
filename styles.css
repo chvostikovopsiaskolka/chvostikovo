@@ -1821,8 +1821,6 @@ html.support-chat-open-v52,html.support-chat-open-v52 body{overflow:hidden!impor
 .support-chat-unread-v52{top:-3px!important;right:-3px!important;width:auto!important;min-width:22px!important;height:22px!important;padding:0 5px;display:grid;place-items:center;font-size:12px;font-weight:800;line-height:1;color:#fff;border:2px solid #fff;border-radius:999px}
 #supportChatModalV52{top:var(--chat-top,0px)!important;bottom:auto!important;height:var(--chat-height,100dvh)!important;box-sizing:border-box;padding:12px!important;overflow:hidden!important;place-items:center}
 html.phone-portrait-layout #supportChatModalV52 .support-chat-card-v52,#supportChatModalV52 .support-chat-card-v52{width:min(580px,100%)!important;max-width:100%!important;height:min(var(--chat-preferred,56dvh),100%)!important;max-height:100%!important;min-height:0!important;grid-template-rows:auto minmax(0,1fr) auto!important;overflow:hidden!important;border-radius:24px!important;padding:14px 12px 10px!important;gap:10px;box-sizing:border-box}
-#supportChatModalV52.chat-keyboard-open{place-items:end center;padding:8px 8px 0!important}
-#supportChatModalV52.chat-keyboard-open .support-chat-card-v52{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
 #supportChatModalV52 #supportChatTitleV52{font-size:19px!important;margin:0 46px 0 2px!important;min-height:34px;display:flex;align-items:center}
 #supportChatModalV52 .legal-close{top:12px!important;right:12px!important}
 #supportMessageThreadV52{min-height:0!important;max-height:none!important;height:100%!important;margin:0!important;padding:8px!important;overflow-y:auto!important;overscroll-behavior:contain;gap:7px!important;-webkit-overflow-scrolling:touch}

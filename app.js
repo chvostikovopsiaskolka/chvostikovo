@@ -1,6 +1,6 @@
 
 function createCompactChatLayout(modal,card,thread,input){
- let baseline=0,width=0,frame=0;
+ let frame=0,preferred=0,lastHeight=0,lastTop=-1;
  function latest(){requestAnimationFrame(()=>{thread.scrollTop=thread.scrollHeight})}
  function resizeInput(){
   const near=thread.scrollHeight-thread.scrollTop-thread.clientHeight<90;
@@ -14,21 +14,25 @@ function createCompactChatLayout(modal,card,thread,input){
  }
  function layout(){
   frame=0;if(modal.classList.contains('hidden'))return;
-  const v=window.visualViewport,h=v?.height||innerHeight,w=v?.width||innerWidth;
-  const near=thread.scrollHeight-thread.scrollTop-thread.clientHeight<90;
-  if(!baseline||Math.abs(w-width)>60){baseline=Math.max(document.documentElement.clientHeight,innerHeight,h);width=w}
-  baseline=Math.max(baseline,h);
-  modal.style.setProperty('--chat-height',h+'px');
-  modal.style.setProperty('--chat-top',(v?.offsetTop||0)+'px');
-  modal.style.setProperty('--chat-preferred',Math.min(560,Math.max(320,baseline*.56))+'px');
-  modal.classList.toggle('chat-keyboard-open',baseline-h>80);
-  if(near)latest();
+  const v=window.visualViewport;
+  const h=Math.max(240,Math.round(v?.height||innerHeight||document.documentElement.clientHeight));
+  const top=Math.max(0,Math.round(v?.offsetTop||0));
+  if(!preferred){
+    const full=Math.max(document.documentElement.clientHeight||0,innerHeight||0,h);
+    preferred=Math.min(560,Math.max(320,full*.56));
+    modal.style.setProperty('--chat-preferred',preferred+'px');
+  }
+  if(Math.abs(h-lastHeight)>1){modal.style.setProperty('--chat-height',h+'px');lastHeight=h}
+  if(Math.abs(top-lastTop)>1){modal.style.setProperty('--chat-top',top+'px');lastTop=top}
+  modal.classList.remove('chat-keyboard-open');
  }
  function schedule(){if(!frame)frame=requestAnimationFrame(layout)}
  input.addEventListener('input',resizeInput);
- input.addEventListener('focus',schedule);input.addEventListener('blur',schedule);
- window.visualViewport?.addEventListener('resize',schedule);window.visualViewport?.addEventListener('scroll',schedule);window.addEventListener('resize',schedule);
- return {open(){baseline=0;layout();resizeInput();latest()},close(){input.blur();modal.classList.remove('chat-keyboard-open');if(frame)cancelAnimationFrame(frame);frame=0},resizeInput,latest};
+ input.addEventListener('focus',()=>{schedule();requestAnimationFrame(latest)});
+ input.addEventListener('blur',schedule);
+ window.visualViewport?.addEventListener('resize',schedule);
+ window.addEventListener('resize',schedule);
+ return {open(){preferred=0;lastHeight=0;lastTop=-1;modal.classList.remove('chat-keyboard-open');layout();resizeInput();latest()},close(){input.blur();modal.classList.remove('chat-keyboard-open');if(frame)cancelAnimationFrame(frame);frame=0},resizeInput,latest};
 }
 (function preservePhoneLayout(){
     // Screen dimensions remain stable when the keyboard opens or the phone rotates.
@@ -62,8 +66,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261008-compact-chat-v174';
-const APP_VERSION='1.0.21';
+const APP_BUILD='20261008-ios-chat-keyboard-owner-link-v175';
+const APP_VERSION='1.0.22';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
