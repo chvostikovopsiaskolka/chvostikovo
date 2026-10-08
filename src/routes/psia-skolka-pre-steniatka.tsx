@@ -169,8 +169,8 @@ function PuppyDaycarePage() {
                 Psia škôlka pre šteniatka v Košiciach
               </p>
               <h1 className="mt-2 text-[37px] leading-[1.06] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
-                Vaše šteniatko <span className="whitespace-nowrap">si určite</span>
-                <span className="block text-coral-dark">škôlku zamiluje</span>
+                Vaše šteniatko <span className="whitespace-nowrap">si škôlku</span>
+                <span className="block text-coral-dark">určite zamiluje</span>
               </h1>
 
               <p className="mx-auto mt-3 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg lg:mx-0">
@@ -192,7 +192,7 @@ function PuppyDaycarePage() {
               <button
                 type="button"
                 onClick={scrollToBenefits}
-                className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
+                className="btn-coral mt-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
               >
                 Zistiť viac
                 <ArrowDown className="size-5" />
