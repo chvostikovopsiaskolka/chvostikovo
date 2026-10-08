@@ -78,9 +78,10 @@ export function InfoTicker({ className = "", compact = false, language = "sk" }:
       if (!loopDistance) return;
 
       const isMobile = window.matchMedia("(max-width: 767px)").matches;
+      const isNarrowMobile = window.matchMedia("(max-width: 390px)").matches;
       const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const pixelsPerSecond = prefersReducedMotion ? 22 : isMobile ? 88 : 30;
-      const minimumDuration = prefersReducedMotion ? 24 : isMobile ? 11 : 28;
+      const pixelsPerSecond = prefersReducedMotion ? 22 : isNarrowMobile ? 58 : isMobile ? 88 : 30;
+      const minimumDuration = prefersReducedMotion ? 24 : isNarrowMobile ? 16 : isMobile ? 11 : 28;
       const duration = Math.max(loopDistance / pixelsPerSecond, minimumDuration);
 
       track.style.setProperty("--ticker-duration", `${duration.toFixed(2)}s`);
