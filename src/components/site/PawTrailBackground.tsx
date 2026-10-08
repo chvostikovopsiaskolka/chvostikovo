@@ -22,26 +22,26 @@ const CLOCK_TICK_MS = 90;
 const MAX_OPACITY = 0.48;
 
 const AMBIENT_PAWS = [
-  { x: 9, y: 14, size: 22, rotate: -18, tone: "coral", mobile: true },
-  { x: 54, y: 8, size: 20, rotate: 18, tone: "forest", mobile: true },
-  { x: 23, y: 79, size: 17, rotate: 24, tone: "forest", mobile: true },
-  { x: 36, y: 20, size: 15, rotate: 12, tone: "forest", mobile: false },
-  { x: 44, y: 88, size: 20, rotate: -8, tone: "coral", mobile: false },
-  { x: 58, y: 16, size: 18, rotate: 20, tone: "coral", mobile: false },
-  { x: 66, y: 82, size: 16, rotate: -24, tone: "forest", mobile: true },
-  { x: 78, y: 31, size: 21, rotate: 14, tone: "forest", mobile: true },
-  { x: 91, y: 72, size: 18, rotate: -12, tone: "coral", mobile: true },
-  { x: 14, y: 52, size: 14, rotate: 30, tone: "forest", mobile: false },
-  { x: 86, y: 10, size: 15, rotate: -28, tone: "coral", mobile: false },
-  { x: 18, y: 46, size: 22, rotate: -31, tone: "coral", mobile: true },
-  { x: 49, y: 68, size: 20, rotate: 17, tone: "forest", mobile: true },
-  { x: 70, y: 55, size: 21, rotate: -11, tone: "coral", mobile: true },
+  { x: 9, y: 14, size: 25, rotate: -18, tone: "coral", mobile: true },
+  { x: 54, y: 8, size: 23, rotate: 18, tone: "forest", mobile: true },
+  { x: 23, y: 79, size: 20, rotate: 24, tone: "forest", mobile: true },
+  { x: 36, y: 20, size: 18, rotate: 12, tone: "forest", mobile: false },
+  { x: 44, y: 88, size: 23, rotate: -8, tone: "coral", mobile: false },
+  { x: 58, y: 16, size: 21, rotate: 20, tone: "coral", mobile: false },
+  { x: 66, y: 82, size: 19, rotate: -24, tone: "forest", mobile: true },
+  { x: 78, y: 31, size: 24, rotate: 14, tone: "forest", mobile: true },
+  { x: 91, y: 72, size: 21, rotate: -12, tone: "coral", mobile: true },
+  { x: 14, y: 52, size: 17, rotate: 30, tone: "forest", mobile: false },
+  { x: 86, y: 10, size: 18, rotate: -28, tone: "coral", mobile: false },
+  { x: 18, y: 46, size: 25, rotate: -31, tone: "coral", mobile: true },
+  { x: 49, y: 68, size: 23, rotate: 17, tone: "forest", mobile: true },
+  { x: 70, y: 55, size: 24, rotate: -11, tone: "coral", mobile: true },
 ] as const;
 
 const LANDING_BOTTOM_PAWS = [
-  { x: 11, y: 90, size: 21, rotate: -22, tone: "coral" },
-  { x: 52, y: 96, size: 18, rotate: 16, tone: "forest" },
-  { x: 89, y: 91, size: 20, rotate: 27, tone: "coral" },
+  { x: 11, y: 90, size: 24, rotate: -22, tone: "coral" },
+  { x: 52, y: 96, size: 21, rotate: 16, tone: "forest" },
+  { x: 89, y: 91, size: 23, rotate: 27, tone: "coral" },
 ] as const;
 
 const LEFT_ROUTES: ReadonlyArray<readonly [Point, Point, Point]> = [
