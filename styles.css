@@ -1815,7 +1815,7 @@ html.customer-ios-v171 .bottom-nav{
 }
 
 
-/* v179: consolidated chat layout. One owner for viewport, keyboard, scroll lock and chat polish. */
+/* v180: consolidated chat layout + personal chat avatar. */
 html.support-chat-open-v52,
 html.support-chat-open-v52 body{
   overflow:hidden!important;
@@ -1887,12 +1887,45 @@ html.phone-portrait-layout #supportChatModalV52 .support-chat-card-v52,
   gap:10px;
   box-sizing:border-box;
 }
-#supportChatModalV52 #supportChatTitleV52{
-  font-size:19px!important;
-  margin:0 46px 0 2px!important;
-  min-height:34px;
+#supportChatModalV52 .support-chat-head-v180{
+  min-height:44px;
   display:flex;
   align-items:center;
+  gap:10px;
+  padding-right:48px;
+}
+#supportChatModalV52 .support-chat-staff-avatar-v180{
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:#fff3e9;
+  color:#d95700;
+  border:2px solid #fed7aa;
+  font-size:19px;
+}
+#supportChatModalV52 .support-chat-staff-avatar-v180 img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+}
+#supportChatModalV52 .support-chat-head-v180>div{min-width:0}
+#supportChatModalV52 #supportChatTitleV52{
+  font-size:19px!important;
+  margin:0!important;
+  min-height:0;
+  line-height:1.15;
+}
+#supportChatModalV52 .support-chat-head-v180 small{
+  display:block;
+  margin-top:2px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.2;
 }
 #supportChatModalV52 .legal-close{
   top:12px!important;

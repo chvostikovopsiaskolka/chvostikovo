@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261008-consolidated-chat-layout-v179';
-const APP_VERSION='1.0.26';
+const APP_BUILD='20261008-chat-avatars-v180';
+const APP_VERSION='1.0.27';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2161,7 +2161,7 @@ async function togglePushDirect(btn){
         '<div id="supportChatModalV52" class="legal-modal support-chat-modal-v52 hidden" role="dialog" aria-modal="true" aria-labelledby="supportChatTitleV52">'+
           '<div class="legal-card support-chat-card-v52">'+
             '<button id="supportChatCloseV52" class="legal-close" type="button" aria-label="Zavrieť">×</button>'+
-            '<h2 id="supportChatTitleV52">Správy</h2>'+
+            '<div class="support-chat-head-v180"><span id="supportChatStaffAvatarV180" class="support-chat-staff-avatar-v180" aria-hidden="true">🐾</span><div><h2 id="supportChatTitleV52">Správy</h2><small>Chvostíkovo</small></div></div>'+
             '<div id="supportMessageThreadV52" class="message-thread support-message-thread-v52"></div>'+
             '<form id="supportMessageFormV52" class="form-stack support-message-form-v52">'+
               '<div><label for="supportMessageBodyV52">Správa</label><textarea id="supportMessageBodyV52" class="input" rows="1" maxlength="2000" placeholder="Napíšte správu pre Chvostíkovo…" required></textarea></div>'+
@@ -2181,8 +2181,16 @@ async function togglePushDirect(btn){
     updateButton();
   }
 
+  function renderSupportStaffAvatarV180(){
+    const avatar=$('supportChatStaffAvatarV180');if(!avatar)return;
+    const url=String(state.data?.chat_staff_photo_url||'');
+    avatar.innerHTML=url?'<img src="'+esc(url)+'" alt="Chvostíkovo">':'🐾';
+    avatar.classList.toggle('has-photo',!!url);
+  }
+
   function renderSupportThread(){
     const root=$('supportMessageThreadV52');if(!root)return;
+    renderSupportStaffAvatarV180();
     const rows=state.data?.messages||[];
     const previousTop=root.scrollTop,nearBottom=root.scrollHeight-root.scrollTop-root.clientHeight<90;
     root.classList.remove('hidden');
