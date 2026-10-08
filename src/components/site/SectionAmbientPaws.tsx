@@ -22,10 +22,10 @@ export function SectionAmbientPaws({ tone = "light" }: SectionAmbientPawsProps) 
           key={index}
           className={`absolute ${paw.pos} ${paw.size} ${paw.rotate} ${
             tone === "dark"
-              ? "text-white/12"
+              ? "text-white/16"
               : index % 2 === 0
-                ? "text-coral/13"
-                : "text-forest/10"
+                ? "text-coral/18"
+                : "text-forest/14"
           }`}
         />
       ))}
