@@ -148,7 +148,7 @@ function LeadLandingPage() {
               <button
                 type="button"
                 onClick={() => scrollToBenefits("lead_landing_hero")}
-                className="btn-coral mt-3 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
+                className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
               >
                 Zistiť viac
                 <ArrowDown className="size-5" />
