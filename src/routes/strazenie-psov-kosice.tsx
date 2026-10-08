@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Check, HeartHandshake, Moon, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
+import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { Footer } from "@/components/site/Contact";
 import { ShortForm } from "@/components/site/Forms";
 import { Collapse } from "@/components/site/Collapse";
@@ -151,8 +152,9 @@ function DogDaycarePage() {
           </div>
         </section>
 
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4">
+        <section className="relative overflow-hidden py-14 sm:py-20">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4">
             <div className="mx-auto max-w-3xl text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Viac než iba postrážiť</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Keď nemá byť deň len o čakaní doma</h2>
@@ -205,8 +207,9 @@ function DogDaycarePage() {
           </div>
         </section>
 
-        <section className="bg-secondary/55 py-14 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4">
+        <section className="relative overflow-hidden bg-secondary/55 py-14 sm:py-20">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4">
             <div className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Deň v Chvostíkove</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Pohyb, spoločnosť aj pokojnejšie chvíle</h2>
@@ -241,8 +244,9 @@ function DogDaycarePage() {
           </div>
         </section>
 
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <section className="relative overflow-hidden py-14 sm:py-20">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Rodinné prostredie</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Chceme poznať psíka, nie iba jeho meno v rezervácii</h2>
@@ -284,8 +288,9 @@ function DogDaycarePage() {
           </div>
         </section>
 
-        <section className="bg-card py-14 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4">
+        <section className="relative overflow-hidden bg-card py-14 sm:py-20">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4">
             <div className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Ako začať?</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Stačia tri jednoduché kroky</h2>
@@ -312,8 +317,9 @@ function DogDaycarePage() {
           </div>
         </section>
 
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto max-w-4xl px-4">
+        <section className="relative overflow-hidden py-14 sm:py-20">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4">
             <div className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Máte otázku?</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Časté otázky o strážení psov v Košiciach</h2>
