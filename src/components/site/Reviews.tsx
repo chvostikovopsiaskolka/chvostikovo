@@ -5,6 +5,7 @@ import { ArrowDown, HeartHandshake, PawPrint, Sparkles } from "lucide-react";
 import skolkariVideo from "@/assets/skolkari.mp4";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 import { trackMarketingInteraction } from "@/lib/analytics";
+import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
   const [open, setOpen] = useState(false);
@@ -265,8 +266,9 @@ export function VideoSection() {
   }, []);
 
   return (
-    <section className="scroll-mt-24 bg-card pt-6 pb-8 sm:pt-10 sm:pb-12">
-      <div className="mx-auto max-w-6xl px-4 text-center">
+    <section className="relative scroll-mt-24 overflow-hidden bg-card pt-6 pb-8 sm:pt-10 sm:pb-12">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
         <h3 className="section-title whitespace-nowrap text-[18px] sm:text-3xl">
           Ako sa naši škôlkári tešia do škôlky
         </h3>
