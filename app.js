@@ -1,6 +1,6 @@
 
 function createCompactChatLayout(modal,card,thread,input){
- let frame=0,preferred=0,lastHeight=0,lastTop=-1;
+ let frame=0,preferred=0,baseTop=0,lastWidth=0;
  function latest(){requestAnimationFrame(()=>{thread.scrollTop=thread.scrollHeight})}
  function resizeInput(){
   const near=thread.scrollHeight-thread.scrollTop-thread.clientHeight<90;
@@ -12,27 +12,37 @@ function createCompactChatLayout(modal,card,thread,input){
   input.style.overflowY=input.scrollHeight+border>max?'auto':'hidden';
   if(near)latest();
  }
- function layout(){
-  frame=0;if(modal.classList.contains('hidden'))return;
+ function layout(force=false){
+  frame=0;if(!force&&modal.classList.contains('hidden'))return;
   const v=window.visualViewport;
-  const h=Math.max(240,Math.round(v?.height||innerHeight||document.documentElement.clientHeight));
+  const h=Math.max(220,Math.round(v?.height||innerHeight||document.documentElement.clientHeight));
   const top=Math.max(0,Math.round(v?.offsetTop||0));
-  if(!preferred){
+  const width=Math.round(v?.width||innerWidth||document.documentElement.clientWidth);
+  if(!preferred||Math.abs(width-lastWidth)>60){
     const full=Math.max(document.documentElement.clientHeight||0,innerHeight||0,h);
     preferred=Math.min(560,Math.max(320,full*.56));
-    modal.style.setProperty('--chat-preferred',preferred+'px');
+    const firstHeight=Math.min(preferred,Math.max(204,h-16));
+    baseTop=top+Math.max(8,Math.round((h-firstHeight)/2));
+    lastWidth=width;
   }
-  if(Math.abs(h-lastHeight)>1){modal.style.setProperty('--chat-height',h+'px');lastHeight=h}
-  if(Math.abs(top-lastTop)>1){modal.style.setProperty('--chat-top',top+'px');lastTop=top}
-  modal.classList.remove('chat-keyboard-open');
+  const cardHeight=Math.min(preferred,Math.max(204,h-16));
+  const minTop=top+8,maxTop=Math.max(minTop,top+h-cardHeight-8);
+  const cardTop=Math.min(Math.max(baseTop,minTop),maxTop);
+  modal.style.setProperty('--chat-card-top',cardTop+'px');
+  modal.style.setProperty('--chat-card-height',cardHeight+'px');
  }
- function schedule(){if(!frame)frame=requestAnimationFrame(layout)}
+ function schedule(){if(!frame)frame=requestAnimationFrame(()=>layout(false))}
  input.addEventListener('input',resizeInput);
  input.addEventListener('focus',()=>{schedule();requestAnimationFrame(latest)});
  input.addEventListener('blur',schedule);
  window.visualViewport?.addEventListener('resize',schedule);
  window.addEventListener('resize',schedule);
- return {open(){preferred=0;lastHeight=0;lastTop=-1;modal.classList.remove('chat-keyboard-open');layout();resizeInput();latest()},close(){input.blur();modal.classList.remove('chat-keyboard-open');if(frame)cancelAnimationFrame(frame);frame=0},resizeInput,latest};
+ return {
+  prepare(){preferred=0;baseTop=0;lastWidth=0;layout(true)},
+  open(){layout(true);resizeInput();latest()},
+  close(){input.blur();if(frame)cancelAnimationFrame(frame);frame=0;modal.style.removeProperty('--chat-card-top');modal.style.removeProperty('--chat-card-height')},
+  resizeInput,latest
+ };
 }
 (function preservePhoneLayout(){
     // Screen dimensions remain stable when the keyboard opens or the phone rotates.
@@ -66,8 +76,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261008-ios-chat-keyboard-owner-link-v175';
-const APP_VERSION='1.0.22';
+const APP_BUILD='20261008-chat-viewport-stability-v176';
+const APP_VERSION='1.0.23';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -854,7 +864,7 @@ function repairCustomerScrollV60(){
 }
 function switchTabCore(tab){repairCustomerScrollV60();if(tab==='menu'&&state.activeTab!=='menu'){const dog=$('menuDogGroup'),settings=$('menuSettingsGroup');if(dog)dog.open=false;if(settings)settings.open=false}state.activeTab=tab;for(const t of ['booking','messages','dog','menu','staff'])$(t+'Tab').classList.toggle('hidden',t!==tab);for(const t of ['Booking','Messages','Staff'])$('nav'+t)?.classList.toggle('active',t.toLowerCase()===tab);$('navDog')?.classList.toggle('active',tab==='menu')}
 function switchTab(tab){const openChat=tab==='messages';if(tab==='dog'||openChat)tab='menu';const out=switchTabCore(tab);runCustomerHooks('afterSwitchTab',tab,out);if(openChat)openCustomerChat();return out}
-function openCustomerChat(){$('supportChatBtnV52')?.click()}
+function openCustomerChat(){if(typeof window.openCustomerSupportChatV176==='function')return window.openCustomerSupportChatV176();$('supportChatBtnV52')?.click()}
 async function sendMessage(e){e.preventDefault();const body=$('messageBody').value.trim();if(!body)return;try{const btn=e.submitter;btn.disabled=true;const result=await api({action:'send_message',message:body,booking_request_id:Number($('messageBooking').value)||null}),row=result?.data||result?.message||{id:-Date.now(),body,sender_role:'customer',created_at:new Date().toISOString()};(state.data.messages||(state.data.messages=[])).push(row);$('messageBody').value='';renderMessages();updateUnread();switchTab('messages');toast('Správa bola odoslaná.');queueCustomerSync('messages',80)}catch(e){toast(e.message)}finally{e.submitter&&(e.submitter.disabled=false)}}
 function handleRecoveryHash(){
   const hash=new URLSearchParams(location.hash.replace(/^#/,'')),access=hash.get('access_token'),refresh=hash.get('refresh_token'),type=hash.get('type');
@@ -2187,28 +2197,32 @@ async function togglePushDirect(btn){
     }catch(_){}finally{supportReadInFlight=false}
   }
 
+  let supportPageScrollY=0;
   function open(){
-    // A late booking prefill belongs only to that selected day, not to the general message form.
-    if(!lateBookingContext){
-      $('supportMessageBodyV52').value='';
-    }
+    if(!lateBookingContext)$('supportMessageBodyV52').value='';
     renderSupportThread();
-    $('supportChatModalV52').classList.remove('hidden');
+    supportPageScrollY=window.scrollY||document.scrollingElement?.scrollTop||0;
+    supportLayout.prepare();
     document.documentElement.classList.add('support-chat-open-v52');
+    $('appView').inert=true;
+    $('supportChatModalV52').classList.remove('hidden');
     supportLayout.open();
     $('supportMessageSend').disabled=supportSending||!$('supportMessageBodyV52').value.trim();
-    $('appView').inert=true;
     requestAnimationFrame(()=>{const root=$('supportMessageThreadV52');root.scrollTop=root.scrollHeight});
     updateButton();markRead();
   }
 
   function close(){
-    supportLayout?.close();$('appView').inert=false;
     $('supportChatModalV52').classList.add('hidden');
     document.documentElement.classList.remove('support-chat-open-v52');
+    supportLayout?.close();
+    $('appView').inert=false;
     lateBookingContext=null;
-    $('supportMessageBodyV52').value='';updateButton();
+    $('supportMessageBodyV52').value='';
+    requestAnimationFrame(()=>window.scrollTo(0,supportPageScrollY));
+    updateButton();
   }
+  window.openCustomerSupportChatV176=open;
   window.openCustomerLateBookingMessage=(dogId,date,body,messageOnly=false)=>{
     mount();
     lateBookingContext={dogId,date,messageOnly};

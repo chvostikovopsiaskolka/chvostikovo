@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261008-ios-chat-keyboard-owner-link-v175';
+const CACHE='chvostikovo-portal-shell-20261008-chat-viewport-stability-v176';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -40,7 +40,7 @@ async function decrementCustomerBadgeV171(){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/terms-pdf.js?v=20261008-ios-chat-keyboard-owner-link-v175','/terms-pdf-font.js?v=20261008-ios-chat-keyboard-owner-link-v175','/styles.css?v=20261008-ios-chat-keyboard-owner-link-v175','/app.js?v=20261008-ios-chat-keyboard-owner-link-v175','/back-swipe.js?v=20261008-ios-chat-keyboard-owner-link-v175'];
+const SHELL=['/','/terms-pdf.js?v=20261008-chat-viewport-stability-v176','/terms-pdf-font.js?v=20261008-chat-viewport-stability-v176','/styles.css?v=20261008-chat-viewport-stability-v176','/app.js?v=20261008-chat-viewport-stability-v176','/back-swipe.js?v=20261008-chat-viewport-stability-v176'];
 
 function withPortalCsp(response){
   if(!response)return response;
