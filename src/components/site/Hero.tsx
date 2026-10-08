@@ -24,7 +24,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
         {/* Mobile layout */}
         <div className="lg:hidden">
-          <p className="mx-auto mt-1 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-coral-dark shadow-soft min-[390px]:mt-2 min-[390px]:text-xs sm:text-sm">
+          <p className="mx-auto mt-1 font-display text-xs font-bold uppercase tracking-[0.16em] text-coral-dark min-[390px]:mt-2 sm:text-sm">
             Denná starostlivosť o stredných a veľkých psíkov
           </p>
 
@@ -77,7 +77,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
         {/* Desktop layout */}
         <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
           <div className="flex min-w-0 flex-col lg:py-2">
-            <p className="order-1 mx-0 mb-3 mt-0 max-w-fit whitespace-nowrap rounded-full bg-white/95 px-4 py-1.5 text-sm font-bold text-coral-dark shadow-soft">
+            <p className="order-1 mx-0 mb-3 mt-0 font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Denná starostlivosť o stredných a veľkých psíkov
             </p>
 
