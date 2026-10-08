@@ -1,47 +1,51 @@
 
 function createCompactChatLayout(modal,card,thread,input){
- let frame=0,preferred=0,baseTop=0,lastWidth=0,baselineHeight=0;
- function latest(){requestAnimationFrame(()=>{thread.scrollTop=thread.scrollHeight})}
+ let frame=0,preferred=0,baselineHeight=0,stickToBottom=true;
+ const nearBottom=()=>thread.scrollHeight-thread.scrollTop-thread.clientHeight<90;
+ function latest(){requestAnimationFrame(()=>{thread.scrollTop=thread.scrollHeight;stickToBottom=true})}
  function resizeInput(){
-  const near=thread.scrollHeight-thread.scrollTop-thread.clientHeight<90;
+  const keep=stickToBottom||nearBottom();
   input.style.height='0px';
   const style=getComputedStyle(input),line=parseFloat(style.lineHeight)||24;
   const padding=parseFloat(style.paddingTop)+parseFloat(style.paddingBottom),border=parseFloat(style.borderTopWidth)+parseFloat(style.borderBottomWidth);
   const max=line*3+padding+border;
   input.style.height=Math.min(input.scrollHeight+border,max)+'px';
   input.style.overflowY=input.scrollHeight+border>max?'auto':'hidden';
-  if(near)latest();
+  if(keep)latest();
  }
  function layout(force=false){
   frame=0;if(!force&&modal.classList.contains('hidden'))return;
   const v=window.visualViewport;
-  const h=Math.max(220,Math.round(v?.height||innerHeight||document.documentElement.clientHeight));
+  const h=Math.max(200,Math.round(v?.height||innerHeight||document.documentElement.clientHeight));
   const top=Math.max(0,Math.round(v?.offsetTop||0));
-  const width=Math.round(v?.width||innerWidth||document.documentElement.clientWidth);
   baselineHeight=Math.max(baselineHeight,h);
   const keyboardOpen=baselineHeight-h>80;
-  const topGap=8,bottomGap=keyboardOpen?28:10;
-  if(!preferred||Math.abs(width-lastWidth)>60){
+  const topGap=keyboardOpen?8:12,bottomGap=keyboardOpen?18:12;
+  if(!preferred){
     const full=Math.max(document.documentElement.clientHeight||0,innerHeight||0,baselineHeight,h);
     preferred=Math.min(560,Math.max(320,full*.56));
-    const firstHeight=Math.min(preferred,Math.max(204,h-topGap-bottomGap));
-    baseTop=top+Math.max(topGap,Math.round((h-firstHeight)/2));
-    lastWidth=width;
   }
-  const cardHeight=Math.min(preferred,Math.max(204,h-topGap-bottomGap));
-  const minTop=top+topGap,maxTop=Math.max(minTop,top+h-cardHeight-bottomGap);
-  const cardTop=Math.min(Math.max(baseTop,minTop),maxTop);
+  const cardHeight=Math.min(preferred,Math.max(180,h-topGap-bottomGap));
+  const cardTop=top+Math.max(topGap,Math.round((h-cardHeight)/2));
   modal.style.setProperty('--chat-card-top',cardTop+'px');
   modal.style.setProperty('--chat-card-height',cardHeight+'px');
+  if(stickToBottom||document.activeElement===input)latest();
  }
  function schedule(){if(!frame)frame=requestAnimationFrame(()=>layout(false))}
+ thread.addEventListener('scroll',()=>{stickToBottom=nearBottom()},{passive:true});
  input.addEventListener('input',resizeInput);
- input.addEventListener('focus',()=>{schedule();requestAnimationFrame(latest)});
+ input.addEventListener('focus',()=>{stickToBottom=true;schedule();latest()});
  input.addEventListener('blur',schedule);
  window.visualViewport?.addEventListener('resize',schedule);
+ window.visualViewport?.addEventListener('scroll',schedule);
  window.addEventListener('resize',schedule);
+ modal.addEventListener('touchmove',event=>{
+  const target=event.target;
+  if(thread.contains(target)||input.contains(target))return;
+  event.preventDefault();
+ },{passive:false});
  return {
-  prepare(){preferred=0;baseTop=0;lastWidth=0;baselineHeight=0;layout(true)},
+  prepare(){preferred=0;baselineHeight=0;stickToBottom=true;layout(true)},
   open(){layout(true);resizeInput();latest()},
   close(){input.blur();if(frame)cancelAnimationFrame(frame);frame=0;modal.style.removeProperty('--chat-card-top');modal.style.removeProperty('--chat-card-height')},
   resizeInput,latest
@@ -79,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261008-final-chat-scroll-lock-v178';
-const APP_VERSION='1.0.25';
+const APP_BUILD='20261008-consolidated-chat-layout-v179';
+const APP_VERSION='1.0.26';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
