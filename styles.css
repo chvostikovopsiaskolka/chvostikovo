@@ -1846,3 +1846,19 @@ html.support-chat-open-v52 .support-chat-btn-v52{
   top:-7px!important;
   right:-7px!important;
 }
+
+
+/* v177: final chat visual polish only. */
+@media(max-width:520px), (orientation:landscape) and (pointer:coarse) and (max-height:520px){
+  .support-chat-btn-v52{
+    right:26px!important;
+    bottom:calc(88px + env(safe-area-inset-bottom))!important;
+  }
+}
+.support-chat-unread-v52{
+  top:-10px!important;
+  right:-10px!important;
+}
+html.support-chat-open-v52 .beta-version-badge-v75{
+  visibility:hidden!important;
+}
