@@ -53,7 +53,13 @@ function ReviewCarousel() {
   useEffect(() => {
     const el = track.current;
     if (!el) return;
-    const speed = isMobile ? 50 : 36; // px / s
+    const narrowQuery = window.matchMedia("(max-width: 390px)");
+    let speed = narrowQuery.matches ? 32 : isMobile ? 50 : 36; // px / s
+    const updateSpeed = () => {
+      speed = narrowQuery.matches ? 32 : isMobile ? 50 : 36;
+    };
+    narrowQuery.addEventListener("change", updateSpeed);
+    window.addEventListener("resize", updateSpeed);
     let raf = 0;
     let last = performance.now();
     let carry = 0;
@@ -82,6 +88,8 @@ function ReviewCarousel() {
     raf = requestAnimationFrame(step);
     return () => {
       cancelAnimationFrame(raf);
+      narrowQuery.removeEventListener("change", updateSpeed);
+      window.removeEventListener("resize", updateSpeed);
       if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
     };
   }, [isMobile]);
