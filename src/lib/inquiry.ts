@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { parseDogWeightKg } from "./dog-weight";
+import { TRACKING_LIMITS } from "./tracking-sanitization";
 
 /**
  * Zdieľaná (prehliadač + server) definícia formulárových dát a payloadov.
@@ -8,20 +9,20 @@ import { parseDogWeightKg } from "./dog-weight";
  */
 
 const attributionSchema = z.object({
-  landing_page: z.string().max(500).optional(),
-  referrer: z.string().max(1000).optional(),
-  traffic_source: z.string().max(200).optional(),
-  traffic_medium: z.string().max(200).optional(),
-  utm_campaign: z.string().max(300).optional(),
-  utm_term: z.string().max(300).optional(),
-  utm_content: z.string().max(300).optional(),
-  cta_source: z.string().max(200).optional(),
+  landing_page: z.string().max(TRACKING_LIMITS.landing_page).optional(),
+  referrer: z.string().max(TRACKING_LIMITS.referrer).optional(),
+  traffic_source: z.string().max(TRACKING_LIMITS.traffic_source).optional(),
+  traffic_medium: z.string().max(TRACKING_LIMITS.traffic_medium).optional(),
+  utm_campaign: z.string().max(TRACKING_LIMITS.utm_campaign).optional(),
+  utm_term: z.string().max(TRACKING_LIMITS.utm_term).optional(),
+  utm_content: z.string().max(TRACKING_LIMITS.utm_content).optional(),
+  cta_source: z.string().max(TRACKING_LIMITS.cta_source).optional(),
 });
 
 export const shortSchema = z.object({
   typ: z.literal("informacie"),
   consent: z.literal(true),
-  source_ref: z.string().max(300).optional(),
+  source_ref: z.string().max(TRACKING_LIMITS.source_ref).optional(),
   meno: z.string().min(1).max(200),
   telefon: z.string().regex(/^\+\d{7,15}$/),
   zaujem: z.string().min(1).max(300),
@@ -30,7 +31,7 @@ export const shortSchema = z.object({
 export const longSchema = z.object({
   typ: z.literal("prihlaska"),
   consent: z.literal(true),
-  source_ref: z.string().max(300).optional(),
+  source_ref: z.string().max(TRACKING_LIMITS.source_ref).optional(),
   meno: z.string().min(1).max(200),
   telefon: z.string().regex(/^\+\d{7,15}$/),
   pes: z.string().min(1).max(200),

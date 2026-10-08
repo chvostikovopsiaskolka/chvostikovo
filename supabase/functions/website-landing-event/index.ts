@@ -132,9 +132,16 @@ const FORM_PATHS = new Set(["/", "/psia-skolka-kosice", "/psia-skolka-pre-stenia
 
 async function notifyFormError(input: Json, path: string, attemptId: string | null) {
   const page = path.split(/[?#]/)[0]!.replace(/\/$/, "") || "/";
-  const [source = "", suppliedStage = "", rawStatus] = String(input.event_source || "").split(":");
+  const [source = "", suppliedStage = "", rawStatus, rawIssues = ""] = String(input.event_source || "").split(":");
   if (!FORM_PATHS.has(page) || !/^[a-z_]{1,80}$/.test(source)) return "invalid_diagnostic";
   const stage = ERROR_STAGES.has(suppliedStage) ? suppliedStage : "frontend_validation";
+  // Allowlisted field/code pairs only: never include values or Zod messages.
+  const fields = new Set(["typ", "consent", "meno", "telefon", "zaujem", "pes", "plemeno", "vaha", "pohlavie", "vek", "kastrovana", "duvod", "viac", "source_ref", "landing_page", "referrer", "traffic_source", "traffic_medium", "utm_campaign", "utm_term", "utm_content", "cta_source"]);
+  const codes = new Set(["invalid_type", "invalid_literal", "invalid_string", "too_small", "too_big", "custom", "invalid_union_discriminator"]);
+  const issues = stage === "zod_validation" ? rawIssues.split(",").filter((pair) => {
+    const [field, code, extra] = pair.split("=");
+    return !extra && fields.has(field) && codes.has(code);
+  }).slice(0, 24).join(", ") : "";
   const numericStatus = Number(rawStatus);
   const status = Number.isInteger(numericStatus) && numericStatus >= 100 && numericStatus <= 599 ? numericStatus : null;
   const id = attemptId || crypto.randomUUID();
@@ -172,6 +179,7 @@ async function notifyFormError(input: Json, path: string, attemptId: string | nu
           text: [
             "Návštevník stlačil Odoslať a formulár zobrazil chybu.",
             `Čas: ${new Date().toLocaleString("sk-SK", { timeZone: "Europe/Bratislava" })}`,
+            `Validácia polí: ${issues || "bez detailu"}`,
             `Formulár: ${source}`, `Stránka: https://chvostikovo.sk${page}`,
             `Krok zlyhania: ${stage}`, ...(status ? [`HTTP stav: ${status}`] : []),
             `ID pokusu: ${id}`, databaseCheck, "",

@@ -52,9 +52,14 @@ try {
   assert.equal((await send(failed, "https://untrusted.invalid")).status, 403);
   assert.equal((await send({ ...failed, attempt_id: "not-a-uuid" })).status, 400);
   assert.equal((await (await send({ ...failed, attempt_id: crypto.randomUUID(), event_source: "Name +421915349028" })).json()).alert_status, "invalid_diagnostic");
+  const zodFailure = { ...base, attempt_id: crypto.randomUUID(), event_name: "form_error", event_source: "application_form:zod_validation::source_ref=too_big,landing_page=too_big,PRIVATE=NAME" };
+  assert.equal((await (await send(zodFailure)).json()).alert_status, "sent");
+  assert(emails.at(-1).text.includes("source_ref=too_big"));
+  assert(emails.at(-1).text.includes("landing_page=too_big"));
+  assert(!emails.at(-1).text.includes("PRIVATE"));
   rateLimited = true;
   assert.equal((await (await send({ ...failed, attempt_id: crypto.randomUUID() })).json()).alert_status, "rate_limited");
-  assert.equal(emails.length, 1);
+  assert.equal(emails.length, 2);
   rateLimited = false;
   mailFailure = true;
   const consoleError = console.error;

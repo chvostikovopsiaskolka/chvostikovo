@@ -83,6 +83,7 @@ for (const interest of [
 const productBackend = readFileSync(new URL("../supabase/functions/product-inquiry-submit/index.ts", import.meta.url), "utf8");
 assert(productBackend.includes("/^\\+\\d{7,15}$/"), "Critical form check failed: product inquiry phone regex is not the expected E.164 validation.");
 
+await import("./tracking-form-checks");
 await import("./form-autofill-checks");
 await import("./form-alert-checks");
 await import("./application-dog-details-checks");

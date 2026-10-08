@@ -2,6 +2,7 @@ import { buildDbPayload, inquirySchema, SUPABASE_ENDPOINT, type InquiryInput } f
 import { hasMarketingConsent } from "./consent";
 import { normalizePhone } from "./phone";
 import { InquirySubmissionError } from "./form-errors";
+import { sanitizeTracking } from "./tracking-sanitization";
 
 function getCookie(name: string) {
   if (typeof document === "undefined") return "";
@@ -31,9 +32,10 @@ function buildFbcFromCurrentUrl() {
  * Pri marketingovom súhlase posielame aj Meta attribution údaje pre CAPI.
  */
 export async function submitInquiry(input: InquiryInput, attemptId?: string) {
-  const normalized = { ...input, telefon: normalizePhone(input.telefon) };
+  const normalized = { ...sanitizeTracking(input), telefon: normalizePhone(input.telefon) };
   const parsed = inquirySchema.safeParse(normalized);
-  if (!parsed.success) throw new InquirySubmissionError("zod_validation");
+  if (!parsed.success) throw new InquirySubmissionError("zod_validation", undefined,
+    parsed.error.issues.map((issue) => ({ field: String(issue.path[0] || "typ"), code: issue.code })));
   const data = parsed.data;
   let marketingConsent = false;
   try {
@@ -41,10 +43,10 @@ export async function submitInquiry(input: InquiryInput, attemptId?: string) {
   } catch {
     // Storage may be unavailable in private/restricted browsers.
   }
-  const metaEventId =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `meta-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  let metaEventId = `meta-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  try {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) metaEventId = crypto.randomUUID();
+  } catch { /* An unavailable tracking ID API must not block the contact. */ }
 
   let dbPayload: ReturnType<typeof buildDbPayload>;
   try {

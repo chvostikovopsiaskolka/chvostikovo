@@ -1,3 +1,4 @@
+import { currentSourceRef } from "@/lib/tracking-sanitization";
 import { useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
@@ -7,12 +8,9 @@ import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-i
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { phoneFromForm } from "@/lib/phone";
-import { reportInquiryError, runFormTelemetry } from "@/lib/form-errors";
+import { reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
 
-function sourceRef() {
-  if (typeof window === "undefined") return "/";
-  return `${window.location.pathname}${window.location.search}` || "/";
-}
+function sourceRef() { return currentSourceRef("/"); }
 
 function attributionPayload() {
   const attribution = getTrafficAttribution();
@@ -91,7 +89,7 @@ export function ShortForm({
       runFormTelemetry(() => onSent?.());
     } catch (error) {
       const diagnostic = reportInquiryError(error);
-      void trackCookielessInteraction("form_error", `${trackingSource || "informational_form"}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`, "sk", attemptId);
+      void trackCookielessInteraction("form_error", `${trackingSource || "informational_form"}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, "sk", attemptId);
       setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
     } finally {
       setLoading(false);
@@ -230,7 +228,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
       runFormTelemetry(() => onSent?.());
     } catch (error) {
       const diagnostic = reportInquiryError(error);
-      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`, "sk", attemptId);
+      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, "sk", attemptId);
       setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
     } finally {
       setLoading(false);

@@ -55,7 +55,7 @@ function consent(marketing: boolean) {
 let passed = 0;
 try {
   for (const test of cases) for (const marketing of [false, true]) for (const raw of formats) for (const mode of ["silent-autofill", "input-event"]) {
-    dom.happyDOM.setURL(`https://chvostikovo.sk${test.path}`);
+    dom.happyDOM.setURL(`https://chvostikovo.sk${test.path}?utm_source=ig&utm_medium=social&fbclid=${"x".repeat(650)}`);
     dom.sessionStorage.clear();
     consent(marketing);
     requests = [];
@@ -82,9 +82,11 @@ try {
     assert.equal(new dom.FormData(form).get(input.name), raw);
     assert.equal(phoneFromForm(form as any, input.id), "+421915349028");
     assert.equal(form.checkValidity(), true);
-    await React.act(async () => { form.requestSubmit(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    await React.act(async () => { form.requestSubmit(); await new Promise((resolve) => setTimeout(resolve, 20)); });
     const submission = requests.filter((r) => r.url.endsWith("/web-form-submit"));
     assert.equal(submission.length, 1, `${test.name}: missing or duplicate browser request`);
+    assert(!submission[0]!.body.source_ref.includes("fbclid"));
+    assert(!JSON.stringify(submission[0]!.body.raw_payload).includes("fbclid"));
     assert.equal(submission[0]!.body.phone, "+421915349028");
     assert.equal(submission[0]!.body.owner_name, "TEST – autofill regression");
     if (weight) {
@@ -170,7 +172,7 @@ try {
     const consoleError = console.error;
     console.error = () => {};
     try {
-      for (let i = 0; i < 2; i++) await React.act(async () => { form.requestSubmit(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+      for (let i = 0; i < 2; i++) await React.act(async () => { form.requestSubmit(); await new Promise((resolve) => setTimeout(resolve, 20)); });
     } finally { console.error = consoleError; }
     const events = requests.filter((r) => r.url.endsWith("/website-landing-event"));
     const attempts = events.filter((r) => r.body.event_name === "form_attempt");

@@ -1,3 +1,4 @@
+import { currentSourceRef } from "@/lib/tracking-sanitization";
 import { useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
@@ -7,12 +8,9 @@ import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-i
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { phoneFromForm } from "@/lib/phone";
-import { reportInquiryError, runFormTelemetry } from "@/lib/form-errors";
+import { reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
 
-function sourceRef() {
-  if (typeof window === "undefined") return "/en/dog-daycare-kosice";
-  return `${window.location.pathname}${window.location.search}` || "/en/dog-daycare-kosice";
-}
+function sourceRef() { return currentSourceRef("/en/dog-daycare-kosice"); }
 
 export function EnglishInquiryForm({
   trackingSource = "english_page",
@@ -78,7 +76,7 @@ export function EnglishInquiryForm({
       setSent(true);
     } catch (error) {
       const diagnostic = reportInquiryError(error);
-      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${"status" in diagnostic ? `:${diagnostic.status}` : ""}`, "en", attemptId);
+      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, "en", attemptId);
       setError("Something went wrong. Please try again or call us.");
     } finally {
       setLoading(false);

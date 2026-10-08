@@ -1,3 +1,4 @@
+import { safeAttributionUrl, safeTrackingString, TRACKING_LIMITS } from "./tracking-sanitization";
 export type TrafficAttribution = {
   landing_page: string;
   referrer: string;
@@ -58,58 +59,65 @@ function inferSource(referrer: string) {
   return { source: host, medium: "referral" };
 }
 
-export function captureTrafficAttribution() {
-  if (typeof window === "undefined") return;
+const defaults: TrafficAttribution = {
+  landing_page: "/", referrer: "", source: "unknown", medium: "unknown",
+  campaign: "", term: "", content: "",
+};
 
-  const params = new URLSearchParams(window.location.search);
-  const stored = window.sessionStorage.getItem(STORAGE_KEY);
-  if (stored) return;
-
-  const referrer = document.referrer || "";
-  const inferred = inferSource(referrer);
-
-  const attribution: TrafficAttribution = {
-    landing_page: `${window.location.pathname}${window.location.search}` || "/",
-    referrer,
-    source: params.get("utm_source") || inferred.source,
-    medium: params.get("utm_medium") || inferred.medium,
-    campaign: params.get("utm_campaign") || "",
-    term: params.get("utm_term") || "",
-    content: params.get("utm_content") || "",
+function cleanAttribution(value: unknown): TrafficAttribution {
+  const data = value && typeof value === "object" ? value as Record<string, unknown> : {};
+  return {
+    landing_page: safeAttributionUrl(data["landing_page"], TRACKING_LIMITS.landing_page) || "/",
+    referrer: safeTrackingString(data["referrer"], TRACKING_LIMITS.referrer),
+    source: safeTrackingString(data["source"], TRACKING_LIMITS.traffic_source),
+    medium: safeTrackingString(data["medium"], TRACKING_LIMITS.traffic_medium),
+    campaign: safeTrackingString(data["campaign"], TRACKING_LIMITS.utm_campaign),
+    term: safeTrackingString(data["term"], TRACKING_LIMITS.utm_term),
+    content: safeTrackingString(data["content"], TRACKING_LIMITS.utm_content),
   };
+}
 
-  window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(attribution));
+function currentAttribution(): TrafficAttribution {
+  try {
+    if (typeof window === "undefined") return { ...defaults };
+    const params = new URLSearchParams(window.location.search);
+    const referrer = document.referrer || "";
+    const inferred = inferSource(referrer);
+    return cleanAttribution({
+      landing_page: window.location.href, referrer,
+      source: params.get("utm_source") || inferred.source,
+      medium: params.get("utm_medium") || inferred.medium,
+      campaign: params.get("utm_campaign") || "",
+      term: params.get("utm_term") || "",
+      content: params.get("utm_content") || "",
+    });
+  } catch {
+    return { ...defaults };
+  }
+}
+
+export function captureTrafficAttribution() {
+  try {
+    if (typeof window === "undefined") return;
+    const stored = window.sessionStorage.getItem(STORAGE_KEY);
+    let attribution = currentAttribution();
+    if (stored) {
+      try { attribution = cleanAttribution(JSON.parse(stored)); } catch { /* Replace corrupt storage. */ }
+    }
+    // Also remove old fbclid URLs already stored by previous builds.
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(attribution));
+  } catch {
+    // Restricted storage is optional; current URL attribution still works.
+  }
 }
 
 export function getTrafficAttribution(): TrafficAttribution {
-  if (typeof window === "undefined") {
-    return {
-      landing_page: "/",
-      referrer: "",
-      source: "unknown",
-      medium: "unknown",
-      campaign: "",
-      term: "",
-      content: "",
-    };
-  }
-
   try {
-    captureTrafficAttribution();
-    const stored = window.sessionStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored) as TrafficAttribution;
-  } catch {
-    // Fall through to safe defaults.
-  }
-
-  const inferred = inferSource(document.referrer || "");
-  return {
-    landing_page: `${window.location.pathname}${window.location.search}` || "/",
-    referrer: document.referrer || "",
-    source: inferred.source,
-    medium: inferred.medium,
-    campaign: "",
-    term: "",
-    content: "",
-  };
+    if (typeof window !== "undefined") {
+      captureTrafficAttribution();
+      const stored = window.sessionStorage.getItem(STORAGE_KEY);
+      if (stored) return cleanAttribution(JSON.parse(stored));
+    }
+  } catch { /* Use current URL, or safe defaults, without blocking submission. */ }
+  return currentAttribution();
 }
