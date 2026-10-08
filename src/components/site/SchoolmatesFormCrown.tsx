@@ -4,7 +4,7 @@ export function SchoolmatesFormCrown({ compact = false }: { compact?: boolean })
   if (compact) {
     return (
       <div
-        className="relative z-10 mx-auto -mb-5 h-[82px] w-full max-w-[330px] overflow-hidden"
+        className="relative z-10 mx-auto -mb-5 h-[82px] w-full max-w-[330px] -translate-y-5 overflow-hidden"
         aria-hidden="true"
       >
         <img
@@ -22,7 +22,7 @@ export function SchoolmatesFormCrown({ compact = false }: { compact?: boolean })
 
   return (
     <div
-      className="relative z-10 mx-auto -mb-8 h-[142px] w-full max-w-[500px] overflow-hidden sm:h-[165px]"
+      className="relative z-10 mx-auto -mb-8 h-[142px] w-full max-w-[500px] -translate-y-8 overflow-hidden sm:h-[165px]"
       aria-hidden="true"
     >
       <img
