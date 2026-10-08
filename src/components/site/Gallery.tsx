@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Car, MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { GALLERY, MAP_LINK } from "@/content/site";
 import { Collapse } from "./Collapse";
+import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
 const HYGIENE_SK = [
   {
@@ -64,8 +65,9 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
   }
 
   return (
-    <section id={isEnglish ? "spaces" : "priestory"} className="scroll-mt-24 overflow-x-clip pt-8 pb-14 sm:pt-14 sm:pb-20">
-      <div className="mx-auto max-w-6xl px-4">
+    <section id={isEnglish ? "spaces" : "priestory"} className="relative scroll-mt-24 overflow-hidden pt-8 pb-14 sm:pt-14 sm:pb-20">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="section-title text-3xl sm:text-4xl">
