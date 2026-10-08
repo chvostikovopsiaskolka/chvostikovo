@@ -231,8 +231,9 @@ export function ReviewReasons({
 
 export function Reviews() {
   return (
-    <section id="recenzie" className="scroll-mt-24 bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14">
-      <div className="mx-auto max-w-6xl px-4 text-center">
+    <section id="recenzie" className="relative scroll-mt-24 overflow-hidden bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
         <h2 className="section-title text-[27px] leading-tight sm:text-4xl">100+ spokojných psíkov</h2>
         <p className="mt-0.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 z 5 na Google</p>
 
