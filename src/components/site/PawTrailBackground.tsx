@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { WanderingDog } from "./WanderingDog";
 import "./paw-trail-background.css";
 
 type Point = readonly [number, number];
@@ -273,6 +274,7 @@ export function PawTrailBackground({ landingBottomPaws = false }: { landingBotto
 
   return (
     <div aria-hidden="true" className="paw-trail-background">
+      <WanderingDog />
       <div className="paw-ambient-layer">
         {AMBIENT_PAWS.map((paw, index) => (
           <svg

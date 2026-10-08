@@ -1,0 +1,20 @@
+.hero-wandering-dog-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero-wandering-dog {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 98px;
+  opacity: .78;
+  will-change: transform;
+}
+.hero-wandering-dog-facing { width: 100%; }
+.hero-wandering-dog-art { display: block; width: 100%; height: auto; overflow: visible; }
+@media (max-width: 639px) {
+  .hero-wandering-dog { width: 68px; opacity: .72; }
+}
