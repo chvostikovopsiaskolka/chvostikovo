@@ -14,6 +14,7 @@ import {
 import logo from "@/assets/logo.png";
 import { EnglishInquiryForm } from "@/components/site/EnglishInquiryForm";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
+import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { FormDialog } from "@/components/site/FormDialog";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -518,8 +519,9 @@ function EnglishDogDaycarePage() {
           <InfoTicker language="en" />
         </div>
 
-        <section className="bg-forest pt-10 pb-10 text-cream sm:pt-12 sm:pb-12">
-          <div className="mx-auto max-w-6xl px-4">
+        <section className="relative overflow-hidden bg-forest pt-10 pb-10 text-cream sm:pt-12 sm:pb-12">
+          <SectionAmbientPaws tone="dark" />
+          <div className="relative z-10 mx-auto max-w-6xl px-4">
             <h2 className="text-center font-display text-3xl text-cream sm:text-4xl">
               Why choose Chvostíkovo?
             </h2>
@@ -635,8 +637,9 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <section id="faq" className="scroll-mt-24 bg-card py-14 sm:py-18">
-          <div className="mx-auto max-w-4xl px-4">
+        <section id="faq" className="relative scroll-mt-24 overflow-hidden bg-card py-14 sm:py-18">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4">
             <div className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Questions before the first visit</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Frequently asked questions</h2>
@@ -651,8 +654,9 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <section className="py-14 sm:py-18">
-          <div className="mx-auto max-w-6xl px-4">
+        <section className="relative overflow-hidden py-14 sm:py-18">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4">
             <div className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">How it works</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Starting daycare in 3 simple steps</h2>
@@ -682,8 +686,9 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <section id="requirements" className="scroll-mt-24 bg-secondary/45 py-14 sm:py-18">
-          <div className="mx-auto max-w-6xl px-4">
+        <section id="requirements" className="relative scroll-mt-24 overflow-hidden bg-secondary/45 py-14 sm:py-18">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4">
             <div className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Before joining</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">What your dog needs before daycare</h2>
