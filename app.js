@@ -1,6 +1,6 @@
 
 function createCompactChatLayout(modal,card,thread,input){
- let frame=0,preferred=0,baseTop=0,lastWidth=0;
+ let frame=0,preferred=0,baseTop=0,lastWidth=0,baselineHeight=0;
  function latest(){requestAnimationFrame(()=>{thread.scrollTop=thread.scrollHeight})}
  function resizeInput(){
   const near=thread.scrollHeight-thread.scrollTop-thread.clientHeight<90;
@@ -18,15 +18,18 @@ function createCompactChatLayout(modal,card,thread,input){
   const h=Math.max(220,Math.round(v?.height||innerHeight||document.documentElement.clientHeight));
   const top=Math.max(0,Math.round(v?.offsetTop||0));
   const width=Math.round(v?.width||innerWidth||document.documentElement.clientWidth);
+  baselineHeight=Math.max(baselineHeight,h);
+  const keyboardOpen=baselineHeight-h>80;
+  const topGap=8,bottomGap=keyboardOpen?28:10;
   if(!preferred||Math.abs(width-lastWidth)>60){
-    const full=Math.max(document.documentElement.clientHeight||0,innerHeight||0,h);
+    const full=Math.max(document.documentElement.clientHeight||0,innerHeight||0,baselineHeight,h);
     preferred=Math.min(560,Math.max(320,full*.56));
-    const firstHeight=Math.min(preferred,Math.max(204,h-16));
-    baseTop=top+Math.max(8,Math.round((h-firstHeight)/2));
+    const firstHeight=Math.min(preferred,Math.max(204,h-topGap-bottomGap));
+    baseTop=top+Math.max(topGap,Math.round((h-firstHeight)/2));
     lastWidth=width;
   }
-  const cardHeight=Math.min(preferred,Math.max(204,h-16));
-  const minTop=top+8,maxTop=Math.max(minTop,top+h-cardHeight-8);
+  const cardHeight=Math.min(preferred,Math.max(204,h-topGap-bottomGap));
+  const minTop=top+topGap,maxTop=Math.max(minTop,top+h-cardHeight-bottomGap);
   const cardTop=Math.min(Math.max(baseTop,minTop),maxTop);
   modal.style.setProperty('--chat-card-top',cardTop+'px');
   modal.style.setProperty('--chat-card-height',cardHeight+'px');
@@ -38,7 +41,7 @@ function createCompactChatLayout(modal,card,thread,input){
  window.visualViewport?.addEventListener('resize',schedule);
  window.addEventListener('resize',schedule);
  return {
-  prepare(){preferred=0;baseTop=0;lastWidth=0;layout(true)},
+  prepare(){preferred=0;baseTop=0;lastWidth=0;baselineHeight=0;layout(true)},
   open(){layout(true);resizeInput();latest()},
   close(){input.blur();if(frame)cancelAnimationFrame(frame);frame=0;modal.style.removeProperty('--chat-card-top');modal.style.removeProperty('--chat-card-height')},
   resizeInput,latest
@@ -76,8 +79,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261008-chat-icon-polish-v177';
-const APP_VERSION='1.0.24';
+const APP_BUILD='20261008-final-chat-scroll-lock-v178';
+const APP_VERSION='1.0.25';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2202,8 +2205,9 @@ async function togglePushDirect(btn){
     if(!lateBookingContext)$('supportMessageBodyV52').value='';
     renderSupportThread();
     supportPageScrollY=window.scrollY||document.scrollingElement?.scrollTop||0;
-    supportLayout.prepare();
+    document.documentElement.style.setProperty('--support-chat-lock-top',(-supportPageScrollY)+'px');
     document.documentElement.classList.add('support-chat-open-v52');
+    supportLayout.prepare();
     $('appView').inert=true;
     $('supportChatModalV52').classList.remove('hidden');
     supportLayout.open();
@@ -2215,6 +2219,7 @@ async function togglePushDirect(btn){
   function close(){
     $('supportChatModalV52').classList.add('hidden');
     document.documentElement.classList.remove('support-chat-open-v52');
+    document.documentElement.style.removeProperty('--support-chat-lock-top');
     supportLayout?.close();
     $('appView').inert=false;
     lateBookingContext=null;
