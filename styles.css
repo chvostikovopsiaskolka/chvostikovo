@@ -707,8 +707,7 @@ html.support-chat-open-v52{overflow:hidden}
   }
 }
 html.settings-open-v36,
-html.dog-details-open,
-html.support-chat-open-v52{
+html.dog-details-open{
   overflow-y:auto!important;
   height:auto!important;
   min-height:100dvh!important;
@@ -1534,7 +1533,7 @@ html.customer-awaiting-dog-v107 #appView{
 #customerContactModal .account-card{margin:0;padding:0;border:0;box-shadow:none}
 #customerContactModal .account-card .collapse-btn{display:none}
 #customerContactModal .account-card form{padding:4px 0}
-#supportChatBtnV52,#supportChatHintV53{display:none!important}
+#supportChatHintV53{display:none!important}
 .photo-modal{z-index:700}
 .customer-modal-open{overflow:hidden}
 #bookingTab .deadline-card{position:relative!important;display:flex!important;flex-direction:column;align-items:stretch;justify-content:center;min-height:82px!important;padding:12px 13px 12px 69px!important;margin:0 0 14px!important;text-align:center!important;border:1.5px solid #91e5af!important;border-radius:17px!important;background:#f0fcf5!important;color:#155c37!important}
@@ -1816,19 +1815,24 @@ html.customer-ios-v171 .bottom-nav{
 }
 
 
-/* Messages: full-height conversation and a one-to-four-line composer. */
-.support-chat-btn-v52{bottom:calc(100px + env(safe-area-inset-bottom))!important;width:52px!important;height:52px!important}
+/* Compact chat, sized to the visual viewport without reserving keyboard space. */
+html.support-chat-open-v52,html.support-chat-open-v52 body{overflow:hidden!important;overscroll-behavior:none!important}
+.support-chat-btn-v52{bottom:calc(100px + env(safe-area-inset-bottom))!important;width:48px!important;height:48px!important}
 .support-chat-unread-v52{top:-3px!important;right:-3px!important;width:auto!important;min-width:22px!important;height:22px!important;padding:0 5px;display:grid;place-items:center;font-size:12px;font-weight:800;line-height:1;color:#fff;border:2px solid #fff;border-radius:999px}
-#supportChatModalV52{top:var(--chat-top,0px)!important;bottom:auto!important;height:var(--chat-height,100dvh)!important;padding:0!important;overflow:hidden!important}
-html.phone-portrait-layout #supportChatModalV52 .support-chat-card-v52,#supportChatModalV52 .support-chat-card-v52{width:min(680px,100%)!important;max-width:100%!important;height:100%!important;max-height:100%!important;min-height:0!important;grid-template-rows:auto minmax(0,1fr) auto!important;overflow:hidden!important;border-radius:0!important;padding:calc(14px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom))!important;gap:12px}
-#supportChatModalV52 #supportChatTitleV52{font-size:20px!important;margin:0 48px 0 0!important;min-height:36px;display:flex;align-items:center}
-#supportChatModalV52 .legal-close{top:calc(12px + env(safe-area-inset-top))!important;right:14px!important}
-#supportMessageThreadV52{min-height:0!important;max-height:none!important;height:100%!important;margin:0!important;padding:10px!important;overflow-y:auto!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-#supportMessageThreadV52 .message-bubble{max-width:86%;padding:9px 11px!important;margin-bottom:8px!important;font-size:14px!important;line-height:1.4!important;overflow-wrap:anywhere}
-#supportMessageThreadV52 .message-bubble p{font-size:14px!important;line-height:1.4!important;margin:0!important;white-space:pre-wrap}
-#supportMessageThreadV52 .message-bubble small{font-size:10px!important;margin-top:4px!important}
-#supportMessageFormV52{display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:8px!important;align-items:end;padding:0!important}
+#supportChatModalV52{top:var(--chat-top,0px)!important;bottom:auto!important;height:var(--chat-height,100dvh)!important;box-sizing:border-box;padding:12px!important;overflow:hidden!important;place-items:center}
+html.phone-portrait-layout #supportChatModalV52 .support-chat-card-v52,#supportChatModalV52 .support-chat-card-v52{width:min(580px,100%)!important;max-width:100%!important;height:min(var(--chat-preferred,56dvh),100%)!important;max-height:100%!important;min-height:0!important;grid-template-rows:auto minmax(0,1fr) auto!important;overflow:hidden!important;border-radius:24px!important;padding:14px 12px 10px!important;gap:10px;box-sizing:border-box}
+#supportChatModalV52.chat-keyboard-open{place-items:end center;padding:8px 8px 0!important}
+#supportChatModalV52.chat-keyboard-open .support-chat-card-v52{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
+#supportChatModalV52 #supportChatTitleV52{font-size:19px!important;margin:0 46px 0 2px!important;min-height:34px;display:flex;align-items:center}
+#supportChatModalV52 .legal-close{top:12px!important;right:12px!important}
+#supportMessageThreadV52{min-height:0!important;max-height:none!important;height:100%!important;margin:0!important;padding:8px!important;overflow-y:auto!important;overscroll-behavior:contain;gap:7px!important;-webkit-overflow-scrolling:touch}
+#supportMessageThreadV52 .message-bubble{max-width:88%;padding:8px 10px!important;margin:0!important;font-size:14px!important;line-height:1.35!important;overflow-wrap:anywhere}
+#supportMessageThreadV52 .message-bubble p{font-size:14px!important;line-height:1.35!important;margin:0!important;white-space:pre-wrap}
+#supportMessageThreadV52 .message-bubble small{font-size:10px!important;margin-top:3px!important}
+#supportMessageFormV52{display:grid!important;grid-template-columns:minmax(0,1fr) 44px;gap:8px!important;align-items:end;padding:0!important;margin:0!important}
 #supportMessageFormV52>div{min-width:0}
 #supportMessageFormV52 label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-#supportMessageBodyV52{display:block;font-size:16px!important;line-height:24px!important;padding:10px 12px!important;min-height:46px!important;max-height:118px!important;resize:none!important;overflow-y:hidden;border-radius:16px!important}
-#supportMessageFormV52 .btn{width:auto!important;min-height:44px!important;padding:10px 12px!important;font-size:13px!important;margin:0!important;border-radius:16px!important}
+#supportMessageBodyV52{display:block;box-sizing:border-box;font-size:16px!important;line-height:22px!important;padding:10px 12px!important;min-height:44px!important;max-height:88px!important;resize:none!important;overflow-y:hidden;border-radius:22px!important}
+#supportMessageFormV52 .chat-send{display:grid!important;place-items:center;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;padding:0!important;margin:0!important;border-radius:50%!important}
+#supportMessageFormV52 .chat-send svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+#supportMessageFormV52 .chat-send:disabled{opacity:.4}

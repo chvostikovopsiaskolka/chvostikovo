@@ -1,3 +1,35 @@
+
+function createCompactChatLayout(modal,card,thread,input){
+ let baseline=0,width=0,frame=0;
+ function latest(){requestAnimationFrame(()=>{thread.scrollTop=thread.scrollHeight})}
+ function resizeInput(){
+  const near=thread.scrollHeight-thread.scrollTop-thread.clientHeight<90;
+  input.style.height='0px';
+  const style=getComputedStyle(input),line=parseFloat(style.lineHeight)||24;
+  const padding=parseFloat(style.paddingTop)+parseFloat(style.paddingBottom),border=parseFloat(style.borderTopWidth)+parseFloat(style.borderBottomWidth);
+  const max=line*3+padding+border;
+  input.style.height=Math.min(input.scrollHeight+border,max)+'px';
+  input.style.overflowY=input.scrollHeight+border>max?'auto':'hidden';
+  if(near)latest();
+ }
+ function layout(){
+  frame=0;if(modal.classList.contains('hidden'))return;
+  const v=window.visualViewport,h=v?.height||innerHeight,w=v?.width||innerWidth;
+  const near=thread.scrollHeight-thread.scrollTop-thread.clientHeight<90;
+  if(!baseline||Math.abs(w-width)>60){baseline=Math.max(document.documentElement.clientHeight,innerHeight,h);width=w}
+  baseline=Math.max(baseline,h);
+  modal.style.setProperty('--chat-height',h+'px');
+  modal.style.setProperty('--chat-top',(v?.offsetTop||0)+'px');
+  modal.style.setProperty('--chat-preferred',Math.min(560,Math.max(320,baseline*.56))+'px');
+  modal.classList.toggle('chat-keyboard-open',baseline-h>80);
+  if(near)latest();
+ }
+ function schedule(){if(!frame)frame=requestAnimationFrame(layout)}
+ input.addEventListener('input',resizeInput);
+ input.addEventListener('focus',schedule);input.addEventListener('blur',schedule);
+ window.visualViewport?.addEventListener('resize',schedule);window.visualViewport?.addEventListener('scroll',schedule);window.addEventListener('resize',schedule);
+ return {open(){baseline=0;layout();resizeInput();latest()},close(){input.blur();modal.classList.remove('chat-keyboard-open');if(frame)cancelAnimationFrame(frame);frame=0},resizeInput,latest};
+}
 (function preservePhoneLayout(){
     // Screen dimensions remain stable when the keyboard opens or the phone rotates.
     if (matchMedia('(pointer:coarse)').matches) {
@@ -30,8 +62,8 @@
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261008-customer-admin-direct-chat-v173';
-const APP_VERSION='1.0.20';
+const APP_BUILD='20261008-compact-chat-v174';
+const APP_VERSION='1.0.21';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -126,7 +158,7 @@ async function refreshSession(){
 }
 async function apiCore(body=null,retry=true){if(!state.session)throw new Error('Najprv sa prihláste.');const token=state.session.access_token,opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const r=await fetch(API,opts);const txt=await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
 async function api(body=null,retry=true){const result=await apiCore(body,retry);runCustomerHooks('afterApi',body,result);return result}
-function showAuth(mode='login'){$('supportChatBtnV52')?.classList.add('hidden');$('supportChatModalV52')?.classList.add('hidden');document.documentElement.classList.remove('support-chat-open-v52');document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
+function showAuth(mode='login'){$('supportChatBtnV52')?.classList.add('hidden');$('supportChatModalV52')?.classList.add('hidden');document.documentElement.classList.remove('support-chat-open-v52');document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').inert=false;$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
 function showApp(){$('authView').classList.add('hidden');$('authView').inert=true;$('appView').classList.remove('hidden')}
 function pluralDogs(n){return n===1?'1 prihlásený psík':n+' prihlásených psíkov'}
 function taxiLabel(mode){if(mode==='pickup')return'🚕 vyzdvihnutie/odvoz';if(mode==='pickup_dropoff')return'🚕 vyzdvihnutie aj dovoz';return''}
@@ -319,7 +351,7 @@ function renderNotifications(){
   }
   notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(n.body)).join('<br>')}</p><button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
   notice.querySelectorAll('[data-care-notice]').forEach(b=>b.addEventListener('click',()=>{const row=careRows.find(n=>Number(n.id)===Number(b.dataset.careNotice));if(row)customerCareAction(row)}));
-  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
+  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
   let modal=$('notificationPopup');
   if(!rows.length){modal?.classList.add('hidden');return}
   if(!modal){
@@ -2098,24 +2130,8 @@ async function togglePushDirect(btn){
 
   let lateBookingContext=null;
   let supportReadInFlight=false;
-  function resizeSupportInput(){
-    const input=$('supportMessageBodyV52');if(!input)return;
-    input.style.height='auto';
-    const max=24*4+22;
-    input.style.height=Math.min(input.scrollHeight+2,max)+'px';
-    input.style.overflowY=input.scrollHeight+2>max?'auto':'hidden';
-  }
-  function resizeSupportViewport(){
-    const modal=$('supportChatModalV52');if(!modal||modal.classList.contains('hidden'))return;
-    const viewport=window.visualViewport;
-    modal.style.setProperty('--chat-height',(viewport?.height||window.innerHeight)+'px');
-    modal.style.setProperty('--chat-top',(viewport?.offsetTop||0)+'px');
-  }
-  window.visualViewport?.addEventListener('resize',resizeSupportViewport);
-  window.visualViewport?.addEventListener('scroll',resizeSupportViewport);
-  window.addEventListener('resize',resizeSupportViewport);
-
-  const chatSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path><path d="M7.5 10h9M7.5 13.5h6"></path></svg>';
+  let supportLayout=null,supportSending=false;
+  const chatSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7 18-4-7-7-4 18-7Z"/><path d="m10 14 11-11"/></svg>';
 
   function mount(){
     if(!$('supportChatBtnV52')){
@@ -2128,7 +2144,7 @@ async function togglePushDirect(btn){
             '<div id="supportMessageThreadV52" class="message-thread support-message-thread-v52"></div>'+
             '<form id="supportMessageFormV52" class="form-stack support-message-form-v52">'+
               '<div><label for="supportMessageBodyV52">Správa</label><textarea id="supportMessageBodyV52" class="input" rows="1" maxlength="2000" placeholder="Napíšte správu pre Chvostíkovo…" required></textarea></div>'+
-              '<button class="btn full" type="submit">Odoslať správu</button>'+
+              '<button id="supportMessageSend" class="btn chat-send" type="submit" aria-label="Odoslať správu" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button>'+
             '</form>'+
           '</div>'+
         '</div>');
@@ -2136,7 +2152,9 @@ async function togglePushDirect(btn){
       $('supportChatCloseV52').addEventListener('click',close);
       $('supportChatModalV52').addEventListener('click',e=>{if(e.target===$('supportChatModalV52'))close()});
       $('supportMessageFormV52').addEventListener('submit',send);
-      $('supportMessageBodyV52').addEventListener('input',resizeSupportInput);
+      supportLayout=createCompactChatLayout($('supportChatModalV52'),$('supportChatModalV52').firstElementChild,$('supportMessageThreadV52'),$('supportMessageBodyV52'));
+      $('supportMessageBodyV52').addEventListener('input',()=>{$('supportMessageSend').disabled=supportSending||!$('supportMessageBodyV52').value.trim()});
+      $('supportMessageSend').addEventListener('pointerdown',e=>e.preventDefault());
     }
     renderSupportThread();
     updateButton();
@@ -2145,10 +2163,10 @@ async function togglePushDirect(btn){
   function renderSupportThread(){
     const root=$('supportMessageThreadV52');if(!root)return;
     const rows=state.data?.messages||[];
-    const nearBottom=root.scrollHeight-root.scrollTop-root.clientHeight<90;
+    const previousTop=root.scrollTop,nearBottom=root.scrollHeight-root.scrollTop-root.clientHeight<90;
     root.classList.remove('hidden');
     root.innerHTML=rows.length?rows.map(m=>'<div class="message-bubble '+(m.sender_role==='customer'?'mine':'')+'"><p>'+esc(m.body)+'</p><small>'+skTime(m.created_at)+'</small></div>').join(''):'<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';
-    if(nearBottom)requestAnimationFrame(()=>{root.scrollTop=root.scrollHeight});
+    requestAnimationFrame(()=>{root.scrollTop=nearBottom?root.scrollHeight:previousTop});
   }
 
   async function markRead(){
@@ -2173,16 +2191,19 @@ async function togglePushDirect(btn){
     renderSupportThread();
     $('supportChatModalV52').classList.remove('hidden');
     document.documentElement.classList.add('support-chat-open-v52');
-    resizeSupportViewport();resizeSupportInput();
+    supportLayout.open();
+    $('supportMessageSend').disabled=supportSending||!$('supportMessageBodyV52').value.trim();
+    $('appView').inert=true;
     requestAnimationFrame(()=>{const root=$('supportMessageThreadV52');root.scrollTop=root.scrollHeight});
-    markRead();
+    updateButton();markRead();
   }
 
   function close(){
+    supportLayout?.close();$('appView').inert=false;
     $('supportChatModalV52').classList.add('hidden');
     document.documentElement.classList.remove('support-chat-open-v52');
     lateBookingContext=null;
-    $('supportMessageBodyV52').value='';
+    $('supportMessageBodyV52').value='';updateButton();
   }
   window.openCustomerLateBookingMessage=(dogId,date,body,messageOnly=false)=>{
     mount();
@@ -2194,8 +2215,8 @@ async function togglePushDirect(btn){
   async function send(e){
     e.preventDefault();
     const message=$('supportMessageBodyV52').value.trim();
-    if(!message)return;
-    const btn=e.submitter;
+    if(!message||supportSending)return;
+    const btn=$('supportMessageSend');supportSending=true;
     try{
       if(btn)btn.disabled=true;
       const late=lateBookingContext?.messageOnly?null:lateBookingContext;
@@ -2207,49 +2228,23 @@ async function togglePushDirect(btn){
       if(result?.data?.conversation_id)state.data.conversation_id=result.data.conversation_id;
       (state.data.messages||(state.data.messages=[])).push(row);
       $('supportMessageBodyV52').value='';
-      resizeSupportInput();
+      supportLayout.resizeInput();
       renderMessages();
       renderSupportThread();
+      supportLayout.latest();
       updateUnread();
       lateBookingContext=null;
       if(late){close();toast('Žiadosť o rezerváciu a správa boli odoslané na schválenie.');queueCustomerSync('bookings',80)}
       else{toast('Správa bola odoslaná.');queueCustomerSync('messages',80)}
     }catch(error){toast(error.message)}
-    finally{if(btn)btn.disabled=false}
+    finally{supportSending=false;if(btn)btn.disabled=!$('supportMessageBodyV52').value.trim()}
   }
 
   function updateButton(){
     const btn=$('supportChatBtnV52');if(!btn)return;
     const appVisible=!!state.session&&!$('appView')?.classList.contains('hidden');
-    btn.classList.toggle('hidden',!appVisible);
-  }
-
-  function ensureHint(){
-    if($('supportChatHintV53'))return;
-    const btn=$('supportChatBtnV52');if(!btn)return;
-    btn.insertAdjacentHTML('beforebegin','<button id="supportChatHintV53" class="support-chat-hint-v53 hidden" type="button"><span>Máte otázku?</span><strong>Napíšte nám správu</strong></button>');
-    $('supportChatHintV53').addEventListener('click',()=>{
-      hideHint();
-      $('supportChatBtnV52')?.click();
-    });
-  }
-
-  function hintSeen(){
-    try{return sessionStorage.getItem('chvostikovo_support_hint_v53')==='1'}catch(_){return false}
-  }
-  function markHintSeen(){try{sessionStorage.setItem('chvostikovo_support_hint_v53','1')}catch(_){}}
-  function hideHint(){
-    clearTimeout(window.__supportChatHintTimerV53);
-    $('supportChatHintV53')?.classList.add('hidden');
-  }
-  function showHint(){
-    ensureHint();
-    const hint=$('supportChatHintV53');
-    if(!hint||hintSeen())return;
-    markHintSeen();
-    hint.classList.remove('hidden');
-    clearTimeout(window.__supportChatHintTimerV53);
-    window.__supportChatHintTimerV53=setTimeout(hideHint,6000);
+    const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);
+    btn.classList.toggle('hidden',!appVisible||!unread||!$('supportChatModalV52')?.classList.contains('hidden'));
   }
 
   function refreshNav(){
@@ -2338,21 +2333,12 @@ async function togglePushDirect(btn){
     updateButton();
   });
 
-  addCustomerHook('afterSwitchTab',()=>{
-    updateButton();
-    refreshNav();
-    if(state.activeTab==='dog'){
-      setTimeout(()=>{
-        const btn=$('supportChatBtnV52');
-        if(btn&&!btn.classList.contains('hidden'))showHint();
-      },220);
-    }else hideHint();
-  });
+  addCustomerHook('afterSwitchTab',()=>{updateButton();refreshNav()});
 
   addCustomerHook('afterRenderStaff',()=>{refreshNav()});
   addCustomerHook('afterRenderDog',()=>{
     updateButton();
-    ensureHint();
+
     refreshNav();
     setTimeout(()=>{ensureRulesUiV55();polishMenuV55()},0);
   });
@@ -2361,7 +2347,7 @@ async function togglePushDirect(btn){
     mount();
     updateUnread();
     updateButton();
-    ensureHint();
+
     refreshNav();
     ensureRulesUiV55();
     polishMenuV55();
