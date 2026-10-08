@@ -4,13 +4,15 @@ import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
 import { LongForm } from "./Forms";
 import { REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
+import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
 const reqIcons = [ShieldCheck, HeartHandshake, Sparkles, Stethoscope];
 
 export function Requirements() {
   return (
-    <section id="podmienky" className="scroll-mt-24 py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4">
+    <section id="podmienky" className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             Podmienky prijatia
@@ -78,8 +80,9 @@ export function FirstVisit() {
   const [open, setOpen] = useState(false);
 
   return (
-    <section id="prva-navsteva" className="scroll-mt-24 py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4">
+    <section id="prva-navsteva" className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             Ako to funguje
@@ -138,8 +141,9 @@ export function FirstVisit() {
 
 export function Pricing() {
   return (
-    <section id="cennik" className="scroll-mt-24 py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4">
+    <section id="cennik" className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             Cenník
@@ -270,8 +274,9 @@ function FaqList({ items }: { items: Array<(typeof FAQ)[number]> }) {
 
 export function Faq() {
   return (
-    <section id="faq" className="scroll-mt-24 bg-secondary/40 pt-16 pb-12 sm:pt-20 sm:pb-14">
-      <div className="mx-auto max-w-4xl px-4">
+    <section id="faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 pt-16 pb-12 sm:pt-20 sm:pb-14">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
         <FaqList items={PRIMARY_FAQ} />
         <div className="mt-7 flex justify-center">
@@ -286,8 +291,9 @@ export function Faq() {
 
 export function PracticalFaq() {
   return (
-    <section id="dalsie-otazky" className="scroll-mt-24 bg-secondary/45 py-12 sm:py-14">
-      <div className="mx-auto max-w-4xl px-4">
+    <section id="dalsie-otazky" className="relative scroll-mt-24 overflow-hidden bg-secondary/45 py-12 sm:py-14">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Ďalšie časté otázky</h2>
         <FaqList items={PRACTICAL_FAQ} />
 
