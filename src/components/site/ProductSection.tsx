@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import standMia from "@/assets/products/stand-small-mia.webp";
 import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
 
@@ -25,8 +26,9 @@ const PRODUCTS = [
 
 export function ProductSection() {
   return (
-    <section id="produkty" className="scroll-mt-24 bg-secondary/45 py-9 sm:py-12">
-      <div className="mx-auto max-w-6xl px-4">
+    <section id="produkty" className="relative scroll-mt-24 overflow-hidden bg-secondary/45 py-9 sm:py-12">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Naše produkty</span>
