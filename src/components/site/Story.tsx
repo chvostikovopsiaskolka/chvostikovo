@@ -14,6 +14,7 @@ import bellacord from "@/assets/partner-bellacord.png";
 import coursing from "@/assets/partner-coursing.png";
 import lolkio from "@/assets/partner-lolkio.png";
 import { trackMarketingInteraction } from "@/lib/analytics";
+import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
 const whyIcons = [Home, Zap, Dog];
 
@@ -63,8 +64,9 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
   const items = isEnglish ? careEn : CARE;
 
   return (
-    <section id={isEnglish ? "care" : "starostlivost"} className="scroll-mt-24 py-12 sm:py-16">
-      <div className="mx-auto max-w-6xl px-4">
+    <section id={isEnglish ? "care" : "starostlivost"} className="relative scroll-mt-24 overflow-hidden py-12 sm:py-16">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">
           {isEnglish ? "How we care for your dog" : "Ako sa postaráme o psíka"}
         </h2>
@@ -132,7 +134,9 @@ export function Why() {
   return (
     <section id="preco" className="scroll-mt-24 py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="overflow-hidden rounded-4xl bg-forest px-6 py-10 text-cream sm:px-12 sm:py-12">
+        <div className="relative overflow-hidden rounded-4xl bg-forest px-6 py-10 text-cream sm:px-12 sm:py-12">
+          <SectionAmbientPaws tone="dark" />
+          <div className="relative z-10">
           <h2 className="text-center font-display text-3xl text-cream sm:text-4xl">
             Prečo využiť psiu škôlku?
           </h2>
@@ -188,6 +192,7 @@ export function Why() {
               Zavolajte nám
             </a>
           </div>
+          </div>
         </div>
       </div>
 
@@ -207,8 +212,9 @@ export function About({ language = "sk" }: { language?: "sk" | "en" }) {
   const isEnglish = language === "en";
 
   return (
-    <section id={isEnglish ? "about" : "o-nas"} className="scroll-mt-24 py-12 sm:py-16">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
+    <section id={isEnglish ? "about" : "o-nas"} className="relative scroll-mt-24 overflow-hidden py-12 sm:py-16">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
         <div>
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             {isEnglish ? "About us" : "O nás"}
@@ -284,7 +290,7 @@ export function About({ language = "sk" }: { language?: "sk" | "en" }) {
         </div>
       </div>
 
-      <div className="mx-auto mt-8 max-w-6xl px-4">
+      <div className="relative z-10 mx-auto mt-8 max-w-6xl px-4">
         <div className="grid items-center gap-8 rounded-4xl bg-secondary p-7 sm:p-10 md:text-center lg:grid-cols-[1fr_auto] lg:text-left">
           <div className="md:flex md:flex-col md:items-center lg:items-start">
             <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
