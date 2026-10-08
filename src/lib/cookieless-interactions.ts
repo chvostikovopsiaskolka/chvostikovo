@@ -175,7 +175,8 @@ export async function trackCookielessInteraction(
   const params = url.searchParams;
   const fbclid = params.get("fbclid") || "";
   const landingMetaClickHash = fbclid ? await sha256Hex(fbclid) : "";
-  await ensureLandingRecorded(url, landingMetaClickHash, language);
+  // Landing recovery must never delay a form submit or analytics event.
+  void ensureLandingRecorded(url, landingMetaClickHash, language).catch(() => {});
 
   const metaClickHash = !attemptId ? landingMetaClickHash : "";
   const source = eventSource.slice(0, 200);
