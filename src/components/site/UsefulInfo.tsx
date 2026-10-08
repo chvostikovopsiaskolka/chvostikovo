@@ -1,4 +1,5 @@
 import { ArrowRight, Languages, ShieldCheck, Sparkles } from "lucide-react";
+import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
 const articles = [
   {
@@ -29,8 +30,9 @@ const articles = [
 
 export function UsefulInfo() {
   return (
-    <section id="uzitocne-informacie" className="scroll-mt-24 bg-secondary/45 py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4">
+    <section id="uzitocne-informacie" className="relative scroll-mt-24 overflow-hidden bg-secondary/45 py-16 sm:py-20">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             Užitočné informácie
