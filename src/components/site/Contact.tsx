@@ -6,11 +6,13 @@ import { LongForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { LegalDialog, type LegalDialogType } from "./LegalDialog";
 import { hasFunctionalConsent } from "@/lib/consent";
+import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
 export function Contact() {
   return (
-    <section id="kontakt" className="scroll-mt-24 py-16 sm:py-20">
-      <div className="mx-auto max-w-4xl px-4">
+    <section id="kontakt" className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-4xl px-4">
         <div className="text-center">
           <h2 className="section-title text-3xl leading-tight sm:text-4xl">
             Prihlás svojho psíka ešte dnes
@@ -32,8 +34,9 @@ export function Contact() {
 
 export function EnglishContact() {
   return (
-    <section id="contact" className="scroll-mt-24 py-16 sm:py-20">
-      <div className="mx-auto max-w-4xl px-4">
+    <section id="contact" className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-4xl px-4">
         <div className="text-center">
           <h2 className="section-title text-3xl leading-tight sm:text-4xl">
             Enquire about dog daycare
