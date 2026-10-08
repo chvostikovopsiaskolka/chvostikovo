@@ -1799,3 +1799,18 @@ html.booking-picker-open-v37 body{
     letter-spacing:-.08px!important;
   }
 }
+
+
+/* v172: iOS PWA bottom nav must stay anchored to the visual viewport after long roster expansion.
+   Avoid the historical GPU translateZ/will-change layer; center the fixed bar without transforms. */
+html.customer-ios-v171 .bottom-nav{
+  position:fixed!important;
+  left:0!important;
+  right:0!important;
+  bottom:max(8px,env(safe-area-inset-bottom))!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  transform:none!important;
+  -webkit-transform:none!important;
+  will-change:auto!important;
+}
