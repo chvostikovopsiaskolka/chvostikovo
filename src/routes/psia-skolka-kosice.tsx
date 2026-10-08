@@ -165,7 +165,7 @@ function LeadLandingPage() {
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
                 <p className="text-center font-display text-2xl font-bold text-forest">
-                  Zistite, či je Chvostíkovo vhodné aj pre vášho psíka
+                  Doprajte svojmu psíkovi deň plný hier a kamarátov
                 </p>
                 <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/65">
                   Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií.
@@ -183,7 +183,7 @@ function LeadLandingPage() {
           <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-3.5 pt-12 pb-3.5 shadow-card ring-1 ring-forest/8 sm:px-5 sm:pt-14 sm:pb-5">
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">
-                Zistite, či je Chvostíkovo vhodné aj pre vášho psíka
+                Doprajte svojmu psíkovi deň plný hier a kamarátov
               </p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
                 Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií.
@@ -354,7 +354,7 @@ function LeadLandingPage() {
       <FormDialog
         open={leadModalOpen}
         onOpenChange={setLeadModalOpen}
-        title="Zistite, či je Chvostíkovo vhodné aj pre vášho psíka"
+        title="Doprajte svojmu psíkovi deň plný hier a kamarátov"
         subtitle="Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií."
       >
         <ShortForm trackingSource={leadModalSource} />
