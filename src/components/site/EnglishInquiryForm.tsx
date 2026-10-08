@@ -25,7 +25,7 @@ export function EnglishInquiryForm({
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
 
-  function onFormFocus() {
+  function onFormChange() {
     if (formStarted.current) return;
     formStarted.current = true;
     void trackCookielessInteraction("form_start", trackingSource, "en");
@@ -98,7 +98,7 @@ export function EnglishInquiryForm({
   }
 
   return (
-    <form onSubmit={onSubmit} onFocusCapture={onFormFocus} className="space-y-3 text-left sm:space-y-3.5">
+    <form onSubmit={onSubmit} onChangeCapture={onFormChange} className="space-y-3 text-left sm:space-y-3.5">
       <div>
         <label className="label-sm" htmlFor={`en-${formId}-name`}>Your name *</label>
         <input id={`en-${formId}-name`} name="name" autoComplete="name" required className="field" placeholder="Your name" />

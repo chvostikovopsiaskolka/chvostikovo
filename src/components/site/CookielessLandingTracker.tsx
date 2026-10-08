@@ -77,6 +77,18 @@ function releaseSessionGuard(key: string) {
   }
 }
 
+function landingConfirmedKey(guardKey: string) {
+  return `${guardKey}:confirmed`;
+}
+
+function confirmLanding(guardKey: string) {
+  try {
+    window.sessionStorage.setItem(landingConfirmedKey(guardKey), "1");
+  } catch {
+    // Confirmation is only a resilience hint for later interaction tracking.
+  }
+}
+
 export function CookielessLandingTracker() {
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -116,6 +128,7 @@ export function CookielessLandingTracker() {
           keepalive: true,
         });
         if (!result.ok) releaseSessionGuard(guardKey);
+        else confirmLanding(guardKey);
       } catch {
         releaseSessionGuard(guardKey);
       }

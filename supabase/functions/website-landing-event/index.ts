@@ -68,6 +68,12 @@ function classifySource(input: Json) {
   const sourceTokens = utmSource.split(/[^a-z0-9]+/).filter(Boolean);
   const hasSourceToken = (values: string[]) => sourceTokens.some((token) => values.includes(token));
   const paidMedium = ["paid", "cpc", "ppc", "paid_social", "social_paid"].some((value) => utmMedium.includes(value));
+  const isHost = (domain: string) => referrerHost === domain || referrerHost.endsWith("." + domain);
+  const isGoogleHost =
+    referrerHost === "google.com" ||
+    referrerHost.endsWith(".google.com") ||
+    referrerHost.startsWith("google.") ||
+    referrerHost.startsWith("www.google.");
 
   const isInstagramSource = hasSourceToken(["instagram", "ig"]);
   const isFacebookSource = hasSourceToken(["facebook", "fb"]);
@@ -75,8 +81,7 @@ function classifySource(input: Json) {
   const isGoogleSource = hasSourceToken(["google"]);
   const isBingSource = hasSourceToken(["bing"]);
 
-  const isHost = (domain: string) =>
-    referrerHost === domain || referrerHost.endsWith("." + domain);
+  if (isHost("chvostikovo.sk") || isHost("chvostikovopsiaskolka.github.io")) return "internal_navigation";
 
   if (isMetaSource && paidMedium) return "meta_paid";
   if (isGoogleSource && paidMedium) return "google_paid";
@@ -87,16 +92,35 @@ function classifySource(input: Json) {
     if (isFacebookSource || hasSourceToken(["meta"])) return "facebook_organic";
     if (isGoogleSource) return "google_organic";
     if (isBingSource) return "bing_organic";
+    if (hasSourceToken(["tiktok"])) return "tiktok_organic";
+    if (hasSourceToken(["youtube"])) return "youtube_organic";
+    if (hasSourceToken(["linkedin"])) return "linkedin_organic";
+    if (hasSourceToken(["threads"])) return "threads_organic";
+    if (hasSourceToken(["reddit"])) return "reddit_organic";
+    if (hasSourceToken(["pinterest"])) return "pinterest_organic";
   }
 
-  // Preserve the existing paid-Meta fallback when an ad click only carries fbclid.
   if (hasFbclid) return "meta_paid";
 
   if (isHost("instagram.com")) return "instagram_organic";
   if (isHost("facebook.com") || isHost("fb.com")) return "facebook_organic";
-  if (isHost("google.com") || referrerHost.startsWith("google.")) return "google_organic";
+  if (isGoogleHost) return "google_organic";
   if (isHost("bing.com")) return "bing_organic";
+  if (isHost("search.yahoo.com") || isHost("yahoo.com")) return "yahoo_organic";
+  if (isHost("duckduckgo.com")) return "duckduckgo_organic";
+  if (isHost("ecosia.org")) return "ecosia_organic";
+  if (isHost("seznam.cz")) return "seznam_organic";
+  if (isHost("search.brave.com")) return "brave_organic";
+  if (isHost("startpage.com")) return "startpage_organic";
+  if (isHost("qwant.com")) return "qwant_organic";
+  if (isHost("yandex.com") || isHost("yandex.ru")) return "yandex_organic";
   if (isHost("tiktok.com")) return "tiktok_organic";
+  if (isHost("youtube.com") || isHost("youtu.be")) return "youtube_organic";
+  if (isHost("linkedin.com")) return "linkedin_organic";
+  if (isHost("threads.net")) return "threads_organic";
+  if (isHost("reddit.com")) return "reddit_organic";
+  if (isHost("pinterest.com")) return "pinterest_organic";
+  if (isHost("x.com") || isHost("twitter.com")) return "x_organic";
 
   if (utmSource) return "utm_other";
   if (referrerHost) return "referral";

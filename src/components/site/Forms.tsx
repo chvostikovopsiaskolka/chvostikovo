@@ -48,7 +48,7 @@ export function ShortForm({
     trackingSource?.startsWith("lead_landing_") === true ||
     trackingSource?.startsWith("puppy_landing_") === true;
 
-  function onFormFocus() {
+  function onFormChange() {
     if (!shouldTrackForm || formStarted.current) return;
     formStarted.current = true;
     void trackCookielessInteraction("form_start", trackingSource || "informational_form");
@@ -136,7 +136,7 @@ export function ShortForm({
   }
 
   return (
-    <form onSubmit={onSubmit} onFocusCapture={onFormFocus} className="space-y-3 text-left sm:space-y-3.5">
+    <form onSubmit={onSubmit} onChangeCapture={onFormChange} className="space-y-3 text-left sm:space-y-3.5">
       <div>
         <label className="label-sm" htmlFor={`s-${formId}-meno`}>
           Meno majiteľa *
@@ -181,7 +181,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
   const formStarted = useRef(false);
   const trackingSource = "application_form";
 
-  function onFormFocus() {
+  function onFormChange() {
     if (formStarted.current) return;
     formStarted.current = true;
     void trackCookielessInteraction("form_start", trackingSource);
@@ -252,7 +252,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} onFocusCapture={onFormFocus} className="space-y-3 text-left sm:space-y-3.5">
+    <form onSubmit={onSubmit} onChangeCapture={onFormChange} className="space-y-3 text-left sm:space-y-3.5">
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
         <div>
           <label className="label-sm" htmlFor={`l-${formId}-meno`}>

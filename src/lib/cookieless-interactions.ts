@@ -61,6 +61,95 @@ function releaseSessionGuard(key: string) {
   }
 }
 
+function landingPath(url: URL, metaClickHash: string) {
+  const cleanPath = `${url.pathname}${url.hash || ""}`.slice(0, 500);
+  if (!metaClickHash) return cleanPath;
+
+  const marker = `|chv2h:${metaClickHash}`;
+  return `${cleanPath.slice(0, 500 - marker.length)}${marker}`;
+}
+
+function landingGuardKey(url: URL, metaClickHash: string) {
+  if (metaClickHash) return `chvostikovo:landing:meta-click:${metaClickHash}`;
+
+  const params = url.searchParams;
+  const safeParts = [
+    url.pathname,
+    url.hash,
+    params.get("utm_source") || "",
+    params.get("utm_medium") || "",
+    params.get("utm_campaign") || "",
+    params.get("utm_content") || "",
+    params.get("utm_term") || "",
+    params.get("utm_id") || "",
+  ];
+  return `chvostikovo:landing:session:${safeParts.join("|")}`;
+}
+
+function landingConfirmedKey(guardKey: string) {
+  return `${guardKey}:confirmed`;
+}
+
+function isLandingConfirmed(guardKey: string) {
+  try {
+    return window.sessionStorage.getItem(landingConfirmedKey(guardKey)) === "1";
+  } catch {
+    return false;
+  }
+}
+
+async function ensureLandingRecorded(url: URL, metaClickHash: string, language: "sk" | "en") {
+  const guardKey = landingGuardKey(url, metaClickHash);
+  if (isLandingConfirmed(guardKey)) return;
+
+  // Give the root landing tracker a brief chance to finish first.
+  await new Promise((resolve) => window.setTimeout(resolve, 250));
+  if (isLandingConfirmed(guardKey)) return;
+
+  try {
+    // If the normal landing tracker is still working, do not race it.
+    if (window.sessionStorage.getItem(guardKey)) return;
+    window.sessionStorage.setItem(guardKey, "1");
+  } catch {
+    // If storage is unavailable we can still attempt a best-effort recovery.
+  }
+
+  const params = url.searchParams;
+  const payload = {
+    path: landingPath(url, metaClickHash),
+    language,
+    utm_source: params.get("utm_source") || "",
+    utm_medium: params.get("utm_medium") || "",
+    utm_campaign: normalizeUtm(params.get("utm_campaign") || ""),
+    utm_content: normalizeUtm(params.get("utm_content") || ""),
+    utm_term: normalizeUtm(params.get("utm_term") || ""),
+    utm_id: params.get("utm_id") || "",
+    has_fbclid: Boolean(params.get("fbclid")),
+    referrer_host: safeReferrerHost(),
+    navigation_type: navigationType(),
+  };
+
+  try {
+    const result = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    });
+    if (result.ok) {
+      try {
+        window.sessionStorage.setItem(landingConfirmedKey(guardKey), "1");
+      } catch {
+        // Confirmation is optional.
+      }
+    } else {
+      releaseSessionGuard(guardKey);
+    }
+  } catch {
+    releaseSessionGuard(guardKey);
+  }
+}
+
 export async function trackCookielessInteraction(
   eventName: CookielessInteractionName,
   eventSource: string,
@@ -85,11 +174,17 @@ export async function trackCookielessInteraction(
 
   const params = url.searchParams;
   const fbclid = params.get("fbclid") || "";
-  const metaClickHash = !attemptId && fbclid ? await sha256Hex(fbclid) : "";
+  const landingMetaClickHash = fbclid ? await sha256Hex(fbclid) : "";
+  await ensureLandingRecorded(url, landingMetaClickHash, language);
+
+  const metaClickHash = !attemptId ? landingMetaClickHash : "";
   const source = eventSource.slice(0, 200);
+  // form_start is a page-level funnel step. Ignore placement in the guard so
+  // browser autofill cannot count several rendered forms as several visitors.
+  const guardSource = eventName === "form_start" ? "any_form" : source;
   const guardKey = metaClickHash
-    ? `chvostikovo:interaction:meta:${metaClickHash}:${eventName}:${source}`
-    : `chvostikovo:interaction:session:${url.pathname}:${eventName}:${source}`;
+    ? `chvostikovo:interaction:meta:${metaClickHash}:${eventName}:${guardSource}`
+    : `chvostikovo:interaction:session:${url.pathname}:${eventName}:${guardSource}`;
 
   if (!attemptId && !claimSessionGuard(guardKey)) return;
 

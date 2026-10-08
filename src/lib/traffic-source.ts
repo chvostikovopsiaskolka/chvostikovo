@@ -18,15 +18,42 @@ function hostnameFromUrl(value: string) {
   }
 }
 
+function hostMatches(host: string, domain: string) {
+  return host === domain || host.endsWith(`.${domain}`);
+}
+
+function isGoogleHost(host: string) {
+  return host === "google.com" || host.endsWith(".google.com") || host.startsWith("google.") || host.startsWith("www.google.");
+}
+
 function inferSource(referrer: string) {
   const host = hostnameFromUrl(referrer);
   if (!host) return { source: "direct", medium: "none" };
 
-  if (host.includes("google.")) return { source: "google", medium: "organic" };
-  if (host.includes("bing.com")) return { source: "bing", medium: "organic" };
-  if (host.includes("facebook.com") || host.includes("fb.com")) return { source: "facebook", medium: "referral" };
-  if (host.includes("instagram.com")) return { source: "instagram", medium: "referral" };
-  if (host.includes("tiktok.com")) return { source: "tiktok", medium: "referral" };
+  if (hostMatches(host, "chvostikovo.sk") || hostMatches(host, "chvostikovopsiaskolka.github.io")) {
+    return { source: "internal", medium: "internal" };
+  }
+
+  if (isGoogleHost(host)) return { source: "google", medium: "organic" };
+  if (hostMatches(host, "bing.com")) return { source: "bing", medium: "organic" };
+  if (hostMatches(host, "search.yahoo.com") || hostMatches(host, "yahoo.com")) return { source: "yahoo", medium: "organic" };
+  if (hostMatches(host, "duckduckgo.com")) return { source: "duckduckgo", medium: "organic" };
+  if (hostMatches(host, "ecosia.org")) return { source: "ecosia", medium: "organic" };
+  if (hostMatches(host, "seznam.cz")) return { source: "seznam", medium: "organic" };
+  if (hostMatches(host, "search.brave.com")) return { source: "brave", medium: "organic" };
+  if (hostMatches(host, "startpage.com")) return { source: "startpage", medium: "organic" };
+  if (hostMatches(host, "qwant.com")) return { source: "qwant", medium: "organic" };
+  if (hostMatches(host, "yandex.com") || hostMatches(host, "yandex.ru")) return { source: "yandex", medium: "organic" };
+
+  if (hostMatches(host, "facebook.com") || hostMatches(host, "fb.com")) return { source: "facebook", medium: "social" };
+  if (hostMatches(host, "instagram.com")) return { source: "instagram", medium: "social" };
+  if (hostMatches(host, "threads.net")) return { source: "threads", medium: "social" };
+  if (hostMatches(host, "tiktok.com")) return { source: "tiktok", medium: "social" };
+  if (hostMatches(host, "youtube.com") || hostMatches(host, "youtu.be")) return { source: "youtube", medium: "social" };
+  if (hostMatches(host, "linkedin.com")) return { source: "linkedin", medium: "social" };
+  if (hostMatches(host, "reddit.com")) return { source: "reddit", medium: "social" };
+  if (hostMatches(host, "pinterest.com")) return { source: "pinterest", medium: "social" };
+  if (hostMatches(host, "x.com") || hostMatches(host, "twitter.com")) return { source: "x", medium: "social" };
 
   return { source: host, medium: "referral" };
 }
