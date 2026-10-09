@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261009-health-field-label-v197';
+const CACHE='chvostikovo-portal-shell-20261009-orange-notices-profile-health-v198';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/terms-pdf.js?v=20261009-health-field-label-v197','/terms-pdf-font.js?v=20261009-health-field-label-v197','/styles.css?v=20261009-health-field-label-v197','/app.js?v=20261009-health-field-label-v197','/back-swipe.js?v=20261009-health-field-label-v197'];
+const SHELL=['/','/terms-pdf.js?v=20261009-orange-notices-profile-health-v198','/terms-pdf-font.js?v=20261009-orange-notices-profile-health-v198','/styles.css?v=20261009-orange-notices-profile-health-v198','/app.js?v=20261009-orange-notices-profile-health-v198','/back-swipe.js?v=20261009-orange-notices-profile-health-v198'];
 
 function withPortalCsp(response){
   if(!response)return response;

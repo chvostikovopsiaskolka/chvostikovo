@@ -52,7 +52,7 @@ input[type="date"],input[type="time"]{max-inline-size:100%!important;-webkit-min
 
 
 /* v20: unread notifications in popup */
-.notification-popup{position:fixed;inset:0;z-index:430;background:rgba(17,24,39,.52);display:grid;place-items:center;padding:calc(18px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));overflow:auto}.notification-popup-card{position:relative;width:min(500px,100%);max-height:calc(100dvh - 36px);overflow:auto;background:#fff;border-radius:26px;padding:24px 20px 20px;box-shadow:0 24px 70px rgba(0,0,0,.22)}.notification-popup-close{position:absolute;right:13px;top:12px;width:36px;height:36px;border:0;border-radius:50%;background:#f3f4f6;color:#374151;font-size:25px;line-height:1;display:grid;place-items:center;padding:0}.notification-popup-kicker{display:inline-flex;border-radius:999px;background:#fff7ed;color:#ea580c;font-size:11px;font-weight:900;padding:6px 10px;margin-bottom:10px}.notification-popup-card h2{font-size:23px;line-height:1.15;margin:0 44px 16px 0}.notification-popup-list{display:grid;gap:10px}.notification-popup-item{border:1px solid #fed7aa;border-left:4px solid var(--primary);background:#fffaf6;border-radius:16px;padding:13px 14px}.notification-popup-item strong{display:block;font-size:16px;color:var(--ink)}.notification-popup-item div{margin-top:5px;color:var(--muted);font-size:14px;line-height:1.4}.notification-popup.hidden{display:none!important}@media(max-width:520px), (orientation:landscape) and (pointer:coarse) and (max-height:520px){.notification-popup-card{border-radius:23px;padding:22px 17px 18px}.notification-popup-card h2{font-size:21px}.notification-popup-item strong{font-size:15px}.notification-popup-item div{font-size:13px}}
+.notification-popup{position:fixed;inset:0;z-index:430;background:rgba(17,24,39,.52);display:grid;place-items:center;padding:calc(18px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));overflow:auto}.notification-popup-card{position:relative;width:min(500px,100%);max-height:calc(100dvh - 36px);overflow:auto;background:#fff7ed;border:1px solid #fed7aa;border-left:4px solid var(--primary);border-radius:22px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.22)}.notification-popup-close{position:absolute;right:13px;top:12px;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:#9a470c;font-size:25px;line-height:1;display:grid;place-items:center;padding:0}.notification-popup-kicker{display:inline-flex;border-radius:999px;background:#fff7ed;color:#ea580c;font-size:11px;font-weight:900;padding:6px 10px;margin-bottom:10px}.notification-popup-card h2{font-size:23px;line-height:1.15;margin:0 44px 16px 0}.notification-popup-list{display:grid;gap:10px}.notification-popup-item{border:0;background:transparent;border-radius:0;padding:0}.notification-popup-item+ .notification-popup-item{border-top:1px solid #fed7aa;padding-top:12px!important}.notification-popup-item:first-child strong{padding-right:40px}.notification-popup-item strong{display:block;font-size:16px;color:var(--ink)}.notification-popup-item div{margin-top:5px;color:var(--muted);font-size:14px;line-height:1.4}.notification-popup.hidden{display:none!important}@media(max-width:520px), (orientation:landscape) and (pointer:coarse) and (max-height:520px){.notification-popup-card{border-radius:22px;padding:18px 16px}.notification-popup-card h2{font-size:21px}.notification-popup-item strong{font-size:15px}.notification-popup-item div{font-size:13px}}
 
 
 /* v20: legal confirmations */
@@ -1498,7 +1498,7 @@ html.customer-awaiting-dog-v107 #appView{
 #bookingTab .hero-pass.dog-overview-pass span{font-size:12px;opacity:1}
 #bookingTab .hero-pass.dog-overview-pass strong,#bookingTab .hero-pass.dog-overview-pass.single-v36 strong,#bookingTab .hero-pass.dog-overview-pass .single-entry-label-v75{font-size:23px!important;line-height:1.08!important;margin:0;max-width:none!important;color:#17233b}
 #bookingTab .hero-pass.dog-overview-pass small{font-size:10px!important;line-height:1.2;opacity:.85;margin:1px 0 0;white-space:normal;overflow-wrap:anywhere;min-width:0}
-.notification-popup-without-heading .notification-popup-list{padding-top:34px}
+.notification-popup-without-heading .notification-popup-list{padding-top:0}
 #bookingTab .hero-pass.dog-overview-pass .pass-validity-pending{font-size:9px!important;white-space:nowrap}
 .dog-overview-status,.dog-overview-visits{border:0;background:transparent;color:#253348;text-align:left;padding:2px 0;min-height:32px;font-size:12px;font-weight:700;line-height:1.28;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .dog-overview-status>span:last-child,.dog-overview-visits .overview-label{min-width:0;align-self:center}
@@ -1631,7 +1631,7 @@ html.customer-awaiting-dog-v107 #appView{
 .portal-announcement-head{font-size:14px;line-height:1.25}
 .portal-announcement-body{font-size:12.5px!important;line-height:1.35!important;margin-top:4px!important}
 .notification-popup-list{gap:8px!important}
-.notification-popup-item{padding:10px 12px!important;border-radius:14px!important}
+.notification-popup-item{padding:0!important;border-radius:0!important}
 .notification-popup-item strong{font-size:14px!important}
 .notification-popup-item div{font-size:13px!important;line-height:1.35!important;margin-top:4px!important}
 .notification-popup-item button{min-height:34px!important;margin-top:8px!important;padding:6px 12px!important;font-size:13px!important}
@@ -2084,4 +2084,5 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
   opacity:1!important;
   transform:none!important;
 }
+
 
