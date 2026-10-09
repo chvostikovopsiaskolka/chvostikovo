@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261009-single-line-entry-badge-v191';
-const APP_VERSION='1.0.38';
+const APP_BUILD='20261009-notice-layout-read-badge-v192';
+const APP_VERSION='1.0.39';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -390,10 +390,12 @@ function renderNotifications(){
   let modal=$('notificationPopup');
   if(!rows.length){modal?.classList.add('hidden');return}
   if(!modal){
-    document.body.insertAdjacentHTML('beforeend','<div id="notificationPopup" class="notification-popup hidden" role="dialog" aria-modal="true" aria-labelledby="notificationPopupTitle"><div class="notification-popup-card"><button id="notificationPopupClose" class="notification-popup-close" type="button" aria-label="Zavrieť">×</button><div class="notification-popup-kicker">Chvostíkovo</div><h2 id="notificationPopupTitle">Upozornenia</h2><div id="notificationPopupList" class="notification-popup-list"></div></div></div>');
+    document.body.insertAdjacentHTML('beforeend','<div id="notificationPopup" class="notification-popup hidden" role="dialog" aria-modal="true" aria-label="Správy zo škôlky"><div class="notification-popup-card"><button id="notificationPopupClose" class="notification-popup-close" type="button" aria-label="Zavrieť">×</button><h2 id="notificationPopupTitle" class="hidden">Oznam pre majiteľov škôlkarov</h2><div id="notificationPopupList" class="notification-popup-list"></div></div></div>');
     modal=$('notificationPopup');
   }
   const visibleIds=rows.map(n=>Number(n.id)).filter(Boolean);
+  $('notificationPopupTitle').classList.toggle('hidden',!rows.some(n=>n.notification_type==='announcement_push'));
+  modal.querySelector('.notification-popup-card').classList.toggle('notification-popup-without-heading',!rows.some(n=>n.notification_type==='announcement_push'));
   const list=$('notificationPopupList');
   list.innerHTML=rows.map(n=>`<div class="notification-popup-item"><strong>${esc(n.title||'Upozornenie')}</strong><div>${esc(n.body||'')}</div>${['pass_expiry','vaccination_expiry'].includes(n.notification_type)?`<button type="button" class="btn compact" data-popup-care="${Number(n.id)}">${n.notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button>`:''}</div>`).join('');
   list.querySelectorAll('[data-popup-care]').forEach(b=>b.addEventListener('click',()=>{const row=rows.find(n=>Number(n.id)===Number(b.dataset.popupCare));if(row){close();customerCareAction(row)}}));
@@ -402,12 +404,9 @@ function renderNotifications(){
     modal.classList.add('hidden');
     const stamp=new Date().toISOString();
     (state.data?.notifications||[]).forEach(n=>{if(visibleIds.includes(Number(n.id)))n.read_at=stamp});
+    syncCustomerAppBadgeV186();
     try{
-      await api({action:'mark_notifications_read'});
-      // The API marks all outstanding notices read, not only this popup's five visible rows.
-      const readAt=new Date().toISOString();
-      (state.data?.notifications||[]).forEach(n=>{if(!n.read_at)n.read_at=readAt});
-      syncCustomerAppBadgeV186();
+      await api({action:'mark_notifications_read',notification_ids:visibleIds});
     }catch(_){queueCustomerSync('notifications',80)}
   };
   $('notificationPopupClose').onclick=close;
@@ -439,7 +438,7 @@ function renderPassSummaryCore(){
     $('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>${Number(p.used_entries)||0} z ${Number(p.total_entries)||0}</strong>${validity}`;
     return;
   }
-  if(planned){$('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>0 z ${planned.total}</strong>${planned.start?`<small>Platnosť od ${skDate(planned.start)} do ${skDate(planned.until)}</small>`:'<small>Platí 2 mesiace od prvého rezervovaného vstupu</small>'}`;return}
+  if(planned){$('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>0 z ${planned.total}</strong>${planned.start?`<small>Platnosť od ${skDate(planned.start)} do ${skDate(planned.until)}</small>`:'<small class="pass-validity-pending" title="Platí 2 mesiace od prvého rezervovaného vstupu">2 mesiace od 1. vstupu</small>'}`;return}
   if(d?.default_entry_type==='free'){
     $('passSummary').innerHTML='<span>Vstup</span><strong class="free-entry-label-v96">Bezplatne</strong>';
     return;

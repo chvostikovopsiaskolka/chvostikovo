@@ -1492,10 +1492,12 @@ html.customer-awaiting-dog-v107 #appView{
 .dog-overview-status.invalid .vacc-icon{background:#ffe4e5;color:#c83e4a}
 .overview-icon svg,.dog-overview-gradebook svg,.menu-icon svg,.customer-menu-rows svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .overview-icon svg{width:19px;height:19px}
-#bookingTab .hero-pass.dog-overview-pass{max-width:none!important;text-align:left!important;display:grid;gap:1px;font-weight:700;font-size:13px;line-height:1.2;color:inherit;min-width:0}
+#bookingTab .hero-pass.dog-overview-pass{max-width:100%!important;flex:1 1 0;text-align:left!important;display:grid;gap:1px;font-weight:700;font-size:13px;line-height:1.2;color:inherit;min-width:0}
 #bookingTab .hero-pass.dog-overview-pass span{font-size:12px;opacity:1}
 #bookingTab .hero-pass.dog-overview-pass strong,#bookingTab .hero-pass.dog-overview-pass.single-v36 strong,#bookingTab .hero-pass.dog-overview-pass .single-entry-label-v75{font-size:23px!important;line-height:1.08!important;margin:0;max-width:none!important;color:#17233b}
-#bookingTab .hero-pass.dog-overview-pass small{font-size:11px!important;line-height:1.3;opacity:.85;margin:1px 0 0;white-space:normal}
+#bookingTab .hero-pass.dog-overview-pass small{font-size:10px!important;line-height:1.2;opacity:.85;margin:1px 0 0;white-space:normal;overflow-wrap:anywhere;min-width:0}
+.notification-popup-without-heading .notification-popup-list{padding-top:34px}
+#bookingTab .hero-pass.dog-overview-pass .pass-validity-pending{font-size:9px!important;white-space:nowrap}
 .dog-overview-status,.dog-overview-visits{border:0;background:transparent;color:#253348;text-align:left;padding:2px 0;min-height:32px;font-size:12px;font-weight:700;line-height:1.28;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .dog-overview-status>span:last-child,.dog-overview-visits .overview-label{min-width:0;align-self:center}
 .dog-overview-status.invalid{color:#ad3345}.dog-overview-status.warning{color:#a76414}.dog-overview-status.valid{color:#126b3d}

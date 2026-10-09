@@ -1217,9 +1217,7 @@ Deno.serve(async (req: Request) => {
       }, token) });
     }
     if (action === 'mark_notifications_read') {
-      const ids = Array.isArray(body.notification_ids) ? [...new Set(body.notification_ids.map(Number).filter(id => Number.isSafeInteger(id) && id > 0))].slice(0,100) : null;
-      if (ids && !ids.length) return json({ data: true });
-      await rest('portal_notifications?recipient_user_id=eq.' + encodeURIComponent(String(user.id)) + '&read_at=is.null' + (ids ? '&id=' + encodeURIComponent(inFilter(ids)) : ''), {
+      await rest('portal_notifications?recipient_user_id=eq.' + encodeURIComponent(String(user.id)) + '&read_at=is.null', {
         method: 'PATCH',
         body: { read_at: new Date().toISOString() },
       });
