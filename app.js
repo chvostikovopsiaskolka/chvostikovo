@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261009-chat-tap-polish-v183';
-const APP_VERSION='1.0.30';
+const APP_BUILD='20261009-photo-picker-roster-v184';
+const APP_VERSION='1.0.31';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -730,8 +730,20 @@ function ensurePhotoActionsV89(){
   $('photoActionsCloseV89').onclick=closePhotoActionsV89;
   $('photoActionsModalV89').addEventListener('click',e=>{if(e.target===$('photoActionsModalV89'))closePhotoActionsV89()});
 }
-function closePhotoActionsV89(){$('photoActionsModalV89')?.classList.add('hidden')}
-function selectNewDogPhotoV89(){closePhotoActionsV89();$('dogPhotoInput')?.click()}
+let photoPickerFromActionsV184=false;
+function closePhotoActionsV89(){
+  photoPickerFromActionsV184=false;
+  const modal=$('photoActionsModalV89');
+  modal?.classList.remove('photo-picker-waiting-v184');
+  modal?.classList.add('hidden');
+}
+function selectNewDogPhotoV89(){
+  const modal=$('photoActionsModalV89'),input=$('dogPhotoInput');
+  if(!input)return;
+  photoPickerFromActionsV184=!!modal&&!modal.classList.contains('hidden');
+  if(photoPickerFromActionsV184)modal.classList.add('photo-picker-waiting-v184');
+  input.click();
+}
 function showPhotoActionsV89(dog){
   ensurePhotoActionsV89();
   $('photoActionsModalV89').dataset.dogId=String(dog.id);
@@ -762,7 +774,13 @@ function beginPhotoEditV89(img,options={}){
 async function openPhotoEditor(e){
   const file=e.target.files?.[0];
   window.__customerPhotoPickerV88=false;
-  if(!file)return;
+  if(!file){
+    $('photoActionsModalV89')?.classList.remove('photo-picker-waiting-v184');
+    photoPickerFromActionsV184=false;
+    return;
+  }
+  if(photoPickerFromActionsV184)closePhotoActionsV89();
+  photoPickerFromActionsV184=false;
   window.__customerPhotoDecodeV88=true;
   try{
     const img=await decodePhotoFileV88(file);
@@ -950,6 +968,7 @@ $('bookingDogSelector').addEventListener('change',e=>{state.selectedDogId=Number
 $('dogDetailsPhotoButton').addEventListener('click',()=>{const dog=selectedDog();if(dog?.photo_url)showPhotoActionsV89(dog);else selectNewDogPhotoV89()});
 $('dogPhotoInput').addEventListener('click',()=>{window.__customerPhotoPickerV88=true;setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},15000)});
 $('dogPhotoInput').addEventListener('change',openPhotoEditor);
+$('dogPhotoInput').addEventListener('cancel',()=>{window.__customerPhotoPickerV88=false;photoPickerFromActionsV184=false;$('photoActionsModalV89')?.classList.remove('photo-picker-waiting-v184')});
 $('bookingVaccinationStatus').addEventListener('click',()=>openDogDetails('vaccinations'));
 $('bookingVisitCount').addEventListener('click',()=>window.openDogVisitsV99?.());
 function openCustomerRules(){if(window.openCustomerRulesV55)window.openCustomerRulesV55();else $('schoolRulesCardV55')?.click()}
@@ -1899,7 +1918,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const otherVisible=visible.filter((_,index)=>index!==ownIndex);
     const anonymous=Math.max(0,Number(day.anonymous_dogs||0)-(ownIndex<0?1:0));
     const row=(x,badge='')=>{const sex=x.sex==='male'?' dog-male-v100':x.sex==='female'?' dog-female-v100':' dog-neutral-v100';return `<span class="reserved-roster-row-v37">${x.photo_url?`<i class="reserved-roster-avatar-v37${sex}"><img src="${esc(x.photo_url)}" alt=""></i>`:`<i class="reserved-roster-avatar-v37${sex}">🐾</i>`}<b>${esc(x.name)}</b>${badge}</span>`};
-    return `<details class="reserved-roster-v37"><summary>${esc(pluralDogs(count))}</summary><div>${row(own,passState)}${otherVisible.map(x=>row(x)).join('')}${Array.from({length:anonymous},()=>'<span class="reserved-roster-row-v37"><i class="reserved-roster-avatar-v37 dog-neutral-v100">🐾</i><b>Prihlásený škôlkar</b></span>').join('')}</div></details>`;
+    return `<details class="reserved-roster-v37"><summary>Pozrite si s kým bude váš psík v škôlke</summary><div>${row(own,passState)}${otherVisible.map(x=>row(x)).join('')}${Array.from({length:anonymous},()=>'<span class="reserved-roster-row-v37"><i class="reserved-roster-avatar-v37 dog-neutral-v100">🐾</i><b>Prihlásený škôlkar</b></span>').join('')}</div></details>`;
   }
 
   customerRenderers.upcoming=()=>{

@@ -2061,3 +2061,13 @@ html.support-chat-open-v52 .beta-version-badge-v75{
 #supportChatModalV52 .support-chat-call-v182:active{
   background:#f8fafc!important;
 }
+
+
+/* v184: keep the custom photo actions sheet visually stable while iOS shows its native source chooser. */
+#photoActionsModalV89.photo-picker-waiting-v184{
+  pointer-events:none!important;
+}
+#photoActionsModalV89.photo-picker-waiting-v184 .photo-actions-card-v89{
+  opacity:1!important;
+  transform:none!important;
+}
