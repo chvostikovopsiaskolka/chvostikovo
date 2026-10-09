@@ -660,7 +660,7 @@ function cleanDogPayload(payload: Json) {
     sex,
     neutered: typeof payload.neutered === 'boolean' ? payload.neutered : null,
     allergies: cleanText(payload.allergies, 3000),
-    temperament: cleanText(payload.temperament, 1000),
+    temperament: cleanText(payload.temperament, 3000),
     vaccinations: cleanVaccinations(payload.vaccinations),
   };
 }
@@ -668,6 +668,14 @@ function cleanDogPayload(payload: Json) {
 async function ownsDog(userId: string, dogId: number) {
   const dogs = await linkedDogs(userId);
   return dogs.some((dog) => Number(dog.id) === dogId);
+}
+
+function dogCarePatch(payload: Json, cleaned: Json, vaccinationsProvided: boolean): Json {
+  // Updating vaccination dates must not overwrite unrelated care notes from a stale form.
+  if (vaccinationsProvided) return {};
+  return payload.care_fields_version === 2
+    ? { allergies: cleaned.allergies, temperament: cleaned.temperament }
+    : { allergies: cleaned.allergies };
 }
 
 async function saveDog(user: Json, payload: Json) {
@@ -685,7 +693,11 @@ async function saveDog(user: Json, payload: Json) {
   );
   const datesComplete = allDatesPresent && !hasExpiredVaccination;
   if (dogId) {
-    if (!await ownsDog(userId, dogId)) throw new Error('Tento psík nie je priradený k vášmu účtu.');
+    const ownedDog = (await linkedDogs(userId)).find(dog => Number(dog.id) === dogId);
+    if (!ownedDog) throw new Error('Tento psík nie je priradený k vášmu účtu.');
+    if (!vaccinationsProvided && payload.care_fields_version !== 2 && ownedDog.temperament) {
+      throw new Error('Údaje psíka majú nové samostatné polia. Obnovte aplikáciu a skúste uloženie znova.');
+    }
     let proofRows: Array<Json> = [];
     if (vaccinationsProvided && datesComplete) {
       proofRows = await rest(
@@ -704,8 +716,7 @@ async function saveDog(user: Json, payload: Json) {
       weight_kg: cleaned.weight_kg,
       sex: cleaned.sex,
       neutered: cleaned.neutered,
-      allergies: cleaned.allergies,
-      temperament: cleaned.temperament,
+      ...dogCarePatch(payload, cleaned, vaccinationsProvided),
     };
     await rest('dogs?id=eq.' + dogId, {
       method: 'PATCH',
