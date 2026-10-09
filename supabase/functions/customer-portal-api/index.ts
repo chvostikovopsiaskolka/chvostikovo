@@ -621,13 +621,8 @@ async function saveProfile(user: Json, payload: Json) {
     },
     prefer: 'resolution=merge-duplicates,return=representation',
   }) as Array<Json>;
-  const ownerIds = await linkedOwnerIds(String(user.id));
-  if (ownerIds.length) {
-    await rest('owners?id=' + encodeURIComponent(inFilter(ownerIds)), {
-      method: 'PATCH',
-      body: { name: fullName, phone },
-    });
-  }
+  // Personal contacts belong to this account. The linked owner's original
+  // application contacts and manually selected SMS number remain independent.
   return rows[0];
 }
 
