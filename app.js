@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261009-reservation-entry-badges-v189';
-const APP_VERSION='1.0.36';
+const APP_BUILD='20261009-current-pass-summary-v190';
+const APP_VERSION='1.0.37';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -414,7 +414,7 @@ function renderNotifications(){
   const hasOtherModal=[...document.querySelectorAll('[aria-modal="true"]')].some(el=>el!==modal&&!el.classList.contains('hidden'));
   if(!hasOtherModal)modal.classList.remove('hidden');
 }
-function activePassFor(dogId){const today=new Date().toISOString().slice(0,10);return (state.data?.passes||[]).find(p=>Number(p.dog_id)===Number(dogId)&&p.status==='active'&&Number(p.used_entries)<Number(p.total_entries)&&(!p.valid_until||p.valid_until>=today))||(state.data?.passes||[]).find(p=>Number(p.dog_id)===Number(dogId)&&p.status==='queued')||null}
+function activePassFor(dogId){const today=bratislavaToday();return (state.data?.passes||[]).find(p=>Number(p.dog_id)===Number(dogId)&&p.status==='active'&&Number(p.used_entries)<Number(p.total_entries)&&(!p.valid_until||p.valid_until>=today))||(state.data?.passes||[]).find(p=>Number(p.dog_id)===Number(dogId)&&p.status==='queued')||null}
 function plannedPassSummaryV162(dogId){
   const interest=(state.data?.pass_requests||[]).find(p=>Number(p.dog_id)===Number(dogId)&&p.status==='pending');
   if(!interest)return null;
@@ -428,19 +428,26 @@ function plannedPassSummaryV162(dogId){
   return {total,start,until};
 }
 function renderPassSummaryCore(){
-  const d=selectedDog(),p=d?activePassFor(d.id):null,planned=d?plannedPassSummaryV162(d.id):null;
-  if(planned){$('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>0 z ${planned.total}</strong>${planned.until?`<small>Platí do ${skDate(planned.until)}</small>`:'<small>Platí 2 mesiace od prvého rezervovaného vstupu</small>'}`;return}
+  const d=selectedDog(),today=bratislavaToday();
+  const completedToday=d?(state.data?.passes||[]).find(pass=>Number(pass.dog_id)===Number(d.id)&&Number(pass.used_entries)===Number(pass.total_entries)&&(state.data?.reservations||[]).some(r=>Number(r.dog_id)===Number(d.id)&&Number(r.pass_id)===Number(pass.id)&&r.status==='attended'&&r.reservation_date===today)):null;
+  const p=completedToday||(d?activePassFor(d.id):null),planned=d?plannedPassSummaryV162(d.id):null;
   if(p){
-    $('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>${Number(p.used_entries)||0} z ${Number(p.total_entries)||0}</strong>${p.valid_until?`<small>Platí do ${skDate(p.valid_until)}</small>`:''}`;
+    const firstBooked=Number(p.used_entries)===0?(state.data?.reservations||[]).filter(r=>Number(r.dog_id)===Number(d.id)&&Number(r.pass_id)===Number(p.id)&&r.status==='booked'&&r.reservation_date>=today).map(r=>r.reservation_date).sort()[0]:null;
+    let start=p.valid_from||firstBooked,until=p.valid_until;
+    if(start&&!until&&!p.no_expiry){const [year,month,day]=start.split('-').map(Number),endMonth=new Date(Date.UTC(year,month-1+2,1)),lastDay=new Date(Date.UTC(endMonth.getUTCFullYear(),endMonth.getUTCMonth()+1,0)).getUTCDate();endMonth.setUTCDate(Math.min(day,lastDay));until=endMonth.toISOString().slice(0,10)}
+    const validity=Number(p.used_entries)===0&&start?`<small>Platnosť od ${skDate(start)}${until?` do ${skDate(until)}`:''}</small>`:until?`<small>Platí do ${skDate(until)}</small>`:'';
+    $('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>${Number(p.used_entries)||0} z ${Number(p.total_entries)||0}</strong>${validity}`;
     return;
   }
+  if(planned){$('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>0 z ${planned.total}</strong>${planned.start?`<small>Platnosť od ${skDate(planned.start)} do ${skDate(planned.until)}</small>`:'<small>Platí 2 mesiace od prvého rezervovaného vstupu</small>'}`;return}
   if(d?.default_entry_type==='free'){
     $('passSummary').innerHTML='<span>Vstup</span><strong class="free-entry-label-v96">Bezplatne</strong>';
     return;
   }
   $('passSummary').innerHTML='<span>Vstup</span><strong class="single-entry-label-v75">Jednorazový</strong>';
 }
-function renderPassSummary(){const out=renderPassSummaryCore();runCustomerHooks('afterRenderPassSummary',out);return out}
+let customerPassSummaryDate='';
+function renderPassSummary(){customerPassSummaryDate=bratislavaToday();const out=renderPassSummaryCore();runCustomerHooks('afterRenderPassSummary',out);return out}
 function futureItems(){const today=new Date().toISOString().slice(0,10);const requests=(state.data?.requests||[]).filter(r=>r.reservation_date>=today&&['pending','approved'].includes(r.status));const covered=new Set(requests.map(r=>Number(r.reservation_id)).filter(Boolean));const legacy=(state.data?.reservations||[]).filter(r=>r.reservation_date>=today&&!covered.has(Number(r.id))).map(r=>({...r,status:'approved',_legacy:true,reservation_id:r.id}));return [...requests,...legacy].sort((a,b)=>String(a.reservation_date).localeCompare(String(b.reservation_date)))}
 async function cancelBooking(btn){if(!confirm('Naozaj chcete zrušiť túto rezerváciu?'))return;try{loading(true);const requestId=Number(btn.dataset.request)||0,reservationId=Number(btn.dataset.reservation)||0;await api({action:'cancel_booking',request_id:requestId,reservation_id:reservationId,reason:null});const request=(state.data?.requests||[]).find(r=>Number(r.id)===requestId),reservation=(state.data?.reservations||[]).find(r=>Number(r.id)===reservationId);if(request)request.status='cancelled';if(reservation)reservation.status='cancelled';if(reservationId)for(const row of state.data?.requests||[])if(Number(row.reservation_id)===reservationId)row.status='cancelled';renderUpcoming();renderDays();renderMessages();renderPassSummary();toast('Rezervácia bola zrušená.');queueCustomerSync('bookings',80)}catch(e){toast(e.message)}finally{loading(false)}}
 function bookingFor(dogId,date){return (state.data?.requests||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date&&['pending','approved'].includes(r.status))||(state.data?.reservations||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date)}
@@ -1015,6 +1022,7 @@ async function refreshOnResume(){
   const now=Date.now();
   if(window.__customerPhotoPickerV88===true||window.__customerPhotoDecodeV88===true)return;
   if(!state.session||document.visibilityState==='hidden'||now-lastResumeRefresh<5000)return;
+  if(state.data&&customerPassSummaryDate!==bratislavaToday())renderPassSummary();
   lastResumeRefresh=now;
   startCustomerLive();
   queueCustomerSync('all',40);

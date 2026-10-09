@@ -463,14 +463,6 @@ async function customerBootstrap(user: Json) {
     passes = dogResults[0] as Array<Json>;
     vaccinations = dogResults[1] as Array<Json>;
     reservations = dogResults[2] as Array<Json>;
-    // Keep the just-finished pass visible on its last attendance day only.
-    const finishedPassIds = [...new Set(reservations
-      .filter(row => row.status === 'attended' && row.reservation_date === localDateIso())
-      .map(row => Number(row.pass_id)).filter(id => id > 0 && !passes.some(pass => Number(pass.id) === id)))];
-    if (finishedPassIds.length) {
-      const finishedPasses = await rest('passes?dog_id=' + dogFilter + '&id=' + encodeURIComponent(inFilter(finishedPassIds)) + '&status=eq.used_up&select=id,dog_id,total_entries,used_entries,purchased_on,valid_from,valid_until,no_expiry,status') as Array<Json>;
-      passes.push(...finishedPasses);
-    }
     visits = dogResults[3] as Array<Json>;
     monthlyTotals = dogResults[4] as Array<Json>;
     vaccinationProofs = await withSignedVaccinationProofs(dogResults[5] as Array<Json>);

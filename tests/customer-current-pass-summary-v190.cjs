@@ -1,0 +1,14 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const app=fs.readFileSync(process.argv[2]||__dirname+'/../app.js','utf8');
+let today='2026-10-09';const root={innerHTML:''};
+const data={passes:[{id:63,dog_id:77,status:'active',used_entries:9,total_entries:10,valid_until:'2026-12-09'}],pass_requests:[{id:10,dog_id:77,status:'pending',total_entries:10}],reservations:[],requests:[{dog_id:77,status:'pending',reservation_date:'2026-10-12',planned_pass_request_id:null},{dog_id:77,status:'pending',reservation_date:'2026-10-13',planned_pass_request_id:10}]};
+const ctx={state:{data},selectedDog:()=>({id:77}),bratislavaToday:()=>today,skDate:s=>s,$:()=>root};vm.createContext(ctx);
+vm.runInContext(app.slice(app.indexOf('function activePassFor('),app.indexOf('function renderPassSummary(){')),ctx);
+const check=text=>{ctx.renderPassSummaryCore();assert(root.innerHTML.includes(text),root.innerHTML)};
+check('<strong>9 z 10</strong>');
+today='2026-10-12';Object.assign(data.passes[0],{status:'used_up',used_entries:10});data.reservations.push({dog_id:77,pass_id:63,status:'attended',reservation_date:today});
+check('<strong>10 z 10</strong>');
+today='2026-10-13';check('<strong>0 z 10</strong>');check('Platnosť od 2026-10-13 do 2026-12-13');
+data.passes.push({id:64,dog_id:77,status:'queued',used_entries:0,total_entries:10});today='2026-10-12';check('<strong>10 z 10</strong>');
+today='2026-10-13';data.reservations.push({dog_id:77,pass_id:64,status:'booked',reservation_date:'2026-10-14'});check('<strong>0 z 10</strong>');check('Platnosť od 2026-10-14 do 2026-12-14');
+console.log('Current/finished/planned/queued pass summary tests passed');
