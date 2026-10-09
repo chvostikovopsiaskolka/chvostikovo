@@ -1892,7 +1892,7 @@ html.phone-portrait-layout #supportChatModalV52 .support-chat-card-v52,
   display:flex;
   align-items:center;
   gap:10px;
-  padding-right:48px;
+  padding-right:100px;
 }
 #supportChatModalV52 .support-chat-staff-avatar-v180{
   width:42px;
@@ -1927,6 +1927,32 @@ html.phone-portrait-layout #supportChatModalV52 .support-chat-card-v52,
   font-size:11px;
   line-height:1.2;
 }
+
+#supportChatModalV52 .support-chat-call-v182{
+  position:absolute;
+  top:13px;
+  right:62px;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:#111827;
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  text-decoration:none;
+}
+#supportChatModalV52 .support-chat-call-v182 svg{
+  width:21px;
+  height:21px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.9;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+#supportChatModalV52 .support-chat-call-v182:active{transform:scale(.96)}
+
 #supportChatModalV52 .legal-close{
   top:12px!important;
   right:12px!important;
