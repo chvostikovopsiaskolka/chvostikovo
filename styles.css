@@ -1920,13 +1920,6 @@ html.phone-portrait-layout #supportChatModalV52 .support-chat-card-v52,
   min-height:0;
   line-height:1.15;
 }
-#supportChatModalV52 .support-chat-head-v180 small{
-  display:block;
-  margin-top:2px;
-  color:var(--muted);
-  font-size:11px;
-  line-height:1.2;
-}
 
 #supportChatModalV52 .support-chat-call-v182{
   position:absolute;
@@ -1956,6 +1949,14 @@ html.phone-portrait-layout #supportChatModalV52 .support-chat-card-v52,
 #supportChatModalV52 .legal-close{
   top:12px!important;
   right:12px!important;
+  width:40px!important;
+  height:40px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-touch-callout:none!important;
 }
 #supportMessageThreadV52{
   min-height:0!important;
@@ -2044,3 +2045,19 @@ html.support-chat-open-v52 .beta-version-badge-v75{
   pointer-events:none!important;
 }
 
+
+
+/* v183: remove iOS tap flash from customer chat and message entry without changing keyboard behavior. */
+#supportChatModalV52 button,
+#supportChatModalV52 a,
+#supportChatModalV52 textarea,
+#menuMessage{
+  -webkit-tap-highlight-color:transparent!important;
+}
+#supportChatModalV52 .legal-close:active{
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#supportChatModalV52 .support-chat-call-v182:active{
+  background:#f8fafc!important;
+}

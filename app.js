@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261009-chat-call-header-v182';
-const APP_VERSION='1.0.29';
+const APP_BUILD='20261009-chat-tap-polish-v183';
+const APP_VERSION='1.0.30';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2161,7 +2161,7 @@ async function togglePushDirect(btn){
         '<div id="supportChatModalV52" class="legal-modal support-chat-modal-v52 hidden" role="dialog" aria-modal="true" aria-labelledby="supportChatTitleV52">'+
           '<div class="legal-card support-chat-card-v52">'+
             '<button id="supportChatCloseV52" class="legal-close" type="button" aria-label="Zavrieť">×</button>'+
-            '<div class="support-chat-head-v180"><span id="supportChatStaffAvatarV180" class="support-chat-staff-avatar-v180" aria-hidden="true">🐾</span><div><h2 id="supportChatTitleV52">Chvostíkovo</h2><small>Správy</small></div><a id="supportChatCallV182" class="support-chat-call-v182 hidden" href="#" aria-label="Zavolať do Chvostíkova"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.3 3.8 8 3.2c.6-.1 1.1.2 1.4.7l1.2 2.8c.2.5.1 1-.3 1.4L8.8 9.5a15.7 15.7 0 0 0 5.7 5.7l1.4-1.5c.4-.4.9-.5 1.4-.3l2.8 1.2c.5.2.8.8.7 1.4l-.6 2.7c-.1.7-.7 1.2-1.4 1.2C10.7 19.9 4.1 13.3 4.1 5.2c0-.7.5-1.3 1.2-1.4Z"/></svg></a></div>'+
+            '<div class="support-chat-head-v180"><span id="supportChatStaffAvatarV180" class="support-chat-staff-avatar-v180" aria-hidden="true">🐾</span><div><h2 id="supportChatTitleV52">Chvostíkovo</h2></div><a id="supportChatCallV182" class="support-chat-call-v182 hidden" href="#" aria-label="Zavolať do Chvostíkova"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.3 3.8 8 3.2c.6-.1 1.1.2 1.4.7l1.2 2.8c.2.5.1 1-.3 1.4L8.8 9.5a15.7 15.7 0 0 0 5.7 5.7l1.4-1.5c.4-.4.9-.5 1.4-.3l2.8 1.2c.5.2.8.8.7 1.4l-.6 2.7c-.1.7-.7 1.2-1.4 1.2C10.7 19.9 4.1 13.3 4.1 5.2c0-.7.5-1.3 1.2-1.4Z"/></svg></a></div>'+
             '<div id="supportMessageThreadV52" class="message-thread support-message-thread-v52"></div>'+
             '<form id="supportMessageFormV52" class="form-stack support-message-form-v52">'+
               '<div><label for="supportMessageBodyV52">Správa</label><textarea id="supportMessageBodyV52" class="input" rows="1" maxlength="2000" placeholder="Napíšte správu pre Chvostíkovo…" required></textarea></div>'+
