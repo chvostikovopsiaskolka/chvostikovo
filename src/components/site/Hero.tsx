@@ -24,7 +24,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
         {/* Mobile layout */}
         <div className="lg:hidden">
-          <p className="mx-auto mt-1 whitespace-nowrap font-display text-[10px] font-bold uppercase tracking-[0.14em] text-coral-dark min-[390px]:mt-2 min-[430px]:text-xs sm:text-sm sm:tracking-[0.16em]">
+          <p className="mx-auto mt-1 whitespace-nowrap font-display text-[8.5px] font-bold uppercase tracking-[0.12em] text-coral-dark min-[390px]:mt-2 min-[390px]:text-[9px] min-[430px]:text-[10px] sm:text-sm sm:tracking-[0.16em]">
             Denná starostlivosť o stredných a veľkých psíkov
           </p>
 
