@@ -210,7 +210,8 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         vek: String(fd.get("vek") ?? "").trim(),
         kastrovana: String(fd.get("kastrovana") ?? ""),
         duvod: String(fd.get("duvod") ?? ""),
-        viac: String(fd.get("viac") ?? "").trim(),
+        alergie: String(fd.get("alergie") ?? "").trim(),
+        povaha: String(fd.get("povaha") ?? "").trim(),
       }, attemptId);
 
       void trackCookielessInteraction("form_submit", trackingSource, "sk", attemptId);
@@ -330,16 +331,31 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         </select>
       </div>
       <div>
-        <label className="label-sm" htmlFor={`l-${formId}-viac`}>
-          Viac o psíkovi *
+        <label className="label-sm" htmlFor={`l-${formId}-alergie`}>
+          Alergie a zdravotné obmedzenia *
         </label>
         <textarea
-          id={`l-${formId}-viac`}
-          name="viac"
+          id={`l-${formId}-alergie`}
+          name="alergie"
           required
+          maxLength={3000}
+          rows={3}
+          className="field resize-none"
+          placeholder="Alergie, lieky alebo zdravotné obmedzenia. Ak psík žiadne nemá, napíšte „Nemá“."
+        />
+      </div>
+      <div>
+        <label className="label-sm" htmlFor={`l-${formId}-povaha`}>
+          Povaha a ďalšie informácie *
+        </label>
+        <textarea
+          id={`l-${formId}-povaha`}
+          name="povaha"
+          required
+          maxLength={3000}
           rows={4}
           className="field resize-none"
-          placeholder="Povaha, skúsenosti s inými psami, zdravotný stav..."
+          placeholder="Povaha, skúsenosti s inými psami, zvyky a čo by sme ešte mali vedieť..."
         />
       </div>
       <PrivacyConsentCheckbox />

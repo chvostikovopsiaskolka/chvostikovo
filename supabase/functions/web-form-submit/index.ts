@@ -1,3 +1,5 @@
+// Deno and EdgeRuntime are supplied by the Supabase Edge runtime.
+
 const ALLOWED_ORIGINS = new Set([
   'https://chvostikovo.sk',
   'https://www.chvostikovo.sk',
@@ -213,7 +215,12 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
         payload.interest_reason ?? '',
       )}`,
     );
-    lines.push(`Viac o psíkovi: ${String(payload.dog_info ?? '')}`);
+    if (payload.dog_allergies != null || payload.dog_temperament != null) {
+      lines.push(`Alergie a zdravotné obmedzenia: ${String(payload.dog_allergies ?? '')}`);
+      lines.push(`Povaha a ďalšie informácie: ${String(payload.dog_temperament ?? '')}`);
+    } else {
+      lines.push(`Viac o psíkovi: ${String(payload.dog_info ?? '')}`);
+    }
   } else {
     if (payload.dog_name) lines.push(`Meno psa: ${String(payload.dog_name)}`);
     lines.push(
@@ -271,6 +278,39 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
   }
 }
 
+async function notifyWebFormSms(submissionId: number) {
+  let timeout;
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const configRes = await fetch(supabaseUrl + '/rest/v1/rpc/get_web_form_sms_bridge_config', {
+      method:'POST', headers:{apikey:serviceKey || '', Authorization:'Bearer ' + serviceKey, 'Content-Type':'application/json'},
+      body:'{}', signal:AbortSignal.timeout(5000),
+    });
+    if (!configRes.ok) throw new Error('bridge config unavailable');
+    const config = await configRes.json();
+    if (!config) return;
+    const {url,secret} = config;
+    if (url !== 'https://script.google.com/macros/s/AKfycbyL32_wfNaM29Nnj2VCvCF1NfFkOd0LCtZ1EIHUD7c5BS2pcO6BAC2PqdPSYlle87eKaw/exec' || !secret) {
+      throw new Error('invalid bridge configuration');
+    }
+    const controller = new AbortController();
+    timeout = setTimeout(() => controller.abort(), 20000);
+    const res = await fetch(url, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'web_form_sms', secret, submission_id:submissionId}),
+      signal:controller.signal,
+    });
+    if (!res.ok) throw new Error('webhook HTTP error');
+    const result = await res.json();
+    if (result.ok !== true || result.disabled === true) throw new Error('webhook inactive/failed');
+  } catch (_) {
+    console.error('Web SMS webhook unavailable; outbox fallback will retry.');
+  } finally {
+    if (timeout !== undefined) clearTimeout(timeout);
+  }
+}
+
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get('origin') || '';
   if (req.method === 'OPTIONS') {
@@ -292,7 +332,8 @@ Deno.serve(async (req: Request) => {
 
   try {
     const raw = await req.text();
-    if (!raw || raw.length > 12_000) return response(origin, 400, { ok: false, error: 'invalid_body' });
+    // Two 3000-character fields plus compatibility summary and raw form labels.
+    if (!raw || raw.length > 32_000) return response(origin, 400, { ok: false, error: 'invalid_body' });
     const input = JSON.parse(raw);
 
     // Hidden honeypot field: bots receive a harmless success without storing data.
@@ -368,7 +409,17 @@ Deno.serve(async (req: Request) => {
       }
       const dogNeutered = yesNo(input.dog_neutered ?? input.kastrovana);
       const usage = text(input.interest_reason ?? input.usage_plan ?? input.duvod, 250);
-      const dogInfo = text(input.dog_info ?? input.viac, 3000);
+      const splitCare = input.dog_allergies != null || input.dog_temperament != null || input.alergie != null || input.povaha != null;
+      const allergiesInput = input.dog_allergies ?? input.alergie;
+      const temperamentInput = input.dog_temperament ?? input.povaha;
+      if (splitCare && (typeof allergiesInput !== 'string' || typeof temperamentInput !== 'string' || !allergiesInput.trim() || !temperamentInput.trim() || allergiesInput.trim().length > 3000 || temperamentInput.trim().length > 3000)) {
+        return response(origin, 400, { ok: false, error: 'invalid_dog_care_fields' });
+      }
+      const dogAllergies = splitCare ? text(allergiesInput, 3000) : null;
+      const dogTemperament = splitCare ? text(temperamentInput, 3000) : null;
+      const dogInfo = splitCare
+        ? `Alergie a zdravotné obmedzenia: ${dogAllergies}\n\nPovaha a ďalšie informácie: ${dogTemperament}`
+        : text(input.dog_info ?? input.viac, 3000);
       if (!dogName || !dogSex || !dogAge || dogNeutered === null || !APPLICATION_USAGE.has(usage) || !dogInfo) {
         return response(origin, 400, { ok: false, error: 'missing_application_fields' });
       }
@@ -382,6 +433,8 @@ Deno.serve(async (req: Request) => {
         dog_neutered: dogNeutered,
         interest_reason: usage,
         dog_info: dogInfo,
+        dog_allergies: dogAllergies,
+        dog_temperament: dogTemperament,
       };
     }
 
@@ -402,10 +455,22 @@ Deno.serve(async (req: Request) => {
 
     const insert = await fetch(`${supabaseUrl}/rest/v1/web_form_submissions`, {
       method: 'POST',
-      headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      headers: { ...headers, 'Content-Type': 'application/json', Prefer: 'return=representation' },
       body: JSON.stringify(payload),
     });
     if (!insert.ok) throw new Error(`Insert failed: ${insert.status} ${await insert.text()}`);
+    // Trigger has persisted the SMS outbox in the same successful INSERT transaction.
+    // Failure here must never turn a saved form into an error response.
+    try {
+      const saved = await insert.json();
+      const submissionId = Number(saved?.[0]?.id);
+      if (Number.isSafeInteger(submissionId) && submissionId > 0) {
+        EdgeRuntime.waitUntil(notifyWebFormSms(submissionId));
+      }
+    } catch (_) {
+      console.error('Web SMS dispatch could not start; saved outbox will retry.');
+    }
+
 
     await Promise.allSettled([
       sendNotificationEmail(payload, input),

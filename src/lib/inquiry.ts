@@ -41,10 +41,22 @@ export const longSchema = z.object({
   vek: z.string().min(1).max(100),
   kastrovana: z.string().min(1).max(40),
   duvod: z.string().min(1).max(300),
-  viac: z.string().min(1).max(3000),
+  // Legacy open tabs retain their original combined field.
+  viac: z.string().trim().min(1).max(3000).optional(),
+  alergie: z.string().trim().min(1).max(3000).optional(),
+  povaha: z.string().trim().min(1).max(3000).optional(),
 }).merge(attributionSchema);
 
-export const inquirySchema = z.discriminatedUnion("typ", [shortSchema, longSchema]);
+export const inquirySchema = z.discriminatedUnion("typ", [shortSchema, longSchema]).superRefine((data, ctx) => {
+  if (data.typ !== "prihlaska") return;
+  if (data.alergie !== undefined || data.povaha !== undefined) {
+    for (const field of ["alergie", "povaha"] as const) {
+      if (!data[field]) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: "Vyplňte toto pole." });
+    }
+  } else if (!data.viac) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["viac"], message: "Vyplňte informácie o psíkovi." });
+  }
+});
 
 export type InquiryInput = z.input<typeof inquirySchema>;
 export type InquiryData = z.output<typeof inquirySchema>;
@@ -87,7 +99,10 @@ export function buildFields(data: InquiryData): Array<{ label: string; value: st
     { label: "Vek psa", value: data.vek },
     { label: "Kastrovaný / sterilizovaná", value: data.kastrovana },
     { label: "Ako plánujete využívať škôlku?", value: data.duvod },
-    { label: "Viac o psíkovi", value: data.viac },
+    ...(data.alergie !== undefined || data.povaha !== undefined
+      ? [{ label: "Alergie a zdravotné obmedzenia", value: data.alergie || "" },
+        { label: "Povaha a ďalšie informácie", value: data.povaha || "" }]
+      : [{ label: "Viac o psíkovi", value: data.viac || "" }]),
     { label: "Súhlas so spracovaním osobných údajov", value: "Áno" },
     ...attribution,
   ];
@@ -128,7 +143,11 @@ export function buildDbPayload(data: InquiryData) {
     dog_age_text: data.vek,
     dog_neutered: data.kastrovana,
     interest_reason: data.duvod,
-    dog_info: data.viac,
+    dog_allergies: data.alergie ?? null,
+    dog_temperament: data.povaha ?? null,
+    dog_info: data.alergie !== undefined || data.povaha !== undefined
+      ? `Alergie a zdravotné obmedzenia: ${data.alergie || ""}\n\nPovaha a ďalšie informácie: ${data.povaha || ""}`
+      : data.viac || "",
     consent: true,
     source_ref,
     raw_payload,

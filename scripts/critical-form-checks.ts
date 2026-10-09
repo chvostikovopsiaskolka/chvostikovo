@@ -87,5 +87,6 @@ await import("./tracking-form-checks");
 await import("./form-autofill-checks");
 await import("./form-alert-checks");
 await import("./application-dog-details-checks");
+await import("./application-health-fields-checks");
 
 console.log("Critical form checks passed.");

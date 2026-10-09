@@ -82,7 +82,17 @@ try {
     assert.equal(new dom.FormData(form).get(input.name), raw);
     assert.equal(phoneFromForm(form as any, input.id), "+421915349028");
     assert.equal(form.checkValidity(), true);
-    await React.act(async () => { form.requestSubmit(); await new Promise((resolve) => setTimeout(resolve, 20)); });
+    await React.act(async () => {
+      form.requestSubmit();
+      // SHA-256 telemetry is asynchronous; a fixed 20 ms raced CI/loaded CPUs.
+      // Wait for this submission's event, retaining all assertions below.
+      const deadline = Date.now() + 1500;
+      while (Date.now() < deadline) {
+        const saved = requests.find((r) => r.url.endsWith("/web-form-submit"));
+        if (saved && requests.some((r) => r.body.event_name === "form_submit" && r.body.attempt_id === saved.body.form_attempt_id)) break;
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+    });
     const submission = requests.filter((r) => r.url.endsWith("/web-form-submit"));
     assert.equal(submission.length, 1, `${test.name}: missing or duplicate browser request`);
     assert(!submission[0]!.body.source_ref.includes("fbclid"));

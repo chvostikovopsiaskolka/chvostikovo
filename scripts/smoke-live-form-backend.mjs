@@ -55,5 +55,7 @@ await post({ ...application, dog_breed_weight: "Labrador, 25 kg" });
 for (const dog_weight_kg of [25, "25 kg", "25,5 kg"]) {
   await post({ ...application, dog_breed: "Labrador", dog_weight_kg });
 }
+await post({ ...application, dog_allergies: "Nemá", dog_temperament: "Priateľský, zvyknutý na psov." });
+await post({ ...application, dog_allergies: "A".repeat(3000), dog_temperament: "P".repeat(3000), dog_info: "S".repeat(6100), raw_payload: { health: "A".repeat(3000), temperament: "P".repeat(3000) } });
 
 console.log("Live web-form-submit smoke tests passed.");

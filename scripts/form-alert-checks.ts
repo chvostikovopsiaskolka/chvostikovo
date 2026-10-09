@@ -95,6 +95,18 @@ try {
     assert.equal(databasePayloads.at(-1).dog_weight_kg, 25.5);
   }
   for (const weight of [0, -25, 151, "invalid", ""]) assert.equal((await send({ ...application, dog_breed: "Labrador", dog_weight_kg: weight })).status, 400);
+  for (const care of [
+    { dog_allergies: "Nemá", dog_temperament: "Priateľský" },
+    { dog_allergies: "A".repeat(3000), dog_temperament: "P".repeat(3000), dog_info: "S".repeat(6100), raw_payload: { health: "A".repeat(3000), temperament: "P".repeat(3000) } },
+  ]) {
+    assert.equal((await send({ ...application, ...care })).status, 201);
+    assert.equal(databasePayloads.at(-1).dog_allergies, care.dog_allergies);
+    assert.equal(databasePayloads.at(-1).dog_temperament, care.dog_temperament);
+    assert(databasePayloads.at(-1).dog_info.includes(care.dog_allergies));
+  }
+  for (const care of [{ dog_allergies: "Nemá" }, { dog_allergies: "", dog_temperament: "Povaha" }, { dog_allergies: 123, dog_temperament: "Povaha" }, { dog_allergies: "A".repeat(3001), dog_temperament: "Povaha" }]) {
+    assert.equal((await send({ ...application, ...care })).status, 400);
+  }
   console.log("Form alert checks passed: CORS, per-attempt deduplication, mail delivery receipts, safe diagnostics, rate limiting, and isolated notification failure.");
 } finally {
   globalThis.fetch = originalFetch;
