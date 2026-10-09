@@ -312,9 +312,9 @@ function nextWeekdays(startIso: string, count: number) {
   return values;
 }
 
-async function rosterPhotoPaths(rows: Array<Json>) {
+async function rosterPhotoPaths(rows: Array<Json>, viewerId?: string, viewerDogIds = new Set<number>()) {
   const paths = new Map<number,unknown>(rows.map(dog => [Number(dog.id),dog.photo_path]));
-  const missing = rows.filter(dog => dog.share_name_photo === true && !dog.photo_path && dog.owner_id);
+  const missing = rows.filter(dog => (dog.share_name_photo === true || viewerDogIds.has(Number(dog.id))) && dog.owner_id);
   if (!missing.length) return paths;
   const [photos,links] = await Promise.all([
     rest('customer_dog_photos?dog_id=' + encodeURIComponent(inFilter(missing.map(dog => Number(dog.id)))) + '&select=dog_id,user_id,photo_path'),
@@ -324,10 +324,13 @@ async function rosterPhotoPaths(rows: Array<Json>) {
   const profiles = userIds.length ? await rest('customer_profiles?user_id=' + encodeURIComponent(inFilter(userIds)) + '&select=user_id,created_at&order=created_at.asc,user_id.asc') as Array<Json> : [];
   for (const dog of missing) {
     const owners = new Set(links.filter(link => Number(link.owner_id) === Number(dog.owner_id)).map(link => String(link.user_id)));
-    for (const profile of profiles) {
-      if (!owners.has(String(profile.user_id))) continue;
-      const photo = photos.find(photo => Number(photo.dog_id) === Number(dog.id) && String(photo.user_id) === String(profile.user_id) && photo.photo_path);
-      if (photo) { paths.set(Number(dog.id),photo.photo_path); break; }
+    const primary = profiles.find(profile => owners.has(String(profile.user_id)));
+    const primaryPhoto = primary && photos.find(photo => Number(photo.dog_id) === Number(dog.id) && String(photo.user_id) === String(primary.user_id) && photo.photo_path);
+    // Other customers see the first registered owner's current photo, never the partner's.
+    paths.set(Number(dog.id),primaryPhoto ? primaryPhoto.photo_path : dog.photo_path);
+    if (viewerId && viewerDogIds.has(Number(dog.id))) {
+      const ownPhoto = photos.find(photo => Number(photo.dog_id) === Number(dog.id) && String(photo.user_id) === viewerId && photo.photo_path);
+      paths.set(Number(dog.id),ownPhoto ? ownPhoto.photo_path : dog.photo_path);
     }
   }
   return paths;
@@ -361,7 +364,7 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
     ) as Array<Json>
     : [];
   const rosterDogMap = new Map(rosterDogs.map((dog) => [Number(dog.id), dog]));
-  const publicPhotoPaths = await rosterPhotoPaths(rosterDogs);
+  const publicPhotoPaths = await rosterPhotoPaths(rosterDogs,userId,ownDogIds);
   const publicPhotoUrls = new Map<number,Promise<string|null>>();
   const rosterPhotoUrl = (dogId: number) => {
     if (!publicPhotoUrls.has(dogId)) publicPhotoUrls.set(dogId,signedPhotoUrl(publicPhotoPaths.get(dogId)));
