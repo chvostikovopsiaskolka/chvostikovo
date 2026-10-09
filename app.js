@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261009-separated-dog-care-v195';
-const APP_VERSION='1.0.42';
+const APP_BUILD='20261009-roster-photo-cutoff-v196';
+const APP_VERSION='1.0.43';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -243,7 +243,12 @@ function bootstrapCore(showSpinner=true){
 }
 async function bootstrap(showSpinner=true){const result=await bootstrapCore(showSpinner);runCustomerHooks('afterBootstrap',result);return result}
 function renderUpcoming(){return typeof customerRenderers.upcoming==='function'?customerRenderers.upcoming():undefined}
-function renderDays(){return typeof customerRenderers.days==='function'?customerRenderers.days():undefined}
+function overviewClock(now=new Date()){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now),m=Object.fromEntries(parts.map(p=>[p.type,p.value]));return {date:m.year+'-'+m.month+'-'+m.day,minutes:Number(m.hour)*60+Number(m.minute)}}
+function overviewDayVisible(date,clock=overviewClock()){return date>clock.date||date===clock.date&&clock.minutes<18*60}
+let overviewCutoffTimer=null;
+function scheduleOverviewCutoff(){clearTimeout(overviewCutoffTimer);overviewCutoffTimer=null;if(document.visibilityState!=='visible'||!state.data)return;const now=new Date(),clock=overviewClock(now),minutes=clock.minutes<1080?1080-clock.minutes:1440-clock.minutes;overviewCutoffTimer=setTimeout(()=>{overviewCutoffTimer=null;renderDays()},Math.max(1000,minutes*60000-now.getSeconds()*1000-now.getMilliseconds()))}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&state.data)renderDays();else{clearTimeout(overviewCutoffTimer);overviewCutoffTimer=null}});
+function renderDays(){const out=typeof customerRenderers.days==='function'?customerRenderers.days():undefined;scheduleOverviewCutoff();return out}
 function renderAll(){renderWeekHeader();renderNotifications();renderPassSummary();renderUpcoming();renderDays();renderMessages();renderDogSelector();renderDog();renderProfile();renderStaff();updateUnread()}
 
 /* consolidated stability: unchanged resume data does not touch the DOM */
@@ -448,7 +453,7 @@ function renderPassSummaryCore(){
 }
 let customerPassSummaryDate='';
 function renderPassSummary(){customerPassSummaryDate=bratislavaToday();const out=renderPassSummaryCore();runCustomerHooks('afterRenderPassSummary',out);return out}
-function futureItems(){const today=new Date().toISOString().slice(0,10);const requests=(state.data?.requests||[]).filter(r=>r.reservation_date>=today&&['pending','approved'].includes(r.status));const covered=new Set(requests.map(r=>Number(r.reservation_id)).filter(Boolean));const legacy=(state.data?.reservations||[]).filter(r=>r.reservation_date>=today&&!covered.has(Number(r.id))).map(r=>({...r,status:'approved',_legacy:true,reservation_id:r.id}));return [...requests,...legacy].sort((a,b)=>String(a.reservation_date).localeCompare(String(b.reservation_date)))}
+function futureItems(){const today=overviewClock().date;const requests=(state.data?.requests||[]).filter(r=>r.reservation_date>=today&&['pending','approved'].includes(r.status));const covered=new Set(requests.map(r=>Number(r.reservation_id)).filter(Boolean));const legacy=(state.data?.reservations||[]).filter(r=>r.reservation_date>=today&&!covered.has(Number(r.id))).map(r=>({...r,status:'approved',_legacy:true,reservation_id:r.id}));return [...requests,...legacy].sort((a,b)=>String(a.reservation_date).localeCompare(String(b.reservation_date)))}
 async function cancelBooking(btn){if(!confirm('Naozaj chcete zrušiť túto rezerváciu?'))return;try{loading(true);const requestId=Number(btn.dataset.request)||0,reservationId=Number(btn.dataset.reservation)||0;await api({action:'cancel_booking',request_id:requestId,reservation_id:reservationId,reason:null});const request=(state.data?.requests||[]).find(r=>Number(r.id)===requestId),reservation=(state.data?.reservations||[]).find(r=>Number(r.id)===reservationId);if(request)request.status='cancelled';if(reservation)reservation.status='cancelled';if(reservationId)for(const row of state.data?.requests||[])if(Number(row.reservation_id)===reservationId)row.status='cancelled';renderUpcoming();renderDays();renderMessages();renderPassSummary();toast('Rezervácia bola zrušená.');queueCustomerSync('bookings',80)}catch(e){toast(e.message)}finally{loading(false)}}
 function bookingFor(dogId,date){return (state.data?.requests||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date&&['pending','approved'].includes(r.status))||(state.data?.reservations||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date)}
 function applyLocalBooking(result,fallback){const row=result?.data||result?.booking||result?.request||fallback;if(!row)return;const rows=state.data?.requests||(state.data.requests=[]),index=rows.findIndex(r=>Number(r.id)===Number(row.id));if(index>=0)rows[index]={...rows[index],...row};else rows.push({...fallback,...row});renderUpcoming();renderDays();renderMessages();renderPassSummary()}
@@ -2034,7 +2039,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   customerRenderers.days=()=>{
     const root=$('weekDays'),dog=selectedDog();if(!root)return;
     const days=state.data?.availability?.days||[],byDate=new Map(days.map(d=>[d.date,d]));
-    const items=futureItems().filter(r=>dog&&Number(r.dog_id)===Number(dog.id));
+    const clock=overviewClock(),items=futureItems().filter(r=>dog&&Number(r.dog_id)===Number(dog.id)&&overviewDayVisible(r.reservation_date,clock));
     if(!items.length){root.innerHTML='<div class="card reserved-empty-v37"><svg class="reserved-empty-icon" aria-hidden="true"><use href="#ci-calendar"/></svg><span>Zatiaľ nemáte rezervovaný žiadny deň.</span><small>Kliknite na tlačidlo vyššie a vyberte si termín<br>pre vášho psíka.</small></div>';return}
     root.innerHTML=items.map(r=>{
       const day=byDate.get(r.reservation_date)||{},taxi=taxiLabel(r.taxi_mode),pending=r.status==='pending';

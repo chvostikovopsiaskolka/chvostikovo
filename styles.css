@@ -17,6 +17,7 @@ input[type="date"],input[type="time"]{-webkit-appearance:auto;appearance:auto;di
 .push-switch.syncing,.push-switch.syncing span{transition:none!important}.push-switch.syncing{opacity:.72}.push-switch[disabled]{cursor:default}
 input[type="date"],input[type="time"]{max-inline-size:100%!important;-webkit-min-logical-width:0!important}
 #dogBasicFieldsV96 textarea.input{min-height:70px;line-height:1.4;resize:vertical;font-size:16px}
+#dogBasicFieldsV96 .input:focus{outline:none!important;border-color:#f97316;box-shadow:inset 0 0 0 1px #f97316!important}
 /* v17: jemne menšia typografia bez zmeny rozloženia */
 @media(max-width:520px), (orientation:landscape) and (pointer:coarse) and (max-height:520px){
   .hero p{font-size:15px}.hero h1{font-size:17px}.hero-pass strong{font-size:23px}

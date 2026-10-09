@@ -312,6 +312,27 @@ function nextWeekdays(startIso: string, count: number) {
   return values;
 }
 
+async function rosterPhotoPaths(rows: Array<Json>) {
+  const paths = new Map<number,unknown>(rows.map(dog => [Number(dog.id),dog.photo_path]));
+  const missing = rows.filter(dog => dog.share_name_photo === true && !dog.photo_path && dog.owner_id);
+  if (!missing.length) return paths;
+  const [photos,links] = await Promise.all([
+    rest('customer_dog_photos?dog_id=' + encodeURIComponent(inFilter(missing.map(dog => Number(dog.id)))) + '&select=dog_id,user_id,photo_path'),
+    rest('customer_owner_links?owner_id=' + encodeURIComponent(inFilter([...new Set(missing.map(dog => Number(dog.owner_id)))])) + '&select=user_id,owner_id'),
+  ]) as [Array<Json>,Array<Json>];
+  const userIds = [...new Set(links.map(link => String(link.user_id)))];
+  const profiles = userIds.length ? await rest('customer_profiles?user_id=' + encodeURIComponent(inFilter(userIds)) + '&select=user_id,created_at&order=created_at.asc,user_id.asc') as Array<Json> : [];
+  for (const dog of missing) {
+    const owners = new Set(links.filter(link => Number(link.owner_id) === Number(dog.owner_id)).map(link => String(link.user_id)));
+    for (const profile of profiles) {
+      if (!owners.has(String(profile.user_id))) continue;
+      const photo = photos.find(photo => Number(photo.dog_id) === Number(dog.id) && String(photo.user_id) === String(profile.user_id) && photo.photo_path);
+      if (photo) { paths.set(Number(dog.id),photo.photo_path); break; }
+    }
+  }
+  return paths;
+}
+
 async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
   const today = localDateIso();
   const weekday = new Date(today + 'T12:00:00Z').getUTCDay();
@@ -336,10 +357,16 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
   const rosterDogs = rosterDogIds.length
     ? await rest(
       'dogs?id=' + encodeURIComponent(inFilter(rosterDogIds)) +
-      '&select=id,name,customer_name,sex,photo_path,photo_updated_at,share_name_photo',
+      '&select=id,owner_id,name,customer_name,sex,photo_path,photo_updated_at,share_name_photo',
     ) as Array<Json>
     : [];
   const rosterDogMap = new Map(rosterDogs.map((dog) => [Number(dog.id), dog]));
+  const publicPhotoPaths = await rosterPhotoPaths(rosterDogs);
+  const publicPhotoUrls = new Map<number,Promise<string|null>>();
+  const rosterPhotoUrl = (dogId: number) => {
+    if (!publicPhotoUrls.has(dogId)) publicPhotoUrls.set(dogId,signedPhotoUrl(publicPhotoPaths.get(dogId)));
+    return publicPhotoUrls.get(dogId)!;
+  };
   const settingMap = new Map(settings.map((setting) => [String(setting.day), setting]));
   const days = await Promise.all(dates.map(async (date) => {
     const capacity = Number(settingMap.get(date)?.capacity ?? 8);
@@ -356,7 +383,7 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
       dog_id: Number(dog.id),
       name: dog?.customer_name || dog?.name || 'Psík',
       sex: dog?.sex || null,
-      photo_url: await signedPhotoUrl(dog?.photo_path),
+      photo_url: await rosterPhotoUrl(Number(dog.id)),
     })));
     return {
       date,

@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261009-separated-dog-care-v195';
+const CACHE='chvostikovo-portal-shell-20261009-roster-photo-cutoff-v196';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/terms-pdf.js?v=20261009-separated-dog-care-v195','/terms-pdf-font.js?v=20261009-separated-dog-care-v195','/styles.css?v=20261009-separated-dog-care-v195','/app.js?v=20261009-separated-dog-care-v195','/back-swipe.js?v=20261009-separated-dog-care-v195'];
+const SHELL=['/','/terms-pdf.js?v=20261009-roster-photo-cutoff-v196','/terms-pdf-font.js?v=20261009-roster-photo-cutoff-v196','/styles.css?v=20261009-roster-photo-cutoff-v196','/app.js?v=20261009-roster-photo-cutoff-v196','/back-swipe.js?v=20261009-roster-photo-cutoff-v196'];
 
 function withPortalCsp(response){
   if(!response)return response;
