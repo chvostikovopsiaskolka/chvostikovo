@@ -13,6 +13,8 @@ assert.equal(payload.dog_temperament, care.povaha);
 assert.equal(payload.raw_payload["Alergie a zdravotné obmedzenia"], care.alergie);
 assert.equal(payload.raw_payload["Povaha a ďalšie informácie"], care.povaha);
 assert(inquirySchema.safeParse({ ...base, viac: "Pôvodný zmiešaný text" }).success);
+assert(inquirySchema.safeParse({ ...base, povaha: care.povaha }).success);
+assert(inquirySchema.safeParse({ ...base, alergie: "", povaha: care.povaha }).success);
 for (const invalid of [{}, { alergie: "Nemá" }, { ...care, povaha: "" }, { ...care, alergie: "x".repeat(3001) }]) assert(!inquirySchema.safeParse({ ...base, ...invalid }).success);
 
 const html = readFileSync(new URL("../system/admin-health-fields.html", import.meta.url), "utf8");

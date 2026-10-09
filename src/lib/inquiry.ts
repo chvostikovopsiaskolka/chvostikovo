@@ -43,16 +43,14 @@ export const longSchema = z.object({
   duvod: z.string().min(1).max(300),
   // Legacy open tabs retain their original combined field.
   viac: z.string().trim().min(1).max(3000).optional(),
-  alergie: z.string().trim().min(1).max(3000).optional(),
+  alergie: z.string().trim().max(3000).optional(),
   povaha: z.string().trim().min(1).max(3000).optional(),
 }).merge(attributionSchema);
 
 export const inquirySchema = z.discriminatedUnion("typ", [shortSchema, longSchema]).superRefine((data, ctx) => {
   if (data.typ !== "prihlaska") return;
   if (data.alergie !== undefined || data.povaha !== undefined) {
-    for (const field of ["alergie", "povaha"] as const) {
-      if (!data[field]) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: "Vyplňte toto pole." });
-    }
+    if (!data.povaha) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["povaha"], message: "Vyplňte toto pole." });
   } else if (!data.viac) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["viac"], message: "Vyplňte informácie o psíkovi." });
   }

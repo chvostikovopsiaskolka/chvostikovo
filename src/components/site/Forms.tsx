@@ -332,16 +332,15 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
       </div>
       <div>
         <label className="label-sm" htmlFor={`l-${formId}-alergie`}>
-          Alergie a zdravotné obmedzenia *
+          Alergie a zdravotné obmedzenia
         </label>
         <textarea
           id={`l-${formId}-alergie`}
           name="alergie"
-          required
           maxLength={3000}
           rows={3}
           className="field resize-none"
-          placeholder="Alergie, lieky alebo zdravotné obmedzenia. Ak psík žiadne nemá, napíšte „Nemá“."
+          placeholder="Alergie, lieky alebo zdravotné obmedzenia..."
         />
       </div>
       <div>

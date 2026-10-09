@@ -410,9 +410,9 @@ Deno.serve(async (req: Request) => {
       const dogNeutered = yesNo(input.dog_neutered ?? input.kastrovana);
       const usage = text(input.interest_reason ?? input.usage_plan ?? input.duvod, 250);
       const splitCare = input.dog_allergies != null || input.dog_temperament != null || input.alergie != null || input.povaha != null;
-      const allergiesInput = input.dog_allergies ?? input.alergie;
+      const allergiesInput = input.dog_allergies ?? input.alergie ?? '';
       const temperamentInput = input.dog_temperament ?? input.povaha;
-      if (splitCare && (typeof allergiesInput !== 'string' || typeof temperamentInput !== 'string' || !allergiesInput.trim() || !temperamentInput.trim() || allergiesInput.trim().length > 3000 || temperamentInput.trim().length > 3000)) {
+      if (splitCare && (typeof allergiesInput !== 'string' || typeof temperamentInput !== 'string' || !temperamentInput.trim() || allergiesInput.trim().length > 3000 || temperamentInput.trim().length > 3000)) {
         return response(origin, 400, { ok: false, error: 'invalid_dog_care_fields' });
       }
       const dogAllergies = splitCare ? text(allergiesInput, 3000) : null;
