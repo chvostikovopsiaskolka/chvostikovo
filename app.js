@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261009-notice-layout-read-badge-v192';
-const APP_VERSION='1.0.39';
+const APP_BUILD='20261009-safe-resume-auto-update-v193';
+const APP_VERSION='1.0.40';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -174,7 +174,7 @@ function bratislavaToday(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone
 function dogAgeParts(birthDate,today=bratislavaToday()){if(!birthDate)return null;const b=String(birthDate).slice(0,10).split('-').map(Number),t=String(today).slice(0,10).split('-').map(Number);if(b.length!==3||t.length!==3||b.some(Number.isNaN)||t.some(Number.isNaN))return null;let months=(t[0]-b[0])*12+t[1]-b[1]-(t[2]<b[2]?1:0);if(months<0)return null;return{months,years:Math.floor(months/12)}}
 function dogAgeText(birthDate,today){const age=dogAgeParts(birthDate,today);if(!age)return'';if(age.months<12){if(age.months===0)return'menej ako mesiac';if(age.months===1)return'1 mesiac';if(age.months>=2&&age.months<=4)return age.months+' mesiace';return age.months+' mesiacov'}if(age.years===1)return'1 rok';if(age.years>=2&&age.years<=4)return age.years+' roky';return age.years+' rokov'}
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add('hidden'),3300)}
-function loading(on){const el=$('loading');if(!el)return;const inApp=!!on&&!$('appView')?.classList.contains('hidden');el.classList.toggle('in-app',inApp);el.classList.toggle('hidden',!on);if(!on)el.classList.remove('in-app')}
+function loading(on){const el=$('loading');if(!el)return;const inApp=!!on&&!$('appView')?.classList.contains('hidden');el.classList.toggle('in-app',inApp);el.classList.toggle('hidden',!on);if(!on){el.classList.remove('in-app');scheduleCustomerUpdateApply()}}
 function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
@@ -191,7 +191,8 @@ async function refreshSession(){
   try{return await run}finally{sessionRefreshInFlight=null}
 }
 async function apiCore(body=null,retry=true){if(!state.session)throw new Error('Najprv sa prihláste.');const token=state.session.access_token,opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const r=await fetch(API,opts);const txt=await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
-async function api(body=null,retry=true){const result=await apiCore(body,retry);runCustomerHooks('afterApi',body,result);return result}
+let customerApiMutationsInFlight=0;
+async function api(body=null,retry=true){if(body)customerApiMutationsInFlight++;try{const result=await apiCore(body,retry);runCustomerHooks('afterApi',body,result);return result}finally{if(body)customerApiMutationsInFlight--;scheduleCustomerUpdateApply()}}
 function showAuth(mode='login'){$('supportChatBtnV52')?.classList.add('hidden');$('supportChatModalV52')?.classList.add('hidden');document.documentElement.classList.remove('support-chat-open-v52');document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').inert=false;$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
 function showApp(){$('authView').classList.add('hidden');$('authView').inert=true;$('appView').classList.remove('hidden')}
 function pluralDogs(n){return n===1?'1 prihlásený psík':n+' prihlásených psíkov'}
@@ -853,7 +854,77 @@ function closePhotoEditor(){if(state.photoEdit?.url)URL.revokeObjectURL(state.ph
 function photoJpegData(){const c=$('photoCropCanvas');for(const q of [.9,.84,.78,.72]){const data=c.toDataURL('image/jpeg',q),bytes=Math.ceil((data.length-data.indexOf(',')-1)*3/4);if(bytes<900000)return data}return c.toDataURL('image/jpeg',.68)}
 async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);await api({action:'upload_dog_photo',photo_scope:'account',dog_id:Number(state.selectedDogId),image_data:photoJpegData()});closePhotoEditor();toast('Fotka je uložená.');await bootstrap(false)}catch(e){toast(e.message)}finally{loading(false)}}
 function urlBase64ToUint8Array(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(b);return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
-async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js')}catch(e){console.warn(e)}}
+async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'})}catch(e){console.warn(e)}}
+
+/* Check a static release marker only on foreground entry, never by polling. */
+const CUSTOMER_UPDATE_INTERVAL=5*60*1000;
+const CUSTOMER_UPDATE_CHECK_KEY='chvostikovo-release-check-v1';
+const CUSTOMER_UPDATE_ATTEMPT_KEY='chvostikovo-release-reload-v1';
+let customerUpdateCheckInFlight=null,customerUpdateLastCheck=0,customerUpdatePending='',customerUpdateReloading=false,customerUpdateApplyTimer=0;
+const customerUpdateFieldBaselines=new WeakMap(),customerUpdateDirtyFields=new Set();
+function customerUpdateFieldValue(el){return el.type==='checkbox'||el.type==='radio'?String(el.checked):String(el.value??el.textContent??'')}
+function customerUpdateVisible(el){return !!el?.getClientRects().length&&getComputedStyle(el).visibility!=='hidden'}
+function customerUpdateSafe(){
+  if(document.visibilityState!=='visible'||navigator.onLine===false||customerApiMutationsInFlight||bootstrapInFlight||customerSyncInFlight||dogSaveInFlightV145||vaccinationProofUploadInFlightV143||state.photoEdit||window.__customerPhotoPickerV88||window.__customerPhotoDecodeV88||window.__vaccinationProofProcessingV105)return false;
+  if(customerUpdateVisible($('loading')))return false;
+  if(document.activeElement?.matches('input,textarea,select,[contenteditable="true"]'))return false;
+  if([...document.querySelectorAll('[aria-modal="true"]')].some(customerUpdateVisible))return false;
+  if(['supportMessageBodyV52','messageBody'].some(id=>String($(id)?.value||'').trim()))return false;
+  for(const el of customerUpdateDirtyFields){
+    if(!el.isConnected){customerUpdateDirtyFields.delete(el);continue}
+    if(customerUpdateVisible(el)&&customerUpdateFieldValue(el)!==customerUpdateFieldBaselines.get(el))return false;
+  }
+  return true;
+}
+function applyPendingCustomerUpdate(){
+  if(!customerUpdatePending||customerUpdateReloading||!customerUpdateSafe())return false;
+  try{
+    if(sessionStorage.getItem(CUSTOMER_UPDATE_ATTEMPT_KEY)===customerUpdatePending)return false;
+    // Persist before reloading: even a stale HTML response cannot cause a reload loop.
+    sessionStorage.setItem(CUSTOMER_UPDATE_ATTEMPT_KEY,customerUpdatePending);
+    if(sessionStorage.getItem(CUSTOMER_UPDATE_ATTEMPT_KEY)!==customerUpdatePending)return false;
+  }catch(_){return false}
+  customerUpdateReloading=true;
+  window.location.reload();
+  return true;
+}
+function scheduleCustomerUpdateApply(){
+  if(!customerUpdatePending||customerUpdateReloading)return;
+  clearTimeout(customerUpdateApplyTimer);
+  customerUpdateApplyTimer=setTimeout(()=>{customerUpdateApplyTimer=0;applyPendingCustomerUpdate()},250);
+}
+async function checkCustomerRelease(){
+  if(document.visibilityState!=='visible'||navigator.onLine===false||customerUpdateReloading)return;
+  if(applyPendingCustomerUpdate())return;
+  if(customerUpdateCheckInFlight)return customerUpdateCheckInFlight;
+  const now=Date.now();
+  try{customerUpdateLastCheck=Math.max(customerUpdateLastCheck,Number(sessionStorage.getItem(CUSTOMER_UPDATE_CHECK_KEY))||0)}catch(_){}
+  if(customerUpdateLastCheck&&now-customerUpdateLastCheck<CUSTOMER_UPDATE_INTERVAL)return;
+  customerUpdateLastCheck=now;
+  try{sessionStorage.setItem(CUSTOMER_UPDATE_CHECK_KEY,String(now))}catch(_){}
+  customerUpdateCheckInFlight=(async()=>{
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),4000);
+    try{
+      const response=await fetch('/version.json',{cache:'no-store',credentials:'same-origin',signal:controller.signal});
+      if(!response.ok)return;
+      const release=await response.json(),build=release?.build;
+      if(typeof build!=='string'||! /^[A-Za-z0-9_-]{1,100}$/.test(build))return;
+      customerUpdatePending=build===APP_BUILD?'':build;
+      applyPendingCustomerUpdate();
+    }catch(_){}finally{clearTimeout(timer)}
+  })().finally(()=>{customerUpdateCheckInFlight=null});
+  return customerUpdateCheckInFlight;
+}
+document.addEventListener('focusin',event=>{
+  const el=event.target;if(!el?.matches?.('input,textarea,select,[contenteditable="true"]'))return;
+  if(!customerUpdateDirtyFields.has(el))customerUpdateFieldBaselines.set(el,customerUpdateFieldValue(el));
+});
+document.addEventListener('input',event=>{
+  const el=event.target;if(!el?.matches?.('input,textarea,select,[contenteditable="true"]'))return;
+  if(!customerUpdateFieldBaselines.has(el))customerUpdateFieldBaselines.set(el,el.defaultValue??'');
+  if(customerUpdateFieldValue(el)===customerUpdateFieldBaselines.get(el))customerUpdateDirtyFields.delete(el);else customerUpdateDirtyFields.add(el);
+});
+for(const event of ['click','focusout','change','reset'])document.addEventListener(event,scheduleCustomerUpdateApply);
 async function pushSubscription(){if(!('serviceWorker'in navigator))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
 function applyPushToggle(){const b=$('pushToggle');if(!b)return;b.classList.toggle('active',!!state.pushEnabled);b.classList.remove('syncing');b.setAttribute('aria-checked',state.pushEnabled?'true':'false')}
 async function syncPushSubscriptionV75(sub){
@@ -1019,6 +1090,7 @@ window.addEventListener('pageshow',()=>setTimeout(repairCustomerScrollV60,0));
 window.visualViewport?.addEventListener('resize',()=>requestAnimationFrame(repairCustomerScrollV60));
 async function refreshOnResume(){
   const now=Date.now();
+  void checkCustomerRelease();
   if(window.__customerPhotoPickerV88===true||window.__customerPhotoDecodeV88===true)return;
   if(!state.session||document.visibilityState==='hidden'||now-lastResumeRefresh<5000)return;
   if(state.data&&customerPassSummaryDate!==bratislavaToday())renderPassSummary();
@@ -1045,7 +1117,7 @@ setTimeout(scheduleWaitingDogFallbackV101,1500);
   const badge=$('betaVersionBadge'),modal=$('betaVersionModal'),close=$('betaVersionClose'),messages=$('betaVersionMessages');if(!badge||!modal)return;
   badge.addEventListener('click',()=>modal.classList.remove('hidden'));close?.addEventListener('click',()=>modal.classList.add('hidden'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});messages?.addEventListener('click',()=>{modal.classList.add('hidden');switchTab('messages')});
 })();
-init();
+init().finally(()=>{void checkCustomerRelease()});
 /* consolidated booking layout: section heading + reservation deadline */
 function ensureBookingLayout(){
   const booking=$('bookingTab'),week=$('weekDays');if(!booking||!week)return;
