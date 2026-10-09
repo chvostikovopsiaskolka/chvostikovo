@@ -320,7 +320,7 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
   const monday = dates[0];
   const friday = dates[dates.length - 1];
   const results = await Promise.all([
-    rest('reservations?reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=in.(booked,attended)&select=reservation_date,dog_id'),
+    rest('reservations?reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=eq.booked&select=reservation_date,dog_id'),
     rest('customer_booking_requests?reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=eq.pending&select=reservation_date'),
     rest('portal_day_settings?day=gte.' + monday + '&day=lte.' + friday + '&select=day,capacity,bookings_open,note'),
     linkedDogRows ? Promise.resolve(linkedDogRows) : linkedDogs(userId),
@@ -353,7 +353,6 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
         .filter((dog) => dog?.share_name_photo === true)
       : [];
     const visibleDogs = await Promise.all(consentedDogs.map(async (dog) => ({
-      dog_id: Number(dog.id),
       name: dog?.customer_name || dog?.name || 'Psík',
       sex: dog?.sex || null,
       photo_url: await signedPhotoUrl(dog?.photo_path),
@@ -1306,4 +1305,3 @@ Deno.serve(async (req: Request) => {
     return fail(message, /prihlás|vypršalo/i.test(message) ? 401 : 400);
   }
 });
-

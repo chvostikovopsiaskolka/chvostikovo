@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261009-global-tap-polish-v187';
-const APP_VERSION='1.0.34';
+const APP_BUILD='20261009-attended-roster-v188';
+const APP_VERSION='1.0.35';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1926,17 +1926,15 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
 
   function bookingRosterV37(day,ownDog,passState){
-    const count=(day?.dogs?.length||0)+(Number(day?.anonymous_dogs)||0);
-    if(!count)return '<span class="reserved-roster-count-v37">Zatiaľ bez ďalších psíkov</span>';
     const ownName=String(ownDog?.customer_name||ownDog?.name||'').trim();
     const ownPhoto=String(ownDog?.photo_url||'');
-    const visible=day.dogs||[];
-    const ownIndex=visible.findIndex(x=>String(x.name||'').trim()===ownName);
-    const own=ownIndex>=0?visible[ownIndex]:{name:ownName||'Váš psík',sex:ownDog?.sex,photo_url:ownPhoto};
+    const visible=day?.dogs||[];
+    const ownIndex=visible.findIndex(x=>x.dog_id!=null?Number(x.dog_id)===Number(ownDog?.id):String(x.name||'').trim()===ownName);
+    const own={name:ownName||'Váš psík',sex:ownDog?.sex,photo_url:ownPhoto};
     const otherVisible=visible.filter((_,index)=>index!==ownIndex);
-    const anonymous=Math.max(0,Number(day.anonymous_dogs||0)-(ownIndex<0?1:0));
+    const anonymous=Math.max(0,Number(day?.anonymous_dogs||0)-(ownIndex<0?1:0));
     const row=(x,badge='')=>{const sex=x.sex==='male'?' dog-male-v100':x.sex==='female'?' dog-female-v100':' dog-neutral-v100';return `<span class="reserved-roster-row-v37">${x.photo_url?`<i class="reserved-roster-avatar-v37${sex}"><img src="${esc(x.photo_url)}" alt=""></i>`:`<i class="reserved-roster-avatar-v37${sex}">🐾</i>`}<b>${esc(x.name)}</b>${badge}</span>`};
-    return `<details class="reserved-roster-v37"><summary>Pozrite si s kým bude váš psík v škôlke</summary><div>${row(own,passState)}${otherVisible.map(x=>row(x)).join('')}${Array.from({length:anonymous},()=>'<span class="reserved-roster-row-v37"><i class="reserved-roster-avatar-v37 dog-neutral-v100">🐾</i><b>Prihlásený škôlkar</b></span>').join('')}</div></details>`;
+    return `<details class="reserved-roster-v37"><summary>Pozrite si, s kým bude váš psík v škôlke.</summary><div>${row(own,passState)}${otherVisible.map(x=>row(x)).join('')}${Array.from({length:anonymous},()=>'<span class="reserved-roster-row-v37"><i class="reserved-roster-avatar-v37 dog-neutral-v100">🐾</i><b>Prihlásený škôlkar</b></span>').join('')}</div></details>`;
   }
 
   customerRenderers.upcoming=()=>{
