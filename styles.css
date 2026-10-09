@@ -1640,10 +1640,11 @@ html.customer-awaiting-dog-v107 #appView{
 
 /* Orange entry badge aligned to the right edge of the full-width roster. */
 .reserved-day-meta-v37>.reserved-roster-v37{width:100%;flex:1 1 100%;min-width:0}
-.reserved-roster-row-v37 .reserved-pass-v37{display:inline-flex;align-items:center;justify-content:center;flex:0 1 auto;max-width:60%;min-height:26px;margin-left:auto;font-size:8.5px;padding:4px 6px;border:1px solid #fed7aa;border-radius:10px;background:#fff2e8;color:#b84b09;text-align:center;line-height:1.2;white-space:normal;font-weight:850}
+.reserved-roster-row-v37 .reserved-pass-v37{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;max-width:none;min-height:26px;margin-left:auto;font-size:8.5px;padding:4px 6px;border:1px solid #fed7aa;border-radius:10px;background:#fff2e8;color:#b84b09;text-align:center;line-height:1.2;white-space:nowrap;overflow-wrap:normal;font-weight:850}
 .reserved-roster-row-v37{column-gap:14px!important}
-.reserved-roster-row-v37 .reserved-pass-new-v134{text-align:center}
-@media(max-width:390px){.reserved-roster-row-v37{column-gap:12px!important}.reserved-roster-row-v37 .reserved-pass-v37{max-width:58%;font-size:8px;padding:4px 6px}}
+.reserved-roster-row-v37 .reserved-pass-new-v134{text-align:center;white-space:nowrap}
+.reserved-roster-row-v37 b{flex:1 1 auto;overflow-wrap:anywhere}
+@media(max-width:390px){.reserved-roster-row-v37{column-gap:12px!important}.reserved-roster-row-v37 .reserved-pass-v37{max-width:none;font-size:8px;padding:4px 6px}}
 
 /* v138: one-line deadline and compact approval label. */
 #bookingTab .deadline-card{min-height:52px!important;padding:9px 9px 9px 46px!important}
