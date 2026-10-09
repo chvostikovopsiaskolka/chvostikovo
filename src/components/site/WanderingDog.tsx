@@ -34,11 +34,27 @@ export const WanderingDog = memo(function WanderingDog() {
     let direction = 1;
     let timer: ReturnType<typeof setInterval> | undefined;
     let last = performance.now();
+    let initialPositionSet = false;
 
     function measure() {
       width = layer!.clientWidth;
       height = layer!.clientHeight;
       dogWidth = walker!.offsetWidth;
+      if (!initialPositionSet && width && height) {
+        initialPositionSet = true;
+        if (window.matchMedia("(max-width: 639px)").matches) {
+          const section = layer!.closest("section");
+          const ticker = section?.querySelector<HTMLElement>(
+            '[aria-label="Výhody psej škôlky Chvostíkovo"], [aria-label="Chvostíkovo dog daycare highlights"]',
+          );
+          const tickerTop = ticker && ticker.offsetHeight
+            ? ticker.getBoundingClientRect().top - layer!.getBoundingClientRect().top
+            : height;
+          const travelHeight = height - dogWidth * .51;
+          start = { x: .12, y: Math.max(72, Math.min(travelHeight - 4, tickerTop - dogWidth * .51 - 12)) / travelHeight };
+          control = { x: .5, y: (start.y + end.y) / 2 };
+        }
+      }
     }
     function draw(delta: number) {
       if (!width || !height) measure();
