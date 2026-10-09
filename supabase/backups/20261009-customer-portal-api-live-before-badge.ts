@@ -821,15 +821,8 @@ async function markMessagesRead(userId: string, staff: boolean, conversationId: 
       'portal_conversations?id=eq.' + conversationId + '&customer_user_id=eq.' + encodeURIComponent(userId) + '&select=id&limit=1',
     ) as Array<Json>;
     if (!conversations.length) throw new Error('Konverzácia sa nenašla.');
-    const readAt = new Date().toISOString();
     await rest('portal_messages?conversation_id=eq.' + conversationId + '&sender_role=eq.staff&read_at=is.null', {
-      method: 'PATCH', body: { read_at: readAt },
-    });
-    // Shadow notification for the same conversation is read together with the actual message.
-    await rest('portal_notifications?recipient_user_id=eq.' + encodeURIComponent(userId)
-      + '&notification_type=eq.staff_message_customer&entity_type=eq.conversation&entity_id=eq.'
-      + conversationId + '&read_at=is.null&created_at=lte.' + encodeURIComponent(readAt), {
-      method: 'PATCH', body: { read_at: readAt },
+      method: 'PATCH', body: { read_at: new Date().toISOString() },
     });
   }
   return true;

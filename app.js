@@ -83,29 +83,42 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261009-roster-copy-final-v185';
-const APP_VERSION='1.0.32';
+const APP_BUILD='20261009-unread-badge-v186';
+const APP_VERSION='1.0.33';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   document.documentElement.classList.toggle('customer-ios-v171',iOS);
   return iOS;
 })();
-async function clearCustomerAppBadgeV171(){
-  if(!CUSTOMER_IOS_V171||!('serviceWorker' in navigator))return;
+// iOS home-screen badge follows unread customer data, not the number of received pushes.
+const CUSTOMER_BADGE_EXCLUDED_V186=new Set(['staff_message_customer','customer_message_admin','pass_request_admin','pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test']);
+function customerUnreadBadgeCountV186(){
+  if(!state.session||!state.data)return null;
+  const messages=(state.data.messages||[]).filter(m=>m.sender_role==='staff'&&!m.read_at).length;
+  const notices=(state.data.notifications||[]).filter(n=>!n.read_at&&!CUSTOMER_BADGE_EXCLUDED_V186.has(n.notification_type)&&careNotificationIsCurrent(n)).length;
+  return messages+notices;
+}
+async function setCustomerAppBadgeV186(count){
+  if(!CUSTOMER_IOS_V171)return;
+  const safe=Math.max(0,Math.floor(Number(count)||0));
   try{
-    if('clearAppBadge' in navigator)await navigator.clearAppBadge();
-    else if('setAppBadge' in navigator)await navigator.setAppBadge(0);
+    if(safe>0&&'setAppBadge' in navigator)await navigator.setAppBadge(safe);
+    else if(safe===0&&'clearAppBadge' in navigator)await navigator.clearAppBadge();
+    else if(safe===0&&'setAppBadge' in navigator)await navigator.setAppBadge(0);
   }catch(_){}
+  if(!('serviceWorker' in navigator))return;
   try{
-    const message={type:'SET_CUSTOMER_BADGE_COUNT_V171',count:0};
+    const message={type:'SET_CUSTOMER_BADGE_COUNT_V186',count:safe,updatedAt:Date.now()};
     if(navigator.serviceWorker.controller)navigator.serviceWorker.controller.postMessage(message);
-    else{
-      const reg=await navigator.serviceWorker.ready;
-      reg.active?.postMessage(message);
-    }
+    else (await navigator.serviceWorker.ready).active?.postMessage(message);
   }catch(_){}
 }
+function syncCustomerAppBadgeV186(){
+  const count=customerUnreadBadgeCountV186();
+  if(count!==null)void setCustomerAppBadgeV186(count);
+}
+async function clearCustomerAppBadgeV171(){await setCustomerAppBadgeV186(0);}
 
 
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
@@ -271,6 +284,7 @@ async function flushCustomerSync(){
 
     const nextFingerprint=customerDataFingerprintV18(next);
     state.data=next;
+    syncCustomerAppBadgeV186();
     const nextDogs=next.dogs||[];
     if(!state.selectedDogId&&nextDogs.length)state.selectedDogId=Number(nextDogs[0].id);
     if(state.selectedDogId&&!nextDogs.some(d=>Number(d.id)===Number(state.selectedDogId)))state.selectedDogId=nextDogs.length?Number(nextDogs[0].id):null;
@@ -388,8 +402,13 @@ function renderNotifications(){
     modal.classList.add('hidden');
     const stamp=new Date().toISOString();
     (state.data?.notifications||[]).forEach(n=>{if(visibleIds.includes(Number(n.id)))n.read_at=stamp});
-    try{await api({action:'mark_notifications_read'})}catch(_){}
-    await clearCustomerAppBadgeV171();
+    try{
+      await api({action:'mark_notifications_read'});
+      // The API marks all outstanding notices read, not only this popup's five visible rows.
+      const readAt=new Date().toISOString();
+      (state.data?.notifications||[]).forEach(n=>{if(!n.read_at)n.read_at=readAt});
+      syncCustomerAppBadgeV186();
+    }catch(_){queueCustomerSync('notifications',80)}
   };
   $('notificationPopupClose').onclick=close;
   const hasOtherModal=[...document.querySelectorAll('[aria-modal="true"]')].some(el=>el!==modal&&!el.classList.contains('hidden'));
@@ -430,7 +449,7 @@ async function loadAnnouncements(){return customerRenderers.announcements?custom
 function renderMessagesCore(){const rows=state.data?.messages||[];$('messageThread').innerHTML=rows.length?rows.map(m=>`<div class="message-bubble ${m.sender_role==='customer'?'mine':''}"><p>${esc(m.body)}</p><small>${skTime(m.created_at)}</small></div>`).join(''):'<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';setTimeout(()=>{$('messageThread').scrollTop=$('messageThread').scrollHeight},0);const opts=futureItems();$('messageBooking').innerHTML='<option value="">Bez konkrétnej rezervácie</option>'+opts.map(r=>`<option value="${r.id||''}">${esc(dogName(r.dog_id))} · ${skDate(r.reservation_date)}</option>`).join('')}
 function renderMessages(){const out=renderMessagesCore();runCustomerHooks('afterRenderMessages',out);return out}
 function updateUnreadCore(){const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);$('messageUnread').classList.toggle('hidden',!unread);$('menuMessageUnread')?.classList.toggle('hidden',!unread)}
-function updateUnread(){const out=updateUnreadCore();runCustomerHooks('afterUpdateUnread',out);return out}
+function updateUnread(){const out=updateUnreadCore();runCustomerHooks('afterUpdateUnread',out);syncCustomerAppBadgeV186();return out}
 function renderDogSelector(){const dogs=state.data?.dogs||[];$('dogSelectorWrap').classList.toggle('hidden',dogs.length<=1);const options=dogs.map(d=>`<option value="${d.id}" ${Number(d.id)===Number(state.selectedDogId)?'selected':''}>${esc(d.name)}</option>`).join('');$('dogSelector').innerHTML=options;const booking=$('bookingDogSelector');if(booking){booking.classList.toggle('hidden',dogs.length<=1);booking.innerHTML=options}}
 function totalVisits(dog){const visits=(state.data?.visits||[]).filter(v=>Number(v.dog_id)===Number(dog.id)).length;const monthly=(state.data?.monthly_totals||[]).filter(m=>Number(m.dog_id)===Number(dog.id)).reduce((s,m)=>s+Number(m.visits||0),0);return Math.max(Number(dog.legacy_total_visits)||0,visits,monthly)}
 function ensureDogFormInModalV51(){
