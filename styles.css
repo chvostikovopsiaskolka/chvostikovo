@@ -1898,7 +1898,7 @@ html.phone-portrait-layout #supportChatModalV52 .support-chat-card-v52,
   width:42px;
   height:42px;
   flex:0 0 42px;
-  border-radius:50%;
+  border-radius:12px;
   display:grid;
   place-items:center;
   overflow:hidden;
