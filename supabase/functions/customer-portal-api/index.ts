@@ -946,6 +946,16 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
   }
 }
 
+async function adminPushStatuses(payload: Json) {
+  const ids = Array.isArray(payload.user_ids) ? [...new Set(payload.user_ids.map(String))].slice(0,500) : [];
+  if (ids.some(id => !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))) throw new Error('Neplatný zákaznícky účet.');
+  if (!ids.length) return [];
+  const rows = await rest('portal_push_subscriptions?user_id=' + encodeURIComponent(inFilter(ids)) + '&active=eq.true&select=user_id') as Array<Json>;
+  const counts = new Map<string,number>();
+  for (const row of rows) counts.set(String(row.user_id),(counts.get(String(row.user_id))||0)+1);
+  return ids.map(user_id => ({user_id,active_devices:counts.get(user_id)||0}));
+}
+
 async function adminVaccinationProofs(dogId: number) {
   if (!dogId) throw new Error('Psík sa nenašiel.');
   const rows = await rest(
@@ -1228,6 +1238,9 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!staff) return fail('Nemáte oprávnenie.', 403);
+    if (action === 'admin_push_status') {
+      return json({ data: await adminPushStatuses(body) });
+    }
     if (action === 'admin_chat_photo') {
       return json({ data: { photo_url: await staffChatPhotoUrl() } });
     }
