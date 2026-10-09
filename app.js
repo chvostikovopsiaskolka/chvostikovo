@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261009-attended-roster-v188';
-const APP_VERSION='1.0.35';
+const APP_BUILD='20261009-reservation-entry-badges-v189';
+const APP_VERSION='1.0.36';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -429,9 +429,9 @@ function plannedPassSummaryV162(dogId){
 }
 function renderPassSummaryCore(){
   const d=selectedDog(),p=d?activePassFor(d.id):null,planned=d?plannedPassSummaryV162(d.id):null;
-  if(planned){$('passSummary').innerHTML=`<span>Permanentka</span><strong>0/${planned.total}</strong>${planned.until?`<small>Platí do ${skDate(planned.until)}</small>`:'<small>Platí 2 mesiace od prvého rezervovaného vstupu</small>'}`;return}
+  if(planned){$('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>0 z ${planned.total}</strong>${planned.until?`<small>Platí do ${skDate(planned.until)}</small>`:'<small>Platí 2 mesiace od prvého rezervovaného vstupu</small>'}`;return}
   if(p){
-    $('passSummary').innerHTML=`<span>Permanentka</span><strong>${Number(p.used_entries)||0}/${Number(p.total_entries)||0}</strong>${p.valid_until?`<small>Platí do ${skDate(p.valid_until)}</small>`:''}`;
+    $('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>${Number(p.used_entries)||0} z ${Number(p.total_entries)||0}</strong>${p.valid_until?`<small>Platí do ${skDate(p.valid_until)}</small>`:''}`;
     return;
   }
   if(d?.default_entry_type==='free'){
@@ -1934,7 +1934,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const otherVisible=visible.filter((_,index)=>index!==ownIndex);
     const anonymous=Math.max(0,Number(day?.anonymous_dogs||0)-(ownIndex<0?1:0));
     const row=(x,badge='')=>{const sex=x.sex==='male'?' dog-male-v100':x.sex==='female'?' dog-female-v100':' dog-neutral-v100';return `<span class="reserved-roster-row-v37">${x.photo_url?`<i class="reserved-roster-avatar-v37${sex}"><img src="${esc(x.photo_url)}" alt=""></i>`:`<i class="reserved-roster-avatar-v37${sex}">🐾</i>`}<b>${esc(x.name)}</b>${badge}</span>`};
-    return `<details class="reserved-roster-v37"><summary>Pozrite si, s kým bude váš psík v škôlke.</summary><div>${row(own,passState)}${otherVisible.map(x=>row(x)).join('')}${Array.from({length:anonymous},()=>'<span class="reserved-roster-row-v37"><i class="reserved-roster-avatar-v37 dog-neutral-v100">🐾</i><b>Prihlásený škôlkar</b></span>').join('')}</div></details>`;
+    return `<details class="reserved-roster-v37"><summary>🐶 Pozrite si, s kým bude váš psík v škôlke...</summary><div>${row(own,passState)}${otherVisible.map(x=>row(x)).join('')}${Array.from({length:anonymous},()=>'<span class="reserved-roster-row-v37"><i class="reserved-roster-avatar-v37 dog-neutral-v100">🐾</i><b>Prihlásený škôlkar</b></span>').join('')}</div></details>`;
   }
 
   customerRenderers.upcoming=()=>{
@@ -1959,11 +1959,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(!items.length){root.innerHTML='<div class="card reserved-empty-v37"><svg class="reserved-empty-icon" aria-hidden="true"><use href="#ci-calendar"/></svg><span>Zatiaľ nemáte rezervovaný žiadny deň.</span><small>Kliknite na tlačidlo vyššie a vyberte si termín<br>pre vášho psíka.</small></div>';return}
     root.innerHTML=items.map(r=>{
       const day=byDate.get(r.reservation_date)||{},taxi=taxiLabel(r.taxi_mode),pending=r.status==='pending';
-      const planned=Number(r.projected_entry_number||r.planned_entry_number)||0,plannedTotal=Number(r.projected_pass_total||r.planned_pass_total)||0;
       const reservation=(state.data?.reservations||[]).find(x=>Number(x.id)===Number(r.reservation_id));
+      const planned=Number(reservation?.planned_entry_number||r.projected_entry_number||r.planned_entry_number)||0,plannedTotal=Number(reservation?.planned_pass_total||r.projected_pass_total||r.planned_pass_total)||0;
       const passId=Number(r.pass_id||reservation?.pass_id)||0;
       const upcomingPass=passId&&(state.data?.passes||[]).some(p=>Number(p.id)===passId&&p.status==='queued');
-      const passState=planned&&plannedTotal?`<span class="reserved-pass-v37${r.planned_pass_request_id||upcomingPass?' reserved-pass-new-v134':''}">${r.planned_pass_request_id||upcomingPass?`Plánovaný vstup ${planned}/${plannedTotal} z novej permanentky`:`Vstup z permanentky ${planned}/${plannedTotal}`}</span>`:'';
+      const entryType=reservation?.entry_type||r.entry_type||dog?.default_entry_type;
+      const passState=planned&&plannedTotal?`<span class="reserved-pass-v37${r.planned_pass_request_id||upcomingPass?' reserved-pass-new-v134':''}">${r.planned_pass_request_id||upcomingPass?`Plánovaný vstup ${planned}/${plannedTotal} z novej permanentky`:`Vstup z permanentky ${planned}/${plannedTotal}`}</span>`:entryType==='single'||entryType==='free'?`<span class="reserved-pass-v37">${entryType==='free'?'Bezplatný vstup':'Jednorazový vstup'}</span>`:'';
       const note=day.note&&!(day.bookings_open===false&&/^zatvorené$/i.test(String(day.note).trim()))?`<div class="reserved-note-v37">${esc(day.note)}</div>`:'';
       const sharedNote='';
       const linkedReservation=r.can_manage===false&&r.status==='approved'&&Number(r.reservation_id)>0;

@@ -455,7 +455,7 @@ async function customerBootstrap(user: Json) {
     const dogResults = await Promise.all([
       rest('passes?dog_id=' + dogFilter + '&status=' + encodeURIComponent('in.(active,queued)') + '&select=id,dog_id,total_entries,used_entries,purchased_on,valid_from,valid_until,no_expiry,status&order=created_at.asc'),
       rest('vaccinations?dog_id=' + dogFilter + '&select=id,dog_id,vaccination_type,valid_until,notes&order=vaccination_type.asc'),
-      rest('reservations?dog_id=' + dogFilter + '&reservation_date=gte.' + localDateIso() + '&status=in.(booked,attended)&select=id,dog_id,reservation_date,status,entry_type,pass_id,planned_entry_number,planned_pass_total,taxi_mode,taxi_amount&order=reservation_date.asc'),
+      rest('reservations?dog_id=' + dogFilter + '&reservation_date=gte.' + localDateIso() + '&status=eq.booked&select=id,dog_id,reservation_date,entry_type,planned_entry_number,planned_pass_total,taxi_mode,taxi_amount&order=reservation_date.asc'),
       rest('visits?dog_id=' + dogFilter + '&select=id,dog_id,visit_date&order=visit_date.desc'),
       rest('monthly_visit_totals?dog_id=' + dogFilter + '&select=dog_id,month,visits&order=month.desc'),
       rest('vaccination_proofs?dog_id=' + dogFilter + '&is_current=eq.true&select=id,dog_id,batch_id,storage_path,source,uploaded_at&order=uploaded_at.desc'),
