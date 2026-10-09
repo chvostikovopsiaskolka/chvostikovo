@@ -90,7 +90,7 @@ export function EnglishInquiryForm({
           <Check className="size-7" />
         </div>
         <h3 className="text-xl text-forest">Thank you!</h3>
-        <p className="text-sm text-muted-foreground">We will get back to you as soon as possible.</p>
+        <p className="text-sm text-muted-foreground">We will confirm receipt of your form by SMS.</p>
       </div>
     );
   }

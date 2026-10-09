@@ -104,7 +104,7 @@ export function ShortForm({
         </div>
         <h3 className="text-xl text-forest">Ďakujeme za váš záujem.</h3>
         <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Ozveme sa vám späť do 24 hodín.
+          O úspešnom prijatí formulára vás budeme informovať SMS.
         </p>
         {isTrackedLanding && (
           <div className="mt-2 w-full max-w-sm rounded-2xl bg-secondary/55 p-4">
@@ -243,7 +243,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         </div>
         <h3 className="text-xl text-forest">Prihláška odoslaná</h3>
         <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Ozveme sa vám do 24 hodín a preberieme s vami detaily úvodnej návštevy.
+          O úspešnom prijatí prihlášky vás budeme informovať SMS.
         </p>
       </div>
     );

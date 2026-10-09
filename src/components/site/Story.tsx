@@ -112,7 +112,7 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
         subtitle={
           isEnglish
             ? "Fill in the short, non-binding form. We will get back to you and talk through the options for your dog."
-            : "Vyplňte nezáväzný formulár. Ozveme sa vám späť do 24 hodín a radi s vami preberieme viac informácií."
+            : "Vyplňte nezáväzný formulár. Ozveme sa vám späť a radi s vami preberieme viac informácií."
         }
       >
         {isEnglish ? (

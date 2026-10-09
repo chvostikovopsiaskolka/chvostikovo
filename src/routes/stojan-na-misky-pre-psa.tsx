@@ -388,7 +388,7 @@ function BowlStandPage() {
                         >
                           <Check className="mx-auto size-7 text-coral" />
                           <p className="mt-3 font-display text-xl font-bold text-forest">
-                            Ďakujeme za váš záujem 🐶 Ozveme sa vám do 24 hodín.
+                            Ďakujeme za váš záujem 🐶 Ozveme sa vám hneď, ako to bude možné.
                           </p>
                         </div>
                       ) : (
