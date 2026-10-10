@@ -663,7 +663,7 @@ function EnglishDogDaycarePage() {
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
             <h2 className="section-title whitespace-nowrap text-[clamp(14px,4.7vw,36px)] leading-tight">More than 100 happy dogs</h2>
-            <p className="mt-0.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 out of 5 on Google</p>
+            <p className="mt-0.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 on Google</p>
             <EnglishReviewCarousel />
           </div>
         </section>
