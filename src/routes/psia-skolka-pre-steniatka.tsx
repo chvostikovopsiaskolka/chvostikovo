@@ -4,7 +4,6 @@ import {
   ArrowDown,
   CheckCircle2,
   Heart,
-  MapPin,
   Moon,
   Users,
 } from "lucide-react";
@@ -166,11 +165,12 @@ function PuppyDaycarePage() {
 
           <div className="relative z-10 mx-auto grid min-h-[440px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
-              <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-coral-dark sm:text-sm">
+              <p className="font-display text-[10px] font-bold uppercase tracking-[0.13em] text-coral-dark sm:text-sm sm:tracking-[0.16em]">
                 Psia škôlka pre šteniatka v Košiciach
               </p>
               <h1 className="mt-2 text-[37px] leading-[1.06] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
-                Noví kamoši. Nové zážitky.
+                <span className="block">Noví kamoši.</span>
+                <span className="block whitespace-nowrap">Nové zážitky.</span>
                 <span className="block text-coral-dark">Deň plný objavovania.</span>
               </h1>
 
@@ -193,18 +193,12 @@ function PuppyDaycarePage() {
               <button
                 type="button"
                 onClick={scrollToBenefits}
-                className="btn-coral mt-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
+                className="btn-coral mt-5 mb-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:mb-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg lg:mb-0"
               >
                 Zistiť viac
                 <ArrowDown className="size-5" />
               </button>
 
-              <div className="mt-3 flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-sm font-semibold text-forest/80 sm:mt-5 lg:justify-start">
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="size-4 text-coral" />
-                  Poľská 6, Košice
-                </span>
-              </div>
             </div>
 
             <div className="mx-auto hidden w-full max-w-md lg:mx-0 lg:block">
@@ -279,12 +273,6 @@ function PuppyDaycarePage() {
         <Reviews reviews={PUPPY_REVIEWS} />
 
         <FriendshipFeature />
-
-        <section className="bg-card pt-8 text-center sm:pt-12">
-          <div className="mx-auto max-w-6xl px-4">
-            <h2 className="section-title text-3xl sm:text-4xl">Pozrite si zopár fotiek zo škôlky</h2>
-          </div>
-        </section>
 
         <DaycarePhotoCarousel />
 

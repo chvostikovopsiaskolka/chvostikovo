@@ -28,9 +28,9 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
             Denná starostlivosť o stredných a veľkých psíkov
           </p>
 
-          <h1 className="mt-3 text-[29px] leading-[1.01] tracking-[-0.035em] text-forest min-[350px]:text-[31px] min-[390px]:text-[36px] sm:text-5xl">
-            <span className="block">Psia škôlka v Košiciach,</span>
-            <span className="block">ktorú si váš psík</span>
+          <h1 className="mt-3 text-[clamp(21px,6.8vw,30px)] leading-[1.06] tracking-[-0.035em] text-forest min-[480px]:text-[36px] min-[560px]:text-[42px] sm:text-5xl">
+            <span className="block whitespace-nowrap">Psia škôlka v Košiciach,</span>
+            <span className="block whitespace-nowrap">ktorú si váš psík</span>
             <span className="block text-coral-dark">zamiluje</span>
           </h1>
 

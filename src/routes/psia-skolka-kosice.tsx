@@ -112,7 +112,7 @@ function LeadLandingPage() {
 
           <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
-              <p className="whitespace-nowrap font-display text-[9px] font-bold uppercase tracking-[0.09em] text-coral-dark min-[390px]:text-[9.5px] min-[390px]:tracking-[0.11em] sm:text-sm sm:tracking-[0.16em]">
+              <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
               </p>
               <h1 className="mt-2 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
@@ -145,9 +145,9 @@ function LeadLandingPage() {
                 <ArrowDown className="size-5" />
               </button>
 
-              <div className="mt-2.5 flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-sm font-semibold text-forest/80 sm:mt-5 lg:justify-start">
-                <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 text-coral" /> Poľská 6, Košice</span>
-                <span className="inline-flex items-center gap-1.5"><Clock3 className="size-4 text-coral" /> Po–Pia 7:00–17:00</span>
+              <div className="mt-3 flex flex-wrap justify-center gap-2 text-[12px] font-semibold sm:mt-5 sm:text-sm lg:justify-start">
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-coral px-3 py-1.5 text-white shadow-card"><MapPin className="size-4 shrink-0 text-white" /> Poľská 6, Košice</span>
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-coral px-3 py-1.5 text-white shadow-card"><Clock3 className="size-4 shrink-0 text-white" /> Po–Pia 7:00–17:00</span>
               </div>
             </div>
 
@@ -218,12 +218,6 @@ function LeadLandingPage() {
         <Reviews />
 
         <FriendshipFeature />
-
-        <section className="bg-card pt-8 text-center sm:pt-12">
-          <div className="mx-auto max-w-6xl px-4">
-            <h2 className="section-title text-3xl sm:text-4xl">Pozrite si zopár fotiek zo škôlky</h2>
-          </div>
-        </section>
 
         <DaycarePhotoCarousel />
         <VideoSection />

@@ -26,6 +26,7 @@ import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { VideoSection } from "@/components/site/Reviews";
+import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 import { Care, About } from "@/components/site/Story";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { EnglishContact, Footer } from "@/components/site/Contact";
@@ -619,7 +620,7 @@ function EnglishDogDaycarePage() {
           <InfoTicker language="en" />
         </div>
 
-        <section className="relative overflow-hidden bg-forest pt-10 pb-10 text-cream sm:pt-12 sm:pb-12">
+        <section className="relative overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0">
           <SectionAmbientPaws tone="dark" />
           <div className="relative z-10 mx-auto max-w-6xl px-4">
             <h2 className="text-center font-display text-3xl text-cream sm:text-4xl">
@@ -647,7 +648,7 @@ function EnglishDogDaycarePage() {
               })}
             </div>
 
-            <div className="mt-7 flex justify-center">
+            <div className="relative z-20 mt-7 flex justify-center">
               <button
                 type="button"
                 onClick={() => openInquiry("en_why_chvostikovo")}
@@ -656,6 +657,18 @@ function EnglishDogDaycarePage() {
                 This sounds right for my dog
               </button>
             </div>
+
+            <div className="mx-auto -mt-1 h-[138px] w-full max-w-[820px] overflow-hidden sm:mt-2 sm:h-[225px]" aria-hidden="true">
+              <img
+                src={schoolmatesLineup}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                width={1200}
+                height={630}
+                className="block h-full w-full scale-[1.08] object-cover object-bottom sm:scale-[1.04]"
+              />
+            </div>
           </div>
         </section>
 
@@ -663,7 +676,7 @@ function EnglishDogDaycarePage() {
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
             <h2 className="section-title whitespace-nowrap text-[clamp(14px,4.7vw,36px)] leading-tight">More than 100 happy dogs</h2>
-            <p className="mt-0.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 on Google</p>
+            <p className="mt-2.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 on Google</p>
             <EnglishReviewCarousel />
           </div>
         </section>
