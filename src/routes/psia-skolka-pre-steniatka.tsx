@@ -12,6 +12,7 @@ import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
+import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
@@ -276,6 +277,8 @@ function PuppyDaycarePage() {
         </section>
 
         <Reviews reviews={PUPPY_REVIEWS} />
+
+        <FriendshipFeature />
 
         <section className="bg-card pt-8 text-center sm:pt-12">
           <div className="mx-auto max-w-6xl px-4">

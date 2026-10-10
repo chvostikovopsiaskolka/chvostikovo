@@ -3,6 +3,7 @@ import { Check, HeartHandshake, Moon, ShieldCheck, Sparkles, Users } from "lucid
 import { Header } from "@/components/site/Header";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
+import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { Footer } from "@/components/site/Contact";
 import { ShortForm } from "@/components/site/Forms";
 import { Collapse } from "@/components/site/Collapse";
@@ -287,6 +288,8 @@ function DogDaycarePage() {
             </div>
           </div>
         </section>
+
+        <FriendshipFeature />
 
         <section className="relative overflow-hidden bg-card py-14 sm:py-20">
           <SectionAmbientPaws />

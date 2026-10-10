@@ -15,6 +15,7 @@ import coursing from "@/assets/partner-coursing.png";
 import lolkio from "@/assets/partner-lolkio.png";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
+import { FriendshipFeature } from "./FriendshipFeature";
 
 const whyIcons = [Home, Zap, Dog];
 
@@ -90,6 +91,8 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
             </article>
           ))}
         </div>
+
+        <FriendshipFeature language={language} embedded />
 
         <div className="mt-7 flex justify-center">
           <button

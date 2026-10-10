@@ -178,6 +178,17 @@ await restoreImage({
   targetDir: siteOutputDir,
 });
 
+await restoreImage({
+  label: "FRIENDSHIP FEATURE",
+  dataDir: siteDataDir,
+  prefix: "friendship-feature",
+  output: "friendship-feature.avif",
+  expectedBytes: 151_549,
+  expectedSha256: "6d347a567cdcf007fcffd7346e7ff5c1a30801e487b49c82542cdbe05f3b9a73",
+  minBytes: 100_000,
+  targetDir: siteOutputDir,
+});
+
 const routePath = path.join(root, "src", "routes", "stojan-na-misky-pre-psa.tsx");
 let routeSource = await readFile(routePath, "utf8");
 

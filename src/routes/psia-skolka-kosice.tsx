@@ -14,6 +14,7 @@ import { FormDialog } from "@/components/site/FormDialog";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
+import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
@@ -215,6 +216,8 @@ function LeadLandingPage() {
         </section>
 
         <Reviews />
+
+        <FriendshipFeature />
 
         <section className="bg-card pt-8 text-center sm:pt-12">
           <div className="mx-auto max-w-6xl px-4">
