@@ -263,8 +263,9 @@ export function Reviews({ reviews = REVIEWS }: { reviews?: typeof REVIEWS } = {}
   );
 }
 
-export function VideoSection() {
+export function VideoSection({ language = "sk" }: { language?: "sk" | "en" } = {}) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isEnglish = language === "en";
 
   useEffect(() => {
     const video = videoRef.current;
@@ -291,7 +292,7 @@ export function VideoSection() {
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
         <h3 className="section-title whitespace-nowrap text-[18px] sm:text-3xl">
-          Ako sa naši škôlkári tešia do škôlky
+          {isEnglish ? "How our dogs look forward to daycare" : "Ako sa naši škôlkári tešia do škôlky"}
         </h3>
         <div className="mt-4 flex justify-center sm:mt-6">
           <div className="relative w-full max-w-[250px] overflow-hidden rounded-3xl bg-card shadow-card sm:max-w-[300px] lg:max-w-[320px]">
@@ -304,7 +305,7 @@ export function VideoSection() {
               playsInline
               controls
               preload="none"
-              aria-label="Video zo psiej škôlky Chvostíkovo – škôlkári sa tešia do škôlky"
+              aria-label={isEnglish ? "Video from Chvostíkovo dog daycare – dogs excited to arrive" : "Video zo psiej škôlky Chvostíkovo – škôlkári sa tešia do škôlky"}
             />
           </div>
         </div>
