@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
+  CheckCircle2,
+  Check,
+  Car,
   HeartHandshake,
   Menu,
   Moon,
@@ -22,6 +25,7 @@ import { Collapse } from "@/components/site/Collapse";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
+import { VideoSection } from "@/components/site/Reviews";
 import { Care, About } from "@/components/site/Story";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { EnglishContact, Footer } from "@/components/site/Contact";
@@ -95,28 +99,21 @@ function EnglishReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card p-5 text-center shadow-card sm:w-[46%] sm:p-6 lg:w-[31%]">
-      <div className="flex items-center justify-center gap-3">
-        <span className="flex size-10 items-center justify-center rounded-full bg-secondary font-display text-base font-bold text-forest sm:size-11">
-          {name.charAt(0)}
-        </span>
-        <div className="text-left">
-          <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
-          <span className="text-sm tracking-tight text-[#F5B301]" aria-label="5 out of 5 stars">★★★★★</span>
-        </div>
-      </div>
+    <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
+      <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
+      <span className="text-sm tracking-tight text-[#F5B301]" aria-label="5 out of 5 stars">★★★★★</span>
       <blockquote
         ref={body}
-        className={`mt-3 min-h-[4.5rem] text-[0.9rem] leading-relaxed text-forest/85 sm:min-h-[4.75rem] sm:text-[0.95rem] ${open ? "" : "line-clamp-3"}`}
+        className={`mt-2 min-h-[3.75rem] text-[0.88rem] leading-[1.4] text-forest/85 sm:min-h-[4rem] sm:text-[0.93rem] ${open ? "" : "line-clamp-3"}`}
       >
         “{text}”
       </blockquote>
-      <div className="min-h-[2.25rem] sm:min-h-[2.5rem]">
+      <div className="min-h-[1.75rem] sm:min-h-[2rem]">
         {(clamped || open) && (
           <button
             type="button"
             onClick={() => setOpen((value) => !value)}
-            className="mt-2 font-display text-sm font-semibold text-coral underline underline-offset-4"
+            className="mt-1 font-display text-sm font-semibold text-coral underline underline-offset-4"
           >
             {open ? "Show less" : "Read more"}
           </button>
@@ -129,34 +126,77 @@ function EnglishReviewCard({ name, text }: { name: string; text: string }) {
 function EnglishReviewCarousel() {
   const track = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
+  const resumeTimer = useRef<number | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
     const el = track.current;
     if (!el) return;
 
-    const speed = 30;
+    const narrowQuery = window.matchMedia("(max-width: 390px)");
+    let speed = narrowQuery.matches ? 32 : isMobile ? 50 : 36;
+    const updateSpeed = () => {
+      speed = narrowQuery.matches ? 32 : isMobile ? 50 : 36;
+    };
+    narrowQuery.addEventListener("change", updateSpeed);
+    window.addEventListener("resize", updateSpeed);
+
     let raf = 0;
     let last = performance.now();
+    let carry = 0;
 
     const step = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
 
       if (!paused.current) {
-        const half = el.scrollWidth / 2;
-        el.scrollLeft = el.scrollLeft >= half ? el.scrollLeft - half : el.scrollLeft + speed * dt;
+        carry += speed * dt;
+        const delta = Math.floor(carry);
+        if (delta > 0) {
+          carry -= delta;
+          const half = el.scrollWidth / 2;
+          const next = el.scrollLeft + delta;
+          el.scrollLeft = half > 0 && next >= half ? next - half : next;
+        }
+      } else {
+        carry = 0;
       }
 
       raf = requestAnimationFrame(step);
     };
 
     raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      narrowQuery.removeEventListener("change", updateSpeed);
+      window.removeEventListener("resize", updateSpeed);
+      if (resumeTimer.current !== null) window.clearTimeout(resumeTimer.current);
+    };
   }, [isMobile]);
 
-  const pause = () => (paused.current = true);
-  const resume = () => (paused.current = false);
+  const pause = () => {
+    if (resumeTimer.current !== null) {
+      window.clearTimeout(resumeTimer.current);
+      resumeTimer.current = null;
+    }
+    paused.current = true;
+  };
+
+  const resume = () => {
+    if (resumeTimer.current !== null) {
+      window.clearTimeout(resumeTimer.current);
+      resumeTimer.current = null;
+    }
+    paused.current = false;
+  };
+
+  const pauseForReading = () => {
+    pause();
+    resumeTimer.current = window.setTimeout(() => {
+      paused.current = false;
+      resumeTimer.current = null;
+    }, 8000);
+  };
 
   return (
     <div
@@ -164,11 +204,11 @@ function EnglishReviewCarousel() {
       onMouseEnter={pause}
       onMouseLeave={resume}
       onTouchStart={pause}
-      onTouchEnd={resume}
-      onTouchCancel={resume}
+      onTouchEnd={pauseForReading}
+      onTouchCancel={pauseForReading}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="relative left-1/2 mt-10 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+      className="relative left-1/2 mt-3 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
       {[...REVIEWS_EN, ...REVIEWS_EN].map((review, index) => (
         <EnglishReviewCard key={`${review.name}-${index}`} name={review.name} text={review.text} />
@@ -312,6 +352,39 @@ const WHY_EN = [
   },
 ];
 
+const REQUIREMENTS_EN = [
+  {
+    title: "Vaccinations and prevention",
+    text: "Your dog needs a valid vaccination record covering rabies, core infectious diseases (distemper, parvovirus, parainfluenza, infectious hepatitis and leptospirosis), and kennel cough. Regular deworming and protection against external parasites are required.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Behaviour around dogs and people",
+    text: "Dogs must be comfortable and non-aggressive around people and other dogs. Dogs displaying aggression or unsafe group behaviour cannot attend. We assess suitability during the introductory visit.",
+    icon: Users,
+  },
+  {
+    title: "Hygiene",
+    text: "Dogs should have basic indoor toilet habits, taking a puppy's age and development into account. Please walk your dog before arrival; we provide opportunities to relieve themselves during the day.",
+    icon: Sparkles,
+  },
+  {
+    title: "Health and comfort",
+    text: "Dogs must be clinically healthy and free of contagious illness. Please tell us about allergies and chronic conditions in advance so we can assess their needs. Female dogs cannot attend while in heat.",
+    icon: Moon,
+  },
+];
+
+const INCLUDED_EN = [
+  "Safe, supervised daytime dog care",
+  "Heated indoor spaces and an outdoor run of approximately 80 m²",
+  "Movement, games and time with dog friends",
+  "A friendly environment with all-day supervision",
+  "Photos and videos from the day",
+  "Individual attention for each dog",
+  "Drinking water and suitable treats",
+];
+
 function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -328,6 +401,7 @@ function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
     ["#care", "How we care"],
     ["#why-daycare", "Why daycare"],
     ["#faq", "FAQ"],
+    ["#pricing", "Pricing"],
     ["#requirements", "Requirements"],
     ["#about", "About us"],
     ["/produkty", "Our products"],
@@ -426,79 +500,105 @@ function EnglishDogDaycarePage() {
       <EnglishHeader onEnquire={() => setInquiryOpen(true)} />
 
       <main>
-        <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-28 lg:pb-4">
+        <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-24 lg:pb-1">
           <PawTrailBackground />
 
           <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
             <div className="lg:hidden">
-              <p className="mx-auto mb-4 max-w-fit rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:text-sm">
-                🐾 New daycare dogs are welcome
-              </p>
-
-              <h1 className="text-[34px] leading-[1.05] text-forest sm:text-5xl">
-                <span className="text-coral-dark">Dog daycare</span>
-                <br />
-                in Košice your dog
-                <br />
-                can look forward to
-              </h1>
-
-              <p className="mx-auto mt-4 max-w-fit rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-coral-dark shadow-soft sm:text-sm">
+              <p className="mx-auto mt-1 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-coral-dark min-[390px]:mt-2 min-[390px]:text-[10px] sm:text-sm sm:tracking-[0.16em]">
                 Daytime care for medium and large dogs
               </p>
 
-              <div className="mx-auto mt-5 max-w-xl rounded-2xl bg-white/95 p-4 text-forest shadow-soft">
-                <p className="font-display text-base font-bold sm:text-lg">
+              <h1 className="mt-3 text-[29px] leading-[1.01] tracking-[-0.035em] text-forest min-[350px]:text-[31px] min-[390px]:text-[34px] sm:text-5xl">
+                <span className="block">Dog daycare in Košice</span>
+                <span className="block">your dog will</span>
+                <span className="block text-coral-dark">love</span>
+              </h1>
+
+              <div className="mx-auto mt-3.5 max-w-xl text-forest min-[390px]:mt-4">
+                <p className="font-display text-[13px] font-bold tracking-[-0.02em] min-[350px]:text-[14px] sm:text-base">
                   Your dog does not have to spend the day home alone.
                 </p>
-                <p className="mt-2 text-base font-medium leading-relaxed text-forest/90">
-                  Movement, rest and dog friends — with all-day supervision and a personal approach.
+                <p className="mx-auto mt-1.5 max-w-[34rem] text-sm font-medium leading-snug text-forest/90 min-[390px]:text-base min-[390px]:leading-relaxed">
+                  Play, movement, rest and dog friends under all-day supervision.
                 </p>
+              </div>
+
+              <div className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 min-[390px]:mt-4 min-[390px]:gap-1.5">
+                {["All-day supervision", "Outdoor run", "Free first visit"].map((item) => (
+                  <span
+                    key={item}
+                    className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px]"
+                  >
+                    <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5" />
+                    {item}
+                  </span>
+                ))}
               </div>
 
               <button
                 type="button"
                 onClick={() => openInquiry("en_hero_mobile")}
-                className="mt-4 inline-flex items-center justify-center gap-2 rounded-full border border-coral bg-coral px-5 py-2.5 font-display text-sm font-semibold text-primary-foreground shadow-card transition-colors hover:bg-coral-dark"
+                className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
               >
                 Enquire about daycare
-                <ArrowRight className="size-4" />
+                <ArrowRight className="size-5" />
               </button>
 
-              <InfoTicker language="en" className="mt-5 mb-0 w-screen mx-[calc((100%-100vw)/2)]" />
+              <InfoTicker language="en" className="mt-3 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-4" compact />
             </div>
 
             <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
-              <div className="flex min-w-0 flex-col lg:py-6">
-                <h1 className="order-2 text-6xl leading-[1.05] text-forest">
-                  <span className="text-coral-dark">Dog daycare</span>{" "}
-                  <span className="whitespace-nowrap">in Košice,</span>
-                  <br />
-                  your dog can
-                  <br />
-                  look forward to
-                </h1>
-
-                <p className="order-1 mx-0 mb-2 mt-0 max-w-fit rounded-full bg-white/95 px-4 py-1 text-sm font-bold text-coral-dark shadow-soft">
+              <div className="flex min-w-0 flex-col lg:py-2">
+                <p className="order-1 mx-0 mb-3 mt-0 font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
                   Daytime care for medium and large dogs
                 </p>
 
-                <div className="order-3 mx-0 mt-3 max-w-md rounded-2xl bg-white/95 p-4 text-forest shadow-soft">
-                  <p className="font-display text-base font-bold lg:text-lg">
+                <h1 className="order-2 text-[56px] leading-[1.01] tracking-[-0.035em] text-forest xl:text-[62px]">
+                  <span className="block">Dog daycare</span>
+                  <span className="block">in Košice your dog</span>
+                  <span className="block text-coral-dark">will love</span>
+                </h1>
+
+                <div className="order-3 mx-0 mt-4 max-w-xl text-forest">
+                  <p className="font-display text-lg font-bold">
                     Your dog does not have to spend the day home alone.
                   </p>
-                  <p className="mt-1 text-base font-medium text-forest/90">
-                    Movement, rest and dog friends — with all-day supervision and a personal approach.
+                  <p className="mt-1.5 max-w-lg text-base font-medium leading-relaxed text-forest/90">
+                    Play, movement, rest and dog friends under all-day supervision.
                   </p>
                 </div>
 
-                <a
-                  href={"tel:" + PHONE}
-                  data-tracking-source="en_hero_desktop"
-                  className="btn-coral order-4 mt-4 inline-flex min-w-44 items-center justify-center gap-2 self-start px-4 py-2 text-sm"
-                >
-                  <Phone className="size-4" /> Call us
-                </a>
+                <div className="order-4 mt-4 flex flex-wrap gap-2">
+                  {["All-day supervision", "Outdoor run", "Free first visit"].map((item) => (
+                    <span
+                      key={item}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-forest px-3 py-1.5 text-xs font-bold text-white shadow-card"
+                    >
+                      <CheckCircle2 className="size-4 text-white" />
+                      {item}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="order-5 mt-4 flex items-center gap-3">
+                  <a
+                    href={"tel:" + PHONE}
+                    data-tracking-source="en_hero_desktop"
+                    aria-label="Call Chvostíkovo"
+                    className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-coral text-primary-foreground shadow-card transition-colors hover:bg-coral-dark"
+                  >
+                    <Phone className="size-5" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => openInquiry("en_hero_desktop_cta")}
+                    className="btn-coral inline-flex min-w-44 items-center justify-center gap-2 px-5 py-2.5 text-sm"
+                  >
+                    Enquire about daycare
+                    <ArrowRight className="size-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="min-w-0">
@@ -506,7 +606,7 @@ function EnglishDogDaycarePage() {
                 <div className="rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
                   <h2 className="text-center text-2xl text-forest">Enquire about daycare</h2>
                   <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-                    Leave your contact details. We will get in touch, talk about your dog and answer your questions. If you are interested, we will arrange a free introductory visit.
+                    Leave your contact details. We will get in touch and happily answer your questions.
                   </p>
                   <EnglishInquiryForm trackingSource="en_hero_desktop" />
                 </div>
@@ -559,10 +659,11 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <section id="reviews" className="scroll-mt-24 overflow-x-clip bg-secondary/50 py-14 sm:py-18">
-          <div className="mx-auto max-w-6xl px-4 text-center">
+        <section id="reviews" className="relative scroll-mt-24 overflow-x-clip bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
             <h2 className="section-title whitespace-nowrap text-[clamp(14px,4.7vw,36px)] leading-tight">More than 100 happy dogs</h2>
-            <p className="mt-3 text-forest/80">⭐ 5.0 on Google</p>
+            <p className="mt-0.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 out of 5 on Google</p>
             <EnglishReviewCarousel />
           </div>
         </section>
@@ -571,10 +672,13 @@ function EnglishDogDaycarePage() {
 
         <Gallery language="en" />
 
+        <VideoSection language="en" />
+
         <Care language="en" />
 
-        <section className="bg-card py-10 lg:hidden">
-          <div className="mx-auto max-w-2xl px-4">
+        <section className="relative overflow-hidden bg-card py-10 lg:hidden">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-2xl px-4">
             <div className="rounded-4xl bg-secondary/70 p-6 shadow-soft ring-1 ring-coral/15 sm:p-8">
               <h2 className="text-center text-2xl text-forest">Want to know if daycare is right for your dog?</h2>
               <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
@@ -587,7 +691,9 @@ function EnglishDogDaycarePage() {
 
         <section id="why-daycare" className="scroll-mt-24 py-12 sm:py-16">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="overflow-hidden rounded-4xl bg-forest px-6 py-10 text-cream sm:px-12 sm:py-12">
+            <div className="relative overflow-hidden rounded-4xl bg-forest px-6 py-10 text-cream sm:px-12 sm:py-12">
+              <SectionAmbientPaws tone="dark" />
+              <div className="relative z-10">
               <h2 className="text-center font-display text-3xl text-cream sm:text-4xl">
                 Why use dog daycare?
               </h2>
@@ -632,6 +738,59 @@ function EnglishDogDaycarePage() {
                 >
                   Call us
                 </a>
+              </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="relative scroll-mt-24 overflow-hidden py-14 sm:py-20">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4">
+            <div className="text-center">
+              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Daycare prices</p>
+              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Our daycare prices</h2>
+              <p className="mt-3 text-forest/80">Every dog enjoys the same care — a pass simply offers better value.</p>
+            </div>
+
+            <div className="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2">
+              {[
+                { title: "Single visit", price: "25 €", highlight: false, detail: "" },
+                { title: "10-visit pass", price: "200 €", highlight: true, detail: "Save €50. Valid for 2 months." },
+              ].map((item) => (
+                <article
+                  key={item.title}
+                  className={`relative flex flex-col items-center rounded-3xl p-6 text-center shadow-card ${item.highlight ? "bg-forest text-cream ring-2 ring-coral" : "bg-card"}`}
+                >
+                  {item.highlight && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-4 py-1 font-display text-xs font-semibold whitespace-nowrap text-primary-foreground">
+                      Best value
+                    </span>
+                  )}
+                  <h3 className={`mt-2 text-lg ${item.highlight ? "text-cream" : "text-forest"}`}>{item.title}</h3>
+                  <p className={`mt-3 font-display text-4xl font-bold ${item.highlight ? "text-cream" : "text-coral"}`}>{item.price}</p>
+                  {item.detail && <p className="mt-2 text-sm font-semibold text-cream/85">{item.detail}</p>}
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-6 rounded-4xl bg-card p-7 shadow-card sm:p-9">
+              <h3 className="text-center text-xl text-forest">Included with every visit</h3>
+              <ul className="mx-auto mt-6 grid max-w-3xl gap-3 text-left text-[0.95rem] sm:grid-cols-2">
+                {INCLUDED_EN.map((item) => (
+                  <li key={item} className="flex gap-2.5">
+                    <Check className="mt-0.5 size-4 shrink-0 text-coral" />
+                    <span className="text-forest/85">{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-6 flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-secondary px-5 py-3 text-center font-display text-sm font-semibold text-forest">
+                <Car className="size-5 text-coral" /> Dog pick-up or drop-off: €5 per one-way journey
+              </p>
+              <div className="mt-7 flex justify-center">
+                <button type="button" onClick={() => openInquiry("en_pricing")} className="btn-coral">
+                  Enquire about daycare
+                </button>
               </div>
             </div>
           </div>
@@ -694,24 +853,32 @@ function EnglishDogDaycarePage() {
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">What your dog needs before daycare</h2>
             </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2">
-              {[
-                [ShieldCheck, "Required vaccinations", "A valid vaccination record is required, including rabies, core infectious diseases and kennel cough."],
-                [Sparkles, "Parasite prevention", "Dogs should be regularly dewormed and protected against external parasites before joining the group."],
-                [HeartHandshake, "Group suitability", "The introductory visit helps us assess whether a group daycare environment is comfortable and appropriate for your dog."],
-                [Moon, "Health and comfort", "Please tell us about allergies, health needs or anything that can help us care for your dog safely and comfortably."],
-              ].map(([Icon, heading, copy]) => {
-                const CardIcon = Icon as typeof ShieldCheck;
-                return (
-                  <article key={String(heading)} className="rounded-4xl bg-card p-7 shadow-card">
-                    <span className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-forest">
-                      <CardIcon className="size-6" />
+            <div className="mt-8 space-y-3 md:hidden">
+              {REQUIREMENTS_EN.map(({ title, text, icon: Icon }) => (
+                <Collapse
+                  key={title}
+                  title={title}
+                  icon={
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-forest">
+                      <Icon className="size-5" />
                     </span>
-                    <h3 className="mt-4 text-xl text-forest">{String(heading)}</h3>
-                    <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{String(copy)}</p>
-                  </article>
-                );
-              })}
+                  }
+                >
+                  {text}
+                </Collapse>
+              ))}
+            </div>
+
+            <div className="mt-10 hidden gap-5 md:grid md:grid-cols-2">
+              {REQUIREMENTS_EN.map(({ title, text, icon: Icon }) => (
+                <article key={title} className="rounded-4xl bg-card p-7 shadow-card">
+                  <span className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-forest">
+                    <Icon className="size-6" />
+                  </span>
+                  <h3 className="mt-4 text-xl text-forest">{title}</h3>
+                  <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{text}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
