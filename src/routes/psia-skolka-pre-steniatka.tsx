@@ -6,9 +6,6 @@ import {
   Heart,
   MapPin,
   Moon,
-  PawPrint,
-  ShieldCheck,
-  Sparkles,
   Users,
 } from "lucide-react";
 import { Footer } from "@/components/site/Contact";
@@ -20,6 +17,8 @@ import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { ShortForm } from "@/components/site/Forms";
 import { FormDialog } from "@/components/site/FormDialog";
+import { Reviews } from "@/components/site/Reviews";
+import { REVIEWS } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
@@ -44,6 +43,10 @@ const FAQ = [
     a: "Nemusí. Práve úvodná návšteva nám pomôže zistiť, ako reaguje na ostatných psov, ľudí a nové prostredie. Ďalší postup prispôsobíme konkrétnemu šteniatku.",
   },
   {
+    q: "Nebude sa moje šteniatko báť veľkých psov?",
+    a: "Rozumieme, že pri malom šteniatku môžete mať zo stretnutia s väčšími psami obavy. Preto začíname úvodnou návštevou, pri ktorej sledujeme jeho reakcie aj správanie ostatných psov. Zoznamovanie nenútime a ďalší postup nastavíme podľa toho, ako sa šteniatko cíti a či mu kolektív vyhovuje.",
+  },
+  {
     q: "Hrajú sa šteniatka celý deň?",
     a: "Nie. Pohyb a hra sú iba časť dňa. Rovnako dôležité je, aby sa šteniatko vedelo pri ostatných psoch upokojiť a oddýchnuť si.",
   },
@@ -53,31 +56,27 @@ const FAQ = [
   },
 ];
 
+const PUPPY_REVIEW_NAMES = ["Ján & Max", "Dominika & Eros"];
+const PUPPY_REVIEWS = [
+  ...PUPPY_REVIEW_NAMES.flatMap((name) => REVIEWS.filter((review) => review.name === name)),
+  ...REVIEWS.filter((review) => !PUPPY_REVIEW_NAMES.includes(review.name)),
+];
+
 const BENEFITS = [
   {
     icon: Users,
-    title: "Kontakt so psami",
-    text: "Šteniatko sa učí čítať ostatných psov a fungovať v kolektíve bez toho, aby sa muselo s každým hrať.",
+    title: "Spoznáva psích kamošov",
+    text: "Postupne sa zoznamuje s ostatnými psami a učí sa fungovať v ich spoločnosti. Nemusí sa hneď zapojiť do každej hry — môže najprv pozorovať a zoznamovať sa.",
   },
   {
     icon: Heart,
-    title: "Ľudia a nové podnety",
-    text: "Postupne si zvyká na nových ľudí, prostredie, zvuky a bežné situácie mimo domova.",
-  },
-  {
-    icon: PawPrint,
-    title: "Pohyb a hra",
-    text: "Má priestor vyblázniť sa, hrať sa a prirodzene využiť energiu v priebehu aktívneho dňa.",
+    title: "Objavuje svet aj mimo domova",
+    text: "Noví ľudia, nové prostredie a bežné situácie prinášajú ďalšie skúsenosti. Pri zoznamovaní sledujeme, ako sa šteniatko cíti a čo už zvláda.",
   },
   {
     icon: Moon,
-    title: "Pokoj a oddych",
-    text: "Učí sa, že prítomnosť ďalších psov neznamená neustálu akciu a že je úplne v poriadku aj oddychovať.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Postupná adaptácia",
-    text: "Prvé návštevy nastavujeme podľa toho, ako sa konkrétne šteniatko cíti a čo je preň zvládnuteľné.",
+    title: "Užije si hru aj oddych",
+    text: "Hra a pohyb sa striedajú s prestávkami. Aj medzi kamošmi má šteniatko priestor vydýchnuť si, oddýchnuť a nebyť stále v akcii.",
   },
 ];
 
@@ -170,12 +169,12 @@ function PuppyDaycarePage() {
                 Psia škôlka pre šteniatka v Košiciach
               </p>
               <h1 className="mt-2 text-[37px] leading-[1.06] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
-                Vaše šteniatko <span className="whitespace-nowrap">si škôlku</span>
-                <span className="block text-coral-dark">určite zamiluje</span>
+                Noví kamoši. Nové zážitky.
+                <span className="block text-coral-dark">Deň plný objavovania.</span>
               </h1>
 
               <p className="mx-auto mt-3 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg lg:mx-0">
-                Bezpečne spoznáva psov, ľudí a nové prostredie, vyblázni sa a zároveň sa učí aj oddychovať.
+                V Chvostíkove vaše šteniatko postupne spoznáva psích kamošov, ľudí aj nové prostredie. Užije si hru aj oddych a prvé návštevy prispôsobíme tomu, ako sa u nás cíti.
               </p>
 
               <div className="mx-auto mt-3 flex w-full max-w-[410px] flex-nowrap justify-center gap-1 sm:mt-5 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
@@ -244,10 +243,10 @@ function PuppyDaycarePage() {
               Prečo šteniatku prospieva
             </p>
             <h2 className="section-title mx-auto mt-2 max-w-3xl text-3xl sm:text-4xl">
-              5 dôvodov, prečo si môže škôlku zamilovať
+              Malé zážitky, nové skúsenosti
             </h2>
 
-            <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="mt-7 grid gap-3 md:grid-cols-3">
               {BENEFITS.map(({ icon: Icon, title: benefitTitle, text }) => (
                 <article
                   key={benefitTitle}
@@ -262,6 +261,10 @@ function PuppyDaycarePage() {
               ))}
             </div>
 
+            <p className="mx-auto mt-5 max-w-3xl text-sm leading-relaxed text-forest/70">
+              Škôlka dopĺňa spoločné zážitky, prechádzky a tréning doma. Nenahrádza tréning samostatnosti ani čas strávený s vami.
+            </p>
+
             <button
               type="button"
               onClick={() => openForm("puppy_landing_benefits")}
@@ -272,6 +275,8 @@ function PuppyDaycarePage() {
           </div>
         </section>
 
+        <Reviews reviews={PUPPY_REVIEWS} />
+
         <section className="bg-card pt-8 text-center sm:pt-12">
           <div className="mx-auto max-w-6xl px-4">
             <h2 className="section-title text-3xl sm:text-4xl">Pozrite si zopár fotiek zo škôlky</h2>
@@ -280,53 +285,6 @@ function PuppyDaycarePage() {
 
         <DaycarePhotoCarousel />
 
-        <section className="relative overflow-hidden bg-secondary/35 py-10 sm:py-14">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-5xl px-4">
-            <div className="text-center">
-              <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
-                Čo sa učí
-              </p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">
-                Psia škôlka je viac než len hranie
-              </h2>
-            </div>
-
-            <div className="mt-7 grid gap-4 md:grid-cols-3">
-              <article className="rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <Sparkles className="size-6 text-coral" />
-                <h3 className="mt-3 font-display text-lg font-bold text-forest">Socializácia bez nátlaku</h3>
-                <p className="mt-2 text-sm leading-relaxed text-forest/75">
-                  Učí sa fungovať medzi inými psami a ľuďmi. Cieľom nie je hrať sa s každým, ale zvládať ich prítomnosť pokojnejšie a prirodzene.
-                </p>
-              </article>
-
-              <article className="rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <Moon className="size-6 text-coral" />
-                <h3 className="mt-3 font-display text-lg font-bold text-forest">Aktivita aj vypnutie</h3>
-                <p className="mt-2 text-sm leading-relaxed text-forest/75">
-                  Po hre prichádza oddych. Šteniatko si postupne zvyká, že aj v kolektíve môže ležať, pozorovať a nemusí byť stále v pohybe.
-                </p>
-              </article>
-
-              <article className="rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <Heart className="size-6 text-coral" />
-                <h3 className="mt-3 font-display text-lg font-bold text-forest">Čas bez svojho človeka</h3>
-                <p className="mt-2 text-sm leading-relaxed text-forest/75">
-                  Získava skúsenosť, že môže príjemne stráviť čas aj mimo domova. Škôlka však nenahrádza tréning samostatnosti ani prácu doma.
-                </p>
-              </article>
-            </div>
-
-            <div className="mx-auto mt-7 max-w-3xl rounded-3xl bg-forest p-5 text-center text-cream sm:p-7">
-              <p className="font-display text-lg font-bold">Škôlka je iba jedna časť života šteniatka.</p>
-              <p className="mt-2 text-sm leading-relaxed text-cream/80 sm:text-base">
-                Najlepšie výsledky prináša spolu s bežným životom, prechádzkami, tréningom, odpočinkom a skúsenosťami s vami. Ak šteniatku kolektív vyhovuje, často odporúčame približne 1–2 návštevy týždenne.
-              </p>
-            </div>
-          </div>
-        </section>
-
         <section className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto grid max-w-5xl gap-6 px-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
@@ -334,12 +292,12 @@ function PuppyDaycarePage() {
               <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
                 Kedy môže začať?
               </p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Keď má splnené očkovania a je pripravené na prvú návštevu</h2>
+              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Najprv sa spoznáme</h2>
               <p className="mt-4 leading-relaxed text-forest/75">
                 Pred pobytom v kolektíve musí mať šteniatko platné požadované očkovania: besnota, infekčné ochorenia DHPPi+L a kotercový kašeľ.
               </p>
               <p className="mt-3 leading-relaxed text-forest/75">
-                Potom sa najprv stretneme na bezplatnej úvodnej návšteve. Pozrieme sa, ako reaguje na prostredie, nás aj ostatných psov a podľa toho nastavíme ďalší postup.
+                Na bezplatnej úvodnej návšteve spolu zistíme, ako sa u nás cíti, a dohodneme ďalší postup.
               </p>
               <button
                 type="button"
@@ -350,12 +308,11 @@ function PuppyDaycarePage() {
               </button>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3">
               {[
-                ["1", "Platné očkovania", "Skontrolujeme požadované vakcíny pred prvým pobytom."],
-                ["2", "Úvodná návšteva", "Bezplatne sa zoznámime so šteniatkom a prostredím."],
-                ["3", "Postupná adaptácia", "Ak potrebuje viac času, prvé návštevy nastavíme citlivejšie."],
-                ["4", "Pravidelnosť", "Ak mu kolektív vyhovuje, často funguje približne 1–2× týždenne."],
+                ["1", "Porozprávame sa", "Prejdeme si detaily prihlásenia, odpovieme na vaše otázky a dohodneme úvodnú návštevu."],
+                ["2", "Spoznáme sa na úvodnej návšteve", "Ukážeme vám priestory a pozrieme sa, ako šteniatko reaguje na nás, prostredie aj ostatných psov. Úvodná návšteva je zadarmo."],
+                ["3", "Dohodneme prvý pobyt", "Ak mu kolektív vyhovuje, prvé návštevy prispôsobíme tomu, ako sa cíti. Počas pobytu vám pošleme fotky či videá, aby ste videli, ako sa má."],
               ].map(([number, heading, text]) => (
                 <article key={number} className="rounded-3xl bg-secondary/55 p-5 ring-1 ring-forest/8">
                   <span className="flex size-9 items-center justify-center rounded-full bg-coral font-display font-bold text-white">

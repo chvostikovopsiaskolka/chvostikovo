@@ -45,7 +45,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   );
 }
 
-function ReviewCarousel() {
+function ReviewCarousel({ reviews }: { reviews: typeof REVIEWS }) {
   const track = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
   const resumeTimer = useRef<number | null>(null);
@@ -131,7 +131,7 @@ function ReviewCarousel() {
       onBlurCapture={resume}
       className="relative left-1/2 mt-3 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
-      {[...REVIEWS, ...REVIEWS].map((r, i) => (
+      {[...reviews, ...reviews].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
       ))}
     </div>
@@ -249,7 +249,7 @@ export function ReviewReasons({
   );
 }
 
-export function Reviews() {
+export function Reviews({ reviews = REVIEWS }: { reviews?: typeof REVIEWS } = {}) {
   return (
     <section id="recenzie" className="relative scroll-mt-24 overflow-hidden bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14">
       <SectionAmbientPaws />
@@ -257,7 +257,7 @@ export function Reviews() {
         <h2 className="section-title text-[27px] leading-tight sm:text-4xl">Viac ako 100 spokojných psíkov</h2>
         <p className="mt-0.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 z 5 na Google</p>
 
-        <ReviewCarousel />
+        <ReviewCarousel reviews={reviews} />
       </div>
     </section>
   );
