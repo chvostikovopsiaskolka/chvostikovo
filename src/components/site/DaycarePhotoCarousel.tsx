@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { DAYCARE_GALLERY_EXTRAS } from "@/content/site";
+import newPhoto01 from "@/assets/skolkari-novi-01.avif";
+import newPhoto02 from "@/assets/skolkari-novi-02.avif";
+import newPhoto03 from "@/assets/skolkari-novi-03.avif";
+import newPhoto04 from "@/assets/skolkari-novi-04.avif";
 import photo13 from "@/assets/daycare-carousel-13.avif";
 import photo14 from "@/assets/daycare-carousel-14.avif";
 import photo15 from "@/assets/daycare-carousel-15.avif";
@@ -13,6 +17,10 @@ import photo21 from "@/assets/daycare-carousel-21.avif";
 import photo22 from "@/assets/daycare-carousel-22.avif";
 
 const PHOTOS = [
+  { src: newPhoto01, alt: "Usmiaty husky a chrtík v psiej škôlke Chvostíkovo" },
+  { src: newPhoto02, alt: "Pudel a ďalší veselý psí kamarát v škôlke Chvostíkovo" },
+  { src: newPhoto03, alt: "Dalmatín a ďalší psí kamaráti v škôlke Chvostíkovo" },
+  { src: newPhoto04, alt: "Zlatý retriever a psí kamaráti v škôlke Chvostíkovo" },
   { src: photo13, alt: "Psí škôlkari v Chvostíkove – fotografia 1" },
   { src: photo14, alt: "Psí škôlkari v Chvostíkove – fotografia 2" },
   { src: photo15, alt: "Psí škôlkari v Chvostíkove – fotografia 3" },

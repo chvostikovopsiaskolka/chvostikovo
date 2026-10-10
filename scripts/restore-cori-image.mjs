@@ -1,5 +1,6 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import "./restore-daycare-carousel.mjs";
 
 const root = process.cwd();
@@ -19,6 +20,7 @@ async function restoreImage({
   output,
   minBytes = 8_000,
   expectedBytes,
+  expectedSha256,
   targetDir = outputDir,
   format = "avif",
 }) {
@@ -47,6 +49,10 @@ async function restoreImage({
     (expectedBytes && image.length !== expectedBytes)
   ) {
     throw new Error(`Invalid ${label} ${format.toUpperCase()} (${image.length} bytes)`);
+  }
+
+  if (expectedSha256 && createHash("sha256").update(image).digest("hex") !== expectedSha256) {
+    throw new Error(`Checksum mismatch restoring ${label}: ${output}`);
   }
 
   await writeFile(path.join(targetDir, output), image);
@@ -131,6 +137,47 @@ await restoreImage({
   targetDir: siteOutputDir,
   format: "webp",
 });
+await restoreImage({
+  label: "NEW DAYCARE PHOTO 01",
+  dataDir: galleryDataDir,
+  prefix: "skolkari-novi-01",
+  output: "skolkari-novi-01.avif",
+  expectedBytes: 48328,
+  expectedSha256: "e52ce29c3850c9531dc867d767300c3563ccf370e096878705a659dcf5e7dcd2",
+  minBytes: 20_000,
+  targetDir: siteOutputDir,
+});
+await restoreImage({
+  label: "NEW DAYCARE PHOTO 02",
+  dataDir: galleryDataDir,
+  prefix: "skolkari-novi-02",
+  output: "skolkari-novi-02.avif",
+  expectedBytes: 51178,
+  expectedSha256: "b0bc0fd3d7ae51f0107d5170732aa60639abc6d70d8e36d17d1f34f9ed60be80",
+  minBytes: 20_000,
+  targetDir: siteOutputDir,
+});
+await restoreImage({
+  label: "NEW DAYCARE PHOTO 03",
+  dataDir: galleryDataDir,
+  prefix: "skolkari-novi-03",
+  output: "skolkari-novi-03.avif",
+  expectedBytes: 32957,
+  expectedSha256: "30cab4374faadfb249f9aca6372a22e73bf29af86b0bb3929165e331fc1a7830",
+  minBytes: 20_000,
+  targetDir: siteOutputDir,
+});
+await restoreImage({
+  label: "NEW DAYCARE PHOTO 04",
+  dataDir: galleryDataDir,
+  prefix: "skolkari-novi-04",
+  output: "skolkari-novi-04.avif",
+  expectedBytes: 29345,
+  expectedSha256: "acb1b591b9806794a787dc0f6a8460c9e1bbb8a34adfc34474d807b58178af23",
+  minBytes: 20_000,
+  targetDir: siteOutputDir,
+});
+
 const routePath = path.join(root, "src", "routes", "stojan-na-misky-pre-psa.tsx");
 let routeSource = await readFile(routePath, "utf8");
 
