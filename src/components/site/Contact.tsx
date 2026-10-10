@@ -82,9 +82,9 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
 
       <div>
         <FunctionalMap language={language} />
-        <a href={MAP_LINK} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 font-display font-semibold text-forest underline underline-offset-4 hover:text-coral">
+        <a href={MAP_LINK} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 whitespace-nowrap font-display text-sm font-semibold text-forest sm:text-base underline underline-offset-4 hover:text-coral">
           <MapPin className="size-4" />
-          {isEnglish ? "Chvostíkovo on Google · directions & reviews" : "Chvostíkovo na Google · navigácia a recenzie"}
+          {isEnglish ? "Chvostíkovo on Google" : "Chvostíkovo na Google"}
         </a>
       </div>
     </div>
@@ -186,10 +186,13 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
           </div>
           <div className="mt-6 flex flex-col items-center gap-4 text-center text-xs sm:flex-row sm:justify-between sm:text-left">
             <p>© {new Date().getFullYear()} Chvostíkovo</p>
-            <nav aria-label={isEnglish ? "Legal information" : "Právne informácie"} className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-x-5 sm:gap-y-2">
+            <nav aria-label={isEnglish ? "Legal information" : "Právne informácie"} className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 sm:justify-end [&>button]:whitespace-nowrap">
               <button type="button" onClick={() => setLegalDialog("cookies")} className="underline underline-offset-4 hover:text-cream">Cookies</button>
+              <span aria-hidden="true">·</span>
               <button type="button" onClick={() => setLegalDialog("privacy")} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Privacy" : "Ochrana osobných údajov"}</button>
+              <span aria-hidden="true">·</span>
               <button type="button" onClick={() => setLegalDialog("operator")} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}</button>
+              <span aria-hidden="true">·</span>
               <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Cookie settings" : "Nastavenia cookies"}</button>
             </nav>
           </div>

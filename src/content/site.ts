@@ -5,7 +5,7 @@ export const HERO_IMAGE = `${M}fdc688_6d964e3e1c8b48b6a84a4d5c3cdfd456~mv2.jpg/v
 export const PHONE = "+421951069395";
 export const PHONE_PRETTY = "+421 951 069 395";
 export const EMAIL = "chvostikovo.psiaskolka@gmail.com";
-export const MAP_LINK = "https://maps.app.goo.gl/otDwUKHtjwUdUa2JA";
+export const MAP_LINK = "https://www.google.com/maps/search/?api=1&query=Chvost%C3%ADkovo%20psia%20%C5%A1k%C3%B4lka%20Ko%C5%A1ice&query_place_id=ChIJo6DbxrnhPkcRM-AZKTMwrwg";
 export const FACEBOOK = "https://www.facebook.com/profile.php?id=61564093374033";
 export const INSTAGRAM = "https://www.instagram.com/chvostikovo.psiaskolka/";
 
