@@ -111,8 +111,8 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
         title={isEnglish ? "Enquire about dog daycare" : "Informujte sa o škôlke"}
         subtitle={
           isEnglish
-            ? "Fill in the short, non-binding form. We will get back to you and talk through the options for your dog."
-            : "Vyplňte nezáväzný formulár. Ozveme sa vám späť a radi s vami preberieme viac informácií."
+            ? "Leave your contact details. We will get in touch, talk about your dog and answer your questions. If you are interested, we will arrange a free introductory visit."
+            : "Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu."
         }
       >
         {isEnglish ? (
@@ -138,7 +138,7 @@ export function Why() {
           <SectionAmbientPaws tone="dark" />
           <div className="relative z-10">
           <h2 className="text-center font-display text-3xl text-cream sm:text-4xl">
-            Prečo využiť psiu škôlku?
+            Kedy môže škôlka pomôcť vám a vášmu psíkovi?
           </h2>
 
           {/* Mobil – rozbaľovacie karty */}

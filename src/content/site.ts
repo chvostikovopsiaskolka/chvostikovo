@@ -71,21 +71,21 @@ export const CARE = [
     pos: "object-[50%_18%]",
     title: "Aktívny deň",
     alt: "Aktívny deň v psej škôlke",
-    text: "**Kým pracujete**, alebo si vybavujete povinnosti, váš psík si u nás užije **aktívny deň** plný pohybu, hier a kontaktu s inými psami. Do sýtosti si **vybije fyzickú aj mentálnu energiu**, užije si výbeh a prechádzky na čerstvom vzduchu. Samozrejmosťou je aj **oddych** a **veľa mojkania**!",
+    text: "Hry s kamošmi, pohyb vo výbehu, nové podnety aj chvíle na mojkanie. Počas dňa striedame **aktivity s oddychom**, aby si psík užil program aj čas na vydýchnutie.",
   },
   {
     img: g("c8799fdc98554252af0a25aa67197faa"),
     pos: "object-[50%_12%]",
     title: "Celodenný dohľad",
     alt: "Celodenný dohľad v psej škôlke v Košiciach",
-    text: "Chvostíkovo je **druhým domovom** pre vášho psíka. Preto sú **bezpečie a komfort** našich psích škôlkarov na prvom mieste. Počas celého dňa na psy **dohliadajú minimálne dvaja skúsení opatrovatelia**, ktorí zabezpečujú pokojné prostredie pre hru, oddych a bezpečné interakcie.",
+    text: "Počas celého pobytu na psíkov **dohliadajú minimálne dvaja opatrovatelia**. Sledujeme ich hru, vzájomné reakcie aj chvíle, keď potrebujú prestávku alebo pokojnejšie miesto.",
   },
   {
     img: g("edc3d7299bb443f2ad29502a3d0ea3c6"),
     pos: "object-[50%_10%]",
     title: "Individuálny prístup",
     alt: "Psia škôlka - weimarský stavač",
-    text: "**Každý psík je jedinečný**, preto ku každému pristupujeme **individuálne**, **s trpezlivosťou a rešpektom** k jeho potrebám. Ako majitelia psov vieme, akú dôveru nám zverujete – každému škôlkarovi venujeme rovnakú starostlivosť, akú by sme dopriali aj **vlastným psom**.",
+    text: "Niekto sa hneď pridá ku kamošom, iný potrebuje najprv pozorovať. Spoznávame **povahu, zvyky a potreby vášho psíka** a podľa nich prispôsobujeme jeho deň v škôlke.",
   },
 ];
 
@@ -159,16 +159,16 @@ export const REVIEWS = [
 
 export const WHY = [
   {
-    title: "Psík býva sám doma",
-    text: "Pomáhame psíkom, ktorí trpia separačnou úzkosťou, výrazne zavíjajú alebo majú tendenciu ničiť zariadenie domácnosti.",
+    title: "Keď ste cez deň preč",
+    text: "Práca, vybavovanie alebo nečakané povinnosti — nie vždy môže ísť psík s vami. U nás má počas vašej neprítomnosti spoločnosť a ľudí, ktorí sa oňho postarajú.",
   },
   {
-    title: "Nadbytok energie",
-    text: "Keď má psík priveľa energie a potrebuje ju aktívne vybiť, pomôže mu náš program, starostlivý dohľad a bezpečné prostredie.",
+    title: "Keď má energie na rozdávanie",
+    text: "Máte doma psíka, ktorý by najradšej stále niečo podnikal? Doprajte mu deň s pohybom, hrami a novými podnetmi, medzi ktorými nechýba ani oddych.",
   },
   {
-    title: "Deň s kamarátmi",
-    text: "Aj keď váš psík vydrží sám doma, u nás si užije deň plný pohybu, hier a spoločnosti psích kamarátov. Domov odchádza spokojný po dni plnom zážitkov.",
+    title: "Keď mu chcete dopriať deň s kamošmi",
+    text: "Škôlka nemusí byť iba riešením, keď nestíhate. Aj psík, ktorý zvláda zostať doma, si môže užiť zmenu, spoločnosť a zážitky s ďalšími chlpáčmi.",
   },
 ];
 

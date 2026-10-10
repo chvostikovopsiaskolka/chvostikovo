@@ -168,7 +168,7 @@ function LeadLandingPage() {
                   Doprajte svojmu psíkovi deň plný hier a kamarátov
                 </p>
                 <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/65">
-                  Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií.
+                  Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
                 </p>
                 <ShortForm trackingSource="lead_landing_top" />
               </div>
@@ -186,7 +186,7 @@ function LeadLandingPage() {
                 Doprajte svojmu psíkovi deň plný hier a kamarátov
               </p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
-                Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií.
+                Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
               </p>
             </div>
             <ShortForm trackingSource="lead_landing_mobile_below_hero" />
@@ -337,7 +337,7 @@ function LeadLandingPage() {
               <div className="mx-auto max-w-2xl text-center">
                 <h2 className="section-title text-3xl sm:text-4xl">Chcete to dopriať aj svojmu psíkovi?</h2>
                 <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
-                  Vyplňte nezáväzný formulár. Ozveme sa vám späť a zistíme spolu, či je Chvostíkovo vhodné aj pre vášho psíka.
+                  Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
                 </p>
               </div>
 
@@ -355,7 +355,7 @@ function LeadLandingPage() {
         open={leadModalOpen}
         onOpenChange={setLeadModalOpen}
         title="Doprajte svojmu psíkovi deň plný hier a kamarátov"
-        subtitle="Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií."
+        subtitle="Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu."
       >
         <ShortForm trackingSource={leadModalSource} />
       </FormDialog>

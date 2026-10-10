@@ -506,7 +506,7 @@ function EnglishDogDaycarePage() {
                 <div className="rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
                   <h2 className="text-center text-2xl text-forest">Enquire about daycare</h2>
                   <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-                    Fill in the short, non-binding form. We will get back to you and talk through the options for your dog.
+                    Leave your contact details. We will get in touch, talk about your dog and answer your questions. If you are interested, we will arrange a free introductory visit.
                   </p>
                   <EnglishInquiryForm trackingSource="en_hero_desktop" />
                 </div>
@@ -561,7 +561,7 @@ function EnglishDogDaycarePage() {
 
         <section id="reviews" className="scroll-mt-24 overflow-x-clip bg-secondary/50 py-14 sm:py-18">
           <div className="mx-auto max-w-6xl px-4 text-center">
-            <h2 className="section-title text-3xl sm:text-4xl">100+ happy daycare dogs</h2>
+            <h2 className="section-title text-3xl sm:text-4xl">More than 100 happy dogs</h2>
             <p className="mt-3 text-forest/80">⭐ 5.0 on Google</p>
             <EnglishReviewCarousel />
           </div>
@@ -578,7 +578,7 @@ function EnglishDogDaycarePage() {
             <div className="rounded-4xl bg-secondary/70 p-6 shadow-soft ring-1 ring-coral/15 sm:p-8">
               <h2 className="text-center text-2xl text-forest">Want to know if daycare is right for your dog?</h2>
               <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
-                Fill in the short, non-binding form. We will get back to you and talk through the options.
+                Leave your contact details. We will get in touch, talk about your dog and answer your questions. If you are interested, we will arrange a free introductory visit.
               </p>
               <EnglishInquiryForm trackingSource="en_care_inline_mobile" />
             </div>
@@ -727,7 +727,7 @@ function EnglishDogDaycarePage() {
         open={inquiryOpen}
         onOpenChange={setInquiryOpen}
         title="Enquire about dog daycare"
-        subtitle="Fill in the short, non-binding form. We will get back to you and talk through the options for your dog."
+        subtitle="Leave your contact details. We will get in touch, talk about your dog and answer your questions. If you are interested, we will arrange a free introductory visit."
       >
         <EnglishInquiryForm trackingSource="en_modal" />
       </FormDialog>

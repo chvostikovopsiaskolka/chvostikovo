@@ -214,7 +214,7 @@ function PuppyDaycarePage() {
                   Je Chvostíkovo vhodné pre vaše šteniatko?
                 </p>
                 <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/65">
-                  Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií.
+                  Nechajte nám kontakt. Prejdeme si detaily prihlásenia, odpovieme na vaše otázky a dohodneme ďalší postup.
                 </p>
                 <PuppyForm source="puppy_landing_top" />
               </div>
@@ -230,7 +230,7 @@ function PuppyDaycarePage() {
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">Chcete sa informovať o škôlke pre šteniatko?</p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
-                Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií.
+                Nechajte nám kontakt. Prejdeme si detaily prihlásenia, odpovieme na vaše otázky a dohodneme ďalší postup.
               </p>
             </div>
             <PuppyForm source="puppy_landing_mobile_below_hero" />
@@ -403,7 +403,7 @@ function PuppyDaycarePage() {
                   Je už vaše šteniatko pripravené na škôlku?
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
-                  Nechajte nám kontakt. Ozveme sa vám a prejdeme spolu vek, očkovania a prvú návštevu.
+                  Nechajte nám kontakt. Prejdeme si detaily prihlásenia, odpovieme na vaše otázky a dohodneme ďalší postup.
                 </p>
               </div>
 
@@ -422,7 +422,7 @@ function PuppyDaycarePage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         title="Je Chvostíkovo vhodné pre vaše šteniatko?"
-        subtitle="Vyplňte formulár, ozveme sa vám späť a radi s vami preberieme viac informácií."
+        subtitle="Nechajte nám kontakt. Prejdeme si detaily prihlásenia, odpovieme na vaše otázky a dohodneme ďalší postup."
       >
         <PuppyForm source={formSource} />
       </FormDialog>

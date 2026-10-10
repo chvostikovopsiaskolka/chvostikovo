@@ -8,7 +8,7 @@ import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 
 const INFO_TITLE = "Informujte sa o škôlke";
 const INFO_SUBTITLE =
-  "Vyplňte nezáväzný formulár. Ozveme sa vám späť a radi s vami preberieme viac informácií.";
+  "Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.";
 
 export function InquiryCtaSection() {
   const [open, setOpen] = useState(false);

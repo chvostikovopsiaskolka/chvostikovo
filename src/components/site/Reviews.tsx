@@ -156,12 +156,32 @@ const REVIEW_REASONS = [
   },
 ];
 
+const HOME_REVIEW_REASONS = [
+  {
+    title: "Miesto, kam sa tešia",
+    text: "Najviac nám povedia samotní škôlkari — keď nás vítajú pri dverách a tešia sa na svojich kamošov. Ich radosť môžete vidieť vo videách aj v skúsenostiach majiteľov.",
+    icon: PawPrint,
+  },
+  {
+    title: "Pokojnejší deň pre vás",
+    text: "Zveriť niekomu svojho psíka je veľká vec. Chceme, aby ste poznali ľudí, ktorí sa oňho starajú, mohli sa na nás obrátiť a počas svojho dňa mali pokojnejšiu hlavu.",
+    icon: HeartHandshake,
+  },
+  {
+    title: "Pekný deň aj pre vášho psíka",
+    text: "Kým vy máte svoje povinnosti, on má spoločnosť, pozornosť a program. Večer sa opäť stretnete a môžete si užiť spoločný čas po dni, v ktorom mal aj svoje zážitky.",
+    icon: Sparkles,
+  },
+];
+
 export function ReviewReasons({
   ctaLabel = "Pozrite si, ako to u nás vyzerá",
   onCtaClick,
+  variant = "default",
 }: {
   ctaLabel?: string;
   onCtaClick?: () => void;
+  variant?: "default" | "home";
 } = {}) {
   return (
     <section id="preco-chvostikovo" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0">
@@ -175,7 +195,7 @@ export function ReviewReasons({
         </div>
 
         <div className="mt-7 grid gap-4 md:grid-cols-3 md:gap-5">
-          {REVIEW_REASONS.map(({ title, text, icon: Icon }) => (
+          {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }) => (
             <article
               key={title}
               className="flex items-start gap-3 rounded-2xl bg-cream/10 px-4 py-4 ring-1 ring-cream/15 md:block md:p-5"
@@ -234,7 +254,7 @@ export function Reviews() {
     <section id="recenzie" className="relative scroll-mt-24 overflow-hidden bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
-        <h2 className="section-title text-[27px] leading-tight sm:text-4xl">100+ spokojných psíkov</h2>
+        <h2 className="section-title text-[27px] leading-tight sm:text-4xl">Viac ako 100 spokojných psíkov</h2>
         <p className="mt-0.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 z 5 na Google</p>
 
         <ReviewCarousel />

@@ -138,7 +138,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
                 Informujte sa o škôlke
               </h2>
               <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-                Vyplňte nezáväzný formulár. Ozveme sa vám späť a radi s vami preberieme viac informácií.
+                Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
               </p>
 
               <ShortForm trackingSource="hero_desktop_inline" />

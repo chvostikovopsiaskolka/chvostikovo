@@ -79,17 +79,17 @@ function Index() {
           <InfoTicker />
         </div>
         <Reviews />
-        <ReviewReasons />
+        <ReviewReasons variant="home" />
         <DaycarePhotoCarousel />
         <Gallery />
         <VideoSection />
-        <Care />
-        <Why />
-        <InquirySection />
-        <Faq />
         <FirstVisit />
-        <Requirements />
+        <Why />
+        <Care />
+        <InquirySection />
         <Pricing />
+        <Faq />
+        <Requirements />
         <About />
         <InstagramFeed />
         <Partners />

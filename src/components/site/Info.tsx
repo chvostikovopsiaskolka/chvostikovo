@@ -62,17 +62,17 @@ export function Requirements() {
 
 const STEPS = [
   {
-    title: "Prvý kontakt",
-    text: "Zavoláte nám alebo vyplníte formulár. Poviete nám o psíkovi a dohodneme si termín zoznamovacej návštevy.",
+    title: "Porozprávame sa o vašom psíkovi",
+    text: "Zavolajte nám alebo nechajte kontakt vo formulári. Preberieme jeho povahu, potreby aj vaše otázky a dohodneme termín úvodnej návštevy.",
   },
   {
-    title: "Zoznamovacia návšteva",
-    text: "Zistíme, ako váš psík reaguje na nové prostredie a iných chlpáčov. Prejdeme si spolu priestory, režim dňa aj jeho potreby.",
-    note: "Zoznamovacia návšteva je bezplatná",
+    title: "Prídete nás spoznať",
+    text: "Ukážeme vám priestory a zoznámime sa s vaším psíkom. Pozrieme sa, ako reaguje na nové prostredie a ostatných psov, a spolu sa dohodneme na ďalšom postupe.",
+    note: "Úvodná návšteva je zadarmo",
   },
   {
-    title: "Prvý deň v škôlke",
-    text: "Psík nastupuje do svorky pod dohľadom opatrovateľov. Počas dňa vám posielame fotky a videá, aby ste vedeli, ako sa má.",
+    title: "Doprajete mu prvý deň v škôlke",
+    text: "Ak mu kolektív vyhovuje, dohodneme jeho prvý pobyt. Počas dňa sa oňho postaráme a pošleme vám fotky či videá, aby ste videli, ako sa u nás má.",
   },
 ];
 
@@ -88,7 +88,7 @@ export function FirstVisit() {
             Ako to funguje
           </span>
           <h2 className="section-title mt-2 text-3xl sm:text-4xl">Prvá návšteva v 3 krokoch</h2>
-          <p className="mt-3 text-forest/80">Prehľadný proces bez zbytočných komplikácií.</p>
+          <p className="mt-3 text-forest/80">Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.</p>
         </div>
 
         <ol className="mt-10 grid gap-5 md:grid-cols-3">
