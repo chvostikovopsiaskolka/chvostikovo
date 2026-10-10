@@ -80,12 +80,18 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
         </ContactRow>
       </div>
 
-      <div>
-        <FunctionalMap language={language} />
-        <a href={MAP_LINK} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 whitespace-nowrap font-display text-sm font-semibold text-forest sm:text-base underline underline-offset-4 hover:text-coral">
-          <MapPin className="size-4" />
-          {isEnglish ? "Chvostíkovo on Google" : "Chvostíkovo na Google"}
+      <div className="min-w-0">
+        <a
+          href={MAP_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={isEnglish ? "Open Chvostíkovo's business profile in Google Maps" : "Otvoriť profil Chvostíkova v Google Mapách"}
+          className="mb-3 inline-flex max-w-full items-center gap-2 whitespace-nowrap font-display text-sm font-semibold text-forest underline underline-offset-4 hover:text-coral sm:text-base"
+        >
+          <MapPin className="size-4 shrink-0" />
+          {isEnglish ? "Open in Google Maps" : "Otvoriť v Google Mapách"}
         </a>
+        <FunctionalMap language={language} />
       </div>
     </div>
   );
@@ -134,7 +140,7 @@ function FunctionalMap({ language }: { language: "sk" | "en" }) {
     <div className="overflow-hidden rounded-4xl shadow-card">
       <iframe
         title={isEnglish ? "Map – Chvostíkovo, Poľská 6, Košice" : "Mapa – Chvostíkovo, Poľská 6, Košice"}
-        src="https://www.google.com/maps?q=Po%C4%BEsk%C3%A1%206,%20Ko%C5%A1ice&output=embed"
+        src="https://www.google.com/maps?gl=sk&hl=sk&output=embed&q=Chvost%C3%ADkovo+psia+%C5%A1k%C3%B4lka%2C+Po%C4%BEsk%C3%A1+6%2C+040+01+Ko%C5%A1ice&z=16"
         loading="lazy"
         className="h-60 w-full border-0"
       />
