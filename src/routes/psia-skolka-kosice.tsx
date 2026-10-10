@@ -5,23 +5,22 @@ import {
   Car,
   CheckCircle2,
   Clock3,
-  Heart,
   MapPin,
   PawPrint,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import { ShortForm } from "@/components/site/Forms";
 import { FormDialog } from "@/components/site/FormDialog";
 import { InfoTicker } from "@/components/site/InfoTicker";
-import { Reviews, ReviewReasons, VideoSection } from "@/components/site/Reviews";
+import { Reviews, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
-import { FAQ, REVIEWS } from "@/content/site";
+import { FAQ, PRICING } from "@/content/site";
+import teamPhoto from "@/assets/team-dogs.jpg";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
@@ -45,28 +44,18 @@ const LANDING_FAQ = FAQ.filter((item) => LANDING_FAQ_QUESTIONS.has(item.q));
 const BENEFITS = [
   {
     icon: PawPrint,
-    title: "Aktívny deň",
-    text: "Pohyb, hry, kamaráti aj oddych v bezpečnom dennom režime.",
+    title: "Spoločnosť namiesto čakania",
+    text: "Váš psík má počas dňa kamošov, pozornosť a príležitosti na hru. Vy sa môžete venovať práci alebo svojim povinnostiam.",
+  },
+  {
+    icon: PawPrint,
+    title: "Pohyb aj čas vydýchnuť si",
+    text: "Vo výbehu je priestor na hry a šantenie, vo vnútri na pokoj a oddych. Deň prispôsobujeme aj tomu, koľko aktivity jednotliví psíkovia potrebujú.",
   },
   {
     icon: ShieldCheck,
-    title: "Celodenný dohľad",
-    text: "Psíkovia sú počas pobytu pod dohľadom minimálne dvoch skúsených opatrovateľov.",
-  },
-  {
-    icon: Heart,
-    title: "Individuálny prístup",
-    text: "Ku každému psíkovi pristupujeme podľa jeho povahy, potrieb a tempa.",
-  },
-  {
-    icon: Sparkles,
-    title: "Socializácia",
-    text: "Bezpečný kontakt s inými psami, nové podnety a deň plný zážitkov.",
-  },
-  {
-    icon: Car,
-    title: "Psí taxík",
-    text: "Ak nestíhate dovoz alebo vyzdvihnutie, vieme vám pomôcť s dopravou psíka.",
+    title: "Ľudia, ktorí ho spoznajú",
+    text: "Zaujíma nás jeho povaha, zvyky aj to, čo mu vyhovuje. Počas celého pobytu na psíkov dohliadajú minimálne dvaja opatrovatelia.",
   },
 ];
 
@@ -131,7 +120,7 @@ function LeadLandingPage() {
               </h1>
 
               <p className="mx-auto mt-2.5 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg lg:mx-0">
-                Váš psík si môže užiť aktívny deň s kamošmi, kým vy pracujete. Pohyb, hry, socializácia, oddych a celodenný dohľad v psej škôlke Chvostíkovo v Košiciach.
+                Kým vy pracujete, váš psík môže tráviť deň s kamošmi namiesto čakania doma. V Chvostíkove v Košiciach si užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
               </p>
 
               <div className="mx-auto mt-2.5 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
@@ -200,10 +189,10 @@ function LeadLandingPage() {
               Prečo Chvostíkovo
             </p>
             <h2 className="section-title mx-auto mt-2 max-w-3xl text-3xl sm:text-4xl">
-              5 dôvodov, prečo si psíčkari vyberajú našu škôlku
+              Pekný deň pre psíka. Pokojnejšia hlava pre vás.
             </h2>
 
-            <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="mt-7 grid gap-3 md:grid-cols-3">
               {BENEFITS.map(({ icon: Icon, title: benefitTitle, text }) => (
                 <article key={benefitTitle} className="flex h-full flex-col rounded-3xl bg-secondary/55 p-4 text-left ring-1 ring-forest/8 sm:p-5">
                   <span className="flex size-10 items-center justify-center rounded-2xl bg-coral text-white">
@@ -225,34 +214,7 @@ function LeadLandingPage() {
           </div>
         </section>
 
-        <section className="bg-secondary/35 py-10 sm:py-14">
-          <div className="mx-auto max-w-6xl px-4 text-center">
-            <h2 className="section-title text-3xl sm:text-4xl">Majitelia nám zverujú to najcennejšie</h2>
-            <p className="mt-2 text-sm font-semibold text-forest/70 sm:text-base">
-              ⭐ 5.0 z 5 na Google · 43 hodnotení
-            </p>
-
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              {REVIEWS.slice(0, 3).map((review) => (
-                <figure key={review.name} className="rounded-3xl bg-card p-5 text-left shadow-card sm:p-6">
-                  <div className="text-[#F5B301]">★★★★★</div>
-                  <blockquote className="mt-3 text-sm leading-relaxed text-forest/80">
-                    „{review.text}“
-                  </blockquote>
-                  <figcaption className="mt-4 font-display text-sm font-bold text-forest">
-                    {review.name}
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <Reviews />
-        <ReviewReasons
-          ctaLabel="Toto chcem pre môjho psíka"
-          onCtaClick={() => openLeadModal("lead_landing_why_chvostikovo")}
-        />
 
         <section className="bg-card pt-8 text-center sm:pt-12">
           <div className="mx-auto max-w-6xl px-4">
@@ -269,23 +231,72 @@ function LeadLandingPage() {
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-soft">
               Ako to funguje
             </p>
-            <h2 className="mt-2 font-display text-3xl font-bold sm:text-4xl">Od prvého kliknutia po prvý deň v škôlke</h2>
+            <h2 className="mt-2 font-display text-3xl font-bold sm:text-4xl">Prvá návšteva v 3 krokoch</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-cream/80 sm:text-base">
+              Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.
+            </p>
 
             <div className="mt-7 grid gap-4 md:grid-cols-3">
               {[
-                ["1", "Vyplníte krátky formulár", "Necháte nám meno a telefónny kontakt."],
-                ["2", "Ozveme sa vám", "Preberieme vášho psíka, vaše potreby a odpovieme na otázky."],
-                ["3", "Dohodneme úvodnú návštevu", "Psík sa zoznámi s prostredím, nami aj kolektívom. Úvodná návšteva je zadarmo."],
-              ].map(([number, stepTitle, text]) => (
+                ["1", "Porozprávame sa o vašom psíkovi", "Zavolajte nám alebo nechajte kontakt vo formulári. Preberieme jeho povahu, potreby aj vaše otázky a dohodneme termín úvodnej návštevy."],
+                ["2", "Prídete nás spoznať", "Ukážeme vám priestory a zoznámime sa s vaším psíkom. Pozrieme sa, ako reaguje na nové prostredie a ostatných psov, a spolu sa dohodneme na ďalšom postupe.", "Úvodná návšteva je zadarmo."],
+                ["3", "Doprajete mu prvý deň v škôlke", "Ak mu kolektív vyhovuje, dohodneme jeho prvý pobyt. Počas dňa sa oňho postaráme a pošleme vám fotky či videá, aby ste videli, ako sa u nás má."],
+              ].map(([number, stepTitle, text, note]) => (
                 <article key={number} className="rounded-3xl bg-cream/10 p-5 text-left ring-1 ring-cream/15">
                   <span className="flex size-10 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-white">
                     {number}
                   </span>
                   <h3 className="mt-3 font-display text-lg font-bold text-cream">{stepTitle}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-cream/75">{text}</p>
+                  {note && <p className="mt-3 text-sm font-bold text-cream">{note}</p>}
                 </article>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden bg-card py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto grid max-w-5xl items-center gap-6 px-4 md:grid-cols-2 md:gap-10">
+            <img
+              src={teamPhoto}
+              alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
+              loading="lazy"
+              className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72"
+            />
+            <div>
+              <h2 className="section-title text-3xl sm:text-4xl">Kto sa bude starať o vášho psíka?</h2>
+              <p className="mt-4 text-sm leading-relaxed text-forest/75 sm:text-base">
+                Aj my sme majitelia veľkých psíkov, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov spoznávame, rešpektujeme ich potreby a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
+            <h2 className="section-title text-3xl sm:text-4xl">Koľko stojí deň v škôlke?</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-forest/75 sm:text-base">
+              Pohyb, hry, oddych aj celodenný dohľad sú súčasťou každého vstupu. Pri pravidelných návštevách môžete využiť výhodnejšiu permanentku.
+            </p>
+            <div className="mx-auto mt-7 grid max-w-2xl gap-4 sm:grid-cols-2">
+              {PRICING.map((item) => (
+                <article key={item.name} className={`rounded-3xl p-6 shadow-card ${item.highlight ? "bg-forest text-cream" : "bg-card text-forest"}`}>
+                  <h3 className="font-display text-xl font-bold">{item.name}</h3>
+                  <p className={`mt-3 font-display text-4xl font-bold ${item.highlight ? "text-cream" : "text-coral-dark"}`}>{item.price}</p>
+                  {item.highlight && <p className="mt-3 text-sm leading-relaxed text-cream/85">{item.note}</p>}
+                </article>
+              ))}
+            </div>
+            <p className="mt-5 font-display font-bold text-forest">Úvodná návšteva je zadarmo.</p>
+            <p className="mx-auto mt-4 flex max-w-2xl items-start justify-center gap-2 text-sm leading-relaxed text-forest/75">
+              <Car className="mt-0.5 size-5 shrink-0 text-coral-dark" />
+              <span>Pomôžeme vám aj s vyzdvihnutím a odvozom psíka v Košiciach — 5 € za jednu jazdu.</span>
+            </p>
+            <button type="button" onClick={() => openLeadModal("lead_landing_pricing")} className="btn-coral mt-6 inline-flex">
+              Chcem sa informovať
+            </button>
           </div>
         </section>
 
@@ -311,11 +322,11 @@ function LeadLandingPage() {
                   <div className="mt-4 space-y-3 text-sm leading-relaxed text-forest/75">
                     {item.q === "Aký je cenník služieb?" ? (
                       <p>
-                        Viac o cenníku za služby psej škôlky nájdete v sekcii{" "}
-                        <a href="/#cennik" className="font-semibold text-coral underline underline-offset-2">
+                        Aktuálne ceny nájdete vyššie v sekcii{" "}
+                        <a href="#lead-pricing" className="font-semibold text-coral underline underline-offset-2">
                           Cenník
                         </a>
-                        {" "}na hlavnom webe.
+                        {" "}na tejto stránke.
                       </p>
                     ) : (
                       item.a
