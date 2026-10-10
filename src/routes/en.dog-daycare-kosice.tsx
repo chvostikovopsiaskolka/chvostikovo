@@ -561,7 +561,7 @@ function EnglishDogDaycarePage() {
 
         <section id="reviews" className="scroll-mt-24 overflow-x-clip bg-secondary/50 py-14 sm:py-18">
           <div className="mx-auto max-w-6xl px-4 text-center">
-            <h2 className="section-title text-3xl sm:text-4xl">More than 100 happy dogs</h2>
+            <h2 className="section-title whitespace-nowrap text-[clamp(14px,4.7vw,36px)] leading-tight">More than 100 happy dogs</h2>
             <p className="mt-3 text-forest/80">⭐ 5.0 on Google</p>
             <EnglishReviewCarousel />
           </div>

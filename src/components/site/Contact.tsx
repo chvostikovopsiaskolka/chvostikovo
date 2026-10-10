@@ -26,7 +26,6 @@ export function Contact() {
           <LongForm />
         </div>
 
-        <ContactDetails language="sk" />
       </div>
     </section>
   );
@@ -50,7 +49,6 @@ export function EnglishContact() {
           <EnglishInquiryForm trackingSource="en_contact" />
         </div>
 
-        <ContactDetails language="en" />
       </div>
     </section>
   );
@@ -60,8 +58,8 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
   const isEnglish = language === "en";
 
   return (
-    <>
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-7 lg:grid-cols-2 lg:items-center">
+      <div className="grid gap-5 sm:grid-cols-2">
         <ContactRow icon={<MapPin className="size-5" />} label={isEnglish ? "Address" : "Adresa"}>
           <a href={MAP_LINK} target="_blank" rel="noreferrer" className="hover:text-coral">
             Poľská 6, 040 01 Košice
@@ -82,8 +80,14 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
         </ContactRow>
       </div>
 
-      <FunctionalMap language={language} />
-    </>
+      <div>
+        <FunctionalMap language={language} />
+        <a href={MAP_LINK} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 font-display font-semibold text-forest underline underline-offset-4 hover:text-coral">
+          <MapPin className="size-4" />
+          {isEnglish ? "Chvostíkovo on Google · directions & reviews" : "Chvostíkovo na Google · navigácia a recenzie"}
+        </a>
+      </div>
+    </div>
   );
 }
 
@@ -103,7 +107,7 @@ function FunctionalMap({ language }: { language: "sk" | "en" }) {
 
   if (!allowed) {
     return (
-      <div className="mt-8 flex h-72 flex-col items-center justify-center rounded-4xl bg-secondary/60 px-6 text-center shadow-card">
+      <div className="flex h-60 flex-col items-center justify-center rounded-4xl bg-secondary/60 px-6 text-center shadow-card">
         <MapPin className="size-8 text-coral" />
         <p className="mt-3 font-display text-lg font-bold text-forest">
           {isEnglish ? "Google Map is disabled" : "Google mapa je vypnutá"}
@@ -127,12 +131,12 @@ function FunctionalMap({ language }: { language: "sk" | "en" }) {
   }
 
   return (
-    <div className="mt-8 overflow-hidden rounded-4xl shadow-card">
+    <div className="overflow-hidden rounded-4xl shadow-card">
       <iframe
         title={isEnglish ? "Map – Chvostíkovo, Poľská 6, Košice" : "Mapa – Chvostíkovo, Poľská 6, Košice"}
         src="https://www.google.com/maps?q=Po%C4%BEsk%C3%A1%206,%20Ko%C5%A1ice&output=embed"
         loading="lazy"
-        className="h-72 w-full border-0"
+        className="h-60 w-full border-0"
       />
     </div>
   );
@@ -168,69 +172,26 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
 
   return (
     <>
-      <footer className="bg-forest py-10 text-cream/80">
-        <div className="mx-auto grid max-w-6xl gap-7 px-4 text-center sm:grid-cols-[auto_1fr_auto] sm:items-start sm:text-left">
-          <div className="flex justify-center sm:justify-start">
-            <img
-              src={logo}
-              alt={isEnglish ? "Chvostíkovo dog daycare" : "Chvostíkovo psia škôlka"}
-              className="h-8 w-auto brightness-0 invert opacity-90"
-            />
+      <footer className="bg-forest py-9 text-cream/80">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="rounded-3xl bg-cream p-5 text-forest sm:p-7">
+            <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+              <img src={logo} alt={isEnglish ? "Chvostíkovo dog daycare" : "Chvostíkovo psia škôlka"} className="h-8 w-auto" loading="lazy" />
+              <div className="flex items-center gap-2">
+                <a href={INSTAGRAM} target="_blank" rel="noreferrer" aria-label="Instagram Chvostíkovo" className="flex size-10 items-center justify-center rounded-full bg-forest/10 text-forest transition hover:bg-coral hover:text-cream"><Instagram className="size-5" /></a>
+                <a href={FACEBOOK} target="_blank" rel="noreferrer" aria-label="Facebook Chvostíkovo" className="flex size-10 items-center justify-center rounded-full bg-forest/10 text-forest transition hover:bg-coral hover:text-cream"><Facebook className="size-5" /></a>
+              </div>
+            </div>
+            <ContactDetails language={language} />
           </div>
-
-          <div className="flex flex-col items-center gap-4 text-center">
-            <p className="text-sm">
-              {isEnglish ? "Chvostíkovo dog daycare" : "Psia škôlka Chvostíkovo"} · Poľská 6, Košice ·{" "}
-              <a href={`tel:${PHONE}`} className="font-semibold text-cream hover:text-coral-soft">
-                {PHONE_PRETTY}
-              </a>
-            </p>
-
-            <p className="text-xs">
-              © {new Date().getFullYear()} Chvostíkovo ·{" "}
-              <button type="button" onClick={() => setLegalDialog("cookies")} className="underline hover:text-cream">
-                {isEnglish ? "Cookies" : "Cookies"}
-              </button>{" "}
-              ·{" "}
-              <button type="button" onClick={() => setLegalDialog("privacy")} className="underline hover:text-cream">
-                {isEnglish ? "Privacy" : "Ochrana osobných údajov"}
-              </button>{" "}
-              ·{" "}
-              <button type="button" onClick={() => setLegalDialog("operator")} className="underline hover:text-cream">
-                {isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}
-              </button>{" "}
-              ·{" "}
-              <button
-                type="button"
-                onClick={() =>
-                  window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))
-                }
-                className="underline hover:text-cream"
-              >
-                {isEnglish ? "Cookie settings" : "Nastavenia cookies"}
-              </button>
-            </p>
-          </div>
-
-          <div className="flex items-center justify-center gap-2 sm:justify-end">
-            <a
-              href={INSTAGRAM}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram Chvostíkovo"
-              className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
-            >
-              <Instagram className="size-5" />
-            </a>
-            <a
-              href={FACEBOOK}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Facebook Chvostíkovo"
-              className="flex size-10 items-center justify-center rounded-full bg-cream/10 text-cream transition hover:bg-coral"
-            >
-              <Facebook className="size-5" />
-            </a>
+          <div className="mt-6 flex flex-col items-center gap-4 text-center text-xs sm:flex-row sm:justify-between sm:text-left">
+            <p>© {new Date().getFullYear()} Chvostíkovo</p>
+            <nav aria-label={isEnglish ? "Legal information" : "Právne informácie"} className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-x-5 sm:gap-y-2">
+              <button type="button" onClick={() => setLegalDialog("cookies")} className="underline underline-offset-4 hover:text-cream">Cookies</button>
+              <button type="button" onClick={() => setLegalDialog("privacy")} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Privacy" : "Ochrana osobných údajov"}</button>
+              <button type="button" onClick={() => setLegalDialog("operator")} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}</button>
+              <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Cookie settings" : "Nastavenia cookies"}</button>
+            </nav>
           </div>
         </div>
       </footer>

@@ -240,10 +240,10 @@ function PuppyDaycarePage() {
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
-              Prečo šteniatku prospieva
+              Prečo šteniatku prospieva škôlka
             </p>
             <h2 className="section-title mx-auto mt-2 max-w-3xl text-3xl sm:text-4xl">
-              Malé zážitky, nové skúsenosti
+              Tu sa začínajú nové kamarátstva
             </h2>
 
             <div className="mt-7 grid gap-3 md:grid-cols-3">
