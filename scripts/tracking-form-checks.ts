@@ -11,6 +11,22 @@ Object.defineProperty(globalThis, "document", { configurable: true, writable: tr
 const lead: InquiryInput = { typ: "informacie", consent: true, meno: "Test", telefon: "+421912345678", zaujem: "Mám záujem o pravidelné návštevy" };
 const instagram = "/psia-skolka-kosice?utm_source=ig&utm_medium=social&utm_campaign=test&fbclid=" + "x".repeat(600);
 const application: InquiryInput = { typ: "prihlaska", consent: true, meno: "Test", telefon: lead.telefon, pes: "Rocky", plemeno: "Labrador", vaha: "25 kg", pohlavie: "Pes", vek: "2 roky", kastrovana: "Áno", duvod: "Pravidelne – 1 až 2× týždenne", viac: "Test validácie." };
+// Regression: both enquiry and full application must retain useful campaign
+// identity even when Meta appends a very long fbclid parameter.
+const trackedApplication = inquirySchema.parse({
+  ...application,
+  source_ref: "/psia-skolka-pre-steniatka?utm_source=instagram&utm_campaign=lead_web&fbclid=" + "x".repeat(700),
+  landing_page: "/psia-skolka-pre-steniatka?utm_source=instagram&utm_campaign=lead_web",
+  traffic_source: "instagram",
+  traffic_medium: "paid_social",
+  utm_campaign: "lead_web",
+  utm_content: "puppy_static",
+});
+const trackedPayload = buildDbPayload(trackedApplication);
+assert.equal(trackedPayload.utm_campaign, "lead_web");
+assert.equal(trackedPayload.utm_content, "puppy_static");
+assert.equal(trackedPayload.traffic_source, "instagram");
+assert.equal(trackedPayload.traffic_medium, "paid_social");
 const originalFetch = globalThis.fetch;
 let payload: any;
 globalThis.fetch = (async (_url: any, options: any) => {
@@ -56,6 +72,16 @@ try {
     assert(attribution.landing_page.length <= 500);
     assert(attribution.campaign.length <= 300);
   }
+  // A fresh paid-ads click must replace an old direct visit's session tag.
+  dom.happyDOM.setURL("https://chvostikovo.sk/");
+  dom.sessionStorage.setItem("chvostikovo_traffic_attribution", JSON.stringify({
+    landing_page: "/", source: "direct", medium: "none", campaign: "", content: "", term: "", referrer: "",
+  }));
+  dom.happyDOM.setURL("https://chvostikovo.sk/psia-skolka-pre-steniatka?utm_source=instagram&utm_medium=paid_social&utm_campaign=lead_web&utm_content=puppy_static");
+  const refreshed = getTrafficAttribution();
+  assert.equal(refreshed.campaign, "lead_web");
+  assert.equal(refreshed.content, "puppy_static");
+  assert.equal(refreshed.medium, "paid_social");
   dom.happyDOM.setURL("https://chvostikovo.sk" + instagram);
   Object.defineProperty(dom, "sessionStorage", { configurable: true, get() { throw new Error("blocked storage"); } });
   const attribution = getTrafficAttribution();
