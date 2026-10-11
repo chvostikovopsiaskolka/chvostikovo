@@ -1,0 +1,26 @@
+name: Validate form tracking PR
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/components/site/**"
+      - "src/lib/**"
+      - "supabase/functions/website-landing-event/**"
+      - "scripts/**"
+      - ".github/workflows/check-form-funnel.yml"
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: node scripts/restore-cori-image.mjs
+      - name: Critical form regression
+        run: bun run check:critical-forms
+      - name: TypeScript validation
+        run: bun run check:types
+      - name: Build static pages
+        run: bun run build:pages

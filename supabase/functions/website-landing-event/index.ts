@@ -12,6 +12,10 @@ const INTERACTION_EVENTS = new Set([
   "form_attempt",
   "form_submit",
   "form_error",
+  "form_field_touch",
+  "form_field_complete",
+  "form_field_invalid",
+  "form_abandon",
   "success_conditions_click",
   "success_pricing_click",
 ]);
@@ -77,7 +81,7 @@ function classifySource(input: Json) {
 
   const isInstagramSource = hasSourceToken(["instagram", "ig"]);
   const isFacebookSource = hasSourceToken(["facebook", "fb"]);
-  const isMetaSource = isInstagramSource || isFacebookSource || hasSourceToken(["meta"]);
+  const isMetaSource = isInstagramSource || isFacebookSource || hasSourceToken(["meta", "threads", "th"]);
   const isGoogleSource = hasSourceToken(["google"]);
   const isBingSource = hasSourceToken(["bing"]);
 
@@ -92,6 +96,7 @@ function classifySource(input: Json) {
     if (isFacebookSource || hasSourceToken(["meta"])) return "facebook_organic";
     if (isGoogleSource) return "google_organic";
     if (isBingSource) return "bing_organic";
+    if (hasSourceToken(["threads", "th"])) return "threads_organic";
     if (hasSourceToken(["tiktok"])) return "tiktok_organic";
     if (hasSourceToken(["youtube"])) return "youtube_organic";
     if (hasSourceToken(["linkedin"])) return "linkedin_organic";
@@ -100,7 +105,8 @@ function classifySource(input: Json) {
     if (hasSourceToken(["pinterest"])) return "pinterest_organic";
   }
 
-  if (hasFbclid) return "meta_paid";
+  // fbclid does not prove paid attribution: keep this as unverified Meta referral.
+  if (hasFbclid) return "meta_referral";
 
   if (isHost("instagram.com")) return "instagram_organic";
   if (isHost("facebook.com") || isHost("fb.com")) return "facebook_organic";
@@ -128,6 +134,11 @@ function classifySource(input: Json) {
 }
 
 const ERROR_STAGES = new Set(["frontend_validation", "phone_normalization", "zod_validation", "payload", "network", "backend_http", "backend_response"]);
+const FORM_PROGRESS_EVENTS = new Set(["form_field_touch", "form_field_complete", "form_field_invalid", "form_abandon"]);
+const FORM_PROGRESS_FIELDS = new Set([
+  "meno", "telefon", "zaujem", "pes", "plemeno", "vaha", "pohlavie",
+  "vek", "kastrovana", "duvod", "alergie", "povaha", "name", "phone", "interest",
+]);
 const FORM_PATHS = new Set(["/", "/psia-skolka-kosice", "/psia-skolka-pre-steniatka", "/strazenie-psov-kosice", "/en/dog-daycare-kosice"]);
 
 async function notifyFormError(input: Json, path: string, attemptId: string | null) {
@@ -273,6 +284,14 @@ Deno.serve(async (req: Request) => {
         return response(origin, 400, { ok: false, error: "invalid_event_name" });
       }
 
+      // Fine-grained analytics only permits predetermined field identifiers.
+      if (FORM_PROGRESS_EVENTS.has(eventName)) {
+        const source = text(input.event_source, 200) || "";
+        const parts = source.split("|");
+        if (parts.length !== 2 || !/^[a-z][a-z0-9_]{0,79}$/.test(parts[0]) || !FORM_PROGRESS_FIELDS.has(parts[1])) {
+          return response(origin, 400, { ok: false, error: "invalid_form_field" });
+        }
+      }
       const metaClickHash = text(input.meta_click_hash, 64);
       if (metaClickHash && !/^[0-9a-f]{64}$/.test(metaClickHash)) {
         return response(origin, 400, { ok: false, error: "invalid_meta_click_hash" });

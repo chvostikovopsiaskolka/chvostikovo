@@ -64,6 +64,12 @@ targetInquirySchema.parse({
 });
 
 const forms = readFileSync(new URL("../src/components/site/Forms.tsx", import.meta.url), "utf8");
+const englishForm = readFileSync(new URL("../src/components/site/EnglishInquiryForm.tsx", import.meta.url), "utf8");
+const progressSource = readFileSync(new URL("../src/lib/form-progress.ts", import.meta.url), "utf8");
+assert(forms.includes("progress.onInvalidCapture") && forms.includes("progress.onBlurCapture"), "SK forms must record browser-native validation and per-field completion.");
+assert(englishForm.includes("progress.onInvalidCapture"), "EN enquiry must record native validation.");
+assert(progressSource.includes("hasAnalyticsConsent()"), "Field analytics must require analytics consent.");
+assert(!progressSource.includes("JSON.stringify(target.value)") && !progressSource.includes("event.target.value"), "Never transmit form values in diagnostics.");
 assert(forms.includes("hideInterest = false"), "Critical form check failed: informational interest selector is not enabled by default.");
 
 const backend = readFileSync(new URL("../supabase/functions/web-form-submit/index.ts", import.meta.url), "utf8");

@@ -1,4 +1,5 @@
 import { currentSourceRef } from "@/lib/tracking-sanitization";
+import { useFormProgress } from "@/lib/form-progress";
 import { useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
@@ -22,6 +23,7 @@ export function EnglishInquiryForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
+  const progress = useFormProgress(trackingSource, "en");
 
   function onFormChange() {
     if (formStarted.current) return;
@@ -34,6 +36,7 @@ export function EnglishInquiryForm({
     if (loading) return;
 
     const form = e.currentTarget;
+    progress.markAttempt();
     const attemptId = startFormAttempt(trackingSource, "en");
 
     setLoading(true);
@@ -73,6 +76,7 @@ export function EnglishInquiryForm({
         });
         trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
       });
+      progress.markSuccess();
       setSent(true);
     } catch (error) {
       const diagnostic = reportInquiryError(error);
@@ -96,7 +100,7 @@ export function EnglishInquiryForm({
   }
 
   return (
-    <form onSubmit={onSubmit} onChangeCapture={onFormChange} className="space-y-3 text-left sm:space-y-3.5">
+    <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="space-y-3 text-left sm:space-y-3.5">
       <div>
         <label className="label-sm" htmlFor={`en-${formId}-name`}>Your name *</label>
         <input id={`en-${formId}-name`} name="name" autoComplete="name" required className="field" placeholder="Your name" />
