@@ -13,7 +13,7 @@ const instagram = "/psia-skolka-kosice?utm_source=ig&utm_medium=social&utm_campa
 const application: InquiryInput = { typ: "prihlaska", consent: true, meno: "Test", telefon: lead.telefon, pes: "Rocky", plemeno: "Labrador", vaha: "25 kg", pohlavie: "Pes", vek: "2 roky", kastrovana: "Áno", duvod: "Pravidelne – 1 až 2× týždenne", viac: "Test validácie." };
 // Regression: both enquiry and full application must retain useful campaign
 // identity even when Meta appends a very long fbclid parameter.
-const trackedApplication = inquirySchema.parse({
+const trackedApplication = inquirySchema.parse(sanitizeTracking({
   ...application,
   source_ref: "/psia-skolka-pre-steniatka?utm_source=instagram&utm_campaign=lead_web&fbclid=" + "x".repeat(700),
   landing_page: "/psia-skolka-pre-steniatka?utm_source=instagram&utm_campaign=lead_web",
@@ -21,7 +21,7 @@ const trackedApplication = inquirySchema.parse({
   traffic_medium: "paid_social",
   utm_campaign: "lead_web",
   utm_content: "puppy_static",
-});
+}));
 const trackedPayload = buildDbPayload(trackedApplication);
 assert.equal(trackedPayload.utm_campaign, "lead_web");
 assert.equal(trackedPayload.utm_content, "puppy_static");
