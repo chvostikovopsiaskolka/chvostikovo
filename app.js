@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261011-booking-taxi-ui-v201';
-const APP_VERSION='1.0.48';
+const APP_BUILD='20261011-booking-taxi-ui-v202';
+const APP_VERSION='1.0.49';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1979,7 +1979,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
        ||!Number(row.id)||!Number(row.reservation_id)||row.taxi_change_status==='pending')return false;
     if(!['none','pickup'].includes(String(row.taxi_mode||'none')))return false;
     if(String(row.reservation_date||'')<=bratislavaClockV95().date)return false;
-    return !bookingDeadlineClosedV95(row.reservation_date,selectedDog());
+    const dayBefore=smartShiftV199(row.reservation_date,-1),clock=bratislavaClockV95();
+    return clock.date<dayBefore||(clock.date===dayBefore&&clock.minutes<21*60);
   }
   function ensureTaxiEditV201(){
     if($('bookingTaxiEditV201'))return;
