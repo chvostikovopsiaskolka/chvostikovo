@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261011-ux-taxi-v208';
-const APP_VERSION='1.0.55';
+const APP_BUILD='20261011-taxi-batch-roster-v209';
+const APP_VERSION='1.0.56';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1970,7 +1970,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(document.getElementById('booking-taxi-style-v201'))return;
     const style=document.createElement('style');
     style.id='booking-taxi-style-v201';
-    style.textContent="\n#bookingPickerV37 .booking-day-wrap-v201{min-width:0;display:flex;flex-direction:column;gap:3px}\n#bookingPickerV37 .booking-day-wrap-v201>.booking-day-v37{width:100%;min-width:0}\n#bookingPickerV37 .booking-day-taxi-toggle-v201{width:100%;min-height:28px;display:flex;gap:3px;align-items:center;justify-content:center;border:1px solid #d9dee5;border-radius:9px;background:#fff;color:#64748b;font-size:13px;line-height:1;padding:4px 2px;cursor:pointer}\n#bookingPickerV37 .booking-day-taxi-toggle-v201[aria-expanded=\"true\"]{background:#fff;border-color:#d9dee5}\n#bookingPickerV37 .booking-day-taxi-toggle-v201 .taxi-indicator-v201{width:5px;height:5px;border-radius:50%;background:#ea580c}\n#bookingPickerV37 .booking-taxi-inline-v201{margin:8px 0 4px;padding:10px;background:#fff;border:1px solid #fbd2af;border-radius:12px}\n#bookingPickerV37 .booking-taxi-inline-title-v201{font-size:12px;font-weight:800;color:#9a3412;margin:0 0 7px}\n#bookingPickerV37 .booking-taxi-inline-choices-v201{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}\n#bookingPickerV37 .booking-taxi-inline-choices-v201 button{padding:10px 6px;min-height:40px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;color:#334155;font-size:11px;font-weight:700;white-space:nowrap}\n/* v203 two taxi choices */\n#bookingPickerV37 .booking-taxi-inline-choices-v201 button.active{border-color:#fdba74;background:#fff7ed;color:#9a3412}\n#bookingPickerV37 .booking-taxi-inline-choices-v201 button:focus-visible,\n.booking-taxi-pencil-v201:focus-visible{outline:2px solid #ea580c;outline-offset:2px}\n.booking-taxi-pencil-v201{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:10px;border:1px solid #fbd2af;background:#fff7ed;color:#9a3412;padding:3px;font-size:17px}\n#bookingTaxiEditV201 .booking-taxi-edit-card-v201{max-width:430px;margin:auto;width:min(100%,430px)}\n#bookingTaxiEditV201 .booking-taxi-edit-choices-v201{display:grid;gap:9px;margin:15px 0}\n#bookingTaxiEditV201 .booking-taxi-edit-choices-v201 button{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:49px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;padding:10px 13px;color:#334155;font-size:13px;font-weight:750;text-align:left}\n#bookingTaxiEditV201 .booking-taxi-edit-choices-v201 button.active{background:#fff7ed;border-color:#fb923c;color:#9a3412}\n#bookingTaxiEditV201 .booking-taxi-edit-actions-v201{display:grid;grid-template-columns:1fr 1fr;gap:9px}\n#bookingTaxiEditV201 .booking-taxi-edit-actions-v201 button{min-height:44px;border-radius:11px;border:1px solid #e2e8f0;font-weight:800;font-size:12px}\n#bookingTaxiEditV201 .booking-taxi-edit-actions-v201 .taxi-send-v201{background:#ea743f;color:#fff;border-color:#ea743f}\n#bookingTaxiEditV201 .taxi-info-v201{font-size:12px;color:#64748b;line-height:1.5;margin:8px 0 12px}\n@media(max-width:350px){#bookingPickerV37 .booking-taxi-inline-choices-v201{grid-template-columns:1fr}#bookingPickerV37 .booking-taxi-inline-choices-v201 button:last-child{grid-column:auto}}\n";
+    style.textContent="\n#bookingPickerV37 .booking-day-wrap-v201{min-width:0;display:flex;flex-direction:column;gap:3px}\n#bookingPickerV37 .booking-day-wrap-v201>.booking-day-v37{width:100%;min-width:0}\n#bookingPickerV37 .booking-day-taxi-toggle-v201{width:100%;min-height:28px;display:flex;gap:3px;align-items:center;justify-content:center;border:1px solid #d9dee5;border-radius:9px;background:#fff;color:#64748b;font-size:13px;line-height:1;padding:4px 2px;cursor:pointer}\n#bookingPickerV37 .booking-day-taxi-toggle-v201[aria-expanded=\"true\"]{background:#fff;border-color:#d9dee5}\n#bookingPickerV37 .booking-day-taxi-toggle-v201 .taxi-indicator-v201{width:5px;height:5px;border-radius:50%;background:#ea580c}\n#bookingPickerV37 .booking-taxi-inline-v201{margin:8px 0 4px;padding:10px;background:#fff;border:1px solid #fbd2af;border-radius:12px}\n#bookingPickerV37 .booking-taxi-inline-title-v201{font-size:12px;font-weight:800;color:#9a3412;margin:0 0 7px}\n#bookingPickerV37 .booking-taxi-inline-choices-v201{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}\n#bookingPickerV37 .booking-taxi-inline-choices-v201 button{padding:10px 6px;min-height:40px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;color:#334155;font-size:11px;font-weight:700;white-space:nowrap}\n/* v203 two taxi choices */\n#bookingPickerV37 .booking-taxi-inline-choices-v201 button.active{border-color:#fdba74;background:#fff7ed;color:#9a3412}\n#bookingPickerV37 .booking-taxi-inline-choices-v201 button:focus-visible,\n.booking-taxi-pencil-v201:focus-visible{outline:2px solid #ea580c;outline-offset:2px}\n.booking-taxi-pencil-v201{position:relative;width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;border-radius:10px;border:1px solid #fbd2af;background:#fff7ed;color:#9a3412;padding:3px;font-size:17px}.booking-taxi-plus-v209{position:absolute;right:-3px;top:-4px;display:grid;place-items:center;width:14px;height:14px;border-radius:50%;border:1px solid #fff;background:#ea580c;color:#fff;font-size:11px;line-height:1;font-weight:900}\n#bookingTaxiEditV201 .booking-taxi-edit-card-v201{max-width:430px;margin:auto;width:min(100%,430px)}\n#bookingTaxiEditV201 .booking-taxi-edit-choices-v201{display:grid;gap:9px;margin:15px 0}\n#bookingTaxiEditV201 .booking-taxi-edit-choices-v201 button{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:49px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;padding:10px 13px;color:#334155;font-size:13px;font-weight:750;text-align:left}\n#bookingTaxiEditV201 .booking-taxi-edit-choices-v201 button.active{background:#fff7ed;border-color:#fb923c;color:#9a3412}\n#bookingTaxiEditV201 .booking-taxi-edit-actions-v201{display:grid;grid-template-columns:1fr 1fr;gap:9px}\n#bookingTaxiEditV201 .booking-taxi-edit-actions-v201 button{min-height:44px;border-radius:11px;border:1px solid #e2e8f0;font-weight:800;font-size:12px}\n#bookingTaxiEditV201 .booking-taxi-edit-actions-v201 .taxi-send-v201{background:#ea743f;color:#fff;border-color:#ea743f}\n#bookingTaxiEditV201 .booking-taxi-edit-heading-v209{border:1px solid #e2e8f0;border-radius:15px;background:#fff;padding:12px 14px;margin-bottom:14px}#bookingTaxiEditV201 .taxi-title-line-v209{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px}#bookingTaxiEditV201 .taxi-title-line-v209 h2{margin:0}#bookingTaxiEditV201 #taxiEditDateV201{font-size:13px;color:#64748b;font-weight:650;white-space:nowrap}\n@media(max-width:350px){#bookingPickerV37 .booking-taxi-inline-choices-v201{grid-template-columns:1fr}#bookingPickerV37 .booking-taxi-inline-choices-v201 button:last-child{grid-column:auto}}\n";
     style.textContent += '\n#bookingPickerV37 .booking-day-taxi-toggle-v201{min-height:35px;font-size:17px;transition:background-color .15s,border-color .15s,color .15s}#bookingPickerV37 .booking-day-taxi-toggle-v201[aria-expanded="true"],#bookingPickerV37 .booking-day-taxi-toggle-v201[data-taxi-selected="true"]{background:#fff0e6;border-color:#f97316;color:#c2410c;box-shadow:0 0 0 1px rgba(249,115,22,.1)}';
     document.head.appendChild(style);
   }
@@ -1986,9 +1986,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     document.body.insertAdjacentHTML('beforeend',
       '<div id="bookingTaxiEditV201" class="booking-picker-v37 hidden" role="dialog" aria-modal="true" aria-labelledby="taxiEditTitleV201">'
       +'<div class="booking-picker-card-v37 booking-taxi-edit-card-v201">'
-      +'<div class="booking-picker-head-v37"><div><small>🚕 Psí taxi</small><h2 id="taxiEditTitleV201">Pridať taxi</h2>'
-      +'<p id="taxiEditDateV201"></p></div><button id="taxiEditCloseV201" class="booking-picker-close-v37" type="button" aria-label="Zavrieť">×</button></div>'
-      +'<p class="taxi-info-v201">Pridajte taxi k rezervácii.</p>'
+      +'<div class="booking-picker-head-v37 booking-taxi-edit-heading-v209"><div><small>🚕 Psí taxi</small><div class="taxi-title-line-v209"><h2 id="taxiEditTitleV201">Pridať taxi</h2><span id="taxiEditDateV201"></span></div></div><button id="taxiEditCloseV201" class="booking-picker-close-v37" type="button" aria-label="Zavrieť">×</button></div>'
       +'<div class="booking-taxi-edit-choices-v201">'
       +'<button type="button" data-edit-taxi="pickup"><span>🚕 Vyzdvihnutie</span><b>5 €</b></button>'
       +'<button type="button" data-edit-taxi="pickup_dropoff"><span>🚕 Tam aj späť</span><b>10 €</b></button></div>'
@@ -2175,13 +2173,29 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     }
     submittingV37=true;pickerErrorV95('');renderPickerV37();
     let ok=0,renewalDate=null;const failed=[],successDates=[];
-    for(const date of dates){
+    const acceptedBooking=(row,date)=>{
       const taxiMode=selectedTaxiByDateV91.get(date)||'none';
+      if(row&&!row.planned_pass_request_id&&Number(row.projected_pass_total)>0&&Number(row.projected_entry_number)===Number(row.projected_pass_total))renewalDate=date;
+      applyLocalBooking({data:row},{id:-(Date.now()+ok),dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode,status:'pending',can_manage:true});
+      ok++;successDates.push(date);
+    };
+    if(dates.length>1){
+      // One request; each day keeps the existing server validations and pass accounting.
       try{
-        const result=await api({action:'request_booking',dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode});
-        const bookingRow=result?.data||result?.booking||result?.request||null;
-        if(bookingRow&&!bookingRow.planned_pass_request_id&&Number(bookingRow.projected_pass_total)>0&&Number(bookingRow.projected_entry_number)===Number(bookingRow.projected_pass_total))renewalDate=date;
-        applyLocalBooking(result,{id:-(Date.now()+ok),dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode,status:'pending',can_manage:true});ok++;successDates.push(date);
+        const response=await api({action:'request_bookings',dog_id:Number(dog.id),bookings:dates.map(date=>({date,taxi_mode:selectedTaxiByDateV91.get(date)||'none'}))});
+        const data=response?.data||{},accepted=Array.isArray(data.bookings)?data.bookings:[],rejections=Array.isArray(data.failed)?data.failed:[];
+        const acceptedByDate=new Map(accepted.filter(row=>row?.reservation_date).map(row=>[row.reservation_date,row]));
+        const failedByDate=new Map(rejections.map(row=>[row?.date,String(row?.error||'Nepodarilo sa rezervovať.')]));
+        for(const date of dates){
+          if(acceptedByDate.has(date))acceptedBooking(acceptedByDate.get(date),date);
+          else failed.push({date,error:failedByDate.get(date)||'Nepodarilo sa rezervovať.'});
+        }
+      }catch(e){for(const date of dates)failed.push({date,error:e.message||'Nepodarilo sa rezervovať.'})}
+    }else{
+      const date=dates[0];
+      try{
+        const response=await api({action:'request_booking',dog_id:Number(dog.id),reservation_date:date,taxi_mode:selectedTaxiByDateV91.get(date)||'none'});
+        acceptedBooking(response?.data||response?.booking||response?.request||null,date);
       }catch(e){failed.push({date,error:e.message||'Nepodarilo sa rezervovať.'})}
     }
     try{if(ok)queueCustomerSync('bookings',80)}finally{submittingV37=false}
@@ -2232,6 +2246,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const days=state.data?.availability?.days||[],byDate=new Map(days.map(d=>[d.date,d]));
     const clock=overviewClock(),items=futureItems().filter(r=>dog&&Number(r.dog_id)===Number(dog.id)&&overviewDayVisible(r.reservation_date,clock));
     if(!items.length){root.innerHTML='<div class="card reserved-empty-v37"><svg class="reserved-empty-icon" aria-hidden="true"><use href="#ci-calendar"/></svg><span>Zatiaľ nemáte rezervovaný žiadny deň.</span><small>Kliknite na tlačidlo vyššie a vyberte si termín<br>pre vášho psíka.</small></div>';return}
+    // Maintain the open roster while realtime updates replace the day cards.
+    const openRosterDatesV209=new Set([...root.querySelectorAll('.reserved-day-card-v37[data-date]')].filter(card=>card.querySelector('.reserved-roster-v37[open]')).map(card=>card.dataset.date));
     root.innerHTML=items.map(r=>{
       const day=byDate.get(r.reservation_date)||{},taxi=taxiLabel(r.taxi_mode),pending=r.status==='pending';
       const reservation=(state.data?.reservations||[]).find(x=>Number(x.id)===Number(r.reservation_id));
@@ -2244,12 +2260,15 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const sharedNote='';
       const linkedReservation=r.can_manage===false&&r.status==='approved'&&Number(r.reservation_id)>0;
       const cancel=(r.can_manage!==false||linkedReservation)?`<button class="cancel-booking-v37" type="button" aria-label="Zrušiť rezerváciu na ${esc(skDay(r.reservation_date))} ${esc(skDate(r.reservation_date))}" title="Zrušiť rezerváciu" data-request="${r._legacy||linkedReservation?'':r.id||''}" data-reservation="${r._legacy||linkedReservation?r.reservation_id||r.id:''}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M9 13l6 4M15 13l-6 4"/></svg></button>`:'';
-      const taxiEdit=allowedTaxiEditV201(r)?`<button type="button" class="booking-taxi-pencil-v201" data-taxi-request="${r._legacy?'':Number(r.id)}" data-taxi-reservation="${r._legacy?Number(r.reservation_id):''}" title="Doplniť taxi" aria-label="Doplniť taxi na ${esc(skDay(r.reservation_date))} ${esc(skDate(r.reservation_date))}">✎</button>`:'';
+      const taxiEdit=allowedTaxiEditV201(r)?`<button type="button" class="booking-taxi-pencil-v201" data-taxi-request="${r._legacy?'':Number(r.id)}" data-taxi-reservation="${r._legacy?Number(r.reservation_id):''}" title="Pridať taxi" aria-label="Pridať taxi na ${esc(skDay(r.reservation_date))} ${esc(skDate(r.reservation_date))}">🚕<span class="booking-taxi-plus-v209" aria-hidden="true">+</span></button>`:'';
       const taxiPending=r.taxi_change_status==='pending'?'<span class="reserved-taxi-v37">🚕 Taxi čaká na schválenie</span>':'';
       const detail=(pending&&passState)||taxi||taxiPending?`<div class="reserved-day-detail-v37${pending?' reserved-day-detail-pending-v37':''}">${pending?passState:''}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}${taxiPending}</div>`:'';
       const approvedRoster=pending?'':`<div class="reserved-day-meta-v37">${bookingRosterV37(day,dog,passState)}</div>`;
       return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div class="reserved-day-date-v37"><strong>${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><div class="reserved-day-controls-v37"><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span>${taxiEdit}${cancel}</div></div>${approvedRoster}${detail}${sharedNote}${note}</div>`;
     }).join('');
+    root.querySelectorAll('.reserved-day-card-v37[data-date]').forEach(card=>{
+      if(openRosterDatesV209.has(card.dataset.date))card.querySelector('.reserved-roster-v37')?.setAttribute('open','');
+    });
     root.querySelectorAll('.cancel-booking-v37').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();cancelBooking(btn)}));
     root.querySelectorAll('[data-taxi-request]').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();openTaxiEditV201(btn.dataset.taxiRequest,btn.dataset.taxiReservation)}));
   };
