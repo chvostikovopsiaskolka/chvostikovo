@@ -1,54 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, HeartHandshake, Moon, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { ArrowRight, Clock3, MapPin } from "lucide-react";
 import { Header } from "@/components/site/Header";
+import { Footer } from "@/components/site/Contact";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
-import { FriendshipFeature } from "@/components/site/FriendshipFeature";
-import { Footer } from "@/components/site/Contact";
 import { ShortForm } from "@/components/site/Forms";
-import { Collapse } from "@/components/site/Collapse";
 
 const BASE_URL = "https://chvostikovo.sk";
 const PAGE_URL = `${BASE_URL}/strazenie-psov-kosice`;
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
-const title = "Stráženie psov Košice | Psia škôlka Chvostíkovo";
+const title = "Stráženie psov Košice | Denná psia škôlka Chvostíkovo";
 const description =
-  "Denné stráženie psov v Košiciach v psej škôlke Chvostíkovo. Celodenný dohľad, bezpečné prostredie, rodinná atmosféra, pohyb aj oddych.";
-
-const FAQ = [
-  {
-    q: "Je Chvostíkovo psia škôlka alebo stráženie psov?",
-    a: "Oboje pomenúva tú istú dennú službu. Psíka ráno privediete do Chvostíkova, počas dňa má pohyb, spoločnosť, oddych a celodenný dohľad a popoludní si ho vyzdvihnete. Nejde o pobytové stráženie cez noc.",
-  },
-  {
-    q: "Je môj psík počas dňa stále pod dohľadom?",
-    a: "Áno. Počas celého dňa sú so psíkmi minimálne dvaja skúsení opatrovatelia. Sledujeme hru, vzájomné interakcie, únavu aj to, kedy niektorý psík potrebuje pokoj alebo prestávku.",
-  },
-  {
-    q: "Hrajú sa psy v škôlke celý deň?",
-    a: "Nie. Pohyb a hra sú dôležitou súčasťou dňa, ale rovnako dôležitý je oddych. Aktivitu regulujeme a psy nenechávame hrať sa bez prestávky až do vyčerpania.",
-  },
-  {
-    q: "Môžem využiť stráženie iba občas?",
-    a: "Áno. Chvostíkovo môžete využívať pravidelne aj podľa potreby. Keďže máme obmedzenú kapacitu, miesto je potrebné rezervovať vopred.",
-  },
-  {
-    q: "Ako prebieha prvá návšteva?",
-    a: "Každý nový psík najskôr absolvuje bezplatnú vstupnú návštevu. Zoznámime sa s ním, sledujeme jeho reakcie na nové prostredie, ľudí a ostatných psov a podľa toho nastavíme ďalší postup.",
-  },
-  {
-    q: "Aké sú otváracie hodiny?",
-    a: "Chvostíkovo je otvorené od pondelka do piatka od 7:00 do 17:00.",
-  },
-  {
-    q: "Ponúkate aj stráženie psov cez noc?",
-    a: "Nie. Chvostíkovo funguje ako denná psia škôlka a denné stráženie psov. Psík sa po skončení dňa vracia domov so svojím majiteľom.",
-  },
-];
+  "Denné stráženie psov v Košiciach. V Chvostíkove si psík počas vašej práce užije pohyb, hry, kamarátov aj oddych pod celodenným dohľadom.";
 
 export const Route = createFileRoute("/strazenie-psov-kosice")({
   head: () => ({
@@ -60,7 +27,7 @@ export const Route = createFileRoute("/strazenie-psov-kosice")({
       { property: "og:type", content: "website" },
       { property: "og:url", content: PAGE_URL },
       { property: "og:image", content: OG_IMAGE },
-      { property: "og:image:alt", content: "Chvostíkovo - psia škôlka a stráženie psov v Košiciach" },
+      { property: "og:image:alt", content: "Chvostíkovo – denné stráženie psov v Košiciach" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: description },
       { name: "twitter:image", content: OG_IMAGE },
@@ -71,291 +38,121 @@ export const Route = createFileRoute("/strazenie-psov-kosice")({
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@graph": [
-            {
-              "@type": "Service",
-              name: "Psia škôlka a denné stráženie psov v Košiciach",
-              serviceType: "Denné stráženie psov a psia škôlka",
-              url: PAGE_URL,
-              provider: {
-                "@type": "LocalBusiness",
-                name: "Chvostíkovo psia škôlka",
-                url: BASE_URL,
-                address: {
-                  "@type": "PostalAddress",
-                  streetAddress: "Poľská 6",
-                  addressLocality: "Košice",
-                  postalCode: "040 01",
-                  addressCountry: "SK",
-                },
-              },
-              areaServed: { "@type": "City", name: "Košice" },
+          "@type": "Service",
+          name: "Denné stráženie psov v Košiciach",
+          serviceType: "Denná psia škôlka – stráženie psov počas dňa",
+          url: PAGE_URL,
+          provider: {
+            "@type": "LocalBusiness",
+            name: "Chvostíkovo psia škôlka",
+            url: BASE_URL,
+            address: {
+              "@type": "PostalAddress",
+              streetAddress: "Poľská 6",
+              addressLocality: "Košice",
+              postalCode: "040 01",
+              addressCountry: "SK",
             },
-            {
-              "@type": "FAQPage",
-              mainEntity: FAQ.map((item) => ({
-                "@type": "Question",
-                name: item.q,
-                acceptedAnswer: { "@type": "Answer", text: item.a },
-              })),
-            },
-          ],
+          },
+          areaServed: { "@type": "City", name: "Košice" },
         }),
       },
     ],
   }),
-  component: DogDaycarePage,
+  component: DogSittingPage,
 });
 
-function CtaLink({ className = "" }: { className?: string }) {
-  return (
-    <a
-      href="#informacie"
-      data-marketing-event="inquiry_cta"
-      data-tracking-source="dog_sitting_page_cta"
-      className={`btn-coral ${className}`}
-    >
-      Chcem sa informovať o škôlke
-    </a>
-  );
-}
+const MORE_LINKS = [
+  { href: "/#starostlivost", title: "Ako sa staráme o psíkov", detail: "Hry, kamaráti a oddych" },
+  { href: "/#cennik", title: "Cenník škôlky", detail: "Jednorazové vstupy a permanentky" },
+  { href: "/#podmienky", title: "Podmienky prijatia", detail: "Čo vedieť pred prvou návštevou" },
+];
 
-function DogDaycarePage() {
+function DogSittingPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
       <main>
         <section id="top" className="relative overflow-hidden pt-20 sm:pt-24">
           <PawTrailBackground landingBottomPaws />
-          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-5 sm:min-h-[535px] sm:gap-8 sm:py-7 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-5 sm:min-h-[535px] sm:gap-8 sm:py-7 lg:min-h-[570px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-12">
             <div className="max-w-2xl text-center lg:text-left">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Psia škôlka & denné stráženie</p>
-              <h1 className="mt-3 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px] lg:leading-[1.05]">
-                Psia škôlka a <span className="text-coral-dark">stráženie psov</span> v Košiciach
+              <p className="font-display text-xs font-bold uppercase tracking-[0.1em] text-coral-dark sm:text-sm">
+                Denná starostlivosť o stredných a veľkých psíkov
+              </p>
+              <h1 className="mt-3 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
+                Stráženie psov <span className="text-coral-dark">v Košiciach</span>
               </h1>
-              <p className="mt-5 max-w-2xl text-lg leading-relaxed text-forest/85">
-                Hľadáte spoľahlivé stráženie psa v Košiciach počas práce, povinností alebo dňa, keď nechcete nechať psíka samého doma?
+              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-forest/85 sm:text-lg lg:mx-0">
+                Kým ste v práci, váš psík si v našej dennej škôlke užije pohyb,
+                hry s kamarátmi aj oddych. A to všetko pod naším celodenným dohľadom.
               </p>
-              <p className="mt-4 max-w-2xl leading-relaxed text-forest/80">
-                Chvostíkovo spája denné stráženie psov s režimom psej škôlky. Psík má počas dňa pohyb, spoločnosť, pokojnejšie chvíle aj oddych – a po celý čas je pod dohľadom ľudí, ktorí poznajú jeho potreby.
-              </p>
-              <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-                <CtaLink />
-                <span className="rounded-full bg-card px-4 py-2 font-display text-sm font-semibold text-forest shadow-card">
-                  Pondelok – piatok · 7:00 – 17:00
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold sm:text-sm lg:justify-start">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-coral px-3 py-1.5 text-white shadow-card">
+                  <MapPin className="size-4" aria-hidden="true" /> Košice
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-coral px-3 py-1.5 text-white shadow-card">
+                  <Clock3 className="size-4" aria-hidden="true" /> Po–Pia 7:00–17:00
                 </span>
               </div>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+                <a
+                  href="#informacie"
+                  data-marketing-event="inquiry_cta"
+                  data-tracking-source="dog_sitting_page_cta"
+                  className="btn-coral"
+                >
+                  Chcem sa informovať
+                </a>
+                <a href="/#starostlivost" className="inline-flex items-center gap-1.5 font-semibold text-forest underline-offset-4 hover:underline">
+                  Zistiť viac o škôlke <ArrowRight className="size-4" aria-hidden="true" />
+                </a>
+              </div>
             </div>
-
             <div id="informacie" className="mx-auto w-full max-w-md scroll-mt-24 lg:mx-0">
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
-              <h2 className="text-center text-2xl text-forest">Chcete vedieť, či je škôlka vhodná pre vášho psíka?</h2>
-              <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
-                Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
-              </p>
-              <ShortForm trackingSource="dog_sitting_page_inline" />
+                <h2 className="text-center font-display text-xl font-bold text-forest sm:text-2xl">
+                  Chcete psíkovi dopriať deň s kamarátmi?
+                </h2>
+                <p className="mt-2 mb-4 text-center text-sm leading-relaxed text-forest/70">
+                  Vyplňte krátky formulár, ozveme sa späť a radi s vami preberieme detaily.
+                </p>
+                <ShortForm trackingSource="dog_sitting_page_inline" />
               </div>
             </div>
           </div>
         </section>
 
         <InfoTicker />
-
-        <section className="relative overflow-hidden py-14 sm:py-20">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-6xl px-4">
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Viac než iba postrážiť</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Keď nemá byť deň len o čakaní doma</h2>
-              <p className="mt-4 leading-relaxed text-forest/80">
-                Pre nás stráženie psa neznamená iba to, že naňho niekto občas pozrie. Chceme, aby mal počas dňa zmysluplný režim, kontakt s ľuďmi, možnosť pohybu, spoločnosť ďalších psov aj priestor vypnúť a oddýchnuť si.
-              </p>
-            </div>
-
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                [ShieldCheck, "Celodenný dohľad", "Počas celého dňa sú so psíkmi minimálne dvaja skúsení opatrovatelia."],
-                [Users, "Bezpečné interakcie", "Sledujeme hru a komunikáciu medzi psami a zasahujeme skôr, než vznikne zbytočný konflikt."],
-                [HeartHandshake, "Rodinné prostredie", "Psík nie je anonymnou položkou v poradovníku. Poznáme našich škôlkarov a ich povahy."],
-                [Moon, "Pohyb aj oddych", "Dobrý deň nie je o nepretržitom behaní. Aktivitu striedame s pokojom a odpočinkom."],
-              ].map(([Icon, heading, text]) => {
-                const CardIcon = Icon as typeof ShieldCheck;
-                return (
-                  <article key={String(heading)} className="rounded-4xl bg-card p-6 shadow-card">
-                    <span className="flex size-11 items-center justify-center rounded-2xl bg-secondary text-forest">
-                      <CardIcon className="size-5" />
-                    </span>
-                    <h3 className="mt-4 text-lg text-forest">{String(heading)}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-forest/75">{String(text)}</p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto max-w-5xl px-4">
-            <div className="rounded-4xl bg-forest p-7 text-cream shadow-soft sm:p-10">
-              <div className="flex size-12 items-center justify-center rounded-2xl bg-cream/10">
-                <ShieldCheck className="size-6 text-coral-soft" />
-              </div>
-              <h2 className="mt-5 text-3xl text-cream sm:text-4xl">Bezpečie nie je detail. Je to základ celého dňa.</h2>
-              <div className="mt-5 space-y-4 leading-relaxed text-cream/85">
-                <p>
-                  Bezpečnosť začína ešte pred prvým dňom v škôlke. Každý nový psík absolvuje vstupnú návštevu, počas ktorej sledujeme jeho reakcie na nové prostredie, ľudí a ostatných psov. Potrebujeme vedieť, či sa v kolektíve cíti dobre a či je preňho takýto typ dennej starostlivosti vhodný.
-                </p>
-                <p>
-                  Počas pobytu sledujeme vzájomné interakcie, únavu, náladu aj potrebu oddychu. Psy nenechávame hrať sa bez prestávky až do vyčerpania. Ak niekto potrebuje pauzu, doprajeme mu ju. Ak sa situácia začína zbytočne vyhrocovať, zasiahne človek – nie až druhý pes.
-                </p>
-                <p className="font-semibold text-cream">
-                  Súčasťou prijatia sú aj podmienky očkovania, ochrany proti parazitom a dobrý zdravotný stav psíka.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="relative overflow-hidden bg-secondary/55 py-14 sm:py-20">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-6xl px-4">
-            <div className="text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Deň v Chvostíkove</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Pohyb, spoločnosť aj pokojnejšie chvíle</h2>
-              <p className="mx-auto mt-4 max-w-3xl leading-relaxed text-forest/80">
-                Psia škôlka nie je miesto, kde otvoríme dvere a necháme psy od rána do večera naháňať sa. Režim prispôsobujeme skupine aj konkrétnym psíkom.
-              </p>
-            </div>
-
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              <article className="rounded-4xl bg-card p-7 shadow-card sm:p-9">
-                <Sparkles className="size-6 text-coral" />
-                <h3 className="mt-4 text-2xl text-forest">Pohyb a hra</h3>
-                <p className="mt-3 leading-relaxed text-forest/80">
-                  Psíkovia majú priestor na pohyb, hry a spoločné aktivity. Intenzitu vždy prispôsobujeme tomu, kto je práve v skupine a ako sa cíti.
-                </p>
-              </article>
-              <article className="rounded-4xl bg-card p-7 shadow-card sm:p-9">
-                <Users className="size-6 text-coral" />
-                <h3 className="mt-4 text-2xl text-forest">Psia spoločnosť</h3>
-                <p className="mt-3 leading-relaxed text-forest/80">
-                  Kontakt s ostatnými psami je prirodzenou súčasťou dňa. Nemusí však znamenať neustálu hru – dôležité je vedieť fungovať spolu aj pokojne.
-                </p>
-              </article>
-              <article className="rounded-4xl bg-card p-7 shadow-card sm:p-9">
-                <Moon className="size-6 text-coral" />
-                <h3 className="mt-4 text-2xl text-forest">Oddych a upokojenie</h3>
-                <p className="mt-3 leading-relaxed text-forest/80">
-                  Oddych je rovnako dôležitý ako aktivita. Psíkom dávame priestor spomaliť, upokojiť sa a načerpať energiu na ďalšiu časť dňa.
-                </p>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        <section className="relative overflow-hidden py-14 sm:py-20">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-            <div>
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Rodinné prostredie</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Chceme poznať psíka, nie iba jeho meno v rezervácii</h2>
-              <p className="mt-4 leading-relaxed text-forest/80">
-                Chvostíkovo sme postavili na prostredí, v ktorom sa psík môže cítiť prirodzene a bezpečne. Každý má inú povahu, iné tempo a iné potreby. Niekto je prvý pri hre, ďalší potrebuje najskôr všetko pozorovať a až potom sa zapojiť.
-              </p>
-              <p className="mt-3 leading-relaxed text-forest/80">
-                Preto ku každému pristupujeme individuálne a s rešpektom. Ak vieme, čo má rád, čo mu prekáža alebo kedy potrebuje pokoj, vieme mu deň nastaviť oveľa lepšie.
-              </p>
-            </div>
-            <div className="rounded-4xl bg-card p-7 shadow-soft sm:p-9">
-              <h3 className="text-2xl text-forest">Kedy sa denné stráženie hodí?</h3>
-              <ul className="mt-5 space-y-4 text-forest/80">
-                {[
-                  "Keď ste v práci alebo vás čaká dlhší deň mimo domu.",
-                  "Keď nechcete, aby psík trávil celý deň sám doma a chcete mu dopriať deň s psími kamarátmi.",
-                  "Keď sa doma nudí, kňučí, vyje alebo ničí veci a počas dňa mu chýba pohyb či podnety.",
-                  "Keď ťažko znáša samotu alebo má separačnú úzkosť – škôlka mu môže zabezpečiť dohľad počas dňa, nenahrádza však individuálnu prácu s odborníkom.",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <Check className="mt-0.5 size-5 shrink-0 text-coral" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-6 rounded-3xl bg-secondary p-5 text-sm leading-relaxed text-forest/85">
-                Chvostíkovo je zamerané najmä na stredné a veľké plemená. Vhodnosť pobytu vždy posudzujeme individuálne počas vstupnej návštevy.
-              </p>
-              <p className="mt-4 text-sm leading-relaxed text-forest/75">
-                Máte doma šteniatko?
-                <a
-                  href="/psia-skolka-pre-steniatka"
-                  className="mt-1 block font-display font-semibold text-coral underline-offset-4 hover:underline"
-                >
-                  Pozrite si, ako nastavujeme prvé návštevy a škôlku pre šteniatka →
-                </a>
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <FriendshipFeature />
         <Reviews />
         <DaycarePhotoCarousel />
 
-        <section className="relative overflow-hidden bg-card py-14 sm:py-20">
+        <section className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-6xl px-4">
-            <div className="text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Ako začať?</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Stačia tri jednoduché kroky</h2>
-            </div>
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {[
-                ["1", "Napíšete nám", "Vyplníte krátky nezáväzný formulár a dáte nám vedieť, čo od stráženia alebo škôlky potrebujete."],
-                ["2", "Stretneme sa", "Na bezplatnej vstupnej návšteve sa zoznámime so psíkom a pozrieme sa, ako reaguje na prostredie a kolektív."],
-                ["3", "Dohodneme ďalší postup", "Ak je škôlka pre psíka vhodná, dohodneme prvý deň a ďalšie návštevy podľa vašich potrieb."],
-              ].map(([number, heading, text]) => (
-                <article key={number} className="rounded-4xl bg-background p-7 shadow-card">
-                  <span className="flex size-10 items-center justify-center rounded-full bg-coral font-display font-bold text-white">{number}</span>
-                  <h3 className="mt-4 text-xl text-forest">{heading}</h3>
-                  <p className="mt-2 leading-relaxed text-forest/80">{text}</p>
-                </article>
-              ))}
-            </div>
-            <p className="mx-auto mt-8 max-w-3xl text-center font-display font-semibold text-forest">
-              Nechceme každého psíka natlačiť do rovnakého scenára. Ďalší postup prispôsobujeme tomu, čo vyhovuje práve jemu.
+          <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
+            <h2 className="section-title text-3xl sm:text-4xl">
+              Jeden deň v škôlke. Veľa radosti pre psíka.
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-forest/80">
+              Stráženie psov je u nás denná psia škôlka – bezpečný priestor
+              na hry, socializáciu a oddych. Nových psíkov najprv spoznáme
+              na úvodnej návšteve.
             </p>
-            <div className="mt-7 flex justify-center">
-              <CtaLink />
-            </div>
-          </div>
-        </section>
-
-        <section className="relative overflow-hidden py-14 sm:py-20">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-4xl px-4">
-            <div className="text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Máte otázku?</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Časté otázky o strážení psov v Košiciach</h2>
-            </div>
-            <div className="mt-9 space-y-3">
-              {FAQ.map((item) => (
-                <Collapse key={item.q} title={item.q}>
-                  <p>{item.a}</p>
-                </Collapse>
+            <div className="mt-7 grid gap-3 text-left sm:grid-cols-3">
+              {MORE_LINKS.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="group flex items-center justify-between gap-3 rounded-2xl border border-forest/10 bg-background px-4 py-4 shadow-sm transition-colors hover:border-coral/50 hover:bg-secondary/35"
+                >
+                  <span className="min-w-0">
+                    <span className="block font-display font-semibold text-forest">{link.title}</span>
+                    <span className="mt-1 block text-xs text-forest/70">{link.detail}</span>
+                  </span>
+                  <ArrowRight className="size-5 shrink-0 text-coral transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                </a>
               ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="pb-16 sm:pb-20">
-          <div className="mx-auto max-w-4xl px-4">
-            <div className="rounded-4xl bg-secondary p-7 text-center shadow-card sm:p-10">
-              <h2 className="text-3xl text-forest">Hľadáte stráženie psa v Košiciach?</h2>
-              <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-forest/80">
-                Vyplňte nezáväzný formulár. Ozveme sa vám späť a radi s vami preberieme, či je Chvostíkovo vhodné práve pre vášho psíka.
-              </p>
-              <CtaLink className="mt-6" />
             </div>
           </div>
         </section>
