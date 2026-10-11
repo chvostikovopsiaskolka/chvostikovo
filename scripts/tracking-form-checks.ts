@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { Window } from "happy-dom";
-import { inquirySchema, type InquiryInput } from "../src/lib/inquiry";
+import { buildDbPayload, inquirySchema, type InquiryInput } from "../src/lib/inquiry";
 import { sanitizeTracking, safeTrackingString, TRACKING_LIMITS } from "../src/lib/tracking-sanitization";
 import { submitInquiry } from "../src/lib/submit-inquiry";
 import { getTrafficAttribution } from "../src/lib/traffic-source";
