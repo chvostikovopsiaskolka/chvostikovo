@@ -1830,7 +1830,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         if(!matching.length)continue;
         const weekdays=new Set(matching.map(r=>new Date(r.reservation_date+'T12:00:00Z').getUTCDay()));
         const dates=target.filter(d=>weekdays.has(new Date(d.date+'T12:00:00Z').getUTCDay())).map(d=>d.date);
-        if(dates.length)return {dates,ago};
+        if(dates.length)return {dates,ago,sourceMonday:previous};
       }
     }
     return null;
@@ -1849,9 +1849,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     root.classList.toggle('hidden',!suggestion);
     if(!suggestion){root.innerHTML='';return}
     const weekday=['Ne','Po','Ut','St','Št','Pia','So'];
-    const weekText=suggestion.ago===1?'minulý týždeň':suggestion.ago===2?'pred dvoma týždňami':'pred troma týždňami';
-    root.innerHTML='<div class="smart-head-v199"><span class="smart-icon-v199" aria-hidden="true">🐾</span><div><strong>'
-      +esc(String(dog.name||'Psík'))+' – chcete si rezervovať rovnaké dni ako '+weekText+'?</strong>'
+    const sourceStart=new Date(suggestion.sourceMonday+'T12:00:00Z');
+    const sourceEnd=new Date(smartShiftV199(suggestion.sourceMonday,4)+'T12:00:00Z');
+    const weekText='v týždni '+sourceStart.getUTCDate()+'. '+(sourceStart.getUTCMonth()+1)+'. – '+sourceEnd.getUTCDate()+'. '+(sourceEnd.getUTCMonth()+1)+'.';
+    root.innerHTML='<div class="smart-head-v199"><div><strong>Chcete si rezervovať rovnaké dni ako '
+      +weekText+'?</strong>'
       +'</div></div>'
       +'<div class="smart-chips-v199" aria-label="Navrhované dni">'
       +suggestion.dates.map(date=>'<span class="smart-chip-v199">'+weekday[new Date(date+'T12:00:00Z').getUTCDay()]+'</span>').join('')+'</div>'
