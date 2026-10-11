@@ -12,6 +12,10 @@ const INTERACTION_EVENTS = new Set([
   "form_attempt",
   "form_submit",
   "form_error",
+  "form_field_touch",
+  "form_field_complete",
+  "form_field_invalid",
+  "form_abandon",
   "success_conditions_click",
   "success_pricing_click",
 ]);
@@ -128,6 +132,11 @@ function classifySource(input: Json) {
 }
 
 const ERROR_STAGES = new Set(["frontend_validation", "phone_normalization", "zod_validation", "payload", "network", "backend_http", "backend_response"]);
+const FORM_PROGRESS_EVENTS = new Set(["form_field_touch", "form_field_complete", "form_field_invalid", "form_abandon"]);
+const FORM_PROGRESS_FIELDS = new Set([
+  "meno", "telefon", "zaujem", "pes", "plemeno", "vaha", "pohlavie",
+  "vek", "kastrovana", "duvod", "alergie", "povaha", "name", "phone", "interest",
+]);
 const FORM_PATHS = new Set(["/", "/psia-skolka-kosice", "/psia-skolka-pre-steniatka", "/strazenie-psov-kosice", "/en/dog-daycare-kosice"]);
 
 async function notifyFormError(input: Json, path: string, attemptId: string | null) {
@@ -273,6 +282,15 @@ Deno.serve(async (req: Request) => {
         return response(origin, 400, { ok: false, error: "invalid_event_name" });
       }
 
+      // New fine-grained analytics only permits predetermined field identifiers.
+      // Reject arbitrary content; do not store the actual value of any field.
+      if (FORM_PROGRESS_EVENTS.has(eventName)) {
+        const source = text(input.event_source, 200) || "";
+        const parts = source.split("|");
+        if (parts.length !== 2 || !/^[a-z][a-z0-9_]{0,79}$/.test(parts[0]) || !FORM_PROGRESS_FIELDS.has(parts[1])) {
+          return response(origin, 400, { ok: false, error: "invalid_form_field" });
+        }
+      }
       const metaClickHash = text(input.meta_click_hash, 64);
       if (metaClickHash && !/^[0-9a-f]{64}$/.test(metaClickHash)) {
         return response(origin, 400, { ok: false, error: "invalid_meta_click_hash" });
