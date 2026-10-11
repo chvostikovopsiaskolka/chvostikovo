@@ -81,7 +81,7 @@ function classifySource(input: Json) {
 
   const isInstagramSource = hasSourceToken(["instagram", "ig"]);
   const isFacebookSource = hasSourceToken(["facebook", "fb"]);
-  const isMetaSource = isInstagramSource || isFacebookSource || hasSourceToken(["meta"]);
+  const isMetaSource = isInstagramSource || isFacebookSource || hasSourceToken(["meta", "threads", "th"]);
   const isGoogleSource = hasSourceToken(["google"]);
   const isBingSource = hasSourceToken(["bing"]);
 
@@ -96,6 +96,7 @@ function classifySource(input: Json) {
     if (isFacebookSource || hasSourceToken(["meta"])) return "facebook_organic";
     if (isGoogleSource) return "google_organic";
     if (isBingSource) return "bing_organic";
+    if (hasSourceToken(["threads", "th"])) return "threads_organic";
     if (hasSourceToken(["tiktok"])) return "tiktok_organic";
     if (hasSourceToken(["youtube"])) return "youtube_organic";
     if (hasSourceToken(["linkedin"])) return "linkedin_organic";
@@ -104,7 +105,8 @@ function classifySource(input: Json) {
     if (hasSourceToken(["pinterest"])) return "pinterest_organic";
   }
 
-  if (hasFbclid) return "meta_paid";
+  // fbclid does not prove paid attribution: keep this as unverified Meta referral.
+  if (hasFbclid) return "meta_referral";
 
   if (isHost("instagram.com")) return "instagram_organic";
   if (isHost("facebook.com") || isHost("fb.com")) return "facebook_organic";
@@ -282,8 +284,7 @@ Deno.serve(async (req: Request) => {
         return response(origin, 400, { ok: false, error: "invalid_event_name" });
       }
 
-      // New fine-grained analytics only permits predetermined field identifiers.
-      // Reject arbitrary content; do not store the actual value of any field.
+      // Fine-grained analytics only permits predetermined field identifiers.
       if (FORM_PROGRESS_EVENTS.has(eventName)) {
         const source = text(input.event_source, 200) || "";
         const parts = source.split("|");
