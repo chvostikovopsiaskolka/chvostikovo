@@ -3,6 +3,10 @@ import { Check, HeartHandshake, Moon, ShieldCheck, Sparkles, Users } from "lucid
 import { Header } from "@/components/site/Header";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
+import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
+import { InfoTicker } from "@/components/site/InfoTicker";
+import { Reviews } from "@/components/site/Reviews";
+import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { Footer } from "@/components/site/Contact";
 import { ShortForm } from "@/components/site/Forms";
@@ -121,12 +125,12 @@ function DogDaycarePage() {
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
       <main>
-        <section id="top" className="relative overflow-hidden pt-28 pb-14 sm:pt-32 sm:pb-20">
-          <PawTrailBackground />
-          <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
-            <div>
+        <section id="top" className="relative overflow-hidden pt-20 sm:pt-24">
+          <PawTrailBackground landingBottomPaws />
+          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-5 sm:min-h-[535px] sm:gap-8 sm:py-7 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+            <div className="max-w-2xl text-center lg:text-left">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Psia škôlka & denné stráženie</p>
-              <h1 className="mt-3 text-4xl leading-[1.05] text-forest sm:text-5xl lg:text-6xl">
+              <h1 className="mt-3 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px] lg:leading-[1.05]">
                 Psia škôlka a <span className="text-coral-dark">stráženie psov</span> v Košiciach
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-forest/85">
@@ -135,7 +139,7 @@ function DogDaycarePage() {
               <p className="mt-4 max-w-2xl leading-relaxed text-forest/80">
                 Chvostíkovo spája denné stráženie psov s režimom psej škôlky. Psík má počas dňa pohyb, spoločnosť, pokojnejšie chvíle aj oddych – a po celý čas je pod dohľadom ľudí, ktorí poznajú jeho potreby.
               </p>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
+              <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
                 <CtaLink />
                 <span className="rounded-full bg-card px-4 py-2 font-display text-sm font-semibold text-forest shadow-card">
                   Pondelok – piatok · 7:00 – 17:00
@@ -143,15 +147,20 @@ function DogDaycarePage() {
               </div>
             </div>
 
-            <div id="informacie" className="scroll-mt-28 rounded-4xl bg-card p-6 shadow-soft sm:p-8 lg:border lg:border-white/50 lg:bg-card/20 lg:backdrop-blur-[1px]">
+            <div id="informacie" className="mx-auto w-full max-w-md scroll-mt-24 lg:mx-0">
+              <SchoolmatesFormCrown compact />
+              <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
               <h2 className="text-center text-2xl text-forest">Chcete vedieť, či je škôlka vhodná pre vášho psíka?</h2>
               <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
                 Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
               </p>
               <ShortForm trackingSource="dog_sitting_page_inline" />
+              </div>
             </div>
           </div>
         </section>
+
+        <InfoTicker />
 
         <section className="relative overflow-hidden py-14 sm:py-20">
           <SectionAmbientPaws />
@@ -290,6 +299,8 @@ function DogDaycarePage() {
         </section>
 
         <FriendshipFeature />
+        <Reviews />
+        <DaycarePhotoCarousel />
 
         <section className="relative overflow-hidden bg-card py-14 sm:py-20">
           <SectionAmbientPaws />
