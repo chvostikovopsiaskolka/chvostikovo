@@ -36,6 +36,11 @@ try {
   const base = { path: "/", language: "sk", event_source: "application_form", attempt_id: crypto.randomUUID() };
   assert.equal((await send({ ...base, event_name: "form_attempt" })).status, 201);
   assert.equal((await send({ ...base, event_name: "form_submit" })).status, 201);
+  // Field-level analytics: identifiers only, no arbitrary form values.
+  for (const event_name of ["form_field_touch", "form_field_complete", "form_field_invalid", "form_abandon"]) {
+    assert.equal((await send({ path: "/", language: "sk", event_name, event_source: "lead_landing_hero|telefon" })).status, 201);
+    assert.equal((await send({ path: "/", language: "sk", event_name, event_source: "lead_landing_hero|PRIVATE PHONE +421915349028" })).status, 400);
+  }
   assert.equal(emails.length, 0);
   const failed = { ...base, event_name: "form_error", event_source: "application_form:backend_http:500", owner_name: "PRIVATE NAME", phone: "+421915349028" };
   assert.equal((await (await send(failed)).json()).alert_status, "sent");
