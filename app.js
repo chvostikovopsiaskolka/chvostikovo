@@ -1815,23 +1815,24 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const eligible=days.filter(d=>typeof d.date==='string'&&d.date.length===10&&d.date>today
       &&d.bookings_open!==false&&Number(d.available)>0
       &&!bookingFor(dog.id,d.date)&&!bookingDeadlineClosedV95(d.date,dog));
+    // "Minulý týždeň" means the most recent completed Mon–Fri period.
+    // On weekends that is the current ISO week's workdays; otherwise the previous ISO week.
+    const todayDow=new Date(today+'T12:00:00Z').getUTCDay();
+    const lastWorkWeekMonday=smartShiftV199(smartMondayV199(today),(todayDow===0||todayDow===6)?0:-7);
+    const matching=history.filter(r=>smartMondayV199(r.reservation_date)===lastWorkWeekMonday);
+    if(!matching.length)return null;
+    const weekdays=new Set(matching.map(r=>new Date(r.reservation_date+'T12:00:00Z').getUTCDay()));
     const weeks=[...new Set(eligible.map(d=>smartMondayV199(d.date)).filter(Boolean))].sort();
     for(const monday of weeks){
-      // Adding a day to an already booked week is manual; never search an older weekly pattern.
+      // If a week has existing bookings, let the customer add days manually.
       const hasActiveBooking=(state.data?.requests||[]).some(r=>Number(r.dog_id)===Number(dog.id)
         &&['pending','approved'].includes(r.status)&&smartMondayV199(r.reservation_date)===monday)
         ||(state.data?.reservations||[]).some(r=>Number(r.dog_id)===Number(dog.id)
         &&['booked','attended'].includes(r.status)&&smartMondayV199(r.reservation_date)===monday);
       if(hasActiveBooking)return null;
       const target=eligible.filter(d=>smartMondayV199(d.date)===monday);
-      for(let ago=1;ago<=3;ago++){
-        const previous=smartShiftV199(monday,-7*ago);
-        const matching=history.filter(r=>smartMondayV199(r.reservation_date)===previous);
-        if(!matching.length)continue;
-        const weekdays=new Set(matching.map(r=>new Date(r.reservation_date+'T12:00:00Z').getUTCDay()));
-        const dates=target.filter(d=>weekdays.has(new Date(d.date+'T12:00:00Z').getUTCDay())).map(d=>d.date);
-        if(dates.length)return {dates,ago,sourceMonday:previous};
-      }
+      const dates=target.filter(d=>weekdays.has(new Date(d.date+'T12:00:00Z').getUTCDay())).map(d=>d.date);
+      if(dates.length)return {dates};
     }
     return null;
   }
@@ -1849,11 +1850,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     root.classList.toggle('hidden',!suggestion);
     if(!suggestion){root.innerHTML='';return}
     const weekday=['Ne','Po','Ut','St','Št','Pia','So'];
-    const sourceStart=new Date(suggestion.sourceMonday+'T12:00:00Z');
-    const sourceEnd=new Date(smartShiftV199(suggestion.sourceMonday,4)+'T12:00:00Z');
-    const weekText='v týždni '+sourceStart.getUTCDate()+'. '+(sourceStart.getUTCMonth()+1)+'. – '+sourceEnd.getUTCDate()+'. '+(sourceEnd.getUTCMonth()+1)+'.';
-    root.innerHTML='<div class="smart-head-v199"><div><strong>Chcete si rezervovať rovnaké dni ako '
-      +weekText+'?</strong>'
+    root.innerHTML='<div class="smart-head-v199"><div><strong>Chcete si rezervovať rovnaké dni ako minulý týždeň?</strong>'
       +'</div></div>'
       +'<div class="smart-chips-v199" aria-label="Navrhované dni">'
       +suggestion.dates.map(date=>'<span class="smart-chip-v199">'+weekday[new Date(date+'T12:00:00Z').getUTCDay()]+'</span>').join('')+'</div>'
