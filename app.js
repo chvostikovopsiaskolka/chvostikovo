@@ -1791,6 +1791,94 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   let pickerEpochV157=0;
   let pendingPassRenewalV95=null;
 
+  /* v199 – pattern from authenticated bootstrap records, without new requests. */
+  let smartDaysDismissedV199=false;
+  function smartShiftV199(iso,days){
+    const d=new Date(String(iso||'')+'T12:00:00Z');
+    if(!Number.isFinite(d.getTime()))return '';
+    d.setUTCDate(d.getUTCDate()+days);
+    return d.toISOString().slice(0,10);
+  }
+  function smartMondayV199(iso){
+    const d=new Date(String(iso||'')+'T12:00:00Z');
+    if(!Number.isFinite(d.getTime()))return '';
+    const weekday=d.getUTCDay();
+    return smartShiftV199(iso,-(weekday===0?6:weekday-1));
+  }
+  function smartProposalV199(dog,days){
+    if(!dog||!Array.isArray(days))return null;
+    const history=(state.data?.requests||[]).filter(r=>Number(r.dog_id)===Number(dog.id)
+      &&(r.status==='approved'||r.status==='pending')
+      &&typeof r.reservation_date==='string'&&r.reservation_date.length===10);
+    if(!history.length)return null;
+    const today=bratislavaClockV95().date;
+    const eligible=days.filter(d=>typeof d.date==='string'&&d.date.length===10&&d.date>today
+      &&d.bookings_open!==false&&Number(d.available)>0
+      &&!bookingFor(dog.id,d.date)&&!bookingDeadlineClosedV95(d.date,dog));
+    const weeks=[...new Set(eligible.map(d=>smartMondayV199(d.date)).filter(Boolean))].sort();
+    for(const monday of weeks){
+      const target=eligible.filter(d=>smartMondayV199(d.date)===monday);
+      for(let ago=1;ago<=3;ago++){
+        const previous=smartShiftV199(monday,-7*ago);
+        const matching=history.filter(r=>smartMondayV199(r.reservation_date)===previous);
+        if(!matching.length)continue;
+        const weekdays=new Set(matching.map(r=>new Date(r.reservation_date+'T12:00:00Z').getUTCDay()));
+        const dates=target.filter(d=>weekdays.has(new Date(d.date+'T12:00:00Z').getUTCDay())).map(d=>d.date);
+        if(dates.length)return {dates,ago};
+      }
+    }
+    return null;
+  }
+  function ensureSmartStyleV199(){
+    if(document.getElementById('booking-smart-style-v199'))return;
+    const style=document.createElement('style');
+    style.id='booking-smart-style-v199';
+    style.textContent="\n#bookingPickerSmartDaysV199.booking-smart-v199{margin:12px 0 14px;padding:13px;background:#fff9f3;border:1px solid #fed7aa;border-radius:15px;color:#254836}\n#bookingPickerSmartDaysV199 .smart-head-v199{display:flex;align-items:start;gap:8px}\n#bookingPickerSmartDaysV199 .smart-icon-v199{font-size:20px}\n#bookingPickerSmartDaysV199 strong{font-size:14px;line-height:1.35;font-weight:800}\n#bookingPickerSmartDaysV199 p{margin:5px 0 0;color:#60766b;font-size:12px;line-height:1.45}\n#bookingPickerSmartDaysV199 .smart-chips-v199{display:flex;flex-wrap:wrap;gap:6px;margin:11px 0}\n#bookingPickerSmartDaysV199 .smart-chip-v199{padding:7px 11px;border:1px solid #cce3d4;background:#ecf8f0;color:#24553c;border-radius:9px;font-size:12px;font-weight:800}\n#bookingPickerSmartDaysV199 .smart-actions-v199{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}\n#bookingPickerSmartDaysV199 .smart-actions-v199 button{min-height:42px;padding:8px 6px;border-radius:10px;font-size:12px;font-weight:800;line-height:1.3;cursor:pointer}\n#bookingPickerSmartDaysV199 .smart-apply-v199{background:#ea743f;color:white;border:1px solid #de6434}\n#bookingPickerSmartDaysV199 .smart-manual-v199{background:#fff;color:#345044;border:1px solid #dcded6}\n#bookingPickerSmartDaysV199 .smart-actions-v199 button:focus-visible{outline:3px solid #24553c;outline-offset:2px}\n#bookingPickerSmartDaysV199 .smart-footer-v199{font-size:11px;color:#64766a;margin-top:9px}\n@media(max-width:360px){#bookingPickerSmartDaysV199.booking-smart-v199{padding:10px}#bookingPickerSmartDaysV199 .smart-actions-v199{gap:5px}#bookingPickerSmartDaysV199 .smart-actions-v199 button{font-size:11px}}\n";
+    document.head.appendChild(style);
+  }
+  function renderSmartDaysV199(dog,days){
+    const root=$('bookingPickerSmartDaysV199');
+    if(!root)return;
+    const suggestion=smartDaysDismissedV199?null:smartProposalV199(dog,days);
+    root.classList.toggle('hidden',!suggestion);
+    if(!suggestion){root.innerHTML='';return}
+    const weekday=['Ne','Po','Ut','St','Št','Pi','So'];
+    const weekText=suggestion.ago===1?'minulý týždeň':suggestion.ago===2?'pred dvoma týždňami':'pred troma týždňami';
+    root.innerHTML='<div class="smart-head-v199"><span class="smart-icon-v199" aria-hidden="true">🐾</span><div><strong>'
+      +esc(String(dog.name||'Psík'))+' – rovnaké dni ako '+weekText+'?</strong>'
+      +'<p>Návrh podľa predchádzajúcich rezervácií.</p></div></div>'
+      +'<div class="smart-chips-v199" aria-label="Navrhované dni">'
+      +suggestion.dates.map(date=>'<span class="smart-chip-v199">'+weekday[new Date(date+'T12:00:00Z').getUTCDay()]+'</span>').join('')+'</div>'
+      +'<div class="smart-actions-v199"><button type="button" class="smart-apply-v199" data-smart-action="apply">Predvybrať dni</button>'
+      +'<button type="button" class="smart-manual-v199" data-smart-action="manual">Vyberiem sám</button></div>'
+      +'<p class="smart-footer-v199">Dni sa iba označia. Môžete ich upraviť a až potom odoslať rezerváciu.</p>';
+  }
+  async function applySmartDaysV199(){
+    if(submittingV37||checkingRenewalV157)return;
+    const dog=selectedDog(),proposal=smartProposalV199(dog,state.data?.availability?.days||[]);
+    if(!dog||!proposal)return;
+    if(renewalCheckedDogV157!==Number(dog.id)){
+      checkingRenewalV157=true;
+      const epoch=pickerEpochV157;
+      try{
+        const isCurrent=()=>epoch===pickerEpochV157&&!$('bookingPickerV37')?.classList.contains('hidden');
+        const accepted=await offerRecentPassRenewalV157(Number(dog.id),isCurrent);
+        if(!accepted||Number(state.selectedDogId)!==Number(dog.id)||!isCurrent())return;
+        renewalCheckedDogV157=Number(dog.id);
+      }catch(error){pickerErrorV95(error.message||'Nepodarilo sa overiť permanentku.');return}
+      finally{checkingRenewalV157=false}
+    }
+    const fresh=smartProposalV199(dog,state.data?.availability?.days||[]);
+    if(!fresh)return;
+    for(const date of fresh.dates){
+      selectedDatesV37.add(date);
+      if(!selectedTaxiByDateV91.has(date))selectedTaxiByDateV91.set(date,'none');
+    }
+    smartDaysDismissedV199=true;
+    renderPickerV37();
+  }
+
+
   function bratislavaClockV95(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()),m=Object.fromEntries(parts.map(x=>[x.type,x.value]));return{date:m.year+'-'+m.month+'-'+m.day,minutes:Number(m.hour)*60+Number(m.minute)}}
   function previousIsoDayV95(iso){const d=new Date(String(iso)+'T12:00:00Z');d.setUTCDate(d.getUTCDate()-1);return d.toISOString().slice(0,10)}
   function bookingDeadlineClosedV95(date,dog){
@@ -1870,13 +1958,15 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
   function ensurePickerV37(){
     if($('bookingPickerV37'))return;
-    document.body.insertAdjacentHTML('beforeend',`<div id="bookingPickerV37" class="booking-picker-v37 hidden" role="dialog" aria-modal="true" aria-labelledby="bookingPickerTitleV37"><div class="booking-picker-card-v37"><div class="booking-picker-head-v37"><div><small>Rezervácia škôlky</small><h2 id="bookingPickerTitleV37">Vyberte deň alebo dni</h2><p id="bookingPickerRangeV37"></p></div><button id="bookingPickerCloseV37" class="booking-picker-close-v37" type="button" aria-label="Zavrieť">×</button></div><div id="bookingPickerDogWrapV37" class="booking-picker-dog-v37 hidden"><label for="bookingPickerDogV37">Psík</label><select id="bookingPickerDogV37" class="input"></select></div><div id="bookingPickerDaysV37" class="booking-picker-days-v37"></div><div id="bookingPickerTaxiSectionV91" class="booking-picker-taxi-section-v91 hidden"><div class="booking-picker-taxi-title-v37">Taxi podľa vybraného dňa</div><div id="bookingPickerTaxiByDayV91" class="booking-picker-taxi-by-day-v91"></div></div><div id="bookingPickerErrorV95" class="booking-picker-error-v95 hidden"></div><button id="bookingPickerSubmitV37" class="btn full booking-picker-submit-v37" type="button" disabled>Vyberte deň</button></div></div>`);
+    ensureSmartStyleV199();
+    document.body.insertAdjacentHTML('beforeend',`<div id="bookingPickerV37" class="booking-picker-v37 hidden" role="dialog" aria-modal="true" aria-labelledby="bookingPickerTitleV37"><div class="booking-picker-card-v37"><div class="booking-picker-head-v37"><div><small>Rezervácia škôlky</small><h2 id="bookingPickerTitleV37">Vyberte deň alebo dni</h2><p id="bookingPickerRangeV37"></p></div><button id="bookingPickerCloseV37" class="booking-picker-close-v37" type="button" aria-label="Zavrieť">×</button></div><div id="bookingPickerDogWrapV37" class="booking-picker-dog-v37 hidden"><label for="bookingPickerDogV37">Psík</label><select id="bookingPickerDogV37" class="input"></select></div><div id="bookingPickerSmartDaysV199" class="booking-smart-v199 hidden" role="group" aria-label="Opakované dni rezervácie"></div><div id="bookingPickerDaysV37" class="booking-picker-days-v37"></div><div id="bookingPickerTaxiSectionV91" class="booking-picker-taxi-section-v91 hidden"><div class="booking-picker-taxi-title-v37">Taxi podľa vybraného dňa</div><div id="bookingPickerTaxiByDayV91" class="booking-picker-taxi-by-day-v91"></div></div><div id="bookingPickerErrorV95" class="booking-picker-error-v95 hidden"></div><button id="bookingPickerSubmitV37" class="btn full booking-picker-submit-v37" type="button" disabled>Vyberte deň</button></div></div>`);
     $('bookingPickerCloseV37').addEventListener('click',closePickerV37);
     $('bookingPickerV37').addEventListener('click',e=>{if(e.target===$('bookingPickerV37'))closePickerV37()});
     $('bookingPickerDogV37').addEventListener('change',e=>{
       state.selectedDogId=Number(e.target.value);
       selectedDatesV37.clear();
       selectedTaxiByDateV91.clear();
+      smartDaysDismissedV199=false;
       renderDogSelector();
       renderPassSummary();
       renderDog();
@@ -1884,6 +1974,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       renderDays();
       renderPickerV37();
     });
+    $('bookingPickerSmartDaysV199').addEventListener('click',e=>{const button=e.target.closest('[data-smart-action]');if(!button)return;if(button.dataset.smartAction==='manual'){smartDaysDismissedV199=true;renderPickerV37()}else if(button.dataset.smartAction==='apply')void applySmartDaysV199()});
     $('bookingPickerSubmitV37').addEventListener('click',submitPickerV37);
   }
 
@@ -1897,6 +1988,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('bookingPickerRangeV37').textContent=$('weekTitle')?.textContent||'Najbližšie dva týždne';
 
     updateBookingDeadlineNoticeV127();
+    renderSmartDaysV199(dog,days);
     const groups=[];
     for(let start=0;start<days.length;start+=5){
       const week=days.slice(start,start+5);
@@ -1964,7 +2056,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function openPickerV37(){
     pickerEpochV157++;
     const dog=selectedDog();if(dog&&window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(dog)){switchTab('dog');setTimeout(()=>openDogDetails('vaccinations',false),40);toast('Pred rezerváciou doplňte povinné očkovania.');return}
-    selectedDatesV37.clear();selectedTaxiByDateV91.clear();renewalCheckedDogV157=null;pickerErrorV95('');
+    selectedDatesV37.clear();selectedTaxiByDateV91.clear();renewalCheckedDogV157=null;smartDaysDismissedV199=false;pickerErrorV95('');
     renderPickerV37();
     $('bookingPickerV37').classList.remove('hidden');
     document.documentElement.classList.add('booking-picker-open-v37');
