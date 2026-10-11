@@ -1,4 +1,5 @@
 import { currentSourceRef } from "@/lib/tracking-sanitization";
+import { useFormProgress } from "@/lib/form-progress";
 import { useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
@@ -41,6 +42,7 @@ export function ShortForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
+  const progress = useFormProgress(trackingSource || "informational_form");
   const shouldTrackForm = Boolean(trackingSource);
   const isTrackedLanding =
     trackingSource?.startsWith("lead_landing_") === true ||
@@ -56,6 +58,7 @@ export function ShortForm({
     e.preventDefault();
     if (loading) return;
     const form = e.currentTarget;
+    progress.markAttempt();
     const attemptId = startFormAttempt(trackingSource || "informational_form");
     setLoading(true);
     setError(null);
@@ -85,6 +88,7 @@ export function ShortForm({
         });
         trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
       });
+      progress.markSuccess();
       setSent(true);
       runFormTelemetry(() => onSent?.());
     } catch (error) {
@@ -134,7 +138,7 @@ export function ShortForm({
   }
 
   return (
-    <form onSubmit={onSubmit} onChangeCapture={onFormChange} className="space-y-3 text-left sm:space-y-3.5">
+    <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="space-y-3 text-left sm:space-y-3.5">
       <div>
         <label className="label-sm" htmlFor={`s-${formId}-meno`}>
           Meno majiteľa *
@@ -178,6 +182,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
   const trackingSource = "application_form";
+  const progress = useFormProgress(trackingSource);
 
   function onFormChange() {
     if (formStarted.current) return;
@@ -189,6 +194,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
     e.preventDefault();
     if (loading) return;
     const form = e.currentTarget;
+    progress.markAttempt();
     const attemptId = startFormAttempt(trackingSource);
     setLoading(true);
     setError(null);
@@ -225,6 +231,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         });
         trackMetaFormConversion("prihlaska", undefined, submission.metaEventId);
       });
+      progress.markSuccess();
       setSent(true);
       runFormTelemetry(() => onSent?.());
     } catch (error) {
@@ -251,7 +258,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} onChangeCapture={onFormChange} className="space-y-3 text-left sm:space-y-3.5">
+    <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="space-y-3 text-left sm:space-y-3.5">
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
         <div>
           <label className="label-sm" htmlFor={`l-${formId}-meno`}>
