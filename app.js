@@ -1833,7 +1833,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(document.getElementById('booking-smart-style-v199'))return;
     const style=document.createElement('style');
     style.id='booking-smart-style-v199';
-    style.textContent="\n#bookingPickerSmartDaysV199.booking-smart-v199{margin:12px 0 14px;padding:13px;background:#fff9f3;border:1px solid #fed7aa;border-radius:15px;color:#254836}\n#bookingPickerSmartDaysV199 .smart-head-v199{display:flex;align-items:start;gap:8px}\n#bookingPickerSmartDaysV199 .smart-icon-v199{font-size:20px}\n#bookingPickerSmartDaysV199 strong{font-size:14px;line-height:1.35;font-weight:800}\n#bookingPickerSmartDaysV199 p{margin:5px 0 0;color:#60766b;font-size:12px;line-height:1.45}\n#bookingPickerSmartDaysV199 .smart-chips-v199{display:flex;flex-wrap:wrap;gap:6px;margin:11px 0}\n#bookingPickerSmartDaysV199 .smart-chip-v199{padding:7px 11px;border:1px solid #cce3d4;background:#ecf8f0;color:#24553c;border-radius:9px;font-size:12px;font-weight:800}\n#bookingPickerSmartDaysV199 .smart-actions-v199{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}\n#bookingPickerSmartDaysV199 .smart-actions-v199 button{min-height:42px;padding:8px 6px;border-radius:10px;font-size:12px;font-weight:800;line-height:1.3;cursor:pointer}\n#bookingPickerSmartDaysV199 .smart-apply-v199{background:#ea743f;color:white;border:1px solid #de6434}\n#bookingPickerSmartDaysV199 .smart-manual-v199{background:#fff;color:#345044;border:1px solid #dcded6}\n#bookingPickerSmartDaysV199 .smart-actions-v199 button:focus-visible{outline:3px solid #24553c;outline-offset:2px}\n#bookingPickerSmartDaysV199 .smart-footer-v199{font-size:11px;color:#64766a;margin-top:9px}\n@media(max-width:360px){#bookingPickerSmartDaysV199.booking-smart-v199{padding:10px}#bookingPickerSmartDaysV199 .smart-actions-v199{gap:5px}#bookingPickerSmartDaysV199 .smart-actions-v199 button{font-size:11px}}\n";
+    style.textContent="\n#bookingPickerSmartDaysV199.booking-smart-v199{margin:12px 0 14px;padding:13px;background:#fff9f3;border:1px solid #fed7aa;border-radius:15px;color:#254836}\n#bookingPickerSmartDaysV199 .smart-head-v199{display:flex;align-items:start;gap:8px}\n#bookingPickerSmartDaysV199 .smart-icon-v199{font-size:20px}\n#bookingPickerSmartDaysV199 strong{font-size:14px;line-height:1.35;font-weight:800}\n#bookingPickerSmartDaysV199 p{margin:5px 0 0;color:#60766b;font-size:12px;line-height:1.45}\n#bookingPickerSmartDaysV199 .smart-chips-v199{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;justify-content:flex-start}#bookingPickerSmartDaysV199 .smart-chips-v199.smart-centered-v200{justify-content:center}\n#bookingPickerSmartDaysV199 .smart-chip-v199{padding:7px 11px;border:1px solid #cce3d4;background:#ecf8f0;color:#24553c;border-radius:9px;font-size:12px;font-weight:800}\n#bookingPickerSmartDaysV199 .smart-actions-v199{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}\n#bookingPickerSmartDaysV199 .smart-actions-v199 button{min-height:42px;padding:8px 6px;border-radius:10px;font-size:12px;font-weight:800;line-height:1.3;cursor:pointer}\n#bookingPickerSmartDaysV199 .smart-apply-v199{background:#ea743f;color:white;border:1px solid #de6434}\n#bookingPickerSmartDaysV199 .smart-manual-v199{background:#fff;color:#345044;border:1px solid #dcded6}\n#bookingPickerSmartDaysV199 .smart-actions-v199 button:focus-visible{outline:3px solid #24553c;outline-offset:2px}\n#bookingPickerSmartDaysV199 .smart-footer-v199{display:flex;align-items:center;gap:6px;font-size:10px;color:#64766a;margin-top:9px;white-space:nowrap}#bookingPickerSmartDaysV199 .smart-footer-v199:before{content:'';width:7px;height:7px;flex:none;background:#f97316;border-radius:50%}\n@media(max-width:360px){#bookingPickerSmartDaysV199 .smart-footer-v199{font-size:9px;white-space:normal}#bookingPickerSmartDaysV199.booking-smart-v199{padding:10px}#bookingPickerSmartDaysV199 .smart-actions-v199{gap:5px}#bookingPickerSmartDaysV199 .smart-actions-v199 button{font-size:11px}}\n";
     document.head.appendChild(style);
   }
   function renderSmartDaysV199(dog,days){
@@ -1842,16 +1842,17 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const suggestion=smartDaysDismissedV199?null:smartProposalV199(dog,days);
     root.classList.toggle('hidden',!suggestion);
     if(!suggestion){root.innerHTML='';return}
-    const weekday=['Ne','Po','Ut','St','Št','Pi','So'];
+    const weekday=['Ne','Po','Ut','St','Št','Pia','So'];
     const weekText=suggestion.ago===1?'minulý týždeň':suggestion.ago===2?'pred dvoma týždňami':'pred troma týždňami';
     root.innerHTML='<div class="smart-head-v199"><span class="smart-icon-v199" aria-hidden="true">🐾</span><div><strong>'
       +esc(String(dog.name||'Psík'))+' – rovnaké dni ako '+weekText+'?</strong>'
-      +'<p>Návrh podľa predchádzajúcich rezervácií.</p></div></div>'
+      +'</div></div>'
       +'<div class="smart-chips-v199" aria-label="Navrhované dni">'
       +suggestion.dates.map(date=>'<span class="smart-chip-v199">'+weekday[new Date(date+'T12:00:00Z').getUTCDay()]+'</span>').join('')+'</div>'
-      +'<div class="smart-actions-v199"><button type="button" class="smart-apply-v199" data-smart-action="apply">Predvybrať dni</button>'
+      +'<div class="smart-actions-v199"><button type="button" class="smart-apply-v199" data-smart-action="apply">Vybrať dni</button>'
       +'<button type="button" class="smart-manual-v199" data-smart-action="manual">Vyberiem sám</button></div>'
-      +'<p class="smart-footer-v199">Dni sa iba označia. Môžete ich upraviť a až potom odoslať rezerváciu.</p>';
+      +'<p class="smart-footer-v199">Dni sa len označia, rezerváciu odošlete sami.</p>';
+    root.querySelector('.smart-chips-v199')?.classList.toggle('smart-centered-v200',suggestion.dates.length<=2);
   }
   async function applySmartDaysV199(){
     if(submittingV37||checkingRenewalV157)return;
