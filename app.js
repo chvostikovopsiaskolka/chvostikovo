@@ -1976,8 +1976,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     document.head.appendChild(style);
   }
   function allowedTaxiEditV201(row){
-    if(!row||row._legacy||row.can_manage===false||row.status!=='approved'
-       ||!Number(row.id)||!Number(row.reservation_id)||row.taxi_change_status==='pending')return false;
+    if(!row||row.can_manage===false||row.status!=='approved'
+       ||(!row._legacy&&!Number(row.id))||!Number(row.reservation_id)||row.taxi_change_status==='pending')return false;
     if(!['none','pickup'].includes(String(row.taxi_mode||'none')))return false;
     return String(row.reservation_date||'')>bratislavaClockV95().date;
   }
@@ -2024,13 +2024,15 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       }
     });
   }
-  function openTaxiEditV201(requestId){
-    const row=(state.data?.requests||[]).find(r=>Number(r.id)===Number(requestId));
+  function openTaxiEditV201(requestId,reservationId){
+    const row=Number(reservationId)>0
+      ? futureItems().find(r=>r._legacy&&Number(r.reservation_id)===Number(reservationId))
+      : (state.data?.requests||[]).find(r=>Number(r.id)===Number(requestId));
     if(!allowedTaxiEditV201(row)){toast('Taxi sa pri tejto rezervácii nedá doplniť.');return}
     const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(row.dog_id))||selectedDog();
     const clock=bratislavaClockV95(),dayBefore=smartShiftV199(row.reservation_date,-1);
     const taxiTimeExpired=clock.date>dayBefore||(clock.date===dayBefore&&clock.minutes>=21*60);
-    if(bookingDeadlineClosedV95(row.reservation_date,dog)||taxiTimeExpired){
+    if(row._legacy||taxiTimeExpired){
       const text='Dobrý deň, mám záujem o doplnenie taxi pre '+(dog?.name||'psíka')+' na '+skDay(row.reservation_date)+' '+skDate(row.reservation_date)+'. Prosím, dajte mi vedieť, či je to ešte možné.';
       if(typeof window.openCustomerLateBookingMessage==='function')window.openCustomerLateBookingMessage(Number(row.dog_id),row.reservation_date,text,true);
       else {openCustomerChat();toast('Požiadajte nás o doplnenie taxi v správe.');}
@@ -2243,14 +2245,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const sharedNote='';
       const linkedReservation=r.can_manage===false&&r.status==='approved'&&Number(r.reservation_id)>0;
       const cancel=(r.can_manage!==false||linkedReservation)?`<button class="cancel-booking-v37" type="button" aria-label="Zrušiť rezerváciu na ${esc(skDay(r.reservation_date))} ${esc(skDate(r.reservation_date))}" title="Zrušiť rezerváciu" data-request="${r._legacy||linkedReservation?'':r.id||''}" data-reservation="${r._legacy||linkedReservation?r.reservation_id||r.id:''}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M9 13l6 4M15 13l-6 4"/></svg></button>`:'';
-      const taxiEdit=allowedTaxiEditV201(r)?`<button type="button" class="booking-taxi-pencil-v201" data-taxi-request="${Number(r.id)}" title="Doplniť taxi" aria-label="Doplniť taxi na ${esc(skDay(r.reservation_date))} ${esc(skDate(r.reservation_date))}">✎</button>`:'';
+      const taxiEdit=allowedTaxiEditV201(r)?`<button type="button" class="booking-taxi-pencil-v201" data-taxi-request="${r._legacy?'':Number(r.id)}" data-taxi-reservation="${r._legacy?Number(r.reservation_id):''}" title="Doplniť taxi" aria-label="Doplniť taxi na ${esc(skDay(r.reservation_date))} ${esc(skDate(r.reservation_date))}">✎</button>`:'';
       const taxiPending=r.taxi_change_status==='pending'?'<span class="reserved-taxi-v37">🚕 Taxi čaká na schválenie</span>':'';
       const detail=(pending&&passState)||taxi||taxiPending?`<div class="reserved-day-detail-v37${pending?' reserved-day-detail-pending-v37':''}">${pending?passState:''}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}${taxiPending}</div>`:'';
       const approvedRoster=pending?'':`<div class="reserved-day-meta-v37">${bookingRosterV37(day,dog,passState)}</div>`;
       return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div class="reserved-day-date-v37"><strong>${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><div class="reserved-day-controls-v37"><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span>${taxiEdit}${cancel}</div></div>${approvedRoster}${detail}${sharedNote}${note}</div>`;
     }).join('');
     root.querySelectorAll('.cancel-booking-v37').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();cancelBooking(btn)}));
-    root.querySelectorAll('[data-taxi-request]').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();openTaxiEditV201(btn.dataset.taxiRequest)}));
+    root.querySelectorAll('[data-taxi-request]').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();openTaxiEditV201(btn.dataset.taxiRequest,btn.dataset.taxiReservation)}));
   };
 
   function startV37(){
