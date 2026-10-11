@@ -148,6 +148,14 @@ export function buildDbPayload(data: InquiryData) {
       : data.viac || "",
     consent: true,
     source_ref,
+    landing_page: data.landing_page || "",
+    referrer: data.referrer || "",
+    traffic_source: data.traffic_source || "",
+    traffic_medium: data.traffic_medium || "",
+    utm_campaign: data.utm_campaign || "",
+    utm_term: data.utm_term || "",
+    utm_content: data.utm_content || "",
+    cta_source: data.cta_source || "",
     raw_payload,
   };
 }

@@ -101,7 +101,13 @@ export function captureTrafficAttribution() {
     if (typeof window === "undefined") return;
     const stored = window.sessionStorage.getItem(STORAGE_KEY);
     let attribution = currentAttribution();
-    if (stored) {
+    // A new ad click/UTM-tagged entry in the same browser tab must override
+    // stale direct attribution captured earlier in the session. Retain the
+    // previous landing attribution only for subsequent internal navigation.
+    const params = new URLSearchParams(window.location.search);
+    const hasNewAttribution = params.has("fbclid") ||
+      ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "utm_id"].some((key) => params.has(key));
+    if (stored && !hasNewAttribution) {
       try { attribution = cleanAttribution(JSON.parse(stored)); } catch { /* Replace corrupt storage. */ }
     }
     // Also remove old fbclid URLs already stored by previous builds.
