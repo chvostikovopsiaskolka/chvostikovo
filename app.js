@@ -1978,9 +1978,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(!row||row._legacy||row.can_manage===false||row.status!=='approved'
        ||!Number(row.id)||!Number(row.reservation_id)||row.taxi_change_status==='pending')return false;
     if(!['none','pickup'].includes(String(row.taxi_mode||'none')))return false;
-    if(String(row.reservation_date||'')<=bratislavaClockV95().date)return false;
-    const dayBefore=smartShiftV199(row.reservation_date,-1),clock=bratislavaClockV95();
-    return clock.date<dayBefore||(clock.date===dayBefore&&clock.minutes<21*60);
+    return String(row.reservation_date||'')>bratislavaClockV95().date;
   }
   function ensureTaxiEditV201(){
     if($('bookingTaxiEditV201'))return;
@@ -2028,6 +2026,15 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function openTaxiEditV201(requestId){
     const row=(state.data?.requests||[]).find(r=>Number(r.id)===Number(requestId));
     if(!allowedTaxiEditV201(row)){toast('Taxi sa pri tejto rezervácii nedá doplniť.');return}
+    const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(row.dog_id))||selectedDog();
+    const clock=bratislavaClockV95(),dayBefore=smartShiftV199(row.reservation_date,-1);
+    const taxiTimeExpired=clock.date>dayBefore||(clock.date===dayBefore&&clock.minutes>=21*60);
+    if(bookingDeadlineClosedV95(row.reservation_date,dog)||taxiTimeExpired){
+      const text='Dobrý deň, mám záujem o doplnenie taxi pre '+(dog?.name||'psíka')+' na '+skDay(row.reservation_date)+' '+skDate(row.reservation_date)+'. Prosím, dajte mi vedieť, či je to ešte možné.';
+      if(typeof window.openCustomerLateBookingMessage==='function')window.openCustomerLateBookingMessage(Number(row.dog_id),row.reservation_date,text,true);
+      else {openCustomerChat();toast('Požiadajte nás o doplnenie taxi v správe.');}
+      return;
+    }
     ensureTaxiEditV201();
     taxiEditRequestV201=Number(row.id);taxiEditSelectionV201='';
     $('taxiEditDateV201').textContent=skDay(row.reservation_date)+' '+skDate(row.reservation_date);
