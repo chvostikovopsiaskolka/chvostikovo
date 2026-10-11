@@ -9,6 +9,10 @@ export type CookielessInteractionName =
   | "form_attempt"
   | "form_submit"
   | "form_error"
+  | "form_field_touch"
+  | "form_field_complete"
+  | "form_field_invalid"
+  | "form_abandon"
   | "success_conditions_click"
   | "success_pricing_click";
 
