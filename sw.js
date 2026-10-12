@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261012-l4-keyboard-v212';
+const CACHE='chvostikovo-portal-shell-20261012-inline-l4-v213';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/terms-pdf.js?v=20261012-l4-keyboard-v212','/terms-pdf-font.js?v=20261012-l4-keyboard-v212','/styles.css?v=20261012-l4-keyboard-v212','/app.js?v=20261012-l4-keyboard-v212','/back-swipe.js?v=20261012-l4-keyboard-v212'];
+const SHELL=['/','/terms-pdf.js?v=20261012-inline-l4-v213','/terms-pdf-font.js?v=20261012-inline-l4-v213','/styles.css?v=20261012-inline-l4-v213','/app.js?v=20261012-inline-l4-v213','/back-swipe.js?v=20261012-inline-l4-v213'];
 
 function withPortalCsp(response){
   if(!response)return response;
