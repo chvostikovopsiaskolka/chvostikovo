@@ -13,14 +13,14 @@ export function ContactRevealButton({
     <button
       type="button"
       onClick={onClick}
-      className="btn-coral mx-auto flex w-full max-w-sm flex-col items-center justify-center gap-1 px-5 py-3.5 text-center"
+      className="btn-coral mx-auto flex w-full max-w-sm flex-col items-center justify-center gap-1 px-4 py-3.5 text-center"
       aria-label={language === "en" ? "Open the no-obligation enquiry form" : "Otvoriť nezáväzný kontaktný formulár"}
     >
       <span className="font-display text-base font-bold">
         {language === "en" ? "Enquire about daycare" : "Chcem sa informovať"}
       </span>
-      <span className="text-xs font-medium leading-snug text-white/90">
-        {language === "en" ? "Opens a short, no-obligation form" : "Otvorí sa krátky nezáväzný formulár"}
+      <span className="whitespace-nowrap text-[10px] font-medium leading-tight text-white/90 min-[380px]:text-[11px] sm:text-xs">
+        {language === "en" ? "Tap to open a short form" : "Po stlačení sa otvorí krátky formulár"}
       </span>
     </button>
   );

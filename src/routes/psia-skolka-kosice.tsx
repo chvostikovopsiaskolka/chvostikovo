@@ -4,8 +4,6 @@ import {
   ArrowDown,
   Car,
   CheckCircle2,
-  Clock3,
-  MapPin,
   PawPrint,
   ShieldCheck,
 } from "lucide-react";
@@ -19,6 +17,7 @@ import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
+import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { FAQ, PRICING } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
@@ -91,15 +90,6 @@ function scrollToBenefits(source: string) {
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
 }
 
-function LeadPracticalInfo() {
-  return (
-    <div className="mt-5 flex flex-wrap justify-center gap-3 text-[12px] font-semibold sm:text-sm lg:justify-start">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-coral px-3 py-2 text-white shadow-card"><MapPin className="size-4 shrink-0 text-white" /> Poľská 6, Košice</span>
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-coral px-3 py-2 text-white shadow-card"><Clock3 className="size-4 shrink-0 text-white" /> Po–Pia 7:00–17:00</span>
-    </div>
-  );
-}
-
 function LeadLandingPage() {
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
@@ -119,7 +109,7 @@ function LeadLandingPage() {
         <section className="relative overflow-hidden pt-20 sm:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 pt-0 pb-3 sm:min-h-[535px] sm:pb-4 sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
@@ -153,7 +143,7 @@ function LeadLandingPage() {
                 Zistiť viac
                 <ArrowDown className="size-5" />
               </button>
-              <LeadPracticalInfo />
+              <LandingPracticalInfo />
 
 
             </div>

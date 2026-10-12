@@ -49,7 +49,7 @@ export function EnglishContact({ onEnquire }: { onEnquire?: () => void } = {}) {
           {onEnquire ? (
             <button type="button" onClick={onEnquire} className="btn-coral mx-auto block w-full max-w-sm px-5 py-3 text-center font-bold">
               Enquire about daycare
-              <span className="mt-1 block text-xs font-medium text-white/90">Opens a short, no-obligation form</span>
+              <span className="mt-1 block whitespace-nowrap text-[10px] font-medium leading-tight text-white/90 min-[380px]:text-[11px] sm:text-xs">Tap to open a short form</span>
             </button>
           ) : (
             <EnglishInquiryForm trackingSource="en_contact" />

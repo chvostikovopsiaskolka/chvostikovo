@@ -19,6 +19,7 @@ import { EnglishInquiryForm } from "@/components/site/EnglishInquiryForm";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
+import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
 import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { Collapse } from "@/components/site/Collapse";
@@ -556,8 +557,8 @@ function EnglishDogDaycarePage() {
                 Learn more
                 <ArrowRight className="size-5" />
               </button>
-
-              <InfoTicker language="en" className="mt-3 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-4" compact />
+              <LandingPracticalInfo language="en" />
+              <InfoTicker language="en" className="mt-0 mb-0 w-screen mx-[calc((100%-100vw)/2)]" compact />
             </div>
 
             <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
@@ -611,6 +612,7 @@ function EnglishDogDaycarePage() {
                     <ArrowRight className="size-4" />
                   </button>
                 </div>
+                <LandingPracticalInfo language="en" className="order-6" />
               </div>
 
               <div className="min-w-0">

@@ -14,6 +14,7 @@ import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
+import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { ShortForm } from "@/components/site/Forms";
 import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
@@ -163,7 +164,7 @@ function PuppyDaycarePage() {
         <section className="relative overflow-hidden pt-20 sm:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto grid min-h-[450px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative z-10 mx-auto grid min-h-[450px] max-w-6xl items-center gap-5 px-4 pt-0 pb-3 sm:min-h-[540px] sm:pb-4 sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <p className="font-display text-[10px] font-bold uppercase tracking-[0.13em] text-coral-dark sm:text-sm sm:tracking-[0.16em]">
                 Psia škôlka pre šteniatka v Košiciach
@@ -198,7 +199,7 @@ function PuppyDaycarePage() {
                 Zistiť viac
                 <ArrowDown className="size-5" />
               </button>
-
+              <LandingPracticalInfo />
             </div>
 
             <div className="mx-auto hidden w-full max-w-md lg:mx-0 lg:block">
