@@ -10,7 +10,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { ShortForm } from "@/components/site/Forms";
-import { FormDialog } from "@/components/site/FormDialog";
+import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
@@ -93,9 +93,9 @@ function scrollToBenefits(source: string) {
 
 function LeadPracticalInfo() {
   return (
-    <div className="mt-4 flex flex-wrap justify-center gap-2 border-t border-forest/10 pt-3 text-center text-[11px] font-semibold text-forest/75 sm:text-xs">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-coral/10 px-3 py-2"><MapPin className="size-3.5 shrink-0 text-coral-dark" /> Poľská 6, Košice</span>
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-coral/10 px-3 py-2"><Clock3 className="size-3.5 shrink-0 text-coral-dark" /> Po–Pia 7:00–17:00</span>
+    <div className="mt-5 flex flex-wrap justify-center gap-3 text-[12px] font-semibold sm:text-sm lg:justify-start">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-coral px-3 py-2 text-white shadow-card"><MapPin className="size-4 shrink-0 text-white" /> Poľská 6, Košice</span>
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-coral px-3 py-2 text-white shadow-card"><Clock3 className="size-4 shrink-0 text-white" /> Po–Pia 7:00–17:00</span>
     </div>
   );
 }
@@ -119,7 +119,7 @@ function LeadLandingPage() {
         <section className="relative overflow-hidden pt-20 sm:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto grid min-h-[clamp(500px,72svh,640px)] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
@@ -153,6 +153,7 @@ function LeadLandingPage() {
                 Zistiť viac
                 <ArrowDown className="size-5" />
               </button>
+              <LeadPracticalInfo />
 
 
             </div>
@@ -161,35 +162,35 @@ function LeadLandingPage() {
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
                 <p className="text-center font-display text-2xl font-bold text-forest">
-                  Doprajte svojmu psíkovi deň plný hier a kamarátov
+                  Chcete sa dozvedieť viac o škôlke?
                 </p>
                 <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/65">
-                  Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
+                  Radi vám odpovieme na otázky o škôlke.
                 </p>
-                <ShortForm trackingSource="lead_landing_top" />
-                <LeadPracticalInfo />
+                <ContactRevealButton onClick={() => openLeadModal("lead_landing_top")} />
+                
               </div>
             </div>
           </div>
         </section>
+
+        <InfoTicker />
 
         <section className="bg-card px-4 pt-2 pb-5 sm:pt-4 sm:pb-7 lg:hidden">
           <SchoolmatesFormCrown />
           <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-3.5 pt-12 pb-3.5 shadow-card ring-1 ring-forest/8 sm:px-5 sm:pt-14 sm:pb-5">
             <div className="mb-4 text-center">
               <p className="font-display text-xl font-bold text-forest">
-                Doprajte svojmu psíkovi deň plný hier a kamarátov
+                Chcete sa dozvedieť viac o škôlke?
               </p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
-                Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
+                Radi vám odpovieme na otázky o škôlke.
               </p>
             </div>
-            <ShortForm trackingSource="lead_landing_mobile_below_hero" />
-            <LeadPracticalInfo />
+            <ContactRevealButton onClick={() => openLeadModal("lead_landing_mobile_below_hero")} />
+            
           </div>
         </section>
-
-        <InfoTicker />
 
         <section className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
@@ -218,7 +219,7 @@ function LeadLandingPage() {
               onClick={() => openLeadModal("lead_landing_benefits")}
               className="btn-coral mt-7 inline-flex min-w-[270px] justify-center px-7 py-3.5 text-[15px] sm:min-w-[330px] sm:text-lg"
             >
-              Chcem to pre svojho psíka
+              Toto hľadám pre svojho psíka
             </button>
           </div>
         </section>
@@ -353,12 +354,12 @@ function LeadLandingPage() {
               <div className="mx-auto max-w-2xl text-center">
                 <h2 className="section-title text-3xl sm:text-4xl">Chcete to dopriať aj svojmu psíkovi?</h2>
                 <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
-                  Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
+                  Radi vám odpovieme na otázky o škôlke.
                 </p>
               </div>
 
               <div className="mx-auto mt-6 max-w-md rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <ShortForm trackingSource="lead_landing_bottom" />
+                <ContactRevealButton onClick={() => openLeadModal("lead_landing_bottom")} />
               </div>
             </div>
           </div>
@@ -370,8 +371,8 @@ function LeadLandingPage() {
       <FormDialog
         open={leadModalOpen}
         onOpenChange={setLeadModalOpen}
-        title="Doprajte svojmu psíkovi deň plný hier a kamarátov"
-        subtitle="Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu."
+        title="Chcete sa dozvedieť viac o škôlke?"
+        subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
       >
         <ShortForm trackingSource={leadModalSource} />
       </FormDialog>

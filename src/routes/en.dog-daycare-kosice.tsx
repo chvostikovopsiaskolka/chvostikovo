@@ -19,7 +19,7 @@ import { EnglishInquiryForm } from "@/components/site/EnglishInquiryForm";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
-import { FormDialog } from "@/components/site/FormDialog";
+import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { Collapse } from "@/components/site/Collapse";
 import { InfoTicker } from "@/components/site/InfoTicker";
@@ -491,6 +491,17 @@ function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
 function EnglishDogDaycarePage() {
   const [inquiryOpen, setInquiryOpen] = useState(false);
 
+  const exploreDaycare = (source: string) => {
+    trackMarketingInteraction("explore_daycare", source);
+    const target = document.getElementById("en-benefits");
+    if (!target) return;
+    const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 64;
+    window.scrollTo({
+      top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - headerHeight - 8),
+      behavior: "smooth",
+    });
+  };
+
   const openInquiry = (source: string) => {
     trackMarketingInteraction("inquiry_cta", source);
     setInquiryOpen(true);
@@ -539,10 +550,10 @@ function EnglishDogDaycarePage() {
 
               <button
                 type="button"
-                onClick={() => openInquiry("en_hero_mobile")}
+                onClick={() => exploreDaycare("en_hero_mobile")}
                 className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
               >
-                Enquire about daycare
+                Learn more
                 <ArrowRight className="size-5" />
               </button>
 
@@ -593,10 +604,10 @@ function EnglishDogDaycarePage() {
                   </a>
                   <button
                     type="button"
-                    onClick={() => openInquiry("en_hero_desktop_cta")}
+                    onClick={() => exploreDaycare("en_hero_desktop_cta")}
                     className="btn-coral inline-flex min-w-44 items-center justify-center gap-2 px-5 py-2.5 text-sm"
                   >
-                    Enquire about daycare
+                    Learn more
                     <ArrowRight className="size-4" />
                   </button>
                 </div>
@@ -605,14 +616,23 @@ function EnglishDogDaycarePage() {
               <div className="min-w-0">
                 <SchoolmatesFormCrown compact />
                 <div className="rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
-                  <h2 className="text-center text-2xl text-forest">Enquire about daycare</h2>
+                  <h2 className="text-center text-2xl text-forest">Want to know more about daycare?</h2>
                   <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-                    Leave your contact details. We will get in touch and happily answer your questions.
+                    We are happy to answer your questions.
                   </p>
-                  <EnglishInquiryForm trackingSource="en_hero_desktop" />
+                  <ContactRevealButton language="en" onClick={() => openInquiry("en_hero_desktop")} />
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="bg-card px-4 pt-2 pb-5 lg:hidden">
+          <SchoolmatesFormCrown />
+          <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-4 pb-5 pt-12 text-center shadow-card ring-1 ring-forest/8">
+            <h2 className="font-display text-xl font-bold text-forest">Want to know more about daycare?</h2>
+            <p className="mx-auto mb-4 mt-2 text-sm leading-relaxed text-forest/70">We are happy to answer your questions.</p>
+            <ContactRevealButton language="en" onClick={() => openInquiry("en_hero_mobile_form")} />
           </div>
         </section>
 
@@ -620,7 +640,7 @@ function EnglishDogDaycarePage() {
           <InfoTicker language="en" />
         </div>
 
-        <section className="relative overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0">
+        <section id="en-benefits" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0">
           <SectionAmbientPaws tone="dark" />
           <div className="relative z-10 mx-auto max-w-6xl px-4">
             <h2 className="text-center font-display text-3xl text-cream sm:text-4xl">
@@ -654,7 +674,7 @@ function EnglishDogDaycarePage() {
                 onClick={() => openInquiry("en_why_chvostikovo")}
                 className="btn-coral inline-flex items-center justify-center px-6 py-3 text-center"
               >
-                This sounds right for my dog
+                This is what I'm looking for
               </button>
             </div>
 
@@ -695,9 +715,9 @@ function EnglishDogDaycarePage() {
             <div className="rounded-4xl bg-secondary/70 p-6 shadow-soft ring-1 ring-coral/15 sm:p-8">
               <h2 className="text-center text-2xl text-forest">Want to know if daycare is right for your dog?</h2>
               <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
-                Leave your contact details. We will get in touch, talk about your dog and answer your questions. If you are interested, we will arrange a free introductory visit.
+                Fill in a short, no-obligation enquiry. We will be in touch.
               </p>
-              <EnglishInquiryForm trackingSource="en_care_inline_mobile" />
+              <ContactRevealButton language="en" onClick={() => openInquiry("en_care_inline_mobile")} />
             </div>
           </div>
         </section>
@@ -898,7 +918,7 @@ function EnglishDogDaycarePage() {
 
         <About language="en" />
         <PhotoStrip />
-        <EnglishContact />
+        <EnglishContact onEnquire={() => openInquiry("en_contact")} />
       </main>
 
       <Footer language="en" />
@@ -907,7 +927,7 @@ function EnglishDogDaycarePage() {
         open={inquiryOpen}
         onOpenChange={setInquiryOpen}
         title="Enquire about dog daycare"
-        subtitle="Leave your contact details. We will get in touch, talk about your dog and answer your questions. If you are interested, we will arrange a free introductory visit."
+        subtitle="Fill in the short, no-obligation form. We will be in touch."
       >
         <EnglishInquiryForm trackingSource="en_modal" />
       </FormDialog>

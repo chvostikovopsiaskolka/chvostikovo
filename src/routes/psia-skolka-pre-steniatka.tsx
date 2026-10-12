@@ -16,7 +16,7 @@ import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { ShortForm } from "@/components/site/Forms";
-import { FormDialog } from "@/components/site/FormDialog";
+import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
 import { Reviews } from "@/components/site/Reviews";
 import { REVIEWS } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -163,7 +163,7 @@ function PuppyDaycarePage() {
         <section className="relative overflow-hidden pt-20 sm:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto grid min-h-[clamp(510px,73svh,660px)] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative z-10 mx-auto grid min-h-[450px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <p className="font-display text-[10px] font-bold uppercase tracking-[0.13em] text-coral-dark sm:text-sm sm:tracking-[0.16em]">
                 Psia škôlka pre šteniatka v Košiciach
@@ -205,31 +205,31 @@ function PuppyDaycarePage() {
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
                 <p className="text-center font-display text-2xl font-bold text-forest">
-                  Je Chvostíkovo vhodné pre vaše šteniatko?
+                  Chcete sa dozvedieť viac o škôlke pre šteniatko?
                 </p>
                 <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/65">
-                  Nechajte nám kontakt. Prejdeme si detaily prihlásenia, odpovieme na vaše otázky a dohodneme ďalší postup.
+                  Radi vám odpovieme na otázky o škôlke pre šteniatka.
                 </p>
-                <PuppyForm source="puppy_landing_top" />
+                <ContactRevealButton onClick={() => openForm("puppy_landing_top")} />
               </div>
             </div>
           </div>
         </section>
 
+        <InfoTicker />
+
         <section className="bg-card px-4 pt-2 pb-6 lg:hidden">
           <SchoolmatesFormCrown />
           <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-4 pt-12 pb-4 shadow-card ring-1 ring-forest/8 sm:pt-14">
             <div className="mb-4 text-center">
-              <p className="font-display text-xl font-bold text-forest">Chcete sa informovať o škôlke pre šteniatko?</p>
+              <p className="font-display text-xl font-bold text-forest">Chcete sa dozvedieť viac o škôlke pre šteniatko?</p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
-                Nechajte nám kontakt. Prejdeme si detaily prihlásenia, odpovieme na vaše otázky a dohodneme ďalší postup.
+                Radi vám odpovieme na otázky o škôlke pre šteniatka.
               </p>
             </div>
-            <PuppyForm source="puppy_landing_mobile_below_hero" />
+            <ContactRevealButton onClick={() => openForm("puppy_landing_mobile_below_hero")} />
           </div>
         </section>
-
-        <InfoTicker />
 
         <section id="puppy-benefits" className="relative scroll-mt-20 overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
@@ -265,7 +265,7 @@ function PuppyDaycarePage() {
               onClick={() => openForm("puppy_landing_benefits")}
               className="btn-coral mt-7 inline-flex min-w-[270px] justify-center px-7 py-3.5 text-[15px] sm:min-w-[330px] sm:text-lg"
             >
-              Chcem sa informovať o škôlke
+              Toto hľadám pre svojho psíka
             </button>
           </div>
         </section>
@@ -351,14 +351,13 @@ function PuppyDaycarePage() {
                   Je už vaše šteniatko pripravené na škôlku?
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
-                  Nechajte nám kontakt. Prejdeme si detaily prihlásenia, odpovieme na vaše otázky a dohodneme ďalší postup.
+                  Radi vám odpovieme na otázky o škôlke pre šteniatka.
                 </p>
               </div>
 
-              <PuppyForm
-                source="puppy_landing_bottom"
-                className="mx-auto mt-6 max-w-md rounded-3xl bg-card p-5 shadow-card sm:p-6"
-              />
+              <div className="mx-auto mt-6 max-w-md rounded-3xl bg-card p-5 shadow-card sm:p-6">
+                <ContactRevealButton onClick={() => openForm("puppy_landing_bottom")} />
+              </div>
             </div>
           </div>
         </section>
@@ -369,8 +368,8 @@ function PuppyDaycarePage() {
       <FormDialog
         open={formOpen}
         onOpenChange={setFormOpen}
-        title="Je Chvostíkovo vhodné pre vaše šteniatko?"
-        subtitle="Nechajte nám kontakt. Prejdeme si detaily prihlásenia, odpovieme na vaše otázky a dohodneme ďalší postup."
+        title="Chcete sa dozvedieť viac o škôlke pre šteniatko?"
+        subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
       >
         <PuppyForm source={formSource} />
       </FormDialog>

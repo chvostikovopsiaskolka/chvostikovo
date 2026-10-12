@@ -1,6 +1,31 @@
 import type { ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+/** Visual contact CTA; inputs are only mounted in the existing open FormDialog. */
+export function ContactRevealButton({
+  onClick,
+  language = "sk",
+}: {
+  onClick: () => void;
+  language?: "sk" | "en";
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="btn-coral mx-auto flex w-full max-w-sm flex-col items-center justify-center gap-1 px-5 py-3.5 text-center"
+      aria-label={language === "en" ? "Open the no-obligation enquiry form" : "Otvoriť nezáväzný kontaktný formulár"}
+    >
+      <span className="font-display text-base font-bold">
+        {language === "en" ? "Enquire about daycare" : "Chcem sa informovať"}
+      </span>
+      <span className="text-xs font-medium leading-snug text-white/90">
+        {language === "en" ? "Opens a short, no-obligation form" : "Otvorí sa krátky nezáväzný formulár"}
+      </span>
+    </button>
+  );
+}
+
 export function FormDialog({
   open,
   onOpenChange,

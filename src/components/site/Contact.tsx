@@ -31,7 +31,7 @@ export function Contact() {
   );
 }
 
-export function EnglishContact() {
+export function EnglishContact({ onEnquire }: { onEnquire?: () => void } = {}) {
   return (
     <section id="contact" className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
       <SectionAmbientPaws />
@@ -46,7 +46,14 @@ export function EnglishContact() {
         </div>
 
         <div className="mt-8 rounded-4xl bg-card p-6 shadow-soft sm:p-9">
-          <EnglishInquiryForm trackingSource="en_contact" />
+          {onEnquire ? (
+            <button type="button" onClick={onEnquire} className="btn-coral mx-auto block w-full max-w-sm px-5 py-3 text-center font-bold">
+              Enquire about daycare
+              <span className="mt-1 block text-xs font-medium text-white/90">Opens a short, no-obligation form</span>
+            </button>
+          ) : (
+            <EnglishInquiryForm trackingSource="en_contact" />
+          )}
         </div>
 
       </div>
