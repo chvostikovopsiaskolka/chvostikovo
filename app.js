@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261012-l4-push-v216';
-const APP_VERSION='1.0.61';
+const APP_BUILD='20261012-reminder-photo-l4-v218';
+const APP_VERSION='1.0.62';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -200,6 +200,17 @@ function taxiLabel(mode){if(mode==='pickup')return'🚕 vyzdvihnutie/odvoz';if(m
 function selectedDog(){const dogs=state.data?.dogs||[];return dogs.find(d=>Number(d.id)===Number(state.selectedDogId))||dogs[0]||null}
 function dogName(id){return (state.data?.dogs||[]).find(d=>Number(d.id)===Number(id))?.name||'Psík'}
 
+// Keep a decoded/cached photo in the DOM; only reveal new images after they load.
+function stabilizeDogVisualV218(root){
+  if(!root)return;
+  root.querySelectorAll('img').forEach(img=>{
+    if(img.dataset.photoBoundV218==='1')return;
+    img.dataset.photoBoundV218='1';
+    const ready=()=>img.classList.add('photo-ready-v218');
+    if(img.complete&&img.naturalWidth>0)ready();
+    else img.addEventListener('load',ready,{once:true});
+  });
+}
 async function preloadDogVisualV56(data=state.data){
   const dogs=data?.dogs||[];
   const dog=dogs.find(d=>Number(d.id)===Number(state.selectedDogId))||dogs[0]||null;
@@ -571,7 +582,11 @@ function renderDogProfilePrompt(){for(const id of ['bookingNotice','dogStatus'])
 function renderDetailsPhoto(dog=selectedDog()){
   const preview=$('dogDetailsPhotoPreview'),button=$('dogDetailsPhotoButton');
   if(!preview||!button)return;
-  preview.innerHTML=dog?.photo_url?`<img src="${esc(dog.photo_url)}" alt="Fotka psíka">`:'🐾';
+  const photoKey=[dog?.id,dog?.photo_path,dog?.photo_updated_at,dog?.name,dog?.sex].join('|');
+  if(preview.dataset.photoKeyV218!==photoKey){
+    preview.innerHTML=dog?.photo_url?`<img src="${esc(dog.photo_url)}" alt="Fotka psíka">`:'🐾';
+    preview.dataset.photoKeyV218=photoKey;
+  }
   preview.className='dog-details-photo-preview '+dogSexClassV100(dog);
   $('dogDetailsPhotoControl').className='dog-details-photo-control '+dogSexClassV100(dog);
   button.setAttribute('aria-label',dog?.photo_url?'Upraviť, zmeniť alebo zmazať fotku':'Pridať fotku');
@@ -600,7 +615,7 @@ function renderDogHeaderV56(dog){
     $('dogMenuOpenV99')?.addEventListener('click',()=>window.openCustomerSettingsV102?.());
   }
 }
-function renderDogCore(){ensureDogFormInModalV51();const dog=selectedDog();if(!dog){$('dogProfilePhoto').innerHTML='';$('dogProfilePhoto').removeAttribute('data-dog-visual-key');$('dogProfileSettings').innerHTML='';$('dogStats').innerHTML=box('info','Psíka najprv priradí Chvostíkovo k vášmu účtu.');$('dogForm').classList.add('hidden');renderDogProfilePrompt();return}$('dogForm').classList.remove('hidden');state.selectedDogId=Number(dog.id);renderDogHeaderV56(dog);renderDetailsPhoto(dog);const cachedPush=state.pushChecked?!!state.pushEnabled:(typeof Notification!=='undefined'&&Notification.permission==='granted'&&localStorage.getItem('chvostikovo_push_enabled')==='1');$('dogProfileSettings').innerHTML=`<div class="card profile-settings"><div class="privacy-row"><div><strong>Upozornenia</strong><small>Rezervácie, správy a oznamy z Chvostíkova.</small></div><button id="pushToggle" class="push-switch syncing ${cachedPush?'active':''}" type="button" aria-label="Upozornenia"><span></span></button></div><div class="privacy-row"><div><strong>Zobraziť meno psa a fotku ostatným</strong><small>Súhlas môžete kedykoľvek vypnúť.</small></div><button id="privacyToggle" class="push-switch ${dog.share_name_photo?'active':''}" type="button" aria-label="Zdieľanie"><span></span></button></div></div>`;$('pushToggle').addEventListener('click',togglePush);$('privacyToggle').addEventListener('click',togglePrivacy);applyPushToggle();$('dogStats').innerHTML='';fillDogForm(dog);renderDogProfilePrompt()}
+function renderDogCore(){ensureDogFormInModalV51();const dog=selectedDog();if(!dog){$('dogProfilePhoto').innerHTML='';$('dogProfilePhoto').removeAttribute('data-dog-visual-key');$('dogProfileSettings').innerHTML='';$('dogStats').innerHTML=box('info','Psíka najprv priradí Chvostíkovo k vášmu účtu.');$('dogForm').classList.add('hidden');renderDogProfilePrompt();return}$('dogForm').classList.remove('hidden');state.selectedDogId=Number(dog.id);renderDogHeaderV56(dog);renderDetailsPhoto(dog);stabilizeDogVisualV218($('dogProfilePhoto'));stabilizeDogVisualV218($('dogDetailsPhotoPreview'));const cachedPush=state.pushChecked?!!state.pushEnabled:(typeof Notification!=='undefined'&&Notification.permission==='granted'&&localStorage.getItem('chvostikovo_push_enabled')==='1');$('dogProfileSettings').innerHTML=`<div class="card profile-settings"><div class="privacy-row"><div><strong>Upozornenia</strong><small>Rezervácie, správy a oznamy z Chvostíkova.</small></div><button id="pushToggle" class="push-switch syncing ${cachedPush?'active':''}" type="button" aria-label="Upozornenia"><span></span></button></div><div class="privacy-row"><div><strong>Zobraziť meno psa a fotku ostatným</strong><small>Súhlas môžete kedykoľvek vypnúť.</small></div><button id="privacyToggle" class="push-switch ${dog.share_name_photo?'active':''}" type="button" aria-label="Zdieľanie"><span></span></button></div></div>`;$('pushToggle').addEventListener('click',togglePush);$('privacyToggle').addEventListener('click',togglePrivacy);applyPushToggle();$('dogStats').innerHTML='';fillDogForm(dog);renderDogProfilePrompt()}
 function renderDog(){const out=renderDogCore();runCustomerHooks('afterRenderDog',out);return out}
 function dogCareFields(d){return {allergies:String(d?.allergies||''),temperament:String(d?.temperament||'')}}
 function dogBreedWeightValueV124(d){
@@ -1809,6 +1824,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       avatar.innerHTML=dog.photo_url?'<img src="'+esc(dog.photo_url)+'" alt="">':'🐾';
       avatar.dataset.photoKey=photoKey;
     }
+    stabilizeDogVisualV218(avatar);
     $('bookingDogName').textContent=dog.name||'Môj psík';
     const required=['rabies','infectious','kennel_cough'];
     const rows=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(dog.id));
