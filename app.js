@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261012-customer-ui-v210';
-const APP_VERSION='1.0.57';
+const APP_BUILD='20261012-l4-keyboard-v211';
+const APP_VERSION='1.0.58';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -468,6 +468,54 @@ function ensureDogFormInModalV51(){
   const modal=$('dogDetailsModal'),form=$('dogForm'),card=modal?.querySelector('.dog-details-card');
   if(form&&card&&form.parentElement!==card)card.appendChild(form);
 }
+
+let dogEditorKeyboardBoundV211=false,dogEditorResizeFrameV211=0;
+function clearDogEditorViewportV211(){
+ const modal=$('dogDetailsModal');if(!modal)return;
+ modal.style.removeProperty('--dog-editor-height-v211');
+ modal.style.removeProperty('--dog-editor-top-v211');
+}
+function fitDogEditorViewportV211(){
+ dogEditorResizeFrameV211=0;
+ const modal=$('dogDetailsModal');
+ if(!modal||modal.classList.contains('hidden'))return;
+ const viewport=window.visualViewport;
+ const visibleHeight=Math.max(240,Math.round(viewport?.height||window.innerHeight));
+ const offsetTop=Math.max(0,Math.round(viewport?.offsetTop||0));
+ modal.style.setProperty('--dog-editor-height-v211',visibleHeight+'px');
+ modal.style.setProperty('--dog-editor-top-v211',offsetTop+'px');
+ const active=document.activeElement,card=modal.querySelector('.dog-details-card');
+ if(!card||!active||!modal.contains(active)||!active.matches('textarea,input,select'))return;
+ requestAnimationFrame(()=>{
+  if(modal.classList.contains('hidden')||document.activeElement!==active)return;
+  const a=active.getBoundingClientRect(),c=card.getBoundingClientRect();
+  const bottom=Math.min(c.bottom,offsetTop+visibleHeight-12);
+  if(a.bottom>bottom)card.scrollTop+=a.bottom-bottom+24;
+  else if(a.top<c.top+8)card.scrollTop-=c.top+8-a.top;
+ });
+}
+function requestDogEditorFitV211(){
+ if(!dogEditorResizeFrameV211)dogEditorResizeFrameV211=requestAnimationFrame(fitDogEditorViewportV211);
+}
+function ensureDogEditorKeyboardV211(){
+ if(dogEditorKeyboardBoundV211)return;
+ dogEditorKeyboardBoundV211=true;
+ const modal=$('dogDetailsModal');if(!modal)return;
+ modal.addEventListener('focusin',event=>{
+  if(event.target.matches('textarea,input,select')){
+   requestDogEditorFitV211();
+   setTimeout(requestDogEditorFitV211,110);
+   setTimeout(requestDogEditorFitV211,300);
+  }
+ });
+ modal.addEventListener('input',event=>{
+  if(event.target.matches('textarea'))requestDogEditorFitV211();
+ });
+ window.visualViewport?.addEventListener('resize',requestDogEditorFitV211,{passive:true});
+ window.visualViewport?.addEventListener('scroll',requestDogEditorFitV211,{passive:true});
+ window.addEventListener('resize',requestDogEditorFitV211,{passive:true});
+}
+
 let dogDetailsModeV96='details',dogDetailsMandatoryV96=false,dogDetailsSnapshotV96='';
 let dogSaveInFlightV145=false,customerMutationRevisionV145=0;
 function customerVaccinationsCompleteV96(dog){
@@ -495,7 +543,7 @@ function vaccinationValidityV96(validUntil){
   return {kind:days<=14?'warning':'valid',text:'Platnosť: ešte '+days+' '+vaccinationDaysWordV96(days)};
 }
 function updateVaccinationStatusesV96(){
-  for(const [inputId,statusId] of [['rabiesUntil','rabiesStatusV96'],['infectiousUntil','infectiousStatusV96'],['kennelUntil','kennelStatusV96']]){
+  for(const [inputId,statusId] of [['rabiesUntil','rabiesStatusV96'],['infectiousUntil','infectiousStatusV96'],['kennelUntil','kennelStatusV96'],['leptoL4UntilV211','leptoL4StatusV211']]){
     const box=$(statusId);if(!box)continue;
     const value=vaccinationValidityV96($(inputId)?.value||'');
     box.className='vaccine-validity-v96 '+value.kind;
@@ -504,16 +552,19 @@ function updateVaccinationStatusesV96(){
 }
 function openDogDetails(mode='details',mandatory=false){
   ensureDogFormInModalV51();const dog=selectedDog();if(!dog)return;
+  ensureDogEditorKeyboardV211();
   if(mode!=='vaccinations')clearVaccinationProofStageV104();
   fillDogForm(dog);applyDogDetailsModeV96(mode,mandatory);updateVaccinationStatusesV96();bindVaccinationProofInputsV104();renderVaccinationProofsV104(dog.id);
   renderDetailsPhoto(dog);
   dogDetailsSnapshotV96=dogFormSnapshotV96();
   $('dogDetailsModal').classList.remove('hidden');document.documentElement.classList.add('dog-details-open');
+  requestDogEditorFitV211();
 }
 function closeDogDetails(force=false){
   if(!force&&dogDetailsMandatoryV96)return false;
   if(!force&&dogFormSnapshotV96()!==dogDetailsSnapshotV96&&!confirm('Máte neuložené zmeny. Zavrieť bez uloženia?'))return false;
   $('dogDetailsModal').classList.add('hidden');document.documentElement.classList.remove('dog-details-open');
+  clearDogEditorViewportV211();
   dogDetailsMandatoryV96=false;dogDetailsModeV96='details';return true;
 }
 function renderDogProfilePrompt(){for(const id of ['bookingNotice','dogStatus']){const root=$(id);if(root)root.innerHTML=''}}
@@ -569,9 +620,11 @@ function fillDogForm(d){
   $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=d.breed||'';$('dogWeight').value=d.weight_kg??'';$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';
   const care=dogCareFields(d);if($('dogAllergies'))$('dogAllergies').value=care.allergies;if($('dogTemperament'))$('dogTemperament').value=care.temperament;
   const vs=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(d.id));
-  for(const [type,inputId] of [['rabies','rabiesUntil'],['infectious','infectiousUntil'],['kennel_cough','kennelUntil']]){
+  for(const [type,inputId] of [['rabies','rabiesUntil'],['infectious','infectiousUntil'],['kennel_cough','kennelUntil'],['lepto_l4','leptoL4UntilV211']]){
     const v=vs.find(x=>x.vaccination_type===type)||{};$(inputId).value=v.valid_until||'';
   }
+  const savedL4=vs.some(v=>v.vaccination_type==='lepto_l4'&&v.valid_until);
+  const details=$('leptoL4DetailsV211');if(details)details.open=savedL4;
   updateVaccinationStatusesV96();
   renderVaccinationProofsV104(d.id);
 }
@@ -614,6 +667,8 @@ async function saveDog(e){
       const id=expiredVacc.type==='rabies'?'rabiesUntil':expiredVacc.type==='infectious'?'infectiousUntil':'kennelUntil';$(id)?.focus();return;
     }
   }
+  const l4Date=$('leptoL4UntilV211')?.value||'';
+  const hadL4=Boolean((state.data?.vaccinations||[]).find(v=>Number(v.dog_id)===dogId&&v.vaccination_type==='lepto_l4'));
   const breedWeight={breed:$('dogBreed').value.trim(),weight_kg:$('dogWeight').value.trim()?Number($('dogWeight').value.replace(',','.')):null};
   const body={action:'save_dog',dog_id:dogId,dog_name:$('dogName').value,age_text:ageText,birth_date:birthDate||null,breed:breedWeight.breed,weight_kg:breedWeight.weight_kg,sex,neutered:neut===''?null:neut==='true',allergies:$('dogAllergies')?.value||'',temperament:$('dogTemperament')?.value||'',care_fields_version:2};
   if(savedMode==='vaccinations'){body.vaccinations=vaccinations;body.require_vaccination_proof=true}
@@ -627,11 +682,22 @@ async function saveDog(e){
       toast('Nahrajte aspoň jednu fotografiu očkovacieho preukazu.');return;
     }
     const result=await api(body);
+    // The optional L4 is a separate vaccine entry, not a fourth mandatory requirement.
+    // Skip the RPC when nothing was ever recorded, to avoid unnecessary requests.
+    if(savedMode==='vaccinations'&&(l4Date||hadL4)){
+      try{
+        await authFetch('/rest/v1/rpc/portal_set_optional_l4',{
+          method:'POST',
+          headers:{Authorization:'Bearer '+state.session.access_token},
+          body:JSON.stringify({p_dog_id:dogId,p_valid_until:l4Date||null})
+        });
+      }catch(error){throw new Error('Tri povinné očkovania sú uložené, ale samostatné L4 sa nepodarilo uložiť. Skúste uloženie znova.');}
+    }
     const dog=selectedDog();
     if(dog)Object.assign(dog,{name:body.dog_name,age_text:body.age_text,birth_date:body.birth_date||null,breed:body.breed||null,weight_kg:body.weight_kg?Number(body.weight_kg):null,sex:body.sex||null,neutered:body.neutered,allergies:body.allergies||null,temperament:body.temperament||null});
     if(state.data&&savedMode==='vaccinations'){
-      const other=(state.data.vaccinations||[]).filter(v=>Number(v.dog_id)!==dogId||!['rabies','infectious','kennel_cough'].includes(v.vaccination_type));
-      state.data.vaccinations=[...other,...vaccinations.map(v=>({dog_id:dogId,vaccination_type:v.type,valid_until:v.valid_until}))];
+      const other=(state.data.vaccinations||[]).filter(v=>Number(v.dog_id)!==dogId||!['rabies','infectious','kennel_cough','lepto_l4'].includes(v.vaccination_type));
+      state.data.vaccinations=[...other,...vaccinations.map(v=>({dog_id:dogId,vaccination_type:v.type,valid_until:v.valid_until})),...(l4Date?[{dog_id:dogId,vaccination_type:'lepto_l4',valid_until:l4Date}]:[])];
       if(result?.data?.onboarding_complete){
         state.data.dog_onboarding=state.data.dog_onboarding||[];
         const row=state.data.dog_onboarding.find(x=>Number(x.dog_id)===dogId);

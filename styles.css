@@ -2086,3 +2086,42 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
 }
 
 
+
+
+/* v211 – a fourth, explicitly optional vaccination and keyboard-safe dog editor */
+#dogDetailsModal:not(.hidden){
+ top:var(--dog-editor-top-v211,0px)!important;
+ bottom:auto!important;
+ height:var(--dog-editor-height-v211,100dvh)!important;
+ max-height:var(--dog-editor-height-v211,100dvh)!important;
+ overflow-y:auto!important;
+ overscroll-behavior:contain!important;
+ -webkit-overflow-scrolling:touch!important;
+ touch-action:pan-y!important;
+}
+#dogDetailsModal .dog-details-card{
+ max-height:calc(var(--dog-editor-height-v211,100dvh) - 24px)!important;
+ min-height:0!important;
+ overflow-y:auto!important;
+ overscroll-behavior:contain!important;
+ -webkit-overflow-scrolling:touch!important;
+ touch-action:pan-y!important;
+}
+#dogDetailsModal #dogForm textarea{
+ min-height:114px!important;
+ max-height:48dvh;
+ overflow-y:auto!important;
+ resize:vertical!important;
+ -webkit-overflow-scrolling:touch!important;
+ touch-action:pan-y!important;
+}
+#dogDetailsModal #dogForm textarea:focus{scroll-margin-block:90px 120px}
+#dogDetailsModal .l4-vaccine-v211{border:1px solid #e2e8f0!important;background:#fff!important;padding:0!important;border-radius:15px!important;overflow:hidden}
+#dogDetailsModal .l4-vaccine-v211 summary{display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none;cursor:pointer;padding:13px 15px;font-size:13px;font-weight:750;line-height:1.4;color:#334155;min-height:50px}
+#dogDetailsModal .l4-vaccine-v211 summary::-webkit-details-marker{display:none}
+#dogDetailsModal .l4-vaccine-v211 summary span{font-size:20px;color:#ea743f;flex:none;transition:transform .2s}
+#dogDetailsModal .l4-vaccine-v211[open] summary span{transform:rotate(180deg)}
+#dogDetailsModal .l4-content-v211{padding:0 14px 15px;min-width:0}
+#dogDetailsModal .l4-content-v211 p{font-size:12px;line-height:1.5;color:#64748b;margin:0 0 10px}
+#dogDetailsModal .l4-content-v211 label{font-size:12px;display:block;margin-bottom:6px}
+#dogDetailsModal .l4-content-v211 input{max-width:100%;min-width:0}
