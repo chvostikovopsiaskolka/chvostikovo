@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261012-inline-l4-v213';
-const APP_VERSION='1.0.60';
+const APP_BUILD='20261012-l4-push-v216';
+const APP_VERSION='1.0.61';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -998,11 +998,42 @@ document.addEventListener('input',event=>{
 for(const event of ['click','focusout','change','reset'])document.addEventListener(event,scheduleCustomerUpdateApply);
 async function pushSubscription(){if(!('serviceWorker'in navigator))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
 function applyPushToggle(){const b=$('pushToggle');if(!b)return;b.classList.toggle('active',!!state.pushEnabled);b.classList.remove('syncing');b.setAttribute('aria-checked',state.pushEnabled?'true':'false')}
+let customerPushSyncInFlightV216=null;
+let customerPushSyncLastSuccessV216={key:'',at:0};
+let customerPushSyncLastFailureV216={key:'',at:0};
 async function syncPushSubscriptionV75(sub){
-  const r=await fetch(PUSH_API,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'},body:JSON.stringify({audience:'customer',action:'subscribe',subscription:sub.toJSON()})});
-  if(!r.ok)throw new Error('Upozornenia sa nepodarilo synchronizovať.');
-  if(state.data)state.data.push_subscription_active=true;
-  return true;
+  if(!sub||!state.session?.access_token)throw new Error('Prihlásenie alebo odber upozornení chýba.');
+  const key=String(state.session?.user?.id||state.session?.access_token||'')+'|'+String(sub.endpoint||'');
+  const now=Date.now();
+  if(customerPushSyncInFlightV216?.key===key)return customerPushSyncInFlightV216.promise;
+  if(customerPushSyncLastSuccessV216.key===key&&now-customerPushSyncLastSuccessV216.at<300000)return true;
+  if(customerPushSyncLastFailureV216.key===key&&now-customerPushSyncLastFailureV216.at<60000)throw new Error('Synchronizácia upozornení bola nedávno neúspešná.');
+  async function send(retry){
+    const token=state.session?.access_token;
+    if(!token)throw new Error('Prihlásenie vypršalo.');
+    const r=await fetch(PUSH_API,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({audience:'customer',action:'subscribe',subscription:sub.toJSON()})});
+    if(!r.ok){
+      let data={};try{data=await r.json()}catch(_){}
+      const reason=String(data?.error||data?.message||'');
+      if(retry&&(r.status===400||r.status===401)&&/vypršal|vypršalo|expired|jwt/i.test(reason)){
+        if(state.session?.access_token===token)await refreshSession();
+        return send(false);
+      }
+      throw new Error('Upozornenia sa nepodarilo synchronizovať.');
+    }
+    return true;
+  }
+  const promise=send(true).then(()=>{
+    customerPushSyncLastSuccessV216={key,at:Date.now()};
+    customerPushSyncLastFailureV216={key:'',at:0};
+    if(state.data)state.data.push_subscription_active=true;
+    return true;
+  }).catch(error=>{
+    customerPushSyncLastFailureV216={key,at:Date.now()};
+    throw error;
+  }).finally(()=>{if(customerPushSyncInFlightV216?.promise===promise)customerPushSyncInFlightV216=null;});
+  customerPushSyncInFlightV216={key,promise};
+  return promise;
 }
 async function completePushPromptV75(){
   const result=await api({action:'complete_push_prompt'}),at=result?.data?.answered_at||new Date().toISOString();
@@ -2394,41 +2425,20 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   window.showPassRenewalAfterBookingV94=(dogId,date)=>{bookingDogV38=0;showPromptV38(Number(dogId)||0,date)};
 
   async function healPushV71(){
-    if(!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
+    if(document.visibilityState==='hidden'||!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
     try{
       const reg=await navigator.serviceWorker.ready;
-      try{await reg.update()}catch(_){}
       let sub=await reg.pushManager.getSubscription();
       const remembered=localStorage.getItem('chvostikovo_push_enabled')==='1';
-      if(!sub&&remembered){
-        sub=await reg.pushManager.subscribe({
-          userVisibleOnly:true,
-          applicationServerKey:urlBase64ToUint8Array(VAPID)
-        });
-      }
+      if(!sub&&remembered)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID)});
       if(!sub)return false;
-      const r=await fetch(PUSH_API,{
-        method:'POST',
-        headers:{
-          apikey:SUPABASE_KEY,
-          Authorization:'Bearer '+state.session.access_token,
-          'Content-Type':'application/json'
-        },
-        body:JSON.stringify({
-          audience:'customer',
-          action:'subscribe',
-          subscription:sub.toJSON()
-        }),
-        cache:'no-store'
-      });
-      if(!r.ok)return false;
-      state.pushChecked=true;
-      state.pushEnabled=true;
+      await syncPushSubscriptionV75(sub);
+      state.pushChecked=true;state.pushEnabled=true;
       localStorage.setItem('chvostikovo_push_enabled','1');
       applyPushToggle();
       return true;
     }catch(error){
-      console.warn('Push subscription refresh failed',error);
+      console.warn('Push subscription recovery failed',error?.message||error);
       return false;
     }
   }
