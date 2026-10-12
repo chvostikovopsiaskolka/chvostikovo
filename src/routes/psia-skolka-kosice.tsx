@@ -91,6 +91,15 @@ function scrollToBenefits(source: string) {
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
 }
 
+function LeadPracticalInfo() {
+  return (
+    <div className="mt-4 flex flex-wrap justify-center gap-2 border-t border-forest/10 pt-3 text-center text-[11px] font-semibold text-forest/75 sm:text-xs">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-coral/10 px-3 py-2"><MapPin className="size-3.5 shrink-0 text-coral-dark" /> Poľská 6, Košice</span>
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-coral/10 px-3 py-2"><Clock3 className="size-3.5 shrink-0 text-coral-dark" /> Po–Pia 7:00–17:00</span>
+    </div>
+  );
+}
+
 function LeadLandingPage() {
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
@@ -110,21 +119,21 @@ function LeadLandingPage() {
         <section className="relative overflow-hidden pt-20 sm:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative z-10 mx-auto grid min-h-[clamp(500px,72svh,640px)] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[535px] sm:pt-7 sm:pb-4 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
               </p>
-              <h1 className="mt-2 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
+              <h1 className="mt-3 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
                 Miesto, kam sa psíkovia
                 <span className="block text-coral-dark">radi vracajú</span>
               </h1>
 
-              <p className="mx-auto mt-2.5 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg lg:mx-0">
+              <p className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg lg:mx-0">
                 Kým vy pracujete, váš psík môže tráviť deň s kamošmi namiesto čakania doma. V Chvostíkove v Košiciach si užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
               </p>
 
-              <div className="mx-auto mt-2.5 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
+              <div className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
                 {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
@@ -139,16 +148,13 @@ function LeadLandingPage() {
               <button
                 type="button"
                 onClick={() => scrollToBenefits("lead_landing_hero")}
-                className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
+                className="btn-coral mt-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
               >
                 Zistiť viac
                 <ArrowDown className="size-5" />
               </button>
 
-              <div className="mt-3 flex flex-wrap justify-center gap-2 text-[12px] font-semibold sm:mt-5 sm:text-sm lg:justify-start">
-                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-coral px-3 py-1.5 text-white shadow-card"><MapPin className="size-4 shrink-0 text-white" /> Poľská 6, Košice</span>
-                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-coral px-3 py-1.5 text-white shadow-card"><Clock3 className="size-4 shrink-0 text-white" /> Po–Pia 7:00–17:00</span>
-              </div>
+
             </div>
 
             <div id="lead-form" className="mx-auto hidden w-full max-w-md scroll-mt-24 lg:mx-0 lg:block">
@@ -161,12 +167,11 @@ function LeadLandingPage() {
                   Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
                 </p>
                 <ShortForm trackingSource="lead_landing_top" />
+                <LeadPracticalInfo />
               </div>
             </div>
           </div>
         </section>
-
-        <InfoTicker />
 
         <section className="bg-card px-4 pt-2 pb-5 sm:pt-4 sm:pb-7 lg:hidden">
           <SchoolmatesFormCrown />
@@ -180,8 +185,11 @@ function LeadLandingPage() {
               </p>
             </div>
             <ShortForm trackingSource="lead_landing_mobile_below_hero" />
+            <LeadPracticalInfo />
           </div>
         </section>
+
+        <InfoTicker />
 
         <section className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />

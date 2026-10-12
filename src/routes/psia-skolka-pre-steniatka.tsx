@@ -163,22 +163,22 @@ function PuppyDaycarePage() {
         <section className="relative overflow-hidden pt-20 sm:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto grid min-h-[440px] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
+          <div className="relative z-10 mx-auto grid min-h-[clamp(510px,73svh,660px)] max-w-6xl items-center gap-5 px-4 py-0 sm:min-h-[540px] sm:py-0 lg:min-h-[600px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-14">
             <div className="max-w-2xl text-center lg:text-left">
               <p className="font-display text-[10px] font-bold uppercase tracking-[0.13em] text-coral-dark sm:text-sm sm:tracking-[0.16em]">
                 Psia škôlka pre šteniatka v Košiciach
               </p>
-              <h1 className="mt-2 text-[37px] leading-[1.06] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
+              <h1 className="mt-3 text-[37px] leading-[1.06] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
                 <span className="block">Noví kamoši.</span>
                 <span className="block whitespace-nowrap">Nové zážitky.</span>
                 <span className="block text-coral-dark">Deň plný objavovania.</span>
               </h1>
 
-              <p className="mx-auto mt-3 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg lg:mx-0">
+              <p className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg lg:mx-0">
                 V Chvostíkove vaše šteniatko postupne spoznáva psích kamošov, ľudí aj nové prostredie. Užije si hru aj oddych a prvé návštevy prispôsobíme tomu, ako sa u nás cíti.
               </p>
 
-              <div className="mx-auto mt-3 flex w-full max-w-[410px] flex-nowrap justify-center gap-1 sm:mt-5 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
+              <div className="mx-auto mt-4 flex w-full max-w-[410px] flex-nowrap justify-center gap-1 sm:mt-5 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
                 {["Postupná socializácia", "Hra aj oddych", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
@@ -193,7 +193,7 @@ function PuppyDaycarePage() {
               <button
                 type="button"
                 onClick={scrollToBenefits}
-                className="btn-coral mt-5 mb-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:mb-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg lg:mb-0"
+                className="btn-coral mt-6 mb-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:mb-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg lg:mb-0"
               >
                 Zistiť viac
                 <ArrowDown className="size-5" />
@@ -216,8 +216,6 @@ function PuppyDaycarePage() {
           </div>
         </section>
 
-        <InfoTicker />
-
         <section className="bg-card px-4 pt-2 pb-6 lg:hidden">
           <SchoolmatesFormCrown />
           <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-4 pt-12 pb-4 shadow-card ring-1 ring-forest/8 sm:pt-14">
@@ -230,6 +228,8 @@ function PuppyDaycarePage() {
             <PuppyForm source="puppy_landing_mobile_below_hero" />
           </div>
         </section>
+
+        <InfoTicker />
 
         <section id="puppy-benefits" className="relative scroll-mt-20 overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
