@@ -26,6 +26,7 @@ export const shortSchema = z.object({
   meno: z.string().min(1).max(200),
   telefon: z.string().regex(/^\+\d{7,15}$/),
   zaujem: z.string().min(1).max(300),
+  email: z.string().trim().email().max(254).optional(),
 }).merge(attributionSchema);
 
 export const longSchema = z.object({
@@ -82,6 +83,7 @@ export function buildFields(data: InquiryData): Array<{ label: string; value: st
     return [
       { label: "Meno majiteľa", value: data.meno },
       { label: "Telefón", value: data.telefon },
+      ...(data.email ? [{ label: "E-mail", value: data.email }] : []),
       { label: "O čo máte záujem?", value: data.zaujem },
       { label: "Súhlas so spracovaním osobných údajov", value: "Áno" },
       ...attribution,
@@ -115,6 +117,7 @@ export function buildDbPayload(data: InquiryData) {
       form_type: "lead",
       owner_name: data.meno,
       phone: data.telefon,
+      ...(data.email ? { email: data.email } : {}),
       interest_reason: data.zaujem,
       consent: true,
       source_ref,
