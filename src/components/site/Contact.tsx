@@ -198,7 +198,7 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
             <ContactDetails language={language} />
           </div>
           <div className="mt-6 flex flex-col items-center gap-4 text-center text-xs sm:flex-row sm:justify-between sm:text-left">
-            <p>© {new Date().getFullYear()} Chvostíkovo</p>
+            <p>© {new Date().getFullYear()} Chvostíkovo · {isEnglish ? "All rights reserved." : "Všetky práva vyhradené."}</p>
             <nav aria-label={isEnglish ? "Legal information" : "Právne informácie"} className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 sm:justify-end [&>button]:whitespace-nowrap">
               <button type="button" onClick={() => setLegalDialog("cookies")} className="underline underline-offset-4 hover:text-cream">Cookies</button>
               <span aria-hidden="true">·</span>
