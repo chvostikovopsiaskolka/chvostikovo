@@ -126,7 +126,7 @@ async function sendCrmStage(body: Json): Promise<Response> {
       normalizePhone(a.phone).length>=10 && normalizePhone(a.phone)===normalizePhone(b.phone) &&
       ((a.email && b.email && String(a.email).trim().toLowerCase()===String(b.email).trim().toLowerCase()) ||
       ((!a.email || !b.email) && String(a.owner_name||"").trim().toLowerCase()===String(b.owner_name||"").trim().toLowerCase()));
-    const rows=await rest(`web_form_submissions?phone=eq.${encodeURIComponent(String(submission.phone))}&select=id,phone,owner_name,email,created_at&order=created_at.asc&limit=100`);
+    const rows=await rest(`web_form_submissions?phone=eq.${encodeURIComponent(String(submission.phone))}&select=id,phone,owner_name,email,source_ref,created_at&order=created_at.asc&limit=100`);
     const linked=Array.isArray(rows)?rows.filter((a:Json)=>same(a,submission)):[submission];
     if(!linked.some(a=>Number(a.id)===submissionId))linked.push(submission);
     linked.sort((a,b)=>String(a.created_at||"").localeCompare(String(b.created_at||"")));
@@ -160,7 +160,7 @@ async function sendCrmStage(body: Json): Promise<Response> {
     if (originalIp) userData.client_ip_address = originalIp;
     if (originalUa) userData.client_user_agent = originalUa;
 
-    const sourceRef = String(submission.source_ref || "/");
+    const sourceRef = String(linked.find(x=>/[?&](utm_|fbclid=)/i.test(String(x.source_ref||"")))?.source_ref || submission.source_ref || "/");
     const sourceUrl = sourceRef.startsWith("http")
       ? sourceRef
       : `https://chvostikovo.sk${sourceRef.startsWith("/") ? sourceRef : "/" + sourceRef}`;
