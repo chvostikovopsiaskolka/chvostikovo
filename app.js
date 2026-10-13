@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261013-booking-fab-v220';
-const APP_VERSION='1.0.63';
+const APP_BUILD='20261013-booking-fab-v221';
+const APP_VERSION='1.0.64';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1900,24 +1900,23 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
 /* v220: centered, thumb-reachable booking action with an account-scoped one-time hint. */
 (function customerBookingFabV220(){
-  const hintVersion='booking-fab-hint-v220';
+  const hintVersion='booking-fab-hint-v221';
   const fab=()=>document.getElementById('navBookAddV220');
   const hint=()=>document.getElementById('navBookHintV220');
   const userKey=()=>state.session?.user?.id?hintVersion+':'+state.session.user.id:null;
-  let hintShownThisSession=false;
   let hintTimer=0;
   function dismiss(){
     hint()?.classList.remove('show-v220');
     hint()?.classList.add('hidden');
     const k=userKey();if(k){try{localStorage.setItem(k,'1')}catch(_){}}
-    hintShownThisSession=true;
   }
   function maybeShowHint(retry=0){
     const k=userKey();
-    if(!k||hintShownThisSession||!fab()||!hint())return;
+    if(!fab()||!hint())return;
+    if(!k){if(retry<35)hintTimer=setTimeout(()=>maybeShowHint(retry+1),800);return}
     try{if(localStorage.getItem(k)==='1')return}catch(_){}
     if(window.__customerOnboardingCompleteV75!==true||state.activeTab!=='booking'||document.getElementById('appView')?.classList.contains('hidden')){
-      if(retry<8)hintTimer=setTimeout(()=>maybeShowHint(retry+1),650);
+      if(retry<35)hintTimer=setTimeout(()=>maybeShowHint(retry+1),800);
       return;
     }
     if(document.querySelector('.legal-modal:not(.hidden),.booking-picker-v37:not(.hidden)')){
@@ -1926,8 +1925,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     }
     hint().classList.remove('hidden');
     hint().classList.add('show-v220');
-    try{localStorage.setItem(k,'1')}catch(_){}
-    hintShownThisSession=true;
+    // Do not mark as understood merely because it rendered. Persist on + or ×.
   }
   function openFromFab(){
     dismiss();
@@ -1946,6 +1944,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     hintTimer=setTimeout(()=>maybeShowHint(),1300);
   }
   addCustomerHook('afterBootstrap',()=>{clearTimeout(hintTimer);hintTimer=setTimeout(()=>maybeShowHint(),1000)});
+  addCustomerHook('afterRenderDog',()=>{if(state.session&&!hint()?.classList.contains('show-v220'))setTimeout(()=>maybeShowHint(),450)});
+  addCustomerHook('afterSwitchTab',()=>{if(state.activeTab==='booking')setTimeout(()=>maybeShowHint(),450)});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>maybeShowHint(),500)});
+  window.addEventListener('pageshow',()=>setTimeout(()=>maybeShowHint(),550));
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();
