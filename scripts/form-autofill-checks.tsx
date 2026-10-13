@@ -68,6 +68,7 @@ try {
       if (el instanceof dom.HTMLSelectElement) {
         if (!el.hasAttribute("data-phone-prefix")) el.value = el.options[1]!.value;
       } else if (el instanceof dom.HTMLInputElement && el.type === "checkbox") el.checked = true;
+      else if (el instanceof dom.HTMLInputElement && el.type === "email") el.value = "test@example.com";
       else (el as any).value = "TEST – autofill regression";
     }
     const input = form.querySelector<HTMLInputElement>(`input[type="tel"]`)!;
@@ -174,6 +175,7 @@ try {
       if (el instanceof dom.HTMLSelectElement) {
         if (!el.hasAttribute("data-phone-prefix")) el.value = el.options[1]!.value;
       } else if (el instanceof dom.HTMLInputElement && el.type === "checkbox") el.checked = true;
+      else if (el instanceof dom.HTMLInputElement && el.type === "email") el.value = "test@example.com";
       else (el as any).value = "PRIVATE NAME";
     }
     form.querySelector<HTMLInputElement>('input[type="tel"]')!.value = "+421915349028";
