@@ -362,8 +362,8 @@ Deno.serve(async (req: Request) => {
       const editToken = text(input.edit_token, 100);
       const updatedPhone = text(input.phone, 40);
       if (!Number.isSafeInteger(submissionId) || submissionId <= 0 ||
-          !/^[0-9a-f-]{36}\\.[0-9a-f-]{36}$/.test(editToken) ||
-          !/^\\+[1-9]\\d{6,14}$/.test(updatedPhone)) {
+          !/^[0-9a-f-]{36}\.[0-9a-f-]{36}$/.test(editToken) ||
+          !/^\+[1-9]\d{6,14}$/.test(updatedPhone)) {
         return response(origin, 400, { ok: false, error: 'invalid_phone_correction' });
       }
       const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -392,7 +392,7 @@ Deno.serve(async (req: Request) => {
     const ownerName = text(input.owner_name ?? input.meno, 160);
     const phone = text(input.phone ?? input.telefon, 40);
     const rawEmail = formType === 'lead' ? String(input.email ?? '').trim() : '';
-    if (rawEmail.length > 254 || (rawEmail && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(rawEmail))) {
+    if (rawEmail.length > 254 || (rawEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail))) {
       return response(origin, 400, { ok: false, error: 'invalid_email' });
     }
     const leadEmail = rawEmail.toLowerCase();
