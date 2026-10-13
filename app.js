@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261013-copyright-v226';
-const APP_VERSION='1.0.69';
+const APP_BUILD='20261013-no-expiry-v227';
+const APP_VERSION='1.0.70';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -451,7 +451,7 @@ function renderPassSummaryCore(){
     const firstBooked=Number(p.used_entries)===0?(state.data?.reservations||[]).filter(r=>Number(r.dog_id)===Number(d.id)&&Number(r.pass_id)===Number(p.id)&&r.status==='booked'&&r.reservation_date>=today).map(r=>r.reservation_date).sort()[0]:null;
     let start=p.valid_from||firstBooked,until=p.valid_until;
     if(start&&!until&&!p.no_expiry){const [year,month,day]=start.split('-').map(Number),endMonth=new Date(Date.UTC(year,month-1+2,1)),lastDay=new Date(Date.UTC(endMonth.getUTCFullYear(),endMonth.getUTCMonth()+1,0)).getUTCDate();endMonth.setUTCDate(Math.min(day,lastDay));until=endMonth.toISOString().slice(0,10)}
-    const validity=Number(p.used_entries)===0&&start?`<small>Platnosť od ${skDate(start)}${until?` do ${skDate(until)}`:''}</small>`:until?`<small>Platí do ${skDate(until)}</small>`:'';
+    const validity=p.no_expiry===true?'<small>Platnosť bez obmedzenia</small>':Number(p.used_entries)===0&&start?`<small>Platnosť od ${skDate(start)}${until?` do ${skDate(until)}`:''}</small>`:until?`<small>Platí do ${skDate(until)}</small>`:'';
     $('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>${Number(p.used_entries)||0} z ${Number(p.total_entries)||0}</strong>${validity}`;
     return;
   }
