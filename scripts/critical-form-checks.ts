@@ -16,6 +16,15 @@ shortSchema.parse({
   zaujem: "Mám záujem o pravidelné návštevy",
 });
 
+shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  email: "test@example.com", zaujem: "Mám záujem o pravidelné návštevy",
+});
+assert(!shortSchema.safeParse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  email: "nesprávny-adresát", zaujem: "Mám záujem o pravidelné návštevy",
+}).success, "Invalid optional email should be rejected.");
+
 longSchema.parse({
   typ: "prihlaska",
   consent: true,
@@ -71,10 +80,13 @@ assert(englishForm.includes("progress.onInvalidCapture"), "EN enquiry must recor
 assert(progressSource.includes("hasAnalyticsConsent()"), "Field analytics must require analytics consent.");
 assert(!progressSource.includes("JSON.stringify(target.value)") && !progressSource.includes("event.target.value"), "Never transmit form values in diagnostics.");
 assert(forms.includes("hideInterest = false"), "Critical form check failed: informational interest selector is not enabled by default.");
+assert(forms.includes('name="email"') && englishForm.includes('name="email"'), "Enquiry forms must offer optional email.");
+assert(forms.includes('LeadPhoneReceipt') && englishForm.includes('LeadPhoneReceipt'), "Receipts must display a submitted phone.");
 
 const backend = readFileSync(new URL("../supabase/functions/web-form-submit/index.ts", import.meta.url), "utf8");
 assert(backend.includes("/^\\+\\d{7,15}$/"), "Critical form check failed: web-form-submit phone regex is not the expected E.164 validation.");
 assert(backend.includes("input.dry_run === true"), "Critical form check failed: backend dry-run smoke-test support is missing.");
+assert(backend.includes("correct_web_lead_phone_once") && backend.includes("phone_edit_token"), "Backend must implement the one-time phone correction.");
 
 for (const interest of [
   "Chcem sa dozvedieť viac o psej škôlke",
