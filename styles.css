@@ -2264,3 +2264,10 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
  .customer-social-links-v223 a{gap:6px;font-size:12px;padding:10px 8px;min-height:54px}
  .customer-social-links-v223 a svg{width:20px;height:20px}
 }
+
+/* v224: social links sit below the last Menu option, above the release version. */
+.customer-social-v223{margin:17px 0 9px!important}
+.customer-social-v223>p{margin:0 0 4px!important;line-height:1.35}
+.customer-social-v223 .customer-social-subtitle-v224{
+  display:block;margin:0 0 13px;color:#64748b;font-size:12px;font-weight:500;line-height:1.4
+}
