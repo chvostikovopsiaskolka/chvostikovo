@@ -124,8 +124,8 @@ async function sendCrmStage(body: Json): Promise<Response> {
     // v5: one conversion per identical owner and stage, across forms.
     const same = (a:Json,b:Json) =>
       normalizePhone(a.phone).length>=10 && normalizePhone(a.phone)===normalizePhone(b.phone) &&
-      String(a.owner_name||"").trim().toLowerCase()===String(b.owner_name||"").trim().toLowerCase() &&
-      (!a.email || !b.email || String(a.email).trim().toLowerCase()===String(b.email).trim().toLowerCase());
+      ((a.email && b.email && String(a.email).trim().toLowerCase()===String(b.email).trim().toLowerCase()) ||
+      ((!a.email || !b.email) && String(a.owner_name||"").trim().toLowerCase()===String(b.owner_name||"").trim().toLowerCase()));
     const rows=await rest(`web_form_submissions?phone=eq.${encodeURIComponent(String(submission.phone))}&select=id,phone,owner_name,email,created_at&order=created_at.asc&limit=100`);
     const linked=Array.isArray(rows)?rows.filter((a:Json)=>same(a,submission)):[submission];
     if(!linked.some(a=>Number(a.id)===submissionId))linked.push(submission);
