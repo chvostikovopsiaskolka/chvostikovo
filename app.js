@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261013-booking-fab-v221';
-const APP_VERSION='1.0.64';
+const APP_BUILD='20261013-booking-tile-v222';
+const APP_VERSION='1.0.65';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1898,55 +1898,67 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,120),{once:true});else setTimeout(start,120);
 })();
 
-/* v220: centered, thumb-reachable booking action with an account-scoped one-time hint. */
-(function customerBookingFabV220(){
-  const hintVersion='booking-fab-hint-v221';
+/* v222: booking tile in navigation + a 20-second explanatory hint per page session.
+   Acknowledgement is persisted ONLY after the first tap on the booking tile. */
+(function customerBookingFabV222(){
+  const hintVersion='booking-fab-hint-v222';
   const fab=()=>document.getElementById('navBookAddV220');
   const hint=()=>document.getElementById('navBookHintV220');
   const userKey=()=>state.session?.user?.id?hintVersion+':'+state.session.user.id:null;
-  let hintTimer=0;
-  function dismiss(){
+  const shownForAccounts=new Set();
+  let showTimer=0,hideTimer=0;
+  function hideHint(){
+    clearTimeout(hideTimer);hideTimer=0;
     hint()?.classList.remove('show-v220');
     hint()?.classList.add('hidden');
-    const k=userKey();if(k){try{localStorage.setItem(k,'1')}catch(_){}}
+  }
+  function acknowledgeHint(){
+    const key=userKey();
+    if(key){try{localStorage.setItem(key,'1')}catch(_){}}
+    hideHint();
   }
   function maybeShowHint(retry=0){
-    const k=userKey();
+    const key=userKey();
     if(!fab()||!hint())return;
-    if(!k){if(retry<35)hintTimer=setTimeout(()=>maybeShowHint(retry+1),800);return}
-    try{if(localStorage.getItem(k)==='1')return}catch(_){}
+    if(!key){
+      if(retry<35)showTimer=setTimeout(()=>maybeShowHint(retry+1),800);
+      return;
+    }
+    if(shownForAccounts.has(key))return;
+    try{if(localStorage.getItem(key)==='1')return}catch(_){}
     if(window.__customerOnboardingCompleteV75!==true||state.activeTab!=='booking'||document.getElementById('appView')?.classList.contains('hidden')){
-      if(retry<35)hintTimer=setTimeout(()=>maybeShowHint(retry+1),800);
+      if(retry<35)showTimer=setTimeout(()=>maybeShowHint(retry+1),800);
       return;
     }
     if(document.querySelector('.legal-modal:not(.hidden),.booking-picker-v37:not(.hidden)')){
-      if(retry<8)hintTimer=setTimeout(()=>maybeShowHint(retry+1),650);
+      if(retry<35)showTimer=setTimeout(()=>maybeShowHint(retry+1),800);
       return;
     }
+    shownForAccounts.add(key); // In-memory only: the hint may reappear on the NEXT app start unless + was used.
     hint().classList.remove('hidden');
     hint().classList.add('show-v220');
-    // Do not mark as understood merely because it rendered. Persist on + or ×.
+    clearTimeout(hideTimer);
+    hideTimer=setTimeout(hideHint,20000);
   }
   function openFromFab(){
-    dismiss();
+    acknowledgeHint();
     if(!state.session||!selectedDog()){toast('Najprv musí byť váš psík priradený k účtu.');return}
     if(state.activeTab!=='booking')switchTab('booking');
     if(typeof window.openBookingPickerV37==='function')window.openBookingPickerV37();
     else toast('Rezervácie ešte nie sú pripravené. Skúste to znova.');
   }
   function init(){
-    const button=fab();if(!button||button.dataset.boundV220==='1')return;
-    button.dataset.boundV220='1';
+    const button=fab();if(!button||button.dataset.boundV222==='1')return;
+    button.dataset.boundV222='1';
     button.addEventListener('click',openFromFab);
-    document.getElementById('navBookHintCloseV220')?.addEventListener('click',dismiss);
-    document.getElementById('navBooking')?.addEventListener('click',()=>{hint()?.classList.add('hidden');setTimeout(()=>maybeShowHint(),500)});
-    document.getElementById('navDog')?.addEventListener('click',()=>{hint()?.classList.add('hidden')});
-    hintTimer=setTimeout(()=>maybeShowHint(),1300);
+    document.getElementById('navDog')?.addEventListener('click',hideHint);
+    document.getElementById('navBooking')?.addEventListener('click',()=>{hideHint();setTimeout(()=>maybeShowHint(),500)});
+    showTimer=setTimeout(()=>maybeShowHint(),1300);
   }
-  addCustomerHook('afterBootstrap',()=>{clearTimeout(hintTimer);hintTimer=setTimeout(()=>maybeShowHint(),1000)});
-  addCustomerHook('afterRenderDog',()=>{if(state.session&&!hint()?.classList.contains('show-v220'))setTimeout(()=>maybeShowHint(),450)});
-  addCustomerHook('afterSwitchTab',()=>{if(state.activeTab==='booking')setTimeout(()=>maybeShowHint(),450)});
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>maybeShowHint(),500)});
+  addCustomerHook('afterBootstrap',()=>{clearTimeout(showTimer);showTimer=setTimeout(()=>maybeShowHint(),1000)});
+  addCustomerHook('afterRenderDog',()=>{if(state.session)setTimeout(()=>maybeShowHint(),450)});
+  addCustomerHook('afterSwitchTab',()=>{if(state.activeTab==='booking')setTimeout(()=>maybeShowHint(),450);else hideHint()});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>maybeShowHint(),500);else hideHint()});
   window.addEventListener('pageshow',()=>setTimeout(()=>maybeShowHint(),550));
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
