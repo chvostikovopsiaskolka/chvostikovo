@@ -8,6 +8,7 @@ import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
 import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
+import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
 import { phoneFromForm } from "@/lib/phone";
 import { reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
 
@@ -20,6 +21,7 @@ export function EnglishInquiryForm({
 }) {
   const formId = useId();
   const [sent, setSent] = useState(false);
+  const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
@@ -47,6 +49,7 @@ export function EnglishInquiryForm({
       const source_ref = sourceRef();
       const attribution = getTrafficAttribution();
       const interest = String(fd.get("interest") ?? "").trim();
+      const submittedPhone = phoneFromForm(form, `en-${formId}-phone`);
       const submission = await submitInquiry({
         typ: "informacie",
         consent: true,
@@ -60,7 +63,8 @@ export function EnglishInquiryForm({
         utm_content: attribution.content,
         cta_source: trackingSource,
         meno: String(fd.get("name") ?? "").trim(),
-        telefon: phoneFromForm(form, `en-${formId}-phone`),
+        telefon: submittedPhone,
+        email: String(fd.get("email") ?? "").trim() || undefined,
         zaujem: `EN – Dog daycare enquiry | ${interest}`,
       }, attemptId);
 
@@ -77,6 +81,7 @@ export function EnglishInquiryForm({
         trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
       });
       progress.markSuccess();
+      setReceipt({ phone: submittedPhone, auth: submission.phoneCorrection });
       setSent(true);
     } catch (error) {
       const diagnostic = reportInquiryError(error);
@@ -94,7 +99,8 @@ export function EnglishInquiryForm({
           <Check className="size-7" />
         </div>
         <h3 className="text-xl text-forest">Thank you!</h3>
-        <p className="text-sm text-muted-foreground">We will confirm receipt of your form by SMS.</p>
+        <p className="text-sm text-muted-foreground">We have received your enquiry and are sending an SMS confirmation.</p>
+        {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} language="en" />}
       </div>
     );
   }
@@ -106,6 +112,11 @@ export function EnglishInquiryForm({
         <input id={`en-${formId}-name`} name="name" autoComplete="name" required className="field" placeholder="Your name" />
       </div>
       <PhoneField id={`en-${formId}-phone`} name="phone" label="Phone / WhatsApp *" language="en" />
+      <div>
+        <label className="label-sm" htmlFor={`en-${formId}-email`}>Email (optional)</label>
+        <input id={`en-${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} className="field" placeholder="you@example.com" />
+        <p className="mt-1 text-xs text-forest/65">In case we cannot reach you by phone.</p>
+      </div>
       <div>
         <label className="label-sm" htmlFor={`en-${formId}-interest`}>What are you looking for? *</label>
         <select id={`en-${formId}-interest`} name="interest" required className="field" defaultValue="">

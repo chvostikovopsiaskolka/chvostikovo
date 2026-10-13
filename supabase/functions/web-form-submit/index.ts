@@ -198,6 +198,7 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
 
   lines.push(`Meno majiteľa: ${String(payload.owner_name ?? '')}`);
   lines.push(`Telefón: ${String(payload.phone ?? '')}`);
+  if (!isApplication && payload.email) lines.push(`E-mail: ${String(payload.email)}`);
 
   if (isApplication) {
     lines.push(`Meno psa: ${String(payload.dog_name ?? '')}`);
@@ -278,6 +279,26 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
   }
 }
 
+async function sendPhoneCorrectionEmail(submissionId: number, phone: string) {
+  const apiKey = Deno.env.get('RESEND_API_KEY');
+  if (!apiKey) return;
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: Deno.env.get('NOTIFY_FROM') ?? 'Chvostíkovo web <onboarding@resend.dev>',
+        to: [Deno.env.get('NOTIFY_TO') ?? 'chvostikovo.psiaskolka@gmail.com'],
+        subject: `Opravený telefón pri záujme #${submissionId}`,
+        text: `Zákazník opravil telefón pri pôvodnom záujme #${submissionId}. Nové číslo: ${phone}. Nevytvárať ďalší lead. Ak bola SMS už odoslaná, ďalšia sa neposiela.`,
+      }),
+    });
+    if (!res.ok) console.error('Lead correction email failed:', res.status);
+  } catch (error) {
+    console.error('Lead correction email unavailable:', error);
+  }
+}
+
 async function notifyWebFormSms(submissionId: number) {
   let timeout;
   try {
@@ -336,17 +357,54 @@ Deno.serve(async (req: Request) => {
     if (!raw || raw.length > 32_000) return response(origin, 400, { ok: false, error: 'invalid_body' });
     const input = JSON.parse(raw);
 
+    if (input.action === 'correct_lead_phone') {
+      const submissionId = Number(input.submission_id);
+      const editToken = text(input.edit_token, 100);
+      const updatedPhone = text(input.phone, 40);
+      if (!Number.isSafeInteger(submissionId) || submissionId <= 0 ||
+          !/^[0-9a-f-]{36}\.[0-9a-f-]{36}$/.test(editToken) ||
+          !/^\+[1-9]\d{6,14}$/.test(updatedPhone)) {
+        return response(origin, 400, { ok: false, error: 'invalid_phone_correction' });
+      }
+      const supabaseUrl = Deno.env.get('SUPABASE_URL');
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      if (!supabaseUrl || !serviceKey) throw new Error('Missing Supabase environment');
+      const rpc = await fetch(`${supabaseUrl}/rest/v1/rpc/correct_web_lead_phone_once`, {
+        method: 'POST',
+        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          p_submission_id: submissionId,
+          p_token_hash: await sha256Hex(editToken),
+          p_new_phone: updatedPhone,
+        }),
+      });
+      if (!rpc.ok) throw new Error(`Phone correction RPC failed: ${rpc.status}`);
+      const result = await rpc.json();
+      if (result?.ok !== true) return response(origin, 403, { ok: false, error: 'correction_expired' });
+      EdgeRuntime.waitUntil(sendPhoneCorrectionEmail(submissionId, updatedPhone));
+      return response(origin, 200, { ok: true, sms_queued: result.sms_queued === true });
+    }
+
     // Hidden honeypot field: bots receive a harmless success without storing data.
     if (text(input.company || input.website, 200)) return response(origin, 200, { ok: true });
 
     const formType = text(input.form_type || input.formType, 20);
     const ownerName = text(input.owner_name ?? input.meno, 160);
     const phone = text(input.phone ?? input.telefon, 40);
+    const rawEmail = formType === 'lead' ? String(input.email ?? '').trim() : '';
+    if (rawEmail.length > 254 || (rawEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail))) {
+      return response(origin, 400, { ok: false, error: 'invalid_email' });
+    }
+    const leadEmail = rawEmail.toLowerCase();
     const consent = input.consent === true || text(input.consent, 10).toLowerCase() === 'true';
     if (!['lead', 'application'].includes(formType)) return response(origin, 400, { ok: false, error: 'invalid_form_type' });
     if (!ownerName || !/^\+\d{7,15}$/.test(phone) || !consent) return response(origin, 400, { ok: false, error: 'missing_required_fields' });
 
     const marketingConsent = input.marketing_consent === true;
+    const phoneEditToken = formType === 'lead'
+      ? `${crypto.randomUUID()}.${crypto.randomUUID()}`
+      : '';
+    const phoneEditHash = phoneEditToken ? await sha256Hex(phoneEditToken) : '';
     const storedRawPayload = marketingConsent
       ? {
           ...input,
@@ -360,10 +418,13 @@ Deno.serve(async (req: Request) => {
       status: 'new',
       owner_name: ownerName,
       phone,
+      ...(formType === 'lead' && leadEmail ? { email: leadEmail } : {}),
       consent: true,
       source: 'chvostikovo.sk',
       source_ref: text(input.source_ref || '/', 500),
-      raw_payload: storedRawPayload,
+      raw_payload: phoneEditHash
+        ? { ...storedRawPayload, _phone_edit_hash: phoneEditHash }
+        : storedRawPayload,
     };
 
     if (formType === 'lead') {
@@ -461,10 +522,12 @@ Deno.serve(async (req: Request) => {
     if (!insert.ok) throw new Error(`Insert failed: ${insert.status} ${await insert.text()}`);
     // Trigger has persisted the SMS outbox in the same successful INSERT transaction.
     // Failure here must never turn a saved form into an error response.
+    let savedSubmissionId: number | null = null;
     try {
       const saved = await insert.json();
       const submissionId = Number(saved?.[0]?.id);
       if (Number.isSafeInteger(submissionId) && submissionId > 0) {
+        savedSubmissionId = submissionId;
         EdgeRuntime.waitUntil(notifyWebFormSms(submissionId));
       }
     } catch (_) {
@@ -480,7 +543,12 @@ Deno.serve(async (req: Request) => {
         : sendMetaConversion(payload, input, req),
     ]);
 
-    return response(origin, 201, { ok: true });
+    return response(origin, 201, {
+      ok: true,
+      ...(formType === 'lead' && savedSubmissionId && phoneEditToken
+        ? { submission_id: savedSubmissionId, phone_edit_token: phoneEditToken }
+        : {}),
+    });
   } catch (error) {
     console.error(error);
     return response(origin, 500, { ok: false, error: 'server_error' });

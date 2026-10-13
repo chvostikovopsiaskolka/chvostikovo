@@ -32,7 +32,6 @@ export function InquiryCtaSection() {
       <FormDialog open={open} onOpenChange={setOpen} title={INFO_TITLE} subtitle={INFO_SUBTITLE}>
         <ShortForm
           trackingSource="after_video"
-          onSent={() => setTimeout(() => setOpen(false), 2200)}
         />
       </FormDialog>
     </section>
