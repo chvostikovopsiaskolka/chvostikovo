@@ -11,8 +11,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
-  <link rel="manifest" href="/manifest.webmanifest?v=20261013-customer-social-v223">
-  <link rel="stylesheet" href="/styles.css?v=20261013-customer-social-v223">
+  <link rel="manifest" href="/manifest.webmanifest?v=20261013-social-footer-v224">
+  <link rel="stylesheet" href="/styles.css?v=20261013-social-footer-v224">
   <style id="customer-l4-chevron-fix-v217">
     #dogDetailsModal .vaccine-box .l4-inline-v213 > summary .l4-question-v216 {
       display:block!important;flex:1 1 auto!important;min-width:0!important;
@@ -128,23 +128,24 @@
 
   <section id="menuTab" class="tab-page customer-menu hidden">
     <h1>Menu</h1>
+    <details id="menuDogGroup" class="customer-menu-group"><summary><span class="menu-icon"><svg><use href="#ci-paw"/></svg></span><span class="menu-heading"><strong>Môj psík</strong><small>Správa údajov a informácií o psíkovi</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuDogDetails" type="button"><svg class="menu-paw-icon"><use href="#ci-paw"/></svg><span>Údaje psíka</span><b>›</b></button><button id="menuVaccinations" type="button"><svg><use href="#ci-syringe"/></svg><span>Očkovania</span><b>›</b></button><button id="menuRules" type="button"><svg><use href="#ci-file"/></svg><span>Pravidlá škôlky</span><b>›</b></button><button id="menuGradebook" type="button"><svg><use href="#ci-book"/></svg><span>Žiacka knižka <small>Pripravujeme</small></span><b>›</b></button></div></details>
+    <button id="menuContact" class="customer-menu-group customer-menu-direct" type="button"><span class="menu-icon"><svg><use href="#ci-user"/></svg></span><span class="menu-heading"><strong>Moje kontaktné údaje</strong><small>Vaše osobné údaje a kontakty</small></span><span class="menu-chevron">›</span></button>
+    <details id="menuSettingsGroup" class="customer-menu-group"><summary><span class="menu-icon"><svg><use href="#ci-settings"/></svg></span><span class="menu-heading"><strong>Nastavenia</strong><small>Upozornenia a súhlasy</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuNotifications" type="button"><svg><use href="#ci-bell"/></svg><span>Upozornenia</span><b>›</b></button><button id="menuLegal" type="button"><svg><use href="#ci-shield"/></svg><span>Súhlasy a podmienky</span><b>›</b></button><button id="menuLogout" type="button"><svg><use href="#ci-logout"/></svg><span>Odhlásiť sa</span><b>›</b></button></div></details>
+    <button id="menuMessage" class="customer-menu-group customer-menu-direct" type="button"><span class="menu-icon message"><svg><use href="#ci-message"/></svg></span><span class="menu-heading"><strong>Napíšte nám správu</strong></span><i id="menuMessageUnread" class="menu-unread hidden"></i><span class="menu-chevron">›</span></button>
     <div class="customer-social-v223" aria-label="Sociálne siete Chvostíkova">
-      <p>Sledujte nás na sociálnych sieťach 🐾</p>
+      <p>Sledujte Chvostíkovo aj na sociálnych sieťach 🐾</p>
+      <small class="customer-social-subtitle-v224">Fotky a videá zo dní vašich štvornohých ratolestí.</small>
       <div class="customer-social-links-v223">
         <a class="customer-social-instagram-v223" href="https://www.instagram.com/chvostikovo.psiaskolka/" target="_blank" rel="noopener noreferrer" aria-label="Chvostíkovo na Instagrame (otvorí nový panel)">
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><circle cx="17.6" cy="6.7" r="1.3" fill="currentColor"/></svg>
           <span>Instagram</span><span class="customer-social-arrow-v223">↗</span>
         </a>
-        <a class="customer-social-facebook-v223" href="https://www.facebook.com/profile.php?id=414367335085625" target="_blank" rel="noopener noreferrer" aria-label="Chvostíkovo na Facebooku (otvorí nový panel)">
+        <a class="customer-social-facebook-v223" href="https://www.facebook.com/share/1DgjMMweqr/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Chvostíkovo na Facebooku (otvorí nový panel)">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 22v-8.7H18l.5-4h-4V6.8c0-1.2.4-2 2.1-2H19V1.2C18.6 1.1 17.2 1 15.7 1 12.3 1 10 3.1 10 7v2.3H6.5v4H10V22z" fill="currentColor"/></svg>
           <span>Facebook</span><span class="customer-social-arrow-v223">↗</span>
         </a>
       </div>
     </div>
-    <details id="menuDogGroup" class="customer-menu-group"><summary><span class="menu-icon"><svg><use href="#ci-paw"/></svg></span><span class="menu-heading"><strong>Môj psík</strong><small>Správa údajov a informácií o psíkovi</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuDogDetails" type="button"><svg class="menu-paw-icon"><use href="#ci-paw"/></svg><span>Údaje psíka</span><b>›</b></button><button id="menuVaccinations" type="button"><svg><use href="#ci-syringe"/></svg><span>Očkovania</span><b>›</b></button><button id="menuRules" type="button"><svg><use href="#ci-file"/></svg><span>Pravidlá škôlky</span><b>›</b></button><button id="menuGradebook" type="button"><svg><use href="#ci-book"/></svg><span>Žiacka knižka <small>Pripravujeme</small></span><b>›</b></button></div></details>
-    <button id="menuContact" class="customer-menu-group customer-menu-direct" type="button"><span class="menu-icon"><svg><use href="#ci-user"/></svg></span><span class="menu-heading"><strong>Moje kontaktné údaje</strong><small>Vaše osobné údaje a kontakty</small></span><span class="menu-chevron">›</span></button>
-    <details id="menuSettingsGroup" class="customer-menu-group"><summary><span class="menu-icon"><svg><use href="#ci-settings"/></svg></span><span class="menu-heading"><strong>Nastavenia</strong><small>Upozornenia a súhlasy</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuNotifications" type="button"><svg><use href="#ci-bell"/></svg><span>Upozornenia</span><b>›</b></button><button id="menuLegal" type="button"><svg><use href="#ci-shield"/></svg><span>Súhlasy a podmienky</span><b>›</b></button><button id="menuLogout" type="button"><svg><use href="#ci-logout"/></svg><span>Odhlásiť sa</span><b>›</b></button></div></details>
-    <button id="menuMessage" class="customer-menu-group customer-menu-direct" type="button"><span class="menu-icon message"><svg><use href="#ci-message"/></svg></span><span class="menu-heading"><strong>Napíšte nám správu</strong></span><i id="menuMessageUnread" class="menu-unread hidden"></i><span class="menu-chevron">›</span></button>
     <p id="menuBuildVersion" class="menu-build-version"></p>
   </section>
 
@@ -208,10 +209,10 @@
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/terms-pdf-font.js?v=20261013-customer-social-v223"></script>
-<script src="/terms-pdf.js?v=20261013-customer-social-v223"></script>
-<script src="/app.js?v=20261013-customer-social-v223"></script>
-<script src="/back-swipe.js?v=20261013-customer-social-v223"></script>
+<script src="/terms-pdf-font.js?v=20261013-social-footer-v224"></script>
+<script src="/terms-pdf.js?v=20261013-social-footer-v224"></script>
+<script src="/app.js?v=20261013-social-footer-v224"></script>
+<script src="/back-swipe.js?v=20261013-social-footer-v224"></script>
 </body>
 </html>
 
