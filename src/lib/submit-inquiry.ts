@@ -86,5 +86,20 @@ export async function submitInquiry(input: InquiryInput, attemptId?: string) {
     databaseSaved: true,
     metaEventId,
     marketingConsent,
+    phoneCorrection: result?.submission_id && result?.phone_edit_token
+      ? { id: Number(result.submission_id), token: String(result.phone_edit_token) } : null,
   };
+}
+
+export async function correctInquiryPhone(auth: { id: number; token: string }, newPhone: string) {
+  const phone = normalizePhone(newPhone);
+  const response = await fetch(SUPABASE_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "correct_lead_phone", submission_id: auth.id, edit_token: auth.token, phone }),
+  });
+  if (!response.ok) throw new InquirySubmissionError("backend_http", response.status);
+  const result = await response.json().catch(() => null);
+  if (result?.ok !== true) throw new InquirySubmissionError("backend_response", response.status);
+  return { phone, smsQueued: result.sms_queued === true };
 }
