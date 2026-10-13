@@ -1529,6 +1529,7 @@ html.customer-awaiting-dog-v107 #appView{
 .customer-menu-rows button b{font-size:20px;font-weight:500;color:#aaaeb5}
 .menu-unread{width:9px;height:9px;border-radius:50%;background:#f97316}
 .menu-build-version{margin:auto 0 8px;padding-top:25px;text-align:center;color:#96969e;font-size:12px;overflow-wrap:anywhere}
+.menu-copyright-notice{margin:-4px 0 8px;text-align:center;color:#96969e;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
 .dog-details-photo-control{display:flex;align-items:center;gap:15px;margin:0 0 18px;padding:10px;border:1px solid #eee9e4;border-radius:18px;background:#fcfaf8}
 .dog-details-photo-control .btn{flex:1;min-height:46px;font-size:13px;padding:8px}
 .dog-details-photo-preview{width:68px;height:68px;flex:0 0 68px;display:grid;place-items:center;overflow:hidden;border-radius:25px;border:3px solid #eac3ad;background:#fff;font-size:28px}
