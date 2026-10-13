@@ -1941,7 +1941,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     button.dataset.boundV220='1';
     button.addEventListener('click',openFromFab);
     document.getElementById('navBookHintCloseV220')?.addEventListener('click',dismiss);
-    document.getElementById('navBooking')?.addEventListener('click',()=>{hint()?.classList.add('hidden')});
+    document.getElementById('navBooking')?.addEventListener('click',()=>{hint()?.classList.add('hidden');setTimeout(()=>maybeShowHint(),500)});
     document.getElementById('navDog')?.addEventListener('click',()=>{hint()?.classList.add('hidden')});
     hintTimer=setTimeout(()=>maybeShowHint(),1300);
   }
