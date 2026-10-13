@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261012-reminder-photo-l4-v218';
-const APP_VERSION='1.0.62';
+const APP_BUILD='20261013-booking-fab-v220';
+const APP_VERSION='1.0.63';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -565,11 +565,18 @@ function openDogDetails(mode='details',mandatory=false){
   ensureDogFormInModalV51();const dog=selectedDog();if(!dog)return;
   ensureDogEditorKeyboardV211();
   if(mode!=='vaccinations')clearVaccinationProofStageV104();
-  fillDogForm(dog);applyDogDetailsModeV96(mode,mandatory);updateVaccinationStatusesV96();bindVaccinationProofInputsV104();renderVaccinationProofsV104(dog.id);
+  fillDogForm(dog);
+  const l4=$('leptoL4DetailsV211');
+  if(l4 && mode==='vaccinations' && mandatory)l4.open=true;
+  applyDogDetailsModeV96(mode,mandatory);updateVaccinationStatusesV96();bindVaccinationProofInputsV104();renderVaccinationProofsV104(dog.id);
   renderDetailsPhoto(dog);
   dogDetailsSnapshotV96=dogFormSnapshotV96();
-  $('dogDetailsModal').classList.remove('hidden');document.documentElement.classList.add('dog-details-open');
+  const editor=$('dogDetailsModal');
+  editor.classList.remove('hidden');document.documentElement.classList.add('dog-details-open');
+  editor.scrollTop=0;
+  const editorCard=editor.querySelector('.dog-details-card');if(editorCard)editorCard.scrollTop=0;
   requestDogEditorFitV211();
+  requestAnimationFrame(()=>{if(editor.classList.contains('hidden'))return;requestDogEditorFitV211();editor.scrollTop=0;if(editorCard)editorCard.scrollTop=0});
 }
 function closeDogDetails(force=false){
   if(!force&&dogDetailsMandatoryV96)return false;
@@ -1891,6 +1898,58 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,120),{once:true});else setTimeout(start,120);
 })();
 
+/* v220: centered, thumb-reachable booking action with an account-scoped one-time hint. */
+(function customerBookingFabV220(){
+  const hintVersion='booking-fab-hint-v220';
+  const fab=()=>document.getElementById('navBookAddV220');
+  const hint=()=>document.getElementById('navBookHintV220');
+  const userKey=()=>state.session?.user?.id?hintVersion+':'+state.session.user.id:null;
+  let hintShownThisSession=false;
+  let hintTimer=0;
+  function dismiss(){
+    hint()?.classList.remove('show-v220');
+    hint()?.classList.add('hidden');
+    const k=userKey();if(k){try{localStorage.setItem(k,'1')}catch(_){}}
+    hintShownThisSession=true;
+  }
+  function maybeShowHint(retry=0){
+    const k=userKey();
+    if(!k||hintShownThisSession||!fab()||!hint())return;
+    try{if(localStorage.getItem(k)==='1')return}catch(_){}
+    if(window.__customerOnboardingCompleteV75!==true||state.activeTab!=='booking'||document.getElementById('appView')?.classList.contains('hidden')){
+      if(retry<8)hintTimer=setTimeout(()=>maybeShowHint(retry+1),650);
+      return;
+    }
+    if(document.querySelector('.legal-modal:not(.hidden),.booking-picker-v37:not(.hidden)')){
+      if(retry<8)hintTimer=setTimeout(()=>maybeShowHint(retry+1),650);
+      return;
+    }
+    hint().classList.remove('hidden');
+    hint().classList.add('show-v220');
+    try{localStorage.setItem(k,'1')}catch(_){}
+    hintShownThisSession=true;
+  }
+  function openFromFab(){
+    dismiss();
+    if(!state.session||!selectedDog()){toast('Najprv musí byť váš psík priradený k účtu.');return}
+    if(state.activeTab!=='booking')switchTab('booking');
+    if(typeof window.openBookingPickerV37==='function')window.openBookingPickerV37();
+    else toast('Rezervácie ešte nie sú pripravené. Skúste to znova.');
+  }
+  function init(){
+    const button=fab();if(!button||button.dataset.boundV220==='1')return;
+    button.dataset.boundV220='1';
+    button.addEventListener('click',openFromFab);
+    document.getElementById('navBookHintCloseV220')?.addEventListener('click',dismiss);
+    document.getElementById('navBooking')?.addEventListener('click',()=>{hint()?.classList.add('hidden');setTimeout(()=>maybeShowHint(),500)});
+    document.getElementById('navDog')?.addEventListener('click',()=>{hint()?.classList.add('hidden')});
+    hintTimer=setTimeout(()=>maybeShowHint(),1300);
+  }
+  addCustomerHook('afterBootstrap',()=>{clearTimeout(hintTimer);hintTimer=setTimeout(()=>maybeShowHint(),1000)});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
+  else init();
+})();
+
 /* v37: direct settings notification + compact multi-day booking flow */
 (function customerBookingAndSettingsV37(){
   if(window.__chvostikovoCustomerBookingAndSettingsV37)return;
@@ -2348,8 +2407,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       root.innerHTML=`<div class="booking-gate-v96"><div class="booking-launch-v37 booking-launch-disabled-v96" aria-disabled="true"><span class="booking-launch-icon-v37"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M7 3v4M17 3v4M3 10h18M12 13v5M9.5 15.5h5"></path></svg></span><span><strong>Chcem prihlásiť psíka</strong><small>Rezervácie sa sprístupnia po doplnení očkovaní.</small></span><b>›</b></div><button id="bookingVaccinationsV96" class="btn secondary full booking-vaccinations-v96" type="button">Doplniť očkovania</button></div>`;
       $('bookingVaccinationsV96')?.addEventListener('click',()=>openDogDetails('vaccinations',false));
     }else{
-      root.innerHTML=`<button id="openBookingPickerV37" class="booking-launch-v37" type="button"><span class="booking-launch-icon-v37"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M7 3v4M17 3v4M3 10h18M12 13v5M9.5 15.5h5"></path></svg></span><span><strong>Chcem prihlásiť psíka</strong></span><b>›</b></button>`;
-      $('openBookingPickerV37')?.addEventListener('click',openPickerV37);
+      // v220: Booking action is now the thumb-reachable center + in the bottom navigation.
+      root.innerHTML='';
     }
     const h=document.querySelector('#bookingTab .booking-section-head h2');if(h)h.textContent='Moje rezervácie';
   };
