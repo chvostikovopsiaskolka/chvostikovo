@@ -8,6 +8,7 @@ import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
 import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
+import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
 import { phoneFromForm } from "@/lib/phone";
 import { reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
 
@@ -39,6 +40,7 @@ export function ShortForm({
 }) {
   const formId = useId();
   const [sent, setSent] = useState(false);
+  const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
@@ -66,6 +68,7 @@ export function ShortForm({
       const fd = new FormData(form);
       const source_ref = sourceRef();
       const attribution = attributionPayload();
+      const submittedPhone = phoneFromForm(form, `s-${formId}-tel`);
       const submission = await submitInquiry({
         typ: "informacie",
         consent: true,
@@ -73,7 +76,8 @@ export function ShortForm({
         ...attribution,
         cta_source: trackingSource,
         meno: String(fd.get("meno") ?? "").trim(),
-        telefon: phoneFromForm(form, `s-${formId}-tel`),
+        telefon: submittedPhone,
+        email: String(fd.get("email") ?? "").trim() || undefined,
         zaujem: hideInterest ? interestValue : String(fd.get("zaujem") ?? ""),
       }, attemptId);
       void trackCookielessInteraction("form_submit", trackingSource || "informational_form", "sk", attemptId);
@@ -89,6 +93,7 @@ export function ShortForm({
         trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
       });
       progress.markSuccess();
+      setReceipt({ phone: submittedPhone, auth: submission.phoneCorrection });
       setSent(true);
       runFormTelemetry(() => onSent?.());
     } catch (error) {
@@ -108,8 +113,9 @@ export function ShortForm({
         </div>
         <h3 className="text-xl text-forest">Ďakujeme za váš záujem.</h3>
         <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-          O úspešnom prijatí formulára vás budeme informovať SMS.
+          Váš záujem sme prijali. Potvrdenie vám posielame SMS.
         </p>
+        {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
         {isTrackedLanding && (
           <div className="mt-2 w-full max-w-sm rounded-2xl bg-secondary/55 p-4">
             <p className="text-sm leading-relaxed text-forest/75">
@@ -146,6 +152,11 @@ export function ShortForm({
         <input id={`s-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
       </div>
       <PhoneField id={`s-${formId}-tel`} name="telefon" />
+      <div>
+        <label className="label-sm" htmlFor={`s-${formId}-email`}>E-mail (nepovinné)</label>
+        <input id={`s-${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} className="field" placeholder="vas@email.sk" />
+        <p className="mt-1 text-xs text-forest/65">Pre prípad, že sa vám nebudeme vedieť dovolať.</p>
+      </div>
       {!hideInterest && (
         <div>
           <label className="label-sm" htmlFor={`s-${formId}-zaujem`}>
