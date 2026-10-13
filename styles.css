@@ -2155,19 +2155,20 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
 
 /* v220: one thumb-reachable central reservation action, always above the nav rail. */
 .bottom-nav:has(#navBookAddV220){
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  /* Two original full-size controls, a narrow dedicated space for the booking +. */
+  grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr)!important;
   align-items:center!important;
   overflow:visible!important;
 }
 .bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){
-  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr) minmax(0,1fr)!important;
 }
 .bottom-nav #navBookAddV220{
-  width:76px!important;height:76px!important;min-height:76px!important;
+  width:60px!important;height:60px!important;min-height:60px!important;
   padding:0!important;max-width:100%!important;justify-self:center!important;
   margin:0 auto!important;border:5px solid #fff!important;
   border-radius:50%!important;background:#f97316!important;
-  color:#fff!important;transform:translateY(-15px)!important;
+  color:#fff!important;transform:translateY(-11px)!important;
   box-shadow:0 9px 24px rgba(234,88,12,.29),0 2px 6px rgba(17,24,39,.08)!important;
   display:grid!important;place-items:center!important;touch-action:manipulation;
   -webkit-tap-highlight-color:transparent!important;flex-shrink:0!important;
@@ -2175,7 +2176,7 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
 .bottom-nav #navBookAddV220:active{background:#ea580c!important;box-shadow:0 5px 16px rgba(234,88,12,.25)!important}
 .bottom-nav #navBookAddV220:focus-visible{outline:3px solid #fb923c!important;outline-offset:3px!important}
 .bottom-nav #navBookAddV220 .booking-fab-symbol-v220{
-  display:block;font-size:48px;font-weight:350;line-height:1;
+  display:block;font-size:41px;font-weight:350;line-height:1;
   transform:translateY(-2px);pointer-events:none;
 }
 .bottom-nav .booking-fab-hint-v220{
@@ -2199,8 +2200,10 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
   background:#fff3e7!important;color:#b45309!important;font-size:20px!important;line-height:1!important;
 }
 @media(max-width:370px){
-  .bottom-nav #navBookAddV220{width:68px!important;height:68px!important;min-height:68px!important}
-  .bottom-nav #navBookAddV220 .booking-fab-symbol-v220{font-size:44px}
+  .bottom-nav:has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 56px minmax(0,1fr)!important}
+  .bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 56px minmax(0,1fr) minmax(0,1fr)!important}
+  .bottom-nav #navBookAddV220{width:54px!important;height:54px!important;min-height:54px!important}
+  .bottom-nav #navBookAddV220 .booking-fab-symbol-v220{font-size:37px}
 }
 @media(max-width:720px){
   /* Stable top placement for vaccinations regardless of previous modal scroll or layout. */
@@ -2215,3 +2218,6 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
 @media(prefers-reduced-motion:reduce){
   .bottom-nav #navBookAddV220{transition:none!important}
 }
+
+/* v221: Beta release is shown in Menu > app version, never above bottom navigation. */
+#betaVersionBadge.beta-version-badge-v75{display:none!important}
