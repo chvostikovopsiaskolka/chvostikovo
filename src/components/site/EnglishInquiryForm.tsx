@@ -99,7 +99,7 @@ export function EnglishInquiryForm({
           <Check className="size-7" />
         </div>
         <h3 className="text-xl text-forest">Thank you!</h3>
-        <p className="text-sm text-muted-foreground">We have received your enquiry and are sending an SMS confirmation.</p>
+        <p className="text-sm text-muted-foreground">We have received your enquiry. We plan to send your SMS confirmation in about 2 minutes.</p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} language="en" />}
       </div>
     );

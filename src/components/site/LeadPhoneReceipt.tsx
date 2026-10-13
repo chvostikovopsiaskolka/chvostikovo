@@ -20,6 +20,7 @@ export function LeadPhoneReceipt({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [corrected, setCorrected] = useState(false);
+  const [smsQueued, setSmsQueued] = useState(false);
   const en = language === "en";
 
   async function save(e: FormEvent<HTMLFormElement>) {
@@ -32,6 +33,7 @@ export function LeadPhoneReceipt({
       setPhone(result.phone);
       setAuth(null);
       setCorrected(true);
+      setSmsQueued(result.smsQueued);
       setEditing(false);
     } catch {
       setError(en
@@ -45,7 +47,7 @@ export function LeadPhoneReceipt({
   return (
     <div className="w-full max-w-sm rounded-2xl border border-forest/10 bg-secondary/55 p-3 text-left">
       <p className="text-xs leading-relaxed text-forest/70">
-        {en ? "SMS confirmation is being sent to" : "SMS potvrdenie posielame na číslo"}
+        {en ? "We plan to send the SMS after about 2 minutes to" : "SMS plánujeme odoslať približne o 2 minúty na číslo"}
       </p>
       <div className="mt-1 flex items-center justify-between gap-2">
         <strong className="min-w-0 break-all text-sm text-forest">{phone}</strong>
@@ -77,9 +79,9 @@ export function LeadPhoneReceipt({
       )}
       {corrected && (
         <p role="status" className="mt-2 text-xs leading-relaxed text-forest/75">
-          {en
-            ? "Your contact number is updated. If the SMS was already sent, we won't send a duplicate."
-            : "Kontaktné číslo sme opravili. Ak už SMS odišla, ďalšiu neposielame."}
+          {smsQueued
+            ? (en ? "Number updated. The SMS will be sent to your updated number." : "Kontaktné číslo sme opravili. SMS bude odoslaná na aktualizované číslo.")
+            : (en ? "Number updated. If the SMS was already sent, we won't send another." : "Kontaktné číslo sme opravili. Ak už SMS odišla, ďalšiu neposielame.")}
         </p>
       )}
     </div>

@@ -82,6 +82,12 @@ assert(!progressSource.includes("JSON.stringify(target.value)") && !progressSour
 assert(forms.includes("hideInterest = false"), "Critical form check failed: informational interest selector is not enabled by default.");
 assert(forms.includes('name="email"') && englishForm.includes('name="email"'), "Enquiry forms must offer optional email.");
 assert(forms.includes('LeadPhoneReceipt') && englishForm.includes('LeadPhoneReceipt'), "Receipts must display a submitted phone.");
+const receiptSource = readFileSync(new URL("../src/components/site/LeadPhoneReceipt.tsx", import.meta.url), "utf8");
+const smsDelayMigration = readFileSync(new URL("../supabase/migrations/20261013_lead_sms_two_minute_delay.sql", import.meta.url), "utf8");
+assert(receiptSource.includes("smsQueued") && receiptSource.includes("SMS bude odoslaná na aktualizované číslo."), "Phone correction must confirm queued SMS or explain a previously sent SMS.");
+assert(forms.includes("približne o 2 minúty") && englishForm.includes("about 2 minutes"), "Receipt copy must describe the deferred SMS.");
+assert(smsDelayMigration.includes("new.created_at + interval '2 minutes'") && smsDelayMigration.includes("greatest(available_at,v_created_at+interval '2 minutes')"), "Queued lead SMS must retain the two-minute delay even after correction.");
+assert(smsDelayMigration.includes("new.form_type='lead'") && smsDelayMigration.includes("ELSE now()"), "Application SMS must not be delayed.");
 
 const backend = readFileSync(new URL("../supabase/functions/web-form-submit/index.ts", import.meta.url), "utf8");
 assert(backend.includes("/^\\+\\d{7,15}$/"), "Critical form check failed: web-form-submit phone regex is not the expected E.164 validation.");
