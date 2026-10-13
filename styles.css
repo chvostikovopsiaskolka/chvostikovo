@@ -2221,3 +2221,21 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
 
 /* v221: Beta release is shown in Menu > app version, never above bottom navigation. */
 #betaVersionBadge.beta-version-badge-v75{display:none!important}
+
+/* v222 – booking tile aligned with other rounded nav entries */
+.bottom-nav:has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr)!important}
+.bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr) minmax(0,1fr)!important}
+.bottom-nav #navBookAddV220{
+ width:100%!important;max-width:72px!important;height:70px!important;min-height:70px!important;
+ padding:0!important;margin:0!important;justify-self:stretch!important;align-self:center!important;
+ border:0!important;border-radius:24px!important;background:#f97316!important;color:#fff!important;
+ transform:none!important;box-shadow:none!important
+}
+.bottom-nav #navBookAddV220:active{background:#ea580c!important;box-shadow:none!important}
+.bottom-nav #navBookAddV220 .booking-fab-symbol-v220{font-size:40px!important}
+.bottom-nav .booking-fab-hint-v220{gap:0!important;padding:11px 17px!important}
+@media(max-width:370px){
+ .bottom-nav:has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 66px minmax(0,1fr)!important}
+ .bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 66px minmax(0,1fr) minmax(0,1fr)!important}
+ .bottom-nav #navBookAddV220{max-width:66px!important;width:100%!important;height:70px!important;min-height:70px!important}
+}
