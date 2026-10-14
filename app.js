@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261014-photo-prompt-v228';
-const APP_VERSION='1.0.71';
+const APP_BUILD='20261014-bulletin-v229';
+const APP_VERSION='1.0.72';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -3123,3 +3123,176 @@ async function uploadVaccinationProofsCoreV143(silent=false){
 
 /* v105 runtime-only styles consolidated into styles.css; upload test boundary. */
 
+
+
+/* Customer bulletin v229: published-only notices; no automatic modal, no push. */
+(function installCustomerBulletinV229(){
+  if(window.__customerBulletinV229)return;
+  window.__customerBulletinV229=true;
+  const $=id=>document.getElementById(id);
+  const rowsState={items:[],read:new Set(),at:0,loading:null,session:null,error:false};
+  const select='id,title,body,valid_from,valid_until,created_at,paper_style,image_path,cta_enabled,cta_title,cta_body,cta_button_label,cta_url';
+  let historyReturn=false;
+  let modalsReady=false;
+  function loggedIn(){return !!(state.session?.access_token&&state.data?.dogs?.length)}
+  function validDate(v){return !v||!Number.isNaN(new Date(v).getTime())}
+  function current(row){const now=Date.now();return (!row.valid_from||new Date(row.valid_from).getTime()<=now)&&(!row.valid_until||new Date(row.valid_until).getTime()>now)}
+  function safePhoto(path){
+    if(typeof path!=='string'||!path||path.length>280||path.includes('..')||! /^[A-Za-z0-9_\-./]+$/.test(path))return '';
+    return SUPABASE_URL+'/storage/v1/object/public/chvostikovo-bulletin-public/'+path.split('/').map(encodeURIComponent).join('/');
+  }
+  function safeLink(s){try{const u=new URL(String(s||''));return u.protocol==='https:'&&u.hostname&&!u.username&&!u.password?u.href:''}catch(_){return ''}}
+  function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
+  function modal(title,id){
+    const overlay=el('div','customer-bulletin-modal-v229 hidden');overlay.id=id;
+    overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
+    const dialog=el('div','customer-bulletin-dialog-v229');const header=el('div','customer-bulletin-head-v229');
+    const h=el('h2','',title);const x=el('button','customer-bulletin-close-v229','×');x.type='button';x.setAttribute('aria-label','Zavrieť');
+    const scroll=el('div','customer-bulletin-scroll-v229');
+    header.append(h,x);dialog.append(header,scroll);overlay.append(dialog);document.body.append(overlay);
+    overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
+    x.addEventListener('click',()=>close());
+    function close(){overlay.classList.add('hidden');if(id==='customerBulletinArticleV229'&&historyReturn){historyReturn=false;openHistory(false)}syncScrollLock()}
+    return{overlay,dialog,h,scroll,x,close};
+  }
+  let archiveModal,articleModal,zoomModal;
+  function ensureModals(){
+    if(modalsReady)return;modalsReady=true;
+    archiveModal=modal('Oznamy','customerBulletinHistoryV229');
+    articleModal=modal('','customerBulletinArticleV229');
+    zoomModal=modal('Fotografia oznamu','customerBulletinZoomV229');
+    zoomModal.overlay.classList.add('customer-bulletin-zoom-v229');
+    zoomModal.dialog.style.background='#12151b';
+    zoomModal.h.style.color='#fff';
+    zoomModal.scroll.style.display='grid';zoomModal.scroll.style.placeItems='center';
+    document.addEventListener('keydown',e=>{
+      if(e.key!=='Escape')return;
+      if(!zoomModal.overlay.classList.contains('hidden'))zoomModal.close();
+      else if(!articleModal.overlay.classList.contains('hidden'))articleModal.close();
+      else if(!archiveModal.overlay.classList.contains('hidden'))archiveModal.close();
+    });
+  }
+  function syncScrollLock(){
+    const any=[archiveModal,articleModal,zoomModal].some(x=>x&&!x.overlay.classList.contains('hidden'));
+    document.documentElement.classList.toggle('customer-bulletin-open-v229',any);
+  }
+  function rows(){return rowsState.items.slice().sort((a,b)=>String(b.valid_from||b.created_at||'').localeCompare(String(a.valid_from||a.created_at||'')))}
+  function drawBoard(){
+    const host=$('customerBulletinItemsV229');if(!host)return;host.replaceChildren();
+    const live=rows().filter(current).slice(0,2);
+    if(!live.length){host.append(el('div','customer-bulletin-empty-v229','Zatiaľ žiadne oznamy.'));return}
+    live.forEach(row=>{
+      const b=el('button','customer-bulletin-note-v229');b.type='button';b.dataset.style=['rose','cream','mint'].includes(row.paper_style)?row.paper_style:'rose';
+      if(!rowsState.read.has(Number(row.id)))b.dataset.unread='true';
+      const title=el('strong','',row.title||'Oznam');
+      const excerpt=el('span','customer-bulletin-excerpt-v229',row.body||'');
+      const action=el('span','customer-bulletin-open-v229','Otvoriť oznam →');
+      b.append(title,excerpt,action);b.addEventListener('click',()=>openArticle(row,false));host.append(b);
+    });
+  }
+  function drawHistory(){
+    if(!archiveModal)return;
+    const host=archiveModal.scroll;host.replaceChildren();
+    const saved=rows();
+    if(!saved.length){host.append(el('div','customer-bulletin-history-empty-v229','Zatiaľ žiadne oznamy.'));return}
+    saved.forEach(row=>{
+      const b=el('button','customer-bulletin-history-row-v229');b.type='button';
+      b.append(el('strong','',row.title||'Oznam'));
+      const status=current(row)?'Aktuálny oznam':'Starší oznam';
+      const s=el('small','',status);
+      if(!rowsState.read.has(Number(row.id))){s.append(' · ');s.append(el('span','customer-bulletin-new-v229','Nové'))}
+      b.append(s);b.addEventListener('click',()=>openArticle(row,true));host.append(b);
+    });
+  }
+  async function markRead(row){
+    if(!loggedIn()||rowsState.read.has(Number(row.id)))return;
+    const currentToken=state.session?.access_token;
+    try{
+      const res=await fetch(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?on_conflict=announcement_id,user_id',{
+        method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+currentToken,'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates,return=minimal'},
+        body:JSON.stringify({announcement_id:Number(row.id)})
+      });
+      if(!res.ok)throw Error('Nepodarilo sa označiť oznam ako prečítaný.');
+      if(state.session?.access_token===currentToken){rowsState.read.add(Number(row.id));drawBoard();drawHistory()}
+    }catch(err){console.warn('Customer bulletin: read receipt delayed',err)}
+  }
+  function showImage(url){
+    ensureModals();zoomModal.scroll.replaceChildren();
+    const img=el('img');img.src=url;img.alt='Zväčšená fotografia oznamu';
+    zoomModal.scroll.append(img);zoomModal.overlay.classList.remove('hidden');syncScrollLock();
+  }
+  function openArticle(row,fromHistory){
+    if(!row||!loggedIn())return;
+    ensureModals();
+    historyReturn=!!fromHistory;
+    archiveModal.overlay.classList.add('hidden');
+    articleModal.h.textContent=row.title||'Oznam';
+    articleModal.scroll.replaceChildren();
+    const photo=safePhoto(row.image_path);
+    if(photo){
+      const img=el('img','customer-bulletin-photo-v229');img.src=photo;img.alt='Obrázok k oznamu';img.loading='lazy';
+      img.addEventListener('click',()=>showImage(photo));img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showImage(photo)}});
+      img.setAttribute('role','button');img.tabIndex=0;img.setAttribute('aria-label','Zväčšiť fotografiu oznamu');
+      img.onerror=()=>{img.hidden=true};
+      articleModal.scroll.append(img);
+    }
+    articleModal.scroll.append(el('div','customer-bulletin-article-v229',row.body||''));
+    if(row.cta_enabled&&(row.cta_title||row.cta_body||safeLink(row.cta_url))){
+      const cta=el('section','customer-bulletin-cta-v229');
+      cta.append(el('span','heart','♥'));
+      const body=el('div','content');
+      if(row.cta_title)body.append(el('strong','',row.cta_title));
+      if(row.cta_body)body.append(el('p','',row.cta_body));
+      const href=safeLink(row.cta_url);
+      if(href){const a=el('a','',row.cta_button_label||'Zistiť viac');a.href=href;a.target='_blank';a.rel='noopener noreferrer';body.append(a)}
+      cta.append(body);articleModal.scroll.append(cta);
+    }
+    articleModal.scroll.scrollTop=0;
+    articleModal.overlay.classList.remove('hidden');syncScrollLock();
+    void markRead(row);
+  }
+  function openHistory(refreshData=true){
+    if(!loggedIn())return;
+    ensureModals();historyReturn=false;
+    archiveModal.overlay.classList.remove('hidden');drawHistory();syncScrollLock();
+    if(refreshData)void refresh(false);
+  }
+  async function refresh(force=false){
+    if(!loggedIn()){
+      rowsState.items=[];rowsState.read.clear();rowsState.at=0;rowsState.session=null;drawBoard();drawHistory();return;
+    }
+    const token=state.session.access_token;
+    if(rowsState.session!==token){rowsState.at=0;rowsState.session=token}
+    if(rowsState.loading)return rowsState.loading;
+    if(!force&&rowsState.at&&Date.now()-rowsState.at<60000){drawBoard();drawHistory();return}
+    rowsState.loading=(async()=>{
+      const headers={apikey:SUPABASE_KEY,Authorization:'Bearer '+token};
+      const [pub,read]=await Promise.all([
+        fetch(SUPABASE_URL+'/rest/v1/portal_announcements?select='+encodeURIComponent(select)+'&order=created_at.desc&limit=100',{headers,cache:'no-store'}),
+        fetch(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?select=announcement_id',{headers,cache:'no-store'})
+      ]);
+      if(!pub.ok)throw Error('Oznamy sa nedajú načítať ('+pub.status+').');
+      const json=await pub.json();
+      if(state.session?.access_token!==token)return;
+      rowsState.items=(Array.isArray(json)?json:[]).filter(r=>r.active!==false&&validDate(r.valid_from)&&validDate(r.valid_until));
+      if(read.ok){
+        const receipts=await read.json();
+        if(state.session?.access_token===token)rowsState.read=new Set((Array.isArray(receipts)?receipts:[]).map(x=>Number(x.announcement_id)));
+      }
+      rowsState.at=Date.now();rowsState.error=false;drawBoard();drawHistory();
+    })().catch(err=>{rowsState.error=true;console.warn('Customer bulletin load failed',err);drawBoard();drawHistory()})
+       .finally(()=>{rowsState.loading=null});
+    return rowsState.loading;
+  }
+  // Replace the historical auto-opening popup renderer: clicking a note is now required.
+  customerRenderers.announcements=()=>refresh(false);
+  addCustomerHook('afterSwitchTab',tab=>{if(tab==='booking'||tab==='menu')void refresh(false)});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(false)});
+  window.addEventListener('pageshow',event=>{if(event.persisted&&loggedIn())void refresh(false)});
+  function init(){
+    $('menuBulletinV229')?.addEventListener('click',()=>openHistory(true));
+    drawBoard();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
+  else init();
+})();
