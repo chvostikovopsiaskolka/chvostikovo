@@ -11,8 +11,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
-  <link rel="manifest" href="/manifest.webmanifest?v=20261014-photo-prompt-v228">
-  <link rel="stylesheet" href="/styles.css?v=20261014-photo-prompt-v228">
+  <link rel="manifest" href="/manifest.webmanifest?v=20261014-bulletin-v229">
+  <link rel="stylesheet" href="/styles.css?v=20261014-bulletin-v229">
   <style id="customer-l4-chevron-fix-v217">
     #dogDetailsModal .vaccine-box .l4-inline-v213 > summary .l4-question-v216 {
       display:block!important;flex:1 1 auto!important;min-width:0!important;
@@ -119,6 +119,11 @@
       <div class="dog-overview-identity"><div id="bookingDogAvatar" class="dog-overview-avatar" aria-hidden="true">🐾</div><strong id="bookingDogName" class="dog-overview-name">Môj psík</strong><select id="bookingDogSelector" class="dog-overview-selector hidden" aria-label="Vyberte psíka"></select></div>
       <div class="dog-overview-content"><div class="dog-overview-pass-row"><span class="overview-icon pass-icon"><svg><use href="#ci-ticket"/></svg></span><div id="passSummary" class="hero-pass dog-overview-pass"></div></div><button id="bookingVaccinationStatus" class="dog-overview-status" type="button"></button><button id="bookingVisitCount" class="dog-overview-visits" type="button"><span class="overview-icon"><svg><use href="#ci-chart"/></svg></span><span class="overview-label"></span></button><button id="bookingGradebook" class="dog-overview-gradebook" type="button"><svg><use href="#ci-book"/></svg><span>Žiacka knižka</span></button></div>
     </div>
+    <section id="customerBulletinV229" class="customer-bulletin-v229" aria-label="Nástenka škôlky">
+      <div id="customerBulletinItemsV229" class="customer-bulletin-items-v229">
+        <div class="customer-bulletin-empty-v229">Zatiaľ žiadne oznamy.</div>
+      </div>
+    </section>
     <div class="section-head"><div><h2>Vyberte deň</h2><p id="deadlineText"><strong>Rezervácie na ďalší týždeň do nedele 20:00.</strong><span>Ak potrebujete individuálny termín, kontaktujte nás.</span></p></div></div>
     <div id="bookingNotice"></div>
     <div id="announcementNotice"></div>
@@ -128,7 +133,7 @@
 
   <section id="menuTab" class="tab-page customer-menu hidden">
     <h1>Menu</h1>
-    <details id="menuDogGroup" class="customer-menu-group"><summary><span class="menu-icon"><svg><use href="#ci-paw"/></svg></span><span class="menu-heading"><strong>Môj psík</strong><small>Správa údajov a informácií o psíkovi</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuDogDetails" type="button"><svg class="menu-paw-icon"><use href="#ci-paw"/></svg><span>Údaje psíka</span><b>›</b></button><button id="menuVaccinations" type="button"><svg><use href="#ci-syringe"/></svg><span>Očkovania</span><b>›</b></button><button id="menuRules" type="button"><svg><use href="#ci-file"/></svg><span>Pravidlá škôlky</span><b>›</b></button><button id="menuGradebook" type="button"><svg><use href="#ci-book"/></svg><span>Žiacka knižka <small>Pripravujeme</small></span><b>›</b></button></div></details>
+    <details id="menuDogGroup" class="customer-menu-group"><summary><span class="menu-icon"><svg><use href="#ci-paw"/></svg></span><span class="menu-heading"><strong>Môj psík</strong><small>Správa údajov a informácií o psíkovi</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuDogDetails" type="button"><svg class="menu-paw-icon"><use href="#ci-paw"/></svg><span>Údaje psíka</span><b>›</b></button><button id="menuVaccinations" type="button"><svg><use href="#ci-syringe"/></svg><span>Očkovania</span><b>›</b></button><button id="menuBulletinV229" type="button"><svg><use href="#ci-bell"/></svg><span>Oznamy</span><b>›</b></button><button id="menuRules" type="button"><svg><use href="#ci-file"/></svg><span>Pravidlá škôlky</span><b>›</b></button><button id="menuGradebook" type="button"><svg><use href="#ci-book"/></svg><span>Žiacka knižka <small>Pripravujeme</small></span><b>›</b></button></div></details>
     <button id="menuContact" class="customer-menu-group customer-menu-direct" type="button"><span class="menu-icon"><svg><use href="#ci-user"/></svg></span><span class="menu-heading"><strong>Moje kontaktné údaje</strong><small>Vaše osobné údaje a kontakty</small></span><span class="menu-chevron">›</span></button>
     <details id="menuSettingsGroup" class="customer-menu-group"><summary><span class="menu-icon"><svg><use href="#ci-settings"/></svg></span><span class="menu-heading"><strong>Nastavenia</strong><small>Upozornenia a súhlasy</small></span><span class="menu-chevron">⌄</span></summary><div class="customer-menu-rows"><button id="menuNotifications" type="button"><svg><use href="#ci-bell"/></svg><span>Upozornenia</span><b>›</b></button><button id="menuLegal" type="button"><svg><use href="#ci-shield"/></svg><span>Súhlasy a podmienky</span><b>›</b></button><button id="menuLogout" type="button"><svg><use href="#ci-logout"/></svg><span>Odhlásiť sa</span><b>›</b></button></div></details>
     <button id="menuMessage" class="customer-menu-group customer-menu-direct" type="button"><span class="menu-icon message"><svg><use href="#ci-message"/></svg></span><span class="menu-heading"><strong>Napíšte nám správu</strong></span><i id="menuMessageUnread" class="menu-unread hidden"></i><span class="menu-chevron">›</span></button>
@@ -210,10 +215,10 @@
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/terms-pdf-font.js?v=20261014-photo-prompt-v228"></script>
-<script src="/terms-pdf.js?v=20261014-photo-prompt-v228"></script>
-<script src="/app.js?v=20261014-photo-prompt-v228"></script>
-<script src="/back-swipe.js?v=20261014-photo-prompt-v228"></script>
+<script src="/terms-pdf-font.js?v=20261014-bulletin-v229"></script>
+<script src="/terms-pdf.js?v=20261014-bulletin-v229"></script>
+<script src="/app.js?v=20261014-bulletin-v229"></script>
+<script src="/back-swipe.js?v=20261014-bulletin-v229"></script>
 </body>
 </html>
 
