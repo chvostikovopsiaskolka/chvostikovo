@@ -53,7 +53,7 @@ const twoDogApplication = {
 };
 const parsedTwoDogs = inquirySchema.parse(twoDogApplication);
 const dualPayload = buildDbPayload(parsedTwoDogs);
-assert(dualPayload.form_type === "application", "Two-dog form must remain one application.");
+assert(dualPayload.form_type === "application" && "dogs" in dualPayload, "Two-dog form must remain one application.");
 assert(dualPayload.dog_count === 2 && dualPayload.dogs.length === 2, "Application must include exactly two dog objects.");
 assert(dualPayload.dogs[0].dog_name === "Prvý" && dualPayload.dogs[1].dog_name === "Druhý", "The dogs must retain their separate identities.");
 assert(dualPayload.dogs[1].dog_weight_kg === 19.5 && dualPayload.dogs[1].dog_allergies === "Citlivé trávenie", "Second dog weight/health fields were lost.");
@@ -62,7 +62,7 @@ assert(!inquirySchema.safeParse({ ...twoDogApplication, pes2: "" }).success, "Mi
 assert(!inquirySchema.safeParse({ ...twoDogApplication, vaha2: "invalid" }).success, "Invalid second dog's weight must fail validation.");
 assert(!inquirySchema.safeParse({ ...twoDogApplication, povaha2: "" }).success, "Missing second dog's temperament must fail validation.");
 const oneDogPayload = buildDbPayload(inquirySchema.parse({ ...twoDogApplication, dog_count: "1" }));
-assert(oneDogPayload.form_type === "application" && oneDogPayload.dog_count === 1 && oneDogPayload.dogs.length === 1, "Switching back to one dog must keep the old payload shape.");
+assert(oneDogPayload.form_type === "application" && "dogs" in oneDogPayload && oneDogPayload.dog_count === 1 && oneDogPayload.dogs.length === 1, "Switching back to one dog must keep the old payload shape.");
 
 
 standInquirySchema.parse({
