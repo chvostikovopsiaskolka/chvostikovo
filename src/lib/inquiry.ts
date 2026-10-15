@@ -29,6 +29,16 @@ export const shortSchema = z.object({
   email: z.string().trim().email().max(254).optional(),
 }).merge(attributionSchema);
 
+const secondDogSchema = z.object({
+  pes: z.string().trim().min(1).max(200),
+  plemeno: z.string().trim().min(1).max(200),
+  vaha: z.string().transform(parseDogWeightKg).refine((v): v is number => v !== null, "Zadajte platnú váhu v kilogramoch."),
+  pohlavie: z.string().min(1).max(40),
+  vek: z.string().min(1).max(100),
+  kastrovana: z.string().min(1).max(40),
+  alergie: z.string().trim().max(3000).optional(),
+  povaha: z.string().trim().min(1).max(3000),
+});
 export const longSchema = z.object({
   typ: z.literal("prihlaska"),
   consent: z.literal(true),
@@ -46,6 +56,7 @@ export const longSchema = z.object({
   viac: z.string().trim().min(1).max(3000).optional(),
   alergie: z.string().trim().max(3000).optional(),
   povaha: z.string().trim().min(1).max(3000).optional(),
+  druhyPes: secondDogSchema.optional(),
 }).merge(attributionSchema);
 
 export const inquirySchema = z.discriminatedUnion("typ", [shortSchema, longSchema]).superRefine((data, ctx) => {
@@ -93,6 +104,7 @@ export function buildFields(data: InquiryData): Array<{ label: string; value: st
     { label: "Meno a priezvisko majiteľa", value: data.meno },
     { label: "Telefón", value: data.telefon },
     { label: "Meno psa", value: data.pes },
+    ...(data.druhyPes ? [{ label: "Počet psíkov", value: "2" }] : []),
     { label: "Plemeno psa", value: data.plemeno },
     { label: "Váha psa", value: `${data.vaha} kg` },
     { label: "Pohlavie psa", value: data.pohlavie },
@@ -103,6 +115,16 @@ export function buildFields(data: InquiryData): Array<{ label: string; value: st
       ? [{ label: "Alergie a zdravotné obmedzenia", value: data.alergie || "" },
         { label: "Povaha a ďalšie informácie", value: data.povaha || "" }]
       : [{ label: "Viac o psíkovi", value: data.viac || "" }]),
+    ...(data.druhyPes ? [
+      {label:"2. psík – Meno",value:data.druhyPes.pes},
+      {label:"2. psík – Plemeno",value:data.druhyPes.plemeno},
+      {label:"2. psík – Váha",value:data.druhyPes.vaha+" kg"},
+      {label:"2. psík – Pohlavie",value:data.druhyPes.pohlavie},
+      {label:"2. psík – Vek",value:data.druhyPes.vek},
+      {label:"2. psík – Kastrácia",value:data.druhyPes.kastrovana},
+      {label:"2. psík – Alergie",value:data.druhyPes.alergie||""},
+      {label:"2. psík – Povaha",value:data.druhyPes.povaha},
+    ] : []),
     { label: "Súhlas so spracovaním osobných údajov", value: "Áno" },
     ...attribution,
   ];
@@ -137,6 +159,15 @@ export function buildDbPayload(data: InquiryData) {
     form_type: "application",
     owner_name: data.meno,
     phone: data.telefon,
+    dog_count: data.druhyPes ? 2 : 1,
+    ...(data.druhyPes ? { dogs: [
+      {dog_name:data.pes,dog_breed:data.plemeno,dog_weight_kg:data.vaha,dog_sex:data.pohlavie,
+       dog_age_text:data.vek,dog_neutered:data.kastrovana,dog_allergies:data.alergie??"",
+       dog_temperament:data.povaha??""},
+      {dog_name:data.druhyPes.pes,dog_breed:data.druhyPes.plemeno,dog_weight_kg:data.druhyPes.vaha,
+       dog_sex:data.druhyPes.pohlavie,dog_age_text:data.druhyPes.vek,dog_neutered:data.druhyPes.kastrovana,
+       dog_allergies:data.druhyPes.alergie??"",dog_temperament:data.druhyPes.povaha}
+    ]} : {}),
     dog_name: data.pes,
     dog_breed: data.plemeno,
     dog_weight_kg: data.vaha,
