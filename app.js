@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-compact-booking-v235';
-const APP_VERSION='1.0.78';
+const APP_BUILD='20261015-board-reminder-v236';
+const APP_VERSION='1.0.79';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1279,7 +1279,7 @@ function ensureBookingLayout(){
   const oldHead=[...booking.querySelectorAll('.section-head')].find(x=>x.querySelector('h2')?.textContent?.trim()==='Vyberte deň');
   if(oldHead)oldHead.remove();
   if(!booking.querySelector('.booking-section-head')){
-    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme o rezerváciu miesta na ďalší týždeň do nedele 20:00.</strong><span class="hidden"></span></div>');
+    week.insertAdjacentHTML('beforebegin','<div class="section-head booking-section-head"><div><h2>Vyberte deň</h2><span id="weekTitle" class="week-range-v36">Nasledujúce dni</span></div></div><div id="deadlineText" class="deadline-card"><strong>Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.</strong><span class="hidden"></span></div>');
   }
 }
 ensureBookingLayout();
@@ -2137,7 +2137,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     box.classList.toggle('hidden',!!showClosed);
     box.querySelector('strong').textContent=showClosed
       ? 'Prihlasovanie bolo na tento týždeň uzavreté v nedeľu o 20:00.'
-      : 'Rezervácia na ďalší týždeň do nedele 20:00.';
+      : 'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
     requestAnimationFrame(fitBookingDeadlineTitle);
     const detail=box.querySelector('span');
     if(detail){detail.textContent=showClosed?'Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.':'';detail.classList.toggle('hidden',!showClosed)}
