@@ -2118,8 +2118,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const title=$('deadlineText')?.querySelector('strong');
     if(!title||!title.clientWidth)return;
     if(title.closest('.customer-bulletin-v229')){
-      // v230: keep the existing readable font size; allow 2+ lines at Sunday cutoff.
-      title.style.removeProperty('font-size');return;
+      // v236: fit the exact reservation reminder to one line on mobile.
+      title.style.setProperty('white-space','nowrap','important');
+      title.style.setProperty('font-size','10px','important');
+      const room=title.clientWidth,actual=title.scrollWidth;
+      if(room>0&&actual>room)title.style.setProperty('font-size',Math.max(7,Math.floor((10*room/actual-0.1)*10)/10)+'px','important');
+      return;
     }
     title.style.setProperty('font-size','13px','important');
     if(title.scrollWidth>title.clientWidth)title.style.setProperty('font-size',(13*title.clientWidth/title.scrollWidth).toFixed(2)+'px','important');
