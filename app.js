@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-board-polish-v232';
-const APP_VERSION='1.0.75';
+const APP_BUILD='20261015-vacc-notice-v233';
+const APP_VERSION='1.0.76';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -389,6 +389,7 @@ function customerCareAction(n){
     switchTab('menu');openDogDetails('vaccinations',false);
   }
 }
+const vaccinationCarePolicyV233='Po skončení platnosti treba pred ďalšou rezerváciou aktualizovať dátum aj fotografiu očkovacieho preukazu. Zdravie psíkov je pre nás prvoradé.';
 function renderNotifications(){
   if(window.__customerOnboardingCompleteV75!==true){$('notificationPopup')?.classList.add('hidden');return}
   const careRows=(state.data?.notifications||[]).filter(n=>['vaccination_expiry','pass_expiry'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,12);
@@ -401,7 +402,7 @@ function renderNotifications(){
     if(!groups.has(key))groups.set(key,[]);
     groups.get(key).push(n);
   }
-  notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(n.body)).join('<br>')}</p><button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
+  notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(n.body)).join('<br>')}</p>${group[0].notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}<button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
   notice.querySelectorAll('[data-care-notice]').forEach(b=>b.addEventListener('click',()=>{const row=careRows.find(n=>Number(n.id)===Number(b.dataset.careNotice));if(row)customerCareAction(row)}));
   const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
   let modal=$('notificationPopup');
@@ -414,7 +415,7 @@ function renderNotifications(){
   $('notificationPopupTitle').classList.toggle('hidden',!rows.some(n=>n.notification_type==='announcement_push'));
   modal.querySelector('.notification-popup-card').classList.toggle('notification-popup-without-heading',!rows.some(n=>n.notification_type==='announcement_push'));
   const list=$('notificationPopupList');
-  list.innerHTML=rows.map(n=>`<div class="notification-popup-item"><strong>${esc(n.title||'Upozornenie')}</strong><div>${esc(n.body||'')}</div>${['pass_expiry','vaccination_expiry'].includes(n.notification_type)?`<button type="button" class="btn compact" data-popup-care="${Number(n.id)}">${n.notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button>`:''}</div>`).join('');
+  list.innerHTML=rows.map(n=>`<div class="notification-popup-item"><strong>${esc(n.title||'Upozornenie')}</strong><div>${esc(n.body||'')}</div>${n.notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}${['pass_expiry','vaccination_expiry'].includes(n.notification_type)?`<button type="button" class="btn compact" data-popup-care="${Number(n.id)}">${n.notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button>`:''}</div>`).join('');
   list.querySelectorAll('[data-popup-care]').forEach(b=>b.addEventListener('click',()=>{const row=rows.find(n=>Number(n.id)===Number(b.dataset.popupCare));if(row){close();customerCareAction(row)}}));
   const close=async()=>{
     visibleIds.forEach(id=>customerClosedNotificationIdsV59.add(id));
@@ -2286,7 +2287,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const weekNoticeClosed=week.some(d=>bookingDeadlineClosedV95(d.date,dog));
       const weekNoticeFull=!weekNoticeClosed&&week.some(d=>Number(d.available)<=0);
       const weekNotice=weekNoticeClosed
-        ? '<div class="booking-week-closed-note-v127"><strong>Prihlasovanie uzavreté.</strong><span>Kliknite na deň a napíšte nám aj pri plnej kapacite.</span></div>'
+        ? '<div class="booking-week-closed-note-v127"><strong>Prihlasovanie sa uzavrelo v nedeľu o 20:00.</strong><span>Stále nám však môžete napísať kliknutím na požadovaný deň.</span></div>'
         : weekNoticeFull
         ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni sú plné.</strong><span>Kliknite na deň a napíšte nám záujem o miesto.</span></div>'
         : '';
