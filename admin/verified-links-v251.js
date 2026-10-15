@@ -41,7 +41,7 @@ window.assignedDogsV251=assignedDogsV251;window.registrationLabelV251=registrati
    const root=button.closest('.note')||document;dogId=Number(root.querySelector('.customer-dog-select,.v42-owner-dog')?.value);if(!dogId){alert('Najprv vyberte existujúceho psíka.');return}
   }
   if(!dogId)return;button.disabled=true;
-  try{const ok=await verifyDog(userId,dogId);if(ok&&!manual&&requestedDogNamesV251(profile,state.customerDogSubmissions.find(s=>s.user_id===userId)).length===2)await secondDog(userId,dogId);await loadData();window.refreshAdminDashboardV63?.();queueAdminLive('accounts',40);}catch(e){alert(e.message||'Priradenie sa nepodarilo.')}finally{button.disabled=false}
+  try{const ok=await verifyDog(userId,dogId);if(ok&&!manual&&requestedDogNamesV251(profile,state.customerDogSubmissions.find(s=>s.user_id===userId)).length===2)await secondDog(userId,dogId);await loadData();if(ok&&button.classList.contains('v42-owner-approve'))document.getElementById('adminDashboardModalCloseV41')?.click();window.refreshAdminDashboardV63?.();queueAdminLive('accounts',40);}catch(e){alert(e.message||'Priradenie sa nepodarilo.')}finally{button.disabled=false}
  },true);
  const original=window.registeredOwnerCompactHtml;
  if(original){window.registeredOwnerCompactHtml=registeredOwnerCompactHtml=function(profile,dogs,cls){if(dogs.length>=2)return original(profile,dogs,cls);return original(profile,dogs,cls).replace('</details>','<button type="button" class="btn secondary compact" data-manual-dog-v251 data-customer-user="'+esc(profile.user_id)+'">Priradiť ďalšieho psíka</button></details>')}}
