@@ -105,14 +105,38 @@ async function messageForWebhook(body: Json) {
     };
   }
 
+  if (table === "booking_batch_push_events") {
+    const count = Math.max(0, Math.min(15, Number(record.day_count) || 0));
+    if (!count) return null;
+    const dogIds = Array.isArray(record.dog_ids) ? record.dog_ids.map(Number).filter(Number.isSafeInteger) : [Number(record.dog_id)];
+    const dogRows = await rest(`dogs?id=in.(${dogIds.join(",")})&select=name&order=id`);
+    const dogName = Array.isArray(dogRows) ? dogRows.map(d=>String(d.name)).join(" a ") : "Psík";
+    const dates = Array.isArray(record.dates) ? record.dates.map(String).filter(v => /^\d{4}-\d{2}-\d{2}$/.test(v)) : [];
+    const dayWord = count === 1 ? "deň" : count < 5 ? "dni" : "dní";
+    const dateDetail = count === 1 && dates.length ? ` · ${dates[0].split("-").reverse().join(".")}` : "";
+    return {
+      title: "Nová rezervácia čaká na schválenie",
+      body: `${dogName} · záujem o rezerváciu na ${count} ${dayWord}${dateDetail}.`,
+      tag: `booking-batch-${id}`,
+    };
+  }
+
   if (table === "customer_booking_requests") {
     const dogRows = await rest(`dogs?id=eq.${encodeURIComponent(String(record.dog_id || ""))}&select=name&limit=1`);
     const dogName = Array.isArray(dogRows) && dogRows[0]?.name ? String(dogRows[0].name) : "Psík";
     const date = String(record.reservation_date || "");
     if (record.status === "approved") {
+      if (record.booking_group_id) {
+        const group = await rest(`customer_booking_requests?booking_group_id=eq.${encodeURIComponent(String(record.booking_group_id))}&select=id,dog_id,status&order=id`) as Array<Json>;
+        const approved=group.filter(q=>q.status==="approved");
+        if (!approved.length || Number(approved[0].id)!==Number(record.id) || group.some(q=>q.status==="pending")) return null;
+        const ids=approved.map(q=>Number(q.dog_id));
+        const names=await rest(`dogs?id=in.(${ids.join(",")})&select=name&order=id`) as Array<Json>;
+        return {title:approved.length===2?"Rezervácie oboch psíkov boli schválené":"Rezervácia bola schválená",body:names.map(d=>String(d.name)).join(" a ")+" · "+date.split("-").reverse().join("."),tag:`booking-approved-group-${record.booking_group_id}`,recipientUserId:String(record.user_id||""),audience:"customer"};
+      }
       return {
         title: "Rezervácia bola schválená",
-        body: `Rezervácia na ${date ? date.split("-").reverse().join(".") : ""} bola schválená. Pozrite si, kto bude v ten deň s vaším psíkom v škôlke.`,
+        body: `Rezervácia na ${date ? date.split("-").reverse().join(".") : ""} bola schválená. Pozrite, s kým bude váš psík v škôlke.`,
         tag: `booking-approved-${id}`,
         recipientUserId: String(record.user_id || ""),
         audience: "customer",
@@ -144,11 +168,12 @@ async function messageForWebhook(body: Json) {
   }
 
   if (table === "customer_pass_requests") {
-    const dogRows = await rest(`dogs?id=eq.${encodeURIComponent(String(record.dog_id || ""))}&select=name&limit=1`);
-    const dogName = Array.isArray(dogRows) && dogRows[0]?.name ? String(dogRows[0].name) : "Psík";
+    const ids=Array.isArray(record.dog_ids)?record.dog_ids.map(Number):[Number(record.dog_id)];
+    const dogRows = await rest(`dogs?id=in.(${ids.join(",")})&select=name&order=id`);
+    const dogName = Array.isArray(dogRows)?dogRows.map(d=>String(d.name)).join(" a "):"Psík";
     return {
       title: "Záujem o permanentku",
-      body: `${dogName} má záujem o ďalšiu 10-vstupovú permanentku.`,
+      body: `${dogName} · záujem o ${Number(record.total_entries)}-vstupovú ${ids.length===2?"spoločnú ":""}permanentku.`,
       tag: `pass-interest-${id}`,
     };
   }
@@ -163,12 +188,15 @@ async function messageForWebhook(body: Json) {
   }
 
   if (table === "portal_notifications") {
+    const isAdminMessage = record.notification_type === "customer_message_admin";
+    const notificationBody = String(record.push_body || record.body || "Máte nové upozornenie.");
+    const isTaxiInterest = isAdminMessage && notificationBody.toLocaleLowerCase("sk-SK").includes("doplnenie taxi");
     return {
-      title: String(record.push_title || record.title || "Chvostíkovo"),
-      body: String(record.push_body || record.body || "Máte nové upozornenie."),
+      title: isTaxiInterest ? "Nová žiadosť o taxi" : String(record.push_title || record.title || "Chvostíkovo"),
+      body: notificationBody,
       tag: `portal-${id}`,
       recipientUserId: String(record.recipient_user_id || ""),
-      audience: "customer",
+      audience: isAdminMessage ? "admin" : "customer",
     };
   }
 
@@ -283,6 +311,58 @@ async function dispatchAdminDailySummary(body: Json) {
   return { sent, removed, ignored: false, day, dog_count: dogCount, taxi_count: taxiRows.length };
 }
 
+
+async function dispatchMarketingPreview(body: Json) {
+  const day = String(body.report_date || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+    throw new Error("Invalid report date");
+  }
+  const publications = await rest(
+    "admin_marketing_report_publications?report_date=eq." + encodeURIComponent(day) + "&select=report_date,snapshot&limit=1"
+  ) as Array<Json>;
+  if (!Array.isArray(publications) || !publications.length) {
+    throw new Error("Marketing report is not published");
+  }
+  const snap = (publications[0].snapshot || {}) as Json;
+  const owners = await rest("staff?active=eq.true&role=eq.owner&select=user_id") as Array<Json>;
+  const allowed = new Set((Array.isArray(owners) ? owners : []).map(row => String(row.user_id)));
+  const all = await rest("admin_push_subscriptions?active=eq.true&select=id,user_id,endpoint,p256dh,auth") as Array<Json>;
+  const subscriptions = (Array.isArray(all) ? all : []).filter(row => allowed.has(String(row.user_id)));
+  const web = Number(snap.web_openings || 0);
+  const paid = Number(snap.web_meta_paid || 0);
+  const spend = Number(snap.meta_spend_eur || 0);
+  const links = Number(snap.meta_link_clicks || 0);
+  const metaDay = String(snap.meta_day || "posledný import");
+  const content = JSON.stringify({
+    title: "Nový marketingový report 📊",
+    body: "Dnes: " + web + " otvorení webu, " + paid + " z platených Meta odkazov. Meta " +
+      metaDay + ": " + spend.toFixed(2).replace(".", ",") + " €, " + links + " klikov na web.",
+    tag: "chv-marketing-preview-" + day,
+    badge: "/notification-badge.png?v=20260917-push",
+    data: { url: "/#kampane-report-" + day },
+  });
+  let sent = 0, removed = 0, failed = 0;
+  for (const row of subscriptions) {
+    try {
+      await webpush.sendNotification({
+        endpoint: String(row.endpoint),
+        keys: { p256dh: String(row.p256dh), auth: String(row.auth) },
+      }, content, { TTL: 21600, urgency: "high" });
+      sent++;
+    } catch(error) {
+      const status = Number((error as { statusCode?: number }).statusCode || 0);
+      if (status === 404 || status === 410) {
+        await rest("admin_push_subscriptions?id=eq." + encodeURIComponent(String(row.id)), { method: "DELETE" });
+        removed++;
+      } else {
+        failed++;
+        console.error("Marketing report push failed", status, error instanceof Error ? error.message : String(error));
+      }
+    }
+  }
+  return { sent, removed, failed, targeted: subscriptions.length, day, audience: "owner" };
+}
+
 // Called only when a customer push is being sent, never by a polling loop.
 async function customerUnreadBadgeCountV186(userId: string) {
   const conversations = await rest('portal_conversations?customer_user_id=eq.'
@@ -315,7 +395,7 @@ async function dispatch(body: Json) {
   const customer = message.audience === "customer";
   if (customer && !message.recipientUserId) return { sent: 0, removed: 0, ignored: true };
   const subscriptionTable = customer ? "portal_push_subscriptions" : "admin_push_subscriptions";
-  const userFilter = customer ? `&user_id=eq.${encodeURIComponent(message.recipientUserId)}` : "";
+  const userFilter = message.recipientUserId ? `&user_id=eq.${encodeURIComponent(message.recipientUserId)}` : "";
   const rows = await rest(`${subscriptionTable}?active=eq.true${userFilter}&select=id,endpoint,p256dh,auth`);
   let sent = 0;
   let removed = 0;
@@ -361,6 +441,7 @@ Deno.serve(async (req: Request) => {
     const body = await req.json().catch(() => ({})) as Json;
     if (req.headers.get("x-push-secret") === WEBHOOK_SECRET) {
       if (body.action === "daily_summary") return response(await dispatchAdminDailySummary(body));
+      if (body.action === "marketing_report_preview") return response(await dispatchMarketingPreview(body));
       return response(await dispatch(body));
     }
 

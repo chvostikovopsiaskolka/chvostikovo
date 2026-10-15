@@ -27,6 +27,8 @@ async function confirmation(hash,user,ok=true){
  w.authMessage=(type,text)=>msg={type,text};w.loading=()=>{};w.showAuth=m=>mode=m;
  const again=w.document.createElement('input');again.id='signupPasswordAgain';w.document.body.append(again);
  w.$('signupPassword').value='ValidPass1';again.value='ValidPass1';w.$('signupEmail').value='owner@example.test';
+ w.$('signupDogName').value='Bella';
+ w.eval(section('function registrationNamesV244',"$('signupForm').addEventListener('submit'"));
  w.eval(section("$('signupForm').addEventListener('submit'","$('forgotForm').addEventListener('submit'"));
  const btn=w.$('signupForm').querySelector('button[type=submit]');
  const submit=()=>w.$('signupForm').dispatchEvent(new w.SubmitEvent('submit',{cancelable:true,submitter:btn}));
@@ -36,6 +38,7 @@ async function confirmation(hash,user,ok=true){
  assert(payload.path.includes(encodeURIComponent(w.CUSTOMER_PUBLIC_URL)));dom.window.close();
  // Photo selection: 5 allowed, sixth rejected, old processing cannot enter another dog.
  const ctx=vm.createContext({state:{session:{user:{id:'a'}},data:{vaccination_proofs:[]}},dog:{id:1},window:{},console,Promise,Number,Math});
+ ctx.vaccinationFreshUploadV234=new Set();
  ctx.autoUploads=0;ctx.uploadVaccinationProofsV104=async()=>{ctx.autoUploads++};ctx.$=()=>null;ctx.selectedDog=()=>ctx.dog;ctx.vaccinationProofsForDogV104=()=>[];ctx.toast=()=>{};ctx.renderVaccinationProofsV104=()=>{};
  vm.runInContext('let customerMutationRevisionV145=0,vaccinationProofFilesV104=[],vaccinationProofReplaceModeV104=false;'+section('let vaccinationProofStageEpochV143=0;','function applyDogDetailsModeV96')+section('async function addVaccinationProofFilesV104','function v105PickerGuard'),ctx);
  ctx.v105PrepareProof=async f=>({dataUrl:f});await ctx.addVaccinationProofFilesV104(['1','2','3','4','5','6']);

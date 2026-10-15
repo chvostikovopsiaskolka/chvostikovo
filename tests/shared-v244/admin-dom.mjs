@@ -1,0 +1,18 @@
+import {JSDOM} from 'jsdom';import fs from 'node:fs';import assert from 'node:assert/strict';
+process.env.KEEP_TEST_DB='1';const {db,auth,customer,staff}=await import('./database.mjs');
+await db.exec('delete from public.pass_dogs; delete from public.customer_pass_requests; delete from public.customer_booking_requests; delete from public.reservations; delete from public.visits; delete from public.passes; update public.customer_owner_links set allowed_dog_ids=ARRAY[9001]::bigint[]');
+const dom=new JSDOM('<div class="note"><select class="v42-owner-dog"><option value="9001">Bella</option></select><button class="v42-owner-approve" data-customer-user="'+customer+'">Priradiť</button></div>',{url:'https://fixture.invalid',runScripts:'outside-only'});const w=dom.window;
+let refreshed=0;const state={customerProfiles:[{user_id:customer,full_name:'Test Owner',registration_dog_names:['Bella','Aria']}],dogs:[{id:9001,name:'Bella',owner_id:9001,active:true,owners:{name:'Test Owner'}},{id:9002,name:'Aria',owner_id:9001,active:true}],customerOwnerLinks:[{user_id:customer,owner_id:9001,allowed_dog_ids:[9001]}],customerBookings:[]};
+Object.assign(w,{state,registeredOwnerCompactHtml:()=>'<details></details>',esc:s=>String(s??''),skDate:s=>s,dogById:id=>state.dogs.find(d=>d.id===Number(id)),alert:s=>{throw Error(s)},confirm:()=>true,loadData:async()=>{refreshed++},withJwtRetry:fn=>fn(),supabase:{rpc:async(name,args)=>{await auth(staff);try{return {data:(await db.query('select public.portal_link_dog_verified_v244($1,$2,$3,$4,$5) r',[args.p_user_id,args.p_dog_id,args.p_owner_id,args.p_intro_confirmed,args.p_ownership_note])).rows[0].r}}catch(error){return {error}}}}});
+w.eval(fs.readFileSync('admin/shared-admin-v244.js','utf8'));
+const wait=async condition=>{for(let i=0;i<150;i++){if(condition())return;await new Promise(r=>setTimeout(r,10))}throw Error('Admin DOM timed out')};
+async function approveFirst(){w.document.querySelector('.v42-owner-approve').click();await wait(()=>w.document.querySelector('[data-save]'));w.document.querySelector('[data-intro]').checked=true;w.document.querySelector('[data-note]').value='Osobne overené';w.document.querySelector('[data-save]').click()}
+await approveFirst();await wait(()=>w.document.querySelector('[data-no]'));w.document.querySelector('[data-no]').click();await wait(()=>refreshed===1);
+assert.deepEqual((await db.query('select allowed_dog_ids from public.customer_owner_links where user_id=$1',[customer])).rows[0].allowed_dog_ids,[9001]);
+console.log('PASS admin DOM: two-name registration offers second dog; No retains only Bella');
+state.customerProfiles[0].registration_dog_names=['Bella'];await approveFirst();await wait(()=>refreshed===2);assert.equal(w.document.querySelector('[data-no]'),null);
+console.log('PASS admin DOM: one-name registration has no second-dog question');
+state.customerProfiles[0].registration_dog_names=['Bella','Aria'];await approveFirst();await wait(()=>w.document.querySelector('[data-yes]'));w.document.querySelector('[data-yes]').click();w.document.querySelector('[data-dog]').value='9002';w.document.querySelector('[data-assign]').click();await wait(()=>w.document.querySelector('[data-save]'));w.document.querySelector('[data-intro]').checked=true;w.document.querySelector('[data-note]').value='Overené osobne s majiteľom';w.document.querySelector('[data-save]').click();await wait(()=>refreshed===3);
+assert.deepEqual((await db.query('select allowed_dog_ids from public.customer_owner_links where user_id=$1',[customer])).rows[0].allowed_dog_ids,[9001,9002]);
+console.log('PASS admin DOM: explicit second-dog selection calls verified SQL and grants only Aria');
+dom.window.close();await db.close();
