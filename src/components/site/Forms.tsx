@@ -339,7 +339,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
               Vyberte
             </option>
             <option>Pes</option>
-            <option>Fenka</option>
+            <option>Suka</option>
           </select>
         </div>
         <div>
@@ -422,7 +422,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
             <div>
               <label className="label-sm" htmlFor={`l-${formId}-pohlavie2`}>Pohlavie psa *</label>
               <select id={`l-${formId}-pohlavie2`} name="pohlavie2" required className="field" defaultValue="">
-                <option value="" disabled>Vyberte</option><option>Pes</option><option>Fenka</option>
+                <option value="" disabled>Vyberte</option><option>Pes</option><option>Suka</option>
               </select>
             </div>
             <div>
