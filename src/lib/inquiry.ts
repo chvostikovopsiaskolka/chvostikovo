@@ -35,6 +35,16 @@ export const longSchema = z.object({
   source_ref: z.string().max(TRACKING_LIMITS.source_ref).optional(),
   meno: z.string().min(1).max(200),
   telefon: z.string().regex(/^\+\d{7,15}$/),
+  dog_count: z.enum(["1", "2"]).optional(),
+  pes2: z.string().trim().max(200).optional(),
+  plemeno2: z.string().trim().max(200).optional(),
+  vaha2: z.string().optional(),
+  pohlavie2: z.string().max(40).optional(),
+  vek2: z.string().trim().max(100).optional(),
+  kastrovana2: z.string().max(40).optional(),
+  duvod2: z.string().max(300).optional(),
+  alergie2: z.string().trim().max(3000).optional(),
+  povaha2: z.string().trim().max(3000).optional(),
   pes: z.string().min(1).max(200),
   plemeno: z.string().trim().min(1).max(200),
   vaha: z.string().transform(parseDogWeightKg).refine((value): value is number => value !== null, "Zadajte platnú váhu v kilogramoch."),
@@ -50,6 +60,19 @@ export const longSchema = z.object({
 
 export const inquirySchema = z.discriminatedUnion("typ", [shortSchema, longSchema]).superRefine((data, ctx) => {
   if (data.typ !== "prihlaska") return;
+  if (data.dog_count === "2") {
+    const second = [
+      ["pes2", data.pes2], ["plemeno2", data.plemeno2], ["pohlavie2", data.pohlavie2],
+      ["vek2", data.vek2], ["kastrovana2", data.kastrovana2], ["duvod2", data.duvod2],
+      ["povaha2", data.povaha2],
+    ] as const;
+    for (const [field, value] of second) {
+      if (!String(value || "").trim()) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: "Vyplňte údaje druhého psíka." });
+    }
+    if (parseDogWeightKg(data.vaha2 || "") === null) ctx.addIssue({
+      code: z.ZodIssueCode.custom, path: ["vaha2"], message: "Zadajte platnú váhu druhého psíka.",
+    });
+  }
   if (data.alergie !== undefined || data.povaha !== undefined) {
     if (!data.povaha) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["povaha"], message: "Vyplňte toto pole." });
   } else if (!data.viac) {
@@ -103,6 +126,18 @@ export function buildFields(data: InquiryData): Array<{ label: string; value: st
       ? [{ label: "Alergie a zdravotné obmedzenia", value: data.alergie || "" },
         { label: "Povaha a ďalšie informácie", value: data.povaha || "" }]
       : [{ label: "Viac o psíkovi", value: data.viac || "" }]),
+    ...(data.dog_count === "2" ? [
+      { label: "Počet psíkov", value: "2" },
+      { label: "2. psík – meno", value: data.pes2 || "" },
+      { label: "2. psík – plemeno", value: data.plemeno2 || "" },
+      { label: "2. psík – váha", value: data.vaha2 || "" },
+      { label: "2. psík – pohlavie", value: data.pohlavie2 || "" },
+      { label: "2. psík – vek", value: data.vek2 || "" },
+      { label: "2. psík – kastrácia", value: data.kastrovana2 || "" },
+      { label: "2. psík – využívanie škôlky", value: data.duvod2 || "" },
+      { label: "2. psík – alergie a zdravotné obmedzenia", value: data.alergie2 || "" },
+      { label: "2. psík – povaha a ďalšie informácie", value: data.povaha2 || "" },
+    ] : []),
     { label: "Súhlas so spracovaním osobných údajov", value: "Áno" },
     ...attribution,
   ];
@@ -135,6 +170,22 @@ export function buildDbPayload(data: InquiryData) {
 
   return {
     form_type: "application",
+    dog_count: data.dog_count === "2" ? 2 : 1,
+    dogs: [
+      {
+        dog_name: data.pes, dog_breed: data.plemeno, dog_weight_kg: data.vaha,
+        dog_sex: data.pohlavie, dog_age_text: data.vek, dog_neutered: data.kastrovana,
+        interest_reason: data.duvod, dog_allergies: data.alergie || "",
+        dog_temperament: data.povaha || data.viac || "",
+      },
+      ...(data.dog_count === "2" ? [{
+        dog_name: data.pes2 || "", dog_breed: data.plemeno2 || "",
+        dog_weight_kg: parseDogWeightKg(data.vaha2 || "") || null,
+        dog_sex: data.pohlavie2 || "", dog_age_text: data.vek2 || "",
+        dog_neutered: data.kastrovana2 || "", interest_reason: data.duvod2 || "",
+        dog_allergies: data.alergie2 || "", dog_temperament: data.povaha2 || "",
+      }] : []),
+    ],
     owner_name: data.meno,
     phone: data.telefon,
     dog_name: data.pes,
