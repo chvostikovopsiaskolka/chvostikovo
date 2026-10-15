@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261015-vaccination-v234';
+const CACHE='chvostikovo-portal-shell-20261015-compact-booking-v235';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
