@@ -41,16 +41,23 @@ export function EnglishContact({ onEnquire }: { onEnquire?: () => void } = {}) {
             Enquire about dog daycare
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-forest/80">
-            Fill in the short, non-binding form. We will get back to you and talk through how Chvostíkovo works and whether daycare is a good fit for your dog.
+            Fill in the short form. We will be in touch.
           </p>
         </div>
 
         <div className="mt-8 rounded-4xl bg-card p-6 shadow-soft sm:p-9">
           {onEnquire ? (
-            <button type="button" onClick={onEnquire} className="btn-coral mx-auto block w-full max-w-sm px-5 py-3 text-center font-bold">
-              Enquire about daycare
-              <span className="mt-1 block whitespace-nowrap text-[10px] font-medium leading-tight text-white/90 min-[380px]:text-[11px] sm:text-xs">Tap to open a short form</span>
-            </button>
+            <>
+              <div className="lg:hidden">
+                <button type="button" onClick={onEnquire} className="btn-coral mx-auto block w-full max-w-sm px-5 py-3 text-center font-bold">
+                  Enquire about daycare
+                  <span className="mt-1 block whitespace-nowrap text-[10px] font-medium leading-tight text-white/90 min-[380px]:text-[11px] sm:text-xs">Tap to open a short form</span>
+                </button>
+              </div>
+              <div className="hidden lg:block">
+                <EnglishInquiryForm trackingSource="en_contact_desktop_inline" />
+              </div>
+            </>
           ) : (
             <EnglishInquiryForm trackingSource="en_contact" />
           )}

@@ -552,7 +552,7 @@ function EnglishDogDaycarePage() {
               <button
                 type="button"
                 onClick={() => exploreDaycare("en_hero_mobile")}
-                className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
+                className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg"
               >
                 Learn more
                 <ArrowRight className="size-5" />
@@ -618,11 +618,11 @@ function EnglishDogDaycarePage() {
               <div className="min-w-0">
                 <SchoolmatesFormCrown compact />
                 <div className="rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
-                  <h2 className="text-center text-2xl text-forest">Want to know more about daycare?</h2>
+                  <h2 className="text-center text-2xl text-forest">Enquire about daycare</h2>
                   <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-                    We are happy to answer your questions.
+                    Fill in the short form. We will be in touch.
                   </p>
-                  <ContactRevealButton language="en" onClick={() => openInquiry("en_hero_desktop")} />
+                  <EnglishInquiryForm trackingSource="en_hero_desktop_inline" />
                 </div>
               </div>
             </div>

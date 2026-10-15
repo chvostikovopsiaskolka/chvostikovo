@@ -116,7 +116,7 @@ function DogSittingPage() {
                   Chcete psíkovi dopriať deň s kamarátmi?
                 </h2>
                 <p className="mt-2 mb-4 text-center text-sm leading-relaxed text-forest/70">
-                  Vyplňte krátky formulár, ozveme sa späť a radi s vami preberieme detaily.
+                  Vyplňte krátky formulár. Ozveme sa vám.
                 </p>
                 <ShortForm trackingSource="dog_sitting_page_inline" />
               </div>
