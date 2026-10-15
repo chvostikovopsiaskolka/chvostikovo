@@ -909,13 +909,20 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
   }
 
   const append = payload.append === true;
-  const existing = append ? await rest(
+  const replaceId = payload.replace_proof_id == null ? 0 : Number(payload.replace_proof_id);
+  if (!Number.isSafeInteger(replaceId) || replaceId < 0) throw new Error('Neplatná fotografia na úpravu.');
+  if (replaceId && images.length !== 1) throw new Error('Na jedno miesto vyberte jednu novú fotografiu.');
+  const preserve = append || replaceId > 0;
+  const existing = preserve ? await rest(
     'vaccination_proofs?dog_id=eq.' + dogId + '&is_current=eq.true&select=id,dog_id,batch_id,storage_path,source,uploaded_at&order=uploaded_at.desc',
   ) as Array<Json> : [];
-  if (existing.length + images.length > 5) {
+  if (replaceId && !existing.some(row => Number(row.id) === replaceId)) {
+    throw new Error('Táto fotografia už nie je aktuálna. Obnovte si prehľad.');
+  }
+  if (existing.length + images.length - (replaceId ? 1 : 0) > 5) {
     throw new Error('Na jedného psíka možno uložiť najviac 5 fotografií.');
   }
-  const batchId = append && existing.length ? String(existing[0].batch_id) : crypto.randomUUID();
+  const batchId = preserve && existing.length ? String(existing[0].batch_id) : crypto.randomUUID();
   const uploadedAt = new Date().toISOString();
   const source = staff ? 'staff' : 'customer';
   const uploadedPaths: string[] = [];
@@ -958,7 +965,13 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
       prefer: 'return=representation',
     }) as Array<Json>;
 
-    if (!append) await rest(
+    if (replaceId) {
+      const removed = await rest(
+        'vaccination_proofs?dog_id=eq.' + dogId + '&id=eq.' + replaceId + '&is_current=eq.true',
+        { method: 'PATCH', body: { is_current: false, replaced_at: uploadedAt }, prefer: 'return=representation' },
+      ) as Array<Json>;
+      if (removed.length !== 1) throw new Error('Pôvodná fotografia sa zmenila. Obnovte si prehľad.');
+    } else if (!append) await rest(
       'vaccination_proofs?dog_id=eq.' + dogId + '&is_current=eq.true&batch_id=neq.' + encodeURIComponent(batchId),
       {
         method: 'PATCH',
@@ -969,7 +982,9 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
     return {
       dog_id: dogId,
       batch_id: batchId,
-      proofs: await withSignedVaccinationProofs(append ? [...existing, ...inserted] : inserted),
+      proofs: await withSignedVaccinationProofs(replaceId
+        ? [...existing.filter(row => Number(row.id) !== replaceId), ...inserted]
+        : (append ? [...existing, ...inserted] : inserted)),
     };
   } catch (error) {
     if (uploadedPaths.length) {
@@ -1218,6 +1233,25 @@ Deno.serve(async (req: Request) => {
         p_dog_id: dogId,
         p_reservation_date: date,
         p_message: message,
+      }, token) });
+    }
+    if (action === 'request_bookings') {
+      const dogId = Number(body.dog_id || 0);
+      const items = Array.isArray(body.bookings) ? body.bookings : [];
+      if (!Number.isSafeInteger(dogId) || dogId <= 0 || !items.length || items.length > 15) {
+        throw new Error('Vyberte psíka a 1 až 15 dní.');
+      }
+      const bookings = items.map(item => {
+        const date = validIsoDate(item?.date);
+        const taxiMode = String(item?.taxi_mode || 'none');
+        if (!date || !['none', 'pickup', 'pickup_dropoff'].includes(taxiMode)) {
+          throw new Error('Neplatný dátum alebo voľba taxi.');
+        }
+        return { date, taxi_mode: taxiMode };
+      });
+      return json({ data: await userRpc('portal_request_bookings_batch', {
+        p_dog_id: dogId,
+        p_bookings: bookings,
       }, token) });
     }
     if (action === 'request_booking') {
