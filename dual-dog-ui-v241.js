@@ -7,10 +7,14 @@
   const rootId='bookingMultiDogsV241';
   const dogColor=(dog)=>String(dog?.sex||'').toLowerCase()==='male'?'male':String(dog?.sex||'').toLowerCase()==='female'?'female':'neutral';
   function selectDualDog(id){
-    if(!state?.data?.dogs?.some(d=>Number(d.id)===id)||Number(state.selectedDogId)===id)return;
-    if(typeof clearVaccinationProofStageV104==='function')clearVaccinationProofStageV104();
-    state.selectedDogId=id;
-    renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays();
+    if(!state?.data?.dogs?.some(d=>Number(d.id)===id))return;
+    if(Number(state.selectedDogId)!==id){
+      if(typeof clearVaccinationProofStageV104==='function')clearVaccinationProofStageV104();
+      state.selectedDogId=id;
+      renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays();
+    }
+    // Use the same general dog-details modal as Menu, not the vaccinations view.
+    if(typeof openDogDetails==='function')openDogDetails('details',false);
   }
   function renderDualDogOverview(){
     const root=document.getElementById('bookingDogProfile');
