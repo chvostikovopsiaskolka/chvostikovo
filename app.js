@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-photo-picker-v240';
-const APP_VERSION='1.0.82';
+const APP_BUILD='20261015-bulletin-photo-v241';
+const APP_VERSION='1.0.83';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -3290,6 +3290,22 @@ async function uploadVaccinationProofsCoreV143(silent=false){
   function showImage(url){
     ensureModals();zoomModal.scroll.replaceChildren();
     const img=el('img');img.src=url;img.alt='Zväčšená fotografia oznamu';
+    // Two-finger photo zoom works even with the rest of the installed PWA zoom-locked.
+    let factor=1,originalFactor=1,startDistance=0,panX=0,panY=0,touchX=0,touchY=0;
+    img.style.touchAction='none';
+    const dist=touches=>Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
+    const render=()=>{img.style.transform='translate('+panX+'px,'+panY+'px) scale('+factor+')'};
+    function resetZoom(){factor=1;panX=0;panY=0;startDistance=0;render()}
+    img.addEventListener('touchstart',e=>{
+      if(e.touches.length===2){startDistance=dist(e.touches)||1;originalFactor=factor;e.preventDefault()}
+      else if(e.touches.length===1&&factor>1){touchX=e.touches[0].clientX-panX;touchY=e.touches[0].clientY-panY}
+    },{passive:false});
+    img.addEventListener('touchmove',e=>{
+      if(e.touches.length===2&&startDistance){factor=Math.max(1,Math.min(5,originalFactor*dist(e.touches)/startDistance));render();e.preventDefault()}
+      else if(e.touches.length===1&&factor>1){panX=e.touches[0].clientX-touchX;panY=e.touches[0].clientY-touchY;render();e.preventDefault()}
+    },{passive:false});
+    img.addEventListener('touchend',e=>{if(e.touches.length<2)startDistance=0;if(factor<=1)resetZoom()},{passive:true});
+    img.addEventListener('dblclick',()=>{factor=factor>1?1:2;panX=0;panY=0;render()});
     zoomModal.scroll.append(img);zoomModal.overlay.classList.remove('hidden');syncScrollLock();
   }
   function openArticle(row,fromHistory){
@@ -3299,6 +3315,7 @@ async function uploadVaccinationProofsCoreV143(silent=false){
     archiveModal.overlay.classList.add('hidden');
     articleModal.h.textContent=row.title||'Oznam';
     articleModal.scroll.replaceChildren();
+    articleModal.scroll.append(el('div','customer-bulletin-article-v229',row.body||''));
     const photo=safePhoto(row.image_path);
     if(photo){
       const img=el('img','customer-bulletin-photo-v229');img.src=photo;img.alt='Obrázok k oznamu';img.loading='lazy';
@@ -3307,7 +3324,7 @@ async function uploadVaccinationProofsCoreV143(silent=false){
       img.onerror=()=>{img.hidden=true};
       articleModal.scroll.append(img);
     }
-    articleModal.scroll.append(el('div','customer-bulletin-article-v229',row.body||''));
+
     if(row.cta_enabled&&(row.cta_title||row.cta_body||safeLink(row.cta_url))){
       const cta=el('section','customer-bulletin-cta-v229');
       cta.append(el('span','heart','♥'));
