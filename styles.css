@@ -3015,3 +3015,8 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
 #bookingPickerV37 .booking-picker-future-body-v235 > .booking-week-closed-note-v127 strong{
   line-height:1.23!important;
 }
+
+/* v241: customer notice text above the photo; zoom only inside its dedicated viewer. */
+.customer-bulletin-article-v229 + .customer-bulletin-photo-v229{margin:16px 0 12px}
+.customer-bulletin-zoom-v229 .customer-bulletin-scroll-v229{overflow:hidden!important;touch-action:none!important}
+.customer-bulletin-zoom-v229 img{touch-action:none!important;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
