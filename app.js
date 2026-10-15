@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-vaccination-v234';
-const APP_VERSION='1.0.77';
+const APP_BUILD='20261015-compact-booking-v235';
+const APP_VERSION='1.0.78';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2070,7 +2070,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     root.classList.toggle('hidden',!suggestion);
     if(!suggestion){root.innerHTML='';return}
     const weekday=['Ne','Po','Ut','St','Št','Pia','So'];
-    root.innerHTML='<div class="smart-head-v199"><div><strong>Chcete rezervovať rovnaké dni ako minulý týždeň?</strong>'
+    root.innerHTML='<div class="smart-head-v199"><div><strong>Rovnaké dni ako minulý týždeň?</strong>'
       +'</div></div>'
       +'<div class="smart-chips-v199" aria-label="Navrhované dni">'
       +suggestion.dates.map(date=>'<span class="smart-chip-v199">'+weekday[new Date(date+'T12:00:00Z').getUTCDay()]+'</span>').join('')+'</div>'
@@ -2299,6 +2299,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('bookingPickerSubmitV37').addEventListener('click',submitPickerV37);
   }
 
+  let futureWeekExpandedV235=false;
   function renderPickerV37(){
     ensurePickerV37();
     const dog=selectedDog(),dogs=state.data?.dogs||[],days=state.data?.availability?.days||[];
@@ -2321,7 +2322,9 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         : weekNoticeFull
         ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni sú plné.</strong><span>Kliknite na deň a napíšte nám záujem o miesto.</span></div>'
         : '';
-      groups.push(`<div class="booking-picker-week-v127"><div class="booking-picker-week-label-v127">${['Tento týždeň','Budúci týždeň','O dva týždne'][start/5]||'Ďalší týždeň'}</div>${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
+      const futureWeek=start>=10;
+      const futureOpen=!futureWeek||futureWeekExpandedV235||week.some(d=>selectedDatesV37.has(d.date));
+      groups.push(`<div class="booking-picker-week-v127 ${futureWeek?'booking-picker-future-v235':''}"><div class="booking-picker-week-label-v127">${futureWeek?`<button type="button" class="booking-picker-future-toggle-v235" data-future-toggle="true" aria-expanded="${futureOpen?'true':'false'}">O dva týždne <span aria-hidden="true">${futureOpen?'⌃':'⌄'}</span></button>`:(['Tento týždeň','Budúci týždeň'][start/5]||'Ďalší týždeň')}</div><div class="booking-picker-future-body-v235 ${futureOpen?'':'hidden'}">${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
         const existing=bookingFor(dog.id,d.date),deadlineClosed=bookingDeadlineClosedV95(d.date,dog),closed=d.bookings_open===false,full=Number(d.available)<=0;
         const past=d.date<=bratislavaClockV95().date;
         const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;
@@ -2330,9 +2333,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const stateText=existing?'Rezervované':past?'Uplynulo':closed?'Zatvorené':full?'Plno':deadlineClosed?'Uzavreté':`${Math.max(0,Number(d.available)||0)} voľné`;
         const taxiToggle=selected?`<button type="button" class="booking-day-taxi-toggle-v201" data-taxi-toggle="${d.date}" aria-expanded="${expandedTaxiDateV201===d.date?'true':'false'}" data-taxi-selected="${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'true':'false'}" aria-pressed="${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'true':'false'}" aria-label="Taxi na ${esc(skDay(d.date))} ${esc(skDate(d.date))}">🚕${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'<span class="taxi-indicator-v201"></span>':''}</button>`:'';
         return `<div class="booking-day-wrap-v201"><button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" data-contact="${lateContact?'true':'false'}" data-full="${full?'true':'false'}" ${disabled?'disabled':''}><small>${closed?'❌':esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${closed?'Zatvorené':esc(stateText)}</span></button>${taxiToggle}</div>`;
-      }).join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p><div class="booking-taxi-inline-choices-v201">${[['pickup','Vyzdvihnutie ráno','5 €'],['pickup_dropoff','Tam aj späť','10 €']].map(([id,label,price])=>`<button type="button" class="${(selectedTaxiByDateV91.get(expandedTaxiDateV201)||'none')===id?'active':''}" data-taxi-mode="${id}" data-taxi-date="${expandedTaxiDateV201}">${label}${price?' · '+price:''}</button>`).join('')}</div></div>`:' '}</div>`);
+      }).join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p><div class="booking-taxi-inline-choices-v201">${[['pickup','Vyzdvihnutie ráno','5 €'],['pickup_dropoff','Tam aj späť','10 €']].map(([id,label,price])=>`<button type="button" class="${(selectedTaxiByDateV91.get(expandedTaxiDateV201)||'none')===id?'active':''}" data-taxi-mode="${id}" data-taxi-date="${expandedTaxiDateV201}">${label}${price?' · '+price:''}</button>`).join('')}</div></div>`:' '}</div></div>`);
     }
     $('bookingPickerDaysV37').innerHTML=groups.join('');
+    $('bookingPickerDaysV37').querySelectorAll('[data-future-toggle]').forEach(b=>b.addEventListener('click',()=>{futureWeekExpandedV235=b.getAttribute('aria-expanded')!=='true';renderPickerV37()}));
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',async()=>{
       if(checkingRenewalV157||submittingV37)return;
       const date=btn.dataset.date;
@@ -2388,7 +2392,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function openPickerV37(){
     pickerEpochV157++;
     const dog=selectedDog();if(dog&&window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(dog)){switchTab('dog');setTimeout(()=>openDogDetails('vaccinations',false),40);toast('Pred rezerváciou doplňte povinné očkovania.');return}
-    selectedDatesV37.clear();selectedTaxiByDateV91.clear();expandedTaxiDateV201=null;renewalCheckedDogV157=null;smartDaysDismissedV199=false;pickerErrorV95('');
+    selectedDatesV37.clear();selectedTaxiByDateV91.clear();expandedTaxiDateV201=null;renewalCheckedDogV157=null;smartDaysDismissedV199=false;futureWeekExpandedV235=false;pickerErrorV95('');
     renderPickerV37();
     $('bookingPickerV37').classList.remove('hidden');
     document.documentElement.classList.add('booking-picker-open-v37');
