@@ -1,0 +1,35 @@
+import {JSDOM} from 'jsdom';import fs from 'node:fs';import assert from 'node:assert/strict';
+process.env.KEEP_TEST_DB='1';const {db,auth,clean,pass,customer,staff,date}=await import('./database.mjs');
+await clean();await pass(10,9);await db.exec('delete from public.portal_day_settings');
+const dom=new JSDOM('<div id="signupDogNamesHintV244"></div><div id="passSummary"></div>',{url:'https://fixture.invalid',runScripts:'outside-only'});const w=dom.window;
+let loseResponse=false,mutationCount=0;const state={session:{access_token:'fixture'},selectedDogId:9001,data:{dogs:[{id:9001,name:'Bella'},{id:9002,name:'Aria'}],pass_requests:[],requests:[],reservations:[],passes:[]}};
+const api=async body=>{await auth(customer);const {rows}=await db.query('select public.portal_shared_booking_v244($1,$2,$3) r',[JSON.stringify(body.items),body.operation_id,body.expected?JSON.stringify(body.expected):null]);if(body.expected){mutationCount++;if(loseResponse){loseResponse=false;throw Error('Sieťové spojenie bolo prerušené.')}}return {data:rows[0].r}};
+Object.assign(w,{addCustomerHook:()=>{},renderAll:()=>{},state,SUPABASE_URL:'https://fixture.invalid',SUPABASE_KEY:'fixture',esc:v=>String(v??'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])),skDate:v=>v,queueCustomerSync:()=>{},toast:()=>{},selectedDog:()=>state.data.dogs[0],activePassFor:()=>null,bratislavaToday:()=>date,applyLocalBooking:()=>{},api,$:id=>w.document.getElementById(id),fetch:async(url,opts)=>{
+ if(url.includes('portal_shared_capabilities_v244'))return {ok:true,json:async()=>({shared_passes_v244:true})};
+ await auth(customer);const body=JSON.parse(opts.body);try{const {rows}=await db.query('select to_jsonb(public.portal_request_pass_v244($1,$2,$3)) r',[body.p_dog_ids,body.p_total_entries,body.p_operation_id]);return {ok:true,json:async()=>rows[0].r}}catch(e){return {ok:false,json:async()=>({message:e.message})}}
+}});
+const html=fs.readFileSync('index.html','utf8');assert(html.indexOf('src="/shared-customer-v244.js')<html.indexOf('src="/app.js'));assert(html.includes('src="/shared-customer-v244.js'));
+w.eval(fs.readFileSync('shared-customer-v244.js','utf8'));
+const app=fs.readFileSync('app.js','utf8');w.eval(app.slice(app.indexOf('function registrationNamesV244'),app.indexOf("$('signupForm').addEventListener")));
+assert.deepEqual(Array.from(w.registrationNamesV244(' Bella  ,  Aria ')),['Bella','Aria']);assert.deepEqual(Array.from(w.registrationNamesV244('Bella')),['Bella']);
+for(const raw of ['',',Aria','Bella,','Bella, bella','Bella,Aria,Monty','Bella;Aria'])assert.throws(()=>w.registrationNamesV244(raw));
+let promise=w.confirmRegistrationNamesV244(['Bella','Aria']);assert.match(w.document.querySelector('h2').textContent,/Bella a Aria/);w.document.querySelector('[data-answer="edit"]').click();assert.equal(await promise,false);
+promise=w.confirmRegistrationNamesV244(['Bella','Aria']);w.document.querySelector('[data-answer="yes"]').click();assert.equal(await promise,true);
+console.log('PASS registration DOM: 1/2 names, normalization, malformed/duplicate input, confirm/edit');
+const wait=async condition=>{for(let i=0;i<150;i++){if(condition())return;await new Promise(r=>setTimeout(r,10))}throw Error('DOM test timed out')};
+let booking=w.submitSharedBookingV244([9001,9002],[date],new Map());
+w.document.querySelector('[data-review]').click();await wait(()=>!w.document.querySelector('[data-confirm]').classList.contains('hidden'));
+assert.match(w.document.querySelector('[data-allocation="0"]').textContent,/10\/10/);assert.match(w.document.querySelector('[data-allocation="1"]').textContent,/25 €/);
+loseResponse=true;w.document.querySelector('[data-confirm]').click();await wait(()=>w.document.querySelector('.shared-error-v244').textContent.includes('prerušené'));
+w.document.querySelector('[data-confirm]').click();let result=await booking;assert.equal(result.bookings.length,2);assert.equal(mutationCount,2);assert.equal((await db.query('select count(*)::int n from public.customer_booking_requests')).rows[0].n,2);
+console.log('PASS dialog → SQL: exact last-entry allocation, response loss retry creates two requests once');
+await db.exec('delete from public.customer_booking_requests; delete from private.shared_operations_v244');
+booking=w.submitSharedBookingV244([9001,9002],[date],new Map());w.document.querySelector('[data-review]').click();await wait(()=>!w.document.querySelector('[data-confirm]').classList.contains('hidden'));
+await auth(staff);await db.exec('update public.passes set used_entries=10');
+w.document.querySelector('[data-confirm]').click();await wait(()=>w.document.querySelector('.shared-error-v244').textContent.includes('zmenili'));assert.equal((await db.query('select count(*)::int n from public.customer_booking_requests')).rows[0].n,0);
+w.document.querySelector('.shared-close-v244').click();assert.equal(await booking,null);
+console.log('PASS stale quote rejected with zero partial writes');
+let request=w.requestPassDialogV244(9001);w.document.querySelector('[data-send]').click();assert.match(w.document.querySelector('.shared-error-v244').textContent,/Vyberte/);
+w.document.querySelector('[data-scope]').value='both';w.document.querySelector('[data-total]').value='20';w.document.querySelector('[data-send]').click();let row=await request;assert.equal(row.total_entries,20);assert.deepEqual(Array.from(row.dog_ids),[9001,9002]);assert.equal((await db.query('select count(*)::int n from public.customer_pass_requests')).rows[0].n,1);
+console.log('PASS explicit shared 20-entry request sends one request and creates no sale');
+await db.close();dom.window.close();

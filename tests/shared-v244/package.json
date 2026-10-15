@@ -1,0 +1,15 @@
+{
+  "name": "chvostikovo-shared-pass-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "cd ../.. && node tests/shared-v244/migration-compile.mjs && node tests/shared-v244/boot.mjs && node tests/shared-v244/ui-dom.mjs && node tests/shared-v244/admin-dom.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.10",
+    "jsdom": "26.1.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
