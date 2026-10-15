@@ -661,7 +661,7 @@ function fillDogForm(d){
   renderVaccinationProofsV104(d.id);
 }
 let vaccinationProofFilesV104=[];
-let vaccinationProofReplaceModeV104=false;
+let vaccinationProofReplaceModeV104=false; const vaccinationFreshUploadV234=new Set();
 
 function vaccinationProofsForDogV104(dogId){
   return (state.data?.vaccination_proofs||[]).filter(p=>Number(p.dog_id)===Number(dogId));
@@ -701,6 +701,19 @@ async function saveDog(e){
   }
   const l4Date=$('leptoL4UntilV211')?.value||'';
   const hadL4=Boolean((state.data?.vaccinations||[]).find(v=>Number(v.dog_id)===dogId&&v.vaccination_type==='lepto_l4'));
+  if(savedMode==='vaccinations'){
+    const today=bratislavaToday();
+    if(hadL4&&!l4Date){toast('Evidovanú L4 nemožno vymazať. Ak máte spoločnú DHPPi+L vakcínu, kontaktujte škôlku.');return;}
+    if(l4Date&&l4Date<today){toast('Platnosť leptospirózy L4 už skončila. Zadajte nový dátum.');return;}
+    const prior=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===dogId);
+    const oldDate=(type)=>String(prior.find(v=>v.vaccination_type===type)?.valid_until||'');
+    const changed=vaccinations.some(v=>!!oldDate(v.type)&&oldDate(v.type)!==String(v.valid_until||''))||
+      (l4Date!==oldDate('lepto_l4')&&(hadL4||!!l4Date)&&prior.length>0);
+    if(changed&&!vaccinationFreshUploadV234.has(dogId)){
+      toast('Pri obnovení očkovania najprv nahrajte novú fotografiu preukazu, potom uložte platnosť.');
+      return;
+    }
+  }
   const breedWeight={breed:$('dogBreed').value.trim(),weight_kg:$('dogWeight').value.trim()?Number($('dogWeight').value.replace(',','.')):null};
   const body={action:'save_dog',dog_id:dogId,dog_name:$('dogName').value,age_text:ageText,birth_date:birthDate||null,breed:breedWeight.breed,weight_kg:breedWeight.weight_kg,sex,neutered:neut===''?null:neut==='true',allergies:$('dogAllergies')?.value||'',temperament:$('dogTemperament')?.value||'',care_fields_version:2};
   if(savedMode==='vaccinations'){body.vaccinations=vaccinations;body.require_vaccination_proof=true}
@@ -743,7 +756,7 @@ async function saveDog(e){
     }
     $('dogDetailsOnboardingModalV75')?.classList.add('hidden');
     closeDogDetails(true);renderDog();renderPassSummary();renderUpcoming();renderDays();
-    toast(savedMode==='vaccinations'?'Očkovania sú uložené.':'Údaje psíka sú uložené.');
+    if(savedMode==='vaccinations')vaccinationFreshUploadV234.delete(dogId); toast(savedMode==='vaccinations'?'Očkovania sú uložené. Údaje ešte skontroluje škôlka.':'Údaje psíka sú uložené.');
     queueCustomerSync('all',80);
   }catch(e){toast(e.message)}finally{dogSaveInFlightV145=false;customerMutationRevisionV145++;loading(false);window.runCustomerOnboardingV75?.()}
 }
@@ -3134,7 +3147,7 @@ async function uploadVaccinationProofsCoreV143(silent=false){
   try{
     const images=vaccinationProofFilesV104.map(item=>item.dataUrl);
     const result=await api({action:'upload_vaccination_proofs',dog_id:Number(dog.id),images,append:!vaccinationProofReplaceModeV104&&vaccinationProofsForDogV104(dog.id).length>0});
-    const proofs=result?.data?.proofs||[];
+    const proofs=result?.data?.proofs||[]; if(proofs.length)vaccinationFreshUploadV234.add(Number(dog.id));
     if(account!==state.session?.user?.id||!state.data)return proofs;
     customerMutationRevisionV145++;
     state.data.vaccination_proofs=(state.data.vaccination_proofs||[]).filter(p=>Number(p.dog_id)!==Number(dog.id));
