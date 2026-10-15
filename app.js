@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-softboard-v230';
-const APP_VERSION='1.0.73';
+const APP_BUILD='20261015-board-notes-v231';
+const APP_VERSION='1.0.74';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2101,9 +2101,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const current=days[0],closed=current&&bookingDeadlineClosedV95(current.date,dog);
     const weekday=new Date(bratislavaClockV95().date+'T12:00:00Z').getUTCDay();
     const showClosed=closed&&(weekday===0||weekday===1);
+    // v231: the board displays only the short advance reminder.
+    // Closed-week guidance is already rendered under the week in the reservation picker.
+    box.classList.toggle('hidden',!!showClosed);
     box.querySelector('strong').textContent=showClosed
       ? 'Prihlasovanie bolo na tento týždeň uzavreté v nedeľu o 20:00.'
-      : 'Prosíme o rezerváciu miesta na ďalší týždeň do nedele 20:00.';
+      : 'Rezervácia na ďalší týždeň do nedele 20:00.';
     requestAnimationFrame(fitBookingDeadlineTitle);
     const detail=box.querySelector('span');
     if(detail){detail.textContent=showClosed?'Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.':'';detail.classList.toggle('hidden',!showClosed)}
