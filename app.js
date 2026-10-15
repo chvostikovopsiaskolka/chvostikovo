@@ -2286,7 +2286,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const weekNoticeClosed=week.some(d=>bookingDeadlineClosedV95(d.date,dog));
       const weekNoticeFull=!weekNoticeClosed&&week.some(d=>Number(d.available)<=0);
       const weekNotice=weekNoticeClosed
-        ? '<div class="booking-week-closed-note-v127"><strong>Prihlasovanie uzavreté.</strong><span>Napriek tomu nám môžete napísať kliknutím na deň, aj keď je plno.</span></div>'
+        ? '<div class="booking-week-closed-note-v127"><strong>Prihlasovanie uzavreté.</strong><span>Kliknite na deň a napíšte nám aj pri plnej kapacite.</span></div>'
         : weekNoticeFull
         ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni sú plné.</strong><span>Kliknite na deň a napíšte nám záujem o miesto.</span></div>'
         : '';
