@@ -2640,3 +2640,138 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
  #bookingTab .dog-overview-photo-v231 .dog-overview-name{font-size:10.5px!important;padding:3px 5px!important;bottom:6px!important}
 }
 
+
+
+/* v232: dog-name photo tab connected to the lower edge; width follows name. */
+#bookingTab .dog-overview-photo-v231{overflow:visible!important}
+#bookingTab .dog-overview-photo-v231 .dog-overview-name{
+  position:absolute!important;
+  left:50%!important;
+  bottom:-8px!important;
+  transform:translateX(-50%)!important;
+  width:max-content!important;
+  max-width:calc(100% - 10px)!important;
+  min-width:0!important;
+  display:block!important;
+  margin:0!important;
+  padding:3px 9px 4px!important;
+  border-radius:8px 8px 11px 11px!important;
+  border:1.5px solid var(--dog-accent)!important;
+  background:color-mix(in srgb,var(--dog-tint) 88%,transparent)!important;
+  box-shadow:0 2px 5px #44354722!important;
+  font-size:clamp(9.5px,2.65vw,11px)!important;
+  line-height:1.16!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  pointer-events:none!important;
+}
+@media(max-width:390px){
+ #bookingTab .dog-overview-photo-v231 .dog-overview-name{
+   bottom:-7px!important;
+   padding:3px 7px!important;
+   font-size:clamp(9px,2.6vw,10.2px)!important;
+ }
+}
+
+/* v232: centered small reminder with TWO little green tacks on top corners.
+   The calendar glyph remains on the left, with no central tack. */
+#bookingTab .customer-bulletin-v229 #deadlineText.deadline-card:not(.hidden){
+  margin-top:12px!important;
+  padding:13px 8px 10px 45px!important;
+  min-height:43px!important;
+  border-radius:3px 4px 5px 3px!important;
+  transform:rotate(-.25deg)!important;
+}
+#bookingTab .customer-bulletin-v229 #deadlineText.deadline-card::before{
+  left:9px!important;
+  width:26px!important;
+  height:26px!important;
+  background-size:18px!important;
+}
+#bookingTab .customer-bulletin-v229 #deadlineText.deadline-card::after{
+  content:""!important;
+  position:absolute!important;
+  top:4px!important;
+  left:10px!important;
+  right:10px!important;
+  width:auto!important;
+  height:11px!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:
+    radial-gradient(circle at 35% 24%,#fffde8 0%,#a6ce9a 35%,#488558 79%,#347448 100%) left center / 11px 11px no-repeat,
+    radial-gradient(circle at 35% 24%,#fffde8 0%,#a6ce9a 35%,#488558 79%,#347448 100%) right center / 11px 11px no-repeat!important;
+  pointer-events:none!important;
+}
+#bookingTab .customer-bulletin-v229 #deadlineText.deadline-card strong{
+  font-size:clamp(9px,2.42vw,10.3px)!important;
+  line-height:1.2!important;
+  font-weight:850!important;
+  text-align:center!important;
+  letter-spacing:-.12px!important;
+  white-space:nowrap!important;
+  overflow-wrap:normal!important;
+}
+@media(max-width:360px){
+ #bookingTab .customer-bulletin-v229 #deadlineText.deadline-card:not(.hidden){
+   padding-left:43px!important;
+   padding-right:6px!important;
+ }
+ #bookingTab .customer-bulletin-v229 #deadlineText.deadline-card strong{
+   font-size:9px!important;
+   white-space:normal!important;
+ }
+}
+
+/* v232: week-specific green helper is ABOVE the matching week's day tiles. */
+#bookingPickerV37 .booking-picker-week-v127 > .booking-week-closed-note-v127{
+  margin:5px 0 9px!important;
+  padding:8px 10px 8px 34px!important;
+  display:grid!important;
+  justify-items:center!important;
+  gap:2px!important;
+  min-height:0!important;
+  color:#24603b!important;
+  font-size:10px!important;
+  line-height:1.2!important;
+  text-align:center!important;
+  border-color:#acdec0!important;
+  border-radius:11px!important;
+  background:#edf9f0!important;
+}
+#bookingPickerV37 .booking-picker-week-v127 > .booking-week-closed-note-v127::before{
+  left:10px!important;
+  width:15px!important;
+  height:15px!important;
+  background-size:15px!important;
+}
+#bookingPickerV37 .booking-picker-week-v127 > .booking-week-closed-note-v127 strong{
+  display:block!important;
+  margin:0!important;
+  font-size:10.7px!important;
+  font-weight:850!important;
+  line-height:1.25!important;
+  color:#1b5737!important;
+}
+#bookingPickerV37 .booking-picker-week-v127 > .booking-week-closed-note-v127 span{
+  display:block!important;
+  margin:0!important;
+  font-size:9.7px!important;
+  font-weight:550!important;
+  line-height:1.25!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  text-align:center!important;
+}
+@media(max-width:375px){
+ #bookingPickerV37 .booking-picker-week-v127 > .booking-week-closed-note-v127{
+   padding-left:29px!important;
+   padding-right:5px!important;
+ }
+ #bookingPickerV37 .booking-picker-week-v127 > .booking-week-closed-note-v127 span{
+   font-size:9.2px!important;
+ }
+}
