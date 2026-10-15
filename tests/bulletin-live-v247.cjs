@@ -1,0 +1,38 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const {JSDOM,VirtualConsole}=require('./shared-v244/node_modules/jsdom');
+const html=fs.readFileSync(process.argv[2],'utf8');
+const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
+const dom=new JSDOM('<div id="mainView"><div id="adminDashboardV40"></div><div class="admin-menu-group"><div id="menuSettingsCard"></div></div></div><div id="bottomNav"></div><div id="menuSection"></div>',{url:'https://test.invalid',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:vc});const w=dom.window;
+const draft={id:'10000000-0000-4000-8000-000000000001',title:'Pôvodný titulok',body:'Pôvodný text',paper_style:'rose',status:'archived'};
+const published={id:5,source_draft_id:draft.id,title:draft.title,body:draft.body,active:true,created_at:new Date().toISOString()};
+let rpcCalls=[],draftInserts=0;
+const db={auth:{getSession:async()=>({data:{session:{access_token:'fixture',user:{id:'fixture'}}}})},from(table){let op='read',payload;const q={select(){return q},order(){return q},eq(){return q},single(){return q},update(x){op='update';payload=x;return q},insert(x){op='insert';payload=x;return q},then(resolve,reject){return (async()=>{if(table==='portal_bulletin_drafts'){if(op==='insert')draftInserts++;if(payload)Object.assign(draft,payload);return {data:op==='read'?[{...draft}]:{id:draft.id}}}return {data:[{...published}]}})().then(resolve,reject)}};return q},async rpc(name,args){rpcCalls.push({name,args});Object.assign(published,{title:draft.title,body:draft.body});draft.status='archived';return {data:5}}};
+w.supabase={createClient:()=>db};w.alert=e=>{throw Error(e)};w.matchMedia=()=>({matches:false,addEventListener(){}});
+const ids=new Set(['bb112-script','admin-oznamy-menu-v113','admin-permanentka-nastenka-v114','chvo-oznamy-v116','chvo-bulletin-cork-v117','chvo-v118-bulletin-tabs','chvo-oznamy-v121','chvo-admin-published-bulletin-v229','chvo-bulletin-v241-ui']);
+for(const m of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)){const id=m[1].match(/id="([^"]+)"/)?.[1];if(ids.has(id))w.eval(m[2])}
+const wait=async fn=>{for(let n=0;n<120;n++){if(fn())return;await new Promise(r=>setTimeout(r,10))}throw Error('UI timed out')};
+(async()=>{
+ await wait(()=>w.document.querySelector('#bb112Menu'));
+ w.document.querySelector('#bb112Menu').click();
+ await wait(()=>w.document.querySelectorAll('#bb118LiveList button').length===2);
+ const live=w.document.querySelector('#bb118LiveList');
+ assert.equal(live.querySelector('.bb247-actions').children.length,2);
+ live.querySelector('button').click();
+ assert.equal(w.document.querySelector('#bb112Article').classList.contains('hidden'),false);
+ assert.equal(w.document.querySelector('#bb112ArticleTitle').textContent,published.title);
+ w.document.querySelector('#bb112ArticleClose').click();
+ assert.equal(w.document.querySelector('#bb116HistoryModal').classList.contains('hidden'),false);
+ live.querySelectorAll('button')[1].click();
+ await wait(()=>w.document.querySelector('#bb112Save').textContent==='Uložiť zmeny');
+ assert.equal(w.document.querySelector('#bb116HistoryModal').classList.contains('hidden'),true);
+ assert.equal(w.document.querySelector('#bb112Archive').checked,false);
+ w.document.querySelector('#bb112Body').value='Opravené slovo';
+ w.document.querySelector('#bb112Form').dispatchEvent(new w.Event('submit',{cancelable:true}));
+ await wait(()=>w.document.querySelector('#bb112Status').textContent==='Zmeny uložené.');
+ assert.equal(rpcCalls.length,1);assert.equal(rpcCalls[0].args.p_draft_id,draft.id);assert.equal(draftInserts,0);assert.equal(published.id,5);assert.equal(published.body,'Opravené slovo');
+ w.document.querySelector('#bb112New').click();assert.equal(w.document.querySelector('#bb112Save').textContent,'Zdieľať oznam');
+ w.document.querySelector('#bb112Archive').checked=true;w.document.querySelector('#bb112Archive').dispatchEvent(new w.Event('change'));assert.equal(w.document.querySelector('#bb112Save').textContent,'Uložiť koncept');
+ assert.deepEqual(errors,[]);
+ assert.match(html,/#bb112Article\{z-index:17000!important\}/);assert.match(html,/#bb116HistoryModal\{z-index:16000!important\}/);
+ console.log('PASS live list actions, cloned handlers, article/return, edit existing draft, same published ID, zero new drafts, save labels/new/reset and script runtime');dom.window.close();
+})().catch(e=>{console.error(e,errors);dom.window.close();process.exitCode=1});
