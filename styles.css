@@ -2799,3 +2799,67 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
   line-height:1.4!important;
   border:0!important;
 }
+
+
+/* v235 – compact booking: subtle two tacks, no redundant calendar glyph. */
+#bookingTab .customer-bulletin-v229 #deadlineText.deadline-card:not(.hidden){
+  padding:10px 12px 9px!important;min-height:38px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  text-align:center!important;
+}
+#bookingTab .customer-bulletin-v229 #deadlineText.deadline-card::before{
+  content:none!important;display:none!important;
+}
+#bookingTab .customer-bulletin-v229 #deadlineText.deadline-card::after{
+  top:4px!important;left:9px!important;right:9px!important;
+  height:5px!important;width:auto!important;border:none!important;border-radius:0!important;
+  background:
+  radial-gradient(circle at 36% 28%,#e9f8de 0%,#7fac7a 42%,#417847 100%) left center / 5px 5px no-repeat,
+  radial-gradient(circle at 36% 28%,#e9f8de 0%,#7fac7a 42%,#417847 100%) right center / 5px 5px no-repeat!important;
+  box-shadow:none!important;
+}
+#bookingTab .customer-bulletin-v229 #deadlineText.deadline-card strong{
+ text-align:center!important;font-size:clamp(9px,2.42vw,10px)!important;line-height:1.24!important;
+}
+#bookingTab .customer-bulletin-v229 #deadlineText.deadline-card span{text-align:center!important}
+/* Third week takes no vertical space until the customer opens it. */
+#bookingPickerV37 .booking-picker-future-v235 .booking-picker-week-label-v127{
+ margin-bottom:0!important;
+}
+#bookingPickerV37 .booking-picker-future-toggle-v235{
+ font:inherit!important;color:inherit!important;font-weight:750!important;
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:6px!important;width:100%!important;border:1px solid #d8dce4!important;
+ background:#f9fafb!important;border-radius:11px!important;padding:9px 12px!important;
+ cursor:pointer!important;text-align:left!important;
+}
+#bookingPickerV37 .booking-picker-future-toggle-v235 span{font-size:16px!important;line-height:1!important}
+#bookingPickerV37 .booking-picker-future-body-v235.hidden{display:none!important}
+#bookingPickerV37 .booking-picker-future-body-v235:not(.hidden){padding-top:8px!important}
+/* Keep same-days prompt on one line without obscuring the selector buttons. */
+#bookingPickerV37 #bookingPickerSmartDaysV199 .smart-head-v199 strong{
+ font-size:clamp(10px,2.7vw,11.5px)!important;font-weight:800!important;line-height:1.25!important;
+ white-space:nowrap!important;overflow-wrap:normal!important;letter-spacing:-.1px!important;
+}
+#bookingPickerV37 #bookingPickerSmartDaysV199 .smart-head-v199{
+ justify-content:center!important;text-align:center!important;
+}
+#bookingPickerV37 #bookingPickerSmartDaysV199.booking-smart-v199{
+ padding:10px 12px!important;margin:10px 0 12px!important;
+}
+#bookingPickerV37 #bookingPickerSmartDaysV199 .smart-chips-v199{
+ margin:8px 0!important;
+}
+#bookingPickerV37 #bookingPickerSmartDaysV199 .smart-actions-v199{margin-top:7px!important}
+/* The week closure notice has no calendar pictogram, copy stays centered. */
+#bookingPickerV37 .booking-picker-week-v127 > .booking-week-closed-note-v127{
+ padding:8px 10px!important;text-align:center!important;justify-items:center!important;
+}
+#bookingPickerV37 .booking-picker-week-v127 > .booking-week-closed-note-v127::before{
+ display:none!important;content:none!important;
+}
+@media(max-width:360px){
+ #bookingPickerV37 #bookingPickerSmartDaysV199 .smart-head-v199 strong{
+  font-size:10px!important;white-space:normal!important;
+ }
+}
