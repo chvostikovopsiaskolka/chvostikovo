@@ -1,6 +1,6 @@
 # Verified dog linking v251 — LIVE 2026-10-15
 
-Admin stable-v10-clean MD5 196e293522926d1faa2f8ada363b3299 (714983 characters). Customer API v56 ACTIVE, exact source readback verified. Customer PWA remains 9a4e41625b2aa5908ddb8694a27096a6c5079c36 / Beta 1.0.87 v246.
+Admin stable-v10-clean MD5 829c660075986f00c3e549d385002af9 (715101 characters). Customer API v56 ACTIVE, exact source readback verified. Customer PWA remains 9a4e41625b2aa5908ddb8694a27096a6c5079c36 / Beta 1.0.87 v246.
 
 Registration requests containing Bella, Iris are recognized as two separate requested names. Auth insert trigger stores registration_dog_names; safely parsed pending metadata is backfilled, without creating dogs or linking accounts. Admin selects an existing dog, confirms completed introductory visit and verifies ownership with a note. Only a two-name request receives the second-dog question; No grants only the selected dog, Yes selects another existing active dog of the same recorded owner. Manual second attachment remains available. No third explicit dog. One dog may have two customer accounts. No matching by name grants access.
 
