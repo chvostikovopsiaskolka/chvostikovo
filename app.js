@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261014-bulletin-v229';
-const APP_VERSION='1.0.72';
+const APP_BUILD='20261015-softboard-v230';
+const APP_VERSION='1.0.73';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1254,7 +1254,9 @@ function ensureBookingLayout(){
 }
 ensureBookingLayout();
 function placeDeadlineV59(){
-  const deadline=$('deadlineText'),upcoming=$('upcomingBookings');
+  const deadline=$('deadlineText'),board=$('customerBulletinV229'),upcoming=$('upcomingBookings');
+  // Keep ONE existing, dynamic reminder; move its element inside the noticeboard.
+  if(deadline&&board){if(deadline.parentElement!==board)board.appendChild(deadline);return}
   if(deadline&&upcoming&&deadline.nextElementSibling!==upcoming)upcoming.parentElement?.insertBefore(deadline,upcoming);
 }
 placeDeadlineV59();
@@ -2084,6 +2086,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function fitBookingDeadlineTitle(){
     const title=$('deadlineText')?.querySelector('strong');
     if(!title||!title.clientWidth)return;
+    if(title.closest('.customer-bulletin-v229')){
+      // v230: keep the existing readable font size; allow 2+ lines at Sunday cutoff.
+      title.style.removeProperty('font-size');return;
+    }
     title.style.setProperty('font-size','13px','important');
     if(title.scrollWidth>title.clientWidth)title.style.setProperty('font-size',(13*title.clientWidth/title.scrollWidth).toFixed(2)+'px','important');
   }
