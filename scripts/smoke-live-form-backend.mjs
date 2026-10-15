@@ -60,4 +60,44 @@ await post({ ...application, dog_allergies: "", dog_temperament: "Priateľský."
 await post({ ...application, dog_temperament: "Priateľský." });
 await post({ ...application, dog_allergies: "A".repeat(3000), dog_temperament: "P".repeat(3000), dog_info: "S".repeat(6100), raw_payload: { health: "A".repeat(3000), temperament: "P".repeat(3000) } });
 
+
+const dualDogs = {
+  ...application,
+  dog_count: 2,
+  dog_breed: "Labrador",
+  dog_weight_kg: 25,
+  dog_allergies: "",
+  dog_temperament: "Priateľský a pokojný.",
+  dogs: [
+    {
+      dog_name: "Rocky", dog_breed: "Labrador", dog_weight_kg: 25,
+      dog_sex: "Pes", dog_age_text: "2 roky", dog_neutered: "Áno",
+      interest_reason: "Pravidelne – 1 až 2× týždenne",
+      dog_allergies: "", dog_temperament: "Priateľský a pokojný.",
+    },
+    {
+      dog_name: "Beny", dog_breed: "Zlatý retriever", dog_weight_kg: 19.5,
+      dog_sex: "Fenka", dog_age_text: "3 roky", dog_neutered: "Nie",
+      interest_reason: "Občas podľa potreby",
+      dog_allergies: "Citlivé trávenie", dog_temperament: "Pokojná, zvyknutá na psov.",
+    },
+  ],
+};
+// dry_run:true exercises the live edge validator but does NOT INSERT,
+// so these checks cannot create a lead, SMS, push or customer record.
+await post(dualDogs);
+async function postRejected(payload, expectedError) {
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: origin },
+    body: JSON.stringify({ ...payload, dry_run: true }),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (response.status !== 400 || body?.ok !== false || body?.error !== expectedError) {
+    throw new Error(`Two-dog negative smoke test expected ${expectedError}, got [${response.status}]: ${JSON.stringify(body)}`);
+  }
+}
+await postRejected({ ...dualDogs, dogs: [dualDogs.dogs[0]] }, "missing_second_dog");
+await postRejected({ ...dualDogs, dogs: [dualDogs.dogs[0], { ...dualDogs.dogs[1], dog_weight_kg: 0 }] }, "invalid_second_dog");
+
 console.log("Live web-form-submit smoke tests passed.");
