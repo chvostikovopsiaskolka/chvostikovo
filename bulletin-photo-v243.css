@@ -1,0 +1,36 @@
+/* Chvostikovo customer bulletin v243. Scoped; existing booking/design styles unchanged. */
+.customer-bulletin-note-v229{
+  background:#ffe6ee!important;
+  background-image:linear-gradient(125deg,#fff1f5,#ffe0ea)!important;
+}
+.customer-bulletin-note-v229[data-style="cream"]{
+  background:#fff1c8!important;
+  background-image:linear-gradient(125deg,#fff8e1,#fff0bf)!important;
+}
+.customer-bulletin-note-v229[data-style="mint"]{
+  background:#e3f6e8!important;
+  background-image:linear-gradient(125deg,#effbf1,#ddf3df)!important;
+}
+.customer-bulletin-zoom-v229 .customer-bulletin-head-v229{
+  justify-content:flex-end!important;
+  padding:10px 12px!important;
+  background:#12151b!important;
+  border-bottom:0!important;
+}
+.customer-bulletin-zoom-v229 .customer-bulletin-head-v229 h2{display:none!important}
+.customer-bulletin-zoom-v229 .customer-bulletin-scroll-v229{
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+  touch-action:none!important;
+}
+.customer-bulletin-zoom-v229 img{
+  max-width:100%!important;
+  max-height:calc(100dvh - 125px)!important;
+  object-fit:contain!important;
+  transform-origin:center center!important;
+  touch-action:none!important;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
+}

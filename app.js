@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-dog-overview-details-v242';
-const APP_VERSION='1.0.84';
+const APP_BUILD='20261015-bulletin-zoom-v243';
+const APP_VERSION='1.0.85';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -3241,7 +3241,8 @@ async function uploadVaccinationProofsCoreV143(silent=false){
     if(modalsReady)return;modalsReady=true;
     archiveModal=modal('Oznamy','customerBulletinHistoryV229');
     articleModal=modal('','customerBulletinArticleV229');
-    zoomModal=modal('Fotografia oznamu','customerBulletinZoomV229');
+    zoomModal=modal('','customerBulletinZoomV229');
+    zoomModal.overlay.setAttribute('aria-label','Zväčšená fotografia oznamu');
     zoomModal.overlay.classList.add('customer-bulletin-zoom-v229');
     zoomModal.dialog.style.background='#12151b';
     zoomModal.h.style.color='#fff';
@@ -3300,22 +3301,27 @@ async function uploadVaccinationProofsCoreV143(silent=false){
   function showImage(url){
     ensureModals();zoomModal.scroll.replaceChildren();
     const img=el('img');img.src=url;img.alt='Zväčšená fotografia oznamu';
-    // Two-finger photo zoom works even with the rest of the installed PWA zoom-locked.
-    let factor=1,originalFactor=1,startDistance=0,panX=0,panY=0,touchX=0,touchY=0;
+    // Zoom is centered on the image; one-finger panning is intentionally disabled.
+    let scale=1,initialScale=1,initialDistance=0;
     img.style.touchAction='none';
-    const dist=touches=>Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
-    const render=()=>{img.style.transform='translate('+panX+'px,'+panY+'px) scale('+factor+')'};
-    function resetZoom(){factor=1;panX=0;panY=0;startDistance=0;render()}
+    const distance=touches=>Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
+    const render=()=>{img.style.transform='scale('+scale+')'};
+    function resetZoom(){scale=1;initialScale=1;initialDistance=0;render()}
     img.addEventListener('touchstart',e=>{
-      if(e.touches.length===2){startDistance=dist(e.touches)||1;originalFactor=factor;e.preventDefault()}
-      else if(e.touches.length===1&&factor>1){touchX=e.touches[0].clientX-panX;touchY=e.touches[0].clientY-panY}
+      if(e.touches.length===2){initialDistance=distance(e.touches)||1;initialScale=scale;e.preventDefault()}
     },{passive:false});
     img.addEventListener('touchmove',e=>{
-      if(e.touches.length===2&&startDistance){factor=Math.max(1,Math.min(5,originalFactor*dist(e.touches)/startDistance));render();e.preventDefault()}
-      else if(e.touches.length===1&&factor>1){panX=e.touches[0].clientX-touchX;panY=e.touches[0].clientY-touchY;render();e.preventDefault()}
+      if(e.touches.length===2&&initialDistance){
+        scale=Math.max(1,Math.min(4,initialScale*distance(e.touches)/initialDistance));
+        render();e.preventDefault();
+      }else if(e.touches.length===1&&scale>1){e.preventDefault()}
     },{passive:false});
-    img.addEventListener('touchend',e=>{if(e.touches.length<2)startDistance=0;if(factor<=1)resetZoom()},{passive:true});
-    img.addEventListener('dblclick',()=>{factor=factor>1?1:2;panX=0;panY=0;render()});
+    img.addEventListener('touchend',e=>{
+      if(e.touches.length<2)initialDistance=0;
+      if(scale<=1)resetZoom();
+    },{passive:true});
+    img.addEventListener('touchcancel',resetZoom,{passive:true});
+    img.addEventListener('dblclick',e=>{e.preventDefault();scale=scale>1?1:2;render()});
     zoomModal.scroll.append(img);zoomModal.overlay.classList.remove('hidden');syncScrollLock();
   }
   function openArticle(row,fromHistory){
