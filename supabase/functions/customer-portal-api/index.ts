@@ -926,6 +926,7 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
   const uploadedAt = new Date().toISOString();
   const source = staff ? 'staff' : 'customer';
   const uploadedPaths: string[] = [];
+  let insertedCurrentRows = false;
   try {
     for (const bytes of decoded) {
       const path = 'dogs/' + dogId + '/' + batchId + '/' + crypto.randomUUID() + '.jpg';
@@ -964,6 +965,7 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
       })),
       prefer: 'return=representation',
     }) as Array<Json>;
+    insertedCurrentRows = true;
 
     if (replaceId) {
       const removed = await rest(
@@ -987,7 +989,8 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
         : (append ? [...existing, ...inserted] : inserted)),
     };
   } catch (error) {
-    if (uploadedPaths.length) {
+    // Never delete the photo object after its database row was inserted.
+    if (uploadedPaths.length && !insertedCurrentRows) {
       await fetch(SUPABASE_URL + '/storage/v1/object/vaccination-proof-photos', {
         method: 'DELETE',
         headers: {
