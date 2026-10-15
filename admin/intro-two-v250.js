@@ -1,5 +1,5 @@
 function openPairIntroV250(source,visit=null){
- openDogCreate('intro');state.convertingSubmissionId=source.id;
+ $('dogDetail')?.classList.add('hidden');openDogCreate('intro');state.convertingSubmissionId=source.id;
  let dogs=visit?.application_dogs||source.application_dogs;
  let draft=null;try{if(!visit)draft=JSON.parse(sessionStorage.getItem('chvo-intro-draft-'+source.id)||'null')}catch(_){}
  if(draft?.dogs?.length===2)dogs=draft.dogs;
