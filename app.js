@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-vacc-notice-v233';
-const APP_VERSION='1.0.76';
+const APP_BUILD='20261015-vaccine-safe-v234';
+const APP_VERSION='1.0.77';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -389,6 +389,15 @@ function customerCareAction(n){
     switchTab('menu');openDogDetails('vaccinations',false);
   }
 }
+function vaccinationCopyV234(n){
+  const body=String(n.body||'');
+  if(n.notification_type!=='vaccination_expiry')return body;
+  const record=(state.data?.vaccinations||[]).find(v=>Number(v.id)===Number(n.entity_id));
+  if(record?.vaccination_type==='infectious'&&(state.data?.vaccinations||[]).some(v=>Number(v.dog_id)===Number(record.dog_id)&&v.vaccination_type==='lepto_l4')){
+    return body.replaceAll('DHPPi+L','DHPPi');
+  }
+  return body;
+}
 const vaccinationCarePolicyV233='Po skončení platnosti treba pred ďalšou rezerváciou aktualizovať dátum aj fotografiu očkovacieho preukazu. Zdravie psíkov je pre nás prvoradé.';
 function renderNotifications(){
   if(window.__customerOnboardingCompleteV75!==true){$('notificationPopup')?.classList.add('hidden');return}
@@ -402,7 +411,7 @@ function renderNotifications(){
     if(!groups.has(key))groups.set(key,[]);
     groups.get(key).push(n);
   }
-  notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(n.body)).join('<br>')}</p>${group[0].notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}<button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
+  notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(vaccinationCopyV234(n))).join('<br>')}</p>${group[0].notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}<button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
   notice.querySelectorAll('[data-care-notice]').forEach(b=>b.addEventListener('click',()=>{const row=careRows.find(n=>Number(n.id)===Number(b.dataset.careNotice));if(row)customerCareAction(row)}));
   const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
   let modal=$('notificationPopup');
@@ -415,7 +424,7 @@ function renderNotifications(){
   $('notificationPopupTitle').classList.toggle('hidden',!rows.some(n=>n.notification_type==='announcement_push'));
   modal.querySelector('.notification-popup-card').classList.toggle('notification-popup-without-heading',!rows.some(n=>n.notification_type==='announcement_push'));
   const list=$('notificationPopupList');
-  list.innerHTML=rows.map(n=>`<div class="notification-popup-item"><strong>${esc(n.title||'Upozornenie')}</strong><div>${esc(n.body||'')}</div>${n.notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}${['pass_expiry','vaccination_expiry'].includes(n.notification_type)?`<button type="button" class="btn compact" data-popup-care="${Number(n.id)}">${n.notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button>`:''}</div>`).join('');
+  list.innerHTML=rows.map(n=>`<div class="notification-popup-item"><strong>${esc(n.title||'Upozornenie')}</strong><div>${esc(vaccinationCopyV234(n))}</div>${n.notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}${['pass_expiry','vaccination_expiry'].includes(n.notification_type)?`<button type="button" class="btn compact" data-popup-care="${Number(n.id)}">${n.notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button>`:''}</div>`).join('');
   list.querySelectorAll('[data-popup-care]').forEach(b=>b.addEventListener('click',()=>{const row=rows.find(n=>Number(n.id)===Number(b.dataset.popupCare));if(row){close();customerCareAction(row)}}));
   const close=async()=>{
     visibleIds.forEach(id=>customerClosedNotificationIdsV59.add(id));
@@ -536,7 +545,7 @@ function customerVaccinationsCompleteV96(dog){
   const rows=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(dog.id));
   const proofs=(state.data?.vaccination_proofs||[]).filter(p=>Number(p.dog_id)===Number(dog.id));
   const today=typeof bratislavaClockV95==='function'?bratislavaClockV95().date:new Date().toISOString().slice(0,10);
-  return proofs.length>0&&required.every(type=>rows.some(v=>v.vaccination_type===type&&v.valid_until&&String(v.valid_until)>=today));
+  return proofs.length>0&&required.every(type=>rows.some(v=>v.vaccination_type===type&&v.valid_until&&String(v.valid_until)>=today))&&(!rows.some(v=>v.vaccination_type==='lepto_l4')||rows.some(v=>v.vaccination_type==='lepto_l4'&&v.valid_until&&String(v.valid_until)>=today));
 }
 window.customerVaccinationsCompleteV96=customerVaccinationsCompleteV96;
 function dogFormSnapshotV96(){
@@ -1840,7 +1849,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const required=['rabies','infectious','kennel_cough'];
     const rows=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(dog.id));
     const complete=customerVaccinationsCompleteV96(dog);
-    const nearExpiry=complete&&required.some(type=>{
+    const watched=rows.some(v=>v.vaccination_type==='lepto_l4')?[...required,'lepto_l4']:required;
+    const nearExpiry=complete&&watched.some(type=>{
       const latest=rows.filter(v=>v.vaccination_type===type&&v.valid_until).sort((a,b)=>String(b.valid_until).localeCompare(String(a.valid_until)))[0];
       return latest&&vaccinationValidityV96(latest.valid_until).kind==='warning';
     });
@@ -1848,7 +1858,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     vaccination.className='dog-overview-status '+(!complete?'invalid':nearExpiry?'warning':'valid');
     const vaccinationLabel=!complete?'Očkovania nie sú platné':nearExpiry?'Blížiaci sa koniec<br>platnosti očkovania':'Platné očkovania';
     vaccination.innerHTML='<span class="overview-icon vacc-icon"><svg aria-hidden="true"><use href="#ci-'+(complete&&!nearExpiry?'check':'alert')+'"/></svg></span><span>'+vaccinationLabel+'</span>';
-    $('bookingVisitCount').querySelector('.overview-label').textContent='Celkové návštevy: '+totalVisits(dog);
+    $('bookingVisitCount').querySelector('.overview-label').textContent='Návštevy v škôlke: '+totalVisits(dog);
   }
 
   function ensureSettings(){
