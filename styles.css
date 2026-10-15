@@ -3067,3 +3067,13 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
 .vacc-proof-zoom-actions-v244{position:fixed;z-index:3;bottom:calc(22px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:12px}
 .vacc-proof-zoom-actions-v244 button{width:46px;height:46px;border:0;border-radius:50%;background:#fff;color:#111827;font-size:25px;font-weight:800;box-shadow:0 2px 10px #0004}
 @media(max-width:360px){.vacc-proof-edit-card-v244{padding:15px}.vacc-proof-edit-grid-v244{gap:6px}.vacc-proof-edit-pencil-v244{width:31px;height:31px}}
+
+
+/* v254: all touch actions, including modals mounted outside #appView, avoid iOS tap/selection rectangles. Keyboard focus remains visible. */
+button,a,summary,[role="button"],label:has(input[type="file"]){-webkit-tap-highlight-color:transparent!important}
+button,button *,.vacc-proof-empty-v105 *,.vacc-proof-edit-pencil-v244 *,.vacc-proof-edit-add-v244 *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button span,button svg,button svg *{pointer-events:none}
+.vacc-proof-edit-card-v244{min-width:0;box-sizing:border-box;overflow-x:hidden}
+.vacc-proof-edit-head-v244>div{min-width:0;flex:1}
+.vacc-proof-edit-head-v244 p,.vacc-proof-edit-message-v244{white-space:normal;overflow-wrap:anywhere;max-width:100%}
+.booking-taxi-dog-v254+ .booking-taxi-dog-v254{margin-top:10px}.booking-taxi-dog-v254>strong{display:block;font-size:13px;margin-bottom:5px}

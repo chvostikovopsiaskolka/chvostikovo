@@ -92,12 +92,11 @@ async function linkedOwnerIds(userId: string) {
 }
 
 async function linkedDogs(userId: string) {
-  const ownerIds = await linkedOwnerIds(userId);
-  if (!ownerIds.length) return [];
-  return await rest(
-    'dogs?owner_id=' + encodeURIComponent(inFilter(ownerIds)) +
-    '&select=id,owner_id,name,customer_name,age_text,birth_date,breed,weight_kg,sex,neutered,allergies,temperament,default_entry_type,legacy_total_visits,active,booking_late_exception,photo_path,photo_updated_at,share_name_photo,share_name_photo_at,share_name_photo_version&order=name.asc',
-  ) as Array<Json>;
+  const links = await rest('customer_owner_links?user_id=eq.'+encodeURIComponent(userId)+'&select=owner_id,allowed_dog_ids') as Array<Json>;
+  if (!links.length) return [];
+  const ownerIds = links.map(row=>Number(row.owner_id));
+  const rows = await rest('dogs?owner_id='+encodeURIComponent(inFilter(ownerIds))+'&select=id,owner_id,name,customer_name,age_text,birth_date,breed,weight_kg,sex,neutered,allergies,temperament,default_entry_type,legacy_total_visits,active,booking_late_exception,photo_path,photo_updated_at,share_name_photo,share_name_photo_at,share_name_photo_version&order=name.asc') as Array<Json>;
+  return rows.filter(dog=>links.some(link=>Number(link.owner_id)===Number(dog.owner_id) && (link.allowed_dog_ids==null || (Array.isArray(link.allowed_dog_ids)&&link.allowed_dog_ids.map(Number).includes(Number(dog.id))))));
 }
 
 async function signedPhotoUrl(pathValue: unknown, expiresIn = 3600) {
@@ -318,12 +317,12 @@ async function rosterPhotoPaths(rows: Array<Json>, viewerId?: string, viewerDogI
   if (!missing.length) return paths;
   const [photos,links] = await Promise.all([
     rest('customer_dog_photos?dog_id=' + encodeURIComponent(inFilter(missing.map(dog => Number(dog.id)))) + '&select=dog_id,user_id,photo_path'),
-    rest('customer_owner_links?owner_id=' + encodeURIComponent(inFilter([...new Set(missing.map(dog => Number(dog.owner_id)))])) + '&select=user_id,owner_id'),
+    rest('customer_owner_links?owner_id=' + encodeURIComponent(inFilter([...new Set(missing.map(dog => Number(dog.owner_id)))])) + '&select=user_id,owner_id,allowed_dog_ids'),
   ]) as [Array<Json>,Array<Json>];
   const userIds = [...new Set(links.map(link => String(link.user_id)))];
   const profiles = userIds.length ? await rest('customer_profiles?user_id=' + encodeURIComponent(inFilter(userIds)) + '&select=user_id,created_at&order=created_at.asc,user_id.asc') as Array<Json> : [];
   for (const dog of missing) {
-    const owners = new Set(links.filter(link => Number(link.owner_id) === Number(dog.owner_id)).map(link => String(link.user_id)));
+    const owners = new Set(links.filter(link => Number(link.owner_id) === Number(dog.owner_id) && (link.allowed_dog_ids==null || (link.allowed_dog_ids as number[]||[]).map(Number).includes(Number(dog.id)))).map(link => String(link.user_id)));
     const primary = profiles.find(profile => owners.has(String(profile.user_id)));
     const primaryPhoto = primary && photos.find(photo => Number(photo.dog_id) === Number(dog.id) && String(photo.user_id) === String(primary.user_id) && photo.photo_path);
     // Other customers see the first registered owner's current photo, never the partner's.
@@ -1238,6 +1237,11 @@ Deno.serve(async (req: Request) => {
         p_message: message,
       }, token) });
     }
+    if (action === 'request_dogs_bookings') {
+      const ids = Array.isArray(body.dog_ids) ? body.dog_ids.map(Number) : [];
+      if (!ids.length || ids.length > 2 || new Set(ids).size !== ids.length || ids.some(id=>!Number.isSafeInteger(id)||id<=0)) throw new Error('Vyberte jedného alebo oboch psíkov.');
+      return json({ data: await userRpc('portal_request_dogs_batch_v254', {p_dog_ids:ids,p_bookings:body.bookings,p_request_key:body.request_key}, token) });
+    }
     if (action === 'request_bookings') {
       const dogId = Number(body.dog_id || 0);
       const items = Array.isArray(body.bookings) ? body.bookings : [];
@@ -1344,11 +1348,11 @@ Deno.serve(async (req: Request) => {
       const photos = ids.length ? await rest('customer_dog_photos?dog_id=' + encodeURIComponent(inFilter(ids)) + '&select=dog_id,user_id,photo_path,updated_at') as Array<Json> : [];
       const userIds = [...new Set(photos.map(photo => String(photo.user_id)))];
       const profiles = userIds.length ? await rest('customer_profiles?user_id=' + encodeURIComponent(inFilter(userIds)) + '&select=user_id,full_name') as Array<Json> : [];
-      const links = userIds.length ? await rest('customer_owner_links?user_id=' + encodeURIComponent(inFilter(userIds)) + '&select=user_id,owner_id') as Array<Json> : [];
+      const links = userIds.length ? await rest('customer_owner_links?user_id=' + encodeURIComponent(inFilter(userIds)) + '&select=user_id,owner_id,allowed_dog_ids') as Array<Json> : [];
       const names = new Map(profiles.map(profile => [String(profile.user_id), profile.full_name]));
       return json({ data: await Promise.all(dogs.map(async (dog) => ({
         id:Number(dog.id), photo_url:await signedPhotoUrl(dog.photo_path), photo_updated_at:dog.photo_updated_at || null,
-        owner_photos:await Promise.all(photos.filter(photo => Number(photo.dog_id)===Number(dog.id) && photo.photo_path && links.some(link => String(link.user_id)===String(photo.user_id) && Number(link.owner_id)===Number(dog.owner_id))).map(async photo => ({
+        owner_photos:await Promise.all(photos.filter(photo => Number(photo.dog_id)===Number(dog.id) && photo.photo_path && links.some(link => String(link.user_id)===String(photo.user_id) && Number(link.owner_id)===Number(dog.owner_id) && (link.allowed_dog_ids==null || (link.allowed_dog_ids as number[]||[]).map(Number).includes(Number(dog.id))))).map(async photo => ({
           owner_name:names.get(String(photo.user_id)) || 'Majiteľ', photo_url:await signedPhotoUrl(photo.photo_path), updated_at:photo.updated_at,
         }))),
       }))) });
@@ -1402,4 +1406,6 @@ Deno.serve(async (req: Request) => {
     return fail(message, /prihlás|vypršalo/i.test(message) ? 401 : 400);
   }
 });
+
+
 

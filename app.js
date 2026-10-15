@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-two-dog-overview-v246';
-const APP_VERSION='1.0.87';
+const APP_BUILD='20261015-two-dog-booking-v254';
+const APP_VERSION='1.0.88';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -819,7 +819,7 @@ async function togglePrivacy(){
 }
 function ensurePhotoEditor(){
   if($('photoCropModal'))return;
-  document.body.insertAdjacentHTML('beforeend',`<div id="photoCropModal" class="photo-modal hidden"><div class="photo-modal-card"><div class="photo-modal-head"><div><strong>Upraviť fotku</strong><small>Fotku posuňte jedným prstom. Dvoma prstami ju priblížte.</small></div><button id="photoCropClose" class="icon-btn" type="button">✕</button></div><div class="crop-shell"><canvas id="photoCropCanvas" width="640" height="640"></canvas></div><div class="photo-gesture-hint-v89">Posun: 1 prst · Priblíženie: 2 prsty</div><div class="photo-modal-actions"><button id="photoCropCancel" class="btn secondary" type="button">Zrušiť</button><button id="photoCropSave" class="btn" type="button">Použiť fotku</button></div></div></div>`);
+  document.body.insertAdjacentHTML('beforeend',`<div id="photoCropModal" class="photo-modal hidden"><div class="photo-modal-card"><div class="photo-modal-head"><div><strong>Upraviť fotku</strong><small>Fotku posuňte jedným prstom. Dvoma prstami ju priblížte.</small></div><button id="photoCropClose" class="icon-btn" type="button">✕</button></div><div class="crop-shell"><canvas id="photoCropCanvas" width="640" height="640"></canvas></div><div class="photo-modal-actions"><button id="photoCropCancel" class="btn secondary" type="button">Zrušiť</button><button id="photoCropSave" class="btn" type="button">Použiť fotku</button></div></div></div>`);
   $('photoCropClose').onclick=$('photoCropCancel').onclick=closePhotoEditor;
   $('photoCropSave').onclick=saveCroppedPhoto;
   bindPhotoGesturesV89($('photoCropCanvas'));
@@ -1430,7 +1430,7 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
   function closePrivacyInfo(){if(privacyMandatory)return;$('privacyInfoModal')?.classList.add('hidden')}
   async function acknowledgePrivacy(){if(!privacyMandatory){closePrivacyInfo();return}const btn=$('privacyInfoOk');if(btn)btn.disabled=true;try{const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_acknowledge_privacy_notice',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_version:PRIVACY_VERSION})});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.message||data?.error||'Potvrdenie sa nepodarilo uložiť.');if(state.data?.profile){state.data.profile.privacy_notice_version=PRIVACY_VERSION;state.data.profile.privacy_notice_acknowledged_at=new Date().toISOString()}privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden');runCustomerOnboardingV75()}catch(e){toast(e.message||'Potvrdenie sa nepodarilo uložiť.')}finally{if(btn)btn.disabled=false}}
   async function activeTermsDocument(){try{return await readActiveCustomerTermsV146()}catch(_){return null}}
-  async function acceptedTerms(version){const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_acceptances?user_id=eq.'+encodeURIComponent(state.session.user.id)+'&terms_version=eq.'+encodeURIComponent(version)+'&select=dog_id,terms_version,accepted_at',{headers:authHeaders(),cache:'no-store'});if(!r.ok)return[];return await r.json()}
+  async function acceptedTerms(version){const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_sync_owner_terms_v254',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_terms_version:version}),cache:'no-store'});if(!r.ok)return[];return await r.json()}
   function termParagraphsV106(body){
     const split=String(body||'').replace(/\. (?=(?:Majiteľ|Fenky|Ak|Chvostíkovo|Aj pri|Psia škôlka|Psík|Do kolektívu|Pri závažných|Pri úvodnej|V prípade|Náklady|Kapacita|Bez včasného|Pri závažných dôvodoch|Permanentka|10-vstupová|Platnosť permanentky|Nevyužité vstupy|Služba|Aktuálna cena|Podmienky sa)\b)/g,'.\n');
     return split.split(/\n+/).map(x=>x.trim()).filter(Boolean);
@@ -1456,7 +1456,7 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
     modal.dataset.version=String(doc.version);
     modal.dataset.documentHash=String(doc.document_hash||'');
     $('schoolTermsTitle').textContent=doc.title||'Podmienky škôlky';
-    $('schoolTermsDog').textContent='Psík: '+(dog.name||'')+' · Verzia '+termsVersionLabel(doc.version);
+    $('schoolTermsDog').textContent=(state.data?.dogs||[]).filter(d=>Number(d.owner_id)===Number(dog.owner_id)).map(d=>d.name).join(' a ')+' · Verzia '+termsVersionLabel(doc.version);
     const body=$('schoolTermsBody'),ack=$('schoolTermsAck'),confirm=$('schoolTermsConfirm');
     body.innerHTML=formatSchoolTermsV97(doc.body||'');
     ack.checked=false;
@@ -1489,7 +1489,7 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
     requestAnimationFrame(checkBottom);
     return true
   }
-  async function acceptSchoolTerms(){const modal=$('schoolTermsModal'),dogId=Number(modal?.dataset.dogId||0),version=String(modal?.dataset.version||'');if(!dogId||!version||!$('schoolTermsAck')?.checked||$('schoolTermsAck')?.disabled||$('schoolTermsConfirm')?.disabled)return;const btn=$('schoolTermsConfirm');if(btn)btn.disabled=true;try{const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_accept_school_terms_verified',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_dog_id:dogId,p_terms_version:version,p_document_hash:modal.dataset.documentHash,p_acceptance_text:TERMS_ACCEPTANCE_TEXT})});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.message||data?.error||'Podmienky sa nepodarilo potvrdiť.');modal.classList.add('hidden');toast('Podmienky škôlky boli potvrdené.');window.renderCustomerLegalStatusV103?.(true);runCustomerOnboardingV75()}catch(e){toast(e.message||'Podmienky sa nepodarilo potvrdiť.')}finally{if(btn)btn.disabled=false}}
+  async function acceptSchoolTerms(){const modal=$('schoolTermsModal'),dogId=Number(modal?.dataset.dogId||0),version=String(modal?.dataset.version||'');if(!dogId||!version||!$('schoolTermsAck')?.checked||$('schoolTermsAck')?.disabled||$('schoolTermsConfirm')?.disabled)return;const btn=$('schoolTermsConfirm');if(btn)btn.disabled=true;try{const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_accept_owner_terms_v254',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_dog_id:dogId,p_terms_version:version,p_document_hash:modal.dataset.documentHash,p_acceptance_text:TERMS_ACCEPTANCE_TEXT})});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.message||data?.error||'Podmienky sa nepodarilo potvrdiť.');modal.classList.add('hidden');toast('Podmienky škôlky boli potvrdené.');window.renderCustomerLegalStatusV103?.(true);runCustomerOnboardingV75()}catch(e){toast(e.message||'Podmienky sa nepodarilo potvrdiť.')}finally{if(btn)btn.disabled=false}}
   function visibilityDecided(dogId){if((state.data?.dogs||[]).find(d=>Number(d.id)===Number(dogId))?.share_name_photo_at)return true;return (state.data?.visibility_consents||[]).some(x=>Number(x.dog_id)===Number(dogId))}
   function detailsPromptAnswered(dogId){return (state.data?.dog_onboarding||[]).some(x=>Number(x.dog_id)===Number(dogId))}
   function detailsAlreadyComplete(dog){return window.customerVaccinationsCompleteV96?window.customerVaccinationsCompleteV96(dog):false}
@@ -2031,6 +2031,31 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
   let selectedDatesV37=new Set();
   let selectedTaxiByDateV91=new Map();
+  let pairBookingV254=false;
+  const pairTaxiV254=new Map();
+  function pickerDogsV254(){return pairBookingV254?(state.data?.dogs||[]).slice(0,2):[selectedDog()].filter(Boolean)}
+  function pickerTaxiV254(date,dogId){return pairBookingV254?pairTaxiV254.get(date+'|'+dogId)||'none':selectedTaxiByDateV91.get(date)||'none'}
+  function taxiChoicesV254(date){return pickerDogsV254().map(d=>'<div class="booking-taxi-dog-v254">'+(pairBookingV254?'<strong>'+esc(d.name)+'</strong>':'')+'<div class="booking-taxi-inline-choices-v201">'+[['pickup','Vyzdvihnutie ráno','5 €'],['pickup_dropoff','Tam aj späť','10 €']].map(([id,label,price])=>'<button type="button" class="'+(pickerTaxiV254(date,d.id)===id?'active':'')+'" data-taxi-mode="'+id+'" data-taxi-date="'+date+'" data-taxi-dog="'+d.id+'">'+label+' · '+price+'</button>').join('')+'</div></div>').join('')}
+  async function submitPairV254(dates){
+    const dogs=pickerDogsV254();
+    for(const d of dogs)if(window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(d)){pickerErrorV95('Pred rezerváciou doplňte povinné očkovania pre '+d.name+'.');return}
+    const payload={dog_ids:dogs.map(d=>Number(d.id)),bookings:dates.map(date=>({date,taxi_by_dog:Object.fromEntries(dogs.map(d=>[String(d.id),pickerTaxiV254(date,d.id)]))}))};
+    const fingerprint=JSON.stringify(payload),storageKey='chvo-pair-submit-v254';let saved;
+    try{saved=JSON.parse(sessionStorage.getItem(storageKey)||'null')}catch(_){}
+    if(!saved||saved.user!==state.session.user.id||saved.payload!==fingerprint)saved={user:state.session.user.id,payload:fingerprint,key:crypto.randomUUID()};
+    try{sessionStorage.setItem(storageKey,JSON.stringify(saved))}catch(_){}
+    submittingV37=true;pickerErrorV95('');renderPickerV37();
+    try{
+      const response=await api({action:'request_dogs_bookings',...payload,request_key:saved.key});
+      const rows=response?.data?.bookings||[];
+      if(rows.length!==dates.length*dogs.length)throw Error('Výsledok rezervácie nie je úplný. Obnovte prehľad a skúste znova.');
+      for(const row of rows)applyLocalBooking({data:row},row);
+      queueCustomerSync('bookings',80);submittingV37=false;closePickerV37();
+      toast('Rezervácie pre '+dogs.map(d=>d.name).join(' a ')+' boli odoslané na schválenie.');
+    }catch(error){pickerErrorV95(error.message||'Rezervácia oboch psíkov sa nepodarila. Skúste znova.');queueCustomerSync('bookings',0)}
+    finally{submittingV37=false;if(!$('bookingPickerV37')?.classList.contains('hidden'))renderPickerV37()}
+  }
+
   let submittingV37=false;
   let checkingRenewalV157=false;
   let renewalCheckedDogV157=null;
@@ -2313,7 +2338,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('bookingPickerCloseV37').addEventListener('click',closePickerV37);
     $('bookingPickerV37').addEventListener('click',e=>{if(e.target===$('bookingPickerV37'))closePickerV37()});
     $('bookingPickerDogV37').addEventListener('change',e=>{
-      state.selectedDogId=Number(e.target.value);
+      if(submittingV37)return;pairBookingV254=e.target.value==='both';pairTaxiV254.clear();
+      if(!pairBookingV254)state.selectedDogId=Number(e.target.value);
       selectedDatesV37.clear();
       selectedTaxiByDateV91.clear();
       expandedTaxiDateV201=null;
@@ -2336,11 +2362,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(!dog)return;
     const dogWrap=$('bookingPickerDogWrapV37'),dogSelect=$('bookingPickerDogV37');
     dogWrap.classList.toggle('hidden',dogs.length<=1);
-    dogSelect.innerHTML=dogs.map(d=>`<option value="${d.id}" ${Number(d.id)===Number(dog.id)?'selected':''}>${esc(d.name)}</option>`).join('');
+    dogSelect.disabled=submittingV37;dogSelect.innerHTML=dogs.map(d=>`<option value="${d.id}" ${!pairBookingV254&&Number(d.id)===Number(dog.id)?'selected':''}>${esc(d.name)}</option>`).join('')+(dogs.length===2?'<option value="both" '+(pairBookingV254?'selected':'')+'>Obaja psíkovia</option>':'');
     $('bookingPickerRangeV37').textContent=$('weekTitle')?.textContent||'Najbližšie dva týždne';
 
     updateBookingDeadlineNoticeV127();
-    renderSmartDaysV199(dog,days);
+    if(pairBookingV254)$('bookingPickerSmartDaysV199').classList.add('hidden');else renderSmartDaysV199(dog,days);
     const groups=[];
     for(let start=0;start<days.length;start+=5){
       const week=days.slice(start,start+5);
@@ -2355,7 +2381,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const futureWeek=start>=10;
       const futureOpen=!futureWeek||futureWeekExpandedV235||week.some(d=>selectedDatesV37.has(d.date));
       groups.push(`<div class="booking-picker-week-v127 ${futureWeek?'booking-picker-future-v235':''}"><div class="booking-picker-week-label-v127">${futureWeek?`<button type="button" class="booking-picker-future-toggle-v235" data-future-toggle="true" aria-expanded="${futureOpen?'true':'false'}">O dva týždne <span aria-hidden="true">${futureOpen?'⌃':'⌄'}</span></button>`:(['Tento týždeň','Budúci týždeň'][start/5]||'Ďalší týždeň')}</div><div class="booking-picker-future-body-v235 ${futureOpen?'':'hidden'}">${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
-        const existing=bookingFor(dog.id,d.date),deadlineClosed=bookingDeadlineClosedV95(d.date,dog),closed=d.bookings_open===false,full=Number(d.available)<=0;
+        const existing=pickerDogsV254().some(x=>bookingFor(x.id,d.date)),deadlineClosed=pickerDogsV254().some(x=>bookingDeadlineClosedV95(d.date,x)),closed=d.bookings_open===false,full=Number(d.available)<pickerDogsV254().length;
         const past=d.date<=bratislavaClockV95().date;
         const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;
         const disabled=!!existing||closed||past;
@@ -2363,14 +2389,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const stateText=existing?'Rezervované':past?'Uplynulo':closed?'Zatvorené':full?'Plno':deadlineClosed?'Uzavreté':`${Math.max(0,Number(d.available)||0)} voľné`;
         const taxiToggle=selected?`<button type="button" class="booking-day-taxi-toggle-v201" data-taxi-toggle="${d.date}" aria-expanded="${expandedTaxiDateV201===d.date?'true':'false'}" data-taxi-selected="${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'true':'false'}" aria-pressed="${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'true':'false'}" aria-label="Taxi na ${esc(skDay(d.date))} ${esc(skDate(d.date))}">🚕${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'<span class="taxi-indicator-v201"></span>':''}</button>`:'';
         return `<div class="booking-day-wrap-v201"><button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" data-contact="${lateContact?'true':'false'}" data-full="${full?'true':'false'}" ${disabled?'disabled':''}><small>${closed?'❌':esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${closed?'Zatvorené':esc(stateText)}</span></button>${taxiToggle}</div>`;
-      }).join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p><div class="booking-taxi-inline-choices-v201">${[['pickup','Vyzdvihnutie ráno','5 €'],['pickup_dropoff','Tam aj späť','10 €']].map(([id,label,price])=>`<button type="button" class="${(selectedTaxiByDateV91.get(expandedTaxiDateV201)||'none')===id?'active':''}" data-taxi-mode="${id}" data-taxi-date="${expandedTaxiDateV201}">${label}${price?' · '+price:''}</button>`).join('')}</div></div>`:' '}</div></div>`);
+      }).join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p>${taxiChoicesV254(expandedTaxiDateV201)}</div>`:' '}</div></div>`);
     }
     $('bookingPickerDaysV37').innerHTML=groups.join('');
     $('bookingPickerDaysV37').querySelectorAll('[data-future-toggle]').forEach(b=>b.addEventListener('click',()=>{futureWeekExpandedV235=b.getAttribute('aria-expanded')!=='true';renderPickerV37()}));
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',async()=>{
       if(checkingRenewalV157||submittingV37)return;
       const date=btn.dataset.date;
-      if(!selectedDatesV37.has(date)&&renewalCheckedDogV157!==Number(dog.id)){
+      if(!pairBookingV254&&!selectedDatesV37.has(date)&&renewalCheckedDogV157!==Number(dog.id)){
         checkingRenewalV157=true;
         const epoch=pickerEpochV157;
         try{
@@ -2381,6 +2407,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         }catch(error){pickerErrorV95(error.message);return}
         finally{checkingRenewalV157=false}
       }
+      if(btn.dataset.contact==='true'&&pairBookingV254){pickerErrorV95('Pre oboch psíkov nie sú dostupné dve miesta alebo sa prihlasovanie uzavrelo. Vyberte iný deň alebo nám napíšte.');return}
       if(btn.dataset.contact==='true'){
         closePickerV37();
         const message=`Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`;
@@ -2409,8 +2436,9 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('bookingPickerDaysV37').querySelectorAll('[data-taxi-mode]').forEach(button=>button.addEventListener('click',()=>{
       const date=button.dataset.taxiDate;
       if(!selectedDatesV37.has(date))return;
-      const previously=selectedTaxiByDateV91.get(date)||'none';
-      selectedTaxiByDateV91.set(date,previously===button.dataset.taxiMode?'none':button.dataset.taxiMode);
+      const dogId=Number(button.dataset.taxiDog||dog.id),previously=pickerTaxiV254(date,dogId);
+      if(pairBookingV254)pairTaxiV254.set(date+'|'+dogId,previously===button.dataset.taxiMode?'none':button.dataset.taxiMode);
+      else selectedTaxiByDateV91.set(date,previously===button.dataset.taxiMode?'none':button.dataset.taxiMode);
       expandedTaxiDateV201=null;
       renderPickerV37();
     }));
@@ -2420,7 +2448,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
 
   function openPickerV37(){
-    pickerEpochV157++;
+    pairBookingV254=false;pairTaxiV254.clear();pickerEpochV157++;
     const dog=selectedDog();if(dog&&window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(dog)){switchTab('dog');setTimeout(()=>openDogDetails('vaccinations',false),40);toast('Pred rezerváciou doplňte povinné očkovania.');return}
     selectedDatesV37.clear();selectedTaxiByDateV91.clear();expandedTaxiDateV201=null;renewalCheckedDogV157=null;smartDaysDismissedV199=false;futureWeekExpandedV235=false;pickerErrorV95('');
     renderPickerV37();
@@ -2434,6 +2462,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   async function submitPickerV37(){
     const dog=selectedDog(),dates=[...selectedDatesV37].sort();
     if(!dog||!dates.length||submittingV37||checkingRenewalV157)return;
+    if(pairBookingV254)return submitPairV254(dates);
     if(window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(dog)){pickerErrorV95('Pred rezerváciou doplňte povinné očkovania.');return}
     const deadlineDates=dates.filter(date=>bookingDeadlineClosedV95(date,dog));
     if(deadlineDates.length){
@@ -2513,11 +2542,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   customerRenderers.days=()=>{
     const root=$('weekDays'),dog=selectedDog();if(!root)return;
     const days=state.data?.availability?.days||[],byDate=new Map(days.map(d=>[d.date,d]));
-    const clock=overviewClock(),items=futureItems().filter(r=>dog&&Number(r.dog_id)===Number(dog.id)&&overviewDayVisible(r.reservation_date,clock));
+    const clock=overviewClock(),multi=(state.data?.dogs||[]).length===2,items=futureItems().filter(r=>dog&&(multi||Number(r.dog_id)===Number(dog.id))&&overviewDayVisible(r.reservation_date,clock));
     if(!items.length){root.innerHTML='<div class="card reserved-empty-v37"><svg class="reserved-empty-icon" aria-hidden="true"><use href="#ci-calendar"/></svg><span>Zatiaľ nemáte rezervovaný žiadny deň.</span><small>Kliknite na tlačidlo vyššie a vyberte si termín<br>pre vášho psíka.</small></div>';return}
     // Maintain the open roster while realtime updates replace the day cards.
     const openRosterDatesV209=new Set([...root.querySelectorAll('.reserved-day-card-v37[data-date]')].filter(card=>card.querySelector('.reserved-roster-v37[open]')).map(card=>card.dataset.date));
     root.innerHTML=items.map(r=>{
+      const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(r.dog_id))||selectedDog();
       const day=byDate.get(r.reservation_date)||{},taxi=taxiLabel(r.taxi_mode),pending=r.status==='pending';
       const reservation=(state.data?.reservations||[]).find(x=>Number(x.id)===Number(r.reservation_id));
       const planned=Number(reservation?.planned_entry_number||r.projected_entry_number||r.planned_entry_number)||0,plannedTotal=Number(reservation?.planned_pass_total||r.projected_pass_total||r.planned_pass_total)||0;
@@ -2533,7 +2563,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const taxiPending=r.taxi_change_status==='pending'?'<span class="reserved-taxi-v37">🚕 Taxi čaká na schválenie</span>':'';
       const detail=(pending&&passState)||taxi||taxiPending?`<div class="reserved-day-detail-v37${pending?' reserved-day-detail-pending-v37':''}">${pending?passState:''}${taxi?`<span class="reserved-taxi-v37">${esc(taxi)}</span>`:''}${taxiPending}</div>`:'';
       const approvedRoster=pending?'':`<div class="reserved-day-meta-v37">${bookingRosterV37(day,dog,passState)}</div>`;
-      return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div class="reserved-day-date-v37"><strong>${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><div class="reserved-day-controls-v37"><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span>${taxiEdit}${cancel}</div></div>${approvedRoster}${detail}${sharedNote}${note}</div>`;
+      return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div class="reserved-day-date-v37"><strong>${multi?esc(dog.name)+' · ':''}${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><div class="reserved-day-controls-v37"><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span>${taxiEdit}${cancel}</div></div>${approvedRoster}${detail}${sharedNote}${note}</div>`;
     }).join('');
     root.querySelectorAll('.reserved-day-card-v37[data-date]').forEach(card=>{
       if(openRosterDatesV209.has(card.dataset.date))card.querySelector('.reserved-roster-v37')?.setAttribute('open','');
@@ -3118,12 +3148,12 @@ function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
   current.querySelectorAll('[data-proof-index]').forEach(button=>button.addEventListener('click',()=>openVaccinationProofViewerV104(proofs[Number(button.dataset.proofIndex)]?.image_url)));
   const busy=window.__vaccinationProofProcessingV105===true||!!vaccinationProofUploadInFlightV143;
   const retry=vaccinationProofFilesV104.length>0&&!busy;
-  const empty=$('vaccProofEmptyV105');if(empty){empty.disabled=busy;if(retry)empty.querySelector('span:not(.vacc-proof-plus-v105)').textContent='Skúsiť nahratie znova';empty.addEventListener('click',()=>{if(retry)uploadVaccinationProofsV104(false).catch(()=>{});else $('vaccProofLibraryV104')?.click()})}
+  const empty=$('vaccProofEmptyV105');if(empty){empty.disabled=busy;if(retry)empty.querySelector('span:not(.vacc-proof-plus-v105)').textContent='Skúsiť nahratie znova';empty.addEventListener('click',()=>{if(retry)uploadVaccinationProofsV104(false).catch(()=>{});else {empty.blur();$('vaccProofLibraryV104')?.click()}})}
   const replace=$('vaccProofReplaceV104');if(replace){replace.classList.toggle('hidden',!proofs.length);replace.disabled=busy;replace.textContent=retry?'Skúsiť nahratie znova':'Upraviť fotky'}
   staged.classList.toggle('hidden',!vaccinationProofFilesV104.length);
   staged.innerHTML=vaccinationProofFilesV104.length?'<div class="vacc-proof-stage-title-v104">Vybrané nové fotografie</div><div class="vacc-proof-grid-v104">'+vaccinationProofFilesV104.map((item,i)=>'<div class="vacc-proof-thumb-v104 staged"><img src="'+item.dataUrl+'" alt="Vybraná fotografia '+(i+1)+'"><button type="button" data-remove-proof="'+i+'" aria-label="Odstrániť">×</button></div>').join('')+'</div>':'';
   staged.querySelectorAll('[data-remove-proof]').forEach(button=>{button.disabled=busy;button.addEventListener('click',()=>{if(window.__vaccinationProofProcessingV105||vaccinationProofUploadInFlightV143)return;vaccinationProofFilesV104.splice(Number(button.dataset.removeProof),1);renderVaccinationProofsV104(dogId)})});
-  if(msg&&!vaccinationProofFilesV104.length&&!busy)msg.textContent=vaccinationProofReplaceModeV104?'Vyberte 1 až 5 nových fotografií.':vaccinationPhotoNeededV244(dogId)?'Zmenili ste dátum očkovania. Pred uložením nahrajte aj aktuálnu fotografiu cez „Upraviť fotky“.':proofs.length?'Uložené '+proofs.length+' z 5 fotografií.':'Na dokončenie očkovaní nahrajte aspoň jednu fotografiu.';
+  if(msg&&!vaccinationProofFilesV104.length&&!busy)msg.textContent=vaccinationProofReplaceModeV104?'Vyberte 1 až 5 nových fotografií.':vaccinationPhotoNeededV244(dogId)?'Zmenili ste dátum očkovania. Pred uložením nahrajte aj aktuálnu fotografiu cez „Upraviť fotky“.':proofs.length?'Uložené '+proofs.length+' z 5 fotografií.':'Na dokončenie nahrajte fotografie očkovaní z očkovacieho preukazu.';
 }
 async function addVaccinationProofFilesV104(files){
   const incoming=[...(files||[])].filter(Boolean);
@@ -3270,7 +3300,7 @@ function renderVaccProofEditorV244(){
   grid.querySelectorAll('[data-vacc-preview]').forEach(b=>b.addEventListener('click',()=>openVaccinationProofViewerV104(byId.get(Number(b.dataset.vaccPreview))?.image_url)));
   grid.querySelectorAll('[data-vacc-replace]').forEach(b=>{b.disabled=vaccProofEditBusyV244;b.addEventListener('click',()=>{
     if(vaccProofEditBusyV244)return;
-    const input=$('vaccProofEditFileV244');input.dataset.replaceId=b.dataset.vaccReplace;input.click();
+    const input=$('vaccProofEditFileV244');input.dataset.replaceId=b.dataset.vaccReplace;b.blur();input.click();
   })});
 }
 async function uploadSingleVaccProofV244(file,replaceId){
@@ -3526,3 +3556,4 @@ function installVaccinationViewerZoomV244(modal){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();
+

@@ -1,0 +1,7 @@
+[
+  {
+    "schema": "private",
+    "name": "dog_name_accusative",
+    "definition": "CREATE OR REPLACE FUNCTION private.dog_name_accusative(p_name text, p_sex text)\n RETURNS text\n LANGUAGE plpgsql\n IMMUTABLE\n SET search_path TO ''\nAS $function$\ndeclare v_name text := pg_catalog.btrim(coalesce(p_name,'')); \nbegin\n if v_name='' then return 'psíka'; end if;\n if p_sex='female' and pg_catalog.lower(pg_catalog.right(v_name,1))='a' and char_length(v_name)>1 then\n   return pg_catalog.left(v_name,char_length(v_name)-1) ||\n     case when pg_catalog.right(v_name,1)='A' then 'U' else 'u' end;\n end if;\n return v_name;\nend\n$function$\n"
+  }
+]

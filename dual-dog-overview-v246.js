@@ -1,89 +1,35 @@
-/* V244: two approved dogs; click opens the existing general details form. */
-(function initDualDogOverviewV241(){
-  'use strict';
-  const rootId='bookingMultiDogsV241';
-  const dogColor=(dog)=>String(dog?.sex||'').toLowerCase()==='male'?'male':String(dog?.sex||'').toLowerCase()==='female'?'female':'neutral';
-  function selectDualDog(id){
-    if(!state?.data?.dogs?.some(d=>Number(d.id)===id))return;
-    if(Number(state.selectedDogId)!==id){
-      if(typeof clearVaccinationProofStageV104==='function')clearVaccinationProofStageV104();
-      state.selectedDogId=id;
-      renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays();
-    }
-    // Use the same general dog-details modal as Menu, not the vaccinations view.
-    if(typeof openDogDetails==='function')openDogDetails('details',false);
+/* v254: two square photographs and each dog's own compact information. */
+(function dualDogOverviewV254(){
+ const rootId='bookingMultiDogsV241';
+ function openDog(id,action){
+  if(!state.data?.dogs?.some(d=>Number(d.id)===id))return;
+  if(Number(state.selectedDogId)!==id){clearVaccinationProofStageV104();state.selectedDogId=id;renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays()}
+  if(action==='vaccinations')openDogDetails('vaccinations',false);
+  else if(action==='visits')window.openDogVisitsV99?.();
+  else if(action==='grades')openCustomerGradebook();
+  else openDogDetails('details',false);
+ }
+ function render(){
+  const root=document.getElementById('bookingDogProfile'),identity=root?.querySelector('.dog-overview-identity');if(!identity)return;
+  const dogs=state.data?.dogs||[];let holder=document.getElementById(rootId);
+  if(dogs.length!==2){root.classList.remove('dual-dog-v241');holder?.remove();return}
+  root.classList.add('dual-dog-v241');
+  if(!holder){holder=document.createElement('div');holder.id=rootId;holder.className='dual-dog-choices-v241';holder.setAttribute('aria-label','Moji psíkovia');identity.prepend(holder);holder.addEventListener('click',e=>{const b=e.target.closest('[data-dog-open-v254]');if(b)openDog(Number(b.dataset.dogOpenV254),b.dataset.action||'details')})}
+  for(const dog of dogs){
+   let panel=holder.querySelector('[data-dog-panel="'+Number(dog.id)+'"]');
+   if(!panel){panel=document.createElement('article');panel.className='dual-dog-panel-v254';panel.dataset.dogPanel=String(dog.id);panel.innerHTML='<button type="button" class="dual-dog-photo-v254" data-action="details"><span class="dual-dog-picture-v241"></span><strong class="dual-dog-name-v241"></strong></button><div class="dual-dog-info-v254"><div class="dual-dog-pass-v254"></div><button type="button" data-action="vaccinations" class="dual-dog-status-v254"></button><button type="button" data-action="visits" class="dual-dog-visits-v254"></button><button type="button" data-action="grades" class="dual-dog-grades-v254"><svg aria-hidden="true"><use href="#ci-book"/></svg>Žiacka knižka</button></div>';holder.append(panel)}
+   panel.querySelectorAll('button').forEach(b=>{b.dataset.dogOpenV254=String(dog.id)});
+   panel.classList.toggle('male-v241',dog.sex==='male');
+   const photo=panel.querySelector('.dual-dog-picture-v241'),key=[dog.id,dog.photo_path||dog.photo_url,dog.photo_updated_at].join('|');
+   if(photo.dataset.key!==key){photo.replaceChildren();photo.dataset.key=key;if(dog.photo_url){const img=document.createElement('img');img.alt=dog.name||'Psík';img.src=dog.photo_url;img.decoding='async';photo.append(img)}else photo.textContent='🐾'}
+   panel.querySelector('.dual-dog-name-v241').textContent=dog.name||'Psík';panel.querySelector('.dual-dog-photo-v254').setAttribute('aria-label','Údaje psíka '+dog.name);
+   const pass=activePassFor(dog.id),planned=typeof plannedPassSummaryV162==='function'?plannedPassSummaryV162(dog.id):null;
+   panel.querySelector('.dual-dog-pass-v254').innerHTML=pass?'<small>Permanentka</small><strong>'+Number(pass.used_entries||0)+' z '+Number(pass.total_entries)+'</strong>':planned?'<small>Plánovaná permanentka</small><strong>0 z '+Number(planned.total)+'</strong>':'<small>Vstup</small><strong>'+(dog.default_entry_type==='free'?'Bezplatný':'Jednorazový')+'</strong>';
+   const valid=customerVaccinationsCompleteV96(dog),soon=(state.data.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(dog.id)).some(v=>vaccinationValidityV96(v.valid_until).kind==='warning');
+   const status=panel.querySelector('.dual-dog-status-v254');status.textContent=!valid?'Očkovania nie sú platné':soon?'Končí platnosť očkovania':'Platné očkovania';status.classList.toggle('warning',!valid||soon);
+   panel.querySelector('.dual-dog-visits-v254').textContent='Návštevy: '+totalVisits(dog);
   }
-  function renderDualDogOverview(){
-    const root=document.getElementById('bookingDogProfile');
-    const identity=root?.querySelector('.dog-overview-identity');
-    if(!root||!identity)return;
-    const dogs=state?.data?.dogs||[];
-    let holder=document.getElementById(rootId);
-    if(dogs.length!==2){
-      root.classList.remove('dual-dog-v241');
-      holder?.remove();
-      return;
-    }
-    root.classList.add('dual-dog-v241');
-    if(!holder){
-      holder=document.createElement('div');
-      holder.id=rootId;
-      holder.className='dual-dog-choices-v241';
-      holder.setAttribute('role','group');
-      holder.setAttribute('aria-label','Moji psíkovia');
-      identity.insertBefore(holder,identity.firstChild);
-      holder.addEventListener('click',event=>{
-        const button=event.target.closest('button[data-dual-dog-id]');
-        if(!button||!holder.contains(button))return;
-        selectDualDog(Number(button.dataset.dualDogId));
-      });
-    }
-    const selected=Number(state.selectedDogId);
-    const liveIds=new Set(dogs.map(d=>String(d.id)));
-    for(const old of holder.querySelectorAll('button[data-dual-dog-id]')){
-      if(!liveIds.has(old.dataset.dualDogId))old.remove();
-    }
-    for(const dog of dogs){
-      const id=String(dog.id);
-      let button=Array.from(holder.children).find(el=>el.dataset.dualDogId===id);
-      if(!button){
-        button=document.createElement('button');
-        button.type='button';
-        button.className='dual-dog-choice-v241';
-        button.dataset.dualDogId=id;
-        const photo=document.createElement('span');
-        photo.className='dual-dog-picture-v241';
-        const label=document.createElement('span');
-        label.className='dual-dog-name-v241';
-        button.append(photo,label);
-      }
-      button.classList.toggle('selected-v241',Number(dog.id)===selected);
-      button.classList.toggle('female-v241',dogColor(dog)==='female');
-      button.classList.toggle('male-v241',dogColor(dog)==='male');
-      button.setAttribute('aria-pressed',Number(dog.id)===selected?'true':'false');
-      button.setAttribute('aria-label','Zobraziť psíka '+String(dog.name||''));
-      const photo=button.querySelector('.dual-dog-picture-v241');
-      const label=button.querySelector('.dual-dog-name-v241');
-      const photoUrl=typeof dog.photo_url==='string'?dog.photo_url:'';
-      if(photo.dataset.url!==photoUrl){
-        photo.replaceChildren();
-        photo.dataset.url=photoUrl;
-        if(photoUrl){
-          const img=document.createElement('img');
-          img.alt='';
-          img.loading='eager';
-          img.decoding='async';
-          img.src=photoUrl;
-          img.addEventListener('error',()=>{if(img.isConnected)photo.textContent='🐾'},{once:true});
-          photo.appendChild(img);
-        }else photo.textContent='🐾';
-      }
-      label.textContent=String(dog.name||'Psík');
-      holder.appendChild(button);
-    }
-  }
-  if(typeof customerHooks!=='undefined'&&Array.isArray(customerHooks.afterRenderDog)){
-    customerHooks.afterRenderDog.push(renderDualDogOverview);
-    if(typeof state!=='undefined'&&state.data)renderDualDogOverview();
-  }
+ }
+ customerHooks.afterRenderDog.push(render);customerHooks.afterRenderPassSummary.push(render);
+ if(state.data)render();
 })();
