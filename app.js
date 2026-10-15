@@ -571,11 +571,18 @@ function updateVaccinationStatusesV96(){
     box.textContent=value.text;
   }
 }
+function updateVaccineSplitLabelV234(){
+ const input=$('leptoL4UntilV211'),box=input?.closest('.vaccine-box'),active=!!input?.value;
+ const title=box?.querySelector('strong'),hint=box?.querySelector('.vaccine-disease-hint-v96 span:last-child');
+ if(title)title.textContent=active?'Infekčné ochorenia (DHPPi)':'Infekčné ochorenia (DHPPi+L)';
+ if(hint)hint.textContent=active?'Psia parainfluenza':'Psia parainfluenza · leptospiróza';
+ if(input&&!input.dataset.v234Bound){input.dataset.v234Bound='1';input.addEventListener('change',updateVaccineSplitLabelV234)}
+}
 function openDogDetails(mode='details',mandatory=false){
   ensureDogFormInModalV51();const dog=selectedDog();if(!dog)return;
   ensureDogEditorKeyboardV211();
   if(mode!=='vaccinations')clearVaccinationProofStageV104();
-  fillDogForm(dog);
+  fillDogForm(dog);updateVaccineSplitLabelV234();
   const l4=$('leptoL4DetailsV211');
   if(l4 && mode==='vaccinations' && mandatory)l4.open=true;
   applyDogDetailsModeV96(mode,mandatory);updateVaccinationStatusesV96();bindVaccinationProofInputsV104();renderVaccinationProofsV104(dog.id);
@@ -2970,7 +2977,7 @@ async function togglePushDirect(btn){
     try{if(sessionStorage.getItem(key)==='1')return;sessionStorage.setItem(key,'1')}catch(_){}
     const modal=ensureV104(),days=found.item.days;
     $('vaccRenewalTitleV104').textContent='Boli ste už preočkovať svojho psíka?';
-    $('vaccRenewalTextV104').innerHTML=days<0?'<p>Platnosť jedného z očkovaní už skončila. Nahrajte nové fotografie očkovacieho preukazu a zadajte novú platnosť.</p>':days===0?'<p>Platnosť jedného z očkovaní končí dnes. Nahrajte nové fotografie očkovacieho preukazu a zadajte novú platnosť.</p>':'<p>Jedno z očkovaní bude platné už len <strong>'+days+' '+vaccinationDaysWordV96(days)+'</strong>. Po preočkovaní nahrajte nové fotografie a novú platnosť.</p>';
+    $('vaccRenewalTextV104').innerHTML=days<0?'<p>Platnosť očkovania proti <strong>'+esc(found.item.v.vaccination_type==='lepto_l4'?'leptospiróze (L4)':found.item.v.vaccination_type==='rabies'?'besnote':found.item.v.vaccination_type==='kennel_cough'?'kotercovému kašľu':((state.data?.vaccinations||[]).some(v=>Number(v.dog_id)===Number(found.dog.id)&&v.vaccination_type==='lepto_l4')?'infekčným ochoreniam (DHPPi)':'infekčným ochoreniam (DHPPi+L)'))+'</strong> už skončila. Nahrajte nové fotografie preukazu a zadajte novú platnosť.</p>':days===0?'<p>Platnosť jedného z očkovaní končí dnes. Nahrajte nové fotografie očkovacieho preukazu a zadajte novú platnosť.</p>':'<p>Jedno z očkovaní bude platné už len <strong>'+days+' '+vaccinationDaysWordV96(days)+'</strong>. Po preočkovaní nahrajte nové fotografie a novú platnosť.</p>';
     $('vaccRenewalUpdateV104').onclick=()=>{modal.classList.add('hidden');state.selectedDogId=Number(found.dog.id);renderDogSelector();renderDog();switchTab('dog');setTimeout(()=>openDogDetails('vaccinations',false),60)};
     modal.classList.remove('hidden');
   }
