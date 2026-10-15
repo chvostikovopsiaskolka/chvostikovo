@@ -1,0 +1,20 @@
+const fs=require('node:fs');
+const crypto=require('node:crypto');
+const source=process.argv[2],target=process.argv[3];
+let html=fs.readFileSync(source,'utf8');
+if(crypto.createHash('md5').update(html).digest('hex')!=='ad0e44ab84c454b75b747b3f08da254d')throw Error('Unexpected LIVE baseline');
+const replacements=[];
+function replace(a,b){replacements.push([a,b]);if(!html.includes(a))throw Error('Missing anchor: '+a.slice(0,80));html=html.replace(a,b)}
+replace('converted_dog_id,created_at\').order(\'created_at\'', 'converted_dog_id,created_at,application_dogs:web_form_application_dogs_v237(*)\').order(\'created_at\'');
+replace("(s.dog_name||s.owner_name||'Prihláška')","((s.application_dogs?.length===2?s.application_dogs.slice().sort((a,b)=>a.dog_order-b.dog_order).map(d=>d.dog_name).join(' a '):s.dog_name)||s.owner_name||'Prihláška')");
+replace('[s.owner_name,s.phone,s.email,s.dog_name,s.dog_breed,s.dog_info,s.dog_allergies,s.dog_temperament]',"[s.owner_name,s.phone,s.email,s.dog_name,s.dog_breed,s.dog_info,s.dog_allergies,s.dog_temperament,...(s.application_dogs||[]).map(d=>d.dog_name)]");
+replace("  $('dogDetail').classList.remove('hidden');\n  $('prefillSubmissionIntro')", "  $('dogDetail').classList.remove('hidden');\n  if(s.application_dogs?.length===2)await window.chvoExpandWebDogsV246(id,s.application_dogs,supabase);\n  $('prefillSubmissionIntro')");
+replace("  $('followupIntroVisit').addEventListener", "  if(s.application_dogs?.length===2)void window.chvoExpandWebDogsV246(id,s.application_dogs,supabase);\n  $('followupIntroVisit').addEventListener");
+replace("async function expand(id){", "async function expand(id,providedRows,activeClient){\n if(activeClient)client=activeClient;");
+replace("var response=await c.from('web_form_application_dogs_v237')", "var response=providedRows?{data:providedRows,error:null}:await c.from('web_form_application_dogs_v237')");
+replace("'Pes':'Fenka'", "'Pes':'Suka'");
+replace("document.addEventListener('click',function(ev){\n var card=ev.target.closest('[data-web-submission-id]');", "window.chvoExpandWebDogsV246=expand;\n/* Legacy click expansion removed: every open path now calls the renderer with authenticated preloaded rows. */\n/*document.addEventListener('click',function(ev){\n var card=ev.target.closest('[data-web-submission-id]');");
+replace("},false);\n})();\n</script>\n<style id=\"chvo-bulletin-v241-style\">", "},false);*/\n})();\n</script>\n<style id=\"chvo-bulletin-v241-style\">");
+fs.writeFileSync(target,html);
+fs.writeFileSync(target+'.replacements.json',JSON.stringify(replacements));
+console.log(crypto.createHash('md5').update(html).digest('hex'));
