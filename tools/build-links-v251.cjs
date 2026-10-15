@@ -37,7 +37,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.portal_link_dog_verified_v251(uuid,bigint,bigint,boolean,text) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.portal_link_dog_verified_v251(uuid,bigint,bigint,boolean,text) TO authenticated;
 `;
-const p=JSON.parse(fs.readFileSync('../link251-policy.json'))[0];sql+=`ALTER POLICY ${p.policyname} ON public.${p.tablename} WITH CHECK (${p.with_check.replace('(d.owner_id = l.owner_id)','(d.owner_id = l.owner_id AND (l.allowed_dog_ids IS NULL OR d.id=ANY(l.allowed_dog_ids)))')});\n`;
+const p=JSON.parse(fs.readFileSync('supabase/backups/link-policy-before-v251.json'))[0];sql+=`ALTER POLICY ${p.policyname} ON public.${p.tablename} WITH CHECK (${p.with_check.replace('(d.owner_id = l.owner_id)','(d.owner_id = l.owner_id AND (l.allowed_dog_ids IS NULL OR d.id=ANY(l.allowed_dog_ids)))')});\n`;
 // Parse registration requests only. Never creates or assigns a dog.
 sql+=`CREATE FUNCTION private.registration_names_v251() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE names text[]; raw text; BEGIN
