@@ -194,7 +194,7 @@ function PuppyDaycarePage() {
               <button
                 type="button"
                 onClick={scrollToBenefits}
-                className="btn-coral mt-6 mb-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:mb-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg lg:mb-0"
+                className="btn-coral mt-6 mb-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:mb-6 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg lg:mb-0 lg:py-2.5"
               >
                 Zistiť viac
                 <ArrowDown className="size-5" />
@@ -205,13 +205,13 @@ function PuppyDaycarePage() {
             <div className="mx-auto hidden w-full max-w-md lg:mx-0 lg:block">
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
-                <p className="text-center font-display text-2xl font-bold text-forest">
-                  Chcete sa dozvedieť viac o škôlke pre šteniatko?
+                <h2 className="text-center font-display text-2xl font-bold text-forest">
+                  Informujte sa o škôlke pre šteniatko
+                </h2>
+                <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/75">
+                  Vyplňte krátky formulár. Ozveme sa vám.
                 </p>
-                <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/65">
-                  Radi vám odpovieme na otázky o škôlke pre šteniatka.
-                </p>
-                <ContactRevealButton onClick={() => openForm("puppy_landing_top")} />
+                <PuppyForm source="puppy_landing_desktop_inline" />
               </div>
             </div>
           </div>

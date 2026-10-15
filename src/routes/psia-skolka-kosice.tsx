@@ -138,7 +138,7 @@ function LeadLandingPage() {
               <button
                 type="button"
                 onClick={() => scrollToBenefits("lead_landing_hero")}
-                className="btn-coral mt-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
+                className="btn-coral mt-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg lg:py-2.5"
               >
                 Zistiť viac
                 <ArrowDown className="size-5" />
@@ -151,13 +151,13 @@ function LeadLandingPage() {
             <div id="lead-form" className="mx-auto hidden w-full max-w-md scroll-mt-24 lg:mx-0 lg:block">
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
-                <p className="text-center font-display text-2xl font-bold text-forest">
-                  Chcete sa dozvedieť viac o škôlke?
+                <h2 className="text-center font-display text-2xl font-bold text-forest">
+                  Informujte sa o škôlke
+                </h2>
+                <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/75">
+                  Vyplňte krátky formulár. Ozveme sa vám.
                 </p>
-                <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/65">
-                  Radi vám odpovieme na otázky o škôlke.
-                </p>
-                <ContactRevealButton onClick={() => openLeadModal("lead_landing_top")} />
+                <ShortForm trackingSource="lead_landing_desktop_inline" />
                 
               </div>
             </div>

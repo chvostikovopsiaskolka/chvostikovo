@@ -65,7 +65,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
               trackMarketingInteraction("hero_learn_more", "hero_mobile");
               scrollToWhyChvostikovo();
             }}
-            className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-4 sm:text-lg"
+            className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg"
           >
             Zistiť viac
             <ArrowDown className="size-5" />
@@ -138,7 +138,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
                 Informujte sa o škôlke
               </h2>
               <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-                Nechajte nám kontakt. Ozveme sa vám, porozprávame sa o vašom psíkovi a odpovieme na vaše otázky. Ak budete mať záujem, dohodneme bezplatnú úvodnú návštevu.
+                Vyplňte krátky nezáväzný formulár. Ozveme sa vám.
               </p>
 
               <ShortForm trackingSource="hero_desktop_inline" />
