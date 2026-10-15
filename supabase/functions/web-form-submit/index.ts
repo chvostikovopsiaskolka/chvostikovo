@@ -204,7 +204,7 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
     lines.push(`Meno psa: ${String(payload.dog_name ?? '')}`);
     lines.push(`Plemeno psa: ${String(payload.dog_breed ?? '')}`);
     lines.push(`Váha psa: ${payload.dog_weight_kg == null ? 'neuvedené' : `${payload.dog_weight_kg} kg`}`);
-    lines.push(`Pohlavie psa: ${String(payload.dog_sex ?? '')}`);
+    lines.push(`Pohlavie psa: ${(payload.dog_sex === 'male' ? 'Pes' : payload.dog_sex === 'female' ? 'Suka' : '—')}`);
     lines.push(`Vek psa: ${String(payload.dog_age_text ?? '')}`);
     lines.push(
       `Kastrovaný / sterilizovaná: ${
@@ -222,6 +222,22 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
     } else {
       lines.push(`Viac o psíkovi: ${String(payload.dog_info ?? '')}`);
     }
+    const dogs = (payload.raw_payload as { dogs?: Record<string, unknown>[] } | undefined)?.dogs;
+    if (Array.isArray(dogs) && dogs.length === 2) {
+      const dog = dogs[1];
+      lines.push('');
+      lines.push('--- 2. PSÍK (rovnaký majiteľ) ---');
+      lines.push('Meno: ' + String(dog.dog_name ?? ''));
+      lines.push('Plemeno: ' + String(dog.dog_breed ?? ''));
+      lines.push('Váha: ' + String(dog.dog_weight_kg ?? '') + ' kg');
+      lines.push('Pohlavie: ' + (dog.dog_sex === 'male' ? 'Pes' : 'Suka'));
+      lines.push('Vek: ' + String(dog.dog_age_text ?? ''));
+      lines.push('Kastrovaný / sterilizovaná: ' + (dog.dog_neutered === true ? 'Áno' : 'Nie'));
+      lines.push('Plán využívania: ' + String(dog.interest_reason ?? ''));
+      lines.push('Alergie a zdravotné obmedzenia: ' + String(dog.dog_allergies ?? ''));
+      lines.push('Povaha a ďalšie informácie: ' + String(dog.dog_temperament ?? ''));
+    }
+
   } else {
     if (payload.dog_name) lines.push(`Meno psa: ${String(payload.dog_name)}`);
     lines.push(
@@ -484,6 +500,43 @@ Deno.serve(async (req: Request) => {
       if (!dogName || !dogSex || !dogAge || dogNeutered === null || !APPLICATION_USAGE.has(usage) || !dogInfo) {
         return response(origin, 400, { ok: false, error: 'missing_application_fields' });
       }
+      const dogCount = Number(input.dog_count ?? input.dogCount ?? 1);
+      if (dogCount !== 1 && dogCount !== 2) return response(origin, 400, { ok: false, error: 'invalid_dog_count' });
+      let extraDog: Record<string, unknown> | null = null;
+      if (dogCount === 2) {
+        if (!Array.isArray(input.dogs) || input.dogs.length !== 2 ||
+            !input.dogs[1] || typeof input.dogs[1] !== 'object' || Array.isArray(input.dogs[1])) {
+          return response(origin, 400, { ok: false, error: 'missing_second_dog' });
+        }
+        const second = input.dogs[1] as Record<string, unknown>;
+        const secondName = text(second.dog_name, 160), secondBreed = text(second.dog_breed, 200);
+        const secondAge = text(second.dog_age_text, 80), secondSex = sex(second.dog_sex);
+        const secondNeutered = yesNo(second.dog_neutered), secondUsage = text(second.interest_reason, 250);
+        const secondAllergies = second.dog_allergies ?? '', secondTemperament = second.dog_temperament;
+        const rawWeight = String(second.dog_weight_kg ?? '').trim().replace(/\s*kg\s*$/i, '').trim();
+        const secondWeight = Number(rawWeight.replace(',', '.'));
+        if (!secondName || !secondBreed || !secondAge || !secondSex || secondNeutered === null ||
+            !APPLICATION_USAGE.has(secondUsage) || typeof secondAllergies !== 'string' ||
+            typeof secondTemperament !== 'string' || !secondTemperament.trim() ||
+            secondAllergies.length > 3000 || secondTemperament.length > 3000 ||
+            !/^\d+(?:[.,]\d+)?$/.test(rawWeight) || !Number.isFinite(secondWeight) ||
+            secondWeight <= 0 || secondWeight > 150) {
+          return response(origin, 400, { ok: false, error: 'invalid_second_dog' });
+        }
+        extraDog = { dog_name: secondName, dog_breed: secondBreed, dog_weight_kg: secondWeight,
+          dog_sex: secondSex, dog_age_text: secondAge, dog_neutered: secondNeutered,
+          interest_reason: secondUsage, dog_allergies: text(secondAllergies, 3000),
+          dog_temperament: text(secondTemperament, 3000) };
+      }
+      const applicationDogs = [{
+        dog_name: dogName, dog_breed: dogBreed || null, dog_weight_kg: dogWeight,
+        dog_sex: dogSex, dog_age_text: dogAge, dog_neutered: dogNeutered,
+        interest_reason: usage, dog_allergies: dogAllergies || '',
+        dog_temperament: dogTemperament || dogInfo,
+      }, ...(extraDog ? [extraDog] : [])];
+      // One submitted form = one stored lead, one SMS, one marketing conversion.
+      // Database stores separate dog rows transactionally via existing trigger.
+      payload.raw_payload = { ...storedRawPayload, dog_count: dogCount, dogs: applicationDogs };
       payload = {
         ...payload,
         dog_name: dogName,
