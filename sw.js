@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/','/terms-pdf.js?v=20261015-vaccination-v234','/terms-pdf-font.js?v=20261015-vaccination-v234','/styles.css?v=20261015-vaccination-v234','/app.js?v=20261015-vaccination-v234','/back-swipe.js?v=20261015-vaccination-v234'];
+const SHELL=['/','/terms-pdf.js?v=20261015-compact-booking-v235','/terms-pdf-font.js?v=20261015-compact-booking-v235','/styles.css?v=20261015-compact-booking-v235','/app.js?v=20261015-compact-booking-v235','/back-swipe.js?v=20261015-compact-booking-v235'];
 
 function withPortalCsp(response){
   if(!response)return response;
