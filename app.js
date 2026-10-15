@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-board-notes-v231';
-const APP_VERSION='1.0.74';
+const APP_BUILD='20261015-board-polish-v232';
+const APP_VERSION='1.0.75';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2282,7 +2282,15 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const groups=[];
     for(let start=0;start<days.length;start+=5){
       const week=days.slice(start,start+5);
-      groups.push(`<div class="booking-picker-week-v127"><div class="booking-picker-week-label-v127">${['Tento týždeň','Budúci týždeň','O dva týždne'][start/5]||'Ďalší týždeň'}</div><div class="booking-picker-week-days-v127">${week.map(d=>{
+      // v232: show the week-specific status ABOVE its days, not beneath them.
+      const weekNoticeClosed=week.some(d=>bookingDeadlineClosedV95(d.date,dog));
+      const weekNoticeFull=!weekNoticeClosed&&week.some(d=>Number(d.available)<=0);
+      const weekNotice=weekNoticeClosed
+        ? '<div class="booking-week-closed-note-v127"><strong>Prihlasovanie uzavreté.</strong><span>Kliknite na deň a napíšte nám aj pri plnej kapacite.</span></div>'
+        : weekNoticeFull
+        ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni sú plné.</strong><span>Kliknite na deň a napíšte nám záujem o miesto.</span></div>'
+        : '';
+      groups.push(`<div class="booking-picker-week-v127"><div class="booking-picker-week-label-v127">${['Tento týždeň','Budúci týždeň','O dva týždne'][start/5]||'Ďalší týždeň'}</div>${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
         const existing=bookingFor(dog.id,d.date),deadlineClosed=bookingDeadlineClosedV95(d.date,dog),closed=d.bookings_open===false,full=Number(d.available)<=0;
         const past=d.date<=bratislavaClockV95().date;
         const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;
@@ -2291,7 +2299,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const stateText=existing?'Rezervované':past?'Uplynulo':closed?'Zatvorené':full?'Plno':deadlineClosed?'Uzavreté':`${Math.max(0,Number(d.available)||0)} voľné`;
         const taxiToggle=selected?`<button type="button" class="booking-day-taxi-toggle-v201" data-taxi-toggle="${d.date}" aria-expanded="${expandedTaxiDateV201===d.date?'true':'false'}" data-taxi-selected="${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'true':'false'}" aria-pressed="${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'true':'false'}" aria-label="Taxi na ${esc(skDay(d.date))} ${esc(skDate(d.date))}">🚕${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'<span class="taxi-indicator-v201"></span>':''}</button>`:'';
         return `<div class="booking-day-wrap-v201"><button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" data-contact="${lateContact?'true':'false'}" data-full="${full?'true':'false'}" ${disabled?'disabled':''}><small>${closed?'❌':esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${closed?'Zatvorené':esc(stateText)}</span></button>${taxiToggle}</div>`;
-      }).join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p><div class="booking-taxi-inline-choices-v201">${[['pickup','Vyzdvihnutie ráno','5 €'],['pickup_dropoff','Tam aj späť','10 €']].map(([id,label,price])=>`<button type="button" class="${(selectedTaxiByDateV91.get(expandedTaxiDateV201)||'none')===id?'active':''}" data-taxi-mode="${id}" data-taxi-date="${expandedTaxiDateV201}">${label}${price?' · '+price:''}</button>`).join('')}</div></div>`:' '}${week.some(d=>bookingDeadlineClosedV95(d.date,dog))?'<small class="booking-week-closed-note-v127">Prihlasovanie uzavreté. Kliknutím na deň nám môžete napísať aj pri plnej kapacite.</small>':week.some(d=>Number(d.available)<=0)?'<small class="booking-week-closed-note-v127">Pri plnej kapacite kliknite na deň a napíšte nám záujem o miesto.</small>':''}</div>`);
+      }).join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p><div class="booking-taxi-inline-choices-v201">${[['pickup','Vyzdvihnutie ráno','5 €'],['pickup_dropoff','Tam aj späť','10 €']].map(([id,label,price])=>`<button type="button" class="${(selectedTaxiByDateV91.get(expandedTaxiDateV201)||'none')===id?'active':''}" data-taxi-mode="${id}" data-taxi-date="${expandedTaxiDateV201}">${label}${price?' · '+price:''}</button>`).join('')}</div></div>`:' '}</div>`);
     }
     $('bookingPickerDaysV37').innerHTML=groups.join('');
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',async()=>{
