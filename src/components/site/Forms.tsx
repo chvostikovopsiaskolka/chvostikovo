@@ -190,6 +190,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
   const formId = useId();
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [dogCount, setDogCount] = useState<1 | 2>(1);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
   const trackingSource = "application_form";
@@ -220,6 +221,18 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         ...attribution,
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: phoneFromForm(form, `l-${formId}-tel`),
+        dog_count: String(dogCount) as "1" | "2",
+        ...(dogCount === 2 ? {
+          pes2: String(fd.get("pes2") ?? "").trim(),
+          plemeno2: String(fd.get("plemeno2") ?? "").trim(),
+          vaha2: String(fd.get("vaha2") ?? "").trim(),
+          pohlavie2: String(fd.get("pohlavie2") ?? ""),
+          vek2: String(fd.get("vek2") ?? "").trim(),
+          kastrovana2: String(fd.get("kastrovana2") ?? ""),
+          duvod2: String(fd.get("duvod2") ?? ""),
+          alergie2: String(fd.get("alergie2") ?? "").trim(),
+          povaha2: String(fd.get("povaha2") ?? "").trim(),
+        } : {}),
         pes: String(fd.get("pes") ?? "").trim(),
         plemeno: String(fd.get("plemeno") ?? "").trim(),
         vaha: String(fd.get("vaha") ?? "").trim(),
@@ -270,6 +283,17 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
 
   return (
     <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="space-y-3 text-left sm:space-y-3.5">
+      <fieldset className="rounded-2xl border border-coral/25 bg-secondary/30 p-3.5">
+        <legend className="px-1 text-sm font-bold text-forest">Koľkých psíkov chcete prihlásiť?</legend>
+        <div className="mt-1 grid gap-2 sm:grid-cols-2">
+          {([1, 2] as const).map((count) => (
+            <label key={count} className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-3 text-sm font-semibold transition ${dogCount === count ? "border-coral bg-white text-forest" : "border-forest/15 bg-card text-forest/75"}`}>
+              <input type="radio" name="pocet_psikov" value={count} checked={dogCount === count} onChange={() => setDogCount(count)} className="accent-orange-500" />
+              {count === 1 ? "Chcem prihlásiť jedného psíka" : "Chcem prihlásiť dvoch psíkov"}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
         <div>
           <label className="label-sm" htmlFor={`l-${formId}-meno`}>
@@ -279,6 +303,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         </div>
         <PhoneField id={`l-${formId}-tel`} name="telefon" />
       </div>
+      {dogCount === 2 && <h4 className="mt-4 border-b border-coral/20 pb-2 text-base font-bold text-forest">1. psík</h4>}
       <div>
           <label className="label-sm" htmlFor={`l-${formId}-pes`}>
             Meno psa *
@@ -375,6 +400,60 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           placeholder="Povaha, skúsenosti s inými psami, zvyky a čo by sme ešte mali vedieť..."
         />
       </div>
+      {dogCount === 2 && (
+        <section aria-label="Údaje druhého psíka" className="mt-5 space-y-3.5 rounded-2xl border border-coral/20 bg-card/60 p-3.5 sm:p-4">
+          <h4 className="border-b border-coral/20 pb-2 text-base font-bold text-forest">2. psík</h4>
+          <div>
+            <label className="label-sm" htmlFor={`l-${formId}-pes2`}>Meno druhého psa *</label>
+            <input id={`l-${formId}-pes2`} name="pes2" required maxLength={200} className="field" placeholder="Beny" />
+          </div>
+          <div className="grid grid-cols-2 gap-3.5">
+            <div>
+              <label className="label-sm" htmlFor={`l-${formId}-plemeno2`}>Plemeno *</label>
+              <input id={`l-${formId}-plemeno2`} name="plemeno2" required maxLength={200} className="field" placeholder="Zlatý retriever" />
+            </div>
+            <div>
+              <label className="label-sm" htmlFor={`l-${formId}-vaha2`}>Váha psa *</label>
+              <input id={`l-${formId}-vaha2`} name="vaha2" required inputMode="decimal" className="field" placeholder="25 kg" />
+            </div>
+          </div>
+          <div className="grid gap-3.5 sm:grid-cols-2">
+            <div>
+              <label className="label-sm" htmlFor={`l-${formId}-pohlavie2`}>Pohlavie psa *</label>
+              <select id={`l-${formId}-pohlavie2`} name="pohlavie2" required className="field" defaultValue="">
+                <option value="" disabled>Vyberte</option><option>Pes</option><option>Fenka</option>
+              </select>
+            </div>
+            <div>
+              <label className="label-sm" htmlFor={`l-${formId}-vek2`}>Vek psa *</label>
+              <input id={`l-${formId}-vek2`} name="vek2" required maxLength={100} className="field" placeholder="3 roky" />
+            </div>
+          </div>
+          <div>
+            <label className="label-sm" htmlFor={`l-${formId}-kastrovana2`}>Kastrovaný / sterilizovaná *</label>
+            <select id={`l-${formId}-kastrovana2`} name="kastrovana2" required className="field" defaultValue="">
+              <option value="" disabled>Vyberte</option><option>Áno</option><option>Nie</option>
+            </select>
+          </div>
+          <div>
+            <label className="label-sm" htmlFor={`l-${formId}-duvod2`}>Ako plánujete využívať škôlku s druhým psíkom? *</label>
+            <select id={`l-${formId}-duvod2`} name="duvod2" required className="field" defaultValue="">
+              <option value="" disabled>Vyberte možnosť</option>
+              <option>Pravidelne – 1 až 2× týždenne</option>
+              <option>Občas podľa potreby</option>
+              <option>Jednorazové stráženie</option>
+            </select>
+          </div>
+          <div>
+            <label className="label-sm" htmlFor={`l-${formId}-alergie2`}>Alergie a zdravotné obmedzenia</label>
+            <textarea id={`l-${formId}-alergie2`} name="alergie2" maxLength={3000} rows={3} className="field resize-none" placeholder="Alergie, lieky alebo zdravotné obmedzenia..." />
+          </div>
+          <div>
+            <label className="label-sm" htmlFor={`l-${formId}-povaha2`}>Povaha a ďalšie informácie *</label>
+            <textarea id={`l-${formId}-povaha2`} name="povaha2" required maxLength={3000} rows={4} className="field resize-none" placeholder="Povaha, skúsenosti s inými psami, zvyky..." />
+          </div>
+        </section>
+      )}
       <PrivacyConsentCheckbox />
       {error && <p className="text-sm text-destructive">{error}</p>}
       <button type="submit" disabled={loading} className="btn-coral w-full disabled:opacity-60">
