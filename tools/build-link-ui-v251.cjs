@@ -13,6 +13,7 @@ source=source.replace("return original(profile,dogs,cls).replace('</details>'", 
 source=source.replace("return original(profile,dogs,cls).replace", "if(dogs.length>=2)return original(profile,dogs,cls);return original(profile,dogs,cls).replace");
 source=source.replace("await loadData();}finally", "await loadData();window.refreshAdminDashboardV63?.();queueAdminLive('accounts',40);}catch(e){alert(e.message||'Priradenie sa nepodarilo.')}finally");
 source=source.replace("const root=button.closest('.note')||document;dogId=Number(root.querySelector('.customer-dog-select,.v42-owner-dog')?.value);", "const root=button.closest('.note')||document;dogId=Number(root.querySelector('.customer-dog-select,.v42-owner-dog')?.value);if(!dogId){alert('Najprv vyberte existujúceho psíka.');return}");
+source=source.replace('await loadData();window.refreshAdminDashboardV63?.();',"await loadData();if(ok&&button.classList.contains('v42-owner-approve'))document.getElementById('adminDashboardModalCloseV41')?.click();window.refreshAdminDashboardV63?.();");
 rep('async function linkRegisteredOwner(userId){',source+'\nasync function linkRegisteredOwner(userId){');
 rep("'user_id,owner_id,created_at'","'user_id,owner_id,allowed_dog_ids,created_at'");
 rep('status,privacy_notice_version,privacy_notice_acknowledged_at,created_at','status,registration_dog_names,privacy_notice_version,privacy_notice_acknowledged_at,created_at');
@@ -22,9 +23,3 @@ rep('Uvedený psík: <strong>','<strong>');
 rep('assigned=state.dogs.filter(d=>ownerIds.includes(Number(d.owner_id)))','assigned=assignedDogsV251(p.user_id)');
 rep('const dogs=(state.dogs||[]).filter(d=>ownerIds.includes(Number(d.owner_id)));','const dogs=window.assignedDogsV251(p.user_id);');
 fs.writeFileSync('admin/verified-links-v251.js',source);fs.writeFileSync('../staged-admin-v251.html',html);fs.writeFileSync('../staged-admin-v251.html.replacements.json',JSON.stringify(changes));console.log(crypto.createHash('md5').update(html).digest('hex'));
-// Patch exact LIVE API; financial and shared-pass draft code never enters deployment.
-let api=fs.readFileSync('supabase/backups/customer-portal-api-v55-before-v251.ts','utf8'),draft=fs.readFileSync('supabase/functions/customer-portal-api/index.ts','utf8');
-for(const [start,end] of [['async function linkedDogs(', 'async function signedPhotoUrl('],['async function rosterPhotoPaths(', 'async function getAvailability(']]){api=api.slice(0,api.indexOf(start))+draft.slice(draft.indexOf(start),draft.indexOf(end))+api.slice(api.indexOf(end))}
-api=api.replace("'&select=user_id,owner_id') as Array<Json> : [];", "'&select=user_id,owner_id,allowed_dog_ids') as Array<Json> : [];");
-api=api.replace('Number(link.owner_id)===Number(dog.owner_id)))','Number(link.owner_id)===Number(dog.owner_id) && (link.allowed_dog_ids==null || (link.allowed_dog_ids as number[]||[]).map(Number).includes(Number(dog.id)))))');
-fs.writeFileSync('supabase/changes/customer-api-v251.ts',api);
