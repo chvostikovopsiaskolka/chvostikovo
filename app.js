@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-photo-picker-v239';
-const APP_VERSION='1.0.81';
+const APP_BUILD='20261015-photo-picker-v240';
+const APP_VERSION='1.0.82';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -818,7 +818,7 @@ async function togglePrivacy(){
 }
 function ensurePhotoEditor(){
   if($('photoCropModal'))return;
-  document.body.insertAdjacentHTML('beforeend',`<div id="photoCropModal" class="photo-modal hidden"><div class="photo-modal-card"><div class="photo-modal-head"><div><strong>Upraviť fotku</strong><small>Jedným prstom fotku posuňte, dvoma prstami ju priblížte alebo oddiaľte.</small></div><button id="photoCropClose" class="icon-btn" type="button">✕</button></div><div class="crop-shell"><canvas id="photoCropCanvas" width="640" height="640"></canvas></div><div class="photo-gesture-hint-v89">Posun: 1 prst · Priblíženie: 2 prsty</div><div class="photo-modal-actions"><button id="photoCropCancel" class="btn secondary" type="button">Zrušiť</button><button id="photoCropSave" class="btn" type="button">Použiť fotku</button></div></div></div>`);
+  document.body.insertAdjacentHTML('beforeend',`<div id="photoCropModal" class="photo-modal hidden"><div class="photo-modal-card"><div class="photo-modal-head"><div><strong>Upraviť fotku</strong><small>Fotku posuňte jedným prstom. Dvoma prstami ju priblížte.</small></div><button id="photoCropClose" class="icon-btn" type="button">✕</button></div><div class="crop-shell"><canvas id="photoCropCanvas" width="640" height="640"></canvas></div><div class="photo-gesture-hint-v89">Posun: 1 prst · Priblíženie: 2 prsty</div><div class="photo-modal-actions"><button id="photoCropCancel" class="btn secondary" type="button">Zrušiť</button><button id="photoCropSave" class="btn" type="button">Použiť fotku</button></div></div></div>`);
   $('photoCropClose').onclick=$('photoCropCancel').onclick=closePhotoEditor;
   $('photoCropSave').onclick=saveCroppedPhoto;
   bindPhotoGesturesV89($('photoCropCanvas'));
