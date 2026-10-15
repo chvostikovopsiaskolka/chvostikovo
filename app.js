@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-vax-onboarding-v238';
-const APP_VERSION='1.0.80';
+const APP_BUILD='20261015-photo-picker-v239';
+const APP_VERSION='1.0.81';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2085,7 +2085,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     root.classList.toggle('hidden',!suggestion);
     if(!suggestion){root.innerHTML='';return}
     const weekday=['Ne','Po','Ut','St','Št','Pia','So'];
-    root.innerHTML='<div class="smart-head-v199"><div><strong>Rovnaké dni ako minulý týždeň?</strong>'
+    root.innerHTML='<div class="smart-head-v199"><div><strong>Chcete rezervovať rovnaké dni ako minulý týždeň?</strong>'
       +'</div></div>'
       +'<div class="smart-chips-v199" aria-label="Navrhované dni">'
       +suggestion.dates.map(date=>'<span class="smart-chip-v199">'+weekday[new Date(date+'T12:00:00Z').getUTCDay()]+'</span>').join('')+'</div>'
