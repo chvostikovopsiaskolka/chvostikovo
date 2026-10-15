@@ -1220,6 +1220,25 @@ Deno.serve(async (req: Request) => {
         p_message: message,
       }, token) });
     }
+    if (action === 'request_bookings') {
+      const dogId = Number(body.dog_id || 0);
+      const items = Array.isArray(body.bookings) ? body.bookings : [];
+      if (!Number.isSafeInteger(dogId) || dogId <= 0 || !items.length || items.length > 15) {
+        throw new Error('Vyberte psíka a 1 až 15 dní.');
+      }
+      const bookings = items.map(item => {
+        const date = validIsoDate(item?.date);
+        const taxiMode = String(item?.taxi_mode || 'none');
+        if (!date || !['none', 'pickup', 'pickup_dropoff'].includes(taxiMode)) {
+          throw new Error('Neplatný dátum alebo voľba taxi.');
+        }
+        return { date, taxi_mode: taxiMode };
+      });
+      return json({ data: await userRpc('portal_request_bookings_batch', {
+        p_dog_id: dogId,
+        p_bookings: bookings,
+      }, token) });
+    }
     if (action === 'request_booking') {
       const dogId = Number(body.dog_id || 0);
       const date = validIsoDate(body.reservation_date);
