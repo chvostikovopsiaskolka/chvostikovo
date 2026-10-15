@@ -3042,3 +3042,28 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
   outline:3px solid var(--dog-ink,#b84b82)!important;
   outline-offset:4px!important;
 }
+
+
+/* v244: edit a single vaccination proof without replacing the others. */
+.vacc-proof-edit-modal-v244{position:fixed;inset:0;z-index:845;display:grid;place-items:center;background:rgba(17,24,39,.64);padding:calc(15px + env(safe-area-inset-top)) 14px calc(15px + env(safe-area-inset-bottom))}
+.vacc-proof-edit-modal-v244.hidden{display:none!important}
+.vacc-proof-edit-card-v244{width:min(480px,100%);max-height:calc(100dvh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow:auto;background:white;border-radius:24px;padding:20px;box-shadow:0 20px 60px #11182735}
+.vacc-proof-edit-head-v244{display:flex;align-items:flex-start;gap:12px;justify-content:space-between}
+.vacc-proof-edit-head-v244 h2{font-size:20px;font-weight:850;color:#111827;margin:0 0 6px}
+.vacc-proof-edit-head-v244 p{font-size:13px;color:#64748b;line-height:1.5;margin:0 0 18px}
+#vaccProofEditCloseV244{width:42px;height:42px;border:0;border-radius:50%;background:#f3f4f6;color:#374151;font-size:29px;flex:0 0 auto}
+.vacc-proof-edit-grid-v244{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.vacc-proof-edit-tile-v244{position:relative;min-width:0;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;background:#fff;text-align:center}
+.vacc-proof-edit-preview-v244{display:block;width:100%;border:0;background:#f4f4f5;padding:0}
+.vacc-proof-edit-preview-v244 img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
+.vacc-proof-edit-tile-v244>span{display:block;font-size:11px;font-weight:800;padding:7px 0;color:#334155}
+.vacc-proof-edit-pencil-v244{position:absolute;top:5px;right:5px;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;border:2px solid white;background:#f97316;color:#fff;font-size:20px;box-shadow:0 2px 8px #11182755}
+.vacc-proof-edit-pencil-v244:disabled{opacity:.5}
+.vacc-proof-edit-add-v244{border:1.5px dashed #fdba74;background:#fff7ed;color:#9a3412;border-radius:14px;min-height:118px;display:flex;gap:6px;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.vacc-proof-edit-add-v244>span{font-size:33px;font-weight:400;line-height:1}
+.vacc-proof-edit-message-v244{font-size:12px;line-height:1.5;color:#64748b;margin:14px 0 0;min-height:18px}
+.vacc-proof-viewer-v104{z-index:895!important;overflow:hidden}
+.vacc-proof-viewer-v104 img{touch-action:none;user-select:none;-webkit-user-select:none;transform-origin:center center;transition:transform .13s ease}
+.vacc-proof-zoom-actions-v244{position:fixed;z-index:3;bottom:calc(22px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:12px}
+.vacc-proof-zoom-actions-v244 button{width:46px;height:46px;border:0;border-radius:50%;background:#fff;color:#111827;font-size:25px;font-weight:800;box-shadow:0 2px 10px #0004}
+@media(max-width:360px){.vacc-proof-edit-card-v244{padding:15px}.vacc-proof-edit-grid-v244{gap:6px}.vacc-proof-edit-pencil-v244{width:31px;height:31px}}
