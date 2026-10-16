@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261016-normal-pass-renewal-v261';
-const APP_VERSION='1.0.94';
+const APP_BUILD='20261016-authenticated-startup-v264';
+const APP_VERSION='1.0.95';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -136,6 +136,7 @@ const PASSWORD_STRONG_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 let state={data:null,session:null,storage:localStorage,selectedDogId:null,activeTab:'booking',pushChecked:false,pushEnabled:false};
 // One concurrent read for onboarding, settings and rules; never share account state.
 let customerTermsReadV146=null;
+let bootstrapInFlight=null,lastResumeRefresh=0;
 async function readActiveCustomerTermsV146(force=false){
   const session=state.session;if(!session)return null;
   const key=String(session.user?.id||'')+'|'+session.access_token;
