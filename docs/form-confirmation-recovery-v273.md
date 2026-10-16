@@ -6,7 +6,7 @@ Only leads displayed LeadPhoneReceipt and received a one-use phone-edit token. A
 
 ## Phone confirmation
 
-Both lead and application share LeadPhoneReceipt, including the explicit correct-number question and existing edit workflow. LongForm keeps submitted phone/token and displays the shared component after success. Its enclosing Header/Info/Story modals no longer auto-close before editing. Both SMS types become available at original creation+2minutes. Existing15-minute, one-use token correction accepts lead/application, changes the same submission and pending/failed SMS destination without shortening the deadline. Sent/processing SMS history stays unchanged and no duplicate is sent. Generic correction email wording now covers both form types. Existing past outbox jobs are not rescheduled.
+Both lead and application share LeadPhoneReceipt, including the explicit correct-number question and existing edit workflow. LongForm keeps submitted phone/token and displays the shared component after success. Receipt modals in Header/Info/Story/EnrollBanner no longer auto-close before either lead or application phone editing. Both SMS types become available at original creation+2minutes. Existing15-minute, one-use token correction accepts lead/application, changes the same submission and pending/failed SMS destination without shortening the deadline. Sent/processing SMS history stays unchanged and no duplicate is sent. Generic correction email wording now covers both form types. Existing past outbox jobs are not rescheduled.
 
 ## Recovery
 

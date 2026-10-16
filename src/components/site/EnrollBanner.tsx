@@ -28,7 +28,7 @@ export function EnrollBanner() {
       </div>
 
       <FormDialog open={open} onOpenChange={setOpen} title="Máte záujem o škôlku?">
-        <ShortForm onSent={() => setTimeout(() => setOpen(false), 2200)} />
+        <ShortForm />
       </FormDialog>
     </section>
   );

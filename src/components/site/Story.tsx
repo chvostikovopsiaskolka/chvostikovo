@@ -123,7 +123,6 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
         ) : (
           <ShortForm
             trackingSource="care_cta"
-            onSent={() => setTimeout(() => setInfoOpen(false), 2200)}
           />
         )}
       </FormDialog>
