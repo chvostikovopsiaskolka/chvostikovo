@@ -14,3 +14,5 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION private.guard_shared_dog_owner_v260() FROM PUBLIC,anon,authenticated;
 CREATE TRIGGER guard_shared_dog_owner_v260 BEFORE UPDATE OF owner_id ON public.dogs FOR EACH ROW EXECUTE FUNCTION private.guard_shared_dog_owner_v260();
+-- Bootstrap already returns capabilities together with scoped membership; no separate public flag endpoint.
+REVOKE EXECUTE ON FUNCTION public.portal_shared_capabilities_v244() FROM anon,authenticated;

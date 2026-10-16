@@ -1247,73 +1247,14 @@ begin
   return v_id;
 end;
 $function$;
-CREATE OR REPLACE FUNCTION public.mark_no_show(p_reservation_id bigint)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO ''
-AS $function$
-declare
-  r public.reservations%rowtype;
-  v public.visits%rowtype;
-  p public.passes%rowtype;
-  v_month date;
-  v_new_used integer;
-  v_local_today date := (clock_timestamp() at time zone 'Europe/Bratislava')::date;
-begin
-  perform private.lock_pool_v244((select dog_id from public.reservations where id=p_reservation_id));
-  if not exists (
-    select 1 from public.staff s
-    where s.user_id=(select auth.uid()) and s.active=true
-  ) then raise exception 'Nemáte oprávnenie.'; end if;
-
-  select * into r from public.reservations where id=p_reservation_id for update;
-  if r.id is null then raise exception 'Rezervácia neexistuje.'; end if;
-  if r.reservation_date > v_local_today then raise exception 'Budúcu rezerváciu nemožno označiť ako neprítomnosť.'; end if;
-  if r.status='no_show' then return jsonb_build_object('reservation_id',r.id,'status','no_show','changed',false); end if;
-  if r.status <> 'attended' then raise exception 'Ako neprítomnosť možno označiť iba už započítanú návštevu.'; end if;
-
-  select * into v from public.visits where reservation_id=r.id for update;
-  if v.id is null then raise exception 'K rezervácii chýba započítaná návšteva.'; end if;
-  v_month := date_trunc('month',r.reservation_date)::date;
-
-  if v.entry_type='pass' and v.pass_id is not null then
-    select * into p from public.passes where id=v.pass_id for update;
-    if p.id is not null then
-      v_new_used := greatest(0,p.used_entries-1);
-      if v.pass_entry_number=1 and p.purchased_on is not null and not coalesce(p.no_expiry,false)
-         and p.valid_from=r.reservation_date and p.valid_until=(r.reservation_date + interval '2 months')::date then
-        update public.passes set used_entries=v_new_used,valid_from=null,valid_until=null,status='active' where id=p.id;
-      else
-        update public.passes set used_entries=v_new_used,status=case
-          when not coalesce(p.no_expiry,false) and p.valid_until is not null and p.valid_until < r.reservation_date then 'expired'
-          else 'active' end where id=p.id;
-      end if;
-      if exists(select 1 from public.passes where id=p.id and status='active') then
-        update public.passes set status='queued'
-        where dog_id=r.dog_id and id<>p.id and status='active' and used_entries<total_entries;
-      end if;
-    end if;
-  end if;
-
-  delete from public.visits where id=v.id;
-  update public.reservations set status='no_show',notes=case
-    when coalesce(notes,'')='' then 'Pes neprišiel – vstup vrátený'
-    else notes || E'\nPes neprišiel – vstup vrátený' end where id=r.id;
-  update public.dogs set legacy_total_visits=greatest(0,coalesce(legacy_total_visits,0)-1) where id=r.dog_id;
-
-  update public.monthly_visit_totals set visits=greatest(0,visits-1)
-  where dog_id=r.dog_id and month=v_month;
-  delete from public.monthly_visit_totals where dog_id=r.dog_id and month=v_month and visits<=0;
-
-  perform private.renumber_shared_visits_v244(v.pass_id);
-  perform private.ensure_current_pass(r.dog_id);
-  perform private.replan_dog_reservations(r.dog_id,r.reservation_date+1);
-  perform private.refresh_daily_financial(r.reservation_date);
-
-  return jsonb_build_object('reservation_id',r.id,'dog_id',r.dog_id,'date',r.reservation_date,'status','no_show','changed',true,'returned_pass_entry',v.entry_type='pass');
-end;
-$function$;
+-- Retain the exact baseline no-show body and ACL; inject only pool locking and shared renumbering.
+DO $patch_no_show$ DECLARE definition text; BEGIN
+ SELECT pg_get_functiondef('public.mark_no_show(bigint)'::regprocedure) INTO definition;
+ IF md5(definition)<>'0ac84765c78c2ef4e56cc79248eb98d6' THEN RAISE EXCEPTION 'No-show baseline changed';END IF;
+ definition:=replace(definition,E'begin\n',E'begin\n  perform private.lock_pool_v244((select dog_id from public.reservations where id=p_reservation_id));\n');
+ definition:=replace(definition,'  perform private.ensure_current_pass(r.dog_id);',E'  perform private.renumber_shared_visits_v244(v.pass_id);\n  perform private.ensure_current_pass(r.dog_id);');
+ EXECUTE definition;
+END $patch_no_show$;
 CREATE OR REPLACE FUNCTION public.set_pass_used_entries(p_pass_id bigint, p_used_entries integer)
  RETURNS void
  LANGUAGE plpgsql
