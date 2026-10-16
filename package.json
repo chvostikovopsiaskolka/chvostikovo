@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "check:types": "tsc --noEmit",
-    "check:critical-forms": "bun scripts/critical-form-checks.ts",
+    "check:critical-forms": "bun scripts/critical-form-checks.ts && node scripts/form-recovery-checks.cjs && node scripts/contact-recovery-client-checks.cjs",
     "smoke:forms": "node scripts/smoke-live-form-backend.mjs",
     "build:pages": "vite build --config vite.config.pages.ts && node scripts/finalize-pages.mjs"
   },

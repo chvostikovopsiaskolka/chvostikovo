@@ -46,6 +46,7 @@ export function LeadPhoneReceipt({
 
   return (
     <div className="w-full max-w-sm rounded-2xl border border-forest/10 bg-secondary/55 p-3 text-left">
+      <p className="mb-1 text-sm font-semibold text-forest">{en ? "Is this phone number correct?" : "Je toto telefónne číslo správne?"}</p>
       <p className="text-xs leading-relaxed text-forest/70">
         {en ? "We plan to send the SMS after about 2 minutes to" : "SMS plánujeme odoslať približne o 2 minúty na číslo"}
       </p>

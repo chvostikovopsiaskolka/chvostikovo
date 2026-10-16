@@ -304,8 +304,8 @@ async function sendPhoneCorrectionEmail(submissionId: number, phone: string) {
       body: JSON.stringify({
         from: Deno.env.get('NOTIFY_FROM') ?? 'Chvostíkovo web <onboarding@resend.dev>',
         to: [Deno.env.get('NOTIFY_TO') ?? 'chvostikovo.psiaskolka@gmail.com'],
-        subject: `Opravený telefón pri záujme #${submissionId}`,
-        text: `Zákazník opravil telefón pri pôvodnom záujme #${submissionId}. Nové číslo: ${phone}. Nevytvárať ďalší lead. Ak bola SMS už odoslaná, ďalšia sa neposiela.`,
+        subject: `Opravený telefón pri formulári #${submissionId}`,
+        text: `Zákazník opravil telefón pri pôvodnom formulári #${submissionId}. Nové číslo: ${phone}. Nevytvárať ďalší lead. Ak bola SMS už odoslaná, ďalšia sa neposiela.`,
       }),
     });
     if (!res.ok) console.error('Lead correction email failed:', res.status);
@@ -347,6 +347,27 @@ async function notifyWebFormSms(submissionId: number) {
   }
 }
 
+// Recovery is operational contact storage, separate from analytics and conversions.
+async function saveFormRecoveryV273(input: Record<string, unknown>, payload: Record<string, unknown> | null, stage: string): Promise<boolean> {
+  const url=Deno.env.get('SUPABASE_URL'),key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const kind=payload?.form_type??input.form_type;if(!['lead','application'].includes(String(kind)))return false;
+  const name=text(payload?.owner_name ?? input.owner_name,160),phone=text(payload?.phone ?? input.phone,40);
+  if(!url||!key||input.consent!==true||!name||!/^\+[1-9]\d{6,14}$/.test(phone))return false;
+  const id=String(input.form_attempt_id||'');if(!/^[0-9a-f-]{36}$/i.test(id))return false;
+  const dogs=Array.isArray((payload?.raw_payload as Record<string,unknown>)?.dogs)?(payload!.raw_payload as Record<string,unknown>).dogs as Array<Record<string,unknown>>:[];
+  const clean=payload?Object.fromEntries(Object.entries(payload).filter(([k])=>!['raw_payload','status','source'].includes(k))):{};
+  if(dogs.length)clean.dogs=dogs;
+  const row={attempt_id:id,form_type:kind==='application'?'application':'lead',owner_name:name,phone,
+    email:text(input.email,254)||null,dog_names:text(dogs.map(d=>text(d.dog_name,160)).join(' a ')||input.dog_name,330),
+    interest_reason:text(payload?.interest_reason??input.interest_reason,300),source_ref:text(input.source_ref||'/',500),error_stage:stage,
+    recovery_payload:clean};
+  if(input.action==='recover_contact')try{
+    const exists=await fetch(url+'/rest/v1/web_form_submissions?raw_payload->>form_attempt_id=eq.'+encodeURIComponent(id)+'&select=id&limit=1',{headers:{apikey:key,Authorization:`Bearer ${key}`},signal:AbortSignal.timeout(3000)});
+    if(exists.ok&&(await exists.json()).length)return true;
+  }catch{}
+  try{const r=await fetch(url+'/rest/v1/web_form_recoveries_v273?on_conflict=attempt_id',{method:'POST',headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify(row),signal:AbortSignal.timeout(4000)});return r.ok}catch{return false}
+}
+
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get('origin') || '';
   if (req.method === 'OPTIONS') {
@@ -366,11 +387,19 @@ Deno.serve(async (req: Request) => {
   if (req.method !== 'POST') return response(origin, 405, { ok: false, error: 'method_not_allowed' });
   if (!ALLOWED_ORIGINS.has(origin)) return response(origin, 403, { ok: false, error: 'origin_not_allowed' });
 
+  let recoveryInputV273: Record<string,unknown>|null=null;
+  let recoverySavedV273=false;
   try {
     const raw = await req.text();
     // Two 3000-character fields plus compatibility summary and raw form labels.
     if (!raw || raw.length > 32_000) return response(origin, 400, { ok: false, error: 'invalid_body' });
     const input = JSON.parse(raw);
+
+    if(input.action==='recover_contact'){
+      if(input.dry_run===true)return response(origin,200,{ok:true,dry_run:true});
+      const saved=await saveFormRecoveryV273(input,null,'client_failure');
+      return response(origin,saved?202:503,{ok:saved,recovery_saved:saved});
+    }
 
     if (input.action === 'correct_lead_phone') {
       const submissionId = Number(input.submission_id);
@@ -416,9 +445,7 @@ Deno.serve(async (req: Request) => {
     if (!ownerName || !/^\+\d{7,15}$/.test(phone) || !consent) return response(origin, 400, { ok: false, error: 'missing_required_fields' });
 
     const marketingConsent = input.marketing_consent === true;
-    const phoneEditToken = formType === 'lead'
-      ? `${crypto.randomUUID()}.${crypto.randomUUID()}`
-      : '';
+    const phoneEditToken = `${crypto.randomUUID()}.${crypto.randomUUID()}`;
     const phoneEditHash = phoneEditToken ? await sha256Hex(phoneEditToken) : '';
     const storedRawPayload = marketingConsent
       ? {
@@ -558,6 +585,9 @@ Deno.serve(async (req: Request) => {
     if (!supabaseUrl || !serviceKey) throw new Error('Missing Supabase environment');
     const headers = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
 
+    input.form_attempt_id=/^[0-9a-f-]{36}$/i.test(String(input.form_attempt_id||''))?input.form_attempt_id:crypto.randomUUID();
+    recoveryInputV273=input;
+    recoverySavedV273=await saveFormRecoveryV273(input,payload,'received');
     const since = new Date(Date.now() - 30_000).toISOString();
     const duplicate = await fetch(
       `${supabaseUrl}/rest/v1/web_form_submissions?phone=eq.${encodeURIComponent(phone)}&created_at=gte.${encodeURIComponent(since)}&select=id&limit=1`,
@@ -597,12 +627,16 @@ Deno.serve(async (req: Request) => {
 
     return response(origin, 201, {
       ok: true,
-      ...(formType === 'lead' && savedSubmissionId && phoneEditToken
+      ...(savedSubmissionId && phoneEditToken
         ? { submission_id: savedSubmissionId, phone_edit_token: phoneEditToken }
         : {}),
     });
   } catch (error) {
     console.error(error);
-    return response(origin, 500, { ok: false, error: 'server_error' });
+    if(recoveryInputV273&&recoverySavedV273){
+      const u=Deno.env.get('SUPABASE_URL'),k=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      try{await fetch(`${u}/rest/v1/web_form_recoveries_v273?attempt_id=eq.${recoveryInputV273.form_attempt_id}`,{method:'PATCH',headers:{apikey:k!,Authorization:`Bearer ${k}`,'Content-Type':'application/json'},body:JSON.stringify({error_stage:'server_error'})})}catch{}
+    }
+    return response(origin, 500, { ok: false, error: 'server_error', recovery_saved:recoverySavedV273 });
   }
 });

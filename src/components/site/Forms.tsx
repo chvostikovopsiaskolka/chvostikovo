@@ -10,7 +10,7 @@ import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
 import { phoneFromForm } from "@/lib/phone";
-import { reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
+import { InquirySubmissionError, reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
 
 function sourceRef() { return currentSourceRef("/"); }
 
@@ -99,7 +99,7 @@ export function ShortForm({
     } catch (error) {
       const diagnostic = reportInquiryError(error);
       void trackCookielessInteraction("form_error", `${trackingSource || "informational_form"}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, "sk", attemptId);
-      setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
+      setError(error instanceof InquirySubmissionError && error.recoverySaved ? "Odoslanie formulára zlyhalo, ale váš kontakt sme zachovali. Ozveme sa vám." : "Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
     } finally {
       setLoading(false);
     }
@@ -189,6 +189,7 @@ export function ShortForm({
 export function LongForm({ onSent }: { onSent?: () => void }) {
   const formId = useId();
   const [sent, setSent] = useState(false);
+  const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [dogCount, setDogCount] = useState<1 | 2>(1);
   const [error, setError] = useState<string | null>(null);
@@ -214,13 +215,14 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
       const fd = new FormData(form);
       const source_ref = sourceRef();
       const attribution = attributionPayload();
+      const submittedPhone = phoneFromForm(form, `l-${formId}-tel`);
       const submission = await submitInquiry({
         typ: "prihlaska",
         consent: true,
         source_ref,
         ...attribution,
         meno: String(fd.get("meno") ?? "").trim(),
-        telefon: phoneFromForm(form, `l-${formId}-tel`),
+        telefon: submittedPhone,
         dog_count: String(dogCount) as "1" | "2",
         ...(dogCount === 2 ? {
           pes2: String(fd.get("pes2") ?? "").trim(),
@@ -255,12 +257,13 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         trackMetaFormConversion("prihlaska", undefined, submission.metaEventId);
       });
       progress.markSuccess();
+      setReceipt({ phone: submittedPhone, auth: submission.phoneCorrection });
       setSent(true);
       runFormTelemetry(() => onSent?.());
     } catch (error) {
       const diagnostic = reportInquiryError(error);
       void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, "sk", attemptId);
-      setError("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
+      setError(error instanceof InquirySubmissionError && error.recoverySaved ? "Odoslanie formulára zlyhalo, ale váš kontakt sme zachovali. Ozveme sa vám." : "Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
     } finally {
       setLoading(false);
     }
@@ -276,6 +279,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
           O úspešnom prijatí prihlášky vás budeme informovať SMS.
         </p>
+        {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
       </div>
     );
   }

@@ -100,6 +100,7 @@ targetInquirySchema.parse({
 
 const forms = readFileSync(new URL("../src/components/site/Forms.tsx", import.meta.url), "utf8");
 assert(!forms.includes('name="duvod2"'), "Second usage selector must not be rendered.");
+assert((forms.match(/<LeadPhoneReceipt /g)||[]).length===2, "Lead and application must both offer the same phone receipt.");
 const englishForm = readFileSync(new URL("../src/components/site/EnglishInquiryForm.tsx", import.meta.url), "utf8");
 const progressSource = readFileSync(new URL("../src/lib/form-progress.ts", import.meta.url), "utf8");
 assert(forms.includes("progress.onInvalidCapture") && forms.includes("progress.onBlurCapture"), "SK forms must record browser-native validation and per-field completion.");
