@@ -53,6 +53,31 @@ export function FormDialog({
       if (!content) return;
       content.style.setProperty("--form-viewport-height", `${viewport?.height ?? window.innerHeight}px`);
       content.style.setProperty("--form-viewport-top", `${viewport?.offsetTop ?? 0}px`);
+      // v278: enforce native mobile coordinates on the actual portal element.
+      // Unlike a CSS-only override, these important inline values cannot inherit
+      // Radix's translate(-50%, -50%) or be lost to Tailwind layer ordering.
+      const mobile = window.innerWidth <= 639;
+      const propertyNames = ["position", "top", "bottom", "left", "right", "width", "max-width", "margin", "transform", "translate", "scale", "animation", "max-height"];
+      if (mobile) {
+        const values: Record<string, string> = {
+          position: "fixed",
+          top: "calc(var(--form-viewport-top, 0px) + 12px + env(safe-area-inset-top, 0px))",
+          bottom: "auto",
+          left: "12px",
+          right: "12px",
+          width: "auto",
+          "max-width": "none",
+          margin: "0",
+          transform: "none",
+          translate: "none",
+          scale: "none",
+          animation: "none",
+          "max-height": "calc(var(--form-viewport-height, 100svh) - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+        };
+        for (const [name, value] of Object.entries(values)) content.style.setProperty(name, value, "important");
+      } else {
+        for (const name of propertyNames) content.style.removeProperty(name);
+      }
     };
     const schedule = () => {
       cancelAnimationFrame(frame);
@@ -76,13 +101,14 @@ export function FormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         ref={contentRef}
-        data-form-dialog="stable-v274"
+        positioning="form"
+        data-form-dialog="stable-v278"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           // Announce the dialog without opening the keyboard or jumping to an input.
           titleRef.current?.focus({ preventScroll: true });
         }}
-        className="form-dialog max-h-[88vh] w-[calc(100%-1.5rem)] max-w-lg gap-4 overflow-hidden rounded-3xl border-none bg-card p-4 sm:p-7"
+        className="form-dialog left-3 right-3 top-3 w-auto max-w-none max-h-[88vh] gap-4 overflow-hidden rounded-3xl border-none bg-card p-4 sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-1.5rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-7"
       >
         <DialogHeader className="shrink-0">
           <DialogTitle ref={titleRef} tabIndex={-1} className="pr-6 text-left font-display text-base leading-snug text-forest outline-none sm:text-xl">
