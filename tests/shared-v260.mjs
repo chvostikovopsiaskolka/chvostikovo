@@ -106,4 +106,48 @@ console.log('PASS v257 extras: legacy individual, projected expiry, foreign enti
 await auth(customer);const scope=(await rpc('select public.portal_shared_bootstrap_v260() r')).r;assert.equal(scope.enabled,true);assert(scope.memberships.every(m=>[9001,9002].includes(m.dog_id)));await assert.rejects(db.exec('update dogs set owner_id=9002 where id=9001'),/spoločnú permanentku/);console.log('PASS authorized bootstrap and blocked ownership transfer across shared ledger');
 await clean();await auth(customer);await rpc('select to_jsonb(public.portal_request_pass_v244(ARRAY[9001]::bigint[],20,$1)) r',[uid()]);const indiv=(await rpc('select to_jsonb(public.portal_request_booking(9001,$1)) r',[date])).r;assert.equal(indiv.projected_pass_total,20);console.log('PASS explicit individual 20-entry interest keeps legacy single-dog booking compatible');
 await clean();await auth(customer);const singles=(await rpc('select public.portal_request_dogs_batch_v254(ARRAY[9001,9002]::bigint[],$1::jsonb,$2) r',[JSON.stringify([{date,taxi_by_dog:{9001:'none',9002:'pickup'}}]),uid()])).r;assert.equal(singles.bookings.length,2);await auth(staff);for(const row of singles.bookings)await rpc('select public.portal_approve_booking($1,null)',[row.id]);assert((await db.query('select entry_type,pass_id from reservations')).rows.every(r=>r.entry_type==='single'&&r.pass_id===null));assert.equal((await rpc('select count(*)::int n from passes')).n,0);console.log('PASS legacy two-dog single-entry commit/approval, per-dog taxi, no pass purchase');
+
+
+// v261 normal end-of-pass flow requests renewal after the pair was already booked.
+await clean();await pass(10,9);await auth(customer);
+const lastQuote=await quote();await commit(items,lastQuote,uid());
+const afterBookingInterest=(await rpc('select to_jsonb(portal_request_pass_v244(ARRAY[9001,9002]::bigint[],10,$1)) r',[uid()])).r;
+const replanned=(await db.query('select dog_id,projected_entry_number,planned_pass_request_id from customer_booking_requests order by dog_id')).rows;
+assert.equal(replanned[0].projected_entry_number,10);assert.equal(replanned[1].projected_entry_number,1);assert.equal(replanned[1].planned_pass_request_id,afterBookingInterest.id);
+await auth(staff);const boughtAfterBooking=(await rpc('select to_jsonb(portal_approve_pass_request($1,null)) r',[afterBookingInterest.id])).r;
+await rpc('select portal_approve_pass_request($1,null)',[afterBookingInterest.id]);
+assert.equal((await rpc('select count(*)::int n from passes')).n,2);assert.equal((await rpc('select count(*)::int n from pass_dogs where pass_id=$1',[boughtAfterBooking.pass_id])).n,2);
+console.log('PASS normal post-booking renewal: old10 plus next1, shared interest after booked split, one next 10-entry purchase on repeated staff approval');
+
+// v262: a real one-dog owner scope traverses booking, approval, attendance and finance.
+await clean();await auth(staff);await db.exec("update dogs set owner_id=9002 where id=9002;update customer_owner_links set allowed_dog_ids=ARRAY[9001]::bigint[] where owner_id=9001");
+for(const total of [10,20,0]){
+ await clean();await auth(staff);
+ let oldId=null;
+ if(total)oldId=(await rpc("insert into passes(dog_id,total_entries,used_entries,purchased_on,purchase_price,status) values(9001,$1,4,current_date,$2,'active') returning id",[total,total===10?200:320])).id;
+ await auth(customer);
+ const cancelled=(await rpc('select to_jsonb(portal_request_booking(9001,$1)) r',[date])).r;
+ await rpc('select portal_cancel_booking($1,null)',[cancelled.id]);
+ if(total)assert.equal((await rpc('select used_entries from passes where id=$1',[oldId])).used_entries,4);
+ const booked=(await rpc('select to_jsonb(portal_request_booking(9001,$1)) r',[date])).r;
+ if(total){assert.equal(booked.projected_entry_number,5);assert.equal(booked.projected_pass_total,total)}
+ await auth(staff);await rpc('select portal_approve_booking($1,null)',[booked.id]);
+ await db.query('update reservations set reservation_date=$1',[today]);
+ await rpc('select private.finalize_day($1)',[today]);await rpc('select private.finalize_day($1)',[today]);
+ const visits=(await db.query('select dog_id,entry_type,value_amount,pass_entry_number from visits')).rows;
+ assert.equal(visits.length,1);assert.equal(visits[0].dog_id,9001);assert.equal(visits[0].entry_type,total?'pass':'single');
+ if(total){assert.equal(visits[0].pass_entry_number,5);assert.equal((await rpc('select used_entries from passes where id=$1',[oldId])).used_entries,5)}
+ else assert.equal(Number(visits[0].value_amount),25);
+ const finance=await rpc('select pass10_count,pass20_count,single_count from daily_financials where day=$1',[today]);
+ assert.equal(finance.pass10_count,total===10?1:0);assert.equal(finance.pass20_count,total===20?1:0);assert.equal(finance.single_count,total===0?1:0);
+ const reservation=(await rpc('select id from reservations order by id limit 1'));await rpc('select mark_no_show($1)',[reservation.id]);
+ assert.equal((await rpc('select count(*)::int n from visits')).n,0);
+ if(total)assert.equal((await rpc('select used_entries from passes where id=$1',[oldId])).used_entries,4);
+ console.log(`PASS single-dog owner: ${total?total+'-entry pass':'25 EUR single'}, cancellation, approval, attendance once, daily totals, no-show reversal`);
+}
+await clean();await auth(staff);await db.exec("update vaccinations set valid_until=current_date-1 where dog_id=9001 and vaccination_type='kennel_cough'");await auth(customer);
+await assert.rejects(rpc('select portal_request_booking(9001,$1)',[date]),/očkovan|platn/);
+assert.equal((await rpc('select count(*)::int n from customer_booking_requests')).n,0);
+console.log('PASS single-dog vaccine gate still rejects an invalid future visit without a booking');
+
 console.log('V260 SHARED CURRENT BASELINE PASS');await db.close();

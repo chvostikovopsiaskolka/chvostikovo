@@ -1,0 +1,10 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';import {stripTypeScriptTypes} from 'node:module';import {webcrypto,createHash} from 'node:crypto';
+const hash=createHash('sha256').update('fixture-only').digest('hex');
+const source=fs.readFileSync('tests/fixtures/sms-intro-visits-v8.ts','utf8').replace(/const EXPECTED_HASH = '[a-f0-9]+';/,"const EXPECTED_HASH = '"+hash+"';");
+let handler,fetches=0;
+const ctx=vm.createContext({Response,Request,URL,TextEncoder,crypto:webcrypto,Deno:{env:{get:k=>({SUPABASE_URL:'https://fixture',SUPABASE_SERVICE_ROLE_KEY:'fixture'})[k]},serve:f=>handler=f},fetch:async url=>{fetches++;assert(String(url).includes('visit_date=eq.2026-10-17'));return new Response(JSON.stringify([{id:17,dog_name:'Bella a Iris',owner_phone:'+421912345678',visit_date:'2026-10-17',visit_time:'10:00:00'}]));}});
+new vm.Script(stripTypeScriptTypes(source)).runInContext(ctx);
+assert.equal((await handler(new Request('https://fixture/feed?date=2026-10-17'))).status,401);assert.equal(fetches,0);
+const r=await handler(new Request('https://fixture/feed?date=2026-10-17',{headers:{'x-sms-secret':'fixture-only'}}));
+assert.equal(r.status,200);const rows=await r.json();assert.equal(rows.length,1);assert.equal(rows[0].dog_name,'Bella a Iris');assert.equal(rows[0].time,'10:00');assert.equal(rows[0].date,'2026-10-17');
+console.log('PASS exact deployed v8 feed handler: secret required, one item with both names and 17 October 10:00; external SMS sender/delivery not claimed');
