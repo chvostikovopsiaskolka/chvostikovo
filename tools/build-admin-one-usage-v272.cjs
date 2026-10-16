@@ -1,0 +1,4 @@
+const fs=require('fs'),crypto=require('crypto');
+const old="if(row.interest_reason)textField('Ako plánuje využívať škôlku',row.interest_reason);",next="if(Number(row.dog_order)===1&&row.interest_reason)textField('Ako plánuje využívať škôlku',row.interest_reason);";
+function build(){let h=require('./build-admin-planned-label-v271.cjs')();if(crypto.createHash('md5').update(h).digest('hex')!=='10cb4a2eae30c79a4c14ddd4e5090664')throw Error('v271 baseline changed');if(h.split(old).length!==2)throw Error('Usage anchor changed');return h.replace(old,next)}
+module.exports=build;module.exports.patch={old,new:next};if(require.main===module){const h=build();fs.writeFileSync('/workspace/scratch/7d4a60d428d0/admin-v272.html',h);console.log(Array.from(h).length,crypto.createHash('md5').update(h).digest('hex'))}
