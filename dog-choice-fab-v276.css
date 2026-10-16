@@ -65,3 +65,24 @@ html.dog-choice-open-v276,html.dog-choice-open-v276 body{overflow:hidden!importa
 }
 .bottom-nav #navBookAddV220 .booking-fab-symbol-v220::before{width:26px;height:3px}
 .bottom-nav #navBookAddV220 .booking-fab-symbol-v220::after{width:3px;height:26px}
+
+/* v280: match the existing reservation empty-state calendar-with-plus.
+   Keep the orange button geometry and click behavior unchanged on iOS/Android. */
+.bottom-nav #navBookAddV220 .booking-fab-symbol-v220{
+  width:30px!important;height:30px!important;
+  display:grid!important;place-items:center!important;
+  margin:0!important;padding:0!important;
+}
+.bottom-nav #navBookAddV220 .booking-fab-symbol-v220::before,
+.bottom-nav #navBookAddV220 .booking-fab-symbol-v220::after{
+  content:none!important;
+}
+.bottom-nav #navBookAddV220 .booking-fab-calendar-v280{
+  display:block!important;
+  width:29px!important;height:29px!important;
+  fill:none!important;stroke:currentColor!important;
+  stroke-width:1.9!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+  transform:none!important;
+  pointer-events:none!important;
+}
