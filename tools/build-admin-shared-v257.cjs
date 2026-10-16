@@ -1,0 +1,38 @@
+const fs=require('fs'),crypto=require('crypto');let s=fs.readFileSync('../staged-admin-v253.html','utf8');
+if(crypto.createHash('md5').update(s).digest('hex')!=='e8fc02fdd98e98accf81a01f9ea38422')throw Error('LIVE admin baseline changed');
+function exact(a,b){if(!s.includes(a))throw Error('Missing anchor: '+a.slice(0,140));s=s.split(a).join(b)}
+exact("'id,user_id,dog_id,total_entries,status,requested_at,decided_at,decision_note'","'id,user_id,dog_id,dog_ids,total_entries,status,requested_at,decided_at,decision_note'");
+exact("'id,dog_id,total_entries,used_entries,purchased_on,purchase_price,valid_from,valid_until,no_expiry,status,created_at'","'id,dog_id,total_entries,used_entries,purchased_on,purchase_price,valid_from,valid_until,no_expiry,status,source,created_at,pass_dogs(dog_id)'");
+exact("'id,dog_id,total_entries,purchased_on,purchase_price,status'","'id,dog_id,total_entries,purchased_on,purchase_price,status,pass_dogs(dog_id)'");
+exact('state.passes=new Map(); for(const p of passesRes.data||[]){ if(!state.passes.has(p.dog_id))state.passes.set(p.dog_id,[]); state.passes.get(p.dog_id).push(p) }','state.passes=indexSharedPassesV257(passesRes.data||[])');
+exact('state.passes=new Map();for(const p of active.data||[]){if(!state.passes.has(p.dog_id))state.passes.set(p.dog_id,[]);state.passes.get(p.dog_id).push(p)}','state.passes=indexSharedPassesV257(active.data||[])');
+exact('state.passes=new Map();for(const pass of active.data||[]){if(!state.passes.has(pass.dog_id))state.passes.set(pass.dog_id,[]);state.passes.get(pass.dog_id).push(pass)}','state.passes=indexSharedPassesV257(active.data||[])');
+exact("withJwtRetry(()=>supabase.from('passes').select('id,dog_id,total_entries,used_entries,purchased_on,purchase_price,valid_from,valid_until,no_expiry,status,source,created_at').eq('dog_id',id).neq('status','cancelled').order('created_at'))",'loadDogPassHistoryV257(id)');
+exact('<strong>${p.total_entries}-vstupová permanentka</strong>','<strong>${p.total_entries}-vstupová permanentka</strong>${p.pass_dogs?.length===2?`<div class="muted small">Spoločná · ${esc(sharedPassNamesV257(p))}</div>`:""}${p.source==="test_shared_v257"?`<div class="muted small">Testovacia — bez predaja</div>`:""}');
+exact('<div id="pass-body-${p.id}" class="collapse-body hidden">','<div id="pass-body-${p.id}" class="collapse-body hidden">${p.pass_dogs?.length===2?`<button type="button" class="btn secondary compact" data-shared-ledger-v257="${p.id}">Čerpanie a plánované vstupy</button><div class="stack" data-shared-ledger-body-v257></div>`:""}');
+exact("esc(dog?.name||'Pes')","esc(p.pass_dogs?.length===2?sharedPassNamesV257(p):(dog?.name||'Pes'))");
+exact('Záujem o ${r.total_entries||10}-vstupovú permanentku',"${r.dog_ids?.length===2?'Spoločná pre '+r.dog_ids.map(id=>esc(dogById(id)?.name||'Psík')).join(' a '):'Individuálna'} · Záujem o ${r.total_entries||10}-vstupovú permanentku");
+exact("Záujem o '+total+'-vstupovú permanentku","'+(r.dog_ids?.length===2?'Spoločná pre '+r.dog_ids.map(id=>esc(dogById(id)?.name||'Psík')).join(' a '):'Individuálna')+' · Záujem o '+total+'-vstupovú permanentku");
+exact("'Potvrdiť nákup '+request.total_entries+'-vstupovej permanentky dnes?","'Potvrdiť '+(request.dog_ids?.length===2?'jednu spoločnú pre '+request.dog_ids.map(id=>dogById(id)?.name||'Psík').join(' a '):'individuálnu')+' '+request.total_entries+'-vstupovú permanentku za '+(Number(request.total_entries)===20?320:200)+' € dnes?");
+exact('projected_entry_number,projected_pass_total,planned_pass_request_id,taxi_mode','projected_entry_number,projected_pass_total,projected_pass_id,planned_pass_request_id,booking_group_id,taxi_mode');
+exact('data-request-id="${r.id}">Schváliť</button>','data-request-id="${r.id}">${sharedGroupPendingV257(r)?"Schváliť oboch":"Schváliť"}</button>');
+exact('data-decision="approve" type="button">Schváliť</button>','data-decision="approve" type="button">\'+(!taxiChange&&sharedGroupPendingV257(r)?\'Schváliť oboch\':\'Schváliť\')+\'</button>');
+exact("{entry_type:'single',pass_id:null,pass_locked:false,planned_entry_number:null,planned_pass_total:null,source_label:null}","{entry_type:'single',billing_choice:'single',pass_id:null,pass_locked:false,planned_entry_number:null,planned_pass_total:null,source_label:null}");
+exact("{entry_type:'pass',pass_id:passId,pass_locked:true}","{entry_type:'pass',billing_choice:'auto',pass_id:passId,pass_locked:true}");
+exact("filter(p=>p.status!=='cancelled')","filter(p=>p.status!=='cancelled'&&p.source!=='test_shared_v257')");
+// Membership-aware pending labels and manual planning, without duplicating sales.
+exact("Number(r.dog_id)===Number(d.id)&&r.status==='pending'","(Number(r.dog_id)===Number(d.id)||(r.dog_ids||[]).map(Number).includes(Number(d.id)))&&r.status==='pending'");
+exact("Number(r.dog_id)===Number(dogId)&&r.status==='pending'","(Number(r.dog_id)===Number(dogId)||(r.dog_ids||[]).map(Number).includes(Number(dogId)))&&r.status==='pending'");
+exact("r.dog_id===dogId&&r.entry_type==='pass'", "r.entry_type==='pass'");
+{
+ const begin=s.indexOf('function plannedUnpaidForNew('),end=s.indexOf('function endingPassesThisWeek(',begin);
+ let block=s.slice(begin,end);
+ block=block.replace('const earlier=',"const ids=(interest.dog_ids||[dogId]).map(Number);const earlier=");
+ block=block.replaceAll('Number(r.dog_id)===Number(dogId)&&', 'ids.includes(Number(r.dog_id))&&');
+ block=block.replace("const rows=(state.reservations||[]).filter(r=>r.entry_type==='pass'", "const rows=[...(state.reservations||[]),...(state.customerBookings||[]).filter(q=>q.status==='pending').map(q=>({...q,status:'booked',entry_type:'pass',pass_id:q.projected_pass_id,planned_entry_number:q.projected_entry_number,planned_pass_total:q.projected_pass_total}))].filter(r=>r.entry_type==='pass'");
+ block=block.replace('a.reservation_date.localeCompare(b.reservation_date)||a.id-b.id','a.reservation_date.localeCompare(b.reservation_date)||Number(a.planned_entry_number)-Number(b.planned_entry_number)');
+ s=s.slice(0,begin)+block+s.slice(end);
+}
+exact('</body>','<script>\n'+fs.readFileSync('admin/shared-pass-v257.js','utf8')+'\n</script>\n</body>');
+fs.writeFileSync('../staged-admin-v257.html',s);
+console.log('Admin v257',s.length,crypto.createHash('md5').update(s).digest('hex'));
