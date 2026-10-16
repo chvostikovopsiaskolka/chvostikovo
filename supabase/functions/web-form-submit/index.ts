@@ -233,7 +233,6 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
       lines.push('Pohlavie: ' + (dog.dog_sex === 'male' ? 'Pes' : 'Suka'));
       lines.push('Vek: ' + String(dog.dog_age_text ?? ''));
       lines.push('Kastrovaný / sterilizovaná: ' + (dog.dog_neutered === true ? 'Áno' : 'Nie'));
-      lines.push('Plán využívania: ' + String(dog.interest_reason ?? ''));
       lines.push('Alergie a zdravotné obmedzenia: ' + String(dog.dog_allergies ?? ''));
       lines.push('Povaha a ďalšie informácie: ' + String(dog.dog_temperament ?? ''));
     }
@@ -511,7 +510,7 @@ Deno.serve(async (req: Request) => {
         const second = input.dogs[1] as Record<string, unknown>;
         const secondName = text(second.dog_name, 160), secondBreed = text(second.dog_breed, 200);
         const secondAge = text(second.dog_age_text, 80), secondSex = sex(second.dog_sex);
-        const secondNeutered = yesNo(second.dog_neutered), secondUsage = text(second.interest_reason, 250);
+        const secondNeutered = yesNo(second.dog_neutered), secondUsage = usage;
         const secondAllergies = second.dog_allergies ?? '', secondTemperament = second.dog_temperament;
         const rawWeight = String(second.dog_weight_kg ?? '').trim().replace(/\s*kg\s*$/i, '').trim();
         const secondWeight = Number(rawWeight.replace(',', '.'));

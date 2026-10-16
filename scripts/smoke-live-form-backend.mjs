@@ -1,6 +1,7 @@
 const endpoint = "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/web-form-submit";
 const origin = "https://chvostikovo.sk";
-const phone = "+421915349028";
+// Synthetic non-subscriber fixture; dry_run validates without storage or delivery.
+const phone = "+421000000000";
 
 async function post(payload) {
   const response = await fetch(endpoint, {

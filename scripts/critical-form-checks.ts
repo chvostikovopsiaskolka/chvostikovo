@@ -48,11 +48,12 @@ const twoDogApplication = {
   vek: "2 roky", kastrovana: "Áno", duvod: "Pravidelne – 1 až 2× týždenne",
   alergie: "", povaha: "Priateľský a pokojný.",
   pes2: "Druhý", plemeno2: "Retríver", vaha2: "19,5 kg", pohlavie2: "Fenka",
-  vek2: "3 roky", kastrovana2: "Nie", duvod2: "Občas podľa potreby",
+  vek2: "3 roky", kastrovana2: "Nie",
   alergie2: "Citlivé trávenie", povaha2: "Hravá a spoločenská.",
 };
 const parsedTwoDogs = inquirySchema.parse(twoDogApplication);
 const dualPayload = buildDbPayload(parsedTwoDogs);
+assert(dualPayload.dogs?.[1]?.interest_reason === twoDogApplication.duvod, "Both dogs must share the first usage choice.");
 assert(dualPayload.form_type === "application" && "dogs" in dualPayload, "Two-dog form must remain one application.");
 assert(dualPayload.dog_count === 2 && dualPayload.dogs.length === 2, "Application must include exactly two dog objects.");
 assert(dualPayload.dogs[0].dog_name === "Prvý" && dualPayload.dogs[1].dog_name === "Druhý", "The dogs must retain their separate identities.");
@@ -98,6 +99,7 @@ targetInquirySchema.parse({
 });
 
 const forms = readFileSync(new URL("../src/components/site/Forms.tsx", import.meta.url), "utf8");
+assert(!forms.includes('name="duvod2"'), "Second usage selector must not be rendered.");
 const englishForm = readFileSync(new URL("../src/components/site/EnglishInquiryForm.tsx", import.meta.url), "utf8");
 const progressSource = readFileSync(new URL("../src/lib/form-progress.ts", import.meta.url), "utf8");
 assert(forms.includes("progress.onInvalidCapture") && forms.includes("progress.onBlurCapture"), "SK forms must record browser-native validation and per-field completion.");
