@@ -1587,11 +1587,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const account=state.session.user?.id,request=String(Number(root.dataset.request||0)+1);root.dataset.request=request;
     root.textContent='Načítavam potvrdené verzie…';
     try{
-      const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_terms_acceptance_history',{method:'POST',headers:headers(),body:JSON.stringify({p_dog_id:dogId}),cache:'no-store'});
+      const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_owner_terms_history_v256',{method:'POST',headers:headers(),body:JSON.stringify({p_dog_id:dogId}),cache:'no-store'});
       if(!response.ok)throw new Error('Potvrdené verzie sa nepodarilo načítať.');
       const rows=await response.json();if(root.dataset.request!==request||state.session?.user?.id!==account)return;
-      root.innerHTML=rows.length?'<details class="terms-history"><summary><span>Moje potvrdené verzie ('+rows.length+')</span><small>Otvoriť alebo stiahnuť PDF</small></summary>'+rows.map((row,i)=>'<div class="terms-history-row"><strong>Verzia '+esc(termsVersionLabel(row.terms_version))+'</strong><small>✓ Potvrdené dňa '+esc(skDateTime(row.accepted_at))+'</small><div class="terms-history-actions"><button type="button" class="btn secondary small" data-terms-view="'+i+'">Zobraziť podmienky</button><button type="button" class="btn secondary small" data-terms-pdf="'+i+'" data-open="true">Otvoriť PDF</button><button type="button" class="btn secondary small" data-terms-pdf="'+i+'">Stiahnuť PDF</button></div></div>').join('')+'</details>':'<small>Zatiaľ nemáte potvrdenú verziu podmienok.</small>';
-      root.querySelectorAll('[data-terms-view]').forEach(btn=>btn.onclick=()=>{const row=rows[Number(btn.dataset.termsView)];openRead({title:row.title,version:row.terms_version,body:row.body});document.getElementById('schoolTermsReadMeta').textContent='Verzia '+termsVersionLabel(row.terms_version)+' · Potvrdené dňa '+skDateTime(row.accepted_at)});
+      root.innerHTML=rows.length?'<details class="terms-history"><summary><span>Moje potvrdené verzie ('+rows.length+')</span><small>Otvoriť alebo stiahnuť PDF</small></summary>'+rows.map((row,i)=>'<div class="terms-history-row"><strong>Verzia '+esc(termsVersionLabel(row.terms_version))+'</strong><small>✓ Potvrdené dňa '+esc(skDateTime(row.accepted_at))+'</small><div class="terms-history-actions"><button type="button" class="btn secondary small" data-terms-pdf="'+i+'" data-open="true">Otvoriť PDF</button><button type="button" class="btn secondary small" data-terms-pdf="'+i+'">Stiahnuť PDF</button></div></div>').join('')+'</details>':'<small>Zatiaľ nemáte potvrdenú verziu podmienok.</small>';
       root.querySelectorAll('[data-terms-pdf]').forEach(btn=>btn.onclick=async()=>{
         const row=rows[Number(btn.dataset.termsPdf)],open=btn.dataset.open==='true';
         const preview=open?window.open('about:blank','_blank'):null;
@@ -1600,12 +1599,18 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         try{
           const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(row.body)))).map(x=>x.toString(16).padStart(2,'0')).join('');
           if(hash!==row.document_hash)throw new Error('Kontrola historického dokumentu zlyhala.');
-          const url=URL.createObjectURL(window.createCustomerTermsPdf(row));
-          if(preview){preview.location.replace(url)}else{
-            const a=document.createElement('a');a.href=url;a.download='Chvostikovo-podmienky-'+termsVersionLabel(row.terms_version)+'.pdf';a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
+          const blob=window.createCustomerTermsPdf(row),filename='Chvostikovo-podmienky-'+termsVersionLabel(row.terms_version)+'.pdf';
+          const file=new File([blob],filename,{type:'application/pdf'});
+          if(!open&&navigator.canShare?.({files:[file]})){
+            await navigator.share({files:[file]});
+          }else{
+            const url=URL.createObjectURL(blob);
+            if(preview){preview.location.replace(url)}else{
+              const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+            }
+            setTimeout(()=>URL.revokeObjectURL(url),300000);
           }
-          setTimeout(()=>URL.revokeObjectURL(url),300000);
-        }catch(error){preview?.close();toast(error.message||'PDF sa nepodarilo vytvoriť.')}finally{btn.disabled=false}
+        }catch(error){preview?.close();if(error.name!=='AbortError')toast(error.message||'PDF sa nepodarilo vytvoriť.')}finally{btn.disabled=false}
       });
     }catch(error){if(root.dataset.request===request)root.textContent=error.message}
   }
@@ -2338,7 +2343,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('bookingPickerCloseV37').addEventListener('click',closePickerV37);
     $('bookingPickerV37').addEventListener('click',e=>{if(e.target===$('bookingPickerV37'))closePickerV37()});
     $('bookingPickerDogV37').addEventListener('change',e=>{
-      if(submittingV37)return;pairBookingV254=e.target.value==='both';pairTaxiV254.clear();
+      if(submittingV37)return;pairBookingV254=e.target.value==='both';e.target.blur();pairTaxiV254.clear();
       if(!pairBookingV254)state.selectedDogId=Number(e.target.value);
       selectedDatesV37.clear();
       selectedTaxiByDateV91.clear();
@@ -2362,7 +2367,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(!dog)return;
     const dogWrap=$('bookingPickerDogWrapV37'),dogSelect=$('bookingPickerDogV37');
     dogWrap.classList.toggle('hidden',dogs.length<=1);
-    dogSelect.disabled=submittingV37;dogSelect.innerHTML=dogs.map(d=>`<option value="${d.id}" ${!pairBookingV254&&Number(d.id)===Number(dog.id)?'selected':''}>${esc(d.name)}</option>`).join('')+(dogs.length===2?'<option value="both" '+(pairBookingV254?'selected':'')+'>Obaja psíkovia</option>':'');
+    dogSelect.disabled=submittingV37;dogSelect.innerHTML=(dogs.length===2?'<option value="both" '+(pairBookingV254?'selected':'')+'>Obaja psíkovia</option>':'')+dogs.map(d=>`<option value="${d.id}" ${!pairBookingV254&&Number(d.id)===Number(dog.id)?'selected':''}>${esc(d.name)}</option>`).join('');
     $('bookingPickerRangeV37').textContent=$('weekTitle')?.textContent||'Najbližšie dva týždne';
 
     updateBookingDeadlineNoticeV127();
@@ -2448,7 +2453,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
 
   function openPickerV37(){
-    pairBookingV254=false;pairTaxiV254.clear();pickerEpochV157++;
+    pairBookingV254=(state.data?.dogs||[]).length===2;pairTaxiV254.clear();pickerEpochV157++;
     const dog=selectedDog();if(dog&&window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(dog)){switchTab('dog');setTimeout(()=>openDogDetails('vaccinations',false),40);toast('Pred rezerváciou doplňte povinné očkovania.');return}
     selectedDatesV37.clear();selectedTaxiByDateV91.clear();expandedTaxiDateV201=null;renewalCheckedDogV157=null;smartDaysDismissedV199=false;futureWeekExpandedV235=false;pickerErrorV95('');
     renderPickerV37();
@@ -3556,4 +3561,5 @@ function installVaccinationViewerZoomV244(modal){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();
+
 
