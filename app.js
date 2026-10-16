@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261016-booking-connection-v265';
-const APP_VERSION='1.0.96';
+const APP_BUILD='20261016-booking-groups-smart-v267';
+const APP_VERSION='1.0.97';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2188,15 +2188,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const eligible=days.filter(d=>typeof d.date==='string'&&d.date.length===10&&d.date>today
       &&d.bookings_open!==false&&Number(d.available)>0
       &&!bookingFor(dog.id,d.date)&&!bookingDeadlineClosedV95(d.date,dog));
-    // "Minulý týždeň" means the most recent completed Mon–Fri period.
-    // On weekends that is the current ISO week's workdays; otherwise the previous ISO week.
-    const todayDow=new Date(today+'T12:00:00Z').getUTCDay();
-    const lastWorkWeekMonday=smartShiftV199(smartMondayV199(today),(todayDow===0||todayDow===6)?0:-7);
-    const matching=history.filter(r=>smartMondayV199(r.reservation_date)===lastWorkWeekMonday);
-    if(!matching.length)return null;
-    const weekdays=new Set(matching.map(r=>new Date(r.reservation_date+'T12:00:00Z').getUTCDay()));
+    // Compare with the week immediately preceding the offered booking week.
     const weeks=[...new Set(eligible.map(d=>smartMondayV199(d.date)).filter(Boolean))].sort();
     for(const monday of weeks){
+      const matching=history.filter(r=>smartMondayV199(r.reservation_date)===smartShiftV199(monday,-7));
+      if(!matching.length)return null;
+      const weekdays=new Set(matching.map(r=>new Date(r.reservation_date+'T12:00:00Z').getUTCDay()));
       // If a week has existing bookings, let the customer add days manually.
       const hasActiveBooking=(state.data?.requests||[]).some(r=>Number(r.dog_id)===Number(dog.id)
         &&['pending','approved'].includes(r.status)&&smartMondayV199(r.reservation_date)===monday)
