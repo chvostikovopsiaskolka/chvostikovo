@@ -17,6 +17,7 @@ const fetch=async(url,opts={})=>{
  const path=url.split('/rest/v1/')[1];readPaths.push(path);let result;
  if(path.startsWith('staff?'))result=staffAllowed?[{user_id:'staff'}]:[];
  else if(path.startsWith('web_form_submissions?id=')){const id=Number(new URL(url).searchParams.get('id').slice(3));result=rows.filter(r=>r.id===id);}
+ else if(path.startsWith('web_form_submissions?or=')){const root=Number(new URL(url).searchParams.get('or').match(/id.eq.(\d+)/)[1]);result=rows.filter(r=>r.id===root||r.crm_lead_id===root);}
  else if(path.startsWith('web_form_submissions?phone='))result=rows.filter(r=>r.phone===new URL(url).searchParams.get('phone').slice(3));
  else if(path.startsWith('meta_crm_event_log?')&&opts.method==='POST'){const row=JSON.parse(opts.body);logs=logs.filter(r=>r.submission_id!==row.submission_id||r.event_name!==row.event_name);logs.push(row);return new Response(null,{status:204});}
  else if(path.startsWith('meta_crm_event_log?')){const params=new URL(url).searchParams;result=logs.filter(r=>{
