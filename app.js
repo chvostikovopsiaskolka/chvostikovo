@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261016-calendar-fab-v280';
-const APP_VERSION='1.0.101';
+const APP_BUILD='20261016-booking-post-interest-v281';
+const APP_VERSION='1.0.102';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2147,40 +2147,45 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function sharedItemsV260(dates=[...selectedDatesV37].sort()){
     return dates.flatMap(date=>pickerDogsV254().map(d=>({dog_id:Number(d.id),date,taxi_mode:pickerTaxiV254(date,d.id),billing_choice:'auto'})));
   }
-  let sharedReviewV260=null;
-  function showSharedReviewV260(quote){
-    let root=$('sharedBookingReviewV257');if(!root){root=document.createElement('div');root.id='sharedBookingReviewV257';root.className='booking-picker-error-v95';$('bookingPickerSubmitV37').before(root)}
-    root.innerHTML=quote.map(q=>'<div><strong>'+esc(dogName(q.dog_id))+' · '+esc(skDate(q.date))+'</strong> '+(q.mode==='pass'?'Permanentka: '+Number(q.entry_number)+'/'+Number(q.total):q.mode==='planned'?'Plánovaná permanentka: '+Number(q.entry_number)+'/'+Number(q.total):q.mode==='free'?'Voľný vstup':'Jednorazový vstup · 25 €')+'</div>').join('');
-    root.classList.remove('hidden');
+  /* v281: the server quote is an internal consistency guard, never a second confirmation step. */
+  function postBookingChoicesV281(quote){
+    const byDog=new Map();
+    for(const q of quote||[]){
+      const id=Number(q.dog_id),total=Number(q.total)||0,number=Number(q.entry_number)||0;
+      const reason=q.mode==='pass'&&total>0&&number===total?'last':q.mode==='single'?'single':null;
+      if(!reason||!Number.isSafeInteger(id)||id<=0)continue;
+      if((state.data?.pass_requests||[]).some(p=>p.status==='pending'&&passAllowsDogV244(p,id)))continue;
+      const existing=byDog.get(id);
+      if(!existing||reason==='last'&&existing.reason!=='last')byDog.set(id,{dogId:id,date:String(q.date),reason});
+    }
+    return [...byDog.values()].sort((a,b)=>a.reason===b.reason?a.dogId-b.dogId:a.reason==='last'?-1:1);
   }
   async function submitSharedV260(dates){
-    const items=sharedItemsV260(dates),payload=JSON.stringify(items),key='chvo-shared-submit-v260',reviewed=sharedReviewV260?.payload===payload;let saved;
+    const items=sharedItemsV260(dates),payload=JSON.stringify(items),key='chvo-shared-submit-v260';let saved;
     for(const d of pickerDogsV254())if(window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(d)){pickerErrorV95('Pred rezerváciou doplňte povinné očkovania pre '+d.name+'.');return}
     try{saved=JSON.parse(sessionStorage.getItem(key)||'null')}catch(_){}
-    if(!saved||saved.user!==state.session.user.id||saved.payload!==payload)saved={user:state.session.user.id,payload,operation:crypto.randomUUID(),quote:null,confirmed:false};
+    if(!saved||saved.user!==state.session.user.id||saved.payload!==payload)saved={user:state.session.user.id,payload,operation:crypto.randomUUID(),quote:null};
     const persist=()=>{try{sessionStorage.setItem(key,JSON.stringify(saved))}catch(_){}};
     submittingV37=true;pickerErrorV95('');renderPickerV37();
     try{
       if(!saved.quote){
-        const preview=await api({action:'shared_booking_v257',items});saved.quote=preview?.data?.quote;
+        const preview=await api({action:'shared_booking_v257',items});
+        saved.quote=preview?.data?.quote;
         if(!Array.isArray(saved.quote)||saved.quote.length!==items.length)throw Error('Rozdelenie vstupov sa nepodarilo overiť.');
         persist();
-        if(saved.quote.some(q=>q.mode==='single')){
-          sharedReviewV260={payload};showSharedReviewV260(saved.quote);return;
-        }
       }
-      if(saved.quote.some(q=>q.mode==='single')&&!saved.confirmed&&!reviewed){sharedReviewV260={payload};showSharedReviewV260(saved.quote);return}
-      saved.confirmed=true;persist();
+      /* Commit atomically on the FIRST click; preserve the same UUID across explicit retries. */
       const response=await api({action:'shared_booking_v257',items,operation_id:saved.operation,expected:saved.quote});
       const rows=response?.data?.bookings||[];
       if(!response?.data?.committed||rows.length!==items.length)throw Error('Výsledok rezervácie nie je úplný. Skúste znova.');
       for(const row of rows)applyLocalBooking({data:row},{...row,can_manage:true});
-      sessionStorage.removeItem(key);sharedReviewV260=null;$('sharedBookingReviewV257')?.classList.add('hidden');
-      queueCustomerSync('bookings',80);submittingV37=false;closePickerV37();toast('Rezervácie boli odoslané na schválenie.');
-      const last=saved.quote.find(q=>q.mode==='pass'&&Number(q.entry_number)===Number(q.total));
-      if(last&&!state.data.pass_requests?.some(p=>p.status==='pending'&&passAllowsDogV244(p,last.dog_id)))setTimeout(()=>window.showPassRenewalAfterBookingV94?.(Number(last.dog_id),last.date),140);
+      const intents=postBookingChoicesV281(response?.data?.quote||saved.quote);
+      sessionStorage.removeItem(key);
+      queueCustomerSync('bookings',80);submittingV37=false;closePickerV37();
+      toast('Rezervácie boli odoslané na schválenie.');
+      if(intents.length)setTimeout(()=>window.showPostBookingPassChoicesV281?.(intents),170);
     }catch(error){
-      if(/zmenili/.test(error.message)){sessionStorage.removeItem(key);sharedReviewV260=null;$('sharedBookingReviewV257')?.classList.add('hidden')}
+      if(/zmenili/.test(error.message)){sessionStorage.removeItem(key);saved.quote=null}
       pickerErrorV95(error.message||'Rezervácia sa nepodarila. Skúste znova.');queueCustomerSync('bookings',0);
     }finally{submittingV37=false;if(!$('bookingPickerV37')?.classList.contains('hidden'))renderPickerV37()}
   }
@@ -2513,11 +2518,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     dogWrap.classList.toggle('hidden',dogs.length<=1);
     dogSelect.disabled=submittingV37;dogSelect.innerHTML=(dogs.length===2?'<option value="both" '+(pairBookingV254?'selected':'')+'>Obaja psíkovia</option>':'')+dogs.map(d=>`<option value="${d.id}" ${!pairBookingV254&&Number(d.id)===Number(dog.id)?'selected':''}>${esc(d.name)}</option>`).join('');
     $('bookingPickerRangeV37').textContent=$('weekTitle')?.textContent||'Najbližšie dva týždne';
-    let interest=$('sharedPassChoiceV260');
-    if(!interest){interest=document.createElement('button');interest.id='sharedPassChoiceV260';interest.type='button';interest.className='btn secondary compact';interest.textContent='Záujem o permanentku';$('bookingPickerDogWrapV37').after(interest);interest.onclick=async()=>{interest.disabled=true;try{await openSharedPassRequestV260(Number(selectedDog()?.id));renderPickerV37()}finally{interest.disabled=false}}}
-    interest.classList.toggle('hidden',!state.data?.shared_passes_enabled||dogs.length!==2||(state.data.pass_requests||[]).some(q=>q.status==='pending'));
-    interest.disabled=submittingV37;
-
+    /* v281: renewal interest is offered only after a successful booking. */
+    $('sharedPassChoiceV260')?.remove();
 
     updateBookingDeadlineNoticeV127();
     if(pairBookingV254)$('bookingPickerSmartDaysV199').classList.add('hidden');else renderSmartDaysV199(dog,days);
@@ -2550,17 +2552,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('bookingPickerDaysV37').querySelectorAll('.booking-day-v37:not(:disabled)').forEach(btn=>btn.addEventListener('click',async()=>{
       if(checkingRenewalV157||submittingV37)return;
       const date=btn.dataset.date;
-      if(!pairBookingV254&&!selectedDatesV37.has(date)&&renewalCheckedDogV157!==Number(dog.id)){
-        checkingRenewalV157=true;
-        const epoch=pickerEpochV157;
-        try{
-          const isCurrent=()=>epoch===pickerEpochV157&&!$('bookingPickerV37')?.classList.contains('hidden');
-          const proceed=sharedDogBillingV260(dog.id)?true:await offerRecentPassRenewalV157(Number(dog.id),isCurrent);
-          if(!proceed||Number(state.selectedDogId)!==Number(dog.id)||!isCurrent())return;
-          renewalCheckedDogV157=Number(dog.id);
-        }catch(error){pickerErrorV95(error.message);return}
-        finally{checkingRenewalV157=false}
-      }
+      /* v281: selecting a date never opens a permanentka modal or makes an extra RPC. */
       if(btn.dataset.contact==='true'&&pairBookingV254){pickerErrorV95('Pre oboch psíkov nie sú dostupné dve miesta alebo sa prihlasovanie uzavrelo. Vyberte iný deň alebo nám napíšte.');return}
       if(btn.dataset.contact==='true'){
         closePickerV37();
@@ -2599,11 +2591,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const submit=$('bookingPickerSubmitV37'),count=selectedDatesV37.size;
     submit.disabled=!count||submittingV37;
     submit.textContent=count?`Rezervovať ${count===1?'1 deň':count<5?count+' dni':count+' dní'}`:'Vyberte deň';
-    if(sharedReviewV260&&sharedReviewV260.payload===JSON.stringify(sharedItemsV260()))submit.textContent='Potvrdiť rezerváciu';else{sharedReviewV260=null;$('sharedBookingReviewV257')?.classList.add('hidden')}
+    $('sharedBookingReviewV257')?.remove();
   }
 
   function openPickerV37(){
-    sharedReviewV260=null;$('sharedBookingReviewV257')?.classList.add('hidden');pairBookingV254=(state.data?.dogs||[]).length===2;pairTaxiV254.clear();pickerEpochV157++;
+    $('sharedBookingReviewV257')?.remove();pairBookingV254=(state.data?.dogs||[]).length===2;pairTaxiV254.clear();pickerEpochV157++;
     const dog=selectedDog();if(dog&&window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(dog)){switchTab('dog');setTimeout(()=>openDogDetails('vaccinations',false),40);toast('Pred rezerváciou doplňte povinné očkovania.');return}
     selectedDatesV37.clear();selectedTaxiByDateV91.clear();expandedTaxiDateV201=null;renewalCheckedDogV157=null;smartDaysDismissedV199=false;futureWeekExpandedV235=false;pickerErrorV95('');
     renderPickerV37();
@@ -2782,6 +2774,88 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     modal.classList.remove('hidden');
   }
   window.showPassRenewalAfterBookingV94=(dogId,date)=>{bookingDogV38=0;showPromptV38(Number(dogId)||0,date)};
+
+  /* v281: reuse the existing one-dog renewal modal after confirmed booking. */
+  async function requestSingleDogPassV281(dogId,operationId){
+    const account=state.session?.user?.id;
+    if(!account)return null;
+    const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_request_pass_v244',{
+      method:'POST',
+      headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'},
+      body:JSON.stringify({p_dog_ids:[dogId],p_total_entries:10,p_operation_id:operationId})
+    });
+    const txt=await response.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}
+    if(!response.ok)throw new Error(data?.message||data?.error||'Záujem o permanentku sa nepodarilo odoslať.');
+    if(state.session?.user?.id!==account)return null;
+    const row=Array.isArray(data)?data[0]:data;
+    if(!row||!Number(row.id))throw new Error('Záujem sa nepodarilo potvrdiť. Skúste znova.');
+    state.data.pass_requests=state.data.pass_requests||[];
+    if(!state.data.pass_requests.some(p=>Number(p.id)===Number(row.id)))state.data.pass_requests.unshift(row);
+    renderPassSummary();renderDog();queueCustomerSync('bookings',0);
+    return row;
+  }
+  window.showPostBookingPassChoicesV281=async function(choices){
+    const account=state.session?.user?.id;
+    if(!account||!Array.isArray(choices))return;
+    for(const item of choices){
+      if(state.session?.user?.id!==account)break;
+      const dogId=Number(item.dogId);
+      const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===dogId);
+      if(!dog||!['last','single'].includes(item.reason)||
+         (state.data.pass_requests||[]).some(p=>p.status==='pending'&&passAllowsDogV244(p,dogId)))continue;
+      await new Promise(resolve=>{
+        ensureModalV38();
+        const modal=$('passRenewalModalV38'),yes=$('passRenewalRequestV38'),
+          later=$('passRenewalLaterV38'),close=$('passRenewalCloseV38');
+        const title=$('passRenewalTitleV38'),day=$('passRenewalDayV38');
+        const description=modal.querySelector('.legal-body>p:nth-child(2)');
+        const hint=modal.querySelector('.pass-renewal-validity-v38');
+        const original={title:title.textContent,day:day.textContent,
+          description:description?.textContent,hint:hint?.textContent,yes:yes.textContent};
+        const isLast=item.reason==='last';
+        title.textContent=isLast?'Posledný vstup – '+dog.name:'Permanentka pre '+dog.name+'?';
+        day.textContent=isLast
+          ?dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' rezervovaný posledný vstup zo súčasnej permanentky.'
+          :dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' odoslanú jednorazovú rezerváciu.';
+        if(description)description.textContent=isLast
+          ?'Máte záujem o ďalšiu 10-vstupovú permanentku pre '+dog.name+'?'
+          :'Chcete tento vstup pre '+dog.name+' zaradiť medzi plánované vstupy novej 10-vstupovej permanentky?';
+        if(hint)hint.textContent='Ak zvolíte Neskôr, rezervácia zostane bez zmeny. Záujem musí potvrdiť škôlka.';
+        yes.textContent='Mám záujem o permanentku';
+        later.textContent='Neskôr';
+        let done=false,busy=false;
+        const operationId=crypto.randomUUID();
+        const onBackdrop=e=>{if(e.target===modal)finish()};
+        const finish=()=>{
+          if(done||busy)return;
+          done=true;modal.classList.add('hidden');
+          modal.removeEventListener('click',onBackdrop);
+          yes.onclick=later.onclick=close.onclick=null;
+          title.textContent=original.title;day.textContent=original.day;
+          if(description)description.textContent=original.description||'';
+          if(hint)hint.textContent=original.hint||'';
+          yes.textContent=original.yes;
+          yes.disabled=later.disabled=close.disabled=false;
+          resolve();
+        };
+        later.onclick=close.onclick=finish;
+        modal.addEventListener('click',onBackdrop);
+        yes.onclick=async()=>{
+          if(busy||state.session?.user?.id!==account){finish();return}
+          busy=true;yes.disabled=later.disabled=close.disabled=true;
+          try{
+            const row=isLast
+              ?await requestPass(10,{dogId,showConfirmation:false,renewal:true})
+              :await requestSingleDogPassV281(dogId,operationId);
+            if(row){busy=false;finish();toast('Záujem o permanentku pre '+dog.name+' sme odoslali škôlke.')}
+          }catch(e){toast(e.message||'Záujem sa nepodarilo odoslať.')}
+          finally{busy=false;yes.disabled=later.disabled=close.disabled=false}
+        };
+        modal.classList.remove('hidden');
+      });
+    }
+  };
+
 
   async function healPushV71(){
     if(document.visibilityState==='hidden'||!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
