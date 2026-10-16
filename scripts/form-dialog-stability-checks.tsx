@@ -72,7 +72,7 @@ try {
     assert.equal(dialog.style.cssText, before, "closed dialog removed its viewport listeners");
   }
   const css = readFileSync("src/styles.css", "utf8");
-  assert.match(css, /@media \(max-width: 639px\)[\s\S]*\.form-dialog\[data-state\][\s\S]*translate: none;[\s\S]*animation: none;/);
+  assert.match(css, /@media \(max-width: 639px\)[\s\S]*\.form-dialog\[data-state\][\s\S]*left: 12px !important;[\s\S]*right: 12px !important;[\s\S]*transform: none !important;[\s\S]*translate: none !important;[\s\S]*animation: none !important;/);
   const forms = readFileSync("src/components/site/Forms.tsx", "utf8");
   assert.match(forms, /name="pes" autoComplete="off"/);
   assert.match(forms, /name="pes2" autoComplete="off"/);
