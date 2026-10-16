@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261015-two-dog-booking-v255';
-const APP_VERSION='1.0.89';
+const APP_BUILD='20261016-notice-pdf-v258';
+const APP_VERSION='1.0.91';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -401,7 +401,7 @@ function vaccinationCopyV234(n){
 const vaccinationCarePolicyV233='Po skončení platnosti treba pred ďalšou rezerváciou aktualizovať dátum aj fotografiu očkovacieho preukazu. Zdravie psíkov je pre nás prvoradé.';
 function renderNotifications(){
   if(window.__customerOnboardingCompleteV75!==true){$('notificationPopup')?.classList.add('hidden');return}
-  const careRows=(state.data?.notifications||[]).filter(n=>['vaccination_expiry','pass_expiry'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,12);
+  const careRows=(state.data?.notifications||[]).filter(n=>n.notification_type==='pass_expiry'&&careNotificationIsCurrent(n)).slice(0,12);
   const notice=$('notificationList'),booking=$('bookingTab');
   if(notice&&booking&&notice.parentElement!==booking)$('bookingDogProfile')?.insertAdjacentElement('afterend',notice);
   const groups=new Map();
@@ -1585,12 +1585,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   async function renderTermsHistory(root,dogId){
     if(!root||!state.session||!dogId)return;
     const account=state.session.user?.id,request=String(Number(root.dataset.request||0)+1);root.dataset.request=request;
-    root.textContent='Načítavam potvrdené verzie…';
+    root.replaceChildren();
     try{
       const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_owner_terms_history_v256',{method:'POST',headers:headers(),body:JSON.stringify({p_dog_id:dogId}),cache:'no-store'});
       if(!response.ok)throw new Error('Potvrdené verzie sa nepodarilo načítať.');
       const rows=await response.json();if(root.dataset.request!==request||state.session?.user?.id!==account)return;
-      root.innerHTML=rows.length?'<details class="terms-history"><summary><span>Moje potvrdené verzie ('+rows.length+')</span><small>Otvoriť alebo stiahnuť PDF</small></summary>'+rows.map((row,i)=>'<div class="terms-history-row"><strong>Verzia '+esc(termsVersionLabel(row.terms_version))+'</strong><small>✓ Potvrdené dňa '+esc(skDateTime(row.accepted_at))+'</small><div class="terms-history-actions"><button type="button" class="btn secondary small" data-terms-pdf="'+i+'" data-open="true">Otvoriť PDF</button><button type="button" class="btn secondary small" data-terms-pdf="'+i+'">Stiahnuť PDF</button></div></div>').join('')+'</details>':'<small>Zatiaľ nemáte potvrdenú verziu podmienok.</small>';
+      root.innerHTML=rows.length?'<details class="terms-history"><summary><span>Moje potvrdené verzie ('+rows.length+')</span><small>Otvoriť alebo stiahnuť PDF</small></summary>'+rows.map((row,i)=>'<div class="terms-history-row"><strong>Verzia '+esc(termsVersionLabel(row.terms_version))+'</strong><small>✓ Potvrdené dňa '+esc(skDateTime(row.accepted_at))+'</small><div class="terms-history-actions"><button type="button" class="btn secondary small" data-terms-pdf="'+i+'" data-open="true">Otvoriť PDF</button><button type="button" class="btn small" data-terms-pdf="'+i+'">Stiahnuť PDF</button></div></div>').join('')+'</details>':'<small>Zatiaľ nemáte potvrdenú verziu podmienok.</small>';
       root.querySelectorAll('[data-terms-pdf]').forEach(btn=>btn.onclick=async()=>{
         const row=rows[Number(btn.dataset.termsPdf)],open=btn.dataset.open==='true';
         const preview=open?window.open('about:blank','_blank'):null;
@@ -2952,27 +2952,37 @@ async function togglePushDirect(btn){
   async function openRulesV55(){
     ensureRulesUiV55();
     const modal=$('schoolRulesModalV55'),body=$('schoolRulesBodyV55'),title=$('schoolRulesTitleV55'),accepted=$('schoolRulesAcceptedV55');
+    const dogId=Number(selectedDog()?.id||0),account=state.session?.user?.id;
+    if(!dogId||!account||modal.dataset.loading==='true')return;
+    modal.dataset.loading='true';
+    const trigger=$('schoolRulesCardV55');trigger?.setAttribute('aria-busy','true');
     body.innerHTML='';accepted.textContent='';accepted.classList.add('hidden');
     const request=String(Number(modal.dataset.request||0)+1);modal.dataset.request=request;
     try{
-      const doc=await activeTermsV55();
+      const [doc]=await Promise.all([
+        activeTermsV55(),
+        window.renderCustomerTermsHistory?.($('schoolRulesHistoryV141'),dogId)
+      ]);
+      if(modal.dataset.request!==request||state.session?.user?.id!==account||Number(selectedDog()?.id||0)!==dogId)return;
       title.textContent=doc?.title||'Pravidlá škôlky';
       body.innerHTML=formatSchoolTermsV102(doc?.body||'Pravidlá škôlky momentálne nie sú dostupné.');
-      modal.classList.remove('hidden');
-      const dogId=Number(selectedDog()?.id||0);
-      window.renderCustomerTermsHistory?.($('schoolRulesHistoryV141'),dogId);
-      if(doc?.version&&dogId&&state.session){
-        const url=SUPABASE_URL+'/rest/v1/portal_terms_acceptances?user_id=eq.'+encodeURIComponent(state.session.user.id)+'&dog_id=eq.'+dogId+'&terms_version=eq.'+encodeURIComponent(doc.version)+'&select=accepted_at&order=accepted_at.desc&limit=1';
-        const response=await fetch(url,{headers:authHeadersV55(),cache:'no-store'});
-        if(response.ok&&modal.dataset.request===request){
-          const rows=await response.json();
-          if(rows?.[0]?.accepted_at){accepted.textContent='Pravidlá potvrdené '+new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(rows[0].accepted_at))+' · Verzia '+termsVersionLabel(doc.version);accepted.classList.remove('hidden')}
-        }
+      if(doc?.version){
+        const url=SUPABASE_URL+'/rest/v1/portal_terms_acceptances?user_id=eq.'+encodeURIComponent(account)+'&dog_id=eq.'+dogId+'&terms_version=eq.'+encodeURIComponent(doc.version)+'&select=accepted_at&order=accepted_at.desc&limit=1';
+        try{
+          const response=await fetch(url,{headers:authHeadersV55(),cache:'no-store'});
+          if(response.ok){
+            const rows=await response.json();
+            if(rows?.[0]?.accepted_at){accepted.textContent='Pravidlá potvrdené '+new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(rows[0].accepted_at))+' · Verzia '+termsVersionLabel(doc.version);accepted.classList.remove('hidden')}
+          }
+        }catch(_){}
       }
+      if(modal.dataset.request===request&&state.session?.user?.id===account&&Number(selectedDog()?.id||0)===dogId)modal.classList.remove('hidden');
     }catch(e){
-      if(!body.innerHTML){title.textContent='Pravidlá škôlky';body.innerHTML='<p class="terms-loose-v97">'+esc(e.message||'Pravidlá sa nepodarilo načítať.')+'</p>'}
-    }
-    modal.classList.remove('hidden');
+      if(modal.dataset.request===request&&state.session?.user?.id===account&&Number(selectedDog()?.id||0)===dogId){
+        title.textContent='Pravidlá škôlky';body.innerHTML='<p class="terms-loose-v97">'+esc(e.message||'Pravidlá sa nepodarilo načítať.')+'</p>';
+        modal.classList.remove('hidden');
+      }
+    }finally{modal.dataset.loading='false';trigger?.removeAttribute('aria-busy')}
   }
   window.openCustomerRulesV55=openRulesV55;
 

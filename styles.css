@@ -3078,3 +3078,8 @@ button span,button svg,button svg *{pointer-events:none}
 .vacc-proof-edit-head-v244 p,.vacc-proof-edit-message-v244{white-space:normal;overflow-wrap:anywhere;max-width:100%}
 .booking-taxi-dog-v254+ .booking-taxi-dog-v254{margin-top:10px}.booking-taxi-dog-v254>strong{display:block;font-size:13px;margin-bottom:5px}
 
+
+/* v258: compact, reachable care actions and aligned PDF controls. */
+#notificationPopup [data-popup-care]{display:flex;align-items:center;justify-content:center;margin-left:auto;min-height:44px!important;padding:7px 12px!important;font-size:12px!important;line-height:1.2}
+#schoolRulesModalV55 .terms-history-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:8px}
+#schoolRulesModalV55 .terms-history-actions>.btn{display:flex;align-items:center;justify-content:center;width:100%;height:44px;min-height:44px;margin:0;padding:8px;font-size:12px;line-height:1.2;text-align:center}
