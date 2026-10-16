@@ -1,0 +1,30 @@
+name: Admin stability checks
+on:
+  pull_request:
+    branches: [customer-portal-production]
+  push:
+    branches: [customer-portal-production]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned test runtime outside the app
+        run: |
+          npm install --prefix "$RUNNER_TEMP/chvo-admin-deps" --no-save --no-package-lock jsdom@26.1.0 typescript@5.8.3
+          mkdir -p tests/shared-v244
+          ln -s "$RUNNER_TEMP/chvo-admin-deps/node_modules" tests/shared-v244/node_modules
+          echo "NODE_PATH=$RUNNER_TEMP/chvo-admin-deps/node_modules" >> "$GITHUB_ENV"
+      - name: Assembled admin startup and analytics
+        run: node tests/admin-runtime-v275.cjs
+      - name: Existing photo, CRM, booking and recovery invariants
+        run: node tests/admin-existing-v275.cjs
+      - name: Viewport transitions and push grammar
+        run: |
+          node tests/admin-nav-v275.cjs
+          node tests/admin-push-v275.cjs
