@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261016-smart-history-fallback-v268';
-const APP_VERSION='1.0.98';
+const APP_BUILD='20261016-dog-choice-fab-v276';
+const APP_VERSION='1.0.99';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -617,6 +617,52 @@ function openDogDetails(mode='details',mandatory=false){
   requestDogEditorFitV211();
   requestAnimationFrame(()=>{if(editor.classList.contains('hidden'))return;requestDogEditorFitV211();editor.scrollTop=0;if(editorCard)editorCard.scrollTop=0});
 }
+
+/* v276: generic dog actions ask which authorised dog to edit, without changing existing per-dog cards. */
+let dogChoiceReturnFocusV276=null;
+function closeDogChoiceV276(restoreFocus=true){
+  const modal=$('dogChoiceModalV276');
+  if(!modal||modal.classList.contains('hidden'))return;
+  modal.classList.add('hidden');document.documentElement.classList.remove('dog-choice-open-v276');
+  if(restoreFocus&&dogChoiceReturnFocusV276?.isConnected)dogChoiceReturnFocusV276.focus({preventScroll:true});
+}
+function openDogWithChoiceV276(mode='details'){
+  const dogs=state.data?.dogs||[];
+  if(dogs.length<=1){openDogDetails(mode,false);return}
+  const modal=$('dogChoiceModalV276'),list=$('dogChoiceListV276');
+  if(!modal||!list)return;
+  dogChoiceReturnFocusV276=document.activeElement;
+  $('dogChoiceContextV276').textContent=mode==='vaccinations'?'Očkovania':'Údaje psíka';
+  list.replaceChildren();
+  for(const dog of dogs){
+    const button=document.createElement('button');button.type='button';button.className='dog-choice-item-v276';
+    button.setAttribute('aria-label',(mode==='vaccinations'?'Otvoriť očkovania: ':'Otvoriť údaje: ')+(dog.name||'Psík'));
+    const avatar=document.createElement('span');avatar.className='dog-choice-avatar-v276';
+    if(dog.photo_url){const img=document.createElement('img');img.src=dog.photo_url;img.alt='';img.decoding='async';avatar.append(img)}
+    else avatar.textContent='🐾';
+    const name=document.createElement('strong');name.textContent=dog.name||'Psík';
+    const arrow=document.createElement('span');arrow.className='dog-choice-arrow-v276';arrow.textContent='›';arrow.setAttribute('aria-hidden','true');
+    button.append(avatar,name,arrow);
+    button.addEventListener('click',()=>{
+      const current=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(dog.id));
+      if(!current){closeDogChoiceV276();return}
+      closeDogChoiceV276(false);
+      if(Number(state.selectedDogId)!==Number(current.id)){
+        clearVaccinationProofStageV104();state.selectedDogId=Number(current.id);
+        renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays();
+      }
+      openDogDetails(mode,false);
+    });
+    list.append(button);
+  }
+  modal.classList.remove('hidden');document.documentElement.classList.add('dog-choice-open-v276');
+  list.querySelector('button')?.focus({preventScroll:true});
+}
+$('dogChoiceCloseV276')?.addEventListener('click',()=>closeDogChoiceV276());
+$('dogChoiceModalV276')?.addEventListener('click',e=>{if(e.target===$('dogChoiceModalV276'))closeDogChoiceV276()});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!$('dogChoiceModalV276')?.classList.contains('hidden')){e.preventDefault();closeDogChoiceV276()}
+});
 function closeDogDetails(force=false){
   if(!force&&dogDetailsMandatoryV96)return false;
   if(!force&&dogFormSnapshotV96()!==dogDetailsSnapshotV96&&!confirm('Máte neuložené zmeny. Zavrieť bez uloženia?'))return false;
@@ -650,8 +696,8 @@ function renderDogHeaderV56(dog){
       <button id="dogMenuOpenV99" class="dog-hub-tile-v99" type="button"><span class="dog-hub-emoji-v99">⚙️</span><strong>Nastavenia</strong></button>
     </div></div>`;
     root.dataset.dogVisualKey=key;
-    $('dogDataOpenV96')?.addEventListener('click',()=>openDogDetails('details',false));
-    $('dogVaccinationsOpenV96')?.addEventListener('click',()=>openDogDetails('vaccinations',false));
+    $('dogDataOpenV96')?.addEventListener('click',()=>openDogWithChoiceV276('details'));
+    $('dogVaccinationsOpenV96')?.addEventListener('click',()=>openDogWithChoiceV276('vaccinations'));
     $('dogVisitsOpenV99')?.addEventListener('click',()=>window.openDogVisitsV99?.());
     $('dogMenuOpenV99')?.addEventListener('click',()=>window.openCustomerSettingsV102?.());
   }
@@ -1280,19 +1326,19 @@ $('dogSelector').addEventListener('change',e=>{clearVaccinationProofStageV104();
 $('bookingDogSelector').addEventListener('change',e=>{state.selectedDogId=Number(e.target.value);renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays()});
 // v242: the hero's photo/name and blank surface open the existing "Údaje psíka" editor.
 // Do not steal clicks from vaccination, visits, gradebook, pass actions or dog selection.
-$('bookingDogDetailsOpenV242')?.addEventListener('click',()=>openDogDetails('details',false));
+$('bookingDogDetailsOpenV242')?.addEventListener('click',()=>openDogWithChoiceV276('details'));
 $('bookingDogProfile')?.addEventListener('click',event=>{
   const target=event.target;
   if(!(target instanceof Element))return;
   if(target.closest('button,a,select,input,textarea,label,[role="button"],[role="link"],[contenteditable="true"]'))return;
-  openDogDetails('details',false);
+  openDogWithChoiceV276('details');
 });
 
 $('dogDetailsPhotoButton').addEventListener('click',()=>{const dog=selectedDog();if(dog?.photo_url)showPhotoActionsV89(dog);else selectNewDogPhotoV89()});
 $('dogPhotoInput').addEventListener('click',()=>{window.__customerPhotoPickerV88=true;setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},15000)});
 $('dogPhotoInput').addEventListener('change',openPhotoEditor);
 $('dogPhotoInput').addEventListener('cancel',()=>{window.__customerPhotoPickerV88=false;photoPickerFromActionsV184=false;$('photoActionsModalV89')?.classList.remove('photo-picker-waiting-v184')});
-$('bookingVaccinationStatus').addEventListener('click',()=>openDogDetails('vaccinations'));
+$('bookingVaccinationStatus').addEventListener('click',()=>openDogWithChoiceV276('vaccinations'));
 $('bookingVisitCount').addEventListener('click',()=>window.openDogVisitsV99?.());
 function openCustomerRules(){if(window.openCustomerRulesV55)window.openCustomerRulesV55();else $('schoolRulesCardV55')?.click()}
 function closeCustomerSmallModal(id){$(id).classList.add('hidden');document.documentElement.classList.remove('customer-modal-open')}
@@ -1302,8 +1348,8 @@ $('bookingGradebook').addEventListener('click',openCustomerGradebook);
 $('menuGradebook').addEventListener('click',openCustomerGradebook);
 $('customerGradebookClose').addEventListener('click',()=>closeCustomerSmallModal('customerGradebookModal'));
 $('customerGradebookModal').addEventListener('click',e=>{if(e.target===$('customerGradebookModal'))closeCustomerSmallModal('customerGradebookModal')});
-$('menuDogDetails').addEventListener('click',()=>openDogDetails('details'));
-$('menuVaccinations').addEventListener('click',()=>openDogDetails('vaccinations'));
+$('menuDogDetails').addEventListener('click',()=>openDogWithChoiceV276('details'));
+$('menuVaccinations').addEventListener('click',()=>openDogWithChoiceV276('vaccinations'));
 $('menuMessage').addEventListener('click',openCustomerChat);
 $('menuContact').addEventListener('click',()=>{const card=document.querySelector('.account-card');if(card)$('customerContactContent').appendChild(card);renderProfile();$('profileForm').classList.remove('hidden');$('customerContactModal').classList.remove('hidden');document.documentElement.classList.add('customer-modal-open');requestAnimationFrame(renderProfile)});
 $('customerContactClose').addEventListener('click',()=>closeCustomerSmallModal('customerContactModal'));
