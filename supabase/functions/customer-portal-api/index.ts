@@ -242,6 +242,12 @@ function addDays(iso: string, days: number) {
   return date.toISOString().slice(0, 10);
 }
 
+function bookingHistoryWindowV268(today = localDateIso()) {
+  const weekday = new Date(today + 'T12:00:00Z').getUTCDay();
+  const monday = addDays(today, weekday === 0 ? -6 : 1 - weekday);
+  return {from:addDays(monday,-7),to:addDays(monday,6)};
+}
+
 function nextMonday() {
   const today = localDateIso();
   const day = new Date(today + 'T12:00:00Z').getUTCDay();
@@ -488,10 +494,12 @@ async function customerBootstrap(user: Json, token: string) {
   let vaccinations: Array<Json> = [];
   let vaccinationProofs: Array<Json> = [];
   let reservations: Array<Json> = [];
+  let bookingHistory: Array<Json> = [];
   let visits: Array<Json> = [];
   let monthlyTotals: Array<Json> = [];
   if (dogIds.length) {
     const dogFilter = encodeURIComponent(inFilter(dogIds));
+    const historyWindow = bookingHistoryWindowV268();
     const dogResults = await Promise.all([
       rest('passes?' + sharedFilter + '&status=' + encodeURIComponent('in.(active,queued)') + '&select=id,dog_id,total_entries,used_entries,purchased_on,valid_from,valid_until,no_expiry,status,pass_dogs(dog_id)&order=created_at.asc'),
       rest('vaccinations?dog_id=' + dogFilter + '&select=id,dog_id,vaccination_type,valid_until,notes&order=vaccination_type.asc'),
@@ -499,10 +507,12 @@ async function customerBootstrap(user: Json, token: string) {
       rest('visits?dog_id=' + dogFilter + '&select=id,dog_id,visit_date&order=visit_date.desc'),
       rest('monthly_visit_totals?dog_id=' + dogFilter + '&select=dog_id,month,visits&order=month.desc'),
       rest('vaccination_proofs?dog_id=' + dogFilter + '&is_current=eq.true&select=id,dog_id,batch_id,storage_path,source,uploaded_at&order=uploaded_at.desc'),
+      rest('reservations?dog_id=' + dogFilter + '&reservation_date=gte.' + historyWindow.from + '&reservation_date=lte.' + historyWindow.to + '&status=in.(booked,attended)&select=dog_id,reservation_date,status&order=reservation_date.asc'),
     ]);
     passes = (dogResults[0] as Array<Json>).map(visiblePass);
     vaccinations = dogResults[1] as Array<Json>;
     reservations = dogResults[2] as Array<Json>;
+    bookingHistory = dogResults[6] as Array<Json>;
     // Keep the just-finished pass visible on its last attendance day only.
     const finishedPassIds = [...new Set(reservations
       .filter(row => row.status === 'attended' && row.reservation_date === localDateIso())
@@ -532,6 +542,7 @@ async function customerBootstrap(user: Json, token: string) {
     vaccinations,
     vaccination_proofs: vaccinationProofs,
     reservations,
+    booking_history: bookingHistory,
     visits,
     monthly_totals: monthlyTotals,
     notifications,
