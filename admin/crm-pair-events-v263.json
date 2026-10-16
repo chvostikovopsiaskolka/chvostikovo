@@ -1,0 +1,10 @@
+[
+  {
+    "old": "if(register){const c=await withJwtRetry(()=>supabase.rpc('convert_web_application_two_dogs_v237',{p_submission_id:context.sourceId}));if(c.error)throw c.error;await loadData()}",
+    "new": "if(register){const c=await withJwtRetry(()=>supabase.rpc('convert_web_application_two_dogs_v237',{p_submission_id:context.sourceId}));if(c.error)throw c.error;await sendMetaCrmStage(context.sourceId,'qualified');await sendMetaCrmStage(context.sourceId,'converted');await loadData()}"
+  },
+  {
+    "old": "    if(result.error)throw result.error;\n    var ids=result.data?.dog_ids||[];",
+    "new": "    if(result.error)throw result.error;\n    await sendMetaCrmStage(Number(id),'converted');\n    var ids=result.data?.dog_ids||[];"
+  }
+]

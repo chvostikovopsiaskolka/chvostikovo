@@ -111,7 +111,7 @@ async function sendCrmStage(body: Json): Promise<Response> {
     }
 
     const submissionRows = await rest(
-      `web_form_submissions?id=eq.${submissionId}&select=id,form_type,owner_name,phone,email,source_ref,raw_payload,created_at&limit=1`,
+      `web_form_submissions?id=eq.${submissionId}&select=id,form_type,owner_name,phone,email,source_ref,raw_payload,created_at,crm_lead_id&limit=1`,
     );
     if (!Array.isArray(submissionRows) || !submissionRows.length) throw new Error("Pôvodný webový formulár sa nenašiel.");
 
@@ -134,8 +134,14 @@ async function sendCrmStage(body: Json): Promise<Response> {
     const rows=await rest(`web_form_submissions?phone=eq.${encodeURIComponent(String(submission.phone))}&select=id,form_type,phone,owner_name,email,source_ref,raw_payload,created_at&order=created_at.asc&limit=100`);
     const linked=Array.isArray(rows)?rows.filter((a:Json)=>(a.raw_payload as Json)?.is_test!==true&&same(a,submission)):[submission];
     if(!linked.some(a=>Number(a.id)===submissionId))linked.push(submission);
+    // Persisted staff/automatic link survives name/phone changes and direct returns.
+    const rootId=Number(submission.crm_lead_id)||(submission.form_type==="lead"?submissionId:0);
+    if(rootId){
+      const group=await rest(`web_form_submissions?or=(id.eq.${rootId},crm_lead_id.eq.${rootId})&select=id,form_type,phone,owner_name,email,source_ref,raw_payload,created_at&order=created_at.asc&limit=100`);
+      for(const row of Array.isArray(group)?group:[])if((row.raw_payload as Json)?.is_test!==true&&!linked.some(x=>Number(x.id)===Number(row.id)))linked.push(row);
+    }
     linked.sort((a,b)=>String(a.created_at||"").localeCompare(String(b.created_at||"")));
-    eventId=`crm-${eventName.toLowerCase()}-${linked[0].id}`;
+    eventId=`crm-${eventName.toLowerCase()}-${rootId||linked[0].id}`;
     if(linked.length>1){
       const prev=await rest(`meta_crm_event_log?submission_id=in.(${linked.map(a=>a.id).join(",")})&event_name=eq.${encodeURIComponent(eventName)}&status=eq.sent&select=event_id&limit=1`);
       if(Array.isArray(prev)&&prev.length){
@@ -158,7 +164,7 @@ async function sendCrmStage(body: Json): Promise<Response> {
     const email = String(submission.email || "").trim().toLowerCase();
     if (email) userData.em = [await sha256Hex(email)];
 
-    const originalLead = linked.find(x=>x.form_type==="lead" && (x.raw_payload as Json)?.marketing_consent===true &&
+    const originalLead = linked.slice().sort((a,b)=>(Number(b.id)===rootId?1:0)-(Number(a.id)===rootId?1:0)).find(x=>x.form_type==="lead" && (x.raw_payload as Json)?.marketing_consent===true &&
       ((x.raw_payload as Json)?.meta_fbc || (x.raw_payload as Json)?.meta_fbp || /[?&](utm_|fbclid=)/i.test(String(x.source_ref||""))));
     const originalRaw=(originalLead?.raw_payload || {}) as Json;
     const fbp = String(raw.meta_fbp || originalRaw.meta_fbp || "").trim();
@@ -237,8 +243,8 @@ async function retryUndeliveredCrm() {
   // Sources of truth are real admin CRM transitions, not website CTA events.
   const since = encodeURIComponent(new Date(Date.now() - 90*24*60*60*1000).toISOString());
   const [visits, converted, logs] = await Promise.all([
-    rest(`intro_visits?source_submission_id=not.is.null&created_at=gte.${since}&select=source_submission_id,created_at&order=created_at.asc&limit=500`),
-    rest(`web_form_submissions?status=eq.converted&converted_dog_id=not.is.null&created_at=gte.${since}&select=id,created_at&order=created_at.asc&limit=500`),
+    rest(`web_form_submissions?crm_qualified_at=not.is.null&updated_at=gte.${since}&select=id,crm_qualified_at&order=updated_at.desc&limit=500`),
+    rest(`web_form_submissions?status=eq.converted&converted_dog_id=not.is.null&updated_at=gte.${since}&select=id,updated_at&order=updated_at.desc&limit=500`),
     rest("meta_crm_event_log?select=submission_id,event_name,status&limit=5000"),
   ]);
   const completed = new Set((Array.isArray(logs)?logs:[])
@@ -246,7 +252,7 @@ async function retryUndeliveredCrm() {
     .map(x=>String(x.submission_id)+"|"+String(x.event_name)));
   const candidates = new Map<string,{submission_id:number,stage:string}>();
   for(const item of Array.isArray(visits)?visits:[]) {
-    const id=Number(item.source_submission_id);
+    const id=Number(item.id);
     if(Number.isSafeInteger(id)&&id>0&&!completed.has(id+"|QualifiedLead"))
       candidates.set(id+"|QualifiedLead",{submission_id:id,stage:"qualified"});
   }
