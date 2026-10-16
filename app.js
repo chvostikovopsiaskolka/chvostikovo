@@ -2775,6 +2775,88 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
   window.showPassRenewalAfterBookingV94=(dogId,date)=>{bookingDogV38=0;showPromptV38(Number(dogId)||0,date)};
 
+  /* v281: reuse the existing one-dog renewal modal after confirmed booking. */
+  async function requestSingleDogPassV281(dogId,operationId){
+    const account=state.session?.user?.id;
+    if(!account)return null;
+    const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_request_pass_v244',{
+      method:'POST',
+      headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'},
+      body:JSON.stringify({p_dog_ids:[dogId],p_total_entries:10,p_operation_id:operationId})
+    });
+    const txt=await response.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}
+    if(!response.ok)throw new Error(data?.message||data?.error||'Záujem o permanentku sa nepodarilo odoslať.');
+    if(state.session?.user?.id!==account)return null;
+    const row=Array.isArray(data)?data[0]:data;
+    if(!row||!Number(row.id))throw new Error('Záujem sa nepodarilo potvrdiť. Skúste znova.');
+    state.data.pass_requests=state.data.pass_requests||[];
+    if(!state.data.pass_requests.some(p=>Number(p.id)===Number(row.id)))state.data.pass_requests.unshift(row);
+    renderPassSummary();renderDog();queueCustomerSync('bookings',0);
+    return row;
+  }
+  window.showPostBookingPassChoicesV281=async function(choices){
+    const account=state.session?.user?.id;
+    if(!account||!Array.isArray(choices))return;
+    for(const item of choices){
+      if(state.session?.user?.id!==account)break;
+      const dogId=Number(item.dogId);
+      const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===dogId);
+      if(!dog||!['last','single'].includes(item.reason)||
+         (state.data.pass_requests||[]).some(p=>p.status==='pending'&&passAllowsDogV244(p,dogId)))continue;
+      await new Promise(resolve=>{
+        ensureModalV38();
+        const modal=$('passRenewalModalV38'),yes=$('passRenewalRequestV38'),
+          later=$('passRenewalLaterV38'),close=$('passRenewalCloseV38');
+        const title=$('passRenewalTitleV38'),day=$('passRenewalDayV38');
+        const description=modal.querySelector('.legal-body>p:nth-child(2)');
+        const hint=modal.querySelector('.pass-renewal-validity-v38');
+        const original={title:title.textContent,day:day.textContent,
+          description:description?.textContent,hint:hint?.textContent,yes:yes.textContent};
+        const isLast=item.reason==='last';
+        title.textContent=isLast?'Posledný vstup – '+dog.name:'Permanentka pre '+dog.name+'?';
+        day.textContent=isLast
+          ?dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' rezervovaný posledný vstup zo súčasnej permanentky.'
+          :dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' odoslanú jednorazovú rezerváciu.';
+        if(description)description.textContent=isLast
+          ?'Máte záujem o ďalšiu 10-vstupovú permanentku pre '+dog.name+'?'
+          :'Chcete tento vstup pre '+dog.name+' zaradiť medzi plánované vstupy novej 10-vstupovej permanentky?';
+        if(hint)hint.textContent='Ak zvolíte Neskôr, rezervácia zostane bez zmeny. Záujem musí potvrdiť škôlka.';
+        yes.textContent='Mám záujem o permanentku';
+        later.textContent='Neskôr';
+        let done=false,busy=false;
+        const operationId=crypto.randomUUID();
+        const onBackdrop=e=>{if(e.target===modal)finish()};
+        const finish=()=>{
+          if(done||busy)return;
+          done=true;modal.classList.add('hidden');
+          modal.removeEventListener('click',onBackdrop);
+          yes.onclick=later.onclick=close.onclick=null;
+          title.textContent=original.title;day.textContent=original.day;
+          if(description)description.textContent=original.description||'';
+          if(hint)hint.textContent=original.hint||'';
+          yes.textContent=original.yes;
+          yes.disabled=later.disabled=close.disabled=false;
+          resolve();
+        };
+        later.onclick=close.onclick=finish;
+        modal.addEventListener('click',onBackdrop);
+        yes.onclick=async()=>{
+          if(busy||state.session?.user?.id!==account){finish();return}
+          busy=true;yes.disabled=later.disabled=close.disabled=true;
+          try{
+            const row=isLast
+              ?await requestPass(10,{dogId,showConfirmation:false,renewal:true})
+              :await requestSingleDogPassV281(dogId,operationId);
+            if(row){busy=false;finish();toast('Záujem o permanentku pre '+dog.name+' sme odoslali škôlke.')}
+          }catch(e){toast(e.message||'Záujem sa nepodarilo odoslať.')}
+          finally{busy=false;yes.disabled=later.disabled=close.disabled=false}
+        };
+        modal.classList.remove('hidden');
+      });
+    }
+  };
+
+
   async function healPushV71(){
     if(document.visibilityState==='hidden'||!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
     try{
