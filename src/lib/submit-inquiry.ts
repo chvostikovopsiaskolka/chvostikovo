@@ -1,3 +1,4 @@
+import { preserveFailedContact, clearRecoveredContact, stageContactDraft } from "./form-recovery";
 import { buildDbPayload, inquirySchema, SUPABASE_ENDPOINT, type InquiryInput } from "./inquiry";
 import { hasMarketingConsent } from "./consent";
 import { normalizePhone } from "./phone";
@@ -31,7 +32,7 @@ function buildFbcFromCurrentUrl() {
  * `web-form-submit`, ktorá zapíše dáta do DB a odošle e-mailovú notifikáciu.
  * Pri marketingovom súhlase posielame aj Meta attribution údaje pre CAPI.
  */
-export async function submitInquiry(input: InquiryInput, attemptId?: string) {
+async function submitInquiryCore(input: InquiryInput, attemptId?: string) {
   const normalized = { ...sanitizeTracking(input), telefon: normalizePhone(input.telefon) };
   const parsed = inquirySchema.safeParse(normalized);
   if (!parsed.success) throw new InquirySubmissionError("zod_validation", undefined,
@@ -75,7 +76,9 @@ export async function submitInquiry(input: InquiryInput, attemptId?: string) {
   }
 
   if (!res.ok) {
-    throw new InquirySubmissionError("backend_http", res.status);
+    const body=await res.json().catch(()=>null);
+    const error=new InquirySubmissionError("backend_http",res.status);
+    error.recoverySaved=body?.recovery_saved===true;throw error;
   }
 
   const result = await res.json().catch(() => null);
@@ -89,6 +92,16 @@ export async function submitInquiry(input: InquiryInput, attemptId?: string) {
     phoneCorrection: result?.submission_id && result?.phone_edit_token
       ? { id: Number(result.submission_id), token: String(result.phone_edit_token) } : null,
   };
+}
+
+export async function submitInquiry(input: InquiryInput, attemptId?: string) {
+  if(!attemptId){try{attemptId=crypto.randomUUID()}catch{attemptId="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.floor(Math.random()*16);return (c==="x"?r:(r&3)|8).toString(16)})}}
+  stageContactDraft(input,attemptId);
+  try{const result=await submitInquiryCore(input,attemptId);clearRecoveredContact();return result}
+  catch(error){
+    if(error instanceof InquirySubmissionError&&!error.recoverySaved)error.recoverySaved=await preserveFailedContact(input,attemptId);
+    throw error;
+  }
 }
 
 export async function correctInquiryPhone(auth: { id: number; token: string }, newPhone: string) {

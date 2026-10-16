@@ -8,6 +8,7 @@ export type InquiryErrorStage =
   | "backend_response";
 
 export class InquirySubmissionError extends Error {
+  recoverySaved = false;
   constructor(public readonly stage: InquiryErrorStage, public readonly status?: number, public readonly issues?: Array<{ field: string; code: string }>) {
     super(`Form submission failed at ${stage}`);
     this.name = "InquirySubmissionError";

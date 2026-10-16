@@ -133,7 +133,7 @@ export function FirstVisit() {
         title="Prihlás svojho psíka ešte dnes"
         subtitle="Vyplňte formulár, v ktorom nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky."
       >
-        <LongForm onSent={() => setTimeout(() => setOpen(false), 15_000)} />
+        <LongForm />
       </FormDialog>
     </section>
   );

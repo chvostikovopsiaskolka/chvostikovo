@@ -45,7 +45,7 @@ let requests: Array<{ url: string; body: any }> = [];
 const originalFetch = globalThis.fetch;
 globalThis.fetch = (async (url: any, init: any) => {
   requests.push({ url: String(url), body: JSON.parse(init.body) });
-  return new Response(JSON.stringify({ ok: true }), { status: 201, headers: { "Content-Type": "application/json" } });
+  return new Response(JSON.stringify({ ok: true, submission_id: 123, phone_edit_token: "00000000-0000-4000-8000-000000000001.00000000-0000-4000-8000-000000000002" }), { status: 201, headers: { "Content-Type": "application/json" } });
 }) as typeof fetch;
 function consent(marketing: boolean) {
   dom.localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify({ version: CONSENT_VERSION, savedAt: new Date().toISOString(), necessary: true, functional: false, analytics: true, marketing }));
@@ -115,6 +115,8 @@ try {
     assert.equal(events.find((r) => r.body.event_name === "form_submit")!.body.attempt_id, attempt.body.attempt_id);
     assert(!events.some((r) => r.body.event_name === "form_error"));
     assert(!container.querySelector("form"), `${test.name}: success UI missing`);
+    if(test.name === "application_form") assert(container.textContent?.includes("Je toto telefónne číslo správne?"), "Application must display the same phone confirmation");
+
     await React.act(async () => root.unmount());
     container.remove();
     passed++;

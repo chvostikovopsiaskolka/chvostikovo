@@ -123,7 +123,6 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
         ) : (
           <ShortForm
             trackingSource="care_cta"
-            onSent={() => setTimeout(() => setInfoOpen(false), 2200)}
           />
         )}
       </FormDialog>
@@ -205,7 +204,7 @@ export function Why() {
         title="Prihlás svojho psíka ešte dnes"
         subtitle="Vyplňte prihlášku do škôlky, v ktorej nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky."
       >
-        <LongForm onSent={() => setTimeout(() => setOpen(false), 15_000)} />
+        <LongForm />
       </FormDialog>
     </section>
   );
