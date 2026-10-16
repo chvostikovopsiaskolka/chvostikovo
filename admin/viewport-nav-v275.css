@@ -1,0 +1,10 @@
+/* Keep a single viewport-owned nav. Never attach it to a scrolling card. */
+@supports (min-height:100svh){.app{min-height:100svh}}
+#bottomNav.nav{transform:translateX(-50%) translateY(var(--admin-nav-shift-v275,0px))!important;transition:none!important;animation:none!important}
+.t266-line{min-width:0;max-width:100%}
+.t266-line svg{overflow:hidden}
+.t266-kpis,.t266-panel,.t266-click,.t266-pages{min-width:0;max-width:100%}
+.t266-pages{gap:6px}
+.t266-pages button{flex:1 0 auto}
+.t266-click small{overflow-wrap:anywhere}
+@media(max-width:420px){.t266-line text{font-size:13px}.t266-mini{gap:8px}.t266-mini b{font-size:15px}}

@@ -81,7 +81,12 @@ async function messageForWebhook(body: Json) {
   if (table === "web_form_submissions") {
     const application = record.form_type === "application";
     const owner = String(record.owner_name || "Nový kontakt");
-    const dog = String(record.dog_name || "");
+    const raw = record.raw_payload && typeof record.raw_payload === "object" ? record.raw_payload as Json : {};
+    const dogs = Array.isArray(raw.dogs)
+      ? raw.dogs.map((entry: Json) => String(entry?.dog_name || "").trim().slice(0, 160)).filter(Boolean).slice(0, 2)
+      : [];
+    if (!dogs.length && record.dog_name) dogs.push(String(record.dog_name).trim().slice(0, 160));
+    const dog = dogs.join(" a ");
 
     if (!application) {
       const openLeads = await rest("web_form_submissions?form_type=eq.lead&status=eq.new&select=id");
@@ -93,13 +98,13 @@ async function messageForWebhook(body: Json) {
           : `Máte ${count} nových záujmov`;
       return {
         title,
-        body: owner,
+        body: dog ? `${owner} · ${dog}` : owner,
         tag: `web-form-${id}`,
       };
     }
 
     return {
-      title: "Nová prihláška psa",
+      title: dogs.length > 1 ? "Nová prihláška psíkov" : "Nová prihláška psa",
       body: dog ? `${owner} · ${dog}` : owner,
       tag: `web-form-${id}`,
     };
@@ -475,4 +480,3 @@ Deno.serve(async (req: Request) => {
     return response({ error: error instanceof Error ? error.message : String(error) }, 400);
   }
 });
-
