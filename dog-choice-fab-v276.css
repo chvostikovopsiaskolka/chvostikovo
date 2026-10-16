@@ -19,3 +19,49 @@
 .dog-choice-avatar-v276 img{width:100%;height:100%;object-fit:cover}
 .dog-choice-arrow-v276{font-size:28px;color:#b65c88;line-height:1}
 html.dog-choice-open-v276,html.dog-choice-open-v276 body{overflow:hidden!important}
+
+/* v279: Android vaccination photo editor – smaller centered native SVG pencil. */
+#vaccProofEditorV244 .vacc-proof-edit-pencil-v244{
+  box-sizing:border-box!important;
+  width:32px!important;height:32px!important;
+  min-width:32px!important;min-height:32px!important;
+  max-width:32px!important;max-height:32px!important;
+  padding:0!important;margin:0!important;
+  display:grid!important;place-items:center!important;
+  line-height:0!important;font-size:0!important;
+}
+#vaccProofEditorV244 .vacc-proof-edit-pencil-v244 svg{
+  width:16px!important;height:16px!important;
+  display:block!important;flex-shrink:0!important;
+  transform:none!important;stroke:currentColor;
+  pointer-events:none;
+}
+@media(max-width:360px){
+  #vaccProofEditorV244 .vacc-proof-edit-pencil-v244{
+    width:30px!important;height:30px!important;
+    min-width:30px!important;min-height:30px!important;
+    max-width:30px!important;max-height:30px!important;
+  }
+}
+/* v279: geometric + eliminates font baseline/Android glyph offset. */
+.bottom-nav #navBookAddV220{
+  display:grid!important;place-items:center!important;
+  padding:0!important;margin:0!important;
+  align-self:center!important;justify-self:center!important;
+  transform:none!important;
+}
+.bottom-nav #navBookAddV220 .booking-fab-symbol-v220{
+  display:block!important;
+  position:relative!important;width:26px!important;height:26px!important;
+  margin:0!important;padding:0!important;
+  font-size:0!important;line-height:0!important;
+  transform:none!important;
+}
+.bottom-nav #navBookAddV220 .booking-fab-symbol-v220::before,
+.bottom-nav #navBookAddV220 .booking-fab-symbol-v220::after{
+  content:"";position:absolute;top:50%;left:50%;
+  border-radius:2px;background:currentColor;
+  transform:translate(-50%,-50%);
+}
+.bottom-nav #navBookAddV220 .booking-fab-symbol-v220::before{width:26px;height:3px}
+.bottom-nav #navBookAddV220 .booking-fab-symbol-v220::after{width:3px;height:26px}
