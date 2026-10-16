@@ -260,16 +260,26 @@ html:has([data-form-dialog]) {
 }
 
 @media (max-width: 639px) {
+  /*
+   * v277: Radix supplies 50% left/top and -50% X/Y translations.
+   * A partial mobile override displaced every shared form off-screen on iOS.
+   * Own the entire mobile geometry in one rule; no transformed native-picker ancestor.
+   */
   .form-dialog[data-state] {
-    top: calc(var(--form-viewport-top, 0px) + 12px + env(safe-area-inset-top, 0px));
-    left: 0;
-    right: 0;
-    margin-inline: auto;
-    max-height: calc(var(--form-viewport-height, 100svh) - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-    transform: none;
-    translate: none;
-    scale: none;
-    animation: none;
+    position: fixed !important;
+    box-sizing: border-box !important;
+    top: calc(var(--form-viewport-top, 0px) + 12px + env(safe-area-inset-top, 0px)) !important;
+    bottom: auto !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    max-height: calc(var(--form-viewport-height, 100svh) - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    transform: none !important;
+    translate: none !important;
+    scale: none !important;
+    animation: none !important;
   }
 }
 
