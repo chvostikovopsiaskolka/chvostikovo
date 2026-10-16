@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261016-dog-choice-fab-v276';
-const APP_VERSION='1.0.99';
+const APP_BUILD='20261016-android-icons-v279';
+const APP_VERSION='1.0.100';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -3494,7 +3494,7 @@ function renderVaccProofEditorV244(){
       const add=document.createElement('button');add.type='button';add.className='vacc-proof-edit-add-v244';add.dataset.vaccReplace='0';add.innerHTML='<span>+</span>Pridať fotku';return add;
     }
     const tile=document.createElement('div');tile.className='vacc-proof-edit-tile-v244';
-    tile.innerHTML='<button type="button" class="vacc-proof-edit-preview-v244" data-vacc-preview=""><img></button><button type="button" class="vacc-proof-edit-pencil-v244" data-vacc-replace="">✎</button><span></span>';return tile;
+    tile.innerHTML='<button type="button" class="vacc-proof-edit-preview-v244" data-vacc-preview=""><img></button><button type="button" class="vacc-proof-edit-pencil-v244" data-vacc-replace=""><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 18.5 3 20l1.5-4.5Z"/></svg></button><span></span>';return tile;
   });
   grid.querySelectorAll('[data-vacc-replace]').forEach(b=>{b.disabled=vaccProofEditBusyV244;b.onclick=()=>{
     if(vaccProofEditBusyV244)return;
