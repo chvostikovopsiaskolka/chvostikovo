@@ -1,0 +1,3 @@
+const fs=require('fs'),crypto=require('crypto');
+function build(){const h=require('./build-admin-stability-v270.cjs')();if(crypto.createHash('md5').update(h).digest('hex')!=='669359151b8bb61584b2b1d6355280d0')throw Error('v270 baseline changed');if(h.split("r.planned_pass_request_id?'Nová perma · ':'')").length!==2)throw Error('Label anchor changed');return h.replace("r.planned_pass_request_id?'Nová perma · ':'')","r.planned_pass_request_id?'Naplánované · ':'')")}
+module.exports=build;if(require.main===module){const h=build();console.log(Array.from(h).length,crypto.createHash('md5').update(h).digest('hex'))}
