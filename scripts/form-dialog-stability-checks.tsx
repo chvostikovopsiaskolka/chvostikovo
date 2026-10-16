@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { Window } from "happy-dom";
 
 const dom = new Window({ url: "https://chvostikovo.sk/" });
+Object.defineProperty(dom, "innerWidth", { configurable: true, writable: true, value: 390 });
 for (const key of ["window", "document", "navigator", "HTMLElement", "HTMLInputElement", "HTMLSelectElement", "HTMLTextAreaElement", "HTMLButtonElement", "HTMLFormElement", "DocumentFragment", "Event", "CustomEvent", "MutationObserver", "Node", "NodeFilter", "Element", "getComputedStyle", "requestAnimationFrame", "cancelAnimationFrame"] as const) {
   const value = key === "window" ? dom : (dom as any)[key];
   Object.defineProperty(globalThis, key, { configurable: true, writable: true, value: typeof value === "function" && /^(getComputedStyle|requestAnimationFrame|cancelAnimationFrame)$/.test(key) ? value.bind(dom) : value });
@@ -36,6 +37,12 @@ try {
     await React.act(settle);
     const dialog = dom.document.querySelector<HTMLElement>("[data-form-dialog]")!;
     assert.ok(dialog, "actual Radix dialog mounted");
+    assert.equal(dialog.getAttribute("data-form-dialog"), "stable-v278");
+    assert.equal(dialog.style.getPropertyValue("left"), "12px", "mobile form anchored within viewport");
+    assert.equal(dialog.style.getPropertyValue("right"), "12px", "right edge anchored");
+    assert.equal(dialog.style.getPropertyPriority("left"), "important", "mobile anchor wins over base CSS");
+    assert.equal(dialog.style.getPropertyValue("translate"), "none", "Radix translation disabled");
+    assert.equal(dialog.style.getPropertyValue("transform"), "none", "no transformed native picker ancestor");
     assert.equal(dialog.style.getPropertyValue("--form-viewport-height"), "750px");
     assert.equal(dom.document.activeElement?.tagName, "H2", "opening announces title without focusing a text field");
     const scroll = dialog.querySelector<HTMLElement>(".form-dialog-scroll")!;
@@ -60,6 +67,12 @@ try {
     assert.equal(scroll.scrollTop, 420, "keyboard dismissal / select focus preserves position");
     assert.equal(dom.document.activeElement, select);
     assert.equal(backgroundScrolls, 0, "no programmatic background scrolling");
+    (dom as any).innerWidth = 900;
+    await React.act(async () => { dom.dispatchEvent(new dom.Event("resize")); await settle(); });
+    assert.equal(dialog.style.getPropertyValue("left"), "", "desktop removes forced mobile positioning");
+    (dom as any).innerWidth = 390;
+    await React.act(async () => { dom.dispatchEvent(new dom.Event("resize")); await settle(); });
+    assert.equal(dialog.style.getPropertyValue("left"), "12px", "mobile anchoring restored after rotation");
     viewport.scale = 2;
     viewport.height = 300;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
@@ -73,6 +86,8 @@ try {
   }
   const css = readFileSync("src/styles.css", "utf8");
   assert.match(css, /@media \(max-width: 639px\)[\s\S]*\.form-dialog\[data-state\][\s\S]*left: 12px !important;[\s\S]*right: 12px !important;[\s\S]*transform: none !important;[\s\S]*translate: none !important;[\s\S]*animation: none !important;/);
+  const dialogComponent = readFileSync("src/components/ui/dialog.tsx", "utf8");
+  assert.match(dialogComponent, /positioning === "form"/, "shared form opts out of Radix default centering");
   const forms = readFileSync("src/components/site/Forms.tsx", "utf8");
   assert.match(forms, /name="pes" autoComplete="off"/);
   assert.match(forms, /name="pes2" autoComplete="off"/);
