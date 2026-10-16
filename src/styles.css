@@ -242,6 +242,37 @@
   }
 }
 
+/* A form has one scroll owner. Keep native iOS pickers outside transformed
+   coordinate systems; changing keyboard height must not recenter the dialog. */
+.form-dialog {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-dialog-scroll {
+  overflow-anchor: none;
+  scroll-behavior: auto;
+  scroll-padding-block: 0.75rem;
+}
+
+html:has([data-form-dialog]) {
+  scroll-behavior: auto;
+}
+
+@media (max-width: 639px) {
+  .form-dialog[data-state] {
+    top: calc(var(--form-viewport-top, 0px) + 12px + env(safe-area-inset-top, 0px));
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    max-height: calc(var(--form-viewport-height, 100svh) - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    transform: none;
+    translate: none;
+    scale: none;
+    animation: none;
+  }
+}
+
 @utility label-sm {
   display: block;
   font-size: 0.82rem;

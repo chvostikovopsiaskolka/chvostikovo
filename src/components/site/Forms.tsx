@@ -312,7 +312,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <label className="label-sm" htmlFor={`l-${formId}-pes`}>
             Meno psa *
           </label>
-          <input id={`l-${formId}-pes`} name="pes" required className="field" placeholder="Rocky" />
+          <input id={`l-${formId}-pes`} name="pes" autoComplete="off" required className="field" placeholder="Rocky" />
       </div>
       <div className="grid grid-cols-2 gap-3.5">
         <div>
@@ -409,7 +409,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <h4 className="border-b border-coral/20 pb-2 text-base font-bold text-forest">2. psík</h4>
           <div>
             <label className="label-sm" htmlFor={`l-${formId}-pes2`}>Meno druhého psa *</label>
-            <input id={`l-${formId}-pes2`} name="pes2" required maxLength={200} className="field" placeholder="Beny" />
+            <input id={`l-${formId}-pes2`} name="pes2" autoComplete="off" required maxLength={200} className="field" placeholder="Beny" />
           </div>
           <div className="grid grid-cols-2 gap-3.5">
             <div>
