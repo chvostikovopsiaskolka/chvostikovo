@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261016-booking-post-interest-v281';
-const APP_VERSION='1.0.102';
+const APP_BUILD='20261016-pass-copy-v282';
+const APP_VERSION='1.0.103';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2769,7 +2769,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(!lastDay)return;
     state.selectedDogId=Number(dogId);ensureModalV38();
     const modal=document.getElementById('passRenewalModalV38'),button=document.getElementById('passRenewalRequestV38');
-    $('passRenewalDayV38').textContent=`Rezervovaný deň ${skDay(reservationDate)} ${skDate(reservationDate)} využije posledný voľný vstup z aktuálnej permanentky.`;
+    $('passRenewalDayV38').textContent=`Táto rezervácia na ${skDay(reservationDate)} ${skDate(reservationDate)} využije posledný voľný vstup z aktuálnej permanentky. Máte záujem o novú?`;
     button.onclick=async()=>{if(button.disabled)return;if(state.session?.user?.id!==account){modal.classList.add('hidden');return}button.disabled=true;try{const row=await requestPass(10,{dogId,renewal:true});if(row)modal.classList.add('hidden')}finally{button.disabled=false}};
     modal.classList.remove('hidden');
   }
@@ -2813,12 +2813,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const original={title:title.textContent,day:day.textContent,
           description:description?.textContent,hint:hint?.textContent,yes:yes.textContent};
         const isLast=item.reason==='last';
-        title.textContent=isLast?'Posledný vstup – '+dog.name:'Permanentka pre '+dog.name+'?';
+        title.textContent=isLast?'Posledný vstup z permanentky':'Permanentka pre '+dog.name+'?';
         day.textContent=isLast
-          ?dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' rezervovaný posledný vstup zo súčasnej permanentky.'
+          ?'Rezervácia pre '+dog.name+' na '+skDay(item.date)+' '+skDate(item.date)+' využije posledný voľný vstup z aktuálnej permanentky.'
           :dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' odoslanú jednorazovú rezerváciu.';
         if(description)description.textContent=isLast
-          ?'Máte záujem o ďalšiu 10-vstupovú permanentku pre '+dog.name+'?'
+          ?'Máte záujem o kúpu novej 10-vstupovej permanentky?'
           :'Chcete tento vstup pre '+dog.name+' zaradiť medzi plánované vstupy novej 10-vstupovej permanentky?';
         if(hint)hint.textContent='Ak zvolíte Neskôr, rezervácia zostane bez zmeny. Záujem musí potvrdiť škôlka.';
         yes.textContent='Mám záujem o permanentku';
