@@ -63,7 +63,7 @@ export const inquirySchema = z.discriminatedUnion("typ", [shortSchema, longSchem
   if (data.dog_count === "2") {
     const second = [
       ["pes2", data.pes2], ["plemeno2", data.plemeno2], ["pohlavie2", data.pohlavie2],
-      ["vek2", data.vek2], ["kastrovana2", data.kastrovana2], ["duvod2", data.duvod2],
+      ["vek2", data.vek2], ["kastrovana2", data.kastrovana2],
       ["povaha2", data.povaha2],
     ] as const;
     for (const [field, value] of second) {
@@ -134,7 +134,6 @@ export function buildFields(data: InquiryData): Array<{ label: string; value: st
       { label: "2. psík – pohlavie", value: data.pohlavie2 || "" },
       { label: "2. psík – vek", value: data.vek2 || "" },
       { label: "2. psík – kastrácia", value: data.kastrovana2 || "" },
-      { label: "2. psík – využívanie škôlky", value: data.duvod2 || "" },
       { label: "2. psík – alergie a zdravotné obmedzenia", value: data.alergie2 || "" },
       { label: "2. psík – povaha a ďalšie informácie", value: data.povaha2 || "" },
     ] : []),
@@ -182,7 +181,7 @@ export function buildDbPayload(data: InquiryData) {
         dog_name: data.pes2 || "", dog_breed: data.plemeno2 || "",
         dog_weight_kg: parseDogWeightKg(data.vaha2 || "") || null,
         dog_sex: data.pohlavie2 || "", dog_age_text: data.vek2 || "",
-        dog_neutered: data.kastrovana2 || "", interest_reason: data.duvod2 || "",
+        dog_neutered: data.kastrovana2 || "", interest_reason: data.duvod,
         dog_allergies: data.alergie2 || "", dog_temperament: data.povaha2 || "",
       }] : []),
     ],

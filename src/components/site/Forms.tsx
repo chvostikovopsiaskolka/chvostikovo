@@ -229,7 +229,6 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           pohlavie2: String(fd.get("pohlavie2") ?? ""),
           vek2: String(fd.get("vek2") ?? "").trim(),
           kastrovana2: String(fd.get("kastrovana2") ?? ""),
-          duvod2: String(fd.get("duvod2") ?? ""),
           alergie2: String(fd.get("alergie2") ?? "").trim(),
           povaha2: String(fd.get("povaha2") ?? "").trim(),
         } : {}),
@@ -434,15 +433,6 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
             <label className="label-sm" htmlFor={`l-${formId}-kastrovana2`}>Kastrovaný / sterilizovaná *</label>
             <select id={`l-${formId}-kastrovana2`} name="kastrovana2" required className="field" defaultValue="">
               <option value="" disabled>Vyberte</option><option>Áno</option><option>Nie</option>
-            </select>
-          </div>
-          <div>
-            <label className="label-sm" htmlFor={`l-${formId}-duvod2`}>Ako plánujete využívať škôlku s druhým psíkom? *</label>
-            <select id={`l-${formId}-duvod2`} name="duvod2" required className="field" defaultValue="">
-              <option value="" disabled>Vyberte možnosť</option>
-              <option>Pravidelne – 1 až 2× týždenne</option>
-              <option>Občas podľa potreby</option>
-              <option>Jednorazové stráženie</option>
             </select>
           </div>
           <div>
