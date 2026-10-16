@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261016-booking-groups-smart-v267';
-const APP_VERSION='1.0.97';
+const APP_BUILD='20261016-smart-history-fallback-v268';
+const APP_VERSION='1.0.98';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2180,20 +2180,24 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
   function smartProposalV199(dog,days){
     if(!dog||!Array.isArray(days))return null;
-    const history=(state.data?.requests||[]).filter(r=>Number(r.dog_id)===Number(dog.id)
-      &&(r.status==='approved'||r.status==='pending')
-      &&typeof r.reservation_date==='string'&&r.reservation_date.length===10);
+    const history=[
+      ...(state.data?.requests||[]).filter(r=>['approved','pending'].includes(r.status)),
+      ...(state.data?.booking_history||[]).filter(r=>['booked','attended'].includes(r.status))
+    ].filter(r=>Number(r.dog_id)===Number(dog.id)&&typeof r.reservation_date==='string'&&r.reservation_date.length===10);
     if(!history.length)return null;
     const today=bratislavaClockV95().date;
     const eligible=days.filter(d=>typeof d.date==='string'&&d.date.length===10&&d.date>today
       &&d.bookings_open!==false&&Number(d.available)>0
       &&!bookingFor(dog.id,d.date)&&!bookingDeadlineClosedV95(d.date,dog));
-    // Compare with the week immediately preceding the offered booking week.
+    // Previous calendar week first; current week only if the previous has no bookings.
+    const currentMonday=smartMondayV199(today),previousMonday=smartShiftV199(currentMonday,-7);
+    const previous=history.filter(r=>smartMondayV199(r.reservation_date)===previousMonday);
+    const matching=previous.length?previous:history.filter(r=>smartMondayV199(r.reservation_date)===currentMonday);
+    if(!matching.length)return null;
+    const sourceWeek=previous.length?'previous':'current';
+    const weekdays=new Set(matching.map(r=>new Date(r.reservation_date+'T12:00:00Z').getUTCDay()));
     const weeks=[...new Set(eligible.map(d=>smartMondayV199(d.date)).filter(Boolean))].sort();
     for(const monday of weeks){
-      const matching=history.filter(r=>smartMondayV199(r.reservation_date)===smartShiftV199(monday,-7));
-      if(!matching.length)return null;
-      const weekdays=new Set(matching.map(r=>new Date(r.reservation_date+'T12:00:00Z').getUTCDay()));
       // If a week has existing bookings, let the customer add days manually.
       const hasActiveBooking=(state.data?.requests||[]).some(r=>Number(r.dog_id)===Number(dog.id)
         &&['pending','approved'].includes(r.status)&&smartMondayV199(r.reservation_date)===monday)
@@ -2202,7 +2206,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       if(hasActiveBooking)return null;
       const target=eligible.filter(d=>smartMondayV199(d.date)===monday);
       const dates=target.filter(d=>weekdays.has(new Date(d.date+'T12:00:00Z').getUTCDay())).map(d=>d.date);
-      if(dates.length)return {dates};
+      if(dates.length)return {dates,sourceWeek};
     }
     return null;
   }
@@ -2220,7 +2224,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     root.classList.toggle('hidden',!suggestion);
     if(!suggestion){root.innerHTML='';return}
     const weekday=['Ne','Po','Ut','St','Št','Pia','So'];
-    root.innerHTML='<div class="smart-head-v199"><div><strong>Chcete rezervovať rovnaké dni ako minulý týždeň?</strong>'
+    root.innerHTML='<div class="smart-head-v199"><div><strong>'+(suggestion.sourceWeek==='previous'?'Chcete rezervovať rovnaké dni ako minulý týždeň?':'Chcete rezervovať rovnaké dni ako tento týždeň?')+'</strong>'
       +'</div></div>'
       +'<div class="smart-chips-v199" aria-label="Navrhované dni">'
       +suggestion.dates.map(date=>'<span class="smart-chip-v199">'+weekday[new Date(date+'T12:00:00Z').getUTCDay()]+'</span>').join('')+'</div>'
