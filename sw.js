@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261016-stable-vaccine-photos-v259';
+const CACHE='chvostikovo-portal-shell-20261016-resume-shared-passes-v260';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/dual-dog-overview-v246.js?v=20261016-stable-vaccine-photos-v259','/dual-dog-overview-v246.css?v=20261016-stable-vaccine-photos-v259','/','/terms-pdf.js?v=20261016-stable-vaccine-photos-v259','/terms-pdf-font.js?v=20261016-stable-vaccine-photos-v259','/styles.css?v=20261016-stable-vaccine-photos-v259','/bulletin-photo-v243.css?v=20261016-stable-vaccine-photos-v259','/app.js?v=20261016-stable-vaccine-photos-v259','/back-swipe.js?v=20261016-stable-vaccine-photos-v259'];
+const SHELL=['/dual-dog-overview-v246.js?v=20261016-resume-shared-passes-v260','/dual-dog-overview-v246.css?v=20261016-resume-shared-passes-v260','/','/terms-pdf.js?v=20261016-resume-shared-passes-v260','/terms-pdf-font.js?v=20261016-resume-shared-passes-v260','/styles.css?v=20261016-resume-shared-passes-v260','/bulletin-photo-v243.css?v=20261016-resume-shared-passes-v260','/app.js?v=20261016-resume-shared-passes-v260','/back-swipe.js?v=20261016-resume-shared-passes-v260'];
 
 function withPortalCsp(response){
   if(!response)return response;
