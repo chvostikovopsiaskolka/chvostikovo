@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261016-notice-pdf-v258';
-const APP_VERSION='1.0.91';
+const APP_BUILD='20261016-stable-vaccine-photos-v259';
+const APP_VERSION='1.0.92';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -3148,6 +3148,23 @@ async function v105PrepareProof(file){
     window.__customerPhotoDecodeV88=false;
   }
 }
+// Keep unchanged image nodes and signed-URL sources through upload/status renders.
+function reconcileVaccProofNodesV259(root,dogId,entries,create){
+  const scope=String(state.session?.user?.id||'')+'|'+String(dogId);
+  if(root.dataset.proofScope!==scope){root.replaceChildren();root.dataset.proofScope=scope}
+  const existing=new Map([...root.children].map(el=>[el.dataset.proofKey,el]));
+  const wanted=entries.map(entry=>{
+    const key=String(entry.key),el=existing.get(key)||create(entry);
+    el.dataset.proofKey=key;entry.update(el);return el;
+  });
+  const keep=new Set(wanted);
+  [...root.children].forEach(el=>{if(!keep.has(el))el.remove()});
+  wanted.forEach((el,i)=>{if(root.children[i]!==el)root.insertBefore(el,root.children[i]||null)});
+}
+function updateVaccProofImageV259(img,proof){
+  const url=String(proof?.image_url||''),identity=String(proof?.storage_path||url.split('?')[0]);
+  if(img.dataset.proofImage!==identity){img.src=url;img.dataset.proofImage=identity}
+}
 function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
   const current=$('vaccProofCurrentV104'),staged=$('vaccProofStagedV104'),count=$('vaccProofCountV104'),msg=$('vaccProofMessageV104');
   if(!current||!staged||!count)return;
@@ -3155,12 +3172,18 @@ function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
   count.textContent=String(proofs.length);
   if(proofs.length){
     current.classList.remove('vacc-proof-empty-wrap-v105');
-    current.innerHTML=proofs.map((p,i)=>'<button class="vacc-proof-thumb-v104" type="button" data-proof-index="'+i+'"><img src="'+esc(p.image_url||'')+'" alt="Očkovací preukaz '+(i+1)+'"><span>Foto '+(i+1)+'</span></button>').join('');
+    reconcileVaccProofNodesV259(current,dogId,proofs.map((proof,i)=>({key:proof.id,update(button){
+      button.dataset.proofIndex=String(i);
+      const img=button.querySelector('img');updateVaccProofImageV259(img,proof);img.alt='Očkovací preukaz '+(i+1);
+      button.querySelector('span').textContent='Foto '+(i+1);
+      button.onclick=()=>openVaccinationProofViewerV104(vaccinationProofsForDogV104(dogId).find(p=>Number(p.id)===Number(proof.id))?.image_url);
+    }})),()=>{
+      const button=document.createElement('button');button.className='vacc-proof-thumb-v104';button.type='button';button.innerHTML='<img><span></span>';return button;
+    });
   }else{
     current.classList.add('vacc-proof-empty-wrap-v105');
     current.innerHTML='<button id="vaccProofEmptyV105" class="vacc-proof-empty-v105" type="button"><span class="vacc-proof-plus-v105">+</span><span>Nahrať fotky</span><small>Kliknite a vyberte fotografie</small></button>';
   }
-  current.querySelectorAll('[data-proof-index]').forEach(button=>button.addEventListener('click',()=>openVaccinationProofViewerV104(proofs[Number(button.dataset.proofIndex)]?.image_url)));
   const busy=window.__vaccinationProofProcessingV105===true||!!vaccinationProofUploadInFlightV143;
   const retry=vaccinationProofFilesV104.length>0&&!busy;
   const empty=$('vaccProofEmptyV105');if(empty){empty.disabled=busy;if(retry)empty.querySelector('span:not(.vacc-proof-plus-v105)').textContent='Skúsiť nahratie znova';empty.addEventListener('click',()=>{if(retry)uploadVaccinationProofsV104(false).catch(()=>{});else {empty.blur();$('vaccProofLibraryV104')?.click()}})}
@@ -3305,18 +3328,26 @@ function renderVaccProofEditorV244(){
   const byId=new Map(proofs.map(p=>[Number(p.id),p]));
   vaccProofEditOrderV244=vaccProofEditOrderV244.filter(id=>byId.has(id));
   proofs.forEach(p=>{if(!vaccProofEditOrderV244.includes(Number(p.id)))vaccProofEditOrderV244.push(Number(p.id))});
-  grid.innerHTML=vaccProofEditOrderV244.map((id,i)=>{
-    const p=byId.get(id);
-    return '<div class="vacc-proof-edit-tile-v244">'+
-      '<button type="button" class="vacc-proof-edit-preview-v244" data-vacc-preview="'+id+'" aria-label="Zväčšiť fotografiu '+(i+1)+'"><img src="'+esc(p?.image_url||'')+'" alt="Fotografia očkovania '+(i+1)+'"></button>'+
-      '<button type="button" class="vacc-proof-edit-pencil-v244" data-vacc-replace="'+id+'" aria-label="Nahradiť fotografiu '+(i+1)+'">✎</button>'+
-      '<span>Foto '+(i+1)+'</span></div>';
-  }).join('')+(proofs.length<5?'<button type="button" class="vacc-proof-edit-add-v244" data-vacc-replace="0"><span>+</span>Pridať fotku</button>':'');
-  grid.querySelectorAll('[data-vacc-preview]').forEach(b=>b.addEventListener('click',()=>openVaccinationProofViewerV104(byId.get(Number(b.dataset.vaccPreview))?.image_url)));
-  grid.querySelectorAll('[data-vacc-replace]').forEach(b=>{b.disabled=vaccProofEditBusyV244;b.addEventListener('click',()=>{
+  const entries=vaccProofEditOrderV244.map((id,i)=>({key:id,update(tile){
+    const preview=tile.querySelector('[data-vacc-preview]'),p=byId.get(id),img=preview.querySelector('img');
+    preview.dataset.vaccPreview=String(id);preview.setAttribute('aria-label','Zväčšiť fotografiu '+(i+1));
+    updateVaccProofImageV259(img,p);img.alt='Fotografia očkovania '+(i+1);
+    preview.onclick=()=>openVaccinationProofViewerV104(vaccinationProofsForDogV104(dogId).find(p=>Number(p.id)===id)?.image_url);
+    const pencil=tile.querySelector('[data-vacc-replace]');pencil.dataset.vaccReplace=String(id);pencil.setAttribute('aria-label','Nahradiť fotografiu '+(i+1));
+    tile.querySelector('span').textContent='Foto '+(i+1);
+  }}));
+  if(proofs.length<5)entries.push({key:'add',update(){}});
+  reconcileVaccProofNodesV259(grid,dogId,entries,entry=>{
+    if(entry.key==='add'){
+      const add=document.createElement('button');add.type='button';add.className='vacc-proof-edit-add-v244';add.dataset.vaccReplace='0';add.innerHTML='<span>+</span>Pridať fotku';return add;
+    }
+    const tile=document.createElement('div');tile.className='vacc-proof-edit-tile-v244';
+    tile.innerHTML='<button type="button" class="vacc-proof-edit-preview-v244" data-vacc-preview=""><img></button><button type="button" class="vacc-proof-edit-pencil-v244" data-vacc-replace="">✎</button><span></span>';return tile;
+  });
+  grid.querySelectorAll('[data-vacc-replace]').forEach(b=>{b.disabled=vaccProofEditBusyV244;b.onclick=()=>{
     if(vaccProofEditBusyV244)return;
     const input=$('vaccProofEditFileV244');input.dataset.replaceId=b.dataset.vaccReplace;b.blur();input.click();
-  })});
+  }});
 }
 async function uploadSingleVaccProofV244(file,replaceId){
   if(vaccProofEditBusyV244||vaccinationProofUploadInFlightV143)return;
@@ -3339,7 +3370,10 @@ async function uploadSingleVaccProofV244(file,replaceId){
     if(!current()||!state.data)return;
     const added=proofs.find(p=>!oldIds.includes(Number(p.id)));
     state.data.vaccination_proofs=(state.data.vaccination_proofs||[]).filter(p=>Number(p.dog_id)!==dogId);
-    state.data.vaccination_proofs.push(...proofs);
+    const byId=new Map(proofs.map(p=>[Number(p.id),p]));
+    const ordered=oldIds.map(id=>byId.get(id===replaceId&&added?Number(added.id):id)).filter(Boolean);
+    const orderedIds=new Set(ordered.map(p=>Number(p.id)));
+    state.data.vaccination_proofs.push(...ordered,...proofs.filter(p=>!orderedIds.has(Number(p.id))));
     if(replaceId&&added){
       const slot=vaccProofEditOrderV244.indexOf(replaceId);
       if(slot>=0)vaccProofEditOrderV244[slot]=Number(added.id);
