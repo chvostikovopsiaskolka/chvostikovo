@@ -1,0 +1,21 @@
+const fs=require('fs'),crypto=require('crypto');
+const hash=s=>crypto.createHash('md5').update(s).digest('hex');
+function patches(){
+ const crm=fs.readFileSync('admin/crm-workflow-v263.js','utf8');
+ const mainMarker='/* v63: messages/dashboard update via initial load + Realtime + resume sync; no periodic polling */';
+ return [
+ {old:"planned=r.projected_entry_number&&r.projected_pass_total?' · '+r.projected_entry_number+'/'+r.projected_pass_total:''",new:"planned=r.projected_entry_number&&r.projected_pass_total?' · '+(r.planned_pass_request_id?'Nová perma · ':'')+r.projected_entry_number+'/'+r.projected_pass_total:''"},
+ {old:'<script id="chvo-crm-workflow-v263">\n'+crm+'\n</script>',new:''},
+ {old:mainMarker,new:fs.readFileSync('admin/photo-stability-v270.js','utf8')+'\n'+crm.replace(' const originalFollowup=showWebSubmissionFollowup;',' window.openWebSubmission=openWebSubmission;\n const originalFollowup=showWebSubmissionFollowup;')+'\n'+mainMarker},
+ {old:"bookingBody.innerHTML=bookings.length?bookings.map(bookingOverviewRow).join(''):'<div class=\"muted small\" style=\"padding-top:8px\">Momentálne bez čakajúcich rezervácií.</div>';",new:"if(window.bookingReviewV267)window.bookingReviewV267.replace(bookingBody,window.bookingReviewV267.html());else bookingBody.innerHTML=bookings.length?bookings.map(bookingOverviewRow).join(''):'<div class=\"muted small\" style=\"padding-top:8px\">Momentálne bez čakajúcich rezervácií.</div>';"},
+ {old:'host.innerHTML=markup;for(const el of host.querySelectorAll',new:'adminStableHtmlV270(host,markup);for(const el of host.querySelectorAll'},
+ {old:'window.bookingReviewV267={groups,html,decide,redraw};',new:'window.bookingReviewV267={groups,html,decide,redraw,replace};'},
+ {old:"body.innerHTML=markup||'<div class=\"v41-dashboard-empty\">Momentálne tu nie sú žiadne položky.</div>';",new:"if(window.adminStableHtmlV270)window.adminStableHtmlV270(body,markup||'<div class=\"v41-dashboard-empty\">Momentálne tu nie sú žiadne položky.</div>');else body.innerHTML=markup||'<div class=\"v41-dashboard-empty\">Momentálne tu nie sú žiadne položky.</div>';"},
+ {old:"state.owners=ownersRes.data||[];const owners=new Map(state.owners.map(o=>[o.id,o])); state.dogs=(dogsRes.data||[]).map(d=>({...d,owners:owners.get(d.owner_id)||null}));await loadStaffPhotoUrls();",new:"state.owners=ownersRes.data||[];const owners=new Map(state.owners.map(o=>[o.id,o])),oldDogsV270=new Map(state.dogs.map(d=>[Number(d.id),d])); state.dogs=(dogsRes.data||[]).map(d=>{const old=oldDogsV270.get(Number(d.id)),same=old&&old.photo_path===d.photo_path&&old.photo_updated_at===d.photo_updated_at;if(!same)adminPhotoSignedAtV73.delete(Number(d.id));return {...d,owners:owners.get(d.owner_id)||null,photo_url:same?old.photo_url:null,owner_photos:same?old.owner_photos:[]}});await loadStaffPhotoUrls();"},
+ {old:"const ids=dogIds||state.dogs.map(d=>d.id);if(!ids.length)return;",new:"const ids=(dogIds||state.dogs.map(d=>d.id)).filter(id=>!adminPhotoSignedAtV73.has(Number(id))||Date.now()-adminPhotoSignedAtV73.get(Number(id))>=ADMIN_PHOTO_REFRESH_V73);if(!ids.length)return;"},
+ {old:"return {...d,owners:owners.get(d.owner_id)||null,photo_url:samePhoto?(old.photo_url||null):null}",new:"if(!samePhoto)adminPhotoSignedAtV73.delete(Number(d.id));return {...d,owners:owners.get(d.owner_id)||null,photo_url:samePhoto?(old.photo_url||null):null,owner_photos:samePhoto?(old.owner_photos||[]):[]}"},
+ {old:"<img src=\"${esc(photo)}\" alt=\"${esc(d.name||'Psík')}\">",new:"<img data-admin-photo-key=\"${esc([d.id,d.photo_path,d.photo_updated_at,String(photo).split('?')[0]].join('|'))}\" src=\"${esc(photo)}\" alt=\"${esc(d.name||'Psík')}\">"}
+ ].filter(p=>p.old!==p.new);
+}
+function build(){let h=require('./build-admin-booking-v269.cjs')();if(hash(h)!=='08dbaca92cebc85bc648e4570ee5deff')throw Error('v269 baseline changed');for(const p of patches()){if(h.split(p.old).length!==2)throw Error('v270 anchor differs: '+p.old.slice(0,100));h=h.replace(p.old,p.new)}return h}
+module.exports=build;module.exports.patches=patches;if(require.main===module){const h=build();fs.writeFileSync('/workspace/scratch/7d4a60d428d0/admin-v270.html',h);console.log(Array.from(h).length,hash(h))}
