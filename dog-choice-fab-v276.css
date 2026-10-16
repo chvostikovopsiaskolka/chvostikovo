@@ -1,0 +1,21 @@
+/* v276 – compact booking '+' and scoped dog selector, no changes to the existing stylesheet. */
+.bottom-nav:has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr)!important}
+.bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr) minmax(0,1fr)!important}
+.bottom-nav #navBookAddV220{box-sizing:border-box!important;width:56px!important;min-width:56px!important;max-width:56px!important;height:56px!important;min-height:56px!important;max-height:56px!important;flex:0 0 56px!important;justify-self:center!important;align-self:center!important;border-radius:19px!important}
+.bottom-nav #navBookAddV220 .booking-fab-symbol-v220{font-size:34px!important;line-height:1!important}
+@media(max-width:370px){
+ .bottom-nav:has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr)!important}
+ .bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr) minmax(0,1fr)!important}
+ .bottom-nav #navBookAddV220{width:52px!important;min-width:52px!important;max-width:52px!important;height:52px!important;min-height:52px!important;max-height:52px!important;flex-basis:52px!important}
+}
+#dogChoiceModalV276{z-index:640!important;padding:14px!important;align-items:center!important;justify-content:center!important}
+#dogChoiceModalV276 .dog-choice-panel-v276{box-sizing:border-box;width:min(460px,100%);max-width:100%;max-height:calc(100dvh - 28px);overflow-y:auto;padding:22px 18px;border-radius:24px}
+#dogChoiceContextV276{font-size:13px;font-weight:750;color:#6b7280;margin:4px 0 8px}
+#dogChoiceListV276{display:grid;gap:11px;margin-top:18px}
+.dog-choice-item-v276{display:flex;align-items:center;gap:14px;width:100%;min-height:76px;background:#fff;border:1.5px solid #f3c4db;border-radius:18px;padding:10px 13px;color:#26313e;text-align:left;cursor:pointer}
+.dog-choice-item-v276:focus-visible{outline:3px solid #e15b9d;outline-offset:2px}
+.dog-choice-item-v276 strong{min-width:0;flex:1;font-size:17px;overflow-wrap:anywhere}
+.dog-choice-avatar-v276{width:54px;height:54px;flex:0 0 54px;border-radius:15px;display:grid;place-items:center;overflow:hidden;background:#fff0f7;font-size:23px}
+.dog-choice-avatar-v276 img{width:100%;height:100%;object-fit:cover}
+.dog-choice-arrow-v276{font-size:28px;color:#b65c88;line-height:1}
+html.dog-choice-open-v276,html.dog-choice-open-v276 body{overflow:hidden!important}
