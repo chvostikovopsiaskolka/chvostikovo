@@ -1,8 +1,9 @@
 /* The existing one-dog card remains unchanged. */
 #bookingTab #bookingDogProfile.dual-dog-v241{display:block!important;padding:14px!important;background:linear-gradient(145deg,#fff9f5,#fff3f7 70%,#f3f8ff)!important;border-color:#e7c4cf!important}
-#bookingTab .dual-dog-v241 .dog-overview-identity{display:block!important;width:100%!important;max-width:100%!important;padding:0!important}
+#bookingTab .dual-dog-v241 .dog-overview-identity{display:block!important;width:100%!important;max-width:100%!important;padding:0!important;border-right:0!important}
 #bookingTab .dual-dog-v241 #bookingDogDetailsOpenV242,#bookingTab .dual-dog-v241 #bookingDogSelector,#bookingTab .dual-dog-v241 .dog-overview-content{display:none!important}
-#bookingTab .dual-dog-choices-v241{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;width:100%;align-items:start}
+#bookingTab .dual-dog-choices-v241{display:grid;position:relative;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;width:100%;align-items:start}
+#bookingTab .dual-dog-choices-v241::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:#e8c9da;pointer-events:none}
 #bookingTab .dual-dog-panel-v254{min-width:0;--dog-color:#c866a2}
 #bookingTab .dual-dog-panel-v254.male-v241{--dog-color:#5499d7}
 #bookingTab .dual-dog-photo-v254{display:block;position:relative;appearance:none;width:100%;padding:0;margin:0 0 12px;border:0;background:transparent;cursor:pointer;color:#283244}
@@ -12,8 +13,17 @@
 #bookingTab .dual-dog-info-v254{display:grid;gap:7px;padding-top:3px}
 #bookingTab .dual-dog-info-v254 button{appearance:none;text-align:left;border:0;background:transparent;padding:0;color:#4b5563;font-size:12px;line-height:1.35;min-height:28px;cursor:pointer}
 #bookingTab .dual-dog-info-v254 .warning{color:#a16207;font-weight:700}
+#bookingTab .dual-dog-info-v254 .dual-dog-status-v254{display:flex;align-items:center;gap:6px;min-height:36px}
+#bookingTab .dual-dog-status-v254.valid{color:#126b3d}
+#bookingTab .dual-dog-status-v254 .vacc-icon{flex:0 0 25px;width:25px;height:25px}
+#bookingTab .dual-dog-status-v254 .vacc-icon svg{width:17px;height:17px}
 #bookingTab .dual-dog-pass-v254 small{display:block;font-size:11px;color:#6b7280}
 #bookingTab .dual-dog-pass-v254 strong{display:block;font-size:clamp(15px,4vw,21px);line-height:1.25;overflow-wrap:anywhere;color:#111827}
 #bookingTab .dual-dog-info-v254 .dual-dog-grades-v254{display:inline-flex;align-items:center;gap:5px;justify-self:start;border-radius:12px;padding:6px 8px;background:#fff1df;color:#c45f22;font-size:11px;font-weight:750}
 #bookingTab .dual-dog-grades-v254 svg{width:16px;height:16px;stroke:currentColor;fill:none}
 #bookingTab .dual-dog-panel-v254 button:focus-visible{outline:3px solid #f88b38;outline-offset:3px}
+
+/* iOS native selects must not paint the dark tap/selection layer. */
+#bookingPickerDogV37{-webkit-tap-highlight-color:transparent!important;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;appearance:none;-webkit-appearance:none;background-color:#fff;color:#111827;opacity:1;padding-right:42px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='m6 8 4 4 4-4' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-position:right 14px center;background-repeat:no-repeat}
+#bookingPickerDogV37:active,#bookingPickerDogV37:focus{background-color:#fff;color:#111827}
+

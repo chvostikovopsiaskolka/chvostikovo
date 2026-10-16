@@ -21,10 +21,15 @@
     const paragraph=(text,size=10.8)=>{const rows=lines(text,size),leading=size*1.42;if(size>12&&y<90)newPage();for(const line of rows){if(y<55)newPage();content.push(`BT /F1 ${size} Tf 1 0 0 1 42 ${y.toFixed(2)} Tm <${hex(line)}> Tj ET`);y-=leading}y-=8};
     paragraph('Podmienky psej škôlky Chvostíkovo',18);
     paragraph('Verzia dokumentu: '+window.customerTermsVersionLabel(record.terms_version),11);
-    paragraph('Psík: '+(record.dog_name||'Neuvedené'),11);
+    const names=Array.isArray(record.dog_names)&&record.dog_names.length?record.dog_names:[record.dog_name||'Neuvedené'];
+    paragraph((names.length>1?'Psíkovia: ':'Psík: ')+names.join(' a '),11);
     if(record.owner_name)paragraph('Majiteľ: '+record.owner_name,11);
     paragraph('Elektronicky potvrdené: '+date(record.accepted_at)+' (Europe/Bratislava)',10);
     paragraph('Dokument bol elektronicky potvrdený prostredníctvom zákazníckeho účtu.',10);
+    if(names.length>1){
+      paragraph('Podmienky sú potvrdené týmto majiteľom pre oboch uvedených psíkov. Pôvodné záznamy a obsah potvrdení zostávajú zachované.',10);
+      for(const confirmation of record.coverage_confirmations||[])paragraph(confirmation.dog_name+': potvrdené '+date(confirmation.accepted_at)+' (Europe/Bratislava)',10);
+    }
     paragraph(record.acceptance_text||'',10);y-=8;
     for(const p of record.body.split(/\n{2,}/).filter(Boolean))paragraph(p,/^\d+\.\s/.test(p)?13:10.8);
     newPage();
@@ -50,3 +55,4 @@
     return new Blob([concat(parts)],{type:'application/pdf'});
   };
 })();
+

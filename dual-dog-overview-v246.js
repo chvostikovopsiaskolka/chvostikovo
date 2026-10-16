@@ -28,10 +28,11 @@
    const pass=completedToday||activePassFor(dog.id),planned=typeof plannedPassSummaryV162==='function'?plannedPassSummaryV162(dog.id):null;
    panel.querySelector('.dual-dog-pass-v254').innerHTML=pass?'<small>'+(pass.status==='queued'?'Plánovaná permanentka':'Permanentka')+'</small><strong>'+Number(pass.used_entries||0)+' z '+Number(pass.total_entries)+'</strong>'+(pass.valid_until?'<small>Platí do '+skDate(pass.valid_until)+'</small>':''):planned?'<small>Plánovaná permanentka</small><strong>0 z '+Number(planned.total)+'</strong>':'<small>Vstup</small><strong>'+(dog.default_entry_type==='free'?'Bezplatný':'Jednorazový')+'</strong>';
    const valid=customerVaccinationsCompleteV96(dog),soon=(state.data.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(dog.id)).some(v=>vaccinationValidityV96(v.valid_until).kind==='warning');
-   const status=panel.querySelector('.dual-dog-status-v254');status.textContent=!valid?'Očkovania nie sú platné':soon?'Končí platnosť očkovania':'Platné očkovania';status.classList.toggle('warning',!valid||soon);
+   const status=panel.querySelector('.dual-dog-status-v254');status.className='dual-dog-status-v254 dog-overview-status '+(!valid?'invalid':soon?'warning':'valid');status.innerHTML='<span class="overview-icon vacc-icon"><svg aria-hidden="true"><use href="#ci-'+(valid&&!soon?'check':'alert')+'"/></svg></span><span>'+(!valid?'Očkovania nie sú platné':soon?'Končí platnosť očkovania':'Platné očkovania')+'</span>';
    panel.querySelector('.dual-dog-visits-v254').textContent='Návštevy: '+totalVisits(dog);
   }
  }
  customerHooks.afterRenderDog.push(render);customerHooks.afterRenderPassSummary.push(render);
  if(state.data)render();
 })();
+
