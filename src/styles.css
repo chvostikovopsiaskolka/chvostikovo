@@ -263,12 +263,12 @@ html:has([data-form-dialog]) {
   /*
    * v277: Radix supplies 50% left/top and -50% X/Y translations.
    * A partial mobile override displaced every shared form off-screen on iOS.
-   * Own the entire mobile geometry in one rule; no transformed native-picker ancestor.
+   * Own mobile geometry without visualViewport.offsetTop feedback; no transform or OS-picker jumps.
    */
   .form-dialog[data-state] {
     position: fixed !important;
     box-sizing: border-box !important;
-    top: calc(var(--form-viewport-top, 0px) + 12px + env(safe-area-inset-top, 0px)) !important;
+    top: calc(12px + env(safe-area-inset-top, 0px)) !important;
     bottom: auto !important;
     left: 12px !important;
     right: 12px !important;
@@ -289,4 +289,30 @@ html:has([data-form-dialog]) {
   font-weight: 600;
   color: var(--color-forest);
   margin-bottom: 0.35rem;
+}
+
+/* v292 — Native form elements follow the light website palette, even when
+   iOS is in dark system mode. Only radio choices are used for binary dog facts,
+   so no OS select sheet opens for Pes/Suka or Áno/Nie. */
+[data-form-dialog] select,
+[data-form-dialog] select option,
+[data-form-dialog] input,
+[data-form-dialog] textarea {
+  color-scheme: light;
+}
+[data-form-dialog] select,
+[data-form-dialog] .form-binary-choice-v292,
+[data-form-dialog] .form-binary-choice-v292 * {
+  -webkit-tap-highlight-color: transparent;
+}
+[data-form-dialog] select option {
+  background: white;
+  color: var(--color-forest-deep);
+}
+[data-form-dialog] .form-binary-choice-v292 {
+  -webkit-touch-callout: none;
+}
+[data-form-dialog] .form-binary-choice-v292 input:focus-visible + span {
+  outline: 2px solid var(--color-coral);
+  outline-offset: 2px;
 }
