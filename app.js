@@ -760,7 +760,7 @@ function syncDogAgeField(){
   const today=bratislavaToday(),birth=input.value;
   input.max=today;
   const future=!!birth&&birth>today;
-  input.toggleAttribute('aria-invalid',future);
+  if(future)input.setAttribute('aria-invalid','true');else input.removeAttribute('aria-invalid');
   $('dogBirthDateErrorV297')?.classList.toggle('hidden',!future);
   const calculated=future?'':dogAgeText(birth);
   age.value=calculated;age.readOnly=true;age.setAttribute('aria-readonly','true');
