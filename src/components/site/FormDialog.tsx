@@ -76,12 +76,13 @@ export function FormDialog({
     };
     const update = () => {
       if (viewport && Math.abs(viewport.scale - 1) > 0.01) return;
+      let scrollOnKeyboardClosed: number | null = null;
       const content = contentRef.current;
       if (!content) return;
       const mobile = window.innerWidth <= 639;
       const available = Math.max(200, viewport?.height ?? window.innerHeight);
       const keyboard = mobile && baseHeight - available > 150;
-      if (import.meta.env.MODE === "test") console.log("V297_TEST_VIEWPORT", { available, baseHeight, keyboard, keyboardWasVisible, beforeKeyboardScroll });
+      console.log("V297_TEST_VIEWPORT", { available, baseHeight, keyboard, keyboardWasVisible, beforeKeyboardScroll });
       // Safari may scroll the inner form to reveal a focused input. On Done,
       // recover the position from before the keyboard, not the last focused
       // field or the artificial scroll applied while the keyboard was open.
@@ -91,12 +92,7 @@ export function FormDialog({
         keyboardWasVisible = false;
         const position = beforeKeyboardScroll;
         beforeKeyboardScroll = null;
-        if (position !== null) {
-          cancelAnimationFrame(restoreFrame);
-          restoreFrame = requestAnimationFrame(() => {
-            if (scrollRef.current) scrollRef.current.scrollTop = position;
-          });
-        }
+        if (position !== null) scrollOnKeyboardClosed = position;
       }
       content.style.setProperty("--form-viewport-height", `${available}px`);
       content.dataset['formKeyboard'] = keyboard ? "open" : "closed";
@@ -148,6 +144,17 @@ export function FormDialog({
         for (const name of propertyNames) content.style.removeProperty(name);
         scrollRef.current?.style.removeProperty("max-height");
       }
+      if (scrollOnKeyboardClosed !== null && scrollRef.current) {
+        // Restore synchronously after releasing the keyboard-only height clip;
+        // the next animation frame repeats it in case native Safari adjusts
+        // scrollTop again while it completes its viewport resize.
+        scrollRef.current.scrollTop = scrollOnKeyboardClosed;
+        cancelAnimationFrame(restoreFrame);
+        const restoreTo = scrollOnKeyboardClosed;
+        restoreFrame = requestAnimationFrame(() => {
+          if (scrollRef.current) scrollRef.current.scrollTop = restoreTo;
+        });
+      }
     };
     const schedule = () => {
       cancelAnimationFrame(frame);
@@ -160,7 +167,7 @@ export function FormDialog({
       });
     };
     const onFocus = () => {
-      if (import.meta.env.MODE === "test") console.log("V297_TEST_FOCUS", { was:keyboardWasVisible, saved:beforeKeyboardScroll, current:scrollRef.current?.scrollTop });
+      console.log("V297_TEST_FOCUS", { was:keyboardWasVisible, saved:beforeKeyboardScroll, current:scrollRef.current?.scrollTop });
       // Keyboard activation is asynchronous. Record the user's pre-edit scroll
       // once per keyboard session, including accessibility/keyboard focus.
       if (!keyboardWasVisible && beforeKeyboardScroll === null) {
