@@ -1,0 +1,14 @@
+const assert=require('assert/strict'),{boot}=require('./admin-history-v283.cjs');
+const fixture={attempt_id:'synthetic-recovery',created_at:'2026-10-16T12:00:00Z',form_type:'lead',owner_name:'Synthetic veľmi dlhé meno majiteľa',phone:'+421900000000',email:'synthetic-long-address@example.invalid',dog_names:'Synthetic Bella a Synthetic Iris',interest_reason:'Viaceré dni v týždni',error_stage:'validation',recovery_payload:{dogs:[{dog_name:'Synthetic Bella',dog_breed:'Synthetic plemeno'},{dog_name:'Synthetic Iris',dog_info:'Dlhší text zdravotných obmedzení.'}]}};
+(async()=>{
+ const old=await boot(process.env.ADMIN_BEFORE||'admin-served-v284.html');try{await old.w.formRecoveryV273.load();assert(old.w.document.getElementById('formRecoveryV273'));old.w.openAdminDashboardModal('interest','Nové záujmy');await new Promise(r=>setTimeout(r,50));assert(old.w.document.getElementById('adminDashboardModalBodyV41').textContent.includes('nepodarilo načítať'));console.log('REPRODUCED old duplicate root and unsupported limit loading failure');}finally{old.w.close()}
+ const run=await boot(process.env.ADMIN_SOURCE||'admin-v285.html'),{w,errors}=run;try{
+ let handled=false;const calls=[];w.fetch=async(url,opts={})=>{calls.push({url:String(url),method:opts.method||'GET'});let data=[];if(String(url).includes('/web_form_recoveries_v273?')){if(opts.method==='PATCH')handled=true;data=handled?[]:[fixture];}return{ok:true,status:200,text:async()=>JSON.stringify(data),json:async()=>data}};
+ await w.formRecoveryV273.load();assert.equal(w.document.getElementById('formRecoveryV273'),null,'no standalone recovery section');
+ w.document.querySelector('#menuSection [data-admin-modal-kind="interest"]').click();await new Promise(r=>setTimeout(r,50));
+ const body=w.document.getElementById('adminDashboardModalBodyV41');assert.equal(body.querySelectorAll('[data-recovery-modal]').length,1);assert.equal(body.querySelectorAll('.recovery-item-v285').length,1);assert(body.textContent.includes(fixture.owner_name));assert(body.textContent.includes(fixture.dog_names));assert.equal(body.querySelector('a.phone').getAttribute('href'),'tel:'+fixture.phone);assert.equal(body.querySelectorAll('.recovery-details-v285 h4').length,2);
+ assert(calls.filter(x=>x.method==='GET').every(x=>new URL(x.url).searchParams.get('limit')==='100'));
+ body.querySelector('[data-recovery-handled]').click();await new Promise(r=>setTimeout(r,50));assert.equal(body.querySelectorAll('.recovery-item-v285').length,0);assert(calls.some(x=>x.method==='PATCH'));assert.equal(w.document.querySelectorAll('#todaySection [data-recovery-modal]').length,0);assert.deepEqual(errors,[]);
+ console.log('PASS assembled runtime: only interest modal, bounded GET limit100, contact/two-dog fields, handled PATCH and refresh, no dashboard duplicate or runtime errors');
+ }finally{w.close()}
+})().catch(e=>{console.error(e);process.exitCode=1});

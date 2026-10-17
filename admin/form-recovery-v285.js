@@ -1,0 +1,21 @@
+(function(){
+'use strict';
+let rows=[],loading=null,loadError="";const $=id=>document.getElementById(id);
+const labels={dog_name:'Meno psíka',dog_breed:'Plemeno',dog_weight_kg:'Váha',dog_sex:'Pohlavie',dog_age_text:'Vek',dog_neutered:'Kastrácia',interest_reason:'Využívanie škôlky',dog_allergies:'Alergie a zdravotné obmedzenia',dog_temperament:'Povaha a ďalšie informácie',dog_info:'Ďalšie informácie'};
+function fields(p){return Object.entries(labels).filter(([k])=>p?.[k]!==undefined&&p[k]!==null&&p[k]!=='').map(([k,label])=>'<div class="history-row"><strong>'+esc(label)+'</strong><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(typeof p[k]==='boolean'?(p[k]?'Áno':'Nie'):p[k])+'</div></div>').join('')}
+function contents(){
+ const q=String($('dogSearch')?.value||'').trim().toLowerCase(),visible=rows.filter(r=>!q||[r.owner_name,r.phone,r.email,r.dog_names].some(v=>String(v||'').toLowerCase().includes(q)));
+ return '<details class="card recovery-group-v285" '+(rows.length?'open':'')+'><summary><strong>⚠ Neúspešné odoslania</strong><span class="pill warn">'+visible.length+'</span></summary><div class="recovery-toolbar-v285"><button type="button" class="btn secondary compact" data-recovery-refresh>Obnoviť</button></div>'+(loadError?'<p class="warning-box">'+esc(loadError)+'</p>':'')+(!visible.length&&!loadError?'<p class="muted small">Zatiaľ bez neúspešných odoslaní.</p>':'')+visible.map(r=>'<article class="recovery-item-v285"><header><strong>'+esc(r.owner_name)+'</strong><div class="muted small">'+(r.form_type==='lead'?'Záujem':'Prihláška')+' · '+esc(webSubmissionDate(r.created_at))+'</div></header><div class="recovery-contact-v285"><a class="phone" href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a>'+(r.email?'<div>'+esc(r.email)+'</div>':'')+'</div>'+(r.dog_names?'<div class="recovery-dogs-v285">'+esc(r.dog_names)+'</div>':'')+(r.interest_reason?'<div class="recovery-reason-v285">'+esc(r.interest_reason)+'</div>':'')+'<details class="recovery-details-v285"><summary>Údaje z formulára</summary>'+fields(r.recovery_payload)+(r.recovery_payload?.dogs||[]).map((d,i)=>'<h4>'+(i+1)+'. psík</h4>'+fields(d)).join('')+'</details><button type="button" class="btn secondary recovery-handle-v285" data-recovery-handled="'+esc(r.attempt_id)+'">Označiť ako vybavené</button></article>').join('')+'</details>';
+}
+function html(){return '<section class="recovery-list-v285" data-recovery-modal>'+contents()+'</section>'}
+function render(){
+ $('formRecoveryV273')?.remove();
+ document.querySelectorAll('#adminDashboardModalBodyV41 [data-recovery-modal]').forEach(host=>host.innerHTML=contents());
+}
+async function load(){if(loading)return loading;loading=(async()=>{try{const r=await withJwtRetry(()=>supabase.from('web_form_recoveries_v273').select('attempt_id,created_at,form_type,owner_name,phone,email,dog_names,interest_reason,recovery_payload,error_stage').is('resolved_submission_id',null).is('handled_at',null).order('created_at',{ascending:false}).limit(100));if(r.error)throw r.error;loadError='';rows=(r.data||[]).filter(r=>r.error_stage!=='received'||Date.now()-Date.parse(r.created_at)>60000);render()}catch(e){loadError='Zachránené formuláre sa nepodarilo načítať. Skúste obnoviť prehľad.';render()}})();try{return await loading}finally{loading=null}}
+const originalLoad=loadData;loadData=async function(...args){await originalLoad(...args);await load()};window.loadData=loadData;
+const originalRender=renderWebSubmissions;renderWebSubmissions=function(...args){const value=originalRender(...args);render();return value};
+window.addEventListener('focus',()=>{if(!$('mainView')?.classList.contains('hidden'))void load()});
+document.addEventListener('click',event=>{const b=event.target.closest('[data-recovery-refresh],[data-recovery-handled]');if(!b)return;event.preventDefault();if(b.hasAttribute('data-recovery-refresh')){void load();return}b.disabled=true;void(async()=>{try{const r=await withJwtRetry(()=>supabase.from('web_form_recoveries_v273').update({handled_at:new Date().toISOString()}).eq('attempt_id',b.dataset.recoveryHandled));if(r.error)throw r.error;await load()}catch(e){alert(e.message||'Zmenu sa nepodarilo uložiť.');b.disabled=false}})()});
+window.formRecoveryV273={load,render,html};
+})();
