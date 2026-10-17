@@ -3103,3 +3103,18 @@ button span,button svg,button svg *{pointer-events:none}
  white-space:normal!important;overflow-wrap:anywhere!important;
 }
 #dogVaccinationFieldsV96 #vaccineErrorV287[hidden]{display:none!important}
+
+/* v290: iOS touch layer of interactive proof tiles must never paint a transient rectangle.
+   Do not change preview img nodes/src, pencil geometry, or keyboard focus-visible. */
+.vacc-proof-edit-modal-v244 .vacc-proof-edit-preview-v244,
+.vacc-proof-edit-modal-v244 .vacc-proof-edit-pencil-v244,
+.vacc-proof-edit-modal-v244 .vacc-proof-edit-add-v244,
+.vacc-proof-edit-modal-v244 .vacc-proof-edit-preview-v244 img {
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-touch-callout:none!important;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.vacc-proof-edit-modal-v244 button:focus:not(:focus-visible){
+  outline:none!important;
+}
