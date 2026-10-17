@@ -37,7 +37,7 @@ try {
     await React.act(settle);
     const dialog = dom.document.querySelector<HTMLElement>("[data-form-dialog]")!;
     assert.ok(dialog, "actual Radix dialog mounted");
-    assert.equal(dialog.getAttribute("data-form-dialog"), "stable-v296");
+    assert.equal(dialog.getAttribute("data-form-dialog"), "candidate-v297");
     assert.equal(dialog.style.getPropertyValue("left"), "12px", "mobile form anchored within viewport");
     assert.equal(dialog.style.getPropertyValue("right"), "12px", "right edge anchored");
     assert.equal(dialog.style.getPropertyPriority("left"), "important", "mobile anchor wins over base CSS");
@@ -65,12 +65,16 @@ try {
     await React.act(async () => { root.render(render(true, twoDogs)); await settle(); });
     assert.equal(dialog.querySelector('[name="meno"]'), name, "autofilled node remains mounted");
     assert.equal(name.value, "Synthetic Autofill");
+    // Simulate Safari moving the form during a keyboard session: tapping Done
+    // must put the viewport back at the position it had before text editing.
+    scroll.scrollTop = 670;
     const select = dialog.querySelector<HTMLSelectElement>("select")!;
     select.focus();
     viewport.height = 750;
     viewport.offsetTop = 0;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
-    assert.equal(scroll.scrollTop, 420, "keyboard dismissal / select focus preserves position");
+    await React.act(settle); // post-viewport rAF where Safari lays out the expanded scroller
+    assert.equal(scroll.scrollTop, 420, "Done restores pre-focus scroll despite Safari-induced 670px movement");
     assert.equal(dialog.dataset.formKeyboard, "closed");
     assert.match(dialog.style.getPropertyValue("height"), /100svh/, "closing keyboard keeps the same outer frame");
     assert.equal(scroll.style.getPropertyValue("max-height"), "", "closing keyboard removes only inner scroll constraint");
@@ -100,6 +104,8 @@ try {
     (allergies as any).getBoundingClientRect = originalAllergiesRect;
     viewport.height = 750;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
+    await React.act(settle);
+    assert.equal(scroll.scrollTop, 420, "Done after lower textarea restores pre-keyboard scroll instead of jumping down");
     select.focus(); // Restore native select focus after explicitly blurring the textarea.
     assert.equal(dom.document.activeElement, select);
     assert.equal(backgroundScrolls, 0, "no programmatic background scrolling");
@@ -131,12 +137,17 @@ try {
   const cssColor = readFileSync("src/styles.css", "utf8");
   assert.match(cssColor, /color-scheme: light;/);
   const dialogComponent = readFileSync("src/components/ui/dialog.tsx", "utf8");
+  assert.match(dialogComponent, /positioning === "form" \? "form-dialog-overlay"/, "form-specific backdrop must not change other dialogs");
+  assert.match(css, /html:has\(\.form-dialog\[data-form-keyboard="open"\]\) \.form-dialog-overlay\s*\{/, "keyboard overlay must respond to actual dialog state");
+  assert.match(css, /background-color:\s*#ffffff !important;/, "opaque white mask blocks underlying page during keyboard motion");
+  assert.match(css, /top:\s*-100vh !important;[\s\S]*bottom:\s*-100vh !important;/, "keyboard mask extends beyond Safari visual viewport panning");
+
   assert.match(dialogComponent, /positioning === "form"/, "shared form opts out of Radix default centering");
   const forms = readFileSync("src/components/site/Forms.tsx", "utf8");
   assert.match(forms, /name="pes" autoComplete="off"/);
   assert.match(forms, /name="pes2" autoComplete="off"/);
   assert.match(forms, /name="meno" autoComplete="name"/);
-  console.log("PASS shared Radix modal: 1/2 dogs, constant outer keyboard/no-keyboard frame, inner scroll clipping, focus/textarea visibility, autofill value/node stability, background scroll blocked and zoom cleanup. Real physical Safari and Android remain unverified.");
+  console.log("PASS candidate v297: 1/2 dogs, keyboard Done scroll recovery, constant outer keyboard/no-keyboard frame, inner scroll clipping, focus/textarea visibility, autofill value/node stability, background scroll blocked and zoom cleanup. Real physical Safari and Android remain unverified.");
 } finally {
   await React.act(async () => root.unmount());
   dom.happyDOM.abort();

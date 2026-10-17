@@ -53,6 +53,9 @@ export function FormDialog({
     let frame = 0;
     let focusFrame = 0;
     let touchStartY = 0;
+    let keyboardWasVisible = false;
+    let beforeKeyboardScroll: number | null = null;
+    let restoreFrame = 0;
     const keepFocusedFieldVisible = () => {
       if (window.innerWidth > 639) return;
       const scroller = scrollRef.current;
@@ -73,11 +76,28 @@ export function FormDialog({
     };
     const update = () => {
       if (viewport && Math.abs(viewport.scale - 1) > 0.01) return;
+      let scrollOnKeyboardClosed: number | null = null;
       const content = contentRef.current;
       if (!content) return;
       const mobile = window.innerWidth <= 639;
       const available = Math.max(200, viewport?.height ?? window.innerHeight);
       const keyboard = mobile && baseHeight - available > 150;
+      // Safari may scroll the inner form to reveal a focused input. On Done,
+      // recover the position from before the keyboard, not the last focused
+      // field or the artificial scroll applied while the keyboard was open.
+      if (keyboard) {
+        if (!keyboardWasVisible && beforeKeyboardScroll === null) {
+          // Fallback for programmatic focus or browsers that do not dispatch
+          // the input focus event before the viewport starts changing.
+          beforeKeyboardScroll = scrollRef.current?.scrollTop ?? null;
+        }
+        keyboardWasVisible = true;
+      } else if (keyboardWasVisible) {
+        keyboardWasVisible = false;
+        const position = beforeKeyboardScroll;
+        beforeKeyboardScroll = null;
+        if (position !== null) scrollOnKeyboardClosed = position;
+      }
       content.style.setProperty("--form-viewport-height", `${available}px`);
       content.dataset['formKeyboard'] = keyboard ? "open" : "closed";
       // In iOS Safari, a focused input can pan the *visual* viewport while a
@@ -128,6 +148,17 @@ export function FormDialog({
         for (const name of propertyNames) content.style.removeProperty(name);
         scrollRef.current?.style.removeProperty("max-height");
       }
+      if (scrollOnKeyboardClosed !== null && scrollRef.current) {
+        // Restore synchronously after releasing the keyboard-only height clip;
+        // the next animation frame repeats it in case native Safari adjusts
+        // scrollTop again while it completes its viewport resize.
+        scrollRef.current.scrollTop = scrollOnKeyboardClosed;
+        cancelAnimationFrame(restoreFrame);
+        const restoreTo = scrollOnKeyboardClosed;
+        restoreFrame = requestAnimationFrame(() => {
+          if (scrollRef.current) scrollRef.current.scrollTop = restoreTo;
+        });
+      }
     };
     const schedule = () => {
       cancelAnimationFrame(frame);
@@ -139,12 +170,26 @@ export function FormDialog({
         }
       });
     };
-    const onFocus = () => schedule();
+    const onFocus = () => {
+      // Keyboard activation is asynchronous. Record the user's pre-edit scroll
+      // once per keyboard session, including accessibility/keyboard focus.
+      if (!keyboardWasVisible && beforeKeyboardScroll === null) {
+        beforeKeyboardScroll = scrollRef.current?.scrollTop ?? null;
+      }
+      schedule();
+    };
     // Safari's rubber-band overscroll can move the page BEHIND a modal despite
     // Radix's body scroll-lock. Block background touch gestures, but keep the
     // sole inner form scroller independently scrollable.
     const onTouchStart = (event: TouchEvent) => {
       touchStartY = event.touches[0]?.clientY ?? 0;
+      const el = event.target;
+      const scroller = scrollRef.current;
+      if (!keyboardWasVisible && scroller && el instanceof Element &&
+          scroller.contains(el) && el.matches('input:not([type=radio]):not([type=checkbox]), textarea')) {
+        // Capture before native Safari focus can pan the document or scroller.
+        beforeKeyboardScroll = scroller.scrollTop;
+      }
     };
     const onTouchMove = (event: TouchEvent) => {
       if (!event.cancelable || window.innerWidth > 639) return;
@@ -174,6 +219,7 @@ export function FormDialog({
     return () => {
       cancelAnimationFrame(frame);
       cancelAnimationFrame(focusFrame);
+      cancelAnimationFrame(restoreFrame);
       content?.removeEventListener("focusin", onFocus);
       viewport?.removeEventListener("resize", schedule);
       viewport?.removeEventListener("scroll", schedule);
@@ -188,7 +234,7 @@ export function FormDialog({
       <DialogContent
         ref={contentRef}
         positioning="form"
-        data-form-dialog="stable-v296"
+        data-form-dialog="candidate-v297"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           // Announce the dialog without opening the keyboard or jumping to an input.
