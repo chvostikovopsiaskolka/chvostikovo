@@ -3128,7 +3128,7 @@ button span,button svg,button svg *{pointer-events:none}
 #dogBasicFieldsV96 .dog-inline-choice-v297{
   min-width:0;min-height:46px;padding:10px 5px;border-radius:14px;
   border:1px solid #d1d5db;background:#fff;color:#293241;
-  font:700 14px/1.25 inherit;font-size:14px;font-weight:700;
+  font-family:inherit;line-height:1.25;font-size:14px;font-weight:700;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent;
   -webkit-touch-callout:none
 }
