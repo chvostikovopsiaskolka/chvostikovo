@@ -331,3 +331,19 @@ html:has([data-form-dialog]) {
     touch-action: pan-y;
   }
 }
+
+/* v297: The native iOS keyboard can pan the visible viewport independently
+   from the fixed dialog. The pre-existing translucent, blurred overlay lets
+   the underlying landing page show through any newly exposed area.
+   Make ONLY form overlays opaque while the keyboard is open. Extend beyond
+   the layout viewport to keep the visual viewport covered during WebKit pan.
+   Neither modal width nor input values/positions are altered here. */
+@media (max-width: 639px) {
+  html:has(.form-dialog[data-form-keyboard="open"]) .form-dialog-overlay {
+    background-color: #ffffff !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    top: -100vh !important;
+    bottom: -100vh !important;
+  }
+}
