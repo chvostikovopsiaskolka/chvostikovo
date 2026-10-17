@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261017-pass-label-v296';
-const APP_VERSION='1.0.112';
+const APP_BUILD='20261017-dog-editor-v297';
+const APP_VERSION='1.0.113';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -708,6 +708,7 @@ function renderDetailsPhoto(dog=selectedDog()){
   $('dogDetailsPhotoControl').className='dog-details-photo-control '+dogSexClassV100(dog);
   button.setAttribute('aria-label',dog?.photo_url?'Upraviť, zmeniť alebo zmazať fotku':'Pridať fotku');
   button.title=button.getAttribute('aria-label');
+  if(!$('dogDetailsModal')?.classList.contains('hidden'))syncDogDetailsSexTintV297();
 }
 function dogSexClassV100(dog){return dog?.sex==='male'?'dog-male-v100':dog?.sex==='female'?'dog-female-v100':'dog-neutral-v100'}
 function renderDogHeaderV56(dog){
@@ -751,10 +752,70 @@ function parseDogBreedWeightV124(value){
   const breed=String(match[1]||'').replace(/[\s,;|\/-]+$/,'').trim(),weight=Number(String(match[2]).replace(',','.'));
   return {breed,weight_kg:Number.isFinite(weight)&&weight>0?weight:null};
 }
-function syncDogAgeField(){const birth=$('dogBirthDate').value,age=$('dogAge'),automatic=dogAgeText(birth);age.value=automatic;age.readOnly=true;age.setAttribute('aria-readonly','true');age.placeholder=automatic?'Vypočítané z dátumu narodenia':'Vek po zadaní dátumu narodenia';age.title='Vek sa automaticky vypočíta po zadaní dátumu narodenia.'}
+/* v297: display age and field warnings while entering a date, not only after blur.
+   Onboarding may start with an empty date; never save a future birthday. */
+function syncDogAgeField(){
+  const input=$('dogBirthDate'),age=$('dogAge');
+  if(!input||!age)return;
+  const today=bratislavaToday(),birth=input.value;
+  input.max=today;
+  const future=!!birth&&birth>today;
+  input.toggleAttribute('aria-invalid',future);
+  $('dogBirthDateErrorV297')?.classList.toggle('hidden',!future);
+  const calculated=future?'':dogAgeText(birth);
+  age.value=calculated;age.readOnly=true;age.setAttribute('aria-readonly','true');
+  age.placeholder=future?'Opravte dátum narodenia':calculated?'Vypočítané z dátumu narodenia':'Vek po zadaní dátumu narodenia';
+  age.title=future?'Dátum narodenia nemôže byť v budúcnosti.':'Vek sa automaticky vypočíta po zadaní dátumu narodenia.';
+}
+/* v297: live preview of gender tint uses unsaved form selection; never alters dog data or image nodes. */
+function syncDogDetailsSexTintV297(){
+  const sex=$('dogSex')?.value,cls=sex==='male'?'dog-male-v100':sex==='female'?'dog-female-v100':'dog-neutral-v100';
+  for(const id of ['dogDetailsPhotoControl','dogDetailsPhotoPreview']){
+    const root=$(id);if(!root)continue;
+    root.classList.remove('dog-male-v100','dog-female-v100','dog-neutral-v100');
+    root.classList.add(cls);
+  }
+}
+function syncDogInlineChoicesV297(){
+  for(const id of ['dogSex','dogNeutered']){
+    const input=$(id),group=input?.parentElement?.querySelector('.dog-inline-choices-v297');
+    if(!group)continue;
+    for(const btn of group.querySelectorAll('[data-choice-v297]'))
+      btn.setAttribute('aria-checked',String(btn.dataset.choiceV297===input.value));
+  }
+}
+/* The iOS native select overlay can obscure the form in dark system appearance.
+   Replace only the visible picker with choices in the same field; retain the real
+   select and its existing save/event handling for 1- and 2-dog accounts. */
+function mountDogInlineChoicesV297(){
+  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(!isIOS)return;
+  for(const id of ['dogSex','dogNeutered']){
+    const select=$(id);
+    if(!select||select.dataset.iosChoicesV297==='1')continue;
+    const group=document.createElement('div');
+    group.className='dog-inline-choices-v297';group.setAttribute('role','radiogroup');
+    group.setAttribute('aria-label',select.parentElement?.querySelector('label')?.textContent?.trim()||id);
+    for(const option of select.options){
+      const btn=document.createElement('button');
+      btn.type='button';btn.className='dog-inline-choice-v297';btn.textContent=option.textContent;
+      btn.dataset.choiceV297=option.value;btn.setAttribute('role','radio');
+      btn.addEventListener('click',()=>{
+        select.value=btn.dataset.choiceV297;
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+        syncDogInlineChoicesV297();
+      });
+      group.appendChild(btn);
+    }
+    select.after(group);select.dataset.iosChoicesV297='1';
+    select.classList.add('dog-ios-native-select-v297');select.setAttribute('aria-hidden','true');select.tabIndex=-1;
+    select.addEventListener('change',syncDogInlineChoicesV297);
+  }
+  syncDogInlineChoicesV297();
+}
 function fillDogForm(d,force=false){
   if(!force&&!$('dogDetailsModal')?.classList.contains('hidden'))return;
-  $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=d.breed||'';$('dogWeight').value=d.weight_kg??'';$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';
+  $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=d.breed||'';$('dogWeight').value=d.weight_kg??'';$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';syncDogInlineChoicesV297();syncDogDetailsSexTintV297();
   const care=dogCareFields(d);if($('dogAllergies'))$('dogAllergies').value=care.allergies;if($('dogTemperament'))$('dogTemperament').value=care.temperament;
   const vs=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(d.id));
   for(const [type,inputId] of [['rabies','rabiesUntil'],['infectious','infectiousUntil'],['kennel_cough','kennelUntil'],['lepto_l4','leptoL4UntilV211']]){
@@ -796,6 +857,12 @@ async function saveDog(e){
   if(dogSaveInFlightV145)return;
   const savedAccountV287=state.session?.user?.id;
   const savedMode=dogDetailsModeV96,mandatoryFlow=dogDetailsMandatoryV96,neut=$('dogNeutered').value,birthDate=$('dogBirthDate').value,sex=$('dogSex').value,ageText=dogAgeText(birthDate)||selectedDog()?.age_text||'',dogId=Number($('dogId').value);
+  syncDogAgeField();
+  if(birthDate&&birthDate>bratislavaToday()){
+    $('dogBirthDate')?.focus({preventScroll:true});
+    toast('Dátum narodenia nemôže byť v budúcnosti.');
+    return;
+  }
   const vaccinations=[
     {type:'rabies',valid_until:$('rabiesUntil').value},
     {type:'infectious',valid_until:$('infectiousUntil').value},
@@ -1370,7 +1437,9 @@ $('logoutBtn').addEventListener('click',async()=>{
   }
 });
 $('navBooking').addEventListener('click',()=>switchTab('booking'));$('navDog').addEventListener('click',()=>switchTab('menu'));$('navMessages').addEventListener('click',()=>switchTab('messages'));$('navStaff').addEventListener('click',()=>switchTab('staff'));
-$('dogSelector').addEventListener('change',e=>{const editing=!$('dogDetailsModal')?.classList.contains('hidden'),mode=dogDetailsModeV96;rememberVaccineDraftV287();clearVaccinationProofStageV104();state.selectedDogId=Number(e.target.value);renderPassSummary();renderDog();if(editing)openDogDetails(mode,false)});$('dogBirthDate').addEventListener('change',()=>syncDogAgeField());['rabiesUntil','infectiousUntil','kennelUntil','leptoL4UntilV211'].forEach(id=>['input','change'].forEach(type=>$(id)?.addEventListener(type,()=>{$('vaccineErrorV287')?.remove();$(id)?.removeAttribute('aria-invalid');updateVaccinationStatusesV96();renderVaccinationProofsV104()})));$('dogForm').addEventListener('submit',saveDog);$('dogDetailsClose').addEventListener('click',()=>closeDogDetails(false));$('dogDetailsModal').addEventListener('click',e=>{if(e.target===$('dogDetailsModal'))e.preventDefault()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dogDetailsModal').classList.contains('hidden'))closeDogDetails(false)});$('profileForm').addEventListener('submit',saveProfile);$('accountToggle').addEventListener('click',()=>$('profileForm').classList.toggle('hidden'));$('messageForm').addEventListener('submit',sendMessage);
+$('dogSelector').addEventListener('change',e=>{const editing=!$('dogDetailsModal')?.classList.contains('hidden'),mode=dogDetailsModeV96;rememberVaccineDraftV287();clearVaccinationProofStageV104();state.selectedDogId=Number(e.target.value);renderPassSummary();renderDog();if(editing)openDogDetails(mode,false)});['input','change'].forEach(type=>$('dogBirthDate').addEventListener(type,syncDogAgeField));
+$('dogSex').addEventListener('change',syncDogDetailsSexTintV297);
+mountDogInlineChoicesV297();['rabiesUntil','infectiousUntil','kennelUntil','leptoL4UntilV211'].forEach(id=>['input','change'].forEach(type=>$(id)?.addEventListener(type,()=>{$('vaccineErrorV287')?.remove();$(id)?.removeAttribute('aria-invalid');updateVaccinationStatusesV96();renderVaccinationProofsV104()})));$('dogForm').addEventListener('submit',saveDog);$('dogDetailsClose').addEventListener('click',()=>closeDogDetails(false));$('dogDetailsModal').addEventListener('click',e=>{if(e.target===$('dogDetailsModal'))e.preventDefault()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dogDetailsModal').classList.contains('hidden'))closeDogDetails(false)});$('profileForm').addEventListener('submit',saveProfile);$('accountToggle').addEventListener('click',()=>$('profileForm').classList.toggle('hidden'));$('messageForm').addEventListener('submit',sendMessage);
 $('bookingDogSelector').addEventListener('change',e=>{state.selectedDogId=Number(e.target.value);renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays()});
 // v242: the hero's photo/name and blank surface open the existing "Údaje psíka" editor.
 // Do not steal clicks from vaccination, visits, gradebook, pass actions or dog selection.
