@@ -46,16 +46,19 @@ export function FormDialog({
   useEffect(() => {
     if (!open) return;
     const viewport = window.visualViewport;
+    // Capture the unoccluded viewport when the dialog first opens. On Android
+    // window.innerHeight may also shrink when the keyboard opens; this baseline
+    // must not shrink with it.
+    const baseHeight = Math.max(window.innerHeight, document.documentElement.clientHeight, viewport?.height ?? 0);
     let frame = 0;
     let focusFrame = 0;
+    let touchStartY = 0;
     const keepFocusedFieldVisible = () => {
       if (window.innerWidth > 639) return;
       const scroller = scrollRef.current;
       const content = contentRef.current;
       const active = document.activeElement;
       if (!scroller || !content || !active || !content.contains(active)) return;
-      // Native iOS select sheets must not trigger our own scrolling/positioning.
-      // Text fields use only the inner modal scroll, never page scrollIntoView().
       if (!active.matches("input:not([type=radio]):not([type=checkbox]), textarea")) return;
       const field = active.getBoundingClientRect();
       const area = scroller.getBoundingClientRect();
@@ -69,20 +72,28 @@ export function FormDialog({
       }
     };
     const update = () => {
-      // The visual viewport may scroll independently when Safari opens a
-      // keyboard, auto-fills a field or closes a native picker. Its offsetTop
-      // must NOT be added to the modal top: that moves the entire form.
       if (viewport && Math.abs(viewport.scale - 1) > 0.01) return;
       const content = contentRef.current;
       if (!content) return;
-      const available = viewport?.height ?? window.innerHeight;
-      content.style.setProperty("--form-viewport-height", `${available}px`);
       const mobile = window.innerWidth <= 639;
-      const propertyNames = ["position", "top", "bottom", "left", "right", "width", "max-width", "margin", "transform", "translate", "scale", "animation", "max-height"];
+      const available = Math.max(200, viewport?.height ?? window.innerHeight);
+      const keyboard = mobile && baseHeight - available > 150;
+      content.style.setProperty("--form-viewport-height", `${available}px`);
+      content.dataset.formKeyboard = keyboard ? "open" : "closed";
+      // In iOS Safari, a focused input can pan the *visual* viewport while a
+      // fixed dialog remains in layout-viewport coordinates. v292 ignored this
+      // offset entirely, leaving the dialog high above the keyboard. Use it
+      // ONLY with a confirmed keyboard, clamped to the actual occluded region.
+      // Without the keyboard, retain a constant 12px/safe-area top.
+      const visualOffset = keyboard
+        ? Math.min(Math.max(0, viewport?.offsetTop ?? 0), Math.max(0, baseHeight - available))
+        : 0;
+      content.style.setProperty("--form-keyboard-top", `${Math.round(visualOffset)}px`);
+      const propertyNames = ["position", "top", "bottom", "left", "right", "width", "max-width", "margin", "transform", "translate", "scale", "animation", "max-height", "height"];
       if (mobile) {
         const values: Record<string, string> = {
           position: "fixed",
-          top: "calc(12px + env(safe-area-inset-top, 0px))",
+          top: "calc(var(--form-keyboard-top, 0px) + 12px + env(safe-area-inset-top, 0px))",
           bottom: "auto",
           left: "12px",
           right: "12px",
@@ -95,7 +106,15 @@ export function FormDialog({
           animation: "none",
           "max-height": "calc(var(--form-viewport-height, 100svh) - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
         };
+        if (keyboard) {
+          // A full-height sheet ends at the keyboard, rather than a short card
+          // floating above a large exposed band of the background page.
+          const sheetHeight = "calc(var(--form-viewport-height, 100svh) - 12px - env(safe-area-inset-top, 0px))";
+          values.height = sheetHeight;
+          values["max-height"] = sheetHeight;
+        }
         for (const [name, value] of Object.entries(values)) content.style.setProperty(name, value, "important");
+        if (!keyboard) content.style.removeProperty("height");
       } else {
         for (const name of propertyNames) content.style.removeProperty(name);
       }
@@ -109,19 +128,46 @@ export function FormDialog({
       });
     };
     const onFocus = () => schedule();
+    // Safari's rubber-band overscroll can move the page BEHIND a modal despite
+    // Radix's body scroll-lock. Block background touch gestures, but keep the
+    // sole inner form scroller independently scrollable.
+    const onTouchStart = (event: TouchEvent) => {
+      touchStartY = event.touches[0]?.clientY ?? 0;
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      if (!event.cancelable || window.innerWidth > 639) return;
+      const scroller = scrollRef.current;
+      const target = event.target;
+      if (!scroller || !(target instanceof Node) || !scroller.contains(target)) {
+        event.preventDefault();
+        return;
+      }
+      const currentY = event.touches[0]?.clientY ?? touchStartY;
+      const delta = currentY - touchStartY;
+      const end = scroller.scrollHeight - scroller.clientHeight;
+      if ((scroller.scrollTop <= 0 && delta > 0) ||
+          (scroller.scrollTop >= end - 1 && delta < 0) || end <= 0) {
+        event.preventDefault();
+      }
+    };
     const content = contentRef.current;
     update();
-    // Radix may attach the portal right after this effect.
     schedule();
     content?.addEventListener("focusin", onFocus);
     viewport?.addEventListener("resize", schedule);
+    viewport?.addEventListener("scroll", schedule);
     window.addEventListener("resize", schedule);
+    document.addEventListener("touchstart", onTouchStart, { passive: true, capture: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: false, capture: true });
     return () => {
       cancelAnimationFrame(frame);
       cancelAnimationFrame(focusFrame);
       content?.removeEventListener("focusin", onFocus);
       viewport?.removeEventListener("resize", schedule);
+      viewport?.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
+      document.removeEventListener("touchstart", onTouchStart, true);
+      document.removeEventListener("touchmove", onTouchMove, true);
     };
   }, [open]);
 
@@ -130,7 +176,7 @@ export function FormDialog({
       <DialogContent
         ref={contentRef}
         positioning="form"
-        data-form-dialog="stable-v292"
+        data-form-dialog="stable-v293"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           // Announce the dialog without opening the keyboard or jumping to an input.
