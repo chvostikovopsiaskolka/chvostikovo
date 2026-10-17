@@ -186,6 +186,39 @@ export function ShortForm({
   );
 }
 
+/** Inline binary choices avoid the dark iOS native picker sheet in the application. */
+function DogBinaryChoice({
+  label,
+  name,
+  options,
+}: {
+  label: string;
+  name: string;
+  options: readonly [string, string];
+}) {
+  return (
+    <fieldset className="min-w-0">
+      <legend className="label-sm">{label} *</legend>
+      <div className="grid grid-cols-2 gap-2">
+        {options.map((option) => (
+          <label key={option} className="form-binary-choice-v292 relative min-w-0 cursor-pointer">
+            <input
+              type="radio"
+              name={name}
+              value={option}
+              required
+              className="peer sr-only"
+            />
+            <span className="flex min-h-11 items-center justify-center rounded-[0.85rem] border border-border bg-white px-2 py-2.5 text-center text-base font-semibold text-forest transition-colors peer-checked:border-coral peer-checked:bg-secondary/55">
+              {option}
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
 export function LongForm({ onSent }: { onSent?: () => void }) {
   const formId = useId();
   const [sent, setSent] = useState(false);
@@ -333,18 +366,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         </div>
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2">
-        <div>
-          <label className="label-sm" htmlFor={`l-${formId}-pohlavie`}>
-            Pohlavie psa *
-          </label>
-          <select id={`l-${formId}-pohlavie`} name="pohlavie" required className="field" defaultValue="">
-            <option value="" disabled>
-              Vyberte
-            </option>
-            <option>Pes</option>
-            <option>Suka</option>
-          </select>
-        </div>
+        <DogBinaryChoice label="Pohlavie psa" name="pohlavie" options={["Pes", "Suka"]} />
         <div>
           <label className="label-sm" htmlFor={`l-${formId}-vek`}>
             Vek psa *
@@ -352,18 +374,7 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
           <input id={`l-${formId}-vek`} name="vek" required className="field" placeholder="2 roky" />
         </div>
       </div>
-      <div>
-        <label className="label-sm" htmlFor={`l-${formId}-kastrovana`}>
-          Kastrovaný / sterilizovaná *
-        </label>
-        <select id={`l-${formId}-kastrovana`} name="kastrovana" required className="field" defaultValue="">
-          <option value="" disabled>
-            Vyberte
-          </option>
-          <option>Áno</option>
-          <option>Nie</option>
-        </select>
-      </div>
+      <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana" options={["Áno", "Nie"]} />
       <div>
         <label className="label-sm" htmlFor={`l-${formId}-duvod`}>
           Ako plánujete využívať škôlku? *
@@ -422,23 +433,13 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
             </div>
           </div>
           <div className="grid gap-3.5 sm:grid-cols-2">
-            <div>
-              <label className="label-sm" htmlFor={`l-${formId}-pohlavie2`}>Pohlavie psa *</label>
-              <select id={`l-${formId}-pohlavie2`} name="pohlavie2" required className="field" defaultValue="">
-                <option value="" disabled>Vyberte</option><option>Pes</option><option>Suka</option>
-              </select>
-            </div>
+            <DogBinaryChoice label="Pohlavie psa" name="pohlavie2" options={["Pes", "Suka"]} />
             <div>
               <label className="label-sm" htmlFor={`l-${formId}-vek2`}>Vek psa *</label>
               <input id={`l-${formId}-vek2`} name="vek2" required maxLength={100} className="field" placeholder="3 roky" />
             </div>
           </div>
-          <div>
-            <label className="label-sm" htmlFor={`l-${formId}-kastrovana2`}>Kastrovaný / sterilizovaná *</label>
-            <select id={`l-${formId}-kastrovana2`} name="kastrovana2" required className="field" defaultValue="">
-              <option value="" disabled>Vyberte</option><option>Áno</option><option>Nie</option>
-            </select>
-          </div>
+          <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana2" options={["Áno", "Nie"]} />
           <div>
             <label className="label-sm" htmlFor={`l-${formId}-alergie2`}>Alergie a zdravotné obmedzenia</label>
             <textarea id={`l-${formId}-alergie2`} name="alergie2" maxLength={3000} rows={3} className="field resize-none" placeholder="Alergie, lieky alebo zdravotné obmedzenia..." />
