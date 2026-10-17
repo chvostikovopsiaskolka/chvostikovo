@@ -3,7 +3,7 @@
  const rootId='bookingMultiDogsV241';
  function openDog(id,action){
   if(!state.data?.dogs?.some(d=>Number(d.id)===id))return;
-  if(Number(state.selectedDogId)!==id){clearVaccinationProofStageV104();state.selectedDogId=id;renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays()}
+  if(Number(state.selectedDogId)!==id){rememberVaccineDraftV287();clearVaccinationProofStageV104();state.selectedDogId=id;renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays()}
   if(action==='vaccinations')openDogDetails('vaccinations',false);
   else if(action==='visits')window.openDogVisitsV99?.();
   else if(action==='grades')openCustomerGradebook();

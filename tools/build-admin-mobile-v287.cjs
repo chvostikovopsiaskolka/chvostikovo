@@ -1,0 +1,4 @@
+const fs=require('fs'),crypto=require('crypto'),zlib=require('zlib');
+module.exports=function(){let s=require('./build-admin-stability-v275.cjs')();for(const v of ['attendance-v283','approval-push-v284','recovery-layout-v285'])s=require('./build-admin-'+v+'.cjs')(s);s=s.replace('</head>','<style id="attendance-spacing-v286">#attendanceGuardV283 > button + button{margin-top:10px!important}</style>\n</head>');if(crypto.createHash('md5').update(s).digest('hex')!=='959d8179a1df69c40f4184f8205bc75d')throw Error('Baseline changed');
+const patch=JSON.parse(fs.readFileSync('admin/patches-v287.json','utf8'));for(const [old,next]of patch){if(s.split(old).length!==2)throw Error('Nonunique patch anchor');s=s.replace(old,next)}return s};
+if(require.main===module)fs.writeFileSync('../admin-v287.html',module.exports());

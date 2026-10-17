@@ -28,3 +28,14 @@ jobs:
         run: |
           node tests/admin-nav-v275.cjs
           node tests/admin-push-v275.cjs
+
+      - name: Vaccine and mobile stats regression against assembled v287
+        run: |
+          node tools/build-admin-mobile-v287.cjs
+          node tests/customer-vaccine-v287.cjs
+          node tests/customer-stable-vaccine-photos-v259.cjs
+          ADMIN_SOURCE=../admin-v287.html node tests/admin-mobile-v287.cjs
+          ADMIN_SOURCE=../admin-v287.html node tests/admin-runtime-v275.cjs
+          ADMIN_SOURCE=../admin-v287.html node tests/admin-existing-v275.cjs
+          ADMIN_SOURCE=../admin-v287.html node tests/admin-attendance-v283.cjs
+          ADMIN_SOURCE=../admin-v287.html node tests/admin-batch-approval-v284.cjs

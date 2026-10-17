@@ -14,3 +14,15 @@ The priority is a working public website, customer portal and admin. Complete an
 10. **Evidence and documentation.** Verify the live checksum/source and relevant data/response/UI boundary, then update the existing functional paragraphs and the current identifier in 00; add one historical entry to 07. Report exactly what passed and what remains unverified. 'Deployed', 'automatically tested' and 'observed on the user's phone' are different states.
 
 Existing invariants: owner scope, shared-pass atomicity, per-dog attendance counts, individual/bulk approval validation, vaccination gates, CRM attribution/root identity, consent, idempotency and SMS delay/correction remain authoritative. Do not change them as collateral work.
+
+## Layout and reporting contract (v287)
+
+- One document scroll owner for main sections. `.app` uses `100svh` as a minimum, never a forced content height or accumulated viewport offsets.
+- `#bottomNav` is a direct child of `body`, fixed to the safe bottom with a horizontal centering transform only. Never measure its transformed bounds to accumulate another transform. No scroll listener may change navigation translation or document height.
+- Main content reserves the measured navigation height plus safe bottom/gap once. Individual sections must not add another navigation-sized footer. Modal/detail scrollers remain isolated; preserve existing chat/detail hiding rules.
+- The safe top has a fixed background mask. Inputs and modal grids must have zero minimum inline size; warnings wrap inside the form. Keep styles for a system after the predecessor styles, rather than installing competing JS patches.
+- Reapply the active statistics view synchronously after every stats render and on resume. The active label and visible content must always agree.
+- Vaccine drafts, new-proof flags and retry files belong to account+dog. Never accept unchanged photos as a new proof; dates (including optional L4) use one server transaction. Upload failure must retain the draft. Do not clear existing decoded photographs on unrelated refresh.
+- Chart gaps mean unavailable data, never zero; future days have no actual values. Daily visits use real visit records including free entries and exclude synthetic/cancelled/no-show reservations. Earlier monthly totals must not be expanded into invented daily values.
+- Revenue charts reuse `revenueMonth`: daily single count × existing price, purchases on `purchased_on`, taxi and hotel in annual totals. Do not count pass consumption as a sale.
+- Meta status in daily metric rows is observed at import, not historical daily activity. Label this uncertainty. Status is independent of spend; do not hide zero-spend active ads. Report summaries include all campaigns for the period.
