@@ -85,6 +85,7 @@ try {
     (allergies as any).getBoundingClientRect = originalAllergiesRect;
     viewport.height = 750;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
+    select.focus(); // Restore native select focus after explicitly blurring the textarea.
     assert.equal(dom.document.activeElement, select);
     assert.equal(backgroundScrolls, 0, "no programmatic background scrolling");
     (dom as any).innerWidth = 900;
