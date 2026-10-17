@@ -3118,3 +3118,33 @@ button span,button svg,button svg *{pointer-events:none}
 .vacc-proof-edit-modal-v244 button:focus:not(:focus-visible){
   outline:none!important;
 }
+
+/* v297 – native iOS select overlay avoided only in the dog details form.
+   The existing select remains the single source of truth for saving values. */
+#dogBasicFieldsV96 select.dog-ios-native-select-v297{display:none!important}
+#dogBasicFieldsV96 .dog-inline-choices-v297{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;width:100%
+}
+#dogBasicFieldsV96 .dog-inline-choice-v297{
+  min-width:0;min-height:46px;padding:10px 5px;border-radius:14px;
+  border:1px solid #d1d5db;background:#fff;color:#293241;
+  font-family:inherit;line-height:1.25;font-size:14px;font-weight:700;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  -webkit-touch-callout:none
+}
+#dogBasicFieldsV96 .dog-inline-choice-v297[aria-checked="true"]{
+  border-color:#ea7a35;background:#fff2e8;color:#a94c16;
+  box-shadow:inset 0 0 0 1px #ea7a35
+}
+#dogBasicFieldsV96 .dog-inline-choice-v297:focus-visible{
+  outline:3px solid #f97316;outline-offset:2px
+}
+#dogBasicFieldsV96 .dog-birthdate-error-v297{
+  display:block;color:#ae352c;margin-top:7px;font-size:12px;
+  line-height:1.35;font-weight:700
+}
+#dogBasicFieldsV96 .dog-birthdate-error-v297.hidden{display:none!important}
+#dogBasicFieldsV96 #dogBirthDate[aria-invalid="true"]{
+  border-color:#ae352c!important;box-shadow:inset 0 0 0 1px #ae352c!important
+}
+#dogBasicFieldsV96 select.input{color-scheme:light}
