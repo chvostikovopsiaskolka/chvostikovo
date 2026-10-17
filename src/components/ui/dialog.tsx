@@ -38,7 +38,7 @@ const DialogContent = React.forwardRef<
   DialogContentProps
 >(({ className, children, positioning = "centered", ...props }, ref) => (
   <DialogPortal>
-    <DialogOverlay />
+    <DialogOverlay className={positioning === "form" ? "form-dialog-overlay" : undefined} />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
