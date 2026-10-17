@@ -73,6 +73,7 @@ try {
     viewport.height = 750;
     viewport.offsetTop = 0;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
+    await React.act(settle); // post-viewport rAF where Safari lays out the expanded scroller
     assert.equal(scroll.scrollTop, 420, "Done restores pre-focus scroll despite Safari-induced 670px movement");
     assert.equal(dialog.dataset.formKeyboard, "closed");
     assert.match(dialog.style.getPropertyValue("height"), /100svh/, "closing keyboard keeps the same outer frame");
@@ -103,6 +104,7 @@ try {
     (allergies as any).getBoundingClientRect = originalAllergiesRect;
     viewport.height = 750;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
+    await React.act(settle);
     assert.equal(scroll.scrollTop, 420, "Done after lower textarea restores pre-keyboard scroll instead of jumping down");
     select.focus(); // Restore native select focus after explicitly blurring the textarea.
     assert.equal(dom.document.activeElement, select);
