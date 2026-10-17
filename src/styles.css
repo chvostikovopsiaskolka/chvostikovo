@@ -242,44 +242,39 @@
   }
 }
 
-/* A form has one scroll owner. Keep native iOS pickers outside transformed
-   coordinate systems; changing keyboard height must not recenter the dialog. */
+/* v298: back to one stable form frame and one native inner scroller.
+   The dialog is pinned at a constant position, with a natural (not forced
+   full-screen) height and a single max-height. Browser keyboard events must
+   never change its geometry or synthesize a scroll offset. */
 .form-dialog {
   display: flex;
   flex-direction: column;
+  overscroll-behavior: contain;
 }
 
 .form-dialog-scroll {
-  overflow-anchor: none;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
   scroll-behavior: auto;
-  scroll-padding-block: 0.75rem;
-}
-
-html:has([data-form-dialog]) {
-  scroll-behavior: auto;
+  scroll-padding-block: 12px;
 }
 
 @media (max-width: 639px) {
-  /*
-   * v277: Radix supplies 50% left/top and -50% X/Y translations.
-   * A partial mobile override displaced every shared form off-screen on iOS.
-   * Own mobile geometry without visualViewport.offsetTop feedback; no transform or OS-picker jumps.
-   */
   .form-dialog[data-state] {
     position: fixed !important;
     box-sizing: border-box !important;
-    top: calc(var(--form-keyboard-top, 0px) + 12px + env(safe-area-inset-top, 0px)) !important;
+    top: calc(12px + env(safe-area-inset-top, 0px)) !important;
     bottom: auto !important;
     left: 12px !important;
     right: 12px !important;
     width: auto !important;
     max-width: none !important;
-    margin: 0 !important;
-    height: calc(100svh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
     max-height: calc(100svh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
     transform: none !important;
     translate: none !important;
-    scale: none !important;
     animation: none !important;
   }
 }
@@ -318,32 +313,3 @@ html:has([data-form-dialog]) {
   outline-offset: 2px;
 }
 
-/* v296: keyboard changes only the inner scroll viewport. The white dialog
-   stays the SAME size/width/radius while Safari opens or dismisses the keyboard.
-   Extending the unchanged white frame behind the keyboard also covers the
-   background gap reported on physical iPhones. */
-@media (max-width: 639px) {
-  .form-dialog-scroll {
-    min-height: 0;
-    flex: 1 1 auto;
-    overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
-  }
-}
-
-/* v297: The native iOS keyboard can pan the visible viewport independently
-   from the fixed dialog. The pre-existing translucent, blurred overlay lets
-   the underlying landing page show through any newly exposed area.
-   Make ONLY form overlays opaque while the keyboard is open. Extend beyond
-   the layout viewport to keep the visual viewport covered during WebKit pan.
-   Neither modal width nor input values/positions are altered here. */
-@media (max-width: 639px) {
-  html:has(.form-dialog[data-form-keyboard="open"]) .form-dialog-overlay {
-    background-color: #ffffff !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-    top: -100vh !important;
-    bottom: -100vh !important;
-  }
-}
