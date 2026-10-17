@@ -1,0 +1,12 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+const {JSDOM}=require('./shared-v244/node_modules/jsdom');
+async function boot(file){
+ const html=fs.readFileSync(file,'utf8');const dom=new JSDOM(html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''),{url:'https://admin.fixture',runScripts:'outside-only',pretendToBeVisual:true});
+ const w=dom.window,errors=[];w.console.error=(...x)=>errors.push(x.join(' '));w.addEventListener('error',e=>errors.push(e.message));w.alert=()=>{};w.confirm=()=>true;w.scrollTo=()=>{};w.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});
+ w.fetch=async (url)=>{let data=[];if(String(url).includes('/visits?'))data=[{id:1,dog_id:8,reservation_id:373,visit_date:'2026-10-14',entry_type:'pass',pass_id:55,pass_entry_number:11}];if(String(url).includes('/reservations?'))data=[{id:373,dog_id:8,reservation_date:'2026-10-14',status:'attended',entry_type:'pass',pass_id:55,planned_entry_number:11,planned_pass_total:20}];if(String(url).includes('/passes?'))data=[{id:55,total_entries:20}];if(String(url).includes('/dogs?'))data=[{id:8,name:'Spirit'}];return {ok:true,status:200,text:async()=>JSON.stringify(data),json:async()=>data};};
+ for(const [,script]of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)){if(script.trim())try{new vm.Script(script).runInContext(dom.getInternalVMContext())}catch(e){errors.push(e.message)}}
+ await new Promise(r=>setTimeout(r,50));w.document.dispatchEvent(new w.Event('DOMContentLoaded'));await new Promise(r=>setTimeout(r,50));
+ return {w,dom,errors};
+}
+module.exports={boot};
+if(require.main===module)(async()=>{const {w,errors}=await boot(process.argv[2]||'admin-before.html');try{w.document.getElementById('menuStatsCardV1').click();await new Promise(r=>setTimeout(r,200));console.log(JSON.stringify({errors,statsHidden:w.document.getElementById('statsSection').className,tabs:w.document.querySelectorAll('[data-v40-stats]').length,history:w.document.getElementById('visitHistoryContent').textContent}));const b=w.document.querySelector('[data-v40-stats="history"]');if(b){b.click();await new Promise(r=>setTimeout(r,100));console.log('after history:',w.document.getElementById('visitHistoryContent').textContent)} }finally{w.close()}})().catch(e=>{console.error(e);process.exitCode=1});
