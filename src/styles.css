@@ -275,7 +275,8 @@ html:has([data-form-dialog]) {
     width: auto !important;
     max-width: none !important;
     margin: 0 !important;
-    max-height: calc(var(--form-viewport-height, 100svh) - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    height: calc(100svh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    max-height: calc(100svh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
     transform: none !important;
     translate: none !important;
     scale: none !important;
@@ -317,18 +318,14 @@ html:has([data-form-dialog]) {
   outline-offset: 2px;
 }
 
-/* v293: keyboard-open long forms expand right to the keyboard edge. The only
-   scroll owner remains form-dialog-scroll; body content never peeks through
-   between the card and the keyboard. */
+/* v296: keyboard changes only the inner scroll viewport. The white dialog
+   stays the SAME size/width/radius while Safari opens or dismisses the keyboard.
+   Extending the unchanged white frame behind the keyboard also covers the
+   background gap reported on physical iPhones. */
 @media (max-width: 639px) {
-  .form-dialog[data-form-keyboard="open"] {
-    left: 0 !important;
-    right: 0 !important;
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    padding-bottom: 0 !important;
-  }
   .form-dialog-scroll {
+    min-height: 0;
+    flex: 1 1 auto;
     overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;

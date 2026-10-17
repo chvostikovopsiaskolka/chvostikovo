@@ -1,3 +1,18 @@
+## v296 — 17.10.2026, physical iPhone regression: modal changes width/height on focus
+
+**Actual screenshots 16:22–16:23** confirm that web v293 is NOT a stable form on iOS Safari: application and contact modal switch from a rounded 12px-gutter frame to full-width white sheet whenever keyboard appears, then snap back when keyboard closes. Some lower fields expose blurred background between the form and keyboard. The viewport itself can pan during editing and native autofill. Prior v293 automated tests passed because they explicitly **expected** left/right 0 and keyboard-height outer-frame changes; these were wrong acceptance criteria. Do not call v293 physically fixed.
+
+**Source-confirmed regression**: the v293 FormDialog `left/right` values depend on `keyboard`, the outer `height/max-height` switch between natural and visualViewport dimensions, and `src/styles.css` applies `.form-dialog[data-form-keyboard="open"]` with left/right 0 and no bottom radii. The iOS browser may add its own scroll/pan. These mutations cause the observed full-width "zoom" and jumps.
+
+**v296 rules for ALL shared contact/application EN/SK / 1- and 2-dog dialogs**:
+- The **outer white modal** on mobile retains 12px left/right gutters, same radius, same safe-area top positioning and a constant `100svh`-based frame height throughout keyboard open/close/autofill. A white frame extends behind the native keyboard and masks the green/blur web background instead of switching to a full-width sheet. No conditional change of width/height/bottom radii at keyboard state.
+- iOS `visualViewport.height/offsetTop` may only limit the visible height of **the one inner `.form-dialog-scroll`** (and bounded compensation of visual viewport pan for the top), not change outer-frame dimensions. Focused textarea/input scrolls only inside that container, no new owner. Do not remount inputs, alter submitted values, autofocus, keyboard, consent or backend.
+- When dismissing keyboard after editing an initial owner name, avoid forcing another scroll to the next field; initial form position should be retained. Any remaining iOS focus behavior must be measured on a device, not inferred from a happy-dom simulation.
+- Keep inline Pes/Suka and Áno/Nie accessible radio controls, `font-size:16px` on inputs to avoid native Safari auto-zoom, working name/phone autofill and tracking.
+- Regression tests must assert stable external modal **before/during/after** keyboard focus on name, phone, breed, kg, age, allergies, character, and contact name/phone. For two dogs check the second set of fields. Check iOS Safari native keyboard and browser chrome, Android Chrome, landscape, no green background below the card and no scroll bleed. Automated DOM CSS tests do not prove physical iOS.
+
+If physically still broken after v296: STOP further guessed CSS deployments. Measure on Safari the actual visualViewport.height/offsetTop, layout viewport, modal and scroll rects and compare keyboard positions before any new code patch. Preserve rollback branch `backup-web-before-form-stable-frame-v296-20261017` from `dc087bd34da2d5223906b1addad32eef5bc0441d`.
+
 # Web form viewport stability — v274 (16 October 2026)
 
 Reported on iPhone: choosing a dog's sex/neuter status after dismissing the keyboard, or autofilling the owner's name, displaced the visible form. Screenshots show native iOS pickers separated from their controls. Exact OS-level geometry cannot be reproduced in the available DOM runtime; do not describe it as a confirmed WebKit root cause or claim physical-device verification.
