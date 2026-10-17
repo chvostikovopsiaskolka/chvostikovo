@@ -126,15 +126,89 @@ async function messageForWebhook(body: Json) {
     };
   }
 
+
+  if (table === "booking_approval_push_events_v284") {
+    const account = String(record.user_id || "");
+    const requestIds = Array.isArray(record.request_ids)
+      ? [...new Set(record.request_ids.map(Number).filter(n => Number.isSafeInteger(n) && n > 0))].slice(0, 60)
+      : [];
+    if (!account || !requestIds.length) return null;
+    const rows = await rest(`customer_booking_requests?id=in.(${requestIds.join(",")})&user_id=eq.${encodeURIComponent(account)}&status=eq.approved&select=id,dog_id,reservation_date,user_id,status&order=reservation_date.asc,id.asc&limit=60`);
+    const approved = (Array.isArray(rows) ? rows : []).filter(r =>
+      String(r.user_id) === account && r.status === "approved" &&
+      requestIds.includes(Number(r.id)) && /^\d{4}-\d{2}-\d{2}$/.test(String(r.reservation_date)));
+    if (!approved.length) return null;
+    const dates = [...new Set(approved.map(r => String(r.reservation_date)))].sort();
+    const dogIds = [...new Set(approved.map(r => Number(r.dog_id)))];
+    const dogs = await rest(`dogs?id=in.(${dogIds.join(",")})&select=id,name`);
+    const names = dogIds.map(dogId => String((Array.isArray(dogs) ? dogs.find(d => Number(d.id) === dogId) : null)?.name || "Psík"));
+    const count = dates.length;
+    const multiple = names.length > 1;
+    const subject = names.join(" a ");
+    const dayWord = count < 5 ? "dni" : "dní";
+    const date = dates[0];
+    const dateLabel = `${Number(date.slice(8,10))}. ${Number(date.slice(5,7))}. ${date.slice(0,4)}`;
+    return {
+      title: count > 1 ? "Rezervácie boli schválené 🐾" : "Rezervácia bola schválená 🐾",
+      body: count > 1
+        ? `${subject} ${multiple ? "majú" : "má"} ${count < 5 ? "schválené" : "schválených"} ${count} ${dayWord} v škôlke. ${multiple ? "Tešíme sa na nich!" : "Už sa tešíme!"}`
+        : `${subject} ${multiple ? "majú" : "má"} schválenú rezerváciu na ${dateLabel}. ${multiple ? "Tešíme sa na nich!" : "Už sa tešíme!"}`,
+      tag: `booking-approval-batch-${id}`,
+      recipientUserId: account,
+      audience: "customer",
+    };
+  }
+
   if (table === "customer_booking_requests") {
     const dogRows = await rest(`dogs?id=eq.${encodeURIComponent(String(record.dog_id || ""))}&select=name&limit=1`);
     const dogName = Array.isArray(dogRows) && dogRows[0]?.name ? String(dogRows[0].name) : "Psík";
     const date = String(record.reservation_date || "");
     if (record.status === "approved") {
+      // v29: include names of ACTUALLY approved dogs within the same shared booking.
+      // An unapproved second dog is never implied. A stable group tag updates
+      // the first notification if a second dog is approved later.
+      const group = String(record.booking_group_id || "").trim();
+      const account = String(record.user_id || "").trim();
+      let approved = [record];
+      if (group && /^[0-9a-f-]{36}$/i.test(group) && account && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        try {
+          const grouped = await rest(
+            `customer_booking_requests?booking_group_id=eq.${encodeURIComponent(group)}&user_id=eq.${encodeURIComponent(account)}&reservation_date=eq.${encodeURIComponent(date)}&status=eq.approved&select=id,dog_id,booking_group_id,user_id,reservation_date,status&order=id.asc&limit=4`,
+          );
+          if (Array.isArray(grouped)) approved = grouped.filter(row =>
+            String(row.user_id || "") === account &&
+            String(row.booking_group_id || "") === group &&
+            String(row.reservation_date || "") === date &&
+            String(row.status || "") === "approved"
+          );
+        } catch (error) {
+          console.warn("Grouped approval lookup unavailable", error instanceof Error ? error.message : String(error));
+        }
+      }
+      if (!approved.some(row => String(row.id) === id)) approved.push(record);
+      const ids = [...new Set(approved.map(row => Number(row.dog_id))
+        .filter(value => Number.isSafeInteger(value) && value > 0))].slice(0, 2);
+      let dogRows = [];
+      try {
+        if (ids.length) dogRows = await rest(`dogs?id=in.(${ids.join(",")})&select=id,name`);
+      } catch (error) {
+        console.warn("Approval dog labels unavailable", error instanceof Error ? error.message : String(error));
+      }
+      const names = ids.map(dogId => {
+        const found = Array.isArray(dogRows) ? dogRows.find(row => Number(row.id) === dogId) : null;
+        return String(found?.name || (dogId === Number(record.dog_id) ? dogName : "Psík")).trim().slice(0, 100);
+      });
+      if (!names.length) names.push(dogName);
+      const dateLabel = /^\d{4}-\d{2}-\d{2}$/.test(date)
+        ? `${Number(date.slice(8, 10))}. ${Number(date.slice(5, 7))}. ${date.slice(0, 4)}`
+        : "";
+      const multiple = names.length > 1;
       return {
-        title: "Rezervácia bola schválená",
-        body: `Rezervácia na ${date ? date.split("-").reverse().join(".") : ""} bola schválená. Pozrite, s kým bude váš psík v škôlke.`,
-        tag: `booking-approved-${id}`,
+        title: "Rezervácia bola schválená 🐾",
+        body: multiple
+          ? `${names.join(" a ")} majú schválenú rezerváciu${dateLabel ? " na " + dateLabel : ""}. Tešíme sa na nich!`
+          : `${names[0]} má schválenú rezerváciu${dateLabel ? " na " + dateLabel : ""}. Už sa tešíme!`,
+        tag: `booking-approved-${group || id}`,
         recipientUserId: String(record.user_id || ""),
         audience: "customer",
       };
@@ -165,12 +239,41 @@ async function messageForWebhook(body: Json) {
   }
 
   if (table === "customer_pass_requests") {
-    const dogRows = await rest(`dogs?id=eq.${encodeURIComponent(String(record.dog_id || ""))}&select=name&limit=1`);
-    const dogName = Array.isArray(dogRows) && dogRows[0]?.name ? String(dogRows[0].name) : "Psík";
+    // v28: summarize only genuine pending interests by this same account, within a brief session.
+    const userId = String(record.user_id || "");
+    const stamp = Date.parse(String(record.requested_at || ""));
+    const windowMs = 20 * 60 * 1000;
+    let related = [record];
+    if (userId && Number.isFinite(stamp)) {
+      try {
+        const minTime = encodeURIComponent(new Date(stamp - windowMs).toISOString());
+        const rows = await rest(`customer_pass_requests?user_id=eq.${encodeURIComponent(userId)}&status=eq.pending&requested_at=gte.${minTime}&select=id,dog_id,dog_ids,requested_at,status&order=requested_at.asc&limit=20`);
+        if (Array.isArray(rows)) related = rows.filter(row =>
+          Number.isFinite(Date.parse(String(row.requested_at || ""))) &&
+          Math.abs(Date.parse(String(row.requested_at || "")) - stamp) <= windowMs
+        );
+      } catch (error) { console.warn("Pass interest grouping unavailable", error instanceof Error ? error.message : String(error)); }
+    }
+    if (!related.some(row => String(row.id) === id)) related.push(record);
+    const confirmed = related.filter(row => String(row.status || "pending") === "pending");
+    const ids = [...new Set(confirmed.flatMap(row =>
+      Array.isArray(row.dog_ids) && row.dog_ids.length ? row.dog_ids.map(Number) : [Number(row.dog_id)]
+    ).filter(value => Number.isSafeInteger(value) && value > 0))].slice(0, 2);
+    const dogRows = ids.length ? await rest(`dogs?id=in.(${ids.join(",")})&select=id,name`) : [];
+    const names = ids.map(dogId => {
+      const dog = Array.isArray(dogRows) ? dogRows.find(row => Number(row.id) === dogId) : null;
+      return String(dog?.name || "Psík").trim().slice(0, 100);
+    });
+    const multiple = names.length > 1;
+    const shared = multiple && confirmed.length === 1;
+    const earliestId = confirmed.map(row => Number(row.id)).filter(value => Number.isSafeInteger(value) && value > 0).sort((a,b) => a-b)[0] || id;
     return {
-      title: "Záujem o permanentku",
-      body: `${dogName} má záujem o ďalšiu 10-vstupovú permanentku.`,
-      tag: `pass-interest-${id}`,
+      title: multiple ? "Záujem o permanentky" : "Záujem o permanentku",
+      body: multiple
+        ? `${names.join(" a ")} majú záujem o ${shared ? "spoločnú 10-vstupovú permanentku" : "nové 10-vstupové permanentky"}.`
+        : `${names[0] || "Psík"} má záujem o novú 10-vstupovú permanentku.`,
+      // A shared notification tag replaces the first alert if the second consent arrives.
+      tag: `pass-interest-${earliestId}`,
     };
   }
 
