@@ -731,7 +731,7 @@ function dogCarePatch(payload: Json, cleaned: Json, vaccinationsProvided: boolea
     : { allergies: cleaned.allergies };
 }
 
-async function saveDog(user: Json, payload: Json) {
+async function saveDog(user: Json, payload: Json, token: string) {
   const cleaned = cleanDogPayload(payload);
   const userId = String(user.id);
   const dogId = Number(payload.dog_id || 0);
@@ -776,21 +776,11 @@ async function saveDog(user: Json, payload: Json) {
       body: dogPatch,
     });
     if (vaccinationsProvided) {
-      await rest(
-        'vaccinations?dog_id=eq.' + dogId + '&vaccination_type=' + encodeURIComponent('in.(rabies,infectious,kennel_cough)'),
-        { method: 'DELETE' },
-      );
-      if (cleaned.vaccinations.length) {
-        await rest('vaccinations', {
-          method: 'POST',
-          body: cleaned.vaccinations.map((v) => ({
-            dog_id: dogId,
-            vaccination_type: v.type,
-            valid_until: v.valid_until,
-            notes: v.notes,
-          })),
-        });
-      }
+      return await userRpc('portal_save_vaccinations_v287', {
+        p_dog_id: dogId, p_vaccinations: cleaned.vaccinations,
+        p_l4: payload.lepto_l4_until || null,
+        p_include_l4: payload.include_optional_l4 === true,
+      }, token);
     }
     const completeVaccinations = datesComplete && proofRows.length > 0;
     if (completeVaccinations) {
@@ -1227,7 +1217,7 @@ Deno.serve(async (req: Request) => {
     if (action === 'save_profile') return json({ data: await saveProfile(user, body) });
     if (action === 'save_dog') {
       await ensureProfile(user);
-      return json({ data: await saveDog(user, body) });
+      return json({ data: await saveDog(user, body, token) });
     }
     if (action === 'upload_vaccination_proofs') {
       return json({ data: await uploadVaccinationProofs(String(user.id), staff, body) });
@@ -1433,6 +1423,3 @@ Deno.serve(async (req: Request) => {
     return fail(message, /prihlás|vypršalo/i.test(message) ? 401 : 400);
   }
 });
-
-
-

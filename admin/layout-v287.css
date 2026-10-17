@@ -1,0 +1,30 @@
+/* Single document scroller. Fixed chrome is owned by body, never content. */
+html{overflow-x:clip;scroll-padding-top:env(safe-area-inset-top);scroll-padding-bottom:var(--admin-nav-reserve,110px)}
+body{overflow:visible;min-height:100svh}
+.app{min-height:100svh;padding-top:env(safe-area-inset-top);padding-bottom:var(--admin-nav-reserve,110px);transform:none;filter:none;contain:none}
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top);background:#f5f6f8;z-index:9000;pointer-events:none}
+#bottomNav.nav{position:fixed!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;transition:none!important;animation:none!important;padding-bottom:8px!important}
+#chvAuditOverlayV120 .chv-audit-filter{gap:12px}
+#chvAuditOverlayV120 input{inline-size:100%;min-inline-size:0;max-inline-size:100%}
+#chvAuditOverlayV120 label{overflow:hidden}
+.t266-panel,.t266-kpis,.t266-mini,.t266-click,.t266-click>div,.t266-mini>*{min-width:0;max-width:100%}
+.t266 h3,.t266 h4,.t266-mini span,.t266-kpi>span{overflow-wrap:anywhere;white-space:normal}
+.t266-source{grid-template-columns:8px minmax(0,1fr) auto}
+.t266-source>b{display:grid;grid-template-columns:minmax(3ch,auto) 6ch;gap:9px;white-space:nowrap;text-align:right;align-items:center}
+.t266-source b small{display:inline;margin:0;text-align:right}
+.t266-click b{font-size:clamp(16px,5vw,24px);overflow-wrap:anywhere}
+.t266-line,.t266-line svg{min-width:0;max-width:100%;overflow:hidden}
+#cmReportModalV76 .cm-report-dialog-v76>header{grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;row-gap:8px!important}
+#cmReportModalV76 #cmReportTitleV76{white-space:normal!important;overflow-wrap:anywhere;grid-column:1/-1!important;grid-row:1!important}
+#cmReportModalV76 .cm-report-date-v76{grid-column:1!important;grid-row:2!important;justify-self:start;max-width:100%!important}
+#cmReportModalV76 #cmReportCloseV76{grid-column:2!important;grid-row:2!important;align-self:center!important;margin:0!important}
+#cmReportModalV76 .cm-report-date-v76 input{height:40px!important;min-height:40px!important;margin:0!important;box-sizing:border-box}
+#cmReportModalV76 #cmReportDateGoV76{height:40px!important;width:40px!important;min-height:40px!important;margin:0!important}
+.stats-chart-v287{min-width:0;margin:16px 0}.stats-chart-v287 svg{width:100%;height:auto;display:block}.stats-chart-v287 text{font:11px -apple-system,sans-serif;fill:#748094}.stats-chart-v287 figcaption{min-height:28px;font-size:13px;color:#64748b;text-align:center}.stats-chart-v287 [data-stat-point]{cursor:pointer}
+.stats-controls-v287{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0}.stats-controls-v287 input,.stats-controls-v287 select{max-width:100%;min-height:44px;padding:8px;border:1px solid #d1d5db;border-radius:12px;background:white}
+.stats-legend-v287{display:flex;gap:15px;flex-wrap:wrap;font-size:12px}.stats-legend-v287 i{display:inline-block;width:12px;height:3px;vertical-align:middle;margin-right:5px}
+@media(max-width:600px){#chvAuditOverlayV120 .chv-audit-filter{grid-template-columns:minmax(0,1fr)}.t266-donut-layout{grid-template-columns:minmax(0,1fr);justify-items:center}.t266-legend{width:100%}.t266-mini{grid-template-columns:repeat(2,minmax(0,1fr))}.t266-ads summary img{width:44px;height:44px}.t266-ads summary{gap:9px}.t266-pages button{flex:1 1 auto;min-width:0;white-space:normal}.t266-fieldhead{flex-wrap:wrap}.stats-summary-row{flex-wrap:wrap}}
+
+.t266-kpi>strong{font-size:clamp(14px,calc(34px - var(--kpi-length,4)*2px),32px)!important;white-space:nowrap;letter-spacing:-.5px}
+@media(max-width:600px){.t266-pagebars{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.t266-pagecol>strong{font-size:18px;overflow-wrap:anywhere}}
+@media(min-width:600px){#cmReportModalV76 .cm-report-dialog-v76>header{grid-template-columns:minmax(0,1fr) auto auto!important}#cmReportModalV76 #cmReportTitleV76{grid-column:1!important}#cmReportModalV76 .cm-report-date-v76{grid-column:2!important;grid-row:1!important}#cmReportModalV76 #cmReportCloseV76{grid-column:3!important;grid-row:1!important}}
