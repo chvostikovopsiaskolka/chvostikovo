@@ -22,11 +22,12 @@ dom.document.body.append(container);
 const root = createRoot(container as any);
 const settle = () => new Promise(resolve => setTimeout(resolve, 35));
 const beforeStyle = dom.document.body.style.cssText;
+const beforeRootOverflow = dom.document.documentElement.style.overflow;
 let windowScrolls = 0;
 let restoredTo: [number, number] | null = null;
 dom.scrollTo = ((x: number, y: number) => { windowScrolls++; restoredTo = [x, y]; }) as typeof dom.scrollTo;
-function render(open: boolean, twoDogs: boolean) {
-  return <FormDialog open={open} onOpenChange={() => {}} title="Prihláška">
+function render(open: boolean, twoDogs: boolean, success = false) {
+  return <FormDialog open={open} onOpenChange={() => {}} title={success ? "Prihláška odoslaná" : "Prihláška"} subtitle="Úvodný text pred odoslaním" hideHeader={success}>
     <form>
       <input name="meno" autoComplete="name" />
       <input name="telefon" autoComplete="tel" />
@@ -43,7 +44,9 @@ try {
     await React.act(async () => { root.render(render(true, twoDogs)); await settle(); });
     const modal = dom.document.querySelector<HTMLElement>("[data-form-dialog]")!;
     assert.ok(modal, "real Radix form modal renders");
-    assert.equal(modal.dataset.formDialog, "simple-v299");
+    assert.equal(modal.dataset.formDialog, "simple-v300");
+    assert.equal(dom.document.documentElement.style.overflow, "hidden", "Safari root scroll locked while dialog is open");
+    assert.ok(modal.textContent?.includes("Úvodný text pred odoslaním"), "form introduction visible before submit");
     assert.equal(dom.document.body.style.position, "fixed", "body frozen while form open");
     assert.equal(dom.document.body.style.top, "-120px", "retain existing background scroll position");
     assert.equal(dom.document.body.style.overflow, "hidden", "background does not scroll");
@@ -99,9 +102,14 @@ try {
     scroller.dispatchEvent(new dom.Event("touchstart", { bubbles: true }));
     await React.act(async () => { await new Promise(resolve => setTimeout(resolve, 370)); });
     assert.equal(scroller.scrollTop, 490, "manual scrolling cancels the scheduled recovery");
+    await React.act(async () => { root.render(render(true, twoDogs, true)); await settle(); });
+    assert.ok(modal.querySelector(".sr-only")?.textContent?.includes("Prihláška odoslaná"), "confirmation dialog has accessible title");
+    assert.equal(modal.textContent?.includes("Úvodný text pred odoslaním"), false, "old form intro removed only after success");
+    assert.ok(modal.querySelector(".form-dialog-scroll"), "confirmation retains content and close button");
     await React.act(async () => { root.render(render(false, twoDogs)); await settle(); });
     assert.equal(dom.document.querySelector("[data-form-dialog]"), null, "modal removed");
     assert.equal(dom.document.body.style.cssText, beforeStyle, "background style restored on close");
+    assert.equal(dom.document.documentElement.style.overflow, beforeRootOverflow, "root overflow lock restored on close");
     assert.deepEqual(restoredTo, [0, 120], "page returns to exact pre-dialog position");
   }
 
@@ -109,6 +117,9 @@ try {
   const component = readFileSync("src/components/site/FormDialog.tsx", "utf8");
   const primitive = readFileSync("src/components/ui/dialog.tsx", "utf8");
   const forms = readFileSync("src/components/site/Forms.tsx", "utf8");
+  const header = readFileSync("src/components/site/Header.tsx", "utf8");
+  assert.ok(header.includes("<LongForm onSent={() => setApplicationSent(true)} />"), "header success controlled by saved application");
+  assert.ok(header.includes("hideHeader={applicationSent}"), "hide intro only after backend success");
   assert.match(css, /\.form-dialog-scroll\s*\{[^}]*overflow-y:\s*auto/, "one native internal scroll owner");
   assert.match(css, /max-height:\s*calc\(100svh/, "modal height limited without forced fullscreen");
   assert.doesNotMatch(css, /\.form-dialog\[data-form-keyboard|top:\s*-100vh|(?:^|\n)\s*height:\s*calc\(100svh/m, "no fullscreen or keyboard mask hacks");
@@ -118,7 +129,7 @@ try {
   assert.match(forms, /name="meno" autoComplete="name"/);
   assert.match(forms, /name="pes2" autoComplete="off"/);
   assert.match(css, /color-scheme: light;/);
-  console.log("PASS v299 simple form modal + isolated iOS owner autofill Done correction: 1/2 dogs, frozen page, no keyboard geometry changes, stable internal scroll, title focus, autofill/node retention, close restores background and unchanged CRM fields. Physical iOS Safari/Android remain unverified.");
+  console.log("PASS v300 form modal: success-only minimal receipt, locked Safari root, retained owner autofill Done correction: 1/2 dogs, frozen page, no keyboard geometry changes, stable internal scroll, title focus, autofill/node retention, close restores background and unchanged CRM fields. Physical iOS Safari/Android remain unverified.");
 } finally {
   await React.act(async () => root.unmount());
   dom.happyDOM.abort();

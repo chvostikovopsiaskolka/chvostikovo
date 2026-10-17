@@ -41,6 +41,7 @@ export function Header({
   landingTrackingSource?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [applicationSent, setApplicationSent] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
 
@@ -200,8 +201,8 @@ export function Header({
         </div>
       )}
 
-      <FormDialog open={open} onOpenChange={setOpen} title="Prihlás svojho psíka ešte dnes" subtitle="Vyplňte prihlášku do škôlky, v ktorej nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky.">
-        <LongForm />
+      <FormDialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setApplicationSent(false); }} hideHeader={applicationSent} title={applicationSent ? "Prihláška odoslaná" : "Prihlás svojho psíka ešte dnes"} subtitle="Vyplňte prihlášku do škôlky, v ktorej nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky.">
+        <LongForm onSent={() => setApplicationSent(true)} />
       </FormDialog>
     </header>
   );

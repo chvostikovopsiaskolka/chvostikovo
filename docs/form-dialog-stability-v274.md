@@ -1,3 +1,13 @@
+## v300 — 17.10.2026, iOS keyboard background + application receipt (small scope)
+
+Physical Safari screenshots 18:05–18:06 prove **successful real application submission** on v299, with correct success text and phone correction UI. At the bottom of the still-open long modal, focusing and dismissing the keyboard may make the underlying website appear to move or show through the dark Radix backdrop. User explicitly warns against a full rework. Do NOT add visualViewport listeners or alter modal width/height/scrollTop, overlay opacity/position, form fields or SMS/CRM flow.
+
+Minimal v300 approach: while any shared FormDialog is open, preserve the existing body fixed + scrollY scroll-lock and additionally set `document.documentElement.style.overflow = "hidden"`. Restore its exact previous inline value when the modal closes. The inner `.form-dialog-scroll` must remain independently scrollable (1- and 2-dog, phone/age/allergy/character, contact forms). This addresses a remaining un-locked *root* scroll owner; screenshot alone does not prove WebKit scroll is fully stopped. A real iOS Safari test remains necessary; never claim it passed based on happy-dom.
+
+When LongForm's existing successful `onSent` callback fires only **after** submitInquiry succeeded, the Header's FormDialog visually hides its pre-submit heading and description. An accessible visually hidden title `Prihláška odoslaná` remains, and the original LongForm confirmation (checkmark, SMS info, phone number and edit) is unchanged. When reopening, the introduction returns. Inline Contact/ShortForm and all other modals unchanged; importantly no additional form submission or lead event is triggered by the UI change.
+
+Tests: existing CI form+autofill+backend, root locked/unlocked over modal lifecycle, confirmation removes intro only after success but remains accessible, no mutation of the form's inputs, scrollTop/viewport logic unchanged. Backup branch `backup-web-before-confirmation-root-lock-v300-20261017` from live v299 main SHA `13fa4171649275aeb38b76c23c1ec6ff3a28a96d`; deploy only after CI.
+
 ## v299 — 17.10.2026, iPhone autofill owner name Done jumps to bottom (focused fix)
 
 Real user iPhone screenshot at 17:52 after autofilling owner name shows long 1-dog application scrolled almost to end (Povaha, consent) even though editing began at the first owner-name field. **Other behavior in v298 was reported sufficiently usable**; do NOT reintroduce the v293–v297 keyboard viewport or overlay machinery.
