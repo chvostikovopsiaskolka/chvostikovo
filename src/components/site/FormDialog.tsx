@@ -54,7 +54,13 @@ export function FormDialog({
     // This runs once on open/close, never during typing or keyboard resizing.
     const body = document.body;
     const html = document.documentElement;
-    const originalBodyCss = body.style.cssText;
+    // Change ONLY our six owned properties. Radix may independently write
+    // body pointer-events and scrollbar offsets: cssText replacement here
+    // would overwrite those unrelated changes on dialog cleanup.
+    const owned = ["position", "top", "left", "right", "width", "overflow"] as const;
+    const previous = owned.map(name => ({
+      name, value: body.style.getPropertyValue(name), priority: body.style.getPropertyPriority(name),
+    }));
     const originalOverscroll = html.style.overscrollBehavior;
     const originalScrollY = window.scrollY;
 
@@ -67,7 +73,10 @@ export function FormDialog({
     html.style.overscrollBehavior = "none";
 
     return () => {
-      body.style.cssText = originalBodyCss;
+      for (const { name, value, priority } of previous) {
+        if (value) body.style.setProperty(name, value, priority);
+        else body.style.removeProperty(name);
+      }
       html.style.overscrollBehavior = originalOverscroll;
       window.scrollTo(0, originalScrollY);
     };
