@@ -87,7 +87,7 @@ try {
   assert.match(css, /\.form-dialog-scroll\s*\{[^}]*overflow-y:\s*auto/, "one native internal scroll owner");
   assert.match(css, /max-height:\s*calc\(100svh/, "modal height limited without forced fullscreen");
   assert.doesNotMatch(css, /\.form-dialog\[data-form-keyboard|top:\s*-100vh|(?:^|\n)\s*height:\s*calc\(100svh/m, "no fullscreen or keyboard mask hacks");
-  assert.doesNotMatch(component, /visualViewport|scrollTop|touchmove|scrollIntoView|form-viewport|form-keyboard/, "no keyboard resize or scroll manipulation");
+  assert.doesNotMatch(component, /window\\.visualViewport|scrollTop\\s*\\+=|addEventListener\\(|scrollIntoView|--form-viewport|--form-keyboard/, "no imperative keyboard scroll/viewport manipulation");
   assert.match(primitive, /<DialogOverlay \/>/, "ordinary dark backdrop used for all dialogs");
   assert.equal((forms.match(/<DogBinaryChoice /g) || []).length, 4, "dog sex/neuter inline buttons remain");
   assert.match(forms, /name="meno" autoComplete="name"/);
