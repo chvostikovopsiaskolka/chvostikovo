@@ -268,7 +268,7 @@ html:has([data-form-dialog]) {
   .form-dialog[data-state] {
     position: fixed !important;
     box-sizing: border-box !important;
-    top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+    top: calc(var(--form-keyboard-top, 0px) + 12px + env(safe-area-inset-top, 0px)) !important;
     bottom: auto !important;
     left: 12px !important;
     right: 12px !important;
@@ -315,4 +315,22 @@ html:has([data-form-dialog]) {
 [data-form-dialog] .form-binary-choice-v292 input:focus-visible + span {
   outline: 2px solid var(--color-coral);
   outline-offset: 2px;
+}
+
+/* v293: keyboard-open long forms expand right to the keyboard edge. The only
+   scroll owner remains form-dialog-scroll; body content never peeks through
+   between the card and the keyboard. */
+@media (max-width: 639px) {
+  .form-dialog[data-form-keyboard="open"] {
+    left: 0 !important;
+    right: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .form-dialog-scroll {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
 }
