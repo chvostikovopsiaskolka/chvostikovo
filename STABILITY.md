@@ -15,6 +15,19 @@ The priority is a working public website, customer portal and admin. Complete an
 
 Existing invariants: owner scope, shared-pass atomicity, per-dog attendance counts, individual/bulk approval validation, vaccination gates, CRM attribution/root identity, consent, idempotency and SMS delay/correction remain authoritative. Do not change them as collateral work.
 
+## Cross-app bottom-navigation invariants (v289, 17 October 2026)
+
+Applies to **both** the customer PWA and the Supabase-served admin, on iOS Safari/Add to Home Screen, Android Chrome/installed PWA, and desktop. Treat any changed width, height, vertical position or horizontal alignment of the nav while switching main sections as a regression. The footer is never positioned from section content height (short Menu vs long Week/Traffic); tabs must not own competing layout/scroll contexts.
+
+- A single stable viewport reference: use safe-area-inset-bottom and 100svh where supported; never accumulate offsets from visualViewport resize/scroll, transformed getBoundingClientRect or previous frame. Keyboard appearance, address-bar collapse, page resume and tab switching must not cause nav drift.
+- One nav container outside scrollable, transformed, filtered or contained content. Only horizontal centering transform is allowed. Stable min/max width, button count, icon/label sizes, height, side gutters, and active-state geometry are shared across **all** main tabs. Active button background must not resize the bar.
+- Reserve the measured nav height plus safe-area/gap **once** in main scrolling content. No extra per-tab bottom padding, campaign/footer 110/175px, body height feedback or scroll observer to reposition the bar. Keep final content accessible above the bar.
+- Scope modal/detail/chat hiding individually; opening keyboard, inline validation error, landscape, safe top, scroll and PWA resume may not remount/rebuild the bar. Keep touch targets >=44px and respect both iOS and Android system insets.
+- Regression gates before **each admin OR customer UI release**: compare Overview/Week/Dogs/Traffic/Menu on 320,360,390,430 and landscape; short vs long content, open/close modal, browser chrome expansion, scroll, push-resume and keyboard dismissal. Test a physical signed-in iPhone and Android when available. Snapshot/Chromium/JSDOM tests alone never prove permanent physical stability.
+- Respect distinct deployment paths: admin live source is the Supabase stable frontend snapshot; customer source is Git customer-portal-production + its Vercel alias. Preserve separate rollback points, verify served artifacts, and avoid changing the other app as collateral work.
+
+The admin v288 mobile nav uses stable 100svh-derived top plus measured height; its non-mobile bottom positioning remains. The customer portal retains its own fixed safe-bottom implementation. Do not simply copy one implementation to the other or restore deprecated v275 cumulative feedback correction.
+
 ## Layout and reporting contract (v287)
 
 - One document scroll owner for main sections. `.app` uses `100svh` as a minimum, never a forced content height or accumulated viewport offsets.

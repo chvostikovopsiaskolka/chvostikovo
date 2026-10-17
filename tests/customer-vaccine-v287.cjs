@@ -9,6 +9,17 @@ async function scenario(count){
   assert.match(run(`vaccinationValidityV96('2026-10-16').text`),/skončila/);assert.match(run(`vaccinationValidityV96('2026-10-17').text`),/končí dnes/);
   for(let id=1;id<=count;id++){
    run(`state.selectedDogId=${id};openDogDetails('vaccinations');`);assert.equal(w.document.querySelectorAll('#dogForm').length,1);assert.equal(w.document.getElementById('rabiesUntil').value,'2026-12-31');assert.equal(w.document.getElementById('vaccProofCurrentV104').querySelectorAll('img').length,1);
+   // v289: saving the same expiry dates (including after a reverted invalid edit)
+   // must not issue a server request, create a review or show false success.
+   run("$('rabiesUntil').value='2026-10-16'");
+   await run("saveDog({preventDefault(){}})");
+   assert.equal(w.saved.length,0);
+   assert.equal(w.document.getElementById('vaccineErrorV287').classList.contains('vaccination-error-alert-v289'),true);
+   run("$('rabiesUntil').value='2026-12-31'");
+   await run("saveDog({preventDefault(){}})");
+   assert.equal(w.saved.length,0);
+   assert.match(w.document.getElementById('toast').textContent,/zostali nezmenené/);
+   run("openDogDetails('vaccinations')");
    for(const date of ['2026-10-16','2026-10-17','2027-01-01']){
     run(`$('rabiesUntil').value='${date}';`);await run(`saveDog({preventDefault(){}})`);
     assert.equal(w.saved.length,0);assert.match(w.document.getElementById('vaccineErrorV287').textContent,date==='2026-10-16'?/Po skutočnom preočkovaní/:/aktuálnu fotografiu/);assert.notEqual(w.document.activeElement.id,'rabiesUntil');
