@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261017-remaining-pass-choice-v292';
-const APP_VERSION='1.0.108';
+const APP_BUILD='20261017-shared-pass-clarity-v293';
+const APP_VERSION='1.0.109';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2201,13 +2201,16 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     /* A shared pass may have one entry left for two dogs. The other dog is then
        quoted as single: offer a new pass only to that dog, not twice. */
     const dogs=pickerDogsV254();
-    const lastSharedCoveredBySingle=new Set();
+    const lastSharedCoveredBySingle=new Set(),sharedRenewalBySingle=new Map();
     if(dogs.length===2){
       for(const q of quote||[]){
         if(q.mode!=='pass'||Number(q.total)<=0||Number(q.entry_number)!==Number(q.total)||!q.pass_id)continue;
         const shared=(state.data?.passes||[]).some(p=>Number(p.id)===Number(q.pass_id)&&p.is_shared&&dogs.every(d=>passAllowsDogV244(p,d.id)));
-        const otherSingle=(quote||[]).some(x=>x.mode==='single'&&String(x.date)===String(q.date)&&Number(x.dog_id)!==Number(q.dog_id)&&dogs.some(d=>Number(d.id)===Number(x.dog_id)));
-        if(shared&&otherSingle)lastSharedCoveredBySingle.add(Number(q.dog_id)+'|'+String(q.date));
+        const otherSingle=(quote||[]).find(x=>x.mode==='single'&&String(x.date)===String(q.date)&&Number(x.dog_id)!==Number(q.dog_id)&&dogs.some(d=>Number(d.id)===Number(x.dog_id)));
+        if(shared&&otherSingle){
+          lastSharedCoveredBySingle.add(Number(q.dog_id)+'|'+String(q.date));
+          sharedRenewalBySingle.set(Number(otherSingle.dog_id)+'|'+String(q.date),{sharedDogIds:dogs.map(d=>Number(d.id)),lastDogId:Number(q.dog_id)});
+        }
       }
     }
     for(const q of quote||[]){
@@ -2216,8 +2219,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       if(!reason||!Number.isSafeInteger(id)||id<=0)continue;
       if(reason==='last'&&lastSharedCoveredBySingle.has(id+'|'+String(q.date)))continue;
       if((state.data?.pass_requests||[]).some(p=>p.status==='pending'&&passAllowsDogV244(p,id)))continue;
+      const shared=reason==='single'?sharedRenewalBySingle.get(id+'|'+String(q.date)):null;
+      if(shared&&(state.data?.pass_requests||[]).some(p=>p.status==='pending'&&shared.sharedDogIds.some(dogId=>passAllowsDogV244(p,dogId))))continue;
       const existing=byDog.get(id);
-      if(!existing||reason==='last'&&existing.reason!=='last')byDog.set(id,{dogId:id,date:String(q.date),reason});
+      if(!existing||reason==='last'&&existing.reason!=='last'||shared&&!existing.sharedDogIds)byDog.set(id,{dogId:id,date:String(q.date),reason,...shared});
     }
     return [...byDog.values()].sort((a,b)=>a.reason===b.reason?a.dogId-b.dogId:a.reason==='last'?-1:1);
   }
@@ -2837,13 +2842,13 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   window.showPassRenewalAfterBookingV94=(dogId,date)=>{bookingDogV38=0;showPromptV38(Number(dogId)||0,date)};
 
   /* v281: reuse the existing one-dog renewal modal after confirmed booking. */
-  async function requestSingleDogPassV281(dogId,operationId){
+  async function requestPostBookingPassV293(dogIds,operationId){
     const account=state.session?.user?.id;
     if(!account)return null;
     const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_request_pass_v244',{
       method:'POST',
       headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'},
-      body:JSON.stringify({p_dog_ids:[dogId],p_total_entries:10,p_operation_id:operationId})
+      body:JSON.stringify({p_dog_ids:dogIds,p_total_entries:10,p_operation_id:operationId})
     });
     const txt=await response.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}
     if(!response.ok)throw new Error(data?.message||data?.error||'Záujem o permanentku sa nepodarilo odoslať.');
@@ -2862,8 +2867,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       if(state.session?.user?.id!==account)break;
       const dogId=Number(item.dogId);
       const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===dogId);
-      if(!dog||!['last','single'].includes(item.reason)||
-         (state.data.pass_requests||[]).some(p=>p.status==='pending'&&passAllowsDogV244(p,dogId)))continue;
+      const wantsShared=Array.isArray(item.sharedDogIds)&&item.sharedDogIds.length===2&&item.reason==='single';
+      const sharedDogs=wantsShared?item.sharedDogIds.map(id=>(state.data?.dogs||[]).find(d=>Number(d.id)===Number(id))).filter(Boolean):[];
+      if(!dog||!['last','single'].includes(item.reason)||wantsShared&&sharedDogs.length!==2||
+         (state.data.pass_requests||[]).some(p=>p.status==='pending'&&(passAllowsDogV244(p,dogId)||wantsShared&&sharedDogs.some(d=>passAllowsDogV244(p,d.id)))))continue;
+      const isShared=wantsShared&&sharedDogs.length===2;
+      const lastDog=isShared?sharedDogs.find(d=>Number(d.id)===Number(item.lastDogId)):null;
+      if(isShared&&!lastDog)continue;
+      const sharedNames=sharedDogs.map(d=>d.name).join(' a ');
       await new Promise(resolve=>{
         ensureModalV38();
         const modal=$('passRenewalModalV38'),yes=$('passRenewalRequestV38'),
@@ -2874,14 +2885,18 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const original={title:title.textContent,day:day.textContent,
           description:description?.textContent,hint:hint?.textContent,yes:yes.textContent};
         const isLast=item.reason==='last';
-        title.textContent=isLast?'Posledný vstup z permanentky':'Nová permanentka pre '+dog.name+'?';
-        day.textContent=isLast
-          ?'Rezervácia pre '+dog.name+' na '+skDay(item.date)+' '+skDate(item.date)+' využije posledný voľný vstup z aktuálnej permanentky.'
+        title.textContent=isShared?'Nová spoločná permanentka: '+sharedNames+'?':isLast?'Posledný vstup z permanentky':'Nová permanentka pre '+dog.name+'?';
+        day.textContent=isShared
+          ?'Posledný vstup zo spoločnej permanentky na '+skDay(item.date)+' '+skDate(item.date)+' využije '+lastDog.name+'. '+dog.name+' má zatiaľ na tento deň jednorazový vstup.'
+          :isLast?'Rezervácia pre '+dog.name+' na '+skDay(item.date)+' '+skDate(item.date)+' využije posledný voľný vstup z aktuálnej permanentky.'
           :dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' odoslanú jednorazovú rezerváciu.';
-        if(description)description.textContent=isLast
-          ?'Máte záujem o kúpu novej 10-vstupovej permanentky?'
+        if(description)description.textContent=isShared
+          ?'Máte záujem o novú spoločnú 10-vstupovú permanentku pre oboch psíkov – '+sharedNames+'?'
+          :isLast?'Máte záujem o kúpu novej 10-vstupovej permanentky?'
           :'Máte záujem o novú 10-vstupovú permanentku pre '+dog.name+'?';
-        if(hint)hint.textContent=isLast?'Ak zvolíte Neskôr, rezervácia zostane na aktuálnej permanentke.':'Ak zvolíte Neskôr, rezervácia pre '+dog.name+' zostane jednorazová.';
+        if(hint)hint.textContent=isShared
+          ?'Ak zvolíte Neskôr, '+lastDog.name+' využije posledný vstup z aktuálnej permanentky a '+dog.name+' zostane na jednorazovom vstupe.'
+          :isLast?'Ak zvolíte Neskôr, rezervácia zostane na aktuálnej permanentke.':'Ak zvolíte Neskôr, rezervácia pre '+dog.name+' zostane jednorazová.';
         yes.textContent='Mám záujem o permanentku';
         later.textContent='Neskôr';
         let done=false,busy=false;
@@ -2907,8 +2922,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
           try{
             const row=isLast
               ?await requestPass(10,{dogId,showConfirmation:false,renewal:true})
-              :await requestSingleDogPassV281(dogId,operationId);
-            if(row){busy=false;finish();toast('Záujem o permanentku pre '+dog.name+' sme odoslali škôlke.')}
+              :await requestPostBookingPassV293(isShared?sharedDogs.map(d=>Number(d.id)):[dogId],operationId);
+            if(row){busy=false;finish();toast(isShared?'Záujem o novú spoločnú permanentku ('+sharedNames+') sme odoslali škôlke.':'Záujem o permanentku pre '+dog.name+' sme odoslali škôlke.')}
           }catch(e){toast(e.message||'Záujem sa nepodarilo odoslať.')}
           finally{busy=false;yes.disabled=later.disabled=close.disabled=false}
         };
