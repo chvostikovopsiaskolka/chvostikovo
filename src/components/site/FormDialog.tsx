@@ -79,7 +79,7 @@ export function FormDialog({
       const available = Math.max(200, viewport?.height ?? window.innerHeight);
       const keyboard = mobile && baseHeight - available > 150;
       content.style.setProperty("--form-viewport-height", `${available}px`);
-      content.dataset.formKeyboard = keyboard ? "open" : "closed";
+      content.dataset['formKeyboard'] = keyboard ? "open" : "closed";
       // In iOS Safari, a focused input can pan the *visual* viewport while a
       // fixed dialog remains in layout-viewport coordinates. v292 ignored this
       // offset entirely, leaving the dialog high above the keyboard. Use it
@@ -110,7 +110,7 @@ export function FormDialog({
           // A full-height sheet ends at the keyboard, rather than a short card
           // floating above a large exposed band of the background page.
           const sheetHeight = "calc(var(--form-viewport-height, 100svh) - 12px - env(safe-area-inset-top, 0px))";
-          values.height = sheetHeight;
+          values['height'] = sheetHeight;
           values["max-height"] = sheetHeight;
         }
         for (const [name, value] of Object.entries(values)) content.style.setProperty(name, value, "important");
