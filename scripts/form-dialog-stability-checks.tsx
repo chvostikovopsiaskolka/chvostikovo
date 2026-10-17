@@ -24,7 +24,7 @@ dom.scrollTo = () => { backgroundScrolls++; };
 
 function render(open: boolean, twoDogs: boolean) {
   return <FormDialog open={open} onOpenChange={() => {}} title="Prihláška">
-    <form><input name="meno" autoComplete="name" />
+    <form><input name="meno" autoComplete="name" /><textarea name="alergie" />
       <select name="pohlavie"><option>Vyberte</option><option>Pes</option><option>Suka</option></select>
       {twoDogs && <input name="pes2" autoComplete="off" />}
     </form>
@@ -37,7 +37,7 @@ try {
     await React.act(settle);
     const dialog = dom.document.querySelector<HTMLElement>("[data-form-dialog]")!;
     assert.ok(dialog, "actual Radix dialog mounted");
-    assert.equal(dialog.getAttribute("data-form-dialog"), "stable-v278");
+    assert.equal(dialog.getAttribute("data-form-dialog"), "stable-v292");
     assert.equal(dialog.style.getPropertyValue("left"), "12px", "mobile form anchored within viewport");
     assert.equal(dialog.style.getPropertyValue("right"), "12px", "right edge anchored");
     assert.equal(dialog.style.getPropertyPriority("left"), "important", "mobile anchor wins over base CSS");
@@ -54,7 +54,8 @@ try {
     viewport.offsetTop = 30;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); viewport.dispatchEvent(new dom.Event("scroll")); await settle(); });
     assert.equal(dialog.style.getPropertyValue("--form-viewport-height"), "390px");
-    assert.equal(dialog.style.getPropertyValue("--form-viewport-top"), "30px");
+    assert.equal(dialog.style.getPropertyValue("top"), "calc(12px + env(safe-area-inset-top, 0px))", "keyboard viewport movement never shifts the form top");
+    assert.equal(dialog.style.getPropertyValue("--form-viewport-top"), "", "no visualViewport offsetTop feedback");
     assert.equal(scroll.scrollTop, 420, "keyboard resize does not reset form scroll");
     await React.act(async () => { root.render(render(true, twoDogs)); await settle(); });
     assert.equal(dialog.querySelector('[name="meno"]'), name, "autofilled node remains mounted");
@@ -65,6 +66,26 @@ try {
     viewport.offsetTop = 0;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
     assert.equal(scroll.scrollTop, 420, "keyboard dismissal / select focus preserves position");
+    // Mock only geometry, to exercise the real inner-scroll correction (not window scroll).
+    const allergies = dialog.querySelector<HTMLTextAreaElement>('[name="alergie"]')!;
+    const originalScrollerRect = scroll.getBoundingClientRect.bind(scroll);
+    const originalAllergiesRect = allergies.getBoundingClientRect.bind(allergies);
+    (scroll as any).getBoundingClientRect = () => ({ top: 100, bottom: 360, height: 260 });
+    (allergies as any).getBoundingClientRect = () => ({ top: 410, bottom: 515, height: 105 });
+    const beforeAllergies = scroll.scrollTop;
+    allergies.focus();
+    viewport.height = 345;
+    viewport.offsetTop = 110;
+    await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
+    assert.ok(scroll.scrollTop > beforeAllergies, "focused allergies textarea is scrolled inside the dialog");
+    assert.equal(dialog.style.getPropertyValue("top"), "calc(12px + env(safe-area-inset-top, 0px))", "top remains fixed even after Safari viewport scroll");
+    assert.equal(backgroundScrolls, 0, "focus never calls window scrollTo");
+    allergies.blur();
+    (scroll as any).getBoundingClientRect = originalScrollerRect;
+    (allergies as any).getBoundingClientRect = originalAllergiesRect;
+    viewport.height = 750;
+    await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
+    select.focus(); // Restore native select focus after explicitly blurring the textarea.
     assert.equal(dom.document.activeElement, select);
     assert.equal(backgroundScrolls, 0, "no programmatic background scrolling");
     (dom as any).innerWidth = 900;
@@ -86,13 +107,17 @@ try {
   }
   const css = readFileSync("src/styles.css", "utf8");
   assert.match(css, /@media \(max-width: 639px\)[\s\S]*\.form-dialog\[data-state\][\s\S]*left: 12px !important;[\s\S]*right: 12px !important;[\s\S]*transform: none !important;[\s\S]*translate: none !important;[\s\S]*animation: none !important;/);
+  const formsFile = readFileSync("src/components/site/Forms.tsx", "utf8");
+  assert.equal((formsFile.match(/<DogBinaryChoice /g) || []).length, 4, "one- and two-dog sex/neuter fields avoid native picker popups");
+  const cssColor = readFileSync("src/styles.css", "utf8");
+  assert.match(cssColor, /color-scheme: light;/);
   const dialogComponent = readFileSync("src/components/ui/dialog.tsx", "utf8");
   assert.match(dialogComponent, /positioning === "form"/, "shared form opts out of Radix default centering");
   const forms = readFileSync("src/components/site/Forms.tsx", "utf8");
   assert.match(forms, /name="pes" autoComplete="off"/);
   assert.match(forms, /name="pes2" autoComplete="off"/);
   assert.match(forms, /name="meno" autoComplete="name"/);
-  console.log("PASS actual Radix form dialog: 1/2 dogs, no input autofocus, viewport shrink/restore, native select focus, silent autofill/node stability, scroll preservation, zoom and cleanup. Physical iOS picker geometry remains a device check.");
+  console.log("PASS shared Radix form dialog: 1/2 dogs, fixed iOS top during keyboard scroll, in-dialog focus visibility for textarea, native select skipped, silent autofill/node stability, zoom, cleanup and in-form binary choices. Physical iOS Safari and Android remain device checks.");
 } finally {
   await React.act(async () => root.unmount());
   dom.happyDOM.abort();
