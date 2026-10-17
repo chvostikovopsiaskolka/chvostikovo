@@ -67,6 +67,10 @@ try {
     for (const el of form.querySelectorAll("input, textarea, select")) {
       if (el instanceof dom.HTMLSelectElement) {
         if (!el.hasAttribute("data-phone-prefix")) el.value = el.options[1]!.value;
+      } else if (el instanceof dom.HTMLInputElement && el.type === "radio") {
+        // Keep the original field value and select exactly one valid option
+        // for each binary dog field (do not overwrite radio.value as text).
+        if (!form.querySelector(`input[type="radio"][name="${el.name}"]:checked`)) el.checked = true;
       } else if (el instanceof dom.HTMLInputElement && el.type === "checkbox") el.checked = true;
       else if (el instanceof dom.HTMLInputElement && el.type === "email") el.value = "test@example.com";
       else (el as any).value = "TEST – autofill regression";
@@ -176,6 +180,10 @@ try {
     for (const el of form.querySelectorAll("input, textarea, select")) {
       if (el instanceof dom.HTMLSelectElement) {
         if (!el.hasAttribute("data-phone-prefix")) el.value = el.options[1]!.value;
+      } else if (el instanceof dom.HTMLInputElement && el.type === "radio") {
+        // Keep the original field value and select exactly one valid option
+        // for each binary dog field (do not overwrite radio.value as text).
+        if (!form.querySelector(`input[type="radio"][name="${el.name}"]:checked`)) el.checked = true;
       } else if (el instanceof dom.HTMLInputElement && el.type === "checkbox") el.checked = true;
       else if (el instanceof dom.HTMLInputElement && el.type === "email") el.value = "test@example.com";
       else (el as any).value = "PRIVATE NAME";
