@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261017-signup-two-dogs-hint-v295';
-const APP_VERSION='1.0.111';
+const APP_BUILD='20261017-pass-label-v296';
+const APP_VERSION='1.0.112';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2768,7 +2768,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const passId=Number(r.pass_id||reservation?.pass_id)||0;
       const upcomingPass=passId&&(state.data?.passes||[]).some(p=>Number(p.id)===passId&&p.status==='queued');
       const entryType=reservation?.entry_type||r.entry_type||dog?.default_entry_type;
-      const passState=planned&&plannedTotal?`<span class="reserved-pass-v37${r.planned_pass_request_id||upcomingPass?' reserved-pass-new-v134':''}">${r.planned_pass_request_id||upcomingPass?`Plánovaný vstup ${planned} z ${plannedTotal}`:`Vstup z permanentky ${planned} z ${plannedTotal}`}</span>`:entryType==='single'||entryType==='free'?`<span class="reserved-pass-v37">${entryType==='free'?'Bezplatný vstup':'Jednorazový vstup'}</span>`:'';
+      const pendingSingle=pending&&!planned&&!plannedTotal&&!reservation&&r.billing_choice==='auto'&&!r.projected_pass_id&&!r.planned_pass_request_id&&entryType!=='free';
+      const passState=planned&&plannedTotal?`<span class="reserved-pass-v37${r.planned_pass_request_id||upcomingPass?' reserved-pass-new-v134':''}">${r.planned_pass_request_id||upcomingPass?`Plánovaný vstup ${planned} z ${plannedTotal}`:`Vstup z permanentky ${planned} z ${plannedTotal}`}</span>`:pendingSingle||entryType==='single'||entryType==='free'?`<span class="reserved-pass-v37">${entryType==='free'?'Bezplatný vstup':'Jednorazový vstup'}</span>`:'';
       const note=day.note&&!(day.bookings_open===false&&/^zatvorené$/i.test(String(day.note).trim()))?`<div class="reserved-note-v37">${esc(day.note)}</div>`:'';
       const sharedNote='';
       const linkedReservation=r.can_manage===false&&r.status==='approved'&&Number(r.reservation_id)>0;
@@ -2822,7 +2823,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
   function ensureModalV38(){
     if(document.getElementById('passRenewalModalV38'))return;
-    document.body.insertAdjacentHTML('beforeend','<div id="passRenewalModalV38" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passRenewalTitleV38"><div class="legal-card"><button id="passRenewalCloseV38" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="passRenewalTitleV38">Posledný vstup z permanentky</h2><div class="legal-body"><p id="passRenewalDayV38"></p><p>Chcete pre psíka ďalšiu permanentku? Dajte nám vedieť tlačidlom nižšie.</p><p class="hint pass-renewal-validity-v38">Platnosť novej permanentky začne až jej prvým použitím.</p><p class="hint pass-interest-disclaimer-v44">Odoslaním záujmu nevzniká povinnosť platby ani automatický nákup permanentky. Ide iba o informáciu pre Chvostíkovo, že máte o novú permanentku záujem.</p></div><button id="passRenewalRequestV38" class="btn full" type="button">Mám záujem o novú permanentku</button><button id="passRenewalLaterV38" class="btn secondary full" type="button">Neskôr</button></div></div>');
+    document.body.insertAdjacentHTML('beforeend','<div id="passRenewalModalV38" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passRenewalTitleV38"><div class="legal-card"><button id="passRenewalCloseV38" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="passRenewalTitleV38">Posledný vstup z permanentky</h2><div class="legal-body"><p id="passRenewalDayV38"></p><p>Dajte nám vedieť tlačidlom nižšie.</p><p class="hint pass-renewal-validity-v38">Platnosť novej permanentky začne až jej prvým použitím.</p><p class="hint pass-interest-disclaimer-v44">Odoslaním záujmu nevzniká povinnosť platby ani automatický nákup permanentky. Ide iba o informáciu pre Chvostíkovo, že máte o novú permanentku záujem.</p></div><button id="passRenewalRequestV38" class="btn full" type="button">Mám záujem o novú permanentku</button><button id="passRenewalLaterV38" class="btn secondary full" type="button">Neskôr</button></div></div>');
     const close=()=>document.getElementById('passRenewalModalV38')?.classList.add('hidden');
     document.getElementById('passRenewalCloseV38').addEventListener('click',close);
     document.getElementById('passRenewalLaterV38').addEventListener('click',close);
@@ -2835,7 +2836,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(!lastDay)return;
     state.selectedDogId=Number(dogId);ensureModalV38();
     const modal=document.getElementById('passRenewalModalV38'),button=document.getElementById('passRenewalRequestV38');
-    $('passRenewalDayV38').textContent=`Táto rezervácia na ${skDay(reservationDate)} ${skDate(reservationDate)} využije posledný voľný vstup z aktuálnej permanentky. Máte záujem o novú?`;
+    $('passRenewalDayV38').textContent=`Rezervácia na ${skDay(reservationDate)} ${skDate(reservationDate)} využije posledný voľný vstup z aktuálnej permanentky. Máte záujem o novú?`;
     button.onclick=async()=>{if(button.disabled)return;if(state.session?.user?.id!==account){modal.classList.add('hidden');return}button.disabled=true;try{const row=await requestPass(10,{dogId,renewal:true});if(row)modal.classList.add('hidden')}finally{button.disabled=false}};
     modal.classList.remove('hidden');
   }
@@ -2888,11 +2889,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         title.textContent=isShared?'Nová spoločná permanentka: '+sharedNames+'?':isLast?'Posledný vstup z permanentky':'Nová permanentka pre '+dog.name+'?';
         day.textContent=isShared
           ?'Posledný vstup zo spoločnej permanentky na '+skDay(item.date)+' '+skDate(item.date)+' využije '+lastDog.name+'. '+dog.name+' má zatiaľ na tento deň jednorazový vstup.'
-          :isLast?'Rezervácia pre '+dog.name+' na '+skDay(item.date)+' '+skDate(item.date)+' využije posledný voľný vstup z aktuálnej permanentky.'
+          :isLast?'Rezervácia pre '+dog.name+' na '+skDay(item.date)+' '+skDate(item.date)+' využije posledný voľný vstup z aktuálnej permanentky. Máte záujem o novú?'
           :dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' odoslanú jednorazovú rezerváciu.';
         if(description)description.textContent=isShared
           ?'Máte záujem o novú spoločnú 10-vstupovú permanentku pre oboch psíkov – '+sharedNames+'?'
-          :isLast?'Máte záujem o kúpu novej 10-vstupovej permanentky?'
+          :isLast?'Dajte nám vedieť tlačidlom nižšie.'
           :'Máte záujem o novú 10-vstupovú permanentku pre '+dog.name+'?';
         if(hint)hint.textContent=isShared
           ?'Ak zvolíte Neskôr, '+lastDog.name+' využije posledný vstup z aktuálnej permanentky a '+dog.name+' zostane na jednorazovom vstupe.'
