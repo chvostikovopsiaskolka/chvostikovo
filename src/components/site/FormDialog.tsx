@@ -95,8 +95,8 @@ export function FormDialog({
           position: "fixed",
           top: "calc(var(--form-keyboard-top, 0px) + 12px + env(safe-area-inset-top, 0px))",
           bottom: "auto",
-          left: keyboard ? "0px" : "12px",
-          right: keyboard ? "0px" : "12px",
+          left: "12px",
+          right: "12px",
           width: "auto",
           "max-width": "none",
           margin: "0",
@@ -104,19 +104,29 @@ export function FormDialog({
           translate: "none",
           scale: "none",
           animation: "none",
-          "max-height": "calc(var(--form-viewport-height, 100svh) - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+          // The OUTER frame retains its height and rounded width even when
+          // the OS keyboard appears. Only the INNER scrollable area shrinks.
+          height: "calc(100svh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+          "max-height": "calc(100svh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
         };
-        if (keyboard) {
-          // A full-height sheet ends at the keyboard, rather than a short card
-          // floating above a large exposed band of the background page.
-          const sheetHeight = "calc(var(--form-viewport-height, 100svh) - 12px - env(safe-area-inset-top, 0px))";
-          values['height'] = sheetHeight;
-          values["max-height"] = sheetHeight;
-        }
         for (const [name, value] of Object.entries(values)) content.style.setProperty(name, value, "important");
-        if (!keyboard) content.style.removeProperty("height");
+        const scroller = scrollRef.current;
+        if (scroller) {
+          if (keyboard) {
+            // Use visualViewport for the CLIP of the inner scroll only.
+            // Keep the surrounding white dialog frame unchanged: this
+            // prevents the full-width/full-height "zoom" seen on real iPhone.
+            const visualBottom = (viewport?.offsetTop ?? 0) + available;
+            const innerTop = scroller.getBoundingClientRect().top;
+            const visibleInner = Math.max(96, Math.floor(visualBottom - innerTop - 16));
+            scroller.style.setProperty("max-height", `${visibleInner}px`);
+          } else {
+            scroller.style.removeProperty("max-height");
+          }
+        }
       } else {
         for (const name of propertyNames) content.style.removeProperty(name);
+        scrollRef.current?.style.removeProperty("max-height");
       }
     };
     const schedule = () => {
@@ -124,7 +134,9 @@ export function FormDialog({
       cancelAnimationFrame(focusFrame);
       frame = requestAnimationFrame(() => {
         update();
-        focusFrame = requestAnimationFrame(keepFocusedFieldVisible);
+        if (contentRef.current?.dataset['formKeyboard'] === "open") {
+          focusFrame = requestAnimationFrame(keepFocusedFieldVisible);
+        }
       });
     };
     const onFocus = () => schedule();
@@ -176,7 +188,7 @@ export function FormDialog({
       <DialogContent
         ref={contentRef}
         positioning="form"
-        data-form-dialog="stable-v293"
+        data-form-dialog="stable-v296"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           // Announce the dialog without opening the keyboard or jumping to an input.
