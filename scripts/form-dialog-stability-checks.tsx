@@ -86,7 +86,7 @@ try {
   const forms = readFileSync("src/components/site/Forms.tsx", "utf8");
   assert.match(css, /\.form-dialog-scroll\s*\{[^}]*overflow-y:\s*auto/, "one native internal scroll owner");
   assert.match(css, /max-height:\s*calc\(100svh/, "modal height limited without forced fullscreen");
-  assert.doesNotMatch(css, /\.form-dialog\[data-form-keyboard|top:\s*-100vh|height:\s*calc\(100svh/, "no fullscreen or keyboard mask hacks");
+  assert.doesNotMatch(css, /\.form-dialog\[data-form-keyboard|top:\s*-100vh|(?:^|\n)\s*height:\s*calc\(100svh/m, "no fullscreen or keyboard mask hacks");
   assert.doesNotMatch(component, /visualViewport|scrollTop|touchmove|scrollIntoView|form-viewport|form-keyboard/, "no keyboard resize or scroll manipulation");
   assert.match(primitive, /<DialogOverlay \/>/, "ordinary dark backdrop used for all dialogs");
   assert.equal((forms.match(/<DogBinaryChoice /g) || []).length, 4, "dog sex/neuter inline buttons remain");
