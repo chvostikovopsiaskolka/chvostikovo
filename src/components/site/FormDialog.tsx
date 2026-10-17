@@ -36,12 +36,15 @@ export function FormDialog({
   onOpenChange,
   title,
   subtitle,
+  hideHeader = false,
   children,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   title: string;
   subtitle?: string;
+  /** Keep an accessible dialog title, hide the pre-submission intro on success. */
+  hideHeader?: boolean;
   children: ReactNode;
 }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -105,6 +108,7 @@ export function FormDialog({
       name, value: body.style.getPropertyValue(name), priority: body.style.getPropertyPriority(name),
     }));
     const originalOverscroll = html.style.overscrollBehavior;
+    const originalRootOverflow = html.style.overflow;
     const originalScrollY = window.scrollY;
 
     body.style.position = "fixed";
@@ -114,6 +118,10 @@ export function FormDialog({
     body.style.width = "100%";
     body.style.overflow = "hidden";
     html.style.overscrollBehavior = "none";
+    // Safari may still rubber-band the root scrolling element while a
+    // textarea near the bottom of the form holds native keyboard focus.
+    // Lock ONLY the root overflow; the modal inner scroller stays available.
+    html.style.overflow = "hidden";
 
     return () => {
       for (const { name, value, priority } of previous) {
@@ -121,6 +129,7 @@ export function FormDialog({
         else body.style.removeProperty(name);
       }
       html.style.overscrollBehavior = originalOverscroll;
+      html.style.overflow = originalRootOverflow;
       window.scrollTo(0, originalScrollY);
     };
   }, [open]);
@@ -129,21 +138,21 @@ export function FormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         positioning="form"
-        data-form-dialog="simple-v299"
+        data-form-dialog="simple-v300"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           titleRef.current?.focus({ preventScroll: true });
         }}
         className="form-dialog left-3 right-3 top-3 w-auto max-w-none max-h-[88svh] gap-4 overflow-hidden rounded-3xl border-none bg-card p-4 sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-1.5rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-7"
       >
-        <DialogHeader className="shrink-0">
-          <DialogTitle ref={titleRef} tabIndex={-1} className="pr-6 text-left font-display text-base leading-snug text-forest outline-none sm:text-xl">
-            {title}
-          </DialogTitle>
-          {subtitle && (
-            <p className="pr-6 text-left text-sm text-forest/80">{subtitle}</p>
-          )}
-        </DialogHeader>
+        {hideHeader ? (
+          <DialogTitle ref={titleRef} tabIndex={-1} className="sr-only">{title}</DialogTitle>
+        ) : (
+          <DialogHeader className="shrink-0">
+            <DialogTitle ref={titleRef} tabIndex={-1} className="pr-6 text-left font-display text-base leading-snug text-forest outline-none sm:text-xl">{title}</DialogTitle>
+            {subtitle && <p className="pr-6 text-left text-sm text-forest/80">{subtitle}</p>}
+          </DialogHeader>
+        )}
         <div
           ref={contentScrollRef}
           className="form-dialog-scroll min-h-0 overflow-y-auto overscroll-contain"
