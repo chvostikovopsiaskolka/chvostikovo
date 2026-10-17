@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261017-shared-pass-cache-v294';
+const CACHE='chvostikovo-portal-shell-20261017-signup-two-dogs-hint-v295';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/dog-choice-fab-v276.css?v=20261017-shared-pass-cache-v294','/dual-dog-overview-v246.js?v=20261017-shared-pass-cache-v294','/dual-dog-overview-v246.css?v=20261017-shared-pass-cache-v294','/','/terms-pdf.js?v=20261017-shared-pass-cache-v294','/terms-pdf-font.js?v=20261017-shared-pass-cache-v294','/styles.css?v=20261017-shared-pass-cache-v294','/bulletin-photo-v243.css?v=20261017-shared-pass-cache-v294','/app.js?v=20261017-shared-pass-cache-v294','/back-swipe.js?v=20261017-shared-pass-cache-v294'];
+const SHELL=['/dog-choice-fab-v276.css?v=20261017-signup-two-dogs-hint-v295','/dual-dog-overview-v246.js?v=20261017-signup-two-dogs-hint-v295','/dual-dog-overview-v246.css?v=20261017-signup-two-dogs-hint-v295','/','/terms-pdf.js?v=20261017-signup-two-dogs-hint-v295','/terms-pdf-font.js?v=20261017-signup-two-dogs-hint-v295','/styles.css?v=20261017-signup-two-dogs-hint-v295','/bulletin-photo-v243.css?v=20261017-signup-two-dogs-hint-v295','/app.js?v=20261017-signup-two-dogs-hint-v295','/back-swipe.js?v=20261017-signup-two-dogs-hint-v295'];
 
 function withPortalCsp(response){
   if(!response)return response;
