@@ -1,3 +1,11 @@
+## v299 — 17.10.2026, iPhone autofill owner name Done jumps to bottom (focused fix)
+
+Real user iPhone screenshot at 17:52 after autofilling owner name shows long 1-dog application scrolled almost to end (Povaha, consent) even though editing began at the first owner-name field. **Other behavior in v298 was reported sufficiently usable**; do NOT reintroduce the v293–v297 keyboard viewport or overlay machinery.
+
+A deliberately minimal shared FormDialog workaround: only in narrow iOS Safari/WebKit viewport, on the **owner-name** input `name="meno" autoComplete="name"` losing focus after Done, restore `.form-dialog-scroll.scrollTop = 0` after the native keyboard closes (one animation frame and one bounded ~320ms late correction because WebKit may scroll after keyboard resize). Only if no other field is active; cancel immediately on any next-field focus, touch or pointer interaction. This does NOT alter the dialog geometry, height, backdrop, body lock, scroll owner, fields, autofill value, form submission, tracking or DB. The general viewport model from v298 remains unchanged.
+
+Acceptance: iOS name autofill and Done leaves first name/phone fields visible, existing name untouched; phone/dog/age/allergies and second dog editing remains scrollable, next-field navigation never gets reset, manual touch cancels late restoration, short contact form and English use same field. CI regression uses iPhone user-agent + simulated late WebKit scroll after Done and verifies user interaction cancellation. This **does not count as a physical iPhone keyboard test**; native WebKit still requires user confirmation. Backup: backup-web-before-owner-autofill-v299-20261017, based on v298 main 3b4a8c1f62fa9ee2eff5413238dfc1382c8ddde7. [TEST until PR merge/Pages verified].
+
 ## v298 — 17.10.2026 — návrat k jednoduchému modalu (nadradené pravidlá)
 
 **Zdrojové screenshoty iPhone 17:23–17:24 dokazujú, že v297 NIE JE funkčný na skutočnom iOS.** Otvorenie klávesnice posúva pozadie aj obsah, po „Hotovo“ zostáva biely prázdny panel. Automatické CI pre v297 fungovalo, ale testovalo umelo vytvorený visualViewport, nie skutočný Safari WebKit. ZRUŠIŤ odporúčanie v297 používať biely fullscreen overlay, keyboardTop/height, auto-scroll alebo návrat scrollTop.

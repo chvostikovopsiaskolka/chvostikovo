@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type FocusEvent, type ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 /** Visual contact CTA; inputs are only mounted in the existing open FormDialog. */
@@ -45,6 +45,49 @@ export function FormDialog({
   children: ReactNode;
 }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
+  const autofillRestoreFrame = useRef<number | null>(null);
+  const autofillRestoreTimer = useRef<number | null>(null);
+  const restoreToken = useRef(0);
+
+  function cancelAutofillRestore() {
+    restoreToken.current += 1;
+    if (autofillRestoreFrame.current !== null) cancelAnimationFrame(autofillRestoreFrame.current);
+    if (autofillRestoreTimer.current !== null) clearTimeout(autofillRestoreTimer.current);
+    autofillRestoreFrame.current = null;
+    autofillRestoreTimer.current = null;
+  }
+
+  function onOwnerNameBlur(event: FocusEvent<HTMLDivElement>) {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.name !== "meno" || input.autocomplete !== "name") return;
+    // This is an iOS Safari-specific Done/autofill workaround only. Keep the
+    // normal scrolling behavior of every other field and on other platforms.
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (!isIOS || window.innerWidth > 639) return;
+    // When the user moves directly into the next field, don't override Safari.
+    if (event.relatedTarget instanceof Element && event.currentTarget.contains(event.relatedTarget)) return;
+    const scroll = contentScrollRef.current;
+    if (!scroll) return;
+    cancelAutofillRestore();
+    const token = restoreToken.current;
+    const restoreIfIdle = () => {
+      if (restoreToken.current !== token || !scroll.isConnected) return;
+      if (scroll.contains(document.activeElement)) return;
+      scroll.scrollTop = 0;
+    };
+    autofillRestoreFrame.current = requestAnimationFrame(restoreIfIdle);
+    // Native iOS keyboard collapse can scroll again after the first frame.
+    // One late correction, cancelled on any further touch/focus, is enough.
+    autofillRestoreTimer.current = window.setTimeout(() => {
+      restoreIfIdle();
+      autofillRestoreTimer.current = null;
+    }, 320);
+  }
+
+  useEffect(() => () => cancelAutofillRestore(), []);
+
 
   useEffect(() => {
     if (!open) return;
@@ -86,7 +129,7 @@ export function FormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         positioning="form"
-        data-form-dialog="simple-v298"
+        data-form-dialog="simple-v299"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           titleRef.current?.focus({ preventScroll: true });
@@ -101,7 +144,14 @@ export function FormDialog({
             <p className="pr-6 text-left text-sm text-forest/80">{subtitle}</p>
           )}
         </DialogHeader>
-        <div className="form-dialog-scroll min-h-0 overflow-y-auto overscroll-contain">
+        <div
+          ref={contentScrollRef}
+          className="form-dialog-scroll min-h-0 overflow-y-auto overscroll-contain"
+          onBlurCapture={onOwnerNameBlur}
+          onFocusCapture={cancelAutofillRestore}
+          onPointerDownCapture={cancelAutofillRestore}
+          onTouchStartCapture={cancelAutofillRestore}
+        >
           {children}
         </div>
       </DialogContent>
