@@ -13,3 +13,5 @@ Outstanding: Bella Jr18 September is marked attended without a visit. No fee app
 Rollback: restore admin snapshot backup-admin-before-attendance-v283-20261017 only if current checksum matches v283. Audit99 stores previous cron4 command and calendar trigger definition. Unschedule chvostikovo-attendance-watchdog-v283, restore cron4 and calendar definition, revoke/drop new RPC/functions as appropriate; keep incidents/audit for evidence. Data repairs use before/after snapshots audit45/66; do not erase later visits.
 
 UI/OS on physical iPhone/Android remains unobserved. No customer forms, auth, PWA, marketing or menu redesign changed.
+
+Follow-up verification also repaired Spirit's October monthly total9→10 to match the ten confirmed visits; monthly source=app discrepancies from September2026 onwards are now included in the watchdog. Complete 14–16 October Google Calendar comparison also fixed Kevin15 October to5/10; no other matched event discrepancies remain in that interval. Original snapshots retained in audit66/99. Admin served MD5 518bd0d463dd103cf49e9832fe943983, HTTP200. CI39016884233 passed and PR74 merged61fcedf06ed86c358eb366e234cfd2bfa80629e9.

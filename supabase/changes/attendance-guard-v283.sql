@@ -32,7 +32,12 @@ missing as (
 select 'integrity:missing:'||d,'Chýba zapísaná dochádzka',n||' psíkov: '||names,d from missing
 union all select 'integrity:numbers:'||d,'Nesúlad čísiel návštev',names,d from mismatched
 union all select 'integrity:duplicate:'||pass_id||':'||pass_entry_number,'Opakovaný vstup permanentky',names||' · vstup '||pass_entry_number,d from duplicates
-union all select 'integrity:counter:'||id,'Nesúlad permanentky s návštevami',name||' · permanentka '||used_entries||', posledná návšteva '||last_number,d from counters;
+union all select 'integrity:counter:'||id,'Nesúlad permanentky s návštevami',name||' · permanentka '||used_entries||', posledná návšteva '||last_number,d from counters
+union all
+select 'integrity:monthly:'||m.dog_id||':'||m.month,'Nesúlad mesačnej štatistiky',d.name||' · mesačne '||m.visits||', zapísané návštevy '||count(v.id),m.month
+from public.monthly_visit_totals m join public.dogs d on d.id=m.dog_id
+left join public.visits v on v.dog_id=m.dog_id and v.visit_date>=m.month and v.visit_date<(m.month+interval '1 month')::date
+where m.source='app' and m.month>='2026-09-01' group by m.dog_id,m.month,d.name,m.visits having m.visits<>count(v.id);
 $fn$;
 revoke all on function private.attendance_issues_v283() from public,anon,authenticated;
 
