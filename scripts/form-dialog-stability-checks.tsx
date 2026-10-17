@@ -137,6 +137,11 @@ try {
   const cssColor = readFileSync("src/styles.css", "utf8");
   assert.match(cssColor, /color-scheme: light;/);
   const dialogComponent = readFileSync("src/components/ui/dialog.tsx", "utf8");
+  assert.match(dialogComponent, /positioning === "form" \? "form-dialog-overlay"/, "form-specific backdrop must not change other dialogs");
+  assert.match(css, /html:has\(\.form-dialog\[data-form-keyboard="open"\]\) \.form-dialog-overlay\s*\{/, "keyboard overlay must respond to actual dialog state");
+  assert.match(css, /background-color:\s*#ffffff !important;/, "opaque white mask blocks underlying page during keyboard motion");
+  assert.match(css, /top:\s*-100vh !important;[\s\S]*bottom:\s*-100vh !important;/, "keyboard mask extends beyond Safari visual viewport panning");
+
   assert.match(dialogComponent, /positioning === "form"/, "shared form opts out of Radix default centering");
   const forms = readFileSync("src/components/site/Forms.tsx", "utf8");
   assert.match(forms, /name="pes" autoComplete="off"/);
