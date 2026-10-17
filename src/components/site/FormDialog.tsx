@@ -81,6 +81,7 @@ export function FormDialog({
       const mobile = window.innerWidth <= 639;
       const available = Math.max(200, viewport?.height ?? window.innerHeight);
       const keyboard = mobile && baseHeight - available > 150;
+      if (import.meta.env.MODE === "test") console.log("V297_TEST_VIEWPORT", { available, baseHeight, keyboard, keyboardWasVisible, beforeKeyboardScroll });
       // Safari may scroll the inner form to reveal a focused input. On Done,
       // recover the position from before the keyboard, not the last focused
       // field or the artificial scroll applied while the keyboard was open.
@@ -159,6 +160,7 @@ export function FormDialog({
       });
     };
     const onFocus = () => {
+      if (import.meta.env.MODE === "test") console.log("V297_TEST_FOCUS", { was:keyboardWasVisible, saved:beforeKeyboardScroll, current:scrollRef.current?.scrollTop });
       // Keyboard activation is asynchronous. Record the user's pre-edit scroll
       // once per keyboard session, including accessibility/keyboard focus.
       if (!keyboardWasVisible && beforeKeyboardScroll === null) {
