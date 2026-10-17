@@ -240,8 +240,22 @@ async function preloadDogVisualV56(data=state.data){
   await Promise.all((data?.dogs||[]).map(async dog=>{
     const key=dogPhotoIdentityV260(dog);
     if(!dog.photo_url||[...document.querySelectorAll('[data-dog-photo-v260]')].some(el=>el.dataset.dogPhotoV260===key&&el.querySelector('img')))return;
-    try{const img=new Image();img.src=dog.photo_url;const ready=typeof img.decode==='function'?img.decode():new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject});await Promise.race([ready,new Promise(resolve=>setTimeout(resolve,700))])}catch(_){}
+    try{const img=new Image();img.src=dog.photo_url;const ready=typeof img.decode==='function'?img.decode():new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject});await Promise.race([ready,new Promise(resolve=>setTimeout(resolve,1500))])}catch(_){}
   }));
+}
+
+async function settleCustomerFirstPhotosV291(limit=850){
+ const images=[...($('appView')?.querySelectorAll('img')||[])].filter(img=>img.getAttribute('src')&&!img.closest('.hidden')).slice(0,24);
+ if(!images.length)return;
+ const ready=Promise.allSettled(images.map(async img=>{
+   if(!img.complete)await new Promise(resolve=>{
+     const done=()=>{img.removeEventListener('load',done);img.removeEventListener('error',done);resolve()};
+     img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});
+     if(img.complete)done();
+   });
+   if(img.complete&&img.naturalWidth>0&&typeof img.decode==='function')await img.decode().catch(()=>{});
+ }));
+ await Promise.race([ready,new Promise(resolve=>setTimeout(resolve,limit))]);
 }
 
 function bootstrapCore(showSpinner=true){
@@ -252,9 +266,18 @@ function bootstrapCore(showSpinner=true){
     const hasAssignedDog=!!d.dogs?.length;
     document.documentElement.classList.toggle('customer-awaiting-dog-v107',!hasAssignedDog);
     if(!state.selectedDogId&&hasAssignedDog)state.selectedDogId=Number(d.dogs[0].id);
-    await preloadDogVisualV56(d);showApp();renderAll();startCustomerLive();
-    const secondary=[loadAnnouncements()];if(typeof ensurePushState==='function')secondary.push(ensurePushState());
-    Promise.allSettled(secondary).then(()=>{if(state.data&&typeof applyPushToggle==='function')applyPushToggle()});
+    // v291: Keep the existing loader over the first data/photo/notice render.
+    // No fake "no notices" flash; never remount an unchanged image after revealing.
+    await Promise.race([
+      Promise.allSettled([preloadDogVisualV56(d),loadAnnouncements()]),
+      new Promise(resolve=>setTimeout(resolve,2300))
+    ]);
+    showApp();renderAll();
+    await settleCustomerFirstPhotosV291(850);
+    startCustomerLive();
+    if(typeof ensurePushState==='function')Promise.resolve(ensurePushState()).finally(()=>{
+      if(state.data&&typeof applyPushToggle==='function')applyPushToggle();
+    });
   }catch(e){
     const message=String(e?.message||'');
     const staleAuth=/prihl|vypršalo|refresh\s*token|invalid\s+(?:refresh\s+)?token|jwt|token\s+not\s+found|unauthorized/i.test(message);
@@ -3725,7 +3748,7 @@ function installVaccinationViewerZoomV244(modal){
   function drawBoard(){
     const host=$('customerBulletinItemsV229');if(!host)return;host.replaceChildren();
     const live=rows().filter(current).slice(0,2);
-    if(!live.length){host.append(el('div','customer-bulletin-empty-v229','Zatiaľ žiadne oznamy.'));return}
+    if(!live.length){host.append(el('div','customer-bulletin-empty-v229',!rowsState.at&&loggedIn()?'Načítavam oznamy…':rowsState.error?'Oznamy sa momentálne nepodarilo načítať.':'Zatiaľ žiadne oznamy.'));return}
     live.forEach(row=>{
       const b=el('button','customer-bulletin-note-v229');b.type='button';b.dataset.style=['rose','cream','mint'].includes(row.paper_style)?row.paper_style:'rose';
       if(!rowsState.read.has(Number(row.id)))b.dataset.unread='true';
