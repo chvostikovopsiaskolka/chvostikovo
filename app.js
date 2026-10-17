@@ -174,7 +174,7 @@ const skTime=v=>{try{return new Intl.DateTimeFormat('sk-SK',{day:'numeric',month
 function bratislavaToday(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),map=Object.fromEntries(parts.map(x=>[x.type,x.value]));return map.year+'-'+map.month+'-'+map.day}
 function dogAgeParts(birthDate,today=bratislavaToday()){if(!birthDate)return null;const b=String(birthDate).slice(0,10).split('-').map(Number),t=String(today).slice(0,10).split('-').map(Number);if(b.length!==3||t.length!==3||b.some(Number.isNaN)||t.some(Number.isNaN))return null;let months=(t[0]-b[0])*12+t[1]-b[1]-(t[2]<b[2]?1:0);if(months<0)return null;return{months,years:Math.floor(months/12)}}
 function dogAgeText(birthDate,today){const age=dogAgeParts(birthDate,today);if(!age)return'';if(age.months<12){if(age.months===0)return'menej ako mesiac';if(age.months===1)return'1 mesiac';if(age.months>=2&&age.months<=4)return age.months+' mesiace';return age.months+' mesiacov'}if(age.years===1)return'1 rok';if(age.years>=2&&age.years<=4)return age.years+' roky';return age.years+' rokov'}
-function toast(msg){const el=$('toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add('hidden'),3300)}
+function toast(msg,duration=3300){const el=$('toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add('hidden'),duration)}
 function loading(on){const el=$('loading');if(!el)return;const inApp=!!on&&!$('appView')?.classList.contains('hidden');el.classList.toggle('in-app',inApp);el.classList.toggle('hidden',!on);if(!on){el.classList.remove('in-app');scheduleCustomerUpdateApply()}}
 function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
@@ -857,7 +857,7 @@ async function saveDog(e){
     }
     $('dogDetailsOnboardingModalV75')?.classList.add('hidden');
     closeDogDetails(true);renderDog();renderPassSummary();renderUpcoming();renderDays();
-    if(savedMode==='vaccinations')vaccinationFreshUploadV234.delete(vaccineKeyV287(dogId));vaccineDraftsV287.delete(vaccineKeyV287(dogId));vaccineStagesV287.delete(vaccineKeyV287(dogId)); toast(savedMode==='vaccinations'?'Očkovania sú uložené. Ak ste zmenili platnosť, škôlka dostane upozornenie na kontrolu. Platné očkovania môžete ďalej používať.':'Údaje psíka sú uložené.');
+    if(savedMode==='vaccinations')vaccinationFreshUploadV234.delete(vaccineKeyV287(dogId));vaccineDraftsV287.delete(vaccineKeyV287(dogId));vaccineStagesV287.delete(vaccineKeyV287(dogId)); toast(savedMode==='vaccinations'?'Očkovanie bolo aktualizované. Rezervácie sú opäť sprístupnené.':'Údaje psíka sú uložené.',savedMode==='vaccinations'?6500:3300);
     queueCustomerSync('all',80);
   }catch(e){if(savedMode==='vaccinations')vaccineErrorV287(e.message);else toast(e.message)}finally{dogSaveInFlightV145=false;customerMutationRevisionV145++;loading(false);window.runCustomerOnboardingV75?.()}
 }
