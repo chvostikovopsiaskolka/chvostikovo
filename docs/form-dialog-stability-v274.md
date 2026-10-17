@@ -1,3 +1,17 @@
+## v298 — 17.10.2026 — návrat k jednoduchému modalu (nadradené pravidlá)
+
+**Zdrojové screenshoty iPhone 17:23–17:24 dokazujú, že v297 NIE JE funkčný na skutočnom iOS.** Otvorenie klávesnice posúva pozadie aj obsah, po „Hotovo“ zostáva biely prázdny panel. Automatické CI pre v297 fungovalo, ale testovalo umelo vytvorený visualViewport, nie skutočný Safari WebKit. ZRUŠIŤ odporúčanie v297 používať biely fullscreen overlay, keyboardTop/height, auto-scroll alebo návrat scrollTop.
+
+**Záväzný technický kontrakt v298 (bez zavádzania nových funkcií):**
+- Jedna spoločná `FormDialog` pre krátky záujem a dlhú prihlášku jedného či dvoch psov na SK/EN webe, pôvodný Radix tmavý overlay, zachovať header, 12px mobilné okraje a zaoblenie.
+- Formulár má prirodzenú výšku s iba `max-height` pri okrajoch bezpečnej oblasti, NIE vynútené `height:100svh`. Jediný rolovací prvok je `.form-dialog-scroll`; pozadie webu je zamknuté raz pri otvorení modalu (body fixed s uchovaným scrollY) a vrátené pri zavretí, NIE na každý focus/blur.
+- Žiadne `visualViewport` listenery, `window.scrollTo` pri focus/blur, nastavovanie `scrollTop` pri klávesnici, viewport offsety, nastavovanie `height/width/top` podľa stavu klávesnice alebo prefarbenie/rozťahovanie overlayu.
+- Body style zámok upravuje iba vlastné vlastnosti position/top/left/right/width/overflow a vracia iba tie. Neobnovovať celé `body.style.cssText`, pretože Radix môže medzitým riadiť iné vlastnosti (napr. pointer-events). Pôvodný scrollY sa vracia AŽ pri úplnom zavretí modalu.
+- Žiadne zásahy do dát/CRM/Meta trackingu, SMS, validácie, súhlasov ani autofillu. Povinné zachovanie input 16px, Pes/Suka, Áno/Nie, 1/2 psov, existujúcich formulárov i EN.
+- Akceptácia: „Hotovo“ nesmie účelovo preskočiť na iné pole, pozadie sa nesmie dať scrollovať, formulár nezmení šírku a nemá pri zatvorení klávesnice veľkú bielu plochu. Testovať na SKUTOČNOM Safari iPhone pred vyhlásením „funkčne overené“. Happy-dom a mobilný Chromium nevedia verne simulovať iOS natívnu klávesnicu.
+
+Záloha: `backup-web-before-modal-simplify-v298-20261017`, v297 main SHA `81f90d373fa6899861133bd267ca7a6ccaf14af4`; PR #87. [TEST/NASADENIE POSÚDIŤ AŽ PO CI] História v293–v297 nižšie dokumentuje chyby; nie je aktuálnym návodom pre nové implementácie.
+
 ## v297 — 17.10.2026, iOS Done scroll recovery and opaque keyboard backdrop (candidate pending device confirmation)
 
 **Physical iPhone evidence (16:48)**: after entering a dog name and dismissing the keyboard, the form stays scrolled to a later field; when the keyboard is up at lower fields, the blurred landing page is visible between the dialog's white card and the native keyboard. These are distinct regressions still present in LIVE web v296. A successful build or simulated DOM regression did not prove actual iPhone Safari behavior.
