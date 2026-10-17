@@ -4,6 +4,7 @@ import { Window } from "happy-dom";
 
 const dom = new Window({ url: "https://chvostikovo.sk/" });
 Object.defineProperty(dom, "innerWidth", { configurable: true, writable: true, value: 390 });
+Object.defineProperty(dom, "scrollY", { configurable: true, writable: true, value: 120 });
 for (const key of ["window", "document", "navigator", "HTMLElement", "HTMLInputElement", "HTMLSelectElement", "HTMLTextAreaElement", "HTMLButtonElement", "HTMLFormElement", "DocumentFragment", "Event", "CustomEvent", "MutationObserver", "Node", "NodeFilter", "Element", "getComputedStyle", "requestAnimationFrame", "cancelAnimationFrame"] as const) {
   const value = key === "window" ? dom : (dom as any)[key];
   Object.defineProperty(globalThis, key, { configurable: true, writable: true, value: typeof value === "function" && /^(getComputedStyle|requestAnimationFrame|cancelAnimationFrame)$/.test(key) ? value.bind(dom) : value });
@@ -19,135 +20,80 @@ const container = dom.document.createElement("div");
 dom.document.body.append(container);
 const root = createRoot(container as any);
 const settle = () => new Promise(resolve => setTimeout(resolve, 35));
-let backgroundScrolls = 0;
-dom.scrollTo = () => { backgroundScrolls++; };
-
+const beforeStyle = dom.document.body.style.cssText;
+let windowScrolls = 0;
+let restoredTo: [number, number] | null = null;
+dom.scrollTo = ((x: number, y: number) => { windowScrolls++; restoredTo = [x, y]; }) as typeof dom.scrollTo;
 function render(open: boolean, twoDogs: boolean) {
   return <FormDialog open={open} onOpenChange={() => {}} title="Prihláška">
-    <form><input name="meno" autoComplete="name" /><textarea name="alergie" />
-      <select name="pohlavie"><option>Vyberte</option><option>Pes</option><option>Suka</option></select>
+    <form>
+      <input name="meno" autoComplete="name" />
+      <input name="telefon" autoComplete="tel" />
+      <input name="pes" autoComplete="off" />
+      <textarea name="alergie" />
+      <textarea name="povaha" />
+      <select name="frekvencia"><option>Vyberte</option><option>Týždenne</option></select>
       {twoDogs && <input name="pes2" autoComplete="off" />}
     </form>
   </FormDialog>;
 }
-
 try {
   for (const twoDogs of [false, true]) {
     await React.act(async () => { root.render(render(true, twoDogs)); await settle(); });
-    await React.act(settle);
-    const dialog = dom.document.querySelector<HTMLElement>("[data-form-dialog]")!;
-    assert.ok(dialog, "actual Radix dialog mounted");
-    assert.equal(dialog.getAttribute("data-form-dialog"), "candidate-v297");
-    assert.equal(dialog.style.getPropertyValue("left"), "12px", "mobile form anchored within viewport");
-    assert.equal(dialog.style.getPropertyValue("right"), "12px", "right edge anchored");
-    assert.equal(dialog.style.getPropertyPriority("left"), "important", "mobile anchor wins over base CSS");
-    assert.equal(dialog.style.getPropertyValue("translate"), "none", "Radix translation disabled");
-    assert.equal(dialog.style.getPropertyValue("transform"), "none", "no transformed native picker ancestor");
-    assert.equal(dialog.style.getPropertyValue("--form-viewport-height"), "750px");
-    assert.equal(dom.document.activeElement?.tagName, "H2", "opening announces title without focusing a text field");
-    const scroll = dialog.querySelector<HTMLElement>(".form-dialog-scroll")!;
-    scroll.scrollTop = 420;
-    const name = dialog.querySelector<HTMLInputElement>('[name="meno"]')!;
-    name.value = "Synthetic Autofill"; // Silent browser autofill, without React input state.
+    const modal = dom.document.querySelector<HTMLElement>("[data-form-dialog]")!;
+    assert.ok(modal, "real Radix form modal renders");
+    assert.equal(modal.dataset.formDialog, "simple-v298");
+    assert.equal(dom.document.body.style.position, "fixed", "body frozen while form open");
+    assert.equal(dom.document.body.style.top, "-120px", "retain existing background scroll position");
+    assert.equal(dom.document.body.style.overflow, "hidden", "background does not scroll");
+    assert.equal(dom.document.activeElement?.tagName, "H2", "title focused without keyboard on open");
+    assert.equal(dom.document.querySelectorAll("[data-form-dialog]").length, 1);
+    const scroller = modal.querySelector<HTMLElement>(".form-dialog-scroll")!;
+    const originalCss = modal.style.cssText;
+    scroller.scrollTop = 440;
+    const name = modal.querySelector<HTMLInputElement>('[name="meno"]')!;
+    name.value = "Silent iOS autofill"; // silent native autofill is not a React remount
     name.focus();
-    viewport.height = 390;
-    viewport.offsetTop = 30;
+    viewport.height = 365;
+    viewport.offsetTop = 120;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); viewport.dispatchEvent(new dom.Event("scroll")); await settle(); });
-    assert.equal(dialog.style.getPropertyValue("--form-viewport-height"), "390px");
-    assert.equal(dialog.style.getPropertyValue("--form-keyboard-top"), "30px", "visual viewport panning is compensated only with keyboard open");
-    assert.equal(dialog.style.getPropertyValue("top"), "calc(var(--form-keyboard-top, 0px) + 12px + env(safe-area-inset-top, 0px))");
-    assert.equal(dialog.dataset.formKeyboard, "open", "keyboard opens an edge-to-edge sheet");
-    assert.equal(dialog.style.getPropertyValue("left"), "12px", "same horizontal geometry while keyboard is open");
-    assert.equal(dialog.style.getPropertyValue("right"), "12px", "form never switches to a full-width sheet");
-    assert.match(dialog.style.getPropertyValue("height"), /100svh/, "outer dialog height does not depend on keyboard height");
-    assert.match(scroll.style.getPropertyValue("max-height"), /px$/, "only inner scroll height adapts to keyboard");
-    assert.equal(scroll.scrollTop, 420, "keyboard resize does not reset form scroll");
-    await React.act(async () => { root.render(render(true, twoDogs)); await settle(); });
-    assert.equal(dialog.querySelector('[name="meno"]'), name, "autofilled node remains mounted");
-    assert.equal(name.value, "Synthetic Autofill");
-    // Simulate Safari moving the form during a keyboard session: tapping Done
-    // must put the viewport back at the position it had before text editing.
-    scroll.scrollTop = 670;
-    const select = dialog.querySelector<HTMLSelectElement>("select")!;
-    select.focus();
+    assert.equal(modal.style.cssText, originalCss, "keyboard does not mutate modal position, width, height or radius");
+    assert.equal(scroller.scrollTop, 440, "opening keyboard does not programmatically scroll modal");
+    assert.equal(windowScrolls, twoDogs ? 1 : 0, "no page scrollTo while open");
+    assert.equal(dom.document.body.style.position, "fixed", "keyboard cannot unlock background");
+    const allergy = modal.querySelector<HTMLTextAreaElement>('[name="alergie"]')!;
+    allergy.focus();
+    scroller.scrollTop = 710; // native user scrolling: preserve exactly
     viewport.height = 750;
     viewport.offsetTop = 0;
+    allergy.blur();
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
-    await React.act(settle); // post-viewport rAF where Safari lays out the expanded scroller
-    assert.equal(scroll.scrollTop, 420, "Done restores pre-focus scroll despite Safari-induced 670px movement");
-    assert.equal(dialog.dataset.formKeyboard, "closed");
-    assert.match(dialog.style.getPropertyValue("height"), /100svh/, "closing keyboard keeps the same outer frame");
-    assert.equal(scroll.style.getPropertyValue("max-height"), "", "closing keyboard removes only inner scroll constraint");
-    assert.equal(dialog.style.getPropertyValue("left"), "12px", "no margin changes while dismissing keyboard");
-    // Mock only geometry, to exercise the real inner-scroll correction (not window scroll).
-    const allergies = dialog.querySelector<HTMLTextAreaElement>('[name="alergie"]')!;
-    const originalScrollerRect = scroll.getBoundingClientRect.bind(scroll);
-    const originalAllergiesRect = allergies.getBoundingClientRect.bind(allergies);
-    (scroll as any).getBoundingClientRect = () => ({ top: 100, bottom: 360, height: 260 });
-    (allergies as any).getBoundingClientRect = () => ({ top: 410, bottom: 515, height: 105 });
-    const beforeAllergies = scroll.scrollTop;
-    allergies.focus();
-    viewport.height = 345;
-    viewport.offsetTop = 110;
-    await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
-    assert.ok(scroll.scrollTop > beforeAllergies, "focused allergies textarea is scrolled inside the dialog");
-    assert.equal(dialog.style.getPropertyValue("--form-keyboard-top"), "110px", "iOS visual viewport offset is bounded and only applied while keyboard open");
-    assert.equal(dialog.dataset.formKeyboard, "open");
-    assert.equal(dialog.style.getPropertyValue("left"), "12px", "textarea focus must not enlarge the modal");
-    assert.equal(backgroundScrolls, 0, "focus never calls window scrollTo");
-    const overlayGesture = new dom.Event("touchmove", { bubbles: true, cancelable: true });
-    Object.defineProperty(overlayGesture, "touches", { value: [{ clientY: 220 }] });
-    dom.document.body.dispatchEvent(overlayGesture);
-    assert.equal(overlayGesture.defaultPrevented, true, "scrolling behind a modal is blocked");
-    allergies.blur();
-    (scroll as any).getBoundingClientRect = originalScrollerRect;
-    (allergies as any).getBoundingClientRect = originalAllergiesRect;
-    viewport.height = 750;
-    await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
-    await React.act(settle);
-    assert.equal(scroll.scrollTop, 420, "Done after lower textarea restores pre-keyboard scroll instead of jumping down");
-    select.focus(); // Restore native select focus after explicitly blurring the textarea.
-    assert.equal(dom.document.activeElement, select);
-    assert.equal(backgroundScrolls, 0, "no programmatic background scrolling");
-    (dom as any).innerWidth = 900;
-    await React.act(async () => { dom.dispatchEvent(new dom.Event("resize")); await settle(); });
-    assert.equal(dialog.style.getPropertyValue("left"), "", "desktop removes forced mobile positioning");
-    (dom as any).innerWidth = 390;
-    await React.act(async () => { dom.dispatchEvent(new dom.Event("resize")); await settle(); });
-    assert.equal(dialog.style.getPropertyValue("left"), "12px", "mobile anchoring restored after rotation");
-    viewport.scale = 2;
-    viewport.height = 300;
-    await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
-    assert.equal(dialog.style.getPropertyValue("--form-viewport-height"), "750px", "pinch zoom is not counteracted");
-    assert.equal(dialog.style.getPropertyValue("left"), "12px");
-    assert.match(dialog.style.getPropertyValue("height"), /100svh/);
+    assert.equal(scroller.scrollTop, 710, "Done does not impose artificial scroll restore");
+    assert.equal(modal.style.cssText, originalCss, "Done does not change frame geometry");
+    await React.act(async () => { root.render(render(true, twoDogs)); await settle(); });
+    assert.equal(modal.querySelector('[name="meno"]'), name, "autofilled input remains mounted");
+    assert.equal(name.value, "Silent iOS autofill", "autofill value preserved");
+    assert.equal(dom.document.body.style.position, "fixed");
     await React.act(async () => { root.render(render(false, twoDogs)); await settle(); });
-    viewport.scale = 1;
-    viewport.height = 750;
-    const before = dialog.style.cssText;
-    await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
-    assert.equal(dialog.style.cssText, before, "closed dialog removed its viewport listeners");
+    assert.equal(dom.document.querySelector("[data-form-dialog]"), null, "modal removed");
+    assert.equal(dom.document.body.style.cssText, beforeStyle, "background style restored on close");
+    assert.deepEqual(restoredTo, [0, 120], "page returns to exact pre-dialog position");
   }
-  const css = readFileSync("src/styles.css", "utf8");
-  assert.match(css, /@media \(max-width: 639px\)[\s\S]*\.form-dialog\[data-state\][\s\S]*left: 12px !important;[\s\S]*right: 12px !important;[\s\S]*transform: none !important;[\s\S]*translate: none !important;[\s\S]*animation: none !important;/);
-  assert.doesNotMatch(css, /\.form-dialog\[data-form-keyboard="open"\][\s\S]*?left: 0 !important;/, "do not reintroduce v293 fullscreen keyboard sheet");
-  assert.match(css, /height: calc\(100svh - 24px/, "stable frame does not collapse to visualViewport.height");
-  const formsFile = readFileSync("src/components/site/Forms.tsx", "utf8");
-  assert.equal((formsFile.match(/<DogBinaryChoice /g) || []).length, 4, "one- and two-dog sex/neuter fields avoid native picker popups");
-  const cssColor = readFileSync("src/styles.css", "utf8");
-  assert.match(cssColor, /color-scheme: light;/);
-  const dialogComponent = readFileSync("src/components/ui/dialog.tsx", "utf8");
-  assert.match(dialogComponent, /positioning === "form" \? "form-dialog-overlay"/, "form-specific backdrop must not change other dialogs");
-  assert.match(css, /html:has\(\.form-dialog\[data-form-keyboard="open"\]\) \.form-dialog-overlay\s*\{/, "keyboard overlay must respond to actual dialog state");
-  assert.match(css, /background-color:\s*#ffffff !important;/, "opaque white mask blocks underlying page during keyboard motion");
-  assert.match(css, /top:\s*-100vh !important;[\s\S]*bottom:\s*-100vh !important;/, "keyboard mask extends beyond Safari visual viewport panning");
 
-  assert.match(dialogComponent, /positioning === "form"/, "shared form opts out of Radix default centering");
+  const css = readFileSync("src/styles.css", "utf8");
+  const component = readFileSync("src/components/site/FormDialog.tsx", "utf8");
+  const primitive = readFileSync("src/components/ui/dialog.tsx", "utf8");
   const forms = readFileSync("src/components/site/Forms.tsx", "utf8");
-  assert.match(forms, /name="pes" autoComplete="off"/);
-  assert.match(forms, /name="pes2" autoComplete="off"/);
+  assert.match(css, /\.form-dialog-scroll\s*\{[^}]*overflow-y:\s*auto/, "one native internal scroll owner");
+  assert.match(css, /max-height:\s*calc\(100svh/, "modal height limited without forced fullscreen");
+  assert.doesNotMatch(css, /\.form-dialog\[data-form-keyboard|top:\s*-100vh|(?:^|\n)\s*height:\s*calc\(100svh/m, "no fullscreen or keyboard mask hacks");
+  for (const forbidden of ["window.visualViewport", "scrollRef.current", "addEventListener(", "scrollIntoView(", "--form-viewport", "--form-keyboard"]) { assert.equal(component.includes(forbidden), false, `no keyboard logic: ${forbidden}`); }
+  assert.match(primitive, /<DialogOverlay \/>/, "ordinary dark backdrop used for all dialogs");
+  assert.equal((forms.match(/<DogBinaryChoice /g) || []).length, 4, "dog sex/neuter inline buttons remain");
   assert.match(forms, /name="meno" autoComplete="name"/);
-  console.log("PASS candidate v297: 1/2 dogs, keyboard Done scroll recovery, constant outer keyboard/no-keyboard frame, inner scroll clipping, focus/textarea visibility, autofill value/node stability, background scroll blocked and zoom cleanup. Real physical Safari and Android remain unverified.");
+  assert.match(forms, /name="pes2" autoComplete="off"/);
+  assert.match(css, /color-scheme: light;/);
+  console.log("PASS v298 simple form modal: 1/2 dogs, frozen page, no keyboard geometry changes, stable internal scroll, title focus, autofill/node retention, close restores background and unchanged CRM fields. Physical iOS Safari/Android remain unverified.");
 } finally {
   await React.act(async () => root.unmount());
   dom.happyDOM.abort();
