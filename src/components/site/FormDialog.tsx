@@ -40,28 +40,49 @@ export function FormDialog({
   children: ReactNode;
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const viewport = window.visualViewport;
     let frame = 0;
+    let focusFrame = 0;
+    const keepFocusedFieldVisible = () => {
+      if (window.innerWidth > 639) return;
+      const scroller = scrollRef.current;
+      const content = contentRef.current;
+      const active = document.activeElement;
+      if (!scroller || !content || !active || !content.contains(active)) return;
+      // Native iOS select sheets must not trigger our own scrolling/positioning.
+      // Text fields use only the inner modal scroll, never page scrollIntoView().
+      if (!active.matches("input:not([type=radio]):not([type=checkbox]), textarea")) return;
+      const field = active.getBoundingClientRect();
+      const area = scroller.getBoundingClientRect();
+      const top = area.top + 12;
+      const bottom = area.bottom - 16;
+      if (bottom <= top || !field.height) return;
+      if (field.top < top || field.height > bottom - top) {
+        scroller.scrollTop += field.top - top;
+      } else if (field.bottom > bottom) {
+        scroller.scrollTop += field.bottom - bottom;
+      }
+    };
     const update = () => {
-      // Pinch zoom must remain under the user's control. No focus/scroll reset.
+      // The visual viewport may scroll independently when Safari opens a
+      // keyboard, auto-fills a field or closes a native picker. Its offsetTop
+      // must NOT be added to the modal top: that moves the entire form.
       if (viewport && Math.abs(viewport.scale - 1) > 0.01) return;
       const content = contentRef.current;
       if (!content) return;
-      content.style.setProperty("--form-viewport-height", `${viewport?.height ?? window.innerHeight}px`);
-      content.style.setProperty("--form-viewport-top", `${viewport?.offsetTop ?? 0}px`);
-      // v278: enforce native mobile coordinates on the actual portal element.
-      // Unlike a CSS-only override, these important inline values cannot inherit
-      // Radix's translate(-50%, -50%) or be lost to Tailwind layer ordering.
+      const available = viewport?.height ?? window.innerHeight;
+      content.style.setProperty("--form-viewport-height", `${available}px`);
       const mobile = window.innerWidth <= 639;
       const propertyNames = ["position", "top", "bottom", "left", "right", "width", "max-width", "margin", "transform", "translate", "scale", "animation", "max-height"];
       if (mobile) {
         const values: Record<string, string> = {
           position: "fixed",
-          top: "calc(var(--form-viewport-top, 0px) + 12px + env(safe-area-inset-top, 0px))",
+          top: "calc(12px + env(safe-area-inset-top, 0px))",
           bottom: "auto",
           left: "12px",
           right: "12px",
@@ -81,18 +102,25 @@ export function FormDialog({
     };
     const schedule = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(update);
+      cancelAnimationFrame(focusFrame);
+      frame = requestAnimationFrame(() => {
+        update();
+        focusFrame = requestAnimationFrame(keepFocusedFieldVisible);
+      });
     };
+    const onFocus = () => schedule();
+    const content = contentRef.current;
     update();
-    // Radix portals may mount their content just after the parent's effect.
+    // Radix may attach the portal right after this effect.
     schedule();
+    content?.addEventListener("focusin", onFocus);
     viewport?.addEventListener("resize", schedule);
-    viewport?.addEventListener("scroll", schedule);
     window.addEventListener("resize", schedule);
     return () => {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(focusFrame);
+      content?.removeEventListener("focusin", onFocus);
       viewport?.removeEventListener("resize", schedule);
-      viewport?.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
     };
   }, [open]);
@@ -102,7 +130,7 @@ export function FormDialog({
       <DialogContent
         ref={contentRef}
         positioning="form"
-        data-form-dialog="stable-v278"
+        data-form-dialog="stable-v292"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           // Announce the dialog without opening the keyboard or jumping to an input.
@@ -118,7 +146,7 @@ export function FormDialog({
             <p className="pr-6 text-left text-sm text-forest/80">{subtitle}</p>
           )}
         </DialogHeader>
-        <div className="form-dialog-scroll min-h-0 overflow-y-auto overscroll-contain">
+        <div ref={scrollRef} className="form-dialog-scroll min-h-0 overflow-y-auto overscroll-contain">
           {children}
         </div>
       </DialogContent>
