@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/dog-choice-fab-v276.css?v=20261017-shared-pass-clarity-v293','/dual-dog-overview-v246.js?v=20261017-shared-pass-clarity-v293','/dual-dog-overview-v246.css?v=20261017-shared-pass-clarity-v293','/','/terms-pdf.js?v=20261017-shared-pass-clarity-v293','/terms-pdf-font.js?v=20261017-shared-pass-clarity-v293','/styles.css?v=20261017-shared-pass-clarity-v293','/bulletin-photo-v243.css?v=20261017-shared-pass-clarity-v293','/app.js?v=20261017-shared-pass-clarity-v293','/back-swipe.js?v=20261017-shared-pass-clarity-v293'];
+const SHELL=['/dog-choice-fab-v276.css?v=20261017-remaining-pass-choice-v292','/dual-dog-overview-v246.js?v=20261017-remaining-pass-choice-v292','/dual-dog-overview-v246.css?v=20261017-remaining-pass-choice-v292','/','/terms-pdf.js?v=20261017-remaining-pass-choice-v292','/terms-pdf-font.js?v=20261017-remaining-pass-choice-v292','/styles.css?v=20261017-remaining-pass-choice-v292','/bulletin-photo-v243.css?v=20261017-remaining-pass-choice-v292','/app.js?v=20261017-remaining-pass-choice-v292','/back-swipe.js?v=20261017-remaining-pass-choice-v292'];
 
 function withPortalCsp(response){
   if(!response)return response;
