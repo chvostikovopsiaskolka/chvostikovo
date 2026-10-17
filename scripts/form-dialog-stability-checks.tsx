@@ -37,7 +37,7 @@ try {
     await React.act(settle);
     const dialog = dom.document.querySelector<HTMLElement>("[data-form-dialog]")!;
     assert.ok(dialog, "actual Radix dialog mounted");
-    assert.equal(dialog.getAttribute("data-form-dialog"), "stable-v292");
+    assert.equal(dialog.getAttribute("data-form-dialog"), "stable-v293");
     assert.equal(dialog.style.getPropertyValue("left"), "12px", "mobile form anchored within viewport");
     assert.equal(dialog.style.getPropertyValue("right"), "12px", "right edge anchored");
     assert.equal(dialog.style.getPropertyPriority("left"), "important", "mobile anchor wins over base CSS");
@@ -54,8 +54,12 @@ try {
     viewport.offsetTop = 30;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); viewport.dispatchEvent(new dom.Event("scroll")); await settle(); });
     assert.equal(dialog.style.getPropertyValue("--form-viewport-height"), "390px");
-    assert.equal(dialog.style.getPropertyValue("top"), "calc(12px + env(safe-area-inset-top, 0px))", "keyboard viewport movement never shifts the form top");
-    assert.equal(dialog.style.getPropertyValue("--form-viewport-top"), "", "no visualViewport offsetTop feedback");
+    assert.equal(dialog.style.getPropertyValue("--form-keyboard-top"), "30px", "visual viewport panning is compensated only with keyboard open");
+    assert.equal(dialog.style.getPropertyValue("top"), "calc(var(--form-keyboard-top, 0px) + 12px + env(safe-area-inset-top, 0px))");
+    assert.equal(dialog.dataset.formKeyboard, "open", "keyboard opens an edge-to-edge sheet");
+    assert.equal(dialog.style.getPropertyValue("left"), "0px");
+    assert.equal(dialog.style.getPropertyValue("right"), "0px");
+    assert.match(dialog.style.getPropertyValue("height"), /--form-viewport-height/, "keyboard sheet fills viewport above keyboard");
     assert.equal(scroll.scrollTop, 420, "keyboard resize does not reset form scroll");
     await React.act(async () => { root.render(render(true, twoDogs)); await settle(); });
     assert.equal(dialog.querySelector('[name="meno"]'), name, "autofilled node remains mounted");
@@ -66,6 +70,9 @@ try {
     viewport.offsetTop = 0;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
     assert.equal(scroll.scrollTop, 420, "keyboard dismissal / select focus preserves position");
+    assert.equal(dialog.dataset.formKeyboard, "closed");
+    assert.equal(dialog.style.getPropertyValue("height"), "", "closing keyboard restores natural dialog height");
+    assert.equal(dialog.style.getPropertyValue("left"), "12px", "closing keyboard restores margins");
     // Mock only geometry, to exercise the real inner-scroll correction (not window scroll).
     const allergies = dialog.querySelector<HTMLTextAreaElement>('[name="alergie"]')!;
     const originalScrollerRect = scroll.getBoundingClientRect.bind(scroll);
@@ -78,8 +85,14 @@ try {
     viewport.offsetTop = 110;
     await React.act(async () => { viewport.dispatchEvent(new dom.Event("resize")); await settle(); });
     assert.ok(scroll.scrollTop > beforeAllergies, "focused allergies textarea is scrolled inside the dialog");
-    assert.equal(dialog.style.getPropertyValue("top"), "calc(12px + env(safe-area-inset-top, 0px))", "top remains fixed even after Safari viewport scroll");
+    assert.equal(dialog.style.getPropertyValue("--form-keyboard-top"), "110px", "iOS visual viewport offset is bounded and only applied while keyboard open");
+    assert.equal(dialog.dataset.formKeyboard, "open");
+    assert.equal(dialog.style.getPropertyValue("left"), "0px");
     assert.equal(backgroundScrolls, 0, "focus never calls window scrollTo");
+    const overlayGesture = new dom.Event("touchmove", { bubbles: true, cancelable: true });
+    Object.defineProperty(overlayGesture, "touches", { value: [{ clientY: 220 }] });
+    dom.document.body.dispatchEvent(overlayGesture);
+    assert.equal(overlayGesture.defaultPrevented, true, "scrolling behind a modal is blocked");
     allergies.blur();
     (scroll as any).getBoundingClientRect = originalScrollerRect;
     (allergies as any).getBoundingClientRect = originalAllergiesRect;
@@ -117,7 +130,7 @@ try {
   assert.match(forms, /name="pes" autoComplete="off"/);
   assert.match(forms, /name="pes2" autoComplete="off"/);
   assert.match(forms, /name="meno" autoComplete="name"/);
-  console.log("PASS shared Radix form dialog: 1/2 dogs, fixed iOS top during keyboard scroll, in-dialog focus visibility for textarea, native select skipped, silent autofill/node stability, zoom, cleanup and in-form binary choices. Physical iOS Safari and Android remain device checks.");
+  console.log("PASS shared Radix modal: 1/2 dogs, keyboard-only viewport compensation, white edge-to-edge keyboard sheet, no background touch scroll, visible focus/textarea, no autofill remount, zoom/cleanup. Physical iOS Safari and Android remain device checks.");
 } finally {
   await React.act(async () => root.unmount());
   dom.happyDOM.abort();
