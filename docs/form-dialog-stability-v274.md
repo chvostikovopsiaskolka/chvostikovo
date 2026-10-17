@@ -1,3 +1,18 @@
+## v297 — 17.10.2026, iOS Done scroll recovery and opaque keyboard backdrop (candidate pending device confirmation)
+
+**Physical iPhone evidence (16:48)**: after entering a dog name and dismissing the keyboard, the form stays scrolled to a later field; when the keyboard is up at lower fields, the blurred landing page is visible between the dialog's white card and the native keyboard. These are distinct regressions still present in LIVE web v296. A successful build or simulated DOM regression did not prove actual iPhone Safari behavior.
+
+**Verified code causes**: FormDialog's `keepFocusedFieldVisible` increases only the *inner* `.form-dialog-scroll.scrollTop` when the keyboard opens, but v296 never restored it on keyboard close. Separately, the standard Radix dialog backdrop is deliberately *translucent* (`bg-forest-deep/70 backdrop-blur-sm`). Under iOS visual-viewport panning this permits the background page to show wherever the dialog fails to cover the space above the keyboard.
+
+The v297 isolated candidate in PR #86:
+- records scrollTop before keyboard focus and restores it on viewport keyboard-close, after removal of the inner scroll height limit; never changes field values or re-mounts nodes; keeps `touchmove` protection against scrolling outside the dialog;
+- adds a **form-specific** overlay class to the shared dialog primitive, and only while `data-form-keyboard="open"` makes this overlay solid white with no backdrop blur; the overlay extends 100vh above/below layout viewport to cover movement of the iOS visual viewport. The modal's 12px side gutters, `100svh` outer frame and rounded corners remain unchanged. No global overlay changes to non-form dialogs; the original dimmed backdrop returns when the keyboard closes.
+- keeps all application/contact SK/EN forms, two-dog fields, sex/neuter inline choices, inputs, autofill, consent, UTM, Pixel/CAPI, CRM, SMS and validation unchanged.
+
+Regression coverage: simulate keyboard-open viewport resize, forced inner scroll, Done/close restoring prior scroll, blocked background touch, scroller focus visibility, form-only overlay hook and opaque extended keyboard-only CSS, then TS and build. A mobile Chromium CSS computed-style check with `meta viewport` confirms the overlay changes from dark translucent to opaque white only during keyboard state and returns after it. Chromium is **not iOS Safari native keyboard**. The masking approach eliminates visibility of the underlying website even when the viewport shifts; it does not prove the actual form/keyboard gap size is zero on a physical device.
+
+Rollback: `backup-web-before-ios-restore-v297-20261017` at prior live v296 commit `6f4be391e6578363652abf359ba51311bce4aaec` or selective PR #86 revert if newer commits exist. **Never claim physical iOS verified without a real test.** If native Safari remains wrong, stop guessing and collect actual `visualViewport.height`, `visualViewport.offsetTop`, `window.scrollY`, modal/inner-scroll/client rects before changing layout CSS again.
+
 ## v296 — 17.10.2026, physical iPhone regression: modal changes width/height on focus
 
 **Actual screenshots 16:22–16:23** confirm that web v293 is NOT a stable form on iOS Safari: application and contact modal switch from a rounded 12px-gutter frame to full-width white sheet whenever keyboard appears, then snap back when keyboard closes. Some lower fields expose blurred background between the form and keyboard. The viewport itself can pan during editing and native autofill. Prior v293 automated tests passed because they explicitly **expected** left/right 0 and keyboard-height outer-frame changes; these were wrong acceptance criteria. Do not call v293 physically fixed.
