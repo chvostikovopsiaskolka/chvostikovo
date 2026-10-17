@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261017-mobile-vaccines-charts-v287';
-const APP_VERSION='1.0.104';
+const APP_BUILD='20261017-remaining-pass-choice-v292';
+const APP_VERSION='1.0.108';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2198,10 +2198,23 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   /* v281: the server quote is an internal consistency guard, never a second confirmation step. */
   function postBookingChoicesV281(quote){
     const byDog=new Map();
+    /* A shared pass may have one entry left for two dogs. The other dog is then
+       quoted as single: offer a new pass only to that dog, not twice. */
+    const dogs=pickerDogsV254();
+    const lastSharedCoveredBySingle=new Set();
+    if(dogs.length===2){
+      for(const q of quote||[]){
+        if(q.mode!=='pass'||Number(q.total)<=0||Number(q.entry_number)!==Number(q.total)||!q.pass_id)continue;
+        const shared=(state.data?.passes||[]).some(p=>Number(p.id)===Number(q.pass_id)&&p.is_shared&&dogs.every(d=>passAllowsDogV244(p,d.id)));
+        const otherSingle=(quote||[]).some(x=>x.mode==='single'&&String(x.date)===String(q.date)&&Number(x.dog_id)!==Number(q.dog_id)&&dogs.some(d=>Number(d.id)===Number(x.dog_id)));
+        if(shared&&otherSingle)lastSharedCoveredBySingle.add(Number(q.dog_id)+'|'+String(q.date));
+      }
+    }
     for(const q of quote||[]){
       const id=Number(q.dog_id),total=Number(q.total)||0,number=Number(q.entry_number)||0;
       const reason=q.mode==='pass'&&total>0&&number===total?'last':q.mode==='single'?'single':null;
       if(!reason||!Number.isSafeInteger(id)||id<=0)continue;
+      if(reason==='last'&&lastSharedCoveredBySingle.has(id+'|'+String(q.date)))continue;
       if((state.data?.pass_requests||[]).some(p=>p.status==='pending'&&passAllowsDogV244(p,id)))continue;
       const existing=byDog.get(id);
       if(!existing||reason==='last'&&existing.reason!=='last')byDog.set(id,{dogId:id,date:String(q.date),reason});
@@ -2861,14 +2874,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const original={title:title.textContent,day:day.textContent,
           description:description?.textContent,hint:hint?.textContent,yes:yes.textContent};
         const isLast=item.reason==='last';
-        title.textContent=isLast?'Posledný vstup z permanentky':'Permanentka pre '+dog.name+'?';
+        title.textContent=isLast?'Posledný vstup z permanentky':'Nová permanentka pre '+dog.name+'?';
         day.textContent=isLast
           ?'Rezervácia pre '+dog.name+' na '+skDay(item.date)+' '+skDate(item.date)+' využije posledný voľný vstup z aktuálnej permanentky.'
           :dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' odoslanú jednorazovú rezerváciu.';
         if(description)description.textContent=isLast
           ?'Máte záujem o kúpu novej 10-vstupovej permanentky?'
-          :'Chcete tento vstup pre '+dog.name+' zaradiť medzi plánované vstupy novej 10-vstupovej permanentky?';
-        if(hint)hint.textContent='Ak zvolíte Neskôr, rezervácia zostane bez zmeny. Záujem musí potvrdiť škôlka.';
+          :'Máte záujem o novú 10-vstupovú permanentku pre '+dog.name+'?';
+        if(hint)hint.textContent=isLast?'Ak zvolíte Neskôr, rezervácia zostane na aktuálnej permanentke.':'Ak zvolíte Neskôr, rezervácia pre '+dog.name+' zostane jednorazová.';
         yes.textContent='Mám záujem o permanentku';
         later.textContent='Neskôr';
         let done=false,busy=false;
