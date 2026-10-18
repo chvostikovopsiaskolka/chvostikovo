@@ -83,7 +83,7 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261017-dog-editor-v297';
+const APP_BUILD='20261018-dog-choices-allergies-v298';
 const APP_VERSION='1.0.113';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
@@ -780,23 +780,24 @@ function syncDogInlineChoicesV297(){
   for(const id of ['dogSex','dogNeutered']){
     const input=$(id),group=input?.parentElement?.querySelector('.dog-inline-choices-v297');
     if(!group)continue;
-    for(const btn of group.querySelectorAll('[data-choice-v297]'))
-      btn.setAttribute('aria-checked',String(btn.dataset.choiceV297===input.value));
+    for(const btn of group.querySelectorAll('[data-choice-v297]')){
+      const checked=btn.dataset.choiceV297===input.value;
+      btn.setAttribute('aria-checked',String(checked));
+      btn.tabIndex=checked||(!input.value&&btn===group.firstElementChild)?0:-1;
+    }
   }
 }
-/* The iOS native select overlay can obscure the form in dark system appearance.
-   Replace only the visible picker with choices in the same field; retain the real
-   select and its existing save/event handling for 1- and 2-dog accounts. */
+/* v298: show two explicit choices on all platforms, retaining the original
+   nullable select as the sole saved value for one or two assigned dogs. */
 function mountDogInlineChoicesV297(){
-  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  if(!isIOS)return;
   for(const id of ['dogSex','dogNeutered']){
     const select=$(id);
-    if(!select||select.dataset.iosChoicesV297==='1')continue;
+    if(!select||select.dataset.inlineChoicesV298==='1')continue;
     const group=document.createElement('div');
     group.className='dog-inline-choices-v297';group.setAttribute('role','radiogroup');
     group.setAttribute('aria-label',select.parentElement?.querySelector('label')?.textContent?.trim()||id);
     for(const option of select.options){
+      if(!option.value)continue; // missing data means neither button is selected
       const btn=document.createElement('button');
       btn.type='button';btn.className='dog-inline-choice-v297';btn.textContent=option.textContent;
       btn.dataset.choiceV297=option.value;btn.setAttribute('role','radio');
@@ -807,8 +808,19 @@ function mountDogInlineChoicesV297(){
       });
       group.appendChild(btn);
     }
-    select.after(group);select.dataset.iosChoicesV297='1';
-    select.classList.add('dog-ios-native-select-v297');select.setAttribute('aria-hidden','true');select.tabIndex=-1;
+    group.addEventListener('keydown',event=>{
+      const buttons=[...group.querySelectorAll('[data-choice-v297]')];
+      const current=buttons.indexOf(document.activeElement);
+      let next=-1;
+      if(event.key==='ArrowRight'||event.key==='ArrowDown')next=(current+1)%buttons.length;
+      if(event.key==='ArrowLeft'||event.key==='ArrowUp')next=(current+buttons.length-1)%buttons.length;
+      if(event.key==='Home')next=0;
+      if(event.key==='End')next=buttons.length-1;
+      if(next<0)return;
+      event.preventDefault();buttons[next].focus();buttons[next].click();
+    });
+    select.after(group);select.dataset.inlineChoicesV298='1';
+    select.classList.add('dog-inline-native-select-v298');select.setAttribute('aria-hidden','true');select.tabIndex=-1;
     select.addEventListener('change',syncDogInlineChoicesV297);
   }
   syncDogInlineChoicesV297();
@@ -817,6 +829,7 @@ function fillDogForm(d,force=false){
   if(!force&&!$('dogDetailsModal')?.classList.contains('hidden'))return;
   $('dogId').value=d.id;$('dogName').value=d.name||'';$('dogBirthDate').value=d.birth_date||'';syncDogAgeField();$('dogBreed').value=d.breed||'';$('dogWeight').value=d.weight_kg??'';$('dogSex').value=d.sex||'';$('dogNeutered').value=d.neutered===true?'true':d.neutered===false?'false':'';syncDogInlineChoicesV297();syncDogDetailsSexTintV297();
   const care=dogCareFields(d);if($('dogAllergies'))$('dogAllergies').value=care.allergies;if($('dogTemperament'))$('dogTemperament').value=care.temperament;
+  const allergiesDetails=$('dogAllergiesDetailsV298');if(allergiesDetails)allergiesDetails.open=!!care.allergies.trim();
   const vs=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(d.id));
   for(const [type,inputId] of [['rabies','rabiesUntil'],['infectious','infectiousUntil'],['kennel_cough','kennelUntil'],['lepto_l4','leptoL4UntilV211']]){
     const v=vs.find(x=>x.vaccination_type===type)||{};$(inputId).value=v.valid_until||'';
