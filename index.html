@@ -11,9 +11,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
-  <link rel="manifest" href="/manifest.webmanifest?v=20261017-dog-editor-v297">
-  <link rel="stylesheet" href="/styles.css?v=20261017-dog-editor-v297">
-  <link rel="stylesheet" href="/dog-choice-fab-v276.css?v=20261017-dog-editor-v297">
+  <link rel="manifest" href="/manifest.webmanifest?v=20261018-dog-choices-allergies-v298">
+  <link rel="stylesheet" href="/styles.css?v=20261018-dog-choices-allergies-v298">
+  <link rel="stylesheet" href="/dog-choice-fab-v276.css?v=20261018-dog-choices-allergies-v298">
   <style id="customer-l4-chevron-fix-v217">
     #dogDetailsModal .vaccine-box .l4-inline-v213 > summary .l4-question-v216 {
       display:block!important;flex:1 1 auto!important;min-width:0!important;
@@ -54,8 +54,8 @@
   </style>
   <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}.loading-screen.in-app{background:transparent;pointer-events:none;padding:0}.loading-screen.in-app .loading-logo,.loading-screen.in-app small{display:none}.loading-screen.in-app .loading-paw{width:68px;height:68px;border:0;border-radius:18px;background:#fff;box-shadow:0 10px 34px rgba(17,24,39,.16);font-size:0;animation:none}.loading-screen.in-app .loading-paw::before{content:'🐾';width:42px;height:42px;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;display:grid;place-items:center;font-size:18px;animation:loadingSpin .8s linear infinite}</style>
   <title>Chvostíkovo</title>
-  <link rel="stylesheet" href="/bulletin-photo-v243.css?v=20261017-dog-editor-v297">
-<link rel="stylesheet" href="/dual-dog-overview-v246.css?v=20261017-dog-editor-v297">
+  <link rel="stylesheet" href="/bulletin-photo-v243.css?v=20261018-dog-choices-allergies-v298">
+<link rel="stylesheet" href="/dual-dog-overview-v246.css?v=20261018-dog-choices-allergies-v298">
 </head>
 <body>
 <svg class="customer-icon-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -202,8 +202,8 @@
         <div><label for="dogName">Meno psíka</label><input id="dogName" class="input dog-name-locked-v87" readonly aria-readonly="true" tabindex="-1" required></div>
         <div class="grid2"><div><label for="dogBirthDate">Dátum narodenia</label><small class="birthdate-recommend-v100">Odporúčame vyplniť – psíka bude čakať narodeninové prekvapenie. 🎂🐾</small><input id="dogBirthDate" class="input" type="date" aria-describedby="dogBirthDateErrorV297"><small id="dogBirthDateErrorV297" class="dog-birthdate-error-v297 hidden" role="alert">Dátum narodenia nemôže byť v budúcnosti.</small></div><div><label for="dogAge">Vek</label><input id="dogAge" class="input dog-age-locked-v81" readonly aria-readonly="true" tabindex="-1" placeholder="Vyplní sa automaticky"></div></div>
         <div class="dog-breed-weight-row"><div><label for="dogBreed">Plemeno</label><input id="dogBreed" class="input" autocomplete="off"></div><div><label for="dogWeight">Váha (kg)</label><input id="dogWeight" class="input" type="number" inputmode="decimal" min="0.1" step="any" autocomplete="off"></div></div>
-        <div class="grid2"><div><label for="dogSex">Pohlavie</label><select id="dogSex" class="input"><option value="">Neuvedené</option><option value="male">Pes</option><option value="female">Suka</option></select></div><div><label for="dogNeutered">Kastrovaný / sterilizovaná</label><select id="dogNeutered" class="input"><option value="">Neuvedené</option><option value="true">Áno</option><option value="false">Nie</option></select></div></div>
-        <div><label for="dogAllergies">Alergie a zdravotné obmedzenia</label><textarea id="dogAllergies" class="input" rows="2" maxlength="3000" placeholder="Alergie, lieky, zdravotné obmedzenia alebo čo psík nesmie"></textarea></div>
+        <div class="grid2"><div><label for="dogSex">Pohlavie</label><select id="dogSex" class="input"><option value=""></option><option value="male">Pes</option><option value="female">Suka</option></select></div><div><label for="dogNeutered">Kastrovaný / sterilizovaná</label><select id="dogNeutered" class="input"><option value=""></option><option value="true">Áno</option><option value="false">Nie</option></select></div></div>
+        <details id="dogAllergiesDetailsV298" class="dog-allergies-details-v298"><summary><span>Alergie a zdravotné obmedzenia <small>(ak psík nejaké má)</small></span><span class="dog-allergies-chevron-v298" aria-hidden="true">⌄</span></summary><div class="dog-allergies-body-v298"><label for="dogAllergies" class="dog-allergies-label-v298">Alergie, lieky a zdravotné obmedzenia</label><textarea id="dogAllergies" class="input" rows="2" maxlength="3000" placeholder="Alergie, lieky, zdravotné obmedzenia alebo čo psík nesmie"></textarea></div></details>
         <div><label for="dogTemperament">Povaha a ďalšie informácie</label><textarea id="dogTemperament" class="input" rows="2" maxlength="3000" placeholder="Správanie, zvyky a ďalšie dôležité informácie o psíkovi"></textarea></div>
       </div>
       <div id="dogVaccinationFieldsV96" class="dog-details-section-v96">
@@ -226,11 +226,11 @@
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/terms-pdf-font.js?v=20261017-dog-editor-v297"></script>
-<script src="/terms-pdf.js?v=20261017-dog-editor-v297"></script>
-<script src="/app.js?v=20261017-dog-editor-v297"></script>
-<script src="/dual-dog-overview-v246.js?v=20261017-dog-editor-v297"></script>
-<script src="/back-swipe.js?v=20261017-dog-editor-v297"></script>
+<script src="/terms-pdf-font.js?v=20261018-dog-choices-allergies-v298"></script>
+<script src="/terms-pdf.js?v=20261018-dog-choices-allergies-v298"></script>
+<script src="/app.js?v=20261018-dog-choices-allergies-v298"></script>
+<script src="/dual-dog-overview-v246.js?v=20261018-dog-choices-allergies-v298"></script>
+<script src="/back-swipe.js?v=20261018-dog-choices-allergies-v298"></script>
 </body>
 </html>
 
