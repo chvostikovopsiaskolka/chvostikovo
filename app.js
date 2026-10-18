@@ -84,7 +84,7 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
 const APP_BUILD='20261018-dog-choices-allergies-v298';
-const APP_VERSION='1.0.113';
+const APP_VERSION='1.0.114';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
