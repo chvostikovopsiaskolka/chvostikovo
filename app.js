@@ -3008,7 +3008,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
           :dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' odoslanú jednorazovú rezerváciu.';
         if(description)description.textContent=isShared
           ?'Máte záujem o novú spoločnú '+renewalTotal+'-vstupovú permanentku pre oboch psíkov – '+sharedNames+'?'
-          :isLast?'Dajte nám vedieť tlačidlom nižšie.'
+          :isLast?(renewalTotal===20?'Máte záujem o novú 20-vstupovú permanentku?':'Dajte nám vedieť tlačidlom nižšie.')
           :'Máte záujem o novú '+renewalTotal+'-vstupovú permanentku pre '+dog.name+'?';
         if(hint)hint.textContent=isShared
           ?'Ak zvolíte Neskôr, '+lastDog.name+' využije posledný vstup z aktuálnej permanentky a '+dog.name+' zostane na jednorazovom vstupe.'
