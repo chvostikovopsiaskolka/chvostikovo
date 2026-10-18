@@ -160,18 +160,12 @@ export function ShortForm({
       {!hideInterest && (
         <fieldset className="min-w-0">
           <legend className="label-sm">O čo máte záujem? *</legend>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-            {([
-              { value: "Chcem sa dozvedieť viac o psej škôlke", lines: ["Viac o", "škôlke"] },
-              { value: "Mám záujem o pravidelné návštevy", lines: ["Pravidelné", "návštevy"] },
-              { value: "Potrebujem škôlku občas", lines: ["Občas podľa", "potreby"] },
-            ] as const).map((option) => (
-              <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
-                <input type="radio" name="zaujem" value={option.value} aria-label={option.value} required className="peer sr-only" />
-                <span className="flex h-full min-h-16 min-w-0 flex-col items-center justify-center rounded-[0.85rem] border border-border bg-white px-1 py-2 text-center text-[11px] leading-[1.25] font-semibold text-forest transition-colors peer-checked:border-coral peer-checked:bg-secondary/55 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:text-xs">
-                  {option.lines.map((line) => (
-                    <span key={line} className="block max-w-full break-words [overflow-wrap:anywhere]">{line}</span>
-                  ))}
+          <div className="grid grid-cols-2 gap-2">
+            {(["Chcem sa dozvedieť viac o psej škôlke", "Mám záujem o pravidelné návštevy"] as const).map((option) => (
+              <label key={option} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
+                <input type="radio" name="zaujem" value={option} required className="peer sr-only" />
+                <span className="flex h-full min-h-16 min-w-0 items-center justify-center rounded-[0.85rem] border border-border bg-white px-2 py-3 text-center text-[13px] leading-snug font-semibold text-forest break-words [overflow-wrap:anywhere] transition-colors peer-checked:border-coral peer-checked:bg-secondary/55 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:text-sm">
+                  {option}
                 </span>
               </label>
             ))}
