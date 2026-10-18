@@ -3175,3 +3175,28 @@ button span,button svg,button svg *{pointer-events:none}
   position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)
 }
 #dogBasicFieldsV96 .dog-inline-choice-v297{overflow-wrap:break-word;-webkit-tap-highlight-color:transparent}
+
+
+/* v300: photo crop buttons must not touch the cropped picture; the native
+   iOS source chooser stays functional without a translucent custom sheet beneath it. */
+#photoCropModal .photo-modal-actions{
+  margin-top:14px!important;
+  gap:12px!important;
+}
+#photoCropModal .photo-modal-actions .btn,
+#photoActionsModalV89 .photo-actions-list-v89 .btn{
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-touch-callout:none!important;
+  -webkit-user-select:none;
+  user-select:none;
+}
+#photoCropModal .photo-modal-actions .btn:focus:not(:focus-visible),
+#photoActionsModalV89 .photo-actions-list-v89 .btn:focus:not(:focus-visible){
+  outline:none!important;
+}
+#photoActionsModalV89.photo-picker-waiting-v184{
+  background:transparent!important;
+}
+#photoActionsModalV89.photo-picker-waiting-v184 .photo-actions-card-v89{
+  visibility:hidden!important;
+}
