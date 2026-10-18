@@ -108,6 +108,22 @@ assert(englishForm.includes("progress.onInvalidCapture"), "EN enquiry must recor
 assert(progressSource.includes("hasAnalyticsConsent()"), "Field analytics must require analytics consent.");
 assert(!progressSource.includes("JSON.stringify(target.value)") && !progressSource.includes("event.target.value"), "Never transmit form values in diagnostics.");
 assert(forms.includes("hideInterest = false"), "Critical form check failed: informational interest selector is not enabled by default.");
+
+// v301: only the visible Slovak ShortForm selector changes; no backend/API migration.
+const shortFormSource = forms.slice(forms.indexOf("export function ShortForm"), forms.indexOf("/** Inline binary choices"));
+assert(shortFormSource.includes("!hideInterest") && shortFormSource.includes('name="zaujem"'), "Hidden-interest variants and the existing zaujem name must remain.");
+assert(shortFormSource.includes('type="radio" name="zaujem" value={option} required'), "Visible short-form interest must use a mandatory native radio group.");
+assert(shortFormSource.includes("grid-cols-2") && shortFormSource.includes("peer-checked:border-coral") && shortFormSource.includes("peer-focus-visible:outline") && shortFormSource.includes("-webkit-tap-highlight-color:transparent"), "Two responsive choices must retain selected and keyboard focus states without a touch highlight.");
+assert(!shortFormSource.includes('name="zaujem" required className="field"'), "Remove only the original short-form native dropdown.");
+assert(!shortFormSource.includes("Potrebujem škôlku občas") && !shortFormSource.includes("Potrebujem jednorazové stráženie"), "Removed options must not appear in the short-form UI.");
+assert(!shortFormSource.includes("defaultChecked") && !shortFormSource.includes('checked={'), "Neither radio option may start selected.");
+for (const interest of ["Chcem sa dozvedieť viac o psej škôlke", "Mám záujem o pravidelné návštevy"]) {
+  assert(shortFormSource.includes(interest), "Both original Slovak values must remain unmodified.");
+  const parsed = shortSchema.parse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: interest });
+  assert(buildDbPayload(parsed).interest_reason === interest, "Selected interest text must arrive unchanged in the CRM payload.");
+}
+assert(!shortSchema.safeParse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: "" }).success, "Blank interest must remain invalid.");
+
 assert(forms.includes('name="email"') && englishForm.includes('name="email"'), "Enquiry forms must offer optional email.");
 assert(forms.includes('LeadPhoneReceipt') && englishForm.includes('LeadPhoneReceipt'), "Receipts must display a submitted phone.");
 const receiptSource = readFileSync(new URL("../src/components/site/LeadPhoneReceipt.tsx", import.meta.url), "utf8");
