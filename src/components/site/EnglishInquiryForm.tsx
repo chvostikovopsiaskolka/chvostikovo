@@ -128,8 +128,8 @@ export function EnglishInquiryForm({
             <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
               <input type="radio" name="interest" value={option.value} aria-label={option.value} required className="peer sr-only" />
               <span className="flex h-full min-h-16 min-w-0 flex-col items-center justify-center rounded-[0.85rem] border border-border bg-white px-1 py-2 text-center text-[11px] leading-[1.25] font-semibold text-forest transition-colors peer-checked:border-coral peer-checked:bg-secondary/55 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:text-xs">
-                {option.lines.map((line) => (
-                  <span key={line} className="block max-w-full break-words [overflow-wrap:anywhere]">{line}</span>
+                {option.lines.map((line, index) => (
+                  <span key={line} className={`block max-w-full break-words [overflow-wrap:anywhere] ${index === 0 || option.value === "Occasional daycare" ? "text-xs font-bold sm:text-[13px]" : "text-[10px] font-normal sm:text-[11px]"}`}>{line}</span>
                 ))}
               </span>
             </label>
