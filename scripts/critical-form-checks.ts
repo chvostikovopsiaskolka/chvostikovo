@@ -45,7 +45,7 @@ const twoDogApplication = {
   typ: "prihlaska" as const, consent: true as const, meno: "Test", telefon: phone,
   dog_count: "2" as const,
   pes: "Prvý", plemeno: "Labrador", vaha: "25 kg", pohlavie: "Pes",
-  vek: "2 roky", kastrovana: "Áno", duvod: "Pravidelne – 1 až 2× týždenne",
+  vek: "2 roky", kastrovana: "Áno", duvod: "Pravidelne – 1× alebo viackrát týždenne",
   alergie: "", povaha: "Priateľský a pokojný.",
   pes2: "Druhý", plemeno2: "Retríver", vaha2: "19,5 kg", pohlavie2: "Fenka",
   vek2: "3 roky", kastrovana2: "Nie",
@@ -100,6 +100,29 @@ targetInquirySchema.parse({
 
 const forms = readFileSync(new URL("../src/components/site/Forms.tsx", import.meta.url), "utf8");
 assert(!forms.includes('name="duvod2"'), "Second usage selector must not be rendered.");
+
+// v305: shared 1/2-dog application usage is one required radio group with three compact cards.
+// Keep backend compatibility for historical submissions and record the broadened regular choice.
+const applicationSource = forms.slice(forms.indexOf("export function LongForm"));
+assert(applicationSource.includes('name="duvod" value={option.value} aria-label={option.value} required'), "The application requires a native accessible radio choice.");
+assert(applicationSource.includes("grid-cols-3") && applicationSource.includes("min-h-24") && applicationSource.includes("peer-checked:border-coral") && applicationSource.includes("peer-focus-visible:outline") && applicationSource.includes("-webkit-tap-highlight-color:transparent"), "Three cards must retain size, selection, focus and mobile touch styling.");
+assert(applicationSource.includes('lines: ["Pravidelne", "1× alebo viackrát", "týždenne"]') && applicationSource.includes('lines: ["Občas", "podľa potreby"]') && applicationSource.includes('lines: ["Jednorazové", "stráženie"]'), "Application wording must not limit weekly visits to one or two.");
+assert(!applicationSource.includes('<select id={`l-${formId}-duvod`') && !applicationSource.includes("defaultChecked"), "No application usage dropdown or preselected radio.");
+assert(applicationSource.includes('duvod: String(fd.get("duvod") ?? "")'), "Do not alter submission mapping.");
+assert((applicationSource.match(/name="duvod"/g) || []).length === 1, "Single shared usage field even for two dogs.");
+for (const usage of ["Pravidelne – 1× alebo viackrát týždenne", "Občas podľa potreby", "Jednorazové stráženie"]) {
+  assert(applicationSource.includes(usage), "Original categories and broadened regular choice must remain visible.");
+  const parsed = longSchema.parse({ ...twoDogApplication, dog_count: "1", duvod: usage });
+  assert(buildDbPayload(parsed).interest_reason === usage, "One-dog application must preserve the selected usage in CRM.");
+  const dual = buildDbPayload(inquirySchema.parse({ ...twoDogApplication, duvod: usage }));
+  assert(dual.dogs?.[0]?.interest_reason === usage && dual.dogs?.[1]?.interest_reason === usage, "Both dogs must share the correct usage value.");
+}
+assert(!longSchema.safeParse({ ...twoDogApplication, duvod: "" }).success, "Unselected application usage must not submit.");
+const backendUsageSrc = readFileSync(new URL("../supabase/functions/web-form-submit/index.ts", import.meta.url), "utf8");
+for (const usage of ["Pravidelne – 1 až 2× týždenne", "Pravidelne – 1× alebo viackrát týždenne", "Občas podľa potreby", "Jednorazové stráženie"]) {
+  assert(backendUsageSrc.includes(`'${usage}'`), "Backend allowlist must keep both the old and the new application usage values.");
+}
+
 assert((forms.match(/<LeadPhoneReceipt /g)||[]).length===2, "Lead and application must both offer the same phone receipt.");
 const englishForm = readFileSync(new URL("../src/components/site/EnglishInquiryForm.tsx", import.meta.url), "utf8");
 const progressSource = readFileSync(new URL("../src/lib/form-progress.ts", import.meta.url), "utf8");
