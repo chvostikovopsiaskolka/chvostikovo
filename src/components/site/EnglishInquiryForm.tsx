@@ -117,16 +117,25 @@ export function EnglishInquiryForm({
         <input id={`en-${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} className="field" placeholder="you@example.com" />
         <p className="mt-1 text-xs text-forest/65">In case we cannot reach you by phone.</p>
       </div>
-      <div>
-        <label className="label-sm" htmlFor={`en-${formId}-interest`}>What are you looking for? *</label>
-        <select id={`en-${formId}-interest`} name="interest" required className="field" defaultValue="">
-          <option value="" disabled>Select an option</option>
-          <option>Regular daycare visits</option>
-          <option>Occasional daycare</option>
-          <option>One-off daytime care</option>
-          <option>I just want more information</option>
-        </select>
-      </div>
+      <fieldset className="min-w-0">
+        <legend className="label-sm">What are you looking for? *</legend>
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+          {([
+            { value: "I just want more information", lines: ["Learn more", "about daycare"] },
+            { value: "Regular daycare visits", lines: ["Regular", "visits"] },
+            { value: "Occasional daycare", lines: ["Occasional", "visits"] },
+          ] as const).map((option) => (
+            <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
+              <input type="radio" name="interest" value={option.value} aria-label={option.value} required className="peer sr-only" />
+              <span className="flex h-full min-h-16 min-w-0 flex-col items-center justify-center rounded-[0.85rem] border border-border bg-white px-1 py-2 text-center text-[11px] leading-[1.25] font-semibold text-forest transition-colors peer-checked:border-coral peer-checked:bg-secondary/55 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:text-xs">
+                {option.lines.map((line) => (
+                  <span key={line} className="block max-w-full break-words [overflow-wrap:anywhere]">{line}</span>
+                ))}
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <PrivacyConsentCheckbox language="en" />
       {error && <p className="text-sm text-destructive">{error}</p>}
       <button
