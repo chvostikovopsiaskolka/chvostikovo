@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261018-legacy20-renewal-v299';
-const APP_VERSION='1.0.115';
+const APP_BUILD='20261018-photo-chooser-v301';
+const APP_VERSION='1.0.117';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1143,7 +1143,7 @@ function bindPhotoGesturesV89(canvas){
 }
 function ensurePhotoActionsV89(){
   if($('photoActionsModalV89'))return;
-  document.body.insertAdjacentHTML('beforeend',`<div id="photoActionsModalV89" class="photo-modal photo-actions-modal-v89 hidden"><div class="photo-actions-card-v89"><div class="photo-modal-head"><div><strong>Fotka psíka</strong><small>Vyberte, čo chcete s fotkou urobiť.</small></div><button id="photoActionsCloseV89" class="icon-btn" type="button">✕</button></div><div class="photo-actions-list-v89"><button id="photoEditCurrentV89" class="btn secondary" type="button">Upraviť aktuálnu fotku</button><button id="photoReplaceV89" class="btn secondary" type="button">Nahrať novú fotku</button><button id="photoDeleteV89" class="btn danger" type="button">Zmazať fotku</button></div></div></div>`);
+  document.body.insertAdjacentHTML('beforeend',`<div id="photoActionsModalV89" class="photo-modal photo-actions-modal-v89 hidden"><div class="photo-actions-card-v89"><div class="photo-modal-head"><div><strong>Fotka psíka</strong><small>Vyberte, čo chcete s fotkou urobiť.</small></div><button id="photoActionsCloseV89" class="icon-btn" type="button">✕</button></div><div class="photo-actions-list-v89"><button id="photoEditCurrentV89" class="btn secondary" type="button">Upraviť aktuálnu fotku</button><button id="photoReplaceV89" class="btn secondary" type="button">Nahrať novú fotku</button><button id="photoDeleteV89" class="btn danger" type="button">Zmazať fotku</button></div><div class="photo-picker-status-v301" role="status" aria-live="polite">Vyberte zdroj novej fotky v systémovej ponuke telefónu. Po zrušení sa môžete vrátiť k týmto možnostiam.</div></div></div>`);
   $('photoActionsCloseV89').onclick=closePhotoActionsV89;
   $('photoActionsModalV89').addEventListener('click',e=>{if(e.target===$('photoActionsModalV89'))closePhotoActionsV89()});
 }
@@ -1152,14 +1152,24 @@ function closePhotoActionsV89(){
   photoPickerFromActionsV184=false;
   const modal=$('photoActionsModalV89');
   modal?.classList.remove('photo-picker-waiting-v184');
+  modal?.removeAttribute('aria-busy');
   modal?.classList.add('hidden');
 }
 function selectNewDogPhotoV89(){
   const modal=$('photoActionsModalV89'),input=$('dogPhotoInput');
   if(!input)return;
   photoPickerFromActionsV184=!!modal&&!modal.classList.contains('hidden');
-  if(photoPickerFromActionsV184)modal.classList.add('photo-picker-waiting-v184');
-  input.click();
+  if(photoPickerFromActionsV184){
+    modal.classList.add('photo-picker-waiting-v184');
+    modal.setAttribute('aria-busy','true');
+  }
+  try{input.click()}
+  catch(error){
+    modal?.classList.remove('photo-picker-waiting-v184');
+    modal?.removeAttribute('aria-busy');
+    photoPickerFromActionsV184=false;
+    toast('Nepodarilo sa otvoriť výber fotky. Skúste to znova.');
+  }
 }
 function showPhotoActionsV89(dog){
   ensurePhotoActionsV89();
@@ -1167,7 +1177,10 @@ function showPhotoActionsV89(dog){
   $('photoEditCurrentV89').onclick=()=>{closePhotoActionsV89();openExistingPhotoEditorV89(dog)};
   $('photoReplaceV89').onclick=selectNewDogPhotoV89;
   $('photoDeleteV89').onclick=()=>deleteCurrentDogPhotoV89(dog);
-  $('photoActionsModalV89').classList.remove('hidden');
+  const photoModal=$('photoActionsModalV89');
+  photoModal.classList.remove('photo-picker-waiting-v184');
+  photoModal.removeAttribute('aria-busy');
+  photoModal.classList.remove('hidden');
 }
 function fileDataUrlV88(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(reader.error||new Error('read failed'));reader.readAsDataURL(file)})}
 function imageFromDataUrlV88(dataUrl){return new Promise((resolve,reject)=>{const img=new Image();let done=false;const finish=(ok)=>{if(done)return;done=true;clearTimeout(timer);ok?resolve(img):reject(new Error('decode failed'))};const timer=setTimeout(()=>finish(false),15000);img.onload=()=>finish(true);img.onerror=()=>finish(false);img.src=dataUrl})}
@@ -1193,6 +1206,7 @@ async function openPhotoEditor(e){
   window.__customerPhotoPickerV88=false;
   if(!file){
     $('photoActionsModalV89')?.classList.remove('photo-picker-waiting-v184');
+    $('photoActionsModalV89')?.removeAttribute('aria-busy');
     photoPickerFromActionsV184=false;
     return;
   }
@@ -1498,7 +1512,13 @@ $('bookingDogProfile')?.addEventListener('click',event=>{
 $('dogDetailsPhotoButton').addEventListener('click',()=>{const dog=selectedDog();if(dog?.photo_url)showPhotoActionsV89(dog);else selectNewDogPhotoV89()});
 $('dogPhotoInput').addEventListener('click',()=>{window.__customerPhotoPickerV88=true;setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},15000)});
 $('dogPhotoInput').addEventListener('change',openPhotoEditor);
-$('dogPhotoInput').addEventListener('cancel',()=>{window.__customerPhotoPickerV88=false;photoPickerFromActionsV184=false;$('photoActionsModalV89')?.classList.remove('photo-picker-waiting-v184')});
+$('dogPhotoInput').addEventListener('cancel',()=>{
+  window.__customerPhotoPickerV88=false;
+  photoPickerFromActionsV184=false;
+  const modal=$('photoActionsModalV89');
+  modal?.classList.remove('photo-picker-waiting-v184');
+  modal?.removeAttribute('aria-busy');
+});
 $('bookingVaccinationStatus').addEventListener('click',()=>openDogWithChoiceV276('vaccinations'));
 $('bookingVisitCount').addEventListener('click',()=>window.openDogVisitsV99?.());
 function openCustomerRules(){if(window.openCustomerRulesV55)window.openCustomerRulesV55();else $('schoolRulesCardV55')?.click()}

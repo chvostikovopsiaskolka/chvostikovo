@@ -3194,9 +3194,57 @@ button span,button svg,button svg *{pointer-events:none}
 #photoActionsModalV89 .photo-actions-list-v89 .btn:focus:not(:focus-visible){
   outline:none!important;
 }
+/* v301: keep ONE clear app context above the iOS system source menu.
+   A native iOS file chooser itself cannot be recolored from the web. */
+#photoActionsModalV89 .photo-picker-status-v301{
+  display:none!important;
+}
 #photoActionsModalV89.photo-picker-waiting-v184{
-  background:transparent!important;
+  background:rgba(17,24,39,.56)!important;
+  place-items:start center!important;
+  padding-top:calc(env(safe-area-inset-top) + 22px)!important;
+  padding-bottom:calc(env(safe-area-inset-bottom) + 16px)!important;
 }
 #photoActionsModalV89.photo-picker-waiting-v184 .photo-actions-card-v89{
-  visibility:hidden!important;
+  visibility:visible!important;
+  opacity:1!important;
+  transform:none!important;
+  width:min(420px,100%)!important;
+  max-height:min(38svh,280px)!important;
+  overflow-y:auto!important;
+}
+#photoActionsModalV89.photo-picker-waiting-v184 .photo-actions-list-v89{
+  display:none!important;
+}
+#photoActionsModalV89.photo-picker-waiting-v184 .photo-picker-status-v301{
+  display:block!important;
+  margin-top:4px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:#fff7ed;
+  color:#9a3412;
+  font-size:13px;
+  font-weight:650;
+  line-height:1.45;
+}
+#dogDetailsPhotoButton,
+#dogPhotoActionBtnV89,
+#photoActionsModalV89 button,
+#photoCropModal button{
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-touch-callout:none!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  touch-action:manipulation;
+}
+#dogDetailsPhotoButton:active,
+#dogPhotoActionBtnV89:active{
+  opacity:1!important;
+  filter:none!important;
+  background:#fff!important;
+}
+#dogDetailsPhotoButton:focus-visible,
+#dogPhotoActionBtnV89:focus-visible{
+  outline:3px solid #f97316!important;
+  outline-offset:3px!important;
 }
