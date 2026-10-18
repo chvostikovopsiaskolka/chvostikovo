@@ -24,6 +24,7 @@ const EN_LEAD_INTERESTS = new Set([
 
 const APPLICATION_USAGE = new Set([
   'Pravidelne – 1 až 2× týždenne',
+  'Pravidelne – 1× alebo viackrát týždenne',
   'Občas podľa potreby',
   'Jednorazové stráženie',
 ]);

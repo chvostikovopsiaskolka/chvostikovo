@@ -380,19 +380,25 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
         </div>
       </div>
       <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana" options={["Áno", "Nie"]} />
-      <div>
-        <label className="label-sm" htmlFor={`l-${formId}-duvod`}>
-          Ako plánujete využívať škôlku? *
-        </label>
-        <select id={`l-${formId}-duvod`} name="duvod" required className="field" defaultValue="">
-          <option value="" disabled>
-            Vyberte možnosť
-          </option>
-          <option>Pravidelne – 1 až 2× týždenne</option>
-          <option>Občas podľa potreby</option>
-          <option>Jednorazové stráženie</option>
-        </select>
-      </div>
+      <fieldset className="min-w-0">
+        <legend className="label-sm">Ako plánujete využívať škôlku? *</legend>
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+          {([
+            { value: "Pravidelne – 1× alebo viackrát týždenne", lines: ["Pravidelne", "1× alebo viackrát", "týždenne"] },
+            { value: "Občas podľa potreby", lines: ["Občas", "podľa potreby"] },
+            { value: "Jednorazové stráženie", lines: ["Jednorazové", "stráženie"] },
+          ] as const).map((option) => (
+            <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
+              <input type="radio" name="duvod" value={option.value} aria-label={option.value} required className="peer sr-only" />
+              <span className="flex h-full min-h-24 min-w-0 flex-col items-center justify-center rounded-[0.85rem] border border-border bg-white px-1 py-2 text-center text-[11px] leading-[1.25] font-semibold text-forest transition-colors peer-checked:border-coral peer-checked:bg-secondary/55 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:text-xs">
+                {option.lines.map((line) => (
+                  <span key={line} className="block max-w-full break-words [overflow-wrap:anywhere]">{line}</span>
+                ))}
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div>
         <label className="label-sm" htmlFor={`l-${formId}-alergie`}>
           Alergie a zdravotné obmedzenia
