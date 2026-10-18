@@ -109,16 +109,17 @@ assert(progressSource.includes("hasAnalyticsConsent()"), "Field analytics must r
 assert(!progressSource.includes("JSON.stringify(target.value)") && !progressSource.includes("event.target.value"), "Never transmit form values in diagnostics.");
 assert(forms.includes("hideInterest = false"), "Critical form check failed: informational interest selector is not enabled by default.");
 
-// v301: only the visible Slovak ShortForm selector changes; no backend/API migration.
+// v303: three visible Slovak ShortForm choices; same required field and CRM contract.
 const shortFormSource = forms.slice(forms.indexOf("export function ShortForm"), forms.indexOf("/** Inline binary choices"));
 assert(shortFormSource.includes("!hideInterest") && shortFormSource.includes('name="zaujem"'), "Hidden-interest variants and the existing zaujem name must remain.");
-assert(shortFormSource.includes('type="radio" name="zaujem" value={option} required'), "Visible short-form interest must use a mandatory native radio group.");
-assert(shortFormSource.includes("grid-cols-2") && shortFormSource.includes("peer-checked:border-coral") && shortFormSource.includes("peer-focus-visible:outline") && shortFormSource.includes("-webkit-tap-highlight-color:transparent"), "Two responsive choices must retain selected and keyboard focus states without a touch highlight.");
+assert(shortFormSource.includes('type="radio" name="zaujem" value={option.value} aria-label={option.value} required'), "Visible short-form interest must use a mandatory native radio group.");
+assert(shortFormSource.includes("grid-cols-3") && shortFormSource.includes("peer-checked:border-coral") && shortFormSource.includes("peer-focus-visible:outline") && shortFormSource.includes("-webkit-tap-highlight-color:transparent"), "Three responsive choices must retain selected and keyboard focus states without a touch highlight.");
 assert(!shortFormSource.includes('name="zaujem" required className="field"'), "Remove only the original short-form native dropdown.");
-assert(!shortFormSource.includes("Potrebujem škôlku občas") && !shortFormSource.includes("Potrebujem jednorazové stráženie"), "Removed options must not appear in the short-form UI.");
-assert(!shortFormSource.includes("defaultChecked") && !shortFormSource.includes('checked={'), "Neither radio option may start selected.");
-for (const interest of ["Chcem sa dozvedieť viac o psej škôlke", "Mám záujem o pravidelné návštevy"]) {
-  assert(shortFormSource.includes(interest), "Both original Slovak values must remain unmodified.");
+assert(shortFormSource.includes("Potrebujem škôlku občas") && !shortFormSource.includes("Potrebujem jednorazové stráženie"), "Only the one-off-sitting option must remain hidden in the short-form UI.");
+assert(shortFormSource.includes("Chcem zistiť") && shortFormSource.includes("viac o škôlke"), "First option must show the shortened two-line label.");
+assert(!shortFormSource.includes("defaultChecked") && !shortFormSource.includes('checked={'), "No radio option may start selected.");
+for (const interest of ["Chcem sa dozvedieť viac o psej škôlke", "Mám záujem o pravidelné návštevy", "Potrebujem škôlku občas"]) {
+  assert(shortFormSource.includes(interest), "All three original Slovak values must remain unmodified.");
   const parsed = shortSchema.parse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: interest });
   assert(buildDbPayload(parsed).interest_reason === interest, "Selected interest text must arrive unchanged in the CRM payload.");
 }
