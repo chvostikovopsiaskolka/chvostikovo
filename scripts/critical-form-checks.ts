@@ -105,7 +105,7 @@ assert(!forms.includes('name="duvod2"'), "Second usage selector must not be rend
 // Keep backend compatibility for historical submissions and record the broadened regular choice.
 const applicationSource = forms.slice(forms.indexOf("export function LongForm"));
 assert(applicationSource.includes('name="duvod" value={option.value} aria-label={option.value} required'), "The application requires a native accessible radio choice.");
-assert(applicationSource.includes("grid-cols-3") && applicationSource.includes("min-h-24") && applicationSource.includes("peer-checked:border-coral") && applicationSource.includes("peer-focus-visible:outline") && applicationSource.includes("-webkit-tap-highlight-color:transparent"), "Three cards must retain size, selection, focus and mobile touch styling.");
+assert(applicationSource.includes("grid-cols-3") && applicationSource.includes("min-h-20") && applicationSource.includes("peer-checked:border-coral") && applicationSource.includes("peer-focus-visible:outline") && applicationSource.includes("-webkit-tap-highlight-color:transparent"), "Three cards must retain size, selection, focus and mobile touch styling.");
 assert(applicationSource.includes('lines: ["Pravidelne", "1× alebo viackrát", "týždenne"]') && applicationSource.includes('lines: ["Občas", "podľa potreby"]') && applicationSource.includes('lines: ["Jednorazové", "stráženie"]'), "Application wording must not limit weekly visits to one or two.");
 assert(!applicationSource.includes('<select id={`l-${formId}-duvod`') && !applicationSource.includes("defaultChecked"), "No application usage dropdown or preselected radio.");
 assert(applicationSource.includes('duvod: String(fd.get("duvod") ?? "")'), "Do not alter submission mapping.");
@@ -164,6 +164,13 @@ for (const interest of ["Chcem sa dozvedieť viac o psej škôlke", "Mám záuje
   assert(buildDbPayload(parsed).interest_reason === interest, "Selected interest text must arrive unchanged in the CRM payload.");
 }
 assert(!shortSchema.safeParse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: "" }).success, "Blank interest must remain invalid.");
+
+// v306: typography-only changes in the three option groups; input value attributes are unchanged.
+assert(applicationSource.includes('option.value === "Občas podľa potreby"') && applicationSource.includes("text-xs font-bold sm:text-[13px]") && applicationSource.includes("text-[10px] font-normal sm:text-[11px]"), "Application choice titles must be bold and descriptions smaller; occasional full title bold.");
+assert(shortFormSource.includes('option.value === "Potrebujem škôlku občas"') && shortFormSource.includes("text-xs font-bold sm:text-[13px]") && shortFormSource.includes("text-[10px] font-normal sm:text-[11px]"), "SK enquiry choice titles must stand out without changing option values.");
+assert(englishForm.includes('option.value === "Occasional daycare"') && englishForm.includes("text-xs font-bold sm:text-[13px]") && englishForm.includes("text-[10px] font-normal sm:text-[11px]"), "EN enquiry cards must use the same visual hierarchy.");
+assert(applicationSource.includes("min-h-20") && !applicationSource.includes("min-h-24"), "Only application usage cards should be more compact.");
+
 
 assert(forms.includes('name="email"') && englishForm.includes('name="email"'), "Enquiry forms must offer optional email.");
 assert(forms.includes('LeadPhoneReceipt') && englishForm.includes('LeadPhoneReceipt'), "Receipts must display a submitted phone.");
