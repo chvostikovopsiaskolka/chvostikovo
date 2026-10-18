@@ -34,6 +34,7 @@ jobs:
           node tools/build-admin-mobile-v287.cjs
           node tests/customer-vaccine-v287.cjs
           node tests/customer-stable-vaccine-photos-v259.cjs
+          node tests/customer-photo-chooser-v301.cjs
           ADMIN_SOURCE=../admin-v287.html node tests/admin-mobile-v287.cjs
           ADMIN_SOURCE=../admin-v287.html node tests/admin-runtime-v275.cjs
           ADMIN_SOURCE=../admin-v287.html node tests/admin-existing-v275.cjs
