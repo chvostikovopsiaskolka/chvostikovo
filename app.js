@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261018-dog-choices-allergies-v298';
-const APP_VERSION='1.0.114';
+const APP_BUILD='20261018-legacy20-renewal-v299';
+const APP_VERSION='1.0.115';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -486,6 +486,20 @@ function renderNotifications(){
 function passAllowsDogV244(pass,dogId){return Number(pass.dog_id)===Number(dogId)||(pass.dog_ids||[]).map(Number).includes(Number(dogId))}
 function sharedDogBillingV260(dogId){return (state.data?.shared_dog_ids||[]).map(Number).includes(Number(dogId))||(state.data?.passes||[]).some(p=>passAllowsDogV244(p,dogId)&&p.is_shared)||(state.data?.pass_requests||[]).some(p=>p.status==='pending'&&p.dog_ids?.length===2&&passAllowsDogV244(p,dogId))}
 function activePassFor(dogId){const today=bratislavaToday();return (state.data?.passes||[]).find(p=>passAllowsDogV244(p,dogId)&&p.status==='active'&&Number(p.used_entries)<Number(p.total_entries)&&(!p.valid_until||p.valid_until>=today))||(state.data?.passes||[]).find(p=>passAllowsDogV244(p,dogId)&&p.status==='queued')||null}
+/* v299: grandfather the historically issued 20-entry pass; do not offer it to new customers. */
+function legacyPassRenewalTotalV299(dogId){
+  const passes=(state.data?.passes||[]).filter(p=>passAllowsDogV244(p,dogId))
+    .sort((a,b)=>Number(b.id)-Number(a.id));
+  const current=passes.find(p=>p.status==='active'||p.status==='queued')||passes[0];
+  return Number(current?.total_entries)===20?20:10;
+}
+function renewalAlreadyPreparedV299(dogId,currentPassId=0){
+  return (state.data?.pass_requests||[]).some(r=>r.status==='pending'&&passAllowsDogV244(r,dogId))
+    ||(state.data?.passes||[]).some(p=>passAllowsDogV244(p,dogId)
+      &&Number(p.used_entries)<Number(p.total_entries)
+      &&(p.status==='queued'
+        ||(currentPassId>0&&Number(p.id)!==Number(currentPassId)&&p.status==='active')));
+}
 function plannedPassSummaryV162(dogId){
   const interest=(state.data?.pass_requests||[]).find(p=>passAllowsDogV244(p,dogId)&&p.status==='pending');
   if(!interest)return null;
@@ -969,9 +983,13 @@ function ensurePassInterestConfirmation(){
   document.body.insertAdjacentHTML('beforeend','<div id="passInterestConfirmationV44" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passInterestConfirmationTitleV44"><div class="legal-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="passInterestConfirmationTitleV44">Permanentka je pripravená</h2><div class="legal-body"><p>Novú 10-vstupovú permanentku sme zaradili k vášmu psíkovi. V prehľade ju uvidíte ako 0/10 a jej platnosť sa počíta na 2 mesiace od prvého naplánovaného vstupu. Uhradíte ju pri návšteve škôlky.</p></div><button id="passInterestConfirmationCloseV44" class="btn full" type="button">Ďakujem</button></div></div>');
   $('passInterestConfirmationCloseV44').onclick=()=>$('passInterestConfirmationV44').classList.add('hidden');
 }
-function showPassInterestConfirmation(sharedDogIds=[]){
+function showPassInterestConfirmation(sharedDogIds=[],totalEntries=10){
   $('passInterestConfirmationV44')?.remove();ensurePassInterestConfirmation();
   if(sharedDogIds.length===2)$('passInterestConfirmationV44').querySelector('.legal-body').textContent='Novú spoločnú 10-vstupovú permanentku sme zaradili k vašim psíkom. V prehľade ju uvidíte ako 0/10 a jej platnosť sa počíta na 2 mesiace od prvého naplánovaného vstupu. Uhradíte ju pri návšteve škôlky.';
+  if(Number(totalEntries)===20){
+    const body=$('passInterestConfirmationV44').querySelector('.legal-body');
+    body.textContent=body.textContent.replaceAll('10-vstupovú','20-vstupovú').replaceAll('0/10','0/20');
+  }
   $('passInterestConfirmationV44').classList.remove('hidden');
 }
 function openSharedPassRequestV260(dogId){
@@ -979,9 +997,17 @@ function openSharedPassRequestV260(dogId){
   const modal=$('passInterestConfirmationV44'),card=modal.querySelector('.legal-card'),dogs=state.data?.dogs||[],account=state.session?.user?.id;
   card.querySelector('h2').textContent='Záujem o permanentku';
   const content=card.querySelector('.legal-body');
-  content.innerHTML='<label>Permanentka pre<select class="input" data-pass-scope>'+dogs.map(d=>'<option value="'+d.id+'">'+esc(d.name)+'</option>').join('')+(dogs.length===2?'<option value="both">Spoločná · '+dogs.map(d=>esc(d.name)).join(' a ')+'</option>':'')+'</select></label><label>Počet vstupov<select class="input" data-pass-total><option value="10">10 vstupov · 200 €</option><option value="20">20 vstupov · 320 €</option></select></label><p>Platnosť začne prvým využitím. Kúpu potvrdí personál.</p><p role="alert" data-pass-error></p>';
+  content.innerHTML='<label>Permanentka pre<select class="input" data-pass-scope>'+dogs.map(d=>'<option value="'+d.id+'">'+esc(d.name)+'</option>').join('')+(dogs.length===2?'<option value="both">Spoločná · '+dogs.map(d=>esc(d.name)).join(' a ')+'</option>':'')+'</select></label><label>Počet vstupov<select class="input" data-pass-total><option value="10">10 vstupov · 200 €</option></select></label><p>Platnosť začne prvým využitím. Kúpu potvrdí personál.</p><p role="alert" data-pass-error></p>';
   const shared=(state.data.passes||[]).find(p=>p.is_shared&&passAllowsDogV244(p,dogId));
   content.querySelector('[data-pass-scope]').value=dogs.length===2&&(shared||!activePassFor(dogId))?'both':String(dogId);
+  const scopePicker=content.querySelector('[data-pass-scope]'),totalPicker=content.querySelector('[data-pass-total]');
+  const refreshLegacyTotal=()=>{
+    const ids=scopePicker.value==='both'?dogs.map(d=>Number(d.id)):[Number(scopePicker.value)];
+    const eligible=ids.length>0&&ids.every(id=>legacyPassRenewalTotalV299(id)===20);
+    totalPicker.innerHTML='<option value="10">10 vstupov · 200 €</option>'+(eligible?'<option value="20">20 vstupov · 320 €</option>':'');
+    totalPicker.value=eligible?'20':'10';
+  };
+  scopePicker.addEventListener('change',refreshLegacyTotal);refreshLegacyTotal();
   const send=$('passInterestConfirmationCloseV44');send.textContent='Odoslať záujem';send.onclick=null;
   const back=document.createElement('button');back.type='button';back.className='btn secondary full';back.textContent='Späť';card.append(back);modal.classList.remove('hidden');
   return new Promise(resolve=>{
@@ -1003,23 +1029,25 @@ function openSharedPassRequestV260(dogId){
 const passRenewalOperationsV261=new Map();
 async function requestPass(totalEntries,{dogId=Number(state.selectedDogId),showConfirmation=true,renewal=false}={}){
   if(!renewal&&state.data?.shared_passes_enabled&&((state.data.dogs||[]).length===2||sharedDogBillingV260(dogId)))return openSharedPassRequestV260(dogId);
-  const total=Number(totalEntries)||10;if(total!==10)return;
+  const total=Number(totalEntries)||10;
+  if(![10,20].includes(total)||(total===20&&legacyPassRenewalTotalV299(dogId)!==20))return null;
   const account=state.session?.user?.id;
   const pass=renewal&&state.data?.shared_passes_enabled?(state.data.passes||[]).find(p=>p.is_shared&&p.status==='active'&&passAllowsDogV244(p,dogId)):null;
-  const ids=pass?[...new Set((pass.dog_ids||[]).map(Number))].sort((a,b)=>a-b):[];
+  const ids=pass?[...new Set((pass.dog_ids||[]).map(Number))].sort((a,b)=>a-b):[dogId];
   if(pass&&(ids.length!==2||ids.some(id=>!(state.data.dogs||[]).some(d=>Number(d.id)===id)))){toast('O obnovu spoločnej permanentky požiadajte škôlku.');return null}
-  const operationKey=account+'|'+pass?.id+'|'+total;
-  if(pass&&!passRenewalOperationsV261.has(operationKey))passRenewalOperationsV261.set(operationKey,crypto.randomUUID());
-  const body=pass?{p_dog_ids:ids,p_total_entries:total,p_operation_id:passRenewalOperationsV261.get(operationKey)}:{p_dog_id:dogId,p_total_entries:total};
+  const operationKey=account+'|'+(pass?.id||dogId)+'|'+total;
+  const useV244=!!pass||total===20;
+  if(useV244&&!passRenewalOperationsV261.has(operationKey))passRenewalOperationsV261.set(operationKey,crypto.randomUUID());
+  const body=useV244?{p_dog_ids:ids,p_total_entries:total,p_operation_id:passRenewalOperationsV261.get(operationKey)}:{p_dog_id:dogId,p_total_entries:total};
   try{
     loading(true);
-    const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+(pass?'portal_request_pass_v244':'portal_request_pass'),{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+(useV244?'portal_request_pass_v244':'portal_request_pass'),{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'},body:JSON.stringify(body)});
     const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}
     if(!r.ok)throw new Error(data?.message||data?.error||'Záujem sa nepodarilo odoslať.');
     if(state.session?.user?.id!==account)return null;
     const row=Array.isArray(data)?data[0]:data;
     if(row&&typeof row==='object'){state.data.pass_requests=state.data.pass_requests||[];if(!state.data.pass_requests.some(x=>Number(x.id)===Number(row.id)))state.data.pass_requests.unshift(row)}
-    renderPassSummary();renderDog();queueCustomerSync('bookings',0);if(showConfirmation)showPassInterestConfirmation(ids);return row;
+    renderPassSummary();renderDog();queueCustomerSync('bookings',0);if(showConfirmation)showPassInterestConfirmation(pass?ids:[],total);return row;
   }catch(e){toast(e.message);return null}finally{loading(false)}
 }
 async function offerRecentPassRenewalV157(dogId,isCurrent=()=>true){
@@ -1027,17 +1055,20 @@ async function offerRecentPassRenewalV157(dogId,isCurrent=()=>true){
   if(!response.ok)throw new Error('Nepodarilo sa overiť permanentku. Skúste to znova.');
   if(await response.json()!==true)return true;
   if(Number(state.selectedDogId)!==dogId||!isCurrent())return false;
+  if(renewalAlreadyPreparedV299(dogId))return true;
+  const renewalTotal=legacyPassRenewalTotalV299(dogId);
   return new Promise(resolve=>{
     const modal=document.createElement('div');modal.className='legal-modal';modal.id='recentPassRenewalV157';modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','recentPassTitleV157');
     modal.innerHTML='<div class="legal-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="recentPassTitleV157">Máte záujem o novú permanentku?</h2><p>Predchádzajúca permanentka sa skončila alebo už má rezervované všetky vstupy. Chcete pokračovať s novou 10-vstupovou permanentkou?</p><p>Rezervácie sa budú počítať ako vstupy z novej 10-vstupovej permanentky. Permanentku uhradíte pri najbližšej návšteve škôlky.</p><div class="stack"><button type="button" class="btn full" data-renewal="yes">Áno, mám záujem</button><button type="button" class="btn secondary full" data-renewal="single">Pokračovať jednorazovo</button><button type="button" class="btn secondary full" data-renewal="cancel">Späť</button></div></div>';
+    if(renewalTotal===20)modal.innerHTML=modal.innerHTML.replaceAll('10-vstupov','20-vstupov');
     const finish=result=>{modal.remove();resolve(result)};
     modal.querySelector('[data-renewal="single"]').onclick=()=>finish(true);
     modal.querySelector('[data-renewal="cancel"]').onclick=()=>finish(false);
     modal.querySelector('[data-renewal="yes"]').onclick=async()=>{
       if(Number(state.selectedDogId)!==dogId||!isCurrent()){finish(false);return}
       modal.querySelectorAll('button').forEach(b=>b.disabled=true);
-      const row=await requestPass(10,{dogId,showConfirmation:false,renewal:true});
-      if(row){finish(true);showPassInterestConfirmation()}
+      const row=await requestPass(renewalTotal,{dogId,showConfirmation:false,renewal:true});
+      if(row){finish(true);showPassInterestConfirmation([],renewalTotal)}
       else modal.querySelectorAll('button').forEach(b=>b.disabled=false);
     };
     document.body.append(modal);
@@ -2300,11 +2331,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const reason=q.mode==='pass'&&total>0&&number===total?'last':q.mode==='single'?'single':null;
       if(!reason||!Number.isSafeInteger(id)||id<=0)continue;
       if(reason==='last'&&lastSharedCoveredBySingle.has(id+'|'+String(q.date)))continue;
-      if((state.data?.pass_requests||[]).some(p=>p.status==='pending'&&passAllowsDogV244(p,id)))continue;
+      if(renewalAlreadyPreparedV299(id,reason==='last'?Number(q.pass_id)||0:0))continue;
       const shared=reason==='single'?sharedRenewalBySingle.get(id+'|'+String(q.date)):null;
       if(shared&&(state.data?.pass_requests||[]).some(p=>p.status==='pending'&&shared.sharedDogIds.some(dogId=>passAllowsDogV244(p,dogId))))continue;
       const existing=byDog.get(id);
-      if(!existing||reason==='last'&&existing.reason!=='last'||shared&&!existing.sharedDogIds)byDog.set(id,{dogId:id,date:String(q.date),reason,...shared});
+      if(!existing||reason==='last'&&existing.reason!=='last'||shared&&!existing.sharedDogIds)byDog.set(id,{dogId:id,date:String(q.date),reason,total:reason==='last'&&Number(q.total)===20?20:legacyPassRenewalTotalV299(id),passId:Number(q.pass_id)||0,...shared});
     }
     return [...byDog.values()].sort((a,b)=>a.reason===b.reason?a.dogId-b.dogId:a.reason==='last'?-1:1);
   }
@@ -2912,26 +2943,27 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     document.getElementById('passRenewalModalV38').addEventListener('click',e=>{if(e.target===document.getElementById('passRenewalModalV38'))close()});
   }
   function showPromptV38(dogId,reservationDate){
-    if(!dogId||!lastEntryReservedV38(dogId)||pendingPassV38(dogId))return;
+    if(!dogId||!lastEntryReservedV38(dogId)||renewalAlreadyPreparedV299(dogId,Number(currentActivePassV38(dogId)?.id)||0))return;
     const pass=currentActivePassV38(dogId),account=state.session?.user?.id;
     const lastDay=futureItems().find(r=>passAllowsDogV244(pass,Number(r.dog_id))&&r.reservation_date===reservationDate&&!r.planned_pass_request_id&&Number(r.projected_entry_number||r.planned_entry_number)===Number(r.projected_pass_total||r.planned_pass_total)&&Number(r.projected_pass_total||r.planned_pass_total)>0);
     if(!lastDay)return;
     state.selectedDogId=Number(dogId);ensureModalV38();
     const modal=document.getElementById('passRenewalModalV38'),button=document.getElementById('passRenewalRequestV38');
     $('passRenewalDayV38').textContent=`Rezervácia na ${skDay(reservationDate)} ${skDate(reservationDate)} využije posledný voľný vstup z aktuálnej permanentky. Máte záujem o novú?`;
-    button.onclick=async()=>{if(button.disabled)return;if(state.session?.user?.id!==account){modal.classList.add('hidden');return}button.disabled=true;try{const row=await requestPass(10,{dogId,renewal:true});if(row)modal.classList.add('hidden')}finally{button.disabled=false}};
+    button.onclick=async()=>{if(button.disabled)return;if(state.session?.user?.id!==account){modal.classList.add('hidden');return}button.disabled=true;try{const row=await requestPass(legacyPassRenewalTotalV299(dogId),{dogId,renewal:true});if(row)modal.classList.add('hidden')}finally{button.disabled=false}};
     modal.classList.remove('hidden');
   }
   window.showPassRenewalAfterBookingV94=(dogId,date)=>{bookingDogV38=0;showPromptV38(Number(dogId)||0,date)};
 
   /* v281: reuse the existing one-dog renewal modal after confirmed booking. */
-  async function requestPostBookingPassV293(dogIds,operationId){
+  async function requestPostBookingPassV293(dogIds,operationId,totalEntries=10){
     const account=state.session?.user?.id;
     if(!account)return null;
+    if(totalEntries===20&&!dogIds.every(id=>legacyPassRenewalTotalV299(id)===20))throw new Error('20-vstupová permanentka nie je pre týchto psíkov dostupná.');
     const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_request_pass_v244',{
       method:'POST',
       headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'},
-      body:JSON.stringify({p_dog_ids:dogIds,p_total_entries:10,p_operation_id:operationId})
+      body:JSON.stringify({p_dog_ids:dogIds,p_total_entries:totalEntries,p_operation_id:operationId})
     });
     const txt=await response.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}
     if(!response.ok)throw new Error(data?.message||data?.error||'Záujem o permanentku sa nepodarilo odoslať.');
@@ -2953,8 +2985,9 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const wantsShared=Array.isArray(item.sharedDogIds)&&item.sharedDogIds.length===2&&item.reason==='single';
       const sharedDogs=wantsShared?item.sharedDogIds.map(id=>(state.data?.dogs||[]).find(d=>Number(d.id)===Number(id))).filter(Boolean):[];
       if(!dog||!['last','single'].includes(item.reason)||wantsShared&&sharedDogs.length!==2||
-         (state.data.pass_requests||[]).some(p=>p.status==='pending'&&(passAllowsDogV244(p,dogId)||wantsShared&&sharedDogs.some(d=>passAllowsDogV244(p,d.id)))))continue;
+         (renewalAlreadyPreparedV299(dogId,Number(item.passId)||0)||wantsShared&&sharedDogs.some(d=>renewalAlreadyPreparedV299(d.id,Number(item.passId)||0))))continue;
       const isShared=wantsShared&&sharedDogs.length===2;
+      const renewalTotal=Number(item.total)===20?20:10;
       const lastDog=isShared?sharedDogs.find(d=>Number(d.id)===Number(item.lastDogId)):null;
       if(isShared&&!lastDog)continue;
       const sharedNames=sharedDogs.map(d=>d.name).join(' a ');
@@ -2974,9 +3007,9 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
           :isLast?'Rezervácia pre '+dog.name+' na '+skDay(item.date)+' '+skDate(item.date)+' využije posledný voľný vstup z aktuálnej permanentky. Máte záujem o novú?'
           :dog.name+' má na '+skDay(item.date)+' '+skDate(item.date)+' odoslanú jednorazovú rezerváciu.';
         if(description)description.textContent=isShared
-          ?'Máte záujem o novú spoločnú 10-vstupovú permanentku pre oboch psíkov – '+sharedNames+'?'
-          :isLast?'Dajte nám vedieť tlačidlom nižšie.'
-          :'Máte záujem o novú 10-vstupovú permanentku pre '+dog.name+'?';
+          ?'Máte záujem o novú spoločnú '+renewalTotal+'-vstupovú permanentku pre oboch psíkov – '+sharedNames+'?'
+          :isLast?(renewalTotal===20?'Máte záujem o novú 20-vstupovú permanentku?':'Dajte nám vedieť tlačidlom nižšie.')
+          :'Máte záujem o novú '+renewalTotal+'-vstupovú permanentku pre '+dog.name+'?';
         if(hint)hint.textContent=isShared
           ?'Ak zvolíte Neskôr, '+lastDog.name+' využije posledný vstup z aktuálnej permanentky a '+dog.name+' zostane na jednorazovom vstupe.'
           :isLast?'Ak zvolíte Neskôr, rezervácia zostane na aktuálnej permanentke.':'Ak zvolíte Neskôr, rezervácia pre '+dog.name+' zostane jednorazová.';
@@ -3004,8 +3037,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
           busy=true;yes.disabled=later.disabled=close.disabled=true;
           try{
             const row=isLast
-              ?await requestPass(10,{dogId,showConfirmation:false,renewal:true})
-              :await requestPostBookingPassV293(isShared?sharedDogs.map(d=>Number(d.id)):[dogId],operationId);
+              ?await requestPass(renewalTotal,{dogId,showConfirmation:false,renewal:true})
+              :await requestPostBookingPassV293(isShared?sharedDogs.map(d=>Number(d.id)):[dogId],operationId,renewalTotal);
             if(row){busy=false;finish();toast(isShared?'Záujem o novú spoločnú permanentku ('+sharedNames+') sme odoslali škôlke.':'Záujem o permanentku pre '+dog.name+' sme odoslali škôlke.')}
           }catch(e){toast(e.message||'Záujem sa nepodarilo odoslať.')}
           finally{busy=false;yes.disabled=later.disabled=close.disabled=false}
