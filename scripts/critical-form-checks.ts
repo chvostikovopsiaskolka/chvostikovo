@@ -105,6 +105,23 @@ const englishForm = readFileSync(new URL("../src/components/site/EnglishInquiryF
 const progressSource = readFileSync(new URL("../src/lib/form-progress.ts", import.meta.url), "utf8");
 assert(forms.includes("progress.onInvalidCapture") && forms.includes("progress.onBlurCapture"), "SK forms must record browser-native validation and per-field completion.");
 assert(englishForm.includes("progress.onInvalidCapture"), "EN enquiry must record native validation.");
+ 
+// v304: English landing and modal share exactly three visible native radio options.
+// The display text is compact but the original CRM-compatible English values stay unchanged.
+assert(englishForm.includes('type="radio" name="interest" value={option.value} aria-label={option.value} required'), "EN interest needs a mandatory accessible native radio group.");
+assert(englishForm.includes("grid-cols-3") && englishForm.includes("peer-checked:border-coral") && englishForm.includes("peer-focus-visible:outline") && englishForm.includes("-webkit-tap-highlight-color:transparent"), "EN cards need three columns, clear selection, keyboard focus, and no iOS tap highlight.");
+assert(englishForm.includes('lines: ["Learn more", "about daycare"]') && englishForm.includes('lines: ["Regular", "visits"]') && englishForm.includes('lines: ["Occasional", "visits"]'), "EN short labels must preserve the exact three categories.");
+assert(!englishForm.includes("One-off daytime care") && !englishForm.includes('<select id={`en-${formId}-interest`'), "Remove the fourth EN option and dropdown only.");
+assert(!englishForm.includes("defaultChecked") && !englishForm.includes('checked={'), "Do not preselect EN enquiry radio options.");
+assert(englishForm.includes('fd.get("interest")') && englishForm.includes('zaujem: `EN – Dog daycare enquiry | ${interest}`'), "Preserve original EN -> CRM mapping and tracking.");
+for (const enInterest of ["I just want more information", "Regular daycare visits", "Occasional daycare"]) {
+  assert(englishForm.includes(enInterest), "Original EN CRM values must remain unchanged.");
+  const fullInterest = `EN – Dog daycare enquiry | ${enInterest}`;
+  const payload = shortSchema.parse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: fullInterest });
+  assert(buildDbPayload(payload).interest_reason === fullInterest, "Every selected EN interest value must be preserved in CRM.");
+}
+assert(!shortSchema.safeParse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: "" }).success, "Unselected English interest must remain invalid.");
+
 assert(progressSource.includes("hasAnalyticsConsent()"), "Field analytics must require analytics consent.");
 assert(!progressSource.includes("JSON.stringify(target.value)") && !progressSource.includes("event.target.value"), "Never transmit form values in diagnostics.");
 assert(forms.includes("hideInterest = false"), "Critical form check failed: informational interest selector is not enabled by default.");
