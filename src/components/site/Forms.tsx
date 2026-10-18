@@ -158,20 +158,19 @@ export function ShortForm({
         <p className="mt-1 text-xs text-forest/65">Pre prípad, že sa vám nebudeme vedieť dovolať.</p>
       </div>
       {!hideInterest && (
-        <div>
-          <label className="label-sm" htmlFor={`s-${formId}-zaujem`}>
-            O čo máte záujem? *
-          </label>
-          <select id={`s-${formId}-zaujem`} name="zaujem" required className="field" defaultValue="">
-            <option value="" disabled>
-              Vyberte možnosť
-            </option>
-            <option>Chcem sa dozvedieť viac o psej škôlke</option>
-            <option>Mám záujem o pravidelné návštevy</option>
-            <option>Potrebujem škôlku občas</option>
-            <option>Potrebujem jednorazové stráženie</option>
-          </select>
-        </div>
+        <fieldset className="min-w-0">
+          <legend className="label-sm">O čo máte záujem? *</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {(["Chcem sa dozvedieť viac o psej škôlke", "Mám záujem o pravidelné návštevy"] as const).map((option) => (
+              <label key={option} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
+                <input type="radio" name="zaujem" value={option} required className="peer sr-only" />
+                <span className="flex h-full min-h-16 min-w-0 items-center justify-center rounded-[0.85rem] border border-border bg-white px-2 py-3 text-center text-[13px] leading-snug font-semibold text-forest break-words [overflow-wrap:anywhere] transition-colors peer-checked:border-coral peer-checked:bg-secondary/55 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:text-sm">
+                  {option}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
       )}
       <PrivacyConsentCheckbox />
       {error && <p className="text-sm text-destructive">{error}</p>}
