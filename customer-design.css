@@ -142,3 +142,45 @@ html.design-modal-open{overflow:hidden}.design-modal-open #bottomNav{visibility:
 .customer-design #bookingTaxiEditV201.design-inline-taxi{position:static!important;display:block!important;inset:auto!important;width:100%!important;max-width:none!important;min-height:0!important;background:transparent!important;padding:0!important;margin:15px 0!important;overflow:visible!important;backdrop-filter:none!important}.customer-design #bookingTaxiEditV201.design-inline-taxi.hidden{display:none!important}.customer-design #bookingTaxiEditV201.design-inline-taxi .booking-taxi-edit-card-v201{width:100%!important;max-width:none!important;max-height:none!important;box-shadow:none!important;border:1px solid #efcca7!important;border-radius:16px!important;padding:13px!important}.customer-design #bookingTaxiEditV201.design-inline-taxi h2{font-size:18px!important}
 @media(max-width:350px){.design-ticket h2>span{font-size:14px!important}.design-validity{font-size:9px}.design-friend-tile{font-size:8px}.customer-design #bookingPickerV37 .design-carousel-friends{max-width:100%}.design-visit-edit{min-width:30px}.design-visits-title h2{font-size:15px}}
 .design-friend-tile{grid-column:4}.customer-design #bookingTab #bookingVaccinationStatus.warning{color:#996323!important;font-size:13px!important}
+
+/* Stage 10: compact cards, consistent controls and one centre divider. */
+.customer-design #bookingTab #bookingDogName{font-size:30px!important;letter-spacing:1.5px!important}
+.customer-design #bookingTab #bookingVaccinationStatus.warning{font-size:11px!important}
+.customer-design #bookingTab #bookingDogAvatar{min-height:156px!important}
+.customer-design #bookingTab #bookingGradebook{box-sizing:border-box;width:100%!important;border:1px solid #f5d5ae!important;background:#fff1df!important;border-radius:13px!important;padding:7px 8px!important;min-height:36px!important}
+.customer-design #bookingTab #bookingVisitCount{box-sizing:border-box;width:100%!important}
+.customer-design #bookingTab .dual-dog-panel-v254+.dual-dog-panel-v254{border-left:0!important;padding-left:0!important}
+.customer-design #bookingTab .dual-dog-picture-v241{width:min(100%,140px)!important}
+.customer-design #bookingTab .dual-dog-name-v241{font-size:23px!important;line-height:1.15!important;-webkit-text-stroke-width:2.5px;letter-spacing:1.2px!important}
+.customer-design #bookingTab .dual-dog-photo-v254{margin-bottom:5px!important}
+.customer-design #bookingTab .dual-dog-info-v254{width:min(100%,140px);margin-inline:auto;gap:4px!important;padding-top:0!important;text-align:left!important}
+.customer-design #bookingTab .dual-dog-visits-v254{justify-content:flex-start!important;text-align:left!important}
+.design-visits-title{justify-content:flex-end;margin-bottom:4px;min-height:0}
+.design-visits-title:has(small[hidden]){display:none}
+.design-visit-card .design-nearest-head>strong{font-size:11px;line-height:1.35}
+.design-visit-label{font-size:inherit}
+.design-visit-edit{box-sizing:border-box;display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;min-height:44px;padding:0;border:1px solid #f0cfae;border-radius:50%;background:#fff5e9;color:#d56c1a;font-size:18px;line-height:1}
+.design-friends-line{margin-top:5px}
+.design-friend-tile{font-size:9px;line-height:1.15;padding:3px!important;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.design-friend-tile b{position:static;transform:none;font-size:16px;line-height:1.1;margin-top:2px}
+#designBulletinTitle{font-size:18px;line-height:1.3;margin:10px 0 5px}
+.customer-design #customerBulletinV229{margin-top:0!important}
+.customer-design #designMyBookings .reserved-day-card-v37{flex-basis:100%;box-sizing:border-box;scroll-snap-stop:always}
+#designBookingSwipeHint{font-size:10px;color:#897c86;text-align:right;margin:0 0 6px}
+#designBookingSwipeHint[hidden]{display:none}
+.customer-design #bookingPickerV37 .design-reservation-actions :is(.booking-taxi-pencil-v201,.cancel-booking-v37),.design-existing-taxi{font-weight:800!important}
+.customer-design #bookingPickerV37 .design-reservation-actions .booking-taxi-pencil-v201{background:#fff!important;border:1px solid #d4a319!important;color:#a77b00!important}
+.customer-design #bookingPickerV37 .design-reservation-actions .booking-taxi-pencil-v201.design-has-taxi,.customer-design #bookingPickerV37 .design-existing-taxi{background:#d6a311!important;border:1px solid #d6a311!important;color:#fff!important}
+.customer-design #bookingPickerV37 .pill{font-weight:800!important}
+.customer-design #bookingPickerV37 .design-carousel-friends{max-width:none;flex:0 1 auto;min-width:0;font-size:10px!important}
+.customer-design #bookingPickerV37 .reserved-day-meta-v37{flex-wrap:nowrap!important;gap:5px!important}
+.customer-design #bookingPickerV37 .reserved-pass-v37{flex:none;padding:3px 0!important}
+#designWeekDeadline{font-weight:400}
+#designWeekDeadline strong,#designWeekDeadline span{display:block}
+#designWeekDeadline strong,#designReservationNotice{font-weight:800}
+.customer-design #bookingPickerV37 .booking-day-v37[data-capacity-level=full]:not(.disabled):not(.selected){background:#f67b12!important;border-color:#f67b12!important;color:white!important}
+#designCapacityLegend i.full{background:#f67b12!important}
+.design-reservation-chat{border-radius:50%;padding:0;flex:0 0 44px}
+.customer-design #bookingPickerV37 #bookingPickerCloseV37 svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.customer-design #bookingPickerV37 #bookingPickerCloseV37{display:grid!important;place-items:center!important;flex:0 0 44px!important;width:44px!important;height:44px!important;border-radius:50%!important;padding:0!important;line-height:1!important;font-family:Arial,sans-serif!important;transform:none!important}
+@media(max-width:350px){.customer-design #bookingTab #bookingDogName{font-size:28px!important}.customer-design #bookingTab .dual-dog-name-v241{font-size:21px!important}.design-visit-card .design-nearest-head>strong{font-size:10px}.design-friend-tile{font-size:8px}.customer-design #bookingPickerV37 .reserved-day-meta-v37{flex-wrap:wrap!important}}

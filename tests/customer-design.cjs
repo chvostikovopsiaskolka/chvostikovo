@@ -18,13 +18,15 @@ async function scenario(count){
   run("overviewClock=()=>({date:'2099-01-01',minutes:600});renderDog()");
   assert.equal(w.document.querySelectorAll('.design-paws>span').length,count===2?20:10);
   assert.equal(w.document.querySelectorAll('.design-paws .used').length,6);
-  assert.equal(w.document.querySelector('.design-visits-title h2').textContent,'Najbližšia návšteva');
+  assert.equal(w.document.querySelector('.design-visit-label').textContent,'Najbližšia návšteva · ');
   assert.equal(w.document.querySelector('#designDogName > span'),null,'no redundant pencil');
   assert.match(w.document.querySelector('.design-validity').textContent,/Platnosť do/);
+  assert.match(w.document.querySelector('.design-validity').textContent,/2099/,'pass expiry retains full year');
+  assert.match(w.document.querySelector('.design-friend-tile').textContent,/Zobraziťkamarátovv škôlke/);
   const photo=w.document.querySelector('.design-friend-strip img');assert(photo);
   const edit=w.document.querySelector('.design-visit-edit');assert(edit);edit.click();
   assert(!w.document.getElementById('bookingPickerV37').classList.contains('hidden'));
-  assert.match(w.document.getElementById('weekDays').textContent,/Vstup z permanentky 7 z 10/);
+  assert.match(w.document.getElementById('weekDays').textContent,/Vstupy 7 z 10/);
   const addTaxi=w.document.querySelector('#weekDays [data-taxi-request]');assert(addTaxi);addTaxi.click();
   assert(w.document.getElementById('bookingTaxiEditV201').classList.contains('design-inline-taxi'));
   w.document.getElementById('taxiEditCloseV201').click();run('window.closeBookingPickerV305()');
@@ -36,6 +38,10 @@ async function scenario(count){
   w.document.getElementById('supportChatCloseV52').click();
   w.__fixtureNowIso='2099-01-05T09:00:00Z';run("renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday keeps closed-week guidance by calendar');
+  assert(w.document.getElementById('designWeekDeadline').previousElementSibling.classList.contains('booking-picker-week-label-v127'),'closed notice follows week heading');
+  assert.match(w.document.querySelector('#designWeekDeadline strong').textContent,/20:00/);
+  assert.match(w.document.querySelector('#designWeekDeadline span').textContent,/v plný deň/);
+  assert(w.document.querySelector('#bookingPickerCloseV37 svg'),'close glyph is geometrically centred vector');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,true);
   w.__fixtureNowIso='2099-01-05T23:00:00Z';run("renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,true,'Tuesday switches to next-week reminder');
