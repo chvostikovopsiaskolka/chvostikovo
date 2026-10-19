@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-stage-20261019-v307-design-2';
+const CACHE='chvostikovo-portal-shell-stage-20261019-v307-design-3';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -42,8 +42,8 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
   return task;
 }
 
-const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/stage-config.js?v=stage-design-2','/customer-design.js?v=stage-design-2','/customer-design.css?v=stage-design-2','/dog-choice-fab-v276.css?v=stage-20261019-v307-design-2','/dual-dog-overview-v246.js?v=stage-20261019-v307-design-2','/dual-dog-overview-v246.css?v=stage-20261019-v307-design-2','/','/terms-pdf.js?v=stage-20261019-v307-design-2','/terms-pdf-font.js?v=stage-20261019-v307-design-2','/styles.css?v=stage-20261019-v307-design-2','/bulletin-photo-v243.css?v=stage-20261019-v307-design-2','/app.js?v=stage-20261019-v307-design-2','/back-swipe.js?v=stage-20261019-v307-design-2'];
+const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://jgzabminzgbfhsrgqedt.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://jgzabminzgbfhsrgqedt.supabase.co wss://jgzabminzgbfhsrgqedt.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
+const SHELL=['/stage-config.js?v=stage-design-3','/customer-design.js?v=stage-design-3','/customer-design.css?v=stage-design-3','/dog-choice-fab-v276.css?v=stage-20261019-v307-design-3','/dual-dog-overview-v246.js?v=stage-20261019-v307-design-3','/dual-dog-overview-v246.css?v=stage-20261019-v307-design-3','/','/terms-pdf.js?v=stage-20261019-v307-design-3','/terms-pdf-font.js?v=stage-20261019-v307-design-3','/styles.css?v=stage-20261019-v307-design-3','/bulletin-photo-v243.css?v=stage-20261019-v307-design-3','/app.js?v=stage-20261019-v307-design-3','/back-swipe.js?v=stage-20261019-v307-design-3'];
 
 function withPortalCsp(response){
   if(!response)return response;

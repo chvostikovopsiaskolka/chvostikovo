@@ -96,7 +96,7 @@
   function openFriends(date) {
     if (!approvedForDate(date)) return;
     const updating=rosterDate===date&&!byId('customerDesignModal')?.classList.contains('hidden');
-    if(!updating)showModal('Kamaráti v škôlke', skDay(date)+' '+skDate(date)); rosterDate=date;
+    if(!updating)showModal('Kamaráti v škôlke', skDay(date)+' '+skDate(date),selectedDog()?.sex!=='male'); rosterDate=date;
     const body=byId('customerDesignModalBody'); if(!updating)body.replaceChildren();
     const rows=friends(date);
     if(!rows.length){body.textContent='Zatiaľ tu nie sú ďalší kamaráti.';return;}

@@ -17,4 +17,6 @@ Observed in the deployed cloud browser: real staging demo login, one-dog overvie
 
 The final design also persisted a two-dog staging request on 27 October: Falco pickup, Spirit none, one booking_group_id. No pass usage or attendance was created by requesting a booking. The single fixed navigation keeps its original grid geometry; its z-index is raised over the reservations page. Smart repeat-day suggestions are another carousel tile instead of consuming a separate vertical block. Long warnings, missing/expired vaccination gates and optional L4 remain governed by the current runtime.
 
+Reopen defect reproduced and diagnosed: sw.js withPortalCsp overrode the navigation response with its production backend allowlist even though Vercel's headers allowed staging. On a service-worker-controlled reload, staging API and terms fetches were therefore blocked. The worker's staging allowlist now exactly matches vercel.json. A regression assertion compares both policies and the release cache build. Release bumped to stage-20261019-v307-design-3 / 1.0.123-stage.3.
+
 Synthetic photographs: Unsplash, Atanas Teodosiev (IA0M6Xqda-M), Stephan Hinni (yljkjsy12zo), Shantanu Goyal (CE8q1CL76Pg); stored only in staging Storage for layout tests.

@@ -1,5 +1,11 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
 const {JSDOM,VirtualConsole}=require('./shared-v244/node_modules/jsdom');
+const sw=fs.readFileSync('sw.js','utf8'),headers=JSON.parse(fs.readFileSync('vercel.json','utf8'));
+const swCsp=JSON.parse(sw.match(/^const PORTAL_CSP=(.+);$/m)[1]);
+assert.equal(swCsp,headers.headers.find(h=>h.source==='/').headers.find(h=>h.key==='Content-Security-Policy').value,'navigation responses from the service worker must allow the same backend as Vercel');
+if(fs.existsSync('stage-config.js')){assert(swCsp.includes('jgzabminzgbfhsrgqedt.supabase.co'));assert(!swCsp.includes('tlhcqwsluyqpywymjoxn'));}
+assert(sw.includes(JSON.parse(fs.readFileSync('version.json','utf8')).build));
+console.log('PASS server/service-worker backend allowlist and release cache coherence');
 async function scenario(count){
  const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>{if(!/Could not parse CSS|Not implemented:.*(scroll|canvas|navigation)/.test(e.message))errors.push(e.message)});
  const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'https://design.fixture',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:vc}),w=dom.window,c=dom.getInternalVMContext(),run=s=>vm.runInContext(s,c);
