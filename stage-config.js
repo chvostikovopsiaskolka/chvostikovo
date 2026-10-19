@@ -6,7 +6,7 @@ window.CUSTOMER_RUNTIME = Object.freeze({staging:true,supabaseUrl:'https://jgzab
   window.fetch=(input,options)=>{
     const url=new URL(typeof input==='string'?input:input.url,location.href);
     if(url.hostname.endsWith('.supabase.co')&&url.hostname!=='jgzabminzgbfhsrgqedt.supabase.co')return Promise.reject(new Error('Staging blocked a production request.'));
-    return originalFetch(input,options);
+    return originalFetch(input,options).catch(error=>{console.warn('Staging request failed',url.origin+url.pathname,error.message);throw error;});
   };
   document.addEventListener('DOMContentLoaded',()=>{
     const card=document.querySelector('.auth-card');if(!card)return;

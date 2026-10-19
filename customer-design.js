@@ -95,11 +95,15 @@
   }
   function openFriends(date) {
     if (!approvedForDate(date)) return;
-    showModal('Kamaráti v škôlke', skDay(date)+' '+skDate(date)); rosterDate=date;
-    const body=byId('customerDesignModalBody'); body.replaceChildren();
+    const updating=rosterDate===date&&!byId('customerDesignModal')?.classList.contains('hidden');
+    if(!updating)showModal('Kamaráti v škôlke', skDay(date)+' '+skDate(date)); rosterDate=date;
+    const body=byId('customerDesignModalBody'); if(!updating)body.replaceChildren();
     const rows=friends(date);
-    if(!rows.length){const p=document.createElement('p');p.textContent='Zatiaľ tu nie sú ďalší kamaráti.';body.append(p);return;}
-    rows.forEach(d=>{const row=document.createElement('div');row.className='design-roster-row';const name=document.createElement('strong');name.textContent=d.name||'Prihlásený škôlkar';row.append(photoNode(d,'design-friend-photo'),name);body.append(row);});
+    if(!rows.length){body.textContent='Zatiaľ tu nie sú ďalší kamaráti.';return;}
+    body.querySelector('p')?.remove();
+    const wanted=new Set(rows.map(d=>String(d.dog_id||d.key||d.name)));
+    [...body.children].forEach(row=>{if(!wanted.has(row.dataset.rosterKey))row.remove();});
+    rows.forEach((d,i)=>{const key=String(d.dog_id||d.key||d.name);let row=[...body.children].find(row=>row.dataset.rosterKey===key);if(!row){row=document.createElement('div');row.className='design-roster-row';row.dataset.rosterKey=key;row.append(photoNode(d,'design-friend-photo'),document.createElement('strong'));}row.querySelector('strong').textContent=d.name||'Prihlásený škôlkar';if(body.children[i]!==row)body.insertBefore(row,body.children[i]||null);});
   }
   function ticket() {
     const source=byId('passSummary'),dog=selectedDog(); if(!source||!dog)return;
@@ -139,7 +143,7 @@
       byId('bookingGradebook').after(byId('bookingVisitCount'));
     }
     const nav=byId('navBooking');if(nav){const label=nav.querySelector(':scope > span:last-child');if(label)label.textContent='Prehľad';}
-    ticket();nearest();
+    ticket();nearest();if(rosterDate){if(approvedForDate(rosterDate))openFriends(rosterDate);else closeModal();}
   }
   const originalDays=customerRenderers.days;
   customerRenderers.days=(...args)=>{const out=originalDays?.(...args);byId('weekDays')?.querySelectorAll('.reserved-roster-v37').forEach(details=>{const card=details.closest('[data-date]'),date=card?.dataset.date;if(!date||!approvedForDate(date))return;const button=document.createElement('button');button.type='button';button.className='design-carousel-friends';button.textContent='Kamaráti v škôlke ›';button.addEventListener('click',()=>openFriends(date));details.replaceWith(button);});nearest();return out;};

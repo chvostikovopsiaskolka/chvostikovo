@@ -12,6 +12,7 @@
 .customer-design #bookingTab .design-dog-name{display:flex!important;align-items:center;gap:10px;background:none;border:0;padding:0;min-height:38px;max-width:100%;text-align:left;color:#172136}
 .customer-design #bookingTab #bookingDogName{font-size:25px!important;line-height:1.15!important;text-align:left!important;padding:0!important;white-space:normal!important;overflow-wrap:anywhere;max-width:none!important}
 .design-dog-name>span{font-size:23px;color:#64748b}
+.customer-design #bookingTab #bookingDogName{color:#172136!important}
 .customer-design #bookingTab #bookingVaccinationStatus{display:flex!important;gap:6px!important;align-items:center!important;min-height:44px!important;border-radius:12px!important;padding:7px 9px!important;margin:0!important;font-size:12px!important;line-height:1.25!important;width:100%!important}
 .customer-design #bookingVaccinationStatus.warning{background:#fff3bd!important;border:1px solid #efd787!important;color:#8b4517!important}
 .customer-design #bookingVaccinationStatus.valid{background:#eaf7ed!important;border:1px solid #b9dfc7!important;color:#176343!important}
