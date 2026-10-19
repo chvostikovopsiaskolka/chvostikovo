@@ -15,5 +15,13 @@
 #loading.loading-screen.loading-concept{position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;height:100vh!important;height:100dvh!important;min-height:100svh!important;max-height:none!important;margin:0!important;transform:none!important;z-index:20000!important;overflow:hidden!important;background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}
 #loading.loading-screen.loading-concept.in-app{background:transparent!important}
 .concept-brand{width:min(230px,62vw)}
+/* Animate an actual SVG arc, without relying on a pseudo-element transform. */
+.concept-orbit::before{display:none!important}
+.concept-orbit>svg.concept-ring{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);fill:none;filter:none;animation:none;overflow:visible;transform:none}
+.concept-ring-track{fill:none;stroke:#ead6c6;stroke-opacity:.45;stroke-width:2}
+.concept-ring-arc{fill:none;stroke:url(#loadingArcGradient);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:28 72;stroke-dashoffset:0;animation:conceptArcTravel 1.8s linear infinite}
+#loading.in-app .concept-orbit>svg.concept-ring{width:calc(100% + 8px);height:calc(100% + 8px);inset:-4px}
+@keyframes conceptArcTravel{to{stroke-dashoffset:-100}}
+@media(prefers-reduced-motion:reduce){.concept-ring-arc{animation:none;stroke-dasharray:40 60}}
 
 #loading.loading-concept{width:100%;height:100%;min-height:0;display:flex;box-sizing:border-box;gap:0;color:#907866}#loading.loading-concept.hidden{display:none}#loading .concept-paws{display:block}#loading.in-app{background:transparent;pointer-events:none}#loading.in-app .concept-brand,#loading.in-app .concept-subtitle,#loading.in-app .concept-paws,#loading.in-app .concept-watermark{display:none}#loading.in-app .concept-center{padding:0;transform:none}#loading.in-app .concept-orbit{width:60px;height:60px;margin:0;background:#fff;box-shadow:0 8px 28px #30203520}#loading.in-app .concept-orbit svg{width:28px;height:28px}#loading.in-app .concept-orbit::before{inset:4px}

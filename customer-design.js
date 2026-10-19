@@ -191,7 +191,7 @@
     const taxiTitle=byId('bookingPickerTaxiSectionV91')?.querySelector('.booking-picker-taxi-title-v37');if(taxiTitle)taxiTitle.textContent='Vybrané dni';
     picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=Number(day.available)<=0?'full':Number(day.available)<=2?'limited':'free';button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';
       const span=button.querySelector(':scope > span');if(span&&!button.disabled&&button.dataset.contact!=='true')span.textContent=Number(day.occupied||0)+'/'+Number(day.capacity||0);
-      if(!button.disabled&&!button.classList.contains('booked')&&!button.querySelector('.design-capacity-dot')){const dot=document.createElement('i');dot.className='design-capacity-dot';dot.setAttribute('aria-hidden','true');span?.prepend(dot);}
+      if(!button.disabled&&!button.classList.contains('booked')&&button.dataset.contact!=='true'&&!button.querySelector('.design-capacity-dot')){const dot=document.createElement('i');dot.className='design-capacity-dot';dot.setAttribute('aria-hidden','true');span?.prepend(dot);}
     });
     const empty=byId('weekDays')?.querySelector('.reserved-empty-v37'),smart=byId('bookingPickerSmartDaysV199');
     const hasReservations=!!byId('weekDays')?.querySelector('.reserved-day-card-v37');

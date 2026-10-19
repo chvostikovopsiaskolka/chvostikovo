@@ -125,3 +125,5 @@ html.design-modal-open{overflow:hidden}.design-modal-open #bottomNav{visibility:
 .design-visit-actions{display:flex;justify-content:space-between;align-items:center;gap:5px;margin-top:5px;flex-wrap:wrap}.design-visit-actions .design-friends-button{margin:0 0 0 auto}.design-visit-actions .design-overview-taxi{margin:0;padding:0;min-height:0;flex:0 1 auto}.customer-design #appView{transition:none!important;animation:none!important}
 .customer-design #bookingTaxiEditV201{z-index:12100!important}.customer-design #supportChatModalV52{z-index:12200!important}
 .customer-design .design-reservations-page .booking-day-v37:is([data-capacity-level=free],[data-capacity-level=limited]):not(.disabled):not(.selected):not(.week-closed-v127){background:#fff!important;border-color:#e4e3e8!important;box-shadow:0 3px 9px #342b3b08!important}
+#bookingPickerV37.design-reservations-page .booking-week-closed-note-v127{display:none!important}
+.customer-design #bookingTab #bookingDogName,.customer-design #bookingTab .dual-dog-name-v241{-webkit-text-stroke-width:3px}

@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-stage-20261019-v308-design-6';
+const CACHE='chvostikovo-portal-shell-stage-20261019-v308-design-7';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://jgzabminzgbfhsrgqedt.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://jgzabminzgbfhsrgqedt.supabase.co wss://jgzabminzgbfhsrgqedt.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/loading-design.css?v=stage-design-6','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/stage-config.js?v=stage-design-6','/customer-design.js?v=stage-design-6','/customer-design.css?v=stage-design-6','/dog-choice-fab-v276.css?v=stage-20261019-v308-design-6','/dual-dog-overview-v246.js?v=stage-20261019-v308-design-6','/dual-dog-overview-v246.css?v=stage-20261019-v308-design-6','/','/terms-pdf.js?v=stage-20261019-v308-design-6','/terms-pdf-font.js?v=stage-20261019-v308-design-6','/styles.css?v=stage-20261019-v308-design-6','/bulletin-photo-v243.css?v=stage-20261019-v308-design-6','/app.js?v=stage-20261019-v308-design-6','/back-swipe.js?v=stage-20261019-v308-design-6'];
+const SHELL=['/loading-design.css?v=stage-design-7','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/stage-config.js?v=stage-design-7','/customer-design.js?v=stage-design-7','/customer-design.css?v=stage-design-7','/dog-choice-fab-v276.css?v=stage-20261019-v308-design-7','/dual-dog-overview-v246.js?v=stage-20261019-v308-design-7','/dual-dog-overview-v246.css?v=stage-20261019-v308-design-7','/','/terms-pdf.js?v=stage-20261019-v308-design-7','/terms-pdf-font.js?v=stage-20261019-v308-design-7','/styles.css?v=stage-20261019-v308-design-7','/bulletin-photo-v243.css?v=stage-20261019-v308-design-7','/app.js?v=stage-20261019-v308-design-7','/back-swipe.js?v=stage-20261019-v308-design-7'];
 
 function withPortalCsp(response){
   if(!response)return response;
