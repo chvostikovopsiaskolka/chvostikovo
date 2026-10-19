@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261019-photo-label-v304';
-const APP_VERSION='1.0.120';
+const APP_BUILD='20261019-android-install-state-v305';
+const APP_VERSION='1.0.121';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1614,7 +1614,7 @@ placeDeadlineV59();
     if(installTimer){clearTimeout(installTimer);installTimer=null}
     ensureGuide();
     const steps=document.querySelector('#installGuideModal .install-steps');
-    if(steps)steps.innerHTML='<div class="install-step"><b>✓</b><span><strong>Aplikácia je nainštalovaná.</strong><br>Otvorte Chvostíkovo cez ikonu aplikácie v telefóne.</span></div>';
+    if(steps)steps.innerHTML='<div class="install-step"><b>✓</b><span><strong>Chrome potvrdil pridanie aplikácie.</strong><br>Ikona Chvostíkova sa môže zobraziť až po chvíli. Otvorte aplikáciu cez jej ikonu v telefóne.</span></div>';
     const ib=document.getElementById('installGuideInstallBtn');
     if(ib){ib.classList.add('hidden');ib.disabled=false;ib.textContent='Nainštalovať aplikáciu'}
     const cb=document.getElementById('installGuideContinue');
@@ -1624,19 +1624,19 @@ placeDeadlineV59();
 
   function pendingUi(){
     const steps=document.querySelector('#installGuideModal .install-steps');
-    if(steps)steps.innerHTML='<div class="install-step"><b>…</b><span><strong>Android prijal inštaláciu.</strong><br>Čakám, kým telefón potvrdí jej dokončenie.</span></div>';
+    if(steps)steps.innerHTML='<div class="install-step"><b>…</b><span><strong>Android spracúva inštaláciu.</strong><br>Dokončenie aj bezpečnostná kontrola môžu chvíľu trvať. Sledujte systémové upozornenia.</span></div>';
     const ib=document.getElementById('installGuideInstallBtn');
     if(ib){ib.disabled=true;ib.textContent='Inštaluje sa…'}
     if(installTimer)clearTimeout(installTimer);
     installTimer=setTimeout(()=>{
       if(installConfirmed||standalone())return installedUi();
       const target=document.querySelector('#installGuideModal .install-steps');
-      if(target)target.innerHTML='<div class="install-step"><b>!</b><span><strong>Android zatiaľ nepotvrdil dokončenie inštalácie.</strong><br>Skontrolujte, či sa Chvostíkovo objavilo medzi aplikáciami. Ak nie, znovu otvorte tento odkaz v <strong>Chrome</strong> a skúste inštaláciu ešte raz.</span></div>';
+      if(target)target.innerHTML='<div class="install-step"><b>!</b><span><strong>Chrome zatiaľ nepotvrdil výsledok inštalácie.</strong><br>Skontrolujte ikonu Chvostíkova na ploche alebo medzi aplikáciami. Ak tam je, skúste ju otvoriť. Pri upozornení na nebezpečnú aplikáciu ochranu neobchádzajte; zatiaľ používajte Chrome a dajte nám vedieť.</span></div>';
       const b=document.getElementById('installGuideInstallBtn');
       if(b){b.classList.add('hidden');b.disabled=false;b.textContent='Nainštalovať aplikáciu'}
       const cb=document.getElementById('installGuideContinue');
       if(cb)cb.textContent='Zavrieť';
-    },20000);
+    },30000);
   }
 
   window.addEventListener('appinstalled',installedUi);
@@ -1644,7 +1644,7 @@ placeDeadlineV59();
     e.preventDefault();
     deferredPrompt=e;
     ensureGuide();
-    if(platform()==='android'){const steps=document.querySelector('#installGuideModal .install-steps');if(steps)steps.innerHTML='<div class="install-step"><span>Kliknite na tlačidlo <strong>Nainštalovať aplikáciu</strong> nižšie a potvrďte inštaláciu.</span></div>'}
+    if(platform()==='android'){const steps=document.querySelector('#installGuideModal .install-steps');if(steps)steps.innerHTML='<div class="install-step"><span>Kliknite na <strong>Nainštalovať aplikáciu</strong> a potvrďte inštaláciu. Android môže aplikáciu bezpečnostne kontrolovať. Ak upozorní na nebezpečnú aplikáciu, prečítajte si podrobnosti a pri bezpečnostnom riziku inštaláciu prerušte. Chvostíkovo možno používať aj v Chrome.</span></div>'}
     const b=document.getElementById('installGuideInstallBtn');
     if(b){b.classList.remove('hidden');b.disabled=false;b.textContent='Nainštalovať aplikáciu'}
     if(!standalone())setTimeout(openGuide,0);
@@ -1656,7 +1656,7 @@ placeDeadlineV59();
     const steps=p==='ios'
       ?'<div class="install-step"><b>1</b><span>V Safari otvorte <strong>⋯ → Zdieľať → Zobraziť viac</strong>.</span></div><div class="install-step"><b>2</b><span>Vyberte <strong>Pridať na plochu</strong>.</span></div><div class="install-step"><b>3</b><span>Zapnite <strong>Otvoriť ako webovú apku</strong>, potvrďte <strong>Pridať</strong> a otvorte Chvostíkovo cez ikonu na ploche.</span></div>'
       :p==='android'
-      ?'<div class="install-step"><span>Otvorte tento odkaz v <strong>Chrome</strong>. Keď prehliadač ponúkne inštaláciu, kliknite na tlačidlo <strong>Nainštalovať aplikáciu</strong> a potvrďte ju.</span></div>'
+      ?'<div class="install-step"><span>Otvorte tento odkaz v <strong>Chrome</strong>. Keď prehliadač ponúkne inštaláciu, kliknite na <strong>Nainštalovať aplikáciu</strong> a potvrďte ju. Ak Android varuje pred nebezpečnou aplikáciou, prečítajte si podrobnosti a pri bezpečnostnom riziku inštaláciu prerušte. Chvostíkovo môžete používať aj v Chrome.</span></div>'
       :'<div class="install-step"><b>1</b><span>Otvorte menu prehliadača.</span></div><div class="install-step"><b>2</b><span>Vyberte možnosť <strong>Inštalovať aplikáciu</strong> alebo <strong>Pridať na plochu</strong>.</span></div>';
     document.body.insertAdjacentHTML('beforeend','<div id="installGuideModal" class="install-guide-modal hidden" role="dialog" aria-modal="true" aria-labelledby="installGuideTitle"><div class="install-guide-card"><button id="installGuideClose" class="install-guide-close" type="button" aria-label="Zavrieť">×</button><div class="install-guide-logo">Chvostíkovo</div><h2 id="installGuideTitle">Pridajte si Chvostíkovo ako aplikáciu</h2><p>Je to najjednoduchší spôsob, ako mať rezervácie, správy a upozornenia vždy poruke.</p><div class="install-steps">'+steps+'</div><button id="installGuideInstallBtn" class="btn full hidden" type="button">Nainštalovať aplikáciu</button><button id="installGuideContinue" class="btn secondary full" type="button">Zavrieť</button></div></div>');
     document.getElementById('installGuideModal')?.classList.toggle('install-guide-ios',p==='ios');
@@ -1668,13 +1668,21 @@ placeDeadlineV59();
       if(!deferredPrompt)return;
       const prompt=deferredPrompt;
       deferredPrompt=null;
-      prompt.prompt();
-      const choice=await prompt.userChoice.catch(()=>null);
+      let choice=null;
+      try{
+        // Play Protect may interrupt the browser flow; a dismissed result does not prove no icon was added.
+        await Promise.resolve(prompt.prompt());
+        choice=await prompt.userChoice.catch(()=>null);
+      }catch(_){choice=null}
+      if(installConfirmed||standalone()){installedUi();return}
       if(choice?.outcome==='accepted')pendingUi();
       else{
-        const steps=document.querySelector('#installGuideModal .install-steps');if(steps)steps.innerHTML='<div class="install-step"><span>Inštaláciu ste nepotvrdili. Znovu otvorte tento odkaz v <strong>Chrome</strong> a potvrďte <strong>Nainštalovať aplikáciu</strong>.</span></div>';
+        const steps=document.querySelector('#installGuideModal .install-steps');
+        if(steps)steps.innerHTML='<div class="install-step"><b>!</b><span><strong>Chrome nepotvrdil dokončenie inštalácie.</strong><br>Ak už vidíte ikonu Chvostíkova, skúste ju otvoriť. Ak nie, používajte zatiaľ aplikáciu v Chrome. Pri upozornení na nebezpečnú aplikáciu ochranu neobchádzajte a dajte nám vedieť.</span></div>';
         const b=document.getElementById('installGuideInstallBtn');
         if(b){b.classList.add('hidden');b.disabled=false;b.textContent='Nainštalovať aplikáciu'}
+        const cb=document.getElementById('installGuideContinue');
+        if(cb)cb.textContent='Zavrieť';
       }
     });
   }
