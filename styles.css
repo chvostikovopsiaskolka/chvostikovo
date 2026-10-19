@@ -3245,3 +3245,43 @@ button span,button svg,button svg *{pointer-events:none}
   outline:3px solid #f97316!important;
   outline-offset:3px!important;
 }
+
+/* v303: photo-action touch feedback is CSS-only. Cover the actual native
+   file control AND its internal button, not just the visible label.
+   Keep the v302 direct input hit target, picker and modal lifecycle intact. */
+#photoActionsModalV89 .photo-actions-list-v89 .btn,
+#photoActionsModalV89 #dogPhotoReplaceNativeV302,
+#photoActionsModalV89 #dogPhotoReplaceNativeV302::file-selector-button{
+  -webkit-appearance:none;
+  appearance:none;
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-touch-callout:none!important;
+  -webkit-user-select:none;
+  user-select:none;
+}
+#photoActionsModalV89 .photo-actions-list-v89 .btn:active{
+  opacity:1!important;
+  filter:none!important;
+  box-shadow:none!important;
+}
+#photoActionsModalV89 .photo-actions-list-v89 .btn.secondary:active{
+  background:#f3f4f6!important;
+}
+#photoActionsModalV89 .photo-actions-list-v89 .btn.danger:active{
+  background:#fee2e2!important;
+}
+#photoActionsModalV89 #dogPhotoReplaceNativeV302,
+#photoActionsModalV89 #dogPhotoReplaceNativeV302::file-selector-button{
+  background:transparent!important;
+  color:transparent!important;
+  border:0!important;
+  border-radius:inherit;
+  box-shadow:none!important;
+  outline:none!important;
+}
+/* Focus belongs to the visible label (v302 :has(:focus-visible)), never
+   the invisible file control. Real button keyboard focus remains visible. */
+#photoActionsModalV89 .photo-actions-list-v89 button:focus-visible{
+  outline:3px solid #f97316!important;
+  outline-offset:-3px!important;
+}
