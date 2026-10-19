@@ -49,9 +49,45 @@ export function Header({
   const logoHref = homeSectionLinks ? "/" : "#top";
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
+    if (!menuOpen) return;
+
+    // iOS Safari can still scroll the page with overflow:hidden on body alone.
+    // Freeze its position without changing the independently scrollable menu.
+    const body = document.body;
+    const html = document.documentElement;
+    const scrollY = window.scrollY;
+    const bodyProperties = ["position", "top", "left", "right", "width", "overflow"] as const;
+    const htmlProperties = ["overflow", "overscroll-behavior"] as const;
+    const savedBody = bodyProperties.map((name) => ({
+      name,
+      value: body.style.getPropertyValue(name),
+      priority: body.style.getPropertyPriority(name),
+    }));
+    const savedHtml = htmlProperties.map((name) => ({
+      name,
+      value: html.style.getPropertyValue(name),
+      priority: html.style.getPropertyPriority(name),
+    }));
+
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    html.style.overflow = "hidden";
+    html.style.overscrollBehavior = "none";
+
     return () => {
-      document.body.style.overflow = "";
+      for (const { name, value, priority } of savedBody) {
+        if (value) body.style.setProperty(name, value, priority);
+        else body.style.removeProperty(name);
+      }
+      for (const { name, value, priority } of savedHtml) {
+        if (value) html.style.setProperty(name, value, priority);
+        else html.style.removeProperty(name);
+      }
+      window.scrollTo(0, scrollY);
     };
   }, [menuOpen]);
 
@@ -148,7 +184,7 @@ export function Header({
 
         <div className="flex items-center gap-1 min-[390px]:gap-1.5 sm:gap-3">
           <a href="/en/dog-daycare-kosice" lang="en" aria-label="English information" className="inline-flex rounded-full bg-secondary px-2 py-1.5 font-display text-[0.6rem] font-semibold text-forest transition-colors hover:bg-coral-soft min-[390px]:px-2.5 min-[390px]:py-2 min-[390px]:text-[0.68rem] sm:px-3 sm:text-xs">EN</a>
-          <button type="button" onClick={() => setOpen(true)} className="btn-coral px-2.5 py-2 text-[0.58rem] leading-none whitespace-nowrap min-[390px]:px-3 min-[390px]:text-[0.65rem] sm:px-6 sm:py-3 sm:text-sm">Prihláška do škôlky</button>
+          <button type="button" onClick={() => { closeMobileMenu(); setOpen(true); }} className="btn-coral px-2.5 py-2 text-[0.58rem] leading-none whitespace-nowrap min-[390px]:px-3 min-[390px]:text-[0.65rem] sm:px-6 sm:py-3 sm:text-sm">Prihláška do škôlky</button>
           <button type="button" aria-label="Otvoriť menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition-colors hover:bg-coral-soft min-[390px]:size-9 lg:hidden">
             {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
@@ -156,7 +192,7 @@ export function Header({
       </div>
 
       {menuOpen && (
-        <div className="mx-auto mt-2 max-h-[calc(100vh-5.5rem)] max-w-6xl overflow-y-auto rounded-3xl bg-card/98 p-3 shadow-soft backdrop-blur-md lg:hidden">
+        <div className="mx-auto mt-2 max-h-[calc(100vh-5.5rem)] max-w-6xl overflow-y-auto overscroll-contain rounded-3xl bg-card/98 p-3 shadow-soft backdrop-blur-md lg:hidden">
           <nav className="flex flex-col">
             {NAV_MOBILE_BEFORE_ABOUT.map((item) => (
               <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
