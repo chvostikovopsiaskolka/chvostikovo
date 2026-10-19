@@ -2077,16 +2077,6 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
 }
 
 
-/* v184: keep the custom photo actions sheet visually stable while iOS shows its native source chooser. */
-#photoActionsModalV89.photo-picker-waiting-v184{
-  pointer-events:none!important;
-}
-#photoActionsModalV89.photo-picker-waiting-v184 .photo-actions-card-v89{
-  opacity:1!important;
-  transform:none!important;
-}
-
-
 
 
 /* v211 – a fourth, explicitly optional vaccination and keyboard-safe dog editor */
@@ -3194,38 +3184,45 @@ button span,button svg,button svg *{pointer-events:none}
 #photoActionsModalV89 .photo-actions-list-v89 .btn:focus:not(:focus-visible){
   outline:none!important;
 }
-/* v301: keep ONE clear app context above the iOS system source menu.
-   A native iOS file chooser itself cannot be recolored from the web. */
-#photoActionsModalV89 .photo-picker-status-v301{
-  display:none!important;
+/* v302: the native iOS chooser is triggered by a real, visible-target
+   input tap, not a synthetic click from a full-screen overlay. */
+#photoActionsModalV89 .photo-direct-label-v302{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:50px;
+  margin:0;
+  overflow:hidden;
+  color:var(--ink);
+  font-size:14px;
+  font-weight:800;
+  line-height:1.3;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent!important;
 }
-#photoActionsModalV89.photo-picker-waiting-v184{
-  background:rgba(17,24,39,.56)!important;
-  place-items:start center!important;
-  padding-top:calc(env(safe-area-inset-top) + 22px)!important;
-  padding-bottom:calc(env(safe-area-inset-bottom) + 16px)!important;
-}
-#photoActionsModalV89.photo-picker-waiting-v184 .photo-actions-card-v89{
-  visibility:visible!important;
-  opacity:1!important;
-  transform:none!important;
-  width:min(420px,100%)!important;
-  max-height:min(38svh,280px)!important;
-  overflow-y:auto!important;
-}
-#photoActionsModalV89.photo-picker-waiting-v184 .photo-actions-list-v89{
-  display:none!important;
-}
-#photoActionsModalV89.photo-picker-waiting-v184 .photo-picker-status-v301{
+#photoActionsModalV89 #dogPhotoReplaceNativeV302{
+  position:absolute;
+  inset:0;
   display:block!important;
-  margin-top:4px;
-  padding:12px 14px;
-  border-radius:12px;
-  background:#fff7ed;
-  color:#9a3412;
-  font-size:13px;
-  font-weight:650;
-  line-height:1.45;
+  width:100%;
+  height:100%;
+  min-height:50px;
+  margin:0;
+  padding:0;
+  border:0;
+  opacity:0;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent!important;
+  touch-action:manipulation;
+}
+#photoActionsModalV89 .photo-direct-label-v302:has(#dogPhotoReplaceNativeV302:focus-visible){
+  outline:3px solid #f97316!important;
+  outline-offset:-3px!important;
+}
+#photoActionsModalV89 .photo-actions-list-v89 .btn{
+  -webkit-tap-highlight-color:transparent!important;
 }
 #dogDetailsPhotoButton,
 #dogPhotoActionBtnV89,
