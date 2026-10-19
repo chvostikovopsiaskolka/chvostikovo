@@ -202,6 +202,19 @@ html.design-modal-open{overflow:hidden}.design-modal-open #bottomNav{visibility:
 .design-friend-tile{grid-column:5;font-size:8px;line-height:1.2}
 .design-friend-tile b{font-size:14px}
 #designBulletinTitle{font-size:16px}
+/* Stage 12: keep the deadline source for reservation logic, hide its board duplicate. */
+.customer-design #bookingTab #deadlineText{display:none!important}
+#bookingPickerV37.design-reservations-page #designReservationNotice{text-align:center}
+.customer-design #bookingPickerV37 .reserved-day-meta-v37{min-height:44px!important;padding-top:7px!important;align-items:center!important}
+.design-visit-card .design-nearest-head>strong{font-size:12px}
+.design-visit-edit{font-size:15px;margin-right:-10px}
+.design-visit-edit::before{width:23px;height:23px}
+.design-friend-tile{font-size:7.5px}
+.customer-design #bookingTab #bookingVisitCount{font-size:10px!important}
+.customer-design #bookingTab #bookingVaccinationStatus,.customer-design #bookingTab #bookingVaccinationStatus.warning{font-size:10px!important}
+.customer-design #bookingTab #bookingGradebook{font-size:11px!important;width:fit-content!important}
+.customer-design #bookingTab .dual-dog-status-v254,.customer-design #bookingTab .dual-dog-visits-v254{font-size:10px!important}
+.customer-design #bookingTab .dual-dog-grades-v254{font-size:10px!important}
 .customer-design #bookingPickerV37 #bookingPickerCloseV37 svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .customer-design #bookingPickerV37 #bookingPickerCloseV37{display:grid!important;place-items:center!important;flex:0 0 44px!important;width:44px!important;height:44px!important;border-radius:50%!important;padding:0!important;line-height:1!important;font-family:Arial,sans-serif!important;transform:none!important}
-@media(max-width:350px){.customer-design #bookingTab #bookingDogName{font-size:28px!important}.customer-design #bookingTab .dual-dog-name-v241{font-size:21px!important}.design-visit-card .design-nearest-head>strong{font-size:10px}.design-friend-tile{font-size:8px}.customer-design #bookingPickerV37 .reserved-day-meta-v37{flex-wrap:wrap!important}}
+@media(max-width:350px){.customer-design #bookingTab #bookingDogName{font-size:28px!important}.customer-design #bookingTab .dual-dog-name-v241{font-size:21px!important}.design-visit-card .design-nearest-head>strong{font-size:11px}.design-friend-tile{font-size:7px}.customer-design #bookingPickerV37 .reserved-day-meta-v37{flex-wrap:wrap!important}}
