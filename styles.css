@@ -3289,3 +3289,20 @@ button span,button svg,button svg *{pointer-events:none}
   outline:3px solid #f97316!important;
   outline-offset:-3px!important;
 }
+
+
+/* v307 – concise booking vaccination explanation from the bottom + action. */
+.booking-vaccine-modal-v307{z-index:710}
+.booking-vaccine-card-v307{width:min(490px,100%);max-height:calc(100dvh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain}
+.booking-vaccine-card-v307 .legal-kicker{margin-bottom:12px}
+.booking-vaccine-card-v307 h2{font-size:23px;line-height:1.25;color:#17213a}
+.booking-vaccine-body-v307{font-size:14px;line-height:1.55;color:#526174;margin:0 0 16px}
+.booking-vaccine-list-v307{display:grid;gap:10px;margin-bottom:16px}
+.booking-vaccine-row-v307{display:grid;gap:12px;padding:14px;border:1px solid #f5d6e3;border-radius:16px;background:#fffafd;min-width:0}
+.booking-vaccine-info-v307{display:grid;gap:4px;min-width:0}
+.booking-vaccine-info-v307 strong{color:#17213a;font-size:16px}
+.booking-vaccine-info-v307 small{color:#667285;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.booking-vaccine-action-v307{min-height:44px;width:100%;padding:11px 14px;border:1px solid #ffcfaa;border-radius:13px;background:#fff4e9;color:#cb5300;font-size:14px;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.booking-vaccine-cancel-v307{width:100%;min-height:44px;border:0;border-radius:13px;background:#f1f3f7;color:#384356;font-size:14px;font-weight:750;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.booking-vaccine-modal-v307 button:focus-visible{outline:3px solid #da4292;outline-offset:3px}
+@media(max-width:520px){.booking-vaccine-card-v307{padding:22px 17px 17px}.booking-vaccine-card-v307 h2{font-size:21px}.booking-vaccine-row-v307{padding:12px}}
