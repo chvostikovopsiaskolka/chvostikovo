@@ -141,7 +141,7 @@
         card.setAttribute('aria-label',`${i===0?'Najbližšia návšteva, ':''}${skDay(date)} ${skDate(date)}`);
         card.querySelector('.design-visit-label').textContent='Najbližšia návšteva · ';
         if(carousel.children[i]!==card)carousel.insertBefore(card,carousel.children[i]||null);
-        if(approved)reconcilePhotos(card.querySelector('.design-friend-strip'),friends(date).slice(0,3));
+        if(approved)reconcilePhotos(card.querySelector('.design-friend-strip'),friends(date).slice(0,4));
 
       });
     }else{

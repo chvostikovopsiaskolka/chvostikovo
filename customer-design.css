@@ -181,6 +181,27 @@ html.design-modal-open{overflow:hidden}.design-modal-open #bottomNav{visibility:
 .customer-design #bookingPickerV37 .booking-day-v37[data-capacity-level=full]:not(.disabled):not(.selected){background:#f67b12!important;border-color:#f67b12!important;color:white!important}
 #designCapacityLegend i.full{background:#f67b12!important}
 .design-reservation-chat{border-radius:50%;padding:0;flex:0 0 44px}
+/* Stage 11: shared card edges, distinct booking states, four friend portraits. */
+.customer-design #bookingPickerV37 .reserved-day-top-v37{padding:0 0 9px!important;margin:0!important}
+.customer-design #bookingPickerV37 .reserved-day-date-v37 span{margin-top:0!important}
+.customer-design #bookingPickerV37 .reserved-day-controls-v37{padding:0!important;margin:0!important}
+.customer-design #bookingPickerV37 .reserved-pass-v37{padding:4px 7px!important;background:#fff1e2!important;color:#a35420!important;border:1px solid #f2d0ae!important;border-radius:8px!important}
+.customer-design #bookingPickerV37 .reserved-day-meta-v37{width:100%!important;box-sizing:border-box}
+.customer-design #bookingPickerV37 .design-carousel-friends{margin:0!important;padding-right:0!important}
+.customer-design #bookingPickerV37 .booking-day-v37.booked[data-own-status=approved]{background:#199653!important;border-color:#199653!important;opacity:1!important;color:#fff!important}
+.customer-design #bookingPickerV37 .booking-day-v37.booked[data-own-status=pending]{background:#ffe7a0!important;border-color:#e8c55b!important;opacity:1!important;color:#8b6214!important}
+.customer-design #bookingPickerV37 .booking-day-v37.booked[data-own-status=approved] :is(small,strong,span){color:#fff!important}
+.customer-design #bookingPickerV37 .booking-day-v37.booked[data-own-status=pending] :is(small,strong,span){color:#8b6214!important}
+.customer-design #bookingPickerV37 .booking-day-v37.booked span{font-size:8px!important;line-height:1.2!important}
+.customer-design #bookingTab #bookingVisitCount{font-size:11px!important}
+.customer-design #bookingTab #bookingGradebook{width:fit-content!important;max-width:100%!important;align-self:flex-start!important;justify-self:start!important}
+.design-visit-edit{position:relative;border:0!important;background:transparent!important;isolation:isolate;font-size:13px}
+.design-visit-edit::before{content:'';position:absolute;z-index:-1;left:50%;top:50%;transform:translate(-50%,-50%);box-sizing:border-box;width:23px;height:23px;border:1px solid #efcda9;border-radius:50%;background:#fff5e9}
+.design-friends-line{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.design-friend-strip .design-friend-photo,.design-friend-tile{max-width:58px;justify-self:start}
+.design-friend-tile{grid-column:5;font-size:8px;line-height:1.2}
+.design-friend-tile b{font-size:14px}
+#designBulletinTitle{font-size:16px}
 .customer-design #bookingPickerV37 #bookingPickerCloseV37 svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .customer-design #bookingPickerV37 #bookingPickerCloseV37{display:grid!important;place-items:center!important;flex:0 0 44px!important;width:44px!important;height:44px!important;border-radius:50%!important;padding:0!important;line-height:1!important;font-family:Arial,sans-serif!important;transform:none!important}
 @media(max-width:350px){.customer-design #bookingTab #bookingDogName{font-size:28px!important}.customer-design #bookingTab .dual-dog-name-v241{font-size:21px!important}.design-visit-card .design-nearest-head>strong{font-size:10px}.design-friend-tile{font-size:8px}.customer-design #bookingPickerV37 .reserved-day-meta-v37{flex-wrap:wrap!important}}

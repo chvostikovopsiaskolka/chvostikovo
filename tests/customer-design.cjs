@@ -24,9 +24,14 @@ async function scenario(count){
   assert.match(w.document.querySelector('.design-validity').textContent,/2099/,'pass expiry retains full year');
   assert.match(w.document.querySelector('.design-friend-tile').textContent,/Zobraziťkamarátovv škôlke/);
   const photo=w.document.querySelector('.design-friend-strip img');assert(photo);
+  run("state.data.availability.days[0].dogs.push({dog_id:9,name:'Kamarát 2',sex:'male'},{dog_id:10,name:'Kamarát 3',sex:'female'},{dog_id:11,name:'Kamarát 4',sex:'male'});renderDog()");
+  assert.equal(w.document.querySelectorAll('.design-friend-strip>.design-friend-photo').length,4,'four permitted friends in overview');
+  assert.equal(w.document.querySelector('.design-friend-strip img'),photo,'four-friend layout preserves decoded first photo');
   const edit=w.document.querySelector('.design-visit-edit');assert(edit);edit.click();
   assert(!w.document.getElementById('bookingPickerV37').classList.contains('hidden'));
   assert.match(w.document.getElementById('weekDays').textContent,/Vstupy 7 z 10/);
+  assert.equal(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').dataset.ownStatus,'approved');
+  assert.match(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').textContent,/Schválené/);
   const addTaxi=w.document.querySelector('#weekDays [data-taxi-request]');assert(addTaxi);addTaxi.click();
   assert(w.document.getElementById('bookingTaxiEditV201').classList.contains('design-inline-taxi'));
   w.document.getElementById('taxiEditCloseV201').click();run('window.closeBookingPickerV305()');
@@ -65,6 +70,7 @@ async function scenario(count){
   assert.equal(w.document.querySelector('.design-friend-strip img'),photo,'adding another visit preserves existing decoded photo');
   w.document.querySelectorAll('.design-friends-button')[1].click();assert.match(w.document.getElementById('customerDesignModalSubtitle').textContent,/7\. 1\./);w.document.querySelector('.design-modal-close').click();
   run("state.data.requests=state.data.requests.slice(0,1);state.data.requests[0].status='pending';renderDays();renderDog()");assert.equal(w.document.querySelectorAll('#weekDays .design-carousel-friends').length,0);assert.match(w.document.getElementById('designNearest').textContent,/Čaká na schválenie/);
+  run('window.openBookingPickerV37()');assert.equal(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').dataset.ownStatus,'pending');assert.match(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').textContent,/Čaká na schválenie/);run('window.closeBookingPickerV305()');
   run("state.data.requests=[];state.data.passes=[];renderPassSummary();renderDays();renderDog()");assert.match(w.document.getElementById('designTicket').textContent,/Jednorazový/);assert.match(w.document.getElementById('designNearest').textContent,/Rezervovať miesto/);
   run("state.data.availability.days[2].available=0");w.document.querySelector('#designNearest button').click();assert.equal(w.document.querySelectorAll('.booking-day-v37').length,10);
   const dateButton=w.document.querySelector('.booking-day-v37:not(:disabled)[data-contact="false"]');assert(dateButton);dateButton.click();
