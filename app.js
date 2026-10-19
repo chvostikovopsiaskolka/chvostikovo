@@ -689,6 +689,25 @@ function openBookingVaccineGateV307(){
     });
     row.append(info,action);list.append(row);
   }
+  // With two dogs, do not make the vaccinated dog wait for the other dog's update.
+  for(const dog of (state.data?.dogs||[]).filter(d=>customerVaccinationsCompleteV96(d))){
+    if(!problems.length)continue;
+    const row=document.createElement('div');row.className='booking-vaccine-row-v307 booking-vaccine-ready-row-v307';
+    const info=document.createElement('div');info.className='booking-vaccine-info-v307';
+    const name=document.createElement('strong');name.textContent=dog.name||'Psík';
+    const detail=document.createElement('small');detail.textContent='Očkovania sú platné';
+    info.append(name,detail);
+    const action=document.createElement('button');action.type='button';
+    action.className='booking-vaccine-action-v307 booking-vaccine-ready-v307';
+    action.textContent='Rezervovať iba tohto psíka ›';
+    action.setAttribute('aria-label','Rezervovať psíka: '+(dog.name||'Psík'));
+    action.addEventListener('click',()=>{
+      closeBookingVaccineGateV307(false);
+      switchTab('booking');
+      window.openBookingPickerV37?.(Number(dog.id));
+    });
+    row.append(info,action);list.append(row);
+  }
   bookingVaccineReturnFocusV307=document.activeElement;
   modal.classList.remove('hidden');
   document.documentElement.classList.add('customer-modal-open');
@@ -2882,9 +2901,16 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('sharedBookingReviewV257')?.remove();
   }
 
-  function openPickerV37(){
-    $('sharedBookingReviewV257')?.remove();pairBookingV254=(state.data?.dogs||[]).length===2;pairTaxiV254.clear();pickerEpochV157++;
-    if(openBookingVaccineGateV307())return;
+  function openPickerV37(preferredDogId=null){
+    const dogs=state.data?.dogs||[];
+    const readySingle=(typeof preferredDogId==='number'&&Number.isInteger(preferredDogId))
+      ?dogs.find(d=>Number(d.id)===preferredDogId&&customerVaccinationsCompleteV96(d)):null;
+    if(!readySingle&&openBookingVaccineGateV307())return;
+    $('sharedBookingReviewV257')?.remove();pairBookingV254=dogs.length===2&&!readySingle;pairTaxiV254.clear();pickerEpochV157++;
+    if(readySingle){
+      state.selectedDogId=Number(readySingle.id);
+      renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays();
+    }
     selectedDatesV37.clear();selectedTaxiByDateV91.clear();expandedTaxiDateV201=null;renewalCheckedDogV157=null;smartDaysDismissedV199=false;futureWeekExpandedV235=false;pickerErrorV95('');
     renderPickerV37();
     $('bookingPickerV37').classList.remove('hidden');
