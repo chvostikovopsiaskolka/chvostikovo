@@ -3204,18 +3204,22 @@ button span,button svg,button svg *{pointer-events:none}
 }
 #photoActionsModalV89 #dogPhotoReplaceNativeV302{
   position:absolute;
-  inset:0;
+  /* v304: the label is the full-size touch target. Keep the native input
+     accessible, but do not offer UIKit a full-button preview rectangle. */
+  top:50%;
+  left:50%;
   display:block!important;
-  width:100%;
-  height:100%;
-  min-height:50px;
+  width:1px;
+  height:1px;
+  min-height:0;
   margin:0;
   padding:0;
   border:0;
   opacity:0;
-  cursor:pointer;
+  clip-path:inset(50%);
+  overflow:hidden;
+  pointer-events:none;
   -webkit-tap-highlight-color:transparent!important;
-  touch-action:manipulation;
 }
 #photoActionsModalV89 .photo-direct-label-v302:has(#dogPhotoReplaceNativeV302:focus-visible){
   outline:3px solid #f97316!important;

@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261019-photo-touch-v303';
-const APP_VERSION='1.0.119';
+const APP_BUILD='20261019-photo-label-v304';
+const APP_VERSION='1.0.120';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1143,11 +1143,12 @@ function bindPhotoGesturesV89(canvas){
 }
 function ensurePhotoActionsV89(){
   if($('photoActionsModalV89'))return;
-  document.body.insertAdjacentHTML('beforeend',`<div id="photoActionsModalV89" class="photo-modal photo-actions-modal-v89 hidden"><div class="photo-actions-card-v89"><div class="photo-modal-head"><div><strong>Fotka psíka</strong><small>Vyberte, čo chcete s fotkou urobiť.</small></div><button id="photoActionsCloseV89" class="icon-btn" type="button">✕</button></div><div class="photo-actions-list-v89"><button id="photoEditCurrentV89" class="btn secondary" type="button">Upraviť aktuálnu fotku</button><label id="photoReplaceV89" class="btn secondary photo-direct-label-v302">Nahrať novú fotku<input id="dogPhotoReplaceNativeV302" type="file" accept="image/*" aria-label="Nahrať novú fotku"></label><button id="photoDeleteV89" class="btn danger" type="button">Zmazať fotku</button></div></div></div>`);
+  document.body.insertAdjacentHTML('beforeend',`<div id="photoActionsModalV89" class="photo-modal photo-actions-modal-v89 hidden"><div class="photo-actions-card-v89"><div class="photo-modal-head"><div><strong>Fotka psíka</strong><small>Vyberte, čo chcete s fotkou urobiť.</small></div><button id="photoActionsCloseV89" class="icon-btn" type="button">✕</button></div><div class="photo-actions-list-v89"><button id="photoEditCurrentV89" class="btn secondary" type="button">Upraviť aktuálnu fotku</button><label id="photoReplaceV89" for="dogPhotoReplaceNativeV302" class="btn secondary photo-direct-label-v302">Nahrať novú fotku<input id="dogPhotoReplaceNativeV302" type="file" accept="image/*" aria-label="Nahrať novú fotku"></label><button id="photoDeleteV89" class="btn danger" type="button">Zmazať fotku</button></div></div></div>`);
   $('photoActionsCloseV89').onclick=closePhotoActionsV89;
   $('photoActionsModalV89').addEventListener('click',e=>{if(e.target===$('photoActionsModalV89'))closePhotoActionsV89()});
-  // On iOS the actual visible file input receives the tap. No synthetic click
-  // from a full-screen modal: it can cause a large native glass backdrop.
+  // v304: native label activation forwards the user gesture to the visually
+  // hidden input. No full-button transparent input for iOS to highlight,
+  // no scripted .click(), and no changes to picker/modal lifecycle.
   const direct=$('dogPhotoReplaceNativeV302');
   direct.addEventListener('click',()=>{
     window.__customerPhotoPickerV88=true;

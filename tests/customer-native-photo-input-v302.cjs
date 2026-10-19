@@ -63,6 +63,25 @@ const ui=new Function('document','$','window','setTimeout','selectedDog','decode
  assert.equal(els.get('dogPhotoInput').clicks,0);
  els.get('dogDetailsPhotoButton').click();
  assert.equal(modal.classList.contains('hidden'),false,'existing photo pencil opens actions again');
- assert.equal(src.includes("const APP_VERSION='1.0.119'"),true);
+ assert.equal(src.includes("const APP_VERSION='1.0.120'"),true);
  console.log('Customer native photo picker v302: 18 scoped assertions PASS');
 })().catch(error=>{console.error(error);process.exitCode=1});
+// v304: verify HTML's label activation rather than mocking a JS .click().
+{
+ const {JSDOM}=require('./shared-v244/node_modules/jsdom');
+ const markup=src.match(/document.body.insertAdjacentHTML\('beforeend',`(<div id="photoActionsModalV89"[\s\S]*?)`\);/)[1];
+ const dom=new JSDOM('<style>'+css+'</style>'+markup);
+ const d=dom.window.document,label=d.getElementById('photoReplaceV89'),input=d.getElementById('dogPhotoReplaceNativeV302');
+ let activations=0;input.addEventListener('click',()=>activations++);
+ assert.equal(label.control,input);
+ label.click();assert.equal(activations,1,'one native activation per label tap');
+ label.click();assert.equal(activations,2,'repeat native activation');
+ assert.equal(input.disabled,false);
+ assert.notEqual(input.tabIndex,-1,'keyboard-accessible input');
+ const style=dom.window.getComputedStyle(input);
+ assert.equal(style.width,'1px');assert.equal(style.height,'1px');
+ assert.equal(style.minHeight,'0');assert.equal(style.pointerEvents,'none');
+ assert.equal(d.getElementById('photoEditCurrentV89').tagName,'BUTTON');
+ assert.equal(d.getElementById('photoDeleteV89').tagName,'BUTTON');
+ console.log('Photo label v304: native activation, repeat, keyboard and source geometry PASS (physical iOS preview unverified)');
+}
