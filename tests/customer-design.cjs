@@ -14,6 +14,7 @@ async function scenario(count){
  await new Promise(r=>setTimeout(r,600));
  try{
   run(`bratislavaClockV95=()=>({date:'2099-01-01'});bratislavaToday=()=> '2099-01-01';queueCustomerSync=()=>{};window.runCustomerOnboardingV75=()=>{};state.session={user:{id:'design-fixture'},access_token:'fixture'};state.selectedDogId=1;state.data={profile:{status:'active'},dogs:Array.from({length:${count}},(_,i)=>({id:i+1,name:['Bella','Iris'][i],sex:i?'male':'female',default_entry_type:'pass',legacy_total_visits:12,photo_path:'fixture/'+i,photo_url:'https://fixture.invalid/'+i+'.jpg'})),vaccinations:Array.from({length:${count}},(_,i)=>['rabies','infectious','kennel_cough',...(i?['lepto_l4']:[])].map(type=>({dog_id:i+1,vaccination_type:type,valid_until:'2099-02-01'}))).flat(),vaccination_proofs:Array.from({length:${count}},(_,i)=>({id:i+1,dog_id:i+1,storage_path:'proof'+i})),passes:[{id:1,dog_id:1,dog_ids:[1,2],total_entries:${count===2?20:10},used_entries:6,status:'active',valid_until:'2099-03-01'}],requests:[{id:70,dog_id:1,reservation_date:'2099-01-05',status:'approved',can_manage:true}],reservations:[],pass_requests:[],visits:[],monthly_totals:[],availability:{days:Array.from({length:15},(_,i)=>({date:'2099-01-'+String(5+i).padStart(2,'0'),available:8,capacity:8,occupied:2,bookings_open:true,anonymous_dogs:2,dogs:[{dog_id:8,name:'Kala',sex:'male',photo_url:'https://fixture.invalid/kala.jpg'}]}))}};renderPassSummary();renderDog();renderUpcoming();renderDays();`);
+  run("overviewClock=()=>({date:'2099-01-01',minutes:600});renderDog()");
   assert.equal(w.document.querySelectorAll('.design-paws>span').length,count===2?20:10);
   assert.equal(w.document.querySelectorAll('.design-paws .used').length,6);
   const photo=w.document.querySelector('.design-friend-strip img');assert(photo);
@@ -29,7 +30,12 @@ async function scenario(count){
   w.document.querySelector('.design-modal-close').click();
   const calendarLinks=w.document.querySelectorAll('#weekDays .design-carousel-friends');assert.equal(calendarLinks.length,1);
   calendarLinks[0].click();assert.equal(w.document.getElementById('customerDesignModalTitle').textContent,'Kamaráti v škôlke');w.document.querySelector('.design-modal-close').click();
-  run("state.data.requests[0].status='pending';renderDays();renderDog()");assert.equal(w.document.querySelectorAll('#weekDays .design-carousel-friends').length,0);assert.match(w.document.getElementById('designNearest').textContent,/čaká na schválenie/);
+  run("state.data.requests.push({id:71,dog_id:1,reservation_date:'2099-01-06',status:'pending'},{id:72,dog_id:1,reservation_date:'2099-01-07',status:'approved'},{id:73,dog_id:2,reservation_date:'2099-01-07',status:'approved'},{id:74,dog_id:1,reservation_date:'2099-02-01',status:'approved'});renderDog()");
+  assert.equal(w.document.querySelectorAll('.design-visit-card').length,3,'one carousel card per date in next two weeks');
+  assert.equal(w.document.querySelectorAll('.design-visit-card[data-status=pending] img').length,0,'pending visit reveals no friends');
+  assert.equal(w.document.querySelector('.design-friend-strip img'),photo,'adding another visit preserves existing decoded photo');
+  w.document.querySelectorAll('.design-friends-button')[1].click();assert.match(w.document.getElementById('customerDesignModalSubtitle').textContent,/7\. 1\./);w.document.querySelector('.design-modal-close').click();
+  run("state.data.requests=state.data.requests.slice(0,1);state.data.requests[0].status='pending';renderDays();renderDog()");assert.equal(w.document.querySelectorAll('#weekDays .design-carousel-friends').length,0);assert.match(w.document.getElementById('designNearest').textContent,/Čaká na schválenie/);
   run("state.data.requests=[];state.data.passes=[];renderPassSummary();renderDays();renderDog()");assert.match(w.document.getElementById('designTicket').textContent,/Jednorazový/);assert.match(w.document.getElementById('designNearest').textContent,/Rezervovať miesto/);
   w.document.querySelector('#designNearest button').click();assert.equal(w.document.querySelectorAll('.booking-day-v37').length,10);
   const dateButton=w.document.querySelector('.booking-day-v37:not(:disabled)[data-contact="false"]');assert(dateButton);dateButton.click();

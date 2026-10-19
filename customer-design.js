@@ -121,16 +121,35 @@
     if(!state.data)return;
     let root=byId('designNearest');
     if(!root){root=document.createElement('section');root.id='designNearest';root.className='design-nearest';byId('designTicket').after(root);}
-    const next=futureItems().find(r=>r.status==='approved'&&overviewDayVisible(r.reservation_date,overviewClock()));
-    const pending=!next&&futureItems().find(r=>r.status==='pending'&&overviewDayVisible(r.reservation_date,overviewClock()));
-    const key=next?.reservation_date||(pending?'pending:'+pending.reservation_date:'empty');
-    if(root.dataset.date!==key){root.dataset.date=key;root.replaceChildren();
-      if(next){root.innerHTML=`<div class="design-nearest-head">${icon('calendar')}<h2>Najbližšia návšteva <span>· ${esc(skDay(next.reservation_date).slice(0,2).toLowerCase())} ${esc(skDate(next.reservation_date).replace(/\s*20\d{2}$/, ''))}</span></h2><span class="design-approved" aria-label="Schválená">✓</span></div><div class="design-friends-line"><div class="design-friend-strip"></div><button type="button" class="design-friends-button">Kamaráti<br>v škôlke <b>›</b></button></div>`;
-        root.querySelector('button').addEventListener('click',()=>openFriends(next.reservation_date));
-      }else{root.innerHTML=pending?`<p class="design-empty-heading">Rezervácia čaká na schválenie</p><p class="design-pending-date">${esc(skDay(pending.reservation_date))} ${esc(skDate(pending.reservation_date))}</p><button type="button" class="btn full">Moje rezervácie</button>`:'<p class="design-empty-heading">Zatiaľ nemáte vytvorenú rezerváciu.</p><div class="design-empty-reminder"></div><button type="button" class="btn full">Rezervovať miesto v škôlke</button>';root.querySelector('button').addEventListener('click',()=>window.openBookingPickerV37?.());}
+    const clock=overviewClock(),end=new Date(clock.date+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+14);
+    const all=futureItems().filter(r=>overviewDayVisible(r.reservation_date,clock));
+    const dates=[...new Set(all.filter(r=>r.reservation_date<end.toISOString().slice(0,10)).map(r=>r.reservation_date))];
+    if(dates.length){
+      if(!root.querySelector('.design-overview-carousel'))root.innerHTML='<div class="design-visits-title"><h2>Rezervácie</h2><small>Posuňte pre ďalšie dni →</small></div><div class="design-overview-carousel" role="region" aria-label="Rezervované návštevy" tabindex="0"></div>';
+      root.querySelector('.design-visits-title small').hidden=dates.length<2;
+      const carousel=root.querySelector('.design-overview-carousel');
+      [...carousel.children].forEach(card=>{if(!dates.includes(card.dataset.visitDate))card.remove();});
+      dates.forEach((date,i)=>{
+        const approved=approvedForDate(date),status=approved?'approved':'pending';
+        let card=[...carousel.children].find(n=>n.dataset.visitDate===date);
+        if(!card){card=document.createElement('article');card.className='design-visit-card';card.dataset.visitDate=date;}
+        if(card.dataset.status!==status){
+          card.dataset.status=status;
+          card.innerHTML=`<div class="design-nearest-head">${icon('calendar')}<strong>${esc(skDay(date).slice(0,2).toLowerCase())} ${esc(skDate(date).replace(/\s*20\d{2}$/, ''))}</strong>${approved?'<span class="design-approved" aria-label="Schválená">✓</span>':'<span class="design-visit-pending">Čaká na schválenie</span>'}</div>${approved?'<div class="design-friends-line"><div class="design-friend-strip"></div><button type="button" class="design-friends-button">Kamaráti<br>v škôlke <b>›</b></button></div>':'<p class="design-waiting-friends">Kamarátov uvidíte po schválení rezervácie.</p>'}`;
+          if(approved)card.querySelector('button').addEventListener('click',()=>openFriends(date));
+        }
+        card.setAttribute('aria-label',`${i===0?'Najbližšia návšteva, ':''}${skDay(date)} ${skDate(date)}`);
+        if(carousel.children[i]!==card)carousel.insertBefore(card,carousel.children[i]||null);
+        if(approved)reconcilePhotos(card.querySelector('.design-friend-strip'),friends(date).slice(0,4));
+      });
+    }else{
+      const key=all.length?'outside-range':'empty';
+      if(root.dataset.date!==key||root.querySelector('.design-overview-carousel')){
+        root.dataset.date=key;root.innerHTML=`<h2>Rezervácie</h2><p class="design-empty-heading">${all.length?'Najbližšia rezervácia je neskôr než o dva týždne.':'Zatiaľ nemáte vytvorenú rezerváciu.'}</p><div class="design-empty-reminder"></div><button type="button" class="btn full">${all.length?'Moje rezervácie':'Rezervovať miesto v škôlke'}</button>`;
+        root.querySelector('button').addEventListener('click',()=>window.openBookingPickerV37?.());
+      }
+      const target=root.querySelector('.design-empty-reminder'),notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu do nedele 20:00.';target.classList.toggle('design-deadline-closed',notice?.classList.contains('hidden'));
     }
-    if(next)reconcilePhotos(root.querySelector('.design-friend-strip'),friends(next.reservation_date).slice(0,4));
-    else if(!pending){const target=root.querySelector('.design-empty-reminder');const notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu do nedele 20:00.';target.classList.toggle('design-deadline-closed',notice?.classList.contains('hidden'));}
     const bulletin=byId('customerBulletinV229'); if(bulletin&&root.nextElementSibling!==bulletin)root.after(bulletin);
   }
   function layout() {

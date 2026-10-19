@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-stage-20261019-v307-design-3';
+const CACHE='chvostikovo-portal-shell-stage-20261019-v308-design-4';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://jgzabminzgbfhsrgqedt.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://jgzabminzgbfhsrgqedt.supabase.co wss://jgzabminzgbfhsrgqedt.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/stage-config.js?v=stage-design-3','/customer-design.js?v=stage-design-3','/customer-design.css?v=stage-design-3','/dog-choice-fab-v276.css?v=stage-20261019-v307-design-3','/dual-dog-overview-v246.js?v=stage-20261019-v307-design-3','/dual-dog-overview-v246.css?v=stage-20261019-v307-design-3','/','/terms-pdf.js?v=stage-20261019-v307-design-3','/terms-pdf-font.js?v=stage-20261019-v307-design-3','/styles.css?v=stage-20261019-v307-design-3','/bulletin-photo-v243.css?v=stage-20261019-v307-design-3','/app.js?v=stage-20261019-v307-design-3','/back-swipe.js?v=stage-20261019-v307-design-3'];
+const SHELL=['/android-install-choice-v308.js?v=20261019-android-choice-v308','/stage-config.js?v=stage-design-4','/customer-design.js?v=stage-design-4','/customer-design.css?v=stage-design-4','/dog-choice-fab-v276.css?v=stage-20261019-v308-design-4','/dual-dog-overview-v246.js?v=stage-20261019-v308-design-4','/dual-dog-overview-v246.css?v=stage-20261019-v308-design-4','/','/terms-pdf.js?v=stage-20261019-v308-design-4','/terms-pdf-font.js?v=stage-20261019-v308-design-4','/styles.css?v=stage-20261019-v308-design-4','/bulletin-photo-v243.css?v=stage-20261019-v308-design-4','/app.js?v=stage-20261019-v308-design-4','/back-swipe.js?v=stage-20261019-v308-design-4'];
 
 function withPortalCsp(response){
   if(!response)return response;
