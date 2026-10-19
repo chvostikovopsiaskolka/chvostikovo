@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='stage-20261019-v307-design-1';
-const APP_VERSION='1.0.123-stage.1';
+const APP_BUILD='stage-20261019-v307-design-2';
+const APP_VERSION='1.0.123-stage.2';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -286,7 +286,7 @@ function bootstrapCore(showSpinner=true){
       showAuth('login');
       if($('authMessage'))$('authMessage').innerHTML='';
       const standalone=window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
-      if(!standalone){
+      if(!standalone&&!window.CUSTOMER_RUNTIME?.staging){
         sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
         setTimeout(()=>document.getElementById('installHelpLink')?.click(),220);
       }
@@ -1600,7 +1600,7 @@ $('logoutBtn').addEventListener('click',async()=>{
   try{if(state.session)await authFetch('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+state.session.access_token}})}catch(_){}
   clearSession();showAuth('login');
   const standalone=window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
-  if(!standalone){
+  if(!standalone&&!window.CUSTOMER_RUNTIME?.staging){
     sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
     setTimeout(()=>document.getElementById('installHelpLink')?.click(),180);
   }
@@ -2278,7 +2278,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function applyNav(){
     const booking=$('navBooking'),menu=$('navDog');
     if(!booking||!menu)return;
-    booking.innerHTML='<span class="nav-icon-v36">'+calendarSvg+'</span><span>Rezervácie</span>';
+    booking.innerHTML='<span class="nav-icon-v36">'+calendarSvg+'</span><span>Prehľad</span>';
     menu.innerHTML='<span class="nav-icon-v36">'+gearSvg+'</span><span>Menu</span>';
     booking.classList.add('nav-item-v36');menu.classList.add('nav-item-v36');
   }

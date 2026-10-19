@@ -1,5 +1,6 @@
 /* Staging-only wiring. Do not include this file in a production release. */
 if (location.hostname === 'app.chvostikovo.sk') throw new Error('Staging configuration cannot run on production.');
+sessionStorage.setItem('chvostikovo_install_guide_seen_v1','1');
 window.CUSTOMER_RUNTIME = Object.freeze({staging:true,supabaseUrl:'https://jgzabminzgbfhsrgqedt.supabase.co',supabaseKey:"sb_publishable_SxAm6NUsZ8699ienaT8fzw_6bWt5cPq"});
 (() => {
   const originalFetch=window.fetch.bind(window);
@@ -14,6 +15,7 @@ window.CUSTOMER_RUNTIME = Object.freeze({staging:true,supabaseUrl:'https://jgzab
     panel.innerHTML='<strong>Skúšobná zákaznícka appka</strong><p>Vyberte si skúšobný účet. Údaje sú oddelené od živej appky.</p><div><button type="button" data-stage-account="bella.design@example.invalid">Bella · 1 psík</button><button type="button" data-stage-account="dvojica.design@example.invalid">Falco a Spirit · 2 psíkovia</button></div>';
     card.prepend(panel);
     panel.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+      document.getElementById('navBooking')?.click();
       document.getElementById('loginEmail').value=b.dataset.stageAccount;document.getElementById('loginPassword').value='ChvostikovoTest2026!';document.getElementById('loginForm').requestSubmit();
     }));
     for(const id of ['signupForm','forgotForm'])document.getElementById(id)?.addEventListener('submit',e=>{e.preventDefault();e.stopImmediatePropagation();alert('V skúšobnej verzii použite pripravené testovacie účty.');},true);

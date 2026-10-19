@@ -122,14 +122,15 @@
     let root=byId('designNearest');
     if(!root){root=document.createElement('section');root.id='designNearest';root.className='design-nearest';byId('designTicket').after(root);}
     const next=futureItems().find(r=>r.status==='approved'&&overviewDayVisible(r.reservation_date,overviewClock()));
-    const key=next?.reservation_date||'empty';
+    const pending=!next&&futureItems().find(r=>r.status==='pending'&&overviewDayVisible(r.reservation_date,overviewClock()));
+    const key=next?.reservation_date||(pending?'pending:'+pending.reservation_date:'empty');
     if(root.dataset.date!==key){root.dataset.date=key;root.replaceChildren();
       if(next){root.innerHTML=`<div class="design-nearest-head">${icon('calendar')}<h2>Najbližšia návšteva <span>· ${esc(skDay(next.reservation_date).slice(0,2).toLowerCase())} ${esc(skDate(next.reservation_date).replace(/\s*20\d{2}$/, ''))}</span></h2><span class="design-approved" aria-label="Schválená">✓</span></div><div class="design-friends-line"><div class="design-friend-strip"></div><button type="button" class="design-friends-button">Kamaráti<br>v škôlke <b>›</b></button></div>`;
         root.querySelector('button').addEventListener('click',()=>openFriends(next.reservation_date));
-      }else{root.innerHTML='<p class="design-empty-heading">Zatiaľ nemáte vytvorenú rezerváciu.</p><div class="design-empty-reminder"></div><button type="button" class="btn full">Rezervovať miesto v škôlke</button>';root.querySelector('button').addEventListener('click',()=>window.openBookingPickerV37?.());}
+      }else{root.innerHTML=pending?`<p class="design-empty-heading">Rezervácia čaká na schválenie</p><p class="design-pending-date">${esc(skDay(pending.reservation_date))} ${esc(skDate(pending.reservation_date))}</p><button type="button" class="btn full">Moje rezervácie</button>`:'<p class="design-empty-heading">Zatiaľ nemáte vytvorenú rezerváciu.</p><div class="design-empty-reminder"></div><button type="button" class="btn full">Rezervovať miesto v škôlke</button>';root.querySelector('button').addEventListener('click',()=>window.openBookingPickerV37?.());}
     }
     if(next)reconcilePhotos(root.querySelector('.design-friend-strip'),friends(next.reservation_date).slice(0,4));
-    else{const target=root.querySelector('.design-empty-reminder');const notice=byId('bookingDeadlineNoticeV127')||byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu do nedele 20:00.';}
+    else if(!pending){const target=root.querySelector('.design-empty-reminder');const notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu do nedele 20:00.';target.classList.toggle('design-deadline-closed',notice?.classList.contains('hidden'));}
     const bulletin=byId('customerBulletinV229'); if(bulletin&&root.nextElementSibling!==bulletin)root.after(bulletin);
   }
   function layout() {
@@ -156,13 +157,15 @@
       const section=document.createElement('section');section.id='designMyBookings';section.innerHTML='<div id="designReservationNotice"></div><h2>Moje rezervácie</h2>';head.after(section);section.append(byId('weekDays'));
       const chat=document.createElement('button');chat.type='button';chat.className='design-reservation-chat';chat.setAttribute('aria-label','Napísať správu');chat.innerHTML=icon('message');chat.addEventListener('click',()=>{window.closeBookingPickerV305?.();openCustomerChat();});head.insertBefore(chat,byId('bookingPickerCloseV37'));
     }
-    const source=byId('bookingDeadlineNoticeV127')||byId('deadlineText');byId('designReservationNotice').textContent=source?.textContent?.trim()||'Prosíme o rezerváciu do nedele 20:00.';
+    let carousel=byId('designBookingCarousel');if(!carousel){carousel=document.createElement('div');carousel.id='designBookingCarousel';byId('weekDays').before(carousel);carousel.append(byId('weekDays'));}
+    const source=byId('deadlineText'),notice=byId('designReservationNotice');notice.textContent=[...source?.querySelectorAll('strong,span')||[]].map(n=>n.textContent.trim()).filter(Boolean).join(' ')||'Prosíme o rezerváciu do nedele 20:00.';notice.classList.toggle('design-deadline-closed',source?.classList.contains('hidden'));
+    const taxiTitle=byId('bookingPickerTaxiSectionV91')?.querySelector('.booking-picker-taxi-title-v37');if(taxiTitle)taxiTitle.textContent='Vybrané dni';
+    picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=Number(day.available)<=0?'full':Number(day.available)<=2?'limited':'free';button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';});
     const empty=byId('weekDays')?.querySelector('.reserved-empty-v37'),smart=byId('bookingPickerSmartDaysV199');
-    if(empty&&smart&&!smart.classList.contains('hidden')){empty.classList.add('hidden');byId('designMyBookings').append(smart);}
-    else if(smart&&smart.parentElement?.id==='designMyBookings')byId('bookingPickerDaysV37').before(smart);
+    if(smart&&!smart.classList.contains('hidden')){empty?.classList.add('hidden');carousel.append(smart);}
   };
-  window.customerDesignPickerOpened=()=>{window.customerDesignPickerRender();document.documentElement.classList.add('design-reservations-open');};
-  window.customerDesignPickerClosed=()=>document.documentElement.classList.remove('design-reservations-open');
+  window.customerDesignPickerOpened=()=>{window.customerDesignPickerRender();document.documentElement.classList.add('design-reservations-open');byId('bookingTab').inert=true;};
+  window.customerDesignPickerClosed=()=>{document.documentElement.classList.remove('design-reservations-open');byId('bookingTab').inert=false;};
   customerHooks.afterSwitchTab.push(()=>{window.closeBookingPickerV305?.();layout();});
   customerHooks.afterRenderDog.push(layout);customerHooks.afterRenderPassSummary.push(layout);customerHooks.afterBootstrap.push(layout);
   document.addEventListener('click',e=>{const single=e.target.closest('#bookingVaccinationStatus'),dual=e.target.closest('.dual-dog-status-v254');if(!single&&!dual)return;e.preventDefault();e.stopImmediatePropagation();openVaccineSummary(dual?Number(dual.dataset.dogOpenV254):state.selectedDogId);},true);
