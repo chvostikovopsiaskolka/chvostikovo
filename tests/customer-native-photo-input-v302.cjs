@@ -12,7 +12,8 @@ const js=slice('function ensurePhotoActionsV89(){','function fileDataUrlV88')+
 assert.doesNotMatch(js,/photoPickerFromActionsV184|photo-picker-waiting-v184|photo-picker-status-v301/);
 assert.doesNotMatch(css,/photo-picker-waiting-v184|photo-picker-status-v301/);
 assert.match(js,/<label id="photoReplaceV89"[^>]+>Nahrať novú fotku<input id="dogPhotoReplaceNativeV302" type="file" accept="image\/\*"/);
-assert.match(css,/#photoActionsModalV89 #dogPhotoReplaceNativeV302\{[\s\S]*?opacity:0;[\s\S]*?display:block!important;/);
+assert.match(css,/#photoActionsModalV89 #dogPhotoReplaceNativeV302\{[\s\S]*?display:block!important;/);
+assert.match(css,/#photoActionsModalV89 #dogPhotoReplaceNativeV302\{[\s\S]*?opacity:0;/);
 assert.doesNotMatch(js,/\$\('photoReplaceV89'\)\.onclick=selectNewDogPhotoV89/);
 class MockElement{
  constructor(id,raw=''){
@@ -29,8 +30,8 @@ const $=id=>els.get(id)||null;
 const document={body:{insertAdjacentHTML(_where,markup){for(const m of markup.matchAll(/<[^>]*id="([^"]+)"[^>]*>/g)){els.set(m[1],new MockElement(m[1],m[0]))}}}};
 const window={__customerPhotoPickerV88:false,__customerPhotoDecodeV88:false};
 const opened=[],errors=[],dialogs=[];
-const ui=new Function('document','$','window','setTimeout','decodePhotoFileV88','beginPhotoEditV89','openExistingPhotoEditorV89','deleteCurrentDogPhotoV89','toast',
- js+'\nreturn {showPhotoActionsV89,openPhotoEditor,closePhotoActionsV89}')(document,$,window,()=>{},async file=>{if(file.name==='bad.jpg')throw Error('decode');return {file}},img=>opened.push(img),dog=>opened.push({existing:dog.id}),()=>dialogs.push('delete'),e=>errors.push(e));
+const ui=new Function('document','$','window','setTimeout','selectedDog','decodePhotoFileV88','beginPhotoEditV89','openExistingPhotoEditorV89','deleteCurrentDogPhotoV89','toast',
+ js+'\nreturn {showPhotoActionsV89,openPhotoEditor,closePhotoActionsV89}')(document,$,window,()=>{},()=>({id:77,photo_url:'present'}),async file=>{if(file.name==='bad.jpg')throw Error('decode');return {file}},img=>opened.push(img),dog=>opened.push({existing:dog.id}),()=>dialogs.push('delete'),e=>errors.push(e));
 (async()=>{
  ui.showPhotoActionsV89({id:77,photo_url:'present'});
  const modal=$('photoActionsModalV89'),input=$('dogPhotoReplaceNativeV302');
