@@ -10,6 +10,7 @@ async function scenario(count){
  const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>{if(!/Could not parse CSS|Not implemented:.*(scroll|canvas|navigation)/.test(e.message))errors.push(e.message)});
  const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'https://design.fixture',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:vc}),w=dom.window,c=dom.getInternalVMContext(),run=s=>vm.runInContext(s,c);
  Object.assign(w,{fetch:async()=>({ok:true,status:200,json:async()=>[],text:async()=>'[]',headers:{get:()=>''}}),matchMedia:()=>({matches:false,addEventListener(){},removeEventListener(){}}),scrollTo(){},confirm:()=>true,ResizeObserver:class{observe(){}disconnect(){}},IntersectionObserver:class{observe(){}disconnect(){}}});
+ const NativeDate=w.Date;w.Date=class extends NativeDate{constructor(...args){super(...(args.length?args:[w.__fixtureNowIso||NativeDate.now()]))}static now(){return w.__fixtureNowIso?new NativeDate(w.__fixtureNowIso).getTime():NativeDate.now()}};
  for(const file of ['terms-pdf.js','app.js','dual-dog-overview-v246.js','customer-design.js'])new vm.Script(fs.readFileSync(file,'utf8')).runInContext(c);
  await new Promise(r=>setTimeout(r,600));
  try{
@@ -27,6 +28,19 @@ async function scenario(count){
   const addTaxi=w.document.querySelector('#weekDays [data-taxi-request]');assert(addTaxi);addTaxi.click();
   assert(w.document.getElementById('bookingTaxiEditV201').classList.contains('design-inline-taxi'));
   w.document.getElementById('taxiEditCloseV201').click();run('window.closeBookingPickerV305()');
+  w.__fixtureNowIso='2099-01-04T19:59:00Z';run("window.openBookingPickerV37();window.customerDesignOpenTaxi(70,'')");
+  assert(!w.document.getElementById('bookingTaxiEditV201').classList.contains('hidden'),'20:59 uses original taxi approval form');
+  w.document.getElementById('taxiEditCloseV201').click();
+  w.__fixtureNowIso='2099-01-04T20:00:00Z';run("window.customerDesignOpenTaxi(70,'')");
+  assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'),'21:00 uses original late taxi message');
+  w.document.getElementById('supportChatCloseV52').click();
+  w.__fixtureNowIso='2099-01-05T09:00:00Z';run("renderDays();window.customerDesignPickerRender()");
+  assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday keeps closed-week guidance by calendar');
+  assert.equal(w.document.getElementById('designReservationNotice').hidden,true);
+  w.__fixtureNowIso='2099-01-05T23:00:00Z';run("renderDays();window.customerDesignPickerRender()");
+  assert.equal(w.document.getElementById('designWeekDeadline').hidden,true,'Tuesday switches to next-week reminder');
+  assert.equal(w.document.getElementById('designReservationNotice').hidden,false);
+  w.__fixtureNowIso=null;run("window.closeBookingPickerV305();renderDays()");
   run('renderDog();renderPassSummary()');assert.equal(w.document.querySelector('.design-friend-strip img'),photo,'unrelated render preserves friend image');
   const vax=w.document.querySelector(count===1?'#bookingVaccinationStatus':'[data-dog-open-v254="2"].dual-dog-status-v254');vax.click();
   assert.equal(w.document.querySelectorAll('.design-vaccine-row').length,count===1?3:4);

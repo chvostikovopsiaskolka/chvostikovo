@@ -182,6 +182,7 @@
       const chat=document.createElement('button');chat.type='button';chat.className='design-reservation-chat';chat.setAttribute('aria-label','Napísať správu');chat.innerHTML=icon('message');chat.addEventListener('click',()=>{window.customerDesignKeepPickerForChat?.();openCustomerChat();});head.insertBefore(chat,byId('bookingPickerCloseV37'));
     }
     let carousel=byId('designBookingCarousel');if(!carousel){carousel=document.createElement('div');carousel.id='designBookingCarousel';byId('weekDays').before(carousel);carousel.append(byId('weekDays'));}
+    window.customerDesignRefreshDeadline?.();
     const source=byId('deadlineText'),notice=byId('designReservationNotice'),closed=source?.classList.contains('hidden');
     notice.hidden=!!closed;notice.textContent=source?.querySelector('strong')?.textContent||'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
     let weekNotice=byId('designWeekDeadline');if(!weekNotice){weekNotice=document.createElement('div');weekNotice.id='designWeekDeadline';byId('bookingPickerDaysV37').prepend(weekNotice);}
