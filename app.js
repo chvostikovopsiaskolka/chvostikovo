@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='stage-20261019-v308-design-5';
-const APP_VERSION='1.0.123-stage.5';
+const APP_BUILD='stage-20261019-v308-design-6';
+const APP_VERSION='1.0.123-stage.6';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2864,7 +2864,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       /* v281: selecting a date never opens a permanentka modal or makes an extra RPC. */
       if(btn.dataset.contact==='true'&&pairBookingV254){pickerErrorV95('Pre oboch psíkov nie sú dostupné dve miesta alebo sa prihlasovanie uzavrelo. Vyberte iný deň alebo nám napíšte.');return}
       if(btn.dataset.contact==='true'){
-        closePickerV37();
+        if(!window.customerDesignKeepPickerForChat?.())closePickerV37();
         const message=`Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`;
         window.openCustomerLateBookingMessage?.(Number(dog.id),date,message,btn.dataset.full==='true');
         return;
@@ -2925,6 +2925,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
   window.openBookingPickerV37=openPickerV37;
   window.closeBookingPickerV305=()=>{closePickerV37();window.customerDesignPickerClosed?.();};
+  window.customerDesignOpenTaxi=(requestId,reservationId)=>openTaxiEditV201(requestId,reservationId);
+  window.customerDesignCanEditTaxi=row=>allowedTaxiEditV201(row);
   function closePickerV37(){if(submittingV37)return;pickerEpochV157++;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');window.customerDesignPickerClosed?.();pickerErrorV95('');if(pendingPassRenewalV95){const renewal=pendingPassRenewalV95;pendingPassRenewalV95=null;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(renewal.dogId,renewal.date),100)}}
 
   async function submitPickerV37(){
@@ -3400,6 +3402,7 @@ async function togglePushDirect(btn){
     supportLayout.prepare();
     $('appView').inert=true;
     $('supportChatModalV52').classList.remove('hidden');
+    window.customerDesignChatOpened?.();
     supportLayout.open();
     $('supportMessageSend').disabled=supportSending||!$('supportMessageBodyV52').value.trim();
     requestAnimationFrame(()=>{const root=$('supportMessageThreadV52');root.scrollTop=root.scrollHeight});
@@ -3415,6 +3418,7 @@ async function togglePushDirect(btn){
     lateBookingContext=null;
     $('supportMessageBodyV52').value='';
     requestAnimationFrame(()=>window.scrollTo(0,supportPageScrollY));
+    window.customerDesignChatClosed?.();
     updateButton();
   }
   window.openCustomerSupportChatV176=open;
