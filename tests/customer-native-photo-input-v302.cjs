@@ -63,7 +63,8 @@ const ui=new Function('document','$','window','setTimeout','selectedDog','decode
  assert.equal(els.get('dogPhotoInput').clicks,0);
  els.get('dogDetailsPhotoButton').click();
  assert.equal(modal.classList.contains('hidden'),false,'existing photo pencil opens actions again');
- assert.equal(src.includes("const APP_VERSION='1.0.120'"),true);
+ const release=JSON.parse(fs.readFileSync(path.join(__dirname,'..','version.json'),'utf8'));
+ assert.equal(src.includes("const APP_VERSION='"+release.version+"'"),true,'APP_VERSION matches version.json');
  console.log('Customer native photo picker v302: 18 scoped assertions PASS');
 })().catch(error=>{console.error(error);process.exitCode=1});
 // v304: verify HTML's label activation rather than mocking a JS .click().
