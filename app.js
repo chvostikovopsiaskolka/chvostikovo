@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261019-dog-onboarding-v306';
-const APP_VERSION='1.0.122';
+const APP_BUILD='20261019-booking-vaccine-gate-v307';
+const APP_VERSION='1.0.123';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -607,6 +607,114 @@ function customerVaccinationsCompleteV96(dog){
   return proofs.length>0&&required.every(type=>rows.some(v=>v.vaccination_type===type&&v.valid_until&&String(v.valid_until)>=today))&&(!rows.some(v=>v.vaccination_type==='lepto_l4')||rows.some(v=>v.vaccination_type==='lepto_l4'&&v.valid_until&&String(v.valid_until)>=today));
 }
 window.customerVaccinationsCompleteV96=customerVaccinationsCompleteV96;
+
+/* v307: explain missing versus expired vaccinations before opening the booking picker.
+   Use already loaded scoped dog/vaccination/proof data; leave the server booking gate unchanged. */
+let bookingVaccineReturnFocusV307=null;
+function bookingVaccineProblemsV307(){
+  const today=typeof bratislavaClockV95==='function'?bratislavaClockV95().date:new Date().toISOString().slice(0,10);
+  return (state.data?.dogs||[]).filter(dog=>!customerVaccinationsCompleteV96(dog)).map(dog=>{
+    const rows=(state.data?.vaccinations||[]).filter(v=>Number(v.dog_id)===Number(dog.id));
+    const proofs=(state.data?.vaccination_proofs||[]).filter(p=>Number(p.dog_id)===Number(dog.id));
+    let missing=proofs.length===0,expired=false;
+    for(const type of ['rabies','infectious','kennel_cough','lepto_l4']){
+      const ofType=rows.filter(v=>v.vaccination_type===type);
+      if(type==='lepto_l4'&&!ofType.length)continue;
+      if(!ofType.length||!ofType.some(v=>v.valid_until))missing=true;
+      if(ofType.some(v=>v.valid_until&&String(v.valid_until)<today))expired=true;
+    }
+    return {dog,missing,expired};
+  });
+}
+function closeBookingVaccineGateV307(restoreFocus=true){
+  const modal=$('bookingVaccineModalV307');
+  if(!modal||modal.classList.contains('hidden'))return;
+  modal.classList.add('hidden');
+  document.documentElement.classList.remove('customer-modal-open');
+  if(restoreFocus&&bookingVaccineReturnFocusV307?.isConnected)bookingVaccineReturnFocusV307.focus({preventScroll:true});
+  bookingVaccineReturnFocusV307=null;
+}
+function openBookingVaccineGateV307(){
+  const problems=bookingVaccineProblemsV307();
+  if(!problems.length)return false;
+  let modal=$('bookingVaccineModalV307');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='bookingVaccineModalV307';
+    modal.className='legal-modal booking-vaccine-modal-v307 hidden';
+    modal.setAttribute('role','dialog');
+    modal.setAttribute('aria-modal','true');
+    modal.setAttribute('aria-labelledby','bookingVaccineTitleV307');
+    modal.setAttribute('aria-describedby','bookingVaccineBodyV307');
+    modal.innerHTML='<section class="legal-card booking-vaccine-card-v307"><button type="button" class="legal-close booking-vaccine-close-v307" aria-label="Zavrieť">×</button><span class="legal-kicker">🐾 Pred rezerváciou</span><h2 id="bookingVaccineTitleV307"></h2><p id="bookingVaccineBodyV307" class="booking-vaccine-body-v307"></p><div id="bookingVaccineListV307" class="booking-vaccine-list-v307"></div><button type="button" class="booking-vaccine-cancel-v307">Zavrieť</button></section>';
+    modal.querySelector('.booking-vaccine-close-v307').addEventListener('click',()=>closeBookingVaccineGateV307());
+    modal.querySelector('.booking-vaccine-cancel-v307').addEventListener('click',()=>closeBookingVaccineGateV307());
+    modal.addEventListener('click',e=>{if(e.target===modal)closeBookingVaccineGateV307()});
+    modal.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){e.preventDefault();closeBookingVaccineGateV307();return}
+      if(e.key!=='Tab')return;
+      const focusable=[...modal.querySelectorAll('button:not([disabled])')];
+      const first=focusable[0],last=focusable[focusable.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+    });
+    document.body.append(modal);
+  }
+  const hasMissing=problems.some(x=>x.missing),hasExpired=problems.some(x=>x.expired);
+  $('bookingVaccineTitleV307').textContent=hasMissing&&hasExpired?'Doplňte alebo aktualizujte očkovania':hasMissing?'Doplňte očkovania':'Aktualizujte očkovania';
+  const many=(state.data?.dogs||[]).length>1;
+  $('bookingVaccineBodyV307').textContent='Pred rezerváciou je potrebné doplniť alebo aktualizovať povinné očkovania '+(many?'vašich psíkov.':'vášho psíka.')+' Vyberte psíka a otvorte jeho očkovania.';
+  const list=$('bookingVaccineListV307');list.replaceChildren();
+  for(const item of problems){
+    const row=document.createElement('div');row.className='booking-vaccine-row-v307';
+    const info=document.createElement('div');info.className='booking-vaccine-info-v307';
+    const name=document.createElement('strong');name.textContent=item.dog.name||'Psík';
+    const detail=document.createElement('small');
+    detail.textContent=item.missing&&item.expired?'Chýbajúce aj neplatné očkovania':item.missing?'Chýbajúce očkovania alebo doklad':'Očkovania po platnosti';
+    info.append(name,detail);
+    const action=document.createElement('button');action.type='button';action.className='booking-vaccine-action-v307';
+    action.textContent='Otvoriť očkovania ›';
+    action.setAttribute('aria-label','Otvoriť očkovania: '+(item.dog.name||'Psík'));
+    action.addEventListener('click',()=>{
+      const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(item.dog.id));
+      closeBookingVaccineGateV307(false);
+      if(!dog)return;
+      if(Number(state.selectedDogId)!==Number(dog.id)){
+        rememberVaccineDraftV287();clearVaccinationProofStageV104();
+        state.selectedDogId=Number(dog.id);
+        renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays();
+      }
+      switchTab('menu');
+      openDogDetails('vaccinations',false);
+    });
+    row.append(info,action);list.append(row);
+  }
+  // With two dogs, do not make the vaccinated dog wait for the other dog's update.
+  for(const dog of (state.data?.dogs||[]).filter(d=>customerVaccinationsCompleteV96(d))){
+    if(!problems.length)continue;
+    const row=document.createElement('div');row.className='booking-vaccine-row-v307 booking-vaccine-ready-row-v307';
+    const info=document.createElement('div');info.className='booking-vaccine-info-v307';
+    const name=document.createElement('strong');name.textContent=dog.name||'Psík';
+    const detail=document.createElement('small');detail.textContent='Očkovania sú platné';
+    info.append(name,detail);
+    const action=document.createElement('button');action.type='button';
+    action.className='booking-vaccine-action-v307 booking-vaccine-ready-v307';
+    action.textContent='Rezervovať iba tohto psíka ›';
+    action.setAttribute('aria-label','Rezervovať psíka: '+(dog.name||'Psík'));
+    action.addEventListener('click',()=>{
+      closeBookingVaccineGateV307(false);
+      switchTab('booking');
+      window.openBookingPickerV37?.(Number(dog.id));
+    });
+    row.append(info,action);list.append(row);
+  }
+  bookingVaccineReturnFocusV307=document.activeElement;
+  modal.classList.remove('hidden');
+  document.documentElement.classList.add('customer-modal-open');
+  modal.querySelector('.booking-vaccine-action-v307')?.focus({preventScroll:true});
+  return true;
+}
+
 function dogFormSnapshotV96(){
   const form=$('dogForm');if(!form)return'';
   return [...new FormData(form).entries()].map(([k,v])=>k+'='+String(v)).join('&');
@@ -2793,9 +2901,16 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('sharedBookingReviewV257')?.remove();
   }
 
-  function openPickerV37(){
-    $('sharedBookingReviewV257')?.remove();pairBookingV254=(state.data?.dogs||[]).length===2;pairTaxiV254.clear();pickerEpochV157++;
-    const dog=selectedDog();if(dog&&window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(dog)){switchTab('dog');setTimeout(()=>openDogDetails('vaccinations',false),40);toast('Pred rezerváciou doplňte povinné očkovania.');return}
+  function openPickerV37(preferredDogId=null){
+    const dogs=state.data?.dogs||[];
+    const readySingle=(typeof preferredDogId==='number'&&Number.isInteger(preferredDogId))
+      ?dogs.find(d=>Number(d.id)===preferredDogId&&customerVaccinationsCompleteV96(d)):null;
+    if(!readySingle&&openBookingVaccineGateV307())return;
+    $('sharedBookingReviewV257')?.remove();pairBookingV254=dogs.length===2&&!readySingle;pairTaxiV254.clear();pickerEpochV157++;
+    if(readySingle){
+      state.selectedDogId=Number(readySingle.id);
+      renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays();
+    }
     selectedDatesV37.clear();selectedTaxiByDateV91.clear();expandedTaxiDateV201=null;renewalCheckedDogV157=null;smartDaysDismissedV199=false;futureWeekExpandedV235=false;pickerErrorV95('');
     renderPickerV37();
     $('bookingPickerV37').classList.remove('hidden');
@@ -2876,13 +2991,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     updateBookingDeadlineNoticeV127();
     if(!dog){root.innerHTML='';return}
     const ready=window.customerVaccinationsCompleteV96?window.customerVaccinationsCompleteV96(dog):true;
-    if(!ready){
-      root.innerHTML=`<div class="booking-gate-v96"><div class="booking-launch-v37 booking-launch-disabled-v96" aria-disabled="true"><span class="booking-launch-icon-v37"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M7 3v4M17 3v4M3 10h18M12 13v5M9.5 15.5h5"></path></svg></span><span><strong>Chcem prihlásiť psíka</strong><small>Rezervácie sa sprístupnia po doplnení očkovaní.</small></span><b>›</b></div><button id="bookingVaccinationsV96" class="btn secondary full booking-vaccinations-v96" type="button">Doplniť očkovania</button></div>`;
-      $('bookingVaccinationsV96')?.addEventListener('click',()=>openDogDetails('vaccinations',false));
-    }else{
-      // v220: Booking action is now the thumb-reachable center + in the bottom navigation.
-      root.innerHTML='';
-    }
+    // v307: the old disabled booking CTA is removed; the bottom + explains vaccination problems.
+    root.innerHTML='';
     const h=document.querySelector('#bookingTab .booking-section-head h2');if(h)h.textContent='Moje rezervácie';
   };
 
