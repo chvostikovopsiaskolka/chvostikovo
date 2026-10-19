@@ -1149,7 +1149,10 @@ function ensurePhotoActionsV89(){
   // On iOS the actual visible file input receives the tap. No synthetic click
   // from a full-screen modal: it can cause a large native glass backdrop.
   const direct=$('dogPhotoReplaceNativeV302');
-  direct.addEventListener('click',()=>{window.__customerPhotoPickerV88=true;});
+  direct.addEventListener('click',()=>{
+    window.__customerPhotoPickerV88=true;
+    setTimeout(()=>{if(!window.__customerPhotoDecodeV88)window.__customerPhotoPickerV88=false},20000);
+  });
   direct.addEventListener('change',openPhotoEditor);
   direct.addEventListener('cancel',()=>{window.__customerPhotoPickerV88=false;});
 }
