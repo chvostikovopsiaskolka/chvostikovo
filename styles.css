@@ -3306,3 +3306,6 @@ button span,button svg,button svg *{pointer-events:none}
 .booking-vaccine-cancel-v307{width:100%;min-height:44px;border:0;border-radius:13px;background:#f1f3f7;color:#384356;font-size:14px;font-weight:750;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .booking-vaccine-modal-v307 button:focus-visible{outline:3px solid #da4292;outline-offset:3px}
 @media(max-width:520px){.booking-vaccine-card-v307{padding:22px 17px 17px}.booking-vaccine-card-v307 h2{font-size:21px}.booking-vaccine-row-v307{padding:12px}}
+
+.booking-vaccine-ready-row-v307{background:#f7fcf9;border-color:#b7e3cb}
+.booking-vaccine-ready-v307{color:#14603d;border-color:#b6dfc4;background:#e9f8ee}
