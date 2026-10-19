@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261019-booking-vaccine-gate-v307';
-const APP_VERSION='1.0.123';
+const APP_BUILD='stage-20261019-v307-design-1';
+const APP_VERSION='1.0.123-stage.1';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -123,14 +123,14 @@ async function clearCustomerAppBadgeV171(){await setCustomerAppBadgeV186(0);}
 
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
-const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
+const CUSTOMER_PUBLIC_URL=window.CUSTOMER_RUNTIME?.staging?location.origin+'/':'https://app.chvostikovo.sk/';
 const CUSTOMER_EMAIL_CONFIRM_URL=CUSTOMER_PUBLIC_URL+'email-confirmed.html';
-const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
-const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
+const SUPABASE_URL=window.CUSTOMER_RUNTIME?.supabaseUrl||'https://tlhcqwsluyqpywymjoxn.supabase.co';
+const SUPABASE_KEY=window.CUSTOMER_RUNTIME?.supabaseKey||'sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
 const PUSH_API=SUPABASE_URL+'/functions/v1/admin-push';
 const VAPID='BCFhf2kRc1P8blGDHKugmyBhCOfa-x8qbYSMo_qeO-650GSxg3I6naMHVqFTs7UOrTXotemfg9LhNElm56Zhv6k';
-const SESSION_KEY='chvostikovo_customer_session';
+const SESSION_KEY=window.CUSTOMER_RUNTIME?.staging?'chvostikovo_stage_customer_session':'chvostikovo_customer_session';
 const PASSWORD_MIN_MESSAGE='Minimálne 8 znakov, malé a veľké písmeno a aspoň 1 číslica.';
 const PASSWORD_STRONG_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 let state={data:null,session:null,storage:localStorage,selectedDogId:null,activeTab:'booking',pushChecked:false,pushEnabled:false};
@@ -405,6 +405,7 @@ function customerScopeForMessage(message){
 function scheduleCustomerReconnect(){if(!state.session||customerLiveReconnect)return;const wait=[1000,2000,5000,10000,20000,30000][Math.min(customerLiveAttempt++,5)];customerLiveReconnect=setTimeout(()=>{customerLiveReconnect=0;startCustomerLive(true)},wait)}
 function stopCustomerLive(){clearInterval(customerLiveHeartbeat);clearTimeout(customerLiveReconnect);customerLiveHeartbeat=customerLiveReconnect=0;if(customerLiveSocket){const socket=customerLiveSocket;customerLiveSocket=null;try{socket.close()}catch(_){}}}
 function startCustomerLive(force=false){
+  if(window.CUSTOMER_RUNTIME?.staging)return;
   if(!state.session?.access_token||document.visibilityState==='hidden')return;
   if(customerLiveSocket&&!force&&[WebSocket.OPEN,WebSocket.CONNECTING].includes(customerLiveSocket.readyState))return;
   stopCustomerLive();
@@ -1484,6 +1485,7 @@ async function completePushPromptV75(){
   return at;
 }
 async function ensurePushState(force=false){
+  if(window.CUSTOMER_RUNTIME?.staging){state.pushChecked=true;state.pushEnabled=false;return false;}
   if(state.pushChecked&&!force)return state.pushEnabled;
   let on=false;
   try{
@@ -2831,7 +2833,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     updateBookingDeadlineNoticeV127();
     if(pairBookingV254)$('bookingPickerSmartDaysV199').classList.add('hidden');else renderSmartDaysV199(dog,days);
     const groups=[];
-    for(let start=0;start<days.length;start+=5){
+    for(let start=0;start<Math.min(days.length,10);start+=5){
       const week=days.slice(start,start+5);
       // v232: show the week-specific status ABOVE its days, not beneath them.
       const weekNoticeClosed=week.some(d=>bookingDeadlineClosedV95(d.date,dog));
@@ -2878,15 +2880,17 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       renderPickerV37();
     }));
 
-    // The prior always-visible taxi summary is retired; choices open only via the emoji for a selected day.
-    $('bookingPickerTaxiSectionV91')?.classList.add('hidden');
-    if($('bookingPickerTaxiByDayV91'))$('bookingPickerTaxiByDayV91').innerHTML='';
-    $('bookingPickerDaysV37').querySelectorAll('[data-taxi-toggle]').forEach(button=>button.addEventListener('click',()=>{
+    // Selected dates own the optional taxi disclosure; calendar tiles only select dates.
+    $('bookingPickerTaxiSectionV91')?.classList.toggle('hidden',!selectedDatesV37.size);
+    $('bookingPickerTaxiByDayV91').classList.add('design-selected-days');
+    $('bookingPickerTaxiByDayV91').innerHTML=[...selectedDatesV37].sort().map(date=>`<div class="design-selected-day"><strong>${esc(skDay(date))} ${esc(skDate(date))}</strong><button type="button" class="design-taxi-disclosure" data-taxi-toggle="${date}" aria-expanded="${expandedTaxiDateV201===date}"><span>Potrebujete odvoz? 🚕${pickerDogsV254().some(d=>pickerTaxiV254(date,d.id)!=='none')?' · Vybrané':''}</span><span aria-hidden="true">${expandedTaxiDateV201===date?'⌃':'⌄'}</span></button>${expandedTaxiDateV201===date?`<div class="booking-taxi-inline-v201">${taxiChoicesV254(date)}</div>`:''}</div>`).join('');
+    $('bookingPickerDaysV37').querySelectorAll('[data-taxi-toggle],.booking-taxi-inline-v201').forEach(node=>node.remove());
+    $('bookingPickerTaxiByDayV91').querySelectorAll('[data-taxi-toggle]').forEach(button=>button.addEventListener('click',()=>{
       const date=button.dataset.taxiToggle;
       expandedTaxiDateV201=expandedTaxiDateV201===date?null:date;
       renderPickerV37();
     }));
-    $('bookingPickerDaysV37').querySelectorAll('[data-taxi-mode]').forEach(button=>button.addEventListener('click',()=>{
+    $('bookingPickerTaxiByDayV91').querySelectorAll('[data-taxi-mode]').forEach(button=>button.addEventListener('click',()=>{
       const date=button.dataset.taxiDate;
       if(!selectedDatesV37.has(date))return;
       const dogId=Number(button.dataset.taxiDog||dog.id),previously=pickerTaxiV254(date,dogId);
@@ -2899,6 +2903,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     submit.disabled=!count||submittingV37;
     submit.textContent=count?`Rezervovať ${count===1?'1 deň':count<5?count+' dni':count+' dní'}`:'Vyberte deň';
     $('sharedBookingReviewV257')?.remove();
+    window.customerDesignPickerRender?.();
   }
 
   function openPickerV37(preferredDogId=null){
@@ -2916,9 +2921,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('bookingPickerV37').classList.remove('hidden');
     document.documentElement.classList.add('booking-picker-open-v37');
     $('bookingPickerV37').scrollTop=0;
+    window.customerDesignPickerOpened?.();
   }
   window.openBookingPickerV37=openPickerV37;
-  function closePickerV37(){if(submittingV37)return;pickerEpochV157++;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');pickerErrorV95('');if(pendingPassRenewalV95){const renewal=pendingPassRenewalV95;pendingPassRenewalV95=null;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(renewal.dogId,renewal.date),100)}}
+  window.closeBookingPickerV305=()=>{closePickerV37();window.customerDesignPickerClosed?.();};
+  function closePickerV37(){if(submittingV37)return;pickerEpochV157++;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');window.customerDesignPickerClosed?.();pickerErrorV95('');if(pendingPassRenewalV95){const renewal=pendingPassRenewalV95;pendingPassRenewalV95=null;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(renewal.dogId,renewal.date),100)}}
 
   async function submitPickerV37(){
     const dog=selectedDog(),dates=[...selectedDatesV37].sort();
