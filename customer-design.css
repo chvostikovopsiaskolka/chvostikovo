@@ -63,7 +63,7 @@ html.design-modal-open{overflow:hidden}.design-modal-open #bottomNav{visibility:
 .customer-design #bookingTab .dual-dog-name-v241::after{content:' ✎';font-size:14px;color:#768293}
 .customer-design #bookingTab .dual-dog-photo-v254{display:flex!important;flex-direction:column!important;align-items:center!important;width:100%!important}
 .customer-design #bookingTab .dual-dog-picture-v241{width:min(100%,92px)!important}
-.customer-design #bookingTab .dual-dog-name-v241{background:transparent!important;border:0!important;color:#172136!important;padding:0!important;text-align:center!important}
+.customer-design #bookingTab .dual-dog-name-v241{position:static!important;inset:auto!important;transform:none!important;max-width:100%!important;background:transparent!important;border:0!important;color:#172136!important;padding:2px 0 0!important;text-align:center!important}
 .design-paws>span{max-width:28px;max-height:28px;justify-self:center;width:100%}
 .customer-design #bookingTab #bookingDogAvatar{max-width:180px!important;max-height:none!important;aspect-ratio:1!important}
 .design-reservations-page .booking-day-v37[data-capacity-level=free]:not(.disabled):not(.selected):not(.week-closed-v127){background:#edf8f1!important;border-color:#b8dfc6!important;color:#206745!important}
