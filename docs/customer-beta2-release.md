@@ -1,0 +1,9 @@
+# Customer Beta 2.0.0 — approved design release
+
+User approved production implementation on 20 October 2026. Base: current production dd92a93d60853f59ec8642233209818aa1a72fbc, core1.0.123/v307 plus unchanged Android v308. Source design: reviewed staging b548779c8dfd3b309554d073e9b342aa56c73dc9/stage14. New runtime version2.0.0; build20261020-beta2-design-v309.
+
+Only reviewed customer UI/picker hooks, styles, loader and version metadata are transferred. No stage-config, synthetic login/accounts, test backend, alternate session namespace, disabled push/realtime, preview-only page or staging CSP. Original production public URL, session storage key, backend URL/public key, push/realtime, VAPID, menu/social/editor, Android add-on and CSP are retained. Existing automatic release check and service-worker update remain; shell adds the design/loader assets and original logo. API/RPC bodies and vaccine, per-dog/shared-pass, taxi deadline, approval and cancellation rules are unchanged.
+
+Acceptance: full-runtime1/2dog scenarios include vaccine3/4types and original editor, consent/privacy, four stable photos, approved/pending statuses, authoritative pass numbers, no-pass/empty/smart CTA, two weeks/selected taxi, original20:59→21:00 taxi cutoff, Monday→Tuesday notice, chat close/selection retention. Existing vaccine draft/upload/account and photo stability regression tests also run. Browser checks must inspect served build and production origin; no customer reservations/messages/push are sent for testing. Physical iPhone/Android final release remains user validation.
+
+Rollback: backup/customer-before-beta2-design-20261020 at dd92a93d60853f59ec8642233209818aa1a72fbc; old Vercel production deployment dpl_6EYmQcRnKC7BJzGGPkDDb8VWrJ92. Re-promote that deployment for immediate rollback, preserve Git history and make any source rollback a new commit with a new build identifier. No DB rollback needed because this release changes no backend or data.

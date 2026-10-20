@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261019-booking-vaccine-gate-v307';
+const CACHE='chvostikovo-portal-shell-20261020-beta2-design-v309';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/dog-choice-fab-v276.css?v=20261019-booking-vaccine-gate-v307','/dual-dog-overview-v246.js?v=20261019-booking-vaccine-gate-v307','/dual-dog-overview-v246.css?v=20261019-booking-vaccine-gate-v307','/','/terms-pdf.js?v=20261019-booking-vaccine-gate-v307','/terms-pdf-font.js?v=20261019-booking-vaccine-gate-v307','/styles.css?v=20261019-booking-vaccine-gate-v307','/bulletin-photo-v243.css?v=20261019-booking-vaccine-gate-v307','/app.js?v=20261019-booking-vaccine-gate-v307','/back-swipe.js?v=20261019-booking-vaccine-gate-v307'];
+const SHELL=['/loading-motion.js?v=20261020-beta2-design-v309','/loading-design.css?v=20261020-beta2-design-v309','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=20261020-beta2-design-v309','/customer-design.css?v=20261020-beta2-design-v309','/dog-choice-fab-v276.css?v=20261020-beta2-design-v309','/dual-dog-overview-v246.js?v=20261020-beta2-design-v309','/dual-dog-overview-v246.css?v=20261020-beta2-design-v309','/','/terms-pdf.js?v=20261020-beta2-design-v309','/terms-pdf-font.js?v=20261020-beta2-design-v309','/styles.css?v=20261020-beta2-design-v309','/bulletin-photo-v243.css?v=20261020-beta2-design-v309','/app.js?v=20261020-beta2-design-v309','/back-swipe.js?v=20261020-beta2-design-v309'];
 
 function withPortalCsp(response){
   if(!response)return response;
