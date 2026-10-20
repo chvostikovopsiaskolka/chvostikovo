@@ -64,8 +64,9 @@ async function scenario(count){
   assert.equal(lateDay.querySelector('span').textContent,'6/8','late day shows actual occupancy');
   assert(lateDay.querySelector('.design-capacity-dot'),'late day retains capacity dot');
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,true,'no empty select-day button');
-  lateDay.click();assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'),'occupancy display does not bypass late-day message');
-  w.document.getElementById('supportChatCloseV52').click();
+  lateDay.click();
+  if(count===1){assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'),'occupancy display does not bypass late-day message');w.document.getElementById('supportChatCloseV52').click();}
+  else assert.match(w.document.getElementById('bookingPickerErrorV95').textContent,/Pre oboch psíkov/,'existing joint-booking contact guard remains authoritative');
   w.__fixtureNowIso='2099-01-05T23:00:00Z';run("renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'contact guidance remains below current week heading on Tuesday');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false);
