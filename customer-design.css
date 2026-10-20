@@ -52,7 +52,7 @@
 html.design-modal-open{overflow:hidden}.design-modal-open #bottomNav{visibility:hidden!important}
 .customer-design .design-reservations-page{position:fixed!important;inset:0!important;z-index:1000!important;display:block!important;background:#faf9fb!important;padding:0!important;overflow:auto!important;overscroll-behavior:contain!important;backdrop-filter:none!important}
 .customer-design .design-reservations-page.hidden{display:none!important}
-.customer-design .design-reservations-page .booking-picker-card-v37{width:min(100%,600px)!important;max-height:none!important;overflow:visible!important;box-shadow:none!important;border:0!important;border-radius:0!important;margin:0 auto!important;padding:calc(10px + env(safe-area-inset-top)) 13px calc(var(--customer-nav-height,86px) + env(safe-area-inset-bottom) + 20px)!important;background:transparent!important}
+.customer-design .design-reservations-page .booking-picker-card-v37{width:min(100%,820px)!important;max-width:100%!important;max-height:none!important;overflow:visible!important;box-shadow:none!important;border:0!important;border-radius:0!important;margin:0 auto!important;padding:calc(10px + env(safe-area-inset-top)) 14px calc(var(--customer-nav-height,86px) + env(safe-area-inset-bottom) + 20px)!important;background:transparent!important}
 .design-reservations-page .booking-picker-head-v37{align-items:center!important;margin-bottom:12px!important;gap:9px}.design-reservations-page .booking-picker-head-v37 small,.design-reservations-page #bookingPickerRangeV37{display:none!important}.design-reservations-page #bookingPickerTitleV37{font-size:27px!important}.design-reservations-page .booking-picker-head-v37>div{flex:1}.design-reservation-chat{display:grid;place-items:center;width:44px;height:44px;border:1px solid #ebded6;border-radius:13px;background:#fff;color:#e7690d}.design-reservation-chat svg{width:23px;height:23px;fill:none;stroke:currentColor}
 .customer-design.design-reservations-open .bottom-nav{display:grid!important;visibility:visible!important;z-index:1100!important}.design-reservations-open .nav-book-add-v220{opacity:1!important}
 .design-modal-open .bottom-nav{visibility:hidden!important}
@@ -257,3 +257,9 @@ html.design-modal-open{overflow:hidden}.design-modal-open #bottomNav{visibility:
 .customer-design #bookingPickerV37 #bookingPickerTaxiSectionV91{margin-top:0;gap:4px}
 @media(max-width:350px){.customer-design #bookingPickerV37 #bookingPickerDaysV37{padding:9px 5px 11px!important}.customer-design #bookingPickerV37 .booking-day-v37[data-contact=true][data-full=false] span{font-size:8px!important}}
 
+
+/* v316: match Overview gutters; cancel the legacy modal's extra phone-width inset. */
+html.customer-design.phone-portrait-layout .design-reservations-page .booking-picker-card-v37{width:min(100%,var(--phone-portrait-width))!important}
+@media(max-width:520px), (orientation:landscape) and (pointer:coarse) and (max-height:520px){
+ .customer-design .design-reservations-page .booking-picker-card-v37{padding-left:12px!important;padding-right:12px!important}
+}
