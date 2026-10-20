@@ -199,7 +199,7 @@
     notice.hidden=!!closed;notice.textContent=source?.querySelector('strong')?.textContent||'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
     let weekNotice=byId('designWeekDeadline');if(!weekNotice){weekNotice=document.createElement('div');weekNotice.id='designWeekDeadline';byId('bookingPickerDaysV37').querySelector('.booking-picker-week-label-v127')?.after(weekNotice);}
     // Calendar rendering replaces its contents each time; re-create this one scoped notice as needed.
-    weekNotice.hidden=!closed;weekNotice.innerHTML=closed?'<strong>Prihlasovanie sa uzavrelo v nedeľu o 20:00.</strong><span>Ak máte záujem o miesto po uzávierke alebo v plný deň, kliknite na požadovaný deň a napíšte nám správu.</span>':'';
+    weekNotice.hidden=false;weekNotice.innerHTML='<strong>Máte záujem o rezerváciu?</strong><span>Kliknite na konkrétny deň a pošlite nám správu — aj v prípade plnej kapacity.</span>';
 
     const taxiTitle=byId('bookingPickerTaxiSectionV91')?.querySelector('.booking-picker-taxi-title-v37');if(taxiTitle)taxiTitle.textContent='Vybrané dni';
     picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=Number(day.available)<=0?'full':Number(day.available)<=2?'limited':'free';button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';

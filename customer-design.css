@@ -240,3 +240,12 @@ html.design-modal-open{overflow:hidden}.design-modal-open #bottomNav{visibility:
 .customer-design #bookingPickerV37 #bookingPickerSmartDaysV199 .smart-footer-v199{justify-content:center!important;white-space:normal!important}
 @media(max-width:350px){.design-visit-card .design-nearest-head>strong{font-size:12px}.design-no-friends{font-size:12px}}
 
+/* Beta 2.0.2: align the roster action and separate the two-week calendar. */
+.design-friends-line .design-friend-tile{justify-self:end}
+.customer-design #bookingTab .customer-bulletin-items-v229{min-height:130px!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37{box-sizing:border-box;width:100%;min-width:0;padding:10px 8px 12px!important;border:1px solid #f3b779;border-radius:18px;background:linear-gradient(145deg,#fffaf4,#fffefd);box-shadow:inset 0 1px 0 #fff,0 3px 0 #f3d5b5,0 7px 15px #b46f2414}
+.customer-design #bookingPickerV37 #designWeekDeadline{margin:7px 0 10px;text-align:center}
+.customer-design #bookingPickerV37 .booking-day-v37[data-contact=true][data-full=false]:not(:disabled){background:#fff8ef!important;border-color:#efcfac!important;opacity:1!important}
+.customer-design #bookingPickerV37 .booking-day-v37[data-contact=true][data-full=false] span{font-size:9px!important;white-space:normal!important;line-height:1.25!important;color:#945b2a!important}
+@media(max-width:350px){.customer-design #bookingPickerV37 #bookingPickerDaysV37{padding:9px 5px 11px!important}.customer-design #bookingPickerV37 .booking-day-v37[data-contact=true][data-full=false] span{font-size:8px!important}}
+
