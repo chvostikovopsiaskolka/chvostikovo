@@ -22,6 +22,8 @@ jobs:
           echo "NODE_PATH=$RUNNER_TEMP/chvo-admin-deps/node_modules" >> "$GITHUB_ENV"
       - name: Assembled admin startup and analytics
         run: node tests/admin-runtime-v275.cjs
+      - name: Customer loading motion lifecycle
+        run: node tests/loading-motion-v317.cjs
       - name: Staff vaccination photo management v321
         run: |
           node tools/build-admin-proofs-v321.cjs
