@@ -7,6 +7,8 @@ const transport=async(url,options={})=>{
  if(p.includes('/storage/v1/object/sign/'))return response({signedURL:'/object/sign/vaccination-proof-photos/fixture?token=private'});
  if(p.includes('/storage/v1/object/'))return failUpload?new Response('fixture upload failed',{status:503}):response({Key:'fixture'});
  const table=p.split('/').at(-1);
+ if(table==='app_settings')return response(params.get('setting_key')==='eq.daycare_default_capacity'?[{setting_value:'10'}]:[]);
+ if(table==='portal_day_settings'){const d=new Date(new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava'}).format(new Date())+'T12:00:00Z');const day=d.getUTCDay();d.setUTCDate(d.getUTCDate()+(day===0?1:1-day));return response([{day:d.toISOString().slice(0,10),capacity:12,bookings_open:true}]);}
  if(table==='staff')return response(params.get('user_id')==='eq.staff'?[{user_id:'staff'}]:[]);
  if(table==='customer_owner_links')return response([{owner_id:10,allowed_dog_ids:[1]}]);
  if(table==='dogs')return response([{id:1,owner_id:10,name:'Synthetic Bella',photo_path:null}]);
@@ -28,7 +30,7 @@ let r=await post('staff',{action:'upload_vaccination_proofs',dog_id:1,images:[jp
 const added=proofs.at(-1).id;
 r=await post('staff',{action:'upload_vaccination_proofs',dog_id:1,images:[jpeg],replace_proof_id:2});assert.equal(r.status,200);assert.equal(r.data.data.proofs.length,4);assert(!proofs.find(p=>p.id===2).is_current);assert(proofs.find(p=>p.id===1).is_current&&proofs.find(p=>p.id===3).is_current);
 // Actual authenticated owner bootstrap reuses the exact staff records and private signing path.
-const boot=await handler(new Request('https://fixture.invalid/',{headers:{authorization:'Bearer owner'}}));const owner=await boot.json();assert.equal(boot.status,200);assert(owner.vaccination_proofs.some(p=>p.id===added&&p.source==='staff'));assert(!owner.vaccination_proofs.some(p=>p.id===2));assert(owner.vaccination_proofs.every(p=>p.image_url));
+const boot=await handler(new Request('https://fixture.invalid/',{headers:{authorization:'Bearer owner'}}));const owner=await boot.json();assert.equal(boot.status,200);assert(owner.availability.days.some(d=>d.capacity===10));assert(owner.availability.days.some(d=>d.capacity===12));assert(owner.vaccination_proofs.some(p=>p.id===added&&p.source==='staff'));assert(!owner.vaccination_proofs.some(p=>p.id===2));assert(owner.vaccination_proofs.every(p=>p.image_url));
 const snapshot=JSON.stringify(proofs);r=await post('owner',{action:'admin_delete_vaccination_proof',dog_id:1,proof_id:1});assert.equal(r.status,403);assert.equal(JSON.stringify(proofs),snapshot);
 r=await post('expired',{action:'admin_delete_vaccination_proof',dog_id:1,proof_id:1});assert.equal(r.status,401);
 r=await post('staff',{action:'admin_delete_vaccination_proof',dog_id:2,proof_id:1});assert.equal(r.status,400);assert.equal(JSON.stringify(proofs),snapshot);

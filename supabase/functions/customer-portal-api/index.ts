@@ -354,6 +354,7 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
     rest('portal_day_settings?day=gte.' + monday + '&day=lte.' + friday + '&select=day,capacity,bookings_open,note'),
     linkedDogRows ? Promise.resolve(linkedDogRows) : linkedDogs(userId),
     rest('customer_booking_requests?user_id=eq.' + encodeURIComponent(userId) + '&reservation_date=gte.' + monday + '&reservation_date=lte.' + friday + '&status=eq.approved&select=reservation_date'),
+    getAppSetting('daycare_default_capacity'),
   ]);
   const reservations = results[0] as Array<{ reservation_date: string; dog_id: number }>;
   const pending = results[1] as Array<{ reservation_date: string }>;
@@ -375,9 +376,11 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
     if (!publicPhotoUrls.has(dogId)) publicPhotoUrls.set(dogId,signedPhotoUrl(publicPhotoPaths.get(dogId)));
     return publicPhotoUrls.get(dogId)!;
   };
+  const configuredCapacity = Number(results[5]);
+  const defaultCapacity = Number.isInteger(configuredCapacity) && configuredCapacity >= 1 && configuredCapacity <= 30 ? configuredCapacity : 8;
   const settingMap = new Map(settings.map((setting) => [String(setting.day), setting]));
   const days = await Promise.all(dates.map(async (date) => {
-    const capacity = Number(settingMap.get(date)?.capacity ?? 8);
+    const capacity = Number(settingMap.get(date)?.capacity ?? defaultCapacity);
     const booked = reservations.filter((row) => row.reservation_date === date).length;
     const waiting = pending.filter((row) => row.reservation_date === date).length;
     const viewerApproved = approvedRequests.some((row) => row.reservation_date === date) ||

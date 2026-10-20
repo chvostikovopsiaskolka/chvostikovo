@@ -1,0 +1,13 @@
+# Admin v322: global capacity, attendance row and branded boot
+
+Source baseline cb604c0, live admin v321 MD5 c89018c3f89c7d25b399d5829f59ccdc. Reconstruct the exact rollback HTML with tools/build-admin-proofs-v321.cjs (asserted hash); the v320 gzip and v321 patch are already retained in Git. API61 is retained verbatim in supabase/backups/customer-portal-api-before-v322.ts. Wrapper four original files are in supabase/backups/admin-wrapper-before-v322/.
+
+Týždeň → Kapacita miest in the header edits the persistent app_settings daycare_default_capacity, initially 10. Explicit portal_day_settings overrides win and are never bulk overwritten. Staff-only RPC validates 1–30, rejects a reduction below booked+pending occupancy for future dates without overrides, and synchronizes with customer booking/group approval via a shared advisory lock taken before pool/day locks. Same default is read by admin and customer API availability. Closure creates new rows using that default. Existing daily setter is unchanged.
+
+Attendance no-show rows retain a single badge/button line. On very narrow screens names can ellipsize to retain the actions. Admin initial wrapper and inner startup copy the exact customer v317 brand/paw/arc and frame animation, with detached-node stop. Original logo assets, icons, manifest, SW, routing, bottom navigation and customer UI stay unchanged.
+
+Validation: isolated PostgreSQL actual functions, staff/nonstaff/anon, range, persistence, daily precedence, closure and occupied reduction; actual assembled admin header click/failure/cancel/invalid, Falco markup, startup/analytics/photo management/recovery/navigation; actual customer API transport availability 10 vs explicit 12 and prior staff/owner proof actions. No production fixture bookings, messages, SMS or push. Physical iOS/Android unobserved.
+
+Rollout: guard exact pg_get_functiondef before SQL, preserve ACLs; seed10 only if absent and occupancy permits. Deploy API with existing verify_jwt=false and body Auth. CAS stable-v10-clean from baseline MD5 and retain backup-admin-before-capacity-boot-v322-20261020. Deploy wrapper only to prj_HHYSXBfQI7tP3o0yweahSQbzxVBh / team_jvejA5gjOfk5Prg8xM6aYXRH, preserve exact other three files. Read back live SQL, served HTML and wrapper source.
+
+Rollback only after inspecting newer releases: restore exact snapshot backup and API61; restore three consumer function bodies from capacity-before-v322.json, then remove only the new functions and daycare_default_capacity setting. Do not delete daily overrides, reservations or vaccination data. Wrapper baseline dpl_FWWnKRxmpevnLHDLauBzkE1FeJyy. Full source retained in this release.
