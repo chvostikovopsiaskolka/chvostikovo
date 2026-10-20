@@ -1037,6 +1037,19 @@ async function adminVaccinationProofs(dogId: number) {
   return await withSignedVaccinationProofs(rows);
 }
 
+// Staff management only. Retain the private object/history; remove it from both apps.
+async function adminDeleteVaccinationProof(payload: Json) {
+  const dogId = Number(payload.dog_id), proofId = Number(payload.proof_id);
+  if (!Number.isSafeInteger(dogId) || dogId <= 0 || !Number.isSafeInteger(proofId) || proofId <= 0) {
+    throw new Error('Neplatná fotografia očkovacieho preukazu.');
+  }
+  const removed = await rest('vaccination_proofs?dog_id=eq.' + dogId + '&id=eq.' + proofId + '&is_current=eq.true', {
+    method: 'PATCH', body: { is_current: false, replaced_at: new Date().toISOString() }, prefer: 'return=representation',
+  }) as Array<Json>;
+  if (removed.length !== 1) throw new Error('Fotografia už nie je aktuálna. Obnovte si prehľad.');
+  return { dog_id: dogId, proofs: await adminVaccinationProofs(dogId) };
+}
+
 async function removeProfilePhoto(path: string) {
   await fetch(SUPABASE_URL + '/storage/v1/object/dog-profile-photos', {
     method:'DELETE', headers:{apikey:SERVICE_KEY,Authorization:'Bearer ' + SERVICE_KEY,'Content-Type':'application/json'},
@@ -1348,6 +1361,9 @@ Deno.serve(async (req: Request) => {
     }
     if (action === 'admin_vaccination_proofs') {
       return json({ data: await adminVaccinationProofs(Number(body.dog_id || 0)) });
+    }
+    if (action === 'admin_delete_vaccination_proof') {
+      return json({ data: await adminDeleteVaccinationProof(body) });
     }
     if (action === 'admin_send_message') {
       return json({ data: await sendMessage(user, true, body) });

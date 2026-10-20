@@ -1,0 +1,13 @@
+# Admin v321: vaccination-proof photo management
+
+Existing dogs: Info o psíkovi → Očkovania → Pridať fotky preukazu. Each thumbnail has a pencil with rotation/save, replace and confirmed deletion. Up to five private JPEG proofs; three thumbnails visible in one row, horizontal overflow for four/five. Native associated file labels preserve mobile picker behavior. Images keep their existing DOM/source through unchanged refreshes and renewed signed URLs.
+
+The existing staff-authorized `upload_vaccination_proofs` route remains authoritative for append/individual replacement, JPEG conversion, private Storage paths and `source=staff`. New staff-only `admin_delete_vaccination_proof` deactivates one current dog+proof record, retaining the private object/history. It does not modify vaccination dates or other proofs. No new grants, RLS policies, tables, notification triggers or customer frontend changes.
+
+Customer bootstrap reads the exact same current proof records and signs private URLs after owner-scope filtering; changes appear on its next existing sync/reopen. No fake realtime promise. Native HEIC decoding depends on browser support, with a clear JPEG/camera fallback, as in customer preparation.
+
+Validation: full assembled admin scripts + actual dog-detail opening and UI actions, image identity preservation, file preparation/rotation, failure/limit recovery and two-dog isolation. Full Edge handler with simulated Auth/REST/Storage transport verifies staff append/replace/delete → actual owner bootstrap and signed URLs, unauthorized/expired/foreign-dog/stale rejection and upload failure retention. Existing customer proof/editor, admin CRM/recovery/analytics/nav tests pass. No production customer records or files were mutated for tests. Physical iOS/Android behavior remains unobserved.
+
+Baseline admin MD5 `6c8ab60f9f7b4b5064346562daa38105`, exact served backup in `supabase/admin-snapshots/admin-before-v321.html.gz`; build with `node tools/build-admin-proofs-v321.cjs`. Baseline customer-portal-api version60 exact source in `supabase/backups/customer-portal-api-before-v321.ts`. Its previous verify_jwt=false is preserved; body authenticates every action and staff guard precedes delete. Snapshot rollout uses baseline MD5 CAS and immutable backup `backup-admin-before-proof-management-v321-20261020`. Rollback restores the exact snapshot only if no newer release intervened; redeploy API backup as a new version if needed. Uploaded files/customer data are never rolled back by deleting operational history.
+
+No change to customer Beta2.0.6/v315, weekly Sunday20:00, D-1 management19:00, bottom navigation or branding.
