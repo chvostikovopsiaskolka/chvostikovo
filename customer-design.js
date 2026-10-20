@@ -1,6 +1,7 @@
 /* V-039: presentation layer over the current customer runtime. */
 (() => {
   'use strict';
+  if(/Android/i.test(navigator.userAgent))document.documentElement.classList.add('customer-android');
   const byId = id => document.getElementById(id);
   const icon = name => `<svg aria-hidden="true"><use href="#ci-${name}"/></svg>`;
   let modalReturn = null;
