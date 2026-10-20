@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261020-beta2-design-v309';
-const APP_VERSION='2.0.0';
+const APP_BUILD='20261020-customer-hotfix-v310';
+const APP_VERSION='2.0.1';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -92,7 +92,7 @@ const CUSTOMER_IOS_V171=(()=>{
   return iOS;
 })();
 // iOS home-screen badge follows unread customer data, not the number of received pushes.
-const CUSTOMER_BADGE_EXCLUDED_V186=new Set(['staff_message_customer','customer_message_admin','pass_request_admin','pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test']);
+const CUSTOMER_BADGE_EXCLUDED_V186=new Set(['staff_message_customer','customer_message_admin','pass_request_admin','pass_interest_registered','weekly_booking_reminder','weekly_booking_reminder_test']);
 function customerUnreadBadgeCountV186(){
   if(!state.session||!state.data)return null;
   const messages=(state.data.messages||[]).filter(m=>m.sender_role==='staff'&&!m.read_at).length;
@@ -344,6 +344,8 @@ async function flushCustomerSync(){
 
     const nextFingerprint=customerDataFingerprintV18(next);
     state.data=next;
+    document.documentElement.classList.toggle('customer-awaiting-dog-v107',!(next.dogs||[]).length);
+    scheduleWaitingDogFallbackV101();
     syncCustomerAppBadgeV186();
     const nextDogs=next.dogs||[];
     if(!state.selectedDogId&&nextDogs.length)state.selectedDogId=Number(nextDogs[0].id);
@@ -456,7 +458,7 @@ function renderNotifications(){
   }
   notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(vaccinationCopyV234(n))).join('<br>')}</p>${group[0].notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}<button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
   notice.querySelectorAll('[data-care-notice]').forEach(b=>b.addEventListener('click',()=>{const row=careRows.find(n=>Number(n.id)===Number(b.dataset.careNotice));if(row)customerCareAction(row)}));
-  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
+  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
   let modal=$('notificationPopup');
   if(!rows.length){modal?.classList.add('hidden');return}
   if(!modal){
@@ -670,7 +672,7 @@ function openBookingVaccineGateV307(){
     const info=document.createElement('div');info.className='booking-vaccine-info-v307';
     const name=document.createElement('strong');name.textContent=item.dog.name||'Psík';
     const detail=document.createElement('small');
-    detail.textContent=item.missing&&item.expired?'Chýbajúce aj neplatné očkovania':item.missing?'Chýbajúce očkovania alebo doklad':'Očkovania po platnosti';
+    detail.textContent=item.missing&&item.expired?'Chýbajúce aj neplatné očkovania':item.missing?'Chýbajúce očkovania alebo fotka očkovacieho preukazu.':'Očkovania po platnosti';
     info.append(name,detail);
     const action=document.createElement('button');action.type='button';action.className='booking-vaccine-action-v307';
     action.textContent='Otvoriť očkovania ›';
@@ -1221,6 +1223,8 @@ function bindPhotoGesturesV89(canvas){
   canvas.__photoGesturesV89=true;
   const pointers=new Map();
   let pinch=null;
+  canvas.resetPhotoGestures=()=>{pointers.clear();pinch=null;};
+  canvas.style.touchAction='none';
   const point=e=>{const r=canvas.getBoundingClientRect(),ratio=640/r.width;return{x:(e.clientX-r.left)*ratio,y:(e.clientY-r.top)*ratio}};
   const startPinch=()=>{
     if(pointers.size<2||!state.photoEdit){pinch=null;return}
@@ -1231,6 +1235,7 @@ function bindPhotoGesturesV89(canvas){
   canvas.addEventListener('pointerdown',e=>{
     if(!state.photoEdit)return;
     e.preventDefault();
+    if(e.isPrimary&&e.pointerType==='touch')canvas.resetPhotoGestures();
     const p=point(e);pointers.set(e.pointerId,p);
     try{canvas.setPointerCapture(e.pointerId)}catch(_){}
     if(pointers.size===2)startPinch();
@@ -1265,6 +1270,9 @@ function bindPhotoGesturesV89(canvas){
   };
   canvas.addEventListener('pointerup',release);
   canvas.addEventListener('pointercancel',release);
+  canvas.addEventListener('lostpointercapture',release);
+  window.addEventListener('blur',canvas.resetPhotoGestures);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')canvas.resetPhotoGestures();});
 }
 function ensurePhotoActionsV89(){
   if($('photoActionsModalV89'))return;
@@ -1310,6 +1318,7 @@ async function decodePhotoFileV88(file){
 }
 function beginPhotoEditV89(img,options={}){
   ensurePhotoEditor();
+  $('photoCropCanvas').resetPhotoGestures?.();
   const startZoom=Math.max(1,Math.min(3,Number(options.startZoom)||1));
   state.photoEdit={img,url:null,zoom:startZoom,ox:0,oy:0};
   clampPhotoOffset(true);
@@ -1364,7 +1373,7 @@ async function deleteCurrentDogPhotoV89(dog){
 }
 function clampPhotoOffset(reset=false){const e=state.photoEdit;if(!e)return;const base=Math.max(640/e.img.width,640/e.img.height),scale=base*e.zoom,w=e.img.width*scale,h=e.img.height*scale;if(reset){e.ox=(640-w)/2;e.oy=(640-h)/2}e.ox=Math.min(0,Math.max(640-w,e.ox));e.oy=Math.min(0,Math.max(640-h,e.oy))}
 function drawPhotoCrop(){const e=state.photoEdit;if(!e)return;const c=$('photoCropCanvas'),ctx=c.getContext('2d'),base=Math.max(640/e.img.width,640/e.img.height),scale=base*e.zoom;ctx.clearRect(0,0,640,640);ctx.drawImage(e.img,e.ox,e.oy,e.img.width*scale,e.img.height*scale)}
-function closePhotoEditor(){if(state.photoEdit?.url)URL.revokeObjectURL(state.photoEdit.url);try{state.photoEdit?.img?.close?.()}catch(_){}state.photoEdit=null;$('photoCropModal')?.classList.add('hidden')}
+function closePhotoEditor(){$('photoCropCanvas')?.resetPhotoGestures?.();if(state.photoEdit?.url)URL.revokeObjectURL(state.photoEdit.url);try{state.photoEdit?.img?.close?.()}catch(_){}state.photoEdit=null;$('photoCropModal')?.classList.add('hidden')}
 function photoJpegData(){const c=$('photoCropCanvas');for(const q of [.9,.84,.78,.72]){const data=c.toDataURL('image/jpeg',q),bytes=Math.ceil((data.length-data.indexOf(',')-1)*3/4);if(bytes<900000)return data}return c.toDataURL('image/jpeg',.68)}
 async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);await api({action:'upload_dog_photo',photo_scope:'account',dog_id:Number(state.selectedDogId),image_data:photoJpegData()});closePhotoEditor();toast('Fotka je uložená.');await bootstrap(false)}catch(e){toast(e.message)}finally{loading(false)}}
 function urlBase64ToUint8Array(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(b);return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
@@ -1667,8 +1676,9 @@ function scheduleWaitingDogFallbackV101(){
       queueCustomerSync('all',0);
       scheduleWaitingDogFallbackV101();
     }
-  },60000);
+  },15000);
 }
+customerHooks.afterBootstrap.push(scheduleWaitingDogFallbackV101);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')scheduleWaitingDogFallbackV101();else{clearTimeout(waitingDogFallbackV101);waitingDogFallbackV101=0}});
 setTimeout(scheduleWaitingDogFallbackV101,1500);
 (function betaUiV75Runtime(){
@@ -2087,6 +2097,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       prefix.value='+421';
       prefix.setAttribute('aria-label','Medzinárodná telefónna predvoľba');
       prefix.setAttribute('maxlength','5');
+      prefix.tabIndex=-1;
       input.parentNode.insertBefore(wrap,input);wrap.append(prefix,input);
     }
     const cleanPrefix=()=>{

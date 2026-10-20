@@ -17,6 +17,14 @@ async function scenario(count){
  try{
   run(`bratislavaClockV95=()=>({date:'2099-01-01'});bratislavaToday=()=> '2099-01-01';queueCustomerSync=()=>{};window.runCustomerOnboardingV75=()=>{};state.session={user:{id:'design-fixture'},access_token:'fixture'};state.selectedDogId=1;state.data={profile:{status:'active'},dogs:Array.from({length:${count}},(_,i)=>({id:i+1,name:['Bella','Iris'][i],sex:i?'male':'female',default_entry_type:'pass',legacy_total_visits:12,photo_path:'fixture/'+i,photo_url:'https://fixture.invalid/'+i+'.jpg'})),vaccinations:Array.from({length:${count}},(_,i)=>['rabies','infectious','kennel_cough',...(i?['lepto_l4']:[])].map(type=>({dog_id:i+1,vaccination_type:type,valid_until:'2099-02-01'}))).flat(),vaccination_proofs:Array.from({length:${count}},(_,i)=>({id:i+1,dog_id:i+1,storage_path:'proof'+i})),passes:[{id:1,dog_id:1,dog_ids:[1,2],total_entries:${count===2?20:10},used_entries:6,status:'active',valid_until:'2099-03-01'}],requests:[{id:70,reservation_id:700,projected_entry_number:7,projected_pass_total:10,dog_id:1,reservation_date:'2099-01-05',status:'approved',can_manage:true}],reservations:[],pass_requests:[],visits:[],monthly_totals:[],availability:{days:Array.from({length:15},(_,i)=>({date:'2099-01-'+String(5+i).padStart(2,'0'),available:8,capacity:8,occupied:2,bookings_open:true,anonymous_dogs:2,dogs:[{dog_id:8,name:'Kala',sex:'male',photo_url:'https://fixture.invalid/kala.jpg'}]}))}};renderPassSummary();renderDog();renderUpcoming();renderDays();`);
   run("overviewClock=()=>({date:'2099-01-01',minutes:600});renderDog()");
+  // Actual render order for a new account: days run before the pass/design anchor exists.
+  run("globalThis.assignedFixture=state.data;state.data={...state.data,profile:{status:'pending'},dogs:[],passes:[],requests:[],notifications:[]};state.selectedDogId=null;document.getElementById('designNearest')?.remove();document.getElementById('designTicket')?.remove();renderAll()");
+  assert.equal(w.document.getElementById('designNearest'),null,'waiting account has no invented visit card');
+  run("globalThis.savedApi=api;api=async()=>assignedFixture;document.documentElement.classList.add('customer-awaiting-dog-v107');customerPendingScopes.add('all')");
+  await run('flushCustomerSync()');
+  assert(!w.document.documentElement.classList.contains('customer-awaiting-dog-v107'),'assignment resync clears waiting layout');
+  assert(w.document.getElementById('designTicket'),'assignment renders original pass and design anchor');
+  run('api=savedApi');
   assert.equal(w.document.querySelectorAll('.design-paws>span').length,count===2?20:10);
   assert.equal(w.document.querySelectorAll('.design-paws .used').length,6);
   assert.equal(w.document.querySelector('.design-visit-label').textContent,'Najbližšia návšteva · ');
@@ -82,7 +90,8 @@ async function scenario(count){
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').disabled,false);
   assert(w.document.getElementById('designCapacityLegend'));
   assert.equal(w.document.querySelectorAll('#designMyBookings img').length,0);
-  assert.match(w.document.querySelector('.design-empty-booking-cta').textContent,/do nedele 20:00/);
+  assert.equal(w.document.querySelector('.design-empty-booking-cta').textContent,'Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.');
+  assert.equal(w.document.getElementById('designMyBookings').nextElementSibling.id,'designReservationNotice','deadline follows own reservations');
   // Test late/full-day chat without sending anything: selected days and picker survive close.
   if(count===1){
    const picker=w.document.getElementById('bookingPickerV37');picker.scrollTop=120;
@@ -96,6 +105,28 @@ async function scenario(count){
   }
   run("state.data.requests=[{id:90,dog_id:1,reservation_date:'2099-01-08',status:'rejected'}];renderDog()");
   assert(w.document.querySelector('.design-visit-status.rejected'));assert.equal(w.document.querySelectorAll('.design-visit-card img').length,0);
+
+  run("state.data.requests[0].status='approved';state.data.availability.days.forEach(d=>{d.dogs=[];d.anonymous_dogs=0});renderDog()");
+  assert.match(w.document.querySelector('.design-no-friends').textContent,/Zatiaľ sa neprihlásil žiaden kamoš/);
+  assert.equal(w.document.querySelector('#designNearest h2').textContent,'📅 Rezervácie');
+  assert.equal(w.document.getElementById('signupPhonePrefix').tabIndex,-1,'number is next in sequential phone input');
+  run("state.data.notifications=[{id:123,notification_type:'dog_approved',read_at:null}]");
+  assert.equal(run('customerUnreadBadgeCountV186()'),1,'unread dog approval counts toward badge');
+  // Real gesture handler, interrupted pinch, next single-finger gesture and editor reuse.
+  run('ensurePhotoEditor()');const canvas=w.document.getElementById('photoCropCanvas');
+  canvas.getBoundingClientRect=()=>({left:0,top:0,width:640,height:640});
+  canvas.getContext=()=>({clearRect(){},drawImage(){}});
+  run('beginPhotoEditV89({width:1000,height:1000})');
+  const pointer=(type,id,x,primary=false)=>{const e=new w.Event(type,{cancelable:true});Object.assign(e,{pointerId:id,clientX:x,clientY:200,pointerType:'touch',isPrimary:primary});canvas.dispatchEvent(e)};
+  pointer('pointerdown',1,100,true);pointer('pointerdown',2,300);pointer('pointermove',2,400);
+  assert.equal(run('state.photoEdit.zoom'),1.5,'two fingers zoom');
+  pointer('lostpointercapture',2,400);pointer('pointermove',1,140);
+  assert.equal(run('state.photoEdit.zoom'),1.5,'remaining finger only pans');
+  pointer('pointerdown',3,200,true);pointer('pointermove',3,250);
+  assert.equal(run('state.photoEdit.zoom'),1.5,'new primary touch discards interrupted gesture');
+  run('closePhotoEditor();beginPhotoEditV89({width:1000,height:1000})');pointer('pointerdown',4,200,true);pointer('pointermove',4,260);
+  assert.equal(run('state.photoEdit.zoom'),1,'editor reuse clears prior touches');
+  run('closePhotoEditor()');
 
   assert.deepEqual(errors,[]);
   console.log('PASS design '+count+' dog(s): 10/20 used paws, stable photos, optional L4, original editor, consent roster/shared entry, pending privacy, single ticket, empty CTA, 10 dates, optional per-dog taxi');

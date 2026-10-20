@@ -119,13 +119,16 @@
   }
   function nearest() {
     if(!state.data)return;
+    if(!selectedDog()){byId('designNearest')?.remove();byId('designTicket')?.remove();byId('designBulletinTitle')?.remove();return;}
+    ticket();
+    const anchor=byId('designTicket');if(!anchor)return;
     let root=byId('designNearest');
-    if(!root){root=document.createElement('section');root.id='designNearest';root.className='design-nearest';byId('designTicket').after(root);}
+    if(!root){root=document.createElement('section');root.id='designNearest';root.className='design-nearest';anchor.after(root);}
     const clock=overviewClock(),end=new Date(clock.date+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+14);
     const all=[...futureItems(),...(state.data.requests||[]).filter(r=>r.status==='rejected')].filter(r=>overviewDayVisible(r.reservation_date,clock));
     const dates=[...new Set(all.filter(r=>r.reservation_date<end.toISOString().slice(0,10)).map(r=>r.reservation_date))].sort();
     if(dates.length){
-      if(!root.querySelector('.design-overview-carousel'))root.innerHTML='<div class="design-visits-title"><small>Posuňte pre zobrazenie ďalších dní →</small></div><div class="design-overview-carousel" role="region" aria-label="Rezervované návštevy" tabindex="0"></div>';
+      if(!root.querySelector('.design-overview-carousel'))root.innerHTML='<div class="design-visits-title"><h2>📅 Rezervácie</h2><small>Posuňte pre zobrazenie ďalších dní →</small></div><div class="design-overview-carousel" role="region" aria-label="Rezervované návštevy" tabindex="0"></div>';
       root.querySelector('.design-visits-title small').hidden=dates.length<2;
       const carousel=root.querySelector('.design-overview-carousel');
       [...carousel.children].forEach(card=>{if(!dates.includes(card.dataset.visitDate))card.remove();});
@@ -141,13 +144,19 @@
         card.setAttribute('aria-label',`${i===0?'Najbližšia návšteva, ':''}${skDay(date)} ${skDate(date)}`);
         card.querySelector('.design-visit-label').textContent='Najbližšia návšteva · ';
         if(carousel.children[i]!==card)carousel.insertBefore(card,carousel.children[i]||null);
-        if(approved)reconcilePhotos(card.querySelector('.design-friend-strip'),friends(date).slice(0,4));
+        if(approved){
+          const rows=friends(date).slice(0,4),strip=card.querySelector('.design-friend-strip');
+          reconcilePhotos(strip,rows);
+          let empty=card.querySelector('.design-no-friends');
+          if(!rows.length&&!empty){empty=document.createElement('p');empty.className='design-no-friends';empty.textContent='Zatiaľ sa neprihlásil žiaden kamoš.';strip.after(empty);}
+          if(rows.length)empty?.remove();
+        }
 
       });
     }else{
       const key=all.length?'outside-range':'empty';
       if(root.dataset.date!==key||root.querySelector('.design-overview-carousel')){
-        root.dataset.date=key;root.innerHTML=`<h2>Najbližšia návšteva</h2><p class="design-empty-heading">${all.length?'Najbližšia rezervácia je neskôr než o dva týždne.':'Zatiaľ nemáte vytvorenú rezerváciu.'}</p><div class="design-empty-reminder"></div><button type="button" class="btn full">${all.length?'Moje rezervácie':'Rezervovať miesto v škôlke'}</button>`;
+        root.dataset.date=key;root.innerHTML=`<div class="design-visits-title"><h2>📅 Rezervácie</h2></div><article class="design-visit-card design-visit-empty"><p class="design-empty-heading">${all.length?'Najbližšia rezervácia je neskôr než o dva týždne.':'Zatiaľ nemáte vytvorenú rezerváciu.'}</p><div class="design-empty-reminder"></div><button type="button" class="btn full">${all.length?'Moje rezervácie':'Rezervovať miesto v škôlke'}</button></article>`;
         root.querySelector('button').addEventListener('click',()=>window.openBookingPickerV37?.());
       }
       const target=root.querySelector('.design-empty-reminder'),notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu do nedele 20:00.';target.classList.toggle('design-deadline-closed',notice?.classList.contains('hidden'));
@@ -186,6 +195,7 @@
     let hint=byId('designBookingSwipeHint');if(!hint){hint=document.createElement('p');hint.id='designBookingSwipeHint';hint.textContent='Posuňte pre zobrazenie ďalších dní →';carousel.before(hint);}hint.hidden=byId('weekDays').querySelectorAll('.reserved-day-card-v37').length<2;
     window.customerDesignRefreshDeadline?.();
     const source=byId('deadlineText'),notice=byId('designReservationNotice'),closed=source?.classList.contains('hidden');
+    byId('designMyBookings').after(notice);
     notice.hidden=!!closed;notice.textContent=source?.querySelector('strong')?.textContent||'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
     let weekNotice=byId('designWeekDeadline');if(!weekNotice){weekNotice=document.createElement('div');weekNotice.id='designWeekDeadline';byId('bookingPickerDaysV37').querySelector('.booking-picker-week-label-v127')?.after(weekNotice);}
     // Calendar rendering replaces its contents each time; re-create this one scoped notice as needed.
@@ -199,7 +209,7 @@
     const empty=byId('weekDays')?.querySelector('.reserved-empty-v37'),smart=byId('bookingPickerSmartDaysV199');
     const hasReservations=!!byId('weekDays')?.querySelector('.reserved-day-card-v37');
     if(smart&&!smart.classList.contains('hidden')){smart.classList.toggle('design-smart-hidden',hasReservations);if(!hasReservations){empty?.classList.add('hidden');carousel.append(smart);}}
-    if(empty&&!hasReservations&&(!smart||smart.classList.contains('hidden'))) {empty.classList.remove('hidden');let text=empty.querySelector('.design-empty-booking-cta');if(!text){text=document.createElement('p');text.className='design-empty-booking-cta';empty.replaceChildren(text);}text.textContent='Rezervujte miesto pre svojho psíka do nedele 20:00. Vyberte si deň nižšie.';}
+    if(empty&&!hasReservations&&(!smart||smart.classList.contains('hidden'))) {empty.classList.remove('hidden');let text=empty.querySelector('.design-empty-booking-cta');if(!text){text=document.createElement('p');text.className='design-empty-booking-cta';empty.replaceChildren(text);}text.textContent='Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.';}
     if(!byId('designCapacityLegend')){const legend=document.createElement('div');legend.id='designCapacityLegend';legend.innerHTML='<span><i class="free"></i>Voľné miesta</span><span><i class="limited"></i>Takmer plné</span><span><i class="full"></i>Plné</span>';byId('bookingPickerDaysV37').after(legend);}
 
   };
