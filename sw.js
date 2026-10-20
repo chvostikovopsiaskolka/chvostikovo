@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261020-customer-calendar-v313';
+const CACHE='chvostikovo-portal-shell-20261020-customer-cutoff-v314';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/loading-motion.js?v=20261020-customer-calendar-v313','/loading-design.css?v=20261020-customer-calendar-v313','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=20261020-customer-calendar-v313','/customer-design.css?v=20261020-customer-calendar-v313','/dog-choice-fab-v276.css?v=20261020-customer-calendar-v313','/dual-dog-overview-v246.js?v=20261020-customer-calendar-v313','/dual-dog-overview-v246.css?v=20261020-customer-calendar-v313','/','/terms-pdf.js?v=20261020-customer-calendar-v313','/terms-pdf-font.js?v=20261020-customer-calendar-v313','/styles.css?v=20261020-customer-calendar-v313','/bulletin-photo-v243.css?v=20261020-customer-calendar-v313','/app.js?v=20261020-customer-calendar-v313','/back-swipe.js?v=20261020-customer-calendar-v313'];
+const SHELL=['/loading-motion.js?v=20261020-customer-cutoff-v314','/loading-design.css?v=20261020-customer-cutoff-v314','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=20261020-customer-cutoff-v314','/customer-design.css?v=20261020-customer-cutoff-v314','/dog-choice-fab-v276.css?v=20261020-customer-cutoff-v314','/dual-dog-overview-v246.js?v=20261020-customer-cutoff-v314','/dual-dog-overview-v246.css?v=20261020-customer-cutoff-v314','/','/terms-pdf.js?v=20261020-customer-cutoff-v314','/terms-pdf-font.js?v=20261020-customer-cutoff-v314','/styles.css?v=20261020-customer-cutoff-v314','/bulletin-photo-v243.css?v=20261020-customer-cutoff-v314','/app.js?v=20261020-customer-cutoff-v314','/back-swipe.js?v=20261020-customer-cutoff-v314'];
 
 function withPortalCsp(response){
   if(!response)return response;
