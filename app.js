@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261020-customer-ui-v311';
-const APP_VERSION='2.0.2';
+const APP_BUILD='20261020-customer-popup-v312';
+const APP_VERSION='2.0.3';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -444,8 +444,30 @@ function vaccinationCopyV234(n){
   return body;
 }
 const vaccinationCarePolicyV233='Po skončení platnosti treba pred ďalšou rezerváciou aktualizovať dátum aj fotografiu očkovacieho preukazu. Zdravie psíkov je pre nás prvoradé.';
+const customerDogApprovalReadsV312=new Map();
+async function acknowledgeAssignedDogNoticeV312(){
+  const userId=state.session?.user?.id;
+  if(!userId||window.__customerOnboardingCompleteV75!==true||!(state.data?.dogs||[]).length)return;
+  const ids=(state.data.notifications||[]).filter(n=>n.notification_type==='dog_approved'&&!n.read_at).map(n=>Number(n.id)).filter(id=>Number.isSafeInteger(id)&&id>0);
+  if(!ids.length)return;
+  const key=userId+':'+ids.join(',');
+  if(customerDogApprovalReadsV312.has(key))return customerDogApprovalReadsV312.get(key);
+  const task=(async()=>{
+    try{
+      await api({action:'mark_notifications_read',notification_ids:ids});
+      if(state.session?.user?.id!==userId)return;
+      const stamp=new Date().toISOString();
+      (state.data?.notifications||[]).forEach(n=>{if(n.notification_type==='dog_approved'&&ids.includes(Number(n.id)))n.read_at=stamp;});
+      syncCustomerAppBadgeV186();
+    }catch(_){/* Retry on a later ordinary refresh; do not interrupt onboarding. */}
+    finally{customerDogApprovalReadsV312.delete(key);}
+  })();
+  customerDogApprovalReadsV312.set(key,task);
+  return task;
+}
 function renderNotifications(){
   if(window.__customerOnboardingCompleteV75!==true){$('notificationPopup')?.classList.add('hidden');return}
+  void acknowledgeAssignedDogNoticeV312();
   const careRows=(state.data?.notifications||[]).filter(n=>n.notification_type==='pass_expiry'&&careNotificationIsCurrent(n)).slice(0,12);
   const notice=$('notificationList'),booking=$('bookingTab');
   if(notice&&booking&&notice.parentElement!==booking)$('bookingDogProfile')?.insertAdjacentElement('afterend',notice);
@@ -458,7 +480,7 @@ function renderNotifications(){
   }
   notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(vaccinationCopyV234(n))).join('<br>')}</p>${group[0].notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}<button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
   notice.querySelectorAll('[data-care-notice]').forEach(b=>b.addEventListener('click',()=>{const row=careRows.find(n=>Number(n.id)===Number(b.dataset.careNotice));if(row)customerCareAction(row)}));
-  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
+  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
   let modal=$('notificationPopup');
   if(!rows.length){modal?.classList.add('hidden');return}
   if(!modal){

@@ -112,6 +112,18 @@ async function scenario(count){
   assert.equal(w.document.getElementById('signupPhonePrefix').tabIndex,-1,'number is next in sequential phone input');
   run("state.data.notifications=[{id:123,notification_type:'dog_approved',read_at:null}]");
   assert.equal(run('customerUnreadBadgeCountV186()'),1,'unread dog approval counts toward badge');
+  run("window.__customerOnboardingCompleteV75=true;globalThis.noticeReadCalls=[];globalThis.oldNoticeApi=api;api=async body=>{noticeReadCalls.push(body);return true};renderNotifications()");
+  await run('acknowledgeAssignedDogNoticeV312()');
+  assert.equal(w.document.getElementById('notificationPopup')?.classList.contains('hidden')??true,true,'dog approval never opens popup');
+  assert.equal(run('noticeReadCalls.length'),1,'concurrent acknowledgement is coalesced');
+  assert.equal(run('noticeReadCalls[0].notification_ids.join()'),'123','only the dog approval is marked read');
+  assert.equal(run('customerUnreadBadgeCountV186()'),0,'badge clears after completed onboarding');
+  run("state.data.notifications=[{id:124,notification_type:'dog_approved'},{id:125,notification_type:'day_closed',title:'Zatvorený deň'}];api=async()=>{throw Error('offline')};renderNotifications()");
+  await run('acknowledgeAssignedDogNoticeV312()');
+  assert(!run('state.data.notifications[0].read_at'),'failed acknowledgement remains unread for retry');
+  assert.match(w.document.getElementById('notificationPopupList').textContent,/Zatvorený deň/,'other notifications stay visible');
+  assert(!w.document.getElementById('notificationPopupList').textContent.includes('priradený'),'dog approval stays excluded with other notices');
+  run('api=oldNoticeApi;window.__customerOnboardingCompleteV75=false');
   // Real gesture handler, interrupted pinch, next single-finger gesture and editor reuse.
   run('ensurePhotoEditor()');const canvas=w.document.getElementById('photoCropCanvas');
   canvas.getBoundingClientRect=()=>({left:0,top:0,width:640,height:640});
