@@ -78,6 +78,32 @@ async function messageForWebhook(body: Json) {
   const record = (body.record && typeof body.record === "object" ? body.record : {}) as Json;
   const id = String(record.id || Date.now());
 
+  if (table === "portal_vaccination_review_events_v234") {
+    // v290: show the actual dog's name and vaccination type; no contact/owner data.
+    // Only on a genuinely pending event: staff marking reviewed never sends another push.
+    if (String(record.review_status || "") !== "pending" ||
+        !["INSERT","UPDATE"].includes(String(body.type || ""))) return null;
+    const dogId = Number(record.dog_id);
+    if (!Number.isSafeInteger(dogId) || dogId <= 0) return null;
+    const dogRows = await rest("dogs?id=eq." + dogId + "&select=name&limit=1");
+    const name = Array.isArray(dogRows) && dogRows[0]?.name
+      ? String(dogRows[0].name).replace(/[\r\n\t]/g, " ").trim().slice(0, 70)
+      : "Psík";
+    const vaccine = ({
+      rabies: "Besnota", infectious: "Infekčné ochorenia",
+      kennel_cough: "Kotercový kašeľ", lepto_l4: "Leptospiróza (L4)",
+    } as Record<string, string>)[String(record.vaccination_type || "")] || "Očkovanie";
+    const pending = await rest("portal_vaccination_review_events_v234?review_status=eq.pending&select=id&limit=100");
+    const count = Array.isArray(pending) ? pending.length : 1;
+    if (!count) return null;
+    return {
+      title: "Aktualizované očkovanie 🐾",
+      body: name + " – " + vaccine + ". " +
+        (count === 1 ? "1 očkovanie čaká na kontrolu." : count < 100 ? count + " očkovaní čaká na kontrolu." : "100+ očkovaní čaká na kontrolu."),
+      tag: "vaccination-review-count",
+    };
+  }
+
   if (table === "web_form_submissions") {
     const application = record.form_type === "application";
     const owner = String(record.owner_name || "Nový kontakt");
@@ -478,7 +504,7 @@ async function customerUnreadBadgeCountV186(userId: string) {
   const todayParts = bratislavaParts();
   const today = todayParts.year + '-' + todayParts.month + '-' + todayParts.day;
   const excluded = new Set(['staff_message_customer','customer_message_admin','pass_request_admin',
-    'pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test']);
+    'pass_interest_registered','weekly_booking_reminder','weekly_booking_reminder_test']);
   const currentNotices = notices.filter(n => {
     if(excluded.has(String(n.notification_type || '')))return false;
     if(n.visible_from && String(n.visible_from) > today)return false;

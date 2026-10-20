@@ -1706,7 +1706,7 @@ html.phone-portrait-layout :is(.legal-card,.booking-picker-card-v37,.support-cha
 .email-confirmation-page{min-height:100dvh;display:grid;place-items:center;padding:24px;background:#fff;color:#172033}
 .email-confirmation-card{max-width:440px;width:100%;text-align:center}
 .email-confirmation-card h1{font-size:25px}
-.email-confirmation-card p{font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.email-confirmation-card p{font-size:18px;line-height:1.6;overflow-wrap:anywhere}
 .email-confirmation-card .btn{margin-top:14px;display:block;text-decoration:none}
 
 /* Consolidated vaccination/legal/booking visuals (formerly injected at runtime). */
