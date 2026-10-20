@@ -53,10 +53,20 @@ async function scenario(count){
   w.__fixtureNowIso='2099-01-05T09:00:00Z';run("renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday keeps closed-week guidance by calendar');
   assert(w.document.getElementById('designWeekDeadline').previousElementSibling.classList.contains('booking-picker-week-label-v127'),'closed notice follows week heading');
-  assert.match(w.document.querySelector('#designWeekDeadline strong').textContent,/Máte záujem o rezerváciu/);
+  assert.match(w.document.querySelector('#designWeekDeadline strong').textContent,/uzavrelo v nedeľu o 20:00/);
   assert.match(w.document.querySelector('#designWeekDeadline span').textContent,/aj v prípade plnej kapacity/);
   assert(w.document.querySelector('#bookingPickerCloseV37 svg'),'close glyph is geometrically centred vector');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,true);
+  run("state.data.availability.days[1].available=2;state.data.availability.days[1].occupied=6;renderDays();window.customerDesignPickerRender()");
+  const lateDay=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');
+  assert.equal(lateDay.dataset.contact,'true','late day still routes to message');
+  assert.equal(lateDay.dataset.capacityLevel,'limited');
+  assert.equal(lateDay.querySelector('span').textContent,'6/8','late day shows actual occupancy');
+  assert(lateDay.querySelector('.design-capacity-dot'),'late day retains capacity dot');
+  assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,true,'no empty select-day button');
+  lateDay.click();
+  if(count===1){assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'),'occupancy display does not bypass late-day message');w.document.getElementById('supportChatCloseV52').click();}
+  else assert.match(w.document.getElementById('bookingPickerErrorV95').textContent,/Pre oboch psíkov/,'existing joint-booking contact guard remains authoritative');
   w.__fixtureNowIso='2099-01-05T23:00:00Z';run("renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'contact guidance remains below current week heading on Tuesday');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false);
@@ -88,6 +98,7 @@ async function scenario(count){
   assert.equal(w.document.querySelectorAll('#bookingPickerTaxiByDayV91 [data-taxi-mode]').length,count===2?4:2);
   w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-mode="pickup"]').click();assert.match(w.document.getElementById('bookingPickerTaxiByDayV91').textContent,/Vybrané/);
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').disabled,false);
+  assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,false,'real reservation submit appears after selection');
   assert(w.document.getElementById('designCapacityLegend'));
   assert.equal(w.document.querySelectorAll('#designMyBookings img').length,0);
   assert.equal(w.document.querySelector('.design-empty-booking-cta').textContent,'Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.');
