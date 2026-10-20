@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261020-customer-popup-v312';
-const APP_VERSION='2.0.3';
+const APP_BUILD='20261020-customer-calendar-v313';
+const APP_VERSION='2.0.4';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2934,6 +2934,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       renderPickerV37();
     }));
     const submit=$('bookingPickerSubmitV37'),count=selectedDatesV37.size;
+    submit.hidden=count===0;
     submit.disabled=!count||submittingV37;
     submit.textContent=count?`Rezervovať ${count===1?'1 deň':count<5?count+' dni':count+' dní'}`:'Vyberte deň';
     $('sharedBookingReviewV257')?.remove();
