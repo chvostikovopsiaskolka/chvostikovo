@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="sk">
+<html lang="sk" class="customer-design">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -11,9 +11,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
-  <link rel="manifest" href="/manifest.webmanifest?v=20261019-booking-vaccine-gate-v307">
-  <link rel="stylesheet" href="/styles.css?v=20261019-booking-vaccine-gate-v307">
-  <link rel="stylesheet" href="/dog-choice-fab-v276.css?v=20261019-booking-vaccine-gate-v307">
+  <link rel="manifest" href="/manifest.webmanifest?v=20261020-beta2-design-v309">
+  <link rel="stylesheet" href="/styles.css?v=20261020-beta2-design-v309">
+  <link rel="stylesheet" href="/dog-choice-fab-v276.css?v=20261020-beta2-design-v309">
   <style id="customer-l4-chevron-fix-v217">
     #dogDetailsModal .vaccine-box .l4-inline-v213 > summary .l4-question-v216 {
       display:block!important;flex:1 1 auto!important;min-width:0!important;
@@ -54,8 +54,11 @@
   </style>
   <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}.loading-screen.in-app{background:transparent;pointer-events:none;padding:0}.loading-screen.in-app .loading-logo,.loading-screen.in-app small{display:none}.loading-screen.in-app .loading-paw{width:68px;height:68px;border:0;border-radius:18px;background:#fff;box-shadow:0 10px 34px rgba(17,24,39,.16);font-size:0;animation:none}.loading-screen.in-app .loading-paw::before{content:'🐾';width:42px;height:42px;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;display:grid;place-items:center;font-size:18px;animation:loadingSpin .8s linear infinite}</style>
   <title>Chvostíkovo</title>
-  <link rel="stylesheet" href="/bulletin-photo-v243.css?v=20261019-booking-vaccine-gate-v307">
-<link rel="stylesheet" href="/dual-dog-overview-v246.css?v=20261019-booking-vaccine-gate-v307">
+  <link rel="stylesheet" href="/bulletin-photo-v243.css?v=20261020-beta2-design-v309">
+<link rel="stylesheet" href="/dual-dog-overview-v246.css?v=20261020-beta2-design-v309">
+<link rel="stylesheet" href="/loading-design.css?v=20261020-beta2-design-v309">
+<link rel="stylesheet" href="/customer-design.css?v=20261020-beta2-design-v309">
+<script defer src="/loading-motion.js?v=20261020-beta2-design-v309"></script>
 </head>
 <body>
 <svg class="customer-icon-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -79,7 +82,7 @@
 </svg>
 <a class="skip-link" href="#mainContent">Preskočiť na obsah</a>
 <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><defs><symbol id="ci-loading-paw" viewBox="0 0 64 64"><ellipse cx="32" cy="39" rx="16" ry="13"/><circle cx="14" cy="23" r="7"/><circle cx="27" cy="14" r="7"/><circle cx="41" cy="14" r="7"/><circle cx="52" cy="25" r="7"/></symbol></defs></svg>
-<div id="loading" class="loading-screen" role="status" aria-live="polite"><div class="loading-paws" aria-hidden="true"><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg></div><div class="loading-paw" aria-hidden="true">🐾</div><small>Načítavam Chvostíkovo…</small></div>
+<div id="loading" class="loading-screen loading-concept" role="status" aria-label="Načítavanie aplikácie" aria-live="polite"><div class="concept-paws" aria-hidden="true"><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg></div><svg class="concept-watermark" aria-hidden="true"><use href="#ci-loading-paw"/></svg><div class="concept-center"><img class="concept-brand" src="/loading-brand.png" alt="chvostíkovo" fetchpriority="high"><span class="concept-subtitle">Psia škôlka</span><div class="concept-orbit" aria-hidden="true"><svg class="concept-ring" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="loadingArcGradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e9983f"/><stop offset="1" stop-color="#dc8fc3"/></linearGradient></defs><circle class="concept-ring-track" cx="60" cy="60" r="56"/><circle class="concept-ring-arc" cx="60" cy="60" r="56" pathLength="100"/></svg><svg><use href="#ci-loading-paw"/></svg></div></div></div>
 
 <main id="authView" class="auth-shell hidden" inert>
   <section class="auth-card">
@@ -176,8 +179,8 @@
   </section>
 
   <section id="staffTab" class="tab-page hidden"><div class="section-head"><div><h1>Žiadosti zákazníkov</h1><p>Táto karta je viditeľná iba pracovníkom Chvostíkova.</p></div></div><div id="staffSummary"></div></section>
-  <button id="betaVersionBadge" class="beta-version-badge-v75" type="button">Beta 1</button>
-  <div id="betaVersionModal" class="legal-modal beta-version-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="betaVersionTitle"><div class="legal-card"><button id="betaVersionClose" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="betaVersionTitle">Beta 1</h2><div class="legal-body"><p>Testujete Beta 1 aplikácie Chvostíkovo (verzia 1.0.64). Ak narazíte na chybu, napíšte nám cez Správy alebo nám pošlite správu na Instagrame.</p></div><button id="betaVersionMessages" class="btn full" type="button">Otvoriť Správy</button></div></div>
+  <button id="betaVersionBadge" class="beta-version-badge-v75" type="button">Beta 2.0.0</button>
+  <div id="betaVersionModal" class="legal-modal beta-version-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="betaVersionTitle"><div class="legal-card"><button id="betaVersionClose" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="betaVersionTitle">Beta 2.0.0</h2><div class="legal-body"><p>Testujete aplikáciu Chvostíkovo Beta 2.0.0. Ak narazíte na chybu, napíšte nám cez Správy alebo nám pošlite správu na Instagrame.</p></div><button id="betaVersionMessages" class="btn full" type="button">Otvoriť Správy</button></div></div>
   <nav class="bottom-nav" aria-label="Hlavná navigácia"><button id="navBooking" class="active" type="button">Rezervácie</button><button id="navBookAddV220" type="button" aria-label="Prihlásiť psíka do škôlky" title="Chcem prihlásiť psíka"><span class="booking-fab-symbol-v220" aria-hidden="true"><svg class="booking-fab-calendar-v280" viewBox="0 0 24 24" focusable="false"><use href="#ci-calendar"/></svg></span></button><button id="navDog" type="button">Menu</button><button id="navMessages" type="button">Správy <i id="messageUnread" class="nav-badge hidden"></i></button><button id="navStaff" class="hidden" type="button">Žiadosti</button><div id="navBookHintV220" class="booking-fab-hint-v220 hidden" role="status"><span>Chcem prihlásiť psíka</span></div></nav>
 </div>
 <div id="customerContactModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="customerContactTitle"><div class="legal-card"><button id="customerContactClose" class="legal-close" type="button" aria-label="Zavrieť">×</button><h2 id="customerContactTitle">Moje kontaktné údaje</h2><div id="customerContactContent"></div></div></div>
@@ -226,12 +229,13 @@
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/terms-pdf-font.js?v=20261019-booking-vaccine-gate-v307"></script>
-<script src="/terms-pdf.js?v=20261019-booking-vaccine-gate-v307"></script>
-<script src="/app.js?v=20261019-booking-vaccine-gate-v307"></script>
-<script src="/dual-dog-overview-v246.js?v=20261019-booking-vaccine-gate-v307"></script>
-<script src="/back-swipe.js?v=20261019-booking-vaccine-gate-v307"></script>
+<script src="/terms-pdf-font.js?v=20261020-beta2-design-v309"></script>
+<script src="/terms-pdf.js?v=20261020-beta2-design-v309"></script>
+<script src="/app.js?v=20261020-beta2-design-v309"></script>
+<script src="/dual-dog-overview-v246.js?v=20261020-beta2-design-v309"></script>
+<script src="/back-swipe.js?v=20261020-beta2-design-v309"></script>
 <script src="/android-install-choice-v308.js?v=20261019-android-choice-v308"></script>
+<script src="/customer-design.js?v=20261020-beta2-design-v309"></script>
 </body>
 </html>
 
