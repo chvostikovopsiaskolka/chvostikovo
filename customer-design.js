@@ -203,7 +203,7 @@
 
     const selectedSection=byId('bookingPickerTaxiSectionV91');
     const taxiTitle=byId('designSelectedDaysTitle')||selectedSection?.querySelector('.booking-picker-taxi-title-v37');
-    if(taxiTitle){taxiTitle.id='designSelectedDaysTitle';taxiTitle.textContent='Vybraté dni ↓';taxiTitle.hidden=selectedSection.classList.contains('hidden');byId('bookingPickerDaysV37').after(taxiTitle);}
+    if(taxiTitle){taxiTitle.id='designSelectedDaysTitle';taxiTitle.textContent='Vybraté dni ↓';taxiTitle.hidden=selectedSection.classList.contains('hidden');}
     picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=Number(day.available)<=0?'full':Number(day.available)<=2?'limited':'free';button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';
       const span=button.querySelector(':scope > span');if(span&&!button.disabled&&button.dataset.full!=='true')span.textContent=Number(day.occupied||0)+'/'+Number(day.capacity||0);
       if(!button.disabled&&!button.classList.contains('booked')&&button.dataset.full!=='true'&&!button.querySelector('.design-capacity-dot')){const dot=document.createElement('i');dot.className='design-capacity-dot';dot.setAttribute('aria-hidden','true');span?.prepend(dot);}
@@ -213,7 +213,7 @@
     if(smart&&!smart.classList.contains('hidden')){smart.classList.toggle('design-smart-hidden',hasReservations);if(!hasReservations){empty?.classList.add('hidden');carousel.append(smart);}}
     if(empty&&!hasReservations&&(!smart||smart.classList.contains('hidden'))) {empty.classList.remove('hidden');let text=empty.querySelector('.design-empty-booking-cta');if(!text){text=document.createElement('p');text.className='design-empty-booking-cta';empty.replaceChildren(text);}text.textContent='Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.';}
     if(!byId('designCapacityLegend')){const legend=document.createElement('div');legend.id='designCapacityLegend';legend.innerHTML='<span><i class="free"></i>Voľné miesta</span><span><i class="limited"></i>Takmer plné</span><span><i class="full"></i>Plné</span>';byId('bookingPickerDaysV37').after(legend);}
-    if(taxiTitle)taxiTitle.after(byId('designCapacityLegend'));
+    if(taxiTitle)byId('designCapacityLegend').after(taxiTitle);
 
   };
   window.customerDesignEditReservation=date=>{window.openBookingPickerV37?.();const carousel=byId('designBookingCarousel'),card=byId('weekDays')?.querySelector('[data-date="'+date+'"]');if(carousel&&card)carousel.scrollLeft=card.offsetLeft-carousel.offsetLeft;};
