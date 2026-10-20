@@ -27,6 +27,13 @@ jobs:
           node tests/admin-capacity-ui-v322.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v322.html node tests/admin-runtime-v275.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v322.html node tests/admin-proofs-v321.cjs
+      - name: Admin loading and remembered-session regression v323
+        run: |
+          node tools/build-admin-loader-v323.cjs
+          node tests/admin-loader-auth-v323.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v323.html node tests/admin-runtime-v275.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v323.html node tests/admin-capacity-ui-v322.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v323.html node tests/admin-proofs-v321.cjs
       - name: Assembled admin startup and analytics
         run: node tests/admin-runtime-v275.cjs
       - name: Customer loading motion lifecycle
