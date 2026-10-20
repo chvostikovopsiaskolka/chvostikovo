@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261020-customer-calendar-v313';
-const APP_VERSION='2.0.4';
+const APP_BUILD='20261020-customer-cutoff-v314';
+const APP_VERSION='2.0.5';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -558,7 +558,25 @@ function renderPassSummaryCore(){
 let customerPassSummaryDate='';
 function renderPassSummary(){customerPassSummaryDate=bratislavaToday();const out=renderPassSummaryCore();runCustomerHooks('afterRenderPassSummary',out);return out}
 function futureItems(){const today=overviewClock().date;const requests=(state.data?.requests||[]).filter(r=>r.reservation_date>=today&&['pending','approved'].includes(r.status));const covered=new Set(requests.map(r=>Number(r.reservation_id)).filter(Boolean));const legacy=(state.data?.reservations||[]).filter(r=>r.reservation_date>=today&&!covered.has(Number(r.id))).map(r=>({...r,status:'approved',_legacy:true,reservation_id:r.id}));return [...requests,...legacy].sort((a,b)=>String(a.reservation_date).localeCompare(String(b.reservation_date)))}
-async function cancelBooking(btn){if(!confirm('Naozaj chcete zrušiť túto rezerváciu?'))return;try{loading(true);const requestId=Number(btn.dataset.request)||0,reservationId=Number(btn.dataset.reservation)||0;await api({action:'cancel_booking',request_id:requestId,reservation_id:reservationId,reason:null});const request=(state.data?.requests||[]).find(r=>Number(r.id)===requestId),reservation=(state.data?.reservations||[]).find(r=>Number(r.id)===reservationId);if(request)request.status='cancelled';if(reservation)reservation.status='cancelled';if(reservationId)for(const row of state.data?.requests||[])if(Number(row.reservation_id)===reservationId)row.status='cancelled';renderUpcoming();renderDays();renderMessages();renderPassSummary();toast('Rezervácia bola zrušená.');queueCustomerSync('bookings',80)}catch(e){toast(e.message)}finally{loading(false)}}
+function customerManagementClosedV314(date,now=new Date()){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date||'')))return false;
+  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now).map(p=>[p.type,p.value]));
+  const clock={date:parts.year+'-'+parts.month+'-'+parts.day,minutes:Number(parts.hour)*60+Number(parts.minute)},previous=new Date(date+'T12:00:00Z');previous.setUTCDate(previous.getUTCDate()-1);
+  const cutoffDate=previous.toISOString().slice(0,10);
+  return clock.date>cutoffDate||(clock.date===cutoffDate&&clock.minutes>=19*60);
+}
+async function cancelBooking(btn){
+  const requestId=Number(btn.dataset.request)||0,reservationId=Number(btn.dataset.reservation)||0;
+  const row=(state.data?.requests||[]).find(r=>Number(r.id)===requestId)||(state.data?.reservations||[]).find(r=>Number(r.id)===reservationId)||(state.data?.requests||[]).find(r=>reservationId>0&&Number(r.reservation_id)===reservationId);
+  if(row&&customerManagementClosedV314(row.reservation_date)){
+    const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(row.dog_id));
+    window.customerDesignKeepPickerForChat?.();
+    window.openCustomerLateBookingMessage?.(Number(row.dog_id),row.reservation_date,'Dobrý deň, prosím o zrušenie rezervácie pre '+(dog?.name||'psíka')+' na '+skDay(row.reservation_date)+' '+skDate(row.reservation_date)+'.',true);
+    return;
+  }
+  if(!confirm('Naozaj chcete zrušiť túto rezerváciu?'))return;
+  try{loading(true);await api({action:'cancel_booking',request_id:requestId,reservation_id:reservationId,reason:null});const request=(state.data?.requests||[]).find(r=>Number(r.id)===requestId),reservation=(state.data?.reservations||[]).find(r=>Number(r.id)===reservationId);if(request)request.status='cancelled';if(reservation)reservation.status='cancelled';if(reservationId)for(const row of state.data?.requests||[])if(Number(row.reservation_id)===reservationId)row.status='cancelled';renderUpcoming();renderDays();renderMessages();renderPassSummary();toast('Rezervácia bola zrušená.');queueCustomerSync('bookings',80)}catch(e){toast(e.message)}finally{loading(false)}
+}
 function bookingFor(dogId,date){return (state.data?.requests||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date&&['pending','approved'].includes(r.status))||(state.data?.reservations||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date)}
 function applyLocalBooking(result,fallback){const row=result?.data||result?.booking||result?.request||fallback;if(!row)return;const rows=state.data?.requests||(state.data.requests=[]),index=rows.findIndex(r=>Number(r.id)===Number(row.id));if(index>=0)rows[index]={...rows[index],...row};else rows.push({...fallback,...row});renderUpcoming();renderDays();renderMessages();renderPassSummary()}
 async function loadAnnouncements(){return customerRenderers.announcements?customerRenderers.announcements():undefined}
@@ -2803,8 +2821,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       : (state.data?.requests||[]).find(r=>Number(r.id)===Number(requestId));
     if(!allowedTaxiEditV201(row)){toast('Taxi sa pri tejto rezervácii nedá doplniť.');return}
     const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(row.dog_id))||selectedDog();
-    const clock=bratislavaClockV95(),dayBefore=smartShiftV199(row.reservation_date,-1);
-    const taxiTimeExpired=clock.date>dayBefore||(clock.date===dayBefore&&clock.minutes>=21*60);
+    const taxiTimeExpired=customerManagementClosedV314(row.reservation_date);
     if(row._legacy||taxiTimeExpired){
       const text='Dobrý deň, mám záujem o doplnenie taxi pre '+(dog?.name||'psíka')+' na '+skDay(row.reservation_date)+' '+skDate(row.reservation_date)+'. Prosím, dajte mi vedieť, či je to ešte možné.';
       if(typeof window.openCustomerLateBookingMessage==='function')window.openCustomerLateBookingMessage(Number(row.dog_id),row.reservation_date,text,true);

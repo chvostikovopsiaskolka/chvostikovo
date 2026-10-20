@@ -249,5 +249,11 @@ html.design-modal-open{overflow:hidden}.design-modal-open #bottomNav{visibility:
 .customer-design #bookingPickerV37 .booking-day-v37[data-contact=true][data-full=false] span{font-size:9px!important;white-space:normal!important;line-height:1.25!important;color:#7b8493!important}
 .customer-design #bookingPickerV37 .booking-day-v37[data-contact=true][data-full=false] strong{color:#206745!important}
 .customer-design #bookingPickerV37 #bookingPickerSubmitV37[hidden]{display:none!important}
+.customer-design #bookingPickerV37 #designWeekDeadline{margin-inline:-4px;padding:8px 7px}
+.customer-design #bookingPickerV37 #designWeekDeadline span{font-size:10px;line-height:1.4}
+.customer-design #bookingPickerV37 #designSelectedDaysTitle{margin:6px 2px 0;font-size:13px;font-weight:850;line-height:1.3}
+.customer-design #bookingPickerV37 #designSelectedDaysTitle[hidden]{display:none!important}
+.customer-design #bookingPickerV37 #designCapacityLegend{padding:6px 0}
+.customer-design #bookingPickerV37 #bookingPickerTaxiSectionV91{margin-top:0;gap:4px}
 @media(max-width:350px){.customer-design #bookingPickerV37 #bookingPickerDaysV37{padding:9px 5px 11px!important}.customer-design #bookingPickerV37 .booking-day-v37[data-contact=true][data-full=false] span{font-size:8px!important}}
 
