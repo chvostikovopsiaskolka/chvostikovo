@@ -53,12 +53,12 @@ async function scenario(count){
   w.__fixtureNowIso='2099-01-05T09:00:00Z';run("renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday keeps closed-week guidance by calendar');
   assert(w.document.getElementById('designWeekDeadline').previousElementSibling.classList.contains('booking-picker-week-label-v127'),'closed notice follows week heading');
-  assert.match(w.document.querySelector('#designWeekDeadline strong').textContent,/20:00/);
-  assert.match(w.document.querySelector('#designWeekDeadline span').textContent,/v plný deň/);
+  assert.match(w.document.querySelector('#designWeekDeadline strong').textContent,/Máte záujem o rezerváciu/);
+  assert.match(w.document.querySelector('#designWeekDeadline span').textContent,/aj v prípade plnej kapacity/);
   assert(w.document.querySelector('#bookingPickerCloseV37 svg'),'close glyph is geometrically centred vector');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,true);
   w.__fixtureNowIso='2099-01-05T23:00:00Z';run("renderDays();window.customerDesignPickerRender()");
-  assert.equal(w.document.getElementById('designWeekDeadline').hidden,true,'Tuesday switches to next-week reminder');
+  assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'contact guidance remains below current week heading on Tuesday');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false);
   w.__fixtureNowIso=null;run("window.closeBookingPickerV305();renderDays()");
   run('renderDog();renderPassSummary()');assert.equal(w.document.querySelector('.design-friend-strip img'),photo,'unrelated render preserves friend image');
