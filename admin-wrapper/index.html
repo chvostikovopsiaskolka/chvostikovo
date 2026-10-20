@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#fffaf5">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Chvostíkovo">
@@ -12,7 +12,7 @@
   <link rel="manifest" href="/manifest.webmanifest?v=20261014-admin-pwa-v111">
   <title>Chvostíkovo</title>
   <style>
-    html,body{margin:0;min-height:100%;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    html,body{margin:0;min-height:100%;background:#fffaf5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     #boot{position:fixed;inset:0;z-index:99999;display:grid;place-content:center;justify-items:center;gap:16px;padding:24px;background:#fff;color:#6b7280;text-align:center}
     .boot-mark{position:relative;width:54px;height:54px;display:grid;place-items:center}
     .boot-ring{position:absolute;inset:0;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;animation:boot-spin .8s linear infinite}
@@ -41,7 +41,7 @@
 .concept-orbit::before{display:none!important}
 .concept-orbit>svg.concept-ring{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);fill:none;filter:none;animation:none;overflow:visible;transform:none}
 .concept-ring-track{fill:none;stroke:#ead6c6;stroke-opacity:.45;stroke-width:2}
-.concept-ring-arc{fill:none;stroke:url(#bootArcGradient);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:28 72;stroke-dashoffset:0;animation:conceptArcTravel 1.8s linear infinite}
+.concept-ring-arc{fill:none;stroke:url(#loadingArcGradient);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:28 72;stroke-dashoffset:0;animation:conceptArcTravel 1.8s linear infinite}
 #boot.in-app .concept-orbit>svg.concept-ring{width:calc(100% + 8px);height:calc(100% + 8px);inset:-4px}
 @keyframes conceptArcTravel{to{stroke-dashoffset:-100}}
 @media(prefers-reduced-motion:reduce){.concept-ring-arc{animation:none;stroke-dasharray:40 60}}
@@ -60,7 +60,7 @@
 #boot.in-app .concept-orbit>.concept-paw>svg{width:100%;height:100%}
 @media(prefers-reduced-motion:reduce){.concept-orbit>.concept-paw{will-change:auto}}
 
-#boot{padding:0!important;z-index:99999!important}#bootText{font-size:14px;color:#991b1b;max-width:300px}</style></head>
+#boot{padding:0!important;z-index:99999!important;width:auto!important;height:auto!important;min-height:0!important;inset:0!important}html:has(#boot),body:has(#boot){background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}#bootText{font-size:14px;color:#991b1b;max-width:300px}</style></head>
 <body>
 <div id="boot" class="app-boot loading-screen loading-concept" role="status" aria-label="Načítavanie aplikácie" aria-live="polite"><svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><defs><symbol id="ci-loading-paw" viewBox="0 0 64 64"><ellipse cx="32" cy="39" rx="16" ry="13"/><circle cx="14" cy="23" r="7"/><circle cx="27" cy="14" r="7"/><circle cx="41" cy="14" r="7"/><circle cx="52" cy="25" r="7"/></symbol></defs></svg><div class="concept-paws" aria-hidden="true"><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg></div><svg class="concept-watermark" aria-hidden="true"><use href="#ci-loading-paw"/></svg><div class="concept-center"><img class="concept-brand" src="https://app.chvostikovo.sk/loading-brand.png" alt="chvostíkovo" fetchpriority="high"><span class="concept-subtitle">Psia škôlka</span><div class="concept-orbit" aria-hidden="true"><svg class="concept-ring" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="loadingArcGradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e9983f"/><stop offset="1" stop-color="#dc8fc3"/></linearGradient></defs><circle class="concept-ring-track" cx="60" cy="60" r="56"/><circle class="concept-ring-arc" cx="60" cy="60" r="56" pathLength="100"/></svg><span class="concept-paw"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ci-loading-paw" width="64" height="64" transform="translate(-1 2.5)"/></svg></span></div><p id="bootText" role="alert"></p></div></div><script id="admin-boot-motion-v322">/* Isolated, frame-synchronised loading indicator; no application data access. */
 (() => {
