@@ -16,10 +16,17 @@ jobs:
           node-version: '22'
       - name: Install pinned test runtime outside the app
         run: |
-          npm install --prefix "$RUNNER_TEMP/chvo-admin-deps" --no-save --no-package-lock jsdom@26.1.0 typescript@5.8.3
+          npm install --prefix "$RUNNER_TEMP/chvo-admin-deps" --no-save --no-package-lock jsdom@26.1.0 typescript@5.8.3 @electric-sql/pglite@0.5.10
           mkdir -p tests/shared-v244
           ln -s "$RUNNER_TEMP/chvo-admin-deps/node_modules" tests/shared-v244/node_modules
           echo "NODE_PATH=$RUNNER_TEMP/chvo-admin-deps/node_modules" >> "$GITHUB_ENV"
+      - name: Default capacity and admin boot v322
+        run: |
+          node tools/build-admin-capacity-v322.cjs
+          node tests/admin-capacity-db-v322.mjs
+          node tests/admin-capacity-ui-v322.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v322.html node tests/admin-runtime-v275.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v322.html node tests/admin-proofs-v321.cjs
       - name: Assembled admin startup and analytics
         run: node tests/admin-runtime-v275.cjs
       - name: Customer loading motion lifecycle

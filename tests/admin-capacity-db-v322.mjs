@@ -1,0 +1,31 @@
+import {PGlite} from './shared-v244/node_modules/@electric-sql/pglite/dist/index.js';
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const db=new PGlite();
+await db.exec(`create schema auth;create schema private;create schema extensions;create role anon;create role authenticated;create role service_role;create function auth.uid() returns uuid language sql as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function extensions.uuid_generate_v4() returns uuid language sql as $$select gen_random_uuid()$$;create table auth.users(id uuid primary key,email text,raw_user_meta_data jsonb default '{}');`);
+for(const t of JSON.parse(fs.readFileSync('tests/shared-v244/all-schema.json')).tables){const cols=t.columns.map(c=>`${c.name} ${c.type}${c.identity?' generated always as identity':c.default&&!c.default.includes('nextval(')?' default '+c.default:''}${c.notnull?' not null':''}`);cols.push(...(t.constraints||[]).filter(c=>!c.startsWith('FOREIGN KEY')));await db.exec(`create table ${t.schema}.${t.name}(${cols.join(',')})`)}
+for(const f of JSON.parse(fs.readFileSync('tests/shared-v244/baseline-name-helper.json')))await db.exec(f.definition);
+let pending=JSON.parse(fs.readFileSync('supabase/backups/shared-v243-functions.json'));for(let i=0;i<2;i++){const failed=[];for(const f of pending)try{await db.exec(f.definition)}catch(_){failed.push(f)}pending=failed}assert.equal(pending.length,0);
+await db.exec('create policy portal_terms_acceptances_customer_insert on portal_terms_acceptances for insert to authenticated with check(true)');
+for(const file of ['20261015190455_verified_dog_links_v251.sql','20261015200808_owner_terms_pair_booking_v254.sql','20261016060000_shared_passes_v257.sql'])await db.exec(fs.readFileSync('supabase/migrations/'+file,'utf8'));
+
+await db.exec(fs.readFileSync('supabase/changes/default-capacity-v322.sql','utf8'));
+await db.exec(fs.readFileSync('supabase/changes/capacity-consumers-v322.sql','utf8'));
+const staff='10000000-0000-0000-0000-000000000001',other='20000000-0000-0000-0000-000000000001';
+await db.exec(`insert into auth.users(id) values('${staff}'),('${other}');insert into staff(user_id,display_name,active) values('${staff}','Synthetic Staff',true);`);
+await assert.rejects(db.query('select portal_set_default_capacity_v322(10)'),/oprávnenie/);
+await db.query("select set_config('request.jwt.claim.sub',$1,false)",[other]);
+await assert.rejects(db.query('select portal_set_default_capacity_v322(10)'),/oprávnenie/);
+await db.query("select set_config('request.jwt.claim.sub',$1,false)",[staff]);
+for(const v of ['0','31','null'])await assert.rejects(db.query('select portal_set_default_capacity_v322('+v+')'),/Kapacita/);
+await db.query('select portal_set_default_capacity_v322(10)');
+assert.equal((await db.query('select private.daycare_default_capacity_v322() AS n')).rows[0].n,10);
+await db.query("insert into portal_day_settings(day,capacity) values('2030-01-02',12)");
+await db.query('select portal_set_default_capacity_v322(9)');
+assert.equal((await db.query("select capacity from portal_day_settings where day='2030-01-02'")).rows[0].capacity,12);
+await db.query("select portal_set_day_closed('2030-01-03',true,null)");
+assert.equal((await db.query("select capacity from portal_day_settings where day='2030-01-03'")).rows[0].capacity,9);
+await db.exec(`insert into owners(id,name) overriding system value values(9001,'Synthetic Owner');insert into dogs(id,owner_id,name,active,default_entry_type) overriding system value values(9001,9001,'Synthetic Dog',true,'single'),(9002,9001,'Synthetic Dog 2',true,'single');insert into reservations(id,dog_id,reservation_date,status,entry_type) overriding system value values(9001,9001,'2030-02-01','booked','single'),(9002,9002,'2030-02-01','booked','single');`);
+await assert.rejects(db.query('select portal_set_default_capacity_v322(1)'),/obsadených/);
+assert.equal((await db.query('select private.daycare_default_capacity_v322() AS n')).rows[0].n,9);
+assert.equal((await db.query("select has_function_privilege('anon','public.portal_set_default_capacity_v322(integer)','execute') AS allowed")).rows[0].allowed,false);
+await db.close();console.log('PASS PostgreSQL: staff authorization, range, persistent default, daily override, closure inheritance, occupancy guard, anon denied. Isolated; no production fixture writes.');

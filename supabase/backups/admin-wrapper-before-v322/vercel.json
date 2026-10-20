@@ -1,0 +1,60 @@
+{
+  "rewrites": [
+    {
+      "source": "/icon-192.png",
+      "destination": "https://app.chvostikovo.sk/icon-192.png"
+    },
+    {
+      "source": "/icon-512.png",
+      "destination": "https://app.chvostikovo.sk/icon-512.png"
+    },
+    {
+      "source": "/icon-maskable-512.png",
+      "destination": "https://app.chvostikovo.sk/icon-maskable-512.png"
+    },
+    {
+      "source": "/Store-v2.png",
+      "destination": "https://app.chvostikovo.sk/icon-192.png"
+    },
+    {
+      "source": "/apple-touch-icon.png",
+      "destination": "https://app.chvostikovo.sk/apple-touch-icon.png"
+    },
+    {
+      "source": "/notification-badge.png",
+      "destination": "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-app-icon?badge=1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
+  ]
+}
