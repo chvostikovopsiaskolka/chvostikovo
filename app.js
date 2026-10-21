@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261021-reservation-fixes-v327';
-const APP_VERSION='2.0.10';
+const APP_BUILD='20261021-taxi-modal-v328';
+const APP_VERSION='2.0.11';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2819,10 +2819,17 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       +'<div class="booking-taxi-edit-actions-v201"><button type="button" id="taxiEditLaterV201">Zrušiť</button>'
       +'<button type="button" class="taxi-send-v201" id="taxiEditSendV201" disabled>Požiadať o taxi</button></div></div></div>');
     const modal=$('bookingTaxiEditV201');
-    const close=()=>{if(taxiEditBusyV201)return;modal.classList.add('hidden');taxiEditRequestV201=0;taxiEditReservationV327=0;taxiEditSelectionV201='';document.documentElement.classList.remove('booking-picker-open-v37')};
+    const close=()=>{if(taxiEditBusyV201)return;modal.classList.add('hidden');window.customerDesignTaxiClosed?.();taxiEditRequestV201=0;taxiEditReservationV327=0;taxiEditSelectionV201='';document.documentElement.classList.remove('booking-picker-open-v37')};
     $('taxiEditCloseV201').addEventListener('click',close);
     $('taxiEditLaterV201').addEventListener('click',close);
     modal.addEventListener('click',e=>{if(e.target===modal)close()});
+    modal.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){e.preventDefault();close();return;}
+      if(e.key!=='Tab')return;
+      const nodes=[...modal.querySelectorAll('button')].filter(n=>!n.disabled);
+      if(e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes.at(-1)?.focus();}
+      else if(!e.shiftKey&&document.activeElement===nodes.at(-1)){e.preventDefault();nodes[0]?.focus();}
+    });
     modal.querySelectorAll('[data-edit-taxi]').forEach(b=>b.addEventListener('click',()=>{
       taxiEditSelectionV201=b.dataset.editTaxi;
       modal.querySelectorAll('[data-edit-taxi]').forEach(x=>x.classList.toggle('active',x===b));

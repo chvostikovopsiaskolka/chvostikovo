@@ -76,8 +76,8 @@ async function scenario(count){
   run(`state.data=JSON.parse(${JSON.stringify(originalBookingFixture)});renderDays();`);w.authFetch=originalAuthFetch;run('authFetch=window.authFetch');
   assert.match(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').textContent,/Schválené/);
   const addTaxi=w.document.querySelector('#weekDays [data-taxi-request]');assert(addTaxi);addTaxi.click();
-  assert(w.document.getElementById('bookingTaxiEditV201').classList.contains('design-inline-taxi'));
-  w.document.getElementById('taxiEditCloseV201').click();run('window.closeBookingPickerV305()');
+  assert(w.document.getElementById('bookingTaxiEditV201').classList.contains('design-taxi-modal'));assert.equal(w.document.getElementById('bookingTaxiEditV201').parentElement,w.document.body);assert.equal(w.document.getElementById('bookingPickerV37').inert,true);assert.equal(w.document.getElementById('bookingTaxiEditV201').getAttribute('aria-modal'),'true');
+  w.document.getElementById('taxiEditCloseV201').click();assert.equal(w.document.getElementById('bookingPickerV37').inert,false);run('window.closeBookingPickerV305()');
   w.__fixtureNowIso='2099-01-04T17:59:00Z';run("window.openBookingPickerV37();window.customerDesignOpenTaxi(70,'')");
   assert(!w.document.getElementById('bookingTaxiEditV201').classList.contains('hidden'),'18:59 uses original taxi approval form');
   w.document.getElementById('taxiEditCloseV201').click();
