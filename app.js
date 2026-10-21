@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261021-booking-deadline-v331';
-const APP_VERSION='2.0.14';
+const APP_BUILD='20261021-capacity-message-v332';
+const APP_VERSION='2.0.15';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2722,19 +2722,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
   function updateBookingDeadlineNoticeV127(){
     const box=$('deadlineText');if(!box)return;
-    const dog=selectedDog(),days=state.data?.availability?.days||[];
-    const current=days[0],closed=current&&bookingDeadlineClosedV95(current.date,dog);
-    const weekday=new Date(bratislavaClockV95().date+'T12:00:00Z').getUTCDay();
-    const showClosed=closed&&(weekday===0||weekday===1);
-    // v231: the board displays only the short advance reminder.
-    // Closed-week guidance is already rendered under the week in the reservation picker.
-    box.classList.toggle('hidden',!!showClosed);
-    box.querySelector('strong').textContent=showClosed
-      ? 'O miesto na najbližší deň nám už napíšte správu.'
-      : 'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
+    // Advance planning remains a reminder, independently of this week's requests.
+    box.classList.remove('hidden');
+    box.querySelector('strong').textContent='Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
     requestAnimationFrame(fitBookingDeadlineTitle);
     const detail=box.querySelector('span');
-    if(detail){detail.textContent=showClosed?'Žiadosť o rezerváciu môžete odoslať najneskôr deň vopred do 19:00. Potom nám napíšte správu.':'';detail.classList.toggle('hidden',!showClosed)}
+    if(detail){detail.textContent='';detail.classList.add('hidden')}
   }
   function pickerErrorV95(message,deadline=false){const box=$('bookingPickerErrorV95');if(!box)return;box.classList.toggle('hidden',!message);if(!message){box.innerHTML='';return}box.innerHTML='<strong>'+esc(message)+'</strong>'+(deadline?'<div>Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.</div>':'')}
 
@@ -2934,20 +2927,21 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     for(let start=0;start<Math.min(days.length,10);start+=5){
       const week=days.slice(start,start+5);
       // v232: show the week-specific status ABOVE its days, not beneath them.
-      const weekNoticeClosed=week.some(d=>bookingDeadlineClosedV95(d.date,dog));
-      const weekNoticeFull=!weekNoticeClosed&&week.some(d=>Number(d.available)<=0);
-      const weekNotice=weekNoticeClosed
-        ? '<div class="booking-week-closed-note-v127"><strong>Žiadosti prijímame do 19:00 deň pred návštevou.</strong><span>Po tomto čase kliknite na požadovaný deň a napíšte nám správu.</span></div>'
+      const today=bratislavaClockV95().date,weekEnd=new Date(week[0].date+'T12:00:00Z');weekEnd.setUTCDate(weekEnd.getUTCDate()+6);
+      const currentWeek=start===0&&today>=week[0].date&&today<=weekEnd.toISOString().slice(0,10);
+      const weekNoticeFull=week.some(d=>Number(d.available)<pickerDogsV254().length);
+      const weekNotice=currentWeek
+        ? '<div id="designWeekDeadline" class="booking-week-closed-note-v127"><strong>Nestihli ste rezervovať do nedele? Stále môžete požiadať o miesto.</strong><span>Kliknite na požadovaný deň a odošlite žiadosť o rezerváciu. Počkajte na jej schválenie. Pri plnej kapacite alebo od 19:00 deň pred návštevou nám pošlete iba správu.</span></div>'
         : weekNoticeFull
-        ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni sú plné.</strong><span>Vyberte deň s dostatkom voľných miest pre vybraných psíkov.</span></div>'
+        ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni nemajú dostatok voľných miest.</strong><span>Kliknite na požadovaný deň a napíšte nám správu. O možnosti prihlásenia vás budeme informovať.</span></div>'
         : '';
       const futureWeek=start>=10;
       const futureOpen=!futureWeek||futureWeekExpandedV235||week.some(d=>selectedDatesV37.has(d.date));
       groups.push(`<div class="booking-picker-week-v127 ${futureWeek?'booking-picker-future-v235':''}"><div class="booking-picker-week-label-v127">${futureWeek?`<button type="button" class="booking-picker-future-toggle-v235" data-future-toggle="true" aria-expanded="${futureOpen?'true':'false'}">O dva týždne <span aria-hidden="true">${futureOpen?'⌃':'⌄'}</span></button>`:(['Tento týždeň','Budúci týždeň'][start/5]||'Ďalší týždeň')}</div><div class="booking-picker-future-body-v235 ${futureOpen?'':'hidden'}">${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
         const existing=pickerDogsV254().some(x=>bookingFor(x.id,d.date)),deadlineClosed=pickerDogsV254().some(x=>bookingDeadlineClosedV95(d.date,x)),closed=d.bookings_open===false,full=Number(d.available)<pickerDogsV254().length;
         const past=d.date<=bratislavaClockV95().date;
-        const lateContact=deadlineClosed&&!existing&&!past&&!closed;
-        const disabled=!!existing||closed||past||(full&&!deadlineClosed);
+        const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;
+        const disabled=!!existing||closed||past;
         const selected=selectedDatesV37.has(d.date);
         const ownBookings=pickerDogsV254().map(x=>bookingFor(x.id,d.date)).filter(Boolean);
         const ownStatus=existing?(ownBookings.some(r=>r.status==='pending')?'pending':'approved'):'';
@@ -2968,7 +2962,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const message=pairBookingV254
           ? `Dobrý deň, mám záujem o miesta na ${skDay(date)} ${skDate(date)} pre oboch psíkov (${requestedDogs.map(d=>d.name).join(' a ')}). Prosím o potvrdenie dostupnosti oboch miest.`
           : `Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`;
-        // Once D−1 19:00 is reached, contact is always message-only.
+        // Full days and D−1 19:00 contact never create a booking request.
         window.openCustomerLateBookingMessage?.(Number(dog.id),date,message,true);
         return;
       }
