@@ -34,6 +34,11 @@ async function scenario(count){
   assert.equal(w.document.querySelector('#designDogName > span'),null,'no redundant pencil');
   assert.match(w.document.querySelector('.design-validity').textContent,/Platnosť do/);
   assert.match(w.document.querySelector('.design-validity').textContent,/2099/,'pass expiry retains full year');
+  assert(w.document.querySelector('.design-ticket-usage p'),'pass usage and validity share the row above the divider');
+  assert.equal(w.document.querySelector('.design-validity').parentElement.className,'design-ticket-usage');
+  assert.equal(w.document.querySelector('.design-visits-title h2').textContent,'📅 Moje rezervácie');
+  assert.equal(w.document.getElementById('designBulletinTitle'),null,'board has no redundant visible title');
+  assert.equal(w.document.getElementById('designNearest').nextElementSibling.id,'customerBulletinV229','published board stays in overview');
   assert.match(w.document.querySelector('.design-friends-inline').textContent,/Zobraziť kamošov v škôlke/);
   let photo=w.document.querySelector('.design-friend-strip img');assert(photo);
   run("state.data.availability.days[0].dogs.push({dog_id:9,name:'Kamarát 2',sex:'male'},{dog_id:10,name:'Kamarát 3',sex:'female'},{dog_id:11,name:'Kamarát 4',sex:'male'});renderDog()");
@@ -185,7 +190,8 @@ async function scenario(count){
   assert(w.document.getElementById('designCapacityLegend'));
   assert.equal(w.document.querySelectorAll('#designMyBookings img').length,0);
   assert.equal(w.document.querySelector('.design-empty-booking-cta').textContent,'Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.');
-  assert.equal(w.document.getElementById('designMyBookings').nextElementSibling.id,'designReservationNotice','deadline follows own reservations');
+  assert.equal(w.document.getElementById('designReservationNotice').parentElement.id,'bookingPickerDaysV37','deadline is inside highlighted two-week calendar');
+  assert.equal(w.document.querySelectorAll('#designReservationNotice').length,1,'calendar rerenders retain exactly one reminder');
   // A full-day enquiry preserves selected dates and scroll when returning.
   if(count===1){
    const picker=w.document.getElementById('bookingPickerV37');picker.scrollTop=120;
@@ -202,7 +208,7 @@ async function scenario(count){
 
   run("state.data.requests[0].status='approved';state.data.availability.days.forEach(d=>{d.dogs=[];d.anonymous_dogs=0});renderDog()");
   assert.match(w.document.querySelector('.design-no-friends').textContent,/Zatiaľ sa neprihlásil žiaden kamoš/);
-  assert.equal(w.document.querySelector('#designNearest h2').textContent,'📅 Rezervácie');
+  assert.equal(w.document.querySelector('#designNearest h2').textContent,'📅 Moje rezervácie');
   assert.equal(w.document.getElementById('signupPhonePrefix').tabIndex,-1,'number is next in sequential phone input');
   run("state.data.notifications=[{id:123,notification_type:'dog_approved',read_at:null}]");
   assert.equal(run('customerUnreadBadgeCountV186()'),1,'unread dog approval counts toward badge');

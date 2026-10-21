@@ -2,7 +2,7 @@
 
 User approved account blocking, request ceilings, and removing private pilot emails from current source. Admin password login/MFA configuration unchanged.
 
-Admin source: Supabase stable-v10-clean, isolated patch with baseline e4e5ee61c9d95d30d487064637b6c166; candidate84a2c9c9c0d483eeaf15835221ceb610. Customer2.0.18/build20261021-access-limits-v336 only adds blocked-account cleanup/message; existing business rules unchanged.
+Admin source: Supabase stable-v10-clean, isolated patch with baseline e4e5ee61c9d95d30d487064637b6c166; candidate84a2c9c9c0d483eeaf15835221ceb610. Customer2.0.19/build20261021-access-layout-v337 preserves the reservation layout from PR141 and adds blocked-account cleanup/message.
 
 Staff RPC portal_set_customer_blocked_v336 targets a single customer Auth identity, refuses active staff/self, preserves dogs/owner links/visits/passes/history. It marks suspended, bans customer Auth sign-in, deletes only that customer's sessions/refresh tokens and disables their push subscriptions. Unblock restores previous status/ban, never restores old sessions/subscriptions. Direct customer RPC paths and REST policies reject blocked identities, including previously issued JWTs. Existing manual Auth bans are preserved when restoring.
 
