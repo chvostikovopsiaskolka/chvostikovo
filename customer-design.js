@@ -231,13 +231,27 @@
 
   };
   window.customerDesignEditReservation=date=>{window.openBookingPickerV37?.();const carousel=byId('designBookingCarousel'),card=byId('weekDays')?.querySelector('[data-date="'+date+'"]');if(carousel&&card)carousel.scrollLeft=card.offsetLeft-carousel.offsetLeft;};
-  window.customerDesignTaxiOpened=()=>{const picker=byId('bookingPickerV37'),taxi=byId('bookingTaxiEditV201');if(!picker||picker.classList.contains('hidden')||!taxi)return;taxi.classList.add('design-inline-taxi');taxi.setAttribute('role','region');taxi.removeAttribute('aria-modal');byId('bookingPickerTaxiSectionV91').after(taxi);byId('taxiEditSendV201').textContent='Pridať taxík';requestAnimationFrame(()=>{picker.scrollTop=Math.max(0,taxi.offsetTop-20);});};
+  let taxiReturnV328=null,taxiPickerInertV328=false;
+  window.customerDesignTaxiOpened=()=>{
+    const picker=byId('bookingPickerV37'),taxi=byId('bookingTaxiEditV201');if(!taxi)return;
+    taxiReturnV328=document.activeElement;taxiPickerInertV328=!!picker?.inert;
+    if(picker&&!picker.classList.contains('hidden'))picker.inert=true;
+    document.body.append(taxi);taxi.classList.remove('design-inline-taxi');taxi.classList.add('design-taxi-modal');
+    taxi.setAttribute('role','dialog');taxi.setAttribute('aria-modal','true');
+    byId('taxiEditSendV201').textContent='Pridať taxík';document.documentElement.classList.add('design-modal-open');
+    byId('taxiEditCloseV201').focus({preventScroll:true});
+  };
+  window.customerDesignTaxiClosed=()=>{
+    const picker=byId('bookingPickerV37');if(picker)picker.inert=taxiPickerInertV328;
+    document.documentElement.classList.remove('design-modal-open');
+    if(taxiReturnV328?.isConnected)taxiReturnV328.focus({preventScroll:true});taxiReturnV328=null;
+  };
   let chatPickerScroll=null;
   window.customerDesignKeepPickerForChat=()=>{const picker=byId('bookingPickerV37');if(!picker||picker.classList.contains('hidden'))return false;chatPickerScroll=picker.scrollTop;picker.inert=true;return true;};
   window.customerDesignChatOpened=()=>window.customerDesignKeepPickerForChat();
   window.customerDesignChatClosed=()=>{const picker=byId('bookingPickerV37');if(chatPickerScroll!==null&&picker&&!picker.classList.contains('hidden')){picker.inert=false;picker.scrollTop=chatPickerScroll;document.documentElement.classList.add('design-reservations-open');byId('bookingTab').inert=true;}chatPickerScroll=null;};
   window.customerDesignPickerOpened=()=>{window.customerDesignPickerRender();document.documentElement.classList.add('design-reservations-open');byId('bookingTab').inert=true;};
-  window.customerDesignPickerClosed=()=>{byId('bookingTaxiEditV201')?.classList.add('hidden');document.documentElement.classList.remove('design-reservations-open');byId('bookingTab').inert=false;};
+  window.customerDesignPickerClosed=()=>{if(!byId('bookingTaxiEditV201')?.classList.contains('hidden')){byId('bookingTaxiEditV201')?.classList.add('hidden');window.customerDesignTaxiClosed();}byId('bookingPickerV37').inert=false;document.documentElement.classList.remove('design-reservations-open');byId('bookingTab').inert=false;};
   customerHooks.afterSwitchTab.push(()=>{window.closeBookingPickerV305?.();layout();});
   customerHooks.afterRenderDog.push(layout);customerHooks.afterRenderPassSummary.push(layout);customerHooks.afterBootstrap.push(layout);
   document.addEventListener('click',e=>{const single=e.target.closest('#bookingVaccinationStatus'),dual=e.target.closest('.dual-dog-status-v254');if(!single&&!dual)return;e.preventDefault();e.stopImmediatePropagation();openVaccineSummary(dual?Number(dual.dataset.dogOpenV254):state.selectedDogId);},true);
