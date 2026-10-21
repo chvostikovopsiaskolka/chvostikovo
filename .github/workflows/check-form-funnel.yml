@@ -20,6 +20,8 @@ jobs:
       - run: node scripts/restore-cori-image.mjs
       - name: Critical form regression
         run: bun run check:critical-forms
+      - name: AI referral regression
+        run: node scripts/ai-referral-checks.cjs
       - name: TypeScript validation
         run: bun run check:types
       - name: Build static pages
