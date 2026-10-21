@@ -100,8 +100,8 @@ async function scenario(count){
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday keeps closed-week guidance by calendar');
   assert.notEqual(w.getComputedStyle(w.document.getElementById('designWeekDeadline')).display,'none','legacy closed-week CSS cannot hide the Monday notice');
   assert(w.document.getElementById('designWeekDeadline').previousElementSibling.classList.contains('booking-picker-week-label-v127'),'closed notice follows week heading');
-  assert.match(w.document.querySelector('#designWeekDeadline strong').textContent,/Stále môžete požiadať o miesto/);
-  assert.match(w.document.querySelector('#designWeekDeadline span').textContent,/Počkajte na jej schválenie/);
+  assert.match(w.document.querySelector('#designWeekDeadline strong').textContent,/Nestihli ste rezervovať miesto do nedele/);
+  assert.match(w.document.querySelector('#designWeekDeadline span').textContent,/odošlite žiadosť a počkajte na schválenie/);
   assert(w.document.querySelector('#bookingPickerCloseV37 svg'),'close glyph is geometrically centred vector');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false,'Sunday reminder stays visible on Monday');
   assert.match(w.document.getElementById('designReservationNotice').textContent,/do nedele 20:00/);
