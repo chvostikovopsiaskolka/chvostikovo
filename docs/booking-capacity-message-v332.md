@@ -1,4 +1,4 @@
-# Capacity enquiries and current-week notice · v332 / Beta 2.0.15
+# Capacity enquiries and current-week notice · v332 / Beta 2.0.16
 
 Normal requests continue after the Sunday planning reminder until D−1 19:00 Europe/Bratislava, without an automatic message. Full days (including insufficient places for Both) open the existing message-only conversation. Sending uses send_message and never creates a booking request. After the final cutoff contact is likewise message-only. Existing bookings, past dates and operationally closed dates remain disabled. Server capacity, vaccination, ownership, pair atomicity and final-cutoff guards remain unchanged from v331/API64.
 
