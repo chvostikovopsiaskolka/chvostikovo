@@ -1,3 +1,4 @@
+import {securityLimitV336,securityAccessV336} from "./security-v336.ts";
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
@@ -1221,6 +1222,8 @@ Deno.serve(async (req: Request) => {
     const user = auth.user as Json;
     const token = auth.token;
     const staff = await isStaff(String(user.id));
+    if (!staff) { const denied=await securityAccessV336(req,SUPABASE_URL,SERVICE_KEY,CORS);if(denied)return denied; }
+    if (!staff && req.method==='GET') { const limited=await securityLimitV336(req,'bootstrap_user',String(user.id),SUPABASE_URL,SERVICE_KEY,CORS);if(limited)return limited; }
 
     if (req.method === 'GET') {
       const result = await customerBootstrap(user, token);
@@ -1228,8 +1231,11 @@ Deno.serve(async (req: Request) => {
     }
     if (req.method !== 'POST') return fail('Nepodporovaná metóda.', 405);
 
-    const body = await req.json().catch(() => ({})) as Json;
+    const rawBody=await req.text();
+    if(rawBody.length>9_000_000)return fail('Požiadavka je príliš veľká.',413);
+    let body:Json={};try{body=JSON.parse(rawBody)}catch{}
     const action = String(body.action || '');
+    if(!staff){const scope=action==='send_message'?'message_user':action.startsWith('upload_')?'upload_user':'mutation_user';const limited=await securityLimitV336(req,scope,String(user.id),SUPABASE_URL,SERVICE_KEY,CORS);if(limited)return limited;}
     if (action === 'save_profile') return json({ data: await saveProfile(user, body) });
     if (action === 'save_dog') {
       await ensureProfile(user);
@@ -1439,7 +1445,7 @@ Deno.serve(async (req: Request) => {
     return fail('Neznáma akcia.', 404);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return fail(message, /prihlás|vypršalo/i.test(message) ? 401 : 400);
+    return fail(message, /Príliš veľa požiadaviek/.test(message)?429:/prihlás|vypršalo/i.test(message)?401:400);
   }
 });
 

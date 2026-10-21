@@ -20,6 +20,16 @@ jobs:
           mkdir -p tests/shared-v244
           ln -s "$RUNNER_TEMP/chvo-admin-deps/node_modules" tests/shared-v244/node_modules
           echo "NODE_PATH=$RUNNER_TEMP/chvo-admin-deps/node_modules" >> "$GITHUB_ENV"
+      - name: Customer access and abuse ceilings v336
+        run: |
+          node tests/security-access-v336.mjs
+          node tests/security-handlers-v336.mjs
+          node tests/admin-access-v336.cjs
+      - name: Customer access and abuse ceilings v336
+        run: |
+          node tests/security-access-v336.mjs
+          node tests/security-handlers-v336.mjs
+          node tests/admin-access-v336.cjs
       - name: Default capacity and admin boot v322
         run: |
           node tools/build-admin-capacity-v322.cjs
