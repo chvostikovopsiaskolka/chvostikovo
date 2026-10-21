@@ -347,3 +347,7 @@ html.customer-android.customer-design #bookingPickerV37 .booking-day-v37{min-hei
 .design-ticket-usage p{font-size:12px;line-height:1.4;margin:0;min-width:0}
 .design-ticket-usage .design-validity{font-size:9px;padding:5px 6px;flex:none;max-width:56%}
 @media(max-width:350px){.design-ticket h2,.design-visits-title h2{font-size:14px!important}.design-ticket-usage p{font-size:11px}.design-ticket-usage .design-validity{font-size:8px}}
+
+/* v339: start with the reservation card; give the repeat-days prompt full width. */
+.customer-design #bookingPickerV37.design-reservations-page .booking-picker-head-v37{display:none!important}
+.customer-design #bookingPickerV37 #designBookingCarousel #bookingPickerSmartDaysV199{flex:0 0 100%;max-width:100%;margin:0!important}
