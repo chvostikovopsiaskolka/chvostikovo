@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),ts=require('typescript');
-let source=fs.readFileSync('supabase/functions/admin-push/index.ts','utf8').replace(/^import webpush[^\n]+\n/,'');
+let source=fs.readFileSync('supabase/functions/admin-push/index.ts','utf8').replace(/^import[^\n]+\n/gm,'');
 source=ts.transpile(source,{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS});
 const c=vm.createContext({Deno:{env:{get:()=>''},serve(){}},console,webpush:{}});vm.runInContext(source,c);
 (async()=>{const record={id:1,recipient_user_id:'synthetic-staff',notification_type:'taxi_cancelled_admin',title:'Taxík bol zrušený',body:'Synthetic Bella · 02.01.2030. Rezervácia škôlky zostáva platná.'};

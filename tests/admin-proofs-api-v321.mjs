@@ -1,3 +1,4 @@
+import {securityEdgeSourceV336} from './helpers/security-edge-source-v336.mjs';
 import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';import {stripTypeScriptTypes} from 'node:module';
 let handler,failUpload=false,next=10;const proofs=[1,2,3].map(id=>({id,dog_id:1,batch_id:'batch',storage_path:'dogs/1/old'+id+'.jpg',is_current:true,source:'customer'}));
 const calls=[],response=x=>new Response(JSON.stringify(x),{status:200});
@@ -7,6 +8,7 @@ const transport=async(url,options={})=>{
  if(p.includes('/storage/v1/object/sign/'))return response({signedURL:'/object/sign/vaccination-proof-photos/fixture?token=private'});
  if(p.includes('/storage/v1/object/'))return failUpload?new Response('fixture upload failed',{status:503}):response({Key:'fixture'});
  const table=p.split('/').at(-1);
+ if(table==='consume_request_limit_v336'||table==='portal_customer_access_allowed_v336')return response(true);
  if(table==='app_settings')return response(params.get('setting_key')==='eq.daycare_default_capacity'?[{setting_value:'10'}]:[]);
  if(table==='portal_day_settings'){const d=new Date(new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava'}).format(new Date())+'T12:00:00Z');const day=d.getUTCDay();d.setUTCDate(d.getUTCDate()+(day===0?1:1-day));return response([{day:d.toISOString().slice(0,10),capacity:12,bookings_open:true}]);}
  if(table==='staff')return response(params.get('user_id')==='eq.staff'?[{user_id:'staff'}]:[]);
@@ -23,7 +25,7 @@ const transport=async(url,options={})=>{
  }
  return response([]);
 };
-const context={Deno:{env:{get:k=>k==='SUPABASE_URL'?'https://fixture.invalid':'fixture-secret'},serve:f=>handler=f},Request,Response,URL,URLSearchParams,console,crypto,TextEncoder,atob,fetch:transport};vm.createContext(context);vm.runInContext(stripTypeScriptTypes(fs.readFileSync('supabase/functions/customer-portal-api/index.ts','utf8')),context);
+const context={Deno:{env:{get:k=>k==='SUPABASE_URL'?'https://fixture.invalid':'fixture-secret'},serve:f=>handler=f},Request,Response,URL,URLSearchParams,console,crypto,TextEncoder,AbortSignal,atob,fetch:transport};vm.createContext(context);vm.runInContext(stripTypeScriptTypes(securityEdgeSourceV336('customer-portal-api')),context);
 const post=async(token,body)=>{const r=await handler(new Request('https://fixture.invalid/',{method:'POST',headers:{authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)}));return {status:r.status,data:await r.json()}};
 const jpeg='data:image/jpeg;base64,/9j/2Q==';
 let r=await post('staff',{action:'upload_vaccination_proofs',dog_id:1,images:[jpeg],append:true});assert.equal(r.status,200);assert.equal(r.data.data.proofs.length,4);assert.equal(proofs.at(-1).source,'staff');
