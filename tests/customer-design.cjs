@@ -11,6 +11,7 @@ async function scenario(count){
  const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>{if(!/Could not parse CSS|Not implemented:.*(scroll|canvas|navigation)/.test(e.message))errors.push(e.message)});
  const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'https://design.fixture',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:vc}),w=dom.window,c=dom.getInternalVMContext(),run=s=>vm.runInContext(s,c);
  Object.assign(w,{fetch:async()=>({ok:true,status:200,json:async()=>[],text:async()=>'[]',headers:{get:()=>''}}),matchMedia:()=>({matches:false,addEventListener(){},removeEventListener(){}}),scrollTo(){},confirm:()=>true,ResizeObserver:class{observe(){}disconnect(){}},IntersectionObserver:class{observe(){}disconnect(){}}});
+ w.HTMLElement.prototype.scrollIntoView=function(){};
  const NativeDate=w.Date;w.Date=class extends NativeDate{constructor(...args){super(...(args.length?args:[w.__fixtureNowIso||NativeDate.now()]))}static now(){return w.__fixtureNowIso?new NativeDate(w.__fixtureNowIso).getTime():NativeDate.now()}};
  Object.defineProperty(w.navigator,'userAgent',{value:count===1?'Mozilla/5.0 (Linux; Android 14) Chrome/130':'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15'});
  for(const file of ['terms-pdf.js','app.js','dual-dog-overview-v246.js','customer-design.js'])new vm.Script(fs.readFileSync(file,'utf8')).runInContext(c);
@@ -33,10 +34,12 @@ async function scenario(count){
   assert.equal(w.document.querySelector('#designDogName > span'),null,'no redundant pencil');
   assert.match(w.document.querySelector('.design-validity').textContent,/Platnosť do/);
   assert.match(w.document.querySelector('.design-validity').textContent,/2099/,'pass expiry retains full year');
-  assert.match(w.document.querySelector('.design-friend-tile').textContent,/Zobraziťkamarátovv škôlke/);
+  assert.match(w.document.querySelector('.design-friends-inline').textContent,/Zobraziť kamošov v škôlke/);
   let photo=w.document.querySelector('.design-friend-strip img');assert(photo);
   run("state.data.availability.days[0].dogs.push({dog_id:9,name:'Kamarát 2',sex:'male'},{dog_id:10,name:'Kamarát 3',sex:'female'},{dog_id:11,name:'Kamarát 4',sex:'male'});renderDog()");
-  assert.equal(w.document.querySelectorAll('.design-friend-strip>.design-friend-photo').length,4,'four permitted friends in overview');
+  run("state.data.availability.days[0].dogs.push({dog_id:12,name:'Photo Friend',sex:'female',photo_url:'https://fixture.invalid/priority.jpg'});renderDog()");
+  assert.equal(w.document.querySelectorAll('.design-friend-strip img')[1].src,'https://fixture.invalid/priority.jpg','allowed current photos precede classmates without photos');
+  assert.equal(w.document.querySelectorAll('.design-friend-strip>.design-friend-photo').length,5,'five allowed classmates including anonymous, photos first');
   assert.equal(w.document.querySelector('.design-friend-strip img'),photo,'four-friend layout preserves decoded first photo');
   const edit=w.document.querySelector('.design-visit-edit');assert(edit);edit.click();
   assert(!w.document.getElementById('bookingPickerV37').classList.contains('hidden'));
@@ -63,6 +66,14 @@ async function scenario(count){
   assert.equal(run('state.data.requests[0].status'),'approved');assert.equal(run('state.data.requests[0].taxi_mode'),'none');assert.equal(run('taxiPayload.p_request_id'),70);
   run(`state.data=JSON.parse(${JSON.stringify(originalBookingFixture)});renderDays();`);w.api=originalApi;run('api=window.api');w.authFetch=originalAuthFetch;run('authFetch=window.authFetch');photo=w.document.querySelector('.design-friend-strip img');
   assert.equal(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').dataset.ownStatus,'approved');
+  run(`state.data.requests=[];state.data.reservations=[{id:700,dog_id:1,status:'booked',reservation_date:'2099-01-05',entry_type:'pass',taxi_mode:'none',planned_entry_number:7,planned_pass_total:10}];renderDays();window.openBookingPickerV37();`);
+  w.document.querySelector('#weekDays [data-taxi-reservation="700"]').click();
+  assert(!w.document.getElementById('bookingTaxiEditV201').classList.contains('hidden'),'legacy reservation opens real taxi form');
+  run("authFetch=async(path,opts)=>{globalThis.legacyTaxiCall={path,body:JSON.parse(opts.body)};return {id:71,dog_id:1,reservation_id:700,reservation_date:'2099-01-05',status:'approved',taxi_mode:'none',taxi_change_status:'pending',requested_taxi_mode:'pickup'}}");
+  w.document.querySelector('[data-edit-taxi="pickup"]').click();w.document.getElementById('taxiEditSendV201').click();await new Promise(r=>setTimeout(r,25));
+  assert.match(run('legacyTaxiCall.path'),/portal_request_reservation_taxi_v327/);assert.equal(run('legacyTaxiCall.body.p_reservation_id'),700);
+  assert.equal(run('state.data.requests[0].taxi_change_status'),'pending');assert.equal(run('futureItems().length'),1,'bridging request does not duplicate booking');
+  run(`state.data=JSON.parse(${JSON.stringify(originalBookingFixture)});renderDays();`);w.authFetch=originalAuthFetch;run('authFetch=window.authFetch');
   assert.match(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').textContent,/Schválené/);
   const addTaxi=w.document.querySelector('#weekDays [data-taxi-request]');assert(addTaxi);addTaxi.click();
   assert(w.document.getElementById('bookingTaxiEditV201').classList.contains('design-inline-taxi'));
@@ -189,6 +200,18 @@ async function scenario(count){
   assert.match(w.document.getElementById('notificationPopupList').textContent,/Synthetic rejection/);
   w.document.getElementById('notificationPopupClose').click();
   assert.equal(run('state.data.notifications[0].read_at!==null'),true);
+  new vm.Script(fs.readFileSync('back-swipe.js','utf8')).runInContext(c);
+  w.HTMLElement.prototype.getClientRects=function(){return this.closest('.hidden,[hidden]')||w.getComputedStyle(this).display==='none'?[]:[{left:0,right:390,top:0,bottom:800}];};
+  function swipe(target=w.document.body,x=70){
+    const event=(type,touches,changed=[])=>{const e=new w.Event(type,{bubbles:true,cancelable:true});Object.defineProperties(e,{touches:{value:touches},changedTouches:{value:changed}});target.dispatchEvent(e);};
+    const start={clientX:x,clientY:120,identifier:1},end={clientX:x+140,clientY:120,identifier:1};event('touchstart',[start]);event('touchmove',[end]);event('touchend',[],[end]);
+  }
+  // Navigation fixture has completed onboarding; retain separate mandatory-form guard below.
+  run("loading(false);document.getElementById('installGuideContinue')?.click();window.runCustomerOnboardingV75=()=>{};state.data.profile.privacy_notice_acknowledged_at='2099-01-01';state.data.profile.push_prompt_answered_at='2099-01-01';document.querySelectorAll('.onboarding-modal-v75,#privacyInfoModal,#schoolTermsModal').forEach(el=>el.classList.add('hidden'));showApp();switchTab('menu')");swipe();assert.equal(run('state.activeTab'),'booking');
+  run('window.openBookingPickerV37()');swipe(w.document.getElementById('bookingPickerV37'),10);assert(w.document.getElementById('bookingPickerV37').classList.contains('hidden'));
+  run("switchTab('menu');openDogDetails('details',false);document.getElementById('dogBreed').value='Synthetic unsaved change'");w.confirm=()=>false;swipe();assert(!w.document.getElementById('dogDetailsModal').classList.contains('hidden'),'swipe respects unsaved fields without name');w.confirm=()=>true;swipe();assert(w.document.getElementById('dogDetailsModal').classList.contains('hidden'));assert.equal(run('state.activeTab'),'booking');
+  run("switchTab('menu');openDogDetails('vaccinations',false)");swipe();assert(w.document.getElementById('dogDetailsModal').classList.contains('hidden'));assert.equal(run('state.activeTab'),'booking');
+  run("switchTab('menu');openDogDetails('details',true)");swipe();assert(!w.document.getElementById('dogDetailsModal').classList.contains('hidden'),'mandatory form stays open');run('closeDogDetails(true);switchTab("booking")');
   assert.deepEqual(errors,[]);
   console.log('PASS design '+count+' dog(s): 10/20 used paws, stable photos, optional L4, original editor, consent roster/shared entry, pending privacy, single ticket, empty CTA, 10 dates, optional per-dog taxi');
  }finally{w.close()}
