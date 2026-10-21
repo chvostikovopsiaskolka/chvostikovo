@@ -69,3 +69,10 @@ jobs:
           ADMIN_SOURCE=../admin-v287.html node tests/admin-existing-v275.cjs
           ADMIN_SOURCE=../admin-v287.html node tests/admin-attendance-v283.cjs
           ADMIN_SOURCE=../admin-v287.html node tests/admin-batch-approval-v284.cjs
+
+      - name: Customer reservation controls v326
+        run: |
+          node tests/customer-design.cjs
+          node tests/customer-taxi-cancel-v326.mjs
+          node tests/taxi-notification-v326.cjs
+

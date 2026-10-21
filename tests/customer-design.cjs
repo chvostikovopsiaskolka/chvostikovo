@@ -34,13 +34,34 @@ async function scenario(count){
   assert.match(w.document.querySelector('.design-validity').textContent,/Platnosť do/);
   assert.match(w.document.querySelector('.design-validity').textContent,/2099/,'pass expiry retains full year');
   assert.match(w.document.querySelector('.design-friend-tile').textContent,/Zobraziťkamarátovv škôlke/);
-  const photo=w.document.querySelector('.design-friend-strip img');assert(photo);
+  let photo=w.document.querySelector('.design-friend-strip img');assert(photo);
   run("state.data.availability.days[0].dogs.push({dog_id:9,name:'Kamarát 2',sex:'male'},{dog_id:10,name:'Kamarát 3',sex:'female'},{dog_id:11,name:'Kamarát 4',sex:'male'});renderDog()");
   assert.equal(w.document.querySelectorAll('.design-friend-strip>.design-friend-photo').length,4,'four permitted friends in overview');
   assert.equal(w.document.querySelector('.design-friend-strip img'),photo,'four-friend layout preserves decoded first photo');
   const edit=w.document.querySelector('.design-visit-edit');assert(edit);edit.click();
   assert(!w.document.getElementById('bookingPickerV37').classList.contains('hidden'));
-  assert.match(w.document.getElementById('weekDays').textContent,/Vstupy 7 z 10/);
+  assert.match(w.document.getElementById('weekDays').textContent,/Plánovaný vstup 7 z 10/);
+  assert.match(w.document.querySelector('.design-visit-entries').textContent,/Plánovaný vstup 7 z 10/);
+  assert.match(edit.textContent,/Upraviť/);
+  const originalBookingFixture=run('JSON.stringify(state.data)'),originalApi=run('api'),originalAuthFetch=run('authFetch');
+  // Exercise real delegated cancellation flow, not isolated render helpers.
+  for(const choice of ['none','illness','reschedule']){
+    run(`state.data=JSON.parse(${JSON.stringify(originalBookingFixture)});state.data.reservations=[{id:700,dog_id:1,status:'booked',reservation_date:'2099-01-05',taxi_mode:'pickup',taxi_amount:5,planned_entry_number:7,planned_pass_total:10}];api=async body=>{globalThis.cancelPayload=body;return {data:{}}};renderDays();`);
+    const task=run("cancelBooking({dataset:{request:'70',reservation:''}})");
+    assert(!w.document.getElementById('customerDesignModal').classList.contains('hidden'));
+    w.document.querySelector(`[data-cancel-reason="${choice}"]`).click();await task;
+    assert.equal(run('state.data.requests[0].status'),'cancelled');
+    assert.equal(run('state.data.reservations[0].status'),'cancelled','linked reservation is removed immediately too');
+    assert.equal(run('futureItems().length'),0,'cancelled reservation cannot reappear as legacy');
+    assert.equal(run('cancelPayload.reason'),choice==='none'?null:choice==='illness'?'Psík ochorel':'Chcem zmeniť termín');
+    if(choice==='reschedule')assert(!w.document.getElementById('bookingPickerV37').classList.contains('hidden'));
+  }
+  run(`state.data=JSON.parse(${JSON.stringify(originalBookingFixture)});state.data.requests[0].taxi_mode='pickup_dropoff';state.data.requests[0].taxi_amount=10;renderDays();`);
+  let taxiCancel=w.document.querySelector('[data-taxi-cancel-request]');assert(taxiCancel);
+  run("authFetch=async(path,opts)=>{globalThis.taxiPayload=JSON.parse(opts.body);return {reservation_id:700,changed:true}};");
+  await run("cancelTaxiV326(document.querySelector('[data-taxi-cancel-request]'))");
+  assert.equal(run('state.data.requests[0].status'),'approved');assert.equal(run('state.data.requests[0].taxi_mode'),'none');assert.equal(run('taxiPayload.p_request_id'),70);
+  run(`state.data=JSON.parse(${JSON.stringify(originalBookingFixture)});renderDays();`);w.api=originalApi;run('api=window.api');w.authFetch=originalAuthFetch;run('authFetch=window.authFetch');photo=w.document.querySelector('.design-friend-strip img');
   assert.equal(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').dataset.ownStatus,'approved');
   assert.match(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').textContent,/Schválené/);
   const addTaxi=w.document.querySelector('#weekDays [data-taxi-request]');assert(addTaxi);addTaxi.click();
@@ -52,9 +73,12 @@ async function scenario(count){
   w.__fixtureNowIso='2099-01-04T18:00:00Z';run("window.customerDesignOpenTaxi(70,'')");
   assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'),'19:00 uses original late taxi message');
   w.document.getElementById('supportChatCloseV52').click();
-  await run("cancelBooking({dataset:{request:'70',reservation:''}})");
+  const lateCancel=run("cancelBooking({dataset:{request:'70',reservation:''}})");
+  assert.equal(w.document.querySelectorAll('[data-cancel-reason]').length,3);
+  w.document.querySelector('[data-cancel-reason="illness"]').click();await lateCancel;
   assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'),'19:00 cancellation opens message instead of cancel RPC');
   assert.match(w.document.getElementById('supportMessageBodyV52').value,/zrušenie rezervácie/);
+  assert.match(w.document.getElementById('supportMessageBodyV52').value,/Psík ochorel/);
   assert.equal(run('state.data.requests[0].status'),'approved','late cancellation leaves booking intact');
   w.document.getElementById('supportChatCloseV52').click();
   w.__fixtureNowIso='2099-01-05T09:00:00Z';run("window.openBookingPickerV37();renderDays();window.customerDesignPickerRender()");
@@ -125,7 +149,7 @@ async function scenario(count){
    assert.equal(w.document.getElementById('bookingPickerSubmitV37').disabled,false,'selected days retained');
   }
   run("state.data.requests=[{id:90,dog_id:1,reservation_date:'2099-01-08',status:'rejected'}];renderDog()");
-  assert(w.document.querySelector('.design-visit-status.rejected'));assert.equal(w.document.querySelectorAll('.design-visit-card img').length,0);
+  assert.equal(w.document.querySelector('.design-visit-status.rejected'),null);assert.equal(w.document.querySelectorAll('.design-visit-card img').length,0);
 
   run("state.data.requests[0].status='approved';state.data.availability.days.forEach(d=>{d.dogs=[];d.anonymous_dogs=0});renderDog()");
   assert.match(w.document.querySelector('.design-no-friends').textContent,/Zatiaľ sa neprihlásil žiaden kamoš/);
@@ -161,9 +185,14 @@ async function scenario(count){
   assert.equal(run('state.photoEdit.zoom'),1,'editor reuse clears prior touches');
   run('closePhotoEditor()');
 
+  run("window.closeBookingPickerV305();window.__customerOnboardingCompleteV75=true;state.data.notifications=[{id:999,notification_type:'booking_rejected',title:'Rezervácia nebola schválená',body:'Synthetic rejection',read_at:null}];renderNotifications()");
+  assert.match(w.document.getElementById('notificationPopupList').textContent,/Synthetic rejection/);
+  w.document.getElementById('notificationPopupClose').click();
+  assert.equal(run('state.data.notifications[0].read_at!==null'),true);
   assert.deepEqual(errors,[]);
   console.log('PASS design '+count+' dog(s): 10/20 used paws, stable photos, optional L4, original editor, consent roster/shared entry, pending privacy, single ticket, empty CTA, 10 dates, optional per-dog taxi');
  }finally{w.close()}
 }
 (async()=>{await scenario(1);await scenario(2)})().catch(e=>{console.error(e);process.exitCode=1});
+
 

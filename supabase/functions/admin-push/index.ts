@@ -313,7 +313,7 @@ async function messageForWebhook(body: Json) {
   }
 
   if (table === "portal_notifications") {
-    const isAdminMessage = record.notification_type === "customer_message_admin";
+    const isAdminMessage = ["customer_message_admin", "taxi_cancelled_admin"].includes(String(record.notification_type));
     const notificationBody = String(record.push_body || record.body || "Máte nové upozornenie.");
     const isTaxiInterest = isAdminMessage && notificationBody.toLocaleLowerCase("sk-SK").includes("doplnenie taxi");
     return {
@@ -609,3 +609,4 @@ Deno.serve(async (req: Request) => {
     return response({ error: error instanceof Error ? error.message : String(error) }, 400);
   }
 });
+
