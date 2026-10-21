@@ -84,6 +84,7 @@
     const visible = (day?.dogs || []).filter(d => !own.some(o => d.dog_id != null ? Number(o.id) === Number(d.dog_id) : String(o.customer_name || o.name).trim() === String(d.name).trim()));
     const ownNotListed = own.filter(o => futureItems().some(r => Number(r.dog_id)===Number(o.id) && r.reservation_date===date && r.status==='approved') && !(day?.dogs || []).some(d => d.dog_id != null ? Number(d.dog_id)===Number(o.id) : d.name===(o.customer_name||o.name))).length;
     const anonymous = Math.max(0, Number(day?.anonymous_dogs || 0) - ownNotListed);
+    visible.sort((a,b)=>Number(!!b.photo_url)-Number(!!a.photo_url));
     return [...visible, ...Array.from({length:anonymous},(_,i) => ({name:'Prihlásený škôlkar',anonymous:true,key:'anonymous-'+i}))];
   }
   function photoNode(dog, className) {
@@ -149,7 +150,7 @@
         if(!card){card=document.createElement('article');card.className='design-visit-card';card.dataset.visitDate=date;}
         if(card.dataset.status!==status){
           card.dataset.status=status;
-          card.innerHTML=`<div class="design-nearest-head">${icon('calendar')}<strong><span class="design-visit-label"></span>${esc(skDay(date).slice(0,2).toLowerCase())} ${esc(skDate(date).replace(/\s*20\d{2}$/, ''))}</strong><button type="button" class="design-visit-edit" aria-label="Upraviť rezerváciu na ${esc(skDate(date))}"><span aria-hidden="true">✎</span> Upraviť</button>${approved?'<span class="design-approved" aria-label="Schválená">✓</span>':status==='pending'?'<span class="design-visit-status pending" aria-label="Čaká na schválenie" title="Čaká na schválenie">?</span>':'<span class="design-visit-status rejected" aria-label="Zamietnutá" title="Zamietnutá">×</span>'}</div>${approved?'<div class="design-friends-line"><div class="design-friend-strip"></div><button type="button" class="design-friends-button design-friend-tile"><span>Zobraziť<br>kamarátov<br>v škôlke</span><b aria-hidden="true">→</b></button></div>':`<p class="design-waiting-friends">${status==='pending'?'Čaká na schválenie. Kamarátov uvidíte po schválení rezervácie.':'Rezervácia bola zamietnutá.'}</p>`}<div class="design-visit-entries"></div>`;
+          card.innerHTML=`<div class="design-nearest-head">${icon('calendar')}<strong><span class="design-visit-label"></span>${esc(skDay(date).slice(0,2).toLowerCase())} ${esc(skDate(date).replace(/\s*20\d{2}$/, ''))}</strong><button type="button" class="design-visit-edit" aria-label="Upraviť rezerváciu na ${esc(skDate(date))}"><span aria-hidden="true">✎</span> Upraviť</button>${approved?'<span class="design-approved" aria-label="Schválená">✓</span>':status==='pending'?'<span class="design-visit-status pending" aria-label="Čaká na schválenie" title="Čaká na schválenie">?</span>':'<span class="design-visit-status rejected" aria-label="Zamietnutá" title="Zamietnutá">×</span>'}</div>${approved?'<div class="design-friends-line"><div class="design-friend-strip"></div></div>':`<p class="design-waiting-friends">${status==='pending'?'Čaká na schválenie. Kamarátov uvidíte po schválení rezervácie.':'Rezervácia bola zamietnutá.'}</p>`}<div class="design-visit-footer"><div class="design-visit-entries"></div>${approved?'<button type="button" class="design-friends-button design-friends-inline">Zobraziť kamošov v škôlke <span aria-hidden="true">›</span></button>':''}</div>`;
           if(approved)card.querySelector('.design-friends-button').addEventListener('click',()=>openFriends(date));card.querySelector('.design-visit-edit').addEventListener('click',()=>window.customerDesignEditReservation(date));
         }
         card.setAttribute('aria-label',`${i===0?'Najbližšia návšteva, ':''}${skDay(date)} ${skDate(date)}`);
@@ -158,7 +159,7 @@
         card.querySelector('.design-visit-entries').innerHTML=entryRows.map(row=>{const label=bookingEntrySummaryV326(row).label;if(!label)return '';const dog=state.data.dogs.find(d=>Number(d.id)===Number(row.dog_id));return `<div>${icon('ticket')} ${multi?esc(dog?.name||'Psík')+' · ':''}${esc(label)}</div>`;}).join('');
         if(carousel.children[i]!==card)carousel.insertBefore(card,carousel.children[i]||null);
         if(approved){
-          const rows=friends(date).slice(0,4),strip=card.querySelector('.design-friend-strip');
+          const rows=friends(date).slice(0,5),strip=card.querySelector('.design-friend-strip');
           reconcilePhotos(strip,rows);
           let empty=card.querySelector('.design-no-friends');
           if(!rows.length&&!empty){empty=document.createElement('p');empty.className='design-no-friends';empty.textContent='Zatiaľ sa neprihlásil žiaden kamoš.';strip.after(empty);}
@@ -201,7 +202,7 @@
     const head=card.querySelector('.booking-picker-head-v37');
     const close=byId('bookingPickerCloseV37');if(!close.querySelector('svg'))close.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     if(!byId('designMyBookings')){
-      const section=document.createElement('section');section.id='designMyBookings';section.innerHTML='<div id="designReservationNotice"></div><h2>Moje rezervácie</h2>';head.after(section);section.append(byId('weekDays'));
+      const section=document.createElement('section');section.id='designMyBookings';section.innerHTML='<div id="designReservationNotice"></div><h2>📅 Moje rezervácie</h2>';head.after(section);section.append(byId('weekDays'));
       const chat=document.createElement('button');chat.type='button';chat.className='design-reservation-chat';chat.setAttribute('aria-label','Napísať správu');chat.innerHTML=icon('message');chat.addEventListener('click',()=>{window.customerDesignKeepPickerForChat?.();openCustomerChat();});head.insertBefore(chat,byId('bookingPickerCloseV37'));
     }
     let carousel=byId('designBookingCarousel');if(!carousel){carousel=document.createElement('div');carousel.id='designBookingCarousel';byId('weekDays').before(carousel);carousel.append(byId('weekDays'));}

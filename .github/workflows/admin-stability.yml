@@ -76,3 +76,8 @@ jobs:
           node tests/customer-taxi-cancel-v326.mjs
           node tests/taxi-notification-v326.cjs
 
+
+      - name: Reservation replan and legacy taxi v327
+        run: |
+          node tests/customer-replan-auto-v327.mjs
+          node tests/reservation-taxi-v327.mjs

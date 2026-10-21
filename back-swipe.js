@@ -3,7 +3,33 @@
 (function installBackSwipe(){
   const layerSelector='[role="dialog"],.legal-modal,.overlay,.v41-dashboard-modal,.settings-modal-v36,.booking-picker-v37,.photo-modal,.notification-popup,.vacc-proof-viewer-v104';
   const visible=el=>el&&!el.closest('.hidden')&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden';
+  const customerActive=()=>document.getElementById('appView')&&!document.getElementById('appView').classList.contains('hidden')&&typeof state!=='undefined';
+  const closeButton=top=>[...top.querySelectorAll('button')].find(b=>visible(b)&&!b.disabled&&(/close|backBtn|ModalBack|CreateBack/i.test(b.id)||b.getAttribute('aria-label')==='Zavrieť'||b.getAttribute('aria-label')==='Zatvoriť'));
+  const visibleLayers=()=>[...document.querySelectorAll(layerSelector)].filter(visible).sort((a,b)=>(parseInt(getComputedStyle(a).zIndex)||0)-(parseInt(getComputedStyle(b).zIndex)||0));
+  function customerOverview(){
+    // Existing close handlers keep mandatory onboarding, unsaved drafts and busy guards.
+    for(let i=0;i<12;i++){
+      const top=visibleLayers().at(-1);if(!top)break;
+      const close=closeButton(top);if(!close)return false;
+      close.click();if(visible(top))return false;
+    }
+    if(visibleLayers().length)return false;
+    switchTab('booking');window.scrollTo(0,0);return true;
+  }
+  function horizontalSurface(target){
+    for(let el=target;el&&el!==document.body;el=el.parentElement){
+      if(el.matches('.design-overview-carousel,#designBookingCarousel,.photo-modal,.photo-actions-modal,[data-swipe-ignore]'))return true;
+      if(el.scrollWidth>el.clientWidth+2&&/auto|scroll/.test(getComputedStyle(el).overflowX))return true;
+    }
+    return false;
+  }
   function backAction(){
+    if(customerActive()){
+      if(visible(document.getElementById('loading')))return null;
+      const top=visibleLayers().at(-1);
+      if(top)return closeButton(top)?customerOverview:null;
+      return state.activeTab==='booking'?null:customerOverview;
+    }
     const layers=[...document.querySelectorAll(layerSelector)].filter(visible);
     layers.sort((a,b)=>(parseInt(getComputedStyle(a).zIndex)||0)-(parseInt(getComputedStyle(b).zIndex)||0));
     const top=layers.at(-1);
@@ -22,7 +48,9 @@
   let start=null;
   document.addEventListener('touchstart',e=>{
     start=null;if(e.touches.length!==1)return;
-    const t=e.touches[0];if(t.clientX>44||e.target.closest('input,textarea,select,[contenteditable="true"],canvas,[data-swipe-ignore]'))return;
+    const t=e.touches[0];if(e.target.closest('input,textarea,select,[contenteditable="true"],canvas,[data-swipe-ignore],#photoCropModal,#photoActionsModalV89,.vacc-proof-viewer-v104'))return;
+    if(customerActive()){if(t.clientX>44&&horizontalSurface(e.target))return;}
+    else if(t.clientX>44)return;
     const action=backAction();if(action)start={x:t.clientX,y:t.clientY,id:t.identifier,time:Date.now(),action};
   },{passive:true});
   document.addEventListener('touchmove',e=>{
@@ -40,3 +68,4 @@
   },{passive:false});
   document.addEventListener('touchcancel',()=>{start=null},{passive:true});
 })();
+
