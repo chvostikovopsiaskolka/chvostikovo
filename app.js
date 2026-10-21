@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261021-taxi-directions-v329b';
-const APP_VERSION='2.0.12';
+const APP_BUILD='20261021-pair-late-message-v330';
+const APP_VERSION='2.0.13';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2966,11 +2966,15 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       if(checkingRenewalV157||submittingV37)return;
       const date=btn.dataset.date;
       /* v281: selecting a date never opens a permanentka modal or makes an extra RPC. */
-      if(btn.dataset.contact==='true'&&pairBookingV254){pickerErrorV95('Pre oboch psíkov nie sú dostupné dve miesta alebo sa prihlasovanie uzavrelo. Vyberte iný deň alebo nám napíšte.');return}
       if(btn.dataset.contact==='true'){
         if(!window.customerDesignKeepPickerForChat?.())closePickerV37();
-        const message=`Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`;
-        window.openCustomerLateBookingMessage?.(Number(dog.id),date,message,btn.dataset.full==='true');
+        const requestedDogs=pickerDogsV254();
+        const message=pairBookingV254
+          ? `Dobrý deň, mám záujem o miesta na ${skDay(date)} ${skDate(date)} pre oboch psíkov (${requestedDogs.map(d=>d.name).join(' a ')}). Prosím o potvrdenie dostupnosti oboch miest.`
+          : `Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`;
+        // A joint late enquiry is one message. Never create a request for only
+        // one of the selected dogs through the single-dog late-booking RPC.
+        window.openCustomerLateBookingMessage?.(Number(dog.id),date,message,pairBookingV254||btn.dataset.full==='true');
         return;
       }
       if(selectedDatesV37.has(date)){

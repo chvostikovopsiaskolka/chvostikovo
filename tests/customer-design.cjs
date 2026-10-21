@@ -111,8 +111,30 @@ async function scenario(count){
   assert(lateDay.querySelector('.design-capacity-dot'),'late day retains capacity dot');
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,true,'no empty select-day button');
   lateDay.click();
-  if(count===1){assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'),'occupancy display does not bypass late-day message');w.document.getElementById('supportChatCloseV52').click();}
-  else assert.match(w.document.getElementById('bookingPickerErrorV95').textContent,/Pre oboch psíkov/,'existing joint-booking contact guard remains authoritative');
+  assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'),'late-day contact opens the existing message dialog');
+  if(count===2){
+    assert.match(w.document.getElementById('supportMessageBodyV52').value,/Bella a Iris/);
+    assert.match(w.document.getElementById('supportMessageBodyV52').value,/oboch miest/);
+    w.__savedPairLateApi=run('api');
+    run("api=async(payload)=>{globalThis.pairLatePayload=payload;return {data:{message:{id:998,body:payload.message,sender_role:'customer',created_at:'2099-01-05T09:00:00Z'}}}};");
+    w.document.getElementById('supportMessageSend').click();await new Promise(r=>setTimeout(r,30));
+    assert.equal(run('pairLatePayload.action'),'send_message','joint enquiry cannot create a one-dog reservation');
+    assert.match(run('pairLatePayload.message'),/Bella a Iris/);
+    run('api=window.__savedPairLateApi');
+  }
+  w.document.getElementById('supportChatCloseV52').click();
+  if(count===2){
+    const selection=w.document.getElementById('bookingPickerDogV37');selection.value='1';selection.dispatchEvent(new w.Event('change',{bubbles:true}));
+    w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]').click();
+    assert.match(w.document.getElementById('supportMessageBodyV52').value,/Bella/);
+    assert(!w.document.getElementById('supportMessageBodyV52').value.includes('Iris'),'single-dog selection does not include the other dog');
+    w.document.getElementById('supportChatCloseV52').click();
+    selection.value='both';selection.dispatchEvent(new w.Event('change',{bubbles:true}));
+    run('state.data.availability.days[1].available=1;renderDays();window.customerDesignPickerRender()');
+    w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]').click();
+    assert.match(w.document.getElementById('supportMessageBodyV52').value,/Bella a Iris/,'insufficient joint capacity still allows an enquiry for both dogs');
+    w.document.getElementById('supportChatCloseV52').click();
+  }
   w.__fixtureNowIso='2099-01-05T23:00:00Z';run("renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'contact guidance remains below current week heading on Tuesday');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false);
