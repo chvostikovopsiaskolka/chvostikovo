@@ -1,0 +1,13 @@
+# Account blocking and request ceilings v336 — 21 October 2026
+
+User approved account blocking, request ceilings, and removing private pilot emails from current source. Admin password login/MFA configuration unchanged.
+
+Admin source: Supabase stable-v10-clean, isolated patch with baseline e4e5ee61c9d95d30d487064637b6c166; candidate84a2c9c9c0d483eeaf15835221ceb610. Customer2.0.19/build20261021-access-layout-v337 preserves the reservation layout from PR141 and adds blocked-account cleanup/message.
+
+Staff RPC portal_set_customer_blocked_v336 targets a single customer Auth identity, refuses active staff/self, preserves dogs/owner links/visits/passes/history. It marks suspended, bans customer Auth sign-in, deletes only that customer's sessions/refresh tokens and disables their push subscriptions. Unblock restores previous status/ban, never restores old sessions/subscriptions. Direct customer RPC paths and REST policies reject blocked identities, including previously issued JWTs. Existing manual Auth bans are preserved when restoring.
+
+Atomic fixed-window limits: forms20/IP/10min and200global/10min; recovery30/IP/10min; phone correction20/IP/10min; messages30/user/5min; upload requests20/user/10min (existing max5 vaccination images and1profile remain); customer mutation120/user/5min; bootstrap120/user/5min; push registration30/user/10min; direct customer RPC240/user/5min. Nested RPCs count individually. Hashed limiter subjects,2day expiry with bounded opportunistic cleanup. No CAPTCHA or admin login changes. Limits return429; dry-run stays write-free.
+
+Baseline/rollback: private.security_release_backup_v336, private audit tables, backup-admin-before-access-v336-20261021; security-access-rollback-v336.sql restores only21 guarded definitions and12 added policies with version checks. Unblock customers before rolling back; never restore revoked sessions. Source/deploy order: DB -> five Edge bundles (customer API, admin-push, web forms, product order/inquiry) -> admin snapshot/customer Git production. Exact original Edge sources retained privately; verify newer versions before selective restore.
+
+Tests: isolated PGlite full current guarded definitions, role permissions, two customer/partner scopes, block/unblock/revocation and atomic limiter; full handler mocks with no sends; assembled admin controls/runtime; customer1/2dog boot. No real customer blocked, no production test reservation/payment/message, no push/SMS/email/Meta sends. Physical iOS/Android unverified. Current public source removes historical pilot emails; old Git commits/other historical refs remain without rewriting history.

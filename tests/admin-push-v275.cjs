@@ -1,6 +1,6 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
 const ts=require('typescript');
-const source=fs.readFileSync('supabase/functions/admin-push/index.ts','utf8').replace(/^import[^\n]+\n/,'');
+const source=fs.readFileSync('supabase/functions/admin-push/index.ts','utf8').replace(/^import[^\n]+\n/gm,'');
 let sends=0;const ctx={Deno:{env:{get:()=>''},serve(){}},webpush:{setVapidDetails(){},sendNotification(){sends++}},fetch:async()=>Response.json([]),Request,Response,URL,console,crypto};
 vm.createContext(ctx);vm.runInContext(ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,ctx);
 async function message(record){ctx.fixture={table:'web_form_submissions',record:{id:999,owner_name:'Synthetic Owner',...record}};return vm.runInContext('messageForWebhook(fixture)',ctx)}

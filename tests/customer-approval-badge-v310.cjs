@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),{stripTypeScriptTypes}=require('node:module');
-const source=fs.readFileSync('supabase/functions/admin-push/index.ts','utf8').replace(/^import[^\n]+\n/,'');
+const source=fs.readFileSync('supabase/functions/admin-push/index.ts','utf8').replace(/^import[^\n]+\n/gm,'');
 let sends=0;
 const context={Deno:{env:{get:()=>''},serve(){}},webpush:{setVapidDetails(){},sendNotification(){sends++}},Request,Response,URL,console,crypto,fetch:async()=>Response.json([])};
 vm.createContext(context);vm.runInContext(stripTypeScriptTypes(source),context);

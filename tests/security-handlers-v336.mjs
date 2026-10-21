@@ -1,0 +1,34 @@
+import fs from 'node:fs';import vm from 'node:vm';import {stripTypeScriptTypes} from 'node:module';import {webcrypto} from 'node:crypto';import assert from 'node:assert/strict';
+const uuid='20000000-0000-0000-0000-000000000001';
+function boot(slug){let handler;const calls=[];const fixture={allow:true,access:true};
+ const fetch=async(url,opts={})=>{url=String(url);calls.push({url,method:opts.method||'GET',body:opts.body});
+  if(url.endsWith('/auth/v1/user'))return Response.json({id:uuid,email:'synthetic@example.invalid',user_metadata:{}});
+  if(url.includes('/staff?'))return Response.json([]);
+  if(url.endsWith('/rpc/portal_customer_access_allowed_v336'))return Response.json(fixture.access);
+  if(url.endsWith('/rpc/consume_request_limit_v336'))return Response.json(fixture.allow);
+  if(url.endsWith('/rpc/admin_push_runtime_config'))return Response.json({vapid_public_key:'fixture-public',vapid_private_key:'fixture-private',webhook_secret:'fixture-webhook'});
+  if(url.includes('/web_form_recoveries_v273'))return Response.json([], {status:201});
+  if(url.includes('/web_form_submissions')&&opts.method==='POST')return Response.json([{id:1}],{status:201});
+  if(url.endsWith('/portal_conversations')&&opts.method==='POST')return Response.json([{id:1}]);
+  if(url.endsWith('/portal_messages')&&opts.method==='POST')return Response.json([{id:1,...JSON.parse(opts.body)}]);
+  if(url.includes('/portal_push_subscriptions?on_conflict'))return Response.json([{id:1}]);
+  return Response.json([]);
+ };
+ const sandbox={Request,Response,Headers,URL,AbortSignal,crypto:webcrypto,TextEncoder,Uint8Array,atob,btoa,fetch,console:{log(){},error(){},warn(){}},setTimeout,clearTimeout,EdgeRuntime:{waitUntil(){}},Deno:{env:{get:k=>({SUPABASE_URL:'https://fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service'}[k])},serve:h=>handler=h},webpush:{setVapidDetails(){},sendNotification(){throw Error('No sends allowed')}}};
+ const helper=fs.readFileSync('supabase/functions/'+slug+'/security-v336.ts','utf8').replace(/export /g,'');
+ let code=fs.readFileSync('supabase/functions/'+slug+'/index.ts','utf8').replace(/^import .*;\n/gm,'');
+ const js=stripTypeScriptTypes(helper+'\n'+code,{mode:'transform'});vm.runInNewContext(js,sandbox,{filename:slug});
+ return{handler,fixture,calls,post:body=>handler(new Request('https://fixture.invalid/functions/'+slug,{method:'POST',headers:{origin:'https://chvostikovo.sk',authorization:'Bearer synthetic','content-type':'application/json','cf-connecting-ip':'192.0.2.1'},body:JSON.stringify(body)}))};
+}
+for(const slug of ['customer-portal-api','admin-push','web-form-submit','product-order-submit','product-inquiry-submit'])boot(slug);
+let api=boot('customer-portal-api');api.fixture.access=false;let r=await api.post({action:'save_profile'});assert.equal(r.status,403);assert.equal((await r.json()).code,'account_blocked');assert(!api.calls.some(c=>c.method==='PATCH'||c.url.includes('on_conflict')));
+for(const action of ['send_message','upload_vaccination_proofs','upload_dog_photo','save_profile']){api=boot('customer-portal-api');api.fixture.allow=false;r=await api.post({action});assert.equal(r.status,429,action);assert(!api.calls.some(c=>/\/(?:portal_messages|vaccination_proofs|customer_dog_photos|dogs)(?:\?|$)/.test(c.url)));}
+api=boot('customer-portal-api');r=await api.post({action:'send_message',message:'Synthetic normal message'});assert.equal(r.status,200);assert(api.calls.some(c=>c.url.endsWith('/portal_messages')&&c.method==='POST'));
+const form={form_type:'lead',owner_name:'Synthetic Person',phone:'+421900000001',consent:true,interest_reason:'Informačný formulár – záujem o psiu škôlku',source_ref:'/'};
+let web=boot('web-form-submit');r=await web.post({...form,dry_run:true});if(r.status!==200)console.log(await r.clone().text());assert.equal(r.status,200);assert.equal(web.calls.length,0,'dry run has no writes/limiter');
+web=boot('web-form-submit');web.fixture.allow=false;r=await web.post(form);assert.equal(r.status,429);assert(!web.calls.some(c=>c.url.includes('/web_form_submissions')));
+web=boot('web-form-submit');web.fixture.allow=false;r=await web.post({...form,action:'recover_contact',form_attempt_id:'90000000-0000-0000-0000-000000000001'});assert.equal(r.status,429);assert(!web.calls.some(c=>c.url.includes('/web_form_recoveries')));
+web=boot('web-form-submit');r=await web.post(form);assert.equal(r.status,201);assert(web.calls.some(c=>c.url.includes('/web_form_submissions')&&c.method==='POST'));
+let push=boot('admin-push');push.fixture.access=false;r=await push.post({audience:'customer',subscription:{endpoint:'https://fixture.invalid',keys:{p256dh:'fake',auth:'fake'}}});assert.equal(r.status,403);assert(!push.calls.some(c=>c.url.includes('on_conflict')));
+push=boot('admin-push');push.fixture.allow=false;r=await push.post({audience:'customer',subscription:{endpoint:'https://fixture.invalid',keys:{p256dh:'fake',auth:'fake'}}});assert.equal(r.status,429);
+console.log('PASS full TypeScript handlers/helper: blocked account stops before data reads/writes; message/photo/profile ceilings return429; normal message/form preserved; form dry-run has zero requests; recovery blocked before save; push block/limit; no external sends');

@@ -1,3 +1,4 @@
+import {securityLimitV336,securityAccessV336} from "./security-v336.ts";
 import webpush from "npm:web-push@3.6.7";
 
 const CORS = {
@@ -584,6 +585,7 @@ Deno.serve(async (req: Request) => {
 
     const audience = body.audience === "customer" ? "customer" : "admin";
     const userId = audience === "customer" ? await requireUser(req) : await requireStaff(req);
+    if(audience==='customer'){const denied=await securityAccessV336(req,SUPABASE_URL,SERVICE_KEY,CORS);if(denied)return denied;const limited=await securityLimitV336(req,'push_user',userId,SUPABASE_URL,SERVICE_KEY,CORS);if(limited)return limited;}
     const subscriptionTable = audience === "customer" ? "portal_push_subscriptions" : "admin_push_subscriptions";
     const action = String(body.action || "subscribe");
     if (action === "unsubscribe") {

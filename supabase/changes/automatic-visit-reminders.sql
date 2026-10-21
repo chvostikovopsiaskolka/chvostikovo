@@ -2,7 +2,8 @@ ALTER TABLE public.dogs DROP CONSTRAINT dogs_visit_reminder_channel_check;
 ALTER TABLE public.dogs ADD CONSTRAINT dogs_visit_reminder_channel_check CHECK (visit_reminder_channel IN ('auto','sms','both','push'));
 ALTER TABLE public.dogs ALTER COLUMN visit_reminder_channel SET DEFAULT 'auto';
 -- Existing defaults and the two original pilot profiles become automatic. Explicit dual mode remains intact.
-UPDATE public.dogs SET visit_reminder_channel='auto' WHERE visit_reminder_channel='sms' OR (visit_reminder_channel='push' AND owner_id IN (SELECT owner_id FROM public.customer_owner_links WHERE user_id IN (SELECT user_id FROM public.customer_profiles WHERE email IN ('chvostikovo.psiaskolka@gmail.com','riskix.leder@gmail.com'))));
+UPDATE public.dogs SET visit_reminder_channel='auto' WHERE visit_reminder_channel='sms';
+-- Historical pilot-account exception omitted from public source for privacy; this migration is already applied.
 CREATE OR REPLACE FUNCTION private.visit_reminder_candidates(p_day date)
  RETURNS TABLE(recipient_user_id uuid, dog_id bigint, reservation_id bigint, body text)
  LANGUAGE sql
