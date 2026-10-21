@@ -1,0 +1,3 @@
+const fs=require('fs'),z=require('zlib'),assert=require('assert/strict'),crypto=require('crypto');
+const before=z.gunzipSync(fs.readFileSync('supabase/backups/admin-before-taxi-v329.html.gz'));assert.equal(crypto.createHash('md5').update(before).digest('hex'),'23c5f4aa4b6c44b304be44bf360cb48d');
+const after=z.gunzipSync(fs.readFileSync('supabase/backups/admin-candidate-taxi-v329.html.gz')).toString();assert.equal(crypto.createHash('md5').update(after).digest('hex'),'4d67fa4dca85a59171db6ef0230e0bcb');fs.writeFileSync('/tmp/admin-candidate-v329.html',after);console.log('PASS exact guarded admin taxi v329 artifact');

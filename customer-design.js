@@ -238,7 +238,7 @@
     if(picker&&!picker.classList.contains('hidden'))picker.inert=true;
     document.body.append(taxi);taxi.classList.remove('design-inline-taxi');taxi.classList.add('design-taxi-modal');
     taxi.setAttribute('role','dialog');taxi.setAttribute('aria-modal','true');
-    byId('taxiEditSendV201').textContent='Pridať taxík';document.documentElement.classList.add('design-modal-open');
+    document.documentElement.classList.add('design-modal-open');
     byId('taxiEditCloseV201').focus({preventScroll:true});
   };
   window.customerDesignTaxiClosed=()=>{

@@ -322,3 +322,17 @@ html.customer-android.customer-design #bookingPickerV37 .booking-day-v37{min-hei
 .customer-design #bookingTaxiEditV201.design-taxi-modal button{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;cursor:pointer}
 .customer-design #bookingTaxiEditV201.design-taxi-modal button:focus-visible{outline:2px solid #d76b20;outline-offset:3px}
 @media(max-width:350px){.design-visit-entries{font-size:9px}.design-friends-button.design-friends-inline{font-size:9px;flex-basis:119px;padding:5px}.design-visit-footer .design-visit-entries{flex-basis:105px}}
+
+/* v329: one-line friends action, distinct visit card and three taxi directions. */
+.design-visit-card{background:#fff0f7;border-color:#eecbdf}
+.design-friends-button.design-friends-inline{white-space:nowrap;font-size:8px;flex:0 0 auto;max-width:none;padding:5px 6px;gap:4px}
+.design-visit-footer{flex-wrap:nowrap}
+.customer-design #bookingPickerV37 .booking-taxi-inline-choices-v201{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.customer-design #bookingPickerV37 .booking-taxi-inline-choices-v201 button{white-space:normal;font-size:9px;line-height:1.4;padding:8px 3px;min-height:50px}
+.customer-design #bookingPickerV37 .booking-taxi-pencil-v201{gap:5px;white-space:normal;font-size:10px!important}
+.design-taxi-pencil{flex:none;font-size:16px}
+#bookingTaxiEditV201 [data-edit-taxi][hidden]{display:none!important}
+#bookingTaxiEditV201 #taxiEditCancelV329{width:100%;margin:0 0 14px;font-size:12px}
+.customer-design #bookingTaxiEditV201.design-taxi-modal h2{font-size:20px}
+#bookingTaxiEditV201 .booking-taxi-edit-actions-v201:has(#taxiEditSendV201[hidden]){grid-template-columns:1fr}
+@media(max-width:350px){.design-friends-button.design-friends-inline{font-size:7.5px;flex-basis:auto;padding:5px}.design-visit-footer .design-visit-entries{flex:1 1 0}}

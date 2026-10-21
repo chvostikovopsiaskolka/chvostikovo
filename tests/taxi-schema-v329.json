@@ -1,0 +1,1793 @@
+[
+  {
+    "name": "customer_booking_requests",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "a"
+      },
+      {
+        "name": "user_id",
+        "type": "uuid",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "dog_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "reservation_date",
+        "type": "date",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "default": "'pending'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "reservation_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "projected_entry_number",
+        "type": "integer",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "projected_pass_total",
+        "type": "integer",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "decision_note",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "decided_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "decided_by",
+        "type": "uuid",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "taxi_mode",
+        "type": "text",
+        "default": "'none'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "taxi_amount",
+        "type": "numeric(10,2)",
+        "default": "0",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "cancellation_reason",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "cancelled_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "requested_taxi_mode",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "requested_taxi_amount",
+        "type": "numeric(10,2)",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "taxi_change_status",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "taxi_change_requested_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "taxi_change_decided_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "taxi_change_decided_by",
+        "type": "uuid",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "taxi_change_note",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "planned_pass_request_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "projected_pass_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "billing_choice",
+        "type": "text",
+        "default": "'auto'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "booking_group_id",
+        "type": "uuid",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "CHECK ((billing_choice = ANY (ARRAY['auto'::text, 'single'::text, 'planned'::text])))",
+        "name": "customer_booking_requests_billing_choice_check"
+      },
+      {
+        "def": "CHECK (((cancellation_reason IS NULL) OR (char_length(cancellation_reason) <= 500)))",
+        "name": "customer_booking_requests_cancellation_reason_length"
+      },
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "customer_booking_requests_pkey"
+      },
+      {
+        "def": "CHECK (((projected_entry_number IS NULL) OR (projected_entry_number > 0)))",
+        "name": "customer_booking_requests_projected_entry_number_check"
+      },
+      {
+        "def": "CHECK (((projected_pass_total IS NULL) OR (projected_pass_total > 0)))",
+        "name": "customer_booking_requests_projected_pass_total_check"
+      },
+      {
+        "def": "CHECK ((((requested_taxi_mode IS NULL) AND (requested_taxi_amount IS NULL)) OR ((requested_taxi_mode = 'pickup'::text) AND (requested_taxi_amount = (5)::numeric)) OR ((requested_taxi_mode = 'pickup_dropoff'::text) AND (requested_taxi_amount = (10)::numeric))))",
+        "name": "customer_booking_requests_requested_taxi_amount_check"
+      },
+      {
+        "def": "CHECK (((requested_taxi_mode IS NULL) OR (requested_taxi_mode = ANY (ARRAY['pickup'::text, 'pickup_dropoff'::text]))))",
+        "name": "customer_booking_requests_requested_taxi_mode_check"
+      },
+      {
+        "def": "CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'cancelled'::text, 'cancel_requested'::text])))",
+        "name": "customer_booking_requests_status_check"
+      },
+      {
+        "def": "CHECK ((((taxi_mode = 'none'::text) AND (taxi_amount = (0)::numeric)) OR ((taxi_mode = 'pickup'::text) AND (taxi_amount = (5)::numeric)) OR ((taxi_mode = 'pickup_dropoff'::text) AND (taxi_amount = (10)::numeric))))",
+        "name": "customer_booking_requests_taxi_amount_check"
+      },
+      {
+        "def": "CHECK (((taxi_change_note IS NULL) OR (char_length(taxi_change_note) <= 500)))",
+        "name": "customer_booking_requests_taxi_change_note_length"
+      },
+      {
+        "def": "CHECK (((taxi_change_status IS NULL) OR (taxi_change_status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text]))))",
+        "name": "customer_booking_requests_taxi_change_status_check"
+      },
+      {
+        "def": "CHECK ((taxi_mode = ANY (ARRAY['none'::text, 'pickup'::text, 'pickup_dropoff'::text])))",
+        "name": "customer_booking_requests_taxi_mode_check"
+      }
+    ]
+  },
+  {
+    "name": "customer_owner_links",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "user_id",
+        "type": "uuid",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "owner_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "approved_by",
+        "type": "uuid",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "allowed_dog_ids",
+        "type": "bigint[]",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "CHECK (((allowed_dog_ids IS NULL) OR (((cardinality(allowed_dog_ids) >= 1) AND (cardinality(allowed_dog_ids) <= 2)) AND (array_position(allowed_dog_ids, NULL::bigint) IS NULL))))",
+        "name": "allowed_dogs_v251"
+      },
+      {
+        "def": "PRIMARY KEY (user_id, owner_id)",
+        "name": "customer_owner_links_pkey"
+      }
+    ]
+  },
+  {
+    "name": "customer_pass_requests",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "d"
+      },
+      {
+        "name": "user_id",
+        "type": "uuid",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "dog_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "total_entries",
+        "type": "integer",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "default": "'pending'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "pass_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "requested_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "decided_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "decided_by",
+        "type": "uuid",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "decision_note",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "dog_ids",
+        "type": "bigint[]",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "customer_pass_requests_pkey"
+      },
+      {
+        "def": "CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'cancelled'::text, 'handled'::text])))",
+        "name": "customer_pass_requests_status_check"
+      },
+      {
+        "def": "CHECK ((total_entries = ANY (ARRAY[10, 20])))",
+        "name": "customer_pass_requests_total_entries_check"
+      }
+    ]
+  },
+  {
+    "name": "customer_profiles",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "user_id",
+        "type": "uuid",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "full_name",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "phone",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "default": "'pending'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "email",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "privacy_notice_version",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "privacy_notice_acknowledged_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "push_prompt_answered_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "registration_dog_names",
+        "type": "text[]",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "CHECK (((email IS NULL) OR (POSITION(('@'::text) IN (email)) > 1)))",
+        "name": "customer_profiles_email_basic_check"
+      },
+      {
+        "def": "CHECK (((full_name IS NULL) OR ((char_length(btrim(full_name)) >= 2) AND (char_length(btrim(full_name)) <= 120))))",
+        "name": "customer_profiles_full_name_check"
+      },
+      {
+        "def": "CHECK (((phone IS NULL) OR (phone ~ '^[+][1-9][0-9]{8,14}$'::text)))",
+        "name": "customer_profiles_phone_check"
+      },
+      {
+        "def": "PRIMARY KEY (user_id)",
+        "name": "customer_profiles_pkey"
+      },
+      {
+        "def": "CHECK ((status = ANY (ARRAY['pending'::text, 'active'::text, 'suspended'::text])))",
+        "name": "customer_profiles_status_check"
+      }
+    ]
+  },
+  {
+    "name": "dogs",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "a"
+      },
+      {
+        "name": "owner_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "sms_name",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "age_years",
+        "type": "numeric(4,1)",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "birth_date",
+        "type": "date",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "sex",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "neutered",
+        "type": "boolean",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "default_entry_type",
+        "type": "text",
+        "default": "'single'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "legacy_total_visits",
+        "type": "integer",
+        "default": "0",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "active",
+        "type": "boolean",
+        "default": "true",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "source_row",
+        "type": "integer",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "breed",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "allergies",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "temperament",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "vaccination_notes",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "age_text",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "weight_kg",
+        "type": "numeric",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "photo_path",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "photo_updated_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "share_name_photo",
+        "type": "boolean",
+        "default": "false",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "share_name_photo_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "share_name_photo_version",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "customer_name",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "vaccination_requirements_verified",
+        "type": "boolean",
+        "default": "false",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "booking_late_exception",
+        "type": "boolean",
+        "default": "false",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "visit_reminder_channel",
+        "type": "text",
+        "default": "'auto'::text",
+        "notnull": true,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "CHECK (((age_years IS NULL) OR (age_years >= (0)::numeric)))",
+        "name": "dogs_age_years_check"
+      },
+      {
+        "def": "CHECK ((default_entry_type = ANY (ARRAY['pass'::text, 'single'::text, 'free'::text])))",
+        "name": "dogs_default_entry_type_check"
+      },
+      {
+        "def": "CHECK ((legacy_total_visits >= 0))",
+        "name": "dogs_legacy_total_visits_check"
+      },
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "dogs_pkey"
+      },
+      {
+        "def": "CHECK ((sex = ANY (ARRAY['male'::text, 'female'::text])))",
+        "name": "dogs_sex_check"
+      },
+      {
+        "def": "CHECK ((visit_reminder_channel = ANY (ARRAY['auto'::text, 'sms'::text, 'both'::text, 'push'::text])))",
+        "name": "dogs_visit_reminder_channel_check"
+      },
+      {
+        "def": "CHECK (((weight_kg IS NULL) OR ((weight_kg > (0)::numeric) AND (weight_kg <= (150)::numeric))))",
+        "name": "dogs_weight_kg_check"
+      }
+    ]
+  },
+  {
+    "name": "owners",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "a"
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "phone",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "alternate_phone",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "owners_pkey"
+      }
+    ]
+  },
+  {
+    "name": "pass_dogs",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "pass_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "dog_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "approved_by",
+        "type": "uuid",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "PRIMARY KEY (pass_id, dog_id)",
+        "name": "pass_dogs_pkey"
+      }
+    ]
+  },
+  {
+    "name": "passes",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "a"
+      },
+      {
+        "name": "dog_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "total_entries",
+        "type": "integer",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "used_entries",
+        "type": "integer",
+        "default": "0",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "valid_from",
+        "type": "date",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "valid_until",
+        "type": "date",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "default": "'active'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "source",
+        "type": "text",
+        "default": "'legacy_crm'::text",
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "purchased_on",
+        "type": "date",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "purchase_price",
+        "type": "numeric(10,2)",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "no_expiry",
+        "type": "boolean",
+        "default": "false",
+        "notnull": true,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "CHECK (((used_entries >= 0) AND (used_entries <= total_entries)))",
+        "name": "passes_check"
+      },
+      {
+        "def": "CHECK (((valid_until IS NULL) OR (valid_from IS NULL) OR (valid_until >= valid_from)))",
+        "name": "passes_check1"
+      },
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "passes_pkey"
+      },
+      {
+        "def": "CHECK (((purchase_price IS NULL) OR (purchase_price >= (0)::numeric)))",
+        "name": "passes_purchase_price_check"
+      },
+      {
+        "def": "CHECK ((status = ANY (ARRAY['active'::text, 'queued'::text, 'used_up'::text, 'expired'::text, 'cancelled'::text])))",
+        "name": "passes_status_check"
+      },
+      {
+        "def": "CHECK ((total_entries > 0))",
+        "name": "passes_total_entries_check"
+      }
+    ]
+  },
+  {
+    "name": "portal_day_settings",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "day",
+        "type": "date",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "capacity",
+        "type": "smallint",
+        "default": "8",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "bookings_open",
+        "type": "boolean",
+        "default": "true",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "note",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "CHECK (((capacity >= 0) AND (capacity <= 30)))",
+        "name": "portal_day_settings_capacity_check"
+      },
+      {
+        "def": "PRIMARY KEY (day)",
+        "name": "portal_day_settings_pkey"
+      }
+    ]
+  },
+  {
+    "name": "portal_notifications",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "a"
+      },
+      {
+        "name": "recipient_user_id",
+        "type": "uuid",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "notification_type",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "body",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "entity_type",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "entity_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "read_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "event_key",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "visible_from",
+        "type": "date",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "visible_until",
+        "type": "date",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "push_title",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "push_body",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "portal_notifications_pkey"
+      }
+    ]
+  },
+  {
+    "name": "portal_push_subscriptions",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "a"
+      },
+      {
+        "name": "user_id",
+        "type": "uuid",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "endpoint",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "p256dh",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "auth",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "active",
+        "type": "boolean",
+        "default": "true",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "user_agent",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "last_seen_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "UNIQUE (endpoint)",
+        "name": "portal_push_subscriptions_endpoint_key"
+      },
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "portal_push_subscriptions_pkey"
+      }
+    ]
+  },
+  {
+    "name": "reservations",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "a"
+      },
+      {
+        "name": "dog_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "reservation_date",
+        "type": "date",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "entry_type",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "default": "'booked'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "pass_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "source",
+        "type": "text",
+        "default": "'app'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "source_ref",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "source_label",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "planned_entry_number",
+        "type": "integer",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "planned_pass_total",
+        "type": "integer",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "pass_locked",
+        "type": "boolean",
+        "default": "false",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "taxi_service",
+        "type": "text",
+        "default": "'none'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "taxi_amount",
+        "type": "numeric(10,2)",
+        "default": "0",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "taxi_mode",
+        "type": "text",
+        "default": "'none'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "billing_choice",
+        "type": "text",
+        "default": "'auto'::text",
+        "notnull": true,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "CHECK ((billing_choice = ANY (ARRAY['auto'::text, 'single'::text, 'planned'::text])))",
+        "name": "reservations_billing_choice_check"
+      },
+      {
+        "def": "UNIQUE (dog_id, reservation_date)",
+        "name": "reservations_dog_id_reservation_date_key"
+      },
+      {
+        "def": "CHECK ((entry_type = ANY (ARRAY['pass'::text, 'single'::text, 'free'::text])))",
+        "name": "reservations_entry_type_check"
+      },
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "reservations_pkey"
+      },
+      {
+        "def": "CHECK (((planned_entry_number IS NULL) OR (planned_entry_number > 0)))",
+        "name": "reservations_planned_entry_number_check"
+      },
+      {
+        "def": "CHECK (((planned_entry_number IS NULL) = (planned_pass_total IS NULL)))",
+        "name": "reservations_planned_pair_check"
+      },
+      {
+        "def": "CHECK (((planned_pass_total IS NULL) OR (planned_pass_total > 0)))",
+        "name": "reservations_planned_pass_total_check"
+      },
+      {
+        "def": "CHECK ((status = ANY (ARRAY['booked'::text, 'cancelled'::text, 'attended'::text, 'no_show'::text])))",
+        "name": "reservations_status_check"
+      },
+      {
+        "def": "CHECK ((taxi_amount = ANY (ARRAY[(0)::numeric, (5)::numeric, (10)::numeric])))",
+        "name": "reservations_taxi_amount_check"
+      },
+      {
+        "def": "CHECK ((taxi_mode = ANY (ARRAY['none'::text, 'pickup'::text, 'pickup_dropoff'::text])))",
+        "name": "reservations_taxi_mode_check"
+      },
+      {
+        "def": "CHECK ((taxi_service = ANY (ARRAY['none'::text, 'pickup'::text, 'roundtrip'::text])))",
+        "name": "reservations_taxi_service_check"
+      }
+    ]
+  },
+  {
+    "name": "staff",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "user_id",
+        "type": "uuid",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "display_name",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "role",
+        "type": "text",
+        "default": "'staff'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "active",
+        "type": "boolean",
+        "default": "true",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "PRIMARY KEY (user_id)",
+        "name": "staff_pkey"
+      },
+      {
+        "def": "CHECK ((role = ANY (ARRAY['owner'::text, 'staff'::text])))",
+        "name": "staff_role_check"
+      }
+    ]
+  },
+  {
+    "name": "vaccination_proofs",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "d"
+      },
+      {
+        "name": "dog_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "uploaded_by",
+        "type": "uuid",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "batch_id",
+        "type": "uuid",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "storage_path",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "source",
+        "type": "text",
+        "default": "'customer'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "is_current",
+        "type": "boolean",
+        "default": "true",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "uploaded_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "replaced_at",
+        "type": "timestamp with time zone",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "vaccination_proofs_pkey"
+      },
+      {
+        "def": "CHECK ((source = ANY (ARRAY['customer'::text, 'staff'::text])))",
+        "name": "vaccination_proofs_source_check"
+      },
+      {
+        "def": "UNIQUE (storage_path)",
+        "name": "vaccination_proofs_storage_path_key"
+      }
+    ]
+  },
+  {
+    "name": "vaccinations",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "a"
+      },
+      {
+        "name": "dog_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "vaccination_type",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "vaccinated_on",
+        "type": "date",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "valid_until",
+        "type": "date",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "vaccinations_pkey"
+      }
+    ]
+  },
+  {
+    "name": "visits",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": "a"
+      },
+      {
+        "name": "dog_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "reservation_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "visit_date",
+        "type": "date",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "entry_type",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "pass_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "pass_entry_number",
+        "type": "integer",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "value_amount",
+        "type": "numeric(10,2)",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "taxi_service",
+        "type": "text",
+        "default": "'none'::text",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "taxi_amount",
+        "type": "numeric(10,2)",
+        "default": "0",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "taxi_mode",
+        "type": "text",
+        "default": "'none'::text",
+        "notnull": true,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "UNIQUE (dog_id, visit_date)",
+        "name": "visits_dog_id_visit_date_key"
+      },
+      {
+        "def": "CHECK ((entry_type = ANY (ARRAY['pass'::text, 'single'::text, 'free'::text])))",
+        "name": "visits_entry_type_check"
+      },
+      {
+        "def": "CHECK (((pass_entry_number IS NULL) OR (pass_entry_number > 0)))",
+        "name": "visits_pass_entry_number_check"
+      },
+      {
+        "def": "PRIMARY KEY (id)",
+        "name": "visits_pkey"
+      },
+      {
+        "def": "UNIQUE (reservation_id)",
+        "name": "visits_reservation_id_key"
+      },
+      {
+        "def": "CHECK ((taxi_amount = ANY (ARRAY[(0)::numeric, (5)::numeric, (10)::numeric])))",
+        "name": "visits_taxi_amount_check"
+      },
+      {
+        "def": "CHECK ((taxi_mode = ANY (ARRAY['none'::text, 'pickup'::text, 'pickup_dropoff'::text])))",
+        "name": "visits_taxi_mode_check"
+      },
+      {
+        "def": "CHECK ((taxi_service = ANY (ARRAY['none'::text, 'pickup'::text, 'roundtrip'::text])))",
+        "name": "visits_taxi_service_check"
+      },
+      {
+        "def": "CHECK (((value_amount IS NULL) OR (value_amount >= (0)::numeric)))",
+        "name": "visits_value_amount_check"
+      }
+    ]
+  },
+  {
+    "name": "vaccination_state_v234",
+    "schema": "private",
+    "columns": [
+      {
+        "name": "dog_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "vaccination_type",
+        "type": "text",
+        "default": null,
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "valid_until",
+        "type": "date",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "accepted_proof_id",
+        "type": "bigint",
+        "default": "0",
+        "notnull": true,
+        "identity": ""
+      },
+      {
+        "name": "requires_proof_after_id",
+        "type": "bigint",
+        "default": null,
+        "notnull": false,
+        "identity": ""
+      },
+      {
+        "name": "changed_at",
+        "type": "timestamp with time zone",
+        "default": "now()",
+        "notnull": true,
+        "identity": ""
+      }
+    ],
+    "constraints": [
+      {
+        "def": "PRIMARY KEY (dog_id, vaccination_type)",
+        "name": "vaccination_state_v234_pkey"
+      }
+    ]
+  }
+]

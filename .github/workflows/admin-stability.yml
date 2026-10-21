@@ -81,3 +81,10 @@ jobs:
         run: |
           node tests/customer-replan-auto-v327.mjs
           node tests/reservation-taxi-v327.mjs
+
+      - name: Taxi directions, pricing and actual admin v329
+        run: |
+          node tools/build-admin-taxi-v329.cjs
+          node tests/admin-taxi-v329.cjs
+          node tests/taxi-directions-v329.mjs
+          node tests/taxi-notification-v329.cjs
