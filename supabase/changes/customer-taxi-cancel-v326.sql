@@ -33,7 +33,7 @@ BEGIN
   PERFORM private.lock_pool_v244(v_dog_id);
   IF p_request_id IS NOT NULL THEN
     SELECT * INTO v_q FROM public.customer_booking_requests
-      WHERE id=p_request_id AND dog_id=v_dog_id AND user_id=v_uid FOR UPDATE;
+      WHERE id=p_request_id AND dog_id=v_dog_id AND user_id=v_uid FOR UPDATE NOWAIT;
     IF v_q.id IS NULL OR v_q.status NOT IN ('pending','approved') THEN
       RAISE EXCEPTION 'Rezervácia sa nenašla.';
     END IF;
@@ -43,7 +43,12 @@ BEGIN
     v_res_id := p_reservation_id;
   END IF;
   IF v_res_id IS NOT NULL THEN
-    SELECT * INTO v_res FROM public.reservations WHERE id=v_res_id AND dog_id=v_dog_id FOR UPDATE;
+    -- Staff taxi approval also locks request before reservation. Never wait while
+    -- holding the reservation if another staff transaction is updating its request.
+    PERFORM q.id FROM public.customer_booking_requests q
+      WHERE q.reservation_id=v_res_id AND q.status IN ('pending','approved')
+      ORDER BY q.id FOR UPDATE NOWAIT;
+    SELECT * INTO v_res FROM public.reservations WHERE id=v_res_id AND dog_id=v_dog_id FOR UPDATE NOWAIT;
     IF v_res.id IS NULL OR v_res.status <> 'booked' THEN RAISE EXCEPTION 'Rezervácia sa nenašla.'; END IF;
     v_date := v_res.reservation_date;
   ELSIF v_q.status <> 'pending' THEN
@@ -74,6 +79,8 @@ BEGIN
       FROM public.staff s WHERE s.active=true AND s.user_id IS NOT NULL;
   END IF;
   RETURN jsonb_build_object('reservation_id',v_res_id,'request_id',p_request_id,'changed',coalesce(v_changed,false));
+EXCEPTION WHEN lock_not_available OR deadlock_detected THEN
+  RAISE EXCEPTION 'Rezervácia sa práve aktualizuje. Skúste to znova.';
 END;
 $function$;
 REVOKE ALL ON FUNCTION public.portal_cancel_taxi_v326(bigint,bigint) FROM PUBLIC, anon;
