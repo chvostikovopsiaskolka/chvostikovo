@@ -104,8 +104,8 @@ async function scenario(count){
   w.__fixtureNowIso='2099-01-05T09:00:00Z';run("window.openBookingPickerV37();renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,true,'already registered this week does not see the missed-Sunday reminder');
   const registeredWeekFixture=run('JSON.stringify(state.data)');
-  const noticeCase=(requests,reservations,visible,message)=>{
-    run(`state.data.requests=${JSON.stringify(requests)};state.data.reservations=${JSON.stringify(reservations)};renderDays();window.customerDesignPickerRender()`);
+  const noticeCase=(requests,reservations,visible,message,history=[],visits=[])=>{
+    run(`state.data.requests=${JSON.stringify(requests)};state.data.reservations=${JSON.stringify(reservations)};state.data.booking_history=${JSON.stringify(history)};state.data.visits=${JSON.stringify(visits)};renderDays();window.customerDesignPickerRender()`);
     assert.equal(!w.document.getElementById('designWeekDeadline').hidden,visible,message);
   };
   const weekRequest={id:880,dog_id:1,reservation_date:'2099-01-07',status:'pending'};
@@ -113,6 +113,8 @@ async function scenario(count){
   noticeCase([{...weekRequest,status:'approved'}],[],false,'approved request hides reminder');
   noticeCase([],[{...weekRequest,id:881,status:'booked'}],false,'staff-created booking without customer request hides reminder');
   noticeCase([],[{...weekRequest,id:881,status:'attended',reservation_date:'2099-01-05'}],false,'completed visit this week still counts');
+  noticeCase([],[],false,'past staff booking from real bootstrap history counts',[{dog_id:1,reservation_date:'2099-01-05',status:'attended'}]);
+  noticeCase([],[],false,'recorded visit counts when upcoming reservations no longer contain it',[],[{dog_id:1,visit_date:'2099-01-05'}]);
   noticeCase([{...weekRequest,reservation_id:881,status:'approved'}],[{...weekRequest,id:881,status:'cancelled'}],true,'cancelled reservation cannot be revived by a stale approved request');
   noticeCase([{...weekRequest,status:'rejected'},{...weekRequest,id:882,status:'cancelled'}],[],true,'rejected and cancelled requests do not hide reminder');
   noticeCase([{...weekRequest,reservation_date:'2099-01-12'}],[],true,'next-week booking does not suppress this-week reminder');

@@ -2914,8 +2914,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const dogIds=new Set((state.data?.dogs||[]).map(d=>Number(d.id)));
     const inWeek=r=>dogIds.has(Number(r.dog_id))&&r.reservation_date>=from&&r.reservation_date<=to;
     const reservations=state.data?.reservations||[];
-    const inactive=new Set(reservations.filter(r=>!['booked','attended'].includes(r.status)).map(r=>Number(r.id)));
-    return reservations.some(r=>inWeek(r)&&['booked','attended'].includes(r.status))||
+    const inactiveRows=reservations.filter(r=>!['booked','attended'].includes(r.status));
+    const inactive=new Set(inactiveRows.map(r=>Number(r.id)).filter(id=>id>0));
+    const inactiveDates=new Set(inactiveRows.map(r=>r.dog_id+'|'+r.reservation_date));
+    return [...reservations,...(state.data?.booking_history||[])].some(r=>inWeek(r)&&['booked','attended'].includes(r.status)&&!inactiveDates.has(r.dog_id+'|'+r.reservation_date))||
+      (state.data?.visits||[]).some(r=>dogIds.has(Number(r.dog_id))&&r.visit_date>=from&&r.visit_date<=to)||
       (state.data?.requests||[]).some(r=>inWeek(r)&&['pending','approved'].includes(r.status)&&!inactive.has(Number(r.reservation_id)));
   }
 
