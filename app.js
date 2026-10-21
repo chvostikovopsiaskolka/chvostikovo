@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261021-pair-late-message-v330';
-const APP_VERSION='2.0.13';
+const APP_BUILD='20261021-booking-deadline-v331';
+const APP_VERSION='2.0.14';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2702,11 +2702,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function bratislavaClockV95(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()),m=Object.fromEntries(parts.map(x=>[x.type,x.value]));return{date:m.year+'-'+m.month+'-'+m.day,minutes:Number(m.hour)*60+Number(m.minute)}}
   function previousIsoDayV95(iso){const d=new Date(String(iso)+'T12:00:00Z');d.setUTCDate(d.getUTCDate()-1);return d.toISOString().slice(0,10)}
   function bookingDeadlineClosedV95(date,dog){
-    if(dog?.booking_late_exception===true)return false;
-    const now=bratislavaClockV95(),weekday=new Date(date+'T12:00:00Z').getUTCDay();
-    const sunday=new Date(date+'T12:00:00Z');sunday.setUTCDate(sunday.getUTCDate()-weekday);
-    const cutoff=sunday.toISOString().slice(0,10);
-    return now.date>cutoff||(now.date===cutoff&&now.minutes>=20*60);
+    return customerManagementClosedV314(date);
   }
   function fitBookingDeadlineTitle(){
     const title=$('deadlineText')?.querySelector('strong');
@@ -2734,11 +2730,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     // Closed-week guidance is already rendered under the week in the reservation picker.
     box.classList.toggle('hidden',!!showClosed);
     box.querySelector('strong').textContent=showClosed
-      ? 'Prihlasovanie bolo na tento týždeň uzavreté v nedeľu o 20:00.'
+      ? 'O miesto na najbližší deň nám už napíšte správu.'
       : 'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
     requestAnimationFrame(fitBookingDeadlineTitle);
     const detail=box.querySelector('span');
-    if(detail){detail.textContent=showClosed?'Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.':'';detail.classList.toggle('hidden',!showClosed)}
+    if(detail){detail.textContent=showClosed?'Žiadosť o rezerváciu môžete odoslať najneskôr deň vopred do 19:00. Potom nám napíšte správu.':'';detail.classList.toggle('hidden',!showClosed)}
   }
   function pickerErrorV95(message,deadline=false){const box=$('bookingPickerErrorV95');if(!box)return;box.classList.toggle('hidden',!message);if(!message){box.innerHTML='';return}box.innerHTML='<strong>'+esc(message)+'</strong>'+(deadline?'<div>Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.</div>':'')}
 
@@ -2941,17 +2937,17 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const weekNoticeClosed=week.some(d=>bookingDeadlineClosedV95(d.date,dog));
       const weekNoticeFull=!weekNoticeClosed&&week.some(d=>Number(d.available)<=0);
       const weekNotice=weekNoticeClosed
-        ? '<div class="booking-week-closed-note-v127"><strong>Prihlasovanie sa uzavrelo v nedeľu o 20:00.</strong><span>Stále nám však môžete napísať kliknutím na požadovaný deň.</span></div>'
+        ? '<div class="booking-week-closed-note-v127"><strong>Žiadosti prijímame do 19:00 deň pred návštevou.</strong><span>Po tomto čase kliknite na požadovaný deň a napíšte nám správu.</span></div>'
         : weekNoticeFull
-        ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni sú plné.</strong><span>Kliknite na deň a napíšte nám záujem o miesto.</span></div>'
+        ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni sú plné.</strong><span>Vyberte deň s dostatkom voľných miest pre vybraných psíkov.</span></div>'
         : '';
       const futureWeek=start>=10;
       const futureOpen=!futureWeek||futureWeekExpandedV235||week.some(d=>selectedDatesV37.has(d.date));
       groups.push(`<div class="booking-picker-week-v127 ${futureWeek?'booking-picker-future-v235':''}"><div class="booking-picker-week-label-v127">${futureWeek?`<button type="button" class="booking-picker-future-toggle-v235" data-future-toggle="true" aria-expanded="${futureOpen?'true':'false'}">O dva týždne <span aria-hidden="true">${futureOpen?'⌃':'⌄'}</span></button>`:(['Tento týždeň','Budúci týždeň'][start/5]||'Ďalší týždeň')}</div><div class="booking-picker-future-body-v235 ${futureOpen?'':'hidden'}">${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
         const existing=pickerDogsV254().some(x=>bookingFor(x.id,d.date)),deadlineClosed=pickerDogsV254().some(x=>bookingDeadlineClosedV95(d.date,x)),closed=d.bookings_open===false,full=Number(d.available)<pickerDogsV254().length;
         const past=d.date<=bratislavaClockV95().date;
-        const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;
-        const disabled=!!existing||closed||past;
+        const lateContact=deadlineClosed&&!existing&&!past&&!closed;
+        const disabled=!!existing||closed||past||(full&&!deadlineClosed);
         const selected=selectedDatesV37.has(d.date);
         const ownBookings=pickerDogsV254().map(x=>bookingFor(x.id,d.date)).filter(Boolean);
         const ownStatus=existing?(ownBookings.some(r=>r.status==='pending')?'pending':'approved'):'';
@@ -2972,9 +2968,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const message=pairBookingV254
           ? `Dobrý deň, mám záujem o miesta na ${skDay(date)} ${skDate(date)} pre oboch psíkov (${requestedDogs.map(d=>d.name).join(' a ')}). Prosím o potvrdenie dostupnosti oboch miest.`
           : `Dobrý deň, prosím o dodatočnú rezerváciu pre ${dog.name} na ${skDay(date)} ${skDate(date)}.`;
-        // A joint late enquiry is one message. Never create a request for only
-        // one of the selected dogs through the single-dog late-booking RPC.
-        window.openCustomerLateBookingMessage?.(Number(dog.id),date,message,pairBookingV254||btn.dataset.full==='true');
+        // Once D−1 19:00 is reached, contact is always message-only.
+        window.openCustomerLateBookingMessage?.(Number(dog.id),date,message,true);
         return;
       }
       if(selectedDatesV37.has(date)){
@@ -3042,14 +3037,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   async function submitPickerV37(){
     const dog=selectedDog(),dates=[...selectedDatesV37].sort();
     if(!dog||!dates.length||submittingV37||checkingRenewalV157)return;
-    if(state.data?.shared_passes_enabled&&pickerDogsV254().some(d=>sharedDogBillingV260(d.id)))return submitSharedV260(dates);
-    if(pairBookingV254)return submitPairV254(dates);
-    if(window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(dog)){pickerErrorV95('Pred rezerváciou doplňte povinné očkovania.');return}
     const deadlineDates=dates.filter(date=>bookingDeadlineClosedV95(date,dog));
     if(deadlineDates.length){
       deadlineDates.forEach(date=>{selectedDatesV37.delete(date);selectedTaxiByDateV91.delete(date)});
-      renderPickerV37();pickerErrorV95('Rezervácie na '+deadlineDates.map(skDate).join(', ')+' sa uzavreli v nedeľu o 20:00.',true);queueCustomerSync('bookings',0);return;
+      renderPickerV37();pickerErrorV95('Žiadosti na '+deadlineDates.map(skDate).join(', ')+' sa prijímajú najneskôr deň vopred do 19:00.',true);queueCustomerSync('bookings',0);return;
     }
+    if(state.data?.shared_passes_enabled&&pickerDogsV254().some(d=>sharedDogBillingV260(d.id)))return submitSharedV260(dates);
+    if(pairBookingV254)return submitPairV254(dates);
+    if(window.customerVaccinationsCompleteV96&&!window.customerVaccinationsCompleteV96(dog)){pickerErrorV95('Pred rezerváciou doplňte povinné očkovania.');return}
     submittingV37=true;pickerErrorV95('');renderPickerV37();
     let ok=0,renewalDate=null;const failed=[],successDates=[];
     const acceptedBooking=(row,date)=>{

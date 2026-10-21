@@ -88,3 +88,6 @@ jobs:
           node tests/admin-taxi-v329.cjs
           node tests/taxi-directions-v329.mjs
           node tests/taxi-notification-v329.cjs
+
+      - name: Booking requests until day-before 19:00 v331
+        run: node tests/booking-deadline-v331.mjs
