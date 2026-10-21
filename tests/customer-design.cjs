@@ -102,6 +102,30 @@ async function scenario(count){
   assert.equal(run('state.data.requests[0].status'),'approved','late cancellation leaves booking intact');
   w.document.getElementById('supportChatCloseV52').click();
   w.__fixtureNowIso='2099-01-05T09:00:00Z';run("window.openBookingPickerV37();renderDays();window.customerDesignPickerRender()");
+  assert.equal(w.document.getElementById('designWeekDeadline').hidden,true,'already registered this week does not see the missed-Sunday reminder');
+  const registeredWeekFixture=run('JSON.stringify(state.data)');
+  const noticeCase=(requests,reservations,visible,message,history=[],visits=[])=>{
+    run(`state.data.requests=${JSON.stringify(requests)};state.data.reservations=${JSON.stringify(reservations)};state.data.booking_history=${JSON.stringify(history)};state.data.visits=${JSON.stringify(visits)};renderDays();window.customerDesignPickerRender()`);
+    assert.equal(!w.document.getElementById('designWeekDeadline').hidden,visible,message);
+  };
+  const weekRequest={id:880,dog_id:1,reservation_date:'2099-01-07',status:'pending'};
+  noticeCase([weekRequest],[],false,'pending request hides reminder before approval');
+  noticeCase([{...weekRequest,status:'approved'}],[],false,'approved request hides reminder');
+  noticeCase([],[{...weekRequest,id:881,status:'booked'}],false,'staff-created booking without customer request hides reminder');
+  noticeCase([],[{...weekRequest,id:881,status:'attended',reservation_date:'2099-01-05'}],false,'completed visit this week still counts');
+  noticeCase([],[],false,'past staff booking from real bootstrap history counts',[{dog_id:1,reservation_date:'2099-01-05',status:'attended'}]);
+  noticeCase([],[],false,'recorded visit counts when upcoming reservations no longer contain it',[],[{dog_id:1,visit_date:'2099-01-05'}]);
+  noticeCase([{...weekRequest,reservation_id:881,status:'approved'}],[{...weekRequest,id:881,status:'cancelled'}],true,'cancelled reservation cannot be revived by a stale approved request');
+  noticeCase([{...weekRequest,status:'rejected'},{...weekRequest,id:882,status:'cancelled'}],[],true,'rejected and cancelled requests do not hide reminder');
+  noticeCase([{...weekRequest,reservation_date:'2099-01-12'}],[],true,'next-week booking does not suppress this-week reminder');
+  noticeCase([{...weekRequest,reservation_date:'2098-12-31'}],[],true,'previous-week booking does not suppress this-week reminder');
+  noticeCase([{...weekRequest,dog_id:999}],[],true,'unassigned dog does not suppress account reminder');
+  if(count===2){
+    noticeCase([{...weekRequest,dog_id:2}],[],false,'second dog counts while first dog is selected');
+    run('state.selectedDogId=2;renderDays()');assert.equal(w.document.getElementById('designWeekDeadline').hidden,true,'switching dogs preserves account-wide decision');
+    run('state.selectedDogId=1');
+  }
+  noticeCase([],[],true,'no registration this week shows guidance');
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday keeps closed-week guidance by calendar');
   assert.notEqual(w.getComputedStyle(w.document.getElementById('designWeekDeadline')).display,'none','legacy closed-week CSS cannot hide the Monday notice');
   assert(w.document.getElementById('designWeekDeadline').previousElementSibling.classList.contains('booking-picker-week-label-v127'),'closed notice follows week heading');
@@ -110,6 +134,7 @@ async function scenario(count){
   assert(w.document.querySelector('#bookingPickerCloseV37 svg'),'close glyph is geometrically centred vector');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false,'Sunday reminder stays visible on Monday');
   assert.match(w.document.getElementById('designReservationNotice').textContent,/do nedele 20:00/);
+  run(`state.data=JSON.parse(${JSON.stringify(registeredWeekFixture)});renderDays()`);
   w.__fixtureNowIso='2099-01-04T20:00:00Z';run('window.openBookingPickerV37()');
   assert.equal(w.document.getElementById('designWeekDeadline'),null,'late-week notice does not appear on preceding Sunday');
   w.__fixtureNowIso='2099-01-05T09:00:00Z';run('window.openBookingPickerV37()');
@@ -153,7 +178,7 @@ async function scenario(count){
   assert.equal(run('afterCutoffPayload.action'),'send_message','after cutoff sending never creates a booking or interest');
   w.document.getElementById('supportChatCloseV52').click();run('api=window.__savedDeadlineApi;state.data=JSON.parse(beforeDeadlineFixture);renderDays()');photo=w.document.querySelector('.design-friend-strip img');
   w.__fixtureNowIso='2099-01-05T23:00:00Z';run("renderDays();window.customerDesignPickerRender()");
-  assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'contact guidance remains below current week heading on Tuesday');
+  assert.equal(w.document.getElementById('designWeekDeadline').hidden,true,'earlier registration this week still suppresses reminder on Tuesday');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false);
   w.__fixtureNowIso=null;run("window.closeBookingPickerV305();renderDays()");
   run('renderDog();renderPassSummary()');assert.equal(w.document.querySelector('.design-friend-strip img'),photo,'unrelated render preserves friend image');

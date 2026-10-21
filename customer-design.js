@@ -215,7 +215,7 @@
     calendar.prepend(notice);
     notice.hidden=!!closed;notice.textContent=source?.querySelector('strong')?.textContent||'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
     // The core calendar owns the Monday-to-Sunday notice and its visibility.
-    const weekNotice=byId('designWeekDeadline');if(weekNotice)byId('bookingPickerDaysV37').querySelector('.booking-picker-week-label-v127')?.after(weekNotice);
+    const weekNotice=byId('designWeekDeadline');if(weekNotice){weekNotice.hidden=!!window.customerDesignHasWeekBooking?.(weekNotice.dataset.weekFrom,weekNotice.dataset.weekTo);byId('bookingPickerDaysV37').querySelector('.booking-picker-week-label-v127')?.after(weekNotice);}
 
     const selectedSection=byId('bookingPickerTaxiSectionV91');
     const taxiTitle=byId('designSelectedDaysTitle')||selectedSection?.querySelector('.booking-picker-taxi-title-v37');
