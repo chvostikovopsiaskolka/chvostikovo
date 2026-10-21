@@ -1,4 +1,11 @@
 BEGIN;
+DO $guard$
+BEGIN
+ PERFORM 1 FROM public.frontend_snapshots WHERE key='stable-v10-clean' AND md5(html)='17ef940be116618aa0fadd8f281513fa' FOR UPDATE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Admin changed since AI release; use selective rollback'; END IF;
+ IF md5(pg_get_functiondef('public.admin_traffic_dashboard_v266(date,date)'::regprocedure))<>'5c1675232036b903403ea77fd7234568' THEN RAISE EXCEPTION 'Traffic RPC changed since AI release'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.frontend_snapshots WHERE key='backup-admin-before-ai-referral-20261021' AND md5(html)='84a2c9c9c0d483eeaf15835221ceb610') THEN RAISE EXCEPTION 'Rollback backup mismatch'; END IF;
+END $guard$;
 UPDATE public.frontend_snapshots SET html=(SELECT html FROM public.frontend_snapshots WHERE key='backup-admin-before-ai-referral-20261021') WHERE key='stable-v10-clean' AND md5(html)='17ef940be116618aa0fadd8f281513fa';
 CREATE OR REPLACE FUNCTION public.admin_traffic_dashboard_v266(p_from date, p_to date)
  RETURNS jsonb
