@@ -170,8 +170,8 @@
     }else{
       const key=all.length?'outside-range':'empty';
       if(root.dataset.date!==key||root.querySelector('.design-overview-carousel')){
-        root.dataset.date=key;root.innerHTML=`<div class="design-visits-title"><h2>📅 Moje rezervácie</h2></div><article class="design-visit-card design-visit-empty"><p class="design-empty-heading">${all.length?'Najbližšia rezervácia je neskôr než o dva týždne.':'Zatiaľ nemáte vytvorenú rezerváciu.'}</p><div class="design-empty-reminder"></div><button type="button" class="btn full">${all.length?'Moje rezervácie':'Rezervovať miesto v škôlke'}</button></article>`;
-        root.querySelector('button').addEventListener('click',()=>window.openBookingPickerV37?.());
+        root.dataset.date=key;root.innerHTML=`<div class="design-visits-title"><h2>📅 Moje rezervácie</h2></div><article class="design-visit-card design-visit-empty"><p class="design-empty-heading">${all.length?'Najbližšia rezervácia je neskôr než o dva týždne.':'Zatiaľ nemáte vytvorenú rezerváciu.'}</p><div class="design-empty-reminder"></div>${all.length?'<button type="button" class="btn full">Moje rezervácie</button>':''}</article>`;
+        root.querySelector('button')?.addEventListener('click',()=>window.openBookingPickerV37?.());
       }
       const target=root.querySelector('.design-empty-reminder'),notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu do nedele 20:00.';target.classList.toggle('design-deadline-closed',notice?.classList.contains('hidden'));
     }
