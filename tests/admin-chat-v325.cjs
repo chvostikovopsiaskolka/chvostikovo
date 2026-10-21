@@ -1,0 +1,28 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),{JSDOM}=require('./shared-v244/node_modules/jsdom');
+const html=process.env.ADMIN_SOURCE?fs.readFileSync(process.env.ADMIN_SOURCE,'utf8'):require('../tools/build-admin-chat-v325.cjs')();
+const dom=new JSDOM(html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''),{url:'https://admin.fixture',runScripts:'outside-only',pretendToBeVisual:true}),w=dom.window,errors=[],writes=[];
+w.console.error=(...a)=>errors.push(a.map(String).join(' '));w.addEventListener('error',e=>errors.push(e.message));w.alert=()=>{};w.confirm=()=>true;w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};w.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});
+w.WebSocket=class{static OPEN=1;static CONNECTING=0;constructor(){this.readyState=0}close(){}send(){}};
+w.CSS={escape:s=>String(s).replace(/[^a-zA-Z0-9_-]/g,c=>'\\'+c)};
+w.fetch=async(url,opts={})=>{if(opts.method&&opts.method!=='GET')writes.push({url:String(url),method:opts.method});return {ok:true,json:async()=>({data:[]}),text:async()=> '[]',headers:{get:()=>''}}};
+for(const [,code] of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))if(code.trim())new vm.Script(code).runInContext(dom.getInternalVMContext());
+w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+(async()=>{try{
+ await new Promise(r=>setTimeout(r,30));
+ const s=w.state,c={id:19,customer_user_id:'synthetic-marek'},bella={id:77,owner_id:60,name:'Bella',active:true,sex:'female',photo_url:'https://image.fixture/bella.jpg?token=1',photo_path:'bella-v1',photo_updated_at:'1',owner_photos:[{photo_url:'https://image.fixture/old-bella.jpg'}]},iris={id:89,owner_id:60,name:'Iris',active:true,photo_url:'https://image.fixture/iris.jpg'};
+ Object.assign(s,{dogs:[iris,bella],customerProfiles:[{user_id:c.customer_user_id,full_name:'Marek Fixture',phone:'+421900000000'}],customerOwnerLinks:[{user_id:c.customer_user_id,owner_id:60,allowed_dog_ids:[77]}],portalConversations:[c],portalMessages:[{id:28,conversation_id:19,sender_role:'customer',body:'Synthetic message',read_at:'2026-10-21',created_at:'2026-10-21T08:00:00Z'}]});
+ w.adminMessageRuntime.render();assert(w.document.getElementById('customerMessagesList').textContent.includes('Marek • Bella'));assert(!w.document.getElementById('customerMessagesList').textContent.includes('Iris'));
+ w.openAdminChatV48(19);const title=w.document.getElementById('adminChatTitleV48'),avatar=w.document.getElementById('adminChatDogAvatarV66');
+ assert.equal(title.textContent,'Marek • Bella');let img=avatar.querySelector('img');assert.equal(img.src,bella.photo_url);assert.equal(img.alt,'Bella');assert.equal(w.document.getElementById('adminChatCallV68').getAttribute('href'),'tel:+421900000000');
+ w.__refreshAdminChatV48();assert.equal(avatar.querySelector('img'),img);
+ bella.photo_url='https://image.fixture/bella.jpg?token=2';w.__refreshAdminChatV48();assert.equal(avatar.querySelector('img'),img,'Signed URL renewal preserves unchanged photo');
+ bella.photo_path='bella-v2';bella.photo_updated_at='2';bella.photo_url='https://image.fixture/bella-new.jpg';w.__refreshAdminChatV48();assert.notEqual(avatar.querySelector('img'),img);assert.equal(avatar.querySelector('img').src,bella.photo_url);
+ bella.owner_photos=[{owner_name:'Other Fixture',photo_url:'https://image.fixture/other.jpg'},{owner_name:'Marek Fixture',photo_url:'https://image.fixture/account-bella.jpg',updated_at:'3'}];w.__refreshAdminChatV48();assert.equal(avatar.querySelector('img').src,'https://image.fixture/account-bella.jpg','Current account photo takes precedence over old staff fallback');
+ s.customerOwnerLinks[0].allowed_dog_ids=[89,77];w.__refreshAdminChatV48();assert.equal(title.textContent,'Marek • Iris, Bella');assert.equal(avatar.querySelector('img').alt,'Iris');
+ s.customerOwnerLinks[0].allowed_dog_ids=[];w.__refreshAdminChatV48();assert.equal(title.textContent,'Marek');assert.equal(avatar.querySelector('img'),null);
+ s.customerOwnerLinks[0].allowed_dog_ids=null;w.__refreshAdminChatV48();assert.equal(title.textContent,'Marek • Iris, Bella');
+ iris.active=false;s.customerOwnerLinks[0].allowed_dog_ids=[89];w.__refreshAdminChatV48();assert.equal(title.textContent,'Marek');assert.equal(avatar.querySelector('img'),null);
+ s.customerOwnerLinks=[{user_id:'other-account',owner_id:60,allowed_dog_ids:null}];w.__refreshAdminChatV48();assert.equal(title.textContent,'Marek');assert.equal(avatar.querySelector('img'),null);
+ assert.equal(w.adminMessageRuntime.label(null),'Majiteľ');await new Promise(r=>setTimeout(r,30));assert.deepEqual(writes,[],'No real or synthetic message mutations');assert.deepEqual(errors,[]);
+ console.log('PASS assembled admin chat: scoped list/title/avatar, same-owner isolation, one/two/zero/inactive dogs, live reassignment/photo replacement, stable image token renewal, profile phone, no writes.');
+}finally{w.close()}})().catch(e=>{console.error(e);process.exitCode=1});

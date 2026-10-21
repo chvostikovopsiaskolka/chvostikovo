@@ -36,6 +36,12 @@ jobs:
           ADMIN_SOURCE=/tmp/admin-candidate-v323.html node tests/admin-proofs-v321.cjs
       - name: Assembled admin startup and analytics
         run: node tests/admin-runtime-v275.cjs
+      - name: Account-scoped admin chat v325
+        run: |
+          node tools/build-admin-chat-v325.cjs
+          node tests/admin-chat-v325.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v325.html node tests/admin-runtime-v275.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v325.html node tests/admin-proofs-v321.cjs
       - name: Customer loading motion lifecycle
         run: node tests/loading-motion-v317.cjs
       - name: Staff vaccination photo management v321
