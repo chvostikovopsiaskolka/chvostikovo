@@ -6,6 +6,7 @@
   const icon = name => `<svg aria-hidden="true"><use href="#ci-${name}"/></svg>`;
   let modalReturn = null;
   let rosterDate = null;
+  let cancellationResolveV326 = null;
   function ensureModal() {
     let root = byId('customerDesignModal');
     if (root) return root;
@@ -26,6 +27,7 @@
     document.body.append(root); return root;
   }
   function closeModal() {
+    const resolve=cancellationResolveV326;cancellationResolveV326=null;resolve?.(null);
     byId('customerDesignModal')?.classList.add('hidden'); rosterDate = null;
     document.documentElement.classList.remove('design-modal-open');
     if (modalReturn?.isConnected) modalReturn.focus({preventScroll:true});
@@ -38,6 +40,14 @@
     root.classList.remove('hidden'); document.documentElement.classList.add('design-modal-open');
     root.querySelector('button').focus({preventScroll:true});
   }
+  window.customerChooseCancelReasonV326=row=>new Promise(resolve=>{
+    closeModal();
+    const dog=state.data?.dogs?.find(d=>Number(d.id)===Number(row.dog_id));
+    showModal('Zrušiť rezerváciu',`${dog?.name||'Psík'} · ${skDay(row.reservation_date)} ${skDate(row.reservation_date)}`,dog?.sex!=='male');
+    cancellationResolveV326=resolve;
+    byId('customerDesignModalBody').innerHTML='<div class="design-cancel-reasons"><button type="button" data-cancel-reason="none">Bez udania dôvodu</button><button type="button" data-cancel-reason="illness">Psík ochorel</button><button type="button" data-cancel-reason="reschedule">Chcem zmeniť termín</button></div>'+(customerManagementClosedV314(row.reservation_date)?'<p class="design-cancel-deadline">Po uzávierke odošlite žiadosť o zrušenie v správe škôlke.</p>':'');
+    byId('customerDesignModalBody').querySelectorAll('[data-cancel-reason]').forEach(button=>button.addEventListener('click',()=>{cancellationResolveV326=null;closeModal();resolve(button.dataset.cancelReason);}));
+  });
   function selectDog(id) {
     if (!state.data?.dogs?.some(d => Number(d.id) === Number(id))) return false;
     if (Number(state.selectedDogId) !== Number(id)) {
@@ -126,7 +136,7 @@
     let root=byId('designNearest');
     if(!root){root=document.createElement('section');root.id='designNearest';root.className='design-nearest';anchor.after(root);}
     const clock=overviewClock(),end=new Date(clock.date+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+14);
-    const all=[...futureItems(),...(state.data.requests||[]).filter(r=>r.status==='rejected')].filter(r=>overviewDayVisible(r.reservation_date,clock));
+    const all=futureItems().filter(r=>overviewDayVisible(r.reservation_date,clock));
     const dates=[...new Set(all.filter(r=>r.reservation_date<end.toISOString().slice(0,10)).map(r=>r.reservation_date))].sort();
     if(dates.length){
       if(!root.querySelector('.design-overview-carousel'))root.innerHTML='<div class="design-visits-title"><h2>📅 Rezervácie</h2><small>Posuňte pre zobrazenie ďalších dní →</small></div><div class="design-overview-carousel" role="region" aria-label="Rezervované návštevy" tabindex="0"></div>';
@@ -139,11 +149,13 @@
         if(!card){card=document.createElement('article');card.className='design-visit-card';card.dataset.visitDate=date;}
         if(card.dataset.status!==status){
           card.dataset.status=status;
-          card.innerHTML=`<div class="design-nearest-head">${icon('calendar')}<strong><span class="design-visit-label"></span>${esc(skDay(date).slice(0,2).toLowerCase())} ${esc(skDate(date).replace(/\s*20\d{2}$/, ''))}</strong><button type="button" class="design-visit-edit" aria-label="Upraviť rezerváciu na ${esc(skDate(date))}">✎</button>${approved?'<span class="design-approved" aria-label="Schválená">✓</span>':status==='pending'?'<span class="design-visit-status pending" aria-label="Čaká na schválenie" title="Čaká na schválenie">?</span>':'<span class="design-visit-status rejected" aria-label="Zamietnutá" title="Zamietnutá">×</span>'}</div>${approved?'<div class="design-friends-line"><div class="design-friend-strip"></div><button type="button" class="design-friends-button design-friend-tile"><span>Zobraziť<br>kamarátov<br>v škôlke</span><b aria-hidden="true">→</b></button></div>':`<p class="design-waiting-friends">${status==='pending'?'Čaká na schválenie. Kamarátov uvidíte po schválení rezervácie.':'Rezervácia bola zamietnutá.'}</p>`}`;
+          card.innerHTML=`<div class="design-nearest-head">${icon('calendar')}<strong><span class="design-visit-label"></span>${esc(skDay(date).slice(0,2).toLowerCase())} ${esc(skDate(date).replace(/\s*20\d{2}$/, ''))}</strong><button type="button" class="design-visit-edit" aria-label="Upraviť rezerváciu na ${esc(skDate(date))}"><span aria-hidden="true">✎</span> Upraviť</button>${approved?'<span class="design-approved" aria-label="Schválená">✓</span>':status==='pending'?'<span class="design-visit-status pending" aria-label="Čaká na schválenie" title="Čaká na schválenie">?</span>':'<span class="design-visit-status rejected" aria-label="Zamietnutá" title="Zamietnutá">×</span>'}</div>${approved?'<div class="design-friends-line"><div class="design-friend-strip"></div><button type="button" class="design-friends-button design-friend-tile"><span>Zobraziť<br>kamarátov<br>v škôlke</span><b aria-hidden="true">→</b></button></div>':`<p class="design-waiting-friends">${status==='pending'?'Čaká na schválenie. Kamarátov uvidíte po schválení rezervácie.':'Rezervácia bola zamietnutá.'}</p>`}<div class="design-visit-entries"></div>`;
           if(approved)card.querySelector('.design-friends-button').addEventListener('click',()=>openFriends(date));card.querySelector('.design-visit-edit').addEventListener('click',()=>window.customerDesignEditReservation(date));
         }
         card.setAttribute('aria-label',`${i===0?'Najbližšia návšteva, ':''}${skDay(date)} ${skDate(date)}`);
         card.querySelector('.design-visit-label').textContent='Najbližšia návšteva · ';
+        const entryRows=all.filter(r=>r.reservation_date===date),multi=(state.data.dogs||[]).length>1;
+        card.querySelector('.design-visit-entries').innerHTML=entryRows.map(row=>{const label=bookingEntrySummaryV326(row).label;if(!label)return '';const dog=state.data.dogs.find(d=>Number(d.id)===Number(row.dog_id));return `<div>${icon('ticket')} ${multi?esc(dog?.name||'Psík')+' · ':''}${esc(label)}</div>`;}).join('');
         if(carousel.children[i]!==card)carousel.insertBefore(card,carousel.children[i]||null);
         if(approved){
           const rows=friends(date).slice(0,4),strip=card.querySelector('.design-friend-strip');
@@ -232,4 +244,5 @@
   customerHooks.afterApi.push(()=>{if(rosterDate){if(!approvedForDate(rosterDate))closeModal();else openFriends(rosterDate);}});
   if(state.data)layout();
 })();
+
 

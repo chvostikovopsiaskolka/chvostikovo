@@ -266,3 +266,31 @@ html.customer-design.phone-portrait-layout .design-reservations-page .booking-pi
 
 /* v317: shorter Android day tiles, retaining the same text and touch area. */
 html.customer-android.customer-design #bookingPickerV37 .booking-day-v37{min-height:74px!important;padding-top:7px!important;padding-bottom:7px!important}
+
+
+/* v326: compact reservation controls and separation from the date picker. */
+.design-nearest-head .design-approved,.design-nearest-head .design-visit-status{border-radius:7px}
+.design-visit-edit{display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:0 0 auto;width:auto;min-width:68px;min-height:44px;height:44px;padding:0 3px;margin-right:0;font-size:11px;font-weight:750;white-space:nowrap}
+.design-visit-edit::before{display:none}
+.design-visit-edit>span{font-size:15px}
+.design-visit-card .design-nearest-head>strong{min-width:0;flex:1;font-size:12px}
+.design-visit-entries{display:grid;gap:5px;margin-top:10px;color:#a9541b;font-size:12px;font-weight:750;line-height:1.4}
+.design-visit-entries:empty{display:none}
+.design-visit-entries>div{min-width:0;overflow-wrap:anywhere}
+.design-visit-entries>div>span{margin-right:3px}
+.customer-design #bookingPickerV37 #designMyBookings{box-sizing:border-box;min-width:0;padding:11px 10px 5px;border:1px solid #f3dcc5;border-radius:17px;background:#fff7ed;margin:0 0 18px}
+.customer-design #bookingPickerV37 #designMyBookings h2{margin:0 0 7px;font-size:18px}
+.customer-design #bookingPickerV37 .booking-picker-head-v37{margin-bottom:13px!important}
+.customer-design #bookingPickerV37 #bookingPickerTitleV37{font-size:23px!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37{margin-top:17px!important}
+.design-taxi-cancel-row{display:flex;justify-content:flex-start;margin:3px 0 8px;min-width:0}
+.design-taxi-cancel{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border:1px solid #edbac2;border-radius:10px;background:#fff1f3;color:#bc354c;font-size:12px;font-weight:750;padding:5px 11px}
+.design-taxi-cancel>span{font-size:20px;line-height:1}
+.design-cancel-reasons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.design-cancel-reasons>button{box-sizing:border-box;min-width:0;min-height:62px;padding:10px 7px;border:1px solid #efceb0;border-radius:12px;background:#fff6ed;color:#9a4f20;font-size:13px;font-weight:750;line-height:1.4;overflow-wrap:anywhere}
+.design-cancel-deadline{margin:13px 0 0;font-size:12px;line-height:1.5;color:#7b6574}
+.design-visit-edit,.design-taxi-cancel,.design-cancel-reasons>button{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;cursor:pointer}
+.design-visit-edit:focus-visible,.design-taxi-cancel:focus-visible,.design-cancel-reasons>button:focus-visible{outline:2px solid #d76b20;outline-offset:3px}
+@media(max-width:350px){.design-visit-card .design-nearest-head>strong{font-size:11px}.design-visit-label{display:block}.design-visit-edit{min-width:64px;font-size:10px}.design-visit-entries{font-size:11px}.design-cancel-reasons>button{font-size:12px;padding:9px 5px}.customer-design #bookingPickerV37 #designMyBookings{padding:10px 7px 4px}}
+.design-visit-entries>div{display:flex;align-items:center;gap:6px}
+.design-visit-entries svg,.design-entry-ticket{display:inline-block;vertical-align:middle;flex:none;width:18px;height:18px;fill:#f4b3ca;stroke:#ca557d;stroke-width:1.5}
