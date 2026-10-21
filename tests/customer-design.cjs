@@ -98,6 +98,7 @@ async function scenario(count){
   w.document.getElementById('supportChatCloseV52').click();
   w.__fixtureNowIso='2099-01-05T09:00:00Z';run("window.openBookingPickerV37();renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday keeps closed-week guidance by calendar');
+  assert.notEqual(w.getComputedStyle(w.document.getElementById('designWeekDeadline')).display,'none','legacy closed-week CSS cannot hide the Monday notice');
   assert(w.document.getElementById('designWeekDeadline').previousElementSibling.classList.contains('booking-picker-week-label-v127'),'closed notice follows week heading');
   assert.match(w.document.querySelector('#designWeekDeadline strong').textContent,/Stále môžete požiadať o miesto/);
   assert.match(w.document.querySelector('#designWeekDeadline span').textContent,/Počkajte na jej schválenie/);
