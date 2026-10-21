@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fffaf5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Chvostíkovo">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png?v=20261014-admin-pwa-v111">
+  <link rel="icon" type="image/png" href="/icon-192.png?v=20261014-admin-pwa-v111">
+  <link rel="manifest" href="/manifest.webmanifest?v=20261014-admin-pwa-v111">
+  <title>Chvostíkovo</title>
+  <style>
+    html,body{margin:0;min-height:100%;background:#fffaf5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    #boot{position:fixed;inset:0;z-index:99999;display:grid;place-content:center;justify-items:center;gap:16px;padding:24px;background:#fff;color:#6b7280;text-align:center}
+    .boot-mark{position:relative;width:54px;height:54px;display:grid;place-items:center}
+    .boot-ring{position:absolute;inset:0;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;animation:boot-spin .8s linear infinite}
+    .boot-paw{position:relative;z-index:1;font-size:21px;line-height:1}
+    #bootText{font-size:14px;font-weight:700;line-height:1.35}
+    @keyframes boot-spin{to{transform:rotate(360deg)}}
+  </style>
+<style>/* Branded loading presentation; the existing loading() lifecycle remains authoritative. */
+.loading-preview-page{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#263349;background:#fffaf5}
+.loading-preview-page{box-sizing:border-box;margin:0;min-height:100svh;display:grid;place-items:center;background:#eee9e5}
+.loading-concept{position:relative;isolation:isolate;width:min(100%,430px);min-height:100svh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5}
+.concept-paws{position:absolute;inset:0;z-index:-1;color:#edbba0}.concept-paws svg{position:absolute;width:48px;height:48px;fill:currentColor;opacity:.18;transform:rotate(-22deg)}.concept-paws svg:nth-child(even){color:#dfa4c6;transform:rotate(25deg)}.concept-paws svg:nth-child(1){top:8%;left:9%}.concept-paws svg:nth-child(2){top:19%;right:8%;width:60px;height:60px}.concept-paws svg:nth-child(3){top:37%;left:5%;width:32px;height:32px}.concept-paws svg:nth-child(4){bottom:30%;right:5%}.concept-paws svg:nth-child(5){bottom:14%;left:13%;width:65px;height:65px}.concept-paws svg:nth-child(6){bottom:6%;right:17%;width:30px;height:30px}
+.concept-watermark{position:absolute;z-index:-1;top:22%;left:50%;width:300px;height:300px;transform:translateX(-50%) rotate(-12deg);fill:#e7b896;opacity:.1}
+.concept-center{text-align:center;padding:30px 18px;transform:translateY(-20px)}
+.concept-brand{display:block;width:min(300px,76vw);height:auto;margin:0 auto;filter:drop-shadow(0 8px 12px #99542012)}.concept-subtitle{display:block;margin-top:8px;color:#9d8575;font-size:11px;letter-spacing:2.3px;text-transform:uppercase}
+.concept-orbit{width:108px;height:108px;position:relative;display:grid;place-items:center;margin:42px auto 26px;border-radius:50%;background:linear-gradient(145deg,#fffdfb,#ffe9db);box-shadow:inset 0 2px 2px #fff,0 16px 28px #c77b3620,0 3px 6px #a9683010}
+.concept-orbit::before{content:"";position:absolute;inset:-7px;border:2px solid #ead6c660;border-top-color:#eb913e;border-right-color:#e9a1c6;border-radius:50%;animation:conceptSpin 1.8s linear infinite}.concept-orbit svg{width:48px;height:48px;fill:#d0804b;filter:drop-shadow(0 3px 1px #c28a5320);animation:conceptBreathe 2.2s ease-in-out infinite}
+.concept-caption{font-size:14px;color:#907866;margin:0;letter-spacing:.1px}.concept-note{position:absolute;bottom:max(30px,env(safe-area-inset-bottom));font-size:10px;color:#b09b8c;letter-spacing:1px}
+.concept-back{position:fixed;top:max(14px,env(safe-area-inset-top));left:max(14px,calc(50% - 200px));z-index:3;background:#ffffffc9;border:1px solid #eadfd4;border-radius:12px;padding:10px;color:#8f643e;text-decoration:none;font-size:12px;min-height:44px;display:flex;align-items:center;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}.concept-back:focus-visible{outline:3px solid #e68a3a}
+@keyframes conceptSpin{to{transform:rotate(360deg)}}@keyframes conceptBreathe{50%{transform:scale(1.055);opacity:.8}}@media(prefers-reduced-motion:reduce){.concept-orbit::before,.concept-orbit svg{animation:none}}
+/* Explicit viewport units avoid percentage sizing against iOS's auto-height root. */
+#boot.loading-screen.loading-concept{position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;height:100vh!important;height:100dvh!important;min-height:100svh!important;max-height:none!important;margin:0!important;transform:none!important;z-index:20000!important;overflow:hidden!important;background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}
+#boot.loading-screen.loading-concept.in-app{background:transparent!important}
+.concept-brand{width:min(230px,62vw)}
+/* Animate an actual SVG arc, without relying on a pseudo-element transform. */
+.concept-orbit::before{display:none!important}
+.concept-orbit>svg.concept-ring{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);fill:none;filter:none;animation:none;overflow:visible;transform:none}
+.concept-ring-track{fill:none;stroke:#ead6c6;stroke-opacity:.45;stroke-width:2}
+.concept-ring-arc{fill:none;stroke:url(#loadingArcGradient);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:28 72;stroke-dashoffset:0;animation:conceptArcTravel 1.8s linear infinite}
+#boot.in-app .concept-orbit>svg.concept-ring{width:calc(100% + 8px);height:calc(100% + 8px);inset:-4px}
+@keyframes conceptArcTravel{to{stroke-dashoffset:-100}}
+@media(prefers-reduced-motion:reduce){.concept-ring-arc{animation:none;stroke-dasharray:40 60}}
+.concept-ring-arc{animation:none!important;stroke-dasharray:28 72}
+/* The actual loader includes eight decorative paws; every one needs its own position. */
+.concept-paws svg:nth-child(7){top:3%;left:54%;width:36px;height:36px}
+.concept-paws svg:nth-child(8){top:auto;bottom:43%;right:2%;width:30px;height:30px}
+
+#boot.loading-concept{width:100%;height:100%;min-height:0;display:flex;box-sizing:border-box;gap:0;color:#907866}#boot.loading-concept.hidden{display:none}#boot .concept-paws{display:block}#boot.in-app{background:transparent;pointer-events:none}#boot.in-app .concept-brand,#boot.in-app .concept-subtitle,#boot.in-app .concept-paws,#boot.in-app .concept-watermark{display:none}#boot.in-app .concept-center{padding:0;transform:none}#boot.in-app .concept-orbit{width:60px;height:60px;margin:0;background:#fff;box-shadow:0 8px 28px #30203520}#boot.in-app .concept-orbit svg{width:28px;height:28px}#boot.in-app .concept-orbit::before{inset:4px}
+
+
+/* v317: fixed HTML animation box; explicit SVG viewport and optical paw centering. */
+.concept-orbit>.concept-paw{position:absolute;inset:0;margin:auto;width:48px;height:48px;display:grid;place-items:center;transform-origin:50% 50%;will-change:transform;animation:none}
+.concept-orbit>.concept-paw>svg{display:block;width:100%;height:100%;animation:none;transform:none}
+#boot.in-app .concept-orbit>.concept-paw{width:28px;height:28px}
+#boot.in-app .concept-orbit>.concept-paw>svg{width:100%;height:100%}
+@media(prefers-reduced-motion:reduce){.concept-orbit>.concept-paw{will-change:auto}}
+
+#boot{padding:0!important;z-index:99999!important;width:auto!important;height:auto!important;min-height:0!important;inset:0!important}html:has(#boot),body:has(#boot){background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}#bootText{font-size:14px;color:#991b1b;max-width:300px}</style></head>
+<body>
+<div id="boot" class="app-boot loading-screen loading-concept" role="status" aria-label="Načítavanie aplikácie" aria-live="polite"><svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><defs><symbol id="ci-loading-paw" viewBox="0 0 64 64"><ellipse cx="32" cy="39" rx="16" ry="13"/><circle cx="14" cy="23" r="7"/><circle cx="27" cy="14" r="7"/><circle cx="41" cy="14" r="7"/><circle cx="52" cy="25" r="7"/></symbol></defs></svg><div class="concept-paws" aria-hidden="true"><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg></div><svg class="concept-watermark" aria-hidden="true"><use href="#ci-loading-paw"/></svg><div class="concept-center"><img class="concept-brand" src="https://app.chvostikovo.sk/loading-brand.png" alt="chvostíkovo" fetchpriority="high"><span class="concept-subtitle">Psia škôlka</span><div class="concept-orbit" aria-hidden="true"><svg class="concept-ring" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="loadingArcGradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e9983f"/><stop offset="1" stop-color="#dc8fc3"/></linearGradient></defs><circle class="concept-ring-track" cx="60" cy="60" r="56"/><circle class="concept-ring-arc" cx="60" cy="60" r="56" pathLength="100"/></svg><span class="concept-paw"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ci-loading-paw" width="64" height="64" transform="translate(-1 2.5)"/></svg></span></div><p id="bootText" role="alert"></p></div></div><script id="admin-boot-motion-v322">/* Isolated, frame-synchronised loading indicator; no application data access. */
+(() => {
+  'use strict';
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const arcs=[...document.querySelectorAll('.concept-ring-arc')];
+  const paws=[...document.querySelectorAll('.concept-orbit>.concept-paw')];
+  let frame=0,previous=0,phase=0,breathe=0;
+  const visible=arc=>arc.isConnected&&!document.hidden&&!arc.closest('#boot')?.classList.contains('hidden');
+  const draw=time=>{
+    frame=0;
+    if(!arcs.some(visible)){previous=0;return;}
+    if(previous){
+      const delta=Math.max(0,Math.min(time-previous,64));
+      phase=(phase+delta/(reduced?.matches?4000:1800))%1;
+      breathe=(breathe+delta/2200)%1;
+    }
+    previous=time;
+    for(const arc of arcs)if(visible(arc))arc.style.strokeDashoffset=String(-100*phase);
+    // HTML transforms have a stable centre on both WebKit and Android SVG renderers.
+    const scale=reduced?.matches?1:1+.055*(.5-.5*Math.cos(2*Math.PI*breathe));
+    for(const paw of paws)if(visible(paw))paw.style.transform='scale('+scale+')';
+    frame=requestAnimationFrame(draw);
+  };
+  const resume=()=>{if(!frame&&arcs.some(visible))frame=requestAnimationFrame(draw);};
+  for(const loading of new Set(arcs.map(arc=>arc.closest('#boot')).filter(Boolean)))
+    new MutationObserver(resume).observe(loading,{attributes:true,attributeFilter:['class']});
+  document.addEventListener('visibilitychange',resume);
+  reduced?.addEventListener?.('change',()=>{breathe=0;for(const paw of paws)paw.style.transform='scale(1)';resume();});
+  resume();
+})();
+
+</script>
+  <script>
+    if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js?v=20261014-admin-pwa-v111').catch(()=>{});
+    (async()=>{
+      try{
+        const r=await fetch('https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-frontend?v=20261014-admin-pwa-v111',{cache:'no-store'});
+        if(!r.ok)throw new Error('server '+r.status);
+        const h=await r.text();
+        if(!h.includes('Chvostíkovo'))throw new Error('neplatná odpoveď');
+        document.open();document.write(h);document.close();
+      }catch(e){
+        const t=document.getElementById('bootText');
+        if(t)t.textContent='Appka sa nenačítala: '+(e.message||e);
+      }
+    })();
+  </script>
+</body>
+</html>
+
