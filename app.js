@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261021-access-layout-v337';
-const APP_VERSION='2.0.19';
+const APP_BUILD='20261021-week-notice-v338';
+const APP_VERSION='2.0.20';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2909,6 +2909,17 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('bookingPickerSubmitV37').addEventListener('click',submitPickerV37);
   }
 
+  // This reminder is account-wide: a completed visit earlier this week counts too.
+  function hasWeekBookingV337(from,to){
+    const dogIds=new Set((state.data?.dogs||[]).map(d=>Number(d.id)));
+    const inWeek=r=>dogIds.has(Number(r.dog_id))&&r.reservation_date>=from&&r.reservation_date<=to;
+    const reservations=state.data?.reservations||[];
+    const inactive=new Set(reservations.filter(r=>!['booked','attended'].includes(r.status)).map(r=>Number(r.id)));
+    return reservations.some(r=>inWeek(r)&&['booked','attended'].includes(r.status))||
+      (state.data?.requests||[]).some(r=>inWeek(r)&&['pending','approved'].includes(r.status)&&!inactive.has(Number(r.reservation_id)));
+  }
+
+  window.customerDesignHasWeekBooking=hasWeekBookingV337;
   let futureWeekExpandedV235=false;
   function renderPickerV37(){
     ensurePickerV37();
@@ -2931,7 +2942,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const currentWeek=start===0&&today>=week[0].date&&today<=weekEnd.toISOString().slice(0,10);
       const weekNoticeFull=week.some(d=>Number(d.available)<pickerDogsV254().length);
       const weekNotice=currentWeek
-        ? '<div id="designWeekDeadline"><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na deň, odošlite žiadosť a počkajte na schválenie. Pri plnej kapacite nám napíšte správu.</span></div>'
+        ? `<div id="designWeekDeadline" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}" ${hasWeekBookingV337(week[0].date,weekEnd.toISOString().slice(0,10))?'hidden':''}><strong>Nestihli ste rezervovať miesto do nedele?</strong><span>Kliknite na deň, odošlite žiadosť a počkajte na schválenie. Pri plnej kapacite nám napíšte správu.</span></div>`
         : weekNoticeFull
         ? '<div class="booking-week-closed-note-v127"><strong>Niektoré dni nemajú dostatok voľných miest.</strong><span>Kliknite na požadovaný deň a napíšte nám správu. O možnosti prihlásenia vás budeme informovať.</span></div>'
         : '';
