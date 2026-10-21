@@ -99,10 +99,14 @@ async function scenario(count){
   w.__fixtureNowIso='2099-01-05T09:00:00Z';run("window.openBookingPickerV37();renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday keeps closed-week guidance by calendar');
   assert(w.document.getElementById('designWeekDeadline').previousElementSibling.classList.contains('booking-picker-week-label-v127'),'closed notice follows week heading');
-  assert.match(w.document.querySelector('#designWeekDeadline strong').textContent,/19:00 deň pred návštevou/);
-  assert.match(w.document.querySelector('#designWeekDeadline span').textContent,/odošlite rezerváciu/);
+  assert.match(w.document.querySelector('#designWeekDeadline strong').textContent,/Stále môžete požiadať o miesto/);
+  assert.match(w.document.querySelector('#designWeekDeadline span').textContent,/Počkajte na jej schválenie/);
   assert(w.document.querySelector('#bookingPickerCloseV37 svg'),'close glyph is geometrically centred vector');
-  assert.equal(w.document.getElementById('designReservationNotice').hidden,true);
+  assert.equal(w.document.getElementById('designReservationNotice').hidden,false,'Sunday reminder stays visible on Monday');
+  assert.match(w.document.getElementById('designReservationNotice').textContent,/do nedele 20:00/);
+  w.__fixtureNowIso='2099-01-04T20:00:00Z';run('window.openBookingPickerV37()');
+  assert.equal(w.document.getElementById('designWeekDeadline'),null,'late-week notice does not appear on preceding Sunday');
+  w.__fixtureNowIso='2099-01-05T09:00:00Z';run('window.openBookingPickerV37()');
   run("state.data.availability.days[1].available=2;state.data.availability.days[1].occupied=6;renderDays();window.customerDesignPickerRender()");
   const lateDay=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');
   assert.equal(lateDay.dataset.contact,'false','Sunday planning reminder no longer blocks a normal request');
@@ -121,7 +125,19 @@ async function scenario(count){
   w.__fixtureNowIso='2099-01-05T17:59:00Z';run('window.openBookingPickerV37()');
   assert.equal(w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]').dataset.contact,'false','18:59 still accepts normal requests');
   run('state.data.availability.days[1].available=0;window.openBookingPickerV37()');
-  assert(w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]').disabled,'capacity is enforced before the cutoff without chat');
+  const fullDay=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');
+  assert(!fullDay.disabled,'full day can open an enquiry');assert.equal(fullDay.dataset.contact,'true');fullDay.click();
+  if(count===2)assert.match(w.document.getElementById('supportMessageBodyV52').value,/Bella a Iris/);
+  run("api=async(payload)=>{globalThis.fullCapacityPayload=payload;return {data:{message:{id:997,body:payload.message,sender_role:'customer',created_at:'2099-01-05T17:59:00Z'}}}};");
+  w.document.getElementById('supportMessageSend').click();await new Promise(r=>setTimeout(r,30));
+  assert.equal(run('fullCapacityPayload.action'),'send_message','full capacity sends only a message for one/two dogs');
+  assert.equal(run("state.data.requests.filter(r=>r.reservation_date==='2099-01-06').length"),0,'full capacity creates no booking request');
+  w.document.getElementById('supportChatCloseV52').click();run('api=window.__savedDeadlineApi');
+  if(count===2){
+    run('state.data.availability.days[1].available=1;window.openBookingPickerV37()');
+    assert.equal(w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]').dataset.contact,'true','one remaining place cannot create a partial two-dog reservation');
+    run('state.data.availability.days[1].available=0');
+  }
   w.__fixtureNowIso='2099-01-05T18:00:00Z';run('window.openBookingPickerV37()');
   const contact=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');assert.equal(contact.dataset.contact,'true','19:00 switches to message-only, also when full');contact.click();
   assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'));
@@ -169,13 +185,14 @@ async function scenario(count){
   assert.equal(w.document.querySelectorAll('#designMyBookings img').length,0);
   assert.equal(w.document.querySelector('.design-empty-booking-cta').textContent,'Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.');
   assert.equal(w.document.getElementById('designMyBookings').nextElementSibling.id,'designReservationNotice','deadline follows own reservations');
-  // Capacity before the cutoff cannot open chat or discard selected days.
+  // A full-day enquiry preserves selected dates and scroll when returning.
   if(count===1){
    const picker=w.document.getElementById('bookingPickerV37');picker.scrollTop=120;
    w.document.querySelector('.booking-day-v37[data-full="true"]').click();
    assert(!picker.classList.contains('hidden'));
-   assert(w.document.querySelector('.booking-day-v37[data-full="true"]').disabled);
-   assert(w.document.getElementById('supportChatModalV52').classList.contains('hidden'));
+   assert(!w.document.querySelector('.booking-day-v37[data-full="true"]').disabled);
+   assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'));
+   assert.equal(picker.inert,true);w.document.getElementById('supportChatCloseV52').click();
    assert.equal(picker.inert,false);assert.equal(picker.scrollTop,120);
    assert.equal(w.document.getElementById('bookingPickerSubmitV37').disabled,false,'selected days retained');
   }
