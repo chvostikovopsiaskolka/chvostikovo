@@ -98,3 +98,10 @@ jobs:
           node tests/admin-owner-review-v334.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v334.html node tests/admin-taxi-v329.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v334.html node tests/admin-runtime-v275.cjs
+
+      - name: Compact admin week and four taxi choices v335
+        run: |
+          node tools/build-admin-compact-week-v335.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-owner-review-v334.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-taxi-v329.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-runtime-v275.cjs
