@@ -83,7 +83,7 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261021-taxi-directions-v329';
+const APP_BUILD='20261021-taxi-directions-v329b';
 const APP_VERSION='2.0.12';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
@@ -2800,8 +2800,9 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     document.head.appendChild(style);
   }
   function allowedTaxiEditV201(row){
-    if(!row||row.status!=='approved'
-       ||(!row._legacy&&!Number(row.id))||!Number(row.reservation_id))return false;
+    if(!row||!['approved','pending'].includes(row.status)||(!row._legacy&&!Number(row.id)))return false;
+    if(row.status==='approved'&&!Number(row.reservation_id))return false;
+    if(row.status==='pending'&&!taxiLabel(row.taxi_mode))return false;
     if(!['none','pickup','dropoff','pickup_dropoff'].includes(String(row.taxi_mode||'none')))return false;
     return String(row.reservation_date||'')>bratislavaClockV95().date;
   }
@@ -2845,7 +2846,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('taxiEditSendV201').addEventListener('click',async()=>{
       if(taxiEditBusyV201||(!taxiEditRequestV201&&!taxiEditReservationV327)||!['pickup','dropoff','pickup_dropoff'].includes(taxiEditSelectionV201))return;
       const row=taxiEditReservationV327?futureItems().find(r=>Number(r.reservation_id)===taxiEditReservationV327):(state.data?.requests||[]).find(r=>Number(r.id)===taxiEditRequestV201);
-      if(!allowedTaxiEditV201(row)||row.taxi_change_status==='pending'){toast('Taxi sa už pri tejto rezervácii nedá zmeniť.');close();return}
+      if(!allowedTaxiEditV201(row)||row.status!=='approved'||row.taxi_change_status==='pending'){toast('Taxi sa už pri tejto rezervácii nedá zmeniť.');close();return}
       taxiEditBusyV201=true;$('taxiEditSendV201').disabled=true;
       try{
         const accountId=state.session?.user?.id;
@@ -2880,14 +2881,14 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     $('taxiEditDateV201').textContent=skDay(row.reservation_date)+' '+skDate(row.reservation_date);
     $('taxiEditErrorV201').textContent='';$('taxiEditErrorV201').classList.add('hidden');
     $('taxiEditSendV201').textContent=taxiLabel(row.taxi_mode)?'Požiadať o zmenu':'Pridať taxík';
-    $('taxiEditTitleV201').textContent=row.taxi_change_status==='pending'?'Taxík čaká na schválenie':taxiLabel(row.taxi_mode)?'Prajete si zmeniť typ taxíka?':'Pridať taxík';
-    $('taxiEditSendV201').disabled=true;$('taxiEditSendV201').hidden=row.taxi_change_status==='pending';
+    $('taxiEditTitleV201').textContent=row.status==='pending'||row.taxi_change_status==='pending'?'Taxík čaká na schválenie':taxiLabel(row.taxi_mode)?'Prajete si zmeniť typ taxíka?':'Pridať taxík';
+    $('taxiEditSendV201').disabled=true;$('taxiEditSendV201').hidden=row.status==='pending'||row.taxi_change_status==='pending';
     const cancel=$('taxiEditCancelV329');cancel.classList.toggle('hidden',!taxiLabel(row.taxi_mode)&&row.taxi_change_status!=='pending');
     cancel.dataset.taxiCancelRequest=row._legacy||row.can_manage===false?'':Number(row.id);
     cancel.dataset.taxiCancelReservation=row._legacy||row.can_manage===false?Number(row.reservation_id):'';
     $('bookingTaxiEditV201').querySelectorAll('[data-edit-taxi]').forEach(x=>{
       x.classList.remove('active');
-      x.hidden=x.dataset.editTaxi===row.taxi_mode||row.taxi_change_status==='pending';x.disabled=x.hidden;x.setAttribute('aria-pressed','false');
+      x.hidden=x.dataset.editTaxi===row.taxi_mode||row.status==='pending'||row.taxi_change_status==='pending';x.disabled=x.hidden;x.setAttribute('aria-pressed','false');
     });
     $('bookingTaxiEditV201').classList.remove('hidden');
     document.documentElement.classList.add('booking-picker-open-v37');

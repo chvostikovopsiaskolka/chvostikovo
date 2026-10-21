@@ -75,6 +75,10 @@ async function scenario(count){
   assert.equal(run('state.data.requests[0].taxi_change_status'),'pending');assert.equal(run('futureItems().length'),1,'bridging request does not duplicate booking');
   run(`state.data=JSON.parse(${JSON.stringify(originalBookingFixture)});renderDays();`);w.authFetch=originalAuthFetch;run('authFetch=window.authFetch');
   assert.match(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').textContent,/Schválené/);
+  run(`state.data.requests[0].status='pending';state.data.requests[0].taxi_mode='dropoff';state.data.reservations=[];renderDays();`);
+  const pendingTaxi=w.document.querySelector('#weekDays [data-taxi-request]');assert(pendingTaxi);pendingTaxi.click();
+  assert(!w.document.getElementById('taxiEditCancelV329').classList.contains('hidden'),'pending booking retains taxi-only cancellation under pencil');assert(w.document.getElementById('taxiEditSendV201').hidden);assert.equal([...w.document.querySelectorAll('[data-edit-taxi]')].filter(x=>!x.hidden).length,0);
+  w.document.getElementById('taxiEditCloseV201').click();run(`state.data=JSON.parse(${JSON.stringify(originalBookingFixture)});renderDays();`);photo=w.document.querySelector('.design-friend-strip img');
   const addTaxi=w.document.querySelector('#weekDays [data-taxi-request]');assert(addTaxi);addTaxi.click();
   assert(w.document.getElementById('bookingTaxiEditV201').classList.contains('design-taxi-modal'));assert.equal(w.document.getElementById('bookingTaxiEditV201').parentElement,w.document.body);assert.equal(w.document.getElementById('bookingPickerV37').inert,true);assert.equal(w.document.getElementById('bookingTaxiEditV201').getAttribute('aria-modal'),'true');
   w.document.getElementById('taxiEditCloseV201').click();assert.equal(w.document.getElementById('bookingPickerV37').inert,false);run('window.closeBookingPickerV305()');
