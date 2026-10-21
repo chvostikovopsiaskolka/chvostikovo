@@ -60,10 +60,10 @@ async function scenario(count){
     if(choice==='reschedule')assert(!w.document.getElementById('bookingPickerV37').classList.contains('hidden'));
   }
   run(`state.data=JSON.parse(${JSON.stringify(originalBookingFixture)});state.data.requests[0].taxi_mode='pickup_dropoff';state.data.requests[0].taxi_amount=10;renderDays();`);
-  let taxiCancel=w.document.querySelector('[data-taxi-cancel-request]');assert(taxiCancel);
+  w.document.querySelector('#weekDays [data-taxi-request]').click();let taxiCancel=w.document.getElementById('taxiEditCancelV329');assert(!taxiCancel.classList.contains('hidden'));assert.equal(w.document.querySelectorAll('#weekDays .design-taxi-cancel').length,0);assert.equal([...w.document.querySelectorAll('[data-edit-taxi]')].filter(b=>!b.hidden).length,2);
   run("authFetch=async(path,opts)=>{globalThis.taxiPayload=JSON.parse(opts.body);return {reservation_id:700,changed:true}};");
   await run("cancelTaxiV326(document.querySelector('[data-taxi-cancel-request]'))");
-  assert.equal(run('state.data.requests[0].status'),'approved');assert.equal(run('state.data.requests[0].taxi_mode'),'none');assert.equal(run('taxiPayload.p_request_id'),70);
+  assert.equal(run('state.data.requests[0].status'),'approved');assert.equal(run('state.data.requests[0].taxi_mode'),'none');assert.equal(run('taxiPayload.p_request_id'),70);w.document.getElementById('taxiEditCloseV201').click();
   run(`state.data=JSON.parse(${JSON.stringify(originalBookingFixture)});renderDays();`);w.api=originalApi;run('api=window.api');w.authFetch=originalAuthFetch;run('authFetch=window.authFetch');photo=w.document.querySelector('.design-friend-strip img');
   assert.equal(w.document.querySelector('.booking-day-v37[data-date="2099-01-05"]').dataset.ownStatus,'approved');
   run(`state.data.requests=[];state.data.reservations=[{id:700,dog_id:1,status:'booked',reservation_date:'2099-01-05',entry_type:'pass',taxi_mode:'none',planned_entry_number:7,planned_pass_total:10}];renderDays();window.openBookingPickerV37();`);
@@ -137,7 +137,7 @@ async function scenario(count){
   const dateButton=w.document.querySelector('.booking-day-v37:not(:disabled)[data-contact="false"]');assert(dateButton);dateButton.click();
   assert.equal(w.document.querySelectorAll('#bookingPickerDaysV37 [data-taxi-toggle]').length,0);
   const taxi=w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-toggle]');assert(taxi);taxi.click();
-  assert.equal(w.document.querySelectorAll('#bookingPickerTaxiByDayV91 [data-taxi-mode]').length,count===2?4:2);
+  assert.equal(w.document.querySelectorAll('#bookingPickerTaxiByDayV91 [data-taxi-mode]').length,count===2?6:3);
   w.document.querySelector('#bookingPickerTaxiByDayV91 [data-taxi-mode="pickup"]').click();assert.match(w.document.getElementById('bookingPickerTaxiByDayV91').textContent,/Vybrané/);
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').disabled,false);
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,false,'real reservation submit appears after selection');

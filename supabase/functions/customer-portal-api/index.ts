@@ -1284,7 +1284,7 @@ Deno.serve(async (req: Request) => {
       const bookings = items.map(item => {
         const date = validIsoDate(item?.date);
         const taxiMode = String(item?.taxi_mode || 'none');
-        if (!date || !['none', 'pickup', 'pickup_dropoff'].includes(taxiMode)) {
+        if (!date || !['none', 'pickup', 'dropoff', 'pickup_dropoff'].includes(taxiMode)) {
           throw new Error('Neplatný dátum alebo voľba taxi.');
         }
         return { date, taxi_mode: taxiMode };
@@ -1297,7 +1297,7 @@ Deno.serve(async (req: Request) => {
     if (action === 'request_booking') {
       const dogId = Number(body.dog_id || 0);
       const date = validIsoDate(body.reservation_date);
-      const taxiMode = ['none', 'pickup', 'pickup_dropoff'].includes(String(body.taxi_mode || ''))
+      const taxiMode = ['none', 'pickup', 'dropoff', 'pickup_dropoff'].includes(String(body.taxi_mode || ''))
         ? String(body.taxi_mode)
         : 'none';
       if (!dogId || !date) throw new Error('Vyberte psíka a deň.');
@@ -1328,7 +1328,7 @@ Deno.serve(async (req: Request) => {
     if (action === 'request_taxi_change') {
       const requestId = Number(body.request_id || 0);
       const taxiMode = String(body.taxi_mode || '');
-      if (!requestId || !['pickup', 'pickup_dropoff'].includes(taxiMode)) {
+      if (!requestId || !['pickup', 'dropoff', 'pickup_dropoff'].includes(taxiMode)) {
         throw new Error('Vyberte rezerváciu a možnosť taxi.');
       }
       return json({ data: await userRpc('portal_request_taxi_change', {
@@ -1442,3 +1442,4 @@ Deno.serve(async (req: Request) => {
     return fail(message, /prihlás|vypršalo/i.test(message) ? 401 : 400);
   }
 });
+

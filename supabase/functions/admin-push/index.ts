@@ -73,6 +73,10 @@ async function requireStaff(req: Request) {
   return userId;
 }
 
+function taxiDescriptionV329(mode: unknown): string {
+  return ({pickup:"Vyzdvihnutie (5 €)",dropoff:"Dovoz domov (5 €)",pickup_dropoff:"Vyzdvihnutie aj dovoz domov (10 €)"} as Record<string,string>)[String(mode || "none")] || "Bez taxíka";
+}
+
 async function messageForWebhook(body: Json) {
   const table = String(body.table || "");
   const record = (body.record && typeof body.record === "object" ? body.record : {}) as Json;
@@ -143,11 +147,20 @@ async function messageForWebhook(body: Json) {
     const dogRows = await rest(ids.length ? `dogs?id=in.(${ids.join(',')})&select=id,name&order=id` : `dogs?id=eq.${encodeURIComponent(String(record.dog_id || ""))}&select=name&limit=1`);
     const dogName = Array.isArray(dogRows) && dogRows.length ? dogRows.map(row=>String(row.name||'Psík')).join(' a ') : "Psík";
     const dates = Array.isArray(record.dates) ? record.dates.map(String).filter(v => /^\d{4}-\d{2}-\d{2}$/.test(v)) : [];
+    let taxiDetail = "";
+    const bookingDogIds=ids.length?ids:[Number(record.dog_id)].filter(n=>Number.isSafeInteger(n)&&n>0);
+    if(bookingDogIds.length && dates.length){
+      try {
+        const bookings=await rest(`customer_booking_requests?dog_id=in.(${bookingDogIds.join(",")})&reservation_date=in.(${dates.join(",")})&status=eq.pending&select=dog_id,reservation_date,taxi_mode&order=reservation_date.asc,dog_id.asc&limit=30`);
+        const labels=Array.isArray(bookings)?[...new Set(bookings.filter(row=>bookingDogIds.includes(Number(row.dog_id))&&dates.includes(String(row.reservation_date))&&row.taxi_mode!=="none").map(row=>taxiDescriptionV329(row.taxi_mode)))]:[];
+        if(labels.length)taxiDetail=" · Taxi: "+labels.join("; ");
+      } catch(error){console.warn("Batch taxi labels unavailable",error instanceof Error?error.message:String(error));}
+    }
     const dayWord = count === 1 ? "deň" : count < 5 ? "dni" : "dní";
     const dateDetail = count === 1 && dates.length ? ` · ${dates[0].split("-").reverse().join(".")}` : "";
     return {
       title: "Nová rezervácia čaká na schválenie",
-      body: `${dogName} ${ids.length===2?"majú":"má"} záujem o rezerváciu na ${count} ${dayWord}${dateDetail}.`,
+      body: `${dogName} ${ids.length===2?"majú":"má"} záujem o rezerváciu na ${count} ${dayWord}${dateDetail}.${taxiDetail}`,
       tag: `booking-batch-${id}`,
     };
   }
@@ -189,6 +202,14 @@ async function messageForWebhook(body: Json) {
     const dogRows = await rest(`dogs?id=eq.${encodeURIComponent(String(record.dog_id || ""))}&select=name&limit=1`);
     const dogName = Array.isArray(dogRows) && dogRows[0]?.name ? String(dogRows[0].name) : "Psík";
     const date = String(record.reservation_date || "");
+    if (record.taxi_change_status === "pending") {
+      return {
+        title: "Zmena taxi čaká na schválenie",
+        body: `${dogName}${date ? ` · ${date.split("-").reverse().join(".")}` : ""} · ${taxiDescriptionV329(record.taxi_mode)} → ${taxiDescriptionV329(record.requested_taxi_mode)}`,
+        tag: `taxi-change-${id}`,
+        audience: "admin",
+      };
+    }
     if (record.status === "approved") {
       // v29: include names of ACTUALLY approved dogs within the same shared booking.
       // An unapproved second dog is never implied. A stable group tag updates
@@ -239,16 +260,6 @@ async function messageForWebhook(body: Json) {
         audience: "customer",
       };
     }
-    if (record.taxi_change_status === "pending") {
-      const taxi = record.requested_taxi_mode === "pickup_dropoff"
-        ? "vyzdvihnutie aj dovoz (+10 €)"
-        : "vyzdvihnutie ráno / dovoz domov (+5 €)";
-      return {
-        title: "Zmena taxi čaká na schválenie",
-        body: `${dogName}${date ? ` · ${date.split("-").reverse().join(".")}` : ""} · ${taxi}`,
-        tag: `taxi-change-${id}`,
-      };
-    }
     if (record.status === "cancelled") {
       const reason = String(record.cancellation_reason || "").trim();
       return {
@@ -259,7 +270,7 @@ async function messageForWebhook(body: Json) {
     }
     return {
       title: "Nová rezervácia čaká na schválenie",
-      body: `${dogName}${date ? ` · ${date.split("-").reverse().join(".")}` : ""}`,
+      body: `${dogName}${date ? ` · ${date.split("-").reverse().join(".")}` : ""} · ${taxiDescriptionV329(record.taxi_mode)}`,
       tag: `booking-${id}`,
     };
   }
@@ -344,8 +355,9 @@ function bratislavaParts() {
 
 function adminTaxiLabel(mode: unknown) {
   const value = String(mode || "").trim().toLowerCase();
-  if (["pickup_dropoff", "do/zo", "do-zo"].includes(value)) return "do/zo";
-  if (["pickup", "do", "one_way"].includes(value)) return "do";
+  if (["pickup_dropoff", "do/zo", "do-zo"].includes(value)) return "vyzdvihnutie aj dovoz domov";
+  if (["pickup", "do", "one_way"].includes(value)) return "vyzdvihnutie";
+  if (value === "dropoff") return "dovoz domov";
   return value && value !== "none" ? value : "";
 }
 
