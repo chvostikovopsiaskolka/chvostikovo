@@ -63,7 +63,7 @@ function browserInfo(uaRaw: string) {
   return { browser_context, browser_family, device_type };
 }
 
-function classifySource(input: Json) {
+function legacyClassifySource(input: Json) {
   const utmSource = String(input.utm_source || "").toLowerCase();
   const utmMedium = String(input.utm_medium || "").toLowerCase();
   const referrerHost = String(input.referrer_host || "").toLowerCase();
@@ -131,6 +131,37 @@ function classifySource(input: Json) {
   if (utmSource) return "utm_other";
   if (referrerHost) return "referral";
   return "direct";
+}
+
+// Identified clicks only; this does not measure AI citations or crawler fetches.
+function aiReferralProvider(input: Json, channel: string) {
+  if (!['utm_other', 'referral', 'google_organic', 'bing_organic', 'ai_referral'].includes(channel)) return null;
+  if (input.has_fbclid === true || /paid|cpc|ppc|display|cpm|cpv|sponsored/i.test(String(input.utm_medium || ''))) return null;
+  const normalize = (value: unknown) => {
+    let v = String(value || '').trim().toLowerCase();
+    try { v = decodeURIComponent(v); } catch { return ''; }
+    return v.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').replace(/\.$/, '');
+  };
+  const source = normalize(input.utm_source);
+  const rawSource = String(input.utm_source || '').trim();
+  const host = normalize(input.referrer_host);
+  const value = rawSource ? source : host;
+  const aliases: Record<string, string> = {
+    'chatgpt':'chatgpt', 'chatgpt.com':'chatgpt', 'chat.openai.com':'chatgpt',
+    'openai':'chatgpt', 'openai.com':'chatgpt',
+    'perplexity':'perplexity', 'perplexity.ai':'perplexity',
+    'gemini':'gemini', 'gemini.google.com':'gemini',
+    'claude':'claude', 'claude.ai':'claude',
+    'copilot':'copilot', 'copilot.microsoft.com':'copilot', 'copilot.com':'copilot',
+  };
+  // Bare names and the corporate OpenAI domain are accepted only as explicit UTM labels.
+  if (!rawSource && !['chatgpt.com','chat.openai.com','perplexity.ai','gemini.google.com','claude.ai','copilot.microsoft.com','copilot.com'].includes(host)) return null;
+  return aliases[value] || null;
+}
+
+function classifySource(input: Json) {
+  const channel = legacyClassifySource(input);
+  return aiReferralProvider(input, channel) ? 'ai_referral' : channel;
 }
 
 const ERROR_STAGES = new Set(["frontend_validation", "phone_normalization", "zod_validation", "payload", "network", "backend_http", "backend_response"]);
@@ -242,6 +273,11 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return response(origin, 405, { ok: false, error: "method_not_allowed" });
   if (!ALLOWED_ORIGINS.has(origin)) return response(origin, 403, { ok: false, error: "origin_not_allowed" });
   if (!SUPABASE_URL || !SERVICE_KEY) return response(origin, 500, { ok: false, error: "server_config" });
+
+  // AI fetchers and known crawlers are not human click-throughs.
+  if (/bot\b|crawler|spider|ChatGPT-User|OAI-SearchBot|Perplexity-User|Claude-User|Claude-SearchBot|Google-Extended/i.test(req.headers.get('user-agent') || '')) {
+    return response(origin, 200, { ok: true, ignored: 'crawler' });
+  }
 
   try {
     const raw = await req.text();
