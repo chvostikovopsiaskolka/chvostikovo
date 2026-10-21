@@ -213,7 +213,7 @@
     notice.hidden=!!closed;notice.textContent=source?.querySelector('strong')?.textContent||'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
     let weekNotice=byId('designWeekDeadline');if(!weekNotice){weekNotice=document.createElement('div');weekNotice.id='designWeekDeadline';byId('bookingPickerDaysV37').querySelector('.booking-picker-week-label-v127')?.after(weekNotice);}
     // Calendar rendering replaces its contents each time; re-create this one scoped notice as needed.
-    weekNotice.hidden=false;weekNotice.innerHTML='<strong>Prihlasovanie sa uzavrelo v nedeľu o 20:00.</strong><span>O dodatočnú rezerváciu môžete požiadať kliknutím na konkrétny deň a odoslaním správy — aj v prípade plnej kapacity.</span>';
+    weekNotice.hidden=false;weekNotice.innerHTML='<strong>Žiadosti prijímame do 19:00 deň pred návštevou.</strong><span>Vyberte deň a odošlite rezerváciu. Po tomto čase nám môžete napísať správu.</span>';
 
     const selectedSection=byId('bookingPickerTaxiSectionV91');
     const taxiTitle=byId('designSelectedDaysTitle')||selectedSection?.querySelector('.booking-picker-taxi-title-v37');

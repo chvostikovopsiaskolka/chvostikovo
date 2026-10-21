@@ -408,7 +408,7 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
       anonymous_dogs: viewerApproved ? Math.max(0, booked - visibleDogs.length) : booked,
     };
   }));
-  return { monday, friday, deadline_label: 'nedeľa 20:00', days };
+  return { monday, friday, deadline_label: 'deň vopred 19:00', days };
 }
 
 async function customerBootstrap(user: Json, token: string) {
