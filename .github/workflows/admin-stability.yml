@@ -27,6 +27,15 @@ jobs:
           node tests/admin-access-v336.cjs
       - name: Vaccination push grouping v343
         run: node tests/vaccine-push-batch-v343.cjs
+      - name: Private OpenTelemetry ingestion and actual admin v345
+        run: |
+          npm ci --prefix tools/telemetry-runtime --ignore-scripts
+          node tools/build-telemetry-v345.cjs
+          git diff --exit-code -- telemetry-v345.js
+          node tests/telemetry-db-v345.cjs
+          node tools/build-admin-telemetry-v345.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v345.html node tests/admin-runtime-v275.cjs
+          ADMIN_SOURCE=/tmp/admin-candidate-v345.html node tests/admin-loader-auth-v323.cjs
       - name: Default capacity and admin boot v322
         run: |
           node tools/build-admin-capacity-v322.cjs

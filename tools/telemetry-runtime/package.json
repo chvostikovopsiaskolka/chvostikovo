@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@opentelemetry/api": "1.10.0",
+    "@opentelemetry/resources": "3.0.0",
+    "@opentelemetry/sdk-trace": "3.0.0",
+    "esbuild": "0.25.11"
+  }
+}

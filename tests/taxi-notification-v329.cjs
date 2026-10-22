@@ -4,6 +4,7 @@ source=ts.transpile(source,{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.C
 const c=vm.createContext({Deno:{env:{get:()=>''},serve(){}},console,webpush:{}});vm.runInContext(source,c);
 (async()=>{const record={id:1,recipient_user_id:'synthetic-staff',notification_type:'taxi_cancelled_admin',title:'Taxík bol zrušený',body:'Synthetic Bella · 02.01.2030. Rezervácia škôlky zostáva platná.'};
  c.fixture={table:'portal_notifications',record};const result=await vm.runInContext('messageForWebhook(fixture)',c);assert.equal(result.audience,'admin');assert.equal(result.recipientUserId,'synthetic-staff');assert.equal(result.body,record.body);
+ c.fixture.record.notification_type='app_diagnostics_admin';assert.equal((await vm.runInContext('messageForWebhook(fixture)',c)).audience,'admin');
  c.fixture.record.notification_type='booking_rejected';assert.equal((await vm.runInContext('messageForWebhook(fixture)',c)).audience,'customer');
  c.fixture.record.notification_type='customer_message_admin';assert.equal((await vm.runInContext('messageForWebhook(fixture)',c)).audience,'admin');c.rest=async(path)=>path.startsWith('dogs')?[{id:1,name:'Synthetic Bella'}]:[{dog_id:1,reservation_date:'2030-10-25',taxi_mode:'dropoff'}];
  for(const mode of ['pickup','dropoff','pickup_dropoff']){
