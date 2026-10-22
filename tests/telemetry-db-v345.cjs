@@ -1,0 +1,33 @@
+const fs=require('fs'),assert=require('assert/strict');
+const {PGlite}=require('./shared-v244/node_modules/@electric-sql/pglite');
+const migration=fs.readFileSync('supabase/migrations/20261022074947_app_opentelemetry_v345.sql','utf8').split('-- Cleanup runs independently')[0];
+const attr=(key,value)=>({key,value:{stringValue:String(value)}});
+const customer='00000000-0000-4000-8000-000000000345',staff='00000000-0000-4000-8000-000000000346',sid='00000000-0000-4000-8000-000000000347';
+function payload(id=1,app='customer'){return{resourceSpans:[{resource:{attributes:[attr('service.name','chvostikovo-'+app),attr('service.version','20261022-opentelemetry-v345'),attr('browser','Safari/26'),attr('platform','iOS'),attr('email','private@example.test')]},scopeSpans:[{spans:[{traceId:id.toString(16).padStart(32,'0'),spanId:id.toString(16).padStart(16,'0'),name:'private@example.test',attributes:[attr('category','request.error'),attr('operation','rpc/portal_customer_access_allowed_v336'),attr('surface','reservations'),attr('exception.type','TypeError'),attr('code.file','app.js'),attr('code.line','207'),attr('code.column','1'),attr('http.status','503'),attr('duration.ms','1200'),attr('exception.message','PRIVATE_NAME private@example.test TOKEN_SECRET'),attr('http.url','https://example.test/?token=TOKEN_SECRET')]}]}]}]}}
+async function test(){const db=new PGlite();await db.exec(`create role anon;create role authenticated;create schema private;create schema auth;grant usage on schema auth,public to anon,authenticated;
+ create function auth.uid() returns uuid language sql as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+ create function auth.jwt() returns jsonb language sql as $$select jsonb_build_object('session_id',current_setting('request.jwt.claim.session',true))$$;
+ create table auth.sessions(id uuid,user_id uuid);insert into auth.sessions values('${sid}','${customer}'),('${sid}','${staff}');
+ create table public.staff(user_id uuid,active boolean);insert into public.staff values('${staff}',true);
+ create table public.customer_profiles(user_id uuid,status text);insert into public.customer_profiles values('${customer}','active');
+ create function public.portal_customer_access_allowed_v336() returns boolean language sql as $$select current_setting('request.blocked',true) is distinct from 'yes'$$;
+ `);await db.exec(migration);
+ const identity=async(id=customer)=>{await db.exec(`reset role;select set_config('request.jwt.claim.sub','${id}',false),set_config('request.jwt.claim.session','${sid}',false);set role authenticated;`)};
+ const ingest=async(p)=>{return(await db.query('select public.portal_telemetry_ingest_v345($1::jsonb) ok',[JSON.stringify(p)])).rows[0].ok};
+ await db.exec('set role anon');await assert.rejects(()=>ingest(payload()),/permission denied/);await identity();
+ for(const p of [null,{}, {resourceSpans:{}},{resourceSpans:[{scopeSpans:{}}]}, {resourceSpans:[{scopeSpans:[{spans:{}}]}]}])assert.equal(await ingest(p),false,'malformed input is harmless');
+ assert.equal(await ingest(payload()),true);assert.equal(await ingest(payload()),true);
+ await assert.rejects(()=>db.query('select * from private.app_telemetry_v345'),/permission denied/);
+ await assert.rejects(()=>db.query('select public.portal_staff_telemetry_v345()'),/Prístup len/);
+ assert.equal(await ingest(payload(2,'admin')),false,'customer cannot spoof admin');
+ await db.exec("select set_config('request.blocked','yes',false)");assert.equal(await ingest(payload(3)),false);await db.exec("select set_config('request.blocked','no',false)");
+ await db.exec("select set_config('request.jwt.claim.session','revoked',false)");assert.equal(await ingest(payload(4)),false);await identity();
+ const injected=payload(5);injected.resourceSpans[0].scopeSpans[0].spans[0].attributes.push(attr('code.file','https://private.example.test/TOKEN_SECRET'),attr('operation','private@example.test'));assert.equal(await ingest(injected),true);
+ await db.exec('reset role');const rows=(await db.query('select * from private.app_telemetry_v345 order by id')).rows;assert.equal(rows.length,2,'duplicate trace is idempotent');const saved=JSON.stringify(rows);for(const secret of ['PRIVATE_NAME','private@example.test','TOKEN_SECRET','http.url','exception.message'])assert(!saved.includes(secret),secret+' must never persist');assert.equal(rows[1].source_file,'unknown');assert.equal(rows[1].operation,'request');
+ await identity(staff);assert.equal(await ingest(payload(6,'admin')),true);const report=(await db.query('select public.portal_staff_telemetry_v345() report')).rows[0].report;assert.equal(report.groups.length,3);assert.equal(report.enabled,true);
+ await identity();for(let i=10;i<80;i++)await ingest(payload(i));await db.exec('reset role');const limited=(await db.query("select used from private.app_telemetry_limits_v345 where bucket like 'u:%' and used=60")).rows;assert.equal(limited.length,1,'atomic per-user budget caps at 60');
+ await db.exec("update private.app_telemetry_limits_v345 set used=5000 where bucket like 'g:%'");await identity(staff);assert.equal(await ingest(payload(99,'admin')),false,'global cap enforced');
+ await db.exec("reset role;update private.app_telemetry_config_v345 set enabled=false");await identity(staff);assert.equal(await ingest(payload(100,'admin')),false,'server kill switch');
+ await db.exec("reset role;update private.app_telemetry_v345 set received_at=now()-interval '31 days';delete from private.app_telemetry_v345 where received_at<now()-interval '30 days'");assert.equal((await db.query('select count(*)::int n from private.app_telemetry_v345')).rows[0].n,0);
+ await db.close();console.log('PASS telemetry DB: authenticated/session/staff boundaries, field whitelist/redaction, duplicate safety, caps, kill switch and retention');}
+test().catch(e=>{console.error(e);process.exitCode=1});
