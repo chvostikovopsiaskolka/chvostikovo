@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261022-booking-surface-v350';
-const APP_VERSION='2.0.26';
+const APP_BUILD='20261022-week-reminder-v351';
+const APP_VERSION='2.0.27';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -2727,13 +2727,22 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   window.addEventListener('resize',()=>requestAnimationFrame(fitBookingDeadlineTitle));
 
   function updateBookingDeadlineNoticeV127(){
-    const box=$('deadlineText');if(!box)return;
-    // Advance planning remains a reminder, independently of this week's requests.
-    box.classList.remove('hidden');
-    box.querySelector('strong').textContent='Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
+    // Local calendar dates keep the deadline correct across DST and year changes.
+    const monday=new Date(bratislavaClockV95().date+'T12:00:00Z');
+    monday.setUTCDate(monday.getUTCDate()-((monday.getUTCDay()+6)%7)+7);
+    const from=monday.toISOString().slice(0,10),to=new Date(monday);
+    to.setUTCDate(to.getUTCDate()+6);
+    const sunday=previousIsoDayV95(from),parts=sunday.split('-').map(Number);
+    const reminder={from,to:to.toISOString().slice(0,10),deadline:sunday,
+      text:`Prosíme o rezerváciu na budúci týždeň do nedele ${parts[2]}. ${parts[1]}. do 20:00.`};
+    reminder.hidden=hasWeekBookingV337(reminder.from,reminder.to);
+    const box=$('deadlineText');if(!box)return reminder;
+    box.classList.toggle('hidden',reminder.hidden);
+    box.querySelector('strong').textContent=reminder.text;
     requestAnimationFrame(fitBookingDeadlineTitle);
     const detail=box.querySelector('span');
     if(detail){detail.textContent='';detail.classList.add('hidden')}
+    return reminder;
   }
   function pickerErrorV95(message,deadline=false){const box=$('bookingPickerErrorV95');if(!box)return;box.classList.toggle('hidden',!message);if(!message){box.innerHTML='';return}box.innerHTML='<strong>'+esc(message)+'</strong>'+(deadline?'<div>Pre dodatočné prihlásenie kliknite na požadovaný deň a napíšte nám správu.</div>':'')}
 
@@ -2957,7 +2966,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         : '';
       const futureWeek=start>=10;
       const futureOpen=!futureWeek||futureWeekExpandedV235||week.some(d=>selectedDatesV37.has(d.date));
-      groups.push(`<div class="booking-picker-week-v127 ${futureWeek?'booking-picker-future-v235':''}"><div class="booking-picker-week-label-v127">${futureWeek?`<button type="button" class="booking-picker-future-toggle-v235" data-future-toggle="true" aria-expanded="${futureOpen?'true':'false'}">O dva týždne <span aria-hidden="true">${futureOpen?'⌃':'⌄'}</span></button>`:(['Tento týždeň','Budúci týždeň'][start/5]||'Ďalší týždeň')}</div><div class="booking-picker-future-body-v235 ${futureOpen?'':'hidden'}">${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
+      groups.push(`<div class="booking-picker-week-v127 ${futureWeek?'booking-picker-future-v235':''}" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}"><div class="booking-picker-week-label-v127">${futureWeek?`<button type="button" class="booking-picker-future-toggle-v235" data-future-toggle="true" aria-expanded="${futureOpen?'true':'false'}">O dva týždne <span aria-hidden="true">${futureOpen?'⌃':'⌄'}</span></button>`:(['Tento týždeň','Budúci týždeň'][start/5]||'Ďalší týždeň')}</div><div class="booking-picker-future-body-v235 ${futureOpen?'':'hidden'}">${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
         const existing=pickerDogsV254().some(x=>bookingFor(x.id,d.date)),deadlineClosed=pickerDogsV254().some(x=>bookingDeadlineClosedV95(d.date,x)),closed=d.bookings_open===false,full=Number(d.available)<pickerDogsV254().length;
         const past=d.date<=bratislavaClockV95().date;
         const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;
@@ -3045,6 +3054,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   window.closeBookingPickerV305=()=>{closePickerV37();window.customerDesignPickerClosed?.();};
   window.customerDesignOpenTaxi=(requestId,reservationId)=>openTaxiEditV201(requestId,reservationId);
   window.customerDesignRefreshDeadline=()=>updateBookingDeadlineNoticeV127();
+  window.customerDesignRefreshCalendarV351=()=>renderPickerV37();
   window.customerDesignCanEditTaxi=row=>allowedTaxiEditV201(row);
   function closePickerV37(){if(submittingV37)return;pickerEpochV157++;$('bookingPickerV37')?.classList.add('hidden');document.documentElement.classList.remove('booking-picker-open-v37');window.customerDesignPickerClosed?.();pickerErrorV95('');if(pendingPassRenewalV95){const renewal=pendingPassRenewalV95;pendingPassRenewalV95=null;setTimeout(()=>window.showPassRenewalAfterBookingV94?.(renewal.dogId,renewal.date),100)}}
 
