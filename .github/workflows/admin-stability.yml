@@ -25,6 +25,8 @@ jobs:
           node tests/security-access-v336.mjs
           node tests/security-handlers-v336.mjs
           node tests/admin-access-v336.cjs
+      - name: Vaccination push grouping v343
+        run: node tests/vaccine-push-batch-v343.cjs
       - name: Default capacity and admin boot v322
         run: |
           node tools/build-admin-capacity-v322.cjs

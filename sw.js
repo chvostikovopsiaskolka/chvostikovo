@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261021-booking-spacing-v340';
+const CACHE='chvostikovo-portal-shell-20261022-vaccine-summary-v343';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/loading-motion.js?v=20261021-booking-spacing-v340','/loading-design.css?v=20261021-booking-spacing-v340','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=20261021-booking-spacing-v340','/customer-design.css?v=20261021-booking-spacing-v340','/dog-choice-fab-v276.css?v=20261021-booking-spacing-v340','/dual-dog-overview-v246.js?v=20261021-booking-spacing-v340','/dual-dog-overview-v246.css?v=20261021-booking-spacing-v340','/','/terms-pdf.js?v=20261021-booking-spacing-v340','/terms-pdf-font.js?v=20261021-booking-spacing-v340','/styles.css?v=20261021-booking-spacing-v340','/bulletin-photo-v243.css?v=20261021-booking-spacing-v340','/app.js?v=20261021-booking-spacing-v340','/back-swipe.js?v=20261021-booking-spacing-v340'];
+const SHELL=['/loading-motion.js?v=20261022-vaccine-summary-v343','/loading-design.css?v=20261022-vaccine-summary-v343','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=20261022-vaccine-summary-v343','/customer-design.css?v=20261022-vaccine-summary-v343','/dog-choice-fab-v276.css?v=20261022-vaccine-summary-v343','/dual-dog-overview-v246.js?v=20261022-vaccine-summary-v343','/dual-dog-overview-v246.css?v=20261022-vaccine-summary-v343','/','/terms-pdf.js?v=20261022-vaccine-summary-v343','/terms-pdf-font.js?v=20261022-vaccine-summary-v343','/styles.css?v=20261022-vaccine-summary-v343','/bulletin-photo-v243.css?v=20261022-vaccine-summary-v343','/app.js?v=20261022-vaccine-summary-v343','/back-swipe.js?v=20261022-vaccine-summary-v343'];
 
 function withPortalCsp(response){
   if(!response)return response;
