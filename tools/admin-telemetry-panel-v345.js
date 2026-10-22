@@ -1,5 +1,5 @@
 // Installed inside the existing authenticated main scope.
-try{window.ChvoTelemetry?.init({app:'admin',build:'20261022-opentelemetry-v347',base:SUPABASE_URL,key:SUPABASE_KEY,getToken:async()=>{const r=await supabase.auth.getSession();return r.data?.session?.access_token||''},isReady:()=>!document.getElementById('appBoot')||document.getElementById('appBoot').classList.contains('hidden'),getSurface:()=>{
+try{window.ChvoTelemetry?.init({app:'admin',build:'20261022-opentelemetry-v348',base:SUPABASE_URL,key:SUPABASE_KEY,getToken:async()=>{const r=await supabase.auth.getSession();return r.data?.session?.access_token||''},isReady:()=>!document.getElementById('appBoot')||document.getElementById('appBoot').classList.contains('hidden'),getSurface:()=>{
  if(!document.getElementById('dogDetail')?.classList.contains('hidden'))return 'dog-details';
  if(!document.getElementById('menuSection')?.classList.contains('hidden'))return 'menu';
  if(!document.getElementById('weekSection')?.classList.contains('hidden'))return 'reservations';return 'overview';
