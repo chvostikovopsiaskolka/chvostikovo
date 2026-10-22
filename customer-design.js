@@ -173,7 +173,7 @@
         root.dataset.date=key;root.innerHTML=`<div class="design-visits-title"><h2>📅 Moje rezervácie</h2></div><article class="design-visit-card design-visit-empty"><p class="design-empty-heading">${all.length?'Najbližšia rezervácia je neskôr než o dva týždne.':'Zatiaľ nemáte vytvorenú rezerváciu.'}</p><div class="design-empty-reminder"></div>${all.length?'<button type="button" class="btn full">Moje rezervácie</button>':''}</article>`;
         root.querySelector('button')?.addEventListener('click',()=>window.openBookingPickerV37?.());
       }
-      const target=root.querySelector('.design-empty-reminder'),notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu do nedele 20:00.';target.classList.toggle('design-deadline-closed',notice?.classList.contains('hidden'));
+      const target=root.querySelector('.design-empty-reminder'),notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu do nedele 20:00.';target.hidden=!!notice?.classList.contains('hidden');target.classList.remove('design-deadline-closed');
     }
     byId('designBulletinTitle')?.remove();
     const bulletin=byId('customerBulletinV229');if(bulletin&&root.nextElementSibling!==bulletin)root.after(bulletin);
@@ -198,6 +198,10 @@
   customerRenderers.days=(...args)=>{const out=originalDays?.(...args);byId('weekDays')?.querySelectorAll('.reserved-roster-v37').forEach(details=>{const card=details.closest('[data-date]'),date=card?.dataset.date;if(!date||!approvedForDate(date))return;const button=document.createElement('button');button.type='button';button.className='design-carousel-friends';button.textContent='Pozrite si kamošov v škôlke ›';button.addEventListener('click',()=>openFriends(date));details.replaceWith(button);});nearest();if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();return out;};
   window.customerDesignPickerRender=()=>{
     const picker=byId('bookingPickerV37'),card=picker?.querySelector('.booking-picker-card-v37');if(!card)return;
+    // Resume/bootstrap can advance availability while this page remains open.
+    const firstDate=state.data?.availability?.days?.[0]?.date;
+    const renderedDate=byId('bookingPickerDaysV37')?.querySelector('.booking-picker-week-v127')?.dataset.weekFrom;
+    if(firstDate&&renderedDate&&firstDate!==renderedDate){window.customerDesignRefreshCalendarV351?.();return;}
     picker.classList.add('design-reservations-page');picker.setAttribute('role','region');picker.removeAttribute('aria-modal');
     byId('bookingPickerTitleV37').textContent='Rezervácie';
     const head=card.querySelector('.booking-picker-head-v37');
@@ -207,12 +211,15 @@
     }
     let carousel=byId('designBookingCarousel');if(!carousel){carousel=document.createElement('div');carousel.id='designBookingCarousel';byId('weekDays').before(carousel);carousel.append(byId('weekDays'));}
     let hint=byId('designBookingSwipeHint');if(!hint){hint=document.createElement('p');hint.id='designBookingSwipeHint';hint.textContent='Posuňte pre zobrazenie ďalších dní →';carousel.before(hint);}hint.hidden=byId('weekDays').querySelectorAll('.reserved-day-card-v37').length<2;
-    window.customerDesignRefreshDeadline?.();
-    const source=byId('deadlineText'),calendar=byId('bookingPickerDaysV37'),closed=source?.classList.contains('hidden');
-    // Core calendar rerenders replace its children; restore one reminder inside it.
+    const reminder=window.customerDesignRefreshDeadline?.();
+    const calendar=byId('bookingPickerDaysV37');
+    // Reattach exactly one reminder under the matching next-week heading.
     let notice=byId('designReservationNotice');if(!notice){notice=document.createElement('div');notice.id='designReservationNotice';}
-    calendar.prepend(notice);
-    notice.hidden=!!closed;notice.textContent=source?.querySelector('strong')?.textContent||'Prosíme o rezerváciu na ďalší týždeň do nedele 20:00.';
+    const nextWeek=[...calendar.querySelectorAll('.booking-picker-week-v127')].find(week=>week.dataset.weekFrom===reminder?.from);
+    const nextHeading=nextWeek?.querySelector('.booking-picker-week-label-v127');
+    if(nextHeading)nextHeading.after(notice);else calendar.append(notice);
+    notice.hidden=!nextHeading||!!reminder?.hidden;notice.textContent=reminder?.text||'';
+    notice.dataset.weekFrom=reminder?.from||'';notice.dataset.weekTo=reminder?.to||'';notice.dataset.deadline=reminder?.deadline||'';
     // The core calendar owns the Monday-to-Sunday notice and its visibility.
     const weekNotice=byId('designWeekDeadline');if(weekNotice){weekNotice.hidden=!!window.customerDesignHasWeekBooking?.(weekNotice.dataset.weekFrom,weekNotice.dataset.weekTo);byId('bookingPickerDaysV37').querySelector('.booking-picker-week-label-v127')?.after(weekNotice);}
 

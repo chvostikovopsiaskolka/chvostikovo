@@ -18,7 +18,7 @@ async function scenario(count){
  await new Promise(r=>setTimeout(r,600));
  try{
   assert.equal(w.document.documentElement.classList.contains('customer-android'),count===1,'compact day height is scoped to Android');
-  run(`bratislavaClockV95=()=>({date:'2099-01-01'});bratislavaToday=()=> '2099-01-01';queueCustomerSync=()=>{};window.runCustomerOnboardingV75=()=>{};state.session={user:{id:'design-fixture'},access_token:'fixture'};state.selectedDogId=1;state.data={profile:{status:'active'},dogs:Array.from({length:${count}},(_,i)=>({id:i+1,name:['Bella','Iris'][i],sex:i?'male':'female',default_entry_type:'pass',legacy_total_visits:12,photo_path:'fixture/'+i,photo_url:'https://fixture.invalid/'+i+'.jpg'})),vaccinations:Array.from({length:${count}},(_,i)=>['rabies','infectious','kennel_cough',...(i?['lepto_l4']:[])].map(type=>({dog_id:i+1,vaccination_type:type,valid_until:'2099-02-01'}))).flat(),vaccination_proofs:Array.from({length:${count}},(_,i)=>({id:i+1,dog_id:i+1,storage_path:'proof'+i})),passes:[{id:1,dog_id:1,dog_ids:[1,2],total_entries:${count===2?20:10},used_entries:6,status:'active',valid_until:'2099-03-01'}],requests:[{id:70,reservation_id:700,projected_entry_number:7,projected_pass_total:10,dog_id:1,reservation_date:'2099-01-05',status:'approved',can_manage:true}],reservations:[],pass_requests:[],visits:[],monthly_totals:[],availability:{days:Array.from({length:15},(_,i)=>({date:'2099-01-'+String(5+i).padStart(2,'0'),available:8,capacity:8,occupied:2,bookings_open:true,anonymous_dogs:2,dogs:[{dog_id:8,name:'Kala',sex:'male',photo_url:'https://fixture.invalid/kala.jpg'}]}))}};renderPassSummary();renderDog();renderUpcoming();renderDays();`);
+  run(`bratislavaClockV95=()=>({date:'2099-01-01'});bratislavaToday=()=> '2099-01-01';queueCustomerSync=()=>{};window.runCustomerOnboardingV75=()=>{};state.session={user:{id:'design-fixture'},access_token:'fixture'};state.selectedDogId=1;state.data={profile:{status:'active'},dogs:Array.from({length:${count}},(_,i)=>({id:i+1,name:['Bella','Iris'][i],sex:i?'male':'female',default_entry_type:'pass',legacy_total_visits:12,photo_path:'fixture/'+i,photo_url:'https://fixture.invalid/'+i+'.jpg'})),vaccinations:Array.from({length:${count}},(_,i)=>['rabies','infectious','kennel_cough',...(i?['lepto_l4']:[])].map(type=>({dog_id:i+1,vaccination_type:type,valid_until:'2099-02-01'}))).flat(),vaccination_proofs:Array.from({length:${count}},(_,i)=>({id:i+1,dog_id:i+1,storage_path:'proof'+i})),passes:[{id:1,dog_id:1,dog_ids:[1,2],total_entries:${count===2?20:10},used_entries:6,status:'active',valid_until:'2099-03-01'}],requests:[{id:70,reservation_id:700,projected_entry_number:7,projected_pass_total:10,dog_id:1,reservation_date:'2099-01-05',status:'approved',can_manage:true}],reservations:[],pass_requests:[],visits:[],monthly_totals:[],availability:{days:Array.from({length:15},(_,i)=>({date:'2099-01-'+String(5+i+Math.floor(i/5)*2).padStart(2,'0'),available:8,capacity:8,occupied:2,bookings_open:true,anonymous_dogs:2,dogs:[{dog_id:8,name:'Kala',sex:'male',photo_url:'https://fixture.invalid/kala.jpg'}]}))}};renderPassSummary();renderDog();renderUpcoming();renderDays();`);
   run("overviewClock=()=>({date:'2099-01-01',minutes:600});renderDog()");
   // Actual render order for a new account: days run before the pass/design anchor exists.
   run("globalThis.assignedFixture=state.data;state.data={...state.data,profile:{status:'pending'},dogs:[],passes:[],requests:[],notifications:[]};state.selectedDogId=null;document.getElementById('designNearest')?.remove();document.getElementById('designTicket')?.remove();renderAll()");
@@ -142,7 +142,23 @@ async function scenario(count){
   assert.match(w.document.querySelector('#designWeekDeadline span').textContent,/odošlite žiadosť a počkajte na schválenie/);
   assert(w.document.querySelector('#bookingPickerCloseV37 svg'),'close glyph is geometrically centred vector');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false,'Sunday reminder stays visible on Monday');
-  assert.match(w.document.getElementById('designReservationNotice').textContent,/do nedele 20:00/);
+  assert.match(w.document.getElementById('designReservationNotice').textContent,/do nedele 11\. 1\. do 20:00/);
+  assert.equal(w.document.getElementById('designReservationNotice').dataset.weekFrom,'2099-01-12');
+  assert.equal(w.document.getElementById('designReservationNotice').previousElementSibling.textContent,'Budúci týždeň');
+  const nextWeekCase=(requests,reservations,hidden,message)=>{
+    run(`state.data.requests=${JSON.stringify(requests)};state.data.reservations=${JSON.stringify(reservations)};state.data.booking_history=[];state.data.visits=[];renderDays();window.customerDesignPickerRender()`);
+    assert.equal(w.document.getElementById('designReservationNotice').hidden,hidden,message);
+    assert.equal(w.document.querySelectorAll('#designReservationNotice').length,1,'one next-week notice after rerenders');
+  };
+  const nextRequest={...weekRequest,reservation_date:'2099-01-12'};
+  nextWeekCase([weekRequest],[],false,'this-week registration does not hide next-week reminder');
+  nextWeekCase([nextRequest],[],true,'next-week pending registration hides its reminder');
+  nextWeekCase([{...nextRequest,status:'approved'}],[],true,'next-week approval hides its reminder');
+  nextWeekCase([],[{...nextRequest,id:881,status:'booked'}],true,'staff next-week booking hides reminder');
+  nextWeekCase([{...nextRequest,status:'cancelled'},{...nextRequest,status:'rejected'}],[],false,'cancelled/rejected do not count');
+  nextWeekCase([{...nextRequest,status:'approved',reservation_id:881}],[{...nextRequest,id:881,status:'cancelled'}],false,'cancelled reservation overrides stale approved request');
+  nextWeekCase([{...nextRequest,dog_id:999}],[],false,'foreign dog does not hide reminder');
+  if(count===2)nextWeekCase([{...nextRequest,dog_id:2}],[],true,'sibling registration hides account-wide next-week reminder');
   run(`state.data=JSON.parse(${JSON.stringify(registeredWeekFixture)});renderDays()`);
   w.__fixtureNowIso='2099-01-04T20:00:00Z';run('window.openBookingPickerV37()');
   assert.equal(w.document.getElementById('designWeekDeadline'),null,'late-week notice does not appear on preceding Sunday');
@@ -189,7 +205,30 @@ async function scenario(count){
   w.__fixtureNowIso='2099-01-05T23:00:00Z';run("renderDays();window.customerDesignPickerRender()");
   assert.equal(w.document.getElementById('designWeekDeadline').hidden,true,'earlier registration this week still suppresses reminder on Tuesday');
   assert.equal(w.document.getElementById('designReservationNotice').hidden,false);
+  const rolloverFixture=run('JSON.stringify(state.data)');
+  const datedReminder=(now,monday,deadline,requests=[])=>{
+    w.__fixtureNowIso=now;
+    run(`state.data.requests=${JSON.stringify(requests)};state.data.reservations=[];state.data.booking_history=[];state.data.visits=[];state.data.availability.days=Array.from({length:10},(_,i)=>{const date=new Date(${JSON.stringify(monday)}+'T12:00:00Z');date.setUTCDate(date.getUTCDate()+i+Math.floor(i/5)*2);return {date:date.toISOString().slice(0,10),available:8,capacity:8,occupied:0,bookings_open:true,dogs:[]}});renderDays();window.customerDesignPickerRender()`);
+    const notice=w.document.getElementById('designReservationNotice');
+    assert.equal(notice.dataset.deadline,deadline);
+    assert.equal(notice.previousElementSibling.textContent,'Budúci týždeň');
+    assert.equal(notice.parentElement.dataset.weekFrom,notice.dataset.weekFrom);
+    return notice;
+  };
+  assert.equal(datedReminder('2026-10-22T10:00:00Z','2026-10-19','2026-10-25').hidden,false);
+  assert.match(w.document.getElementById('designReservationNotice').textContent,/25\. 10\. do 20:00/);
+  if(process.env.DESIGN_EXPORT_DIR)fs.writeFileSync(process.env.DESIGN_EXPORT_DIR+'/reminder-'+count+'.html',dom.serialize().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''));
+  assert.equal(datedReminder('2026-10-25T22:59:00Z','2026-10-19','2026-10-25',[{...weekRequest,reservation_date:'2026-10-26'}]).hidden,true,'booked next week stays hidden through Sunday');
+  assert.equal(datedReminder('2026-10-25T23:00:00Z','2026-10-26','2026-11-01',[{...weekRequest,reservation_date:'2026-10-26'}]).hidden,false,'Bratislava Monday after DST targets a new week and Sunday');
+  assert.equal(w.document.getElementById('designWeekDeadline').hidden,true,'Monday current-week booking still suppresses the old missed-deadline notice');
+  datedReminder('2026-10-26T09:00:00Z','2026-10-26','2026-11-01');
+  assert.equal(w.document.getElementById('designWeekDeadline').hidden,false,'Monday with no current-week booking retains existing guidance');
+  assert.match(w.document.getElementById('designReservationNotice').textContent,/1\. 11\. do 20:00/);
+  datedReminder('2026-12-31T11:00:00Z','2026-12-28','2027-01-03');
+  datedReminder('2027-03-28T22:00:00Z','2027-03-29','2027-04-04');
+  run(`state.data=JSON.parse(${JSON.stringify(rolloverFixture)})`);
   w.__fixtureNowIso=null;run("window.closeBookingPickerV305();renderDays()");
+  photo=w.document.querySelector('.design-friend-strip img');
   run('renderDog();renderPassSummary()');assert.equal(w.document.querySelector('.design-friend-strip img'),photo,'unrelated render preserves friend image');
   const vax=w.document.querySelector(count===1?'#bookingVaccinationStatus':'[data-dog-open-v254="2"].dual-dog-status-v254');vax.click();
   assert.equal(w.document.querySelectorAll('.design-vaccine-row').length,count===1?3:4);
