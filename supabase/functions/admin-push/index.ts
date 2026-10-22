@@ -84,12 +84,20 @@ async function messageForWebhook(body: Json) {
   const id = String(record.id || Date.now());
 
   if (table === "portal_vaccination_review_events_v234") {
-    // v290: show the actual dog's name and vaccination type; no contact/owner data.
+    // v343: one save is one transaction; its review rows share the exact created_at.
+    // Only the lowest event ID sends, even when webhooks arrive concurrently/out of order.
     // Only on a genuinely pending event: staff marking reviewed never sends another push.
     if (String(record.review_status || "") !== "pending" ||
         !["INSERT","UPDATE"].includes(String(body.type || ""))) return null;
     const dogId = Number(record.dog_id);
     if (!Number.isSafeInteger(dogId) || dogId <= 0) return null;
+    const eventId = Number(record.id), savedAt = String(record.created_at || "");
+    if (!Number.isSafeInteger(eventId) || eventId <= 0 || !savedAt) return null;
+    // Preserve PostgreSQL microseconds; Date conversion would merge distinct saves.
+    const batch = await rest("portal_vaccination_review_events_v234?dog_id=eq." + dogId +
+      "&created_at=eq." + encodeURIComponent(savedAt) + "&select=id,review_status&order=id.asc&limit=100");
+    if (!Array.isArray(batch) || Number(batch[0]?.id) !== eventId ||
+        batch[0]?.review_status !== "pending") return null;
     const dogRows = await rest("dogs?id=eq." + dogId + "&select=name&limit=1");
     const name = Array.isArray(dogRows) && dogRows[0]?.name
       ? String(dogRows[0].name).replace(/[\r\n\t]/g, " ").trim().slice(0, 70)
@@ -98,14 +106,12 @@ async function messageForWebhook(body: Json) {
       rabies: "Besnota", infectious: "Infekčné ochorenia",
       kennel_cough: "Kotercový kašeľ", lepto_l4: "Leptospiróza (L4)",
     } as Record<string, string>)[String(record.vaccination_type || "")] || "Očkovanie";
-    const pending = await rest("portal_vaccination_review_events_v234?review_status=eq.pending&select=id&limit=100");
-    const count = Array.isArray(pending) ? pending.length : 1;
-    if (!count) return null;
+    const multiple = batch.length > 1;
     return {
-      title: "Aktualizované očkovanie 🐾",
-      body: name + " – " + vaccine + ". " +
-        (count === 1 ? "1 očkovanie čaká na kontrolu." : count < 100 ? count + " očkovaní čaká na kontrolu." : "100+ očkovaní čaká na kontrolu."),
-      tag: "vaccination-review-count",
+      title: multiple ? "Aktualizované očkovania 🐾" : "Aktualizované očkovanie 🐾",
+      body: multiple ? name + " – aktualizované očkovania čakajú na kontrolu." :
+        name + " – " + vaccine + ". Očkovanie čaká na kontrolu.",
+      tag: "vaccination-review-" + dogId + "-" + savedAt,
     };
   }
 

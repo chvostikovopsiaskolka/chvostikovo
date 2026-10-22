@@ -354,3 +354,9 @@ html.customer-android.customer-design #bookingPickerV37 .booking-day-v37{min-hei
 
 /* v340: a little more breathing room below the device safe area. */
 .customer-design #bookingPickerV37.design-reservations-page .booking-picker-card-v37{padding-top:calc(20px + env(safe-area-inset-top))!important}
+
+/* v343: a clear valid status, kept on one line beside the existing icon. */
+.customer-design #bookingTab #bookingVaccinationStatus.valid>span:last-child,
+.customer-design #bookingTab .dual-dog-status-v254.valid>span:last-child{color:#177548!important;font-size:13px!important;font-weight:800;white-space:nowrap}
+@media(max-width:379px){.customer-design #bookingTab #bookingVaccinationStatus.valid>span:last-child,.customer-design #bookingTab .dual-dog-status-v254.valid>span:last-child{font-size:12px!important}}
+@media(max-width:350px){.customer-design #bookingTab #bookingVaccinationStatus.valid>span:last-child,.customer-design #bookingTab .dual-dog-status-v254.valid>span:last-child{font-size:11px!important}}
