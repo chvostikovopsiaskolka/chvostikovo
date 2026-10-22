@@ -1,5 +1,5 @@
 // Installed inside the existing authenticated main scope.
-try{window.ChvoTelemetry?.init({app:'admin',build:'20261022-opentelemetry-v345',base:SUPABASE_URL,key:SUPABASE_KEY,getToken:async()=>{const r=await supabase.auth.getSession();return r.data?.session?.access_token||''},getSurface:()=>{
+try{window.ChvoTelemetry?.init({app:'admin',build:'20261022-opentelemetry-v347',base:SUPABASE_URL,key:SUPABASE_KEY,getToken:async()=>{const r=await supabase.auth.getSession();return r.data?.session?.access_token||''},isReady:()=>!document.getElementById('appBoot')||document.getElementById('appBoot').classList.contains('hidden'),getSurface:()=>{
  if(!document.getElementById('dogDetail')?.classList.contains('hidden'))return 'dog-details';
  if(!document.getElementById('menuSection')?.classList.contains('hidden'))return 'menu';
  if(!document.getElementById('weekSection')?.classList.contains('hidden'))return 'reservations';return 'overview';
@@ -7,7 +7,7 @@ try{window.ChvoTelemetry?.init({app:'admin',build:'20261022-opentelemetry-v345',
 function installTelemetryPanelV345(){
  const opener=document.getElementById('menuTelemetryV345');if(!opener)return;
  const modal=document.createElement('dialog');modal.id='telemetryPanelV345';modal.setAttribute('aria-labelledby','telemetryTitleV345');
- modal.innerHTML='<header><h2 id="telemetryTitleV345">Technický stav appiek</h2><button type="button" class="btn secondary" data-telemetry-close aria-label="Zavrieť">×</button></header><p class="muted small">Technické chyby za posledných 7 dní. Bez obsahu správ, formulárov či fotografií.</p><button type="button" class="btn secondary" data-telemetry-refresh>Obnoviť</button><div data-telemetry-body aria-live="polite"></div>';
+ modal.innerHTML='<header><h2 id="telemetryTitleV345">Technický stav appiek</h2><button type="button" class="btn secondary" data-telemetry-close aria-label="Zavrieť">×</button></header><p class="muted small">Technické chyby za posledných 7 dní. Bez obsahu správ, formulárov či fotografií.</p><p class="muted small">Pri opakovanej závažnej chybe príde upozornenie. Najviac raz za hodinu; rovnaký problém najviac raz za deň.</p><button type="button" class="btn secondary" data-telemetry-refresh>Obnoviť</button><div data-telemetry-body aria-live="polite"></div>';
  document.body.append(modal);let generation=0;
  function close(){generation++;modal.close();modal.querySelector('[data-telemetry-body]').replaceChildren();}
  const el=(tag,text,cls)=>{const node=document.createElement(tag);node.textContent=text;if(cls)node.className=cls;return node;};

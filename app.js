@@ -83,7 +83,7 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261022-opentelemetry-v345';
+const APP_BUILD='20261022-opentelemetry-v347';
 const APP_VERSION='2.0.25';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
@@ -134,7 +134,7 @@ const SESSION_KEY='chvostikovo_customer_session';
 const PASSWORD_MIN_MESSAGE='Minimálne 8 znakov, malé a veľké písmeno a aspoň 1 číslica.';
 const PASSWORD_STRONG_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 let state={data:null,session:null,storage:localStorage,selectedDogId:null,activeTab:'booking',pushChecked:false,pushEnabled:false};
-try{window.ChvoTelemetry?.init({app:'customer',build:APP_BUILD,base:SUPABASE_URL,key:SUPABASE_KEY,getToken:()=>state.session?.access_token||'',getSurface:()=>{
+try{window.ChvoTelemetry?.init({app:'customer',build:APP_BUILD,base:SUPABASE_URL,key:SUPABASE_KEY,getToken:()=>state.session?.access_token||'',isReady:()=>document.getElementById('loading')?.classList.contains('hidden')===true,getSurface:()=>{
  if(!document.getElementById('supportChatModalV52')?.classList.contains('hidden'))return 'messages';
  if(!document.getElementById('dogDetailsModal')?.classList.contains('hidden'))return 'dog-details';
  if(!document.getElementById('bookingPickerV37')?.classList.contains('hidden'))return 'reservations';

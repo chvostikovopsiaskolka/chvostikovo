@@ -49,7 +49,7 @@ function init(config){
   try{
    if(disabled||!categories.has(category))return;
    const now=Date.now();if(now-windowAt>600000){recorded=0;windowAt=now;seen.clear();}if(recorded>=40)return;
-   const operation=actions.has(details.action)?'action/'+details.action:typeof details.operation==='string'&&/^(rpc\/[a-z][a-z0-9_]{0,79}|db\/[a-z][a-z0-9_]{0,79}|edge\/[a-z][a-z0-9-]{0,79}|storage|javascript|customer-operation)$/.test(details.operation)?details.operation:'javascript';
+   const operation=actions.has(details.action)?'action/'+details.action:typeof details.operation==='string'&&/^(rpc\/[a-z][a-z0-9_]{0,79}|db\/[a-z][a-z0-9_]{0,79}|edge\/[a-z][a-z0-9-]{0,79}|storage|javascript|customer-operation|app-startup)$/.test(details.operation)?details.operation:'javascript';
    const source=sourceLocation(details.error,details.event),status=Math.min(599,Math.max(0,Number(details.status)||0));
    const key=[category,operation,status,source['code.file'],source['code.line']].join(':');if(now-(seen.get(key)||0)<60000)return;seen.set(key,now);recorded++;
    const type=types.has(details.error?.name)?details.error.name:'Error';
@@ -61,13 +61,15 @@ function init(config){
  window.addEventListener('unhandledrejection',event=>{if(event.reason?.name!=='AbortError')capture('promise.error',{error:event.reason});});
  window.fetch=function(input,options){
   const operation=routeName(input,config.base);if(!operation)return nativeFetch(input,options);
-  const started=performance.now();return nativeFetch(input,options).then(response=>{
-   const duration=performance.now()-started;if(response.status>=400)capture('request.error',{operation,status:response.status,duration});else if(duration>=10000)capture('request.slow',{operation,status:response.status,duration});return response;
-  },error=>{if(error?.name!=='AbortError')capture('request.error',{operation,error,duration:performance.now()-started});throw error;});
+  const started=performance.now(),watchdog=setTimeout(()=>{if(document.visibilityState!=='hidden'&&navigator.onLine!==false)capture('request.error',{operation,error:{name:'TimeoutError'},duration:30000});},30000);
+  return nativeFetch(input,options).then(response=>{
+   clearTimeout(watchdog);const duration=performance.now()-started;if(response.status>=400)capture('request.error',{operation,status:response.status,duration});else if(duration>=10000)capture('request.slow',{operation,status:response.status,duration});return response;
+  },error=>{clearTimeout(watchdog);if(error?.name!=='AbortError')capture('request.error',{operation,error,duration:performance.now()-started});throw error;});
  };
  const flush=()=>provider.forceFlush().catch(()=>{});
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')void flush();});
  window.addEventListener('pagehide',()=>{void flush();});
+ setTimeout(()=>{try{if(document.visibilityState!=='hidden'&&navigator.onLine!==false&&typeof config.isReady==='function'&&!config.isReady())capture('request.error',{operation:'app-startup',error:{name:'TimeoutError'},duration:30000});}catch(_){}},30000);
  Object.assign(window.ChvoTelemetry,{active:true,capture,flush,disable(){disabled=true;seen.clear();void provider.shutdown().catch(()=>{});}});
 }
 window.ChvoTelemetry=window.ChvoTelemetry||{init,active:false};

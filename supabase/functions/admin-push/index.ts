@@ -331,7 +331,7 @@ async function messageForWebhook(body: Json) {
   }
 
   if (table === "portal_notifications") {
-    const isAdminMessage = ["customer_message_admin", "taxi_cancelled_admin"].includes(String(record.notification_type));
+    const isAdminMessage = ["customer_message_admin", "taxi_cancelled_admin", "app_diagnostics_admin"].includes(String(record.notification_type));
     const notificationBody = String(record.push_body || record.body || "Máte nové upozornenie.");
     const isTaxiInterest = isAdminMessage && notificationBody.toLocaleLowerCase("sk-SK").includes("doplnenie taxi");
     return {

@@ -43,4 +43,15 @@ for(const app of ['customer','admin']){
  console.log('PASS actual '+app+' runtime: SDK export, private-field exclusion, duplicate suppression, response integrity, collector failure isolation'+(app==='admin'?', staff report and mobile/landscape dialog':''));
  await browser.close();
 }
+const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true,args:packed?[...packed.args.filter(x=>!x.includes('in-process-gpu')),'--disable-gpu']:['--no-sandbox']});
+const page=await browser.newPage();await page.goto('about:blank');await page.clock.install();
+await page.evaluate(()=>{window.__packets=[];window.fetch=(input,options={})=>String(input).includes('portal_telemetry_ingest')?(window.__packets.push(JSON.parse(options.body)),Promise.resolve(new Response('true'))):new Promise(()=>{});});
+await page.addScriptTag({content:fs.readFileSync('telemetry-v345.js','utf8')});
+await page.evaluate(base=>{window.ChvoTelemetry.init({app:'customer',build:'20261022-opentelemetry-v347',base,key:'synthetic-public',getToken:()=> 'synthetic-token',isReady:()=>false});window.pendingRequest=fetch(base+'/rest/v1/rpc/portal_save_vaccinations_v287');},base);
+await page.clock.fastForward(30001);await page.evaluate(()=>window.ChvoTelemetry.flush());
+const watchdogs=await page.evaluate(()=>window.__packets.flatMap(p=>p.p_payload.resourceSpans.flatMap(r=>r.scopeSpans.flatMap(s=>s.spans))));
+assert(watchdogs.some(s=>s.attributes.some(a=>a.key==='operation'&&a.value.stringValue==='app-startup')),'startup watchdog');
+assert(watchdogs.some(s=>s.attributes.some(a=>a.key==='operation'&&a.value.stringValue==='rpc/portal_save_vaccinations_v287')),'hung request watchdog');
+assert(watchdogs.every(s=>s.attributes.some(a=>a.key==='exception.type'&&a.value.stringValue==='TimeoutError')));
+console.log('PASS actual SDK watchdogs: 30s unfinished request and blocked startup are reported without cancelling app requests');await browser.close();
 })().catch(e=>{console.error(e);process.exitCode=1});
