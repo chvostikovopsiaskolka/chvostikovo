@@ -199,12 +199,11 @@
   window.customerDesignPickerRender=()=>{
     const picker=byId('bookingPickerV37'),card=picker?.querySelector('.booking-picker-card-v37');if(!card)return;
     picker.classList.add('design-reservations-page');picker.setAttribute('role','region');picker.removeAttribute('aria-modal');
-    byId('bookingPickerTitleV37').textContent='Moje rezervácie';
+    byId('bookingPickerTitleV37').textContent='Rezervácie';
     const head=card.querySelector('.booking-picker-head-v37');
     const close=byId('bookingPickerCloseV37');if(!close.querySelector('svg'))close.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     if(!byId('designMyBookings')){
       const section=document.createElement('section');section.id='designMyBookings';section.innerHTML='<h2>📅 Moje rezervácie</h2>';head.after(section);section.append(byId('weekDays'));
-      const chat=document.createElement('button');chat.type='button';chat.className='design-reservation-chat';chat.setAttribute('aria-label','Napísať správu');chat.innerHTML=icon('message');chat.addEventListener('click',()=>{window.customerDesignKeepPickerForChat?.();openCustomerChat();});head.insertBefore(chat,byId('bookingPickerCloseV37'));
     }
     let carousel=byId('designBookingCarousel');if(!carousel){carousel=document.createElement('div');carousel.id='designBookingCarousel';byId('weekDays').before(carousel);carousel.append(byId('weekDays'));}
     let hint=byId('designBookingSwipeHint');if(!hint){hint=document.createElement('p');hint.id='designBookingSwipeHint';hint.textContent='Posuňte pre zobrazenie ďalších dní →';carousel.before(hint);}hint.hidden=byId('weekDays').querySelectorAll('.reserved-day-card-v37').length<2;

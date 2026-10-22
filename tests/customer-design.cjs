@@ -48,6 +48,15 @@ async function scenario(count){
   assert.equal(w.document.querySelector('.design-friend-strip img'),photo,'four-friend layout preserves decoded first photo');
   const edit=w.document.querySelector('.design-visit-edit');assert(edit);edit.click();
   assert(!w.document.getElementById('bookingPickerV37').classList.contains('hidden'));
+  assert.equal(w.document.getElementById('bookingPickerTitleV37').textContent,'Rezervácie');
+  assert.equal(w.document.querySelector('#bookingPickerV37 .design-reservation-chat'),null);
+  w.document.getElementById('bookingPickerCloseV37').click();
+  assert(w.document.getElementById('bookingPickerV37').classList.contains('hidden'),'original X closes reservations');
+  edit.click();
+  if(process.env.DESIGN_EXPORT_DIR){
+    fs.mkdirSync(process.env.DESIGN_EXPORT_DIR,{recursive:true});
+    fs.writeFileSync(process.env.DESIGN_EXPORT_DIR+'/booking-'+count+'.html',dom.serialize().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''));
+  }
   assert.match(w.document.getElementById('weekDays').textContent,/Plánovaný vstup 7 z 10/);
   assert.match(w.document.querySelector('.design-visit-entries').textContent,/Plánovaný vstup 7 z 10/);
   assert.match(edit.textContent,/Upraviť/);
