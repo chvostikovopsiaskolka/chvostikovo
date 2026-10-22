@@ -103,6 +103,7 @@ export function CookieBanner() {
   const [open, setOpen] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [hasSavedConsent, setHasSavedConsent] = useState(false);
+  const [savedNotice, setSavedNotice] = useState(false);
   const [expandedService, setExpandedService] = useState<string | null>(null);
   const [consent, setConsent] = useState<Consent>(emptyConsent());
 
@@ -123,6 +124,7 @@ export function CookieBanner() {
       const latest = readStoredConsent();
       if (latest) setConsent(latest);
       setShowDetails(true);
+      setSavedNotice(false);
       setHasSavedConsent(Boolean(latest));
       setOpen(true);
     }
@@ -143,6 +145,12 @@ export function CookieBanner() {
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!savedNotice) return;
+    const timeout = window.setTimeout(() => setSavedNotice(false), 5500);
+    return () => window.clearTimeout(timeout);
+  }, [savedNotice]);
+
   if (!mounted) return null;
 
   const isEnglish = window.location.pathname.startsWith("/en/");
@@ -151,6 +159,7 @@ export function CookieBanner() {
     const stored = writeStoredConsent(next);
     if (stored) setConsent(stored);
     setHasSavedConsent(true);
+    setSavedNotice(true);
     setOpen(false);
   }
 
@@ -174,7 +183,17 @@ export function CookieBanner() {
     setConsent((current) => ({ ...current, [category]: checked }));
   }
 
-  if (!open) return null;
+  if (!open) {
+    if (!savedNotice) return null;
+    return (
+      <div role="status" className="fixed bottom-[calc(12px+env(safe-area-inset-bottom))] left-3 right-3 z-[110] mx-auto flex max-w-md items-center gap-2 rounded-2xl border border-forest/15 bg-card px-4 py-3 text-sm text-forest shadow-xl">
+        <span className="flex-1">{isEnglish ? "Your cookie choices were saved for up to 180 days." : "Vašu voľbu cookies sme uložili na najviac 180 dní."}</span>
+        <button type="button" className="shrink-0 font-semibold text-coral underline" onClick={() => window.dispatchEvent(new Event("chvostikovo-open-cookie-settings"))}>
+          {isEnglish ? "Settings" : "Nastavenia"}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
