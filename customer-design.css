@@ -35,6 +35,7 @@
 .design-ticket.male{--paw:#75b4e6;background:linear-gradient(110deg,#fff 65%,#f5faff)}
 .design-ticket::before,.design-ticket::after{content:'';position:absolute;top:53%;width:14px;height:17px;background:#faf9fb;border:1px solid #e8e3e8;border-radius:50%;z-index:-1}
 .design-ticket::before{left:-8px}.design-ticket::after{right:-8px}
+.design-ticket.design-ticket-single::before,.design-ticket.design-ticket-single::after{display:none}
 .design-ticket-head{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
 .design-ticket h2{font-size:17px;line-height:1.25;margin:0;white-space:nowrap}.design-ticket h2>span{font-size:20px}
 .design-validity{border-radius:9px;background:#ffedd9;color:#ab4914;padding:6px 7px;font-size:10px;font-weight:800;text-align:center;max-width:54%;line-height:1.3}
