@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v357';
-const APP_VERSION='2.0.32';
+const APP_BUILD='v358';
+const APP_VERSION='2.0.33';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -188,7 +188,7 @@ function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
 function saveSession(s,remember=true){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));state.session=s}
-function clearSession(){void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
+function clearSession(){window.customerGuideAbortV358?.();window.customerBulletinAbortV358?.();void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
 async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok){const error=new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');error.status=r.status;error.code=data?.code||data?.error_code||'';if(error.code==='user_banned'||/user is banned/i.test(error.message))error.message='Prístup k účtu je zablokovaný. Kontaktujte Chvostíkovo.';throw error}return data}
 let sessionRefreshInFlight=null,sessionRefreshOwnerV357=null;
 function customerSessionNeedsRefreshV357(session=state.session){
@@ -2035,7 +2035,7 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
   function readPhotoPromptV162(key){try{return localStorage.getItem(key)}catch(_){return null}}
   function needsOwnPhotoPromptV162(dog){const key=photoPromptKeyV162(dog);const hasAnyPhoto=!!(dog.photo_url||dog.photo_path);const anotherOwnerOnboarded=(state.data?.other_owner_onboarded_dog_ids||[]).some(id=>Number(id)===Number(dog.id));return (!hasAnyPhoto||(anotherOwnerOnboarded&&!dog.personal_photo))&&!photoPromptsAnsweredV162.has(key)&&readPhotoPromptV162(key)!=='done'}
   function showOwnPhotoPromptV162(dog){hideFlow('personalPhotoOnboardingV162');if(!$('personalPhotoOnboardingV162'))document.body.insertAdjacentHTML('beforeend','<div id="personalPhotoOnboardingV162" class="legal-modal onboarding-modal-v75 hidden" role="dialog" aria-modal="true" aria-labelledby="personalPhotoTitleV162"><div class="legal-card"><h2 id="personalPhotoTitleV162">Pridať fotku psíka?</h2><div class="legal-body"><p>Ak chcete, môžete si do svojho účtu pridať fotku psíka. Fotku môžete pridať alebo zmeniť aj neskôr v časti Môj psík.</p></div><button id="personalPhotoAddV162" class="btn full" type="button">Pridať fotku</button><button id="personalPhotoSkipV162" class="btn secondary full" type="button">Teraz nie</button></div></div>');const finish=add=>{const key=photoPromptKeyV162(dog);photoPromptsAnsweredV162.add(key);try{localStorage.setItem(key,'done')}catch(_){}$('personalPhotoOnboardingV162').classList.add('hidden');state.selectedDogId=Number(dog.id);runCustomerOnboardingV75();if(add)selectNewDogPhotoV89()};$('personalPhotoAddV162').onclick=()=>finish(true);$('personalPhotoSkipV162').onclick=()=>finish(false);$('personalPhotoOnboardingV162').classList.remove('hidden')}
-async function evaluate(){if(!state.session||!state.data)return;window.__customerOnboardingCompleteV75=false;const dogs=state.data?.dogs||[];document.documentElement.classList.toggle('customer-awaiting-dog-v107',!dogs.length);try{await ensurePushState(true)}catch(_){}if(!state.data.profile?.privacy_notice_acknowledged_at){openPrivacyInfo(true);return}if(privacyMandatory){privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden')}if(!state.data.profile?.push_prompt_answered_at){showPushPrompt();return}if(!dogs.length){hideFlow('waitingDogAssignmentModalV75');ensureWaiting().classList.remove('hidden');return}ensureWaiting().classList.add('hidden');const doc=await activeTermsDocument();if(doc){const accepted=await acceptedTerms(doc.version),acceptedIds=new Set((accepted||[]).map(x=>Number(x.dog_id))),missing=dogs.find(d=>!acceptedIds.has(Number(d.id)));if(missing){showSchoolTerms(missing,doc);return}}$('schoolTermsModal')?.classList.add('hidden');const shareDog=dogs.find(d=>!visibilityDecided(d.id));if(shareDog){showSharePrompt(shareDog);return}if(dogSaveInFlightV145||!$('dogDetailsModal')?.classList.contains('hidden'))return;const detailsDog=(state.data?.dogs||[]).find(d=>!detailsPromptAnswered(d.id));if(detailsDog){showDetailsPrompt(detailsDog);return}const photoDog=dogs.find(needsOwnPhotoPromptV162);if(photoDog){showOwnPhotoPromptV162(photoDog);return}hideFlow();window.__customerOnboardingCompleteV75=true;if(typeof loadAnnouncements==='function')await loadAnnouncements();renderNotifications()}
+async function evaluate(){if(!state.session||!state.data)return;window.__customerOnboardingCompleteV75=false;const dogs=state.data?.dogs||[];document.documentElement.classList.toggle('customer-awaiting-dog-v107',!dogs.length);try{await ensurePushState(true)}catch(_){}if(!state.data.profile?.privacy_notice_acknowledged_at){openPrivacyInfo(true);return}if(privacyMandatory){privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden')}if(!state.data.profile?.push_prompt_answered_at){showPushPrompt();return}if(!dogs.length){hideFlow('waitingDogAssignmentModalV75');ensureWaiting().classList.remove('hidden');return}ensureWaiting().classList.add('hidden');const doc=await activeTermsDocument();if(doc){const accepted=await acceptedTerms(doc.version),acceptedIds=new Set((accepted||[]).map(x=>Number(x.dog_id))),missing=dogs.find(d=>!acceptedIds.has(Number(d.id)));if(missing){showSchoolTerms(missing,doc);return}}$('schoolTermsModal')?.classList.add('hidden');const shareDog=dogs.find(d=>!visibilityDecided(d.id));if(shareDog){showSharePrompt(shareDog);return}if(dogSaveInFlightV145||!$('dogDetailsModal')?.classList.contains('hidden'))return;const detailsDog=(state.data?.dogs||[]).find(d=>!detailsPromptAnswered(d.id));if(detailsDog){showDetailsPrompt(detailsDog);return}const photoDog=dogs.find(needsOwnPhotoPromptV162);if(photoDog){showOwnPhotoPromptV162(photoDog);return}hideFlow();window.__customerOnboardingCompleteV75=true;document.dispatchEvent(new Event('customer-onboarding-ready-v358'));if(typeof loadAnnouncements==='function')await loadAnnouncements();renderNotifications()}
   async function runCustomerOnboardingV75(){if(running){rerun=true;return}running=true;try{await evaluate()}catch(e){console.warn('Customer onboarding',e)}finally{running=false;if(rerun){rerun=false;setTimeout(runCustomerOnboardingV75,20)}}}
   window.runCustomerOnboardingV75=runCustomerOnboardingV75;
   document.addEventListener('click',e=>{if(e.target.closest('#privacyInfoBtn')){e.preventDefault();openPrivacyInfo(false)}if(e.target.closest('#privacyInfoClose'))closePrivacyInfo();if(e.target.closest('#privacyInfoOk'))acknowledgePrivacy();if(e.target.closest('#schoolTermsConfirm'))acceptSchoolTerms();if(e.target.closest('#schoolTermsLogout'))$('logoutBtn')?.click()});
@@ -4146,6 +4146,23 @@ function installVaccinationViewerZoomV244(modal){
   const $=id=>document.getElementById(id);
   const rowsState={items:[],read:new Set(),at:0,loading:null,session:null,error:false};
   const select='id,title,body,valid_from,valid_until,created_at,paper_style,image_path,cta_enabled,cta_title,cta_body,cta_button_label,cta_url';
+  const photoCacheV358=new Map();
+  let articleEpochV358=0;
+  function preparePhotoV358(url){
+    if(photoCacheV358.has(url))return photoCacheV358.get(url);
+    const img=new Image();img.loading='eager';img.decoding='async';
+    const entry={img,promise:null};
+    entry.promise=new Promise(resolve=>{
+      let done=false;const finish=ok=>{if(done)return;done=true;clearTimeout(timer);img.onload=null;img.onerror=null;if(!ok)photoCacheV358.delete(url);resolve(ok);};
+      const timer=setTimeout(()=>finish(false),7000);
+      img.onload=()=>{Promise.resolve(typeof img.decode==='function'?img.decode():undefined).then(()=>finish(true),()=>finish(false));};
+      img.onerror=()=>finish(false);img.src=url;
+      if(img.complete&&img.naturalWidth>0)img.onload();
+    });
+    photoCacheV358.set(url,entry);
+    if(photoCacheV358.size>8)photoCacheV358.delete(photoCacheV358.keys().next().value);
+    return entry;
+  }
   let historyReturn=false;
   let modalsReady=false;
   function loggedIn(){return !!(state.session?.access_token&&state.data?.dogs?.length)}
@@ -4166,10 +4183,11 @@ function installVaccinationViewerZoomV244(modal){
     header.append(h,x);dialog.append(header,scroll);overlay.append(dialog);document.body.append(overlay);
     overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
     x.addEventListener('click',()=>close());
-    function close(){overlay.classList.add('hidden');if(id==='customerBulletinArticleV229'&&historyReturn){historyReturn=false;openHistory(false)}syncScrollLock()}
+    function close(){overlay.classList.add('hidden');if(id==='customerBulletinArticleV229'){articleEpochV358++;if(historyReturn){historyReturn=false;openHistory(false)}}syncScrollLock()}
     return{overlay,dialog,h,scroll,x,close};
   }
   let archiveModal,articleModal,zoomModal;
+  window.customerBulletinAbortV358=()=>{articleEpochV358++;photoCacheV358.clear();historyReturn=false;[archiveModal,articleModal,zoomModal].forEach(modal=>modal?.overlay.classList.add('hidden'));syncScrollLock();};
   function ensureModals(){
     if(modalsReady)return;modalsReady=true;
     archiveModal=modal('Oznamy','customerBulletinHistoryV229');
@@ -4257,22 +4275,31 @@ function installVaccinationViewerZoomV244(modal){
     img.addEventListener('dblclick',e=>{e.preventDefault();scale=scale>1?1:2;render()});
     zoomModal.scroll.append(img);zoomModal.overlay.classList.remove('hidden');syncScrollLock();
   }
-  function openArticle(row,fromHistory){
+  async function openArticle(row,fromHistory){
     if(!row||!loggedIn())return;
     ensureModals();
     historyReturn=!!fromHistory;
     archiveModal.overlay.classList.add('hidden');
     articleModal.h.textContent=row.title||'Oznam';
     articleModal.scroll.replaceChildren();
-    articleModal.scroll.append(el('div','customer-bulletin-article-v229',row.body||''));
+    const generation=++articleEpochV358,userId=state.session?.user?.id;
     const photo=safePhoto(row.image_path);
+    articleModal.overlay.classList.remove('hidden');syncScrollLock();
+    let prepared=null,photoReady=false;
     if(photo){
-      const img=el('img','customer-bulletin-photo-v229');img.src=photo;img.alt='Obrázok k oznamu';img.loading='lazy';
-      img.addEventListener('click',()=>showImage(photo));img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showImage(photo)}});
+      const wait=el('p','customer-bulletin-loading-v358','Načítavam oznam…');wait.setAttribute('role','status');articleModal.scroll.append(wait);articleModal.scroll.setAttribute('aria-busy','true');
+      prepared=preparePhotoV358(photo);photoReady=await prepared.promise;
+    }
+    if(generation!==articleEpochV358||userId!==state.session?.user?.id||!loggedIn()||articleModal.overlay.classList.contains('hidden'))return;
+    articleModal.scroll.removeAttribute('aria-busy');articleModal.scroll.replaceChildren();
+    articleModal.scroll.append(el('div','customer-bulletin-article-v229',row.body||''));
+    if(photo&&photoReady){
+      const img=prepared.img;img.className='customer-bulletin-photo-v229';img.alt='Obrázok k oznamu';img.hidden=false;
+      img.onclick=()=>showImage(photo);img.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showImage(photo)}};
       img.setAttribute('role','button');img.tabIndex=0;img.setAttribute('aria-label','Zväčšiť fotografiu oznamu');
-      img.onerror=()=>{img.hidden=true};
       articleModal.scroll.append(img);
     }
+    else if(photo)articleModal.scroll.append(el('p','customer-bulletin-photo-error-v358','Fotografiu sa nepodarilo načítať. Skúste oznam otvoriť znova.'));
 
     if(row.cta_enabled&&(row.cta_title||row.cta_body||safeLink(row.cta_url))){
       const cta=el('section','customer-bulletin-cta-v229');
@@ -4318,6 +4345,7 @@ function installVaccinationViewerZoomV244(modal){
         if(state.session?.access_token===token)rowsState.read=new Set((Array.isArray(receipts)?receipts:[]).map(x=>Number(x.announcement_id)));
       }
       rowsState.at=Date.now();rowsState.error=false;drawBoard();drawHistory();
+      rowsState.items.filter(current).slice(0,2).forEach(row=>{const photo=safePhoto(row.image_path);if(photo)preparePhotoV358(photo);});
     })().catch(err=>{rowsState.error=true;console.warn('Customer bulletin load failed',err);drawBoard();drawHistory()})
        .finally(()=>{rowsState.loading=null});
     return rowsState.loading;
