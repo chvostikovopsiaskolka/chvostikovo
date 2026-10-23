@@ -397,7 +397,7 @@ html.booking-picker-open-v37{overflow:hidden!important}
 .dog-profile-header .dog-avatar.profile{width:76px;height:76px;font-size:28px}
 .dog-profile-header .dog-photo-name{font-size:23px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dog-profile-header .photo-pencil{right:-2px;bottom:-2px;width:29px;height:29px;font-size:16px}
-.dog-details-open{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:10px 14px;white-space:nowrap}
+button.dog-details-open{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:10px 14px;white-space:nowrap}
 .profile-onboarding-card .btn{flex:0 0 auto;min-height:44px;padding:10px 14px}
 html.dog-details-open{overflow:hidden}
 .dog-details-modal{z-index:560}
@@ -420,7 +420,7 @@ html.dog-details-open{overflow:hidden}
   .dog-profile-identity{gap:10px}
   .dog-profile-header .dog-avatar.profile{width:64px;height:64px;font-size:24px}
   .dog-profile-header .dog-photo-name{font-size:20px;max-width:110px}
-  .dog-details-open{font-size:13px;padding:9px 11px}
+  button.dog-details-open{font-size:13px;padding:9px 11px}
   .profile-onboarding-card .btn{width:100%}
   .dog-details-card .grid2{grid-template-columns:minmax(0,1fr)!important}
   .visit-summary-card{padding:18px}
