@@ -13,7 +13,7 @@ test('mobile bundle uses local shared assets, excludes server material and servi
   assert(html.indexOf('/native-runtime.js') < html.indexOf('/app.js'));
   assert(!html.includes('android-install-choice'));
   const manifest = JSON.parse(await read('www/mobile-build.json'));
-  assert.equal(manifest.build, 'v360');
+  assert.equal(manifest.build, 'v361');
   assert.equal(manifest.files['app.js'].length, 64);
 });
 test('release requires Firebase, signing credentials and verified push/App Links', async () => {

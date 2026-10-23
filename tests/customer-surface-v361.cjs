@@ -1,0 +1,21 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const css=fs.readFileSync('customer-design.css','utf8');
+const js=fs.readFileSync('app.js','utf8'), design=fs.readFileSync('customer-design.js','utf8');
+const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');
+const ver=JSON.parse(fs.readFileSync('version.json','utf8'));
+const block=css.split('/* v361: lighter customer surfaces')[1];
+assert(block);
+for(const selector of ['#bookingGradebook','#designTicket.design-ticket','#designNearest.design-nearest','.design-visit-empty','.design-empty-reminder','#designReservationNotice:not([hidden])','#designMyBookings','#bookingPickerDaysV37','#bookingPickerSmartDaysV199'])
+ assert(block.includes(selector),selector);
+assert(block.includes('margin:2px 0 0 -27px!important'),'book icon aligns with visits gutter');
+assert(block.includes('focus-visible')&&block.includes('prefers-reduced-motion'));
+assert(js.includes('text:`Prosíme o rezerváciu miesta do nedele ${parts[2]}. ${parts[1]}. do 20:00.`'));
+assert(js.includes('reminder.hidden=hasWeekBookingV337(reminder.from,reminder.to)'));
+assert(design.includes('notice.hidden=!nextHeading||!!reminder?.hidden'));
+assert(design.includes("notice?.classList.contains('hidden')"));
+assert.equal(ver.build,'v361');assert.equal(ver.version,'2.0.36');
+assert(js.includes("const APP_BUILD='v361'")&&js.includes("const APP_VERSION='2.0.36'"));
+assert(sw.includes('shell-v361'));
+assert(!html.includes('?v=v360')&&!sw.includes('?v=v360'));
+assert(html.includes('customer-design.css?v=v361'));
+console.log('PASS surface v361: deadline logic, scoped depth, accessibility and asset/cache release');

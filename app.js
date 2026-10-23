@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v360';
-const APP_VERSION='2.0.35';
+const APP_BUILD='v361';
+const APP_VERSION='2.0.36';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -2786,7 +2786,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     to.setUTCDate(to.getUTCDate()+6);
     const sunday=previousIsoDayV95(from),parts=sunday.split('-').map(Number);
     const reminder={from,to:to.toISOString().slice(0,10),deadline:sunday,
-      text:`Prosíme o rezerváciu na budúci týždeň do nedele ${parts[2]}. ${parts[1]}. do 20:00.`};
+      text:`Prosíme o rezerváciu miesta do nedele ${parts[2]}. ${parts[1]}. do 20:00.`};
     reminder.hidden=hasWeekBookingV337(reminder.from,reminder.to);
     const box=$('deadlineText');if(!box)return reminder;
     box.classList.toggle('hidden',reminder.hidden);

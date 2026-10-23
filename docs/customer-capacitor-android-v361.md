@@ -1,7 +1,7 @@
 # Android Capacitor preparation — 23 October 2026
 
-**Prepared, not deployed.** Production remains customer v360 / 2.0.35 at
-`af169c978538c5c00ebc01dc44253bc562138337`. No Google Play release or native
+**Prepared, not deployed.** The initial Android preview used customer v360 / 2.0.35 at
+`af169c978538c5c00ebc01dc44253bc562138337`; Android draft now contains the same customer v361 / 2.0.36 UI as LIVE PWA commit `8855e0912f290c5d6795181954f0198ffd06abf0`. No Google Play release or native
 push delivery is claimed. Rollback: discard this isolated branch/PR; production
 PWA/admin/DB are unchanged.
 
@@ -40,3 +40,6 @@ does not establish physical Android behavior or actual Firebase delivery.
 Draft PR: https://github.com/chvostikovopsiaskolka/chvostikovo/pull/162
 
 Detailed setup and exact outstanding prerequisites: `mobile/README.md`.
+
+## v361 refresh of Android draft
+The native test branch incorporates the already-live customer v361 styling: gradebook without outlined pill, white raised Overview and Reservations surfaces, no green Sunday notice frame, centered empty state and intact date/booking logic. Native-only lifecycle/FCM/App Links adapters stay in place; no backend deployment. Android Gradle versionName, package files and build manifest track 2.0.36/v361. The earlier artifact run 39956938313 used v360 and is **not** the updated preview. A fresh Android CI build and physical device verification are required. Rollback this draft update independently from deployed PWA v361.

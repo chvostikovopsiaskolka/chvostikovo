@@ -1,7 +1,7 @@
 # Chvostíkovo Android — Capacitor preparation
 
 Status: **prepared for testing; not a signed Google Play release**. Source baseline:
-customer-portal-production `af169c978538c5c00ebc01dc44253bc562138337`, customer v360 / 2.0.35.
+initial customer-portal-production `af169c978538c5c00ebc01dc44253bc562138337` (v360), now synchronized with customer PWA v361 / 2.0.36 commit `8855e0912f290c5d6795181954f0198ffd06abf0`. The native debug APK must be rebuilt from this updated branch; the older v360 debug APK is not current.
 The production PWA and database are not changed by building this directory.
 
 ## Shared source and repeatable builds
