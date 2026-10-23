@@ -1,3 +1,17 @@
+# Customer v369 / 2.0.44 — unified translucent surfaces and labelled booking action
+
+Based on live v368 commit c88af23ba206ef415c9f65168a68805c50b44b7f. User references: current Overview/Menu/Reservations plus the iOS Notification Centre glass reference. The requested web treatment uses CSS transparency and blur; it does not claim the native iOS rendering pipeline.
+
+- Shared white surface alpha .26, 18px backdrop blur and 135% saturation across permanentka, nearest/my reservations, calendar, selected dates, Menu groups/social panel and bottom navigation. Remove white card/profile borders and white inset outlines; retain soft depth. Nested empty/smart panels, free day tiles and Menu social links use a lighter translucent treatment. Keep disabled, selected, booked and capacity states recognisable, along with readable opaque unsupported-filter/reduced-transparency fallbacks.
+- The gender-coloured profile and photo border remain. Photo and information panel stretch to the same grid row height, including long names. Existing three-row font parity and all profile actions remain.
+- Stronger two-pixel dashed pass divider separates usage/validity from paw counters. Filled/unused paw styles and pass arithmetic do not change.
+- Same outer rail width, fixed bottom/safe-area position and 70px action height. Narrower Overview/Menu controls surround a wider central orange action labelled Rezervovať miesto, with the existing calendar-plus icon on its left. Preserve button ID/listeners, booking gates, guide target and modal/nav hiding rules. No new navigation/booking system.
+- Week sections have 12px top padding for the existing Tento týždeň / Budúci týždeň headings.
+
+Verification: mandatory release preflight and complete workflow on final source; actual assembled Chromium 320/360/390/430, 844x390 and1280 for one/two dogs covers profile bounds/equal heights/font parity, icon left of label, label fit, rail stability across Overview/Menu/expanded menu/Reservations, shared Menu glass, divider and week padding, active/queued passes, unsupported/reduced-transparency fallback, notices and article. Existing inbox and guide browser checks are run separately. The guide calendar preview uses compact local padding so the added normal week spacing does not push its controls off screen; normal Reservations keeps its 12px top padding. The obsolete guide browser six-pixel-divider assertion is replaced with a panel-containment check matching the divider-free profile. No DB, Edge, API traffic, operational data or notification change. Physical iOS/Android remain unverified.
+
+Rollback: backup/customer-before-glass-unify-v369-20261023 points to c88af23ba206ef415c9f65168a68805c50b44b7f; previous Vercel dpl_4BJ8MFpHHG7WD8RM8FGJVo3FpVPi. Prefer a selective revert when newer work exists. No data rollback.
+
 # Customer v368 / 2.0.43 — clearer unused pass paws
 
 Only unused permanentka paws change: outline width .8 → 1.4 and opacity .42 → .9. Used paws retain their original fill, colour, width and opacity. No background-paw, data, accounting or interaction change. Baseline v367 commit 9595fe02144a7a6dcd6a87a8816739cbffc40818; rollback backup/customer-before-paw-outline-v368-20261023. Release contract, full CI and existing browser profile/pass checks apply; physical devices remain unverified.

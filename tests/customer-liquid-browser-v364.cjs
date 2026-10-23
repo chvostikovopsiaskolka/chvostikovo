@@ -13,14 +13,19 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwr
   await page.evaluate(dogs=>{queueCustomerSync=()=>{};window.runCustomerOnboardingV75=()=>{};state.session={user:{id:'synthetic-browser'},access_token:'fixture',expires_at:Date.now()/1000+3600};state.selectedDogId=1;state.data={profile:{status:'active',intro_guide_eligible:false,privacy_notice_acknowledged_at:'2026-01-01',push_prompt_answered_at:'2026-01-01'},dogs:Array.from({length:dogs},(_,i)=>({id:i+1,name:i?'Iris':'Bella',sex:i?'male':'female',default_entry_type:'single',photo_path:'fixture/dog',share_name_photo_at:'2026-01-01'})),messages:[],conversation_id:7,vaccinations:Array.from({length:dogs},(_,i)=>['rabies','infectious','kennel_cough'].map(vaccination_type=>({dog_id:i+1,vaccination_type,valid_until:'2099-12-31'}))).flat(),vaccination_proofs:Array.from({length:dogs},(_,i)=>({id:i+1,dog_id:i+1,storage_path:'fixture'})),dog_onboarding:Array.from({length:dogs},(_,i)=>({dog_id:i+1,details_prompt_answered_at:'2026-01-01'})),passes:[],requests:[],reservations:[],visits:[],pass_requests:[],monthly_totals:[],notifications:[],availability:{days:[]}};showApp();renderAll();loading(false);window.__customerOnboardingCompleteV75=true;return loadAnnouncements(true);},dogs);
   assert.equal(await page.locator('#designTicket').count(),0,'no single entry card in the DOM');
   const nav=await page.locator('.bottom-nav').boundingBox();
+  const centre=await page.locator('#navBookAddV220').boundingBox(),edge=await page.locator('#navBooking').boundingBox();assert(centre.width>edge.width,'booking action wider than side tabs');
+  assert.equal(await page.locator('#navBookAddV220').getAttribute('aria-label'),'Rezervovať miesto');
+  const icon=await page.locator('#navBookAddV220 svg').boundingBox(),label=await page.locator('.booking-action-label-v369').boundingBox();assert(icon.x+icon.width<=label.x+1,'icon left of booking label');assert(label.x+label.width<=centre.x+centre.width,'label fits');
+
   for(const sex of ['female','male']){
    await page.evaluate(sex=>{state.data.dogs[0].sex=sex;renderDog();},sex);
    const style=await page.locator('#bookingDogProfile').evaluate(el=>({frame:getComputedStyle(el).borderColor,width:getComputedStyle(el).borderWidth,bg:getComputedStyle(el).backgroundColor}));
-   assert.equal(style.frame,'rgb(255, 255, 255)');assert.equal(style.width,'3px');
+   assert.equal(style.width,'0px');
    if(dogs===1)assert.equal(style.bg,sex==='male'?'rgb(220, 236, 251)':'rgb(249, 222, 237)');
    const name=await page.locator(dogs===1?'#bookingDogName':'.dual-dog-name-v241').first().evaluate(el=>({stroke:getComputedStyle(el).webkitTextStrokeWidth,color:getComputedStyle(el).color,size:getComputedStyle(el).fontSize}));assert.equal(name.stroke,'0px');assert(name.color!=='rgb(255, 255, 255)');
   }
   if(dogs===1){
+   const photo=await page.locator('#bookingDogAvatar').boundingBox(),info=await page.locator('.dog-overview-content').boundingBox();assert(Math.abs(photo.height-info.height)<1,'photo and information equal height');assert(Math.abs(photo.y-info.y)<1,'aligned profile panels');
    const layout=await page.locator('.dog-overview-content').evaluate(el=>{
     const b=el.getBoundingClientRect();return [...el.querySelectorAll('#bookingDogName,button,button svg,button .overview-icon')].filter(x=>x.getBoundingClientRect().width).map(x=>{const r=x.getBoundingClientRect();return {id:x.id||x.tagName,left:r.left-b.left,right:b.right-r.right,top:r.top-b.top,bottom:b.bottom-r.bottom};});
    });
@@ -29,18 +34,26 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwr
   }
   if(dogs===2){const fonts=await page.locator('.dual-dog-info-v254').first().evaluate(el=>[...el.querySelectorAll('.dual-dog-status-v254>span:last-child,.dual-dog-visits-v254,.dual-dog-grades-v254')].map(x=>getComputedStyle(x).fontSize));assert.equal(fonts.length,3);assert.equal(new Set(fonts).size,1,'dual information font parity');}
   const backgrounds=await page.evaluate(()=>[document.documentElement,document.body].map(el=>getComputedStyle(el).backgroundColor));assert.equal(backgrounds[0],backgrounds[1]);
-  await page.evaluate(()=>switchTab('menu'));assert(await page.evaluate(()=>document.documentElement.classList.contains('customer-liquid-v364')));await page.evaluate(()=>switchTab('booking'));
-  const panel=await page.locator(dogs===1?'.dog-overview-content':'.dual-dog-info-v254').first().evaluate((el,single)=>({border:getComputedStyle(el).borderLeftWidth,blur:getComputedStyle(el,single?'::before':null).backdropFilter}),dogs===1);if(dogs===1)assert.equal(panel.border,'0px');assert.equal(panel.blur,'blur(12px) saturate(1.45)');
+  await page.locator('#navDog').click();assert(await page.evaluate(()=>document.documentElement.classList.contains('customer-liquid-v364')));
+  const menu=await page.locator('#menuContact').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).borderWidth,blur:getComputedStyle(el).backdropFilter}));assert.equal(menu.bg,'rgba(255, 255, 255, 0.26)');assert.equal(menu.border,'0px');assert.equal(menu.blur,'blur(18px) saturate(1.35)');
+  assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'menu rail stable');
+  await page.locator('#menuSettingsGroup>summary').click();assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'expanded menu rail stable');await page.locator('#menuSettingsGroup>summary').click();
+  if(width===390)await page.screenshot({path:'/tmp/glass-v369-menu-'+dogs+'.png'});
+  await page.locator('#navBooking').click();
+
+  const panel=await page.locator(dogs===1?'.dog-overview-content':'.dual-dog-info-v254').first().evaluate((el,single)=>({border:getComputedStyle(el).borderLeftWidth,blur:getComputedStyle(el,single?'::before':null).backdropFilter}),dogs===1);if(dogs===1)assert.equal(panel.border,'0px');assert.equal(panel.blur,'blur(18px) saturate(1.35)');
+  await page.evaluate(()=>{state.data.dogs[0].sex='female';renderDog();});
   for(const status of ['active','queued']){
    await page.evaluate(status=>{state.data.passes=[{id:1,dog_id:1,dog_ids:[1,2],total_entries:10,used_entries:status==='queued'?0:6,status,valid_until:'2099-12-31'}];renderPassSummary();renderDog();},status);
-   assert(await page.locator('#designTicket').isVisible());assert((await page.locator('#designTicket').textContent()).includes('10'));assert.equal(await page.locator('.design-paws>span').count(),10);
+   assert(await page.locator('#designTicket').isVisible());assert((await page.locator('#designTicket').textContent()).includes('10'));assert.equal(await page.locator('.design-paws>span').count(),10);const divider=await page.locator('.design-paws').evaluate(el=>({style:getComputedStyle(el).borderTopStyle,width:getComputedStyle(el).borderTopWidth}));assert.equal(divider.style,'dashed');assert.equal(divider.width,'2px');if(width===390&&status==='active')await page.screenshot({path:'/tmp/glass-v369-pass-active-'+dogs+'.png'});
   }
   assert(await page.locator('#customerInboxV363').isVisible(),'inbox remains visible after pass changes');
   await page.waitForTimeout(80);if(width===390)await page.screenshot({path:'/tmp/liquid-v364-overview-'+dogs+'.png'});
   await page.evaluate(()=>{state.data.passes=[];renderPassSummary();renderDog();state.data.dogs[0].name='Alexandriana Veľmi dlhé meno';renderDog();});assert.equal(await page.locator('#designTicket').count(),0);
-  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'long name no horizontal overflow');
-  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2099-01-01'});bratislavaToday=()=> '2099-01-01';state.data.availability={days:Array.from({length:15},(_,i)=>({date:'2099-01-'+String(5+i+Math.floor(i/5)*2).padStart(2,'0'),available:8,capacity:10,occupied:2,bookings_open:true,dogs:[]}))};window.openBookingPickerV37();});await page.waitForTimeout(100);
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'long name no horizontal overflow');if(dogs===1){const p=await page.locator('#bookingDogAvatar').boundingBox(),i=await page.locator('.dog-overview-content').boundingBox();assert(Math.abs(p.height-i.height)<1,'long name keeps matching panel heights');}
+  await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2099-01-01'});bratislavaToday=()=> '2099-01-01';state.data.availability={days:Array.from({length:15},(_,i)=>({date:'2099-01-'+String(5+i+Math.floor(i/5)*2).padStart(2,'0'),available:8,capacity:10,occupied:2,bookings_open:true,dogs:[]}))};});await page.locator('#navBookAddV220').click();await page.waitForTimeout(100);
   assert.equal(await page.locator('#designCapacityLegend').count(),0);assert(await page.locator('#designMyBookings').isVisible());assert(await page.locator('#bookingPickerDaysV37').isVisible());assert.equal(await page.locator('#bookingPickerV37').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(245, 177, 124)');
+  assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'reservation rail stable');assert((await page.locator('.booking-picker-week-v127').first().evaluate(el=>parseFloat(getComputedStyle(el).paddingTop)))>=10);
   const bounds=await page.locator('#bookingPickerDaysV37').evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth}));assert(bounds.scroll<=bounds.width+1);
   await page.waitForTimeout(80);if(width===390)await page.screenshot({path:'/tmp/liquid-v364-reservations-'+dogs+'.png'});
   await page.evaluate(()=>window.closeBookingPickerV305());
@@ -52,5 +65,5 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwr
   const fallback=await page.locator('#designNearest').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).backdropFilter}));assert.equal(fallback.blur,'none');assert.equal(fallback.bg,'rgb(255, 249, 243)');
   await cdp.send('Emulation.setEmulatedMedia',{features:[]});await page.evaluate(()=>{for(const sheet of document.styleSheets){for(let i=sheet.cssRules.length-1;i>=0;i--){const r=sheet.cssRules[i];if(r instanceof CSSSupportsRule&&r.cssText.includes('--liquid-surface-v364'))sheet.deleteRule(i);}}});const unsupported=await page.locator('#designNearest').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).backdropFilter}));assert.equal(unsupported.blur,'none');assert.equal(unsupported.bg,'rgb(255, 249, 243)');
   assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav);assert.deepEqual(errors,[]);console.log('PASS Liquid browser 1/2 sex/long name/no single/active+queued/75%+header/calendar/fallback/nav',dogs,width);await context.close();await browser.close();
- }}finally{await browser.close();}
+ }}finally{await browser?.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});
