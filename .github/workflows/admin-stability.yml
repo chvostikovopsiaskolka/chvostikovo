@@ -96,6 +96,7 @@ jobs:
           node tests/customer-design.cjs
           node tests/customer-surface-v361.cjs
           node tests/customer-magnetic-board-v362.cjs
+          node tests/customer-read-recovery-v367.cjs
           node tests/customer-session-startup-v357.cjs
           node tests/customer-guide-v358.cjs
           node tests/customer-guide-db-v358.cjs
