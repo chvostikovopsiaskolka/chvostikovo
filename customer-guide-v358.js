@@ -40,7 +40,7 @@
     document.body.append(root);
     $('guideSkipV358').onclick=()=>finish('skipped');
     $('guideBackV358').onclick=()=>{if(tour?.step>0)void step(tour.step-1);};
-    $('guideNextV358').onclick=()=>{if(!tour)return;if(tour.step===-1){void record('started');void step(0);}else if(tour.step<4)void step(tour.step+1);else finish('completed');};
+    $('guideNextV358').onclick=()=>{if(!tour)return;if(tour.step===-1){void record('started');void step(0);}else if(tour.step<5)void step(tour.step+1);else finish('completed');};
     root.addEventListener('keydown',e=>{
       if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish('skipped');}
       if(e.key!=='Tab')return;
@@ -54,14 +54,21 @@
   function navigation(tab){
     window.closeBookingPickerV305?.();switchTab(tab);
   }
-  function cleanDemo(){ $('guideDemoReservationV358')?.remove();$('guideDemoFrameV358')?.remove(); }
+  function cleanDemo(){ $('guideDemoReservationV358')?.remove();$('guidePickerPreviewV360')?.remove();document.querySelectorAll('[data-guide-stashed-v360]').forEach(n=>n.removeAttribute('data-guide-stashed-v360')); }
   function sample(){
-    const card=document.createElement('div');card.id='guideDemoReservationV358';card.className='guide-demo';
-    card.innerHTML='<span class="guide-demo-label">Ukážka rezervácie · neodosiela sa</span><div class="guide-demo-head"><strong>Ukážková návšteva</strong><span>Schválená ✓</span></div><p>Taxi do škôlky a domov</p><button type="button" tabindex="-1">Upraviť</button>';
-    const host=$('designMyBookings');
-    if(host&&pickerOpen())host.prepend(card);
-    else{const frame=document.createElement('div');frame.id='guideDemoFrameV358';frame.append(card);document.body.append(frame);}
-    return card;
+    const markup=window.customerGuidePreviewV360?.(),host=$('designMyBookings');if(!markup||!host)return null;
+    host.querySelectorAll('.reserved-empty-v37,#bookingPickerSmartDaysV199').forEach(n=>n.setAttribute('data-guide-stashed-v360',''));
+    const frame=document.createElement('div');frame.id='guideDemoReservationV358';frame.inert=true;
+    frame.innerHTML='<p class="guide-demo-label">Ukážka rezervácie</p>'+markup.reservation;
+    window.customerGuideReservationPresentationV360?.(frame);host.append(frame);return frame;
+  }
+  function calendarSample(){
+    const markup=window.customerGuidePreviewV360?.(),picker=$('bookingPickerV37');if(!markup||!picker)return null;
+    picker.querySelector('.booking-picker-card-v37')?.setAttribute('data-guide-stashed-v360','');
+    const frame=document.createElement('section');frame.id='guidePickerPreviewV360';frame.className='booking-picker-card-v37 guide-picker-preview-v360';frame.inert=true;
+    frame.innerHTML='<div class="booking-picker-days-v37 guide-preview-calendar">'+markup.calendar+'</div><div class="booking-picker-taxi-title-v37">Vybraté dni ↓</div><div class="booking-picker-taxi-by-day-v91 design-selected-days">'+markup.selected+'</div><button type="button" class="btn full booking-picker-submit-v37">Rezervovať 2 dni</button>';
+    frame.querySelectorAll('.booking-day-v37').forEach(button=>{button.dataset.capacityLevel='free';const span=button.querySelector('span');if(span){const dot=document.createElement('i');dot.className='design-capacity-dot';dot.setAttribute('aria-hidden','true');span.prepend(dot);}});
+    picker.append(frame);return frame;
   }
   function union(nodes){
     const rects=nodes.filter(Boolean).map(n=>n.getBoundingClientRect()).filter(r=>r.width&&r.height);
@@ -75,6 +82,7 @@
     card.style.left=Math.max(10,(width-Math.min(width-20,390))/2)+'px';card.style.width=Math.min(width-20,390)+'px';card.style.maxHeight=Math.max(140,height-28)+'px';
     if(tour.step===-1){spot.hidden=true;root.classList.add('guide-welcome');card.style.top=Math.max(14,(height-card.offsetHeight)/2)+'px';return;}
     root.classList.remove('guide-welcome');
+    const preview=$('guidePickerPreviewV360');if(preview)preview.style.setProperty('max-height',Math.max(120,height-card.offsetHeight-32)+'px','important');
     const rect=union(tour.targets||[]);if(!rect){spot.hidden=true;card.style.top='20px';return;}
     spot.hidden=false;
     const top=Math.max(8,Math.min(rect.top-6,height-66)),bottom=Math.max(top+36,Math.min(rect.bottom+6,height-8));
@@ -86,41 +94,43 @@
   }
   async function step(index){
     if(!tour||account()!==tour.id)return abort();
-    const current=++epoch;tour.step=index;cleanDemo();
+    const current=++epoch;tour.step=index;cleanDemo();shell().classList.toggle('guide-calendar-step',index===4);
     shell().querySelector('.guide-top').append($('guideSkipV358'));
-    const titles=['Váš psík v Prehľade','Vstupy a vaše návštevy','Prihlásenie do škôlky','Rezervácie a taxi','Všetko ostatné v Menu'];
+    const titles=['Váš psík v Prehľade','Vstupy, rezervácie a nástenka','Prihlásenie do škôlky','Vaše rezervácie','Výber dní a taxi','Všetko ostatné v Menu'];
     const texts=[
       'Ťuknutím na profil otvoríte údaje a fotografiu psíka. Pri očkovaniach nájdete ich platnosť, pri grafe počet návštev. Pri zapnutých upozorneniach pripomenieme končiace očkovanie 14 a 7 dní vopred.',
-      'Tu vidíte permanentku a jej platnosť alebo jednorazový vstup. Pod ňou nájdete svoje rezervácie. Tlačidlom Upraviť sa dostanete k možnostiam rezervácie. Nižšie na nástenke nájdete novinky zo škôlky.',
-      'Oranžovým tlačidlom otvoríte rezervácie. Vyberiete dostupné dni na dva týždne dopredu a podľa potreby pridáte taxi. Pri dvoch psíkoch vyberiete jedného alebo oboch.',
-      'V kalendári vyberáte dni. Pri vytvorenej rezervácii nájdete stav schválenia a tlačidlo Upraviť: podľa dostupných možností zmeníte taxi alebo zrušíte návštevu. Pri zmene termínu zrušíte pôvodný a vyberiete nový.',
+      'Ak máte zakúpenú permanentku, tu uvidíte jej platnosť a počet využitých vstupov. Pod ňou nájdete svoje rezervácie a možnosť Upraviť. Na nástenke sú oznamy a novinky zo škôlky.',
+      'Oranžovým tlačidlom otvoríte rezervácie. Vyberiete dostupné dni na dva týždne dopredu a podľa potreby pridáte taxi.',
+      'Tu nájdete vytvorené rezervácie a stav schválenia. Podľa dostupných možností pridáte alebo upravíte taxi či zrušíte návštevu. Ak chcete zmeniť termín, zrušíte pôvodný a vyberiete nový.',
+      'Ukážka: vyberte jeden alebo viac dní z dvoch týždňov. Pri každom môžete pridať taxi. Výber odošlete tlačidlom Rezervovať.',
       'V Menu nájdete údaje psíka, očkovania, svoje kontakty aj správy pre škôlku. V Nastaveniach si môžete tohto sprievodcu kedykoľvek zopakovať. Pripravujeme aj rozšírenú žiacku knižku a odmeny.'
     ];
     const next=$('guideNextV358');next.disabled=true;
-    if(index===4)navigation('menu');
-    else if(index===3){navigation('booking');if((state.data?.dogs||[]).every(d=>window.customerVaccinationsCompleteV96?.(d)))window.openBookingPickerV37?.();}
+    if(index===5)navigation('menu');
+    else if(index===3||index===4){navigation('booking');if((state.data?.dogs||[]).every(d=>window.customerVaccinationsCompleteV96?.(d)))window.openBookingPickerV37?.();}
     else navigation('booking');
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     if(!tour||current!==epoch)return;
     if(index===0)tour.targets=[$('bookingDogProfile')];
-    if(index===1)tour.targets=[$('designTicket'),$('designNearest')];
+    if(index===1)tour.targets=[$('designTicket'),$('designNearest'),$('customerBulletinV229')];
     if(index===2)tour.targets=[$('navBookAddV220')];
     if(index===3){const existing=$('designMyBookings')?.querySelector('.reserved-day-card-v37');tour.targets=[existing||sample()];}
-    if(index===4)tour.targets=[$('menuDogGroup'),$('menuContact'),$('menuSettingsGroup')];
+    if(index===4)tour.targets=[calendarSample()];
+    if(index===5)tour.targets=[$('menuDogGroup'),$('menuContact'),$('menuSettingsGroup')];
     const target=tour.targets.find(Boolean);
-    if(index!==2&&target)target.scrollIntoView({block:'start',behavior:'instant'});
+    if(index!==2&&index!==4&&target)target.scrollIntoView({block:'start',behavior:'instant'});
     $('guideTitleV358').textContent=titles[index];$('guideTextV358').textContent=texts[index];
-    $('guideProgressV358').textContent=(index+1)+' z 5';$('guideBackV358').hidden=index===0;
-    next.textContent=index===4?'Dokončiť':'Pokračovať';next.disabled=false;position();next.focus({preventScroll:true});
+    $('guideProgressV358').textContent=(index+1)+' z 6';$('guideBackV358').hidden=index===0;
+    next.textContent=index===5?'Dokončiť':'Pokračovať';next.disabled=false;position();next.focus({preventScroll:true});
   }
   function begin(manual=false){
     if(tour||!account()||!state.data?.dogs?.length||otherModal())return;
     if(!manual&&!ready())return;
     const root=shell();tour={id:account(),step:-1,targets:[],tab:state.activeTab,scroll:window.scrollY,focus:document.activeElement,picker:pickerOpen()};
-    root.classList.remove('hidden');document.documentElement.classList.add('customer-guide-open');
+    root.classList.remove('hidden','guide-calendar-step');document.documentElement.classList.add('customer-guide-open');
     $('guideProgressV358').textContent='';$('guideTitleV358').textContent='Sprievodca appkou';
     root.querySelector('.guide-card').append($('guideSkipV358'));
-    $('guideTextV358').textContent='Ukážeme vám Prehľad, rezervácie a Menu v piatich krátkych krokoch. Sprievodcu môžete kedykoľvek preskočiť.';
+    $('guideTextV358').textContent='Ukážeme vám Prehľad, rezervácie a Menu v šiestich krátkych krokoch. Sprievodcu môžete kedykoľvek preskočiť.';
     $('guideBackV358').hidden=true;$('guideNextV358').textContent='Spustiť sprievodcu';$('guideNextV358').disabled=false;
     position();$('guideNextV358').focus({preventScroll:true});
   }

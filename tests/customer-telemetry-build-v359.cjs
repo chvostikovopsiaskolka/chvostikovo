@@ -12,7 +12,7 @@ const packed=process.env.PACKED_CHROMIUM?require(process.env.PACKED_CHROMIUM):nu
  assert(!await page.locator('#authView').isVisible());assert(await page.evaluate(()=>!!localStorage.getItem('chvostikovo_customer_session')));
  await page.evaluate(()=>window.ChvoTelemetry.flush());const packets=await page.evaluate(()=>window.packets);assert(packets.length);
  const packet=packets.find(p=>p.p_payload.resourceSpans[0].scopeSpans[0].spans.some(s=>s.attributes.some(a=>a.key==='operation'&&a.value.stringValue==='edge/customer-portal-api')));assert(packet,'actual failed bootstrap exported');
- const version=packet.p_payload.resourceSpans[0].resource.attributes.find(a=>a.key==='service.version').value.stringValue;assert.match(version,/^[0-9]{8}-[a-z0-9-]{1,70}$/);assert.match(version,/v359$/);
+ const version=packet.p_payload.resourceSpans[0].resource.attributes.find(a=>a.key==='service.version').value.stringValue;assert.match(version,/^[0-9]{8}-[a-z0-9-]{1,70}$/);assert(version.endsWith(await page.evaluate(()=>APP_BUILD)));
  for(const secret of ['SYNTHETIC_TOKEN','SYNTHETIC_REFRESH','synthetic-owner','Could not query'])assert(!JSON.stringify(packet).includes(secret));
  fs.writeFileSync('/tmp/customer-v359-telemetry-packet.json',JSON.stringify(packet.p_payload));await page.screenshot({path:'/tmp/customer-v359-recovery.png'});
  await page.evaluate(()=>{window.failData=false});await page.locator('#startupRetryV359').click();await page.locator('#startupRecoveryV359').waitFor({state:'hidden'});assert(!await page.locator('#authView').isVisible());assert.deepEqual(errors,[]);
