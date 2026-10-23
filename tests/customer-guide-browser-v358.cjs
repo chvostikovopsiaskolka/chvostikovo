@@ -22,21 +22,23 @@ const packed=process.env.PACKED_CHROMIUM?require(process.env.PACKED_CHROMIUM):nu
   assert(skip.y>=next.y+next.height,'welcome skip below primary action');assert(skip.height>=44);
   assert.equal(await page.locator('#guideSkipV358').evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
   assert(welcome.y>=0&&welcome.y+welcome.height<=(width===844?390:844)+1);
-  if(width===390&&count===1)await page.screenshot({path:'/tmp/guide-v359-welcome.png'});
+  if(width===390&&count===1)await page.screenshot({path:'/tmp/guide-v360-welcome.png'});
   const nav=await page.locator('.bottom-nav').boundingBox();
+  if(count===1){const distance=await page.evaluate(()=>document.getElementById('designDogName').getBoundingClientRect().x-document.getElementById('bookingVaccinationStatus').querySelector('.overview-icon').getBoundingClientRect().x);assert(Math.abs(distance-6)<1,'name has six-pixel breathing room: '+distance);}
   await page.locator('#guideNextV358').click();
-  for(let i=0;i<5;i++){
-   await page.waitForFunction(n=>document.getElementById('guideProgressV358').textContent===(n+1)+' z 5'&&!document.getElementById('guideNextV358').disabled,i);
+  for(let i=0;i<6;i++){
+   await page.waitForFunction(n=>document.getElementById('guideProgressV358').textContent===(n+1)+' z 6'&&!document.getElementById('guideNextV358').disabled,i);
    const card=await page.locator('.guide-card').boundingBox(),spot=await page.locator('.guide-spot').boundingBox();
    assert(card.x>=0&&card.x+card.width<=width+1&&card.y>=0&&card.y+card.height<=(width===844?390:844)+1,JSON.stringify({width,count,i,card}));
    assert(spot&&spot.width>40&&spot.height>20,JSON.stringify({width,count,i,spot}));
+   if(i===4){assert.equal(await page.locator('#guidePickerPreviewV360 .booking-day-v37.selected').count(),2);assert.equal(await page.locator('#guidePickerPreviewV360 [data-taxi-mode]').count(),3);assert(await page.locator('#guidePickerPreviewV360 .booking-picker-submit-v37').isVisible());const bounds=await page.locator('#guidePickerPreviewV360').evaluate(el=>({inner:el.scrollWidth,width:el.clientWidth,height:el.clientHeight,scrollHeight:el.scrollHeight}));assert(bounds.inner<=bounds.width+1,'preview horizontal overflow '+JSON.stringify(bounds));if(width>=360&&width<=430)assert(bounds.scrollHeight<=bounds.height+1,'all preview controls visible together '+JSON.stringify(bounds));}
    assert(await page.locator('#guideNextV358').isVisible());assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-   if(width===390&&count===1)await page.screenshot({path:'/tmp/guide-v358-step-'+(i+1)+'.png'});
+   if(width===390&&count===1)await page.screenshot({path:'/tmp/guide-v360-step-'+(i+1)+'.png'});
    await page.locator('#guideNextV358').click();
   }
   await page.locator('#customerGuideV358').waitFor({state:'hidden'});
   const restored=await page.locator('.bottom-nav').boundingBox();assert.equal(restored.x,nav.x);assert.equal(restored.y,nav.y);assert.equal(restored.width,nav.width);assert.equal(restored.height,nav.height);
   assert.equal(await page.locator('#guideDemoReservationV358').count(),0);assert.deepEqual(errors,[]);
-  console.log('PASS browser five steps/spotlight/card/nav/cleanup',count,width);await context.close();await browser.close();
+  console.log('PASS browser six steps/spotlight/card/nav/cleanup',count,width);await context.close();await browser.close();
  }}finally{await browser?.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});

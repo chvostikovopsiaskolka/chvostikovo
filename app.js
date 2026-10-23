@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v359';
-const APP_VERSION='2.0.34';
+const APP_BUILD='v360';
+const APP_VERSION='2.0.35';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -2566,7 +2566,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   const pairTaxiV254=new Map();
   function pickerDogsV254(){return pairBookingV254?(state.data?.dogs||[]).slice(0,2):[selectedDog()].filter(Boolean)}
   function pickerTaxiV254(date,dogId){return pairBookingV254?pairTaxiV254.get(date+'|'+dogId)||'none':selectedTaxiByDateV91.get(date)||'none'}
-  function taxiChoicesV254(date){return pickerDogsV254().map(d=>'<div class="booking-taxi-dog-v254">'+(pairBookingV254?'<strong>'+esc(d.name)+'</strong>':'')+'<div class="booking-taxi-inline-choices-v201">'+[['pickup','Vyzdvihnutie','5 €'],['pickup_dropoff','Vyzdvihnutie aj dovoz','10 €'],['dropoff','Dovoz domov','5 €']].map(([id,label,price])=>'<button type="button" class="'+(pickerTaxiV254(date,d.id)===id?'active':'')+'" data-taxi-mode="'+id+'" data-taxi-date="'+date+'" data-taxi-dog="'+d.id+'">'+label+' · '+price+'</button>').join('')+'</div></div>').join('')}
+  function taxiChoicesV254(date,previewDog=null){return (previewDog?[previewDog]:pickerDogsV254()).map(d=>'<div class="booking-taxi-dog-v254">'+(!previewDog&&pairBookingV254?'<strong>'+esc(d.name)+'</strong>':'')+'<div class="booking-taxi-inline-choices-v201">'+[['pickup','Vyzdvihnutie','5 €'],['pickup_dropoff','Vyzdvihnutie aj dovoz','10 €'],['dropoff','Dovoz domov','5 €']].map(([id,label,price])=>'<button type="button" class="'+(!previewDog&&pickerTaxiV254(date,d.id)===id?'active':'')+'" data-taxi-mode="'+id+'" data-taxi-date="'+date+'" data-taxi-dog="'+d.id+'">'+label+' · '+price+'</button>').join('')+'</div></div>').join('')}
+  function selectedDaysMarkupV360(dates,expandedDate,previewDog=null){return dates.map(date=>`<div class="design-selected-day"><strong>${esc(skDay(date))} ${esc(skDate(date))}</strong><button type="button" class="design-taxi-disclosure" data-taxi-toggle="${date}" aria-expanded="${expandedDate===date}"><span>Potrebujete odvoz? 🚕${(!previewDog&&pickerDogsV254().some(d=>pickerTaxiV254(date,d.id)!=='none'))?' · Vybrané':''}</span><span aria-hidden="true">${expandedDate===date?'⌃':'⌄'}</span></button>${expandedDate===date?`<div class="booking-taxi-inline-v201">${taxiChoicesV254(date,previewDog)}</div>`:''}</div>`).join('')}
   function sharedItemsV260(dates=[...selectedDatesV37].sort()){
     return dates.flatMap(date=>pickerDogsV254().map(d=>({dog_id:Number(d.id),date,taxi_mode:pickerTaxiV254(date,d.id),billing_choice:'auto'})));
   }
@@ -2985,6 +2986,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
   window.customerDesignHasWeekBooking=hasWeekBookingV337;
   let futureWeekExpandedV235=false;
+  function bookingDayMarkupV360(d,{selected=false,existing=false,lateContact=false,full=false,disabled=false,ownStatus='',closed=false,stateText='',taxiToggle=''}={}){return `<div class="booking-day-wrap-v201"><button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" data-contact="${lateContact?'true':'false'}" data-full="${full?'true':'false'}" data-own-status="${ownStatus}" ${disabled?'disabled':''}><small>${closed?'❌':esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${closed?'Zatvorené':esc(stateText)}</span></button>${taxiToggle}</div>`;}
   function renderPickerV37(){
     ensurePickerV37();
     const dog=selectedDog(),dogs=state.data?.dogs||[],days=state.data?.availability?.days||[];
@@ -3022,7 +3024,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         const ownStatus=existing?(ownBookings.some(r=>r.status==='pending')?'pending':'approved'):'';
         const stateText=existing?(ownStatus==='pending'?'Čaká':'Schválené'):past?'Uplynulo':closed?'Zatvorené':full?'Plno':deadlineClosed?'Napíšte nám':`${Math.max(0,Number(d.available)||0)} voľné`;
         const taxiToggle=selected?`<button type="button" class="booking-day-taxi-toggle-v201" data-taxi-toggle="${d.date}" aria-expanded="${expandedTaxiDateV201===d.date?'true':'false'}" data-taxi-selected="${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'true':'false'}" aria-pressed="${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'true':'false'}" aria-label="Taxi na ${esc(skDay(d.date))} ${esc(skDate(d.date))}">🚕${(selectedTaxiByDateV91.get(d.date)||'none')!=='none'?'<span class="taxi-indicator-v201"></span>':''}</button>`:'';
-        return `<div class="booking-day-wrap-v201"><button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" data-contact="${lateContact?'true':'false'}" data-full="${full?'true':'false'}" data-own-status="${ownStatus}" ${disabled?'disabled':''}><small>${closed?'❌':esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${closed?'Zatvorené':esc(stateText)}</span></button>${taxiToggle}</div>`;
+        return bookingDayMarkupV360(d,{selected,existing,lateContact,full,disabled,ownStatus,closed,stateText,taxiToggle});
       }).join('')}</div>${expandedTaxiDateV201&&week.some(d=>d.date===expandedTaxiDateV201)&&selectedDatesV37.has(expandedTaxiDateV201)?`<div class="booking-taxi-inline-v201" data-taxi-date="${expandedTaxiDateV201}"><p class="booking-taxi-inline-title-v201">🚕 Taxi · ${esc(skDay(expandedTaxiDateV201))} ${esc(skDate(expandedTaxiDateV201))}</p>${taxiChoicesV254(expandedTaxiDateV201)}</div>`:' '}</div></div>`);
     }
     $('bookingPickerDaysV37').innerHTML=groups.join('');
@@ -3055,7 +3057,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     // Selected dates own the optional taxi disclosure; calendar tiles only select dates.
     $('bookingPickerTaxiSectionV91')?.classList.toggle('hidden',!selectedDatesV37.size);
     $('bookingPickerTaxiByDayV91').classList.add('design-selected-days');
-    $('bookingPickerTaxiByDayV91').innerHTML=[...selectedDatesV37].sort().map(date=>`<div class="design-selected-day"><strong>${esc(skDay(date))} ${esc(skDate(date))}</strong><button type="button" class="design-taxi-disclosure" data-taxi-toggle="${date}" aria-expanded="${expandedTaxiDateV201===date}"><span>Potrebujete odvoz? 🚕${pickerDogsV254().some(d=>pickerTaxiV254(date,d.id)!=='none')?' · Vybrané':''}</span><span aria-hidden="true">${expandedTaxiDateV201===date?'⌃':'⌄'}</span></button>${expandedTaxiDateV201===date?`<div class="booking-taxi-inline-v201">${taxiChoicesV254(date)}</div>`:''}</div>`).join('');
+    $('bookingPickerTaxiByDayV91').innerHTML=selectedDaysMarkupV360([...selectedDatesV37].sort(),expandedTaxiDateV201);
     $('bookingPickerDaysV37').querySelectorAll('[data-taxi-toggle],.booking-taxi-inline-v201').forEach(node=>node.remove());
     $('bookingPickerTaxiByDayV91').querySelectorAll('[data-taxi-toggle]').forEach(button=>button.addEventListener('click',()=>{
       const date=button.dataset.taxiToggle;
@@ -3180,14 +3182,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const h=document.querySelector('#bookingTab .booking-section-head h2');if(h)h.textContent='Moje rezervácie';
   };
 
-  customerRenderers.days=()=>{
-    const root=$('weekDays'),dog=selectedDog();if(!root)return;
-    const days=state.data?.availability?.days||[],byDate=new Map(days.map(d=>[d.date,d]));
-    const clock=overviewClock(),multi=(state.data?.dogs||[]).length===2,items=futureItems().filter(r=>dog&&(multi||Number(r.dog_id)===Number(dog.id))&&overviewDayVisible(r.reservation_date,clock));
-    if(!items.length){root.innerHTML='<div class="card reserved-empty-v37"><svg class="reserved-empty-icon" aria-hidden="true"><use href="#ci-calendar"/></svg><span>Zatiaľ nemáte rezervovaný žiadny deň.</span><small>Kliknite na tlačidlo vyššie a vyberte si termín<br>pre vášho psíka.</small></div>';return}
-    // Maintain the open roster while realtime updates replace the day cards.
-    const openRosterDatesV209=new Set([...root.querySelectorAll('.reserved-day-card-v37[data-date]')].filter(card=>card.querySelector('.reserved-roster-v37[open]')).map(card=>card.dataset.date));
-    root.innerHTML=items.map(r=>{
+  function reservationCardMarkupV360(r,byDate,multi){
       const dog=(state.data?.dogs||[]).find(d=>Number(d.id)===Number(r.dog_id))||selectedDog();
       const day=byDate.get(r.reservation_date)||{},taxi=taxiLabel(r.taxi_mode),pending=r.status==='pending';
       const reservation=(state.data?.reservations||[]).find(x=>Number(x.id)===Number(r.reservation_id));
@@ -3203,13 +3198,31 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const detail=taxiPending?`<div class="reserved-day-detail-v37">${taxiPending}</div>`:'';
       const approvedRoster=`<div class="reserved-day-meta-v37">${passState}${pending?'':bookingRosterV37(day,dog,'')}</div>`;
       return `<div class="card reserved-day-card-v37" data-date="${esc(r.reservation_date)}"><div class="reserved-day-top-v37"><div class="reserved-day-date-v37"><strong>${multi?esc(dog.name)+' · ':''}${esc(skDay(r.reservation_date))}</strong><span>${esc(skDate(r.reservation_date))}</span></div><div class="reserved-day-controls-v37"><span class="pill ${pending?'pending':'approved'}">${pending?'Čaká na schválenie':'Schválená'}</span></div></div><div class="design-reservation-actions">${taxiEdit}${cancel}</div>${approvedRoster}${detail}${sharedNote}${note}</div>`;
-    }).join('');
+
+  }
+  customerRenderers.days=()=>{
+    const root=$('weekDays'),dog=selectedDog();if(!root)return;
+    const days=state.data?.availability?.days||[],byDate=new Map(days.map(d=>[d.date,d]));
+    const clock=overviewClock(),multi=(state.data?.dogs||[]).length===2,items=futureItems().filter(r=>dog&&(multi||Number(r.dog_id)===Number(dog.id))&&overviewDayVisible(r.reservation_date,clock));
+    if(!items.length){root.innerHTML='<div class="card reserved-empty-v37"><svg class="reserved-empty-icon" aria-hidden="true"><use href="#ci-calendar"/></svg><span>Zatiaľ nemáte rezervovaný žiadny deň.</span><small>Kliknite na tlačidlo vyššie a vyberte si termín<br>pre vášho psíka.</small></div>';return}
+    // Maintain the open roster while realtime updates replace the day cards.
+    const openRosterDatesV209=new Set([...root.querySelectorAll('.reserved-day-card-v37[data-date]')].filter(card=>card.querySelector('.reserved-roster-v37[open]')).map(card=>card.dataset.date));
+    root.innerHTML=items.map(r=>reservationCardMarkupV360(r,byDate,multi)).join('');
     root.querySelectorAll('.reserved-day-card-v37[data-date]').forEach(card=>{
       if(openRosterDatesV209.has(card.dataset.date))card.querySelector('.reserved-roster-v37')?.setAttribute('open','');
     });
     root.querySelectorAll('.cancel-booking-v37').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();cancelBooking(btn)}));
 
     root.querySelectorAll('[data-taxi-request]').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();openTaxiEditV201(btn.dataset.taxiRequest,btn.dataset.taxiReservation)}));
+  };
+
+  window.customerGuidePreviewV360=()=>{
+    const dog=selectedDog();if(!dog)return null;
+    const now=new Date(bratislavaToday()+'T12:00:00Z'),offset=(8-now.getUTCDay())%7||7;now.setUTCDate(now.getUTCDate()+offset);
+    const dateAt=n=>{const d=new Date(now);d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
+    const dates=[dateAt(1),dateAt(9)],row={id:-360,reservation_id:-360,dog_id:dog.id,reservation_date:dateAt(2),status:'approved',taxi_mode:'none',can_manage:true,entry_type:'single'};
+    const weeks=[0,7].map((start,i)=>'<div class="booking-picker-week-v127"><div class="booking-picker-week-label-v127">'+['Tento týždeň','Budúci týždeň'][i]+'</div><div class="booking-picker-future-body-v235"><div class="booking-picker-week-days-v127">'+Array.from({length:5},(_,n)=>{const date=dateAt(start+n);return bookingDayMarkupV360({date},{selected:dates.includes(date),stateText:'3/10'})}).join('')+'</div></div></div>').join('');
+    return {reservation:reservationCardMarkupV360(row,new Map(),(state.data?.dogs||[]).length===2),calendar:weeks,selected:selectedDaysMarkupV360(dates,dates[0],dog),dates};
   };
 
   function startV37(){

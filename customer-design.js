@@ -199,8 +199,12 @@
     const nav=byId('navBooking');if(nav){const label=nav.querySelector(':scope > span:last-child');if(label)label.textContent='Prehľad';}
     ticket();nearest();if(rosterDate){if(approvedForDate(rosterDate))openFriends(rosterDate);else closeModal();}
   }
+  function reservationPresentationV360(root,preview=false){
+    root?.querySelectorAll('.reserved-roster-v37').forEach(details=>{const card=details.closest('[data-date]'),date=card?.dataset.date;if(!date||(!preview&&!approvedForDate(date)))return;const button=document.createElement('button');button.type='button';button.className='design-carousel-friends';button.textContent='Pozrite si kamošov v škôlke ›';if(!preview)button.addEventListener('click',()=>openFriends(date));details.replaceWith(button);});
+  }
+  window.customerGuideReservationPresentationV360=root=>reservationPresentationV360(root,true);
   const originalDays=customerRenderers.days;
-  customerRenderers.days=(...args)=>{const out=originalDays?.(...args);byId('weekDays')?.querySelectorAll('.reserved-roster-v37').forEach(details=>{const card=details.closest('[data-date]'),date=card?.dataset.date;if(!date||!approvedForDate(date))return;const button=document.createElement('button');button.type='button';button.className='design-carousel-friends';button.textContent='Pozrite si kamošov v škôlke ›';button.addEventListener('click',()=>openFriends(date));details.replaceWith(button);});nearest();if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();return out;};
+  customerRenderers.days=(...args)=>{const out=originalDays?.(...args);reservationPresentationV360(byId('weekDays'));nearest();if(!byId('bookingPickerV37')?.classList.contains('hidden'))window.customerDesignPickerRender?.();return out;};
   window.customerDesignPickerRender=()=>{
     const picker=byId('bookingPickerV37'),card=picker?.querySelector('.booking-picker-card-v37');if(!card)return;
     // Resume/bootstrap can advance availability while this page remains open.

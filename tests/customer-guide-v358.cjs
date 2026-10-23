@@ -20,20 +20,21 @@ async function ready(f){await f.run('window.runCustomerOnboardingV75()');await t
  for(const count of [1,2]){
   const f=await fixture(count);try{
    await ready(f);assert(visible(f),'real onboarding completion opens eligible welcome: '+JSON.stringify(f.run(`({ready:window.__customerOnboardingCompleteV75,tab:state.activeTab,loading:document.getElementById('loading')?.className,picker:document.getElementById('bookingPickerV37')?.className,saved:localStorage.getItem('chvo-guide-v358:synthetic-guide'),profile:state.data?.profile,vax:state.data?.dogs.map(d=>customerVaccinationsCompleteV96(d)),modals:[...document.querySelectorAll('[role="dialog"]')].filter(el=>!el.classList.contains('hidden')&&getComputedStyle(el).display!=='none').map(el=>el.id)})`)));
-   const before=f.run('JSON.stringify([state.data.requests,state.data.reservations,state.data.passes,state.data.visits])');
+   const before=f.run('JSON.stringify([state.data.requests,state.data.reservations,state.data.passes,state.data.visits,state.data.availability,state.selectedDogId])');
    click(f,'guideNextV358');await tick(60);
-   for(let i=1;i<=5;i++){
-    assert.equal(f.w.document.getElementById('guideProgressV358').textContent,i+' z 5');
-    if(i===4)assert(f.w.document.getElementById('guideDemoReservationV358'),'empty account uses isolated demo');
+   for(let i=1;i<=6;i++){
+    assert.equal(f.w.document.getElementById('guideProgressV358').textContent,i+' z 6');
+    if(i===4){const demo=f.w.document.getElementById('guideDemoReservationV358');assert(demo,'empty account uses isolated demo');assert(demo.querySelector('.reserved-day-card-v37'));assert(demo.querySelector('.booking-taxi-pencil-v201'));}
+    if(i===5){const demo=f.w.document.getElementById('guidePickerPreviewV360');assert.equal(demo.querySelectorAll('.booking-day-v37.selected').length,2);assert.equal(demo.querySelectorAll('.design-selected-day').length,2);assert.equal(demo.querySelectorAll('[data-taxi-mode]').length,3);assert(demo.textContent.includes('Rezervovať 2 dni'));demo.querySelector('.booking-picker-submit-v37').click();click(f,'guideBackV358');await tick(60);assert(!f.w.document.getElementById('guidePickerPreviewV360'));assert(!f.w.document.querySelector('.booking-picker-card-v37[data-guide-stashed-v360]'));click(f,'guideNextV358');await tick(60);assert(f.w.document.getElementById('guidePickerPreviewV360'));}
     click(f,'guideNextV358');await tick(60);
    }
-   assert(!visible(f));assert(!f.w.document.getElementById('guideDemoReservationV358'));
-   assert.equal(f.run('JSON.stringify([state.data.requests,state.data.reservations,state.data.passes,state.data.visits])'),before);
+   assert(!visible(f));assert(!f.w.document.getElementById('guideDemoReservationV358'));assert(!f.w.document.querySelector('[data-guide-stashed-v360]'));assert(!f.w.document.getElementById('guidePickerPreviewV360'));
+   assert.equal(f.run('JSON.stringify([state.data.requests,state.data.reservations,state.data.passes,state.data.visits,state.data.availability,state.selectedDogId])'),before);
    assert(f.calls.filter(c=>c.method==='POST').every(c=>c.url.includes('portal_record_guide')),'tour never makes operational writes');
    assert.equal(f.run('state.data.profile.intro_guide_result'),'completed');
    f.run('document.dispatchEvent(new Event("customer-onboarding-ready-v358"))');await tick(450);assert(!visible(f));
    click(f,'menuGuideV358');assert(visible(f),'manual replay');click(f,'guideSkipV358');assert(!visible(f));
-   assert.deepEqual(f.errors,[]);console.log('PASS actual 5-step guide, isolated demo, skip/replay/one-time,',count,'dogs');
+   assert.deepEqual(f.errors,[]);console.log('PASS actual 6-step guide, isolated demo, skip/replay/one-time,',count,'dogs');
   }finally{f.w.close()}
  }
  for(const mode of ['existing','vaccines','onboarding','logout']){

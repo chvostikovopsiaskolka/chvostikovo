@@ -16,10 +16,18 @@
 .guide-actions button[hidden]{display:none!important}
 .guide-card button,#menuGuideV358,.guide-demo button{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;cursor:pointer}
 .guide-card button:focus-visible,#menuGuideV358:focus-visible{outline:2px solid #c66a20;outline-offset:3px}
-.guide-demo{box-sizing:border-box;background:#fff;border:1px dashed #e8ad73;border-radius:15px;padding:12px;margin:7px 0 12px;color:#172136;max-width:100%}
-.guide-demo-label{display:block;color:#96512c;font-size:11px;font-weight:750;margin-bottom:9px}
-.guide-demo-head{display:flex;justify-content:space-between;gap:8px;font-size:12px}
-.guide-demo-head>span{color:#177548;font-size:11px}.guide-demo p{font-size:12px;margin:9px 0}
-.guide-demo button{border:1px solid #edcdaa;background:#fff5e9;border-radius:8px;padding:7px 11px;font-weight:750;color:#95612f}
-#guideDemoFrameV358{position:fixed;z-index:30000;left:14px;right:14px;top:max(20px,env(safe-area-inset-top));max-width:440px;margin:auto}
-@media(max-height:480px){.guide-card{padding:10px 14px}.guide-card h2{font-size:17px;margin:1px 0 5px}.guide-card p{font-size:12px;margin-bottom:7px}.guide-top button{min-height:36px}.guide-actions button{min-height:44px}.guide-demo{padding:8px}.guide-demo p{margin:5px 0}}
+[data-guide-stashed-v360]{display:none!important}
+.guide-demo-label{display:block;color:#96512c;font-size:11px;font-weight:750;margin:0 0 8px}
+#guideDemoReservationV358{box-sizing:border-box;width:100%;min-width:0}
+.customer-design #bookingPickerV37.design-reservations-page .guide-picker-preview-v360{position:fixed;top:10px;left:12px;right:12px;width:calc(100% - 24px)!important;max-width:600px!important;min-height:0!important;margin:0 auto!important;padding:10px!important;overflow:auto!important;overscroll-behavior:contain;box-sizing:border-box}
+.guide-preview-calendar{padding:10px 7px;background:#fff6e9;border:1px solid #efceb0;border-radius:18px}
+.guide-picker-preview-v360 .design-selected-days{max-height:none;overflow:visible}
+.guide-picker-preview-v360 .booking-picker-taxi-title-v37{margin:9px 2px 0;font-size:13px;font-weight:850}
+@media(max-height:480px){.guide-card{padding:10px 14px}.guide-card h2{font-size:17px;margin:1px 0 5px}.guide-card p{font-size:12px;margin-bottom:7px}.guide-top button{min-height:36px}.guide-actions button{min-height:44px}}
+
+.guide-calendar-step .guide-card{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"title progress" "body body" "actions actions";column-gap:6px;padding:12px}
+.guide-calendar-step .guide-top{grid-area:progress;gap:5px;font-size:10px}
+.guide-calendar-step .guide-top button{font-size:11px;padding-left:4px}
+.guide-calendar-step .guide-card h2{grid-area:title;font-size:17px;margin:0;align-self:center}
+.guide-calendar-step .guide-card p{grid-area:body;font-size:12px;line-height:1.4;margin:4px 0 10px}
+.guide-calendar-step .guide-actions{grid-area:actions}
