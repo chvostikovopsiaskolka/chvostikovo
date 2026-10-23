@@ -13,9 +13,10 @@ assert(js.includes('text:`Prosíme o rezerváciu miesta do nedele ${parts[2]}. $
 assert(js.includes('reminder.hidden=hasWeekBookingV337(reminder.from,reminder.to)'));
 assert(design.includes('notice.hidden=!nextHeading||!!reminder?.hidden'));
 assert(design.includes("notice?.classList.contains('hidden')"));
-assert.equal(ver.build,'v361');assert.equal(ver.version,'2.0.36');
-assert(js.includes("const APP_BUILD='v361'")&&js.includes("const APP_VERSION='2.0.36'"));
-assert(sw.includes('shell-v361'));
+// Visual v361 invariants persist across later customer releases.
+assert(/^v\\d+$/.test(ver.build)&&Number(ver.build.slice(1))>=361);
+assert(js.includes("const APP_BUILD='"+ver.build+"'")&&js.includes("const APP_VERSION='"+ver.version+"'"));
+assert(sw.includes('shell-'+ver.build));
 assert(!html.includes('?v=v360')&&!sw.includes('?v=v360'));
-assert(html.includes('customer-design.css?v=v361'));
+assert(html.includes('customer-design.css?v='+ver.build));
 console.log('PASS surface v361: deadline logic, scoped depth, accessibility and asset/cache release');
