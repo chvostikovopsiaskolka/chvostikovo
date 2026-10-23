@@ -50,16 +50,17 @@ async function ready(f){await f.run('window.runCustomerOnboardingV75()');await t
  const f=await fixture(1,false);try{
   await ready(f);f.w.noticeRows=[{id:1,title:'Synthetic notice',body:'Article text',active:true,image_path:'synthetic/photo.jpg'},{id:2,title:'Second',body:'Other text',active:true,image_path:'synthetic/other.jpg'}];
   f.run('Date.now=()=>new Date().getTime()+61000;loadAnnouncements()');await tick(30);
-  const buttons=f.w.document.querySelectorAll('.customer-bulletin-note-v229');assert.equal(buttons.length,2);
+  click(f,'customerAnnouncementsV363');await tick(30);
+  const buttons=f.w.document.querySelectorAll('.customer-bulletin-history-row-v229');assert.equal(buttons.length,2);
   buttons[0].click();assert.match(f.w.document.getElementById('customerBulletinArticleV229').textContent,/Načítavam oznam/);assert(!f.w.document.querySelector('.customer-bulletin-article-v229'));
   const photo=f.images.find(img=>img.src.includes('synthetic/photo'));photo.onload();await tick(30);
   assert.equal(f.w.document.querySelector('.customer-bulletin-article-v229').textContent,'Article text');assert.equal(f.w.document.querySelector('.customer-bulletin-photo-v229'),photo);
   photo.click();assert(!f.w.document.getElementById('customerBulletinZoomV229').classList.contains('hidden'));
-  f.w.document.querySelector('#customerBulletinZoomV229 .customer-bulletin-close-v229').click();
+  f.w.document.querySelector('#customerBulletinZoomV229 .customer-bulletin-close-v229').click();await tick(30);
   buttons[1].click();f.images.find(img=>img.src.includes('synthetic/other')).onerror();await tick(30);
   assert.equal(f.w.document.querySelector('.customer-bulletin-article-v229').textContent,'Other text');assert(f.w.document.querySelector('.customer-bulletin-photo-error-v358'));
-  f.w.document.querySelector('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();
-  buttons[1].click();f.w.document.querySelector('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();
+  f.w.document.querySelector('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();await tick(30);
+  buttons[1].click();f.w.document.querySelector('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();await tick(30);
   f.images.filter(img=>img.src.includes('synthetic/other')).at(-1).onload();await tick(30);assert(f.w.document.getElementById('customerBulletinArticleV229').classList.contains('hidden'));
   buttons[0].click();await tick(30);assert(f.w.document.querySelector('.customer-bulletin-photo-v229'));
   f.run('clearSession()');assert(f.w.document.getElementById('customerBulletinArticleV229').classList.contains('hidden'));

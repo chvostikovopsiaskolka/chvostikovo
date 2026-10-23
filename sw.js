@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-v362';
+const CACHE='chvostikovo-portal-shell-v363';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/customer-guide-v358.js?v=v362','/customer-guide-v358.css?v=v362','/telemetry-v345.js?v=v362','/loading-motion.js?v=v362','/loading-design.css?v=v362','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v362','/customer-design.css?v=v362','/dog-choice-fab-v276.css?v=v362','/dual-dog-overview-v246.js?v=v362','/dual-dog-overview-v246.css?v=v362','/','/terms-pdf.js?v=v362','/terms-pdf-font.js?v=v362','/styles.css?v=v362','/bulletin-photo-v243.css?v=v362','/app.js?v=v362','/back-swipe.js?v=v362'];
+const SHELL=['/customer-guide-v358.js?v=v363','/customer-guide-v358.css?v=v363','/telemetry-v345.js?v=v363','/loading-motion.js?v=v363','/loading-design.css?v=v363','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v363','/customer-design.css?v=v363','/dog-choice-fab-v276.css?v=v363','/dual-dog-overview-v246.js?v=v363','/dual-dog-overview-v246.css?v=v363','/','/terms-pdf.js?v=v363','/terms-pdf-font.js?v=v363','/styles.css?v=v363','/bulletin-photo-v243.css?v=v363','/app.js?v=v363','/back-swipe.js?v=v363'];
 
 function withPortalCsp(response){
   if(!response)return response;
@@ -130,7 +130,8 @@ self.addEventListener('push',event=>{
 });
 self.addEventListener('notificationclick',event=>{
   event.notification.close();
-  const target=new URL(event.notification.data?.url||'/',self.location.origin).href;
+  let target=new URL('/',self.location.origin).href;
+  try{const u=new URL(event.notification.data?.url||'/',self.location.origin);if(u.origin===self.location.origin&&['/','/index.html'].includes(u.pathname))target=u.href;}catch(_){}
   event.waitUntil((async()=>{
     const wins=await self.clients.matchAll({type:'window',includeUncontrolled:true});
     const existing=wins.find(client=>client.url.startsWith(self.location.origin));

@@ -33,6 +33,7 @@
     if(customerActive()){
       if(visible(document.getElementById('loading')))return null;
       const top=visibleLayers().at(-1);
+      if(top?.id.startsWith('customerBulletin'))return closeButton(top)?()=>closeButton(top).click():null;
       if(top)return closeButton(top)?customerOverview:null;
       return state.activeTab==='booking'?null:customerOverview;
     }
