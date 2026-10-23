@@ -52,6 +52,12 @@
     return null;
   }
   let start=null;
+  // Reuse the very same guarded close actions for Android system back.
+  document.addEventListener('chvo-native-back',event=>{
+    const action=backAction();
+    if(action){event.preventDefault();action();return;}
+    if(visibleLayers().length||visible(document.getElementById('loading')))event.preventDefault();
+  });
   document.addEventListener('touchstart',e=>{
     start=null;if(e.touches.length!==1)return;
     const t=e.touches[0];if(e.target.closest('input,textarea,select,[contenteditable="true"],canvas,[data-swipe-ignore],#photoCropModal,#photoActionsModalV89,.vacc-proof-viewer-v104'))return;
