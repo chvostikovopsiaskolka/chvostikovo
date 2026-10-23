@@ -46,7 +46,7 @@ function createCompactChatLayout(modal,card,thread,input){
  },{passive:false});
  return {
   prepare(){preferred=0;baselineHeight=0;stickToBottom=true;layout(true)},
-  open(){layout(true);resizeInput();latest()},
+  open(){layout(true);resizeInput();latest();schedule()},
   close(){input.blur();if(frame)cancelAnimationFrame(frame);frame=0;modal.style.removeProperty('--chat-card-top');modal.style.removeProperty('--chat-card-height')},
   resizeInput,latest
  };
@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v369';
-const APP_VERSION='2.0.44';
+const APP_BUILD='v370';
+const APP_VERSION='2.0.45';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -690,6 +690,7 @@ function ensureDogFormInModalV51(){
 }
 
 let dogEditorKeyboardBoundV211=false,dogEditorResizeFrameV211=0;
+let dogEditorPageScrollV370=0,dogEditorReturnFocusV370=null;
 function clearDogEditorViewportV211(){
  const modal=$('dogDetailsModal');if(!modal)return;
  modal.style.removeProperty('--dog-editor-height-v211');
@@ -905,6 +906,7 @@ function openDogDetails(mode='details',mandatory=false){
   renderDetailsPhoto(dog);
   dogDetailsSnapshotV96=dogFormSnapshotV96();
   const editor=$('dogDetailsModal');
+  if(editor.classList.contains('hidden')){dogEditorPageScrollV370=window.scrollY;dogEditorReturnFocusV370=document.activeElement;}
   editor.classList.remove('hidden');document.documentElement.classList.add('dog-details-open');
   editor.scrollTop=0;
   const editorCard=editor.querySelector('.dog-details-card');if(editorCard)editorCard.scrollTop=0;
@@ -961,7 +963,10 @@ function closeDogDetails(force=false){
   if(!force&&dogDetailsMandatoryV96)return false;
   if(!force&&dogFormSnapshotV96()!==dogDetailsSnapshotV96&&!confirm('Máte neuložené zmeny. Zavrieť bez uloženia?'))return false;
   rememberVaccineDraftV287();$('dogDetailsModal').classList.add('hidden');document.documentElement.classList.remove('dog-details-open');
-  clearDogEditorViewportV211();
+  if($('dogDetailsModal').contains(document.activeElement))document.activeElement.blur();
+  if(dogEditorResizeFrameV211)cancelAnimationFrame(dogEditorResizeFrameV211);dogEditorResizeFrameV211=0;
+  clearDogEditorViewportV211();repairCustomerScrollV60();
+  requestAnimationFrame(()=>{if(!$('dogDetailsModal').classList.contains('hidden'))return;window.scrollTo(0,dogEditorPageScrollV370);if(dogEditorReturnFocusV370?.isConnected)dogEditorReturnFocusV370.focus({preventScroll:true});});
   dogDetailsMandatoryV96=false;dogDetailsModeV96='details';return true;
 }
 function renderDogProfilePrompt(){for(const id of ['bookingNotice','dogStatus']){const root=$(id);if(root)root.innerHTML=''}}
@@ -1793,7 +1798,7 @@ function openMenuSettings(section){window.openCustomerSettingsV102?.(section)}
 $('menuNotifications').addEventListener('click',()=>openMenuSettings('notifications'));
 $('menuLegal').addEventListener('click',()=>openMenuSettings('legal'));
 $('menuLogout').addEventListener('click',()=>$('logoutBtn').click());
-$('menuBuildVersion').textContent=APP_BUILD;
+$('menuBuildVersion').textContent='Beta '+APP_VERSION;
 $('menuCopyrightYear').textContent=String(new Date().getFullYear());
 window.addEventListener('pageshow',()=>setTimeout(repairCustomerScrollV60,0));
 window.visualViewport?.addEventListener('resize',()=>requestAnimationFrame(repairCustomerScrollV60));
@@ -3610,8 +3615,8 @@ async function togglePushDirect(btn){
     $('notificationPopup')?.classList.add('hidden');
     supportPageScrollY=window.scrollY||document.scrollingElement?.scrollTop||0;
     document.documentElement.style.setProperty('--support-chat-lock-top',(-supportPageScrollY)+'px');
-    document.documentElement.classList.add('support-chat-open-v52');
     supportLayout.prepare();
+    document.documentElement.classList.add('support-chat-open-v52');
     $('appView').inert=true;
     $('supportChatModalV52').classList.remove('hidden');
     window.customerDesignChatOpened?.();
