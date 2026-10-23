@@ -14,7 +14,7 @@ assert(js.includes('reminder.hidden=hasWeekBookingV337(reminder.from,reminder.to
 assert(design.includes('notice.hidden=!nextHeading||!!reminder?.hidden'));
 assert(design.includes("notice?.classList.contains('hidden')"));
 // Visual v361 invariants persist across later customer releases.
-assert(/^v\\d+$/.test(ver.build)&&Number(ver.build.slice(1))>=361);
+assert(/^v[0-9]+$/.test(ver.build)&&Number(ver.build.slice(1))>=361);
 assert(js.includes("const APP_BUILD='"+ver.build+"'")&&js.includes("const APP_VERSION='"+ver.version+"'"));
 assert(sw.includes('shell-'+ver.build));
 assert(!html.includes('?v=v360')&&!sw.includes('?v=v360'));
