@@ -11,12 +11,13 @@ async function fixture(saved,{mode='ok',defer=false,remember=true}={}){
  const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>{if(!/Could not parse CSS|Not implemented:.*(scroll|canvas|navigation)/.test(e.message))errors.push(e.message)});
  const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'https://app.chvostikovo.sk/',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:vc}),w=dom.window,ctx=dom.getInternalVMContext(),run=s=>vm.runInContext(s,ctx);
  (remember?w.localStorage:w.sessionStorage).setItem(key,JSON.stringify(saved));
+ w.bootstrapFailure=mode==='api503';
  let release;const barrier=defer?new Promise(r=>release=r):Promise.resolve();const calls=[],sockets=[];
  const response=(body,status=200)=>({ok:status<400,status,json:async()=>body,text:async()=>JSON.stringify(body),headers:{get:()=>''}});
  Object.assign(w,{matchMedia:()=>({matches:false,addEventListener(){},removeEventListener(){}}),scrollTo(){},ResizeObserver:class{observe(){}disconnect(){}},IntersectionObserver:class{observe(){}disconnect(){}},WebSocket:class{static OPEN=1;static CONNECTING=0;constructor(){this.readyState=0;this.sent=[];sockets.push(this)}send(body){this.sent.push(JSON.parse(body))}close(){this.readyState=3}},fetch:async(url,opts={})=>{
   const path=String(url);calls.push({path,headers:opts.headers||{},method:opts.method||'GET',body:opts.body});
   if(path.includes('grant_type=refresh_token')){await barrier;if(mode==='network')throw new TypeError('offline');if(mode==='503')return response({message:'refresh token temporarily unavailable'},503);if(mode==='revoked')return response({code:'refresh_token_not_found',message:'Invalid refresh token'},400);return response(session('new',3600));}
-  if(path.includes('/customer-portal-api')){if(mode==='fallback401'&&opts.headers.Authorization!=='Bearer new')return response({error:'Prihlásenie vypršalo.'},401);return response(data);}
+  if(path.includes('/customer-portal-api')){if(w.bootstrapFailure)return response({error:'Could not query the database for the schema cache. Retrying.'},503);if(mode==='fallback401'&&opts.headers.Authorization!=='Bearer new')return response({error:'Prihlásenie vypršalo.'},401);return response(data);}
   if(path.includes('/admin-push'))return response({ok:true});
   if(path.includes('portal_terms_documents'))return response([{version:'synthetic-terms',document_hash:'hash'}]);
   return response([]);
@@ -57,6 +58,25 @@ async function waitBoot(f){await tick(850);assert.deepEqual(f.errors,[]);}
   try{await tick(80);assert.equal(protectedCalls(f).length,0);const stored=f.w.localStorage.getItem(key);assert.equal(!!stored,mode!=='revoked',mode+' session persistence');assert.equal(refreshes(f).length,1);assert.deepEqual(f.errors,[]);}finally{f.w.close()}
  }
  console.log('PASS offline/503 preserve saved login; revoked refresh returns to login without protected requests');
+ for(const recovery of ['button','resume']){
+  f=await fixture(session(),{mode:'api503'});
+  try{
+   await tick(100);assert(f.w.localStorage.getItem(key));assert.equal(refreshes(f).length,1);
+   assert(f.w.document.getElementById('authView').classList.contains('hidden'),'transient API error does not show login');
+   assert(!f.w.document.getElementById('startupRecoveryV359').classList.contains('hidden'));
+   assert.equal(f.calls.filter(c=>c.path.endsWith('/customer-portal-api')).length,1,'no polling/retry loop');
+   f.w.bootstrapFailure=false;
+   if(recovery==='button')f.w.document.getElementById('startupRetryV359').click();
+   else await f.run('lastResumeRefresh=0;refreshOnResume()');
+   await waitBoot(f);assert(!f.w.document.getElementById('appView').classList.contains('hidden'));
+   assert(f.w.document.getElementById('startupRecoveryV359').classList.contains('hidden'));
+   assert.equal(refreshes(f).length,1,'recovery reuses valid refreshed session');
+   assert.equal(f.calls.filter(c=>c.path.endsWith('/customer-portal-api')).length,2);
+   f.w.bootstrapFailure=true;await f.run('bootstrap(false)');assert(!f.w.document.getElementById('appView').classList.contains('hidden'),'already visible app stays visible');
+   assert(f.w.document.getElementById('authView').classList.contains('hidden'));assert(f.w.localStorage.getItem(key));
+  }finally{f.w.close()}
+ }
+ console.log('PASS schema-cache503 preserves session, shows recovery without login, button/resume recover, visible app retained');
  for(const change of ['logout','newlogin']){
   f=await fixture(session(),{defer:true});
   try{f.run(change==='logout'?'clearSession()':"saveSession({access_token:'other-login',refresh_token:'other-refresh',expires_at:9999999999,user:{id:'other-owner'}},false)");f.release();await tick(100);assert.equal(f.run('state.session?.access_token'),change==='logout'?undefined:'other-login');assert.equal(protectedCalls(f).length,0,'old startup must not issue new-account calls');}finally{f.w.close()}

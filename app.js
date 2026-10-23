@@ -83,8 +83,10 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v358';
-const APP_VERSION='2.0.33';
+const APP_BUILD='v359';
+const APP_VERSION='2.0.34';
+// Keep the collector's dated build contract while the menu displays APP_BUILD.
+const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -134,7 +136,7 @@ const SESSION_KEY='chvostikovo_customer_session';
 const PASSWORD_MIN_MESSAGE='Minimálne 8 znakov, malé a veľké písmeno a aspoň 1 číslica.';
 const PASSWORD_STRONG_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 let state={data:null,session:null,storage:localStorage,selectedDogId:null,activeTab:'booking',pushChecked:false,pushEnabled:false};
-try{window.ChvoTelemetry?.init({app:'customer',build:APP_BUILD,base:SUPABASE_URL,key:SUPABASE_KEY,getToken:()=>state.session?.access_token||'',isReady:()=>document.getElementById('loading')?.classList.contains('hidden')===true,getSurface:()=>{
+try{window.ChvoTelemetry?.init({app:'customer',build:APP_TELEMETRY_BUILD,base:SUPABASE_URL,key:SUPABASE_KEY,getToken:()=>state.session?.access_token||'',isReady:()=>document.getElementById('loading')?.classList.contains('hidden')===true,getSurface:()=>{
  if(!document.getElementById('supportChatModalV52')?.classList.contains('hidden'))return 'messages';
  if(!document.getElementById('dogDetailsModal')?.classList.contains('hidden'))return 'dog-details';
  if(!document.getElementById('bookingPickerV37')?.classList.contains('hidden'))return 'reservations';
@@ -240,8 +242,13 @@ async function sharedQuoteResponseV265(opts){
 async function apiCore(body=null,retry=true){const session=await ensureCustomerSessionV357();if(!state.session)throw new Error('Najprv sa prihláste.');const token=state.session.access_token,opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const quote=body?.action==='shared_booking_v257'&&!body.operation_id;const result=quote?await sharedQuoteResponseV265(opts):null;const r=result?result.response:await fetch(API,opts);const txt=result?result.text:await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(!state.session||state.session.user?.id!==session.user?.id)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(data.code==='account_blocked'){clearSession();showAuth('login');authMessage('error',data.error);throw new Error(data.error)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
 let customerApiMutationsInFlight=0;
 async function api(body=null,retry=true){if(body)customerApiMutationsInFlight++;try{const result=await apiCore(body,retry);runCustomerHooks('afterApi',body,result);return result}catch(error){try{window.ChvoTelemetry?.capture('operation.error',{operation:'customer-operation',action:body?.action,error})}catch(_){}throw error}finally{if(body)customerApiMutationsInFlight--;scheduleCustomerUpdateApply()}}
-function showAuth(mode='login'){$('supportChatBtnV52')?.classList.add('hidden');$('supportChatModalV52')?.classList.add('hidden');document.documentElement.classList.remove('support-chat-open-v52');document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').inert=false;$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
-function showApp(){$('authView').classList.add('hidden');$('authView').inert=true;$('appView').classList.remove('hidden')}
+function showAuth(mode='login'){$('startupRecoveryV359')?.classList.add('hidden');if($('startupRecoveryV359'))$('startupRecoveryV359').inert=true;$('supportChatBtnV52')?.classList.add('hidden');$('supportChatModalV52')?.classList.add('hidden');document.documentElement.classList.remove('support-chat-open-v52');document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').inert=false;$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
+function showApp(){$('startupRecoveryV359')?.classList.add('hidden');if($('startupRecoveryV359'))$('startupRecoveryV359').inert=true;$('authView').classList.add('hidden');$('authView').inert=true;$('appView').classList.remove('hidden')}
+function showStartupRecoveryV359(){
+  $('authView').classList.add('hidden');$('authView').inert=true;
+  const view=$('startupRecoveryV359');view.inert=false;view.classList.remove('hidden');
+  $('startupRetryV359').onclick=async()=>{const button=$('startupRetryV359');if(button.disabled||!state.session)return;button.disabled=true;try{await bootstrap()}finally{button.disabled=false}};
+}
 function pluralDogs(n){return n===1?'1 prihlásený psík':n+' prihlásených psíkov'}
 function taxiLabel(mode){return ({pickup:'🚕 Vyzdvihnutie',dropoff:'🚕 Dovoz domov',pickup_dropoff:'🚕 Vyzdvihnutie aj dovoz domov'})[mode]||''}
 function selectedDog(){const dogs=state.data?.dogs||[];return dogs.find(d=>Number(d.id)===Number(state.selectedDogId))||dogs[0]||null}
@@ -324,7 +331,10 @@ function bootstrapCore(showSpinner=true){
         sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
         setTimeout(()=>document.getElementById('installHelpLink')?.click(),220);
       }
-    }else{if($('appView')?.classList.contains('hidden'))showAuth('login');toast(message||'Aplikáciu sa nepodarilo načítať.');}
+    }else if(state.session){
+      if($('appView')?.classList.contains('hidden'))showStartupRecoveryV359();
+      else toast('Údaje sa nepodarilo obnoviť. Skúste to znova o chvíľu.');
+    }else{showAuth('login');toast('Aplikáciu sa nepodarilo načítať. Skúste to znova.');}
   }})();
   bootstrapInFlight=run.finally(()=>{if(showSpinner)loading(false);bootstrapInFlight=null});
   return bootstrapInFlight;
@@ -1773,6 +1783,7 @@ async function refreshOnResume(){
   lastResumeRefresh=now;
   try{await ensureCustomerSessionV357()}catch(error){if(error.sessionInvalid){clearSession();showAuth('login');authMessage('error','Prihlásenie vypršalo. Prihláste sa znova.')}return;}
   if(document.visibilityState==='hidden')return;
+  if(!$('startupRecoveryV359')?.classList.contains('hidden')){await bootstrap();return;}
   startCustomerLive();
   queueCustomerSync('all',40);
 }
