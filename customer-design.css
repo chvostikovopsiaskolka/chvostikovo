@@ -514,3 +514,93 @@ html.customer-bulletin-open-v229 body{position:fixed!important;top:var(--bulleti
 
 #customerBulletinHistoryV229 .customer-bulletin-head-v229 h2{display:flex;align-items:center;gap:9px}
 #customerBulletinHistoryV229 .customer-bulletin-head-v229 h2 svg{width:22px;height:22px;fill:none;stroke:#c65d16;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* v364: Chvostíkovo Liquid surfaces. Default is opaque; blur is a small enhancement. */
+.customer-design{
+ --liquid-surface-v364:#fff9f3;
+ --liquid-panel-v364:#fff9fc;
+ --liquid-shadow-v364:inset 0 1px 0 #fff,0 9px 22px #8b431b26,0 2px 5px #8b431b12;
+ --liquid-orange-v364:#f5b17c;
+ --liquid-paws-v364:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='430' viewBox='0 0 300 430'%3E%3Cdefs%3E%3Cg id='p' fill='white'%3E%3Cellipse cx='16' cy='25' rx='12' ry='10'/%3E%3Cellipse cx='0' cy='11' rx='5' ry='7' transform='rotate(-25 0 11)'/%3E%3Cellipse cx='12' cy='3' rx='5' ry='7'/%3E%3Cellipse cx='25' cy='5' rx='5' ry='7' transform='rotate(15 25 5)'/%3E%3Cellipse cx='35' cy='15' rx='5' ry='7' transform='rotate(30 35 15)'/%3E%3C/g%3E%3C/defs%3E%3Cg opacity='.38'%3E%3Cuse href='%23p' transform='translate(27 34) rotate(-22) scale(1.15)'/%3E%3Cuse href='%23p' transform='translate(217 23) rotate(22) scale(.65)'/%3E%3Cuse href='%23p' transform='translate(145 100) rotate(-15) scale(.8)'/%3E%3Cuse href='%23p' transform='translate(260 169) rotate(30) scale(1.35)'/%3E%3Cuse href='%23p' transform='translate(29 200) rotate(-25) scale(.6)'/%3E%3Cuse href='%23p' transform='translate(112 255) rotate(25) scale(1.4)'/%3E%3Cuse href='%23p' transform='translate(244 318) rotate(-22) scale(.7)'/%3E%3Cuse href='%23p' transform='translate(22 363) rotate(-15) scale(1)'/%3E%3Cuse href='%23p' transform='translate(170 406) rotate(30) scale(.5)'/%3E%3C/g%3E%3C/svg%3E");
+}
+html.customer-liquid-v364{background:#f5b17c!important}
+html.customer-liquid-v364 body,
+.customer-design #bookingPickerV37.design-reservations-page{
+ background-color:var(--liquid-orange-v364)!important;
+ background-image:var(--liquid-paws-v364),linear-gradient(155deg,#f9c092 0%,#f5ac75 54%,#f8be91 100%)!important;
+ background-size:300px 430px,100% 100%!important;background-repeat:repeat,no-repeat!important;
+}
+html.customer-liquid-v364 #appView,html.customer-liquid-v364 #bookingTab{background:transparent!important}
+html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #bookingTab::after{display:none!important}
+.customer-design #bookingTab #bookingDogProfile{
+ border:3px solid #fff!important;
+ background:#f9deed!important;
+ box-shadow:inset 0 1px 0 #ffffffb3,0 10px 24px #9a4e3824,0 2px 5px #8b431b12!important;
+}
+.customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241){background:#dcecfb!important}
+.customer-design #bookingTab #bookingDogProfile::after{opacity:.22!important}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content{
+ border-left:0!important;padding-left:12px!important;isolation:isolate;
+}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before{
+ content:'';position:absolute;inset:-2px -2px -2px -10px;z-index:-1;pointer-events:none;
+ border:1px solid #ffffffd9;border-radius:16px;background:var(--liquid-panel-v364);
+ box-shadow:inset 0 1px 0 #ffffffd9,0 4px 12px #9b59851a;
+}
+.customer-design #bookingTab #bookingDogName,
+.customer-design #bookingTab .dual-dog-name-v241{
+ color:#a52e70!important;-webkit-text-stroke:0 transparent!important;text-shadow:none!important;
+}
+.customer-design #bookingTab #bookingDogProfile[data-design-sex=male] #bookingDogName,
+.customer-design #bookingTab .male-v241 .dual-dog-name-v241{color:#24659d!important}
+.customer-design #bookingTab .dual-dog-choices-v241::after{display:none!important}
+.customer-design #bookingTab .dual-dog-panel-v254{background:#f9deed;border-radius:16px}
+.customer-design #bookingTab .dual-dog-panel-v254.male-v241{background:#dcecfb}
+.customer-design #bookingTab .dual-dog-panel-v254+.dual-dog-panel-v254{border-left:0;padding-left:13px}
+.customer-design #bookingTab .dual-dog-info-v254{
+ border:1px solid #ffffffd9;border-radius:14px;background:var(--liquid-panel-v364);
+ box-shadow:inset 0 1px 0 #fff,0 4px 12px #9b59851a;
+}
+.customer-design #designTicket.design-ticket,
+.customer-design #designNearest.design-nearest,
+.customer-design #customerInboxV363>button,
+.customer-design #bookingPickerV37 #designMyBookings,
+.customer-design #bookingPickerV37 #bookingPickerDaysV37,
+.customer-design #bookingPickerV37 .design-selected-day{
+ background:var(--liquid-surface-v364)!important;
+ border:1px solid #ffffffd9!important;
+ box-shadow:var(--liquid-shadow-v364)!important;
+}
+.customer-design #designNearest .design-visit-card:not(.design-visit-empty),
+.customer-design #bookingPickerV37 #designMyBookings .reserved-day-card-v37,
+.customer-design #bookingPickerV37 #bookingPickerSmartDaysV199{background:#ffffffb8!important;border-color:#ffffffd9!important}
+.customer-design #bookingPickerV37 .booking-picker-week-v127{
+ background:#ffffff69;border:1px solid #ffffffb3;border-radius:15px;padding:2px 6px 9px;
+ box-shadow:inset 0 1px 0 #ffffffd9,0 3px 9px #9a4e3810;
+}
+.customer-design #customerInboxV363>button{color:#a7460b;border-radius:14px}
+.customer-design #designNearest .design-empty-reminder,
+.customer-design #bookingPickerV37 #designReservationNotice:not([hidden]){color:#195d39!important}
+#customerBulletinArticleV229 .customer-bulletin-head-v229{align-items:center}
+#customerBulletinArticleV229 .customer-bulletin-head-v229 h2{flex:1;min-width:0;margin:0}
+#customerBulletinArticleV229 .customer-bulletin-close-v229{align-self:center;margin:0}
+@supports ((backdrop-filter:blur(4px)) or (-webkit-backdrop-filter:blur(4px))){
+ .customer-design{--liquid-surface-v364:rgba(255,255,255,.85);--liquid-panel-v364:rgba(255,255,255,.68)}
+ .customer-design #designTicket.design-ticket,.customer-design #designNearest.design-nearest,
+ .customer-design #customerInboxV363>button,.customer-design #bookingPickerV37 #designMyBookings,
+ .customer-design #bookingPickerV37 #bookingPickerDaysV37,
+ .customer-design #bookingTab .dual-dog-info-v254,
+ .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before{
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+ }
+}
+@media(prefers-reduced-transparency:reduce){
+ .customer-design{--liquid-surface-v364:#fff9f3;--liquid-panel-v364:#fff9fc}
+ .customer-design #designTicket.design-ticket,.customer-design #designNearest.design-nearest,
+ .customer-design #customerInboxV363>button,.customer-design #bookingPickerV37 #designMyBookings,
+ .customer-design #bookingPickerV37 #bookingPickerDaysV37,
+ .customer-design #bookingTab .dual-dog-info-v254,
+ .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before{
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+ }
+}
