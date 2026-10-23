@@ -1,0 +1,9 @@
+# Customer v371 / Beta 2.0.46
+
+Baseline761ea2b9061cdaca8f9d87676b93e31c7de830ff/treeb0694e84c72b91577454d64070a6fcaa74d926b1. Immutable backup customer-before-clear-surfaces-v371-20261023. Rollback selectively after any later release; no data rollback.
+
+Section cards now use the same clear white alpha .72 and no backdrop filter as the bottom rail. Previous8px blur removed the visible paw shapes even though surfaces were technically transparent. Single dog outer sex tint is alpha .24 rather than opaque; dual dog outer surface transparent, individual pink/blue panels .24. White information panels stay .72. Existing background paws can show through; no extra decorative paws added. Existing unsupported/reduced-transparency opaque fallback retained, including sex colours.
+
+Instagram/Facebook links, previous-week smart selection, week containers and free/disabled day tiles receive subtle1px inset boundaries. Insets do not alter box sizing; selected/booked/full/limited state backgrounds remain unchanged. No nav dimensions, geometry, scroll/modal/chat logic, photos, business logic, API or data changes. Only app build/version metadata changes outside CSS.
+
+Validation: mandatory release-contract and full stability CI on final source; browser matrix320/360/390/430/844x390/1280 for1/2dogs including transparent section/nav parity, sex tint, inner boundaries, profile, pass, reservations, editor close+touch-scroll, chat keyboard, fallback. Rendered PNG pixel comparisons with the actual existing paw backgrounds enabled/disabled confirm transmission through Menu, profile information (single and dual), pass, own-booking overview and calendar. Existing inbox and guide browser regressions required. Physical iOS/Android remains unverified until user checks. No operational writes or test messages/push.

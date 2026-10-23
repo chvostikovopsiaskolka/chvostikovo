@@ -593,11 +593,23 @@ html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #booking
  .customer-design #bookingPickerV37 #bookingPickerDaysV37,
  .customer-design #bookingTab .dual-dog-info-v254,
  .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before{
-  -webkit-backdrop-filter:blur(8px) saturate(110%);backdrop-filter:blur(8px) saturate(110%);
+  -webkit-backdrop-filter:none;backdrop-filter:none;
  }
+}
+/* v371: expose the existing page paws through the profile, like the nav. */
+@supports ((backdrop-filter:blur(4px)) or (-webkit-backdrop-filter:blur(4px))){
+ .customer-design #bookingTab #bookingDogProfile{background:rgba(249,222,237,.24)!important}
+ .customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241){background:rgba(220,236,251,.24)!important}
+ .customer-design #bookingTab #bookingDogProfile.dual-dog-v241{background:transparent!important}
+ .customer-design #bookingTab .dual-dog-panel-v254{background:rgba(249,222,237,.24)!important}
+ .customer-design #bookingTab .dual-dog-panel-v254.male-v241{background:rgba(220,236,251,.24)!important}
 }
 @media(prefers-reduced-transparency:reduce){
  .customer-design{--liquid-surface-v364:#fff9f3;--liquid-panel-v364:#fff9fc}
+ .customer-design #bookingTab #bookingDogProfile{background:#f9deed!important}
+ .customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241){background:#dcecfb!important}
+ .customer-design #bookingTab .dual-dog-panel-v254{background:#f9deed!important}
+ .customer-design #bookingTab .dual-dog-panel-v254.male-v241{background:#dcecfb!important}
  .customer-design #menuTab .customer-menu-group,.customer-design #menuTab .customer-social-v223,
  .customer-design .bottom-nav,.customer-design #bookingPickerV37 .design-selected-day,
  .customer-design #designTicket.design-ticket,.customer-design #designNearest.design-nearest,
@@ -686,3 +698,11 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 #dogDetailsModal:not(.hidden){position:fixed!important;left:0!important;right:0!important;width:100%!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:column!important}
 #dogDetailsModal .dog-details-card{flex:0 1 auto!important;min-height:0!important;overflow-y:auto!important}
 #supportChatModalV52{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+
+/* v371: visible inner boundaries without changing tile sizing or state colours. */
+.customer-design #menuTab .customer-social-links-v223 a{box-shadow:inset 0 0 0 1px #9b4d2540!important}
+.customer-design #menuTab .customer-social-links-v223 .customer-social-instagram-v223{box-shadow:inset 0 0 0 1px #a52e7052!important}
+.customer-design #menuTab .customer-social-links-v223 .customer-social-facebook-v223{box-shadow:inset 0 0 0 1px #24659d52!important}
+.customer-design #bookingPickerV37 #bookingPickerSmartDaysV199{box-shadow:inset 0 0 0 1px #9b4d2540!important}
+.customer-design #bookingPickerV37 .booking-picker-week-v127{box-shadow:inset 0 0 0 1px #9b4d2538,0 3px 9px #9a4e3810!important}
+.customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37:not(.selected):not(.booked):not([data-capacity-level=full]):not([data-capacity-level=limited]){box-shadow:inset 0 0 0 1px #64708440,0 2px 5px #342b3b08!important}
