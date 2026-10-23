@@ -24,7 +24,7 @@ const packed=process.env.PACKED_CHROMIUM?require(process.env.PACKED_CHROMIUM):nu
   assert(welcome.y>=0&&welcome.y+welcome.height<=(width===844?390:844)+1);
   if(width===390&&count===1)await page.screenshot({path:'/tmp/guide-v360-welcome.png'});
   const nav=await page.locator('.bottom-nav').boundingBox();
-  if(count===1){const distance=await page.evaluate(()=>document.getElementById('designDogName').getBoundingClientRect().x-document.getElementById('bookingVaccinationStatus').querySelector('.overview-icon').getBoundingClientRect().x);assert(Math.abs(distance-6)<1,'name has six-pixel breathing room: '+distance);}
+  if(count===1){const contained=await page.evaluate(()=>{const p=document.querySelector('.dog-overview-content').getBoundingClientRect();return ['designDogName','bookingVaccinationStatus','bookingVisitCount','bookingGradebook'].every(id=>{const b=document.getElementById(id).getBoundingClientRect();return b.left>=p.left&&b.right<=p.right+1;});});assert(contained,'guide profile controls remain inside their panel');}
   await page.locator('#guideNextV358').click();
   for(let i=0;i<6;i++){
    await page.waitForFunction(n=>document.getElementById('guideProgressV358').textContent===(n+1)+' z 6'&&!document.getElementById('guideNextV358').disabled,i);
