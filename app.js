@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='20261023-name-edge-v356';
-const APP_VERSION='2.0.31';
+const APP_BUILD='v357';
+const APP_VERSION='2.0.32';
 const CUSTOMER_IOS_V171=(()=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -144,7 +144,9 @@ try{window.ChvoTelemetry?.init({app:'customer',build:APP_BUILD,base:SUPABASE_URL
 let customerTermsReadV146=null;
 let bootstrapInFlight=null,lastResumeRefresh=0;
 async function readActiveCustomerTermsV146(force=false){
-  const session=state.session;if(!session)return null;
+  if(!state.session)return null;
+  if(customerSessionNeedsRefreshV357()||sessionRefreshInFlight)await ensureCustomerSessionV357();
+  const session=state.session;
   const key=String(session.user?.id||'')+'|'+session.access_token;
   const current=customerTermsReadV146;
   if(current?.key===key&&(current.pending||(!force&&Date.now()-current.at<60000)))return current.promise;
@@ -187,15 +189,40 @@ function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
 function saveSession(s,remember=true){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));state.session=s}
 function clearSession(){void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
-async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok){const error=new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');error.code=data?.code||data?.error_code||'';if(error.code==='user_banned'||/user is banned/i.test(error.message))error.message='Prístup k účtu je zablokovaný. Kontaktujte Chvostíkovo.';throw error}return data}
-let sessionRefreshInFlight=null;
+async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok){const error=new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');error.status=r.status;error.code=data?.code||data?.error_code||'';if(error.code==='user_banned'||/user is banned/i.test(error.message))error.message='Prístup k účtu je zablokovaný. Kontaktujte Chvostíkovo.';throw error}return data}
+let sessionRefreshInFlight=null,sessionRefreshOwnerV357=null;
+function customerSessionNeedsRefreshV357(session=state.session){
+  if(!session?.access_token)return false;
+  let expires=Number(session.expires_at);
+  if(!Number.isFinite(expires)||expires<=0){
+    try{const payload=session.access_token.split('.')[1];expires=Number(JSON.parse(atob(payload.replace(/-/g,'+').replace(/_/g,'/'))).exp)}catch(_){expires=0}
+  }
+  // Local scheduling only. The server still validates the token and account.
+  return expires>0&&expires*1000<=Date.now()+60000;
+}
+async function ensureCustomerSessionV357(){
+  const session=state.session;
+  if(!session?.access_token)throw Object.assign(new Error('Najprv sa prihláste.'),{sessionInvalid:true});
+  if(sessionRefreshInFlight&&sessionRefreshOwnerV357===session)await sessionRefreshInFlight;
+  else if(customerSessionNeedsRefreshV357(session))await refreshSession();
+  if(!state.session||state.session.user?.id!==session.user?.id)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});
+  return state.session;
+}
 async function refreshSession(){
-  if(sessionRefreshInFlight)return sessionRefreshInFlight;
-  if(!state.session?.refresh_token)throw new Error('Prihlásenie vypršalo.');
-  const token=state.session.refresh_token,remember=state.storage===localStorage;
-  const run=(async()=>{const s=await authFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:token})});saveSession(s,remember);startCustomerLive(true);return s})();
-  sessionRefreshInFlight=run;
-  try{return await run}finally{sessionRefreshInFlight=null}
+  const previous=state.session;
+  if(sessionRefreshInFlight&&sessionRefreshOwnerV357===previous)return sessionRefreshInFlight;
+  if(!previous?.refresh_token)throw Object.assign(new Error('Prihlásenie vypršalo.'),{sessionInvalid:true});
+  const token=previous.refresh_token,remember=state.storage===localStorage;
+  const run=(async()=>{
+    let s;
+    try{s=await authFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:token})})}
+    catch(error){if(state.session!==previous)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});error.sessionInvalid=/^(refresh_token_not_found|refresh_token_already_used|invalid_grant|user_banned)$/.test(error.code||'')||error.status===400||error.status===401;error.authRefreshTransient=!error.sessionInvalid;throw error}
+    if(state.session!==previous)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});
+    if(!s?.access_token||!s?.refresh_token)throw Object.assign(new Error('Server nevrátil úplnú reláciu. Skúste znova.'),{authRefreshTransient:true});
+    saveSession(s,remember);startCustomerLive(true);return s;
+  })();
+  sessionRefreshInFlight=run;sessionRefreshOwnerV357=previous;
+  try{return await run}finally{if(sessionRefreshInFlight===run){sessionRefreshInFlight=null;sessionRefreshOwnerV357=null}}
 }
 // A quote is read-only: retry a broken transport once without repeating a booking write.
 async function sharedQuoteResponseV265(opts){
@@ -210,7 +237,7 @@ async function sharedQuoteResponseV265(opts){
     }finally{clearTimeout(timer)}
   }
 }
-async function apiCore(body=null,retry=true){if(!state.session)throw new Error('Najprv sa prihláste.');const token=state.session.access_token,opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const quote=body?.action==='shared_booking_v257'&&!body.operation_id;const result=quote?await sharedQuoteResponseV265(opts):null;const r=result?result.response:await fetch(API,opts);const txt=result?result.text:await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(data.code==='account_blocked'){clearSession();showAuth('login');authMessage('error',data.error);throw new Error(data.error)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
+async function apiCore(body=null,retry=true){const session=await ensureCustomerSessionV357();if(!state.session)throw new Error('Najprv sa prihláste.');const token=state.session.access_token,opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const quote=body?.action==='shared_booking_v257'&&!body.operation_id;const result=quote?await sharedQuoteResponseV265(opts):null;const r=result?result.response:await fetch(API,opts);const txt=result?result.text:await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(!state.session||state.session.user?.id!==session.user?.id)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(data.code==='account_blocked'){clearSession();showAuth('login');authMessage('error',data.error);throw new Error(data.error)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
 let customerApiMutationsInFlight=0;
 async function api(body=null,retry=true){if(body)customerApiMutationsInFlight++;try{const result=await apiCore(body,retry);runCustomerHooks('afterApi',body,result);return result}catch(error){try{window.ChvoTelemetry?.capture('operation.error',{operation:'customer-operation',action:body?.action,error})}catch(_){}throw error}finally{if(body)customerApiMutationsInFlight--;scheduleCustomerUpdateApply()}}
 function showAuth(mode='login'){$('supportChatBtnV52')?.classList.add('hidden');$('supportChatModalV52')?.classList.add('hidden');document.documentElement.classList.remove('support-chat-open-v52');document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').inert=false;$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
@@ -285,8 +312,9 @@ function bootstrapCore(showSpinner=true){
       if(state.data&&typeof applyPushToggle==='function')applyPushToggle();
     });
   }catch(e){
+    if(e.code==='session_changed')return;
     const message=String(e?.message||'');
-    const staleAuth=/prihl|vypršalo|refresh\s*token|invalid\s+(?:refresh\s+)?token|jwt|token\s+not\s+found|unauthorized/i.test(message);
+    const staleAuth=e.sessionInvalid===true||(!e.authRefreshTransient&&/prihl|vypršalo|refresh\s*token|invalid\s+(?:refresh\s+)?token|jwt|token\s+not\s+found|unauthorized/i.test(message));
     if(staleAuth){
       clearSession();
       showAuth('login');
@@ -414,6 +442,9 @@ function scheduleCustomerReconnect(){if(!state.session||customerLiveReconnect)re
 function stopCustomerLive(){clearInterval(customerLiveHeartbeat);clearTimeout(customerLiveReconnect);customerLiveHeartbeat=customerLiveReconnect=0;if(customerLiveSocket){const socket=customerLiveSocket;customerLiveSocket=null;try{socket.close()}catch(_){}}}
 function startCustomerLive(force=false){
   if(!state.session?.access_token||document.visibilityState==='hidden')return;
+  if(customerSessionNeedsRefreshV357()||(sessionRefreshInFlight&&sessionRefreshOwnerV357===state.session)){
+    void ensureCustomerSessionV357().then(()=>startCustomerLive(force)).catch(()=>{if(!customerSessionNeedsRefreshV357())scheduleCustomerReconnect()});return;
+  }
   if(customerLiveSocket&&!force&&[WebSocket.OPEN,WebSocket.CONNECTING].includes(customerLiveSocket.readyState))return;
   stopCustomerLive();
   const url=SUPABASE_URL.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(SUPABASE_KEY)+'&vsn=1.0.3';
@@ -1538,6 +1569,7 @@ async function syncPushSubscriptionV75(sub){
   if(customerPushSyncLastSuccessV216.key===key&&now-customerPushSyncLastSuccessV216.at<300000)return true;
   if(customerPushSyncLastFailureV216.key===key&&now-customerPushSyncLastFailureV216.at<60000)throw new Error('Synchronizácia upozornení bola nedávno neúspešná.');
   async function send(retry){
+    await ensureCustomerSessionV357();
     const token=state.session?.access_token;
     if(!token)throw new Error('Prihlásenie vypršalo.');
     const r=await fetch(PUSH_API,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({audience:'customer',action:'subscribe',subscription:sub.toJSON()})});
@@ -1728,7 +1760,7 @@ function openMenuSettings(section){window.openCustomerSettingsV102?.(section)}
 $('menuNotifications').addEventListener('click',()=>openMenuSettings('notifications'));
 $('menuLegal').addEventListener('click',()=>openMenuSettings('legal'));
 $('menuLogout').addEventListener('click',()=>$('logoutBtn').click());
-$('menuBuildVersion').textContent='Beta '+APP_VERSION;
+$('menuBuildVersion').textContent=APP_BUILD;
 $('menuCopyrightYear').textContent=String(new Date().getFullYear());
 window.addEventListener('pageshow',()=>setTimeout(repairCustomerScrollV60,0));
 window.visualViewport?.addEventListener('resize',()=>requestAnimationFrame(repairCustomerScrollV60));
@@ -1736,9 +1768,11 @@ async function refreshOnResume(){
   const now=Date.now();
   void checkCustomerRelease();
   if(window.__customerPhotoPickerV88===true||window.__customerPhotoDecodeV88===true)return;
-  if(!state.session||document.visibilityState==='hidden'||now-lastResumeRefresh<5000)return;
+  if(!state.session||document.visibilityState==='hidden'||now-lastResumeRefresh<5000||bootstrapInFlight)return;
   if(state.data&&customerPassSummaryDate!==bratislavaToday())renderPassSummary();
   lastResumeRefresh=now;
+  try{await ensureCustomerSessionV357()}catch(error){if(error.sessionInvalid){clearSession();showAuth('login');authMessage('error','Prihlásenie vypršalo. Prihláste sa znova.')}return;}
+  if(document.visibilityState==='hidden')return;
   startCustomerLive();
   queueCustomerSync('all',40);
 }
@@ -2039,6 +2073,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
   async function acceptance(dogId,version,force=false){
     if(!state?.session||!dogId||!version)return null;
+    if(customerSessionNeedsRefreshV357()||sessionRefreshInFlight)await ensureCustomerSessionV357();
     const key=String(state.session.user?.id||'')+'|'+String(dogId)+'|'+String(version);
     if(acceptanceCache.has(key)&&!force)return acceptanceCache.get(key);
     if(acceptancePromises.has(key)&&!force)return acceptancePromises.get(key);
@@ -4263,6 +4298,7 @@ function installVaccinationViewerZoomV244(modal){
     if(!loggedIn()){
       rowsState.items=[];rowsState.read.clear();rowsState.at=0;rowsState.session=null;drawBoard();drawHistory();return;
     }
+    try{if(customerSessionNeedsRefreshV357()||sessionRefreshInFlight)await ensureCustomerSessionV357()}catch(_){return;}
     const token=state.session.access_token;
     if(rowsState.session!==token){rowsState.at=0;rowsState.session=token}
     if(rowsState.loading)return rowsState.loading;

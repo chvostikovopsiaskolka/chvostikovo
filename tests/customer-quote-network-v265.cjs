@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
-const source=fs.readFileSync('app.js','utf8'),code=source.slice(source.indexOf('async function sharedQuoteResponseV265'),source.indexOf('let customerApiMutationsInFlight'));
+const source=fs.readFileSync('app.js','utf8'),code=source.slice(source.indexOf('let sessionRefreshInFlight'),source.indexOf('async function refreshSession'))+source.slice(source.indexOf('async function sharedQuoteResponseV265'),source.indexOf('let customerApiMutationsInFlight'));
 async function check(mode,body){
  let calls=0,refreshes=0,deadline;
  const ctx={API:'https://fixture.invalid',SUPABASE_KEY:'public',state:{session:{access_token:'fixture'}},navigator:{onLine:mode!=='offline'},AbortController,setTimeout:fn=>{deadline=fn;return 1},clearTimeout(){},refreshSession:async()=>{refreshes++},fetch:async(url,opts)=>{calls++;if(mode==='timeout')return new Promise((_,reject)=>{opts.signal.addEventListener('abort',()=>reject(Error('aborted')));queueMicrotask(()=>deadline())});if(mode==='offline'||mode==='fail'||(mode==='recover'&&calls===1))throw TypeError('Load failed');return {ok:mode!=='validation',status:mode==='validation'?400:200,text:async()=>JSON.stringify(mode==='validation'?{error:'Kapacita je plná.'}:{data:{quote:[]}})}}};
