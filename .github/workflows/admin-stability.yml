@@ -90,6 +90,8 @@ jobs:
         run: |
           node tests/customer-design.cjs
           node tests/customer-session-startup-v357.cjs
+          node tests/customer-guide-v358.cjs
+          node tests/customer-guide-db-v358.cjs
           node tests/customer-taxi-cancel-v326.mjs
           node tests/taxi-notification-v326.cjs
 

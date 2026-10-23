@@ -1,0 +1,24 @@
+const fs=require('fs'),assert=require('assert/strict');
+const {PGlite}=require('./shared-v244/node_modules/@electric-sql/pglite');
+(async()=>{const db=new PGlite();try{
+ await db.exec(`create role authenticated;create role anon;create schema auth;
+ create function auth.uid() returns uuid language sql as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+ grant usage on schema auth to authenticated,anon;grant execute on function auth.uid() to authenticated,anon;
+ create table public.customer_profiles(user_id uuid primary key,status text);
+ alter table public.customer_profiles enable row level security;
+ create policy own on public.customer_profiles to authenticated using(user_id=auth.uid()) with check(user_id=auth.uid());
+ grant select on public.customer_profiles to authenticated;
+ insert into public.customer_profiles values ('00000000-0000-0000-0000-000000000001','active'),('00000000-0000-0000-0000-000000000002','active');`);
+ await db.exec(fs.readFileSync('supabase/changes/customer-guide-v358.sql','utf8'));
+ assert.equal((await db.query('select count(*)::int n from customer_profiles where intro_guide_eligible')).rows[0].n,0,'existing users excluded');
+ await db.exec(`insert into customer_profiles(user_id,status) values('00000000-0000-0000-0000-000000000003','active');`);
+ assert.equal((await db.query('select count(*)::int n from customer_profiles where intro_guide_eligible')).rows[0].n,1,'new profiles eligible');
+ await db.exec(`set role authenticated;set request.jwt.claim.sub='00000000-0000-0000-0000-000000000003';`);
+ assert.equal((await db.query("select portal_record_guide_v358('started') ok")).rows[0].ok,true);
+ await db.query("select portal_record_guide_v358('completed')");await db.query("select portal_record_guide_v358('skipped')");
+ assert.equal((await db.query('select intro_guide_result from customer_profiles')).rows[0].intro_guide_result,'completed');
+ await assert.rejects(db.query("select portal_record_guide_v358('bogus')"));await assert.rejects(db.query('select portal_record_guide_v358(null)'));
+ await db.exec('reset role');assert.equal((await db.query('select count(*)::int n from customer_profiles where intro_guide_seen_at is not null')).rows[0].n,1,'other owners unchanged');
+ await db.exec('set role anon');await assert.rejects(db.query("select public.portal_record_guide_v358('completed')"));
+ console.log('PASS guide SQL defaults, invoker/RLS own-account, invalid and anon rejected, completed monotonic');
+ }finally{await db.close()}})().catch(e=>{console.error(e);process.exitCode=1});
