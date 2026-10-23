@@ -361,6 +361,7 @@ html.customer-android.customer-design #bookingPickerV37 .booking-day-v37{min-hei
 @media(max-width:350px){.customer-design #bookingTab #bookingVaccinationStatus.valid>span:last-child,.customer-design #bookingTab .dual-dog-status-v254.valid>span:last-child{font-size:11px!important}}
 /* v344: share the name's text edge; keep status icons in a separate gutter. */
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content{padding-left:29px!important}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .design-dog-name{margin-left:-27px!important;max-width:none!important}
 .customer-design #bookingTab #bookingVaccinationStatus,.customer-design #bookingTab #bookingVisitCount{position:relative;gap:0!important}
 .customer-design #bookingTab #bookingVaccinationStatus>.overview-icon,.customer-design #bookingTab #bookingVisitCount>.overview-icon{position:absolute!important;left:-27px;top:50%;transform:translateY(-50%);width:24px!important;min-width:24px!important;flex-basis:24px!important}
 

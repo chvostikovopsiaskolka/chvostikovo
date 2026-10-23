@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-20261023-single-card-v355';
+const CACHE='chvostikovo-portal-shell-20261023-name-edge-v356';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/telemetry-v345.js?v=20261023-single-card-v355','/loading-motion.js?v=20261023-single-card-v355','/loading-design.css?v=20261023-single-card-v355','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=20261023-single-card-v355','/customer-design.css?v=20261023-single-card-v355','/dog-choice-fab-v276.css?v=20261023-single-card-v355','/dual-dog-overview-v246.js?v=20261023-single-card-v355','/dual-dog-overview-v246.css?v=20261023-single-card-v355','/','/terms-pdf.js?v=20261023-single-card-v355','/terms-pdf-font.js?v=20261023-single-card-v355','/styles.css?v=20261023-single-card-v355','/bulletin-photo-v243.css?v=20261023-single-card-v355','/app.js?v=20261023-single-card-v355','/back-swipe.js?v=20261023-single-card-v355'];
+const SHELL=['/telemetry-v345.js?v=20261023-name-edge-v356','/loading-motion.js?v=20261023-name-edge-v356','/loading-design.css?v=20261023-name-edge-v356','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=20261023-name-edge-v356','/customer-design.css?v=20261023-name-edge-v356','/dog-choice-fab-v276.css?v=20261023-name-edge-v356','/dual-dog-overview-v246.js?v=20261023-name-edge-v356','/dual-dog-overview-v246.css?v=20261023-name-edge-v356','/','/terms-pdf.js?v=20261023-name-edge-v356','/terms-pdf-font.js?v=20261023-name-edge-v356','/styles.css?v=20261023-name-edge-v356','/bulletin-photo-v243.css?v=20261023-name-edge-v356','/app.js?v=20261023-name-edge-v356','/back-swipe.js?v=20261023-name-edge-v356'];
 
 function withPortalCsp(response){
   if(!response)return response;
