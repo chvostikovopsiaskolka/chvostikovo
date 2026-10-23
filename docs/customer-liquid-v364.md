@@ -1,3 +1,7 @@
+# Customer v368 / 2.0.43 — clearer unused pass paws
+
+Only unused permanentka paws change: outline width .8 → 1.4 and opacity .42 → .9. Used paws retain their original fill, colour, width and opacity. No background-paw, data, accounting or interaction change. Baseline v367 commit 9595fe02144a7a6dcd6a87a8816739cbffc40818; rollback backup/customer-before-paw-outline-v368-20261023. Release contract, full CI and existing browser profile/pass checks apply; physical devices remain unverified.
+
 # Customer v366 / 2.0.41 — profile containment and Liquid polish
 
 Based on verified production v364, commit `d9302acab613b55b5d132c3a33d3a6d3e2f7acab`, successful CI 39994035233 and READY deployment `dpl_Gd8PUqttb3uemNCJYqwvaCUd6D3q`. User iPhone screenshot confirmed the profile icons/name escaped the new information panel: inherited negative divider gutters were retained in v364.
