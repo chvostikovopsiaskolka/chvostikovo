@@ -17,6 +17,14 @@ async function test(){const db=new PGlite();await db.exec(`create role anon;crea
  const identity=async(id=customer)=>{await db.exec(`reset role;select set_config('request.jwt.claim.sub','${id}',false),set_config('request.jwt.claim.session','${sid}',false);set role authenticated;`)};
  const ingest=async(p)=>{return(await db.query('select public.portal_telemetry_ingest_v345($1::jsonb) ok',[JSON.stringify(p)])).rows[0].ok};
  await db.exec('set role anon');await assert.rejects(()=>ingest(payload()),/permission denied/);await identity();
+ await db.exec('begin');
+ const appSource=fs.readFileSync('app.js','utf8'),APP_BUILD=appSource.match(/const APP_BUILD='([^']+)'/)[1];
+ const currentBuild=appSource.match(/const APP_TELEMETRY_BUILD=([^;]+);/);
+ const versionPacket=payload(359);versionPacket.resourceSpans[0].resource.attributes.find(a=>a.key==='service.version').value.stringValue=APP_BUILD;
+ assert.equal(await ingest(versionPacket),false,'short menu build is rejected by existing collector');
+ versionPacket.resourceSpans[0].resource.attributes.find(a=>a.key==='service.version').value.stringValue=currentBuild?eval(currentBuild[1]):APP_BUILD;
+ assert.equal(await ingest(versionPacket),true,'actual app telemetry build accepted by collector');
+ await db.exec('rollback');
  for(const p of [null,{}, {resourceSpans:{}},{resourceSpans:[{scopeSpans:{}}]}, {resourceSpans:[{scopeSpans:[{spans:{}}]}]}])assert.equal(await ingest(p),false,'malformed input is harmless');
  assert.equal(await ingest(payload()),true);assert.equal(await ingest(payload()),true);
  await assert.rejects(()=>db.query('select * from private.app_telemetry_v345'),/permission denied/);

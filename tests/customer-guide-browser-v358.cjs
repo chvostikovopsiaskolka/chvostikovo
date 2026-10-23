@@ -17,6 +17,12 @@ const packed=process.env.PACKED_CHROMIUM?require(process.env.PACKED_CHROMIUM):nu
   await page.waitForTimeout(1300);
   if(!await page.locator('#customerGuideV358').isVisible())console.log('NOT READY',await page.evaluate(()=>({ready:window.__customerOnboardingCompleteV75,modals:[...document.querySelectorAll('[role="dialog"]')].filter(el=>getComputedStyle(el).display!=='none').map(el=>el.id),loading:document.getElementById('loading').className,errors:typeof window.customerGuideAbortV358})),errors);
   await page.locator('#customerGuideV358').waitFor({state:'visible',timeout:10000});
+  const welcome=await page.locator('.guide-card').boundingBox(),next=await page.locator('#guideNextV358').boundingBox(),skip=await page.locator('#guideSkipV358').boundingBox();
+  assert.equal(await page.locator('#guideProgressV358').textContent(),'');
+  assert(skip.y>=next.y+next.height,'welcome skip below primary action');assert(skip.height>=44);
+  assert.equal(await page.locator('#guideSkipV358').evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
+  assert(welcome.y>=0&&welcome.y+welcome.height<=(width===844?390:844)+1);
+  if(width===390&&count===1)await page.screenshot({path:'/tmp/guide-v359-welcome.png'});
   const nav=await page.locator('.bottom-nav').boundingBox();
   await page.locator('#guideNextV358').click();
   for(let i=0;i<5;i++){

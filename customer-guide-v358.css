@@ -7,6 +7,9 @@
 .guide-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:750;color:#9a572c}
 .guide-top button{min-height:44px;background:transparent;border:0;color:#6c6c77;padding:4px 0 4px 12px;font-size:12px}
 .guide-card h2{font-size:21px;line-height:1.25;margin:6px 0 10px}
+.guide-welcome .guide-top{display:none}
+.guide-welcome .guide-card h2{margin-top:0}
+.guide-welcome #guideSkipV358{display:block;width:100%;min-height:44px;margin:6px 0 -6px;padding:4px 8px;background:transparent;border:0;box-shadow:none;color:#6c6c77;font-size:12px;font-weight:650}
 .guide-card p{font-size:14px;line-height:1.5;margin:0 0 14px;overflow-wrap:anywhere}
 .guide-actions{display:flex;justify-content:flex-end;gap:8px}
 .guide-actions button{min-height:44px;flex:1;min-width:0;font-size:14px}

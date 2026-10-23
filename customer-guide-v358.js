@@ -87,6 +87,7 @@
   async function step(index){
     if(!tour||account()!==tour.id)return abort();
     const current=++epoch;tour.step=index;cleanDemo();
+    shell().querySelector('.guide-top').append($('guideSkipV358'));
     const titles=['Váš psík v Prehľade','Vstupy a vaše návštevy','Prihlásenie do škôlky','Rezervácie a taxi','Všetko ostatné v Menu'];
     const texts=[
       'Ťuknutím na profil otvoríte údaje a fotografiu psíka. Pri očkovaniach nájdete ich platnosť, pri grafe počet návštev. Pri zapnutých upozorneniach pripomenieme končiace očkovanie 14 a 7 dní vopred.',
@@ -117,7 +118,8 @@
     if(!manual&&!ready())return;
     const root=shell();tour={id:account(),step:-1,targets:[],tab:state.activeTab,scroll:window.scrollY,focus:document.activeElement,picker:pickerOpen()};
     root.classList.remove('hidden');document.documentElement.classList.add('customer-guide-open');
-    $('guideProgressV358').textContent='Chvostíkovo';$('guideTitleV358').textContent='Sprievodca appkou';
+    $('guideProgressV358').textContent='';$('guideTitleV358').textContent='Sprievodca appkou';
+    root.querySelector('.guide-card').append($('guideSkipV358'));
     $('guideTextV358').textContent='Ukážeme vám Prehľad, rezervácie a Menu v piatich krátkych krokoch. Sprievodcu môžete kedykoľvek preskočiť.';
     $('guideBackV358').hidden=true;$('guideNextV358').textContent='Spustiť sprievodcu';$('guideNextV358').disabled=false;
     position();$('guideNextV358').focus({preventScroll:true});
