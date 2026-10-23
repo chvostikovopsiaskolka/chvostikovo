@@ -5,7 +5,7 @@ const section=(a,b)=>source.slice(source.indexOf(a),source.indexOf(b,source.inde
  new vm.Script(source);cssTree.parse(fs.readFileSync('styles.css','utf8'));
  const ctx={state:{session:{user:{id:'a'},access_token:'token-a'}},SUPABASE_URL:'https://test.invalid',SUPABASE_KEY:'public',Date};vm.createContext(ctx);
  let reads=0,release;ctx.fetch=()=>{reads++;return new Promise(resolve=>release=resolve)};
- vm.runInContext(section('let customerTermsReadV146=', 'const customerHooks='),ctx);
+ vm.runInContext(section('let sessionRefreshInFlight','async function refreshSession')+section('let customerTermsReadV146=', 'const customerHooks='),ctx);
  const first=ctx.readActiveCustomerTermsV146(),second=ctx.readActiveCustomerTermsV146(),forced=ctx.readActiveCustomerTermsV146(true);
  assert.equal(reads,1);release({ok:true,json:async()=>[{version:'test',document_hash:'hash'}]});await Promise.all([first,second,forced]);
  assert.equal((await ctx.readActiveCustomerTermsV146()).document_hash,'hash');assert.equal(reads,1);
