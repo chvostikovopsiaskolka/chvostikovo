@@ -1,4 +1,4 @@
-# Customer v365 / 2.0.40 — profile containment and Liquid polish
+# Customer v366 / 2.0.41 — profile containment and Liquid polish
 
 Based on verified production v364, commit `d9302acab613b55b5d132c3a33d3a6d3e2f7acab`, successful CI 39994035233 and READY deployment `dpl_Gd8PUqttb3uemNCJYqwvaCUd6D3q`. User iPhone screenshot confirmed the profile icons/name escaped the new information panel: inherited negative divider gutters were retained in v364.
 
@@ -8,6 +8,8 @@ Based on verified production v364, commit `d9302acab613b55b5d132c3a33d3a6d3e2f7a
 - Remove the redundant capacity legend from the rendered calendar. Selected-day heading follows the calendar directly; per-day occupancy/status remains.
 
 No backend, notifications, accounting or reservation rules changed. The v364 message preview and push navigation are preserved. No extra API traffic, synthetic production records, messages or push.
+
+v365 passed the full workflow (PR167 CI39998644895), was merged as 4eea3e6f9603a1857dbd08938e33e698f7d1fca4 and deployed as dpl_JDkyQtxxvzweHA6ZiunpgPa4qdA2. The final two-dog computed-style inspection found a stronger historical gradebook selector; v366 raises the information-row selector specificity and verifies parity for both layouts. No other behaviour changed.
 
 Validation: mandatory release contract and complete workflow locally and on final GitHub SHA before merge. Browser fixture covers 320/360/390/430, 844x390 and 1280 for one/two dogs, information content/icon bounding boxes, equal three-row fonts, menu colour scope, no legend, active/queued passes, long name, article, calendar, opaque fallback and stable nav. Physical iOS/Android rendering remains unverified; Chromium platform user agents do not prove device behaviour.
 
