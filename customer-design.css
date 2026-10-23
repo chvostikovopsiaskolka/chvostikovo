@@ -436,3 +436,50 @@ html.customer-android.customer-design #bookingPickerV37 .booking-day-v37{min-hei
 @media(prefers-reduced-motion:reduce){
  .customer-design #designNearest,.customer-design #designTicket{transition:none!important}
 }
+
+/* v362: customer bulletin becomes a light magnetic board, not cork.
+   CSS-only: all published-paper content, unread badge and open/zoom actions stay intact. */
+.customer-design #bookingTab #customerBulletinV229{
+  box-sizing:border-box!important;
+  border:5px solid #353e49!important;
+  border-radius:16px!important;
+  background:
+    radial-gradient(ellipse at 18% 16%,rgba(255,255,255,.86),transparent 58%),
+    radial-gradient(circle at 78% 78%,rgba(179,190,204,.16),transparent 45%),
+    linear-gradient(148deg,#f3f6f8 0%,#e8edf2 55%,#eef1f5 100%)!important;
+  box-shadow:inset 0 0 0 1px #ffffffb8,inset 0 3px 8px #18223313,0 8px 20px #202d4017!important;
+  padding:14px 12px 13px!important;
+}
+.customer-design #bookingTab #customerBulletinV229::before,
+.customer-design #bookingTab #customerBulletinV229::after{content:none!important;display:none!important}
+.customer-design #bookingTab #customerBulletinV229 .customer-bulletin-items-v229{
+  margin-top:10px!important;
+}
+.customer-design #bookingTab #customerBulletinV229 .customer-bulletin-note-v229{
+  box-shadow:0 2px 3px #26324113,0 7px 14px #2731421b!important;
+  border-color:#4755691c!important;
+}
+.customer-design #bookingTab #customerBulletinV229 .customer-bulletin-note-v229::before,
+.customer-design #bookingTab #customerBulletinV229 .customer-bulletin-note-v229[data-style="cream"]::before{
+  content:""!important;
+  top:5px!important;left:calc(50% - 8px)!important;
+  width:16px!important;height:16px!important;border-radius:50%!important;
+  background:radial-gradient(circle at 30% 25%,#f6f9fc 0 2px,#bdc6d2 4px,#7b8795 10px,#505c6b 100%)!important;
+  border:1px solid #667281!important;
+  box-shadow:inset 0 -2px 3px #27324365,0 2px 3px #18223546!important;
+}
+.customer-design #bookingTab #customerBulletinV229 .customer-bulletin-empty-v229{
+  color:#556171!important;
+}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) #bookingGradebook{
+  font-size:12px!important;font-weight:800!important;
+}
+.customer-design #bookingTab #bookingDogProfile.dual-dog-v241 .dual-dog-grades-v254{
+  font-size:10px!important;
+}
+@media(max-width:350px){
+  .customer-design #bookingTab #customerBulletinV229{
+    padding:12px 9px 11px!important;
+    border-width:4px!important;
+  }
+}
