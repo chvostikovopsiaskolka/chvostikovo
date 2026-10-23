@@ -181,7 +181,7 @@
     const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile');if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
   }
   function layout() {
-    document.documentElement.classList.toggle('customer-liquid-v364',!!state.session&&!!state.data&&state.activeTab==='booking');
+    document.documentElement.classList.toggle('customer-liquid-v364',!!state.session&&!!state.data);
     if(!state.data)return;
     document.documentElement.classList.add('customer-design');
     const profile=byId('bookingDogProfile'),content=profile?.querySelector('.dog-overview-content');
@@ -241,8 +241,8 @@
     const hasReservations=!!byId('weekDays')?.querySelector('.reserved-day-card-v37');
     if(smart&&!smart.classList.contains('hidden')){smart.classList.toggle('design-smart-hidden',hasReservations);if(!hasReservations){empty?.classList.add('hidden');carousel.append(smart);}}
     if(empty&&!hasReservations&&(!smart||smart.classList.contains('hidden'))) {empty.classList.remove('hidden');let text=empty.querySelector('.design-empty-booking-cta');if(!text){text=document.createElement('p');text.className='design-empty-booking-cta';empty.replaceChildren(text);}text.textContent='Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.';}
-    if(!byId('designCapacityLegend')){const legend=document.createElement('div');legend.id='designCapacityLegend';legend.innerHTML='<span><i class="free"></i>Voľné miesta</span><span><i class="limited"></i>Takmer plné</span><span><i class="full"></i>Plné</span>';byId('bookingPickerDaysV37').after(legend);}
-    if(taxiTitle)byId('designCapacityLegend').after(taxiTitle);
+    byId('designCapacityLegend')?.remove();
+    if(taxiTitle)byId('bookingPickerDaysV37').after(taxiTitle);
 
   };
   window.customerDesignEditReservation=date=>{window.openBookingPickerV37?.();const carousel=byId('designBookingCarousel'),card=byId('weekDays')?.querySelector('[data-date="'+date+'"]');if(carousel&&card)carousel.scrollLeft=card.offsetLeft-carousel.offsetLeft;};

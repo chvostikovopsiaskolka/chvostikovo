@@ -20,7 +20,16 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwr
    if(dogs===1)assert.equal(style.bg,sex==='male'?'rgb(220, 236, 251)':'rgb(249, 222, 237)');
    const name=await page.locator(dogs===1?'#bookingDogName':'.dual-dog-name-v241').first().evaluate(el=>({stroke:getComputedStyle(el).webkitTextStrokeWidth,color:getComputedStyle(el).color,size:getComputedStyle(el).fontSize}));assert.equal(name.stroke,'0px');assert(name.color!=='rgb(255, 255, 255)');
   }
-  const panel=await page.locator(dogs===1?'.dog-overview-content':'.dual-dog-info-v254').first().evaluate((el,single)=>({border:getComputedStyle(el).borderLeftWidth,blur:getComputedStyle(el,single?'::before':null).backdropFilter}),dogs===1);if(dogs===1)assert.equal(panel.border,'0px');assert.equal(panel.blur,'blur(4px)');
+  if(dogs===1){
+   const layout=await page.locator('.dog-overview-content').evaluate(el=>{
+    const b=el.getBoundingClientRect();return [...el.querySelectorAll('#bookingDogName,button,button svg,button .overview-icon')].filter(x=>x.getBoundingClientRect().width).map(x=>{const r=x.getBoundingClientRect();return {id:x.id||x.tagName,left:r.left-b.left,right:b.right-r.right,top:r.top-b.top,bottom:b.bottom-r.bottom};});
+   });
+   assert(layout.every(x=>x.left>=-1&&x.right>=-1&&x.top>=-1&&x.bottom>=-1),JSON.stringify(layout));
+   const fonts=await page.locator('#bookingVaccinationStatus>span:last-child,#bookingVisitCount>span:last-child,#bookingGradebook>span:last-child').evaluateAll(els=>els.map(el=>getComputedStyle(el).fontSize));assert.equal(fonts.length,3);assert.equal(new Set(fonts).size,1,'three equal information fonts');
+  }
+  const backgrounds=await page.evaluate(()=>[document.documentElement,document.body].map(el=>getComputedStyle(el).backgroundColor));assert.equal(backgrounds[0],backgrounds[1]);
+  await page.evaluate(()=>switchTab('menu'));assert(await page.evaluate(()=>document.documentElement.classList.contains('customer-liquid-v364')));await page.evaluate(()=>switchTab('booking'));
+  const panel=await page.locator(dogs===1?'.dog-overview-content':'.dual-dog-info-v254').first().evaluate((el,single)=>({border:getComputedStyle(el).borderLeftWidth,blur:getComputedStyle(el,single?'::before':null).backdropFilter}),dogs===1);if(dogs===1)assert.equal(panel.border,'0px');assert.equal(panel.blur,'blur(12px) saturate(1.45)');
   for(const status of ['active','queued']){
    await page.evaluate(status=>{state.data.passes=[{id:1,dog_id:1,dog_ids:[1,2],total_entries:10,used_entries:status==='queued'?0:6,status,valid_until:'2099-12-31'}];renderPassSummary();renderDog();},status);
    assert(await page.locator('#designTicket').isVisible());assert((await page.locator('#designTicket').textContent()).includes('10'));assert.equal(await page.locator('.design-paws>span').count(),10);
@@ -30,7 +39,7 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwr
   await page.evaluate(()=>{state.data.passes=[];renderPassSummary();renderDog();state.data.dogs[0].name='Alexandriana Veľmi dlhé meno';renderDog();});assert.equal(await page.locator('#designTicket').count(),0);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'long name no horizontal overflow');
   await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2099-01-01'});bratislavaToday=()=> '2099-01-01';state.data.availability={days:Array.from({length:15},(_,i)=>({date:'2099-01-'+String(5+i+Math.floor(i/5)*2).padStart(2,'0'),available:8,capacity:10,occupied:2,bookings_open:true,dogs:[]}))};window.openBookingPickerV37();});await page.waitForTimeout(100);
-  assert(await page.locator('#designMyBookings').isVisible());assert(await page.locator('#bookingPickerDaysV37').isVisible());assert.equal(await page.locator('#bookingPickerV37').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(245, 177, 124)');
+  assert.equal(await page.locator('#designCapacityLegend').count(),0);assert(await page.locator('#designMyBookings').isVisible());assert(await page.locator('#bookingPickerDaysV37').isVisible());assert.equal(await page.locator('#bookingPickerV37').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(245, 177, 124)');
   const bounds=await page.locator('#bookingPickerDaysV37').evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth}));assert(bounds.scroll<=bounds.width+1);
   await page.waitForTimeout(80);if(width===390)await page.screenshot({path:'/tmp/liquid-v364-reservations-'+dogs+'.png'});
   await page.evaluate(()=>window.closeBookingPickerV305());

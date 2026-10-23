@@ -20,7 +20,7 @@ async function fixture(query='',dogs=1){
  return {w,run,dom,calls,errors,reads,login,click,visible,setNotices:r=>notices=r,failReads:v=>readFailure=v};
 }
 (async()=>{
- const css=fs.readFileSync('customer-design.css','utf8').split('/* v364: Chvostíkovo Liquid surfaces.')[1];
+ const css=fs.readFileSync('customer-design.css','utf8').split('/* v364/v365: Liquid surfaces')[1];
  assert(css&&css.includes('@supports')&&css.includes('prefers-reduced-transparency'));
  assert(css.includes('-webkit-text-stroke:0 transparent!important'));
  assert(css.includes('#customerBulletinArticleV229 .customer-bulletin-head-v229{align-items:center}'));
@@ -36,7 +36,7 @@ async function fixture(query='',dogs=1){
    }
    f.run("state.data.passes=[];renderPassSummary();renderDog();");assert.equal(f.w.document.getElementById('designTicket'),null);assert.equal(f.w.document.getElementById('customerInboxV363').nextElementSibling.id,'designNearest');
    assert(f.w.document.documentElement.classList.contains('customer-liquid-v364'));
-   f.run("switchTab('menu')");assert(!f.w.document.documentElement.classList.contains('customer-liquid-v364'));
+   f.run("switchTab('menu')");assert(f.w.document.documentElement.classList.contains('customer-liquid-v364'));
    f.run("switchTab('booking')");assert(f.w.document.documentElement.classList.contains('customer-liquid-v364'));
    assert.equal(f.run('JSON.stringify([state.data.requests,state.data.reservations,state.data.visits])'),before);
    f.run('clearSession()');assert(!f.w.document.documentElement.classList.contains('customer-liquid-v364'));
