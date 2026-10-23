@@ -15,6 +15,10 @@ vm.createContext(ctx);vm.runInContext(stripTypeScriptTypes(helper+'\n'+source,{m
   sent.length=0;const r=await handler(new Request('https://synthetic.invalid/push',{method:'POST',headers:{'x-push-secret':'fixture-secret'},body:JSON.stringify({table:'portal_notifications',type:'INSERT',record:{id:99,recipient_user_id:'synthetic-user',notification_type:type,entity_type:entity,entity_id:id,title:'Synthetic title',body:'https://untrusted.invalid'}})}));
   assert.equal(r.status,200);assert.equal(sent.length,1,'one push per device');assert.equal(sent[0].data.url,expected);assert.equal(sent[0].tag,'portal-99');
  }
+ for(const [body,expected] of [['Dobrý deň, zajtrajšiu návštevu Belly máme potvrdenú. Tešíme sa na ňu! 🐾','Dobrý deň, zajtrajšiu návštevu Belly máme potvrdenú. Tešíme sa na ňu! 🐾'],['  ahoj'+String.fromCharCode(10)+' svet  ','ahoj svet'],['','Máte novú správu od Chvostíkova.'],[null,'Máte novú správu od Chvostíkova.'],[{},'Máte novú správu od Chvostíkova.'],['🐾'.repeat(250),'🐾'.repeat(240)+'…']]){
+  sent.length=0;const r=await handler(new Request('https://synthetic.invalid/push',{method:'POST',headers:{'x-push-secret':'fixture-secret'},body:JSON.stringify({table:'portal_notifications',type:'INSERT',record:{id:100,recipient_user_id:'synthetic-user',notification_type:'staff_message_customer',entity_type:'conversation',entity_id:7,title:'old title',push_body:'unrelated override',body}})}));
+  assert.equal(r.status,200);assert.equal(sent.length,1);assert.equal(sent[0].title,'Chvostíkovo');assert.equal(sent[0].body,expected);assert.equal(sent[0].data.url,'/?open=messages&conversation=7&recipient=synthetic-user');
+ }
  const handlers={},navigations=[],opens=[];
  const self={location:{origin:'https://app.fixture'},navigator:{},addEventListener:(k,f)=>handlers[k]=f,clients:{matchAll:async()=>[],openWindow:async url=>opens.push(url)},registration:{showNotification:async()=>{}}};
  vm.runInNewContext(fs.readFileSync(process.env.SW_SOURCE||'sw.js','utf8'),{self,URL,Response,Headers,console});
