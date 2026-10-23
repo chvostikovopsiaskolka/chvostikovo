@@ -27,6 +27,7 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwr
    assert(layout.every(x=>x.left>=-1&&x.right>=-1&&x.top>=-1&&x.bottom>=-1),JSON.stringify(layout));
    const fonts=await page.locator('#bookingVaccinationStatus>span:last-child,#bookingVisitCount>span:last-child,#bookingGradebook>span:last-child').evaluateAll(els=>els.map(el=>getComputedStyle(el).fontSize));assert.equal(fonts.length,3);assert.equal(new Set(fonts).size,1,'three equal information fonts');
   }
+  if(dogs===2){const fonts=await page.locator('.dual-dog-info-v254').first().evaluate(el=>[...el.querySelectorAll('.dual-dog-status-v254>span:last-child,.dual-dog-visits-v254,.dual-dog-grades-v254')].map(x=>getComputedStyle(x).fontSize));assert.equal(fonts.length,3);assert.equal(new Set(fonts).size,1,'dual information font parity');}
   const backgrounds=await page.evaluate(()=>[document.documentElement,document.body].map(el=>getComputedStyle(el).backgroundColor));assert.equal(backgrounds[0],backgrounds[1]);
   await page.evaluate(()=>switchTab('menu'));assert(await page.evaluate(()=>document.documentElement.classList.contains('customer-liquid-v364')));await page.evaluate(()=>switchTab('booking'));
   const panel=await page.locator(dogs===1?'.dog-overview-content':'.dual-dog-info-v254').first().evaluate((el,single)=>({border:getComputedStyle(el).borderLeftWidth,blur:getComputedStyle(el,single?'::before':null).backdropFilter}),dogs===1);if(dogs===1)assert.equal(panel.border,'0px');assert.equal(panel.blur,'blur(12px) saturate(1.45)');

@@ -620,8 +620,8 @@ html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #booking
 .customer-design #bookingTab #bookingDogProfile :is(#bookingVaccinationStatus,#bookingVisitCount,#bookingGradebook) span:last-child{
  font-size:inherit!important;white-space:normal!important;min-width:0;overflow-wrap:anywhere;
 }
-.customer-design #bookingTab .dual-dog-info-v254 :is(.dual-dog-status-v254,.dual-dog-visits-v254,.dual-dog-grades-v254){font-size:11px!important;line-height:1.3!important}
-.customer-design #bookingTab .dual-dog-info-v254 .dual-dog-status-v254>span:last-child{font-size:inherit!important;white-space:normal!important}
+.customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254 :is(.dual-dog-status-v254,.dual-dog-visits-v254,.dual-dog-grades-v254){font-size:11px!important;line-height:1.3!important}
+.customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254 .dual-dog-status-v254>span:last-child{font-size:inherit!important;white-space:normal!important}
 @media(max-width:350px){
  .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) :is(#bookingVaccinationStatus,#bookingVisitCount,#bookingGradebook){font-size:11px!important}
 }

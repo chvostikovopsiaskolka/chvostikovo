@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-v365';
+const CACHE='chvostikovo-portal-shell-v366';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/customer-guide-v358.js?v=v365','/customer-guide-v358.css?v=v365','/telemetry-v345.js?v=v365','/loading-motion.js?v=v365','/loading-design.css?v=v365','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v365','/customer-design.css?v=v365','/dog-choice-fab-v276.css?v=v365','/dual-dog-overview-v246.js?v=v365','/dual-dog-overview-v246.css?v=v365','/','/terms-pdf.js?v=v365','/terms-pdf-font.js?v=v365','/styles.css?v=v365','/bulletin-photo-v243.css?v=v365','/app.js?v=v365','/back-swipe.js?v=v365'];
+const SHELL=['/customer-guide-v358.js?v=v366','/customer-guide-v358.css?v=v366','/telemetry-v345.js?v=v366','/loading-motion.js?v=v366','/loading-design.css?v=v366','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v366','/customer-design.css?v=v366','/dog-choice-fab-v276.css?v=v366','/dual-dog-overview-v246.js?v=v366','/dual-dog-overview-v246.css?v=v366','/','/terms-pdf.js?v=v366','/terms-pdf-font.js?v=v366','/styles.css?v=v366','/bulletin-photo-v243.css?v=v366','/app.js?v=v366','/back-swipe.js?v=v366'];
 
 function withPortalCsp(response){
   if(!response)return response;
