@@ -1,5 +1,17 @@
 const fs=require('fs'),path=require('path'),assert=require('assert/strict');
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwright');
+const {PNG}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/pngjs');
+async function assertPawsTransmit(page,selector,background){
+ const target=page.locator(selector).first();await target.scrollIntoViewIfNeeded();
+ const a=PNG.sync.read(await target.screenshot({animations:'disabled'}));
+ const saved=await page.locator(background).evaluate(el=>{const previous=el.getAttribute('style');el.style.setProperty('background-image','none','important');return previous;});
+ const b=PNG.sync.read(await target.screenshot({animations:'disabled'}));
+ await page.locator(background).evaluate((el,saved)=>{if(saved===null)el.removeAttribute('style');else el.setAttribute('style',saved);},saved);
+ assert.equal(a.width,b.width);assert.equal(a.height,b.height);let visible=0,max=0;
+ for(let y=12;y<a.height-12;y++)for(let x=12;x<a.width-12;x++){let delta=0;for(let c=0;c<3;c++)delta+=Math.abs(a.data[(y*a.width+x)*4+c]-b.data[(y*b.width+x)*4+c]);max=Math.max(max,delta);if(delta>=8)visible++;}
+ assert(visible>=20&&max>=8,selector+' must visibly transmit actual background paws: '+JSON.stringify({visible,max}));console.log('PASS actual paw transmission',selector,{visible,max});
+}
+
 (async()=>{
  const packed=process.env.PACKED_CHROMIUM?require(process.env.PACKED_CHROMIUM):null;
  const launch=()=>chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true,args:packed?packed.args:['--no-sandbox']});
@@ -21,7 +33,7 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwr
    await page.evaluate(sex=>{state.data.dogs[0].sex=sex;renderDog();},sex);
    const style=await page.locator('#bookingDogProfile').evaluate(el=>({frame:getComputedStyle(el).borderColor,width:getComputedStyle(el).borderWidth,bg:getComputedStyle(el).backgroundColor}));
    assert.equal(style.width,'0px');
-   if(dogs===1)assert.equal(style.bg,sex==='male'?'rgb(220, 236, 251)':'rgb(249, 222, 237)');
+   if(dogs===1)assert.equal(style.bg,sex==='male'?'rgba(220, 236, 251, 0.24)':'rgba(249, 222, 237, 0.24)');
    const name=await page.locator(dogs===1?'#bookingDogName':'.dual-dog-name-v241').first().evaluate(el=>({stroke:getComputedStyle(el).webkitTextStrokeWidth,color:getComputedStyle(el).color,size:getComputedStyle(el).fontSize}));assert.equal(name.stroke,'0px');assert(name.color!=='rgb(255, 255, 255)');
   }
   if(dogs===1){
@@ -35,7 +47,7 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwr
   if(dogs===2){const fonts=await page.locator('.dual-dog-info-v254').first().evaluate(el=>[...el.querySelectorAll('.dual-dog-status-v254>span:last-child,.dual-dog-visits-v254,.dual-dog-grades-v254')].map(x=>getComputedStyle(x).fontSize));assert.equal(fonts.length,3);assert.equal(new Set(fonts).size,1,'dual information font parity');}
   const backgrounds=await page.evaluate(()=>[document.documentElement,document.body].map(el=>getComputedStyle(el).backgroundColor));assert.equal(backgrounds[0],backgrounds[1]);
   await page.locator('#navDog').click();assert(await page.evaluate(()=>document.documentElement.classList.contains('customer-liquid-v364')));
-  const menu=await page.locator('#menuContact').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).borderWidth,blur:getComputedStyle(el).backdropFilter}));assert.equal(menu.bg,'rgba(255, 255, 255, 0.72)');assert.equal(menu.border,'0px');assert.equal(menu.blur,'blur(8px) saturate(1.1)');
+  const menu=await page.locator('#menuContact').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).borderWidth,blur:getComputedStyle(el).backdropFilter}));assert.equal(menu.bg,'rgba(255, 255, 255, 0.72)');assert.equal(menu.border,'0px');assert.equal(menu.blur,'none');const railStyle=await page.locator('.bottom-nav').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).backdropFilter}));assert.equal(menu.bg,railStyle.bg);assert.equal(menu.blur,railStyle.blur,'section surfaces match clear nav');assert((await page.locator('.customer-social-instagram-v223').evaluate(el=>getComputedStyle(el).boxShadow)).includes('inset'));assert((await page.locator('.customer-social-facebook-v223').evaluate(el=>getComputedStyle(el).boxShadow)).includes('inset'));
   assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'menu rail stable');
   await page.locator('#menuSettingsGroup>summary').click();assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'expanded menu rail stable');await page.locator('#menuSettingsGroup>summary').click();
   assert.equal(await page.locator('#menuBuildVersion').textContent(),'Beta '+JSON.parse(fs.readFileSync('version.json')).version);
@@ -46,31 +58,33 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwr
     await page.locator(mode==='details'?'#menuDogDetails':'#menuVaccinations').click();await page.waitForTimeout(70);
     const modal=await page.locator('#dogDetailsModal').boundingBox();assert.equal(modal.y,0);assert.equal(modal.height,height);assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).display),'block','root stays block while editor opens');
     assert.equal(await page.locator('.bottom-nav').evaluate(el=>getComputedStyle(el).visibility),'hidden');
-    await page.locator('#dogDetailsModal .dog-details-card').evaluate(el=>el.scrollTop=el.scrollHeight);
-    assert(await page.locator('#dogDetailsModal .dog-details-card').evaluate(el=>el.scrollHeight<=el.clientHeight||el.scrollTop>0),'long editor scrolls');
+    const editorScrolls=await page.locator('#dogDetailsModal .dog-details-card').evaluate(async el=>{await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));el.scrollTop=el.scrollHeight;return el.scrollHeight<=el.clientHeight||el.scrollTop>0;});assert(editorScrolls,'long editor scrolls');
     await page.locator('#dogDetailsClose').click();await page.waitForTimeout(70);
     await page.evaluate(()=>window.scrollTo(0,0));await page.waitForTimeout(40);const touch=await context.newCDPSession(page),start=Math.round(height*.7),x=Math.round(width/2);await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y:start}]});for(let y=start-10;y>=Math.max(50,start-260);y-=10){await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y}]});await page.waitForTimeout(16);}await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await touch.detach();await page.waitForTimeout(90);
     assert(await page.evaluate(()=>scrollY>0),'Menu scroll restored after '+mode);assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'rail stable after '+mode);
    }
    await page.evaluate(()=>window.scrollTo(0,0));
   }
+  if(width===390){await assertPawsTransmit(page,'#menuContact','body');await page.evaluate(()=>scrollTo(0,0));}
   if(width===390)await page.screenshot({path:'/tmp/glass-v369-menu-'+dogs+'.png'});
   await page.locator('#navBooking').click();
 
-  const panel=await page.locator(dogs===1?'.dog-overview-content':'.dual-dog-info-v254').first().evaluate((el,single)=>({border:getComputedStyle(el).borderLeftWidth,blur:getComputedStyle(el,single?'::before':null).backdropFilter}),dogs===1);if(dogs===1)assert.equal(panel.border,'0px');assert.equal(panel.blur,'blur(8px) saturate(1.1)');
+  const panel=await page.locator(dogs===1?'.dog-overview-content':'.dual-dog-info-v254').first().evaluate((el,single)=>({border:getComputedStyle(el).borderLeftWidth,blur:getComputedStyle(el,single?'::before':null).backdropFilter}),dogs===1);if(dogs===1)assert.equal(panel.border,'0px');assert.equal(panel.blur,'none');
   await page.evaluate(()=>{state.data.dogs[0].sex='female';renderDog();});
   for(const status of ['active','queued']){
    await page.evaluate(status=>{state.data.passes=[{id:1,dog_id:1,dog_ids:[1,2],total_entries:10,used_entries:status==='queued'?0:6,status,valid_until:'2099-12-31'}];renderPassSummary();renderDog();},status);
    assert(await page.locator('#designTicket').isVisible());assert((await page.locator('#designTicket').textContent()).includes('10'));assert.equal(await page.locator('.design-paws>span').count(),10);const divider=await page.locator('.design-paws').evaluate(el=>({style:getComputedStyle(el).borderTopStyle,width:getComputedStyle(el).borderTopWidth}));assert.equal(divider.style,'dashed');assert.equal(divider.width,'2px');if(width===390&&status==='active')await page.screenshot({path:'/tmp/glass-v369-pass-active-'+dogs+'.png'});
   }
   assert(await page.locator('#customerInboxV363').isVisible(),'inbox remains visible after pass changes');
+  if(width===390){await assertPawsTransmit(page, dogs===1?'.dog-overview-content':'.dual-dog-info-v254','body');await assertPawsTransmit(page,'#designTicket','body');await assertPawsTransmit(page,'#designNearest','body');await page.evaluate(()=>scrollTo(0,0));}
   await page.waitForTimeout(80);if(width===390)await page.screenshot({path:'/tmp/liquid-v364-overview-'+dogs+'.png'});
   await page.evaluate(()=>{state.data.passes=[];renderPassSummary();renderDog();state.data.dogs[0].name='Alexandriana Veľmi dlhé meno';renderDog();});assert.equal(await page.locator('#designTicket').count(),0);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'long name no horizontal overflow');if(dogs===1){const p=await page.locator('#bookingDogAvatar').boundingBox(),i=await page.locator('.dog-overview-content').boundingBox();assert(Math.abs(p.height-i.height)<1,'long name keeps matching panel heights');}
   await page.evaluate(()=>{bratislavaClockV95=()=>({date:'2099-01-01'});bratislavaToday=()=> '2099-01-01';state.data.availability={days:Array.from({length:15},(_,i)=>({date:'2099-01-'+String(5+i+Math.floor(i/5)*2).padStart(2,'0'),available:8,capacity:10,occupied:2,bookings_open:true,dogs:[]}))};});await page.locator('#navBookAddV220').click();await page.waitForTimeout(100);
   assert.equal(await page.locator('#designCapacityLegend').count(),0);assert(await page.locator('#designMyBookings').isVisible());assert(await page.locator('#bookingPickerDaysV37').isVisible());assert.equal(await page.locator('#bookingPickerV37').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(239, 187, 145)');
   assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'reservation rail stable');assert((await page.locator('.booking-picker-week-v127').first().evaluate(el=>parseFloat(getComputedStyle(el).paddingTop)))>=10);
-  const bounds=await page.locator('#bookingPickerDaysV37').evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth}));assert(bounds.scroll<=bounds.width+1);
+  const bounds=await page.locator('#bookingPickerDaysV37').evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth}));assert(bounds.scroll<=bounds.width+1);assert((await page.locator('.booking-picker-week-v127').first().evaluate(el=>getComputedStyle(el).boxShadow)).includes('inset'),'week boundary');assert((await page.locator('.booking-day-v37').first().evaluate(el=>getComputedStyle(el).boxShadow)).includes('inset'),'day boundary');
+  if(width===390){await assertPawsTransmit(page,'#bookingPickerDaysV37','#bookingPickerV37');assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'nav stable after calendar pixel check');assert(await page.locator('.bottom-nav').isVisible(),'nav visible after calendar pixel check');}
   await page.waitForTimeout(80);if(width===390)await page.screenshot({path:'/tmp/liquid-v364-reservations-'+dogs+'.png'});
   await page.evaluate(()=>window.closeBookingPickerV305());
   await page.evaluate(()=>{window.__noticeFixture=[{id:1,active:true,title:'Zbierka',body:'Synthetic full article',valid_from:'2020-01-01'}];return loadAnnouncements(true);});
