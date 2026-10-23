@@ -78,6 +78,18 @@ function taxiDescriptionV329(mode: unknown): string {
   return ({pickup:"Vyzdvihnutie (5 €)",dropoff:"Dovoz domov (5 €)",pickup_dropoff:"Vyzdvihnutie aj dovoz domov (10 €)"} as Record<string,string>)[String(mode || "none")] || "Bez taxíka";
 }
 
+function customerNotificationUrlV363(record: Json): string {
+  const id = Number(record.entity_id), type = String(record.notification_type || "");
+  const recipient = String(record.recipient_user_id || "");
+  if (!Number.isSafeInteger(id) || id <= 0 || !recipient) return "/";
+  const suffix = "&recipient=" + encodeURIComponent(recipient);
+  if (type === "staff_message_customer" && record.entity_type === "conversation")
+    return "/?open=messages&conversation=" + id + suffix;
+  if (type === "announcement_push" && record.entity_type === "announcement")
+    return "/?open=announcement&announcement=" + id + suffix;
+  return "/";
+}
+
 async function messageForWebhook(body: Json) {
   const table = String(body.table || "");
   const record = (body.record && typeof body.record === "object" ? body.record : {}) as Json;
@@ -340,6 +352,8 @@ async function messageForWebhook(body: Json) {
       tag: `portal-${id}`,
       recipientUserId: String(record.recipient_user_id || ""),
       audience: isAdminMessage ? "admin" : "customer",
+      // Route only from trusted notification metadata; never from message content.
+      customerUrl: customerNotificationUrlV363(record),
     };
   }
 
@@ -552,7 +566,7 @@ async function dispatch(body: Json) {
     ...message,
     ...(badgeCount === null ? {} : { badgeCount, badgeComputedAt: new Date().toISOString() }),
     badge: "/notification-badge.png?v=20260917-push",
-    data: { url: "/" },
+    data: { url: customer ? ("customerUrl" in message ? message.customerUrl : "/") : "/" },
   });
 
   for (const row of Array.isArray(rows) ? rows : []) {

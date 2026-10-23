@@ -11,7 +11,7 @@ for(const selector of ['#customerBulletinV229','.customer-bulletin-note-v229::be
 assert(magnetic.includes('content:none!important;display:none!important'), 'screws removed');
 assert(magnetic.includes('background:radial-gradient(circle'), 'magnet is rendered with CSS, no extra network fetch');
 assert(magnetic.includes('font-size:12px!important'), 'smaller gradebook label');
-assert(html.includes('id="customerBulletinV229"') && html.includes('id="bookingGradebook"'), 'existing functional DOM stays');
+assert(!html.includes('id="customerBulletinV229"') && html.includes('id="customerInboxV363"') && html.includes('id="bookingGradebook"'), 'v363 replaces visual board while preserving the gradebook');
 assert(/^v[0-9]+$/.test(ver.build) && Number(ver.build.slice(1))>=362,'magnetic board design exists since v362');
 assert(html.includes('customer-design.css?v='+ver.build));
 assert(app.includes("const APP_BUILD='"+ver.build+"'")&&app.includes("const APP_VERSION='"+ver.version+"'"));

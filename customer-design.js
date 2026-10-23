@@ -120,7 +120,7 @@
   function ticket() {
     const source=byId('passSummary'),dog=selectedDog(); if(!source||!dog)return;
     let root=byId('designTicket');
-    if(!root){root=document.createElement('section');root.id='designTicket';root.className='design-ticket';root.setAttribute('aria-label','Permanentka a vstupy');byId('bookingDogProfile').after(root);}
+    if(!root){root=document.createElement('section');root.id='designTicket';root.className='design-ticket';root.setAttribute('aria-label','Permanentka a vstupy');(byId('customerInboxV363')||byId('bookingDogProfile')).after(root);}
     root.classList.toggle('male',dog.sex==='male');
     const originalTitle=source.querySelector('span')?.textContent||'Vstup',counts=source.querySelector('strong')?.textContent||'';
     root.classList.toggle('design-ticket-single',counts==='Jednorazový');
@@ -181,7 +181,7 @@
       const target=root.querySelector('.design-empty-reminder'),notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu miesta do nedele 20:00.';target.hidden=!!notice?.classList.contains('hidden');target.classList.remove('design-deadline-closed');
     }
     byId('designBulletinTitle')?.remove();
-    const bulletin=byId('customerBulletinV229');if(bulletin&&root.nextElementSibling!==bulletin)root.after(bulletin);
+    const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile');if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
   }
   function layout() {
     if(!state.data)return;

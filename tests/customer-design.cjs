@@ -38,7 +38,9 @@ async function scenario(count){
   assert.equal(w.document.querySelector('.design-validity').parentElement.className,'design-ticket-usage');
   assert.equal(w.document.querySelector('.design-visits-title h2').textContent,'📅 Moje rezervácie');
   assert.equal(w.document.getElementById('designBulletinTitle'),null,'board has no redundant visible title');
-  assert.equal(w.document.getElementById('designNearest').nextElementSibling.id,'customerBulletinV229','published board stays in overview');
+  assert.equal(w.document.getElementById('bookingDogProfile').nextElementSibling.id,'customerInboxV363','compact inbox follows profile');
+  assert.equal(w.document.getElementById('customerInboxV363').nextElementSibling.id,'designTicket','inbox precedes pass');
+  assert.equal(w.document.getElementById('customerBulletinV229'),null,'visual board removed');
   assert.match(w.document.querySelector('.design-friends-inline').textContent,/Zobraziť kamošov v škôlke/);
   let photo=w.document.querySelector('.design-friend-strip img');assert(photo);
   run("state.data.availability.days[0].dogs.push({dog_id:9,name:'Kamarát 2',sex:'male'},{dog_id:10,name:'Kamarát 3',sex:'female'},{dog_id:11,name:'Kamarát 4',sex:'male'});renderDog()");

@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v362';
-const APP_VERSION='2.0.37';
+const APP_BUILD='v363';
+const APP_VERSION='2.0.38';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -397,6 +397,7 @@ async function flushCustomerSync(){
 
     // Same build + same data = keep the existing DOM exactly as it is.
     if(previousData&&previousFingerprint===nextFingerprint){
+      if(scopes.has('all')||scopes.has('announcements'))await loadAnnouncements(scopes.has('announcements'));
       return;
     }
 
@@ -425,7 +426,7 @@ async function flushCustomerSync(){
       if(typeof window.runCustomerOnboardingV75==='function')window.runCustomerOnboardingV75();
     });
 
-    if(all||scopes.has('announcements'))await loadAnnouncements();
+    if(all||scopes.has('announcements'))await loadAnnouncements(scopes.has('announcements'));
   }catch(error){
     if(navigator.onLine)console.warn('Live resync zlyhal',error)
   }finally{
@@ -527,7 +528,7 @@ function renderNotifications(){
   }
   notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(vaccinationCopyV234(n))).join('<br>')}</p>${group[0].notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}<button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
   notice.querySelectorAll('[data-care-notice]').forEach(b=>b.addEventListener('click',()=>{const row=careRows.find(n=>Number(n.id)===Number(b.dataset.careNotice));if(row)customerCareAction(row)}));
-  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
+  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer','announcement_push'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
   let modal=$('notificationPopup');
   if(!rows.length){modal?.classList.add('hidden');return}
   if(!modal){
@@ -654,7 +655,7 @@ async function cancelTaxiV326(btn){
 }
 function bookingFor(dogId,date){return (state.data?.requests||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date&&['pending','approved'].includes(r.status))||(state.data?.reservations||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date)}
 function applyLocalBooking(result,fallback){const row=result?.data||result?.booking||result?.request||fallback;if(!row)return;const rows=state.data?.requests||(state.data.requests=[]),index=rows.findIndex(r=>Number(r.id)===Number(row.id));if(index>=0)rows[index]={...rows[index],...row};else rows.push({...fallback,...row});renderUpcoming();renderDays();renderMessages();renderPassSummary()}
-async function loadAnnouncements(){return customerRenderers.announcements?customerRenderers.announcements():undefined}
+async function loadAnnouncements(force=false){return customerRenderers.announcements?customerRenderers.announcements(force):undefined}
 function renderMessagesCore(){const rows=state.data?.messages||[];$('messageThread').innerHTML=rows.length?rows.map(m=>`<div class="message-bubble ${m.sender_role==='customer'?'mine':''}"><p>${esc(m.body)}</p><small>${skTime(m.created_at)}</small></div>`).join(''):'<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';setTimeout(()=>{$('messageThread').scrollTop=$('messageThread').scrollHeight},0);const opts=futureItems();$('messageBooking').innerHTML='<option value="">Bez konkrétnej rezervácie</option>'+opts.map(r=>`<option value="${r.id||''}">${esc(dogName(r.dog_id))} · ${skDate(r.reservation_date)}</option>`).join('')}
 function renderMessages(){const out=renderMessagesCore();runCustomerHooks('afterRenderMessages',out);return out}
 function updateUnreadCore(){const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);$('messageUnread').classList.toggle('hidden',!unread);$('menuMessageUnread')?.classList.toggle('hidden',!unread)}
@@ -3570,8 +3571,10 @@ async function togglePushDirect(btn){
     if(!unread)return;
     const ids=new Set((state.data.messages||[]).filter(m=>m.sender_role==='staff'&&!m.read_at).map(m=>m.id));
     supportReadInFlight=true;
+    const account=state.session?.user?.id,conversation=state.data.conversation_id;
     try{
       await api({action:'mark_messages_read',conversation_id:Number(state.data.conversation_id)});
+      if(state.session?.user?.id!==account||state.data?.conversation_id!==conversation)return;
       const stamp=new Date().toISOString();
       (state.data.messages||[]).forEach(m=>{if(ids.has(m.id))m.read_at=stamp});
       updateUnread();
@@ -3582,6 +3585,7 @@ async function togglePushDirect(btn){
   function open(){
     if(!lateBookingContext)$('supportMessageBodyV52').value='';
     renderSupportThread();
+    $('notificationPopup')?.classList.add('hidden');
     supportPageScrollY=window.scrollY||document.scrollingElement?.scrollTop||0;
     document.documentElement.style.setProperty('--support-chat-lock-top',(-supportPageScrollY)+'px');
     document.documentElement.classList.add('support-chat-open-v52');
@@ -3592,7 +3596,7 @@ async function togglePushDirect(btn){
     supportLayout.open();
     $('supportMessageSend').disabled=supportSending||!$('supportMessageBodyV52').value.trim();
     requestAnimationFrame(()=>{const root=$('supportMessageThreadV52');root.scrollTop=root.scrollHeight});
-    updateButton();markRead();
+    updateButton();if(document.visibilityState==='visible')requestAnimationFrame(()=>{if(!$('supportChatModalV52').classList.contains('hidden'))void markRead();});
   }
 
   function close(){
@@ -4169,7 +4173,7 @@ function installVaccinationViewerZoomV244(modal){
   window.__customerBulletinV229=true;
   const $=id=>document.getElementById(id);
   const rowsState={items:[],read:new Set(),at:0,loading:null,session:null,error:false};
-  const select='id,title,body,valid_from,valid_until,created_at,paper_style,image_path,cta_enabled,cta_title,cta_body,cta_button_label,cta_url';
+  const select='id,active,title,body,valid_from,valid_until,created_at,paper_style,image_path,cta_enabled,cta_title,cta_body,cta_button_label,cta_url';
   const photoCacheV358=new Map();
   let articleEpochV358=0;
   function preparePhotoV358(url){
@@ -4187,7 +4191,19 @@ function installVaccinationViewerZoomV244(modal){
     if(photoCacheV358.size>8)photoCacheV358.delete(photoCacheV358.keys().next().value);
     return entry;
   }
-  let historyReturn=false;
+  let historyReturn=false,lockY=0,locked=false,returnFocus=null;
+  const layerKey='customerBulletinV363';
+  function recordLayer(name){if(history.state?.[layerKey]!==name)history.pushState({...history.state,[layerKey]:name},'',location.href);}
+  window.addEventListener('popstate',()=>{
+    if(!modalsReady)return;
+    const target=history.state?.[layerKey];
+    articleEpochV358++;
+    zoomModal.overlay.classList.add('hidden');
+    if(target==='article'&&loggedIn()){articleModal.overlay.classList.remove('hidden');archiveModal.overlay.classList.add('hidden');}
+    else if(target==='list'&&loggedIn()){articleModal.overlay.classList.add('hidden');openHistory(false);}
+    else{historyReturn=false;[archiveModal,articleModal].forEach(m=>m.overlay.classList.add('hidden'));}
+    syncScrollLock();
+  });
   let modalsReady=false;
   function loggedIn(){return !!(state.session?.access_token&&state.data?.dogs?.length)}
   function validDate(v){return !v||!Number.isNaN(new Date(v).getTime())}
@@ -4200,21 +4216,22 @@ function installVaccinationViewerZoomV244(modal){
   function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
   function modal(title,id){
     const overlay=el('div','customer-bulletin-modal-v229 hidden');overlay.id=id;
-    overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
+    overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-labelledby',id+'Title');
     const dialog=el('div','customer-bulletin-dialog-v229');const header=el('div','customer-bulletin-head-v229');
-    const h=el('h2','',title);const x=el('button','customer-bulletin-close-v229','×');x.type='button';x.setAttribute('aria-label','Zavrieť');
+    const h=el('h2','',title);h.id=id+'Title';const x=el('button','customer-bulletin-close-v229','×');x.type='button';x.setAttribute('aria-label','Zavrieť');
     const scroll=el('div','customer-bulletin-scroll-v229');
     header.append(h,x);dialog.append(header,scroll);overlay.append(dialog);document.body.append(overlay);
     overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
     x.addEventListener('click',()=>close());
-    function close(){overlay.classList.add('hidden');if(id==='customerBulletinArticleV229'){articleEpochV358++;if(historyReturn){historyReturn=false;openHistory(false)}}syncScrollLock()}
+    function close(){overlay.classList.add('hidden');if(id==='customerBulletinArticleV229'){articleEpochV358++;if(historyReturn){historyReturn=false;openHistory(false)}}syncScrollLock();const name=id==='customerBulletinHistoryV229'?'list':id==='customerBulletinArticleV229'?'article':'zoom';if(history.state?.[layerKey]===name)history.back();}
     return{overlay,dialog,h,scroll,x,close};
   }
   let archiveModal,articleModal,zoomModal;
-  window.customerBulletinAbortV358=()=>{articleEpochV358++;photoCacheV358.clear();historyReturn=false;[archiveModal,articleModal,zoomModal].forEach(modal=>modal?.overlay.classList.add('hidden'));syncScrollLock();};
+  window.customerBulletinAbortV358=()=>{articleEpochV358++;photoCacheV358.clear();historyReturn=false;rowsState.items=[];rowsState.read.clear();rowsState.at=0;rowsState.session=null;[archiveModal,articleModal,zoomModal].forEach(modal=>modal?.overlay.classList.add('hidden'));if(history.state?.[layerKey]){const next={...history.state};delete next[layerKey];history.replaceState(next,'',location.href);}drawBoard();syncScrollLock();};
   function ensureModals(){
     if(modalsReady)return;modalsReady=true;
     archiveModal=modal('Oznamy','customerBulletinHistoryV229');
+    archiveModal.h.textContent='Oznamy';archiveModal.h.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 6-3v20l-6-3H4V5Zm0 0v14M4 9H2v6h2m3 4 1 4h4l-2-4"/></svg>');
     articleModal=modal('','customerBulletinArticleV229');
     zoomModal=modal('','customerBulletinZoomV229');
     zoomModal.overlay.setAttribute('aria-label','Zväčšená fotografia oznamu');
@@ -4223,6 +4240,7 @@ function installVaccinationViewerZoomV244(modal){
     zoomModal.h.style.color='#fff';
     zoomModal.scroll.style.display='grid';zoomModal.scroll.style.placeItems='center';
     document.addEventListener('keydown',e=>{
+      if(e.key==='Tab'){const top=[zoomModal,articleModal,archiveModal].find(m=>!m.overlay.classList.contains('hidden'));if(top){const nodes=[...top.dialog.querySelectorAll('button,a[href],[tabindex="0"]')].filter(n=>!n.disabled&&!n.closest('[inert]'));const first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}return;}
       if(e.key!=='Escape')return;
       if(!zoomModal.overlay.classList.contains('hidden'))zoomModal.close();
       else if(!articleModal.overlay.classList.contains('hidden'))articleModal.close();
@@ -4230,39 +4248,44 @@ function installVaccinationViewerZoomV244(modal){
     });
   }
   function syncScrollLock(){
-    const any=[archiveModal,articleModal,zoomModal].some(x=>x&&!x.overlay.classList.contains('hidden'));
+    const top=[zoomModal,articleModal,archiveModal].find(x=>x&&!x.overlay.classList.contains('hidden'));
+    const any=!!top;
+    if(any&&!locked){lockY=window.scrollY||0;returnFocus=document.activeElement;document.documentElement.style.setProperty('--bulletin-lock-top-v363',(-lockY)+'px');}
     document.documentElement.classList.toggle('customer-bulletin-open-v229',any);
+    if($('appView'))$('appView').inert=any;
+    const nav=document.querySelector('.bottom-nav');if(nav)nav.inert=any;
+    [archiveModal,articleModal,zoomModal].forEach(m=>{if(m)m.overlay.inert=any&&m!==top;});
+    if(top&&!top.dialog.contains(document.activeElement))top.x.focus({preventScroll:true});
+    if(!any&&locked){document.documentElement.style.removeProperty('--bulletin-lock-top-v363');window.scrollTo(0,lockY);if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});}
+    locked=any;
   }
   function rows(){return rowsState.items.slice().sort((a,b)=>String(b.valid_from||b.created_at||'').localeCompare(String(a.valid_from||a.created_at||'')))}
   function drawBoard(){
-    const host=$('customerBulletinItemsV229');if(!host)return;host.replaceChildren();
-    const live=rows().filter(current).slice(0,2);
-    if(!live.length){host.append(el('div','customer-bulletin-empty-v229',!rowsState.at&&loggedIn()?'Načítavam oznamy…':rowsState.error?'Oznamy sa momentálne nepodarilo načítať.':'Zatiaľ žiadne oznamy.'));return}
-    live.forEach(row=>{
-      const b=el('button','customer-bulletin-note-v229');b.type='button';b.dataset.style=['rose','cream','mint'].includes(row.paper_style)?row.paper_style:'rose';
-      if(!rowsState.read.has(Number(row.id)))b.dataset.unread='true';
-      const title=el('strong','',row.title||'Oznam');
-      const excerpt=el('span','customer-bulletin-excerpt-v229',row.body||'');
-      const action=el('span','customer-bulletin-open-v229','Otvoriť oznam →');
-      b.append(title,excerpt,action);b.addEventListener('click',()=>openArticle(row,false));host.append(b);
-    });
+    const count=rows().filter(row=>!rowsState.read.has(Number(row.id))).length;
+    const badge=$('customerAnnouncementsCountV363');if(badge){badge.textContent=String(count);badge.classList.toggle('hidden',!count);}
+    $('customerAnnouncementsV363')?.setAttribute('aria-label',count?'Oznamy, neprečítané: '+count:'Oznamy');
   }
   function drawHistory(){
     if(!archiveModal)return;
     const host=archiveModal.scroll;host.replaceChildren();
     const saved=rows();
-    if(!saved.length){host.append(el('div','customer-bulletin-history-empty-v229','Zatiaľ žiadne oznamy.'));return}
+    if(!saved.length){host.append(el('p','customer-bulletin-history-empty-v229',rowsState.error?'Oznamy sa momentálne nepodarilo načítať.':!rowsState.at?'Načítavam oznamy…':'Zatiaľ nemáte žiadne oznamy.'));if(rowsState.error){const retry=el('button','btn secondary','Skúsiť znova');retry.type='button';retry.onclick=()=>refresh(true);host.append(retry);}return;}
+    if(rowsState.error)host.append(el('p','','Oznamy sa nepodarilo obnoviť. Zobrazené sú naposledy načítané údaje.'));
     saved.forEach(row=>{
-      const b=el('button','customer-bulletin-history-row-v229');b.type='button';
-      b.append(el('strong','',row.title||'Oznam'));
-      const status=current(row)?'Aktuálny oznam':'Starší oznam';
-      const s=el('small','',status);
-      if(!rowsState.read.has(Number(row.id))){s.append(' · ');s.append(el('span','customer-bulletin-new-v229','Nové'))}
-      b.append(s);b.addEventListener('click',()=>openArticle(row,true));host.append(b);
+      const b=el('button','customer-bulletin-history-row-v229');b.type='button';b.dataset.announcementId=String(row.id);
+      const photo=safePhoto(row.image_path),thumb=el('span','customer-notice-thumb-v363');
+      const paw=()=>{thumb.replaceChildren();thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';};
+      if(photo){const img=el('img');img.src=photo;img.alt='';img.loading='lazy';img.onerror=paw;thumb.append(img);}else paw();
+      const content=el('span','customer-notice-content-v363');
+      const head=el('span','customer-notice-head-v363');head.append(el('strong','',row.title||'Oznam'));
+      if(!rowsState.read.has(Number(row.id)))head.append(el('span','customer-bulletin-new-v229','Nové'));
+      content.append(head,el('span','customer-notice-excerpt-v363',row.body||''),el('span','customer-notice-action-v363','Zobraziť oznam ›'));
+      b.append(thumb,content);b.addEventListener('click',()=>openArticle(row,true));host.append(b);
     });
   }
   async function markRead(row){
     if(!loggedIn()||rowsState.read.has(Number(row.id)))return;
+    try{await ensureCustomerSessionV357();}catch(_){return;}
     const currentToken=state.session?.access_token;
     try{
       const res=await fetch(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?on_conflict=announcement_id,user_id',{
@@ -4297,12 +4320,12 @@ function installVaccinationViewerZoomV244(modal){
     },{passive:true});
     img.addEventListener('touchcancel',resetZoom,{passive:true});
     img.addEventListener('dblclick',e=>{e.preventDefault();scale=scale>1?1:2;render()});
-    zoomModal.scroll.append(img);zoomModal.overlay.classList.remove('hidden');syncScrollLock();
+    zoomModal.scroll.append(img);recordLayer('zoom');zoomModal.overlay.classList.remove('hidden');syncScrollLock();
   }
   async function openArticle(row,fromHistory){
     if(!row||!loggedIn())return;
     ensureModals();
-    historyReturn=!!fromHistory;
+    historyReturn=!!fromHistory;recordLayer('article');$('notificationPopup')?.classList.add('hidden');
     archiveModal.overlay.classList.add('hidden');
     articleModal.h.textContent=row.title||'Oznam';
     articleModal.scroll.replaceChildren();
@@ -4342,6 +4365,7 @@ function installVaccinationViewerZoomV244(modal){
   function openHistory(refreshData=true){
     if(!loggedIn())return;
     ensureModals();historyReturn=false;
+    if(refreshData)recordLayer('list');
     archiveModal.overlay.classList.remove('hidden');drawHistory();syncScrollLock();
     if(refreshData)void refresh(false);
   }
@@ -4351,19 +4375,22 @@ function installVaccinationViewerZoomV244(modal){
     }
     try{if(customerSessionNeedsRefreshV357()||sessionRefreshInFlight)await ensureCustomerSessionV357()}catch(_){return;}
     const token=state.session.access_token;
+    const account=state.session?.user?.id;
+    if(rowsState.account!==account){rowsState.items=[];rowsState.read.clear();rowsState.at=0;rowsState.account=account;drawBoard();drawHistory();}
     if(rowsState.session!==token){rowsState.at=0;rowsState.session=token}
-    if(rowsState.loading)return rowsState.loading;
+    if(rowsState.loading){const previousToken=rowsState.loadingToken;await rowsState.loading;if(state.session?.access_token===token&&previousToken!==token)return refresh(force);return;}
     if(!force&&rowsState.at&&Date.now()-rowsState.at<60000){drawBoard();drawHistory();return}
+    rowsState.loadingToken=token;
     rowsState.loading=(async()=>{
       const headers={apikey:SUPABASE_KEY,Authorization:'Bearer '+token};
       const [pub,read]=await Promise.all([
-        fetch(SUPABASE_URL+'/rest/v1/portal_announcements?select='+encodeURIComponent(select)+'&order=created_at.desc&limit=100',{headers,cache:'no-store'}),
-        fetch(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?select=announcement_id',{headers,cache:'no-store'})
+        fetch(SUPABASE_URL+'/rest/v1/portal_announcements?active=eq.true&valid_from=lte.'+encodeURIComponent(new Date().toISOString())+'&select='+encodeURIComponent(select)+'&order=created_at.desc&limit=1000',{headers,cache:'no-store'}),
+        fetch(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?user_id=eq.'+encodeURIComponent(account)+'&select=announcement_id',{headers,cache:'no-store'})
       ]);
-      if(!pub.ok)throw Error('Oznamy sa nedajú načítať ('+pub.status+').');
+      if(!pub.ok||!read.ok)throw Error('Oznamy sa nedajú načítať ('+(pub.ok?read.status:pub.status)+').');
       const json=await pub.json();
       if(state.session?.access_token!==token)return;
-      rowsState.items=(Array.isArray(json)?json:[]).filter(r=>r.active!==false&&validDate(r.valid_from)&&validDate(r.valid_until));
+      rowsState.items=(Array.isArray(json)?json:[]).filter(r=>r.active!==false&&validDate(r.valid_from)&&validDate(r.valid_until)&&(!r.valid_from||new Date(r.valid_from).getTime()<=Date.now()));
       if(read.ok){
         const receipts=await read.json();
         if(state.session?.access_token===token)rowsState.read=new Set((Array.isArray(receipts)?receipts:[]).map(x=>Number(x.announcement_id)));
@@ -4375,12 +4402,16 @@ function installVaccinationViewerZoomV244(modal){
     return rowsState.loading;
   }
   // Replace the historical auto-opening popup renderer: clicking a note is now required.
-  customerRenderers.announcements=()=>refresh(false);
+  customerRenderers.announcements=(force=false)=>refresh(force);
+  window.openCustomerAnnouncementV363=async(id,beforeOpen)=>{const user=state.session?.user?.id;await refresh(false);if(rowsState.error||!user||state.session?.user?.id!==user)return false;const row=rows().find(r=>Number(r.id)===Number(id));if(!row){toast('Tento oznam už nie je dostupný.');return true;}beforeOpen?.();void openArticle(row,false);return true;};
   addCustomerHook('afterSwitchTab',tab=>{if(tab==='booking'||tab==='menu')void refresh(false)});
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(false)});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(true)});
   window.addEventListener('pageshow',event=>{if(event.persisted&&loggedIn())void refresh(false)});
   function init(){
     $('menuBulletinV229')?.addEventListener('click',()=>openHistory(true));
+    $('customerAnnouncementsV363')?.addEventListener('click',()=>openHistory(true));
+    $('customerMessagesV363')?.addEventListener('click',openCustomerChat);
+    addCustomerHook('afterUpdateUnread',()=>{const count=(state.data?.messages||[]).filter(m=>m.sender_role==='staff'&&!m.read_at).length;const badge=$('customerMessagesCountV363');if(badge){badge.textContent=String(count);badge.classList.toggle('hidden',!count);}$('customerMessagesV363')?.setAttribute('aria-label',count?'Správy, neprečítané: '+count:'Správy');});
     drawBoard();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
@@ -4389,3 +4420,37 @@ function installVaccinationViewerZoomV244(modal){
 
 
 
+
+/* v363: only an explicit notification URL requests navigation; login retains it. */
+(function customerNotificationTargetV363(){
+  let running=false;
+  function target(){
+    const p=new URLSearchParams(location.search),kind=p.get('open');
+    if(kind!=='messages'&&kind!=='announcement')return null;
+    const raw=p.get(kind==='messages'?'conversation':'announcement'),id=Number(raw);
+    if(!raw||!Number.isSafeInteger(id)||id<=0)return null;
+    return {kind,id,recipient:p.get('recipient')||''};
+  }
+  function consume(){const u=new URL(location.href);['open','conversation','announcement','recipient'].forEach(k=>u.searchParams.delete(k));history.replaceState(history.state,'',u.pathname+u.search+u.hash);}
+  async function openPending(){
+    const t=target();
+    if(running||!t||!state.session?.user?.id||!state.data||state.data.profile?.status!=='active'||$('appView')?.classList.contains('hidden')||window.__customerOnboardingCompleteV75!==true||document.visibilityState==='hidden')return;
+    if(t.recipient&&t.recipient!==state.session.user.id){consume();toast('Toto upozornenie patrí inému účtu.');return;}
+    running=true;
+    const account=state.session.user.id;
+    try{
+      window.customerGuideAbortV358?.();
+      if(t.kind==='messages'){
+        if(Number(state.data.conversation_id)!==t.id){consume();toast('Táto konverzácia nie je dostupná pre váš účet.');return;}
+        consume();openCustomerChat();
+      }else{
+        const opened=await window.openCustomerAnnouncementV363?.(t.id,()=>{if(state.session?.user?.id===account)consume();});
+        if(opened&&state.session?.user?.id===account)consume();
+      }
+    }finally{running=false;}
+  }
+  addCustomerHook('afterBootstrap',()=>{void openPending();});
+  document.addEventListener('customer-onboarding-ready-v358',()=>{void openPending();});
+  window.addEventListener('pageshow',()=>{void openPending();});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void openPending();});
+})();
