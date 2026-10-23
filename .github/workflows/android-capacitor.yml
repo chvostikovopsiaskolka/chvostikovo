@@ -23,8 +23,8 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: android-actions/setup-android@v3
-      - name: Install Android SDK
-        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
       - name: Install pinned dependencies and sync shared assets
         working-directory: mobile
         run: |
