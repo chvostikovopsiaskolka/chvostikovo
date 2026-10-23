@@ -1,3 +1,20 @@
+# Customer v365 / 2.0.40 — profile containment and Liquid polish
+
+Based on verified production v364, commit `d9302acab613b55b5d132c3a33d3a6d3e2f7acab`, successful CI 39994035233 and READY deployment `dpl_Gd8PUqttb3uemNCJYqwvaCUd6D3q`. User iPhone screenshot confirmed the profile icons/name escaped the new information panel: inherited negative divider gutters were retained in v364.
+
+- Reset the name, icon and gradebook negative offsets; anchor the information background to its own positioned content box. Use a 42% photo column and internal panel padding. All three information rows share a 12px font (11px on narrow screens); two-dog rows share 11px. Keep the large gender-coloured name.
+- One solid `#f5b17c` orange under the background paws, including HTML safe area, body, Reservations and Menu. Matching HTML/PWA theme colours. Remove one of nine background paws (11.1% fewer); pass-entry paw counters are unchanged.
+- Lower white surface opacity from .85 to .58; 12px blur and 145% saturation create a clearer glass effect. Keep white edge, shadow, opaque unsupported/reduced-transparency fallback and readable text.
+- Remove the redundant capacity legend from the rendered calendar. Selected-day heading follows the calendar directly; per-day occupancy/status remains.
+
+No backend, notifications, accounting or reservation rules changed. The v364 message preview and push navigation are preserved. No extra API traffic, synthetic production records, messages or push.
+
+Validation: mandatory release contract and complete workflow locally and on final GitHub SHA before merge. Browser fixture covers 320/360/390/430, 844x390 and 1280 for one/two dogs, information content/icon bounding boxes, equal three-row fonts, menu colour scope, no legend, active/queued passes, long name, article, calendar, opaque fallback and stable nav. Physical iOS/Android rendering remains unverified; Chromium platform user agents do not prove device behaviour.
+
+Rollback: immutable `backup/customer-before-polish-v365-20261023` points to `d9302acab613b55b5d132c3a33d3a6d3e2f7acab`; previous Vercel `dpl_Gd8PUqttb3uemNCJYqwvaCUd6D3q`. Prefer a selective revert when newer releases exist. No DB rollback.
+
+## Previous v364 release evidence
+
 # Customer v364 / 2.0.39 — Liquid surfaces and message preview
 
 Release candidate based on the verified live customer commit `2f212bc669cdeda1960a4b2b9797a78c38d9236b` (v363 / 2.0.38). Before editing, all eight served app-shell files matched that Git commit and Vercel deployment `dpl_EpWXRLX2aKs8tFy6CuW4m6UwuhRX` on `app.chvostikovo.sk`.

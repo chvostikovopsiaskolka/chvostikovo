@@ -260,9 +260,9 @@ async function scenario(count){
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').disabled,false);
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,false,'real reservation submit appears after selection');
   assert.equal(w.document.getElementById('designSelectedDaysTitle').textContent,'Vybraté dni ↓');
-  assert.equal(w.document.getElementById('designSelectedDaysTitle').previousElementSibling.id,'designCapacityLegend','selected hint follows legend');
+  assert.equal(w.document.getElementById('designSelectedDaysTitle').previousElementSibling.id,'bookingPickerDaysV37','selected hint follows calendar');
   assert.equal(w.document.getElementById('designSelectedDaysTitle').nextElementSibling.id,'bookingPickerTaxiSectionV91','selected hint precedes selected dates');
-  assert(w.document.getElementById('designCapacityLegend'));
+  assert.equal(w.document.getElementById('designCapacityLegend'),null);
   assert.equal(w.document.querySelectorAll('#designMyBookings img').length,0);
   assert.equal(w.document.querySelector('.design-empty-booking-cta').textContent,'Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.');
   assert.equal(w.document.getElementById('designReservationNotice').parentElement.id,'bookingPickerDaysV37','deadline is inside highlighted two-week calendar');
