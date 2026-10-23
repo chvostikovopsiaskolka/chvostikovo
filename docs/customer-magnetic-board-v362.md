@@ -10,3 +10,5 @@ Implementation:
 - Leave registration, calendar, bookings, roster visibility, vaccinations, permanentka, telemetry and nav untouched. No DB, admin or Supabase change. PWA version 2.0.37/v362 with standard cache bump.
 - Android Capacitor remains an isolated draft; sync shared sources and version into it and produce a NEW debug APK, not a Play release. Physical iOS/Android UI and native push cannot be asserted from CI.
 Acceptance: existing customer-design, customer guide/session, bulletin and v362 CSS/version tests PASS, Android build PASS if attempted, live Git/Vercel alias plus served-file verification, physical devices pending.
+
+Quality gate updated after first two PR164 failures: version-agnostic carry-forward assertions in v361/v362 visual tests, one early centralized cross-file release preflight, documented in STABILITY.md and docs/release-versioning.md. Do not claim a new deployment from updating tests; exact new commit CI and Vercel evidence still required.

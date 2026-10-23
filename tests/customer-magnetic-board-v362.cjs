@@ -12,8 +12,8 @@ assert(magnetic.includes('content:none!important;display:none!important'), 'scre
 assert(magnetic.includes('background:radial-gradient(circle'), 'magnet is rendered with CSS, no extra network fetch');
 assert(magnetic.includes('font-size:12px!important'), 'smaller gradebook label');
 assert(html.includes('id="customerBulletinV229"') && html.includes('id="bookingGradebook"'), 'existing functional DOM stays');
-assert(html.includes('customer-design.css?v=v362')&&!html.includes('?v=v361'));
-assert(app.includes("const APP_BUILD='v362'")&&app.includes("const APP_VERSION='2.0.37'"));
-assert.equal(ver.build,'v362');assert.equal(ver.version,'2.0.37');
-assert(sw.includes('shell-v362')&&!sw.includes('?v=v361'));
+assert(/^v[0-9]+$/.test(ver.build) && Number(ver.build.slice(1))>=362,'magnetic board design exists since v362');
+assert(html.includes('customer-design.css?v='+ver.build));
+assert(app.includes("const APP_BUILD='"+ver.build+"'")&&app.includes("const APP_VERSION='"+ver.version+"'"));
+assert(sw.includes('shell-'+ver.build));
 console.log('PASS v362 magnetic notice board, preserved labels/interactions and release cache');
