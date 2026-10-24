@@ -30,6 +30,7 @@ async function run(engine, width, height, suffix) {
     const page = await context.newPage();
     await page.goto(base + "/", { waitUntil: "domcontentloaded" });
     await page.locator("h1").first().waitFor();
+    await page.locator(".mobile-dock[data-hydrated=\"true\"]").waitFor({ timeout: 20000 });
     await page.waitForTimeout(600);
 
     const details = await page.evaluate(() => {
@@ -63,7 +64,7 @@ async function run(engine, width, height, suffix) {
       assert(Math.abs((fixedTop?.y ?? 0) - (details.top ?? 0)) < 3, suffix + " dock must not move on scroll");
 
       await page.getByRole("button", { name: /otvoriť menu/i }).click();
-      await page.locator(".mobile-dock-menu").waitFor({ state: "visible" });
+      await page.locator(".mobile-dock-menu").waitFor({ state: "visible", timeout: 8000 });
       await page.screenshot({ path: "artifacts/mobile-dock/" + suffix + "-menu.png" });
       await page.keyboard.press("Escape");
       await page.locator(".mobile-dock-menu").waitFor({ state: "hidden" });
