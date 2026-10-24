@@ -393,13 +393,13 @@
   .mobile-dock-overlay {
     position: fixed;
     inset: 0;
-    z-index: 53;
+    z-index: 56;
     background: rgba(20, 47, 36, .33);
   }
   .mobile-dock-menu {
     box-sizing: border-box;
     position: fixed;
-    z-index: 56;
+    z-index: 57;
     left: max(8px, calc((100vw - 640px) / 2));
     right: max(8px, calc((100vw - 640px) / 2));
     bottom: calc(80px + env(safe-area-inset-bottom, 0px));
