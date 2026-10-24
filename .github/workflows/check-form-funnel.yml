@@ -22,6 +22,8 @@ jobs:
         run: bun run check:critical-forms
       - name: AI referral regression
         run: node scripts/ai-referral-checks.cjs
+      - name: Mobile dock contract
+        run: node scripts/mobile-dock-contract.cjs
       - name: TypeScript validation
         run: bun run check:types
       - name: Build static pages
