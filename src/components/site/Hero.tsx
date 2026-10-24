@@ -18,7 +18,7 @@ function scrollToWhyChvostikovo() {
 
 export function Hero({ background, learnMoreHref }: { background?: ReactNode; learnMoreHref?: string }) {
   return (
-    <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-24 lg:pb-1">
+    <section id="top" className="relative overflow-hidden pt-4 pb-0 sm:pt-6 lg:pt-24 lg:pb-1">
       {background ?? <PawTrailBackground />}
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
