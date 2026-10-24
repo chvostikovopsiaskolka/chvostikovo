@@ -90,6 +90,7 @@ jobs:
 
       - name: Customer reservation controls v326
         run: |
+          node tests/customer-frosted-glass-pilot.cjs
           node tests/customer-liquid-v364.cjs
           node tests/customer-inbox-v363.cjs
           node tests/customer-push-routing-v363.cjs
