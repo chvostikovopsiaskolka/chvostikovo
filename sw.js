@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-v374';
+const CACHE='chvostikovo-portal-shell-v375';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/customer-guide-v358.js?v=v374','/customer-guide-v358.css?v=v374','/telemetry-v345.js?v=v374','/loading-motion.js?v=v374','/loading-design.css?v=v374','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v374','/customer-design.css?v=v374','/dog-choice-fab-v276.css?v=v374','/dual-dog-overview-v246.js?v=v374','/dual-dog-overview-v246.css?v=v374','/','/terms-pdf.js?v=v374','/terms-pdf-font.js?v=v374','/styles.css?v=v374','/bulletin-photo-v243.css?v=v374','/app.js?v=v374','/back-swipe.js?v=v374'];
+const SHELL=['/customer-liquid-optics.js?v=v375','/vendor/liquidlens/liquid-glass.js','/vendor/simple-liquid-glass/webgl.js','/vendor/liquidlens/chvostikovo-paws.png','/customer-guide-v358.js?v=v375','/customer-guide-v358.css?v=v375','/telemetry-v345.js?v=v375','/loading-motion.js?v=v375','/loading-design.css?v=v375','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v375','/customer-design.css?v=v375','/dog-choice-fab-v276.css?v=v375','/dual-dog-overview-v246.js?v=v375','/dual-dog-overview-v246.css?v=v375','/','/terms-pdf.js?v=v375','/terms-pdf-font.js?v=v375','/styles.css?v=v375','/bulletin-photo-v243.css?v=v375','/app.js?v=v375','/back-swipe.js?v=v375'];
 
 function withPortalCsp(response){
   if(!response)return response;
