@@ -229,9 +229,9 @@ if (!routeSource.includes(oldRealizations)) {
 routeSource = routeSource.replace(oldRealizations, newRealizations);
 
 const oldHeroSpacing =
-  'className="scroll-mt-24 relative overflow-hidden pt-28 pb-14 sm:pt-32 sm:pb-20"';
+  'className="scroll-mt-24 relative overflow-hidden pt-8 pb-14 sm:pt-10 sm:pb-20 lg:pt-32"';
 const newHeroSpacing =
-  'className="scroll-mt-24 relative overflow-hidden pt-28 pb-6 sm:pt-32 sm:pb-14"';
+  'className="scroll-mt-24 relative overflow-hidden pt-8 pb-6 sm:pt-10 sm:pb-14 lg:pt-32"';
 if (!routeSource.includes(oldHeroSpacing)) {
   throw new Error("Expected hero spacing classes were not found in product route");
 }
