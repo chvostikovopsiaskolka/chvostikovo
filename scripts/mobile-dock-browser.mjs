@@ -31,6 +31,13 @@ async function run(engine, width, height, suffix) {
     await page.goto(base + "/", { waitUntil: "domcontentloaded" });
     await page.locator("h1").first().waitFor();
     await page.locator(".mobile-dock[data-hydrated=\"true\"]").waitFor({ timeout: 20000 });
+    // Fresh-visitor consent blocks page interaction by design. Choose
+    // necessary-only and let the existing confirmation toast disappear.
+    const consent = page.getByRole("dialog", { name: /Používame cookies|We use cookies/i });
+    if (await consent.isVisible()) {
+      await consent.getByRole("button", { name: /Len nevyhnutné|Necessary only/i }).click();
+      await page.getByRole("status").waitFor({ state: "hidden", timeout: 10000 });
+    }
     await page.waitForTimeout(600);
 
     const details = await page.evaluate(() => {
