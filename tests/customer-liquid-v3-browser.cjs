@@ -11,7 +11,9 @@ const launch=type=>type.launch(type===chromium?{headless:true,executablePath:pro
  browser=await launch(type);const {page,context,errors}=await fixture(browser,dogs,width,engine);
  await page.evaluate(()=>{state.data.passes=[{id:1,dog_id:1,dog_ids:[1,2],total_entries:10,used_entries:6,status:'active',valid_until:'2099-12-31'}];renderPassSummary();renderDog();});await page.waitForTimeout(500);
  const nav=await page.locator('.bottom-nav').boundingBox();
+ if(engine==='webkit'&&!process.env.V3_LOW_CONTEXT)await page.waitForFunction(()=>{const d=window.customerLiquidV3Diagnostics?.();return d?.surfaces.some(s=>s.renderer==='webgl'||s.reason);},null,{timeout:15000});
  const diag=await page.evaluate(()=>window.customerLiquidV3Diagnostics?.());
+ console.log('READY DIAGNOSTICS',engine,dogs,width,JSON.stringify(diag));
  if(!process.env.V3_BASELINE){assert(diag);assert(diag.contexts<=2);assert(diag.mapGenerations<30);if(process.env.V3_LOW_CONTEXT){assert.equal(diag.contexts,0);assert.equal(diag.mapGenerations,0);}else if(engine==='webkit'){assert(diag.surfaces.some(s=>s.renderer==='webgl'),'WebKit must really render the WebGL output');assert(diag.contexts>=1&&diag.contexts<=2);}console.log('DIAGNOSTICS',engine,dogs,width,JSON.stringify(diag));}
  if(width===390)await page.screenshot({path:path.join(out,`${process.env.V3_LOW_CONTEXT?'fallback':process.env.V3_BASELINE?'before':'after'}-${engine}-${dogs}.png`),animations:'disabled'});
  for(const id of ['navDog','navBooking']){await page.locator('#'+id).click();await page.waitForTimeout(120);assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav,'fixed dock survives tab switching');}

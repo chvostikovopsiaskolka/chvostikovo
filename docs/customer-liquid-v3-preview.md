@@ -30,6 +30,8 @@ CI40126399043: existing verify job SUCCESS; browser job first failed because the
 
 CI40126637812: verify SUCCESS; the browser optical proof failed only for the sparse two-dog scene on Chromium151, where changed font metrics moved the paw pattern away from the sampled card rim. The SVG pixel proof now temporarily uses a controlled striped QA backdrop on the actual app material, with a stronger>100pixel threshold, then restores the real wallpaper. Product screenshots remain on the unchanged paw artwork. This avoids judging support from CSS syntax or an accidentally flat sample.
 
+CI40126943408: verify and all Chromium browser/pixel cases passed (839changedpixels for each dog count); WebKit was not active at the fixed500ms sample. Browser readiness now waits for actual active/error diagnostics, bounded15seconds, instead of a timing assumption, and the Linux CI job explicitly requests software Mesa rendering. A fallback or real WebGL failure still fails the required high-resource optical check.
+
 ## Rollback and release gate
 
 Production remains on `5b8d89e50b003081af1453aa42adb8e2428dd386` / deployment above. Before-V3 pilot is `ff7f796988b4fd1b0d5acce32d5da7e5377edded` (local backup/customer-liquid-v3-before-20261024); remote backup push was rejected by automatic approval review and was not retried. Revert only the V3 preview commit or close the draft to discard it. No data rollback.
