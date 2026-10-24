@@ -1,31 +1,35 @@
 'use strict';
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const css = fs.readFileSync('customer-design.css', 'utf8');
-const marker = '/* White Frosted Liquid Glass pilot (review branch only).';
-assert.equal(css.split(marker).length, 2, 'one isolated glass pilot appended after the existing CSS');
-const pilot = css.split(marker)[1];
-assert.match(pilot, /@supports\s*\(\(-webkit-backdrop-filter:blur\(1px\)\) or \(backdrop-filter:blur\(1px\)\)\)/);
-assert.match(pilot, /--customer-glass-optics:blur\(18px\) saturate\(150%\)/);
-assert.match(pilot, /--customer-glass-fill:rgba\(255,255,255,\.56\)/);
-assert.match(pilot, /data-customer-glass-pilot="soft"/);
-assert.match(pilot, /data-customer-glass-pilot="rich"/);
-for (const selector of [
-  '#bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before',
-  '#bookingDogProfile .dual-dog-info-v254',
-  '#designTicket.design-ticket',
-  '#designNearest.design-nearest',
-  '#customerInboxV363>button'
-]) assert(pilot.includes(selector), 'pilot includes '+selector);
-assert.match(pilot, /-webkit-backdrop-filter:var\(--customer-glass-optics\)!important/);
-assert.match(pilot, /backdrop-filter:var\(--customer-glass-optics\)!important/);
-assert.match(pilot, /\.bottom-nav::before\s*\{[^}]*pointer-events:none;[^}]*backdrop-filter:var\(--customer-glass-optics\)/s);
-assert.match(pilot, /\.bottom-nav > :is\(button,a\)\s*\{[^}]*z-index:1/s);
-const stableNav = css.split('/* v370: one document scroller')[1].split(marker)[0];
-assert.match(stableNav, /\.customer-design \.bottom-nav\s*\{[^}]*transform:none!important;[^}]*backdrop-filter:none!important/s, 'outer viewport-owned nav must not become a filtered containing block');
-assert.match(pilot, /@media \(prefers-reduced-transparency:reduce\)/);
-const reduced = pilot.split('@media (prefers-reduced-transparency:reduce)')[1];
-assert.match(reduced, /backdrop-filter:none!important/);
-assert.match(reduced, /\.bottom-nav::before\s*\{\s*display:none!important/);
-assert(!pilot.includes('@keyframes') && !pilot.includes('url('), 'no motion/network material');
-console.log('PASS White Frosted Liquid Glass pilot selectors, optics, nav isolation and accessibility fallback');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const css=fs.readFileSync('customer-design.css','utf8');
+const html=fs.readFileSync('index.html','utf8');
+const optics=fs.readFileSync('customer-liquid-optics.js','utf8');
+const core=fs.readFileSync('vendor/liquid-glass/liquid-glass-core.js','utf8');
+assert.equal(css.split('/* Liquid Glass refraction pilot — v2.').length,2,'one optical pilot');
+const pilot=css.split('/* Liquid Glass refraction pilot — v2.')[1];
+assert.match(pilot,/--customer-lg-fallback:blur\(7px\) saturate\(155%\) brightness\(1\.10\) contrast\(1\.12\)/);
+assert.match(pilot,/radial-gradient\(ellipse/,'specular glints exist');
+assert.match(pilot,/linear-gradient\(144deg/,'material sheen exists');
+assert.match(pilot,/border:1px solid rgba\(255,255,255,\.68\)!important/);
+assert.match(pilot,/\.bottom-nav::before\s*\{[^}]*pointer-events:none;/s);
+assert.match(pilot,/\.bottom-nav > :is\(button,a\)\s*\{position:relative;z-index:1\}/);
+assert.match(pilot,/\.customer-design \.bottom-nav\{background:transparent!important\}/);
+assert.match(pilot,/\.bottom-nav\.customer-lg-map-ready::before/,'refractive rim not whole navigation');
+assert.match(pilot,/customer-lg-filter\) blur\(\.3px\)/,'supported SVG optical filter');
+assert.match(pilot,/@media \(prefers-reduced-transparency:reduce\)/);
+const reduced=pilot.split('@media (prefers-reduced-transparency:reduce)')[1];
+assert.match(reduced,/backdrop-filter:none!important/);
+assert.match(reduced,/\.bottom-nav::before\{display:none!important\}/);
+assert.match(pilot,/@media \(prefers-contrast:more\)/);
+assert.match(html,/<script type="module" src="\/customer-liquid-optics\.js\?v=v374"><\/script>/);
+assert.match(optics,/from '\.\/vendor\/liquid-glass\/liquid-glass-core\.js'/);
+assert.match(optics,/createLiquidGlassDisplacementPixels/);
+assert.match(optics,/supportsLiquidGlassSvgFilter/);
+assert.match(optics,/pixels\.scale\/supersample\*1\.16/,'measured SVG displacement scale');
+assert.match(optics,/new MutationObserver\(schedule\)/);
+assert.match(core,/export function createLiquidGlassDisplacementPixels/);
+assert.match(core,/roundedRectSdf/);
+assert.match(core,/supportsLiquidGlassSvgFilter/);
+assert(fs.existsSync('vendor/liquid-glass/LICENSE.txt'),'upstream attribution and MIT notice');
+assert(!optics.includes('fetch(')&&!optics.includes('setInterval('),'optics has no added backend polling');
+console.log('PASS genuine measured refraction, iOS fallback, optical edge, stable dock, accessibility and no network calls');
