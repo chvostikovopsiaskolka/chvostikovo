@@ -4,6 +4,7 @@ import logo from "@/assets/logo.png";
 import { PHONE, PHONE_PRETTY } from "@/content/site";
 import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
+import { MobileDock } from "./MobileDock";
 import { trackMarketingInteraction } from "@/lib/analytics";
 
 const NAV_MOBILE_BEFORE_ABOUT = [
@@ -129,7 +130,8 @@ export function Header({
 
   if (landingMinimal) {
     return (
-      <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2.5 min-[390px]:px-3 min-[390px]:pt-3">
+    <>
+      <header className="fixed inset-x-0 top-0 z-50 hidden px-2 pt-2.5 lg:block min-[390px]:px-3 min-[390px]:pt-3">
         <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/95 px-4 py-2.5 shadow-soft backdrop-blur-md min-[390px]:px-5 sm:px-6">
           <a href="/" className="shrink-0" aria-label="Chvostíkovo - domov">
             <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-5 w-auto sm:h-6" />
@@ -145,11 +147,17 @@ export function Header({
           </a>
         </div>
       </header>
+      <MobileDock onApplicationOpen={() => { setApplicationSent(false); setOpen(true); }} />
+      <FormDialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setApplicationSent(false); }} hideHeader={applicationSent} title={applicationSent ? "Prihláška odoslaná" : "Prihlás svojho psíka ešte dnes"} subtitle="Vyplňte prihlášku do škôlky, v ktorej nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky.">
+        <LongForm onSent={() => setApplicationSent(true)} />
+      </FormDialog>
+    </>
     );
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2.5 min-[390px]:px-3 min-[390px]:pt-3">
+    <>
+    <header className="fixed inset-x-0 top-0 z-50 hidden px-2 pt-2.5 lg:block min-[390px]:px-3 min-[390px]:pt-3">
       <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-1 rounded-full bg-card/95 px-2.5 py-2 shadow-soft backdrop-blur-md min-[390px]:gap-1.5 min-[390px]:px-4 sm:gap-3 sm:px-6">
         <a href={logoHref} className="shrink-0">
           <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-[17px] w-auto min-[390px]:h-5 sm:h-6" />
@@ -241,5 +249,7 @@ export function Header({
         <LongForm onSent={() => setApplicationSent(true)} />
       </FormDialog>
     </header>
+    <MobileDock onApplicationOpen={() => { closeMobileMenu(); setApplicationSent(false); setOpen(true); }} />
+    </>
   );
 }
