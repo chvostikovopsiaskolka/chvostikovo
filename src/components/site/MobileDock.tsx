@@ -17,6 +17,8 @@ export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockPro
   const homePath = english ? "/en/dog-daycare-kosice" : "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("top");
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navigatingRef = useRef(false);
 
@@ -118,7 +120,7 @@ export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockPro
 
   return (
     <>
-      <nav className="mobile-dock" aria-label={english ? "Mobile navigation" : "Mobilná navigácia"}>
+      <nav className="mobile-dock" data-hydrated={hydrated ? "true" : "false"} aria-label={english ? "Mobile navigation" : "Mobilná navigácia"}>
         <div className="mobile-dock-bar">
           {sections.map(({ id, icon: Icon, label }) => (
             <a
