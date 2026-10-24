@@ -727,3 +727,15 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
  .customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254{background:#ffddf0!important}
  .customer-design #bookingTab #bookingDogProfile .male-v241 .dual-dog-info-v254{background:#d8ecff!important}
 }
+
+/* v373: white information cards over the coloured panel, equal photo slots. */
+.customer-design #bookingTab .dual-dog-photo-v254{aspect-ratio:1!important;flex:none!important}
+.customer-design #bookingTab .dual-dog-picture-v241{position:absolute!important;inset:0!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important}
+.customer-design #bookingTab .dual-dog-picture-v241 img{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover!important}
+.customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254,
+.customer-design #bookingTab #bookingDogProfile .male-v241 .dual-dog-info-v254{background:var(--liquid-surface-v364)!important;display:flex!important;flex-direction:column!important;flex:none!important;gap:8px!important;text-align:left!important}
+.customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254 :is(.dual-dog-status-v254,.dual-dog-visits-v254,.dual-dog-grades-v254){justify-content:flex-start!important;text-align:left!important;min-height:36px!important;flex:none!important}
+.customer-design #bookingTab #bookingDogProfile .dual-dog-status-v254>span:last-child{text-align:left!important}
+.customer-design #bookingTab .dual-dog-photo-v254{margin-bottom:12px!important}
+.customer-design #bookingTab .dual-dog-name-v241{inset:auto auto -9px 50%!important;transform:translateX(-50%)!important;width:max-content!important;max-width:90%!important;padding:5px 13px!important;border:1px solid var(--dog-color)!important;background:rgba(255,255,255,.94)!important;font-size:20px!important;border-radius:13px!important}
+.customer-design #bookingTab .male-v241 .dual-dog-name-v241{background:rgba(255,255,255,.94)!important}
