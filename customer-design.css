@@ -746,57 +746,67 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-design #bookingTab .dual-dog-grades-v254>svg{flex:0 0 23px!important;width:23px!important;height:20px!important}
 #customerBulletinHistoryV229 .customer-bulletin-head-v229 h2>svg{width:24px;height:24px;aspect-ratio:1;flex:0 0 24px}
 
-/* White Frosted Liquid Glass pilot (review branch only).
-   One/two-dog overview, pass/nearest/inbox cards and viewport-owned nav.
-   Keep the original outer navigation free of backdrop-filter: it avoids
-   iOS visual-viewport drift; blur is painted inside a noninteractive layer.
-   Presets are opt-in via html[data-customer-glass-pilot], not a customer toggle. */
+
+/* Liquid Glass refraction pilot — v2.
+   From upstream github.com/xinlingfeiwu/liquid-glass-design-skill:
+   inverse-lens edge refraction in Chromium, toned frosted optics for WebKit.
+   Mobile Focus Sheet recipe. Preserve existing elements and nav anchoring. */
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))) {
  .customer-design {
-  --customer-glass-fill:rgba(255,255,255,.56);
-  --customer-glass-optics:blur(18px) saturate(150%);
-  --customer-glass-rim:inset 0 1px 0 rgba(255,255,255,.82),inset 0 -1px 0 rgba(255,255,255,.35);
- }
- html[data-customer-glass-pilot="soft"] .customer-design {
-  --customer-glass-fill:rgba(255,255,255,.64);
-  --customer-glass-optics:blur(14px) saturate(135%);
- }
- html[data-customer-glass-pilot="rich"] .customer-design {
-  --customer-glass-fill:rgba(255,255,255,.48);
-  --customer-glass-optics:blur(22px) saturate(155%);
+  --customer-lg-fallback:blur(7px) saturate(155%) brightness(1.10) contrast(1.12);
+  --customer-lg-tint:rgba(255,255,255,.30);
+  --customer-lg-shine:
+   radial-gradient(ellipse 78% 65% at 4% -12%,rgba(255,255,255,.72),transparent 75%),
+   radial-gradient(ellipse 46% 72% at 104% 110%,rgba(255,255,255,.34),transparent 80%),
+   linear-gradient(144deg,rgba(255,255,255,.38),rgba(255,255,255,.08) 42%,rgba(255,255,255,.16) 76%,rgba(255,255,255,.35));
+  --customer-lg-rim:inset 0 1.5px 0 rgba(255,255,255,.93),inset 1px 0 0 rgba(255,255,255,.54),
+   inset -1px -1px 0 rgba(147,70,38,.13),0 11px 25px rgba(110,53,32,.16),0 3px 5px rgba(98,47,35,.08);
  }
  .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before,
  .customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254,
  .customer-design #designTicket.design-ticket,
  .customer-design #designNearest.design-nearest,
  .customer-design #customerInboxV363>button {
-  background:var(--customer-glass-fill)!important;
-  -webkit-backdrop-filter:var(--customer-glass-optics)!important;
-  backdrop-filter:var(--customer-glass-optics)!important;
-  box-shadow:var(--customer-glass-rim),var(--liquid-shadow-v364)!important;
+  background-color:var(--customer-lg-tint)!important;
+  background-image:var(--customer-lg-shine)!important;
+  border:1px solid rgba(255,255,255,.68)!important;
+  -webkit-backdrop-filter:var(--customer-lg-fallback)!important;
+  backdrop-filter:var(--customer-lg-fallback)!important;
+  box-shadow:var(--customer-lg-rim)!important;
  }
- /* The nav remains a fixed viewport child with no transform/filter.
-    This internal paint-only layer cannot intercept taps or alter grid sizing. */
- .customer-design .bottom-nav {
-  background:transparent!important;
+ .customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254,
+ .customer-design #designTicket.design-ticket,
+ .customer-design #designNearest.design-nearest,
+ .customer-design #customerInboxV363>button {
+  /* This is a real glass surface; children stay normal sharp DOM. */
+  isolation:isolate;
  }
+ .customer-design .bottom-nav{background:transparent!important}
  .customer-design .bottom-nav::before {
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  border-radius:inherit;
-  background:var(--customer-glass-fill);
-  -webkit-backdrop-filter:var(--customer-glass-optics);
-  backdrop-filter:var(--customer-glass-optics);
-  box-shadow:var(--customer-glass-rim);
-  border:1px solid rgba(255,255,255,.54);
-  box-sizing:border-box;
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  border-radius:inherit;box-sizing:border-box;
+  border:1px solid rgba(255,255,255,.78);
+  background-color:rgba(255,255,255,.30);
+  background-image:var(--customer-lg-shine);
+  -webkit-backdrop-filter:var(--customer-lg-fallback);
+  backdrop-filter:var(--customer-lg-fallback);
+  box-shadow:var(--customer-lg-rim);
  }
- .customer-design .bottom-nav > :is(button,a) {
-  position:relative;
-  z-index:1;
+ .customer-design .bottom-nav > :is(button,a){position:relative;z-index:1}
+ .customer-design #customerInboxV363>button{
+  box-shadow:inset 0 1px 0 #fff,0 7px 19px rgba(104,48,27,.14)!important;
+ }
+ html.customer-lg-svg-active .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content.customer-lg-map-ready::before,
+ html.customer-lg-svg-active .customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254.customer-lg-map-ready,
+ html.customer-lg-svg-active .customer-design #designTicket.customer-lg-map-ready,
+ html.customer-lg-svg-active .customer-design #designNearest.customer-lg-map-ready,
+ html.customer-lg-svg-active .customer-design #customerInboxV363>button.customer-lg-map-ready {
+  -webkit-backdrop-filter:var(--customer-lg-filter) blur(.3px) saturate(155%) brightness(1.10) contrast(1.12)!important;
+  backdrop-filter:var(--customer-lg-filter) blur(.3px) saturate(155%) brightness(1.10) contrast(1.12)!important;
+ }
+ html.customer-lg-svg-active .customer-design .bottom-nav.customer-lg-map-ready::before {
+  -webkit-backdrop-filter:var(--customer-lg-filter) blur(.3px) saturate(155%) brightness(1.10) contrast(1.12)!important;
+  backdrop-filter:var(--customer-lg-filter) blur(.3px) saturate(155%) brightness(1.10) contrast(1.12)!important;
  }
 }
 @media (prefers-reduced-transparency:reduce) {
@@ -805,18 +815,20 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
  .customer-design #designTicket.design-ticket,
  .customer-design #designNearest.design-nearest,
  .customer-design #customerInboxV363>button {
-  background:var(--liquid-surface-v364)!important;
-  -webkit-backdrop-filter:none!important;
-  backdrop-filter:none!important;
+  background-image:none!important;
+  background-color:var(--liquid-surface-v364)!important;
+  border:0!important;
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
   box-shadow:var(--liquid-shadow-v364)!important;
  }
  .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before {
-  background:var(--liquid-panel-v364)!important;
+  background-color:var(--liquid-panel-v364)!important;
  }
- .customer-design .bottom-nav {
-  background:#fff9f3!important;
- }
- .customer-design .bottom-nav::before {
-  display:none!important;
- }
+ .customer-design .bottom-nav{background:#fff9f3!important}
+ .customer-design .bottom-nav::before{display:none!important}
+}
+@media (prefers-contrast:more) {
+ .customer-design #designTicket.design-ticket,
+ .customer-design #designNearest.design-nearest,
+ .customer-design #customerInboxV363>button {border:1px solid rgba(255,255,255,.96)!important}
 }
