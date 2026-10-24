@@ -4446,7 +4446,7 @@ function installVaccinationViewerZoomV244(modal){
   customerRenderers.announcements=(force=false)=>refresh(force);
   window.openCustomerAnnouncementV363=async(id,beforeOpen)=>{const user=state.session?.user?.id;await refresh(false);if(rowsState.error||!user||state.session?.user?.id!==user)return false;const row=rows().find(r=>Number(r.id)===Number(id));if(!row){toast('Tento oznam už nie je dostupný.');return true;}beforeOpen?.();void openArticle(row,false);return true;};
   addCustomerHook('afterSwitchTab',tab=>{if(tab==='booking'||tab==='menu')void refresh(false)});
-  ['afterRenderDog','afterRenderPassSummary'].forEach(name=>addCustomerHook(name,()=>queueMicrotask(drawOverview))); 
+  window.customerRefreshNoticeOverviewV376=drawOverview;
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(true)});
   window.addEventListener('pageshow',event=>{if(event.persisted&&loggedIn())void refresh(false)});
   function init(){

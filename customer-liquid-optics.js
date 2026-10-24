@@ -64,7 +64,7 @@ function sync(){
  for(const [el,s]of states)if(!el.isConnected||!found.includes(el))remove(el,s);
  let used=0;
  for(const el of found){
-  let s=states.get(el);if(!visible(el)){if(s)stop(s);continue;}
+  let s=states.get(el);if(s&&s.layer.parentElement!==el)el.prepend(s.layer);if(!visible(el)){if(s)stop(s);continue;}
   if(!s){
    const layer=document.createElement('span');layer.className='lg-v3-material';layer.setAttribute('aria-hidden','true');layer.dataset.renderer='fallback';
    s={layer,engine:null,key:'',width:0,height:0};states.set(el,s);

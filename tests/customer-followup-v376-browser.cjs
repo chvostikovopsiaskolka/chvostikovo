@@ -15,7 +15,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await page.evaluate(()=>{for(let i=0;i<12;i++){renderPassSummary();renderUpcoming();renderDog();}state.data.passes[0].used_entries=1;renderPassSummary();renderDog();});
  await page.waitForTimeout(160);
  assert(await page.evaluate(()=>document.querySelector('#designTicket>.lg-v3-material')===window.__passMaterial),'updated pass retains exact optical layer');
- await page.evaluate(()=>{document.querySelector('#designTicket').innerHTML='<h2>Externá obnova obsahu</h2>'});await page.waitForTimeout(160);
+ await page.evaluate(()=>{document.querySelector('#designTicket').innerHTML='<h2>Externá obnova obsahu</h2>'});await page.waitForSelector('#designTicket>.lg-v3-material',{state:'attached',timeout:10000});
  assert.equal(await page.locator('#designTicket>.lg-v3-material').count(),1,'optics recovers externally replaced content');
  await page.evaluate(()=>{delete document.querySelector('#designTicket').dataset.presentationKey;renderPassSummary();renderDog();window.__noticeFixture=[{id:51,active:true,show_in_overview:true,title:'Vybraný oznam',body:'Prvý oznam',valid_from:'2020-01-01'},{id:52,active:true,show_in_overview:false,title:'Iba v histórii',body:'Druhý oznam',valid_from:'2020-01-01'},{id:53,active:true,show_in_overview:true,title:'Skončený oznam',valid_until:'2021-01-01',valid_from:'2020-01-01'}];return loadAnnouncements(true);});
  assert.equal(await page.locator('#customerNoticeOverviewV376 [data-announcement-id]').count(),1);

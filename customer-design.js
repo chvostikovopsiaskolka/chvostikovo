@@ -184,6 +184,7 @@
     }
     byId('designBulletinTitle')?.remove();
     const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile');if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
+    window.customerRefreshNoticeOverviewV376?.();
   }
   function layout() {
     document.documentElement.classList.toggle('customer-liquid-v364',!!state.session&&!!state.data);
