@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v373';
-const APP_VERSION='2.0.48';
+const APP_BUILD='v374';
+const APP_VERSION='2.0.49';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -4258,7 +4258,7 @@ function installVaccinationViewerZoomV244(modal){
   function ensureModals(){
     if(modalsReady)return;modalsReady=true;
     archiveModal=modal('Oznamy','customerBulletinHistoryV229');
-    archiveModal.h.textContent='Oznamy';archiveModal.h.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 6-3v20l-6-3H4V5Zm0 0v14M4 9H2v6h2m3 4 1 4h4l-2-4"/></svg>');
+    archiveModal.h.textContent='Oznamy';archiveModal.h.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d="M3 10v4h4l10 4V6L7 10H3Zm4 0v4m0 0 2 6h3l-2-5m10-5 2-1m-2 5 2 1"/></svg>');
     articleModal=modal('','customerBulletinArticleV229');
     zoomModal=modal('','customerBulletinZoomV229');
     zoomModal.overlay.setAttribute('aria-label','Zväčšená fotografia oznamu');
