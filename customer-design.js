@@ -129,7 +129,12 @@
     const validity=small.replace(/(\d{2})\.(\d{2})\.(\d{4})/g,(_,d,m,y)=>`${d}. ${m}. ${y.slice(-2)}`).replace(/(\d{4})/g,y=>y.slice(-2));
     const date=small.match(/(?:do|Platí do)\s+(.*)/)?.[1];
     const badge=date?'Platnosť do '+date:validity.replace('Platnosť ','');
+    const presentationKey=JSON.stringify([originalTitle,counts,small,dog.sex]);
+    if(root.dataset.presentationKey===presentationKey)return;
+    root.dataset.presentationKey=presentationKey;
+    const material=root.querySelector(':scope > .lg-v3-material');
     root.innerHTML=`<div class="design-ticket-head"><h2 aria-label="${esc(originalTitle)}">${icon("ticket")}<span>${esc(originalTitle)}</span></h2></div><div class="design-ticket-usage">${match?`<p>Použité <strong>${Number(match[1])} z ${Number(match[2])} vstupov</strong></p>`:`<p class="design-single-entry"><strong>${esc(counts==='Jednorazový'?'Jednorazový vstup':counts)}</strong></p>`}${badge?`<span class="design-validity" title="${esc(small)}">${esc(badge)}</span>`:''}</div>${match?`<div class="design-paws" aria-hidden="true">${Array.from({length:Number(match[2])},(_,i)=>`<span class="${i<Number(match[1])?'used':''}">${icon('paw')}</span>`).join('')}</div>`:''}`;
+    if(material)root.prepend(material);
   }
   function nearest() {
     if(!state.data)return;

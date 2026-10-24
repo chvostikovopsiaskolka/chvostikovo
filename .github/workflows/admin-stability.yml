@@ -157,6 +157,7 @@ jobs:
         run: |
           node tests/customer-liquid-browser-v364.cjs
           node tests/customer-liquid-v3-browser.cjs
+          node tests/customer-followup-v376-browser.cjs
           V3_ENGINE=webkit V3_LOW_CONTEXT=1 node tests/customer-liquid-v3-browser.cjs
           node tests/customer-inbox-browser-v363.cjs
           node tests/customer-guide-browser-v358.cjs

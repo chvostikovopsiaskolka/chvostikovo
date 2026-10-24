@@ -499,14 +499,14 @@ html.customer-bulletin-open-v229 body{position:fixed!important;top:var(--bulleti
 #customerBulletinHistoryV229 .customer-bulletin-head-v229 h2{font-size:21px}
 .customer-bulletin-close-v229{min-width:44px;min-height:44px;flex:0 0 44px}
 #customerBulletinHistoryV229 .customer-bulletin-scroll-v229{flex:1;padding:12px 14px 16px;scrollbar-gutter:stable}
-#customerBulletinHistoryV229 .customer-bulletin-history-row-v229{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center;padding:12px;margin:0 0 10px;min-height:84px;border:1px solid #ece7e3;border-radius:16px;background:#fff;box-shadow:0 2px 5px #29201805;font:inherit;white-space:normal;-webkit-appearance:none}
+.customer-bulletin-history-row-v229{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center;padding:12px;margin:0 0 10px;min-height:84px;border:1px solid #ece7e3;border-radius:16px;background:#fff;box-shadow:0 2px 5px #29201805;font:inherit;white-space:normal;-webkit-appearance:none}
 .customer-notice-thumb-v363{display:grid;place-items:center;width:56px;height:56px;overflow:hidden;border-radius:11px;color:#d46b9f}
 .customer-notice-thumb-v363 img{width:100%;height:100%;object-fit:cover}
 .customer-notice-thumb-v363 svg{width:30px;height:30px;fill:currentColor;stroke:currentColor;stroke-width:.7}
 .customer-notice-content-v363{display:grid;gap:4px;min-width:0}
 .customer-notice-head-v363{display:flex;align-items:flex-start;gap:6px;min-width:0}
 .customer-notice-head-v363 strong{flex:1;min-width:0;font-size:14px;line-height:1.35;overflow-wrap:anywhere}
-#customerBulletinHistoryV229 .customer-bulletin-new-v229{flex:none;background:#fff2e8;color:#a74609;padding:2px 6px;border-radius:7px;font-size:10px;line-height:1.4;font-weight:750}
+.customer-bulletin-new-v229{flex:none;background:#fff2e8;color:#a74609;padding:2px 6px;border-radius:7px;font-size:10px;line-height:1.4;font-weight:750}
 .customer-notice-excerpt-v363{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;color:#667080;font-size:12px;line-height:1.4}
 .customer-notice-action-v363{color:#b45212;font-size:11px;font-weight:750;line-height:1.4}
 @keyframes customer-inbox-rise-v363{from{transform:translateY(30px);opacity:.5}to{transform:translateY(0);opacity:1}}
@@ -649,14 +649,14 @@ html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #booking
 .customer-design #menuTab .customer-menu-rows{background:transparent!important;border-color:#75462024!important}
 .customer-design #menuTab .customer-social-links-v223 a{background:#ffffff26!important;border:0!important}
 .customer-design .bottom-nav{background:var(--liquid-surface-v364)!important;border:0!important;box-shadow:var(--liquid-shadow-v364)!important}
-.customer-design .bottom-nav:has(#navBookAddV220){grid-template-columns:minmax(52px,.65fr) minmax(0,1.9fr) minmax(52px,.65fr)!important}
-.customer-design .bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){grid-template-columns:minmax(44px,.6fr) minmax(0,1.9fr) minmax(44px,.6fr) minmax(44px,.6fr)!important}
-.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff){font-size:10px!important;gap:3px!important}
-.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff) svg{width:20px!important;height:20px!important}
+.customer-design .bottom-nav:has(#navBookAddV220){grid-template-columns:minmax(44px,1fr) minmax(44px,1fr) minmax(88px,2.35fr) minmax(44px,1fr) minmax(44px,1fr)!important}
+.customer-design .bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){grid-template-columns:repeat(2,minmax(44px,1fr)) minmax(84px,2.1fr) repeat(3,minmax(44px,1fr))!important}
+.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#customerMessagesV363,#customerAnnouncementsV363){font-size:10px!important;gap:3px!important}
+.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#customerMessagesV363,#customerAnnouncementsV363) svg{width:20px!important;height:20px!important}
 .customer-design .bottom-nav #navBookAddV220{
  display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:7px!important;
  width:100%!important;max-width:none!important;height:54px!important;min-height:54px!important;
- padding:8px!important;border-radius:20px!important;font-size:12px!important;line-height:1.2!important;
+ padding:8px!important;border-radius:20px!important;font-size:11px!important;line-height:1.2!important;
 }
 .customer-design .bottom-nav #navBookAddV220 .booking-fab-symbol-v220{
  display:flex!important;align-items:center!important;flex:none!important;font-size:24px!important;transform:none!important;
@@ -671,7 +671,7 @@ html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #booking
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) #bookingDogAvatar{height:100%!important;min-height:var(--profile-min-v369)!important;max-height:none!important;aspect-ratio:auto!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content{align-self:stretch!important;justify-content:space-between!important;gap:3px!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) :is(#bookingVaccinationStatus,#bookingVisitCount,#bookingGradebook){min-height:28px!important}
-.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff).active{background:#ffffff30!important}
+.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#customerMessagesV363,#customerAnnouncementsV363).active{background:#ffffff30!important}
 .customer-design #bookingPickerV37 #designMyBookings .reserved-empty-v37{background:#ffffff1f!important;background-image:none!important;border:0!important;box-shadow:none!important}
 .customer-design #bookingPickerV37 #bookingPickerSmartDaysV199 .btn.secondary{background:#ffffff30!important;border-color:transparent!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled):not([data-capacity-level=full]):not([data-capacity-level=limited]){background:#ffffff3d!important;border-color:transparent!important}
@@ -688,7 +688,7 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
  transform:none!important;-webkit-transform:none!important;will-change:auto!important;
  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
 }
-.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#navBookAddV220){height:54px!important;min-height:54px!important;max-height:54px!important;align-self:center!important;box-sizing:border-box!important}
+.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#navBookAddV220,#customerMessagesV363,#customerAnnouncementsV363){height:54px!important;min-height:54px!important;max-height:54px!important;align-self:center!important;box-sizing:border-box!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241){padding:8px!important;gap:10px!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) #bookingDogAvatar{position:relative!important;box-sizing:border-box!important}
 .customer-design #bookingTab #bookingDogAvatar img{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;border-radius:0!important;object-fit:cover!important}
@@ -758,7 +758,10 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254.lg-v3-host,
 .customer-design #designTicket.lg-v3-host,
 .customer-design #designNearest.lg-v3-host,
-.customer-design #customerInboxV363>button.lg-v3-host,
+.customer-design #menuTab .customer-menu-group.lg-v3-host,
+.customer-design #menuTab .customer-social-v223.lg-v3-host,
+.customer-design .customer-bulletin-history-row-v229.lg-v3-host,
+.customer-design :is(#customerBulletinHistoryV229,#customerBulletinArticleV229) .customer-bulletin-dialog-v229.lg-v3-host,
 .customer-design #bookingPickerV37 #designMyBookings.lg-v3-host,
 .customer-design .bottom-nav.lg-v3-host{
  background:transparent!important;border:0!important;box-shadow:none!important;
@@ -791,3 +794,22 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
  .customer-design .lg-v3-material::after,.customer-design .lg-v3-output{display:none!important}
 }
 @media(prefers-reduced-motion:reduce){.customer-design .lg-v3-material{animation:none;transition:none}}
+
+/* v376: shared notice cards and dock actions; outer dock geometry is unchanged. */
+.customer-design #customerInboxV363{display:none!important}
+.customer-design .bottom-nav :is(#customerMessagesV363,#customerAnnouncementsV363){display:flex!important;flex-direction:column;align-items:center;justify-content:center;position:relative;min-width:44px;padding:3px 0;border:0;background:transparent;color:#a7460b;font:inherit;border-radius:17px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+.customer-design .bottom-nav :is(#customerMessagesV363,#customerAnnouncementsV363) svg{fill:none;stroke:currentColor;stroke-width:1.8;flex:none}
+.customer-design .bottom-nav .customer-inbox-count-v363{position:absolute;top:1px;right:1px;min-width:15px;height:15px;padding:0 3px;font-size:9px;line-height:15px}
+.customer-design .bottom-nav button:focus-visible{outline:3px solid #ad4c0d;outline-offset:-3px}
+.customer-design .bottom-nav #navBookAddV220{gap:4px!important;padding:5px!important}
+.customer-design .bottom-nav #navBookAddV220 .booking-action-label-v369{font-size:10px!important}
+.customer-design .bottom-nav #navBookAddV220 svg{width:20px!important;height:20px!important}
+.customer-design .customer-bulletin-history-row-v229{position:relative;isolation:isolate;border:0!important;background:rgba(255,255,255,.55);box-shadow:0 8px 21px #6f3d2721}
+.customer-design :is(#customerBulletinHistoryV229,#customerBulletinArticleV229) .customer-bulletin-dialog-v229{position:relative;isolation:isolate;background:rgba(255,248,240,.94);border:0;box-shadow:0 -8px 35px #713b2033}
+.customer-design .customer-bulletin-head-v229{background:transparent}
+.customer-design .customer-bulletin-close-v229{background:#ffffff88}
+.customer-notice-overview-v376{margin:12px 0;min-width:0}
+.customer-notice-carousel-v376{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0;padding:4px 0 15px;overscroll-behavior-x:contain}
+.customer-notice-carousel-v376>.customer-bulletin-history-row-v229{flex:0 0 100%;box-sizing:border-box;scroll-snap-align:start;margin:0;min-width:0;text-align:left;min-height:112px}
+.customer-notice-carousel-v376[data-multiple=true]>.customer-bulletin-history-row-v229{flex-basis:94%}
+.customer-notice-carousel-v376:focus-visible{outline:3px solid #ad4c0d;outline-offset:2px}
