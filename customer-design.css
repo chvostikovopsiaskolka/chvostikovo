@@ -739,3 +739,9 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-design #bookingTab .dual-dog-photo-v254{margin-bottom:12px!important}
 .customer-design #bookingTab .dual-dog-name-v241{inset:auto auto -9px 50%!important;transform:translateX(-50%)!important;width:max-content!important;max-width:90%!important;padding:5px 13px!important;border:1px solid var(--dog-color)!important;background:rgba(255,255,255,.94)!important;font-size:20px!important;border-radius:13px!important}
 .customer-design #bookingTab .male-v241 .dual-dog-name-v241{background:rgba(255,255,255,.94)!important}
+
+/* v374: compact information rows with a shared label gutter. */
+.customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254{gap:3px!important}
+.customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254 :is(.dual-dog-status-v254,.dual-dog-visits-v254,.dual-dog-grades-v254){min-height:32px!important;padding:4px 0!important}
+.customer-design #bookingTab .dual-dog-grades-v254>svg{flex:0 0 23px!important;width:23px!important;height:20px!important}
+#customerBulletinHistoryV229 .customer-bulletin-head-v229 h2>svg{width:24px;height:24px;aspect-ratio:1;flex:0 0 24px}
