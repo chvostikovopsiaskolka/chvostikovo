@@ -20,13 +20,18 @@ const launch=type=>type.launch(type===chromium?{headless:true,executablePath:pro
  if(!process.env.V3_BASELINE&&engine==='chromium'&&width===390){
  // Pixel proof: compare the actual SVG backdrop lens to identical blur without
  // displacement. A supported CSS property alone is deliberately insufficient.
+ const wallpaperStyle=await page.locator('body').getAttribute('style');
+ // A controlled high-frequency QA backdrop makes this independent of whether
+ // the sparse paw tile happens to intersect an edge in a runner's font layout.
+ await page.locator('body').evaluate(el=>el.style.setProperty('background-image','repeating-linear-gradient(90deg,#123456 0 3px,#fff 3px 8px)','important'));
  const lens=page.locator('#designNearest>.lg-v3-material');
  const a=PNG.sync.read(await lens.screenshot());
  await lens.evaluate(el=>el.style.backdropFilter='blur(.65px) saturate(115%)');
  const b=PNG.sync.read(await lens.screenshot());
  await lens.evaluate(el=>el.style.removeProperty('backdrop-filter'));
  let changed=0;for(let i=0;i<a.data.length;i+=4)if(Math.abs(a.data[i]-b.data[i])+Math.abs(a.data[i+1]-b.data[i+1])+Math.abs(a.data[i+2]-b.data[i+2])>6)changed++;
- assert(changed>30,'actual backdrop pixels must move with the lens');console.log('PASS SVG pixel refraction',dogs,changed);
+ await page.locator('body').evaluate((el,s)=>{if(s===null)el.removeAttribute('style');else el.setAttribute('style',s)},wallpaperStyle);
+ assert(changed>100,'actual backdrop pixels must move with the lens');console.log('PASS SVG pixel refraction',dogs,changed);
  // Reduced transparency must release outputs and keep touchable sharp content.
  const cdp=await context.newCDPSession(page);await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'reduce'},{name:'prefers-reduced-motion',value:'reduce'}]});await page.waitForTimeout(120);
  assert.equal(await page.locator('#designNearest>.lg-v3-material').evaluate(el=>getComputedStyle(el).backdropFilter),'none');assert.equal((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts,0);await cdp.detach();
