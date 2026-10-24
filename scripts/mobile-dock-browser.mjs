@@ -29,7 +29,7 @@ async function run(engine, width, height, suffix) {
     });
     const page = await context.newPage();
     await page.goto(base + "/", { waitUntil: "domcontentloaded" });
-    await page.locator("h1").first().waitFor();
+    await page.locator("h1:visible").first().waitFor({ timeout: 15000 });
     await page.locator(".mobile-dock[data-hydrated=\"true\"]").waitFor({ timeout: 20000 });
     // Fresh-visitor consent blocks page interaction by design. Choose
     // necessary-only and let the existing confirmation toast disappear.
