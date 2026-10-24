@@ -26,6 +26,8 @@ The browser fixtures block all Supabase requests and stub fetch locally with syn
 - Optical pixel proof: Chromium actual app backdrop lens vs identical blur without displacement changes215pixels (one dog),95(two dogs) at390px; WebKit upstream WebGL renderer over a striped source changes1950edge pixels with0changed centre pixels. CSS.supports is only a syntax veto, not the evidence for refraction.
 - Physical iOS Safari, installed standalone PWA, OS keyboard/overscroll/background recovery, Android Chrome and actual Capacitor WebView/APK, hardware GPU performance and battery cost remain UNVERIFIED. Android packaging verified from draft PR162: Capacitor local bundle/WebView, not TWA; PR162 head508078a373facd5bd6d2ab11c3836ecc70ef882f is unmerged and not modified here. No claim of Play readiness.
 
+CI40126399043: existing verify job SUCCESS; browser job first failed because the legacy Chromium test selected an iPhone user-agent only for two profiles and asserted a CSS blur even when WebGL was correctly active. Corrected that test to use its actual Chromium platform for both profile counts; real WebKit remains a separate required job. The complete workflow must rerun on the corrected HEAD.
+
 ## Rollback and release gate
 
 Production remains on `5b8d89e50b003081af1453aa42adb8e2428dd386` / deployment above. Before-V3 pilot is `ff7f796988b4fd1b0d5acce32d5da7e5377edded` (local backup/customer-liquid-v3-before-20261024); remote backup push was rejected by automatic approval review and was not retried. Revert only the V3 preview commit or close the draft to discard it. No data rollback.
