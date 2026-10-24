@@ -805,10 +805,13 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
  .customer-design #designTicket.design-ticket,
  .customer-design #designNearest.design-nearest,
  .customer-design #customerInboxV363>button {
-  background:#fff9fc!important;
+  background:var(--liquid-surface-v364)!important;
   -webkit-backdrop-filter:none!important;
   backdrop-filter:none!important;
   box-shadow:var(--liquid-shadow-v364)!important;
+ }
+ .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before {
+  background:var(--liquid-panel-v364)!important;
  }
  .customer-design .bottom-nav {
   background:#fff9f3!important;
