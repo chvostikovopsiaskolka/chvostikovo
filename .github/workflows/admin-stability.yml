@@ -90,7 +90,7 @@ jobs:
 
       - name: Customer reservation controls v326
         run: |
-          node tests/customer-frosted-glass-pilot.cjs
+          node tests/customer-liquid-v3.cjs
           node tests/customer-liquid-v364.cjs
           node tests/customer-inbox-v363.cjs
           node tests/customer-push-routing-v363.cjs
@@ -133,3 +133,33 @@ jobs:
           ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-owner-review-v334.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-taxi-v329.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-runtime-v275.cjs
+
+  liquid-v3-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reproduce vendored optical bundle
+        run: |
+          npm ci --prefix tools/liquid-v3 --ignore-scripts
+          node tools/build-liquid-v3.cjs
+          git diff --exit-code -- vendor/simple-liquid-glass/webgl.js
+      - name: Install browser test runtime
+        run: |
+          npm install --prefix "$RUNNER_TEMP/chvo-v3-browser" --no-save --no-package-lock playwright@1.62.1 pngjs@7.0.0
+          echo "CODEX_PRIMARY_RUNTIME_NODE_MODULES=$RUNNER_TEMP/chvo-v3-browser/node_modules" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/chvo-v3-browser/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Current customer browser regression and pixel proof
+        run: |
+          node tests/customer-liquid-browser-v364.cjs
+          node tests/customer-liquid-v3-browser.cjs
+          V3_ENGINE=webkit V3_LOW_CONTEXT=1 node tests/customer-liquid-v3-browser.cjs
+          node tests/customer-inbox-browser-v363.cjs
+          node tests/customer-guide-browser-v358.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: liquid-v3-browser-evidence
+          path: /tmp/chvo-v3-screenshots/
