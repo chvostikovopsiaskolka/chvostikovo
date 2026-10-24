@@ -370,6 +370,21 @@
     touch-action: manipulation;
   }
   .mobile-dock-item svg { flex-shrink: 0; }
+  /* At 320px the long Slovak label must wrap inside its own 44px slot,
+     never paint over the adjacent Priestory or Cenník labels. */
+  .mobile-dock-item > span {
+    display: block;
+    box-sizing: border-box;
+    max-width: 100%;
+    padding-inline: 1px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    line-height: 1.12;
+  }
+  @media (max-width: 359px) {
+    .mobile-dock-item { min-height: 58px; }
+  }
   .mobile-dock-item.is-active {
     color: var(--forest-deep);
     background: color-mix(in srgb, var(--forest) 11%, transparent);
