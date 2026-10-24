@@ -306,7 +306,7 @@ function PuppyDaycarePage() {
                 ["2", "Spoznáme sa na úvodnej návšteve", "Ukážeme vám priestory a pozrieme sa, ako šteniatko reaguje na nás, prostredie aj ostatných psov. Úvodná návšteva je zadarmo."],
                 ["3", "Dohodneme prvý pobyt", "Ak mu kolektív vyhovuje, prvé návštevy prispôsobíme tomu, ako sa cíti. Počas pobytu vám pošleme fotky či videá, aby ste videli, ako sa má."],
               ].map(([number, heading, text]) => (
-                <article key={number} className="rounded-3xl bg-secondary/55 p-5 ring-1 ring-forest/8">
+                <article key={number} data-site-glass="light" className="rounded-3xl bg-secondary/55 p-5 ring-1 ring-forest/8">
                   <span className="flex size-9 items-center justify-center rounded-full bg-coral font-display font-bold text-white">
                     {number}
                   </span>

@@ -313,3 +313,15 @@
   outline-offset: 2px;
 }
 
+
+/* Shared optical material: content and overflowing step badges stay sharp. */
+[data-site-glass]{position:relative;isolation:isolate;background:rgba(255,255,255,.55)!important;border:0!important;--tw-ring-shadow:0 0 #0000!important}
+[data-site-glass="dark"]{background:rgba(255,255,255,.08)!important}
+.site-glass-material{position:absolute;inset:0;z-index:-1;border-radius:inherit;overflow:hidden;pointer-events:none;background:rgba(255,255,255,.22);box-shadow:inset 0 1px 3px #ffffff40,0 8px 24px #3c59331c;-webkit-backdrop-filter:blur(3px) saturate(110%);backdrop-filter:blur(3px) saturate(110%)}
+[data-site-glass="dark"]>.site-glass-material{background:rgba(255,255,255,.04);box-shadow:inset 0 1px 3px #ffffff20,0 8px 24px #122e2022}
+.site-glass-material[data-renderer="svg"]{backdrop-filter:var(--site-glass-filter) blur(.65px) saturate(110%)}
+.site-glass-material[data-renderer="webgl"]{-webkit-backdrop-filter:none;backdrop-filter:none;background:transparent}
+.site-glass-output{position:absolute;inset:0;pointer-events:none}
+.site-glass-source{position:fixed;inset:0;width:100%;height:100%;visibility:hidden;pointer-events:none}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){[data-site-glass]{background:#fffaf4!important}[data-site-glass="dark"]{background:#356e51!important}.site-glass-material{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}.site-glass-output{display:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){[data-site-glass]{background:#fffaf4!important}[data-site-glass="dark"]{background:#356e51!important}}

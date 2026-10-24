@@ -182,6 +182,13 @@ function RootComponent() {
 
   useEffect(() => {
     captureTrafficAttribution();
+    if (!document.getElementById("site-liquid-optics")) {
+      const script = document.createElement("script");
+      script.id = "site-liquid-optics";
+      script.type = "module";
+      script.src = "/liquid-glass/site-optics.js";
+      document.body.append(script);
+    }
   }, []);
 
   return (

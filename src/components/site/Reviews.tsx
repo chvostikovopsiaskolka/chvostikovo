@@ -19,7 +19,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
+    <figure data-site-glass="light" className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
       <div className="text-center">
         <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
         <span className="text-sm tracking-tight text-[#F5B301]">★★★★★</span>
@@ -198,6 +198,7 @@ export function ReviewReasons({
           {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }) => (
             <article
               key={title}
+              data-site-glass="dark"
               className="flex items-start gap-3 rounded-2xl bg-cream/10 px-4 py-4 ring-1 ring-cream/15 md:block md:p-5"
             >
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground md:size-11">

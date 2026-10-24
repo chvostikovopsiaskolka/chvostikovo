@@ -101,7 +101,7 @@ function EnglishReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
+    <figure data-site-glass="light" className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
       <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
       <span className="text-sm tracking-tight text-[#F5B301]" aria-label="5 out of 5 stars">★★★★★</span>
       <blockquote
@@ -752,7 +752,7 @@ function EnglishDogDaycarePage() {
 
               <div className="mt-8 hidden gap-6 md:grid md:grid-cols-3">
                 {WHY_EN.map(({ title, text, icon: Icon }) => (
-                  <div key={title} className="rounded-3xl bg-cream/10 p-6 ring-1 ring-cream/15 backdrop-blur-sm">
+                  <div key={title} data-site-glass="dark" className="rounded-3xl bg-cream/10 p-6 ring-1 ring-cream/15 backdrop-blur-sm">
                     <span className="flex size-12 items-center justify-center rounded-2xl bg-coral text-primary-foreground">
                       <Icon className="size-6" />
                     </span>
@@ -862,7 +862,7 @@ function EnglishDogDaycarePage() {
                 ["2", "Meet us", "The introductory visit is free. We get to know your dog, show you the daycare and see how they respond to the new environment."],
                 ["3", "Plan the first daycare day", "If daycare is a good fit, we agree on the next visit. If your dog needs more time, we can recommend a gentler introduction."],
               ].map(([number, heading, copy]) => (
-                <article key={number} className="relative rounded-4xl bg-card p-7 pt-9 shadow-card">
+                <article key={number} data-site-glass="light" className="relative rounded-4xl bg-card p-7 pt-9 shadow-card">
                   <span className="absolute -top-5 left-7 flex size-11 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-primary-foreground shadow-card">
                     {number}
                   </span>
