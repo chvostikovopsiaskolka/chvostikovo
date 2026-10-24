@@ -73,7 +73,7 @@ function DogSittingPage() {
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
       <main>
-        <section id="top" className="relative overflow-hidden pt-20 sm:pt-24">
+        <section id="top" className="relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
           <PawTrailBackground landingBottomPaws />
           <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-5 sm:min-h-[535px] sm:gap-8 sm:py-7 lg:min-h-[570px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-12">
             <div className="max-w-2xl text-center lg:text-left">
