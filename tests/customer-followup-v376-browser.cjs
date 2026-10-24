@@ -4,7 +4,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
 (async()=>{
  const type=process.env.V3_ENGINE==='webkit'?webkit:chromium;
  for(const dogs of [1,2])for(const width of [320,360,390,430,844]){
- const browser=await type.launch(type===chromium?{executablePath:process.env.CHROMIUM_PATH,args:require(process.env.PACKED_CHROMIUM).args}:{});
+ const browser=await type.launch(type===chromium?{executablePath:process.env.CHROMIUM_PATH,args:process.env.PACKED_CHROMIUM?require(process.env.PACKED_CHROMIUM).args:["--no-sandbox"]}:{});
  try{const{page,context,errors}=await fixture(browser,dogs,width,type.name());
  await page.evaluate(()=>{state.data.passes=[{id:1,dog_id:1,dog_ids:[1,2],total_entries:10,used_entries:0,status:'active',valid_until:'2099-12-31'}];renderPassSummary();renderDog();});
  await page.waitForSelector('#designTicket>.lg-v3-material',{state:'attached'});
