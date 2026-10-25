@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Home, Zap, Dog, Check } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
-import { LongForm, ShortForm } from "./Forms";
+import { ShortForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
@@ -14,6 +14,7 @@ import bellacord from "@/assets/partner-bellacord.png";
 import coursing from "@/assets/partner-coursing.png";
 import lolkio from "@/assets/partner-lolkio.png";
 import { trackMarketingInteraction } from "@/lib/analytics";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FriendshipFeature } from "./FriendshipFeature";
 
@@ -184,8 +185,16 @@ export function Why() {
           </div>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <button type="button" onClick={() => setOpen(true)} className="btn-coral">
-              Prihláška do škôlky
+            <button
+              type="button"
+              onClick={() => {
+                trackMarketingInteraction("inquiry_cta", "home_why_interest");
+                void trackCookielessInteraction("inquiry_cta", "home_why_interest");
+                setOpen(true);
+              }}
+              className="btn-coral"
+            >
+              Hľadám škôlku pre psíka
             </button>
             <a
               href={`tel:${PHONE}`}
@@ -201,10 +210,10 @@ export function Why() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Prihlás svojho psíka ešte dnes"
-        subtitle="Vyplňte prihlášku do škôlky, v ktorej nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky."
+        title="Máte záujem o škôlku?"
+        subtitle="Nechajte nám kontakt. Ozveme sa vám, odpovieme na otázky a ak bude Chvostíkovo pre vášho psíka vhodné, dohodneme úvodnú návštevu."
       >
-        <LongForm />
+        <ShortForm trackingSource="home_why_interest" />
       </FormDialog>
     </section>
   );
