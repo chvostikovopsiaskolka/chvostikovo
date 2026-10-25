@@ -1,12 +1,7 @@
 name: Mobile dock visual preview
 # Run browser screenshots only when explicitly requested, avoiding PR notification spam.
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "src/styles.css"
-      - "scripts/mobile-dock-browser.mjs"
-      - ".github/workflows/mobile-dock-preview.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -27,7 +22,7 @@ jobs:
       - name: Render mobile dock at required breakpoints
         run: |
           (./node_modules/.bin/vite dev --host 127.0.0.1 --port 4173 > /tmp/chvostikovo-vite.log 2>&1 &)
-          node scripts/premium-buttons-browser.mjs || { cat /tmp/chvostikovo-vite.log; exit 1; }
+          node scripts/mobile-dock-browser.mjs || { cat /tmp/chvostikovo-vite.log; exit 1; }
       - name: Upload visual review screenshots
         if: always()
         uses: actions/upload-artifact@v4

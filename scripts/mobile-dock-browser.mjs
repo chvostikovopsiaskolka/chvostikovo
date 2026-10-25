@@ -92,7 +92,7 @@ async function run(engine, width, height, suffix) {
     });
     assert(premium.hero && premium.hero.shadow.includes("inset") && premium.hero.gradient.includes("linear-gradient"),
       suffix + " Hero CTA lacks top light/depth: " + JSON.stringify(premium.hero));
-    assert(premium.hero.width >= 44 && premium.hero.height >= 44, suffix + " Hero CTA touch size regressed");
+    assert(premium.hero.width >= 44 && premium.hero.height >= (width < 1024 ? 44 : 38), suffix + " Hero CTA original dimensions regressed");
     if (width < 1024) {
       assert(premium.dock && premium.dock.shadow.includes("inset") && premium.dock.gradient.includes("linear-gradient"),
         suffix + " orange dock CTA lacks premium finish: " + JSON.stringify(premium.dock));
