@@ -69,6 +69,35 @@ async function run(engine, width, height, suffix) {
       assert(details.heights.every((v) => v >= 44), suffix + " touch height under 44 px");
       assert(!details.labelOverflow, suffix + " item labels overlap adjacent slots");
     }
+
+    // Both desktop and mobile must paint the premium CTA depth without altering
+    // the original shape, label, dimensions or native button actions.
+    const premium = await page.evaluate(() => {
+      const heroCta = document.querySelector("#top .btn-coral");
+      const primaryDock = document.querySelector(".mobile-dock-apply");
+      const describe = (el) => {
+        if (!el) return null;
+        const style = getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+        return {
+          shadow: style.boxShadow,
+          gradient: style.backgroundImage,
+          radius: style.borderRadius,
+          background: style.backgroundColor,
+          width: rect.width,
+          height: rect.height,
+        };
+      };
+      return { hero: describe(heroCta), dock: describe(primaryDock) };
+    });
+    assert(premium.hero && premium.hero.shadow.includes("inset") && premium.hero.gradient.includes("linear-gradient"),
+      suffix + " Hero CTA lacks top light/depth: " + JSON.stringify(premium.hero));
+    assert(premium.hero.width >= 44 && premium.hero.height >= 44, suffix + " Hero CTA touch size regressed");
+    if (width < 1024) {
+      assert(premium.dock && premium.dock.shadow.includes("inset") && premium.dock.gradient.includes("linear-gradient"),
+        suffix + " orange dock CTA lacks premium finish: " + JSON.stringify(premium.dock));
+      assert(premium.dock.height >= 44, suffix + " orange dock CTA height regressed");
+    }
     await page.screenshot({ path: "artifacts/mobile-dock/" + suffix + "-hero.png" });
 
     if (width < 1024) {
