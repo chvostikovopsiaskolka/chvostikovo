@@ -20,7 +20,7 @@ for (const value of ["Home", "Why us?", "Reviews", "Prices", "Enquire", "SK"]) {
 for (const anchor of ["priestory", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "why-daycare", "pricing"]) {
   assert(dock.includes(anchor), "Missing valid anchor " + anchor);
 }
-assert(dock.includes("onApplicationOpen()"), "Dock must use existing modal opener");
+assert(dock.includes("onApplicationOpen?.()") && dock.includes("onInterestOpen?.()"), "Dock must delegate to existing modal openers");
 assert(!/submitInquiry|fetch\(|createClient|supabase/i.test(dock), "Dock must not own network/form submission");
 assert(dock.includes("window.requestAnimationFrame(() => window.requestAnimationFrame(execute))"), "Close sheet before routing");
 assert(dock.includes("DialogPrimitive.Overlay") && dock.includes("DialogPrimitive.Content"), "Accessible menu required");
@@ -33,7 +33,7 @@ assert(css.includes("max-width: 1023px") && css.includes("min-width: 1024px"), "
 assert(css.includes("env(safe-area-inset-bottom") && css.includes("grid-template-columns: repeat(4"), "Safe area and six columns");
 assert(css.includes("body:has([data-form-dialog]) .mobile-dock"), "Hide dock for every existing FormDialog");
 assert(css.includes(".mobile-dock-menu") && css.includes("overflow-y: auto"), "Small-screen sheet scrolling");
-assert(hero.includes("pt-4 pb-0 sm:pt-6 lg:pt-24"), "Hero should not reserve removed mobile header");
+assert(hero.includes("pt-7 pb-0 sm:pt-9 lg:pt-24"), "Mobile Hero spacing must be updated without touching desktop");
 assert(form.includes('data-form-dialog="simple-v300"'), "Existing FormDialog mount contract");
 assert(forms.includes("submitInquiry"), "Shared form logic retained");
 console.log("Mobile dock structural regression guards: PASS");
