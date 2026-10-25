@@ -108,7 +108,7 @@ function LeadLandingPage() {
       <MobileDock variant="lead" onInterestOpen={() => openLeadModal("lead_landing_mobile_dock")} />
 
       <main>
-        <section className="relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
+        <section className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
           <PawTrailBackground landingBottomPaws />
 
           <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 pt-0 pb-3 sm:min-h-[535px] sm:pb-4 sm:pt-7 sm:pb-4 lg:min-h-[510px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-3">
