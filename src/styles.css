@@ -557,3 +557,85 @@
 @media (prefers-reduced-transparency: reduce) and (max-width: 1023px) {
   .mobile-dock-bar, .mobile-dock-menu { background: #fffaf0; -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
+
+
+/* Premium CTA lighting (desktop + mobile).
+ * Preserve each button's original brand fill, radius, dimensions and click
+ * behaviour. Two inner highlights create the top-lit edge and subtle lower
+ * bevel; the soft outer shadow gives depth without a visible white border.
+ * Restricted to action CTAs so form choices, navigation tabs and close buttons
+ * retain their separate interaction states. */
+.btn-coral,
+.btn-forest,
+.mobile-dock-item.mobile-dock-apply,
+.mobile-dock-menu-actions a:first-child {
+  --cta-drop-shadow: rgba(147, 74, 40, 0.28);
+  --cta-lower-edge: rgba(91, 44, 26, 0.17);
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.17) 0%,
+    rgba(255, 255, 255, 0.055) 32%,
+    rgba(0, 0, 0, 0.035) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.48),
+    inset 0 -2px 0 var(--cta-lower-edge),
+    0 2px 3px rgba(42, 44, 38, 0.08),
+    0 9px 21px -6px var(--cta-drop-shadow);
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-forest {
+  --cta-drop-shadow: rgba(32, 84, 58, 0.27);
+  --cta-lower-edge: rgba(18, 51, 37, 0.18);
+}
+
+/* Transparent/outlined buttons get an understated lift, not a painted fill. */
+.btn-outline-forest {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    0 5px 13px -9px rgba(32, 84, 58, 0.35);
+}
+
+/* Mobile navigation is deliberately flat except for its primary CTA; keep
+ * active section indicators and the dock backdrop untouched. */
+@media (hover: hover) and (pointer: fine) {
+  .btn-coral:hover,
+  .btn-forest:hover,
+  .mobile-dock-item.mobile-dock-apply:hover,
+  .mobile-dock-menu-actions a:first-child:hover {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.54),
+      inset 0 -2px 0 var(--cta-lower-edge),
+      0 3px 5px rgba(42, 44, 38, 0.09),
+      0 13px 25px -7px var(--cta-drop-shadow);
+  }
+}
+
+/* A pressed button settles down by one pixel; no permanent scaling or shift. */
+.btn-coral:active:not(:disabled),
+.btn-forest:active:not(:disabled),
+.mobile-dock-item.mobile-dock-apply:active,
+.mobile-dock-menu-actions a:first-child:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 2px rgba(42, 44, 38, 0.13),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+    0 2px 6px -3px var(--cta-drop-shadow);
+}
+
+.btn-coral:focus-visible,
+.btn-forest:focus-visible,
+.btn-outline-forest:focus-visible {
+  outline: 2px solid var(--forest-deep);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-coral,
+  .btn-forest,
+  .mobile-dock-item.mobile-dock-apply,
+  .mobile-dock-menu-actions a:first-child {
+    transition: none;
+  }
+}
