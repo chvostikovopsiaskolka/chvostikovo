@@ -163,10 +163,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const language = pathname.startsWith("/en/") ? "en" : "sk";
+  // The public Hero is white; other routes retain their original warm cream.
+  // Match the iOS Safari/Android top bar colour to avoid a harsh seam.
+  const whiteHeroPaths = new Set([
+    "/",
+    "/psia-skolka-kosice",
+    "/psia-skolka-pre-steniatka",
+    "/strazenie-psov-kosice",
+    "/en/dog-daycare-kosice",
+  ]);
+  const mobileThemeColor = whiteHeroPaths.has(pathname) ? "#ffffff" : "#faf8f0";
 
   return (
     <html lang={language}>
       <head>
+        <meta name="theme-color" content={mobileThemeColor} media="(max-width: 1023px)" />
         <HeadContent />
       </head>
       <body>
