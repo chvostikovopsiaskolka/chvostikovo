@@ -93,7 +93,8 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     const destination = new URL(href, window.location.href);
-    const targetId = (destination.hash.slice(1) || "top").replace(/[^a-z0-9_-]/gi, "").slice(0, 70);
+    const targetId = (destination.hash.slice(1) || (destination.pathname === homePath ? "top" : destination.pathname.replace(/^\\/+|\\/+$/g, "").replace(/\\//g, "_")))
+      .replace(/[^a-z0-9_-]/gi, "").slice(0, 70);
     const source = `mobile_${fromMenu ? "menu" : "dock"}_${variant}_${targetId}`;
     void trackCookielessInteraction("nav_click", source, language);
     // Keep Pixel/GA4 interests separate from cookieless navigation and from successful leads.
@@ -130,8 +131,14 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
 
   const openApplication = () => {
     if (menuOpen) setMenuOpen(false);
-    if (marketing) onInterestOpen?.();
-    else onApplicationOpen?.();
+    if (marketing) {
+      // SK landing pages already track enquiries in their route callback.
+      if (english) void trackCookielessInteraction("inquiry_cta", "en_mobile_dock", "en");
+      onInterestOpen?.();
+    } else {
+      void trackCookielessInteraction("nav_click", "mobile_dock_main_application", language);
+      onApplicationOpen?.();
+    }
   };
 
   // Marketing landings keep their conversion actions and section links locally.
