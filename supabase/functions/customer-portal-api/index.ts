@@ -318,13 +318,13 @@ function nextWeekdays(startIso: string, count: number) {
   return values;
 }
 
-async function rosterPhotoPaths(rows: Array<Json>, viewerId?: string, viewerDogIds = new Set<number>()) {
+async function rosterPhotoPaths(rows: Array<Json>, viewerId?: string, viewerDogIds = new Set<number>(), ownerLinks?: Array<Json>) {
   const paths = new Map<number,unknown>(rows.map(dog => [Number(dog.id),dog.photo_path]));
   const missing = rows.filter(dog => (dog.share_name_photo === true || viewerDogIds.has(Number(dog.id))) && dog.owner_id);
   if (!missing.length) return paths;
   const [photos,links] = await Promise.all([
     rest('customer_dog_photos?dog_id=' + encodeURIComponent(inFilter(missing.map(dog => Number(dog.id)))) + '&select=dog_id,user_id,photo_path'),
-    rest('customer_owner_links?owner_id=' + encodeURIComponent(inFilter([...new Set(missing.map(dog => Number(dog.owner_id)))])) + '&select=user_id,owner_id,allowed_dog_ids'),
+    ownerLinks ? Promise.resolve(ownerLinks) : rest('customer_owner_links?owner_id=' + encodeURIComponent(inFilter([...new Set(missing.map(dog => Number(dog.owner_id)))])) + '&select=user_id,owner_id,allowed_dog_ids'),
   ]) as [Array<Json>,Array<Json>];
   const userIds = [...new Set(links.map(link => String(link.user_id)))];
   const profiles = userIds.length ? await rest('customer_profiles?user_id=' + encodeURIComponent(inFilter(userIds)) + '&select=user_id,created_at&order=created_at.asc,user_id.asc') as Array<Json> : [];
@@ -367,11 +367,29 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
   const rosterDogs = rosterDogIds.length
     ? await rest(
       'dogs?id=' + encodeURIComponent(inFilter(rosterDogIds)) +
-      '&select=id,owner_id,name,customer_name,sex,photo_path,photo_updated_at,share_name_photo',
+      '&select=id,owner_id,name,customer_name,sex,active,photo_path,photo_updated_at,share_name_photo,share_name_photo_at',
     ) as Array<Json>
     : [];
   const rosterDogMap = new Map(rosterDogs.map((dog) => [Number(dog.id), dog]));
-  const publicPhotoPaths = await rosterPhotoPaths(rosterDogs,userId,ownDogIds);
+  // Roster-only visibility: an active dog without a linked portal account and
+  // without a previous visibility decision may appear by name, never by photo.
+  // A customer link ends this temporary rule automatically; the existing
+  // onboarding then asks the linked owner to opt in (or decline).
+  const rosterOwnerIds = [...new Set(rosterDogs.map((dog) => Number(dog.owner_id)).filter(Boolean))];
+  const rosterOwnerLinks = rosterOwnerIds.length
+    ? await rest('customer_owner_links?owner_id=' + encodeURIComponent(inFilter(rosterOwnerIds)) +
+        '&select=user_id,owner_id,allowed_dog_ids') as Array<Json>
+    : [];
+  const rosterAutoNameV389 = (dog: Json | undefined) => !!dog
+    && dog.active === true
+    && dog.share_name_photo === false
+    && dog.share_name_photo_at == null
+    && !rosterOwnerLinks.some((link) =>
+      Number(link.owner_id) === Number(dog.owner_id)
+      && (link.allowed_dog_ids == null
+        || (Array.isArray(link.allowed_dog_ids)
+          && link.allowed_dog_ids.map(Number).includes(Number(dog.id)))));
+  const publicPhotoPaths = await rosterPhotoPaths(rosterDogs,userId,ownDogIds,rosterOwnerLinks);
   const publicPhotoUrls = new Map<number,Promise<string|null>>();
   const rosterPhotoUrl = (dogId: number) => {
     if (!publicPhotoUrls.has(dogId)) publicPhotoUrls.set(dogId,signedPhotoUrl(publicPhotoPaths.get(dogId)));
@@ -389,13 +407,13 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
     const consentedDogs = viewerApproved
       ? reservations.filter((row) => row.reservation_date === date)
         .map((row) => rosterDogMap.get(Number(row.dog_id)))
-        .filter((dog) => dog?.share_name_photo === true)
+        .filter((dog) => dog?.share_name_photo === true || rosterAutoNameV389(dog))
       : [];
     const visibleDogs = await Promise.all(consentedDogs.map(async (dog) => ({
       dog_id: Number(dog.id),
       name: dog?.customer_name || dog?.name || 'Psík',
       sex: dog?.sex || null,
-      photo_url: await rosterPhotoUrl(Number(dog.id)),
+      photo_url: dog.share_name_photo === true ? await rosterPhotoUrl(Number(dog.id)) : null,
     })));
     return {
       date,
