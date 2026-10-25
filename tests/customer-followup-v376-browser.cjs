@@ -29,13 +29,14 @@ const fixture=require('./liquid-v3-fixture.cjs');
  assert.equal(await page.locator('#customerNoticeOverviewV376 [data-announcement-id]').count(),2);assert.equal(await page.locator('.customer-notice-carousel-v376').getAttribute('data-multiple'),'true');
  const headerControls=await page.locator('.customer-notice-controls-v381').boundingBox(),cardTrack=await page.locator('.customer-notice-carousel-v376').boundingBox();assert(Math.abs(headerControls.y+headerControls.height/2-(cardTrack.y+cardTrack.height/2))<2&&headerControls.x>cardTrack.x+cardTrack.width-12,'carousel arrows sit beside the card at its vertical centre');
  await page.locator('[aria-label="Ďalší oznam"]').click();
- await page.waitForFunction(()=>document.querySelector('.customer-notice-position-v381').textContent==='2 / 2');
+ await page.waitForFunction(()=>document.querySelector('.customer-notice-carousel-v376').dataset.currentIndex==='1');
  assert(await page.locator('[aria-label="Ďalší oznam"]').isDisabled());
  await page.evaluate(()=>document.querySelector('.customer-notice-carousel-v376').scrollTo({left:0,behavior:'instant'}));
- await page.waitForFunction(()=>document.querySelector('.customer-notice-position-v381').textContent==='1 / 2');
+ await page.waitForFunction(()=>document.querySelector('.customer-notice-carousel-v376').dataset.currentIndex==='0');
  assert(await page.locator('[aria-label="Predchádzajúci oznam"]').isDisabled());
  await page.locator('#customerNoticeOverviewV376').scrollIntoViewIfNeeded();
  await page.locator('#customerNoticeOverviewV376 .customer-notice-content-v363>.lg-v3-material').first().waitFor({state:'attached'});
+ assert.equal(await page.locator('.customer-notice-position-v381').count(),0,'visible numbering is removed');
  assert.equal(await page.locator('#customerNoticeOverviewV376>.lg-v3-material').count(),0,'outer notice remains opaque');
  assert.equal(await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 218, 192)');
  assert((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts<=2,'inner notice does not allocate extra WebGL contexts');
@@ -62,7 +63,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
    await page.locator('#customerNoticeOverviewV376').scrollIntoViewIfNeeded();
    await page.screenshot({path:`/tmp/chvo-v376-screenshots/carousel-preview-${type.name()}.png`});
    const readBefore=await page.evaluate(()=>__noticeReads.length);
-   await page.locator('[aria-label="Ďalší oznam"]').click();await page.waitForFunction(()=>document.querySelector('.customer-notice-position-v381').textContent==='2 / 2');
+   await page.locator('[aria-label="Ďalší oznam"]').click();await page.waitForFunction(()=>document.querySelector('.customer-notice-carousel-v376').dataset.currentIndex==='1');
    await page.locator('[data-announcement-id="preview-extra"]').click();await page.waitForSelector('#customerBulletinArticleV229:not(.hidden)');
    assert.equal(await page.evaluate(()=>__noticeReads.length),readBefore,'preview does not write a fake receipt');
    await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();await page.waitForTimeout(140);
@@ -71,6 +72,17 @@ const fixture=require('./liquid-v3-fixture.cjs');
  }
  assert.deepEqual(errors,[]);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  console.log('PASS v376 pass layer persistence/recovery, selected 0/1/2 carousel, shared notice sheet, five-button nav/menu',type.name(),dogs,width);
+ if(dogs===1&&width===390){
+   const previewBrowser=await type.launch(type===chromium?{executablePath:process.env.CHROMIUM_PATH,args:process.env.PACKED_CHROMIUM?require(process.env.PACKED_CHROMIUM).args:['--no-sandbox']}:{});
+   try{const white=await fixture(previewBrowser,1,390,type.name(),'?background-preview=white&notice-carousel-preview=1');
+   assert.equal(await white.page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
+   assert((await white.page.locator('body').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('chvostikovo-paws-white-preview.png'));
+   assert.equal(await white.page.locator('body').evaluate(el=>getComputedStyle(el).backgroundSize.split(',')[0].trim()),'300px 430px');
+   assert.equal(await white.page.locator('#customerNoticeOverviewV376 [data-announcement-id]').count(),2);
+   assert.equal(await white.page.locator('.customer-notice-position-v381').count(),0);
+   assert.deepEqual(white.errors,[]);assert((await white.page.evaluate(()=>customerLiquidV3Diagnostics())).contexts<=2);
+   await white.page.screenshot({path:`/tmp/chvo-v376-screenshots/white-preview-${type.name()}.png`});}finally{await previewBrowser.close();}
+ }
  await context.close();}finally{await browser.close();}
  }
 })().catch(e=>{console.error(e);process.exitCode=1});

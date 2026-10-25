@@ -51,7 +51,7 @@ function wallpaper(){
  sourceImage=new Image();sourceImage.onload=()=>{sourceKey='';paintWallpaper();schedule();};
  // Same original SVG rasterized once: WebKit taints canvases painted from
  // a data-SVG containing <use>. Same-origin PNG keeps GPU upload origin-clean.
- sourceImage.src='/vendor/liquidlens/chvostikovo-paws.png';return source;
+ sourceImage.src=root.dataset.backgroundPreview==='white'?'/vendor/liquidlens/chvostikovo-paws-white-preview.png':'/vendor/liquidlens/chvostikovo-paws.png';return source;
 }
 function stop(s){if(s.engine){s.engine.destroy();s.engine=null;stats.contexts--;s.layer.dataset.renderer='fallback';s.output?.remove();s.output=null;}}
 function remove(el,s){stop(s);s.filter?.remove();s.layer.remove();resize.unobserve(el);el.classList.remove('lg-v3-host');if(s.previousPosition!==undefined)el.style.position=s.previousPosition;states.delete(el);}

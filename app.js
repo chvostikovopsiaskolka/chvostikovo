@@ -4282,16 +4282,16 @@ function installVaccinationViewerZoomV244(modal){
     const header=el('div','customer-notice-header-v382'),stage=el('div','customer-notice-stage-v382');stage.dataset.multiple=String(selected.length>1);header.append(heading);stage.append(track);host.replaceChildren(header,stage);
     if(selected.length>1){
       const controls=el('div','customer-notice-controls-v381');
-      const prev=el('button','','‹'),next=el('button','','›'),position=el('span','customer-notice-position-v381');
-      prev.type=next.type='button';prev.setAttribute('aria-label','Predchádzajúci oznam');next.setAttribute('aria-label','Ďalší oznam');position.setAttribute('aria-live','polite');position.setAttribute('aria-atomic','true');
+      const prev=el('button','','‹'),next=el('button','','›');
+      prev.type=next.type='button';prev.setAttribute('aria-label','Predchádzajúci oznam');next.setAttribute('aria-label','Ďalší oznam');
       let index=Math.min(oldIndex,selected.length-1),pending=0;
       const step=()=>Math.max(1,track.firstElementChild.getBoundingClientRect().width+12);
-      const update=()=>{pending=0;index=Math.max(0,Math.min(selected.length-1,Math.round(track.scrollLeft/step())));prev.disabled=index===0;next.disabled=index===selected.length-1;const text=(index+1)+' / '+selected.length;if(position.textContent!==text)position.textContent=text;};
+      const update=()=>{pending=0;index=Math.max(0,Math.min(selected.length-1,Math.round(track.scrollLeft/step())));prev.disabled=index===0;next.disabled=index===selected.length-1;track.dataset.currentIndex=String(index);};
       const move=direction=>track.scrollTo({left:(index+direction)*step(),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
       prev.onclick=()=>move(-1);next.onclick=()=>move(1);
       track.addEventListener('scroll',()=>{if(!pending)pending=requestAnimationFrame(update)},{passive:true});
       track.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();move(event.key==='ArrowRight'?1:-1)}});
-      controls.append(next,prev);header.append(position);stage.append(controls);track.scrollLeft=index*step();update();
+      controls.append(next,prev);stage.append(controls);track.scrollLeft=index*step();update();
     }
   }
   async function markRead(row){
