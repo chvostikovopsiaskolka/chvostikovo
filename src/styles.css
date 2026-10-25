@@ -367,6 +367,16 @@
     -webkit-backdrop-filter: blur(18px) saturate(1.25);
     backdrop-filter: blur(18px) saturate(1.25);
   }
+  /* Landing-page docks have one fewer tab and a wider central interest CTA.
+     The six-slot main-page navigation and all desktop CSS stay unchanged. */
+  .mobile-dock:not([data-variant="main"]) .mobile-dock-bar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(100px, 1.9fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .mobile-dock:not([data-variant="main"]) .mobile-dock-apply > span {
+    font-size: 9px;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+  }
   .mobile-dock-item {
     box-sizing: border-box;
     display: flex;

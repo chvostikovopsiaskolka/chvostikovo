@@ -14,7 +14,7 @@ const forms = read("src/components/site/Forms.tsx");
 for (const value of ["Domov", "Priestory", "Starostlivosť", "Cenník", "Prihláška", "Menu"]) {
   assert(dock.includes(value), "Missing dock item " + value);
 }
-for (const value of ["Home", "Why us?", "Reviews", "Prices", "Enquire", "Slovak version"]) {
+for (const value of ["Home", "Why us?", "Interested in daycare", "Prices", "Slovak version"]) {
   assert(dock.includes(value), "Missing EN item " + value);
 }
 for (const anchor of ["priestory", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "why-daycare", "pricing"]) {
@@ -106,8 +106,25 @@ for (const [route, variant, marker] of [
   assert(source.includes('variant="' + variant + '" onInterestOpen='), route + " must use route-local interest CTA");
   assert(source.includes(marker), route + " must call existing interest form logic");
 }
-assert(dock.includes("marketing ? \"Záujem\""), "Landing CTA must say Záujem");
+assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('label: "Interested in daycare"'), "Landing CTA must have full SK/EN label");
 assert(dock.includes("marketingExtra"), "Local first visit menu links required");
+assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");
+assert(!dock.includes('{ id: "recenzie", label: "Recenzie", icon: ImageIcon }'), "Reviews must leave marketing docks");
+assert(!dock.includes('{ id: "reviews", label: "Reviews", icon: ImageIcon }'), "Reviews must leave EN dock");
+assert(dock.includes('id === "interest" ? (') && dock.includes('{!marketing && ('), "Interest must sit between Why and Pricing, with main site unchanged");
+assert(dock.includes('trackCookielessInteraction("nav_click", source, language)'), "Navigation must use dedicated cookieless events");
+assert(dock.includes('trackCookielessInteraction("inquiry_cta", "en_mobile_dock", "en")'), "EN interest CTA tracking required");
+assert(dock.includes('trackMarketingInteraction("view_pricing", source)'), "Dock pricing should preserve consented Pixel interest");
+assert(dock.includes('trackMarketingInteraction("view_care", source)'), "Main dock care should be consented Pixel interest");
+assert(css.includes('grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(100px, 1.9fr)'), "Wide centered CTA must only apply to marketing docks");
+const cookieless = read("src/lib/cookieless-interactions.ts");
+const analytics = read("src/lib/analytics.ts");
+const trackingEdge = read("supabase/functions/website-landing-event/index.ts");
+assert(cookieless.includes('  | "nav_click"'), "Client event type nav_click missing");
+assert(trackingEdge.includes('  "nav_click",'), "Active tracking allowlist source must accept nav_click");
+assert(analytics.includes('trackMetaCustom("ViewCare"'), "Care Pixel event missing");
+assert(!dock.includes('onClick={() => trackMarketingInteraction("phone_click"'), "Phone tracking must not be double-sent");
+
 assert(dock.includes("homePath + \"#lead-first-visit\""), "Local lead visit link");
 assert(dock.includes("homePath + \"#puppy-first-visit\""), "Local puppy visit link");
 assert(dock.includes("homePath + \"#dog-sitting-first-visit\""), "Local dog visit link");

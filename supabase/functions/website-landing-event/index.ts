@@ -6,6 +6,7 @@ const ALLOWED_ORIGINS = new Set([
 
 const INTERACTION_EVENTS = new Set([
   "phone_click",
+  "nav_click",
   "explore_daycare",
   "inquiry_cta",
   "form_start",
