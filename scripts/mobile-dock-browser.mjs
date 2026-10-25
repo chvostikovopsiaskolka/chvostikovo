@@ -184,8 +184,8 @@ await run(webkit, 320, 568, "webkit-320-short");
       await consent.getByRole("button", { name: /Necessary only/i }).click();
       await page.getByRole("status").waitFor({ state: "hidden", timeout: 10000 });
     }
-    assert.equal(await page.locator(".mobile-dock-item").count(), 6);
-    for (const label of ["Home", "Why us?", "Reviews", "Prices", "Enquire", "Menu"]) {
+    assert.equal(await page.locator(".mobile-dock-item").count(), 5);
+    for (const label of ["Home", "Why us?", "Interested in daycare", "Prices", "Menu"]) {
       assert(await page.locator(".mobile-dock-item").filter({ hasText: label }).count() >= 1, "Missing EN dock label: " + label);
     }
     await page.screenshot({ path: "artifacts/mobile-dock/chromium-en-390-hero.png" });
@@ -223,11 +223,14 @@ for (const { route, why, price, first } of [
       await consent.getByRole("button", { name: /Len nevyhnutné/i }).click();
       await page.getByRole("status").waitFor({ state: "hidden", timeout: 10000 });
     }
-    assert.equal(await page.locator(".mobile-dock-item").count(), 6, route + " must have six buttons");
-    assert.equal(await page.locator('.mobile-dock-apply').innerText(), "Záujem");
-    const expected = [route, route + "#" + why, route + "#recenzie", route + "#" + price];
+    assert.equal(await page.locator(".mobile-dock-item").count(), 5, route + " must have five buttons");
+    assert.equal(await page.locator('.mobile-dock-apply').innerText(), "Mám záujem o škôlku");
+    const expected = [route, route + "#" + why, route + "#" + price];
     const destinations = await page.locator(".mobile-dock-item[href]").evaluateAll((els) => els.map((el) => el.getAttribute("href")));
     assert.deepEqual(destinations, expected, route + " must use local section URLs");
+    const visualOrder = await page.locator(".mobile-dock-bar > .mobile-dock-item").allTextContents();
+    assert.deepEqual(visualOrder.map(label => label.trim()), ["Domov", "Prečo my?", "Mám záujem o škôlku", "Cenník", "Menu"], route + " central CTA order");
+
     await page.screenshot({ path: "artifacts/mobile-dock/landing-" + route.slice(1) + "-hero.png" });
     await page.getByRole("button", { name: /otvoriť menu/i }).click();
     const menu = page.locator(".mobile-dock-menu");
@@ -248,8 +251,6 @@ for (const { route, why, price, first } of [
     await page.locator('.mobile-dock-item[href="' + route + '#' + why + '"]').click();
     await page.waitForFunction((hash) => location.hash === hash, "#" + why);
     assert.equal(new URL(page.url()).pathname, route, route + " Why us must stay on landing");
-    await page.locator('.mobile-dock-item[href="' + route + '#recenzie"]').click();
-    await page.waitForFunction(() => location.hash === "#recenzie");
     await page.locator('.mobile-dock-item[href="' + route + '#' + price + '"]').click();
     await page.waitForFunction((hash) => location.hash === hash, "#" + price);
     assert.equal(new URL(page.url()).pathname, route, route + " pricing must stay on landing");
