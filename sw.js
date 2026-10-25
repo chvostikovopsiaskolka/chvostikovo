@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-v380';
+const CACHE='chvostikovo-portal-shell-v381';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/customer-liquid-optics.js?v=v380','/vendor/liquidlens/liquid-glass.js','/vendor/simple-liquid-glass/webgl.js','/vendor/liquidlens/chvostikovo-paws.png','/customer-guide-v358.js?v=v380','/customer-guide-v358.css?v=v380','/telemetry-v345.js?v=v380','/loading-motion.js?v=v380','/loading-design.css?v=v380','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v380','/customer-design.css?v=v380','/dog-choice-fab-v276.css?v=v380','/dual-dog-overview-v246.js?v=v380','/dual-dog-overview-v246.css?v=v380','/','/terms-pdf.js?v=v380','/terms-pdf-font.js?v=v380','/styles.css?v=v380','/bulletin-photo-v243.css?v=v380','/app.js?v=v380','/back-swipe.js?v=v380'];
+const SHELL=['/customer-liquid-optics.js?v=v381','/vendor/liquidlens/liquid-glass.js','/vendor/simple-liquid-glass/webgl.js','/vendor/liquidlens/chvostikovo-paws.png','/customer-guide-v358.js?v=v381','/customer-guide-v358.css?v=v381','/telemetry-v345.js?v=v381','/loading-motion.js?v=v381','/loading-design.css?v=v381','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v381','/customer-design.css?v=v381','/dog-choice-fab-v276.css?v=v381','/dual-dog-overview-v246.js?v=v381','/dual-dog-overview-v246.css?v=v381','/','/terms-pdf.js?v=v381','/terms-pdf-font.js?v=v381','/styles.css?v=v381','/bulletin-photo-v243.css?v=v381','/app.js?v=v381','/back-swipe.js?v=v381'];
 
 function withPortalCsp(response){
   if(!response)return response;

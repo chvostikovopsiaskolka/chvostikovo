@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v380';
-const APP_VERSION='2.0.55';
+const APP_BUILD='v381';
+const APP_VERSION='2.0.56';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -4308,24 +4308,45 @@ function installVaccinationViewerZoomV244(modal){
     if(photo){const img=el('img');img.src=photo;img.alt='';img.loading='lazy';img.onerror=paw;thumb.append(img);}else paw();
     const content=el('span','customer-notice-content-v363');
     const head=el('span','customer-notice-head-v363');head.append(el('strong','',row.title||'Oznam'));
-    if(!rowsState.read.has(Number(row.id)))head.append(el('span','customer-bulletin-new-v229','Nové'));
+    if(!row.preview&&!rowsState.read.has(Number(row.id)))head.append(el('span','customer-bulletin-new-v229','Nové'));
     content.append(head,el('span','customer-notice-excerpt-v363',row.body||''),el('span','customer-notice-action-v363','Zobraziť oznam ›'));
     b.append(thumb,content);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
   }
   function drawOverview(){
     const anchor=$('designNearest');let host=$('customerNoticeOverviewV376');
+    const preview=new URLSearchParams(location.search).get('notice-carousel-preview')==='1';
     const selected=loggedIn()?rows().filter(row=>row.show_in_overview===true&&current(row)):[];
+    if(preview&&loggedIn()){
+      if(!selected.length)selected.push({id:'preview-first',preview:true,title:'Oznam zo škôlky',body:'Takto bude vyzerať vybraný oznam pod vašimi rezerváciami.'});
+      selected.push({id:'preview-extra',preview:true,title:'Skúšobný oznam',body:'Druhý oznam na ukážku karuselu. Potiahnite karty do strán alebo použite šípky. Tento oznam sa zákazníkom nepublikuje.'});
+    }
     if(!anchor||!selected.length){host?.remove();return;}
     if(!host){host=el('section','customer-notice-overview-v376');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');anchor.after(host);}
     const key=JSON.stringify(selected.map(row=>[row.id,row.title,row.body,row.image_path,rowsState.read.has(Number(row.id))]));
-    if(host.dataset.contentKey===key)return;host.dataset.contentKey=key;
+    if(host.dataset.contentKey===key)return;
+    const oldTrack=host.querySelector('.customer-notice-carousel-v376');
+    const oldIndex=oldTrack?Math.round(oldTrack.scrollLeft/Math.max(1,(oldTrack.firstElementChild?.offsetWidth||0)+12)):0;
+    host.dataset.contentKey=key;
+    const heading=el('h2','customer-notice-title-v381',preview?'Oznamy · ukážka':'Oznamy');
     const track=el('div','customer-notice-carousel-v376');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
-    selected.forEach(row=>track.append(noticeCard(row,false)));
-    track.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();track.scrollBy({left:(event.key==='ArrowRight'?1:-1)*track.clientWidth*.94,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}});
-    host.replaceChildren(track);
+    selected.forEach((row,index)=>{const card=noticeCard(row,false);card.setAttribute('aria-label',(index+1)+' z '+selected.length+': '+(row.title||'Oznam'));track.append(card)});
+    host.replaceChildren(heading,track);
+    if(selected.length>1){
+      const controls=el('div','customer-notice-controls-v381');
+      const prev=el('button','','‹'),next=el('button','','›'),position=el('span','customer-notice-position-v381');
+      prev.type=next.type='button';prev.setAttribute('aria-label','Predchádzajúci oznam');next.setAttribute('aria-label','Ďalší oznam');position.setAttribute('aria-live','polite');position.setAttribute('aria-atomic','true');
+      let index=Math.min(oldIndex,selected.length-1),pending=0;
+      const step=()=>Math.max(1,track.firstElementChild.getBoundingClientRect().width+12);
+      const update=()=>{pending=0;index=Math.max(0,Math.min(selected.length-1,Math.round(track.scrollLeft/step())));prev.disabled=index===0;next.disabled=index===selected.length-1;const text=(index+1)+' / '+selected.length;if(position.textContent!==text)position.textContent=text;};
+      const move=direction=>track.scrollTo({left:(index+direction)*step(),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+      prev.onclick=()=>move(-1);next.onclick=()=>move(1);
+      track.addEventListener('scroll',()=>{if(!pending)pending=requestAnimationFrame(update)},{passive:true});
+      track.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();move(event.key==='ArrowRight'?1:-1)}});
+      controls.append(prev,position,next);host.append(controls);track.scrollLeft=index*step();update();
+    }
   }
   async function markRead(row){
-    if(!loggedIn()||rowsState.read.has(Number(row.id)))return;
+    if(row.preview||!loggedIn()||rowsState.read.has(Number(row.id)))return;
     try{await ensureCustomerSessionV357();}catch(_){return;}
     const currentToken=state.session?.access_token;
     try{
