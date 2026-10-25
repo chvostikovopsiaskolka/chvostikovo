@@ -60,6 +60,23 @@ assert(pawComponent.includes("const TOP_EDGE_PAWS = ["), "Top static paws source
 assert(pawComponent.includes('className={`paw-top-edge-print'), "Top static paws not rendered");
 assert(pawCss.includes(".paw-top-edge-print { display: none; }"), "Static paws must stay hidden on desktop");
 assert(pawCss.includes(".paw-top-edge-print { display: block; opacity: 0.22; }"), "Top paws must appear softly on mobile");
+
+// Premium CTA top-light contract: unchanged controls with additive surface depth.
+for (const selector of [
+  ".btn-coral,",
+  ".btn-forest,",
+  ".mobile-dock-item.mobile-dock-apply,",
+  ".mobile-dock-menu-actions a:first-child {",
+]) {
+  assert(css.includes(selector), "Premium lighting selector missing: " + selector);
+}
+assert(css.includes("inset 0 1px 0 rgba(255, 255, 255, 0.48)"), "Top bevel light missing");
+assert(css.includes("inset 0 -2px 0 var(--cta-lower-edge)"), "Bottom inner shadow missing");
+assert(css.includes("0 9px 21px -6px var(--cta-drop-shadow)"), "Soft drop shadow missing");
+assert(css.includes("@media (hover: hover) and (pointer: fine)"), "Hover glow must not affect touch");
+assert(css.includes("@media (prefers-reduced-motion: reduce)"), "Reduced motion preference required");
+assert(!css.includes("transform: scale("), "CTA must not scale on touch and shift adjacent labels");
+
 console.log("Mobile dock structural regression guards: PASS");
 
 for (const [route, variant, marker] of [
