@@ -53,6 +53,13 @@ for (const route of ["src/routes/psia-skolka-kosice.tsx", "src/routes/psia-skolk
 }
 assert(pawCss.includes("inset: 0;") && pawCss.includes("position: absolute;"), "Decorative paws must follow Hero bounds");
 
+// Top static paw trial: only Hero decoration, no separate overlay or fixed
+// positioning that would follow the user into other sections.
+const pawComponent = read("src/components/site/PawTrailBackground.tsx");
+assert(pawComponent.includes("const TOP_EDGE_PAWS = ["), "Top static paws source missing");
+assert(pawComponent.includes('className={`paw-top-edge-print'), "Top static paws not rendered");
+assert(pawCss.includes(".paw-top-edge-print { display: none; }"), "Static paws must stay hidden on desktop");
+assert(pawCss.includes(".paw-top-edge-print { display: block; opacity: 0.22; }"), "Top paws must appear softly on mobile");
 console.log("Mobile dock structural regression guards: PASS");
 
 for (const [route, variant, marker] of [

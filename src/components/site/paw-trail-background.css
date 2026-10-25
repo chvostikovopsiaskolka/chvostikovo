@@ -22,6 +22,11 @@
   filter: saturate(0.9);
 }
 
+/* Decorative-only. Ordinary static prints keep their existing layout; the
+   three additional top-edge prints are limited to mobile Hero sections. */
+.paw-top-edge-print { display: none; }
+
+
 .paw-ambient-coral {
   fill: var(--color-coral, #ee8749);
 }
@@ -41,6 +46,7 @@
 }
 
 @media (max-width: 1023px) {
+  .paw-top-edge-print { display: block; opacity: 0.22; }
   .paw-trail-lane-2 {
     display: none;
   }
