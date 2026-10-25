@@ -120,25 +120,27 @@
   function ticket() {
     const source=byId('passSummary'),dog=selectedDog(); if(!source||!dog)return;
     let root=byId('designTicket');
-    if(!root){root=document.createElement('section');root.id='designTicket';root.className='design-ticket';root.setAttribute('aria-label','Permanentka a vstupy');byId('bookingDogProfile').after(root);}
-    root.classList.toggle('male',dog.sex==='male');
     const originalTitle=source.querySelector('span')?.textContent||'Vstup',counts=source.querySelector('strong')?.textContent||'';
+    if(counts==='Jednorazový'){root?.remove();return;}
+    if(!root){root=document.createElement('section');root.id='designTicket';root.className='design-ticket';root.setAttribute('aria-label','Permanentka a vstupy');(byId('customerInboxV363')||byId('bookingDogProfile')).after(root);}
+    root.classList.toggle('male',dog.sex==='male');
     root.classList.toggle('design-ticket-single',counts==='Jednorazový');
     const match=counts.match(/(\d+)\s+z\s+(\d+)/),small=[...source.querySelectorAll('small')].map(x=>x.textContent).filter(s=>s!=='Použité vstupy').join(' · ');
     const validity=small.replace(/(\d{2})\.(\d{2})\.(\d{4})/g,(_,d,m,y)=>`${d}. ${m}. ${y.slice(-2)}`).replace(/(\d{4})/g,y=>y.slice(-2));
     const date=small.match(/(?:do|Platí do)\s+(.*)/)?.[1];
     const badge=date?'Platnosť do '+date:validity.replace('Platnosť ','');
-    if(counts==='Jednorazový'){
-      root.innerHTML=`<div class="design-ticket-head"><h2 aria-label="Jednorazový vstup">${icon('ticket')}<span>Jednorazový vstup</span></h2></div>`;
-      return;
-    }
-    root.innerHTML=`<div class="design-ticket-head"><h2 aria-label="${esc(originalTitle)}">${icon("ticket")}<span>${esc(originalTitle)}</span></h2></div><div class="design-ticket-usage">${match?`<p>Použité <strong>${Number(match[1])} z ${Number(match[2])} vstupov</strong></p>`:`<p class="design-single-entry"><strong>${esc(counts==='Jednorazový'?'Jednorazový vstup':counts)}</strong></p>`}${badge?`<span class="design-validity" title="${esc(small)}">${esc(badge)}</span>`:''}</div>${match?`<div class="design-paws" aria-hidden="true">${Array.from({length:Number(match[2])},(_,i)=>`<span class="${i<Number(match[1])?'used':''}">${icon('paw')}</span>`).join('')}</div>`:''}`;
+    const presentationKey=JSON.stringify([originalTitle,counts,small,dog.sex]);
+    if(root.dataset.presentationKey===presentationKey)return;
+    root.dataset.presentationKey=presentationKey;
+    const material=root.querySelector(':scope > .lg-v3-material');
+    root.innerHTML=`<div class="design-ticket-head"><h2 aria-label="${esc(originalTitle)}">${icon("ticket")}<span>${esc(originalTitle)}</span></h2></div><div class="design-ticket-usage">${match?`<p>Použité <strong>${Number(match[1])} z ${Number(match[2])} vstupov</strong></p>`:`<p class="design-single-entry"><strong>${esc(counts==='Jednorazový'?'Jednorazový vstup':counts)}</strong></p>`}${badge?`<span class="design-validity" title="${esc(small)}">${esc(badge)}</span>`:''}</div>${match?`<div class="design-paws" aria-hidden="true">${Array.from({length:Number(match[2])},(_,i)=>`<span class="${i<Number(match[1])?'used':''}">${icon('pass-paw')}</span>`).join('')}</div>`:''}`;
+    if(material)root.prepend(material);
   }
   function nearest() {
     if(!state.data)return;
     if(!selectedDog()){byId('designNearest')?.remove();byId('designTicket')?.remove();byId('designBulletinTitle')?.remove();return;}
     ticket();
-    const anchor=byId('designTicket');if(!anchor)return;
+    const anchor=byId('designTicket')||byId('customerInboxV363');if(!anchor)return;
     let root=byId('designNearest');
     if(!root){root=document.createElement('section');root.id='designNearest';root.className='design-nearest';anchor.after(root);}
     const clock=overviewClock(),end=new Date(clock.date+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+14);
@@ -181,9 +183,11 @@
       const target=root.querySelector('.design-empty-reminder'),notice=byId('deadlineText');target.textContent=notice?.textContent?.trim()||'Prosíme o rezerváciu miesta do nedele 20:00.';target.hidden=!!notice?.classList.contains('hidden');target.classList.remove('design-deadline-closed');
     }
     byId('designBulletinTitle')?.remove();
-    const bulletin=byId('customerBulletinV229');if(bulletin&&root.nextElementSibling!==bulletin)root.after(bulletin);
+    const inbox=byId('customerInboxV363'),profile=byId('bookingDogProfile');if(inbox&&profile?.nextElementSibling!==inbox)profile?.after(inbox);
+    window.customerRefreshNoticeOverviewV376?.();
   }
   function layout() {
+    document.documentElement.classList.toggle('customer-liquid-v364',!!state.session&&!!state.data);
     if(!state.data)return;
     document.documentElement.classList.add('customer-design');
     const profile=byId('bookingDogProfile'),content=profile?.querySelector('.dog-overview-content');
@@ -243,8 +247,8 @@
     const hasReservations=!!byId('weekDays')?.querySelector('.reserved-day-card-v37');
     if(smart&&!smart.classList.contains('hidden')){smart.classList.toggle('design-smart-hidden',hasReservations);if(!hasReservations){empty?.classList.add('hidden');carousel.append(smart);}}
     if(empty&&!hasReservations&&(!smart||smart.classList.contains('hidden'))) {empty.classList.remove('hidden');let text=empty.querySelector('.design-empty-booking-cta');if(!text){text=document.createElement('p');text.className='design-empty-booking-cta';empty.replaceChildren(text);}text.textContent='Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.';}
-    if(!byId('designCapacityLegend')){const legend=document.createElement('div');legend.id='designCapacityLegend';legend.innerHTML='<span><i class="free"></i>Voľné miesta</span><span><i class="limited"></i>Takmer plné</span><span><i class="full"></i>Plné</span>';byId('bookingPickerDaysV37').after(legend);}
-    if(taxiTitle)byId('designCapacityLegend').after(taxiTitle);
+    byId('designCapacityLegend')?.remove();
+    if(taxiTitle)byId('bookingPickerDaysV37').after(taxiTitle);
 
   };
   window.customerDesignEditReservation=date=>{window.openBookingPickerV37?.();const carousel=byId('designBookingCarousel'),card=byId('weekDays')?.querySelector('[data-date="'+date+'"]');if(carousel&&card)carousel.scrollLeft=card.offsetLeft-carousel.offsetLeft;};

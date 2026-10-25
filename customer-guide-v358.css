@@ -1,6 +1,5 @@
 .customer-guide{position:fixed;inset:0;z-index:31000;isolation:isolate;overflow:hidden;touch-action:pan-y}
 .customer-guide.hidden{display:none!important}
-.customer-guide-open #navBookHintV220{display:none!important}
 .customer-guide.guide-welcome{background:#172136a8}
 .guide-spot{position:fixed;border-radius:17px;border:2px solid #ffb670;box-shadow:0 0 0 9999px #172136b8;pointer-events:none;box-sizing:border-box}
 .guide-card{position:fixed;box-sizing:border-box;background:#fffcfa;border:1px solid #efd6c5;border-radius:22px;padding:17px;box-shadow:0 12px 45px #10182735;color:#172136;overflow:auto;overscroll-behavior:contain}
@@ -31,3 +30,13 @@
 .guide-calendar-step .guide-card h2{grid-area:title;font-size:17px;margin:0;align-self:center}
 .guide-calendar-step .guide-card p{grid-area:body;font-size:12px;line-height:1.4;margin:4px 0 10px}
 .guide-calendar-step .guide-actions{grid-area:actions}
+
+/* v369: keep the inert calendar preview within the mobile guide after roomier weeks. */
+.customer-design #bookingPickerV37.design-reservations-page .guide-picker-preview-v360{padding:6px!important}
+.guide-picker-preview-v360 .guide-preview-calendar{padding:6px 7px}
+.customer-design #bookingPickerV37 .guide-picker-preview-v360 .booking-picker-week-v127{padding:8px 6px 6px}
+.customer-design #bookingPickerV37 .guide-picker-preview-v360 .booking-picker-week-label-v127{margin:8px 0 6px!important}
+.guide-picker-preview-v360 .design-selected-day{padding:6px 10px}
+.guide-picker-preview-v360 .design-selected-days{gap:6px;margin:4px 0;padding:0}
+.customer-design #bookingPickerV37 .guide-picker-preview-v360 .booking-taxi-inline-v201{margin-top:4px!important}
+.customer-design #bookingPickerV37 .guide-picker-preview-v360 .booking-picker-submit-v37{margin-top:9px!important}

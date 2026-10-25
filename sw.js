@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-v361';
+const CACHE='chvostikovo-portal-shell-v392';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/customer-guide-v358.js?v=v361','/customer-guide-v358.css?v=v361','/telemetry-v345.js?v=v361','/loading-motion.js?v=v361','/loading-design.css?v=v361','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v361','/customer-design.css?v=v361','/dog-choice-fab-v276.css?v=v361','/dual-dog-overview-v246.js?v=v361','/dual-dog-overview-v246.css?v=v361','/','/terms-pdf.js?v=v361','/terms-pdf-font.js?v=v361','/styles.css?v=v361','/bulletin-photo-v243.css?v=v361','/app.js?v=v361','/back-swipe.js?v=v361'];
+const SHELL=['/vendor/liquidlens/reels-noise-v385.png','/customer-liquid-optics.js?v=v392','/vendor/liquidlens/liquid-glass.js','/vendor/simple-liquid-glass/webgl.js','/vendor/liquidlens/chvostikovo-paws.png','/vendor/liquidlens/chvostikovo-paws-soft-v383.png','/customer-guide-v358.js?v=v392','/customer-guide-v358.css?v=v392','/telemetry-v345.js?v=v392','/loading-motion.js?v=v392','/loading-design.css?v=v392','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v392','/customer-design.css?v=v392','/dog-choice-fab-v276.css?v=v392','/dual-dog-overview-v246.js?v=v392','/dual-dog-overview-v246.css?v=v392','/','/terms-pdf.js?v=v392','/terms-pdf-font.js?v=v392','/styles.css?v=v392','/bulletin-photo-v243.css?v=v392','/app.js?v=v392','/back-swipe.js?v=v392'];
 
 function withPortalCsp(response){
   if(!response)return response;
@@ -130,7 +130,8 @@ self.addEventListener('push',event=>{
 });
 self.addEventListener('notificationclick',event=>{
   event.notification.close();
-  const target=new URL(event.notification.data?.url||'/',self.location.origin).href;
+  let target=new URL('/',self.location.origin).href;
+  try{const u=new URL(event.notification.data?.url||'/',self.location.origin);if(u.origin===self.location.origin&&['/','/index.html'].includes(u.pathname))target=u.href;}catch(_){}
   event.waitUntil((async()=>{
     const wins=await self.clients.matchAll({type:'window',includeUncontrolled:true});
     const existing=wins.find(client=>client.url.startsWith(self.location.origin));

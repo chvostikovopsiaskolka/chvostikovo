@@ -397,7 +397,7 @@ html.booking-picker-open-v37{overflow:hidden!important}
 .dog-profile-header .dog-avatar.profile{width:76px;height:76px;font-size:28px}
 .dog-profile-header .dog-photo-name{font-size:23px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dog-profile-header .photo-pencil{right:-2px;bottom:-2px;width:29px;height:29px;font-size:16px}
-.dog-details-open{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:10px 14px;white-space:nowrap}
+button.dog-details-open{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:10px 14px;white-space:nowrap}
 .profile-onboarding-card .btn{flex:0 0 auto;min-height:44px;padding:10px 14px}
 html.dog-details-open{overflow:hidden}
 .dog-details-modal{z-index:560}
@@ -420,7 +420,7 @@ html.dog-details-open{overflow:hidden}
   .dog-profile-identity{gap:10px}
   .dog-profile-header .dog-avatar.profile{width:64px;height:64px;font-size:24px}
   .dog-profile-header .dog-photo-name{font-size:20px;max-width:110px}
-  .dog-details-open{font-size:13px;padding:9px 11px}
+  button.dog-details-open{font-size:13px;padding:9px 11px}
   .profile-onboarding-card .btn{width:100%}
   .dog-details-card .grid2{grid-template-columns:minmax(0,1fr)!important}
   .visit-summary-card{padding:18px}
@@ -2170,26 +2170,6 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
   display:block;font-size:41px;font-weight:350;line-height:1;
   transform:translateY(-2px);pointer-events:none;
 }
-.bottom-nav .booking-fab-hint-v220{
-  position:absolute;left:50%;bottom:calc(100% + 14px);
-  transform:translateX(-50%);width:max-content;max-width:calc(100vw - 30px);
-  background:#fff;color:#b45309;border:1px solid #fed7aa;border-radius:17px;
-  box-shadow:0 10px 30px rgba(17,24,39,.16);
-  display:flex;align-items:center;justify-content:center;
-  gap:9px;padding:11px 11px 11px 16px;font-size:14px;font-weight:800;line-height:1.3;
-  z-index:2;
-}
-.bottom-nav .booking-fab-hint-v220::after{
-  content:"";position:absolute;left:50%;top:100%;width:12px;height:12px;
-  transform:translate(-50%,-6px) rotate(45deg);
-  background:#fff;border-right:1px solid #fed7aa;border-bottom:1px solid #fed7aa;
-}
-.bottom-nav .booking-fab-hint-v220 button{
-  display:grid!important;place-items:center!important;position:relative;z-index:1;
-  flex:0 0 28px!important;width:28px!important;height:28px!important;
-  min-height:28px!important;padding:0!important;border:0!important;border-radius:50%!important;
-  background:#fff3e7!important;color:#b45309!important;font-size:20px!important;line-height:1!important;
-}
 @media(max-width:370px){
   .bottom-nav:has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 56px minmax(0,1fr)!important}
   .bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 56px minmax(0,1fr) minmax(0,1fr)!important}
@@ -2224,7 +2204,6 @@ body button,body a,body summary,body [role="button"],body [role="switch"]{
 }
 .bottom-nav #navBookAddV220:active{background:#ea580c!important;box-shadow:none!important}
 .bottom-nav #navBookAddV220 .booking-fab-symbol-v220{font-size:40px!important}
-.bottom-nav .booking-fab-hint-v220{gap:0!important;padding:11px 17px!important}
 @media(max-width:370px){
  .bottom-nav:has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 66px minmax(0,1fr)!important}
  .bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){grid-template-columns:minmax(0,1fr) 66px minmax(0,1fr) minmax(0,1fr)!important}
@@ -3309,3 +3288,10 @@ button span,button svg,button svg *{pointer-events:none}
 
 .booking-vaccine-ready-row-v307{background:#f7fcf9;border-color:#b7e3cb}
 .booking-vaccine-ready-v307{color:#14603d;border-color:#b6dfc4;background:#e9f8ee}
+
+/* v392: vaccination photo actions keep the existing editor and native picker. */
+#vaccProofActionsV392{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+#vaccProofActionsV392.hidden{display:none}
+#vaccProofActionsV392 .btn{min-height:44px;flex:1 1 140px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+#vaccProofActionsV392 label{display:flex;align-items:center;justify-content:center;cursor:pointer}
+#vaccProofEditorV244:has(#vaccProofEditFileV244:focus-visible) #vaccProofActionsV392 label{outline:2px solid var(--orange);outline-offset:2px}

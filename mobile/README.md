@@ -1,7 +1,9 @@
 # Chvostíkovo Android — Capacitor preparation
 
 Status: **prepared for testing; not a signed Google Play release**. Source baseline:
-initial customer-portal-production `af169c978538c5c00ebc01dc44253bc562138337` (v360), now synchronized with customer PWA v361 / 2.0.36 commit `8855e0912f290c5d6795181954f0198ffd06abf0`. The native debug APK must be rebuilt from this updated branch; the older v360 debug APK is not current.
+customer-portal-production `9819732f9063aceef0ec0a833a3b9908e9d9ed0a`,
+customer PWA v392 / 2.0.67 (25 October 2026). Earlier v360/v361 APK/AAB files
+are obsolete. Every subsequent Android file must be rebuilt after shared changes.
 The production PWA and database are not changed by building this directory.
 
 ## Shared source and repeatable builds
@@ -23,6 +25,14 @@ code is bundled locally, while existing authenticated APIs still use Supabase.
 The PWA service worker and its release-marker reload are skipped only in native
 mode. The PWA continues to use its existing updater. Keep shared changes in the
 root source; never edit generated `www` or Android assets manually.
+
+Android `versionName` and `versionCode` are read directly from root `version.json`
+(v392 -> code 392, name 2.0.67). Use a newer shared build number for each Play
+upload. The build cleans old output, includes the optical engine's runtime assets
+and records shared plus packaged SHA-256 hashes and the Git source commit in
+`mobile-build.json`. Packaging tests verify source parity and vendor references.
+This does not publish or update an already-installed APK automatically: sync this
+branch with the current production source, test, rebuild and distribute each release.
 
 The GitHub Actions workflow produces a **debug APK** and an **unsigned AAB**.
 These are compile artifacts, not evidence of device testing or production readiness.
@@ -103,8 +113,8 @@ in the build environment, never in committed Gradle files:
 - `CHVO_NATIVE_PUSH_VERIFIED=1` and `CHVO_APP_LINKS_VERIFIED=1` **only after actual tests**
 
 Then `npm run android:bundle`. The preflight deliberately blocks an unconfigured
-release. Increment Android `versionCode` for each Play upload and keep versionName
-aligned with the shared release. Initial versionCode is 1.
+release. The shared build number must increase for each Play upload; Android reads
+it directly as `versionCode`. Current candidate uses code 392 and versionName 2.0.67.
 
 Upload the signed AAB to Google Play internal testing, add testers' Play Google
 accounts and share the opt-in link. They sign in with existing Chvostíkovo credentials;

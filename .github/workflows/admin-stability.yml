@@ -14,6 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Preflight customer release version contract
+        run: node tests/customer-release-contract.cjs
       - name: Install pinned test runtime outside the app
         run: |
           npm install --prefix "$RUNNER_TEMP/chvo-admin-deps" --no-save --no-package-lock jsdom@26.1.0 typescript@5.8.3 @electric-sql/pglite@0.5.10
@@ -25,6 +27,11 @@ jobs:
           node tests/security-access-v336.mjs
           node tests/security-handlers-v336.mjs
           node tests/admin-access-v336.cjs
+      - name: Customer proof deletion and grouped errors v392
+        run: |
+          node tests/customer-proof-delete-v392.mjs
+          node tests/customer-proof-delete-v392.cjs
+          node tests/customer-proof-delete-db-v392.cjs
       - name: Vaccination push grouping v343
         run: node tests/vaccine-push-batch-v343.cjs
       - name: Private OpenTelemetry ingestion and actual admin v345
@@ -88,8 +95,16 @@ jobs:
 
       - name: Customer reservation controls v326
         run: |
+          node tests/customer-liquid-v3.cjs
+          node tests/customer-liquid-v364.cjs
+          node tests/customer-inbox-v363.cjs
+          node tests/customer-push-routing-v363.cjs
           node tests/customer-design.cjs
           node tests/customer-surface-v361.cjs
+          node tests/customer-magnetic-board-v362.cjs
+          node tests/customer-read-recovery-v367.cjs
+          node tests/customer-transient-reads-v391.cjs
+          node tests/customer-roster-unlinked-v389.cjs
           node tests/customer-session-startup-v357.cjs
           node tests/customer-guide-v358.cjs
           node tests/customer-guide-db-v358.cjs
@@ -125,3 +140,52 @@ jobs:
           ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-owner-review-v334.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-taxi-v329.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v335.html node tests/admin-runtime-v275.cjs
+
+  liquid-v3-browser:
+    runs-on: ubuntu-latest
+    env:
+      LIBGL_ALWAYS_SOFTWARE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reproduce vendored optical bundle
+        run: |
+          npm ci --prefix tools/liquid-v3 --ignore-scripts
+          node tools/build-liquid-v3.cjs
+          git diff --exit-code -- vendor/simple-liquid-glass/webgl.js
+      - name: Install browser test runtime
+        run: |
+          npm install --prefix "$RUNNER_TEMP/chvo-v3-browser" --no-save --no-package-lock playwright@1.62.1 pngjs@7.0.0
+          echo "CODEX_PRIMARY_RUNTIME_NODE_MODULES=$RUNNER_TEMP/chvo-v3-browser/node_modules" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/chvo-v3-browser/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Current customer browser regression and pixel proof
+        run: |
+          node tests/customer-proof-delete-v392-browser.cjs
+          V3_ENGINE=webkit node tests/customer-proof-delete-v392-browser.cjs
+          node tests/customer-android-dock-v389-browser.cjs
+          node tests/customer-auth-glass-v386-browser.cjs
+          V3_ENGINE=webkit node tests/customer-auth-glass-v386-browser.cjs
+          node tests/customer-scroll-optics-v389-browser.cjs
+          V3_ENGINE=webkit node tests/customer-scroll-optics-v389-browser.cjs
+          node tests/customer-reels-v385-browser.cjs
+          V3_ENGINE=webkit node tests/customer-reels-v385-browser.cjs
+          node tests/customer-liquid-browser-v364.cjs
+          node tests/customer-liquid-v3-browser.cjs
+          node tests/customer-followup-v376-browser.cjs
+          V3_ENGINE=webkit node tests/customer-followup-v376-browser.cjs
+          V3_ENGINE=webkit V3_LOW_CONTEXT=1 node tests/customer-liquid-v3-browser.cjs
+          node tests/customer-inbox-browser-v363.cjs
+          node tests/customer-guide-browser-v358.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: liquid-v3-browser-evidence
+          path: |
+            /tmp/chvo-v392-proof/
+            /tmp/chvo-v389-screenshots/
+            /tmp/chvo-v386-auth/
+            /tmp/chvo-v385-screenshots/
+            /tmp/chvo-v3-screenshots/
+            /tmp/chvo-v376-screenshots/

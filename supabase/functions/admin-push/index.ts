@@ -78,6 +78,26 @@ function taxiDescriptionV329(mode: unknown): string {
   return ({pickup:"Vyzdvihnutie (5 €)",dropoff:"Dovoz domov (5 €)",pickup_dropoff:"Vyzdvihnutie aj dovoz domov (10 €)"} as Record<string,string>)[String(mode || "none")] || "Bez taxíka";
 }
 
+// Message content stays in the push body, never in navigation URLs or diagnostics.
+function customerMessagePreviewV364(value: unknown): string {
+  if (typeof value !== "string") return "Máte novú správu od Chvostíkova.";
+  const text = value.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim();
+  const chars = Array.from(text);
+  return chars.length ? chars.slice(0, 240).join("") + (chars.length > 240 ? "…" : "") : "Máte novú správu od Chvostíkova.";
+}
+
+function customerNotificationUrlV363(record: Json): string {
+  const id = Number(record.entity_id), type = String(record.notification_type || "");
+  const recipient = String(record.recipient_user_id || "");
+  if (!Number.isSafeInteger(id) || id <= 0 || !recipient) return "/";
+  const suffix = "&recipient=" + encodeURIComponent(recipient);
+  if (type === "staff_message_customer" && record.entity_type === "conversation")
+    return "/?open=messages&conversation=" + id + suffix;
+  if (type === "announcement_push" && record.entity_type === "announcement")
+    return "/?open=announcement&announcement=" + id + suffix;
+  return "/";
+}
+
 async function messageForWebhook(body: Json) {
   const table = String(body.table || "");
   const record = (body.record && typeof body.record === "object" ? body.record : {}) as Json;
@@ -332,14 +352,17 @@ async function messageForWebhook(body: Json) {
 
   if (table === "portal_notifications") {
     const isAdminMessage = ["customer_message_admin", "taxi_cancelled_admin", "app_diagnostics_admin"].includes(String(record.notification_type));
-    const notificationBody = String(record.push_body || record.body || "Máte nové upozornenie.");
+    const isCustomerMessage = record.notification_type === "staff_message_customer";
+    const notificationBody = isCustomerMessage ? customerMessagePreviewV364(record.body) : String(record.push_body || record.body || "Máte nové upozornenie.");
     const isTaxiInterest = isAdminMessage && notificationBody.toLocaleLowerCase("sk-SK").includes("doplnenie taxi");
     return {
-      title: isTaxiInterest ? "Nová žiadosť o taxi" : String(record.push_title || record.title || "Chvostíkovo"),
+      title: isCustomerMessage ? "Chvostíkovo" : isTaxiInterest ? "Nová žiadosť o taxi" : String(record.push_title || record.title || "Chvostíkovo"),
       body: notificationBody,
       tag: `portal-${id}`,
       recipientUserId: String(record.recipient_user_id || ""),
       audience: isAdminMessage ? "admin" : "customer",
+      // Route only from trusted notification metadata; never from message content.
+      customerUrl: customerNotificationUrlV363(record),
     };
   }
 
@@ -552,7 +575,7 @@ async function dispatch(body: Json) {
     ...message,
     ...(badgeCount === null ? {} : { badgeCount, badgeComputedAt: new Date().toISOString() }),
     badge: "/notification-badge.png?v=20260917-push",
-    data: { url: "/" },
+    data: { url: customer ? ("customerUrl" in message ? message.customerUrl : "/") : "/" },
   });
 
   for (const row of Array.isArray(rows) ? rows : []) {

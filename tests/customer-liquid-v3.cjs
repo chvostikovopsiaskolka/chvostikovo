@@ -1,0 +1,12 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const css=fs.readFileSync('customer-design.css','utf8'),js=fs.readFileSync('customer-liquid-optics.js','utf8');
+assert(!css.includes('Liquid Glass refraction pilot — v2.'));
+assert(css.includes('Liquid Glass V3 preview'));
+assert(js.includes('window.LiquidLens.makeDisplacementMap'));
+assert(js.includes('createWebGLSurface'));
+assert(js.includes('maps.size>32'));
+assert(js.includes('stats.contextLimit'));
+assert(!js.includes('fetch(')&&!js.includes('setInterval('));
+assert(!css.split('/* Liquid Glass V3 preview')[1].includes('border:1px'));
+for(const f of ['vendor/liquidlens/LICENSE','vendor/simple-liquid-glass/LICENSE','vendor/simple-liquid-glass/THIRD_PARTY_NOTICES.md'])assert(fs.existsSync(f));
+console.log('PASS V3 real vendored optics, bounded maps/contexts, border-free material, no backend/polling');

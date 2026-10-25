@@ -21,6 +21,7 @@ const transport=async(url,options={})=>{
    let rows=proofs.filter(p=>!params.has('is_current')||p.is_current);
    const dog=params.get('dog_id');if(dog?.startsWith('eq.'))rows=rows.filter(p=>p.dog_id===Number(dog.slice(3)));if(dog?.startsWith('in.'))rows=rows.filter(p=>dog.includes(String(p.dog_id)));
    if(params.get('id'))rows=rows.filter(p=>p.id===Number(params.get('id').slice(3)));
+   if(method==='DELETE')rows.forEach(row=>proofs.splice(proofs.indexOf(row),1));
    if(method==='PATCH')rows.forEach(p=>Object.assign(p,body));return response(rows);
  }
  return response([]);
@@ -30,7 +31,7 @@ const post=async(token,body)=>{const r=await handler(new Request('https://fixtur
 const jpeg='data:image/jpeg;base64,/9j/2Q==';
 let r=await post('staff',{action:'upload_vaccination_proofs',dog_id:1,images:[jpeg],append:true});assert.equal(r.status,200);assert.equal(r.data.data.proofs.length,4);assert.equal(proofs.at(-1).source,'staff');
 const added=proofs.at(-1).id;
-r=await post('staff',{action:'upload_vaccination_proofs',dog_id:1,images:[jpeg],replace_proof_id:2});assert.equal(r.status,200);assert.equal(r.data.data.proofs.length,4);assert(!proofs.find(p=>p.id===2).is_current);assert(proofs.find(p=>p.id===1).is_current&&proofs.find(p=>p.id===3).is_current);
+r=await post('staff',{action:'upload_vaccination_proofs',dog_id:1,images:[jpeg],replace_proof_id:2});assert.equal(r.status,200);assert.equal(r.data.data.proofs.length,4);assert(!proofs.find(p=>p.id===2)?.is_current);assert(proofs.find(p=>p.id===1).is_current&&proofs.find(p=>p.id===3).is_current);
 // Actual authenticated owner bootstrap reuses the exact staff records and private signing path.
 const boot=await handler(new Request('https://fixture.invalid/',{headers:{authorization:'Bearer owner'}}));const owner=await boot.json();assert.equal(boot.status,200);assert(owner.availability.days.some(d=>d.capacity===10));assert(owner.availability.days.some(d=>d.capacity===12));assert(owner.vaccination_proofs.some(p=>p.id===added&&p.source==='staff'));assert(!owner.vaccination_proofs.some(p=>p.id===2));assert(owner.vaccination_proofs.every(p=>p.image_url));
 const snapshot=JSON.stringify(proofs);r=await post('owner',{action:'admin_delete_vaccination_proof',dog_id:1,proof_id:1});assert.equal(r.status,403);assert.equal(JSON.stringify(proofs),snapshot);

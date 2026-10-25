@@ -46,7 +46,7 @@ function createCompactChatLayout(modal,card,thread,input){
  },{passive:false});
  return {
   prepare(){preferred=0;baselineHeight=0;stickToBottom=true;layout(true)},
-  open(){layout(true);resizeInput();latest()},
+  open(){layout(true);resizeInput();latest();schedule()},
   close(){input.blur();if(frame)cancelAnimationFrame(frame);frame=0;modal.style.removeProperty('--chat-card-top');modal.style.removeProperty('--chat-card-height')},
   resizeInput,latest
  };
@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v361';
-const APP_VERSION='2.0.36';
+const APP_BUILD='v392';
+const APP_VERSION='2.0.67';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -145,6 +145,32 @@ try{window.ChvoTelemetry?.init({app:'customer',build:APP_TELEMETRY_BUILD,base:SU
 // One concurrent read for onboarding, settings and rules; never share account state.
 let customerTermsReadV146=null;
 let bootstrapInFlight=null,lastResumeRefresh=0;
+// v392: Retry one transient transport failure on authenticated read-only GETs.
+// Never repeat mutations, mask HTTP failures, or cross a logout/account change.
+async function customerReadJsonV391(url,ownerId){
+  if(!ownerId)throw new Error('Najprv sa prihláste.');
+  let firstError=null;
+  for(let attempt=0;attempt<2;attempt++){
+    if(!state.session||state.session.user?.id!==ownerId)throw Object.assign(new Error('Účet sa zmenil.'),{code:'session_changed'});
+    if(attempt){
+      if(navigator.onLine===false||document.visibilityState==='hidden')throw firstError;
+      await new Promise(resolve=>setTimeout(resolve,450));
+      if(!state.session||state.session.user?.id!==ownerId)throw Object.assign(new Error('Účet sa zmenil.'),{code:'session_changed'});
+      if(navigator.onLine===false||document.visibilityState==='hidden')throw firstError;
+    }
+    const session=await ensureCustomerSessionV357();
+    if(session.user?.id!==ownerId)throw Object.assign(new Error('Účet sa zmenil.'),{code:'session_changed'});
+    try{
+      const response=await fetch(url,{method:'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token},cache:'no-store'});
+      const raw=await response.text();
+      return {response,rows:response.ok?(raw?JSON.parse(raw):[]):null};
+    }catch(error){
+      if(attempt||!['TypeError','NetworkError'].includes(error?.name)||navigator.onLine===false||document.visibilityState==='hidden')throw error;
+      firstError=error;
+    }
+  }
+}
+
 async function readActiveCustomerTermsV146(force=false){
   if(!state.session)return null;
   if(customerSessionNeedsRefreshV357()||sessionRefreshInFlight)await ensureCustomerSessionV357();
@@ -155,9 +181,9 @@ async function readActiveCustomerTermsV146(force=false){
   const entry={key,at:Date.now(),pending:true,promise:null};
   entry.promise=(async()=>{
     const now=new Date().toISOString();
-    const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token},cache:'no-store'});
-    if(!r.ok)throw new Error('Pravidlá sa nepodarilo načítať.');
-    const rows=await r.json();return rows?.[0]||null;
+    const {response,rows}=await customerReadJsonV391(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',session.user?.id);
+    if(!response.ok)throw new Error('Pravidlá sa nepodarilo načítať.');
+    return rows?.[0]||null;
   })();
   customerTermsReadV146=entry;
   try{return await entry.promise}catch(error){if(customerTermsReadV146===entry)customerTermsReadV146=null;throw error}finally{entry.pending=false}
@@ -190,7 +216,7 @@ function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
 function saveSession(s,remember=true){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));state.session=s}
-function clearSession(){void window.ChvoNative?.logout(state.session);window.customerGuideAbortV358?.();window.customerBulletinAbortV358?.();void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
+function clearSession(){void window.ChvoNative?.logout(state.session);document.documentElement.classList.remove('customer-liquid-v364');window.customerGuideAbortV358?.();window.customerBulletinAbortV358?.();void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
 async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok){const error=new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');error.status=r.status;error.code=data?.code||data?.error_code||'';if(error.code==='user_banned'||/user is banned/i.test(error.message))error.message='Prístup k účtu je zablokovaný. Kontaktujte Chvostíkovo.';throw error}return data}
 let sessionRefreshInFlight=null,sessionRefreshOwnerV357=null;
 function customerSessionNeedsRefreshV357(session=state.session){
@@ -239,7 +265,29 @@ async function sharedQuoteResponseV265(opts){
     }finally{clearTimeout(timer)}
   }
 }
-async function apiCore(body=null,retry=true){const session=await ensureCustomerSessionV357();if(!state.session)throw new Error('Najprv sa prihláste.');const token=state.session.access_token,opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const quote=body?.action==='shared_booking_v257'&&!body.operation_id;const result=quote?await sharedQuoteResponseV265(opts):null;const r=result?result.response:await fetch(API,opts);const txt=result?result.text:await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(!state.session||state.session.user?.id!==session.user?.id)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(data.code==='account_blocked'){clearSession();showAuth('login');authMessage('error',data.error);throw new Error(data.error)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
+// One recovery attempt for a read-only transport failure; writes are never replayed here.
+async function customerReadResponseV367(opts,session){
+ const owner=session.user?.id;let firstError;
+ const changed=()=>!state.session||state.session.user?.id!==owner;
+ const sessionChanged=()=>Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});
+ for(let attempt=0;attempt<2;attempt++){
+  if(changed())throw sessionChanged();
+  if(attempt){
+   await new Promise(resolve=>setTimeout(resolve,350));
+   if(changed())throw sessionChanged();
+   if(navigator.onLine===false||document.visibilityState==='hidden')throw firstError;
+   await ensureCustomerSessionV357();
+   if(changed())throw sessionChanged();
+   opts={...opts,headers:{...opts.headers,Authorization:'Bearer '+state.session.access_token}};
+  }
+  try{const response=await fetch(API,opts);const text=await response.text();return {response,text,token:opts.headers.Authorization.slice(7)};}
+  catch(error){
+   if(attempt||!['TypeError','NetworkError'].includes(error?.name)||navigator.onLine===false||document.visibilityState==='hidden')throw error;
+   firstError=error;
+  }
+ }
+}
+async function apiCore(body=null,retry=true){const session=await ensureCustomerSessionV357();if(!state.session)throw new Error('Najprv sa prihláste.');let token=state.session.access_token;const opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const quote=body?.action==='shared_booking_v257'&&!body.operation_id;const result=quote?await sharedQuoteResponseV265(opts):!body?await customerReadResponseV367(opts,session):null;if(result?.token)token=result.token;const r=result?result.response:await fetch(API,opts);const txt=result?result.text:await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(!state.session||state.session.user?.id!==session.user?.id)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(data.code==='account_blocked'){clearSession();showAuth('login');authMessage('error',data.error);throw new Error(data.error)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
 let customerApiMutationsInFlight=0;
 async function api(body=null,retry=true){if(body)customerApiMutationsInFlight++;try{const result=await apiCore(body,retry);runCustomerHooks('afterApi',body,result);return result}catch(error){try{window.ChvoTelemetry?.capture('operation.error',{operation:'customer-operation',action:body?.action,error})}catch(_){}throw error}finally{if(body)customerApiMutationsInFlight--;scheduleCustomerUpdateApply()}}
 function showAuth(mode='login'){$('startupRecoveryV359')?.classList.add('hidden');if($('startupRecoveryV359'))$('startupRecoveryV359').inert=true;$('supportChatBtnV52')?.classList.add('hidden');$('supportChatModalV52')?.classList.add('hidden');document.documentElement.classList.remove('support-chat-open-v52');document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').inert=false;$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
@@ -397,6 +445,7 @@ async function flushCustomerSync(){
 
     // Same build + same data = keep the existing DOM exactly as it is.
     if(previousData&&previousFingerprint===nextFingerprint){
+      if(scopes.has('all')||scopes.has('announcements'))await loadAnnouncements(scopes.has('announcements'));
       return;
     }
 
@@ -425,7 +474,7 @@ async function flushCustomerSync(){
       if(typeof window.runCustomerOnboardingV75==='function')window.runCustomerOnboardingV75();
     });
 
-    if(all||scopes.has('announcements'))await loadAnnouncements();
+    if(all||scopes.has('announcements'))await loadAnnouncements(scopes.has('announcements'));
   }catch(error){
     if(navigator.onLine)console.warn('Live resync zlyhal',error)
   }finally{
@@ -527,7 +576,7 @@ function renderNotifications(){
   }
   notice.innerHTML=[...groups.values()].map(group=>`<div class="care-notice"><strong>${esc(group[0].title)}</strong><p>${group.map(n=>esc(vaccinationCopyV234(n))).join('<br>')}</p>${group[0].notification_type==='vaccination_expiry'?`<p class="vacc-policy-note-v233">${esc(vaccinationCarePolicyV233)}</p>`:''}<button class="btn secondary compact" type="button" data-care-notice="${Number(group[0].id)}">${group[0].notification_type==='pass_expiry'?'Vybrať termín':'Pozrieť očkovania'}</button></div>`).join('');
   notice.querySelectorAll('[data-care-notice]').forEach(b=>b.addEventListener('click',()=>{const row=careRows.find(n=>Number(n.id)===Number(b.dataset.careNotice));if(row)customerCareAction(row)}));
-  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
+  const rows=(state.data?.notifications||[]).filter(n=>!n.read_at&&!customerClosedNotificationIdsV59.has(Number(n.id))&&!['pass_interest_registered','dog_approved','weekly_booking_reminder','weekly_booking_reminder_test','staff_message_customer','announcement_push'].includes(n.notification_type)&&careNotificationIsCurrent(n)).slice(0,5);
   let modal=$('notificationPopup');
   if(!rows.length){modal?.classList.add('hidden');return}
   if(!modal){
@@ -591,7 +640,7 @@ function renderPassSummaryCore(){
     const firstBooked=Number(p.used_entries)===0?(state.data?.reservations||[]).filter(r=>Number(r.dog_id)===Number(d.id)&&Number(r.pass_id)===Number(p.id)&&r.status==='booked'&&r.reservation_date>=today).map(r=>r.reservation_date).sort()[0]:null;
     let start=p.valid_from||firstBooked,until=p.valid_until;
     if(start&&!until&&!p.no_expiry){const [year,month,day]=start.split('-').map(Number),endMonth=new Date(Date.UTC(year,month-1+2,1)),lastDay=new Date(Date.UTC(endMonth.getUTCFullYear(),endMonth.getUTCMonth()+1,0)).getUTCDate();endMonth.setUTCDate(Math.min(day,lastDay));until=endMonth.toISOString().slice(0,10)}
-    const validity=p.no_expiry===true?'<small>Platnosť bez obmedzenia</small>':Number(p.used_entries)===0&&start?`<small>Platnosť od ${skDate(start)}${until?` do ${skDate(until)}`:''}</small>`:until?`<small>Platí do ${skDate(until)}</small>`:'';
+    const validity=(p.status==='queued'&&p.no_expiry===true)?'':p.no_expiry===true?'<small>Platnosť bez obmedzenia</small>':Number(p.used_entries)===0&&start?`<small>Platnosť od ${skDate(start)}${until?` do ${skDate(until)}`:''}</small>`:until?`<small>Platí do ${skDate(until)}</small>`:'';
     $('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>${Number(p.used_entries)||0} z ${Number(p.total_entries)||0}</strong>${validity}`;
     return;
   }
@@ -654,7 +703,7 @@ async function cancelTaxiV326(btn){
 }
 function bookingFor(dogId,date){return (state.data?.requests||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date&&['pending','approved'].includes(r.status))||(state.data?.reservations||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date)}
 function applyLocalBooking(result,fallback){const row=result?.data||result?.booking||result?.request||fallback;if(!row)return;const rows=state.data?.requests||(state.data.requests=[]),index=rows.findIndex(r=>Number(r.id)===Number(row.id));if(index>=0)rows[index]={...rows[index],...row};else rows.push({...fallback,...row});renderUpcoming();renderDays();renderMessages();renderPassSummary()}
-async function loadAnnouncements(){return customerRenderers.announcements?customerRenderers.announcements():undefined}
+async function loadAnnouncements(force=false){return customerRenderers.announcements?customerRenderers.announcements(force):undefined}
 function renderMessagesCore(){const rows=state.data?.messages||[];$('messageThread').innerHTML=rows.length?rows.map(m=>`<div class="message-bubble ${m.sender_role==='customer'?'mine':''}"><p>${esc(m.body)}</p><small>${skTime(m.created_at)}</small></div>`).join(''):'<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';setTimeout(()=>{$('messageThread').scrollTop=$('messageThread').scrollHeight},0);const opts=futureItems();$('messageBooking').innerHTML='<option value="">Bez konkrétnej rezervácie</option>'+opts.map(r=>`<option value="${r.id||''}">${esc(dogName(r.dog_id))} · ${skDate(r.reservation_date)}</option>`).join('')}
 function renderMessages(){const out=renderMessagesCore();runCustomerHooks('afterRenderMessages',out);return out}
 function updateUnreadCore(){const unread=(state.data?.messages||[]).some(m=>m.sender_role==='staff'&&!m.read_at);$('messageUnread').classList.toggle('hidden',!unread);$('menuMessageUnread')?.classList.toggle('hidden',!unread)}
@@ -667,6 +716,7 @@ function ensureDogFormInModalV51(){
 }
 
 let dogEditorKeyboardBoundV211=false,dogEditorResizeFrameV211=0;
+let dogEditorPageScrollV370=0,dogEditorReturnFocusV370=null;
 function clearDogEditorViewportV211(){
  const modal=$('dogDetailsModal');if(!modal)return;
  modal.style.removeProperty('--dog-editor-height-v211');
@@ -882,6 +932,7 @@ function openDogDetails(mode='details',mandatory=false){
   renderDetailsPhoto(dog);
   dogDetailsSnapshotV96=dogFormSnapshotV96();
   const editor=$('dogDetailsModal');
+  if(editor.classList.contains('hidden')){dogEditorPageScrollV370=window.scrollY;dogEditorReturnFocusV370=document.activeElement;}
   editor.classList.remove('hidden');document.documentElement.classList.add('dog-details-open');
   editor.scrollTop=0;
   const editorCard=editor.querySelector('.dog-details-card');if(editorCard)editorCard.scrollTop=0;
@@ -938,7 +989,10 @@ function closeDogDetails(force=false){
   if(!force&&dogDetailsMandatoryV96)return false;
   if(!force&&dogFormSnapshotV96()!==dogDetailsSnapshotV96&&!confirm('Máte neuložené zmeny. Zavrieť bez uloženia?'))return false;
   rememberVaccineDraftV287();$('dogDetailsModal').classList.add('hidden');document.documentElement.classList.remove('dog-details-open');
-  clearDogEditorViewportV211();
+  if($('dogDetailsModal').contains(document.activeElement))document.activeElement.blur();
+  if(dogEditorResizeFrameV211)cancelAnimationFrame(dogEditorResizeFrameV211);dogEditorResizeFrameV211=0;
+  clearDogEditorViewportV211();repairCustomerScrollV60();
+  requestAnimationFrame(()=>{if(!$('dogDetailsModal').classList.contains('hidden'))return;window.scrollTo(0,dogEditorPageScrollV370);if(dogEditorReturnFocusV370?.isConnected)dogEditorReturnFocusV370.focus({preventScroll:true});});
   dogDetailsMandatoryV96=false;dogDetailsModeV96='details';return true;
 }
 function renderDogProfilePrompt(){for(const id of ['bookingNotice','dogStatus']){const root=$(id);if(root)root.innerHTML=''}}
@@ -1774,7 +1828,7 @@ function openMenuSettings(section){window.openCustomerSettingsV102?.(section)}
 $('menuNotifications').addEventListener('click',()=>openMenuSettings('notifications'));
 $('menuLegal').addEventListener('click',()=>openMenuSettings('legal'));
 $('menuLogout').addEventListener('click',()=>$('logoutBtn').click());
-$('menuBuildVersion').textContent=APP_BUILD;
+$('menuBuildVersion').textContent='Beta '+APP_VERSION;
 $('menuCopyrightYear').textContent=String(new Date().getFullYear());
 window.addEventListener('pageshow',()=>setTimeout(repairCustomerScrollV60,0));
 window.visualViewport?.addEventListener('resize',()=>requestAnimationFrame(repairCustomerScrollV60));
@@ -1849,20 +1903,26 @@ placeDeadlineV59();
     $('announcementModalCloseV75').onclick=async()=>{const id=Number(modal.dataset.announcementId||0);modal.classList.add('hidden');if(id)await markAnnouncementModalReadV75(id)};
     modal.classList.remove('hidden');
   }
+  let announcementsInFlightV391=null;
   customerRenderers.announcements=async()=>{
-    if(!state.session)return;
-    try{
-      const headers={apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token};
-      const [annRes,disRes]=await Promise.all([
-        fetch(SUPABASE_URL+'/rest/v1/portal_announcements?active=eq.true&select=id,title,body,valid_until,created_at&order=created_at.desc&limit=10',{headers,cache:'no-store'}),
-        fetch(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?select=announcement_id',{headers,cache:'no-store'})
-      ]);
-      if(!annRes.ok)return;
-      const now=Date.now(),rows=(await annRes.json()).filter(a=>!a.valid_until||new Date(a.valid_until).getTime()>now);
-      const dismissed=disRes.ok?new Set((await disRes.json()).map(x=>Number(x.announcement_id))):new Set();
-      $('announcementNotice').innerHTML=rows.length?'<div class="portal-announcements">'+rows.map(a=>'<div class="portal-announcement" data-announcement-id="'+Number(a.id)+'"><div class="portal-announcement-head">📣 <strong>'+esc(a.title)+'</strong></div><div class="portal-announcement-body">'+esc(a.body)+'</div></div>').join('')+'</div>':'';
-      const unread=rows.find(a=>!dismissed.has(Number(a.id)));if(unread)showAnnouncementModalV75(unread);else $('announcementModalV75')?.classList.add('hidden');
-    }catch(e){console.warn('Oznamy sa nepodarilo načítať',e)}
+    const ownerId=state.session?.user?.id;
+    if(!ownerId)return;
+    if(announcementsInFlightV391?.ownerId===ownerId)return announcementsInFlightV391.promise;
+    const promise=(async()=>{
+      try{
+        const [ann,dis]=await Promise.all([
+          customerReadJsonV391(SUPABASE_URL+'/rest/v1/portal_announcements?active=eq.true&select=id,title,body,valid_until,created_at&order=created_at.desc&limit=10',ownerId),
+          customerReadJsonV391(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?select=announcement_id',ownerId)
+        ]);
+        if(!ann.response.ok||state.session?.user?.id!==ownerId)return;
+        const now=Date.now(),rows=(ann.rows||[]).filter(a=>!a.valid_until||new Date(a.valid_until).getTime()>now);
+        const dismissed=dis.response.ok?new Set((dis.rows||[]).map(x=>Number(x.announcement_id))):new Set();
+        $('announcementNotice').innerHTML=rows.length?'<div class="portal-announcements">'+rows.map(a=>'<div class="portal-announcement" data-announcement-id="'+Number(a.id)+'"><div class="portal-announcement-head">📣 <strong>'+esc(a.title)+'</strong></div><div class="portal-announcement-body">'+esc(a.body)+'</div></div>').join('')+'</div>':'';
+        const unread=rows.find(a=>!dismissed.has(Number(a.id)));if(unread)showAnnouncementModalV75(unread);else $('announcementModalV75')?.classList.add('hidden');
+      }catch(e){console.warn('Oznamy sa nepodarilo načítať',e)}
+    })();
+    announcementsInFlightV391={ownerId,promise};
+    try{return await promise}finally{if(announcementsInFlightV391?.promise===promise)announcementsInFlightV391=null}
   };
 })();
 (function installGuideV83(){
@@ -2494,70 +2554,19 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,120),{once:true});else setTimeout(start,120);
 })();
 
-/* v222: booking tile in navigation + a 20-second explanatory hint per page session.
-   Acknowledgement is persisted ONLY after the first tap on the booking tile. */
+/* Booking tile: direct opening without an explanatory popover. */
 (function customerBookingFabV222(){
-  const hintVersion='booking-fab-hint-v222';
-  const fab=()=>document.getElementById('navBookAddV220');
-  const hint=()=>document.getElementById('navBookHintV220');
-  const userKey=()=>state.session?.user?.id?hintVersion+':'+state.session.user.id:null;
-  const shownForAccounts=new Set();
-  let showTimer=0,hideTimer=0;
-  function hideHint(){
-    clearTimeout(hideTimer);hideTimer=0;
-    hint()?.classList.remove('show-v220');
-    hint()?.classList.add('hidden');
-  }
-  function acknowledgeHint(){
-    const key=userKey();
-    if(key){try{localStorage.setItem(key,'1')}catch(_){}}
-    hideHint();
-  }
-  function maybeShowHint(retry=0){
-    const key=userKey();
-    if(!fab()||!hint())return;
-    if(!key){
-      if(retry<35)showTimer=setTimeout(()=>maybeShowHint(retry+1),800);
-      return;
-    }
-    if(shownForAccounts.has(key))return;
-    try{if(localStorage.getItem(key)==='1')return}catch(_){}
-    if(window.__customerOnboardingCompleteV75!==true||state.activeTab!=='booking'||document.getElementById('appView')?.classList.contains('hidden')){
-      if(retry<35)showTimer=setTimeout(()=>maybeShowHint(retry+1),800);
-      return;
-    }
-    if(document.querySelector('.legal-modal:not(.hidden),.booking-picker-v37:not(.hidden)')){
-      if(retry<35)showTimer=setTimeout(()=>maybeShowHint(retry+1),800);
-      return;
-    }
-    shownForAccounts.add(key); // In-memory only: the hint may reappear on the NEXT app start unless + was used.
-    hint().classList.remove('hidden');
-    hint().classList.add('show-v220');
-    clearTimeout(hideTimer);
-    hideTimer=setTimeout(hideHint,20000);
-  }
   function openFromFab(){
-    acknowledgeHint();
     if(!state.session||!selectedDog()){toast('Najprv musí byť váš psík priradený k účtu.');return}
     if(state.activeTab!=='booking')switchTab('booking');
     if(typeof window.openBookingPickerV37==='function')window.openBookingPickerV37();
     else toast('Rezervácie ešte nie sú pripravené. Skúste to znova.');
   }
   function init(){
-    const button=fab();if(!button||button.dataset.boundV222==='1')return;
-    button.dataset.boundV222='1';
-    button.addEventListener('click',openFromFab);
-    document.getElementById('navDog')?.addEventListener('click',hideHint);
-    document.getElementById('navBooking')?.addEventListener('click',()=>{hideHint();setTimeout(()=>maybeShowHint(),500)});
-    showTimer=setTimeout(()=>maybeShowHint(),1300);
+    const button=document.getElementById('navBookAddV220');if(!button||button.dataset.boundV222==='1')return;
+    button.dataset.boundV222='1';button.addEventListener('click',openFromFab);
   }
-  addCustomerHook('afterBootstrap',()=>{clearTimeout(showTimer);showTimer=setTimeout(()=>maybeShowHint(),1000)});
-  addCustomerHook('afterRenderDog',()=>{if(state.session)setTimeout(()=>maybeShowHint(),450)});
-  addCustomerHook('afterSwitchTab',()=>{if(state.activeTab==='booking')setTimeout(()=>maybeShowHint(),450);else hideHint()});
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>maybeShowHint(),500);else hideHint()});
-  window.addEventListener('pageshow',()=>setTimeout(()=>maybeShowHint(),550));
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 
 /* v37: direct settings notification + compact multi-day booking flow */
@@ -3155,8 +3164,9 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       if(renewalDate)pendingPassRenewalV95={dogId:Number(dog.id),date:renewalDate};
       renderPickerV37();
       const deadlineFailure=failed.some(x=>/20:00|uzavreli v nedeľu|zatvorené/i.test(x.error));
-      const details=failed.map(x=>skDate(x.date)+' – '+x.error).join(' | ');
+      const details=bookingFailureDetailsV392(failed);
       pickerErrorV95((ok?`Odoslané ${ok} z ${dates.length}. `:'')+'Nepodarilo sa: '+details,deadlineFailure);
+      if(failed.some(x=>/očkov/i.test(x.error))){const box=$('bookingPickerErrorV95');if(box){const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='Upraviť očkovania';button.onclick=()=>{closePickerV37();openDogDetails('vaccinations')};box.append(button)}}
       queueCustomerSync('bookings',0);
       return;
     }
@@ -3578,8 +3588,10 @@ async function togglePushDirect(btn){
     if(!unread)return;
     const ids=new Set((state.data.messages||[]).filter(m=>m.sender_role==='staff'&&!m.read_at).map(m=>m.id));
     supportReadInFlight=true;
+    const account=state.session?.user?.id,conversation=state.data.conversation_id;
     try{
       await api({action:'mark_messages_read',conversation_id:Number(state.data.conversation_id)});
+      if(state.session?.user?.id!==account||state.data?.conversation_id!==conversation)return;
       const stamp=new Date().toISOString();
       (state.data.messages||[]).forEach(m=>{if(ids.has(m.id))m.read_at=stamp});
       updateUnread();
@@ -3590,17 +3602,18 @@ async function togglePushDirect(btn){
   function open(){
     if(!lateBookingContext)$('supportMessageBodyV52').value='';
     renderSupportThread();
+    $('notificationPopup')?.classList.add('hidden');
     supportPageScrollY=window.scrollY||document.scrollingElement?.scrollTop||0;
     document.documentElement.style.setProperty('--support-chat-lock-top',(-supportPageScrollY)+'px');
-    document.documentElement.classList.add('support-chat-open-v52');
     supportLayout.prepare();
+    document.documentElement.classList.add('support-chat-open-v52');
     $('appView').inert=true;
     $('supportChatModalV52').classList.remove('hidden');
     window.customerDesignChatOpened?.();
     supportLayout.open();
     $('supportMessageSend').disabled=supportSending||!$('supportMessageBodyV52').value.trim();
     requestAnimationFrame(()=>{const root=$('supportMessageThreadV52');root.scrollTop=root.scrollHeight});
-    updateButton();markRead();
+    updateButton();if(document.visibilityState==='visible')requestAnimationFrame(()=>{if(!$('supportChatModalV52').classList.contains('hidden'))void markRead();});
   }
 
   function close(){
@@ -3944,7 +3957,7 @@ function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
   staged.classList.toggle('hidden',!vaccinationProofFilesV104.length);
   staged.innerHTML=vaccinationProofFilesV104.length?'<div class="vacc-proof-stage-title-v104">Vybrané nové fotografie</div><div class="vacc-proof-grid-v104">'+vaccinationProofFilesV104.map((item,i)=>'<div class="vacc-proof-thumb-v104 staged"><img src="'+item.dataUrl+'" alt="Vybraná fotografia '+(i+1)+'"><button type="button" data-remove-proof="'+i+'" aria-label="Odstrániť">×</button></div>').join('')+'</div>':'';
   staged.querySelectorAll('[data-remove-proof]').forEach(button=>{button.disabled=busy;button.addEventListener('click',()=>{if(window.__vaccinationProofProcessingV105||vaccinationProofUploadInFlightV143)return;vaccinationProofFilesV104.splice(Number(button.dataset.removeProof),1);renderVaccinationProofsV104(dogId)})});
-  if(msg&&!vaccinationProofFilesV104.length&&!busy)msg.textContent=vaccinationProofReplaceModeV104?'Vyberte 1 až 5 nových fotografií.':vaccinationPhotoNeededV244(dogId)?'Zmenili ste dátum očkovania. Pred uložením nahrajte aj aktuálnu fotografiu cez „Upraviť fotky“.':proofs.length?'Uložené '+proofs.length+' z 5 fotografií.':'Na dokončenie nahrajte fotografie očkovaní z očkovacieho preukazu.';
+  if(msg&&!vaccinationProofFilesV104.length&&!busy)msg.textContent=vaccinationProofReplaceModeV104?'Vyberte 1 až 5 nových fotografií.':vaccinationPhotoNeededV244(dogId)?'Máte nové očkovanie? Upravte dátum a cez ceruzku pri pôvodnej fotke ju nahraďte aktuálnou.':proofs.length?'Uložené '+proofs.length+' z 5 fotografií.':'Na dokončenie nahrajte fotografie očkovaní z očkovacieho preukazu.';
 }
 async function addVaccinationProofFilesV104(files){
   const incoming=[...(files||[])].filter(Boolean);
@@ -4046,21 +4059,25 @@ function ensureVaccProofEditorV244(){
   document.body.insertAdjacentHTML('beforeend',
     '<div id="vaccProofEditorV244" class="vacc-proof-edit-modal-v244 hidden" role="dialog" aria-modal="true" aria-labelledby="vaccProofEditTitleV244">'+
       '<section class="vacc-proof-edit-card-v244">'+
-        '<div class="vacc-proof-edit-head-v244"><div><h2 id="vaccProofEditTitleV244">Upraviť fotky očkovania</h2><p>Kliknite na ceruzku pri fotografii, ktorú chcete vymeniť. Ostatné zostanú uložené.</p></div><button type="button" id="vaccProofEditCloseV244" aria-label="Zavrieť úpravu fotografií">×</button></div>'+
+        '<div class="vacc-proof-edit-head-v244"><div><h2 id="vaccProofEditTitleV244">Upraviť fotky očkovania</h2><p>Cez ceruzku nahraďte pôvodnú fotku aktuálnou alebo vymažte nepotrebnú fotku.</p></div><button type="button" id="vaccProofEditCloseV244" aria-label="Zavrieť úpravu fotografií">×</button></div>'+
         '<div id="vaccProofEditGridV244" class="vacc-proof-edit-grid-v244"></div>'+
         '<p id="vaccProofEditMessageV244" class="vacc-proof-edit-message-v244" role="status" aria-live="polite">Vyberte fotografiu na výmenu.</p>'+
-        '<input type="file" accept="image/*" id="vaccProofEditFileV244" hidden>'+
+        '<div id="vaccProofActionsV392" class="hidden"><label class="btn secondary" for="vaccProofEditFileV244">Nahradiť fotku</label><button type="button" class="btn secondary" id="vaccProofDeleteV392">Vymazať fotku</button><button type="button" class="btn secondary" id="vaccProofActionsCancelV392">Zrušiť</button></div>'+
+        '<input type="file" accept="image/*" id="vaccProofEditFileV244" style="position:absolute;width:1px;height:1px;opacity:0;clip-path:inset(50%)">'+
       '</section></div>');
   modal=$('vaccProofEditorV244');
-  const close=()=>{if(vaccProofEditBusyV244)return;modal.classList.add('hidden')};
+  const close=()=>{if(vaccProofEditBusyV244)return;$('vaccProofActionsV392').classList.add('hidden');modal.classList.add('hidden')};
   $('vaccProofEditCloseV244').addEventListener('click',close);
   modal.addEventListener('click',e=>{if(e.target===modal)close()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.classList.contains('hidden')){e.stopPropagation();close()}},true);
+  $('vaccProofActionsCancelV392').onclick=()=>$('vaccProofActionsV392').classList.add('hidden');
+  $('vaccProofDeleteV392').onclick=()=>deleteVaccProofV392(Number($('vaccProofEditFileV244').dataset.replaceId||0));
   const input=$('vaccProofEditFileV244');
   input.addEventListener('click',()=>v105PickerGuard());
   input.addEventListener('change',async()=>{
     const file=input.files?.[0],replaceId=Number(input.dataset.replaceId||0);
     input.value='';
+    $('vaccProofActionsV392').classList.add('hidden');
     try{if(file)await uploadSingleVaccProofV244(file,replaceId)}
     finally{window.__customerPhotoPickerV88=false}
   });
@@ -4071,8 +4088,9 @@ function openVaccProofEditorV244(){
   const dogId=Number(selectedDog()?.id||0);if(!dogId)return;
   const modal=ensureVaccProofEditorV244();
   modal.dataset.dogId=String(dogId);
+  $('vaccProofActionsV392').classList.add('hidden');
   vaccProofEditOrderV244=vaccinationProofsForDogV104(dogId).map(p=>Number(p.id));
-  $('vaccProofEditMessageV244').textContent='Vymeňte len vybranú fotku alebo pridajte ďalšiu (maximálne 5).';
+  $('vaccProofEditMessageV244').textContent='Pri obnove očkovania nahraďte pôvodnú fotku. Ďalšiu stranu preukazu môžete pridať (maximálne 5 fotiek).';
   renderVaccProofEditorV244();
   modal.classList.remove('hidden');
 }
@@ -4088,7 +4106,7 @@ function renderVaccProofEditorV244(){
     preview.dataset.vaccPreview=String(id);preview.setAttribute('aria-label','Zväčšiť fotografiu '+(i+1));
     updateVaccProofImageV259(img,p);img.alt='Fotografia očkovania '+(i+1);
     preview.onclick=()=>openVaccinationProofViewerV104(vaccinationProofsForDogV104(dogId).find(p=>Number(p.id)===id)?.image_url);
-    const pencil=tile.querySelector('[data-vacc-replace]');pencil.dataset.vaccReplace=String(id);pencil.setAttribute('aria-label','Nahradiť fotografiu '+(i+1));
+    const pencil=tile.querySelector('[data-vacc-replace]');pencil.dataset.vaccReplace=String(id);pencil.setAttribute('aria-label','Upraviť fotografiu '+(i+1));
     tile.querySelector('span').textContent='Foto '+(i+1);
   }}));
   if(proofs.length<5)entries.push({key:'add',update(){}});
@@ -4099,10 +4117,39 @@ function renderVaccProofEditorV244(){
     const tile=document.createElement('div');tile.className='vacc-proof-edit-tile-v244';
     tile.innerHTML='<button type="button" class="vacc-proof-edit-preview-v244" data-vacc-preview=""><img></button><button type="button" class="vacc-proof-edit-pencil-v244" data-vacc-replace=""><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 18.5 3 20l1.5-4.5Z"/></svg></button><span></span>';return tile;
   });
+  $('vaccProofDeleteV392').disabled=vaccProofEditBusyV244;
   grid.querySelectorAll('[data-vacc-replace]').forEach(b=>{b.disabled=vaccProofEditBusyV244;b.onclick=()=>{
     if(vaccProofEditBusyV244)return;
-    const input=$('vaccProofEditFileV244');input.dataset.replaceId=b.dataset.vaccReplace;b.blur();input.click();
+    const input=$('vaccProofEditFileV244');input.dataset.replaceId=b.dataset.vaccReplace;b.blur();
+    if(Number(b.dataset.vaccReplace)){$('vaccProofActionsV392').classList.remove('hidden');input.focus()}else{input.click()}
   }});
+}
+async function deleteVaccProofV392(proofId){
+  if(vaccProofEditBusyV244||vaccinationProofUploadInFlightV143||window.__vaccinationProofProcessingV105)return;
+  const dogId=Number($('vaccProofEditorV244')?.dataset.dogId||0),userId=state.session?.user?.id,epoch=vaccinationProofStageEpochV143;
+  if(!dogId||Number(selectedDog()?.id)!==dogId||!vaccinationProofsForDogV104(dogId).some(p=>Number(p.id)===proofId))return;
+  if(!confirm('Vymazať túto fotku natrvalo? Ak vymažete poslednú, pred ďalšou rezerváciou treba nahrať novú.'))return;
+  const current=()=>state.session?.user?.id===userId&&vaccinationProofStageEpochV143===epoch&&Number(selectedDog()?.id)===dogId;
+  vaccProofEditBusyV244=true;window.__vaccinationProofProcessingV105=true;
+  $('vaccProofActionsV392').classList.add('hidden');renderVaccProofEditorV244();
+  const msg=$('vaccProofEditMessageV244');msg.textContent='Vymazávam fotografiu…';
+  try{
+    const result=await api({action:'delete_vaccination_proof',dog_id:dogId,proof_id:proofId});
+    const proofs=result?.data?.proofs;if(!Array.isArray(proofs))throw Error('Vymazanie sa nepodarilo overiť. Obnovte prehľad.');
+    if(!current()||!state.data)return;
+    state.data.vaccination_proofs=(state.data.vaccination_proofs||[]).filter(p=>Number(p.dog_id)!==dogId).concat(proofs);
+    vaccinationFreshUploadV234.delete(vaccineKeyV287(dogId));
+    vaccineRetriesV287.delete(vaccineKeyV287(dogId));$('vaccProofRetryV287')?.remove();
+    customerMutationRevisionV145++;msg.textContent='Fotografia bola natrvalo vymazaná.';toast(msg.textContent);
+  }catch(error){if(current()){msg.textContent=error.message||'Fotografiu sa nepodarilo vymazať. Skúste to znova.';toast(msg.textContent)}}
+  finally{vaccProofEditBusyV244=false;window.__vaccinationProofProcessingV105=false;if(current()){renderVaccinationProofsV104(dogId);renderVaccProofEditorV244();renderDog();renderUpcoming();renderDays();}}
+}
+
+function bookingFailureDetailsV392(failed){
+  const vaccine=/očkov|fotografiu očkovacieho preukazu/i;
+  const groups=new Map();
+  for(const item of failed){const error=String(item.error||'Nepodarilo sa rezervovať.');if(!groups.has(error))groups.set(error,[]);groups.get(error).push(item.date)}
+  return [...groups].map(([error,dates])=>vaccine.test(error)?error:dates.map(skDate).join(', ')+' – '+error).join(' | ');
 }
 async function uploadSingleVaccProofV244(file,replaceId){
   if(vaccProofEditBusyV244||vaccinationProofUploadInFlightV143)return;
@@ -4136,8 +4183,8 @@ async function uploadSingleVaccProofV244(file,replaceId){
     $('vaccineErrorV287')?.remove();$('vaccProofReplaceV104')?.removeAttribute('aria-invalid');vaccineRetriesV287.delete(vaccineKeyV287(dogId));
     vaccinationFreshUploadV234.add(vaccineKeyV287(dogId));
     customerMutationRevisionV145++;
-    msg.textContent=replaceId?'Vybraná fotografia bola úspešne vymenená. Ostatné zostali zachované.':'Fotografia bola pridaná. Ostatné zostali zachované.';
-    toast(replaceId?'Fotografia bola vymenená.':'Fotografia bola pridaná.');
+    msg.textContent=result?.data?.cleanup_warning||(replaceId?'Fotografia bola vymenená a pôvodná vymazaná.':'Fotografia bola pridaná.');
+    toast(result?.data?.cleanup_warning||(replaceId?'Fotografia bola vymenená.':'Fotografia bola pridaná.'));
   }catch(error){
     const message=String(error?.message||'Fotografiu sa nepodarilo nahrať.');
     if(current())vaccineRetriesV287.set(vaccineKeyV287(dogId),{file,replaceId});
@@ -4177,7 +4224,7 @@ function installVaccinationViewerZoomV244(modal){
   window.__customerBulletinV229=true;
   const $=id=>document.getElementById(id);
   const rowsState={items:[],read:new Set(),at:0,loading:null,session:null,error:false};
-  const select='id,title,body,valid_from,valid_until,created_at,paper_style,image_path,cta_enabled,cta_title,cta_body,cta_button_label,cta_url';
+  const select='id,active,title,body,valid_from,valid_until,created_at,paper_style,image_path,cta_enabled,cta_title,cta_body,cta_button_label,cta_url,show_in_overview';
   const photoCacheV358=new Map();
   let articleEpochV358=0;
   function preparePhotoV358(url){
@@ -4195,7 +4242,19 @@ function installVaccinationViewerZoomV244(modal){
     if(photoCacheV358.size>8)photoCacheV358.delete(photoCacheV358.keys().next().value);
     return entry;
   }
-  let historyReturn=false;
+  let historyReturn=false,lockY=0,locked=false,returnFocus=null;
+  const layerKey='customerBulletinV363';
+  function recordLayer(name){if(history.state?.[layerKey]!==name)history.pushState({...history.state,[layerKey]:name},'',location.href);}
+  window.addEventListener('popstate',()=>{
+    if(!modalsReady)return;
+    const target=history.state?.[layerKey];
+    articleEpochV358++;
+    zoomModal.overlay.classList.add('hidden');
+    if(target==='article'&&loggedIn()){articleModal.overlay.classList.remove('hidden');archiveModal.overlay.classList.add('hidden');}
+    else if(target==='list'&&loggedIn()){articleModal.overlay.classList.add('hidden');openHistory(false);}
+    else{historyReturn=false;[archiveModal,articleModal].forEach(m=>m.overlay.classList.add('hidden'));}
+    syncScrollLock();
+  });
   let modalsReady=false;
   function loggedIn(){return !!(state.session?.access_token&&state.data?.dogs?.length)}
   function validDate(v){return !v||!Number.isNaN(new Date(v).getTime())}
@@ -4208,21 +4267,22 @@ function installVaccinationViewerZoomV244(modal){
   function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
   function modal(title,id){
     const overlay=el('div','customer-bulletin-modal-v229 hidden');overlay.id=id;
-    overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
+    overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-labelledby',id+'Title');
     const dialog=el('div','customer-bulletin-dialog-v229');const header=el('div','customer-bulletin-head-v229');
-    const h=el('h2','',title);const x=el('button','customer-bulletin-close-v229','×');x.type='button';x.setAttribute('aria-label','Zavrieť');
+    const h=el('h2','',title);h.id=id+'Title';const x=el('button','customer-bulletin-close-v229','×');x.type='button';x.setAttribute('aria-label','Zavrieť');
     const scroll=el('div','customer-bulletin-scroll-v229');
     header.append(h,x);dialog.append(header,scroll);overlay.append(dialog);document.body.append(overlay);
     overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
     x.addEventListener('click',()=>close());
-    function close(){overlay.classList.add('hidden');if(id==='customerBulletinArticleV229'){articleEpochV358++;if(historyReturn){historyReturn=false;openHistory(false)}}syncScrollLock()}
+    function close(){overlay.classList.add('hidden');if(id==='customerBulletinArticleV229'){articleEpochV358++;if(historyReturn){historyReturn=false;openHistory(false)}}syncScrollLock();const name=id==='customerBulletinHistoryV229'?'list':id==='customerBulletinArticleV229'?'article':'zoom';if(history.state?.[layerKey]===name)history.back();}
     return{overlay,dialog,h,scroll,x,close};
   }
   let archiveModal,articleModal,zoomModal;
-  window.customerBulletinAbortV358=()=>{articleEpochV358++;photoCacheV358.clear();historyReturn=false;[archiveModal,articleModal,zoomModal].forEach(modal=>modal?.overlay.classList.add('hidden'));syncScrollLock();};
+  window.customerBulletinAbortV358=()=>{articleEpochV358++;photoCacheV358.clear();historyReturn=false;rowsState.items=[];rowsState.read.clear();rowsState.at=0;rowsState.session=null;[archiveModal,articleModal,zoomModal].forEach(modal=>modal?.overlay.classList.add('hidden'));if(history.state?.[layerKey]){const next={...history.state};delete next[layerKey];history.replaceState(next,'',location.href);}drawBoard();syncScrollLock();};
   function ensureModals(){
     if(modalsReady)return;modalsReady=true;
     archiveModal=modal('Oznamy','customerBulletinHistoryV229');
+    archiveModal.h.textContent='Oznamy';archiveModal.h.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d="M3 10v4h4l10 4V6L7 10H3Zm4 0v4m0 0 2 6h3l-2-5m10-5 2-1m-2 5 2 1"/></svg>');
     articleModal=modal('','customerBulletinArticleV229');
     zoomModal=modal('','customerBulletinZoomV229');
     zoomModal.overlay.setAttribute('aria-label','Zväčšená fotografia oznamu');
@@ -4231,6 +4291,7 @@ function installVaccinationViewerZoomV244(modal){
     zoomModal.h.style.color='#fff';
     zoomModal.scroll.style.display='grid';zoomModal.scroll.style.placeItems='center';
     document.addEventListener('keydown',e=>{
+      if(e.key==='Tab'){const top=[zoomModal,articleModal,archiveModal].find(m=>!m.overlay.classList.contains('hidden'));if(top){const nodes=[...top.dialog.querySelectorAll('button,a[href],[tabindex="0"]')].filter(n=>!n.disabled&&!n.closest('[inert]'));const first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}return;}
       if(e.key!=='Escape')return;
       if(!zoomModal.overlay.classList.contains('hidden'))zoomModal.close();
       else if(!articleModal.overlay.classList.contains('hidden'))articleModal.close();
@@ -4238,39 +4299,79 @@ function installVaccinationViewerZoomV244(modal){
     });
   }
   function syncScrollLock(){
-    const any=[archiveModal,articleModal,zoomModal].some(x=>x&&!x.overlay.classList.contains('hidden'));
+    const top=[zoomModal,articleModal,archiveModal].find(x=>x&&!x.overlay.classList.contains('hidden'));
+    const any=!!top;
+    if(any&&!locked){lockY=window.scrollY||0;returnFocus=document.activeElement;document.documentElement.style.setProperty('--bulletin-lock-top-v363',(-lockY)+'px');}
     document.documentElement.classList.toggle('customer-bulletin-open-v229',any);
+    if($('appView'))$('appView').inert=any;
+    const nav=document.querySelector('.bottom-nav');if(nav)nav.inert=any;
+    [archiveModal,articleModal,zoomModal].forEach(m=>{if(m)m.overlay.inert=any&&m!==top;});
+    if(top&&!top.dialog.contains(document.activeElement))top.x.focus({preventScroll:true});
+    if(!any&&locked){document.documentElement.style.removeProperty('--bulletin-lock-top-v363');window.scrollTo(0,lockY);if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});}
+    locked=any;
   }
   function rows(){return rowsState.items.slice().sort((a,b)=>String(b.valid_from||b.created_at||'').localeCompare(String(a.valid_from||a.created_at||'')))}
   function drawBoard(){
-    const host=$('customerBulletinItemsV229');if(!host)return;host.replaceChildren();
-    const live=rows().filter(current).slice(0,2);
-    if(!live.length){host.append(el('div','customer-bulletin-empty-v229',!rowsState.at&&loggedIn()?'Načítavam oznamy…':rowsState.error?'Oznamy sa momentálne nepodarilo načítať.':'Zatiaľ žiadne oznamy.'));return}
-    live.forEach(row=>{
-      const b=el('button','customer-bulletin-note-v229');b.type='button';b.dataset.style=['rose','cream','mint'].includes(row.paper_style)?row.paper_style:'rose';
-      if(!rowsState.read.has(Number(row.id)))b.dataset.unread='true';
-      const title=el('strong','',row.title||'Oznam');
-      const excerpt=el('span','customer-bulletin-excerpt-v229',row.body||'');
-      const action=el('span','customer-bulletin-open-v229','Otvoriť oznam →');
-      b.append(title,excerpt,action);b.addEventListener('click',()=>openArticle(row,false));host.append(b);
-    });
+    drawOverview();
+    const count=rows().filter(row=>!rowsState.read.has(Number(row.id))).length;
+    const badge=$('customerAnnouncementsCountV363');if(badge){badge.textContent=String(count);badge.classList.toggle('hidden',!count);}
+    $('customerAnnouncementsV363')?.setAttribute('aria-label',count?'Oznamy, neprečítané: '+count:'Oznamy');
   }
   function drawHistory(){
     if(!archiveModal)return;
     const host=archiveModal.scroll;host.replaceChildren();
     const saved=rows();
-    if(!saved.length){host.append(el('div','customer-bulletin-history-empty-v229','Zatiaľ žiadne oznamy.'));return}
-    saved.forEach(row=>{
-      const b=el('button','customer-bulletin-history-row-v229');b.type='button';
-      b.append(el('strong','',row.title||'Oznam'));
-      const status=current(row)?'Aktuálny oznam':'Starší oznam';
-      const s=el('small','',status);
-      if(!rowsState.read.has(Number(row.id))){s.append(' · ');s.append(el('span','customer-bulletin-new-v229','Nové'))}
-      b.append(s);b.addEventListener('click',()=>openArticle(row,true));host.append(b);
-    });
+    if(!saved.length){host.append(el('p','customer-bulletin-history-empty-v229',rowsState.error?'Oznamy sa momentálne nepodarilo načítať.':!rowsState.at?'Načítavam oznamy…':'Zatiaľ nemáte žiadne oznamy.'));if(rowsState.error){const retry=el('button','btn secondary','Skúsiť znova');retry.type='button';retry.onclick=()=>refresh(true);host.append(retry);}return;}
+    if(rowsState.error)host.append(el('p','','Oznamy sa nepodarilo obnoviť. Zobrazené sú naposledy načítané údaje.'));
+    saved.forEach(row=>host.append(noticeCard(row,true)));
+  }
+  function noticeCard(row,fromHistory){
+    const b=el('button','customer-bulletin-history-row-v229');b.type='button';b.dataset.announcementId=String(row.id);
+    const photo=safePhoto(row.image_path),thumb=el('span','customer-notice-thumb-v363');
+    const paw=()=>{thumb.replaceChildren();thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';};
+    if(photo){const img=el('img');img.src=photo;img.alt='';img.loading='lazy';img.onerror=paw;thumb.append(img);}else paw();
+    const content=el('span','customer-notice-content-v363');
+    const head=el('span','customer-notice-head-v363');head.append(el('strong','',row.title||'Oznam'));
+    if(!row.preview&&!rowsState.read.has(Number(row.id)))head.append(el('span','customer-bulletin-new-v229','Nové'));
+    content.append(head,el('span','customer-notice-excerpt-v363',row.body||''),el('span','customer-notice-action-v363','Otvoriť oznam ›'));
+    const panel=el('span','customer-notice-panel-v383');panel.append(content,thumb);b.append(panel);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
+  }
+  function drawOverview(){
+    const anchor=$('designNearest');let host=$('customerNoticeOverviewV376');
+    const preview=new URLSearchParams(location.search).get('notice-carousel-preview')==='1';
+    const selected=loggedIn()?rows().filter(row=>row.show_in_overview===true&&current(row)):[];
+    if(preview&&loggedIn()){
+      if(!selected.length)selected.push({id:'preview-first',preview:true,title:'Oznam zo škôlky',body:'Takto bude vyzerať vybraný oznam pod vašimi rezerváciami.'});
+      selected.push({id:'preview-extra',preview:true,title:'Skúšobný oznam',body:'Druhý oznam na ukážku karuselu. Potiahnite karty do strán alebo použite šípky. Tento oznam sa zákazníkom nepublikuje.'});
+    }
+    if(!anchor||!selected.length){host?.remove();return;}
+    if(!host){host=el('section','customer-notice-overview-v376');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');anchor.after(host);}
+    const key=JSON.stringify(selected.map(row=>[row.id,row.title,row.body,row.image_path,rowsState.read.has(Number(row.id))]));
+    if(host.dataset.contentKey===key)return;
+    const oldTrack=host.querySelector('.customer-notice-carousel-v376');
+    const oldIndex=oldTrack?Math.round(oldTrack.scrollLeft/Math.max(1,(oldTrack.firstElementChild?.offsetWidth||0)+12)):0;
+    host.dataset.contentKey=key;
+    const heading=el('h2','customer-notice-title-v381',preview?'Oznamy · ukážka':'Oznamy');
+    const track=el('div','customer-notice-carousel-v376');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
+    selected.forEach((row,index)=>{const card=noticeCard(row,false);card.setAttribute('aria-label',(index+1)+' z '+selected.length+': '+(row.title||'Oznam'));track.append(card)});
+    const header=el('div','customer-notice-header-v382'),stage=el('div','customer-notice-stage-v382');stage.dataset.multiple=String(selected.length>1);header.append(heading);stage.append(track);host.replaceChildren(header,stage);
+    if(selected.length>1){
+      const controls=el('div','customer-notice-controls-v381');
+      const prev=el('button','','‹'),next=el('button','','›');
+      prev.type=next.type='button';prev.setAttribute('aria-label','Predchádzajúci oznam');next.setAttribute('aria-label','Ďalší oznam');
+      let index=Math.min(oldIndex,selected.length-1),pending=0;
+      const step=()=>Math.max(1,track.firstElementChild.getBoundingClientRect().width+12);
+      const update=()=>{pending=0;index=Math.max(0,Math.min(selected.length-1,Math.round(track.scrollLeft/step())));prev.disabled=index===0;next.disabled=index===selected.length-1;track.dataset.currentIndex=String(index);};
+      const move=direction=>track.scrollTo({left:(index+direction)*step(),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+      prev.onclick=()=>move(-1);next.onclick=()=>move(1);
+      track.addEventListener('scroll',()=>{if(!pending)pending=requestAnimationFrame(update)},{passive:true});
+      track.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();move(event.key==='ArrowRight'?1:-1)}});
+      controls.append(next,prev);stage.append(controls);track.scrollLeft=index*step();update();
+    }
   }
   async function markRead(row){
-    if(!loggedIn()||rowsState.read.has(Number(row.id)))return;
+    if(row.preview||!loggedIn()||rowsState.read.has(Number(row.id)))return;
+    try{await ensureCustomerSessionV357();}catch(_){return;}
     const currentToken=state.session?.access_token;
     try{
       const res=await fetch(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?on_conflict=announcement_id,user_id',{
@@ -4305,12 +4406,12 @@ function installVaccinationViewerZoomV244(modal){
     },{passive:true});
     img.addEventListener('touchcancel',resetZoom,{passive:true});
     img.addEventListener('dblclick',e=>{e.preventDefault();scale=scale>1?1:2;render()});
-    zoomModal.scroll.append(img);zoomModal.overlay.classList.remove('hidden');syncScrollLock();
+    zoomModal.scroll.append(img);recordLayer('zoom');zoomModal.overlay.classList.remove('hidden');syncScrollLock();
   }
   async function openArticle(row,fromHistory){
     if(!row||!loggedIn())return;
     ensureModals();
-    historyReturn=!!fromHistory;
+    historyReturn=!!fromHistory;recordLayer('article');$('notificationPopup')?.classList.add('hidden');
     archiveModal.overlay.classList.add('hidden');
     articleModal.h.textContent=row.title||'Oznam';
     articleModal.scroll.replaceChildren();
@@ -4350,6 +4451,7 @@ function installVaccinationViewerZoomV244(modal){
   function openHistory(refreshData=true){
     if(!loggedIn())return;
     ensureModals();historyReturn=false;
+    if(refreshData)recordLayer('list');
     archiveModal.overlay.classList.remove('hidden');drawHistory();syncScrollLock();
     if(refreshData)void refresh(false);
   }
@@ -4359,19 +4461,22 @@ function installVaccinationViewerZoomV244(modal){
     }
     try{if(customerSessionNeedsRefreshV357()||sessionRefreshInFlight)await ensureCustomerSessionV357()}catch(_){return;}
     const token=state.session.access_token;
+    const account=state.session?.user?.id;
+    if(rowsState.account!==account){rowsState.items=[];rowsState.read.clear();rowsState.at=0;rowsState.account=account;drawBoard();drawHistory();}
     if(rowsState.session!==token){rowsState.at=0;rowsState.session=token}
-    if(rowsState.loading)return rowsState.loading;
+    if(rowsState.loading){const previousToken=rowsState.loadingToken;await rowsState.loading;if(state.session?.access_token===token&&previousToken!==token)return refresh(force);return;}
     if(!force&&rowsState.at&&Date.now()-rowsState.at<60000){drawBoard();drawHistory();return}
+    rowsState.loadingToken=token;
     rowsState.loading=(async()=>{
       const headers={apikey:SUPABASE_KEY,Authorization:'Bearer '+token};
       const [pub,read]=await Promise.all([
-        fetch(SUPABASE_URL+'/rest/v1/portal_announcements?select='+encodeURIComponent(select)+'&order=created_at.desc&limit=100',{headers,cache:'no-store'}),
-        fetch(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?select=announcement_id',{headers,cache:'no-store'})
+        fetch(SUPABASE_URL+'/rest/v1/portal_announcements?active=eq.true&valid_from=lte.'+encodeURIComponent(new Date().toISOString())+'&select='+encodeURIComponent(select)+'&order=created_at.desc&limit=1000',{headers,cache:'no-store'}),
+        fetch(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?user_id=eq.'+encodeURIComponent(account)+'&select=announcement_id',{headers,cache:'no-store'})
       ]);
-      if(!pub.ok)throw Error('Oznamy sa nedajú načítať ('+pub.status+').');
+      if(!pub.ok||!read.ok)throw Error('Oznamy sa nedajú načítať ('+(pub.ok?read.status:pub.status)+').');
       const json=await pub.json();
       if(state.session?.access_token!==token)return;
-      rowsState.items=(Array.isArray(json)?json:[]).filter(r=>r.active!==false&&validDate(r.valid_from)&&validDate(r.valid_until));
+      rowsState.items=(Array.isArray(json)?json:[]).filter(r=>r.active!==false&&validDate(r.valid_from)&&validDate(r.valid_until)&&(!r.valid_from||new Date(r.valid_from).getTime()<=Date.now()));
       if(read.ok){
         const receipts=await read.json();
         if(state.session?.access_token===token)rowsState.read=new Set((Array.isArray(receipts)?receipts:[]).map(x=>Number(x.announcement_id)));
@@ -4383,12 +4488,17 @@ function installVaccinationViewerZoomV244(modal){
     return rowsState.loading;
   }
   // Replace the historical auto-opening popup renderer: clicking a note is now required.
-  customerRenderers.announcements=()=>refresh(false);
+  customerRenderers.announcements=(force=false)=>refresh(force);
+  window.openCustomerAnnouncementV363=async(id,beforeOpen)=>{const user=state.session?.user?.id;await refresh(false);if(rowsState.error||!user||state.session?.user?.id!==user)return false;const row=rows().find(r=>Number(r.id)===Number(id));if(!row){toast('Tento oznam už nie je dostupný.');return true;}beforeOpen?.();void openArticle(row,false);return true;};
   addCustomerHook('afterSwitchTab',tab=>{if(tab==='booking'||tab==='menu')void refresh(false)});
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(false)});
+  window.customerRefreshNoticeOverviewV376=drawOverview;
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(true)});
   window.addEventListener('pageshow',event=>{if(event.persisted&&loggedIn())void refresh(false)});
   function init(){
     $('menuBulletinV229')?.addEventListener('click',()=>openHistory(true));
+    $('customerAnnouncementsV363')?.addEventListener('click',()=>openHistory(true));
+    $('customerMessagesV363')?.addEventListener('click',openCustomerChat);
+    addCustomerHook('afterUpdateUnread',()=>{const count=(state.data?.messages||[]).filter(m=>m.sender_role==='staff'&&!m.read_at).length;const badge=$('customerMessagesCountV363');if(badge){badge.textContent=String(count);badge.classList.toggle('hidden',!count);}$('customerMessagesV363')?.setAttribute('aria-label',count?'Správy, neprečítané: '+count:'Správy');});
     drawBoard();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
@@ -4397,3 +4507,37 @@ function installVaccinationViewerZoomV244(modal){
 
 
 
+
+/* v363: only an explicit notification URL requests navigation; login retains it. */
+(function customerNotificationTargetV363(){
+  let running=false;
+  function target(){
+    const p=new URLSearchParams(location.search),kind=p.get('open');
+    if(kind!=='messages'&&kind!=='announcement')return null;
+    const raw=p.get(kind==='messages'?'conversation':'announcement'),id=Number(raw);
+    if(!raw||!Number.isSafeInteger(id)||id<=0)return null;
+    return {kind,id,recipient:p.get('recipient')||''};
+  }
+  function consume(){const u=new URL(location.href);['open','conversation','announcement','recipient'].forEach(k=>u.searchParams.delete(k));history.replaceState(history.state,'',u.pathname+u.search+u.hash);}
+  async function openPending(){
+    const t=target();
+    if(running||!t||!state.session?.user?.id||!state.data||state.data.profile?.status!=='active'||$('appView')?.classList.contains('hidden')||window.__customerOnboardingCompleteV75!==true||document.visibilityState==='hidden')return;
+    if(t.recipient&&t.recipient!==state.session.user.id){consume();toast('Toto upozornenie patrí inému účtu.');return;}
+    running=true;
+    const account=state.session.user.id;
+    try{
+      window.customerGuideAbortV358?.();
+      if(t.kind==='messages'){
+        if(Number(state.data.conversation_id)!==t.id){consume();toast('Táto konverzácia nie je dostupná pre váš účet.');return;}
+        consume();openCustomerChat();
+      }else{
+        const opened=await window.openCustomerAnnouncementV363?.(t.id,()=>{if(state.session?.user?.id===account)consume();});
+        if(opened&&state.session?.user?.id===account)consume();
+      }
+    }finally{running=false;}
+  }
+  addCustomerHook('afterBootstrap',()=>{void openPending();});
+  document.addEventListener('customer-onboarding-ready-v358',()=>{void openPending();});
+  window.addEventListener('pageshow',()=>{void openPending();});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void openPending();});
+})();

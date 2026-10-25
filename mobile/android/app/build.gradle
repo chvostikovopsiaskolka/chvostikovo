@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+// One version source for PWA and every newly assembled Android artifact.
+def customerRelease = new groovy.json.JsonSlurper().parse(new File(rootProject.projectDir, '../../version.json'))
+def customerVersionCode = customerRelease.build.toString().replaceFirst('^v', '').toInteger()
+
 android {
     namespace = "sk.chvostikovo.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +11,8 @@ android {
         applicationId "sk.chvostikovo.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "2.0.36"
+        versionCode customerVersionCode
+        versionName customerRelease.version.toString()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

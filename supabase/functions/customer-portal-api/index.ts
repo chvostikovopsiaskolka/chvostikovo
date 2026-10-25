@@ -318,13 +318,13 @@ function nextWeekdays(startIso: string, count: number) {
   return values;
 }
 
-async function rosterPhotoPaths(rows: Array<Json>, viewerId?: string, viewerDogIds = new Set<number>()) {
+async function rosterPhotoPaths(rows: Array<Json>, viewerId?: string, viewerDogIds = new Set<number>(), ownerLinks?: Array<Json>) {
   const paths = new Map<number,unknown>(rows.map(dog => [Number(dog.id),dog.photo_path]));
   const missing = rows.filter(dog => (dog.share_name_photo === true || viewerDogIds.has(Number(dog.id))) && dog.owner_id);
   if (!missing.length) return paths;
   const [photos,links] = await Promise.all([
     rest('customer_dog_photos?dog_id=' + encodeURIComponent(inFilter(missing.map(dog => Number(dog.id)))) + '&select=dog_id,user_id,photo_path'),
-    rest('customer_owner_links?owner_id=' + encodeURIComponent(inFilter([...new Set(missing.map(dog => Number(dog.owner_id)))])) + '&select=user_id,owner_id,allowed_dog_ids'),
+    ownerLinks ? Promise.resolve(ownerLinks) : rest('customer_owner_links?owner_id=' + encodeURIComponent(inFilter([...new Set(missing.map(dog => Number(dog.owner_id)))])) + '&select=user_id,owner_id,allowed_dog_ids'),
   ]) as [Array<Json>,Array<Json>];
   const userIds = [...new Set(links.map(link => String(link.user_id)))];
   const profiles = userIds.length ? await rest('customer_profiles?user_id=' + encodeURIComponent(inFilter(userIds)) + '&select=user_id,created_at&order=created_at.asc,user_id.asc') as Array<Json> : [];
@@ -367,11 +367,29 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
   const rosterDogs = rosterDogIds.length
     ? await rest(
       'dogs?id=' + encodeURIComponent(inFilter(rosterDogIds)) +
-      '&select=id,owner_id,name,customer_name,sex,photo_path,photo_updated_at,share_name_photo',
+      '&select=id,owner_id,name,customer_name,sex,active,photo_path,photo_updated_at,share_name_photo,share_name_photo_at',
     ) as Array<Json>
     : [];
   const rosterDogMap = new Map(rosterDogs.map((dog) => [Number(dog.id), dog]));
-  const publicPhotoPaths = await rosterPhotoPaths(rosterDogs,userId,ownDogIds);
+  // Roster-only visibility: an active dog without a linked portal account and
+  // without a previous visibility decision may appear by name, never by photo.
+  // A customer link ends this temporary rule automatically; the existing
+  // onboarding then asks the linked owner to opt in (or decline).
+  const rosterOwnerIds = [...new Set(rosterDogs.map((dog) => Number(dog.owner_id)).filter(Boolean))];
+  const rosterOwnerLinks = rosterOwnerIds.length
+    ? await rest('customer_owner_links?owner_id=' + encodeURIComponent(inFilter(rosterOwnerIds)) +
+        '&select=user_id,owner_id,allowed_dog_ids') as Array<Json>
+    : [];
+  const rosterAutoNameV389 = (dog: Json | undefined) => !!dog
+    && dog.active === true
+    && dog.share_name_photo === false
+    && dog.share_name_photo_at == null
+    && !rosterOwnerLinks.some((link) =>
+      Number(link.owner_id) === Number(dog.owner_id)
+      && (link.allowed_dog_ids == null
+        || (Array.isArray(link.allowed_dog_ids)
+          && link.allowed_dog_ids.map(Number).includes(Number(dog.id)))));
+  const publicPhotoPaths = await rosterPhotoPaths(rosterDogs,userId,ownDogIds,rosterOwnerLinks);
   const publicPhotoUrls = new Map<number,Promise<string|null>>();
   const rosterPhotoUrl = (dogId: number) => {
     if (!publicPhotoUrls.has(dogId)) publicPhotoUrls.set(dogId,signedPhotoUrl(publicPhotoPaths.get(dogId)));
@@ -389,13 +407,13 @@ async function getAvailability(userId: string, linkedDogRows?: Array<Json>) {
     const consentedDogs = viewerApproved
       ? reservations.filter((row) => row.reservation_date === date)
         .map((row) => rosterDogMap.get(Number(row.dog_id)))
-        .filter((dog) => dog?.share_name_photo === true)
+        .filter((dog) => dog?.share_name_photo === true || rosterAutoNameV389(dog))
       : [];
     const visibleDogs = await Promise.all(consentedDogs.map(async (dog) => ({
       dog_id: Number(dog.id),
       name: dog?.customer_name || dog?.name || 'Psík',
       sex: dog?.sex || null,
-      photo_url: await rosterPhotoUrl(Number(dog.id)),
+      photo_url: dog.share_name_photo === true ? await rosterPhotoUrl(Number(dog.id)) : null,
     })));
     return {
       date,
@@ -930,13 +948,13 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
   if (!Number.isSafeInteger(replaceId) || replaceId < 0) throw new Error('Neplatná fotografia na úpravu.');
   if (replaceId && images.length !== 1) throw new Error('Na jedno miesto vyberte jednu novú fotografiu.');
   const preserve = append || replaceId > 0;
-  const existing = preserve ? await rest(
+  const existing = await rest(
     'vaccination_proofs?dog_id=eq.' + dogId + '&is_current=eq.true&select=id,dog_id,batch_id,storage_path,source,uploaded_at&order=uploaded_at.desc',
-  ) as Array<Json> : [];
+  ) as Array<Json>;
   if (replaceId && !existing.some(row => Number(row.id) === replaceId)) {
     throw new Error('Táto fotografia už nie je aktuálna. Obnovte si prehľad.');
   }
-  if (existing.length + images.length - (replaceId ? 1 : 0) > 5) {
+  if ((preserve ? existing.length : 0) + images.length - (replaceId ? 1 : 0) > 5) {
     throw new Error('Na jedného psíka možno uložiť najviac 5 fotografií.');
   }
   const batchId = preserve && existing.length ? String(existing[0].batch_id) : crypto.randomUUID();
@@ -984,26 +1002,20 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
     }) as Array<Json>;
     insertedCurrentRows = true;
 
-    if (replaceId) {
-      const removed = await rest(
-        'vaccination_proofs?dog_id=eq.' + dogId + '&id=eq.' + replaceId + '&is_current=eq.true',
-        { method: 'PATCH', body: { is_current: false, replaced_at: uploadedAt }, prefer: 'return=representation' },
-      ) as Array<Json>;
-      if (removed.length !== 1) throw new Error('Pôvodná fotografia sa zmenila. Obnovte si prehľad.');
-    } else if (!append) await rest(
-      'vaccination_proofs?dog_id=eq.' + dogId + '&is_current=eq.true&batch_id=neq.' + encodeURIComponent(batchId),
-      {
-        method: 'PATCH',
-        body: { is_current: false, replaced_at: uploadedAt },
-      },
-    );
+    // Store the new proof first. Failed cleanup keeps the old proof visible and
+    // returns a warning so its owner can retry Delete without uploading again.
+    let cleanupWarning: string | null = null;
+    const obsolete = replaceId ? existing.filter(row => Number(row.id) === replaceId) : (append ? [] : existing);
+    for (const row of obsolete) {
+      try { await permanentlyRemoveVaccinationProof(row, dogId); }
+      catch { cleanupWarning = 'Nová fotografia je uložená. Pôvodnú sa nepodarilo vymazať. Skúste ju vymazať cez ceruzku.'; }
+    }
 
     return {
       dog_id: dogId,
       batch_id: batchId,
-      proofs: await withSignedVaccinationProofs(replaceId
-        ? [...existing.filter(row => Number(row.id) !== replaceId), ...inserted]
-        : (append ? [...existing, ...inserted] : inserted)),
+      cleanup_warning: cleanupWarning,
+      proofs: await adminVaccinationProofs(dogId),
     };
   } catch (error) {
     // Never delete the photo object after its database row was inserted.
@@ -1020,6 +1032,31 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
     }
     throw error;
   }
+}
+
+// Storage API removes actual bytes; SQL alone would leave billable orphan objects.
+async function permanentlyRemoveVaccinationProof(row: Json, dogId: number) {
+  const path = String(row.storage_path || '');
+  if (!path.startsWith('dogs/' + dogId + '/') || path.includes('..')) throw new Error('Neplatná cesta fotografie.');
+  const response = await fetch(SUPABASE_URL + '/storage/v1/object/vaccination-proof-photos', {
+    method: 'DELETE',
+    headers: { apikey: SERVICE_KEY, Authorization: 'Bearer ' + SERVICE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prefixes: [path] }),
+  });
+  if (!response.ok) throw new Error('Fotografiu sa nepodarilo vymazať z úložiska. Skúste to znova.');
+  // Retain the metadata until Storage succeeds. A failed metadata delete can be
+  // retried with the same ID; Storage removal is idempotent.
+  await rest('vaccination_proofs?dog_id=eq.' + dogId + '&id=eq.' + Number(row.id), { method: 'DELETE' });
+}
+
+async function deleteVaccinationProof(userId: string, staff: boolean, payload: Json) {
+  const dogId = Number(payload.dog_id), proofId = Number(payload.proof_id);
+  if (!Number.isSafeInteger(dogId) || dogId <= 0 || !Number.isSafeInteger(proofId) || proofId <= 0) throw new Error('Neplatná fotografia očkovacieho preukazu.');
+  if (!staff && !await ownsDog(userId, dogId)) throw new Error('Tento psík nie je priradený k vášmu účtu.');
+  const rows = await rest('vaccination_proofs?dog_id=eq.' + dogId + '&id=eq.' + proofId + '&is_current=eq.true&select=id,dog_id,storage_path') as Array<Json>;
+  if (rows.length !== 1) throw new Error('Fotografia už nie je aktuálna. Obnovte si prehľad.');
+  await permanentlyRemoveVaccinationProof(rows[0], dogId);
+  return { dog_id: dogId, proofs: await adminVaccinationProofs(dogId) };
 }
 
 async function adminPushStatuses(payload: Json) {
@@ -1243,6 +1280,9 @@ Deno.serve(async (req: Request) => {
     }
     if (action === 'upload_vaccination_proofs') {
       return json({ data: await uploadVaccinationProofs(String(user.id), staff, body) });
+    }
+    if (action === 'delete_vaccination_proof') {
+      return json({ data: await deleteVaccinationProof(String(user.id), staff, body) });
     }
     if (action === 'upload_dog_photo') {
       return json({ data: await uploadDogPhoto(String(user.id), staff && body.photo_scope !== 'account', body) });
