@@ -31,7 +31,7 @@ for (const { engine, type, width, height } of [
     const page = await context.newPage();
 
     // No test event may reach the production analytics or lead endpoints.
-    await page.route("**/supabase.co/**", route => route.fulfill({ status: 204, body: "" }));
+    await page.route("**/*supabase.co/**", route => route.fulfill({ status: 204, body: "" }));
 
     await page.goto(base + "/", { waitUntil: "domcontentloaded" });
     await page.locator("h1:visible").first().waitFor({ timeout: 20000 });
@@ -74,7 +74,7 @@ for (const { engine, type, width, height } of [
     if (width < 1024) {
       const pricingTab = page.locator('.mobile-dock-item[href="/#cennik"]');
       await pricingTab.click();
-      await page.waitForFunction(() => location.hash === "#cennik", { timeout: 12000 });
+      await page.waitForFunction(() => location.hash === "#cennik", null, { timeout: 12000 });
       await page.locator('.mobile-dock-item[href="/#cennik"].is-active').waitFor({ state: "attached", timeout: 12000 });
       const boxes = await page.evaluate(() => {
         const pricing = document.querySelector('.mobile-dock-item[href="/#cennik"]')?.getBoundingClientRect();
