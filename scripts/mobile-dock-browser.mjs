@@ -73,7 +73,7 @@ async function run(engine, width, height, suffix) {
     // Both desktop and mobile must paint the premium CTA depth without altering
     // the original shape, label, dimensions or native button actions.
     const premium = await page.evaluate(() => {
-      const heroCta = document.querySelector("#top .btn-coral");
+      const heroCta = [...document.querySelectorAll("#top .btn-coral")].find((node) => node.getBoundingClientRect().width >= 44);
       const primaryDock = document.querySelector(".mobile-dock-apply");
       const describe = (el) => {
         if (!el) return null;
