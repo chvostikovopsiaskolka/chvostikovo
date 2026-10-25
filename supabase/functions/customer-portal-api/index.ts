@@ -948,13 +948,13 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
   if (!Number.isSafeInteger(replaceId) || replaceId < 0) throw new Error('Neplatná fotografia na úpravu.');
   if (replaceId && images.length !== 1) throw new Error('Na jedno miesto vyberte jednu novú fotografiu.');
   const preserve = append || replaceId > 0;
-  const existing = preserve ? await rest(
+  const existing = await rest(
     'vaccination_proofs?dog_id=eq.' + dogId + '&is_current=eq.true&select=id,dog_id,batch_id,storage_path,source,uploaded_at&order=uploaded_at.desc',
-  ) as Array<Json> : [];
+  ) as Array<Json>;
   if (replaceId && !existing.some(row => Number(row.id) === replaceId)) {
     throw new Error('Táto fotografia už nie je aktuálna. Obnovte si prehľad.');
   }
-  if (existing.length + images.length - (replaceId ? 1 : 0) > 5) {
+  if ((preserve ? existing.length : 0) + images.length - (replaceId ? 1 : 0) > 5) {
     throw new Error('Na jedného psíka možno uložiť najviac 5 fotografií.');
   }
   const batchId = preserve && existing.length ? String(existing[0].batch_id) : crypto.randomUUID();
@@ -1002,26 +1002,20 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
     }) as Array<Json>;
     insertedCurrentRows = true;
 
-    if (replaceId) {
-      const removed = await rest(
-        'vaccination_proofs?dog_id=eq.' + dogId + '&id=eq.' + replaceId + '&is_current=eq.true',
-        { method: 'PATCH', body: { is_current: false, replaced_at: uploadedAt }, prefer: 'return=representation' },
-      ) as Array<Json>;
-      if (removed.length !== 1) throw new Error('Pôvodná fotografia sa zmenila. Obnovte si prehľad.');
-    } else if (!append) await rest(
-      'vaccination_proofs?dog_id=eq.' + dogId + '&is_current=eq.true&batch_id=neq.' + encodeURIComponent(batchId),
-      {
-        method: 'PATCH',
-        body: { is_current: false, replaced_at: uploadedAt },
-      },
-    );
+    // Store the new proof first. Failed cleanup keeps the old proof visible and
+    // returns a warning so its owner can retry Delete without uploading again.
+    let cleanupWarning: string | null = null;
+    const obsolete = replaceId ? existing.filter(row => Number(row.id) === replaceId) : (append ? [] : existing);
+    for (const row of obsolete) {
+      try { await permanentlyRemoveVaccinationProof(row, dogId); }
+      catch { cleanupWarning = 'Nová fotografia je uložená. Pôvodnú sa nepodarilo vymazať. Skúste ju vymazať cez ceruzku.'; }
+    }
 
     return {
       dog_id: dogId,
       batch_id: batchId,
-      proofs: await withSignedVaccinationProofs(replaceId
-        ? [...existing.filter(row => Number(row.id) !== replaceId), ...inserted]
-        : (append ? [...existing, ...inserted] : inserted)),
+      cleanup_warning: cleanupWarning,
+      proofs: await adminVaccinationProofs(dogId),
     };
   } catch (error) {
     // Never delete the photo object after its database row was inserted.
@@ -1038,6 +1032,31 @@ async function uploadVaccinationProofs(userId: string, staff: boolean, payload: 
     }
     throw error;
   }
+}
+
+// Storage API removes actual bytes; SQL alone would leave billable orphan objects.
+async function permanentlyRemoveVaccinationProof(row: Json, dogId: number) {
+  const path = String(row.storage_path || '');
+  if (!path.startsWith('dogs/' + dogId + '/') || path.includes('..')) throw new Error('Neplatná cesta fotografie.');
+  const response = await fetch(SUPABASE_URL + '/storage/v1/object/vaccination-proof-photos', {
+    method: 'DELETE',
+    headers: { apikey: SERVICE_KEY, Authorization: 'Bearer ' + SERVICE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prefixes: [path] }),
+  });
+  if (!response.ok) throw new Error('Fotografiu sa nepodarilo vymazať z úložiska. Skúste to znova.');
+  // Retain the metadata until Storage succeeds. A failed metadata delete can be
+  // retried with the same ID; Storage removal is idempotent.
+  await rest('vaccination_proofs?dog_id=eq.' + dogId + '&id=eq.' + Number(row.id), { method: 'DELETE' });
+}
+
+async function deleteVaccinationProof(userId: string, staff: boolean, payload: Json) {
+  const dogId = Number(payload.dog_id), proofId = Number(payload.proof_id);
+  if (!Number.isSafeInteger(dogId) || dogId <= 0 || !Number.isSafeInteger(proofId) || proofId <= 0) throw new Error('Neplatná fotografia očkovacieho preukazu.');
+  if (!staff && !await ownsDog(userId, dogId)) throw new Error('Tento psík nie je priradený k vášmu účtu.');
+  const rows = await rest('vaccination_proofs?dog_id=eq.' + dogId + '&id=eq.' + proofId + '&is_current=eq.true&select=id,dog_id,storage_path') as Array<Json>;
+  if (rows.length !== 1) throw new Error('Fotografia už nie je aktuálna. Obnovte si prehľad.');
+  await permanentlyRemoveVaccinationProof(rows[0], dogId);
+  return { dog_id: dogId, proofs: await adminVaccinationProofs(dogId) };
 }
 
 async function adminPushStatuses(payload: Json) {
@@ -1261,6 +1280,9 @@ Deno.serve(async (req: Request) => {
     }
     if (action === 'upload_vaccination_proofs') {
       return json({ data: await uploadVaccinationProofs(String(user.id), staff, body) });
+    }
+    if (action === 'delete_vaccination_proof') {
+      return json({ data: await deleteVaccinationProof(String(user.id), staff, body) });
     }
     if (action === 'upload_dog_photo') {
       return json({ data: await uploadDogPhoto(String(user.id), staff && body.photo_scope !== 'account', body) });

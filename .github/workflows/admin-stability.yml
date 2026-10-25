@@ -27,6 +27,11 @@ jobs:
           node tests/security-access-v336.mjs
           node tests/security-handlers-v336.mjs
           node tests/admin-access-v336.cjs
+      - name: Customer proof deletion and grouped errors v392
+        run: |
+          node tests/customer-proof-delete-v392.mjs
+          node tests/customer-proof-delete-v392.cjs
+          node tests/customer-proof-delete-db-v392.cjs
       - name: Vaccination push grouping v343
         run: node tests/vaccine-push-batch-v343.cjs
       - name: Private OpenTelemetry ingestion and actual admin v345
@@ -157,6 +162,8 @@ jobs:
           "$RUNNER_TEMP/chvo-v3-browser/node_modules/.bin/playwright" install --with-deps chromium webkit
       - name: Current customer browser regression and pixel proof
         run: |
+          node tests/customer-proof-delete-v392-browser.cjs
+          V3_ENGINE=webkit node tests/customer-proof-delete-v392-browser.cjs
           node tests/customer-android-dock-v389-browser.cjs
           node tests/customer-auth-glass-v386-browser.cjs
           V3_ENGINE=webkit node tests/customer-auth-glass-v386-browser.cjs
@@ -176,6 +183,7 @@ jobs:
         with:
           name: liquid-v3-browser-evidence
           path: |
+            /tmp/chvo-v392-proof/
             /tmp/chvo-v389-screenshots/
             /tmp/chvo-v386-auth/
             /tmp/chvo-v385-screenshots/

@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v391';
-const APP_VERSION='2.0.66';
+const APP_BUILD='v392';
+const APP_VERSION='2.0.67';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -145,7 +145,7 @@ try{window.ChvoTelemetry?.init({app:'customer',build:APP_TELEMETRY_BUILD,base:SU
 // One concurrent read for onboarding, settings and rules; never share account state.
 let customerTermsReadV146=null;
 let bootstrapInFlight=null,lastResumeRefresh=0;
-// v391: Retry one transient transport failure on authenticated read-only GETs.
+// v392: Retry one transient transport failure on authenticated read-only GETs.
 // Never repeat mutations, mask HTTP failures, or cross a logout/account change.
 async function customerReadJsonV391(url,ownerId){
   if(!ownerId)throw new Error('Najprv sa prihláste.');
@@ -3159,8 +3159,9 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       if(renewalDate)pendingPassRenewalV95={dogId:Number(dog.id),date:renewalDate};
       renderPickerV37();
       const deadlineFailure=failed.some(x=>/20:00|uzavreli v nedeľu|zatvorené/i.test(x.error));
-      const details=failed.map(x=>skDate(x.date)+' – '+x.error).join(' | ');
+      const details=bookingFailureDetailsV392(failed);
       pickerErrorV95((ok?`Odoslané ${ok} z ${dates.length}. `:'')+'Nepodarilo sa: '+details,deadlineFailure);
+      if(failed.some(x=>/očkov/i.test(x.error))){const box=$('bookingPickerErrorV95');if(box){const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='Upraviť očkovania';button.onclick=()=>{closePickerV37();openDogDetails('vaccinations')};box.append(button)}}
       queueCustomerSync('bookings',0);
       return;
     }
@@ -3948,7 +3949,7 @@ function renderVaccinationProofsV104(dogId=Number(selectedDog()?.id||0)){
   staged.classList.toggle('hidden',!vaccinationProofFilesV104.length);
   staged.innerHTML=vaccinationProofFilesV104.length?'<div class="vacc-proof-stage-title-v104">Vybrané nové fotografie</div><div class="vacc-proof-grid-v104">'+vaccinationProofFilesV104.map((item,i)=>'<div class="vacc-proof-thumb-v104 staged"><img src="'+item.dataUrl+'" alt="Vybraná fotografia '+(i+1)+'"><button type="button" data-remove-proof="'+i+'" aria-label="Odstrániť">×</button></div>').join('')+'</div>':'';
   staged.querySelectorAll('[data-remove-proof]').forEach(button=>{button.disabled=busy;button.addEventListener('click',()=>{if(window.__vaccinationProofProcessingV105||vaccinationProofUploadInFlightV143)return;vaccinationProofFilesV104.splice(Number(button.dataset.removeProof),1);renderVaccinationProofsV104(dogId)})});
-  if(msg&&!vaccinationProofFilesV104.length&&!busy)msg.textContent=vaccinationProofReplaceModeV104?'Vyberte 1 až 5 nových fotografií.':vaccinationPhotoNeededV244(dogId)?'Zmenili ste dátum očkovania. Pred uložením nahrajte aj aktuálnu fotografiu cez „Upraviť fotky“.':proofs.length?'Uložené '+proofs.length+' z 5 fotografií.':'Na dokončenie nahrajte fotografie očkovaní z očkovacieho preukazu.';
+  if(msg&&!vaccinationProofFilesV104.length&&!busy)msg.textContent=vaccinationProofReplaceModeV104?'Vyberte 1 až 5 nových fotografií.':vaccinationPhotoNeededV244(dogId)?'Máte nové očkovanie? Upravte dátum a cez ceruzku pri pôvodnej fotke ju nahraďte aktuálnou.':proofs.length?'Uložené '+proofs.length+' z 5 fotografií.':'Na dokončenie nahrajte fotografie očkovaní z očkovacieho preukazu.';
 }
 async function addVaccinationProofFilesV104(files){
   const incoming=[...(files||[])].filter(Boolean);
@@ -4050,21 +4051,25 @@ function ensureVaccProofEditorV244(){
   document.body.insertAdjacentHTML('beforeend',
     '<div id="vaccProofEditorV244" class="vacc-proof-edit-modal-v244 hidden" role="dialog" aria-modal="true" aria-labelledby="vaccProofEditTitleV244">'+
       '<section class="vacc-proof-edit-card-v244">'+
-        '<div class="vacc-proof-edit-head-v244"><div><h2 id="vaccProofEditTitleV244">Upraviť fotky očkovania</h2><p>Kliknite na ceruzku pri fotografii, ktorú chcete vymeniť. Ostatné zostanú uložené.</p></div><button type="button" id="vaccProofEditCloseV244" aria-label="Zavrieť úpravu fotografií">×</button></div>'+
+        '<div class="vacc-proof-edit-head-v244"><div><h2 id="vaccProofEditTitleV244">Upraviť fotky očkovania</h2><p>Cez ceruzku nahraďte pôvodnú fotku aktuálnou alebo vymažte nepotrebnú fotku.</p></div><button type="button" id="vaccProofEditCloseV244" aria-label="Zavrieť úpravu fotografií">×</button></div>'+
         '<div id="vaccProofEditGridV244" class="vacc-proof-edit-grid-v244"></div>'+
         '<p id="vaccProofEditMessageV244" class="vacc-proof-edit-message-v244" role="status" aria-live="polite">Vyberte fotografiu na výmenu.</p>'+
-        '<input type="file" accept="image/*" id="vaccProofEditFileV244" hidden>'+
+        '<div id="vaccProofActionsV392" class="hidden"><label class="btn secondary" for="vaccProofEditFileV244">Nahradiť fotku</label><button type="button" class="btn secondary" id="vaccProofDeleteV392">Vymazať fotku</button><button type="button" class="btn secondary" id="vaccProofActionsCancelV392">Zrušiť</button></div>'+
+        '<input type="file" accept="image/*" id="vaccProofEditFileV244" style="position:absolute;width:1px;height:1px;opacity:0;clip-path:inset(50%)">'+
       '</section></div>');
   modal=$('vaccProofEditorV244');
-  const close=()=>{if(vaccProofEditBusyV244)return;modal.classList.add('hidden')};
+  const close=()=>{if(vaccProofEditBusyV244)return;$('vaccProofActionsV392').classList.add('hidden');modal.classList.add('hidden')};
   $('vaccProofEditCloseV244').addEventListener('click',close);
   modal.addEventListener('click',e=>{if(e.target===modal)close()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.classList.contains('hidden')){e.stopPropagation();close()}},true);
+  $('vaccProofActionsCancelV392').onclick=()=>$('vaccProofActionsV392').classList.add('hidden');
+  $('vaccProofDeleteV392').onclick=()=>deleteVaccProofV392(Number($('vaccProofEditFileV244').dataset.replaceId||0));
   const input=$('vaccProofEditFileV244');
   input.addEventListener('click',()=>v105PickerGuard());
   input.addEventListener('change',async()=>{
     const file=input.files?.[0],replaceId=Number(input.dataset.replaceId||0);
     input.value='';
+    $('vaccProofActionsV392').classList.add('hidden');
     try{if(file)await uploadSingleVaccProofV244(file,replaceId)}
     finally{window.__customerPhotoPickerV88=false}
   });
@@ -4075,8 +4080,9 @@ function openVaccProofEditorV244(){
   const dogId=Number(selectedDog()?.id||0);if(!dogId)return;
   const modal=ensureVaccProofEditorV244();
   modal.dataset.dogId=String(dogId);
+  $('vaccProofActionsV392').classList.add('hidden');
   vaccProofEditOrderV244=vaccinationProofsForDogV104(dogId).map(p=>Number(p.id));
-  $('vaccProofEditMessageV244').textContent='Vymeňte len vybranú fotku alebo pridajte ďalšiu (maximálne 5).';
+  $('vaccProofEditMessageV244').textContent='Pri obnove očkovania nahraďte pôvodnú fotku. Ďalšiu stranu preukazu môžete pridať (maximálne 5 fotiek).';
   renderVaccProofEditorV244();
   modal.classList.remove('hidden');
 }
@@ -4092,7 +4098,7 @@ function renderVaccProofEditorV244(){
     preview.dataset.vaccPreview=String(id);preview.setAttribute('aria-label','Zväčšiť fotografiu '+(i+1));
     updateVaccProofImageV259(img,p);img.alt='Fotografia očkovania '+(i+1);
     preview.onclick=()=>openVaccinationProofViewerV104(vaccinationProofsForDogV104(dogId).find(p=>Number(p.id)===id)?.image_url);
-    const pencil=tile.querySelector('[data-vacc-replace]');pencil.dataset.vaccReplace=String(id);pencil.setAttribute('aria-label','Nahradiť fotografiu '+(i+1));
+    const pencil=tile.querySelector('[data-vacc-replace]');pencil.dataset.vaccReplace=String(id);pencil.setAttribute('aria-label','Upraviť fotografiu '+(i+1));
     tile.querySelector('span').textContent='Foto '+(i+1);
   }}));
   if(proofs.length<5)entries.push({key:'add',update(){}});
@@ -4103,10 +4109,39 @@ function renderVaccProofEditorV244(){
     const tile=document.createElement('div');tile.className='vacc-proof-edit-tile-v244';
     tile.innerHTML='<button type="button" class="vacc-proof-edit-preview-v244" data-vacc-preview=""><img></button><button type="button" class="vacc-proof-edit-pencil-v244" data-vacc-replace=""><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 18.5 3 20l1.5-4.5Z"/></svg></button><span></span>';return tile;
   });
+  $('vaccProofDeleteV392').disabled=vaccProofEditBusyV244;
   grid.querySelectorAll('[data-vacc-replace]').forEach(b=>{b.disabled=vaccProofEditBusyV244;b.onclick=()=>{
     if(vaccProofEditBusyV244)return;
-    const input=$('vaccProofEditFileV244');input.dataset.replaceId=b.dataset.vaccReplace;b.blur();input.click();
+    const input=$('vaccProofEditFileV244');input.dataset.replaceId=b.dataset.vaccReplace;b.blur();
+    if(Number(b.dataset.vaccReplace)){$('vaccProofActionsV392').classList.remove('hidden');input.focus()}else{input.click()}
   }});
+}
+async function deleteVaccProofV392(proofId){
+  if(vaccProofEditBusyV244||vaccinationProofUploadInFlightV143||window.__vaccinationProofProcessingV105)return;
+  const dogId=Number($('vaccProofEditorV244')?.dataset.dogId||0),userId=state.session?.user?.id,epoch=vaccinationProofStageEpochV143;
+  if(!dogId||Number(selectedDog()?.id)!==dogId||!vaccinationProofsForDogV104(dogId).some(p=>Number(p.id)===proofId))return;
+  if(!confirm('Vymazať túto fotku natrvalo? Ak vymažete poslednú, pred ďalšou rezerváciou treba nahrať novú.'))return;
+  const current=()=>state.session?.user?.id===userId&&vaccinationProofStageEpochV143===epoch&&Number(selectedDog()?.id)===dogId;
+  vaccProofEditBusyV244=true;window.__vaccinationProofProcessingV105=true;
+  $('vaccProofActionsV392').classList.add('hidden');renderVaccProofEditorV244();
+  const msg=$('vaccProofEditMessageV244');msg.textContent='Vymazávam fotografiu…';
+  try{
+    const result=await api({action:'delete_vaccination_proof',dog_id:dogId,proof_id:proofId});
+    const proofs=result?.data?.proofs;if(!Array.isArray(proofs))throw Error('Vymazanie sa nepodarilo overiť. Obnovte prehľad.');
+    if(!current()||!state.data)return;
+    state.data.vaccination_proofs=(state.data.vaccination_proofs||[]).filter(p=>Number(p.dog_id)!==dogId).concat(proofs);
+    vaccinationFreshUploadV234.delete(vaccineKeyV287(dogId));
+    vaccineRetriesV287.delete(vaccineKeyV287(dogId));$('vaccProofRetryV287')?.remove();
+    customerMutationRevisionV145++;msg.textContent='Fotografia bola natrvalo vymazaná.';toast(msg.textContent);
+  }catch(error){if(current()){msg.textContent=error.message||'Fotografiu sa nepodarilo vymazať. Skúste to znova.';toast(msg.textContent)}}
+  finally{vaccProofEditBusyV244=false;window.__vaccinationProofProcessingV105=false;if(current()){renderVaccinationProofsV104(dogId);renderVaccProofEditorV244();renderDog();renderUpcoming();renderDays();}}
+}
+
+function bookingFailureDetailsV392(failed){
+  const vaccine=/očkov|fotografiu očkovacieho preukazu/i;
+  const groups=new Map();
+  for(const item of failed){const error=String(item.error||'Nepodarilo sa rezervovať.');if(!groups.has(error))groups.set(error,[]);groups.get(error).push(item.date)}
+  return [...groups].map(([error,dates])=>vaccine.test(error)?error:dates.map(skDate).join(', ')+' – '+error).join(' | ');
 }
 async function uploadSingleVaccProofV244(file,replaceId){
   if(vaccProofEditBusyV244||vaccinationProofUploadInFlightV143)return;
@@ -4140,8 +4175,8 @@ async function uploadSingleVaccProofV244(file,replaceId){
     $('vaccineErrorV287')?.remove();$('vaccProofReplaceV104')?.removeAttribute('aria-invalid');vaccineRetriesV287.delete(vaccineKeyV287(dogId));
     vaccinationFreshUploadV234.add(vaccineKeyV287(dogId));
     customerMutationRevisionV145++;
-    msg.textContent=replaceId?'Vybraná fotografia bola úspešne vymenená. Ostatné zostali zachované.':'Fotografia bola pridaná. Ostatné zostali zachované.';
-    toast(replaceId?'Fotografia bola vymenená.':'Fotografia bola pridaná.');
+    msg.textContent=result?.data?.cleanup_warning||(replaceId?'Fotografia bola vymenená a pôvodná vymazaná.':'Fotografia bola pridaná.');
+    toast(result?.data?.cleanup_warning||(replaceId?'Fotografia bola vymenená.':'Fotografia bola pridaná.'));
   }catch(error){
     const message=String(error?.message||'Fotografiu sa nepodarilo nahrať.');
     if(current())vaccineRetriesV287.set(vaccineKeyV287(dogId),{file,replaceId});
