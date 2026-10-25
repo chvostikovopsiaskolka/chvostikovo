@@ -57,7 +57,29 @@ function wallpaper(){
  // a data-SVG containing <use>. Same-origin PNG keeps GPU upload origin-clean.
  sourceImage.src='/vendor/liquidlens/chvostikovo-paws-soft-v383.png';return source;
 }
-function stop(s){if(s.engine){s.engine.destroy();s.engine=null;stats.contexts--;s.layer.dataset.renderer='fallback';s.output?.remove();s.output=null;}}
+// A profile moves in document space. Its texture must move with it too:
+// viewport snapshots can lag WebKit's compositor scroll and expose white bands.
+function profileBackdrop(el,s){
+ const panel=el.closest('.dual-dog-panel-v254,#bookingDogProfile');
+ if(!panel)return wallpaper();
+ if(!sourceImage?.naturalWidth)return null;
+ if(!s.profileSource){
+  const canvas=document.createElement('canvas');canvas.className='lg-v3-profile-source';
+  canvas.setAttribute('aria-hidden','true');canvas.style.cssText='position:absolute!important;inset:-32px auto auto -32px!important;width:calc(100% + 64px)!important;height:calc(100% + 64px)!important;visibility:hidden!important;pointer-events:none';
+  panel.append(canvas);s.profileSource=canvas;
+ }
+ const canvas=s.profileSource,r=panel.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,1.5);
+ const x=Math.round(r.left+scrollX)-32,y=Math.round(r.top+scrollY)-32,color=getComputedStyle(panel).backgroundColor;
+ const key=[Math.round(r.width),Math.round(r.height),x,y,color,dpr].join(':');
+ if(key!==s.profileSourceKey){
+  s.profileSourceKey=key;const w=r.width+64,h=r.height+64;canvas.width=Math.ceil(w*dpr);canvas.height=Math.ceil(h*dpr);
+  const c=canvas.getContext('2d');c.scale(dpr,dpr);c.fillStyle=getComputedStyle(document.body).backgroundColor;c.fillRect(0,0,w,h);
+  c.save();c.translate(-((x%300+300)%300),-((y%430+430)%430));c.fillStyle=c.createPattern(sourceImage,'repeat');c.fillRect(0,0,w+300,h+430);c.restore();
+  c.fillStyle=color;c.fillRect(0,0,w,h);canvas.dataset.liquidGlassRevision=String(++revision);
+ }
+ return canvas;
+}
+function stop(s){if(s.engine){s.engine.destroy();s.engine=null;stats.contexts--;s.layer.dataset.renderer='fallback';s.output?.remove();s.output=null;}s.profileSource?.remove();s.profileSource=null;s.profileSourceKey='';}
 function remove(el,s){stop(s);s.filter?.remove();s.layer.remove();resize.unobserve(el);el.classList.remove('lg-v3-host');if(s.previousPosition!==undefined)el.style.position=s.previousPosition;states.delete(el);}
 function visible(el){const r=el.getBoundingClientRect(),css=getComputedStyle(el);return r.width>20&&r.height>18&&r.bottom>0&&r.top<innerHeight&&css.visibility!=='hidden'&&css.display!=='none'&&!el.closest('.hidden');}
 function materialHolder(el){return el.matches('details')?el.querySelector(':scope>summary'):el;}
@@ -96,7 +118,8 @@ function sync(){
   if(webkit&&!low&&selected&&used<stats.contextLimit){
    used++;
    if(!s.engine&&!s.failed){
-    const backdrop=wallpaper();if(!sourceImage?.naturalWidth)continue;
+    wallpaper();if(!sourceImage?.naturalWidth)continue;
+    const backdrop=el.matches('.dog-overview-content,.dual-dog-info-v254')?profileBackdrop(el,s):wallpaper();if(!backdrop)continue;
     paintWallpaper();const output=document.createElement('span');output.className='lg-v3-output';s.layer.prepend(output);s.output=output;
     try{
      s.engine=createWebGLSurface(el,output,backdrop,{map:map.uri,scale:map.scale,dispersion:0,specular:.1,classic:false,neutralPoint:128/255,radius,blur:reels?3:.65,saturation:reels?180:115},status=>{
@@ -105,6 +128,7 @@ function sync(){
      });stats.contexts++;stats.peakContexts=Math.max(stats.peakContexts,stats.contexts);
     }catch(error){s.failed=true;s.reason=String(error.message||error);output.remove();s.output=null;}
    }
+   if(s.engine&&s.profileSource)profileBackdrop(el,s);
    if(s.failed)stop(s);
   }else stop(s);
  }

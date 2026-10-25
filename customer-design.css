@@ -72,7 +72,7 @@ html.design-modal-open{overflow:hidden}.design-modal-open #bottomNav{visibility:
 .design-reservations-page .booking-day-v37[data-capacity-level=limited]:not(.disabled):not(.selected):not(.week-closed-v127){background:#fff4cd!important;border-color:#e8d28b!important;color:#87601c!important}
 .design-reservations-page .booking-day-v37[data-capacity-level=full]:not(.disabled):not(.selected){background:#283240!important;border-color:#283240!important;color:#fff!important}
 #designMyBookings h2{font-size:18px;margin:14px 0 8px}#designMyBookings #weekDays{display:flex!important;gap:10px!important;overflow-x:auto!important;scroll-snap-type:x mandatory;padding:0 0 10px!important;margin:0!important;scrollbar-width:thin}#designMyBookings .reserved-day-card-v37{flex:0 0 88%;min-width:0;scroll-snap-align:start;margin:0!important;padding:12px!important}.design-carousel-friends{border:0;background:transparent;color:#886a59;font-size:12px;font-weight:750;min-height:44px;padding:4px 0}.design-reservations-page .reserved-day-date-v37 strong{font-size:15px!important}.design-reservations-page .reserved-day-date-v37 span{font-size:12px!important}.design-reservations-page .reserved-day-controls-v37{gap:5px!important}.design-reservations-page .pill{font-size:10px!important}.design-reservations-page .reserved-empty-v37{flex:1;padding:13px!important;font-size:13px!important;min-width:100%}.design-reservations-page .reserved-empty-v37 small{display:none!important}.design-reservations-page .reserved-empty-icon{width:24px!important;height:24px!important}.design-reservations-page #bookingPickerDaysV37{margin-top:10px!important}.design-reservations-page .booking-picker-week-days-v127{gap:5px!important}.design-reservations-page .booking-day-v37{min-height:89px!important;padding:10px 2px!important;border-radius:13px!important}.design-reservations-page .booking-day-v37 strong{font-size:17px!important}.design-reservations-page .booking-day-v37 span{font-size:9px!important}.design-reservations-page .booking-day-v37 small{font-size:11px!important}.design-reservations-page .booking-week-closed-note-v127{font-size:11px!important;padding:8px 10px!important}.design-reservations-page .booking-week-closed-note-v127 span{font-size:10px!important}
-.design-selected-days{max-height:260px;overflow:auto;overscroll-behavior:contain;display:grid;gap:8px;margin:8px 0}.design-selected-day{border:1px solid #e9e1e7;border-radius:13px;background:#fff;padding:10px 12px}.design-selected-day>strong{font-size:13px}.design-taxi-disclosure{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;border:0;background:none;color:#786c79;font-size:12px;padding:8px 0 0}.design-selected-day .booking-taxi-inline-v201{margin-top:8px!important}
+.design-selected-days{max-height:260px;overflow:auto;overscroll-behavior:contain;display:grid;gap:12px;margin:0 -10px;padding:8px 10px 16px;box-sizing:border-box}.design-selected-day{border:1px solid #e9e1e7;border-radius:13px;background:#fff;padding:10px 12px}.design-selected-day>strong{font-size:13px}.design-taxi-disclosure{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;border:0;background:none;color:#786c79;font-size:12px;padding:8px 0 0}.design-selected-day .booking-taxi-inline-v201{margin-top:8px!important}
 .customer-design button,.customer-design [role=button]{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}.customer-design button:focus-visible{outline:3px solid #f58b39;outline-offset:3px}
 @media(max-width:350px){.design-ticket{padding:11px}.design-ticket h2{font-size:15px}.design-validity{font-size:9px}.design-friend-photo{width:36px;height:36px;border-radius:9px}.design-friend-strip{gap:4px}.design-friends-button{font-size:10px;padding-left:7px}.customer-design #bookingTab #bookingDogProfile{gap:9px!important;padding:10px!important}.customer-design #bookingTab #bookingDogName{font-size:23px!important}.design-paws{gap:5px}.design-nearest h2{font-size:11px}.design-nearest-head{gap:5px}}
 @media(min-width:600px){.customer-design #bookingTab #bookingDogAvatar{max-height:180px!important}.design-friend-photo{width:58px;height:58px}.design-ticket,.design-nearest{padding:16px 19px}.design-nearest h2{font-size:16px}}
@@ -555,7 +555,7 @@ html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #booking
 .customer-design #bookingTab #bookingDogProfile[data-design-sex=male] #bookingDogName,
 .customer-design #bookingTab .male-v241 .dual-dog-name-v241{color:#24659d!important}
 .customer-design #bookingTab .dual-dog-choices-v241::after{display:none!important}
-.customer-design #bookingTab .dual-dog-panel-v254{background:#f9deed;border-radius:16px}
+.customer-design #bookingTab .dual-dog-panel-v254{position:relative;background:#f9deed;border-radius:16px}
 .customer-design #bookingTab .dual-dog-panel-v254.male-v241{background:#dcecfb}
 .customer-design #bookingTab .dual-dog-panel-v254+.dual-dog-panel-v254{border-left:0;padding-left:13px}
 .customer-design #bookingTab .dual-dog-info-v254{
@@ -566,14 +566,21 @@ html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #booking
 .customer-design #designNearest.design-nearest,
 .customer-design #customerInboxV363>button,
 .customer-design #bookingPickerV37 #designMyBookings,
-.customer-design #bookingPickerV37 #bookingPickerDaysV37,
-.customer-design #bookingPickerV37 .design-selected-day{
+.customer-design #bookingPickerV37 #bookingPickerDaysV37{
  background:var(--liquid-surface-v364)!important;
  border:0!important;
  box-shadow:var(--liquid-shadow-v364)!important;
 }
+/* Leave room around rounded cards so the scrollport cannot cut their shadows. */
+.customer-design #bookingPickerV37 .design-selected-day{
+ background:var(--liquid-surface-v364)!important;border:0!important;
+ box-shadow:0 6px 16px #553c4926,0 1px 4px #553c4912!important;
+}
 .customer-design #designNearest .design-visit-card:not(.design-visit-empty),
-.customer-design #bookingPickerV37 #designMyBookings .reserved-day-card-v37,
+.customer-design #bookingPickerV37 #designMyBookings .reserved-day-card-v37{
+ background:#ffffffb8!important;border-color:transparent!important;
+ box-shadow:0 5px 14px #553c4924,0 1px 4px #553c4914!important;
+}
 .customer-design #bookingPickerV37 #bookingPickerSmartDaysV199{background:#ffffff2e!important;border-color:transparent!important}
 .customer-design #bookingPickerV37 .booking-picker-week-v127{
  background:#ffffff1f;border:0;border-radius:15px;padding:12px 6px 9px;

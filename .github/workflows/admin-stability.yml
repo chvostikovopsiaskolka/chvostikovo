@@ -158,6 +158,8 @@ jobs:
         run: |
           node tests/customer-auth-glass-v386-browser.cjs
           V3_ENGINE=webkit node tests/customer-auth-glass-v386-browser.cjs
+          node tests/customer-scroll-optics-v389-browser.cjs
+          V3_ENGINE=webkit node tests/customer-scroll-optics-v389-browser.cjs
           node tests/customer-reels-v385-browser.cjs
           V3_ENGINE=webkit node tests/customer-reels-v385-browser.cjs
           node tests/customer-liquid-browser-v364.cjs
@@ -172,6 +174,7 @@ jobs:
         with:
           name: liquid-v3-browser-evidence
           path: |
+            /tmp/chvo-v389-screenshots/
             /tmp/chvo-v386-auth/
             /tmp/chvo-v385-screenshots/
             /tmp/chvo-v3-screenshots/
