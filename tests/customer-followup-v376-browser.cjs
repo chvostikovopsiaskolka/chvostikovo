@@ -34,7 +34,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await page.evaluate(()=>document.querySelector('.customer-notice-carousel-v376').scrollTo({left:0,behavior:'instant'}));
  await page.waitForFunction(()=>document.querySelector('.customer-notice-carousel-v376').dataset.currentIndex==='0');
  assert(await page.locator('[aria-label="Predchádzajúci oznam"]').isDisabled());
- await page.locator('#customerNoticeOverviewV376').scrollIntoViewIfNeeded();
+ await page.locator('#customerNoticeOverviewV376 .customer-notice-content-v363').first().scrollIntoViewIfNeeded();
  await page.locator('#customerNoticeOverviewV376 .customer-notice-content-v363>.lg-v3-material').first().waitFor({state:'attached'});
  assert.equal(await page.locator('.customer-notice-position-v381').count(),0,'visible numbering is removed');
  assert.equal(await page.locator('#customerNoticeOverviewV376>.lg-v3-material').count(),0,'outer notice remains opaque');

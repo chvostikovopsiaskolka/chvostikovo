@@ -108,7 +108,7 @@ const resize=new ResizeObserver(schedule);
 function start(){
  new MutationObserver(records=>{if(records.some(r=>!(r.target instanceof Element)||!r.target.closest('.lg-v3-material')))schedule();}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','hidden']});
  window.addEventListener('resize',()=>{sourceKey='';paintWallpaper();schedule();},{passive:true});
- window.addEventListener('scroll',()=>{paintWallpaper();schedule();},{passive:true});
+ window.addEventListener('scroll',()=>{paintWallpaper();schedule();},{passive:true,capture:true});
  document.addEventListener('visibilitychange',()=>{if(document.hidden){if(frame)cancelAnimationFrame(frame);frame=0;sync();}else schedule();});window.addEventListener('pageshow',schedule);
  reduce.addEventListener('change',schedule);contrast.addEventListener('change',schedule);
  document.fonts?.ready.then(schedule);schedule();
