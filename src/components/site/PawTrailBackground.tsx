@@ -39,6 +39,16 @@ const AMBIENT_PAWS = [
   { x: 70, y: 55, size: 24, rotate: -11, tone: "coral", mobile: true },
 ] as const;
 
+// Fixed-position ornamental prints close to the *document* top, not tied to
+// Hero height or the animation clock. They do not follow scrolling and never
+// cover text/interactions. Safari itself still owns any pixels outside its
+// document viewport (for example opaque browser chrome).
+const TOP_EDGE_PAWS = [
+  { x: 27, top: 12, size: 18, rotate: -18, tone: "forest" },
+  { x: 65, top: 27, size: 20, rotate: 22, tone: "coral" },
+  { x: 88, top: 57, size: 18, rotate: -12, tone: "forest" },
+] as const;
+
 const LANDING_BOTTOM_PAWS = [
   { x: 11, y: 90, size: 24, rotate: -22, tone: "coral" },
   { x: 52, y: 96, size: 21, rotate: 16, tone: "forest" },
@@ -284,6 +294,21 @@ export function PawTrailBackground({ landingBottomPaws = false }: { landingBotto
             style={{
               left: `${paw.x}%`,
               top: `${paw.y}%`,
+              width: `${paw.size}px`,
+              transform: `translate(-50%, -50%) rotate(${paw.rotate}deg)`,
+            }}
+          >
+            <PawPrint />
+          </svg>
+        ))}
+        {TOP_EDGE_PAWS.map((paw, index) => (
+          <svg
+            key={`top-edge-${index}`}
+            className={`paw-top-edge-print paw-ambient-print paw-ambient-${paw.tone}`}
+            viewBox="0 0 32 36"
+            style={{
+              left: `${paw.x}%`,
+              top: `${paw.top}px`,
               width: `${paw.size}px`,
               transform: `translate(-50%, -50%) rotate(${paw.rotate}deg)`,
             }}
