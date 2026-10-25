@@ -11,7 +11,7 @@ const low=(navigator.deviceMemory&&navigator.deviceMemory<=2)||(navigator.hardwa
 const svgSyntax=CSS.supports('backdrop-filter','url("#lg-v3-check")');
 const chromium=svgSyntax&&/\b(Chrome|Chromium|Edg|SamsungBrowser)\//.test(navigator.userAgent)&&!/\b(CriOS|EdgiOS)\//.test(navigator.userAgent);
 const webkit=/AppleWebKit/.test(navigator.userAgent)&&!chromium;
-const selectors=['#bookingDogProfile:not(.dual-dog-v241) .dog-overview-content','#bookingDogProfile .dual-dog-info-v254','#customerInboxV363>button','#designTicket.design-ticket','#designNearest.design-nearest','#bookingPickerV37 #designMyBookings','.bottom-nav'];
+const selectors=['#bookingDogProfile:not(.dual-dog-v241) .dog-overview-content','#bookingDogProfile .dual-dog-info-v254','#menuTab .customer-menu-group','#menuTab .customer-social-v223','.customer-bulletin-history-row-v229','#customerBulletinHistoryV229 .customer-bulletin-dialog-v229','#customerBulletinArticleV229 .customer-bulletin-dialog-v229','#designTicket.design-ticket','#designNearest.design-nearest','#bookingPickerV37 #designMyBookings','.bottom-nav'];
 const states=new Map(),maps=new Map();let bank,source,sourceImage,sourceKey='',revision=0,frame=0,sequence=0;
 const stats={mode:'fallback',mapGenerations:0,contexts:0,contextLimit:low?0:2,source:'original-wallpaper-only'};
 window.customerLiquidV3Diagnostics=()=>({...stats,surfaces:[...states.values()].map(s=>({renderer:s.layer.dataset.renderer,reason:s.reason||null,width:s.width,height:s.height}))});
@@ -64,13 +64,15 @@ function sync(){
  for(const [el,s]of states)if(!el.isConnected||!found.includes(el))remove(el,s);
  let used=0;
  for(const el of found){
-  let s=states.get(el);if(!visible(el)){if(s)stop(s);continue;}
+  let s=states.get(el);if(s&&s.layer.parentElement!==el)el.prepend(s.layer);if(!visible(el)){if(s)stop(s);continue;}
   if(!s){
    const layer=document.createElement('span');layer.className='lg-v3-material';layer.setAttribute('aria-hidden','true');layer.dataset.renderer='fallback';
    s={layer,engine:null,key:'',width:0,height:0};states.set(el,s);
    if(getComputedStyle(el).position==='static'){s.previousPosition=el.style.position;el.style.position='relative';}
    el.classList.add('lg-v3-host');el.prepend(layer);resize.observe(el);
   }
+  // Content renderers can replace their children independently of geometry.
+  if(s.layer.parentElement!==el)el.prepend(s.layer);
   const r=el.getBoundingClientRect(),w=Math.round(r.width),h=Math.round(r.height),radius=parseFloat(getComputedStyle(el).borderTopLeftRadius)||16,key=[w,h,radius].join(':');
   if(opaque){stop(s);s.layer.dataset.renderer='fallback';continue;}
   if(!chromium&&(!webkit||low)){stop(s);s.layer.dataset.renderer='fallback';continue;}
