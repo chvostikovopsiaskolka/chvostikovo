@@ -410,11 +410,16 @@
   .mobile-dock-item.is-active {
     color: var(--forest-deep);
     background: color-mix(in srgb, var(--forest) 18%, #f1f8ec);
-    box-shadow: inset 0 0 0 1px rgba(73, 115, 83, .11), 0 0 14px rgba(82, 138, 95, .17);
+    /* Keep the active green card separate from the adjacent orange CTA. */
+    margin-inline: 2px;
+    box-shadow: inset 0 0 0 1px rgba(73, 115, 83, .11), 0 0 7px rgba(82, 138, 95, .12);
   }
   .mobile-dock-item.mobile-dock-apply {
     color: white;
     background: var(--coral);
+    /* A small optical gutter prevents two rounded highlights from merging. */
+    margin-inline-start: 4px;
+    margin-inline-end: 2px;
     font-weight: 750;
     box-shadow: 0 3px 10px rgba(153,82,37,.17);
   }
