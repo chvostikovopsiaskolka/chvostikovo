@@ -9,6 +9,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await page.evaluate(()=>{state.data.passes=[{id:1,dog_id:1,dog_ids:[1,2],total_entries:10,used_entries:0,status:'active',valid_until:'2099-12-31'}];renderPassSummary();renderDog();});
  await page.waitForSelector('#designTicket>.lg-v3-material',{state:'attached'});
  const nav=await page.locator('.bottom-nav').boundingBox();
+ assert.equal(await page.locator('#navBookHintV220').count(),0,'booking hint is removed rather than hidden temporarily');
  if(dogs===1){const aligned=await page.evaluate(()=>{const ids=['bookingVaccinationStatus','bookingVisitCount','bookingGradebook'];return ids.map(id=>{const row=document.getElementById(id),icon=row.querySelector('svg').getBoundingClientRect(),label=row.querySelector(':scope>span:last-child').getBoundingClientRect();return{x:icon.x,width:icon.width,height:icon.height,textX:label.x};});});assert(aligned.every(a=>Math.abs(a.x-aligned[0].x)<1&&a.width===24&&a.height===24&&Math.abs(a.textX-aligned[0].textX)<1),'profile icon and text columns align');}
 
  const buttons=await page.locator('.bottom-nav>button').evaluateAll(nodes=>nodes.filter(el=>getComputedStyle(el).display!=='none').map(el=>({id:el.id,w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
@@ -26,6 +27,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  assert.equal(await page.locator('#customerNoticeOverviewV376 .customer-notice-carousel-v376').getAttribute('data-multiple'),'false');assert.equal(await page.locator('.customer-notice-controls-v381').count(),0);
  await page.evaluate(()=>{__noticeFixture.push({id:54,active:true,show_in_overview:true,title:'Ďalší oznam',body:'Pozvánka',valid_from:'2020-01-01'});return loadAnnouncements(true)});
  assert.equal(await page.locator('#customerNoticeOverviewV376 [data-announcement-id]').count(),2);assert.equal(await page.locator('.customer-notice-carousel-v376').getAttribute('data-multiple'),'true');
+ const headerControls=await page.locator('.customer-notice-controls-v381').boundingBox(),cardTrack=await page.locator('.customer-notice-carousel-v376').boundingBox();assert(headerControls.y+headerControls.height<=cardTrack.y+1&&headerControls.x+headerControls.width<=cardTrack.x+cardTrack.width+1,'carousel controls are above the card on the right');
  await page.locator('[aria-label="Ďalší oznam"]').click();
  await page.waitForFunction(()=>document.querySelector('.customer-notice-position-v381').textContent==='2 / 2');
  assert(await page.locator('[aria-label="Ďalší oznam"]').isDisabled());

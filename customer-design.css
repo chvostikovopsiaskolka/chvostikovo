@@ -809,16 +809,17 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-design .customer-bulletin-head-v229{background:transparent}
 .customer-design .customer-bulletin-close-v229{background:#ffffff88}
 .customer-notice-overview-v376{margin:16px 0;min-width:0}
-.customer-notice-title-v381{margin:0 0 8px;padding:0 12px;color:#283041;font-size:17px;line-height:1.35;font-weight:800}
+.customer-notice-header-v382{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 10px 4px 12px}
+.customer-notice-title-v381{margin:0;padding:0;color:#283041;font-size:17px;line-height:1.35;font-weight:800}
 .customer-notice-carousel-v376{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0;padding:4px 0 8px;overscroll-behavior-x:contain;scrollbar-width:none}
 .customer-notice-carousel-v376>.customer-bulletin-history-row-v229{flex:0 0 100%;box-sizing:border-box;scroll-snap-align:start;margin:0;min-width:0;text-align:left;min-height:120px}
 .customer-notice-carousel-v376[data-multiple=true]>.customer-bulletin-history-row-v229{flex-basis:94%}
 .customer-notice-carousel-v376::-webkit-scrollbar{display:none}
-.customer-notice-controls-v381{display:flex;align-items:center;justify-content:center;gap:8px;color:#824b2d}
+.customer-notice-controls-v381{display:flex;align-items:center;justify-content:flex-end;gap:4px;color:#824b2d}
 .customer-notice-controls-v381 button{width:44px;height:44px;padding:0;border:0;border-radius:50%;background:#ffffff99;color:#a7460b;font-family:inherit;font-size:28px;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 .customer-notice-controls-v381 button:disabled{opacity:.35;cursor:default}
 .customer-notice-controls-v381 button:focus-visible{outline:3px solid #ad4c0d;outline-offset:2px}
-.customer-notice-position-v381{min-width:42px;text-align:center;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.customer-notice-position-v381{min-width:32px;text-align:center;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
 .customer-notice-carousel-v376:focus-visible{outline:3px solid #ad4c0d;outline-offset:2px}
 
 /* Closed details only paint summary descendants: keep the material there. */
