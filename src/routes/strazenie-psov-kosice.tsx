@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { ArrowRight, Clock3, MapPin } from "lucide-react";
 import { Header } from "@/components/site/Header";
+import { MobileDock } from "@/components/site/MobileDock";
+import { LandingMobilePricing } from "@/components/site/LandingMobilePricing";
+import { FormDialog } from "@/components/site/FormDialog";
+import { trackMarketingInteraction } from "@/lib/analytics";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { Footer } from "@/components/site/Contact";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
@@ -69,9 +75,17 @@ const MORE_LINKS = [
 ];
 
 function DogSittingPage() {
+  const [interestOpen, setInterestOpen] = useState(false);
+  function openInterest() {
+    trackMarketingInteraction("inquiry_cta", "dog_sitting_page_mobile_dock");
+    void trackCookielessInteraction("inquiry_cta", "dog_sitting_page_mobile_dock");
+    setInterestOpen(true);
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <Header homeSectionLinks />
+      <Header homeSectionLinks hideMobileDock />
+      <MobileDock variant="dog-sitting" onInterestOpen={openInterest} />
       <main>
         <section id="top" className="relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
           <PawTrailBackground landingBottomPaws />
@@ -128,13 +142,13 @@ function DogSittingPage() {
         <Reviews />
         <DaycarePhotoCarousel />
 
-        <section className="relative overflow-hidden bg-card py-10 sm:py-14">
+        <section id="dog-sitting-why" className="relative scroll-mt-4 overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
             <h2 className="section-title text-3xl sm:text-4xl">
               Jeden deň v škôlke. Veľa radosti pre psíka.
             </h2>
-            <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-forest/80">
+            <p id="dog-sitting-first-visit" className="mx-auto mt-3 max-w-2xl scroll-mt-4 leading-relaxed text-forest/80">
               Stráženie psov je u nás denná psia škôlka – bezpečný priestor
               na hry, socializáciu a oddych. Nových psíkov najprv spoznáme
               na úvodnej návšteve.
@@ -156,8 +170,17 @@ function DogSittingPage() {
             </div>
           </div>
         </section>
+        <LandingMobilePricing id="dog-sitting-pricing" onInterest={openInterest} />
       </main>
       <Footer />
+      <FormDialog
+        open={interestOpen}
+        onOpenChange={setInterestOpen}
+        title="Chcete sa dozvedieť viac o škôlke?"
+        subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
+      >
+        <ShortForm trackingSource="dog_sitting_page_mobile_dock" />
+      </FormDialog>
     </div>
   );
 }

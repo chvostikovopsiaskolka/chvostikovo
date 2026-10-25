@@ -120,7 +120,7 @@ await run(webkit, 390, 844, "webkit-390");
       await page.getByRole("status").waitFor({ state: "hidden", timeout: 10000 });
     }
     assert.equal(await page.locator(".mobile-dock-item").count(), 6);
-    for (const label of ["Home", "Spaces", "Care", "Prices", "Enquire", "Menu"]) {
+    for (const label of ["Home", "Why us?", "Reviews", "Prices", "Enquire", "Menu"]) {
       assert(await page.locator(".mobile-dock-item").filter({ hasText: label }).count() >= 1, "Missing EN dock label: " + label);
     }
     await page.screenshot({ path: "artifacts/mobile-dock/chromium-en-390-hero.png" });
@@ -138,4 +138,59 @@ await run(webkit, 390, 844, "webkit-390");
     await browser.close();
   }
 }
+
+// Route-local marketing dock: no button navigates unexpectedly to the homepage.
+for (const { route, why, price, first } of [
+  { route: "/psia-skolka-kosice", why: "lead-benefits", price: "lead-pricing", first: "lead-first-visit" },
+  { route: "/psia-skolka-pre-steniatka", why: "puppy-benefits", price: "puppy-pricing", first: "puppy-first-visit" },
+  { route: "/strazenie-psov-kosice", why: "dog-sitting-why", price: "dog-sitting-pricing", first: "dog-sitting-first-visit" },
+]) {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await page.goto(base + route, { waitUntil: "domcontentloaded" });
+    await page.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: "attached" });
+    const consent = page.getByRole("dialog", { name: /Používame cookies/i });
+    if (await consent.isVisible()) {
+      await consent.getByRole("button", { name: /Len nevyhnutné/i }).click();
+      await page.getByRole("status").waitFor({ state: "hidden", timeout: 10000 });
+    }
+    assert.equal(await page.locator(".mobile-dock-item").count(), 6, route + " must have six buttons");
+    assert.equal(await page.locator('.mobile-dock-apply').innerText(), "Záujem");
+    const expected = [route, route + "#" + why, route + "#recenzie", route + "#" + price];
+    const destinations = await page.locator(".mobile-dock-item[href]").evaluateAll((els) => els.map((el) => el.getAttribute("href")));
+    assert.deepEqual(destinations, expected, route + " must use local section URLs");
+    await page.screenshot({ path: "artifacts/mobile-dock/landing-" + route.slice(1) + "-hero.png" });
+    await page.getByRole("button", { name: /otvoriť menu/i }).click();
+    const menu = page.locator(".mobile-dock-menu");
+    await menu.waitFor({ state: "visible" });
+    const logo = await menu.locator(".mobile-dock-menu-logo img").boundingBox();
+    const panel = await menu.boundingBox();
+    assert(logo && panel && logo.y >= panel.y - 2 && logo.y + logo.height <= panel.y + panel.height + 2,
+      route + " menu logo must be visible without scrolling");
+    assert.equal(await menu.locator('a[href="' + route + '#' + first + '"]').count(), 1);
+    await page.screenshot({ path: "artifacts/mobile-dock/landing-" + route.slice(1) + "-menu.png" });
+    await page.keyboard.press("Escape");
+    await page.locator(".mobile-dock-apply").click();
+    await page.locator("[data-form-dialog]").waitFor({ state: "visible" });
+    assert(await page.locator(".mobile-dock").isHidden(), route + " interest dialog must hide dock");
+    await page.screenshot({ path: "artifacts/mobile-dock/landing-" + route.slice(1) + "-interest.png" });
+    await page.keyboard.press("Escape");
+    await page.locator("[data-form-dialog]").waitFor({ state: "hidden" });
+    await page.locator('.mobile-dock-item[href="' + route + '#' + why + '"]').click();
+    await page.waitForFunction((hash) => location.hash === hash, "#" + why);
+    assert.equal(new URL(page.url()).pathname, route, route + " Why us must stay on landing");
+    await page.locator('.mobile-dock-item[href="' + route + '#recenzie"]').click();
+    await page.waitForFunction(() => location.hash === "#recenzie");
+    await page.locator('.mobile-dock-item[href="' + route + '#' + price + '"]').click();
+    await page.waitForFunction((hash) => location.hash === hash, "#" + price);
+    assert.equal(new URL(page.url()).pathname, route, route + " pricing must stay on landing");
+    await context.close();
+    captures.push({ suffix: "landing-" + route.slice(1), passed: true });
+  } finally {
+    await browser.close();
+  }
+}
+
 console.log("Browser visual / navigation assertions PASS:", JSON.stringify(captures));

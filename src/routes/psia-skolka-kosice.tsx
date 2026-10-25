@@ -15,6 +15,7 @@ import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
+import { MobileDock } from "@/components/site/MobileDock";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
@@ -103,7 +104,8 @@ function LeadLandingPage() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
-      <Header landingMinimal landingTrackingSource="lead_landing_header_phone" />
+      <Header landingMinimal hideMobileDock landingTrackingSource="lead_landing_header_phone" />
+      <MobileDock variant="lead" onInterestOpen={() => openLeadModal("lead_landing_mobile_dock")} />
 
       <main>
         <section className="relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
@@ -285,7 +287,7 @@ function LeadLandingPage() {
                 </article>
               ))}
             </div>
-            <p className="mt-5 font-display font-bold text-forest">Úvodná návšteva je zadarmo.</p>
+            <p id="lead-first-visit" className="mt-5 scroll-mt-4 font-display font-bold text-forest">Úvodná návšteva je zadarmo.</p>
             <p className="mx-auto mt-4 flex max-w-2xl items-start justify-center gap-2 text-sm leading-relaxed text-forest/75">
               <Car className="mt-0.5 size-5 shrink-0 text-coral-dark" />
               <span>Pomôžeme vám aj s vyzdvihnutím a odvozom psíka v Košiciach — 5 € za jednu jazdu.</span>

@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
+import { MobileDock } from "@/components/site/MobileDock";
+import { LandingMobilePricing } from "@/components/site/LandingMobilePricing";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
@@ -158,7 +160,8 @@ function PuppyDaycarePage() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
-      <Header landingMinimal landingTrackingSource="puppy_landing_header_phone" />
+      <Header landingMinimal hideMobileDock landingTrackingSource="puppy_landing_header_phone" />
+      <MobileDock variant="puppy" onInterestOpen={() => openForm("puppy_landing_mobile_dock")} />
 
       <main>
         <section className="relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
@@ -277,7 +280,7 @@ function PuppyDaycarePage() {
 
         <DaycarePhotoCarousel />
 
-        <section className="relative overflow-hidden bg-card py-10 sm:py-14">
+        <section id="puppy-first-visit" className="relative scroll-mt-4 overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto grid max-w-5xl gap-6 px-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
@@ -317,6 +320,8 @@ function PuppyDaycarePage() {
             </div>
           </div>
         </section>
+
+        <LandingMobilePricing id="puppy-pricing" onInterest={() => openForm("puppy_landing_dock_pricing")} />
 
         <section className="relative overflow-hidden bg-secondary/40 py-10 sm:py-14">
           <SectionAmbientPaws />

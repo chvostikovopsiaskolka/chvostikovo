@@ -488,7 +488,7 @@ function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
         </div>
       )}
     </header>
-    <MobileDock language="en" onApplicationOpen={() => openEnquiry("en_mobile_dock")} />
+    <MobileDock language="en" variant="en" onInterestOpen={() => openEnquiry("en_mobile_dock")} />
     </>
   );
 }
@@ -852,7 +852,7 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <section className="relative overflow-hidden py-14 sm:py-18">
+        <section id="en-first-visit" className="relative scroll-mt-4 overflow-hidden py-14 sm:py-18">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-6xl px-4">
             <div className="text-center">

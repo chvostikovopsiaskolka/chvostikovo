@@ -36,10 +36,12 @@ export function Header({
   homeSectionLinks = false,
   landingMinimal = false,
   landingTrackingSource = "landing_header",
+  hideMobileDock = false,
 }: {
   homeSectionLinks?: boolean;
   landingMinimal?: boolean;
   landingTrackingSource?: string;
+  hideMobileDock?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [applicationSent, setApplicationSent] = useState(false);
@@ -147,7 +149,7 @@ export function Header({
           </a>
         </div>
       </header>
-      <MobileDock onApplicationOpen={() => { setApplicationSent(false); setOpen(true); }} />
+      {!hideMobileDock && <MobileDock onApplicationOpen={() => { setApplicationSent(false); setOpen(true); }} />}
       <FormDialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setApplicationSent(false); }} hideHeader={applicationSent} title={applicationSent ? "Prihláška odoslaná" : "Prihlás svojho psíka ešte dnes"} subtitle="Vyplňte prihlášku do škôlky, v ktorej nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky.">
         <LongForm onSent={() => setApplicationSent(true)} />
       </FormDialog>
@@ -249,7 +251,7 @@ export function Header({
         <LongForm onSent={() => setApplicationSent(true)} />
       </FormDialog>
     </header>
-    <MobileDock onApplicationOpen={() => { closeMobileMenu(); setApplicationSent(false); setOpen(true); }} />
+    {!hideMobileDock && <MobileDock onApplicationOpen={() => { closeMobileMenu(); setApplicationSent(false); setOpen(true); }} />}
     </>
   );
 }

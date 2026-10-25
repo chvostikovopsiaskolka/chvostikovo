@@ -18,7 +18,7 @@ function scrollToWhyChvostikovo() {
 
 export function Hero({ background, learnMoreHref }: { background?: ReactNode; learnMoreHref?: string }) {
   return (
-    <section id="top" className="relative overflow-hidden pt-4 pb-0 sm:pt-6 lg:pt-24 lg:pb-1">
+    <section id="top" className="relative overflow-hidden pt-7 pb-0 sm:pt-9 lg:pt-24 lg:pb-1">
       {background ?? <PawTrailBackground />}
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
@@ -28,13 +28,13 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
             Denná starostlivosť o stredných a veľkých psíkov
           </p>
 
-          <h1 className="mt-3 text-[clamp(21px,6.8vw,30px)] leading-[1.06] tracking-[-0.035em] text-forest min-[480px]:text-[36px] min-[560px]:text-[42px] sm:text-5xl">
+          <h1 className="mt-4 text-[clamp(22px,7.2vw,33px)] leading-[1.06] tracking-[-0.035em] text-forest min-[480px]:text-[37px] min-[560px]:text-[43px] sm:text-5xl">
             <span className="block whitespace-nowrap">Psia škôlka v Košiciach,</span>
             <span className="block whitespace-nowrap">ktorú si váš psík</span>
             <span className="block text-coral-dark">zamiluje</span>
           </h1>
 
-          <div className="mx-auto mt-3.5 max-w-xl text-forest min-[390px]:mt-4">
+          <div className="mx-auto mt-5 max-w-xl text-forest min-[390px]:mt-5">
             <p className="font-display text-[13px] font-bold tracking-[-0.02em] min-[350px]:text-[14px] sm:text-base">
               Váš psík už nemusí tráviť deň sám doma.
             </p>
@@ -43,7 +43,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
             </p>
           </div>
 
-          <div className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 min-[390px]:mt-4 min-[390px]:gap-1.5">
+          <div className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 min-[390px]:mt-5 min-[390px]:gap-1.5">
             {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
               <span
                 key={item}
@@ -65,13 +65,13 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
               trackMarketingInteraction("hero_learn_more", "hero_mobile");
               scrollToWhyChvostikovo();
             }}
-            className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg"
+            className="btn-coral mt-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg"
           >
             Zistiť viac
             <ArrowDown className="size-5" />
           </button>
 
-          <InfoTicker className="mt-3 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-4" compact />
+          <InfoTicker className="mt-4 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-5" compact />
         </div>
 
         {/* Desktop layout */}
