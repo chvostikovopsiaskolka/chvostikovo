@@ -238,7 +238,7 @@ function LeadLandingPage() {
                 ["2", "Prídete nás spoznať", "Ukážeme vám priestory a zoznámime sa s vaším psíkom. Pozrieme sa, ako reaguje na nové prostredie a ostatných psov, a spolu sa dohodneme na ďalšom postupe.", "Úvodná návšteva je zadarmo."],
                 ["3", "Doprajete mu prvý deň v škôlke", "Ak mu kolektív vyhovuje, dohodneme jeho prvý pobyt. Počas dňa sa oňho postaráme a pošleme vám fotky či videá, aby ste videli, ako sa u nás má."],
               ].map(([number, stepTitle, text, note]) => (
-                <article key={number} className="rounded-3xl bg-cream/10 p-5 text-left ring-1 ring-cream/15">
+                <article key={number} data-site-glass="dark" className="rounded-3xl bg-cream/10 p-5 text-left ring-1 ring-cream/15"><span className="site-glass-material" data-renderer="fallback" aria-hidden="true" />
                   <span className="flex size-10 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-white">
                     {number}
                   </span>

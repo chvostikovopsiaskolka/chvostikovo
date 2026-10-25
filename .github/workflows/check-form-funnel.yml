@@ -28,3 +28,20 @@ jobs:
         run: bun run check:types
       - name: Build static pages
         run: bun run build:pages
+
+      - name: Browser verification of shared optical material
+        run: |
+          npm install --prefix "$RUNNER_TEMP/web-glass-runtime" --no-save --no-package-lock playwright@1.62.1 pngjs@7.0.0
+          echo "CODEX_PRIMARY_RUNTIME_NODE_MODULES=$RUNNER_TEMP/web-glass-runtime/node_modules" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/web-glass-runtime/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Mobile and desktop glass across all service pages
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          node scripts/liquid-glass-browser.cjs
+          V3_ENGINE=webkit node scripts/liquid-glass-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-glass-browser-evidence
+          path: /tmp/chvo-web-glass-screenshots/

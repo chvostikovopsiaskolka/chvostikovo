@@ -47,7 +47,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -182,6 +182,13 @@ function RootComponent() {
 
   useEffect(() => {
     captureTrafficAttribution();
+    if (!document.getElementById("site-liquid-optics")) {
+      const script = document.createElement("script");
+      script.id = "site-liquid-optics";
+      script.type = "module";
+      script.src = "/liquid-glass/site-optics.js";
+      document.body.append(script);
+    }
   }, []);
 
   return (
