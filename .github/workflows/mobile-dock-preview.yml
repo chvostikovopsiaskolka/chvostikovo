@@ -2,6 +2,8 @@ name: Mobile dock visual preview
 # Run browser screenshots only when explicitly requested, avoiding PR notification spam.
 on:
   workflow_dispatch:
+  push:
+    branches: [feature/web-mobile-nav-tracking-20261025]
 
 permissions:
   contents: read
