@@ -15,3 +15,5 @@ Tests: dedicated actual API transport, assembled UI, PostgreSQL deletion gate fi
 Initial local test failures: existing API mock did not implement DELETE (fixed to model permanent removal); UI refresh referred to nonexistent render (fixed to existing renderDog/renderUpcoming/renderDays); no production changes occurred during these failures.
 
 Pre-deploy SQL dry run caught a missing statement separator after pg_get_functiondef output; corrected before any commit to the database. Full CI rerun on the corrected SQL commit.
+
+Final boundary review: an already pending requires_proof_after_id must survive deletion of the older accepted proof even when another pre-renewal photo remains. Trigger now preserves that requirement; regression fixture covers it.
