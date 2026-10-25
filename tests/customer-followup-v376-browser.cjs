@@ -23,13 +23,22 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await page.evaluate(()=>{delete document.querySelector('#designTicket').dataset.presentationKey;renderPassSummary();renderDog();window.__noticeFixture=[{id:51,active:true,show_in_overview:true,title:'Vybraný oznam',body:'Prvý oznam',valid_from:'2020-01-01'},{id:52,active:true,show_in_overview:false,title:'Iba v histórii',body:'Druhý oznam',valid_from:'2020-01-01'},{id:53,active:true,show_in_overview:true,title:'Skončený oznam',valid_until:'2021-01-01',valid_from:'2020-01-01'}];return loadAnnouncements(true);});
  assert.equal(await page.locator('#customerNoticeOverviewV376 [data-announcement-id]').count(),1);
  assert(await page.evaluate(()=>document.getElementById('designNearest').nextElementSibling.id==='customerNoticeOverviewV376'));
- assert.equal(await page.locator('#customerNoticeOverviewV376 .customer-notice-carousel-v376').getAttribute('data-multiple'),'false');
+ assert.equal(await page.locator('#customerNoticeOverviewV376 .customer-notice-carousel-v376').getAttribute('data-multiple'),'false');assert.equal(await page.locator('.customer-notice-controls-v381').count(),0);
  await page.evaluate(()=>{__noticeFixture.push({id:54,active:true,show_in_overview:true,title:'Ďalší oznam',body:'Pozvánka',valid_from:'2020-01-01'});return loadAnnouncements(true)});
  assert.equal(await page.locator('#customerNoticeOverviewV376 [data-announcement-id]').count(),2);assert.equal(await page.locator('.customer-notice-carousel-v376').getAttribute('data-multiple'),'true');
+ await page.locator('[aria-label="Ďalší oznam"]').click();
+ await page.waitForFunction(()=>document.querySelector('.customer-notice-position-v381').textContent==='2 / 2');
+ assert(await page.locator('[aria-label="Ďalší oznam"]').isDisabled());
+ await page.evaluate(()=>document.querySelector('.customer-notice-carousel-v376').scrollTo({left:0,behavior:'instant'}));
+ await page.waitForFunction(()=>document.querySelector('.customer-notice-position-v381').textContent==='1 / 2');
+ assert(await page.locator('[aria-label="Predchádzajúci oznam"]').isDisabled());
+ assert.equal(await page.locator('#customerNoticeOverviewV376 .lg-v3-material').count(),0);
+ const cardStyle=await page.locator('#customerNoticeOverviewV376 [data-announcement-id]').first().evaluate(el=>{const s=getComputedStyle(el);return {background:s.backgroundColor,radius:s.borderRadius,padding:s.padding,columns:s.gridTemplateColumns}});
  assert.equal(await page.evaluate(()=>__noticeReads.length),0,'carousel does not dismiss notices');
  await page.locator('#customerAnnouncementsV363').click();await page.waitForTimeout(100);
  assert.equal(await page.locator('#customerBulletinHistoryV229 [data-announcement-id]').count(),4);
  assert.equal(await page.locator('#customerBulletinHistoryV229 .lg-v3-material').count(),0,'notice sheet has an opaque background');
+ assert.deepEqual(await page.locator('#customerBulletinHistoryV229 [data-announcement-id]').first().evaluate(el=>{const s=getComputedStyle(el);return {background:s.backgroundColor,radius:s.borderRadius,padding:s.padding}}),{background:cardStyle.background,radius:cardStyle.radius,padding:cardStyle.padding},'overview and sheet use the same white card material');
  if(width===390){fs.mkdirSync('/tmp/chvo-v376-screenshots',{recursive:true});await page.screenshot({path:`/tmp/chvo-v376-screenshots/notice-${type.name()}-${dogs}.png`});}
  await page.locator('#customerBulletinHistoryV229 .customer-bulletin-close-v229').click();await page.waitForTimeout(140);
  for(const id of ['navDog','navBooking']){await page.locator('#'+id).click();await page.waitForTimeout(100);assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav);}
@@ -40,6 +49,19 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await page.locator('#navBooking').click();await page.waitForTimeout(150);
  if(width===390)await page.screenshot({path:`/tmp/chvo-v376-screenshots/overview-${type.name()}-${dogs}.png`});
  await page.evaluate(()=>{__noticeFixture.forEach(row=>row.show_in_overview=false);return loadAnnouncements(true)});assert.equal(await page.locator('#customerNoticeOverviewV376').count(),0);
+ if(dogs===1&&width===390){
+   await page.evaluate(()=>{history.replaceState({},'', '?notice-carousel-preview=1');return loadAnnouncements(true)});
+   assert.equal(await page.locator('#customerNoticeOverviewV376 [data-announcement-id]').count(),2);
+   await page.locator('#customerNoticeOverviewV376').scrollIntoViewIfNeeded();
+   await page.screenshot({path:`/tmp/chvo-v376-screenshots/carousel-preview-${type.name()}.png`});
+   const readBefore=await page.evaluate(()=>__noticeReads.length);
+   await page.locator('[aria-label="Ďalší oznam"]').click();await page.waitForFunction(()=>document.querySelector('.customer-notice-position-v381').textContent==='2 / 2');
+   await page.locator('[data-announcement-id="preview-extra"]').click();await page.waitForSelector('#customerBulletinArticleV229:not(.hidden)');
+   assert.equal(await page.evaluate(()=>__noticeReads.length),readBefore,'preview does not write a fake receipt');
+   await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();await page.waitForTimeout(140);
+   await page.evaluate(()=>{history.replaceState({},'', '/');return loadAnnouncements(true)});
+   assert.equal(await page.locator('#customerNoticeOverviewV376').count(),0,'preview is opt-in and not persisted');
+ }
  assert.deepEqual(errors,[]);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  console.log('PASS v376 pass layer persistence/recovery, selected 0/1/2 carousel, shared notice sheet, five-button nav/menu',type.name(),dogs,width);
  await context.close();}finally{await browser.close();}
