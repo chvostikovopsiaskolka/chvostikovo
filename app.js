@@ -4316,10 +4316,10 @@ function installVaccinationViewerZoomV244(modal){
     const anchor=$('designNearest');let host=$('customerNoticeOverviewV376');
     const selected=loggedIn()?rows().filter(row=>row.show_in_overview===true&&current(row)):[];
     if(!anchor||!selected.length){host?.remove();return;}
-    if(!host){host=el('section','customer-notice-overview-v377');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');anchor.after(host);}
+    if(!host){host=el('section','customer-notice-overview-v376');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');anchor.after(host);}
     const key=JSON.stringify(selected.map(row=>[row.id,row.title,row.body,row.image_path,rowsState.read.has(Number(row.id))]));
     if(host.dataset.contentKey===key)return;host.dataset.contentKey=key;
-    const track=el('div','customer-notice-carousel-v377');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
+    const track=el('div','customer-notice-carousel-v376');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
     selected.forEach(row=>track.append(noticeCard(row,false)));
     track.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();track.scrollBy({left:(event.key==='ArrowRight'?1:-1)*track.clientWidth*.94,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}});
     host.replaceChildren(track);
