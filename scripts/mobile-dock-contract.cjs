@@ -43,8 +43,10 @@ const root = read("src/routes/__root.tsx");
 const pawCss = read("src/components/site/paw-trail-background.css");
 assert(root.includes("viewport-fit=cover"), "Full-bleed viewport required for iOS status bar");
 assert(css.includes("padding-top: env(safe-area-inset-top, 0px)"), "Non-Hero routes need safe top");
-assert(css.includes("margin-top: calc(0px - env(safe-area-inset-top, 0px))"), "Hero backdrop must extend up behind status bar");
-assert(css.includes("padding-top: calc(var(--hero-content-top) + env(safe-area-inset-top, 0px))"), "Hero text must stay below notch");
+assert(css.includes("body:has(.hero-safe-top)") && css.includes("padding-top: 0"), "Hero routes must not inherit the body safe-area blank strip");
+assert(css.includes("margin-top: 0;") && css.includes("--hero-safe-inset: env(safe-area-inset-top"), "Hero must handle safe area without a collapsing negative margin");
+assert(root.includes('name="theme-color"') && root.includes("whiteHeroPaths.has(pathname)"), "Match initial Safari top-bar colour to the Hero");
+assert(css.includes("padding-top: calc(var(--hero-content-top) + var(--hero-safe-inset))"), "Hero text must stay below notch");
 assert(hero.includes('className="hero-safe-top hero-safe-top-main'), "Main Hero full-bleed class");
 for (const route of ["src/routes/psia-skolka-kosice.tsx", "src/routes/psia-skolka-pre-steniatka.tsx", "src/routes/strazenie-psov-kosice.tsx", "src/routes/en.dog-daycare-kosice.tsx"]) {
   assert(read(route).includes('className="hero-safe-top relative overflow-hidden'), "Landing full-bleed class missing: " + route);
