@@ -106,7 +106,7 @@ for (const [route, variant, marker] of [
   assert(source.includes('variant="' + variant + '" onInterestOpen='), route + " must use route-local interest CTA");
   assert(source.includes(marker), route + " must call existing interest form logic");
 }
-assert(dock.includes("marketing ? \"Záujem\""), "Landing CTA must say Záujem");
+assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('label: "Interested in daycare"'), "Landing CTA must have full SK/EN label");
 assert(dock.includes("marketingExtra"), "Local first visit menu links required");
 assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");
 assert(!dock.includes('{ id: "recenzie", label: "Recenzie", icon: ImageIcon }'), "Reviews must leave marketing docks");
