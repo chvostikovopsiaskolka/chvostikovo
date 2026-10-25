@@ -79,6 +79,38 @@ async function run(engine, width, height, suffix) {
 
       await page.getByRole("button", { name: /otvoriť menu/i }).click();
       await page.locator(".mobile-dock-menu").waitFor({ state: "visible", timeout: 8000 });
+      const menuGeometry = await page.locator(".mobile-dock-menu").evaluate((panel) => {
+        const logo = panel.querySelector(".mobile-dock-menu-logo img")?.getBoundingClientRect();
+        const heading = panel.querySelector(".mobile-dock-menu-title")?.getBoundingClientRect();
+        const actions = [...panel.querySelectorAll(".mobile-dock-menu-actions a")];
+        const buttons = actions.map((button) => {
+          const b = button.getBoundingClientRect();
+          return {
+            width: b.width,
+            height: b.height,
+            overflow: button.scrollWidth - button.clientWidth,
+            text: button.textContent?.trim(),
+          };
+        });
+        const rect = panel.getBoundingClientRect();
+        const actionRow = panel.querySelector(".mobile-dock-menu-actions")?.getBoundingClientRect();
+        return {
+          headingVisible: heading && heading.width > 0 && heading.height > 0,
+          logoVisible: logo && logo.top >= rect.top && logo.bottom <= rect.bottom + 1,
+          logoGap: (logo && actionRow) ? logo.top - actionRow.bottom : -1,
+          buttons,
+          titleToLinks: (heading && panel.querySelector(".mobile-dock-menu-links")) ?
+            panel.querySelector(".mobile-dock-menu-links").getBoundingClientRect().top - heading.bottom : -1,
+        };
+      });
+      assert(menuGeometry.headingVisible, suffix + " Menu heading missing");
+      assert(menuGeometry.logoVisible, suffix + " menu logo is hidden until scroll");
+      assert(menuGeometry.logoGap >= 13, suffix + " logo too close to contact buttons: " + JSON.stringify(menuGeometry));
+      assert(menuGeometry.titleToLinks <= 6, suffix + " excessive gap after menu title");
+      assert(menuGeometry.buttons.length === 2 && menuGeometry.buttons.every((b) => b.width >= 44 && b.height >= 44 && b.overflow <= 1),
+        suffix + " action buttons overflow: " + JSON.stringify(menuGeometry));
+      assert(menuGeometry.buttons[1].text === "English version", suffix + " EN link must use full label");
+      assert.equal(await page.locator('.mobile-dock-menu a[href="/strazenie-psov-kosice"]').count(), 0, "Remove dog sitting from menu");
       await page.screenshot({ path: "artifacts/mobile-dock/" + suffix + "-menu.png" });
       await page.keyboard.press("Escape");
       await page.locator(".mobile-dock-menu").waitFor({ state: "hidden" });
@@ -106,6 +138,8 @@ for (const width of [320, 360, 390, 430, 768, 1024, 1440]) {
   await run(chromium, width, width < 1024 ? 740 : 900, "chromium-" + width);
 }
 await run(webkit, 390, 844, "webkit-390");
+await run(chromium, 320, 568, "chromium-320-short");
+await run(webkit, 320, 568, "webkit-320-short");
 // The EN page uses its existing English enquiry form and localized anchors.
 {
   const browser = await chromium.launch({ headless: true });
@@ -131,6 +165,8 @@ await run(webkit, 390, 844, "webkit-390");
     await page.getByRole("button", { name: /Open menu/i }).click();
     await page.locator(".mobile-dock-menu").waitFor({ state: "visible" });
     assert.equal(await page.locator(".mobile-dock-menu a[lang=sk]").count(), 1, "EN menu missing Slovak return");
+    assert.equal(await page.locator(".mobile-dock-menu a[lang=sk]").innerText(), "Slovak version");
+    assert.equal(await page.locator('.mobile-dock-menu a[href="/strazenie-psov-kosice"]').count(), 0);
     await page.screenshot({ path: "artifacts/mobile-dock/chromium-en-390-menu.png" });
     await context.close();
     captures.push({ suffix: "chromium-en-390", passed: true });

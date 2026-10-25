@@ -453,10 +453,11 @@
     display: flex;
     flex: 0 0 auto;
     align-items: center;
-    justify-content: flex-end;
-    min-height: 38px;
-    padding: 0 1px 2px;
+    justify-content: space-between;
+    min-height: 44px;
+    padding: 0 1px 0 8px;
   }
+  .mobile-dock-menu-title { display: flex; align-items: center; min-height: 44px; margin: 0; line-height: 1.1; }
   .mobile-dock-menu-close {
     display: grid;
     flex-shrink: 0;
@@ -505,28 +506,29 @@
     min-height: 46px;
     justify-content: center;
     align-items: center;
-    gap: 6px;
-    padding: 9px 5px;
+    gap: 5px;
+    padding: 9px 3px;
     border-radius: 16px;
     background: var(--peach);
     font-family: var(--font-display);
-    font-size: 12px;
+    font-size: clamp(10.5px, 3vw, 12px);
     font-weight: 700;
     text-align: center;
     text-decoration: none;
     white-space: nowrap;
     color: var(--forest-deep);
   }
+  .mobile-dock-menu-actions a svg { flex-shrink: 0; width: 16px; height: 16px; }
   .mobile-dock-menu-actions a:first-child { background: var(--coral); color: white; }
   .mobile-dock-menu-logo {
     display: flex;
     flex: 0 0 auto;
-    min-height: 39px;
+    min-height: 61px;
     justify-content: center;
-    align-items: center;
-    padding: 5px 5px 0;
+    align-items: flex-end;
+    padding: 16px 5px 2px;
   }
-  .mobile-dock-menu-logo img { width: auto; height: auto; max-width: 155px; max-height: 32px; object-fit: contain; }
+  .mobile-dock-menu-logo img { width: auto; height: auto; max-width: 155px; max-height: 39px; object-fit: contain; }
   body:has([data-form-dialog]) .mobile-dock {
     display: none !important;
     pointer-events: none !important;

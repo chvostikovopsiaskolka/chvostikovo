@@ -14,7 +14,7 @@ const forms = read("src/components/site/Forms.tsx");
 for (const value of ["Domov", "Priestory", "Starostlivosť", "Cenník", "Prihláška", "Menu"]) {
   assert(dock.includes(value), "Missing dock item " + value);
 }
-for (const value of ["Home", "Why us?", "Reviews", "Prices", "Enquire", "SK"]) {
+for (const value of ["Home", "Why us?", "Reviews", "Prices", "Enquire", "Slovak version"]) {
   assert(dock.includes(value), "Missing EN item " + value);
 }
 for (const anchor of ["priestory", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "why-daycare", "pricing"]) {
@@ -69,3 +69,9 @@ assert(dock.includes("homePath + \"#lead-first-visit\""), "Local lead visit link
 assert(dock.includes("homePath + \"#puppy-first-visit\""), "Local puppy visit link");
 assert(dock.includes("homePath + \"#dog-sitting-first-visit\""), "Local dog visit link");
 assert(read("src/components/site/LandingMobilePricing.tsx").includes("PRICING"), "Reuse current prices");
+
+assert(dock.includes('className="mobile-dock-menu-title'), "Menu title must be visible");
+assert(dock.includes('English version') && dock.includes('Slovak version'), "Menu languages must be spelled out");
+assert(!dock.includes('{ label: "Stráženie psov"') && !dock.includes('{ label: "Dog sitting"'), "Dog-sitting link removed from menu");
+assert(css.includes("min-height: 61px") && css.includes("padding: 16px 5px 2px"), "Logo needs separation from footer actions");
+assert(css.includes("font-size: clamp(10.5px, 3vw, 12px)"), "Language buttons must fit narrow phones");
