@@ -754,7 +754,7 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241){background:rgba(135,190,240,.62)!important}
 .customer-design #bookingTab .dual-dog-panel-v254{background:rgba(245,154,201,.62)!important}
 .customer-design #bookingTab .dual-dog-panel-v254.male-v241{background:rgba(135,190,240,.62)!important}
-.customer-design .lg-v3-host{isolation:isolate}
+:is(.customer-design,.customer-auth-glass-v386) .lg-v3-host{isolation:isolate}
 .customer-design #bookingTab #bookingDogProfile .dog-overview-content.lg-v3-host::before,
 .customer-design .bottom-nav.lg-v3-host::before{display:none!important}
 .customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254.lg-v3-host,
@@ -765,7 +765,7 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
  background:transparent!important;border:0!important;box-shadow:none!important;
 }
 .customer-design #menuTab :is(.customer-menu-group,.customer-social-v223).lg-v3-host{background:transparent!important;border:0!important;box-shadow:0 9px 24px #553c4924,0 2px 7px #553c4912!important}
-.customer-design .lg-v3-material{
+:is(.customer-design,.customer-auth-glass-v386) .lg-v3-material{
  position:absolute;inset:0;z-index:-1;pointer-events:none;border:0;border-radius:inherit;
  overflow:hidden;background:rgba(255,255,255,.35);
  box-shadow:inset 0 1px 3px rgba(255,255,255,.3),0 8px 21px rgba(111,61,39,.13);
@@ -774,26 +774,26 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-design .customer-notice-panel-v383>.lg-v3-material{box-shadow:inset 0 1px 2px #ffffffb3,inset 0 -1px 2px #b66d3720,0 5px 14px #713b2026}
 .customer-design .bottom-nav>.lg-v3-material{z-index:0;box-shadow:inset 0 1px 3px #ffffff55,0 8px 24px #713b2029}
 .customer-design .bottom-nav>:is(button,a){position:relative;z-index:1}
-.customer-design .lg-v3-material::after{
+:is(.customer-design,.customer-auth-glass-v386) .lg-v3-material::after{
  content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
  background:linear-gradient(155deg,rgba(255,255,255,.23),transparent 27%,transparent 80%,rgba(255,255,255,.09));
 }
-.customer-design .lg-v3-material[data-renderer=svg]{backdrop-filter:var(--lg-v3-filter) blur(.65px) saturate(115%)}
-.customer-design .lg-v3-material[data-renderer=fallback]{-webkit-backdrop-filter:blur(3px) saturate(115%);backdrop-filter:blur(3px) saturate(115%)}
-.customer-design .lg-v3-material[data-renderer=webgl]{background:transparent}
-.customer-design .lg-v3-material[data-renderer=webgl]::after{background:rgba(255,255,255,.35)}
-.customer-design .lg-v3-output{position:absolute;inset:0;pointer-events:none}
+:is(.customer-design,.customer-auth-glass-v386) .lg-v3-material[data-renderer=svg]{backdrop-filter:var(--lg-v3-filter) blur(.65px) saturate(115%)}
+:is(.customer-design,.customer-auth-glass-v386) .lg-v3-material[data-renderer=fallback]{-webkit-backdrop-filter:blur(3px) saturate(115%);backdrop-filter:blur(3px) saturate(115%)}
+:is(.customer-design,.customer-auth-glass-v386) .lg-v3-material[data-renderer=webgl]{background:transparent}
+:is(.customer-design,.customer-auth-glass-v386) .lg-v3-material[data-renderer=webgl]::after{background:rgba(255,255,255,.35)}
+:is(.customer-design,.customer-auth-glass-v386) .lg-v3-output{position:absolute;inset:0;pointer-events:none}
 #customer-lg-v3-wallpaper{position:fixed;inset:0;width:100%;height:100%;visibility:hidden;pointer-events:none}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
- .customer-design .lg-v3-material{background:#fff9f3}
+ :is(.customer-design,.customer-auth-glass-v386) .lg-v3-material{background:#fff9f3}
 }
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
  .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241),.customer-design #bookingTab .dual-dog-panel-v254{background:#f5b3d6!important}
  .customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241),.customer-design #bookingTab .dual-dog-panel-v254.male-v241{background:#a7cff1!important}
- .customer-design .lg-v3-material{background:#fff9f3!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
- .customer-design .lg-v3-material::after,.customer-design .lg-v3-output{display:none!important}
+ :is(.customer-design,.customer-auth-glass-v386) .lg-v3-material{background:#fff9f3!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+ :is(.customer-design,.customer-auth-glass-v386) .lg-v3-material::after,:is(.customer-design,.customer-auth-glass-v386) .lg-v3-output{display:none!important}
 }
-@media(prefers-reduced-motion:reduce){.customer-design .lg-v3-material{animation:none;transition:none}}
+@media(prefers-reduced-motion:reduce){:is(.customer-design,.customer-auth-glass-v386) .lg-v3-material{animation:none;transition:none}}
 
 /* v376: shared notice cards and dock actions; outer dock geometry is unchanged. */
 .customer-design #customerInboxV363{display:none!important}
@@ -838,3 +838,10 @@ html[data-glass-material=reels] .lg-v3-material[data-renderer=svg]{backdrop-filt
 html[data-glass-material=reels] .lg-v3-material[data-renderer=fallback]{-webkit-backdrop-filter:blur(3px) saturate(180%);backdrop-filter:blur(3px) saturate(180%)}
 html[data-glass-material=reels] .lg-v3-material[data-renderer=webgl]::after{background:rgba(255,255,255,.24)}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){html[data-glass-material=reels] .lg-v3-material{background:#fff9f3!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
+
+/* Same material on the shared login, signup and password card. */
+html.customer-auth-glass-v386{background:#fff}
+html.customer-auth-glass-v386 body{background-color:#fff!important;background-image:url('/vendor/liquidlens/chvostikovo-paws-soft-v383.png')!important;background-size:300px 430px!important;background-repeat:repeat!important}
+.customer-auth-glass-v386 #authView{background:transparent!important}
+.customer-auth-glass-v386 #authView>.auth-card{position:relative;isolation:isolate;background:transparent;border:0;box-shadow:0 14px 36px #553c4926,0 2px 8px #553c4914}
+.customer-auth-glass-v386 #authView .input{background:rgba(255,255,255,.96)}
