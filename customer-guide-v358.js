@@ -99,7 +99,7 @@
     const titles=['Váš psík v Prehľade','Oznamy, správy a vstupy','Prihlásenie do škôlky','Vaše rezervácie','Výber dní a taxi','Všetko ostatné v Menu'];
     const texts=[
       'Ťuknutím na profil otvoríte údaje a fotografiu psíka. Pri očkovaniach nájdete ich platnosť, pri grafe počet návštev. Pri zapnutých upozorneniach pripomenieme končiace očkovanie 14 a 7 dní vopred.',
-      'Ak máte zakúpenú permanentku, tu uvidíte jej platnosť a počet využitých vstupov. Pod ňou nájdete svoje rezervácie a možnosť Upraviť. Cez Oznamy otvoríte novinky zo škôlky a cez Správy nám priamo napíšete. Číslo pri tlačidle označuje neprečítané položky.',
+      'Ak máte zakúpenú permanentku, tu uvidíte jej platnosť a počet využitých vstupov. Pod ňou nájdete svoje rezervácie a možnosť Upraviť. Cez Oznamy otvoríte novinky zo škôlky a cez Správy nám priamo napíšete.',
       'Oranžovým tlačidlom otvoríte rezervácie. Vyberiete dostupné dni na dva týždne dopredu a podľa potreby pridáte taxi.',
       'Tu nájdete vytvorené rezervácie a stav schválenia. Podľa dostupných možností pridáte alebo upravíte taxi či zrušíte návštevu. Ak chcete zmeniť termín, zrušíte pôvodný a vyberiete nový.',
       'Ukážka: vyberte jeden alebo viac dní z dvoch týždňov. Pri každom môžete pridať taxi. Výber odošlete tlačidlom Rezervovať.',
