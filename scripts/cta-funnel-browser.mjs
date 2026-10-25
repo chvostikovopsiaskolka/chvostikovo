@@ -61,10 +61,9 @@ for (const { engine, type, width, height } of [
       assert(await dialog.locator('input[name="telefon"]').count() > 0, "Missing contact phone input");
       if (choice.kind === "short") {
         assert.equal(await dialog.locator('input[name="pes"]').count(), 0, "Full application incorrectly opened");
-        if (choice.id === "prva-navsteva")
-          assert.equal(await dialog.locator('input[name="zaujem"]').count(), 0, "Intro visit should keep its explicit interest");
-        else
-          assert(await dialog.locator('input[name="zaujem"]').count() > 0, "Why should show short-form interest options");
+        const interest = dialog.locator('input[name="zaujem"]');
+        assert.equal(await interest.count(), 3, "Short form must show the three original required interest options");
+        assert.equal(await interest.first().getAttribute("required"), "", "The interest question must remain required");
       } else {
         assert(await dialog.locator('input[name="pes"]').count() > 0, "Pricing must open LongForm");
       }
