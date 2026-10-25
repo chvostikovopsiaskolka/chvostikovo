@@ -3288,3 +3288,10 @@ button span,button svg,button svg *{pointer-events:none}
 
 .booking-vaccine-ready-row-v307{background:#f7fcf9;border-color:#b7e3cb}
 .booking-vaccine-ready-v307{color:#14603d;border-color:#b6dfc4;background:#e9f8ee}
+
+/* v392: vaccination photo actions keep the existing editor and native picker. */
+#vaccProofActionsV392{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+#vaccProofActionsV392.hidden{display:none}
+#vaccProofActionsV392 .btn{min-height:44px;flex:1 1 140px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+#vaccProofActionsV392 label{display:flex;align-items:center;justify-content:center;cursor:pointer}
+#vaccProofEditorV244:has(#vaccProofEditFileV244:focus-visible) #vaccProofActionsV392 label{outline:2px solid var(--orange);outline-offset:2px}
