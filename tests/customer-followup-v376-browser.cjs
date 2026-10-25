@@ -52,6 +52,8 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await page.locator('#customerBulletinHistoryV229 .customer-bulletin-close-v229').click();await page.waitForTimeout(140);
  for(const id of ['navDog','navBooking']){await page.locator('#'+id).click();await page.waitForTimeout(100);assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav);}
  await page.locator('#navDog').click();await page.waitForTimeout(150);assert(await page.locator('#menuTab .lg-v3-material').count()>0);
+ assert.equal(await page.locator('#menuTab').evaluate(el=>getComputedStyle(el,'::before').display),'none','legacy menu paws are disabled; body is the sole wallpaper');
+ assert(await page.locator('#menuDogGroup').evaluate(el=>getComputedStyle(el).boxShadow.includes('24px')),'menu shadow is painted on the outer panel');
  for(const id of ['menuDogGroup','menuSettingsGroup']){const layer=page.locator('#'+id+'>summary>.lg-v3-material');await layer.waitFor({state:'attached'});assert(await layer.isVisible(),'closed details material is painted inside summary');await page.locator('#'+id+'>summary').click();assert(await layer.isVisible());await page.locator('#'+id+'>summary').click();assert(await layer.isVisible());}
  assert(!await page.locator('#menuMessage').isVisible());
  if(width===390)await page.screenshot({path:`/tmp/chvo-v376-screenshots/menu-${type.name()}-${dogs}.png`});
