@@ -532,7 +532,7 @@ html.customer-liquid-v364 body,
  background-size:300px 430px,100% 100%!important;background-repeat:repeat,no-repeat!important;
 }
 html.customer-liquid-v364 #appView,html.customer-liquid-v364 #bookingTab,html.customer-liquid-v364 #menuTab{background:transparent!important}
-html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #bookingTab::after{display:none!important}
+html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #bookingTab::after,html.customer-liquid-v364 #menuTab.customer-menu::before{display:none!important}
 .customer-design #bookingTab #bookingDogProfile{
  border:0!important;
  background:#f9deed!important;
@@ -760,12 +760,11 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254.lg-v3-host,
 .customer-design #designTicket.lg-v3-host,
 .customer-design #designNearest.lg-v3-host,
-.customer-design #menuTab .customer-menu-group.lg-v3-host,
-.customer-design #menuTab .customer-social-v223.lg-v3-host,
 .customer-design #bookingPickerV37 #designMyBookings.lg-v3-host,
 .customer-design .bottom-nav.lg-v3-host{
  background:transparent!important;border:0!important;box-shadow:none!important;
 }
+.customer-design #menuTab :is(.customer-menu-group,.customer-social-v223).lg-v3-host{background:transparent!important;border:0!important;box-shadow:0 9px 24px #553c4924,0 2px 7px #553c4912!important}
 .customer-design .lg-v3-material{
  position:absolute;inset:0;z-index:-1;pointer-events:none;border:0;border-radius:inherit;
  overflow:hidden;background:rgba(255,255,255,.35);
