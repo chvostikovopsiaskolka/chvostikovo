@@ -10,6 +10,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await page.waitForSelector('#designTicket>.lg-v3-material',{state:'attached'});
  const nav=await page.locator('.bottom-nav').boundingBox();
  const buttons=await page.locator('.bottom-nav>button').evaluateAll(nodes=>nodes.filter(el=>getComputedStyle(el).display!=='none').map(el=>({id:el.id,w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
+ assert(await page.locator('.booking-action-label-v369').evaluate(el=>el.scrollWidth<=el.clientWidth&&getComputedStyle(el).whiteSpace==='nowrap'));
  assert.equal(buttons.length,5);assert(buttons.every(b=>b.w>=44&&b.h>=44));const centre=buttons.find(b=>b.id==='navBookAddV220');assert(buttons.filter(b=>b!==centre).every(b=>centre.w>b.w));
  await page.evaluate(()=>window.__passMaterial=document.querySelector('#designTicket>.lg-v3-material'));
  await page.evaluate(()=>{for(let i=0;i<12;i++){renderPassSummary();renderUpcoming();renderDog();}state.data.passes[0].used_entries=1;renderPassSummary();renderDog();});
@@ -26,11 +27,13 @@ const fixture=require('./liquid-v3-fixture.cjs');
  assert.equal(await page.evaluate(()=>__noticeReads.length),0,'carousel does not dismiss notices');
  await page.locator('#customerAnnouncementsV363').click();await page.waitForTimeout(100);
  assert.equal(await page.locator('#customerBulletinHistoryV229 [data-announcement-id]').count(),4);
- await page.waitForSelector('#customerBulletinHistoryV229 .customer-bulletin-dialog-v229>.lg-v3-material',{state:'attached'});
+ assert.equal(await page.locator('#customerBulletinHistoryV229 .lg-v3-material').count(),0,'notice sheet has an opaque background');
  if(width===390){fs.mkdirSync('/tmp/chvo-v376-screenshots',{recursive:true});await page.screenshot({path:`/tmp/chvo-v376-screenshots/notice-${type.name()}-${dogs}.png`});}
  await page.locator('#customerBulletinHistoryV229 .customer-bulletin-close-v229').click();await page.waitForTimeout(140);
  for(const id of ['navDog','navBooking']){await page.locator('#'+id).click();await page.waitForTimeout(100);assert.deepEqual(await page.locator('.bottom-nav').boundingBox(),nav);}
  await page.locator('#navDog').click();await page.waitForTimeout(150);assert(await page.locator('#menuTab .lg-v3-material').count()>0);
+ for(const id of ['menuDogGroup','menuSettingsGroup']){const layer=page.locator('#'+id+'>summary>.lg-v3-material');await layer.waitFor({state:'attached'});assert(await layer.isVisible(),'closed details material is painted inside summary');await page.locator('#'+id+'>summary').click();assert(await layer.isVisible());await page.locator('#'+id+'>summary').click();assert(await layer.isVisible());}
+ assert(!await page.locator('#menuMessage').isVisible());
  if(width===390)await page.screenshot({path:`/tmp/chvo-v376-screenshots/menu-${type.name()}-${dogs}.png`});
  await page.locator('#navBooking').click();await page.waitForTimeout(150);
  if(width===390)await page.screenshot({path:`/tmp/chvo-v376-screenshots/overview-${type.name()}-${dogs}.png`});
