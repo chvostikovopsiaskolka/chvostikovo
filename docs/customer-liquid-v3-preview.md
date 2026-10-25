@@ -2,6 +2,14 @@
 
 **TEST, NOT PRODUCTION.** Continue draft PR177 on top of unchanged production v374 / 2.0.49, commit `5b8d89e50b003081af1453aa42adb8e2428dd386`. Vercel production inspected: `dpl_5hhrQd9jXhDfw26iCv15A3YorYYK`, READY, correct SHA, alias `app.chvostikovo.sk`, aliasError null. HTTP version.json agrees. No merge, promotion, production alias, backend, auth, booking, vaccine, pass, message or push change.
 
+## Current integration correction — v389, 25 October 2026
+
+The historical preview below has since been approved and released. The current default is the reels material, white wallpaper and orange/pink paws; login uses the same optical layer (v386), female information panels use 34% milk tint (v388).
+
+Profile WebGL now samples a small canvas anchored to its own gender panel, with 32px opaque overscan for blur. This avoids viewport-raster/compositor-scroll disagreement that caused white bands across the name or gradebook. The canvas contains only the existing wallpaper and gender fill, never photos or text. Its raster key is document geometry/tint, so ordinary scrolling reuses it; stop/background/offscreen teardown removes it. The shared viewport source remains for the dock and Menu. Context limit stays two; no change to the viewport navigation container or vendored engine.
+
+Selected-day scrollports reserve padding for rounded-card shadows. Approved reservation cards use a slightly denser white fill and a visible soft shadow. No booking/auth/data behavior changes. The new browser regression exercises an approved booking, independent profile motion with GPU pixel checks, actual scroll and texture reuse, photo identity, fixed nav, selected-day gutters and shadows, for one/two dogs and narrow/landscape viewports. The old implementation fails the white-band pixel assertion; the corrected implementation passes. Native WebKit/Chromium CI and physical device observations remain separate evidence.
+
 ## Scope and material
 
 Replace PR177's entire experimental v2 block, its inverse-map adapter and unused vendor. No added override stack. Existing layout, photo nodes, gender photo borders, background paw artwork/300×430 tile/origin and motion are preserved. Wallpaper colour becomes light peach `#ffd0ae`; gender panel fill becomes pink `rgba(245,154,201,.62)` or blue `rgba(135,190,240,.62)`. An inert optical span sits behind the original sharp DOM. No hard white card border. A subtle inner sheen and soft shadow define the material. The dock outer container retains its original fixed position and existing horizontal centering transform: no filter or additional transform.
