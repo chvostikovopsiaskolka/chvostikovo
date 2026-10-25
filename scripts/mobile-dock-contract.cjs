@@ -36,6 +36,21 @@ assert(css.includes(".mobile-dock-menu") && css.includes("overflow-y: auto"), "S
 assert(hero.includes("pt-7 pb-0 sm:pt-9 lg:pt-24"), "Mobile Hero spacing must be updated without touching desktop");
 assert(form.includes('data-form-dialog="simple-v300"'), "Existing FormDialog mount contract");
 assert(forms.includes("submitInquiry"), "Shared form logic retained");
+
+/* iPhone Dynamic Island / Android cutout must not leave an unpainted Hero band.
+   Preserve safe spacing for actual interactive text, never cover the notch. */
+const root = read("src/routes/__root.tsx");
+const pawCss = read("src/components/site/paw-trail-background.css");
+assert(root.includes("viewport-fit=cover"), "Full-bleed viewport required for iOS status bar");
+assert(css.includes("padding-top: env(safe-area-inset-top, 0px)"), "Non-Hero routes need safe top");
+assert(css.includes("margin-top: calc(0px - env(safe-area-inset-top, 0px))"), "Hero backdrop must extend up behind status bar");
+assert(css.includes("padding-top: calc(var(--hero-content-top) + env(safe-area-inset-top, 0px))"), "Hero text must stay below notch");
+assert(hero.includes('className="hero-safe-top hero-safe-top-main'), "Main Hero full-bleed class");
+for (const route of ["src/routes/psia-skolka-kosice.tsx", "src/routes/psia-skolka-pre-steniatka.tsx", "src/routes/strazenie-psov-kosice.tsx", "src/routes/en.dog-daycare-kosice.tsx"]) {
+  assert(read(route).includes('className="hero-safe-top relative overflow-hidden'), "Landing full-bleed class missing: " + route);
+}
+assert(pawCss.includes("inset: 0;") && pawCss.includes("position: absolute;"), "Decorative paws must follow Hero bounds");
+
 console.log("Mobile dock structural regression guards: PASS");
 
 for (const [route, variant, marker] of [

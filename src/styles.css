@@ -317,7 +317,22 @@
 /* Mobile-only fixed navigation. Never auto-hide on scroll; desktop is unchanged. */
 @media (max-width: 1023px) {
   html { scroll-padding-top: 12px; }
-  body { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)); }
+
+  /* viewport-fit=cover paints the Hero all the way behind the phone's
+     status bar/camera cutout. Other pages still keep a safe top inset. */
+  body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  }
+  .hero-safe-top {
+    --hero-content-top: 1rem; /* original pt-4 */
+    margin-top: calc(0px - env(safe-area-inset-top, 0px));
+    padding-top: calc(var(--hero-content-top) + env(safe-area-inset-top, 0px));
+  }
+  .hero-safe-top-main {
+    --hero-content-top: 1.75rem; /* original pt-7 */
+  }
+
 
   .mobile-dock {
     position: fixed;
@@ -517,6 +532,12 @@
     pointer-events: none !important;
     visibility: hidden !important;
   }
+}
+/* Portrait and tablet Hero spacing remains identical to the previous layout,
+   while the absolute paw background now reaches under the notch. */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .hero-safe-top { --hero-content-top: 1.5rem; }
+  .hero-safe-top-main { --hero-content-top: 2.25rem; }
 }
 @media (min-width: 360px) and (max-width: 1023px) {
   .mobile-dock-item { font-size: 9px; letter-spacing: -.035em; }
