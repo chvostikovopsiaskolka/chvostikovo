@@ -141,7 +141,6 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
         { label: "Products", href: "/produkty" },
         { label: "Contact", href: homePath + "#contact" },
         { label: "Puppy daycare", href: "/psia-skolka-pre-steniatka" },
-        { label: "Dog sitting", href: "/strazenie-psov-kosice" },
       ]
     : [
         ...(marketing ? marketingExtra : [{ label: "Recenzie", href: "/#recenzie" }]),
@@ -152,7 +151,6 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
         { label: "Produkty", href: "/produkty" },
         { label: "Kontakt", href: "/#kontakt" },
         { label: "Škôlka pre šteniatka", href: "/psia-skolka-pre-steniatka" },
-        { label: "Stráženie psov", href: "/strazenie-psov-kosice" },
       ];
 
 
@@ -192,7 +190,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                 }}
               >
                 <div className="mobile-dock-menu-heading">
-                  <DialogPrimitive.Title className="sr-only">
+                  <DialogPrimitive.Title className="mobile-dock-menu-title font-display text-xl font-bold text-forest">
                     {english ? "Menu" : "Menu"}
                   </DialogPrimitive.Title>
                   <DialogPrimitive.Close type="button" aria-label={english ? "Close menu" : "Zavrieť menu"} className="mobile-dock-menu-close">
@@ -213,7 +211,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                     {english ? "Call us" : "Zavolajte nám"}
                   </a>
                   <a href={english ? "/" : "/en/dog-daycare-kosice"} lang={english ? "sk" : "en"}>
-                    {english ? "SK" : "EN"}
+                    {english ? "Slovak version" : "English version"}
                   </a>
                 </div>
                 <a href="/" aria-label="Chvostíkovo" className="mobile-dock-menu-logo">
