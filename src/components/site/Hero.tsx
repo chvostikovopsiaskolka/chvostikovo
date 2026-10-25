@@ -18,13 +18,13 @@ function scrollToWhyChvostikovo() {
 
 export function Hero({ background, learnMoreHref }: { background?: ReactNode; learnMoreHref?: string }) {
   return (
-    <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-24 lg:pb-1">
+    <section id="top" className="relative overflow-hidden pt-4 pb-0 sm:pt-6 lg:pt-24 lg:pb-1">
       {background ?? <PawTrailBackground />}
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
         {/* Mobile layout */}
         <div className="lg:hidden">
-          <p className="mx-auto mt-1 whitespace-nowrap font-display text-[8.5px] font-bold uppercase tracking-[0.12em] text-coral-dark min-[390px]:mt-2 min-[390px]:text-[9px] min-[430px]:text-[10px] sm:text-sm sm:tracking-[0.16em]">
+          <p className="mx-auto mt-1 min-[360px]:whitespace-nowrap font-display text-[8.5px] font-bold uppercase tracking-[0.12em] text-coral-dark min-[390px]:mt-2 min-[390px]:text-[9px] min-[430px]:text-[10px] sm:text-sm sm:tracking-[0.16em]">
             Denná starostlivosť o stredných a veľkých psíkov
           </p>
 

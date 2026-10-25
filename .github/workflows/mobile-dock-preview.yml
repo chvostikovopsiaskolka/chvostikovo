@@ -1,0 +1,32 @@
+name: Mobile dock visual preview
+# Run browser screenshots only when explicitly requested, avoiding PR notification spam.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: node scripts/restore-cori-image.mjs
+      - name: Install browsers for isolated PR preview
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Render mobile dock at required breakpoints
+        run: |
+          (./node_modules/.bin/vite dev --host 127.0.0.1 --port 4173 > /tmp/chvostikovo-vite.log 2>&1 &)
+          node scripts/mobile-dock-browser.mjs || { cat /tmp/chvostikovo-vite.log; exit 1; }
+      - name: Upload visual review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-dock-visual-review
+          path: artifacts/mobile-dock/*.png
+          if-no-files-found: ignore

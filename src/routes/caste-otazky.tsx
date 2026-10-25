@@ -50,7 +50,7 @@ function FrequentlyAskedQuestionsPage() {
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
       <main>
-        <section id="top" className="relative overflow-hidden pt-28 pb-14 sm:pt-32 sm:pb-20">
+        <section id="top" className="relative overflow-hidden pt-8 pb-14 sm:pt-10 sm:pb-20 lg:pt-32">
           <div className="absolute -top-24 -right-24 size-80 rounded-full bg-coral-soft/45 blur-3xl" aria-hidden="true" />
           <div className="absolute -bottom-28 -left-20 size-72 rounded-full bg-secondary blur-3xl" aria-hidden="true" />
 

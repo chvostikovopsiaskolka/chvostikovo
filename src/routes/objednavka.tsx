@@ -59,7 +59,7 @@ function OrderPage() {
     return (
       <div className="min-h-screen bg-background">
         <Header homeSectionLinks />
-        <main className="mx-auto max-w-3xl px-4 pb-20 pt-32">
+        <main className="mx-auto max-w-3xl px-4 pb-20 pt-8 sm:pt-10 lg:pt-32">
           <div className="rounded-4xl bg-card p-8 text-center shadow-soft sm:p-12">
             <CheckCircle2 className="mx-auto size-12 text-coral" />
             <p className="mt-5 font-display text-sm font-semibold tracking-wide text-coral uppercase">Objednávka prijatá</p>
@@ -78,7 +78,7 @@ function OrderPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
-      <main className="mx-auto max-w-6xl px-4 pb-20 pt-28 sm:pt-32">
+      <main className="mx-auto max-w-6xl px-4 pb-20 pt-8 sm:pt-10 lg:pt-32">
         <div className="flex items-center gap-3">
           <ShoppingBag className="size-7 text-coral" />
           <h1 className="text-4xl text-forest sm:text-5xl">Dokončenie objednávky</h1>
