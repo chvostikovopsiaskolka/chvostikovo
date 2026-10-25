@@ -35,7 +35,7 @@ function sync(){
  frame=0;const found=[...document.querySelectorAll('[data-site-glass]')],enabled=!document.hidden&&!reduce.matches&&!contrast.matches;
  for(const[el,s]of states)if(!el.isConnected){stop(s);s.filter?.remove();states.delete(el);}
  let used=0;
- for(const el of found){let s=states.get(el);if(!s){const layer=document.createElement('span');layer.className='site-glass-material';layer.dataset.renderer='fallback';layer.setAttribute('aria-hidden','true');el.prepend(layer);s={layer,key:''};states.set(el,s);resize.observe(el);intersection.observe(el);}
+ for(const el of found){let s=states.get(el);if(!s){const layer=el.querySelector(':scope>.site-glass-material');if(!layer)continue;s={layer,key:''};states.set(el,s);resize.observe(el);intersection.observe(el);}
   if(s.layer.parentElement!==el)el.prepend(s.layer);
   if(!enabled||!visible(el)||low){stop(s);continue;}
   const r=el.getBoundingClientRect(),w=Math.round(r.width),h=Math.round(r.height),radius=parseFloat(getComputedStyle(el).borderTopLeftRadius)||24,key=[w,h,radius].join(':');

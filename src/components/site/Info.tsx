@@ -93,7 +93,7 @@ export function FirstVisit() {
 
         <ol className="mt-10 grid gap-5 md:grid-cols-3">
           {STEPS.map((s, i) => (
-            <li key={s.title} data-site-glass="light" className="relative rounded-4xl bg-card p-7 pt-9 shadow-card">
+            <li key={s.title} data-site-glass="light" className="relative rounded-4xl bg-card p-7 pt-9 shadow-card"><span className="site-glass-material" data-renderer="fallback" aria-hidden="true" />
               <span className="absolute -top-5 left-7 flex size-11 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-primary-foreground shadow-card">
                 {i + 1}
               </span>
