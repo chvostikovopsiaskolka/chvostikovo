@@ -848,3 +848,8 @@ html.customer-auth-glass-v386 body{background-color:#fff!important;background-im
 .customer-auth-glass-v386 #authView{background:transparent!important}
 .customer-auth-glass-v386 #authView>.auth-card{position:relative;isolation:isolate;background:transparent;border:0;box-shadow:0 14px 36px #553c4926,0 2px 8px #553c4914}
 .customer-auth-glass-v386 #authView .input{background:rgba(255,255,255,.96)}
+
+/* Android: obscure notice imagery under the dock without changing its geometry.
+   The inherited milk applies to both SVG/fallback and the WebGL overlay. */
+html.customer-android.customer-design .bottom-nav{--lg-v3-milk:.92}
+html.customer-android.customer-design .bottom-nav>.lg-v3-material{background:rgba(255,255,255,.92);box-shadow:inset 0 1px 0 #ffffffcc,0 6px 24px #3c2a3429}
