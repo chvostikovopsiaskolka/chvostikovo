@@ -125,7 +125,9 @@ async function run(engine, width, height, suffix) {
 
       await page.goto(base + "/caste-otazky", { waitUntil: "domcontentloaded" });
       await page.locator('.mobile-dock a[href="/#priestory"]').click();
-      await page.waitForURL(/\/#priestory/);
+      // The link can be handled as a client-side navigation; an additional
+      // page 'load' event is not guaranteed. Assert the actual resolved URL.
+      await page.waitForFunction(() => location.pathname === "/" && location.hash === "#priestory", null, { timeout: 15000 });
     }
     captures.push({ suffix, width, passed: true });
     await context.close();
