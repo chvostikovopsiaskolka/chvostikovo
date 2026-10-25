@@ -317,7 +317,25 @@
 /* Mobile-only fixed navigation. Never auto-hide on scroll; desktop is unchanged. */
 @media (max-width: 1023px) {
   html { scroll-padding-top: 12px; }
-  body { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)); }
+
+  /* viewport-fit=cover paints the Hero all the way behind the phone's
+     status bar/camera cutout. Other pages still keep a safe top inset. */
+  body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  }
+  .hero-safe-top {
+    --hero-content-top: 1rem; /* original pt-4 */
+    margin-top: calc(-1 * env(safe-area-inset-top, 0px));
+    padding-top: calc(var(--hero-content-top) + env(safe-area-inset-top, 0px));
+  }
+  .hero-safe-top-main {
+    --hero-content-top: 1.75rem; /* original pt-7 */
+  }
+  @media (min-width: 640px) {
+    .hero-safe-top { --hero-content-top: 1.5rem; } /* original sm:pt-6 */
+    .hero-safe-top-main { --hero-content-top: 2.25rem; } /* original sm:pt-9 */
+  }
 
   .mobile-dock {
     position: fixed;
