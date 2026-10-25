@@ -21,6 +21,7 @@ import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
 import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
+import { MobileDock } from "@/components/site/MobileDock";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { Collapse } from "@/components/site/Collapse";
 import { InfoTicker } from "@/components/site/InfoTicker";
@@ -416,7 +417,8 @@ function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3">
+    <>
+    <header className="fixed inset-x-0 top-0 z-50 hidden px-3 pt-3 lg:block">
       <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/95 px-4 py-2 shadow-soft backdrop-blur-md sm:px-6">
         <a href="/" className="shrink-0">
           <img src={logo} alt="Chvostíkovo dog daycare Košice" className="h-5 w-auto sm:h-6" />
@@ -486,6 +488,8 @@ function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
         </div>
       )}
     </header>
+    <MobileDock language="en" onApplicationOpen={() => openEnquiry("en_mobile_dock")} />
+    </>
   );
 }
 
@@ -513,7 +517,7 @@ function EnglishDogDaycarePage() {
       <EnglishHeader onEnquire={() => setInquiryOpen(true)} />
 
       <main>
-        <section id="top" className="relative overflow-hidden pt-20 pb-0 sm:pt-24 lg:pt-24 lg:pb-1">
+        <section id="top" className="relative overflow-hidden pt-4 pb-0 sm:pt-6 lg:pt-24 lg:pb-1">
           <PawTrailBackground />
 
           <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">

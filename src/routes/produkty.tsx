@@ -37,7 +37,7 @@ function ProductsPage() {
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
       <main>
-        <section className="bg-background pt-28 pb-12 sm:pt-32 sm:pb-16">
+        <section className="bg-background pt-8 pb-12 sm:pt-10 sm:pb-16 lg:pt-32">
           <div className="mx-auto max-w-5xl px-4 text-center">
             <h1 className="mx-auto max-w-4xl whitespace-nowrap text-[1.75rem] leading-[1.05] text-forest sm:whitespace-normal sm:text-5xl lg:text-6xl">
               Naše <span className="text-coral-dark">produkty pre psov</span>

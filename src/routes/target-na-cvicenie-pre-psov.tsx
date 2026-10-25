@@ -271,7 +271,7 @@ function TargetPage() {
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
       <main>
-        <section className="relative overflow-hidden pt-28 pb-14 sm:pt-32 sm:pb-20">
+        <section className="relative overflow-hidden pt-8 pb-14 sm:pt-10 sm:pb-20 lg:pt-32">
           <div
             className="absolute -top-24 -right-24 size-80 rounded-full bg-coral-soft/40 blur-3xl"
             aria-hidden="true"

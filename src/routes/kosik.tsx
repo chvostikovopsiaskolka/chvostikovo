@@ -25,7 +25,7 @@ function CartPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
-      <main className="mx-auto max-w-5xl px-4 pb-20 pt-28 sm:pt-32">
+      <main className="mx-auto max-w-5xl px-4 pb-20 pt-8 sm:pt-10 lg:pt-32">
         <a href="/produkty" className="inline-flex items-center gap-2 text-sm font-semibold text-forest/65 hover:text-coral">
           <ArrowLeft className="size-4" /> Späť na produkty
         </a>
