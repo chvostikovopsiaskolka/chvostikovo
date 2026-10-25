@@ -625,14 +625,15 @@ html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #booking
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241){grid-template-columns:minmax(0,46%) minmax(0,1fr)!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .design-dog-name{margin:0!important;max-width:100%!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) :is(#bookingVaccinationStatus,#bookingVisitCount,#bookingGradebook){
- display:flex!important;align-items:center!important;gap:6px!important;padding:4px 0!important;
+ display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;align-items:center!important;gap:6px!important;padding:4px 0!important;
  width:100%!important;max-width:100%!important;margin:0!important;min-width:0!important;
  font-size:12px!important;line-height:1.3!important;
 }
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) :is(#bookingVaccinationStatus,#bookingVisitCount)>.overview-icon{
- position:static!important;transform:none!important;display:inline-flex!important;flex:0 0 20px!important;width:20px!important;min-width:20px!important;
+ position:static!important;transform:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 24px!important;width:24px!important;min-width:24px!important;height:24px!important;
 }
-.customer-design #bookingTab #bookingGradebook>svg{flex:0 0 20px!important;width:20px!important}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) :is(#bookingVaccinationStatus,#bookingVisitCount)>.overview-icon>svg,
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) #bookingGradebook>svg{display:block!important;flex:0 0 24px!important;width:24px!important;min-width:24px!important;height:24px!important;margin:0!important}
 .customer-design #bookingTab #bookingDogProfile :is(#bookingVaccinationStatus,#bookingVisitCount,#bookingGradebook) span:last-child{
  font-size:inherit!important;white-space:normal!important;min-width:0;overflow-wrap:anywhere;
 }

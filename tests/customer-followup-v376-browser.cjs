@@ -9,6 +9,8 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await page.evaluate(()=>{state.data.passes=[{id:1,dog_id:1,dog_ids:[1,2],total_entries:10,used_entries:0,status:'active',valid_until:'2099-12-31'}];renderPassSummary();renderDog();});
  await page.waitForSelector('#designTicket>.lg-v3-material',{state:'attached'});
  const nav=await page.locator('.bottom-nav').boundingBox();
+ if(dogs===1){const aligned=await page.evaluate(()=>{const ids=['bookingVaccinationStatus','bookingVisitCount','bookingGradebook'];return ids.map(id=>{const row=document.getElementById(id),icon=row.querySelector('svg').getBoundingClientRect(),label=row.querySelector(':scope>span:last-child').getBoundingClientRect();return{x:icon.x,width:icon.width,height:icon.height,textX:label.x};});});assert(aligned.every(a=>Math.abs(a.x-aligned[0].x)<1&&a.width===24&&a.height===24&&Math.abs(a.textX-aligned[0].textX)<1),'profile icon and text columns align');}
+
  const buttons=await page.locator('.bottom-nav>button').evaluateAll(nodes=>nodes.filter(el=>getComputedStyle(el).display!=='none').map(el=>({id:el.id,w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
  assert(await page.locator('.booking-action-label-v369').evaluate(el=>el.scrollWidth<=el.clientWidth&&getComputedStyle(el).whiteSpace==='nowrap'));
  assert.equal(buttons.length,5);assert(buttons.every(b=>b.w>=44&&b.h>=44));const centre=buttons.find(b=>b.id==='navBookAddV220');assert(buttons.filter(b=>b!==centre).every(b=>centre.w>b.w));
