@@ -831,3 +831,10 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-design :is(#customerBulletinHistoryV229,#customerBulletinArticleV229) .customer-bulletin-dialog-v229{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 
 .customer-design .bottom-nav #navBookAddV220 .booking-fab-symbol-v220{width:14px!important;min-width:14px!important;max-width:14px!important;height:14px!important;flex:0 0 14px!important}
+
+/* Isolated reels comparison: the content stays sharp above the material. */
+html[data-glass-material=reels] .lg-v3-material{background:rgba(255,255,255,.24);box-shadow:inset 0 1px 0 #ffffff5c,inset 0 -1px 2px #713b2018,0 8px 21px #713b2021}
+html[data-glass-material=reels] .lg-v3-material[data-renderer=svg]{backdrop-filter:var(--lg-v3-filter) blur(3px) saturate(180%)}
+html[data-glass-material=reels] .lg-v3-material[data-renderer=fallback]{-webkit-backdrop-filter:blur(3px) saturate(180%);backdrop-filter:blur(3px) saturate(180%)}
+html[data-glass-material=reels] .lg-v3-material[data-renderer=webgl]::after{background:rgba(255,255,255,.24)}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){html[data-glass-material=reels] .lg-v3-material{background:#fff9f3!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}

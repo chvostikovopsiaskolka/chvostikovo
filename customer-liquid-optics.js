@@ -5,6 +5,9 @@
 import './vendor/liquidlens/liquid-glass.js';
 import {createWebGLSurface} from './vendor/simple-liquid-glass/webgl.js';
 const root=document.documentElement, NS='http://www.w3.org/2000/svg';
+const reels=new URLSearchParams(location.search).get('glass-material')!=='lens';root.dataset.glassMaterial=reels?'reels':'lens';
+let turbulenceReady=false;const turbulenceImage=new Image();
+if(reels){turbulenceImage.onload=()=>{turbulenceReady=true;schedule()};turbulenceImage.onerror=()=>{stats.reelsFailure='noise-texture-load';schedule()};turbulenceImage.src='/vendor/liquidlens/reels-noise-v385.png';}
 const reduce=matchMedia('(prefers-reduced-transparency: reduce)');
 const contrast=matchMedia('(prefers-contrast: more)');
 const low=(navigator.deviceMemory&&navigator.deviceMemory<=2)||(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=2);
@@ -14,11 +17,12 @@ const webkit=/AppleWebKit/.test(navigator.userAgent)&&!chromium;
 const selectors=['#bookingDogProfile:not(.dual-dog-v241) .dog-overview-content','#bookingDogProfile .dual-dog-info-v254','#menuTab .customer-menu-group','#menuTab .customer-social-v223','#designTicket.design-ticket','#designNearest.design-nearest','#bookingPickerV37 #designMyBookings','.customer-bulletin-history-row-v229 .customer-notice-panel-v383','.bottom-nav'];
 const states=new Map(),maps=new Map();let bank,source,sourceImage,sourceKey='',revision=0,frame=0,sequence=0;
 const stats={mode:'fallback',mapGenerations:0,contexts:0,contextLimit:low?0:2,source:'original-wallpaper-only'};
-window.customerLiquidV3Diagnostics=()=>({...stats,surfaces:[...states.values()].map(s=>({renderer:s.layer.dataset.renderer,reason:s.reason||null,width:s.width,height:s.height}))});
+window.customerLiquidV3Diagnostics=()=>({...stats,material:reels?'reels':'lens',turbulenceReady,surfaces:[...states.values()].map(s=>({renderer:s.layer.dataset.renderer,reason:s.reason||null,width:s.width,height:s.height}))});
 function svg(tag,attrs,parent){const el=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))el.setAttribute(k,String(v));parent?.append(el);return el;}
 function mapFor(w,h,r){
- const bezel=Math.min(18,r,Math.min(w,h)/3),key=[w,h,r,bezel].join(':');
+ const bezel=Math.min(18,r,Math.min(w,h)/3),key=[reels?'reels':'lens',w,h,r,bezel].join(':');
  if(maps.has(key))return maps.get(key);
+ if(reels){const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.fillStyle=c.createPattern(turbulenceImage,'repeat');c.fillRect(0,0,w,h);const result={uri:canvas.toDataURL('image/png'),scale:6};maps.set(key,result);if(maps.size>32)maps.delete(maps.keys().next().value);stats.mapGenerations++;return result;}
  // LiquidLens normalizes Snell deflection to +/-127. SVG samples channel-.5:
  // scale=2*edgePx compensates that range; neutralPoint matches 128/255 in WebGL.
  const edgePx=Math.min(10,bezel*.6),scale=edgePx*2;
@@ -28,7 +32,7 @@ function mapFor(w,h,r){
 function filterFor(map,w,h){
  if(!bank){bank=svg('svg',{'aria-hidden':'true',style:'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none'},document.body);}
  const id='lg-v3-'+(++sequence),filter=svg('filter',{id,filterUnits:'userSpaceOnUse',x:0,y:0,width:w,height:h,'color-interpolation-filters':'sRGB'},bank);
- svg('feImage',{href:map.uri,x:0,y:0,width:w,height:h,result:'lens',preserveAspectRatio:'none'},filter);
+ if(reels)svg('feTurbulence',{type:'fractalNoise',baseFrequency:'0.018 0.028',numOctaves:2,seed:7,stitchTiles:'stitch',result:'lens'},filter);else svg('feImage',{href:map.uri,x:0,y:0,width:w,height:h,result:'lens',preserveAspectRatio:'none'},filter);
  svg('feDisplacementMap',{in:'SourceGraphic',in2:'lens',scale:map.scale,xChannelSelector:'R',yChannelSelector:'G'},filter);
  return {filter,id};
 }
@@ -77,7 +81,8 @@ function sync(){
   const r=el.getBoundingClientRect(),w=Math.round(r.width),h=Math.round(r.height),radius=parseFloat(getComputedStyle(el).borderTopLeftRadius)||16,key=[w,h,radius].join(':');
   if(opaque){stop(s);s.layer.dataset.renderer='fallback';continue;}
   if(!chromium&&(!webkit||low)){stop(s);s.layer.dataset.renderer='fallback';continue;}
-  const selected=el.matches('.bottom-nav')||el.matches('.dog-overview-content,.dual-dog-info-v254')&&used===0;
+  if(reels&&!turbulenceReady){stop(s);continue;}
+  const selected=el.matches('.bottom-nav')||(el.matches('.dog-overview-content,.dual-dog-info-v254')||reels&&el.matches('#menuTab .customer-menu-group'))&&used===0;
   if(!chromium&&!selected){stop(s);continue;}
   const map=mapFor(w,h,radius);
   if(key!==s.key){
@@ -92,7 +97,7 @@ function sync(){
     const backdrop=wallpaper();if(!sourceImage?.naturalWidth)continue;
     paintWallpaper();const output=document.createElement('span');output.className='lg-v3-output';s.layer.prepend(output);s.output=output;
     try{
-     s.engine=createWebGLSurface(el,output,backdrop,{map:map.uri,scale:map.scale,dispersion:0,specular:.1,classic:false,neutralPoint:128/255,radius,blur:.65,saturation:115},status=>{
+     s.engine=createWebGLSurface(el,output,backdrop,{map:map.uri,scale:map.scale,dispersion:0,specular:.1,classic:false,neutralPoint:128/255,radius,blur:reels?3:.65,saturation:reels?180:115},status=>{
       if(status==='active'){s.layer.dataset.renderer='webgl';stats.mode='webgl';}
       else if(status!=='pending'){s.layer.dataset.renderer='fallback';s.failed=true;s.reason=status;schedule();}
      });stats.contexts++;
