@@ -93,7 +93,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     const destination = new URL(href, window.location.href);
-    const targetId = (destination.hash.slice(1) || (destination.pathname === homePath ? "top" : destination.pathname.replace(/^\\/+|\\/+$/g, "").replace(/\\//g, "_")))
+    const targetId = (destination.hash.slice(1) || (destination.pathname === homePath ? "top" : destination.pathname.split("/").filter(Boolean).join("_")))
       .replace(/[^a-z0-9_-]/gi, "").slice(0, 70);
     const source = `mobile_${fromMenu ? "menu" : "dock"}_${variant}_${targetId}`;
     void trackCookielessInteraction("nav_click", source, language);
