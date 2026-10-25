@@ -4,6 +4,7 @@ import { FilePenLine, Heart, House, Image as ImageIcon, Menu, Phone, Tag, X } fr
 import logo from "@/assets/logo.png";
 import { PHONE } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 type DockLanguage = "sk" | "en";
 type DockVariant = "main" | "lead" | "puppy" | "dog-sitting" | "en";
@@ -32,22 +33,22 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
   const sections = variant === "lead"
     ? [{ id: "top", label: "Domov", icon: House },
        { id: "lead-benefits", label: "Prečo my?", icon: Heart },
-       { id: "recenzie", label: "Recenzie", icon: ImageIcon },
+       { id: "interest", label: "Mám záujem o škôlku", icon: FilePenLine },
        { id: "lead-pricing", label: "Cenník", icon: Tag }]
     : variant === "puppy"
     ? [{ id: "top", label: "Domov", icon: House },
        { id: "puppy-benefits", label: "Prečo my?", icon: Heart },
-       { id: "recenzie", label: "Recenzie", icon: ImageIcon },
+       { id: "interest", label: "Mám záujem o škôlku", icon: FilePenLine },
        { id: "puppy-pricing", label: "Cenník", icon: Tag }]
     : variant === "dog-sitting"
     ? [{ id: "top", label: "Domov", icon: House },
        { id: "dog-sitting-why", label: "Prečo my?", icon: Heart },
-       { id: "recenzie", label: "Recenzie", icon: ImageIcon },
+       { id: "interest", label: "Mám záujem o škôlku", icon: FilePenLine },
        { id: "dog-sitting-pricing", label: "Cenník", icon: Tag }]
     : english
     ? [{ id: "top", label: "Home", icon: House },
        { id: "why-daycare", label: "Why us?", icon: Heart },
-       { id: "reviews", label: "Reviews", icon: ImageIcon },
+       { id: "interest", label: "Interested in daycare", icon: FilePenLine },
        { id: "pricing", label: "Prices", icon: Tag }]
     : [{ id: "top", label: "Domov", icon: House },
        { id: "priestory", label: "Priestory", icon: ImageIcon },
@@ -91,6 +92,17 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
   const go = (event: MouseEvent<HTMLAnchorElement>, href: string, fromMenu = false) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
+    const destination = new URL(href, window.location.href);
+    const targetId = (destination.hash.slice(1) || "top").replace(/[^a-z0-9_-]/gi, "").slice(0, 70);
+    const source = `mobile_${fromMenu ? "menu" : "dock"}_${variant}_${targetId}`;
+    void trackCookielessInteraction("nav_click", source, language);
+    // Keep Pixel/GA4 interests separate from cookieless navigation and from successful leads.
+    // The old header pricing link was measured, but the new dock lives outside <header>.
+    if (!fromMenu && (targetId === "cennik" || targetId.endsWith("-pricing") || targetId === "pricing")) {
+      trackMarketingInteraction("view_pricing", source);
+    } else if (!fromMenu && targetId === "starostlivost") {
+      trackMarketingInteraction("view_care", source);
+    }
     if (fromMenu) {
       navigatingRef.current = true;
       setMenuOpen(false);
@@ -158,7 +170,12 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     <>
       <nav className="mobile-dock" data-variant={variant} data-hydrated={hydrated ? "true" : "false"} aria-label={english ? "Mobile navigation" : "Mobilná navigácia"}>
         <div className="mobile-dock-bar">
-          {sections.map(({ id, icon: Icon, label }) => (
+          {sections.map(({ id, icon: Icon, label }) => id === "interest" ? (
+            <button key={id} type="button" className="mobile-dock-item mobile-dock-apply" onClick={openApplication}>
+              <Icon aria-hidden="true" size={19} strokeWidth={2} />
+              <span>{label}</span>
+            </button>
+          ) : (
             <a
               href={homePath + (id === "top" ? "" : "#" + id)}
               key={id}
@@ -170,13 +187,18 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
               <span>{label}</span>
             </a>
           ))}
-          <button type="button" className="mobile-dock-item mobile-dock-apply" onClick={openApplication}>
-            <FilePenLine aria-hidden="true" size={19} strokeWidth={2} />
-            <span>{english ? "Enquire" : marketing ? "Záujem" : "Prihláška"}</span>
-          </button>
+          {!marketing && (
+            <button type="button" className="mobile-dock-item mobile-dock-apply" onClick={openApplication}>
+              <FilePenLine aria-hidden="true" size={19} strokeWidth={2} />
+              <span>Prihláška</span>
+            </button>
+          )}
           <DialogPrimitive.Root open={menuOpen} onOpenChange={setMenuOpen}>
             <DialogPrimitive.Trigger asChild>
-              <button ref={menuButtonRef} type="button" aria-label={english ? "Open menu" : "Otvoriť menu"} className="mobile-dock-item" aria-expanded={menuOpen}>
+              <button ref={menuButtonRef} type="button" aria-label={english ? "Open menu" : "Otvoriť menu"} className="mobile-dock-item" aria-expanded={menuOpen}
+                  onClick={() => {
+                    if (!menuOpen) void trackCookielessInteraction("nav_click", `mobile_dock_${variant}_menu_open`, language);
+                  }}>
                 <Menu aria-hidden="true" size={19} strokeWidth={2} />
                 <span>{english ? "Menu" : "Menu"}</span>
               </button>
@@ -206,7 +228,11 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                   ))}
                 </div>
                 <div className="mobile-dock-menu-actions">
-                  <a href={"tel:" + PHONE} onClick={() => trackMarketingInteraction("phone_click", english ? "en_mobile_dock_menu" : "mobile_dock_menu")}>
+                  <a href={"tel:" + PHONE}
+                    data-tracking-source={english ? "en_mobile_dock_menu" : "mobile_dock_menu"}
+                    onClick={() => {
+                      void trackCookielessInteraction("phone_click", english ? "en_mobile_dock_menu" : "mobile_dock_menu", language);
+                    }}>
                     <Phone aria-hidden="true" size={17} />
                     {english ? "Call us" : "Zavolajte nám"}
                   </a>
