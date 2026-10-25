@@ -6,15 +6,22 @@ import { PHONE } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 
 type DockLanguage = "sk" | "en";
+type DockVariant = "main" | "lead" | "puppy" | "dog-sitting" | "en";
 
 type MobileDockProps = {
   language?: DockLanguage;
-  onApplicationOpen: () => void;
+  variant?: DockVariant;
+  onApplicationOpen?: () => void;
+  onInterestOpen?: () => void;
 };
 
-export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockProps) {
+export function MobileDock({ language = "sk", variant = "main", onApplicationOpen, onInterestOpen }: MobileDockProps) {
   const english = language === "en";
-  const homePath = english ? "/en/dog-daycare-kosice" : "/";
+  const marketing = variant !== "main";
+  const homePath = variant === "lead" ? "/psia-skolka-kosice"
+    : variant === "puppy" ? "/psia-skolka-pre-steniatka"
+    : variant === "dog-sitting" ? "/strazenie-psov-kosice"
+    : english ? "/en/dog-daycare-kosice" : "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("top");
   const [hydrated, setHydrated] = useState(false);
@@ -22,10 +29,25 @@ export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockPro
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navigatingRef = useRef(false);
 
-  const sections = english
+  const sections = variant === "lead"
+    ? [{ id: "top", label: "Domov", icon: House },
+       { id: "lead-benefits", label: "Prečo my?", icon: Heart },
+       { id: "recenzie", label: "Recenzie", icon: ImageIcon },
+       { id: "lead-pricing", label: "Cenník", icon: Tag }]
+    : variant === "puppy"
+    ? [{ id: "top", label: "Domov", icon: House },
+       { id: "puppy-benefits", label: "Prečo my?", icon: Heart },
+       { id: "recenzie", label: "Recenzie", icon: ImageIcon },
+       { id: "puppy-pricing", label: "Cenník", icon: Tag }]
+    : variant === "dog-sitting"
+    ? [{ id: "top", label: "Domov", icon: House },
+       { id: "dog-sitting-why", label: "Prečo my?", icon: Heart },
+       { id: "recenzie", label: "Recenzie", icon: ImageIcon },
+       { id: "dog-sitting-pricing", label: "Cenník", icon: Tag }]
+    : english
     ? [{ id: "top", label: "Home", icon: House },
-       { id: "spaces", label: "Spaces", icon: ImageIcon },
-       { id: "care", label: "Care", icon: Heart },
+       { id: "why-daycare", label: "Why us?", icon: Heart },
+       { id: "reviews", label: "Reviews", icon: ImageIcon },
        { id: "pricing", label: "Prices", icon: Tag }]
     : [{ id: "top", label: "Domov", icon: House },
        { id: "priestory", label: "Priestory", icon: ImageIcon },
@@ -42,9 +64,14 @@ export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockPro
         return;
       }
       let active = "top";
+      let lastTop = -Infinity;
       for (const section of sections) {
         const el = document.getElementById(section.id);
-        if (el && el.getBoundingClientRect().top <= window.innerHeight * 0.34) active = section.id;
+        const top = el?.getBoundingClientRect().top;
+        if (top !== undefined && top <= window.innerHeight * 0.34 && top >= lastTop) {
+          active = section.id;
+          lastTop = top;
+        }
       }
       setActiveSection(active);
     };
@@ -59,7 +86,7 @@ export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockPro
       window.removeEventListener("resize", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [homePath]);
+  }, [homePath, variant]);
 
   const go = (event: MouseEvent<HTMLAnchorElement>, href: string, fromMenu = false) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -91,14 +118,24 @@ export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockPro
 
   const openApplication = () => {
     if (menuOpen) setMenuOpen(false);
-    onApplicationOpen();
+    if (marketing) onInterestOpen?.();
+    else onApplicationOpen?.();
   };
+
+  // Marketing landings keep their conversion actions and section links locally.
+  const marketingExtra = variant === "lead"
+    ? [{ label: "Prvá návšteva", href: homePath + "#lead-first-visit" }]
+    : variant === "puppy"
+    ? [{ label: "Prvá návšteva", href: homePath + "#puppy-first-visit" }]
+    : variant === "dog-sitting"
+    ? [{ label: "Prvá návšteva", href: homePath + "#dog-sitting-first-visit" }]
+    : [{ label: "First visit", href: homePath + "#en-first-visit" }];
 
   const menuEntries = english
     ? [
-        { label: "Reviews", href: homePath + "#reviews" },
+        ...(marketing ? marketingExtra : [{ label: "Reviews", href: homePath + "#reviews" }]),
         { label: "About us", href: homePath + "#about" },
-        { label: "Why Chvostíkovo", href: homePath + "#why-daycare" },
+        ...(!marketing ? [{ label: "Why Chvostíkovo", href: homePath + "#why-daycare" }] : []),
         { label: "Requirements", href: homePath + "#requirements" },
         { label: "FAQ", href: homePath + "#faq" },
         { label: "Products", href: "/produkty" },
@@ -107,9 +144,9 @@ export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockPro
         { label: "Dog sitting", href: "/strazenie-psov-kosice" },
       ]
     : [
-        { label: "Recenzie", href: "/#recenzie" },
+        ...(marketing ? marketingExtra : [{ label: "Recenzie", href: "/#recenzie" }]),
         { label: "O nás", href: "/#o-nas" },
-        { label: "Prečo Chvostíkovo", href: "/#preco" },
+        ...(!marketing ? [{ label: "Prečo Chvostíkovo", href: "/#preco" }] : []),
         { label: "Podmienky", href: "/#podmienky" },
         { label: "Časté otázky", href: "/caste-otazky" },
         { label: "Produkty", href: "/produkty" },
@@ -118,9 +155,10 @@ export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockPro
         { label: "Stráženie psov", href: "/strazenie-psov-kosice" },
       ];
 
+
   return (
     <>
-      <nav className="mobile-dock" data-hydrated={hydrated ? "true" : "false"} aria-label={english ? "Mobile navigation" : "Mobilná navigácia"}>
+      <nav className="mobile-dock" data-variant={variant} data-hydrated={hydrated ? "true" : "false"} aria-label={english ? "Mobile navigation" : "Mobilná navigácia"}>
         <div className="mobile-dock-bar">
           {sections.map(({ id, icon: Icon, label }) => (
             <a
@@ -136,7 +174,7 @@ export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockPro
           ))}
           <button type="button" className="mobile-dock-item mobile-dock-apply" onClick={openApplication}>
             <FilePenLine aria-hidden="true" size={19} strokeWidth={2} />
-            <span>{english ? "Enquire" : "Prihláška"}</span>
+            <span>{english ? "Enquire" : marketing ? "Záujem" : "Prihláška"}</span>
           </button>
           <DialogPrimitive.Root open={menuOpen} onOpenChange={setMenuOpen}>
             <DialogPrimitive.Trigger asChild>
@@ -154,7 +192,7 @@ export function MobileDock({ language = "sk", onApplicationOpen }: MobileDockPro
                 }}
               >
                 <div className="mobile-dock-menu-heading">
-                  <DialogPrimitive.Title className="font-display text-xl font-bold text-forest">
+                  <DialogPrimitive.Title className="sr-only">
                     {english ? "Menu" : "Menu"}
                   </DialogPrimitive.Title>
                   <DialogPrimitive.Close type="button" aria-label={english ? "Close menu" : "Zavrieť menu"} className="mobile-dock-menu-close">
