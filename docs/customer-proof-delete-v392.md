@@ -13,3 +13,5 @@ UI retains the existing editor and stable other thumbnails. Pencil exposes Repla
 Tests: dedicated actual API transport, assembled UI, PostgreSQL deletion gate fixtures; existing vaccination 1/2 dogs, stable photos, native photo input, security handler and version-contract regressions. Full verify + Chromium/WebKit CI required before merge. Local browser download is unavailable (truncated CDN archive); CI browser evidence is required. Physical signed-in iOS/Android, real customer Storage deletion and push delivery remain unverified until observed. Tests send no customer notifications.
 
 Initial local test failures: existing API mock did not implement DELETE (fixed to model permanent removal); UI refresh referred to nonexistent render (fixed to existing renderDog/renderUpcoming/renderDays); no production changes occurred during these failures.
+
+Pre-deploy SQL dry run caught a missing statement separator after pg_get_functiondef output; corrected before any commit to the database. Full CI rerun on the corrected SQL commit.

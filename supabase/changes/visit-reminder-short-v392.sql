@@ -47,5 +47,4 @@ AS $function$
      WHERE sub.user_id=profile.user_id
        AND sub.active
    );
-$function$
-
+$function$;
