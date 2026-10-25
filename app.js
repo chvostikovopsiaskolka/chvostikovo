@@ -156,6 +156,7 @@ async function customerReadJsonV391(url,ownerId){
       if(navigator.onLine===false||document.visibilityState==='hidden')throw firstError;
       await new Promise(resolve=>setTimeout(resolve,450));
       if(!state.session||state.session.user?.id!==ownerId)throw Object.assign(new Error('Účet sa zmenil.'),{code:'session_changed'});
+      if(navigator.onLine===false||document.visibilityState==='hidden')throw firstError;
     }
     const session=await ensureCustomerSessionV357();
     if(session.user?.id!==ownerId)throw Object.assign(new Error('Účet sa zmenil.'),{code:'session_changed'});
