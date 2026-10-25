@@ -11,7 +11,7 @@ const low=(navigator.deviceMemory&&navigator.deviceMemory<=2)||(navigator.hardwa
 const svgSyntax=CSS.supports('backdrop-filter','url("#lg-v3-check")');
 const chromium=svgSyntax&&/\b(Chrome|Chromium|Edg|SamsungBrowser)\//.test(navigator.userAgent)&&!/\b(CriOS|EdgiOS)\//.test(navigator.userAgent);
 const webkit=/AppleWebKit/.test(navigator.userAgent)&&!chromium;
-const selectors=['#bookingDogProfile:not(.dual-dog-v241) .dog-overview-content','#bookingDogProfile .dual-dog-info-v254','#menuTab .customer-menu-group','#menuTab .customer-social-v223','#designTicket.design-ticket','#designNearest.design-nearest','#bookingPickerV37 #designMyBookings','.customer-bulletin-history-row-v229 .customer-notice-content-v363','.bottom-nav'];
+const selectors=['#bookingDogProfile:not(.dual-dog-v241) .dog-overview-content','#bookingDogProfile .dual-dog-info-v254','#menuTab .customer-menu-group','#menuTab .customer-social-v223','#designTicket.design-ticket','#designNearest.design-nearest','#bookingPickerV37 #designMyBookings','.customer-bulletin-history-row-v229 .customer-notice-panel-v383','.bottom-nav'];
 const states=new Map(),maps=new Map();let bank,source,sourceImage,sourceKey='',revision=0,frame=0,sequence=0;
 const stats={mode:'fallback',mapGenerations:0,contexts:0,contextLimit:low?0:2,source:'original-wallpaper-only'};
 window.customerLiquidV3Diagnostics=()=>({...stats,surfaces:[...states.values()].map(s=>({renderer:s.layer.dataset.renderer,reason:s.reason||null,width:s.width,height:s.height}))});
@@ -51,7 +51,7 @@ function wallpaper(){
  sourceImage=new Image();sourceImage.onload=()=>{sourceKey='';paintWallpaper();schedule();};
  // Same original SVG rasterized once: WebKit taints canvases painted from
  // a data-SVG containing <use>. Same-origin PNG keeps GPU upload origin-clean.
- sourceImage.src=root.dataset.backgroundPreview==='white'?'/vendor/liquidlens/chvostikovo-paws-white-preview.png':'/vendor/liquidlens/chvostikovo-paws.png';return source;
+ sourceImage.src='/vendor/liquidlens/chvostikovo-paws-soft-v383.png';return source;
 }
 function stop(s){if(s.engine){s.engine.destroy();s.engine=null;stats.contexts--;s.layer.dataset.renderer='fallback';s.output?.remove();s.output=null;}}
 function remove(el,s){stop(s);s.filter?.remove();s.layer.remove();resize.unobserve(el);el.classList.remove('lg-v3-host');if(s.previousPosition!==undefined)el.style.position=s.previousPosition;states.delete(el);}
