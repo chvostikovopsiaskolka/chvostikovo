@@ -65,7 +65,7 @@ function trackMetaCustom(eventName: string, params: EventParams) {
 }
 
 export function trackMarketingInteraction(
-  kind: "inquiry_cta" | "phone_click" | "view_pricing" | "hero_learn_more" | "explore_daycare",
+  kind: "inquiry_cta" | "phone_click" | "view_pricing" | "hero_learn_more" | "explore_daycare" | "view_care",
   source: string,
 ) {
   const params = {
@@ -106,6 +106,15 @@ export function trackMarketingInteraction(
       content_name: "daycare_spaces",
     });
     pushAnalyticsEvent("explore_daycare", params);
+    return;
+  }
+
+  if (kind === "view_care") {
+    trackMetaCustom("ViewCare", {
+      ...params,
+      content_name: "starostlivost",
+    });
+    pushAnalyticsEvent("view_care", params);
     return;
   }
 
