@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v390';
-const APP_VERSION='2.0.65';
+const APP_BUILD='v391';
+const APP_VERSION='2.0.66';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -145,6 +145,32 @@ try{window.ChvoTelemetry?.init({app:'customer',build:APP_TELEMETRY_BUILD,base:SU
 // One concurrent read for onboarding, settings and rules; never share account state.
 let customerTermsReadV146=null;
 let bootstrapInFlight=null,lastResumeRefresh=0;
+// v391: Retry one transient transport failure on authenticated read-only GETs.
+// Never repeat mutations, mask HTTP failures, or cross a logout/account change.
+async function customerReadJsonV391(url,ownerId){
+  if(!ownerId)throw new Error('Najprv sa prihláste.');
+  let firstError=null;
+  for(let attempt=0;attempt<2;attempt++){
+    if(!state.session||state.session.user?.id!==ownerId)throw Object.assign(new Error('Účet sa zmenil.'),{code:'session_changed'});
+    if(attempt){
+      if(navigator.onLine===false||document.visibilityState==='hidden')throw firstError;
+      await new Promise(resolve=>setTimeout(resolve,450));
+      if(!state.session||state.session.user?.id!==ownerId)throw Object.assign(new Error('Účet sa zmenil.'),{code:'session_changed'});
+      if(navigator.onLine===false||document.visibilityState==='hidden')throw firstError;
+    }
+    const session=await ensureCustomerSessionV357();
+    if(session.user?.id!==ownerId)throw Object.assign(new Error('Účet sa zmenil.'),{code:'session_changed'});
+    try{
+      const response=await fetch(url,{method:'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token},cache:'no-store'});
+      const raw=await response.text();
+      return {response,rows:response.ok?(raw?JSON.parse(raw):[]):null};
+    }catch(error){
+      if(attempt||!['TypeError','NetworkError'].includes(error?.name)||navigator.onLine===false||document.visibilityState==='hidden')throw error;
+      firstError=error;
+    }
+  }
+}
+
 async function readActiveCustomerTermsV146(force=false){
   if(!state.session)return null;
   if(customerSessionNeedsRefreshV357()||sessionRefreshInFlight)await ensureCustomerSessionV357();
@@ -155,9 +181,9 @@ async function readActiveCustomerTermsV146(force=false){
   const entry={key,at:Date.now(),pending:true,promise:null};
   entry.promise=(async()=>{
     const now=new Date().toISOString();
-    const r=await fetch(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token},cache:'no-store'});
-    if(!r.ok)throw new Error('Pravidlá sa nepodarilo načítať.');
-    const rows=await r.json();return rows?.[0]||null;
+    const {response,rows}=await customerReadJsonV391(SUPABASE_URL+'/rest/v1/portal_terms_documents?active=eq.true&effective_from=lte.'+encodeURIComponent(now)+'&select=id,version,title,body,document_hash,effective_from&order=effective_from.desc&limit=1',session.user?.id);
+    if(!response.ok)throw new Error('Pravidlá sa nepodarilo načítať.');
+    return rows?.[0]||null;
   })();
   customerTermsReadV146=entry;
   try{return await entry.promise}catch(error){if(customerTermsReadV146===entry)customerTermsReadV146=null;throw error}finally{entry.pending=false}
@@ -1872,20 +1898,26 @@ placeDeadlineV59();
     $('announcementModalCloseV75').onclick=async()=>{const id=Number(modal.dataset.announcementId||0);modal.classList.add('hidden');if(id)await markAnnouncementModalReadV75(id)};
     modal.classList.remove('hidden');
   }
+  let announcementsInFlightV391=null;
   customerRenderers.announcements=async()=>{
-    if(!state.session)return;
-    try{
-      const headers={apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token};
-      const [annRes,disRes]=await Promise.all([
-        fetch(SUPABASE_URL+'/rest/v1/portal_announcements?active=eq.true&select=id,title,body,valid_until,created_at&order=created_at.desc&limit=10',{headers,cache:'no-store'}),
-        fetch(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?select=announcement_id',{headers,cache:'no-store'})
-      ]);
-      if(!annRes.ok)return;
-      const now=Date.now(),rows=(await annRes.json()).filter(a=>!a.valid_until||new Date(a.valid_until).getTime()>now);
-      const dismissed=disRes.ok?new Set((await disRes.json()).map(x=>Number(x.announcement_id))):new Set();
-      $('announcementNotice').innerHTML=rows.length?'<div class="portal-announcements">'+rows.map(a=>'<div class="portal-announcement" data-announcement-id="'+Number(a.id)+'"><div class="portal-announcement-head">📣 <strong>'+esc(a.title)+'</strong></div><div class="portal-announcement-body">'+esc(a.body)+'</div></div>').join('')+'</div>':'';
-      const unread=rows.find(a=>!dismissed.has(Number(a.id)));if(unread)showAnnouncementModalV75(unread);else $('announcementModalV75')?.classList.add('hidden');
-    }catch(e){console.warn('Oznamy sa nepodarilo načítať',e)}
+    const ownerId=state.session?.user?.id;
+    if(!ownerId)return;
+    if(announcementsInFlightV391?.ownerId===ownerId)return announcementsInFlightV391.promise;
+    const promise=(async()=>{
+      try{
+        const [ann,dis]=await Promise.all([
+          customerReadJsonV391(SUPABASE_URL+'/rest/v1/portal_announcements?active=eq.true&select=id,title,body,valid_until,created_at&order=created_at.desc&limit=10',ownerId),
+          customerReadJsonV391(SUPABASE_URL+'/rest/v1/portal_announcement_dismissals?select=announcement_id',ownerId)
+        ]);
+        if(!ann.response.ok||state.session?.user?.id!==ownerId)return;
+        const now=Date.now(),rows=(ann.rows||[]).filter(a=>!a.valid_until||new Date(a.valid_until).getTime()>now);
+        const dismissed=dis.response.ok?new Set((dis.rows||[]).map(x=>Number(x.announcement_id))):new Set();
+        $('announcementNotice').innerHTML=rows.length?'<div class="portal-announcements">'+rows.map(a=>'<div class="portal-announcement" data-announcement-id="'+Number(a.id)+'"><div class="portal-announcement-head">📣 <strong>'+esc(a.title)+'</strong></div><div class="portal-announcement-body">'+esc(a.body)+'</div></div>').join('')+'</div>':'';
+        const unread=rows.find(a=>!dismissed.has(Number(a.id)));if(unread)showAnnouncementModalV75(unread);else $('announcementModalV75')?.classList.add('hidden');
+      }catch(e){console.warn('Oznamy sa nepodarilo načítať',e)}
+    })();
+    announcementsInFlightV391={ownerId,promise};
+    try{return await promise}finally{if(announcementsInFlightV391?.promise===promise)announcementsInFlightV391=null}
   };
 })();
 (function installGuideV83(){
