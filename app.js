@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v376';
-const APP_VERSION='2.0.51';
+const APP_BUILD='v377';
+const APP_VERSION='2.0.52';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -614,7 +614,7 @@ function renderPassSummaryCore(){
     const firstBooked=Number(p.used_entries)===0?(state.data?.reservations||[]).filter(r=>Number(r.dog_id)===Number(d.id)&&Number(r.pass_id)===Number(p.id)&&r.status==='booked'&&r.reservation_date>=today).map(r=>r.reservation_date).sort()[0]:null;
     let start=p.valid_from||firstBooked,until=p.valid_until;
     if(start&&!until&&!p.no_expiry){const [year,month,day]=start.split('-').map(Number),endMonth=new Date(Date.UTC(year,month-1+2,1)),lastDay=new Date(Date.UTC(endMonth.getUTCFullYear(),endMonth.getUTCMonth()+1,0)).getUTCDate();endMonth.setUTCDate(Math.min(day,lastDay));until=endMonth.toISOString().slice(0,10)}
-    const validity=p.no_expiry===true?'<small>Platnosť bez obmedzenia</small>':Number(p.used_entries)===0&&start?`<small>Platnosť od ${skDate(start)}${until?` do ${skDate(until)}`:''}</small>`:until?`<small>Platí do ${skDate(until)}</small>`:'';
+    const validity=(p.status==='queued'&&p.no_expiry===true)?'':p.no_expiry===true?'<small>Platnosť bez obmedzenia</small>':Number(p.used_entries)===0&&start?`<small>Platnosť od ${skDate(start)}${until?` do ${skDate(until)}`:''}</small>`:until?`<small>Platí do ${skDate(until)}</small>`:'';
     $('passSummary').innerHTML=`<span>Permanentka</span><small>Použité vstupy</small><strong>${Number(p.used_entries)||0} z ${Number(p.total_entries)||0}</strong>${validity}`;
     return;
   }
@@ -4316,10 +4316,10 @@ function installVaccinationViewerZoomV244(modal){
     const anchor=$('designNearest');let host=$('customerNoticeOverviewV376');
     const selected=loggedIn()?rows().filter(row=>row.show_in_overview===true&&current(row)):[];
     if(!anchor||!selected.length){host?.remove();return;}
-    if(!host){host=el('section','customer-notice-overview-v376');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');anchor.after(host);}
+    if(!host){host=el('section','customer-notice-overview-v377');host.id='customerNoticeOverviewV376';host.setAttribute('aria-label','Oznamy škôlky');anchor.after(host);}
     const key=JSON.stringify(selected.map(row=>[row.id,row.title,row.body,row.image_path,rowsState.read.has(Number(row.id))]));
     if(host.dataset.contentKey===key)return;host.dataset.contentKey=key;
-    const track=el('div','customer-notice-carousel-v376');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
+    const track=el('div','customer-notice-carousel-v377');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
     selected.forEach(row=>track.append(noticeCard(row,false)));
     track.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();track.scrollBy({left:(event.key==='ArrowRight'?1:-1)*track.clientWidth*.94,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}});
     host.replaceChildren(track);
