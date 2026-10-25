@@ -155,6 +155,10 @@ jobs:
           "$RUNNER_TEMP/chvo-v3-browser/node_modules/.bin/playwright" install --with-deps chromium webkit
       - name: Current customer browser regression and pixel proof
         run: |
+          node tests/customer-auth-glass-v386-browser.cjs
+          V3_ENGINE=webkit node tests/customer-auth-glass-v386-browser.cjs
+          node tests/customer-reels-v385-browser.cjs
+          V3_ENGINE=webkit node tests/customer-reels-v385-browser.cjs
           node tests/customer-liquid-browser-v364.cjs
           node tests/customer-liquid-v3-browser.cjs
           node tests/customer-followup-v376-browser.cjs
@@ -167,5 +171,7 @@ jobs:
         with:
           name: liquid-v3-browser-evidence
           path: |
+            /tmp/chvo-v386-auth/
+            /tmp/chvo-v385-screenshots/
             /tmp/chvo-v3-screenshots/
             /tmp/chvo-v376-screenshots/
