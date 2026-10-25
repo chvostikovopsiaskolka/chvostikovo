@@ -799,8 +799,8 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-design .bottom-nav :is(#customerMessagesV363,#customerAnnouncementsV363) svg{fill:none;stroke:currentColor;stroke-width:1.8;flex:none}
 .customer-design .bottom-nav .customer-inbox-count-v363{position:absolute;top:1px;right:1px;min-width:15px;height:15px;padding:0 3px;font-size:9px;line-height:15px}
 .customer-design .bottom-nav button:focus-visible{outline:3px solid #ad4c0d;outline-offset:-3px}
-.customer-design .bottom-nav #navBookAddV220{gap:3px!important;padding:3px!important}
-.customer-design .bottom-nav #navBookAddV220 .booking-action-label-v369{font-size:clamp(7px,2.1vw,9px)!important;white-space:nowrap!important;line-height:1.2!important}
+.customer-design .bottom-nav #navBookAddV220{gap:3px!important;padding:3px!important;flex-direction:column!important}
+.customer-design .bottom-nav #navBookAddV220 .booking-action-label-v369{font-size:clamp(8px,2.2vw,10px)!important;letter-spacing:0!important;white-space:nowrap!important;line-height:1.2!important}
 .customer-design .bottom-nav #navBookAddV220 svg{width:14px!important;height:14px!important}
 .customer-design .customer-bulletin-history-row-v229{position:relative;isolation:isolate;border:0!important;background:#fff;box-shadow:0 3px 12px #6f3d2712}
 .customer-design :is(#customerBulletinHistoryV229,#customerBulletinArticleV229) .customer-bulletin-dialog-v229{position:relative;isolation:isolate;background:#fff; border:0;box-shadow:0 -8px 35px #713b2033}
@@ -818,3 +818,5 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-design #menuMessage{display:none!important}
 
 .customer-design :is(#customerBulletinHistoryV229,#customerBulletinArticleV229) .customer-bulletin-dialog-v229{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+
+.customer-design .bottom-nav #navBookAddV220 .booking-fab-symbol-v220{width:14px!important;min-width:14px!important;max-width:14px!important;height:14px!important;flex:0 0 14px!important}
