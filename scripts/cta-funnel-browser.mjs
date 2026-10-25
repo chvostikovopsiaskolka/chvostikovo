@@ -35,6 +35,8 @@ for (const { engine, type, width, height } of [
 
     await page.goto(base + "/", { waitUntil: "domcontentloaded" });
     await page.locator("h1:visible").first().waitFor({ timeout: 20000 });
+    // SSR buttons can be visible but inert until React has hydrated.
+    await page.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: "attached", timeout: 20000 });
     const consent = page.getByRole("dialog", { name: /Používame cookies|We use cookies/i });
     if (await consent.isVisible()) {
       await consent.getByRole("button", { name: /Len nevyhnutné|Necessary only/i }).click();
