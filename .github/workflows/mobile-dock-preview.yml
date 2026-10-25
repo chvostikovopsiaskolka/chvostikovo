@@ -1,7 +1,13 @@
 name: Mobile dock visual preview
 # Run browser screenshots only when explicitly requested, avoiding PR notification spam.
 on:
-  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/styles.css"
+      - "src/routes/__root.tsx"
+      - "scripts/mobile-dock-browser.mjs"
+      - ".github/workflows/mobile-dock-preview.yml"
 
 permissions:
   contents: read
