@@ -139,11 +139,7 @@ export function FirstVisit() {
         title="Dohodnúť bezplatnú úvodnú návštevu"
         subtitle="Nechajte nám kontakt a ozveme sa vám. Termín úvodnej návštevy dohodneme po preverení zdravotných podmienok a platných očkovaní vášho psíka."
       >
-        <ShortForm
-          trackingSource="home_first_visit_interest"
-          hideInterest
-          interestValue="Mám záujem o bezplatnú úvodnú návštevu"
-        />
+        <ShortForm trackingSource="home_first_visit_interest" />
       </FormDialog>
     </section>
   );

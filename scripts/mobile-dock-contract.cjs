@@ -87,7 +87,7 @@ const first = info.slice(info.indexOf("export function FirstVisit()"), info.inde
 const pricing = info.slice(info.indexOf("export function Pricing()"), info.indexOf("const PRIMARY_FAQ"));
 assert(why.includes("Hľadám škôlku pre psíka") && why.includes('<ShortForm trackingSource="home_why_interest" />'), "Why CTA must open tracked short enquiry");
 assert(!why.includes("<LongForm"), "Why should not duplicate full registration");
-assert(first.includes("Dohodnúť úvodnú návštevu") && first.includes('trackingSource="home_first_visit_interest"') && first.includes("hideInterest"), "Intro visit CTA needs short, prefocused enquiry");
+assert(first.includes("Dohodnúť úvodnú návštevu") && first.includes('trackingSource="home_first_visit_interest"') && !first.includes("hideInterest") && !first.includes("interestValue"), "Intro visit CTA must show the ordinary required interest options");
 assert(!first.includes("<LongForm"), "Intro visit should not present a full application");
 assert(pricing.includes("Prihláška do škôlky") && pricing.includes("<LongForm />") && pricing.includes("<FormDialog"), "Pricing must open the canonical full application");
 assert(!pricing.includes('href="#kontakt"'), "Pricing CTA must not misroute to generic contact");
