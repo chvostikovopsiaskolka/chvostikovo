@@ -27,7 +27,7 @@ async function assertPawsTransmit(page,selector,background){
   const nav=await page.locator('.bottom-nav').boundingBox();
   const centre=await page.locator('#navBookAddV220').boundingBox(),edge=await page.locator('#navBooking').boundingBox();assert(centre.width>edge.width,'booking action wider than side tabs');assert.equal(centre.height,edge.height,'all nav buttons equal height');assert.equal(await page.locator('.bottom-nav').evaluate(el=>el.parentElement.tagName),'BODY');
   assert.equal(await page.locator('#navBookAddV220').getAttribute('aria-label'),'Rezervovať miesto');
-  const icon=await page.locator('#navBookAddV220 svg').boundingBox(),label=await page.locator('.booking-action-label-v369').boundingBox();assert(icon.x+icon.width<=label.x+1,'icon left of booking label');assert(label.x+label.width<=centre.x+centre.width,'label fits');
+  const icon=await page.locator('#navBookAddV220 svg').boundingBox(),label=await page.locator('.booking-action-label-v369').boundingBox();assert(icon.y+icon.height<=label.y+1,'compact booking icon above single-line label');assert(label.x+label.width<=centre.x+centre.width,'label fits');
 
   for(const sex of ['female','male']){
    await page.evaluate(sex=>{state.data.dogs[0].sex=sex;renderDog();},sex);await page.waitForTimeout(60);
