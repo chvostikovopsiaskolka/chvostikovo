@@ -28,6 +28,8 @@ async function run(engine, width, height, suffix) {
       reducedMotion: "reduce",
     });
     const page = await context.newPage();
+    // Do not leave test landing/navigation interactions in production reports.
+    await page.route("**/*supabase.co/**", route => route.fulfill({ status: 204, body: "" }));
     await page.goto(base + "/", { waitUntil: "domcontentloaded" });
     await page.locator("h1:visible").first().waitFor({ timeout: 15000 });
     await page.locator(".mobile-dock[data-hydrated=\"true\"]").waitFor({ state: "attached", timeout: 20000 });
@@ -177,6 +179,8 @@ await run(webkit, 320, 568, "webkit-320-short");
   try {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const page = await context.newPage();
+    // Do not leave test landing/navigation interactions in production reports.
+    await page.route("**/*supabase.co/**", route => route.fulfill({ status: 204, body: "" }));
     await page.goto(base + "/en/dog-daycare-kosice", { waitUntil: "domcontentloaded" });
     await page.locator(".mobile-dock[data-hydrated=\"true\"]").waitFor();
     const consent = page.getByRole("dialog", { name: /We use cookies/i });
@@ -216,6 +220,8 @@ for (const { route, why, price, first } of [
   try {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
     const page = await context.newPage();
+    // Do not leave test landing/navigation interactions in production reports.
+    await page.route("**/*supabase.co/**", route => route.fulfill({ status: 204, body: "" }));
     await page.goto(base + route, { waitUntil: "domcontentloaded" });
     await page.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: "attached" });
     const consent = page.getByRole("dialog", { name: /Používame cookies/i });
@@ -271,6 +277,8 @@ for (const { route, why, price, first } of [
     for (const route of ["/", "/psia-skolka-kosice", "/psia-skolka-pre-steniatka", "/strazenie-psov-kosice", "/en/dog-daycare-kosice"]) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
       const page = await context.newPage();
+    // Do not leave test landing/navigation interactions in production reports.
+    await page.route("**/*supabase.co/**", route => route.fulfill({ status: 204, body: "" }));
       await page.goto(base + route, { waitUntil: "domcontentloaded" });
       await page.locator(".paw-trail-background").first().waitFor();
       // Simulate a real iPhone safe inset without changing the tested layout
