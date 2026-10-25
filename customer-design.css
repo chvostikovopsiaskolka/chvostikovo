@@ -815,9 +815,11 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 .customer-notice-carousel-v376>.customer-bulletin-history-row-v229{flex:0 0 100%;box-sizing:border-box;scroll-snap-align:start;margin:0;min-width:0;text-align:left;min-height:120px}
 .customer-notice-carousel-v376[data-multiple=true]>.customer-bulletin-history-row-v229{flex-basis:94%}
 .customer-notice-carousel-v376::-webkit-scrollbar{display:none}
-.customer-notice-controls-v381{display:flex;align-items:center;justify-content:flex-end;gap:4px;color:#824b2d}
+.customer-notice-stage-v382{position:relative;min-width:0}
+.customer-notice-stage-v382[data-multiple=true]{padding-right:34px}
+.customer-notice-controls-v381{position:absolute;right:-2px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;color:#824b2d}
 .customer-notice-controls-v381 button{width:44px;height:44px;padding:0;border:0;border-radius:50%;background:#ffffff99;color:#a7460b;font-family:inherit;font-size:28px;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
-.customer-notice-controls-v381 button:disabled{opacity:.35;cursor:default}
+.customer-notice-controls-v381 button:disabled{display:none;cursor:default}
 .customer-notice-controls-v381 button:focus-visible{outline:3px solid #ad4c0d;outline-offset:2px}
 .customer-notice-position-v381{min-width:32px;text-align:center;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
 .customer-notice-carousel-v376:focus-visible{outline:3px solid #ad4c0d;outline-offset:2px}

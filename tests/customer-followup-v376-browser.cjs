@@ -27,7 +27,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  assert.equal(await page.locator('#customerNoticeOverviewV376 .customer-notice-carousel-v376').getAttribute('data-multiple'),'false');assert.equal(await page.locator('.customer-notice-controls-v381').count(),0);
  await page.evaluate(()=>{__noticeFixture.push({id:54,active:true,show_in_overview:true,title:'Ďalší oznam',body:'Pozvánka',valid_from:'2020-01-01'});return loadAnnouncements(true)});
  assert.equal(await page.locator('#customerNoticeOverviewV376 [data-announcement-id]').count(),2);assert.equal(await page.locator('.customer-notice-carousel-v376').getAttribute('data-multiple'),'true');
- const headerControls=await page.locator('.customer-notice-controls-v381').boundingBox(),cardTrack=await page.locator('.customer-notice-carousel-v376').boundingBox();assert(headerControls.y+headerControls.height<=cardTrack.y+1&&headerControls.x+headerControls.width<=cardTrack.x+cardTrack.width+1,'carousel controls are above the card on the right');
+ const headerControls=await page.locator('.customer-notice-controls-v381').boundingBox(),cardTrack=await page.locator('.customer-notice-carousel-v376').boundingBox();assert(Math.abs(headerControls.y+headerControls.height/2-(cardTrack.y+cardTrack.height/2))<2&&headerControls.x>cardTrack.x+cardTrack.width-12,'carousel arrows sit beside the card at its vertical centre');
  await page.locator('[aria-label="Ďalší oznam"]').click();
  await page.waitForFunction(()=>document.querySelector('.customer-notice-position-v381').textContent==='2 / 2');
  assert(await page.locator('[aria-label="Ďalší oznam"]').isDisabled());

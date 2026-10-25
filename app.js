@@ -4279,7 +4279,7 @@ function installVaccinationViewerZoomV244(modal){
     const heading=el('h2','customer-notice-title-v381',preview?'Oznamy · ukážka':'Oznamy');
     const track=el('div','customer-notice-carousel-v376');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
     selected.forEach((row,index)=>{const card=noticeCard(row,false);card.setAttribute('aria-label',(index+1)+' z '+selected.length+': '+(row.title||'Oznam'));track.append(card)});
-    const header=el('div','customer-notice-header-v382');header.append(heading);host.replaceChildren(header,track);
+    const header=el('div','customer-notice-header-v382'),stage=el('div','customer-notice-stage-v382');stage.dataset.multiple=String(selected.length>1);header.append(heading);stage.append(track);host.replaceChildren(header,stage);
     if(selected.length>1){
       const controls=el('div','customer-notice-controls-v381');
       const prev=el('button','','‹'),next=el('button','','›'),position=el('span','customer-notice-position-v381');
@@ -4291,7 +4291,7 @@ function installVaccinationViewerZoomV244(modal){
       prev.onclick=()=>move(-1);next.onclick=()=>move(1);
       track.addEventListener('scroll',()=>{if(!pending)pending=requestAnimationFrame(update)},{passive:true});
       track.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();move(event.key==='ArrowRight'?1:-1)}});
-      controls.append(prev,position,next);header.append(controls);track.scrollLeft=index*step();update();
+      controls.append(next,prev);header.append(position);stage.append(controls);track.scrollLeft=index*step();update();
     }
   }
   async function markRead(row){
