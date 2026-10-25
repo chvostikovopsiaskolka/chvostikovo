@@ -193,4 +193,40 @@ for (const { route, why, price, first } of [
   }
 }
 
+
+// Simulate a 55px top safe inset in WebKit (Linux browser emulation otherwise
+// reports env(safe-area-inset-top)=0). Confirm the decorative white paw layer
+// begins at y=0 while the heading remains below the simulated system cutout.
+{
+  const browser = await webkit.launch({ headless: true });
+  try {
+    for (const route of ["/", "/psia-skolka-kosice", "/psia-skolka-pre-steniatka", "/strazenie-psov-kosice", "/en/dog-daycare-kosice"]) {
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
+      const page = await context.newPage();
+      await page.goto(base + route, { waitUntil: "domcontentloaded" });
+      await page.locator(".paw-trail-background").first().waitFor();
+      await page.addStyleTag({
+        content: "@media(max-width:1023px){body{padding-top:55px!important}.hero-safe-top{margin-top:-55px!important;padding-top:calc(var(--hero-content-top) + 55px)!important}}",
+      });
+      const measure = await page.evaluate(() => {
+        const paw = document.querySelector(".paw-trail-background");
+        const hero = document.querySelector(".hero-safe-top");
+        const heading = hero?.querySelector("h1");
+        const pawY = paw?.getBoundingClientRect().top;
+        const heroY = hero?.getBoundingClientRect().top;
+        const headingY = heading?.getBoundingClientRect().top;
+        return { pawY, heroY, headingY, viewport: window.innerWidth, documentWidth: document.documentElement.scrollWidth };
+      });
+      assert(Math.abs(measure.pawY ?? 999) <= 2, route + " paw background must paint behind status bar: " + JSON.stringify(measure));
+      assert(Math.abs(measure.heroY ?? 999) <= 2, route + " Hero top must extend to screen edge");
+      assert((measure.headingY ?? -1) >= 55, route + " heading must stay below the phone cutout");
+      assert((measure.documentWidth ?? 99999) <= measure.viewport + 1, route + " must have no horizontal overflow");
+      await page.screenshot({ path: "artifacts/mobile-dock/safe-area-" + (route === "/" ? "home" : route.slice(1)) + "-webkit.png" });
+      await context.close();
+    }
+  } finally {
+    await browser.close();
+  }
+}
+
 console.log("Browser visual / navigation assertions PASS:", JSON.stringify(captures));
