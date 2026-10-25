@@ -125,7 +125,9 @@ async function run(engine, width, height, suffix) {
 
       await page.goto(base + "/caste-otazky", { waitUntil: "domcontentloaded" });
       await page.locator('.mobile-dock a[href="/#priestory"]').click();
-      await page.waitForURL(/\/#priestory/);
+      // The link can be handled as a client-side navigation; an additional
+      // page 'load' event is not guaranteed. Assert the actual resolved URL.
+      await page.waitForFunction(() => location.pathname === "/" && location.hash === "#priestory", null, { timeout: 15000 });
     }
     captures.push({ suffix, width, passed: true });
     await context.close();
@@ -241,8 +243,10 @@ for (const { route, why, price, first } of [
       const page = await context.newPage();
       await page.goto(base + route, { waitUntil: "domcontentloaded" });
       await page.locator(".paw-trail-background").first().waitFor();
+      // Simulate a real iPhone safe inset without changing the tested layout
+      // rules: the Hero must begin at y=0, while its content starts below 55px.
       await page.addStyleTag({
-        content: "@media(max-width:1023px){body{padding-top:55px!important}.hero-safe-top{margin-top:-55px!important;padding-top:calc(var(--hero-content-top) + 55px)!important}}",
+        content: "@media(max-width:1023px){.hero-safe-top{--hero-safe-inset:55px!important}}",
       });
       const measure = await page.evaluate(() => {
         const paw = document.querySelector(".paw-trail-background");

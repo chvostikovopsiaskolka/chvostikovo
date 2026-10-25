@@ -318,16 +318,23 @@
 @media (max-width: 1023px) {
   html { scroll-padding-top: 12px; }
 
-  /* viewport-fit=cover paints the Hero all the way behind the phone's
-     status bar/camera cutout. Other pages still keep a safe top inset. */
+  /* The root body's safe inset previously painted a cream band before the
+     white Hero. Let the Hero itself own the inset, rather than relying on a
+     negative margin that can collapse through its unstyled parent. */
   body {
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
   }
+  body:has(.hero-safe-top) {
+    padding-top: 0;
+    background-color: #fff;
+  }
+  html:has(.hero-safe-top) { background-color: #fff; }
   .hero-safe-top {
     --hero-content-top: 1rem; /* original pt-4 */
-    margin-top: calc(0px - env(safe-area-inset-top, 0px));
-    padding-top: calc(var(--hero-content-top) + env(safe-area-inset-top, 0px));
+    --hero-safe-inset: env(safe-area-inset-top, 0px);
+    margin-top: 0;
+    padding-top: calc(var(--hero-content-top) + var(--hero-safe-inset));
   }
   .hero-safe-top-main {
     --hero-content-top: 1.75rem; /* original pt-7 */
