@@ -9,6 +9,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  const material=page.locator('#authView>.auth-card>.lg-v3-material');await material.waitFor({state:'attached'});
  await page.waitForFunction(engine=>document.querySelector('#authView>.auth-card>.lg-v3-material')?.dataset.renderer===(engine==='webkit'?'webgl':'svg'),type.name(),{timeout:15000});
  assert((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts<=1,'login uses at most one context');
+ assert((await page.evaluate(()=>customerLiquidV3Diagnostics())).peakContexts<=2,'app-to-login transition cannot briefly allocate a third context');
  assert(!await page.locator('.bottom-nav').isVisible());assert.equal(await page.locator('#loginForm').evaluate(el=>getComputedStyle(el).filter),'none');
  assert((await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('chvostikovo-paws-soft-v383.png'));
  if(width===390){fs.mkdirSync('/tmp/chvo-v386-auth',{recursive:true});await page.screenshot({path:`/tmp/chvo-v386-auth/login-${type.name()}.png`});}

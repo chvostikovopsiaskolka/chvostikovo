@@ -16,7 +16,7 @@ const chromium=svgSyntax&&/\b(Chrome|Chromium|Edg|SamsungBrowser)\//.test(naviga
 const webkit=/AppleWebKit/.test(navigator.userAgent)&&!chromium;
 const selectors=['#authView>.auth-card','#bookingDogProfile:not(.dual-dog-v241) .dog-overview-content','#bookingDogProfile .dual-dog-info-v254','#menuTab .customer-menu-group','#menuTab .customer-social-v223','#designTicket.design-ticket','#designNearest.design-nearest','#bookingPickerV37 #designMyBookings','.customer-bulletin-history-row-v229 .customer-notice-panel-v383','.bottom-nav'];
 const states=new Map(),maps=new Map();let bank,source,sourceImage,sourceKey='',revision=0,frame=0,sequence=0;
-const stats={mode:'fallback',mapGenerations:0,contexts:0,contextLimit:low?0:2,source:'original-wallpaper-only'};
+const stats={mode:'fallback',mapGenerations:0,contexts:0,peakContexts:0,contextLimit:low?0:2,source:'original-wallpaper-only'};
 window.customerLiquidV3Diagnostics=()=>({...stats,material:reels?'reels':'lens',turbulenceReady,surfaces:[...states.values()].map(s=>({renderer:s.layer.dataset.renderer,reason:s.reason||null,width:s.width,height:s.height}))});
 function svg(tag,attrs,parent){const el=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))el.setAttribute(k,String(v));parent?.append(el);return el;}
 function mapFor(w,h,r){
@@ -68,7 +68,7 @@ function sync(){
  const enabled=(root.classList.contains('customer-liquid-v364')||authVisible)&&!document.hidden;
  const opaque=reduce.matches||contrast.matches;
  const found=enabled?selectors.flatMap(s=>[...document.querySelectorAll(s)]):[];
- for(const [el,s]of states)if(!el.isConnected||!found.includes(el))remove(el,s);
+ for(const [el,s]of states)if(!el.isConnected||!found.includes(el))remove(el,s);else if(!visible(el))stop(s);
  let used=0;
  for(const el of found){
   let s=states.get(el);if(s&&s.layer.parentElement!==materialHolder(el))materialHolder(el).prepend(s.layer);if(!visible(el)){if(s)stop(s);continue;}
@@ -102,7 +102,7 @@ function sync(){
      s.engine=createWebGLSurface(el,output,backdrop,{map:map.uri,scale:map.scale,dispersion:0,specular:.1,classic:false,neutralPoint:128/255,radius,blur:reels?3:.65,saturation:reels?180:115},status=>{
       if(status==='active'){s.layer.dataset.renderer='webgl';stats.mode='webgl';}
       else if(status!=='pending'){s.layer.dataset.renderer='fallback';s.failed=true;s.reason=status;schedule();}
-     });stats.contexts++;
+     });stats.contexts++;stats.peakContexts=Math.max(stats.peakContexts,stats.contexts);
     }catch(error){s.failed=true;s.reason=String(error.message||error);output.remove();s.output=null;}
    }
    if(s.failed)stop(s);
