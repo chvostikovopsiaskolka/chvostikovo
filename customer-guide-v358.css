@@ -1,6 +1,5 @@
 .customer-guide{position:fixed;inset:0;z-index:31000;isolation:isolate;overflow:hidden;touch-action:pan-y}
 .customer-guide.hidden{display:none!important}
-.customer-guide-open #navBookHintV220{display:none!important}
 .customer-guide.guide-welcome{background:#172136a8}
 .guide-spot{position:fixed;border-radius:17px;border:2px solid #ffb670;box-shadow:0 0 0 9999px #172136b8;pointer-events:none;box-sizing:border-box}
 .guide-card{position:fixed;box-sizing:border-box;background:#fffcfa;border:1px solid #efd6c5;border-radius:22px;padding:17px;box-shadow:0 12px 45px #10182735;color:#172136;overflow:auto;overscroll-behavior:contain}

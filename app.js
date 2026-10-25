@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v381';
-const APP_VERSION='2.0.56';
+const APP_BUILD='v382';
+const APP_VERSION='2.0.57';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -2517,70 +2517,19 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,120),{once:true});else setTimeout(start,120);
 })();
 
-/* v222: booking tile in navigation + a 20-second explanatory hint per page session.
-   Acknowledgement is persisted ONLY after the first tap on the booking tile. */
+/* Booking tile: direct opening without an explanatory popover. */
 (function customerBookingFabV222(){
-  const hintVersion='booking-fab-hint-v222';
-  const fab=()=>document.getElementById('navBookAddV220');
-  const hint=()=>document.getElementById('navBookHintV220');
-  const userKey=()=>state.session?.user?.id?hintVersion+':'+state.session.user.id:null;
-  const shownForAccounts=new Set();
-  let showTimer=0,hideTimer=0;
-  function hideHint(){
-    clearTimeout(hideTimer);hideTimer=0;
-    hint()?.classList.remove('show-v220');
-    hint()?.classList.add('hidden');
-  }
-  function acknowledgeHint(){
-    const key=userKey();
-    if(key){try{localStorage.setItem(key,'1')}catch(_){}}
-    hideHint();
-  }
-  function maybeShowHint(retry=0){
-    const key=userKey();
-    if(!fab()||!hint())return;
-    if(!key){
-      if(retry<35)showTimer=setTimeout(()=>maybeShowHint(retry+1),800);
-      return;
-    }
-    if(shownForAccounts.has(key))return;
-    try{if(localStorage.getItem(key)==='1')return}catch(_){}
-    if(window.__customerOnboardingCompleteV75!==true||state.activeTab!=='booking'||document.getElementById('appView')?.classList.contains('hidden')){
-      if(retry<35)showTimer=setTimeout(()=>maybeShowHint(retry+1),800);
-      return;
-    }
-    if(document.querySelector('.legal-modal:not(.hidden),.booking-picker-v37:not(.hidden)')){
-      if(retry<35)showTimer=setTimeout(()=>maybeShowHint(retry+1),800);
-      return;
-    }
-    shownForAccounts.add(key); // In-memory only: the hint may reappear on the NEXT app start unless + was used.
-    hint().classList.remove('hidden');
-    hint().classList.add('show-v220');
-    clearTimeout(hideTimer);
-    hideTimer=setTimeout(hideHint,20000);
-  }
   function openFromFab(){
-    acknowledgeHint();
     if(!state.session||!selectedDog()){toast('Najprv musí byť váš psík priradený k účtu.');return}
     if(state.activeTab!=='booking')switchTab('booking');
     if(typeof window.openBookingPickerV37==='function')window.openBookingPickerV37();
     else toast('Rezervácie ešte nie sú pripravené. Skúste to znova.');
   }
   function init(){
-    const button=fab();if(!button||button.dataset.boundV222==='1')return;
-    button.dataset.boundV222='1';
-    button.addEventListener('click',openFromFab);
-    document.getElementById('navDog')?.addEventListener('click',hideHint);
-    document.getElementById('navBooking')?.addEventListener('click',()=>{hideHint();setTimeout(()=>maybeShowHint(),500)});
-    showTimer=setTimeout(()=>maybeShowHint(),1300);
+    const button=document.getElementById('navBookAddV220');if(!button||button.dataset.boundV222==='1')return;
+    button.dataset.boundV222='1';button.addEventListener('click',openFromFab);
   }
-  addCustomerHook('afterBootstrap',()=>{clearTimeout(showTimer);showTimer=setTimeout(()=>maybeShowHint(),1000)});
-  addCustomerHook('afterRenderDog',()=>{if(state.session)setTimeout(()=>maybeShowHint(),450)});
-  addCustomerHook('afterSwitchTab',()=>{if(state.activeTab==='booking')setTimeout(()=>maybeShowHint(),450);else hideHint()});
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>maybeShowHint(),500);else hideHint()});
-  window.addEventListener('pageshow',()=>setTimeout(()=>maybeShowHint(),550));
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 
 /* v37: direct settings notification + compact multi-day booking flow */
@@ -4309,7 +4258,7 @@ function installVaccinationViewerZoomV244(modal){
     const content=el('span','customer-notice-content-v363');
     const head=el('span','customer-notice-head-v363');head.append(el('strong','',row.title||'Oznam'));
     if(!row.preview&&!rowsState.read.has(Number(row.id)))head.append(el('span','customer-bulletin-new-v229','Nové'));
-    content.append(head,el('span','customer-notice-excerpt-v363',row.body||''),el('span','customer-notice-action-v363','Zobraziť oznam ›'));
+    content.append(head,el('span','customer-notice-excerpt-v363',row.body||''),el('span','customer-notice-action-v363','Otvoriť oznam ›'));
     b.append(thumb,content);b.addEventListener('click',()=>openArticle(row,fromHistory));return b;
   }
   function drawOverview(){
@@ -4330,19 +4279,19 @@ function installVaccinationViewerZoomV244(modal){
     const heading=el('h2','customer-notice-title-v381',preview?'Oznamy · ukážka':'Oznamy');
     const track=el('div','customer-notice-carousel-v376');track.dataset.multiple=String(selected.length>1);track.setAttribute('role','region');track.setAttribute('aria-label','Oznamy škôlky');track.tabIndex=0;
     selected.forEach((row,index)=>{const card=noticeCard(row,false);card.setAttribute('aria-label',(index+1)+' z '+selected.length+': '+(row.title||'Oznam'));track.append(card)});
-    host.replaceChildren(heading,track);
+    const header=el('div','customer-notice-header-v382'),stage=el('div','customer-notice-stage-v382');stage.dataset.multiple=String(selected.length>1);header.append(heading);stage.append(track);host.replaceChildren(header,stage);
     if(selected.length>1){
       const controls=el('div','customer-notice-controls-v381');
-      const prev=el('button','','‹'),next=el('button','','›'),position=el('span','customer-notice-position-v381');
-      prev.type=next.type='button';prev.setAttribute('aria-label','Predchádzajúci oznam');next.setAttribute('aria-label','Ďalší oznam');position.setAttribute('aria-live','polite');position.setAttribute('aria-atomic','true');
+      const prev=el('button','','‹'),next=el('button','','›');
+      prev.type=next.type='button';prev.setAttribute('aria-label','Predchádzajúci oznam');next.setAttribute('aria-label','Ďalší oznam');
       let index=Math.min(oldIndex,selected.length-1),pending=0;
       const step=()=>Math.max(1,track.firstElementChild.getBoundingClientRect().width+12);
-      const update=()=>{pending=0;index=Math.max(0,Math.min(selected.length-1,Math.round(track.scrollLeft/step())));prev.disabled=index===0;next.disabled=index===selected.length-1;const text=(index+1)+' / '+selected.length;if(position.textContent!==text)position.textContent=text;};
+      const update=()=>{pending=0;index=Math.max(0,Math.min(selected.length-1,Math.round(track.scrollLeft/step())));prev.disabled=index===0;next.disabled=index===selected.length-1;track.dataset.currentIndex=String(index);};
       const move=direction=>track.scrollTo({left:(index+direction)*step(),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
       prev.onclick=()=>move(-1);next.onclick=()=>move(1);
       track.addEventListener('scroll',()=>{if(!pending)pending=requestAnimationFrame(update)},{passive:true});
       track.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();move(event.key==='ArrowRight'?1:-1)}});
-      controls.append(prev,position,next);host.append(controls);track.scrollLeft=index*step();update();
+      controls.append(next,prev);stage.append(controls);track.scrollLeft=index*step();update();
     }
   }
   async function markRead(row){
