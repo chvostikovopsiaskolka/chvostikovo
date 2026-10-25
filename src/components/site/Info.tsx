@@ -2,7 +2,9 @@ import { useState } from "react";
 import { ShieldCheck, HeartHandshake, Sparkles, Stethoscope, Check, Plus, Minus, Car, Phone } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
-import { LongForm } from "./Forms";
+import { LongForm, ShortForm } from "./Forms";
+import { trackMarketingInteraction } from "@/lib/analytics";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
@@ -119,10 +121,14 @@ export function FirstVisit() {
         <div className="mt-8 flex justify-center">
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              trackMarketingInteraction("inquiry_cta", "home_first_visit_interest");
+              void trackCookielessInteraction("inquiry_cta", "home_first_visit_interest");
+              setOpen(true);
+            }}
             className="btn-coral inline-flex min-w-[220px] items-center justify-center px-7 py-3.5 text-[15px] sm:min-w-[310px] sm:px-10 sm:py-4 sm:text-lg"
           >
-            Prihláška do škôlky
+            Dohodnúť úvodnú návštevu
           </button>
         </div>
       </div>
@@ -130,16 +136,22 @@ export function FirstVisit() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Prihlás svojho psíka ešte dnes"
-        subtitle="Vyplňte formulár, v ktorom nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky."
+        title="Dohodnúť bezplatnú úvodnú návštevu"
+        subtitle="Nechajte nám kontakt a ozveme sa vám. Termín úvodnej návštevy dohodneme po preverení zdravotných podmienok a platných očkovaní vášho psíka."
       >
-        <LongForm />
+        <ShortForm
+          trackingSource="home_first_visit_interest"
+          hideInterest
+          interestValue="Mám záujem o bezplatnú úvodnú návštevu"
+        />
       </FormDialog>
     </section>
   );
 }
 
 export function Pricing() {
+  const [open, setOpen] = useState(false);
+
   return (
     <section id="cennik" className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
       <SectionAmbientPaws />
@@ -205,13 +217,21 @@ export function Pricing() {
           </p>
 
           <div className="mt-7 flex justify-center">
-            <a href="#kontakt" className="btn-coral">
+            <button type="button" onClick={() => setOpen(true)} className="btn-coral">
               Prihláška do škôlky
-            </a>
+            </button>
           </div>
         </div>
 
       </div>
+      <FormDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Prihláška do škôlky"
+        subtitle="Povedzte nám viac o svojom psíkovi. Po odoslaní prihlášky sa vám ozveme a dohodneme ďalší postup."
+      >
+        <LongForm />
+      </FormDialog>
     </section>
   );
 }

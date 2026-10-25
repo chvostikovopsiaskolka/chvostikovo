@@ -77,6 +77,23 @@ assert(css.includes("@media (hover: hover) and (pointer: fine)"), "Hover glow mu
 assert(css.includes("@media (prefers-reduced-motion: reduce)"), "Reduced motion preference required");
 assert(!css.includes("transform: scale("), "CTA must not scale on touch and shift adjacent labels");
 
+
+// Conversion CTA structure: Why and First Visit are enquiries, Pricing is the
+// sole full-form CTA of these three sections. Never change submit internals.
+const story = read("src/components/site/Story.tsx");
+const info = read("src/components/site/Info.tsx");
+const why = story.slice(story.indexOf("export function Why()"), story.indexOf("export function About("));
+const first = info.slice(info.indexOf("export function FirstVisit()"), info.indexOf("export function Pricing()"));
+const pricing = info.slice(info.indexOf("export function Pricing()"), info.indexOf("const PRIMARY_FAQ"));
+assert(why.includes("Hľadám škôlku pre psíka") && why.includes('<ShortForm trackingSource="home_why_interest" />'), "Why CTA must open tracked short enquiry");
+assert(!why.includes("<LongForm"), "Why should not duplicate full registration");
+assert(first.includes("Dohodnúť úvodnú návštevu") && first.includes('trackingSource="home_first_visit_interest"') && first.includes("hideInterest"), "Intro visit CTA needs short, prefocused enquiry");
+assert(!first.includes("<LongForm"), "Intro visit should not present a full application");
+assert(pricing.includes("Prihláška do škôlky") && pricing.includes("<LongForm />") && pricing.includes("<FormDialog"), "Pricing must open the canonical full application");
+assert(!pricing.includes('href="#kontakt"'), "Pricing CTA must not misroute to generic contact");
+assert(css.includes("margin-inline-start: 4px") && css.includes("margin-inline: 2px"), "Active dock and orange CTA must not touch");
+assert(forms.includes("typ: \"prihlaska\"") && forms.includes("typ: \"informacie\""), "Preserve distinct lead and application types");
+
 console.log("Mobile dock structural regression guards: PASS");
 
 for (const [route, variant, marker] of [
