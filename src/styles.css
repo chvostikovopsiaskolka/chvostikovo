@@ -457,7 +457,7 @@
     min-height: 44px;
     padding: 0 1px 0 8px;
   }
-  .mobile-dock-menu-title { margin: 0; line-height: 1.1; }
+  .mobile-dock-menu-title { display: flex; align-items: center; min-height: 44px; margin: 0; line-height: 1.1; }
   .mobile-dock-menu-close {
     display: grid;
     flex-shrink: 0;

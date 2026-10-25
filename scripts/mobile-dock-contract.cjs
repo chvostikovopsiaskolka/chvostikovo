@@ -14,7 +14,7 @@ const forms = read("src/components/site/Forms.tsx");
 for (const value of ["Domov", "Priestory", "Starostlivosť", "Cenník", "Prihláška", "Menu"]) {
   assert(dock.includes(value), "Missing dock item " + value);
 }
-for (const value of ["Home", "Why us?", "Reviews", "Prices", "Enquire", "SK"]) {
+for (const value of ["Home", "Why us?", "Reviews", "Prices", "Enquire", "Slovak version"]) {
   assert(dock.includes(value), "Missing EN item " + value);
 }
 for (const anchor of ["priestory", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "why-daycare", "pricing"]) {
