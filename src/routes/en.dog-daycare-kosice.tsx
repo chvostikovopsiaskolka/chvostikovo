@@ -606,18 +606,10 @@ function EnglishDogDaycarePage() {
                 </div>
 
                 <div className="order-5 mt-4 flex items-center gap-3">
-                  <a
-                    href={"tel:" + PHONE}
-                    data-tracking-source="en_hero_desktop"
-                    aria-label="Call Chvostíkovo"
-                    className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-coral text-primary-foreground shadow-card transition-colors hover:bg-coral-dark"
-                  >
-                    <Phone className="size-5" />
-                  </a>
                   <button
                     type="button"
                     onClick={() => exploreDaycare("en_hero_desktop_cta")}
-                    className="btn-coral inline-flex min-w-44 items-center justify-center gap-2 px-5 py-2.5 text-sm"
+                    className="btn-coral inline-flex min-w-[310px] items-center justify-center gap-3 px-10 py-4 text-lg"
                   >
                     Learn more
                     <ArrowRight className="size-4" />
