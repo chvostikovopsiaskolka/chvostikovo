@@ -160,7 +160,7 @@ export const REVIEWS = [
 export const WHY = [
   {
     title: "Keď ste cez deň preč",
-    text: "Práca, vybavovanie alebo nečakané povinnosti — nie vždy môže ísť psík s vami. U nás má počas vašej neprítomnosti spoločnosť a ľudí, ktorí sa oňho postarajú.",
+    text: "Práca, vybavovanie alebo nečakané povinnosti? Nie vždy môže ísť psík s vami. U nás má počas vašej neprítomnosti spoločnosť a ľudí, ktorí sa oňho postarajú.",
   },
   {
     title: "Keď má energie na rozdávanie",
