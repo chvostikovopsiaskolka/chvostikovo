@@ -93,7 +93,7 @@ export function FirstVisit() {
           <p className="mt-3 text-forest/80">Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.</p>
         </div>
 
-        <ol className="mt-10 grid gap-5 md:grid-cols-3">
+        <ol className="mt-10 grid gap-6 md:grid-cols-3">
           {STEPS.map((s, i) => (
             <li key={s.title} className="relative rounded-4xl bg-card p-7 pt-9 shadow-card">
               <span className="absolute -top-5 left-7 flex size-11 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-primary-foreground shadow-card">
