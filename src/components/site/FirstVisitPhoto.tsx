@@ -6,22 +6,23 @@ type FirstVisitPhotoProps = {
   number: number | string;
   image: string;
   alt: string;
+  language?: "sk" | "en";
 };
 
 const approvedPhotos = [
-  { src: firstVisitTwoDogs, alt: "Dvaja psíkovia v škôlke Chvostíkovo" },
-  { src: firstVisitDogFriends, alt: "Skupina psích kamarátov v škôlke Chvostíkovo" },
-  { src: firstVisitYoungDog, alt: "Svetlý psík v škôlke Chvostíkovo" },
+  { src: firstVisitTwoDogs, alt: "Dvaja psíkovia v škôlke Chvostíkovo", altEn: "Two dogs sitting together at Chvostíkovo daycare" },
+  { src: firstVisitDogFriends, alt: "Skupina psích kamarátov v škôlke Chvostíkovo", altEn: "Group of friendly dogs at Chvostíkovo daycare" },
+  { src: firstVisitYoungDog, alt: "Svetlý psík v škôlke Chvostíkovo", altEn: "Young light-coloured dog sitting at Chvostíkovo daycare" },
 ];
 
 /** Three user-approved authentic photos, consistent across SK and EN first-visit steps. */
-export function FirstVisitPhoto({ number, image, alt }: FirstVisitPhotoProps) {
+export function FirstVisitPhoto({ number, image, alt, language = "sk" }: FirstVisitPhotoProps) {
   const photo = approvedPhotos[Number(number) - 1];
   return (
     <div className="relative mx-auto mb-6 w-fit">
       <img
         src={photo?.src ?? image}
-        alt={photo?.alt ?? alt}
+        alt={photo ? (language === "en" ? photo.altEn : photo.alt) : alt}
         width={600}
         height={600}
         loading="lazy"
