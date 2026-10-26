@@ -730,6 +730,8 @@ function EnglishDogDaycarePage() {
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Starting daycare in 3 simple steps</h2>
             </div>
 
+            <p className="mx-auto mt-4 w-fit rounded-full border border-coral/30 bg-coral/10 px-5 py-2 text-center font-display text-base font-bold text-coral-dark sm:text-lg">Free introductory visit</p>
+
             <div className="mt-10 grid gap-9 text-center md:grid-cols-3 md:gap-8">
               {[
                 ["1", "Get in touch", "Send us a short enquiry or call us. Tell us a little about your dog and we will arrange an introductory visit."],
