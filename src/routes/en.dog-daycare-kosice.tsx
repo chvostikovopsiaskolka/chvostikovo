@@ -737,7 +737,7 @@ function EnglishDogDaycarePage() {
                 ["3", "Plan the first daycare day", "If daycare is a good fit, we agree on the next visit. If your dog needs more time, we can recommend a gentler introduction."],
               ].map(([number, heading, copy], i) => (
                 <article key={number} className="min-w-0">
-                  <FirstVisitPhoto number={number} image={GALLERY[[2, 0, 5][i]!]!.src} alt={["Dogs enjoying the daycare", "Indoor daycare space", "Dogs relaxing at daycare"][i]!} />
+                  <FirstVisitPhoto number={number ?? i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={["Dogs enjoying the daycare", "Indoor daycare space", "Dogs relaxing at daycare"][i]!} />
                   <h3 className="font-display text-xl font-bold text-forest">{heading}</h3>
                   <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{copy}</p>
                 </article>
