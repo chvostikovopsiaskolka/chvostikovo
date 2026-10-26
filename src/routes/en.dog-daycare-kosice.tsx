@@ -18,6 +18,8 @@ import logo from "@/assets/logo.png";
 import { EnglishInquiryForm } from "@/components/site/EnglishInquiryForm";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
+import { EditorialBenefits } from "@/components/site/EditorialBenefits";
+import { DAYCARE_GALLERY_EXTRAS } from "@/content/site";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
 import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
@@ -737,33 +739,16 @@ function EnglishDogDaycarePage() {
                 Why use dog daycare?
               </h2>
 
-              <div className="mt-6 space-y-3 md:hidden">
-                {WHY_EN.map(({ title, text, icon: Icon }) => (
-                  <Collapse
-                    key={title}
-                    title={title}
-                    tone="dark"
-                    icon={
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground">
-                        <Icon className="size-5" />
-                      </span>
-                    }
-                  >
-                    {text}
-                  </Collapse>
-                ))}
-              </div>
-
-              <div className="mt-8 hidden gap-6 md:grid md:grid-cols-3">
-                {WHY_EN.map(({ title, text, icon: Icon }) => (
-                  <div key={title} className="rounded-3xl bg-cream/10 p-6 ring-1 ring-cream/15 backdrop-blur-sm">
-                    <span className="flex size-12 items-center justify-center rounded-2xl bg-coral text-primary-foreground">
-                      <Icon className="size-6" />
-                    </span>
-                    <h3 className="mt-4 text-xl text-cream">{title}</h3>
-                    <p className="mt-2 text-[0.95rem] leading-relaxed text-cream/85">{text}</p>
-                  </div>
-                ))}
+              <div className="mt-7">
+                <EditorialBenefits image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt="Dogs playing at Chvostíkovo daycare" secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt="Dogs resting on the sofa at Chvostíkovo">
+                  {WHY_EN.map(({ title, text, icon: Icon }, i) => (
+                    <article key={title} className={`py-3 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-cream/25" : ""}`}>
+                      <Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden />
+                      <h3 className="font-display text-[14px] font-bold leading-snug text-cream min-[390px]:text-[16px] sm:text-xl">{title}</h3>
+                      <p className="mt-1 text-[12px] leading-[1.5] text-cream/85 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{text}</p>
+                    </article>
+                  ))}
+                </EditorialBenefits>
               </div>
 
               <div className="mt-8 flex flex-wrap justify-center gap-3">

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ShieldCheck, HeartHandshake, Sparkles, Stethoscope, Check, Plus, Minus, Car, Phone } from "lucide-react";
 import { FormDialog } from "./FormDialog";
-import { Collapse } from "./Collapse";
 import { LongForm, ShortForm } from "./Forms";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -22,38 +21,18 @@ export function Requirements() {
           <h2 className="section-title mt-2 text-3xl sm:text-4xl">Čo musí psík spĺňať</h2>
         </div>
 
-        {/* Mobil – rozbaľovacie karty */}
-        <div className="mt-8 space-y-3 md:hidden">
+        <div className="mx-auto mt-8 max-w-4xl overflow-hidden rounded-3xl bg-card px-4 shadow-card ring-1 ring-forest/5 sm:px-7">
           {REQUIREMENTS.map((r, i) => {
             const Icon = reqIcons[i]!;
             return (
-              <Collapse
-                key={r.title}
-                title={r.title}
-                icon={
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-forest">
-                    <Icon className="size-5" />
-                  </span>
-                }
-              >
-                {r.text}
-              </Collapse>
-            );
-          })}
-        </div>
-
-        {/* Desktop – pôvodné karty */}
-        <div className="mt-10 hidden gap-5 md:grid md:grid-cols-2">
-          {REQUIREMENTS.map((r, i) => {
-            const Icon = reqIcons[i]!;
-            return (
-              <article key={r.title} className="rounded-4xl bg-card p-7 shadow-card">
-                <span className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-forest">
-                  <Icon className="size-6" />
-                </span>
-                <h3 className="mt-4 text-xl text-forest">{r.title}</h3>
-                <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{r.text}</p>
-              </article>
+              <details key={r.title} className="group border-b border-forest/10 py-1 last:border-b-0">
+                <summary className="flex min-h-16 cursor-pointer list-none items-center gap-3 py-3 text-left [&::-webkit-details-marker]:hidden">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-forest"><Icon className="size-5" /></span>
+                  <span className="min-w-0 flex-1 font-display text-base font-bold text-forest sm:text-xl">{r.title}</span>
+                  <Plus className="size-5 shrink-0 text-coral transition-transform group-open:rotate-45" aria-hidden />
+                </summary>
+                <p className="pb-5 pl-[52px] pr-3 text-[0.95rem] leading-relaxed text-forest/80">{r.text}</p>
+              </details>
             );
           })}
         </div>
@@ -93,27 +72,14 @@ export function FirstVisit() {
           <p className="mt-3 text-forest/80">Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.</p>
         </div>
 
-        <ol className="mt-10 grid gap-5 md:grid-cols-3">
+        <ol className="relative mx-auto mt-11 grid max-w-5xl gap-6 md:grid-cols-3 md:gap-8">
           {STEPS.map((s, i) => (
-            <li key={s.title} className="relative rounded-4xl bg-card p-7 pt-9 shadow-card">
-              <span className="absolute -top-5 left-7 flex size-11 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-primary-foreground shadow-card">
-                {i + 1}
-              </span>
-              <h3 className="text-xl text-forest">{s.title}</h3>
+            <li key={s.title} className="relative border-l-2 border-forest/20 pb-3 pl-7 last:border-transparent md:border-l-0 md:border-t-2 md:pb-0 md:pl-0 md:pt-8">
+              <span className="absolute -left-[22px] -top-3 flex size-11 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-primary-foreground shadow-card md:-top-[23px] md:left-0">{String(i + 1).padStart(2, "0")}</span>
+              <h3 className="font-display text-xl font-bold leading-snug text-forest">{s.title}</h3>
               <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{s.text}</p>
-              {s.note && (
-                <p className="mt-4 flex items-start gap-2 font-display text-sm font-semibold text-forest">
-                  <Check className="size-5 shrink-0 text-forest" /> {s.note}
-                </p>
-              )}
-              {i === 0 && (
-                <a
-                  href={`tel:${PHONE}`}
-                  className="mt-4 inline-flex items-center gap-2 font-display text-sm font-semibold text-coral"
-                >
-                  <Phone className="size-4" /> {PHONE_PRETTY}
-                </a>
-              )}
+              {s.note && <p className="mt-4 flex items-start gap-2 font-display text-sm font-semibold text-forest"><Check className="size-5 shrink-0 text-forest" /> {s.note}</p>}
+              {i === 0 && <a href={`tel:${PHONE}`} className="mt-4 inline-flex items-center gap-2 font-display text-sm font-semibold text-coral"><Phone className="size-4" /> {PHONE_PRETTY}</a>}
             </li>
           ))}
         </ol>
