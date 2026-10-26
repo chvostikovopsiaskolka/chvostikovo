@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Syringe, PawPrint, Droplets, HeartPulse, Check, Plus, Minus, Car, Phone } from "lucide-react";
+import { Syringe, PawPrint, Droplets, HeartPulse, Check, Plus, Minus, Car } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { LongForm, ShortForm } from "./Forms";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
-import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
+import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE } from "@/content/site";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FirstVisitPhoto } from "./FirstVisitPhoto";
 
@@ -165,7 +165,7 @@ export function Pricing() {
           ))}
         </div>
 
-        <div className="mt-6 rounded-4xl bg-card p-7 shadow-card sm:p-9">
+        <div className="mt-6 rounded-4xl bg-card p-7 shadow-card sm:p-9 lg:mx-auto lg:max-w-3xl lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none">
           <h3 className="text-center text-xl text-forest">
             Čo je v cene zahrnuté pri každom vstupe
           </h3>
@@ -178,7 +178,7 @@ export function Pricing() {
             ))}
           </ul>
 
-          <p className="mt-6 flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-secondary px-5 py-3 text-center font-display text-sm font-semibold text-forest">
+          <p className="mt-6 flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-secondary px-5 py-3 text-center font-display text-sm font-semibold text-forest lg:mx-auto lg:w-fit lg:rounded-full lg:bg-coral/10 lg:px-5 lg:py-2">
             <Car className="size-5 text-coral" /> Vyzdvihnutie a odvoz psíka: 5 € za jednu jazdu
           </p>
 
