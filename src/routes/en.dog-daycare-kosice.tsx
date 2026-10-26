@@ -10,6 +10,10 @@ import {
   Moon,
   Phone,
   ShieldCheck,
+  Syringe,
+  PawPrint,
+  Droplets,
+  HeartPulse,
   Sparkles,
   Users,
   X,
@@ -18,8 +22,9 @@ import logo from "@/assets/logo.png";
 import { EnglishInquiryForm } from "@/components/site/EnglishInquiryForm";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
+import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
-import { DAYCARE_GALLERY_EXTRAS } from "@/content/site";
+import { DAYCARE_GALLERY_EXTRAS, GALLERY } from "@/content/site";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
 import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
@@ -361,22 +366,22 @@ const REQUIREMENTS_EN = [
   {
     title: "Vaccinations and prevention",
     text: "Your dog needs a valid vaccination record covering rabies, core infectious diseases (distemper, parvovirus, parainfluenza, infectious hepatitis and leptospirosis), and kennel cough. Regular deworming and protection against external parasites are required.",
-    icon: ShieldCheck,
+    icon: Syringe,
   },
   {
     title: "Behaviour around dogs and people",
     text: "Dogs must be comfortable and non-aggressive around people and other dogs. Dogs displaying aggression or unsafe group behaviour cannot attend. We assess suitability during the introductory visit.",
-    icon: Users,
+    icon: PawPrint,
   },
   {
     title: "Hygiene",
     text: "Dogs should have basic indoor toilet habits, taking a puppy's age and development into account. Please walk your dog before arrival; we provide opportunities to relieve themselves during the day.",
-    icon: Sparkles,
+    icon: Droplets,
   },
   {
     title: "Health and comfort",
     text: "Dogs must be clinically healthy and free of contagious illness. Please tell us about allergies and chronic conditions in advance so we can assess their needs. Female dogs cannot attend while in heat.",
-    icon: Moon,
+    icon: HeartPulse,
   },
 ];
 
@@ -717,6 +722,36 @@ function EnglishDogDaycarePage() {
 
         <Care language="en" />
 
+        <section id="en-first-visit" className="relative scroll-mt-4 overflow-hidden py-14 sm:py-18">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4">
+            <div className="text-center">
+              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">How it works</p>
+              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Starting daycare in 3 simple steps</h2>
+            </div>
+
+            <div className="mt-10 grid gap-9 text-center md:grid-cols-3 md:gap-8">
+              {[
+                ["1", "Get in touch", "Send us a short enquiry or call us. Tell us a little about your dog and we will arrange an introductory visit."],
+                ["2", "Meet us", "The introductory visit is free. We get to know your dog, show you the daycare and see how they respond to the new environment."],
+                ["3", "Plan the first daycare day", "If daycare is a good fit, we agree on the next visit. If your dog needs more time, we can recommend a gentler introduction."],
+              ].map(([number, heading, copy], i) => (
+                <article key={number} className="min-w-0">
+                  <FirstVisitPhoto number={number ?? i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={["Dogs enjoying the daycare", "Indoor daycare space", "Dogs relaxing at daycare"][i]!} />
+                  <h3 className="font-display text-xl font-bold text-forest">{heading}</h3>
+                  <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{copy}</p>
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              <button type="button" onClick={() => openInquiry("en_first_visit")} className="btn-coral">
+                Enquire about a first visit
+              </button>
+            </div>
+          </div>
+        </section>
+
         <section className="relative overflow-hidden bg-card py-10 lg:hidden">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-2xl px-4">
@@ -764,6 +799,28 @@ function EnglishDogDaycarePage() {
                 </a>
               </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="requirements" className="relative scroll-mt-24 overflow-hidden bg-secondary/45 py-14 sm:py-18">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4">
+            <div className="text-center">
+              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Before joining</p>
+              <h2 className="section-title mt-2 text-3xl sm:text-4xl">What your dog needs before daycare</h2>
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 sm:gap-5">
+              {REQUIREMENTS_EN.map(({ title, text, icon: Icon }) => (
+                <article key={title} className="rounded-3xl border border-forest/10 bg-card p-6 shadow-card sm:p-7">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-forest"><Icon className="size-6" aria-hidden /></span>
+                    <h3 className="font-display text-lg font-bold text-forest sm:text-xl">{title}</h3>
+                  </div>
+                  <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80">{text}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -837,75 +894,9 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <section id="en-first-visit" className="relative scroll-mt-4 overflow-hidden py-14 sm:py-18">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-6xl px-4">
-            <div className="text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">How it works</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">Starting daycare in 3 simple steps</h2>
-            </div>
 
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {[
-                ["1", "Get in touch", "Send us a short enquiry or call us. Tell us a little about your dog and we will arrange an introductory visit."],
-                ["2", "Meet us", "The introductory visit is free. We get to know your dog, show you the daycare and see how they respond to the new environment."],
-                ["3", "Plan the first daycare day", "If daycare is a good fit, we agree on the next visit. If your dog needs more time, we can recommend a gentler introduction."],
-              ].map(([number, heading, copy]) => (
-                <article key={number} className="relative rounded-4xl bg-card p-7 pt-9 shadow-card">
-                  <span className="absolute -top-5 left-7 flex size-11 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-primary-foreground shadow-card">
-                    {number}
-                  </span>
-                  <h3 className="text-xl text-forest">{heading}</h3>
-                  <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{copy}</p>
-                </article>
-              ))}
-            </div>
 
-            <div className="mt-8 flex justify-center">
-              <button type="button" onClick={() => openInquiry("en_first_visit")} className="btn-coral">
-                Enquire about a first visit
-              </button>
-            </div>
-          </div>
-        </section>
 
-        <section id="requirements" className="relative scroll-mt-24 overflow-hidden bg-secondary/45 py-14 sm:py-18">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-6xl px-4">
-            <div className="text-center">
-              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Before joining</p>
-              <h2 className="section-title mt-2 text-3xl sm:text-4xl">What your dog needs before daycare</h2>
-            </div>
-
-            <div className="mt-8 space-y-3 md:hidden">
-              {REQUIREMENTS_EN.map(({ title, text, icon: Icon }) => (
-                <Collapse
-                  key={title}
-                  title={title}
-                  icon={
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-forest">
-                      <Icon className="size-5" />
-                    </span>
-                  }
-                >
-                  {text}
-                </Collapse>
-              ))}
-            </div>
-
-            <div className="mt-10 hidden gap-5 md:grid md:grid-cols-2">
-              {REQUIREMENTS_EN.map(({ title, text, icon: Icon }) => (
-                <article key={title} className="rounded-4xl bg-card p-7 shadow-card">
-                  <span className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-forest">
-                    <Icon className="size-6" />
-                  </span>
-                  <h3 className="mt-4 text-xl text-forest">{title}</h3>
-                  <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{text}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
 
         <About language="en" />
         <PhotoStrip />

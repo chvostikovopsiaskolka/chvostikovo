@@ -194,13 +194,16 @@ export function ReviewReasons({
           <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
         </div>
 
-        <div className="mt-7 overflow-hidden rounded-3xl bg-cream px-5 text-forest shadow-card ring-1 ring-cream/40 md:grid md:grid-cols-3 md:px-3">
+        {/* One continuous liquid-glass surface, preserving the original translucent character. */}
+        <div className="mt-7 overflow-hidden rounded-3xl bg-cream/10 px-5 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl md:grid md:grid-cols-3 md:px-3">
           {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }, i) => (
-            <article key={title} className={`flex min-w-0 items-start gap-3 py-5 md:block md:px-5 md:py-7 ${i ? "border-t border-forest/15 md:border-l md:border-t-0" : ""}`}>
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground md:size-11"><Icon className="size-5" /></span>
-              <div className="min-w-0 md:mt-3">
-                <h3 className="font-display text-base font-bold text-forest md:text-lg">{title}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-forest/80">{text}</p>
+            <article key={title} className={`flex min-w-0 items-start gap-3 py-6 md:block md:px-5 md:py-8 ${i ? "border-t border-cream/20 md:border-l md:border-t-0" : ""}`}>
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-coral text-primary-foreground md:size-12">
+                <Icon className="size-6" />
+              </span>
+              <div className="min-w-0 md:mt-4">
+                <h3 className="font-display text-lg font-bold leading-snug text-cream sm:text-xl">{title}</h3>
+                <p className="mt-2 text-base leading-relaxed text-cream/90 sm:text-[1.05rem]">{text}</p>
               </div>
             </article>
           ))}

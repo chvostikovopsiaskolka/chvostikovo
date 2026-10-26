@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { ShieldCheck, HeartHandshake, Sparkles, Stethoscope, Check, Plus, Minus, Car, Phone } from "lucide-react";
+import { Syringe, PawPrint, Droplets, HeartPulse, Check, Plus, Minus, Car, Phone } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { LongForm, ShortForm } from "./Forms";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
-import { REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
+import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
+import { FirstVisitPhoto } from "./FirstVisitPhoto";
 
-const reqIcons = [ShieldCheck, HeartHandshake, Sparkles, Stethoscope];
+const reqIcons = [Syringe, PawPrint, Droplets, HeartPulse];
 
 export function Requirements() {
   return (
@@ -21,18 +22,20 @@ export function Requirements() {
           <h2 className="section-title mt-2 text-3xl sm:text-4xl">Čo musí psík spĺňať</h2>
         </div>
 
-        <div className="mx-auto mt-8 max-w-4xl overflow-hidden rounded-3xl bg-card px-4 shadow-card ring-1 ring-forest/5 sm:px-7">
+        {/* Four distinct information cards, always visible, unlike the FAQ accordion. */}
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 sm:gap-5">
           {REQUIREMENTS.map((r, i) => {
             const Icon = reqIcons[i]!;
             return (
-              <details key={r.title} className="group border-b border-forest/10 py-1 last:border-b-0">
-                <summary className="flex min-h-16 cursor-pointer list-none items-center gap-3 py-3 text-left [&::-webkit-details-marker]:hidden">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-forest"><Icon className="size-5" /></span>
-                  <span className="min-w-0 flex-1 font-display text-base font-bold text-forest sm:text-xl">{r.title}</span>
-                  <Plus className="size-5 shrink-0 text-coral transition-transform group-open:rotate-45" aria-hidden />
-                </summary>
-                <p className="pb-5 pl-[52px] pr-3 text-[0.95rem] leading-relaxed text-forest/80">{r.text}</p>
-              </details>
+              <article key={r.title} className="rounded-3xl border border-forest/10 bg-card p-6 shadow-card sm:p-7">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-forest">
+                    <Icon className="size-6" aria-hidden />
+                  </span>
+                  <h3 className="font-display text-lg font-bold text-forest sm:text-xl">{r.title}</h3>
+                </div>
+                <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80">{r.text}</p>
+              </article>
             );
           })}
         </div>
@@ -72,13 +75,13 @@ export function FirstVisit() {
           <p className="mt-3 text-forest/80">Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.</p>
         </div>
 
-        <ol className="relative mx-auto mt-11 grid max-w-5xl gap-6 md:grid-cols-3 md:gap-8">
+        <ol className="mx-auto mt-10 grid max-w-5xl gap-9 text-center md:grid-cols-3 md:gap-8">
           {STEPS.map((s, i) => (
-            <li key={s.title} className="relative border-l-2 border-forest/20 pb-3 pl-7 last:border-transparent md:border-l-0 md:border-t-2 md:pb-0 md:pl-0 md:pt-8">
-              <span className="absolute -left-[22px] -top-3 flex size-11 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-primary-foreground shadow-card md:-top-[23px] md:left-0">{String(i + 1).padStart(2, "0")}</span>
+            <li key={s.title} className="min-w-0">
+              <FirstVisitPhoto number={i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
               <h3 className="font-display text-xl font-bold leading-snug text-forest">{s.title}</h3>
               <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{s.text}</p>
-              {s.note && <p className="mt-4 flex items-start gap-2 font-display text-sm font-semibold text-forest"><Check className="size-5 shrink-0 text-forest" /> {s.note}</p>}
+              {s.note && <p className="mt-4 flex items-center justify-center gap-2 font-display text-sm font-semibold text-forest"><Check className="size-5 shrink-0 text-forest" /> {s.note}</p>}
               {i === 0 && <a href={`tel:${PHONE}`} className="mt-4 inline-flex items-center gap-2 font-display text-sm font-semibold text-coral"><Phone className="size-4" /> {PHONE_PRETTY}</a>}
             </li>
           ))}

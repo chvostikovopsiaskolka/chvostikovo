@@ -153,20 +153,20 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
   const menuEntries = english
     ? [
         ...(marketing ? marketingExtra : [{ label: "Reviews", href: homePath + "#reviews" }]),
-        { label: "About us", href: homePath + "#about" },
         ...(!marketing ? [{ label: "Why Chvostíkovo", href: homePath + "#why-daycare" }] : []),
         { label: "Requirements", href: homePath + "#requirements" },
         { label: "FAQ", href: homePath + "#faq" },
+        { label: "About us", href: homePath + "#about" },
         { label: "Products", href: "/produkty" },
         { label: "Contact", href: homePath + "#contact" },
         { label: "Puppy daycare", href: "/psia-skolka-pre-steniatka" },
       ]
     : [
         ...(marketing ? marketingExtra : [{ label: "Recenzie", href: "/#recenzie" }]),
-        { label: "O nás", href: "/#o-nas" },
-        ...(!marketing ? [{ label: "Prečo Chvostíkovo", href: "/#preco" }] : []),
+        ...(!marketing ? [{ label: "Prečo Chvostíkovo", href: "/#preco-chvostikovo" }] : []),
         { label: "Podmienky", href: "/#podmienky" },
         { label: "Časté otázky", href: "/caste-otazky" },
+        { label: "O nás", href: "/#o-nas" },
         { label: "Produkty", href: "/produkty" },
         { label: "Kontakt", href: "/#kontakt" },
         { label: "Škôlka pre šteniatka", href: "/psia-skolka-pre-steniatka" },

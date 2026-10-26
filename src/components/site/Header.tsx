@@ -9,7 +9,6 @@ import { trackMarketingInteraction } from "@/lib/analytics";
 
 const NAV_MOBILE_BEFORE_ABOUT = [
   { href: "#recenzie", label: "Recenzie" },
-  { href: "/caste-otazky", label: "Časté otázky" },
   { href: "#priestory", label: "Priestory" },
   { href: "#starostlivost", label: "Ako sa postaráme" },
   { href: "#preco", label: "Prečo škôlka" },
@@ -18,6 +17,7 @@ const NAV_MOBILE_BEFORE_ABOUT = [
 
 const NAV_MOBILE_AFTER_INFO = [
   { href: "#cennik", label: "Cenník" },
+  { href: "/caste-otazky", label: "Časté otázky" },
   { href: "#kontakt", label: "Kontakt" },
 ];
 
@@ -208,6 +208,10 @@ export function Header({
               <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
             ))}
 
+{NAV_MOBILE_AFTER_INFO.slice(0, 2).map((item) => (
+              <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
+            ))}
+
             <a
               href={sectionHref("#o-nas")}
               onClick={(event) => handleSectionClick(event, "#o-nas")}
@@ -215,10 +219,6 @@ export function Header({
             >
               O nás
             </a>
-
-            {NAV_MOBILE_AFTER_INFO.slice(0, 1).map((item) => (
-              <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
-            ))}
 
             <a
               href="/produkty"
@@ -239,7 +239,7 @@ export function Header({
               </div>
             )}
 
-            {NAV_MOBILE_AFTER_INFO.slice(1).map((item) => (
+            {NAV_MOBILE_AFTER_INFO.slice(2).map((item) => (
               <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="rounded-2xl px-4 py-3 font-display text-sm font-semibold text-forest transition-colors hover:bg-secondary hover:text-coral">{item.label}</a>
             ))}
           </nav>
