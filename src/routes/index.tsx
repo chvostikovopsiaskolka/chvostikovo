@@ -79,9 +79,9 @@ function Index() {
           <InfoTicker />
         </div>
         <Reviews />
+        <ReviewReasons variant="home" withVideo />
         <DaycarePhotoCarousel />
         <Gallery />
-        <ReviewReasons variant="home" withVideo />
         <Care />
         <FirstVisit />
         <Why />
