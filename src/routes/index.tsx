@@ -3,7 +3,7 @@ import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
-import { ReviewReasons, Reviews, VideoSection } from "@/components/site/Reviews";
+import { ReviewReasons, Reviews } from "@/components/site/Reviews";
 import { Care, Why, About, Partners } from "@/components/site/Story";
 import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
 import { UsefulInfo } from "@/components/site/UsefulInfo";
@@ -79,10 +79,9 @@ function Index() {
           <InfoTicker />
         </div>
         <Reviews />
-        <ReviewReasons variant="home" />
         <DaycarePhotoCarousel />
         <Gallery />
-        <VideoSection />
+        <ReviewReasons variant="home" withVideo />
         <Care />
         <FirstVisit />
         <Why />
