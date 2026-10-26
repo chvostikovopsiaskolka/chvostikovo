@@ -13,6 +13,7 @@ import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
+import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
@@ -21,7 +22,7 @@ import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
-import { DAYCARE_GALLERY_EXTRAS, FAQ, PRICING } from "@/content/site";
+import { DAYCARE_GALLERY_EXTRAS, GALLERY, FAQ, PRICING } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -224,7 +225,7 @@ function LeadLandingPage() {
         <DaycarePhotoCarousel />
         <VideoSection />
 
-        <section className="relative overflow-hidden bg-forest py-10 text-cream sm:py-14">
+        <section id="lead-first-visit" className="relative scroll-mt-24 overflow-hidden bg-forest py-10 text-cream sm:py-14">
           <SectionAmbientPaws tone="dark" />
           <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-soft">
@@ -235,18 +236,16 @@ function LeadLandingPage() {
               Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.
             </p>
 
-            <div className="mt-9 grid gap-6 md:grid-cols-3 md:gap-8">
+            <div className="mt-10 grid gap-9 text-center md:grid-cols-3 md:gap-8">
               {[
                 ["1", "Porozprávame sa o vašom psíkovi", "Zavolajte nám alebo nechajte kontakt vo formulári. Preberieme jeho povahu, potreby aj vaše otázky a dohodneme termín úvodnej návštevy."],
                 ["2", "Prídete nás spoznať", "Ukážeme vám priestory a zoznámime sa s vaším psíkom. Pozrieme sa, ako reaguje na nové prostredie a ostatných psov, a spolu sa dohodneme na ďalšom postupe.", "Úvodná návšteva je zadarmo."],
                 ["3", "Doprajete mu prvý deň v škôlke", "Ak mu kolektív vyhovuje, dohodneme jeho prvý pobyt. Počas dňa sa oňho postaráme a pošleme vám fotky či videá, aby ste videli, ako sa u nás má."],
-              ].map(([number, stepTitle, text, note]) => (
-                <article key={number} className="border-l-2 border-cream/30 py-2 pl-5 text-left md:border-l-0 md:border-t-2 md:py-6 md:pl-0">
-                  <span className="flex size-10 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-white">
-                    {number}
-                  </span>
-                  <h3 className="mt-3 font-display text-lg font-bold text-cream">{stepTitle}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-cream/75">{text}</p>
+              ].map(([number, stepTitle, text, note], i) => (
+                <article key={number} className="min-w-0">
+                  <FirstVisitPhoto number={number} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
+                  <h3 className="font-display text-lg font-bold text-cream">{stepTitle}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-cream/85">{text}</p>
                   {note && <p className="mt-3 text-sm font-bold text-cream">{note}</p>}
                 </article>
               ))}
@@ -288,7 +287,7 @@ function LeadLandingPage() {
                 </article>
               ))}
             </div>
-            <p id="lead-first-visit" className="mt-5 scroll-mt-4 font-display font-bold text-forest">Úvodná návšteva je zadarmo.</p>
+            <p className="mt-5 font-display font-bold text-forest">Úvodná návšteva je zadarmo.</p>
             <p className="mx-auto mt-4 flex max-w-2xl items-start justify-center gap-2 text-sm leading-relaxed text-forest/75">
               <Car className="mt-0.5 size-5 shrink-0 text-coral-dark" />
               <span>Pomôžeme vám aj s vyzdvihnutím a odvozom psíka v Košiciach — 5 € za jednu jazdu.</span>
