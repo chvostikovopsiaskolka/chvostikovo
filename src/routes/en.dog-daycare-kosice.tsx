@@ -10,6 +10,10 @@ import {
   Moon,
   Phone,
   ShieldCheck,
+  Syringe,
+  PawPrint,
+  Droplets,
+  HeartPulse,
   Sparkles,
   Users,
   X,
@@ -362,22 +366,22 @@ const REQUIREMENTS_EN = [
   {
     title: "Vaccinations and prevention",
     text: "Your dog needs a valid vaccination record covering rabies, core infectious diseases (distemper, parvovirus, parainfluenza, infectious hepatitis and leptospirosis), and kennel cough. Regular deworming and protection against external parasites are required.",
-    icon: ShieldCheck,
+    icon: Syringe,
   },
   {
     title: "Behaviour around dogs and people",
     text: "Dogs must be comfortable and non-aggressive around people and other dogs. Dogs displaying aggression or unsafe group behaviour cannot attend. We assess suitability during the introductory visit.",
-    icon: Users,
+    icon: PawPrint,
   },
   {
     title: "Hygiene",
     text: "Dogs should have basic indoor toilet habits, taking a puppy's age and development into account. Please walk your dog before arrival; we provide opportunities to relieve themselves during the day.",
-    icon: Sparkles,
+    icon: Droplets,
   },
   {
     title: "Health and comfort",
     text: "Dogs must be clinically healthy and free of contagious illness. Please tell us about allergies and chronic conditions in advance so we can assess their needs. Female dogs cannot attend while in heat.",
-    icon: Moon,
+    icon: HeartPulse,
   },
 ];
 
