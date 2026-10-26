@@ -194,18 +194,13 @@ export function ReviewReasons({
           <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
         </div>
 
-        <div className="mt-7 grid gap-4 md:grid-cols-3 md:gap-5">
-          {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }) => (
-            <article
-              key={title}
-              className="flex items-start gap-3 rounded-2xl bg-cream/10 px-4 py-4 ring-1 ring-cream/15 md:block md:p-5"
-            >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground md:size-11">
-                <Icon className="size-5" />
-              </span>
+        <div className="mt-7 overflow-hidden rounded-3xl bg-cream px-5 text-forest shadow-card ring-1 ring-cream/40 md:grid md:grid-cols-3 md:px-3">
+          {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }, i) => (
+            <article key={title} className={`flex min-w-0 items-start gap-3 py-5 md:block md:px-5 md:py-7 ${i ? "border-t border-forest/15 md:border-l md:border-t-0" : ""}`}>
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground md:size-11"><Icon className="size-5" /></span>
               <div className="min-w-0 md:mt-3">
-                <h3 className="font-display text-base font-bold text-cream md:text-lg">{title}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-cream/80">{text}</p>
+                <h3 className="font-display text-base font-bold text-forest md:text-lg">{title}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-forest/80">{text}</p>
               </div>
             </article>
           ))}
