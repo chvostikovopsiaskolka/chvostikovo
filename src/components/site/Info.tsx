@@ -75,15 +75,13 @@ export function FirstVisit() {
           <p className="mt-3 text-forest/80">Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.</p>
         </div>
 
-        <p className="mx-auto mt-4 w-fit rounded-full border border-coral/30 bg-coral/10 px-5 py-2 text-center font-display text-base font-bold text-coral-dark sm:text-lg">Úvodná návšteva zadarmo</p>
-
         <ol className="mx-auto mt-10 grid max-w-5xl gap-9 text-center md:grid-cols-3 md:gap-8">
           {STEPS.map((s, i) => (
             <li key={s.title} className="min-w-0">
               <FirstVisitPhoto number={i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
               <h3 className="font-display text-xl font-bold leading-snug text-forest">{s.title}</h3>
               <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{s.text}</p>
-              {s.note && <p className="mt-4 flex items-center justify-center gap-2 font-display text-sm font-semibold text-forest"><Check className="size-5 shrink-0 text-forest" /> {s.note}</p>}
+              {s.note && <p className="mt-4 flex items-center justify-center gap-2 font-display text-sm font-semibold text-forest"><span className="flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-forest bg-card/80 text-forest"><Check className="size-4" strokeWidth={2.5} aria-hidden="true" /></span> {s.note}</p>}
             </li>
           ))}
         </ol>
@@ -165,7 +163,7 @@ export function Pricing() {
           ))}
         </div>
 
-        <div className="mt-6 rounded-4xl bg-card p-7 shadow-card sm:p-9 lg:mx-auto lg:max-w-2xl lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none">
+        <div className="mt-6 rounded-4xl bg-card p-7 shadow-card sm:p-9 lg:mx-auto lg:max-w-2xl lg:rounded-4xl lg:bg-card lg:p-8 lg:shadow-card">
           <h3 className="text-center text-xl text-forest">
             Čo je v cene zahrnuté pri každom vstupe
           </h3>
