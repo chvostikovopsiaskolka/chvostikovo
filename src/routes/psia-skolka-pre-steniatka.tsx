@@ -198,7 +198,7 @@ function PuppyDaycarePage() {
               <button
                 type="button"
                 onClick={scrollToBenefits}
-                className="btn-coral mt-6 mb-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:mb-6 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg lg:mb-0 lg:py-2.5"
+                className="btn-coral mt-6 mb-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:mb-6 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg lg:mb-0 lg:min-w-[360px] lg:px-12 lg:py-4"
               >
                 Zistiť viac
                 <ArrowDown className="size-5" />

@@ -134,8 +134,19 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
                 <h3 className="font-display text-[14px] leading-snug text-forest min-[390px]:text-[16px] sm:text-xl">
                   {item.title}
                 </h3>
-                <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:mt-2 sm:text-base sm:leading-relaxed">
+                <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:hidden">
                   {highlights[i]}
+                </p>
+                <details className="mt-1 sm:hidden">
+                  <summary className="cursor-pointer font-display text-[12px] font-semibold text-coral-dark min-[390px]:text-[13px]">
+                    {isEnglish ? "Read the full description" : "Prečítať celý text"}
+                  </summary>
+                  <p className="mt-2 text-[12px] leading-relaxed text-forest/80 min-[390px]:text-[13px]">
+                    {renderText(item.text)}
+                  </p>
+                </details>
+                <p className="mt-2 hidden text-base leading-relaxed text-forest/80 sm:block">
+                  {renderText(item.text)}
                 </p>
               </article>
             ))}
@@ -194,14 +205,14 @@ export function Why() {
           </h2>
 
           <div className="mt-8">
-            <EditorialBenefits image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
+            <EditorialBenefits mobileTextOnly image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
               {WHY.map((w, i) => {
                 const Icon = whyIcons[i]!;
                 return (
-                  <article key={w.title} className={`py-3 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-cream/25" : ""}`}>
+                  <article key={w.title} className={`py-4 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-cream/25" : ""}`}>
                     <Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden />
-                    <h3 className="font-display text-[14px] font-bold leading-snug text-cream min-[390px]:text-[16px] sm:text-xl">{w.title}</h3>
-                    <p className="mt-1 text-[12px] leading-[1.5] text-cream/85 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{w.text}</p>
+                    <h3 className="font-display text-lg font-bold leading-snug text-cream sm:text-xl">{w.title}</h3>
+                    <p className="mt-2 text-[15px] leading-relaxed text-cream/90 sm:text-base">{w.text}</p>
                   </article>
                 );
               })}
