@@ -165,7 +165,7 @@ export function Pricing() {
           ))}
         </div>
 
-        <div className="mt-6 rounded-4xl bg-card p-7 shadow-card sm:p-9 lg:mx-auto lg:max-w-3xl lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none">
+        <div className="mt-6 rounded-4xl bg-card p-7 shadow-card sm:p-9 lg:mx-auto lg:max-w-2xl lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none">
           <h3 className="text-center text-xl text-forest">
             Čo je v cene zahrnuté pri každom vstupe
           </h3>
