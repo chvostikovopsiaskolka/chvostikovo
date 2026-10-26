@@ -311,7 +311,7 @@ function PuppyDaycarePage() {
                 ["3", "Dohodneme prvý pobyt", "Ak mu kolektív vyhovuje, prvé návštevy prispôsobíme tomu, ako sa cíti. Počas pobytu vám pošleme fotky či videá, aby ste videli, ako sa má."],
               ].map(([number, heading, text], i) => (
                 <article key={number} className="min-w-0">
-                  <FirstVisitPhoto number={number} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
+                  <FirstVisitPhoto number={number ?? i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
                   <h3 className="font-display font-bold text-forest">{heading}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-forest/75">{text}</p>
                 </article>
