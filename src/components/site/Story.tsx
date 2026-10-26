@@ -64,6 +64,19 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
     },
   ];
   const items = isEnglish ? careEn : CARE;
+  // Short shared copy keeps the editorial two-column layout readable at 320px.
+  // Full details are available in the existing care context below the layout.
+  const highlights = isEnglish
+    ? [
+        "Play with friends, outdoor movement and time to relax. We balance activity with rest throughout the day.",
+        "At least two caregivers supervise the dogs throughout their stay, including playtime and quiet moments.",
+        "Every dog has their own pace. We respect their personality, habits and individual needs.",
+      ]
+    : [
+        "Hry s kamošmi, pohyb vo výbehu aj čas na oddych. Aktivity striedame podľa potrieb psíkov.",
+        "Na psíkov počas pobytu dohliadajú minimálne dvaja opatrovatelia. Sledujeme hry aj pokojné chvíle.",
+        "Každý psík má vlastné tempo. Rešpektujeme jeho povahu, zvyky a potreby.",
+      ];
 
   return (
     <section id={isEnglish ? "care" : "starostlivost"} className="relative scroll-mt-24 overflow-hidden py-12 sm:py-16">
@@ -73,24 +86,34 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
           {isEnglish ? "How we care for your dog" : "Ako sa postaráme o psíka"}
         </h2>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {items.map((c) => (
-            <article
-              key={c.title}
-              className="flex flex-col overflow-hidden rounded-4xl bg-card shadow-card"
-            >
-              <img
-                src={c.img}
-                alt={c.alt}
-                loading="lazy"
-                className={`h-56 w-full object-cover ${c.pos}`}
-              />
-              <div className="flex flex-1 flex-col p-6">
-                <h3 className="text-xl text-forest">{c.title}</h3>
-                <p className="mt-3 text-[0.95rem] leading-relaxed text-forest/80">{renderText(c.text)}</p>
-              </div>
-            </article>
-          ))}
+        {/* One editorial photo and three readable benefits, including a true two-column mobile layout. */}
+        <div className="mt-8 grid grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] items-stretch gap-3 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:gap-7 lg:gap-12">
+          <figure className="relative min-h-[340px] overflow-hidden rounded-[22px] bg-secondary shadow-card sm:min-h-[390px] sm:rounded-4xl lg:min-h-[420px]">
+            <img
+              src={CARE[0]!.img}
+              alt={isEnglish ? "Dogs enjoying active time together at Chvostíkovo daycare" : "Psíkovia sa spolu hrajú v psej škôlke Chvostíkovo"}
+              width={900}
+              height={900}
+              loading="lazy"
+              decoding="async"
+              className={`absolute inset-0 h-full w-full object-cover ${CARE[0]!.pos}`}
+            />
+          </figure>
+          <div className="flex min-w-0 flex-col justify-center">
+            {items.map((item, i) => (
+              <article
+                key={item.title}
+                className={`min-w-0 py-3 first:pt-0 last:pb-0 sm:py-5 ${i === 0 ? "" : "border-t border-forest/15"}`}
+              >
+                <h3 className="font-display text-[14px] leading-snug text-forest min-[390px]:text-[16px] sm:text-xl">
+                  {item.title}
+                </h3>
+                <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:mt-2 sm:text-base sm:leading-relaxed">
+                  {highlights[i]}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
 
         <FriendshipFeature language={language} embedded />
