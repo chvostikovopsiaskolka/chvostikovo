@@ -361,7 +361,12 @@ function PuppyDaycarePage() {
               </div>
 
               <div className="mx-auto mt-6 max-w-md rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <ContactRevealButton onClick={() => openForm("puppy_landing_bottom")} />
+                <div className="lg:hidden">
+                  <ContactRevealButton onClick={() => openForm("puppy_landing_bottom")} />
+                </div>
+                <div className="hidden lg:block">
+                  <PuppyForm source="puppy_landing_bottom_desktop_inline" />
+                </div>
               </div>
             </div>
           </div>
