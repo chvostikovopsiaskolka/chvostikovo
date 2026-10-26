@@ -236,7 +236,9 @@ function LeadLandingPage() {
               Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.
             </p>
 
-            <div className="mt-10 grid gap-9 text-center md:grid-cols-3 md:gap-8">
+<p className="mx-auto mt-4 w-fit rounded-full border border-coral-soft/40 bg-cream/15 px-5 py-2 font-display text-base font-bold text-cream shadow-sm sm:text-lg">Úvodná návšteva zadarmo</p>
+
+                        <div className="mt-10 grid gap-9 text-center md:grid-cols-3 md:gap-8">
               {[
                 ["1", "Porozprávame sa o vašom psíkovi", "Zavolajte nám alebo nechajte kontakt vo formulári. Preberieme jeho povahu, potreby aj vaše otázky a dohodneme termín úvodnej návštevy."],
                 ["2", "Prídete nás spoznať", "Ukážeme vám priestory a zoznámime sa s vaším psíkom. Pozrieme sa, ako reaguje na nové prostredie a ostatných psov, a spolu sa dohodneme na ďalšom postupe.", "Úvodná návšteva je zadarmo."],
@@ -351,7 +353,12 @@ function LeadLandingPage() {
               </div>
 
               <div className="mx-auto mt-6 max-w-md rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <ContactRevealButton onClick={() => openLeadModal("lead_landing_bottom")} />
+                <div className="lg:hidden">
+                  <ContactRevealButton onClick={() => openLeadModal("lead_landing_bottom")} />
+                </div>
+                <div className="hidden lg:block">
+                  <ShortForm trackingSource="lead_landing_bottom_desktop_inline" />
+                </div>
               </div>
             </div>
           </div>
