@@ -29,12 +29,7 @@ export function FirstVisitPhoto({ number, image, alt, language = "sk" }: FirstVi
         decoding="async"
         className="size-36 rounded-full object-cover shadow-card ring-4 ring-card sm:size-44 lg:size-48"
       />
-      <span
-        aria-hidden="true"
-        className="absolute -left-3 -top-3 grid size-14 place-items-center rounded-full bg-coral font-display text-2xl font-bold text-white shadow-card sm:size-16 sm:text-3xl"
-      >
-        {String(number).padStart(2, "0")}
-      </span>
+
     </div>
   );
 }
