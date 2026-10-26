@@ -211,13 +211,13 @@ type VideoBenefit = { title: string; text: string; icon: LucideIcon };
 /** Video beside the first benefit on mobile, with the other two side by side below. */
 export function VideoReasonsGrid({ items, language = "sk" }: { items: VideoBenefit[]; language?: "sk" | "en" }) {
   return (
-    <div className="mt-7 grid grid-cols-2 items-stretch gap-3 sm:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] sm:gap-7 lg:gap-10">
+    <div className="mt-7 grid grid-cols-2 items-stretch gap-3 rounded-3xl bg-cream/10 p-3 shadow-card ring-1 ring-cream/20 backdrop-blur-xl sm:rounded-none sm:bg-transparent sm:p-0 sm:shadow-none sm:ring-0 sm:backdrop-blur-none sm:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] sm:gap-7 lg:gap-10">
       <div className="min-w-0">
         <InlineDaycareVideo language={language} />
       </div>
       <div className="contents sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl">
         {items.map(({ title, text, icon: Icon }) => (
-          <article key={title} className="min-w-0 rounded-2xl bg-cream/10 px-3 py-4 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl sm:rounded-none sm:bg-transparent sm:px-0 sm:py-4 sm:shadow-none sm:ring-0 sm:backdrop-blur-none">
+          <article key={title} className="min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4">
             <h3 className="flex min-w-0 items-start gap-2 font-display text-[13px] font-bold leading-snug text-cream min-[390px]:text-[15px] sm:text-lg lg:text-xl">
               <span className="grid size-6 shrink-0 place-items-center rounded-full bg-coral text-primary-foreground sm:size-9">
                 <Icon className="size-3.5 sm:size-5" aria-hidden="true" />
