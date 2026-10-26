@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Zap, Dog, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
 import { ShortForm } from "./Forms";
@@ -18,8 +18,6 @@ import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FriendshipFeature } from "./FriendshipFeature";
 import { EditorialBenefits } from "./EditorialBenefits";
-
-const whyIcons = [Home, Zap, Dog];
 
 const ABOUT_MORE = [
   "Práve preto vzniklo Chvostíkovo – psia škôlka v Košiciach zameraná na stredné a veľké plemená, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste. Máme dlhoročné skúsenosti s prácou so psami (práca v útulku, starostlivosť o psov v dočasnej opatere, výchova vlastných psíkov). Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.",
@@ -207,10 +205,8 @@ export function Why() {
           <div className="mt-8">
             <EditorialBenefits mobileTextOnly image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
               {WHY.map((w, i) => {
-                const Icon = whyIcons[i]!;
                 return (
                   <article key={w.title} className={`py-4 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-cream/25" : ""}`}>
-                    <Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden />
                     <h3 className="font-display text-lg font-bold leading-snug text-cream sm:text-xl">{w.title}</h3>
                     <p className="mt-2 text-[15px] leading-relaxed text-cream/90 sm:text-base">{w.text}</p>
                   </article>
