@@ -17,6 +17,7 @@ import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FriendshipFeature } from "./FriendshipFeature";
+import { EditorialBenefits } from "./EditorialBenefits";
 
 const whyIcons = [Home, Zap, Dog];
 
@@ -192,44 +193,19 @@ export function Why() {
             Kedy môže škôlka pomôcť vám a vášmu psíkovi?
           </h2>
 
-          {/* Mobil – rozbaľovacie karty */}
-          <div className="mt-6 space-y-3 md:hidden">
-            {WHY.map((w, i) => {
-              const Icon = whyIcons[i]!;
-              return (
-                <Collapse
-                  key={w.title}
-                  title={w.title}
-                  tone="dark"
-                  icon={
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-coral text-primary-foreground">
-                      <Icon className="size-5" />
-                    </span>
-                  }
-                >
-                  {w.text}
-                </Collapse>
-              );
-            })}
-          </div>
-
-          {/* Desktop */}
-          <div className="mt-8 hidden gap-6 md:grid md:grid-cols-3">
-            {WHY.map((w, i) => {
-              const Icon = whyIcons[i]!;
-              return (
-                <div
-                  key={w.title}
-                  className="rounded-3xl bg-cream/10 p-6 ring-1 ring-cream/15 backdrop-blur-sm"
-                >
-                  <span className="flex size-12 items-center justify-center rounded-2xl bg-coral text-primary-foreground">
-                    <Icon className="size-6" />
-                  </span>
-                  <h3 className="mt-4 text-xl text-cream">{w.title}</h3>
-                  <p className="mt-2 text-[0.95rem] leading-relaxed text-cream/85">{w.text}</p>
-                </div>
-              );
-            })}
+          <div className="mt-8">
+            <EditorialBenefits image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
+              {WHY.map((w, i) => {
+                const Icon = whyIcons[i]!;
+                return (
+                  <article key={w.title} className={`py-3 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-cream/25" : ""}`}>
+                    <Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden />
+                    <h3 className="font-display text-[14px] font-bold leading-snug text-cream min-[390px]:text-[16px] sm:text-xl">{w.title}</h3>
+                    <p className="mt-1 text-[12px] leading-[1.5] text-cream/85 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{w.text}</p>
+                  </article>
+                );
+              })}
+            </EditorialBenefits>
           </div>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
