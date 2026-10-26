@@ -18,6 +18,8 @@ import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FriendshipFeature } from "./FriendshipFeature";
 import { EditorialBenefits } from "./EditorialBenefits";
+import careDogFriendsSquare from "@/assets/care-dog-friends-square.webp";
+import careHappyDogSquare from "@/assets/care-happy-dog-square.webp";
 
 const ABOUT_MORE = [
   "Práve preto vzniklo Chvostíkovo – psia škôlka v Košiciach zameraná na stredné a veľké plemená, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste. Máme dlhoročné skúsenosti s prácou so psami (práca v útulku, starostlivosť o psov v dočasnej opatere, výchova vlastných psíkov). Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.",
@@ -63,18 +65,7 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
     },
   ];
   const items = isEnglish ? careEn : CARE;
-  // Short shared copy keeps the editorial two-column layout readable at 320px.
-  const highlights = isEnglish
-    ? [
-        "Play with friends, outdoor movement and time to relax. We balance activity with rest throughout the day.",
-        "At least two caregivers supervise the dogs throughout their stay, including playtime and quiet moments.",
-        "Every dog has their own pace. We respect their personality, habits and individual needs.",
-      ]
-    : [
-        "Hry s kamošmi, pohyb vo výbehu aj čas na oddych. Aktivity striedame podľa potrieb psíkov.",
-        "Na psíkov počas pobytu dohliadajú minimálne dvaja opatrovatelia. Sledujeme hry aj pokojné chvíle.",
-        "Každý psík má vlastné tempo. Rešpektujeme jeho povahu, zvyky a potreby.",
-      ];
+
 
   return (
     <section id={isEnglish ? "care" : "starostlivost"} className="relative scroll-mt-24 overflow-hidden py-12 sm:py-16">
@@ -86,9 +77,9 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
 
         {/* One editorial photo and three readable benefits, including a true two-column mobile layout. */}
         <div className="mt-8 grid grid-cols-[minmax(0,0.97fr)_minmax(0,1.03fr)] items-stretch gap-3 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:gap-7 lg:gap-12">
-          {/* Mobile: wider photo column with two genuine Chvostíkovo photos, not a stretched single image. */}
-          <div className="grid min-h-[360px] min-w-0 grid-rows-2 gap-2 sm:hidden">
-            <figure className="relative min-h-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
+          {/* Mobile: four authentic photos in independent square frames, never stretched to match copy height. */}
+          <div className="flex min-w-0 flex-col gap-2 sm:hidden">
+            <figure className="relative aspect-square min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
               <img
                 src={CARE[0]!.img}
                 alt={isEnglish ? "Dogs enjoying an active day at Chvostíkovo" : "Psíkovia si užívajú aktívny deň v Chvostíkove"}
@@ -99,7 +90,7 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
                 className={`absolute inset-0 size-full object-cover ${CARE[0]!.pos}`}
               />
             </figure>
-            <figure className="relative min-h-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
+            <figure className="relative aspect-square min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
               <img
                 src={DAYCARE_GALLERY_EXTRAS[1]!.src}
                 alt={isEnglish ? "Iris and Gael resting on the sofa at Chvostíkovo" : DAYCARE_GALLERY_EXTRAS[1]!.alt}
@@ -107,6 +98,20 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
                 height={900}
                 loading="lazy"
                 decoding="async"
+                className="absolute inset-0 size-full object-cover object-center"
+              />
+            </figure>
+            <figure className="relative aspect-square min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
+              <img src={careDogFriendsSquare}
+                alt={isEnglish ? "Three dog friends together at Chvostíkovo daycare" : "Traja psí kamaráti spolu v škôlke Chvostíkovo"}
+                width={720} height={720} loading="lazy" decoding="async"
+                className="absolute inset-0 size-full object-cover object-center"
+              />
+            </figure>
+            <figure className="relative aspect-square min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
+              <img src={careHappyDogSquare}
+                alt={isEnglish ? "Happy black-and-white dog at Chvostíkovo daycare" : "Usmiaty čiernobiely psík v škôlke Chvostíkovo"}
+                width={720} height={720} loading="lazy" decoding="async"
                 className="absolute inset-0 size-full object-cover object-center"
               />
             </figure>
@@ -132,18 +137,7 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
                 <h3 className="font-display text-[14px] leading-snug text-forest min-[390px]:text-[16px] sm:text-xl">
                   {item.title}
                 </h3>
-                <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:hidden">
-                  {highlights[i]}
-                </p>
-                <details className="mt-1 sm:hidden">
-                  <summary className="cursor-pointer font-display text-[12px] font-semibold text-coral-dark min-[390px]:text-[13px]">
-                    {isEnglish ? "Read the full description" : "Prečítať celý text"}
-                  </summary>
-                  <p className="mt-2 text-[12px] leading-relaxed text-forest/80 min-[390px]:text-[13px]">
-                    {renderText(item.text)}
-                  </p>
-                </details>
-                <p className="mt-2 hidden text-base leading-relaxed text-forest/80 sm:block">
+                <p className="mt-2 text-[13px] leading-[1.55] text-forest/80 min-[390px]:text-[14px] sm:text-base sm:leading-relaxed">
                   {renderText(item.text)}
                 </p>
               </article>
