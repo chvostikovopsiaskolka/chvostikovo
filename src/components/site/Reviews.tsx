@@ -174,14 +174,48 @@ const HOME_REVIEW_REASONS = [
   },
 ];
 
+/** Existing daycare video, reusable in the combined Why section without changing the lead video. */
+export function InlineDaycareVideo({ language = "sk" }: { language?: "sk" | "en" }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = ref.current;
+    if (!video || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry) return;
+      if (entry.isIntersecting) void video.play().catch(() => undefined);
+      else video.pause();
+    }, { rootMargin: "200px 0px" });
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div className="mx-auto w-full max-w-[290px] overflow-hidden rounded-3xl bg-forest/40 shadow-card ring-1 ring-cream/20">
+      <video
+        ref={ref}
+        src={skolkariVideo}
+        className="aspect-[9/16] w-full object-cover"
+        muted
+        loop
+        playsInline
+        controls
+        preload="none"
+        aria-label={language === "en" ? "Video from Chvostíkovo dog daycare – dogs excited to arrive" : "Video zo psiej škôlky Chvostíkovo – škôlkári sa tešia do škôlky"}
+      />
+    </div>
+  );
+}
+
 export function ReviewReasons({
   ctaLabel = "Pozrite si, ako to u nás vyzerá",
   onCtaClick,
   variant = "default",
+  withVideo = false,
 }: {
   ctaLabel?: string;
   onCtaClick?: () => void;
   variant?: "default" | "home";
+  withVideo?: boolean;
 } = {}) {
   return (
     <section id="preco-chvostikovo" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0">
@@ -194,19 +228,26 @@ export function ReviewReasons({
           <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
         </div>
 
-        {/* One continuous liquid-glass surface, preserving the original translucent character. */}
-        <div className="mt-7 overflow-hidden rounded-3xl bg-cream/10 px-5 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl md:grid md:grid-cols-3 md:px-3">
-          {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }, i) => (
-            <article key={title} className={`flex min-w-0 items-start gap-3 py-6 md:block md:px-5 md:py-8 ${i ? "border-t border-cream/20 md:border-l md:border-t-0" : ""}`}>
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-coral text-primary-foreground md:size-12">
-                <Icon className="size-6" />
-              </span>
-              <div className="min-w-0 md:mt-4">
-                <h3 className="font-display text-lg font-bold leading-snug text-cream sm:text-xl">{title}</h3>
-                <p className="mt-2 text-base leading-relaxed text-cream/90 sm:text-[1.05rem]">{text}</p>
-              </div>
-            </article>
-          ))}
+        <div className={withVideo ? "mt-7 grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] items-start gap-3 sm:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] sm:gap-8" : ""}>
+          {withVideo && (
+            <div className="min-w-0">
+              <InlineDaycareVideo />
+            </div>
+          )}
+          {/* Preserve the single translucent liquid surface and its three original benefits. */}
+          <div className={`overflow-hidden rounded-3xl bg-cream/10 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl ${withVideo ? "px-3 sm:px-5" : "mt-7 px-5 md:grid md:grid-cols-3 md:px-3"}`}>
+            {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }, i) => (
+              <article key={title} className={`min-w-0 ${withVideo ? "py-4 first:pt-4 last:pb-4 sm:py-5" : "flex items-start gap-3 py-6 md:block md:px-5 md:py-8"} ${i ? (withVideo ? "border-t border-cream/20" : "border-t border-cream/20 md:border-l md:border-t-0") : ""}`}>
+                <span className={`${withVideo ? "mb-2 size-8 sm:size-10" : "size-11 shrink-0 md:size-12"} flex items-center justify-center rounded-2xl bg-coral text-primary-foreground`}>
+                  <Icon className={withVideo ? "size-4 sm:size-5" : "size-6"} />
+                </span>
+                <div className={`min-w-0 ${withVideo ? "" : "md:mt-4"}`}>
+                  <h3 className={`font-display font-bold leading-snug text-cream ${withVideo ? "text-[14px] min-[390px]:text-[16px] sm:text-lg lg:text-xl" : "text-lg sm:text-xl"}`}>{title}</h3>
+                  <p className={`mt-2 leading-relaxed text-cream/90 ${withVideo ? "text-[12px] min-[390px]:text-[13px] sm:text-[15px] lg:text-base" : "text-base sm:text-[1.05rem]"}`}>{text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
 
         <div className="relative z-20 mt-7 flex justify-center">
