@@ -65,7 +65,6 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
   ];
   const items = isEnglish ? careEn : CARE;
   // Short shared copy keeps the editorial two-column layout readable at 320px.
-  // Full details are available in the existing care context below the layout.
   const highlights = isEnglish
     ? [
         "Play with friends, outdoor movement and time to relax. We balance activity with rest throughout the day.",
