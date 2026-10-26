@@ -14,6 +14,7 @@ import { LandingMobilePricing } from "@/components/site/LandingMobilePricing";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
+import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
@@ -21,7 +22,7 @@ import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { ShortForm } from "@/components/site/Forms";
 import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
 import { Reviews } from "@/components/site/Reviews";
-import { REVIEWS } from "@/content/site";
+import { GALLERY, REVIEWS } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
@@ -303,18 +304,16 @@ function PuppyDaycarePage() {
               </button>
             </div>
 
-            <div className="grid gap-3">
+            <div className="grid gap-8 text-center sm:grid-cols-3 sm:gap-5">
               {[
                 ["1", "Porozprávame sa", "Prejdeme si detaily prihlásenia, odpovieme na vaše otázky a dohodneme úvodnú návštevu."],
                 ["2", "Spoznáme sa na úvodnej návšteve", "Ukážeme vám priestory a pozrieme sa, ako šteniatko reaguje na nás, prostredie aj ostatných psov. Úvodná návšteva je zadarmo."],
                 ["3", "Dohodneme prvý pobyt", "Ak mu kolektív vyhovuje, prvé návštevy prispôsobíme tomu, ako sa cíti. Počas pobytu vám pošleme fotky či videá, aby ste videli, ako sa má."],
-              ].map(([number, heading, text]) => (
-                <article key={number} className="rounded-3xl bg-secondary/55 p-5 ring-1 ring-forest/8">
-                  <span className="flex size-9 items-center justify-center rounded-full bg-coral font-display font-bold text-white">
-                    {number}
-                  </span>
-                  <h3 className="mt-3 font-display font-bold text-forest">{heading}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-forest/70">{text}</p>
+              ].map(([number, heading, text], i) => (
+                <article key={number} className="min-w-0">
+                  <FirstVisitPhoto number={number} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
+                  <h3 className="font-display font-bold text-forest">{heading}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-forest/75">{text}</p>
                 </article>
               ))}
             </div>
