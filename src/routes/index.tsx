@@ -83,13 +83,13 @@ function Index() {
         <DaycarePhotoCarousel />
         <Gallery />
         <VideoSection />
+        <Care />
         <FirstVisit />
         <Why />
-        <Care />
         <InquirySection />
+        <Requirements />
         <Pricing />
         <Faq />
-        <Requirements />
         <About />
         <InstagramFeed />
         <Partners />
