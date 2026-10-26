@@ -34,7 +34,7 @@ import { Collapse } from "@/components/site/Collapse";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
-import { InlineDaycareVideo } from "@/components/site/Reviews";
+import { VideoReasonsGrid } from "@/components/site/Reviews";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 import { Care, About } from "@/components/site/Story";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
@@ -730,6 +730,8 @@ function EnglishDogDaycarePage() {
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Starting daycare in 3 simple steps</h2>
             </div>
 
+            <p className="mx-auto mt-4 w-fit rounded-full border border-coral/30 bg-coral/10 px-5 py-2 text-center font-display text-base font-bold text-coral-dark sm:text-lg">Free introductory visit</p>
+
             <div className="mt-10 grid gap-9 text-center md:grid-cols-3 md:gap-8">
               {[
                 ["1", "Get in touch", "Send us a short enquiry or call us. Tell us a little about your dog and we will arrange an introductory visit."],
@@ -774,18 +776,7 @@ function EnglishDogDaycarePage() {
                 Why use dog daycare?
               </h2>
 
-              <div className="mt-7 grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] items-start gap-3 sm:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] sm:gap-8">
-                <div className="min-w-0"><InlineDaycareVideo language="en" /></div>
-                <div className="overflow-hidden rounded-3xl bg-cream/10 px-3 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl sm:px-5">
-                  {WHY_EN.map(({ title, text, icon: Icon }, i) => (
-                    <article key={title} className={`py-4 first:pt-4 last:pb-4 sm:py-5 ${i ? "border-t border-cream/25" : ""}`}>
-                      <Icon className="mb-2 size-7 text-coral" aria-hidden />
-                      <h3 className="font-display text-[14px] font-bold leading-snug text-cream min-[390px]:text-[16px] sm:text-xl">{title}</h3>
-                      <p className="mt-1 text-[12px] leading-[1.5] text-cream/90 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{text}</p>
-                    </article>
-                  ))}
-                </div>
-              </div>
+              <VideoReasonsGrid items={WHY_EN} language="en" />
 
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <button type="button" onClick={() => openInquiry("en_why_daycare")} className="btn-coral">

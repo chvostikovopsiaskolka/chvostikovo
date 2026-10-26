@@ -295,6 +295,7 @@ function PuppyDaycarePage() {
               <p className="mt-3 leading-relaxed text-forest/75">
                 Na bezplatnej úvodnej návšteve spolu zistíme, ako sa u nás cíti, a dohodneme ďalší postup.
               </p>
+              <p className="mt-4 w-fit rounded-full border border-coral/30 bg-coral/10 px-4 py-2 font-display text-sm font-bold text-coral-dark">Úvodná návšteva zadarmo</p>
               <button
                 type="button"
                 onClick={() => openForm("puppy_landing_eligibility")}
@@ -361,7 +362,12 @@ function PuppyDaycarePage() {
               </div>
 
               <div className="mx-auto mt-6 max-w-md rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <ContactRevealButton onClick={() => openForm("puppy_landing_bottom")} />
+                <div className="lg:hidden">
+                  <ContactRevealButton onClick={() => openForm("puppy_landing_bottom")} />
+                </div>
+                <div className="hidden lg:block">
+                  <PuppyForm source="puppy_landing_bottom_desktop_inline" />
+                </div>
               </div>
             </div>
           </div>

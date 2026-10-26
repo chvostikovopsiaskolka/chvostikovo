@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowDown, HeartHandshake, PawPrint, Sparkles } from "lucide-react";
+import { ArrowDown, HeartHandshake, PawPrint, Sparkles, type LucideIcon } from "lucide-react";
 import skolkariVideo from "@/assets/skolkari.mp4";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -190,11 +190,11 @@ export function InlineDaycareVideo({ language = "sk" }: { language?: "sk" | "en"
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-[290px] overflow-hidden rounded-3xl bg-forest/40 shadow-card ring-1 ring-cream/20">
+    <div className="relative h-full min-h-[260px] w-full overflow-hidden rounded-3xl bg-forest/40 shadow-card ring-1 ring-cream/20">
       <video
         ref={ref}
         src={skolkariVideo}
-        className="aspect-[9/16] w-full object-cover"
+        className="absolute inset-0 size-full object-cover"
         muted
         loop
         playsInline
@@ -202,6 +202,32 @@ export function InlineDaycareVideo({ language = "sk" }: { language?: "sk" | "en"
         preload="none"
         aria-label={language === "en" ? "Video from Chvostíkovo dog daycare – dogs excited to arrive" : "Video zo psiej škôlky Chvostíkovo – škôlkári sa tešia do škôlky"}
       />
+    </div>
+  );
+}
+
+type VideoBenefit = { title: string; text: string; icon: LucideIcon };
+
+/** Video beside the first benefit on mobile, with the other two side by side below. */
+export function VideoReasonsGrid({ items, language = "sk" }: { items: VideoBenefit[]; language?: "sk" | "en" }) {
+  return (
+    <div className="mt-7 grid grid-cols-2 items-stretch gap-3 sm:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] sm:gap-7 lg:gap-10">
+      <div className="min-w-0">
+        <InlineDaycareVideo language={language} />
+      </div>
+      <div className="contents sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl">
+        {items.map(({ title, text, icon: Icon }) => (
+          <article key={title} className="min-w-0 rounded-2xl bg-cream/10 px-3 py-4 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl sm:rounded-none sm:bg-transparent sm:px-0 sm:py-4 sm:shadow-none sm:ring-0 sm:backdrop-blur-none">
+            <h3 className="flex min-w-0 items-start gap-2 font-display text-[13px] font-bold leading-snug text-cream min-[390px]:text-[15px] sm:text-lg lg:text-xl">
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-coral text-primary-foreground sm:size-9">
+                <Icon className="size-3.5 sm:size-5" aria-hidden="true" />
+              </span>
+              <span className="min-w-0 pt-0.5">{title}</span>
+            </h3>
+            <p className="mt-2 text-[12px] leading-[1.5] text-cream/90 min-[390px]:text-[13px] sm:text-[15px] sm:leading-relaxed lg:text-base">{text}</p>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }
@@ -228,27 +254,21 @@ export function ReviewReasons({
           <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
         </div>
 
-        <div className={withVideo ? "mt-7 grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] items-start gap-3 sm:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] sm:gap-8" : ""}>
-          {withVideo && (
-            <div className="min-w-0">
-              <InlineDaycareVideo />
-            </div>
-          )}
-          {/* Preserve the single translucent liquid surface and its three original benefits. */}
-          <div className={`overflow-hidden rounded-3xl bg-cream/10 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl ${withVideo ? "px-3 sm:px-5" : "mt-7 px-5 md:grid md:grid-cols-3 md:px-3"}`}>
-            {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }, i) => (
-              <article key={title} className={`min-w-0 ${withVideo ? "py-4 first:pt-4 last:pb-4 sm:py-5" : "flex items-start gap-3 py-6 md:block md:px-5 md:py-8"} ${i ? (withVideo ? "border-t border-cream/20" : "border-t border-cream/20 md:border-l md:border-t-0") : ""}`}>
-                <span className={`${withVideo ? "mb-2 size-8 sm:size-10" : "size-11 shrink-0 md:size-12"} flex items-center justify-center rounded-2xl bg-coral text-primary-foreground`}>
-                  <Icon className={withVideo ? "size-4 sm:size-5" : "size-6"} />
-                </span>
-                <div className={`min-w-0 ${withVideo ? "" : "md:mt-4"}`}>
-                  <h3 className={`font-display font-bold leading-snug text-cream ${withVideo ? "text-[14px] min-[390px]:text-[16px] sm:text-lg lg:text-xl" : "text-lg sm:text-xl"}`}>{title}</h3>
-                  <p className={`mt-2 leading-relaxed text-cream/90 ${withVideo ? "text-[12px] min-[390px]:text-[13px] sm:text-[15px] lg:text-base" : "text-base sm:text-[1.05rem]"}`}>{text}</p>
+        {withVideo ? (
+          <VideoReasonsGrid items={variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS} />
+        ) : (
+          <div className="mt-7 overflow-hidden rounded-3xl bg-cream/10 px-5 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl md:grid md:grid-cols-3 md:px-3">
+            {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }) => (
+              <article key={title} className="flex min-w-0 items-start gap-3 py-6 md:block md:px-5 md:py-8">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-coral text-primary-foreground md:size-12"><Icon className="size-6" aria-hidden /></span>
+                <div className="min-w-0 md:mt-4">
+                  <h3 className="font-display text-lg font-bold leading-snug text-cream sm:text-xl">{title}</h3>
+                  <p className="mt-2 text-base leading-relaxed text-cream/90 sm:text-[1.05rem]">{text}</p>
                 </div>
               </article>
             ))}
           </div>
-        </div>
+        )}
 
         <div className="relative z-20 mt-7 flex justify-center">
           <button
