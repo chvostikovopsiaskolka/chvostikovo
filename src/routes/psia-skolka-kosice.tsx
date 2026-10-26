@@ -243,7 +243,7 @@ function LeadLandingPage() {
                 ["3", "Doprajete mu prvý deň v škôlke", "Ak mu kolektív vyhovuje, dohodneme jeho prvý pobyt. Počas dňa sa oňho postaráme a pošleme vám fotky či videá, aby ste videli, ako sa u nás má."],
               ].map(([number, stepTitle, text, note], i) => (
                 <article key={number} className="min-w-0">
-                  <FirstVisitPhoto number={number} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
+                  <FirstVisitPhoto number={number ?? i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
                   <h3 className="font-display text-lg font-bold text-cream">{stepTitle}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-cream/85">{text}</p>
                   {note && <p className="mt-3 text-sm font-bold text-cream">{note}</p>}
