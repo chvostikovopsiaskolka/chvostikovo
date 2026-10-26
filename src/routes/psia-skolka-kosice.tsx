@@ -13,6 +13,7 @@ import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
+import { EditorialBenefits } from "@/components/site/EditorialBenefits";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { MobileDock } from "@/components/site/MobileDock";
@@ -20,7 +21,7 @@ import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
-import { FAQ, PRICING } from "@/content/site";
+import { DAYCARE_GALLERY_EXTRAS, FAQ, PRICING } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -194,16 +195,16 @@ function LeadLandingPage() {
               Pekný deň pre psíka. Pokojnejšia hlava pre vás.
             </h2>
 
-            <div className="mt-7 grid gap-3 md:grid-cols-3">
-              {BENEFITS.map(({ icon: Icon, title: benefitTitle, text }) => (
-                <article key={benefitTitle} className="flex h-full flex-col rounded-3xl bg-secondary/55 p-4 text-left ring-1 ring-forest/8 sm:p-5">
-                  <span className="flex size-10 items-center justify-center rounded-2xl bg-coral text-white">
-                    <Icon className="size-5" />
-                  </span>
-                  <h3 className="mt-3 font-display text-base font-bold text-forest">{benefitTitle}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-forest/70">{text}</p>
-                </article>
-              ))}
+            <div className="mt-7">
+              <EditorialBenefits image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
+                {BENEFITS.map(({ icon: Icon, title: benefitTitle, text }, i) => (
+                  <article key={benefitTitle} className={`py-3 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-forest/15" : ""}`}>
+                    <Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden />
+                    <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px] sm:text-xl">{benefitTitle}</h3>
+                    <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{text}</p>
+                  </article>
+                ))}
+              </EditorialBenefits>
             </div>
 
             <button
@@ -234,13 +235,13 @@ function LeadLandingPage() {
               Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.
             </p>
 
-            <div className="mt-7 grid gap-4 md:grid-cols-3">
+            <div className="mt-9 grid gap-6 md:grid-cols-3 md:gap-8">
               {[
                 ["1", "Porozprávame sa o vašom psíkovi", "Zavolajte nám alebo nechajte kontakt vo formulári. Preberieme jeho povahu, potreby aj vaše otázky a dohodneme termín úvodnej návštevy."],
                 ["2", "Prídete nás spoznať", "Ukážeme vám priestory a zoznámime sa s vaším psíkom. Pozrieme sa, ako reaguje na nové prostredie a ostatných psov, a spolu sa dohodneme na ďalšom postupe.", "Úvodná návšteva je zadarmo."],
                 ["3", "Doprajete mu prvý deň v škôlke", "Ak mu kolektív vyhovuje, dohodneme jeho prvý pobyt. Počas dňa sa oňho postaráme a pošleme vám fotky či videá, aby ste videli, ako sa u nás má."],
               ].map(([number, stepTitle, text, note]) => (
-                <article key={number} className="rounded-3xl bg-cream/10 p-5 text-left ring-1 ring-cream/15">
+                <article key={number} className="border-l-2 border-cream/30 py-2 pl-5 text-left md:border-l-0 md:border-t-2 md:py-6 md:pl-0">
                   <span className="flex size-10 items-center justify-center rounded-full bg-coral font-display text-lg font-bold text-white">
                     {number}
                   </span>
