@@ -75,6 +75,8 @@ export function FirstVisit() {
           <p className="mt-3 text-forest/80">Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.</p>
         </div>
 
+        <p className="mx-auto mt-4 w-fit rounded-full border border-coral/30 bg-coral/10 px-5 py-2 text-center font-display text-base font-bold text-coral-dark sm:text-lg">Úvodná návšteva zadarmo</p>
+
         <ol className="mx-auto mt-10 grid max-w-5xl gap-9 text-center md:grid-cols-3 md:gap-8">
           {STEPS.map((s, i) => (
             <li key={s.title} className="min-w-0">
