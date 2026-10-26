@@ -101,7 +101,7 @@ function DogSittingPage() {
                 Kým ste v práci, váš psík si v našej dennej škôlke užije pohyb,
                 hry s kamarátmi aj oddych. A to všetko pod naším celodenným dohľadom.
               </p>
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold sm:text-sm lg:justify-start">
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold sm:text-sm lg:hidden">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-coral px-3 py-1.5 text-white shadow-card">
                   <MapPin className="size-4" aria-hidden="true" /> Košice
                 </span>
