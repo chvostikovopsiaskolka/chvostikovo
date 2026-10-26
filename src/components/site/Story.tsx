@@ -4,7 +4,7 @@ import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
 import { ShortForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
-import { CARE, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
+import { CARE, DAYCARE_GALLERY_EXTRAS, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import dogsPair from "@/assets/dogs-pair.jpg";
 import certAdriana from "@/assets/cert-adriana.jpg";
@@ -86,8 +86,34 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
         </h2>
 
         {/* One editorial photo and three readable benefits, including a true two-column mobile layout. */}
-        <div className="mt-8 grid grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] items-stretch gap-3 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:gap-7 lg:gap-12">
-          <figure className="relative min-h-[340px] overflow-hidden rounded-[22px] bg-secondary shadow-card sm:min-h-[390px] sm:rounded-4xl lg:min-h-[420px]">
+        <div className="mt-8 grid grid-cols-[minmax(0,0.97fr)_minmax(0,1.03fr)] items-stretch gap-3 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:gap-7 lg:gap-12">
+          {/* Mobile: wider photo column with two genuine Chvostíkovo photos, not a stretched single image. */}
+          <div className="grid min-h-[360px] min-w-0 grid-rows-2 gap-2 sm:hidden">
+            <figure className="relative min-h-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
+              <img
+                src={CARE[0]!.img}
+                alt={isEnglish ? "Dogs enjoying an active day at Chvostíkovo" : "Psíkovia si užívajú aktívny deň v Chvostíkove"}
+                width={900}
+                height={900}
+                loading="lazy"
+                decoding="async"
+                className={`absolute inset-0 size-full object-cover ${CARE[0]!.pos}`}
+              />
+            </figure>
+            <figure className="relative min-h-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
+              <img
+                src={DAYCARE_GALLERY_EXTRAS[1]!.src}
+                alt={isEnglish ? "Iris and Gael resting on the sofa at Chvostíkovo" : DAYCARE_GALLERY_EXTRAS[1]!.alt}
+                width={900}
+                height={900}
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 size-full object-cover object-center"
+              />
+            </figure>
+          </div>
+          {/* Desktop/tablet: preserve the previously approved single-photo composition. */}
+          <figure className="relative hidden min-h-[390px] overflow-hidden rounded-4xl bg-secondary shadow-card sm:block lg:min-h-[420px]">
             <img
               src={CARE[0]!.img}
               alt={isEnglish ? "Dogs enjoying active time together at Chvostíkovo daycare" : "Psíkovia sa spolu hrajú v psej škôlke Chvostíkovo"}
