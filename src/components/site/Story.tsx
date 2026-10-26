@@ -128,7 +128,7 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
               className={`absolute inset-0 h-full w-full object-cover ${CARE[0]!.pos}`}
             />
           </figure>
-          <div className="flex min-w-0 flex-col justify-center">
+          <div className="flex min-w-0 flex-col justify-between sm:justify-center">
             {items.map((item, i) => (
               <article
                 key={item.title}
