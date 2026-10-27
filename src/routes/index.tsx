@@ -17,7 +17,7 @@ import { FAQ } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
-const title = "Psia škôlka Košice | Denné stráženie psov | Chvostíkovo";
+const title = "Chvostíkovo | Psia škôlka Košice | Denné stráženie psov";
 const description =
   "Psia škôlka Chvostíkovo v Košiciach – denné stráženie psov s individuálnym prístupom, bezpečným výbehom a celodenným dohľadom.";
 
