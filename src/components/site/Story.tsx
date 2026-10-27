@@ -65,6 +65,26 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
     },
   ];
   const items = isEnglish ? careEn : CARE;
+  const mobilePhotos = [
+    {
+      src: CARE[0]!.img,
+      alt: isEnglish ? "Dogs enjoying an active day at Chvostíkovo" : "Psíkovia si užívajú aktívny deň v Chvostíkove",
+      size: 900,
+      position: CARE[0]!.pos,
+    },
+    {
+      src: careDogFriendsSquare,
+      alt: isEnglish ? "Three dog friends together at Chvostíkovo daycare" : "Traja psí kamaráti spolu v škôlke Chvostíkovo",
+      size: 720,
+      position: "object-center",
+    },
+    {
+      src: careHappyDogSquare,
+      alt: isEnglish ? "Happy black-and-white dog at Chvostíkovo daycare" : "Usmiaty čiernobiely psík v škôlke Chvostíkovo",
+      size: 720,
+      position: "object-center",
+    },
+  ];
 
 
   return (
@@ -75,47 +95,36 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
           {isEnglish ? "How we care for your dog" : "Ako sa postaráme o psíka"}
         </h2>
 
-        {/* One editorial photo and three readable benefits, including a true two-column mobile layout. */}
-        <div className="mt-8 grid grid-cols-[minmax(0,0.97fr)_minmax(0,1.03fr)] items-stretch gap-3 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:gap-7 lg:gap-12">
-          {/* Mobile: four authentic photos in independent square frames, never stretched to match copy height. */}
-          <div className="flex min-w-0 flex-col gap-2 sm:hidden">
-            <figure className="relative aspect-square min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
-              <img
-                src={CARE[0]!.img}
-                alt={isEnglish ? "Dogs enjoying an active day at Chvostíkovo" : "Psíkovia si užívajú aktívny deň v Chvostíkove"}
-                width={900}
-                height={900}
-                loading="lazy"
-                decoding="async"
-                className={`absolute inset-0 size-full object-cover ${CARE[0]!.pos}`}
-              />
-            </figure>
-            <figure className="relative aspect-square min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
-              <img
-                src={DAYCARE_GALLERY_EXTRAS[1]!.src}
-                alt={isEnglish ? "Iris and Gael resting on the sofa at Chvostíkovo" : DAYCARE_GALLERY_EXTRAS[1]!.alt}
-                width={900}
-                height={900}
-                loading="lazy"
-                decoding="async"
-                className="absolute inset-0 size-full object-cover object-center"
-              />
-            </figure>
-            <figure className="relative aspect-square min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
-              <img src={careDogFriendsSquare}
-                alt={isEnglish ? "Three dog friends together at Chvostíkovo daycare" : "Traja psí kamaráti spolu v škôlke Chvostíkovo"}
-                width={720} height={720} loading="lazy" decoding="async"
-                className="absolute inset-0 size-full object-cover object-center"
-              />
-            </figure>
-            <figure className="relative aspect-square min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
-              <img src={careHappyDogSquare}
-                alt={isEnglish ? "Happy black-and-white dog at Chvostíkovo daycare" : "Usmiaty čiernobiely psík v škôlke Chvostíkovo"}
-                width={720} height={720} loading="lazy" decoding="async"
-                className="absolute inset-0 size-full object-cover object-center"
-              />
-            </figure>
-          </div>
+        {/* Mobile: each photo shares a row with its complete benefit text. */}
+        <div className="mt-8 space-y-4 sm:hidden">
+          {items.map((item, i) => {
+            const photo = mobilePhotos[i]!;
+            return (
+              <div key={item.title} className="grid grid-cols-[minmax(0,0.97fr)_minmax(0,1.03fr)] items-stretch gap-3">
+                <figure className="relative min-h-40 min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
+                  <img
+                    src={photo.src}
+                    alt={photo.alt}
+                    width={photo.size}
+                    height={photo.size}
+                    loading="lazy"
+                    decoding="async"
+                    className={`absolute inset-0 size-full object-cover ${photo.position}`}
+                  />
+                </figure>
+                <article className="min-w-0">
+                  <h3 className="font-display text-[14px] leading-snug text-forest min-[390px]:text-[16px]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-[13px] leading-[1.55] text-forest/80 min-[390px]:text-[14px]">
+                    {renderText(item.text)}
+                  </p>
+                </article>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-8 hidden grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-stretch gap-7 sm:grid lg:gap-12">
           {/* Desktop/tablet: preserve the previously approved single-photo composition. */}
           <figure className="relative hidden min-h-[390px] overflow-hidden rounded-4xl bg-secondary shadow-card sm:block lg:min-h-[420px]">
             <img
