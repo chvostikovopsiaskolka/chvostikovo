@@ -17,51 +17,22 @@ The known-good icon is the **exact admin asset `Store-v2.png` (500x500 PNG)**. R
 
 For the customer portal, the production solution confirmed working on 2026-09-15 serves the same `Store-v2.png` content through the existing same-origin icon route and uses it in the manifest/iOS icon path. Verify the actual iPhone **Add to Home Screen** preview before considering icon work complete.
 
-## Mandatory project context before changes
+## Permanent delivery agreement — user decision 27 October 2026
 
-This is a **public repository**. This file intentionally contains only safe, high-level
-instructions. It is NOT the full operating specification of Chvostíkovo.
+- Source order: observed LIVE production -> current GitHub code/commits/branches -> the private Bellaris Workspace wiki (`chvostikovopsiaskolka/Bellaris-workspace`, versioned Markdown on `main`) -> its synchronized local Obsidian copy -> Google Drive as historical archive/backup. Observed behavior is evidence, not permission to discard newer explicit requirements. Record discrepancies and dates.
+- For normal development read only relevant wiki sections and affected code. Do not open, compare, synchronize or update Drive routinely. Use Drive only for an explicitly requested restore, backup or historical audit; preserve existing scheduled backups.
+- An explicit implementation request (edit/fix/add/change/implement) authorizes the requested ordinary change through relevant tests, commit, push, required PR, checked merge to the designated production branch, existing deployment mechanism, LIVE verification and wiki update. Do not stop at a local edit, build, commit, PR or preview, or ask for the same permission again.
+- First verify the project, current LIVE version and Git state; synchronize without losing drafts; retain a reproducible rollback; make the smallest isolated change. Reuse existing tools/dependencies. Run tests appropriate to the risk; preserve existing CTA, forms, attribution, navigation and shared language variants. Do not repeat successful checks unless later changes invalidate them. Auth, database, reservations, passes, health data and critical integrations require their full relevant regressions.
+- Separate approval is required for destructive data changes, incompatible migrations, pricing/payments/billing changes, ads/budgets, bulk SMS/email/push, first client launch, DNS/cutover, customer-data migration, service disconnection, or significant security/access changes outside the requested scope. A first migration/launch is never implied by an ordinary UI request.
+- Respect explicit planning-only, preview-only, PR-only and do-not-deploy instructions. If permissions, required CI, rollback or deployment prerequisites fail, do not bypass safeguards; report the exact blocker and leave a reviewable safe branch. Never force-push or rewrite published history.
+- Verify the served artifact and relevant user flow before saying LIVE. Distinguish automated/browser checks from physical-device observations. Finish with outcome, commit/version, tests, deployment, rollback and unverified limits.
+- Update the existing relevant wiki section and log, merge its checked documentation change to wiki `main` and read it back. Obsidian is a synchronized copy, not a competing source. Never copy private wiki contents, credentials or customer data into this repository. A link does not grant access to the private wiki; report missing access.
 
-Before changing behavior, content, styles, tracking, forms, deployment, or related
-systems, an agent with authorized access MUST:
+## Production paths
 
-1. Read the current **"Chvostíkovo – 00 Hlavný prehľad a rozcestník"** from
-   the connected Google Drive, then read the relevant specifications:
-   **01 Web a SEO**, **02 Zákaznícka PWA**, **03 Admin**,
-   **04 Marketing**, **05 Backend a integrácie**, and **07 História zmien**
-   for the affected systems. Read **06 Register vízií** when the request
-   concerns an idea, vision, or previous decision. Access those documents
-   through the authorized Drive connector; DO NOT guess document contents,
-   replicate private documents into GitHub, or assume chat memory is complete.
-2. Distinguish **verified production** from history, proposed designs,
-   pending deployments, tests, and cancelled approaches. A successful commit
-   or deployment status alone does not prove that the feature works in production.
-   Explicit recent user decisions supersede older proposals.
-3. Inspect the current remote branch/commit, actual affected files, dependencies,
-   deployed version, and API/database permissions where relevant. Identify
-   the intended user-facing outcome and acceptance criteria.
-4. Create or identify a reproducible rollback (commit, immutable branch or
-   appropriate system snapshot) BEFORE modifying production-connected code.
-   Preserve published Git history; do not force-push, rewrite history,
-   overwrite stable snapshots, or silently swap deployment paths.
-5. Make the smallest isolated change. No unrelated refactors, new tools,
-   extra requests to backend services, unapproved marketing changes, or
-   redesigns while repairing a defect.
-6. Test relevant desktop and mobile widths, iOS Safari and Android/Chrome
-   behavior, keyboard/accessibility, performance, empty/error states,
-   navigation and links. For web/forms also verify iOS/Android autofill,
-   validation, failure recovery, end-to-end delivery, SEO/EN where relevant,
-   consent and accurate analytics attribution. Never inflate live leads with
-   test submissions.
-7. Deploy ONLY explicitly requested components through the correct pipeline;
-   independently verify the result on the live URL before reporting it LIVE.
-   Update the EXISTING section of each affected Drive document, update the
-   overview in 00, and add ONE release/test entry to 07 in the same task
-   where applicable. Read back documentation writes and report any failure.
-8. If authorized Drive access, a current production snapshot, a safe rollback,
-   or required permissions are missing, **stop before changing or deploying
-   production behavior**, state the blocker clearly, and request access or
-   provide a reviewable proposal. Never invent verification.
+- Public website: this repository, `main` -> existing GitHub Pages workflow -> https://chvostikovo.sk.
+- Customer PWA: this repository, `customer-portal-production` -> existing Vercel project -> https://app.chvostikovo.sk. Never deploy customer changes through web main.
+- Admin: verify the existing Supabase frontend snapshot/approved publishing mechanism, stable version and rollback; never publish admin through Pages or customer Vercel. Backend releases remain separate and require their relevant schema/access checks.
 
 ## Scope, privacy and operational safeguards
 
@@ -95,11 +66,10 @@ systems, an agent with authorized access MUST:
 
 ## Source of truth and limits
 
-Repository files document implementation; the authorized Drive specifications
-document operational decisions; production APIs and live artifacts establish
-what actually runs. In case of conflict, check the latest explicit decision
-and report the discrepancy instead of silently choosing one.
+Repository files document implementation; current Bellaris Workspace wiki records
+operational decisions; production APIs and served artifacts establish what runs.
+Use the source order above and report conflicts with the latest explicit request.
 
-These rules cannot by themselves force an AI tool to connect to Drive.
-If the connected agent lacks Drive access, it MUST acknowledge that
-limitation and must not treat this public `AGENTS.md` as a complete specification.
+These rules do not grant private wiki or deployment access. If access is missing,
+report the precise gap and keep a safe reviewable branch; do not substitute a
+routine Drive read or claim a deployment.
