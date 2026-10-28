@@ -709,10 +709,6 @@ function EnglishDogDaycarePage() {
 
         <DaycarePhotoCarousel language="en" />
 
-        <Gallery language="en" />
-
-
-
         <Care language="en" showEmbeddedFriendship={false} showInterest={false} />
 
         <section id="pricing" className="relative scroll-mt-24 overflow-hidden py-14 sm:py-20">
@@ -768,6 +764,8 @@ function EnglishDogDaycarePage() {
         </section>
 
         <FriendshipFeature language="en" ctaLabel="This is what I’m looking for" onCtaClick={() => openInquiry("en_friendship_20261028")} />
+
+        <Gallery language="en" />
 
         <section id="en-first-visit" className="relative scroll-mt-4 overflow-hidden py-14 sm:py-18">
           <SectionAmbientPaws />
