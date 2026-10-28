@@ -873,7 +873,6 @@ html,body{overscroll-behavior:none}
 .customer-design #bookingPickerV37 #designSelectedDaysTitle{font-size:18px!important;font-weight:850!important;margin:8px 2px 4px!important;color:#713b20}
 .customer-design #bookingPickerV37.has-selected-days-v393 #bookingPickerTaxiSectionV91{padding:8px 6px;border:1px solid #edb787;border-radius:18px;background:#fff7ed66;box-shadow:0 3px 12px #b46f241a;margin-bottom:8px}
 .customer-design #bookingPickerV37.has-selected-days-v393 .design-selected-days{max-height:min(34dvh,300px)!important}
-.customer-design #bookingPickerV37.has-selected-days-v393 #bookingPickerDaysV37{margin-top:14px}
 .customer-design :is(#navBookAddV220,#bookingPickerSubmitV37):not(:disabled):not([aria-busy=true]){box-shadow:0 0 0 1px #faae6170,0 0 14px #f9731633!important}
 .customer-design #bookingPickerSubmitV37:disabled{box-shadow:none!important}
 @media(max-height:600px){#authView.auth-shell{align-content:start;align-items:start;padding-top:calc(12px + env(safe-area-inset-top))}}
