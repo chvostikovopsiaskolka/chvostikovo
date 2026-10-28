@@ -877,3 +877,10 @@ html,body{overscroll-behavior:none}
 .customer-design :is(#navBookAddV220,#bookingPickerSubmitV37):not(:disabled):not([aria-busy=true]){box-shadow:0 0 0 1px #faae6170,0 0 14px #f9731633!important}
 .customer-design #bookingPickerSubmitV37:disabled{box-shadow:none!important}
 @media(max-height:600px){#authView.auth-shell{align-content:start;align-items:start;padding-top:calc(12px + env(safe-area-inset-top))}}
+
+/* v393: smaller existing animation, without adding a loading delay. */
+#loading .concept-brand{width:min(175px,50vw)}
+#loading .concept-orbit{width:78px;height:78px;margin:30px auto 20px}
+#loading .concept-orbit>.concept-paw{width:36px;height:36px}
+#loading.in-app .concept-orbit{width:48px;height:48px;margin:0}
+#loading.in-app .concept-orbit>.concept-paw{width:24px;height:24px}
