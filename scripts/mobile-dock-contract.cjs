@@ -11,10 +11,10 @@ const hero = read("src/components/site/Hero.tsx");
 const form = read("src/components/site/FormDialog.tsx");
 const forms = read("src/components/site/Forms.tsx");
 
-for (const value of ["Domov", "Priestory", "Starostlivosť", "Cenník", "Prihláška", "Menu"]) {
+for (const value of ["Priestory", "Starostlivosť", "Cenník", "O nás", "Prihláška", "Menu"]) {
   assert(dock.includes(value), "Missing dock item " + value);
 }
-// V-051 pilot applies only to the main SK dock, not four marketing docks.
+// The main SK order and route-local landing sequences are intentionally distinct.
 const mainDock = dock.slice(dock.indexOf('    : [{ id: "starostlivost", label: "Starostlivosť"'), dock.indexOf("// Return arrow: hide while moving down; show on upward scroll or after stopping."));
 assert(mainDock.includes('{ id: "o-nas", label: "O nás"') && !mainDock.includes('{ id: "top", label: "Domov"'), "Main dock should replace Domov with O nás");
 assert(mainDock.indexOf('id: "starostlivost"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "priestory"') && mainDock.indexOf('id: "priestory"') < mainDock.indexOf('id: "o-nas"'), "Main nav order must be care, prices, spaces, about");
@@ -28,10 +28,10 @@ assert(dock.includes('english ? "Back to top" : "Späť hore"') && dock.includes
 assert(dock.includes('`mobile_dock_${variant}_back_to_top`'), "Return clicks must be measured separately per variant from old Domov");
 assert(css.includes('bottom: calc(100% + 9px)') && css.includes('border-radius: 999px') && css.includes('border: none;') && css.includes('.mobile-dock-back-top[data-visible="false"]'), "Arrow must be borderless round glass, above dock and hide without shift");
 
-for (const value of ["Home", "Why us?", "Interested in daycare", "Prices", "Slovak version"]) {
+for (const value of ["First visit", "Why us?", "Interested in daycare", "Prices", "Slovak version"]) {
   assert(dock.includes(value), "Missing EN item " + value);
 }
-for (const anchor of ["priestory", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "why-daycare", "pricing"]) {
+for (const anchor of ["priestory", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "en-benefits", "pricing"]) {
   assert(dock.includes(anchor), "Missing valid anchor " + anchor);
 }
 assert(dock.includes("onApplicationOpen?.()") && dock.includes("onInterestOpen?.()"), "Dock must delegate to existing modal openers");
