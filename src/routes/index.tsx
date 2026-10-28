@@ -4,7 +4,7 @@ import { Hero } from "@/components/site/Hero";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
 import { ReviewReasons, Reviews } from "@/components/site/Reviews";
-import { Care, Why, About, Partners } from "@/components/site/Story";
+import { Care, Why, About, Partners, FriendshipInterest } from "@/components/site/Story";
 import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
 import { UsefulInfo } from "@/components/site/UsefulInfo";
 import { ProductSection } from "@/components/site/ProductSection";
@@ -82,12 +82,13 @@ function Index() {
         <ReviewReasons variant="home" withVideo />
         <DaycarePhotoCarousel />
         <Gallery />
-        <Care />
+        <Care showEmbeddedFriendship={false} showInterest={false} />
+        <Pricing interestMode />
+        <FriendshipInterest />
         <FirstVisit />
         <Why />
         <InquirySection />
         <Requirements />
-        <Pricing />
         <Faq />
         <About />
         <InstagramFeed />
