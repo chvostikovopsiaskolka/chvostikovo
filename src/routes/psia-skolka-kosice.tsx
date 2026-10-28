@@ -196,7 +196,26 @@ function LeadLandingPage() {
               Pekný deň pre psíka. Pokojnejšia hlava pre vás.
             </h2>
 
-            <div className="mt-7">
+            {/* Mobile: one real photo paired with each benefit, with no overlapping rows. */}
+            <div className="mt-7 space-y-5 sm:hidden">
+              {BENEFITS.map(({ title: benefitTitle, text }, i) => {
+                const photo = [DAYCARE_GALLERY_EXTRAS[2]!, DAYCARE_GALLERY_EXTRAS[1]!, DAYCARE_GALLERY_EXTRAS[0]!][i]!;
+                return (
+                  <div key={benefitTitle} className="grid grid-cols-[minmax(0,0.97fr)_minmax(0,1.03fr)] items-stretch gap-3">
+                    <figure className="relative min-h-40 min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
+                      <img src={photo.src} alt={photo.alt} width={720} height={720} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
+                    </figure>
+                    <article className="min-w-0 py-1 text-left">
+                      <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px]">{benefitTitle}</h3>
+                      <p className="mt-2 text-[12px] leading-[1.55] text-forest/80 min-[390px]:text-[13px]">{text}</p>
+                    </article>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop/tablet: retain the established editorial composition. */}
+            <div className="mt-7 hidden sm:block">
               <EditorialBenefits image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
                 {BENEFITS.map(({ icon: Icon, title: benefitTitle, text }, i) => (
                   <article key={benefitTitle} className={`py-3 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-forest/15" : ""}`}>
