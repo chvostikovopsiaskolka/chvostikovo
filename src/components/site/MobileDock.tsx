@@ -239,15 +239,16 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                     data-tracking-source={english ? "en_mobile_dock_menu" : "mobile_dock_menu"}
                     onClick={() => {
                       void trackCookielessInteraction("phone_click", english ? "en_mobile_dock_menu" : "mobile_dock_menu", language);
+                       void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_phone", language);
                     }}>
                     <Phone aria-hidden="true" size={17} />
                     {english ? "Call us" : "Zavolajte nám"}
                   </a>
-                  <a href={english ? "/" : "/en/dog-daycare-kosice"} lang={english ? "sk" : "en"}>
+                  <a href={english ? "/" : "/en/dog-daycare-kosice"} lang={english ? "sk" : "en"} onClick={() => { void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_language", language); }}>
                     {english ? "Slovak version" : "English version"}
                   </a>
                 </div>
-                <a href="/" aria-label="Chvostíkovo" className="mobile-dock-menu-logo">
+                <a href="/" aria-label="Chvostíkovo" className="mobile-dock-menu-logo" onClick={() => { void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_top", language); }}>
                   <img src={logo} alt="Chvostíkovo" />
                 </a>
               </DialogPrimitive.Content>
