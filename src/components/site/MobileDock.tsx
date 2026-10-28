@@ -140,7 +140,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
       window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
     }
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    window.scrollTo({ top: 0, behavior: reducedMotion ? "instant" : "smooth" });
+    window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
   };
 
   const openApplication = () => {
