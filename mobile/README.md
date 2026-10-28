@@ -1,7 +1,7 @@
 # Chvostíkovo Android — Capacitor preparation
 
 Status: **prepared for testing; not a signed Google Play release**. Source baseline:
-customer PWA candidate v393 / 2.0.68 (28 October 2026), based on
+customer PWA candidate v394 / 2.0.69 (28 October 2026), based on
 production `3159725685584014b50b912e09995b2d68fcebfd`. Earlier v360/v361 APK/AAB files
 are obsolete. Every subsequent Android file must be rebuilt after shared changes.
 The production PWA and database are not changed by building this directory.
@@ -27,7 +27,7 @@ mode. The PWA continues to use its existing updater. Keep shared changes in the
 root source; never edit generated `www` or Android assets manually.
 
 Android `versionName` and `versionCode` are read directly from root `version.json`
-(v393 -> code 393, name 2.0.68). Use a newer shared build number for each Play
+(v394 -> code 394, name 2.0.69). Use a newer shared build number for each Play
 upload. The build cleans old output, includes the optical engine's runtime assets
 and records shared plus packaged SHA-256 hashes and the Git source commit in
 `mobile-build.json`. Packaging tests verify source parity and vendor references.
@@ -237,7 +237,7 @@ in the build environment, never in committed Gradle files:
 
 Then `npm run android:bundle`. The preflight deliberately blocks an unconfigured
 release. The shared build number must increase for each Play upload; Android reads
-it directly as `versionCode`. Current candidate uses code 393 and versionName 2.0.68.
+it directly as `versionCode`. Current candidate uses code 394 and versionName 2.0.69.
 
 Upload the signed AAB to Google Play internal testing, add testers' Play Google
 accounts and share the opt-in link. They sign in with existing Chvostíkovo credentials;
@@ -273,3 +273,17 @@ wiki. This is a debug candidate, not a Play publication or proof of delivered no
 Rollback: retain the previous v392 APK and its source branch. Reinstalling older debug code may need
 an Android-approved version downgrade; do not uninstall or clear customer data as a routine rollback.
 PWA rollback is separate. Native push server rollout must preserve existing web push and token privacy.
+
+### Backend activation — 28 October 2026
+
+Deployed `native_push_devices_v393` (additive, service-only/RLS), `customer-native-push` v1,
+and `admin-push` v42. Deployed files read back identical; missing/invalid bearer both return 401;
+no synthetic device remains (count 0). Firebase server secret is still to be supplied by the operator.
+Full assembled webhook tests preserve web delivery/copy/targets and skip native lookup without FCM.
+
+Fresh LIVE `admin-push` v41 backup: `supabase/backups/admin-push-before-native-v393.ts`,
+SHA256 `521f6d8a3d60e5f103c0f7e9c3bbd977b335331761960ba32e7955ba43196829`, with companion security backup.
+Rollback native dispatch by deploying those exact v41 sources only if v42 has not received newer
+changes. Preserve the device table and existing web subscriptions. Never put tokens or Firebase
+service-account contents into Git. Sending/receiving is unverified until a synthetic device account
+can register with the configured secret and foreground/background/terminated scenarios are observed.

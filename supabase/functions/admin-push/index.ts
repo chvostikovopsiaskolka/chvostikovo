@@ -1,3 +1,4 @@
+import { dispatchNative } from "./native-dispatch.ts";
 import {securityLimitV336,securityAccessV336} from "./security-v336.ts";
 import webpush from "npm:web-push@3.6.7";
 
@@ -595,7 +596,10 @@ async function dispatch(body: Json) {
       }
     }
   }
-  return { sent, removed, ignored: false };
+  let nativeSent = 0;
+  try { nativeSent = (await dispatchNative(message, SUPABASE_URL, SERVICE_KEY)).sent; }
+  catch { console.error("Native push dispatch unavailable"); }
+  return { sent, removed, nativeSent, ignored: false };
 }
 
 Deno.serve(async (req: Request) => {
@@ -652,4 +656,5 @@ Deno.serve(async (req: Request) => {
     return response({ error: error instanceof Error ? error.message : String(error) }, 400);
   }
 });
+
 
