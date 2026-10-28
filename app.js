@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v394';
-const APP_VERSION='2.0.69';
+const APP_BUILD='v396';
+const APP_VERSION='2.0.71';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -2029,7 +2029,7 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
   function closePrivacyInfo(){if(privacyMandatory)return;$('privacyInfoModal')?.classList.add('hidden')}
   async function acknowledgePrivacy(){if(!privacyMandatory){closePrivacyInfo();return}const btn=$('privacyInfoOk');if(btn)btn.disabled=true;try{const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_acknowledge_privacy_notice',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_version:PRIVACY_VERSION})});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.message||data?.error||'Potvrdenie sa nepodarilo uložiť.');if(state.data?.profile){state.data.profile.privacy_notice_version=PRIVACY_VERSION;state.data.profile.privacy_notice_acknowledged_at=new Date().toISOString()}privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden');runCustomerOnboardingV75()}catch(e){toast(e.message||'Potvrdenie sa nepodarilo uložiť.')}finally{if(btn)btn.disabled=false}}
   async function activeTermsDocument(){try{return await readActiveCustomerTermsV146()}catch(_){return null}}
-  async function acceptedTerms(version){const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_sync_owner_terms_v254',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_terms_version:version}),cache:'no-store'});if(!r.ok)return[];return await r.json()}
+  async function acceptedTerms(version){const account=state.session.user.id;const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_sync_owner_terms_v254',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_terms_version:version}),cache:'no-store'});if(!r.ok)return[];const rows=await r.json();if(state.session?.user?.id===account)window.seedCustomerTermsAcceptancesV396?.(account,version,rows);return rows}
   function termParagraphsV106(body){
     const split=String(body||'').replace(/\. (?=(?:Majiteľ|Fenky|Ak|Chvostíkovo|Aj pri|Psia škôlka|Psík|Do kolektívu|Pri závažných|Pri úvodnej|V prípade|Náklady|Kapacita|Bez včasného|Pri závažných dôvodoch|Permanentka|10-vstupová|Platnosť permanentky|Nevyužité vstupy|Služba|Aktuálna cena|Podmienky sa)\b)/g,'.\n');
     return split.split(/\n+/).map(x=>x.trim()).filter(Boolean);
@@ -2144,6 +2144,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   window.__chvostikovoCustomerLegalStatusV21=true;
   let renderSeq=0;
   const acceptanceCache=new Map(),acceptancePromises=new Map();
+  window.seedCustomerTermsAcceptancesV396=(account,version,rows)=>{if(account!==state.session?.user?.id||!Array.isArray(rows))return;for(const row of rows){if(row.accepted_at&&String(row.terms_version)===String(version))acceptanceCache.set(account+'|'+String(row.dog_id)+'|'+String(version),row)}void render(false)};
   const headers=()=>({apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'});
   const skDateTime=v=>{try{return new Intl.DateTimeFormat('sk-SK',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}catch(_){return String(v||'')}};
   async function activeDoc(force=false){
@@ -3598,7 +3599,10 @@ async function togglePushDirect(btn){
   function renderSupportStaffAvatarV180(){
     const avatar=$('supportChatStaffAvatarV180');if(!avatar)return;
     const url=String(state.data?.chat_staff_photo_url||'');
-    avatar.innerHTML=url?'<img src="'+esc(url)+'" alt="Chvostíkovo">':'🐾';
+    const image=avatar.querySelector('img');
+    const identity=value=>{try{const u=new URL(value,location.href);return u.origin+u.pathname}catch(_){return value}};
+    if(url){if(!image||identity(image.src)!==identity(url))avatar.innerHTML='<img src="'+esc(url)+'" alt="Chvostíkovo">';}
+    else if(image)avatar.textContent='🐾';
     avatar.classList.toggle('has-photo',!!url);
     const call=$('supportChatCallV182');
     if(call){
@@ -3615,7 +3619,21 @@ async function togglePushDirect(btn){
     const rows=state.data?.messages||[];
     const previousTop=root.scrollTop,nearBottom=root.scrollHeight-root.scrollTop-root.clientHeight<90;
     root.classList.remove('hidden');
-    root.innerHTML=rows.length?rows.map(m=>'<div class="message-bubble '+(m.sender_role==='customer'?'mine':'')+'"><p>'+esc(m.body)+'</p><small>'+skTime(m.created_at)+'</small></div>').join(''):'<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';
+    const owner=String(state.session?.user?.id||'')+'|'+String(state.data?.conversation_id||'');
+    if(root.dataset.owner!==owner){root.replaceChildren();root.dataset.owner=owner}
+    if(!rows.length){if(!root.querySelector('.message-empty'))root.innerHTML='<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';}
+    else{
+      root.querySelector('.message-empty')?.remove();
+      const existing=new Map(Array.from(root.children,e=>[e.dataset.messageId,e]));
+      rows.forEach((m,i)=>{
+        const key=String(m.id??('row-'+i));let bubble=existing.get(key);existing.delete(key);
+        if(!bubble){bubble=document.createElement('div');bubble.dataset.messageId=key;bubble.innerHTML='<p></p><small></small>';}
+        const cls='message-bubble '+(m.sender_role==='customer'?'mine':'');if(bubble.className!==cls)bubble.className=cls;
+        const body=String(m.body||''),time=skTime(m.created_at);if(bubble.firstChild.textContent!==body)bubble.firstChild.textContent=body;if(bubble.lastChild.textContent!==time)bubble.lastChild.textContent=time;
+        if(root.children[i]!==bubble)root.insertBefore(bubble,root.children[i]||null);
+      });
+      for(const bubble of existing.values())bubble.remove();
+    }
     requestAnimationFrame(()=>{root.scrollTop=nearBottom?root.scrollHeight:previousTop});
   }
 

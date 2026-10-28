@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-v394';
+const CACHE='chvostikovo-portal-shell-v396';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/vendor/liquidlens/reels-noise-v385.png','/customer-liquid-optics.js?v=v394','/vendor/liquidlens/liquid-glass.js','/vendor/simple-liquid-glass/webgl.js','/vendor/liquidlens/chvostikovo-paws.png','/vendor/liquidlens/chvostikovo-paws-soft-v383.png','/customer-guide-v358.js?v=v394','/customer-guide-v358.css?v=v394','/telemetry-v345.js?v=v394','/loading-motion.js?v=v394','/loading-design.css?v=v394','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v394','/customer-design.css?v=v394','/dog-choice-fab-v276.css?v=v394','/dual-dog-overview-v246.js?v=v394','/dual-dog-overview-v246.css?v=v394','/','/terms-pdf.js?v=v394','/terms-pdf-font.js?v=v394','/styles.css?v=v394','/bulletin-photo-v243.css?v=v394','/app.js?v=v394','/back-swipe.js?v=v394'];
+const SHELL=['/vendor/liquidlens/reels-noise-v385.png','/customer-liquid-optics.js?v=v396','/vendor/liquidlens/liquid-glass.js','/vendor/simple-liquid-glass/webgl.js','/vendor/liquidlens/chvostikovo-paws.png','/vendor/liquidlens/chvostikovo-paws-soft-v383.png','/customer-guide-v358.js?v=v396','/customer-guide-v358.css?v=v396','/telemetry-v345.js?v=v396','/loading-motion.js?v=v396','/loading-design.css?v=v396','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v396','/customer-design.css?v=v396','/dog-choice-fab-v276.css?v=v396','/dual-dog-overview-v246.js?v=v396','/dual-dog-overview-v246.css?v=v396','/','/terms-pdf.js?v=v396','/terms-pdf-font.js?v=v396','/styles.css?v=v396','/bulletin-photo-v243.css?v=v396','/app.js?v=v396','/back-swipe.js?v=v396'];
 
 function withPortalCsp(response){
   if(!response)return response;
