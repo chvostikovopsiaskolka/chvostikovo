@@ -2212,6 +2212,15 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const stats=document.getElementById('dogStats');
     const dogId=Number(state?.selectedDogId||0);
     if(!stats||!state?.session||!dogId){document.getElementById('customerLegalStatusCard')?.remove();return}
+    // The privacy document is local: make it available while active terms load.
+    let card=document.getElementById('customerLegalStatusCard');
+    if(!card){
+      card=document.createElement('div');card.id='customerLegalStatusCard';card.className='card customer-legal-card';
+      const target=document.querySelector('#customerLegalSectionV23 .details-content')||stats;
+      target.prepend(card);
+      card.innerHTML='<div class="customer-legal-doc-v105"><strong>Ochrana údajov</strong><button class="btn secondary customer-legal-doc-action-v105" type="button">Otvoriť súhlas</button></div><p role="status">Načítavam aktuálne pravidlá škôlky…</p>';
+      card.querySelector('button').onclick=()=>document.getElementById('privacyInfoBtn')?.click();
+    }
     const doc=await activeDoc(force);
     if(seq!==renderSeq)return;
     let accepted=null;
@@ -2220,7 +2229,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(doc&&!pendingAcceptance)accepted=await acceptance(dogId,doc.version,force);
     if(seq!==renderSeq)return;
     const privacyAt=state.data?.profile?.privacy_notice_acknowledged_at||null;
-    let card=document.getElementById('customerLegalStatusCard');
+    card=document.getElementById('customerLegalStatusCard');
     if(!card){card=document.createElement('div');card.id='customerLegalStatusCard';card.className='card customer-legal-card'}
     const v23Target=document.querySelector('#customerLegalSectionV23 .details-content');
     if(v23Target){card.classList.remove('card');card.classList.add('v23-legal-inner');const controls=document.getElementById('customerLegalControlsV23');if(controls)v23Target.insertBefore(card,controls);else v23Target.appendChild(card)}
