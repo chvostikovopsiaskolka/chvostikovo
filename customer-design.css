@@ -883,3 +883,6 @@ html,body{overscroll-behavior:none}
 #loading .concept-orbit>.concept-paw{width:36px;height:36px}
 #loading.in-app .concept-orbit{width:48px;height:48px;margin:0}
 #loading.in-app .concept-orbit>.concept-paw{width:24px;height:24px}
+
+/* v396: one document scroll owner; reserve the dock only in appView. */
+.customer-design #bookingTab:not(.hidden){height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;padding-bottom:0!important}
