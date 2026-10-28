@@ -76,16 +76,16 @@ const MORE_LINKS = [
 
 function DogSittingPage() {
   const [interestOpen, setInterestOpen] = useState(false);
-  function openInterest() {
-    trackMarketingInteraction("inquiry_cta", "dog_sitting_page_mobile_dock");
-    void trackCookielessInteraction("inquiry_cta", "dog_sitting_page_mobile_dock");
+  function openInterest(source = "dog_sitting_page_mobile_dock") {
+    trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
     setInterestOpen(true);
   }
 
   return (
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks hideMobileDock />
-      <MobileDock variant="dog-sitting" onInterestOpen={openInterest} />
+      <MobileDock variant="dog-sitting" onInterestOpen={() => openInterest()} />
       <main>
         <section id="top" className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
           <PawTrailBackground landingBottomPaws />
@@ -170,7 +170,7 @@ function DogSittingPage() {
             </div>
           </div>
         </section>
-        <LandingMobilePricing id="dog-sitting-pricing" onInterest={openInterest} />
+        <LandingMobilePricing id="dog-sitting-pricing" allScreens onInterest={() => openInterest("dog_sitting_pricing_20261028")} />
       </main>
       <Footer />
       <FormDialog
