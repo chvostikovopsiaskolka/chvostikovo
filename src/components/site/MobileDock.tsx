@@ -31,32 +31,34 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navigatingRef = useRef(false);
 
+  // Keep the prominent enquiry as the middle slot on landing pages.
+  // Other links follow the actual section order on each route.
   const sections = variant === "lead"
-    ? [{ id: "top", label: "Domov", icon: House },
-       { id: "lead-benefits", label: "Prečo my?", icon: Heart },
+    ? [{ id: "lead-benefits", label: "Prečo my?", icon: Heart },
+       { id: "lead-pricing", label: "Cenník", icon: Tag },
        { id: "interest", label: "Mám záujem o škôlku", icon: FilePenLine },
-       { id: "lead-pricing", label: "Cenník", icon: Tag }]
+       { id: "lead-first-visit", label: "Prvá návšteva", icon: House }]
     : variant === "puppy"
-    ? [{ id: "top", label: "Domov", icon: House },
-       { id: "puppy-benefits", label: "Prečo my?", icon: Heart },
+    ? [{ id: "puppy-benefits", label: "Prečo my?", icon: Heart },
+       { id: "puppy-pricing", label: "Cenník", icon: Tag },
        { id: "interest", label: "Mám záujem o škôlku", icon: FilePenLine },
-       { id: "puppy-pricing", label: "Cenník", icon: Tag }]
+       { id: "puppy-first-visit", label: "Prvá návšteva", icon: House }]
     : variant === "dog-sitting"
-    ? [{ id: "top", label: "Domov", icon: House },
-       { id: "dog-sitting-why", label: "Prečo my?", icon: Heart },
+    ? [{ id: "dog-sitting-why", label: "Prečo my?", icon: Heart },
+       { id: "dog-sitting-first-visit", label: "Prvá návšteva", icon: House },
        { id: "interest", label: "Mám záujem o škôlku", icon: FilePenLine },
        { id: "dog-sitting-pricing", label: "Cenník", icon: Tag }]
     : english
-    ? [{ id: "top", label: "Home", icon: House },
-       { id: "why-daycare", label: "Why us?", icon: Heart },
+    ? [{ id: "en-benefits", label: "Why us?", icon: Heart },
+       { id: "pricing", label: "Prices", icon: Tag },
        { id: "interest", label: "Interested in daycare", icon: FilePenLine },
-       { id: "pricing", label: "Prices", icon: Tag }]
-    : [{ id: "priestory", label: "Priestory", icon: ImageIcon },
-       { id: "starostlivost", label: "Starostlivosť", icon: Heart },
+       { id: "en-first-visit", label: "First visit", icon: House }]
+    : [{ id: "starostlivost", label: "Starostlivosť", icon: Heart },
        { id: "cennik", label: "Cenník", icon: Tag },
+       { id: "priestory", label: "Priestory", icon: ImageIcon },
        { id: "o-nas", label: "O nás", icon: Users }];
 
-  // Scroll-down-only reveal on all public dock variants; idle/up hides the control.
+  // Return arrow: hide while moving down; show on upward scroll or after stopping.
   // Reuse the existing section listener without adding a second scroll subscription.
   useEffect(() => {
     let frame = 0;
@@ -88,14 +90,24 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
         !document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]');
       if (Math.abs(delta) >= 6) {
         anchorY = y;
-        setShowBackToTop(eligible && delta > 0);
         window.clearTimeout(idleTimer);
-        if (eligible && delta > 0) {
-          idleTimer = window.setTimeout(() => setShowBackToTop(false), 800);
+        if (!eligible) {
+          setShowBackToTop(false);
+        } else if (delta > 0) {
+          // Hide during downward motion, then reveal after the user stops.
+          setShowBackToTop(false);
+          idleTimer = window.setTimeout(() => {
+            const stillEligible = window.scrollY > Math.max(420, window.innerHeight * 0.75) &&
+              !document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]');
+            setShowBackToTop(stillEligible);
+          }, 350);
+        } else {
+          // Immediately available on upward scrolling, then stays visible at rest.
+          setShowBackToTop(true);
         }
       } else if (!eligible) {
-        setShowBackToTop(false);
         window.clearTimeout(idleTimer);
+        setShowBackToTop(false);
       }
       updateActiveSection();
     };
