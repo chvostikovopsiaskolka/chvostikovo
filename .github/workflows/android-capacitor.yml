@@ -1,0 +1,53 @@
+name: Android Capacitor build
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/capacitor-android-v361]
+  pull_request:
+    branches: [customer-portal-production, feat/capacitor-android-v361]
+    paths: ['mobile/**', 'app.js', 'back-swipe.js', 'email-confirmed.js', '.github/workflows/android-capacitor.yml']
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
+      - name: Install pinned dependencies and sync shared assets
+        working-directory: mobile
+        run: |
+          npm ci
+          npm run sync
+          npm test
+      - name: Existing PWA regressions
+        run: |
+          npm ci --prefix tests/shared-v244 --ignore-scripts
+          node tests/customer-session-startup-v357.cjs
+          node tests/customer-native-schema-v393.cjs
+          node tests/customer-mobile-v393.cjs
+          node tests/customer-design.cjs
+          node tests/customer-confirm-return-v155.cjs
+          node tests/customer-guide-v358.cjs
+      - name: Compile debug APK and unsigned release bundle
+        working-directory: mobile/android
+        run: ./gradlew assembleDebug bundleRelease --console=plain
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chvostikovo-android-preview
+          retention-days: 30
+          path: |
+            mobile/android/app/build/outputs/apk/debug/app-debug.apk
+            mobile/android/app/build/outputs/bundle/release/app-release.aab
+            mobile/www/mobile-build.json
