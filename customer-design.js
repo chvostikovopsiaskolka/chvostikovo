@@ -212,7 +212,7 @@
   window.customerDesignPickerRender=()=>{
     const picker=byId('bookingPickerV37'),card=picker?.querySelector('.booking-picker-card-v37');if(!card)return;
     // Resume/bootstrap can advance availability while this page remains open.
-    const firstDate=state.data?.availability?.days?.[0]?.date;
+    const firstDate=window.customerPickerDaysV393?.()?.[0]?.date||state.data?.availability?.days?.[0]?.date;
     const renderedDate=byId('bookingPickerDaysV37')?.querySelector('.booking-picker-week-v127')?.dataset.weekFrom;
     if(firstDate&&renderedDate&&firstDate!==renderedDate){window.customerDesignRefreshCalendarV351?.();return;}
     picker.classList.add('design-reservations-page');picker.setAttribute('role','region');picker.removeAttribute('aria-modal');
@@ -248,7 +248,13 @@
     if(smart&&!smart.classList.contains('hidden')){smart.classList.toggle('design-smart-hidden',hasReservations);if(!hasReservations){empty?.classList.add('hidden');carousel.append(smart);}}
     if(empty&&!hasReservations&&(!smart||smart.classList.contains('hidden'))) {empty.classList.remove('hidden');let text=empty.querySelector('.design-empty-booking-cta');if(!text){text=document.createElement('p');text.className='design-empty-booking-cta';empty.replaceChildren(text);}text.textContent='Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.';}
     byId('designCapacityLegend')?.remove();
-    if(taxiTitle)byId('bookingPickerDaysV37').after(taxiTitle);
+    if(taxiTitle){
+      const selected=!selectedSection.classList.contains('hidden');
+      picker.classList.toggle('has-selected-days-v393',selected);
+      const submit=byId('bookingPickerSubmitV37'),error=byId('bookingPickerErrorV95');
+      if(selected)calendar.before(taxiTitle,selectedSection,error,submit);
+      else calendar.after(taxiTitle,selectedSection,error,submit);
+    }
 
   };
   window.customerDesignEditReservation=date=>{window.openBookingPickerV37?.();const carousel=byId('designBookingCarousel'),card=byId('weekDays')?.querySelector('[data-date="'+date+'"]');if(carousel&&card)carousel.scrollLeft=card.offsetLeft-carousel.offsetLeft;};

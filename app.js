@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v392';
-const APP_VERSION='2.0.67';
+const APP_BUILD='v393';
+const APP_VERSION='2.0.68';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -290,7 +290,7 @@ async function customerReadResponseV367(opts,session){
 async function apiCore(body=null,retry=true){const session=await ensureCustomerSessionV357();if(!state.session)throw new Error('Najprv sa prihláste.');let token=state.session.access_token;const opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const quote=body?.action==='shared_booking_v257'&&!body.operation_id;const result=quote?await sharedQuoteResponseV265(opts):!body?await customerReadResponseV367(opts,session):null;if(result?.token)token=result.token;const r=result?result.response:await fetch(API,opts);const txt=result?result.text:await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(!state.session||state.session.user?.id!==session.user?.id)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(data.code==='account_blocked'){clearSession();showAuth('login');authMessage('error',data.error);throw new Error(data.error)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
 let customerApiMutationsInFlight=0;
 async function api(body=null,retry=true){if(body)customerApiMutationsInFlight++;try{const result=await apiCore(body,retry);runCustomerHooks('afterApi',body,result);return result}catch(error){try{window.ChvoTelemetry?.capture('operation.error',{operation:'customer-operation',action:body?.action,error})}catch(_){}throw error}finally{if(body)customerApiMutationsInFlight--;scheduleCustomerUpdateApply()}}
-function showAuth(mode='login'){$('startupRecoveryV359')?.classList.add('hidden');if($('startupRecoveryV359'))$('startupRecoveryV359').inert=true;$('supportChatBtnV52')?.classList.add('hidden');$('supportChatModalV52')?.classList.add('hidden');document.documentElement.classList.remove('support-chat-open-v52');document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').inert=false;$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
+function showAuth(mode='login'){$('authView').dataset.authMode=mode;$('startupRecoveryV359')?.classList.add('hidden');if($('startupRecoveryV359'))$('startupRecoveryV359').inert=true;$('supportChatBtnV52')?.classList.add('hidden');$('supportChatModalV52')?.classList.add('hidden');document.documentElement.classList.remove('support-chat-open-v52');document.documentElement.classList.remove('customer-awaiting-dog-v107');$('appView').inert=false;$('appView').classList.add('hidden');$('authView').inert=false;$('authView').classList.remove('hidden');for(const id of ['loginForm','signupForm','forgotForm','newPasswordForm'])$(id).classList.add('hidden');$('showLogin').classList.toggle('active',mode==='login');$('showSignup').classList.toggle('active',mode==='signup');$(mode==='signup'?'signupForm':mode==='forgot'?'forgotForm':mode==='newPassword'?'newPasswordForm':'loginForm').classList.remove('hidden')}
 function showApp(){$('startupRecoveryV359')?.classList.add('hidden');if($('startupRecoveryV359'))$('startupRecoveryV359').inert=true;$('authView').classList.add('hidden');$('authView').inert=true;$('appView').classList.remove('hidden')}
 function showStartupRecoveryV359(){
   $('authView').classList.add('hidden');$('authView').inert=true;
@@ -702,7 +702,7 @@ async function cancelTaxiV326(btn){
   try{loading(true);const result=await authFetch('/rest/v1/rpc/portal_cancel_taxi_v326',{method:'POST',headers:{Authorization:'Bearer '+state.session.access_token},body:JSON.stringify({p_request_id:requestId||null,p_reservation_id:reservationId||null})});if(accountId!==state.session?.user?.id)return;const id=Number(result.reservation_id)||0;for(const request of state.data?.requests||[])if((id&&Number(request.reservation_id)===id)||Number(request.id)===requestId)Object.assign(request,{taxi_mode:'none',taxi_amount:0,requested_taxi_mode:null,requested_taxi_amount:null,taxi_change_status:null});const reservation=(state.data?.reservations||[]).find(r=>Number(r.id)===id);if(reservation)Object.assign(reservation,{taxi_mode:'none',taxi_service:'none',taxi_amount:0});renderDays();renderUpcoming();toast('Taxík bol zrušený. Rezervácia zostáva platná.');queueCustomerSync('bookings',80);return true;}catch(e){toast(e.message||'Taxík sa nepodarilo zrušiť.');}finally{btn.disabled=false;loading(false);}
 }
 function bookingFor(dogId,date){return (state.data?.requests||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date&&['pending','approved'].includes(r.status))||(state.data?.reservations||[]).find(r=>Number(r.dog_id)===Number(dogId)&&r.reservation_date===date)}
-function applyLocalBooking(result,fallback){const row=result?.data||result?.booking||result?.request||fallback;if(!row)return;const rows=state.data?.requests||(state.data.requests=[]),index=rows.findIndex(r=>Number(r.id)===Number(row.id));if(index>=0)rows[index]={...rows[index],...row};else rows.push({...fallback,...row});renderUpcoming();renderDays();renderMessages();renderPassSummary()}
+function applyLocalBooking(result,fallback,deferRender=false){const row=result?.data||result?.booking||result?.request||fallback;if(!row)return;const rows=state.data?.requests||(state.data.requests=[]),index=rows.findIndex(r=>Number(r.id)===Number(row.id));if(index>=0)rows[index]={...rows[index],...row};else rows.push({...fallback,...row});if(!deferRender){renderUpcoming();renderDays();renderMessages();renderPassSummary()}}
 async function loadAnnouncements(force=false){return customerRenderers.announcements?customerRenderers.announcements(force):undefined}
 function renderMessagesCore(){const rows=state.data?.messages||[];$('messageThread').innerHTML=rows.length?rows.map(m=>`<div class="message-bubble ${m.sender_role==='customer'?'mine':''}"><p>${esc(m.body)}</p><small>${skTime(m.created_at)}</small></div>`).join(''):'<div class="message-empty">Zatiaľ tu nemáte žiadne správy.</div>';setTimeout(()=>{$('messageThread').scrollTop=$('messageThread').scrollHeight},0);const opts=futureItems();$('messageBooking').innerHTML='<option value="">Bez konkrétnej rezervácie</option>'+opts.map(r=>`<option value="${r.id||''}">${esc(dogName(r.dog_id))} · ${skDate(r.reservation_date)}</option>`).join('')}
 function renderMessages(){const out=renderMessagesCore();runCustomerHooks('afterRenderMessages',out);return out}
@@ -1921,6 +1921,8 @@ placeDeadlineV59();
   };
 })();
 (function installGuideV83(){
+  // Android distribution uses the native app; keep the iOS home-screen guide.
+  if(/android/i.test(navigator.userAgent)||window.Capacitor?.isNativePlatform?.())return;
   const KEY='chvostikovo_install_guide_seen_v1';
   let deferredPrompt=null,installTimer=null,installConfirmed=false;
   const standalone=()=>window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
@@ -2212,7 +2214,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     if(!stats||!state?.session||!dogId){document.getElementById('customerLegalStatusCard')?.remove();return}
     const doc=await activeDoc(force);
     if(seq!==renderSeq)return;
-    const accepted=doc?await acceptance(dogId,doc.version,force):null;
+    let accepted=null;
+    const acceptanceKey=String(state.session.user?.id||'')+'|'+dogId+'|'+String(doc?.version||'');
+    const pendingAcceptance=doc&&!acceptanceCache.has(acceptanceKey);
+    if(doc&&!pendingAcceptance)accepted=await acceptance(dogId,doc.version,force);
     if(seq!==renderSeq)return;
     const privacyAt=state.data?.profile?.privacy_notice_acknowledged_at||null;
     let card=document.getElementById('customerLegalStatusCard');
@@ -2222,9 +2227,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     else{const legalAnchor=stats.querySelector('.stats-grid.old-stats')||stats.querySelector('.visit-stats-card');if(legalAnchor)stats.insertBefore(card,legalAnchor);else stats.appendChild(card)}
     card.innerHTML=
       '<div class="customer-legal-doc-v105"><div class="customer-legal-row"><div class="customer-legal-main"><strong>Ochrana údajov</strong><small>'+(privacyAt?'Potvrdené '+skDateTime(privacyAt):'Informácie o spracúvaní osobných údajov')+'</small></div><span class="customer-legal-status '+(privacyAt?'ok':'warn')+'">'+(privacyAt?'Potvrdené':'Nepotvrdené')+'</span></div><button id="customerPrivacyReadBtn" class="btn secondary customer-legal-doc-action-v105" type="button">Otvoriť súhlas</button></div>'+
-      '<div class="customer-legal-doc-v105"><div class="customer-legal-row"><div class="customer-legal-main"><strong>Pravidlá škôlky</strong><small>'+(accepted?'✓ Potvrdené dňa '+skDateTime(accepted.accepted_at)+' · Verzia '+termsVersionLabel(doc.version):(doc?'Čakajú na potvrdenie':'Dokument zatiaľ nie je aktívny'))+'</small></div><span class="customer-legal-status '+(accepted?'ok':'warn')+'">'+(accepted?'Odsúhlasené':'Nepotvrdené')+'</span></div>'+(doc?'<button id="customerTermsReadBtn" class="btn secondary customer-legal-doc-action-v105" type="button">Otvoriť pravidlá škôlky</button>':'')+'</div>';
+      '<div class="customer-legal-doc-v105"><div class="customer-legal-row"><div class="customer-legal-main"><strong>Pravidlá škôlky</strong><small>'+(accepted?'✓ Potvrdené dňa '+skDateTime(accepted.accepted_at)+' · Verzia '+termsVersionLabel(doc.version):(doc?(pendingAcceptance?'Overujem potvrdenie…':'Čakajú na potvrdenie'):'Dokument zatiaľ nie je aktívny'))+'</small></div><span class="customer-legal-status '+(accepted?'ok':'warn')+'">'+(accepted?'Odsúhlasené':pendingAcceptance?'Overujem…':'Nepotvrdené')+'</span></div>'+(doc?'<button id="customerTermsReadBtn" class="btn secondary customer-legal-doc-action-v105" type="button">Otvoriť pravidlá škôlky</button>':'')+'</div>';
     document.getElementById('customerPrivacyReadBtn')?.addEventListener('click',()=>document.getElementById('privacyInfoBtn')?.click());
     document.getElementById('customerTermsReadBtn')?.addEventListener('click',()=>openRead(doc));
+    if(pendingAcceptance){await acceptance(dogId,doc.version,force);if(seq===renderSeq&&state.selectedDogId===dogId)void render(false);}
   }
   window.renderCustomerLegalStatusV103=(force=false)=>render(force===true);
   function start(){
@@ -2629,7 +2635,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const response=await api({action:'shared_booking_v257',items,operation_id:saved.operation,expected:saved.quote});
       const rows=response?.data?.bookings||[];
       if(!response?.data?.committed||rows.length!==items.length)throw Error('Výsledok rezervácie nie je úplný. Skúste znova.');
-      for(const row of rows)applyLocalBooking({data:row},{...row,can_manage:true});
+      for(const row of rows)applyLocalBooking({data:row},{...row,can_manage:true},true);
+      renderUpcoming();renderDays();renderMessages();renderPassSummary();
       const intents=postBookingChoicesV281(response?.data?.quote||saved.quote);
       sessionStorage.removeItem(key);
       queueCustomerSync('bookings',80);submittingV37=false;closePickerV37();
@@ -2653,7 +2660,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       const response=await api({action:'request_dogs_bookings',...payload,request_key:saved.key});
       const rows=response?.data?.bookings||[];
       if(rows.length!==dates.length*dogs.length)throw Error('Výsledok rezervácie nie je úplný. Obnovte prehľad a skúste znova.');
-      for(const row of rows)applyLocalBooking({data:row},row);
+      for(const row of rows)applyLocalBooking({data:row},row,true);
+      renderUpcoming();renderDays();renderMessages();renderPassSummary();
       queueCustomerSync('bookings',80);submittingV37=false;closePickerV37();
       toast('Rezervácie pre '+dogs.map(d=>d.name).join(' a ')+' boli odoslané na schválenie.');
     }catch(error){pickerErrorV95(error.message||'Rezervácia oboch psíkov sa nepodarila. Skúste znova.');queueCustomerSync('bookings',0)}
@@ -2996,14 +3004,27 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   window.customerDesignHasWeekBooking=hasWeekBookingV337;
   let futureWeekExpandedV235=false;
   function bookingDayMarkupV360(d,{selected=false,existing=false,lateContact=false,full=false,disabled=false,ownStatus='',closed=false,stateText='',taxiToggle=''}={}){return `<div class="booking-day-wrap-v201"><button type="button" class="booking-day-v37 ${selected?'selected':''} ${existing?'booked':''} ${lateContact?'week-closed-v127':''} ${disabled?'disabled':''}" data-date="${d.date}" data-contact="${lateContact?'true':'false'}" data-full="${full?'true':'false'}" data-own-status="${ownStatus}" ${disabled?'disabled':''}><small>${closed?'❌':esc(shortDayV37(d.date))}</small><strong>${esc(compactDateV37(d.date))}</strong><span>${closed?'Zatvorené':esc(stateText)}</span></button>${taxiToggle}</div>`;}
+  function pickerDaysV393(){
+    const days=state.data?.availability?.days||[],today=bratislavaClockV95().date;
+    const clock=new Date(today+'T12:00:00Z'),weekday=clock.getUTCDay();
+    clock.setUTCDate(clock.getUTCDate()-(weekday===0?6:weekday-1));
+    const monday=clock.toISOString().slice(0,10);
+    clock.setUTCDate(clock.getUTCDate()+6);const sunday=clock.toISOString().slice(0,10);
+    const dogs=pickerDogsV254();
+    const attended=dogs.length>0&&dogs.every(d=>(state.data?.visits||[]).some(v=>Number(v.dog_id)===Number(d.id)&&v.visit_date>=monday&&v.visit_date<=today));
+    // Obaja keeps the current week if either dog has not attended yet.
+    const offset=attended&&days[0]?.date>=monday&&days[0]?.date<=sunday?5:0;
+    return days.slice(offset,offset+10);
+  }
+  window.customerPickerDaysV393=pickerDaysV393;
   function renderPickerV37(){
     ensurePickerV37();
-    const dog=selectedDog(),dogs=state.data?.dogs||[],days=state.data?.availability?.days||[];
+    const dog=selectedDog(),dogs=state.data?.dogs||[],days=pickerDaysV393();
     if(!dog)return;
     const dogWrap=$('bookingPickerDogWrapV37'),dogSelect=$('bookingPickerDogV37');
     dogWrap.classList.toggle('hidden',dogs.length<=1);
     dogSelect.disabled=submittingV37;dogSelect.innerHTML=(dogs.length===2?'<option value="both" '+(pairBookingV254?'selected':'')+'>Obaja psíkovia</option>':'')+dogs.map(d=>`<option value="${d.id}" ${!pairBookingV254&&Number(d.id)===Number(dog.id)?'selected':''}>${esc(d.name)}</option>`).join('');
-    $('bookingPickerRangeV37').textContent=$('weekTitle')?.textContent||'Najbližšie dva týždne';
+    $('bookingPickerRangeV37').textContent=days.length?skDate(days[0].date)+' – '+skDate(days[days.length-1].date):'Najbližšie dva týždne';
     /* v281: renewal interest is offered only after a successful booking. */
     $('sharedPassChoiceV260')?.remove();
 
@@ -3085,7 +3106,8 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const submit=$('bookingPickerSubmitV37'),count=selectedDatesV37.size;
     submit.hidden=count===0;
     submit.disabled=!count||submittingV37;
-    submit.textContent=count?`Rezervovať ${count===1?'1 deň':count<5?count+' dni':count+' dní'}`:'Vyberte deň';
+    submit.setAttribute('aria-busy',String(submittingV37));
+    submit.textContent=submittingV37?'Odosielam rezerváciu…':count?`Rezervovať ${count===1?'1 deň':count<5?count+' dni':count+' dní'}`:'Vyberte deň';
     $('sharedBookingReviewV257')?.remove();
     window.customerDesignPickerRender?.();
   }
@@ -3131,7 +3153,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const acceptedBooking=(row,date)=>{
       const taxiMode=selectedTaxiByDateV91.get(date)||'none';
       if(row&&!row.planned_pass_request_id&&Number(row.projected_pass_total)>0&&Number(row.projected_entry_number)===Number(row.projected_pass_total))renewalDate=date;
-      applyLocalBooking({data:row},{id:-(Date.now()+ok),dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode,status:'pending',can_manage:true});
+      applyLocalBooking({data:row},{id:-(Date.now()+ok),dog_id:Number(dog.id),reservation_date:date,taxi_mode:taxiMode,status:'pending',can_manage:true},true);
       ok++;successDates.push(date);
     };
     if(dates.length>1){
@@ -3153,7 +3175,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         acceptedBooking(response?.data||response?.booking||response?.request||null,date);
       }catch(e){failed.push({date,error:e.message||'Nepodarilo sa rezervovať.'})}
     }
-    try{if(ok)queueCustomerSync('bookings',80)}finally{submittingV37=false}
+    try{if(ok){renderUpcoming();renderDays();renderMessages();renderPassSummary();queueCustomerSync('bookings',80)}}finally{submittingV37=false}
     if(failed.length){
       successDates.forEach(date=>{selectedDatesV37.delete(date);selectedTaxiByDateV91.delete(date)});
       if(renewalDate)pendingPassRenewalV95={dogId:Number(dog.id),date:renewalDate};
