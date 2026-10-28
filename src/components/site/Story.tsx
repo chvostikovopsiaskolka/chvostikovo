@@ -38,7 +38,7 @@ function renderText(text: string) {
 
 
 
-export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
+export function Care({ language = "sk", showEmbeddedFriendship = true, showInterest = true }: { language?: "sk" | "en"; showEmbeddedFriendship?: boolean; showInterest?: boolean }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const isEnglish = language === "en";
   const careEn = [
@@ -154,9 +154,9 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
           </div>
         </div>
 
-        <FriendshipFeature language={language} embedded />
+        {showEmbeddedFriendship && <FriendshipFeature language={language} embedded />}
 
-        <div className="mt-7 flex justify-center">
+        {showInterest && <div className="mt-7 flex justify-center">
           <button
             type="button"
             onClick={() => {
@@ -167,7 +167,7 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
           >
             {isEnglish ? "This is what I’m looking for" : "Toto hľadám pre svojho psíka"}
           </button>
-        </div>
+        </div>}
       </div>
 
       <FormDialog
@@ -189,6 +189,31 @@ export function Care({ language = "sk" }: { language?: "sk" | "en" }) {
         )}
       </FormDialog>
     </section>
+  );
+}
+
+/** Reuses the established friendship panel with a short, qualified-interest form on the main website. */
+export function FriendshipInterest() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <section className="relative bg-card pb-10 sm:pb-12">
+        <div className="mx-auto max-w-6xl px-4">
+          <FriendshipFeature embedded />
+          <div className="mt-7 flex justify-center">
+            <button type="button" className="btn-coral" onClick={() => {
+              trackMarketingInteraction("inquiry_cta", "home_friendship_interest_20261028");
+              void trackCookielessInteraction("inquiry_cta", "home_friendship_interest_20261028");
+              setOpen(true);
+            }}>Toto hľadám pre svojho psíka</button>
+          </div>
+        </div>
+      </section>
+      <FormDialog open={open} onOpenChange={setOpen} title="Máte záujem o škôlku?"
+        subtitle="Nechajte nám kontakt. Ozveme sa vám a odpovieme na otázky o škôlke.">
+        <ShortForm trackingSource="home_friendship_interest_20261028" />
+      </FormDialog>
+    </>
   );
 }
 
