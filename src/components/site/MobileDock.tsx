@@ -56,14 +56,14 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
        { id: "cennik", label: "Cenník", icon: Tag },
        { id: "o-nas", label: "O nás", icon: Users }];
 
-  // Only the active icon/label changes; the dock dimensions never change.
+  // Scroll-down-only reveal on all public dock variants; idle/up hides the control.
+  // Reuse the existing section listener without adding a second scroll subscription.
   useEffect(() => {
     let frame = 0;
-    const update = () => {
-      frame = 0;
-      const onThisPage = window.location.pathname === homePath;
-      setShowBackToTop(variant === "main" && onThisPage && window.scrollY > Math.max(420, window.innerHeight * 0.75));
-      if (!onThisPage) {
+    let idleTimer = 0;
+    let anchorY = Math.max(0, window.scrollY);
+    const updateActiveSection = () => {
+      if (window.location.pathname !== homePath) {
         setActiveSection("");
         return;
       }
@@ -79,16 +79,40 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
       }
       setActiveSection(active);
     };
-    const onScroll = () => {
-      if (!frame) frame = window.requestAnimationFrame(update);
+    const update = () => {
+      frame = 0;
+      const y = Math.max(0, window.scrollY); // iOS overscroll cannot trigger the arrow
+      const delta = y - anchorY;
+      const eligible = window.location.pathname === homePath &&
+        y > Math.max(420, window.innerHeight * 0.75) &&
+        !document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]');
+      if (Math.abs(delta) >= 6) {
+        anchorY = y;
+        setShowBackToTop(eligible && delta > 0);
+        window.clearTimeout(idleTimer);
+        if (eligible && delta > 0) {
+          idleTimer = window.setTimeout(() => setShowBackToTop(false), 800);
+        }
+      } else if (!eligible) {
+        setShowBackToTop(false);
+        window.clearTimeout(idleTimer);
+      }
+      updateActiveSection();
     };
-    update();
+    const onScroll = () => { if (!frame) frame = window.requestAnimationFrame(update); };
+    const onResize = () => {
+      anchorY = Math.max(0, window.scrollY);
+      setShowBackToTop(false);
+      onScroll();
+    };
+    updateActiveSection();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
       if (frame) window.cancelAnimationFrame(frame);
+      window.clearTimeout(idleTimer);
     };
   }, [homePath, variant]);
 
@@ -134,7 +158,8 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
 
   const backToTop = () => {
     // A navigation click, not a Lead or form submission. Historical Domov events remain separate.
-    void trackCookielessInteraction("nav_click", "mobile_dock_main_back_to_top", "sk");
+    void trackCookielessInteraction("nav_click", `mobile_dock_${variant}_back_to_top`, language);
+    setShowBackToTop(false);
     // Clear an existing section hash so refresh does not return to the old anchor.
     if (window.location.hash) {
       window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
@@ -190,19 +215,17 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
   return (
     <>
       <nav className="mobile-dock" data-variant={variant} data-hydrated={hydrated ? "true" : "false"} aria-label={english ? "Mobile navigation" : "Mobilná navigácia"}>
-        {!marketing && (
-          <button
+        <button
             type="button"
             className="mobile-dock-back-top"
             data-visible={hydrated && showBackToTop && !menuOpen ? "true" : "false"}
             disabled={!hydrated || !showBackToTop || menuOpen}
-            aria-label="Späť hore"
-            title="Späť hore"
+            aria-label={english ? "Back to top" : "Späť hore"}
+            title={english ? "Back to top" : "Späť hore"}
             onClick={backToTop}
           >
             <ArrowUp aria-hidden="true" size={21} strokeWidth={2.1} />
           </button>
-        )}
         <div className="mobile-dock-bar">
           {sections.map(({ id, icon: Icon, label }) => id === "interest" ? (
             <button key={id} type="button" className="mobile-dock-item mobile-dock-apply" onClick={openApplication}>
