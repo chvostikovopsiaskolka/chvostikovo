@@ -40,3 +40,7 @@
 .guide-picker-preview-v360 .design-selected-days{gap:6px;margin:4px 0;padding:0}
 .customer-design #bookingPickerV37 .guide-picker-preview-v360 .booking-taxi-inline-v201{margin-top:4px!important}
 .customer-design #bookingPickerV37 .guide-picker-preview-v360 .booking-picker-submit-v37{margin-top:9px!important}
+/* v393: compact the inert illustration to leave the guide controls visible. */
+.customer-design #bookingPickerV37 .guide-picker-preview-v360 .booking-picker-week-v127{padding:6px 6px 4px}
+.customer-design #bookingPickerV37 .guide-picker-preview-v360 .booking-picker-week-label-v127{margin:6px 0 4px!important}
+.guide-picker-preview-v360 .design-selected-day{padding:4px 10px}

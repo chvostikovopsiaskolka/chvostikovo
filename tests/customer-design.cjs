@@ -117,7 +117,7 @@ async function scenario(count){
   const registeredWeekFixture=run('JSON.stringify(state.data)');
   const noticeCase=(requests,reservations,visible,message,history=[],visits=[])=>{
     run(`state.data.requests=${JSON.stringify(requests)};state.data.reservations=${JSON.stringify(reservations)};state.data.booking_history=${JSON.stringify(history)};state.data.visits=${JSON.stringify(visits)};renderDays();window.customerDesignPickerRender()`);
-    assert.equal(!w.document.getElementById('designWeekDeadline').hidden,visible,message);
+    assert.equal(!!w.document.getElementById('designWeekDeadline')&&!w.document.getElementById('designWeekDeadline').hidden,visible,message);
   };
   const weekRequest={id:880,dog_id:1,reservation_date:'2099-01-07',status:'pending'};
   noticeCase([weekRequest],[],false,'pending request hides reminder before approval');
@@ -260,7 +260,7 @@ async function scenario(count){
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').disabled,false);
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,false,'real reservation submit appears after selection');
   assert.equal(w.document.getElementById('designSelectedDaysTitle').textContent,'Vybraté dni ↓');
-  assert.equal(w.document.getElementById('designSelectedDaysTitle').previousElementSibling.id,'bookingPickerDaysV37','selected hint follows calendar');
+  assert.equal(w.document.getElementById('bookingPickerSubmitV37').nextElementSibling.id,'bookingPickerDaysV37','selected days and submit precede the still available calendar');
   assert.equal(w.document.getElementById('designSelectedDaysTitle').nextElementSibling.id,'bookingPickerTaxiSectionV91','selected hint precedes selected dates');
   assert.equal(w.document.getElementById('designCapacityLegend'),null);
   assert.equal(w.document.querySelectorAll('#designMyBookings img').length,0);
