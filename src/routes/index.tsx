@@ -81,10 +81,10 @@ function Index() {
         <Reviews />
         <ReviewReasons variant="home" withVideo />
         <DaycarePhotoCarousel />
-        <Gallery />
         <Care showEmbeddedFriendship={false} showInterest={false} />
         <Pricing interestMode />
         <FriendshipInterest />
+        <Gallery />
         <FirstVisit />
         <Why />
         <InquirySection />
