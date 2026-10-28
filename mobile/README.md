@@ -258,6 +258,7 @@ admin-push over newer fixes. Never reset booking, pass, attendance or payment da
 - Android portrait policy in the manifest; existing Capacitor native system/IME insets retained.
 - WebView overscroll stretch disabled without disabling normal content scrolling or touch handlers.
 - Explicit white window/system background and dark icons; Android 10+ contrast scrims disabled.
+  Android 7 retains a dark navigation strip because that OS cannot display dark navigation icons.
   The previous DayNight window background was used by Capacitor SystemBars for native inset areas.
 - Smaller system splash uses the approved existing artwork. No artificial loading delay.
 - FCM carries the existing account-scoped message/article URL and notification tag. Native taps use
