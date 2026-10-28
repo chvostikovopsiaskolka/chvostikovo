@@ -6,6 +6,7 @@ import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
 import { MobileDock } from "./MobileDock";
 import { trackMarketingInteraction } from "@/lib/analytics";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 const NAV_MOBILE_BEFORE_ABOUT = [
   { href: "#recenzie", label: "Recenzie" },
@@ -50,6 +51,11 @@ export function Header({
 
   const sectionHref = (href: string) => (href.startsWith("/") ? href : homeSectionLinks ? `/${href}` : href);
   const logoHref = homeSectionLinks ? "/" : "#top";
+  // Navigation-only events. These are not Meta leads or form conversions.
+  const trackDesktopNav = (target: string) => {
+    if (typeof window === "undefined" || window.innerWidth < 1024) return;
+    void trackCookielessInteraction("nav_click", "desktop_nav_main_" + target, "sk");
+  };
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -161,20 +167,20 @@ export function Header({
     <>
     <header className="fixed inset-x-0 top-0 z-50 hidden px-2 pt-2.5 lg:block min-[390px]:px-3 min-[390px]:pt-3">
       <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-1 rounded-full bg-card/95 px-2.5 py-2 shadow-soft backdrop-blur-md min-[390px]:gap-1.5 min-[390px]:px-4 sm:gap-3 sm:px-6">
-        <a href={logoHref} className="shrink-0">
+        <a href={logoHref} onClick={() => trackDesktopNav("top")} className="shrink-0">
           <img src={logo} alt="Chvostíkovo – psia škôlka Košice" className="h-[17px] w-auto min-[390px]:h-5 sm:h-6" />
         </a>
 
         <nav className="absolute left-[48%] hidden -translate-x-1/2 items-center gap-6 lg:flex">
           {NAV_DESKTOP_BEFORE_ABOUT.map((item) => (
-            <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">
+            <a key={item.href} href={sectionHref(item.href)} onClick={(event) => { trackDesktopNav(item.href.slice(1)); handleSectionClick(event, item.href); }} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">
               {item.label}
             </a>
           ))}
 
           <a
             href={sectionHref("#o-nas")}
-            onClick={(event) => handleSectionClick(event, "#o-nas")}
+            onClick={(event) => { trackDesktopNav("o-nas"); handleSectionClick(event, "#o-nas"); }}
             className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
           >
             O nás
@@ -182,19 +188,20 @@ export function Header({
 
           <a
             href="/produkty"
+            onClick={() => trackDesktopNav("produkty")}
             className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
           >
             Produkty
           </a>
 
           {NAV_DESKTOP_AFTER_ABOUT.map((item) => (
-            <a key={item.href} href={sectionHref(item.href)} onClick={(event) => handleSectionClick(event, item.href)} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">{item.label}</a>
+            <a key={item.href} href={sectionHref(item.href)} onClick={(event) => { trackDesktopNav(item.href.slice(1)); handleSectionClick(event, item.href); }} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">{item.label}</a>
           ))}
         </nav>
 
         <div className="flex items-center gap-1 min-[390px]:gap-1.5 sm:gap-3">
-          <a href="/en/dog-daycare-kosice" lang="en" aria-label="English information" className="inline-flex rounded-full bg-secondary px-2 py-1.5 font-display text-[0.6rem] font-semibold text-forest transition-colors hover:bg-coral-soft min-[390px]:px-2.5 min-[390px]:py-2 min-[390px]:text-[0.68rem] sm:px-3 sm:text-xs">EN</a>
-          <button type="button" onClick={() => { closeMobileMenu(); setOpen(true); }} className="btn-coral px-2.5 py-2 text-[0.58rem] leading-none whitespace-nowrap min-[390px]:px-3 min-[390px]:text-[0.65rem] sm:px-6 sm:py-3 sm:text-sm">Prihláška do škôlky</button>
+          <a href="/en/dog-daycare-kosice" lang="en" onClick={() => trackDesktopNav("en")} aria-label="English information" className="inline-flex rounded-full bg-secondary px-2 py-1.5 font-display text-[0.6rem] font-semibold text-forest transition-colors hover:bg-coral-soft min-[390px]:px-2.5 min-[390px]:py-2 min-[390px]:text-[0.68rem] sm:px-3 sm:text-xs">EN</a>
+          <button type="button" onClick={() => { trackDesktopNav("application"); closeMobileMenu(); setOpen(true); }} className="btn-coral px-2.5 py-2 text-[0.58rem] leading-none whitespace-nowrap min-[390px]:px-3 min-[390px]:text-[0.65rem] sm:px-6 sm:py-3 sm:text-sm">Prihláška do škôlky</button>
           <button type="button" aria-label="Otvoriť menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition-colors hover:bg-coral-soft min-[390px]:size-9 lg:hidden">
             {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
