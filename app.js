@@ -126,7 +126,7 @@ async function clearCustomerAppBadgeV171(){await setCustomerAppBadgeV186(0);}
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
-const CUSTOMER_EMAIL_CONFIRM_URL=CUSTOMER_PUBLIC_URL+'email-confirmed.html';
+const CUSTOMER_EMAIL_CONFIRM_URL=window.ChvoNative?.active?'/email-confirmed.html':CUSTOMER_PUBLIC_URL+'email-confirmed.html';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -216,7 +216,7 @@ function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
 function saveSession(s,remember=true){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));state.session=s}
-function clearSession(){document.documentElement.classList.remove('customer-liquid-v364');window.customerGuideAbortV358?.();window.customerBulletinAbortV358?.();void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
+function clearSession(){void window.ChvoNative?.logout(state.session);document.documentElement.classList.remove('customer-liquid-v364');window.customerGuideAbortV358?.();window.customerBulletinAbortV358?.();void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
 async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok){const error=new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');error.status=r.status;error.code=data?.code||data?.error_code||'';if(error.code==='user_banned'||/user is banned/i.test(error.message))error.message='Prístup k účtu je zablokovaný. Kontaktujte Chvostíkovo.';throw error}return data}
 let sessionRefreshInFlight=null,sessionRefreshOwnerV357=null;
 function customerSessionNeedsRefreshV357(session=state.session){
@@ -1549,7 +1549,7 @@ function closePhotoEditor(){$('photoCropCanvas')?.resetPhotoGestures?.();if(stat
 function photoJpegData(){const c=$('photoCropCanvas');for(const q of [.9,.84,.78,.72]){const data=c.toDataURL('image/jpeg',q),bytes=Math.ceil((data.length-data.indexOf(',')-1)*3/4);if(bytes<900000)return data}return c.toDataURL('image/jpeg',.68)}
 async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);await api({action:'upload_dog_photo',photo_scope:'account',dog_id:Number(state.selectedDogId),image_data:photoJpegData()});closePhotoEditor();toast('Fotka je uložená.');await bootstrap(false)}catch(e){toast(e.message)}finally{loading(false)}}
 function urlBase64ToUint8Array(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(b);return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
-async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'})}catch(e){console.warn(e)}}
+async function registerSW(){if(window.ChvoNative?.active)return;if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'})}catch(e){console.warn(e)}}
 
 /* Check a static release marker only on foreground entry, never by polling. */
 const CUSTOMER_UPDATE_INTERVAL=5*60*1000;
@@ -1589,6 +1589,7 @@ function scheduleCustomerUpdateApply(){
   customerUpdateApplyTimer=setTimeout(()=>{customerUpdateApplyTimer=0;applyPendingCustomerUpdate()},250);
 }
 async function checkCustomerRelease(){
+  if(window.ChvoNative?.active)return window.ChvoNative.checkUpdate();
   if(document.visibilityState!=='visible'||navigator.onLine===false||customerUpdateReloading)return;
   if(applyPendingCustomerUpdate())return;
   if(customerUpdateCheckInFlight)return customerUpdateCheckInFlight;
@@ -1666,6 +1667,7 @@ async function completePushPromptV75(){
   return at;
 }
 async function ensurePushState(force=false){
+  if(window.ChvoNative?.active)return window.ChvoNative.ensurePush(force);
   if(state.pushChecked&&!force)return state.pushEnabled;
   let on=false;
   try{
@@ -1677,6 +1679,7 @@ async function ensurePushState(force=false){
   state.pushChecked=true;state.pushEnabled=on;localStorage.setItem('chvostikovo_push_enabled',on?'1':'0');return on;
 }
 async function enablePushForCurrentUserV75(){
+  if(window.ChvoNative?.active)return window.ChvoNative.enablePush();
   if(!('serviceWorker'in navigator)||typeof Notification==='undefined'||!('PushManager'in window))throw new Error('Toto zariadenie nepodporuje push upozornenia.');
   const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();
   if(permission!=='granted')throw new Error('Upozornenia neboli povolené.');
@@ -1687,6 +1690,7 @@ async function enablePushForCurrentUserV75(){
   localStorage.setItem('chvostikovo_push_enabled','1');applyPushToggle();return true;
 }
 async function togglePush(){
+  if(window.ChvoNative?.active)return window.ChvoNative.togglePush();
   const b=$('pushToggle');if(!b||b.disabled)return;b.disabled=true;
   try{
     const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
@@ -1742,7 +1746,7 @@ function handleVerifiedEmailReturn(){
   loading(false);
   return true;
 }
-async function init(){registerSW();if(handleRecoveryHash()||handleVerifiedEmailReturn()){loading(false);return}state.session=currentSession();if(state.session)await bootstrap();else{showAuth('login');loading(false)}}
+async function init(){if(window.ChvoNative?.active&&await window.ChvoNative.prepareLaunch())return;registerSW();if(handleRecoveryHash()||handleVerifiedEmailReturn()){loading(false);return}state.session=currentSession();if(state.session)await bootstrap();else{showAuth('login');loading(false)}}
 $('showLogin').addEventListener('click',()=>showAuth('login'));$('showSignup').addEventListener('click',()=>showAuth('signup'));$('forgotPasswordBtn').addEventListener('click',()=>showAuth('forgot'));$('backToLogin').addEventListener('click',()=>showAuth('login'));
 const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');if(pendingLoginEmail&&!$('loginEmail').value)$('loginEmail').value=pendingLoginEmail;
 (function customerSignupPasswordV19(){
@@ -1861,6 +1865,7 @@ setTimeout(scheduleWaitingDogFallbackV101,1500);
   const badge=$('betaVersionBadge'),modal=$('betaVersionModal'),close=$('betaVersionClose'),messages=$('betaVersionMessages');if(!badge||!modal)return;
   badge.addEventListener('click',()=>modal.classList.remove('hidden'));close?.addEventListener('click',()=>modal.classList.add('hidden'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});messages?.addEventListener('click',()=>{modal.classList.add('hidden');switchTab('messages')});
 })();
+window.ChvoNative?.attach({openNotification:()=>window.customerNativeNotificationV393?.(),getSession:()=>state.session,ensureSession:ensureCustomerSessionV357,completePushPrompt:completePushPromptV75,setPush:on=>{state.pushChecked=true;state.pushEnabled=!!on;if(state.data)state.data.push_subscription_active=!!on;localStorage.setItem('chvostikovo_push_enabled',on?'1':'0');applyPushToggle()},resume:refreshOnResume,pause:stopCustomerLive,notify:toast,flush:()=>window.ChvoTelemetry?.flush?.()});
 init().finally(()=>{void checkCustomerRelease()});
 /* consolidated booking layout: section heading + reservation deadline */
 function ensureBookingLayout(){
@@ -3423,6 +3428,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
 
   async function healPushV71(){
+    if(window.ChvoNative?.active)return false;
     if(document.visibilityState==='hidden'||!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
     try{
       const reg=await navigator.serviceWorker.ready;
@@ -3487,6 +3493,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
 
   async function actualPushState(){
+    if(window.ChvoNative?.active)return window.ChvoNative.ensurePush();
     if(!('serviceWorker' in navigator)||typeof Notification==='undefined')return false;
     if(Notification.permission!=='granted')return false;
     try{const reg=await navigator.serviceWorker.ready;return !!(await reg.pushManager.getSubscription())}catch(_){return false}
@@ -3497,6 +3504,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
 
 async function togglePushDirect(btn){
+  if(window.ChvoNative?.active)return window.ChvoNative.togglePush(btn);
   if(pushBusy)return;pushBusy=true;btn.disabled=true;
   try{
     if(!('serviceWorker'in navigator)||typeof Notification==='undefined')throw new Error('Tento telefón nepodporuje upozornenia v aplikácii.');
@@ -4559,6 +4567,8 @@ function installVaccinationViewerZoomV244(modal){
 (function customerNotificationTargetV363(){
   let running=false;
   function target(){
+    const native=window.ChvoNative?.takeNotification?.();
+    if(native)history.replaceState(history.state,'',location.pathname+'?'+native);
     const p=new URLSearchParams(location.search),kind=p.get('open');
     if(kind!=='messages'&&kind!=='announcement')return null;
     const raw=p.get(kind==='messages'?'conversation':'announcement'),id=Number(raw);
@@ -4583,6 +4593,7 @@ function installVaccinationViewerZoomV244(modal){
       }
     }finally{running=false;}
   }
+  window.customerNativeNotificationV393=()=>{void openPending();};
   addCustomerHook('afterBootstrap',()=>{void openPending();});
   document.addEventListener('customer-onboarding-ready-v358',()=>{void openPending();});
   window.addEventListener('pageshow',()=>{void openPending();});

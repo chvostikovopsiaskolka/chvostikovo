@@ -1,0 +1,4 @@
+<!-- The approved PNG already contains white safe padding; avoid padding it twice. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android" android:inset="-24dp">
+    <bitmap android:src="@drawable/chvo_app_icon" android:gravity="fill" />
+</inset>
