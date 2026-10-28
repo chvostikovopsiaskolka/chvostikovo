@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { FilePenLine, Heart, House, Image as ImageIcon, Menu, Phone, Tag, X } from "lucide-react";
+import { ArrowUp, FilePenLine, Heart, House, Image as ImageIcon, Menu, Phone, Tag, Users, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { PHONE } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -25,6 +25,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     : english ? "/en/dog-daycare-kosice" : "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("top");
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -50,21 +51,23 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
        { id: "why-daycare", label: "Why us?", icon: Heart },
        { id: "interest", label: "Interested in daycare", icon: FilePenLine },
        { id: "pricing", label: "Prices", icon: Tag }]
-    : [{ id: "top", label: "Domov", icon: House },
-       { id: "priestory", label: "Priestory", icon: ImageIcon },
+    : [{ id: "priestory", label: "Priestory", icon: ImageIcon },
        { id: "starostlivost", label: "Starostlivosť", icon: Heart },
-       { id: "cennik", label: "Cenník", icon: Tag }];
+       { id: "cennik", label: "Cenník", icon: Tag },
+       { id: "o-nas", label: "O nás", icon: Users }];
 
   // Only the active icon/label changes; the dock dimensions never change.
   useEffect(() => {
     let frame = 0;
     const update = () => {
       frame = 0;
-      if (window.location.pathname !== homePath) {
+      const onThisPage = window.location.pathname === homePath;
+      setShowBackToTop(variant === "main" && onThisPage && window.scrollY > Math.max(420, window.innerHeight * 0.75));
+      if (!onThisPage) {
         setActiveSection("");
         return;
       }
-      let active = "top";
+      let active = variant === "main" ? "" : "top";
       let lastTop = -Infinity;
       for (const section of sections) {
         const el = document.getElementById(section.id);
@@ -129,6 +132,17 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     else execute();
   };
 
+  const backToTop = () => {
+    // A navigation click, not a Lead or form submission. Historical Domov events remain separate.
+    void trackCookielessInteraction("nav_click", "mobile_dock_main_back_to_top", "sk");
+    // Clear an existing section hash so refresh does not return to the old anchor.
+    if (window.location.hash) {
+      window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+    }
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    window.scrollTo({ top: 0, behavior: reducedMotion ? "instant" : "smooth" });
+  };
+
   const openApplication = () => {
     if (menuOpen) setMenuOpen(false);
     if (marketing) {
@@ -176,6 +190,19 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
   return (
     <>
       <nav className="mobile-dock" data-variant={variant} data-hydrated={hydrated ? "true" : "false"} aria-label={english ? "Mobile navigation" : "Mobilná navigácia"}>
+        {!marketing && (
+          <button
+            type="button"
+            className="mobile-dock-back-top"
+            data-visible={hydrated && showBackToTop && !menuOpen ? "true" : "false"}
+            disabled={!hydrated || !showBackToTop || menuOpen}
+            aria-label="Späť hore"
+            title="Späť hore"
+            onClick={backToTop}
+          >
+            <ArrowUp aria-hidden="true" size={21} strokeWidth={2.1} />
+          </button>
+        )}
         <div className="mobile-dock-bar">
           {sections.map(({ id, icon: Icon, label }) => id === "interest" ? (
             <button key={id} type="button" className="mobile-dock-item mobile-dock-apply" onClick={openApplication}>
