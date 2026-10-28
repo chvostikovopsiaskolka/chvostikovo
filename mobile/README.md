@@ -39,6 +39,129 @@ These are compile artifacts, not evidence of device testing or production readin
 Debug sideloading may show Android installation warnings. The intended customer
 distribution route is Google Play internal testing.
 
+## Windows / Android Studio — local build verified 28 October 2026
+
+**[TEST / device observation, not release approval]** On a Windows notebook,
+branch `feat/capacitor-android-v361` at `eb209bc`, the v392/2.0.67 native
+**debug APK** was built, found on disk, installed and opened on a physical
+Android phone. `assembleDebug` reported `BUILD SUCCESSFUL` (156 Gradle
+tasks in 4m35s). This is NOT a signed AAB, successful Google Play upload,
+confirmed FCM delivery or regression pass for all customer flows.
+
+### The actual failure chain and durable prevention
+
+- Android Studio first attempted **Gradle 8.14.3 with JDK 25**; change Gradle
+  JVM to **JDK 21**. A working local JBR 21 was under
+  `$env:USERPROFILE\.jdks\jbr-21.0.11`. PowerShell still required
+  `JAVA_HOME`; Android Studio's own JDK setting did not populate that shell.
+- `npx`/`node` were initially unavailable: install an appropriate Node.js
+  LTS and reopen the terminal/IDE. Tested: Node 24.22.1 / npm 11.19.1.
+  In PowerShell, `npm.cmd` / `npx.cmd` avoid script-execution policy issues.
+- `npm.cmd ci` installed 102 dependencies using the existing lockfile.
+  It also reported three *moderate* advisories, a `uuid` deprecation and an
+  `esbuild` install-scripts warning. These were not resolved/audited by the
+  successful debug build. **Do not run `npm audit fix --force`** as a shortcut;
+  review `npm audit` and build dependencies separately before release.
+- Initial Gradle sync lacked
+  `android/capacitor-cordova-android-plugins/cordova.variables.gradle`:
+  use Capacitor sync, do not create a dummy Gradle script.
+- Direct `cap sync android` failed because `www/index.html` was absent;
+  the canonical build is **`npm run sync`**, which runs the shared asset
+  builder, copies the approved icon, then synchronizes Capacitor.
+- The builder repeatedly failed on `vendor/liquidlens/liquid-glass.js`,
+  `vendor/simple-liquid-glass/webgl.js` and
+  `vendor/liquidlens/chvostikovo-paws.png`. Root cause was **Git sparse
+  checkout** allowing only `.github`, `docs`, `mobile`, `system`, `tests`
+  while omitting tracked `vendor` files. `git ls-files -v -- vendor/...`
+  showed **`S` (skip-worktree)**. After preserving local work and checking
+  Git status, `git sparse-checkout disable` restored the complete checkout.
+  The next build succeeded: **v392; 36 allowlisted shared files**.
+  Do not solve this by downloading missing assets one by one, by generating
+  replacement pictures, or by editing the allowlist to silently omit assets.
+  Sparse checkout may omit other required root files without an immediate
+  error; verify a complete source checkout before every reproducible release.
+
+### Repeatable local Windows path (do not deploy production)
+
+From the root of the Android-source Git checkout, first verify branch, commit,
+dirty state and source parity with the designated production PWA. **Do not
+discard local drafts, untracked files, `google-services.json` or signing
+materials**. A `.codex/visualizations` checkout is temporary; create a
+separate durable checkout before relying on it for future Play builds.
+
+```powershell
+git status --short
+git branch --show-current
+git rev-parse --short HEAD
+git sparse-checkout list
+git ls-files -v -- vendor/liquidlens/chvostikovo-paws.png
+# If vendor is skipped (S), review local changes/backups first:
+# git sparse-checkout disable
+cd mobile
+npm.cmd ci
+npm.cmd run sync
+npm.cmd test
+Test-Path .\www\index.html
+cd android
+$env:JAVA_HOME = "$env:USERPROFILE\.jdks\jbr-21.0.11"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+& "$env:JAVA_HOME\bin\java.exe" -version
+.\gradlew.bat assembleDebug
+Test-Path .\app\build\outputs\apk\debug\app-debug.apk
+```
+
+Required: **Java 21 / compatible Gradle JVM**, Android SDK Platform 36 and
+matching Build-Tools/Platform-Tools; correct existing Firebase
+`google-services.json` in `mobile/android/app` (gitignored). The actual
+test used `npm.cmd run build`, then `npm.cmd run sync`, then Gradle. The
+full `npm.cmd test` suite above is a **future requirement**, not a test
+claimed as completed during this manual session. The debug file is
+`mobile/android/app/build/outputs/apk/debug/app-debug.apk`.
+
+### Physical Android observations — OPEN (28 October 2026)
+
+**[USER-OBSERVED ON DEVICE; NOT FIXED/NOT VERIFIED RESOLVED]** The installed
+v392 debug APK opens, but the following must be reproduced, scoped and tested
+on physical devices before a Play release:
+
+1. Scrolling appears to stretch/overscroll text and allows motion past the
+   actual end of content when notices are below the fold. Inspect WebView
+   scrolling ownership, Android overscroll behavior and native/HTML heights
+   without breaking access to the last announcement or the fixed bottom nav.
+2. Device auto-rotate was enabled, but the app did not rotate to landscape.
+   Check manifest/activity configuration, WebView, device policy and actual
+   rotation behavior; do not assume the manifest is the only cause.
+3. Grey bands cover the top status area (clock/battery) and bottom Android
+   gesture/navigation area. Test edge-to-edge/window insets, SystemBars,
+   theme status/navigation bar colors, icon contrast and background on the
+   same phone. Do not hide OS controls or apply global Web CSS patches blindly.
+4. **Notifications toggle cannot be enabled.** Native runtime calls
+   `customer-native-push` to subscribe its owner-bound FCM token; on
+   28 October 2026 the deployed Supabase Edge Function listing did **not**
+   contain that slug. This is a deployment/configuration *blocker to
+   investigate*, not proof of the sole cause: also verify Firebase project,
+   Google Services package, permissions, registration callbacks, backend
+   secrets, RLS and actual registration/delivery. No production push/schema
+   rollout is implied by the APK build. Test only with a synthetic/authorized
+   device/account; never broadcast test notifications to customers.
+
+**Acceptance before internal Play testing:** no scroll overrun or viewport
+occlusion; portrait and intended landscape policy explicit; visible,
+high-contrast status/navigation controls; toggle can register/unregister
+only its own device; foreground/background FCM delivery, tapping the push,
+logout/account-switch and duplicate PWA/native subscriptions tested;
+authenticated reservation/pass/notice flows regression-tested. Confirm
+`mobile-build.json` source SHA and Android versionCode/versionName against
+the **current** customer production baseline. Verify signing, App Links and
+a signed AAB separately; a debug APK is never production readiness.
+
+**Rollback / scope:** this section records diagnostics and procedures only;
+it does not change deployed PWA, Android code, Supabase, Firebase or Google
+Play. Retain `eb209bc` and the original APK as build references; when
+repairing native code in the future, keep an isolated commit and revert only
+that change if new device regressions occur. No `git reset --hard`,
+`git clean` or forced push on the user's active checkout.
+
 ## Native integrations
 
 - App ID: `sk.chvostikovo.app`; display name: `Chvostíkovo – psia škôlka`.
