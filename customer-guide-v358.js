@@ -66,7 +66,7 @@
     const markup=window.customerGuidePreviewV360?.(),picker=$('bookingPickerV37');if(!markup||!picker)return null;
     picker.querySelector('.booking-picker-card-v37')?.setAttribute('data-guide-stashed-v360','');
     const frame=document.createElement('section');frame.id='guidePickerPreviewV360';frame.className='booking-picker-card-v37 guide-picker-preview-v360';frame.inert=true;
-    frame.innerHTML='<div class="booking-picker-taxi-title-v37">Vybraté dni ↓</div><div class="booking-picker-taxi-by-day-v91 design-selected-days">'+markup.selected+'</div><button type="button" class="btn full booking-picker-submit-v37">Rezervovať 2 dni</button><div class="booking-picker-days-v37 guide-preview-calendar">'+markup.calendar+'</div>';
+    frame.innerHTML='<div class="booking-picker-days-v37 guide-preview-calendar">'+markup.calendar+'</div><div class="booking-picker-taxi-title-v37">Vybraté dni ↓</div><div class="booking-picker-taxi-by-day-v91 design-selected-days">'+markup.selected+'</div><button type="button" class="btn full booking-picker-submit-v37">Rezervovať 2 dni</button>';
     frame.querySelectorAll('.booking-day-v37').forEach(button=>{button.dataset.capacityLevel='free';const span=button.querySelector('span');if(span){const dot=document.createElement('i');dot.className='design-capacity-dot';dot.setAttribute('aria-hidden','true');span.prepend(dot);}});
     picker.append(frame);return frame;
   }
@@ -103,7 +103,7 @@
       'Ak máte zakúpenú permanentku, tu uvidíte jej platnosť a počet využitých vstupov. Pod ňou nájdete svoje rezervácie a možnosť Upraviť. Cez Oznamy otvoríte novinky zo škôlky a cez Správy nám priamo napíšete.',
       'Tlačidlom Rezervovať miesto v spodnej lište otvoríte dostupné dni. Po výbere uvidíte Vybraté dni a potvrdenie rezervácie.',
       'Tu nájdete vytvorené rezervácie a stav schválenia. Podľa dostupných možností pridáte alebo upravíte taxi či zrušíte návštevu. Ak chcete zmeniť termín, zrušíte pôvodný a vyberiete nový.',
-      'Ukážka: vyberte dni v kalendári. Vybraté dni a tlačidlo Rezervovať sú nad kalendárom. Ku každému dňu môžete pridať taxi.',
+      'Ukážka: vyberte dni v kalendári. Vybraté dni a tlačidlo Rezervovať nájdete pod kalendárom. Ku každému dňu môžete pridať taxi.',
       'V Menu nájdete údaje psíka, očkovania, svoje kontakty aj správy pre škôlku. V Nastaveniach si môžete tohto sprievodcu kedykoľvek zopakovať. Pripravujeme aj rozšírenú žiacku knižku a odmeny.'
     ];
     const next=$('guideNextV358');next.disabled=true;

@@ -260,7 +260,7 @@ async function scenario(count){
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').disabled,false);
   assert.equal(w.document.getElementById('bookingPickerSubmitV37').hidden,false,'real reservation submit appears after selection');
   assert.equal(w.document.getElementById('designSelectedDaysTitle').textContent,'Vybraté dni ↓');
-  assert.equal(w.document.getElementById('bookingPickerSubmitV37').nextElementSibling.id,'bookingPickerDaysV37','selected days and submit precede the still available calendar');
+  assert.equal(w.document.getElementById('designSelectedDaysTitle').previousElementSibling.id,'bookingPickerDaysV37','selected days remain below the calendar after selection');
   assert.equal(w.document.getElementById('designSelectedDaysTitle').nextElementSibling.id,'bookingPickerTaxiSectionV91','selected hint precedes selected dates');
   assert.equal(w.document.getElementById('designCapacityLegend'),null);
   assert.equal(w.document.querySelectorAll('#designMyBookings img').length,0);

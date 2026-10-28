@@ -252,8 +252,7 @@
       const selected=!selectedSection.classList.contains('hidden');
       picker.classList.toggle('has-selected-days-v393',selected);
       const submit=byId('bookingPickerSubmitV37'),error=byId('bookingPickerErrorV95');
-      if(selected)calendar.before(taxiTitle,selectedSection,error,submit);
-      else calendar.after(taxiTitle,selectedSection,error,submit);
+      calendar.after(taxiTitle,selectedSection,error,submit);
     }
 
   };
