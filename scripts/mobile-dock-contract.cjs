@@ -15,14 +15,18 @@ for (const value of ["Domov", "Priestory", "Starostlivosť", "Cenník", "Prihlá
   assert(dock.includes(value), "Missing dock item " + value);
 }
 // V-051 pilot applies only to the main SK dock, not four marketing docks.
-const mainDock = dock.slice(dock.indexOf('    : [{ id: "priestory", label: "Priestory"'), dock.indexOf("// Scroll-down-only reveal on all public dock variants;"));
+const mainDock = dock.slice(dock.indexOf('    : [{ id: "starostlivost", label: "Starostlivosť"'), dock.indexOf("// Return arrow: hide while moving down; show on upward scroll or after stopping."));
 assert(mainDock.includes('{ id: "o-nas", label: "O nás"') && !mainDock.includes('{ id: "top", label: "Domov"'), "Main dock should replace Domov with O nás");
-assert(dock.includes('window.scrollY') && dock.includes('delta > 0') && dock.includes('window.setTimeout(() => setShowBackToTop(false), 800)'), "Return arrow must react to meaningful down-scroll, idle timeout and scroll direction");
+assert(mainDock.indexOf('id: "starostlivost"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "priestory"') && mainDock.indexOf('id: "priestory"') < mainDock.indexOf('id: "o-nas"'), "Main nav order must be care, prices, spaces, about");
+assert(!dock.includes('{ id: "top", label: "Domov"') && !dock.includes('{ id: "top", label: "Home"'), "Landing docks should use meaningful local sections instead of Domov");
+for (const anchor of ["lead-first-visit", "puppy-first-visit", "dog-sitting-first-visit", "en-first-visit"]) assert(dock.includes('id: "' + anchor + '"'), "Missing landing first-visit shortcut: " + anchor);
+
+assert(dock.includes('delta > 0') && dock.includes('setShowBackToTop(false)') && dock.includes('window.setTimeout(() => {') && dock.includes('setShowBackToTop(true)') && dock.includes('}, 350)'), "Back-to-top must hide only during downward scroll and remain available after idle/up");
 assert(dock.includes('className="mobile-dock-back-top"') && dock.includes('`mobile_dock_${variant}_back_to_top`'), "Return arrow must support all public variants with separate tracking");
 assert(dock.includes('disabled={!hydrated || !showBackToTop || menuOpen}'), "Hidden arrow must not be interactive");
 assert(dock.includes('english ? "Back to top" : "Späť hore"') && dock.includes('window.scrollTo({ top: 0'), "Accessible localized return-to-top behavior missing");
 assert(dock.includes('`mobile_dock_${variant}_back_to_top`'), "Return clicks must be measured separately per variant from old Domov");
-assert(css.includes('bottom: calc(100% + 9px)') && css.includes('border-radius: 999px') && css.includes('.mobile-dock-back-top[data-visible="false"]'), "Arrow must be round glass, above dock and hide without shift");
+assert(css.includes('bottom: calc(100% + 9px)') && css.includes('border-radius: 999px') && css.includes('border: none;') && css.includes('.mobile-dock-back-top[data-visible="false"]'), "Arrow must be borderless round glass, above dock and hide without shift");
 
 for (const value of ["Home", "Why us?", "Interested in daycare", "Prices", "Slovak version"]) {
   assert(dock.includes(value), "Missing EN item " + value);
