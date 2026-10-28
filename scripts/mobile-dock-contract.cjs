@@ -14,6 +14,16 @@ const forms = read("src/components/site/Forms.tsx");
 for (const value of ["Domov", "Priestory", "Starostlivosť", "Cenník", "Prihláška", "Menu"]) {
   assert(dock.includes(value), "Missing dock item " + value);
 }
+// V-051 pilot applies only to the main SK dock, not four marketing docks.
+const mainDock = dock.slice(dock.indexOf('    : [{ id: "priestory", label: "Priestory"'), dock.indexOf("// Only the active icon/label changes;"));
+assert(mainDock.includes('{ id: "o-nas", label: "O nás"') && !mainDock.includes('{ id: "top", label: "Domov"'), "Main dock should replace Domov with O nás");
+assert(dock.includes('variant === "main" && onThisPage && window.scrollY > Math.max(420, window.innerHeight * 0.75)'), "Return arrow must activate only after main-page scroll");
+assert(dock.includes('!marketing && (') && dock.includes('className="mobile-dock-back-top"'), "Return arrow must be main-only");
+assert(dock.includes('disabled={!hydrated || !showBackToTop || menuOpen}'), "Hidden arrow must not be interactive");
+assert(dock.includes('aria-label="Späť hore"') && dock.includes('window.scrollTo({ top: 0'), "Accessible return-to-top behavior missing");
+assert(dock.includes('"mobile_dock_main_back_to_top"'), "Return clicks must be measured separately from old Domov");
+assert(css.includes('bottom: calc(100% + 9px)') && css.includes('.mobile-dock-back-top[data-visible="false"]'), "Arrow must sit above the bar and hide without layout shift");
+
 for (const value of ["Home", "Why us?", "Interested in daycare", "Prices", "Slovak version"]) {
   assert(dock.includes(value), "Missing EN item " + value);
 }
