@@ -176,8 +176,8 @@ export function Pricing({ interestMode = false }: { interestMode?: boolean } = {
             ))}
           </ul>
 
-          <p className="mt-6 flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-secondary px-5 py-3 text-center font-display text-sm font-semibold text-forest lg:mx-auto lg:w-fit lg:rounded-full lg:bg-coral/10 lg:px-5 lg:py-2">
-            <Car className="size-5 text-coral" /> Vyzdvihnutie a odvoz psíka: 5 € za jednu jazdu
+          <p className="mt-6 flex flex-nowrap items-center justify-center gap-1 rounded-2xl bg-secondary px-2 py-3 text-center font-display text-[clamp(10px,2.8vw,13px)] font-semibold leading-tight whitespace-nowrap text-forest sm:gap-2 sm:px-5 sm:text-sm lg:mx-auto lg:w-fit lg:rounded-full lg:bg-coral/10 lg:py-2">
+            <Car className="size-4 shrink-0 text-coral sm:size-5" /> <span>Odvoz / vyzdvihnutie: 5 € / jazda</span>
           </p>
 
           <div className="mt-7 flex justify-center">
@@ -187,7 +187,7 @@ export function Pricing({ interestMode = false }: { interestMode?: boolean } = {
                 void trackCookielessInteraction("inquiry_cta", "home_pricing_interest_20261028");
               }
               setOpen(true);
-            }} className="btn-coral">
+            }} className={interestMode ? "btn-coral w-full !px-1.5 !text-[clamp(10px,2.75vw,14px)] !leading-tight whitespace-nowrap sm:w-auto sm:!px-6 sm:!text-base" : "btn-coral"}>
               {interestMode ? "Mám záujem o psiu škôlku pre psíka" : "Prihláška do škôlky"}
             </button>
           </div>

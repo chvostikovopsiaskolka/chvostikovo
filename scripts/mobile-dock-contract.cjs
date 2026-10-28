@@ -15,14 +15,14 @@ for (const value of ["Domov", "Priestory", "Starostlivosť", "Cenník", "Prihlá
   assert(dock.includes(value), "Missing dock item " + value);
 }
 // V-051 pilot applies only to the main SK dock, not four marketing docks.
-const mainDock = dock.slice(dock.indexOf('    : [{ id: "priestory", label: "Priestory"'), dock.indexOf("// Only the active icon/label changes;"));
+const mainDock = dock.slice(dock.indexOf('    : [{ id: "priestory", label: "Priestory"'), dock.indexOf("// Scroll-down-only reveal on all public dock variants;"));
 assert(mainDock.includes('{ id: "o-nas", label: "O nás"') && !mainDock.includes('{ id: "top", label: "Domov"'), "Main dock should replace Domov with O nás");
-assert(dock.includes('variant === "main" && onThisPage && window.scrollY > Math.max(420, window.innerHeight * 0.75)'), "Return arrow must activate only after main-page scroll");
-assert(dock.includes('!marketing && (') && dock.includes('className="mobile-dock-back-top"'), "Return arrow must be main-only");
+assert(dock.includes('window.scrollY') && dock.includes('delta > 0') && dock.includes('window.setTimeout(() => setShowBackToTop(false), 800)'), "Return arrow must react to meaningful down-scroll, idle timeout and scroll direction");
+assert(dock.includes('className="mobile-dock-back-top"') && dock.includes('`mobile_dock_${variant}_back_to_top`'), "Return arrow must support all public variants with separate tracking");
 assert(dock.includes('disabled={!hydrated || !showBackToTop || menuOpen}'), "Hidden arrow must not be interactive");
-assert(dock.includes('aria-label="Späť hore"') && dock.includes('window.scrollTo({ top: 0'), "Accessible return-to-top behavior missing");
-assert(dock.includes('"mobile_dock_main_back_to_top"'), "Return clicks must be measured separately from old Domov");
-assert(css.includes('bottom: calc(100% + 9px)') && css.includes('.mobile-dock-back-top[data-visible="false"]'), "Arrow must sit above the bar and hide without layout shift");
+assert(dock.includes('english ? "Back to top" : "Späť hore"') && dock.includes('window.scrollTo({ top: 0'), "Accessible localized return-to-top behavior missing");
+assert(dock.includes('`mobile_dock_${variant}_back_to_top`'), "Return clicks must be measured separately per variant from old Domov");
+assert(css.includes('bottom: calc(100% + 9px)') && css.includes('border-radius: 999px') && css.includes('.mobile-dock-back-top[data-visible="false"]'), "Arrow must be round glass, above dock and hide without shift");
 
 for (const value of ["Home", "Why us?", "Interested in daycare", "Prices", "Slovak version"]) {
   assert(dock.includes(value), "Missing EN item " + value);
@@ -99,6 +99,8 @@ assert(why.includes("Hľadám škôlku pre psíka") && why.includes('<ShortForm 
 assert(!why.includes("<LongForm"), "Why should not duplicate full registration");
 assert(first.includes("Dohodnúť úvodnú návštevu") && first.includes('trackingSource="home_first_visit_interest"') && !first.includes("hideInterest") && !first.includes("interestValue"), "Intro visit CTA must show the ordinary required interest options");
 assert(!first.includes("<LongForm"), "Intro visit should not present a full application");
+assert(info.includes('flex-nowrap items-center') && info.includes('sm:gap-2') && info.includes('Odvoz / vyzdvihnutie: 5 € / jazda'), "Taxi note must stay one-line and preserve 5 euro fare");
+assert(info.includes('!text-[clamp(10px,2.75vw,14px)] !leading-tight whitespace-nowrap'), "Homepage inquiry CTA must stay one line on narrow phones");
 assert(pricing.includes("Prihláška do škôlky") && pricing.includes("<LongForm />") && pricing.includes("<FormDialog") && pricing.includes('interestMode ? <ShortForm trackingSource="home_pricing_interest_20261028" />'), "Pricing must preserve canonical full-form mode and approved homepage short enquiry");
 assert(!pricing.includes('href="#kontakt"'), "Pricing CTA must not misroute to generic contact");
 assert(css.includes("margin-inline-start: 4px") && css.includes("margin-inline: 2px"), "Active dock and orange CTA must not touch");
