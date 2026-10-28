@@ -37,10 +37,3 @@
 #loading.in-app .concept-orbit>.concept-paw{width:28px;height:28px}
 #loading.in-app .concept-orbit>.concept-paw>svg{width:100%;height:100%}
 @media(prefers-reduced-motion:reduce){.concept-orbit>.concept-paw{will-change:auto}}
-
-/* v393: smaller existing animation, without adding a loading delay. */
-#loading .concept-brand{width:min(175px,50vw)}
-#loading .concept-orbit{width:78px;height:78px;margin:30px auto 20px}
-#loading .concept-orbit>.concept-paw{width:36px;height:36px}
-#loading.in-app .concept-orbit{width:48px;height:48px;margin:0}
-#loading.in-app .concept-orbit>.concept-paw{width:24px;height:24px}
