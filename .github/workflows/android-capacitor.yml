@@ -4,7 +4,7 @@ on:
   push:
     branches: [feat/capacitor-android-v361]
   pull_request:
-    branches: [customer-portal-production]
+    branches: [customer-portal-production, feat/capacitor-android-v361]
     paths: ['mobile/**', 'app.js', 'back-swipe.js', 'email-confirmed.js', '.github/workflows/android-capacitor.yml']
 permissions:
   contents: read
@@ -35,6 +35,8 @@ jobs:
         run: |
           npm ci --prefix tests/shared-v244 --ignore-scripts
           node tests/customer-session-startup-v357.cjs
+          node tests/customer-native-schema-v393.cjs
+          node tests/customer-mobile-v393.cjs
           node tests/customer-design.cjs
           node tests/customer-confirm-return-v155.cjs
           node tests/customer-guide-v358.cjs

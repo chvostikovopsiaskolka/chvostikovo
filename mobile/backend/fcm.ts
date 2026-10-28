@@ -28,10 +28,10 @@ export function firebaseAccount(): Account | null {
   if (!/^[a-z0-9-]+$/.test(account.project_id) || !account.client_email || !account.private_key) throw new Error('Invalid FCM configuration');
   return account;
 }
-export async function sendFcm(account: Account, token: string, title: string, body: string) {
+export async function sendFcm(account: Account, token: string, title: string, body: string, customerUrl = '/', tag = '') {
   const response = await fetch(`https://fcm.googleapis.com/v1/projects/${account.project_id}/messages:send`, {
     method: 'POST', headers: { Authorization: 'Bearer ' + await access(account), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: { token, notification: { title, body }, data: { surface: 'overview' }, android: { ttl: '86400s', priority: 'high', notification: { channel_id: 'chvostikovo', icon: 'ic_notification' } } } }),
+    body: JSON.stringify({ message: { token, notification: { title, body }, data: { url: customerUrl }, android: { ttl: '86400s', priority: 'high', notification: { channel_id: 'chvostikovo', icon: 'ic_notification', ...(tag ? { tag } : {}) } } } }),
     signal: AbortSignal.timeout(10000)
   });
   if (response.ok) return 'sent';

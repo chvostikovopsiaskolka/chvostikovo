@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
@@ -19,7 +20,7 @@ test('mobile bundle uses local shared assets, excludes server material and servi
   assert.equal(manifest.version, release.version);
   assert.equal(manifest.files['app.js'].length, 64);
 });
-test('packaged v392 runtime and optical dependencies match the shared source byte for byte', async () => {
+test('packaged current runtime and optical dependencies match the shared source byte for byte', async () => {
   const manifest = JSON.parse(await read('www/mobile-build.json'));
   for (const [file, hash] of Object.entries(manifest.files)) {
     const source = await readFile(new URL('../../' + file, import.meta.url));
@@ -45,7 +46,15 @@ test('packaged v392 runtime and optical dependencies match the shared source byt
 });
 test('release requires Firebase, signing credentials and verified push/App Links', async () => {
   const { spawnSync } = await import('node:child_process');
-  const result = spawnSync(process.execPath, [new URL('../scripts/check-release.mjs', import.meta.url).pathname], { env: { PATH: process.env.PATH } });
+  const { mkdtemp, mkdir, copyFile, rm } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const temp = await mkdtemp(join(tmpdir(), 'chvo-release-'));
+  await mkdir(join(temp, 'scripts'));
+  await copyFile(new URL('../scripts/check-release.mjs', import.meta.url), join(temp, 'scripts/check-release.mjs'));
+  let result;
+  try { result = spawnSync(process.execPath, [join(temp, 'scripts/check-release.mjs')], { env: { PATH: process.env.PATH } }); }
+  finally { await rm(temp, { recursive: true, force: true }); }
   assert.equal(result.status, 1);
   assert.match(result.stderr.toString(), /Firebase google-services.json/);
   assert.match(result.stderr.toString(), /CHVO_KEYSTORE_PATH/);

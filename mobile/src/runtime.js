@@ -1,7 +1,7 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
-import { callbackPath } from './policy.js';
+import { notificationQuery, callbackPath } from './policy.js';
 
 if (Capacitor.isNativePlatform()) {
   const Updates = registerPlugin('ChvoUpdates');
@@ -51,11 +51,14 @@ if (Capacitor.isNativePlatform()) {
     sessionStorage.setItem('chvo-native-callback', fingerprint);
     location.replace(route); return true;
   }
+  let pendingNotification = null;
   const ready = Promise.all([
     PushNotifications.addListener('registration', value => { if(token!==value.value){registeredOwner='';syncAt=0;}token = value.value; registrationDone(token); }),
     PushNotifications.addListener('registrationError', () => { registrationFailed(); report(); }),
-    PushNotifications.addListener('pushNotificationActionPerformed', () => {
-      // Backend content is never executed or used as an arbitrary navigation URL.
+    PushNotifications.addListener('pushNotificationActionPerformed', action => {
+      pendingNotification = notificationQuery(action?.notification?.data?.url);
+      // Shared routing verifies account/conversation after login and onboarding.
+      host?.openNotification?.();
       void host?.resume();
     }),
     App.addListener('appStateChange', ({ isActive }) => { if (isActive) void host?.resume(); else { host?.pause(); void host?.flush(); } }),
@@ -67,6 +70,7 @@ if (Capacitor.isNativePlatform()) {
   ]).catch(report);
   window.ChvoNative = {
     active: true,
+    takeNotification() { const value = pendingNotification; pendingNotification = null; return value; },
     attach(value) { host = value; },
     async prepareLaunch() {
       await ready;

@@ -1,8 +1,9 @@
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { build } from 'esbuild';
-const result = await build({ entryPoints: [new URL('../backend/customer-native-push.ts', import.meta.url).pathname], bundle: true, write: false, format: 'iife', plugins: [{ name: 'access-fixture', setup(b) {
+const result = await build({ entryPoints: [fileURLToPath(new URL('../backend/customer-native-push.ts', import.meta.url))], bundle: true, write: false, format: 'iife', plugins: [{ name: 'access-fixture', setup(b) {
   b.onResolve({ filter: /security-v336\.ts$/ }, args => ({ path: args.path, namespace: 'fixture' }));
   b.onLoad({ filter: /.*/, namespace: 'fixture' }, () => ({ contents: 'export const securityAccessV336=async()=>__fixture.denied?new Response("blocked",{status:403}):null;export const securityLimitV336=async()=>null;', loader: 'js' }));
 } }] });

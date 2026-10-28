@@ -99,6 +99,7 @@ jobs:
           node tests/customer-liquid-v364.cjs
           node tests/customer-inbox-v363.cjs
           node tests/customer-push-routing-v363.cjs
+          node tests/customer-mobile-v393.cjs
           node tests/customer-design.cjs
           node tests/customer-surface-v361.cjs
           node tests/customer-magnetic-board-v362.cjs
@@ -162,6 +163,8 @@ jobs:
           "$RUNNER_TEMP/chvo-v3-browser/node_modules/.bin/playwright" install --with-deps chromium webkit
       - name: Current customer browser regression and pixel proof
         run: |
+          node tests/customer-mobile-v393-browser.cjs
+          V3_ENGINE=webkit node tests/customer-mobile-v393-browser.cjs
           node tests/customer-proof-delete-v392-browser.cjs
           V3_ENGINE=webkit node tests/customer-proof-delete-v392-browser.cjs
           node tests/customer-android-dock-v389-browser.cjs

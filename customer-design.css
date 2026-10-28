@@ -860,3 +860,27 @@ html.customer-auth-glass-v386 body{background-color:#fff!important;background-im
    The inherited milk applies to both SVG/fallback and the WebGL overlay. */
 html.customer-android.customer-design .bottom-nav{--lg-v3-milk:.92}
 html.customer-android.customer-design .bottom-nav>.lg-v3-material{background:rgba(255,255,255,.92);box-shadow:inset 0 1px 0 #ffffffcc,0 6px 24px #3c2a3429}
+
+/* v393: preserve the document scroll owner, stop boundary chaining/stretch. */
+html,body{overscroll-behavior:none}
+:is(.booking-picker-v37,.legal-body,.legal-card,.message-thread,.customer-bulletin-dialog-v229,.design-selected-days,.guide-card){overscroll-behavior:contain}
+#authView.auth-shell{min-height:100dvh;align-content:center;align-items:safe center}
+#authView[data-auth-mode=signup]{align-content:start;align-items:start}
+#authView .auth-brand img{width:min(180px,65%);height:auto;filter:drop-shadow(0 3px 6px #9954200a)}
+#authView .auth-brand{margin-bottom:14px}
+.customer-design #bookingPickerV37 .booking-picker-head-v37{margin-bottom:10px!important;min-height:0!important;padding-bottom:0!important}
+.customer-design #bookingPickerV37 #designMyBookings{margin-top:0!important;margin-bottom:10px!important}
+.customer-design #bookingPickerV37 #designSelectedDaysTitle{font-size:18px!important;font-weight:850!important;margin:8px 2px 4px!important;color:#713b20}
+.customer-design #bookingPickerV37.has-selected-days-v393 #bookingPickerTaxiSectionV91{padding:8px 6px;border:1px solid #edb787;border-radius:18px;background:#fff7ed66;box-shadow:0 3px 12px #b46f241a;margin-bottom:8px}
+.customer-design #bookingPickerV37.has-selected-days-v393 .design-selected-days{max-height:min(34dvh,300px)!important}
+.customer-design #bookingPickerV37.has-selected-days-v393 #bookingPickerDaysV37{margin-top:14px}
+.customer-design :is(#navBookAddV220,#bookingPickerSubmitV37):not(:disabled):not([aria-busy=true]){box-shadow:0 0 0 1px #faae6170,0 0 14px #f9731633!important}
+.customer-design #bookingPickerSubmitV37:disabled{box-shadow:none!important}
+@media(max-height:600px){#authView.auth-shell{align-content:start;align-items:start;padding-top:calc(12px + env(safe-area-inset-top))}}
+
+/* v393: smaller existing animation, without adding a loading delay. */
+#loading .concept-brand{width:min(175px,50vw)}
+#loading .concept-orbit{width:78px;height:78px;margin:30px auto 20px}
+#loading .concept-orbit>.concept-paw{width:36px;height:36px}
+#loading.in-app .concept-orbit{width:48px;height:48px;margin:0}
+#loading.in-app .concept-orbit>.concept-paw{width:24px;height:24px}

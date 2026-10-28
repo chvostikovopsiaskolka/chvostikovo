@@ -66,7 +66,7 @@
     const markup=window.customerGuidePreviewV360?.(),picker=$('bookingPickerV37');if(!markup||!picker)return null;
     picker.querySelector('.booking-picker-card-v37')?.setAttribute('data-guide-stashed-v360','');
     const frame=document.createElement('section');frame.id='guidePickerPreviewV360';frame.className='booking-picker-card-v37 guide-picker-preview-v360';frame.inert=true;
-    frame.innerHTML='<div class="booking-picker-days-v37 guide-preview-calendar">'+markup.calendar+'</div><div class="booking-picker-taxi-title-v37">Vybraté dni ↓</div><div class="booking-picker-taxi-by-day-v91 design-selected-days">'+markup.selected+'</div><button type="button" class="btn full booking-picker-submit-v37">Rezervovať 2 dni</button>';
+    frame.innerHTML='<div class="booking-picker-taxi-title-v37">Vybraté dni ↓</div><div class="booking-picker-taxi-by-day-v91 design-selected-days">'+markup.selected+'</div><button type="button" class="btn full booking-picker-submit-v37">Rezervovať 2 dni</button><div class="booking-picker-days-v37 guide-preview-calendar">'+markup.calendar+'</div>';
     frame.querySelectorAll('.booking-day-v37').forEach(button=>{button.dataset.capacityLevel='free';const span=button.querySelector('span');if(span){const dot=document.createElement('i');dot.className='design-capacity-dot';dot.setAttribute('aria-hidden','true');span.prepend(dot);}});
     picker.append(frame);return frame;
   }
@@ -79,6 +79,7 @@
     if(!tour)return;
     const root=shell(),spot=root.querySelector('.guide-spot'),card=root.querySelector('.guide-card');
     const width=document.documentElement.clientWidth||innerWidth,height=window.visualViewport?.height||innerHeight;
+    const offset=window.visualViewport?.offsetTop||0;root.style.top=offset+'px';root.style.height=height+'px';
     card.style.left=Math.max(10,(width-Math.min(width-20,390))/2)+'px';card.style.width=Math.min(width-20,390)+'px';card.style.maxHeight=Math.max(140,height-28)+'px';
     if(tour.step===-1){spot.hidden=true;root.classList.add('guide-welcome');card.style.top=Math.max(14,(height-card.offsetHeight)/2)+'px';return;}
     root.classList.remove('guide-welcome');
@@ -96,13 +97,13 @@
     if(!tour||account()!==tour.id)return abort();
     const current=++epoch;tour.step=index;cleanDemo();shell().classList.toggle('guide-calendar-step',index===4);
     shell().querySelector('.guide-top').append($('guideSkipV358'));
-    const titles=['Váš psík v Prehľade','Oznamy, správy a vstupy','Prihlásenie do škôlky','Vaše rezervácie','Výber dní a taxi','Všetko ostatné v Menu'];
+    const titles=['Váš psík v Prehľade','Permanentka a vaše rezervácie','Rezervovať miesto','Vaše rezervácie','Výber dní a taxi','Všetko ostatné v Menu'];
     const texts=[
       'Ťuknutím na profil otvoríte údaje a fotografiu psíka. Pri očkovaniach nájdete ich platnosť, pri grafe počet návštev. Pri zapnutých upozorneniach pripomenieme končiace očkovanie 14 a 7 dní vopred.',
       'Ak máte zakúpenú permanentku, tu uvidíte jej platnosť a počet využitých vstupov. Pod ňou nájdete svoje rezervácie a možnosť Upraviť. Cez Oznamy otvoríte novinky zo škôlky a cez Správy nám priamo napíšete.',
-      'Oranžovým tlačidlom otvoríte rezervácie. Vyberiete dostupné dni na dva týždne dopredu a podľa potreby pridáte taxi.',
+      'Tlačidlom Rezervovať miesto v spodnej lište otvoríte dostupné dni. Po výbere uvidíte Vybraté dni a potvrdenie rezervácie.',
       'Tu nájdete vytvorené rezervácie a stav schválenia. Podľa dostupných možností pridáte alebo upravíte taxi či zrušíte návštevu. Ak chcete zmeniť termín, zrušíte pôvodný a vyberiete nový.',
-      'Ukážka: vyberte jeden alebo viac dní z dvoch týždňov. Pri každom môžete pridať taxi. Výber odošlete tlačidlom Rezervovať.',
+      'Ukážka: vyberte dni v kalendári. Vybraté dni a tlačidlo Rezervovať sú nad kalendárom. Ku každému dňu môžete pridať taxi.',
       'V Menu nájdete údaje psíka, očkovania, svoje kontakty aj správy pre škôlku. V Nastaveniach si môžete tohto sprievodcu kedykoľvek zopakovať. Pripravujeme aj rozšírenú žiacku knižku a odmeny.'
     ];
     const next=$('guideNextV358');next.disabled=true;
@@ -112,7 +113,7 @@
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     if(!tour||current!==epoch)return;
     if(index===0)tour.targets=[$('bookingDogProfile')];
-    if(index===1)tour.targets=[$('designTicket'),$('designNearest'),$('customerInboxV363')];
+    if(index===1)tour.targets=[$('designTicket'),$('designNearest')];
     if(index===2)tour.targets=[$('navBookAddV220')];
     if(index===3){const existing=$('designMyBookings')?.querySelector('.reserved-day-card-v37');tour.targets=[existing||sample()];}
     if(index===4)tour.targets=[calendarSample()];

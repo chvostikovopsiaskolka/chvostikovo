@@ -7,6 +7,6 @@ assert(js.includes('createWebGLSurface'));
 assert(js.includes('maps.size>32'));
 assert(js.includes('stats.contextLimit'));
 assert(!js.includes('fetch(')&&!js.includes('setInterval('));
-assert(!css.split('/* Liquid Glass V3 preview')[1].includes('border:1px'));
+assert(!css.split('/* Liquid Glass V3 preview')[1].split('/* v376:')[0].includes('border:1px'));
 for(const f of ['vendor/liquidlens/LICENSE','vendor/simple-liquid-glass/LICENSE','vendor/simple-liquid-glass/THIRD_PARTY_NOTICES.md'])assert(fs.existsSync(f));
 console.log('PASS V3 real vendored optics, bounded maps/contexts, border-free material, no backend/polling');

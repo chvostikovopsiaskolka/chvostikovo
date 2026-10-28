@@ -1,8 +1,8 @@
 # Chvostíkovo Android — Capacitor preparation
 
 Status: **prepared for testing; not a signed Google Play release**. Source baseline:
-customer-portal-production `9819732f9063aceef0ec0a833a3b9908e9d9ed0a`,
-customer PWA v392 / 2.0.67 (25 October 2026). Earlier v360/v361 APK/AAB files
+customer PWA candidate v394 / 2.0.69 (28 October 2026), based on
+production `3159725685584014b50b912e09995b2d68fcebfd`. Earlier v360/v361 APK/AAB files
 are obsolete. Every subsequent Android file must be rebuilt after shared changes.
 The production PWA and database are not changed by building this directory.
 
@@ -27,7 +27,7 @@ mode. The PWA continues to use its existing updater. Keep shared changes in the
 root source; never edit generated `www` or Android assets manually.
 
 Android `versionName` and `versionCode` are read directly from root `version.json`
-(v392 -> code 392, name 2.0.67). Use a newer shared build number for each Play
+(v394 -> code 394, name 2.0.69). Use a newer shared build number for each Play
 upload. The build cleans old output, includes the optical engine's runtime assets
 and records shared plus packaged SHA-256 hashes and the Git source commit in
 `mobile-build.json`. Packaging tests verify source parity and vendor references.
@@ -237,7 +237,7 @@ in the build environment, never in committed Gradle files:
 
 Then `npm run android:bundle`. The preflight deliberately blocks an unconfigured
 release. The shared build number must increase for each Play upload; Android reads
-it directly as `versionCode`. Current candidate uses code 392 and versionName 2.0.67.
+it directly as `versionCode`. Current candidate uses code 394 and versionName 2.0.69.
 
 Upload the signed AAB to Google Play internal testing, add testers' Play Google
 accounts and share the opt-in link. They sign in with existing Chvostíkovo credentials;
@@ -251,3 +251,40 @@ revert only its commit; do not revert later unrelated PWA releases. If native ba
 is subsequently activated, preserve token-table audit/privacy requirements and
 disable native delivery using server configuration; do not restore an old full
 admin-push over newer fixes. Never reset booking, pass, attendance or payment data.
+
+## Mobile refinement v393 — 28 October 2026
+
+- Shared v393 login/registration, loader, selected-day priority and real-visit week selection.
+- Android portrait policy in the manifest; existing Capacitor native system/IME insets retained.
+- WebView overscroll stretch disabled without disabling normal content scrolling or touch handlers.
+- Explicit white window/system background and dark icons; Android 10+ contrast scrims disabled.
+  Android 7 retains a dark navigation strip because that OS cannot display dark navigation icons.
+  The previous DayNight window background was used by Capacitor SystemBars for native inset areas.
+- Smaller system splash uses the approved existing artwork. No artificial loading delay.
+- FCM carries the existing account-scoped message/article URL and notification tag. Native taps use
+  the existing shared recipient/conversation/onboarding guards; arbitrary URL navigation is rejected.
+- Windows tests use fileURLToPath and isolate the missing-configuration preflight from local Firebase files.
+
+Verification: native runtime/backend/policy/package/dispatch tests and isolated PostgreSQL schema checks;
+JDK 21 / SDK 36 debug compilation. No Android device was connected to adb. System-bar appearance,
+keyboard gestures, background/terminated delivery and App Links require a physical test. The server
+FCM secret is being supplied by the operator; missing backend activation is tracked in the release
+wiki. This is a debug candidate, not a Play publication or proof of delivered notifications.
+
+Rollback: retain the previous v392 APK and its source branch. Reinstalling older debug code may need
+an Android-approved version downgrade; do not uninstall or clear customer data as a routine rollback.
+PWA rollback is separate. Native push server rollout must preserve existing web push and token privacy.
+
+### Backend activation — 28 October 2026
+
+Deployed `native_push_devices_v393` (additive, service-only/RLS), `customer-native-push` v1,
+and `admin-push` v42. Deployed files read back identical; missing/invalid bearer both return 401;
+no synthetic device remains (count 0). Firebase server secret is still to be supplied by the operator.
+Full assembled webhook tests preserve web delivery/copy/targets and skip native lookup without FCM.
+
+Fresh LIVE `admin-push` v41 backup: `supabase/backups/admin-push-before-native-v393.ts`,
+SHA256 `521f6d8a3d60e5f103c0f7e9c3bbd977b335331761960ba32e7955ba43196829`, with companion security backup.
+Rollback native dispatch by deploying those exact v41 sources only if v42 has not received newer
+changes. Preserve the device table and existing web subscriptions. Never put tokens or Firebase
+service-account contents into Git. Sending/receiving is unverified until a synthetic device account
+can register with the configured secret and foreground/background/terminated scenarios are observed.

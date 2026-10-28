@@ -1,4 +1,4 @@
--- PREPARED, NOT APPLIED. No changes to existing web-push subscriptions.
+-- Applied as native_push_devices_v393 on 28 October 2026. Existing web push unchanged.
 begin;
 create table public.portal_native_push_devices (
   token text primary key check (length(token) between 20 and 4096),

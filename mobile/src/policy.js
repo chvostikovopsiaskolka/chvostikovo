@@ -9,3 +9,16 @@ export function callbackPath(value) {
     return url.pathname + url.search + url.hash;
   } catch { return null; }
 }
+
+// Retain only the existing account-scoped notification target contract.
+export function notificationQuery(value) {
+  try {
+    if (typeof value !== 'string' || value.length > 2048) return null;
+    const url = new URL(value, 'https://app.chvostikovo.sk');
+    if (url.origin !== 'https://app.chvostikovo.sk' || !['/', '/index.html'].includes(url.pathname) || url.hash) return null;
+    const kind = url.searchParams.get('open'), field = kind === 'messages' ? 'conversation' : kind === 'announcement' ? 'announcement' : '';
+    const id = Number(url.searchParams.get(field)), recipient = url.searchParams.get('recipient');
+    if (!field || !Number.isSafeInteger(id) || id <= 0 || !/^[a-f0-9-]{36}$/i.test(recipient || '')) return null;
+    return new URLSearchParams({ open: kind, [field]: String(id), recipient }).toString();
+  } catch { return null; }
+}

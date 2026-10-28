@@ -1,9 +1,10 @@
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { webcrypto } from 'node:crypto';
 import { build } from 'esbuild';
-const result = await build({ entryPoints: [new URL('../src/runtime.js', import.meta.url).pathname], bundle: true, write: false, format: 'iife', plugins: [{ name: 'native-device-fixture', setup(b) {
+const result = await build({ entryPoints: [fileURLToPath(new URL('../src/runtime.js', import.meta.url))], bundle: true, write: false, format: 'iife', plugins: [{ name: 'native-device-fixture', setup(b) {
   b.onResolve({ filter: /^@capacitor\// }, args => ({ path: args.path, namespace: 'fixture' }));
   b.onLoad({ filter: /.*/, namespace: 'fixture' }, () => ({ contents: 'export const Capacitor={isNativePlatform:()=>true};export const registerPlugin=()=>__device.updates;export const App=__device.app;export const PushNotifications=__device.push;', loader: 'js' }));
 } }] });
@@ -67,4 +68,13 @@ test('explicit disable remains disabled on resume', async () => {
   const count = f.calls.length;
   assert.equal(await f.ctx.ChvoNative.ensurePush(), false);
   assert.equal(f.calls.length, count);
+});
+
+test('notification target survives cold attachment and is consumed only once', async () => {
+ const f=fixture();await f.ctx.ChvoNative.prepareLaunch();
+ f.listeners.pushNotificationActionPerformed({notification:{data:{url:'/?open=messages&conversation=7&recipient=12345678-1234-1234-1234-123456789012'}}});
+ assert.match(f.ctx.ChvoNative.takeNotification(),/open=messages&conversation=7/);
+ assert.equal(f.ctx.ChvoNative.takeNotification(),null);
+ f.listeners.pushNotificationActionPerformed({notification:{data:{url:'https://evil.example/'}}});assert.equal(f.ctx.ChvoNative.takeNotification(),null);
+ assert.equal(f.navigations.length,0,'push cannot navigate to arbitrary URL');
 });
