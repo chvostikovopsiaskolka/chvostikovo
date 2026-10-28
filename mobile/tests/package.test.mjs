@@ -4,6 +4,10 @@ import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 const read = name => readFile(new URL('../' + name, import.meta.url), 'utf8');
+test('adaptive launcher zooms the original padded artwork without replacing it', async () => {
+  assert.match(await read('android/app/src/main/res/drawable/chvo_launcher_foreground.xml'), /android:inset="-24dp"/);
+  assert.deepEqual(await readFile(new URL('../android/app/src/main/res/drawable/chvo_app_icon.png', import.meta.url)),await readFile(new URL('../../icon-maskable-512.png', import.meta.url)));
+});
 test('mobile bundle uses local shared assets, excludes server material and service worker', async () => {
   const files = await readdir(new URL('../www', import.meta.url));
   assert(!files.includes('sw.js'));
