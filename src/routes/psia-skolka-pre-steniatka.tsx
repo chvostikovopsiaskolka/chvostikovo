@@ -277,7 +277,9 @@ function PuppyDaycarePage() {
 
         <Reviews reviews={PUPPY_REVIEWS} />
 
-        <FriendshipFeature />
+        <LandingMobilePricing id="puppy-pricing" allScreens onInterest={() => openForm("puppy_landing_pricing_20261028")} />
+
+        <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openForm("puppy_landing_friendship_20261028")} />
 
         <DaycarePhotoCarousel />
 
@@ -321,7 +323,6 @@ function PuppyDaycarePage() {
           </div>
         </section>
 
-        <LandingMobilePricing id="puppy-pricing" onInterest={() => openForm("puppy_landing_dock_pricing")} />
 
         <section className="relative overflow-hidden bg-secondary/40 py-10 sm:py-14">
           <SectionAmbientPaws />
