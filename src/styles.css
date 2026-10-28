@@ -349,9 +349,9 @@
     pointer-events: none;
     -webkit-tap-highlight-color: transparent;
   }
-  /* Pilot on main SK page only: small, dock-attached return control.
-     It never occupies a navigation slot and is hidden without layout shift. */
-  .mobile-dock[data-variant="main"] .mobile-dock-back-top {
+  /* Glass return arrow shared by main, LEAD, puppy, dog-sitting and EN.
+     Sits above the dock (outside its grid) with a full-size touch target. */
+  .mobile-dock .mobile-dock-back-top {
     position: absolute;
     left: max(6px, calc((100% - 640px) / 2 + 6px));
     bottom: calc(100% + 9px);
@@ -360,20 +360,20 @@
     display: grid;
     place-items: center;
     padding: 0;
-    border: 1px solid color-mix(in srgb, var(--forest) 20%, transparent);
-    border-radius: 16px;
-    background: rgba(255, 252, 241, .97);
-    box-shadow: 0 5px 16px rgba(30, 65, 49, .16);
+    border: 1px solid rgba(255, 255, 255, .7);
+    border-radius: 999px;
+    background: rgba(248, 253, 248, .57);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.85), inset 0 -1px 0 rgba(80,120,95,.08), 0 5px 16px rgba(30,65,49,.16);
     color: var(--forest-deep);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+    backdrop-filter: blur(18px) saturate(1.35);
     cursor: pointer;
     pointer-events: auto;
     touch-action: manipulation;
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
-    transition: opacity 160ms ease, transform 160ms ease, visibility 160ms;
+    transition: opacity 150ms ease, transform 150ms ease, visibility 150ms;
   }
   .mobile-dock-back-top[data-visible="false"] {
     opacity: 0;
@@ -381,12 +381,15 @@
     pointer-events: none;
     transform: translateY(7px);
   }
-  .mobile-dock-back-top:focus-visible {
-    outline: 2px solid var(--forest-deep);
-    outline-offset: 3px;
+  .mobile-dock-back-top:focus-visible { outline: 2px solid var(--forest-deep); outline-offset: 3px; }
+  body:has([data-form-dialog], [role="dialog"][data-state="open"]) .mobile-dock-back-top {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .mobile-dock-back-top { transition: none !important; }
+  @media (prefers-reduced-motion: reduce) { .mobile-dock-back-top { transition: none !important; } }
+  @media (prefers-reduced-transparency: reduce) {
+    .mobile-dock-back-top { background: #f8fdf8; -webkit-backdrop-filter: none; backdrop-filter: none; }
   }
   .mobile-dock-bar {
     pointer-events: auto;
