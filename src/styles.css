@@ -349,6 +349,45 @@
     pointer-events: none;
     -webkit-tap-highlight-color: transparent;
   }
+  /* Pilot on main SK page only: small, dock-attached return control.
+     It never occupies a navigation slot and is hidden without layout shift. */
+  .mobile-dock[data-variant="main"] .mobile-dock-back-top {
+    position: absolute;
+    left: max(6px, calc((100% - 640px) / 2 + 6px));
+    bottom: calc(100% + 9px);
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--forest) 20%, transparent);
+    border-radius: 16px;
+    background: rgba(255, 252, 241, .97);
+    box-shadow: 0 5px 16px rgba(30, 65, 49, .16);
+    color: var(--forest-deep);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 160ms ease, transform 160ms ease, visibility 160ms;
+  }
+  .mobile-dock-back-top[data-visible="false"] {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(7px);
+  }
+  .mobile-dock-back-top:focus-visible {
+    outline: 2px solid var(--forest-deep);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-dock-back-top { transition: none !important; }
+  }
   .mobile-dock-bar {
     pointer-events: auto;
     box-sizing: border-box;
