@@ -5,6 +5,7 @@ import { ArrowDown, HeartHandshake, PawPrint, Sparkles, type LucideIcon } from "
 import skolkariVideo from "@/assets/skolkari.mp4";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 import { trackMarketingInteraction } from "@/lib/analytics";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
 function ReviewCard({ name, text }: { name: string; text: string }) {
@@ -233,7 +234,7 @@ export function VideoReasonsGrid({ items, language = "sk" }: { items: VideoBenef
 }
 
 export function ReviewReasons({
-  ctaLabel = "Pozrite si, ako to u nás vyzerá",
+  ctaLabel = "Ako sa postaráme o vášho psíka",
   onCtaClick,
   variant = "default",
   withVideo = false,
@@ -278,8 +279,9 @@ export function ReviewReasons({
                 onCtaClick();
                 return;
               }
-              trackMarketingInteraction("explore_daycare", "why_chvostikovo");
-              document.getElementById("priestory")?.scrollIntoView({
+              trackMarketingInteraction("view_care", "why_chvostikovo_care_20261028");
+              void trackCookielessInteraction("explore_daycare", "why_chvostikovo_care_20261028");
+              document.getElementById("starostlivost")?.scrollIntoView({
                 behavior: "smooth",
                 block: "start",
               });

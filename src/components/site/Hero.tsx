@@ -5,6 +5,7 @@ import { InfoTicker } from "./InfoTicker";
 import { PawTrailBackground } from "./PawTrailBackground";
 import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 import { trackMarketingInteraction } from "@/lib/analytics";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 function scrollToWhyChvostikovo() {
   const target = document.getElementById("preco-chvostikovo");
@@ -62,6 +63,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
                 return;
               }
               trackMarketingInteraction("hero_learn_more", "hero_mobile");
+              void trackCookielessInteraction("explore_daycare", "home_hero_mobile_20261028");
               scrollToWhyChvostikovo();
             }}
             className="btn-coral mt-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg"
@@ -112,6 +114,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
                 type="button"
                 onClick={() => {
                   trackMarketingInteraction("hero_learn_more", "hero_desktop");
+                  void trackCookielessInteraction("explore_daycare", "home_hero_desktop_20261028");
                   scrollToWhyChvostikovo();
                 }}
                 className="btn-coral inline-flex min-w-[310px] items-center justify-center gap-3 px-10 py-4 text-lg"

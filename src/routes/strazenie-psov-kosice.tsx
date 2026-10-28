@@ -14,6 +14,7 @@ import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
+import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { ShortForm } from "@/components/site/Forms";
 
 const BASE_URL = "https://chvostikovo.sk";
@@ -76,16 +77,18 @@ const MORE_LINKS = [
 
 function DogSittingPage() {
   const [interestOpen, setInterestOpen] = useState(false);
-  function openInterest() {
-    trackMarketingInteraction("inquiry_cta", "dog_sitting_page_mobile_dock");
-    void trackCookielessInteraction("inquiry_cta", "dog_sitting_page_mobile_dock");
+  const [interestSource, setInterestSource] = useState("dog_sitting_page_mobile_dock");
+  function openInterest(source = "dog_sitting_page_mobile_dock") {
+    trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
+    setInterestSource(source);
     setInterestOpen(true);
   }
 
   return (
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks hideMobileDock />
-      <MobileDock variant="dog-sitting" onInterestOpen={openInterest} />
+      <MobileDock variant="dog-sitting" onInterestOpen={() => openInterest()} />
       <main>
         <section id="top" className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
           <PawTrailBackground landingBottomPaws />
@@ -170,7 +173,8 @@ function DogSittingPage() {
             </div>
           </div>
         </section>
-        <LandingMobilePricing id="dog-sitting-pricing" onInterest={openInterest} />
+        <LandingMobilePricing id="dog-sitting-pricing" allScreens onInterest={() => openInterest("dog_sitting_pricing_20261028")} />
+        <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openInterest("dog_sitting_friendship_20261028")} />
       </main>
       <Footer />
       <FormDialog
@@ -179,7 +183,7 @@ function DogSittingPage() {
         title="Chcete sa dozvedieť viac o škôlke?"
         subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
       >
-        <ShortForm trackingSource="dog_sitting_page_mobile_dock" />
+        <ShortForm trackingSource={interestSource} />
       </FormDialog>
     </div>
   );

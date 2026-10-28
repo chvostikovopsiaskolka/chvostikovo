@@ -4,9 +4,11 @@ import { SectionAmbientPaws } from "./SectionAmbientPaws";
 type FriendshipFeatureProps = {
   language?: "sk" | "en";
   embedded?: boolean;
+  ctaLabel?: string;
+  onCtaClick?: () => void;
 };
 
-export function FriendshipFeature({ language = "sk", embedded = false }: FriendshipFeatureProps) {
+export function FriendshipFeature({ language = "sk", embedded = false, ctaLabel, onCtaClick }: FriendshipFeatureProps) {
   const isEnglish = language === "en";
   const content = (
     <div className="grid overflow-hidden rounded-4xl bg-secondary/55 shadow-card ring-1 ring-forest/5 md:grid-cols-[1.05fr_0.95fr] md:items-center">
@@ -35,14 +37,25 @@ export function FriendshipFeature({ language = "sk", embedded = false }: Friends
     </div>
   );
 
+  const body = (
+    <>
+      {content}
+      {ctaLabel && onCtaClick && (
+        <div className="mt-7 flex justify-center">
+          <button type="button" className="btn-coral" onClick={onCtaClick}>{ctaLabel}</button>
+        </div>
+      )}
+    </>
+  );
+
   if (embedded) {
-    return <div className="mt-9">{content}</div>;
+    return <div className="mt-9">{body}</div>;
   }
 
   return (
     <section className="relative overflow-hidden bg-card pt-9 pb-6 sm:pt-12 sm:pb-8">
       <SectionAmbientPaws />
-      <div className="relative z-10 mx-auto max-w-6xl px-4">{content}</div>
+      <div className="relative z-10 mx-auto max-w-6xl px-4">{body}</div>
     </section>
   );
 }

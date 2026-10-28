@@ -2,13 +2,14 @@ import { PRICING } from "@/content/site";
 
 /** Small mobile-only price reference on conversion landings. Canonical prices
  * stay in content/site.ts and desktop SEO layouts are left untouched. */
-export function LandingMobilePricing({ id, onInterest }: {
+export function LandingMobilePricing({ id, onInterest, allScreens = false }: {
   id: string;
   onInterest: () => void;
+  allScreens?: boolean;
 }) {
   return (
-    <section id={id} className="scroll-mt-4 bg-secondary/35 px-4 py-9 lg:hidden">
-      <div className="mx-auto max-w-lg text-center">
+    <section id={id} className={`scroll-mt-24 bg-secondary/35 px-4 py-9 ${allScreens ? "" : "lg:hidden"}`}>
+      <div className={`mx-auto text-center ${allScreens ? "max-w-3xl" : "max-w-lg"}`}>
         <h2 className="font-display text-2xl font-bold text-forest">Cenník škôlky</h2>
         <p className="mt-2 text-sm text-forest/75">Starostlivosť, pohyb, hry aj oddych sú zahrnuté v každom vstupe.</p>
         <div className="mt-5 grid grid-cols-2 gap-3">

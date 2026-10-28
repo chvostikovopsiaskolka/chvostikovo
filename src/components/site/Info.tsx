@@ -113,7 +113,7 @@ export function FirstVisit() {
   );
 }
 
-export function Pricing() {
+export function Pricing({ interestMode = false }: { interestMode?: boolean } = {}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -181,8 +181,14 @@ export function Pricing() {
           </p>
 
           <div className="mt-7 flex justify-center">
-            <button type="button" onClick={() => setOpen(true)} className="btn-coral">
-              Prihláška do škôlky
+            <button type="button" onClick={() => {
+              if (interestMode) {
+                trackMarketingInteraction("inquiry_cta", "home_pricing_interest_20261028");
+                void trackCookielessInteraction("inquiry_cta", "home_pricing_interest_20261028");
+              }
+              setOpen(true);
+            }} className="btn-coral">
+              {interestMode ? "Mám záujem o psiu škôlku pre psíka" : "Prihláška do škôlky"}
             </button>
           </div>
         </div>
@@ -191,10 +197,10 @@ export function Pricing() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Prihláška do škôlky"
-        subtitle="Povedzte nám viac o svojom psíkovi. Po odoslaní prihlášky sa vám ozveme a dohodneme ďalší postup."
+        title={interestMode ? "Máte záujem o psiu škôlku?" : "Prihláška do škôlky"}
+        subtitle={interestMode ? "Nechajte nám kontakt. Ozveme sa vám a dohodneme ďalší postup." : "Povedzte nám viac o svojom psíkovi. Po odoslaní prihlášky sa vám ozveme a dohodneme ďalší postup."}
       >
-        <LongForm />
+        {interestMode ? <ShortForm trackingSource="home_pricing_interest_20261028" /> : <LongForm />}
       </FormDialog>
     </section>
   );
