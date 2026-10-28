@@ -239,7 +239,34 @@ function LeadLandingPage() {
 
         <Reviews />
 
-        <FriendshipFeature />
+        <section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
+            <h2 className="section-title text-3xl sm:text-4xl">Koľko stojí deň v škôlke?</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-forest/75 sm:text-base">
+              Pohyb, hry, oddych aj celodenný dohľad sú súčasťou každého vstupu. Pri pravidelných návštevách môžete využiť výhodnejšiu permanentku.
+            </p>
+            <div className="mx-auto mt-7 grid max-w-2xl gap-4 sm:grid-cols-2">
+              {PRICING.map((item) => (
+                <article key={item.name} className={`rounded-3xl p-6 shadow-card ${item.highlight ? "bg-forest text-cream" : "bg-card text-forest"}`}>
+                  <h3 className="font-display text-xl font-bold">{item.name}</h3>
+                  <p className={`mt-3 font-display text-4xl font-bold ${item.highlight ? "text-cream" : "text-coral-dark"}`}>{item.price}</p>
+                  {item.highlight && <p className="mt-3 text-sm leading-relaxed text-cream/85">{item.note}</p>}
+                </article>
+              ))}
+            </div>
+            <p className="mt-5 font-display font-bold text-forest">Úvodná návšteva je zadarmo.</p>
+            <p className="mx-auto mt-4 flex max-w-2xl items-start justify-center gap-2 text-sm leading-relaxed text-forest/75">
+              <Car className="mt-0.5 size-5 shrink-0 text-coral-dark" />
+              <span>Pomôžeme vám aj s vyzdvihnutím a odvozom psíka v Košiciach — 5 € za jednu jazdu.</span>
+            </p>
+            <button type="button" onClick={() => openLeadModal("lead_landing_pricing_20261028")} className="btn-coral mt-6 inline-flex">
+              Chcem sa informovať o škôlke
+            </button>
+          </div>
+        </section>
+
+        <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />
 
         <DaycarePhotoCarousel />
         <VideoSection />
@@ -289,33 +316,6 @@ function LeadLandingPage() {
                 Aj my sme majitelia veľkých psíkov, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov spoznávame, rešpektujeme ich potreby a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
               </p>
             </div>
-          </div>
-        </section>
-
-        <section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
-            <h2 className="section-title text-3xl sm:text-4xl">Koľko stojí deň v škôlke?</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-forest/75 sm:text-base">
-              Pohyb, hry, oddych aj celodenný dohľad sú súčasťou každého vstupu. Pri pravidelných návštevách môžete využiť výhodnejšiu permanentku.
-            </p>
-            <div className="mx-auto mt-7 grid max-w-2xl gap-4 sm:grid-cols-2">
-              {PRICING.map((item) => (
-                <article key={item.name} className={`rounded-3xl p-6 shadow-card ${item.highlight ? "bg-forest text-cream" : "bg-card text-forest"}`}>
-                  <h3 className="font-display text-xl font-bold">{item.name}</h3>
-                  <p className={`mt-3 font-display text-4xl font-bold ${item.highlight ? "text-cream" : "text-coral-dark"}`}>{item.price}</p>
-                  {item.highlight && <p className="mt-3 text-sm leading-relaxed text-cream/85">{item.note}</p>}
-                </article>
-              ))}
-            </div>
-            <p className="mt-5 font-display font-bold text-forest">Úvodná návšteva je zadarmo.</p>
-            <p className="mx-auto mt-4 flex max-w-2xl items-start justify-center gap-2 text-sm leading-relaxed text-forest/75">
-              <Car className="mt-0.5 size-5 shrink-0 text-coral-dark" />
-              <span>Pomôžeme vám aj s vyzdvihnutím a odvozom psíka v Košiciach — 5 € za jednu jazdu.</span>
-            </p>
-            <button type="button" onClick={() => openLeadModal("lead_landing_pricing")} className="btn-coral mt-6 inline-flex">
-              Chcem sa informovať
-            </button>
           </div>
         </section>
 
