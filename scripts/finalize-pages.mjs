@@ -7,6 +7,7 @@ import { extname, join } from "node:path";
 const dir = "dist/client";
 
 const seoUrls = [
+  "https://chvostikovo.sk/psia-skolka-kosice",
   "https://chvostikovo.sk/strazenie-psov-kosice",
   "https://chvostikovo.sk/en/dog-daycare-kosice",
 ];
