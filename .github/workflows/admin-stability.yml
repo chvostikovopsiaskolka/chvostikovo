@@ -163,8 +163,8 @@ jobs:
           "$RUNNER_TEMP/chvo-v3-browser/node_modules/.bin/playwright" install --with-deps chromium webkit
       - name: Current customer browser regression and pixel proof
         run: |
-          node tests/customer-push-migration-v397-browser.cjs
-          V3_ENGINE=webkit node tests/customer-push-migration-v397-browser.cjs
+          node tests/customer-push-onboarding-v398-browser.cjs
+          V3_ENGINE=webkit node tests/customer-push-onboarding-v398-browser.cjs
           node tests/customer-polish-v396-browser.cjs
           V3_ENGINE=webkit node tests/customer-polish-v396-browser.cjs
           node tests/customer-mobile-v393-browser.cjs
