@@ -18,8 +18,8 @@ import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FriendshipFeature } from "./FriendshipFeature";
 import { EditorialBenefits } from "./EditorialBenefits";
-import careDogFriendsSquare from "@/assets/care-dog-friends-square.webp";
-import careHappyDogSquare from "@/assets/care-happy-dog-square.webp";
+import careSupervisionOriginal from "@/assets/care-supervision-original.webp";
+import careIndividualOriginal from "@/assets/care-individual-original.webp";
 import { CarePhotoSlideshow } from "./CarePhotoSlideshow";
 
 const ABOUT_MORE = [
@@ -74,16 +74,18 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
       position: CARE[0]!.pos,
     },
     {
-      src: careDogFriendsSquare,
-      alt: isEnglish ? "Three dog friends together at Chvostíkovo daycare" : "Traja psí kamaráti spolu v škôlke Chvostíkovo",
-      size: 720,
-      position: "object-center",
+      src: careSupervisionOriginal,
+      alt: isEnglish ? "Two dogs sitting together at Chvostíkovo daycare" : "Dvaja psíkovia sedia spolu v škôlke Chvostíkovo",
+      size: 1200,
+      height: 1600,
+      position: "object-[50%_35%]",
     },
     {
-      src: careHappyDogSquare,
-      alt: isEnglish ? "Happy black-and-white dog at Chvostíkovo daycare" : "Usmiaty čiernobiely psík v škôlke Chvostíkovo",
-      size: 720,
-      position: "object-center",
+      src: careIndividualOriginal,
+      alt: isEnglish ? "Happy Weimaraner at Chvostíkovo daycare" : "Usmiaty weimarský stavač v škôlke Chvostíkovo",
+      size: 1200,
+      height: 1600,
+      position: "object-[50%_35%]",
     },
   ];
 
@@ -107,7 +109,7 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
                     src={photo.src}
                     alt={photo.alt}
                     width={photo.size}
-                    height={photo.size}
+                    height={photo.height ?? photo.size}
                     loading="lazy"
                     decoding="async"
                     className={`absolute inset-0 size-full object-cover ${photo.position}`}
