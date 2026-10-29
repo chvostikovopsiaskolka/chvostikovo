@@ -119,3 +119,72 @@ Používať iba schema, ktorá zodpovedá reálnemu obsahu stránky.
 - `/psia-skolka-pre-steniatka`: informačný + komerčný intent pre škôlku pre šteniatka.
 - `/en/dog-daycare-kosice`: anglické dopyty typu dog daycare / dog sitting / pet sitting Košice, bez predstierania overnight boarding služby.
 - Budúca stránka o socializácii: informačný search intent, nie ďalšia kópia predajnej landing page.
+
+
+## 12. Prevádzkový audit Bellaris — jednotný vykonávací checklist (29.10.2026)
+
+Toto je **kontrolný postup**, nie tvrdenie, že každý bod webu Chvostíkova prešiel LIVE testom. Použi ho spolu s klientskym briefom a bezpečnostným/release checklistom. Kanonická súkromná metodika a klientsky výstup: Bellaris Workspace → `05-Sablony/07-SEO-a-organicke-vyhladavanie.md`. Interné údaje a výsledky o zákazníkoch neukladať do verejného repozitára.
+
+### Záznam auditu (povinné polia)
+
+- Projekt, produkčná doména, hlavná lokalita / pôsobnosť, dátum, auditor, aktuálna vetva/commit, deploy URL, existujúci rollback.
+- Pre každý bod eviduj **stav** `PASS / FAIL / PARTIAL / N/A / UNVERIFIED`, **dôkaz** `LIVE HTTP / GSC / GA4 / GBP / Supabase agregát / zdrojový kód / screenshot`, dátum kontroly, prioritu `P0/P1/P2`, vlastníka a ďalší krok.
+- `PASS v kóde` nie je `LIVE PASS`. `UNVERIFIED` sa nepočíta ako úspech. Neuvádzať skóre, ak vysokoprioritné body nemajú dôkaz.
+
+### Pred obsahovou prácou — klient, publikum a zámer
+
+- [ ] Zadefinovaná služba, klient, oblasť pôsobenia, vylúčené služby, prevádzkové podmienky a primárna konverzia.
+- [ ] Zozbierané existujúce domény, URL, vlastníctvo GSC/GA4/GBP, prístupy cez roly, historické indexované URL a možné migrácie.
+- [ ] Prieskum reálnych otázok zákazníkov, odporúčaní Google Search Console, Search Results a Keyword Planneru, bez vymyslených mesačných objemov.
+- [ ] Mapa `dopyt → intent → cieľová URL → hlavné CTA → meraný výsledok`, oddelený brand/non-brand a lokálne/celoslovenské dopyty.
+- [ ] Konkurenčné stránky a rozdiely v službách preverené k dátumu; nevyrábať desiatky mestských kópií alebo duplicitných landing pages.
+
+### Technická brána indexácie — vyžaduje LIVE dôkaz
+
+- [ ] DNS/HTTPS, 200 na kanonickej URL, redirect HTTP→HTTPS a host variácií bez slučiek, pravdivé 404/410, žiadne soft-404.
+- [ ] Každá predajná stránka skutočne v build/prerender zozname, má HTML s vlastným title, description, H1 a obsahom **pred spustením JS**; 404 SPA fallback nie je dôkaz prerenderu.
+- [ ] `robots.txt` nezakazuje dôležité URL a správne odkazuje na sitemap, ktorá vracia 200 a parsovateľné XML.
+- [ ] Sitemap obsahuje presne požadované indexovateľné canonical URL, neobsahuje súkromné/preview/košík či neexistujúce varianty; `lastmod` iba skutočná zmena obsahu.
+- [ ] Self-canonical a skutočná finálna URL sa zhodujú (vrátane lomky, jazykovej verzie a redirects), žiadne konfliktné `noindex` alebo HTTP hlavičky.
+- [ ] Všetky SK/EN alternatívy používajú vzájomné `hreflang` a správny `lang`; sú to obsahovo zodpovedajúce stránky, nie nútené preklady.
+- [ ] Žiadne dôležité orphan pages, prerušené interné odkazy, cykly, zlé kotvy alebo zablokované obrázky a JS.
+- [ ] Google Search Console: overená doména, sitemap stav, URL Inspection a indexácia jednotlivých cieľových URL; exportovať chybové kategórie bez publikovania interných údajov.
+
+### Obsah / dôvera / lokálna relevantnosť
+
+- [ ] Každá relevantná URL má unikátny search intent, prirodzené kľúčové témy, výstižný title/description, logické nadpisy, odpoveď na cenu/proces/podmienky.
+- [ ] CTA a formulár skutočne fungujú aj na iOS/Android, vrátane autofill, chýb a server confirmation; nejde iba o kliknutie.
+- [ ] Reálne fotky, licencie, alt, veľkosti a prístupnosť; recenzie sú autentické a presné k dátumu.
+- [ ] Právne/prevádzkové kontakty, adresa, hodiny, služba a cena sa zhodujú medzi webom a Google Business Profile; link na správne mapy.
+- [ ] Schema.org typy `LocalBusiness/Service/Organization/Product` iba k skutočnému obsahu. Validovať Rich Results a Schema validator; FAQ markup nezaručuje Google rich result.
+- [ ] Služby a oblasť pôsobenia pravdivé. Lokálna služba sa neoptimalizuje na celoslovenský predaj, pokiaľ ho reálne neposkytuje.
+- [ ] Odpovede na otázky klientov zrozumiteľné aj pre AI vyhľadávanie; citovateľné originálne skúsenosti a jasná identita, bez fiktívnych hodnotení alebo AI generovaného keyword spamu.
+
+### Výkon, mobil a prístupnosť
+
+- [ ] Mobile-first render 320–430 px, dotyk, kontrast, formuláre, safe areas, bez CLS spôsobeného fotografiami/animáciami.
+- [ ] Google PageSpeed Insights + merania CrUX/GSC tam, kde existujú: LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1 na 75. percentile; oddeliť lab a field výsledky.
+- [ ] Hero obrázok nemá zbytočný lazy loading, má správny rozmer/prioritu; obrázky mimo viewportu lazy; JS/video/fonty nezdržiavajú kritický obsah.
+- [ ] Základné a11y: keyboard/focus, alt, nadpisy, labely, error messaging a reduced-motion.
+
+### Meranie a SEO → biznis
+
+- [ ] Zvlášť merať Search Console impressions/kliknutia/CTR/pozíciu, interné landings, reálny form submit, CRM kvalifikáciu a klienta.
+- [ ] `google_organic` klasifikácia nie je ekvivalent všetkých výsledkov GSC; nespočítavať PageView + interné prechody ako nových používateľov.
+- [ ] Normalizovať `/cesta`, `/cesta/`, fragmenty, query a UTM do reportov podľa definovaného kontraktu bez mazania historických raw udalostí.
+- [ ] Consent a právny základ GA4/Pixel/cookieless zodpovedajú skutočnému nasadeniu; testy a recovery leady nie sú produkčné konverzie.
+- [ ] Baseline 28 dní (ak dostupné), porovnanie 7/28/90 dní a podľa URL/kanálu/zariadenia; report uvádza výluky, dátum pokrytia a chýbajúce zdroje.
+- [ ] Prioritizovať: P0 indexovateľnosť a súkromie; P1 relevantnosť/konverzia; P2 obsahové rozšírenie/backlinky. Zmeny testovať izolovane, bez falošných sľubov poradia.
+
+### Migrácia, release, odovzdanie
+
+- [ ] Pred migráciou export aktuálnych URL, GSC, sitemap, canonical, redirects, merania a formulárov; 301 mapovanie každá dôležitá stará URL → najbližší relevantný obsah.
+- [ ] Staging nie je indexovaný; zachovať doménu a vlastníctvo účtov klienta, rollback, schema, UTM a formulárové eventy.
+- [ ] Git diff → test statického HTML, routes, sitemap, JSON-LD, mobil/EN, formulár → kontrolovaný deploy → LIVE HTTP/HTML/CTA/GSC kontrola → wiki release + rollback.
+- [ ] Výstup je auditný report `PASS/FAIL/UNVERIFIED`, prioritný backlog a dátum ďalšej kontroly. Odovzdať klientovi len jeho dáta.
+
+### Chvostíkovo: konkrétny technický regresný kontrakt
+
+- Verejná route `/psia-skolka-kosice` musí byť súčasne v `vite.config.pages.ts`, `public/sitemap.xml` a finálnom statickom HTML; normalizácia URL je v `scripts/finalize-pages.mjs`.
+- Po `bun run build:pages` vykonaj `node scripts/check-seo-indexability.cjs`. Chybové hlásenie nesmie byť ignorované pred merge/deploy.
+- Priebeh, dátum a agregované výsledky reálneho auditu patria do súkromnej wiki `01-Chvostikovo/06-Web-SEO-tracking-a-suhlas.md`, nie do public repozitára.
