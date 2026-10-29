@@ -8,17 +8,17 @@ const result = await build({ entryPoints: [fileURLToPath(new URL('../src/runtime
   b.onResolve({ filter: /^@capacitor\// }, args => ({ path: args.path, namespace: 'fixture' }));
   b.onLoad({ filter: /.*/, namespace: 'fixture' }, () => ({ contents: 'export const Capacitor={isNativePlatform:()=>true};export const registerPlugin=()=>__device.updates;export const App=__device.app;export const PushNotifications=__device.push;', loader: 'js' }));
 } }] });
-function fixture() {
+function fixture(owner='synthetic-owner') {
   const listeners = {}, store = new Map(), calls = [], navigations = [], set = [];
-  let session = { user: { id: 'synthetic-owner' }, access_token: 'synthetic-access' };
+  let session = { user: { id: owner }, access_token: 'synthetic-access' };
   const dom = new EventTarget();
   const ctx = { crypto: webcrypto, TextEncoder, URL, URLSearchParams, AbortSignal, setTimeout, clearTimeout, Event, CustomEvent,
     document: Object.assign(dom, { visibilityState: 'visible', getElementById: () => null }), navigator: { onLine: true },
     localStorage: { getItem: k => store.get(k) || null, setItem: (k, v) => store.set(k, v), removeItem: k => store.delete(k) },
     sessionStorage: { getItem: k => store.get(k) || null, setItem: (k, v) => store.set(k, v) },
     location: { replace: value => navigations.push(value) },
-    fetch: async (url, opts) => { calls.push({ url, ...opts }); return { ok: true }; },
-    __device: { updates: { check: async () => ({ available: false }) }, app: {
+    fetch: async (url, opts) => { calls.push({ url, ...opts }); return { ok: !ctx.__device.failSubscribe }; },
+    __device: { updates: { check: async () => ({ available: false }), openPushMigration:async value=>calls.push({migration:value.owner}) }, app: {
       addListener: async (name, fn) => { listeners[name] = fn; }, getLaunchUrl: async () => ({ url: '' }), minimizeApp: async () => calls.push('minimize')
     }, push: {
       addListener: async (name, fn) => { listeners[name] = fn; }, checkPermissions: async () => ({ receive: 'granted' }),
@@ -77,4 +77,15 @@ test('notification target survives cold attachment and is consumed only once', a
  assert.equal(f.ctx.ChvoNative.takeNotification(),null);
  f.listeners.pushNotificationActionPerformed({notification:{data:{url:'https://evil.example/'}}});assert.equal(f.ctx.ChvoNative.takeNotification(),null);
  assert.equal(f.navigations.length,0,'push cannot navigate to arbitrary URL');
+});
+
+test('Chrome handoff requires confirmed native registration and never transfers credentials or FCM token',async()=>{
+ const owner='12345678-1234-1234-1234-123456789012',f=fixture(owner);await f.ctx.ChvoNative.prepareLaunch();
+ assert.equal(f.ctx.ChvoNative.canMigratePush(),false);
+ await f.ctx.ChvoNative.ensurePush();assert.equal(f.ctx.ChvoNative.canMigratePush(),true);
+ await f.ctx.ChvoNative.openPushMigration();assert.deepEqual(JSON.parse(JSON.stringify(f.calls.find(c=>c?.migration))),{migration:owner});
+ await f.ctx.ChvoNative.togglePush();assert.equal(f.ctx.ChvoNative.canMigratePush(),false);
+ const count=f.calls.filter(c=>c?.migration).length;
+ await assert.rejects(f.ctx.ChvoNative.openPushMigration());assert.equal(f.calls.filter(c=>c?.migration).length,count);
+ const failed=fixture(owner);failed.ctx.__device.failSubscribe=true;await assert.rejects(failed.ctx.ChvoNative.openPushMigration());assert(!failed.calls.some(c=>c?.migration));
 });

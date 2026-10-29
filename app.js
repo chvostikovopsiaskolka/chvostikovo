@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v396';
-const APP_VERSION='2.0.71';
+const APP_BUILD='v397';
+const APP_VERSION='2.0.72';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -1623,10 +1623,13 @@ document.addEventListener('input',event=>{
 for(const event of ['click','focusout','change','reset'])document.addEventListener(event,scheduleCustomerUpdateApply);
 async function pushSubscription(){if(!('serviceWorker'in navigator))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
 function applyPushToggle(){const b=$('pushToggle');if(!b)return;b.classList.toggle('active',!!state.pushEnabled);b.classList.remove('syncing');b.setAttribute('aria-checked',state.pushEnabled?'true':'false')}
+let customerPushMigrationBusyV397=false;
+function customerWebPushMigratedV397(){return !window.ChvoNative?.active&&localStorage.getItem('chvo-web-push-migrated')==='1'}
 let customerPushSyncInFlightV216=null;
 let customerPushSyncLastSuccessV216={key:'',at:0};
 let customerPushSyncLastFailureV216={key:'',at:0};
 async function syncPushSubscriptionV75(sub){
+  if(customerWebPushMigratedV397())return false;
   if(!sub||!state.session?.access_token)throw new Error('Prihlásenie alebo odber upozornení chýba.');
   const key=String(state.session?.user?.id||state.session?.access_token||'')+'|'+String(sub.endpoint||'');
   const now=Date.now();
@@ -1636,6 +1639,7 @@ async function syncPushSubscriptionV75(sub){
   async function send(retry){
     await ensureCustomerSessionV357();
     const token=state.session?.access_token;
+    if(customerWebPushMigratedV397())return false;
     if(!token)throw new Error('Prihlásenie vypršalo.');
     const r=await fetch(PUSH_API,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({audience:'customer',action:'subscribe',subscription:sub.toJSON()})});
     if(!r.ok){
@@ -1668,6 +1672,7 @@ async function completePushPromptV75(){
 }
 async function ensurePushState(force=false){
   if(window.ChvoNative?.active)return window.ChvoNative.ensurePush(force);
+  if(customerWebPushMigratedV397()){state.pushChecked=true;state.pushEnabled=false;return false}
   if(state.pushChecked&&!force)return state.pushEnabled;
   let on=false;
   try{
@@ -1680,12 +1685,14 @@ async function ensurePushState(force=false){
 }
 async function enablePushForCurrentUserV75(){
   if(window.ChvoNative?.active)return window.ChvoNative.enablePush();
+  if(customerPushMigrationBusyV397)throw new Error('Počkajte na dokončenie prepnutia upozornení.');
   if(!('serviceWorker'in navigator)||typeof Notification==='undefined'||!('PushManager'in window))throw new Error('Toto zariadenie nepodporuje push upozornenia.');
   const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();
   if(permission!=='granted')throw new Error('Upozornenia neboli povolené.');
   const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
   if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID)});
-  await syncPushSubscriptionV75(sub);await completePushPromptV75();
+  const migrated=customerWebPushMigratedV397();localStorage.removeItem('chvo-web-push-migrated');
+  try{await syncPushSubscriptionV75(sub);await completePushPromptV75()}catch(error){if(migrated)localStorage.setItem('chvo-web-push-migrated','1');throw error}
   state.pushChecked=true;state.pushEnabled=true;if(state.data)state.data.push_subscription_active=true;
   localStorage.setItem('chvostikovo_push_enabled','1');applyPushToggle();return true;
 }
@@ -3429,6 +3436,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
   async function healPushV71(){
     if(window.ChvoNative?.active)return false;
+    if(customerWebPushMigratedV397())return false;
     if(document.visibilityState==='hidden'||!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
     try{
       const reg=await navigator.serviceWorker.ready;
@@ -3437,6 +3445,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
       if(!sub&&remembered)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID)});
       if(!sub)return false;
       await syncPushSubscriptionV75(sub);
+      if(customerWebPushMigratedV397())return false;
       state.pushChecked=true;state.pushEnabled=true;
       localStorage.setItem('chvostikovo_push_enabled','1');
       applyPushToggle();
@@ -3494,6 +3503,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
   async function actualPushState(){
     if(window.ChvoNative?.active)return window.ChvoNative.ensurePush();
+    if(customerWebPushMigratedV397())return false;
     if(!('serviceWorker' in navigator)||typeof Notification==='undefined')return false;
     if(Notification.permission!=='granted')return false;
     try{const reg=await navigator.serviceWorker.ready;return !!(await reg.pushManager.getSubscription())}catch(_){return false}
@@ -4598,4 +4608,81 @@ function installVaccinationViewerZoomV244(modal){
   document.addEventListener('customer-onboarding-ready-v358',()=>{void openPending();});
   window.addEventListener('pageshow',()=>{void openPending();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void openPending();});
+})();
+
+
+/* v397: explicit, account-checked handoff of this browser's push subscription. */
+(function customerPushMigrationV397(){
+  const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const chrome=/Android/i.test(navigator.userAgent)&&/Chrome\//.test(navigator.userAgent)&&!/(EdgA|SamsungBrowser|OPR|Firefox)/.test(navigator.userAgent);
+  const storageKey='chvo-push-migration-request';
+  let requested=null,busy=false,shownOwner=null;
+  try{
+    const hash=new URLSearchParams(location.hash.slice(1)),owner=hash.get('push-migration');
+    if(chrome&&!window.ChvoNative?.active&&uuid.test(owner||'')){
+      requested={owner,at:Date.now()};sessionStorage.setItem(storageKey,JSON.stringify(requested));
+      hash.delete('push-migration');history.replaceState(history.state,'',location.pathname+location.search+(hash.size?'#'+hash:''));
+    }else requested=JSON.parse(sessionStorage.getItem(storageKey)||'null');
+    if(!requested||!uuid.test(requested.owner)||Date.now()-requested.at>900000||Date.now()<requested.at)requested=null;
+  }catch(_){requested=null}
+  function off(){customerPushSyncLastSuccessV216={key:'',at:0};customerPushSyncLastFailureV216={key:'',at:0};state.pushChecked=true;state.pushEnabled=false;if(state.data)state.data.push_subscription_active=false;localStorage.setItem('chvostikovo_push_enabled','0');applyPushToggle();for(const id of ['settingsPushToggleV37','pushToggleV23']){const b=$(id);b?.classList.remove('active');b?.setAttribute('aria-checked','false')}}
+  function modal(){
+    let el=$('pushMigrationV397');if(el)return el;
+    el=document.createElement('div');el.id='pushMigrationV397';el.className='legal-modal hidden';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-labelledby','pushMigrationTitleV397');
+    el.innerHTML='<div class="legal-card"><h2 id="pushMigrationTitleV397">Upozornenia v novej aplikácii</h2><p id="pushMigrationTextV397" class="legal-body"></p><p id="pushMigrationStatusV397" role="status" aria-live="polite"></p><button id="pushMigrationConfirmV397" class="btn full" type="button"></button><button id="pushMigrationCloseV397" class="btn secondary full" type="button">Neskôr</button></div>';
+    document.body.append(el);$('pushMigrationCloseV397').onclick=()=>{if(!busy){el.classList.add('hidden');$('appView').inert=false}};return el;
+  }
+  async function finish(){
+    if(busy||!requested||!chrome||window.ChvoNative?.active)return;
+    busy=true;customerPushMigrationBusyV397=true;const button=$('pushMigrationConfirmV397');button.disabled=true;$('pushMigrationCloseV397').disabled=true;
+    const owner=requested.owner,previous=localStorage.getItem('chvo-web-push-migrated');let stopped=false,marked=false;
+    try{
+      await ensureCustomerSessionV357();if(state.session?.user?.id!==owner)throw new Error('Prihláste sa do rovnakého účtu ako v novej aplikácii.');
+      const headers={apikey:SUPABASE_KEY,Authorization:'Bearer '+state.session.access_token,'Content-Type':'application/json'};
+      const result=await fetch(SUPABASE_URL+'/functions/v1/customer-native-push',{method:'POST',headers,body:JSON.stringify({action:'migration-status',platform:'android'}),signal:AbortSignal.timeout(10000)});
+      if(!result.ok||!(await result.json()).native_active)throw new Error('Najprv zapnite upozornenia v novej aplikácii. Chrome zostáva zapnutý.');
+      if(state.session?.user?.id!==owner)throw new Error('Účet sa zmenil. Otvorte prechod znova z novej aplikácie.');
+      localStorage.setItem('chvo-web-push-migrated','1');marked=true;
+      await customerPushSyncInFlightV216?.promise?.catch(()=>{});
+      const reg=await navigator.serviceWorker.getRegistration('/'),sub=await reg?.pushManager.getSubscription();
+      if(state.session?.user?.id!==owner)throw new Error('Účet sa zmenil. Otvorte prechod znova.');
+      if(sub){
+        const response=await fetch(PUSH_API,{method:'POST',headers,body:JSON.stringify({audience:'customer',action:'unsubscribe',endpoint:sub.endpoint}),signal:AbortSignal.timeout(10000)});
+        if(!response.ok)throw new Error('Upozornenia Chrome sa nepodarilo vypnúť. Skúste znova.');
+        stopped=true;
+        if(state.session?.user?.id!==owner)throw new Error('Účet sa zmenil. Otvorte prechod znova.');
+        if(!await sub.unsubscribe())throw new Error('Dokončite odpojenie Chrome opätovným stlačením tlačidla.');
+      }else stopped=true;
+      off();requested=null;sessionStorage.removeItem(storageKey);button.classList.add('hidden');$('pushMigrationCloseV397').textContent='Zavrieť';
+      $('pushMigrationStatusV397').textContent='Hotovo. Upozornenia v tomto Chrome sú vypnuté. Vráťte sa do novej aplikácie; ostatné zariadenia zostali nezmenené.';
+    }catch(error){
+      if(marked&&!stopped){if(previous===null)localStorage.removeItem('chvo-web-push-migrated');else localStorage.setItem('chvo-web-push-migrated',previous)}
+      if(stopped&&state.session?.user?.id===owner)off();
+      $('pushMigrationStatusV397').textContent=error.message||'Prechod sa nepodarilo dokončiť. Skúste znova.';
+    }finally{busy=false;customerPushMigrationBusyV397=false;button.disabled=false;$('pushMigrationCloseV397').disabled=false}
+  }
+  function offer(native=false){
+    const el=modal();$('pushMigrationStatusV397').textContent='';$('pushMigrationConfirmV397').classList.remove('hidden');
+    $('pushMigrationTextV397').textContent=native?'Ak ste Chvostíkovo používali cez Chrome, môžete vypnúť jeho pôvodné upozornenia a predísť dvojitému doručovaniu. Upozornenia v novej aplikácii zostanú zapnuté.':'Prepnite upozornenia z tohto Chrome do novej aplikácie. Vypne sa iba tento prehliadač; ostatné zariadenia zostanú nezmenené.';
+    const button=$('pushMigrationConfirmV397');button.textContent=native?'Pokračovať v Chrome':'Prepnúť upozornenia';
+    button.disabled=!native&&state.session?.user?.id!==requested?.owner;
+    if(button.disabled)$('pushMigrationStatusV397').textContent='Prihláste sa v Chrome do rovnakého účtu ako v novej aplikácii.';
+    button.onclick=native?async()=>{button.disabled=true;try{await window.ChvoNative.openPushMigration();el.classList.add('hidden');$('appView').inert=false}catch(error){$('pushMigrationStatusV397').textContent=error.message||'Chrome sa nepodarilo otvoriť.'}finally{button.disabled=false}}:finish;
+    el.classList.remove('hidden');$('appView').inert=true;$('pushMigrationCloseV397').focus();
+  }
+  function refresh(){
+    if(window.ChvoNative?.active){
+      if(!state.session||!window.ChvoNative.canMigratePush?.())return;
+      let button=$('pushMigrationOpenV397');if(!button){button=document.createElement('button');button.id='pushMigrationOpenV397';button.className='btn secondary full';button.textContent='Prepnúť pôvodné upozornenia z Chrome';button.onclick=()=>offer(true);$('menuSettingsGroup')?.querySelector('.customer-menu-rows')?.append(button)}
+      const key='chvo-push-migration-offered:'+state.session.user.id;
+      if(window.__customerOnboardingCompleteV75&&!localStorage.getItem(key)){localStorage.setItem(key,'1');offer(true)}
+      return;
+    }
+    if(!requested||!chrome)return;
+    if(!state.session){let note=$('pushMigrationLoginV397');if(!note){note=document.createElement('p');note.id='pushMigrationLoginV397';note.className='info-box';note.textContent='Na prepnutie upozornení sa prihláste do rovnakého účtu ako v novej aplikácii.';$('authView')?.querySelector('.auth-card')?.prepend(note)}return}
+    $('pushMigrationLoginV397')?.remove();if(!busy&&shownOwner!==state.session.user.id){shownOwner=state.session.user.id;offer();}
+  }
+  addCustomerHook('afterBootstrap',refresh);addCustomerHook('afterSwitchTab',()=>{if(window.ChvoNative?.active)refresh()});
+  document.addEventListener('customer-onboarding-ready-v358',refresh);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh,{once:true});else refresh();
 })();
