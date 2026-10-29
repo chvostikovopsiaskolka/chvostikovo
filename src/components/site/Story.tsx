@@ -20,6 +20,7 @@ import { FriendshipFeature } from "./FriendshipFeature";
 import { EditorialBenefits } from "./EditorialBenefits";
 import careDogFriendsSquare from "@/assets/care-dog-friends-square.webp";
 import careHappyDogSquare from "@/assets/care-happy-dog-square.webp";
+import { CarePhotoSlideshow } from "./CarePhotoSlideshow";
 
 const ABOUT_MORE = [
   "Práve preto vzniklo Chvostíkovo – psia škôlka v Košiciach zameraná na stredné a veľké plemená, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste. Máme dlhoročné skúsenosti s prácou so psami (práca v útulku, starostlivosť o psov v dočasnej opatere, výchova vlastných psíkov). Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.",
@@ -125,18 +126,8 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
           })}
         </div>
         <div className="mt-8 hidden grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-stretch gap-7 sm:grid lg:gap-12">
-          {/* Desktop/tablet: preserve the previously approved single-photo composition. */}
-          <figure className="relative hidden min-h-[390px] overflow-hidden rounded-4xl bg-secondary shadow-card sm:block lg:min-h-[420px]">
-            <img
-              src={CARE[0]!.img}
-              alt={isEnglish ? "Dogs enjoying active time together at Chvostíkovo daycare" : "Psíkovia sa spolu hrajú v psej škôlke Chvostíkovo"}
-              width={900}
-              height={900}
-              loading="lazy"
-              decoding="async"
-              className={`absolute inset-0 h-full w-full object-cover ${CARE[0]!.pos}`}
-            />
-          </figure>
+          {/* Desktop/tablet: rotate the same three photos; mobile keeps its paired rows. */}
+          <CarePhotoSlideshow photos={mobilePhotos} language={language} />
           <div className="flex min-w-0 flex-col justify-between sm:justify-center">
             {items.map((item, i) => (
               <article
