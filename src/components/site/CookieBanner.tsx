@@ -197,7 +197,9 @@ export function CookieBanner() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-forest/50 px-2 pb-2 pt-16 backdrop-blur-[2px] sm:items-center sm:p-6"
+      // On slow mobile GPUs, avoid blurring the entire page behind the cookie modal.
+      // Consent text is the measured LCP element on first visit; retain the same panel and choices.
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-forest/50 px-2 pb-2 pt-16 sm:items-center sm:p-6 sm:backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="cookie-consent-title"
