@@ -77,11 +77,15 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
 
     const speed = window.matchMedia("(max-width: 639px)").matches ? 22 : 28;
     let raf = 0;
-    let last = performance.now();
+    let last = 0;
     let carry = 0;
+    let nearViewport = false;
 
     const step = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 0.1);
+      raf = 0;
+      // Stop DOM scroll writes while off-screen or in background tabs.
+      if (!nearViewport || document.hidden) return;
+      const dt = last === 0 ? 0 : Math.min((now - last) / 1000, 0.1);
       last = now;
 
       if (!paused.current) {
@@ -101,10 +105,50 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
       raf = requestAnimationFrame(step);
     };
 
-    raf = requestAnimationFrame(step);
+    const stop = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      last = 0;
+      carry = 0;
+    };
+
+    const start = () => {
+      if (!raf && nearViewport && !document.hidden) {
+        last = 0; // Do not fast-forward the gallery after returning to the tab.
+        raf = requestAnimationFrame(step);
+      }
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+
+    // Keep the same visual motion when the gallery is visible.
+    // A small root margin starts it before scrolling into view.
+    const observer = typeof IntersectionObserver === "undefined"
+      ? null
+      : new IntersectionObserver(
+          ([entry]) => {
+            nearViewport = Boolean(entry?.isIntersecting);
+            if (nearViewport) start();
+            else stop();
+          },
+          { rootMargin: "160px 0px" },
+        );
+
+    if (observer) observer.observe(el);
+    else {
+      nearViewport = true;
+      start();
+    }
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
-      cancelAnimationFrame(raf);
+      observer?.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      stop();
       clearResumeTimer();
     };
   }, []);
