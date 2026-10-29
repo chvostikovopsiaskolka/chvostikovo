@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Pause, Play } from "lucide-react";
 
-type Photo = { src: string; alt: string; size: number; position?: string };
+type Photo = { src: string; alt: string; size: number; height?: number; position?: string };
 
 /** Desktop Care photos share the existing mobile sources; never run an offscreen timer. */
 export function CarePhotoSlideshow({ photos, language }: { photos: readonly Photo[]; language: "sk" | "en" }) {
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
   const frame = useRef<HTMLElement>(null);
   const count = photos.length;
   const english = language === "en";
@@ -21,7 +21,7 @@ export function CarePhotoSlideshow({ photos, language }: { photos: readonly Phot
     const synchronize = () => {
       clearInterval(timer);
       timer = undefined;
-      if (!paused && inView && desktop.matches && !reducedMotion.matches && !document.hidden) {
+      if (!hovered && !focused && inView && desktop.matches && !reducedMotion.matches && !document.hidden) {
         timer = setInterval(() => setActive(index => (index + 1) % count), 5000);
       }
     };
@@ -40,13 +40,19 @@ export function CarePhotoSlideshow({ photos, language }: { photos: readonly Phot
       reducedMotion.removeEventListener("change", synchronize);
       document.removeEventListener("visibilitychange", synchronize);
     };
-  }, [count, paused]);
+  }, [count, hovered, focused]);
 
   return (
     <figure
       ref={frame}
       aria-label={english ? "Photos of care at Chvostíkovo" : "Fotografie starostlivosti v Chvostíkove"}
-      className="care-photo-slideshow relative hidden min-h-[390px] overflow-hidden rounded-4xl bg-secondary shadow-card sm:block lg:min-h-[420px]"
+      aria-description={english ? "Photos rotate every five seconds. Focus or hover over the photo to hold it." : "Fotografie sa striedajú každých päť sekúnd. Zaostrením alebo podržaním kurzora fotografiu pozastavíte."}
+      tabIndex={0}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      className="care-photo-slideshow relative hidden min-h-[390px] overflow-hidden rounded-4xl bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-forest sm:block lg:min-h-[420px]"
     >
       {photos.map((photo, index) => (
         <img
@@ -55,35 +61,13 @@ export function CarePhotoSlideshow({ photos, language }: { photos: readonly Phot
           alt={index === active ? photo.alt : ""}
           aria-hidden={index !== active}
           width={photo.size}
-          height={photo.size}
+          height={photo.height ?? photo.size}
           loading="lazy"
           decoding="async"
           data-active={index === active}
           className={`absolute inset-0 size-full object-cover transition-opacity duration-500 motion-reduce:transition-none ${photo.position ?? "object-center"} ${index === active ? "opacity-100" : "opacity-0"}`}
         />
       ))}
-      <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-gradient-to-t from-black/55 to-transparent px-3 pb-3 pt-8">
-        {photos.map((photo, index) => (
-          <button
-            key={photo.src}
-            type="button"
-            aria-label={english ? `Show photo ${index + 1} of ${count}` : `Zobraziť fotografiu ${index + 1} z ${count}`}
-            aria-pressed={active === index}
-            onClick={() => { setActive(index); setPaused(true); }}
-            className="grid size-11 place-items-center rounded-full text-white hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white"
-          >
-            <span aria-hidden className={`h-2.5 rounded-full ${active === index ? "w-6 bg-white" : "w-2.5 bg-white/55"}`} />
-          </button>
-        ))}
-        <button
-          type="button"
-          aria-label={english ? (paused ? "Resume photo rotation" : "Pause photo rotation") : (paused ? "Spustiť striedanie fotografií" : "Pozastaviť striedanie fotografií")}
-          onClick={() => setPaused(value => !value)}
-          className="grid size-11 place-items-center rounded-full text-white hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white motion-reduce:hidden"
-        >
-          {paused ? <Play aria-hidden className="size-4" /> : <Pause aria-hidden className="size-4" />}
-        </button>
-      </div>
     </figure>
   );
 }
