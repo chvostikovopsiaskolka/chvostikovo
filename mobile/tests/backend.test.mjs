@@ -10,9 +10,9 @@ const result = await build({ entryPoints: [fileURLToPath(new URL('../backend/cus
 function fixture() {
   let handler; const calls = [];
   const ctx = { Request, Response, URLSearchParams, Uint8Array, TextEncoder, AbortSignal, Date, JSON, console,
-    __fixture: { denied: false, auth: true, firebase: false },
+    __fixture: { denied: false, auth: true, firebase: false, devices: false },
     Deno: { env: { get: key => key === 'FIREBASE_SERVICE_ACCOUNT_JSON' ? ctx.__fixture.firebase ? JSON.stringify({ project_id: 'synthetic-project', client_email: 'synthetic@example.invalid', private_key: 'synthetic' }) : '' : key === 'SUPABASE_URL' ? 'https://synthetic.invalid' : 'synthetic-service' }, serve: fn => { handler = fn; } },
-    fetch: async (url, opts) => { calls.push({ url, opts }); return String(url).endsWith('/auth/v1/user') ? new Response(JSON.stringify({ id: 'synthetic-user' }), { status: ctx.__fixture.auth ? 200 : 401 }) : new Response(null, { status: 204 }); }
+    fetch: async (url, opts) => { calls.push({ url, opts }); return String(url).endsWith('/auth/v1/user') ? new Response(JSON.stringify({ id: 'synthetic-user' }), { status: ctx.__fixture.auth ? 200 : 401 }) : String(url).includes('portal_native_push_devices?')&&(!opts.method||opts.method==='GET') ? new Response(JSON.stringify(ctx.__fixture.devices?[{updated_at:'2026-10-29'}]:[]),{status:200}) : new Response(null, { status: 204 }); }
   };
   vm.runInNewContext(result.outputFiles[0].text, ctx);
   const request = (body, authorization = 'Bearer synthetic') => handler(new Request('https://synthetic.invalid/native', { method: 'POST', headers: authorization ? { authorization } : {}, body: JSON.stringify(body) }));
@@ -33,4 +33,17 @@ test('unconfigured Firebase does not claim subscription success; unsubscribe rem
   let call = f.calls.at(-1); assert.equal(JSON.parse(call.opts.body).user_id, 'synthetic-user');
   assert.equal((await f.request({ ...data, action: 'unsubscribe' })).status, 200);
   call = f.calls.at(-1); assert.match(call.url, /user_id=eq.synthetic-user/); assert.equal(call.opts.method, 'DELETE');
+});
+
+test('migration status is read-only, authenticated and scoped to the server verified owner', async () => {
+ const f=fixture(),data={action:'migration-status',platform:'android',user_id:'other-owner'};
+ assert.equal((await f.request(data,'')).status,401);
+ assert.equal((await (await f.request(data)).json()).native_active,false);
+ f.ctx.__fixture.firebase=true;
+ assert.equal((await (await f.request(data)).json()).native_active,false);
+ f.ctx.__fixture.devices=true;
+ const response=await f.request(data);assert.equal(response.status,200);assert.equal((await response.json()).native_active,true);
+ const call=f.calls.at(-1);assert.match(call.url,/user_id=eq.synthetic-user&platform=eq.android&select=updated_at&limit=1/);assert(!call.opts.method||call.opts.method==='GET');
+ assert.equal((await f.request({...data,platform:'ios'})).status,400);
+ f.ctx.__fixture.denied=true;assert.equal((await f.request(data)).status,403);
 });

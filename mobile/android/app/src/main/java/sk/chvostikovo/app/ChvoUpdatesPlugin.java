@@ -13,6 +13,21 @@ import com.google.android.play.core.install.model.UpdateAvailability;
 @CapacitorPlugin(name = "ChvoUpdates")
 public class ChvoUpdatesPlugin extends Plugin {
     @PluginMethod
+    public void openPushMigration(PluginCall call) {
+        String owner = call.getString("owner", "");
+        if (!owner.matches("(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            call.reject("Invalid account");
+            return;
+        }
+        Uri url = Uri.parse("https://app.chvostikovo.sk/").buildUpon()
+            .fragment("push-migration=" + owner).build();
+        Intent intent = new Intent(Intent.ACTION_VIEW, url);
+        intent.setPackage("com.android.chrome");
+        try { getActivity().startActivity(intent); call.resolve(); }
+        catch (Exception unavailable) { call.reject("Chrome sa nepodarilo otvoriť. Skontrolujte, či je nainštalovaný."); }
+    }
+
+    @PluginMethod
     public void check(PluginCall call) {
         AppUpdateManagerFactory.create(getContext()).getAppUpdateInfo()
             .addOnSuccessListener(info -> {

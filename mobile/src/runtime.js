@@ -70,6 +70,12 @@ if (Capacitor.isNativePlatform()) {
   ]).catch(report);
   window.ChvoNative = {
     active: true,
+    canMigratePush() { return !!registeredOwner && registeredOwner === host?.getSession()?.user?.id && localStorage.getItem('chvo-native-push-disabled') !== '1'; },
+    async openPushMigration() {
+      const owner = host?.getSession()?.user?.id;
+      if (!owner || !await this.ensurePush() || registeredOwner !== owner || host?.getSession()?.user?.id !== owner) throw new Error('Najprv zapnite upozornenia v novej aplikácii.');
+      await Updates.openPushMigration({ owner });
+    },
     takeNotification() { const value = pendingNotification; pendingNotification = null; return value; },
     attach(value) { host = value; },
     async prepareLaunch() {
