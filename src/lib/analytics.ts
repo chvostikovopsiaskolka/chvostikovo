@@ -72,13 +72,17 @@ export function trackMarketingInteraction(
     source,
     page_path: pagePath(),
   };
+  const gaParams = {
+    cta_source: source,
+    page_path: pagePath(),
+  };
 
   if (kind === "phone_click") {
     trackMetaStandard("Contact", {
       ...params,
       content_name: "phone_click",
     });
-    pushAnalyticsEvent("phone_click", params);
+    pushAnalyticsEvent("phone_click", gaParams);
     return;
   }
 
@@ -87,7 +91,7 @@ export function trackMarketingInteraction(
       ...params,
       content_name: "informacie",
     });
-    pushAnalyticsEvent("inquiry_cta_click", params);
+    pushAnalyticsEvent("inquiry_cta_click", gaParams);
     return;
   }
 
@@ -96,7 +100,7 @@ export function trackMarketingInteraction(
       ...params,
       content_name: "daycare_info",
     });
-    pushAnalyticsEvent("hero_learn_more", params);
+    pushAnalyticsEvent("hero_learn_more", gaParams);
     return;
   }
 
@@ -105,7 +109,7 @@ export function trackMarketingInteraction(
       ...params,
       content_name: "daycare_spaces",
     });
-    pushAnalyticsEvent("explore_daycare", params);
+    pushAnalyticsEvent("explore_daycare", gaParams);
     return;
   }
 
@@ -114,7 +118,7 @@ export function trackMarketingInteraction(
       ...params,
       content_name: "starostlivost",
     });
-    pushAnalyticsEvent("view_care", params);
+    pushAnalyticsEvent("view_care", gaParams);
     return;
   }
 
@@ -122,7 +126,7 @@ export function trackMarketingInteraction(
     ...params,
     content_name: "cennik",
   });
-  pushAnalyticsEvent("view_pricing", params);
+  pushAnalyticsEvent("view_pricing", gaParams);
 }
 
 export function trackMetaFormConversion(

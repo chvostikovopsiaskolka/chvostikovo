@@ -25,6 +25,8 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Restore product AVIF images
         run: node scripts/restore-cori-image.mjs
+      - name: GA4 acquisition attribution regression
+        run: bun scripts/check-ga4-attribution.mjs
       - name: Critical form regression checks
         run: bun run check:critical-forms
       - name: Smoke-test live form backend
