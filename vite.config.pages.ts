@@ -15,6 +15,7 @@ export default defineConfig({
     },
     pages: [
       { path: "/" },
+      { path: "/psia-skolka-kosice" },
       { path: "/cookies" },
       { path: "/ochrana-osobnych-udajov" },
       { path: "/udaje-prevadzkovatela" },

@@ -7,6 +7,9 @@ on:
       - "src/lib/**"
       - "supabase/functions/website-landing-event/**"
       - "scripts/**"
+      - "public/sitemap.xml"
+      - "vite.config.pages.ts"
+      - "SEO_CHECKLIST.md"
       - ".github/workflows/check-form-funnel.yml"
 permissions:
   contents: read
@@ -28,3 +31,5 @@ jobs:
         run: bun run check:types
       - name: Build static pages
         run: bun run build:pages
+      - name: Verify SEO route, sitemap and HTML
+        run: node scripts/check-seo-indexability.cjs
