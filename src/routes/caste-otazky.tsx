@@ -5,7 +5,7 @@ import { Collapse } from "@/components/site/Collapse";
 import { FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
-const PAGE_URL = `${BASE_URL}/caste-otazky`;
+const PAGE_URL = `${BASE_URL}/caste-otazky/`;
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Časté otázky | Psia škôlka Chvostíkovo Košice";
 const description =

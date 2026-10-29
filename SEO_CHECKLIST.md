@@ -2,6 +2,25 @@
 
 Tento checklist používame ako praktický štandard pri tvorbe a rozširovaní webov. Neobsahuje SEO úpravy, ktoré sa robia iba „pre audit“, ale veci s reálnym významom pre indexáciu, organickú návštevnosť, používateľskú skúsenosť a konverzie.
 
+## Hodnotenie SEO stavu X/10 (kontrolný scorecard)
+
+Hodnotenie sa udeľuje **konkrétnemu webu ku konkrétnemu dátumu**, nie abstraktnému checklistu. Každé z nasledujúcich 10 kritérií má váhu **1 bod**: **PASS = 1**, **PARTIAL = 0,5**, **FAIL = 0**, **NEOVERENÉ = 0** do času získania dôkazu. Vždy uviesť dôkaz, zdroj, dátum a otvorený krok. Nevymýšľať si Google Lighthouse/PageSpeed ani GSC pozície a nezamieňať CI/deploy úspech za LIVE HTTP overenie.
+
+| # | Kritérium (max. 1 bod) | Overenie |
+| --- | --- | --- |
+| 1 | Dopyty a reálny search intent | GSC queries, stránky, lokalita, zámer |
+| 2 | Title, meta description, H1 | Unikátne tagy pre dôležité URL, ideálne prvotný HTML |
+| 3 | Obsah a vhodné CTA | Relevantnosť, pravdivé služby, formulár, dôvera |
+| 4 | Indexovateľnosť a sitemap/prerender | HTML/HTTP, robots, sitemap, predvykreslené business routes |
+| 5 | Canonical, redirecty a jazykové alternatívy | URL varianty, Google-selected canonical, SK/EN |
+| 6 | Interné prepojenie | Logické kontextové odkazy, bez nefunkčných ciest |
+| 7 | Local SEO a štruktúrované údaje | Lokálna adresa/hodiny, GBP, schema |
+| 8 | Meranie SEO výsledkov | Aktuálny GSC export, rozlíšené first-party eventy a leady |
+| 9 | Mobilná UX a Core Web Vitals | Fyzický mobil + PSI/CrUX: LCP, INP, CLS |
+| 10 | LIVE verifikácia a regresné testy | Prvotný HTML/HTTP, end-to-end formulár, desktop/iOS/Android podľa dostupnosti |
+
+**Aktuálny príklad Chvostíkovo – 29.10.2026:** pred FAQ opravou audit evidoval **6,5/10**: kritériá 1, 2, 3, 6, 7, 8 = 6 bodov; kritérium 5 = 0,5; kritérium 4 = 0 (FAQ chýba v sitemap a prerender konfigurácii); kritériá 9 a 10 = 0 (nezávislé meranie / LIVE test nedostupné). Po tejto izolovanej oprave možno dať **7/10 až po úspešnom CI build+SEO teste** (kritérium 4 = 0,5, kým nie je potvrdený HTTP/HTML LIVE). Toto nie je hodnotenie 10/10 po deployi. Rozpis, dôkazy a otvorené úlohy sú v súkromnom Bellaris SEO audite Chvostíkova. Pri ďalšom webe vyplň scorecard nanovo.
+
 ## 1. Search intent a štruktúra webu
 
 - Pred vytvorením stránky určiť, aký dopyt a zámer má pokrývať.
