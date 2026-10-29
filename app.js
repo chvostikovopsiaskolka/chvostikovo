@@ -1686,7 +1686,6 @@ async function ensurePushState(force=false){
 }
 async function enablePushForCurrentUserV75(){
   if(window.ChvoNative?.active)return window.ChvoNative.enablePush();
-  if(customerPushMigrationBusyV397)throw new Error('Počkajte na dokončenie prepnutia upozornení.');
   if(!('serviceWorker'in navigator)||typeof Notification==='undefined'||!('PushManager'in window))throw new Error('Toto zariadenie nepodporuje push upozornenia.');
   const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();
   if(permission!=='granted')throw new Error('Upozornenia neboli povolené.');

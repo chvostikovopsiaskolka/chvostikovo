@@ -35,15 +35,7 @@ test('unconfigured Firebase does not claim subscription success; unsubscribe rem
   call = f.calls.at(-1); assert.match(call.url, /user_id=eq.synthetic-user/); assert.equal(call.opts.method, 'DELETE');
 });
 
-test('migration status is read-only, authenticated and scoped to the server verified owner', async () => {
- const f=fixture(),data={action:'migration-status',platform:'android',user_id:'other-owner'};
- assert.equal((await f.request(data,'')).status,401);
- assert.equal((await (await f.request(data)).json()).native_active,false);
- f.ctx.__fixture.firebase=true;
- assert.equal((await (await f.request(data)).json()).native_active,false);
- f.ctx.__fixture.devices=true;
- const response=await f.request(data);assert.equal(response.status,200);assert.equal((await response.json()).native_active,true);
- const call=f.calls.at(-1);assert.match(call.url,/user_id=eq.synthetic-user&platform=eq.android&select=updated_at&limit=1/);assert(!call.opts.method||call.opts.method==='GET');
- assert.equal((await f.request({...data,platform:'ios'})).status,400);
- f.ctx.__fixture.denied=true;assert.equal((await f.request(data)).status,403);
+test('removed migration status cannot be used; subscription actions retain their validation',async()=>{
+ const f=fixture();assert.equal((await f.request({action:'migration-status',platform:'android'})).status,400);
+ assert(!f.calls.some(c=>c.url.includes('portal_native_push_devices')));
 });

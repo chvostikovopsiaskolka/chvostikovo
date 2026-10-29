@@ -79,13 +79,13 @@ test('notification target survives cold attachment and is consumed only once', a
  assert.equal(f.navigations.length,0,'push cannot navigate to arbitrary URL');
 });
 
-test('Chrome handoff requires confirmed native registration and never transfers credentials or FCM token',async()=>{
- const owner='12345678-1234-1234-1234-123456789012',f=fixture(owner);await f.ctx.ChvoNative.prepareLaunch();
- assert.equal(f.ctx.ChvoNative.canMigratePush(),false);
- await f.ctx.ChvoNative.ensurePush();assert.equal(f.ctx.ChvoNative.canMigratePush(),true);
- await f.ctx.ChvoNative.openPushMigration();assert.deepEqual(JSON.parse(JSON.stringify(f.calls.find(c=>c?.migration))),{migration:owner});
- await f.ctx.ChvoNative.togglePush();assert.equal(f.ctx.ChvoNative.canMigratePush(),false);
- const count=f.calls.filter(c=>c?.migration).length;
- await assert.rejects(f.ctx.ChvoNative.openPushMigration());assert.equal(f.calls.filter(c=>c?.migration).length,count);
- const failed=fixture(owner);failed.ctx.__device.failSubscribe=true;await assert.rejects(failed.ctx.ChvoNative.openPushMigration());assert(!failed.calls.some(c=>c?.migration));
+test('new Android installation prompts an existing account once; enabled and explicitly disabled push is respected',async()=>{
+ const f=fixture('existing-owner');await f.ctx.ChvoNative.prepareLaunch();
+ assert.equal(f.ctx.ChvoNative.needsPushPrompt(),true,'PWA answer does not suppress new native installation prompt');
+ assert.equal(f.ctx.ChvoNative.openPushMigration,undefined);
+ f.ctx.ChvoNative.markPushPromptAnswered('other-account');assert.equal(f.ctx.ChvoNative.needsPushPrompt(),true);
+ f.ctx.ChvoNative.markPushPromptAnswered('existing-owner');assert.equal(f.ctx.ChvoNative.needsPushPrompt(),false,'skip acknowledged for this account and installation');
+ const enabled=fixture();await enabled.ctx.ChvoNative.ensurePush();assert.equal(enabled.ctx.ChvoNative.needsPushPrompt(),false);
+ const disabled=fixture();disabled.store.set('chvo-native-push-disabled','1');assert.equal(disabled.ctx.ChvoNative.needsPushPrompt(),false);
+ const fresh=fixture();assert.equal(fresh.ctx.ChvoNative.needsPushPrompt(),true,'different installation has its own choice');
 });
