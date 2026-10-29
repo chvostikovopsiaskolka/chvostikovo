@@ -16,15 +16,6 @@ Deno.serve(async (req: Request) => {
     const limited = await securityLimitV336(req, 'push_user', user.id, base, key, cors); if (limited) return limited;
     const raw = await req.text(); if (raw.length > 8192) return reply({ error: 'Too large' }, 413);
     const body = JSON.parse(raw), token = body.token;
-    if (body.action === 'migration-status') {
-      if (body.platform !== 'android') return reply({ error: 'Invalid request' }, 400);
-      if (!firebaseAccount()) return reply({ ok: true, native_active: false });
-      const response = await fetch(base + '/rest/v1/portal_native_push_devices?user_id=eq.' + encodeURIComponent(user.id) + '&platform=eq.android&select=updated_at&limit=1', { headers: { apikey: key, Authorization: 'Bearer ' + key }, signal: AbortSignal.timeout(5000) });
-      if (!response.ok) throw new Error('Device status unavailable');
-      const rows = await response.json();
-      return reply({ ok: true, native_active: Array.isArray(rows) && rows.length > 0 });
-    }
-
     if (!['subscribe', 'unsubscribe'].includes(body.action) || body.platform !== 'android' || typeof token !== 'string' || !/^[A-Za-z0-9_:\-]{20,4096}$/.test(token)) return reply({ error: 'Invalid request' }, 400);
     if (body.action === 'subscribe' && !firebaseAccount()) return reply({ error: 'Native push not configured' }, 503);
     const unsubscribe = body.action === 'unsubscribe';
