@@ -37,6 +37,8 @@
       if(top)return closeButton(top)?customerOverview:null;
       return state.activeTab==='booking'?null:customerOverview;
     }
+    const authBack=document.getElementById('authBackV403');
+    if(visible(authBack)&&!visible(document.getElementById('loading')))return ()=>authBack.click();
     const layers=[...document.querySelectorAll(layerSelector)].filter(visible);
     layers.sort((a,b)=>(parseInt(getComputedStyle(a).zIndex)||0)-(parseInt(getComputedStyle(b).zIndex)||0));
     const top=layers.at(-1);
