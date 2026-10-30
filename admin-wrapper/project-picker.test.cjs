@@ -18,6 +18,7 @@ assert(moduleSource.includes(".from('bp_staff')"),'Server RLS staff check requir
 assert(moduleSource.includes(".eq('is_test',false)"),'Test CRM entries excluded');
 assert(!/\.from\('bp_(inquiries|projects|milestones)'\)\.update\(/.test(moduleSource),'Bellaris phone MVP must remain read-only');
 assert(!moduleSource.includes('tlhcqwsluyqpywymjoxn'),'Bellaris must not use Chvostikovo Supabase');
+assert(moduleSource.includes('persistSession:false'),'Bellaris JWT must not persist on Chvostikovo origin');
 
 async function simulate(href) {
   let fetched=0, registered=0, navigated='', written='', openedBellaris=0;
