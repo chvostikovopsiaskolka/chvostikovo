@@ -5,10 +5,10 @@
 #bellarisDashboard button,#bellarisDashboard input{font:inherit}
 #bellarisDashboard button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 #bellarisDashboard button:focus-visible,#bellarisDashboard input:focus-visible{outline:3px solid #218b91;outline-offset:2px}
-#bellarisDashboard .bm-shell{width:min(620px,100%);min-height:100dvh;margin:0 auto;padding:calc(env(safe-area-inset-top) + 10px) 17px calc(env(safe-area-inset-bottom) + 106px)}
-#bellarisDashboard .bm-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:3px 0 26px}
+#bellarisDashboard .bm-shell{width:min(620px,100%);min-height:100dvh;margin:0 auto;padding:calc(env(safe-area-inset-top) + 20px) 17px calc(env(safe-area-inset-bottom) + 122px)}
+#bellarisDashboard .bm-header{display:flex;align-items:center;gap:10px;margin:8px 0 18px}
 #bellarisDashboard .bm-header-brand{display:flex;flex-direction:column}
-#bellarisDashboard .bm-logo{display:block;width:140px;height:58px;object-fit:contain;object-position:left center}
+#bellarisDashboard .bm-logo{display:block;width:140px;height:66px;object-fit:contain;object-position:left center}
 #bellarisDashboard .bm-header-brand>span{font-size:11px;font-weight:700;color:#69878b;margin-top:-7px}
 #bellarisDashboard .bm-header-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:3px}
 #bellarisDashboard .bm-mini{background:transparent;color:#536f76;border:0;border-radius:10px;font-size:12px;font-weight:700;padding:11px 7px;min-height:44px}
@@ -43,8 +43,8 @@
 #bellarisDashboard .bm-coming p,#bellarisDashboard .bm-muted{font-size:13px;color:#6c858a}
 #bellarisDashboard .bm-coming>span{font-size:11px;font-weight:800;color:#3b9292}
 #bellarisDashboard .bm-empty{color:#71878c;font-size:13px;margin:14px 0}
-#bellarisDashboard .bm-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(620px,100%);display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-top:1px solid #e2eaea;padding:8px 10px calc(env(safe-area-inset-bottom) + 8px);box-shadow:0 -7px 22px #0b303009;z-index:100005}
-#bellarisDashboard .bm-nav button{background:transparent;border:0;padding:13px 3px;min-height:44px;color:#6f878d;font-size:12px;font-weight:750;border-radius:12px}
+#bellarisDashboard .bm-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(620px,100%);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:#fff;border-top:1px solid #e2eaea;padding:8px 10px calc(env(safe-area-inset-bottom) + 8px);box-shadow:0 -7px 22px #0b303009;z-index:100005}
+#bellarisDashboard .bm-nav button{background:transparent;border:0;padding:13px 3px;min-height:44px;color:#6f878d;font-size:10px;font-weight:750;border-radius:12px}
 #bellarisDashboard .bm-nav button.active{color:#0c706f;background:#e8f6f4}
 #bellarisDashboard .bm-subback{border:0;background:transparent;padding:8px 3px 18px;color:#198a8e;font-weight:700}
 #bellarisDashboard .bm-detail h1{font-size:24px;overflow-wrap:anywhere}
@@ -68,3 +68,24 @@
 @media(max-width:370px){#bellarisDashboard .bm-shell{padding-left:12px;padding-right:12px}#bellarisDashboard .bm-mini{padding-left:4px;padding-right:4px}#bellarisDashboard .bm-kpi{padding:13px 11px}}
 @media(min-width:700px){#bellarisDashboard .bm-kpis{grid-template-columns:repeat(3,1fr)}}
 @media(prefers-reduced-motion:reduce){#bellarisDashboard .bm-spinner{animation:none}}
+
+#bellarisDashboard .bm-login{margin:4vh auto 0}
+#bellarisDashboard .bm-login-back{display:block;width:100%;margin-top:14px;border:1px solid #cfdddd;background:#fff;border-radius:12px;min-height:46px;color:#536f76;font-weight:700}
+#bellarisDashboard .bm-remember{display:flex;align-items:center;gap:10px;font-weight:600;font-size:12px;color:#496b70}
+#bellarisDashboard .bm-remember input{width:18px;height:18px;min-height:18px;accent-color:#117b80;flex:none}
+#bellarisDashboard .bm-menu{padding:4px 17px}
+#bellarisDashboard .bm-menu button{display:flex;align-items:center;justify-content:space-between;width:100%;padding:17px 2px;min-height:58px;border:0;border-bottom:1px solid #e7eeee;background:transparent;text-align:left;color:#17393d;font-weight:750}
+#bellarisDashboard .bm-menu button:last-child{border:0;color:#a23b3b}
+#bellarisDashboard .bm-traffic-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px}
+#bellarisDashboard .bm-traffic-kpis .bm-kpi{min-height:110px}
+#bellarisDashboard .bm-traffic-intro{font-size:12px;color:#70858c;margin:10px 0 16px}
+#bellarisDashboard .bm-chart{display:block;width:100%;height:auto;margin:12px 0}
+#bellarisDashboard .bm-range{font:inherit;font-size:12px;border:1px solid #d4e0e3;border-radius:11px;background:#fff;color:#284b52;padding:9px}
+#bellarisDashboard .bm-traffic-row{padding:12px 0;border-bottom:1px solid #edf1f1}
+#bellarisDashboard .bm-traffic-row:last-child{border-bottom:0}
+#bellarisDashboard .bm-traffic-row>div{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:11px}
+#bellarisDashboard .bm-traffic-row>div>span{overflow-wrap:anywhere}
+#bellarisDashboard .bm-traffic-row strong{white-space:nowrap;font-size:14px}
+#bellarisDashboard .bm-traffic-bar{height:8px;width:100%;display:block;background:#edf2f3;border-radius:7px;overflow:hidden}
+#bellarisDashboard .bm-traffic-bar span{height:100%;display:block;background:#ed995e;border-radius:7px}
+@media(max-width:370px){#bellarisDashboard .bm-nav button{font-size:9px;padding:12px 2px}#bellarisDashboard .bm-kpi{min-height:105px}}
