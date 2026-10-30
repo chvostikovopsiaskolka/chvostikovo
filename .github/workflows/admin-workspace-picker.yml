@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - "admin-wrapper/project-picker-20261030"
+      - "admin-wrapper-production"
+      - "codex/bellaris-consultation-*"
     paths:
       - "admin-wrapper/**"
       - "admin-wrapper/project-picker.test.cjs"
