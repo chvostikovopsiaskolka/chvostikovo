@@ -33,7 +33,7 @@ export function projectProgress(projectId, milestones) {
 const state = {
   root: null, onBack: null, client: null, user: null, busy: false,
   inquiries: [], projects: [], milestones: [], view: 'overview',
-  selectedId: null, error: '', ready: false, traffic: [], trafficReady: false, range: 30, remember: false
+  selectedId: null, error: '', ready: false, traffic: [], trafficReady: false, range: 30, remember: false, expandedCta: null
 };
 
 function bellarisSessionStorage() {
@@ -186,9 +186,16 @@ export function trafficSummary(rows, days=30) {
   const ctas=selected.filter(x=>x.event_type==='cta_click').reduce((v,x)=>v+numeric(x.total),0);
   const forms=selected.filter(x=>x.event_type==='lead_submit').reduce((v,x)=>v+numeric(x.total),0);
   const byPage=new Map(),bySource=new Map(),byDay=new Map(),byCta=new Map();
+  const byCtaOrigin=new Map();
   for(const x of selected.filter(x=>x.event_type==='cta_click')) {
     const key=x.event_label||'iné';
-    byCta.set(key,(byCta.get(key)||0)+numeric(x.total));
+    const amount=numeric(x.total);
+    byCta.set(key,(byCta.get(key)||0)+amount);
+    // Page and source are stored as grouped first-party event dimensions.
+    // There is no UTM in this daily schema, so do not claim campaign-level attribution.
+    const channel=trafficLabels[x.source_channel]?x.source_channel:'other';
+    const detailKey=JSON.stringify([key,x.path||'/',channel]);
+    byCtaOrigin.set(detailKey,(byCtaOrigin.get(detailKey)||0)+amount);
   }
   for(const x of selected.filter(x=>x.event_type==='page_view')) {
     const n=numeric(x.total);
@@ -200,6 +207,7 @@ export function trafficSummary(rows, days=30) {
   return {total,ctas,forms,byPage:[...byPage].sort((a,b)=>b[1]-a[1]),
     bySource:[...bySource].sort((a,b)=>b[1]-a[1]),
     byCta:[...byCta].sort((a,b)=>b[1]-a[1]),
+    byCtaOrigin:[...byCtaOrigin].map(([key,total])=>{const [label,path,channel]=JSON.parse(key);return {label,path,channel,total};}).sort((a,b)=>b.total-a.total),
     byDay:[...byDay].sort((a,b)=>a[0].localeCompare(b[0]))};
 }
 function lineChart(points) {
@@ -225,6 +233,19 @@ function trafficRows(items,type,maxEntries=6){
     '</span><strong>'+n.toLocaleString('sk-SK')+'</strong></div><span class="bm-traffic-bar"><span style="width:'+
     Math.min(100,Math.round(n/max*100))+'%"></span></span></div>').join('');
 }
+function trafficCtaDetails(data) {
+  if(!data.byCta.length)return '<p class="bm-empty">Zatiaľ nie sú namerané kliknutia na tlačidlá.</p>';
+  const max=Math.max(1,...data.byCta.map(x=>x[1]));
+  return data.byCta.slice(0,10).map(([label,count])=>{
+    const expanded=state.expandedCta===label;
+    const breakdown=data.byCtaOrigin.filter(x=>x.label===label);
+    const rows=breakdown.map(x=>'<div class="bm-cta-source"><span><strong>'+escapeText(trafficLabels[x.channel]||x.channel)+'</strong><small>'+escapeText(x.path||'/')+'</small></span><b>'+x.total.toLocaleString('sk-SK')+'</b></div>').join('');
+    return '<article class="bm-cta-item"><button type="button" class="bm-cta-toggle" data-bm="cta-detail" data-label="'+escapeText(encodeURIComponent(label))+'" aria-expanded="'+expanded+'"><span><strong>'+escapeText(label)+'</strong><small>Rozkliknúť pôvod kliknutí</small></span><b>'+count.toLocaleString('sk-SK')+' '+(expanded?'⌃':'⌄')+'</b></button>'+
+      '<span class="bm-traffic-bar"><span style="width:'+Math.min(100,Math.round(count/max*100))+'%"></span></span>'+
+      (expanded?'<div class="bm-cta-details"><strong>Odkiaľ prišli kliknutia</strong>'+rows+
+        '<p class="bm-traffic-intro">Zdroje podľa dostupnej atribúcie pri kliku a podstránky. Ide o udalosti, nie unikátne osoby. Detail kampane/UTM zatiaľ táto denná evidencia neobsahuje.</p></div>':'')+'</article>';
+  }).join('');
+}
 function renderTrafficPreview() {
   const data=trafficSummary(state.traffic,30);
   return '<section class="bm-section"><div class="bm-heading"><h2>Návštevnosť webu</h2>'+
@@ -248,7 +269,7 @@ function renderTrafficFull() {
     (state.range===30?'selected':'')+'>30 dní</option></select></div>'+
     (data.total ? lineChart(data.byDay):'<p class="bm-empty">Za zvolené obdobie zatiaľ nemáme merania.</p>')+'</section>'+
     '<section class="bm-section"><h2>Stránky</h2>'+trafficRows(data.byPage,'path')+'</section>'+
-    '<section class="bm-section"><h2>Kliknutia na tlačidlá</h2>'+trafficRows(data.byCta,'cta',10)+'</section>'+ 
+    '<section class="bm-section"><h2>Kliknutia na tlačidlá</h2>'+trafficCtaDetails(data)+'</section>'+ 
     '<section class="bm-section"><h2>Odkiaľ prichádzajú</h2><p class="bm-traffic-intro">Zdroj podľa UTM alebo domény odkazu, nie osobná identifikácia.</p>'+
     trafficRows(data.bySource,'source')+'</section>'+
     '<section class="bm-section bm-coming"><h2>Google Search Console a GA4</h2>'+
@@ -291,7 +312,7 @@ async function refresh() {
     try {
       const after=new Date(Date.now()-31*864e5).toISOString().slice(0,10);
       const t=await state.client.from('bp_web_traffic_daily')
-        .select('day,path,source_channel,event_type,total').gte('day',after).limit(5000);
+        .select('day,path,source_channel,event_type,event_label,total').gte('day',after).limit(5000);
       state.traffic=t.error?[]:(t.data||[]);
       state.trafficReady=!t.error;
     } catch {state.traffic=[];state.trafficReady=false;}
@@ -337,12 +358,21 @@ async function handleClick(event) {
   if(action==='logout'){state.busy=true;try{await state.client.auth.signOut();state.user=null;state.view='overview';renderLogin();}finally{state.busy=false;}return;}
   if(action==='refresh'){await refresh();return;}
   if(['overview','inquiries','projects','traffic','menu'].includes(action)){state.view=action;render();return;}
+  if(action==='cta-detail'&&state.view==='traffic'){
+    let label='';
+    try {label=decodeURIComponent(button.dataset.label||'');} catch {return;}
+    const current=trafficSummary(state.traffic,state.range);
+    if(!current.byCta.some(item=>item[0]===label))return;
+    state.expandedCta=state.expandedCta===label?null:label;
+    render();return;
+  }
   if(action==='inquiry'||action==='project'){state.view=action;state.selectedId=button.dataset.id;render();}
 }
 function handleChange(event) {
   if(event.target?.id==='bmRange'){
     const next=Number(event.target.value);
     state.range=next===7?7:30;
+    state.expandedCta=null;
     render();
   }
 }
