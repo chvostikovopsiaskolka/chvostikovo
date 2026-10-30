@@ -98,6 +98,7 @@ html:has(#projectPicker:not([hidden])),body:has(#projectPicker:not([hidden])){ba
     </button>
   </section>
 </main>
+<div id="bellarisDashboard" hidden aria-label="Bellaris mobilný admin"></div>
 <div id="bellarisSplash" hidden role="status" aria-label="Otvára sa Bellaris"><div><img class="workspace-logo-bellaris" src="https://bellaris-client-portal.pages.dev/assets/bellaris-logo-light-background.svg" alt="Bellaris" onerror="this.style.display='none';this.nextElementSibling.hidden=false"><strong class="workspace-name" hidden>BELLARIS</strong><p>Otvára sa Bellaris…</p></div></div>
 <div id="boot" class="app-boot loading-screen loading-concept hidden" role="status" aria-label="Načítavanie aplikácie" aria-live="polite"><svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><defs><symbol id="ci-loading-paw" viewBox="0 0 64 64"><ellipse cx="32" cy="39" rx="16" ry="13"/><circle cx="14" cy="23" r="7"/><circle cx="27" cy="14" r="7"/><circle cx="41" cy="14" r="7"/><circle cx="52" cy="25" r="7"/></symbol></defs></svg><div class="concept-paws" aria-hidden="true"><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg></div><svg class="concept-watermark" aria-hidden="true"><use href="#ci-loading-paw"/></svg><div class="concept-center"><img class="concept-brand" src="https://app.chvostikovo.sk/loading-brand.png" alt="chvostíkovo" fetchpriority="high"><span class="concept-subtitle">Psia škôlka</span><div class="concept-orbit" aria-hidden="true"><svg class="concept-ring" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="loadingArcGradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e9983f"/><stop offset="1" stop-color="#dc8fc3"/></linearGradient></defs><circle class="concept-ring-track" cx="60" cy="60" r="56"/><circle class="concept-ring-arc" cx="60" cy="60" r="56" pathLength="100"/></svg><span class="concept-paw"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ci-loading-paw" width="64" height="64" transform="translate(-1 2.5)"/></svg></span></div><p id="bootText" role="alert"></p></div></div><script id="admin-boot-motion-v322">/* Isolated, frame-synchronised loading indicator; no application data access. */
 (() => {
@@ -138,7 +139,23 @@ html:has(#projectPicker:not([hidden])),body:has(#projectPicker:not([hidden])){ba
       const picker = document.getElementById('projectPicker');
       const boot = document.getElementById('boot');
       const bellarisSplash = document.getElementById('bellarisSplash');
-      const target = 'https://bellaris-client-portal.pages.dev/';
+      const dashboard = document.getElementById('bellarisDashboard');
+      const returnToPicker = () => {
+        dashboard.hidden = true;
+        bellarisSplash.hidden = true;
+        picker.hidden = false;
+        started = false;
+      };
+      const loadBellarisStyle = () => new Promise((resolve, reject) => {
+        if (document.getElementById('bellarisMobileStyle')) { resolve(); return; }
+        const link = document.createElement('link');
+        link.id = 'bellarisMobileStyle';
+        link.rel = 'stylesheet';
+        link.href = '/bellaris-admin.css?v=20261030-v1';
+        link.onload = resolve;
+        link.onerror = () => reject(new Error('Bellaris stylesheet unavailable'));
+        document.head.appendChild(link);
+      });
       let started = false;
       async function loadChvostikovo() {
         if (started) return;
@@ -157,13 +174,27 @@ html:has(#projectPicker:not([hidden])),body:has(#projectPicker:not([hidden])){ba
         }
       }
       document.getElementById('chooseChvostikovo').addEventListener('click', loadChvostikovo);
-      document.getElementById('chooseBellaris').addEventListener('click', () => {
+      document.getElementById('chooseBellaris').addEventListener('click', async () => {
         if (started) return;
         started = true;
         picker.hidden = true;
         bellarisSplash.hidden = false;
-        // No cross-project login or token sharing; Bellaris owns its own session.
-        window.location.assign(target);
+        try {
+          // Bellaris is rendered inside this PWA. Its data remains in the
+          // separate Bellaris Supabase, protected by staff auth and RLS.
+          await loadBellarisStyle();
+          const {openBellarisMobile} = await import('/bellaris-admin.mjs?v=20261030-v1');
+          await openBellarisMobile(dashboard, returnToPicker);
+          bellarisSplash.hidden = true;
+        } catch {
+          bellarisSplash.hidden = true;
+          dashboard.hidden = false;
+          dashboard.innerHTML = '<div style="padding:34px 22px;text-align:center">' +
+            '<h2>Bellaris sa nepodarilo otvoriť</h2>' +
+            '<p>Skontrolujte pripojenie a skúste to znova.</p>' +
+            '<button id="bellarisRetry" type="button" style="padding:14px;border-radius:12px">Späť na výber</button></div>';
+          document.getElementById('bellarisRetry')?.addEventListener('click',returnToPicker);
+        }
       });
       const u = new URL(window.location.href);
       const direct = u.searchParams.get('workspace') === 'chvostikovo'
