@@ -60,9 +60,46 @@
 #boot.in-app .concept-orbit>.concept-paw>svg{width:100%;height:100%}
 @media(prefers-reduced-motion:reduce){.concept-orbit>.concept-paw{will-change:auto}}
 
-#boot{padding:0!important;z-index:99999!important;width:auto!important;height:auto!important;min-height:0!important;inset:0!important}html:has(#boot),body:has(#boot){background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}#bootText{font-size:14px;color:#991b1b;max-width:300px}</style></head>
+#boot{padding:0!important;z-index:99999!important;width:auto!important;height:auto!important;min-height:0!important;inset:0!important}html:has(#boot),body:has(#boot){background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}#bootText{font-size:14px;color:#991b1b;max-width:300px}</style><style id="admin-workspace-picker-v1">
+#projectPicker,#bellarisSplash{position:fixed;inset:0;z-index:100001;background:#fff;color:#243047;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:auto;padding:calc(22px + env(safe-area-inset-top)) 20px calc(26px + env(safe-area-inset-bottom));}
+#projectPicker[hidden],#bellarisSplash[hidden]{display:none!important}
+#projectPicker{display:flex;align-items:center;justify-content:center}
+.workspace-inner{width:min(440px,100%);margin:auto;display:grid;gap:14px}
+.workspace-heading{text-align:center;font-size:25px;line-height:1.2;letter-spacing:-.025em;margin:0 0 3px;color:#1f2937}
+.workspace-hint{text-align:center;margin:0 0 19px;color:#6b7280;font-size:14px;line-height:1.55}
+.workspace-card{width:100%;min-height:136px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:23px 20px;border:1px solid #e5e7eb;background:#fff;border-radius:24px;box-shadow:0 7px 24px rgba(27,40,59,.075);text-align:left;color:#243047;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.workspace-card:focus-visible{outline:3px solid #f97316;outline-offset:3px}
+.workspace-card:active{transform:scale(.99)}
+.workspace-card .workspace-brand{display:grid;gap:9px;min-width:0}
+.workspace-logo-chvo{display:block;max-width:174px;width:70%;height:auto;max-height:72px;object-fit:contain;object-position:left center}
+.workspace-logo-bellaris{display:block;max-width:190px;width:100%;height:60px;object-fit:contain;object-position:left center}
+.workspace-name{font-size:17px;font-weight:800;letter-spacing:.01em}
+.workspace-description{font-size:12px;color:#6b7280;font-weight:500;line-height:1.35}
+.workspace-chevron{font-size:24px;color:#94a3b8;flex:none}
+#bellarisSplash{display:grid;place-items:center;text-align:center}
+#bellarisSplash .workspace-logo-bellaris{width:min(240px,70vw);max-width:none;height:auto;max-height:110px;margin:auto}
+#bellarisSplash p{margin-top:22px;color:#667085;font-size:13px}
+html:has(#projectPicker:not([hidden])),body:has(#projectPicker:not([hidden])){background:#fff!important}
+@media(max-width:370px){.workspace-card{min-height:120px;padding:18px 15px}.workspace-logo-chvo{max-width:150px}.workspace-logo-bellaris{max-width:165px}}
+@media(prefers-reduced-motion:reduce){.workspace-card:active{transform:none}}
+</style></head>
 <body>
-<div id="boot" class="app-boot loading-screen loading-concept" role="status" aria-label="Načítavanie aplikácie" aria-live="polite"><svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><defs><symbol id="ci-loading-paw" viewBox="0 0 64 64"><ellipse cx="32" cy="39" rx="16" ry="13"/><circle cx="14" cy="23" r="7"/><circle cx="27" cy="14" r="7"/><circle cx="41" cy="14" r="7"/><circle cx="52" cy="25" r="7"/></symbol></defs></svg><div class="concept-paws" aria-hidden="true"><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg></div><svg class="concept-watermark" aria-hidden="true"><use href="#ci-loading-paw"/></svg><div class="concept-center"><img class="concept-brand" src="https://app.chvostikovo.sk/loading-brand.png" alt="chvostíkovo" fetchpriority="high"><span class="concept-subtitle">Psia škôlka</span><div class="concept-orbit" aria-hidden="true"><svg class="concept-ring" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="loadingArcGradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e9983f"/><stop offset="1" stop-color="#dc8fc3"/></linearGradient></defs><circle class="concept-ring-track" cx="60" cy="60" r="56"/><circle class="concept-ring-arc" cx="60" cy="60" r="56" pathLength="100"/></svg><span class="concept-paw"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ci-loading-paw" width="64" height="64" transform="translate(-1 2.5)"/></svg></span></div><p id="bootText" role="alert"></p></div></div><script id="admin-boot-motion-v322">/* Isolated, frame-synchronised loading indicator; no application data access. */
+<main id="projectPicker" aria-label="Výber pracovného priestoru">
+  <section class="workspace-inner">
+    <h1 class="workspace-heading">Vyberte pracovný priestor</h1>
+    <p class="workspace-hint">Otvorte administráciu, s ktorou chcete pracovať.</p>
+    <button id="chooseChvostikovo" class="workspace-card" type="button" aria-label="Otvoriť Chvostíkovo">
+      <span class="workspace-brand"><img class="workspace-logo-chvo" src="https://app.chvostikovo.sk/loading-brand.png" alt="Chvostíkovo" loading="eager"><span class="workspace-description">Psia škôlka · administrácia</span></span>
+      <span class="workspace-chevron" aria-hidden="true">›</span>
+    </button>
+    <button id="chooseBellaris" class="workspace-card" type="button" aria-label="Otvoriť Bellaris">
+      <span class="workspace-brand"><img class="workspace-logo-bellaris" src="https://bellaris-client-portal.pages.dev/assets/bellaris-logo-light-background.svg" alt="Bellaris" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.hidden=false"><span class="workspace-name" hidden>BELLARIS</span><span class="workspace-description">Projekty a CRM · samostatné prihlásenie</span></span>
+      <span class="workspace-chevron" aria-hidden="true">›</span>
+    </button>
+  </section>
+</main>
+<div id="bellarisSplash" hidden role="status" aria-label="Otvára sa Bellaris"><div><img class="workspace-logo-bellaris" src="https://bellaris-client-portal.pages.dev/assets/bellaris-logo-light-background.svg" alt="Bellaris" onerror="this.style.display='none';this.nextElementSibling.hidden=false"><strong class="workspace-name" hidden>BELLARIS</strong><p>Otvára sa Bellaris…</p></div></div>
+<div id="boot" class="app-boot loading-screen loading-concept hidden" role="status" aria-label="Načítavanie aplikácie" aria-live="polite"><svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><defs><symbol id="ci-loading-paw" viewBox="0 0 64 64"><ellipse cx="32" cy="39" rx="16" ry="13"/><circle cx="14" cy="23" r="7"/><circle cx="27" cy="14" r="7"/><circle cx="41" cy="14" r="7"/><circle cx="52" cy="25" r="7"/></symbol></defs></svg><div class="concept-paws" aria-hidden="true"><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg><svg><use href="#ci-loading-paw"/></svg></div><svg class="concept-watermark" aria-hidden="true"><use href="#ci-loading-paw"/></svg><div class="concept-center"><img class="concept-brand" src="https://app.chvostikovo.sk/loading-brand.png" alt="chvostíkovo" fetchpriority="high"><span class="concept-subtitle">Psia škôlka</span><div class="concept-orbit" aria-hidden="true"><svg class="concept-ring" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="loadingArcGradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e9983f"/><stop offset="1" stop-color="#dc8fc3"/></linearGradient></defs><circle class="concept-ring-track" cx="60" cy="60" r="56"/><circle class="concept-ring-arc" cx="60" cy="60" r="56" pathLength="100"/></svg><span class="concept-paw"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ci-loading-paw" width="64" height="64" transform="translate(-1 2.5)"/></svg></span></div><p id="bootText" role="alert"></p></div></div><script id="admin-boot-motion-v322">/* Isolated, frame-synchronised loading indicator; no application data access. */
 (() => {
   'use strict';
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -94,19 +131,46 @@
 })();
 
 </script>
-  <script>
+  <script id="admin-workspace-controller-v1">
+    // Keep the existing PWA worker, notification routes and Chvostikovo bootstrap.
     if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js?v=20261014-admin-pwa-v111').catch(()=>{});
-    (async()=>{
-      try{
-        const r=await fetch('https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-frontend?v=20261014-admin-pwa-v111',{cache:'no-store'});
-        if(!r.ok)throw new Error('server '+r.status);
-        const h=await r.text();
-        if(!h.includes('Chvostíkovo'))throw new Error('neplatná odpoveď');
-        document.open();document.write(h);document.close();
-      }catch(e){
-        const t=document.getElementById('bootText');
-        if(t)t.textContent='Appka sa nenačítala: '+(e.message||e);
+    (() => {
+      const picker = document.getElementById('projectPicker');
+      const boot = document.getElementById('boot');
+      const bellarisSplash = document.getElementById('bellarisSplash');
+      const target = 'https://bellaris-client-portal.pages.dev/';
+      let started = false;
+      async function loadChvostikovo() {
+        if (started) return;
+        started = true;
+        picker.hidden = true;
+        boot.classList.remove('hidden');
+        try {
+          const r = await fetch('https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-frontend?v=20261014-admin-pwa-v111', {cache:'no-store'});
+          if (!r.ok) throw new Error('server ' + r.status);
+          const h = await r.text();
+          if (!h.includes('Chvostíkovo')) throw new Error('neplatná odpoveď');
+          document.open();document.write(h);document.close();
+        } catch (e) {
+          const t = document.getElementById('bootText');
+          if (t) t.textContent = 'Appka sa nenačítala: ' + (e.message || e);
+        }
       }
+      document.getElementById('chooseChvostikovo').addEventListener('click', loadChvostikovo);
+      document.getElementById('chooseBellaris').addEventListener('click', () => {
+        if (started) return;
+        started = true;
+        picker.hidden = true;
+        bellarisSplash.hidden = false;
+        // No cross-project login or token sharing; Bellaris owns its own session.
+        window.location.assign(target);
+      });
+      const u = new URL(window.location.href);
+      const direct = u.searchParams.get('workspace') === 'chvostikovo'
+        || (u.search && !u.searchParams.has('workspace'))
+        || Boolean(u.hash);
+      // Notification deep links and explicit legacy admin links skip the chooser.
+      if (direct) void loadChvostikovo();
     })();
   </script>
 </body>

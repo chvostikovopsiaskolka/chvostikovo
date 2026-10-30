@@ -1,0 +1,23 @@
+name: Admin wrapper workspace picker
+on:
+  pull_request:
+    paths:
+      - "admin-wrapper/index.html"
+      - "admin-wrapper/project-picker.test.cjs"
+      - ".github/workflows/admin-workspace-picker.yml"
+  push:
+    branches:
+      - "admin-wrapper/project-picker-20261030"
+    paths:
+      - "admin-wrapper/index.html"
+      - "admin-wrapper/project-picker.test.cjs"
+      - ".github/workflows/admin-workspace-picker.yml"
+permissions:
+  contents: read
+jobs:
+  workspace-picker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Isolated admin boot and routing checks
+        run: node admin-wrapper/project-picker.test.cjs
