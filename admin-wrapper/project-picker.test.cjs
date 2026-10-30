@@ -12,7 +12,7 @@ assert(html.includes('id="bellarisDashboard"'));
 assert(html.includes('class="app-boot loading-screen loading-concept hidden"'));
 assert(html.includes('20261014-admin-pwa-v111'));
 assert(!originalScript.includes('location.assign('),'Bellaris must not redirect to Safari');
-assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261030-v1')"));
+assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261030-v2')"));
 assert(css.includes('#bellarisDashboard'));
 assert(html.includes('html:has(#boot:not(.hidden))'),'Hidden loader must not leave a cream iOS underlay');
 assert(html.includes('html:has(#bellarisDashboard:not([hidden]))'),'Bellaris safe-area should match its screen');
@@ -70,7 +70,7 @@ async function simulate(href) {
     })
   };
   const testScript=originalScript.replace(
-    "await import('/bellaris-admin.mjs?v=20261030-v1')",
+    "await import('/bellaris-admin.mjs?v=20261030-v2')",
     'await window.testImportBellaris()'
   );
   assert.notEqual(testScript,originalScript,'Test import mock inserted');
@@ -175,5 +175,17 @@ async function simulate(href) {
   assert.equal(summary.total,10);
   assert.equal(summary.ctas,3);
   assert.equal(summary.forms,1);
+
+  const breakdown=pure.trafficSummary([
+    {day:new Date().toISOString().slice(0,10),event_type:'cta_click',event_label:'Zistiť viac',path:'/lead',source_channel:'meta_paid',total:3},
+    {day:new Date().toISOString().slice(0,10),event_type:'cta_click',event_label:'Zistiť viac',path:'/lead',source_channel:'google_organic',total:2},
+    {day:new Date().toISOString().slice(0,10),event_type:'cta_click',event_label:'Zistiť viac',path:'/',source_channel:'direct',total:1}
+  ],7);
+  assert.equal(breakdown.ctas,6);
+  assert.equal(breakdown.byCta[0][1],6);
+  assert.equal(breakdown.byCtaOrigin.length,3);
+  assert.deepEqual(breakdown.byCtaOrigin.map(x=>x.total),[3,2,1]);
+  assert(moduleSource.includes('data-bm="cta-detail"'),'Tapping CTA should open provenance detail');
+  assert(moduleSource.includes("event_label,total"),'Daily CTA labels must be requested in traffic query');
   console.log('PASS: inline Bellaris dashboard, Chvo spinner, push routes, RLS guard, escaped fields, no writes');
 })().catch(err=>{console.error(err);process.exitCode=1});
