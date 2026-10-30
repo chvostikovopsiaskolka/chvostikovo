@@ -35,6 +35,25 @@ assert(moduleSource.includes('← Výber projektu'),'Project chooser belongs ins
 assert(moduleSource.includes('Odoslané záujmy'),'Traffic analytics must distinguish forms from page views');
 assert(!moduleSource.includes('<button class="bm-mini" data-bm="logout"'),'Logout should not be in header');
 
+assert(css.includes('#bellarisDashboard{height:100dvh;min-height:0;bottom:auto'),
+  'Bellaris viewport must anchor to dynamic height, not an overscrolled body');
+assert(css.includes('#bellarisDashboard .bm-nav{position:absolute;bottom:0}'),
+  'Dock must stay at bottom of the Bellaris viewport');
+assert(css.includes('.bm-login-form label.bm-remember{'),
+  'Remember-login label must override the generic grid label with flex row');
+assert(css.includes('.bm-login-form label.bm-remember input{'),
+  'Checkbox width and height must not inherit full-width text input rules');
+assert(moduleSource.includes('>Zapamätať prihlásenie</span>'),
+  'Remember-me copy should fit one line, without promising password storage');
+assert(moduleSource.includes('trafficSourceDonut(data.bySource)'),
+  'Overview must show the existing measured traffic sources');
+assert(moduleSource.includes('Podiel zobrazení podľa nameraného zdroja'),
+  'Pie chart must not suggest unique visitors or precise attribution');
+assert(moduleSource.includes('if(!total)return'),
+  'Zero-measurement source chart must not invent traffic');
+assert(!moduleSource.includes('Web Push API'), 'Push is outside this isolated visual correction');
+
+
 async function simulate(href) {
   let fetched=0, registered=0, navigated='', written='', openedBellaris=0;
   let back=null;
