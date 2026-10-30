@@ -185,7 +185,11 @@ export function trafficSummary(rows, days=30) {
   const total=selected.filter(x=>x.event_type==='page_view').reduce((v,x)=>v+numeric(x.total),0);
   const ctas=selected.filter(x=>x.event_type==='cta_click').reduce((v,x)=>v+numeric(x.total),0);
   const forms=selected.filter(x=>x.event_type==='lead_submit').reduce((v,x)=>v+numeric(x.total),0);
-  const byPage=new Map(),bySource=new Map(),byDay=new Map();
+  const byPage=new Map(),bySource=new Map(),byDay=new Map(),byCta=new Map();
+  for(const x of selected.filter(x=>x.event_type==='cta_click')) {
+    const key=x.event_label||'iné';
+    byCta.set(key,(byCta.get(key)||0)+numeric(x.total));
+  }
   for(const x of selected.filter(x=>x.event_type==='page_view')) {
     const n=numeric(x.total);
     byPage.set(x.path,(byPage.get(x.path)||0)+n);
@@ -195,6 +199,7 @@ export function trafficSummary(rows, days=30) {
   }
   return {total,ctas,forms,byPage:[...byPage].sort((a,b)=>b[1]-a[1]),
     bySource:[...bySource].sort((a,b)=>b[1]-a[1]),
+    byCta:[...byCta].sort((a,b)=>b[1]-a[1]),
     byDay:[...byDay].sort((a,b)=>a[0].localeCompare(b[0]))};
 }
 function lineChart(points) {
@@ -243,6 +248,7 @@ function renderTrafficFull() {
     (state.range===30?'selected':'')+'>30 dní</option></select></div>'+
     (data.total ? lineChart(data.byDay):'<p class="bm-empty">Za zvolené obdobie zatiaľ nemáme merania.</p>')+'</section>'+
     '<section class="bm-section"><h2>Stránky</h2>'+trafficRows(data.byPage,'path')+'</section>'+
+    '<section class="bm-section"><h2>Kliknutia na tlačidlá</h2>'+trafficRows(data.byCta,'cta',10)+'</section>'+ 
     '<section class="bm-section"><h2>Odkiaľ prichádzajú</h2><p class="bm-traffic-intro">Zdroj podľa UTM alebo domény odkazu, nie osobná identifikácia.</p>'+
     trafficRows(data.bySource,'source')+'</section>'+
     '<section class="bm-section bm-coming"><h2>Google Search Console a GA4</h2>'+
