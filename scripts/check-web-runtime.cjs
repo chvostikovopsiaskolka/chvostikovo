@@ -3,8 +3,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 // Run in CI, without submitting forms or emitting analytics traffic.
-const base = process.env.WEB_BASE_URL || 'https://chvostikovo.sk';
-const urls = [new URL('/', base), new URL('/psia-skolka-kosice/', base), new URL('/en/dog-daycare-kosice/', base)];
+const bellaris = process.env.WEB_SITE === 'bellaris';
+const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
+const urls = (bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/en/dog-daycare-kosice/']).map(route => new URL(route, base));
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -39,11 +40,11 @@ const failures = [];
           if (/This page didn.t load|Stránku sa nepodarilo načítať|Something went wrong on our end/i.test(text)) throw new Error('Root error boundary replaced the website');
           if (!await page.locator('h1').count()) throw new Error('Missing page heading');
           // Cookie preferences are installed by a client effect, so this also verifies hydration.
-          const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all/i }).first();
+          const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné/i }).first();
           await cookieButton.waitFor({ timeout: 10000 });
           await cookieButton.click();
           await page.waitForTimeout(300);
-          if (/This page didn.t load/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
+          if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
           if (errors.length) throw new Error(errors.join('; '));
           results.push({ engine, restricted, route: url.pathname, status: 'PASS' });
           console.log(`PASS ${label}`);

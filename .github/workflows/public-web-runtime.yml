@@ -23,6 +23,10 @@ jobs:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ github.event_name == 'pull_request' && fromJSON('["chvostikovo"]') || fromJSON('["chvostikovo","bellaris"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -44,11 +48,20 @@ jobs:
       - name: Verify hydrated pages in Chromium and Safari WebKit
         env:
           NODE_PATH: /tmp/web-runtime/node_modules
-          WEB_BASE_URL: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173' || 'https://chvostikovo.sk' }}
+          WEB_SITE: ${{ matrix.site }}
+          WEB_BASE_URL: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173' || (matrix.site == 'bellaris' && 'https://bellaris.sk' || 'https://chvostikovo.sk') }}
+        run: node scripts/check-web-runtime.cjs
+      - name: Record current production baseline before release
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          NODE_PATH: /tmp/web-runtime/node_modules
+          WEB_BASE_URL: https://chvostikovo.sk
+          RUNTIME_REPORT_DIR: runtime-report/live-baseline
         run: node scripts/check-web-runtime.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: public-web-runtime-${{ github.run_id }}
+          name: public-web-runtime-${{ matrix.site }}-${{ github.run_id }}
           path: runtime-report
           retention-days: 7
