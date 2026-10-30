@@ -179,7 +179,14 @@ async function refresh() {
   }finally{state.busy=false;}
 }
 async function loadPublicConfig() {
-  if(window.BELLARIS_PORTAL_CONFIG?.publishableKey)return window.BELLARIS_PORTAL_CONFIG;
+  // Always validate the Bellaris project reference, even if a config already exists.
+  if (window.BELLARIS_PORTAL_CONFIG?.publishableKey) {
+    const existing=window.BELLARIS_PORTAL_CONFIG;
+    if (existing.supabaseUrl === EXPECTED_API &&
+        (existing.publishableKey.startsWith('sb_publishable_') || existing.publishableKey.startsWith('eyJ')))
+      return existing;
+    throw new Error('Invalid Bellaris public configuration');
+  }
   await new Promise((resolve,reject)=>{
     const script=document.createElement('script');
     script.src=CONFIG_ORIGIN+'/config.js';
@@ -238,8 +245,9 @@ export async function openBellarisMobile(root,onBack) {
       const cfg=await loadPublicConfig();
       const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2.57.0');
       state.client=createClient(cfg.supabaseUrl,cfg.publishableKey,{
-        auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,
-          storageKey:'bellaris-mobile-admin-v1'}
+        // Never persist a Bellaris access token on Chvostikovo's origin.
+        // RLS protects server-side data; a separate Bellaris login is required on PWA restart.
+        auth:{persistSession:false,autoRefreshToken:true,detectSessionInUrl:false}
       });
     }catch {
       state.user=null;
