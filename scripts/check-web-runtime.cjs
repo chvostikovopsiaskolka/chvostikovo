@@ -40,7 +40,7 @@ const failures = [];
           if (/This page didn.t load|Stránku sa nepodarilo načítať|Something went wrong on our end/i.test(text)) throw new Error('Root error boundary replaced the website');
           if (!await page.locator('h1').count()) throw new Error('Missing page heading');
           // Cookie preferences are installed by a client effect, so this also verifies hydration.
-          const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné/i }).first();
+          const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
           await cookieButton.waitFor({ timeout: 10000 });
           await cookieButton.click();
           await page.waitForTimeout(300);
