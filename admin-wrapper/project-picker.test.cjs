@@ -23,7 +23,17 @@ assert(moduleSource.includes(".from('bp_staff')"),'Server RLS staff check requir
 assert(moduleSource.includes(".eq('is_test',false)"),'Test CRM entries excluded');
 assert(!/\.from\('bp_(inquiries|projects|milestones)'\)\.update\(/.test(moduleSource),'Bellaris phone MVP must remain read-only');
 assert(!moduleSource.includes('tlhcqwsluyqpywymjoxn'),'Bellaris must not use Chvostikovo Supabase');
-assert(moduleSource.includes('persistSession:false'),'Bellaris JWT must not persist on Chvostikovo origin');
+assert(moduleSource.includes('bellaris-staff-session-v1'),'Bellaris remembered login must use a separate storage key');
+assert(moduleSource.includes('bellarisSessionStorage()'),'Session selection must be opt-in');
+assert(moduleSource.includes("state.remember=form.get('remember')==='on'"),'Remember-me choice honored');
+assert(!moduleSource.includes('Interná administrácia'),'Remove extra header label');
+assert(!moduleSource.includes('netestovacích'),'Do not show internal test filtering in public admin copy');
+assert(!moduleSource.includes('Mimo testovacích'),'Do not show internal filters on cards');
+assert(moduleSource.includes("nav('menu','Menu')"),'Settings menu must be in bottom navigation');
+assert(moduleSource.includes("nav('traffic','Návštevnosť')"),'Traffic must have a dashboard tab');
+assert(moduleSource.includes('← Výber projektu'),'Project chooser belongs inside login form');
+assert(moduleSource.includes('Odoslané záujmy'),'Traffic analytics must distinguish forms from page views');
+assert(!moduleSource.includes('<button class="bm-mini" data-bm="logout"'),'Logout should not be in header');
 
 async function simulate(href) {
   let fetched=0, registered=0, navigated='', written='', openedBellaris=0;
@@ -157,5 +167,13 @@ async function simulate(href) {
     {project_id:'one',weight:2,completed:true},{project_id:'one',weight:2,completed:false},
     {project_id:'two',weight:9,completed:true}]),50);
   assert.equal(pure.projectProgress('missing',[]),0);
+  const summary=pure.trafficSummary([
+    {day:new Date().toISOString().slice(0,10),event_type:'page_view',path:'/',source_channel:'direct',total:10},
+    {day:new Date().toISOString().slice(0,10),event_type:'cta_click',path:'/',source_channel:'direct',total:3},
+    {day:new Date().toISOString().slice(0,10),event_type:'lead_submit',path:'/',source_channel:'direct',total:1}
+  ],7);
+  assert.equal(summary.total,10);
+  assert.equal(summary.ctas,3);
+  assert.equal(summary.forms,1);
   console.log('PASS: inline Bellaris dashboard, Chvo spinner, push routes, RLS guard, escaped fields, no writes');
 })().catch(err=>{console.error(err);process.exitCode=1});
