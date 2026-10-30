@@ -16,6 +16,8 @@ const failures = [];
     const browser = await browserType.launch();
     for (const restricted of [false, true]) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+      // Each URL must start without a saved choice from the preceding URL.
+      if (!restricted) await context.addInitScript(() => { localStorage.clear(); sessionStorage.clear(); });
       await context.route('**/*', route => {
         const request = route.request();
         const url = new URL(request.url());
