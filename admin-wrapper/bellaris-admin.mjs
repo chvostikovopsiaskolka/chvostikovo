@@ -193,7 +193,7 @@ export function trafficSummary(rows, days=30) {
     byCta.set(key,(byCta.get(key)||0)+amount);
     // Page and source are stored as grouped first-party event dimensions.
     // There is no UTM in this daily schema, so do not claim campaign-level attribution.
-    const channel=trafficLabels[x.source_channel]?x.source_channel:'other';
+    const channel=String(x.source_channel||'direct').slice(0,80);
     const detailKey=JSON.stringify([key,x.path||'/',channel]);
     byCtaOrigin.set(detailKey,(byCtaOrigin.get(detailKey)||0)+amount);
   }
