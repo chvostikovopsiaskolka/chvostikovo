@@ -9,7 +9,8 @@ on:
     workflows: ['Deploy to GitHub Pages']
     types: [completed]
   schedule:
-    - cron: '7,22,37,52 * * * *'
+    # Once daily at 07:17 UTC; this is a browser test, with no AI calls.
+    - cron: '17 7 * * *'
 
 permissions:
   contents: read
