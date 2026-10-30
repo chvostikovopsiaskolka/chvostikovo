@@ -866,7 +866,7 @@ html,body{overscroll-behavior:none}
 :is(.booking-picker-v37,.legal-body,.legal-card,.message-thread,.customer-bulletin-dialog-v229,.design-selected-days,.guide-card){overscroll-behavior:contain}
 #authView.auth-shell{min-height:100dvh;align-content:center;align-items:safe center}
 #authView[data-auth-mode=signup]{align-content:start;align-items:start}
-#authView .auth-brand img{width:min(180px,65%);height:auto;filter:drop-shadow(0 3px 6px #9954200a)}
+#authView .auth-brand img{width:min(160px,65%);height:auto;filter:drop-shadow(0 3px 6px #9954200a)}
 #authView .auth-brand{margin-bottom:14px}
 .customer-design #bookingPickerV37 .booking-picker-head-v37{margin-bottom:10px!important;min-height:0!important;padding-bottom:0!important}
 .customer-design #bookingPickerV37 #designMyBookings{margin-top:0!important;margin-bottom:10px!important}
