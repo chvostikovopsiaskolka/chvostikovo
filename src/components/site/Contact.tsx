@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { MapPin, Mail, Phone, Clock, Instagram, Facebook } from "lucide-react";
 import logo from "@/assets/logo.png";
+import bellarisFooterLogo from "@/assets/bellaris-footer-credit.svg";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { LongForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
@@ -215,6 +217,21 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
               <span aria-hidden="true">·</span>
               <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Cookie settings" : "Nastavenia cookies"}</button>
             </nav>
+          </div>
+          <div className="mt-5 flex justify-center border-t border-cream/15 pt-4">
+            <a
+              href="https://bellaris.sk/?utm_source=chvostikovo&utm_medium=referral&utm_campaign=footer_credit"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                void trackCookielessInteraction("nav_click", "footer_bellaris_credit", language).catch(() => {});
+              }}
+              aria-label={isEnglish ? "Website by Bellaris — opens in a new tab" : "Web vytvoril Bellaris — otvorí sa v novej karte"}
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 py-1 text-cream/70 transition-colors hover:text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
+            >
+              <span className="text-xs">{isEnglish ? "Website by" : "Web vytvoril"}</span>
+              <img src={bellarisFooterLogo} width={105} height={40} loading="lazy" alt="Bellaris" className="h-10 w-auto object-contain" />
+            </a>
           </div>
         </div>
       </footer>
