@@ -16,7 +16,9 @@ self.addEventListener('push',event=>{
 });
 self.addEventListener('notificationclick',event=>{
   event.notification.close();
-  const targetUrl=new URL(event.notification.data?.url||'/',self.location.origin).href;
+  const requestedUrl=event.notification.data?.url||'/';
+  // Default admin push must open Chvostikovo directly, not the workspace picker.
+  const targetUrl=new URL(requestedUrl==='/'?'/?workspace=chvostikovo':requestedUrl,self.location.origin).href;
   event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(windows=>{
     const existing=windows.find(client=>client.url.startsWith(self.location.origin));
     if(existing){existing.focus();return existing.navigate(targetUrl)}
