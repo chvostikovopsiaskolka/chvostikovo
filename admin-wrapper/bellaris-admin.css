@@ -89,3 +89,12 @@
 #bellarisDashboard .bm-traffic-bar{height:8px;width:100%;display:block;background:#edf2f3;border-radius:7px;overflow:hidden}
 #bellarisDashboard .bm-traffic-bar span{height:100%;display:block;background:#ed995e;border-radius:7px}
 @media(max-width:370px){#bellarisDashboard .bm-nav button{font-size:9px;padding:12px 2px}#bellarisDashboard .bm-kpi{min-height:105px}}
+
+#bellarisDashboard .bm-consultation{padding:16px 0;border-bottom:1px solid #e2e9e9}
+#bellarisDashboard .bm-consultation p{font-size:14px;color:#61777b;margin:8px 0}
+#bellarisDashboard .bm-consultation button,#bellarisDashboard .bm-block button{min-height:44px;border:1px solid #cfdcdc;border-radius:12px;padding:10px 14px;background:#fff;color:#143f46;font:inherit;font-size:13px}
+#bellarisDashboard .bm-consultation-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#bellarisDashboard #bellarisBlockSlot{display:grid;gap:14px;margin:18px 0}
+#bellarisDashboard #bellarisBlockSlot label{display:grid;gap:7px;font-size:14px}
+#bellarisDashboard #bellarisBlockSlot input,#bellarisDashboard #bellarisBlockSlot select{min-height:44px;border:1px solid #ccdada;border-radius:12px;background:white;padding:10px;font:inherit;width:100%;box-sizing:border-box}
+#bellarisDashboard .bm-block{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #e2e9e9}

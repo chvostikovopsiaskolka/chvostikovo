@@ -10,7 +10,7 @@ const projectStates = {
 const inquiryStates = {
   new: 'Nový', received: 'Nový', reviewing: 'V riešení',
   contacted: 'Kontaktovaný', approved: 'Schválený', rejected: 'Zamietnutý',
-  converted: 'Projekt vytvorený'
+  consultation: 'Konzultácia', offer: 'Ponuka', converted: 'Projekt vytvorený'
 };
 export const escapeText = value => String(value ?? '').replace(/[&<>"']/g, c => ({
   '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
@@ -33,7 +33,7 @@ export function projectProgress(projectId, milestones) {
 const state = {
   root: null, onBack: null, client: null, user: null, busy: false,
   inquiries: [], projects: [], milestones: [], view: 'overview',
-  selectedId: null, error: '', ready: false, traffic: [], trafficReady: false, range: 30, remember: false
+  consultations: [], blocks: [], consultationReady: false, selectedId: null, error: '', ready: false, traffic: [], trafficReady: false, range: 30, remember: false
 };
 
 function bellarisSessionStorage() {
@@ -112,6 +112,32 @@ function projectRow(p) {
     '<span class="bm-progress"><span style="width:' + progress + '%"></span></span><small>' +
     progress + ' % dokončené</small></button>';
 }
+const slotDate = value => new Intl.DateTimeFormat('sk-SK',{timeZone:'Europe/Bratislava',day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
+const consultationLabels={reserved:'Rezervované',confirmed:'Potvrdené',cancelled:'Zrušené'};
+function consultationCard(c){
+ const q=state.inquiries.find(x=>x.id===c.inquiry_id);
+ return '<article class="bm-consultation"><strong>'+escapeText(slotDate(c.starts_at))+' · 30 min</strong><p>'+escapeText(q?.name||'Konzultácia')+' · '+escapeText(consultationLabels[c.status]||c.status)+'</p>'+
+ '<button type="button" data-bm="inquiry" data-id="'+escapeText(c.inquiry_id)+'">Otvoriť záujem</button>'+
+ (c.status!=='cancelled'?'<div class="bm-consultation-actions">'+(c.status==='reserved'?'<button class="bm-primary" type="button" data-bm="confirm-consultation" data-id="'+escapeText(c.id)+'">Potvrdiť hovor</button>':'')+
+ '<button type="button" data-bm="cancel-consultation" data-id="'+escapeText(c.id)+'">Zrušiť a uvoľniť čas</button></div>':'')+'</article>';
+}
+function renderConsultations(){
+ return '<div class="bm-intro"><span class="bm-eyebrow">BELLARIS · HOVORY</span><h1>Konzultácie</h1><p>Časy Bratislava · 30 minút + 15 minút prestávka</p></div>'+
+ '<section class="bm-section">'+(state.consultationReady?(state.consultations.length?state.consultations.map(consultationCard).join(''):'<p>Zatiaľ žiadne rezervácie.</p>'):'<p>Kalendár zatiaľ nie je dostupný. Obnovte údaje.</p>')+'</section>'+
+ '<section class="bm-section"><h2>Blokovať nedostupný čas</h2><p class="bm-muted">Po–Pi, začiatky každých 45 minút od 9:00 do 15:00. Existujúcu rezerváciu najprv vyriešte so záujemcom.</p><form id="bellarisBlockSlot"><label>Deň<input type="date" name="day" required></label><label>Čas (Bratislava)<select name="time">'+['09:00','09:45','10:30','11:15','12:00','12:45','13:30','14:15','15:00'].map(t=>'<option>'+t+'</option>').join('')+'</select></label><button class="bm-primary" type="submit">Zablokovať termín</button></form>'+
+ state.blocks.map(b=>'<div class="bm-block"><span>'+escapeText(slotDate(b.starts_at))+'</span><button type="button" data-bm="unblock-consultation" data-slot="'+escapeText(b.starts_at)+'">Uvoľniť termín</button></div>').join('')+'</section>';
+}
+function localSlot(value){
+ const parts=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(value));
+ const get=t=>parts.find(x=>x.type===t)?.value;
+ return get('year')+'-'+get('month')+'-'+get('day')+'T'+get('hour')+':'+get('minute');
+}
+async function mutateConsultation(name,args){
+ if(state.busy||!state.user)return;state.busy=true;
+ try {const r=await state.client.rpc(name,args);if(r.error||r.data!==true)throw new Error('denied');}
+ catch {window.alert('Zmenu sa nepodarilo uložiť. Termín môže byť obsadený alebo nemáte prístup.');}
+ finally{state.busy=false;await refresh();}
+}
 function render() {
   if (!state.user) return renderLogin(state.error);
   const sum=getSummary(state.inquiries,state.projects,state.milestones);
@@ -129,12 +155,16 @@ function render() {
       '<section class="bm-section"><div class="bm-heading"><h2>Projekty</h2><button data-bm="projects" type="button">Všetky</button></div>' +
       (state.projects.length ? state.projects.slice(0,4).map(projectRow).join('') : '<p class="bm-empty">Zatiaľ žiadne projekty.</p>') +
       '</section>' +
+      '<section class="bm-section"><div class="bm-heading"><h2>Najbližšie konzultácie</h2><button type="button" data-bm="consultations">Kalendár</button></div>'+
+      (state.consultations.filter(c=>c.status!=='cancelled'&&new Date(c.starts_at)>new Date()).slice(0,3).map(consultationCard).join('')||'<p class="bm-empty">Zatiaľ žiadne rezervácie.</p>')+'</section>'+
       renderTrafficPreview());
   } else if (state.view === 'inquiries') {
     frame('<div class="bm-intro"><span class="bm-eyebrow">CRM</span><h1>Záujmy</h1>' +
       '<p>' + sum.inquiries + ' záznamov · ' + sum.newInquiries + ' nových</p></div>' +
       '<section class="bm-section">' + (state.inquiries.length ?
         state.inquiries.map(inquiryRow).join('') : '<p class="bm-empty">Zatiaľ nič na spracovanie.</p>') + '</section>');
+  } else if (state.view === 'consultations') {
+    frame(renderConsultations());
   } else if (state.view === 'projects') {
     frame('<div class="bm-intro"><span class="bm-eyebrow">REALIZÁCIE</span><h1>Projekty</h1>' +
       '<p>Stav a priebeh realizácie jednotlivých webov.</p></div><section class="bm-section">' +
@@ -145,6 +175,7 @@ function render() {
   } else if (state.view === 'menu') {
     frame('<div class="bm-intro"><span class="bm-eyebrow">NASTAVENIA</span><h1>Menu</h1>' +
       '<p>Ovládanie pracovného priestoru Bellaris.</p></div><section class="bm-section bm-menu">' +
+      '<button type="button" data-bm="consultations">Konzultácie <span aria-hidden="true">›</span></button>'+
       '<button type="button" data-bm="refresh">Obnoviť údaje <span aria-hidden="true">↻</span></button>' +
       '<button type="button" data-bm="back">Výber projektu <span aria-hidden="true">›</span></button>' +
       '<button type="button" data-bm="logout">Odhlásiť Bellaris <span aria-hidden="true">↪</span></button>' +
@@ -157,9 +188,12 @@ function render() {
       '<p><strong>Stav:</strong> ' + escapeText(inquiryStates[q.status] || q.status || '—') + '</p>' +
       '<p><strong>Typ:</strong> ' + escapeText(q.project_type || '—') + '</p>' +
       '<p><strong>Dátum:</strong> ' + humanDate(q.created_at) + '</p>' +
+      '<p><strong>E-mail:</strong> <a href="mailto:'+encodeURIComponent(q.email||'')+'">'+escapeText(q.email||'—')+'</a></p>'+
+      '<p><strong>Telefón:</strong> <a href="tel:'+escapeText(q.phone||'')+'">'+escapeText(q.phone||'—')+'</a></p>'+
+      (state.consultations.find(c=>c.inquiry_id===q.id)?consultationCard(state.consultations.find(c=>c.inquiry_id===q.id)):'')+
       '<h2>Správa</h2><p class="bm-detail-text">' + escapeText(q.message || 'Bez správy') + '</p>' +
       '<h2>Interná poznámka</h2><p class="bm-detail-text">' + escapeText(q.internal_note || 'Bez poznámky') + '</p>' +
-      '<p class="bm-muted">Zatiaľ iba čítanie. Stav a schvaľovanie zostávajú v pôvodnom CRM.</p></section>');
+      '<p class="bm-muted">Konzultáciu môžete potvrdiť alebo zrušiť vyššie. Ostatné kroky záujmu zostávajú v pôvodnom CRM.</p></section>');
   } else if (state.view === 'project') {
     const p=state.projects.find(x=>x.id===state.selectedId);
     if(!p){state.view='projects';return render();}
@@ -269,7 +303,7 @@ async function refresh() {
     state.user=user;
     const [inquiries,projects]=await Promise.all([
       state.client.from('bp_inquiries')
-        .select('id,created_at,name,project_type,message,status,internal_note,is_test')
+        .select('id,created_at,name,email,phone,project_type,message,status,internal_note,is_test')
         .eq('is_test',false).order('created_at',{ascending:false}).limit(150),
       state.client.from('bp_projects')
         .select('id,name,state,is_test,created_at').eq('is_test',false)
@@ -295,6 +329,14 @@ async function refresh() {
       state.traffic=t.error?[]:(t.data||[]);
       state.trafficReady=!t.error;
     } catch {state.traffic=[];state.trafficReady=false;}
+    try {
+      const after=new Date(Date.now()-30*864e5).toISOString();
+      const [calls,blocks]=await Promise.all([
+        state.client.from('bp_consultations').select('id,inquiry_id,starts_at,status').eq('is_test',false).gte('starts_at',after).order('starts_at',{ascending:true}).limit(500),
+        state.client.from('bp_consultation_blocks').select('starts_at').gte('starts_at',after).order('starts_at',{ascending:true}).limit(500)
+      ]);
+      state.consultations=calls.error?[]:(calls.data||[]);state.blocks=blocks.error?[]:(blocks.data||[]);state.consultationReady=!calls.error&&!blocks.error;
+    }catch{state.consultations=[];state.blocks=[];state.consultationReady=false;}
     state.error='';
     render();
   }catch(err){
@@ -336,7 +378,14 @@ async function handleClick(event) {
   if(action==='back'){state.onBack();return;}
   if(action==='logout'){state.busy=true;try{await state.client.auth.signOut();state.user=null;state.view='overview';renderLogin();}finally{state.busy=false;}return;}
   if(action==='refresh'){await refresh();return;}
-  if(['overview','inquiries','projects','traffic','menu'].includes(action)){state.view=action;render();return;}
+  if(action==='confirm-consultation'||action==='cancel-consultation'){
+    if(!window.confirm(action==='cancel-consultation'?'Zrušiť konzultáciu a uvoľniť termín? Záujemcu kontaktujte osobne.':'Potvrdiť tento hovor?'))return;
+    await mutateConsultation('bp_update_consultation',{p_id:button.dataset.id,p_status:action==='confirm-consultation'?'confirmed':'cancelled'});return;
+  }
+  if(action==='unblock-consultation'){
+    await mutateConsultation('bp_block_consultation',{p_local:localSlot(button.dataset.slot),p_block:false});return;
+  }
+  if(['overview','inquiries','projects','traffic','menu','consultations'].includes(action)){state.view=action;render();return;}
   if(action==='inquiry'||action==='project'){state.view=action;state.selectedId=button.dataset.id;render();}
 }
 function handleChange(event) {
@@ -347,6 +396,10 @@ function handleChange(event) {
   }
 }
 async function handleSubmit(event) {
+  if(event.target.id==='bellarisBlockSlot'){
+    event.preventDefault();const form=new FormData(event.target);
+    await mutateConsultation('bp_block_consultation',{p_local:String(form.get('day'))+'T'+String(form.get('time')),p_block:true});return;
+  }
   if(event.target.id!=='bellarisAdminLogin')return;
   event.preventDefault();
   if(state.busy)return;

@@ -2,14 +2,14 @@ name: Admin wrapper workspace picker
 on:
   pull_request:
     paths:
-      - "admin-wrapper/index.html"
+      - "admin-wrapper/**"
       - "admin-wrapper/project-picker.test.cjs"
       - ".github/workflows/admin-workspace-picker.yml"
   push:
     branches:
       - "admin-wrapper/project-picker-20261030"
     paths:
-      - "admin-wrapper/index.html"
+      - "admin-wrapper/**"
       - "admin-wrapper/project-picker.test.cjs"
       - ".github/workflows/admin-workspace-picker.yml"
 permissions:
@@ -21,3 +21,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Isolated admin boot and routing checks
         run: node admin-wrapper/project-picker.test.cjs
+
+      - name: Bellaris consultation staff actions
+        run: node admin-wrapper/consultations.test.cjs
