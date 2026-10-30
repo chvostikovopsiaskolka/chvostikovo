@@ -26,6 +26,20 @@ assert(homeHtml.includes("Web vytvoril"), "Footer credit not rendered in home HT
 assert(homeHtml.includes("Bellaris"), "Original Bellaris wordmark must retain alt text");
 console.log("[seo] PASS: Bellaris footer credit and outbound attribution");
 
+// Keep the original small logo in the SAME footer row as copyright/legal links.
+const footerSource = fs.readFileSync("src/components/site/Contact.tsx", "utf8");
+const footerStart = footerSource.indexOf('export function Footer');
+const rowStart = footerSource.indexOf('className="mt-6 flex flex-wrap items-center', footerStart);
+const rowEnd = footerSource.indexOf('</footer>', rowStart);
+const lowerFooter = footerSource.slice(rowStart, rowEnd);
+assert(rowStart > footerStart, "Footer copyright/legal layout row missing");
+assert(lowerFooter.includes('footer_bellaris_credit'), "Bellaris link must share copyright/legal row");
+assert(lowerFooter.includes('width={84} height={32}'), "Bellaris wordmark must use the compact size");
+assert(lowerFooter.includes('className="h-7 w-auto object-contain"'), "Compact wordmark height missing");
+assert(!lowerFooter.includes('border-t border-cream/15'), "Credit must not occupy a separate bordered row");
+console.log("[seo] PASS: compact Bellaris credit shares copyright/legal row");
+
+
 
 // FAQ route must be crawlable from initial HTML (not only from the SPA 404 fallback).
 // Keep this isolated from the homepage and conversion/marketing flows.
