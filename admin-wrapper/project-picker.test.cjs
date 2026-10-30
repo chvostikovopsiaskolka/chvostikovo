@@ -78,5 +78,29 @@ async function simulate(href) {
     assert.equal(d.elements.projectPicker.hidden,true);
   }
 
-  console.log('PASS: chooser first, spinner only after choice, Bellaris redirect, push deep links, single fetch, SW unchanged');
+  const sw = fs.readFileSync('admin-wrapper/sw.js','utf8');
+  const listeners = {};
+  let opened = '';
+  const selfMock = {
+    location:{origin:'https://chvostikovo-app.vercel.app'},
+    addEventListener(name, fn){listeners[name] = fn},
+    clients:{
+      matchAll:async()=>[],
+      openWindow:async(url)=>{opened=url},
+    },
+  };
+  vm.runInNewContext(sw,{self:selfMock,URL},{timeout:1000});
+  async function clickPush(url) {
+    let pending;
+    const notification={data:{url},close(){}};
+    listeners.notificationclick({notification,waitUntil(p){pending=p}});
+    await pending;
+    return opened;
+  }
+  assert.equal(await clickPush('/'), 'https://chvostikovo-app.vercel.app/?workspace=chvostikovo',
+    'Default push must bypass launcher for Chvostikovo admin');
+  assert.equal(await clickPush('/?tab=reservations'), 'https://chvostikovo-app.vercel.app/?tab=reservations',
+    'Existing push deep links preserved');
+
+  console.log('PASS: chooser, spinner after choice, Bellaris redirect, SW and push notification routes');
 })().catch(e=>{console.error(e);process.exitCode=1});
