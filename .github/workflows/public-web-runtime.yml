@@ -1,0 +1,67 @@
+name: Public web runtime
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['src/**', 'scripts/**', '.github/workflows/public-web-runtime.yml']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy to GitHub Pages']
+    types: [completed]
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-web-runtime-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  runtime:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ github.event_name == 'pull_request' && fromJSON('["chvostikovo"]') || fromJSON('["chvostikovo","bellaris"]') }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated browser test runtime
+        run: |
+          npm install --prefix /tmp/web-runtime --no-package-lock --no-audit --no-fund playwright@1.56.1
+          /tmp/web-runtime/node_modules/.bin/playwright install --with-deps chromium webkit
+      - name: Build candidate for pull requests
+        if: github.event_name == 'pull_request'
+        run: |
+          bun install --frozen-lockfile
+          node scripts/restore-cori-image.mjs
+          bun run build:pages
+          python3 -m http.server 4173 --directory dist/client > /tmp/web-runtime-server.log 2>&1 &
+          for attempt in $(seq 1 30); do curl --fail --silent http://127.0.0.1:4173/ > /dev/null && break; sleep 1; done
+      - name: Verify hydrated pages in Chromium and Safari WebKit
+        env:
+          NODE_PATH: /tmp/web-runtime/node_modules
+          WEB_SITE: ${{ matrix.site }}
+          WEB_BASE_URL: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173' || (matrix.site == 'bellaris' && 'https://bellaris.sk' || 'https://chvostikovo.sk') }}
+        run: node scripts/check-web-runtime.cjs
+      - name: Record current production baseline before release
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          NODE_PATH: /tmp/web-runtime/node_modules
+          WEB_BASE_URL: https://chvostikovo.sk
+          RUNTIME_REPORT_DIR: runtime-report/live-baseline
+        run: node scripts/check-web-runtime.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-web-runtime-${{ matrix.site }}-${{ github.run_id }}
+          path: runtime-report
+          retention-days: 7
