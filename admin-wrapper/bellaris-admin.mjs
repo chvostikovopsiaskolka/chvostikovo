@@ -91,7 +91,7 @@ function renderLogin(error='') {
     '<label>E-mail<input type="email" name="email" autocomplete="username" required placeholder="E-mail správcu"></label>' +
     '<label>Heslo<input type="password" name="password" autocomplete="current-password" required placeholder="Heslo"></label>' +
     '<label class="bm-remember"><input type="checkbox" name="remember" ' + (state.remember ? 'checked' : '') +
-    '> Zapamätať prihlásenie na tomto zariadení</label>' +
+    '><span>Zapamätať prihlásenie</span></label>' +
     message(error) + '<button class="bm-primary" type="submit">Prihlásiť do Bellaris</button></form>' +
     '<button class="bm-login-back" data-bm="back" type="button">← Výber projektu</button></section>', {login:true});
 }
@@ -246,6 +246,27 @@ function trafficCtaDetails(data) {
         '<p class="bm-traffic-intro">Zdroje podľa dostupnej atribúcie pri kliku a podstránky. Ide o udalosti, nie unikátne osoby. Detail kampane/UTM zatiaľ táto denná evidencia neobsahuje.</p></div>':'')+'</article>';
   }).join('');
 }
+// A chart of measured page views, not unique visitors or precise campaign attribution.
+function trafficSourceDonut(sources) {
+  const values=sources.filter(([channel,n])=>trafficLabels[channel] && Number.isFinite(n) && n>0);
+  const total=values.reduce((v,[,n])=>v+n,0);
+  if(!total)return '<p class="bm-empty">Zdroj návštev zatiaľ nepoznáme.</p>';
+  const palette=['#188b91','#9cd6bf','#ec985b','#8074c6','#d4bc75','#526eaa','#a7bac0'];
+  let angle=0;
+  const parts=values.map(([key,n],i)=>{
+    const start=angle;
+    angle+=n/total*100;
+    return palette[i % palette.length]+' '+start.toFixed(3)+'% '+angle.toFixed(3)+'%';
+  });
+  const legend=values.map(([key,n],i)=>
+    '<li><span class="bm-source-dot" style="background:'+palette[i % palette.length]+'"></span>'+
+    '<span>'+escapeText(trafficLabels[key])+'</span><b>'+Math.round(100*n/total)+' %</b></li>'
+  ).join('');
+  return '<div class="bm-source-layout">'+
+    '<div class="bm-source-pie" role="img" aria-label="Podiel zdrojov zobrazení stránok" style="background:conic-gradient('+parts.join(',')+')">'+
+    '<span class="bm-source-center">'+total.toLocaleString('sk-SK')+'<small>zobrazení</small></span></div>'+
+    '<ul class="bm-source-legend">'+legend+'</ul></div>';
+}
 function renderTrafficPreview() {
   const data=trafficSummary(state.traffic,30);
   return '<section class="bm-section"><div class="bm-heading"><h2>Návštevnosť webu</h2>'+
@@ -253,7 +274,10 @@ function renderTrafficPreview() {
     (!state.trafficReady?'<p class="bm-empty">Interné meranie sa pripravuje. Žiadne čísla neodhadujeme.</p>':
       '<p class="bm-traffic-intro">Posledných 30 dní · anonymné zobrazenia stránok</p>' +
       '<div class="bm-traffic-kpis">'+card(data.total.toLocaleString('sk-SK'),'Zobrazenia stránok')+
-      card(data.ctas.toLocaleString('sk-SK'),'Kliknutia na CTA')+'</div>')+
+      card(data.ctas.toLocaleString('sk-SK'),'Kliknutia na CTA')+'</div>'+
+      '<div class="bm-source-overview"><h3>Odkiaľ ľudia prichádzajú</h3>'+
+      '<p>Podiel zobrazení podľa nameraného zdroja; nie počet unikátnych ľudí.</p>'+
+      trafficSourceDonut(data.bySource)+'</div>')+
     '</section>';
 }
 function renderTrafficFull() {
