@@ -17,6 +17,16 @@ assert(html.includes("Psia škôlka Košice"), "Pre-rendered HTML missing landin
 assert(html.includes(url), "Pre-rendered HTML missing normalized canonical URL");
 console.log("[seo] PASS: sitemap + prerender + canonical for " + route);
 
+// Credit is a genuine outbound reference and should not alter existing SEO routes.
+const homeHtml = fs.readFileSync("dist/client/index.html", "utf8");
+assert(homeHtml.includes("utm_source=chvostikovo"), "Bellaris credit missing UTM source");
+assert(homeHtml.includes("utm_medium=referral"), "Bellaris credit missing UTM medium");
+assert(homeHtml.includes("utm_campaign=footer_credit"), "Bellaris credit missing UTM campaign");
+assert(homeHtml.includes("Web vytvoril"), "Footer credit not rendered in home HTML");
+assert(homeHtml.includes("Bellaris"), "Original Bellaris wordmark must retain alt text");
+console.log("[seo] PASS: Bellaris footer credit and outbound attribution");
+
+
 // FAQ route must be crawlable from initial HTML (not only from the SPA 404 fallback).
 // Keep this isolated from the homepage and conversion/marketing flows.
 const faqRoute = "/caste-otazky";
