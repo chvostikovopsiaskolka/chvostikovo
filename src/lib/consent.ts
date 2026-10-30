@@ -22,13 +22,15 @@ export function emptyConsent(): Consent {
   };
 }
 
+let memoryConsent: Consent | null = null;
+
 export function readStoredConsent(): Consent | null {
   if (typeof window === "undefined") return null;
-
-  const raw = window.localStorage.getItem(CONSENT_STORAGE_KEY);
-  if (!raw) return null;
+  if (memoryConsent) return memoryConsent;
 
   try {
+    const raw = window.localStorage.getItem(CONSENT_STORAGE_KEY);
+    if (!raw) return memoryConsent;
     const parsed = JSON.parse(raw) as Partial<Consent>;
     if (parsed.version !== CONSENT_VERSION || !parsed.savedAt) return null;
 
@@ -44,7 +46,7 @@ export function readStoredConsent(): Consent | null {
       marketing: parsed.marketing === true,
     };
   } catch {
-    return null;
+    return memoryConsent;
   }
 }
 
@@ -60,7 +62,14 @@ export function writeStoredConsent(input: Omit<Consent, "version" | "savedAt" | 
     marketing: input.marketing === true,
   };
 
-  window.localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(next));
+  memoryConsent = next;
+  try {
+    window.localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(next));
+    memoryConsent = null;
+  } catch {
+    // Restricted storage is optional: retain this choice only for this page.
+    memoryConsent = next;
+  }
   window.dispatchEvent(new CustomEvent("chvostikovo-consent-changed", { detail: next }));
   return next;
 }
