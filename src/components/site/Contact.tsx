@@ -206,7 +206,7 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
             </div>
             <ContactDetails language={language} />
           </div>
-          <div className="mt-6 flex flex-col items-center gap-4 text-center text-xs sm:flex-row sm:justify-between sm:text-left">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-center text-xs lg:justify-between lg:text-left">
             <p>© {new Date().getFullYear()} Chvostíkovo · {isEnglish ? "All rights reserved." : "Všetky práva vyhradené."}</p>
             <nav aria-label={isEnglish ? "Legal information" : "Právne informácie"} className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 sm:justify-end [&>button]:whitespace-nowrap">
               <button type="button" onClick={() => setLegalDialog("cookies")} className="underline underline-offset-4 hover:text-cream">Cookies</button>
@@ -217,8 +217,6 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
               <span aria-hidden="true">·</span>
               <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Cookie settings" : "Nastavenia cookies"}</button>
             </nav>
-          </div>
-          <div className="mt-5 flex justify-center border-t border-cream/15 pt-4">
             <a
               href="https://bellaris.sk/?utm_source=chvostikovo&utm_medium=referral&utm_campaign=footer_credit"
               target="_blank"
@@ -227,10 +225,10 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
                 void trackCookielessInteraction("nav_click", "footer_bellaris_credit", language).catch(() => {});
               }}
               aria-label={isEnglish ? "Website by Bellaris — opens in a new tab" : "Web vytvoril Bellaris — otvorí sa v novej karte"}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 py-1 text-cream/70 transition-colors hover:text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 py-1 text-cream/70 transition-colors hover:text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
             >
               <span className="text-xs">{isEnglish ? "Website by" : "Web vytvoril"}</span>
-              <img src={bellarisFooterLogo} width={105} height={40} loading="lazy" alt="Bellaris" className="h-10 w-auto object-contain" />
+              <img src={bellarisFooterLogo} width={84} height={32} loading="lazy" alt="Bellaris" className="h-7 w-auto object-contain" />
             </a>
           </div>
         </div>
