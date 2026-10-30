@@ -14,6 +14,11 @@ assert(html.includes('20261014-admin-pwa-v111'));
 assert(!originalScript.includes('location.assign('),'Bellaris must not redirect to Safari');
 assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261030-v1')"));
 assert(css.includes('#bellarisDashboard'));
+assert(html.includes('html:has(#boot:not(.hidden))'),'Hidden loader must not leave a cream iOS underlay');
+assert(html.includes('html:has(#bellarisDashboard:not([hidden]))'),'Bellaris safe-area should match its screen');
+assert(html.includes('html:has(#bellarisSplash:not([hidden]))'),'Bellaris splash should use a white underlay');
+assert(html.includes('<meta name="theme-color" content="#ffffff">'),'Launcher theme should be white');
+assert(originalScript.includes('const oldBootCanvas'),'Legacy Chvo login underlay needs scoped CSS fix');
 assert(moduleSource.includes(".from('bp_staff')"),'Server RLS staff check required');
 assert(moduleSource.includes(".eq('is_test',false)"),'Test CRM entries excluded');
 assert(!/\.from\('bp_(inquiries|projects|milestones)'\)\.update\(/.test(moduleSource),'Bellaris phone MVP must remain read-only');
@@ -31,8 +36,10 @@ async function simulate(href) {
         textContent:'',innerHTML:''}
     ])
   );
+  const theme={value:'#ffffff',setAttribute(name,value){assert.equal(name,'content');this.value=value;}};
   const doc={
     getElementById(id){return elements[id]},
+    querySelector(selector){return selector==='meta[name="theme-color"]'?theme:null;},
     createElement(tag){
       assert.equal(tag,'link');
       return {onload:null,onerror:null};
@@ -61,11 +68,12 @@ async function simulate(href) {
     fetched++;
     assert(url.endsWith('/chvostikovo-frontend?v=20261014-admin-pwa-v111'));
     assert.equal(options.cache,'no-store');
-    return {ok:true,text:async()=>'<html>Chvostíkovo admin unchanged</html>'};
+    return {ok:true,text:async()=>'<html><style>html:has(#appBoot),body:has(#appBoot){background:#fff!important}</style>Chvostíkovo admin unchanged</html>'};
   }},{timeout:1500});
   await Promise.resolve();
   return {
     elements,
+    get theme(){return theme.value;},
     clickChvo(){return elements.chooseChvostikovo.listeners.click()},
     clickBellaris(){return elements.chooseBellaris.listeners.click()},
     back(){back?.()},
@@ -81,12 +89,18 @@ async function simulate(href) {
   assert.equal(first.registered,1);
   assert.equal(first.elements.projectPicker.hidden,false);
   assert.equal(first.elements.boot.classList.removed.length,0);
+  assert.equal(first.theme,'#ffffff');
   first.clickChvo();
+  assert.equal(first.theme,'#fffaf5','Chvostikovo loader should keep its cream theme');
   await first.flush();
   assert.equal(first.fetched,1);
   assert.equal(first.elements.projectPicker.hidden,true);
   assert.deepEqual(first.elements.boot.classList.removed,['hidden']);
   assert(first.written.includes('Chvostíkovo'));
+  assert(first.written.includes('html:has(#appBoot:not(.hidden))'),
+    'Chvostikovo login safe-area should stop painting boot-white after boot hides');
+  assert(!first.written.includes('html:has(#appBoot),body:has(#appBoot)'),
+    'Legacy permanent white underlay should be scoped, without changing any other HTML');
   first.clickChvo();
   assert.equal(first.fetched,1,'Double-tap cannot start second boot');
 
@@ -97,10 +111,12 @@ async function simulate(href) {
   assert.equal(bellaris.openedBellaris,1);
   assert.equal(bellaris.elements.bellarisDashboard.hidden,false,'Dashboard inside admin PWA');
   assert.equal(bellaris.elements.bellarisSplash.hidden,true);
+  assert.equal(bellaris.theme,'#f4f7f7','Bellaris mobile surface must have matching iOS theme');
   assert(bellaris.elements.bellarisDashboard.innerHTML.includes('Bellaris staff dashboard'));
   bellaris.back();
   assert.equal(bellaris.elements.projectPicker.hidden,false,'Return to project selection');
   assert.equal(bellaris.elements.bellarisDashboard.hidden,true);
+  assert.equal(bellaris.theme,'#ffffff','Returning to the project picker restores white iOS theme');
   bellaris.clickChvo();
   await bellaris.flush();
   assert.equal(bellaris.fetched,1,'Switching to Chvostikovo still works');

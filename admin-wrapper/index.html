@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#fffaf5">
+  <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Chvostíkovo">
@@ -60,7 +60,7 @@
 #boot.in-app .concept-orbit>.concept-paw>svg{width:100%;height:100%}
 @media(prefers-reduced-motion:reduce){.concept-orbit>.concept-paw{will-change:auto}}
 
-#boot{padding:0!important;z-index:99999!important;width:auto!important;height:auto!important;min-height:0!important;inset:0!important}html:has(#boot),body:has(#boot){background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}#bootText{font-size:14px;color:#991b1b;max-width:300px}</style><style id="admin-workspace-picker-v1">
+#boot{padding:0!important;z-index:99999!important;width:auto!important;height:auto!important;min-height:0!important;inset:0!important}html:has(#boot:not(.hidden)),body:has(#boot:not(.hidden)){background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}#bootText{font-size:14px;color:#991b1b;max-width:300px}</style><style id="admin-workspace-picker-v1">
 #projectPicker,#bellarisSplash{position:fixed;inset:0;z-index:100001;background:#fff;color:#243047;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:auto;padding:calc(22px + env(safe-area-inset-top)) 20px calc(26px + env(safe-area-inset-bottom));}
 #projectPicker[hidden],#bellarisSplash[hidden]{display:none!important}
 #projectPicker{display:flex;align-items:center;justify-content:center}
@@ -80,6 +80,11 @@
 #bellarisSplash .workspace-logo-bellaris{width:min(240px,70vw);max-width:none;height:auto;max-height:110px;margin:auto}
 #bellarisSplash p{margin-top:22px;color:#667085;font-size:13px}
 html:has(#projectPicker:not([hidden])),body:has(#projectPicker:not([hidden])){background:#fff!important}
+/* iOS standalone safe-area: match active workspace; a hidden boot must not
+   retain the cream underlay behind the white or Bellaris screen. */
+html:has(#bellarisSplash:not([hidden])),body:has(#bellarisSplash:not([hidden])){background:#fff!important}
+html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidden])){background:#f4f7f7!important}
+#projectPicker,#bellarisSplash{min-height:100vh;min-height:100dvh}
 @media(max-width:370px){.workspace-card{min-height:120px;padding:18px 15px}.workspace-logo-chvo{max-width:150px}.workspace-logo-bellaris{max-width:165px}}
 @media(prefers-reduced-motion:reduce){.workspace-card:active{transform:none}}
 </style></head>
@@ -140,10 +145,13 @@ html:has(#projectPicker:not([hidden])),body:has(#projectPicker:not([hidden])){ba
       const boot = document.getElementById('boot');
       const bellarisSplash = document.getElementById('bellarisSplash');
       const dashboard = document.getElementById('bellarisDashboard');
+      const themeColor = document.querySelector('meta[name="theme-color"]');
+      const setSurfaceTheme = color => { if (themeColor) themeColor.setAttribute('content',color); };
       const returnToPicker = () => {
         dashboard.hidden = true;
         bellarisSplash.hidden = true;
         picker.hidden = false;
+        setSurfaceTheme('#ffffff');
         started = false;
       };
       const loadBellarisStyle = () => new Promise((resolve, reject) => {
@@ -161,13 +169,21 @@ html:has(#projectPicker:not([hidden])),body:has(#projectPicker:not([hidden])){ba
         if (started) return;
         started = true;
         picker.hidden = true;
+        setSurfaceTheme('#fffaf5');
         boot.classList.remove('hidden');
         try {
           const r = await fetch('https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-frontend?v=20261014-admin-pwa-v111', {cache:'no-store'});
           if (!r.ok) throw new Error('server ' + r.status);
           const h = await r.text();
           if (!h.includes('Chvostíkovo')) throw new Error('neplatná odpoveď');
-          document.open();document.write(h);document.close();
+          // The stable admin HTML has a legacy iOS root rule that paints white
+          // even after #appBoot is hidden. Only scope that ONE CSS selector
+          // to the visible boot: after login begins, the original gray canvas
+          // matches the actual form screen. Leave auth/data/scripts untouched.
+          const oldBootCanvas = 'html:has(#appBoot),body:has(#appBoot){background:#fff!important}';
+          const visibleBootCanvas = 'html:has(#appBoot:not(.hidden)),body:has(#appBoot:not(.hidden)){background:#fff!important}';
+          const html = h.includes(oldBootCanvas) ? h.replace(oldBootCanvas, visibleBootCanvas) : h;
+          document.open();document.write(html);document.close();
         } catch (e) {
           const t = document.getElementById('bootText');
           if (t) t.textContent = 'Appka sa nenačítala: ' + (e.message || e);
@@ -178,6 +194,7 @@ html:has(#projectPicker:not([hidden])),body:has(#projectPicker:not([hidden])){ba
         if (started) return;
         started = true;
         picker.hidden = true;
+        setSurfaceTheme('#ffffff');
         bellarisSplash.hidden = false;
         try {
           // Bellaris is rendered inside this PWA. Its data remains in the
@@ -186,9 +203,11 @@ html:has(#projectPicker:not([hidden])),body:has(#projectPicker:not([hidden])){ba
           const {openBellarisMobile} = await import('/bellaris-admin.mjs?v=20261030-v1');
           await openBellarisMobile(dashboard, returnToPicker);
           bellarisSplash.hidden = true;
+          setSurfaceTheme('#f4f7f7');
         } catch {
           bellarisSplash.hidden = true;
           dashboard.hidden = false;
+          setSurfaceTheme('#f4f7f7');
           dashboard.innerHTML = '<div style="padding:34px 22px;text-align:center">' +
             '<h2>Bellaris sa nepodarilo otvoriť</h2>' +
             '<p>Skontrolujte pripojenie a skúste to znova.</p>' +
