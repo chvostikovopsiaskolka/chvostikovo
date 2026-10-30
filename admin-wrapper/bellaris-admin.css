@@ -89,3 +89,18 @@
 #bellarisDashboard .bm-traffic-bar{height:8px;width:100%;display:block;background:#edf2f3;border-radius:7px;overflow:hidden}
 #bellarisDashboard .bm-traffic-bar span{height:100%;display:block;background:#ed995e;border-radius:7px}
 @media(max-width:370px){#bellarisDashboard .bm-nav button{font-size:9px;padding:12px 2px}#bellarisDashboard .bm-kpi{min-height:105px}}
+
+/* Bellaris CTA attribution, expanded within the existing traffic card. */
+#bellarisDashboard .bm-cta-item{padding:11px 0;border-bottom:1px solid #edf1f1}
+#bellarisDashboard .bm-cta-item:last-child{border-bottom:0}
+#bellarisDashboard .bm-cta-toggle{display:flex;align-items:center;justify-content:space-between;gap:11px;width:100%;min-height:52px;background:transparent;border:0;padding:5px 0 10px;text-align:left;color:#17393d}
+#bellarisDashboard .bm-cta-toggle>span{min-width:0}
+#bellarisDashboard .bm-cta-toggle strong{display:block;font-size:14px}
+#bellarisDashboard .bm-cta-toggle small{display:block;font-size:11px;color:#739095;margin-top:5px}
+#bellarisDashboard .bm-cta-toggle>b{font-size:14px;white-space:nowrap}
+#bellarisDashboard .bm-cta-details{background:#f6fafa;padding:12px;margin:13px 0 2px;border-radius:12px}
+#bellarisDashboard .bm-cta-details>strong{display:block;font-size:13px;margin-bottom:10px}
+#bellarisDashboard .bm-cta-source{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:1px solid #e1eaea;padding:10px 0;font-size:13px}
+#bellarisDashboard .bm-cta-source>span{min-width:0}
+#bellarisDashboard .bm-cta-source small{display:block;color:#728a91;margin-top:4px;overflow-wrap:anywhere}
+#bellarisDashboard .bm-cta-source b{white-space:nowrap}
