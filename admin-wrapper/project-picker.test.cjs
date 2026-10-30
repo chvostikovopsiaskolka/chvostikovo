@@ -18,6 +18,7 @@ assert(html.includes('html:has(#boot:not(.hidden))'),'Hidden loader must not lea
 assert(html.includes('html:has(#bellarisDashboard:not([hidden]))'),'Bellaris safe-area should match its screen');
 assert(html.includes('html:has(#bellarisSplash:not([hidden]))'),'Bellaris splash should use a white underlay');
 assert(html.includes('<meta name="theme-color" content="#ffffff">'),'Launcher theme should be white');
+assert(originalScript.includes('const oldBootCanvas'),'Legacy Chvo login underlay needs scoped CSS fix');
 assert(moduleSource.includes(".from('bp_staff')"),'Server RLS staff check required');
 assert(moduleSource.includes(".eq('is_test',false)"),'Test CRM entries excluded');
 assert(!/\.from\('bp_(inquiries|projects|milestones)'\)\.update\(/.test(moduleSource),'Bellaris phone MVP must remain read-only');
@@ -67,7 +68,7 @@ async function simulate(href) {
     fetched++;
     assert(url.endsWith('/chvostikovo-frontend?v=20261014-admin-pwa-v111'));
     assert.equal(options.cache,'no-store');
-    return {ok:true,text:async()=>'<html>Chvostíkovo admin unchanged</html>'};
+    return {ok:true,text:async()=>'<html><style>html:has(#appBoot),body:has(#appBoot){background:#fff!important}</style>Chvostíkovo admin unchanged</html>'};
   }},{timeout:1500});
   await Promise.resolve();
   return {
@@ -96,6 +97,10 @@ async function simulate(href) {
   assert.equal(first.elements.projectPicker.hidden,true);
   assert.deepEqual(first.elements.boot.classList.removed,['hidden']);
   assert(first.written.includes('Chvostíkovo'));
+  assert(first.written.includes('html:has(#appBoot:not(.hidden))'),
+    'Chvostikovo login safe-area should stop painting boot-white after boot hides');
+  assert(!first.written.includes('html:has(#appBoot),body:has(#appBoot)'),
+    'Legacy permanent white underlay should be scoped, without changing any other HTML');
   first.clickChvo();
   assert.equal(first.fetched,1,'Double-tap cannot start second boot');
 
