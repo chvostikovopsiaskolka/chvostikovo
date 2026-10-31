@@ -237,6 +237,7 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
               <span className="block">{isEnglish ? "All rights reserved." : "Všetky práva vyhradené."}</span>
             </p>
           </div>
+        </div>
       </footer>
 
       <LegalDialog
