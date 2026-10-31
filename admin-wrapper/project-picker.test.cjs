@@ -2,6 +2,17 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const html = fs.readFileSync('admin-wrapper/index.html','utf8');
+const fsIcon=fs.readFileSync('admin-wrapper/apple-touch-icon.png');
+assert.equal(fsIcon.subarray(1,4).toString(),'PNG','Home screen icon must be a PNG');
+assert.equal(fsIcon.readUInt32BE(16),180,'iOS icon width must be 180');
+assert.equal(fsIcon.readUInt32BE(20),180,'iOS icon height must be 180');
+const adminManifest=JSON.parse(fs.readFileSync('admin-wrapper/manifest.webmanifest','utf8'));
+const vercelConfig=JSON.parse(fs.readFileSync('admin-wrapper/vercel.json','utf8'));
+assert(html.includes('rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20261031-admin-both-v2"'));
+assert(adminManifest.icons.every(x=>x.src.startsWith('/admin-icon-') && x.src.includes('admin-both-v2')),'All Android launch icons must be admin-specific');
+assert(!vercelConfig.rewrites.some(x=>x.source==='/apple-touch-icon.png'),'iOS apple-touch-icon must be served locally, not from customer PWA');
+assert(vercelConfig.rewrites.filter(x=>x.source.startsWith('/icon-')).every(x=>x.destination.startsWith('/admin-icon-')),'Legacy launch icon routes must resolve to admin-specific artwork');
+
 const moduleSource = fs.readFileSync('admin-wrapper/bellaris-admin.mjs','utf8');
 const css = fs.readFileSync('admin-wrapper/bellaris-admin.css','utf8');
 const originalScript = html.match(/<script id="admin-workspace-controller-v1">([\s\S]*?)<\/script>/)?.[1];
