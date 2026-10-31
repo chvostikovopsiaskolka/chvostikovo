@@ -43,8 +43,17 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
   const paused = useRef(false);
   const resumeTimer = useRef<number | null>(null);
   const pointerStartX = useRef<number | null>(null);
+  const pointerStartY = useRef<number | null>(null);
+  const holdTimer = useRef<number | null>(null);
+  const held = useRef(false);
+  const gesturePaused = useRef(false);
   const dragged = useRef(false);
   const [active, setActive] = useState<number | null>(null);
+
+  const clearHoldTimer = () => {
+    if (holdTimer.current !== null) window.clearTimeout(holdTimer.current);
+    holdTimer.current = null;
+  };
 
   const clearResumeTimer = () => {
     if (resumeTimer.current !== null) {
@@ -150,6 +159,7 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
       document.removeEventListener("visibilitychange", onVisibilityChange);
       stop();
       clearResumeTimer();
+      clearHoldTimer();
     };
   }, []);
 
@@ -199,32 +209,70 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
       <div className="w-full">
         <div
           ref={track}
+          data-gesture-track="photos"
           onMouseEnter={pause}
           onMouseLeave={() => {
             if (active === null) resume();
           }}
           onPointerDown={(event) => {
-            pause();
+            clearHoldTimer();
             pointerStartX.current = event.clientX;
+            pointerStartY.current = event.clientY;
             dragged.current = false;
+            held.current = false;
+            gesturePaused.current = false;
+            if (event.pointerType === "touch" && event.isPrimary) {
+              holdTimer.current = window.setTimeout(() => {
+                holdTimer.current = null;
+                held.current = true;
+                gesturePaused.current = true;
+                pause();
+              }, 500);
+            } else {
+              pause();
+            }
           }}
           onPointerMove={(event) => {
-            if (pointerStartX.current === null) return;
-            if (Math.abs(event.clientX - pointerStartX.current) > 8) dragged.current = true;
+            if (pointerStartX.current === null || pointerStartY.current === null) return;
+            const dx = Math.abs(event.clientX - pointerStartX.current);
+            const dy = Math.abs(event.clientY - pointerStartY.current);
+            if (Math.max(dx, dy) <= 8) return;
+            clearHoldTimer();
+            dragged.current = true;
+            if (dx > dy) {
+              gesturePaused.current = true;
+              pause();
+            } else if (event.pointerType === "touch" && !held.current && active === null) {
+              resume();
+            }
           }}
-          onPointerUp={() => {
+          onPointerUp={(event) => {
+            clearHoldTimer();
             pointerStartX.current = null;
-            if (active === null) resumeAfterPause();
+            pointerStartY.current = null;
+            if (held.current) dragged.current = true; // long hold must not open lightbox
+            const shouldPause = held.current || gesturePaused.current || event.pointerType !== "touch";
+            held.current = false;
+            gesturePaused.current = false;
+            if (active === null) {
+              if (shouldPause) resumeAfterPause();
+              else resume();
+            }
           }}
           onPointerCancel={() => {
+            clearHoldTimer();
             pointerStartX.current = null;
-            if (active === null) resumeAfterPause();
+            pointerStartY.current = null;
+            dragged.current = true;
+            held.current = false;
+            gesturePaused.current = false;
+            if (active === null) resume();
           }}
           onFocusCapture={pause}
           onBlurCapture={() => {
             if (active === null) resumeAfterPause();
           }}
-          className="flex w-screen max-w-none overflow-x-auto overscroll-x-contain [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] [&::-webkit-scrollbar]:hidden"
+          className="flex w-screen max-w-none overflow-x-auto overscroll-x-contain [scrollbar-width:none] [touch-action:auto] [will-change:scroll-position] [&::-webkit-scrollbar]:hidden"
         >
           {[0, 1].map((setIndex) => (
             <div
