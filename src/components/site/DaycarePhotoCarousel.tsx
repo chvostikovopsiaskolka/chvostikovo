@@ -210,9 +210,11 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
         <div
           ref={track}
           data-gesture-track="photos"
-          onMouseEnter={pause}
+          onMouseEnter={() => {
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) pause();
+          }}
           onMouseLeave={() => {
-            if (active === null) resume();
+            if (active === null && window.matchMedia("(hover: hover) and (pointer: fine)").matches) resume();
           }}
           onPointerDown={(event) => {
             clearHoldTimer();
