@@ -1,0 +1,27 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const footer = fs.readFileSync(path.join(__dirname, "../src/components/site/Contact.tsx"), "utf8");
+const styles = fs.readFileSync(path.join(__dirname, "../src/styles.css"), "utf8");
+const start = footer.indexOf("export function Footer");
+assert.ok(start >= 0, "footer component missing");
+const content = footer.slice(start);
+const nav = content.indexOf("<nav");
+const credit = content.indexOf("footer-bellaris-liquid");
+const copyright = content.indexOf("© {new Date().getFullYear()} Chvostíkovo");
+assert.ok(nav >= 0 && nav < credit && credit < copyright, "mobile legal nav must precede credit and copyright");
+assert.match(content, /grid-cols-\[auto_minmax\(0,1fr\)\]/);
+assert.match(content, /lg:grid-cols-\[minmax\(0,1fr\)_auto_minmax\(0,1fr\)\]/);
+assert.match(content, /lg:col-start-3 lg:row-start-1/);
+assert.match(content, /lg:col-start-1 lg:row-start-1/);
+assert.match(content, /justify-self-end text-right/);
+assert.ok(content.includes('setLegalDialog("cookies")'));
+assert.ok(content.includes('setLegalDialog("privacy")'));
+assert.ok(content.includes('setLegalDialog("operator")'));
+assert.ok(content.includes('chvostikovo-open-cookie-settings'));
+assert.ok(content.includes('utm_source=chvostikovo&utm_medium=referral&utm_campaign=footer_credit'));
+assert.ok(content.includes('footer_bellaris_credit'));
+assert.ok(content.includes('isEnglish ? "All rights reserved." : "Všetky práva vyhradené."'));
+assert.ok(styles.includes("linear-gradient(120deg, oklch(0.2 0.04 222), oklch(0.27 0.05 220)"));
+console.log("PASS mobile legal-first footer (SK/EN, attribution, Bellaris petrol background)");

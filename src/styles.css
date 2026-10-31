@@ -699,7 +699,7 @@
 
 /* Bellaris footer credit: use Chvostíkovo's own forest palette, with a restrained glass sheen. */
 .footer-bellaris-liquid {
-  background: linear-gradient(120deg, var(--forest-deep), color-mix(in srgb, var(--forest-deep) 82%, var(--forest)) 55%, var(--forest-deep));
+  background: linear-gradient(120deg, oklch(0.2 0.04 222), oklch(0.27 0.05 220) 55%, oklch(0.2 0.04 222));
   border: 1px solid rgba(240, 255, 245, .2);
   box-shadow: inset 0 1px 0 rgba(250, 255, 252, .12), 0 4px 12px rgba(9, 35, 29, .14);
   -webkit-backdrop-filter: blur(8px) saturate(1.08);

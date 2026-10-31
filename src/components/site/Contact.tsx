@@ -206,7 +206,19 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
             </div>
             <ContactDetails language={language} />
           </div>
-          <div className="mt-6 grid grid-cols-1 items-center gap-x-4 gap-y-3 text-xs lg:grid-cols-[auto_minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+          <div className="mt-6 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 text-xs lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-x-4">
+            <nav
+              aria-label={isEnglish ? "Legal information" : "Právne informácie"}
+              className="col-span-2 mb-1 flex w-full min-w-0 flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center text-[11px] lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:mb-0 lg:w-auto lg:justify-self-end lg:justify-end lg:gap-x-1.5 lg:whitespace-nowrap lg:text-left"
+            >
+              <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Cookie settings" : "Nastavenia cookies"}</button>
+              <span aria-hidden="true" className="hidden lg:inline">·</span>
+              <button type="button" onClick={() => setLegalDialog("cookies")} className="underline underline-offset-4 hover:text-cream">Cookies</button>
+              <span aria-hidden="true" className="hidden lg:inline">·</span>
+              <button type="button" onClick={() => setLegalDialog("privacy")} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Privacy" : "Ochrana osobných údajov"}</button>
+              <span aria-hidden="true" className="hidden lg:inline">·</span>
+              <button type="button" onClick={() => setLegalDialog("operator")} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}</button>
+            </nav>
             <a
               href="https://bellaris.sk/?utm_source=chvostikovo&utm_medium=referral&utm_campaign=footer_credit"
               target="_blank"
@@ -215,24 +227,15 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
                 void trackCookielessInteraction("nav_click", "footer_bellaris_credit", language).catch(() => {});
               }}
               aria-label={isEnglish ? "Website by Bellaris — opens in a new tab" : "Web vytvoril Bellaris — otvorí sa v novej karte"}
-              className="footer-bellaris-liquid relative isolate inline-flex min-h-11 shrink-0 items-center justify-center justify-self-start gap-2 overflow-hidden rounded-2xl px-4 py-2 text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
+              className="footer-bellaris-liquid relative isolate inline-flex min-h-11 min-w-0 items-center justify-center justify-self-start gap-1 overflow-hidden rounded-2xl px-2 py-2 text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream sm:gap-2 sm:px-4 lg:col-start-1 lg:row-start-1"
             >
-              <span className="relative z-10 text-xs font-semibold">{isEnglish ? "Website by" : "Web vytvoril"}</span>
-              <img src={bellarisFooterLogo} width={84} height={32} loading="lazy" alt="Bellaris" className="relative z-10 h-7 w-auto object-contain" />
+              <span className="relative z-10 shrink-0 whitespace-nowrap text-[11px] font-semibold sm:text-xs">{isEnglish ? "Website by" : "Web vytvoril"}</span>
+              <img src={bellarisFooterLogo} width={84} height={32} loading="lazy" alt="Bellaris" className="relative z-10 h-6 w-auto max-w-[68px] object-contain sm:h-7 sm:max-w-none" />
             </a>
-            <p className="min-w-0 justify-self-center text-center leading-relaxed">
+            <p className="min-w-0 justify-self-end text-right text-[10px] leading-relaxed sm:text-xs lg:col-start-2 lg:row-start-1 lg:justify-self-center lg:text-center">
               <span className="block">© {new Date().getFullYear()} Chvostíkovo</span>
               <span className="block">{isEnglish ? "All rights reserved." : "Všetky práva vyhradené."}</span>
             </p>
-            <nav aria-label={isEnglish ? "Legal information" : "Právne informácie"} className="flex w-full min-w-0 max-w-full flex-nowrap items-center justify-start gap-x-1.5 overflow-x-auto whitespace-nowrap py-1 text-[11px] lg:w-auto lg:justify-self-end lg:justify-end lg:overflow-visible lg:text-[11px]">
-              <button type="button" onClick={() => setLegalDialog("cookies")} className="shrink-0 underline underline-offset-4 hover:text-cream">Cookies</button>
-              <span aria-hidden="true">·</span>
-              <button type="button" onClick={() => setLegalDialog("privacy")} className="shrink-0 underline underline-offset-4 hover:text-cream">{isEnglish ? "Privacy" : "Ochrana osobných údajov"}</button>
-              <span aria-hidden="true">·</span>
-              <button type="button" onClick={() => setLegalDialog("operator")} className="shrink-0 underline underline-offset-4 hover:text-cream">{isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}</button>
-              <span aria-hidden="true">·</span>
-              <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="shrink-0 underline underline-offset-4 hover:text-cream">{isEnglish ? "Cookie settings" : "Nastavenia cookies"}</button>
-            </nav>
           </div>
         </div>
       </footer>

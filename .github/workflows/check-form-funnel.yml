@@ -31,6 +31,8 @@ jobs:
         run: node scripts/ai-referral-checks.cjs
       - name: Mobile dock contract
         run: node scripts/mobile-dock-contract.cjs
+      - name: Mobile footer legal/credit contract
+        run: node scripts/footer-mobile-contract.cjs
       - name: TypeScript validation
         run: bun run check:types
       - name: Build static pages
