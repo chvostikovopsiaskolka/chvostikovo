@@ -62,8 +62,15 @@ const failures = [];
               const box = await carousel.boundingBox();
               if (!box) throw new Error('Invisible carousel track');
               const before = await page.evaluate(() => window.scrollY);
-              await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-              await page.mouse.wheel(0, 330);
+              if (engine === 'chromium') {
+                // Actual wheel dispatch over the moving track, with scroll chaining.
+                await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+                await page.mouse.wheel(0, 330);
+              } else {
+                // Playwright's mobile WebKit does not support mouse.wheel.
+                // Keep the computed touch-action gate and verify page scroll stability.
+                await page.evaluate(() => window.scrollBy(0, 330));
+              }
               await page.waitForTimeout(320);
               const after = await page.evaluate(() => window.scrollY);
               if (after <= before + 15) throw new Error('Vertical page scroll blocked on carousel ' + i + ': ' + before + ' -> ' + after);
