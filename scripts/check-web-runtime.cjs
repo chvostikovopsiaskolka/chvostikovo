@@ -47,6 +47,28 @@ const failures = [];
           await cookieButton.click();
           await page.waitForTimeout(300);
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
+          // Real browser-level regression: wheel over moving carousels must
+          // continue page scrolling, and their computed touch-action must not
+          // reserve gestures for horizontal panning only.
+          if (!bellaris && !restricted) {
+            const tracks = page.locator('[data-gesture-track]');
+            const count = await tracks.count();
+            if (url.pathname === '/' && count < 2) throw new Error('Missing homepage carousel tracks');
+            for (let i = 0; i < count; i++) {
+              const carousel = tracks.nth(i);
+              const touchAction = await carousel.evaluate(el => getComputedStyle(el).touchAction);
+              if (touchAction !== 'auto') throw new Error('Carousel blocks vertical touch panning: ' + touchAction);
+              await carousel.scrollIntoViewIfNeeded();
+              const box = await carousel.boundingBox();
+              if (!box) throw new Error('Invisible carousel track');
+              const before = await page.evaluate(() => window.scrollY);
+              await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+              await page.mouse.wheel(0, 330);
+              await page.waitForTimeout(320);
+              const after = await page.evaluate(() => window.scrollY);
+              if (after <= before + 15) throw new Error('Vertical page scroll blocked on carousel ' + i + ': ' + before + ' -> ' + after);
+            }
+          }
           if (errors.length) throw new Error(errors.join('; '));
           results.push({ engine, restricted, route: url.pathname, status: 'PASS' });
           console.log(`PASS ${label}`);
