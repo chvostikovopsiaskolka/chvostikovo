@@ -10,9 +10,9 @@ import { FirstVisitPhoto } from "./FirstVisitPhoto";
 
 const reqIcons = [Syringe, PawPrint, Droplets, HeartPulse];
 
-export function Requirements() {
+export function Requirements({ id = "podmienky" }: { id?: string } = {}) {
   return (
-    <section id="podmienky" className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
+    <section id={id} className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
@@ -20,14 +20,15 @@ export function Requirements() {
             Podmienky prijatia
           </span>
           <h2 className="section-title mt-2 text-3xl sm:text-4xl">Čo musí psík spĺňať</h2>
+          <p className="mt-3 text-sm text-forest/65 sm:hidden">Potiahnite do strany a pozrite si všetky podmienky.</p>
         </div>
 
-        {/* Four distinct information cards, always visible, unlike the FAQ accordion. */}
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 sm:gap-5">
+        {/* All conditions remain visible and swipeable on mobile; two-column grid from sm upwards. */}
+        <div role="region" aria-label="Podmienky prijatia – posúvajte do strany" tabIndex={0} className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:mt-10 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0">
           {REQUIREMENTS.map((r, i) => {
             const Icon = reqIcons[i]!;
             return (
-              <article key={r.title} className="rounded-3xl border border-forest/10 bg-card p-6 shadow-card sm:p-7">
+              <article key={r.title} className="w-[86%] shrink-0 snap-start rounded-3xl border border-forest/10 bg-card p-6 shadow-card sm:w-auto sm:shrink sm:p-7">
                 <div className="flex items-center gap-3">
                   <span className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-forest">
                     <Icon className="size-6" aria-hidden />

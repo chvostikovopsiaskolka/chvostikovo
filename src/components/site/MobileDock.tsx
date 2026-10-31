@@ -215,7 +215,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     : [
         ...(marketing ? marketingExtra : [{ label: "Recenzie", href: "/#recenzie" }]),
         ...(!marketing ? [{ label: "Prečo Chvostíkovo", href: "/#preco-chvostikovo" }] : []),
-        { label: "Podmienky", href: "/#podmienky" },
+        { label: "Podmienky", href: variant === "lead" ? homePath + "#lead-requirements" : "/#podmienky" },
         { label: "Časté otázky", href: "/caste-otazky" },
         { label: "O nás", href: "/#o-nas" },
         { label: "Produkty", href: "/produkty" },

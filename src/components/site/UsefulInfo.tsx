@@ -43,12 +43,15 @@ export function UsefulInfo() {
           </p>
         </div>
 
-        <div className="mx-auto mt-9 grid max-w-6xl gap-5 md:grid-cols-3">
+        <div role="region"
+          aria-label="Články o živote v škôlke – posúvajte do strany"
+          tabIndex={0}
+          className="-mx-4 mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-auto md:grid md:max-w-6xl md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0">
           {articles.map(({ href, Icon, eyebrow, title, text, cta }) => (
             <a
               key={href}
               href={href}
-              className="group flex h-full flex-col rounded-4xl bg-card p-7 shadow-card transition-transform hover:-translate-y-1 sm:p-8"
+              className="group flex h-auto w-[86%] shrink-0 snap-start flex-col rounded-4xl bg-card p-7 shadow-card transition-transform hover:-translate-y-1 sm:w-[46%] sm:p-8 md:h-full md:w-auto md:shrink md:snap-align-none"
             >
               <div className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-coral">
                 <Icon className="size-6" />

@@ -846,11 +846,12 @@ function EnglishDogDaycarePage() {
             <div className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Before joining</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">What your dog needs before daycare</h2>
+              <p className="mt-3 text-sm text-forest/65 sm:hidden">Swipe sideways to see all requirements.</p>
             </div>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 sm:gap-5">
+            <div role="region" aria-label="Daycare requirements – swipe sideways" tabIndex={0} className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:mt-10 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0">
               {REQUIREMENTS_EN.map(({ title, text, icon: Icon }) => (
-                <article key={title} className="rounded-3xl border border-forest/10 bg-card p-6 shadow-card sm:p-7">
+                <article key={title} className="w-[86%] shrink-0 snap-start rounded-3xl border border-forest/10 bg-card p-6 shadow-card sm:w-auto sm:shrink sm:p-7">
                   <div className="flex items-center gap-3">
                     <span className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-forest"><Icon className="size-6" aria-hidden /></span>
                     <h3 className="font-display text-lg font-bold text-forest sm:text-xl">{title}</h3>

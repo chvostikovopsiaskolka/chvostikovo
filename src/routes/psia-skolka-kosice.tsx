@@ -15,6 +15,7 @@ import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
+import { Requirements } from "@/components/site/Info";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { MobileDock } from "@/components/site/MobileDock";
@@ -263,8 +264,13 @@ function LeadLandingPage() {
             <button type="button" onClick={() => openLeadModal("lead_landing_pricing_20261028")} className="btn-coral mt-6 inline-flex">
               Chcem sa informovať o škôlke
             </button>
+            <a href="#lead-requirements" className="mt-4 block font-display text-sm font-semibold text-forest underline underline-offset-4 hover:text-coral focus-visible:text-coral">
+              Pozrieť podmienky prijatia
+            </a>
           </div>
         </section>
+
+        <Requirements id="lead-requirements" />
 
         <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />
 
