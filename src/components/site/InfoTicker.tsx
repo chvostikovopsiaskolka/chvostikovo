@@ -101,7 +101,7 @@ export function InfoTicker({ className = "", compact = false, language = "sk" }:
 
   return (
     <section className={`w-full overflow-hidden bg-card ${className}`} aria-label={ariaLabel}>
-      <div className={`group flex items-center overflow-hidden border-y border-border bg-card ${compact ? "h-9" : "h-11 sm:h-12"}`}>
+      <div className={`group flex touch-pan-y items-center overflow-hidden border-y border-border bg-card ${compact ? "h-9" : "h-11 sm:h-12"}`}>
         <div
           ref={trackRef}
           className="info-ticker-track flex w-max items-center lg:group-hover:[animation-play-state:paused]"
