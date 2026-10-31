@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowDown, HeartHandshake, PawPrint, Sparkles, type LucideIcon } from "lucide-react";
@@ -50,6 +50,9 @@ function ReviewCarousel({ reviews }: { reviews: typeof REVIEWS }) {
   const track = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
   const resumeTimer = useRef<number | null>(null);
+  const holdTimer = useRef<number | null>(null);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const touchPaused = useRef(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -93,6 +96,7 @@ function ReviewCarousel({ reviews }: { reviews: typeof REVIEWS }) {
       narrowQuery.removeEventListener("change", updateSpeed);
       window.removeEventListener("resize", updateSpeed);
       if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+      if (holdTimer.current !== null) window.clearTimeout(holdTimer.current);
     };
   }, [isMobile]);
 
@@ -120,17 +124,61 @@ function ReviewCarousel({ reviews }: { reviews: typeof REVIEWS }) {
     }, 8000);
   };
 
+  // Let the browser handle vertical scrolling; only pause on a deliberate hold
+  // or horizontal swipe. No preventDefault() or programmatic page scrolling.
+  const clearHoldTimer = () => {
+    if (holdTimer.current !== null) window.clearTimeout(holdTimer.current);
+    holdTimer.current = null;
+  };
+  const onTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    clearHoldTimer();
+    if (event.touches.length !== 1) return;
+    const finger = event.touches[0]!;
+    touchStart.current = { x: finger.clientX, y: finger.clientY };
+    touchPaused.current = false;
+    holdTimer.current = window.setTimeout(() => {
+      holdTimer.current = null;
+      touchPaused.current = true;
+      pause();
+    }, 500);
+  };
+  const onTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+    const origin = touchStart.current;
+    if (!origin || event.touches.length !== 1) return;
+    const finger = event.touches[0]!;
+    const dx = Math.abs(finger.clientX - origin.x);
+    const dy = Math.abs(finger.clientY - origin.y);
+    if (Math.max(dx, dy) <= 8) return;
+    clearHoldTimer();
+    touchStart.current = null;
+    if (dx > dy) {
+      touchPaused.current = true;
+      pause();
+    } else if (!touchPaused.current) {
+      resume();
+    }
+  };
+  const onTouchFinish = (cancelled = false) => {
+    clearHoldTimer();
+    touchStart.current = null;
+    if (!cancelled && touchPaused.current) pauseForReading();
+    else resume();
+    touchPaused.current = false;
+  };
+
   return (
     <div
       ref={track}
+      data-gesture-track="reviews"
       onMouseEnter={pause}
       onMouseLeave={resume}
-      onTouchStart={pause}
-      onTouchEnd={pauseForReading}
-      onTouchCancel={pauseForReading}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={() => onTouchFinish()}
+      onTouchCancel={() => onTouchFinish(true)}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="relative left-1/2 mt-3 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+      className="relative left-1/2 mt-3 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:auto] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
     >
       {[...reviews, ...reviews].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
