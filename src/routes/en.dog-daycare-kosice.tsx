@@ -259,8 +259,12 @@ function EnglishReviewCarousel() {
     <div
       ref={track}
       data-gesture-track="reviews"
-      onMouseEnter={pause}
-      onMouseLeave={resume}
+      onMouseEnter={() => {
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) pause();
+      }}
+      onMouseLeave={() => {
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) resume();
+      }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={() => onTouchFinish()}
