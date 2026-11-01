@@ -34,7 +34,7 @@
 .concept-back{position:fixed;top:max(14px,env(safe-area-inset-top));left:max(14px,calc(50% - 200px));z-index:3;background:#ffffffc9;border:1px solid #eadfd4;border-radius:12px;padding:10px;color:#8f643e;text-decoration:none;font-size:12px;min-height:44px;display:flex;align-items:center;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}.concept-back:focus-visible{outline:3px solid #e68a3a}
 @keyframes conceptSpin{to{transform:rotate(360deg)}}@keyframes conceptBreathe{50%{transform:scale(1.055);opacity:.8}}@media(prefers-reduced-motion:reduce){.concept-orbit::before,.concept-orbit svg{animation:none}}
 /* Explicit viewport units avoid percentage sizing against iOS's auto-height root. */
-#boot.loading-screen.loading-concept{position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;height:100vh!important;height:100dvh!important;min-height:100svh!important;max-height:none!important;margin:0!important;transform:none!important;z-index:20000!important;overflow:hidden!important;background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}
+#boot.loading-screen.loading-concept{position:fixed!important;inset:0!important;width:auto!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;transform:none!important;z-index:20000!important;overflow:hidden!important;background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}
 #boot.loading-screen.loading-concept.in-app{background:transparent!important}
 .concept-brand{width:min(230px,62vw)}
 /* Animate an actual SVG arc, without relying on a pseudo-element transform. */
@@ -159,7 +159,7 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
         const link = document.createElement('link');
         link.id = 'bellarisMobileStyle';
         link.rel = 'stylesheet';
-        link.href = '/bellaris-admin.css?v=20261101-ios26-axis-v1';
+        link.href = '/bellaris-admin.css?v=20261101-stability-v2';
         link.onload = resolve;
         link.onerror = () => reject(new Error('Bellaris stylesheet unavailable'));
         document.head.appendChild(link);
@@ -200,7 +200,7 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
           // Bellaris is rendered inside this PWA. Its data remains in the
           // separate Bellaris Supabase, protected by staff auth and RLS.
           await loadBellarisStyle();
-          const {openBellarisMobile} = await import('/bellaris-admin.mjs?v=20261101-ios26-axis-v1');
+          const {openBellarisMobile} = await import('/bellaris-admin.mjs?v=20261101-stability-v2');
           await openBellarisMobile(dashboard, returnToPicker);
           bellarisSplash.hidden = true;
           setSurfaceTheme('#f4f7f7');
