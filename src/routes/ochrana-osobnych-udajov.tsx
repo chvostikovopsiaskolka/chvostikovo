@@ -3,7 +3,7 @@ import { EMAIL } from "@/content/site";
 
 const title = "Zásady ochrany osobných údajov | Chvostíkovo";
 const description =
-  "Zásady ochrany osobných údajov psej škôlky Chvostíkovo v Košiciach. Denné stráženie psov s individuálnym prístupom a celodenným dohľadom.";
+  "Zásady ochrany osobných údajov webu a zákazníckej aplikácie Chvostíkovo.";
 
 const BASE_URL = "https://chvostikovo.sk";
 
@@ -35,16 +35,19 @@ function Privacy() {
         ← Späť na hlavnú stránku
       </Link>
       <h1 className="section-title mt-4 text-3xl sm:text-4xl">Zásady ochrany osobných údajov</h1>
+      <p className="mt-2 text-sm text-forest/70">Pre web a zákaznícku aplikáciu Chvostíkovo · aktualizované 1. 11. 2026</p>
 
       <div className="mt-6 space-y-4 text-forest/85">
         <H2>1. Úvod</H2>
         <p>
-          Tieto Zásady ochrany osobných údajov poskytujú informácie o tom, ako spracovávame osobné
-          údaje, ktoré nám poskytujete prostredníctvom webovej stránky www.chvostikovo.sk.
+          Tieto zásady vysvetľujú, ako spracúvame osobné údaje pri používaní webu
+          chvostikovo.sk, jeho formulárov a zákazníckeho portálu Chvostíkovo na
+          app.chvostikovo.sk vrátane mobilnej aplikácie.
         </p>
         <p>
-          Prevádzkovateľom tejto stránky je Marek Leder - Bellaris so sídlom Miškovecká 2 Košice,
-          IČO: 56 447 001 (ďalej len „Prevádzkovateľ“).
+          Prevádzkovateľom je Marek Leder – Bellaris, IČO: 56 447 001,
+          miesto podnikania Miškovecká 1023/2, 040 11 Košice-Juh; prevádzkareň Chvostíkovo:
+          Poľská 2207/6, 040 01 Košice-Juh (ďalej len „Prevádzkovateľ“).
         </p>
 
         <H2>2. Aké osobné údaje spracovávame</H2>
@@ -58,6 +61,17 @@ function Privacy() {
             webovej stránke, cookies, informácie o prehliadači a zariadení.
           </li>
         </ul>
+
+        <p>
+          <strong>Zákaznícka aplikácia:</strong> pri registrácii a správe účtu spracúvame meno a
+          priezvisko, e-mail, telefón, údaje potrebné na prihlásenie a informácie o schválení účtu.
+          Spracúvame aj údaje o psíkovi (napríklad meno, plemeno, vek, váhu, povahu, alergie,
+          zdravotné obmedzenia a očkovania), fotografie psíka a očkovacieho preukazu, rezervácie,
+          návštevy, permanentky, požiadavky na taxi, správy a oznámenia.
+          Pre bezpečnosť a funkčnosť aplikácie sa spracúvajú aj technické údaje, informácie
+          o relácii, záznamy o chybách a pri povolení upozornení identifikátory potrebné
+          na doručovanie push správ.
+        </p>
 
         <H2>3. Účely spracovania osobných údajov</H2>
         <p>Vaše osobné údaje spracovávame na tieto účely:</p>
@@ -76,6 +90,14 @@ function Privacy() {
           </li>
         </ul>
 
+        <p>
+          Zákaznícka aplikácia tieto údaje používa na správu účtu, schvaľovanie prístupu,
+          organizáciu návštev, rezervácií, permanentiek a taxi služby, bezpečnú starostlivosť
+          o psíka a komunikáciu so škôlkou. Dobrovoľné zobrazenie mena a fotografie psíka
+          ostatným majiteľom sa riadi samostatnou nastaviteľnou voľbou v aplikácii.
+          Údaje z registrácie nepoužívame ako automatický súhlas s reklamnými správami.
+        </p>
+
         <H2>4. Právny základ spracovania</H2>
         <p>Osobné údaje spracovávame na základe:</p>
         <ul className="list-disc space-y-2 pl-5">
@@ -93,10 +115,21 @@ function Privacy() {
           </li>
         </ul>
 
+        <p>
+          Vybavenie dopytu a kroky pred uzavretím zmluvy alebo poskytovanie dohodnutej služby
+          môžu vychádzať z čl. 6 ods. 1 písm. b) GDPR, zákonná evidencia z písm. c)
+          a ochrana účtov a právnych nárokov z oprávneného záujmu podľa písm. f),
+          ak sú splnené príslušné podmienky. Samostatný súhlas sa používa len na účely,
+          ktoré ho vyžadujú. Povinné oboznámenie sa s týmito informáciami nie je
+          univerzálnym súhlasom na akékoľvek ďalšie spracovanie.
+        </p>
+
         <H2>5. Uchovávanie osobných údajov</H2>
         <p>
-          Vaše osobné údaje uchovávame po dobu nevyhnutnú na splnenie účelov, na ktoré boli získané,
-          alebo po dobu požadovanú príslušnými právnymi predpismi.
+          Údaje uchovávame počas obdobia potrebného na vybavenie dopytu alebo poskytovanie služby;
+          po skončení zákazníckeho vzťahu iba po čas potrebný na splnenie zákonných povinností
+          a ochranu právnych nárokov. Účtovné záznamy môžu podliehať osobitným lehotám.
+          Technické záznamy uchovávame len na nevyhnutný prevádzkový alebo bezpečnostný účel.
         </p>
 
         <H2>6. Práva dotknutých osôb</H2>
@@ -128,10 +161,26 @@ function Privacy() {
         </ul>
         <p>Svoje práva môžete uplatniť prostredníctvom e-mailu: {EMAIL}.</p>
 
+        <p id="vymazanie-uctu">
+          <strong>Vymazanie zákazníckeho účtu:</strong> o zrušenie účtu a vymazanie súvisiacich
+          osobných údajov môžete požiadať aj bez prihlásenia, e-mailom na{" "}
+          <a href={"mailto:" + EMAIL + "?subject=Ziadost%20o%20vymazanie%20uctu%20Chvostikovo"}
+            className="font-semibold text-coral underline">{EMAIL}</a>.
+          Po overení žiadosti vymažeme údaje, na ktorých ďalšie uchovanie nemáme
+          právny dôvod. Zákonom povinné záznamy uchováme len v nevyhnutnom rozsahu.
+          O postupe vás budeme informovať.
+        </p>
+
         <H2>7. Zdieľanie osobných údajov</H2>
         <p>
-          Vaše údaje nezdieľame s tretími stranami, okrem prípadov, keď je to nevyhnutné na plnenie
-          našich povinností alebo ak to vyžaduje zákon.
+          Zákaznícke kontakty nepredávame ani ich neposkytujeme iným firmám na ich vlastnú reklamu.
+          Na technickej prevádzke sa podieľajú poverení poskytovatelia služieb, najmä Supabase
+          (databáza a prihlasovanie), Vercel (zákaznícky portál), GitHub Pages (verejný web)
+          a podľa využívanej funkcie poskytovatelia e-mailových, SMS a push upozornení.
+          Pri analytických a marketingových technológiách webu môžu údaje spracúvať aj
+          príslušní dodávatelia v rozsahu danom nastaveniami a právnym základom.
+          Údaje poskytujeme príslušným orgánom, ak to vyžaduje zákon.
+          Ak sa údaje prenášajú mimo EHP, použijú sa zodpovedajúce záruky podľa GDPR.
         </p>
 
         <H2>8. Bezpečnosť údajov</H2>
@@ -148,6 +197,12 @@ function Privacy() {
             Pravidlách používania cookies
           </Link>
           .
+        </p>
+
+        <p>
+          Tieto zásady platia aj pre mobilnú aplikáciu Chvostíkovo. Zákazník môže dokument
+          otvoriť bez prihlásenia. Samostatný súhlas so zverejnením mena alebo fotografie
+          psíka ostatným zákazníkom možno v aplikácii kedykoľvek zmeniť.
         </p>
 
         <H2>10. Kontakt</H2>
