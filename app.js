@@ -4418,12 +4418,19 @@ function installVaccinationViewerZoomV244(modal){
     const photo=safePhoto(row.image_path),thumb=el('span','customer-notice-thumb-v363');
     // Keep layout stable without a paw while a photo is still decoding.
     if(photo){
+      const status=el('span','customer-notice-photo-status-v406','Načítavam foto');
+      thumb.append(status);
       const img=el('img');img.alt='';img.decoding='async';img.loading='eager';
       const reveal=()=>{
-        if(thumb.contains(img)&&img.naturalWidth>0)thumb.classList.add('customer-notice-photo-ready-v404');
+        if(!thumb.contains(img)||img.naturalWidth<=0)return;
+        status.remove();
+        thumb.classList.add('customer-notice-photo-ready-v404');
       };
       img.addEventListener('load',reveal,{once:true});
-      img.addEventListener('error',()=>{img.remove();thumb.classList.add('customer-notice-photo-failed-v404')},{once:true});
+      img.addEventListener('error',()=>{
+        img.remove();status.textContent='Foto nedostupné';
+        thumb.classList.add('customer-notice-photo-failed-v404');
+      },{once:true});
       thumb.append(img);img.src=photo;
       if(img.complete&&img.naturalWidth>0)reveal();
     }else{
