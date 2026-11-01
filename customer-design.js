@@ -90,12 +90,11 @@
   function photoNode(dog, className) {
     const el = document.createElement('span'); el.className = className + (dog.sex==='male'?' male':dog.sex==='female'?' female':'');
     el.dataset.friendKey = String(dog.dog_id || dog.key || dog.name);
-    // Paint a stable, meaningful placeholder immediately, even on slow LTE.
-    // The decoded photo overlays it only after a successful load; no extra API request.
-    el.innerHTML = icon('paw');
+    // Keep the tile dimensions stable without a paw over real photo uploads.
+    // Non-photo / consent-hidden friends retain the pre-existing paw marker.
     if (dog.photo_url) {
       const img = document.createElement('img');
-      img.alt = dog.name || 'Psík'; img.decoding='async'; img.loading='lazy';
+      img.alt = dog.name || 'Psík'; img.decoding='async'; img.loading='eager';
       const reveal = async () => {
         try { if (typeof img.decode === 'function') await img.decode(); } catch (_) {}
         if (el.contains(img) && img.naturalWidth > 0) el.classList.add('design-photo-ready-v404');
@@ -104,7 +103,7 @@
       img.addEventListener('error', () => el.classList.add('design-photo-failed-v404'), {once:true});
       el.append(img); img.src = dog.photo_url;
       if (img.complete && img.naturalWidth > 0) void reveal();
-    }
+    } else el.innerHTML = icon('paw');
     el.dataset.photoVersion = String(dog.photo_updated_at || dog.photo_path || dog.photo_url?.split('?')[0] || '');
     return el;
   }
