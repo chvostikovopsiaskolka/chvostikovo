@@ -4418,7 +4418,7 @@ function installVaccinationViewerZoomV244(modal){
     const photo=safePhoto(row.image_path),thumb=el('span','customer-notice-thumb-v363');
     // Keep layout stable without a paw while a photo is still decoding.
     if(photo){
-      const img=el('img');img.alt='';img.decoding='async';img.loading=fromHistory?'lazy':'eager';
+      const img=el('img');img.alt='';img.decoding='async';img.loading='eager';
       const reveal=async()=>{
         try{if(typeof img.decode==='function')await img.decode()}catch(_){}
         if(thumb.contains(img)&&img.naturalWidth>0)thumb.classList.add('customer-notice-photo-ready-v404');
