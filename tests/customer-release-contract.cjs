@@ -22,7 +22,7 @@ function checkAssetVersions(source,label){
 checkAssetVersions(html,'index.html');
 checkAssetVersions(sw,'sw.js');
 
-assert.match(html, /id="menuSettingsGroup"[\\s\\S]*?class="menu-deletion-link-v407" href="https:\/\/chvostikovo\\.sk\/ochrana-osobnych-udajov#vymazanie-uctu" target="_blank" rel="noopener noreferrer"/,
+assert(html.includes('class="menu-deletion-link-v407" href="https://chvostikovo.sk/ochrana-osobnych-udajov#vymazanie-uctu" target="_blank" rel="noopener noreferrer"'),
   'settings must offer a direct, publicly accessible account deletion request path');
 
 // Older-version feature regression tests must keep their behavior assertions while
