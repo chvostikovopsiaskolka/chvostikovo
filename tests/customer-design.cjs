@@ -236,13 +236,19 @@ async function scenario(count){
   assert.equal(w.document.querySelectorAll('.design-vaccine-row').length,count===1?3:4);
   assert.match(w.document.getElementById('customerDesignModalBody').textContent,/Platné ešte/);
   w.document.getElementById('designOpenVaccines').click();assert(!w.document.getElementById('dogDetailsModal').classList.contains('hidden'));assert.equal(w.document.getElementById('dogId').value,String(count===1?1:2));
-  run('closeDogDetails(true)');w.document.querySelector('.design-friends-button').click();
+  run('closeDogDetails(true)');
+  // Opening a photo roster now awaits thumbnail warmup. Simulate instant browser
+  // cache completion so this fixture tests the actual async click flow, not LTE.
+  const originalImageV404=w.Image;
+  w.Image=class{set src(url){this._src=url;queueMicrotask(()=>this.onload?.())}get src(){return this._src}decode(){return Promise.resolve()}};
+  w.document.querySelector('.design-friends-button').click();
+  await new Promise(resolve=>setTimeout(resolve,25));
   assert.match(w.document.getElementById('customerDesignModalBody').textContent,/Kala/);
   assert.match(w.document.getElementById('customerDesignModalBody').textContent,/Prihlásený škôlkar/);
   const modalPhoto=w.document.querySelector('.design-roster-row img');run('renderDog()');assert.equal(w.document.querySelector('.design-roster-row img'),modalPhoto);
   w.document.querySelector('.design-modal-close').click();
   const calendarLinks=w.document.querySelectorAll('#weekDays .design-carousel-friends');assert.equal(calendarLinks.length,1);
-  calendarLinks[0].click();assert.equal(w.document.getElementById('customerDesignModalTitle').textContent,'Kamaráti v škôlke');w.document.querySelector('.design-modal-close').click();
+  calendarLinks[0].click();await new Promise(resolve=>setTimeout(resolve,25));assert.equal(w.document.getElementById('customerDesignModalTitle').textContent,'Kamaráti v škôlke');w.document.querySelector('.design-modal-close').click();w.Image=originalImageV404;
   run("state.data.requests.push({id:71,dog_id:1,reservation_date:'2099-01-06',status:'pending'},{id:72,dog_id:1,reservation_date:'2099-01-07',status:'approved'},{id:73,dog_id:2,reservation_date:'2099-01-07',status:'approved'},{id:74,dog_id:1,reservation_date:'2099-02-01',status:'approved'});renderDog()");
   assert.equal(w.document.querySelectorAll('.design-visit-card').length,3,'one carousel card per date in next two weeks');
   assert.equal(w.document.querySelectorAll('.design-visit-card[data-status=pending] img').length,0,'pending visit reveals no friends');
