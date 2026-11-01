@@ -332,6 +332,29 @@ async function preloadDogVisualV56(data=state.data){
   }));
 }
 
+async function preloadFirstScreenFriendsV404(data=state.data){
+  // No extra backend reads: warm only actual next approved-day thumbnails from
+  // the already authorized availability payload, not the whole dog directory.
+  const approvedDates=[...new Set(futureItems().filter(r=>r.status==='approved').map(r=>r.reservation_date))].slice(0,2);
+  const urls=[...new Set((data?.availability?.days||[])
+    .filter(day=>approvedDates.includes(day.date))
+    .flatMap(day=>(day.dogs||[]).map(d=>d.photo_url).filter(Boolean)))].slice(0,6);
+  if(!urls.length)return;
+  await Promise.allSettled(urls.map(url=>new Promise(resolve=>{
+    const img=new Image();let done=false;
+    const finish=async(ok)=>{
+      if(done)return;done=true;clearTimeout(timer);
+      if(ok&&typeof img.decode==='function')try{await img.decode()}catch(_){}
+      resolve();
+    };
+    const timer=setTimeout(()=>finish(false),2400);
+    img.onload=()=>{void finish(true)};
+    img.onerror=()=>{void finish(false)};
+    img.src=url;
+    if(img.complete&&img.naturalWidth>0)void finish(true);
+  })));
+}
+
 async function settleCustomerFirstPhotosV291(limit=850){
  const images=[...($('appView')?.querySelectorAll('img')||[])].filter(img=>img.getAttribute('src')&&!img.closest('.hidden')).slice(0,24);
  if(!images.length)return;
@@ -357,8 +380,15 @@ function bootstrapCore(showSpinner=true){
     // v291: Keep the existing loader over the first data/photo/notice render.
     // No fake "no notices" flash; never remount an unchanged image after revealing.
     await Promise.race([
-      Promise.allSettled([preloadDogVisualV56(d),loadAnnouncements()]),
-      new Promise(resolve=>setTimeout(resolve,2300))
+      Promise.allSettled([preloadDogVisualV56(d),preloadFirstScreenFriendsV404(d),loadAnnouncements()]),
+      new Promise(resolve=>setTimeout(resolve,2900))
+    ]);
+    // The notice data load already begins its first thumbnail fetch. Let its
+    // already-started image complete when possible, but never trap a user
+    // indefinitely behind a large photo or a broken network connection.
+    if(window.customerPreloadOverviewNoticesV404)await Promise.race([
+      Promise.resolve(window.customerPreloadOverviewNoticesV404()).catch(()=>{}),
+      new Promise(resolve=>setTimeout(resolve,700))
     ]);
     showApp();renderAll();
     await settleCustomerFirstPhotosV291(850);
@@ -4564,6 +4594,10 @@ function installVaccinationViewerZoomV244(modal){
   customerRenderers.announcements=(force=false)=>refresh(force);
   window.openCustomerAnnouncementV363=async(id,beforeOpen)=>{const user=state.session?.user?.id;await refresh(false);if(rowsState.error||!user||state.session?.user?.id!==user)return false;const row=rows().find(r=>Number(r.id)===Number(id));if(!row){toast('Tento oznam už nie je dostupný.');return true;}beforeOpen?.();void openArticle(row,false);return true;};
   addCustomerHook('afterSwitchTab',tab=>{if(tab==='booking'||tab==='menu')void refresh(false)});
+  window.customerPreloadOverviewNoticesV404=()=>Promise.allSettled(
+    rowsState.items.filter(row=>row.show_in_overview===true&&current(row))
+      .slice(0,2).map(row=>{const photo=safePhoto(row.image_path);return photo?preparePhotoV358(photo).promise:Promise.resolve();})
+  );
   window.customerRefreshNoticeOverviewV376=drawOverview;
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(true)});
   window.addEventListener('pageshow',event=>{if(event.persisted&&loggedIn())void refresh(false)});
