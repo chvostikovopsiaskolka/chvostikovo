@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { MapPin, Mail, Phone, Clock, Instagram, Facebook } from "lucide-react";
 import logo from "@/assets/logo.png";
-import bellarisFooterLogo from "@/assets/bellaris-footer-credit.svg";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { LongForm } from "./Forms";
@@ -196,19 +195,30 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
             </div>
             <ContactDetails language={language} />
           </div>
-          <div className="mt-6 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 text-xs lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-x-4">
+          <div className="mt-6 grid grid-cols-[minmax(0,1fr)_minmax(6rem,auto)] items-center gap-x-3 gap-y-3 sm:gap-x-8">
             <nav
               aria-label={isEnglish ? "Legal information" : "Právne informácie"}
-              className="col-span-2 mb-1 flex w-full min-w-0 flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center text-[11px] lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:mb-0 lg:w-auto lg:justify-self-end lg:justify-end lg:gap-x-1.5 lg:whitespace-nowrap lg:text-left"
+              className="grid min-w-0 max-w-[26rem] grid-cols-2 gap-x-2 gap-y-1 break-words text-left text-[10px] leading-snug min-[375px]:text-[11px] sm:gap-x-5 sm:text-xs"
             >
-              <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Cookie settings" : "Nastavenia cookies"}</button>
-              <span aria-hidden="true" className="hidden lg:inline">·</span>
-              <button type="button" onClick={() => setLegalDialog("cookies")} className="underline underline-offset-4 hover:text-cream">Cookies</button>
-              <span aria-hidden="true" className="hidden lg:inline">·</span>
-              <button type="button" onClick={() => setLegalDialog("privacy")} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Privacy" : "Ochrana osobných údajov"}</button>
-              <span aria-hidden="true" className="hidden lg:inline">·</span>
-              <button type="button" onClick={() => setLegalDialog("operator")} className="underline underline-offset-4 hover:text-cream">{isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}</button>
+              <button type="button" onClick={() => setLegalDialog("cookies")} className="flex min-h-11 min-w-0 items-center text-left underline underline-offset-4 hover:text-cream">
+                Cookies
+              </button>
+              <button type="button" onClick={() => setLegalDialog("operator")} className="flex min-h-11 min-w-0 items-center text-left underline underline-offset-4 hover:text-cream">
+                {isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}
+              </button>
+              <button type="button" onClick={() => setLegalDialog("privacy")} className="flex min-h-11 min-w-0 items-center text-left underline underline-offset-4 hover:text-cream">
+                {isEnglish ? "Privacy" : "Ochrana osobných údajov"}
+              </button>
+              <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="flex min-h-11 min-w-0 items-center text-left underline underline-offset-4 hover:text-cream">
+                {isEnglish ? "Cookie settings" : "Nastavenia cookies"}
+              </button>
             </nav>
+            <p className="min-w-0 justify-self-end text-right text-[10px] leading-relaxed sm:text-xs">
+              <span className="block">© {new Date().getFullYear()} Chvostíkovo</span>
+              <span className="block">{isEnglish ? "All rights reserved." : "Všetky práva vyhradené."}</span>
+            </p>
+          </div>
+          <div className="mt-5 border-t border-cream/25 pt-3 text-center">
             <a
               href="https://bellaris.sk/?utm_source=chvostikovo&utm_medium=referral&utm_campaign=footer_credit"
               target="_blank"
@@ -217,15 +227,11 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
                 void trackCookielessInteraction("nav_click", "footer_bellaris_credit", language).catch(() => {});
               }}
               aria-label={isEnglish ? "Website by Bellaris — opens in a new tab" : "Web vytvoril Bellaris — otvorí sa v novej karte"}
-              className="footer-bellaris-liquid relative isolate inline-flex min-h-11 min-w-0 items-center justify-center justify-self-start gap-1 overflow-hidden rounded-2xl px-2 py-2 text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream sm:gap-2 sm:px-4 lg:col-start-1 lg:row-start-1"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 text-xs text-cream/65 transition-colors hover:text-cream focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
             >
-              <span className="relative z-10 shrink-0 whitespace-nowrap text-[11px] font-semibold sm:text-xs">{isEnglish ? "Website by" : "Web vytvoril"}</span>
-              <img src={bellarisFooterLogo} width={84} height={32} loading="lazy" alt="Bellaris" className="relative z-10 h-6 w-auto max-w-[68px] object-contain sm:h-7 sm:max-w-none" />
+              <span>{isEnglish ? "Website by" : "Web vytvoril"}</span>
+              <span className="font-semibold tracking-[0.06em] text-cream/85">Bellaris</span>
             </a>
-            <p className="min-w-0 justify-self-end text-right text-[10px] leading-relaxed sm:text-xs lg:col-start-2 lg:row-start-1 lg:justify-self-center lg:text-center">
-              <span className="block">© {new Date().getFullYear()} Chvostíkovo</span>
-              <span className="block">{isEnglish ? "All rights reserved." : "Všetky práva vyhradené."}</span>
-            </p>
           </div>
         </div>
       </footer>

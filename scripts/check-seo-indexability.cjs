@@ -37,33 +37,28 @@ assert(!mapMarkup.includes("Otvoriť v Google Mapách") && !mapMarkup.includes("
 console.log("[seo] PASS: contact map retained without redundant Google Maps CTA");
 
 
-// Footer: mobile legal links first, then Bellaris on the left and copyright on the right;
-// desktop keeps three columns with centered copyright. UTM and handlers remain unchanged.
+// Footer: 2x2 legal links left + copyright right, then a divider and centered,
+// understated Bellaris attribution (SK/EN). Cookies and analytics handlers unchanged.
 const footerSource = fs.readFileSync("src/components/site/Contact.tsx", "utf8");
-const footerStyles = fs.readFileSync("src/styles.css", "utf8");
 const footerStart = footerSource.indexOf("export function Footer");
-const rowStart = footerSource.indexOf('className="mt-6 grid grid-cols-[auto_minmax(0,1fr)]', footerStart);
-const rowEnd = footerSource.indexOf("</footer>", rowStart);
-const lowerFooter = footerSource.slice(rowStart, rowEnd);
-assert(rowStart > footerStart, "Shared footer layout row missing");
-assert(lowerFooter.includes("lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"), "Desktop must center copyright between equal side columns");
-assert(lowerFooter.indexOf('aria-label={isEnglish ? "Legal information"') < lowerFooter.indexOf("footer_bellaris_credit"), "Mobile legal links must precede the Bellaris badge");
-assert(lowerFooter.indexOf("footer_bellaris_credit") < lowerFooter.indexOf("© {new Date().getFullYear()} Chvostíkovo"), "Mobile Bellaris credit must be left of copyright");
-assert(lowerFooter.includes("col-span-2 mb-1 flex") && lowerFooter.includes("flex-wrap"), "Mobile legal row must wrap above credits");
-assert(lowerFooter.includes("lg:col-start-3 lg:row-start-1"), "Desktop legal links must stay on the right");
-assert(lowerFooter.includes("lg:col-start-1 lg:row-start-1"), "Desktop Bellaris badge must stay on the left");
-assert(lowerFooter.includes('justify-self-end text-right') && lowerFooter.includes('lg:justify-self-center lg:text-center'), "Mobile copyright right / desktop centered");
-assert(lowerFooter.includes('<span className="block">© {new Date().getFullYear()} Chvostíkovo</span>'), "Copyright separate first line missing");
-assert(lowerFooter.includes('<span className="block">{isEnglish ? "All rights reserved." : "Všetky práva vyhradené."}</span>'), "Rights separate second line missing");
-assert(lowerFooter.includes("lg:justify-self-end lg:justify-end"), "Desktop legal links must stay aligned right");
-assert(lowerFooter.includes("footer-bellaris-liquid") && footerStyles.includes("oklch(0.2 0.04 222)"), "Bellaris badge must use petrol-blue brand background");
-assert(lowerFooter.includes("width={84} height={32}"), "Original Bellaris wordmark size changed unexpectedly");
-assert(lowerFooter.includes("min-h-11"), "Footer link touch target must remain at least 44px");
-assert(lowerFooter.includes("utm_source=chvostikovo&utm_medium=referral&utm_campaign=footer_credit"), "Footer UTM attribution changed unexpectedly");
-assert(lowerFooter.includes("footer_bellaris_credit"), "Footer outbound event name changed unexpectedly");
-assert(footerStyles.includes(".footer-bellaris-liquid::before") && footerStyles.includes(".footer-bellaris-liquid::after"), "Liquid surface must retain scoped decorative layers");
-assert(footerStyles.includes("@media (prefers-reduced-motion: reduce)"), "Reduced-motion treatment missing");
-console.log("[seo] PASS: mobile legal first, Bellaris left, copyright right, desktop symmetric, UTM untouched");
+const footerEnd = footerSource.indexOf("</footer>", footerStart);
+const footerContent = footerSource.slice(footerStart, footerEnd);
+assert(footerStart >= 0 && footerEnd > footerStart, "Footer component missing");
+assert(footerContent.includes("grid-cols-[minmax(0,1fr)_minmax(6rem,auto)]"), "Footer right copyright column missing");
+assert(footerContent.includes("max-w-[26rem] grid-cols-2"), "Legal 2x2 layout missing");
+assert(footerContent.includes("justify-self-end text-right"), "Copyright must be right aligned");
+assert(footerContent.includes("border-t border-cream/25 pt-3 text-center"), "Creator credit must be centered below divider");
+assert(footerContent.includes('setLegalDialog("cookies")'), "Cookies legal dialog must work");
+assert(footerContent.includes('setLegalDialog("operator")'), "Operator legal dialog must work");
+assert(footerContent.includes('setLegalDialog("privacy")'), "GDPR legal dialog must work");
+assert(footerContent.includes("chvostikovo-open-cookie-settings"), "Cookie settings must work");
+assert(footerContent.includes("utm_source=chvostikovo&utm_medium=referral&utm_campaign=footer_credit"), "Footer attribution UTM changed");
+assert(footerContent.includes("footer_bellaris_credit"), "Footer event name changed");
+assert(footerContent.includes('isEnglish ? "Website by" : "Web vytvoril"'), "English credit missing");
+assert(footerContent.includes('isEnglish ? "All rights reserved." : "Všetky práva vyhradené."'), "Localized copyright missing");
+assert(footerContent.includes("min-h-11"), "Footer touch targets too small");
+assert(!footerContent.includes("footer-bellaris-liquid"), "Large decorative badge must not return");
+console.log("[seo] PASS: legal links left, copyright right, subtle centered Bellaris credit, UTM and handlers intact");
 
 
 // FAQ route must be crawlable from initial HTML (not only from the SPA 404 fallback).
