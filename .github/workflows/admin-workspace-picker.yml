@@ -28,10 +28,10 @@ jobs:
       - name: Build exact guarded stable admin candidate
         run: |
           export ADMIN_SOURCE="$RUNNER_TEMP/admin-stability.html"
-          node admin-wrapper/build-stability.mjs
+          node admin-wrapper/build-disclosure.mjs
           echo "ADMIN_SOURCE=$ADMIN_SOURCE" >> "$GITHUB_ENV"
           node admin-wrapper/check-assembled.mjs
-          node --test admin-wrapper/admin-lifecycle-patch.test.mjs admin-wrapper/admin-source.test.mjs admin-wrapper/reporting-period.test.mjs
+          node --test admin-wrapper/admin-lifecycle-patch.test.mjs admin-wrapper/admin-source.test.mjs admin-wrapper/reporting-period.test.mjs admin-wrapper/revenue-evidence.test.mjs
       - name: Install isolated regression dependencies
         run: |
           npm install --prefix "$RUNNER_TEMP/admin-stability-runtime" --no-save --no-package-lock jsdom@26.1.0 playwright@1.56.1
@@ -51,3 +51,5 @@ jobs:
           BELLARIS_BROWSER=webkit node admin-wrapper/dock-identity.browser.mjs
           node admin-wrapper/workspace-flow.browser.mjs
           BELLARIS_BROWSER=webkit node admin-wrapper/workspace-flow.browser.mjs
+          node admin-wrapper/revenue-disclosure.browser.mjs
+          BELLARIS_BROWSER=webkit node admin-wrapper/revenue-disclosure.browser.mjs
