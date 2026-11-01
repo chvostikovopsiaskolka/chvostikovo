@@ -925,3 +925,10 @@ html,body{overscroll-behavior:none}
 .design-friend-photo:has(img) img{opacity:0;transition:opacity .14s ease}
 .design-friend-photo.design-photo-ready-v404 img{opacity:1}
 @media(prefers-reduced-motion:reduce){.design-friend-photo:has(img) img{transition:none}}
+
+/* v404: keep announcement cards stable without exposing a half-loaded bitmap. */
+.customer-notice-thumb-v363{position:relative;flex-shrink:0}
+.customer-notice-thumb-v363 img{opacity:0;transition:opacity .14s ease}
+.customer-notice-thumb-v363.customer-notice-photo-ready-v404 img{opacity:1}
+.customer-bulletin-photo-slot-v404{min-height:52px}
+@media(prefers-reduced-motion:reduce){.customer-notice-thumb-v363 img{transition:none}}
