@@ -1,11 +1,11 @@
 /* Bellaris staff dashboard scoped to the installed Chvostikovo admin wrapper. */
 #bellarisDashboard[hidden]{display:none!important}
-#bellarisDashboard{position:fixed;inset:0;z-index:100002;background:#f4f7f7;color:#16383e;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+#bellarisDashboard{position:fixed;inset:0;z-index:100002;background:#f4f7f7;color:#16383e;overflow:hidden;display:grid;grid-template-rows:minmax(0,1fr) auto;overscroll-behavior:none;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 #bellarisDashboard *{box-sizing:border-box}
 #bellarisDashboard button,#bellarisDashboard input{font:inherit}
 #bellarisDashboard button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 #bellarisDashboard button:focus-visible,#bellarisDashboard input:focus-visible{outline:3px solid #218b91;outline-offset:2px}
-#bellarisDashboard .bm-shell{width:min(620px,100%);min-height:100dvh;margin:0 auto;padding:calc(env(safe-area-inset-top) + 20px) 17px calc(env(safe-area-inset-bottom) + 122px)}
+#bellarisDashboard .bm-shell{width:min(620px,100%);min-height:100%;margin:0 auto;padding:calc(env(safe-area-inset-top) + 20px) 17px 20px}
 #bellarisDashboard .bm-header{display:flex;align-items:center;gap:10px;margin:8px 0 18px}
 #bellarisDashboard .bm-header-brand{display:flex;flex-direction:column}
 #bellarisDashboard .bm-logo{display:block;width:140px;height:66px;object-fit:contain;object-position:left center}
@@ -43,7 +43,7 @@
 #bellarisDashboard .bm-coming p,#bellarisDashboard .bm-muted{font-size:13px;color:#6c858a}
 #bellarisDashboard .bm-coming>span{font-size:11px;font-weight:800;color:#3b9292}
 #bellarisDashboard .bm-empty{color:#71878c;font-size:13px;margin:14px 0}
-#bellarisDashboard .bm-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(620px,100%);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:#fff;border-top:1px solid #e2eaea;padding:8px 10px calc(env(safe-area-inset-bottom) + 8px);box-shadow:0 -7px 22px #0b303009;z-index:100005}
+#bellarisDashboard .bm-nav{position:relative;margin:0 auto;width:min(620px,100%);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:#fff;border-top:1px solid #e2eaea;padding:8px 10px calc(env(safe-area-inset-bottom) + 8px);box-shadow:0 -7px 22px #0b303009;z-index:100005}
 #bellarisDashboard .bm-nav button{background:transparent;border:0;padding:13px 3px;min-height:44px;color:#6f878d;font-size:10px;font-weight:750;border-radius:12px}
 #bellarisDashboard .bm-nav button.active{color:#0c706f;background:#e8f6f4}
 #bellarisDashboard .bm-subback{border:0;background:transparent;padding:8px 3px 18px;color:#198a8e;font-weight:700}
@@ -105,14 +105,9 @@
 #bellarisDashboard .bm-cta-source small{display:block;color:#728a91;margin-top:4px;overflow-wrap:anywhere}
 #bellarisDashboard .bm-cta-source b{white-space:nowrap}
 
-/* Root remains viewport-anchored; ONLY bm-scrollport scrolls.
-   Prior position:absolute nav was a descendant of the scrolling root and moved
-   along with scroll content, reproducing an iOS 26 mid-screen dock. */
-#bellarisDashboard{height:100dvh;min-height:0;bottom:auto;overflow:hidden;display:flex;flex-direction:column;overscroll-behavior:none}
-#bellarisDashboard[hidden]{display:none!important}
-#bellarisDashboard .bm-scrollport{flex:1 1 auto;min-height:0;max-width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
-#bellarisDashboard .bm-shell{min-height:100%;padding-bottom:calc(20px + env(safe-area-inset-bottom, 0px))}
-#bellarisDashboard .bm-nav{position:relative;bottom:auto;left:auto;transform:none;flex:0 0 auto;margin:0 auto}
+/* One viewport owner: inset defines height, only its first grid row scrolls. */
+html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidden])){overflow:hidden;overscroll-behavior:none}
+#bellarisDashboard .bm-scrollport{min-height:0;max-width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
 #bellarisDashboard .bm-login-form label.bm-remember{
   display:flex;flex-flow:row nowrap;align-items:center;gap:10px;min-width:0;
   font-size:12px;line-height:1.3;white-space:nowrap;

@@ -119,16 +119,11 @@ function render() {
   if (state.view === 'overview') {
     frame('<div class="bm-intro"><span class="bm-eyebrow">BELLARIS · SPRÁVA</span><h1>Prehľad</h1>' +
       '<p>Záujmy a priebeh projektov na jednom mieste.</p></div>' +
-      '<section class="bm-kpis" aria-label="Štatistiky">' +
-        card(sum.inquiries,'Záujmy','Celkom') +
-        card(sum.activeProjects,'Aktívne projekty','Rozpracované') +
-        card(sum.newInquiries + sum.reviewProjects,'Na kontrolu','Nové záujmy + projekty') +
+      '<section class="bm-section"><div class="bm-heading"><h2>Projekty</h2><button data-bm="projects" type="button">Všetky</button></div>' +
+      (state.projects.length ? state.projects.slice(0,4).map(projectRow).join('') : '<p class="bm-empty">Zatiaľ žiadne projekty.</p>') +
       '</section>' +
       '<section class="bm-section"><div class="bm-heading"><h2>Posledné záujmy</h2><button data-bm="inquiries" type="button">Všetky</button></div>' +
       (state.inquiries.length ? state.inquiries.slice(0,5).map(inquiryRow).join('') : '<p class="bm-empty">Zatiaľ žiadne záujmy.</p>') +
-      '</section>' +
-      '<section class="bm-section"><div class="bm-heading"><h2>Projekty</h2><button data-bm="projects" type="button">Všetky</button></div>' +
-      (state.projects.length ? state.projects.slice(0,4).map(projectRow).join('') : '<p class="bm-empty">Zatiaľ žiadne projekty.</p>') +
       '</section>' +
       renderTrafficPreview());
   } else if (state.view === 'inquiries') {

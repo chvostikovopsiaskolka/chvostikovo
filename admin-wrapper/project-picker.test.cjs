@@ -23,7 +23,7 @@ assert(html.includes('id="bellarisDashboard"'));
 assert(html.includes('class="app-boot loading-screen loading-concept hidden"'));
 assert(html.includes('20261014-admin-pwa-v111'));
 assert(!originalScript.includes('location.assign('),'Bellaris must not redirect to Safari');
-assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261101-ios26-axis-v1')"));
+assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261101-stability-v2')"));
 assert(css.includes('#bellarisDashboard'));
 assert(html.includes('html:has(#boot:not(.hidden))'),'Hidden loader must not leave a cream iOS underlay');
 assert(html.includes('html:has(#bellarisDashboard:not([hidden]))'),'Bellaris safe-area should match its screen');
@@ -46,12 +46,9 @@ assert(moduleSource.includes('← Výber projektu'),'Project chooser belongs ins
 assert(moduleSource.includes('Odoslané záujmy'),'Traffic analytics must distinguish forms from page views');
 assert(!moduleSource.includes('<button class="bm-mini" data-bm="logout"'),'Logout should not be in header');
 
-assert(css.includes('#bellarisDashboard{height:100dvh;min-height:0;bottom:auto;overflow:hidden;display:flex;flex-direction:column'),
-  'Bellaris viewport must not scroll together with its dock');
-assert(css.includes('#bellarisDashboard .bm-scrollport{flex:1 1 auto;min-height:0'),
-  'Only the inner scrollport must scroll');
-assert(css.includes('#bellarisDashboard .bm-nav{position:relative;bottom:auto;left:auto;transform:none'),
-  'Dock must be a sibling of the scrolling content in the viewport flex layout');
+assert(css.includes('display:grid;grid-template-rows:minmax(0,1fr) auto'),'One viewport grid owns scrolling content and sibling dock');
+assert(!css.includes('bottom:auto;overflow:hidden;display:flex'),'No competing vh/flex viewport declaration');
+assert(css.includes('.bm-scrollport{min-height:0'),'Inner scrollport may shrink');
 assert(moduleSource.includes("state.root.innerHTML = '<div class=\"bm-scrollport\"><div class=\"bm-shell\"><header"),
   'Frame must create a dedicated scrolling container');
 assert(moduleSource.includes("'</main></div></div>'"),
@@ -112,7 +109,7 @@ async function simulate(href) {
     })
   };
   const testScript=originalScript.replace(
-    "await import('/bellaris-admin.mjs?v=20261101-ios26-axis-v1')",
+    "await import('/bellaris-admin.mjs?v=20261101-stability-v2')",
     'await window.testImportBellaris()'
   );
   assert.notEqual(testScript,originalScript,'Test import mock inserted');
