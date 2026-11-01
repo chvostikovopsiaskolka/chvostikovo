@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v403';
-const APP_VERSION='2.0.76';
+const APP_BUILD='v404';
+const APP_VERSION='2.0.77';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -332,6 +332,29 @@ async function preloadDogVisualV56(data=state.data){
   }));
 }
 
+async function preloadFirstScreenFriendsV404(data=state.data){
+  // No extra backend reads: warm only actual next approved-day thumbnails from
+  // the already authorized availability payload, not the whole dog directory.
+  const approvedDates=[...new Set(futureItems().filter(r=>r.status==='approved').map(r=>r.reservation_date))].slice(0,2);
+  const urls=[...new Set((data?.availability?.days||[])
+    .filter(day=>approvedDates.includes(day.date))
+    .flatMap(day=>(day.dogs||[]).map(d=>d.photo_url).filter(Boolean)))].slice(0,6);
+  if(!urls.length)return;
+  await Promise.allSettled(urls.map(url=>new Promise(resolve=>{
+    const img=new Image();let done=false;
+    const finish=async(ok)=>{
+      if(done)return;done=true;clearTimeout(timer);
+      if(ok&&typeof img.decode==='function')try{await img.decode()}catch(_){}
+      resolve();
+    };
+    const timer=setTimeout(()=>finish(false),2400);
+    img.onload=()=>{void finish(true)};
+    img.onerror=()=>{void finish(false)};
+    img.src=url;
+    if(img.complete&&img.naturalWidth>0)void finish(true);
+  })));
+}
+
 async function settleCustomerFirstPhotosV291(limit=850){
  const images=[...($('appView')?.querySelectorAll('img')||[])].filter(img=>img.getAttribute('src')&&!img.closest('.hidden')).slice(0,24);
  if(!images.length)return;
@@ -357,8 +380,15 @@ function bootstrapCore(showSpinner=true){
     // v291: Keep the existing loader over the first data/photo/notice render.
     // No fake "no notices" flash; never remount an unchanged image after revealing.
     await Promise.race([
-      Promise.allSettled([preloadDogVisualV56(d),loadAnnouncements()]),
-      new Promise(resolve=>setTimeout(resolve,2300))
+      Promise.allSettled([preloadDogVisualV56(d),preloadFirstScreenFriendsV404(d),loadAnnouncements()]),
+      new Promise(resolve=>setTimeout(resolve,2900))
+    ]);
+    // The notice data load already begins its first thumbnail fetch. Let its
+    // already-started image complete when possible, but never trap a user
+    // indefinitely behind a large photo or a broken network connection.
+    if(window.customerPreloadOverviewNoticesV404)await Promise.race([
+      Promise.resolve(window.customerPreloadOverviewNoticesV404()).catch(()=>{}),
+      new Promise(resolve=>setTimeout(resolve,700))
     ]);
     showApp();renderAll();
     await settleCustomerFirstPhotosV291(850);
@@ -4386,8 +4416,22 @@ function installVaccinationViewerZoomV244(modal){
   function noticeCard(row,fromHistory){
     const b=el('button','customer-bulletin-history-row-v229');b.type='button';b.dataset.announcementId=String(row.id);
     const photo=safePhoto(row.image_path),thumb=el('span','customer-notice-thumb-v363');
-    const paw=()=>{thumb.replaceChildren();thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';};
-    if(photo){const img=el('img');img.src=photo;img.alt='';img.loading='lazy';img.onerror=paw;thumb.append(img);}else paw();
+    // Keep layout stable without a paw while a photo is still decoding.
+    if(photo){
+      const img=el('img');img.alt='';img.decoding='async';img.loading=fromHistory?'lazy':'eager';
+      const reveal=async()=>{
+        try{if(typeof img.decode==='function')await img.decode()}catch(_){}
+        if(thumb.contains(img)&&img.naturalWidth>0)thumb.classList.add('customer-notice-photo-ready-v404');
+      };
+      img.addEventListener('load',()=>{void reveal()},{once:true});
+      img.addEventListener('error',()=>{img.remove();thumb.classList.add('customer-notice-photo-failed-v404')},{once:true});
+      thumb.append(img);img.src=photo;
+      if(img.complete&&img.naturalWidth>0)void reveal();
+    }else{
+      // Keep the existing intentional icon for notices without an image.
+      // For an image URL, never render the icon while the actual photo loads.
+      thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';
+    }
     const content=el('span','customer-notice-content-v363');
     const head=el('span','customer-notice-head-v363');head.append(el('strong','',row.title||'Oznam'));
     if(!row.preview&&!rowsState.read.has(Number(row.id)))head.append(el('span','customer-bulletin-new-v229','Nové'));
@@ -4466,7 +4510,7 @@ function installVaccinationViewerZoomV244(modal){
     img.addEventListener('dblclick',e=>{e.preventDefault();scale=scale>1?1:2;render()});
     zoomModal.scroll.append(img);recordLayer('zoom');zoomModal.overlay.classList.remove('hidden');syncScrollLock();
   }
-  async function openArticle(row,fromHistory){
+  function openArticle(row,fromHistory){
     if(!row||!loggedIn())return;
     ensureModals();
     historyReturn=!!fromHistory;recordLayer('article');$('notificationPopup')?.classList.add('hidden');
@@ -4475,26 +4519,16 @@ function installVaccinationViewerZoomV244(modal){
     articleModal.scroll.replaceChildren();
     const generation=++articleEpochV358,userId=state.session?.user?.id;
     const photo=safePhoto(row.image_path);
-    articleModal.overlay.classList.remove('hidden');syncScrollLock();
-    let prepared=null,photoReady=false;
-    if(photo){
-      const wait=el('p','customer-bulletin-loading-v358','Načítavam oznam…');wait.setAttribute('role','status');articleModal.scroll.append(wait);articleModal.scroll.setAttribute('aria-busy','true');
-      prepared=preparePhotoV358(photo);photoReady=await prepared.promise;
-    }
-    if(generation!==articleEpochV358||userId!==state.session?.user?.id||!loggedIn()||articleModal.overlay.classList.contains('hidden'))return;
-    articleModal.scroll.removeAttribute('aria-busy');articleModal.scroll.replaceChildren();
+    // Show the message and CTA immediately, even when image transfer takes seconds.
     articleModal.scroll.append(el('div','customer-bulletin-article-v229',row.body||''));
-    if(photo&&photoReady){
-      const img=prepared.img;img.className='customer-bulletin-photo-v229';img.alt='Obrázok k oznamu';img.hidden=false;
-      img.onclick=()=>showImage(photo);img.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showImage(photo)}};
-      img.setAttribute('role','button');img.tabIndex=0;img.setAttribute('aria-label','Zväčšiť fotografiu oznamu');
-      articleModal.scroll.append(img);
+    let imageSlot=null;
+    if(photo){
+      imageSlot=el('div','customer-bulletin-photo-slot-v404');
+      const wait=el('p','customer-bulletin-loading-v358','Načítavam fotografiu…');wait.setAttribute('role','status');
+      imageSlot.append(wait);articleModal.scroll.append(imageSlot);
     }
-    else if(photo)articleModal.scroll.append(el('p','customer-bulletin-photo-error-v358','Fotografiu sa nepodarilo načítať. Skúste oznam otvoriť znova.'));
-
     if(row.cta_enabled&&(row.cta_title||row.cta_body||safeLink(row.cta_url))){
-      const cta=el('section','customer-bulletin-cta-v229');
-      cta.append(el('span','heart','♥'));
+      const cta=el('section','customer-bulletin-cta-v229');cta.append(el('span','heart','♥'));
       const body=el('div','content');
       if(row.cta_title)body.append(el('strong','',row.cta_title));
       if(row.cta_body)body.append(el('p','',row.cta_body));
@@ -4505,6 +4539,21 @@ function installVaccinationViewerZoomV244(modal){
     articleModal.scroll.scrollTop=0;
     articleModal.overlay.classList.remove('hidden');syncScrollLock();
     void markRead(row);
+    if(photo&&imageSlot){
+      const prepared=preparePhotoV358(photo);
+      void prepared.promise.then(ok=>{
+        // Ignore stale image resolutions after user/account change or modal close.
+        if(generation!==articleEpochV358||userId!==state.session?.user?.id||!loggedIn()||articleModal.overlay.classList.contains('hidden')||!imageSlot.isConnected)return;
+        imageSlot.replaceChildren();
+        if(ok){
+          const img=prepared.img;img.className='customer-bulletin-photo-v229';img.alt='Obrázok k oznamu';img.hidden=false;
+          img.onclick=()=>showImage(photo);
+          img.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showImage(photo)}};
+          img.setAttribute('role','button');img.tabIndex=0;img.setAttribute('aria-label','Zväčšiť fotografiu oznamu');
+          imageSlot.append(img);
+        }else imageSlot.append(el('p','customer-bulletin-photo-error-v358','Fotografiu sa nepodarilo načítať. Skúste oznam otvoriť znova.'));
+      });
+    }
   }
   function openHistory(refreshData=true){
     if(!loggedIn())return;
@@ -4549,6 +4598,10 @@ function installVaccinationViewerZoomV244(modal){
   customerRenderers.announcements=(force=false)=>refresh(force);
   window.openCustomerAnnouncementV363=async(id,beforeOpen)=>{const user=state.session?.user?.id;await refresh(false);if(rowsState.error||!user||state.session?.user?.id!==user)return false;const row=rows().find(r=>Number(r.id)===Number(id));if(!row){toast('Tento oznam už nie je dostupný.');return true;}beforeOpen?.();void openArticle(row,false);return true;};
   addCustomerHook('afterSwitchTab',tab=>{if(tab==='booking'||tab==='menu')void refresh(false)});
+  window.customerPreloadOverviewNoticesV404=()=>Promise.allSettled(
+    rowsState.items.filter(row=>row.show_in_overview===true&&current(row))
+      .slice(0,2).map(row=>{const photo=safePhoto(row.image_path);return photo?preparePhotoV358(photo).promise:Promise.resolve();})
+  );
   window.customerRefreshNoticeOverviewV376=drawOverview;
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(true)});
   window.addEventListener('pageshow',event=>{if(event.persisted&&loggedIn())void refresh(false)});
