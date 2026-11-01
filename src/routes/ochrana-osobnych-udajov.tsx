@@ -174,13 +174,15 @@ function Privacy() {
         <H2>7. Zdieľanie osobných údajov</H2>
         <p>
           Zákaznícke kontakty nepredávame ani ich neposkytujeme iným firmám na ich vlastnú reklamu.
-          Na technickej prevádzke sa podieľajú poverení poskytovatelia služieb, najmä Supabase
-          (databáza a prihlasovanie), Vercel (zákaznícky portál), GitHub Pages (verejný web)
-          a podľa využívanej funkcie poskytovatelia e-mailových, SMS a push upozornení.
-          Pri analytických a marketingových technológiách webu môžu údaje spracúvať aj
-          príslušní dodávatelia v rozsahu danom nastaveniami a právnym základom.
-          Údaje poskytujeme príslušným orgánom, ak to vyžaduje zákon.
-          Ak sa údaje prenášajú mimo EHP, použijú sa zodpovedajúce záruky podľa GDPR.
+          Na zabezpečenie webu a zákazníckej aplikácie môžu osobné údaje v nevyhnutnom rozsahu
+          spracúvať naši poverení poskytovatelia technických služieb: hostingu a prevádzky
+          webu či aplikácie, databázovej infraštruktúry, prihlasovania a bezpečnosti účtov,
+          ukladania súborov, doručovania e-mailov, SMS a push upozornení a technickej diagnostiky.
+          Pri analytických a marketingových technológiách webu môžu údaje spracúvať
+          poskytovatelia analytických a reklamných služieb podľa príslušného právneho
+          základu a nastavení súkromia. Údaje môžeme poskytnúť aj príslušným orgánom,
+          ak to vyžaduje zákon. Ak dochádza k prenosu údajov mimo Európskeho hospodárskeho
+          priestoru (EHP), používajú sa zodpovedajúce záruky podľa GDPR.
         </p>
 
         <H2>8. Bezpečnosť údajov</H2>

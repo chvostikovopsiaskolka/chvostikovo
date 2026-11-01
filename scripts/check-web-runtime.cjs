@@ -61,19 +61,23 @@ const failures = [];
               await carousel.scrollIntoViewIfNeeded();
               const box = await carousel.boundingBox();
               if (!box) throw new Error('Invisible carousel track');
+              // WebKit's mobile visual viewport makes scrollHeight-innerHeight unreliable.
+              // A carousel well below the top can always be tested by scrolling upward.
               const before = await page.evaluate(() => window.scrollY);
+              const delta = engine === 'webkit' && before > 330 ? -330 : 330;
               if (engine === 'chromium') {
                 // Actual wheel dispatch over the moving track, with scroll chaining.
                 await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-                await page.mouse.wheel(0, 330);
+                await page.mouse.wheel(0, delta);
               } else {
                 // Playwright's mobile WebKit does not support mouse.wheel.
                 // Keep the computed touch-action gate and verify page scroll stability.
-                await page.evaluate(() => window.scrollBy(0, 330));
+                await page.evaluate(dy => window.scrollBy(0, dy), delta);
               }
               await page.waitForTimeout(320);
               const after = await page.evaluate(() => window.scrollY);
-              if (after <= before + 15) throw new Error('Vertical page scroll blocked on carousel ' + i + ': ' + before + ' -> ' + after);
+              if (Math.sign(delta) * (after - before) <= 15)
+                throw new Error('Vertical page scroll blocked on carousel ' + i + ': ' + before + ' -> ' + after);
             }
           }
           if (errors.length) throw new Error(errors.join('; '));

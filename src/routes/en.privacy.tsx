@@ -118,12 +118,14 @@ function EnglishPrivacy() {
         <H2>7. Sharing personal data</H2>
         <p>
           We do not sell customer contacts or share them with other companies for their own advertising.
-          Service providers supporting operations include Supabase (authentication and database),
-          Vercel (customer portal), GitHub Pages (public website) and, where used, messaging,
-          e-mail, SMS and push delivery providers. Website analytics and advertising providers
-          may process data according to the applicable cookie choices and legal basis.
-          Authorities may receive data where required by law. Applicable GDPR safeguards
-          govern transfers outside the European Economic Area.
+          To operate the website and customer app, authorised service providers may process
+          personal data to the extent necessary. These include providers of website and app
+          hosting, database infrastructure, account authentication and security, file storage,
+          e-mail, SMS and push delivery, and technical diagnostics. Website analytics and
+          advertising service providers may also process data in line with the applicable
+          legal basis and privacy settings. We may disclose data to competent authorities
+          where required by law. Where data is transferred outside the European Economic Area,
+          appropriate safeguards under the GDPR apply.
         </p>
 
         <H2>8. Data security</H2>
