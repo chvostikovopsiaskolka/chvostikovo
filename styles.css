@@ -1527,6 +1527,12 @@ html.customer-awaiting-dog-v107 #appView{
 .customer-menu-rows button span{flex:1;font-size:14px;font-weight:680;line-height:1.25}
 .customer-menu-rows button small{display:block;font-size:11px;color:#8a8990;font-weight:500;margin-top:2px}
 .customer-menu-rows button b{font-size:20px;font-weight:500;color:#aaaeb5}
+.customer-menu-rows .menu-deletion-link-v407{display:flex;align-items:center;gap:14px;min-height:52px;border:0;border-top:1px solid #f0e9e5;padding:9px 3px;background:transparent;color:#303b4d;text-align:left;text-decoration:none;font-size:16px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+.customer-menu-rows .menu-deletion-link-v407 svg{flex:0 0 23px;width:23px;height:23px;color:#7d8795}
+.customer-menu-rows .menu-deletion-link-v407 span{flex:1;font-size:14px;font-weight:680;line-height:1.25}
+.customer-menu-rows .menu-deletion-link-v407 b{font-size:20px;font-weight:500;color:#aaaeb5}
+.customer-menu-rows .menu-deletion-link-v407:focus-visible{outline:2px solid #c26136;outline-offset:2px}
+
 .menu-unread{width:9px;height:9px;border-radius:50%;background:#f97316}
 .menu-build-version{margin:auto 0 8px;padding-top:25px;text-align:center;color:#96969e;font-size:12px;overflow-wrap:anywhere}
 .menu-copyright-notice{margin:-4px 0 8px;text-align:center;color:#96969e;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
