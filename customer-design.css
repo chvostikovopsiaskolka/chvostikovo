@@ -932,3 +932,8 @@ html,body{overscroll-behavior:none}
 .customer-notice-thumb-v363.customer-notice-photo-ready-v404 img{opacity:1}
 .customer-bulletin-photo-slot-v404{min-height:52px}
 @media(prefers-reduced-motion:reduce){.customer-notice-thumb-v363 img{transition:none}}
+
+
+/* v406 bulletin thumbnail: never leave an unlabelled empty tile on slow LTE.
+   A finished image hides the text only after its load event (no decode gate). */
+.customer-notice-thumb-v363 .customer-notice-photo-status-v406{font-size:9px;line-height:1.25;text-align:center;padding:3px;max-width:100%;box-sizing:border-box;color:#8f5d78;overflow-wrap:anywhere;pointer-events:none}
