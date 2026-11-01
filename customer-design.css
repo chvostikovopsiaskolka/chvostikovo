@@ -928,7 +928,7 @@ html,body{overscroll-behavior:none}
 
 /* v404: keep announcement cards stable without exposing a half-loaded bitmap. */
 .customer-notice-thumb-v363{position:relative;flex-shrink:0}
-.customer-notice-thumb-v363 img{opacity:0;transition:opacity .14s ease}
-.customer-notice-thumb-v363.customer-notice-photo-ready-v404 img{opacity:1}
+ /* v406: do not suppress the native image render on iOS. Safari may delay or
+    reject a second decode() promise after the image itself has loaded. */
+.customer-notice-thumb-v363 img{display:block;opacity:1}
 .customer-bulletin-photo-slot-v404{min-height:52px}
-@media(prefers-reduced-motion:reduce){.customer-notice-thumb-v363 img{transition:none}}

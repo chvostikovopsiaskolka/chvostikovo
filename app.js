@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v405';
-const APP_VERSION='2.0.78';
+const APP_BUILD='v406';
+const APP_VERSION='2.0.79';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -4411,25 +4411,27 @@ function installVaccinationViewerZoomV244(modal){
     const saved=rows();
     if(!saved.length){host.append(el('p','customer-bulletin-history-empty-v229',rowsState.error?'Oznamy sa momentálne nepodarilo načítať.':!rowsState.at?'Načítavam oznamy…':'Zatiaľ nemáte žiadne oznamy.'));if(rowsState.error){const retry=el('button','btn secondary','Skúsiť znova');retry.type='button';retry.onclick=()=>refresh(true);host.append(retry);}return;}
     if(rowsState.error)host.append(el('p','','Oznamy sa nepodarilo obnoviť. Zobrazené sú naposledy načítané údaje.'));
-    saved.forEach(row=>host.append(noticeCard(row,true)));
+    // Immediately fetch the first visible archive thumbnails on iOS Safari.
+    // Keep later offscreen items lazy to avoid downloading the entire archive.
+    saved.forEach((row,i)=>host.append(noticeCard(row,true,i<3)));
   }
-  function noticeCard(row,fromHistory){
+  function noticeCard(row,fromHistory,priority=false){
     const b=el('button','customer-bulletin-history-row-v229');b.type='button';b.dataset.announcementId=String(row.id);
     const photo=safePhoto(row.image_path),thumb=el('span','customer-notice-thumb-v363');
-    // Keep layout stable without a paw while a photo is still decoding.
     if(photo){
-      const img=el('img');img.alt='';img.decoding='async';img.loading=fromHistory?'lazy':'eager';
-      const reveal=async()=>{
-        try{if(typeof img.decode==='function')await img.decode()}catch(_){}
-        if(thumb.contains(img)&&img.naturalWidth>0)thumb.classList.add('customer-notice-photo-ready-v404');
-      };
-      img.addEventListener('load',()=>{void reveal()},{once:true});
-      img.addEventListener('error',()=>{img.remove();thumb.classList.add('customer-notice-photo-failed-v404')},{once:true});
+      const img=el('img');img.alt='';img.decoding='async';
+      // An archive is inside a dynamically opened scrollable modal. WebKit can
+      // defer lazy images there indefinitely. Load first visible cards eagerly.
+      img.loading=!fromHistory||priority?'eager':'lazy';
+      if(!fromHistory||priority)img.fetchPriority='high';
+      img.addEventListener('error',()=>{
+        img.remove();thumb.classList.add('customer-notice-photo-failed-v406');
+      },{once:true});
+      // Never hide the bitmap behind an extra decode() promise. The browser
+      // paints it when available, including images already in its HTTP cache.
       thumb.append(img);img.src=photo;
-      if(img.complete&&img.naturalWidth>0)void reveal();
     }else{
-      // Keep the existing intentional icon for notices without an image.
-      // For an image URL, never render the icon while the actual photo loads.
+      // Keep the existing intentional icon only for notices with no photo.
       thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';
     }
     const content=el('span','customer-notice-content-v363');
