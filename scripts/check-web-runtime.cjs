@@ -61,13 +61,10 @@ const failures = [];
               await carousel.scrollIntoViewIfNeeded();
               const box = await carousel.boundingBox();
               if (!box) throw new Error('Invisible carousel track');
-              // A lower carousel can already be at the document bottom after scrollIntoViewIfNeeded.
-              // Choose an available scroll direction; a zero movement is still a regression.
-              const { before, maxScroll } = await page.evaluate(() => ({
-                before: window.scrollY,
-                maxScroll: Math.max(0, document.scrollingElement.scrollHeight - window.innerHeight),
-              }));
-              const delta = maxScroll - before > 350 ? 330 : -330;
+              // WebKit's mobile visual viewport makes scrollHeight-innerHeight unreliable.
+              // A carousel well below the top can always be tested by scrolling upward.
+              const before = await page.evaluate(() => window.scrollY);
+              const delta = engine === 'webkit' && before > 330 ? -330 : 330;
               if (engine === 'chromium') {
                 // Actual wheel dispatch over the moving track, with scroll chaining.
                 await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
