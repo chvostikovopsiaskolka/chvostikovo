@@ -23,7 +23,7 @@ assert(html.includes('id="bellarisDashboard"'));
 assert(html.includes('class="app-boot loading-screen loading-concept hidden"'));
 assert(html.includes('20261014-admin-pwa-v111'));
 assert(!originalScript.includes('location.assign('),'Bellaris must not redirect to Safari');
-assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261101-stability-v2')"));
+assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261101-dock-v3')"));
 assert(css.includes('#bellarisDashboard'));
 assert(html.includes('html:has(#boot:not(.hidden))'),'Hidden loader must not leave a cream iOS underlay');
 assert(html.includes('html:has(#bellarisDashboard:not([hidden]))'),'Bellaris safe-area should match its screen');
@@ -80,7 +80,7 @@ async function simulate(href) {
   const elements=Object.fromEntries(
     ['projectPicker','boot','bellarisSplash','bellarisDashboard','chooseChvostikovo','chooseBellaris','bootText'].map(id=>[
       id,{hidden:id==='bellarisSplash'||id==='bellarisDashboard',listeners:{},
-        classList:{removed:[],remove(x){this.removed.push(x)}},
+        classList:{removed:[],added:[],remove(...x){this.removed.push(...x)},add(...x){this.added.push(...x)}},
         addEventListener(evt,fn){this.listeners[evt]=fn},
         textContent:'',innerHTML:''}
     ])
@@ -109,7 +109,7 @@ async function simulate(href) {
     })
   };
   const testScript=originalScript.replace(
-    "await import('/bellaris-admin.mjs?v=20261101-stability-v2')",
+    "await import('/bellaris-admin.mjs?v=20261101-dock-v3')",
     'await window.testImportBellaris()'
   );
   assert.notEqual(testScript,originalScript,'Test import mock inserted');
@@ -144,7 +144,7 @@ async function simulate(href) {
   await first.flush();
   assert.equal(first.fetched,1);
   assert.equal(first.elements.projectPicker.hidden,true);
-  assert.deepEqual(first.elements.boot.classList.removed,['hidden']);
+  assert.deepEqual(first.elements.boot.classList.removed,['hidden','load-failed']);
   assert(first.written.includes('Chvostíkovo'));
   assert(first.written.includes('html:has(#appBoot:not(.hidden))'),
     'Chvostikovo login safe-area should stop painting boot-white after boot hides');

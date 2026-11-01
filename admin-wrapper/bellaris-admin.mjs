@@ -74,6 +74,12 @@ const card = (value,label,details='') => '<div class="bm-kpi"><strong>' + value 
 function frame(content, {login=false}={}) {
   // The inner scrollport moves independently. Its sibling dock never scrolls
   // with the document (iOS 26 WebKit can also mispaint fixed bottom controls).
+  const existing=state.root.querySelector('.bm-main');
+  if(existing&&!login&&state.user&&state.root.querySelector('.bm-nav')){
+    existing.innerHTML=content;
+    state.root.querySelectorAll('.bm-nav [data-bm]').forEach(button=>{const active=button.dataset.bm===state.view;button.classList.toggle('active',active);button.setAttribute('aria-current',active?'page':'false');});
+    return;
+  }
   state.root.innerHTML = '<div class="bm-scrollport"><div class="bm-shell"><header class="bm-header"><div class="bm-header-brand">' + logo +
     '</div></header>' +
     '<main class="bm-main">' + content + '</main></div></div>' +
@@ -409,7 +415,7 @@ async function handleClick(event) {
   if(action==='back'){state.onBack();return;}
   if(action==='logout'){state.busy=true;try{await state.client.auth.signOut();state.user=null;state.view='overview';renderLogin();}finally{state.busy=false;}return;}
   if(action==='refresh'){await refresh();return;}
-  if(['overview','inquiries','projects','traffic','menu'].includes(action)){state.view=action;render();return;}
+  if(['overview','inquiries','projects','traffic','menu'].includes(action)){state.view=action;render();const scroll=state.root.querySelector('.bm-scrollport');if(scroll)scroll.scrollTop=0;return;}
   if(action==='cta-detail'&&state.view==='traffic'){
     let label='';
     try {label=decodeURIComponent(button.dataset.label||'');} catch {return;}

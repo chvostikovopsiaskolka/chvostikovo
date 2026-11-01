@@ -12,8 +12,9 @@
   <link rel="manifest" href="/manifest.webmanifest?v=20261031-admin-both-v2">
   <title>Chvostíkovo</title>
   <style>
-    html,body{margin:0;min-height:100%;background:#fffaf5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    #boot{position:fixed;inset:0;z-index:99999;display:grid;place-content:center;justify-items:center;gap:16px;padding:24px;background:#fff;color:#6b7280;text-align:center}
+    html,body{margin:0;min-height:100svh;background:#fffaf5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{position:relative}
+    #boot{position:absolute;inset:0;z-index:99999;display:grid;place-content:center;justify-items:center;gap:16px;padding:24px;background:#fff;color:#6b7280;text-align:center}
     .boot-mark{position:relative;width:54px;height:54px;display:grid;place-items:center}
     .boot-ring{position:absolute;inset:0;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;animation:boot-spin .8s linear infinite}
     .boot-paw{position:relative;z-index:1;font-size:21px;line-height:1}
@@ -33,8 +34,8 @@
 .concept-caption{font-size:14px;color:#907866;margin:0;letter-spacing:.1px}.concept-note{position:absolute;bottom:max(30px,env(safe-area-inset-bottom));font-size:10px;color:#b09b8c;letter-spacing:1px}
 .concept-back{position:fixed;top:max(14px,env(safe-area-inset-top));left:max(14px,calc(50% - 200px));z-index:3;background:#ffffffc9;border:1px solid #eadfd4;border-radius:12px;padding:10px;color:#8f643e;text-decoration:none;font-size:12px;min-height:44px;display:flex;align-items:center;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}.concept-back:focus-visible{outline:3px solid #e68a3a}
 @keyframes conceptSpin{to{transform:rotate(360deg)}}@keyframes conceptBreathe{50%{transform:scale(1.055);opacity:.8}}@media(prefers-reduced-motion:reduce){.concept-orbit::before,.concept-orbit svg{animation:none}}
-/* Explicit viewport units avoid percentage sizing against iOS's auto-height root. */
-#boot.loading-screen.loading-concept{position:fixed!important;inset:0!important;width:auto!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;transform:none!important;z-index:20000!important;overflow:hidden!important;background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}
+/* The wrapper document owns a real viewport-height canvas before either app loads. */
+#boot.loading-screen.loading-concept{position:absolute!important;inset:0!important;width:auto!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;transform:none!important;z-index:20000!important;overflow:hidden!important;background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}
 #boot.loading-screen.loading-concept.in-app{background:transparent!important}
 .concept-brand{width:min(230px,62vw)}
 /* Animate an actual SVG arc, without relying on a pseudo-element transform. */
@@ -60,8 +61,8 @@
 #boot.in-app .concept-orbit>.concept-paw>svg{width:100%;height:100%}
 @media(prefers-reduced-motion:reduce){.concept-orbit>.concept-paw{will-change:auto}}
 
-#boot{padding:0!important;z-index:99999!important;width:auto!important;height:auto!important;min-height:0!important;inset:0!important}html:has(#boot:not(.hidden)),body:has(#boot:not(.hidden)){background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}#bootText{font-size:14px;color:#991b1b;max-width:300px}</style><style id="admin-workspace-picker-v1">
-#projectPicker,#bellarisSplash{position:fixed;inset:0;z-index:100001;background:#fff;color:#243047;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:auto;padding:calc(22px + env(safe-area-inset-top)) 20px calc(26px + env(safe-area-inset-bottom));}
+#boot{padding:0!important;z-index:99999!important;width:auto!important;height:auto!important;min-height:0!important;inset:0!important}html:has(#boot:not(.hidden)),body:has(#boot:not(.hidden)){background:radial-gradient(ellipse at 80% 20%,#fde9f180,transparent 65%),radial-gradient(ellipse at 10% 90%,#ffe3c980,transparent 65%),#fffaf5!important}#bootText{font-size:14px;color:#991b1b;max-width:300px}.workspace-load-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}.workspace-load-actions button{min-height:44px;padding:10px 15px;border:1px solid #d8b99d;border-radius:12px;background:#fffaf5;color:#604431;font:inherit;cursor:pointer;touch-action:manipulation}#boot.load-failed .concept-orbit{display:none}</style><style id="admin-workspace-picker-v1">
+#projectPicker,#bellarisSplash{position:absolute;inset:0;z-index:100001;background:#fff;color:#243047;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:auto;padding:calc(22px + env(safe-area-inset-top)) 20px calc(26px + env(safe-area-inset-bottom));}
 #projectPicker[hidden],#bellarisSplash[hidden]{display:none!important}
 #projectPicker{display:flex;align-items:center;justify-content:center}
 .workspace-inner{width:min(440px,100%);margin:auto;display:grid;gap:14px}
@@ -84,7 +85,7 @@ html:has(#projectPicker:not([hidden])),body:has(#projectPicker:not([hidden])){ba
    retain the cream underlay behind the white or Bellaris screen. */
 html:has(#bellarisSplash:not([hidden])),body:has(#bellarisSplash:not([hidden])){background:#fff!important}
 html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidden])){background:#f4f7f7!important}
-#projectPicker,#bellarisSplash{min-height:100vh;min-height:100dvh}
+#projectPicker,#bellarisSplash{box-sizing:border-box;min-height:0}
 @media(max-width:370px){.workspace-card{min-height:120px;padding:18px 15px}.workspace-logo-chvo{max-width:150px}.workspace-logo-bellaris{max-width:165px}}
 @media(prefers-reduced-motion:reduce){.workspace-card:active{transform:none}}
 </style></head>
@@ -112,7 +113,7 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
   const arcs=[...document.querySelectorAll('.concept-ring-arc')];
   const paws=[...document.querySelectorAll('.concept-orbit>.concept-paw')];
   let frame=0,previous=0,phase=0,breathe=0;
-  const visible=arc=>arc.isConnected&&!document.hidden&&!arc.closest('#boot')?.classList.contains('hidden');
+  const visible=arc=>arc.isConnected&&!document.hidden&&!arc.closest('#boot')?.classList.contains('hidden')&&!arc.closest('#boot')?.classList.contains('load-failed');
   const draw=time=>{
     frame=0;
     if(!arcs.some(visible)){previous=0;return;}
@@ -149,6 +150,7 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
       const setSurfaceTheme = color => { if (themeColor) themeColor.setAttribute('content',color); };
       const returnToPicker = () => {
         dashboard.hidden = true;
+        boot.classList.add('hidden');
         bellarisSplash.hidden = true;
         picker.hidden = false;
         setSurfaceTheme('#ffffff');
@@ -159,7 +161,7 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
         const link = document.createElement('link');
         link.id = 'bellarisMobileStyle';
         link.rel = 'stylesheet';
-        link.href = '/bellaris-admin.css?v=20261101-stability-v2';
+        link.href = '/bellaris-admin.css?v=20261101-dock-v3';
         link.onload = resolve;
         link.onerror = () => reject(new Error('Bellaris stylesheet unavailable'));
         document.head.appendChild(link);
@@ -170,7 +172,9 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
         started = true;
         picker.hidden = true;
         setSurfaceTheme('#fffaf5');
-        boot.classList.remove('hidden');
+        boot.classList.remove('hidden','load-failed');
+        document.getElementById('chvoLoadActions')?.remove();
+        const status=document.getElementById('bootText');if(status)status.textContent='';
         try {
           const r = await fetch('https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-frontend?v=20261014-admin-pwa-v111', {cache:'no-store'});
           if (!r.ok) throw new Error('server ' + r.status);
@@ -186,7 +190,15 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
           document.open();document.write(html);document.close();
         } catch (e) {
           const t = document.getElementById('bootText');
-          if (t) t.textContent = 'Appka sa nenačítala: ' + (e.message || e);
+          started=false;boot.classList.add('load-failed');
+          if (t) {
+            t.textContent = 'Appka sa nenačítala. Skontrolujte pripojenie a skúste znova.';
+            t.setAttribute('role','alert');
+            const actions=document.createElement('div');actions.id='chvoLoadActions';actions.className='workspace-load-actions';
+            const retry=document.createElement('button');retry.type='button';retry.id='chvoLoadRetry';retry.textContent='Skúsiť znova';retry.addEventListener('click',()=>void loadChvostikovo());
+            const back=document.createElement('button');back.type='button';back.textContent='Výber prostredia';back.addEventListener('click',returnToPicker);
+            actions.append(retry,back);t.parentElement.appendChild(actions);
+          }
         }
       }
       document.getElementById('chooseChvostikovo').addEventListener('click', loadChvostikovo);
@@ -200,7 +212,7 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
           // Bellaris is rendered inside this PWA. Its data remains in the
           // separate Bellaris Supabase, protected by staff auth and RLS.
           await loadBellarisStyle();
-          const {openBellarisMobile} = await import('/bellaris-admin.mjs?v=20261101-stability-v2');
+          const {openBellarisMobile} = await import('/bellaris-admin.mjs?v=20261101-dock-v3');
           await openBellarisMobile(dashboard, returnToPicker);
           bellarisSplash.hidden = true;
           setSurfaceTheme('#f4f7f7');
