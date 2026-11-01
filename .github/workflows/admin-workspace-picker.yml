@@ -53,3 +53,5 @@ jobs:
           BELLARIS_BROWSER=webkit node admin-wrapper/workspace-flow.browser.mjs
           node admin-wrapper/revenue-disclosure.browser.mjs
           BELLARIS_BROWSER=webkit node admin-wrapper/revenue-disclosure.browser.mjs
+          node admin-wrapper/calendar.browser.mjs
+          BELLARIS_BROWSER=webkit node admin-wrapper/calendar.browser.mjs
