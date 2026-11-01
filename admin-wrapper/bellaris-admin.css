@@ -151,3 +151,8 @@
 #bellarisDashboard .bm-axis-y{font-size:13px;font-weight:750;fill:#526b70;font-family:inherit}
 #bellarisDashboard .bm-axis-x{font-size:11px;fill:#728a91;font-family:inherit}
 #bellarisDashboard .bm-chart-note{font-size:11px;color:#6e868c;margin:4px 0 10px}
+
+#bellarisDashboard .bm-funnel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+#bellarisDashboard .bm-funnel>div{display:flex;flex-direction:column;gap:6px;min-width:0;padding:12px;background:#f4f8f8;border-radius:11px}
+#bellarisDashboard .bm-funnel span{font-size:11px;line-height:1.4;color:#657f85}
+#bellarisDashboard .bm-funnel strong{font-size:21px;color:#17393d;font-variant-numeric:tabular-nums}
