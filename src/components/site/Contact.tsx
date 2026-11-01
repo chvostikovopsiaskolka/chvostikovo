@@ -198,7 +198,7 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
           <div className="mt-6 grid grid-cols-[minmax(0,1fr)_minmax(6rem,auto)] items-center gap-x-3 gap-y-3 sm:gap-x-8">
             <nav
               aria-label={isEnglish ? "Legal information" : "Právne informácie"}
-              className="grid min-w-0 max-w-[26rem] grid-cols-2 gap-x-2 gap-y-1 text-left text-[10px] leading-snug sm:gap-x-5 sm:text-xs"
+              className="grid min-w-0 max-w-[26rem] grid-cols-2 gap-x-2 gap-y-1 break-words text-left text-[10px] leading-snug min-[375px]:text-[11px] sm:gap-x-5 sm:text-xs"
             >
               <button type="button" onClick={() => setLegalDialog("cookies")} className="flex min-h-11 min-w-0 items-center text-left underline underline-offset-4 hover:text-cream">
                 Cookies
