@@ -1,3 +1,4 @@
+import {collectViewportDiagnostics} from './viewport-diagnostics.mjs';
 // Bellaris staff dashboard inside the existing Chvostikovo admin PWA.
 // Public Bellaris config is loaded from the existing portal only after selection.
 // Never share auth tokens, project data, service-role keys or session state with Chvostikovo.
@@ -149,6 +150,7 @@ function render() {
       '<p>Ovládanie pracovného priestoru Bellaris.</p></div><section class="bm-section bm-menu">' +
       '<button type="button" data-bm="refresh">Obnoviť údaje <span aria-hidden="true">↻</span></button>' +
       '<button type="button" data-bm="back">Výber projektu <span aria-hidden="true">›</span></button>' +
+      '<button type="button" data-bm="viewport-diagnostics">Skopírovať diagnostiku rozloženia <span aria-hidden="true">↗</span></button><p id="bmViewportStatus" role="status"></p><textarea id="bmViewportReport" aria-label="Diagnostika rozmerov obrazovky" readonly hidden style="width:100%;min-height:160px;font-size:16px"></textarea>'+
       '<button type="button" data-bm="logout">Odhlásiť Bellaris <span aria-hidden="true">↪</span></button>' +
       '</section>');
   } else if (state.view === 'inquiry') {
@@ -414,6 +416,7 @@ async function handleClick(event) {
   const action=button.dataset.bm;
   if(action==='back'){state.onBack();return;}
   if(action==='logout'){state.busy=true;try{await state.client.auth.signOut();state.user=null;state.view='overview';renderLogin();}finally{state.busy=false;}return;}
+  if(action==='viewport-diagnostics'){const report=JSON.stringify(collectViewportDiagnostics(),null,2),output=state.root.querySelector('#bmViewportReport'),status=state.root.querySelector('#bmViewportStatus');output.value=report;output.hidden=false;try{await navigator.clipboard.writeText(report);status.textContent='Diagnostika skopírovaná. Vložte ju do chatu.';}catch{output.focus();output.select();status.textContent='Skopírujte označený text a vložte ho do chatu.';}return;}
   if(action==='refresh'){await refresh();return;}
   if(['overview','inquiries','projects','traffic','menu'].includes(action)){state.view=action;render();const scroll=state.root.querySelector('.bm-scrollport');if(scroll)scroll.scrollTop=0;return;}
   if(action==='cta-detail'&&state.view==='traffic'){
