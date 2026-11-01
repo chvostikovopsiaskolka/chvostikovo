@@ -52,7 +52,7 @@ async function ready(f){await f.run('window.runCustomerOnboardingV75()');await t
   f.run('Date.now=()=>new Date().getTime()+61000;loadAnnouncements()');await tick(30);
   click(f,'customerAnnouncementsV363');await tick(30);
   const buttons=f.w.document.querySelectorAll('.customer-bulletin-history-row-v229');assert.equal(buttons.length,2);
-  buttons[0].click();assert.match(f.w.document.getElementById('customerBulletinArticleV229').textContent,/Načítavam oznam/);assert(!f.w.document.querySelector('.customer-bulletin-article-v229'));
+  buttons[0].click();assert.match(f.w.document.getElementById('customerBulletinArticleV229').textContent,/Načítavam fotografiu/);assert.equal(f.w.document.querySelector('.customer-bulletin-article-v229').textContent,'Article text','text must appear immediately while photo loads');
   const photo=f.images.find(img=>img.src.includes('synthetic/photo'));photo.onload();await tick(30);
   assert.equal(f.w.document.querySelector('.customer-bulletin-article-v229').textContent,'Article text');assert.equal(f.w.document.querySelector('.customer-bulletin-photo-v229'),photo);
   photo.click();assert(!f.w.document.getElementById('customerBulletinZoomV229').classList.contains('hidden'));
@@ -64,6 +64,6 @@ async function ready(f){await f.run('window.runCustomerOnboardingV75()');await t
   f.images.filter(img=>img.src.includes('synthetic/other')).at(-1).onload();await tick(30);assert(f.w.document.getElementById('customerBulletinArticleV229').classList.contains('hidden'));
   buttons[0].click();await tick(30);assert(f.w.document.querySelector('.customer-bulletin-photo-v229'));
   f.run('clearSession()');assert(f.w.document.getElementById('customerBulletinArticleV229').classList.contains('hidden'));
-  assert.deepEqual(f.errors,[]);console.log('PASS notice preloading, atomic text+decoded photo, image-error fallback/retry, zoom, close/race/cache/logout');
+  assert.deepEqual(f.errors,[]);console.log('PASS notice preloading, immediate text and async decoded photo, image-error fallback/retry, zoom, close/race/cache/logout');
  }finally{f.w.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -4,7 +4,7 @@ on:
   push:
     branches: [feat/capacitor-android-v361]
   pull_request:
-    branches: [customer-portal-production, feat/capacitor-android-v361]
+    branches: [customer-portal-production, feat/capacitor-android-v361, codex/android-welcome-v403]
     paths: ['mobile/**', 'app.js', 'back-swipe.js', 'email-confirmed.js', '.github/workflows/android-capacitor.yml']
 permissions:
   contents: read
@@ -38,6 +38,7 @@ jobs:
           node tests/customer-native-schema-v393.cjs
           node tests/customer-mobile-v393.cjs
           node tests/customer-design.cjs
+          node tests/customer-image-network-v404.cjs
           node tests/customer-confirm-return-v155.cjs
           node tests/customer-guide-v358.cjs
       - name: Compile debug APK and unsigned release bundle
