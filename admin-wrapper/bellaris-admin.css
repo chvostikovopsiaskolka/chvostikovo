@@ -1,6 +1,6 @@
 /* Bellaris staff dashboard scoped to the installed Chvostikovo admin wrapper. */
 #bellarisDashboard[hidden]{display:none!important}
-#bellarisDashboard{position:fixed;inset:0;z-index:100002;background:#f4f7f7;color:#16383e;overflow:hidden;display:grid;grid-template-rows:minmax(0,1fr) auto;overscroll-behavior:none;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+#bellarisDashboard{position:relative;width:100%;height:100svh;height:100dvh;z-index:100002;background:#f4f7f7;color:#16383e;overflow:hidden;display:grid;grid-template-rows:minmax(0,1fr) auto;overscroll-behavior:none;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 #bellarisDashboard *{box-sizing:border-box}
 #bellarisDashboard button,#bellarisDashboard input{font:inherit}
 #bellarisDashboard button{cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -105,8 +105,8 @@
 #bellarisDashboard .bm-cta-source small{display:block;color:#728a91;margin-top:4px;overflow-wrap:anywhere}
 #bellarisDashboard .bm-cta-source b{white-space:nowrap}
 
-/* One viewport owner: inset defines height, only its first grid row scrolls. */
-html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidden])){overflow:hidden;overscroll-behavior:none}
+/* The document owns the viewport. The dock is a grid row, never a fixed WebKit layer. */
+html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidden])){margin:0;overflow:hidden;overscroll-behavior:none}
 #bellarisDashboard .bm-scrollport{min-height:0;max-width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
 #bellarisDashboard .bm-login-form label.bm-remember{
   display:flex;flex-flow:row nowrap;align-items:center;gap:10px;min-width:0;
