@@ -72,12 +72,13 @@ const humanDate = value => {
 };
 const card = (value,label,details='') => '<div class="bm-kpi"><strong>' + value + '</strong><span>' + escapeText(label) + '</span><small>' + escapeText(details) + '</small></div>';
 function frame(content, {login=false}={}) {
-  state.root.innerHTML = '<div class="bm-shell"><header class="bm-header"><div class="bm-header-brand">' + logo +
+  // The inner scrollport moves independently. Its sibling dock never scrolls
+  // with the document (iOS 26 WebKit can also mispaint fixed bottom controls).
+  state.root.innerHTML = '<div class="bm-scrollport"><div class="bm-shell"><header class="bm-header"><div class="bm-header-brand">' + logo +
     '</div></header>' +
-    '<main class="bm-main">' + content + '</main>' +
+    '<main class="bm-main">' + content + '</main></div></div>' +
     (!login && state.user ? '<nav class="bm-nav" aria-label="Bellaris sekcie">' +
-      nav('overview','Prehľad') + nav('inquiries','Záujmy') + nav('projects','Projekty') + nav('traffic','Návštevnosť') + nav('menu','Menu') + '</nav>' : '') +
-    '</div>';
+      nav('overview','Prehľad') + nav('inquiries','Záujmy') + nav('projects','Projekty') + nav('traffic','Návštevnosť') + nav('menu','Menu') + '</nav>' : '');
 }
 function nav(view,label) {
   return '<button type="button" data-bm="' + view + '" class="' + (state.view === view ? 'active' : '') +
@@ -211,19 +212,29 @@ export function trafficSummary(rows, days=30) {
     byDay:[...byDay].sort((a,b)=>a[0].localeCompare(b[0]))};
 }
 function lineChart(points) {
-  const max=Math.max(1,...points.map(x=>x[1]));
-  const width=460,height=185,pad=18;
+  if (!points.length) return '<p class="bm-empty">Za zvolené obdobie zatiaľ nemáme merania.</p>';
+  const max=Math.max(1,...points.map(x=>numeric(x[1])));
+  const rough=max/4,magnitude=10**Math.floor(Math.log10(rough));
+  const tickStep=Math.max(1,[1,2,5,10].map(x=>x*magnitude).find(x=>x>=rough)||10*magnitude);
+  const ceiling=Math.max(tickStep,Math.ceil(max/tickStep)*tickStep);
+  const width=460,height=210,left=57,right=447,top=16,bottom=174;
   const xy=points.map(([_,n],i)=>[
-    points.length===1 ? width/2:pad+(width-2*pad)*i/(points.length-1),
-    height-pad-(height-2*pad)*n/max
+    points.length===1 ? (left+right)/2:left+(right-left)*i/(points.length-1),
+    bottom-(bottom-top)*numeric(n)/ceiling
   ]);
   const poly=xy.map(([x,y])=>x.toFixed(1)+','+y.toFixed(1)).join(' ');
-  return '<svg class="bm-chart" viewBox="0 0 460 185" role="img" aria-label="Vývoj zobrazení stránok za obdobie">' +
-    '<line x1="18" y1="167" x2="442" y2="167" stroke="#dfe8ed"/>' +
-    '<line x1="18" y1="92" x2="442" y2="92" stroke="#ecf0f2"/>' +
+  let grid='';
+  for(let val=0;val<=ceiling;val+=tickStep){
+    const y=bottom-(bottom-top)*val/ceiling;
+    grid+='<line x1="'+left+'" x2="'+right+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#e2edef" stroke-dasharray="3 4"/>'+
+      '<text class="bm-axis-y" x="'+(left-9)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end">'+val.toLocaleString('sk-SK')+'</text>';
+  }
+  const dates=[0,Math.floor((points.length-1)/2),points.length-1];
+  const labels=[...new Set(dates)].map(i=>'<text class="bm-axis-x" x="'+xy[i][0].toFixed(1)+'" y="200" text-anchor="middle">'+escapeText(String(points[i][0]).slice(5))+'</text>').join('');
+  return '<div class="bm-chart-scroll" tabindex="0" role="region" aria-label="Graf dennej návštevnosti, posúvajte vodorovne na mobile"><svg class="bm-chart" viewBox="0 0 460 210" role="img" aria-label="Počet zobrazení stránok za deň, číselná os Y">'+grid+
     (poly?'<polyline points="'+poly+'" fill="none" stroke="#ec985b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>':'')+
-    xy.map(([x,y])=>'<circle cx="'+x+'" cy="'+y+'" r="3.2" stroke="#ec985b" stroke-width="2.2" fill="white"/>').join('')+
-    '</svg>';
+    xy.map(([x,y],i)=>'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="3.8" stroke="#ec985b" stroke-width="2.2" fill="white"><title>'+escapeText(String(points[i][0])+': '+numeric(points[i][1]).toLocaleString('sk-SK')+' zobrazení')+'</title></circle>').join('')+
+    labels+'</svg></div><p class="bm-chart-note">Os Y = počet zobrazení stránok. Na mobile graf posuňte vodorovne.</p>';
 }
 function trafficRows(items,type,maxEntries=6){
   const max=Math.max(1,...items.map(x=>x[1]));
