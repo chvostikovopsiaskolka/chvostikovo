@@ -90,8 +90,21 @@
   function photoNode(dog, className) {
     const el = document.createElement('span'); el.className = className + (dog.sex==='male'?' male':dog.sex==='female'?' female':'');
     el.dataset.friendKey = String(dog.dog_id || dog.key || dog.name);
-    if (dog.photo_url) { const img = document.createElement('img'); img.src = dog.photo_url; img.alt = dog.name || 'Psík'; img.decoding='async'; el.append(img); }
-    else el.innerHTML = icon('paw');
+    // Paint a stable, meaningful placeholder immediately, even on slow LTE.
+    // The decoded photo overlays it only after a successful load; no extra API request.
+    el.innerHTML = icon('paw');
+    if (dog.photo_url) {
+      const img = document.createElement('img');
+      img.alt = dog.name || 'Psík'; img.decoding='async'; img.loading='lazy';
+      const reveal = async () => {
+        try { if (typeof img.decode === 'function') await img.decode(); } catch (_) {}
+        if (el.contains(img) && img.naturalWidth > 0) el.classList.add('design-photo-ready-v404');
+      };
+      img.addEventListener('load', () => { void reveal(); }, {once:true});
+      img.addEventListener('error', () => el.classList.add('design-photo-failed-v404'), {once:true});
+      el.append(img); img.src = dog.photo_url;
+      if (img.complete && img.naturalWidth > 0) void reveal();
+    }
     el.dataset.photoVersion = String(dog.photo_updated_at || dog.photo_path || dog.photo_url?.split('?')[0] || '');
     return el;
   }
@@ -115,7 +128,7 @@
     body.querySelector('p')?.remove();
     const wanted=new Set(rows.map(d=>String(d.dog_id||d.key||d.name)));
     [...body.children].forEach(row=>{if(!wanted.has(row.dataset.rosterKey))row.remove();});
-    rows.forEach((d,i)=>{const key=String(d.dog_id||d.key||d.name);let row=[...body.children].find(row=>row.dataset.rosterKey===key);if(!row){row=document.createElement('div');row.className='design-roster-row';row.dataset.rosterKey=key;row.append(photoNode(d,'design-friend-photo'),document.createElement('strong'));}row.querySelector('strong').textContent=d.name||'Prihlásený škôlkar';if(body.children[i]!==row)body.insertBefore(row,body.children[i]||null);});
+    rows.forEach((d,i)=>{const key=String(d.dog_id||d.key||d.name);let row=[...body.children].find(row=>row.dataset.rosterKey===key);if(!row){row=document.createElement('div');row.className='design-roster-row';row.dataset.rosterKey=key;row.append(photoNode(d,'design-friend-photo'),document.createElement('strong'));}else{const version=String(d.photo_updated_at||d.photo_path||d.photo_url?.split('?')[0]||'');const oldPhoto=row.querySelector('.design-friend-photo');if(oldPhoto?.dataset.photoVersion!==version)oldPhoto?.replaceWith(photoNode(d,'design-friend-photo'));}row.querySelector('strong').textContent=d.name||'Prihlásený škôlkar';if(body.children[i]!==row)body.insertBefore(row,body.children[i]||null);});
   }
   function ticket() {
     const source=byId('passSummary'),dog=selectedDog(); if(!source||!dog)return;
