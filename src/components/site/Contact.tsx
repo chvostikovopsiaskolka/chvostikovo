@@ -97,16 +97,6 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
       </div>
 
       <div className="min-w-0">
-        <a
-          href={MAP_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={isEnglish ? "Open Chvostíkovo's business profile in Google Maps" : "Otvoriť profil Chvostíkova v Google Mapách"}
-          className="mb-3 inline-flex max-w-full items-center gap-2 whitespace-nowrap font-display text-sm font-semibold text-forest underline underline-offset-4 hover:text-coral sm:text-base"
-        >
-          <MapPin className="size-4 shrink-0" />
-          {isEnglish ? "Open in Google Maps" : "Otvoriť v Google Mapách"}
-        </a>
         <FunctionalMap language={language} />
       </div>
     </div>

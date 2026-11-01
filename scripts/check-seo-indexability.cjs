@@ -26,6 +26,17 @@ assert(homeHtml.includes("Web vytvoril"), "Footer credit not rendered in home HT
 assert(homeHtml.includes("Bellaris"), "Original Bellaris wordmark must retain alt text");
 console.log("[seo] PASS: Bellaris footer credit and outbound attribution");
 
+// The map widget itself contains the Google Maps opening action. Keep its
+// original iframe/consent flow and linked address, not a duplicate CTA above.
+const contactSource = fs.readFileSync("src/components/site/Contact.tsx", "utf8");
+const mapMarkup = contactSource.slice(contactSource.indexOf("function ContactDetails("), contactSource.indexOf("function ContactRow("));
+assert(mapMarkup.includes("<FunctionalMap language={language} />"), "Contact map widget missing");
+assert(mapMarkup.includes("<iframe") && mapMarkup.includes("output=embed"), "Google Maps embed removed");
+assert(mapMarkup.includes("href={MAP_LINK}"), "Contact address map link removed");
+assert(!mapMarkup.includes("Otvoriť v Google Mapách") && !mapMarkup.includes("Open in Google Maps"), "Duplicate map CTA restored");
+console.log("[seo] PASS: contact map retained without redundant Google Maps CTA");
+
+
 // Footer: mobile legal links first, then Bellaris on the left and copyright on the right;
 // desktop keeps three columns with centered copyright. UTM and handlers remain unchanged.
 const footerSource = fs.readFileSync("src/components/site/Contact.tsx", "utf8");
