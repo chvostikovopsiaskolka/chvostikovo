@@ -21,6 +21,10 @@ function checkAssetVersions(source,label){
 }
 checkAssetVersions(html,'index.html');
 checkAssetVersions(sw,'sw.js');
+
+assert.match(html, /id="menuSettingsGroup"[\\s\\S]*?class="menu-deletion-link-v407" href="https:\/\/chvostikovo\\.sk\/ochrana-osobnych-udajov#vymazanie-uctu" target="_blank" rel="noopener noreferrer"/,
+  'settings must offer a direct, publicly accessible account deletion request path');
+
 // Older-version feature regression tests must keep their behavior assertions while
 // reading the CURRENT build dynamically, not asserting that this release IS v361/v362.
 for(const path of ['tests/customer-surface-v361.cjs','tests/customer-magnetic-board-v362.cjs']){
