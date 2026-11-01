@@ -61,19 +61,26 @@ const failures = [];
               await carousel.scrollIntoViewIfNeeded();
               const box = await carousel.boundingBox();
               if (!box) throw new Error('Invisible carousel track');
-              const before = await page.evaluate(() => window.scrollY);
+              // A lower carousel can already be at the document bottom after scrollIntoViewIfNeeded.
+              // Choose an available scroll direction; a zero movement is still a regression.
+              const { before, maxScroll } = await page.evaluate(() => ({
+                before: window.scrollY,
+                maxScroll: Math.max(0, document.scrollingElement.scrollHeight - window.innerHeight),
+              }));
+              const delta = maxScroll - before > 350 ? 330 : -330;
               if (engine === 'chromium') {
                 // Actual wheel dispatch over the moving track, with scroll chaining.
                 await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-                await page.mouse.wheel(0, 330);
+                await page.mouse.wheel(0, delta);
               } else {
                 // Playwright's mobile WebKit does not support mouse.wheel.
                 // Keep the computed touch-action gate and verify page scroll stability.
-                await page.evaluate(() => window.scrollBy(0, 330));
+                await page.evaluate(dy => window.scrollBy(0, dy), delta);
               }
               await page.waitForTimeout(320);
               const after = await page.evaluate(() => window.scrollY);
-              if (after <= before + 15) throw new Error('Vertical page scroll blocked on carousel ' + i + ': ' + before + ' -> ' + after);
+              if (Math.sign(delta) * (after - before) <= 15)
+                throw new Error('Vertical page scroll blocked on carousel ' + i + ': ' + before + ' -> ' + after);
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
