@@ -4427,6 +4427,10 @@ function installVaccinationViewerZoomV244(modal){
       img.addEventListener('error',()=>{img.remove();thumb.classList.add('customer-notice-photo-failed-v404')},{once:true});
       thumb.append(img);img.src=photo;
       if(img.complete&&img.naturalWidth>0)void reveal();
+    }else{
+      // Keep the existing intentional icon for notices without an image.
+      // For an image URL, never render the icon while the actual photo loads.
+      thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';
     }
     const content=el('span','customer-notice-content-v363');
     const head=el('span','customer-notice-head-v363');head.append(el('strong','',row.title||'Oznam'));
