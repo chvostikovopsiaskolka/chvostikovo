@@ -106,14 +106,40 @@ function EnglishPrivacy() {
         </ul>
         <p>You can exercise your rights by contacting us at {EMAIL}.</p>
 
-        <p id="account-deletion">
-          <strong>Delete your Chvostíkovo customer account:</strong> you can request account
-          deletion and deletion of associated personal data without logging in by contacting{" "}
-          <a className="font-semibold text-coral underline"
-            href={"mailto:" + EMAIL + "?subject=Chvostikovo%20account%20deletion"}>{EMAIL}</a>.
-          We will verify the request and erase data that we have no legal reason to retain.
-          Statutory records are kept only as long as required by law.
-        </p>
+        <section id="account-deletion" aria-labelledby="account-deletion-heading" className="scroll-mt-6 space-y-3">
+          <h3 id="account-deletion-heading" className="font-display text-lg font-bold text-forest">
+            Delete your Chvostíkovo customer account
+          </h3>
+          <p>
+            You can request deletion of your Chvostíkovo customer app account and associated
+            personal data without signing in. Email{" "}
+            <a className="font-semibold text-coral underline"
+              href={"mailto:" + EMAIL + "?subject=Chvostikovo%20account%20deletion"}>{EMAIL}</a>{" "}
+            with the subject “Chvostíkovo account deletion” and include the email address
+            registered with your account. Do not send your password or identity documents.
+            We may securely verify account ownership.
+          </p>
+          <p><strong>Data removed:</strong> after verification, we delete the login account
+            and information tied exclusively to it when no legal retention basis remains.
+            This can include contact and authentication information, notification tokens,
+            personal messages, uploaded dog photos or vaccination documents, and reservations.
+            For dogs with multiple owners, we also respect the rights of the other owners
+            and any ongoing care arrangements.
+          </p>
+          <p><strong>Data retained and retention:</strong> mandatory accounting documents
+            and records are generally retained for <strong>10 years following the year
+            they relate to</strong> under Section 35 of Slovak Act No. 431/2002.
+            Information needed for outstanding payments, complaints or legal claims may
+            be retained only for the applicable statutory period or while the matter is pending.
+            We will explain any specific exception and its retention period when handling
+            your request. This does not mean keeping the entire active customer profile.
+          </p>
+          <p>
+            We respond without undue delay, generally within one month under the GDPR.
+            The request is reviewed and verified; clicking the link does not immediately
+            or automatically delete the account.
+          </p>
+        </section>
 
         <H2>7. Sharing personal data</H2>
         <p>

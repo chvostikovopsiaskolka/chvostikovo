@@ -161,15 +161,41 @@ function Privacy() {
         </ul>
         <p>Svoje práva môžete uplatniť prostredníctvom e-mailu: {EMAIL}.</p>
 
-        <p id="vymazanie-uctu">
-          <strong>Vymazanie zákazníckeho účtu:</strong> o zrušenie účtu a vymazanie súvisiacich
-          osobných údajov môžete požiadať aj bez prihlásenia, e-mailom na{" "}
-          <a href={"mailto:" + EMAIL + "?subject=Ziadost%20o%20vymazanie%20uctu%20Chvostikovo"}
-            className="font-semibold text-coral underline">{EMAIL}</a>.
-          Po overení žiadosti vymažeme údaje, na ktorých ďalšie uchovanie nemáme
-          právny dôvod. Zákonom povinné záznamy uchováme len v nevyhnutnom rozsahu.
-          O postupe vás budeme informovať.
-        </p>
+        <section id="vymazanie-uctu" aria-labelledby="vymazanie-uctu-nadpis" className="scroll-mt-6 space-y-3">
+          <h3 id="vymazanie-uctu-nadpis" className="font-display text-lg font-bold text-forest">
+            Vymazanie zákazníckeho účtu Chvostíkovo
+          </h3>
+          <p>
+            O odstránenie účtu v zákazníckej aplikácii Chvostíkovo a súvisiacich osobných
+            údajov môžete požiadať aj bez prihlásenia. Pošlite e-mail s predmetom
+            „Žiadosť o vymazanie účtu Chvostíkovo“ na{" "}
+            <a href={"mailto:" + EMAIL + "?subject=Ziadost%20o%20vymazanie%20uctu%20Chvostikovo"}
+              className="font-semibold text-coral underline">{EMAIL}</a>.
+            Uveďte e-mail používaný pri registrácii. Heslo ani fotografie dokladov
+            neposielajte. V prípade potreby si bezpečným spôsobom overíme, že účet patrí vám.
+          </p>
+          <p><strong>Čo vymažeme:</strong> po overení a vybavení žiadosti odstránime prístupový
+            účet a údaje viazané výhradne naň, ktoré už nepotrebujeme na zákonný účel.
+            Typicky ide o kontaktné a prihlasovacie údaje, tokeny upozornení,
+            vlastné správy, nahrané fotografie či dokumenty psíka a záznamy o rezerváciách,
+            ak neexistuje dôvod na ich ďalšie uchovanie. Ak má psík aj ďalšieho majiteľa,
+            nevymažeme jeho údaje ani údaje potrebné na pokračujúcu starostlivosť bez
+            posúdenia práv ostatných dotknutých osôb.
+          </p>
+          <p><strong>Čo môže zostať a ako dlho:</strong> účtovné doklady a súvisiace
+            povinné účtovné záznamy uchovávame spravidla <strong>10 rokov nasledujúcich
+            po roku, ktorého sa týkajú</strong>, podľa § 35 zákona č. 431/2002 Z. z.
+            Údaje nevyhnutné na riešenie nevyriešených platieb, reklamácií či právnych
+            nárokov môžu zostať iba počas trvania príslušného zákonného dôvodu alebo
+            konania. O konkrétnych výnimkách a ich lehote vás budeme pri vybavení žiadosti
+            informovať. Neuchovávame kvôli týmto výnimkám celý aktívny zákaznícky profil.
+          </p>
+          <p>
+            Na žiadosť odpovieme bez zbytočného odkladu, spravidla do jedného mesiaca
+            podľa GDPR. Žiadosť o vymazanie účtu <strong>nie je automatické okamžité
+            zmazanie</strong>; po overení ju vybavíme individuálne a potvrdíme výsledok.
+          </p>
+        </section>
 
         <H2>7. Zdieľanie osobných údajov</H2>
         <p>
