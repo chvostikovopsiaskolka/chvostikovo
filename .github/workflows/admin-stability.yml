@@ -98,6 +98,7 @@ jobs:
           node tests/customer-liquid-v3.cjs
           node tests/customer-liquid-v364.cjs
           node tests/customer-inbox-v363.cjs
+          node tests/customer-image-network-v404.cjs
           node tests/customer-push-routing-v363.cjs
           node tests/customer-mobile-v393.cjs
           node tests/customer-design.cjs
