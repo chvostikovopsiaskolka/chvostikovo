@@ -4386,8 +4386,18 @@ function installVaccinationViewerZoomV244(modal){
   function noticeCard(row,fromHistory){
     const b=el('button','customer-bulletin-history-row-v229');b.type='button';b.dataset.announcementId=String(row.id);
     const photo=safePhoto(row.image_path),thumb=el('span','customer-notice-thumb-v363');
-    const paw=()=>{thumb.replaceChildren();thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';};
-    if(photo){const img=el('img');img.src=photo;img.alt='';img.loading='lazy';img.onerror=paw;thumb.append(img);}else paw();
+    // Keep layout stable without a paw while a photo is still decoding.
+    if(photo){
+      const img=el('img');img.alt='';img.decoding='async';img.loading=fromHistory?'lazy':'eager';
+      const reveal=async()=>{
+        try{if(typeof img.decode==='function')await img.decode()}catch(_){}
+        if(thumb.contains(img)&&img.naturalWidth>0)thumb.classList.add('customer-notice-photo-ready-v404');
+      };
+      img.addEventListener('load',()=>{void reveal()},{once:true});
+      img.addEventListener('error',()=>{img.remove();thumb.classList.add('customer-notice-photo-failed-v404')},{once:true});
+      thumb.append(img);img.src=photo;
+      if(img.complete&&img.naturalWidth>0)void reveal();
+    }
     const content=el('span','customer-notice-content-v363');
     const head=el('span','customer-notice-head-v363');head.append(el('strong','',row.title||'Oznam'));
     if(!row.preview&&!rowsState.read.has(Number(row.id)))head.append(el('span','customer-bulletin-new-v229','Nové'));
@@ -4466,7 +4476,7 @@ function installVaccinationViewerZoomV244(modal){
     img.addEventListener('dblclick',e=>{e.preventDefault();scale=scale>1?1:2;render()});
     zoomModal.scroll.append(img);recordLayer('zoom');zoomModal.overlay.classList.remove('hidden');syncScrollLock();
   }
-  async function openArticle(row,fromHistory){
+  function openArticle(row,fromHistory){
     if(!row||!loggedIn())return;
     ensureModals();
     historyReturn=!!fromHistory;recordLayer('article');$('notificationPopup')?.classList.add('hidden');
@@ -4475,26 +4485,16 @@ function installVaccinationViewerZoomV244(modal){
     articleModal.scroll.replaceChildren();
     const generation=++articleEpochV358,userId=state.session?.user?.id;
     const photo=safePhoto(row.image_path);
-    articleModal.overlay.classList.remove('hidden');syncScrollLock();
-    let prepared=null,photoReady=false;
-    if(photo){
-      const wait=el('p','customer-bulletin-loading-v358','Načítavam oznam…');wait.setAttribute('role','status');articleModal.scroll.append(wait);articleModal.scroll.setAttribute('aria-busy','true');
-      prepared=preparePhotoV358(photo);photoReady=await prepared.promise;
-    }
-    if(generation!==articleEpochV358||userId!==state.session?.user?.id||!loggedIn()||articleModal.overlay.classList.contains('hidden'))return;
-    articleModal.scroll.removeAttribute('aria-busy');articleModal.scroll.replaceChildren();
+    // Show the message and CTA immediately, even when image transfer takes seconds.
     articleModal.scroll.append(el('div','customer-bulletin-article-v229',row.body||''));
-    if(photo&&photoReady){
-      const img=prepared.img;img.className='customer-bulletin-photo-v229';img.alt='Obrázok k oznamu';img.hidden=false;
-      img.onclick=()=>showImage(photo);img.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showImage(photo)}};
-      img.setAttribute('role','button');img.tabIndex=0;img.setAttribute('aria-label','Zväčšiť fotografiu oznamu');
-      articleModal.scroll.append(img);
+    let imageSlot=null;
+    if(photo){
+      imageSlot=el('div','customer-bulletin-photo-slot-v404');
+      const wait=el('p','customer-bulletin-loading-v358','Načítavam fotografiu…');wait.setAttribute('role','status');
+      imageSlot.append(wait);articleModal.scroll.append(imageSlot);
     }
-    else if(photo)articleModal.scroll.append(el('p','customer-bulletin-photo-error-v358','Fotografiu sa nepodarilo načítať. Skúste oznam otvoriť znova.'));
-
     if(row.cta_enabled&&(row.cta_title||row.cta_body||safeLink(row.cta_url))){
-      const cta=el('section','customer-bulletin-cta-v229');
-      cta.append(el('span','heart','♥'));
+      const cta=el('section','customer-bulletin-cta-v229');cta.append(el('span','heart','♥'));
       const body=el('div','content');
       if(row.cta_title)body.append(el('strong','',row.cta_title));
       if(row.cta_body)body.append(el('p','',row.cta_body));
@@ -4505,6 +4505,21 @@ function installVaccinationViewerZoomV244(modal){
     articleModal.scroll.scrollTop=0;
     articleModal.overlay.classList.remove('hidden');syncScrollLock();
     void markRead(row);
+    if(photo&&imageSlot){
+      const prepared=preparePhotoV358(photo);
+      void prepared.promise.then(ok=>{
+        // Ignore stale image resolutions after user/account change or modal close.
+        if(generation!==articleEpochV358||userId!==state.session?.user?.id||!loggedIn()||articleModal.overlay.classList.contains('hidden')||!imageSlot.isConnected)return;
+        imageSlot.replaceChildren();
+        if(ok){
+          const img=prepared.img;img.className='customer-bulletin-photo-v229';img.alt='Obrázok k oznamu';img.hidden=false;
+          img.onclick=()=>showImage(photo);
+          img.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showImage(photo)}};
+          img.setAttribute('role','button');img.tabIndex=0;img.setAttribute('aria-label','Zväčšiť fotografiu oznamu');
+          imageSlot.append(img);
+        }else imageSlot.append(el('p','customer-bulletin-photo-error-v358','Fotografiu sa nepodarilo načítať. Skúste oznam otvoriť znova.'));
+      });
+    }
   }
   function openHistory(refreshData=true){
     if(!loggedIn())return;
