@@ -72,12 +72,13 @@ const humanDate = value => {
 };
 const card = (value,label,details='') => '<div class="bm-kpi"><strong>' + value + '</strong><span>' + escapeText(label) + '</span><small>' + escapeText(details) + '</small></div>';
 function frame(content, {login=false}={}) {
-  state.root.innerHTML = '<div class="bm-shell"><header class="bm-header"><div class="bm-header-brand">' + logo +
+  // The inner scrollport moves independently. Its sibling dock never scrolls
+  // with the document (iOS 26 WebKit can also mispaint fixed bottom controls).
+  state.root.innerHTML = '<div class="bm-scrollport"><div class="bm-shell"><header class="bm-header"><div class="bm-header-brand">' + logo +
     '</div></header>' +
-    '<main class="bm-main">' + content + '</main>' +
+    '<main class="bm-main">' + content + '</main></div></div>' +
     (!login && state.user ? '<nav class="bm-nav" aria-label="Bellaris sekcie">' +
-      nav('overview','Prehľad') + nav('inquiries','Záujmy') + nav('projects','Projekty') + nav('traffic','Návštevnosť') + nav('menu','Menu') + '</nav>' : '') +
-    '</div>';
+      nav('overview','Prehľad') + nav('inquiries','Záujmy') + nav('projects','Projekty') + nav('traffic','Návštevnosť') + nav('menu','Menu') + '</nav>' : '');
 }
 function nav(view,label) {
   return '<button type="button" data-bm="' + view + '" class="' + (state.view === view ? 'active' : '') +
@@ -179,9 +180,10 @@ const trafficLabels = {direct:'Priame / neznáme',google:'Google',social:'Sociá
   paid:'Reklama',referral:'Odkazy',ai:'AI vyhľadávanie',other:'Ostatné'};
 const numeric = n => Number.isFinite(Number(n)) ? Math.max(0,Number(n)) : 0;
 export function trafficSummary(rows, days=30) {
-  const today=new Date();
-  const start=new Date(Date.UTC(today.getUTCFullYear(),today.getUTCMonth(),today.getUTCDate()-days+1));
-  const selected=rows.filter(x=>new Date(String(x.day)+'T00:00:00Z')>=start);
+  // Daily aggregate dates are Europe/Bratislava calendar days, not UTC midnight.
+  const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  const start=new Date(Date.parse(today+'T12:00:00Z')-(days-1)*864e5).toISOString().slice(0,10);
+  const selected=rows.filter(x=>typeof x.day==='string' && x.day>=start && x.day<=today);
   const total=selected.filter(x=>x.event_type==='page_view').reduce((v,x)=>v+numeric(x.total),0);
   const ctas=selected.filter(x=>x.event_type==='cta_click').reduce((v,x)=>v+numeric(x.total),0);
   const forms=selected.filter(x=>x.event_type==='lead_submit').reduce((v,x)=>v+numeric(x.total),0);
@@ -204,26 +206,39 @@ export function trafficSummary(rows, days=30) {
     bySource.set(key,(bySource.get(key)||0)+n);
     byDay.set(x.day,(byDay.get(x.day)||0)+n);
   }
-  return {total,ctas,forms,byPage:[...byPage].sort((a,b)=>b[1]-a[1]),
+  const eventCounts=Object.fromEntries([...new Set(selected.map(x=>x.event_type))].filter(Boolean).map(type=>[
+    type,selected.filter(x=>x.event_type===type).reduce((v,x)=>v+numeric(x.total),0)
+  ]));
+  return {total,ctas,forms,formOpens:eventCounts.form_open||0,eventCounts,byPage:[...byPage].sort((a,b)=>b[1]-a[1]),
     bySource:[...bySource].sort((a,b)=>b[1]-a[1]),
     byCta:[...byCta].sort((a,b)=>b[1]-a[1]),
     byCtaOrigin:[...byCtaOrigin].map(([key,total])=>{const [label,path,channel]=JSON.parse(key);return {label,path,channel,total};}).sort((a,b)=>b.total-a.total),
     byDay:[...byDay].sort((a,b)=>a[0].localeCompare(b[0]))};
 }
 function lineChart(points) {
-  const max=Math.max(1,...points.map(x=>x[1]));
-  const width=460,height=185,pad=18;
+  if (!points.length) return '<p class="bm-empty">Za zvolené obdobie zatiaľ nemáme merania.</p>';
+  const max=Math.max(1,...points.map(x=>numeric(x[1])));
+  const rough=max/4,magnitude=10**Math.floor(Math.log10(rough));
+  const tickStep=Math.max(1,[1,2,5,10].map(x=>x*magnitude).find(x=>x>=rough)||10*magnitude);
+  const ceiling=Math.max(tickStep,Math.ceil(max/tickStep)*tickStep);
+  const width=460,height=210,left=57,right=447,top=16,bottom=174;
   const xy=points.map(([_,n],i)=>[
-    points.length===1 ? width/2:pad+(width-2*pad)*i/(points.length-1),
-    height-pad-(height-2*pad)*n/max
+    points.length===1 ? (left+right)/2:left+(right-left)*i/(points.length-1),
+    bottom-(bottom-top)*numeric(n)/ceiling
   ]);
   const poly=xy.map(([x,y])=>x.toFixed(1)+','+y.toFixed(1)).join(' ');
-  return '<svg class="bm-chart" viewBox="0 0 460 185" role="img" aria-label="Vývoj zobrazení stránok za obdobie">' +
-    '<line x1="18" y1="167" x2="442" y2="167" stroke="#dfe8ed"/>' +
-    '<line x1="18" y1="92" x2="442" y2="92" stroke="#ecf0f2"/>' +
+  let grid='';
+  for(let val=0;val<=ceiling;val+=tickStep){
+    const y=bottom-(bottom-top)*val/ceiling;
+    grid+='<line x1="'+left+'" x2="'+right+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#e2edef" stroke-dasharray="3 4"/>'+
+      '<text class="bm-axis-y" x="'+(left-9)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end">'+val.toLocaleString('sk-SK')+'</text>';
+  }
+  const dates=[0,Math.floor((points.length-1)/2),points.length-1];
+  const labels=[...new Set(dates)].map(i=>'<text class="bm-axis-x" x="'+xy[i][0].toFixed(1)+'" y="200" text-anchor="middle">'+escapeText(String(points[i][0]).slice(5))+'</text>').join('');
+  return '<div class="bm-chart-scroll" tabindex="0" role="region" aria-label="Graf dennej návštevnosti, posúvajte vodorovne na mobile"><svg class="bm-chart" viewBox="0 0 460 210" role="img" aria-label="Počet zobrazení stránok za deň, číselná os Y">'+grid+
     (poly?'<polyline points="'+poly+'" fill="none" stroke="#ec985b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>':'')+
-    xy.map(([x,y])=>'<circle cx="'+x+'" cy="'+y+'" r="3.2" stroke="#ec985b" stroke-width="2.2" fill="white"/>').join('')+
-    '</svg>';
+    xy.map(([x,y],i)=>'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="3.8" stroke="#ec985b" stroke-width="2.2" fill="white"><title>'+escapeText(String(points[i][0])+': '+numeric(points[i][1]).toLocaleString('sk-SK')+' zobrazení')+'</title></circle>').join('')+
+    labels+'</svg></div><p class="bm-chart-note">Os Y = počet zobrazení stránok. Na mobile graf posuňte vodorovne.</p>';
 }
 function trafficRows(items,type,maxEntries=6){
   const max=Math.max(1,...items.map(x=>x[1]));
@@ -280,18 +295,36 @@ function renderTrafficPreview() {
       trafficSourceDonut(data.bySource)+'</div>')+
     '</section>';
 }
+function trafficFunnel(data) {
+  // These are raw event totals. Missing instrumentation is not reported as zero.
+  const steps=[
+    ['page_view','Zobrazenia stránok'],
+    ['form_open','Otvorenia formulára'],
+    ['form_start','Začiatok vypĺňania'],
+    ['form_attempt','Pokusy o odoslanie'],
+    ['lead_submit','Úspešne odoslané záujmy'],
+    ['form_error','Chyby pri odoslaní']
+  ];
+  return '<section class="bm-section"><h2>Cesta k odoslaniu záujmu</h2>'+
+    '<p class="bm-traffic-intro">Počty nameraných udalostí, nie unikátni návštevníci. Pomlčka znamená, že typ udalosti sa v tomto období nemeral.</p>'+
+    '<div class="bm-funnel">'+steps.map(([key,label])=>'<div><span>'+label+'</span><strong>'+
+    (Object.hasOwn(data.eventCounts,key)?data.eventCounts[key].toLocaleString('sk-SK'):'—')+
+    '</strong></div>').join('')+'</div></section>';
+}
 function renderTrafficFull() {
   const data=trafficSummary(state.traffic,state.range);
   return '<div class="bm-intro"><span class="bm-eyebrow">BELLARIS · WEB</span>'+
     '<h1>Návštevnosť</h1><p>Vlastné anonymné meranie bez cookies a identifikátorov. Počítame udalosti, nie unikátnych ľudí.</p></div>' +
     '<section class="bm-traffic-kpis">'+card(data.total.toLocaleString('sk-SK'),'Zobrazenia stránok')+
       card(data.ctas.toLocaleString('sk-SK'),'Kliknutia na CTA')+
+      card(data.formOpens.toLocaleString('sk-SK'),'Otvorenia formulára','Zaznamenané udalosti')+
       card(data.forms.toLocaleString('sk-SK'),'Odoslané záujmy','Iba po potvrdení webu')+
     '</section><section class="bm-section"><div class="bm-heading"><h2>Návštevnosť po dňoch</h2>'+
     '<select class="bm-range" id="bmRange" aria-label="Obdobie"><option value="7" '+
     (state.range===7?'selected':'')+'>7 dní</option><option value="30" '+
     (state.range===30?'selected':'')+'>30 dní</option></select></div>'+
     (data.total ? lineChart(data.byDay):'<p class="bm-empty">Za zvolené obdobie zatiaľ nemáme merania.</p>')+'</section>'+
+    trafficFunnel(data)+
     '<section class="bm-section"><h2>Stránky</h2>'+trafficRows(data.byPage,'path')+'</section>'+
     '<section class="bm-section"><h2>Kliknutia na tlačidlá</h2>'+trafficCtaDetails(data)+'</section>'+ 
     '<section class="bm-section"><h2>Odkiaľ prichádzajú</h2><p class="bm-traffic-intro">Zdroj podľa UTM alebo domény odkazu, nie osobná identifikácia.</p>'+

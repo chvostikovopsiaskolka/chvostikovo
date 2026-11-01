@@ -23,7 +23,7 @@ assert(html.includes('id="bellarisDashboard"'));
 assert(html.includes('class="app-boot loading-screen loading-concept hidden"'));
 assert(html.includes('20261014-admin-pwa-v111'));
 assert(!originalScript.includes('location.assign('),'Bellaris must not redirect to Safari');
-assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261030-v3')"));
+assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261101-ios26-axis-v1')"));
 assert(css.includes('#bellarisDashboard'));
 assert(html.includes('html:has(#boot:not(.hidden))'),'Hidden loader must not leave a cream iOS underlay');
 assert(html.includes('html:has(#bellarisDashboard:not([hidden]))'),'Bellaris safe-area should match its screen');
@@ -46,10 +46,22 @@ assert(moduleSource.includes('← Výber projektu'),'Project chooser belongs ins
 assert(moduleSource.includes('Odoslané záujmy'),'Traffic analytics must distinguish forms from page views');
 assert(!moduleSource.includes('<button class="bm-mini" data-bm="logout"'),'Logout should not be in header');
 
-assert(css.includes('#bellarisDashboard{height:100dvh;min-height:0;bottom:auto'),
-  'Bellaris viewport must anchor to dynamic height, not an overscrolled body');
-assert(css.includes('#bellarisDashboard .bm-nav{position:absolute;bottom:0}'),
-  'Dock must stay at bottom of the Bellaris viewport');
+assert(css.includes('#bellarisDashboard{height:100dvh;min-height:0;bottom:auto;overflow:hidden;display:flex;flex-direction:column'),
+  'Bellaris viewport must not scroll together with its dock');
+assert(css.includes('#bellarisDashboard .bm-scrollport{flex:1 1 auto;min-height:0'),
+  'Only the inner scrollport must scroll');
+assert(css.includes('#bellarisDashboard .bm-nav{position:relative;bottom:auto;left:auto;transform:none'),
+  'Dock must be a sibling of the scrolling content in the viewport flex layout');
+assert(moduleSource.includes("state.root.innerHTML = '<div class=\"bm-scrollport\"><div class=\"bm-shell\"><header"),
+  'Frame must create a dedicated scrolling container');
+assert(moduleSource.includes("'</main></div></div>'"),
+  'Frame must close the scrolling container before drawing the dock');
+assert(moduleSource.includes('class="bm-axis-y"'),
+  'Traffic SVG must show numeric values on the Y axis');
+assert(moduleSource.includes('trafficFunnel(data)'),
+  'Existing measured form events must be visible without inventing sessions');
+assert(css.includes('min-width:420px'),
+  'Narrow mobile plot must horizontally scroll instead of hiding Y labels');
 assert(css.includes('.bm-login-form label.bm-remember{'),
   'Remember-login label must override the generic grid label with flex row');
 assert(css.includes('.bm-login-form label.bm-remember input{'),
@@ -100,7 +112,7 @@ async function simulate(href) {
     })
   };
   const testScript=originalScript.replace(
-    "await import('/bellaris-admin.mjs?v=20261030-v3')",
+    "await import('/bellaris-admin.mjs?v=20261101-ios26-axis-v1')",
     'await window.testImportBellaris()'
   );
   assert.notEqual(testScript,originalScript,'Test import mock inserted');
@@ -205,6 +217,9 @@ async function simulate(href) {
   assert.equal(summary.total,10);
   assert.equal(summary.ctas,3);
   assert.equal(summary.forms,1);
+  assert.equal(summary.formOpens,0);
+  assert.equal(summary.eventCounts.page_view,10);
+  assert.equal(summary.eventCounts.lead_submit,1);
 
   const breakdown=pure.trafficSummary([
     {day:new Date().toISOString().slice(0,10),event_type:'cta_click',event_label:'Zistiť viac',path:'/lead',source_channel:'meta_paid',total:3},
