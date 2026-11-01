@@ -161,7 +161,7 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
         const link = document.createElement('link');
         link.id = 'bellarisMobileStyle';
         link.rel = 'stylesheet';
-        link.href = '/bellaris-admin.css?v=20261101-dock-v3';
+        link.href = '/bellaris-admin.css?v=20261101-viewport-diag-v1';
         link.onload = resolve;
         link.onerror = () => reject(new Error('Bellaris stylesheet unavailable'));
         document.head.appendChild(link);
@@ -212,7 +212,7 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
           // Bellaris is rendered inside this PWA. Its data remains in the
           // separate Bellaris Supabase, protected by staff auth and RLS.
           await loadBellarisStyle();
-          const {openBellarisMobile} = await import('/bellaris-admin.mjs?v=20261101-dock-v3');
+          const {openBellarisMobile} = await import('/bellaris-admin.mjs?v=20261101-viewport-diag-v1');
           await openBellarisMobile(dashboard, returnToPicker);
           bellarisSplash.hidden = true;
           setSurfaceTheme('#f4f7f7');

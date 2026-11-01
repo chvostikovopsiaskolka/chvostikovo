@@ -11,6 +11,7 @@ try{for(const width of [390,844]){const c=await browser.newContext({viewport:{wi
  });
  await p.route('**/*',async r=>{const u=new URL(r.request().url());
   if(u.origin==='https://fixture.test'&&u.pathname==='/')return r.fulfill({contentType:'text/html',body:wrapper});
+  if(u.origin==='https://fixture.test'&&u.pathname==='/viewport-diagnostics.mjs')return r.fulfill({contentType:'application/javascript',body:readFileSync('admin-wrapper/viewport-diagnostics.mjs','utf8')});
   if(u.origin==='https://fixture.test'&&u.pathname.startsWith('/bellaris-admin.'))return r.fulfill({contentType:u.pathname.endsWith('.css')?'text/css':'application/javascript',body:readFileSync('admin-wrapper'+u.pathname,'utf8')});
   if(u.pathname.endsWith('/chvostikovo-frontend')){frontendCalls++;await new Promise(resolve=>setTimeout(resolve,300));if(failures-->0)return r.fulfill({status:503,body:'Synthetic unavailable'});return r.fulfill({contentType:'text/html',body:snapshot});}
   if(u.hostname==='bellaris-client-portal.pages.dev'&&u.pathname==='/config.js')return r.fulfill({contentType:'application/javascript',body:'window.BELLARIS_PORTAL_CONFIG={supabaseUrl:"https://cycjpgjftbdcnrqisibw.supabase.co",publishableKey:"sb_publishable_SYNTHETIC"};'});
