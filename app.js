@@ -4419,14 +4419,13 @@ function installVaccinationViewerZoomV244(modal){
     // Keep layout stable without a paw while a photo is still decoding.
     if(photo){
       const img=el('img');img.alt='';img.decoding='async';img.loading='eager';
-      const reveal=async()=>{
-        try{if(typeof img.decode==='function')await img.decode()}catch(_){}
+      const reveal=()=>{
         if(thumb.contains(img)&&img.naturalWidth>0)thumb.classList.add('customer-notice-photo-ready-v404');
       };
-      img.addEventListener('load',()=>{void reveal()},{once:true});
+      img.addEventListener('load',reveal,{once:true});
       img.addEventListener('error',()=>{img.remove();thumb.classList.add('customer-notice-photo-failed-v404')},{once:true});
       thumb.append(img);img.src=photo;
-      if(img.complete&&img.naturalWidth>0)void reveal();
+      if(img.complete&&img.naturalWidth>0)reveal();
     }else{
       // Keep the existing intentional icon for notices without an image.
       // For an image URL, never render the icon while the actual photo loads.
