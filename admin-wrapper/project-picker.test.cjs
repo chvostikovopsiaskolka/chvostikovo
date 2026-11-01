@@ -52,8 +52,10 @@ assert(css.includes('#bellarisDashboard .bm-scrollport{flex:1 1 auto;min-height:
   'Only the inner scrollport must scroll');
 assert(css.includes('#bellarisDashboard .bm-nav{position:relative;bottom:auto;left:auto;transform:none'),
   'Dock must be a sibling of the scrolling content in the viewport flex layout');
-assert(moduleSource.includes("'<div class=\"bm-scrollport\"><div class=\"bm-shell\">'"),
-  'Frame must put the nav outside the scrolling panel');
+assert(moduleSource.includes("state.root.innerHTML = '<div class=\"bm-scrollport\"><div class=\"bm-shell\"><header"),
+  'Frame must create a dedicated scrolling container');
+assert(moduleSource.includes("'</main></div></div>'"),
+  'Frame must close the scrolling container before drawing the dock');
 assert(moduleSource.includes('class="bm-axis-y"'),
   'Traffic SVG must show numeric values on the Y axis');
 assert(moduleSource.includes('trafficFunnel(data)'),
