@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [customer-portal-production]
   push:
-    branches: [customer-portal-production]
+    branches: [customer-portal-production, fix/customer-notice-thumbnail-v406-20261101]
 permissions:
   contents: read
 jobs:
