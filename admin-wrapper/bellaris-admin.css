@@ -151,3 +151,8 @@ html:has(#bellarisDashboard:not([hidden])),body:has(#bellarisDashboard:not([hidd
 #bellarisDashboard .bm-funnel>div{display:flex;flex-direction:column;gap:6px;min-width:0;padding:12px;background:#f4f8f8;border-radius:11px}
 #bellarisDashboard .bm-funnel span{font-size:11px;line-height:1.4;color:#657f85}
 #bellarisDashboard .bm-funnel strong{font-size:21px;color:#17393d;font-variant-numeric:tabular-nums}
+
+#bellarisDashboard .bm-month-picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap}#bellarisDashboard .bm-month-picker button{min-width:44px;min-height:44px;border:1px solid #d4e4e2;background:#fff;border-radius:9px;font-size:21px;color:#176f72}#bellarisDashboard .bm-month-picker input{min-width:0;width:155px;min-height:44px;font-size:16px;padding:7px;border:1px solid #d4e4e2;border-radius:9px;touch-action:manipulation}
+#bellarisDashboard{touch-action:manipulation;-webkit-text-size-adjust:100%}#bellarisDashboard button,#bellarisDashboard input,#bellarisDashboard select,#bellarisDashboard a{touch-action:manipulation}
+
+#bellarisDashboard .bm-period-picker{display:flex;gap:6px;flex-wrap:wrap}#bellarisDashboard .bm-period-picker button{min-height:44px;padding:9px 12px;border:1px solid #d4e4e2;background:#fff;color:#176f72;border-radius:9px;font-size:13px}#bellarisDashboard .bm-period-picker [aria-pressed="true"]{background:#e8f6f4}

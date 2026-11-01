@@ -1,3 +1,4 @@
+import {calendarMonth,localDay,shiftMonth,periodSeries,reportingWindow} from './reporting-period.mjs';
 // Bellaris staff dashboard inside the existing Chvostikovo admin PWA.
 // Public Bellaris config is loaded from the existing portal only after selection.
 // Never share auth tokens, project data, service-role keys or session state with Chvostikovo.
@@ -33,7 +34,7 @@ export function projectProgress(projectId, milestones) {
 const state = {
   root: null, onBack: null, client: null, user: null, busy: false,
   inquiries: [], projects: [], milestones: [], view: 'overview',
-  selectedId: null, error: '', ready: false, traffic: [], trafficReady: false, range: 30, remember: false, expandedCta: null
+  selectedId: null, error: '', ready: false, traffic: [], trafficReady: false, range: 30, month:localDay().slice(0,7), trafficEpoch:0, trafficLoading:false, trafficTruncated:false, remember: false, expandedCta: null
 };
 
 function bellarisSessionStorage() {
@@ -180,11 +181,12 @@ function render() {
 const trafficLabels = {direct:'Priame / neznáme',google:'Google',social:'Sociálne siete',
   paid:'Reklama',referral:'Odkazy',ai:'AI vyhľadávanie',other:'Ostatné'};
 const numeric = n => Number.isFinite(Number(n)) ? Math.max(0,Number(n)) : 0;
-export function trafficSummary(rows, days=30) {
+export function trafficSummary(rows, days=localDay().slice(0,7)) {
   // Daily aggregate dates are Europe/Bratislava calendar days, not UTC midnight.
   const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-  const start=new Date(Date.parse(today+'T12:00:00Z')-(days-1)*864e5).toISOString().slice(0,10);
-  const selected=rows.filter(x=>typeof x.day==='string' && x.day>=start && x.day<=today);
+  const month=typeof days==='string'?calendarMonth(days):null,period=reportingWindow({month:month?.month,days:typeof days==='number'?days:undefined,today});
+  const start=period.start;
+  const selected=rows.filter(x=>typeof x.day==='string' && x.day>=start && x.day<=today && x.day<period.endExclusive && x.total!==null && x.total!=='' && Number.isSafeInteger(Number(x.total)) && Number(x.total)>=0);
   const total=selected.filter(x=>x.event_type==='page_view').reduce((v,x)=>v+numeric(x.total),0);
   const ctas=selected.filter(x=>x.event_type==='cta_click').reduce((v,x)=>v+numeric(x.total),0);
   const forms=selected.filter(x=>x.event_type==='lead_submit').reduce((v,x)=>v+numeric(x.total),0);
@@ -214,7 +216,7 @@ export function trafficSummary(rows, days=30) {
     bySource:[...bySource].sort((a,b)=>b[1]-a[1]),
     byCta:[...byCta].sort((a,b)=>b[1]-a[1]),
     byCtaOrigin:[...byCtaOrigin].map(([key,total])=>{const [label,path,channel]=JSON.parse(key);return {label,path,channel,total};}).sort((a,b)=>b.total-a.total),
-    byDay:[...byDay].sort((a,b)=>a[0].localeCompare(b[0]))};
+    byDay:periodSeries(selected,{month:month?.month,days:typeof days==='number'?days:undefined,today}).points.map(p=>[p.day,p.value,p.status])};
 }
 function lineChart(points) {
   if (!points.length) return '<p class="bm-empty">Za zvolené obdobie zatiaľ nemáme merania.</p>';
@@ -222,24 +224,24 @@ function lineChart(points) {
   const rough=max/4,magnitude=10**Math.floor(Math.log10(rough));
   const tickStep=Math.max(1,[1,2,5,10].map(x=>x*magnitude).find(x=>x>=rough)||10*magnitude);
   const ceiling=Math.max(tickStep,Math.ceil(max/tickStep)*tickStep);
-  const width=460,height=210,left=57,right=447,top=16,bottom=174;
+  const width=Math.max(460,points.length*25+70),height=210,left=57,right=width-13,top=16,bottom=174;
   const xy=points.map(([_,n],i)=>[
     points.length===1 ? (left+right)/2:left+(right-left)*i/(points.length-1),
     bottom-(bottom-top)*numeric(n)/ceiling
   ]);
-  const poly=xy.map(([x,y])=>x.toFixed(1)+','+y.toFixed(1)).join(' ');
+  let poly='',connected=false;xy.forEach(([x,y],i)=>{if(points[i][1]===null){connected=false;return;}poly+=(connected?' L ':' M ')+x.toFixed(1)+' '+y.toFixed(1);connected=true;});
   let grid='';
   for(let val=0;val<=ceiling;val+=tickStep){
     const y=bottom-(bottom-top)*val/ceiling;
     grid+='<line x1="'+left+'" x2="'+right+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#e2edef" stroke-dasharray="3 4"/>'+
       '<text class="bm-axis-y" x="'+(left-9)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end">'+val.toLocaleString('sk-SK')+'</text>';
   }
-  const dates=[0,Math.floor((points.length-1)/2),points.length-1];
-  const labels=[...new Set(dates)].map(i=>'<text class="bm-axis-x" x="'+xy[i][0].toFixed(1)+'" y="200" text-anchor="middle">'+escapeText(String(points[i][0]).slice(5))+'</text>').join('');
-  return '<div class="bm-chart-scroll" tabindex="0" role="region" aria-label="Graf dennej návštevnosti, posúvajte vodorovne na mobile"><svg class="bm-chart" viewBox="0 0 460 210" role="img" aria-label="Počet zobrazení stránok za deň, číselná os Y">'+grid+
-    (poly?'<polyline points="'+poly+'" fill="none" stroke="#ec985b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>':'')+
-    xy.map(([x,y],i)=>'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="3.8" stroke="#ec985b" stroke-width="2.2" fill="white"><title>'+escapeText(String(points[i][0])+': '+numeric(points[i][1]).toLocaleString('sk-SK')+' zobrazení')+'</title></circle>').join('')+
-    labels+'</svg></div><p class="bm-chart-note">Os Y = počet zobrazení stránok. Na mobile graf posuňte vodorovne.</p>';
+  const dates=points.map((_,i)=>i);
+  const labels=[...new Set(dates)].map(i=>'<text class="bm-axis-x" x="'+xy[i][0].toFixed(1)+'" y="200" text-anchor="middle">'+escapeText(String(points[i][0]).slice(8))+'</text>').join('');
+  return '<div class="bm-chart-scroll" tabindex="0" role="region" aria-label="Graf dennej návštevnosti, posúvajte vodorovne na mobile"><svg class="bm-chart" style="min-width:'+width+'px" viewBox="0 0 '+width+' 210" role="img" aria-label="Počet zobrazení stránok za deň, číselná os Y">'+grid+
+    (poly?'<path d="'+poly+'" fill="none" stroke="#ec985b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>':'')+
+    xy.map(([x,y],i)=>points[i][1]===null?'':'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="3.8" stroke="#ec985b" stroke-width="2.2" fill="white"><title>'+escapeText(String(points[i][0])+': '+numeric(points[i][1]).toLocaleString('sk-SK')+' zobrazení')+'</title></circle>').join('')+
+    labels+'</svg></div><p class="bm-chart-note">Os Y = počet zobrazení stránok. Na mobile graf posuňte vodorovne. Prázdne dni sú bez dostupného merania; budúce dni ešte nenastali.</p>';
 }
 function trafficRows(items,type,maxEntries=6){
   const max=Math.max(1,...items.map(x=>x[1]));
@@ -283,14 +285,15 @@ function trafficSourceDonut(sources) {
     '<span class="bm-source-center">'+total.toLocaleString('sk-SK')+'<small>zobrazení</small></span></div>'+
     '<ul class="bm-source-legend">'+legend+'</ul></div>';
 }
+function trafficNumber(data,key,value){return state.trafficLoading||!state.trafficReady||!Object.hasOwn(data.eventCounts,key)?'—':value.toLocaleString('sk-SK');}
 function renderTrafficPreview() {
-  const data=trafficSummary(state.traffic,30);
+  const data=trafficSummary(state.traffic,state.month||state.range);
   return '<section class="bm-section"><div class="bm-heading"><h2>Návštevnosť webu</h2>'+
     '<button type="button" data-bm="traffic">Podrobnosti</button></div>' +
     (!state.trafficReady?'<p class="bm-empty">Interné meranie sa pripravuje. Žiadne čísla neodhadujeme.</p>':
-      '<p class="bm-traffic-intro">Posledných 30 dní · anonymné zobrazenia stránok</p>' +
-      '<div class="bm-traffic-kpis">'+card(data.total.toLocaleString('sk-SK'),'Zobrazenia stránok')+
-      card(data.ctas.toLocaleString('sk-SK'),'Kliknutia na CTA')+'</div>'+
+      '<p class="bm-traffic-intro">'+escapeText(reportingWindow({month:state.month,days:state.range,today:localDay()}).label)+' · namerané zobrazenia stránok</p>' +
+      '<div class="bm-traffic-kpis">'+card(trafficNumber(data,'page_view',data.total),'Zobrazenia stránok')+
+      card(trafficNumber(data,'cta_click',data.ctas),'Kliknutia na CTA')+'</div>'+
       '<div class="bm-source-overview"><h3>Odkiaľ ľudia prichádzajú</h3>'+
       '<p>Podiel zobrazení podľa nameraného zdroja; nie počet unikátnych ľudí.</p>'+
       trafficSourceDonut(data.bySource)+'</div>')+
@@ -313,18 +316,19 @@ function trafficFunnel(data) {
     '</strong></div>').join('')+'</div></section>';
 }
 function renderTrafficFull() {
-  const data=trafficSummary(state.traffic,state.range);
+  const data=trafficSummary(state.traffic,state.month||state.range);
   return '<div class="bm-intro"><span class="bm-eyebrow">BELLARIS · WEB</span>'+
     '<h1>Návštevnosť</h1><p>Vlastné anonymné meranie bez cookies a identifikátorov. Počítame udalosti, nie unikátnych ľudí.</p></div>' +
-    '<section class="bm-traffic-kpis">'+card(data.total.toLocaleString('sk-SK'),'Zobrazenia stránok')+
-      card(data.ctas.toLocaleString('sk-SK'),'Kliknutia na CTA')+
-      card(data.formOpens.toLocaleString('sk-SK'),'Otvorenia formulára','Zaznamenané udalosti')+
-      card(data.forms.toLocaleString('sk-SK'),'Odoslané záujmy','Iba po potvrdení webu')+
+    '<section class="bm-traffic-kpis">'+card(trafficNumber(data,'page_view',data.total),'Zobrazenia stránok')+
+      card(trafficNumber(data,'cta_click',data.ctas),'Kliknutia na CTA')+
+      card(trafficNumber(data,'form_open',data.formOpens),'Otvorenia formulára','Zaznamenané udalosti')+
+      card(trafficNumber(data,'lead_submit',data.forms),'Odoslané záujmy','Iba po potvrdení webu')+
     '</section><section class="bm-section"><div class="bm-heading"><h2>Návštevnosť po dňoch</h2>'+
-    '<select class="bm-range" id="bmRange" aria-label="Obdobie"><option value="7" '+
-    (state.range===7?'selected':'')+'>7 dní</option><option value="30" '+
-    (state.range===30?'selected':'')+'>30 dní</option></select></div>'+
-    (data.total ? lineChart(data.byDay):'<p class="bm-empty">Za zvolené obdobie zatiaľ nemáme merania.</p>')+'</section>'+
+    '<div class="bm-period-picker">'+[1,7,'month'].map(period=>'<button type="button" data-bm="period" data-period="'+period+'" aria-pressed="'+(period==='month'?Boolean(state.month):!state.month&&state.range===period)+'">'+(period==='month'?'Mesiac':period===1?'1 deň':'7 dní')+'</button>').join('')+'</div>'+
+    (state.month?'<div class="bm-month-picker"><button type="button" data-bm="previous-month" aria-label="Predchádzajúci mesiac">‹</button><input type="month" id="bmMonth" aria-label="Mesiac a rok" value="'+state.month+'"><button type="button" data-bm="next-month" aria-label="Nasledujúci mesiac">›</button></div>':'')+'</div>'+
+    '<p>'+escapeText(reportingWindow({month:state.month,days:state.range,today:localDay()}).label)+'</p>'+
+    (state.trafficLoading?'<p role="status">Načítavam zvolené obdobie…</p>':!state.trafficReady?'<p class="bm-empty">Meranie sa nepodarilo načítať. Údaje nie sú nulové.</p>':lineChart(data.byDay))+
+    (state.trafficTruncated?'<p role="status">Dosiahnutý limit načítania; súhrny môžu byť neúplné.</p>':'')+'</section>'+
     trafficFunnel(data)+
     '<section class="bm-section"><h2>Stránky</h2>'+trafficRows(data.byPage,'path')+'</section>'+
     '<section class="bm-section"><h2>Kliknutia na tlačidlá</h2>'+trafficCtaDetails(data)+'</section>'+ 
@@ -334,6 +338,17 @@ function renderTrafficFull() {
     '<p>Nepovinné doplnkové reporty. Interné meranie funguje samostatne.</p></section>';
 }
 
+async function loadTrafficMonth(paint=true){
+ const epoch=++state.trafficEpoch,month=state.month,range=state.range,user=state.user?.id;
+ const period=reportingWindow({month,days:range,today:localDay()});state.trafficLoading=true;state.traffic=[];state.trafficReady=false;
+ if(paint)render();
+ try{
+  const result=await state.client.from('bp_web_traffic_daily').select('day,path,source_channel,event_type,event_label,total').gte('day',period.start).lt('day',period.endExclusive).limit(5000);
+  if(epoch!==state.trafficEpoch||month!==state.month||range!==state.range||user!==state.user?.id)return;
+  state.traffic=result.error?[]:result.data||[];state.trafficReady=!result.error;state.trafficTruncated=state.traffic.length>=5000;
+ }catch{if(epoch===state.trafficEpoch){state.traffic=[];state.trafficReady=false;}}
+ finally{if(epoch===state.trafficEpoch){state.trafficLoading=false;if(paint)render();}}
+}
 async function refresh() {
   if(state.busy)return;
   state.busy=true;
@@ -366,14 +381,7 @@ async function refresh() {
     state.inquiries=inquiries.data||[];
     state.projects=projects.data||[];
     state.milestones=milestones;
-    // Missing analytics module must never break the working CRM.
-    try {
-      const after=new Date(Date.now()-31*864e5).toISOString().slice(0,10);
-      const t=await state.client.from('bp_web_traffic_daily')
-        .select('day,path,source_channel,event_type,event_label,total').gte('day',after).limit(5000);
-      state.traffic=t.error?[]:(t.data||[]);
-      state.trafficReady=!t.error;
-    } catch {state.traffic=[];state.trafficReady=false;}
+    await loadTrafficMonth(false);
     state.error='';
     render();
   }catch(err){
@@ -413,13 +421,15 @@ async function handleClick(event) {
   if(!button || state.busy)return;
   const action=button.dataset.bm;
   if(action==='back'){state.onBack();return;}
-  if(action==='logout'){state.busy=true;try{await state.client.auth.signOut();state.user=null;state.view='overview';renderLogin();}finally{state.busy=false;}return;}
+  if(action==='logout'){++state.trafficEpoch;state.busy=true;try{await state.client.auth.signOut();state.user=null;state.view='overview';renderLogin();}finally{state.busy=false;}return;}
+  if(action==='period'){state.month=button.dataset.period==='month'?localDay().slice(0,7):null;state.range=Number(button.dataset.period)||7;state.expandedCta=null;await loadTrafficMonth();return;}
+  if(action==='previous-month'||action==='next-month'){state.month=shiftMonth(state.month,action==='previous-month'?-1:1);state.expandedCta=null;await loadTrafficMonth();return;}
   if(action==='refresh'){await refresh();return;}
   if(['overview','inquiries','projects','traffic','menu'].includes(action)){state.view=action;render();const scroll=state.root.querySelector('.bm-scrollport');if(scroll)scroll.scrollTop=0;return;}
   if(action==='cta-detail'&&state.view==='traffic'){
     let label='';
     try {label=decodeURIComponent(button.dataset.label||'');} catch {return;}
-    const current=trafficSummary(state.traffic,state.range);
+    const current=trafficSummary(state.traffic,state.month||state.range);
     if(!current.byCta.some(item=>item[0]===label))return;
     state.expandedCta=state.expandedCta===label?null:label;
     render();return;
@@ -427,11 +437,9 @@ async function handleClick(event) {
   if(action==='inquiry'||action==='project'){state.view=action;state.selectedId=button.dataset.id;render();}
 }
 function handleChange(event) {
-  if(event.target?.id==='bmRange'){
-    const next=Number(event.target.value);
-    state.range=next===7?7:30;
-    state.expandedCta=null;
-    render();
+  if(event.target?.id==='bmMonth'){
+    try{calendarMonth(event.target.value);}catch{event.target.value=state.month;return;}
+    state.month=event.target.value;state.expandedCta=null;void loadTrafficMonth();
   }
 }
 async function handleSubmit(event) {

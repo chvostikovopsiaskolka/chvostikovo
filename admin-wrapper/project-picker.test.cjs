@@ -23,7 +23,7 @@ assert(html.includes('id="bellarisDashboard"'));
 assert(html.includes('class="app-boot loading-screen loading-concept hidden"'));
 assert(html.includes('20261014-admin-pwa-v111'));
 assert(!originalScript.includes('location.assign('),'Bellaris must not redirect to Safari');
-assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261101-dock-v3')"));
+assert(originalScript.includes("import('/bellaris-admin.mjs?v=20261101-engine-v4')"));
 assert(css.includes('#bellarisDashboard'));
 assert(html.includes('html:has(#boot:not(.hidden))'),'Hidden loader must not leave a cream iOS underlay');
 assert(html.includes('html:has(#bellarisDashboard:not([hidden]))'),'Bellaris safe-area should match its screen');
@@ -109,7 +109,7 @@ async function simulate(href) {
     })
   };
   const testScript=originalScript.replace(
-    "await import('/bellaris-admin.mjs?v=20261101-dock-v3')",
+    "await import('/bellaris-admin.mjs?v=20261101-engine-v4')",
     'await window.testImportBellaris()'
   );
   assert.notEqual(testScript,originalScript,'Test import mock inserted');
