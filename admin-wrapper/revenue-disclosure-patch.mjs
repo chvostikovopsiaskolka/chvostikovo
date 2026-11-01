@@ -1,0 +1,40 @@
+import {revenueEvidence} from './revenue-evidence.mjs';
+import {installRevenueDisclosure} from './revenue-disclosure.mjs';
+export function enhanceRevenueDisclosures(source){
+ if(!source.includes('content="v403"'))throw Error('Expected stable v403');
+ let html=source.replace('content="v403"','content="v404"');
+ const leave="function leaveApp(){ closeAdminSettings(); hideAppBoot();";
+ if(!html.includes(leave))throw Error('Unknown logout lifecycle');
+ html=html.replace(leave,`function leaveApp(){
+ closeAdminSettings();
+ if(typeof schoolNoticeHideV309==='function')schoolNoticeHideV309();
+ document.querySelectorAll('dialog[open]').forEach(node=>{if(typeof node.close==='function')node.close();else node.removeAttribute('open');});
+ document.querySelectorAll('.overlay,.v41-dashboard-modal,[role="dialog"][aria-modal="true"]').forEach(node=>node.classList.add('hidden'));
+ const locks=['admin-settings-open','v41-dashboard-modal-open','admin-chat-open-v48','att393-open','dog-search-open-v65'];
+ document.documentElement.classList.remove(...locks);document.body.classList.remove(...locks);
+ document.body.style.overflow='';document.documentElement.style.overflow='';
+ document.documentElement.style.removeProperty('--dog-search-lock-top');document.documentElement.style.removeProperty('--admin-chat-lock-top');
+ document.querySelectorAll('[inert]').forEach(node=>node.inert=false);
+ state.selectedDogId=null;state.convertingIntroId=null;state.convertingSubmissionId=null;
+ if(document.activeElement instanceof HTMLElement)document.activeElement.blur();
+ hideAppBoot();`);
+ const oldStart='<div class="note" style="margin-top:8px"><div class="row between"><strong>${clampWeekLabel(w.key,m.prefix)}</strong><strong>${w.total.toFixed(0)} €</strong></div><div class="muted small" style="margin-top:4px">';
+ const newStart='<details class="note" data-revenue-week-detail style="margin-top:8px"><summary class="row between"><strong>${clampWeekLabel(w.key,m.prefix)}</strong><span><strong>${w.total.toFixed(0)} €</strong> <span class="revenue-disclosure-icon" aria-hidden="true">↓</span></span></summary><div class="muted small" style="margin-top:4px">';
+ if(!html.includes(oldStart))throw Error('Unknown revenue week markup');
+ html=html.replace(oldStart,newStart);
+ const oldEnd=' · Extra ${w.hotel.toFixed(0)} €</div></div>`';
+ if(!html.includes(oldEnd))throw Error('Unknown revenue week end');
+ html=html.replace(oldEnd,' · Extra ${w.hotel.toFixed(0)} €</div></details>`');
+ const reason='const schoolEvidenceV404='+revenueEvidence.toString()+';\n';
+ if(!html.includes('function renderSchoolWeeklyV307(){'))throw Error('Unknown weekly report renderer');
+ html=html.replace('function renderSchoolWeeklyV307(){',reason+'function renderSchoolWeeklyV307(){');
+ html=html.replace("value:schoolMoneyV307(o.confirmed_revenue_eur),small:o.confirmed_revenue_eur==null?'Evidencia potvrdených úhrad je neúplná. Návštevy ani evidovaný predaj nie sú potvrdením platby.':''","value:schoolEvidenceV404(active.snapshot).paymentsMeasured?schoolMoneyV307(o.confirmed_revenue_eur):'—',small:schoolEvidenceV404(active.snapshot).message");
+ html=html.replace('Tržba spolu</div></div><div style=','Evidované sumy a odhady</div></div><div style=');
+ html=html.replace('Denné tržby – porovnanie týždňov','Denné účtovné odhady – porovnanie týždňov');
+ html=html.replace('Reálna tržba','Evidované sumy a odhady');
+ html=html.replace('<div id="revenueTotalToggle"', '<p class="note" role="status">Potvrdené prijaté úhrady: —. Prehľad neobsahuje úplnú evidenciu prijatých platieb. Nižšie sú historicky evidované sumy a účtovné odhady; jednorazové vstupy sa v tomto staršom prehľade prepočítavajú sadzbou 25 €, nejde o dôkaz platby.</p><div id="revenueTotalToggle"');
+ const css='<style id="revenue-disclosure-style">.revenue-disclosure-icon{display:inline-block;min-width:24px;text-align:center;font-size:20px;color:#68544a}[data-revenue-month],[data-revenue-year],#revenueTotalToggle{cursor:pointer;min-height:44px}[data-revenue-month]:focus-visible,[data-revenue-year]:focus-visible,#revenueTotalToggle:focus-visible{outline:3px solid #eeb574;outline-offset:3px}[data-revenue-week-detail]>summary{list-style:none;cursor:pointer;min-height:44px}[data-revenue-week-detail]>summary::-webkit-details-marker{display:none}</style>';
+ html=html.replace('</head>',css+'</head>');
+ html=html.replace('</body>','<script id="revenue-disclosure-lifecycle">('+installRevenueDisclosure.toString()+')(document);</script></body>');
+ return html;
+}

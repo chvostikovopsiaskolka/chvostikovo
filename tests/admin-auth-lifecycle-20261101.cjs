@@ -27,7 +27,15 @@ async function assembled(h,staffFailure){
   assert(failed.w.document.getElementById('loginView').classList.contains('hidden'),'login form hidden during retry');assert(failed.w.document.querySelector('.admin-auth-retry-v323 button'));assert.deepEqual(failed.errors,[]);
   failed.transport.staffFailure=false;failed.w.document.querySelector('.admin-auth-retry-v323 button').click();await tick();await tick();assert(!failed.w.document.getElementById('mainView').classList.contains('hidden'));assert(!failed.w.document.getElementById('appBoot'));assert(!failed.calls.some(u=>u.includes('/auth/v1/logout')));
  }finally{failed.w.close()}
- const healthy=await assembled(after,false);try{assert(healthy.w.document.getElementById('loginView').classList.contains('hidden'));assert(!healthy.w.document.getElementById('mainView').classList.contains('hidden'));assert(!healthy.w.document.getElementById('appBoot'));assert(!healthy.calls.some(u=>/grant_type=password|\/logout/.test(u)));assert.deepEqual(healthy.errors,[])}finally{healthy.w.close()}
+ const healthy=await assembled(after,false);try{assert(healthy.w.document.getElementById('loginView').classList.contains('hidden'));assert(!healthy.w.document.getElementById('mainView').classList.contains('hidden'));assert(!healthy.w.document.getElementById('appBoot'));assert(!healthy.calls.some(u=>/grant_type=password|\/logout/.test(u)));assert.deepEqual(healthy.errors,[]);
+  healthy.w.sessionStorage.setItem('bellaris-staff-session-v1','SYNTHETIC-BELLARIS');
+  healthy.w.document.getElementById('adminSettingsModal').classList.remove('hidden');healthy.w.document.documentElement.classList.add('admin-settings-open');
+  healthy.w.document.getElementById('logoutBtn').click();await tick();await tick();
+  assert(!healthy.w.document.getElementById('loginView').classList.contains('hidden'));assert(healthy.w.document.getElementById('adminSettingsModal').classList.contains('hidden'));assert(!healthy.w.document.documentElement.classList.contains('admin-settings-open'));assert.equal(healthy.w.sessionStorage.getItem('bellaris-staff-session-v1'),'SYNTHETIC-BELLARIS');
+  const transport=healthy.w.fetch;healthy.w.fetch=async(url,options)=>String(url).includes('/auth/v1/token?grant_type=password')?response(fixture):transport(url,options);
+  healthy.w.document.getElementById('email').value='staff@example.invalid';healthy.w.document.getElementById('password').value='Synthetic-Password-1!';healthy.w.document.getElementById('loginBtn').click();await tick();await tick();
+  assert(!healthy.w.document.getElementById('mainView').classList.contains('hidden'),'immediate relogin works');assert(healthy.w.document.getElementById('adminSettingsModal').classList.contains('hidden'));assert.deepEqual(healthy.errors,[]);
+ }finally{healthy.w.close()}
  for(const remember of [true,false]){
   const c=await client(after,{...fixture,expires_at:1},remember),{w,api}=c;let refreshes=0,release;const events=[];api.auth.onAuthStateChange(e=>events.push(e));
   w.fetch=async()=>{refreshes++;await new Promise(r=>release=r);return response({...fixture,refresh_token:'rotated-fixture'})};
