@@ -13,8 +13,8 @@ function SlovakPolicy() {
   return (
     <div className="space-y-4 text-sm leading-relaxed text-forest/85">
       <p>
-        Tieto zásady vysvetľujú, ako spracovávame osobné údaje, ktoré nám poskytnete
-        prostredníctvom webovej stránky chvostikovo.sk.
+        Tieto informácie sa týkajú osobných údajov spracúvaných pri používaní webu
+        chvostikovo.sk a zákazníckej aplikácie Chvostíkovo.
       </p>
       <p>
         <strong>Prevádzkovateľ:</strong> Marek Leder - Bellaris, Miškovecká 2, Košice,
@@ -71,7 +71,8 @@ function EnglishPolicy() {
   return (
     <div className="space-y-4 text-sm leading-relaxed text-forest/85">
       <p>
-        This notice explains how we process personal data you provide through chvostikovo.sk.
+        This notice explains how we process personal data through chvostikovo.sk
+        and the Chvostíkovo customer app.
       </p>
       <p>
         <strong>Operator:</strong> Marek Leder - Bellaris, Miškovecká 2, Košice,
@@ -133,7 +134,7 @@ export function PrivacyConsentCheckbox({
           className="mt-1 shrink-0 accent-[oklch(0.72_0.108_40)]"
         />
         <span>
-          {isEnglish ? "I agree to the " : "Súhlasím so "}
+          {isEnglish ? "I have read the " : "Oboznámil/a som sa so "}
           <button
             type="button"
             onClick={(event) => {
@@ -143,7 +144,7 @@ export function PrivacyConsentCheckbox({
             }}
             className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
           >
-            {isEnglish ? "processing of my personal data" : "spracovaním osobných údajov"}
+            {isEnglish ? "Privacy Policy" : "zásadami ochrany osobných údajov"}
           </button>
           . <span className="text-destructive">*</span>
         </span>
