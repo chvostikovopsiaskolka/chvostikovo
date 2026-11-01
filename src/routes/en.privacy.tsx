@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { EMAIL } from "@/content/site";
 
 const title = "Privacy Policy | Chvostíkovo";
-const description = "Privacy policy for the Chvostíkovo dog daycare website in Košice.";
+const description = "Privacy information for the Chvostíkovo website and customer mobile app.";
 const BASE_URL = "https://chvostikovo.sk";
 const PAGE_URL = `${BASE_URL}/en/privacy`;
 
@@ -34,14 +34,15 @@ function EnglishPrivacy() {
         ← Back to the English page
       </Link>
       <h1 className="section-title mt-4 text-3xl sm:text-4xl">Privacy Policy</h1>
+      <p className="mt-2 text-sm text-forest/70">Website and customer app · updated 1 November 2026</p>
 
       <div className="mt-6 space-y-4 text-forest/85">
         <H2>1. Introduction</H2>
         <p>
-          This Privacy Policy explains how we process personal data that you provide through the website chvostikovo.sk.
+          This Privacy Policy applies to the website chvostikovo.sk, enquiry forms and the Chvostíkovo customer portal at app.chvostikovo.sk, including the mobile app.
         </p>
         <p>
-          The website operator is Marek Leder – Bellaris, Miškovecká 2, Košice, Company ID: 56 447 001 (the “Operator”).
+          The data controller is Marek Leder – Bellaris, Company ID 56 447 001, registered business address Miškovecká 1023/2, 040 11 Košice-Juh, Slovakia; Chvostíkovo daycare at Poľská 2207/6, 040 01 Košice-Juh.
         </p>
 
         <H2>2. Personal data we process</H2>
@@ -51,12 +52,27 @@ function EnglishPrivacy() {
           <li><strong>Visit data:</strong> IP address, information about activity on our website, cookies, browser and device information.</li>
         </ul>
 
+        <p>
+          <strong>Customer app:</strong> we process registration and contact details (name, e-mail,
+          phone number), login and account status, dog details (name, breed, age, weight,
+          temperament, health restrictions, allergies and vaccinations), photos of dogs and
+          vaccination records, bookings, visits, passes, transport requests and messages.
+          Technical session data, error logs and optional push-notification identifiers
+          may be processed to maintain the service.
+        </p>
+
         <H2>3. Purposes of processing</H2>
         <ul className="list-disc space-y-2 pl-5">
           <li><strong>Providing services:</strong> to respond to enquiries, communicate with you and provide website functionality.</li>
           <li><strong>Marketing communications:</strong> to send informational or advertising messages where you have given consent.</li>
           <li><strong>Improving our services:</strong> to analyse and improve our services and website.</li>
         </ul>
+
+        <p>
+          Customer data supports account administration, bookings, dog care and communication.
+          Optional sharing of a dog's name and photo with other customers is controlled by
+          a separate changeable setting. Registration is not consent to marketing.
+        </p>
 
         <H2>4. Legal basis</H2>
         <p>We process personal data on the basis of:</p>
@@ -65,6 +81,13 @@ function EnglishPrivacy() {
           <li><strong>Performance of a contract:</strong> where processing is necessary to perform a contract with you.</li>
           <li><strong>Legitimate interests:</strong> for example to protect our systems and improve our services.</li>
         </ul>
+
+        <p>
+          Legal bases may also include steps before entering into a contract (GDPR Article 6(1)(b))
+          and legal obligations (Article 6(1)(c)); legitimate interests (Article 6(1)(f))
+          may apply for security and legal claims. A required acknowledgement of this policy
+          is not blanket consent to all processing.
+        </p>
 
         <H2>5. Retention</H2>
         <p>
@@ -83,9 +106,24 @@ function EnglishPrivacy() {
         </ul>
         <p>You can exercise your rights by contacting us at {EMAIL}.</p>
 
+        <p id="account-deletion">
+          <strong>Delete your Chvostíkovo customer account:</strong> you can request account
+          deletion and deletion of associated personal data without logging in by contacting{" "}
+          <a className="font-semibold text-coral underline"
+            href={"mailto:" + EMAIL + "?subject=Chvostikovo%20account%20deletion"}>{EMAIL}</a>.
+          We will verify the request and erase data that we have no legal reason to retain.
+          Statutory records are kept only as long as required by law.
+        </p>
+
         <H2>7. Sharing personal data</H2>
         <p>
-          We do not share your personal data with third parties except where necessary to fulfil our obligations, operate the services we use, or where required by law.
+          We do not sell customer contacts or share them with other companies for their own advertising.
+          Service providers supporting operations include Supabase (authentication and database),
+          Vercel (customer portal), GitHub Pages (public website) and, where used, messaging,
+          e-mail, SMS and push delivery providers. Website analytics and advertising providers
+          may process data according to the applicable cookie choices and legal basis.
+          Authorities may receive data where required by law. Applicable GDPR safeguards
+          govern transfers outside the European Economic Area.
         </p>
 
         <H2>8. Data security</H2>
