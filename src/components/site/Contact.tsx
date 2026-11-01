@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MapPin, Mail, Phone, Clock, Instagram, Facebook } from "lucide-react";
 import logo from "@/assets/logo.png";
+import bellarisFooterLogo from "@/assets/bellaris-footer-credit.svg";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { LongForm } from "./Forms";
@@ -195,29 +196,27 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
             </div>
             <ContactDetails language={language} />
           </div>
-          <div className="mt-6 grid grid-cols-[minmax(0,1fr)_minmax(6rem,auto)] items-center gap-x-3 gap-y-3 sm:gap-x-8">
-            <nav
-              aria-label={isEnglish ? "Legal information" : "Právne informácie"}
-              className="grid min-w-0 max-w-[26rem] grid-cols-2 gap-x-2 gap-y-1 break-words text-left text-[10px] leading-snug min-[375px]:text-[11px] sm:gap-x-5 sm:text-xs"
-            >
-              <button type="button" onClick={() => setLegalDialog("cookies")} className="flex min-h-11 min-w-0 items-center text-left underline underline-offset-4 hover:text-cream">
-                Cookies
-              </button>
-              <button type="button" onClick={() => setLegalDialog("operator")} className="flex min-h-11 min-w-0 items-center text-left underline underline-offset-4 hover:text-cream">
-                {isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}
-              </button>
-              <button type="button" onClick={() => setLegalDialog("privacy")} className="flex min-h-11 min-w-0 items-center text-left underline underline-offset-4 hover:text-cream">
-                {isEnglish ? "Privacy" : "Ochrana osobných údajov"}
-              </button>
-              <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="flex min-h-11 min-w-0 items-center text-left underline underline-offset-4 hover:text-cream">
-                {isEnglish ? "Cookie settings" : "Nastavenia cookies"}
-              </button>
-            </nav>
-            <p className="min-w-0 justify-self-end text-right text-[10px] leading-relaxed sm:text-xs">
-              <span className="block">© {new Date().getFullYear()} Chvostíkovo</span>
-              <span className="block">{isEnglish ? "All rights reserved." : "Všetky práva vyhradené."}</span>
-            </p>
-          </div>
+          <nav
+            aria-label={isEnglish ? "Legal information" : "Právne informácie"}
+            className="mt-5 flex w-full min-w-0 flex-nowrap items-center justify-between gap-x-1.5 text-[9px] leading-tight min-[360px]:text-[10px] min-[390px]:text-[11px] sm:gap-x-4 sm:text-xs"
+          >
+            <button type="button" onClick={() => setLegalDialog("cookies")} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
+              Cookies
+            </button>
+            <button type="button" onClick={() => setLegalDialog("operator")} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
+              {isEnglish ? "Operator details" : "Údaje prevádzkovateľa"}
+            </button>
+            <button type="button" onClick={() => setLegalDialog("privacy")} aria-label={isEnglish ? "Privacy policy – GDPR" : "Ochrana osobných údajov – GDPR"} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
+              GDPR
+            </button>
+            <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("chvostikovo-open-cookie-settings"))} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap underline underline-offset-4 hover:text-cream">
+              {isEnglish ? "Cookie settings" : "Nastavenia cookies"}
+            </button>
+          </nav>
+          <p className="mt-1 text-center text-[10px] leading-relaxed sm:text-xs">
+            <span className="block">© {new Date().getFullYear()} Chvostíkovo</span>
+            <span className="block">{isEnglish ? "All rights reserved." : "Všetky práva vyhradené."}</span>
+          </p>
           <div className="mt-5 border-t border-cream/25 pt-3 text-center">
             <a
               href="https://bellaris.sk/?utm_source=chvostikovo&utm_medium=referral&utm_campaign=footer_credit"
@@ -227,10 +226,10 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
                 void trackCookielessInteraction("nav_click", "footer_bellaris_credit", language).catch(() => {});
               }}
               aria-label={isEnglish ? "Website by Bellaris — opens in a new tab" : "Web vytvoril Bellaris — otvorí sa v novej karte"}
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 text-xs text-cream/65 transition-colors hover:text-cream focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
+              className="footer-bellaris-liquid relative isolate inline-flex min-h-11 items-center justify-center gap-1.5 overflow-hidden rounded-2xl px-3 py-2 text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
             >
-              <span>{isEnglish ? "Website by" : "Web vytvoril"}</span>
-              <span className="font-semibold tracking-[0.06em] text-cream/85">Bellaris</span>
+              <span className="relative z-10 shrink-0 whitespace-nowrap text-[10px] font-semibold sm:text-[11px]">{isEnglish ? "Website by" : "Web vytvoril"}</span>
+              <img src={bellarisFooterLogo} width={84} height={32} loading="lazy" alt="Bellaris" className="relative z-10 h-5 w-auto max-w-[60px] object-contain sm:h-6 sm:max-w-[68px]" />
             </a>
           </div>
         </div>
