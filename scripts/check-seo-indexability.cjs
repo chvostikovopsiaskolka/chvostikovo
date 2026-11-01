@@ -37,28 +37,28 @@ assert(!mapMarkup.includes("Otvoriť v Google Mapách") && !mapMarkup.includes("
 console.log("[seo] PASS: contact map retained without redundant Google Maps CTA");
 
 
-// Footer: 2x2 legal links left + copyright right, then a divider and centered,
-// understated Bellaris attribution (SK/EN). Cookies and analytics handlers unchanged.
+// Footer: single-row legal links with GDPR, centered copyright, divider,
+// and restored branded Bellaris SVG. Existing cookie/UTM handlers remain unchanged.
 const footerSource = fs.readFileSync("src/components/site/Contact.tsx", "utf8");
 const footerStart = footerSource.indexOf("export function Footer");
 const footerEnd = footerSource.indexOf("</footer>", footerStart);
 const footerContent = footerSource.slice(footerStart, footerEnd);
 assert(footerStart >= 0 && footerEnd > footerStart, "Footer component missing");
-assert(footerContent.includes("grid-cols-[minmax(0,1fr)_minmax(6rem,auto)]"), "Footer right copyright column missing");
-assert(footerContent.includes("max-w-[26rem] grid-cols-2"), "Legal 2x2 layout missing");
-assert(footerContent.includes("justify-self-end text-right"), "Copyright must be right aligned");
-assert(footerContent.includes("border-t border-cream/25 pt-3 text-center"), "Creator credit must be centered below divider");
-assert(footerContent.includes('setLegalDialog("cookies")'), "Cookies legal dialog must work");
-assert(footerContent.includes('setLegalDialog("operator")'), "Operator legal dialog must work");
-assert(footerContent.includes('setLegalDialog("privacy")'), "GDPR legal dialog must work");
+assert(footerContent.includes("flex-nowrap items-center justify-between"), "One-row legal nav missing");
+assert(footerContent.includes("whitespace-nowrap"), "Legal nav should not wrap");
+assert(footerContent.includes('setLegalDialog("cookies")'), "Cookies dialog missing");
+assert(footerContent.includes('setLegalDialog("operator")'), "Operator dialog missing");
+assert(footerContent.includes('setLegalDialog("privacy")'), "GDPR dialog missing");
+assert(footerContent.includes("Ochrana osobných údajov – GDPR"), "Privacy accessible label missing");
 assert(footerContent.includes("chvostikovo-open-cookie-settings"), "Cookie settings must work");
-assert(footerContent.includes("utm_source=chvostikovo&utm_medium=referral&utm_campaign=footer_credit"), "Footer attribution UTM changed");
-assert(footerContent.includes("footer_bellaris_credit"), "Footer event name changed");
-assert(footerContent.includes('isEnglish ? "Website by" : "Web vytvoril"'), "English credit missing");
-assert(footerContent.includes('isEnglish ? "All rights reserved." : "Všetky práva vyhradené."'), "Localized copyright missing");
-assert(footerContent.includes("min-h-11"), "Footer touch targets too small");
-assert(!footerContent.includes("footer-bellaris-liquid"), "Large decorative badge must not return");
-console.log("[seo] PASS: legal links left, copyright right, subtle centered Bellaris credit, UTM and handlers intact");
+assert(footerContent.includes("mt-1 text-center"), "Copyright must be centered");
+assert(footerContent.includes("border-t border-cream/25 pt-3 text-center"), "Badge must be below divider");
+assert(footerContent.includes("footer-bellaris-liquid") && footerContent.includes("bellarisFooterLogo"), "Original Bellaris logo badge missing");
+assert(footerContent.includes("utm_source=chvostikovo&utm_medium=referral&utm_campaign=footer_credit"), "Bellaris UTM changed");
+assert(footerContent.includes("footer_bellaris_credit"), "Bellaris event name changed");
+assert(footerContent.includes('isEnglish ? "All rights reserved." : "Všetky práva vyhradené."'), "EN copyright missing");
+assert(footerContent.includes("min-h-11"), "Legal links must be touch accessible");
+console.log("[seo] PASS: one-row legal GDPR, centered copyright, Bellaris badge and tracking intact");
 
 
 // FAQ route must be crawlable from initial HTML (not only from the SPA 404 fallback).
