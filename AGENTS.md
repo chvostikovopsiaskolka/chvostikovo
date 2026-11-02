@@ -73,3 +73,7 @@ Use the source order above and report conflicts with the latest explicit request
 These rules do not grant private wiki or deployment access. If access is missing,
 report the precise gap and keep a safe reviewable branch; do not substitute a
 routine Drive read or claim a deployment.
+
+## Product inquiries — owner decision 2 November 2026
+
+- Products use the existing direct inquiry forms on each product detail, not a cart or checkout. Do not restore a cart/link/drawer without explicit authorization. /kosik and /objednavka are noindex redirect aliases to /produkty. Retired frontend source is stored as noncompiled text under archive/future-product-cart, not in the production database. Preserve product inquiry transport, idempotency, validation, autofill and existing backend records.

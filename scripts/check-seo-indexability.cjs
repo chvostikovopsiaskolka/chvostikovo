@@ -75,3 +75,14 @@ assert(faqHtml.includes("Odpovede na časté otázky"), "FAQ HTML missing its un
 assert(faqHtml.includes('rel="canonical"') && faqHtml.includes(faqUrl), "FAQ HTML missing its canonical URL");
 assert(faqHtml.includes("FAQPage"), "FAQ HTML missing structured FAQ data");
 console.log("[seo] PASS: sitemap + prerender + title + description + canonical + FAQPage for " + faqRoute);
+
+
+// Retired shop aliases are static, noindex redirects, not checkout pages.
+for (const legacy of ["kosik", "objednavka"]) {
+  assert(!sitemap.includes("/" + legacy), "Retired shop route must stay outside sitemap");
+  const redirectHtml = fs.readFileSync("dist/client/" + legacy + "/index.html", "utf8");
+  assert(/http-equiv="refresh"/i.test(redirectHtml) && redirectHtml.includes("0;url=/produkty"), "Missing static products redirect: " + legacy);
+  assert(redirectHtml.includes("noindex, follow"), "Retired alias must stay noindex");
+  assert(!redirectHtml.includes("Košík je prázdny") && !redirectHtml.includes("Dokončenie objednávky"), "Checkout UI remains in alias HTML");
+}
+console.log("[seo] PASS: retired cart/checkout redirect aliases");
