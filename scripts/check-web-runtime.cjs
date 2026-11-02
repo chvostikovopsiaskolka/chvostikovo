@@ -97,6 +97,36 @@ const failures = [];
           console.error(`FAIL ${label}: ${error.message}`, errors);
         } finally { await page.close(); }
       }
+      if (!bellaris && !restricted) {
+        // Retired checkout addresses must never show a cart. Test both viewport sizes.
+        for (const width of [390, 1440]) {
+          const productPage = await context.newPage();
+          await productPage.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+          try {
+            for (const legacy of ['/kosik/', '/objednavka/']) {
+              await productPage.goto(new URL(legacy, base).href);
+              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'networkidle' });
+              if (!await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).count()) throw new Error('Retired shop alias did not open products: ' + legacy);
+              if (await productPage.getByRole('heading', { name: /Košík|Dokončenie objednávky/ }).count()) throw new Error('Retired cart UI is still exposed');
+            }
+            for (const [route, action] of [['/stojan-na-misky-pre-psa', 'Mám záujem o stojan'], ['/target-na-cvicenie-pre-psov', 'Mám záujem o target']]) {
+              await productPage.goto(new URL(route, base).href);
+              await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
+              const consent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
+              if (await consent.isVisible()) await consent.click();
+              await productPage.getByRole('button', { name: action }).first().click();
+              await productPage.locator('input[name="customer_name"]:visible').waitFor();
+              if (!await productPage.locator('input[name="email"]:visible').count()) throw new Error('Product inquiry contact missing');
+              if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product inquiry points to retired checkout');
+            }
+            results.push({engine, restricted:false, route:'product-inquiries-' + width, status:'PASS'});
+            console.log('PASS product inquiries and retired shop redirects ' + engine + ' ' + width);
+          } catch (error) {
+            failures.push({engine, width, route:'product-inquiries', error:error.message});
+            await productPage.screenshot({path:path.join(out, 'products-' + engine + '-' + width + '.png'), fullPage:true}).catch(()=>{});
+          } finally { await productPage.close(); }
+        }
+      }
       await context.close();
     }
     await browser.close();
