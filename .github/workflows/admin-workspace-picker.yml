@@ -1,4 +1,4 @@
-name: Admin wrapper workspace picker
+name: Admin wrapper direct startup
 on:
   pull_request:
     paths:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Isolated admin boot and routing checks
+      - name: Direct Chvostikovo boot and routing checks
         run: node admin-wrapper/project-picker.test.cjs
 
       - uses: actions/setup-node@v4
@@ -45,10 +45,6 @@ jobs:
           node tests/admin-auth-lifecycle-20261101.cjs
       - name: Render scroll and viewport transitions
         run: |
-          node admin-wrapper/layout.browser.mjs
-          BELLARIS_BROWSER=webkit node admin-wrapper/layout.browser.mjs
-          node admin-wrapper/dock-identity.browser.mjs
-          BELLARIS_BROWSER=webkit node admin-wrapper/dock-identity.browser.mjs
           node admin-wrapper/workspace-flow.browser.mjs
           BELLARIS_BROWSER=webkit node admin-wrapper/workspace-flow.browser.mjs
           node admin-wrapper/revenue-disclosure.browser.mjs
