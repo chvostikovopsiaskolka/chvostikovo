@@ -288,8 +288,16 @@ function TargetPage() {
               <ArrowLeft className="size-4" /> Späť na produkty
             </a>
 
-            <div className="grid gap-9 lg:grid-cols-[1.02fr_0.98fr] lg:items-start lg:gap-12">
-              <div className="aspect-[3/4] overflow-hidden rounded-4xl bg-secondary shadow-soft">
+            <div className="mx-auto max-w-xl">
+              <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
+                Target na cvičenie <span className="text-coral-dark">pre psov</span>
+              </h1>
+              <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
+                Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho
+                postoja, koordinácie a rovnováhy.
+              </p>
+
+              <div className="mt-6 aspect-[3/4] overflow-hidden rounded-4xl bg-secondary shadow-soft">
                 <img
                   src={size === "small" ? targetSmallDog : targetLargeDog}
                   alt={size === "small" ? "Pes stojaci na malom targete na cvičenie" : "Pes stojaci na veľkom targete na cvičenie"}
@@ -298,16 +306,8 @@ function TargetPage() {
                 />
               </div>
 
-              <div>
-                <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
-                  Target na cvičenie <span className="text-coral-dark">pre psov</span>
-                </h1>
-                <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
-                  Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho
-                  postoja, koordinácie a rovnováhy.
-                </p>
-
-                <div className="mt-6">
+              <div className="mt-5">
+                <div>
                   <p className="font-display text-sm font-bold text-forest">Vyberte veľkosť</p>
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     {SIZE_OPTIONS.map((option) => (
