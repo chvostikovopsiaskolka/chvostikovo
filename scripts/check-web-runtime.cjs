@@ -221,8 +221,11 @@ const failures = [];
                 const message = error instanceof Error ? error.message : String(error);
                 if (!/is interrupted by another navigation/i.test(message) || !message.includes('/produkty')) throw error;
               }
-              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'domcontentloaded' });
+              // Locator polling survives the refresh/replace document handoff better than waitForURL.
               await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).waitFor({ state: 'visible' });
+              if (!['/produkty', '/produkty/'].includes(new URL(productPage.url()).pathname)) {
+                throw new Error('Retired shop alias did not resolve to products: ' + legacy);
+              }
               if (await productPage.getByRole('heading', { name: /Košík|Dokončenie objednávky/ }).count()) throw new Error('Retired cart UI is still exposed');
             }
             results.push({engine, restricted:false, route:'product-inquiries-' + width, status:'PASS'});
