@@ -62,7 +62,9 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
   }
 
   function pricingClick() {
-    trackMarketingInteraction("view_pricing", "blog_" + article.slug + "_pricing");
+    const source = "blog_" + article.slug.replaceAll("-", "_") + "_pricing";
+    trackMarketingInteraction("view_pricing", source);
+    void trackCookielessInteraction("nav_click", source, "sk");
   }
 
   return (
