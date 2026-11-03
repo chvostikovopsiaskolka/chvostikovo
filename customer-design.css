@@ -961,3 +961,14 @@ html.customer-auth-glass-v386.customer-ios-auth-v410 #authView>.auth-card>.lg-v3
  }
 }
 
+/* v411: SK/EN is selected before signup; keep the long registration form uncluttered. */
+#authView[data-auth-mode="signup"] #customerLocaleSwitchV408{display:none!important}
+/* The portal welcome description must not leave an orphaned 'one place' line. */
+#authView .auth-welcome-copy-v403{max-width:38ch}
+/* Translation is a reading aid; it cannot change the immutable signed Slovak source. */
+#schoolTermsModal .terms-translation-note-v411,
+#schoolRulesModalV55 .terms-translation-note-v411{
+ margin:0 0 14px;padding:10px 12px;border-radius:10px;
+ background:#fff5ed;border:1px solid #f0d7c4;color:#72513b;
+ font-size:12px;line-height:1.45;
+}
