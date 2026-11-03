@@ -557,8 +557,8 @@
   .mobile-dock-menu-links a:hover { background: var(--peach); }
   .mobile-dock-menu-actions {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 9px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
     margin-top: 8px;
     padding-top: 9px;
     flex: 0 0 auto;
@@ -567,23 +567,26 @@
   .mobile-dock-menu-actions a {
     display: inline-flex;
     min-width: 0;
-    min-height: 46px;
+    min-height: 50px;
     justify-content: center;
     align-items: center;
-    gap: 5px;
-    padding: 9px 3px;
-    border-radius: 16px;
+    padding: 9px 5px;
+    border: 1px solid rgba(83,127,99,.23);
+    border-radius: 14px;
     background: var(--peach);
     font-family: var(--font-display);
-    font-size: clamp(10.5px, 3vw, 12px);
+    font-size: 13px;
     font-weight: 700;
     text-align: center;
     text-decoration: none;
-    white-space: nowrap;
     color: var(--forest-deep);
+    transition: background .2s ease, border-color .2s ease;
   }
-  .mobile-dock-menu-actions a svg { flex-shrink: 0; width: 16px; height: 16px; }
-  .mobile-dock-menu-actions a:first-child { background: var(--coral); color: white; }
+  .mobile-dock-menu-actions a svg { flex-shrink: 0; width: 20px; height: 20px; }
+  .mobile-dock-menu-actions a:first-child { background: var(--coral); border-color: var(--coral); color: white; }
+  .mobile-dock-menu-actions a:hover { border-color: var(--coral); background: var(--coral-soft); }
+  .mobile-dock-menu-actions a:first-child:hover { background: var(--coral); }
+  .mobile-dock-menu-actions a:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
   .mobile-dock-menu-logo {
     display: flex;
     flex: 0 0 auto;

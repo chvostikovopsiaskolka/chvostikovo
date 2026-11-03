@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ArrowUp, FilePenLine, Heart, House, Image as ImageIcon, Menu, Phone, Tag, Users, X } from "lucide-react";
+import { ArrowUp, Facebook, FilePenLine, Heart, House, Image as ImageIcon, Instagram, Menu, Phone, Tag, Users, X } from "lucide-react";
 import logo from "@/assets/logo.png";
-import { PHONE } from "@/content/site";
+import { PHONE, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
@@ -296,18 +296,53 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                     <a key={entry.href} href={entry.href} onClick={(event) => go(event, entry.href, true)}>{entry.label}</a>
                   ))}
                 </div>
-                <div className="mobile-dock-menu-actions">
-                  <a href={"tel:" + PHONE}
+                <div className="mobile-dock-menu-actions" aria-label={english ? "Contact and social links" : "Kontakt a sociálne siete"}>
+                  <a
+                    href={"tel:" + PHONE}
+                    aria-label={english ? "Call Chvostíkovo" : "Zavolať Chvostíkovu"}
+                    title={english ? "Call us" : "Zavolajte nám"}
                     data-tracking-source={english ? "en_mobile_dock_menu" : "mobile_dock_menu"}
                     onClick={() => {
                       void trackCookielessInteraction("phone_click", english ? "en_mobile_dock_menu" : "mobile_dock_menu", language);
-                       void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_phone", language);
-                    }}>
-                    <Phone aria-hidden="true" size={17} />
-                    {english ? "Call us" : "Zavolajte nám"}
+                      void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_phone", language);
+                    }}
+                  >
+                    <Phone aria-hidden="true" size={20} />
                   </a>
-                  <a href={english ? "/" : "/en/dog-daycare-kosice"} lang={english ? "sk" : "en"} onClick={() => { void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_language", language); }}>
-                    {english ? "Slovak version" : "English version"}
+                  <a
+                    href={english ? "/" : "/en/dog-daycare-kosice"}
+                    lang={english ? "sk" : "en"}
+                    aria-label={english ? "Slovak version" : "English version"}
+                    title={english ? "Slovak version" : "English version"}
+                    onClick={() => {
+                      void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_language", language);
+                    }}
+                  >
+                    <span aria-hidden="true">{english ? "SK" : "EN"}</span>
+                  </a>
+                  <a
+                    href={INSTAGRAM}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={english ? "Chvostíkovo on Instagram (new tab)" : "Chvostíkovo na Instagrame (nová karta)"}
+                    title="Instagram"
+                    onClick={() => {
+                      void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_instagram", language);
+                    }}
+                  >
+                    <Instagram aria-hidden="true" size={20} />
+                  </a>
+                  <a
+                    href={FACEBOOK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={english ? "Chvostíkovo on Facebook (new tab)" : "Chvostíkovo na Facebooku (nová karta)"}
+                    title="Facebook"
+                    onClick={() => {
+                      void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_facebook", language);
+                    }}
+                  >
+                    <Facebook aria-hidden="true" size={20} />
                   </a>
                 </div>
                 <a href="/" aria-label="Chvostíkovo" className="mobile-dock-menu-logo" onClick={() => { void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_top", language); }}>
