@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v410';
-const APP_VERSION='2.0.83';
+const APP_BUILD='v411';
+const APP_VERSION='2.0.84';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -2087,10 +2087,15 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
     modal.dataset.dogId=String(dog.id);
     modal.dataset.version=String(doc.version);
     modal.dataset.documentHash=String(doc.document_hash||'');
-    $('schoolTermsTitle').textContent=doc.title||'Podmienky škôlky';
+    const reading=window.ChvostikovoLegalENV411?.view(doc)||doc;
+    $('schoolTermsTitle').textContent=reading.title||'Podmienky škôlky';
     $('schoolTermsDog').textContent=(state.data?.dogs||[]).filter(d=>Number(d.owner_id)===Number(dog.owner_id)).map(d=>d.name).join(' a ')+' · Verzia '+termsVersionLabel(doc.version);
     const body=$('schoolTermsBody'),ack=$('schoolTermsAck'),confirm=$('schoolTermsConfirm');
-    body.innerHTML=formatSchoolTermsV97(doc.body||'');
+    body.innerHTML=formatSchoolTermsV97(reading.body||'');
+    if(reading.__englishReadingTranslation){
+      const note=document.createElement('p');note.className='terms-translation-note-v411';
+      note.textContent=window.ChvostikovoLegalENV411.notice;body.prepend(note);
+    }
     ack.checked=false;
     ack.disabled=true;
     confirm.disabled=true;
@@ -2208,9 +2213,11 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   function openRead(doc){
     if(!doc)return;
     const modal=ensureReadModal();
-    document.getElementById('schoolTermsReadTitle').textContent=doc.title||'Podmienky psej škôlky Chvostíkovo';
+    const reading=window.ChvostikovoLegalENV411?.view(doc)||doc;
+    document.getElementById('schoolTermsReadTitle').textContent=reading.title||'Podmienky psej škôlky Chvostíkovo';
     document.getElementById('schoolTermsReadMeta').textContent='Verzia: '+termsVersionLabel(doc.version);
-    document.getElementById('schoolTermsReadBody').textContent=doc.body||'';
+    document.getElementById('schoolTermsReadBody').textContent=(reading.__englishReadingTranslation
+      ? window.ChvostikovoLegalENV411.notice+'\n\n' : '')+(reading.body||'');
     modal.classList.remove('hidden');
   }
   async function renderTermsHistory(root,dogId){
@@ -3818,8 +3825,13 @@ async function togglePushDirect(btn){
         window.renderCustomerTermsHistory?.($('schoolRulesHistoryV141'),dogId)
       ]);
       if(modal.dataset.request!==request||state.session?.user?.id!==account||Number(selectedDog()?.id||0)!==dogId)return;
-      title.textContent=doc?.title||'Pravidlá škôlky';
-      body.innerHTML=formatSchoolTermsV102(doc?.body||'Pravidlá škôlky momentálne nie sú dostupné.');
+      const reading=window.ChvostikovoLegalENV411?.view(doc)||doc;
+      title.textContent=reading?.title||'Pravidlá škôlky';
+      body.innerHTML=formatSchoolTermsV102(reading?.body||'Pravidlá škôlky momentálne nie sú dostupné.');
+      if(reading?.__englishReadingTranslation){
+        const note=document.createElement('p');note.className='terms-translation-note-v411';
+        note.textContent=window.ChvostikovoLegalENV411.notice;body.prepend(note);
+      }
       if(doc?.version){
         const url=SUPABASE_URL+'/rest/v1/portal_terms_acceptances?user_id=eq.'+encodeURIComponent(account)+'&dog_id=eq.'+dogId+'&terms_version=eq.'+encodeURIComponent(doc.version)+'&select=accepted_at&order=accepted_at.desc&limit=1';
         try{
