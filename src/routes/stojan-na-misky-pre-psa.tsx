@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
+import { ProductDeliveryDetails } from "@/components/site/ProductDeliveryDetails";
 import { Collapse } from "@/components/site/Collapse";
 import { PhoneField } from "@/components/site/PhoneField";
 import { phoneFromForm } from "@/lib/phone";
@@ -355,6 +356,7 @@ function BowlStandPage() {
                   <span className="text-sm text-forest/60">Cena</span>
                   <span className="font-display text-4xl font-bold text-forest">40 €</span>
                 </div>
+                <ProductDeliveryDetails />
 
                 <div id="objednavka-stojana" className="mt-7 scroll-mt-28">
                   <button
