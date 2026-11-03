@@ -289,16 +289,19 @@ function TargetPage() {
               <ArrowLeft className="size-4" /> Späť na produkty
             </a>
 
-            <div className="mx-auto max-w-xl">
-              <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
+            <div className="mx-auto max-w-xl lg:grid lg:max-w-none lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-start lg:gap-x-10 lg:gap-y-5">
+              <div className="lg:col-start-2 lg:row-start-1">
+                <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
                 Target na cvičenie <span className="text-coral-dark">pre psov</span>
               </h1>
               <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
                 Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho
                 postoja, koordinácie a rovnováhy.
               </p>
+              </div>
 
-              <div className="mt-6 aspect-[3/4] overflow-hidden rounded-4xl bg-secondary shadow-soft">
+              <div className="lg:col-start-1 lg:row-span-2 lg:row-start-1">
+              <div className="mt-6 aspect-[3/4] lg:mt-0 overflow-hidden rounded-4xl bg-secondary shadow-soft">
                 <img
                   src={size === "small" ? targetSmallDog : targetLargeDog}
                   alt={size === "small" ? "Pes stojaci na malom targete na cvičenie" : "Pes stojaci na veľkom targete na cvičenie"}
@@ -306,8 +309,9 @@ function TargetPage() {
                   fetchPriority="high"
                 />
               </div>
+              </div>
 
-              <div className="mt-5">
+              <div className="mt-5 lg:col-start-2 lg:row-start-2 lg:mt-0">
                 <div>
                   <p className="font-display text-sm font-bold text-forest">Vyberte veľkosť</p>
                   <div className="mt-3 grid grid-cols-2 gap-2">
