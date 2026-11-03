@@ -104,6 +104,11 @@ function sync(){
   if(s.layer.parentElement!==materialHolder(el))materialHolder(el).prepend(s.layer);
   const r=el.getBoundingClientRect(),w=Math.round(r.width),h=Math.round(r.height),radius=parseFloat(getComputedStyle(el).borderTopLeftRadius)||16,key=[w,h,radius].join(':');
   if(opaque){stop(s);s.layer.dataset.renderer='fallback';continue;}
+  // On long login/signup pages the sampled WebKit wallpaper lags document scroll.
+  // Keep the quiet glass fallback, but not a moving refracted paw texture.
+  if(authVisible && el.matches('#authView>.auth-card')){
+   stop(s);s.layer.dataset.renderer='fallback';stats.mode='fallback';continue;
+  }
   if(!chromium&&(!webkit||low)){stop(s);s.layer.dataset.renderer='fallback';continue;}
   if(reels&&!turbulenceReady){stop(s);continue;}
   const selected=el.matches('.bottom-nav')||(el.matches('.auth-card,.dog-overview-content,.dual-dog-info-v254')||reels&&el.matches('#menuTab .customer-menu-group'))&&used===0;
