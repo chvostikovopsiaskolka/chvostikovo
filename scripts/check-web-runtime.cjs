@@ -213,15 +213,20 @@ const failures = [];
               }
             }
             for (const legacy of ['/kosik/', '/objednavka/']) {
-              await productPage.goto(new URL(legacy, base).href, { waitUntil: 'domcontentloaded' });
-              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'domcontentloaded' });
+              // Meta refresh and hydrated location.replace can interrupt DOMContentLoaded on the retired alias.
+              // Wait only for the navigation commit, then require the actual products heading.
+              await productPage.goto(new URL(legacy, base).href, { waitUntil: 'commit' });
+              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'commit' });
               await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).waitFor({ state: 'visible' });
               if (await productPage.getByRole('heading', { name: /Košík|Dokončenie objednávky/ }).count()) throw new Error('Retired cart UI is still exposed');
             }
             results.push({engine, restricted:false, route:'product-inquiries-' + width, status:'PASS'});
             console.log('PASS product inquiries and retired shop redirects ' + engine + ' ' + width);
           } catch (error) {
-            failures.push({engine, width, route:'product-inquiries', error:error.message});
+            const failure = {engine, width, route:'product-inquiries', status:'FAIL', error:error.message};
+            failures.push(failure);
+            results.push(failure);
+            console.error('FAIL product inquiries and redirects ' + engine + ' ' + width + ': ' + error.message);
             await productPage.screenshot({path:path.join(out, 'products-' + engine + '-' + width + '.png'), fullPage:true}).catch(()=>{});
           } finally { await productPage.close(); }
         }
