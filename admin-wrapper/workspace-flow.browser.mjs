@@ -13,6 +13,7 @@ try{for(const width of [390,844]){const c=await browser.newContext({viewport:{wi
   if(u.origin==='https://fixture.test'&&u.pathname==='/')return r.fulfill({contentType:'text/html',body:wrapper});
   if(u.origin==='https://fixture.test'&&u.pathname==='/viewport-diagnostics.mjs')return r.fulfill({contentType:'application/javascript',body:readFileSync('admin-wrapper/viewport-diagnostics.mjs','utf8')});
   if(u.origin==='https://fixture.test'&&u.pathname==='/admin-pair-v409.js')return r.fulfill({contentType:'application/javascript',body:readFileSync('admin-wrapper/admin-pair-v409.js','utf8')});
+  if(u.origin==='https://fixture.test'&&u.pathname==='/admin-shared-pass-v410.js')return r.fulfill({contentType:'application/javascript',body:readFileSync('admin-wrapper/admin-shared-pass-v410.js','utf8')});
   if(u.pathname.endsWith('/chvostikovo-frontend')){frontendCalls++;await new Promise(resolve=>setTimeout(resolve,300));if(failures-->0)return r.fulfill({status:503,body:'Synthetic unavailable'});return r.fulfill({contentType:'text/html',body:snapshot});}
   if(/\.(?:png|webp|svg)$/.test(u.pathname))return r.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="100" height="40"/>'});
   if(/\/rest\/v1\//.test(u.pathname))return r.fulfill({contentType:'application/json',body:'[]'});
