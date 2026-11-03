@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v403';
-const APP_VERSION='2.0.76';
+const APP_BUILD='v407';
+const APP_VERSION='2.0.80';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -126,7 +126,7 @@ async function clearCustomerAppBadgeV171(){await setCustomerAppBadgeV186(0);}
 const termsVersionLabel=version=>window.customerTermsVersionLabel(version);
 const TERMS_ACCEPTANCE_TEXT='Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.';
 const CUSTOMER_PUBLIC_URL='https://app.chvostikovo.sk/';
-const CUSTOMER_EMAIL_CONFIRM_URL=window.ChvoNative?.active?'/email-confirmed.html':CUSTOMER_PUBLIC_URL+'email-confirmed.html';
+const CUSTOMER_EMAIL_CONFIRM_URL=CUSTOMER_PUBLIC_URL+'email-confirmed.html';
 const SUPABASE_URL='https://tlhcqwsluyqpywymjoxn.supabase.co';
 const SUPABASE_KEY='sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
 const API=SUPABASE_URL+'/functions/v1/customer-portal-api';
@@ -216,7 +216,7 @@ function box(type,msg){return `<div class="${type}-box">${esc(msg)}</div>`}
 function authMessage(type,msg){$('authMessage').innerHTML=box(type,msg)}
 function currentSession(){for(const s of [localStorage,sessionStorage]){try{const x=JSON.parse(s.getItem(SESSION_KEY)||'null');if(x?.access_token){state.storage=s;return x}}catch(_){}}return null}
 function saveSession(s,remember=true){localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.storage=remember?localStorage:sessionStorage;state.storage.setItem(SESSION_KEY,JSON.stringify(s));state.session=s}
-function clearSession(){void window.ChvoNative?.logout(state.session);document.documentElement.classList.remove('customer-liquid-v364');window.customerGuideAbortV358?.();window.customerBulletinAbortV358?.();void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
+function clearSession(){document.documentElement.classList.remove('customer-liquid-v364');window.customerGuideAbortV358?.();window.customerBulletinAbortV358?.();void clearCustomerAppBadgeV171();localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);state.session=null;state.data=null;state.selectedDogId=0;clearVaccinationProofStageV104();stopCustomerLive();['passInterestConfirmationV44','schoolTermsModal','schoolTermsReadModal','schoolRulesModalV55','dogDetailsModal','privacyInfoModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal'].forEach(id=>$(id)?.classList.add('hidden'));window.__customerOnboardingCompleteV75=false}
 async function authFetch(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(opts.headers||{})}});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok){const error=new Error(data?.msg||data?.error_description||data?.message||'Požiadavka sa nepodarila.');error.status=r.status;error.code=data?.code||data?.error_code||'';if(error.code==='user_banned'||/user is banned/i.test(error.message))error.message='Prístup k účtu je zablokovaný. Kontaktujte Chvostíkovo.';throw error}return data}
 let sessionRefreshInFlight=null,sessionRefreshOwnerV357=null;
 function customerSessionNeedsRefreshV357(session=state.session){
@@ -332,6 +332,29 @@ async function preloadDogVisualV56(data=state.data){
   }));
 }
 
+async function preloadFirstScreenFriendsV404(data=state.data){
+  // No extra backend reads: warm only actual next approved-day thumbnails from
+  // the already authorized availability payload, not the whole dog directory.
+  const approvedDates=[...new Set(futureItems().filter(r=>r.status==='approved').map(r=>r.reservation_date))].slice(0,2);
+  const urls=[...new Set((data?.availability?.days||[])
+    .filter(day=>approvedDates.includes(day.date))
+    .flatMap(day=>(day.dogs||[]).map(d=>d.photo_url).filter(Boolean)))].slice(0,6);
+  if(!urls.length)return;
+  await Promise.allSettled(urls.map(url=>new Promise(resolve=>{
+    const img=new Image();let done=false;
+    const finish=async(ok)=>{
+      if(done)return;done=true;clearTimeout(timer);
+      if(ok&&typeof img.decode==='function')try{await img.decode()}catch(_){}
+      resolve();
+    };
+    const timer=setTimeout(()=>finish(false),2400);
+    img.onload=()=>{void finish(true)};
+    img.onerror=()=>{void finish(false)};
+    img.src=url;
+    if(img.complete&&img.naturalWidth>0)void finish(true);
+  })));
+}
+
 async function settleCustomerFirstPhotosV291(limit=850){
  const images=[...($('appView')?.querySelectorAll('img')||[])].filter(img=>img.getAttribute('src')&&!img.closest('.hidden')).slice(0,24);
  if(!images.length)return;
@@ -357,8 +380,15 @@ function bootstrapCore(showSpinner=true){
     // v291: Keep the existing loader over the first data/photo/notice render.
     // No fake "no notices" flash; never remount an unchanged image after revealing.
     await Promise.race([
-      Promise.allSettled([preloadDogVisualV56(d),loadAnnouncements()]),
-      new Promise(resolve=>setTimeout(resolve,2300))
+      Promise.allSettled([preloadDogVisualV56(d),preloadFirstScreenFriendsV404(d),loadAnnouncements()]),
+      new Promise(resolve=>setTimeout(resolve,2900))
+    ]);
+    // The notice data load already begins its first thumbnail fetch. Let its
+    // already-started image complete when possible, but never trap a user
+    // indefinitely behind a large photo or a broken network connection.
+    if(window.customerPreloadOverviewNoticesV404)await Promise.race([
+      Promise.resolve(window.customerPreloadOverviewNoticesV404()).catch(()=>{}),
+      new Promise(resolve=>setTimeout(resolve,700))
     ]);
     showApp();renderAll();
     await settleCustomerFirstPhotosV291(850);
@@ -1549,7 +1579,7 @@ function closePhotoEditor(){$('photoCropCanvas')?.resetPhotoGestures?.();if(stat
 function photoJpegData(){const c=$('photoCropCanvas');for(const q of [.9,.84,.78,.72]){const data=c.toDataURL('image/jpeg',q),bytes=Math.ceil((data.length-data.indexOf(',')-1)*3/4);if(bytes<900000)return data}return c.toDataURL('image/jpeg',.68)}
 async function saveCroppedPhoto(){if(!state.photoEdit)return;try{loading(true);await api({action:'upload_dog_photo',photo_scope:'account',dog_id:Number(state.selectedDogId),image_data:photoJpegData()});closePhotoEditor();toast('Fotka je uložená.');await bootstrap(false)}catch(e){toast(e.message)}finally{loading(false)}}
 function urlBase64ToUint8Array(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(b);return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
-async function registerSW(){if(window.ChvoNative?.active)return;if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'})}catch(e){console.warn(e)}}
+async function registerSW(){if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'})}catch(e){console.warn(e)}}
 
 /* Check a static release marker only on foreground entry, never by polling. */
 const CUSTOMER_UPDATE_INTERVAL=5*60*1000;
@@ -1589,7 +1619,6 @@ function scheduleCustomerUpdateApply(){
   customerUpdateApplyTimer=setTimeout(()=>{customerUpdateApplyTimer=0;applyPendingCustomerUpdate()},250);
 }
 async function checkCustomerRelease(){
-  if(window.ChvoNative?.active)return window.ChvoNative.checkUpdate();
   if(document.visibilityState!=='visible'||navigator.onLine===false||customerUpdateReloading)return;
   if(applyPendingCustomerUpdate())return;
   if(customerUpdateCheckInFlight)return customerUpdateCheckInFlight;
@@ -1672,7 +1701,6 @@ async function completePushPromptV75(){
   return at;
 }
 async function ensurePushState(force=false){
-  if(window.ChvoNative?.active)return window.ChvoNative.ensurePush(force);
   if(customerWebPushMigratedV397()){state.pushChecked=true;state.pushEnabled=false;return false}
   if(state.pushChecked&&!force)return state.pushEnabled;
   let on=false;
@@ -1685,7 +1713,6 @@ async function ensurePushState(force=false){
   state.pushChecked=true;state.pushEnabled=on;localStorage.setItem('chvostikovo_push_enabled',on?'1':'0');return on;
 }
 async function enablePushForCurrentUserV75(){
-  if(window.ChvoNative?.active)return window.ChvoNative.enablePush();
   if(!('serviceWorker'in navigator)||typeof Notification==='undefined'||!('PushManager'in window))throw new Error('Toto zariadenie nepodporuje push upozornenia.');
   const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();
   if(permission!=='granted')throw new Error('Upozornenia neboli povolené.');
@@ -1697,7 +1724,6 @@ async function enablePushForCurrentUserV75(){
   localStorage.setItem('chvostikovo_push_enabled','1');applyPushToggle();return true;
 }
 async function togglePush(){
-  if(window.ChvoNative?.active)return window.ChvoNative.togglePush();
   const b=$('pushToggle');if(!b||b.disabled)return;b.disabled=true;
   try{
     const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
@@ -1753,7 +1779,7 @@ function handleVerifiedEmailReturn(){
   loading(false);
   return true;
 }
-async function init(){if(window.ChvoNative?.active&&await window.ChvoNative.prepareLaunch())return;registerSW();if(handleRecoveryHash()||handleVerifiedEmailReturn()){loading(false);return}state.session=currentSession();if(state.session)await bootstrap();else{showAuth(localStorage.getItem('chvostikovo_pending_login_email')?'login':'welcome');loading(false)}}
+async function init(){registerSW();if(handleRecoveryHash()||handleVerifiedEmailReturn()){loading(false);return}state.session=currentSession();if(state.session)await bootstrap();else{showAuth(localStorage.getItem('chvostikovo_pending_login_email')?'login':'welcome');loading(false)}}
 $('authCreateAccountV403')?.addEventListener('click',()=>showAuth('signup'));$('authHaveAccountV403')?.addEventListener('click',()=>showAuth('login'));$('authBackV403')?.addEventListener('click',()=>showAuth($('authView').dataset.authMode==='forgot'?'login':'welcome'));
 $('showLogin').addEventListener('click',()=>showAuth('login'));$('showSignup').addEventListener('click',()=>showAuth('signup'));$('forgotPasswordBtn').addEventListener('click',()=>showAuth('forgot'));$('backToLogin').addEventListener('click',()=>showAuth('login'));
 const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');if(pendingLoginEmail&&!$('loginEmail').value)$('loginEmail').value=pendingLoginEmail;
@@ -1873,7 +1899,6 @@ setTimeout(scheduleWaitingDogFallbackV101,1500);
   const badge=$('betaVersionBadge'),modal=$('betaVersionModal'),close=$('betaVersionClose'),messages=$('betaVersionMessages');if(!badge||!modal)return;
   badge.addEventListener('click',()=>modal.classList.remove('hidden'));close?.addEventListener('click',()=>modal.classList.add('hidden'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});messages?.addEventListener('click',()=>{modal.classList.add('hidden');switchTab('messages')});
 })();
-window.ChvoNative?.attach({openNotification:()=>window.customerNativeNotificationV393?.(),getSession:()=>state.session,ensureSession:ensureCustomerSessionV357,completePushPrompt:completePushPromptV75,setPush:on=>{state.pushChecked=true;state.pushEnabled=!!on;if(state.data)state.data.push_subscription_active=!!on;localStorage.setItem('chvostikovo_push_enabled',on?'1':'0');applyPushToggle()},resume:refreshOnResume,pause:stopCustomerLive,notify:toast,flush:()=>window.ChvoTelemetry?.flush?.()});
 init().finally(()=>{void checkCustomerRelease()});
 /* consolidated booking layout: section heading + reservation deadline */
 function ensureBookingLayout(){
@@ -2135,10 +2160,10 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   const signup=document.getElementById('signupForm');
   if(signup&&!document.getElementById('signupPrivacyAck')){
     const submit=signup.querySelector('button[type="submit"]');
-    submit?.insertAdjacentHTML('beforebegin','<label class="privacy-ack-row"><input id="signupPrivacyAck" type="checkbox" required><span>Potvrdzujem, že som sa oboznámil/a s <button id="privacyInfoBtn" class="inline-link" type="button">informáciami o spracúvaní osobných údajov</button>.</span></label>');
+    submit?.insertAdjacentHTML('beforebegin','<label class="privacy-ack-row"><input id="signupPrivacyAck" type="checkbox" required><span>Oboznámil/a som sa so <button id="privacyInfoBtn" class="inline-link" type="button">zásadami ochrany osobných údajov</button>.</span></label>');
   }
   if(!document.getElementById('privacyInfoModal')){
-    document.body.insertAdjacentHTML('beforeend','<div id="privacyInfoModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="privacyInfoTitle"><div class="legal-card"><button id="privacyInfoClose" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="privacyInfoTitle">Informácie o spracúvaní osobných údajov</h2><div class="legal-body"><p><strong>Prevádzkovateľ:</strong> Marek Leder – Bellaris, IČO: 56447001, miesto podnikania: Miškovecká 1023/2, 040 11 Košice-Juh. Prevádzkareň Chvostíkovo: Poľská 2207/6, 040 01 Košice-Juh. Zapísaný v Živnostenskom registri Okresného úradu Košice, č. 820-106266. Kontakt: chvostikovo.psiaskolka@gmail.com, +421 951 069 395.</p><p>V zákazníckom portáli spracúvame údaje potrebné na poskytovanie služieb škôlky, najmä meno a priezvisko, e-mail, telefónne číslo, údaje o psíkovi, rezervácie, návštevy, permanentky, taxi službu, komunikáciu so škôlkou, údaje o očkovaniach, fotografie očkovacieho preukazu a fotografiu psíka, ak ju nahráte.</p><p>Údaje používame na správu účtu, organizáciu rezervácií a návštev, bezpečnú starostlivosť o psíka, komunikáciu a plnenie povinností súvisiacich s prevádzkou škôlky.</p><p><strong>Nepoužívame reklamné nástroje ani údaje nepredávame.</strong> Na technickú prevádzku portálu využívame poskytovateľov infraštruktúry potrebných na fungovanie aplikácie.</p><p>Údaje uchovávame počas trvania zákazníckeho vzťahu a následne po dobu potrebnú na splnenie zákonných povinností a ochranu právnych nárokov. V súvislosti so svojimi údajmi môžete požiadať o prístup, opravu, vymazanie alebo obmedzenie spracúvania, ak sú splnené zákonné podmienky.</p><p>Potvrdením pri registrácii neudeľujete marketingový súhlas. Potvrdzujete, že ste sa s týmito informáciami oboznámili.</p><p class="legal-version"></p></div><button id="privacyInfoOk" class="btn full" type="button">Rozumiem</button></div></div>');
+    document.body.insertAdjacentHTML('beforeend','<div id="privacyInfoModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="privacyInfoTitle"><div class="legal-card"><button id="privacyInfoClose" class="legal-close" type="button" aria-label="Zavrieť">×</button><div class="legal-kicker">Chvostíkovo</div><h2 id="privacyInfoTitle">Informácie o spracúvaní osobných údajov</h2><div class="legal-body"><p><strong>Prevádzkovateľ:</strong> Marek Leder – Bellaris, IČO: 56447001, miesto podnikania: Miškovecká 1023/2, 040 11 Košice-Juh. Prevádzkareň Chvostíkovo: Poľská 2207/6, 040 01 Košice-Juh. Zapísaný v Živnostenskom registri Okresného úradu Košice, č. 820-106266. Kontakt: chvostikovo.psiaskolka@gmail.com, +421 951 069 395.</p><p>V zákazníckom portáli spracúvame údaje potrebné na poskytovanie služieb škôlky, najmä meno a priezvisko, e-mail, telefónne číslo, údaje o psíkovi, rezervácie, návštevy, permanentky, taxi službu, komunikáciu so škôlkou, údaje o očkovaniach, fotografie očkovacieho preukazu a fotografiu psíka, ak ju nahráte.</p><p>Údaje používame na správu účtu, organizáciu rezervácií a návštev, bezpečnú starostlivosť o psíka, komunikáciu a plnenie povinností súvisiacich s prevádzkou škôlky.</p><p><strong>Nepoužívame reklamné nástroje ani údaje nepredávame.</strong> Na technickú prevádzku portálu využívame poskytovateľov infraštruktúry potrebných na fungovanie aplikácie.</p><p>Údaje uchovávame počas trvania zákazníckeho vzťahu a následne po dobu potrebnú na splnenie zákonných povinností a ochranu právnych nárokov. V súvislosti so svojimi údajmi môžete požiadať o prístup, opravu, vymazanie alebo obmedzenie spracúvania, ak sú splnené zákonné podmienky.</p><p>Potvrdením pri registrácii neudeľujete marketingový súhlas. Potvrdzujete, že ste sa s týmito informáciami oboznámili.</p><p>Kompletné zásady ochrany osobných údajov pre web aj zákaznícku aplikáciu sú verejne dostupné aj bez prihlásenia: <a class="inline-link" href="https://chvostikovo.sk/ochrana-osobnych-udajov" target="_blank" rel="noopener noreferrer">Otvoriť zásady ochrany osobných údajov</a>.</p><p class="legal-version"></p></div><button id="privacyInfoOk" class="btn full" type="button">Rozumiem</button></div></div>');
   }
   if(!document.getElementById('schoolTermsModal')){
     document.body.insertAdjacentHTML('beforeend','<div id="schoolTermsModal" class="legal-modal hidden" role="dialog" aria-modal="true" aria-labelledby="schoolTermsTitle"><div class="legal-card terms-card"><div class="legal-kicker">Chvostíkovo</div><h2 id="schoolTermsTitle">Podmienky škôlky</h2><div id="schoolTermsDog" class="legal-dog"></div><div id="schoolTermsBody" class="legal-body terms-body"></div><label class="terms-ack-row"><input id="schoolTermsAck" type="checkbox"><span>Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.</span></label><button id="schoolTermsConfirm" class="btn full" type="button" disabled>Potvrdiť a prijať podmienky</button><button id="schoolTermsLogout" class="btn secondary full" type="button">Odhlásiť sa</button></div></div>');
@@ -3436,7 +3461,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
 
   async function healPushV71(){
-    if(window.ChvoNative?.active)return false;
     if(customerWebPushMigratedV397())return false;
     if(document.visibilityState==='hidden'||!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
     try{
@@ -3503,7 +3527,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
 
   async function actualPushState(){
-    if(window.ChvoNative?.active)return window.ChvoNative.ensurePush();
     if(customerWebPushMigratedV397())return false;
     if(!('serviceWorker' in navigator)||typeof Notification==='undefined')return false;
     if(Notification.permission!=='granted')return false;
@@ -3515,7 +3538,6 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
 
 async function togglePushDirect(btn){
-  if(window.ChvoNative?.active)return window.ChvoNative.togglePush(btn);
   if(pushBusy)return;pushBusy=true;btn.disabled=true;
   try{
     if(!('serviceWorker'in navigator)||typeof Notification==='undefined')throw new Error('Tento telefón nepodporuje upozornenia v aplikácii.');
@@ -4389,13 +4411,29 @@ function installVaccinationViewerZoomV244(modal){
     const saved=rows();
     if(!saved.length){host.append(el('p','customer-bulletin-history-empty-v229',rowsState.error?'Oznamy sa momentálne nepodarilo načítať.':!rowsState.at?'Načítavam oznamy…':'Zatiaľ nemáte žiadne oznamy.'));if(rowsState.error){const retry=el('button','btn secondary','Skúsiť znova');retry.type='button';retry.onclick=()=>refresh(true);host.append(retry);}return;}
     if(rowsState.error)host.append(el('p','','Oznamy sa nepodarilo obnoviť. Zobrazené sú naposledy načítané údaje.'));
-    saved.forEach(row=>host.append(noticeCard(row,true)));
+    // Immediately fetch the first visible archive thumbnails on iOS Safari.
+    // Keep later offscreen items lazy to avoid downloading the entire archive.
+    saved.forEach((row,i)=>host.append(noticeCard(row,true,i<3)));
   }
-  function noticeCard(row,fromHistory){
+  function noticeCard(row,fromHistory,priority=false){
     const b=el('button','customer-bulletin-history-row-v229');b.type='button';b.dataset.announcementId=String(row.id);
     const photo=safePhoto(row.image_path),thumb=el('span','customer-notice-thumb-v363');
-    const paw=()=>{thumb.replaceChildren();thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';};
-    if(photo){const img=el('img');img.src=photo;img.alt='';img.loading='lazy';img.onerror=paw;thumb.append(img);}else paw();
+    if(photo){
+      const img=el('img');img.alt='';img.decoding='async';
+      // An archive is inside a dynamically opened scrollable modal. WebKit can
+      // defer lazy images there indefinitely. Load first visible cards eagerly.
+      img.loading=!fromHistory||priority?'eager':'lazy';
+      if(!fromHistory||priority)img.fetchPriority='high';
+      img.addEventListener('error',()=>{
+        img.remove();thumb.classList.add('customer-notice-photo-failed-v406');
+      },{once:true});
+      // Never hide the bitmap behind an extra decode() promise. The browser
+      // paints it when available, including images already in its HTTP cache.
+      thumb.append(img);img.src=photo;
+    }else{
+      // Keep the existing intentional icon only for notices with no photo.
+      thumb.innerHTML='<svg aria-hidden="true"><use href="#ci-paw"/></svg>';
+    }
     const content=el('span','customer-notice-content-v363');
     const head=el('span','customer-notice-head-v363');head.append(el('strong','',row.title||'Oznam'));
     if(!row.preview&&!rowsState.read.has(Number(row.id)))head.append(el('span','customer-bulletin-new-v229','Nové'));
@@ -4474,7 +4512,7 @@ function installVaccinationViewerZoomV244(modal){
     img.addEventListener('dblclick',e=>{e.preventDefault();scale=scale>1?1:2;render()});
     zoomModal.scroll.append(img);recordLayer('zoom');zoomModal.overlay.classList.remove('hidden');syncScrollLock();
   }
-  async function openArticle(row,fromHistory){
+  function openArticle(row,fromHistory){
     if(!row||!loggedIn())return;
     ensureModals();
     historyReturn=!!fromHistory;recordLayer('article');$('notificationPopup')?.classList.add('hidden');
@@ -4483,26 +4521,16 @@ function installVaccinationViewerZoomV244(modal){
     articleModal.scroll.replaceChildren();
     const generation=++articleEpochV358,userId=state.session?.user?.id;
     const photo=safePhoto(row.image_path);
-    articleModal.overlay.classList.remove('hidden');syncScrollLock();
-    let prepared=null,photoReady=false;
-    if(photo){
-      const wait=el('p','customer-bulletin-loading-v358','Načítavam oznam…');wait.setAttribute('role','status');articleModal.scroll.append(wait);articleModal.scroll.setAttribute('aria-busy','true');
-      prepared=preparePhotoV358(photo);photoReady=await prepared.promise;
-    }
-    if(generation!==articleEpochV358||userId!==state.session?.user?.id||!loggedIn()||articleModal.overlay.classList.contains('hidden'))return;
-    articleModal.scroll.removeAttribute('aria-busy');articleModal.scroll.replaceChildren();
+    // Show the message and CTA immediately, even when image transfer takes seconds.
     articleModal.scroll.append(el('div','customer-bulletin-article-v229',row.body||''));
-    if(photo&&photoReady){
-      const img=prepared.img;img.className='customer-bulletin-photo-v229';img.alt='Obrázok k oznamu';img.hidden=false;
-      img.onclick=()=>showImage(photo);img.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showImage(photo)}};
-      img.setAttribute('role','button');img.tabIndex=0;img.setAttribute('aria-label','Zväčšiť fotografiu oznamu');
-      articleModal.scroll.append(img);
+    let imageSlot=null;
+    if(photo){
+      imageSlot=el('div','customer-bulletin-photo-slot-v404');
+      const wait=el('p','customer-bulletin-loading-v358','Načítavam fotografiu…');wait.setAttribute('role','status');
+      imageSlot.append(wait);articleModal.scroll.append(imageSlot);
     }
-    else if(photo)articleModal.scroll.append(el('p','customer-bulletin-photo-error-v358','Fotografiu sa nepodarilo načítať. Skúste oznam otvoriť znova.'));
-
     if(row.cta_enabled&&(row.cta_title||row.cta_body||safeLink(row.cta_url))){
-      const cta=el('section','customer-bulletin-cta-v229');
-      cta.append(el('span','heart','♥'));
+      const cta=el('section','customer-bulletin-cta-v229');cta.append(el('span','heart','♥'));
       const body=el('div','content');
       if(row.cta_title)body.append(el('strong','',row.cta_title));
       if(row.cta_body)body.append(el('p','',row.cta_body));
@@ -4513,6 +4541,21 @@ function installVaccinationViewerZoomV244(modal){
     articleModal.scroll.scrollTop=0;
     articleModal.overlay.classList.remove('hidden');syncScrollLock();
     void markRead(row);
+    if(photo&&imageSlot){
+      const prepared=preparePhotoV358(photo);
+      void prepared.promise.then(ok=>{
+        // Ignore stale image resolutions after user/account change or modal close.
+        if(generation!==articleEpochV358||userId!==state.session?.user?.id||!loggedIn()||articleModal.overlay.classList.contains('hidden')||!imageSlot.isConnected)return;
+        imageSlot.replaceChildren();
+        if(ok){
+          const img=prepared.img;img.className='customer-bulletin-photo-v229';img.alt='Obrázok k oznamu';img.hidden=false;
+          img.onclick=()=>showImage(photo);
+          img.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showImage(photo)}};
+          img.setAttribute('role','button');img.tabIndex=0;img.setAttribute('aria-label','Zväčšiť fotografiu oznamu');
+          imageSlot.append(img);
+        }else imageSlot.append(el('p','customer-bulletin-photo-error-v358','Fotografiu sa nepodarilo načítať. Skúste oznam otvoriť znova.'));
+      });
+    }
   }
   function openHistory(refreshData=true){
     if(!loggedIn())return;
@@ -4557,6 +4600,10 @@ function installVaccinationViewerZoomV244(modal){
   customerRenderers.announcements=(force=false)=>refresh(force);
   window.openCustomerAnnouncementV363=async(id,beforeOpen)=>{const user=state.session?.user?.id;await refresh(false);if(rowsState.error||!user||state.session?.user?.id!==user)return false;const row=rows().find(r=>Number(r.id)===Number(id));if(!row){toast('Tento oznam už nie je dostupný.');return true;}beforeOpen?.();void openArticle(row,false);return true;};
   addCustomerHook('afterSwitchTab',tab=>{if(tab==='booking'||tab==='menu')void refresh(false)});
+  window.customerPreloadOverviewNoticesV404=()=>Promise.allSettled(
+    rowsState.items.filter(row=>row.show_in_overview===true&&current(row))
+      .slice(0,2).map(row=>{const photo=safePhoto(row.image_path);return photo?preparePhotoV358(photo).promise:Promise.resolve();})
+  );
   window.customerRefreshNoticeOverviewV376=drawOverview;
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(true)});
   window.addEventListener('pageshow',event=>{if(event.persisted&&loggedIn())void refresh(false)});
@@ -4578,8 +4625,6 @@ function installVaccinationViewerZoomV244(modal){
 (function customerNotificationTargetV363(){
   let running=false;
   function target(){
-    const native=window.ChvoNative?.takeNotification?.();
-    if(native)history.replaceState(history.state,'',location.pathname+'?'+native);
     const p=new URLSearchParams(location.search),kind=p.get('open');
     if(kind!=='messages'&&kind!=='announcement')return null;
     const raw=p.get(kind==='messages'?'conversation':'announcement'),id=Number(raw);
@@ -4604,7 +4649,6 @@ function installVaccinationViewerZoomV244(modal){
       }
     }finally{running=false;}
   }
-  window.customerNativeNotificationV393=()=>{void openPending();};
   addCustomerHook('afterBootstrap',()=>{void openPending();});
   document.addEventListener('customer-onboarding-ready-v358',()=>{void openPending();});
   window.addEventListener('pageshow',()=>{void openPending();});
