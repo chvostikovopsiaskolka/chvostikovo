@@ -70,7 +70,7 @@
   }
   async function pair() {
     if(submitting||modal.hidden||!verify.checked){fail('Najprv potvrďte spoločného majiteľa.');return}
-    const secondId=id(select.value),firstId=currentDogId,client=runtime()?.client;
+    const secondId=id(select.value),firstId=currentDogId,client=runtime()?.client || (typeof supabase !== 'undefined' && typeof supabase?.from === 'function' ? supabase : null);
     if(!Number.isSafeInteger(firstId)||!Number.isSafeInteger(secondId)||firstId===secondId){fail('Vyberte dvoch rôznych psíkov.');return}
     if(!client?.from){fail('Chýba aktívne prihlásenie personálu. Obnovte administráciu.');return}
     submitting=true;commit.disabled=true;status.textContent='Overujem záznamy…';
