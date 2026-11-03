@@ -122,7 +122,9 @@
           const oldBootCanvas = 'html:has(#appBoot),body:has(#appBoot){background:#fff!important}';
           const visibleBootCanvas = 'html:has(#appBoot:not(.hidden)),body:has(#appBoot:not(.hidden)){background:#fff!important}';
           const html = h.includes(oldBootCanvas) ? h.replace(oldBootCanvas, visibleBootCanvas) : h;
-          document.open(); document.write(html); document.close();
+          // Isolated staff pairing controls; the original Supabase admin stays authoritative.
+          const withPairing = html.replace(/<\/body>/i, '<script src="/admin-pair-v409.js?v=20261103"><\/script></body>');
+          document.open(); document.write(withPairing); document.close();
         } catch (e) {
           started = false;
           boot.classList.add('load-failed');
