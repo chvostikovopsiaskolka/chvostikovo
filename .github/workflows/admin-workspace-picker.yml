@@ -41,6 +41,8 @@ jobs:
           ln -s "$RUNNER_TEMP/admin-stability-runtime/node_modules" tests/shared-v244/node_modules
           echo "NODE_PATH=$RUNNER_TEMP/admin-stability-runtime/node_modules" >> "$GITHUB_ENV"
           "$RUNNER_TEMP/admin-stability-runtime/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Staff dog pairing UI with mock RLS client
+        run: node admin-wrapper/pair-dogs.browser.cjs
       - name: Actual assembled lifecycle and authentication regressions
         run: |
           node tests/admin-lifecycle-20261101.cjs
