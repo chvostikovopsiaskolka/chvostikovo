@@ -106,7 +106,17 @@ for (const slug of [
   assert(markup.includes("BlogPosting"), "BlogPosting JSON-LD missing");
   assert(markup.includes("Chvostíkovo"), "Article author/brand missing");
   assert(markup.includes("Chcem sa informovať o škôlke"), "Article inquiry CTA missing");
-  assert(markup.includes("Pozrieť cenník"), "Article pricing CTA missing");
+  assert(markup.includes('href="#zaujem"'), "Inquiry link must target visible inline form");
+  assert(markup.includes('id="zaujem"'), "Visible inline form section is missing");
+  assert(markup.includes('name="meno"') && markup.includes('name="telefon"'), "Inline inquiry fields missing from prerender");
+  assert(markup.includes('href="/#cennik"'), "Pricing button below inquiry form missing");
+  assert(markup.includes('href="/#podmienky"'), "Conditions button below inquiry form missing");
+  const expectedPhotos = slug === "kam-so-psom-pocas-pracovneho-dna"
+    ? ["blog-workday-cover-", "blog-workday-body-"]
+    : ["blog-suitability-cover-", "blog-suitability-body-"];
+  for (const photo of expectedPhotos) {
+    assert(markup.includes(photo), "Missing owner-provided blog photo from prerender: " + photo);
+  }
 }
 assert(sitemap.includes("<loc>https://chvostikovo.sk/blog/</loc>"), "Blog index missing from sitemap");
 assert(pagesConfig.includes('{ path: "/blog" }'), "Blog index missing from prerender config");
@@ -114,6 +124,7 @@ assert(fs.existsSync("dist/client/blog/index.html"), "Blog index prerender missi
 assert(homeHtml.includes("Kam so psom počas pracovného dňa?"), "Blog carousel absent from homepage");
 assert(!homeHtml.includes("Viac o živote v psej škôlke"), "Duplicate information section still visible");
 assert(homeHtml.includes("Psia škôlka pre šteniatka"), "Puppy preview card missing from homepage");
+assert(homeHtml.includes("blog-puppy-card-"), "Owner-provided puppy photo missing from homepage teaser");
 assert(homeHtml.includes("/psia-skolka-pre-steniatka/#puppy-benefits"), "Puppy preview must link below the existing hero");
 assert(!homeHtml.includes("Dog daycare in Košice"), "Old EN service card still exposed in homepage article section");
 assert(!homeHtml.includes("Psia škôlka a stráženie psov"), "Old dog-sitting service card still exposed in homepage article section");

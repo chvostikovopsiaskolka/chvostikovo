@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { ArrowLeft, ArrowRight, Clock3 } from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Contact";
-import { FormDialog } from "./FormDialog";
 import { ShortForm } from "./Forms";
 import { BlogCard } from "./BlogCard";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -52,14 +50,17 @@ export function blogArticleHead(article: BlogArticleData) {
 }
 
 export function BlogArticle({ article }: { article: BlogArticleData }) {
-  const [open, setOpen] = useState(false);
   const trackingSource = "blog_" + article.slug.replaceAll("-", "_") + "_inquiry";
   const related = blogCards.filter(card => card.id !== article.slug);
 
-  function openInquiry() {
+  function trackInquiryClick() {
     trackMarketingInteraction("inquiry_cta", trackingSource);
     void trackCookielessInteraction("inquiry_cta", trackingSource);
-    setOpen(true);
+  }
+
+  function conditionsClick() {
+    const source = "blog_" + article.slug.replaceAll("-", "_") + "_conditions";
+    void trackCookielessInteraction("nav_click", source, "sk");
   }
 
   function pricingClick() {
@@ -85,13 +86,10 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
               <span className="inline-flex items-center gap-1"><Clock3 className="size-4" aria-hidden="true" />{article.readingMinutes} min čítania</span>
             </div>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-forest/85">{article.intro}</p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <button type="button" onClick={openInquiry} className="btn-coral min-h-11 px-6 py-3 font-display font-semibold">
+            <div className="mt-7">
+              <a href="#zaujem" onClick={trackInquiryClick}
+                className="btn-coral inline-flex min-h-11 items-center justify-center px-6 py-3 font-display font-semibold">
                 Chcem sa informovať o škôlke
-              </button>
-              <a href="/#cennik" onClick={pricingClick}
-                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-forest/20 bg-card px-5 py-3 font-display font-semibold text-forest transition hover:border-coral">
-                Pozrieť cenník <ArrowRight className="size-4" aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -99,8 +97,8 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
 
         <article className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
           <figure className="overflow-hidden rounded-3xl bg-secondary shadow-soft">
-            <img src={article.image.src} alt={article.image.alt} className="aspect-[4/3] w-full object-cover sm:aspect-[16/9]" style={{ objectPosition: article.image.position ?? "center" }}
-              decoding="async" width={1000} height={750} />
+            <img src={article.image.src} alt={article.image.alt} className="mx-auto block max-h-[720px] h-auto max-w-full object-contain"
+              decoding="async" width={article.image.width ?? 1000} height={article.image.height ?? 750} />
             <figcaption className="px-4 py-2 text-sm text-forest/65">Zo života našej psej škôlky v Košiciach</figcaption>
           </figure>
           <div className="mx-auto mt-10 max-w-3xl space-y-10 sm:mt-14">
@@ -118,31 +116,32 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                 {index === 1 && (
                   <figure className="overflow-hidden rounded-3xl bg-secondary">
                     <img src={article.secondImage.src} alt={article.secondImage.alt} loading="lazy" decoding="async"
-                      className="aspect-[4/3] w-full object-cover sm:aspect-[16/9]" style={{ objectPosition: article.secondImage.position ?? "center" }} width={900} height={675} />
+                      className="mx-auto block max-h-[700px] h-auto max-w-full object-contain" width={article.secondImage.width ?? 900} height={article.secondImage.height ?? 675} />
                   </figure>
                 )}
               </section>
             ))}
-            <aside className="rounded-3xl bg-secondary p-6 sm:p-9">
-              <h2 className="font-display text-2xl text-forest">Spoznáme sa aj s vaším psíkom?</h2>
-              <p className="mt-3 leading-relaxed text-forest/80">
-                Úvodná návšteva je zadarmo. Radi s vami preberieme, či bude skupinová starostlivosť vášmu psíkovi vyhovovať.
+            <section id="zaujem" aria-labelledby="blog-inquiry-heading"
+              className="scroll-mt-24 rounded-3xl bg-secondary p-6 shadow-soft sm:p-9">
+              <h2 id="blog-inquiry-heading" className="font-display text-2xl text-forest sm:text-3xl">Spoznáme sa aj s vaším psíkom?</h2>
+              <p className="mt-3 max-w-2xl leading-relaxed text-forest/80">
+                Úvodná návšteva je zadarmo. Vyplňte krátky nezáväzný formulár a radi s vami preberieme,
+                či bude skupinová starostlivosť vášmu psíkovi vyhovovať.
               </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <button type="button" className="btn-coral min-h-11 px-5 py-3 font-display font-semibold" onClick={openInquiry}>
-                  Nezáväzne sa informovať
-                </button>
-                <a href="/#cennik" onClick={pricingClick}
-                  className="inline-flex min-h-11 items-center gap-2 font-display font-semibold text-forest underline-offset-4 hover:underline">
-                  Cenník škôlky <ArrowRight className="size-4" aria-hidden="true" />
-                </a>
+              <div className="mt-6 rounded-2xl bg-card p-4 ring-1 ring-forest/10 sm:p-6">
+                <ShortForm trackingSource={trackingSource} />
               </div>
-            </aside>
-            <nav aria-label="Súvisiace stránky" className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-forest">
-              <a className="underline underline-offset-4" href="/psia-skolka-kosice/">Viac o našej škôlke</a>
-              <a className="underline underline-offset-4" href="/#podmienky">Podmienky prijatia</a>
-              <a className="underline underline-offset-4" href="/#prva-navsteva">Prvá návšteva v 3 krokoch</a>
-            </nav>
+              <nav aria-label="Ďalšie informácie o škôlke" className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <a href="/#cennik" onClick={pricingClick}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral">
+                  Cenník <ArrowRight aria-hidden="true" className="size-4" />
+                </a>
+                <a href="/#podmienky" onClick={conditionsClick}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral">
+                  Podmienky škôlky <ArrowRight aria-hidden="true" className="size-4" />
+                </a>
+              </nav>
+            </section>
           </div>
         </article>
         <section className="border-t border-forest/10 bg-secondary/40 px-4 py-12">
@@ -158,9 +157,6 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
         </section>
       </main>
       <Footer />
-      <FormDialog open={open} onOpenChange={setOpen} title="Informujte sa o psej škôlke" subtitle="Krátky nezáväzný formulár. Radi vám odpovieme.">
-        <ShortForm trackingSource={trackingSource} />
-      </FormDialog>
     </div>
   );
 }
