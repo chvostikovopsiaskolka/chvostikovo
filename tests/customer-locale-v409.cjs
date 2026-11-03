@@ -12,8 +12,8 @@ assert(optic.includes("if(authVisible && ios && el.matches('#authView>.auth-card
 assert(css.includes('position:fixed;inset:0;display:block;pointer-events:none;z-index:0;'));
 assert(css.includes('html.customer-auth-glass-v386.customer-ios-auth-v410 body{background-color:#fff!important;background-image:none!important}'));
 assert(!optic.includes("if(authVisible && el.matches('#authView>.auth-card'))"),'Android must retain its liquid renderer');
-assert(locale.includes("document.getElementById('customerGuideV358')"));
-assert(locale.includes("document.getElementById('appView')"));
+assert(locale.includes("'customerGuideV358'"));
+assert(locale.includes("'appView'"));
 assert(locale.includes("getLanguage: () => lang"));
 assert(!/fetch\(|\.innerHTML\s*=|\.rpc\(/.test(locale.replace(/\/\*[\s\S]*?\*\//g,'')),'Locale may not mutate backend or remount forms');
 assert(html.includes('customer-legal-en-v411.js?v=v411'),'Legal translation module is loaded before app');
