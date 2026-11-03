@@ -147,10 +147,70 @@ const failures = [];
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product inquiry points to retired checkout');
             }
             await productPage.goto(new URL('/', base).href);
+            await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
+            const homeConsent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
+            if (await homeConsent.isVisible()) await homeConsent.click();
+            if (await productPage.getByRole('heading', { name: 'Zo života v škôlke' }).count()) {
+              throw new Error('Standalone Instagram follow section still exists');
+            }
+            const footerSocial = productPage.locator('footer [data-social-links="footer"]:visible');
+            await footerSocial.waitFor({ state: 'visible' });
+            const footerLinks = footerSocial.locator('a');
+            if (await footerLinks.count() !== 2) throw new Error('Footer must expose exactly two social buttons');
+            const [instaHref, fbHref] = await Promise.all([footerLinks.nth(0).getAttribute('href'), footerLinks.nth(1).getAttribute('href')]);
+            if (!instaHref?.startsWith('https://www.instagram.com/') || !fbHref?.startsWith('https://www.facebook.com/')) {
+              throw new Error('Footer social links do not have the correct destinations');
+            }
+            const [instagramBox, facebookBox] = await Promise.all([footerLinks.nth(0).boundingBox(), footerLinks.nth(1).boundingBox()]);
+            if (!instagramBox || !facebookBox || Math.abs(instagramBox.y - facebookBox.y) > 6 ||
+              instagramBox.x + instagramBox.width > facebookBox.x + 5 ||
+              Math.abs(instagramBox.width - facebookBox.width) > 6) {
+              throw new Error('Footer social links must be wide and side by side');
+            }
+            if (width === 1440) {
+              const hoursBox = await productPage.getByText('Pondelok – piatok, 7:00 – 17:00', { exact: true }).boundingBox();
+              if (!hoursBox || instagramBox.y <= hoursBox.y) throw new Error('Desktop footer socials must be below opening hours');
+            }
+            if (width === 390) {
+              await productPage.locator('.mobile-dock').getByRole('button', { name: 'Otvoriť menu' }).click();
+              const menu = productPage.locator('.mobile-dock-menu');
+              await menu.waitFor({ state: 'visible' });
+              const actions = menu.locator('.mobile-dock-menu-actions a');
+              if (await actions.count() !== 4) throw new Error('Mobile menu must have exactly four icon actions');
+              const hrefs = await Promise.all([0, 1, 2, 3].map(index => actions.nth(index).getAttribute('href')));
+              if (!hrefs[0]?.startsWith('tel:') || hrefs[1] !== '/en/dog-daycare-kosice' ||
+                !hrefs[2]?.startsWith('https://www.instagram.com/') || !hrefs[3]?.startsWith('https://www.facebook.com/')) {
+                throw new Error('Mobile menu phone, EN, Instagram and Facebook destinations incorrect');
+              }
+              if (!await actions.nth(0).getAttribute('aria-label') || !await actions.nth(2).getAttribute('aria-label')) {
+                throw new Error('Mobile icon links require accessible names');
+              }
+              const actionBoxes = await Promise.all([0, 1, 2, 3].map(index => actions.nth(index).boundingBox()));
+              if (actionBoxes.some(box => !box || box.width < 40 || box.height < 44) ||
+                actionBoxes.some(box => Math.abs(box.y - actionBoxes[0].y) > 5)) {
+                throw new Error('Mobile menu four icon actions must fit in one tappable row');
+              }
+              await menu.getByRole('button', { name: 'Zavrieť menu' }).click();
+              await menu.waitFor({ state: 'hidden' });
+            }
             for (const route of ['/stojan-na-misky-pre-psa', '/target-na-cvicenie-pre-psov']) {
               const card = productPage.locator('#produkty article a').filter({ has: productPage.locator('h3') }).filter({ has: productPage.locator('img') }).filter({ hasText: route.includes('stojan') ? 'Drevený stojan' : 'Target na cvičenie' }).first();
               const box = await card.boundingBox();
               if (!box || Math.abs(box.width - box.height) > 3) throw new Error('Homepage product card must be square: ' + route);
+            }
+            if (width === 390) {
+              await productPage.goto(new URL('/en/dog-daycare-kosice', base).href);
+              await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
+              const englishConsent = productPage.getByRole('button', { name: /Necessary only|Reject all/i }).first();
+              if (await englishConsent.isVisible()) await englishConsent.click();
+              const englishFooterSocial = productPage.locator('footer [data-social-links="footer"]:visible');
+              await englishFooterSocial.waitFor({ state: 'visible' });
+              if (await englishFooterSocial.locator('a').count() !== 2) throw new Error('English footer social buttons missing');
+              await productPage.locator('.mobile-dock').getByRole('button', { name: 'Open menu' }).click();
+              const englishActions = productPage.locator('.mobile-dock-menu-actions a');
+              if (await englishActions.count() !== 4 || await englishActions.nth(1).getAttribute('href') !== '/') {
+                throw new Error('English mobile menu must retain the SK language switch and four icon actions');
+              }
             }
             for (const legacy of ['/kosik/', '/objednavka/']) {
               await productPage.goto(new URL(legacy, base).href, { waitUntil: 'domcontentloaded' });
