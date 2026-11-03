@@ -7,8 +7,8 @@ export function BlogCard({ card }: { card: BlogCardData }) {
       href={card.href}
       className="group flex h-full flex-col overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-forest/10 transition-transform hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral"
     >
-      <img src={card.image.src} alt={article.image.alt} loading="lazy" decoding="async"
-        className="aspect-[4/3] w-full object-cover sm:aspect-[16/9]" style={{ objectPosition: article.image.position ?? "center" }} width={640} height={480} />
+      <img src={card.image.src} alt={card.image.alt} loading="lazy" decoding="async"
+        className="aspect-[4/3] w-full object-cover sm:aspect-[16/9]" style={{ objectPosition: card.image.position ?? "center" }} width={640} height={480} />
       <div className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
         <p className="text-xs font-semibold text-forest/60">{card.eyebrow}</p>
         <h3 className="font-display text-xl leading-tight text-forest sm:text-2xl">{card.title}</h3>
