@@ -1,4 +1,7 @@
-import { GALLERY } from "@/content/site";
+import dogFriendsPhoto from "@/assets/care-dog-friends-square.webp";
+import playfulGroupPhoto from "@/assets/deco-3.jpg";
+import calmDogPairPhoto from "@/assets/first-visit-dogs-together.webp";
+import introductionFriendsPhoto from "@/assets/care-supervision-original.webp";
 
 export type BlogSection = {
   heading: string;
@@ -14,8 +17,8 @@ export type BlogArticleData = {
   summary: string;
   publishedAt: string;
   readingMinutes: number;
-  image: { src: string; alt: string };
-  secondImage: { src: string; alt: string };
+  image: { src: string; alt: string; position?: string };
+  secondImage: { src: string; alt: string; position?: string };
   intro: string;
   sections: BlogSection[];
 };
@@ -29,8 +32,8 @@ export const blogArticles: BlogArticleData[] = [
     summary: "Keď ste v práci, psík nemusí mať iba dve možnosti: čakať doma alebo ísť s vami. Pozrite si, čo pri výbere starostlivosti zvážiť.",
     publishedAt: "2026-11-03",
     readingMinutes: 4,
-    image: { src: GALLERY[2]!.src, alt: "Psíkovia trávia deň v psej škôlke Chvostíkovo" },
-    secondImage: { src: GALLERY[5]!.src, alt: "Oddych psíkov počas dňa v Chvostíkove" },
+    image: { src: dogFriendsPhoto, alt: "Traja psí kamaráti spolu v psej škôlke Chvostíkovo", position: "center 28%" },
+    secondImage: { src: playfulGroupPhoto, alt: "Skupina psíkov spolu v interiéri psej škôlky Chvostíkovo", position: "center 40%" },
     intro: "Ráno odchádzate do práce a večer sa vraciate domov. Medzitým má váš pes vlastný denný režim: potrebuje bezpečie, primeraný pohyb, odpočinok aj kontakt. Ak riešite, kam so psom počas pracovného dňa v Košiciach, možností je viac. Dôležité je vybrať tú, ktorá vyhovuje konkrétnemu psíkovi, nielen vášmu kalendáru.",
     sections: [
       {
@@ -77,8 +80,8 @@ export const blogArticles: BlogArticleData[] = [
     summary: "Spoločnosť ďalších psov môže byť skvelá, no nie je pre každého. Vysvetľujeme, čo si všímame pri zoznamovaní a prečo je dôležitý oddych.",
     publishedAt: "2026-11-03",
     readingMinutes: 4,
-    image: { src: GALLERY[4]!.src, alt: "Skupina psíkov v interiéri Chvostíkova" },
-    secondImage: { src: GALLERY[1]!.src, alt: "Vonkajší výbeh psej škôlky Chvostíkovo v Košiciach" },
+    image: { src: calmDogPairPhoto, alt: "Dvaja pokojne sediaci psi počas zoznamovania v Chvostíkove", position: "center 32%" },
+    secondImage: { src: introductionFriendsPhoto, alt: "Dvaja psí kamaráti spolu odpočívajú v Chvostíkove", position: "center 28%" },
     intro: "Nie každý pes túži po veľkej skupine kamarátov. Niekto sa zapojí rýchlo, iný potrebuje čas na pozorovanie a ďalšiemu najviac vyhovuje pokojný deň v známom prostredí. Dobrá psia škôlka preto nezačína otázkou, koľko psov sa spolu zahrá, ale či je spoločný pobyt pre konkrétneho psíka bezpečný a príjemný.",
     sections: [
       {
