@@ -14,6 +14,7 @@ const BRAND = "Chvostíkovo";
 
 export function blogArticleHead(article: BlogArticleData) {
   const url = SITE + blogPath(article.slug);
+  const socialImage = new URL(article.image.src, SITE).href;
   return {
     meta: [
       { title: article.seoTitle },
@@ -22,12 +23,12 @@ export function blogArticleHead(article: BlogArticleData) {
       { property: "og:description", content: article.description },
       { property: "og:type", content: "article" },
       { property: "og:url", content: url },
-      { property: "og:image", content: article.image.src },
+      { property: "og:image", content: socialImage },
       { property: "og:image:alt", content: article.image.alt },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: article.seoTitle },
       { name: "twitter:description", content: article.description },
-      { name: "twitter:image", content: article.image.src },
+      { name: "twitter:image", content: socialImage },
     ],
     links: [{ rel: "canonical", href: url }],
     scripts: [{
@@ -39,7 +40,7 @@ export function blogArticleHead(article: BlogArticleData) {
         description: article.description,
         mainEntityOfPage: url,
         url,
-        image: article.image.src,
+        image: socialImage,
         inLanguage: "sk",
         datePublished: article.publishedAt,
         dateModified: article.publishedAt,
@@ -98,8 +99,8 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
 
         <article className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
           <figure className="overflow-hidden rounded-3xl bg-secondary shadow-soft">
-            <img src={article.image.src} alt={article.image.alt} className="aspect-[16/9] w-full object-cover"
-              decoding="async" width={1000} height={563} />
+            <img src={article.image.src} alt={article.image.alt} className="aspect-[4/3] w-full object-cover sm:aspect-[16/9]" style={{ objectPosition: article.image.position ?? "center" }}
+              decoding="async" width={1000} height={750} />
             <figcaption className="px-4 py-2 text-sm text-forest/65">Zo života našej psej škôlky v Košiciach</figcaption>
           </figure>
           <div className="mx-auto mt-10 max-w-3xl space-y-10 sm:mt-14">
@@ -117,7 +118,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                 {index === 1 && (
                   <figure className="overflow-hidden rounded-3xl bg-secondary">
                     <img src={article.secondImage.src} alt={article.secondImage.alt} loading="lazy" decoding="async"
-                      className="aspect-[16/9] w-full object-cover" width={900} height={506} />
+                      className="aspect-[4/3] w-full object-cover sm:aspect-[16/9]" style={{ objectPosition: article.secondImage.position ?? "center" }} width={900} height={675} />
                   </figure>
                 )}
               </section>
