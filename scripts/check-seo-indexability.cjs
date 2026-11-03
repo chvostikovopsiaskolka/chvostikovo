@@ -86,3 +86,31 @@ for (const legacy of ["kosik", "objednavka"]) {
   assert(!redirectHtml.includes("Košík je prázdny") && !redirectHtml.includes("Dokončenie objednávky"), "Checkout UI remains in alias HTML");
 }
 console.log("[seo] PASS: retired cart/checkout redirect aliases");
+
+
+// New editorial pages must be discoverable, prerendered and have non-duplicated
+// metadata and visible CTAs. Do not confuse blog information with service LPs.
+for (const slug of [
+  "kam-so-psom-pocas-pracovneho-dna",
+  "je-psia-skolka-vhodna-pre-kazdeho-psa",
+]) {
+  const page = "/blog/" + slug;
+  const canonical = "https://chvostikovo.sk" + page + "/";
+  assert(sitemap.includes("<loc>" + canonical + "</loc>"), "Blog URL missing from sitemap: " + canonical);
+  assert(pagesConfig.includes('{ path: "' + page + '" }'), "Blog route missing from prerender config: " + page);
+  const file = "dist/client" + page + "/index.html";
+  assert(fs.existsSync(file), "Blog prerender HTML missing: " + file);
+  const markup = fs.readFileSync(file, "utf8");
+  assert(markup.includes(canonical), "Blog canonical missing: " + canonical);
+  assert(markup.includes('og:type') && markup.includes("article"), "Article OG metadata missing");
+  assert(markup.includes("BlogPosting"), "BlogPosting JSON-LD missing");
+  assert(markup.includes("Chvostíkovo"), "Article author/brand missing");
+  assert(markup.includes("Chcem sa informovať o škôlke"), "Article inquiry CTA missing");
+  assert(markup.includes("Pozrieť cenník"), "Article pricing CTA missing");
+}
+assert(sitemap.includes("<loc>https://chvostikovo.sk/blog/</loc>"), "Blog index missing from sitemap");
+assert(pagesConfig.includes('{ path: "/blog" }'), "Blog index missing from prerender config");
+assert(fs.existsSync("dist/client/blog/index.html"), "Blog index prerender missing");
+assert(homeHtml.includes("Kam so psom počas pracovného dňa?"), "Blog carousel absent from homepage");
+assert(homeHtml.includes("Viac o živote v psej škôlke"), "Existing information section removed");
+console.log("[seo] PASS: blog index and two articles prerendered, canonical, schema, CTAs, homepage links");
