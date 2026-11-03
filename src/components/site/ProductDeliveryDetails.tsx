@@ -30,13 +30,13 @@ const DELIVERY_OPTIONS = [
 export function ProductDeliveryDetails() {
   return (
     <div className="mt-4">
-      <div className="flex items-center gap-2 whitespace-nowrap">
+      <div className="flex items-center gap-1.5 whitespace-nowrap">
         <span aria-hidden="true" className="inline-flex shrink-0 items-center gap-0.5 text-coral-dark">
           {Array.from({ length: 5 }, (_, index) => (
-            <Star key={index} className="size-3 sm:size-3.5" strokeWidth={1.8} />
+            <Star key={index} className="size-2.5 min-[375px]:size-3 sm:size-3.5" strokeWidth={1.8} />
           ))}
         </span>
-        <span className="text-[11px] font-medium text-forest/70 sm:text-sm">
+        <span className="text-[10px] font-medium text-forest/70 min-[375px]:text-xs sm:text-sm">
           Recenzie spokojných zákazníkov čoskoro
         </span>
       </div>
