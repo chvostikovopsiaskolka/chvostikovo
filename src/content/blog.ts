@@ -2,6 +2,7 @@ import dogFriendsPhoto from "@/assets/care-dog-friends-square.webp";
 import playfulGroupPhoto from "@/assets/deco-3.jpg";
 import calmDogPairPhoto from "@/assets/first-visit-dogs-together.webp";
 import introductionFriendsPhoto from "@/assets/care-supervision-original.webp";
+import puppyPreviewPhoto from "@/assets/first-visit-young-dog.webp";
 
 export type BlogSection = {
   heading: string;
@@ -124,6 +125,44 @@ export const blogArticles: BlogArticleData[] = [
 ];
 
 export const blogPath = (slug: string) => "/blog/" + slug + "/";
+
+export type BlogCardData = {
+  id: string;
+  href: string;
+  title: string;
+  summary: string;
+  image: BlogArticleData["image"];
+  eyebrow: string;
+  ctaLabel: string;
+};
+
+// Information cards: two actual blog articles and one established puppy page.
+// The puppy entry links to its existing text section; it is NOT a new article URL.
+export const blogCards: BlogCardData[] = [
+  ...blogArticles.map((article) => ({
+    id: article.slug,
+    href: blogPath(article.slug),
+    title: article.title,
+    summary: article.summary,
+    image: article.image,
+    eyebrow: `Rady od Chvostíkova · ${article.readingMinutes} min čítania`,
+    ctaLabel: "Prečítať článok",
+  })),
+  {
+    id: "psia-skolka-pre-steniatka",
+    href: "/psia-skolka-pre-steniatka/#puppy-benefits",
+    title: "Psia škôlka pre šteniatka",
+    summary: "Kedy môže šteniatko začať, ako sa zoznamuje so psíkmi a prečo sú pri prvých návštevách dôležité aj prestávky a oddych.",
+    image: {
+      src: puppyPreviewPhoto,
+      alt: "Mladý psík v priestoroch psej škôlky Chvostíkovo",
+      position: "center 38%",
+    },
+    eyebrow: "Pre najmladších škôlkarov",
+    ctaLabel: "Prečítať viac",
+  },
+];
+
 export const findBlogArticle = (slug: string) => {
   const article = blogArticles.find(item => item.slug === slug);
   if (!article) throw new Error("Unknown blog article: " + slug);

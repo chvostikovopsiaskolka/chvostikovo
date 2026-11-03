@@ -112,5 +112,17 @@ assert(sitemap.includes("<loc>https://chvostikovo.sk/blog/</loc>"), "Blog index 
 assert(pagesConfig.includes('{ path: "/blog" }'), "Blog index missing from prerender config");
 assert(fs.existsSync("dist/client/blog/index.html"), "Blog index prerender missing");
 assert(homeHtml.includes("Kam so psom počas pracovného dňa?"), "Blog carousel absent from homepage");
-assert(homeHtml.includes("Viac o živote v psej škôlke"), "Existing information section removed");
+assert(!homeHtml.includes("Viac o živote v psej škôlke"), "Duplicate information section still visible");
+assert(homeHtml.includes("Psia škôlka pre šteniatka"), "Puppy preview card missing from homepage");
+assert(homeHtml.includes("/psia-skolka-pre-steniatka/#puppy-benefits"), "Puppy preview must link below the existing hero");
+assert(!homeHtml.includes("Dog daycare in Košice"), "Old EN service card still exposed in homepage article section");
+assert(!homeHtml.includes("Psia škôlka a stráženie psov"), "Old dog-sitting service card still exposed in homepage article section");
+const blogIndex = fs.readFileSync("dist/client/blog/index.html", "utf8");
+assert(blogIndex.includes("/psia-skolka-pre-steniatka/#puppy-benefits"), "Puppy guide missing from blog listing");
+assert(!sitemap.includes("/blog/psia-skolka-pre-steniatka/"), "Do not invent a duplicate puppy blog URL");
+assert(sitemap.includes("<loc>https://chvostikovo.sk/psia-skolka-pre-steniatka</loc>") ||
+       sitemap.includes("<loc>https://chvostikovo.sk/psia-skolka-pre-steniatka/</loc>"), "Existing puppy SEO landing removed");
+const puppyHtml = fs.readFileSync("dist/client/psia-skolka-pre-steniatka/index.html", "utf8");
+assert(puppyHtml.includes('id="puppy-benefits"'), "Target text section under puppy hero missing");
+console.log("[seo] PASS: single information carousel, puppy card anchored below hero; original LPs preserved");
 console.log("[seo] PASS: blog index and two articles prerendered, canonical, schema, CTAs, homepage links");
