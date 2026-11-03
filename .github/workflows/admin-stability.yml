@@ -16,8 +16,8 @@ jobs:
           node-version: '22'
       - name: Preflight customer release version contract
         run: node tests/customer-release-contract.cjs
-      - name: Bilingual login presentation invariant v408
-        run: node tests/customer-locale-v408.cjs
+      - name: Bilingual customer UI invariant v409
+        run: node tests/customer-locale-v409.cjs
       - name: Install pinned test runtime outside the app
         run: |
           npm install --prefix "$RUNNER_TEMP/chvo-admin-deps" --no-save --no-package-lock jsdom@26.1.0 typescript@5.8.3 @electric-sql/pglite@0.5.10
@@ -67,8 +67,8 @@ jobs:
           node tests/admin-chat-v325.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v325.html node tests/admin-runtime-v275.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v325.html node tests/admin-proofs-v321.cjs
-      - name: Customer locale UI and persistence v408
-        run: node tests/customer-locale-v408-browser.cjs
+      - name: Customer locale UI and persistence v409
+        run: node tests/customer-locale-v409-browser.cjs
       - name: Customer loading motion lifecycle
         run: node tests/loading-motion-v317.cjs
       - name: Staff vaccination photo management v321
