@@ -7,7 +7,7 @@ import { ShortForm } from "./Forms";
 import { BlogCard } from "./BlogCard";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
-import { blogArticles, blogPath, type BlogArticleData } from "@/content/blog";
+import { blogCards, blogPath, type BlogArticleData } from "@/content/blog";
 
 const SITE = "https://chvostikovo.sk";
 const BRAND = "Chvostíkovo";
@@ -54,7 +54,7 @@ export function blogArticleHead(article: BlogArticleData) {
 export function BlogArticle({ article }: { article: BlogArticleData }) {
   const [open, setOpen] = useState(false);
   const trackingSource = "blog_" + article.slug.replaceAll("-", "_") + "_inquiry";
-  const related = blogArticles.filter(item => item.slug !== article.slug);
+  const related = blogCards.filter(card => card.id !== article.slug);
 
   function openInquiry() {
     trackMarketingInteraction("inquiry_cta", trackingSource);
@@ -152,7 +152,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
             </a>
             <h2 className="mt-4 font-display text-2xl text-forest">Mohlo by vás zaujímať</h2>
             <div className="mt-6 grid max-w-xl gap-5">
-              {related.map(item => <BlogCard key={item.slug} article={item} />)}
+              {related.map(card => <BlogCard key={card.id} card={card} />)}
             </div>
           </div>
         </section>
