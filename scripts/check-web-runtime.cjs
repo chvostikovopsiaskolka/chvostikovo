@@ -153,9 +153,9 @@ const failures = [];
               if (!box || Math.abs(box.width - box.height) > 3) throw new Error('Homepage product card must be square: ' + route);
             }
             for (const legacy of ['/kosik/', '/objednavka/']) {
-              await productPage.goto(new URL(legacy, base).href);
-              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'networkidle' });
-              if (!await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).count()) throw new Error('Retired shop alias did not open products: ' + legacy);
+              await productPage.goto(new URL(legacy, base).href, { waitUntil: 'domcontentloaded' });
+              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'domcontentloaded' });
+              await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).waitFor({ state: 'visible' });
               if (await productPage.getByRole('heading', { name: /Košík|Dokončenie objednávky/ }).count()) throw new Error('Retired cart UI is still exposed');
             }
             results.push({engine, restricted:false, route:'product-inquiries-' + width, status:'PASS'});
