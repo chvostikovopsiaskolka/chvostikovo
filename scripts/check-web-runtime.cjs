@@ -108,6 +108,29 @@ const failures = [];
               await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
               const consent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
               if (await consent.isVisible()) await consent.click();
+              const heroTitle = productPage.getByRole('heading', { level: 1 });
+              const heroPhoto = productPage.locator('img[fetchpriority="high"]').first();
+              const sizeLabel = productPage.getByText(route.includes('stojan') ? 'Vyberte veľkosť stojana' : 'Vyberte veľkosť', { exact: true });
+              const [titleBox, photoBox, selectorBox] = await Promise.all([heroTitle.boundingBox(), heroPhoto.boundingBox(), sizeLabel.boundingBox()]);
+              if (!titleBox || !photoBox || !selectorBox) throw new Error('Product detail desktop/mobile regions missing');
+              if (width === 1440 && !(photoBox.x + photoBox.width <= titleBox.x + 8 && selectorBox.x >= titleBox.x - 8)) {
+                throw new Error('Desktop product image must be left of title and size selection');
+              }
+              if (width === 390 && !(titleBox.y < photoBox.y && photoBox.y < selectorBox.y)) {
+                throw new Error('Mobile product image must follow heading and precede size selection');
+              }
+              if (route.includes('stojan')) {
+                if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('MIA'))) throw new Error('Small stand must show Mia by default');
+                await productPage.getByRole('button', { name: /^Väčší/ }).first().click();
+                if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('CORI'))) throw new Error('Large stand must show CORI');
+                await productPage.getByRole('button', { name: /^Menší/ }).first().click();
+                if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('MIA'))) throw new Error('Returning to small stand must show Mia');
+              } else {
+                await productPage.getByRole('button', { name: /^Malý/ }).first().click();
+                if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('malom targete'))) throw new Error('Small target image missing');
+                await productPage.getByRole('button', { name: /^Veľký/ }).first().click();
+                if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('veľkom targete'))) throw new Error('Large target image missing');
+              }
               const reviewTeaser = productPage.getByText('Recenzie spokojných zákazníkov čoskoro', { exact: true });
               if (!await reviewTeaser.isVisible()) throw new Error('Product review teaser missing');
               await productPage.getByRole('button', { name: 'Ako je to s doručením?' }).click();
@@ -123,10 +146,16 @@ const failures = [];
               if (!await productPage.locator('input[name="email"]:visible').count()) throw new Error('Product inquiry contact missing');
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product inquiry points to retired checkout');
             }
+            await productPage.goto(new URL('/', base).href);
+            for (const route of ['/stojan-na-misky-pre-psa', '/target-na-cvicenie-pre-psov']) {
+              const card = productPage.locator('#produkty article a').filter({ has: productPage.locator('h3') }).filter({ has: productPage.locator('img') }).filter({ hasText: route.includes('stojan') ? 'Drevený stojan' : 'Target na cvičenie' }).first();
+              const box = await card.boundingBox();
+              if (!box || Math.abs(box.width - box.height) > 3) throw new Error('Homepage product card must be square: ' + route);
+            }
             for (const legacy of ['/kosik/', '/objednavka/']) {
-              await productPage.goto(new URL(legacy, base).href);
-              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'networkidle' });
-              if (!await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).count()) throw new Error('Retired shop alias did not open products: ' + legacy);
+              await productPage.goto(new URL(legacy, base).href, { waitUntil: 'domcontentloaded' });
+              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'domcontentloaded' });
+              await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).waitFor({ state: 'visible' });
               if (await productPage.getByRole('heading', { name: /Košík|Dokončenie objednávky/ }).count()) throw new Error('Retired cart UI is still exposed');
             }
             results.push({engine, restricted:false, route:'product-inquiries-' + width, status:'PASS'});
