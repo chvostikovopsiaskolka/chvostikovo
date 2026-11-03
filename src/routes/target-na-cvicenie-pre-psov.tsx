@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
+import { ProductDeliveryDetails } from "@/components/site/ProductDeliveryDetails";
 import { FormDialog } from "@/components/site/FormDialog";
 import { PhoneField } from "@/components/site/PhoneField";
 import { phoneFromForm } from "@/lib/phone";
@@ -334,6 +335,7 @@ function TargetPage() {
                   <span className="text-sm text-forest/60">Cena</span>
                   <span className="font-display text-4xl font-bold text-forest">20 €</span>
                 </div>
+                <ProductDeliveryDetails />
                 <p className="mt-2 text-sm leading-relaxed text-forest/60">
                   Najbežnejšia výška je približne 5 cm. Na požiadanie vieme výšku upraviť podľa
                   dohody.
