@@ -213,11 +213,19 @@ const failures = [];
               }
             }
             for (const legacy of ['/kosik/', '/objednavka/']) {
-              // Meta refresh and hydrated location.replace can interrupt DOMContentLoaded on the retired alias.
-              // Wait only for the navigation commit, then require the actual products heading.
-              await productPage.goto(new URL(legacy, base).href, { waitUntil: 'commit' });
-              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'commit' });
+              // Meta refresh and hydrated location.replace can interrupt navigation to a retired alias.
+              // Accept only that precise interruption; still require the actual /produkty URL and heading.
+              try {
+                await productPage.goto(new URL(legacy, base).href, { waitUntil: 'commit' });
+              } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                if (!/is interrupted by another navigation/i.test(message) || !message.includes('/produkty')) throw error;
+              }
+              // Locator polling survives the refresh/replace document handoff better than waitForURL.
               await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).waitFor({ state: 'visible' });
+              if (!['/produkty', '/produkty/'].includes(new URL(productPage.url()).pathname)) {
+                throw new Error('Retired shop alias did not resolve to products: ' + legacy);
+              }
               if (await productPage.getByRole('heading', { name: /Košík|Dokončenie objednávky/ }).count()) throw new Error('Retired cart UI is still exposed');
             }
             results.push({engine, restricted:false, route:'product-inquiries-' + width, status:'PASS'});
