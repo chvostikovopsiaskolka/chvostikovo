@@ -54,4 +54,16 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://chvostikovo.sk/blog/</loc>
+    <lastmod>2026-11-03</lastmod>
+  </url>
+  <url>
+    <loc>https://chvostikovo.sk/blog/kam-so-psom-pocas-pracovneho-dna/</loc>
+    <lastmod>2026-11-03</lastmod>
+  </url>
+  <url>
+    <loc>https://chvostikovo.sk/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/</loc>
+    <lastmod>2026-11-03</lastmod>
+  </url>
 </urlset>
