@@ -97,8 +97,8 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
 
         <article className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
           <figure className="overflow-hidden rounded-3xl bg-secondary shadow-soft">
-            <img src={article.image.src} alt={article.image.alt} className="aspect-[4/3] w-full object-cover sm:aspect-[16/9]" style={{ objectPosition: article.image.position ?? "center" }}
-              decoding="async" width={1000} height={750} />
+            <img src={article.image.src} alt={article.image.alt} className="mx-auto block max-h-[720px] h-auto max-w-full object-contain"
+              decoding="async" width={article.image.width ?? 1000} height={article.image.height ?? 750} />
             <figcaption className="px-4 py-2 text-sm text-forest/65">Zo života našej psej škôlky v Košiciach</figcaption>
           </figure>
           <div className="mx-auto mt-10 max-w-3xl space-y-10 sm:mt-14">
@@ -116,7 +116,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                 {index === 1 && (
                   <figure className="overflow-hidden rounded-3xl bg-secondary">
                     <img src={article.secondImage.src} alt={article.secondImage.alt} loading="lazy" decoding="async"
-                      className="aspect-[4/3] w-full object-cover sm:aspect-[16/9]" style={{ objectPosition: article.secondImage.position ?? "center" }} width={900} height={675} />
+                      className="mx-auto block max-h-[700px] h-auto max-w-full object-contain" width={article.secondImage.width ?? 900} height={article.secondImage.height ?? 675} />
                   </figure>
                 )}
               </section>
