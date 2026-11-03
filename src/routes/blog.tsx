@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { BlogCard } from "@/components/site/BlogCard";
-import { blogArticles } from "@/content/blog";
+import { blogArticles, blogCards } from "@/content/blog";
 
 const PAGE_URL = "https://chvostikovo.sk/blog/";
 const title = "Užitočné informácie o psoch a psej škôlke | Chvostíkovo";
@@ -39,8 +39,8 @@ function BlogIndex() {
           </div>
         </section>
         <section className="mx-auto max-w-6xl px-4 py-12 sm:py-16" aria-label="Články Chvostíkova">
-          <div className="grid gap-6 sm:grid-cols-2">
-            {blogArticles.map(article => <BlogCard key={article.slug} article={article} />)}
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {blogCards.map(card => <BlogCard key={card.id} card={card} />)}
           </div>
           <p className="mt-10 text-sm text-forest/65">
             Hľadáte skôr podmienky prijatia alebo ceny? <a className="text-coral underline underline-offset-4" href="/#cennik">Pozrite si cenník a ponuku škôlky.</a>
