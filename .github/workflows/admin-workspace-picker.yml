@@ -20,7 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Direct Chvostikovo boot and routing checks
-        run: node admin-wrapper/project-picker.test.cjs
+        run: |
+          node admin-wrapper/project-picker.test.cjs
+          node admin-wrapper/pair-dogs.test.cjs
 
       - uses: actions/setup-node@v4
         with:
