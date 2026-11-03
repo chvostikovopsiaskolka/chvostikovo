@@ -63,7 +63,7 @@ async function simulate(href, failFirst = false) {
       assert.equal(url, 'https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-frontend?v=20261014-admin-pwa-v111');
       assert.equal(options.cache, 'no-store');
       if (failFirst && fetched === 1) return {ok: false, status: 503};
-      return {ok: true, text: async () => '<html><style>html:has(#appBoot),body:has(#appBoot){background:#fff!important}</style>Chvostíkovo admin unchanged</html>'};
+      return {ok: true, text: async () => '<html><style>html:has(#appBoot),body:has(#appBoot){background:#fff!important}</style>Chvostíkovo admin unchanged<div id="adminSettingsModal"><button type="button" id="adminSwitchWorkspace" class="admin-menu-row"><span><strong>Prepnúť prostredie</strong><small style="display:block">Chvostíkovo alebo Bellaris</small></span><span aria-hidden="true">›</span></button><details id="adminSettingsPhotoV72">Profilová fotka</details><div id="pushSetupCard">Upozornenia</div><button id="adminSettingsLogout">Odhlásiť sa</button></div></html>'};
     }
   }, {timeout: 1500});
   return {
@@ -90,6 +90,11 @@ async function simulate(href, failFirst = false) {
     assert.equal(direct.theme.value, '#fffaf5');
     assert(direct.written.includes('Chvostíkovo admin unchanged'));
     assert(direct.written.includes('html:has(#appBoot:not(.hidden))'));
+    assert(!direct.written.includes('id="adminSwitchWorkspace"'), 'Dead environment switch removed from fetched settings');
+    assert(!direct.written.includes('Prepnúť prostredie'), 'Obsolete settings label cannot leak into UI');
+    for (const required of ['adminSettingsModal','adminSettingsPhotoV72','pushSetupCard','adminSettingsLogout']) {
+      assert(direct.written.includes(required), 'Preserve adjacent admin settings control: '+required);
+    }
   }
   const failed = await simulate('https://chvostikovo-app.vercel.app/', true);
   await failed.flush();
