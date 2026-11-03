@@ -67,8 +67,10 @@ jobs:
           node tests/admin-chat-v325.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v325.html node tests/admin-runtime-v275.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v325.html node tests/admin-proofs-v321.cjs
-      - name: Customer locale UI and persistence v409
-        run: node tests/customer-locale-v409-browser.cjs
+      - name: Customer locale signup, bilingual modal and terms safety v411
+        run: |
+          node tests/customer-locale-v409-browser.cjs
+          node tests/customer-legal-v411.cjs
       - name: Customer loading motion lifecycle
         run: node tests/loading-motion-v317.cjs
       - name: Staff vaccination photo management v321
