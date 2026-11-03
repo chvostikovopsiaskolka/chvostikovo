@@ -33,9 +33,10 @@ jobs:
         run: node scripts/mobile-dock-contract.cjs
       - name: Mobile footer legal/credit contract
         run: node scripts/footer-mobile-contract.cjs
+      # TanStack generates the typed route tree during Vite build.
+      - name: Build static pages and generate routes
+        run: bun run build:pages
       - name: TypeScript validation
         run: bun run check:types
-      - name: Build static pages
-        run: bun run build:pages
       - name: Verify SEO route, sitemap and HTML
         run: node scripts/check-seo-indexability.cjs

@@ -216,8 +216,12 @@ const failures = [];
               // Meta refresh and hydrated location.replace can interrupt DOMContentLoaded on the retired alias.
               // Wait only for the navigation commit, then require the actual products heading.
               await productPage.goto(new URL(legacy, base).href, { waitUntil: 'commit' });
-              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'commit' });
+              // The legacy meta refresh can race with waitForURL's navigation-commit
+              // waiter in WebKit. Assert the actual loaded destination instead.
               await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).waitFor({ state: 'visible' });
+              if (!['/produkty', '/produkty/'].includes(new URL(productPage.url()).pathname)) {
+                throw new Error('Retired product alias did not redirect to /produkty: ' + legacy);
+              }
               if (await productPage.getByRole('heading', { name: /Košík|Dokončenie objednávky/ }).count()) throw new Error('Retired cart UI is still exposed');
             }
             results.push({engine, restricted:false, route:'product-inquiries-' + width, status:'PASS'});

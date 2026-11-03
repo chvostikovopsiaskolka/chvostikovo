@@ -1,7 +1,9 @@
 import { ArrowRight, Languages, ShieldCheck, Sparkles } from "lucide-react";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
+import { BlogCard } from "./BlogCard";
+import { blogArticles } from "@/content/blog";
 
-const articles = [
+const resources = [
   {
     href: "/psia-skolka-pre-steniatka",
     Icon: Sparkles,
@@ -34,35 +36,44 @@ export function UsefulInfo() {
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
-          <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
-            Užitočné informácie
-          </span>
-          <h2 className="section-title mt-2 text-3xl sm:text-4xl">Viac o živote v psej škôlke</h2>
+          <h2 className="section-title text-3xl sm:text-4xl">Užitočné informácie</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-forest/80">
+            Rady z našich skúseností a otázky, ktoré majiteľov psíkov zaujímajú.
+          </p>
+        </div>
+        <div role="region" aria-label="Nové články Chvostíkova – na mobile posúvajte do strany" tabIndex={0}
+          className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-auto md:grid md:max-w-5xl md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+          {blogArticles.map(article => (
+            <div key={article.slug} className="w-[86%] shrink-0 snap-start sm:w-[46%] md:w-auto md:shrink">
+              <BlogCard article={article} />
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 text-center">
+          <a href="/blog/" className="inline-flex min-h-11 items-center gap-2 font-display text-sm font-semibold text-coral underline-offset-4 hover:underline">
+            Všetky články <ArrowRight className="size-4" aria-hidden="true" />
+          </a>
+        </div>
+
+        <div className="mt-14 text-center">
+          <h2 className="section-title text-3xl sm:text-4xl">Viac o živote v psej škôlke</h2>
           <p className="mx-auto mt-3 max-w-2xl text-forest/80">
             Praktické informácie pre majiteľov, ktorí chcú vedieť viac ešte pred prvou návštevou.
           </p>
         </div>
-
-        <div role="region"
-          aria-label="Články o živote v škôlke – posúvajte do strany"
-          tabIndex={0}
+        <div role="region" aria-label="Ďalšie informácie o škôlke – posúvajte do strany" tabIndex={0}
           className="-mx-4 mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-auto md:grid md:max-w-6xl md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0">
-          {articles.map(({ href, Icon, eyebrow, title, text, cta }) => (
-            <a
-              key={href}
-              href={href}
-              className="group flex h-auto w-[86%] shrink-0 snap-start flex-col rounded-4xl bg-card p-7 shadow-card transition-transform hover:-translate-y-1 sm:w-[46%] sm:p-8 md:h-full md:w-auto md:shrink md:snap-align-none"
-            >
+          {resources.map(({ href, Icon, eyebrow, title, text, cta }) => (
+            <a key={href} href={href}
+              className="group flex h-auto w-[86%] shrink-0 snap-start flex-col rounded-4xl bg-card p-7 shadow-card transition-transform hover:-translate-y-1 sm:w-[46%] sm:p-8 md:h-full md:w-auto md:shrink">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-coral">
-                <Icon className="size-6" />
+                <Icon className="size-6" aria-hidden="true" />
               </div>
-              <p className="mt-5 font-display text-sm font-semibold tracking-wide text-coral uppercase">
-                {eyebrow}
-              </p>
+              <p className="mt-5 font-display text-sm font-semibold tracking-wide text-coral uppercase">{eyebrow}</p>
               <h3 className="mt-2 text-2xl text-forest">{title}</h3>
               <p className="mt-3 flex-1 leading-relaxed text-forest/80">{text}</p>
               <span className="mt-5 inline-flex items-center gap-2 font-display text-sm font-semibold text-coral">
-                {cta} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                {cta} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
               </span>
             </a>
           ))}
