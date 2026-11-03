@@ -312,8 +312,8 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                   <a
                     href={english ? "/" : "/en/dog-daycare-kosice"}
                     lang={english ? "sk" : "en"}
-                    aria-label={english ? "Slovenská verzia" : "English version"}
-                    title={english ? "Slovenská verzia" : "English version"}
+                    aria-label={english ? "Slovak version" : "English version"}
+                    title={english ? "Slovak version" : "English version"}
                     onClick={() => {
                       void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_language", language);
                     }}
