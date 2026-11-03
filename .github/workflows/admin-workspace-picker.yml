@@ -23,6 +23,7 @@ jobs:
         run: |
           node admin-wrapper/project-picker.test.cjs
           node admin-wrapper/pair-dogs.test.cjs
+          node admin-wrapper/shared-purchase.test.cjs
 
       - uses: actions/setup-node@v4
         with:
@@ -43,6 +44,8 @@ jobs:
           "$RUNNER_TEMP/admin-stability-runtime/node_modules/.bin/playwright" install --with-deps chromium webkit
       - name: Staff dog pairing UI with mock RLS client
         run: node admin-wrapper/pair-dogs.browser.cjs
+      - name: Staff explicit shared pass purchase with mock RPC
+        run: node admin-wrapper/shared-purchase.browser.cjs
       - name: Actual assembled lifecycle and authentication regressions
         run: |
           node tests/admin-lifecycle-20261101.cjs
