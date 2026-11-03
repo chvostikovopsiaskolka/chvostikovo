@@ -103,21 +103,31 @@ const failures = [];
           const productPage = await context.newPage();
           await productPage.setViewportSize({ width, height: width === 390 ? 844 : 900 });
           try {
-            for (const legacy of ['/kosik/', '/objednavka/']) {
-              await productPage.goto(new URL(legacy, base).href);
-              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'networkidle' });
-              if (!await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).count()) throw new Error('Retired shop alias did not open products: ' + legacy);
-              if (await productPage.getByRole('heading', { name: /Košík|Dokončenie objednávky/ }).count()) throw new Error('Retired cart UI is still exposed');
-            }
             for (const [route, action] of [['/stojan-na-misky-pre-psa', 'Mám záujem o stojan'], ['/target-na-cvicenie-pre-psov', 'Mám záujem o target']]) {
               await productPage.goto(new URL(route, base).href);
               await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
               const consent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
               if (await consent.isVisible()) await consent.click();
+              const reviewTeaser = productPage.getByText('Recenzie spokojných zákazníkov čoskoro', { exact: true });
+              if (!await reviewTeaser.isVisible()) throw new Error('Product review teaser missing');
+              await productPage.getByRole('button', { name: 'Ako je to s doručením?' }).click();
+              const deliveryDialog = productPage.getByRole('dialog', { name: 'Doprava a doručenie' });
+              await deliveryDialog.waitFor();
+              for (const label of ['Košice', 'Zadarmo', 'Okolie Košíc a Prešov', '5 €', 'Vzdialenejšie lokality', 'Individuálne']) {
+                if (!await deliveryDialog.getByText(label, { exact: true }).isVisible()) throw new Error('Product delivery information missing: ' + label);
+              }
+              await productPage.keyboard.press('Escape');
+              await deliveryDialog.waitFor({ state: 'hidden' });
               await productPage.getByRole('button', { name: action }).first().click();
               await productPage.locator('input[name="customer_name"]:visible').waitFor();
               if (!await productPage.locator('input[name="email"]:visible').count()) throw new Error('Product inquiry contact missing');
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product inquiry points to retired checkout');
+            }
+            for (const legacy of ['/kosik/', '/objednavka/']) {
+              await productPage.goto(new URL(legacy, base).href);
+              await productPage.waitForURL(url => ['/produkty', '/produkty/'].includes(url.pathname), { waitUntil: 'networkidle' });
+              if (!await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).count()) throw new Error('Retired shop alias did not open products: ' + legacy);
+              if (await productPage.getByRole('heading', { name: /Košík|Dokončenie objednávky/ }).count()) throw new Error('Retired cart UI is still exposed');
             }
             results.push({engine, restricted:false, route:'product-inquiries-' + width, status:'PASS'});
             console.log('PASS product inquiries and retired shop redirects ' + engine + ' ' + width);
