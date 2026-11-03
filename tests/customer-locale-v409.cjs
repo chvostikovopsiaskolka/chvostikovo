@@ -1,6 +1,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
 const read=p=>fs.readFileSync(p,'utf8');
 const html=read('index.html'),locale=read('customer-locale-v409.js'),css=read('customer-design.css'),optic=read('customer-liquid-optics.js');
+const app=read('app.js'),ver=JSON.parse(read('version.json'));
 assert.equal((html.match(/id="customerLocaleSwitchV408"/g)||[]).length,1);
 assert.equal((html.match(/id="customerLocaleInMenuV409"/g)||[]).length,1);
 assert(!html.includes('customerLocaleNoteV408'),'Remove obsolete partial-translation notice from auth card');
@@ -27,7 +28,7 @@ assert(locale.includes('Confirm password')&&locale.includes('privacy policy'));
 assert(locale.includes("'privacyInfoModal'")&&locale.includes("'schoolTermsModal'"));
 new vm.Script(locale);
 new vm.Script(read('customer-legal-en-v411.js'));
-const app=read('app.js'),ver=JSON.parse(read('version.json'));
+
 assert.equal(ver.build,'v411');assert.equal(ver.version,'2.0.84');
 assert(app.includes("const APP_BUILD='v411';"));assert(app.includes("const APP_VERSION='2.0.84';"));
 console.log('PASS: v411 stable iOS/Android glass, shortened welcome, signup language controls and legal EN module');
