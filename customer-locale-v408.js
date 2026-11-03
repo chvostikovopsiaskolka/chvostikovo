@@ -106,9 +106,12 @@
     }
     document.documentElement.lang = lang;
     const note = document.getElementById('customerLocaleNoteV408');
-    if (note) note.textContent = lang === 'en' ?
-      'English preview: legal documents and staff notices are still in Slovak.' :
-      'Anglický náhľad: právne dokumenty a oznamy zatiaľ zostávajú po slovensky.';
+    if (note) {
+      const message = lang === 'en' ?
+        'English preview: legal documents and staff notices are still in Slovak.' :
+        'Anglický náhľad: právne dokumenty a oznamy zatiaľ zostávajú po slovensky.';
+      if (note.textContent !== message) note.textContent = message;
+    }
   }
   let queued = false;
   const requestApply = () => {
