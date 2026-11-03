@@ -5,7 +5,7 @@ assert.equal((html.match(/id="customerLocaleSwitchV408"/g)||[]).length,1);
 assert.equal((html.match(/id="customerLocaleInMenuV409"/g)||[]).length,1);
 assert(!html.includes('customerLocaleNoteV408'),'Remove obsolete partial-translation notice from auth card');
 assert(!locale.includes('English preview:'));
-assert(html.indexOf('customer-locale-v409.js?v=v409')<html.indexOf('/app.js?v=v409'));
+assert(html.indexOf('customer-locale-v409.js?v=v410')<html.indexOf('/app.js?v=v410'));
 assert(css.includes('html.customer-auth-glass-v386.customer-ios-auth-v410 body::before'));
 assert(optic.includes("root.classList.toggle('customer-ios-auth-v410',authVisible&&ios)"));
 assert(optic.includes("if(authVisible && ios && el.matches('#authView>.auth-card'))"));
