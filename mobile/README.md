@@ -1,5 +1,33 @@
 # Chvostíkovo Android — Capacitor preparation
 
+## Android Play v409 / 2.0.82 candidate — November 3, 2026
+
+**Status: UNSIGNED / NOT UPLOADED TO GOOGLE PLAY / physical Android QA still required.**
+Dedicated build-only branch `codex/android-v409-paws-en-play-candidate-20261103`
+is based on the previously tested v407 native candidate
+`c7dbc1143b7ba1227f994fd07b4a5f87c7b6c801`.
+It reuses the **exact Git blobs** from customer PWA v409
+`6ac0c835e884d53b0dbcfd69981c204943c1649f` for the shared
+HTML/JS/CSS (including `customer-locale-v409.js`), versions and tests.
+The preserved original paw wallpaper is pinned to the auth viewport, and the
+login/signup glass uses a stable fallback; language SK/EN appears at login and
+in Menu → Settings. No changes to native FCM, deep-link callbacks, keystore,
+appId or customer Supabase database. `versionCode=409` and
+`versionName=2.0.82` are derived from the shared `version.json`.
+`npm run sync` includes all allowlisted root JS/CSS, including the EN module;
+`mobile/tests/locale-release.test.mjs` ensures the built native bundle
+matches those exact sources without accidentally shipping a service worker.
+
+**Important:** PWA production deployment does not upgrade an installed native
+Capacitor APK. The new Google Play release needs the **original local upload
+keystore**, local Firebase `google-services.json`, signing alias/passwords,
+and actual native push/App Links tests. Never commit keys or hardcode release
+verification flags. The GitHub Actions preview contains an APK for debugging
+and an **unsigned** AAB; it is not the file to upload to Play Console.
+The previous Android v407 candidate remains the rollback/build baseline.
+The actual previously uploaded Play versionCode must be checked before
+signing/publishing. No app store publication is performed here.
+
 Status: **prepared for testing; not a signed Google Play release**. Source baseline:
 customer PWA candidate v394 / 2.0.69 (28 October 2026), based on
 production `3159725685584014b50b912e09995b2d68fcebfd`. Earlier v360/v361 APK/AAB files
