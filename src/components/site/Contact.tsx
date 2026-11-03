@@ -70,6 +70,35 @@ export function EnglishContact({ onEnquire }: { onEnquire?: () => void } = {}) {
   );
 }
 
+function SocialLinks({ language }: { language: "sk" | "en" }) {
+  const isEnglish = language === "en";
+
+  return (
+    <div className="grid w-full grid-cols-2 gap-3" aria-label={isEnglish ? "Social networks" : "Sociálne siete"}>
+      <a
+        href={INSTAGRAM}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={isEnglish ? "Chvostíkovo on Instagram (new tab)" : "Chvostíkovo na Instagrame (nová karta)"}
+        className="inline-flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-2xl border border-forest/15 bg-secondary/65 px-3 py-3 font-display text-sm font-semibold text-forest transition-colors hover:border-coral/40 hover:bg-coral-soft/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral"
+      >
+        <Instagram aria-hidden="true" className="size-5 shrink-0 text-coral-dark" />
+        Instagram
+      </a>
+      <a
+        href={FACEBOOK}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={isEnglish ? "Chvostíkovo on Facebook (new tab)" : "Chvostíkovo na Facebooku (nová karta)"}
+        className="inline-flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-2xl border border-forest/15 bg-secondary/65 px-3 py-3 font-display text-sm font-semibold text-forest transition-colors hover:border-coral/40 hover:bg-coral-soft/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral"
+      >
+        <Facebook aria-hidden="true" className="size-5 shrink-0 text-coral-dark" />
+        Facebook
+      </a>
+    </div>
+  );
+}
+
 function ContactDetails({ language }: { language: "sk" | "en" }) {
   const isEnglish = language === "en";
 
@@ -94,6 +123,9 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
         <ContactRow icon={<Clock className="size-5" />} label={isEnglish ? "Opening hours" : "Otváracie hodiny"}>
           {isEnglish ? "Monday – Friday, 7:00 – 17:00" : "Pondelok – piatok, 7:00 – 17:00"}
         </ContactRow>
+        <div className="hidden lg:col-span-2 lg:block">
+          <SocialLinks language={language} />
+        </div>
       </div>
 
       <div className="min-w-0">
@@ -187,11 +219,10 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
       <footer className="bg-forest py-9 text-cream/80">
         <div className="mx-auto max-w-6xl px-4">
           <div className="rounded-3xl bg-cream p-5 text-forest sm:p-7">
-            <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+            <div className="mb-6 flex flex-col items-center gap-4 lg:flex-row lg:justify-between">
               <img src={logo} alt={isEnglish ? "Chvostíkovo dog daycare" : "Chvostíkovo psia škôlka"} className="h-8 w-auto" loading="lazy" />
-              <div className="flex items-center gap-2">
-                <a href={INSTAGRAM} target="_blank" rel="noreferrer" aria-label="Instagram Chvostíkovo" className="flex size-10 items-center justify-center rounded-full bg-forest/10 text-forest transition hover:bg-coral hover:text-cream"><Instagram className="size-5" /></a>
-                <a href={FACEBOOK} target="_blank" rel="noreferrer" aria-label="Facebook Chvostíkovo" className="flex size-10 items-center justify-center rounded-full bg-forest/10 text-forest transition hover:bg-coral hover:text-cream"><Facebook className="size-5" /></a>
+              <div className="w-full lg:hidden">
+                <SocialLinks language={language} />
               </div>
             </div>
             <ContactDetails language={language} />
