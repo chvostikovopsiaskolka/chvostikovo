@@ -951,3 +951,13 @@ html.customer-auth-glass-v386 #authView>.auth-card>.lg-v3-material[data-renderer
 #customerLocaleInMenuV409 [data-customer-locale]{min-width:52px;min-height:44px;border:0;border-radius:999px;cursor:pointer;background:transparent;color:#8f5877;font:750 13px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 #customerLocaleInMenuV409 [data-customer-locale].active{background:#fff;box-shadow:0 1px 5px #00000019;color:#ad427d}
 #customerLocaleInMenuV409 [data-customer-locale]:focus-visible{outline:2px solid #a63c84;outline-offset:2px}
+
+/* Respect reduced-transparency/high-contrast settings even with pinned paws. */
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+ html.customer-auth-glass-v386 #authView>.auth-card>.lg-v3-material[data-renderer=fallback]{
+  background:#fff9f3!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+ }
+}
+
