@@ -8,7 +8,6 @@ import { Care, Why, About, Partners, FriendshipInterest } from "@/components/sit
 import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
 import { UsefulInfo } from "@/components/site/UsefulInfo";
 import { ProductSection } from "@/components/site/ProductSection";
-import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
 import { InquirySection } from "@/components/site/InquirySection";
@@ -91,7 +90,6 @@ function Index() {
         <Requirements />
         <Faq />
         <About />
-        <InstagramFeed />
         <Partners />
         <ProductSection />
         <UsefulInfo />

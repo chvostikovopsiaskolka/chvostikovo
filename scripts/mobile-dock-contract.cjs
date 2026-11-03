@@ -150,4 +150,10 @@ assert(dock.includes('className="mobile-dock-menu-title'), "Menu title must be v
 assert(dock.includes('English version') && dock.includes('Slovak version'), "Menu languages must be spelled out");
 assert(!dock.includes('{ label: "Stráženie psov"') && !dock.includes('{ label: "Dog sitting"'), "Dog-sitting link removed from menu");
 assert(css.includes("min-height: 61px") && css.includes("padding: 16px 5px 2px"), "Logo needs separation from footer actions");
-assert(css.includes("font-size: clamp(10.5px, 3vw, 12px)"), "Language buttons must fit narrow phones");
+// Menu now exposes four compact icon-only actions, with localized accessible
+// names and full-size touch targets (the visible language icon is EN/SK).
+const menuActions = dock.slice(dock.indexOf('className="mobile-dock-menu-actions"'), dock.indexOf('className="mobile-dock-menu-logo"'));
+assert(menuActions.includes('href={"tel:" + PHONE}') && menuActions.includes('href={english ? "/" : "/en/dog-daycare-kosice"}'), "Mobile phone and language actions required");
+assert(menuActions.includes("href={INSTAGRAM}") && menuActions.includes("href={FACEBOOK}"), "Mobile social icons must use the canonical destinations");
+assert(menuActions.includes("aria-label={english ?") && menuActions.includes("<Phone aria-hidden=") && menuActions.includes("<Instagram aria-hidden=") && menuActions.includes("<Facebook aria-hidden="), "Icon actions need accessible labels");
+assert(css.includes("grid-template-columns: repeat(4, minmax(0, 1fr))") && css.includes("min-height: 50px;") && css.includes("border-radius: 14px;"), "Four equally sized rounded icon actions must fit mobile screens");
