@@ -7,15 +7,20 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await page.evaluate(()=>{state.session=null;state.data=null;showAuth('login');loading(false);document.documentElement.classList.remove('customer-design','customer-liquid-v364')});
  await page.waitForSelector('html.customer-auth-glass-v386');
  const material=page.locator('#authView>.auth-card>.lg-v3-material');await material.waitFor({state:'attached'});
- await page.waitForFunction(()=>document.querySelector('#authView>.auth-card>.lg-v3-material')?.dataset.renderer==='fallback',{timeout:15000});
- assert.equal((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts,0,'auth must never run moving WebKit refraction');
+ await page.waitForFunction(engine=>document.querySelector('#authView>.auth-card>.lg-v3-material')?.dataset.renderer===(engine==='webkit'?'fallback':'svg'),type.name(),{timeout:15000});
+ if(type===webkit)assert.equal((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts,0,'iOS auth must not run moving refraction');
  assert((await page.evaluate(()=>customerLiquidV3Diagnostics())).peakContexts<=2,'app-to-login transition cannot briefly allocate a third context');
  assert(!await page.locator('.bottom-nav').isVisible());assert.equal(await page.locator('#loginForm').evaluate(el=>getComputedStyle(el).filter),'none');
  const wallpaper=await page.locator('body').evaluate(el=>{const body=getComputedStyle(el),fixed=getComputedStyle(el,'::before');return {bodyImage:body.backgroundImage,position:fixed.position,image:fixed.backgroundImage,attachment:fixed.backgroundAttachment,size:fixed.backgroundSize,layer:fixed.zIndex};});
- assert.equal(wallpaper.bodyImage,'none','body tile must not scroll with form');
- assert.equal(wallpaper.position,'fixed','paw background must be viewport anchored');
- assert(wallpaper.image.includes('chvostikovo-paws-soft-v383.png'),'original paw wallpaper must remain');
- assert.equal(wallpaper.size,'300px 430px');
+ if(type===webkit){
+  assert.equal(wallpaper.bodyImage,'none','iOS body tile must not scroll with form');
+  assert.equal(wallpaper.position,'fixed','iOS paws anchored to viewport');
+  assert(wallpaper.image.includes('chvostikovo-paws-soft-v383.png'));
+  assert.equal(wallpaper.size,'300px 430px');
+ }else{
+  assert(wallpaper.bodyImage.includes('chvostikovo-paws-soft-v383.png'),'Android retains the original paw wallpaper');
+  assert.notEqual(wallpaper.position,'fixed','Android must preserve original liquid background');
+ }
  if(width===390){fs.mkdirSync('/tmp/chvo-v386-auth',{recursive:true});await page.screenshot({path:`/tmp/chvo-v386-auth/login-${type.name()}.png`});}
  const before=await page.evaluate(()=>__calls.filter(u=>u.includes('/auth/v1/token')).length);await page.locator('#loginForm [type=submit]').click();
  assert.equal(await page.evaluate(()=>__calls.filter(u=>u.includes('/auth/v1/token')).length),before,'native required validation makes no auth request');
@@ -28,9 +33,14 @@ const fixture=require('./liquid-v3-fixture.cjs');
    await page.evaluate(()=>window.scrollTo(0,150));
    const pinned=await page.locator('body').evaluate(el=>({y:window.scrollY,position:getComputedStyle(el,'::before').position,image:getComputedStyle(el,'::before').backgroundImage}));
    assert(pinned.y>0,'long signup must scroll in test viewport');
-   assert.equal(pinned.position,'fixed','paw canvas stays fixed after signup scroll');
-   assert(pinned.image.includes('chvostikovo-paws-soft-v383.png'));
-   assert.equal(await material.getAttribute('data-renderer'),'fallback');
+   if(type===webkit){
+    assert.equal(pinned.position,'fixed','iOS paws stay pinned after signup scroll');
+    assert(pinned.image.includes('chvostikovo-paws-soft-v383.png'));
+    assert.equal(await material.getAttribute('data-renderer'),'fallback');
+   }else{
+    assert.notEqual(pinned.position,'fixed','Android preserves original paw background');
+    assert.equal(await material.getAttribute('data-renderer'),'svg','Android retains glass refraction with SK/EN');
+   }
    await page.screenshot({path:`/tmp/chvo-v386-auth/signup-${type.name()}.png`});
    await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.scrollTo(0,0));
  }
@@ -39,7 +49,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await page.locator('#loginEmail').focus();await page.keyboard.press('Tab');assert(await page.locator('#loginPassword').evaluate(el=>el===document.activeElement));
  await page.locator('#forgotPasswordBtn').click();assert(await page.locator('#forgotForm').isVisible());await page.locator('#backToLogin').click();
  assert(await page.locator('#loginForm').isVisible());assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
- await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'))});assert.equal((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts,0);
+ await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'))});if(type===webkit)assert.equal((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts,0);
  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'))});await page.waitForTimeout(250);assert((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts<=1);
  if(type===chromium&&width===390){const cdp=await context.newCDPSession(page);await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'reduce'}]});await page.waitForTimeout(120);assert.equal((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts,0);assert.equal(await material.evaluate(el=>getComputedStyle(el).backdropFilter),'none');await cdp.detach();}
  assert.deepEqual(errors,[]);console.log('PASS auth glass login/signup/validation/keyboard/recovery/resume',type.name(),width);await context.close();
