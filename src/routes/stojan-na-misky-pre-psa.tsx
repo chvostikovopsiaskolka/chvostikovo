@@ -158,7 +158,7 @@ function ProductGallery({ size }: { size: StandSize }) {
   const current = GALLERY[active]!;
 
   return (
-    <div className="mt-6">
+    <div className="mt-6 lg:mt-0">
       <div className="aspect-[4/3] overflow-hidden rounded-4xl bg-secondary shadow-soft">
         <img
           src={current.src}
@@ -315,18 +315,22 @@ function BowlStandPage() {
               <ArrowLeft className="size-4" /> Späť na produkty
             </a>
 
-            <div className="mx-auto max-w-2xl">
-              <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
+            <div className="mx-auto max-w-2xl lg:grid lg:max-w-none lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-start lg:gap-x-10 lg:gap-y-5">
+              <div className="lg:col-start-2 lg:row-start-1">
+                <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
                 Drevený stojan na <span className="text-coral-dark">misky pre psa</span>
               </h1>
               <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
                 Dve nerezové misky, výška prispôsobená psíkovi a prevedenie podľa vášho želania.
                 Vyberte si variant a objednajte si vlastný stojan.
               </p>
+              </div>
 
-              <ProductGallery key={size} size={size} />
+              <div className="lg:col-start-1 lg:row-span-2 lg:row-start-1">
+                <ProductGallery key={size} size={size} />
+              </div>
 
-              <div className="mt-5">
+              <div className="mt-5 lg:col-start-2 lg:row-start-2 lg:mt-0">
                 <div>
                   <p className="font-display text-sm font-bold text-forest">Vyberte veľkosť stojana</p>
                   <div className="mt-3 grid grid-cols-2 gap-2">
