@@ -61,6 +61,7 @@
     lang = requested === 'en' || requested === 'sk' ? requested :
       localStorage.getItem(STORAGE_KEY) === 'en' ? 'en' : 'sk';
   } catch (_) { lang = 'sk'; }
+  try { if (new URL(location.href).searchParams.has('lang')) localStorage.setItem(STORAGE_KEY, lang); } catch (_) {}
   const bare = node => (node?.nodeValue || '').trim();
   function updateText(node) {
     if (node.nodeType !== 3 || !node.parentElement ||
