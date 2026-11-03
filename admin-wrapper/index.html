@@ -122,8 +122,12 @@
           const oldBootCanvas = 'html:has(#appBoot),body:has(#appBoot){background:#fff!important}';
           const visibleBootCanvas = 'html:has(#appBoot:not(.hidden)),body:has(#appBoot:not(.hidden)){background:#fff!important}';
           const html = h.includes(oldBootCanvas) ? h.replace(oldBootCanvas, visibleBootCanvas) : h;
+          // The stable Supabase admin still carries this obsolete settings button.
+          // Remove just that button before document.write; its old optional event
+          // binding tolerates a missing element. Leave profile, push and logout intact.
+          const withoutWorkspaceSwitch = html.replace(/<button\b[^>]*\bid=["']adminSwitchWorkspace["'][^>]*>[\s\S]*?<\/button>/i, '');
           // Isolated staff pairing controls; the original Supabase admin stays authoritative.
-          const withPairing = html.replace(/<\/body>/i, '<script src="/admin-pair-v409.js?v=20261103"><\/script><script src="/admin-shared-pass-v410.js?v=20261103"><\/script></body>');
+          const withPairing = withoutWorkspaceSwitch.replace(/<\/body>/i, '<script src="/admin-pair-v409.js?v=20261103"><\/script><script src="/admin-shared-pass-v410.js?v=20261103"><\/script></body>');
           document.open(); document.write(withPairing); document.close();
         } catch (e) {
           started = false;
