@@ -74,7 +74,7 @@ function SocialLinks({ language }: { language: "sk" | "en" }) {
   const isEnglish = language === "en";
 
   return (
-    <div className="grid w-full grid-cols-2 gap-3" aria-label={isEnglish ? "Social networks" : "Sociálne siete"}>
+    <nav data-social-links="footer" className="grid w-full grid-cols-2 gap-3" aria-label={isEnglish ? "Social networks" : "Sociálne siete"}>
       <a
         href={INSTAGRAM}
         target="_blank"
@@ -95,7 +95,7 @@ function SocialLinks({ language }: { language: "sk" | "en" }) {
         <Facebook aria-hidden="true" className="size-5 shrink-0 text-coral-dark" />
         Facebook
       </a>
-    </div>
+    </nav>
   );
 }
 
