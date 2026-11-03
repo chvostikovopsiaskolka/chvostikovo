@@ -22,6 +22,9 @@ assert(!html.includes('bellaris-admin.mjs'));
 assert(!html.includes('bellaris-admin.css'));
 assert(html.includes('class="app-boot loading-screen loading-concept"'), 'Loading is visible from first paint');
 assert(html.includes('html:has(#boot:not(.hidden))'));
+assert(html.includes('#boot.loading-screen.loading-concept{position:fixed!important;inset:0!important;width:100%!important'));
+assert(html.includes('#boot{padding:0!important;z-index:99999!important;width:100%!important;height:100vh!important;height:100dvh!important'));
+
 assert(html.includes('20261014-admin-pwa-v111'));
 
 const script = html.match(/<script id="admin-workspace-controller-v1">([\s\S]*?)<\/script>/)?.[1];
