@@ -17,7 +17,7 @@ export const Route = createFileRoute("/blog")({
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
       { property: "og:url", content: PAGE_URL },
-      { property: "og:image", content: blogArticles[0]!.image.src },
+      { property: "og:image", content: new URL(blogArticles[0]!.image.src, "https://chvostikovo.sk").href },
     ],
     links: [{ rel: "canonical", href: PAGE_URL }],
   }),
