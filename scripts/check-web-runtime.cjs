@@ -218,34 +218,21 @@ const failures = [];
                     throw new Error('Accessible size CTA label missing: ' + type + ', got ' + label);
                   }
                   await sizeCta.click();
-                  // React may commit the expansion after the variant selection.
-                  // Await the actual inquiry first, then capture full diagnostics on failure.
-                  await productPage.locator('#moznosti-objednavky-stojana').waitFor({
-                    state: 'visible', timeout: 4500,
-                  }).catch(() => {});
-                  // Check the actual DOM state of the shared size chooser and inquiry.
-                  // Keep the details in the failure message to identify a real UX
-                  // regression rather than waiting for a brittle accessible-name locator.
-                  const state = await productPage.evaluate((expectedLabel) => {
-                    const heading = [...document.querySelectorAll('p')].find(
-                      el => el.textContent?.trim() === 'Vyberte veľkosť stojana'
-                    );
-                    const buttons = [...(heading?.parentElement?.querySelectorAll('button') ?? [])];
-                    const selected = buttons.find(el => el.textContent?.trim().startsWith(expectedLabel));
-                    const inquiry = document.querySelector('#moznosti-objednavky-stojana');
-                    const form = inquiry?.querySelector('form');
-                    const customer = form?.querySelector('input[name="customer_name"]');
-                    return {
-                      path: location.pathname,
-                      availableSizes: buttons.map(el => el.textContent?.trim().slice(0, 60)),
-                      selectedClass: selected?.getAttribute('class') ?? null,
-                      formOpen: Boolean(inquiry && form && customer),
-                      inquiryFound: Boolean(inquiry),
-                    };
-                  }, type === 'large' ? 'Väčší' : 'Menší');
-                  if (!state.selectedClass?.includes('border-coral') || !state.formOpen) {
-                    throw new Error('Stand size CTA must select ' + type +
-                      ' and open original inquiry; actual DOM state: ' + JSON.stringify(state));
+                  // restore-cori-image.mjs intentionally converts the source's
+                  // inline inquiry panel into a Radix ContentDialog at build.
+                  // Assert the actual production dialog, not the removed
+                  // #moznosti-objednavky-stojana source-only wrapper.
+                  const inquiryDialog = productPage.getByRole('dialog', { name: 'Mám záujem o stojan' });
+                  await inquiryDialog.waitFor({ state: 'visible', timeout: 10000 });
+                  const selectedSize = inquiryDialog.getByRole('button', {
+                    name: type === 'large' ? /^Väčší/ : /^Menší/,
+                  }).first();
+                  const classes = await selectedSize.getAttribute('class', { timeout: 5000 });
+                  if (!classes?.includes('border-coral')) {
+                    throw new Error('Stand card did not preselect ' + type + ' in the real inquiry modal');
+                  }
+                  if (!await inquiryDialog.locator('input[name="customer_name"]:visible').count()) {
+                    throw new Error('Stand size card did not open the existing product inquiry form');
                   }
                 }
               }
