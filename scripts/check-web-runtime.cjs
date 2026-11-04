@@ -153,12 +153,10 @@ const failures = [];
                   throw new Error('Missing compact product value: ' + title);
                 }
               }
-              const colors = await heroHighlights.locator('div').first().evaluate((element) => ({
-                background: getComputedStyle(element).backgroundColor,
-                foreground: getComputedStyle(element).color,
-              }));
-              if (!colors.background.startsWith('rgb(') || !['rgb(255, 255, 255)', 'rgba(255, 255, 255, 1)'].includes(colors.foreground)) {
-                throw new Error('Product value strip must use green cards and white text: ' + route);
+              const valueCard = heroHighlights.locator('div').first();
+              const cardClasses = await valueCard.getAttribute('class');
+              if (!cardClasses?.includes('bg-forest') || !cardClasses.includes('text-white')) {
+                throw new Error('Product value strip must use forest green cards and white text: ' + route);
               }
               if (route.includes('stojan')) {
                 if (await productPage.locator('[data-stand-gallery="autoplay"]').count() !== 1) {
