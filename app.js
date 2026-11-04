@@ -94,7 +94,7 @@ const CUSTOMER_IOS_V171=(()=>{
   return iOS;
 })();
 // iOS home-screen badge follows unread customer data, not the number of received pushes.
-const CUSTOMER_BADGE_EXCLUDED_V186=new Set(['staff_message_customer','customer_message_admin','pass_request_admin','pass_interest_registered','weekly_booking_reminder','weekly_booking_reminder_test']);
+const CUSTOMER_BADGE_EXCLUDED_V186=new Set(['staff_message_customer','customer_message_admin','pass_request_admin','pass_interest_registered','weekly_booking_reminder','weekly_booking_reminder_test','announcement_push']);
 function customerUnreadBadgeCountV186(){
   if(!state.session||!state.data)return null;
   const messages=(state.data.messages||[]).filter(m=>m.sender_role==='staff'&&!m.read_at).length;
