@@ -284,8 +284,26 @@ const failures = [];
               throw new Error('Footer social links must be wide and side by side');
             }
             if (width === 1440) {
-              const hoursBox = await productPage.getByText('Pondelok – piatok, 7:00 – 17:00', { exact: true }).boundingBox();
-              if (!hoursBox || instagramBox.y <= hoursBox.y) throw new Error('Desktop footer socials must be below opening hours');
+              const footer = productPage.locator('footer');
+              const email = footer.locator('a[href^="mailto:"]');
+              if (await email.count() !== 1) throw new Error('Footer email link missing');
+              const emailLayout = await email.evaluate((link) => ({
+                whiteSpace: getComputedStyle(link).whiteSpace,
+                fragments: link.getClientRects().length,
+                right: link.getBoundingClientRect().right,
+                footerRight: link.closest('footer')?.querySelector('.bg-cream')?.getBoundingClientRect().right ?? 0,
+              }));
+              if (emailLayout.whiteSpace !== 'nowrap' || emailLayout.fragments !== 1 ||
+                  emailLayout.right > emailLayout.footerRight - 8) {
+                throw new Error('Desktop footer email must remain on one visible line: ' + JSON.stringify(emailLayout));
+              }
+              const dayBox = await footer.getByText('Pondelok – piatok', { exact: true }).boundingBox();
+              const timeBox = await footer.getByText('7:00 – 17:00', { exact: true }).boundingBox();
+              if (!dayBox || !timeBox || timeBox.y < dayBox.y + dayBox.height - 1 ||
+                  Math.abs(dayBox.x - timeBox.x) > 2) {
+                throw new Error('Footer hours must render on two aligned lines: day above time');
+              }
+              if (instagramBox.y <= dayBox.y) throw new Error('Desktop footer socials must be below opening hours');
             }
             if (width === 390) {
               await productPage.locator('.mobile-dock').getByRole('button', { name: 'Otvoriť menu' }).click();

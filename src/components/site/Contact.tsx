@@ -103,8 +103,8 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
   const isEnglish = language === "en";
 
   return (
-    <div className="grid gap-7 lg:grid-cols-2 lg:items-center">
-      <div className="grid gap-5 sm:grid-cols-2">
+    <div className="grid gap-7 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <ContactRow icon={<MapPin className="size-5" />} label={isEnglish ? "Address" : "Adresa"}>
           <a href={MAP_LINK} target="_blank" rel="noreferrer" className="hover:text-coral">
             Poľská 6, 040 01 Košice
@@ -116,12 +116,13 @@ function ContactDetails({ language }: { language: "sk" | "en" }) {
           </a>
         </ContactRow>
         <ContactRow icon={<Mail className="size-5" />} label={isEnglish ? "Email" : "E-mail"}>
-          <a href={`mailto:${EMAIL}`} className="break-all hover:text-coral">
+          <a href={`mailto:${EMAIL}`} className="break-all hover:text-coral lg:break-normal lg:whitespace-nowrap">
             {EMAIL}
           </a>
         </ContactRow>
         <ContactRow icon={<Clock className="size-5" />} label={isEnglish ? "Opening hours" : "Otváracie hodiny"}>
-          {isEnglish ? "Monday – Friday, 7:00 – 17:00" : "Pondelok – piatok, 7:00 – 17:00"}
+          <span className="block">{isEnglish ? "Monday – Friday" : "Pondelok – piatok"}</span>
+          <span className="block">7:00 – 17:00</span>
         </ContactRow>
         <div className="hidden lg:col-span-2 lg:block">
           <SocialLinks language={language} />
