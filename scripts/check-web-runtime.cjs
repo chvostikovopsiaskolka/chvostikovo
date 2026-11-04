@@ -131,6 +131,18 @@ const failures = [];
                 await productPage.getByRole('button', { name: /^Veľký/ }).first().click();
                 if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('veľkom targete'))) throw new Error('Large target image missing');
               }
+              const valueSectionId = route.includes('stojan') ? 'stand-value-heading' : 'target-value-heading';
+              const valueSection = productPage.locator('section[aria-labelledby="' + valueSectionId + '"]');
+              if (await valueSection.count() !== 1) throw new Error('Product value section missing: ' + route);
+              if (await valueSection.locator('article').count() !== 3) throw new Error('Product must show exactly three value cards: ' + route);
+              const valueTitles = route.includes('stojan')
+                ? ['Misky majú svoje miesto', 'Po jedle rýchlo upratané', 'Výšku nemusíte odhadovať']
+                : ['Presný dotyk labkou', 'Pokojná výdrž v pozícii', 'Nové cviky krok za krokom'];
+              for (const title of valueTitles) {
+                if (!await valueSection.getByRole('heading', { name: title, exact: true }).isVisible()) {
+                  throw new Error('Missing product-specific value card: ' + title);
+                }
+              }
               const reviewTeaser = productPage.getByText('Recenzie spokojných zákazníkov čoskoro', { exact: true });
               if (!await reviewTeaser.isVisible()) throw new Error('Product review teaser missing');
               await productPage.getByRole('button', { name: 'Ako je to s doručením?' }).click();
