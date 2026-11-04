@@ -691,8 +691,9 @@ function BowlStandPage() {
                   ručne, preto vieme upraviť jeho výšku, farebné prevedenie aj personalizáciu.
                 </p>
                 <p>
-                  Používame drevo a povrch stojana ošetrujeme tak, aby sa dal jednoducho udržiavať
-                  pri bežnom používaní okolo vody a krmiva. Dve nerezové misky sú súčasťou stojana.
+                  Drevený povrch má vodeodolnú úpravu pre bežné kvapky vody pri pití.
+                  Jednoducho sa utiera vlhkou handričkou, no nie je určený na dlhodobé máčanie.
+                  Dve vyberateľné nerezové misky sú súčasťou každého stojana.
                 </p>
               </div>
             </div>
