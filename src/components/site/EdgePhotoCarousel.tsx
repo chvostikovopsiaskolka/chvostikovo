@@ -113,6 +113,7 @@ export function EdgePhotoCarousel({
         aria-label={label}
         tabIndex={0}
         data-photo-carousel={dataName}
+        data-stand-gallery={dataName === "stand" ? "autoplay" : undefined}
         data-carousel-motion="ping-pong"
         onMouseEnter={pause}
         onMouseLeave={resume}
