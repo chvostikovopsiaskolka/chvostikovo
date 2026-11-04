@@ -200,7 +200,14 @@ const failures = [];
                   const swipeable = await cards.evaluate(el => el.scrollWidth > el.clientWidth + 30);
                   if (!swipeable) throw new Error('Stand sizes must swipe horizontally on mobile');
                 }
+                // The earlier hero inquiry opens a modal. Close it before testing
+                // buttons behind the overlay, and close it again between choices.
                 for (const [type, name] of [['large', 'väčší'], ['small', 'menší']]) {
+                  const blockingDialog = productPage.getByRole('dialog').first();
+                  if (await blockingDialog.count()) {
+                    await productPage.keyboard.press('Escape');
+                    await blockingDialog.waitFor({ state: 'hidden', timeout: 10000 });
+                  }
                   const sizeCta = cards.locator('article[data-stand-size="' + type + '"] button[type="button"]');
                   if (await sizeCta.count() !== 1) throw new Error('Missing unique size CTA: ' + type);
                   const label = await sizeCta.getAttribute('aria-label');
