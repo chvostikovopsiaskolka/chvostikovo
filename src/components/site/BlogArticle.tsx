@@ -113,7 +113,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
         <article className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
           <figure className={standGuide ? "mx-auto max-w-[640px] overflow-hidden rounded-3xl bg-secondary shadow-soft" : "overflow-hidden rounded-3xl bg-secondary shadow-soft"}>
             <img src={article.image.src} alt={article.image.alt}
-              className={standGuide ? "mx-auto block h-[250px] w-full object-contain sm:h-[380px]" : "mx-auto block max-h-[720px] h-auto max-w-full object-contain"}
+              className={standGuide ? "block h-[300px] w-full object-cover object-[center_54%] sm:h-[430px]" : "mx-auto block max-h-[720px] h-auto max-w-full object-contain"}
               decoding="async" width={article.image.width ?? 1000} height={article.image.height ?? 750} />
             <figcaption className="px-4 py-2 text-sm text-forest/65">{article.imageCaption ?? "Zo života našej psej škôlky v Košiciach"}</figcaption>
           </figure>

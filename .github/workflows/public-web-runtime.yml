@@ -23,7 +23,9 @@ jobs:
   runtime:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Browser installation can exceed 10 minutes on a cold GitHub runner.
+    # Keep full Chromium + WebKit regression coverage and give it enough time.
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:

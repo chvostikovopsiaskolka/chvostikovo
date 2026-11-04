@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   Check,
@@ -13,6 +13,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { ProductDeliveryDetails } from "@/components/site/ProductDeliveryDetails";
 import { ProductValueHighlights } from "@/components/site/ProductValueHighlights";
+import { EdgePhotoCarousel } from "@/components/site/EdgePhotoCarousel";
 import { FormDialog } from "@/components/site/FormDialog";
 import { PhoneField } from "@/components/site/PhoneField";
 import { phoneFromForm } from "@/lib/phone";
@@ -102,112 +103,13 @@ export const Route = createFileRoute("/target-na-cvicenie-pre-psov")({
 });
 
 function TargetGalleryLoop() {
-  const track = useRef<HTMLDivElement>(null);
-  const firstSet = useRef<HTMLDivElement>(null);
-  const paused = useRef(false);
-  const resumeTimer = useRef<number | null>(null);
-
-  const clearResumeTimer = () => {
-    if (resumeTimer.current !== null) {
-      window.clearTimeout(resumeTimer.current);
-      resumeTimer.current = null;
-    }
-  };
-
-  const pause = () => {
-    clearResumeTimer();
-    paused.current = true;
-  };
-
-  const resume = () => {
-    clearResumeTimer();
-    paused.current = false;
-  };
-
-  const resumeAfterPause = () => {
-    clearResumeTimer();
-    resumeTimer.current = window.setTimeout(() => {
-      paused.current = false;
-      resumeTimer.current = null;
-    }, 2600);
-  };
-
-  useEffect(() => {
-    const el = track.current;
-    if (!el) return;
-
-    const speed = window.matchMedia("(max-width: 639px)").matches ? 20 : 25;
-    let raf = 0;
-    let last = performance.now();
-    let carry = 0;
-
-    const step = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 0.1);
-      last = now;
-
-      if (!paused.current) {
-        carry += speed * dt;
-        const delta = Math.floor(carry);
-        if (delta > 0) {
-          carry -= delta;
-          const loopWidth = firstSet.current?.scrollWidth ?? 0;
-          const next = el.scrollLeft + delta;
-          el.scrollLeft = loopWidth > 0 && next >= loopWidth ? next - loopWidth : next;
-        }
-      } else {
-        carry = 0;
-      }
-
-      raf = requestAnimationFrame(step);
-    };
-
-    raf = requestAnimationFrame(step);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      clearResumeTimer();
-    };
-  }, []);
-
   return (
-    <div
-      ref={track}
-      onMouseEnter={pause}
-      onMouseLeave={resume}
-      onPointerDown={pause}
-      onPointerUp={resumeAfterPause}
-      onPointerCancel={resumeAfterPause}
-      onFocusCapture={pause}
-      onBlurCapture={resumeAfterPause}
-      className="mt-9 flex w-full max-w-full overflow-x-auto overscroll-x-contain [scrollbar-width:none] [touch-action:pan-x] [will-change:scroll-position] [&::-webkit-scrollbar]:hidden"
-      aria-label="Fotogaléria targetov na cvičenie pre psov"
-    >
-      {[0, 1].map((setIndex) => (
-        <div
-          key={setIndex}
-          ref={setIndex === 0 ? firstSet : undefined}
-          className="flex shrink-0 gap-4 pr-4 sm:gap-5 sm:pr-5"
-          aria-hidden={setIndex === 1}
-        >
-          {INSPIRATION.map((image, index) => (
-            <figure
-              key={`${setIndex}-${image.alt}`}
-              className="h-80 w-[78vw] max-w-[390px] shrink-0 overflow-hidden rounded-4xl bg-card shadow-card sm:h-96 sm:w-[44vw] sm:max-w-[430px] lg:w-[31vw] lg:max-w-[350px]"
-            >
-              <img
-                src={image.src}
-                alt={setIndex === 0 ? image.alt : ""}
-                loading="lazy"
-                decoding="async"
-                draggable={false}
-                className="size-full select-none object-cover"
-                style={{ objectPosition: "50% 58%" }}
-              />
-            </figure>
-          ))}
-        </div>
-      ))}
-    </div>
+    <EdgePhotoCarousel
+      photos={INSPIRATION}
+      label="Fotogaléria targetov na cvičenie – posúvajte fotografie do strán"
+      dataName="target"
+      className="mt-9"
+    />
   );
 }
 
@@ -389,13 +291,13 @@ function TargetPage() {
                 ],
                 [
                   Check,
-                  "Pokojná výdrž v pozícii",
-                  "Keď psík zvládne dotyk, môžete postupne predlžovať čas, počas ktorého nechá labky na targete.",
+                  "Rehabilitácia a fyzioterapia",
+                  "Pod vedením odborníka sa target môže využiť na kontrolované postavenie labiek, prácu s držaním tela a cviky podporujúce stabilitu či posilňovanie svalstva. Nenahrádza rehabilitačný plán.",
                 ],
                 [
                   Sparkles,
-                  "Nové cviky krok za krokom",
-                  "Target zapojíte do zmien polohy či práce s jednotlivými labkami podľa skúseností a možností psíka.",
+                  "Poslušnosť a zotrvanie na mieste",
+                  "V bežnom tréningu môže target označovať miesto pre labky. Psík sa učí prísť na pokyn, pokojne zotrvať a odísť až po uvoľnení.",
                 ],
               ].map(([Icon, heading, text]) => {
                 const CardIcon = Icon as typeof Check;

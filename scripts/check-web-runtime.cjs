@@ -137,7 +137,7 @@ const failures = [];
               if (await valueSection.locator('article').count() !== 3) throw new Error('Product must show exactly three value cards: ' + route);
               const valueTitles = route.includes('stojan')
                 ? ['Misky majú svoje miesto', 'Po jedle rýchlo upratané', 'Výšku nemusíte odhadovať']
-                : ['Presný dotyk labkou', 'Pokojná výdrž v pozícii', 'Nové cviky krok za krokom'];
+                : ['Presný dotyk labkou', 'Rehabilitácia a fyzioterapia', 'Poslušnosť a zotrvanie na mieste'];
               for (const title of valueTitles) {
                 if (!await valueSection.getByRole('heading', { name: title, exact: true }).isVisible()) {
                   throw new Error('Missing product-specific value card: ' + title);
@@ -158,6 +158,23 @@ const failures = [];
               if (!cardClasses?.includes('bg-forest') || !cardClasses.includes('text-white')) {
                 throw new Error('Product value strip must use forest green cards and white text: ' + route);
               }
+              const carouselName = route.includes('stojan') ? 'stand' : 'target';
+              const galleryTrack = productPage.locator('[data-photo-carousel="' + carouselName + '"]');
+              if (await galleryTrack.count() !== 1) throw new Error('Carousel missing: ' + carouselName);
+              if (await galleryTrack.locator('figure').count() !== (carouselName === 'stand' ? 3 : 8)) {
+                throw new Error('Carousel must render each distinct photo exactly once: ' + carouselName);
+              }
+              if (await galleryTrack.getAttribute('data-carousel-motion') !== 'ping-pong') {
+                throw new Error('Gallery must move back and forth without duplicated slides: ' + carouselName);
+              }
+              if (width === 390) {
+                const galleryBox = await galleryTrack.boundingBox();
+                if (!galleryBox || galleryBox.x > 2 || galleryBox.x + galleryBox.width < width - 2) {
+                  throw new Error('Carousel must extend edge-to-edge on mobile: ' + carouselName);
+                }
+                const imgFit = await galleryTrack.locator('img').first().evaluate(node => getComputedStyle(node).objectFit);
+                if (imgFit !== 'cover') throw new Error('Carousel images must fill their frame: ' + carouselName);
+              }
               if (route.includes('stojan')) {
                 if (await productPage.locator('[data-stand-gallery="autoplay"]').count() !== 1) {
                   throw new Error('Stand realizations carousel missing');
@@ -176,6 +193,51 @@ const failures = [];
               await productPage.getByRole('button', { name: action }).first().click();
               await productPage.locator('input[name="customer_name"]:visible').waitFor();
               if (!await productPage.locator('input[name="email"]:visible').count()) throw new Error('Product inquiry contact missing');
+              if (route.includes('stojan')) {
+                // Independently test the size-card CTA from a fresh real customer view:
+                // the hero CTA above was opened earlier to verify its fields.
+                await productPage.goto(new URL(route, base).href);
+                await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
+                const cards = productPage.locator('[data-stand-sizes="carousel"]');
+                if (await cards.locator('article').count() !== 2) throw new Error('Stand size carousel must show two sizes');
+                if (width === 390) {
+                  const swipeable = await cards.evaluate(el => el.scrollWidth > el.clientWidth + 30);
+                  if (!swipeable) throw new Error('Stand sizes must swipe horizontally on mobile');
+                }
+                // Test the two customer journeys from independent fresh visits.
+                // No Escape or modal cleanup can interfere with the next case.
+                for (const [type, name] of [['large', 'väčší'], ['small', 'menší']]) {
+                  await productPage.goto(new URL(route, base).href);
+                  await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
+                  // Fresh customer visits can display the consent overlay.
+                  // Interact with it instead of forcing a click through the modal.
+                  const consentChoice = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
+                  if (await consentChoice.isVisible()) await consentChoice.click();
+                  const sizeCta = productPage.locator('[data-stand-sizes="carousel"] article[data-stand-size="' + type + '"] button[type="button"]');
+                  if (await sizeCta.count() !== 1) throw new Error('Missing unique size CTA: ' + type);
+                  const label = await sizeCta.getAttribute('aria-label');
+                  if (label !== 'Mám záujem o ' + name + ' stojan') {
+                    throw new Error('Accessible size CTA label missing: ' + type + ', got ' + label);
+                  }
+                  await sizeCta.click();
+                  // restore-cori-image.mjs intentionally converts the source's
+                  // inline inquiry panel into a Radix ContentDialog at build.
+                  // Assert the actual production dialog, not the removed
+                  // #moznosti-objednavky-stojana source-only wrapper.
+                  const inquiryDialog = productPage.getByRole('dialog', { name: 'Mám záujem o stojan' });
+                  await inquiryDialog.waitFor({ state: 'visible', timeout: 10000 });
+                  const selectedSize = inquiryDialog.getByRole('button', {
+                    name: type === 'large' ? /^Väčší/ : /^Menší/,
+                  }).first();
+                  const classes = await selectedSize.getAttribute('class', { timeout: 5000 });
+                  if (!classes?.includes('border-coral')) {
+                    throw new Error('Stand card did not preselect ' + type + ' in the real inquiry modal');
+                  }
+                  if (!await inquiryDialog.locator('input[name="customer_name"]:visible').count()) {
+                    throw new Error('Stand size card did not open the existing product inquiry form');
+                  }
+                }
+              }
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product inquiry points to retired checkout');
             }
             await productPage.goto(new URL('/blog/stojan-na-misky-pre-psa-vyhody-a-vyber/', base).href);
@@ -184,8 +246,14 @@ const failures = [];
             if (!(await standImage.getAttribute('src'))?.includes('stand-mia-')) {
               throw new Error('Stand guide is not using restored MIA AVIF source');
             }
-            if (await productPage.locator('[data-stand-gallery="autoplay"]').count() !== 1) {
-              throw new Error('Stand guide carousel missing above product CTA');
+            const guideCarousel = productPage.locator('[data-stand-gallery="autoplay"]');
+            if (await guideCarousel.count() !== 1) throw new Error('Stand guide carousel missing above product CTA');
+            if (await guideCarousel.locator('figure').count() !== 3) throw new Error('Stand guide must show three unique product photos');
+            if (width === 390) {
+              const guideGalleryBox = await guideCarousel.boundingBox();
+              if (!guideGalleryBox || guideGalleryBox.x > 2 || guideGalleryBox.x + guideGalleryBox.width < width - 2) {
+                throw new Error('Stand guide gallery must use full mobile viewport');
+              }
             }
             if (!(await productPage.getByRole('heading', { name: 'Pozrite si naše vyhotovenia', exact: true }).count())) {
               throw new Error('Simplified stand article CTA title missing');
