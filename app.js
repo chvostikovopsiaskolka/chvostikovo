@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v411';
-const APP_VERSION='2.0.84';
+const APP_BUILD='v412';
+const APP_VERSION='2.0.85';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -308,7 +308,19 @@ function updateDogPhotoV260(root,dog,alt='Fotka psíka'){
   const key=dogPhotoIdentityV260(dog);
   if(root.dataset.dogPhotoV260!==key){
     root.replaceChildren();root.dataset.dogPhotoV260=key;
-    if(dog?.photo_url){const img=document.createElement('img');img.src=dog.photo_url;img.decoding='async';img.alt=alt;root.append(img)}else root.textContent='🐾';
+    if(dog?.photo_url){
+      const img=document.createElement('img');img.src=dog.photo_url;img.decoding='async';img.alt=alt;
+      img.addEventListener('error',()=>{
+        if(root.dataset.dogPhotoV260!==key||img.parentElement!==root)return;
+        root.replaceChildren(document.createTextNode('🐾'));
+        root.classList.add('dog-photo-missing-v412');
+      },{once:true});
+      root.append(img);
+      root.classList.remove('dog-photo-missing-v412');
+    }else{
+      root.textContent='🐾';
+      root.classList.add('dog-photo-missing-v412');
+    }
   }
   const img=root.querySelector('img');if(img)img.alt=alt;
   stabilizeDogVisualV218(root);
@@ -1115,6 +1127,9 @@ function syncDogInlineChoicesV297(){
 }
 /* v298: show two explicit choices on all platforms, retaining the original
    nullable select as the sole saved value for one or two assigned dogs. */
+// Native option text may already be translated when the editor mounts.
+// Buttons must originate from canonical Slovak labels so SK/EN can round-trip.
+const dogChoiceSkLabelsV412={dogSex:{male:'Pes',female:'Suka'},dogNeutered:{true:'Áno',false:'Nie'}};
 function mountDogInlineChoicesV297(){
   for(const id of ['dogSex','dogNeutered']){
     const select=$(id);
@@ -1125,7 +1140,7 @@ function mountDogInlineChoicesV297(){
     for(const option of select.options){
       if(!option.value)continue; // missing data means neither button is selected
       const btn=document.createElement('button');
-      btn.type='button';btn.className='dog-inline-choice-v297';btn.textContent=option.textContent;
+      btn.type='button';btn.className='dog-inline-choice-v297';btn.textContent=dogChoiceSkLabelsV412[id]?.[option.value]||option.textContent;
       btn.dataset.choiceV297=option.value;btn.setAttribute('role','radio');
       btn.addEventListener('click',()=>{
         select.value=btn.dataset.choiceV297;
