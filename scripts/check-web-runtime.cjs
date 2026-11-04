@@ -194,14 +194,17 @@ const failures = [];
               await productPage.locator('input[name="customer_name"]:visible').waitFor();
               if (!await productPage.locator('input[name="email"]:visible').count()) throw new Error('Product inquiry contact missing');
               if (route.includes('stojan')) {
+                // Independently test the size-card CTA from a fresh real customer view:
+                // the hero CTA above was opened earlier to verify its fields.
+                await productPage.goto(new URL(route, base).href);
+                await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
                 const cards = productPage.locator('[data-stand-sizes="carousel"]');
                 if (await cards.locator('article').count() !== 2) throw new Error('Stand size carousel must show two sizes');
                 if (width === 390) {
                   const swipeable = await cards.evaluate(el => el.scrollWidth > el.clientWidth + 30);
                   if (!swipeable) throw new Error('Stand sizes must swipe horizontally on mobile');
                 }
-                // The earlier hero inquiry opens a modal. Close it before testing
-                // buttons behind the overlay, and close it again between choices.
+                // Start from the closed hero inquiry, and close between variants.
                 for (const [type, name] of [['large', 'väčší'], ['small', 'menší']]) {
                   const blockingDialog = productPage.getByRole('dialog').first();
                   if (await blockingDialog.count()) {
