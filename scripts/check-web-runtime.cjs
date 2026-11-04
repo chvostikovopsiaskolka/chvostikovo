@@ -209,6 +209,10 @@ const failures = [];
                 for (const [type, name] of [['large', 'väčší'], ['small', 'menší']]) {
                   await productPage.goto(new URL(route, base).href);
                   await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
+                  // Fresh customer visits can display the consent overlay.
+                  // Interact with it instead of forcing a click through the modal.
+                  const consentChoice = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
+                  if (await consentChoice.isVisible()) await consentChoice.click();
                   const sizeCta = productPage.locator('[data-stand-sizes="carousel"] article[data-stand-size="' + type + '"] button[type="button"]');
                   if (await sizeCta.count() !== 1) throw new Error('Missing unique size CTA: ' + type);
                   const label = await sizeCta.getAttribute('aria-label');
