@@ -144,8 +144,8 @@ for (const spec of [
   {
     slug: "stojan-na-misky-pre-psa-vyhody-a-vyber",
     product: "stojan-na-misky-pre-psa",
-    imageParts: ["stand-small-mia-", "stand-dark-"],
-    expectedCopy: ["Poctivá výroba", "vodeodolne ošetrený", "vlkodavom", "barzojom", "refluxom"],
+    imageParts: ["stand-mia-", "stand-cori-"],
+    expectedCopy: ["Poctivá výroba", "vodeodolne ošetrený", "vlkodavom", "barzojom", "refluxom", "osobný barový pultík", "darček pre psa", "Pozrite si naše vyhotovenia"],
   },
   {
     slug: "target-na-cvicenie-psov-prve-cviky",
@@ -177,12 +177,25 @@ for (const spec of [
   const productHtmlPath = "dist/client" + productPath + "/index.html";
   assert(fs.existsSync(productHtmlPath), "Product prerender missing: " + productHtmlPath);
   const productHtml = fs.readFileSync(productHtmlPath, "utf8");
+  assert(productHtml.includes("bg-forest") && productHtml.includes("text-white"), "Short product highlight contrast missing: " + productPath);
+  const expectedHighlights = spec.product === "stojan-na-misky-pre-psa"
+    ? ["Osobný barový pultík", "Rýchla údržba", "Výška podľa psa"]
+    : ["Kvalitné spracovanie", "Protišmykový povrch", "Ručná výroba"];
+  for (const heading of expectedHighlights) {
+    assert(productHtml.includes(heading), "Missing hero product value: " + heading);
+  }
+  if (spec.product === "stojan-na-misky-pre-psa") {
+    assert(productHtml.includes('data-stand-gallery="autoplay"'), "Stand photo gallery is not autoplay-enabled");
+    assert(markup.includes('data-stand-gallery="autoplay"'), "Stand article gallery above CTA is missing");
+    assert(markup.includes('stand-mia-'), "Stand article must use restored 711x900 MIA AVIF");
+  }
   assert(sitemap.includes("<loc>" + productCanonical + "</loc>"), "Product sitemap canonical changed: " + productPath);
   assert(productHtml.includes("Product"), "Product structured data missing: " + productPath);
   assert(productHtml.includes('href="' + page + '/"'), "Product must link to guide: " + productPath);
   assert(productHtml.includes("Tri praktické"), "Product value cards removed: " + productPath);
 }
 assert(blogIndex.includes("stojan-na-misky-pre-psa-vyhody-a-vyber/"), "Stand guide missing from blog index");
+assert(blogIndex.includes("stand-mia-"), "Stand blog teaser must use restored original MIA AVIF");
 assert(blogIndex.includes("target-na-cvicenie-psov-prve-cviky/"), "Target guide missing from blog index");
 console.log("[seo] PASS: product sitemap + canonical + original photos + reciprocal guides + prerendered blog articles");
 
