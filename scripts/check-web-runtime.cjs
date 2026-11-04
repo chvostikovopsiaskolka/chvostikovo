@@ -215,13 +215,19 @@ const failures = [];
                     throw new Error('Accessible size CTA label missing: ' + type + ', got ' + label);
                   }
                   await sizeCta.click();
-                  const chosen = productPage.locator('#moznosti-objednavky-stojana button').filter({ hasText: type === 'large' ? 'Väčší' : 'Menší' }).first();
-                  const classes = await chosen.getAttribute('class');
+                  // The hero chooser and the inquiry use the same React 'size' state.
+                  // Verify it on the always-mounted chooser, then independently check
+                  // that the existing inquiry was opened by the card CTA.
+                  const heroSizeChooser = productPage.getByText('Vyberte veľkosť stojana', { exact: true }).locator('..');
+                  const chosen = heroSizeChooser.getByRole('button', { name: type === 'large' ? /^Väčší/ : /^Menší/ }).first();
+                  const classes = await chosen.getAttribute('class', { timeout: 5000 });
                   if (!classes?.includes('border-coral')) {
-                    throw new Error('Stand size CTA did not preselect ' + type + ' in inquiry');
+                    throw new Error('Stand size CTA did not preselect ' + type + ' on the shared size chooser');
                   }
-                  if (!await productPage.locator('input[name="customer_name"]:visible').count()) {
-                    throw new Error('Stand size CTA did not open existing inquiry form');
+                  const inquiry = productPage.locator('#moznosti-objednavky-stojana');
+                  await inquiry.waitFor({ state: 'visible', timeout: 5000 });
+                  if (!await inquiry.locator('input[name="customer_name"]:visible').count()) {
+                    throw new Error('Stand size CTA did not open the existing inquiry form');
                   }
                 }
               }
