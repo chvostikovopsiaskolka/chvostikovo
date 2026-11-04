@@ -131,10 +131,10 @@ export const blogArticles: BlogArticleData[] = [
   },
   {
     "slug": "stojan-na-misky-pre-psa-vyhody-a-vyber",
-    "title": "Stojan na misky pre psa: kedy dáva zmysel?",
-    "seoTitle": "Stojan na misky pre psa – výhody, výber a bezpečnosť | Chvostíkovo",
-    "description": "Prečo si vybrať pevný stojan na misky, ako pomáha pri poriadku a čo treba vedieť pri veľkých plemenách či tráviacich ťažkostiach? Praktický sprievodca.",
-    "summary": "Pevné miesto pre misky, menej posúvania a jednoduchšie čistenie. Vysvetľujeme aj to, kedy výšku misky radšej konzultovať s veterinárom.",
+    "title": "Drevený stojan na misky: praktický pomocník aj darček pre psíka",
+    "seoTitle": "Drevený stojan na misky pre psa – výhody a výber | Chvostíkovo",
+    "description": "Ručne vyrábaný stojan na misky pre psa: stabilné miesto, vodeodolne ošetrený povrch, jednoduchá údržba a personalizácia. Kedy zvážiť výšku misiek?",
+    "summary": "Nie sériová výroba, ale stojan na mieru: odolný povrch, vyberateľné misky a meno psíka. Plus praktické rady k správnej výške.",
     "publishedAt": "2026-11-04",
     "readingMinutes": 5,
     "image": {
@@ -148,50 +148,58 @@ export const blogArticles: BlogArticleData[] = [
       "position": "center 63%"
     },
     "imageCaption": "Naše aktuálne vyhotovenie dreveného stojana na misky.",
-    "intro": "Jedlo a voda patria k najbežnejším momentom psieho dňa. A práve pri nich si majitelia často všimnú cestujúce misky, rozliatu vodu alebo neporiadok okolo kŕmneho miesta. Drevený stojan je praktický doplnok, ktorý môže pomôcť udržať misky pokope a zjednodušiť upratovanie. Nie je však zdravotnou pomôckou pre každého psa.",
+    "intro": "Stojan na misky má byť pekný, ale hlavne praktický. Dve misky majú stabilné miesto, voda a jedlo sa ľahšie udržiavajú v jednom kúte a drevené prevedenie si možno prispôsobiť konkrétnemu psíkovi. V Chvostíkove stojany vyrábame ručne, nie na výrobnej linke: záleží nám na spracovaní, odolnosti pri každodennom používaní aj detailoch, ktoré z nich robia osobný výrobok.",
     "sections": [
       {
         "heading": "Misky na jednom mieste a kŕmny kút pod kontrolou",
         "paragraphs": [
           "Keď má každá miska vlastné miesto v jednom pevnom podstavci, pri bežnom jedení a pití sa neposúva samostatne po podlahe. Pre domácnosť je to jednoduchšia organizácia: jedlo aj voda sú na známom mieste a okolie misiek sa ľahšie udržiava.",
-          "Stojan sám osebe nezaručí suchú podlahu ani to, že pes nebude rozsýpať granule. Pri nadšenom jedákovi sa môže voda či krmivo dostať mimo misky tak či tak. Rozdiel je v praktickom usporiadaní miesta, nie v zázračnom riešení neporiadku."
+          "Pes môže pri pití stále kvapkať vodu alebo vysypať pár granúl. Stojan však pomáha obmedziť posúvanie samotných misiek a udržiavať kŕmne miesto prehľadnejšie — bez sľubov, že okolo neho nikdy nebude ani kvapka."
         ]
       },
       {
         "heading": "Jednoduché čistenie bez zložitého rozoberania",
         "paragraphs": [
-          "Naše stojany majú dve vyberateľné nerezové misky, ktoré možno umývať samostatne. Drevený povrch je ošetrený na bežnú údržbu: pri každodennom používaní ho stačí podľa potreby utrieť vlhkou handričkou.",
-          "Pri vode a krmive je pravidelné čistenie dôležitejšie než samotný dizajn stojana. Misky umývajte priebežne a nenechávajte zvyšky krmiva dlho stáť."
+          "Dve nerezové misky sa dajú vybrať a umyť samostatne. Drevený stojan má vodeodolne ošetrený povrch, ktorý lepšie znáša bežné kvapky a vlhkosť pri pití; na každodenné čistenie ho stačí utrieť vlhkou handričkou. Vodeodolná povrchová úprava však neznamená, že drevo je určené na dlhodobé máčanie alebo umývanie pod tečúcou vodou.",
+          "Vyberateľné misky zjednodušujú hygienu pri každodennom kŕmení. Misky odporúčame pravidelne čistiť a rozliatu vodu zo stojana zotrieť, aby si drevo zachovalo pekný vzhľad."
         ]
       },
       {
-        "heading": "A čo veľké plemená? Poznáme vlkodava aj barzoja",
+        "heading": "Pre menších aj veľkých psov – poznáme vlkodava aj barzoja",
         "paragraphs": [
-          "V Chvostíkove máme skúsenosti aj s vlkodavom a barzojom. Pri veľkých psoch si človek rýchlo uvedomí, že veľkosť misky, miesto na kŕmenie a jednotlivé návyky sa líšia. Preto vyrábame menší i väčší pôdorys a pri stojane sa pýtame na výšku konkrétneho psa.",
-          "Z toho však nevyplýva, že každý veľký pes potrebuje jesť zo zvýšenej misky. Pri plemenách náchylných na torziu žalúdka je voľba výšky osobitne citlivá. Výskum nezistil, že zvýšené kŕmenie torzii predchádza; niektoré údaje naznačujú dokonca vyššie riziko. Výšku preto neurčujme len podľa kohútikovej výšky alebo estetického dojmu."
+          "V Chvostíkove máme skúsenosti aj s vlkodavom a barzojom. Pri takýchto psoch si človek uvedomí, že malá miska a univerzálny rozmer nemusia stačiť. Preto ponúkame menší i väčší pôdorys stojana a pri výrobe sa zaujímame o konkrétneho psíka, jeho veľkosť a spôsob kŕmenia.",
+          "Veľkosť psa sama osebe nie je dôvod zdvihnúť misky čo najvyššie. Pri veľkých a hlbokohruďových plemenách môže byť zvýšené kŕmenie dokonca rizikovým faktorom torzie žalúdka. Preto netvrdíme, že vyšší stojan je automaticky zdravší: výška má rešpektovať individuálne potreby psa a prípadné veterinárne odporúčanie."
         ]
       },
       {
-        "heading": "Tráviace ťažkosti: stojan nenahrádza veterinára",
+        "heading": "Kedy môže byť vyvýšené kŕmenie individuálne potrebné?",
         "paragraphs": [
-          "Ak psík pri jedle hltá, vracia, regurgituje, kašle, má bolesti alebo iné problémy s prijímaním potravy, prioritou je zistiť príčinu u veterinára. Zmena polohy misky môže pri niektorých individuálnych diagnózach dávať zmysel, pri iných nemusí byť vhodná.",
-          "Neodporúčame zvýšený stojan ako univerzálnu pomoc pri gastroenterologických ťažkostiach. Pri podozrení na torziu žalúdka, najmä ak je brucho nafúknuté a pes sa neúspešne pokúša vracať, ide o urgentný veterinárny stav. O správnom režime kŕmenia, miske a jej výške má pri zdravotných problémoch rozhodnúť veterinár."
+          "Poznáme aj prípad psíka, ktorý po operácii spojenej s refluxom potrebuje jesť z vyvýšenej misky. To je úplne iná situácia než preventívne zvyšovanie misiek každému veľkému psovi. Pri niektorých ochoreniach pažeráka alebo po konkrétnych zákrokoch môže veterinár predpísať presnú polohu pri kŕmení — a vtedy je dôležité prispôsobiť sa jeho pokynom.",
+          "Samotný drevený stojan nie je liečba refluxu a nenahrádza špeciálne pomôcky na kŕmenie vo vzpriamenej polohe. Ak má psík regurgitáciu, opakované vracanie alebo iné ťažkosti, vhodný spôsob a výšku kŕmenia musí určiť veterinár. Ak ide o individuálne odporúčanie po operácii, pri dopyte nám môžete povedať požadovaný rozmer a spolu preveríme možnosti výroby."
         ]
       },
       {
-        "heading": "Ako vybrať stojan a čo objednať pred sviatkami",
+        "heading": "Poctivá výroba, osobné detaily a vianočný darček",
         "paragraphs": [
-          "Pri výbere si najprv premyslite veľkosť misiek, dostupné miesto a spôsob čistenia. Naše drevené stojany vieme pripraviť v rôznych farebných vyhotoveniach a s menom psíka; výšku riešime podľa konkrétneho použitia a podľa potreby aj po konzultácii s veterinárom.",
-          "Personalizovaný stojan môže byť milým praktickým darčekom pre majiteľa psa. Keďže ide o ručnú výrobu, pred Vianocami si radšej vopred overte možnosti a termín — bez automatického prísľubu doručenia do sviatkov."
+          "Naše stojany nie sú výsledkom pásovej výroby. Každý kus skladáme a dokončujeme ručne, s dôrazom na pevné spracovanie, ošetrený drevený povrch a jednoduchú údržbu. Môžete si zvoliť farebné prevedenie, meno psíka aj farbu písmen. Výška a rozmery sa riešia podľa konkrétnej objednávky a možností výroby.",
+          "Personalizovaný stojan môže byť praktický a osobný vianočný darček pre majiteľa psa. Ručná výroba však vyžaduje čas, preto si dostupnosť vybraného prevedenia a termín doručenia overte vopred. Objednávku vybavujeme nezáväzným dopytom, nie automatickou platbou v košíku."
         ]
       }
     ],
     "productPage": {
       "href": "/stojan-na-misky-pre-psa",
       "label": "Pozrieť stojan na misky",
-      "description": "Pozrite si fotografie MIA/CORI, rozmery, farby a pošlite nezáväzný dopyt k vlastnému stojanu."
+      "description": "Vyberte si ručne vyrábaný stojan MIA/CORI, farbu a personalizáciu menom. Povrch je ošetrený pre jednoduchú údržbu pri bežnej vlhkosti."
     },
     "sources": [
+      {
+        "label": "Merck Veterinary Manual – kŕmenie pri ochoreniach pažeráka",
+        "href": "https://www.merckvetmanual.com/dog-owners/digestive-disorders-of-dogs/disorders-of-the-esophagus-in-dogs"
+      },
+      {
+        "label": "Langford Vets – špecifické odporúčania pri refluxe a kŕmení vo zvýšenej polohe",
+        "href": "https://www.langfordvets.co.uk/small-animal-referral-hospital/clinical-services/soft-tissue-surgery/boas-management/"
+      },
       {
         "label": "Veterinary Evidence – zvýšené misky a riziko GDV (prehľad dôkazov)",
         "href": "https://veterinaryevidence.org/index.php/ve/article/view/57"
