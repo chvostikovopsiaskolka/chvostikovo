@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ArrowUp, Facebook, FilePenLine, Heart, House, Image as ImageIcon, Instagram, Menu, Phone, Tag, Users, X } from "lucide-react";
+import { ArrowUp, Facebook, FilePenLine, Heart, House, Instagram, Menu, Package, Phone, Tag, Users, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { PHONE, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -55,7 +55,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
        { id: "en-first-visit", label: "First visit", icon: House }]
     : [{ id: "starostlivost", label: "Starostlivosť", icon: Heart },
        { id: "cennik", label: "Cenník", icon: Tag },
-       { id: "priestory", label: "Priestory", icon: ImageIcon },
+       { id: "produkty", label: "Produkty", icon: Package },
        { id: "o-nas", label: "O nás", icon: Users }];
 
   // Return arrow: hide while moving down; show on upward scroll or after stopping.
@@ -246,11 +246,11 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
             </button>
           ) : (
             <a
-              href={homePath + (id === "top" ? "" : "#" + id)}
+              href={id === "produkty" && !marketing ? "/produkty" : homePath + (id === "top" ? "" : "#" + id)}
               key={id}
               aria-current={activeSection === id ? "location" : undefined}
               className={"mobile-dock-item" + (activeSection === id ? " is-active" : "")}
-              onClick={(event) => go(event, homePath + (id === "top" ? "" : "#" + id))}
+              onClick={(event) => go(event, id === "produkty" && !marketing ? "/produkty" : homePath + (id === "top" ? "" : "#" + id))}
             >
               <Icon aria-hidden="true" size={19} strokeWidth={1.9} />
               <span>{label}</span>
