@@ -215,6 +215,11 @@ const failures = [];
                     throw new Error('Accessible size CTA label missing: ' + type + ', got ' + label);
                   }
                   await sizeCta.click();
+                  // React may commit the expansion after the variant selection.
+                  // Await the actual inquiry first, then capture full diagnostics on failure.
+                  await productPage.locator('#moznosti-objednavky-stojana').waitFor({
+                    state: 'visible', timeout: 4500,
+                  }).catch(() => {});
                   // Check the actual DOM state of the shared size chooser and inquiry.
                   // Keep the details in the failure message to identify a real UX
                   // regression rather than waiting for a brittle accessible-name locator.
