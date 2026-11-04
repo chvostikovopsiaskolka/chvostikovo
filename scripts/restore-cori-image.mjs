@@ -313,11 +313,15 @@ const listingReplacements = [
 for (const item of listingReplacements) {
   const filePath = path.join(root, item.file);
   let source = await readFile(filePath, "utf8");
-  if (!source.includes(item.oldImport)) {
-    throw new Error(`Expected ${item.oldImport} import was not found in ${item.file}`);
+  if (source.includes(item.oldImport)) {
+    source = source.replace(item.oldImport, item.newImport);
+    await writeFile(filePath, source);
+  } else if (source.includes(item.newImport)) {
+    // This page already imports the restored original AVIF directly.
+    console.log(`Sharp stand image already imported in ${item.file}`);
+  } else {
+    throw new Error(`Neither expected stand image import was found in ${item.file}`);
   }
-  source = source.replace(item.oldImport, item.newImport);
-  await writeFile(filePath, source);
 }
 
 const englishReviewsPath = path.join(root, "src", "routes", "en.dog-daycare-kosice.tsx");
