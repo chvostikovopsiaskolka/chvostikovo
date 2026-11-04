@@ -36,4 +36,5 @@ assert(app.includes('btn.textContent=dogChoiceSkLabelsV412[id]?.[option.value]||
 assert(app.includes("root.classList.add('dog-photo-missing-v412')"));
 assert(css.includes('#bookingDogAvatar.dog-photo-missing-v412'));
 assert(css.includes('#customerAnnouncementsV363 .customer-inbox-count-v363:not(.hidden)'));
+assert(app.includes("'weekly_booking_reminder_test','announcement_push'"),'iOS icon badge must not duplicate bulletin unread receipts');
 console.log('PASS: SK/EN canonical dog choices, centered placeholders and badge; stable iOS/Android glass, shortened welcome, signup language controls and legal EN module');
