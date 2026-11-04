@@ -19,6 +19,22 @@ console.log("[seo] PASS: sitemap + prerender + canonical for " + route);
 
 // Credit is a genuine outbound reference and should not alter existing SEO routes.
 const homeHtml = fs.readFileSync("dist/client/index.html", "utf8");
+// Keep the public products visible in initial HTML, directly after homepage FAQ.
+// This is one section on the homepage, not an invented second product landing URL.
+const faqAnchorIndex = homeHtml.indexOf('id="faq"');
+const productsAnchorIndex = homeHtml.indexOf('id="produkty"');
+const aboutAnchorIndex = homeHtml.indexOf('id="o-nas"');
+assert(faqAnchorIndex >= 0 && productsAnchorIndex > faqAnchorIndex && aboutAnchorIndex > productsAnchorIndex,
+  "Homepage product section must follow FAQ and precede About");
+assert(homeHtml.match(/id="produkty"/g)?.length === 1, "Homepage must not duplicate product section");
+assert(homeHtml.includes("Ručne vyrábané pre vašich psíkov") && homeHtml.includes(">Naše produkty</h2>"),
+  "Homepage product heading or eyebrow missing from prerender");
+assert(homeHtml.includes('href="/stojan-na-misky-pre-psa"') &&
+       homeHtml.includes('href="/target-na-cvicenie-pre-psov"'),
+  "Both direct product links must remain crawlable in homepage HTML");
+assert(homeHtml.includes('href="/produkty"'), "Products listing must be linked from the homepage");
+assert(homeHtml.includes("stand-mia-"), "Homepage product teaser must use restored original stand photo");
+console.log("[seo] PASS: homepage FAQ → products → About order and product links");
 assert(homeHtml.includes("utm_source=chvostikovo"), "Bellaris credit missing UTM source");
 assert(homeHtml.includes("utm_medium=referral"), "Bellaris credit missing UTM medium");
 assert(homeHtml.includes("utm_campaign=footer_credit"), "Bellaris credit missing UTM campaign");

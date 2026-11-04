@@ -89,9 +89,9 @@ function Index() {
         <InquirySection />
         <Requirements />
         <Faq />
+        <ProductSection />
         <About />
         <Partners />
-        <ProductSection />
         <UsefulInfo />
         <PhotoStrip />
         <Contact />

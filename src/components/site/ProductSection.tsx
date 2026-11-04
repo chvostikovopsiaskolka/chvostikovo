@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
-import standMia from "@/assets/products/stand-small-mia.webp";
+import standMia from "@/assets/products/stand-mia.avif";
 import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
 
 const PRODUCTS = [
@@ -31,8 +31,8 @@ export function ProductSection() {
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Naše produkty</span>
-            <h2 className="section-title mt-1 text-3xl sm:text-4xl">Vyrábame aj pre vašich psíkov</h2>
+            <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Ručne vyrábané pre vašich psíkov</span>
+            <h2 className="section-title mt-1 text-3xl sm:text-4xl">Naše produkty</h2>
           </div>
           <a href="/produkty" className="inline-flex w-fit items-center gap-2 font-display text-sm font-semibold text-forest transition-colors hover:text-coral">
             Všetky produkty <ArrowRight className="size-4" />

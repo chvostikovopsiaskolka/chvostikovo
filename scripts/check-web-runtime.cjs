@@ -309,10 +309,44 @@ const failures = [];
               await menu.getByRole('button', { name: 'Zavrieť menu' }).click();
               await menu.waitFor({ state: 'hidden' });
             }
+            const sectionOrder = await productPage.evaluate(() => {
+              const faq = document.querySelector('main #faq');
+              const products = document.querySelector('main #produkty');
+              const cards = [...(products?.querySelectorAll('article a[href]') ?? [])].map(el => el.getAttribute('href'));
+              return {
+                directlyAfterFaq: Boolean(faq && products && faq.nextElementSibling === products),
+                heading: products?.querySelector('h2')?.textContent?.trim(),
+                count: document.querySelectorAll('main #produkty').length,
+                cards,
+              };
+            });
+            if (!sectionOrder.directlyAfterFaq || sectionOrder.heading !== 'Naše produkty' || sectionOrder.count !== 1) {
+              throw new Error('Homepage product section must appear exactly once immediately below FAQ: ' + JSON.stringify(sectionOrder));
+            }
+            if (!sectionOrder.cards.includes('/stojan-na-misky-pre-psa') || !sectionOrder.cards.includes('/target-na-cvicenie-pre-psov')) {
+              throw new Error('Homepage must preserve both existing product detail links');
+            }
+            if (width === 390) {
+              const dock = productPage.locator('.mobile-dock[data-variant="main"]');
+              const productsLink = dock.getByRole('link', { name: 'Produkty', exact: true });
+              if (await productsLink.count() !== 1 || await productsLink.getAttribute('href') !== '/produkty') {
+                throw new Error('Main mobile dock Products link must go to /produkty');
+              }
+              if (await dock.getByText('Priestory', { exact: true }).count()) {
+                throw new Error('Retired Spaces shortcut should not occupy mobile dock');
+              }
+            }
             for (const route of ['/stojan-na-misky-pre-psa', '/target-na-cvicenie-pre-psov']) {
               const card = productPage.locator('#produkty article a').filter({ has: productPage.locator('h3') }).filter({ has: productPage.locator('img') }).filter({ hasText: route.includes('stojan') ? 'Drevený stojan' : 'Target na cvičenie' }).first();
               const box = await card.boundingBox();
               if (!box || Math.abs(box.width - box.height) > 3) throw new Error('Homepage product card must be square: ' + route);
+            }
+            if (width === 390) {
+              await productPage.locator('.mobile-dock[data-variant="main"]').getByRole('link', { name: 'Produkty', exact: true }).click();
+              await productPage.waitForURL(/\/produkty\/?$/);
+              if (!await productPage.getByRole('heading', { level: 1, name: /Naše produkty pre psov/i }).count()) {
+                throw new Error('Mobile dock did not open the existing products catalogue');
+              }
             }
             if (width === 390) {
               await productPage.goto(new URL('/en/dog-daycare-kosice', base).href);
