@@ -143,6 +143,26 @@ const failures = [];
                   throw new Error('Missing product-specific value card: ' + title);
                 }
               }
+              const heroHighlights = productPage.getByLabel('Tri praktické výhody výrobku');
+              if (await heroHighlights.count() !== 1) throw new Error('Compact product value strip missing: ' + route);
+              const shortValues = route.includes('stojan')
+                ? ['Osobný barový pultík', 'Rýchla údržba', 'Výška podľa psa']
+                : ['Kvalitné spracovanie', 'Protišmykový povrch', 'Ručná výroba'];
+              for (const title of shortValues) {
+                if (!await heroHighlights.getByText(title, { exact: true }).isVisible()) {
+                  throw new Error('Missing compact product value: ' + title);
+                }
+              }
+              const valueCard = heroHighlights.locator('div').first();
+              const cardClasses = await valueCard.getAttribute('class');
+              if (!cardClasses?.includes('bg-forest') || !cardClasses.includes('text-white')) {
+                throw new Error('Product value strip must use forest green cards and white text: ' + route);
+              }
+              if (route.includes('stojan')) {
+                if (await productPage.locator('[data-stand-gallery="autoplay"]').count() !== 1) {
+                  throw new Error('Stand realizations carousel missing');
+                }
+              }
               const reviewTeaser = productPage.getByText('Recenzie spokojných zákazníkov čoskoro', { exact: true });
               if (!await reviewTeaser.isVisible()) throw new Error('Product review teaser missing');
               await productPage.getByRole('button', { name: 'Ako je to s doručením?' }).click();
@@ -157,6 +177,22 @@ const failures = [];
               await productPage.locator('input[name="customer_name"]:visible').waitFor();
               if (!await productPage.locator('input[name="email"]:visible').count()) throw new Error('Product inquiry contact missing');
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product inquiry points to retired checkout');
+            }
+            await productPage.goto(new URL('/blog/stojan-na-misky-pre-psa-vyhody-a-vyber/', base).href);
+            await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
+            const standImage = productPage.locator('article > figure img').first();
+            if (!(await standImage.getAttribute('src'))?.includes('stand-mia-')) {
+              throw new Error('Stand guide is not using restored MIA AVIF source');
+            }
+            if (await productPage.locator('[data-stand-gallery="autoplay"]').count() !== 1) {
+              throw new Error('Stand guide carousel missing above product CTA');
+            }
+            if (!(await productPage.getByRole('heading', { name: 'Pozrite si naše vyhotovenia', exact: true }).count())) {
+              throw new Error('Simplified stand article CTA title missing');
+            }
+            if (width === 390) {
+              const photoBox = await standImage.boundingBox();
+              if (!photoBox || photoBox.height > 310) throw new Error('Stand article hero photo remains too tall on mobile');
             }
             await productPage.goto(new URL('/', base).href);
             await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });

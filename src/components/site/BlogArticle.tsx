@@ -3,6 +3,7 @@ import { Header } from "./Header";
 import { Footer } from "./Contact";
 import { ShortForm } from "./Forms";
 import { BlogCard } from "./BlogCard";
+import { StandGalleryLoop } from "./StandGalleryLoop";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { blogCards, blogPath, type BlogArticleData } from "@/content/blog";
@@ -53,6 +54,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
   const trackingSource = "blog_" + article.slug.replaceAll("-", "_") + "_inquiry";
   const related = blogCards.filter(card => card.id !== article.slug).slice(0, 3);
   const productGuide = Boolean(article.productPage);
+  const standGuide = article.slug === "stojan-na-misky-pre-psa-vyhody-a-vyber";
   const publishedLabel = new Intl.DateTimeFormat("sk-SK", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(article.publishedAt + "T12:00:00Z"));
 
   function trackInquiryClick() {
@@ -109,8 +111,9 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
         </header>
 
         <article className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
-          <figure className="overflow-hidden rounded-3xl bg-secondary shadow-soft">
-            <img src={article.image.src} alt={article.image.alt} className="mx-auto block max-h-[720px] h-auto max-w-full object-contain"
+          <figure className={standGuide ? "mx-auto max-w-[640px] overflow-hidden rounded-3xl bg-secondary shadow-soft" : "overflow-hidden rounded-3xl bg-secondary shadow-soft"}>
+            <img src={article.image.src} alt={article.image.alt}
+              className={standGuide ? "mx-auto block h-[250px] w-full object-contain sm:h-[380px]" : "mx-auto block max-h-[720px] h-auto max-w-full object-contain"}
               decoding="async" width={article.image.width ?? 1000} height={article.image.height ?? 750} />
             <figcaption className="px-4 py-2 text-sm text-forest/65">{article.imageCaption ?? "Zo života našej psej škôlky v Košiciach"}</figcaption>
           </figure>
@@ -147,20 +150,28 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                     </ul>
                   </aside>
                 )}
+                {standGuide && (
+                  <section aria-label="Ďalšie ručne vyrábané stojany" className="space-y-4">
+                    <h2 className="font-display text-2xl text-forest sm:text-3xl">Naše realizácie stojanov</h2>
+                    <StandGalleryLoop />
+                  </section>
+                )}
                 <section id="produkt" aria-labelledby="blog-product-heading"
                   className="scroll-mt-24 rounded-3xl bg-secondary p-6 shadow-soft sm:p-9">
-                  <h2 id="blog-product-heading" className="font-display text-2xl text-forest sm:text-3xl">Pozrite si naše vyhotovenie</h2>
+                  <h2 id="blog-product-heading" className="font-display text-2xl text-forest sm:text-3xl">{standGuide ? "Pozrite si naše vyhotovenia" : "Pozrite si naše vyhotovenie"}</h2>
                   <p className="mt-3 max-w-2xl leading-relaxed text-forest/80">{article.productPage.description}</p>
                   <div className="mt-6 flex flex-wrap gap-3">
                     <a href={article.productPage.href} onClick={trackProductClick}
                       className="btn-coral inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 font-display font-semibold">
                       {article.productPage.label} <ArrowRight aria-hidden="true" className="size-4" />
                     </a>
-                    <a href="/produkty" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral">
-                      Všetky produkty <ArrowRight aria-hidden="true" className="size-4" />
-                    </a>
+                    {!standGuide && (
+                      <a href="/produkty" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral">
+                        Všetky produkty <ArrowRight aria-hidden="true" className="size-4" />
+                      </a>
+                    )}
                   </div>
-                  <p className="mt-4 text-sm text-forest/65">Ide o nezáväzný dopyt priamo na produktovej stránke, nie o platbu cez košík.</p>
+                  {!standGuide && <p className="mt-4 text-sm text-forest/65">Ide o nezáväzný dopyt priamo na produktovej stránke, nie o platbu cez košík.</p>}
                 </section>
               </>
             ) : (

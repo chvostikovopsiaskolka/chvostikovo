@@ -223,10 +223,14 @@ routeSource = routeSource.replace(dialogImportAnchor, dialogImports);
 const oldRealizations = "const REALIZATIONS = GALLERY;";
 const newRealizations = `const REALIZATIONS = [\n  ...GALLERY,\n  {\n    src: standMlyncek,\n    alt: "Svetlý drevený stojan na misky pre psa MLYNČEK",\n    position: "50% 58%",\n  },\n  {\n    src: standAron,\n    alt: "Tmavý drevený stojan na misky pre psa ARON",\n    position: "50% 58%",\n  },\n  {\n    src: standLoki,\n    alt: "Tmavý drevený stojan na misky pre psa LOKI",\n    position: "50% 56%",\n  },\n  {\n    src: standPlanetky,\n    alt: "Biely drevený stojan na misky pre psa PLANÉTKY",\n    position: "50% 58%",\n  },\n  {\n    src: standAloy,\n    alt: "Tmavý drevený stojan na misky pre psa ALOY",\n    position: "50% 55%",\n  },\n];`;
 
-if (!routeSource.includes(oldRealizations)) {
-  throw new Error("Expected REALIZATIONS declaration was not found in product route");
+if (routeSource.includes(oldRealizations)) {
+  routeSource = routeSource.replace(oldRealizations, newRealizations);
+} else if (routeSource.includes("<StandGalleryLoop />")) {
+  // New gallery component already uses restored AVIF photos and loops automatically.
+  console.log("Autoplay stand gallery present; no static REALIZATIONS injection needed.");
+} else {
+  throw new Error("Neither legacy realizations nor the approved autoplay gallery is present");
 }
-routeSource = routeSource.replace(oldRealizations, newRealizations);
 
 const oldHeroSpacing =
   'className="scroll-mt-24 relative overflow-hidden pt-8 pb-14 sm:pt-10 sm:pb-20 lg:pt-32"';
@@ -282,10 +286,14 @@ routeSource = routeSource.replace(oldInquiryClose, newInquiryClose);
 const oldRealizationsHeading = `            <div className="text-center">\n              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">\n                Naše realizácie\n              </p>\n              <h2 className="section-title mt-2 text-3xl sm:text-4xl">\n                Spokojní štvornohí klienti\n              </h2>\n              <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-forest/75">\n                Niekoľko hotových prevedení. Ďalšie farby a realizácie budeme postupne dopĺňať.\n              </p>\n            </div>\n            <div className="mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">`;
 const newRealizationsHeading = `            <div className="text-center">\n              <h2 className="section-title text-3xl sm:text-4xl">\n                Spokojní štvornohí klienti\n              </h2>\n            </div>\n            <div className="mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">`;
 
-if (!routeSource.includes(oldRealizationsHeading)) {
-  throw new Error("Expected realizations heading block was not found in product route");
+if (routeSource.includes(oldRealizationsHeading)) {
+  routeSource = routeSource.replace(oldRealizationsHeading, newRealizationsHeading);
+} else if (routeSource.includes("<StandGalleryLoop />")) {
+  // The maintained title is already followed by the reusable moving carousel.
+  console.log("Autoplay stand realizations preserve the current heading.");
+} else {
+  throw new Error("Stand gallery heading has no approved static or autoplay layout");
 }
-routeSource = routeSource.replace(oldRealizationsHeading, newRealizationsHeading);
 
 await writeFile(routePath, routeSource);
 

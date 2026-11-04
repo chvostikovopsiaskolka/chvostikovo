@@ -1,6 +1,6 @@
 import workdayCoverPhoto from "@/assets/blog/blog-workday-cover.webp";
-import standMia from "@/assets/products/stand-small-mia.webp";
-import standDark from "@/assets/products/stand-dark.webp";
+import standMia from "@/assets/products/stand-mia.avif";
+import standDark from "@/assets/products/stand-cori.avif";
 import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
 import targetLargeDetail from "@/assets/products/target-large-detail.jpeg";
 import suitabilityCoverPhoto from "@/assets/blog/blog-suitability-cover.webp";
@@ -151,7 +151,7 @@ export const blogArticles: BlogArticleData[] = [
     "intro": "Stojan na misky má byť pekný, ale hlavne praktický. Dve misky majú stabilné miesto, voda a jedlo sa ľahšie udržiavajú v jednom kúte a drevené prevedenie si možno prispôsobiť konkrétnemu psíkovi. V Chvostíkove stojany vyrábame ručne, nie na výrobnej linke: záleží nám na spracovaní, odolnosti pri každodennom používaní aj detailoch, ktoré z nich robia osobný výrobok.",
     "sections": [
       {
-        "heading": "Misky na jednom mieste a kŕmny kút pod kontrolou",
+        "heading": "Misky na jednom mieste – osobný barový pultík",
         "paragraphs": [
           "Keď má každá miska vlastné miesto v jednom pevnom podstavci, pri bežnom jedení a pití sa neposúva samostatne po podlahe. Pre domácnosť je to jednoduchšia organizácia: jedlo aj voda sú na známom mieste a okolie misiek sa ľahšie udržiava.",
           "Pes môže pri pití stále kvapkať vodu alebo vysypať pár granúl. Stojan však pomáha obmedziť posúvanie samotných misiek a udržiavať kŕmne miesto prehľadnejšie — bez sľubov, že okolo neho nikdy nebude ani kvapka."
@@ -175,21 +175,21 @@ export const blogArticles: BlogArticleData[] = [
         "heading": "Kedy môže byť vyvýšené kŕmenie individuálne potrebné?",
         "paragraphs": [
           "Poznáme aj prípad psíka, ktorý po operácii spojenej s refluxom potrebuje jesť z vyvýšenej misky. To je úplne iná situácia než preventívne zvyšovanie misiek každému veľkému psovi. Pri niektorých ochoreniach pažeráka alebo po konkrétnych zákrokoch môže veterinár predpísať presnú polohu pri kŕmení — a vtedy je dôležité prispôsobiť sa jeho pokynom.",
-          "Samotný drevený stojan nie je liečba refluxu a nenahrádza špeciálne pomôcky na kŕmenie vo vzpriamenej polohe. Ak má psík regurgitáciu, opakované vracanie alebo iné ťažkosti, vhodný spôsob a výšku kŕmenia musí určiť veterinár. Ak ide o individuálne odporúčanie po operácii, pri dopyte nám môžete povedať požadovaný rozmer a spolu preveríme možnosti výroby."
+          "Samotný drevený stojan nie je liečba refluxu a nenahrádza špeciálne pomôcky na kŕmenie vo vzpriamenej polohe. Ak sa psíkovi vracia jedlo späť, opakovane vracia alebo má iné ťažkosti, vhodný spôsob a výšku kŕmenia musí určiť veterinár. Ak ide o individuálne odporúčanie po operácii, pri dopyte nám môžete povedať požadovaný rozmer a spolu preveríme možnosti výroby."
         ]
       },
       {
         "heading": "Poctivá výroba, osobné detaily a vianočný darček",
         "paragraphs": [
           "Naše stojany nie sú výsledkom pásovej výroby. Každý kus skladáme a dokončujeme ručne, s dôrazom na pevné spracovanie, ošetrený drevený povrch a jednoduchú údržbu. Môžete si zvoliť farebné prevedenie, meno psíka aj farbu písmen. Výška a rozmery sa riešia podľa konkrétnej objednávky a možností výroby.",
-          "Personalizovaný stojan môže byť praktický a osobný vianočný darček pre majiteľa psa. Ručná výroba však vyžaduje čas, preto si dostupnosť vybraného prevedenia a termín doručenia overte vopred. Objednávku vybavujeme nezáväzným dopytom, nie automatickou platbou v košíku."
+          "Personalizovaný stojan môže byť praktický darček pre psa aj jeho majiteľa, napríklad pod vianočný stromček. Ručná výroba však vyžaduje čas, preto si dostupnosť vybraného prevedenia a termín doručenia overte vopred. Objednávku vybavujeme nezáväzným dopytom, nie automatickou platbou v košíku."
         ]
       }
     ],
     "productPage": {
       "href": "/stojan-na-misky-pre-psa",
       "label": "Pozrieť stojan na misky",
-      "description": "Vyberte si ručne vyrábaný stojan MIA/CORI, farbu a personalizáciu menom. Povrch je ošetrený pre jednoduchú údržbu pri bežnej vlhkosti."
+      "description": "Vyberte si ručne vyrábaný stojan s možnosťou personalizácie, individuálnym farebným prevedením a výškou prispôsobenou vášmu psíkovi."
     },
     "sources": [
       {

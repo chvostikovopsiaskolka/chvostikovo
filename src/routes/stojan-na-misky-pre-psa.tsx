@@ -14,6 +14,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { ProductDeliveryDetails } from "@/components/site/ProductDeliveryDetails";
 import { ProductValueHighlights } from "@/components/site/ProductValueHighlights";
+import { StandGalleryLoop } from "@/components/site/StandGalleryLoop";
 import { Collapse } from "@/components/site/Collapse";
 import { PhoneField } from "@/components/site/PhoneField";
 import { phoneFromForm } from "@/lib/phone";
@@ -75,8 +76,6 @@ const GALLERY = [
     position: "50% 58%",
   },
 ];
-
-const REALIZATIONS = GALLERY;
 
 const SIZE_OPTIONS: Array<{ value: StandSize; label: string; detail: string }> = [
   { value: "small", label: "Menší", detail: "cca 40 × 20 cm · menšie misky" },
@@ -333,7 +332,7 @@ function BowlStandPage() {
               <div className="mt-5 lg:col-start-2 lg:row-start-2 lg:mt-0">
                 <ProductValueHighlights
                   label="Tri praktické výhody výrobku"
-                  headings={["Misky na mieste","Rýchla údržba","Výška podľa psa"]}
+                  headings={["Osobný barový pultík", "Rýchla údržba", "Výška podľa psa"]}
                 />
                 <div>
                   <p className="font-display text-sm font-bold text-forest">Vyberte veľkosť stojana</p>
@@ -720,21 +719,8 @@ function BowlStandPage() {
                 Niekoľko hotových prevedení. Ďalšie farby a realizácie budeme postupne dopĺňať.
               </p>
             </div>
-            <div className="mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {REALIZATIONS.map((image) => (
-                <figure
-                  key={image.alt}
-                  className="w-[82%] shrink-0 snap-center overflow-hidden rounded-4xl bg-card shadow-card sm:w-[46%] lg:w-[31.5%]"
-                >
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    loading="lazy"
-                    className="h-72 w-full object-cover"
-                    style={{ objectPosition: image.position }}
-                  />
-                </figure>
-              ))}
+            <div className="mt-9">
+              <StandGalleryLoop />
             </div>
           </div>
         </section>

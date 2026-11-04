@@ -314,7 +314,7 @@ function TargetPage() {
               <div className="mt-5 lg:col-start-2 lg:row-start-2 lg:mt-0">
                 <ProductValueHighlights
                   label="Tri praktické výhody výrobku"
-                  headings={["Dotyk labkou","Pokojná výdrž","Nové cviky"]}
+                  headings={["Kvalitné spracovanie", "Protišmykový povrch", "Ručná výroba"]}
                 />
                 <div>
                   <p className="font-display text-sm font-bold text-forest">Vyberte veľkosť</p>
