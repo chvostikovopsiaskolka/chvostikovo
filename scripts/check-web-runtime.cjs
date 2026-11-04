@@ -204,14 +204,12 @@ const failures = [];
                   const swipeable = await cards.evaluate(el => el.scrollWidth > el.clientWidth + 30);
                   if (!swipeable) throw new Error('Stand sizes must swipe horizontally on mobile');
                 }
-                // Start from the closed hero inquiry, and close between variants.
+                // Test the two customer journeys from independent fresh visits.
+                // No Escape or modal cleanup can interfere with the next case.
                 for (const [type, name] of [['large', 'väčší'], ['small', 'menší']]) {
-                  const blockingDialog = productPage.getByRole('dialog').first();
-                  if (await blockingDialog.count()) {
-                    await productPage.keyboard.press('Escape');
-                    await blockingDialog.waitFor({ state: 'hidden', timeout: 10000 });
-                  }
-                  const sizeCta = cards.locator('article[data-stand-size="' + type + '"] button[type="button"]');
+                  await productPage.goto(new URL(route, base).href);
+                  await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
+                  const sizeCta = productPage.locator('[data-stand-sizes="carousel"] article[data-stand-size="' + type + '"] button[type="button"]');
                   if (await sizeCta.count() !== 1) throw new Error('Missing unique size CTA: ' + type);
                   const label = await sizeCta.getAttribute('aria-label');
                   if (label !== 'Mám záujem o ' + name + ' stojan') {
