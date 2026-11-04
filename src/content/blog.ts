@@ -1,4 +1,8 @@
 import workdayCoverPhoto from "@/assets/blog/blog-workday-cover.webp";
+import standMia from "@/assets/products/stand-small-mia.webp";
+import standDark from "@/assets/products/stand-dark.webp";
+import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
+import targetLargeDetail from "@/assets/products/target-large-detail.jpeg";
 import suitabilityCoverPhoto from "@/assets/blog/blog-suitability-cover.webp";
 import puppyPreviewPhoto from "@/assets/blog/blog-puppy-card.webp";
 import workdayBodyPhoto from "@/assets/blog/blog-workday-body.webp";
@@ -22,6 +26,9 @@ export type BlogArticleData = {
   secondImage: { src: string; alt: string; position?: string; width?: number; height?: number };
   intro: string;
   sections: BlogSection[];
+  productPage?: { href: string; label: string; description: string };
+  imageCaption?: string;
+  sources?: Array<{ label: string; href: string }>;
 };
 
 export const blogArticles: BlogArticleData[] = [
@@ -121,6 +128,142 @@ export const blogArticles: BlogArticleData[] = [
         ]
       }
     ]
+  },
+  {
+    "slug": "stojan-na-misky-pre-psa-vyhody-a-vyber",
+    "title": "Stojan na misky pre psa: kedy dáva zmysel?",
+    "seoTitle": "Stojan na misky pre psa – výhody, výber a bezpečnosť | Chvostíkovo",
+    "description": "Prečo si vybrať pevný stojan na misky, ako pomáha pri poriadku a čo treba vedieť pri veľkých plemenách či tráviacich ťažkostiach? Praktický sprievodca.",
+    "summary": "Pevné miesto pre misky, menej posúvania a jednoduchšie čistenie. Vysvetľujeme aj to, kedy výšku misky radšej konzultovať s veterinárom.",
+    "publishedAt": "2026-11-04",
+    "readingMinutes": 5,
+    "image": {
+      "src": standMia,
+      "alt": "Menší drevený stojan MIA s dvojicou misiek od Chvostíkova",
+      "position": "center 58%"
+    },
+    "secondImage": {
+      "src": standDark,
+      "alt": "Väčší tmavý drevený stojan CORI s miskami od Chvostíkova",
+      "position": "center 63%"
+    },
+    "imageCaption": "Naše aktuálne vyhotovenie dreveného stojana na misky.",
+    "intro": "Jedlo a voda patria k najbežnejším momentom psieho dňa. A práve pri nich si majitelia často všimnú cestujúce misky, rozliatu vodu alebo neporiadok okolo kŕmneho miesta. Drevený stojan je praktický doplnok, ktorý môže pomôcť udržať misky pokope a zjednodušiť upratovanie. Nie je však zdravotnou pomôckou pre každého psa.",
+    "sections": [
+      {
+        "heading": "Misky na jednom mieste a kŕmny kút pod kontrolou",
+        "paragraphs": [
+          "Keď má každá miska vlastné miesto v jednom pevnom podstavci, pri bežnom jedení a pití sa neposúva samostatne po podlahe. Pre domácnosť je to jednoduchšia organizácia: jedlo aj voda sú na známom mieste a okolie misiek sa ľahšie udržiava.",
+          "Stojan sám osebe nezaručí suchú podlahu ani to, že pes nebude rozsýpať granule. Pri nadšenom jedákovi sa môže voda či krmivo dostať mimo misky tak či tak. Rozdiel je v praktickom usporiadaní miesta, nie v zázračnom riešení neporiadku."
+        ]
+      },
+      {
+        "heading": "Jednoduché čistenie bez zložitého rozoberania",
+        "paragraphs": [
+          "Naše stojany majú dve vyberateľné nerezové misky, ktoré možno umývať samostatne. Drevený povrch je ošetrený na bežnú údržbu: pri každodennom používaní ho stačí podľa potreby utrieť vlhkou handričkou.",
+          "Pri vode a krmive je pravidelné čistenie dôležitejšie než samotný dizajn stojana. Misky umývajte priebežne a nenechávajte zvyšky krmiva dlho stáť."
+        ]
+      },
+      {
+        "heading": "A čo veľké plemená? Poznáme vlkodava aj barzoja",
+        "paragraphs": [
+          "V Chvostíkove máme skúsenosti aj s vlkodavom a barzojom. Pri veľkých psoch si človek rýchlo uvedomí, že veľkosť misky, miesto na kŕmenie a jednotlivé návyky sa líšia. Preto vyrábame menší i väčší pôdorys a pri stojane sa pýtame na výšku konkrétneho psa.",
+          "Z toho však nevyplýva, že každý veľký pes potrebuje jesť zo zvýšenej misky. Pri plemenách náchylných na torziu žalúdka je voľba výšky osobitne citlivá. Výskum nezistil, že zvýšené kŕmenie torzii predchádza; niektoré údaje naznačujú dokonca vyššie riziko. Výšku preto neurčujme len podľa kohútikovej výšky alebo estetického dojmu."
+        ]
+      },
+      {
+        "heading": "Tráviace ťažkosti: stojan nenahrádza veterinára",
+        "paragraphs": [
+          "Ak psík pri jedle hltá, vracia, regurgituje, kašle, má bolesti alebo iné problémy s prijímaním potravy, prioritou je zistiť príčinu u veterinára. Zmena polohy misky môže pri niektorých individuálnych diagnózach dávať zmysel, pri iných nemusí byť vhodná.",
+          "Neodporúčame zvýšený stojan ako univerzálnu pomoc pri gastroenterologických ťažkostiach. Pri podozrení na torziu žalúdka, najmä ak je brucho nafúknuté a pes sa neúspešne pokúša vracať, ide o urgentný veterinárny stav. O správnom režime kŕmenia, miske a jej výške má pri zdravotných problémoch rozhodnúť veterinár."
+        ]
+      },
+      {
+        "heading": "Ako vybrať stojan a čo objednať pred sviatkami",
+        "paragraphs": [
+          "Pri výbere si najprv premyslite veľkosť misiek, dostupné miesto a spôsob čistenia. Naše drevené stojany vieme pripraviť v rôznych farebných vyhotoveniach a s menom psíka; výšku riešime podľa konkrétneho použitia a podľa potreby aj po konzultácii s veterinárom.",
+          "Personalizovaný stojan môže byť milým praktickým darčekom pre majiteľa psa. Keďže ide o ručnú výrobu, pred Vianocami si radšej vopred overte možnosti a termín — bez automatického prísľubu doručenia do sviatkov."
+        ]
+      }
+    ],
+    "productPage": {
+      "href": "/stojan-na-misky-pre-psa",
+      "label": "Pozrieť stojan na misky",
+      "description": "Pozrite si fotografie MIA/CORI, rozmery, farby a pošlite nezáväzný dopyt k vlastnému stojanu."
+    },
+    "sources": [
+      {
+        "label": "Veterinary Evidence – zvýšené misky a riziko GDV (prehľad dôkazov)",
+        "href": "https://veterinaryevidence.org/index.php/ve/article/view/57"
+      },
+      {
+        "label": "PubMed – rizikové faktory torzie žalúdka u veľkých psov",
+        "href": "https://pubmed.ncbi.nlm.nih.gov/11128539/"
+      }
+    ]
+  },
+  {
+    "slug": "target-na-cvicenie-psov-prve-cviky",
+    "title": "Target na cvičenie psa: ako začať s prvými cvikmi?",
+    "seoTitle": "Target na cvičenie psov – prvé cviky a výber veľkosti | Chvostíkovo",
+    "description": "Ako učiť psa dotyk labkou, výdrž v pozícii a jednoduché cviky s dreveným targetom? Praktický postup, bezpečnosť a výber vhodnej veľkosti.",
+    "summary": "Ukážeme jednoduché využitie targetu: prvý dotyk labkou, pokojné zotrvanie a postupné rozširovanie tréningu bez zbytočného tlaku.",
+    "publishedAt": "2026-11-04",
+    "readingMinutes": 4,
+    "image": {
+      "src": targetLargeDog,
+      "alt": "Pes používa väčší drevený target pri tréningu",
+      "position": "center 50%"
+    },
+    "secondImage": {
+      "src": targetLargeDetail,
+      "alt": "Detail labiek na drevenom targete s protišmykovou plochou",
+      "position": "center 50%"
+    },
+    "imageCaption": "Drevený target Chvostíkova pri ukážke používania.",
+    "intro": "Target je jednoduchá pomôcka, ktorá dá psovi jasnú informáciu: sem polož labku. Netreba hneď zložité cviky ani náročné zostavy. Už krátke, príjemné opakovania môžu pomôcť pri učení presného pohybu a pokojnej spolupráce so psom.",
+    "sections": [
+      {
+        "heading": "1. Najskôr jeden dobrovoľný dotyk labkou",
+        "paragraphs": [
+          "Target položte na stabilný nešmykľavý povrch. Nechajte psa, aby si pomôcku očuchal, a odmeňte záujem. Keď sa labkou dotkne plochy, označte správny okamih a odmeňte ho. Cieľom nie je psa nasilu postaviť na podložku, ale naučiť ho samostatne ponúknuť jednoduchý pohyb.",
+          "Začínajte s krátkymi sériami a pokojne sa vráťte o krok späť, ak pes zaváha. Nech je učenie zrozumiteľné a dobrovoľné."
+        ]
+      },
+      {
+        "heading": "2. Pridajte krátku výdrž bez naháňania výkonu",
+        "paragraphs": [
+          "Keď psík rozumie dotyku, môžete skúsiť odmeniť aj okamih, keď labku na targete chvíľu ponechá. Postupne, po malých krokoch, predlžujte čas zotrvania. Predĺženie o sekundu má zmysel len vtedy, keď pes zostáva pokojný a bezpečne stojí.",
+          "Target môže byť vhodný aj na nácvik pozície pri bežnej manipulácii. Nesmie však slúžiť na nútené držanie psa v nepohodlnej polohe."
+        ]
+      },
+      {
+        "heading": "3. Z jedného dotyku vzniká viac možností",
+        "paragraphs": [
+          "Po zvládnutí základu môžete meniť požadovanú labku, polohu človeka alebo skúšať jednoduché presuny. Vždy iba jeden nový prvok naraz. Pri väčšej záťaži, nezvyčajnej výške, mladých či starších psoch alebo ortopedickom probléme sa poraďte s odborníkom a nechoďte do cvikov cez bolesť.",
+          "Target nie je zárukou rehabilitačného účinku ani náhradou fyzioterapie. Je to pomôcka na vedený tréning, pri ktorom rozhoduje správne prevedenie a komfort psa."
+        ]
+      },
+      {
+        "heading": "Ktorú veľkosť si vybrať?",
+        "paragraphs": [
+          "Veľký obdĺžnikový target má rozmery približne 40 × 20 cm, menší štvorcový približne 25 × 25 cm. Výber závisí od veľkosti labiek a konkrétneho cviku, nie iba od hmotnosti psa. Protišmyková plocha pomáha s kontaktom labky, ale podložka musí stáť na stabilnej podlahe.",
+          "Štandardná výška je približne 5 cm; inú výšku riešime individuálne. Pokiaľ s targetom len začínate, zvyčajne je rozumnejší jednoduchý nízky cvik než vysoké zdvíhanie labiek."
+        ]
+      },
+      {
+        "heading": "Praktický darček pre ľudí, ktorí so psom radi pracujú",
+        "paragraphs": [
+          "Ak poznáte niekoho, kto sa venuje tréningu, target môže byť užitočnejší než ďalšia hračka do poličky. Najviac ho ocení človek, ktorý vie začať od jednoduchých cvikov a rešpektuje tempo svojho psa.",
+          "Pred Vianocami sa nám môžete ozvať s výberom veľkosti alebo otázkou k vyhotoveniu. Aktuálne možnosti ručnej výroby a doručenia potvrdíme pri dopyte individuálne."
+        ]
+      }
+    ],
+    "productPage": {
+      "href": "/target-na-cvicenie-pre-psov",
+      "label": "Pozrieť drevený target",
+      "description": "Porovnajte veľký a malý target, pozrite si skutočné fotografie a pošlite nezáväzný dopyt."
+    }
   }
 ];
 
