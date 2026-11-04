@@ -214,8 +214,8 @@ export const blogArticles: BlogArticleData[] = [
     "slug": "target-na-cvicenie-psov-prve-cviky",
     "title": "Target na cvičenie psa: ako začať s prvými cvikmi?",
     "seoTitle": "Target na cvičenie psov – prvé cviky a výber veľkosti | Chvostíkovo",
-    "description": "Ako učiť psa dotyk labkou, výdrž v pozícii a jednoduché cviky s dreveným targetom? Praktický postup, bezpečnosť a výber vhodnej veľkosti.",
-    "summary": "Ukážeme jednoduché využitie targetu: prvý dotyk labkou, pokojné zotrvanie a postupné rozširovanie tréningu bez zbytočného tlaku.",
+    "description": "Drevený target pre psov: prvý dotyk labkou, rehabilitačné a fyzioterapeutické cviky podľa odborníka aj nácvik zotrvania na mieste. Ako začať bezpečne?",
+    "summary": "Od prvého dotyku labkou cez kontrolované rehabilitačné cviky až po poslušnosť a zotrvanie na mieste. Všetko s ohľadom na potreby psíka.",
     "publishedAt": "2026-11-04",
     "readingMinutes": 4,
     "image": {
@@ -229,7 +229,7 @@ export const blogArticles: BlogArticleData[] = [
       "position": "center 50%"
     },
     "imageCaption": "Drevený target Chvostíkova pri ukážke používania.",
-    "intro": "Target je jednoduchá pomôcka, ktorá dá psovi jasnú informáciu: sem polož labku. Netreba hneď zložité cviky ani náročné zostavy. Už krátke, príjemné opakovania môžu pomôcť pri učení presného pohybu a pokojnej spolupráce so psom.",
+    "intro": "Target je jednoduchá pomôcka, ktorá psíkovi ukáže, kam položiť labku. Dá sa využiť pri bežnom tréningu, nácviku zotrvania na mieste a pod vedením odborníka aj pri niektorých rehabilitačných či fyzioterapeutických cvikoch. Začnite krátkymi dobrovoľnými pokusmi a náročnosť prispôsobte psíkovi.",
     "sections": [
       {
         "heading": "1. Najskôr jeden dobrovoľný dotyk labkou",
@@ -239,17 +239,17 @@ export const blogArticles: BlogArticleData[] = [
         ]
       },
       {
-        "heading": "2. Pridajte krátku výdrž bez naháňania výkonu",
+        "heading": "2. Rehabilitácia, fyzioterapia a držanie tela",
         "paragraphs": [
-          "Keď psík rozumie dotyku, môžete skúsiť odmeniť aj okamih, keď labku na targete chvíľu ponechá. Postupne, po malých krokoch, predlžujte čas zotrvania. Predĺženie o sekundu má zmysel len vtedy, keď pes zostáva pokojný a bezpečne stojí.",
-          "Target môže byť vhodný aj na nácvik pozície pri bežnej manipulácii. Nesmie však slúžiť na nútené držanie psa v nepohodlnej polohe."
+          "Pri niektorých veterinárnych rehabilitačných a fyzioterapeutických plánoch sa používajú pevné plošiny na presné umiestnenie labiek. Odborník môže s ich pomocou viesť kontrolované prenášanie váhy, stabilitu postoja a vhodné posilňovacie cviky. Konkrétna poloha labiek, výška a počet opakovaní závisia od diagnózy a možností psa.",
+          "Náš pevný target nie je zdravotnícka pomôcka s preukázaným liečebným účinkom a nezaručuje spevnenie svalstva ani správny postoj sám osebe. Po operácii, pri bolesti či problémoch s pohybom vyberajte cvičenia výhradne podľa veterinára alebo kvalifikovaného fyzioterapeuta pre zvieratá."
         ]
       },
       {
-        "heading": "3. Z jedného dotyku vzniká viac možností",
+        "heading": "3. Poslušnosť a zotrvanie na mieste",
         "paragraphs": [
-          "Po zvládnutí základu môžete meniť požadovanú labku, polohu človeka alebo skúšať jednoduché presuny. Vždy iba jeden nový prvok naraz. Pri väčšej záťaži, nezvyčajnej výške, mladých či starších psoch alebo ortopedickom probléme sa poraďte s odborníkom a nechoďte do cvikov cez bolesť.",
-          "Target nie je zárukou rehabilitačného účinku ani náhradou fyzioterapie. Je to pomôcka na vedený tréning, pri ktorom rozhoduje správne prevedenie a komfort psa."
+          "V každodennom tréningu môže target slúžiť ako jasne označené miesto pre jednu alebo dve labky. Najskôr odmeňte dobrovoľný dotyk, potom pridajte jednoduchý povel a pomaly predlžujte čas, počas ktorého psík labku na mieste ponechá. Na konci ho zreteľným slovom uvoľnite.",
+          "Takto môžete trénovať pokoj, sústredenie a zotrvanie na určenom mieste. Náš nízky target však nie je plošina na státie celým telom pre každého psa: rozsah cviku vždy prispôsobte rozmerom pomôcky a veľkosti labiek."
         ]
       },
       {
@@ -271,7 +271,21 @@ export const blogArticles: BlogArticleData[] = [
       "href": "/target-na-cvicenie-pre-psov",
       "label": "Pozrieť drevený target",
       "description": "Porovnajte veľký a malý target, pozrite si skutočné fotografie a pošlite nezáväzný dopyt."
-    }
+    },
+    "sources": [
+      {
+        "label": "VCA Animal Hospitals – cvičenia na vnímanie polohy tela a bezpečnosť",
+        "href": "https://vcahospitals.com/know-your-pet/exercises-to-improve-proprioception"
+      },
+      {
+        "label": "WSAVA/VIN – terapeutické cvičenia vo veterinárnej rehabilitácii",
+        "href": "https://www.vin.com/apputil/content/defaultadv1.aspx?id=7054715&pid=12886&print=1"
+      },
+      {
+        "label": "CattleDog Publishing – nácvik zotrvania na platforme",
+        "href": "https://cattledogpublishing.com/blog/stationing-to-a-platform/"
+      }
+    ]
   }
 ];
 
