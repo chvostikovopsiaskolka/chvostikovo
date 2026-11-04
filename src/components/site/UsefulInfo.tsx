@@ -16,7 +16,7 @@ export function UsefulInfo() {
         </div>
         <div role="region" aria-label="Články a rady Chvostíkova – na mobile posúvajte do strany" tabIndex={0}
           className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-auto md:grid md:max-w-6xl md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
-          {blogCards.map(card => (
+          {blogCards.filter(card => ["kam-so-psom-pocas-pracovneho-dna", "je-psia-skolka-vhodna-pre-kazdeho-psa", "psia-skolka-pre-steniatka"].includes(card.id)).map(card => (
             <div key={card.id} className="w-[86%] shrink-0 snap-start sm:w-[46%] md:w-auto md:shrink">
               <BlogCard card={card} />
             </div>
