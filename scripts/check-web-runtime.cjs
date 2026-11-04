@@ -137,7 +137,7 @@ const failures = [];
               if (await valueSection.locator('article').count() !== 3) throw new Error('Product must show exactly three value cards: ' + route);
               const valueTitles = route.includes('stojan')
                 ? ['Misky majú svoje miesto', 'Po jedle rýchlo upratané', 'Výšku nemusíte odhadovať']
-                : ['Presný dotyk labkou', 'Pokojná výdrž v pozícii', 'Nové cviky krok za krokom'];
+                : ['Presný dotyk labkou', 'Rehabilitácia a fyzioterapia', 'Poslušnosť a zotrvanie na mieste'];
               for (const title of valueTitles) {
                 if (!await valueSection.getByRole('heading', { name: title, exact: true }).isVisible()) {
                   throw new Error('Missing product-specific value card: ' + title);
@@ -158,6 +158,23 @@ const failures = [];
               if (!cardClasses?.includes('bg-forest') || !cardClasses.includes('text-white')) {
                 throw new Error('Product value strip must use forest green cards and white text: ' + route);
               }
+              const carouselName = route.includes('stojan') ? 'stand' : 'target';
+              const galleryTrack = productPage.locator('[data-photo-carousel="' + carouselName + '"]');
+              if (await galleryTrack.count() !== 1) throw new Error('Carousel missing: ' + carouselName);
+              if (await galleryTrack.locator('figure').count() !== (carouselName === 'stand' ? 3 : 8)) {
+                throw new Error('Carousel must render each distinct photo exactly once: ' + carouselName);
+              }
+              if (await galleryTrack.getAttribute('data-carousel-motion') !== 'ping-pong') {
+                throw new Error('Gallery must move back and forth without duplicated slides: ' + carouselName);
+              }
+              if (width === 390) {
+                const galleryBox = await galleryTrack.boundingBox();
+                if (!galleryBox || galleryBox.x > 2 || galleryBox.x + galleryBox.width < width - 2) {
+                  throw new Error('Carousel must extend edge-to-edge on mobile: ' + carouselName);
+                }
+                const imgFit = await galleryTrack.locator('img').first().evaluate(node => getComputedStyle(node).objectFit);
+                if (imgFit !== 'cover') throw new Error('Carousel images must fill their frame: ' + carouselName);
+              }
               if (route.includes('stojan')) {
                 if (await productPage.locator('[data-stand-gallery="autoplay"]').count() !== 1) {
                   throw new Error('Stand realizations carousel missing');
@@ -176,6 +193,25 @@ const failures = [];
               await productPage.getByRole('button', { name: action }).first().click();
               await productPage.locator('input[name="customer_name"]:visible').waitFor();
               if (!await productPage.locator('input[name="email"]:visible').count()) throw new Error('Product inquiry contact missing');
+              if (route.includes('stojan')) {
+                const cards = productPage.locator('[data-stand-sizes="carousel"]');
+                if (await cards.locator('article').count() !== 2) throw new Error('Stand size carousel must show two sizes');
+                if (width === 390) {
+                  const swipeable = await cards.evaluate(el => el.scrollWidth > el.clientWidth + 30);
+                  if (!swipeable) throw new Error('Stand sizes must swipe horizontally on mobile');
+                }
+                for (const [type, name] of [['large', 'väčší'], ['small', 'menší']]) {
+                  await cards.getByRole('button', { name: 'Mám záujem o ' + name + ' stojan' }).click();
+                  const chosen = productPage.locator('#moznosti-objednavky-stojana button').filter({ hasText: type === 'large' ? 'Väčší' : 'Menší' }).first();
+                  const classes = await chosen.getAttribute('class');
+                  if (!classes?.includes('border-coral')) {
+                    throw new Error('Stand size CTA did not preselect ' + type + ' in inquiry');
+                  }
+                  if (!await productPage.locator('input[name="customer_name"]:visible').count()) {
+                    throw new Error('Stand size CTA did not open existing inquiry form');
+                  }
+                }
+              }
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product inquiry points to retired checkout');
             }
             await productPage.goto(new URL('/blog/stojan-na-misky-pre-psa-vyhody-a-vyber/', base).href);
@@ -184,8 +220,14 @@ const failures = [];
             if (!(await standImage.getAttribute('src'))?.includes('stand-mia-')) {
               throw new Error('Stand guide is not using restored MIA AVIF source');
             }
-            if (await productPage.locator('[data-stand-gallery="autoplay"]').count() !== 1) {
-              throw new Error('Stand guide carousel missing above product CTA');
+            const guideCarousel = productPage.locator('[data-stand-gallery="autoplay"]');
+            if (await guideCarousel.count() !== 1) throw new Error('Stand guide carousel missing above product CTA');
+            if (await guideCarousel.locator('figure').count() !== 3) throw new Error('Stand guide must show three unique product photos');
+            if (width === 390) {
+              const guideGalleryBox = await guideCarousel.boundingBox();
+              if (!guideGalleryBox || guideGalleryBox.x > 2 || guideGalleryBox.x + guideGalleryBox.width < width - 2) {
+                throw new Error('Stand guide gallery must use full mobile viewport');
+              }
             }
             if (!(await productPage.getByRole('heading', { name: 'Pozrite si naše vyhotovenia', exact: true }).count())) {
               throw new Error('Simplified stand article CTA title missing');
