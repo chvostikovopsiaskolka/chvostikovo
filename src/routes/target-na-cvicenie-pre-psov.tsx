@@ -5,7 +5,6 @@ import {
   Check,
   ChevronRight,
   LoaderCircle,
-  Ruler,
   Send,
   ShieldCheck,
   Sparkles,
@@ -365,20 +364,40 @@ function TargetPage() {
           </div>
         </section>
 
-        <section className="bg-secondary/45 py-12 sm:py-16">
+        <section className="bg-secondary/45 py-12 sm:py-16" aria-labelledby="target-value-heading">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
+                Cvičenie v praxi
+              </p>
+              <h2 id="target-value-heading" className="section-title mt-2 text-3xl sm:text-4xl">
+                Čo môžete s targetom trénovať?
+              </h2>
+            </div>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
               {[
-                [ShieldCheck, "Protišmykový povrch", "Pevný povrch pomáha psíkovi udržať labky na mieste."],
-                [Check, "Pevná konštrukcia", "Drevená základňa je stabilná pri bežnom tréningu."],
-                [Ruler, "Dve veľkosti", "Veľký 40 × 20 cm alebo malý 25 × 25 cm."],
-                [Sparkles, "Výška podľa dohody", "Štandardne približne 5 cm, vyrobiť vieme aj inú výšku."],
+                [
+                  ShieldCheck,
+                  "Presný dotyk labkou",
+                  "Psík má jasne určené miesto, kam položiť labku. Môžete tak trénovať cielený dotyk namiesto náhodného kroku.",
+                ],
+                [
+                  Check,
+                  "Pokojná výdrž v pozícii",
+                  "Keď psík zvládne dotyk, môžete postupne predlžovať čas, počas ktorého nechá labky na targete.",
+                ],
+                [
+                  Sparkles,
+                  "Nové cviky krok za krokom",
+                  "Target zapojíte do zmien polohy či práce s jednotlivými labkami podľa skúseností a možností psíka.",
+                ],
               ].map(([Icon, heading, text]) => {
                 const CardIcon = Icon as typeof Check;
                 return (
-                  <article key={String(heading)} className="rounded-3xl bg-card p-5 shadow-card">
-                    <CardIcon className="size-5 text-coral" />
-                    <h2 className="mt-3 text-lg text-forest">{String(heading)}</h2>
+                  <article key={String(heading)} className="rounded-3xl bg-card p-6 shadow-card">
+                    <CardIcon aria-hidden="true" className="size-5 text-coral" />
+                    <h3 className="mt-3 text-lg text-forest">{String(heading)}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-forest/70">{String(text)}</p>
                   </article>
                 );
