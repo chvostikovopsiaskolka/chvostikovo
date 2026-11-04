@@ -9,7 +9,6 @@ import {
   Ruler,
   LoaderCircle,
   Send,
-  Sparkles,
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
@@ -624,54 +623,44 @@ function BowlStandPage() {
           </div>
         </section>
 
-        <section className="py-14 sm:py-20">
+        <section className="py-14 sm:py-20" aria-labelledby="stand-value-heading">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-12">
-              <div>
-                <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
-                  Praktický každý deň
-                </p>
-                <h2 className="section-title mt-2 text-3xl sm:text-4xl">Prečo stojan na misky?</h2>
-                <p className="mt-4 leading-relaxed text-forest/80">
-                  Stojan drží misky stabilne na jednom mieste a pomáha udržať kŕmny kút
-                  prehľadnejší. Výška sa dá prispôsobiť konkrétnemu psíkovi a vyberateľné nerezové
-                  misky sa jednoducho čistia.
-                </p>
-              </div>
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
+                Pri každodennom používaní
+              </p>
+              <h2 id="stand-value-heading" className="section-title mt-2 text-3xl sm:text-4xl">
+                Tri praktické výhody stojana
+              </h2>
+            </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                {[
-                  [
-                    Check,
-                    "Stabilné misky",
-                    "Pevná drevená konštrukcia obmedzuje posúvanie misiek pri jedení a pití.",
-                  ],
-                  [
-                    Droplets,
-                    "Jednoduchšia údržba",
-                    "Povrch je ošetrený pre jednoduchšie utieranie bežnej vody a nečistôt okolo misiek.",
-                  ],
-                  [
-                    Ruler,
-                    "Výška podľa psa",
-                    "Pri výrobe vychádzame z výšky psíka v kohútiku, nie z jedného univerzálneho rozmeru.",
-                  ],
-                  [
-                    Sparkles,
-                    "Vlastný originál",
-                    "Farbu stojana, meno aj farbu písmen vieme zladiť podľa vášho želania.",
-                  ],
-                ].map(([Icon, heading, text]) => {
-                  const CardIcon = Icon as typeof Check;
-                  return (
-                    <article key={String(heading)} className="rounded-3xl bg-card p-6 shadow-card">
-                      <CardIcon className="size-5 text-coral" />
-                      <h3 className="mt-3 text-lg text-forest">{String(heading)}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-forest/75">{String(text)}</p>
-                    </article>
-                  );
-                })}
-              </div>
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              {[
+                [
+                  Check,
+                  "Misky majú svoje miesto",
+                  "Drevený podstavec drží obe misky pohromade, aby sa pri jedle neposúvali samostatne po podlahe.",
+                ],
+                [
+                  Droplets,
+                  "Po jedle rýchlo upratané",
+                  "Nerezové misky vyberiete a umyjete osobitne; ošetrený povrch stačí utrieť vlhkou handričkou.",
+                ],
+                [
+                  Ruler,
+                  "Výšku nemusíte odhadovať",
+                  "Stačí nám výška psíka v kohútiku. Vhodnú výšku stojana doladíme pri vybavovaní dopytu.",
+                ],
+              ].map(([Icon, heading, text]) => {
+                const CardIcon = Icon as typeof Check;
+                return (
+                  <article key={String(heading)} className="rounded-3xl bg-card p-6 shadow-card">
+                    <CardIcon aria-hidden="true" className="size-5 text-coral" />
+                    <h3 className="mt-3 text-lg text-forest">{String(heading)}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-forest/75">{String(text)}</p>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </section>
