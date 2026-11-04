@@ -151,7 +151,7 @@ for (const spec of [
     slug: "target-na-cvicenie-psov-prve-cviky",
     product: "target-na-cvicenie-pre-psov",
     imageParts: ["target-large-dog-", "target-large-detail-"],
-    expectedCopy: ["dotyk labkou", "výdrž", "veľkosť"],
+    expectedCopy: ["dotyk labkou", "rehabilitácia", "fyzioterapia", "zotrvanie na mieste"],
   },
 ]) {
   const page = "/blog/" + spec.slug;
@@ -188,6 +188,14 @@ for (const spec of [
     assert(productHtml.includes('data-stand-gallery="autoplay"'), "Stand photo gallery is not autoplay-enabled");
     assert(markup.includes('data-stand-gallery="autoplay"'), "Stand article gallery above CTA is missing");
     assert(markup.includes('stand-mia-'), "Stand article must use restored 711x900 MIA AVIF");
+    assert(productHtml.includes('data-stand-sizes="carousel"'), "Stand size carousel missing");
+    assert(productHtml.includes('Mám záujem o menší stojan'), "Small stand carousel CTA missing");
+    assert(productHtml.includes('Mám záujem o väčší stojan'), "Large stand carousel CTA missing");
+    assert(markup.includes('object-cover'), "Stand guide photo should fill its frame");
+  } else {
+    assert(productHtml.includes('data-photo-carousel="target"'), "Target photo gallery missing");
+    assert(productHtml.includes('Rehabilitácia a fyzioterapia'), "Target rehab use case missing");
+    assert(productHtml.includes('Poslušnosť a zotrvanie na mieste'), "Target stationing use case missing");
   }
   assert(sitemap.includes("<loc>" + productCanonical + "</loc>"), "Product sitemap canonical changed: " + productPath);
   assert(productHtml.includes("Product"), "Product structured data missing: " + productPath);
