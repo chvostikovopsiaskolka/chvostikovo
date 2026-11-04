@@ -127,7 +127,7 @@ export function EdgePhotoCarousel({
         {photos.map((photo) => (
           <figure
             key={photo.src}
-            className="h-[310px] w-[85vw] shrink-0 overflow-hidden rounded-3xl shadow-card sm:h-96 sm:w-[44vw] sm:max-w-[420px] lg:w-[31vw] lg:max-w-[360px]"
+            className="relative h-[310px] w-[85vw] shrink-0 overflow-hidden rounded-3xl shadow-card sm:h-96 sm:w-[44vw] sm:max-w-[420px] lg:w-[31vw] lg:max-w-[360px]"
           >
             <img
               src={photo.src}
@@ -138,6 +138,11 @@ export function EdgePhotoCarousel({
               className="h-full w-full select-none object-cover"
               style={{ objectPosition: photo.position ?? "50% 54%" } as CSSProperties}
             />
+            {dataName === "stand" && (
+              <figcaption className="pointer-events-none absolute left-3 top-3 rounded-full bg-card/95 px-3 py-1.5 text-xs font-semibold text-forest shadow-sm backdrop-blur-sm">
+                {photos.indexOf(photo) === 0 ? "MIA" : photos.indexOf(photo) === 1 ? "CORI" : "WOODY"} · Ručná výroba
+              </figcaption>
+            )}
           </figure>
         ))}
       </div>
