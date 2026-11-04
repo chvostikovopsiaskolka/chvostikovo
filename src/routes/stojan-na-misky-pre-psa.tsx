@@ -13,6 +13,7 @@ import {
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { ProductDeliveryDetails } from "@/components/site/ProductDeliveryDetails";
+import { ProductValueHighlights } from "@/components/site/ProductValueHighlights";
 import { Collapse } from "@/components/site/Collapse";
 import { PhoneField } from "@/components/site/PhoneField";
 import { phoneFromForm } from "@/lib/phone";
@@ -330,6 +331,10 @@ function BowlStandPage() {
               </div>
 
               <div className="mt-5 lg:col-start-2 lg:row-start-2 lg:mt-0">
+                <ProductValueHighlights
+                  label="Tri praktické výhody výrobku"
+                  headings={["Misky na mieste","Rýchla údržba","Výška podľa psa"]}
+                />
                 <div>
                   <p className="font-display text-sm font-bold text-forest">Vyberte veľkosť stojana</p>
                   <div className="mt-3 grid grid-cols-2 gap-2">
@@ -662,6 +667,12 @@ function BowlStandPage() {
                 );
               })}
             </div>
+            <p className="mt-7 text-center">
+              <a href="/blog/stojan-na-misky-pre-psa-vyhody-a-vyber/" className="inline-flex min-h-11 items-center gap-2 font-display text-sm font-semibold text-coral-dark underline underline-offset-4 hover:text-forest">
+                Ako vybrať stojan a na čo si dať pozor?
+                <ChevronRight aria-hidden="true" className="size-4" />
+              </a>
+            </p>
           </div>
         </section>
 
