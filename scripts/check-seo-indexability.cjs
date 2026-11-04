@@ -137,3 +137,52 @@ const puppyHtml = fs.readFileSync("dist/client/psia-skolka-pre-steniatka/index.h
 assert(puppyHtml.includes('id="puppy-benefits"'), "Target text section under puppy hero missing");
 console.log("[seo] PASS: single information carousel, puppy card anchored below hero; original LPs preserved");
 console.log("[seo] PASS: blog index and two articles prerendered, canonical, schema, CTAs, homepage links");
+
+// Product guides: unique product intent, canonical HTML, schema, current product
+// photography, clear product CTA and reciprocal links to commercial details.
+for (const spec of [
+  {
+    slug: "stojan-na-misky-pre-psa-vyhody-a-vyber",
+    product: "stojan-na-misky-pre-psa",
+    imageParts: ["stand-small-mia-", "stand-dark-"],
+    expectedCopy: ["Poctivá výroba", "vodeodolne ošetrený", "vlkodavom", "barzojom", "refluxom"],
+  },
+  {
+    slug: "target-na-cvicenie-psov-prve-cviky",
+    product: "target-na-cvicenie-pre-psov",
+    imageParts: ["target-large-dog-", "target-large-detail-"],
+    expectedCopy: ["dotyk labkou", "výdrž", "veľkosť"],
+  },
+]) {
+  const page = "/blog/" + spec.slug;
+  const canonical = "https://chvostikovo.sk" + page + "/";
+  const productPath = "/" + spec.product;
+  const productCanonical = "https://chvostikovo.sk" + productPath;
+
+  assert(sitemap.includes("<loc>" + canonical + "</loc>"), "Missing guide in sitemap: " + canonical);
+  assert(pagesConfig.includes('{ path: "' + page + '" }'), "Guide missing from prerender: " + page);
+  const htmlPath = "dist/client" + page + "/index.html";
+  assert(fs.existsSync(htmlPath), "Guide HTML not prerendered: " + htmlPath);
+  const markup = fs.readFileSync(htmlPath, "utf8");
+  assert(markup.includes(canonical) && markup.includes('rel="canonical"'), "Guide canonical missing: " + page);
+  assert(markup.includes("BlogPosting"), "Guide article structured data missing: " + page);
+  assert(markup.includes('href="' + productPath + '"'), "Guide must link to correct product: " + page);
+  assert(!markup.includes('href="#zaujem"'), "Product guide must not advertise daycare inquiry: " + page);
+  for (const imagePart of spec.imageParts) {
+    assert(markup.includes(imagePart), "Current real product photo missing: " + imagePart);
+  }
+  for (const copy of spec.expectedCopy) {
+    assert(markup.toLocaleLowerCase("sk").includes(copy.toLocaleLowerCase("sk")), "Guide factual section missing: " + copy);
+  }
+  const productHtmlPath = "dist/client" + productPath + "/index.html";
+  assert(fs.existsSync(productHtmlPath), "Product prerender missing: " + productHtmlPath);
+  const productHtml = fs.readFileSync(productHtmlPath, "utf8");
+  assert(sitemap.includes("<loc>" + productCanonical + "</loc>"), "Product sitemap canonical changed: " + productPath);
+  assert(productHtml.includes("Product"), "Product structured data missing: " + productPath);
+  assert(productHtml.includes('href="' + page + '/"'), "Product must link to guide: " + productPath);
+  assert(productHtml.includes("Tri praktické"), "Product value cards removed: " + productPath);
+}
+assert(blogIndex.includes("stojan-na-misky-pre-psa-vyhody-a-vyber/"), "Stand guide missing from blog index");
+assert(blogIndex.includes("target-na-cvicenie-psov-prve-cviky/"), "Target guide missing from blog index");
+console.log("[seo] PASS: product sitemap + canonical + original photos + reciprocal guides + prerendered blog articles");
+

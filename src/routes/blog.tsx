@@ -5,8 +5,8 @@ import { BlogCard } from "@/components/site/BlogCard";
 import { blogArticles, blogCards } from "@/content/blog";
 
 const PAGE_URL = "https://chvostikovo.sk/blog/";
-const title = "Užitočné informácie o psoch a psej škôlke | Chvostíkovo";
-const description = "Praktické rady od Chvostíkova: ako zabezpečiť starostlivosť o psa počas práce a ako zistiť, či mu bude vyhovovať psia škôlka v Košiciach.";
+const title = "Rady pre majiteľov psov: škôlka, stojany a tréning | Chvostíkovo";
+const description = "Praktické rady z Chvostíkova: psia škôlka v Košiciach, stojany na misky a prvé cviky s dreveným targetom pre psov.";
 
 export const Route = createFileRoute("/blog")({
   head: () => ({
@@ -34,7 +34,7 @@ function BlogIndex() {
             <nav className="text-sm text-forest/70"><a href="/" className="hover:underline">Domov</a> / Užitočné informácie</nav>
             <h1 className="mt-6 font-display text-4xl text-forest sm:text-5xl">Užitočné informácie</h1>
             <p className="mt-4 max-w-2xl text-lg leading-relaxed text-forest/80">
-              Skúsenosti, rady a odpovede na otázky, ktoré si majitelia kladú pred návštevou psej škôlky.
+              Praktické skúsenosti zo psej škôlky, výber pomôcok pre psíkov aj tipy na jednoduchý tréning. Bez zbytočných sľubov.
             </p>
           </div>
         </section>

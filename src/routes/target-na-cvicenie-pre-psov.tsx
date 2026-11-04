@@ -12,6 +12,7 @@ import {
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { ProductDeliveryDetails } from "@/components/site/ProductDeliveryDetails";
+import { ProductValueHighlights } from "@/components/site/ProductValueHighlights";
 import { FormDialog } from "@/components/site/FormDialog";
 import { PhoneField } from "@/components/site/PhoneField";
 import { phoneFromForm } from "@/lib/phone";
@@ -311,6 +312,10 @@ function TargetPage() {
               </div>
 
               <div className="mt-5 lg:col-start-2 lg:row-start-2 lg:mt-0">
+                <ProductValueHighlights
+                  label="Tri praktické výhody výrobku"
+                  headings={["Dotyk labkou","Pokojná výdrž","Nové cviky"]}
+                />
                 <div>
                   <p className="font-display text-sm font-bold text-forest">Vyberte veľkosť</p>
                   <div className="mt-3 grid grid-cols-2 gap-2">
@@ -403,6 +408,12 @@ function TargetPage() {
                 );
               })}
             </div>
+            <p className="mt-7 text-center">
+              <a href="/blog/target-na-cvicenie-psov-prve-cviky/" className="inline-flex min-h-11 items-center gap-2 font-display text-sm font-semibold text-coral-dark underline underline-offset-4 hover:text-forest">
+                Ako začať s targetom? Prvé cviky krok za krokom
+                <ChevronRight aria-hidden="true" className="size-4" />
+              </a>
+            </p>
           </div>
         </section>
 

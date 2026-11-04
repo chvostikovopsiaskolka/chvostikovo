@@ -51,11 +51,17 @@ export function blogArticleHead(article: BlogArticleData) {
 
 export function BlogArticle({ article }: { article: BlogArticleData }) {
   const trackingSource = "blog_" + article.slug.replaceAll("-", "_") + "_inquiry";
-  const related = blogCards.filter(card => card.id !== article.slug);
+  const related = blogCards.filter(card => card.id !== article.slug).slice(0, 3);
+  const productGuide = Boolean(article.productPage);
+  const publishedLabel = new Intl.DateTimeFormat("sk-SK", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(article.publishedAt + "T12:00:00Z"));
 
   function trackInquiryClick() {
     trackMarketingInteraction("inquiry_cta", trackingSource);
     void trackCookielessInteraction("inquiry_cta", trackingSource);
+  }
+
+  function trackProductClick() {
+    void trackCookielessInteraction("nav_click", "blog_" + article.slug.replaceAll("-", "_") + "_product", "sk");
   }
 
   function conditionsClick() {
@@ -82,15 +88,22 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
             <h1 className="mt-6 max-w-4xl font-display text-4xl leading-tight text-forest sm:text-5xl">{article.title}</h1>
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-forest/65">
               <span>Autor: {BRAND}</span><span aria-hidden="true">·</span>
-              <time dateTime={article.publishedAt}>3. novembra 2026</time><span aria-hidden="true">·</span>
+              <time dateTime={article.publishedAt}>{publishedLabel}</time><span aria-hidden="true">·</span>
               <span className="inline-flex items-center gap-1"><Clock3 className="size-4" aria-hidden="true" />{article.readingMinutes} min čítania</span>
             </div>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-forest/85">{article.intro}</p>
             <div className="mt-7">
-              <a href="#zaujem" onClick={trackInquiryClick}
-                className="btn-coral inline-flex min-h-11 items-center justify-center px-6 py-3 font-display font-semibold">
-                Chcem sa informovať o škôlke
-              </a>
+              {article.productPage ? (
+                <a href={article.productPage.href} onClick={trackProductClick}
+                  className="btn-coral inline-flex min-h-11 items-center justify-center px-6 py-3 font-display font-semibold">
+                  {article.productPage.label}
+                </a>
+              ) : (
+                <a href="#zaujem" onClick={trackInquiryClick}
+                  className="btn-coral inline-flex min-h-11 items-center justify-center px-6 py-3 font-display font-semibold">
+                  Chcem sa informovať o škôlke
+                </a>
+              )}
             </div>
           </div>
         </header>
@@ -99,7 +112,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
           <figure className="overflow-hidden rounded-3xl bg-secondary shadow-soft">
             <img src={article.image.src} alt={article.image.alt} className="mx-auto block max-h-[720px] h-auto max-w-full object-contain"
               decoding="async" width={article.image.width ?? 1000} height={article.image.height ?? 750} />
-            <figcaption className="px-4 py-2 text-sm text-forest/65">Zo života našej psej škôlky v Košiciach</figcaption>
+            <figcaption className="px-4 py-2 text-sm text-forest/65">{article.imageCaption ?? "Zo života našej psej škôlky v Košiciach"}</figcaption>
           </figure>
           <div className="mx-auto mt-10 max-w-3xl space-y-10 sm:mt-14">
             {article.sections.map((section, index) => (
@@ -121,27 +134,58 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                 )}
               </section>
             ))}
-            <section id="zaujem" aria-labelledby="blog-inquiry-heading"
-              className="scroll-mt-24 rounded-3xl bg-secondary p-6 shadow-soft sm:p-9">
-              <h2 id="blog-inquiry-heading" className="font-display text-2xl text-forest sm:text-3xl">Spoznáme sa aj s vaším psíkom?</h2>
-              <p className="mt-3 max-w-2xl leading-relaxed text-forest/80">
-                Úvodná návšteva je zadarmo. Vyplňte krátky nezáväzný formulár a radi s vami preberieme,
-                či bude skupinová starostlivosť vášmu psíkovi vyhovovať.
-              </p>
-              <div className="mt-6 rounded-2xl bg-card p-4 ring-1 ring-forest/10 sm:p-6">
-                <ShortForm trackingSource={trackingSource} />
-              </div>
-              <nav aria-label="Ďalšie informácie o škôlke" className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <a href="/#cennik" onClick={pricingClick}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral">
-                  Cenník <ArrowRight aria-hidden="true" className="size-4" />
-                </a>
-                <a href="/#podmienky" onClick={conditionsClick}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral">
-                  Podmienky škôlky <ArrowRight aria-hidden="true" className="size-4" />
-                </a>
-              </nav>
-            </section>
+            {productGuide && article.productPage ? (
+              <>
+                {article.sources && article.sources.length > 0 && (
+                  <aside aria-label="Odborné zdroje" className="rounded-2xl border border-forest/10 bg-card p-5">
+                    <h2 className="font-display text-lg text-forest">Odborné zdroje k zdravotným tvrdeniam</h2>
+                    <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-forest/75">
+                      {article.sources.map(source => (
+                        <li key={source.href}><a href={source.href} target="_blank" rel="noopener noreferrer"
+                          className="text-coral-dark underline underline-offset-2 hover:text-forest">{source.label}</a></li>
+                      ))}
+                    </ul>
+                  </aside>
+                )}
+                <section id="produkt" aria-labelledby="blog-product-heading"
+                  className="scroll-mt-24 rounded-3xl bg-secondary p-6 shadow-soft sm:p-9">
+                  <h2 id="blog-product-heading" className="font-display text-2xl text-forest sm:text-3xl">Pozrite si naše vyhotovenie</h2>
+                  <p className="mt-3 max-w-2xl leading-relaxed text-forest/80">{article.productPage.description}</p>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <a href={article.productPage.href} onClick={trackProductClick}
+                      className="btn-coral inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 font-display font-semibold">
+                      {article.productPage.label} <ArrowRight aria-hidden="true" className="size-4" />
+                    </a>
+                    <a href="/produkty" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral">
+                      Všetky produkty <ArrowRight aria-hidden="true" className="size-4" />
+                    </a>
+                  </div>
+                  <p className="mt-4 text-sm text-forest/65">Ide o nezáväzný dopyt priamo na produktovej stránke, nie o platbu cez košík.</p>
+                </section>
+              </>
+            ) : (
+              <section id="zaujem" aria-labelledby="blog-inquiry-heading"
+                className="scroll-mt-24 rounded-3xl bg-secondary p-6 shadow-soft sm:p-9">
+                <h2 id="blog-inquiry-heading" className="font-display text-2xl text-forest sm:text-3xl">Spoznáme sa aj s vaším psíkom?</h2>
+                <p className="mt-3 max-w-2xl leading-relaxed text-forest/80">
+                  Úvodná návšteva je zadarmo. Vyplňte krátky nezáväzný formulár a radi s vami preberieme,
+                  či bude skupinová starostlivosť vášmu psíkovi vyhovovať.
+                </p>
+                <div className="mt-6 rounded-2xl bg-card p-4 ring-1 ring-forest/10 sm:p-6">
+                  <ShortForm trackingSource={trackingSource} />
+                </div>
+                <nav aria-label="Ďalšie informácie o škôlke" className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <a href="/#cennik" onClick={pricingClick}
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral">
+                    Cenník <ArrowRight aria-hidden="true" className="size-4" />
+                  </a>
+                  <a href="/#podmienky" onClick={conditionsClick}
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-card px-5 py-3 font-display font-semibold text-forest shadow-sm transition hover:border-coral focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral">
+                    Podmienky škôlky <ArrowRight aria-hidden="true" className="size-4" />
+                  </a>
+                </nav>
+              </section>
+            )}
           </div>
         </article>
         <section className="border-t border-forest/10 bg-secondary/40 px-4 py-12">
