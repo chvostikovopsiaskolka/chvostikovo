@@ -33,7 +33,7 @@ async function assertPawsTransmit(page,selector,background){
    await page.evaluate(sex=>{state.data.dogs[0].sex=sex;renderDog();},sex);await page.waitForTimeout(60);
    const style=await page.locator('#bookingDogProfile').evaluate(el=>({frame:getComputedStyle(el).borderColor,width:getComputedStyle(el).borderWidth,bg:getComputedStyle(el).backgroundColor}));
    assert.equal(style.width,'0px');
-   if(dogs===1)assert.equal(style.bg,sex==='male'?'rgba(135, 190, 240, 0.62)':'rgba(245, 154, 201, 0.62)');
+   if(dogs===1)assert.equal(style.bg,sex==='male'?'rgba(135, 190, 240, 0.39)':'rgba(245, 154, 201, 0.39)');
    const name=await page.locator(dogs===1?'#bookingDogName':'.dual-dog-name-v241').first().evaluate(el=>({stroke:getComputedStyle(el).webkitTextStrokeWidth,color:getComputedStyle(el).color,size:getComputedStyle(el).fontSize}));assert.equal(name.stroke,'0px');assert(name.color!=='rgb(255, 255, 255)');
   }
   if(dogs===1){
