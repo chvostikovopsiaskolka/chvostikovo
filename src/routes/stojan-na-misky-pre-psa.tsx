@@ -583,47 +583,48 @@ function BowlStandPage() {
               </p>
             </div>
 
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              <article className="overflow-hidden rounded-4xl bg-card shadow-card">
-                <img
-                  src={standMia}
-                  alt="Menšia verzia dreveného stojana na misky"
-                  loading="lazy"
-                  className="h-72 w-full object-cover"
-                  style={{ objectPosition: "50% 58%" }}
-                />
-                <div className="p-7">
-                  <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">
-                    Menšia verzia
-                  </p>
-                  <h3 className="mt-2 text-2xl text-forest">cca 40 × 20 cm</h3>
-                  <p className="mt-3 leading-relaxed text-forest/75">
-                    Menší stojan s menšími nerezovými miskami. Výšku nôh prispôsobujeme konkrétnemu
-                    psíkovi.
-                  </p>
-                </div>
-              </article>
-
-              <article className="overflow-hidden rounded-4xl bg-card shadow-card">
-                <img
-                  src={standDark}
-                  alt="Väčšia verzia dreveného stojana na misky"
-                  loading="lazy"
-                  className="h-72 w-full object-cover"
-                  style={{ objectPosition: "50% 63%" }}
-                />
-                <div className="p-7">
-                  <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">
-                    Väčšia verzia
-                  </p>
-                  <h3 className="mt-2 text-2xl text-forest">cca 60 × 30 cm</h3>
-                  <p className="mt-3 leading-relaxed text-forest/75">
-                    Väčší pôdorys a väčšie nerezové misky pre stredné a veľké plemená. Aj tu je
-                    výška individuálna.
-                  </p>
-                </div>
-              </article>
+            <div role="region" aria-label="Veľkosti stojanov – na mobile posúvajte do strany" tabIndex={0}
+              data-stand-sizes="carousel"
+              className="-mx-4 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-4 touch-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+              {SIZE_OPTIONS.map((option) => {
+                const small = option.value === "small";
+                return (
+                  <article key={option.value} data-stand-size={option.value}
+                    className="flex w-[85vw] shrink-0 snap-start flex-col overflow-hidden rounded-4xl bg-card shadow-card sm:w-[60vw] md:w-auto md:shrink">
+                    <img
+                      src={small ? standMia : standDark}
+                      alt={small ? "Menšia verzia dreveného stojana na misky MIA" : "Väčšia verzia dreveného stojana na misky CORI"}
+                      loading="lazy" decoding="async"
+                      className="h-72 w-full object-cover"
+                      style={{ objectPosition: small ? "50% 58%" : "50% 63%" }}
+                    />
+                    <div className="flex flex-1 flex-col p-6 sm:p-7">
+                      <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">
+                        {small ? "Menšia verzia" : "Väčšia verzia"}
+                      </p>
+                      <h3 className="mt-2 text-2xl text-forest">{small ? "cca 40 × 20 cm" : "cca 60 × 30 cm"}</h3>
+                      <p className="mt-3 flex-1 leading-relaxed text-forest/75">
+                        {small
+                          ? "Menší stojan s menšími nerezovými miskami. Výšku nôh prispôsobujeme konkrétnemu psíkovi."
+                          : "Väčší pôdorys a väčšie nerezové misky pre stredné a veľké plemená. Aj tu je výška individuálna."}
+                      </p>
+                      <button type="button"
+                        onClick={() => {
+                          setSize(option.value);
+                          openOrderOptions();
+                        }}
+                        aria-label={`Mám záujem o ${small ? "menší" : "väčší"} stojan`}
+                        className="btn-coral mt-6 inline-flex min-h-12 items-center justify-center gap-2 self-start px-5 py-3 font-display font-semibold">
+                        Mám záujem <ChevronRight aria-hidden="true" className="size-4" />
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
+            <p className="mt-3 text-center text-sm text-forest/65 md:hidden">
+              Potiahnite do strany a porovnajte obe veľkosti.
+            </p>
           </div>
         </section>
 
