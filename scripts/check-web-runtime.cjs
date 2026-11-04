@@ -225,11 +225,20 @@ const failures = [];
               }
             }
             for (const legacy of ['/kosik/', '/objednavka/']) {
-              // Meta refresh and hydrated location.replace can interrupt DOMContentLoaded on the retired alias.
-              // Wait only for the navigation commit, then require the actual products heading.
-              await productPage.goto(new URL(legacy, base).href, { waitUntil: 'commit' });
-              // The legacy meta refresh can race with waitForURL's navigation-commit
-              // waiter in WebKit. Assert the actual loaded destination instead.
+              // Meta refresh / location.replace can race with Playwright's navigation
+              // promise in WebKit, even while correctly moving to /produkty/.
+              const aliasUrl = new URL(legacy, base).href;
+              try {
+                await productPage.goto(aliasUrl, { waitUntil: 'commit' });
+              } catch (error) {
+                // Tolerate only the specific verified redirect race, not a failed navigation.
+                const expectedRedirect = new URL('/produkty/', base).href;
+                const message = String(error);
+                if (!message.includes(`Navigation to "${aliasUrl}" is interrupted by another navigation to "${expectedRedirect}"`)) {
+                  throw error;
+                }
+              }
+              // The real destination heading and path must still be present.
               await productPage.getByRole('heading', { name: 'Naše produkty pre psov', exact: true }).waitFor({ state: 'visible' });
               if (!['/produkty', '/produkty/'].includes(new URL(productPage.url()).pathname)) {
                 throw new Error('Retired product alias did not redirect to /produkty: ' + legacy);
