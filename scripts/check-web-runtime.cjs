@@ -201,7 +201,13 @@ const failures = [];
                   if (!swipeable) throw new Error('Stand sizes must swipe horizontally on mobile');
                 }
                 for (const [type, name] of [['large', 'väčší'], ['small', 'menší']]) {
-                  await cards.getByRole('button', { name: 'Mám záujem o ' + name + ' stojan' }).click();
+                  const sizeCta = cards.locator('article[data-stand-size="' + type + '"] button[type="button"]');
+                  if (await sizeCta.count() !== 1) throw new Error('Missing unique size CTA: ' + type);
+                  const label = await sizeCta.getAttribute('aria-label');
+                  if (label !== 'Mám záujem o ' + name + ' stojan') {
+                    throw new Error('Accessible size CTA label missing: ' + type + ', got ' + label);
+                  }
+                  await sizeCta.click();
                   const chosen = productPage.locator('#moznosti-objednavky-stojana button').filter({ hasText: type === 'large' ? 'Väčší' : 'Menší' }).first();
                   const classes = await chosen.getAttribute('class');
                   if (!classes?.includes('border-coral')) {
