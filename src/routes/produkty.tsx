@@ -6,7 +6,7 @@ import standMia from "@/assets/products/stand-small-mia.webp";
 import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
 
 const BASE_URL = "https://chvostikovo.sk";
-const PAGE_URL = `${BASE_URL}/produkty`;
+const PAGE_URL = `${BASE_URL}/produkty/`;
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Produkty pre psov | Ručná výroba | Chvostíkovo";
 const description =

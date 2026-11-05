@@ -27,7 +27,7 @@ import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 const BASE_URL = "https://chvostikovo.sk";
-const PAGE_URL = BASE_URL + "/psia-skolka-pre-steniatka";
+const PAGE_URL = BASE_URL + "/psia-skolka-pre-steniatka/";
 const OG_IMAGE = BASE_URL + "/og-image.png";
 const title = "Psia škôlka pre šteniatka v Košiciach | Chvostíkovo";
 const description =
