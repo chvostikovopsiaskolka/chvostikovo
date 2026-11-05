@@ -149,6 +149,16 @@ assert(blogIndex.includes("/psia-skolka-pre-steniatka/#puppy-benefits"), "Puppy 
 assert(!sitemap.includes("/blog/psia-skolka-pre-steniatka/"), "Do not invent a duplicate puppy blog URL");
 assert(sitemap.includes("<loc>https://chvostikovo.sk/psia-skolka-pre-steniatka</loc>") ||
        sitemap.includes("<loc>https://chvostikovo.sk/psia-skolka-pre-steniatka/</loc>"), "Existing puppy SEO landing removed");
+// Assert that Pages' final directory URL, sitemap and visible HTML canonical agree.
+for (const route of ["psia-skolka-pre-steniatka", "produkty"]) {
+  const preferred = "https://chvostikovo.sk/" + route + "/";
+  assert(sitemap.includes("<loc>" + preferred + "</loc>"), "Noncanonical sitemap URL: " + route);
+  assert(pagesConfig.includes('{ path: "/' + route + '" }'), "Missing static route: " + route);
+  const prerendered = fs.readFileSync("dist/client/" + route + "/index.html", "utf8");
+  assert(prerendered.includes('rel="canonical"') && prerendered.includes('href="' + preferred + '"'),
+    "Static HTML must expose the final canonical URL: " + route);
+}
+console.log("[seo] PASS: puppy and product index sitemap + prerender + trailing-slash canonical");
 const puppyHtml = fs.readFileSync("dist/client/psia-skolka-pre-steniatka/index.html", "utf8");
 assert(puppyHtml.includes('id="puppy-benefits"'), "Target text section under puppy hero missing");
 console.log("[seo] PASS: single information carousel, puppy card anchored below hero; original LPs preserved");
