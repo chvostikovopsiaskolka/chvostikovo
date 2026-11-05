@@ -10,6 +10,9 @@ const seoUrls = [
   "https://chvostikovo.sk/psia-skolka-kosice",
   "https://chvostikovo.sk/strazenie-psov-kosice",
   "https://chvostikovo.sk/en/dog-daycare-kosice",
+  // GitHub Pages serves prerendered directory routes with a trailing slash.
+  "https://chvostikovo.sk/psia-skolka-pre-steniatka",
+  "https://chvostikovo.sk/produkty",
 ];
 
 const textExtensions = new Set([".html", ".js", ".xml"]);
