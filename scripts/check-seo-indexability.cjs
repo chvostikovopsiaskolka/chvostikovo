@@ -20,6 +20,8 @@ console.log("[seo] PASS: paid lead prerender + noindex + self-canonical for " + 
 
 // Credit is a genuine outbound reference and should not alter existing SEO routes.
 const homeHtml = fs.readFileSync("dist/client/index.html", "utf8");
+assert(homeHtml.includes("Psia škôlka Košice | Denná starostlivosť pre psov – Chvostíkovo"), "Home SEO title mismatch");
+assert(homeHtml.includes("možnosť vyzdvihnutia a úvodná návšteva zadarmo"), "Home SEO description mismatch");
 // Keep the public products visible in initial HTML, directly after homepage FAQ.
 // This is one section on the homepage, not an invented second product landing URL.
 const faqAnchorIndex = homeHtml.indexOf('id="faq"');
