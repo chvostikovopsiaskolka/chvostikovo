@@ -1,0 +1,13 @@
+const fs=require('node:fs');const assert=require('node:assert/strict');const vm=require('node:vm');
+const html=fs.readFileSync('index.html','utf8'),script=fs.readFileSync('customer-locale-v408.js','utf8');
+assert.equal((html.match(/id="customerLocaleSwitchV408"/g)||[]).length,1);
+assert(html.includes('data-customer-locale="sk"')&&html.includes('data-customer-locale="en"'));
+assert(html.indexOf('customer-locale-v408.js')<html.indexOf('/app.js?v=v408'),'Locale bootstrap must load before app runtime');
+assert(html.includes('customerLocaleNoteV408'),'Incomplete legal translation must be disclosed');
+assert(script.includes('new MutationObserver(requestApply)'),'Auth title changes must be relocalized');
+assert(script.includes("getLanguage: () => lang"),'Saved locale query');
+assert(script.includes("setLanguage: value =>"),'Allow later authenticated selector integration');
+assert(!/fetch\(|supabase|\.innerHTML\s*=/.test(script.replace(/\/\*[\s\S]*?\*\//g,'')),'Language module must not change backend/auth or inject HTML');
+new vm.Script(script);
+const app=fs.readFileSync('app.js','utf8');assert(app.includes("const APP_BUILD='v408';"));assert(app.includes("const APP_VERSION='2.0.81';"));
+console.log('PASS: SK/EN login switch static structure, safe translation and release identifiers');

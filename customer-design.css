@@ -919,3 +919,72 @@ html,body{overscroll-behavior:none}
 @media(max-width:350px){#authView[data-auth-mode=welcome]>.auth-card{padding:24px 19px}#authView .auth-welcome-v403 h1{font-size:27px}#authView .auth-welcome-features-v403{font-size:11px}}
 @media(max-height:600px){#authView.auth-shell:not(.hidden){justify-content:flex-start}#authView .auth-welcome-brand-v403{width:min(210px,70%);margin:8px auto 22px}}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){#authView[data-auth-mode=welcome]>.auth-card{background:#fff9f3!important}#authView #authHaveAccountV403{background:#fff}}
+
+/* Photo preview is a reserved tile, not a fake paw/photo until decoded. */
+.design-friend-photo:has(img){position:relative}
+.design-friend-photo:has(img) img{opacity:0;transition:opacity .14s ease}
+.design-friend-photo.design-photo-ready-v404 img{opacity:1}
+@media(prefers-reduced-motion:reduce){.design-friend-photo:has(img) img{transition:none}}
+
+/* v404: keep announcement cards stable without exposing a half-loaded bitmap. */
+.customer-notice-thumb-v363{position:relative;flex-shrink:0}
+ /* v406: do not suppress the native image render on iOS. Safari may delay or
+    reject a second decode() promise after the image itself has loaded. */
+.customer-notice-thumb-v363 img{display:block;opacity:1}
+.customer-bulletin-photo-slot-v404{min-height:52px}
+
+/* v410: pin iOS wallpaper only; preserve original Android refraction. */
+html.customer-auth-glass-v386.customer-ios-auth-v410 body{background-color:#fff!important;background-image:none!important}
+html.customer-auth-glass-v386.customer-ios-auth-v410 body::before{
+ content:"";position:fixed;inset:0;display:block;pointer-events:none;z-index:0;
+ background-image:url("/vendor/liquidlens/chvostikovo-paws-soft-v383.png");
+ background-repeat:repeat;background-size:300px 430px;background-position:0 0;
+}
+html.customer-auth-glass-v386.customer-ios-auth-v410 #authView{position:relative;z-index:1}
+html.customer-auth-glass-v386.customer-ios-auth-v410 #authView>.auth-card>.lg-v3-material[data-renderer=fallback]{
+ background:rgba(255,255,255,.35)!important;
+ -webkit-backdrop-filter:blur(4px) saturate(120%)!important;
+ backdrop-filter:blur(4px) saturate(120%)!important;
+}
+#customerLocaleInMenuV409{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:8px 12px;color:#6b4057;font-size:13px;font-weight:700}
+#customerLocaleInMenuV409 .customer-menu-locale-buttons{display:flex;gap:4px;flex:none;border:1px solid #e5d3df;border-radius:999px;padding:3px;background:#fff9fd}
+#customerLocaleInMenuV409 [data-customer-locale]{min-width:52px;min-height:44px;border:0;border-radius:999px;cursor:pointer;background:transparent;color:#8f5877;font:750 13px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#customerLocaleInMenuV409 [data-customer-locale].active{background:#fff;box-shadow:0 1px 5px #00000019;color:#ad427d}
+#customerLocaleInMenuV409 [data-customer-locale]:focus-visible{outline:2px solid #a63c84;outline-offset:2px}
+
+/* Respect reduced-transparency/high-contrast settings even with pinned paws. */
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+ html.customer-auth-glass-v386.customer-ios-auth-v410 #authView>.auth-card>.lg-v3-material[data-renderer=fallback]{
+  background:#fff9f3!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+ }
+}
+
+/* v411: SK/EN is selected before signup; keep the long registration form uncluttered. */
+#authView[data-auth-mode="signup"] #customerLocaleSwitchV408{display:none!important}
+/* The portal welcome description must not leave an orphaned 'one place' line. */
+#authView .auth-welcome-copy-v403{max-width:38ch}
+/* Translation is a reading aid; it cannot change the immutable signed Slovak source. */
+#schoolTermsModal .terms-translation-note-v411,
+#schoolRulesModalV55 .terms-translation-note-v411{
+ margin:0 0 14px;padding:10px 12px;border-radius:10px;
+ background:#fff5ed;border:1px solid #f0d7c4;color:#72513b;
+ font-size:12px;line-height:1.45;
+}
+
+/* v412: gently desaturate the dog card; keep sex tint and liquid texture. */
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241){background:rgba(245,154,201,.39)!important}
+.customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241){background:rgba(135,190,240,.39)!important}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content,
+.customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254{--lg-v3-milk:.56!important}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before{background:rgba(255,255,255,.68)!important}
+/* A photo is per account; absent or failed photos get a centered placeholder. */
+.customer-design #bookingTab #bookingDogAvatar.dog-photo-missing-v412{display:grid!important;place-items:center!important;text-align:center!important;font-size:38px!important;line-height:1!important}
+/* Keep the badge number centered without changing the dock geometry. */
+.customer-design .bottom-nav #customerAnnouncementsV363 .customer-inbox-count-v363:not(.hidden){display:grid!important;place-items:center!important;position:absolute;width:17px!important;min-width:17px!important;height:17px!important;top:1px;right:1px;padding:0!important;line-height:1!important;text-align:center!important;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+ .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241){background:#f9dce9!important}
+ .customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241){background:#daeafb!important}
+ .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before{background:#fff!important}
+}
