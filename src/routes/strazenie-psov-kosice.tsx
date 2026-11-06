@@ -20,9 +20,9 @@ import { ShortForm } from "@/components/site/Forms";
 const BASE_URL = "https://chvostikovo.sk";
 const PAGE_URL = `${BASE_URL}/strazenie-psov-kosice`;
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
-const title = "Stráženie psov Košice | Denná psia škôlka Chvostíkovo";
+const title = "Stráženie psov Košice | Denná psia škôlka – Chvostíkovo";
 const description =
-  "Denné stráženie psov v Košiciach. V Chvostíkove si psík počas vašej práce užije pohyb, hry, kamarátov aj oddych pod celodenným dohľadom.";
+  "Hľadáte stráženie psa počas práce? V Košiciach ponúkame dennú psiu škôlku Po–Pi, 7:00–17:00, pre stredné a veľké plemená. Hry, výbeh a celodenný dohľad.";
 
 export const Route = createFileRoute("/strazenie-psov-kosice")({
   head: () => ({
