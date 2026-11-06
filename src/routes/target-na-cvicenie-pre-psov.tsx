@@ -30,7 +30,7 @@ import targetSmallProduct from "@/assets/products/target-small-product.jpeg";
 import targetSizes from "@/assets/products/target-sizes.jpeg";
 
 const BASE_URL = "https://chvostikovo.sk";
-const PAGE_URL = `${BASE_URL}/target-na-cvicenie-pre-psov`;
+const PAGE_URL = `${BASE_URL}/target-na-cvicenie-pre-psov/`;
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Target na cvičenie pre psov | Ručná výroba | Chvostíkovo";
 const description =
