@@ -13,6 +13,8 @@ const seoUrls = [
   // GitHub Pages serves prerendered directory routes with a trailing slash.
   "https://chvostikovo.sk/psia-skolka-pre-steniatka",
   "https://chvostikovo.sk/produkty",
+  "https://chvostikovo.sk/stojan-na-misky-pre-psa",
+  "https://chvostikovo.sk/target-na-cvicenie-pre-psov",
 ];
 
 const textExtensions = new Set([".html", ".js", ".xml"]);

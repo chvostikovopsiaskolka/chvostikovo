@@ -26,7 +26,7 @@ import standWhite from "@/assets/products/stand-white.webp";
 import standMia from "@/assets/products/stand-small-mia.webp";
 
 const BASE_URL = "https://chvostikovo.sk";
-const PAGE_URL = `${BASE_URL}/stojan-na-misky-pre-psa`;
+const PAGE_URL = `${BASE_URL}/stojan-na-misky-pre-psa/`;
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Stojan na misky pre psa | Drevený stojan na mieru | Chvostíkovo";
 const description =

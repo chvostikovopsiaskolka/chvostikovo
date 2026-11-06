@@ -1,4 +1,4 @@
-// Regression guard for the public lead landing: discovery + prerender + canonical.
+// Regression guard for the paid lead landing: prerender and noindex without losing campaigns.
 // Run after "bun run build:pages". No network or customer data required.
 const fs = require("node:fs");
 const assert = require("node:assert/strict");
@@ -7,7 +7,7 @@ const route = "/psia-skolka-kosice";
 const sitemap = fs.readFileSync("public/sitemap.xml", "utf8");
 const pagesConfig = fs.readFileSync("vite.config.pages.ts", "utf8");
 const normalizer = fs.readFileSync("scripts/finalize-pages.mjs", "utf8");
-assert(sitemap.includes("<loc>" + url + "</loc>"), "Lead page missing from sitemap");
+assert(!sitemap.includes("<loc>" + url + "</loc>"), "Paid lead page must stay out of organic sitemap");
 assert(pagesConfig.includes('{ path: "' + route + '" }'), "Lead page missing from prerender routes");
 assert(normalizer.includes('"https://chvostikovo.sk' + route + '"'), "Missing GitHub Pages canonical normalization");
 const output = "dist/client/psia-skolka-kosice/index.html";
@@ -15,7 +15,8 @@ assert(fs.existsSync(output), "Pre-rendered lead HTML missing: " + output);
 const html = fs.readFileSync(output, "utf8");
 assert(html.includes("Psia škôlka Košice"), "Pre-rendered HTML missing landing title/content");
 assert(html.includes(url), "Pre-rendered HTML missing normalized canonical URL");
-console.log("[seo] PASS: sitemap + prerender + canonical for " + route);
+assert(html.includes('content="noindex, follow"'), "Paid lead page must be noindex but follow");
+console.log("[seo] PASS: paid lead prerender + noindex + self-canonical for " + route);
 
 // Credit is a genuine outbound reference and should not alter existing SEO routes.
 const homeHtml = fs.readFileSync("dist/client/index.html", "utf8");
@@ -150,7 +151,7 @@ assert(!sitemap.includes("/blog/psia-skolka-pre-steniatka/"), "Do not invent a d
 assert(sitemap.includes("<loc>https://chvostikovo.sk/psia-skolka-pre-steniatka</loc>") ||
        sitemap.includes("<loc>https://chvostikovo.sk/psia-skolka-pre-steniatka/</loc>"), "Existing puppy SEO landing removed");
 // Assert that Pages' final directory URL, sitemap and visible HTML canonical agree.
-for (const route of ["psia-skolka-pre-steniatka", "produkty"]) {
+for (const route of ["psia-skolka-pre-steniatka", "produkty", "stojan-na-misky-pre-psa", "target-na-cvicenie-pre-psov"]) {
   const preferred = "https://chvostikovo.sk/" + route + "/";
   assert(sitemap.includes("<loc>" + preferred + "</loc>"), "Noncanonical sitemap URL: " + route);
   assert(pagesConfig.includes('{ path: "/' + route + '" }'), "Missing static route: " + route);
@@ -183,7 +184,7 @@ for (const spec of [
   const page = "/blog/" + spec.slug;
   const canonical = "https://chvostikovo.sk" + page + "/";
   const productPath = "/" + spec.product;
-  const productCanonical = "https://chvostikovo.sk" + productPath;
+  const productCanonical = "https://chvostikovo.sk" + productPath + "/";
 
   assert(sitemap.includes("<loc>" + canonical + "</loc>"), "Missing guide in sitemap: " + canonical);
   assert(pagesConfig.includes('{ path: "' + page + '" }'), "Guide missing from prerender: " + page);
@@ -224,6 +225,7 @@ for (const spec of [
     assert(productHtml.includes('Poslušnosť a zotrvanie na mieste'), "Target stationing use case missing");
   }
   assert(sitemap.includes("<loc>" + productCanonical + "</loc>"), "Product sitemap canonical changed: " + productPath);
+  assert(productHtml.includes('rel="canonical"') && productHtml.includes('href="' + productCanonical + '"'), "Product HTML canonical mismatch: " + productPath);
   assert(productHtml.includes("Product"), "Product structured data missing: " + productPath);
   assert(productHtml.includes('href="' + page + '/"'), "Product must link to guide: " + productPath);
   assert(productHtml.includes("Tri praktické"), "Product value cards removed: " + productPath);
