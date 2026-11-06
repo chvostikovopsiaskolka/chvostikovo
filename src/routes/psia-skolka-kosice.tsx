@@ -68,6 +68,7 @@ export const Route = createFileRoute("/psia-skolka-kosice")({
     meta: [
       { title },
       { name: "description", content: description },
+      { name: "robots", content: "noindex, follow" },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
