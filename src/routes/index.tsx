@@ -16,9 +16,9 @@ import { FAQ } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
-const title = "Psia škôlka Košice | Denná starostlivosť – Chvostíkovo";
+const title = "Psia škôlka Košice | Denná starostlivosť pre psov – Chvostíkovo";
 const description =
-  "Psia škôlka v Košiciach pre stredné a veľké plemená. Pondelok – piatok, 7:00–17:00. Celodenný dohľad, vlastný výbeh a úvodná návšteva zadarmo.";
+  "Psia škôlka v Košiciach pre stredné a veľké psy. Po–Pi 7:00–17:00. Celodenný dohľad, vlastný výbeh, možnosť vyzdvihnutia a úvodná návšteva zadarmo.";
 
 const HOME_FAQ_QUESTIONS = new Set([
   "Bude môj psík počas dňa niekedy sám bez dozoru?",
