@@ -961,3 +961,30 @@ html.customer-auth-glass-v386.customer-ios-auth-v410 #authView>.auth-card>.lg-v3
  }
 }
 
+/* v411: SK/EN is selected before signup; keep the long registration form uncluttered. */
+#authView[data-auth-mode="signup"] #customerLocaleSwitchV408{display:none!important}
+/* The portal welcome description must not leave an orphaned 'one place' line. */
+#authView .auth-welcome-copy-v403{max-width:38ch}
+/* Translation is a reading aid; it cannot change the immutable signed Slovak source. */
+#schoolTermsModal .terms-translation-note-v411,
+#schoolRulesModalV55 .terms-translation-note-v411{
+ margin:0 0 14px;padding:10px 12px;border-radius:10px;
+ background:#fff5ed;border:1px solid #f0d7c4;color:#72513b;
+ font-size:12px;line-height:1.45;
+}
+
+/* v412: gently desaturate the dog card; keep sex tint and liquid texture. */
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241){background:rgba(245,154,201,.39)!important}
+.customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241){background:rgba(135,190,240,.39)!important}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content,
+.customer-design #bookingTab #bookingDogProfile .dual-dog-info-v254{--lg-v3-milk:.56!important}
+.customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before{background:rgba(255,255,255,.68)!important}
+/* A photo is per account; absent or failed photos get a centered placeholder. */
+.customer-design #bookingTab #bookingDogAvatar.dog-photo-missing-v412{display:grid!important;place-items:center!important;text-align:center!important;font-size:38px!important;line-height:1!important}
+/* Keep the badge number centered without changing the dock geometry. */
+.customer-design .bottom-nav #customerAnnouncementsV363 .customer-inbox-count-v363:not(.hidden){display:grid!important;place-items:center!important;position:absolute;width:17px!important;min-width:17px!important;height:17px!important;top:1px;right:1px;padding:0!important;line-height:1!important;text-align:center!important;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+ .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241){background:#f9dce9!important}
+ .customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241){background:#daeafb!important}
+ .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before{background:#fff!important}
+}

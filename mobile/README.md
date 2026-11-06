@@ -1,5 +1,28 @@
 # Chvostíkovo Android — Capacitor preparation
 
+## Current Play preview – Android v412 / 2.0.85 (6 November 2026)
+
+This branch bundles the exact customer-portal-production source commit `8fb78ab13db9df0c6d9d37e09135f080201a008a`
+(v412/2.0.85), including SK/EN UI, hash-pinned English reading terms (v411)
+and v412 registration/notification styling changes. The Capacitor native runtime,
+Firebase package name `sk.chvostikovo.app`, App Links and icon are unchanged.
+
+The GitHub Actions workflow produces a **debug APK** for device preview
+and an **UNSIGNED AAB** for compilation checks. Neither artifact is signed with
+the owner's private upload key. Only the owner can sign the final AAB using a
+verified keystore/password on their Windows computer, after matching the
+certificate with the Play upload-key reset. Never commit a JKS or secrets.
+
+Preview: install the debug APK on a test device after checking any existing
+installation/signature conflict. Debug APK is not equivalent to a Play-signed
+update; uninstalling an existing app can remove local-only settings and caches.
+Before Play: verify current Console versionCode, real EN/SK flows, 1/2 dog
+bookings, push/FCM and Android App Links on a physical device.
+Production PWA and backend are unaffected by this Android-only candidate.
+
+---
+## Historical setup notes (original baseline)
+
 Status: **prepared for testing; not a signed Google Play release**. Source baseline:
 customer PWA candidate v394 / 2.0.69 (28 October 2026), based on
 production `3159725685584014b50b912e09995b2d68fcebfd`. Earlier v360/v361 APK/AAB files

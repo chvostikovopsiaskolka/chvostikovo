@@ -43,6 +43,8 @@ jobs:
           node tests/customer-guide-v358.cjs
           node tests/customer-locale-v409.cjs
           NODE_PATH="$PWD/tests/shared-v244/node_modules" node tests/customer-locale-v409-browser.cjs
+          NODE_PATH="$PWD/tests/shared-v244/node_modules" node tests/customer-legal-v411.cjs
+          node tests/customer-release-contract.cjs
       - name: Compile debug APK and unsigned release bundle
         working-directory: mobile/android
         run: ./gradlew assembleDebug bundleRelease --console=plain
