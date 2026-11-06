@@ -87,7 +87,7 @@ function Index() {
         <FirstVisit />
         <Why />
         <InquirySection />
-        <Requirements />
+        <Requirements showContextFaq />
         <Faq />
         <ProductSection />
         <About />
