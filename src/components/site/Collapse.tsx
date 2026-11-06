@@ -11,12 +11,14 @@ export function Collapse({
   tone = "light",
   icon,
   defaultOpen = false,
+  onOpen,
 }: {
   title: string;
   children: ReactNode;
   tone?: "light" | "dark";
   icon?: ReactNode;
   defaultOpen?: boolean;
+  onOpen?: () => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const dark = tone === "dark";
@@ -29,7 +31,11 @@ export function Collapse({
     >
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        onClick={() => {
+          if (!open) onOpen?.();
+          setOpen(!open);
+        }}
         className={`flex w-full items-center justify-between gap-3 p-5 text-left font-display text-base font-semibold ${
           dark ? "text-cream" : "text-forest"
         }`}
