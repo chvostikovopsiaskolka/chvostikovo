@@ -11,7 +11,7 @@ import { ContextFaq, FaqAnswer } from "./ContextFaq";
 
 const reqIcons = [Syringe, PawPrint, Droplets, HeartPulse];
 
-export function Requirements({ id = "podmienky" }: { id?: string } = {}) {
+export function Requirements({ id = "podmienky", showContextFaq = false }: { id?: string; showContextFaq?: boolean } = {}) {
   return (
     <section id={id} className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
       <SectionAmbientPaws />
@@ -41,9 +41,9 @@ export function Requirements({ id = "podmienky" }: { id?: string } = {}) {
             );
           })}
         </div>
-        <div className="mx-auto mt-6 max-w-3xl">
+        {showContextFaq && <div className="mx-auto mt-6 max-w-3xl">
           <ContextFaq question="Prijímate aj šteniatka?" label="Čo ak chcete prihlásiť šteniatko?" source="home_requirements_puppy" />
-        </div>
+        </div>}
       </div>
     </section>
   );
