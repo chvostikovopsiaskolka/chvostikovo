@@ -7,6 +7,7 @@ import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE } from "@/content/site";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FirstVisitPhoto } from "./FirstVisitPhoto";
+import { ContextFaq, FaqAnswer } from "./ContextFaq";
 
 const reqIcons = [Syringe, PawPrint, Droplets, HeartPulse];
 
@@ -39,6 +40,9 @@ export function Requirements({ id = "podmienky" }: { id?: string } = {}) {
               </article>
             );
           })}
+        </div>
+        <div className="mx-auto mt-6 max-w-3xl">
+          <ContextFaq question="Prijímate aj šteniatka?" label="Čo ak chcete prihlásiť šteniatko?" source="home_requirements_puppy" />
         </div>
       </div>
     </section>
@@ -86,6 +90,10 @@ export function FirstVisit() {
             </li>
           ))}
         </ol>
+
+        <div className="mx-auto mt-8 max-w-3xl">
+          <ContextFaq question="Ako prebieha prvá návšteva psíka v škôlke?" label="Zistite viac o úvodnej návšteve" source="home_first_visit" />
+        </div>
 
         <div className="mt-8 flex justify-center">
           <button
@@ -219,7 +227,7 @@ const PRIMARY_FAQ_QUESTIONS = new Set([
 const PRIMARY_FAQ = FAQ.filter((item) => PRIMARY_FAQ_QUESTIONS.has(item.q));
 const PRACTICAL_FAQ = FAQ.filter((item) => !PRIMARY_FAQ_QUESTIONS.has(item.q));
 
-function FaqList({ items }: { items: Array<(typeof FAQ)[number]> }) {
+function FaqList({ items, source }: { items: Array<(typeof FAQ)[number]>; source: string }) {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
@@ -228,7 +236,11 @@ function FaqList({ items }: { items: Array<(typeof FAQ)[number]> }) {
         <div key={f.q} className="overflow-hidden rounded-[2rem] bg-card shadow-card">
           <button
             type="button"
-            onClick={() => setOpen(open === i ? null : i)}
+            aria-expanded={open === i}
+            onClick={() => {
+              if (open !== i) void trackCookielessInteraction("explore_daycare", `faq_${source}_${i + 1}`);
+              setOpen(open === i ? null : i);
+            }}
             className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left font-display text-[1.05rem] font-bold leading-snug text-forest sm:px-6 sm:py-5 sm:text-lg"
           >
             {f.q}
@@ -238,7 +250,7 @@ function FaqList({ items }: { items: Array<(typeof FAQ)[number]> }) {
           </button>
           {open === i && (
             <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80 sm:px-6 sm:pb-6">
-              <p className="whitespace-pre-line">{f.a}</p>
+              <FaqAnswer question={f.q} answer={f.a} />
               {f.q === "Prijímate aj šteniatka?" && (
                 <a
                   href="/psia-skolka-pre-steniatka"
@@ -269,7 +281,7 @@ export function Faq() {
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
-        <FaqList items={PRIMARY_FAQ} />
+        <FaqList items={PRIMARY_FAQ} source="home" />
         <div className="mt-7 flex justify-center">
           <a href="/caste-otazky" className="btn-coral">
             Viac častých otázok
@@ -286,7 +298,7 @@ export function PracticalFaq() {
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Ďalšie časté otázky</h2>
-        <FaqList items={PRACTICAL_FAQ} />
+        <FaqList items={PRACTICAL_FAQ} source="practical" />
 
         <p className="mt-8 text-center text-forest/80">
           Nenašli ste odpoveď?{" "}
