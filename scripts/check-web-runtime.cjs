@@ -321,7 +321,7 @@ const failures = [];
               }
               if (width === 390) {
                 const label = await mobileHygiene.nth(card).locator('p').first().innerText();
-                if (/\\b[1-3]\\s*\\/\\s*3\\b/.test(label)) {
+                if (label.includes((card + 1) + '/3')) {
                   throw new Error('Hygiene mobile card must not display a slide counter: ' + label);
                 }
               }
