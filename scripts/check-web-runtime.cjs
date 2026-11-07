@@ -266,6 +266,41 @@ const failures = [];
             await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
             const homeConsent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
             if (await homeConsent.isVisible()) await homeConsent.click();
+            // Contextual FAQ, article CTA and visibly readable hygiene cards.
+            const introToggle = productPage.locator('#prva-navsteva').getByRole('button', { name: 'Zistite viac o úvodnej návšteve' });
+            await introToggle.click();
+            if (await introToggle.getAttribute('aria-expanded') !== 'true' ||
+                !(await productPage.locator('#prva-navsteva').getByText('2–3 kratšie návštevy', { exact: false }).count())) {
+              throw new Error('First-visit FAQ must open and explain the additional adaptation visits');
+            }
+            const careToggle = productPage.locator('#starostlivost').getByRole('button', { name: 'Ako dbáme na bezpečnosť psíkov?' });
+            await careToggle.click();
+            if (await careToggle.getAttribute('aria-expanded') !== 'true' ||
+                !(await productPage.locator('#starostlivost').getByText('neustálym dohľadom', { exact: false }).count())) {
+              throw new Error('Care safety FAQ must open with its detailed answer');
+            }
+            const whyArticle = productPage.locator('#preco a[href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"]');
+            if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
+            const whyCta = productPage.locator('#preco').getByRole('button', { name: 'Chcem prihlásiť psíka' });
+            const whyPhone = productPage.locator('#preco a[aria-label="Zavolajte nám"]');
+            const [ctaBox, phoneBox] = await Promise.all([whyCta.boundingBox(), whyPhone.boundingBox()]);
+            if (!ctaBox || !phoneBox || Math.abs(ctaBox.y + ctaBox.height / 2 - phoneBox.y - phoneBox.height / 2) > 5) {
+              throw new Error('Interest CTA and round phone action must sit in the same row');
+            }
+            const mobileHygiene = productPage.locator('#priestory article[aria-label^="Čistota priestorov"]');
+            const desktopHygiene = productPage.locator('#priestory article:not([aria-label])');
+            if (await mobileHygiene.count() !== 3 || await desktopHygiene.count() !== 3) {
+              throw new Error('The hygiene section needs three carousel slides and three desktop cards');
+            }
+            for (let card = 0; card < 3; card++) {
+              if (await mobileHygiene.nth(card).isVisible() !== (width === 390) ||
+                  await desktopHygiene.nth(card).isVisible() !== (width === 1440)) {
+                throw new Error('Hygiene information is not openly readable at viewport ' + width);
+              }
+            }
+            if (!(await productPage.locator('#priestory').getByText('Germicídna lampa s ozónom').count())) {
+              throw new Error('Existing hygiene information must be retained');
+            }
             if (await productPage.getByRole('heading', { name: 'Zo života v škôlke' }).count()) {
               throw new Error('Standalone Instagram follow section still exists');
             }
