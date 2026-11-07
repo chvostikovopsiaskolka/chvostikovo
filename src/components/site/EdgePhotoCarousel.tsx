@@ -1,10 +1,12 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { StandPhotoLightbox } from "./StandPhotoLightbox";
 
 export type EdgeCarouselPhoto = {
   src: string;
   alt: string;
   position?: string;
   caption?: string;
+  fullSrc?: string;
 };
 
 type EdgePhotoCarouselProps = {
@@ -26,6 +28,8 @@ export function EdgePhotoCarousel({
   className = "",
 }: EdgePhotoCarouselProps) {
   const track = useRef<HTMLDivElement>(null);
+  const [openedIndex, setOpenedIndex] = useState<number | null>(null);
+  const pointerStart = useRef<{ x: number; y: number } | null>(null);
   const direction = useRef<1 | -1>(1);
   const paused = useRef(false);
   const inView = useRef(false);
@@ -125,20 +129,48 @@ export function EdgePhotoCarousel({
         onBlurCapture={resumeAfterInteraction}
         className="flex w-full gap-3 overflow-x-auto overscroll-x-contain touch-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden sm:gap-4"
       >
-        {photos.map((photo) => (
+        {photos.map((photo, index) => (
           <figure
             key={photo.src}
             className="relative h-[310px] w-[85vw] shrink-0 overflow-hidden rounded-3xl shadow-card sm:h-96 sm:w-[44vw] sm:max-w-[420px] lg:w-[31vw] lg:max-w-[360px]"
           >
-            <img
-              src={photo.src}
-              alt={photo.alt}
-              loading="lazy"
-              decoding="async"
-              draggable={false}
-              className="h-full w-full select-none object-cover"
-              style={{ objectPosition: photo.position ?? "50% 54%" } as CSSProperties}
-            />
+            {dataName === "stand" ? (
+              <button
+                type="button"
+                data-stand-photo-open
+                aria-label={`Otvoriť fotografiu stojana ${photo.caption ?? photo.alt}`}
+                className="block h-full w-full cursor-zoom-in rounded-3xl focus-visible:outline-4 focus-visible:outline-offset-[-4px] focus-visible:outline-coral"
+                onPointerDown={(event) => { pointerStart.current = { x: event.clientX, y: event.clientY }; }}
+                onClick={(event) => {
+                  const start = pointerStart.current;
+                  pointerStart.current = null;
+                  if (event.detail !== 0 && start &&
+                    (Math.abs(event.clientX - start.x) > 10 || Math.abs(event.clientY - start.y) > 10)) return;
+                  pause();
+                  setOpenedIndex(index);
+                }}
+              >
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  loading="lazy"
+                  decoding="async"
+                  draggable={false}
+                  className="h-full w-full select-none object-cover"
+                  style={{ objectPosition: photo.position ?? "50% 54%" } as CSSProperties}
+                />
+              </button>
+            ) : (
+              <img
+                src={photo.src}
+                alt={photo.alt}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+                className="h-full w-full select-none object-cover"
+                style={{ objectPosition: photo.position ?? "50% 54%" } as CSSProperties}
+              />
+            )}
             {dataName === "stand" && photo.caption && (
               <figcaption className="pointer-events-none absolute left-3 top-3 rounded-full bg-card/95 px-3 py-1.5 text-xs font-semibold text-forest shadow-sm backdrop-blur-sm">
                 {photo.caption} · Ručná výroba
@@ -147,6 +179,14 @@ export function EdgePhotoCarousel({
           </figure>
         ))}
       </div>
+      {dataName === "stand" && openedIndex !== null && (
+        <StandPhotoLightbox
+          photos={photos}
+          index={openedIndex}
+          onSelect={setOpenedIndex}
+          onClose={() => { setOpenedIndex(null); resumeAfterInteraction(); }}
+        />
+      )}
     </div>
   );
 }
