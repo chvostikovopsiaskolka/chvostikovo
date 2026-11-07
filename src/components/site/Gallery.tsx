@@ -122,11 +122,13 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
                   aria-label={isEnglish ? `Daycare cleaning – ${hygiene[i]!.title}` : `Čistota priestorov – ${hygiene[i]!.title}`}
                   className="flex min-h-64 w-[82vw] shrink-0 snap-start flex-col justify-center rounded-4xl border border-forest/10 bg-card p-5 text-left shadow-card sm:hidden"
                 >
-                  <p className="mb-3 font-display text-xs font-bold tracking-wide text-coral uppercase">
-                    {isEnglish ? "How we keep the daycare clean" : "Ako zabezpečujeme čistotu priestorov"} · {i + 1}/3
+                  <p className="mb-4 font-display text-xs font-bold tracking-wide text-coral uppercase">
+                    {isEnglish ? "How we keep the daycare clean" : "Ako zabezpečujeme čistotu priestorov"}
                   </p>
-                  <span className="mb-2 text-2xl" aria-hidden="true">{hygiene[i]!.icon}</span>
-                  <h3 className="font-display text-lg font-bold leading-snug text-forest">{hygiene[i]!.title}</h3>
+                  <div className="flex items-center gap-3">
+                    <span className="shrink-0 text-2xl leading-none" aria-hidden="true">{hygiene[i]!.icon}</span>
+                    <h3 className="min-w-0 font-display text-lg font-bold leading-snug text-forest">{hygiene[i]!.title}</h3>
+                  </div>
                   <p className="mt-3 text-[13px] leading-relaxed text-forest/80 min-[390px]:text-sm">{hygiene[i]!.text}</p>
                 </article>
               )}
@@ -162,8 +164,10 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
           <div className="mt-6 grid items-stretch gap-4 sm:grid-cols-3">
             {hygiene.map((h) => (
               <article key={h.title} className="rounded-[2rem] bg-card p-6 shadow-card">
-                <span className="text-2xl" aria-hidden="true">{h.icon}</span>
-                <h4 className="mt-3 font-display text-lg font-bold leading-snug text-forest">{h.title}</h4>
+                <div className="flex items-center gap-3">
+                  <span className="shrink-0 text-2xl leading-none" aria-hidden="true">{h.icon}</span>
+                  <h4 className="min-w-0 font-display text-lg font-bold leading-snug text-forest">{h.title}</h4>
+                </div>
                 <p className="mt-3 text-[0.95rem] leading-relaxed text-forest/80">{h.text}</p>
               </article>
             ))}
