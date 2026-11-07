@@ -303,6 +303,28 @@ const failures = [];
                   await desktopHygiene.nth(card).isVisible() !== (width === 1440)) {
                 throw new Error('Hygiene information is not openly readable at viewport ' + width);
               }
+              const visibleCard = (width === 390 ? mobileHygiene : desktopHygiene).nth(card);
+              const titleLayout = await visibleCard.evaluate(node => {
+                const title = node.querySelector('h3, h4');
+                const icon = title?.previousElementSibling;
+                const row = title?.parentElement;
+                const titleBox = title?.getBoundingClientRect();
+                const iconBox = icon?.getBoundingClientRect();
+                return {
+                  flexRow: Boolean(row && icon && icon.parentElement === row && getComputedStyle(row).display === 'flex'),
+                  centerDiff: titleBox && iconBox
+                    ? Math.abs((titleBox.top + titleBox.height / 2) - (iconBox.top + iconBox.height / 2)) : 999,
+                };
+              });
+              if (!titleLayout.flexRow || titleLayout.centerDiff > 9) {
+                throw new Error('Hygiene emoji and heading must share one aligned row: ' + width + ' ' + card);
+              }
+              if (width === 390) {
+                const label = await mobileHygiene.nth(card).locator('p').first().innerText();
+                if (label.includes((card + 1) + '/3')) {
+                  throw new Error('Hygiene mobile card must not display a slide counter: ' + label);
+                }
+              }
             }
             if (!(await productPage.locator('#priestory').getByText('Germicídna lampa s ozónom').count())) {
               throw new Error('Existing hygiene information must be retained');
