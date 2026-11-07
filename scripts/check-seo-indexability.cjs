@@ -216,7 +216,7 @@ for (const spec of [
   if (spec.product === "stojan-na-misky-pre-psa") {
     assert(productHtml.includes('data-stand-gallery="autoplay"'), "Stand photo gallery is not autoplay-enabled");
     assert(productHtml.includes('Stojany na misky pre malé, stredné aj veľké plemená'), "Stand breed SEO copy missing from product");
-    for (const photo of ["stand-mlyncek-", "stand-aron-", "stand-loki-", "stand-planetky-", "stand-aloy-"]) {
+    for (const photo of ["stand-mlyncek-", "stand-aron-", "stand-loki-", "stand-planetky-", "stand-aloy-", "stand-psik-pri-miskach-", "stand-maya-", "stand-gael-", "stand-lara-", "stand-safira-"]) {
       assert(productHtml.includes(photo) && markup.includes(photo), "Stand realization missing from product or article: " + photo);
     }
     assert(markup.includes('data-stand-gallery="autoplay"'), "Stand article gallery above CTA is missing");

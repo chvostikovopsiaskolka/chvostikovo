@@ -182,12 +182,12 @@ const failures = [];
               const carouselName = route.includes('stojan') ? 'stand' : 'target';
               const galleryTrack = productPage.locator('[data-photo-carousel="' + carouselName + '"]');
               if (await galleryTrack.count() !== 1) throw new Error('Carousel missing: ' + carouselName);
-              if (await galleryTrack.locator('figure').count() !== (carouselName === 'stand' ? 8 : 8)) {
+              if (await galleryTrack.locator('figure').count() !== (carouselName === 'stand' ? 13 : 8)) {
                 throw new Error('Carousel must render each distinct photo exactly once: ' + carouselName);
               }
               if (carouselName === 'stand') {
                 const titles = await galleryTrack.locator('figcaption').allTextContents();
-                for (const name of ['MIA', 'CORI', 'WOODY', 'MLYNČEK', 'ARON', 'LOKI', 'PLANÉTKY', 'ALOY']) {
+                for (const name of ['MIA', 'CORI', 'WOODY', 'MLYNČEK', 'ARON', 'LOKI', 'PLANÉTKY', 'ALOY', 'STOJAN V PRAXI', 'MAYA', 'GAEL', 'LARA', 'SAFIRA']) {
                   if (!titles.some(title => title.startsWith(name + ' ·'))) throw new Error('Missing real stand caption: ' + name);
                 }
               }
@@ -203,7 +203,7 @@ const failures = [];
                 if (imgFit !== 'cover') throw new Error('Carousel images must fill their frame: ' + carouselName);
               }
               if (route.includes('stojan')) {
-                if (await galleryTrack.locator('button[data-stand-photo-open]').count() !== 8) throw new Error('All stand photos must be openable');
+                if (await galleryTrack.locator('button[data-stand-photo-open]').count() !== 13) throw new Error('All stand photos must be openable');
                 const cookieLayerBeforeGallery = productPage.locator('[aria-labelledby="cookie-consent-title"]');
                 if (await cookieLayerBeforeGallery.isVisible()) {
                   await cookieLayerBeforeGallery.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();
@@ -297,8 +297,8 @@ const failures = [];
             }
             const guideCarousel = productPage.locator('[data-stand-gallery="autoplay"]');
             if (await guideCarousel.count() !== 1) throw new Error('Stand guide carousel missing above product CTA');
-            if (await guideCarousel.locator('figure').count() !== 8) throw new Error('Stand guide must show eight distinct realizations');
-            if (await guideCarousel.locator('button[data-stand-photo-open]').count() !== 8) throw new Error('Guide stand photos must open too');
+            if (await guideCarousel.locator('figure').count() !== 13) throw new Error('Stand guide must show thirteen distinct realizations');
+            if (await guideCarousel.locator('button[data-stand-photo-open]').count() !== 13) throw new Error('Guide stand photos must open too');
             const cookieLayerBeforeGuide = productPage.locator('[aria-labelledby="cookie-consent-title"]');
             if (await cookieLayerBeforeGuide.isVisible()) {
               await cookieLayerBeforeGuide.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();

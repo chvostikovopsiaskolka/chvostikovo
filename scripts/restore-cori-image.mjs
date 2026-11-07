@@ -23,7 +23,20 @@ async function restoreImage({
   expectedSha256,
   targetDir = outputDir,
   format = "avif",
+  preferCommittedAsset = false,
 }) {
+  // Product-realization AVIF files are versioned Git assets.
+  // Never replace them with old lower-resolution Base64 chunks.
+  if (preferCommittedAsset) {
+    if (!expectedBytes || !expectedSha256) throw new Error("Missing strict HQ image verification values: " + output);
+    const asset = await readFile(path.join(targetDir, output));
+    const validFormat = asset.subarray(0, 32).toString("ascii").includes("ftypavif");
+    if (!validFormat || asset.length !== expectedBytes || createHash("sha256").update(asset).digest("hex") !== expectedSha256) {
+      throw new Error("High-quality image missing, invalid or changed: " + output);
+    }
+    console.log("Verified committed HQ asset: " + output + " (" + asset.length + " bytes)");
+    return;
+  }
   const dataFiles = await readdir(dataDir);
   const chunks = dataFiles
     .filter((name) => name.startsWith(`${prefix}.`) && name.endsWith(".b64"))
@@ -85,35 +98,91 @@ await restoreImage({
   dataDir: galleryDataDir,
   prefix: "stand-mlyncek",
   output: "stand-mlyncek.avif",
-  expectedBytes: 11_910,
+  expectedBytes: 225481,
+  expectedSha256: "5418818122a4b9512237850ab39e31dd79c60919c868f89894e0404dcfaa18a5",
+  preferCommittedAsset: true,
 });
 await restoreImage({
   label: "ARON",
   dataDir: galleryDataDir,
   prefix: "stand-aron",
   output: "stand-aron.avif",
-  expectedBytes: 9_162,
+  expectedBytes: 56129,
+  expectedSha256: "b29ad10c97702f1682fbb9387439cd4d769f34077ee59292af4e0199ad279806",
+  preferCommittedAsset: true,
 });
 await restoreImage({
   label: "LOKI",
   dataDir: galleryDataDir,
   prefix: "stand-loki",
   output: "stand-loki.avif",
-  expectedBytes: 10_841,
+  expectedBytes: 257304,
+  expectedSha256: "65b5189373d15fffef3ebfdcb28bda749b7ad2fe5d8268cd87f881b02dcfdc31",
+  preferCommittedAsset: true,
 });
 await restoreImage({
   label: "PLANÉTKY",
   dataDir: galleryDataDir,
   prefix: "stand-planetky",
   output: "stand-planetky.avif",
-  expectedBytes: 9_735,
+  expectedBytes: 146187,
+  expectedSha256: "30660f59b79ea3e6faae2ea895af27690ac041b5ea8b6b8fad2b9700e707638d",
+  preferCommittedAsset: true,
 });
 await restoreImage({
   label: "ALOY",
   dataDir: galleryDataDir,
   prefix: "stand-aloy",
   output: "stand-aloy.avif",
-  expectedBytes: 33_594,
+  expectedBytes: 156373,
+  expectedSha256: "fa8fcfd3abd5e9a04a37b657a03466d5668b25ad76de01046ba20a5800dc7774",
+  preferCommittedAsset: true,
+});
+
+await restoreImage({
+  label: "STOJAN V PRAXI",
+  dataDir: galleryDataDir,
+  prefix: "stand-psik-pri-miskach",
+  output: "stand-psik-pri-miskach.avif",
+  expectedBytes: 140408,
+  expectedSha256: "907f4f336faf89f77e585928400e7c53ec592f65e71c38eb306f0d4742a17962",
+  preferCommittedAsset: true,
+});
+await restoreImage({
+  label: "MAYA",
+  dataDir: galleryDataDir,
+  prefix: "stand-maya",
+  output: "stand-maya.avif",
+  expectedBytes: 45938,
+  expectedSha256: "14b868c2975e7842285efb2a876f444a5afe9efd8cf7344c93ab90df9c361bb3",
+  preferCommittedAsset: true,
+});
+await restoreImage({
+  label: "GAEL",
+  dataDir: galleryDataDir,
+  prefix: "stand-gael",
+  output: "stand-gael.avif",
+  expectedBytes: 245715,
+  expectedSha256: "51fea63f2d4a85941a711f516b91d585ff76ad0462af5b69a4c5343c6691e73a",
+  preferCommittedAsset: true,
+});
+await restoreImage({
+  label: "LARA",
+  dataDir: galleryDataDir,
+  prefix: "stand-lara",
+  output: "stand-lara.avif",
+  expectedBytes: 327907,
+  expectedSha256: "3c04913843458c2c4940913eeae4b78137f1571c6fd7fdeed5b995243c526756",
+  preferCommittedAsset: true,
+});
+await restoreImage({
+  label: "SAFIRA",
+  dataDir: galleryDataDir,
+  prefix: "stand-safira",
+  output: "stand-safira.avif",
+  expectedBytes: 265948,
+  expectedSha256: "38d463476a00dae07ff81cf605aac1d57c42dc80705837f3af62860e87a74fad",
+  preferCommittedAsset: true,
 });
 
 await restoreImage({
