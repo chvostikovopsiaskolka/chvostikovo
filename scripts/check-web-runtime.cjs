@@ -204,6 +204,11 @@ const failures = [];
               }
               if (route.includes('stojan')) {
                 if (await galleryTrack.locator('button[data-stand-photo-open]').count() !== 8) throw new Error('All stand photos must be openable');
+                const cookieLayerBeforeGallery = productPage.locator('[aria-labelledby="cookie-consent-title"]');
+                if (await cookieLayerBeforeGallery.isVisible()) {
+                  await cookieLayerBeforeGallery.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();
+                  await cookieLayerBeforeGallery.waitFor({state:'hidden'});
+                }
                 await galleryTrack.locator('button[data-stand-photo-open]').first().click();
                 const lightbox = productPage.locator('[data-stand-lightbox]');
                 await lightbox.waitFor({ state: 'visible' });
@@ -294,6 +299,11 @@ const failures = [];
             if (await guideCarousel.count() !== 1) throw new Error('Stand guide carousel missing above product CTA');
             if (await guideCarousel.locator('figure').count() !== 8) throw new Error('Stand guide must show eight distinct realizations');
             if (await guideCarousel.locator('button[data-stand-photo-open]').count() !== 8) throw new Error('Guide stand photos must open too');
+            const cookieLayerBeforeGuide = productPage.locator('[aria-labelledby="cookie-consent-title"]');
+            if (await cookieLayerBeforeGuide.isVisible()) {
+              await cookieLayerBeforeGuide.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();
+              await cookieLayerBeforeGuide.waitFor({state:'hidden'});
+            }
             await guideCarousel.locator('button[data-stand-photo-open]').first().click();
             const articleLightbox = productPage.locator('[data-stand-lightbox]');
             await articleLightbox.waitFor({state:'visible'});
