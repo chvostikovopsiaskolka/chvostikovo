@@ -172,6 +172,8 @@ export async function trackCookielessInteraction(
     "/psia-skolka-pre-steniatka/",
     "/strazenie-psov-kosice",
     "/strazenie-psov-kosice/",
+    "/caste-otazky",
+    "/caste-otazky/",
     "/en/dog-daycare-kosice",
     "/en/dog-daycare-kosice/",
   ]);

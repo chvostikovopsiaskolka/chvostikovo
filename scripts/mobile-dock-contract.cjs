@@ -102,7 +102,7 @@ const info = read("src/components/site/Info.tsx");
 const why = story.slice(story.indexOf("export function Why()"), story.indexOf("export function About("));
 const first = info.slice(info.indexOf("export function FirstVisit()"), info.indexOf("export function Pricing("));
 const pricing = info.slice(info.indexOf("export function Pricing("), info.indexOf("const PRIMARY_FAQ"));
-assert(why.includes("Hľadám škôlku pre psíka") && why.includes('<ShortForm trackingSource="home_why_interest" />'), "Why CTA must open tracked short enquiry");
+assert(why.includes("Chcem prihlásiť psíka") && why.includes('<ShortForm trackingSource="home_why_interest" />'), "Why CTA must open tracked short enquiry");
 assert(!why.includes("<LongForm"), "Why should not duplicate full registration");
 assert(first.includes("Dohodnúť úvodnú návštevu") && first.includes('trackingSource="home_first_visit_interest"') && !first.includes("hideInterest") && !first.includes("interestValue"), "Intro visit CTA must show the ordinary required interest options");
 assert(!first.includes("<LongForm"), "Intro visit should not present a full application");

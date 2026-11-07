@@ -23,6 +23,9 @@ jobs:
   runtime:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    # Version-pinned official image provides browser binaries and all system libraries without fragile apt mirror fetches.
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
     # Browser installation can exceed 10 minutes on a cold GitHub runner.
     # Keep full Chromium + WebKit regression coverage and give it enough time.
     timeout-minutes: 25
@@ -32,6 +35,10 @@ jobs:
         site: ${{ github.event_name == 'pull_request' && fromJSON('["chvostikovo"]') || fromJSON('["chvostikovo","bellaris"]') }}
     steps:
       - uses: actions/checkout@v4
+      - name: Provision minimal utilities in Playwright image
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends unzip python3 curl
       - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-node@v4
         with:
@@ -39,7 +46,7 @@ jobs:
       - name: Install isolated browser test runtime
         run: |
           npm install --prefix /tmp/web-runtime --no-package-lock --no-audit --no-fund playwright@1.56.1
-          /tmp/web-runtime/node_modules/.bin/playwright install --with-deps chromium webkit
+          # Browsers and native dependencies are preinstalled in the pinned Playwright container.
       - name: Build candidate for pull requests
         if: github.event_name == 'pull_request'
         run: |

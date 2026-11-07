@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { BookOpen, Check, Phone } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
+import { ContextFaq } from "./ContextFaq";
 import { ShortForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { CARE, DAYCARE_GALLERY_EXTRAS, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
@@ -147,6 +148,13 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
           </div>
         </div>
 
+        {!isEnglish && (
+          <div className="mx-auto mt-7 max-w-3xl space-y-3">
+            <ContextFaq question="Ako zabezpečujete bezpečnosť psíkov v škôlke?" label="Ako dbáme na bezpečnosť psíkov?" source="home_care_safety" />
+            <ContextFaq question="Hrajú sa psíkovia v škôlke celý deň?" source="home_care_daily_rhythm" />
+          </div>
+        )}
+
         {showEmbeddedFriendship && <FriendshipFeature language={language} embedded />}
 
         {showInterest && <div className="mt-7 flex justify-center">
@@ -236,7 +244,17 @@ export function Why() {
             </EditorialBenefits>
           </div>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="mt-8 text-center">
+            <a
+              href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"
+              onClick={() => void trackCookielessInteraction("nav_click", "home_why_suitability_article")}
+              className="inline-flex min-h-11 items-center justify-center gap-2 text-center font-display text-sm font-semibold leading-snug text-cream underline decoration-cream/60 underline-offset-4 transition hover:decoration-cream sm:text-base"
+            >
+              <BookOpen className="size-5 shrink-0 text-coral" aria-hidden="true" />
+              Prečítajte si viac o výhodách a vhodnosti psej škôlky
+            </a>
+          </div>
+          <div className="mt-5 flex flex-nowrap items-center justify-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => {
@@ -244,15 +262,18 @@ export function Why() {
                 void trackCookielessInteraction("inquiry_cta", "home_why_interest");
                 setOpen(true);
               }}
-              className="btn-coral"
+              className="btn-coral min-w-0 whitespace-nowrap !px-3 !py-3 text-xs min-[390px]:text-sm sm:!px-6 sm:!py-4 sm:text-base"
             >
-              Hľadám škôlku pre psíka
+              Chcem prihlásiť psíka
             </button>
             <a
               href={`tel:${PHONE}`}
-              className="inline-flex items-center justify-center rounded-full border-2 border-cream/60 px-6 py-3 font-display font-semibold text-cream transition-colors hover:bg-cream hover:text-forest"
+              aria-label="Zavolajte nám"
+              title="Zavolajte nám"
+              onClick={() => void trackCookielessInteraction("phone_click", "home_why_phone")}
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-cream/60 text-cream transition-colors hover:bg-cream hover:text-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream sm:size-12"
             >
-              Zavolajte nám
+              <Phone className="size-5" aria-hidden="true" />
             </a>
           </div>
           </div>

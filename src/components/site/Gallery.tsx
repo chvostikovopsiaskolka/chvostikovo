@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { Car, MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { GALLERY, MAP_LINK } from "@/content/site";
-import { Collapse } from "./Collapse";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
 const HYGIENE_SK = [
@@ -100,6 +99,7 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
             className="flex w-full touch-auto snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {GALLERY.map((item, i) => (
+              <Fragment key={item.src}>
               <button
                 key={item.src}
                 type="button"
@@ -117,6 +117,20 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
                   {isEnglish ? GALLERY_EN[i] : item.caption}
                 </span>
               </button>
+              {i < hygiene.length && (
+                <article
+                  aria-label={isEnglish ? `Daycare cleaning – ${hygiene[i]!.title}` : `Čistota priestorov – ${hygiene[i]!.title}`}
+                  className="flex min-h-64 w-[82vw] shrink-0 snap-start flex-col justify-center rounded-4xl border border-forest/10 bg-card p-5 text-left shadow-card sm:hidden"
+                >
+                  <p className="mb-3 font-display text-xs font-bold tracking-wide text-coral uppercase">
+                    {isEnglish ? "How we keep the daycare clean" : "Ako zabezpečujeme čistotu priestorov"} · {i + 1}/3
+                  </p>
+                  <span className="mb-2 text-2xl" aria-hidden="true">{hygiene[i]!.icon}</span>
+                  <h3 className="font-display text-lg font-bold leading-snug text-forest">{hygiene[i]!.title}</h3>
+                  <p className="mt-3 text-[13px] leading-relaxed text-forest/80 min-[390px]:text-sm">{hygiene[i]!.text}</p>
+                </article>
+              )}
+              </Fragment>
             ))}
           </div>
 
@@ -140,23 +154,18 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
           </div>
         </div>
 
-        <div className="mt-10">
+        {/* On desktop retain the three hygiene cards, now readable without an extra click. */}
+        <div className="mt-10 hidden sm:block">
           <h3 className="section-title text-center text-xl sm:text-2xl">
             {isEnglish ? "How do we keep the daycare clean?" : "Ako zabezpečujeme čistotu priestorov?"}
           </h3>
-          <div className="mt-6 grid items-start gap-4 sm:grid-cols-3">
+          <div className="mt-6 grid items-stretch gap-4 sm:grid-cols-3">
             {hygiene.map((h) => (
-              <Collapse
-                key={h.title}
-                title={h.title}
-                icon={
-                  <span className="text-xl" aria-hidden>
-                    {h.icon}
-                  </span>
-                }
-              >
-                {h.text}
-              </Collapse>
+              <article key={h.title} className="rounded-[2rem] bg-card p-6 shadow-card">
+                <span className="text-2xl" aria-hidden="true">{h.icon}</span>
+                <h4 className="mt-3 font-display text-lg font-bold leading-snug text-forest">{h.title}</h4>
+                <p className="mt-3 text-[0.95rem] leading-relaxed text-forest/80">{h.text}</p>
+              </article>
             ))}
           </div>
         </div>

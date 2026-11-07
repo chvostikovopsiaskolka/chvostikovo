@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { Collapse } from "@/components/site/Collapse";
+import { FaqAnswer } from "@/components/site/ContextFaq";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { FAQ, PHONE, PHONE_PRETTY } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
@@ -65,8 +67,8 @@ function FrequentlyAskedQuestionsPage() {
 
             <div className="mt-10 space-y-3">
               {FAQ.map((item, index) => (
-                <Collapse key={item.q} title={item.q} defaultOpen={index === 0}>
-                  <p className="whitespace-pre-line">{item.a}</p>
+                <Collapse key={item.q} title={item.q} defaultOpen={index === 0} onOpen={() => void trackCookielessInteraction("explore_daycare", `faq_page_${index + 1}`)}>
+                  <FaqAnswer question={item.q} answer={item.a} />
 
                   {item.q === "Prijímate aj šteniatka?" && (
                     <a
