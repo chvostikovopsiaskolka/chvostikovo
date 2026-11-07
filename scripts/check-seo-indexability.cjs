@@ -215,6 +215,9 @@ for (const spec of [
   }
   if (spec.product === "stojan-na-misky-pre-psa") {
     assert(productHtml.includes('data-stand-gallery="autoplay"'), "Stand photo gallery is not autoplay-enabled");
+    for (const photo of ["stand-mlyncek-", "stand-aron-", "stand-loki-", "stand-planetky-", "stand-aloy-"]) {
+      assert(productHtml.includes(photo) && markup.includes(photo), "Stand realization missing from product or article: " + photo);
+    }
     assert(markup.includes('data-stand-gallery="autoplay"'), "Stand article gallery above CTA is missing");
     assert(markup.includes('stand-mia-'), "Stand article must use restored 711x900 MIA AVIF");
     assert(productHtml.includes('data-stand-sizes="carousel"'), "Stand size carousel missing");

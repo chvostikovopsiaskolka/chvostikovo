@@ -4,6 +4,7 @@ export type EdgeCarouselPhoto = {
   src: string;
   alt: string;
   position?: string;
+  caption?: string;
 };
 
 type EdgePhotoCarouselProps = {
@@ -138,9 +139,9 @@ export function EdgePhotoCarousel({
               className="h-full w-full select-none object-cover"
               style={{ objectPosition: photo.position ?? "50% 54%" } as CSSProperties}
             />
-            {dataName === "stand" && (
+            {dataName === "stand" && photo.caption && (
               <figcaption className="pointer-events-none absolute left-3 top-3 rounded-full bg-card/95 px-3 py-1.5 text-xs font-semibold text-forest shadow-sm backdrop-blur-sm">
-                {photos.indexOf(photo) === 0 ? "MIA" : photos.indexOf(photo) === 1 ? "CORI" : "WOODY"} · Ručná výroba
+                {photo.caption} · Ručná výroba
               </figcaption>
             )}
           </figure>

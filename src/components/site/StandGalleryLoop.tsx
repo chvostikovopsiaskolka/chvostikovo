@@ -1,20 +1,30 @@
 import standMia from "@/assets/products/stand-mia.avif";
 import standCori from "@/assets/products/stand-cori.avif";
 import standWoody from "@/assets/products/stand-woody.avif";
+import standMlyncek from "@/assets/products/stand-mlyncek.avif";
+import standAron from "@/assets/products/stand-aron.avif";
+import standLoki from "@/assets/products/stand-loki.avif";
+import standPlanetky from "@/assets/products/stand-planetky.avif";
+import standAloy from "@/assets/products/stand-aloy.avif";
 import { EdgePhotoCarousel, type EdgeCarouselPhoto } from "./EdgePhotoCarousel";
 
 const STANDS: readonly EdgeCarouselPhoto[] = [
-  { src: standMia, alt: "Ručne vyrábaný drevený stojan MIA s menom psíka", position: "50% 56%" },
-  { src: standCori, alt: "Tmavý drevený stojan CORI s nerezovými miskami", position: "50% 56%" },
-  { src: standWoody, alt: "Biely drevený stojan WOODY s nerezovými miskami", position: "50% 56%" },
+  { src: standMia, alt: "Ručne vyrábaný drevený stojan MIA s menom psíka", position: "50% 56%", caption: "MIA" },
+  { src: standCori, alt: "Tmavý drevený stojan CORI s nerezovými miskami", position: "50% 56%", caption: "CORI" },
+  { src: standWoody, alt: "Biely drevený stojan WOODY s nerezovými miskami", position: "50% 56%", caption: "WOODY" },
+  { src: standMlyncek, alt: "Svetlý drevený stojan MLYNČEK s dvoma nerezovými miskami", position: "50% 58%", caption: "MLYNČEK" },
+  { src: standAron, alt: "Detail tmavého dreveného stojana ARON s menom psíka", position: "50% 58%", caption: "ARON" },
+  { src: standLoki, alt: "Tmavý drevený stojan LOKI na dve misky", position: "50% 56%", caption: "LOKI" },
+  { src: standPlanetky, alt: "Svetlý drevený stojan PLANÉTKY s nerezovými miskami", position: "50% 58%", caption: "PLANÉTKY" },
+  { src: standAloy, alt: "Drevený stojan ALOY s hnedým psom pri miskách", position: "50% 55%", caption: "ALOY" },
 ];
 
-/** Exactly one MIA, CORI and WOODY, moving back and forth without cloned slides. */
+/** One photo per realization, shared between product detail and blog guide. */
 export function StandGalleryLoop() {
   return (
     <EdgePhotoCarousel
       photos={STANDS}
-      label="Galéria MIA, CORI a WOODY – fotografie sa pomaly posúvajú do strán"
+      label="Galéria našich realizácií drevených stojanov – fotografie sa pomaly posúvajú do strán"
       dataName="stand"
     />
   );
