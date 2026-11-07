@@ -120,6 +120,27 @@ const failures = [];
                 throw new Error('Mobile product image must follow heading and precede size selection');
               }
               if (route.includes('stojan')) {
+                const heroPicker = productPage.locator('[data-stand-size-picker="hero"]');
+                if (await heroPicker.locator('button').count() !== 2) throw new Error('Stand hero must have two size buttons');
+                const labels = await heroPicker.locator('button').allTextContents();
+                if (!labels.some(text => text.includes('malé plemená')) || !labels.some(text => text.includes('stredné/veľké'))) {
+                  throw new Error('Stand breed labels missing from top size picker');
+                }
+                const checkPicker = async () => {
+                  const buttons = heroPicker.locator('button');
+                  const boxes = await Promise.all([buttons.nth(0).boundingBox(), buttons.nth(1).boundingBox()]);
+                  if (!boxes[0] || !boxes[1] || Math.abs(boxes[0].y - boxes[1].y) > 2) throw new Error('Stand hero size buttons must stay in one row');
+                  for (let n = 0; n < 2; n++) {
+                    const overflows = await buttons.nth(n).evaluate(el => el.querySelector('span')?.scrollWidth > (el.clientWidth - 12));
+                    if (overflows) throw new Error('Stand breed label overflows button');
+                  }
+                };
+                await checkPicker();
+                if (width === 390) {
+                  await productPage.setViewportSize({width:320,height:760});
+                  await checkPicker();
+                  await productPage.setViewportSize({width:390,height:844});
+                }
                 if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('MIA'))) throw new Error('Small stand must show Mia by default');
                 await productPage.getByRole('button', { name: /^Väčší/ }).first().click();
                 if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('CORI'))) throw new Error('Large stand must show CORI');
@@ -182,6 +203,22 @@ const failures = [];
                 if (imgFit !== 'cover') throw new Error('Carousel images must fill their frame: ' + carouselName);
               }
               if (route.includes('stojan')) {
+                if (await galleryTrack.locator('button[data-stand-photo-open]').count() !== 8) throw new Error('All stand photos must be openable');
+                const cookieLayerBeforeGallery = productPage.locator('[aria-labelledby="cookie-consent-title"]');
+                if (await cookieLayerBeforeGallery.isVisible()) {
+                  await cookieLayerBeforeGallery.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();
+                  await cookieLayerBeforeGallery.waitFor({state:'hidden'});
+                }
+                await galleryTrack.locator('button[data-stand-photo-open]').first().click();
+                const lightbox = productPage.locator('[data-stand-lightbox]');
+                await lightbox.waitFor({ state: 'visible' });
+                if (await lightbox.locator('[data-stand-photo-viewport]').getAttribute('data-zoom') !== '1') throw new Error('Stand photo zoom must start at 100%');
+                await lightbox.getByRole('button', { name: 'Priblížiť fotografiu' }).click();
+                if (await lightbox.locator('[data-stand-photo-viewport]').getAttribute('data-zoom') !== '1.5') throw new Error('Stand photo zoom-in failed');
+                await lightbox.getByRole('button', { name: 'Ďalšia fotografia' }).click();
+                if (await lightbox.locator('[data-stand-photo-viewport]').getAttribute('data-zoom') !== '1') throw new Error('Stand photo navigation must reset zoom');
+                await productPage.keyboard.press('Escape');
+                await lightbox.waitFor({ state: 'hidden' });
                 if (await productPage.locator('[data-stand-gallery="autoplay"]').count() !== 1) {
                   throw new Error('Stand realizations carousel missing');
                 }
@@ -232,6 +269,12 @@ const failures = [];
                   // #moznosti-objednavky-stojana source-only wrapper.
                   const inquiryDialog = productPage.getByRole('dialog', { name: 'Mám záujem o stojan' });
                   await inquiryDialog.waitFor({ state: 'visible', timeout: 10000 });
+                  const modalPicker = inquiryDialog.locator('[data-stand-size-picker="inquiry"]');
+                  if (await modalPicker.locator('button').count() !== 2) throw new Error('Inquiry needs two size options');
+                  const modalBoxes = await Promise.all([modalPicker.locator('button').nth(0).boundingBox(), modalPicker.locator('button').nth(1).boundingBox()]);
+                  if (!modalBoxes[0] || !modalBoxes[1] || Math.abs(modalBoxes[0].y - modalBoxes[1].y) > 2) {
+                    throw new Error('Stand inquiry size options must be side by side');
+                  }
                   const selectedSize = inquiryDialog.getByRole('button', {
                     name: type === 'large' ? /^Väčší/ : /^Menší/,
                   }).first();
@@ -255,6 +298,18 @@ const failures = [];
             const guideCarousel = productPage.locator('[data-stand-gallery="autoplay"]');
             if (await guideCarousel.count() !== 1) throw new Error('Stand guide carousel missing above product CTA');
             if (await guideCarousel.locator('figure').count() !== 8) throw new Error('Stand guide must show eight distinct realizations');
+            if (await guideCarousel.locator('button[data-stand-photo-open]').count() !== 8) throw new Error('Guide stand photos must open too');
+            const cookieLayerBeforeGuide = productPage.locator('[aria-labelledby="cookie-consent-title"]');
+            if (await cookieLayerBeforeGuide.isVisible()) {
+              await cookieLayerBeforeGuide.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();
+              await cookieLayerBeforeGuide.waitFor({state:'hidden'});
+            }
+            await guideCarousel.locator('button[data-stand-photo-open]').first().click();
+            const articleLightbox = productPage.locator('[data-stand-lightbox]');
+            await articleLightbox.waitFor({state:'visible'});
+            if (!await articleLightbox.locator('img').first().isVisible()) throw new Error('Guide lightbox has no photo');
+            await productPage.keyboard.press('Escape');
+            await articleLightbox.waitFor({state:'hidden'});
             if (width === 390) {
               const guideGalleryBox = await guideCarousel.boundingBox();
               if (!guideGalleryBox || guideGalleryBox.x > 2 || guideGalleryBox.x + guideGalleryBox.width < width - 2) {

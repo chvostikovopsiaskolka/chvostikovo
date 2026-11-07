@@ -30,7 +30,7 @@ const PAGE_URL = `${BASE_URL}/stojan-na-misky-pre-psa/`;
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Stojan na misky pre psa | Drevený stojan na mieru | Chvostíkovo";
 const description =
-  "Ručne vyrábaný drevený stojan na misky pre psa. Výška na mieru, dve nerezové misky v cene, farebné prevedenia a personalizácia menom.";
+  "Drevený stojan na misky pre malé, stredné aj veľké plemená psov. Výška na mieru aj pre dogu či vlkodava, dve nerezové misky, farba a meno podľa želania.";
 
 const FAQ = [
   {
@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: "Aké veľkosti vyrábate?",
-    a: "Vyrábame menšiu verziu približne 40 × 20 cm a väčšiu verziu približne 60 × 30 cm. Výšku prispôsobujeme psíkovi individuálne.",
+    a: "Menší stojan približne 40 × 20 cm je určený pre malé plemená a väčší približne 60 × 30 cm pre stredné a veľké plemená. Výšku prispôsobujeme konkrétnemu psíkovi v kohútiku, či ide o yorkšíra alebo írskeho vlkodava.",
   },
   {
     q: "Môžem si vybrať farbu a meno na stojane?",
@@ -77,9 +77,9 @@ const GALLERY = [
   },
 ];
 
-const SIZE_OPTIONS: Array<{ value: StandSize; label: string; detail: string }> = [
-  { value: "small", label: "Menší", detail: "cca 40 × 20 cm · menšie misky" },
-  { value: "large", label: "Väčší", detail: "cca 60 × 30 cm · väčšie misky" },
+const SIZE_OPTIONS: Array<{ value: StandSize; label: string; compactLabel: string; fullLabel: string; detail: string }> = [
+  { value: "small", label: "Menší", compactLabel: "Menší · malé plemená", fullLabel: "Menší · malé plemená", detail: "cca 40 × 20 cm · menšie misky" },
+  { value: "large", label: "Väčší", compactLabel: "Väčší · stredné/veľké", fullLabel: "Väčší · stredné a veľké plemená", detail: "cca 60 × 30 cm · väčšie misky" },
 ];
 
 const COLOR_OPTIONS: Array<{ value: StandColor; label: string }> = [
@@ -336,22 +336,25 @@ function BowlStandPage() {
                 />
                 <div>
                   <p className="font-display text-sm font-bold text-forest">Vyberte veľkosť stojana</p>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="mt-3 grid grid-cols-2 gap-2" data-stand-size-picker="hero">
                     {SIZE_OPTIONS.map((option) => (
                       <button
                         key={option.value}
                         type="button"
                         onClick={() => setSize(option.value)}
-                        className={`rounded-2xl border-2 p-3 text-left transition-colors duration-75 ${
+                        aria-label={`${option.label} stojan – ${option.value === "small" ? "malé plemená" : "stredné a veľké plemená"}`}
+                        aria-pressed={size === option.value}
+                        className={`min-w-0 rounded-2xl border-2 p-2.5 text-left transition-colors duration-75 sm:p-3 ${
                           size === option.value
                             ? "border-coral bg-coral-soft/25"
                             : "border-forest/10 bg-card"
                         }`}
                       >
-                        <span className="font-display text-sm font-bold text-forest">
-                          {option.label}
+                        <span className="block whitespace-nowrap font-display text-[10px] font-bold leading-tight tracking-tight text-forest sm:text-xs">
+                          <span className="xl:hidden">{option.compactLabel}</span>
+                          <span className="hidden xl:inline">{option.fullLabel}</span>
                         </span>
-                        <span className="mt-1 block text-xs leading-relaxed text-forest/60">
+                        <span className="mt-1 block text-[11px] leading-relaxed text-forest/60 sm:text-xs">
                           {option.detail}
                         </span>
                       </button>
@@ -453,13 +456,14 @@ function BowlStandPage() {
                             <p className="font-display text-sm font-bold text-forest">
                               1. Rozmer stojana
                             </p>
-                            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                            <div className="mt-3 grid grid-cols-2 gap-2" data-stand-size-picker="inquiry">
                               {SIZE_OPTIONS.map((option) => (
                                 <button
                                   key={option.value}
                                   type="button"
                                   onClick={() => setSize(option.value)}
-                                  className={`rounded-2xl border-2 p-3 text-left transition-colors duration-75 ${
+                                  aria-pressed={size === option.value}
+                                  className={`min-w-0 rounded-2xl border-2 p-2.5 text-left transition-colors duration-75 sm:p-3 ${
                                     size === option.value
                                       ? "border-coral bg-coral-soft/25"
                                       : "border-forest/10 bg-background"
@@ -575,11 +579,15 @@ function BowlStandPage() {
                 Dve veľkosti
               </p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">
-                Pre menších aj väčších psíkov
+                Stojany na misky pre malé, stredné aj veľké plemená
               </h2>
               <p className="mt-4 leading-relaxed text-forest/80">
-                Nechceme jednou univerzálnou veľkosťou riešiť každého psa. Vyberiete vhodný pôdorys
-                a samotnú výšku stojana prispôsobíme podľa psíka.
+                Vyrábame drevené stojany na misky pre malé, stredné aj veľké plemená psíkov.
+                Či už máte yorkšíra, maltézskeho psíka, labradora, maďarskú vyžlu,
+                nemeckú dogu alebo írskeho vlkodava, výška nám nerobí problém.
+                Stačí si vybrať farbu, napísať nám meno psíka a počkať si na svoj
+                originálny stojan. Rozmer misiek si zvolíte podľa veľkosti plemena
+                a výšku stojana prispôsobíme konkrétnemu psíkovi.
               </p>
             </div>
 
