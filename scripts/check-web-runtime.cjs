@@ -471,6 +471,13 @@ const failures = [];
                 cards,
               };
             });
+            const homepageStandCard = productPage.locator('#produkty a[href="/stojan-na-misky-pre-psa"]');
+            if (await homepageStandCard.getByRole('heading', { name: 'Drevený stojan', exact: true }).count() !== 1) {
+              throw new Error('Homepage stand card title must match the catalogue');
+            }
+            if (width === 1440 && await homepageStandCard.getByText('Vyberte si variant a objednajte si svoj stojan.', { exact: true }).count() !== 1) {
+              throw new Error('Homepage stand card description must be short');
+            }
             if (!sectionOrder.directlyAfterFaq || sectionOrder.heading !== 'Naše produkty' || sectionOrder.count !== 1) {
               throw new Error('Homepage product section must appear exactly once immediately below FAQ: ' + JSON.stringify(sectionOrder));
             }
@@ -515,7 +522,7 @@ const failures = [];
               const photoBox = await photo.boundingBox();
               if (!photoBox || photoBox.height < 210 || photoBox.height > 260) throw new Error('Product photo must be taller on mobile');
               if (!await firstCard.getByRole('heading', { name: 'Drevený stojan', exact: true }).count()) throw new Error('Catalogue stand title incorrect');
-              if (!await firstCard.getByText('Vyberte si variant a objednajte si vlastný stojan.', { exact: true }).count()) {
+              if (!await firstCard.getByText('Vyberte si variant a objednajte si svoj stojan.', { exact: true }).count()) {
                 throw new Error('Catalogue stand description incorrect');
               }
               const badges = photo.locator('[data-product-photo-features] > span');
@@ -535,8 +542,32 @@ const failures = [];
               }
               const targetBadges = catalog.locator('[data-product-card]').nth(1).locator('[data-product-photo-features] > span');
               if (await targetBadges.count() !== 3) throw new Error('Target benefits must also overlay its photo');
-              await productPage.getByRole('button', { name: 'Ďalší produkt' }).click();
-              if (!await productPage.getByText('2 / 2', { exact: true }).count()) throw new Error('Carousel navigation failed');
+              const nextProduct = productPage.getByRole('button', { name: 'Ďalší produkt' });
+              const catalogueCookieLayer = productPage.locator('[aria-labelledby="cookie-consent-title"]');
+              // The cookie modal can appear after hydration, including between
+              // our first consent check and a swipe/arrow click. Never force-click.
+              if (await catalogueCookieLayer.isVisible()) {
+                await catalogueCookieLayer.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();
+                await catalogueCookieLayer.waitFor({ state: 'hidden' });
+              }
+              try {
+                await nextProduct.click({ timeout: 4000 });
+              } catch (error) {
+                if (!(await catalogueCookieLayer.isVisible())) throw error;
+                await catalogueCookieLayer.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();
+                await catalogueCookieLayer.waitFor({ state: 'hidden' });
+                await nextProduct.click();
+              }
+              // Smooth scroll and snap update the counter asynchronously.
+              await productPage.getByText('2 / 2', { exact: true }).waitFor({ state: 'visible', timeout: 6000 });
+              await productPage.waitForFunction(
+                () => {
+                  const track = document.querySelector('[data-products-carousel]');
+                  return track && track.scrollLeft > 30;
+                },
+                null,
+                { timeout: 6000 },
+              ).catch(() => { throw new Error('Product carousel did not complete horizontal smooth scroll'); });
             }
             if (width === 390) {
               await productPage.goto(new URL('/en/dog-daycare-kosice', base).href);

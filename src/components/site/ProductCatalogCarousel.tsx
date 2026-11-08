@@ -10,7 +10,7 @@ const PRODUCTS = [
     alt: "Drevený stojan MIA s dvoma nerezovými miskami",
     eyebrow: "Stojany na misky",
     name: "Drevený stojan",
-    description: "Vyberte si variant a objednajte si vlastný stojan.",
+    description: "Vyberte si variant a objednajte si svoj stojan.",
     price: "40 €",
     features: [
       { icon: Sparkles, label: "2 misky v cene" },
@@ -43,7 +43,8 @@ export function ProductCatalogCarousel() {
     const card = root?.querySelectorAll<HTMLElement>("article")[index];
     const first = root?.querySelector<HTMLElement>("article");
     if (!root || !card || !first) return;
-    root.scrollTo({ left: card.offsetLeft - first.offsetLeft, behavior: "smooth" });
+    // Keep the carousel arrow and position synchronized on mobile browsers.
+    root.scrollLeft = card.offsetLeft - first.offsetLeft;
     setActive(index);
   }
 
