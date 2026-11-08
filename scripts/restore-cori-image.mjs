@@ -388,6 +388,13 @@ for (const item of listingReplacements) {
   } else if (source.includes(item.newImport)) {
     // This page already imports the restored original AVIF directly.
     console.log(`Sharp stand image already imported in ${item.file}`);
+  } else if (item.file === "src/routes/produkty.tsx" &&
+    source.includes('import { ProductCatalogCarousel } from "@/components/site/ProductCatalogCarousel";')) {
+    const catalogSource = await readFile(path.join(root, "src/components/site/ProductCatalogCarousel.tsx"), "utf8");
+    if (!catalogSource.includes(item.newImport)) {
+      throw new Error("Product catalog component must use sharp original MIA AVIF");
+    }
+    console.log("Product catalog component uses restored original MIA AVIF");
   } else {
     throw new Error(`Neither expected stand image import was found in ${item.file}`);
   }
