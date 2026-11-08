@@ -8,6 +8,25 @@ import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
+/** Compact, decorative source attribution shared by all Google review cards. */
+export function GoogleReviewMark() {
+  return (
+    <span
+      data-google-review-logo
+      role="img"
+      aria-label="Google"
+      className="pointer-events-none absolute right-3 top-3 inline-flex size-7 items-center justify-center rounded-full bg-white/85 sm:right-4 sm:top-4"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5">
+        <path fill="#4285F4" d="M21.35 11.1H12v3.8h5.35c-.23 1.22-.92 2.25-1.96 2.94v2.46h3.17c1.85-1.7 2.91-4.22 2.91-7.2 0-.68-.06-1.33-.12-2Z" />
+        <path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.61-2.45l-3.17-2.46c-.88.59-2.01.94-3.44.94-2.65 0-4.9-1.79-5.7-4.19H3.04v2.63A10 10 0 0 0 12 22Z" />
+        <path fill="#FBBC05" d="M6.3 13.84A6.05 6.05 0 0 1 5.98 12c0-.64.11-1.26.32-1.84V7.53H3.04A10 10 0 0 0 2 12c0 1.61.39 3.12 1.04 4.47l3.26-2.63Z" />
+        <path fill="#EA4335" d="M12 5.98c1.47 0 2.79.51 3.83 1.52l2.87-2.87C16.96 2.99 14.7 2 12 2A10 10 0 0 0 3.04 7.53l3.26 2.63c.8-2.4 3.05-4.18 5.7-4.18Z" />
+      </svg>
+    </span>
+  );
+}
+
 function ReviewCard({ name, text }: { name: string; text: string }) {
   const [open, setOpen] = useState(false);
   const body = useRef<HTMLQuoteElement>(null);
@@ -20,7 +39,8 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
+    <figure className="relative flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
+      <GoogleReviewMark />
       <div className="text-center">
         <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
         <span className="text-sm tracking-tight text-[#F5B301]">★★★★★</span>
