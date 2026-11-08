@@ -163,9 +163,11 @@ for (const route of ["psia-skolka-pre-steniatka", "produkty", "stojan-na-misky-p
 }
 const catalogueHtml = fs.readFileSync("dist/client/produkty/index.html", "utf8");
 assert(catalogueHtml.includes("Praktické produkty, ktoré ručne vyrábame."), "Updated products intro must be prerendered");
-for (const expected of ["2 misky v cene", "Personalizácia", "Výška na mieru"]) {
-  assert(catalogueHtml.includes(expected), "Compact catalogue benefit missing: " + expected);
+for (const expected of ["2 misky v cene", "Personalizácia", "Výška na mieru", "Vyberte si variant a objednajte si vlastný stojan."]) {
+  assert(catalogueHtml.includes(expected), "Compact catalogue benefit or short description missing: " + expected);
 }
+assert(catalogueHtml.includes('data-product-photo-features'), "Product benefits must be displayed on photos");
+assert(catalogueHtml.includes('Drevený stojan</h3>'), "Short product heading missing");
 console.log("[seo] PASS: puppy and product index sitemap + prerender + trailing-slash canonical");
 const puppyHtml = fs.readFileSync("dist/client/psia-skolka-pre-steniatka/index.html", "utf8");
 assert(puppyHtml.includes('id="puppy-benefits"'), "Target text section under puppy hero missing");
