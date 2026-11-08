@@ -510,10 +510,31 @@ const failures = [];
               if (!await catalog.evaluate(el => el.scrollWidth > el.clientWidth + 40)) throw new Error('Catalogue must swipe horizontally on mobile');
               const firstCard = catalog.locator('[data-product-card]').first();
               const cardBox = await firstCard.boundingBox();
-              if (!cardBox || cardBox.height > 470) throw new Error('Mobile catalogue card must remain compact');
-              for (const feature of ['2 misky v cene', 'Personalizácia', 'Výška na mieru']) {
-                if (!await firstCard.getByText(feature, { exact: true }).count()) throw new Error('Missing compact stand benefit: ' + feature);
+              if (!cardBox || cardBox.height > 540) throw new Error('Mobile catalogue card must remain compact');
+              const photo = firstCard.locator('[data-product-photo]');
+              const photoBox = await photo.boundingBox();
+              if (!photoBox || photoBox.height < 210 || photoBox.height > 260) throw new Error('Product photo must be taller on mobile');
+              if (!await firstCard.getByRole('heading', { name: 'Drevený stojan', exact: true }).count()) throw new Error('Catalogue stand title incorrect');
+              if (!await firstCard.getByText('Vyberte si variant a objednajte si vlastný stojan.', { exact: true }).count()) {
+                throw new Error('Catalogue stand description incorrect');
               }
+              const badges = photo.locator('[data-product-photo-features] > span');
+              if (await badges.count() !== 3) throw new Error('Three product benefits must overlay the photo');
+              const imageBounds = await photo.boundingBox();
+              const badgeBounds = await Promise.all([0,1,2].map(i => badges.nth(i).boundingBox()));
+              if (badgeBounds.some(b => !b) || !imageBounds) throw new Error('Product photo benefits are missing geometry');
+              if (badgeBounds.some(b => Math.abs(b.y - badgeBounds[0].y) > 2 || b.x < imageBounds.x - 1 || b.x + b.width > imageBounds.x + imageBounds.width + 1)) {
+                throw new Error('Product photo benefits must fit within one horizontal row');
+              }
+              for (const feature of ['2 misky v cene', 'Personalizácia', 'Výška na mieru']) {
+                if (!await badges.getByText(feature, { exact: true }).count()) throw new Error('Missing stand photo benefit: ' + feature);
+              }
+              for (const label of ['2 misky v cene', 'Personalizácia', 'Výška na mieru']) {
+                const item = badges.filter({ hasText: label });
+                if (await item.evaluate(el => el.scrollWidth > el.clientWidth + 2)) throw new Error('Product photo badge text overflows: ' + label);
+              }
+              const targetBadges = catalog.locator('[data-product-card]').nth(1).locator('[data-product-photo-features] > span');
+              if (await targetBadges.count() !== 3) throw new Error('Target benefits must also overlay its photo');
               await productPage.getByRole('button', { name: 'Ďalší produkt' }).click();
               if (!await productPage.getByText('2 / 2', { exact: true }).count()) throw new Error('Carousel navigation failed');
             }
