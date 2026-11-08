@@ -261,6 +261,7 @@ function BowlStandPage() {
         customer_name: String(fd.get("customer_name") ?? "").trim(),
         phone: phoneFromForm(event.currentTarget, "stand-phone"),
         email: String(fd.get("email") ?? "").trim(),
+        customer_location: String(fd.get("customer_location") ?? "").trim(),
         source_ref: "/stojan-na-misky-pre-psa",
         consent: true,
         company,
@@ -416,7 +417,7 @@ function BowlStandPage() {
                                 autoComplete="name"
                                 required
                                 maxLength={160}
-                                className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
+                                className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
                               />
                             </label>
                             <PhoneField
@@ -434,7 +435,20 @@ function BowlStandPage() {
                                 autoComplete="email"
                                 required
                                 maxLength={200}
-                                className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
+                                className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
+                              />
+                            </label>
+                            <label className="block font-display text-sm font-bold text-forest sm:col-span-2">
+                              Odkiaľ ste? (mesto, PSČ) *
+                              <input
+                                name="customer_location"
+                                autoComplete="off"
+                                placeholder="napr. Košice, 040 01"
+                                required
+                                maxLength={120}
+                                pattern="[^,]{2,80},[ ]*.{2,20}"
+                                title="Napíšte mesto a PSČ oddelené čiarkou, napr. Košice, 040 01"
+                                className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
                               />
                             </label>
                           </div>
@@ -502,7 +516,7 @@ function BowlStandPage() {
                                 onChange={(event) => setDogHeight(event.target.value)}
                                 inputMode="decimal"
                                 placeholder="napr. 58"
-                                className="w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 pr-12 font-sans font-normal outline-none focus:border-coral"
+                                className="w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 pr-12 font-sans text-base font-normal outline-none focus:border-coral"
                               />
                               <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-forest/50">
                                 cm
@@ -516,7 +530,7 @@ function BowlStandPage() {
                               value={nameOnStand}
                               onChange={(event) => setNameOnStand(event.target.value.slice(0, 24))}
                               placeholder="napr. Bella"
-                              className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
+                              className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
                             />
                             <span className="mt-1 block font-sans text-xs font-normal text-forest/50">
                               Ak personalizáciu nechcete, nechajte pole prázdne.
