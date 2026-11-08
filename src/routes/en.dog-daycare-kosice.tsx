@@ -35,7 +35,7 @@ import { Collapse } from "@/components/site/Collapse";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
-import { VideoReasonsGrid } from "@/components/site/Reviews";
+import { GoogleReviewMark, VideoReasonsGrid } from "@/components/site/Reviews";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 import { Care, About } from "@/components/site/Story";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
@@ -110,7 +110,8 @@ function EnglishReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
+    <figure className="relative flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
+      <GoogleReviewMark />
       <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
       <span className="text-sm tracking-tight text-[#F5B301]" aria-label="5 out of 5 stars">★★★★★</span>
       <blockquote
