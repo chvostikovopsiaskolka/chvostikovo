@@ -9,8 +9,8 @@ const PRODUCTS = [
     image: standMia,
     alt: "Drevený stojan MIA s dvoma nerezovými miskami",
     eyebrow: "Stojany na misky",
-    name: "Drevený stojan",
-    description: "Vyberte si variant a objednajte si svoj stojan.",
+    name: "Drevený stojan na misky pre psa",
+    description: "Stabilný ručne vyrábaný stojan s dvoma miskami. Výšku, farbu aj meno prispôsobíme vášmu psíkovi.",
     price: "40 €",
     features: [
       { icon: Sparkles, label: "2 misky v cene" },

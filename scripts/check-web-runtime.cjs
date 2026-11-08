@@ -152,6 +152,13 @@ const failures = [];
                 await productPage.getByRole('button', { name: /^Veľký/ }).first().click();
                 if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('veľkom targete'))) throw new Error('Large target image missing');
               }
+              const detailIntroText = route.includes('stojan')
+                ? 'Vyberte si variant a objednajte si stojan pre svojho psíka.'
+                : 'Vyberte si variant a objednajte si target pre svojho psíka.';
+              const detailIntro = productPage.locator('h1 + p');
+              if (await detailIntro.count() !== 1 || (await detailIntro.innerText()).trim() !== detailIntroText) {
+                throw new Error('Product detail intro is not the short approved message: ' + route);
+              }
               const valueSectionId = route.includes('stojan') ? 'stand-value-heading' : 'target-value-heading';
               const valueSection = productPage.locator('section[aria-labelledby="' + valueSectionId + '"]');
               if (await valueSection.count() !== 1) throw new Error('Product value section missing: ' + route);
@@ -472,10 +479,10 @@ const failures = [];
               };
             });
             const homepageStandCard = productPage.locator('#produkty a[href="/stojan-na-misky-pre-psa"]');
-            if (await homepageStandCard.getByRole('heading', { name: 'Drevený stojan', exact: true }).count() !== 1) {
+            if (await homepageStandCard.getByRole('heading', { name: 'Drevený stojan na misky pre psa', exact: true }).count() !== 1) {
               throw new Error('Homepage stand card title must match the catalogue');
             }
-            if (width === 1440 && await homepageStandCard.getByText('Vyberte si variant a objednajte si svoj stojan.', { exact: true }).count() !== 1) {
+            if (width === 1440 && await homepageStandCard.getByText('Dve nerezové misky, výška podľa psíka a prevedenie s personalizáciou podľa vášho želania.', { exact: true }).count() !== 1) {
               throw new Error('Homepage stand card description must be short');
             }
             if (!sectionOrder.directlyAfterFaq || sectionOrder.heading !== 'Naše produkty' || sectionOrder.count !== 1) {
@@ -521,8 +528,8 @@ const failures = [];
               const photo = firstCard.locator('[data-product-photo]');
               const photoBox = await photo.boundingBox();
               if (!photoBox || photoBox.height < 210 || photoBox.height > 260) throw new Error('Product photo must be taller on mobile');
-              if (!await firstCard.getByRole('heading', { name: 'Drevený stojan', exact: true }).count()) throw new Error('Catalogue stand title incorrect');
-              if (!await firstCard.getByText('Vyberte si variant a objednajte si svoj stojan.', { exact: true }).count()) {
+              if (!await firstCard.getByRole('heading', { name: 'Drevený stojan na misky pre psa', exact: true }).count()) throw new Error('Catalogue stand title incorrect');
+              if (!await firstCard.getByText('Stabilný ručne vyrábaný stojan s dvoma miskami.', { exact: false }).count()) {
                 throw new Error('Catalogue stand description incorrect');
               }
               const badges = photo.locator('[data-product-photo-features] > span');
