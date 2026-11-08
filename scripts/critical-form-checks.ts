@@ -72,6 +72,7 @@ standInquirySchema.parse({
   customer_name: "Test",
   phone,
   email: "test@example.com",
+  customer_location: "Košice, 040 01",
   source_ref: "/stojan-na-misky-pre-psa",
   consent: true,
   configuration: {
@@ -89,6 +90,7 @@ targetInquirySchema.parse({
   customer_name: "Test",
   phone,
   email: "test@example.com",
+  customer_location: "Košice, 040 01",
   source_ref: "/target-na-cvicenie-pre-psov",
   consent: true,
   configuration: {
@@ -98,6 +100,17 @@ targetInquirySchema.parse({
   },
 });
 
+assert(!standInquirySchema.safeParse({
+  client_submission_id: "00000000-0000-4000-8000-000000000001",
+  product_type: "stand",
+  customer_name: "Test",
+  phone,
+  email: "test@example.com",
+  customer_location: "Košice 04001",
+  source_ref: "/stojan-na-misky-pre-psa",
+  consent: true,
+  configuration: { size: "small", color: "natural", dog_height_cm: 40, name_on_stand: "", letter_color: "dark" },
+}).success, "Product city/postcode must be separated by a comma");
 const forms = readFileSync(new URL("../src/components/site/Forms.tsx", import.meta.url), "utf8");
 assert(!forms.includes('name="duvod2"'), "Second usage selector must not be rendered.");
 
@@ -198,6 +211,7 @@ for (const interest of [
 
 const productBackend = readFileSync(new URL("../supabase/functions/product-inquiry-submit/index.ts", import.meta.url), "utf8");
 assert(productBackend.includes("/^\\+\\d{7,15}$/"), "Critical form check failed: product inquiry phone regex is not the expected E.164 validation.");
+assert(productBackend.includes("customer_location") && productBackend.includes("securityLimitV336"), "Location persistence must retain LIVE product rate limiting");
 
 await import("./tracking-form-checks");
 await import("./form-autofill-checks");
