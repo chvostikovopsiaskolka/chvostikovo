@@ -236,6 +236,21 @@ const failures = [];
               await productPage.getByRole('button', { name: action }).first().click();
               await productPage.locator('input[name="customer_name"]:visible').waitFor();
               if (!await productPage.locator('input[name="email"]:visible').count()) throw new Error('Product inquiry contact missing');
+              const locationInput = productPage.locator('input[name="customer_location"]:visible');
+              if (await locationInput.count() !== 1 || await locationInput.getAttribute('required') === null) {
+                throw new Error('Product city and postal code field missing');
+              }
+              const productDialog = productPage.getByRole('dialog', { name: action });
+              await productDialog.waitFor({ state: 'visible' });
+              if (await productDialog.getAttribute('data-form-dialog') !== 'simple-v300') throw new Error('Product must use stable iOS modal');
+              if (width === 390) {
+                for (const input of await productDialog.locator('input:visible:not([type="checkbox"])').all()) {
+                  const fontSize = await input.evaluate(el => Number.parseFloat(getComputedStyle(el).fontSize));
+                  if (fontSize < 16) throw new Error('Product iOS input zoom risk: ' + (await input.getAttribute('name')));
+                }
+                const locked = await productPage.evaluate(() => document.body.style.position === 'fixed' && document.documentElement.style.overflow === 'hidden');
+                if (!locked) throw new Error('Product form background scroll must be locked on iOS');
+              }
               if (route.includes('stojan')) {
                 // Independently test the size-card CTA from a fresh real customer view:
                 // the hero CTA above was opened earlier to verify its fields.
@@ -480,9 +495,27 @@ const failures = [];
             if (width === 390) {
               await productPage.locator('.mobile-dock[data-variant="main"]').getByRole('link', { name: 'Produkty', exact: true }).click();
               await productPage.waitForURL(/\/produkty\/?$/);
+              // Consent is a real blocking dialog; accept only the necessary cookies
+              // before interacting, never force-click through the overlay.
+              const catalogueConsent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
+              if (await catalogueConsent.isVisible()) await catalogueConsent.click();
               if (!await productPage.getByRole('heading', { level: 1, name: /Naše produkty pre psov/i }).count()) {
                 throw new Error('Mobile dock did not open the existing products catalogue');
               }
+              if (!await productPage.getByText('Praktické produkty, ktoré ručne vyrábame.', { exact: false }).count()) {
+                throw new Error('Updated catalogue intro missing');
+              }
+              const catalog = productPage.locator('[data-products-carousel]');
+              if (await catalog.locator('[data-product-card]').count() !== 2) throw new Error('Two products must be in one carousel');
+              if (!await catalog.evaluate(el => el.scrollWidth > el.clientWidth + 40)) throw new Error('Catalogue must swipe horizontally on mobile');
+              const firstCard = catalog.locator('[data-product-card]').first();
+              const cardBox = await firstCard.boundingBox();
+              if (!cardBox || cardBox.height > 470) throw new Error('Mobile catalogue card must remain compact');
+              for (const feature of ['2 misky v cene', 'Personalizácia', 'Výška na mieru']) {
+                if (!await firstCard.getByText(feature, { exact: true }).count()) throw new Error('Missing compact stand benefit: ' + feature);
+              }
+              await productPage.getByRole('button', { name: 'Ďalší produkt' }).click();
+              if (!await productPage.getByText('2 / 2', { exact: true }).count()) throw new Error('Carousel navigation failed');
             }
             if (width === 390) {
               await productPage.goto(new URL('/en/dog-daycare-kosice', base).href);

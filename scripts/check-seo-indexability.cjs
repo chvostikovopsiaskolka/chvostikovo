@@ -161,6 +161,11 @@ for (const route of ["psia-skolka-pre-steniatka", "produkty", "stojan-na-misky-p
   assert(prerendered.includes('rel="canonical"') && prerendered.includes('href="' + preferred + '"'),
     "Static HTML must expose the final canonical URL: " + route);
 }
+const catalogueHtml = fs.readFileSync("dist/client/produkty/index.html", "utf8");
+assert(catalogueHtml.includes("Praktické produkty, ktoré ručne vyrábame."), "Updated products intro must be prerendered");
+for (const expected of ["2 misky v cene", "Personalizácia", "Výška na mieru"]) {
+  assert(catalogueHtml.includes(expected), "Compact catalogue benefit missing: " + expected);
+}
 console.log("[seo] PASS: puppy and product index sitemap + prerender + trailing-slash canonical");
 const puppyHtml = fs.readFileSync("dist/client/psia-skolka-pre-steniatka/index.html", "utf8");
 assert(puppyHtml.includes('id="puppy-benefits"'), "Target text section under puppy hero missing");

@@ -43,7 +43,7 @@ export function PhoneField({
           aria-label={language === "en" ? "Country calling code" : "Predvoľba krajiny"}
           defaultValue={initial.current.prefix}
           onChange={notifyChange}
-          className="shrink-0 border-r border-border bg-secondary/55 px-2 text-sm font-semibold text-forest outline-none sm:px-2.5"
+          className="shrink-0 border-r border-border bg-secondary/55 px-2 text-base font-semibold text-forest outline-none sm:px-2.5"
         >
           {COUNTRY_CODES.map((code) => (
             <option key={code} value={code}>

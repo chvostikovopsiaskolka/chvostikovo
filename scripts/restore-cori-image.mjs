@@ -283,7 +283,7 @@ if (!routeSource.includes(galleryImportAnchor)) {
 routeSource = routeSource.replace(galleryImportAnchor, galleryImports);
 
 const dialogImportAnchor = 'import { Collapse } from "@/components/site/Collapse";';
-const dialogImports = `${dialogImportAnchor}\nimport { ContentDialog } from "@/components/site/ContentDialog";`;
+const dialogImports = `${dialogImportAnchor}\nimport { FormDialog } from "@/components/site/FormDialog";`;
 if (!routeSource.includes(dialogImportAnchor)) {
   throw new Error("Expected Collapse import anchor was not found in product route");
 }
@@ -339,14 +339,14 @@ if (!routeSource.includes(oldInquiryIcon)) {
 routeSource = routeSource.replace(oldInquiryIcon, newInquiryIcon);
 
 const oldInquiryOpen = `                  {orderOpen && (\n                    <div\n                      id="moznosti-objednavky-stojana"\n                      className="mt-3 rounded-4xl bg-card p-5 shadow-soft sm:p-6"\n                    >`;
-const newInquiryOpen = `                  <ContentDialog\n                    open={orderOpen}\n                    onOpenChange={setOrderOpen}\n                    title="Mám záujem o stojan"\n                    subtitle="Vyberte rozmer, farbu, výšku a personalizáciu"\n                  >`;
+const newInquiryOpen = `                  <FormDialog\n                    open={orderOpen}\n                    onOpenChange={setOrderOpen}\n                    title="Mám záujem o stojan"\n                    subtitle="Vyberte rozmer, farbu, výšku a personalizáciu"\n                  >`;
 if (!routeSource.includes(oldInquiryOpen)) {
   throw new Error("Expected inline stand inquiry opening was not found in product route");
 }
 routeSource = routeSource.replace(oldInquiryOpen, newInquiryOpen);
 
 const oldInquiryClose = `                      )}\n                    </div>\n                  )}\n                </div>\n              </div>`;
-const newInquiryClose = `                      )}\n                  </ContentDialog>\n                </div>\n              </div>`;
+const newInquiryClose = `                      )}\n                  </FormDialog>\n                </div>\n              </div>`;
 if (!routeSource.includes(oldInquiryClose)) {
   throw new Error("Expected inline stand inquiry closing was not found in product route");
 }
@@ -388,6 +388,13 @@ for (const item of listingReplacements) {
   } else if (source.includes(item.newImport)) {
     // This page already imports the restored original AVIF directly.
     console.log(`Sharp stand image already imported in ${item.file}`);
+  } else if (item.file === "src/routes/produkty.tsx" &&
+    source.includes('import { ProductCatalogCarousel } from "@/components/site/ProductCatalogCarousel";')) {
+    const catalogSource = await readFile(path.join(root, "src/components/site/ProductCatalogCarousel.tsx"), "utf8");
+    if (!catalogSource.includes(item.newImport)) {
+      throw new Error("Product catalog component must use sharp original MIA AVIF");
+    }
+    console.log("Product catalog component uses restored original MIA AVIF");
   } else {
     throw new Error(`Neither expected stand image import was found in ${item.file}`);
   }

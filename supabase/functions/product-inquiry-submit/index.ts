@@ -1,3 +1,4 @@
+import {securityLimitV336,securityAccessV336} from "./security-v336.ts";
 const ALLOWED_ORIGINS = new Set([
   "https://chvostikovo.sk",
   "https://www.chvostikovo.sk",
@@ -57,6 +58,7 @@ async function sendNotificationEmail(inquiry: Record<string, any>) {
       `Meno zákazníka: ${inquiry.customer_name}`,
       `Telefón: ${inquiry.phone}`,
       `E-mail: ${inquiry.email}`,
+      `Odkiaľ ste: ${inquiry.customer_location || "neuvedené"}`,
       `Veľkosť: ${LABELS.targetSize[configuration.size] ?? configuration.size}`,
       `Požadovaná výška: ${configuration.height_cm ? `${configuration.height_cm} cm` : "štandardná 5 cm / podľa dohody"}`,
       `Poznámka: ${configuration.note || "bez poznámky"}`,
@@ -71,6 +73,7 @@ async function sendNotificationEmail(inquiry: Record<string, any>) {
       `Meno zákazníka: ${inquiry.customer_name}`,
       `Telefón: ${inquiry.phone}`,
       `E-mail: ${inquiry.email}`,
+      `Odkiaľ ste: ${inquiry.customer_location || "neuvedené"}`,
       `Rozmer: ${LABELS.size[configuration.size]}`,
       `Farba stojana: ${LABELS.color[configuration.color]}`,
       `Výška psíka: ${configuration.dog_height_cm} cm`,
@@ -137,6 +140,11 @@ Deno.serve(async (req: Request) => {
     const customerName = text(input.customer_name, 160);
     const phone = text(input.phone, 40);
     const email = text(input.email, 200).toLowerCase();
+    // Optional to keep requests from older deployed product forms compatible.
+    const customerLocation = text(input.customer_location, 120);
+    if (customerLocation && !/^[^,]{2,80},\s*.{2,20}$/u.test(customerLocation)) {
+      return response(origin, 400, { ok: false, error: "invalid_customer_location" });
+    }
     const sourceRef = text(
       input.source_ref ||
         (productType === "target" ? "/target-na-cvicenie-pre-psov" : "/stojan-na-misky-pre-psa"),
@@ -201,6 +209,11 @@ Deno.serve(async (req: Request) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!supabaseUrl || !serviceKey) throw new Error("missing_supabase_env");
+    const rateBase=Deno.env.get('SUPABASE_URL')||'',rateKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'';
+      const rateCors={'Access-Control-Allow-Origin':origin,Vary:'Origin'};
+      const limited=await securityLimitV336(req,'form_ip','',rateBase,rateKey,rateCors);if(limited)return limited;
+      const globalLimited=await securityLimitV336(req,'form_global','global',rateBase,rateKey,rateCors);if(globalLimited)return globalLimited;
+
     const authHeaders = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
 
     const existingResponse = await fetch(
@@ -234,6 +247,7 @@ Deno.serve(async (req: Request) => {
           customer_name: customerName,
           phone,
           email,
+          customer_location: customerLocation || null,
           status: "new",
           consent: true,
           configuration,

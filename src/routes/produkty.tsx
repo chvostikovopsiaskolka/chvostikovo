@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, Hammer, Paintbrush, Ruler, ShieldCheck, Sparkles, Type } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
-import standMia from "@/assets/products/stand-small-mia.webp";
-import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
+import { ProductCatalogCarousel } from "@/components/site/ProductCatalogCarousel";
 
 const BASE_URL = "https://chvostikovo.sk";
 const PAGE_URL = `${BASE_URL}/produkty/`;
@@ -37,125 +35,25 @@ function ProductsPage() {
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
       <main>
-        <section className="bg-background pt-8 pb-12 sm:pt-10 sm:pb-16 lg:pt-32">
+        <section className="bg-background pt-5 pb-5 sm:pt-10 sm:pb-10 lg:pt-32">
           <div className="mx-auto max-w-5xl px-4 text-center">
-            <h1 className="mx-auto max-w-4xl whitespace-nowrap text-[1.75rem] leading-[1.05] text-forest sm:whitespace-normal sm:text-5xl lg:text-6xl">
+            <h1 className="mx-auto max-w-4xl text-[1.7rem] leading-[1.07] text-forest sm:text-5xl lg:text-6xl">
               Naše <span className="text-coral-dark">produkty pre psov</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-forest/80">
-              Praktické produkty, ktoré vznikajú priamo v Chvostíkove. Vyrábame ich ručne, s dôrazom
-              na funkčnosť, kvalitné spracovanie a individuálne prevedenie.
+            <p className="mx-auto mt-3 max-w-3xl text-base leading-6 text-forest/80 sm:mt-5 sm:text-lg sm:leading-relaxed">
+              Praktické produkty, ktoré ručne vyrábame. S dôrazom na funkčnosť,
+              kvalitné spracovanie a individuálne prevedenie.
             </p>
           </div>
         </section>
-
-        <section className="bg-secondary/45 py-12 sm:py-16">
+        <section className="bg-secondary/45 pt-5 pb-10 sm:py-12" aria-labelledby="products-selection-title">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="mx-auto max-w-3xl text-center">
-              <h2 className="section-title text-3xl sm:text-4xl">Vyberte si produkt</h2>
-            </div>
-
-            <article className="mx-auto mt-9 grid max-w-4xl overflow-hidden rounded-4xl bg-card shadow-soft lg:grid-cols-[1fr_0.95fr]">
-              <a href="/stojan-na-misky-pre-psa" className="group block overflow-hidden">
-                <img
-                  src={standMia}
-                  alt="Drevený stojan na misky pre psa s personalizáciou"
-                  className="h-72 w-full object-cover transition duration-500 group-hover:scale-[1.02] sm:h-80 lg:h-full"
-                  style={{ objectPosition: "50% 63%" }}
-                />
-              </a>
-              <div className="flex flex-col justify-center p-6 sm:p-8">
-                <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">
-                  Stojany na misky
-                </p>
-                <h2 className="mt-2 text-2xl text-forest sm:text-3xl">
-                  Drevený stojan na misky pre psa
-                </h2>
-                <p className="mt-3 leading-relaxed text-forest/80">
-                  Stabilný stojan na dve nerezové misky. Výšku prispôsobíme psíkovi a farebné
-                  prevedenie aj meno doladíme podľa vášho želania, aby mal každý psík svoj originál.
-                </p>
-                <div className="mt-5 grid gap-2 text-sm text-forest/80 sm:grid-cols-2">
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
-                    <Sparkles className="size-4 shrink-0 text-coral" /> 2 nerezové misky v cene
-                  </span>
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
-                    <Ruler className="size-4 shrink-0 text-coral" /> Výška na mieru podľa psíka
-                  </span>
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
-                    <Paintbrush className="size-4 shrink-0 text-coral" /> Farba podľa želania
-                  </span>
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
-                    <Type className="size-4 shrink-0 text-coral" /> Personalizácia menom
-                  </span>
-                </div>
-                <div className="mt-6 flex items-end justify-between gap-4">
-                  <div>
-                    <p className="text-xs text-forest/60">Cena</p>
-                    <p className="font-display text-2xl font-bold text-forest">40 €</p>
-                  </div>
-                  <a
-                    href="/stojan-na-misky-pre-psa"
-                    className="btn-coral inline-flex items-center gap-2"
-                  >
-                    Detail produktu <ArrowRight className="size-4" />
-                  </a>
-                </div>
-              </div>
-            </article>
-
-            <article className="mx-auto mt-6 grid max-w-4xl overflow-hidden rounded-4xl bg-card shadow-soft lg:grid-cols-[1fr_0.95fr]">
-              <a href="/target-na-cvicenie-pre-psov" className="group block overflow-hidden">
-                <img
-                  src={targetLargeDog}
-                  alt="Pes stojaci na targete na cvičenie"
-                  className="h-72 w-full object-cover transition duration-500 group-hover:scale-[1.02] sm:h-80 lg:h-full"
-                  style={{ objectPosition: "50% 58%" }}
-                />
-              </a>
-              <div className="flex flex-col justify-center p-6 sm:p-8">
-                <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">
-                  Tréningové pomôcky
-                </p>
-                <h2 className="mt-2 text-2xl text-forest sm:text-3xl">
-                  Target na cvičenie pre psov
-                </h2>
-                <p className="mt-3 leading-relaxed text-forest/80">
-                  Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho
-                  postoja, koordinácie a rovnováhy.
-                </p>
-                <div className="mt-5 grid gap-2 text-sm text-forest/80 sm:grid-cols-2">
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
-                    <ShieldCheck className="size-4 shrink-0 text-coral" /> Protišmykový povrch
-                  </span>
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
-                    <Ruler className="size-4 shrink-0 text-coral" /> Veľký aj malý variant
-                  </span>
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
-                    <Hammer className="size-4 shrink-0 text-coral" /> Ručná výroba
-                  </span>
-                  <span className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
-                    <Sparkles className="size-4 shrink-0 text-coral" /> Výška podľa dohody
-                  </span>
-                </div>
-                <div className="mt-6 flex items-end justify-between gap-4">
-                  <div>
-                    <p className="text-xs text-forest/60">Cena</p>
-                    <p className="font-display text-2xl font-bold text-forest">20 €</p>
-                  </div>
-                  <a
-                    href="/target-na-cvicenie-pre-psov"
-                    className="btn-coral inline-flex items-center gap-2"
-                  >
-                    Detail produktu <ArrowRight className="size-4" />
-                  </a>
-                </div>
-              </div>
-            </article>
-
-            <div className="mx-auto mt-8 max-w-2xl rounded-3xl bg-card p-5 text-center shadow-card">
-              <Sparkles className="mx-auto size-6 text-coral" />
-              <p className="mt-3 leading-relaxed text-forest/75">
+            <h2 id="products-selection-title" className="section-title text-center text-2xl sm:text-4xl">
+              Vyberte si produkt
+            </h2>
+            <ProductCatalogCarousel />
+            <div className="mx-auto mt-5 max-w-2xl rounded-3xl bg-card p-4 text-center shadow-card sm:mt-8 sm:p-5">
+              <p className="text-sm leading-relaxed text-forest/75 sm:text-base">
                 Ponuku budeme postupne rozširovať o ďalšie produkty z našej výroby.
               </p>
             </div>

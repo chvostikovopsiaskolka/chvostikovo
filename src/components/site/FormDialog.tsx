@@ -63,7 +63,7 @@ export function FormDialog({
 
   function onOwnerNameBlur(event: FocusEvent<HTMLDivElement>) {
     const input = event.target;
-    if (!(input instanceof HTMLInputElement) || input.name !== "meno" || input.autocomplete !== "name") return;
+    if (!(input instanceof HTMLInputElement) || !["meno", "customer_name"].includes(input.name) || input.autocomplete !== "name") return;
     // This is an iOS Safari-specific Done/autofill workaround only. Keep the
     // normal scrolling behavior of every other field and on other platforms.
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||

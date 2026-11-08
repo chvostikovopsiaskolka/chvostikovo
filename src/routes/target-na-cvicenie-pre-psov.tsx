@@ -150,6 +150,7 @@ function TargetPage() {
         customer_name: String(fd.get("customer_name") ?? "").trim(),
         phone: phoneFromForm(event.currentTarget, "target-phone"),
         email: String(fd.get("email") ?? "").trim(),
+        customer_location: String(fd.get("customer_location") ?? "").trim(),
         source_ref: "/target-na-cvicenie-pre-psov",
         consent: true,
         company,
@@ -375,7 +376,7 @@ function TargetPage() {
                   autoComplete="name"
                   required
                   maxLength={160}
-                  className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
+                  className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
                 />
               </label>
               <PhoneField
@@ -393,7 +394,20 @@ function TargetPage() {
                   autoComplete="email"
                   required
                   maxLength={200}
-                  className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
+                  className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
+                />
+              </label>
+              <label className="block font-display text-sm font-bold text-forest sm:col-span-2">
+                Odkiaľ ste? (mesto, PSČ) *
+                <input
+                  name="customer_location"
+                  autoComplete="off"
+                  placeholder="napr. Košice, 040 01"
+                  required
+                  maxLength={120}
+                  pattern="[^,]{2,80},[ ]*.{2,20}"
+                  title="Napíšte mesto a PSČ oddelené čiarkou, napr. Košice, 040 01"
+                  className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
                 />
               </label>
             </div>
@@ -436,7 +450,7 @@ function TargetPage() {
                 onChange={(event) => setHeight(event.target.value)}
                 inputMode="decimal"
                 placeholder="5"
-                className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
+                className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
               />
               <span className="mt-1.5 block font-sans text-xs font-normal text-forest/55">
                 Nepovinné. Najbežnejší model má výšku približne 5 cm.
@@ -450,7 +464,7 @@ function TargetPage() {
                 onChange={(event) => setNote(event.target.value)}
                 maxLength={1000}
                 rows={3}
-                className="mt-2 w-full resize-none rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans font-normal outline-none focus:border-coral"
+                className="mt-2 w-full resize-none rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
                 placeholder="Čokoľvek, čo máme pri výrobe vedieť."
               />
             </label>
