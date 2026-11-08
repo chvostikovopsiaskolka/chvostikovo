@@ -553,7 +553,14 @@ const failures = [];
               }
               // Smooth scroll and snap update the counter asynchronously.
               await productPage.getByText('2 / 2', { exact: true }).waitFor({ state: 'visible', timeout: 6000 });
-              if (!await catalog.evaluate(el => el.scrollLeft > 30)) throw new Error('Product carousel did not scroll horizontally');
+              await productPage.waitForFunction(
+                () => {
+                  const track = document.querySelector('[data-products-carousel]');
+                  return track && track.scrollLeft > 30;
+                },
+                null,
+                { timeout: 6000 },
+              ).catch(() => { throw new Error('Product carousel did not complete horizontal smooth scroll'); });
             }
             if (width === 390) {
               await productPage.goto(new URL('/en/dog-daycare-kosice', base).href);
