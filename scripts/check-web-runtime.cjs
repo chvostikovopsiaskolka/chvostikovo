@@ -495,6 +495,10 @@ const failures = [];
             if (width === 390) {
               await productPage.locator('.mobile-dock[data-variant="main"]').getByRole('link', { name: 'Produkty', exact: true }).click();
               await productPage.waitForURL(/\/produkty\/?$/);
+              // Consent is a real blocking dialog; accept only the necessary cookies
+              // before interacting, never force-click through the overlay.
+              const catalogueConsent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
+              if (await catalogueConsent.isVisible()) await catalogueConsent.click();
               if (!await productPage.getByRole('heading', { level: 1, name: /Naše produkty pre psov/i }).count()) {
                 throw new Error('Mobile dock did not open the existing products catalogue');
               }
