@@ -37,7 +37,7 @@ assert(homeHtml.includes('href="/stojan-na-misky-pre-psa"') &&
   "Both direct product links must remain crawlable in homepage HTML");
 assert(homeHtml.includes('href="/produkty"'), "Products listing must be linked from the homepage");
 assert(homeHtml.includes("stand-mia-"), "Homepage product teaser must use restored original stand photo");
-assert(homeHtml.includes("Vyberte si variant a objednajte si svoj stojan."), "Short homepage stand card description missing");
+assert(homeHtml.includes("Dve nerezové misky, výška podľa psíka a prevedenie s personalizáciou podľa vášho želania."), "Informative homepage stand description missing");
 console.log("[seo] PASS: homepage FAQ → products → About order and product links");
 assert(homeHtml.includes("utm_source=chvostikovo"), "Bellaris credit missing UTM source");
 assert(homeHtml.includes("utm_medium=referral"), "Bellaris credit missing UTM medium");
@@ -164,11 +164,11 @@ for (const route of ["psia-skolka-pre-steniatka", "produkty", "stojan-na-misky-p
 }
 const catalogueHtml = fs.readFileSync("dist/client/produkty/index.html", "utf8");
 assert(catalogueHtml.includes("Praktické produkty, ktoré ručne vyrábame."), "Updated products intro must be prerendered");
-for (const expected of ["2 misky v cene", "Personalizácia", "Výška na mieru", "Vyberte si variant a objednajte si svoj stojan."]) {
+for (const expected of ["2 misky v cene", "Personalizácia", "Výška na mieru", "Stabilný ručne vyrábaný stojan s dvoma miskami."]) {
   assert(catalogueHtml.includes(expected), "Compact catalogue benefit or short description missing: " + expected);
 }
 assert(catalogueHtml.includes('data-product-photo-features'), "Product benefits must be displayed on photos");
-assert(catalogueHtml.includes('Drevený stojan</h3>'), "Short product heading missing");
+assert(catalogueHtml.includes('Drevený stojan na misky pre psa</h3>'), "Informative product title missing");
 console.log("[seo] PASS: puppy and product index sitemap + prerender + trailing-slash canonical");
 const puppyHtml = fs.readFileSync("dist/client/psia-skolka-pre-steniatka/index.html", "utf8");
 assert(puppyHtml.includes('id="puppy-benefits"'), "Target text section under puppy hero missing");
@@ -222,6 +222,7 @@ for (const spec of [
     assert(productHtml.includes(heading), "Missing hero product value: " + heading);
   }
   if (spec.product === "stojan-na-misky-pre-psa") {
+    assert(productHtml.includes('Vyberte si variant a objednajte si stojan pre svojho psíka.'), "Stand detail short description missing");
     assert(productHtml.includes('data-stand-gallery="autoplay"'), "Stand photo gallery is not autoplay-enabled");
     assert(productHtml.includes('Stojany na misky pre malé, stredné aj veľké plemená'), "Stand breed SEO copy missing from product");
     for (const photo of ["stand-mlyncek-", "stand-aron-", "stand-loki-", "stand-planetky-", "stand-aloy-", "stand-psik-pri-miskach-", "stand-maya-", "stand-gael-", "stand-lara-", "stand-safira-"]) {
@@ -234,6 +235,7 @@ for (const spec of [
     assert(productHtml.includes('Mám záujem o väčší stojan'), "Large stand carousel CTA missing");
     assert(markup.includes('object-cover'), "Stand guide photo should fill its frame");
   } else {
+    assert(productHtml.includes('Vyberte si variant a objednajte si target pre svojho psíka.'), "Target detail short description missing");
     assert(productHtml.includes('data-photo-carousel="target"'), "Target photo gallery missing");
     assert(productHtml.includes('Rehabilitácia a fyzioterapia'), "Target rehab use case missing");
     assert(productHtml.includes('Poslušnosť a zotrvanie na mieste'), "Target stationing use case missing");

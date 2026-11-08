@@ -321,8 +321,7 @@ function BowlStandPage() {
                 Drevený stojan na <span className="text-coral-dark">misky pre psa</span>
               </h1>
               <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
-                Dve nerezové misky, výška prispôsobená psíkovi a prevedenie podľa vášho želania.
-                Vyberte si variant a objednajte si vlastný stojan.
+                Vyberte si variant a objednajte si stojan pre svojho psíka.
               </p>
               </div>
 

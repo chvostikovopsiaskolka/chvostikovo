@@ -198,8 +198,7 @@ function TargetPage() {
                 Target na cvičenie <span className="text-coral-dark">pre psov</span>
               </h1>
               <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
-                Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho
-                postoja, koordinácie a rovnováhy.
+                Vyberte si variant a objednajte si target pre svojho psíka.
               </p>
               </div>
 
