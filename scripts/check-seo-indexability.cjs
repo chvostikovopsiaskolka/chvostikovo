@@ -37,6 +37,7 @@ assert(homeHtml.includes('href="/stojan-na-misky-pre-psa"') &&
   "Both direct product links must remain crawlable in homepage HTML");
 assert(homeHtml.includes('href="/produkty"'), "Products listing must be linked from the homepage");
 assert(homeHtml.includes("stand-mia-"), "Homepage product teaser must use restored original stand photo");
+assert(homeHtml.includes("Vyberte si variant a objednajte si svoj stojan."), "Short homepage stand card description missing");
 console.log("[seo] PASS: homepage FAQ → products → About order and product links");
 assert(homeHtml.includes("utm_source=chvostikovo"), "Bellaris credit missing UTM source");
 assert(homeHtml.includes("utm_medium=referral"), "Bellaris credit missing UTM medium");
@@ -163,7 +164,7 @@ for (const route of ["psia-skolka-pre-steniatka", "produkty", "stojan-na-misky-p
 }
 const catalogueHtml = fs.readFileSync("dist/client/produkty/index.html", "utf8");
 assert(catalogueHtml.includes("Praktické produkty, ktoré ručne vyrábame."), "Updated products intro must be prerendered");
-for (const expected of ["2 misky v cene", "Personalizácia", "Výška na mieru", "Vyberte si variant a objednajte si vlastný stojan."]) {
+for (const expected of ["2 misky v cene", "Personalizácia", "Výška na mieru", "Vyberte si variant a objednajte si svoj stojan."]) {
   assert(catalogueHtml.includes(expected), "Compact catalogue benefit or short description missing: " + expected);
 }
 assert(catalogueHtml.includes('data-product-photo-features'), "Product benefits must be displayed on photos");

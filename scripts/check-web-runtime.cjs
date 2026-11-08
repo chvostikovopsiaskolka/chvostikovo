@@ -471,6 +471,13 @@ const failures = [];
                 cards,
               };
             });
+            const homepageStandCard = productPage.locator('#produkty a[href="/stojan-na-misky-pre-psa"]');
+            if (await homepageStandCard.getByRole('heading', { name: 'Drevený stojan', exact: true }).count() !== 1) {
+              throw new Error('Homepage stand card title must match the catalogue');
+            }
+            if (width === 1440 && await homepageStandCard.getByText('Vyberte si variant a objednajte si svoj stojan.', { exact: true }).count() !== 1) {
+              throw new Error('Homepage stand card description must be short');
+            }
             if (!sectionOrder.directlyAfterFaq || sectionOrder.heading !== 'Naše produkty' || sectionOrder.count !== 1) {
               throw new Error('Homepage product section must appear exactly once immediately below FAQ: ' + JSON.stringify(sectionOrder));
             }
@@ -515,7 +522,7 @@ const failures = [];
               const photoBox = await photo.boundingBox();
               if (!photoBox || photoBox.height < 210 || photoBox.height > 260) throw new Error('Product photo must be taller on mobile');
               if (!await firstCard.getByRole('heading', { name: 'Drevený stojan', exact: true }).count()) throw new Error('Catalogue stand title incorrect');
-              if (!await firstCard.getByText('Vyberte si variant a objednajte si vlastný stojan.', { exact: true }).count()) {
+              if (!await firstCard.getByText('Vyberte si variant a objednajte si svoj stojan.', { exact: true }).count()) {
                 throw new Error('Catalogue stand description incorrect');
               }
               const badges = photo.locator('[data-product-photo-features] > span');
