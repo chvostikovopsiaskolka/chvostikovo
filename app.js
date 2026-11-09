@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v413';
-const APP_VERSION='2.0.86';
+const APP_BUILD='v414';
+const APP_VERSION='2.0.87';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -4471,7 +4471,7 @@ function installVaccinationViewerZoomV244(modal){
     drawOverview();
     const count=rows().filter(row=>!rowsState.read.has(Number(row.id))).length;
     const badge=$('customerAnnouncementsCountV363');if(badge){badge.textContent=String(count);badge.classList.toggle('hidden',!count);}
-    $('customerAnnouncementsV363')?.setAttribute('aria-label',count?'Oznamy, neprečítané: '+count:'Oznamy');
+    $('menuBulletinV229')?.setAttribute('aria-label',count?'Oznamy, neprečítané: '+count:'Oznamy');
   }
   function drawHistory(){
     if(!archiveModal)return;
@@ -4677,7 +4677,6 @@ function installVaccinationViewerZoomV244(modal){
   window.addEventListener('pageshow',event=>{if(event.persisted&&loggedIn())void refresh(false)});
   function init(){
     $('menuBulletinV229')?.addEventListener('click',()=>openHistory(true));
-    $('customerAnnouncementsV363')?.addEventListener('click',()=>openHistory(true));
     $('customerMessagesV363')?.addEventListener('click',openCustomerChat);
     addCustomerHook('afterUpdateUnread',()=>{const count=(state.data?.messages||[]).filter(m=>m.sender_role==='staff'&&!m.read_at).length;const badge=$('customerMessagesCountV363');if(badge){badge.textContent=String(count);badge.classList.toggle('hidden',!count);}$('customerMessagesV363')?.setAttribute('aria-label',count?'Správy, neprečítané: '+count:'Správy');});
     drawBoard();
