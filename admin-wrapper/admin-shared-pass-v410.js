@@ -28,8 +28,12 @@
   // has an active/queued pass (including explicit pass_dogs memberships).
   const existingCurrentPass = pool => {
     if(pool.length!==2)return true;
-    const passes=runtime()?.state?.passes;
-    if(!Array.isArray(passes))return true;
+    const passStore=runtime()?.state?.passes;
+    const mapLike=passStore&&typeof passStore.get==='function'&&typeof passStore.values==='function';
+    if(!mapLike&&!Array.isArray(passStore))return true;
+    const passes=mapLike
+      ?pool.flatMap(d=>passStore.get(num(d.id))||[])
+      :passStore;
     const ids=pool.map(d=>num(d.id));
     return passes.some(p=>['active','queued'].includes(p.status)&&(
       ids.includes(num(p.dog_id))||

@@ -47,7 +47,8 @@ const flush=()=>new Promise(res=>setTimeout(res,35));
   assert.equal(w.document.getElementById('chvoPairLaunchV409'),null,'Already linked dogs have no pairing action');
   assert.match(w.document.getElementById('chvoPairBoxV409').textContent,/Spárovaní psíkovia: Synthetic A \+ Synthetic B/);
   // Two explicit pass_dogs rows (not just a common owner) yield a shared pass readout.
-  w.__chvostikovoAdminRuntime.state.passes=[{id:501,dog_id:1,status:'active',used_entries:6,total_entries:10,valid_until:'2026-12-23',pass_dogs:[{dog_id:1},{dog_id:2}]}];
+  const activeShared={id:501,dog_id:1,status:'active',used_entries:6,total_entries:10,valid_until:'2026-12-23',pass_dogs:[{dog_id:1},{dog_id:2}]};
+  w.__chvostikovoAdminRuntime.state.passes=new Map([[1,[activeShared]],[2,[activeShared]]]);
   w.document.getElementById('openDog').click();await flush();
   assert.match(w.document.getElementById('chvoPairBoxV409').textContent,/Aktívna spoločná permanentka.*6 z 10/);
   assert.equal(w.document.getElementById('chvoPairLaunchV409'),null);
