@@ -3301,3 +3301,10 @@ button span,button svg,button svg *{pointer-events:none}
 #vaccProofActionsV392 .btn{min-height:44px;flex:1 1 140px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 #vaccProofActionsV392 label{display:flex;align-items:center;justify-content:center;cursor:pointer}
 #vaccProofEditorV244:has(#vaccProofEditFileV244:focus-visible) #vaccProofActionsV392 label{outline:2px solid var(--orange);outline-offset:2px}
+
+/* v413: optional dog weight, required-field cues and vaccine deferral. */
+.dog-required-marker-v413{color:#b45309;font-weight:900;white-space:nowrap}
+.dog-required-explain-v413{font-size:12px;color:var(--muted);line-height:1.35}
+.dog-optional-v413{font-size:12px;color:var(--muted);font-weight:500}
+#dogVaccinationsLaterV413{min-height:44px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+#dogVaccinationsLaterV413:focus-visible,#dogDetailsOnboardingLaterV413:focus-visible{outline:2px solid currentColor;outline-offset:3px}
