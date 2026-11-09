@@ -3308,3 +3308,7 @@ button span,button svg,button svg *{pointer-events:none}
 .dog-optional-v413{font-size:12px;color:var(--muted);font-weight:500}
 #dogVaccinationsLaterV413{min-height:44px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 #dogVaccinationsLaterV413:focus-visible,#dogDetailsOnboardingLaterV413:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+
+/* v414: external catalog dock link retains the existing five-slot control sizing. */
+.bottom-nav #customerShopV414{display:flex;align-items:center;justify-content:center;text-align:center;box-sizing:border-box;min-height:54px;text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+.bottom-nav #customerShopV414:focus-visible{outline:3px solid currentColor;outline-offset:-3px}
