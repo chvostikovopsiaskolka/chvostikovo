@@ -6,5 +6,6 @@ assert(js.includes("c.rpc('admin_purchase_shared_pass_v348'"),'Use existing guar
 assert(js.includes('p_use_today_single:false'),'Never convert prior-day visits by a new sale');
 assert(js.includes('p_operation_id:operationId'),'Idempotency token required');
 assert(js.includes("confirm.checked"),'Staff confirms amount');
+assert(js.includes('existingCurrentPass(pool)'),'Existing active pass prevents a duplicate sale launcher');
 assert(!js.includes("from('visits').update("),'Must not mutate historical visits');
 console.log('PASS guarded new shared pass only, no historic finance/visit mutation');
