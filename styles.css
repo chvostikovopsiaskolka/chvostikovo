@@ -3312,3 +3312,16 @@ button span,button svg,button svg *{pointer-events:none}
 /* v414: external catalog dock link retains the existing five-slot control sizing. */
 .bottom-nav #customerShopV414{display:flex;align-items:center;justify-content:center;text-align:center;box-sizing:border-box;min-height:54px;text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 .bottom-nav #customerShopV414:focus-visible{outline:3px solid currentColor;outline-offset:-3px}
+
+/* v415: keep the optional weight label on one line even on narrow phone screens. */
+@media (max-width:480px){
+  #dogDetailsModal .dog-breed-weight-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  #dogDetailsModal .dog-breed-weight-row label[for="dogWeight"]{
+    display:flex;align-items:baseline;gap:3px;white-space:nowrap;
+    font-size:clamp(11px,3.4vw,14px);letter-spacing:-.02em;
+  }
+  #dogDetailsModal .dog-breed-weight-row label[for="dogWeight"] .dog-optional-v413{
+    display:inline-block;flex:0 0 auto;white-space:nowrap;
+    font-size:clamp(9px,2.5vw,10.5px);letter-spacing:-.02em;
+  }
+}
