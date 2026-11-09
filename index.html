@@ -11,9 +11,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="/icon-192.png">
-  <link rel="manifest" href="/manifest.webmanifest?v=v412">
-  <link rel="stylesheet" href="/styles.css?v=v412">
-  <link rel="stylesheet" href="/dog-choice-fab-v276.css?v=v412">
+  <link rel="manifest" href="/manifest.webmanifest?v=v413">
+  <link rel="stylesheet" href="/styles.css?v=v413">
+  <link rel="stylesheet" href="/dog-choice-fab-v276.css?v=v413">
   <style id="customer-l4-chevron-fix-v217">
     #dogDetailsModal .vaccine-box .l4-inline-v213 > summary .l4-question-v216 {
       display:block!important;flex:1 1 auto!important;min-width:0!important;
@@ -54,11 +54,11 @@
   </style>
   <style>.loading-screen{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:14px;background:#fff;color:#6b7280;text-align:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.loading-screen.hidden{display:none}.loading-logo{display:block;width:min(240px,62vw);height:auto;margin:0 0 12px;opacity:.76}.loading-paw{width:48px;height:48px;display:grid;place-items:center;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;font-size:20px;animation:loadingSpin .8s linear infinite}.loading-screen small{font-size:13px;font-weight:700}@keyframes loadingSpin{to{transform:rotate(360deg)}}.loading-screen.in-app{background:transparent;pointer-events:none;padding:0}.loading-screen.in-app .loading-logo,.loading-screen.in-app small{display:none}.loading-screen.in-app .loading-paw{width:68px;height:68px;border:0;border-radius:18px;background:#fff;box-shadow:0 10px 34px rgba(17,24,39,.16);font-size:0;animation:none}.loading-screen.in-app .loading-paw::before{content:'🐾';width:42px;height:42px;border:4px solid #ffedd5;border-top-color:#f97316;border-radius:50%;display:grid;place-items:center;font-size:18px;animation:loadingSpin .8s linear infinite}</style>
   <title>Chvostíkovo</title>
-  <link rel="stylesheet" href="/bulletin-photo-v243.css?v=v412">
-<link rel="stylesheet" href="/dual-dog-overview-v246.css?v=v412">
-<link rel="stylesheet" href="/loading-design.css?v=v412">
-<link rel="stylesheet" href="/customer-design.css?v=v412">
-<script defer src="/loading-motion.js?v=v412"></script>
+  <link rel="stylesheet" href="/bulletin-photo-v243.css?v=v413">
+<link rel="stylesheet" href="/dual-dog-overview-v246.css?v=v413">
+<link rel="stylesheet" href="/loading-design.css?v=v413">
+<link rel="stylesheet" href="/customer-design.css?v=v413">
+<script defer src="/loading-motion.js?v=v413"></script>
 <style id="customer-locale-style-v408">
 #customerLocaleSwitchV408{display:flex;align-items:center;justify-content:center;gap:4px;margin:18px auto 0;padding:4px;width:max-content;max-width:100%;border-radius:999px;background:#f3f4f6;border:1px solid #e7e4e6;position:relative;z-index:1}
 #customerLocaleSwitchV408 button{min-width:62px;min-height:44px;border:0;border-radius:999px;background:transparent;color:#4b5563;font:700 14px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer}
@@ -220,48 +220,48 @@
     <div id="dogDetailsPhotoControl" class="dog-details-photo-control"><div class="dog-details-photo-wrap"><span id="dogDetailsPhotoPreview" class="dog-details-photo-preview">🐾</span><button id="dogDetailsPhotoButton" class="photo-pencil" type="button" aria-label="Upraviť fotku" title="Upraviť fotku">✎</button></div><input id="dogPhotoInput" class="hidden" type="file" accept="image/*"></div>
     <form id="dogForm" class="form-stack">
       <input id="dogId" type="hidden"><input id="submissionId" type="hidden">
-      <div id="dogBasicFieldsV96" class="dog-details-section-v96">
-        <div><label for="dogName">Meno psíka</label><input id="dogName" class="input dog-name-locked-v87" readonly aria-readonly="true" tabindex="-1" required></div>
-        <div class="grid2"><div><label for="dogBirthDate">Dátum narodenia</label><small class="birthdate-recommend-v100">Odporúčame vyplniť – psíka bude čakať narodeninové prekvapenie. 🎂🐾</small><input id="dogBirthDate" class="input" type="date" aria-describedby="dogBirthDateErrorV297"><small id="dogBirthDateErrorV297" class="dog-birthdate-error-v297 hidden" role="alert">Dátum narodenia nemôže byť v budúcnosti.</small></div><div><label for="dogAge">Vek</label><input id="dogAge" class="input dog-age-locked-v81" readonly aria-readonly="true" tabindex="-1" placeholder="Vyplní sa automaticky"></div></div>
-        <div class="dog-breed-weight-row"><div><label for="dogBreed">Plemeno</label><input id="dogBreed" class="input" autocomplete="off"></div><div><label for="dogWeight">Váha (kg)</label><input id="dogWeight" class="input" type="number" inputmode="decimal" min="0.1" step="any" autocomplete="off"></div></div>
-        <div class="grid2"><div><label for="dogSex">Pohlavie</label><select id="dogSex" class="input"><option value=""></option><option value="male">Pes</option><option value="female">Suka</option></select></div><div><label for="dogNeutered">Kastrovaný / sterilizovaná</label><select id="dogNeutered" class="input"><option value=""></option><option value="true">Áno</option><option value="false">Nie</option></select></div></div>
+      <div id="dogBasicFieldsV96" class="dog-details-section-v96"><small class="dog-required-explain-v413">* označuje povinný údaj</small>
+        <div><label for="dogName">Meno psíka <span class="dog-required-marker-v413" aria-hidden="true">*</span></label><input id="dogName" class="input dog-name-locked-v87" readonly aria-readonly="true" tabindex="-1" required></div>
+        <div class="grid2"><div><label for="dogBirthDate">Dátum narodenia <span class="dog-required-marker-v413" aria-hidden="true">*</span></label><small class="birthdate-recommend-v100">Odporúčame vyplniť – psíka bude čakať narodeninové prekvapenie. 🎂🐾</small><input id="dogBirthDate" class="input" type="date" aria-describedby="dogBirthDateErrorV297"><small id="dogBirthDateErrorV297" class="dog-birthdate-error-v297 hidden" role="alert">Dátum narodenia nemôže byť v budúcnosti.</small></div><div><label for="dogAge">Vek</label><input id="dogAge" class="input dog-age-locked-v81" readonly aria-readonly="true" tabindex="-1" placeholder="Vyplní sa automaticky"></div></div>
+        <div class="dog-breed-weight-row"><div><label for="dogBreed">Plemeno <span class="dog-required-marker-v413" aria-hidden="true">*</span></label><input id="dogBreed" class="input" autocomplete="off"></div><div><label for="dogWeight">Váha (kg) <small class="dog-optional-v413">(nepovinné)</small></label><input id="dogWeight" class="input" type="number" inputmode="decimal" min="0.1" step="any" autocomplete="off"></div></div>
+        <div class="grid2"><div><label for="dogSex">Pohlavie <span class="dog-required-marker-v413" aria-hidden="true">*</span></label><select id="dogSex" class="input"><option value=""></option><option value="male">Pes</option><option value="female">Suka</option></select></div><div><label for="dogNeutered">Kastrovaný / sterilizovaná</label><select id="dogNeutered" class="input"><option value=""></option><option value="true">Áno</option><option value="false">Nie</option></select></div></div>
         <details id="dogAllergiesDetailsV298" class="dog-allergies-details-v298"><summary><span>Alergie a zdravotné obmedzenia <small>(ak psík nejaké má)</small></span><span class="dog-allergies-chevron-v298" aria-hidden="true">⌄</span></summary><div class="dog-allergies-body-v298"><label for="dogAllergies" class="dog-allergies-label-v298">Alergie, lieky a zdravotné obmedzenia</label><textarea id="dogAllergies" class="input" rows="2" maxlength="3000" placeholder="Alergie, lieky, zdravotné obmedzenia alebo čo psík nesmie"></textarea></div></details>
         <div><label for="dogTemperament">Povaha a ďalšie informácie</label><textarea id="dogTemperament" class="input" rows="2" maxlength="3000" placeholder="Správanie, zvyky a ďalšie dôležité informácie o psíkovi"></textarea></div>
       </div>
-      <div id="dogVaccinationFieldsV96" class="dog-details-section-v96">
+      <div id="dogVaccinationFieldsV96" class="dog-details-section-v96"><small class="dog-required-explain-v413">* označuje povinný údaj</small>
         <div class="vacc-proof-box-v104">
-          <div class="vacc-proof-head-v104"><div><strong>Fotografie očkovacieho preukazu</strong><small>Nahrajte alebo odfoťte 1 až 5 fotografií strán s platnosťou očkovaní.</small></div><span id="vaccProofCountV104" class="vacc-proof-count-v104">0</span></div>
+          <div class="vacc-proof-head-v104"><div><strong>Fotografie očkovacieho preukazu <span class="dog-required-marker-v413" aria-hidden="true">*</span></strong><small>Nahrajte alebo odfoťte 1 až 5 fotografií strán s platnosťou očkovaní.</small></div><span id="vaccProofCountV104" class="vacc-proof-count-v104">0</span></div>
           <div id="vaccProofCurrentV104" class="vacc-proof-grid-v104"></div>
           <div id="vaccProofStagedV104" class="vacc-proof-staged-v104 hidden"></div>
           <button id="vaccProofReplaceV104" class="btn secondary vacc-proof-replace-v104 hidden" type="button">Upraviť fotky</button>
           <input id="vaccProofLibraryV104" type="file" accept="image/*" multiple hidden>
           <div id="vaccProofMessageV104" class="vacc-proof-message-v104"></div>
         </div>
-        <div class="vaccine-box"><strong>Besnota</strong><label>Platí do</label><input id="rabiesUntil" class="input" type="date"><div id="rabiesStatusV96" class="vaccine-validity-v96 neutral"></div></div>
-        <div class="vaccine-box"><strong>Infekčné ochorenia (DHPPi+L)</strong><div class="vaccine-disease-hint-v96"><span>Psinka · infekčný zápal pečene · parvoviróza</span><span>Psia parainfluenza · leptospiróza</span></div><label>Platí do</label><input id="infectiousUntil" class="input" type="date"><div id="infectiousStatusV96" class="vaccine-validity-v96 neutral"></div><details id="leptoL4DetailsV211" class="l4-vaccine-v211 l4-inline-v213"><summary aria-label="Má váš psík leptospirózu zaočkovanú zvlášť?"><span class="l4-question-v216">Má váš psík leptospirózu zaočkovanú zvlášť?</span><span aria-hidden="true">⌄</span></summary><div class="l4-content-v211"><p>Dátum vyplňte iba pri samostatnom očkovaní L4. Ak má psík spoločné DHPPi+L, nechajte toto pole prázdne.</p><label for="leptoL4UntilV211">Platí do (nepovinné)</label><input id="leptoL4UntilV211" name="lepto_l4_until" class="input" type="date"><div id="leptoL4StatusV211" class="vaccine-validity-v96 neutral"></div></div></details></div>
-        <div class="vaccine-box"><strong>Kotercový kašeľ</strong><label>Platí do</label><input id="kennelUntil" class="input" type="date"><div id="kennelStatusV96" class="vaccine-validity-v96 neutral"></div></div>
+        <div class="vaccine-box"><strong>Besnota</strong><label>Platí do <span class="dog-required-marker-v413" aria-hidden="true">*</span></label><input id="rabiesUntil" class="input" type="date"><div id="rabiesStatusV96" class="vaccine-validity-v96 neutral"></div></div>
+        <div class="vaccine-box"><strong>Infekčné ochorenia (DHPPi+L)</strong><div class="vaccine-disease-hint-v96"><span>Psinka · infekčný zápal pečene · parvoviróza</span><span>Psia parainfluenza · leptospiróza</span></div><label>Platí do <span class="dog-required-marker-v413" aria-hidden="true">*</span></label><input id="infectiousUntil" class="input" type="date"><div id="infectiousStatusV96" class="vaccine-validity-v96 neutral"></div><details id="leptoL4DetailsV211" class="l4-vaccine-v211 l4-inline-v213"><summary aria-label="Má váš psík leptospirózu zaočkovanú zvlášť?"><span class="l4-question-v216">Má váš psík leptospirózu zaočkovanú zvlášť?</span><span aria-hidden="true">⌄</span></summary><div class="l4-content-v211"><p>Dátum vyplňte iba pri samostatnom očkovaní L4. Ak má psík spoločné DHPPi+L, nechajte toto pole prázdne.</p><label for="leptoL4UntilV211">Platí do (nepovinné)</label><input id="leptoL4UntilV211" name="lepto_l4_until" class="input" type="date"><div id="leptoL4StatusV211" class="vaccine-validity-v96 neutral"></div></div></details></div>
+        <div class="vaccine-box"><strong>Kotercový kašeľ</strong><label>Platí do <span class="dog-required-marker-v413" aria-hidden="true">*</span></label><input id="kennelUntil" class="input" type="date"><div id="kennelStatusV96" class="vaccine-validity-v96 neutral"></div></div>
          
       </div>
-      <button class="btn full" type="submit">Uložiť</button>
+      <button class="btn full" type="submit">Uložiť</button><button id="dogVaccinationsLaterV413" class="btn secondary full dog-vaccines-later-v413 hidden" type="button">Zadám neskôr</button>
       <div id="dogMessage"></div>
     </form>
   </div>
 </div>
 <div id="toast" class="toast hidden"></div>
-<script src="/terms-pdf-font.js?v=v412"></script>
-<script src="/terms-pdf.js?v=v412"></script>
-<script src="/telemetry-v345.js?v=v412"></script>
-<script src="/customer-locale-v409.js?v=v412"></script>
-<script src="/customer-legal-en-v411.js?v=v412"></script>
-<script src="/app.js?v=v412"></script>
-<script src="/dual-dog-overview-v246.js?v=v412"></script>
-<script src="/back-swipe.js?v=v412"></script>
+<script src="/terms-pdf-font.js?v=v413"></script>
+<script src="/terms-pdf.js?v=v413"></script>
+<script src="/telemetry-v345.js?v=v413"></script>
+<script src="/customer-locale-v409.js?v=v413"></script>
+<script src="/customer-legal-en-v411.js?v=v413"></script>
+<script src="/app.js?v=v413"></script>
+<script src="/dual-dog-overview-v246.js?v=v413"></script>
+<script src="/back-swipe.js?v=v413"></script>
 <script src="/android-install-choice-v308.js?v=20261019-android-choice-v308"></script>
-<script src="/customer-design.js?v=v412"></script>
+<script src="/customer-design.js?v=v413"></script>
 <!-- V3 isolated preview: Chromium SVG lens; selected WebKit surfaces use WebGL. -->
-<script type="module" src="/customer-liquid-optics.js?v=v412"></script>
-<link rel="stylesheet" href="/customer-guide-v358.css?v=v412">
-<script src="/customer-guide-v358.js?v=v412"></script>
+<script type="module" src="/customer-liquid-optics.js?v=v413"></script>
+<link rel="stylesheet" href="/customer-guide-v358.css?v=v413">
+<script src="/customer-guide-v358.js?v=v413"></script>
 </body>
 </html>
 
