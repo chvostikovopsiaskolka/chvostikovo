@@ -982,7 +982,7 @@ html.customer-auth-glass-v386.customer-ios-auth-v410 #authView>.auth-card>.lg-v3
 /* A photo is per account; absent or failed photos get a centered placeholder. */
 .customer-design #bookingTab #bookingDogAvatar.dog-photo-missing-v412{display:grid!important;place-items:center!important;text-align:center!important;font-size:38px!important;line-height:1!important}
 /* Keep the badge number centered without changing the dock geometry. */
-.customer-design .bottom-nav #menuBulletinV229 .customer-menu-notice-count-v414:not(.hidden){display:grid!important;place-items:center!important;position:absolute;width:17px!important;min-width:17px!important;height:17px!important;top:1px;right:1px;padding:0!important;line-height:1!important;text-align:center!important;font-variant-numeric:tabular-nums}
+.customer-design #menuBulletinV229 .customer-menu-notice-count-v414:not(.hidden){display:grid!important;place-items:center!important;position:absolute;width:17px!important;min-width:17px!important;height:17px!important;top:1px;right:1px;padding:0!important;line-height:1!important;text-align:center!important;font-variant-numeric:tabular-nums}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
  .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241){background:#f9dce9!important}
  .customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241){background:#daeafb!important}
