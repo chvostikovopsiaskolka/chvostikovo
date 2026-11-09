@@ -127,7 +127,7 @@
           // binding tolerates a missing element. Leave profile, push and logout intact.
           const withoutWorkspaceSwitch = html.replace(/<button\b[^>]*\bid=["']adminSwitchWorkspace["'][^>]*>[\s\S]*?<\/button>/i, '');
           // Isolated staff pairing controls; the original Supabase admin stays authoritative.
-          const withPairing = withoutWorkspaceSwitch.replace(/<\/body>/i, '<script src="/admin-pair-v409.js?v=20261103"><\/script><script src="/admin-shared-pass-v410.js?v=20261103"><\/script></body>');
+          const withPairing = withoutWorkspaceSwitch.replace(/<\/body>/i, '<script src="/admin-pair-v409.js?v=20261109-v418"><\/script><script src="/admin-shared-pass-v410.js?v=20261109-v418"><\/script></body>');
           document.open(); document.write(withPairing); document.close();
         } catch (e) {
           started = false;
