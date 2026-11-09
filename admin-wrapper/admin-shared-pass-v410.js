@@ -23,6 +23,19 @@
     const pool=getDogs().filter(d=>d.active&&num(d.owner_id)===num(primary.owner_id));
     return pool.length===2&&pool.some(d=>num(d.id)===currentDogId)?pool:[];
   };
+  // The new-sale action is not an owner-pairing or shared-pass repair tool.
+  // Fail closed if pass data has not loaded, and hide it when either dog already
+  // has an active/queued pass (including explicit pass_dogs memberships).
+  const existingCurrentPass = pool => {
+    if(pool.length!==2)return true;
+    const passes=runtime()?.state?.passes;
+    if(!Array.isArray(passes))return true;
+    const ids=pool.map(d=>num(d.id));
+    return passes.some(p=>['active','queued'].includes(p.status)&&(
+      ids.includes(num(p.dog_id))||
+      (Array.isArray(p.pass_dogs)&&p.pass_dogs.some(member=>ids.includes(num(member.dog_id))))
+    ));
+  };
   const style=document.createElement('style');
   style.textContent='#chvoSharedLaunchV410{margin-top:10px;min-height:44px}#chvoSharedModalV410{position:fixed;inset:0;z-index:100001;display:grid;place-items:center;padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px);background:#11182799}#chvoSharedModalV410[hidden]{display:none!important}#chvoSharedModalV410>section{box-sizing:border-box;background:#fff;border-radius:20px;padding:22px;max-height:100%;overflow:auto;width:min(100%,440px);color:#1f2937}#chvoSharedModalV410 label{display:flex;gap:10px;line-height:1.5}#chvoSharedModalV410 button{min-height:44px;border-radius:12px;padding:8px 14px;cursor:pointer}#chvoSharedModalV410 button[disabled]{opacity:.5}#chvoSharedStatusV410{min-height:24px;font-size:13px}';
   document.head.appendChild(style);
@@ -36,11 +49,13 @@
     scheduled=false;
     if(byId('dogDetail').classList.contains('hidden'))return;
     const target=byId('dogInfoCard');
-    if(!target||target.querySelector('#chvoSharedLaunchV410'))return;
-    const pool=ownPair();
-    if(pool.length!==2)return;
+    if(!target)return;
+    const pool=ownPair(),existing=byId('chvoSharedBoxV410');
+    if(pool.length!==2||existingCurrentPass(pool)){existing?.remove();return}
+    if(existing?.parentElement===target)return;
+    existing?.remove();
     const btn=document.createElement('button');btn.id='chvoSharedLaunchV410';btn.type='button';btn.className='btn full';btn.textContent='Zakúpiť spoločnú permanentku (2 psíkovia)';
-    const div=document.createElement('div');div.className='chvo-pair-v409';div.append(btn);
+    const div=document.createElement('div');div.id='chvoSharedBoxV410';div.className='chvo-pair-v409';div.append(btn);
     const note=document.createElement('p');note.className='muted small';note.textContent='Nový predaj pre oboch; minulé návštevy sa nemenia.';
     div.append(note);target.append(div);
   }
@@ -51,7 +66,7 @@
   },true);
   new MutationObserver(schedule).observe(detail,{childList:true});
   function open(){
-    const pool=ownPair();if(pool.length!==2)return;
+    const pool=ownPair();if(pool.length!==2||existingCurrentPass(pool))return;
     byId('chvoSharedDogsV410').textContent=pool.map(d=>d.name).join(' + ');
     confirm.checked=false;status.textContent='';buy.disabled=false;
     operationId=crypto.randomUUID();
@@ -70,7 +85,7 @@
     if(pending||modal.hidden)return;
     if(!confirm.checked){status.textContent='Potvrďte skutočný nový predaj.';return}
     const pool=ownPair(),c=client();
-    if(pool.length!==2||!c?.rpc||!c?.from){status.textContent='Chýba aktívne prihlásenie alebo sa zmenilo vlastníctvo psíkov.';return}
+    if(pool.length!==2||existingCurrentPass(pool)||!c?.rpc||!c?.from){status.textContent='Existujúca permanentka, nenačítané údaje alebo neplatné prihlásenie. Nový predaj nie je povolený.';return}
     pending=true;buy.disabled=true;status.textContent='Kontrolujem predaj…';
     try{
       const ids=pool.map(d=>num(d.id)).sort((a,b)=>a-b);

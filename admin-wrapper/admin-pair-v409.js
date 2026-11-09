@@ -28,16 +28,60 @@
   function fail(message) { status.textContent=String(message || 'Úkon sa nepodaril.'); }
   function dogs() { return Array.isArray(runtime()?.state?.dogs) ? runtime().state.dogs : []; }
   const id = value => Number(value);
+  function existingOwnerPair() {
+    const selected=dogs().find(d=>id(d.id)===currentDogId&&d.active&&id(d.owner_id)>0);
+    if(!selected)return [];
+    const pool=dogs().filter(d=>d.active&&id(d.owner_id)===id(selected.owner_id));
+    return pool.length===2?pool.sort((a,b)=>id(a.id)-id(b.id)):[];
+  }
+  function existingSharedPass(pool) {
+    if(pool.length!==2)return null;
+    const passes=runtime()?.state?.passes;
+    if(!Array.isArray(passes))return null;
+    const ids=pool.map(d=>id(d.id)).sort((a,b)=>a-b);
+    return passes.find(p=>{
+      if(!['active','queued'].includes(p.status))return false;
+      const members=[...new Set((Array.isArray(p.pass_dogs)?p.pass_dogs:[]).map(m=>id(m.dog_id)))].sort((a,b)=>a-b);
+      return members.length===2&&members.every((member,i)=>member===ids[i]);
+    })||null;
+  }
   function renderLauncher() {
     queued=false;
-    if (!currentDogId || wrapper.classList.contains('hidden')) return;
-    if (!dogs().some(d => id(d.id)===currentDogId && d.active)) return;
+    if(!currentDogId||wrapper.classList.contains('hidden'))return;
+    if(!dogs().some(d=>id(d.id)===currentDogId&&d.active))return;
     const target=byId('dogInfoCard')||detail;
-    if (!target || target.querySelector('#chvoPairLaunchV409')) return;
-    const box=document.createElement('div');box.className='chvo-pair-v409';
-    const button=document.createElement('button');button.id='chvoPairLaunchV409';button.type='button';button.className='btn secondary full';button.textContent='Spárovať s ďalším psíkom';
-    const note=document.createElement('p');note.className='muted small';note.textContent='Pre spoločnú permanentku musia mať obaja psíkovia jedného overeného majiteľa.';
-    box.append(button,note);target.appendChild(box);
+    if(!target)return;
+    const pair=existingOwnerPair(),pass=existingSharedPass(pair);
+    const signature=JSON.stringify(pair.length===2
+      ?['linked',pair.map(d=>id(d.id)),pass?.id,pass?.status,pass?.used_entries,pass?.total_entries,pass?.valid_until]
+      :['unlinked',currentDogId]);
+    const previous=byId('chvoPairBoxV409');
+    if(previous?.parentElement===target&&previous.dataset.signature===signature)return;
+    previous?.remove();
+    const box=document.createElement('div');
+    box.id='chvoPairBoxV409';box.className='chvo-pair-v409';box.dataset.signature=signature;
+    if(pair.length===2){
+      box.classList.add('chvo-pair-confirmed-v418');
+      const heading=document.createElement('strong');
+      heading.textContent='Spárovaní psíkovia: '+pair.map(d=>d.name).join(' + ');
+      const note=document.createElement('p');
+      note.className='muted small';
+      if(pass){
+        const valid=pass.valid_until?new Intl.DateTimeFormat('sk-SK',{timeZone:'Europe/Bratislava',day:'numeric',month:'numeric',year:'numeric'}).format(new Date(pass.valid_until+'T12:00:00Z')):'';
+        note.textContent=(pass.status==='active'?'Aktívna':'Nasledujúca')+' spoločná permanentka · '+Number(pass.used_entries||0)+' z '+Number(pass.total_entries||0)+' použitých vstupov'+(valid?' · platí do '+valid:'');
+      }else{
+        note.textContent='Obaja psíkovia už majú spoločného majiteľa. Prípadnú permanentku nájdete v záložke Vstupy.';
+      }
+      box.append(heading,note);
+    }else{
+      const button=document.createElement('button');
+      button.id='chvoPairLaunchV409';button.type='button';button.className='btn secondary full';
+      button.textContent='Spárovať s ďalším psíkom';
+      const note=document.createElement('p');note.className='muted small';
+      note.textContent='Pre spoločnú permanentku musia mať obaja psíkovia jedného overeného majiteľa.';
+      box.append(button,note);
+    }
+    target.appendChild(box);
   }
   function schedule() { if(queued)return;queued=true;requestAnimationFrame(renderLauncher); }
   document.addEventListener('click', e => {
