@@ -38,7 +38,8 @@
     if(pool.length!==2)return null;
     const passStore=runtime()?.state?.passes;
     // Main admin indexes passes into Map<dogId, pass[]> (including both shared members).
-    const passes=passStore instanceof Map
+    const mapLike=passStore&&typeof passStore.get==='function'&&typeof passStore.values==='function';
+    const passes=mapLike
       ?pool.flatMap(d=>passStore.get(id(d.id))||[])
       :Array.isArray(passStore)?passStore:[];
     const ids=pool.map(d=>id(d.id)).sort((a,b)=>a-b);
