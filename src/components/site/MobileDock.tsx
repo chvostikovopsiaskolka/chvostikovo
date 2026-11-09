@@ -249,11 +249,19 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
               href={id === "produkty" && !marketing ? "/produkty" : homePath + (id === "top" ? "" : "#" + id)}
               key={id}
               aria-current={activeSection === id ? "location" : undefined}
+              aria-label={id === "starostlivost" ? label : undefined}
               className={"mobile-dock-item" + (activeSection === id ? " is-active" : "")}
               onClick={(event) => go(event, id === "produkty" && !marketing ? "/produkty" : homePath + (id === "top" ? "" : "#" + id))}
             >
               <Icon aria-hidden="true" size={19} strokeWidth={1.9} />
-              <span>{label}</span>
+              <span>
+                {id === "starostlivost" ? (
+                  <>
+                    <span className="mobile-dock-label-long">{label}</span>
+                    <span className="mobile-dock-label-short" aria-hidden="true">Starostl.</span>
+                  </>
+                ) : label}
+              </span>
             </a>
           ))}
           {!marketing && (

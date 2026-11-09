@@ -51,6 +51,8 @@
 }
 
 :root {
+  /* Preserve the intentionally light brand palette in Android Auto Dark Theme. */
+  color-scheme: only light;
   --radius: 1.25rem;
 
   --cream: oklch(0.985 0.012 85);
@@ -444,8 +446,7 @@
     touch-action: manipulation;
   }
   .mobile-dock-item svg { flex-shrink: 0; }
-  /* At 320px the long Slovak label must wrap inside its own 44px slot,
-     never paint over the adjacent Priestory or Cenník labels. */
+  /* Keep dock labels within their touch targets on narrow phones. */
   .mobile-dock-item > span {
     display: block;
     box-sizing: border-box;
@@ -456,8 +457,11 @@
     text-align: center;
     line-height: 1.12;
   }
-  @media (max-width: 359px) {
+  .mobile-dock-label-short { display: none; }
+  @media (max-width: 379px) {
     .mobile-dock-item { min-height: 58px; }
+    .mobile-dock-label-long { display: none; }
+    .mobile-dock-label-short { display: inline; }
   }
   .mobile-dock-item.is-active {
     color: var(--forest-deep);
