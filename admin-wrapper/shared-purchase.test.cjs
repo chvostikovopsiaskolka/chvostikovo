@@ -1,7 +1,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
 const index=fs.readFileSync('admin-wrapper/index.html','utf8'),js=fs.readFileSync('admin-wrapper/admin-shared-pass-v410.js','utf8');
 new vm.Script(js);
-assert(index.includes('admin-shared-pass-v410.js?v=20261109-v418'));
+assert(index.includes('admin-shared-pass-v410.js?v=20261109-v419'));
 assert(js.includes("c.rpc('admin_purchase_shared_pass_v348'"),'Use existing guarded shared purchase RPC');
 assert(js.includes('p_use_today_single:false'),'Never convert prior-day visits by a new sale');
 assert(js.includes('p_operation_id:operationId'),'Idempotency token required');
