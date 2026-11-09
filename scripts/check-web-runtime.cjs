@@ -529,7 +529,7 @@ const failures = [];
                 meta: document.querySelector('meta[name="color-scheme"]')?.getAttribute('content'),
                 root: getComputedStyle(document.documentElement).colorScheme,
               }));
-              if (pageColors.meta !== 'only light' || pageColors.root !== 'only light') {
+              if (pageColors.meta !== 'only light' || !['only light', 'light only'].includes(pageColors.root)) {
                 throw new Error('Android Auto Dark Theme opt-out is missing: ' + JSON.stringify(pageColors));
               }
               // Verify the short dock label on narrow Android-like viewports.
