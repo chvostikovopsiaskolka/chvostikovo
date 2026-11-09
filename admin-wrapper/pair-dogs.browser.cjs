@@ -41,6 +41,17 @@ const flush=()=>new Promise(res=>setTimeout(res,35));
   assert.match(w.document.getElementById('chvoPairStatusV409').textContent,/Hotovo/);
   assert.equal(data.passes.length,0,'No pass sale');
   assert.equal(data.pass_dogs.length,0,'No pass members added before purchase');
+  // Once the owner is shared, the UI must stop offering the same pairing again.
+  w.document.getElementById('dogInfoCard').replaceChildren();
+  w.document.getElementById('openDog').click();await flush();
+  assert.equal(w.document.getElementById('chvoPairLaunchV409'),null,'Already linked dogs have no pairing action');
+  assert.match(w.document.getElementById('chvoPairBoxV409').textContent,/Spárovaní psíkovia: Synthetic A \+ Synthetic B/);
+  // Two explicit pass_dogs rows (not just a common owner) yield a shared pass readout.
+  w.__chvostikovoAdminRuntime.state.passes=[{id:501,dog_id:1,status:'active',used_entries:6,total_entries:10,valid_until:'2026-12-23',pass_dogs:[{dog_id:1},{dog_id:2}]}];
+  w.document.getElementById('openDog').click();await flush();
+  assert.match(w.document.getElementById('chvoPairBoxV409').textContent,/Aktívna spoločná permanentka.*6 z 10/);
+  assert.equal(w.document.getElementById('chvoPairLaunchV409'),null);
+  assert.equal(updateCount,1,'Existing pairing is read-only');
   w.close();
   console.log('PASS: admin staff dog pairing UI, explicit confirmation, guarded update, zero finance writes');
 })().catch(e=>{console.error(e);process.exitCode=1});
