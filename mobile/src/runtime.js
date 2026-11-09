@@ -22,6 +22,10 @@ if (Capacitor.isNativePlatform()) {
   }
   function hasActiveCustomerModal() {
     if (document.activeElement?.matches?.('input, textarea, select, [contenteditable="true"]')) return true;
+    const booking = document.getElementById('bookingTab');
+    // Never interrupt a reservation in progress, even between field focus events.
+    if (booking && !booking.classList.contains('hidden') &&
+        getComputedStyle(booking).display !== 'none') return true;
     return [...document.querySelectorAll('[aria-modal="true"],dialog[open]')].some(element => {
       if (element.id === 'chvo-native-update' || element.closest('#chvo-native-update')) return false;
       if (element.classList.contains('hidden')) return false;
@@ -41,6 +45,7 @@ if (Capacitor.isNativePlatform()) {
       }, 2000);
       return;
     }
+    const dialogVersionCode = offeredUpdateCode;
     showPlayUpdateDialog({
       language: window.ChvostikovoLocale?.getLanguage?.() || 'sk',
       onUpdate: async () => {
@@ -50,7 +55,7 @@ if (Capacitor.isNativePlatform()) {
       onLater: () => {
         try {
           localStorage.setItem(UPDATE_SNOOZE_KEY, JSON.stringify({
-            versionCode: offeredUpdateCode, until: Date.now() + PLAY_REMIND_LATER_MS
+            versionCode: dialogVersionCode, until: Date.now() + PLAY_REMIND_LATER_MS
           }));
         } catch (_) {}
         offeredUpdateCode = 0;
