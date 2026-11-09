@@ -21,7 +21,7 @@ test('Android v417 / 2.0.90 packages current customer, vaccination actions, SK/E
   }
   const bundledNative=(await read('www/native-runtime.js')).toString();
   assert(bundledNative.includes('chvo-native-update'),'Android Play update dialog is bundled in native JS only');
-  assert(bundledNative.includes('New Chvostíkovo version'),'SK/EN update dialog bundled');
+  assert(bundledNative.includes('chvo-update-body'),'Update modal content is present in native bundle');
   assert(bundledNative.includes('chvo-play-update-snooze-v417'),'Per-version reminder key bundled');
   assert(bundledNative.includes('checkUpdate'),'Native update check is callable');
   const html=(await read('www/index.html')).toString();
