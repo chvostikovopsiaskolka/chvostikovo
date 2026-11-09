@@ -82,7 +82,7 @@ async function assertPawsTransmit(page,selector,background){
    await page.evaluate(status=>{state.data.passes=[{id:1,dog_id:1,dog_ids:[1,2],total_entries:10,used_entries:status==='queued'?0:6,status,valid_until:'2099-12-31'}];renderPassSummary();renderDog();},status);
    assert(await page.locator('#designTicket').isVisible());assert((await page.locator('#designTicket').textContent()).includes('10'));assert.equal(await page.locator('.design-paws>span').count(),10);const divider=await page.locator('.design-paws').evaluate(el=>({style:getComputedStyle(el).borderTopStyle,width:getComputedStyle(el).borderTopWidth}));assert.equal(divider.style,'dashed');assert.equal(divider.width,'2px');if(width===390&&status==='active')await page.screenshot({path:'/tmp/glass-v369-pass-active-'+dogs+'.png'});
   }
-  assert(await page.locator('#customerMessagesV363').isVisible()&&await page.locator('#customerAnnouncementsV363').isVisible(),'both dock inbox actions remain visible after pass changes');
+  assert(await page.locator('#customerMessagesV363').isVisible()&&await page.locator('#customerShopV414').isVisible(),'messages and external shop dock actions remain visible after pass changes');
   if(width===390){await assertPawsTransmit(page, dogs===1?'.dog-overview-content':'.dual-dog-info-v254','body');await assertPawsTransmit(page,'#designTicket','body');await assertPawsTransmit(page,'#designNearest','body');await page.evaluate(()=>scrollTo(0,0));}
   await page.waitForTimeout(80);if(width===390){
    await page.screenshot({path:'/tmp/customer-liquid-v3-overview-'+dogs+'.png',animations:'disabled'});
@@ -103,9 +103,9 @@ async function assertPawsTransmit(page,selector,background){
   const keyboardChat=await page.locator('.support-chat-card-v52').boundingBox();assert(keyboardChat.y>=20&&keyboardChat.y+keyboardChat.height<=20+Math.max(200,height/2),'chat fits keyboard viewport');
   await page.evaluate(()=>{Object.defineProperty(visualViewport,'height',{configurable:true,value:window.__originalV370.height});Object.defineProperty(visualViewport,'offsetTop',{configurable:true,value:window.__originalV370.top});visualViewport.dispatchEvent(new Event('resize'));});await page.waitForTimeout(70);
   assert.deepEqual(await page.locator('.support-chat-card-v52').boundingBox(),chat,'chat restores original position after keyboard');await page.locator('#supportChatCloseV52').click();await page.waitForTimeout(70);
-  await page.locator('#customerAnnouncementsV363').click();await page.locator('[data-announcement-id="1"]').click();
+  await page.locator('#navDog').click();await page.locator('#menuDogGroup > summary').click();await page.locator('#menuBulletinV229').click();await page.locator('[data-announcement-id="1"]').click();
   const heading=await page.locator('#customerBulletinArticleV229 h2').boundingBox(),close=await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').boundingBox();assert(Math.abs(heading.y+heading.height/2-close.y-close.height/2)<1,'article heading aligns with X');
-  await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();await page.waitForTimeout(80);await page.locator('#customerBulletinHistoryV229 .customer-bulletin-close-v229').click();await page.waitForTimeout(80);
+  await page.locator('#customerBulletinArticleV229 .customer-bulletin-close-v229').click();await page.waitForTimeout(80);await page.locator('#customerBulletinHistoryV229 .customer-bulletin-close-v229').click();await page.waitForTimeout(80);await page.locator('#navBooking').click();
   const cdp=await context.newCDPSession(page);await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'reduce'}]});assert(await page.evaluate(()=>matchMedia('(prefers-reduced-transparency:reduce)').matches));
   const fallback=await page.locator('#designNearest>.lg-v3-material').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).backdropFilter}));assert.equal(fallback.blur,'none');assert.equal(fallback.bg,'rgb(255, 249, 243)');
   await cdp.send('Emulation.setEmulatedMedia',{features:[]});
