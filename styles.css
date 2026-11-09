@@ -3325,3 +3325,17 @@ button span,button svg,button svg *{pointer-events:none}
     font-size:clamp(9px,2.5vw,10.5px);letter-spacing:-.02em;
   }
 }
+
+/* v416: compact vaccination actions, with a clear outlined defer choice. */
+#dogDetailsModal[data-mode="vaccinations"] #dogForm > #dogVaccinationsLaterV413{
+  margin-top:-7px;
+  min-height:48px;
+  background:transparent!important;
+  border:2px solid var(--primary-dark)!important;
+  color:var(--primary-dark)!important;
+  box-shadow:none!important;
+}
+#dogDetailsModal[data-mode="vaccinations"] #dogForm > #dogVaccinationsLaterV413:focus-visible{
+  outline:2px solid var(--primary-dark)!important;
+  outline-offset:3px;
+}
