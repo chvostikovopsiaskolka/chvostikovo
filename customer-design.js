@@ -90,8 +90,20 @@
   function photoNode(dog, className) {
     const el = document.createElement('span'); el.className = className + (dog.sex==='male'?' male':dog.sex==='female'?' female':'');
     el.dataset.friendKey = String(dog.dog_id || dog.key || dog.name);
-    if (dog.photo_url) { const img = document.createElement('img'); img.src = dog.photo_url; img.alt = dog.name || 'Psík'; img.decoding='async'; el.append(img); }
-    else el.innerHTML = icon('paw');
+    // Keep the tile dimensions stable without a paw over real photo uploads.
+    // Non-photo / consent-hidden friends retain the pre-existing paw marker.
+    if (dog.photo_url) {
+      const img = document.createElement('img');
+      img.alt = dog.name || 'Psík'; img.decoding='async'; img.loading='eager';
+      const reveal = async () => {
+        try { if (typeof img.decode === 'function') await img.decode(); } catch (_) {}
+        if (el.contains(img) && img.naturalWidth > 0) el.classList.add('design-photo-ready-v404');
+      };
+      img.addEventListener('load', () => { void reveal(); }, {once:true});
+      img.addEventListener('error', () => el.classList.add('design-photo-failed-v404'), {once:true});
+      el.append(img); img.src = dog.photo_url;
+      if (img.complete && img.naturalWidth > 0) void reveal();
+    } else el.innerHTML = icon('paw');
     el.dataset.photoVersion = String(dog.photo_updated_at || dog.photo_path || dog.photo_url?.split('?')[0] || '');
     return el;
   }
@@ -105,6 +117,33 @@
       if(root.children[i]!==node)root.insertBefore(node,root.children[i]||null);
     });
   }
+  let friendOpenGenerationV404=0;
+  async function openFriendsPreparedV404(date,button) {
+    if(!approvedForDate(date))return;
+    const generation=++friendOpenGenerationV404,owner=state.session?.user?.id;
+    const urls=[...new Set(friends(date).map(d=>d.photo_url).filter(Boolean))].slice(0,12);
+    if(!urls.length){openFriends(date);return;}
+    const original=button?.innerHTML;
+    if(button){button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='Načítavam fotografie…';}
+    try{
+      await Promise.race([
+        Promise.allSettled(urls.map(url=>new Promise(resolve=>{
+          const img=new Image();let finished=false;
+          const done=async(ok)=>{if(finished)return;finished=true;clearTimeout(timer);
+            if(ok&&typeof img.decode==='function')try{await img.decode()}catch(_){}
+            resolve();
+          };
+          const timer=setTimeout(()=>{void done(false)},3200);
+          img.onload=()=>{void done(true)};img.onerror=()=>{void done(false)};img.src=url;
+          if(img.complete&&img.naturalWidth>0)void done(true);
+        }))),
+        new Promise(resolve=>setTimeout(resolve,3400))
+      ]);
+      if(generation===friendOpenGenerationV404&&state.session?.user?.id===owner&&approvedForDate(date))openFriends(date);
+    }finally{
+      if(button?.isConnected){button.disabled=false;button.removeAttribute('aria-busy');button.innerHTML=original;}
+    }
+  }
   function openFriends(date) {
     if (!approvedForDate(date)) return;
     const updating=rosterDate===date&&!byId('customerDesignModal')?.classList.contains('hidden');
@@ -115,7 +154,7 @@
     body.querySelector('p')?.remove();
     const wanted=new Set(rows.map(d=>String(d.dog_id||d.key||d.name)));
     [...body.children].forEach(row=>{if(!wanted.has(row.dataset.rosterKey))row.remove();});
-    rows.forEach((d,i)=>{const key=String(d.dog_id||d.key||d.name);let row=[...body.children].find(row=>row.dataset.rosterKey===key);if(!row){row=document.createElement('div');row.className='design-roster-row';row.dataset.rosterKey=key;row.append(photoNode(d,'design-friend-photo'),document.createElement('strong'));}row.querySelector('strong').textContent=d.name||'Prihlásený škôlkar';if(body.children[i]!==row)body.insertBefore(row,body.children[i]||null);});
+    rows.forEach((d,i)=>{const key=String(d.dog_id||d.key||d.name);let row=[...body.children].find(row=>row.dataset.rosterKey===key);if(!row){row=document.createElement('div');row.className='design-roster-row';row.dataset.rosterKey=key;row.append(photoNode(d,'design-friend-photo'),document.createElement('strong'));}else{const version=String(d.photo_updated_at||d.photo_path||d.photo_url?.split('?')[0]||'');const oldPhoto=row.querySelector('.design-friend-photo');if(oldPhoto?.dataset.photoVersion!==version)oldPhoto?.replaceWith(photoNode(d,'design-friend-photo'));}row.querySelector('strong').textContent=d.name||'Prihlásený škôlkar';if(body.children[i]!==row)body.insertBefore(row,body.children[i]||null);});
   }
   function ticket() {
     const source=byId('passSummary'),dog=selectedDog(); if(!source||!dog)return;
@@ -158,7 +197,7 @@
         if(card.dataset.status!==status){
           card.dataset.status=status;
           card.innerHTML=`<div class="design-nearest-head">${icon('calendar')}<strong><span class="design-visit-label"></span>${esc(skDay(date).slice(0,2).toLowerCase())} ${esc(skDate(date).replace(/\s*20\d{2}$/, ''))}</strong><button type="button" class="design-visit-edit" aria-label="Upraviť rezerváciu na ${esc(skDate(date))}"><span aria-hidden="true">✎</span> Upraviť</button>${approved?'<span class="design-approved" aria-label="Schválená">✓</span>':status==='pending'?'<span class="design-visit-status pending" aria-label="Čaká na schválenie" title="Čaká na schválenie">?</span>':'<span class="design-visit-status rejected" aria-label="Zamietnutá" title="Zamietnutá">×</span>'}</div>${approved?'<div class="design-friends-line"><div class="design-friend-strip"></div></div>':`<p class="design-waiting-friends">${status==='pending'?'Čaká na schválenie. Kamarátov uvidíte po schválení rezervácie.':'Rezervácia bola zamietnutá.'}</p>`}<div class="design-visit-footer"><div class="design-visit-entries"></div>${approved?'<button type="button" class="design-friends-button design-friends-inline">Zobraziť kamošov v škôlke <span aria-hidden="true">›</span></button>':''}</div>`;
-          if(approved)card.querySelector('.design-friends-button').addEventListener('click',()=>openFriends(date));card.querySelector('.design-visit-edit').addEventListener('click',()=>window.customerDesignEditReservation(date));
+          if(approved)card.querySelector('.design-friends-button').addEventListener('click',event=>{void openFriendsPreparedV404(date,event.currentTarget)});card.querySelector('.design-visit-edit').addEventListener('click',()=>window.customerDesignEditReservation(date));
         }
         card.setAttribute('aria-label',`${i===0?'Najbližšia návšteva, ':''}${skDay(date)} ${skDate(date)}`);
         card.querySelector('.design-visit-label').textContent='Najbližšia návšteva · ';
