@@ -42,6 +42,8 @@ jobs:
           node tests/customer-confirm-return-v155.cjs
           node tests/customer-guide-v358.cjs
           node tests/customer-locale-v409.cjs
+          node tests/customer-onboarding-v413.cjs
+          node tests/customer-shop-v414.cjs
           NODE_PATH="$PWD/tests/shared-v244/node_modules" node tests/customer-locale-v409-browser.cjs
           NODE_PATH="$PWD/tests/shared-v244/node_modules" node tests/customer-legal-v411.cjs
           node tests/customer-release-contract.cjs
