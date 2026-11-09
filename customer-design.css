@@ -660,8 +660,8 @@ html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #booking
 .customer-design .bottom-nav{background:var(--liquid-surface-v364)!important;border:0!important;box-shadow:var(--liquid-shadow-v364)!important}
 .customer-design .bottom-nav:has(#navBookAddV220){grid-template-columns:minmax(44px,1fr) minmax(44px,1fr) minmax(88px,2.35fr) minmax(44px,1fr) minmax(44px,1fr)!important}
 .customer-design .bottom-nav:has(#navStaff:not(.hidden)):has(#navBookAddV220){grid-template-columns:repeat(2,minmax(44px,1fr)) minmax(84px,2.1fr) repeat(3,minmax(44px,1fr))!important}
-.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#customerMessagesV363,#customerAnnouncementsV363){font-size:10px!important;gap:3px!important}
-.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#customerMessagesV363,#customerAnnouncementsV363) svg{width:20px!important;height:20px!important}
+.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#customerMessagesV363,#customerShopV414){font-size:10px!important;gap:3px!important}
+.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#customerMessagesV363,#customerShopV414) svg{width:20px!important;height:20px!important}
 .customer-design .bottom-nav #navBookAddV220{
  display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:7px!important;
  width:100%!important;max-width:none!important;height:54px!important;min-height:54px!important;
@@ -680,7 +680,7 @@ html.customer-liquid-v364 #bookingTab::before,html.customer-liquid-v364 #booking
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) #bookingDogAvatar{height:100%!important;min-height:var(--profile-min-v369)!important;max-height:none!important;aspect-ratio:auto!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content{align-self:stretch!important;justify-content:space-between!important;gap:3px!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) :is(#bookingVaccinationStatus,#bookingVisitCount,#bookingGradebook){min-height:28px!important}
-.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#customerMessagesV363,#customerAnnouncementsV363).active{background:#ffffff30!important}
+.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#customerMessagesV363,#customerShopV414).active{background:#ffffff30!important}
 .customer-design #bookingPickerV37 #designMyBookings .reserved-empty-v37{background:#ffffff1f!important;background-image:none!important;border:0!important;box-shadow:none!important}
 .customer-design #bookingPickerV37 #bookingPickerSmartDaysV199 .btn.secondary{background:#ffffff30!important;border-color:transparent!important}
 .customer-design #bookingPickerV37 #bookingPickerDaysV37 .booking-day-v37:not(.selected):not(.booked):not(.disabled):not(:disabled):not([data-capacity-level=full]):not([data-capacity-level=limited]){background:#ffffff3d!important;border-color:transparent!important}
@@ -697,7 +697,7 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
  transform:none!important;-webkit-transform:none!important;will-change:auto!important;
  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
 }
-.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#navBookAddV220,#customerMessagesV363,#customerAnnouncementsV363){height:54px!important;min-height:54px!important;max-height:54px!important;align-self:center!important;box-sizing:border-box!important}
+.customer-design .bottom-nav :is(#navBooking,#navDog,#navStaff,#navBookAddV220,#customerMessagesV363,#customerShopV414){height:54px!important;min-height:54px!important;max-height:54px!important;align-self:center!important;box-sizing:border-box!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241){padding:8px!important;gap:10px!important}
 .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) #bookingDogAvatar{position:relative!important;box-sizing:border-box!important}
 .customer-design #bookingTab #bookingDogAvatar img{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;border-radius:0!important;object-fit:cover!important}
@@ -804,8 +804,8 @@ body:has(#appView.hidden)>.bottom-nav{display:none!important}
 
 /* v376: shared notice cards and dock actions; outer dock geometry is unchanged. */
 .customer-design #customerInboxV363{display:none!important}
-.customer-design .bottom-nav :is(#customerMessagesV363,#customerAnnouncementsV363){display:flex!important;flex-direction:column;align-items:center;justify-content:center;position:relative;min-width:44px;padding:3px 0;border:0;background:transparent;color:#a7460b;font:inherit;border-radius:17px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
-.customer-design .bottom-nav :is(#customerMessagesV363,#customerAnnouncementsV363) svg{fill:none;stroke:currentColor;stroke-width:1.8;flex:none}
+.customer-design .bottom-nav :is(#customerMessagesV363,#customerShopV414){display:flex!important;flex-direction:column;align-items:center;justify-content:center;position:relative;min-width:44px;padding:3px 0;border:0;background:transparent;color:#a7460b;font:inherit;border-radius:17px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+.customer-design .bottom-nav :is(#customerMessagesV363,#customerShopV414) svg{fill:none;stroke:currentColor;stroke-width:1.8;flex:none}
 .customer-design .bottom-nav .customer-inbox-count-v363{position:absolute;top:1px;right:1px;min-width:15px;height:15px;padding:0 3px;font-size:9px;line-height:15px}
 .customer-design .bottom-nav button:focus-visible{outline:3px solid #ad4c0d;outline-offset:-3px}
 .customer-design .bottom-nav #navBookAddV220{gap:3px!important;padding:3px!important;flex-direction:column!important}
@@ -982,9 +982,15 @@ html.customer-auth-glass-v386.customer-ios-auth-v410 #authView>.auth-card>.lg-v3
 /* A photo is per account; absent or failed photos get a centered placeholder. */
 .customer-design #bookingTab #bookingDogAvatar.dog-photo-missing-v412{display:grid!important;place-items:center!important;text-align:center!important;font-size:38px!important;line-height:1!important}
 /* Keep the badge number centered without changing the dock geometry. */
-.customer-design .bottom-nav #customerAnnouncementsV363 .customer-inbox-count-v363:not(.hidden){display:grid!important;place-items:center!important;position:absolute;width:17px!important;min-width:17px!important;height:17px!important;top:1px;right:1px;padding:0!important;line-height:1!important;text-align:center!important;font-variant-numeric:tabular-nums}
+.customer-design .bottom-nav #menuBulletinV229 .customer-menu-notice-count-v414:not(.hidden){display:grid!important;place-items:center!important;position:absolute;width:17px!important;min-width:17px!important;height:17px!important;top:1px;right:1px;padding:0!important;line-height:1!important;text-align:center!important;font-variant-numeric:tabular-nums}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
  .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241){background:#f9dce9!important}
  .customer-design #bookingTab #bookingDogProfile[data-design-sex=male]:not(.dual-dog-v241){background:#daeafb!important}
  .customer-design #bookingTab #bookingDogProfile:not(.dual-dog-v241) .dog-overview-content::before{background:#fff!important}
 }
+
+/* v414: external product catalog replaces the former dock notice shortcut, without changing dock geometry. */
+.customer-design .bottom-nav #customerShopV414{text-decoration:none!important;cursor:pointer;touch-action:manipulation}
+.customer-design .bottom-nav #customerShopV414:focus-visible{outline:3px solid #ad4c0d!important;outline-offset:-3px!important}
+.customer-design #menuBulletinV229 .customer-menu-notice-count-v414{flex:0 0 auto!important;display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#ef7516;color:white;font-size:11px;font-weight:800;line-height:20px}
+.customer-design #menuBulletinV229 .customer-menu-notice-count-v414.hidden{display:none!important}
