@@ -19,7 +19,7 @@ const rpc=async(name,args)=>{
   data.pass_dogs.push({pass_id:202,dog_id:1},{pass_id:202,dog_id:2});
   return {data:202,error:null};
 };
-w.__chvostikovoAdminRuntime={state:{dogs:data.dogs,passes:data.passes},client:{from,rpc},loadData:async()=>{}};
+w.__chvostikovoAdminRuntime={state:{dogs:data.dogs,passes:new Map([[1,[]],[2,[]]])},client:{from,rpc},loadData:async()=>{}};
 w.eval(code);
 const flush=()=>new Promise(r=>setTimeout(r,40));
 (async()=>{
@@ -39,6 +39,7 @@ const flush=()=>new Promise(r=>setTimeout(r,40));
   // Active shared pass: UI must not offer a second sale or reactivate the modal.
   data.passes[0].status='active';
   data.passes[0].pass_dogs=[{dog_id:1},{dog_id:2}];
+  w.__chvostikovoAdminRuntime.state.passes=new Map([[1,[data.passes[0]]],[2,[data.passes[0]]]]);
   w.document.getElementById('dogInfoCard').replaceChildren();
   w.document.getElementById('openDog').click();await flush();
   assert.equal(w.document.getElementById('chvoSharedLaunchV410'),null,'Active shared pass blocks new-sale launcher');
