@@ -187,6 +187,8 @@ jobs:
           V3_ENGINE=webkit node tests/customer-mobile-v393-browser.cjs
           node tests/customer-weight-v415-browser.cjs
           V3_ENGINE=webkit node tests/customer-weight-v415-browser.cjs
+          node tests/customer-vaccination-actions-v416-browser.cjs
+          V3_ENGINE=webkit node tests/customer-vaccination-actions-v416-browser.cjs
           node tests/customer-proof-delete-v392-browser.cjs
           V3_ENGINE=webkit node tests/customer-proof-delete-v392-browser.cjs
           node tests/customer-android-dock-v389-browser.cjs
