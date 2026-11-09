@@ -19,7 +19,7 @@ const rpc=async(name,args)=>{
   data.pass_dogs.push({pass_id:202,dog_id:1},{pass_id:202,dog_id:2});
   return {data:202,error:null};
 };
-w.__chvostikovoAdminRuntime={state:{dogs:data.dogs},client:{from,rpc},loadData:async()=>{}};
+w.__chvostikovoAdminRuntime={state:{dogs:data.dogs,passes:data.passes},client:{from,rpc},loadData:async()=>{}};
 w.eval(code);
 const flush=()=>new Promise(r=>setTimeout(r,40));
 (async()=>{
@@ -36,5 +36,12 @@ const flush=()=>new Promise(r=>setTimeout(r,40));
   assert.equal(data.pass_dogs.length,2);
   assert.match(w.document.getElementById('chvoSharedStatusV410').textContent,/0\/10/);
   assert(w.document.getElementById('chvoSharedBuyV410').disabled);
+  // Active shared pass: UI must not offer a second sale or reactivate the modal.
+  data.passes[0].status='active';
+  data.passes[0].pass_dogs=[{dog_id:1},{dog_id:2}];
+  w.document.getElementById('dogInfoCard').replaceChildren();
+  w.document.getElementById('openDog').click();await flush();
+  assert.equal(w.document.getElementById('chvoSharedLaunchV410'),null,'Active shared pass blocks new-sale launcher');
+  assert.equal(calls,1,'Rendering existing pass cannot issue another sale');
   w.close();console.log('PASS staff shared pass purchase: explicit confirmation, single idempotent RPC, verified 2 memberships, no backdated usage');
 })().catch(e=>{console.error(e);process.exitCode=1});
