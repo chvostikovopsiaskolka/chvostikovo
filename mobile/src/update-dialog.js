@@ -69,9 +69,16 @@ export function showPlayUpdateDialog({ language = 'sk', onUpdate, onLater }, doc
   panel.append(symbol, title, description, update, later, error);
   overlay.append(panel);
   const close = () => {
+    doc.removeEventListener?.('chvo-native-back', onNativeBack, true);
     overlay.remove();
     try { if (currentFocus?.isConnected) currentFocus.focus({ preventScroll: true }); } catch (_) {}
   };
+  const onNativeBack = event => {
+    event.preventDefault();
+    event.stopImmediatePropagation?.();
+    later.click();
+  };
+  doc.addEventListener?.('chvo-native-back', onNativeBack, true);
   later.addEventListener('click', () => { onLater(); close(); });
   update.addEventListener('click', async () => {
     update.disabled = true;
