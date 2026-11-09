@@ -1,7 +1,7 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const read=path=>fs.readFileSync(path,'utf8');
-const app=read('app.js'),html=read('index.html'),api=read('supabase/functions/customer-portal-api/index.ts'),locale=read('customer-locale-v409.js');
+const app=read('app.js'),html=read('index.html'),css=read('styles.css'),api=read('supabase/functions/customer-portal-api/index.ts'),locale=read('customer-locale-v409.js');
 assert(app.includes("if(savedMode==='details'){"),'required profile fields validated in normal editing and onboarding');
 assert(app.includes("if(!birthDate||!breed||!sex)"),'date, breed and sex are required');
 assert(app.includes("if(weightText&&(!Number.isFinite(weight)||weight<=0||weight>150))"),'invalid entered weight rejected');
@@ -20,6 +20,8 @@ for(const id of ['dogName','dogBirthDate','dogBreed','dogSex']){
  assert(new RegExp('for="'+id+'"[^>]*>[^<]+<span class="dog-required-marker-v413"').test(html),'missing required marker '+id);
 }
 assert(html.includes('for="dogWeight">Váha (kg) <small class="dog-optional-v413">(nepovinné)</small>'),'weight labelled optional');
+assert(css.includes('#dogDetailsModal .dog-breed-weight-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}'),'mobile breed/weight columns share width');
+assert(css.includes('label[for="dogWeight"] .dog-optional-v413')&&css.includes('white-space:nowrap;'),'optional note stays inline at narrow widths');
 assert(html.includes('id="dogVaccinationsLaterV413"'),'vaccination editor defer button exists');
 assert(app.includes('id="dogDetailsOnboardingLaterV413"'),'vaccination prompt defer button exists');
 assert(locale.includes('"Zadám neskôr","I\'ll add them later"'),'EN defer label exists');
