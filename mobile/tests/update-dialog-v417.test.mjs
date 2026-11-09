@@ -10,8 +10,8 @@ class Element extends EventTarget {
   focus() {this.doc.activeElement=this;}
   click() {this.dispatchEvent(new Event('click'));}
 }
-class Doc {
-  constructor() {this.head=new Element('head',this);this.body=new Element('body',this);this.activeElement=null;}
+class Doc extends EventTarget {
+  constructor() {super();this.head=new Element('head',this);this.body=new Element('body',this);this.activeElement=null;}
   createElement(tag) {return new Element(tag,this);}
   getElementById(id) {const find=el=>el.id===id?el:el.children.map(find).find(Boolean);return find(this.head)||find(this.body)||null;}
 }
@@ -53,5 +53,16 @@ test('EN modal has a working Later path and a retry when Play cannot open',async
   assert(doc.getElementById('chvo-native-update'),'failed Store open must not dismiss');
   secondary.click();
   assert.equal(later,1);
+  assert.equal(doc.getElementById('chvo-native-update'),null);
+});
+
+test('Android back dismisses Play modal without navigating away from the app',()=>{
+  const doc=new Doc();
+  let skipped=0;
+  showPlayUpdateDialog({onUpdate:async()=>{},onLater:()=>skipped++},doc);
+  const event=new Event('chvo-native-back',{cancelable:true});
+  doc.dispatchEvent(event);
+  assert.equal(skipped,1);
+  assert.equal(event.defaultPrevented,true);
   assert.equal(doc.getElementById('chvo-native-update'),null);
 });
