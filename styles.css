@@ -3317,7 +3317,7 @@ button span,button svg,button svg *{pointer-events:none}
 @media (max-width:480px){
   #dogDetailsModal .dog-breed-weight-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   #dogDetailsModal .dog-breed-weight-row label[for="dogWeight"]{
-    display:flex;align-items:baseline;gap:3px;white-space:nowrap;
+    display:flex;align-items:baseline;gap:3px;white-space:nowrap;min-height:16px;
     font-size:clamp(11px,3.4vw,14px);letter-spacing:-.02em;
   }
   #dogDetailsModal .dog-breed-weight-row label[for="dogWeight"] .dog-optional-v413{
