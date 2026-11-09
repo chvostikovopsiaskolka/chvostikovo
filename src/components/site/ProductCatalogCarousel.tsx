@@ -63,7 +63,7 @@ export function ProductCatalogCarousel() {
             setActive(Math.min(PRODUCTS.length - 1, Math.round(root.scrollLeft / (first.offsetWidth + 12))));
           }
         }}
-        className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-3 touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 md:pb-0"
+        className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-3 touch-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 md:pb-0"
       >
         {PRODUCTS.map((product) => (
           <article key={product.href} data-product-card className="flex w-[89%] min-w-0 shrink-0 snap-start flex-col overflow-hidden rounded-3xl bg-card shadow-soft md:w-auto md:shrink md:rounded-4xl">
