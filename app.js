@@ -2177,7 +2177,9 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
   function visibilityDecided(dogId){if((state.data?.dogs||[]).find(d=>Number(d.id)===Number(dogId))?.share_name_photo_at)return true;return (state.data?.visibility_consents||[]).some(x=>Number(x.dog_id)===Number(dogId))}
   function detailsPromptAnswered(dogId){return (state.data?.dog_onboarding||[]).some(x=>Number(x.dog_id)===Number(dogId))}
   function detailsAlreadyComplete(dog){
-    return !!(dog?.birth_date&&String(dog.birth_date)<=bratislavaToday()&&String(dog.breed||'').trim()&&['male','female'].includes(dog.sex));
+    // Honour existing persisted onboarding acknowledgements for legacy accounts,
+    // even when older fixture/admin records omitted a core field.
+    return detailsPromptAnswered(dog?.id)||!!(dog?.birth_date&&String(dog.birth_date)<=bratislavaToday()&&String(dog.breed||'').trim()&&['male','female'].includes(dog.sex));
   }
   window.customerDogDetailsCompleteV95=detailsAlreadyComplete;
   function showPushPrompt(){hideFlow('pushOnboardingModalV75');const modal=ensurePushModal();modal.classList.remove('hidden');$('pushOnboardingEnableV75').onclick=async()=>{const yes=$('pushOnboardingEnableV75'),no=$('pushOnboardingSkipV75');yes.disabled=true;no.disabled=true;try{await enablePushForCurrentUserV75();modal.classList.add('hidden');toast('Upozornenia sú zapnuté.');runCustomerOnboardingV75()}catch(e){toast(e.message||'Upozornenia sa nepodarilo zapnúť.')}finally{yes.disabled=false;no.disabled=false}};$('pushOnboardingSkipV75').onclick=async()=>{const yes=$('pushOnboardingEnableV75'),no=$('pushOnboardingSkipV75');yes.disabled=true;no.disabled=true;try{await completePushPromptV75();modal.classList.add('hidden');runCustomerOnboardingV75()}catch(e){toast(e.message||'Nastavenie sa nepodarilo uložiť.')}finally{yes.disabled=false;no.disabled=false}}}
