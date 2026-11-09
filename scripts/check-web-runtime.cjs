@@ -522,6 +522,26 @@ const failures = [];
               const catalog = productPage.locator('[data-products-carousel]');
               if (await catalog.locator('[data-product-card]').count() !== 2) throw new Error('Two products must be in one carousel');
               if (!await catalog.evaluate(el => el.scrollWidth > el.clientWidth + 40)) throw new Error('Catalogue must swipe horizontally on mobile');
+              // Horizontal snap must not steal vertical gestures on either mobile browser.
+              const catalogTouchAction = await catalog.evaluate(el => getComputedStyle(el).touchAction);
+              if (catalogTouchAction !== 'auto') throw new Error('Product cards block vertical scrolling: ' + catalogTouchAction);
+              const pageColors = await productPage.evaluate(() => ({
+                meta: document.querySelector('meta[name="color-scheme"]')?.getAttribute('content'),
+                root: getComputedStyle(document.documentElement).colorScheme,
+              }));
+              if (pageColors.meta !== 'only light' || pageColors.root !== 'only light') {
+                throw new Error('Android Auto Dark Theme opt-out is missing: ' + JSON.stringify(pageColors));
+              }
+              // Verify the short dock label on narrow Android-like viewports.
+              await productPage.setViewportSize({ width: 320, height: 760 });
+              const careDock = productPage.locator('.mobile-dock a[aria-label="Starostlivosť"]');
+              if (!(await careDock.locator('.mobile-dock-label-short').isVisible())) throw new Error('Narrow dock must use readable care label');
+              const narrowLabel = await careDock.locator('.mobile-dock-label-short').boundingBox();
+              const narrowItem = await careDock.boundingBox();
+              if (!narrowLabel || !narrowItem || narrowLabel.x < narrowItem.x || narrowLabel.x + narrowLabel.width > narrowItem.x + narrowItem.width + 1) {
+                throw new Error('Care label overflows its narrow dock button');
+              }
+              await productPage.setViewportSize({ width: 390, height: 844 });
               const firstCard = catalog.locator('[data-product-card]').first();
               const cardBox = await firstCard.boundingBox();
               if (!cardBox || cardBox.height > 540) throw new Error('Mobile catalogue card must remain compact');
