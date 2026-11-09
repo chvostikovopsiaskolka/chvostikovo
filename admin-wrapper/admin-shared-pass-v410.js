@@ -29,8 +29,9 @@
   const existingCurrentPass = pool => {
     if(pool.length!==2)return true;
     const passStore=runtime()?.state?.passes;
-    if(!(passStore instanceof Map)&&!Array.isArray(passStore))return true;
-    const passes=passStore instanceof Map
+    const mapLike=passStore&&typeof passStore.get==='function'&&typeof passStore.values==='function';
+    if(!mapLike&&!Array.isArray(passStore))return true;
+    const passes=mapLike
       ?pool.flatMap(d=>passStore.get(num(d.id))||[])
       :passStore;
     const ids=pool.map(d=>num(d.id));
