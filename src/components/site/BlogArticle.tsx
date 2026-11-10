@@ -111,30 +111,33 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
         </header>
 
         <article className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
-          <figure className={standGuide ? "mx-auto max-w-[640px] overflow-hidden rounded-3xl bg-secondary shadow-soft" : "overflow-hidden rounded-3xl bg-secondary shadow-soft"}>
-            <img src={article.image.src} alt={article.image.alt}
-              className={standGuide ? "block h-[300px] w-full object-cover object-[center_54%] sm:h-[430px]" : "mx-auto block max-h-[720px] h-auto max-w-full object-contain"}
-              decoding="async" width={article.image.width ?? 1000} height={article.image.height ?? 750} />
-            <figcaption className="px-4 py-2 text-sm text-forest/65">{article.imageCaption ?? "Zo života našej psej škôlky v Košiciach"}</figcaption>
-          </figure>
-          <div className="mx-auto mt-10 max-w-3xl space-y-10 sm:mt-14">
+          <div className="mx-auto max-w-3xl space-y-10">
             {article.sections.map((section, index) => (
-              <section key={section.heading} className="space-y-4">
-                <h2 className="font-display text-2xl leading-tight text-forest sm:text-3xl">{section.heading}</h2>
-                {section.paragraphs.map(paragraph => (
-                  <p key={paragraph} className="text-base leading-8 text-forest/85 sm:text-lg">{paragraph}</p>
-                ))}
-                {section.points && (
-                  <ul className="list-disc space-y-2 pl-6 text-base leading-relaxed text-forest/85">
-                    {section.points.map(point => <li key={point}>{point}</li>)}
-                  </ul>
-                )}
-                {index === 1 && (
-                  <figure className="overflow-hidden rounded-3xl bg-secondary">
-                    <img src={article.secondImage.src} alt={article.secondImage.alt} loading="lazy" decoding="async"
-                      className="mx-auto block max-h-[700px] h-auto max-w-full object-contain" width={article.secondImage.width ?? 900} height={article.secondImage.height ?? 675} />
+              <section key={section.heading} className="flow-root">
+                <h2 className="mb-4 font-display text-2xl leading-tight text-forest sm:text-3xl">{section.heading}</h2>
+                {index === 0 && (
+                  <figure className="mb-6 sm:float-right sm:mb-4 sm:ml-7 sm:w-[42%]">
+                    <img src={article.image.src} alt={article.image.alt} decoding="async"
+                      className="block h-auto w-full rounded-2xl" width={article.image.width ?? 1000} height={article.image.height ?? 750} />
+                    <figcaption className="mt-2 text-xs leading-relaxed text-forest/65">{article.imageCaption ?? "Zo života našej psej škôlky v Košiciach"}</figcaption>
                   </figure>
                 )}
+                {index === 1 && (
+                  <figure className="mb-6 sm:float-left sm:mb-4 sm:mr-7 sm:w-[42%]">
+                    <img src={article.secondImage.src} alt={article.secondImage.alt} loading="lazy" decoding="async"
+                      className="block h-auto w-full rounded-2xl" width={article.secondImage.width ?? 900} height={article.secondImage.height ?? 675} />
+                  </figure>
+                )}
+                <div className="space-y-4">
+                  {section.paragraphs.map(paragraph => (
+                    <p key={paragraph} className="text-base leading-8 text-forest/85 sm:text-lg">{paragraph}</p>
+                  ))}
+                  {section.points && (
+                    <ul className="list-disc space-y-2 pl-6 text-base leading-relaxed text-forest/85">
+                      {section.points.map(point => <li key={point}>{point}</li>)}
+                    </ul>
+                  )}
+                </div>
               </section>
             ))}
             {productGuide && article.productPage ? (
@@ -205,7 +208,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
               <ArrowLeft className="size-4" aria-hidden="true" /> Všetky články
             </a>
             <h2 className="mt-4 font-display text-2xl text-forest">Mohlo by vás zaujímať</h2>
-            <div className="mt-6 grid max-w-xl gap-5">
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {related.map(card => <BlogCard key={card.id} card={card} />)}
             </div>
           </div>
