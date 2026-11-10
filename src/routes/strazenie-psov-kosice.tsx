@@ -90,17 +90,17 @@ function DogSittingPage() {
       <Header homeSectionLinks hideMobileDock />
       <MobileDock variant="dog-sitting" onInterestOpen={() => openInterest()} />
       <main>
-        <section id="top" className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
+        <section id="top" className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-20">
           <PawTrailBackground landingBottomPaws />
-          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 py-5 sm:min-h-[535px] sm:gap-8 sm:py-7 lg:min-h-[570px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-12">
+          <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-5 px-4 py-4 sm:gap-7 sm:py-5 lg:min-h-[510px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-8 lg:py-3">
             <div className="max-w-2xl text-center lg:text-left">
               <p className="font-display text-xs font-bold uppercase tracking-[0.1em] text-coral-dark sm:text-sm">
                 Denná starostlivosť o stredných a veľkých psíkov
               </p>
-              <h1 className="mt-3 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl lg:text-[58px]">
-                Stráženie psov <span className="text-coral-dark">v Košiciach</span>
+              <h1 className="mt-3 text-[38px] sm:text-[46px] lg:text-[clamp(2.75rem,4.2vw,3.5rem)] leading-[1.12] tracking-[-0.035em] text-forest">
+                Stráženie psov <span className="block text-coral-dark">v Košiciach</span>
               </h1>
-              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-forest/85 sm:text-lg lg:mx-0">
+              <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-forest/85 sm:text-lg lg:mx-0">
                 Kým ste v práci, váš psík si v našej dennej škôlke užije pohyb,
                 hry s kamarátmi aj oddych. A to všetko pod naším celodenným dohľadom.
               </p>
@@ -112,7 +112,7 @@ function DogSittingPage() {
                   <Clock3 className="size-4" aria-hidden="true" /> Po–Pia 7:00–17:00
                 </span>
               </div>
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
                 <a
                   href="#informacie"
                   data-marketing-event="inquiry_cta"
@@ -126,7 +126,7 @@ function DogSittingPage() {
                 </a>
               </div>
             </div>
-            <div id="informacie" className="mx-auto w-full max-w-md scroll-mt-24 lg:mx-0">
+            <div id="informacie" className="mx-auto w-full max-w-md scroll-mt-24 lg:mx-0 lg:self-start">
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
                 <h2 className="text-center font-display text-xl font-bold text-forest sm:text-2xl">
