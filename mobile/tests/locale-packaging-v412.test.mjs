@@ -6,11 +6,12 @@ import {createHash} from 'node:crypto';
 const read=async path=>readFile(new URL('../'+path,import.meta.url));
 const root=async path=>readFile(new URL('../../'+path,import.meta.url));
 
-test('Android v417 / 2.0.90 packages current customer, vaccination actions, SK/EN and terms',async()=>{
+test('Android current release packages customer, vaccination actions, SK/EN and terms',async()=>{
   const release=JSON.parse((await read('www/version.json')).toString());
   const manifest=JSON.parse((await read('www/mobile-build.json')).toString());
-  assert.equal(release.build,'v417');
-  assert.equal(release.version,'2.0.90');
+  const authoritative=JSON.parse((await root('version.json')).toString());
+  assert.equal(release.build,authoritative.build);
+  assert.equal(release.version,authoritative.version);
   assert.equal(manifest.build,release.build);
   assert.equal(manifest.version,release.version);
   assert.equal(manifest.packageId,'sk.chvostikovo.app');
@@ -25,8 +26,8 @@ test('Android v417 / 2.0.90 packages current customer, vaccination actions, SK/E
   assert(bundledNative.includes('chvo-play-update-snooze-v417'),'Per-version reminder key bundled');
   assert(bundledNative.includes('checkUpdate'),'Native update check is callable');
   const html=(await read('www/index.html')).toString();
-  assert(html.indexOf('customer-locale-v409.js?v=v417')<html.indexOf('/app.js?v=v417'),'Locale before app');
-  assert(html.indexOf('customer-legal-en-v411.js?v=v417')<html.indexOf('/app.js?v=v417'),'EN reading terms before app');
+  assert(html.indexOf('customer-locale-v409.js?v='+release.build)<html.indexOf('/app.js?v='+release.build),'Locale before app');
+  assert(html.indexOf('customer-legal-en-v411.js?v='+release.build)<html.indexOf('/app.js?v='+release.build),'EN reading terms before app');
   const vaccCss=(await read('www/styles.css')).toString();
   assert(vaccCss.includes('#dogDetailsModal[data-mode="vaccinations"] #dogForm > #dogVaccinationsLaterV413'),'Outlined vaccination defer button packaged');
   assert(vaccCss.includes('margin-top:-7px;'),'Reduced vaccination button gap packaged');
