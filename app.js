@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v418';
-const APP_VERSION='2.0.91';
+const APP_BUILD='v419';
+const APP_VERSION='2.0.92';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -1813,17 +1813,11 @@ const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');
   if(window.__customerSignupPasswordV19)return;window.__customerSignupPasswordV19=true;
   const first=$('signupPassword');if(!first)return;
   const firstGroup=first.parentElement;
-  const style=document.createElement('style');style.id='customer-signup-password-v19-style';style.textContent='.password-field-v19{position:relative}.password-field-v19 .input{padding-right:52px}.password-eye-v19{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:40px;height:38px;border:0;border-radius:10px;background:transparent;font-size:18px;cursor:pointer}.password-eye-v19[aria-pressed="true"]{background:#f3f4f6}.booking-picker-error-v95{margin:10px 0 12px;padding:12px 13px;border:1px solid #fdba74;border-radius:14px;background:#fff7ed;color:#9a3412;font-size:13px;line-height:1.4}.booking-picker-error-v95 strong{display:block;margin-bottom:5px}.booking-picker-error-v95 button{margin-top:9px}';document.head.appendChild(style);
-  function wrap(input){
-    if(!input||input.parentElement?.classList.contains('password-field-v19'))return;
-    const holder=document.createElement('div');holder.className='password-field-v19';input.parentNode.insertBefore(holder,input);holder.appendChild(input);
-    const eye=document.createElement('button');eye.type='button';eye.className='password-eye-v19';eye.textContent='👁';eye.setAttribute('aria-label','Zobraziť heslo');eye.setAttribute('aria-pressed','false');holder.appendChild(eye);
-    eye.addEventListener('click',()=>{const show=input.type==='password';input.type=show?'text':'password';eye.setAttribute('aria-pressed',show?'true':'false');eye.setAttribute('aria-label',show?'Skryť heslo':'Zobraziť heslo')});
-  }
-  wrap(first);
+  // v419: legacy signup eyes duplicated the shared v79 controls; only keep booking error styling.
+  const style=document.createElement('style');style.id='customer-signup-password-v19-style';style.textContent='.booking-picker-error-v95{margin:10px 0 12px;padding:12px 13px;border:1px solid #fdba74;border-radius:14px;background:#fff7ed;color:#9a3412;font-size:13px;line-height:1.4}.booking-picker-error-v95 strong{display:block;margin-bottom:5px}.booking-picker-error-v95 button{margin-top:9px}';document.head.appendChild(style);
   if(!$('signupPasswordAgain')){
     const group=document.createElement('div');group.innerHTML='<label for="signupPasswordAgain">Zopakujte heslo</label><input id="signupPasswordAgain" class="input" type="password" autocomplete="new-password" minlength="8" required>';
-    firstGroup?.insertAdjacentElement('afterend',group);wrap($('signupPasswordAgain'));
+    firstGroup?.insertAdjacentElement('afterend',group);
   }
   const infectious=[...document.querySelectorAll('.vaccine-box strong')].find(el=>el.textContent.trim()==='Infekčné ochorenia');
   if(infectious&&!document.getElementById('infectiousInfoV19')){infectious.textContent='Infekčné ochorenia (DHPPi+L)';infectious.insertAdjacentHTML('afterend','<div id="infectiousInfoV19" class="hint" style="margin-top:5px">Psinka · infekčný zápal pečene · parvoviróza · psia parainfluenza · leptospiróza</div>')}
@@ -2518,10 +2512,23 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     eye.id=eyeId;
     eye.type='button';
     eye.className='password-eye-btn';
-    eye.setAttribute('aria-label','Podržte pre zobrazenie hesla');
-    eye.setAttribute('title','Podržte pre zobrazenie hesla');
+    const isSignup=inputId==='signupPassword'||inputId==='signupPasswordAgain';
+    eye.setAttribute('aria-label',isSignup?'Zobraziť heslo':'Podržte pre zobrazenie hesla');
+    eye.setAttribute('title',isSignup?'Zobraziť heslo':'Podržte pre zobrazenie hesla');
     eye.innerHTML=eyeSvg;
     input.insertAdjacentElement('afterend',eye);
+    if(isSignup){
+      eye.setAttribute('aria-pressed','false');
+      eye.addEventListener('click',()=>{
+        const visible=input.type==='password';
+        input.type=visible?'text':'password';
+        eye.classList.toggle('pressed',visible);
+        eye.setAttribute('aria-pressed',visible?'true':'false');
+        eye.setAttribute('aria-label',visible?'Skryť heslo':'Zobraziť heslo');
+        eye.setAttribute('title',visible?'Skryť heslo':'Zobraziť heslo');
+      });
+      return;
+    }
     const show=()=>{input.type='text';eye.classList.add('pressed')};
     const hide=()=>{input.type='password';eye.classList.remove('pressed')};
     eye.addEventListener('pointerdown',e=>{e.preventDefault();show()});
@@ -2532,7 +2539,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     eye.addEventListener('blur',hide);
     window.addEventListener('blur',hide);
   }
-  function mount(){['loginPassword','signupPassword','newPassword','newPasswordAgain'].forEach(mountOne)}
+  function mount(){['loginPassword','signupPassword','signupPasswordAgain','newPassword','newPasswordAgain'].forEach(mountOne)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
 
