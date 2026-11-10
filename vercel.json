@@ -138,6 +138,19 @@
           "value": "no-store"
         }
       ]
+    },
+    {
+      "source": "/email-logo-800-v1.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
     }
   ],
   "rewrites": [
