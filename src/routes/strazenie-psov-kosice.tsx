@@ -97,7 +97,7 @@ function DogSittingPage() {
               <p className="font-display text-xs font-bold uppercase tracking-[0.1em] text-coral-dark sm:text-sm">
                 Denná starostlivosť o stredných a veľkých psíkov
               </p>
-              <h1 className="mt-3 text-[clamp(2.1rem,4.4vw,3.55rem)] leading-[1.12] tracking-[-0.035em] text-forest">
+              <h1 className="mt-3 text-[38px] sm:text-[46px] lg:text-[clamp(2.75rem,4.2vw,3.5rem)] leading-[1.12] tracking-[-0.035em] text-forest">
                 Stráženie psov <span className="block text-coral-dark">v Košiciach</span>
               </h1>
               <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-forest/85 sm:text-lg lg:mx-0">
