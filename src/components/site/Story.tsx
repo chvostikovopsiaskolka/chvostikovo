@@ -149,7 +149,7 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
         </div>
 
         {!isEnglish && (
-          <div className="mx-auto mt-7 max-w-3xl space-y-3">
+          <div className="mt-7 w-full space-y-3">
             <ContextFaq question="Ako zabezpečujete bezpečnosť psíkov v škôlke?" label="Ako dbáme na bezpečnosť psíkov?" source="home_care_safety" />
             <ContextFaq question="Hrajú sa psíkovia v škôlke celý deň?" source="home_care_daily_rhythm" />
           </div>

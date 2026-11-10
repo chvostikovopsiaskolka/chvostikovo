@@ -55,6 +55,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
   const related = blogCards.filter(card => card.id !== article.slug).slice(0, 3);
   const productGuide = Boolean(article.productPage);
   const standGuide = article.slug === "stojan-na-misky-pre-psa-vyhody-a-vyber";
+  const workdayGuide = article.slug === "kam-so-psom-pocas-pracovneho-dna";
   const publishedLabel = new Intl.DateTimeFormat("sk-SK", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(article.publishedAt + "T12:00:00Z"));
 
   function trackInquiryClick() {
@@ -122,21 +123,29 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                     <figcaption className="mt-2 text-xs leading-relaxed text-forest/65">{article.imageCaption ?? "Zo života našej psej škôlky v Košiciach"}</figcaption>
                   </figure>
                 )}
-                {index === 1 && (
+                {index === 1 && !workdayGuide && (
                   <figure className="mb-6 sm:float-left sm:mb-4 sm:mr-7 sm:w-[42%]">
                     <img src={article.secondImage.src} alt={article.secondImage.alt} loading="lazy" decoding="async"
                       className="block h-auto w-full rounded-2xl" width={article.secondImage.width ?? 900} height={article.secondImage.height ?? 675} />
                   </figure>
                 )}
-                <div className="space-y-4">
-                  {section.paragraphs.map(paragraph => (
-                    <p key={paragraph} className="text-base leading-8 text-forest/85 sm:text-lg">{paragraph}</p>
-                  ))}
-                  {section.points && (
-                    <ul className="list-disc space-y-2 pl-6 text-base leading-relaxed text-forest/85">
-                      {section.points.map(point => <li key={point}>{point}</li>)}
-                    </ul>
+                <div className={index === 1 && workdayGuide ? "sm:grid sm:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)] sm:items-start sm:gap-7" : ""}>
+                  {index === 1 && workdayGuide && (
+                    <figure className="mb-6 sm:mb-0">
+                      <img src={article.secondImage.src} alt={article.secondImage.alt} loading="lazy" decoding="async"
+                        className="block h-auto w-full rounded-2xl" width={article.secondImage.width ?? 900} height={article.secondImage.height ?? 675} />
+                    </figure>
                   )}
+                  <div className="min-w-0 space-y-4">
+                    {section.paragraphs.map(paragraph => (
+                      <p key={paragraph} className="text-base leading-8 text-forest/85 sm:text-lg">{paragraph}</p>
+                    ))}
+                    {section.points && (
+                      <ul className="list-disc space-y-2 pl-6 text-base leading-relaxed text-forest/85">
+                        {section.points.map(point => <li key={point}>{point}</li>)}
+                      </ul>
+                    )}
+                  </div>
                 </div>
               </section>
             ))}

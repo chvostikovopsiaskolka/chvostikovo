@@ -364,6 +364,24 @@ const failures = [];
               const photoBox = await standImage.boundingBox();
               if (!photoBox || photoBox.height > 310) throw new Error('Stand article hero photo remains too tall on mobile');
             }
+            await productPage.goto(new URL('/blog/kam-so-psom-pocas-pracovneho-dna/', base).href);
+            const workdayOptions = productPage.locator('article section.flow-root').nth(1);
+            const workdayPhoto = workdayOptions.locator('figure img');
+            const workdayBullets = workdayOptions.locator('ul > li');
+            if (await workdayBullets.count() !== 4) throw new Error('Workday care options list must retain all four bullets');
+            const [photoBounds, firstBulletBounds, lastBulletBounds] = await Promise.all([
+              workdayPhoto.boundingBox(), workdayBullets.first().boundingBox(), workdayBullets.last().boundingBox(),
+            ]);
+            if (!photoBounds || !firstBulletBounds || !lastBulletBounds) throw new Error('Workday image/list geometry missing');
+            if (Math.abs(firstBulletBounds.x - lastBulletBounds.x) > 3) {
+              throw new Error('Workday bullets shift horizontally around the photo');
+            }
+            if (width === 1440 && firstBulletBounds.x <= photoBounds.x + photoBounds.width + 12) {
+              throw new Error('Desktop workday list must stay in the column beside the photo');
+            }
+            if (width === 390 && firstBulletBounds.y <= photoBounds.y + photoBounds.height - 2) {
+              throw new Error('Mobile workday bullet list must follow the photo');
+            }
             await productPage.goto(new URL('/strazenie-psov-kosice/', base).href);
             const dogHero = productPage.locator('section#top');
             const dogForm = productPage.locator('#informacie form');
@@ -396,6 +414,18 @@ const failures = [];
             if (await careToggle.getAttribute('aria-expanded') !== 'true' ||
                 !(await productPage.locator('#starostlivost').getByText('neustálym dohľadom', { exact: false }).count())) {
               throw new Error('Care safety FAQ must open with its detailed answer');
+            }
+            const careFaq = careToggle.locator('xpath=../..');
+            const careLayout = productPage.locator('#starostlivost > .relative.z-10');
+            const [faqBox, layoutBox] = await Promise.all([careFaq.boundingBox(), careLayout.boundingBox()]);
+            if (!faqBox || !layoutBox || Math.abs(faqBox.width - (layoutBox.width - 32)) > 4) {
+              throw new Error('Care FAQ should span the photo and benefit-text content width');
+            }
+            const repeatedTitle = careFaq.getByRole('heading', { name: 'Ako zabezpečujete bezpečnosť psíkov v škôlke?' });
+            if (await repeatedTitle.count()) throw new Error('Care FAQ repeats a second heading inside its answer');
+            const careAnswer = careToggle.locator('xpath=..').locator('div[id]').first();
+            if (!await careAnswer.getByText('Bezpečnosť začína už vstupnou návštevou.', { exact: false }).count()) {
+              throw new Error('Care FAQ answer missing after removing duplicated heading');
             }
             const whyArticle = productPage.locator('#preco a[href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"]');
             if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
