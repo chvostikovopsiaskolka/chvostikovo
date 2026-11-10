@@ -2,6 +2,9 @@ import { Capacitor, registerPlugin } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { notificationQuery, callbackPath } from './policy.js';
+import { isEligiblePlayUpdate, isSnoozedPlayUpdate, shouldCheckPlayUpdate, PLAY_REMIND_LATER_MS } from './update-policy.js';
+import { showPlayUpdateDialog } from './update-dialog.js';
+import nativeRelease from '../../version.json';
 
 if (Capacitor.isNativePlatform()) {
   const Updates = registerPlugin('ChvoUpdates');
@@ -9,6 +12,63 @@ if (Capacitor.isNativePlatform()) {
   const key = 'sb_publishable_43vD4AvQwchu1V2MwDbniA_j2tLiLi_';
   let host, token = '', registeredOwner = '', syncAt = 0, pending = null, toggleBusy = false;
   let updateAt = 0, updateBusy = null, registration = null;
+  let offeredUpdateCode = 0, updatePromptTimer = null;
+  const installedVersionCode = Number(nativeRelease.build.slice(1));
+  const UPDATE_SNOOZE_KEY = 'chvo-play-update-snooze-v417';
+
+  function readUpdateSnooze() {
+    try { return JSON.parse(localStorage.getItem(UPDATE_SNOOZE_KEY) || 'null'); }
+    catch (_) { return null; }
+  }
+  function hasActiveCustomerModal() {
+    if (document.activeElement?.matches?.('input, textarea, select, [contenteditable="true"]')) return true;
+    const booking = document.getElementById('bookingTab');
+    // Never interrupt a reservation in progress, even between field focus events.
+    if (booking && !booking.classList.contains('hidden') &&
+        getComputedStyle(booking).display !== 'none') return true;
+    return [...document.querySelectorAll('[aria-modal="true"],dialog[open]')].some(element => {
+      if (element.id === 'chvo-native-update' || element.closest('#chvo-native-update')) return false;
+      if (element.classList.contains('hidden')) return false;
+      const style = getComputedStyle(element);
+      return style.display !== 'none' && style.visibility !== 'hidden' &&
+        element.getBoundingClientRect().width > 0;
+    });
+  }
+  function showPendingPlayUpdate() {
+    if (!offeredUpdateCode || document.visibilityState === 'hidden' || navigator.onLine === false) return;
+    if (isSnoozedPlayUpdate(offeredUpdateCode, readUpdateSnooze())) { offeredUpdateCode = 0; return; }
+    if (document.getElementById('chvo-native-update')) return;
+    if (hasActiveCustomerModal()) {
+      if (updatePromptTimer == null) updatePromptTimer = setTimeout(() => {
+        updatePromptTimer = null;
+        showPendingPlayUpdate();
+      }, 2000);
+      return;
+    }
+    const dialogVersionCode = offeredUpdateCode;
+    showPlayUpdateDialog({
+      language: window.ChvostikovoLocale?.getLanguage?.() || 'sk',
+      onUpdate: async () => {
+        await Updates.start();
+        offeredUpdateCode = 0;
+      },
+      onLater: () => {
+        try {
+          localStorage.setItem(UPDATE_SNOOZE_KEY, JSON.stringify({
+            versionCode: dialogVersionCode, until: Date.now() + PLAY_REMIND_LATER_MS
+          }));
+        } catch (_) {}
+        offeredUpdateCode = 0;
+      }
+    });
+  }
+  function queuePlayUpdateCheck() {
+    setTimeout(() => {
+      showPendingPlayUpdate();
+      void window.ChvoNative?.checkUpdate?.();
+    }, 1250);
+  }
+
   const report = () => window.ChvoTelemetry?.capture?.('operation.error', { operation: 'customer-operation', error: { name: 'Error' } });
   const setPush = on => { host?.setPush(on); return on; };
   async function endpoint(action, fcmToken = token, savedSession) {
@@ -61,7 +121,7 @@ if (Capacitor.isNativePlatform()) {
       host?.openNotification?.();
       void host?.resume();
     }),
-    App.addListener('appStateChange', ({ isActive }) => { if (isActive) void host?.resume(); else { host?.pause(); void host?.flush(); } }),
+    App.addListener('appStateChange', ({ isActive }) => { if (isActive) { void host?.resume(); queuePlayUpdateCheck(); } else { host?.pause(); void host?.flush(); } }),
     App.addListener('appUrlOpen', ({ url }) => { void openCallback(url).catch(report); }),
     App.addListener('backButton', () => {
       const event = new CustomEvent('chvo-native-back', { cancelable: true });
@@ -126,18 +186,27 @@ if (Capacitor.isNativePlatform()) {
       if (old && session) try { await endpoint('unsubscribe', old, session); } catch {}
     },
     checkUpdate() {
-      if (updateBusy) return updateBusy;
-      if (Date.now() - updateAt < 300000 || document.visibilityState === 'hidden' || navigator.onLine === false) return;
+      if (!shouldCheckPlayUpdate({
+        lastCheckAt: updateAt,
+        visible: document.visibilityState !== 'hidden',
+        online: navigator.onLine !== false,
+        busy: !!updateBusy
+      })) return updateBusy;
       updateAt = Date.now();
       updateBusy = Updates.check().then(result => {
-        if (!result.available || document.getElementById('chvo-native-update')) return;
-        const card = document.createElement('div'); card.id = 'chvo-native-update'; card.className = 'info-box';
-        card.append(document.createTextNode('Je dostupná nová verzia aplikácie. '));
-        const button = document.createElement('button'); button.className = 'btn secondary'; button.textContent = 'Aktualizovať';
-        button.onclick = async () => { button.disabled = true; try { await Updates.start(); } catch { host?.notify('Aktualizáciu otvorte v Google Play.'); } finally { button.disabled = false; } };
-        card.append(button); document.getElementById('menuTab')?.prepend(card);
-      }).catch(() => {}).finally(() => { updateBusy = null; });
+        const code = Number(result?.versionCode);
+        if (!isEligiblePlayUpdate(result?.available, code, installedVersionCode)) {
+          offeredUpdateCode = 0;
+          return;
+        }
+        offeredUpdateCode = code;
+        showPendingPlayUpdate();
+      }).catch(() => {
+        // A sideloaded/debug build or Play outage is not evidence of a newer release.
+      }).finally(() => { updateBusy = null; });
       return updateBusy;
     }
   };
+  // The native JS bundle runs only inside Capacitor. Web/iOS PWA cannot call Play Core.
+  void ready.then(() => queuePlayUpdateCheck());
 }

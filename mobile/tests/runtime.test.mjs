@@ -89,3 +89,17 @@ test('new Android installation prompts an existing account once; enabled and exp
  const disabled=fixture();disabled.store.set('chvo-native-push-disabled','1');assert.equal(disabled.ctx.ChvoNative.needsPushPrompt(),false);
  const fresh=fixture();assert.equal(fresh.ctx.ChvoNative.needsPushPrompt(),true,'different installation has its own choice');
 });
+
+test('Play checks are native-only, coalesced and throttled on foreground', async () => {
+  const f=fixture();await f.ctx.ChvoNative.prepareLaunch();
+  let checks=0;
+  f.ctx.__device.updates.check=async()=>{checks++;return {available:false,versionCode:0};};
+  await Promise.all([f.ctx.ChvoNative.checkUpdate(),f.ctx.ChvoNative.checkUpdate()]);
+  assert.equal(checks,1,'Play check only once in a five-minute window');
+  f.ctx.document.visibilityState='hidden';
+  await f.ctx.ChvoNative.checkUpdate();
+  assert.equal(checks,1,'No Play check while backgrounded');
+  f.ctx.document.visibilityState='visible';
+  f.listeners.appStateChange({isActive:true});
+  assert(f.calls.includes('resume'),'Existing account/resume lifecycle retained');
+});
