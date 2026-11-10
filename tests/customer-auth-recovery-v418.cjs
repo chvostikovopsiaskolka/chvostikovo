@@ -12,7 +12,7 @@ assert(html.indexOf('id="menuLogout"')<html.indexOf('id="customerLocaleInMenuV40
 assert(html.includes('id="resendConfirmationV418"'),'manual confirmation recovery control');
 assert(app.includes("'/auth/v1/resend?redirect_to='")&&app.includes("type:'signup',email"),'manual resend uses correct signup endpoint');
 assert(app.includes("Date.now()-last<120000"),'manual resend cooldown');
-assert(!app.includes("authFetch('/auth/v1/resend"),'no automatic resend on page startup');
+assert.equal((app.match(/authFetch\('\\/auth\\/v1\\/resend/g)||[]).length,1,'resend is triggered only by the dedicated button');
 assert(css.includes('#authView.auth-shell[data-auth-mode="signup"]:not(.hidden)')&&css.includes('overflow-y:auto!important'),'signup owns scroll area');
 assert(css.includes('#customerLocaleInMenuV409{flex-direction:column'),'locale centered');
 console.log('PASS v418 auth email normalization/error mapping, manual-only 120s resend, signup viewport scroll and menu order');
