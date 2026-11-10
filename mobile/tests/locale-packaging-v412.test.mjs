@@ -44,6 +44,10 @@ test('Android current release packages customer, vaccination actions, SK/EN and 
   assert(optics.includes("root.classList.toggle('customer-ios-auth-v410',authVisible&&ios)"));
   assert(optics.includes("if(authVisible && ios && el.matches('#authView>.auth-card'))"),'Android liquid remains unchanged');
   const css=(await read('www/customer-design.css')).toString();
-  assert(css.includes('html.customer-auth-glass-v386.customer-ios-auth-v410 body::before'));
+  assert(css.includes('html.customer-auth-glass-v386.customer-ios-auth-v410 body::before'))
+  assert(css.includes('#authView.auth-shell[data-auth-mode="signup"]:not(.hidden)'),'Android signup scroll area must be packaged');
+  assert(css.includes('overflow-y:auto!important'),'Android long signup must permit scrolling');
+  assert(html.indexOf('id="menuLogout"')<html.indexOf('id="customerLocaleInMenuV409"'),'Language controls follow logout');
+  assert(html.includes('resendConfirmationV418'),'Explicit confirmation recovery is packaged');;
   assert(!css.includes('html.customer-auth-glass-v386 body{background-color:#fff!important;background-image:none!important}'));
 });
