@@ -1,0 +1,171 @@
+/* Chvostíkovo SK/EN customer interface v409.
+ * Presentation-only: no auth, API, profile, terms or checkout mutation.
+ * Keep legally binding text and staff-written notices in their original language.
+ */
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'chvostikovo-customer-locale-v408';
+  const DICTIONARY = new Map([
+  ["Späť na úvod","Back to welcome"],
+  ["Späť","Back"],
+  ["Bližšie k vášmu psíkovi","Closer to your dog"],
+  ["Zákaznícky portál","Customer portal"],
+  ["Permanentka, dochádzka, rezervácie aj oznamy. Všetko dôležité na jednom mieste.","Passes, attendance, bookings and announcements. Everything important in one place."],
+  ["Prehľad funkcií","Features"],
+  ["Permanentka","Pass"],
+  ["Dochádzka","Attendance"],
+  ["Oznamy","Announcements"],
+  ["Vytvoriť účet","Create an account"],
+  ["Už mám účet","I already have an account"],
+  ["Prihlásenie","Sign in"],
+  ["Prihlásiť sa","Sign in"],
+  ["Obnova hesla","Reset password"],
+  ["Nové heslo","New password"],
+  ["E-mail","Email"],
+  ["Heslo","Password"],
+  ["Zapamätať prihlásenie","Remember me"],
+  ["Zabudli ste heslo?","Forgot your password?"],
+  ["Meno a priezvisko","Full name"],
+  ["Telefón","Phone number"],
+  ["Meno psíka","Dog's name"],
+  ["Podľa mena ho priradíme k vášmu účtu.","We will link your dog to your account by name."],
+  ["V prípade dvoch psíkov vyplňte mená oboch oddelené čiarkou (napr. Bella, Iris).","If you have two dogs, enter both names separated by a comma (e.g. Bella, Iris)."],
+  ["Minimálne 8 znakov, malé a veľké písmeno a aspoň 1 číslica.","At least 8 characters, including upper- and lower-case letters and one digit."],
+  ["E-mail k účtu","Account email"],
+  ["Pošleme vám odkaz na vytvorenie nového hesla.","We will email you a password reset link."],
+  ["Poslať odkaz na obnovu","Send reset link"],
+  ["Späť na prihlásenie","Back to sign in"],
+  ["Zopakujte nové heslo","Repeat your new password"],
+  ["Uložiť nové heslo","Save new password"],
+  ["Skúsiť znova","Try again"],
+  ["Appku sa nepodarilo načítať","The app couldn't be loaded"],
+  ["Prihlásenie zostalo zachované. Skontrolujte pripojenie alebo to skúste znova o chvíľu.","Your sign-in has been preserved. Check your connection or try again shortly."],
+  ["Neplatné prihlasovacie údaje.","Invalid sign-in details."],
+  ["Požiadavka sa nepodarila.","The request couldn't be completed."],
+  ["Prístup k účtu je zablokovaný. Kontaktujte Chvostíkovo.","Your account is blocked. Please contact Chvostíkovo."],
+  ["Zadajte e-mail.","Enter your email."],
+  ["Zadajte heslo.","Enter your password."],
+  ["E-mail bol odoslaný.","Email sent."],
+  ["Skontrolujte e-mail.","Check your email."],
+  ["Zmena hesla","Change password"],
+  ["Otvoriť účet","Open account"]
+  ]);
+  // v409: selected navigation/booking/vaccination/guide UI, never customer content.
+  for(const [sk,en] of [["Môj psík","My dog"],["Správa údajov a informácií o psíkovi","Manage your dog's information"],["Údaje psíka","Dog details"],["Očkovania","Vaccinations"],["Oznamy","Announcements"],["Pravidlá škôlky","Daycare rules"],["Žiacka knižka","Report card"],["Pripravujeme","Coming soon"],["Moje kontaktné údaje","My contact details"],["Vaše osobné údaje a kontakty","Your personal and contact details"],["Nastavenia","Settings"],["Upozornenia a súhlasy","Notifications and consents"],["Upozornenia","Notifications"],["Súhlasy a podmienky","Consents and terms"],["Požiadať o vymazanie účtu","Request account deletion"],["Odhlásiť sa","Sign out"],["Všetky práva vyhradené.","All rights reserved."],["Sledujte Chvostíkovo aj na sociálnych sieťach 🐾","Follow Chvostíkovo on social media 🐾"],["Nájdete tu príbehy, fotky a videá vašich štvornohých ratolestí z ich dní v škôlke.","Enjoy stories, photos and videos from your dogs' days at daycare."],["Napíšte nám správu","Send us a message"],["Správy","Messages"],["Napíšte nám otázku k rezervácii alebo čokoľvek iné.","Ask us about a booking or anything else."],["Zavolať do Chvostíkova","Call Chvostíkovo"],["Súvisiaca rezervácia (nepovinné)","Related booking (optional)"],["Bez konkrétnej rezervácie","No specific booking"],["Správa","Message"],["Odoslať správu","Send message"],["Napíšte správu pre Chvostíkovo…","Write a message to Chvostíkovo…"],["Vyberte deň","Choose a day"],["Rezervácie na ďalší týždeň do nedele 20:00.","Book next week's visits by Sunday at 8 PM."],["Ak potrebujete individuálny termín, kontaktujte nás.","Contact us if you need an individual arrangement."],["Rezervácie","Bookings"],["Rezervovať miesto","Book a place"],["Rezervovať","Book"],["Upraviť","Edit"],["Zrušiť","Cancel"],["Potvrdiť","Confirm"],["Vybraté dni","Selected days"],["Vyberte psíka","Select a dog"],["Otvoriť údaje psíka","Open dog details"],["Moje rezervácie","My bookings"],["Dnes","Today"],["Zajtra","Tomorrow"],["Použité vstupy","Visits used"],["Platnosť od","Valid from"],["Platí do","Valid until"],["Bez aktuálnej permanentky","No active pass"],["Aktívna permanentka","Active pass"],["Plánovaný vstup","Planned visit"],["Jednorazový vstup","Single visit"],["Posledný vstup","Final visit"],["Rezervácia","Booking"],["Čaká na schválenie","Pending approval"],["Schválené","Approved"],["Zrušené","Cancelled"],["Návštevy","Visits"],["Počet návštev","Visit count"],["Príchod","Arrival"],["Odchod","Departure"],["Otvoriť Správy","Open messages"],["Zobraziť viac","Show more"],["Zobraziť všetky","Show all"],["Zavrieť","Close"],["Uložiť","Save"],["Uložiť kontaktné údaje","Save contact details"],["Uložiť očkovania","Save vaccinations"],["Údaje môžete kedykoľvek doplniť alebo upraviť.","You can complete or update these details at any time."],["Fotografie očkovacieho preukazu","Vaccination record photos"],["Nahrajte alebo odfoťte 1 až 5 fotografií strán s platnosťou očkovaní.","Upload or take 1 to 5 photos showing the validity of vaccinations."],["Kotercový kašeľ","Kennel cough"],["Besnota","Rabies"],["Infekčné ochorenia","Infectious diseases"],["Má váš psík leptospirózu zaočkovanú zvlášť?","Has your dog received a separate leptospirosis vaccination?"],["Dátum vyplňte iba pri samostatnom očkovaní L4. Ak má psík spoločné DHPPi+L, nechajte toto pole prázdne.","Enter the date only if L4 was given separately. Leave this blank for a combined DHPPi+L vaccination."],["Platí do (nepovinné)","Valid until (optional)"],["Zdravotné údaje","Health information"],["Plemeno","Breed"],["Váha","Weight"],["Pohlavie","Sex"],["Dátum narodenia","Date of birth"],["Súhlasy","Consents"],["Podmienky škôlky","Daycare terms"],["Ochrana osobných údajov","Privacy policy"],["Preskočiť","Skip"],["Pokračovať","Continue"],["Dokončiť","Finish"],["Spustiť sprievodcu","Start guide"],["Sprievodca appkou","App guide"],["Sprievodca aplikáciou","App guide"],["Ukážka rezervácie","Example booking"],["Rezervovať 2 dni","Book 2 days"],["Váš psík v Prehľade","Your dog in Overview"],["Permanentka a vaše rezervácie","Your pass and bookings"],["Vaše rezervácie","Your bookings"],["Výber dní a taxi","Choose dates and taxi"],["Všetko ostatné v Menu","Everything else in Menu"],["Ťuknutím na profil otvoríte údaje a fotografiu psíka. Pri očkovaniach nájdete ich platnosť, pri grafe počet návštev. Pri zapnutých upozorneniach pripomenieme končiace očkovanie 14 a 7 dní vopred.","Tap the profile to see your dog's details and photo. Check vaccination validity and visit count. With notifications enabled, we'll remind you 14 and 7 days before vaccinations expire."],["Ak máte zakúpenú permanentku, tu uvidíte jej platnosť a počet využitých vstupov. Pod ňou nájdete svoje rezervácie a možnosť Upraviť. Cez Oznamy otvoríte novinky zo škôlky a cez Správy nám priamo napíšete.","Here you'll find your pass validity and used visits. Below are your bookings and an Edit option. Open daycare news in Announcements or contact us in Messages."],["Tlačidlom Rezervovať miesto v spodnej lište otvoríte dostupné dni. Po výbere uvidíte Vybraté dni a potvrdenie rezervácie.","Use Book a place in the bottom bar to view available dates. After selecting, review Selected days and confirm the booking."],["Tu nájdete vytvorené rezervácie a stav schválenia. Podľa dostupných možností pridáte alebo upravíte taxi či zrušíte návštevu. Ak chcete zmeniť termín, zrušíte pôvodný a vyberiete nový.","Find your bookings and approval status here. Depending on availability, you can add or edit taxi transport or cancel a visit. To change a date, cancel the original and book a new one."],["Ukážka: vyberte dni v kalendári. Vybraté dni a tlačidlo Rezervovať nájdete pod kalendárom. Ku každému dňu môžete pridať taxi.","Example: select dates in the calendar. Selected days and the Book button appear below. Taxi transport can be added for each day."],["V Menu nájdete údaje psíka, očkovania, svoje kontakty aj správy pre škôlku. V Nastaveniach si môžete tohto sprievodcu kedykoľvek zopakovať. Pripravujeme aj rozšírenú žiacku knižku a odmeny.","The Menu contains your dog's details, vaccinations, contacts and messages. You can repeat this guide in Settings. More report-card features and rewards are coming."],["Ukážeme vám Prehľad, rezervácie a Menu v šiestich krátkych krokoch. Sprievodcu môžete kedykoľvek preskočiť.","We'll show you Overview, Bookings and the Menu in six short steps. You can skip the guide any time."]]) DICTIONARY.set(sk,en);
+  // v411: complete registration/legal labels and extend customer UI without data mutation.
+  for (const [sk,en] of [["Permanentky, návštevy, rezervácie a novinky na jednom mieste.","Passes, visits, bookings and updates in one place."],["Zopakujte heslo","Confirm password"],["Oboznámil/a som sa so","I have read the"],["zásadami ochrany osobných údajov","privacy policy"],["Informácie o spracúvaní osobných údajov","Privacy notice"],["Prevádzkovateľ:","Data controller:"],["Marek Leder – Bellaris, IČO: 56447001, miesto podnikania: Miškovecká 1023/2, 040 11 Košice-Juh. Prevádzkareň Chvostíkovo: Poľská 2207/6, 040 01 Košice-Juh. Zapísaný v Živnostenskom registri Okresného úradu Košice, č. 820-106266. Kontakt: chvostikovo.psiaskolka@gmail.com, +421 951 069 395.","Marek Leder – Bellaris, company ID: 56447001, registered place of business: Miškovecká 1023/2, 040 11 Košice-Juh. Chvostíkovo daycare premises: Poľská 2207/6, 040 01 Košice-Juh. Registered in the Trade Register of the Košice District Office under No. 820-106266. Contact: chvostikovo.psiaskolka@gmail.com, +421 951 069 395."],["V zákazníckom portáli spracúvame údaje potrebné na poskytovanie služieb škôlky, najmä meno a priezvisko, e-mail, telefónne číslo, údaje o psíkovi, rezervácie, návštevy, permanentky, taxi službu, komunikáciu so škôlkou, údaje o očkovaniach, fotografie očkovacieho preukazu a fotografiu psíka, ak ju nahráte.","In the customer portal, we process the information necessary to provide our daycare services, in particular your full name, email address, telephone number, information about your dog, bookings, visits, passes, dog transport, communications with the daycare, vaccination details, photographs of vaccination records and a photo of your dog if you upload one."],["Údaje používame na správu účtu, organizáciu rezervácií a návštev, bezpečnú starostlivosť o psíka, komunikáciu a plnenie povinností súvisiacich s prevádzkou škôlky.","We use this information to manage your account, organise bookings and visits, care safely for your dog, communicate with you and meet the obligations associated with operating the daycare."],["Nepoužívame reklamné nástroje ani údaje nepredávame.","We do not use advertising tools or sell your information."],["Na technickú prevádzku portálu využívame poskytovateľov infraštruktúry potrebných na fungovanie aplikácie.","We use the infrastructure providers necessary for the app to operate."],["Údaje uchovávame počas trvania zákazníckeho vzťahu a následne po dobu potrebnú na splnenie zákonných povinností a ochranu právnych nárokov. V súvislosti so svojimi údajmi môžete požiadať o prístup, opravu, vymazanie alebo obmedzenie spracúvania, ak sú splnené zákonné podmienky.","We keep your information during the customer relationship and afterwards for as long as necessary to meet legal obligations and protect legal claims. You may request access, rectification, deletion or restriction of processing of your personal data where the applicable legal conditions are met."],["Potvrdením pri registrácii neudeľujete marketingový súhlas. Potvrdzujete, že ste sa s týmito informáciami oboznámili.","Acknowledging this notice during registration does not give marketing consent. It confirms that you have read this information."],["Kompletné zásady ochrany osobných údajov pre web aj zákaznícku aplikáciu sú verejne dostupné aj bez prihlásenia:","The complete privacy policy for the website and customer app is publicly available without signing in:"],["Otvoriť zásady ochrany osobných údajov","Open privacy policy"],["Rozumiem","I understand"],["Potvrdiť a pokračovať","Confirm and continue"],["Potvrdzujem, že som si Podmienky psej škôlky Chvostíkovo prečítal/a, ich obsahu rozumiem a súhlasím s nimi.","I confirm that I have read and understood Chvostíkovo's dog daycare terms and agree to them."],["Potvrdiť a prijať podmienky","Accept terms and continue"],["Podmienky psej škôlky Chvostíkovo","Chvostíkovo Dog Daycare Terms"],["Prečítajte si podmienky. Až potom sa sprístupní potvrdenie o prečítaní podmienok.","Please read the terms. The confirmation option will become available once you have reached the end."],["Teraz môžete potvrdiť, že ste si podmienky prečítali.","You can now confirm that you have read the terms."],["Zavrieť výber psíka","Close dog selection"],["Verzia:","Version:"],["Pravidlá škôlky momentálne nie sú dostupné.","Daycare rules are currently unavailable."],["Pravidlá potvrdené","Terms accepted"],["Moje potvrdené verzie","My accepted versions"],["Otvoriť alebo stiahnuť PDF","Open or download PDF"],["Otvoriť PDF","Open PDF"],["Stiahnuť PDF","Download PDF"],["Zatiaľ nemáte potvrdenú verziu podmienok.","You have not accepted a version of the terms yet."],["Najprv sa prihláste.","Please sign in first."],["Doplniť údaje","Complete details"],["Heslo nie je zhodné.","Passwords do not match."],["Heslá sa nezhodujú.","Passwords do not match."],["Heslo musí mať aspoň 8 znakov.","Password must contain at least 8 characters."],["Potvrdenie hesla","Confirm password"],["Skryť heslo","Hide password"],["Zobraziť heslo","Show password"],["Údaje psíka","Dog details"],["Aktualizovať údaje","Update details"],["Zmeniť fotografiu","Change photo"],["Vybrať fotografiu","Choose photo"],["Alergie a zdravotné obmedzenia","Allergies and health restrictions"],["Alergie","Allergies"],["Obmedzenia","Restrictions"],["Povaha","Temperament"],["Pes","Male"],["Suka","Female"],["Áno","Yes"],["Nie","No"],["Kastrovaný","Neutered"],["Nekastrovaný","Not neutered"],["Odvoz domov","Drop-off at home"],["Vyzdvihnutie","Collection"],["Vyzdvihnutie aj odvoz domov","Collection and drop-off"],["Taxi do škôlky","Taxi to daycare"],["Taxi zo škôlky","Taxi home"],["Bez taxi","No taxi"],["Už mám rezerváciu","I already have a booking"],["Mám záujem","I'm interested"],["Vybrať dni","Choose dates"],["Požiadať o rezerváciu","Request a booking"],["Na schválenie","Awaiting approval"],["Potvrdené","Confirmed"],["Čaká na potvrdenie","Awaiting confirmation"],["Požiadať o permanentku","Request a pass"],["Kúpiť permanentku","Buy a pass"],["Zostávajúce vstupy","Remaining visits"],["Zostáva","Remaining"],["Využité","Used"],["Platnosť permanentky","Pass validity"],["Bez platnej permanentky","No valid pass"],["Neprišiel","Did not attend"],["Moje údaje","My details"],["Upraviť údaje","Edit details"],["Oznamy zo škôlky","Daycare announcements"],["Oznámenia","Notifications"],["Správy od škôlky","Messages from daycare"],["Načítavam…","Loading…"],["Načítavam aktuálne pravidlá škôlky…","Loading the current daycare terms…"],["Nastavenia upozornení","Notification settings"],["Povoliť upozornenia","Enable notifications"],["Vypnúť upozornenia","Disable notifications"],["Pridať na plochu","Add to Home Screen"],["Zavrieť okno","Close window"]]) DICTIONARY.set(sk,en);
+  // v413: profile/vaccination onboarding labels; customer and staff data remain untouched.
+  for(const [sk,en] of [["Zadám neskôr","I'll add them later"],["Doplňte očkovania psíka","Complete your dog's vaccinations"],["Doplniť očkovania","Add vaccinations"],["* označuje povinný údaj","* indicates a required field"],["(nepovinné)","(optional)"],["Základné údaje psíka už máte uložené. Chýbajú len platné očkovania alebo fotografia očkovacieho preukazu. Bez nich zatiaľ nie je možné rezervovať miesto.","Your dog's basic details are saved. Only valid vaccinations or a photo of the vaccination record are missing. Bookings are unavailable until they are added."],["Doplňte dátum narodenia, plemeno a pohlavie psíka. Váha je nepovinná. Platné očkovania a doklady už evidujeme.","Enter your dog's date of birth, breed and sex. Weight is optional. Valid vaccinations and records are already on file."],["Najprv doplňte dátum narodenia, plemeno a pohlavie psíka. Váha je nepovinná. Potom môžete doplniť očkovania a fotografie preukazu.","First enter your dog's date of birth, breed and sex. Weight is optional. You can then add vaccinations and record photos."]]) DICTIONARY.set(sk,en);
+  // v414: the new dock shortcut is an external catalog link, not an in-app checkout.
+  DICTIONARY.set('E-shop','Shop');
+  const root = document.getElementById('authView');
+  const controls = document.getElementById('customerLocaleSwitchV408');
+  if (!root || !controls) return;
+  const original = new WeakMap();
+  const knownAttributes = new WeakMap();
+  let lang = 'sk';
+  try {
+    const requested = new URL(location.href).searchParams.get('lang');
+    lang = requested === 'en' || requested === 'sk' ? requested :
+      localStorage.getItem(STORAGE_KEY) === 'en' ? 'en' : 'sk';
+  } catch (_) { lang = 'sk'; }
+  try { if (new URL(location.href).searchParams.has('lang')) localStorage.setItem(STORAGE_KEY, lang); } catch (_) {}
+  const dynamicRootIds=['appView','customerGuideV358','dogDetailsModal','bookingPickerV37',
+    'privacyInfoModal','schoolTermsModal','schoolRulesModalV55','schoolTermsReadModal',
+    'customerContactModal','customerGradebookModal','dogSettingsModalV36',
+    'dogDetailsOnboardingModalV75','waitingDogAssignmentModalV75','shareOnboardingModalV75'];
+  const roots=()=>[root,...dynamicRootIds.map(id=>document.getElementById(id))].filter(Boolean);
+  // Never translate user/staff-authored content or the signed canonical terms body.
+  const excluded='script,style,textarea,[contenteditable="true"],#messageThread,.message-thread,#announcementNotice,#notificationList,.customer-bulletin-dialog-v229,.customer-bulletin-history-row-v229,#schoolTermsBody,#schoolRulesBodyV55,#schoolTermsReadBody';
+  const skip=element=>!!element?.closest?.(excluded) ||
+    (!!element?.closest?.('.legal-body') && !element.closest('#privacyInfoModal'));
+  const translate = text => DICTIONARY.get(text) ||
+    (/^\d+ z \d+$/.test(text) ? text.replace(/^([0-9]+) z ([0-9]+)$/, '$1 of $2') : null);
+  const bare = node => (node?.nodeValue || '').trim();
+  function updateText(node) {
+    if (node.nodeType !== 3 || !node.parentElement ||
+      skip(node.parentElement)) return;
+    const current = bare(node);
+    if (!current) return;
+    let record = original.get(node);
+    if (!record || (current !== record.sk && current !== record.en)) {
+      const en = translate(current);
+      if (!en) return;
+      record = {sk: current, en};
+      original.set(node, record);
+    }
+    const next = lang === 'en' ? record.en : record.sk;
+    if (current === next) return;
+    const value = node.nodeValue;
+    const leading = value.match(/^\s*/)?.[0] || '';
+    const trailing = value.match(/\s*$/)?.[0] || '';
+    node.nodeValue = leading + next + trailing;
+  }
+  function updateAttributes() {
+    for(const scope of roots()) for(const element of scope.querySelectorAll('[aria-label],[title],[placeholder]')){
+      if(skip(element))continue;
+      let records=knownAttributes.get(element);
+      if(!records){records=new Map();knownAttributes.set(element,records);}
+      for(const attribute of ['aria-label','title','placeholder']){
+        const current=element.getAttribute(attribute);
+        if(current===null||!current.trim())continue;
+        let record=records.get(attribute);
+        if(!record||(current!==record.sk&&current!==record.en)){
+          const en=translate(current);if(!en)continue;
+          record={sk:current,en};records.set(attribute,record);
+        }
+        const next=lang==='en'?record.en:record.sk;
+        if(current!==next)element.setAttribute(attribute,next);
+      }
+    }
+  }
+  function apply(){
+    for(const scope of roots()){
+      const walker=document.createTreeWalker(scope,NodeFilter.SHOW_TEXT);
+      let node;while((node=walker.nextNode()))updateText(node);
+    }
+    updateAttributes();
+    for(const button of document.querySelectorAll('#customerLocaleSwitchV408 button[data-customer-locale],#customerLocaleInMenuV409 button[data-customer-locale]')){
+      const active=button.dataset.customerLocale===lang;
+      if(button.getAttribute('aria-pressed')!==String(active))button.setAttribute('aria-pressed',String(active));
+      button.classList.toggle('active',active);
+    }
+    if(document.documentElement.lang!==lang)document.documentElement.lang=lang;
+  }
+  let queued = false;
+  const requestApply = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {queued = false;apply();});
+  };
+  const clickLocale=event=>{
+    const button=event.target.closest('button[data-customer-locale]');
+    if(!button||!event.currentTarget.contains(button))return;
+    const chosen=button.dataset.customerLocale;if(chosen!=='sk'&&chosen!=='en')return;
+    lang=chosen;try{localStorage.setItem(STORAGE_KEY,lang)}catch(_){}
+    apply();
+  };
+  controls.addEventListener('click',clickLocale);
+  document.getElementById('customerLocaleInMenuV409')?.addEventListener('click',clickLocale);
+  const observer=new MutationObserver(records=>{
+    if(records.some(record=>{
+      const element=record.target.nodeType===1?record.target:record.target.parentElement;
+      if(element?.closest?.('.lg-v3-material,.lg-v3-output')||skip(element))return false;
+      if(element?.closest?.('#authView,'+dynamicRootIds.map(id=>'#'+id).join(',')))return true;
+      return [...record.addedNodes].some(node=>node.nodeType===1&&
+        (dynamicRootIds.includes(node.id) || node.querySelector?.(dynamicRootIds.map(id=>'#'+id).join(','))));
+    }))requestApply();
+  });
+  observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['aria-label','title','placeholder']});
+  window.ChvostikovoLocale = Object.freeze({
+    getLanguage: () => lang,
+    setLanguage: value => {
+      if (value !== 'sk' && value !== 'en') return false;
+      lang = value;
+      try {localStorage.setItem(STORAGE_KEY,lang)} catch (_) {}
+      apply();
+      return true;
+    }
+  });
+  apply();
+})();

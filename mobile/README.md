@@ -1,5 +1,40 @@
 # Chvostíkovo Android — Capacitor preparation
 
+## Play update modal — Android v417 / 2.0.90 (9 November 2026)
+
+**Build preview — NOT signed or uploaded to Google Play.** This native-only release starts Google Play Core checks after cold launch and every return to foreground (coalesced/5-minute throttle). Only a Play-owned, eligible install for which Play Core reports a **higher versionCode** shows an accessible SK/EN modal offering `Aktualizovať v Google Play` and `Pripomenúť neskôr`. The CTA opens the existing Play listing via the Android ChvoUpdates plugin; defer applies for 24 hours per offered version. A newer subsequent version may prompt immediately. The modal waits if the user is typing or a customer modal is already open. No forced interruption, APK sideloading, remote code loading, or separate update backend.
+
+The Play SDK requirements: installed app must belong to Play user library, package/signature must match, tester must be eligible for the release (internal-testing channel included), and published versionCode must be higher. **A v417 build cannot show its own update prompt until v418 or higher becomes available to that tester.** An old build without this feature cannot be retroactively patched by a PWA/Vercel deployment. **Google Play automatic updates may already have installed the next version** before Play Core queries; in that case no modal should appear.
+
+The native branch intentionally has root v417/2.0.90 while customer PWA production stays v416/2.0.89, because its only extra code is the native update UI. Build the exact native PR candidate in a separate full local checkout, preserving all existing local work, and use the original owner keystore after verifying Play upload certificate, password and alias. Place your own `mobile/android/app/google-services.json` (never commit it); run `npm.cmd ci`, `npm.cmd run sync`, `npm.cmd test`, `npm.cmd run check:release` and Gradle `bundleRelease` after setting `CHVO_KEYSTORE_PATH`, `CHVO_KEYSTORE_PASSWORD`, `CHVO_KEY_ALIAS`, `CHVO_KEY_PASSWORD` and physically verifying native FCM/App Links. `check:release` intentionally blocks without verified Firebase/signing/native checks. A CI-built `app-release.aab` without the owner keystore is UNSIGNED and must not be uploaded as-is. Confirm Play Console's latest versionCode and matching upload key before publishing to internal testing. Never send or record passwords/JKS in chat, Git or CI logs.
+
+**Regression:** mobile update policy, modal DOM/accessibility/EN, native runtime packaging, customer PWA regressions and Android Gradle build. Real Play eligibility/checks require an actual signed Play-installed older version plus a newer internal-test release and tester account; GitHub Actions cannot verify that end-to-end. Previous candidate v416 remains available as rollback build, but Play cannot downgrade installed versionCode.
+
+---
+
+## Current Play preview – Android v412 / 2.0.85 (6 November 2026)
+
+This branch bundles the exact customer-portal-production source commit `8fb78ab13db9df0c6d9d37e09135f080201a008a`
+(v412/2.0.85), including SK/EN UI, hash-pinned English reading terms (v411)
+and v412 registration/notification styling changes. The Capacitor native runtime,
+Firebase package name `sk.chvostikovo.app`, App Links and icon are unchanged.
+
+The GitHub Actions workflow produces a **debug APK** for device preview
+and an **UNSIGNED AAB** for compilation checks. Neither artifact is signed with
+the owner's private upload key. Only the owner can sign the final AAB using a
+verified keystore/password on their Windows computer, after matching the
+certificate with the Play upload-key reset. Never commit a JKS or secrets.
+
+Preview: install the debug APK on a test device after checking any existing
+installation/signature conflict. Debug APK is not equivalent to a Play-signed
+update; uninstalling an existing app can remove local-only settings and caches.
+Before Play: verify current Console versionCode, real EN/SK flows, 1/2 dog
+bookings, push/FCM and Android App Links on a physical device.
+Production PWA and backend are unaffected by this Android-only candidate.
+
+---
+## Historical setup notes (original baseline)
+
 Status: **prepared for testing; not a signed Google Play release**. Source baseline:
 customer PWA candidate v394 / 2.0.69 (28 October 2026), based on
 production `3159725685584014b50b912e09995b2d68fcebfd`. Earlier v360/v361 APK/AAB files
