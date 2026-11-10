@@ -397,6 +397,18 @@ const failures = [];
                 !(await productPage.locator('#starostlivost').getByText('neustálym dohľadom', { exact: false }).count())) {
               throw new Error('Care safety FAQ must open with its detailed answer');
             }
+            const careFaq = careToggle.locator('xpath=../..');
+            const careLayout = productPage.locator('#starostlivost > .relative.z-10');
+            const [faqBox, layoutBox] = await Promise.all([careFaq.boundingBox(), careLayout.boundingBox()]);
+            if (!faqBox || !layoutBox || Math.abs(faqBox.width - (layoutBox.width - 32)) > 4) {
+              throw new Error('Care FAQ should span the photo and benefit-text content width');
+            }
+            const repeatedTitle = careFaq.getByRole('heading', { name: 'Ako zabezpečujete bezpečnosť psíkov v škôlke?' });
+            if (await repeatedTitle.count()) throw new Error('Care FAQ repeats a second heading inside its answer');
+            const careAnswer = careToggle.locator('xpath=..').locator('div[id]').first();
+            if (!await careAnswer.getByText('Bezpečnosť začína už vstupnou návštevou.', { exact: false }).count()) {
+              throw new Error('Care FAQ answer missing after removing duplicated heading');
+            }
             const whyArticle = productPage.locator('#preco a[href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"]');
             if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
             const whyCta = productPage.locator('#preco').getByRole('button', { name: 'Chcem prihlásiť psíka' });
