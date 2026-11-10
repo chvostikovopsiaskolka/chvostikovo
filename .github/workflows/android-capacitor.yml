@@ -40,6 +40,7 @@ jobs:
           node tests/customer-design.cjs
           node tests/customer-image-network-v404.cjs
           node tests/customer-confirm-return-v155.cjs
+          node tests/customer-auth-recovery-v418.cjs
           node tests/customer-guide-v358.cjs
           node tests/customer-locale-v409.cjs
           node tests/customer-onboarding-v413.cjs
