@@ -84,8 +84,7 @@ export function ContextFaq({
         </span>
       </button>
       {open && (
-        <div id={answerId} className="px-5 pb-6 text-[0.95rem] leading-relaxed text-forest/80 sm:px-6">
-          {label && <h3 className="mb-3 font-display text-base font-bold text-forest">{question}</h3>}
+        <div id={answerId} className="px-5 pb-6 text-[0.95rem] leading-relaxed text-forest/95 sm:px-6">
           <FaqAnswer question={item.q} answer={item.a} />
         </div>
       )}
