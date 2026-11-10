@@ -30,9 +30,9 @@ const fixture=require('./liquid-v3-fixture.cjs');
  await material.waitFor({state:'visible'});
  if(width===390){
    await page.setViewportSize({width:390,height:580});
-   await page.evaluate(()=>window.scrollTo(0,150));
-   const pinned=await page.locator('body').evaluate(el=>({y:window.scrollY,position:getComputedStyle(el,'::before').position,image:getComputedStyle(el,'::before').backgroundImage}));
-   assert(pinned.y>0,'long signup must scroll in test viewport');
+   await page.evaluate(()=>{document.getElementById('authView').scrollTop=150});
+   const pinned=await page.locator('body').evaluate(el=>({y:document.getElementById('authView').scrollTop,position:getComputedStyle(el,'::before').position,image:getComputedStyle(el,'::before').backgroundImage}));
+   assert(pinned.y>0,'long signup scroll container must move in test viewport');
    if(type===webkit){
     assert.equal(pinned.position,'fixed','iOS paws stay pinned after signup scroll');
     assert(pinned.image.includes('chvostikovo-paws-soft-v383.png'));
@@ -42,7 +42,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
     assert.equal(await material.getAttribute('data-renderer'),'svg','Android retains glass refraction with SK/EN');
    }
    await page.screenshot({path:`/tmp/chvo-v386-auth/signup-${type.name()}.png`});
-   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.scrollTo(0,0));
+   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>{window.scrollTo(0,0);document.getElementById('authView').scrollTop=0});
  }
  for(const id of ['signupName','signupEmail','signupPhone','signupDogName','signupPassword']){await page.locator('#'+id).focus();assert.equal(await page.locator('#'+id).evaluate(el=>getComputedStyle(el).filter),'none');assert(await page.locator('#'+id).evaluate(el=>el.getBoundingClientRect().width>100));}
  await page.locator('#showLogin').click();assert(await page.evaluate(()=>document.getElementById('loginEmail')===__loginNode));assert.equal(await page.locator('#loginEmail').inputValue(),'synthetic@example.invalid');

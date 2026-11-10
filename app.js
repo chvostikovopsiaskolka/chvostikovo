@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v416';
-const APP_VERSION='2.0.89';
+const APP_BUILD='v418';
+const APP_VERSION='2.0.91';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -1800,7 +1800,7 @@ function handleVerifiedEmailReturn(){
   history.replaceState(null,'',location.pathname+(params.size?'?'+params.toString():''));
   if(!verified||typeof verified.email!=='string'||typeof verified.at!=='number'||Date.now()-verified.at>300000||verified.at>Date.now())return false;
   showAuth('login');
-  $('loginEmail').value=verified.email;
+  $('loginEmail').value=String(verified.email).trim().toLowerCase();
   authMessage('info','E-mail je potvrdený. Môžete sa prihlásiť.');
   loading(false);
   return true;
@@ -1808,7 +1808,7 @@ function handleVerifiedEmailReturn(){
 async function init(){registerSW();if(handleRecoveryHash()||handleVerifiedEmailReturn()){loading(false);return}state.session=currentSession();if(state.session)await bootstrap();else{showAuth(localStorage.getItem('chvostikovo_pending_login_email')?'login':'welcome');loading(false)}}
 $('authCreateAccountV403')?.addEventListener('click',()=>showAuth('signup'));$('authHaveAccountV403')?.addEventListener('click',()=>showAuth('login'));$('authBackV403')?.addEventListener('click',()=>showAuth($('authView').dataset.authMode==='forgot'?'login':'welcome'));
 $('showLogin').addEventListener('click',()=>showAuth('login'));$('showSignup').addEventListener('click',()=>showAuth('signup'));$('forgotPasswordBtn').addEventListener('click',()=>showAuth('forgot'));$('backToLogin').addEventListener('click',()=>showAuth('login'));
-const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');if(pendingLoginEmail&&!$('loginEmail').value)$('loginEmail').value=pendingLoginEmail;
+const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');if(pendingLoginEmail&&!$('loginEmail').value)$('loginEmail').value=normalizeCustomerEmailV418(pendingLoginEmail);
 (function customerSignupPasswordV19(){
   if(window.__customerSignupPasswordV19)return;window.__customerSignupPasswordV19=true;
   const first=$('signupPassword');if(!first)return;
@@ -1828,15 +1828,39 @@ const pendingLoginEmail=localStorage.getItem('chvostikovo_pending_login_email');
   const infectious=[...document.querySelectorAll('.vaccine-box strong')].find(el=>el.textContent.trim()==='Infekčné ochorenia');
   if(infectious&&!document.getElementById('infectiousInfoV19')){infectious.textContent='Infekčné ochorenia (DHPPi+L)';infectious.insertAdjacentHTML('afterend','<div id="infectiousInfoV19" class="hint" style="margin-top:5px">Psinka · infekčný zápal pečene · parvoviróza · psia parainfluenza · leptospiróza</div>')}
 })();
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();if(e.submitter?.disabled)return;try{if(e.submitter)e.submitter.disabled=true;loading(true);const s=await authFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:$('loginEmail').value.trim(),password:$('loginPassword').value})});saveSession(s,$('rememberLogin').checked);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}catch(e){authMessage('error',e.message)}finally{if(e.submitter)e.submitter.disabled=false;loading(false)}});
+// v418: normalize common mixed-case email input without changing stored identities or passwords.
+function normalizeCustomerEmailV418(value){return String(value||'').trim().toLowerCase()}
+function customerLoginErrorMessageV418(error){
+ const code=String(error?.code||'').toLowerCase(),message=String(error?.message||'');
+ if(code==='email_not_confirmed'||/email not confirmed/i.test(message))return 'E-mail ešte nie je potvrdený. Otvorte najnovší potvrdzovací e-mail. Ak odkaz nefunguje, požiadajte nižšie o nový.';
+ if(code==='invalid_credentials'||/invalid login credentials/i.test(message))return 'Nesprávny e-mail alebo heslo. Ak ste ešte nepotvrdili e-mail, najprv použite najnovší potvrdzovací odkaz. Inak skúste obnoviť heslo.';
+ if(code==='email_address_invalid'||/invalid e-?mail/i.test(message))return 'Skontrolujte formát e-mailovej adresy a skúste to znova.';
+ if(error?.status===429||/rate limit|too many requests/i.test(message))return 'Priveľa pokusov. Chvíľu počkajte a skúste to znova.';
+ return message||'Prihlásenie sa nepodarilo. Skúste to znova.';
+}
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();if(e.submitter?.disabled)return;try{if(e.submitter)e.submitter.disabled=true;loading(true);const email=normalizeCustomerEmailV418($('loginEmail').value);$('loginEmail').value=email;const s=await authFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password:$('loginPassword').value})});saveSession(s,$('rememberLogin').checked);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}catch(error){authMessage('error',customerLoginErrorMessageV418(error))}finally{if(e.submitter)e.submitter.disabled=false;loading(false)}});
+$('resendConfirmationV418')?.addEventListener('click',async e=>{
+ const email=normalizeCustomerEmailV418($('loginEmail').value),input=$('loginEmail'),button=e.currentTarget;
+ input.value=email;
+ if(!email||!input.checkValidity()){authMessage('error','Najprv zadajte platný e-mail použitý pri registrácii.');input.focus();return}
+ const last=Number(sessionStorage.getItem('chvostikovo_confirmation_resend_v418')||0);
+ if(last>0&&Date.now()-last<120000){authMessage('info','Nový odkaz môžete vyžiadať najskôr o 2 minúty. Skontrolujte zatiaľ posledný e-mail.');return}
+ button.disabled=true;
+ try{
+  await authFetch('/auth/v1/resend?redirect_to='+encodeURIComponent(CUSTOMER_PUBLIC_URL),{method:'POST',body:JSON.stringify({type:'signup',email})});
+  sessionStorage.setItem('chvostikovo_confirmation_resend_v418',String(Date.now()));
+  authMessage('info','Ak e-mail čaká na potvrdenie, poslali sme nový odkaz. Otvorte iba najnovšiu správu a nežiadajte opakovane ďalšie odkazy.');
+ }catch(error){authMessage('error',customerLoginErrorMessageV418(error))}
+ finally{button.disabled=false}
+});
 function showExistingSignupAccount(email){
   showAuth('login');
   $('loginEmail').value=email;
   $('forgotEmail').value=email;
   authMessage('info','Pre tento e-mail už máte účet. Prihláste sa alebo si obnovte heslo.');
 }
-$('signupForm').addEventListener('submit',async e=>{e.preventDefault();if(e.submitter?.disabled)return;const password=$('signupPassword').value,passwordAgain=$('signupPasswordAgain')?.value||'',signupEmail=$('signupEmail').value.trim();if(!PASSWORD_STRONG_RE.test(password)){authMessage('error',PASSWORD_MIN_MESSAGE);$('signupPassword').focus();return}if(password!==passwordAgain){authMessage('error','Heslá sa nezhodujú.');$('signupPasswordAgain')?.focus();return}try{if(e.submitter)e.submitter.disabled=true;loading(true);localStorage.setItem('chvostikovo_pending_login_email',signupEmail);const data=await authFetch('/auth/v1/signup?redirect_to='+encodeURIComponent(CUSTOMER_PUBLIC_URL),{method:'POST',body:JSON.stringify({email:signupEmail,password,data:{full_name:$('signupName').value.trim(),phone:$('signupPhone').value.trim(),dog_name:$('signupDogName').value.trim(),privacy_notice_version:'privacy-v1',privacy_notice_acknowledged_at:new Date().toISOString()}})});const identities=data?.identities??data?.user?.identities;if(!data?.access_token&&Array.isArray(identities)&&identities.length===0){showExistingSignupAccount(signupEmail)}else if(data?.access_token){saveSession(data,true);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}else{showAuth('login');$('loginEmail').value=signupEmail;authMessage('info','Potvrdzovací e-mail bol odoslaný na '+signupEmail+'. Skontrolujte, či je adresa správna, a potvrďte e-mail cez odkaz v správe.')}}catch(e){if(e.code==='user_already_exists'||/^User already registered[.!]?$/i.test(e.message||''))showExistingSignupAccount(signupEmail);else authMessage('error',e.message)}finally{if(e.submitter)e.submitter.disabled=false;loading(false)}});
-$('forgotForm').addEventListener('submit',async e=>{e.preventDefault();try{await authFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(CUSTOMER_PUBLIC_URL),{method:'POST',body:JSON.stringify({email:$('forgotEmail').value.trim()})});authMessage('success','Odkaz na obnovu hesla sme poslali na váš e-mail.')}catch(e){authMessage('error',e.message)}});
+$('signupForm').addEventListener('submit',async e=>{e.preventDefault();if(e.submitter?.disabled)return;const password=$('signupPassword').value,passwordAgain=$('signupPasswordAgain')?.value||'',signupEmail=normalizeCustomerEmailV418($('signupEmail').value);$('signupEmail').value=signupEmail;if(!PASSWORD_STRONG_RE.test(password)){authMessage('error',PASSWORD_MIN_MESSAGE);$('signupPassword').focus();return}if(password!==passwordAgain){authMessage('error','Heslá sa nezhodujú.');$('signupPasswordAgain')?.focus();return}try{if(e.submitter)e.submitter.disabled=true;loading(true);localStorage.setItem('chvostikovo_pending_login_email',signupEmail);const data=await authFetch('/auth/v1/signup?redirect_to='+encodeURIComponent(CUSTOMER_PUBLIC_URL),{method:'POST',body:JSON.stringify({email:signupEmail,password,data:{full_name:$('signupName').value.trim(),phone:$('signupPhone').value.trim(),dog_name:$('signupDogName').value.trim(),privacy_notice_version:'privacy-v1',privacy_notice_acknowledged_at:new Date().toISOString()}})});const identities=data?.identities??data?.user?.identities;if(!data?.access_token&&Array.isArray(identities)&&identities.length===0){showExistingSignupAccount(signupEmail)}else if(data?.access_token){saveSession(data,true);localStorage.removeItem('chvostikovo_pending_login_email');await bootstrap(false)}else{showAuth('login');$('loginEmail').value=signupEmail;authMessage('info','Potvrdzovací e-mail bol odoslaný na '+signupEmail+'. Skontrolujte, či je adresa správna, a potvrďte e-mail cez odkaz v správe.')}}catch(e){if(e.code==='user_already_exists'||/^User already registered[.!]?$/i.test(e.message||''))showExistingSignupAccount(signupEmail);else authMessage('error',e.message)}finally{if(e.submitter)e.submitter.disabled=false;loading(false)}});
+$('forgotForm').addEventListener('submit',async e=>{e.preventDefault();try{await authFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(CUSTOMER_PUBLIC_URL),{method:'POST',body:JSON.stringify({email:normalizeCustomerEmailV418($('forgotEmail').value)})});authMessage('success','Odkaz na obnovu hesla sme poslali na váš e-mail.')}catch(e){authMessage('error',e.message)}});
 $('newPasswordForm').addEventListener('submit',async e=>{e.preventDefault();const password=$('newPassword').value;if(!PASSWORD_STRONG_RE.test(password)){authMessage('error',PASSWORD_MIN_MESSAGE);$('newPassword').focus();return}if(password!==$('newPasswordAgain').value){authMessage('error','Heslá sa nezhodujú.');return}try{await authFetch('/auth/v1/user',{method:'PUT',headers:{Authorization:'Bearer '+state.session.access_token},body:JSON.stringify({password})});authMessage('success','Heslo je zmenené.');await bootstrap()}catch(e){authMessage('error',e.message)}});
 $('logoutBtn').addEventListener('click',async()=>{
   ['dogSettingsModalV36','privacyInfoModal','schoolTermsModal','dogDetailsModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal','customerContactModal','customerGradebookModal'].forEach(id=>$(id)?.classList.add('hidden'));
