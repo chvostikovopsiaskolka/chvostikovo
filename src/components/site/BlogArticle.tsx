@@ -118,7 +118,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                 {index === 0 && (
                   <figure className="mb-6 sm:float-right sm:mb-4 sm:ml-7 sm:w-[42%]">
                     <img src={article.image.src} alt={article.image.alt} decoding="async"
-                      className="block h-auto w-full rounded-2xl" width={article.image.width ?? 1000} height={article.image.height ?? 750} />
+                      className={standGuide ? "block h-[260px] w-full rounded-2xl object-cover sm:h-auto" : "block h-auto w-full rounded-2xl"} style={{ objectPosition: article.image.position ?? "center" }} width={article.image.width ?? 1000} height={article.image.height ?? 750} />
                     <figcaption className="mt-2 text-xs leading-relaxed text-forest/65">{article.imageCaption ?? "Zo života našej psej škôlky v Košiciach"}</figcaption>
                   </figure>
                 )}
