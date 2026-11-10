@@ -16,6 +16,8 @@ jobs:
           node-version: '22'
       - name: Preflight customer release version contract
         run: node tests/customer-release-contract.cjs
+      - name: Auth registration, confirmation and errors v418
+        run: node tests/customer-auth-recovery-v418.cjs
       - name: Bilingual customer UI invariant v409
         run: node tests/customer-locale-v409.cjs
       - name: Dog profile and vaccine-only continuation v413
@@ -179,6 +181,8 @@ jobs:
         run: |
           node tests/customer-welcome-v403-browser.cjs
           V3_ENGINE=webkit node tests/customer-welcome-v403-browser.cjs
+          node tests/customer-auth-v418-browser.cjs
+          V3_ENGINE=webkit node tests/customer-auth-v418-browser.cjs
           node tests/customer-push-onboarding-v398-browser.cjs
           V3_ENGINE=webkit node tests/customer-push-onboarding-v398-browser.cjs
           node tests/customer-polish-v396-browser.cjs

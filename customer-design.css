@@ -994,3 +994,21 @@ html.customer-auth-glass-v386.customer-ios-auth-v410 #authView>.auth-card>.lg-v3
 .customer-design .bottom-nav #customerShopV414:focus-visible{outline:3px solid #ad4c0d!important;outline-offset:-3px!important}
 .customer-design #menuBulletinV229 .customer-menu-notice-count-v414{flex:0 0 auto!important;display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#ef7516;color:white;font-size:11px;font-weight:800;line-height:20px}
 .customer-design #menuBulletinV229 .customer-menu-notice-count-v414.hidden{display:none!important}
+
+/* v418: signup owns a real scrollable viewport on Android WebView and small iOS/PWA screens.
+   v403's later flex/overflow:visible rules used to override the older v74 scroll container. */
+@media (max-width:720px), (max-height:650px){
+ #authView.auth-shell[data-auth-mode="signup"]:not(.hidden){
+  display:block!important;box-sizing:border-box;
+  height:100vh!important;height:100dvh!important;min-height:0!important;max-height:100dvh!important;
+  overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:contain!important;
+  -webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;
+  scroll-padding-bottom:calc(40px + env(safe-area-inset-bottom));
+ }
+ #authView[data-auth-mode="signup"]>.auth-card{width:min(460px,100%)!important;margin:0 auto!important}
+}
+#customerLocaleInMenuV409{flex-direction:column;align-items:center!important;justify-content:center!important;gap:8px;text-align:center;padding:14px 12px}
+#customerLocaleInMenuV409 .customer-menu-locale-buttons{align-self:center;align-items:center;justify-content:center;margin:0 auto}
+#customerLocaleInMenuV409 [data-customer-locale]{display:grid;place-items:center;line-height:1.2}
+#resendConfirmationV418{min-height:44px;white-space:normal;text-align:center;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+#resendConfirmationV418:focus-visible{outline:2px solid currentColor;outline-offset:2px}

@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const app=fs.readFileSync('app.js','utf8'),html=fs.readFileSync('index.html','utf8'),css=fs.readFileSync('customer-design.css','utf8');
+const from=app.indexOf('function normalizeCustomerEmailV418('),to=app.indexOf("$('loginForm').addEventListener",from);
+assert(from>=0&&to>from,'v418 auth helpers retained');
+const helpers=vm.runInNewContext(app.slice(from,to)+';({normalizeCustomerEmailV418,customerLoginErrorMessageV418})');
+assert.equal(helpers.normalizeCustomerEmailV418('  Gajl.TEST@Gmail.Com  '),'gajl.test@gmail.com');
+assert.match(helpers.customerLoginErrorMessageV418({code:'email_not_confirmed',message:'Email not confirmed'}),/potvrdený/);
+assert.match(helpers.customerLoginErrorMessageV418({code:'invalid_credentials',message:'Invalid login credentials'}),/heslo/);
+assert.match(helpers.customerLoginErrorMessageV418({code:'email_address_invalid',message:'invalid email'}),/formát/);
+assert.match(helpers.customerLoginErrorMessageV418({status:429}),/Priveľa/);
+assert(html.indexOf('id="menuLogout"')<html.indexOf('id="customerLocaleInMenuV409"'),'SK/EN below sign out');
+assert(html.includes('id="resendConfirmationV418"'),'manual confirmation recovery control');
+assert(app.includes("'/auth/v1/resend?redirect_to='")&&app.includes("type:'signup',email"),'manual resend uses correct signup endpoint');
+assert(app.includes("Date.now()-last<120000"),'manual resend cooldown');
+assert(!app.includes("authFetch('/auth/v1/resend"),'no automatic resend on page startup');
+assert(css.includes('#authView.auth-shell[data-auth-mode="signup"]:not(.hidden)')&&css.includes('overflow-y:auto!important'),'signup owns scroll area');
+assert(css.includes('#customerLocaleInMenuV409{flex-direction:column'),'locale centered');
+console.log('PASS v418 auth email normalization/error mapping, manual-only 120s resend, signup viewport scroll and menu order');
