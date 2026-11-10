@@ -74,6 +74,15 @@ These rules do not grant private wiki or deployment access. If access is missing
 report the precise gap and keep a safe reviewable branch; do not substitute a
 routine Drive read or claim a deployment.
 
+## Proportionate backup and CI policy — owner decision 10 November 2026
+
+- For an ordinary low-risk UI, text, CSS, layout, image or navigation change, the exact pre-change Git commit SHA and a tested `git revert`/deployment rollback path are the reproducible rollback. Do **not** automatically create a `backup/*` branch, ZIP, GitHub/Workspace duplicate, database snapshot or export for every such edit. Do not force-push or rewrite published history.
+- Group a **named stable checkpoint** about every 10 successfully deployed low-risk changes **per production delivery path**, or at a meaningful release boundary, whichever comes first. Reuse existing successful release commits and deployment histories; avoid duplicating entire working trees or database snapshots. A checkpoint is a reference to a verified version, not necessarily an extra branch or data copy.
+- A risky change still requires a specific pre-change restorable point **before writing**: database schema/data or migrations, Auth/RLS/security/access, bookings, passes/payments, health records, production integrations, DNS and any irreversible operation. Verify restore scope and dependencies. Git code history is not a substitute for database/data or Supabase Storage backups.
+- Preserve provider-managed database backups and existing recovery/audit evidence until their retention, current dependencies and restore path are independently verified. Never bulk-delete branches, tags, production tables, rollback scripts, snapshots, or customer data as a routine tidying step.
+- Run targeted existing local checks once where possible, mandatory final CI on the final candidate commit once, and one relevant LIVE readback after deploy. Do not rerun a full suite when no functional code changed; rerun only checks invalidated by new changes, while keeping security-critical and production release gates intact. Avoid cross-project monitoring jobs and cancel superseded PR-only runs, not manual checks.
+- Keep Chvostíkovo, Bellaris and other client repositories, billing and deployments isolated. Apply this policy via the private workspace standard and each project's applicable instructions, not by mixing project source into a shared branch.
+
 ## Product inquiries — owner decision 2 November 2026
 
 - Products use the existing direct inquiry forms on each product detail, not a cart or checkout. Do not restore a cart/link/drawer without explicit authorization. /kosik and /objednavka are noindex redirect aliases to /produkty. Retired frontend source is stored as noncompiled text under archive/future-product-cart, not in the production database. Preserve product inquiry transport, idempotency, validation, autofill and existing backend records.
