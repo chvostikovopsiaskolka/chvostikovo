@@ -313,10 +313,29 @@ const failures = [];
             }
             await productPage.goto(new URL('/blog/stojan-na-misky-pre-psa-vyhody-a-vyber/', base).href);
             await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
-            const standImage = productPage.locator('article > figure img').first();
+            const standFigure = productPage.locator('article section.flow-root figure').first();
+            const standImage = standFigure.locator('img').first();
             if (!(await standImage.getAttribute('src'))?.includes('stand-mia-')) {
               throw new Error('Stand guide is not using restored MIA AVIF source');
             }
+            const floatStyle = await standFigure.evaluate(el => ({
+              float: getComputedStyle(el).float,
+              background: getComputedStyle(el).backgroundColor,
+            }));
+            if (floatStyle.background !== 'rgba(0, 0, 0, 0)') throw new Error('Article photo still has a colored frame');
+            if (width === 1440 && floatStyle.float !== 'right') throw new Error('Desktop blog cover must float beside the text');
+            if (width === 390 && floatStyle.float !== 'none') throw new Error('Mobile blog cover must remain in reading flow');
+            const relatedGrid = productPage.getByRole('heading', { name: 'Mohlo by vás zaujímať' }).locator('xpath=following-sibling::div[1]');
+            const relatedCards = relatedGrid.locator(':scope > a');
+            if (await relatedCards.count() !== 3) throw new Error('Three related blog cards expected');
+            const firstCard = await relatedCards.nth(0).boundingBox();
+            const secondCard = await relatedCards.nth(1).boundingBox();
+            const thirdCard = await relatedCards.nth(2).boundingBox();
+            if (!firstCard || !secondCard || !thirdCard) throw new Error('Missing related blog card geometry');
+            if (width === 1440 && (Math.abs(firstCard.y - secondCard.y) > 3 || Math.abs(firstCard.y - thirdCard.y) > 3)) {
+              throw new Error('Desktop related articles must appear side by side');
+            }
+            if (width === 390 && secondCard.y <= firstCard.y + 10) throw new Error('Mobile blog cards must stack naturally');
             const guideCarousel = productPage.locator('[data-stand-gallery="autoplay"]');
             if (await guideCarousel.count() !== 1) throw new Error('Stand guide carousel missing above product CTA');
             if (await guideCarousel.locator('figure').count() !== 13) throw new Error('Stand guide must show thirteen distinct realizations');
@@ -344,6 +363,22 @@ const failures = [];
             if (width === 390) {
               const photoBox = await standImage.boundingBox();
               if (!photoBox || photoBox.height > 310) throw new Error('Stand article hero photo remains too tall on mobile');
+            }
+            await productPage.goto(new URL('/strazenie-psov-kosice/', base).href);
+            const dogHero = productPage.locator('section#top');
+            const dogForm = productPage.locator('#informacie form');
+            const dogHeading = dogHero.getByRole('heading', { level: 1 });
+            if (!await dogHeading.isVisible() || !await dogForm.isVisible()) {
+              throw new Error('Dog-sitting hero or inline inquiry form is missing');
+            }
+            const dogCity = dogHeading.locator('span').first();
+            if (await dogCity.evaluate(el => getComputedStyle(el).display) !== 'block') {
+              throw new Error('Dog-sitting city line must not wrap unpredictably');
+            }
+            const dogHeroBox = await dogHero.boundingBox();
+            if (!dogHeroBox) throw new Error('Missing dog-sitting hero geometry');
+            if (width === 1440 && dogHeroBox.height >= 850) {
+              throw new Error('Dog-sitting desktop hero is too tall: ' + dogHeroBox.height);
             }
             await productPage.goto(new URL('/', base).href);
             await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
