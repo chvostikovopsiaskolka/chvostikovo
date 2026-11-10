@@ -41,6 +41,19 @@ const fixture=require('./liquid-v3-fixture.cjs');
     assert.equal(await page.evaluate(()=>__v418AuthCalls[1].payload.type),'signup');
     await page.locator('#resendConfirmationV418').click();
     assert.equal(await page.evaluate(()=>__v418AuthCalls.length),2,'cooldown prevents duplicate emails');
+    await page.evaluate(()=>{showAuth('signup');loading(false)});
+    assert.equal(await page.locator('.password-eye-v19').count(),0,'legacy signup eye is removed');
+    for(const inputId of ['signupPassword','signupPasswordAgain']){
+     const input=page.locator('#'+inputId),eye=page.locator('#'+inputId+' + button.password-eye-btn');
+     assert.equal(await eye.count(),1,inputId+' has exactly one shared eye');
+     assert.equal(await input.getAttribute('type'),'password',inputId+' starts masked');
+     await eye.click();
+     assert.equal(await input.getAttribute('type'),'text',inputId+' click reveals password');
+     assert.equal(await eye.getAttribute('aria-pressed'),'true',inputId+' exposed toggled state');
+     await eye.click();
+     assert.equal(await input.getAttribute('type'),'password',inputId+' second click masks password');
+     assert.equal(await eye.getAttribute('aria-pressed'),'false',inputId+' restored toggled state');
+    }
    }
    await page.close();
   }
