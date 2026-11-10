@@ -11,6 +11,10 @@ on:
       - "vite.config.pages.ts"
       - "SEO_CHECKLIST.md"
       - ".github/workflows/check-form-funnel.yml"
+concurrency:
+  group: form-funnel-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 jobs:
