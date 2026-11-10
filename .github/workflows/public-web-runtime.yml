@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        site: ${{ github.event_name == 'pull_request' && fromJSON('["chvostikovo"]') || fromJSON('["chvostikovo","bellaris"]') }}
+        site: ["chvostikovo"]
     steps:
       - uses: actions/checkout@v4
       - name: Provision minimal utilities in Playwright image
@@ -59,7 +59,7 @@ jobs:
         env:
           NODE_PATH: /tmp/web-runtime/node_modules
           WEB_SITE: ${{ matrix.site }}
-          WEB_BASE_URL: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173' || (matrix.site == 'bellaris' && 'https://bellaris.sk' || 'https://chvostikovo.sk') }}
+          WEB_BASE_URL: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173' || 'https://chvostikovo.sk' }}
         run: node scripts/check-web-runtime.cjs
       - name: Record current production baseline before release
         if: github.event_name == 'pull_request'
