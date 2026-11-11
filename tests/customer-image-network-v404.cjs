@@ -12,6 +12,13 @@ new vm.Script(design,{filename:'customer-design.js'});
 assert.match(version.build,/^v[1-9][0-9]*$/,'use the current release build from version.json');
 assert.match(version.version,/^[0-9]+\.[0-9]+\.[0-9]+$/,'use the current semantic version from version.json');
 assert.match(app,/preloadFirstScreenFriendsV404\(d\)/);
+assert.match(app,/Promise\.allSettled\(\[preloadDogVisualV56\(d\),loadAnnouncements\(\)\]\)/,
+  'first-screen gate only waits for own-dog images and notices');
+assert.doesNotMatch(app,/Promise\.allSettled\(\[preloadDogVisualV56\(d\),preloadFirstScreenFriendsV404\(d\)/,
+  'future-day friend photos must not delay the signed-in first screen');
+assert.match(app,/state\.data===d&&document\.visibilityState!==['"]hidden['"]/,
+  'deferred warmup is bounded to the current visible session');
+assert.match(app,/__chvoBootTimingV421=\{totalMs:/,'boot timing remains available without PII');
 assert.match(app,/setTimeout\(resolve,2900\)/);
 assert.match(app,/setTimeout\(resolve,700\)/);
 assert.match(app,/photoCacheV358/);

@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v420';
-const APP_VERSION='2.0.93';
+const APP_BUILD='v421';
+const APP_VERSION='2.0.94';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -383,16 +383,18 @@ async function settleCustomerFirstPhotosV291(limit=850){
 
 function bootstrapCore(showSpinner=true){
   if(bootstrapInFlight)return bootstrapInFlight;
+  const bootStartedAtV421=performance.now();
+  let apiReadyAtV421=bootStartedAtV421;
   if(showSpinner)loading(true);
   const run=(async()=>{try{
-    const d=await api();state.data=d;
+    const d=await api();state.data=d;apiReadyAtV421=performance.now();
     const hasAssignedDog=!!d.dogs?.length;
     document.documentElement.classList.toggle('customer-awaiting-dog-v107',!hasAssignedDog);
     if(!state.selectedDogId&&hasAssignedDog)state.selectedDogId=Number(d.dogs[0].id);
     // v291: Keep the existing loader over the first data/photo/notice render.
     // No fake "no notices" flash; never remount an unchanged image after revealing.
     await Promise.race([
-      Promise.allSettled([preloadDogVisualV56(d),preloadFirstScreenFriendsV404(d),loadAnnouncements()]),
+      Promise.allSettled([preloadDogVisualV56(d),loadAnnouncements()]),
       new Promise(resolve=>setTimeout(resolve,2900))
     ]);
     // The notice data load already begins its first thumbnail fetch. Let its
@@ -405,6 +407,12 @@ function bootstrapCore(showSpinner=true){
     showApp();renderAll();
     await settleCustomerFirstPhotosV291(850);
     startCustomerLive();
+    // v421: Friends' future-day photos are optional warmup, not part of the first-screen
+    // dog-photo + announcements stability gate. Launch after the visible shell.
+    setTimeout(()=>{
+      if(state.session&&state.data===d&&document.visibilityState!=='hidden')
+        void preloadFirstScreenFriendsV404(d).catch(()=>{});
+    },0);
     if(typeof ensurePushState==='function')Promise.resolve(ensurePushState()).finally(()=>{
       if(state.data&&typeof applyPushToggle==='function')applyPushToggle();
     });
@@ -426,7 +434,15 @@ function bootstrapCore(showSpinner=true){
       else toast('Údaje sa nepodarilo obnoviť. Skúste to znova o chvíľu.');
     }else{showAuth('login');toast('Aplikáciu sa nepodarilo načítať. Skúste to znova.');}
   }})();
-  bootstrapInFlight=run.finally(()=>{if(showSpinner)loading(false);bootstrapInFlight=null});
+  bootstrapInFlight=run.finally(()=>{
+    if(showSpinner)loading(false);
+    if(state.data&&!$('appView')?.classList.contains('hidden')){
+      const end=performance.now();
+      // Timings only: no account, dog, photo URL or token leaves the app.
+      window.__chvoBootTimingV421={totalMs:Math.round(end-bootStartedAtV421),apiMs:Math.round(apiReadyAtV421-bootStartedAtV421),firstRenderMs:Math.round(end-apiReadyAtV421)};
+    }
+    bootstrapInFlight=null;
+  });
   return bootstrapInFlight;
 }
 async function bootstrap(showSpinner=true){const result=await bootstrapCore(showSpinner);runCustomerHooks('afterBootstrap',result);return result}
