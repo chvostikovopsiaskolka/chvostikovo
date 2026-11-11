@@ -114,6 +114,37 @@
     ['Vybraté dni ↓','Selected days ↓'],
     ['Obsadené','Fully booked']
   ]) DICTIONARY.set(sk,en);
+  // v421: built-in navigation/calendar/transport labels; never translate customer text,
+  // staff-written notices, chat, or signed documents.
+  for(const [sk,en] of [
+    ['Prehľad','Overview'],['Hlavná navigácia','Main navigation'],
+    ['Otvoriť produkty Chvostíkova v prehliadači','Open Chvostíkovo products in the browser'],
+    ['Rezervácia škôlky','Daycare booking'],['Vyberte deň alebo dni','Choose a day or days'],
+    ['Najbližšie dva týždne','Next two weeks'],['Psík','Dog'],['Obaja psíkovia','Both dogs'],
+    ['Opakované dni rezervácie','Recurring booking days'],['Tento týždeň','This week'],
+    ['Budúci týždeň','Next week'],['O dva týždne','In two weeks'],
+    ['Vybraté dni ↓','Selected days ↓'],['Taxi podľa vybraného dňa','Taxi for the selected day'],
+    ['Potrebujete odvoz? 🚕','Need transport? 🚕'],[' · Vybrané',' · Selected'],
+    ['Vybrané','Selected'],['Vyzdvihnutie aj dovoz','Pickup and drop-off'],
+    ['Dovoz domov','Drop-off home'],['Pridať taxík','Add transport'],
+    ['Upraviť taxi','Edit transport'],['Pridať taxi','Add transport'],
+    ['Taxík čaká na schválenie','Transport awaiting approval'],
+    ['Prajete si zmeniť typ taxíka?','Change your transport option?'],
+    ['Požiadať o zmenu','Request a change'],
+    ['Nestihli ste rezervovať miesto do nedele?','Missed the Sunday booking deadline?'],
+    ['Kliknite na deň, odošlite žiadosť a počkajte na schválenie. Pri plnej kapacite nám napíšte správu.','Select a day and submit your request for approval. If fully booked, message us.'],
+    ['Niektoré dni nemajú dostatok voľných miest.','Some days have limited availability.'],
+    ['Kliknite na požadovaný deň a napíšte nám správu. O možnosti prihlásenia vás budeme informovať.','Select your preferred day and message us. We will let you know if a place becomes available.'],
+    ['Čaká','Pending'],['Uplynulo','Past'],['Zatvorené','Closed'],['Plno','Full'],
+    ['Napíšte nám','Message us'],['Obsadené','Occupied'],
+    ['Zatvorené pre rezervácie','Bookings closed'],['Čaká na schválenie','Awaiting approval'],
+    ['Schválená','Approved'],['Zamietnutá','Declined'],
+    ['Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.','Book a place for your dog. Select your day(s) below.'],
+    ['Pridať taxík','Add transport'],['Odvoz','Transport'],
+    ['Zobraziť kamošov v škôlke','See daycare friends'],
+    ['Oznamy škôlky','Daycare announcements'],
+    ['Načítavanie aplikácie','Loading app'],['Psia škôlka','Dog daycare']
+  ]) DICTIONARY.set(sk,en);
   // v414: the new dock shortcut is an external catalog link, not an in-app checkout.
   DICTIONARY.set('E-shop','Shop');
   const root = document.getElementById('authView');
@@ -132,15 +163,43 @@
     'privacyInfoModal','schoolTermsModal','schoolRulesModalV55','schoolTermsReadModal',
     'customerContactModal','customerGradebookModal','dogSettingsModalV36',
     'dogDetailsOnboardingModalV75','waitingDogAssignmentModalV75','shareOnboardingModalV75'];
-  const roots=()=>[root,...dynamicRootIds.map(id=>document.getElementById(id))].filter(Boolean);
+  // The fixed dock sits outside #appView, so it must be translated as well.
+  const roots=()=>[root,document.querySelector('.bottom-nav'),...dynamicRootIds.map(id=>document.getElementById(id))].filter(Boolean);
   // Never translate user/staff-authored content or the signed canonical terms body.
   const excluded='script,style,textarea,[contenteditable="true"],#messageThread,.message-thread,#announcementNotice,#notificationList,.customer-bulletin-dialog-v229,.customer-bulletin-history-row-v229,#schoolTermsBody,#schoolRulesBodyV55,#schoolTermsReadBody';
   // App-owned onboarding dialogs use .legal-body for layout too; only signed terms stay untranslated.
   const skip=element=>!!element?.closest?.(excluded) ||
     (!!element?.closest?.('.legal-body') &&
       !element.closest('#privacyInfoModal,#dogDetailsOnboardingModalV75,#waitingDogAssignmentModalV75,#shareOnboardingModalV75,#dogSettingsModalV36,#customerContactModal,#customerGradebookModal'));
-  const translate = text => {
+  const weekdayEn={pondelok:'Monday',utorok:'Tuesday',streda:'Wednesday',štvrtok:'Thursday',piatok:'Friday',sobota:'Saturday',nedeľa:'Sunday'};
+  const dayShortEn={Po:'Mon',Ut:'Tue',St:'Wed','Št':'Thu',Pi:'Fri',So:'Sat',Ne:'Sun'};
+  const monthsEn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const translate = (text,element) => {
     const exact=DICTIONARY.get(text);if(exact)return exact;
+    // Only calendar UI may contain short weekday abbreviations. Never map
+    // ordinary names, announcements, signed text or user-entered data.
+    if(element?.closest?.('#bookingPickerV37,.booking-picker-v37,.design-selected-day,#designBookingCarousel,.design-visit-card')){
+      const shortDay=text.slice(0,1).toUpperCase()+text.slice(1).toLowerCase();
+      if(dayShortEn[shortDay])return dayShortEn[shortDay];
+      const date=text.match(/^(pondelok|utorok|streda|štvrtok|piatok|sobota|nedeľa)\s+(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\.?$/i);
+      if(date)return weekdayEn[date[1].toLowerCase()]+', '+Number(date[2])+' '+monthsEn[Number(date[3])-1]+' '+date[4];
+      if(weekdayEn[text.toLowerCase()])return weekdayEn[text.toLowerCase()];
+    }
+    let availability=text.match(/^(\d+)\s+voľné$/);
+    if(availability)return availability[1]+' places left';
+    availability=text.match(/^Obsadené\s+(\d+)\s+z\s+(\d+)\s+miest$/);
+    if(availability)return 'Occupied: '+availability[1]+' of '+availability[2]+' places';
+    availability=text.match(/^(Vyzdvihnutie aj dovoz|Vyzdvihnutie|Dovoz domov)\\s*·\\s*(\\d+\\s*€)$/);
+    if(availability)return (DICTIONARY.get(availability[1])||availability[1])+' · '+availability[2];
+    availability=text.match(/^Rezervovať\s+(\d+)\s+(deň|dni|dní)$/);
+    if(availability)return 'Book '+availability[1]+' days';
+    availability=text.match(/^Potrebujete odvoz\?\s*🚕(\s*·\s*Vybrané)?$/);
+    if(availability)return 'Need transport? 🚕'+(availability[1]?' · Selected':'');
+    availability=text.match(/^Taxi na\s+(.+)$/);
+    if(availability)return 'Transport on '+availability[1];
+    availability=text.match(/^Upraviť rezerváciu na\s+(.+)$/);
+    if(availability)return 'Edit booking on '+availability[1];
+
     let match=text.match(/^([0-9]+) z ([0-9]+)$/);
     if(match)return match[1]+' of '+match[2];
     match=text.match(/^([0-9]+) z ([0-9]+) vstupov$/);
@@ -165,7 +224,7 @@
     if (!current) return;
     let record = original.get(node);
     if (!record || (current !== record.sk && current !== record.en)) {
-      const en = translate(current);
+      const en = translate(current,node.parentElement);
       if (!en) return;
       record = {sk: current, en};
       original.set(node, record);
@@ -187,13 +246,42 @@
         if(current===null||!current.trim())continue;
         let record=records.get(attribute);
         if(!record||(current!==record.sk&&current!==record.en)){
-          const en=translate(current);if(!en)continue;
+          const en=translate(current,element);if(!en)continue;
           record={sk:current,en};records.set(attribute,record);
         }
         const next=lang==='en'?record.en:record.sk;
         if(current!==next)element.setAttribute(attribute,next);
       }
     }
+  }
+  // A bulletin may be active in the archive without being featured on Overview.
+  // Reuse the authoritative unread counter; never infer unread from the carousel.
+  const unreadSourceV421=document.getElementById('customerAnnouncementsCountV363');
+  const dogSummaryV421=document.querySelector('#menuDogGroup > summary');
+  let dogUnreadV421=null;
+  if(unreadSourceV421&&dogSummaryV421){
+    dogUnreadV421=document.createElement('span');
+    dogUnreadV421.className='customer-dog-unread-v421 hidden';
+    dogUnreadV421.setAttribute('aria-hidden','true');
+    dogSummaryV421.insertBefore(dogUnreadV421,dogSummaryV421.querySelector('.menu-chevron'));
+  }
+  function syncDogUnreadV421(){
+    if(!dogUnreadV421)return;
+    const raw=Number(unreadSourceV421.textContent.trim());
+    const count=!unreadSourceV421.classList.contains('hidden')&&Number.isFinite(raw)&&raw>0?Math.floor(raw):0;
+    dogUnreadV421.classList.toggle('hidden',!count);
+    dogUnreadV421.textContent=count?String(count):'';
+    if(count){
+      const message=lang==='en'
+        ? 'My dog, '+count+' unread announcement'+(count===1?'':'s')
+        : 'Môj psík, '+count+' neprečítan'+(count===1?'ý oznam':count>=2&&count<=4?'é oznamy':'ých oznamov');
+      dogSummaryV421.setAttribute('aria-label',message);
+    }else dogSummaryV421.removeAttribute('aria-label');
+  }
+  if(unreadSourceV421){
+    new MutationObserver(syncDogUnreadV421).observe(unreadSourceV421,{
+      childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class']
+    });
   }
   function apply(){
     for(const scope of roots()){
@@ -207,6 +295,7 @@
       button.classList.toggle('active',active);
     }
     if(document.documentElement.lang!==lang)document.documentElement.lang=lang;
+    syncDogUnreadV421();
   }
   let queued = false;
   const requestApply = () => {
@@ -228,7 +317,7 @@
     if(records.some(record=>{
       const element=record.target.nodeType===1?record.target:record.target.parentElement;
       if(element?.closest?.('.lg-v3-material,.lg-v3-output')||skip(element))return false;
-      if(element?.closest?.('#authView,'+dynamicRootIds.map(id=>'#'+id).join(',')))return true;
+      if(element?.closest?.('#authView,.bottom-nav,'+dynamicRootIds.map(id=>'#'+id).join(',')))return true;
       return [...record.addedNodes].some(node=>node.nodeType===1&&
         (dynamicRootIds.includes(node.id) || node.querySelector?.(dynamicRootIds.map(id=>'#'+id).join(','))));
     }))requestApply();
