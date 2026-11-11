@@ -96,6 +96,60 @@
 })();
 
 </script>
+  <script id="bulletin-preview-transform-v423">
+    // Only new uploads get a sidecar. Existing objects and Storage policies stay intact.
+    window.patchBulletinPreviewsV423=function(source){
+      const imageAnchor='async function img(path){';
+      const uploadAnchor="var path=current+'/'+(crypto.randomUUID?crypto.randomUUID():String(Date.now()))+'.'+ext;var r=await storeFile(f,bucket,path);if(r.error)throw r.error;";
+      const publishAnchor="publicPath=current+'/'+(crypto.randomUUID?crypto.randomUUID():String(Date.now()))+'.'+ext;await storeFile(file,'chvostikovo-bulletin-public',publicPath)";
+      const editorAnchor="void img(x.image_path).then(function(u)";
+      // Guard the assembled runtime: a changed snapshot must retain its existing behavior.
+      if([imageAnchor,uploadAnchor,publishAnchor,editorAnchor].some(a=>source.split(a).length!==2))return source;
+      function runtime(){
+        const failed=new Set();
+        function path(original){return String(original).replace(/\.with-preview-v423\.(?:jpg|jpeg|png|webp)$/i,'.preview-v423.webp')}
+        async function create(file){
+          let bitmap,objectURL,timer;
+          try{
+            const decoded=new Promise(async(resolve,reject)=>{
+              try{
+                const image=new Image();objectURL=URL.createObjectURL(file);
+                image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('decode'));image.src=objectURL;
+              }catch(error){reject(error)}
+            });
+            bitmap=await Promise.race([decoded,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('decode timeout')),5000)})]);
+            const width=bitmap.naturalWidth,height=bitmap.naturalHeight;
+            if(!width||!height||width*height>32000000)return null;
+            const canvas=document.createElement('canvas'),scale=Math.min(1,640/width);
+            canvas.width=Math.max(1,Math.round(width*scale));canvas.height=Math.max(1,Math.round(height*scale));
+            const context=canvas.getContext('2d');if(!context)return null;
+            context.drawImage(bitmap,0,0,canvas.width,canvas.height);
+            const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.78));
+            return blob?.type==='image/webp'&&blob.size<file.size?blob:null;
+          }catch(_){return null}finally{clearTimeout(timer);if(objectURL)URL.revokeObjectURL(objectURL)}
+        }
+        async function upload(file,bucketName,folder){
+          const ext=/png/i.test(file.type)?'png':/webp/i.test(file.type)?'webp':'jpg';
+          const stem=folder+'/'+(crypto.randomUUID?crypto.randomUUID():String(Date.now()));
+          const preview=await create(file);let saved=false;
+          if(preview){try{await storeFile(preview,bucketName,stem+'.preview-v423.webp');saved=true}catch(_){}}
+          const original=stem+(saved?'.with-preview-v423':'')+'.'+ext;
+          await storeFile(file,bucketName,original);return original;
+        }
+        async function small(original){
+          const preview=path(original);
+          if(preview===original||failed.has(preview))return img(original);
+          const value=await img(preview);
+          if(value)return value;failed.add(preview);return img(original);
+        }
+        return {path,create,upload,small};
+      }
+      return source.replace(imageAnchor,'var bulletinPreviewV423=('+runtime.toString()+')();\n'+imageAnchor)
+        .replace(uploadAnchor,'var path=await bulletinPreviewV423.upload(f,bucket,current);')
+        .replace(publishAnchor,"publicPath=await bulletinPreviewV423.upload(file,'chvostikovo-bulletin-public',current)")
+        .replace(editorAnchor,'void bulletinPreviewV423.small(x.image_path).then(function(u)');
+    };
+  </script>
   <script id="admin-workspace-controller-v1">
     // Chvostikovo is the sole admin workspace in this PWA. The standalone
     // Bellaris administration remains on https://admin.bellaris.sk/.
@@ -134,7 +188,8 @@
           const nonblockingBulletinImage="var im=get('bb112Image');im.hidden=true;if(x.image_path){void img(x.image_path).then(function(u){if(u&&current===x.id&&im.isConnected){im.src=u;im.hidden=false}})}listing();";
           const withFastBulletin=withPairing.includes(blockingBulletinImage)
             ?withPairing.replace(blockingBulletinImage,nonblockingBulletinImage):withPairing;
-          document.open(); document.write(withFastBulletin); document.close();
+          const withPreviews=window.patchBulletinPreviewsV423?.(withFastBulletin)||withFastBulletin;
+          document.open(); document.write(withPreviews); document.close();
         } catch (e) {
           started = false;
           boot.classList.add('load-failed');

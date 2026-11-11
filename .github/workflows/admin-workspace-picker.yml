@@ -50,6 +50,12 @@ jobs:
         run: |
           node tests/admin-lifecycle-20261101.cjs
           node tests/admin-auth-lifecycle-20261101.cjs
+      - name: Guarded bulletin previews and unchanged original images
+        run: |
+          ADMIN_SOURCE=/tmp/admin-previews-v423.html node admin-wrapper/bulletin-previews.test.cjs
+          ADMIN_SOURCE=/tmp/admin-previews-v423.html node tests/admin-auth-lifecycle-20261101.cjs
+          node admin-wrapper/bulletin-previews.browser.cjs
+          V3_ENGINE=webkit node admin-wrapper/bulletin-previews.browser.cjs
       - name: Render scroll and viewport transitions
         run: |
           node admin-wrapper/workspace-flow.browser.mjs
