@@ -128,7 +128,13 @@
           const withoutWorkspaceSwitch = html.replace(/<button\b[^>]*\bid=["']adminSwitchWorkspace["'][^>]*>[\s\S]*?<\/button>/i, '');
           // Isolated staff pairing controls; the original Supabase admin stays authoritative.
           const withPairing = withoutWorkspaceSwitch.replace(/<\/body>/i, '<script src="/admin-pair-v409.js?v=20261109-v419"><\/script><script src="/admin-shared-pass-v410.js?v=20261109-v419"><\/script></body>');
-          document.open(); document.write(withPairing); document.close();
+          // Render bulletin editor fields immediately; an authenticated private PNG
+          // read must not block the modal. Preserve the original full-quality image.
+          const blockingBulletinImage="var im=get('bb112Image');im.hidden=true;if(x.image_path){var u=await img(x.image_path);if(u&&current===x.id){im.src=u;im.hidden=false}}listing();";
+          const nonblockingBulletinImage="var im=get('bb112Image');im.hidden=true;if(x.image_path){void img(x.image_path).then(function(u){if(u&&current===x.id&&im.isConnected){im.src=u;im.hidden=false}})}listing();";
+          const withFastBulletin=withPairing.includes(blockingBulletinImage)
+            ?withPairing.replace(blockingBulletinImage,nonblockingBulletinImage):withPairing;
+          document.open(); document.write(withFastBulletin); document.close();
         } catch (e) {
           started = false;
           boot.classList.add('load-failed');
