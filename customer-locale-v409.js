@@ -96,7 +96,23 @@
     ['Nesprávny e-mail alebo heslo. Ak ste ešte nepotvrdili e-mail, najprv použite najnovší potvrdzovací odkaz. Inak skúste obnoviť heslo.','Incorrect email or password. If your email is unverified, use the latest confirmation link. Otherwise, try resetting your password.'],
     ['Skontrolujte formát e-mailovej adresy a skúste to znova.','Check your email address format and try again.'],
     ['Priveľa pokusov. Chvíľu počkajte a skúste to znova.','Too many attempts. Please try again later.'],
-    ['Prihlásenie sa nepodarilo. Skúste to znova.','Sign-in failed. Please try again.']
+    ['Prihlásenie sa nepodarilo. Skúste to znova.','Sign-in failed. Please try again.'],
+    ['Zrušiť rezerváciu','Cancel booking'],
+    ['Bez udania dôvodu','Without a reason'],
+    ['Chcem zmeniť termín','I want to change the date'],
+    ['Po uzávierke odošlite žiadosť o zrušenie v správe škôlke.','After the deadline, ask to cancel via a message to the daycare.'],
+    ['Leptospiróza L4','Leptospirosis L4'],
+    ['Niektoré očkovania už nie sú platné.','Some vaccinations have expired.'],
+    ['Doplňte chýbajúce očkovania alebo doklad.','Add the missing vaccinations or vaccination record.'],
+    ['Blíži sa koniec platnosti očkovania.','One or more vaccinations expire soon.'],
+    ['Nezabudnite preočkovať svojho psíka a aktualizovať doklad, aby ste predišli zablokovaniu ďalších rezervácií.','Please renew the vaccination and update its record to avoid future booking restrictions.'],
+    ['Prihlásený škôlkar','Daycare dog'],
+    ['Kamaráti v škôlke','Dog friends at daycare'],
+    ['Zatiaľ tu nie sú ďalší kamaráti.','No other dog friends are here yet.'],
+    ['📅 Moje rezervácie','📅 My bookings'],
+    ['Pozrite si kamošov v škôlke ›','See dog friends at daycare ›'],
+    ['Vybraté dni ↓','Selected days ↓'],
+    ['Obsadené','Fully booked']
   ]) DICTIONARY.set(sk,en);
   // v414: the new dock shortcut is an external catalog link, not an in-app checkout.
   DICTIONARY.set('E-shop','Shop');
@@ -129,6 +145,8 @@
     if(match)return match[1]+' of '+match[2];
     match=text.match(/^([0-9]+) z ([0-9]+) vstupov$/);
     if(match)return match[1]+' of '+match[2]+' visits';
+    match=text.match(/^Platnosť: ešte ([0-9]+) (deň|dni|dní)$/);
+    if(match)return Number(match[1])===1?'Valid for 1 more day':'Valid for '+match[1]+' more days';
     match=text.match(/^Návštevy v škôlke:\s*([0-9]+)$/);
     if(match)return 'Daycare visits: '+match[1];
     match=text.match(/^Platnosť do (.+)$/);
