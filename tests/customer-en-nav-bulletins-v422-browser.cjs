@@ -54,10 +54,10 @@ const fixture=require('./liquid-v3-fixture.cjs');
    await page.waitForFunction(()=>document.querySelector('#customerAnnouncementsCountV363')?.textContent==='1');
    assert.equal(await page.locator('#customerNoticeOverviewV376').count(),0,
      'archive-only announcement must not appear in featured Overview');
-   assert.equal(await page.locator('#menuDogGroup > summary .customer-dog-unread-v422').innerText(),'1',
+   assert.equal(await page.locator('#menuDogGroup > summary .customer-dog-unread-v421').innerText(),'1',
      'My dog must show the unread badge for archive-only announcement');
    await page.locator('#navDog').click();
-   assert(await page.locator('#menuDogGroup > summary .customer-dog-unread-v422').isVisible());
+   assert(await page.locator('#menuDogGroup > summary .customer-dog-unread-v421').isVisible());
    await page.evaluate(()=>window.ChvostikovoLocale.setLanguage('en'));
    assert.match(await page.locator('#menuDogGroup > summary').getAttribute('aria-label'),/My dog, 1 unread announcement/);
    await page.locator('#menuDogGroup > summary').click();
@@ -66,7 +66,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
    await page.waitForFunction(()=>document.querySelectorAll('.customer-bulletin-history-row-v229').length>0);
    await page.locator('[data-announcement-id="12345"]').click();
    await page.waitForFunction(()=>document.querySelector('#customerAnnouncementsCountV363')?.classList.contains('hidden'));
-   assert(await page.locator('#menuDogGroup > summary .customer-dog-unread-v422').evaluate(el=>el.classList.contains('hidden')),
+   assert(await page.locator('#menuDogGroup > summary .customer-dog-unread-v421').evaluate(el=>el.classList.contains('hidden')),
     'My dog unread marker clears only when announcement is read');
    assert.equal(errors.length,0,'browser JS errors at '+width+': '+errors.join(' | '));
    await context.close();
