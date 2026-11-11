@@ -38,7 +38,7 @@ const {PGlite}=require('./shared-v244/node_modules/@electric-sql/pglite');
   assert.equal(Number(renewed.requires_proof_after_id),10,'date renewal retains proof-baseline protection');
   const updatedReview=(await db.query("select previous_valid_until,new_valid_until from public.portal_vaccination_review_events_v234 where dog_id=1 and vaccination_type='rabies' and new_valid_until='2028-12-31'")).rows;
   assert.equal(updatedReview.length,1);
-  assert.equal(updatedReview[0].previous_valid_until,'2027-12-31');
+  assert.equal(new Date(updatedReview[0].previous_valid_until).toISOString().slice(0,10),'2027-12-31');
   // Other dogs remain untouched, and staff review requires valid current proof.
   assert.equal((await db.query("select count(*)::int as n from public.portal_vaccination_review_events_v234 where dog_id=2")).rows[0].n,4);
   console.log('PASS initial review (3 required + L4), valid first proof, later L4 fresh-proof gate, date renewal, no duplicate and dog isolation');
