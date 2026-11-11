@@ -270,13 +270,14 @@
     const raw=Number(unreadSourceV421.textContent.trim());
     const count=!unreadSourceV421.classList.contains('hidden')&&Number.isFinite(raw)&&raw>0?Math.floor(raw):0;
     dogUnreadV421.classList.toggle('hidden',!count);
-    dogUnreadV421.textContent=count?String(count):'';
+    const nextText=count?String(count):'';
+    if(dogUnreadV421.textContent!==nextText)dogUnreadV421.textContent=nextText;
     if(count){
       const message=lang==='en'
         ? 'My dog, '+count+' unread announcement'+(count===1?'':'s')
         : 'Môj psík, '+count+' neprečítan'+(count===1?'ý oznam':count>=2&&count<=4?'é oznamy':'ých oznamov');
-      dogSummaryV421.setAttribute('aria-label',message);
-    }else dogSummaryV421.removeAttribute('aria-label');
+      if(dogSummaryV421.getAttribute('aria-label')!==message)dogSummaryV421.setAttribute('aria-label',message);
+    }else if(dogSummaryV421.hasAttribute('aria-label'))dogSummaryV421.removeAttribute('aria-label');
   }
   if(unreadSourceV421){
     new MutationObserver(syncDogUnreadV421).observe(unreadSourceV421,{
