@@ -254,7 +254,7 @@ function LeadLandingPage() {
                   {item.highlight && (
                     <>
                       <p className="mt-3 text-sm leading-relaxed text-cream/85">
-                        {item.note.split("Permanentka platí")[0].trim()}
+                        {(item.note?.split("Permanentka platí")[0] ?? "").trim()}
                       </p>
                       <p className="mt-1 text-xs leading-relaxed text-cream/75">
                         Permanentka platí 2 mesiace.
