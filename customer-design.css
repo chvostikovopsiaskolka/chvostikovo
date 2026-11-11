@@ -1043,3 +1043,15 @@ html.customer-auth-glass-v386.customer-ios-auth-v410 #authView>.auth-card>.lg-v3
   .customer-design .design-ticket-usage .design-validity{font-size:9px!important;padding:5px!important}
   .customer-design .design-paws{gap:4px;grid-template-columns:repeat(10,minmax(0,1fr))}
 }
+
+
+/* v421: unread archive bulletin count remains visible next to My dog,
+   independently of whether the bulletin is featured in Overview. */
+.customer-design #menuDogGroup>summary .customer-dog-unread-v421{
+  display:grid;place-items:center;flex:0 0 auto;box-sizing:border-box;
+  min-width:19px;height:19px;padding:0 5px;margin-inline-start:auto;
+  border-radius:999px;background:#ef7516;color:white;
+  font-size:11px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;
+}
+.customer-design #menuDogGroup>summary .customer-dog-unread-v421.hidden{display:none!important}
+.customer-design #menuDogGroup>summary .menu-chevron{margin-inline-start:3px}
