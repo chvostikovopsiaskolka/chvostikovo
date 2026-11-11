@@ -179,7 +179,8 @@
     // Only calendar UI may contain short weekday abbreviations. Never map
     // ordinary names, announcements, signed text or user-entered data.
     if(element?.closest?.('#bookingPickerV37,.booking-picker-v37,.design-selected-day,#designBookingCarousel,.design-visit-card')){
-      if(dayShortEn[text])return dayShortEn[text];
+      const shortDay=text.slice(0,1).toUpperCase()+text.slice(1).toLowerCase();
+      if(dayShortEn[shortDay])return dayShortEn[shortDay];
       const date=text.match(/^(pondelok|utorok|streda|štvrtok|piatok|sobota|nedeľa)\s+(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\.?$/i);
       if(date)return weekdayEn[date[1].toLowerCase()]+', '+Number(date[2])+' '+monthsEn[Number(date[3])-1]+' '+date[4];
       if(weekdayEn[text.toLowerCase()])return weekdayEn[text.toLowerCase()];
