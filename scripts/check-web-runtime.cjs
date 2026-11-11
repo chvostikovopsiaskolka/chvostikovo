@@ -47,6 +47,25 @@ const failures = [];
           await cookieButton.click();
           await page.waitForTimeout(300);
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
+          // New LEAD pilot: one question at a time without any real submission.
+          if (!bellaris && !restricted && url.pathname === '/psia-skolka-kosice/') {
+            const wizard = page.locator('#lead-form [data-lead-step-form]');
+            if (!await wizard.isVisible()) throw new Error('Missing inline mobile lead wizard');
+            if (await wizard.locator('input[name="zaujem"]').count() !== 3) throw new Error('Missing 3 interest cards');
+            const next = wizard.getByRole('button', { name: 'Pokračovať' });
+            if (await next.isEnabled()) throw new Error('Wizard preselected an interest');
+            await wizard.getByText('informovať', { exact: true }).first().click();
+            await next.click();
+            if (!await wizard.getByRole('heading', { name: 'Kam sa vám môžeme ozvať?' }).isVisible()) throw new Error('Lead wizard did not advance to contact step');
+            if (!await wizard.locator('input[name="meno"]').isVisible() || !await wizard.locator('input[name="telefon"]').isVisible())
+              throw new Error('Lead contact fields missing');
+            await wizard.getByRole('button', { name: 'Späť' }).click();
+            if (!await wizard.locator('input[name="zaujem"]').first().isChecked()) throw new Error('Wizard lost selection after back');
+            await page.setViewportSize({ width: 1440, height: 900 });
+            if (!await page.locator('#lead-form-desktop [data-lead-step-form]').isVisible()) throw new Error('Missing desktop hero wizard');
+            if (!await page.locator('#lead-form-pricing [data-lead-step-form]').count() || !await page.locator('[data-lead-step-form]').last().count()) throw new Error('Missing additional inline lead forms');
+            await page.setViewportSize({ width: 390, height: 844 });
+          }
           // Real browser-level regression: wheel over moving carousels must
           // continue page scrolling, and their computed touch-action must not
           // reserve gestures for horizontal panning only.
