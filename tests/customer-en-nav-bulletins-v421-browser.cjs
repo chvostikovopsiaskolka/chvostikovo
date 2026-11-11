@@ -8,7 +8,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
   for(const width of [320,390]){
    const {page,context,errors}=await fixture(browser,1,width,engine.name());
    await page.evaluate(()=>{
-    const today=bratislavaClockV95().date,monday=new Date(today+'T12:00:00Z'),weekday=monday.getUTCDay();
+    const today=new Date().toISOString().slice(0,10),monday=new Date(today+'T12:00:00Z'),weekday=monday.getUTCDay();
     monday.setUTCDate(monday.getUTCDate()-(weekday===0?6:weekday-1));
     state.data.availability.days=Array.from({length:10},(_,i)=>{
       const d=new Date(monday);d.setUTCDate(monday.getUTCDate()+Math.floor(i/5)*7+i%5);
