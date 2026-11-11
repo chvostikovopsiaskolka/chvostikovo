@@ -48,6 +48,7 @@ async function simulate(href, failFirst = false) {
   elements.boot = makeElement();
   elements.bootText = makeElement();
   const theme = {value: '#ffffff', setAttribute(name, value) {assert.equal(name, 'content'); this.value = value;}};
+  const bulletinSource="var im=get('bb112Image');im.hidden=true;if(x.image_path){var u=await img(x.image_path);if(u&&current===x.id){im.src=u;im.hidden=false}}listing();";
   const doc = {
     getElementById(id) {return id === 'chvoLoadActions' ? actions : elements[id] || null;},
     querySelector(selector) {return selector === 'meta[name="theme-color"]' ? theme : null;},
@@ -63,7 +64,7 @@ async function simulate(href, failFirst = false) {
       assert.equal(url, 'https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/chvostikovo-frontend?v=20261014-admin-pwa-v111');
       assert.equal(options.cache, 'no-store');
       if (failFirst && fetched === 1) return {ok: false, status: 503};
-      return {ok: true, text: async () => '<html><style>html:has(#appBoot),body:has(#appBoot){background:#fff!important}</style>Chvostíkovo admin unchanged<div id="adminSettingsModal"><button type="button" id="adminSwitchWorkspace" class="admin-menu-row"><span><strong>Prepnúť prostredie</strong><small style="display:block">Chvostíkovo alebo Bellaris</small></span><span aria-hidden="true">›</span></button><details id="adminSettingsPhotoV72">Profilová fotka</details><div id="pushSetupCard">Upozornenia</div><button id="adminSettingsLogout">Odhlásiť sa</button></div></html>'};
+      return {ok: true, text: async () => '<html><style>html:has(#appBoot),body:has(#appBoot){background:#fff!important}</style>Chvostíkovo admin unchanged<div id="adminSettingsModal"><button type="button" id="adminSwitchWorkspace" class="admin-menu-row"><span><strong>Prepnúť prostredie</strong><small style="display:block">Chvostíkovo alebo Bellaris</small></span><span aria-hidden="true">›</span></button><details id="adminSettingsPhotoV72">Profilová fotka</details><div id="pushSetupCard">Upozornenia</div><button id="adminSettingsLogout">Odhlásiť sa</button></div>'+bulletinSource+'</html>'};
     }
   }, {timeout: 1500});
   return {
@@ -92,6 +93,8 @@ async function simulate(href, failFirst = false) {
     assert(direct.written.includes('html:has(#appBoot:not(.hidden))'));
     assert(!direct.written.includes('id="adminSwitchWorkspace"'), 'Dead environment switch removed from fetched settings');
     assert(!direct.written.includes('Prepnúť prostredie'), 'Obsolete settings label cannot leak into UI');
+    assert(direct.written.includes('void img(x.image_path).then(function(u)'),'Bulletin image must not block opening the editor');
+    assert(!direct.written.includes('var u=await img(x.image_path)'), 'Old awaited private image path removed');
     for (const required of ['adminSettingsModal','adminSettingsPhotoV72','pushSetupCard','adminSettingsLogout']) {
       assert(direct.written.includes(required), 'Preserve adjacent admin settings control: '+required);
     }
