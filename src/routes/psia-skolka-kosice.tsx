@@ -21,7 +21,6 @@ import { Header } from "@/components/site/Header";
 import { MobileDock } from "@/components/site/MobileDock";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
-import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { DAYCARE_GALLERY_EXTRAS, GALLERY, FAQ, PRICING } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
@@ -90,8 +89,7 @@ function scrollToBenefits(source: string) {
   const target = document.getElementById("lead-benefits");
   if (!target) return;
 
-  const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 64;
-  const top = window.scrollY + target.getBoundingClientRect().top - headerHeight - 8;
+  const top = window.scrollY + target.getBoundingClientRect().top;
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
 }
 
@@ -115,8 +113,8 @@ function LeadLandingPage() {
         <section className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-5 px-4 pt-0 pb-3 sm:min-h-[535px] sm:pb-4 sm:pt-7 sm:pb-4 lg:min-h-[510px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-12 lg:py-3">
-            <div className="max-w-2xl text-center lg:text-left">
+          <div className="relative z-10 mx-auto flex min-h-[425px] max-w-4xl items-center justify-center px-4 pb-8 pt-0 sm:min-h-[465px] sm:pt-7 sm:pb-10 lg:min-h-[420px] lg:py-12">
+            <div className="w-full max-w-3xl text-center">
               <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
               </p>
@@ -125,11 +123,11 @@ function LeadLandingPage() {
                 <span className="block text-coral-dark">radi vracajú</span>
               </h1>
 
-              <p className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg lg:mx-0">
-                Kým vy pracujete, váš psík môže tráviť deň s kamošmi namiesto čakania doma. V Chvostíkove v Košiciach si užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
+              <p className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg">
+                Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
               </p>
 
-              <div className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
+              <div className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2">
                 {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
@@ -141,30 +139,22 @@ function LeadLandingPage() {
                 ))}
               </div>
 
-              <button
-                type="button"
-                onClick={() => scrollToBenefits("lead_landing_hero")}
-                className="btn-coral mt-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg lg:min-w-[360px] lg:px-12 lg:py-4"
-              >
-                Zistiť viac
-                <ArrowDown className="size-5" />
-              </button>
-              <LandingPracticalInfo />
-
-
-            </div>
-
-            <div id="lead-form" className="mx-auto hidden w-full max-w-md scroll-mt-24 lg:mx-0 lg:block">
-              <SchoolmatesFormCrown compact />
-              <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
-                <h2 className="text-center font-display text-2xl font-bold text-forest">
-                  Informujte sa o škôlke
-                </h2>
-                <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/75">
-                  Vyplňte krátky formulár. Ozveme sa vám.
-                </p>
-                <ShortForm trackingSource="lead_landing_desktop_inline" />
-                
+              <div className="mx-auto mt-5 flex w-full max-w-[440px] gap-2 sm:mt-6 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => openLeadModal("lead_landing_hero_interest")}
+                  className="btn-coral inline-flex min-h-12 min-w-0 flex-1 items-center justify-center px-3 py-3 text-[13px] font-bold sm:px-6 sm:text-base"
+                >
+                  Mám záujem
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollToBenefits("lead_landing_hero_more")}
+                  className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border-2 border-coral bg-white/20 px-2 py-3 font-display text-[13px] font-bold text-coral-dark shadow-card backdrop-blur-md transition-colors hover:bg-white/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:gap-2 sm:px-5 sm:text-base"
+                >
+                  Viac o škôlke
+                  <ArrowDown className="size-4 shrink-0" aria-hidden="true" />
+                </button>
               </div>
             </div>
           </div>
@@ -172,25 +162,9 @@ function LeadLandingPage() {
 
         <InfoTicker />
 
-        <section className="bg-card px-4 pt-2 pb-5 sm:pt-4 sm:pb-7 lg:hidden">
-          <SchoolmatesFormCrown />
-          <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-3.5 pt-12 pb-3.5 shadow-card ring-1 ring-forest/8 sm:px-5 sm:pt-14 sm:pb-5">
-            <div className="mb-4 text-center">
-              <p className="font-display text-xl font-bold text-forest">
-                Chcete sa dozvedieť viac o škôlke?
-              </p>
-              <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
-                Radi vám odpovieme na otázky o škôlke.
-              </p>
-            </div>
-            <ContactRevealButton onClick={() => openLeadModal("lead_landing_mobile_below_hero")} />
-            
-          </div>
-        </section>
-
-        <section className="relative overflow-hidden bg-card py-10 sm:py-14">
+        <section id="lead-benefits" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
-          <div id="lead-benefits" className="relative z-10 mx-auto max-w-6xl px-4 text-center">
+          <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Prečo Chvostíkovo
             </p>
@@ -239,6 +213,26 @@ function LeadLandingPage() {
           </div>
         </section>
 
+        <section id="lead-form" className="relative scroll-mt-24 bg-card px-4 pt-8 pb-10 sm:pt-12 sm:pb-14">
+          <div className="mx-auto w-full max-w-xl">
+            <SchoolmatesFormCrown />
+            <div className="rounded-3xl bg-secondary/55 px-4 pt-12 pb-5 text-center shadow-card ring-1 ring-forest/8 sm:px-7 sm:pt-14 sm:pb-8">
+              <h2 className="font-display text-xl font-bold text-forest sm:text-2xl">
+                Chcete sa dozvedieť viac o škôlke?
+              </h2>
+              <p className="mx-auto mt-2 mb-5 max-w-sm text-sm leading-relaxed text-forest/75">
+                Radi vám odpovieme na otázky o škôlke.
+              </p>
+              <div className="lg:hidden">
+                <ContactRevealButton onClick={() => openLeadModal("lead_landing_after_benefits_mobile")} />
+              </div>
+              <div className="hidden text-left lg:block">
+                <ShortForm trackingSource="lead_landing_after_benefits_desktop_inline" />
+              </div>
+            </div>
+          </div>
+        </section>
+
         <Reviews />
 
         <section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
@@ -253,14 +247,28 @@ function LeadLandingPage() {
                 <article key={item.name} className={`rounded-3xl p-6 shadow-card ${item.highlight ? "bg-forest text-cream" : "bg-card text-forest"}`}>
                   <h3 className="font-display text-xl font-bold">{item.name}</h3>
                   <p className={`mt-3 font-display text-4xl font-bold ${item.highlight ? "text-cream" : "text-coral-dark"}`}>{item.price}</p>
-                  {item.highlight && <p className="mt-3 text-sm leading-relaxed text-cream/85">{item.note}</p>}
+                  {item.highlight && (
+                    <>
+                      <p className="mt-3 text-sm leading-relaxed text-cream/85">
+                        {item.note.split("Permanentka platí")[0].trim()}
+                      </p>
+                      <p className="mt-1 text-xs leading-relaxed text-cream/75">
+                        Permanentka platí 2 mesiace.
+                      </p>
+                    </>
+                  )}
                 </article>
               ))}
             </div>
-            <p className="mt-5 font-display font-bold text-forest">Úvodná návšteva je zadarmo.</p>
-            <p className="mx-auto mt-4 flex max-w-2xl items-start justify-center gap-2 text-sm leading-relaxed text-forest/75">
-              <Car className="mt-0.5 size-5 shrink-0 text-coral-dark" />
-              <span>Pomôžeme vám aj s vyzdvihnutím a odvozom psíka v Košiciach — 5 € za jednu jazdu.</span>
+            <div className="mx-auto mt-6 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl border border-coral/50 bg-coral/10 px-5 py-3 text-center shadow-card sm:px-7">
+              <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
+              <p className="font-display text-base font-bold text-forest sm:text-lg">
+                Úvodná návšteva zadarmo
+              </p>
+            </div>
+            <p className="mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-secondary px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-forest sm:rounded-full sm:px-5 sm:text-sm">
+              <Car className="size-4 shrink-0 text-coral-dark sm:size-5" aria-hidden="true" />
+              <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
             <button type="button" onClick={() => openLeadModal("lead_landing_pricing_20261028")} className="btn-coral mt-6 inline-flex">
               Chcem sa informovať o škôlke
