@@ -7,6 +7,10 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 
 const LEAD_INTERESTS = new Set([
+  // Additive pilot values for the staged LEAD form; preserve historical and other landing choices.
+  'Chcem sa informovať o škôlke',
+  'Mám záujem využívať škôlku pravidelne',
+  'Mám záujem využívať škôlku občasne',
   'Chcem sa dozvedieť viac o psej škôlke',
   'Mám záujem o pravidelné návštevy',
   'Potrebujem škôlku občas',

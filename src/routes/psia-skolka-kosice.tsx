@@ -7,8 +7,8 @@ import {
   PawPrint,
   ShieldCheck,
 } from "lucide-react";
-import { ShortForm } from "@/components/site/Forms";
-import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
+import { LeadStepForm } from "@/components/site/LeadStepForm";
+import { FormDialog } from "@/components/site/FormDialog";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
@@ -82,6 +82,13 @@ export const Route = createFileRoute("/psia-skolka-kosice")({
   component: LeadLandingPage,
 });
 
+function scrollToLeadForm(source: string) {
+  trackMarketingInteraction("inquiry_cta", source);
+  void trackCookielessInteraction("inquiry_cta", source);
+  const target = document.getElementById(window.innerWidth >= 1024 ? "lead-form-desktop" : "lead-form");
+  if (!target) return;
+  window.scrollTo({ top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - 12), behavior: "smooth" });
+}
 function scrollToBenefits(source: string) {
   trackMarketingInteraction("explore_daycare", source);
   void trackCookielessInteraction("explore_daycare", source);
@@ -107,14 +114,14 @@ function LeadLandingPage() {
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
       <Header landingMinimal hideMobileDock landingTrackingSource="lead_landing_header_phone" />
-      <MobileDock variant="lead" onInterestOpen={() => openLeadModal("lead_landing_mobile_dock")} />
+      <MobileDock variant="lead" onInterestOpen={() => scrollToLeadForm("lead_landing_mobile_dock")} />
 
       <main>
         <section className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto flex min-h-[425px] max-w-4xl items-center justify-center px-4 pb-8 pt-0 sm:min-h-[465px] sm:pt-7 sm:pb-10 lg:min-h-[420px] lg:py-12">
-            <div className="w-full max-w-3xl text-center">
+          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-8 px-4 pb-8 pt-0 sm:min-h-[465px] sm:pt-7 sm:pb-10 lg:min-h-[510px] lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:py-10">
+            <div className="w-full min-w-0 text-center lg:text-left">
               <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
               </p>
@@ -142,7 +149,7 @@ function LeadLandingPage() {
               <div className="mx-auto mt-5 flex w-full max-w-[440px] gap-2 sm:mt-6 sm:gap-3">
                 <button
                   type="button"
-                  onClick={() => openLeadModal("lead_landing_hero_interest")}
+                  onClick={() => scrollToLeadForm("lead_landing_hero_interest")}
                   className="btn-coral inline-flex min-h-12 min-w-0 flex-1 items-center justify-center px-3 py-3 text-[13px] font-bold sm:px-6 sm:text-base"
                 >
                   Mám záujem
@@ -157,10 +164,27 @@ function LeadLandingPage() {
                 </button>
               </div>
             </div>
+            <div id="lead-form-desktop" className="hidden min-w-0 lg:block">
+              <SchoolmatesFormCrown compact />
+              <div className="rounded-3xl border border-coral/15 bg-secondary/55 px-5 pb-6 pt-8 shadow-soft">
+                <h2 className="mb-5 text-center font-display text-xl font-bold text-forest">Zaujíma vás naša škôlka?</h2>
+                <LeadStepForm trackingSource="lead_landing_hero_desktop_inline" />
+              </div>
+            </div>
           </div>
         </section>
 
         <InfoTicker />
+
+        <section id="lead-form" className="bg-card px-4 pb-8 pt-8 sm:pb-12 lg:hidden">
+          <div className="mx-auto max-w-xl">
+            <SchoolmatesFormCrown />
+            <div className="rounded-3xl bg-secondary/55 px-4 pb-6 pt-12 shadow-card ring-1 ring-forest/8 sm:px-6 sm:pt-14">
+              <h2 className="mb-5 text-center font-display text-xl font-bold text-forest sm:text-2xl">Zaujíma vás naša škôlka?</h2>
+              <LeadStepForm trackingSource="lead_landing_hero_mobile_inline" />
+            </div>
+          </div>
+        </section>
 
         <section id="lead-benefits" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
@@ -213,26 +237,6 @@ function LeadLandingPage() {
           </div>
         </section>
 
-        <section id="lead-form" className="relative scroll-mt-24 bg-card px-4 pt-8 pb-10 sm:pt-12 sm:pb-14">
-          <div className="mx-auto w-full max-w-xl">
-            <SchoolmatesFormCrown />
-            <div className="rounded-3xl bg-secondary/55 px-4 pt-12 pb-5 text-center shadow-card ring-1 ring-forest/8 sm:px-7 sm:pt-14 sm:pb-8">
-              <h2 className="font-display text-xl font-bold text-forest sm:text-2xl">
-                Chcete sa dozvedieť viac o škôlke?
-              </h2>
-              <p className="mx-auto mt-2 mb-5 max-w-sm text-sm leading-relaxed text-forest/75">
-                Radi vám odpovieme na otázky o škôlke.
-              </p>
-              <div className="lg:hidden">
-                <ContactRevealButton onClick={() => openLeadModal("lead_landing_after_benefits_mobile")} />
-              </div>
-              <div className="hidden text-left lg:block">
-                <ShortForm trackingSource="lead_landing_after_benefits_desktop_inline" />
-              </div>
-            </div>
-          </div>
-        </section>
-
         <Reviews />
 
         <section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
@@ -250,7 +254,7 @@ function LeadLandingPage() {
                   {item.highlight && (
                     <>
                       <p className="mt-3 text-sm leading-relaxed text-cream/85">
-                        {item.note.split("Permanentka platí")[0].trim()}
+                        {(item.note?.split("Permanentka platí")[0] ?? "").trim()}
                       </p>
                       <p className="mt-1 text-xs leading-relaxed text-cream/75">
                         Permanentka platí 2 mesiace.
@@ -270,12 +274,17 @@ function LeadLandingPage() {
               <Car className="size-4 shrink-0 text-coral-dark sm:size-5" aria-hidden="true" />
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
-            <button type="button" onClick={() => openLeadModal("lead_landing_pricing_20261028")} className="btn-coral mt-6 inline-flex">
-              Chcem sa informovať o škôlke
-            </button>
+
             <a href="#lead-requirements" className="mt-4 block font-display text-sm font-semibold text-forest underline underline-offset-4 hover:text-coral focus-visible:text-coral">
               Pozrieť podmienky prijatia
             </a>
+          </div>
+        </section>
+
+        <section id="lead-form-pricing" className="bg-card px-4 py-10 sm:py-14">
+          <div className="mx-auto max-w-xl rounded-3xl bg-secondary/55 p-5 shadow-card ring-1 ring-coral/15 sm:p-8">
+            <h2 className="mb-5 text-center font-display text-2xl font-bold text-forest">Máte záujem o škôlku?</h2>
+            <LeadStepForm trackingSource="lead_landing_pricing_inline" />
           </div>
         </section>
 
@@ -386,13 +395,8 @@ function LeadLandingPage() {
                 </p>
               </div>
 
-              <div className="mx-auto mt-6 max-w-md rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <div className="lg:hidden">
-                  <ContactRevealButton onClick={() => openLeadModal("lead_landing_bottom")} />
-                </div>
-                <div className="hidden lg:block">
-                  <ShortForm trackingSource="lead_landing_bottom_desktop_inline" />
-                </div>
+              <div className="mx-auto mt-6 max-w-xl rounded-3xl bg-card p-5 shadow-card sm:p-6">
+                <LeadStepForm trackingSource="lead_landing_bottom_inline" />
               </div>
             </div>
           </div>
@@ -407,7 +411,7 @@ function LeadLandingPage() {
         title="Chcete sa dozvedieť viac o škôlke?"
         subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
       >
-        <ShortForm trackingSource={leadModalSource} />
+        <LeadStepForm trackingSource={leadModalSource} />
       </FormDialog>
     </div>
   );

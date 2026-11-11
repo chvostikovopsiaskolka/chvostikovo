@@ -163,6 +163,30 @@ assert(!progressSource.includes("JSON.stringify(target.value)") && !progressSour
 assert(forms.includes("hideInterest = false"), "Critical form check failed: informational interest selector is not enabled by default.");
 
 // v303: three visible Slovak ShortForm choices; same required field and CRM contract.
+// Guided LEAD pilot: exact new UI choices must persist as exact CRM interest_reason values.
+const stagedLeadSource = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
+const stagedLeadLanding = readFileSync(new URL("../src/routes/psia-skolka-kosice.tsx", import.meta.url), "utf8");
+const allowedStagedInterests = [
+  "Chcem sa informovať o škôlke",
+  "Mám záujem využívať škôlku pravidelne",
+  "Mám záujem využívať škôlku občasne",
+];
+for (const value of allowedStagedInterests) {
+  assert(stagedLeadSource.includes(`value: "${value}"`), "Guided lead choice missing from UI: " + value);
+  assert(backendUsageSrc.includes(`'${value}'`), "Guided lead choice missing from backend allowlist: " + value);
+  const payload = buildDbPayload(shortSchema.parse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: value }));
+  assert(payload.interest_reason === value, "New interest must be stored verbatim");
+}
+assert(stagedLeadSource.includes("zaujem: selectedInterest") && stagedLeadSource.includes("name=\"zaujem\"") && stagedLeadSource.includes("PrivacyConsentCheckbox"), "Guided form must preserve interest, consent and submission");
+assert(stagedLeadSource.includes('name="meno"') && stagedLeadSource.includes('name="email"') && stagedLeadSource.includes('<PhoneField'), "Guided form must preserve contact fields and autofill");
+assert(stagedLeadSource.includes('startFormAttempt(trackingSource)') && stagedLeadSource.includes('trackMetaFormConversion("informacie"') && stagedLeadSource.includes('LeadPhoneReceipt'), "Guided form must retain conversion idempotency, receipt and phone correction");
+assert((stagedLeadLanding.match(/<LeadStepForm /g) || []).length === 5, "LEAD form must be inline mobile/desktop hero, after pricing, footer and modal");
+assert(stagedLeadLanding.indexOf('id="lead-form"') < stagedLeadLanding.indexOf('id="lead-benefits"'), "Mobile form must precede Why Chvostikovo");
+assert(stagedLeadLanding.indexOf('id="lead-pricing"') < stagedLeadLanding.indexOf('id="lead-form-pricing"'), "Pricing form must follow pricing");
+assert(stagedLeadLanding.includes('scrollToLeadForm("lead_landing_hero_interest")') && stagedLeadLanding.includes('scrollToLeadForm("lead_landing_mobile_dock")'), "Hero/dock CTA must scroll, not open a modal");
+assert(stagedLeadLanding.includes('openLeadModal("lead_landing_friendship_20261028")'), "Friendship CTA modal must remain");
+assert(!stagedLeadLanding.includes("ContactRevealButton"), "Inline lead forms must not be hidden behind reveal controls");
+
 const shortFormSource = forms.slice(forms.indexOf("export function ShortForm"), forms.indexOf("/** Inline binary choices"));
 assert(shortFormSource.includes("!hideInterest") && shortFormSource.includes('name="zaujem"'), "Hidden-interest variants and the existing zaujem name must remain.");
 assert(shortFormSource.includes('type="radio" name="zaujem" value={option.value} aria-label={option.value} required'), "Visible short-form interest must use a mandatory native radio group.");

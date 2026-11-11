@@ -20,6 +20,10 @@ async function post(payload) {
 }
 
 for (const interest_reason of [
+  // Current staged LEAD UI: three new exact stored values, additive to old forms.
+  "Chcem sa informovať o škôlke",
+  "Mám záujem využívať škôlku pravidelne",
+  "Mám záujem využívať škôlku občasne",
   "Chcem sa dozvedieť viac o psej škôlke",
   "Mám záujem o pravidelné návštevy",
   "Potrebujem škôlku občas",
