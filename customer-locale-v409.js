@@ -189,7 +189,7 @@
     if(availability)return availability[1]+' places left';
     availability=text.match(/^Obsadené\s+(\d+)\s+z\s+(\d+)\s+miest$/);
     if(availability)return 'Occupied: '+availability[1]+' of '+availability[2]+' places';
-    availability=text.match(/^(Vyzdvihnutie aj dovoz|Vyzdvihnutie|Dovoz domov)\\s*·\\s*(\\d+\\s*€)$/);
+    availability=text.match(/^(Vyzdvihnutie aj dovoz|Vyzdvihnutie|Dovoz domov)\s*·\s*(\d+\s*€)$/);
     if(availability)return (DICTIONARY.get(availability[1])||availability[1])+' · '+availability[2];
     availability=text.match(/^Rezervovať\s+(\d+)\s+(deň|dni|dní)$/);
     if(availability)return 'Book '+availability[1]+' days';
