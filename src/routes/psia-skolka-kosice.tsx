@@ -89,7 +89,8 @@ function scrollToBenefits(source: string) {
   const target = document.getElementById("lead-benefits");
   if (!target) return;
 
-  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  const top = window.scrollY + target.getBoundingClientRect().top;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
 }
 
 function LeadLandingPage() {
@@ -155,12 +156,7 @@ function LeadLandingPage() {
                   <ArrowDown className="size-4 shrink-0" aria-hidden="true" />
                 </button>
               </div>
-
-
-
             </div>
-
-
           </div>
         </section>
 
