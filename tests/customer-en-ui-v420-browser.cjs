@@ -35,6 +35,15 @@ const fixture=require('./liquid-v3-fixture.cjs');
       await page.evaluate(()=>window.ChvostikovoLocale.setLanguage('sk'));
       await page.waitForTimeout(60);
       assert.equal(await page.locator('#designTicket .design-paws>span').count(),20,'SK restore must retain all paws');
+      await page.evaluate(()=>{
+        window.ChvostikovoLocale.setLanguage('en');
+        state.data.passes=[];
+        state.data.dogs[0].default_entry_type='single';
+        renderPassSummary();
+        document.querySelector('#passSummary strong').textContent='Single visit';
+        window.customerDesignRefreshLocaleV420?.();
+      });
+      assert.equal(await page.locator('#designTicket').count(),0,'EN single visit must not show an invented pass');
 
       await page.evaluate(()=>{
         switchTab('menu');document.getElementById('menuDogGroup').open=true;
