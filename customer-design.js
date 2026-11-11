@@ -160,7 +160,7 @@
     const source=byId('passSummary'),dog=selectedDog(); if(!source||!dog)return;
     let root=byId('designTicket');
     const originalTitle=source.querySelector('span')?.textContent||'Vstup',counts=source.querySelector('strong')?.textContent||'';
-    if(counts==='Jednorazový'){root?.remove();return;}
+    if(counts==='Jednorazový'||counts==='Single visit'){root?.remove();return;}
     if(!root){root=document.createElement('section');root.id='designTicket';root.className='design-ticket';root.setAttribute('aria-label','Permanentka a vstupy');(byId('customerInboxV363')||byId('bookingDogProfile')).after(root);}
     root.classList.toggle('male',dog.sex==='male');
     root.classList.toggle('design-ticket-single',counts==='Jednorazový');
