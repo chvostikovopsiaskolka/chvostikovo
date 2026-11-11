@@ -186,6 +186,8 @@ jobs:
           V3_ENGINE=webkit node tests/customer-auth-v418-browser.cjs
           node tests/customer-en-ui-v420-browser.cjs
           V3_ENGINE=webkit node tests/customer-en-ui-v420-browser.cjs
+          node tests/customer-en-nav-bulletins-v421-browser.cjs
+          V3_ENGINE=webkit node tests/customer-en-nav-bulletins-v421-browser.cjs
           node tests/customer-push-onboarding-v398-browser.cjs
           V3_ENGINE=webkit node tests/customer-push-onboarding-v398-browser.cjs
           node tests/customer-polish-v396-browser.cjs
