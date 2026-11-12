@@ -3,7 +3,7 @@ import { BookOpen, Check, Phone } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
 import { ContextFaq } from "./ContextFaq";
-import { ShortForm } from "./Forms";
+import { LeadStepForm } from "./LeadStepForm";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { CARE, DAYCARE_GALLERY_EXTRAS, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
@@ -174,7 +174,7 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
       <FormDialog
         open={infoOpen}
         onOpenChange={setInfoOpen}
-        title={isEnglish ? "Enquire about dog daycare" : "Informujte sa o škôlke"}
+        title={isEnglish ? "Enquire about dog daycare" : "Čo hľadáte pre svojho psíka?"}
         subtitle={
           isEnglish
             ? "Leave your contact details. We will get in touch, talk about your dog and answer your questions. If you are interested, we will arrange a free introductory visit."
@@ -184,9 +184,7 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
         {isEnglish ? (
           <EnglishInquiryForm trackingSource="en_care_cta" />
         ) : (
-          <ShortForm
-            trackingSource="care_cta"
-          />
+          <LeadStepForm questionInHeading trackingSource="care_cta" />
         )}
       </FormDialog>
     </section>
@@ -210,9 +208,9 @@ export function FriendshipInterest() {
           </div>
         </div>
       </section>
-      <FormDialog open={open} onOpenChange={setOpen} title="Máte záujem o škôlku?"
+      <FormDialog open={open} onOpenChange={setOpen} title="Čo hľadáte pre svojho psíka?"
         subtitle="Nechajte nám kontakt. Ozveme sa vám a odpovieme na otázky o škôlke.">
-        <ShortForm trackingSource="home_friendship_interest_20261028" />
+        <LeadStepForm questionInHeading trackingSource="home_friendship_interest_20261028" />
       </FormDialog>
     </>
   );
@@ -283,10 +281,10 @@ export function Why() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Máte záujem o škôlku?"
+        title="Čo hľadáte pre svojho psíka?"
         subtitle="Nechajte nám kontakt. Ozveme sa vám, odpovieme na otázky a ak bude Chvostíkovo pre vášho psíka vhodné, dohodneme úvodnú návštevu."
       >
-        <ShortForm trackingSource="home_why_interest" />
+        <LeadStepForm questionInHeading trackingSource="home_why_interest" />
       </FormDialog>
     </section>
   );
