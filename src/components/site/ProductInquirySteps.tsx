@@ -21,18 +21,18 @@ export function ProductInquirySteps({
 }: ProductInquiryStepsProps) {
   return (
     <form onSubmit={onSubmit} data-product-inquiry-steps data-step={step}>
-      <nav aria-label="Postup dopytu" className="mb-6 flex items-center gap-1.5 sm:gap-2">
-        {titles.map((name, index) => {
-          const number = (index + 1) as 1 | 2 | 3;
-          return (
-            <div key={name} aria-current={step === number ? "step" : undefined}
-              className={`min-w-0 flex-1 rounded-xl px-1.5 py-2 text-center transition sm:px-3 ${step === number ? "bg-coral-soft/35 text-forest ring-1 ring-coral/60" : step > number ? "bg-secondary text-forest" : "bg-secondary/45 text-forest/50"}`}>
-              <span className="block font-display text-sm font-bold">{number} / 3</span>
-              <span className="mt-0.5 block text-[10px] font-semibold leading-tight sm:text-xs">{name}</span>
-            </div>
-          );
-        })}
-      </nav>
+      <div className="mb-6" data-product-step-progress>
+        <div className="mb-2 flex items-center justify-between gap-3 font-display text-xs font-medium text-forest/70 sm:text-sm">
+          <span>Krátky nezáväzný formulár</span>
+          <span className="shrink-0 tabular-nums">Krok {step} z 3</span>
+        </div>
+        <div role="progressbar" aria-label="Priebeh formulára"
+          aria-valuemin={0} aria-valuemax={3} aria-valuenow={step}
+          className="h-2.5 overflow-hidden rounded-full bg-forest/10">
+          <div className="h-full rounded-full bg-coral transition-[width] duration-300"
+            style={{ width: `${(step / 3) * 100}%` }} />
+        </div>
+      </div>
 
       <h3 className="mb-4 font-display text-xl font-bold text-forest sm:text-2xl">{titles[step - 1]}</h3>
       <div key={step} className="min-w-0">
