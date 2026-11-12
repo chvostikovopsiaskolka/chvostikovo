@@ -91,6 +91,24 @@ const failures = [];
                   throw new Error('Desktop Hero must only offer the prominent learn-more CTA');
                 if (!await hero.locator('[data-lead-step-form]').first().isVisible())
                   throw new Error('Desktop guided form missing beside Hero');
+                if (['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/'].includes(url.pathname)) {
+                  // Benefit chips should start at the left edge of Hero copy,
+                  // not float right. The EN hero was already left-aligned.
+                  const benefits = hero.locator('[data-hero-benefits]').first();
+                  if (!await benefits.isVisible()) throw new Error('Hero benefits missing on desktop');
+                  const delta = await benefits.evaluate(row => {
+                    // Main Hero renders a separate hidden mobile h1 first:
+                    // select the actual visible heading at the active viewport.
+                    const title = [...(row.closest('section')?.querySelectorAll('h1') || [])].find(node => {
+                      const rect = node.getBoundingClientRect();
+                      return rect.width > 0 && rect.height > 0;
+                    });
+                    if (!title) return null;
+                    return Math.abs(row.getBoundingClientRect().left - title.getBoundingClientRect().left);
+                  });
+                  if (delta === null || delta > 8)
+                    throw new Error('Desktop Hero benefit badges not aligned with text left edge: ' + delta);
+                }
               }
               if ((await primary.evaluate(el => getComputedStyle(el).boxShadow)) === 'none')
                 throw new Error('Primary CTA glow missing: ' + width);
@@ -156,19 +174,58 @@ const failures = [];
               }
             }
           }
-          // Test enquiry modal only AFTER vertical scroll regression: closing Radix
-          // briefly locks background scroll and must not affect carousel checks.
-          if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname)) {
+          // Check dialogs only after scrolling/carousels: Radix locks background
+          // scroll while open. Keep the actual modal centered and scrollable.
+          if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/'].includes(url.pathname)) {
             const entry = url.pathname === '/'
               ? page.locator('section.hero-safe-top .hero-cta-primary:visible').first()
               : page.locator('.mobile-dock .mobile-dock-apply').first();
             await entry.click();
             const modal = page.getByRole('dialog');
-            await modal.waitFor({state: 'visible'});
+            await modal.waitFor({ state: 'visible' });
             if (!await modal.locator('[data-lead-step-form]').count())
               throw new Error('Mobile interest CTA must open guided enquiry modal');
+            const modalFrame = await modal.evaluate(el => {
+              const rect = el.getBoundingClientRect();
+              const inner = el.querySelector('.form-dialog-scroll');
+              return {
+                midpointOffset: Math.abs((rect.top + rect.bottom) / 2 - window.innerHeight / 2),
+                top: rect.top, bottom: rect.bottom, viewport: window.innerHeight,
+                innerScrollable: !!inner && getComputedStyle(inner).overflowY === 'auto',
+              };
+            });
+            if (modalFrame.midpointOffset > 20 || modalFrame.top < -1 || modalFrame.bottom > modalFrame.viewport + 1 || !modalFrame.innerScrollable)
+              throw new Error('Mobile FormDialog is not centered/scrollable: ' + JSON.stringify(modalFrame));
             await page.keyboard.press('Escape');
-            await modal.waitFor({state: 'hidden'});
+            await modal.waitFor({ state: 'hidden' });
+
+            if (url.pathname === '/') {
+              // This CTA says 'register', so it must open the full application,
+              // not the two-step enquiry form. Never actually submit customer data.
+              await page.locator('#preco').getByRole('button', { name: 'Chcem prihlásiť psíka' }).click();
+              const application = page.getByRole('dialog');
+              await application.waitFor({ state: 'visible' });
+              if (!await application.getByRole('heading', { name: 'Prihlás svojho psíka ešte dnes' }).isVisible())
+                throw new Error('Main Why CTA did not open the full application dialog');
+              if (!await application.locator('input[name="pes"]').count() ||
+                  !await application.locator('input[name="meno"]').count() ||
+                  await application.locator('[data-lead-step-form]').count())
+                throw new Error('Main Why CTA opened an inquiry instead of the full dog application');
+              const applicationFrame = await application.evaluate(el => {
+                const rect = el.getBoundingClientRect();
+                const scroll = el.querySelector('.form-dialog-scroll');
+                return {
+                  midpointOffset: Math.abs((rect.top + rect.bottom) / 2 - window.innerHeight / 2),
+                  top: rect.top, bottom: rect.bottom, viewport: window.innerHeight,
+                  innerScrollable: !!scroll && scroll.scrollHeight > scroll.clientHeight + 25,
+                };
+              });
+              if (applicationFrame.midpointOffset > 20 || applicationFrame.top < -1 ||
+                  applicationFrame.bottom > applicationFrame.viewport + 1 || !applicationFrame.innerScrollable)
+                throw new Error('Full dog registration modal must stay centered with inner scrolling: ' + JSON.stringify(applicationFrame));
+              await page.keyboard.press('Escape');
+              await application.waitFor({ state: 'hidden' });
+            }
           }
           if (errors.length) throw new Error(errors.join('; '));
           results.push({ engine, restricted, route: url.pathname, status: 'PASS' });

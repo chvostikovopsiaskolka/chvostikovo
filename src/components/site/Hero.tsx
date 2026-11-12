@@ -111,7 +111,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
               </p>
             </div>
 
-            <div className="order-4 mt-4 flex flex-wrap justify-end gap-2">
+            <div data-hero-benefits className="order-4 mt-4 flex flex-wrap justify-start gap-2">
               {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                 <span
                   key={item}

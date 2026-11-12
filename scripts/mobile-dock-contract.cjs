@@ -52,6 +52,8 @@ assert(css.includes("body:has([data-form-dialog]) .mobile-dock"), "Hide dock for
 assert(css.includes(".mobile-dock-menu") && css.includes("overflow-y: auto"), "Small-screen sheet scrolling");
 assert(hero.includes("pt-7 pb-0 sm:pt-9 lg:pt-24"), "Mobile Hero spacing must be updated without touching desktop");
 assert(form.includes('data-form-dialog="simple-v300"'), "Existing FormDialog mount contract");
+assert(css.includes('top: 50% !important;') && css.includes('transform: translate(-50%, -50%) !important;') && css.includes('.form-dialog[data-state]'), "Mobile form dialogs must be vertically centered");
+assert(css.includes('max-height: calc(100svh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))') && css.includes('.form-dialog-scroll'), "Long form dialogs must retain a scrollable content panel below safe-area bounds");
 assert(forms.includes("submitInquiry"), "Shared form logic retained");
 
 /* iPhone Dynamic Island / Android cutout must not leave an unpainted Hero band.
@@ -95,15 +97,15 @@ assert(css.includes("@media (prefers-reduced-motion: reduce)"), "Reduced motion 
 assert(!css.includes("transform: scale("), "CTA must not scale on touch and shift adjacent labels");
 
 
-// Conversion CTA structure: Why and First Visit remain enquiries; homepage Pricing
-// now opens a tracked short enquiry while preserving the full-form alternate mode.
+// Conversion CTA structure: main Why explicitly starts the full dog application;
+// First Visit and interest pricing remain short enquiries.
 const story = read("src/components/site/Story.tsx");
 const info = read("src/components/site/Info.tsx");
 const why = story.slice(story.indexOf("export function Why()"), story.indexOf("export function About("));
 const first = info.slice(info.indexOf("export function FirstVisit()"), info.indexOf("export function Pricing("));
 const pricing = info.slice(info.indexOf("export function Pricing("), info.indexOf("const PRIMARY_FAQ"));
-assert(why.includes("Chcem prihlásiť psíka") && why.includes('<LeadStepForm questionInHeading trackingSource="home_why_interest" />'), "Why CTA must open tracked short enquiry");
-assert(!why.includes("<LongForm"), "Why should not duplicate full registration");
+assert(why.includes("Chcem prihlásiť psíka") && why.includes('<LongForm onSent={() => setApplicationSent(true)} />') && why.includes('title={applicationSent ? "Prihláška odoslaná" : "Prihlás svojho psíka ešte dnes"}'), "Why registration CTA must open full dog application with correct success header");
+assert(!why.includes("<LeadStepForm"), "Why registration CTA must not open short inquiry");
 assert(first.includes("Dohodnúť úvodnú návštevu") && first.includes('trackingSource="home_first_visit_interest"') && !first.includes("hideInterest") && !first.includes("interestValue"), "Intro visit CTA must show the ordinary required interest options");
 assert(!first.includes("<LongForm"), "Intro visit should not present a full application");
 assert(info.includes('flex-nowrap items-center') && info.includes('sm:gap-2') && info.includes('Odvoz / vyzdvihnutie: 5 € / jazda'), "Taxi note must stay one-line and preserve 5 euro fare");
