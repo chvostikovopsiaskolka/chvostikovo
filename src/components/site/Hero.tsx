@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ArrowDown, CheckCircle2 } from "lucide-react";
-import { ShortForm } from "./Forms";
+import { LeadStepForm } from "./LeadStepForm";
+import { FormDialog } from "./FormDialog";
 import { InfoTicker } from "./InfoTicker";
 import { PawTrailBackground } from "./PawTrailBackground";
 import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
@@ -26,6 +27,14 @@ function scrollToWhyChvostikovo() {
 }
 
 export function Hero({ background, learnMoreHref }: { background?: ReactNode; learnMoreHref?: string }) {
+  const [interestOpen, setInterestOpen] = useState(false);
+  const [interestSource, setInterestSource] = useState("home_hero_interest_mobile");
+  function openInterest(source: string) {
+    trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
+    setInterestSource(source);
+    setInterestOpen(true);
+  }
   return (
     <section id="top" className="hero-safe-top hero-safe-top-main relative overflow-hidden pt-7 pb-0 sm:pt-9 lg:pt-24 lg:pb-1">
       {background ?? <PawTrailBackground />}
@@ -65,7 +74,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
           </div>
 
           <div className="hero-cta-pair mx-auto mt-5">
-            <button type="button" onClick={() => scrollToHomeInquiry("home_hero_interest_mobile")} className="hero-cta-primary">
+            <button type="button" onClick={() => openInterest("home_hero_interest_mobile")} className="hero-cta-primary">
               Mám záujem
             </button>
             <button
@@ -111,7 +120,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
               </p>
             </div>
 
-            <div className="order-4 mt-4 flex flex-wrap gap-2">
+            <div className="order-4 mt-4 flex flex-wrap justify-end gap-2">
               {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                 <span
                   key={item}
@@ -123,12 +132,8 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
               ))}
             </div>
 
-            <div className="hero-cta-pair order-5 mt-4">
-              <button type="button" onClick={() => scrollToHomeInquiry("home_hero_interest_desktop")} className="hero-cta-primary">
-                Mám záujem
-              </button>
-              <button
-                type="button"
+            <div className="order-5 mt-4">
+              <button type="button"
                 onClick={() => {
                   if (learnMoreHref) {
                     window.location.assign(learnMoreHref);
@@ -138,10 +143,10 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
                   void trackCookielessInteraction("explore_daycare", "home_hero_desktop_20261028");
                   scrollToWhyChvostikovo();
                 }}
-                className="hero-cta-secondary"
+                className="hero-cta-primary w-full max-w-[440px] gap-2"
               >
-                <span>Viac o škôlke</span>
-                <ArrowDown className="hero-cta-icon" aria-hidden="true" />
+                Viac o škôlke
+                <ArrowDown className="size-4" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -149,19 +154,22 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
           <div id="home-hero-inline-form" className="min-w-0">
             <SchoolmatesFormCrown compact />
             <div className="rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
-              <h2 className="text-center text-2xl text-forest sm:whitespace-nowrap">
-                Informujte sa o škôlke
+              <h2 className="text-center text-xl text-forest sm:whitespace-nowrap">
+                Čo hľadáte pre svojho psíka?
               </h2>
               <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
                 Vyplňte krátky nezáväzný formulár. Ozveme sa vám.
               </p>
 
-              <ShortForm trackingSource="hero_desktop_inline" />
+              <LeadStepForm questionInHeading trackingSource="hero_desktop_inline" />
             </div>
           </div>
         </div>
       </div>
-
+      <FormDialog open={interestOpen} onOpenChange={setInterestOpen} title="Čo hľadáte pre svojho psíka?"
+        subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám.">
+        <LeadStepForm questionInHeading trackingSource={interestSource} />
+      </FormDialog>
     </section>
   );
 }
