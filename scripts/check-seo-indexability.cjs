@@ -235,7 +235,10 @@ for (const spec of [
       assert(productHtml.includes(photo), "User-supplied stand photo missing: " + photo);
     }
     assert(productHtml.includes('data-product-stand-cards'), "New stand variant cards missing");
-    for (const title of ['S verzia', 'M verzia', 'L verzia', 'cca 40 × 20 cm', 'cca 60 × 30 cm', '40 €', '45 €', 'Na vyžiadanie']) {
+    for (const section of ['data-stand-gallery-section','data-stand-breeds','data-stand-benefits','data-stand-inline-form','data-product-step-progress']) {
+      assert(productHtml.includes(section), 'Missing stand page section or form progress: '+section);
+    }
+    for (const title of ['S verzia', 'M verzia', 'L verzia', 'cca 40 × 20 cm', 'cca 60 × 30 cm', '40 €', '45 €', '50 €']) {
       assert(productHtml.includes(title), "Stand variant content missing: " + title);
     }
     assert(markup.includes('object-cover'), "Stand guide photo should fill its frame");

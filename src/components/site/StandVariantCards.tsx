@@ -1,4 +1,4 @@
-import { ChevronRight, Ruler, Sparkles, Type } from "lucide-react";
+import { ChevronRight, Ruler, Sparkles, Star, Type } from "lucide-react";
 import type { StandSize } from "@/lib/shop";
 import standMia from "@/assets/products/stand-mia.avif";
 import standCori from "@/assets/products/stand-cori.avif";
@@ -20,8 +20,8 @@ const VARIANTS: Array<{
     height: "Väčšie nerezové misky a výška nôh od 20 do 35 cm.",
     price: "45 €", image: standCori, alt: "Drevený stojan CORI – stredný variant M" },
   { value: "extra_large", label: "L verzia", dimension: "Rozmery na mieru",
-    height: "Pre najväčšie plemená. Presné rozmery, výšku a cenu doladíme individuálne.",
-    price: "Na vyžiadanie", image: standRose, alt: "Biely drevený stojan ROSE – veľký variant L" },
+    height: "Pre veľké plemená. Výška nôh od 40 cm bez horného limitu; rozmer prispôsobíme psíkovi.",
+    price: "50 €", image: standRose, alt: "Biely drevený stojan ROSE – veľký variant L" },
 ];
 
 const FEATURES = [
@@ -40,15 +40,19 @@ export function StandVariantCards({ onInterest }: { onInterest: (size: StandSize
           className="flex w-[87vw] max-w-[420px] min-w-0 shrink-0 snap-start flex-col overflow-hidden rounded-4xl bg-card shadow-soft sm:w-[58vw] md:w-auto md:max-w-none md:shrink">
           <div className="relative isolate overflow-hidden">
             <img src={variant.image} alt={variant.alt} loading="eager" decoding="async"
-              className="h-56 w-full object-cover sm:h-64 lg:h-64"
-              style={{ objectPosition: "50% 56%" }} />
-            <div aria-label="Vlastnosti stojana"
-              className="pointer-events-none absolute inset-x-2 bottom-2 z-10 flex items-stretch gap-1 sm:inset-x-3 sm:bottom-3">
+              className="h-80 w-full object-cover sm:h-[23rem] lg:h-[24rem]"
+              style={{ objectPosition: variant.value === "extra_large" ? "50% 57%" : "50% 52%" }} />
+            <div className="pointer-events-none absolute inset-x-2 bottom-2 z-10 sm:inset-x-3 sm:bottom-3">
+              <div aria-hidden="true" className="mb-1 flex w-[33%] justify-center gap-0.5 text-coral-dark drop-shadow-[0_1px_2px_rgba(255,255,255,0.85)]">
+                {Array.from({ length: 5 }, (_, index) => <Star key={index} className="size-3.5 fill-current sm:size-4" strokeWidth={1.5} />)}
+              </div>
+              <div aria-label="Vlastnosti stojana" className="flex items-stretch gap-1">
               {FEATURES.map(({ icon: Icon, label }) => (
                 <span key={label} className="flex min-w-0 flex-1 items-center justify-center gap-0.5 whitespace-nowrap rounded-xl border border-white/75 bg-[#fffaf1]/90 px-1 py-2 font-display text-[clamp(8px,2.2vw,11px)] font-semibold leading-none tracking-tight text-coral-dark shadow-[0_3px_12px_rgba(25,46,37,0.12)] backdrop-blur-md sm:gap-1 sm:px-1.5 sm:text-[10px]">
                   <Icon aria-hidden="true" className="size-3 shrink-0 text-coral-dark" />{label}
                 </span>
               ))}
+              </div>
             </div>
           </div>
           <div className="flex flex-1 flex-col p-5 sm:p-6">
@@ -63,7 +67,7 @@ export function StandVariantCards({ onInterest }: { onInterest: (size: StandSize
               </button>
               <span className="min-w-0 text-right">
                 <span className="block text-[11px] text-forest/60">Cena</span>
-                <span className={`block font-display font-bold text-forest ${variant.value === "extra_large" ? "text-sm" : "text-2xl"}`}>{variant.price}</span>
+                <span className="block font-display text-2xl font-bold text-forest">{variant.price}</span>
               </span>
             </div>
           </div>

@@ -10,6 +10,8 @@ interface ProductInquiryContactProps {
   setPhone: (value: string) => void;
   email: string;
   setEmail: (value: string) => void;
+  customerLocation?: string;
+  setCustomerLocation?: (value: string) => void;
   company: string;
   setCompany: (value: string) => void;
 }
@@ -18,7 +20,7 @@ const inputClass = "mt-2 w-full rounded-2xl border border-forest/15 bg-backgroun
 
 export function ProductInquiryContact({
   phoneId, customerName, setCustomerName, phone, setPhone,
-  email, setEmail, company, setCompany,
+  email, setEmail, customerLocation, setCustomerLocation, company, setCompany,
 }: ProductInquiryContactProps) {
   return (
     <>
@@ -38,7 +40,9 @@ export function ProductInquiryContact({
         <div className="sm:col-span-2">
           <label className="block font-display text-sm font-bold text-forest">
             Odkiaľ ste? (mesto, PSČ) *
-            <input name="customer_location" autoComplete="off" placeholder="napr. Košice, 040 01"
+            <input name="customer_location" autoComplete="off"
+              {...(setCustomerLocation ? { value: customerLocation ?? "", onChange: (event: React.ChangeEvent<HTMLInputElement>) => setCustomerLocation(event.target.value) } : {})}
+              placeholder="napr. Košice, 040 01"
               required maxLength={120} pattern="[^,]{2,80},[ ]*.{2,20}"
               title="Napíšte mesto a PSČ oddelené čiarkou, napr. Košice, 040 01"
               className={inputClass} />
