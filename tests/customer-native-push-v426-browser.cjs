@@ -6,6 +6,8 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
  try{
   const {page,context,errors}=await require('./liquid-v3-fixture.cjs')(browser,1,390,type.name());
   const result=await page.evaluate(async()=>{
+   const assert=(ok,message)=>{if(!ok)throw new Error(message||'Browser assertion failed');};
+   assert.equal=(a,b,message)=>assert(Object.is(a,b),message||('Expected '+String(b)+' but got '+String(a)));
    const calls=[];
    const native={
     active:true,pending:null,
