@@ -91,6 +91,19 @@ const failures = [];
                   throw new Error('Desktop Hero must only offer the prominent learn-more CTA');
                 if (!await hero.locator('[data-lead-step-form]').first().isVisible())
                   throw new Error('Desktop guided form missing beside Hero');
+                if (['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/'].includes(url.pathname)) {
+                  // Benefit chips should start at the left edge of Hero copy,
+                  // not float right. The EN hero was already left-aligned.
+                  const benefits = hero.locator('[data-hero-benefits]').first();
+                  if (!await benefits.isVisible()) throw new Error('Hero benefits missing on desktop');
+                  const delta = await benefits.evaluate(row => {
+                    const title = row.closest('section')?.querySelector('h1');
+                    if (!title) return null;
+                    return Math.abs(row.getBoundingClientRect().left - title.getBoundingClientRect().left);
+                  });
+                  if (delta === null || delta > 8)
+                    throw new Error('Desktop Hero benefit badges not aligned with text left edge: ' + delta);
+                }
               }
               if ((await primary.evaluate(el => getComputedStyle(el).boxShadow)) === 'none')
                 throw new Error('Primary CTA glow missing: ' + width);
