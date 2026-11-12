@@ -97,7 +97,12 @@ const failures = [];
                   const benefits = hero.locator('[data-hero-benefits]').first();
                   if (!await benefits.isVisible()) throw new Error('Hero benefits missing on desktop');
                   const delta = await benefits.evaluate(row => {
-                    const title = row.closest('section')?.querySelector('h1');
+                    // Main Hero renders a separate hidden mobile h1 first:
+                    // select the actual visible heading at the active viewport.
+                    const title = [...(row.closest('section')?.querySelectorAll('h1') || [])].find(node => {
+                      const rect = node.getBoundingClientRect();
+                      return rect.width > 0 && rect.height > 0;
+                    });
                     if (!title) return null;
                     return Math.abs(row.getBoundingClientRect().left - title.getBoundingClientRect().left);
                   });
