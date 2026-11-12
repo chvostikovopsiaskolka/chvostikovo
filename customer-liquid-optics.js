@@ -72,8 +72,9 @@ function profileBackdrop(el,s){
   panel.append(canvas);s.profileSource=canvas;
  }
  const canvas=s.profileSource,r=panel.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,1.5);
- const pinned=ios&&root.classList.contains('customer-liquid-v364')&&root.classList.contains('customer-ios-v171');
- const x=Math.round(r.left+(pinned?0:scrollX))-32,y=Math.round(r.top+(pinned?0:scrollY))-32,color=getComputedStyle(panel).backgroundColor;
+ // Profile texture remains document-anchored to avoid re-rasterizing while
+ // scrolling the booking page; only Menu/dock wallpaper is viewport-fixed.
+ const x=Math.round(r.left+scrollX)-32,y=Math.round(r.top+scrollY)-32,color=getComputedStyle(panel).backgroundColor;
  const key=[Math.round(r.width),Math.round(r.height),x,y,color,dpr].join(':');
  if(key!==s.profileSourceKey){
   s.profileSourceKey=key;const w=r.width+64,h=r.height+64;canvas.width=Math.ceil(w*dpr);canvas.height=Math.ceil(h*dpr);
