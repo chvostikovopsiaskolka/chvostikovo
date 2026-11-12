@@ -230,9 +230,10 @@ for (const spec of [
     }
     assert(markup.includes('data-stand-gallery="autoplay"'), "Stand article gallery above CTA is missing");
     assert(markup.includes('stand-mia-'), "Stand article must use restored 711x900 MIA AVIF");
-    assert(productHtml.includes('data-stand-sizes="carousel"'), "Stand size carousel missing");
-    assert(productHtml.includes('Mám záujem o menší stojan'), "Small stand carousel CTA missing");
-    assert(productHtml.includes('Mám záujem o väčší stojan'), "Large stand carousel CTA missing");
+    assert(productHtml.includes('data-product-stand-cards'), "New stand variant cards missing");
+    for (const title of ['S verzia', 'M verzia', 'L verzia', 'cca 40 × 20 cm', 'cca 60 × 30 cm', '40 €', '45 €', 'Na vyžiadanie']) {
+      assert(productHtml.includes(title), "Stand variant content missing: " + title);
+    }
     assert(markup.includes('object-cover'), "Stand guide photo should fill its frame");
   } else {
     assert(productHtml.includes('Vyberte si variant a objednajte si target pre svojho psíka.'), "Target detail short description missing");
