@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101317">
+<title>Chvostíkovo — návrh admin v425 (test)</title>
+<style>
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;--bg:#101317;--card:#1c2026;--soft:#252a31;--line:#353a42;--fg:#f6f6f7;--muted:#aab2bd;--orange:#ff7416;--green:#6ae3a5}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg)}body{overflow-x:hidden}button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+.shell{max-width:1050px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(112px + env(safe-area-inset-bottom))}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:25px}.brand{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;background:#30261f;color:var(--orange);font-weight:900;font-size:24px}.htext{flex:1;min-width:0}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:750}.htext h1{font-size:27px;line-height:1.1;margin:4px 0 0;letter-spacing:-.03em}.menu-button{width:47px;height:47px;border-radius:13px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:24px;line-height:1}
+.preview-note{padding:9px 12px;border:1px solid #74503b;background:#2c231e;border-radius:11px;font-size:12px;color:#f7cfad;margin-bottom:18px}
+.screen{display:none}.screen.active{display:block}.stack{display:grid;gap:15px}
+.card{border:1px solid var(--line);border-radius:23px;background:var(--card);padding:18px}.card h2{font-size:19px;line-height:1.25;margin:0 0 7px;letter-spacing:-.02em}.muted{color:var(--muted)}.small{font-size:12px}.section-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.section-top h2{margin:0}.section-top .icon{color:var(--muted);font-size:24px}
+.approval-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.approval{background:var(--soft);border:1px solid #3b4048;border-radius:15px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;gap:17px;text-align:left;min-height:115px;color:var(--fg)}.approval span{font-size:13px;font-weight:600}.approval strong{font-size:28px;line-height:1}.approval .row{display:flex;align-items:end;justify-content:space-between}.arrow{font-size:24px;color:#b9c1ce}.today-heading{display:flex;justify-content:space-between;align-items:center}.today-heading strong{font-size:31px}.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:17px 0}.stat{text-align:center;background:var(--soft);border-radius:14px;padding:13px 4px}.stat strong{font-size:25px;display:block}.stat span{font-size:12px;color:var(--muted)}.primary{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:48px;border:0;border-radius:14px;background:var(--orange);color:#221204;font-weight:850}.secondary{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;border:1px solid var(--line);border-radius:13px;background:transparent;color:var(--fg);font-weight:700}
+.week-chips{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:14px 0}.chip{background:#272c34;border:1px solid transparent;border-radius:12px;padding:9px 1px;min-height:65px;color:var(--fg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px}.chip strong{font-size:20px}.chip span{font-size:12px;color:#cbd2db}.chip small{color:#929ca8;font-size:10px}.chip.active{background:#3b281e;border-color:var(--orange)}.week-mini .chip{min-height:62px}.week-mini .chip strong{font-size:17px}.week-foot{margin-top:8px}
+.section-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.extra-card{display:flex;flex-direction:column;gap:12px;min-height:120px}.extra-card strong{font-size:29px}.extra-card button{border:0;color:#ffc293;background:transparent;text-align:left;padding:0;font-weight:750}
+.week-title{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.week-title h2{margin:0}.date-label{font-size:12px;color:var(--muted);margin-top:4px}.capacity{font-size:12px;color:#f2c6a9;font-weight:700}.day-list{display:grid;gap:9px;margin-top:14px}.dog-row{width:100%;display:flex;align-items:center;gap:12px;min-width:0;text-align:left;background:#292e35;border:1px solid #3a414a;border-radius:15px;padding:10px 12px;color:var(--fg)}.avatar{display:grid;place-items:center;flex:none;width:43px;height:43px;background:#42342c;border-radius:12px;color:#ffa667;font-size:20px}.dog-detail{flex:1;min-width:0}.dog-detail strong{font-size:15px}.dog-detail small{display:block;font-size:11px;color:#c7b4ab;margin-top:4px}.pass{text-align:right;font-weight:750;font-size:13px;flex:none}.pass small{display:block;color:var(--muted);font-weight:400}.day-actions{display:flex;align-items:center;justify-content:space-between;gap:9px}.day-actions button{min-height:41px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--fg);padding:8px 13px}.day-actions b{font-size:14px}
+.drawer{position:fixed;z-index:20;inset:0;display:none;justify-content:flex-end}.drawer.open{display:flex}.scrim{position:absolute;inset:0;background:#000a}.panel{position:relative;width:min(350px,90vw);height:100%;overflow:auto;background:#1b2026;padding:calc(21px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));box-shadow:-16px 0 70px #0007}.panel-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.panel-title strong{font-size:18px}.close{width:42px;height:42px;border:1px solid var(--line);border-radius:10px;color:var(--fg);background:var(--soft);font-size:23px}.menu-group{margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}.menu-group h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 9px}.menu-item{display:flex;width:100%;min-height:42px;align-items:center;justify-content:space-between;background:transparent;color:var(--fg);border:0;text-align:left;padding:9px 7px;border-radius:10px}.menu-item:hover{background:var(--soft)}
+.modal{position:fixed;z-index:30;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:#000b}.modal.open{display:flex}.modal-box{width:min(480px,100%);max-height:85dvh;overflow:auto;background:#20252c;border:1px solid var(--line);border-radius:24px;padding:20px}.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.modal-head h2{font-size:20px;margin:0}.mock-list{display:grid;gap:9px}.mock-person{display:flex;gap:11px;align-items:center;background:var(--soft);border-radius:13px;padding:12px}.mock-person .dog-detail{flex:1}.mock-person button{border:1px solid #ce7c43;border-radius:10px;padding:8px 10px;color:#ffb27e;background:#38291f;font-size:12px}.tiny-foot{font-size:12px;color:var(--muted);margin:13px 0 0}
+.bottom{position:fixed;z-index:8;bottom:0;left:50%;transform:translateX(-50%);width:min(1050px,100%);padding:9px 12px calc(9px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#171c22ed;border-top:1px solid #333940;backdrop-filter:blur(12px)}.bottom button{border:0;background:transparent;border-radius:14px;min-height:58px;color:#abb5c0;font-weight:800}.bottom button.active{background:var(--orange);color:#281608}.bottom button span{display:block;font-size:18px;margin-bottom:3px}
+@media(min-width:750px){.shell{padding:32px 24px 120px}.htext h1{font-size:32px}.card{padding:23px}.overview-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px}.overview-columns>.stack{align-content:start}.approval-grid{gap:12px}.chip{min-height:76px}.dog-row:hover{background:#343a43}.week-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}}
+@media(max-width:370px){.shell{padding-left:10px;padding-right:10px}.card{padding:13px}.chip{gap:3px}.chip strong{font-size:17px}.approval{padding:10px}.approval span{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="header">
+    <div class="brand" aria-hidden="true">🐾</div>
+    <div class="htext"><div class="eyebrow">Chvostíkovo · Admin</div><h1 id="screenTitle">Prehľad</h1></div>
+    <button class="menu-button" type="button" id="openMenu" aria-label="Otvoriť všetky moduly" aria-expanded="false">☰</button>
+  </header>
+  <p class="preview-note"><strong>TESTOVACÍ VIZUÁLNY NÁVRH</strong> · Údaje sú ilustračné. Táto stránka nemá pripojenie na Supabase, nič neschvaľuje ani neukladá.</p>
+  <section class="screen active" id="overview" aria-label="Prehľad">
+    <div class="stack">
+      <div class="overview-columns">
+        <div class="stack">
+          <section class="card">
+            <div class="section-top"><h2>Vyžaduje schválenie</h2><span class="icon">↗</span></div>
+            <div class="approval-grid">
+              <button class="approval" data-modal="reservations"><span>Rezervácie</span><span class="row"><strong>2</strong><span class="arrow">›</span></span></button>
+              <button class="approval" data-modal="owners"><span>Majitelia na priradenie psa</span><span class="row"><strong>1</strong><span class="arrow">›</span></span></button>
+            </div>
+          </section>
+          <section class="card">
+            <div class="today-heading"><div><div class="eyebrow">Dnes · štvrtok 12. 11.</div><strong>10 psíkov</strong></div><div class="icon" aria-hidden="true">🐾</div></div>
+            <div class="three"><div class="stat"><strong>6</strong><span>Prišli</span></div><div class="stat"><strong>4</strong><span>Čakáme</span></div><div class="stat"><strong>0</strong><span>Odišli</span></div></div>
+            <button class="primary" data-modal="attendance">Zadať dochádzku <span>➜</span></button>
+          </section>
+        </div>
+        <div class="stack">
+          <section class="card">
+            <div class="section-top"><h2>Týždenný prehľad</h2><span class="icon">▣</span></div>
+            <div class="date-label">9. – 13. 11. 2026 · aktuálny týždeň</div>
+            <div class="week-chips week-mini" id="overviewWeek"></div>
+            <button class="secondary" data-screen="week">Otvoriť týždeň →</button>
+          </section>
+          <div class="section-grid">
+            <section class="card extra-card"><div><h2>Očkovania</h2><div class="small muted">Končiace alebo čakajúce na kontrolu</div></div><strong>3</strong><button data-modal="vaccines">Zobraziť →</button></section>
+            <section class="card extra-card"><div><h2>Permanentky</h2><div class="small muted">Blížia sa ku koncu</div></div><strong>2</strong><button data-modal="passes">Zobraziť →</button></section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="screen" id="week" aria-label="Týždeň">
+    <div class="stack week-two">
+      <section class="card week-block" data-week="0">
+        <div class="week-title"><div><h2>Tento týždeň</h2><div class="date-label">9. – 13. november 2026</div></div><span class="capacity">Kapacita 10</span></div>
+        <div class="week-chips"></div>
+        <div class="day-actions"><b class="currentDay">Štvrtok · 10 psov</b><button type="button" data-modal="newBooking">+ Pridať psa</button></div>
+        <div class="day-list"></div>
+      </section>
+      <section class="card week-block" data-week="1">
+        <div class="week-title"><div><h2>Nasledujúci týždeň</h2><div class="date-label">16. – 20. november 2026</div></div><span class="capacity">Kapacita 10</span></div>
+        <div class="week-chips"></div>
+        <div class="day-actions"><b class="currentDay">Pondelok · 5 psov</b><button type="button" data-modal="newBooking">+ Pridať psa</button></div>
+        <div class="day-list"></div>
+      </section>
+    </div>
+  </section>
+</div>
+<nav class="bottom" aria-label="Hlavná navigácia"><button data-screen="overview" class="active"><span>⌂</span>Prehľad</button><button data-screen="week"><span>▣</span>Týždeň</button></nav>
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="scrim" data-close-menu></div>
+  <aside class="panel" role="dialog" aria-label="Všetky moduly">
+    <div class="panel-title"><strong>🐾 Chvostíkovo</strong><button class="close" data-close-menu aria-label="Zavrieť menu">×</button></div>
+    <div class="menu-group"><h3>Prevádzka</h3><button class="menu-item" data-screen="overview">Prehľad <span>›</span></button><button class="menu-item" data-screen="week">Týždeň <span>›</span></button><button class="menu-item" data-modal="attendance">Dochádzka <span>›</span></button><button class="menu-item" data-modal="messages">Správy <span>›</span></button></div>
+    <div class="menu-group"><h3>Psíkovia a majitelia</h3><button class="menu-item" data-modal="dogs">Zoznam psov <span>›</span></button><button class="menu-item" data-modal="newDog">Prihlásiť psíka <span>›</span></button><button class="menu-item" data-modal="registered">Registrovaní majitelia <span>›</span></button><button class="menu-item" data-modal="owners">Čakajúci majitelia <span>›</span></button></div>
+    <div class="menu-group"><h3>Štatistiky</h3><button class="menu-item" data-modal="traffic">Návštevnosť <span>›</span></button><button class="menu-item" data-modal="revenue">Tržby <span>›</span></button><button class="menu-item" data-modal="visitHistory">Dochádzka a história <span>›</span></button><button class="menu-item" data-modal="campaigns">Kampane <span>›</span></button></div>
+    <div class="menu-group"><h3>Správa škôlky</h3><button class="menu-item" data-modal="vaccines">Očkovania <span>›</span></button><button class="menu-item" data-modal="passes">Permanentky <span>›</span></button><button class="menu-item" data-modal="settings">Nastavenia a upozornenia <span>›</span></button><button class="menu-item" data-modal="logout">Odhlásiť sa <span>›</span></button></div>
+  </aside>
+</div>
+<div class="modal" id="modal" aria-hidden="true"><div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><h2 id="modalTitle"></h2><button class="close" id="closeModal" aria-label="Zavrieť okno">×</button></div><div id="modalBody"></div><p class="tiny-foot">Ilustračná interakcia návrhu — žiadny reálny zápis, schválenie ani zmena dochádzky.</p></div></div>
+<script>
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const counts=[[7,10,8,10,5],[5,7,9,8,6]], days=['Po','Ut','St','Št','Pi'], whole=['Pondelok','Utorok','Streda','Štvrtok','Piatok'];
+  const data=[
+    [{name:'Psík A',pass:'3/10',note:'Kontrola údajov'},{name:'Psík B',pass:'9/10',note:''},{name:'Psík C',pass:'7/10',note:'Taxi: áno'}],
+    [{name:'Psík D',pass:'4/10',note:''},{name:'Psík E',pass:'2/10',note:'Alergia – upozornenie'},{name:'Psík F',pass:'Jednorazovo',note:''}]
+  ];
+  const state={activeWeek:[3,0],screen:'overview'};
+  function chips(host,week,selected,callback){
+    host.replaceChildren();
+    days.forEach((d,i)=>{const b=document.createElement('button');b.type='button';b.className='chip'+(i===selected?' active':'');b.innerHTML='<span>'+d+'</span><strong>'+counts[week][i]+'</strong><small>'+(week?16+i:9+i)+'.11.</small>';b.setAttribute('aria-pressed',String(i===selected));b.addEventListener('click',()=>callback(i));host.append(b)});
+  }
+  function renderWeek(week){
+    const box=document.querySelector('.week-block[data-week="'+week+'"]');
+    const i=state.activeWeek[week];
+    chips(box.querySelector('.week-chips'),week,i,j=>{state.activeWeek[week]=j;renderWeek(week)});
+    box.querySelector('.currentDay').textContent=whole[i]+' '+(week?16+i:9+i)+'. 11. · '+counts[week][i]+' psov';
+    const list=box.querySelector('.day-list');
+    list.replaceChildren();
+    const rows=data[week].map((r,j)=>({...r,pass:j===2?'7/10':r.pass}));
+    for(const dog of rows){
+      const button=document.createElement('button');button.type='button';button.className='dog-row';
+      const av=document.createElement('span');av.className='avatar';av.textContent='🐾';
+      const label=document.createElement('span');label.className='dog-detail';
+      const name=document.createElement('strong');name.textContent=dog.name;label.append(name);
+      if(dog.note){const note=document.createElement('small');note.textContent='⚠ '+dog.note;label.append(note)}
+      const pass=document.createElement('span');pass.className='pass';pass.textContent=dog.pass;
+      const arrow=document.createElement('span');arrow.className='arrow';arrow.textContent='›';
+      button.append(av,label,pass,arrow);button.addEventListener('click',()=>modal('dog',dog.name));list.append(button);
+    }
+  }
+  function showScreen(screen){
+    state.screen=screen;
+    document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('active',x.id===screen));
+    document.querySelectorAll('.bottom [data-screen]').forEach(x=>x.classList.toggle('active',x.dataset.screen===screen));
+    $('screenTitle').textContent=screen==='week'?'Týždeň':'Prehľad';
+    closeMenu();window.scrollTo({top:0,behavior:'instant'});
+  }
+  function closeMenu(){$('drawer').classList.remove('open');$('drawer').setAttribute('aria-hidden','true');$('openMenu').setAttribute('aria-expanded','false')}
+  function openMenu(){$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');$('openMenu').setAttribute('aria-expanded','true');$('drawer').querySelector('.close').focus()}
+  const titles={reservations:'Čakajúce rezervácie',owners:'Majitelia na priradenie psa',attendance:'Dnešná dochádzka',vaccines:'Končiace očkovania',passes:'Končiace permanentky',messages:'Správy',dogs:'Zoznam psov',newDog:'Prihlásiť psíka',registered:'Registrovaní majitelia',traffic:'Návštevnosť',revenue:'Tržby',visitHistory:'História dochádzky',campaigns:'Kampane',settings:'Nastavenia',logout:'Odhlásenie',newBooking:'Nová rezervácia',dog:'Detail psíka'};
+  function modal(kind,dog){
+    closeMenu();$('modalTitle').textContent=kind==='dog'?'Detail · '+dog:(titles[kind]||'Modul');
+    const body=$('modalBody');body.replaceChildren();
+    if(kind==='attendance'){
+      for(const [i,name] of ['Psík A','Psík B','Psík C','Psík D'].entries()){
+        const row=document.createElement('div');row.className='mock-person';
+        const nameEl=document.createElement('span');nameEl.className='dog-detail';nameEl.textContent=name;
+        const button=document.createElement('button');button.textContent=i<2?'Odchod':'Príchod';button.addEventListener('click',()=>{button.textContent='Ukážka ✓'});
+        row.append(nameEl,button);body.append(row)
+      }
+    }else if(kind==='dog'){
+      const p=document.createElement('p');p.textContent='Ukážkový detail: poznámky, očkovania, zostávajúce vstupy, taxi, rezervácia a pôvodné akcie.';body.append(p);
+      const btn=document.createElement('button');btn.className='secondary';btn.textContent='Pôvodné funkcie zostanú zachované';btn.disabled=true;body.append(btn);
+    }else{
+      const p=document.createElement('p');p.textContent='V skutočnej aplikácii sa otvorí existujúci modul '+$('modalTitle').textContent.toLowerCase()+'. Jeho obsah, dáta a logiku meniť nebudeme.';body.append(p)
+    }
+    $('modal').classList.add('open');$('modal').setAttribute('aria-hidden','false');$('closeModal').focus();
+  }
+  document.querySelectorAll('[data-screen]').forEach(btn=>btn.addEventListener('click',()=>showScreen(btn.dataset.screen)));
+  document.querySelectorAll('[data-modal]').forEach(btn=>btn.addEventListener('click',()=>modal(btn.dataset.modal)));
+  $('openMenu').addEventListener('click',()=> $('drawer').classList.contains('open')?closeMenu():openMenu());
+  document.querySelectorAll('[data-close-menu]').forEach(btn=>btn.addEventListener('click',closeMenu));
+  const closeModal=()=>{$('modal').classList.remove('open');$('modal').setAttribute('aria-hidden','true')};
+  $('closeModal').addEventListener('click',closeModal);
+  $('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();closeModal()}});
+  chips($('overviewWeek'),0,3,i=>{state.activeWeek[0]=i;renderWeek(0);showScreen('week')});
+  renderWeek(0);renderWeek(1);
+})();
+</script>
+</body></html>
