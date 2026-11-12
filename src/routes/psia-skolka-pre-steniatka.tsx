@@ -179,7 +179,7 @@ function PuppyDaycarePage() {
                 V Chvostíkove vaše šteniatko postupne spoznáva psích kamošov, ľudí aj nové prostredie. Užije si hru aj oddych a prvé návštevy prispôsobíme tomu, ako sa u nás cíti.
               </p>
 
-              <div className="mx-auto mt-4 flex w-full max-w-[410px] flex-nowrap justify-center gap-1 sm:mt-5 lg:ml-0 lg:mr-auto lg:max-w-none lg:justify-start lg:gap-2">
+              <div data-hero-benefits className="mx-auto mt-4 flex w-full max-w-[410px] flex-nowrap justify-center gap-1 sm:mt-5 lg:ml-0 lg:mr-auto lg:max-w-none lg:justify-start lg:gap-2">
                 {["Postupná socializácia", "Hra aj oddych", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
