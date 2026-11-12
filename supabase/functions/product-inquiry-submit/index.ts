@@ -5,13 +5,13 @@ const ALLOWED_ORIGINS = new Set([
   "https://chvostikovopsiaskolka.github.io",
 ]);
 
-const STAND_SIZES = new Set(["small", "large"]);
+const STAND_SIZES = new Set(["small", "large", "extra_large"]);
 const COLORS = new Set(["natural", "dark", "white", "custom"]);
 const LETTER_COLORS = new Set(["light", "dark", "black", "custom"]);
 const TARGET_SIZES = new Set(["small", "large"]);
 
 const LABELS: Record<string, Record<string, string>> = {
-  size: { small: "Menší", large: "Väčší" },
+  size: { small: "S – 40 × 20 cm", large: "M – 60 × 30 cm", extra_large: "L – individuálny rozmer" },
   color: { natural: "Svetlá", dark: "Tmavá", white: "Biela", custom: "Iná" },
   letter: { light: "Svetlé", dark: "Tmavé", black: "Čierne", custom: "Iné" },
   targetSize: { small: "Malý 25 × 25 cm", large: "Veľký 40 × 20 cm" },
