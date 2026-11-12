@@ -313,8 +313,8 @@ const failures = [];
             if (width === 390 && secondCard.y <= firstCard.y + 10) throw new Error('Mobile blog cards must stack naturally');
             const guideCarousel = productPage.locator('[data-stand-gallery="autoplay"]');
             if (await guideCarousel.count() !== 1) throw new Error('Stand guide carousel missing above product CTA');
-            if (await guideCarousel.locator('figure').count() !== 13) throw new Error('Stand guide must show thirteen distinct realizations');
-            if (await guideCarousel.locator('button[data-stand-photo-open]').count() !== 13) throw new Error('Guide stand photos must open too');
+            if (await guideCarousel.locator('figure').count() !== 16) throw new Error('Stand guide must show sixteen distinct realizations');
+            if (await guideCarousel.locator('button[data-stand-photo-open]').count() !== 16) throw new Error('Guide stand photos must open too');
             const cookieLayerBeforeGuide = productPage.locator('[aria-labelledby="cookie-consent-title"]');
             if (await cookieLayerBeforeGuide.isVisible()) {
               await cookieLayerBeforeGuide.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();
