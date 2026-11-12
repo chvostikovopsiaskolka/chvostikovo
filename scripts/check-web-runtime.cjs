@@ -299,10 +299,10 @@ const failures = [];
                     throw new Error('Decorative stars must be at the right of S/M/L size label');
                   }
                   if (starStyle !== 'rgb(233, 182, 0)') throw new Error('Stand stars must be yellow, not coral');
-                  if (!await heading.locator('span.text-\\[\\#181818\\]').count()) {
-                    const text=await label.textContent();
-                    if (!text?.includes('verzia')) throw new Error('Stand version text missing');
-                  }
+                  const version=label.locator('span').nth(1);
+                  if (await version.textContent() !== 'verzia' ||
+                      await version.evaluate(el=>getComputedStyle(el).color) !== 'rgb(24, 24, 24)')
+                    throw new Error('Stand version must be black beside the quoted size');
                 }
                 if (await productPage.getByText('Recenzie spokojných zákazníkov čoskoro').count()) throw new Error('No review teaser on stand detail');
                 if (await productPage.getByText('Potiahnite do strany').count()) throw new Error('Obvious swipe instruction should be removed');
