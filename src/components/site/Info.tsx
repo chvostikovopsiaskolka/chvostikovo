@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Syringe, PawPrint, Droplets, HeartPulse, Check, Plus, Minus, Car } from "lucide-react";
 import { FormDialog } from "./FormDialog";
-import { LongForm, ShortForm } from "./Forms";
+import { LongForm } from "./Forms";
+import { LeadStepForm } from "./LeadStepForm";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE } from "@/content/site";
@@ -113,10 +114,10 @@ export function FirstVisit() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Dohodnúť bezplatnú úvodnú návštevu"
+        title="Čo hľadáte pre svojho psíka?"
         subtitle="Nechajte nám kontakt a ozveme sa vám. Termín úvodnej návštevy dohodneme po preverení zdravotných podmienok a platných očkovaní vášho psíka."
       >
-        <ShortForm trackingSource="home_first_visit_interest" />
+        <LeadStepForm questionInHeading trackingSource="home_first_visit_interest" />
       </FormDialog>
     </section>
   );
@@ -206,10 +207,10 @@ export function Pricing({ interestMode = false }: { interestMode?: boolean } = {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title={interestMode ? "Máte záujem o psiu škôlku?" : "Prihláška do škôlky"}
+        title={interestMode ? "Čo hľadáte pre svojho psíka?" : "Prihláška do škôlky"}
         subtitle={interestMode ? "Nechajte nám kontakt. Ozveme sa vám a dohodneme ďalší postup." : "Povedzte nám viac o svojom psíkovi. Po odoslaní prihlášky sa vám ozveme a dohodneme ďalší postup."}
       >
-        {interestMode ? <ShortForm trackingSource="home_pricing_interest_20261028" /> : <LongForm />}
+        {interestMode ? <LeadStepForm questionInHeading trackingSource="home_pricing_interest_20261028" /> : <LongForm />}
       </FormDialog>
     </section>
   );
