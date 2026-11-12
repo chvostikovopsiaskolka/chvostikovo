@@ -319,8 +319,12 @@ const failures = [];
                     throw new Error('Mobile stand benefits must stack vertically');
                   for(const item of await items.all()){
                     if(!await item.locator('img').isVisible()) throw new Error('Mobile stand benefit needs circular photo');
-                    const radius=await item.locator('img').evaluate(el=>getComputedStyle(el).borderRadius);
-                    if(radius!=='9999px')throw new Error('Benefit photos must be circular');
+                    const round=await item.locator('img').evaluate(el=>{
+                      const radius=getComputedStyle(el).borderTopLeftRadius;
+                      const size=el.getBoundingClientRect().width;
+                      return radius.includes('%') ? parseFloat(radius)>=50 : parseFloat(radius)>=size/2-1;
+                    });
+                    if(!round)throw new Error('Benefit photos must be circular');
                     const size=await item.locator('p').evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
                     if(size<14) throw new Error('Mobile benefit text too small');
                   }
