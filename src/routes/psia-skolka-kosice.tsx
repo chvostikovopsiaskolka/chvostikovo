@@ -164,7 +164,7 @@ function LeadLandingPage() {
                 </button>
               </div>
               <button type="button" onClick={() => scrollToBenefits("lead_landing_hero_more_desktop")}
-                className="hero-cta-primary mt-5 hidden w-full max-w-[440px] gap-2 lg:inline-flex">
+                className="hero-cta-primary hero-cta-desktop-only mt-5 w-full max-w-[440px] gap-2">
                 Viac o škôlke
                 <ArrowDown className="size-4" aria-hidden="true" />
               </button>
