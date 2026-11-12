@@ -212,8 +212,12 @@ const failures = [];
                 ];
                 for (const item of cases) {
                   const card = cards.locator('article[data-stand-size="' + item.type + '"]');
-                  if (await card.count() !== 1 || !(await card.innerText()).includes(item.label)
-                    || !(await card.innerText()).includes(item.price)) throw new Error('Stand card label/price wrong: '+item.label);
+                  const cardCount = await card.count();
+                  const cardText = cardCount === 1 ? await card.innerText() : '(card not found)';
+                  if (cardCount !== 1 || !cardText.includes(item.label) || !cardText.includes(item.price)) {
+                    throw new Error('Stand card label/price wrong: '+item.label+
+                      ' count='+cardCount+' text='+JSON.stringify(cardText.slice(0,250)));
+                  }
                   if (!(await card.locator('img').getAttribute('alt')).includes(item.photo)) {
                     throw new Error('Stand card photo missing: ' + item.photo);
                   }
