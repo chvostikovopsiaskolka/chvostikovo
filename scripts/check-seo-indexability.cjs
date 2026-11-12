@@ -254,7 +254,11 @@ for (const spec of [
   assert(productHtml.includes('rel="canonical"') && productHtml.includes('href="' + productCanonical + '"'), "Product HTML canonical mismatch: " + productPath);
   assert(productHtml.includes("Product"), "Product structured data missing: " + productPath);
   assert(productHtml.includes('href="' + page + '/"'), "Product must link to guide: " + productPath);
-  assert(productHtml.includes("Tri praktické"), "Product value cards removed: " + productPath);
+  if (spec.product === "stojan-na-misky-pre-psa") {
+    assert(productHtml.includes("Tri praktické"), "Stand value cards removed: " + productPath);
+  } else {
+    assert(productHtml.includes('aria-label="Vlastnosti targetu"'), "Target benefit badges missing: " + productPath);
+  }
 }
 assert(blogIndex.includes("stojan-na-misky-pre-psa-vyhody-a-vyber/"), "Stand guide missing from blog index");
 assert(blogIndex.includes("stand-mia-"), "Stand blog teaser must use restored original MIA AVIF");
