@@ -321,6 +321,11 @@
   flex-shrink: 0;
 }
 
+/* The shared display:flex rule must not override Tailwind's lg:hidden. */
+@media (min-width: 1024px) {
+  .hero-cta-pair.hero-cta-pair-mobile { display: none; }
+}
+
 @media (max-width: 350px) {
   .hero-cta-pair { gap: 0.35rem; }
   .hero-cta-secondary {
