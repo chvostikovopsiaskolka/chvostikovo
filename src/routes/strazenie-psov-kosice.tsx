@@ -126,7 +126,7 @@ function DogSittingPage() {
                   <ArrowRight className="hero-cta-icon" aria-hidden="true" />
                 </a>
               </div>
-              <a href="/#starostlivost" className="hero-cta-primary mt-5 hidden w-full max-w-[440px] gap-2 lg:inline-flex">
+              <a href="/#starostlivost" className="hero-cta-primary hero-cta-desktop-only mt-5 w-full max-w-[440px] gap-2">
                 Viac o škôlke
                 <ArrowRight className="size-4" aria-hidden="true" />
               </a>
