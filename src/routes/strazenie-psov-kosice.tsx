@@ -112,7 +112,7 @@ function DogSittingPage() {
                   <Clock3 className="size-4" aria-hidden="true" /> Po–Pia 7:00–17:00
                 </span>
               </div>
-              <div className="hero-cta-pair mx-auto mt-5 lg:hidden">
+              <div className="hero-cta-pair hero-cta-pair-mobile mx-auto mt-5 lg:hidden">
                 <a
                   href="#informacie"
                   data-marketing-event="inquiry_cta"
