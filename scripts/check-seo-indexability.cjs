@@ -231,6 +231,9 @@ for (const spec of [
     }
     assert(markup.includes('data-stand-gallery="autoplay"'), "Stand article gallery above CTA is missing");
     assert(markup.includes('stand-mia-'), "Stand article must use restored 711x900 MIA AVIF");
+    for (const photo of ["stand-rose-hq-", "stand-bunca-linden-hq-", "stand-arcana-aiden-hq-"]) {
+      assert(productHtml.includes(photo), "User-supplied stand photo missing: " + photo);
+    }
     assert(productHtml.includes('data-product-stand-cards'), "New stand variant cards missing");
     for (const title of ['S verzia', 'M verzia', 'L verzia', 'cca 40 × 20 cm', 'cca 60 × 30 cm', '40 €', '45 €', 'Na vyžiadanie']) {
       assert(productHtml.includes(title), "Stand variant content missing: " + title);
