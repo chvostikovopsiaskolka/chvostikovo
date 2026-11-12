@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v419';
-const APP_VERSION='2.0.92';
+const APP_BUILD='v425';
+const APP_VERSION='2.0.98';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -145,6 +145,15 @@ try{window.ChvoTelemetry?.init({app:'customer',build:APP_TELEMETRY_BUILD,base:SU
 // One concurrent read for onboarding, settings and rules; never share account state.
 let customerTermsReadV146=null;
 let bootstrapInFlight=null,lastResumeRefresh=0;
+let customerBootAttemptsV423=0,customerLastApiTimingV423=null,customerResumeStartedV423=0;
+function customerStartupTimingV423(timing){
+  const ua=navigator.userAgent||'',browser=ua.match(/(SamsungBrowser|Firefox|Edg|Chrome|Version)\/(\d+)/);
+  const record={...timing,build:APP_BUILD,platform:/Android/.test(ua)?'Android':/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)?'iOS':'desktop',browser:browser?browser[1]+'/'+browser[2]:'Other'};
+  window.__chvoStartupTimingV423=record;
+  // Local, bounded and anonymous. Server RUM requires a separately verified collector contract.
+  window.__chvoStartupHistoryV423=[...(window.__chvoStartupHistoryV423||[]).slice(-9),record];
+  try{window.ChvoTelemetry?.startup?.(record)}catch(_){}
+}
 // v392: Retry one transient transport failure on authenticated read-only GETs.
 // Never repeat mutations, mask HTTP failures, or cross a logout/account change.
 async function customerReadJsonV391(url,ownerId){
@@ -236,6 +245,21 @@ async function ensureCustomerSessionV357(){
   if(!state.session||state.session.user?.id!==session.user?.id)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});
   return state.session;
 }
+async function syncCustomerOwnerTermsV423(version){
+  const account=state.session?.user?.id;
+  const assertAccount=()=>{if(!account||state.session?.user?.id!==account)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'})};
+  for(let attempt=0;attempt<2;attempt++){
+    assertAccount();
+    const session=await ensureCustomerSessionV357();assertAccount();
+    const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_sync_owner_terms_v254',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({p_terms_version:version}),cache:'no-store'});
+    assertAccount();
+    if(response.status===401&&!attempt){if(state.session.access_token===session.access_token)await refreshSession();assertAccount();continue;}
+    if(!response.ok)throw new Error('Potvrdené podmienky sa nepodarilo načítať. Skúste to znova.');
+    const rows=await response.json();assertAccount();
+    if(!Array.isArray(rows))throw new Error('Neplatná odpoveď pri načítaní podmienok.');
+    window.seedCustomerTermsAcceptancesV396?.(account,version,rows);return rows;
+  }
+}
 async function refreshSession(){
   const previous=state.session;
   if(sessionRefreshInFlight&&sessionRefreshOwnerV357===previous)return sessionRefreshInFlight;
@@ -267,6 +291,7 @@ async function sharedQuoteResponseV265(opts){
 }
 // One recovery attempt for a read-only transport failure; writes are never replayed here.
 async function customerReadResponseV367(opts,session){
+ const started=performance.now();
  const owner=session.user?.id;let firstError;
  const changed=()=>!state.session||state.session.user?.id!==owner;
  const sessionChanged=()=>Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});
@@ -280,11 +305,13 @@ async function customerReadResponseV367(opts,session){
    if(changed())throw sessionChanged();
    opts={...opts,headers:{...opts.headers,Authorization:'Bearer '+state.session.access_token}};
   }
-  try{const response=await fetch(API,opts);const text=await response.text();return {response,text,token:opts.headers.Authorization.slice(7)};}
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+  try{const response=await fetch(API,{...opts,signal:controller.signal});const text=await response.text();customerLastApiTimingV423={durationMs:Math.round(performance.now()-started)};return {response,text,token:opts.headers.Authorization.slice(7)};}
   catch(error){
+   if(controller.signal.aborted)throw Object.assign(new Error('Načítanie trvá príliš dlho. Skúste to znova.'),{name:'TimeoutError'});
    if(attempt||!['TypeError','NetworkError'].includes(error?.name)||navigator.onLine===false||document.visibilityState==='hidden')throw error;
    firstError=error;
-  }
+  }finally{clearTimeout(timer)}
  }
 }
 async function apiCore(body=null,retry=true){const session=await ensureCustomerSessionV357();if(!state.session)throw new Error('Najprv sa prihláste.');let token=state.session.access_token;const opts={method:body?'POST':'GET',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}};if(body)opts.body=JSON.stringify(body);const quote=body?.action==='shared_booking_v257'&&!body.operation_id;const result=quote?await sharedQuoteResponseV265(opts):!body?await customerReadResponseV367(opts,session):null;if(result?.token)token=result.token;const r=result?result.response:await fetch(API,opts);const txt=result?result.text:await r.text();let data={};try{data=txt?JSON.parse(txt):{}}catch(_){data={error:txt}}if(!state.session||state.session.user?.id!==session.user?.id)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});if(r.status===401&&retry){if(state.session.access_token===token)await refreshSession();return apiCore(body,false)}if(data.code==='account_blocked'){clearSession();showAuth('login');authMessage('error',data.error);throw new Error(data.error)}if(!r.ok||data.error)throw new Error(data.error||'Požiadavka sa nepodarila.');return data}
@@ -369,30 +396,43 @@ async function preloadFirstScreenFriendsV404(data=state.data){
 
 async function settleCustomerFirstPhotosV291(limit=850){
  const images=[...($('appView')?.querySelectorAll('img')||[])].filter(img=>img.getAttribute('src')&&!img.closest('.hidden')).slice(0,24);
- if(!images.length)return;
+ if(!images.length)return true;
+ const decoded=new Set();
  const ready=Promise.allSettled(images.map(async img=>{
    if(!img.complete)await new Promise(resolve=>{
      const done=()=>{img.removeEventListener('load',done);img.removeEventListener('error',done);resolve()};
      img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});
      if(img.complete)done();
    });
-   if(img.complete&&img.naturalWidth>0&&typeof img.decode==='function')await img.decode().catch(()=>{});
+   if(img.complete&&img.naturalWidth>0){
+     if(typeof img.decode==='function')try{await img.decode()}catch(_){return}
+     decoded.add(img);
+   }
  }));
  await Promise.race([ready,new Promise(resolve=>setTimeout(resolve,limit))]);
+ return decoded.size===images.length;
 }
 
 function bootstrapCore(showSpinner=true){
   if(bootstrapInFlight)return bootstrapInFlight;
+  const bootStartedAtV421=performance.now();
+  const first=customerBootAttemptsV423++===0,kind=first?(performance.getEntriesByType?.('navigation')?.[0]?.type==='reload'?'reload':'cold'):window.__chvoStartupTimingV423?.status==='complete'?'refresh':'recovery';
+  const started=first?0:bootStartedAtV421,account=state.session?.user?.id;
+  let apiReadyAtV421=bootStartedAtV421,bootCompletedV423=false,dataReadyAtV423=bootStartedAtV421,photosDoneAtV423=0,apiMsV423=0,interruptedV423=document.visibilityState==='hidden',photosReadyV424=false,photosReadyAtV424=0;
+  const hidden=()=>{if(document.visibilityState==='hidden')interruptedV423=true};
+  const pagehide=()=>{interruptedV423=true;customerStartupTimingV423({kind,status:'interrupted',totalMs:Math.round(performance.now()-started)})};
+  document.addEventListener('visibilitychange',hidden);window.addEventListener('pagehide',pagehide);
+  customerStartupTimingV423({kind,status:'pending',totalMs:0});
   if(showSpinner)loading(true);
   const run=(async()=>{try{
-    const d=await api();state.data=d;
+    const d=await api();state.data=d;apiReadyAtV421=performance.now();apiMsV423=customerLastApiTimingV423?.durationMs||0;
     const hasAssignedDog=!!d.dogs?.length;
     document.documentElement.classList.toggle('customer-awaiting-dog-v107',!hasAssignedDog);
     if(!state.selectedDogId&&hasAssignedDog)state.selectedDogId=Number(d.dogs[0].id);
     // v291: Keep the existing loader over the first data/photo/notice render.
     // No fake "no notices" flash; never remount an unchanged image after revealing.
     await Promise.race([
-      Promise.allSettled([preloadDogVisualV56(d),preloadFirstScreenFriendsV404(d),loadAnnouncements()]),
+      Promise.allSettled([preloadDogVisualV56(d),loadAnnouncements()]).then(()=>{photosDoneAtV423=performance.now()}),
       new Promise(resolve=>setTimeout(resolve,2900))
     ]);
     // The notice data load already begins its first thumbnail fetch. Let its
@@ -402,9 +442,18 @@ function bootstrapCore(showSpinner=true){
       Promise.resolve(window.customerPreloadOverviewNoticesV404()).catch(()=>{}),
       new Promise(resolve=>setTimeout(resolve,700))
     ]);
-    showApp();renderAll();
-    await settleCustomerFirstPhotosV291(850);
+    if(!state.session||state.session.user?.id!==account)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});
+    showApp();renderAll();dataReadyAtV423=performance.now();
+    photosReadyV424=await settleCustomerFirstPhotosV291(850);photosReadyAtV424=performance.now();
+    if(state.session?.user?.id!==account)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});
+    bootCompletedV423=true;
     startCustomerLive();
+    // v421: Friends' future-day photos are optional warmup, not part of the first-screen
+    // dog-photo + announcements stability gate. Launch after the visible shell.
+    setTimeout(()=>{
+      if(state.session&&state.data===d&&document.visibilityState!=='hidden')
+        void preloadFirstScreenFriendsV404(d).catch(()=>{});
+    },0);
     if(typeof ensurePushState==='function')Promise.resolve(ensurePushState()).finally(()=>{
       if(state.data&&typeof applyPushToggle==='function')applyPushToggle();
     });
@@ -426,7 +475,17 @@ function bootstrapCore(showSpinner=true){
       else toast('Údaje sa nepodarilo obnoviť. Skúste to znova o chvíľu.');
     }else{showAuth('login');toast('Aplikáciu sa nepodarilo načítať. Skúste to znova.');}
   }})();
-  bootstrapInFlight=run.finally(()=>{if(showSpinner)loading(false);bootstrapInFlight=null});
+  bootstrapInFlight=run.finally(()=>{
+    document.removeEventListener('visibilitychange',hidden);window.removeEventListener('pagehide',pagehide);
+    if(showSpinner)loading(false);
+    if(bootCompletedV423&&state.data&&!$('appView')?.classList.contains('hidden')){
+      const end=performance.now();
+      // Timings only: no account, dog, photo URL or token leaves the app.
+      window.__chvoBootTimingV421={totalMs:Math.round(end-bootStartedAtV421),apiMs:Math.round(apiReadyAtV421-bootStartedAtV421),firstRenderMs:Math.round(end-apiReadyAtV421)};
+    }
+    customerStartupTimingV423({kind,status:interruptedV423?'interrupted':bootCompletedV423?'complete':'failed',totalMs:Math.round(performance.now()-started),apiMs:apiMsV423,dataMs:Math.round(dataReadyAtV423-bootStartedAtV421),photosMs:photosReadyV424?Math.round(photosReadyAtV424-apiReadyAtV421):null,photosReady:photosReadyV424,photosSettled:!!photosDoneAtV423});
+    bootstrapInFlight=null;
+  });
   return bootstrapInFlight;
 }
 async function bootstrap(showSpinner=true){const result=await bootstrapCore(showSpinner);runCustomerHooks('afterBootstrap',result);return result}
@@ -461,6 +520,7 @@ async function flushCustomerSync(){
   if(customerSyncInFlight){customerPendingScopes.add('all');return customerSyncInFlight}
   if(!state.session||document.visibilityState==='hidden')return;
   const scopes=new Set(customerPendingScopes);customerPendingScopes.clear();
+  const resumeStarted=customerResumeStartedV423;customerResumeStartedV423=0;let syncFailed=false,syncCompleted=false;
   customerSyncInFlight=(async()=>{try{
     const mutationRevision=customerMutationRevisionV145;
     const previousData=state.data;
@@ -488,7 +548,7 @@ async function flushCustomerSync(){
     // Same build + same data = keep the existing DOM exactly as it is.
     if(previousData&&previousFingerprint===nextFingerprint){
       if(scopes.has('all')||scopes.has('announcements'))await loadAnnouncements(scopes.has('announcements'));
-      return;
+      syncCompleted=true;return;
     }
 
     const all=scopes.has('all')||previousDogs.size!==nextDogs.length;
@@ -517,9 +577,12 @@ async function flushCustomerSync(){
     });
 
     if(all||scopes.has('announcements'))await loadAnnouncements(scopes.has('announcements'));
+    syncCompleted=true;
   }catch(error){
+    syncFailed=true;
     if(navigator.onLine)console.warn('Live resync zlyhal',error)
   }finally{
+    if(resumeStarted)customerStartupTimingV423({kind:'resume',status:document.visibilityState==='hidden'||!syncCompleted&&!syncFailed?'interrupted':syncFailed?'failed':'complete',totalMs:Math.round(performance.now()-resumeStarted),apiMs:customerLastApiTimingV423?.durationMs||0});
     customerSyncInFlight=null;
     if(customerPendingScopes.size)queueCustomerSync('all',80)
   }})();
@@ -1685,19 +1748,25 @@ let customerPushSyncLastFailureV216={key:'',at:0};
 async function syncPushSubscriptionV75(sub){
   if(customerWebPushMigratedV397())return false;
   if(!sub||!state.session?.access_token)throw new Error('Prihlásenie alebo odber upozornení chýba.');
+  const account=state.session?.user?.id;
+  const assertAccount=()=>{if(!account||state.session?.user?.id!==account)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'})};
   const key=String(state.session?.user?.id||state.session?.access_token||'')+'|'+String(sub.endpoint||'');
   const now=Date.now();
   if(customerPushSyncInFlightV216?.key===key)return customerPushSyncInFlightV216.promise;
   if(customerPushSyncLastSuccessV216.key===key&&now-customerPushSyncLastSuccessV216.at<300000)return true;
   if(customerPushSyncLastFailureV216.key===key&&now-customerPushSyncLastFailureV216.at<60000)throw new Error('Synchronizácia upozornení bola nedávno neúspešná.');
   async function send(retry){
+    assertAccount();
     await ensureCustomerSessionV357();
+    assertAccount();
     const token=state.session?.access_token;
     if(customerWebPushMigratedV397())return false;
     if(!token)throw new Error('Prihlásenie vypršalo.');
     const r=await fetch(PUSH_API,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({audience:'customer',action:'subscribe',subscription:sub.toJSON()})});
+    assertAccount();
     if(!r.ok){
       let data={};try{data=await r.json()}catch(_){}
+      assertAccount();
       const reason=String(data?.error||data?.message||'');
       if(retry&&(r.status===400||r.status===401)&&/vypršal|vypršalo|expired|jwt/i.test(reason)){
         if(state.session?.access_token===token)await refreshSession();
@@ -1708,12 +1777,13 @@ async function syncPushSubscriptionV75(sub){
     return true;
   }
   const promise=send(true).then(()=>{
+    assertAccount();
     customerPushSyncLastSuccessV216={key,at:Date.now()};
     customerPushSyncLastFailureV216={key:'',at:0};
     if(state.data)state.data.push_subscription_active=true;
     return true;
   }).catch(error=>{
-    customerPushSyncLastFailureV216={key,at:Date.now()};
+    if(state.session?.user?.id===account)customerPushSyncLastFailureV216={key,at:Date.now()};
     throw error;
   }).finally(()=>{if(customerPushSyncInFlightV216?.promise===promise)customerPushSyncInFlightV216=null;});
   customerPushSyncInFlightV216={key,promise};
@@ -1922,9 +1992,10 @@ async function refreshOnResume(){
   if(!state.session||document.visibilityState==='hidden'||now-lastResumeRefresh<5000||bootstrapInFlight)return;
   if(state.data&&customerPassSummaryDate!==bratislavaToday())renderPassSummary();
   lastResumeRefresh=now;
-  try{await ensureCustomerSessionV357()}catch(error){if(error.sessionInvalid){clearSession();showAuth('login');authMessage('error','Prihlásenie vypršalo. Prihláste sa znova.')}return;}
-  if(document.visibilityState==='hidden')return;
-  if(!$('startupRecoveryV359')?.classList.contains('hidden')){await bootstrap();return;}
+  customerResumeStartedV423=performance.now();
+  try{await ensureCustomerSessionV357()}catch(error){customerStartupTimingV423({kind:'resume',status:'failed',totalMs:Math.round(performance.now()-customerResumeStartedV423)});customerResumeStartedV423=0;if(error.sessionInvalid){clearSession();showAuth('login');authMessage('error','Prihlásenie vypršalo. Prihláste sa znova.')}return;}
+  if(document.visibilityState==='hidden'){customerStartupTimingV423({kind:'resume',status:'interrupted',totalMs:Math.round(performance.now()-customerResumeStartedV423)});customerResumeStartedV423=0;return;}
+  if(!$('startupRecoveryV359')?.classList.contains('hidden')){customerResumeStartedV423=0;await bootstrap();return;}
   startCustomerLive();
   queueCustomerSync('all',40);
 }
@@ -2127,7 +2198,7 @@ function ensurePushModal(){if(!$('pushOnboardingModalV75'))document.body.insertA
   function closePrivacyInfo(){if(privacyMandatory)return;$('privacyInfoModal')?.classList.add('hidden')}
   async function acknowledgePrivacy(){if(!privacyMandatory){closePrivacyInfo();return}const btn=$('privacyInfoOk');if(btn)btn.disabled=true;try{const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_acknowledge_privacy_notice',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_version:PRIVACY_VERSION})});const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(_){data=txt}if(!r.ok)throw new Error(data?.message||data?.error||'Potvrdenie sa nepodarilo uložiť.');if(state.data?.profile){state.data.profile.privacy_notice_version=PRIVACY_VERSION;state.data.profile.privacy_notice_acknowledged_at=new Date().toISOString()}privacyMandatory=false;$('privacyInfoModal')?.classList.add('hidden');runCustomerOnboardingV75()}catch(e){toast(e.message||'Potvrdenie sa nepodarilo uložiť.')}finally{if(btn)btn.disabled=false}}
   async function activeTermsDocument(){try{return await readActiveCustomerTermsV146()}catch(_){return null}}
-  async function acceptedTerms(version){const account=state.session.user.id;const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/portal_sync_owner_terms_v254',{method:'POST',headers:authHeaders(),body:JSON.stringify({p_terms_version:version}),cache:'no-store'});if(!r.ok)return[];const rows=await r.json();if(state.session?.user?.id===account)window.seedCustomerTermsAcceptancesV396?.(account,version,rows);return rows}
+  async function acceptedTerms(version){return syncCustomerOwnerTermsV423(version)}
   function termParagraphsV106(body){
     const split=String(body||'').replace(/\. (?=(?:Majiteľ|Fenky|Ak|Chvostíkovo|Aj pri|Psia škôlka|Psík|Do kolektívu|Pri závažných|Pri úvodnej|V prípade|Náklady|Kapacita|Bez včasného|Pri závažných dôvodoch|Permanentka|10-vstupová|Platnosť permanentky|Nevyužité vstupy|Služba|Aktuálna cena|Podmienky sa)\b)/g,'.\n');
     return split.split(/\n+/).map(x=>x.trim()).filter(Boolean);
@@ -4450,6 +4521,16 @@ function installVaccinationViewerZoomV244(modal){
     if(typeof path!=='string'||!path||path.length>280||path.includes('..')||! /^[A-Za-z0-9_\-./]+$/.test(path))return '';
     return SUPABASE_URL+'/storage/v1/object/public/chvostikovo-bulletin-public/'+path.split('/').map(encodeURIComponent).join('/');
   }
+  const failedNoticePreviewsV423=new Set();
+  // One pre-sidecar public bulletin has a verified, immutable 37 KB preview.
+  // The original PNG remains unchanged and is still used in the full article.
+  const legacyZbierkaOriginalV425='7d062ba9-eb65-4586-9623-9a67f33a2706/81b2588c-1f51-4e16-9d65-16c288c0b054.png';
+  const legacyZbierkaPreviewV425='/notice-previews/zbierka-v425.webp';
+  function noticePreviewPhotoV423(path){
+    const preview=path===legacyZbierkaOriginalV425?legacyZbierkaPreviewV425
+      :safePhoto(typeof path==='string'?path.replace(/\.with-preview-v423\.(?:jpg|jpeg|png|webp)$/i,'.preview-v423.webp'):path);
+    return failedNoticePreviewsV423.has(preview)?safePhoto(path):preview;
+  }
   function safeLink(s){try{const u=new URL(String(s||''));return u.protocol==='https:'&&u.hostname&&!u.username&&!u.password?u.href:''}catch(_){return ''}}
   function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
   function modal(title,id){
@@ -4516,7 +4597,7 @@ function installVaccinationViewerZoomV244(modal){
   }
   function noticeCard(row,fromHistory,priority=false){
     const b=el('button','customer-bulletin-history-row-v229');b.type='button';b.dataset.announcementId=String(row.id);
-    const photo=safePhoto(row.image_path),thumb=el('span','customer-notice-thumb-v363');
+    const photo=noticePreviewPhotoV423(row.image_path),thumb=el('span','customer-notice-thumb-v363');
     if(photo){
       const img=el('img');img.alt='';img.decoding='async';
       // An archive is inside a dynamically opened scrollable modal. WebKit can
@@ -4524,8 +4605,13 @@ function installVaccinationViewerZoomV244(modal){
       img.loading=!fromHistory||priority?'eager':'lazy';
       if(!fromHistory||priority)img.fetchPriority='high';
       img.addEventListener('error',()=>{
+        const original=safePhoto(row.image_path);
+        if(original&&img.src!==original){
+          failedNoticePreviewsV423.add(photo);
+          img.src=original;return;
+        }
         img.remove();thumb.classList.add('customer-notice-photo-failed-v406');
-      },{once:true});
+      });
       // Never hide the bitmap behind an extra decode() promise. The browser
       // paints it when available, including images already in its HTTP cache.
       thumb.append(img);img.src=photo;
@@ -4690,7 +4776,7 @@ function installVaccinationViewerZoomV244(modal){
         if(state.session?.access_token===token)rowsState.read=new Set((Array.isArray(receipts)?receipts:[]).map(x=>Number(x.announcement_id)));
       }
       rowsState.at=Date.now();rowsState.error=false;drawBoard();drawHistory();
-      rowsState.items.filter(current).slice(0,2).forEach(row=>{const photo=safePhoto(row.image_path);if(photo)preparePhotoV358(photo);});
+      rowsState.items.filter(current).slice(0,2).forEach(row=>{const photo=noticePreviewPhotoV423(row.image_path);if(photo)preparePhotoV358(photo);});
     })().catch(err=>{rowsState.error=true;console.warn('Customer bulletin load failed',err);drawBoard();drawHistory()})
        .finally(()=>{rowsState.loading=null});
     return rowsState.loading;
@@ -4701,7 +4787,7 @@ function installVaccinationViewerZoomV244(modal){
   addCustomerHook('afterSwitchTab',tab=>{if(tab==='booking'||tab==='menu')void refresh(false)});
   window.customerPreloadOverviewNoticesV404=()=>Promise.allSettled(
     rowsState.items.filter(row=>row.show_in_overview===true&&current(row))
-      .slice(0,2).map(row=>{const photo=safePhoto(row.image_path);return photo?preparePhotoV358(photo).promise:Promise.resolve();})
+      .slice(0,2).map(row=>{const photo=noticePreviewPhotoV423(row.image_path);return photo?preparePhotoV358(photo).promise:Promise.resolve();})
   );
   window.customerRefreshNoticeOverviewV376=drawOverview;
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loggedIn())void refresh(true)});

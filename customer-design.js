@@ -160,21 +160,27 @@
     const source=byId('passSummary'),dog=selectedDog(); if(!source||!dog)return;
     let root=byId('designTicket');
     const originalTitle=source.querySelector('span')?.textContent||'Vstup',counts=source.querySelector('strong')?.textContent||'';
-    if(counts==='Jednorazový'){root?.remove();return;}
+    if(counts==='Jednorazový'||counts==='Single visit'){root?.remove();return;}
     if(!root){root=document.createElement('section');root.id='designTicket';root.className='design-ticket';root.setAttribute('aria-label','Permanentka a vstupy');(byId('customerInboxV363')||byId('bookingDogProfile')).after(root);}
     root.classList.toggle('male',dog.sex==='male');
     root.classList.toggle('design-ticket-single',counts==='Jednorazový');
-    const match=counts.match(/(\d+)\s+z\s+(\d+)/),small=[...source.querySelectorAll('small')].map(x=>x.textContent).filter(s=>s!=='Použité vstupy').join(' · ');
+    const isEn=window.ChvostikovoLocale?.getLanguage?.()==='en';
+    // Source is translated live (0 z 10 → 0 of 10); neither locale may erase pass paws.
+    const match=counts.match(/(\d+)\s+(?:z|of)\s+(\d+)/i),small=[...source.querySelectorAll('small')].map(x=>x.textContent).filter(s=>s!=='Použité vstupy'&&s!=='Visits used').join(' · ');
     const validity=small.replace(/(\d{2})\.(\d{2})\.(\d{4})/g,(_,d,m,y)=>`${d}. ${m}. ${y.slice(-2)}`).replace(/(\d{4})/g,y=>y.slice(-2));
-    const date=small.match(/(?:do|Platí do)\s+(.*)/)?.[1];
-    const badge=date?'Platnosť do '+date:validity.replace('Platnosť ','');
-    const presentationKey=JSON.stringify([originalTitle,counts,small,dog.sex]);
+    const date=small.match(/(?:Platí do|Valid until|\bdo)\s+(.*)/i)?.[1];
+    const badge=date?(isEn?'Valid until ':'Platnosť do ')+date:validity.replace(/^(?:Platnosť |Validity )/,'');
+    const usage=match?(isEn?`Used <strong>${Number(match[1])} of ${Number(match[2])} visits</strong>`:`Použité <strong>${Number(match[1])} z ${Number(match[2])} vstupov</strong>`):'';
+    root.setAttribute('aria-label',isEn?'Pass and visits':'Permanentka a vstupy');
+    const presentationKey=JSON.stringify([originalTitle,counts,small,dog.sex,isEn]);
     if(root.dataset.presentationKey===presentationKey)return;
     root.dataset.presentationKey=presentationKey;
     const material=root.querySelector(':scope > .lg-v3-material');
-    root.innerHTML=`<div class="design-ticket-head"><h2 aria-label="${esc(originalTitle)}">${icon("ticket")}<span>${esc(originalTitle)}</span></h2></div><div class="design-ticket-usage">${match?`<p>Použité <strong>${Number(match[1])} z ${Number(match[2])} vstupov</strong></p>`:`<p class="design-single-entry"><strong>${esc(counts==='Jednorazový'?'Jednorazový vstup':counts)}</strong></p>`}${badge?`<span class="design-validity" title="${esc(small)}">${esc(badge)}</span>`:''}</div>${match?`<div class="design-paws" aria-hidden="true">${Array.from({length:Number(match[2])},(_,i)=>`<span class="${i<Number(match[1])?'used':''}">${icon('pass-paw')}</span>`).join('')}</div>`:''}`;
+    root.innerHTML=`<div class="design-ticket-head"><h2 aria-label="${esc(originalTitle)}">${icon("ticket")}<span>${esc(originalTitle)}</span></h2></div><div class="design-ticket-usage">${match?`<p>${usage}</p>`:`<p class="design-single-entry"><strong>${esc(counts==='Jednorazový'?'Jednorazový vstup':counts)}</strong></p>`}${badge?`<span class="design-validity" title="${esc(small)}">${esc(badge)}</span>`:''}</div>${match?`<div class="design-paws" aria-hidden="true">${Array.from({length:Number(match[2])},(_,i)=>`<span class="${i<Number(match[1])?'used':''}">${icon('pass-paw')}</span>`).join('')}</div>`:''}`;
     if(material)root.prepend(material);
   }
+  // A locale switch doesn't change the account data; repaint just its pass presentation.
+  window.customerDesignRefreshLocaleV420=()=>{if(state.data)ticket();};
   function nearest() {
     if(!state.data)return;
     if(!selectedDog()){byId('designNearest')?.remove();byId('designTicket')?.remove();byId('designBulletinTitle')?.remove();return;}
