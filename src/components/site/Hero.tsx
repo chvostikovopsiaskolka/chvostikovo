@@ -7,6 +7,15 @@ import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
+function scrollToHomeInquiry(source: string) {
+  trackMarketingInteraction("inquiry_cta", source);
+  void trackCookielessInteraction("inquiry_cta", source);
+  const target = document.getElementById(window.innerWidth >= 1024 ? "home-hero-inline-form" : "informujte-sa");
+  if (!target) return;
+  const top = window.scrollY + target.getBoundingClientRect().top - 12;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
 function scrollToWhyChvostikovo() {
   const target = document.getElementById("preco-chvostikovo");
   if (!target) return;
@@ -55,22 +64,27 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (learnMoreHref) {
-                window.location.assign(learnMoreHref);
-                return;
-              }
-              trackMarketingInteraction("hero_learn_more", "hero_mobile");
-              void trackCookielessInteraction("explore_daycare", "home_hero_mobile_20261028");
-              scrollToWhyChvostikovo();
-            }}
-            className="btn-coral mt-5 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg"
-          >
-            Zistiť viac
-            <ArrowDown className="size-5" />
-          </button>
+          <div className="hero-cta-pair mx-auto mt-5">
+            <button type="button" onClick={() => scrollToHomeInquiry("home_hero_interest_mobile")} className="hero-cta-primary">
+              Mám záujem
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (learnMoreHref) {
+                  window.location.assign(learnMoreHref);
+                  return;
+                }
+                trackMarketingInteraction("hero_learn_more", "hero_mobile");
+                void trackCookielessInteraction("explore_daycare", "home_hero_mobile_20261028");
+                scrollToWhyChvostikovo();
+              }}
+              className="hero-cta-secondary"
+            >
+              <span>Viac o škôlke</span>
+              <ArrowDown className="hero-cta-icon" aria-hidden="true" />
+            </button>
+          </div>
 
           <InfoTicker className="mt-4 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-5" compact />
         </div>
@@ -109,23 +123,30 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
               ))}
             </div>
 
-            <div className="order-5 mt-4 flex items-center gap-3">
+            <div className="hero-cta-pair order-5 mt-4">
+              <button type="button" onClick={() => scrollToHomeInquiry("home_hero_interest_desktop")} className="hero-cta-primary">
+                Mám záujem
+              </button>
               <button
                 type="button"
                 onClick={() => {
+                  if (learnMoreHref) {
+                    window.location.assign(learnMoreHref);
+                    return;
+                  }
                   trackMarketingInteraction("hero_learn_more", "hero_desktop");
                   void trackCookielessInteraction("explore_daycare", "home_hero_desktop_20261028");
                   scrollToWhyChvostikovo();
                 }}
-                className="btn-coral inline-flex min-w-[310px] items-center justify-center gap-3 px-10 py-4 text-lg"
+                className="hero-cta-secondary"
               >
-                Zistiť viac
-                <ArrowDown className="size-4" />
+                <span>Viac o škôlke</span>
+                <ArrowDown className="hero-cta-icon" aria-hidden="true" />
               </button>
             </div>
           </div>
 
-          <div className="min-w-0">
+          <div id="home-hero-inline-form" className="min-w-0">
             <SchoolmatesFormCrown compact />
             <div className="rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
               <h2 className="text-center text-2xl text-forest sm:whitespace-nowrap">
