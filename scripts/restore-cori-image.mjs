@@ -258,6 +258,40 @@ await restoreImage({
   targetDir: siteOutputDir,
 });
 
+// User-supplied stand realization photos, reproducibly restored from checked base64
+// to keep the repo text-only while serving real independent WebP assets at runtime.
+for (const photo of [
+  {
+    label: "ROSE",
+    prefix: "stand-rose-hq",
+    bytes: 181570,
+    sha: "df31a87447f99a17ab3dfeafc6b8d77fd83f6b54bcff0e51031dc9e5187783c1",
+  },
+  {
+    label: "BUNCA A LINDEN",
+    prefix: "stand-bunca-linden-hq",
+    bytes: 73024,
+    sha: "cd89c8220da75c78252553ed2d4e3b5cdd2b25a555dafb823609ab263f9a1b94",
+  },
+  {
+    label: "ARCANA A AIDEN",
+    prefix: "stand-arcana-aiden-hq",
+    bytes: 239642,
+    sha: "2af7fb3b6d39816d9d22ebd0e3a74a577a18cc8d1e1d4b1d5909861a89010d17",
+  },
+]) {
+  await restoreImage({
+    label: photo.label,
+    dataDir: galleryDataDir,
+    prefix: photo.prefix,
+    output: photo.prefix + ".webp",
+    minBytes: 50_000,
+    expectedBytes: photo.bytes,
+    expectedSha256: photo.sha,
+    format: "webp",
+  });
+}
+
 const routePath = path.join(root, "src", "routes", "stojan-na-misky-pre-psa.tsx");
 let routeSource = await readFile(routePath, "utf8");
 
@@ -282,12 +316,10 @@ if (!routeSource.includes(galleryImportAnchor)) {
 }
 routeSource = routeSource.replace(galleryImportAnchor, galleryImports);
 
-const dialogImportAnchor = 'import { Collapse } from "@/components/site/Collapse";';
-const dialogImports = `${dialogImportAnchor}\nimport { FormDialog } from "@/components/site/FormDialog";`;
-if (!routeSource.includes(dialogImportAnchor)) {
-  throw new Error("Expected Collapse import anchor was not found in product route");
+// The product route now owns its stable FormDialog directly; no synthetic injection.
+if (!routeSource.includes('import { FormDialog } from "@/components/site/FormDialog";')) {
+  throw new Error("Product inquiry must use the existing FormDialog");
 }
-routeSource = routeSource.replace(dialogImportAnchor, dialogImports);
 
 const oldRealizations = "const REALIZATIONS = GALLERY;";
 const newRealizations = `const REALIZATIONS = [\n  ...GALLERY,\n  {\n    src: standMlyncek,\n    alt: "Svetlý drevený stojan na misky pre psa MLYNČEK",\n    position: "50% 58%",\n  },\n  {\n    src: standAron,\n    alt: "Tmavý drevený stojan na misky pre psa ARON",\n    position: "50% 58%",\n  },\n  {\n    src: standLoki,\n    alt: "Tmavý drevený stojan na misky pre psa LOKI",\n    position: "50% 56%",\n  },\n  {\n    src: standPlanetky,\n    alt: "Biely drevený stojan na misky pre psa PLANÉTKY",\n    position: "50% 58%",\n  },\n  {\n    src: standAloy,\n    alt: "Tmavý drevený stojan na misky pre psa ALOY",\n    position: "50% 55%",\n  },\n];`;
@@ -301,56 +333,8 @@ if (routeSource.includes(oldRealizations)) {
   throw new Error("Neither legacy realizations nor the approved autoplay gallery is present");
 }
 
-const oldHeroSpacing =
-  'className="scroll-mt-24 relative overflow-hidden pt-8 pb-14 sm:pt-10 sm:pb-20 lg:pt-32"';
-const newHeroSpacing =
-  'className="scroll-mt-24 relative overflow-hidden pt-8 pb-6 sm:pt-10 sm:pb-14 lg:pt-32"';
-if (!routeSource.includes(oldHeroSpacing)) {
-  throw new Error("Expected hero spacing classes were not found in product route");
-}
-routeSource = routeSource.replace(oldHeroSpacing, newHeroSpacing);
-
-const oldSizesSection = '<section className="bg-secondary/50 py-14 sm:py-20">';
-const newSizesSection = '<section className="bg-secondary/50 pt-8 pb-14 sm:py-20">';
-if (!routeSource.includes(oldSizesSection)) {
-  throw new Error("Expected sizes section spacing was not found in product route");
-}
-routeSource = routeSource.replace(oldSizesSection, newSizesSection);
-
-const oldOpenOrderOptions = `  function openOrderOptions() {\n    setOrderOpen(true);\n    window.setTimeout(() => {\n      document\n        .getElementById("objednavka-stojana")\n        ?.scrollIntoView({ behavior: "smooth", block: "center" });\n    }, 50);\n  }`;
-const newOpenOrderOptions = `  function openOrderOptions() {\n    setOrderOpen(true);\n  }`;
-if (!routeSource.includes(oldOpenOrderOptions)) {
-  throw new Error("Expected openOrderOptions function was not found in product route");
-}
-routeSource = routeSource.replace(oldOpenOrderOptions, newOpenOrderOptions);
-
-const oldInquiryTrigger = `                    onClick={() => setOrderOpen((open) => !open)}\n                    aria-expanded={orderOpen}\n                    aria-controls="moznosti-objednavky-stojana"`;
-const newInquiryTrigger = `                    onClick={openOrderOptions}\n                    aria-haspopup="dialog"`;
-if (!routeSource.includes(oldInquiryTrigger)) {
-  throw new Error("Expected stand inquiry trigger was not found in product route");
-}
-routeSource = routeSource.replace(oldInquiryTrigger, newInquiryTrigger);
-
-const oldInquiryIcon = `                    <ChevronDown\n                      className={\`size-5 shrink-0 text-forest/65 transition-transform \${orderOpen ? "rotate-180" : ""}\`}\n                    />`;
-const newInquiryIcon = `                    <ChevronRight className="size-5 shrink-0 text-forest/65" />`;
-if (!routeSource.includes(oldInquiryIcon)) {
-  throw new Error("Expected stand inquiry chevron was not found in product route");
-}
-routeSource = routeSource.replace(oldInquiryIcon, newInquiryIcon);
-
-const oldInquiryOpen = `                  {orderOpen && (\n                    <div\n                      id="moznosti-objednavky-stojana"\n                      className="mt-3 rounded-4xl bg-card p-5 shadow-soft sm:p-6"\n                    >`;
-const newInquiryOpen = `                  <FormDialog\n                    open={orderOpen}\n                    onOpenChange={setOrderOpen}\n                    title="Mám záujem o stojan"\n                    subtitle="Vyberte rozmer, farbu, výšku a personalizáciu"\n                  >`;
-if (!routeSource.includes(oldInquiryOpen)) {
-  throw new Error("Expected inline stand inquiry opening was not found in product route");
-}
-routeSource = routeSource.replace(oldInquiryOpen, newInquiryOpen);
-
-const oldInquiryClose = `                      )}\n                    </div>\n                  )}\n                </div>\n              </div>`;
-const newInquiryClose = `                      )}\n                  </FormDialog>\n                </div>\n              </div>`;
-if (!routeSource.includes(oldInquiryClose)) {
-  throw new Error("Expected inline stand inquiry closing was not found in product route");
-}
-routeSource = routeSource.replace(oldInquiryClose, newInquiryClose);
+// S/M/L cards and the three-step modal are maintained in React source.
+// Do not mutate them at build time; retain the image restoration only.
 
 const oldRealizationsHeading = `            <div className="text-center">\n              <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">\n                Naše realizácie\n              </p>\n              <h2 className="section-title mt-2 text-3xl sm:text-4xl">\n                Spokojní štvornohí klienti\n              </h2>\n              <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-forest/75">\n                Niekoľko hotových prevedení. Ďalšie farby a realizácie budeme postupne dopĺňať.\n              </p>\n            </div>\n            <div className="mt-9 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">`;
 const newRealizationsHeading = `            <div className="text-center">\n              <h2 className="section-title text-3xl sm:text-4xl">\n                Spokojní štvornohí klienti\n              </h2>\n            </div>\n            <div className="mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">`;

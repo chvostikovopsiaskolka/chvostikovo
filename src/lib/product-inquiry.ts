@@ -14,7 +14,7 @@ export const standInquirySchema = z.object({
   consent: z.literal(true),
   company: z.string().max(200).optional(),
   configuration: z.object({
-    size: z.enum(["small", "large"]),
+    size: z.enum(["small", "large", "extra_large"]),
     color: z.enum(["natural", "dark", "white", "custom"]),
     dog_height_cm: z.number().min(10).max(120),
     name_on_stand: z.string().trim().max(40),

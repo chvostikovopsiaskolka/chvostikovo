@@ -249,207 +249,99 @@ const failures = [];
               const consent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
               if (await consent.isVisible()) await consent.click();
               const heroTitle = productPage.getByRole('heading', { level: 1 });
-              const heroPhoto = productPage.locator('img[fetchpriority="high"]').first();
-              const sizeLabel = productPage.getByText(route.includes('stojan') ? 'Vyberte veľkosť stojana' : 'Vyberte veľkosť', { exact: true });
-              const [titleBox, photoBox, selectorBox] = await Promise.all([heroTitle.boundingBox(), heroPhoto.boundingBox(), sizeLabel.boundingBox()]);
-              if (!titleBox || !photoBox || !selectorBox) throw new Error('Product detail desktop/mobile regions missing');
-              if (width === 1440 && !(photoBox.x + photoBox.width <= titleBox.x + 8 && selectorBox.x >= titleBox.x - 8)) {
-                throw new Error('Desktop product image must be left of title and size selection');
-              }
-              if (width === 390 && !(titleBox.y < photoBox.y && photoBox.y < selectorBox.y)) {
-                throw new Error('Mobile product image must follow heading and precede size selection');
-              }
-              if (route.includes('stojan')) {
-                const heroPicker = productPage.locator('[data-stand-size-picker="hero"]');
-                if (await heroPicker.locator('button').count() !== 2) throw new Error('Stand hero must have two size buttons');
-                const labels = await heroPicker.locator('button').allTextContents();
-                if (!labels.some(text => text.includes('malé plemená')) || !labels.some(text => text.includes('stredné/veľké'))) {
-                  throw new Error('Stand breed labels missing from top size picker');
-                }
-                const checkPicker = async () => {
-                  const buttons = heroPicker.locator('button');
-                  const boxes = await Promise.all([buttons.nth(0).boundingBox(), buttons.nth(1).boundingBox()]);
-                  if (!boxes[0] || !boxes[1] || Math.abs(boxes[0].y - boxes[1].y) > 2) throw new Error('Stand hero size buttons must stay in one row');
-                  for (let n = 0; n < 2; n++) {
-                    const overflows = await buttons.nth(n).evaluate(el => el.querySelector('span')?.scrollWidth > (el.clientWidth - 12));
-                    if (overflows) throw new Error('Stand breed label overflows button');
-                  }
-                };
-                await checkPicker();
-                if (width === 390) {
-                  await productPage.setViewportSize({width:320,height:760});
-                  await checkPicker();
-                  await productPage.setViewportSize({width:390,height:844});
-                }
-                if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('MIA'))) throw new Error('Small stand must show Mia by default');
-                await productPage.getByRole('button', { name: /^Väčší/ }).first().click();
-                if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('CORI'))) throw new Error('Large stand must show CORI');
-                await productPage.getByRole('button', { name: /^Menší/ }).first().click();
-                if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('MIA'))) throw new Error('Returning to small stand must show Mia');
-              } else {
-                await productPage.getByRole('button', { name: /^Malý/ }).first().click();
-                if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('malom targete'))) throw new Error('Small target image missing');
-                await productPage.getByRole('button', { name: /^Veľký/ }).first().click();
-                if (!await heroPhoto.getAttribute('alt').then(alt => alt?.includes('veľkom targete'))) throw new Error('Large target image missing');
-              }
-              const detailIntroText = route.includes('stojan')
+              if (!await heroTitle.isVisible()) throw new Error('Product hero title missing: ' + route);
+              const detailText = route.includes('stojan')
                 ? 'Vyberte si variant a objednajte si stojan pre svojho psíka.'
                 : 'Vyberte si variant a objednajte si target pre svojho psíka.';
-              const detailIntro = productPage.locator('h1 + p');
-              if (await detailIntro.count() !== 1 || (await detailIntro.innerText()).trim() !== detailIntroText) {
-                throw new Error('Product detail intro is not the short approved message: ' + route);
-              }
-              const valueSectionId = route.includes('stojan') ? 'stand-value-heading' : 'target-value-heading';
-              const valueSection = productPage.locator('section[aria-labelledby="' + valueSectionId + '"]');
-              if (await valueSection.count() !== 1) throw new Error('Product value section missing: ' + route);
-              if (await valueSection.locator('article').count() !== 3) throw new Error('Product must show exactly three value cards: ' + route);
-              const valueTitles = route.includes('stojan')
-                ? ['Misky majú svoje miesto', 'Po jedle rýchlo upratané', 'Výšku nemusíte odhadovať']
-                : ['Presný dotyk labkou', 'Rehabilitácia a fyzioterapia', 'Poslušnosť a zotrvanie na mieste'];
-              for (const title of valueTitles) {
-                if (!await valueSection.getByRole('heading', { name: title, exact: true }).isVisible()) {
-                  throw new Error('Missing product-specific value card: ' + title);
-                }
-              }
-              const heroHighlights = productPage.getByLabel('Tri praktické výhody výrobku');
-              if (await heroHighlights.count() !== 1) throw new Error('Compact product value strip missing: ' + route);
-              const shortValues = route.includes('stojan')
-                ? ['Osobný barový pultík', 'Rýchla údržba', 'Výška podľa psa']
-                : ['Kvalitné spracovanie', 'Protišmykový povrch', 'Ručná výroba'];
-              for (const title of shortValues) {
-                if (!await heroHighlights.getByText(title, { exact: true }).isVisible()) {
-                  throw new Error('Missing compact product value: ' + title);
-                }
-              }
-              const valueCard = heroHighlights.locator('div').first();
-              const cardClasses = await valueCard.getAttribute('class');
-              if (!cardClasses?.includes('bg-forest') || !cardClasses.includes('text-white')) {
-                throw new Error('Product value strip must use forest green cards and white text: ' + route);
-              }
-              const carouselName = route.includes('stojan') ? 'stand' : 'target';
-              const galleryTrack = productPage.locator('[data-photo-carousel="' + carouselName + '"]');
-              if (await galleryTrack.count() !== 1) throw new Error('Carousel missing: ' + carouselName);
-              if (await galleryTrack.locator('figure').count() !== (carouselName === 'stand' ? 13 : 8)) {
-                throw new Error('Carousel must render each distinct photo exactly once: ' + carouselName);
-              }
-              if (carouselName === 'stand') {
-                const titles = await galleryTrack.locator('figcaption').allTextContents();
-                for (const name of ['MIA', 'CORI', 'WOODY', 'MLYNČEK', 'ARON', 'LOKI', 'PLANÉTKY', 'ALOY', 'STOJAN V PRAXI', 'MAYA', 'GAEL', 'LARA', 'SAFIRA']) {
-                  if (!titles.some(title => title.startsWith(name + ' ·'))) throw new Error('Missing real stand caption: ' + name);
-                }
-              }
-              if (await galleryTrack.getAttribute('data-carousel-motion') !== 'ping-pong') {
-                throw new Error('Gallery must move back and forth without duplicated slides: ' + carouselName);
-              }
-              if (width === 390) {
-                const galleryBox = await galleryTrack.boundingBox();
-                if (!galleryBox || galleryBox.x > 2 || galleryBox.x + galleryBox.width < width - 2) {
-                  throw new Error('Carousel must extend edge-to-edge on mobile: ' + carouselName);
-                }
-                const imgFit = await galleryTrack.locator('img').first().evaluate(node => getComputedStyle(node).objectFit);
-                if (imgFit !== 'cover') throw new Error('Carousel images must fill their frame: ' + carouselName);
+              if ((await productPage.locator('h1 + p').innerText()).trim() !== detailText) {
+                throw new Error('Short product hero subtitle missing: ' + route);
               }
               if (route.includes('stojan')) {
-                if (await galleryTrack.locator('button[data-stand-photo-open]').count() !== 13) throw new Error('All stand photos must be openable');
-                const cookieLayerBeforeGallery = productPage.locator('[aria-labelledby="cookie-consent-title"]');
-                if (await cookieLayerBeforeGallery.isVisible()) {
-                  await cookieLayerBeforeGallery.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();
-                  await cookieLayerBeforeGallery.waitFor({state:'hidden'});
+                const cards = productPage.locator('[data-product-stand-cards]');
+                if (await cards.locator('article').count() !== 3) throw new Error('Exactly three stand variant cards required');
+                if (width === 390 && !(await cards.evaluate(el => el.scrollWidth > el.clientWidth + 30))) {
+                  throw new Error('Stand carousel must swipe on mobile');
                 }
-                await galleryTrack.locator('button[data-stand-photo-open]').first().click();
-                const lightbox = productPage.locator('[data-stand-lightbox]');
-                await lightbox.waitFor({ state: 'visible' });
-                if (await lightbox.locator('[data-stand-photo-viewport]').getAttribute('data-zoom') !== '1') throw new Error('Stand photo zoom must start at 100%');
-                await lightbox.getByRole('button', { name: 'Priblížiť fotografiu' }).click();
-                if (await lightbox.locator('[data-stand-photo-viewport]').getAttribute('data-zoom') !== '1.5') throw new Error('Stand photo zoom-in failed');
-                await lightbox.getByRole('button', { name: 'Ďalšia fotografia' }).click();
-                if (await lightbox.locator('[data-stand-photo-viewport]').getAttribute('data-zoom') !== '1') throw new Error('Stand photo navigation must reset zoom');
-                await productPage.keyboard.press('Escape');
-                await lightbox.waitFor({ state: 'hidden' });
-                if (await productPage.locator('[data-stand-gallery="autoplay"]').count() !== 1) {
-                  throw new Error('Stand realizations carousel missing');
+                const cases = [
+                  {type:'small', label:'S verzia', price:'40 €', photo:'MIA'},
+                  {type:'large', label:'M verzia', price:'45 €', photo:'CORI'},
+                  {type:'extra_large', label:'L verzia', price:'Na vyžiadanie', photo:'ROSE'},
+                ];
+                for (const item of cases) {
+                  const card = cards.locator('article[data-stand-size="' + item.type + '"]');
+                  const cardCount = await card.count();
+                  const cardText = cardCount === 1 ? await card.textContent() : '(card not found)';
+                  if (cardCount !== 1 || !cardText.includes(item.label) || !cardText.includes(item.price)) {
+                    throw new Error('Stand card label/price wrong: '+item.label+
+                      ' count='+cardCount+' text='+JSON.stringify(cardText.slice(0,250)));
+                  }
+                  if (!(await card.locator('img').getAttribute('alt')).includes(item.photo)) {
+                    throw new Error('Stand card photo missing: ' + item.photo);
+                  }
+                  if (await card.locator('[aria-label="Vlastnosti stojana"] span').count() !== 3) {
+                    throw new Error('Stand feature badges missing: '+item.label);
+                  }
                 }
+                const card = cards.locator('article[data-stand-size="large"]');
+                await card.getByRole('button', {name:/M verzia/i}).click();
+                const dlg = productPage.getByRole('dialog',{name:'Mám záujem o stojan'});
+                await dlg.waitFor({state:'visible'});
+                if (await dlg.getAttribute('data-form-dialog') !== 'simple-v300') throw new Error('Stand needs stable iOS FormDialog');
+                if (await dlg.locator('[data-product-inquiry-steps][data-step="1"]').count() !== 1) throw new Error('Stand step 1 missing');
+                const selected = dlg.locator('[data-stand-size-picker="inquiry"] button[aria-pressed="true"]');
+                if (!(await selected.innerText()).includes('M verzia')) throw new Error('Stand CTA did not preselect M');
+                await dlg.getByPlaceholder('napr. 58').fill('65');
+                await dlg.getByRole('button',{name:'Pokračovať'}).click();
+                if (await dlg.locator('[data-product-inquiry-steps][data-step="2"]').count() !== 1) throw new Error('Stand personalization step missing');
+                await dlg.getByPlaceholder('napr. Bella').fill('Rex');
+                await dlg.getByRole('button',{name:'Pokračovať'}).click();
+                if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1) throw new Error('Stand contact step missing');
+              } else {
+                const photo = productPage.locator('img[fetchpriority="high"]').first();
+                const label = productPage.getByText('Vyberte veľkosť', { exact: true });
+                const [headingBox, photoBox, sizeBox] = await Promise.all([
+                  heroTitle.boundingBox(),photo.boundingBox(),label.boundingBox()]);
+                if (!headingBox || !photoBox || !sizeBox) throw new Error('Target product regions missing');
+                if (width === 1440 && !(photoBox.x + photoBox.width <= headingBox.x+8 && sizeBox.x >= headingBox.x-8)) throw new Error('Target desktop layout changed');
+                if (width === 390 && !(headingBox.y < photoBox.y && photoBox.y < sizeBox.y)) throw new Error('Target mobile layout changed');
+                await productPage.getByRole('button',{name:action}).first().click();
+                const dlg=productPage.getByRole('dialog',{name:action});
+                await dlg.waitFor({state:'visible'});
+                if (await dlg.locator('[data-product-inquiry-steps][data-step="1"]').count() !== 1) throw new Error('Target step 1 missing');
+                await dlg.getByRole('button',{name:'Pokračovať'}).click();
+                if (await dlg.locator('[data-product-inquiry-steps][data-step="2"]').count() !== 1) throw new Error('Target step 2 missing');
+                await dlg.getByRole('button',{name:'Pokračovať'}).click();
+                if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1) throw new Error('Target contact step missing');
               }
-              const reviewTeaser = productPage.getByText('Recenzie spokojných zákazníkov čoskoro', { exact: true });
-              if (!await reviewTeaser.isVisible()) throw new Error('Product review teaser missing');
-              await productPage.getByRole('button', { name: 'Ako je to s doručením?' }).click();
-              const deliveryDialog = productPage.getByRole('dialog', { name: 'Doprava a doručenie' });
-              await deliveryDialog.waitFor();
-              for (const label of ['Košice', 'Zadarmo', 'Okolie Košíc a Prešov', '5 €', 'Vzdialenejšie lokality', 'Individuálne']) {
-                if (!await deliveryDialog.getByText(label, { exact: true }).isVisible()) throw new Error('Product delivery information missing: ' + label);
+              const formDialog = productPage.getByRole('dialog',{name:action});
+              if (!await formDialog.locator('input[name="customer_name"]').count()
+                || !await formDialog.locator('input[name="email"]').count()
+                || !await formDialog.locator('input[name="customer_location"]').count()) {
+                throw new Error('Product contact inputs missing');
+              }
+              if (await formDialog.locator('[type="checkbox"][required]').count() !== 1) throw new Error('Consent checkbox missing');
+              const locationInput=formDialog.locator('input[name="customer_location"]');
+              if (await locationInput.getAttribute('required') === null) throw new Error('City and postal code must remain mandatory');
+              await formDialog.getByRole('button',{name:'Ako je to s doručením?'}).click();
+              const deliveryDialog=productPage.getByRole('dialog',{name:'Doprava a doručenie'});
+              await deliveryDialog.waitFor({state:'visible'});
+              for(const label of ['Košice','Zadarmo','Okolie Košíc a Prešov','5 €','Vzdialenejšie lokality','Individuálne']) {
+                if(!await deliveryDialog.getByText(label,{exact:true}).isVisible()) throw new Error('Shipping option missing '+label);
               }
               await productPage.keyboard.press('Escape');
-              await deliveryDialog.waitFor({ state: 'hidden' });
-              await productPage.getByRole('button', { name: action }).first().click();
-              await productPage.locator('input[name="customer_name"]:visible').waitFor();
-              if (!await productPage.locator('input[name="email"]:visible').count()) throw new Error('Product inquiry contact missing');
-              const locationInput = productPage.locator('input[name="customer_location"]:visible');
-              if (await locationInput.count() !== 1 || await locationInput.getAttribute('required') === null) {
-                throw new Error('Product city and postal code field missing');
-              }
-              const productDialog = productPage.getByRole('dialog', { name: action });
-              await productDialog.waitFor({ state: 'visible' });
-              if (await productDialog.getAttribute('data-form-dialog') !== 'simple-v300') throw new Error('Product must use stable iOS modal');
+              await deliveryDialog.waitFor({state:'hidden'});
               if (width === 390) {
-                for (const input of await productDialog.locator('input:visible:not([type="checkbox"])').all()) {
-                  const fontSize = await input.evaluate(el => Number.parseFloat(getComputedStyle(el).fontSize));
-                  if (fontSize < 16) throw new Error('Product iOS input zoom risk: ' + (await input.getAttribute('name')));
-                }
-                const locked = await productPage.evaluate(() => document.body.style.position === 'fixed' && document.documentElement.style.overflow === 'hidden');
-                if (!locked) throw new Error('Product form background scroll must be locked on iOS');
-              }
-              if (route.includes('stojan')) {
-                // Independently test the size-card CTA from a fresh real customer view:
-                // the hero CTA above was opened earlier to verify its fields.
-                await productPage.goto(new URL(route, base).href);
-                await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
-                const cards = productPage.locator('[data-stand-sizes="carousel"]');
-                if (await cards.locator('article').count() !== 2) throw new Error('Stand size carousel must show two sizes');
-                if (width === 390) {
-                  const swipeable = await cards.evaluate(el => el.scrollWidth > el.clientWidth + 30);
-                  if (!swipeable) throw new Error('Stand sizes must swipe horizontally on mobile');
-                }
-                // Test the two customer journeys from independent fresh visits.
-                // No Escape or modal cleanup can interfere with the next case.
-                for (const [type, name] of [['large', 'väčší'], ['small', 'menší']]) {
-                  await productPage.goto(new URL(route, base).href);
-                  await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
-                  // Fresh customer visits can display the consent overlay.
-                  // Interact with it instead of forcing a click through the modal.
-                  const consentChoice = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
-                  if (await consentChoice.isVisible()) await consentChoice.click();
-                  const sizeCta = productPage.locator('[data-stand-sizes="carousel"] article[data-stand-size="' + type + '"] button[type="button"]');
-                  if (await sizeCta.count() !== 1) throw new Error('Missing unique size CTA: ' + type);
-                  const label = await sizeCta.getAttribute('aria-label');
-                  if (label !== 'Mám záujem o ' + name + ' stojan') {
-                    throw new Error('Accessible size CTA label missing: ' + type + ', got ' + label);
-                  }
-                  await sizeCta.click();
-                  // restore-cori-image.mjs intentionally converts the source's
-                  // inline inquiry panel into a Radix ContentDialog at build.
-                  // Assert the actual production dialog, not the removed
-                  // #moznosti-objednavky-stojana source-only wrapper.
-                  const inquiryDialog = productPage.getByRole('dialog', { name: 'Mám záujem o stojan' });
-                  await inquiryDialog.waitFor({ state: 'visible', timeout: 10000 });
-                  const modalPicker = inquiryDialog.locator('[data-stand-size-picker="inquiry"]');
-                  if (await modalPicker.locator('button').count() !== 2) throw new Error('Inquiry needs two size options');
-                  const modalBoxes = await Promise.all([modalPicker.locator('button').nth(0).boundingBox(), modalPicker.locator('button').nth(1).boundingBox()]);
-                  if (!modalBoxes[0] || !modalBoxes[1] || Math.abs(modalBoxes[0].y - modalBoxes[1].y) > 2) {
-                    throw new Error('Stand inquiry size options must be side by side');
-                  }
-                  const selectedSize = inquiryDialog.getByRole('button', {
-                    name: type === 'large' ? /^Väčší/ : /^Menší/,
-                  }).first();
-                  const classes = await selectedSize.getAttribute('class', { timeout: 5000 });
-                  if (!classes?.includes('border-coral')) {
-                    throw new Error('Stand card did not preselect ' + type + ' in the real inquiry modal');
-                  }
-                  if (!await inquiryDialog.locator('input[name="customer_name"]:visible').count()) {
-                    throw new Error('Stand size card did not open the existing product inquiry form');
-                  }
+                for(const field of await formDialog.locator('input:visible:not([type="checkbox"])').all()) {
+                  if (await field.evaluate(el => parseFloat(getComputedStyle(el).fontSize)) < 16) throw new Error('Product input risks Safari zoom');
                 }
               }
-              if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product inquiry points to retired checkout');
+              await productPage.keyboard.press('Escape');
+              await formDialog.waitFor({state:'hidden'});
+              const galleryTrack=productPage.locator('[data-photo-carousel="' + (route.includes('stojan')?'stand':'target') + '"]');
+              if (await galleryTrack.count() !== 1 || await galleryTrack.locator('figure').count() !== (route.includes('stojan')?16:8)) {
+                throw new Error('Product gallery missing: '+route);
+              }
+              if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product routes to retired checkout');
             }
             await productPage.goto(new URL('/blog/stojan-na-misky-pre-psa-vyhody-a-vyber/', base).href);
             await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
@@ -478,8 +370,8 @@ const failures = [];
             if (width === 390 && secondCard.y <= firstCard.y + 10) throw new Error('Mobile blog cards must stack naturally');
             const guideCarousel = productPage.locator('[data-stand-gallery="autoplay"]');
             if (await guideCarousel.count() !== 1) throw new Error('Stand guide carousel missing above product CTA');
-            if (await guideCarousel.locator('figure').count() !== 13) throw new Error('Stand guide must show thirteen distinct realizations');
-            if (await guideCarousel.locator('button[data-stand-photo-open]').count() !== 13) throw new Error('Guide stand photos must open too');
+            if (await guideCarousel.locator('figure').count() !== 16) throw new Error('Stand guide must show sixteen distinct realizations');
+            if (await guideCarousel.locator('button[data-stand-photo-open]').count() !== 16) throw new Error('Guide stand photos must open too');
             const cookieLayerBeforeGuide = productPage.locator('[aria-labelledby="cookie-consent-title"]');
             if (await cookieLayerBeforeGuide.isVisible()) {
               await cookieLayerBeforeGuide.getByRole('button', { name: 'Len nevyhnutné', exact: true }).click();

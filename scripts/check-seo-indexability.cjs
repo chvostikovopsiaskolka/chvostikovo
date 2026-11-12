@@ -214,25 +214,30 @@ for (const spec of [
   const productHtmlPath = "dist/client" + productPath + "/index.html";
   assert(fs.existsSync(productHtmlPath), "Product prerender missing: " + productHtmlPath);
   const productHtml = fs.readFileSync(productHtmlPath, "utf8");
-  assert(productHtml.includes("bg-forest") && productHtml.includes("text-white"), "Short product highlight contrast missing: " + productPath);
-  const expectedHighlights = spec.product === "stojan-na-misky-pre-psa"
-    ? ["Osobný barový pultík", "Rýchla údržba", "Výška podľa psa"]
-    : ["Kvalitné spracovanie", "Protišmykový povrch", "Ručná výroba"];
-  for (const heading of expectedHighlights) {
-    assert(productHtml.includes(heading), "Missing hero product value: " + heading);
+  // Target's existing compact hero strip stays unchanged. Stand now puts those benefits
+  // inside its three visible photo-card badges, avoiding a duplicate strip.
+  if (spec.product !== "stojan-na-misky-pre-psa") {
+    assert(productHtml.includes("bg-forest") && productHtml.includes("text-white"), "Target hero highlight contrast missing");
+    for (const heading of ["Kvalitné spracovanie", "Protišmykový povrch", "Ručná výroba"]) {
+      assert(productHtml.includes(heading), "Target hero highlight missing: " + heading);
+    }
   }
   if (spec.product === "stojan-na-misky-pre-psa") {
     assert(productHtml.includes('Vyberte si variant a objednajte si stojan pre svojho psíka.'), "Stand detail short description missing");
     assert(productHtml.includes('data-stand-gallery="autoplay"'), "Stand photo gallery is not autoplay-enabled");
-    assert(productHtml.includes('Stojany na misky pre malé, stredné aj veľké plemená'), "Stand breed SEO copy missing from product");
+    assert(productHtml.includes('L verzia'), "Stand L variant is missing from product");
     for (const photo of ["stand-mlyncek-", "stand-aron-", "stand-loki-", "stand-planetky-", "stand-aloy-", "stand-psik-pri-miskach-", "stand-maya-", "stand-gael-", "stand-lara-", "stand-safira-"]) {
       assert(productHtml.includes(photo) && markup.includes(photo), "Stand realization missing from product or article: " + photo);
     }
     assert(markup.includes('data-stand-gallery="autoplay"'), "Stand article gallery above CTA is missing");
     assert(markup.includes('stand-mia-'), "Stand article must use restored 711x900 MIA AVIF");
-    assert(productHtml.includes('data-stand-sizes="carousel"'), "Stand size carousel missing");
-    assert(productHtml.includes('Mám záujem o menší stojan'), "Small stand carousel CTA missing");
-    assert(productHtml.includes('Mám záujem o väčší stojan'), "Large stand carousel CTA missing");
+    for (const photo of ["stand-rose-hq-", "stand-bunca-linden-hq-", "stand-arcana-aiden-hq-"]) {
+      assert(productHtml.includes(photo), "User-supplied stand photo missing: " + photo);
+    }
+    assert(productHtml.includes('data-product-stand-cards'), "New stand variant cards missing");
+    for (const title of ['S verzia', 'M verzia', 'L verzia', 'cca 40 × 20 cm', 'cca 60 × 30 cm', '40 €', '45 €', 'Na vyžiadanie']) {
+      assert(productHtml.includes(title), "Stand variant content missing: " + title);
+    }
     assert(markup.includes('object-cover'), "Stand guide photo should fill its frame");
   } else {
     assert(productHtml.includes('Vyberte si variant a objednajte si target pre svojho psíka.'), "Target detail short description missing");

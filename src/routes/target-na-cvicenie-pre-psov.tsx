@@ -4,8 +4,6 @@ import {
   ArrowLeft,
   Check,
   ChevronRight,
-  LoaderCircle,
-  Send,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -15,9 +13,9 @@ import { ProductDeliveryDetails } from "@/components/site/ProductDeliveryDetails
 import { ProductValueHighlights } from "@/components/site/ProductValueHighlights";
 import { EdgePhotoCarousel } from "@/components/site/EdgePhotoCarousel";
 import { FormDialog } from "@/components/site/FormDialog";
-import { PhoneField } from "@/components/site/PhoneField";
+import { ProductInquirySteps } from "@/components/site/ProductInquirySteps";
+import { ProductInquiryContact } from "@/components/site/ProductInquiryContact";
 import { phoneFromForm } from "@/lib/phone";
-import { PrivacyConsentCheckbox } from "@/components/site/PrivacyConsentCheckbox";
 import { submitProductInquiry } from "@/lib/product-inquiry";
 import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
 import targetLargeDetail from "@/assets/products/target-large-detail.jpeg";
@@ -118,6 +116,7 @@ function TargetPage() {
   const submissionInFlight = useRef(false);
   const [size, setSize] = useState<TargetSize>("large");
   const [modalOpen, setModalOpen] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -364,136 +363,62 @@ function TargetPage() {
             </p>
           </div>
         ) : (
-          <form onSubmit={sendInquiry}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block font-display text-sm font-bold text-forest sm:col-span-2">
-                Meno a priezvisko *
-                <input
-                  name="customer_name"
-                  defaultValue={customerName}
-                  onChange={(event) => setCustomerName(event.target.value)}
-                  autoComplete="name"
-                  required
-                  maxLength={160}
-                  className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
-                />
-              </label>
-              <PhoneField
-                id="target-phone"
-                value={phone}
-                onChange={setPhone}
-              />
-              <label className="block font-display text-sm font-bold text-forest">
-                E-mail *
-                <input
-                  name="email"
-                  defaultValue={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  type="email"
-                  autoComplete="email"
-                  required
-                  maxLength={200}
-                  className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
-                />
-              </label>
-              <label className="block font-display text-sm font-bold text-forest sm:col-span-2">
-                Odkiaľ ste? (mesto, PSČ) *
-                <input
-                  name="customer_location"
-                  autoComplete="off"
-                  placeholder="napr. Košice, 040 01"
-                  required
-                  maxLength={120}
-                  pattern="[^,]{2,80},[ ]*.{2,20}"
-                  title="Napíšte mesto a PSČ oddelené čiarkou, napr. Košice, 040 01"
-                  className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
-                />
-              </label>
-            </div>
-
-            <label className="absolute -left-[10000px] top-auto size-px overflow-hidden" aria-hidden="true">
-              Firma
-              <input
-                value={company}
-                onChange={(event) => setCompany(event.target.value)}
-                tabIndex={-1}
-                autoComplete="off"
-              />
-            </label>
-
-            <div className="mt-5">
-              <p className="font-display text-sm font-bold text-forest">Veľkosť targetu *</p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                {SIZE_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setSize(option.value)}
-                    className={`rounded-2xl border-2 p-3 text-left transition-colors duration-75 ${
-                      size === option.value
-                        ? "border-coral bg-coral-soft/25"
-                        : "border-forest/10 bg-background"
-                    }`}
-                  >
-                    <span className="font-display text-sm font-bold text-forest">{option.label}</span>
-                    <span className="mt-1 block text-xs text-forest/60">{option.detail}</span>
-                  </button>
-                ))}
+          <ProductInquirySteps step={step} onStepChange={(next) => { setStep(next); setFormError(""); }}
+            titles={["Rozmer targetu", "Úprava na mieru", "Kontakt"]}
+            stepOne={(
+              <div className="space-y-5">
+                <div>
+                  <p className="font-display text-sm font-bold text-forest">Veľkosť targetu *</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {SIZE_OPTIONS.map((option) => (
+                      <button key={option.value} type="button" onClick={() => setSize(option.value)}
+                        aria-pressed={size === option.value}
+                        className={size === option.value
+                          ? "rounded-2xl border-2 border-coral bg-coral-soft/25 p-3 text-left"
+                          : "rounded-2xl border-2 border-forest/10 bg-background p-3 text-left"}>
+                        <span className="font-display text-sm font-bold text-forest">{option.label}</span>
+                        <span className="mt-1 block text-xs text-forest/60">{option.detail}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <label className="block font-display text-sm font-bold text-forest">
+                  Požadovaná výška targetu v cm (voliteľné)
+                  <input value={height} onChange={(event) => { setHeight(event.target.value); setFormError(""); }}
+                    inputMode="decimal" placeholder="5"
+                    className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral" />
+                  <span className="mt-1 block font-sans text-xs font-normal text-forest/55">
+                    Ak výšku necháte prázdnu, platí štandard približne 5 cm.
+                  </span>
+                </label>
               </div>
-            </div>
-
-            <label className="mt-5 block font-display text-sm font-bold text-forest">
-              Požadovaná výška v cm
-              <input
-                value={height}
-                onChange={(event) => setHeight(event.target.value)}
-                inputMode="decimal"
-                placeholder="5"
-                className="mt-2 w-full rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
-              />
-              <span className="mt-1.5 block font-sans text-xs font-normal text-forest/55">
-                Nepovinné. Najbežnejší model má výšku približne 5 cm.
-              </span>
-            </label>
-
-            <label className="mt-5 block font-display text-sm font-bold text-forest">
-              Poznámka
-              <textarea
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-                maxLength={1000}
-                rows={3}
-                className="mt-2 w-full resize-none rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
-                placeholder="Čokoľvek, čo máme pri výrobe vedieť."
-              />
-            </label>
-
-            <div className="mt-5">
-              <PrivacyConsentCheckbox />
-            </div>
-
-            {formError && (
-              <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-                {formError}
-              </p>
             )}
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn-coral mt-5 flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isSubmitting ? (
-                <>
-                  <LoaderCircle className="size-4 animate-spin" /> Odosielam
-                </>
-              ) : (
-                <>
-                  <Send className="size-4" /> Odoslať záujem
-                </>
-              )}
-            </button>
-          </form>
+            stepTwo={(
+              <label className="block font-display text-sm font-bold text-forest">
+                Poznámka k výrobe (voliteľné)
+                <textarea value={note} onChange={(event) => setNote(event.target.value)}
+                  maxLength={1000} rows={4}
+                  className="mt-2 w-full resize-none rounded-2xl border border-forest/15 bg-background px-4 py-3 font-sans text-base font-normal outline-none focus:border-coral"
+                  placeholder="Čokoľvek, čo máme pri výrobe vedieť." />
+                <span className="mt-1 block font-sans text-xs font-normal text-forest/55">
+                  Pokiaľ nechcete žiadnu úpravu, pokračujte bez poznámky.
+                </span>
+              </label>
+            )}
+            stepThree={(
+              <ProductInquiryContact phoneId="target-phone"
+                customerName={customerName} setCustomerName={setCustomerName}
+                phone={phone} setPhone={setPhone}
+                email={email} setEmail={setEmail}
+                company={company} setCompany={setCompany} />
+            )}
+            onNext={() => {
+              const value = height.trim() ? Number(height.replace(",", ".")) : null;
+              const valid = value === null || (Number.isFinite(value) && value >= 3 && value <= 60);
+              setFormError(valid ? "" : "Zadajte výšku targetu v centimetroch (3 až 60) alebo nechajte pole prázdne.");
+              return valid;
+            }}
+            onSubmit={sendInquiry} error={formError} submitting={isSubmitting} />
         )}
       </FormDialog>
     </div>
