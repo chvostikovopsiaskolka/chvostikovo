@@ -209,7 +209,7 @@ function PuppyDaycarePage() {
                 </button>
               </div>
               <button type="button" onClick={scrollToBenefits}
-                className="hero-cta-primary mt-6 hidden w-full max-w-[440px] gap-2 lg:inline-flex">
+                className="hero-cta-primary hero-cta-desktop-only mt-6 w-full max-w-[440px] gap-2">
                 Viac o škôlke
                 <ArrowDown className="size-4" aria-hidden="true" />
               </button>
