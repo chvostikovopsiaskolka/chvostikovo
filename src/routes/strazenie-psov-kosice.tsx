@@ -112,17 +112,18 @@ function DogSittingPage() {
                   <Clock3 className="size-4" aria-hidden="true" /> Po–Pia 7:00–17:00
                 </span>
               </div>
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+              <div className="hero-cta-pair mx-auto mt-5 lg:mx-0">
                 <a
                   href="#informacie"
                   data-marketing-event="inquiry_cta"
                   data-tracking-source="dog_sitting_page_cta"
-                  className="btn-coral"
+                  className="hero-cta-primary"
                 >
-                  Chcem sa informovať
+                  Mám záujem
                 </a>
-                <a href="/#starostlivost" className="inline-flex items-center gap-1.5 font-semibold text-forest underline-offset-4 hover:underline">
-                  Zistiť viac o škôlke <ArrowRight className="size-4" aria-hidden="true" />
+                <a href="/#starostlivost" className="hero-cta-secondary">
+                  <span>Viac o škôlke</span>
+                  <ArrowRight className="hero-cta-icon" aria-hidden="true" />
                 </a>
               </div>
             </div>
