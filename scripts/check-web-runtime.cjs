@@ -208,7 +208,7 @@ const failures = [];
                 const cases = [
                   {type:'small', label:'S verzia', price:'40 €', photo:'MIA'},
                   {type:'large', label:'M verzia', price:'45 €', photo:'CORI'},
-                  {type:'extra_large', label:'L verzia', price:'Na vyžiadanie', photo:'WOODY'},
+                  {type:'extra_large', label:'L verzia', price:'Na vyžiadanie', photo:'ROSE'},
                 ];
                 for (const item of cases) {
                   const card = cards.locator('article[data-stand-size="' + item.type + '"]');
@@ -281,7 +281,7 @@ const failures = [];
               await productPage.keyboard.press('Escape');
               await formDialog.waitFor({state:'hidden'});
               const galleryTrack=productPage.locator('[data-photo-carousel="' + (route.includes('stojan')?'stand':'target') + '"]');
-              if (await galleryTrack.count() !== 1 || await galleryTrack.locator('figure').count() < (route.includes('stojan')?13:8)) {
+              if (await galleryTrack.count() !== 1 || await galleryTrack.locator('figure').count() !== (route.includes('stojan')?16:8)) {
                 throw new Error('Product gallery missing: '+route);
               }
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product routes to retired checkout');
