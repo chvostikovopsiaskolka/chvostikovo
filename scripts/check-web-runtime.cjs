@@ -55,6 +55,8 @@ const failures = [];
               const hero = page.locator('section.hero-safe-top').first();
               const primary = hero.locator('.hero-cta-primary:visible').first();
               if (!await primary.isVisible()) throw new Error('Hero prominent CTA missing at ' + width);
+              if (await hero.locator('.hero-cta-primary:visible').count() !== 1)
+                throw new Error('Hero must display exactly one prominent CTA at ' + width);
               const ctaPair = hero.locator('.hero-cta-pair:visible');
               if (width < 1024) {
                 if (!await ctaPair.isVisible()) throw new Error('Mobile Hero CTA pair missing at ' + width);
