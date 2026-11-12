@@ -213,7 +213,7 @@ const failures = [];
                 for (const item of cases) {
                   const card = cards.locator('article[data-stand-size="' + item.type + '"]');
                   const cardCount = await card.count();
-                  const cardText = cardCount === 1 ? await card.innerText() : '(card not found)';
+                  const cardText = cardCount === 1 ? await card.textContent() : '(card not found)';
                   if (cardCount !== 1 || !cardText.includes(item.label) || !cardText.includes(item.price)) {
                     throw new Error('Stand card label/price wrong: '+item.label+
                       ' count='+cardCount+' text='+JSON.stringify(cardText.slice(0,250)));
