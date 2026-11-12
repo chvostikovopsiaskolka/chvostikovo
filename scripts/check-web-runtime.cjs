@@ -380,6 +380,9 @@ const failures = [];
                     throw new Error('Target photo missing: '+variant.type);
                   const cardImageHeight=await card.locator('img').evaluate(el=>el.getBoundingClientRect().height);
                   if (cardImageHeight < 300)throw new Error('Target photo needs tall product style');
+                  const photoPosition=await card.locator('img').evaluate(el=>getComputedStyle(el).objectPosition);
+                  if (photoPosition !== (variant.type === 'small' ? '50% 100%' : '50% 49%'))
+                    throw new Error('Target crop mismatch; small should reveal feet and large stay unchanged: '+variant.type+' '+photoPosition);
                   const badges=card.locator('[aria-label="Vlastnosti targetu"] span');
                   if (await badges.count()!==3)throw new Error('Target needs three photo badges');
                   const stars=card.locator('[data-target-decorative-stars] svg.lucide-star');

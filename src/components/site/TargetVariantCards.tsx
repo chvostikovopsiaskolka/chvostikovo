@@ -52,7 +52,7 @@ export function TargetVariantCards({ onInterest }: { onInterest: (size: TargetSi
           <div className="relative isolate overflow-hidden">
             <img src={variant.image} alt={variant.alt} loading="eager" decoding="async"
               className="h-80 w-full object-cover sm:h-[23rem] lg:h-[24rem]"
-              style={{ objectPosition: "50% 49%" }} />
+              style={{ objectPosition: variant.value === "small" ? "50% 100%" : "50% 49%" }} />
             <div className="pointer-events-none absolute inset-x-2 bottom-2 z-10 sm:inset-x-3 sm:bottom-3">
               <div aria-label="Vlastnosti targetu" className="flex items-stretch gap-1">
                 {FEATURES.map(({ icon: Icon, label }) => (
