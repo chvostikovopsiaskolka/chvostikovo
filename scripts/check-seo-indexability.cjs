@@ -238,7 +238,8 @@ for (const spec of [
     for (const section of ['data-stand-gallery-section','data-stand-breeds','data-stand-benefits','data-stand-inline-form','data-product-step-progress']) {
       assert(productHtml.includes(section), 'Missing stand page section or form progress: '+section);
     }
-    for (const title of ['„S“', '„M“', '„L“', 'cca 40 × 20 cm', 'cca 60 × 30 cm', '40 €', '45 €', '50 €']) {
+    assert(productHtml.includes('data-stand-card-heading'), 'Stand card label row missing');
+    for (const title of ['verzia', 'cca 40 × 20 cm', 'cca 60 × 30 cm', '40 €', '45 €', '50 €']) {
       assert(productHtml.includes(title), "Stand variant content missing: " + title);
     }
     assert(markup.includes('object-cover'), "Stand guide photo should fill its frame");
