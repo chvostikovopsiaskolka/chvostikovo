@@ -146,7 +146,7 @@ function LeadLandingPage() {
                 ))}
               </div>
 
-              <div className="hero-cta-pair mx-auto mt-5 sm:mt-6 lg:hidden">
+              <div className="hero-cta-pair hero-cta-pair-mobile mx-auto mt-5 sm:mt-6 lg:hidden">
                 <button
                   type="button"
                   onClick={() => scrollToLeadForm("lead_landing_hero_interest")}
