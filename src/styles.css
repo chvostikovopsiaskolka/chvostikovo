@@ -703,6 +703,12 @@
     pointer-events: none !important;
     visibility: hidden !important;
   }
+  /* Product photo viewer is its own Dialog; keep dock clear of the pinch area and arrows. */
+  body:has([data-stand-lightbox]) .mobile-dock {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
 }
 /* Portrait and tablet Hero spacing remains identical to the previous layout,
    while the absolute paw background now reaches under the notch. */

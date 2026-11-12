@@ -263,9 +263,9 @@ const failures = [];
                   throw new Error('Stand carousel must swipe on mobile');
                 }
                 const cases = [
-                  {type:'small', label:'S verzia', price:'40 €', photo:'MIA'},
-                  {type:'large', label:'M verzia', price:'45 €', photo:'CORI'},
-                  {type:'extra_large', label:'L verzia', price:'50 €', photo:'ROSE'},
+                  {type:'small', label:'„S“ verzia', price:'40 €', photo:'MIA'},
+                  {type:'large', label:'„M“ verzia', price:'45 €', photo:'CORI'},
+                  {type:'extra_large', label:'„L“ verzia', price:'50 €', photo:'ROSE'},
                 ];
                 for (const item of cases) {
                   const card = cards.locator('article[data-stand-size="' + item.type + '"]');
@@ -289,9 +289,50 @@ const failures = [];
                   if (await item.locator('svg.lucide-star').count() !== 5) throw new Error('Five decorative filled stars must appear above first feature');
                   const fill=await item.locator('svg.lucide-star').first().getAttribute('class');
                   if (!fill?.includes('fill-current')) throw new Error('Product stars must be filled');
+                  const heading=item.locator('[data-stand-card-heading]');
+                  const label=heading.locator('p');
+                  const stars=heading.locator('[data-stand-decorative-stars]');
+                  const [labelBox,starBox,starStyle]=await Promise.all([
+                    label.boundingBox(),stars.boundingBox(),stars.evaluate(el=>getComputedStyle(el).color)]);
+                  if (!labelBox || !starBox || starBox.x<=labelBox.x+labelBox.width ||
+                      Math.abs(starBox.y-labelBox.y)>9) {
+                    throw new Error('Decorative stars must be at the right of S/M/L size label');
+                  }
+                  if (starStyle !== 'rgb(233, 182, 0)') throw new Error('Stand stars must be yellow, not coral');
+                  const version=label.locator('span').nth(1);
+                  if (await version.textContent() !== 'verzia' ||
+                      await version.evaluate(el=>getComputedStyle(el).color) !== 'rgb(24, 24, 24)')
+                    throw new Error('Stand version must be black beside the quoted size');
                 }
                 if (await productPage.getByText('Recenzie spokojných zákazníkov čoskoro').count()) throw new Error('No review teaser on stand detail');
                 if (await productPage.getByText('Potiahnite do strany').count()) throw new Error('Obvious swipe instruction should be removed');
+                const stepList=productPage.locator('[data-stand-benefit-steps] ol');
+                const items=stepList.locator('[data-stand-benefit-step]');
+                if (await items.count()!==3) throw new Error('Three stand benefits expected');
+                const stepBoxes=await items.evaluateAll(nodes=>nodes.map(node=>{
+                  const r=node.getBoundingClientRect();
+                  return {x:r.x,y:r.y,width:r.width,height:r.height};
+                }));
+                if (width===390) {
+                  if (!(stepBoxes[0].y+stepBoxes[0].height<stepBoxes[1].y+5 &&
+                        stepBoxes[1].y+stepBoxes[1].height<stepBoxes[2].y+5))
+                    throw new Error('Mobile stand benefits must stack vertically');
+                  for(const item of await items.all()){
+                    if(!await item.locator('img').isVisible()) throw new Error('Mobile stand benefit needs circular photo');
+                    const round=await item.locator('img').evaluate(el=>{
+                      const radius=getComputedStyle(el).borderTopLeftRadius;
+                      const size=el.getBoundingClientRect().width;
+                      return radius.includes('%') ? parseFloat(radius)>=50 : parseFloat(radius)>=size/2-1;
+                    });
+                    if(!round)throw new Error('Benefit photos must be circular');
+                    const size=await item.locator('p').evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
+                    if(size<14) throw new Error('Mobile benefit text too small');
+                  }
+                }else{
+                  if (Math.abs(stepBoxes[0].y-stepBoxes[1].y)>5 ||
+                      Math.abs(stepBoxes[1].y-stepBoxes[2].y)>5)
+                    throw new Error('Desktop benefit timeline must remain horizontal');
+                }
                 if (await productPage.locator('section[data-stand-gallery-section]').count() !== 1
                     || await productPage.locator('section[data-stand-breeds]').count() !== 1
                     || await productPage.locator('section[data-stand-benefits]').count() !== 1) {
@@ -411,6 +452,42 @@ const failures = [];
             const articleLightbox = productPage.locator('[data-stand-lightbox]');
             await articleLightbox.waitFor({state:'visible'});
             if (!await articleLightbox.locator('img').first().isVisible()) throw new Error('Guide lightbox has no photo');
+            if (await articleLightbox.getByText('Priblížte si fotografiu').count())
+              throw new Error('Obsolete zoom instructions visible');
+            if (await articleLightbox.getByRole('button',{name:'Priblížiť fotografiu'}).count() ||
+                await articleLightbox.getByRole('button',{name:'Oddialiť fotografiu'}).count())
+              throw new Error('Stand viewer must not show zoom buttons');
+            const viewport=articleLightbox.locator('[data-stand-photo-viewport]');
+            await articleLightbox.locator('[data-stand-photo-viewport][data-pinch-ready="true"]').waitFor({state:'attached'});
+            if (await viewport.getAttribute('data-pinch-enabled')!=='true')
+              throw new Error('Pinch-ready stand image viewport missing');
+            if (await viewport.evaluate(el=>getComputedStyle(el).touchAction)!=='none')
+              throw new Error('Touch viewport must allow custom pinch/pan');
+            if (width===390) {
+              const pinch=await viewport.evaluate(el=>{
+                // Browser-independent synthetic touch-list input: WebKit desktop
+                // rejects the Touch constructor, even when touch handlers work.
+                // Dispatch real event types with the TouchList shape our handlers use.
+                const r=el.getBoundingClientRect(), y=r.y+r.height/2, x=r.x+r.width/2;
+                const emit=(name,points)=>{
+                  const touches={length:points.length,item:index=>points[index]??null};
+                  const event=new Event(name,{bubbles:true,cancelable:true});
+                  Object.defineProperty(event,'touches',{value:touches});
+                  return el.dispatchEvent(event);
+                };
+                emit('touchstart',[{clientX:x-35,clientY:y},{clientX:x+35,clientY:y}]);
+                emit('touchmove',[{clientX:x-100,clientY:y},{clientX:x+100,clientY:y}]);
+                const zoomAfterMove=Number(el.dataset.zoom);
+                emit('touchend',[]);
+                return {zoomAfterMove,zoomAfterEnd:Number(el.dataset.zoom)};
+              });
+              if (!Number.isFinite(pinch.zoomAfterMove) || pinch.zoomAfterMove<=1.3 ||
+                  pinch.zoomAfterEnd<=1.3)
+                throw new Error('Two-finger stand image pinch must actually scale: '+JSON.stringify(pinch));
+              if (await productPage.locator('.mobile-dock').isVisible())
+                throw new Error('Mobile dock must not obstruct photo viewer navigation');
+            }
+
             await productPage.keyboard.press('Escape');
             await articleLightbox.waitFor({state:'hidden'});
             if (width === 390) {

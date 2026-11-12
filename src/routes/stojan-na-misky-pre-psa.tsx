@@ -9,6 +9,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { StandGalleryLoop } from "@/components/site/StandGalleryLoop";
 import { StandVariantCards } from "@/components/site/StandVariantCards";
+import { StandBenefitSteps } from "@/components/site/StandBenefitSteps";
 import { ProductInquirySteps } from "@/components/site/ProductInquirySteps";
 import { ProductInquiryContact } from "@/components/site/ProductInquiryContact";
 import { FormDialog } from "@/components/site/FormDialog";
@@ -366,27 +367,7 @@ function BowlStandPage() {
               <h2 id="stand-value-heading" className="section-title mx-auto mt-3 max-w-xl text-center text-3xl sm:text-4xl">
                 Tri praktické výhody stojana
               </h2>
-              <div className="relative mt-8 rounded-[1.75rem] border border-forest/15 bg-[#e2f0eb] px-3 py-6 sm:mt-10 sm:px-8 sm:py-9">
-                <div className="pointer-events-none absolute top-[48px] right-[16%] left-[16%] h-[2px] bg-forest/25 sm:top-[59px]" aria-hidden="true" />
-                <div className="relative grid grid-cols-3 gap-2 sm:gap-6">
-                  {[
-                    { number: "01", heading: "Misky majú svoje miesto",
-                      description: "Stojan drží obe misky pohromade, aby sa pri kŕmení neposúvali samostatne po podlahe." },
-                    { number: "02", heading: "Jednoduché čistenie",
-                      description: "Neporiadok okolo misiek nemusíte zložito riešiť. Misku vyberiete, umyjete a povrch stojana stačí utrieť." },
-                    { number: "03", heading: "Výška podľa psíka",
-                      description: "Stačí nám výška psíka v kohútiku. Výšku nôh prispôsobíme konkrétnemu psíkovi." },
-                  ].map((item) => (
-                    <article key={item.number} className="min-w-0 text-center">
-                      <span className="relative mx-auto flex size-12 items-center justify-center rounded-full border-[3px] border-white bg-forest font-display text-sm font-bold text-lime-200 shadow-card sm:size-15 sm:text-lg">
-                        {item.number}
-                      </span>
-                      <h3 className="mx-auto mt-3 max-w-[15rem] font-display text-xs font-bold leading-snug text-forest sm:mt-5 sm:text-base">{item.heading}</h3>
-                      <p className="mx-auto mt-2 max-w-[16rem] text-[11px] leading-relaxed text-forest/75 sm:text-sm">{item.description}</p>
-                    </article>
-                  ))}
-                </div>
-              </div>
+              <StandBenefitSteps />
               <div className="mt-8 flex flex-col items-center gap-3 sm:mt-10 sm:flex-row sm:justify-center">
                 <button type="button" onClick={() => openOrderOptions()}
                   className="btn-coral inline-flex min-h-12 items-center justify-center gap-2">
