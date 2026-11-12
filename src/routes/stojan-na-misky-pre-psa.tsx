@@ -482,7 +482,7 @@ function BowlStandPage() {
             </p>
           </div>
         ) : (
-{renderInquiry("stand-phone-modal")}
+          renderInquiry("stand-phone-modal")
         )}
       </FormDialog>
       <Footer />
