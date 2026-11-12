@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v424';
-const APP_VERSION='2.0.97';
+const APP_BUILD='v425';
+const APP_VERSION='2.0.98';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -4522,9 +4522,14 @@ function installVaccinationViewerZoomV244(modal){
     return SUPABASE_URL+'/storage/v1/object/public/chvostikovo-bulletin-public/'+path.split('/').map(encodeURIComponent).join('/');
   }
   const failedNoticePreviewsV423=new Set();
+  // One pre-sidecar public bulletin has a verified, immutable 37 KB preview.
+  // The original PNG remains unchanged and is still used in the full article.
+  const legacyZbierkaOriginalV425='7d062ba9-eb65-4586-9623-9a67f33a2706/81b2588c-1f51-4e16-9d65-16c288c0b054.png';
+  const legacyZbierkaPreviewV425='/notice-previews/zbierka-v425.webp';
   function noticePreviewPhotoV423(path){
-    const preview=typeof path==='string'?path.replace(/\.with-preview-v423\.(?:jpg|jpeg|png|webp)$/i,'.preview-v423.webp'):path;
-    return safePhoto(failedNoticePreviewsV423.has(preview)?path:preview);
+    const preview=path===legacyZbierkaOriginalV425?legacyZbierkaPreviewV425
+      :safePhoto(typeof path==='string'?path.replace(/\.with-preview-v423\.(?:jpg|jpeg|png|webp)$/i,'.preview-v423.webp'):path);
+    return failedNoticePreviewsV423.has(preview)?safePhoto(path):preview;
   }
   function safeLink(s){try{const u=new URL(String(s||''));return u.protocol==='https:'&&u.hostname&&!u.username&&!u.password?u.href:''}catch(_){return ''}}
   function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
@@ -4602,7 +4607,7 @@ function installVaccinationViewerZoomV244(modal){
       img.addEventListener('error',()=>{
         const original=safePhoto(row.image_path);
         if(original&&img.src!==original){
-          failedNoticePreviewsV423.add(row.image_path.replace(/\.with-preview-v423\.(?:jpg|jpeg|png|webp)$/i,'.preview-v423.webp'));
+          failedNoticePreviewsV423.add(photo);
           img.src=original;return;
         }
         img.remove();thumb.classList.add('customer-notice-photo-failed-v406');
