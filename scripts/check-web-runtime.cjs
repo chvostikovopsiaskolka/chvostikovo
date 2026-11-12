@@ -265,7 +265,7 @@ const failures = [];
                 const cases = [
                   {type:'small', label:'S verzia', price:'40 €', photo:'MIA'},
                   {type:'large', label:'M verzia', price:'45 €', photo:'CORI'},
-                  {type:'extra_large', label:'L verzia', price:'Na vyžiadanie', photo:'ROSE'},
+                  {type:'extra_large', label:'L verzia', price:'50 €', photo:'ROSE'},
                 ];
                 for (const item of cases) {
                   const card = cards.locator('article[data-stand-size="' + item.type + '"]');
@@ -282,12 +282,36 @@ const failures = [];
                     throw new Error('Stand feature badges missing: '+item.label);
                   }
                 }
+                for (const type of ['small', 'large', 'extra_large']) {
+                  const item = cards.locator('article[data-stand-size="' + type + '"]');
+                  const photoHeight = await item.locator('img').evaluate(el => el.getBoundingClientRect().height);
+                  if (photoHeight < 300) throw new Error('Stand photo should be tall enough to show whole stand: ' + type);
+                  if (await item.locator('svg.lucide-star').count() !== 5) throw new Error('Five decorative filled stars must appear above first feature');
+                  const fill=await item.locator('svg.lucide-star').first().getAttribute('class');
+                  if (!fill?.includes('fill-current')) throw new Error('Product stars must be filled');
+                }
+                if (await productPage.getByText('Recenzie spokojných zákazníkov čoskoro').count()) throw new Error('No review teaser on stand detail');
+                if (await productPage.getByText('Potiahnite do strany').count()) throw new Error('Obvious swipe instruction should be removed');
+                if (await productPage.locator('section[data-stand-gallery-section]').count() !== 1
+                    || await productPage.locator('section[data-stand-breeds]').count() !== 1
+                    || await productPage.locator('section[data-stand-benefits]').count() !== 1) {
+                  throw new Error('Stand content sections missing');
+                }
+                const order=await productPage.locator('section[data-stand-gallery-section],section[data-stand-breeds],section[data-stand-benefits]').evaluateAll(nodes=>nodes.map(el=>el.getAttribute('data-stand-gallery-section') !== null?'gallery':el.hasAttribute('data-stand-breeds')?'breeds':'benefits'));
+                if (order.join(',') !== 'gallery,breeds,benefits') throw new Error('Stand content order wrong: '+order);
+                const captions=await productPage.locator('[data-photo-carousel="stand"] figcaption').allTextContents();
+                for(const [n, name] of ['MIA','CORI','ROSE','BUNCA & LINDEN','ARCANA & AIDEN'].entries()){
+                  if(!captions[n]?.startsWith(name))throw new Error('Newest stand gallery order wrong: '+name);
+                }
                 const card = cards.locator('article[data-stand-size="large"]');
                 await card.getByRole('button', {name:/M verzia/i}).click();
                 const dlg = productPage.getByRole('dialog',{name:'Mám záujem o stojan'});
                 await dlg.waitFor({state:'visible'});
                 if (await dlg.getAttribute('data-form-dialog') !== 'simple-v300') throw new Error('Stand needs stable iOS FormDialog');
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="1"]').count() !== 1) throw new Error('Stand step 1 missing');
+                const progress = dlg.getByRole('progressbar',{name:'Priebeh formulára'});
+                if (await progress.count() !== 1 || await progress.getAttribute('aria-valuenow') !== '1') throw new Error('Stand step progress missing');
+                if (await dlg.locator('[aria-label="Postup dopytu"]').count()) throw new Error('Old three-box wizard still present');
                 const selected = dlg.locator('[data-stand-size-picker="inquiry"] button[aria-pressed="true"]');
                 if (!(await selected.innerText()).includes('M verzia')) throw new Error('Stand CTA did not preselect M');
                 await dlg.getByPlaceholder('napr. 58').fill('65');
@@ -337,6 +361,12 @@ const failures = [];
               }
               await productPage.keyboard.press('Escape');
               await formDialog.waitFor({state:'hidden'});
+              if (route.includes('stojan')) {
+                const openForm=productPage.locator('[data-stand-inline-form]');
+                if (!await openForm.locator('[data-product-inquiry-steps]').count()) throw new Error('Bottom inline stand form missing');
+                if (await openForm.locator('[data-product-inquiry-steps]').getAttribute('data-step') !== '3') throw new Error('Bottom form and modal must share progress');
+                if (await productPage.locator('section[data-stand-gallery-section] button:has-text("Mám záujem o stojan")').count()) throw new Error('Gallery should precede product explanation without stray CTA');
+              }
               const galleryTrack=productPage.locator('[data-photo-carousel="' + (route.includes('stojan')?'stand':'target') + '"]');
               if (await galleryTrack.count() !== 1 || await galleryTrack.locator('figure').count() !== (route.includes('stojan')?16:8)) {
                 throw new Error('Product gallery missing: '+route);
