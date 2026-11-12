@@ -47,47 +47,65 @@ const failures = [];
           await cookieButton.click();
           await page.waitForTimeout(300);
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
-          // Shared Hero CTA visual regression (all four Slovak marketing routes):
-          // 320/375/390px phones + 1440px desktop, Chromium and Safari WebKit.
-          // Read layout only: no live lead submission, modal or conversion event.
+          // Shared Slovak Hero CTA: mobile pair, desktop single prominent info CTA.
+          // Layout regression 320/375/390/1440 in Chromium and Safari WebKit.
           if (!bellaris && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname)) {
             for (const width of [320, 375, 390, 1440]) {
               await page.setViewportSize({ width, height: width >= 1024 ? 900 : 844 });
-              const cta = page.locator('.hero-cta-pair:visible').first();
-              if (!await cta.isVisible()) throw new Error('Hero CTA pair missing at ' + width);
-              const info = await cta.evaluate(el => {
-                const primary = el.querySelector('.hero-cta-primary');
-                const secondary = el.querySelector('.hero-cta-secondary');
-                const label = secondary?.querySelector('span');
-                const icon = secondary?.querySelector('.hero-cta-icon');
-                if (!primary || !secondary || !label || !icon) return null;
-                const b = el.getBoundingClientRect();
-                const p = primary.getBoundingClientRect();
-                const s = secondary.getBoundingClientRect();
-                const t = label.getBoundingClientRect();
-                const i = icon.getBoundingClientRect();
-                return {
-                  pairLeft: b.left, pairRight: b.right,
-                  primaryWidth: p.width, secondaryWidth: s.width,
-                  labelRight: t.right, iconLeft: i.left, iconRight: i.right,
-                  secondaryRight: s.right,
-                  noWrap: getComputedStyle(secondary).whiteSpace === 'nowrap',
-                  glow: getComputedStyle(primary).boxShadow,
-                  text: secondary.textContent?.trim(),
-                  viewportWidth: window.innerWidth,
-                };
-              });
-              if (!info || !info.noWrap || !info.text?.includes('Viac o škôlke'))
-                throw new Error('Hero secondary text must remain a single line: ' + width);
-              if (info.primaryWidth <= info.secondaryWidth * 1.35)
-                throw new Error('Hero primary CTA is not visibly wider: ' + width);
-              if (info.pairLeft < -1 || info.pairRight > info.viewportWidth + 1)
-                throw new Error('Hero CTA pair extends past viewport: ' + width);
-              if (info.labelRight > info.iconLeft + 1 || info.iconRight > info.secondaryRight - 2)
-                throw new Error('Hero secondary label or arrow overflows: ' + width);
-              if (!info.glow || info.glow === 'none') throw new Error('Hero interest CTA glow is missing');
+              const hero = page.locator('section.hero-safe-top').first();
+              const primary = hero.locator('.hero-cta-primary:visible').first();
+              if (!await primary.isVisible()) throw new Error('Hero prominent CTA missing at ' + width);
+              const ctaPair = hero.locator('.hero-cta-pair:visible');
+              if (width < 1024) {
+                if (!await ctaPair.isVisible()) throw new Error('Mobile Hero CTA pair missing at ' + width);
+                const shape = await ctaPair.evaluate(el => {
+                  const primary = el.querySelector('.hero-cta-primary');
+                  const secondary = el.querySelector('.hero-cta-secondary');
+                  const label = secondary?.querySelector('span');
+                  const icon = secondary?.querySelector('.hero-cta-icon');
+                  if (!primary || !secondary || !label || !icon) return null;
+                  const b = el.getBoundingClientRect(), p = primary.getBoundingClientRect(), s = secondary.getBoundingClientRect();
+                  return {
+                    viewportWidth: window.innerWidth, left: b.left, right: b.right,
+                    primaryWidth: p.width, secondaryWidth: s.width, text: secondary.textContent?.trim(),
+                    nowrap: getComputedStyle(secondary).whiteSpace === 'nowrap',
+                    labelRight: label.getBoundingClientRect().right,
+                    iconLeft: icon.getBoundingClientRect().left,
+                    iconRight: icon.getBoundingClientRect().right,
+                    secondaryRight: s.right,
+                  };
+                });
+                if (!shape || !shape.nowrap || !shape.text?.includes('Viac o škôlke'))
+                  throw new Error('Mobile second CTA must stay in one line: ' + width);
+                if (shape.primaryWidth <= shape.secondaryWidth * 1.35)
+                  throw new Error('Mobile interest CTA must be wider: ' + width);
+                if (shape.left < -1 || shape.right > shape.viewportWidth + 1)
+                  throw new Error('CTA pair extends past viewport: ' + width);
+                if (shape.labelRight > shape.iconLeft + 1 || shape.iconRight > shape.secondaryRight - 2)
+                  throw new Error('CTA label or arrow overlaps: ' + width);
+              } else {
+                if (await ctaPair.count() !== 0) throw new Error('Desktop must hide the interest CTA pair');
+                if (!(await primary.innerText()).includes('Viac o škôlke'))
+                  throw new Error('Desktop Hero must only offer the prominent learn-more CTA');
+                if (!await hero.locator('[data-lead-step-form]').first().isVisible())
+                  throw new Error('Desktop guided form missing beside Hero');
+              }
+              if ((await primary.evaluate(el => getComputedStyle(el).boxShadow)) === 'none')
+                throw new Error('Primary CTA glow missing: ' + width);
             }
             await page.setViewportSize({ width: 390, height: 844 });
+            if (!restricted) {
+              const entry = url.pathname === '/'
+                ? page.locator('section.hero-safe-top .hero-cta-primary:visible').first()
+                : page.locator('.mobile-dock .mobile-dock-apply').first();
+              await entry.click();
+              const modal = page.getByRole('dialog');
+              await modal.waitFor({state: 'visible'});
+              if (!await modal.locator('[data-lead-step-form]').count())
+                throw new Error('Mobile interest CTA must open the guided enquiry modal');
+              await page.keyboard.press('Escape');
+              await modal.waitFor({state: 'hidden'});
+            }
           }
           // New LEAD pilot: one question at a time without any real submission.
           if (!bellaris && !restricted && url.pathname === '/psia-skolka-kosice/') {
