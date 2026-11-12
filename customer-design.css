@@ -1065,7 +1065,7 @@ html.customer-ios-v171.customer-liquid-v364 body::before{
  background-image:var(--liquid-paws-v364);background-size:300px 430px;
  background-position:0 0;background-repeat:repeat;
 }
-html.customer-ios-v171.customer-liquid-v364 #appView.app{position:relative;z-index:1}
+html.customer-ios-v171.customer-liquid-v364 #appView.app{position:relative;z-index:auto}
 html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
  position:fixed!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;
  transform:none!important;-webkit-transform:none!important;will-change:auto!important;
