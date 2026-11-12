@@ -258,7 +258,7 @@ export function Why() {
             <button
               type="button"
               onClick={() => {
-                trackMarketingInteraction("inquiry_cta", "home_why_application");
+                // Registration is a full application, not a short inquiry lead.
                 void trackCookielessInteraction("nav_click", "home_why_application");
                 setApplicationSent(false);
                 setOpen(true);
