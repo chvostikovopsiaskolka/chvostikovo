@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, Clock3 } from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Contact";
-import { ShortForm } from "./Forms";
+import { LeadStepForm } from "./LeadStepForm";
 import { BlogCard } from "./BlogCard";
 import { StandGalleryLoop } from "./StandGalleryLoop";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -195,7 +195,7 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                   či bude skupinová starostlivosť vášmu psíkovi vyhovovať.
                 </p>
                 <div className="mt-6 rounded-2xl bg-card p-4 ring-1 ring-forest/10 sm:p-6">
-                  <ShortForm trackingSource={trackingSource} />
+                  <LeadStepForm trackingSource={trackingSource} />
                 </div>
                 <nav aria-label="Ďalšie informácie o škôlke" className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <a href="/#cennik" onClick={pricingClick}

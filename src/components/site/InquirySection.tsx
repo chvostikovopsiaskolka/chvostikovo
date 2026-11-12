@@ -2,11 +2,11 @@ import { useState } from "react";
 import { ChevronRight, Phone } from "lucide-react";
 import { PHONE } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
-import { ShortForm } from "./Forms";
+import { LeadStepForm } from "./LeadStepForm";
 import { FormDialog } from "./FormDialog";
 import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 
-const INFO_TITLE = "Informujte sa o škôlke";
+const INFO_TITLE = "Čo hľadáte pre svojho psíka?";
 const INFO_SUBTITLE =
   "Vyplňte krátky nezáväzný formulár. Ozveme sa vám.";
 
@@ -30,9 +30,7 @@ export function InquiryCtaSection() {
       </div>
 
       <FormDialog open={open} onOpenChange={setOpen} title={INFO_TITLE} subtitle={INFO_SUBTITLE}>
-        <ShortForm
-          trackingSource="after_video"
-        />
+        <LeadStepForm questionInHeading trackingSource="after_video" />
       </FormDialog>
     </section>
   );
@@ -45,12 +43,12 @@ export function InquirySection() {
         <SchoolmatesFormCrown />
 
         <div className="relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8">
-          <h3 className="text-center text-2xl text-forest">Informujte sa o škôlke</h3>
+          <h3 className="text-center text-2xl text-forest">Čo hľadáte pre svojho psíka?</h3>
           <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
             {INFO_SUBTITLE}
           </p>
 
-          <ShortForm trackingSource="care_inline_mobile" />
+          <LeadStepForm questionInHeading trackingSource="care_inline_mobile" />
 
           <a
             href={`tel:${PHONE}`}

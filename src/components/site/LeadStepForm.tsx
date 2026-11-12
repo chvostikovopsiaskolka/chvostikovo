@@ -12,15 +12,15 @@ import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
 
-// New LEAD landing pilot only. Existing ShortForm, EN and puppy data contracts remain untouched.
-// UI label and stored interest_reason intentionally match; the server allowlist is additive.
+// Shared Slovak two-step enquiry across the public website. The stored interest_reason
+// intentionally matches the existing production Edge allowlist; route context stays in cta_source.
 export const LEAD_STEP_INTERESTS = [
   { value: "Chcem sa informovať o škôlke", lines: ["Chcem sa", "informovať", "o škôlke"] },
   { value: "Mám záujem využívať škôlku pravidelne", lines: ["Mám záujem", "pravidelne", "využívať škôlku"] },
   { value: "Mám záujem využívať škôlku občasne", lines: ["Mám záujem", "občasne", "využívať škôlku"] },
 ] as const;
 
-export function LeadStepForm({ trackingSource, onSent }: { trackingSource: string; onSent?: () => void }) {
+export function LeadStepForm({ trackingSource, onSent, questionInHeading = false }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean }) {
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedInterest, setSelectedInterest] = useState("");
@@ -102,7 +102,7 @@ export function LeadStepForm({ trackingSource, onSent }: { trackingSource: strin
         </div>
         <h3 className="font-display text-xl font-bold text-forest">Ďakujeme za váš záujem.</h3>
         <p className="max-w-sm text-sm leading-relaxed text-forest/75">
-          Váš záujem sme prijali. SMS potvrdenie plánujeme odoslať približne o 2 minúty.
+          Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu.
         </p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
         <div className="mt-2 flex flex-wrap justify-center gap-3 text-sm font-semibold text-forest">
@@ -135,7 +135,7 @@ export function LeadStepForm({ trackingSource, onSent }: { trackingSource: strin
 
       <div className={step === 1 ? "space-y-5" : "hidden"} aria-hidden={step !== 1}>
         <fieldset className="min-w-0">
-          <legend className="mb-3 font-display text-lg font-bold leading-snug text-forest sm:text-xl">
+          <legend className={questionInHeading ? "sr-only" : "mb-3 font-display text-lg font-bold leading-snug text-forest sm:text-xl"}>
             Čo hľadáte pre svojho psíka?
           </legend>
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">

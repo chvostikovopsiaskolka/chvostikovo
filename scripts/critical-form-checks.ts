@@ -144,7 +144,7 @@ assert(englishForm.includes("progress.onInvalidCapture"), "EN enquiry must recor
  
 // v304: English landing and modal share exactly three visible native radio options.
 // The display text is compact but the original CRM-compatible English values stay unchanged.
-assert(englishForm.includes('type="radio" name="interest" value={option.value} aria-label={option.value} required'), "EN interest needs a mandatory accessible native radio group.");
+assert(englishForm.includes('type="radio" name="interest" value={option.value} required aria-label={option.value}'), "EN guided interest requires a mandatory accessible native radio group.");
 assert(englishForm.includes("grid-cols-3") && englishForm.includes("peer-checked:border-coral") && englishForm.includes("peer-focus-visible:outline") && englishForm.includes("-webkit-tap-highlight-color:transparent"), "EN cards need three columns, clear selection, keyboard focus, and no iOS tap highlight.");
 assert(englishForm.includes('lines: ["Learn more", "about daycare"]') && englishForm.includes('lines: ["Regular", "visits"]') && englishForm.includes('lines: ["Occasional", "visits"]'), "EN short labels must preserve the exact three categories.");
 assert(!englishForm.includes("One-off daytime care") && !englishForm.includes('<select id={`en-${formId}-interest`'), "Remove the fourth EN option and dropdown only.");
@@ -183,7 +183,7 @@ assert(stagedLeadSource.includes('startFormAttempt(trackingSource)') && stagedLe
 assert((stagedLeadLanding.match(/<LeadStepForm /g) || []).length === 5, "LEAD form must be inline mobile/desktop hero, after pricing, footer and modal");
 assert(stagedLeadLanding.indexOf('id="lead-form"') < stagedLeadLanding.indexOf('id="lead-benefits"'), "Mobile form must precede Why Chvostikovo");
 assert(stagedLeadLanding.indexOf('id="lead-pricing"') < stagedLeadLanding.indexOf('id="lead-form-pricing"'), "Pricing form must follow pricing");
-assert(stagedLeadLanding.includes('scrollToLeadForm("lead_landing_hero_interest")') && stagedLeadLanding.includes('scrollToLeadForm("lead_landing_mobile_dock")'), "Hero/dock CTA must scroll, not open a modal");
+assert(stagedLeadLanding.includes('scrollToLeadForm("lead_landing_hero_interest")') && stagedLeadLanding.includes('openLeadModal("lead_landing_mobile_dock")'), "Lead hero CTA must scroll while the mobile dock opens the enquiry modal");
 assert(stagedLeadLanding.includes('openLeadModal("lead_landing_friendship_20261028")'), "Friendship CTA modal must remain");
 assert(!stagedLeadLanding.includes("ContactRevealButton"), "Inline lead forms must not be hidden behind reveal controls");
 
@@ -205,7 +205,7 @@ assert(!shortSchema.safeParse({ typ: "informacie", consent: true, meno: "Test", 
 // v306: typography-only changes in the three option groups; input value attributes are unchanged.
 assert(applicationSource.includes('option.value === "Občas podľa potreby"') && applicationSource.includes("text-xs font-bold sm:text-[13px]") && applicationSource.includes("text-[10px] font-normal sm:text-[11px]"), "Application choice titles must be bold and descriptions smaller; occasional full title bold.");
 assert(shortFormSource.includes('option.value === "Potrebujem škôlku občas"') && shortFormSource.includes("text-xs font-bold sm:text-[13px]") && shortFormSource.includes("text-[10px] font-normal sm:text-[11px]"), "SK enquiry choice titles must stand out without changing option values.");
-assert(englishForm.includes('option.value === "Occasional daycare"') && englishForm.includes("text-xs font-bold sm:text-[13px]") && englishForm.includes("text-[10px] font-normal sm:text-[11px]"), "EN enquiry cards must use the same visual hierarchy.");
+assert(englishForm.includes('i === 0 ? "font-bold" : "font-medium"') && englishForm.includes("peer-checked:border-coral"), "EN guided enquiry cards must preserve accessible visual hierarchy.");
 assert(applicationSource.includes("min-h-20") && !applicationSource.includes("min-h-24"), "Only application usage cards should be more compact.");
 
 
@@ -214,7 +214,7 @@ assert(forms.includes('LeadPhoneReceipt') && englishForm.includes('LeadPhoneRece
 const receiptSource = readFileSync(new URL("../src/components/site/LeadPhoneReceipt.tsx", import.meta.url), "utf8");
 const smsDelayMigration = readFileSync(new URL("../supabase/migrations/20261013_lead_sms_two_minute_delay.sql", import.meta.url), "utf8");
 assert(receiptSource.includes("smsQueued") && receiptSource.includes("SMS bude odoslaná na aktualizované číslo."), "Phone correction must confirm queued SMS or explain a previously sent SMS.");
-assert(forms.includes("približne o 2 minúty") && englishForm.includes("about 2 minutes"), "Receipt copy must describe the deferred SMS.");
+assert(stagedLeadSource.includes("Príde vám SMS potvrdenie o prijatí záujmu") && forms.includes("Príde vám SMS potvrdenie o prijatí záujmu") && englishForm.includes("You will receive an SMS confirmation") && !receiptSource.includes("približne o 2 minúty"), "Success copy must promise SMS receipt without timing.");
 assert(smsDelayMigration.includes("new.created_at + interval '2 minutes'") && smsDelayMigration.includes("greatest(available_at,v_created_at+interval '2 minutes')"), "Queued lead SMS must retain the two-minute delay even after correction.");
 assert(smsDelayMigration.includes("new.form_type='lead'") && smsDelayMigration.includes("ELSE now()"), "Application SMS must not be delayed.");
 

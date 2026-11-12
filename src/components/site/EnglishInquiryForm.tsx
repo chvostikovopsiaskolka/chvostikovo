@@ -20,6 +20,8 @@ export function EnglishInquiryForm({
   trackingSource?: string;
 }) {
   const formId = useId();
+  const [step, setStep] = useState<1 | 2>(1);
+  const [selectedInterest, setSelectedInterest] = useState("");
   const [sent, setSent] = useState(false);
   const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,7 +37,7 @@ export function EnglishInquiryForm({
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (loading) return;
+    if (loading || step !== 2 || !selectedInterest) return;
 
     const form = e.currentTarget;
     progress.markAttempt();
@@ -99,52 +101,84 @@ export function EnglishInquiryForm({
           <Check className="size-7" />
         </div>
         <h3 className="text-xl text-forest">Thank you!</h3>
-        <p className="text-sm text-muted-foreground">We have received your enquiry. We plan to send your SMS confirmation in about 2 minutes.</p>
+        <p className="text-sm text-muted-foreground">We have received your enquiry. You will receive an SMS confirmation.</p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} language="en" />}
       </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="space-y-3 text-left sm:space-y-3.5">
-      <div>
-        <label className="label-sm" htmlFor={`en-${formId}-name`}>Your name *</label>
-        <input id={`en-${formId}-name`} name="name" autoComplete="name" required className="field" placeholder="Your name" />
-      </div>
-      <PhoneField id={`en-${formId}-phone`} name="phone" label="Phone / WhatsApp *" language="en" />
-      <div>
-        <label className="label-sm" htmlFor={`en-${formId}-email`}>Email (optional)</label>
-        <input id={`en-${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} className="field" placeholder="you@example.com" />
-        <p className="mt-1 text-xs text-forest/65">In case we cannot reach you by phone.</p>
-      </div>
-      <fieldset className="min-w-0">
-        <legend className="label-sm">What are you looking for? *</legend>
-        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-          {([
-            { value: "I just want more information", lines: ["Learn more", "about daycare"] },
-            { value: "Regular daycare visits", lines: ["Regular", "visits"] },
-            { value: "Occasional daycare", lines: ["Occasional", "visits"] },
-          ] as const).map((option) => (
-            <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
-              <input type="radio" name="interest" value={option.value} aria-label={option.value} required className="peer sr-only" />
-              <span className="flex h-full min-h-16 min-w-0 flex-col items-center justify-center rounded-[0.85rem] border border-border bg-white px-1 py-2 text-center text-[11px] leading-[1.25] font-semibold text-forest transition-colors peer-checked:border-coral peer-checked:bg-secondary/55 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:text-xs">
-                {option.lines.map((line, index) => (
-                  <span key={line} className={`block max-w-full break-words [overflow-wrap:anywhere] ${index === 0 || option.value === "Occasional daycare" ? "text-xs font-bold sm:text-[13px]" : "text-[10px] font-normal sm:text-[11px]"}`}>{line}</span>
-                ))}
-              </span>
-            </label>
-          ))}
+    <form
+      data-lead-step-form
+      onSubmit={onSubmit}
+      onInputCapture={progress.onInputCapture}
+      onBlurCapture={progress.onBlurCapture}
+      onInvalidCapture={progress.onInvalidCapture}
+      onChangeCapture={(event) => { onFormChange(); progress.onChangeCapture(event); }}
+      className="space-y-5 text-left"
+    >
+      <div className="space-y-2">
+        <div className="flex justify-between gap-2 text-xs font-semibold text-forest/75" aria-live="polite">
+          <span>Quick, no-obligation enquiry</span>
+          <span>Step {step} of 2</span>
         </div>
-      </fieldset>
-      <PrivacyConsentCheckbox language="en" />
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <button
-        type="submit"
-        disabled={loading}
-        className="btn-coral w-full px-4 py-2.5 text-sm disabled:opacity-60"
-      >
-        {loading ? "Sending…" : "Enquire about daycare"}
-      </button>
+        <div role="progressbar" aria-label="Enquiry progress" aria-valuenow={step} aria-valuemin={1} aria-valuemax={2}
+          className="h-1.5 overflow-hidden rounded-full bg-forest/10">
+          <div className={`h-full rounded-full bg-coral transition-all duration-300 ${step === 1 ? "w-1/2" : "w-full"}`} />
+        </div>
+      </div>
+      <div className={step === 1 ? "space-y-5" : "hidden"} aria-hidden={step !== 1}>
+        <fieldset className="min-w-0">
+          <legend className="mb-3 font-display text-lg font-bold leading-snug text-forest sm:text-xl">
+            What are you looking for for your dog?
+          </legend>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
+            {([
+              { value: "I just want more information", lines: ["Learn more", "about daycare"] },
+              { value: "Regular daycare visits", lines: ["Regular", "visits"] },
+              { value: "Occasional daycare", lines: ["Occasional", "visits"] },
+            ] as const).map((option) => (
+              <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
+                <input type="radio" name="interest" value={option.value} required aria-label={option.value}
+                  onChange={() => setSelectedInterest(option.value)} className="peer sr-only" />
+                <span className="flex h-full min-h-24 min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 py-3 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:min-h-28 sm:px-3">
+                  {option.lines.map((line, i) => (
+                    <span key={line} className={`block max-w-full break-words text-[10.5px] [overflow-wrap:anywhere] sm:text-xs ${i === 0 ? "font-bold" : "font-medium"}`}>{line}</span>
+                  ))}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <button type="button" disabled={!selectedInterest} onClick={() => setStep(2)}
+          className="btn-coral min-h-12 w-full px-4 py-3 font-bold disabled:cursor-not-allowed disabled:opacity-50">
+          Continue
+        </button>
+      </div>
+      <div className={step === 2 ? "space-y-3.5" : "hidden"} aria-hidden={step !== 2}>
+        <h3 className="font-display text-lg font-bold text-forest sm:text-xl">How can we contact you?</h3>
+        <div>
+          <label className="label-sm" htmlFor={`en-${formId}-name`}>Your name *</label>
+          <input id={`en-${formId}-name`} name="name" autoComplete="name" required className="field" placeholder="Your name" />
+        </div>
+        <PhoneField id={`en-${formId}-phone`} name="phone" label="Phone / WhatsApp *" language="en" />
+        <div>
+          <label className="label-sm" htmlFor={`en-${formId}-email`}>Email (optional)</label>
+          <input id={`en-${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} className="field" placeholder="you@example.com" />
+          <p className="mt-1 text-xs text-forest/65">In case we cannot reach you by phone.</p>
+        </div>
+        <PrivacyConsentCheckbox language="en" />
+        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+          <button type="button" disabled={loading} onClick={() => setStep(1)}
+            className="min-h-12 rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral">
+            Back
+          </button>
+          <button type="submit" disabled={loading} className="btn-coral min-h-12 min-w-0 px-4 py-3 font-bold disabled:opacity-60">
+            {loading ? "Sending…" : "Send enquiry"}
+          </button>
+        </div>
+      </div>
     </form>
   );
 }

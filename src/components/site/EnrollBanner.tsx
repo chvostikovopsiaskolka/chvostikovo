@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FormDialog } from "./FormDialog";
-import { ShortForm } from "./Forms";
+import { LeadStepForm } from "./LeadStepForm";
 
 export function EnrollBanner() {
   const [open, setOpen] = useState(false);
@@ -27,8 +27,8 @@ export function EnrollBanner() {
         </button>
       </div>
 
-      <FormDialog open={open} onOpenChange={setOpen} title="Máte záujem o škôlku?">
-        <ShortForm />
+      <FormDialog open={open} onOpenChange={setOpen} title="Čo hľadáte pre svojho psíka?">
+        <LeadStepForm questionInHeading trackingSource="enroll_banner_interest" />
       </FormDialog>
     </section>
   );

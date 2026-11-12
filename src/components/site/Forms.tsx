@@ -113,7 +113,7 @@ export function ShortForm({
         </div>
         <h3 className="text-xl text-forest">Ďakujeme za váš záujem.</h3>
         <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Váš záujem sme prijali. SMS potvrdenie plánujeme odoslať približne o 2 minúty.
+          Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu.
         </p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
         {isTrackedLanding && (

@@ -19,7 +19,7 @@ import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { LandingPracticalInfo } from "@/components/site/LandingPracticalInfo";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
-import { ShortForm } from "@/components/site/Forms";
+import { LeadStepForm } from "@/components/site/LeadStepForm";
 import { ContactRevealButton, FormDialog } from "@/components/site/FormDialog";
 import { Reviews } from "@/components/site/Reviews";
 import { GALLERY, REVIEWS } from "@/content/site";
@@ -139,11 +139,7 @@ function PuppyForm({
 }) {
   return (
     <div className={className}>
-      <ShortForm
-        trackingSource={source}
-        hideInterest
-        interestValue="Mám záujem o škôlku pre šteniatko"
-      />
+      <LeadStepForm questionInHeading trackingSource={source} />
     </div>
   );
 }
@@ -183,7 +179,7 @@ function PuppyDaycarePage() {
                 V Chvostíkove vaše šteniatko postupne spoznáva psích kamošov, ľudí aj nové prostredie. Užije si hru aj oddych a prvé návštevy prispôsobíme tomu, ako sa u nás cíti.
               </p>
 
-              <div className="mx-auto mt-4 flex w-full max-w-[410px] flex-nowrap justify-center gap-1 sm:mt-5 lg:mx-0 lg:max-w-none lg:justify-start lg:gap-2">
+              <div className="mx-auto mt-4 flex w-full max-w-[410px] flex-nowrap justify-center gap-1 sm:mt-5 lg:ml-auto lg:mr-0 lg:max-w-none lg:justify-end lg:gap-2">
                 {["Postupná socializácia", "Hra aj oddych", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
@@ -195,7 +191,7 @@ function PuppyDaycarePage() {
                 ))}
               </div>
 
-              <div className="hero-cta-pair mx-auto mt-6 mb-4 sm:mb-6 lg:mx-0 lg:mb-0">
+              <div className="hero-cta-pair hero-cta-pair-mobile mx-auto mt-6 mb-4 sm:mb-6 lg:hidden">
                 <button
                   type="button"
                   onClick={() => openForm("puppy_landing_hero_interest")}
@@ -212,6 +208,11 @@ function PuppyDaycarePage() {
                   <ArrowDown className="hero-cta-icon" aria-hidden="true" />
                 </button>
               </div>
+              <button type="button" onClick={scrollToBenefits}
+                className="hero-cta-primary hero-cta-desktop-only mt-6 w-full max-w-[440px] gap-2">
+                Viac o škôlke
+                <ArrowDown className="size-4" aria-hidden="true" />
+              </button>
               <LandingPracticalInfo />
             </div>
 
@@ -219,7 +220,7 @@ function PuppyDaycarePage() {
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
                 <h2 className="text-center font-display text-2xl font-bold text-forest">
-                  Informujte sa o škôlke pre šteniatko
+                  Čo hľadáte pre svojho psíka?
                 </h2>
                 <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/75">
                   Vyplňte krátky formulár. Ozveme sa vám.
@@ -236,7 +237,7 @@ function PuppyDaycarePage() {
           <SchoolmatesFormCrown />
           <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-4 pt-12 pb-4 shadow-card ring-1 ring-forest/8 sm:pt-14">
             <div className="mb-4 text-center">
-              <p className="font-display text-xl font-bold text-forest">Chcete sa dozvedieť viac o škôlke pre šteniatko?</p>
+              <p className="font-display text-xl font-bold text-forest">Čo hľadáte pre svojho psíka?</p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-forest/65">
                 Radi vám odpovieme na otázky o škôlke pre šteniatka.
               </p>
@@ -389,7 +390,7 @@ function PuppyDaycarePage() {
       <FormDialog
         open={formOpen}
         onOpenChange={setFormOpen}
-        title="Chcete sa dozvedieť viac o škôlke pre šteniatko?"
+        title="Čo hľadáte pre svojho psíka?"
         subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
       >
         <PuppyForm source={formSource} />

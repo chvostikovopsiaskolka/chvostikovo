@@ -114,7 +114,7 @@ function LeadLandingPage() {
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
       <Header landingMinimal hideMobileDock landingTrackingSource="lead_landing_header_phone" />
-      <MobileDock variant="lead" onInterestOpen={() => scrollToLeadForm("lead_landing_mobile_dock")} />
+      <MobileDock variant="lead" onInterestOpen={() => openLeadModal("lead_landing_mobile_dock")} />
 
       <main>
         <section className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
@@ -134,7 +134,7 @@ function LeadLandingPage() {
                 Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
               </p>
 
-              <div className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2">
+              <div className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2 lg:ml-auto lg:mr-0 lg:justify-end">
                 {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
@@ -146,7 +146,7 @@ function LeadLandingPage() {
                 ))}
               </div>
 
-              <div className="hero-cta-pair mx-auto mt-5 sm:mt-6 lg:mx-0">
+              <div className="hero-cta-pair hero-cta-pair-mobile mx-auto mt-5 sm:mt-6 lg:hidden">
                 <button
                   type="button"
                   onClick={() => scrollToLeadForm("lead_landing_hero_interest")}
@@ -163,12 +163,17 @@ function LeadLandingPage() {
                   <ArrowDown className="hero-cta-icon" aria-hidden="true" />
                 </button>
               </div>
+              <button type="button" onClick={() => scrollToBenefits("lead_landing_hero_more_desktop")}
+                className="hero-cta-primary hero-cta-desktop-only mt-5 w-full max-w-[440px] gap-2">
+                Viac o škôlke
+                <ArrowDown className="size-4" aria-hidden="true" />
+              </button>
             </div>
             <div id="lead-form-desktop" className="hidden min-w-0 lg:block">
               <SchoolmatesFormCrown compact />
               <div className="rounded-3xl border border-coral/15 bg-secondary/55 px-5 pb-6 pt-8 shadow-soft">
-                <h2 className="mb-5 text-center font-display text-xl font-bold text-forest">Zaujíma vás naša škôlka?</h2>
-                <LeadStepForm trackingSource="lead_landing_hero_desktop_inline" />
+                <h2 className="mb-5 text-center font-display text-xl font-bold text-forest">Čo hľadáte pre svojho psíka?</h2>
+                <LeadStepForm questionInHeading trackingSource="lead_landing_hero_desktop_inline" />
               </div>
             </div>
           </div>
@@ -180,8 +185,8 @@ function LeadLandingPage() {
           <div className="mx-auto max-w-xl">
             <SchoolmatesFormCrown />
             <div className="rounded-3xl bg-secondary/55 px-4 pb-6 pt-12 shadow-card ring-1 ring-forest/8 sm:px-6 sm:pt-14">
-              <h2 className="mb-5 text-center font-display text-xl font-bold text-forest sm:text-2xl">Zaujíma vás naša škôlka?</h2>
-              <LeadStepForm trackingSource="lead_landing_hero_mobile_inline" />
+              <h2 className="mb-5 text-center font-display text-xl font-bold text-forest sm:text-2xl">Čo hľadáte pre svojho psíka?</h2>
+              <LeadStepForm questionInHeading trackingSource="lead_landing_hero_mobile_inline" />
             </div>
           </div>
         </section>
@@ -283,8 +288,8 @@ function LeadLandingPage() {
 
         <section id="lead-form-pricing" className="bg-card px-4 py-10 sm:py-14">
           <div className="mx-auto max-w-xl rounded-3xl bg-secondary/55 p-5 shadow-card ring-1 ring-coral/15 sm:p-8">
-            <h2 className="mb-5 text-center font-display text-2xl font-bold text-forest">Máte záujem o škôlku?</h2>
-            <LeadStepForm trackingSource="lead_landing_pricing_inline" />
+            <h2 className="mb-5 text-center font-display text-2xl font-bold text-forest">Čo hľadáte pre svojho psíka?</h2>
+            <LeadStepForm questionInHeading trackingSource="lead_landing_pricing_inline" />
           </div>
         </section>
 
@@ -396,7 +401,7 @@ function LeadLandingPage() {
               </div>
 
               <div className="mx-auto mt-6 max-w-xl rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <LeadStepForm trackingSource="lead_landing_bottom_inline" />
+                <LeadStepForm questionInHeading trackingSource="lead_landing_bottom_inline" />
               </div>
             </div>
           </div>
@@ -408,10 +413,10 @@ function LeadLandingPage() {
       <FormDialog
         open={leadModalOpen}
         onOpenChange={setLeadModalOpen}
-        title="Chcete sa dozvedieť viac o škôlke?"
+        title="Čo hľadáte pre svojho psíka?"
         subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
       >
-        <LeadStepForm trackingSource={leadModalSource} />
+        <LeadStepForm questionInHeading trackingSource={leadModalSource} />
       </FormDialog>
     </div>
   );

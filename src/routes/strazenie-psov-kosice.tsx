@@ -15,7 +15,7 @@ import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
-import { ShortForm } from "@/components/site/Forms";
+import { LeadStepForm } from "@/components/site/LeadStepForm";
 
 const BASE_URL = "https://chvostikovo.sk";
 const PAGE_URL = `${BASE_URL}/strazenie-psov-kosice`;
@@ -112,7 +112,7 @@ function DogSittingPage() {
                   <Clock3 className="size-4" aria-hidden="true" /> Po–Pia 7:00–17:00
                 </span>
               </div>
-              <div className="hero-cta-pair mx-auto mt-5 lg:mx-0">
+              <div className="hero-cta-pair hero-cta-pair-mobile mx-auto mt-5 lg:hidden">
                 <a
                   href="#informacie"
                   data-marketing-event="inquiry_cta"
@@ -126,17 +126,21 @@ function DogSittingPage() {
                   <ArrowRight className="hero-cta-icon" aria-hidden="true" />
                 </a>
               </div>
+              <a href="/#starostlivost" className="hero-cta-primary hero-cta-desktop-only mt-5 w-full max-w-[440px] gap-2">
+                Viac o škôlke
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </a>
             </div>
             <div id="informacie" className="mx-auto min-w-0 w-full max-w-md scroll-mt-24 lg:mx-0 lg:self-start">
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
                 <h2 className="text-center font-display text-xl font-bold text-forest sm:text-2xl">
-                  Chcete psíkovi dopriať deň s kamarátmi?
+                  Čo hľadáte pre svojho psíka?
                 </h2>
                 <p className="mt-2 mb-4 text-center text-sm leading-relaxed text-forest/70">
                   Vyplňte krátky formulár. Ozveme sa vám.
                 </p>
-                <ShortForm trackingSource="dog_sitting_page_inline" />
+                <LeadStepForm questionInHeading trackingSource="dog_sitting_page_inline" />
               </div>
             </div>
           </div>
@@ -181,10 +185,10 @@ function DogSittingPage() {
       <FormDialog
         open={interestOpen}
         onOpenChange={setInterestOpen}
-        title="Chcete sa dozvedieť viac o škôlke?"
+        title="Čo hľadáte pre svojho psíka?"
         subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
       >
-        <ShortForm trackingSource={interestSource} />
+        <LeadStepForm questionInHeading trackingSource={interestSource} />
       </FormDialog>
     </div>
   );

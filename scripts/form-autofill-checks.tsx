@@ -13,6 +13,7 @@ const React = await import("react");
 const { createRoot } = await import("react-dom/client");
 const { ShortForm, LongForm } = await import("../src/components/site/Forms");
 const { EnglishInquiryForm } = await import("../src/components/site/EnglishInquiryForm");
+const { LeadStepForm } = await import("../src/components/site/LeadStepForm");
 const { PhoneField } = await import("../src/components/site/PhoneField");
 const { submitInquiry } = await import("../src/lib/submit-inquiry");
 const { CONSENT_STORAGE_KEY, CONSENT_VERSION } = await import("../src/lib/consent");
@@ -39,6 +40,12 @@ const cases = [
   ...["lead_landing_top", "lead_landing_mobile_below_hero", "lead_landing_bottom", "lead_landing_modal"].map((name) => ({ name, component: <ShortForm trackingSource={name} />, path: "/psia-skolka-kosice", phoneId: "s-tel" })),
   { name: "puppy_landing_form", component: <ShortForm trackingSource="puppy_landing_form" hideInterest interestValue="Mám záujem o škôlku pre šteniatko" />, path: "/psia-skolka-pre-steniatka", phoneId: "s-tel" },
   { name: "dog_sitting_page_inline", component: <ShortForm trackingSource="dog_sitting_page_inline" />, path: "/strazenie-psov-kosice", phoneId: "s-tel" },
+  ...[
+    ["guided_home", "home_hero_interest_mobile", "/"],
+    ["guided_lead", "lead_landing_hero_mobile_inline", "/psia-skolka-kosice"],
+    ["guided_puppy", "puppy_landing_desktop_inline", "/psia-skolka-pre-steniatka"],
+    ["guided_dog_sitting", "dog_sitting_page_inline", "/strazenie-psov-kosice"],
+  ].map(([name, source, path]) => ({ name, component: <LeadStepForm trackingSource={source} />, path, phoneId: "lead-step-tel" })),
   { name: "english_page", component: <EnglishInquiryForm />, path: "/en/dog-daycare-kosice", phoneId: "en-phone" },
 ];
 let requests: Array<{ url: string; body: any }> = [];
@@ -64,6 +71,15 @@ try {
     const root = createRoot(container as any);
     await React.act(async () => root.render(test.component));
     const form = container.querySelector("form")!;
+    if (form.hasAttribute("data-lead-step-form")) {
+      const interest = form.querySelector<HTMLInputElement>('input[type="radio"][name="zaujem"], input[type="radio"][name="interest"]')!;
+      await React.act(async () => interest.click());
+      const next = [...form.querySelectorAll("button")].find((button) => /^(Pokračovať|Continue)$/.test(button.textContent?.trim() || ""));
+      assert(next && !next.disabled, `${test.name}: guided form did not enable Continue`);
+      await React.act(async () => next!.click());
+      assert(form.querySelector<HTMLInputElement>('input[name="meno"], input[name="name"]'),
+        `${test.name}: guided form did not advance to contact fields`);
+    }
     for (const el of form.querySelectorAll("input, textarea, select")) {
       if (el instanceof dom.HTMLSelectElement) {
         if (!el.hasAttribute("data-phone-prefix")) el.value = el.options[1]!.value;
@@ -164,7 +180,7 @@ try {
   }
 
   // Caught errors, including repeated attempts, must notify without personal data.
-  for (const component of [<ShortForm />, <LongForm />, <EnglishInquiryForm />]) {
+  for (const component of [<ShortForm />, <LongForm />, <EnglishInquiryForm />, <LeadStepForm trackingSource="guided_error_test" />]) {
     dom.happyDOM.setURL("https://chvostikovo.sk/?fbclid=qa-test");
     dom.sessionStorage.clear();
     requests = [];
@@ -177,6 +193,13 @@ try {
     const root = createRoot(container as any);
     await React.act(async () => root.render(component));
     const form = container.querySelector("form")!;
+    if (form.hasAttribute("data-lead-step-form")) {
+      const interest = form.querySelector<HTMLInputElement>('input[type="radio"][name="zaujem"], input[type="radio"][name="interest"]')!;
+      await React.act(async () => interest.click());
+      const next = [...form.querySelectorAll("button")].find(button => /^(Pokračovať|Continue)$/.test(button.textContent?.trim() || ""));
+      assert(next && !next.disabled, "Guided form must enable Continue after choosing an interest");
+      await React.act(async () => next!.click());
+    }
     for (const el of form.querySelectorAll("input, textarea, select")) {
       if (el instanceof dom.HTMLSelectElement) {
         if (!el.hasAttribute("data-phone-prefix")) el.value = el.options[1]!.value;
