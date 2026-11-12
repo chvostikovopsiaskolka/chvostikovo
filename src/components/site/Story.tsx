@@ -4,6 +4,7 @@ import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
 import { ContextFaq } from "./ContextFaq";
 import { LeadStepForm } from "./LeadStepForm";
+import { LongForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { CARE, DAYCARE_GALLERY_EXTRAS, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
@@ -218,6 +219,7 @@ export function FriendshipInterest() {
 
 export function Why() {
   const [open, setOpen] = useState(false);
+  const [applicationSent, setApplicationSent] = useState(false);
 
   return (
     <section id="preco" className="scroll-mt-24 py-12 sm:py-16">
@@ -256,8 +258,9 @@ export function Why() {
             <button
               type="button"
               onClick={() => {
-                trackMarketingInteraction("inquiry_cta", "home_why_interest");
-                void trackCookielessInteraction("inquiry_cta", "home_why_interest");
+                trackMarketingInteraction("inquiry_cta", "home_why_application");
+                void trackCookielessInteraction("nav_click", "home_why_application");
+                setApplicationSent(false);
                 setOpen(true);
               }}
               className="btn-coral min-w-0 whitespace-nowrap !px-3 !py-3 text-xs min-[390px]:text-sm sm:!px-6 sm:!py-4 sm:text-base"
@@ -280,11 +283,15 @@ export function Why() {
 
       <FormDialog
         open={open}
-        onOpenChange={setOpen}
-        title="Čo hľadáte pre svojho psíka?"
-        subtitle="Nechajte nám kontakt. Ozveme sa vám, odpovieme na otázky a ak bude Chvostíkovo pre vášho psíka vhodné, dohodneme úvodnú návštevu."
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          if (!nextOpen) setApplicationSent(false);
+        }}
+        hideHeader={applicationSent}
+        title={applicationSent ? "Prihláška odoslaná" : "Prihlás svojho psíka ešte dnes"}
+        subtitle="Vyplňte prihlášku o svojom psíkovi. Po odoslaní sa vám ozveme a dohodneme ďalší postup."
       >
-        <LeadStepForm questionInHeading trackingSource="home_why_interest" />
+        <LongForm onSent={() => setApplicationSent(true)} />
       </FormDialog>
     </section>
   );
