@@ -464,22 +464,25 @@ const failures = [];
               throw new Error('Touch viewport must allow custom pinch/pan');
             if (width===390) {
               const pinch=await viewport.evaluate(el=>{
-                if (typeof Touch !== 'function' || typeof TouchEvent !== 'function') return 'unsupported';
+                // Browser-independent synthetic touch-list input: WebKit desktop
+                // rejects the Touch constructor, even when touch handlers work.
+                // Dispatch real event types with the TouchList shape our handlers use.
                 const r=el.getBoundingClientRect(), y=r.y+r.height/2, x=r.x+r.width/2;
-                const t=(id,clientX,clientY)=>new Touch({
-                  identifier:id,target:el,clientX,clientY,screenX:clientX,screenY:clientY,
-                  pageX:clientX,pageY:clientY,
-                });
-                const emit=(name,touches)=>el.dispatchEvent(new TouchEvent(name,{
-                  bubbles:true,cancelable:true,touches,targetTouches:touches,changedTouches:touches,
-                }));
-                emit('touchstart',[t(1,x-35,y),t(2,x+35,y)]);
-                emit('touchmove',[t(1,x-100,y),t(2,x+100,y)]);
+                const emit=(name,points)=>{
+                  const touches={length:points.length,item:index=>points[index]??null};
+                  const event=new Event(name,{bubbles:true,cancelable:true});
+                  Object.defineProperty(event,'touches',{value:touches});
+                  return el.dispatchEvent(event);
+                };
+                emit('touchstart',[{clientX:x-35,clientY:y},{clientX:x+35,clientY:y}]);
+                emit('touchmove',[{clientX:x-100,clientY:y},{clientX:x+100,clientY:y}]);
+                const zoomAfterMove=Number(el.dataset.zoom);
                 emit('touchend',[]);
-                return Number(el.dataset.zoom);
+                return {zoomAfterMove,zoomAfterEnd:Number(el.dataset.zoom)};
               });
-              if (pinch!=='unsupported' && (!Number.isFinite(pinch) || pinch<=1.3))
-                throw new Error('Two-finger stand image pinch must actually scale');
+              if (!Number.isFinite(pinch.zoomAfterMove) || pinch.zoomAfterMove<=1.3 ||
+                  pinch.zoomAfterEnd<=1.3)
+                throw new Error('Two-finger stand image pinch must actually scale: '+JSON.stringify(pinch));
               if (await productPage.locator('.mobile-dock').isVisible())
                 throw new Error('Mobile dock must not obstruct photo viewer navigation');
             }
