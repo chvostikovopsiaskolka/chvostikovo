@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
@@ -25,12 +25,14 @@ export function StandPhotoLightbox({
   onSelect: (index: number) => void;
   onClose: () => void;
 }) {
-  const viewportRef = useRef<HTMLDivElement>(null);
+  // Radix Portal may mount after the parent effect. A callback ref ensures
+  // listeners attach only once the actual zoom viewport exists.
+  const [viewportNode, setViewportNode] = useState<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const photo = photos[index];
 
   useEffect(() => {
-    const viewport = viewportRef.current;
+    const viewport = viewportNode;
     const image = imageRef.current;
     if (!viewport || !image) return;
 
@@ -137,8 +139,10 @@ export function StandPhotoLightbox({
     viewport.addEventListener("gesturechange", preventNativeGesture, { passive: false });
     viewport.addEventListener("gestureend", preventNativeGesture, { passive: false });
     apply(1, 0, 0);
+    viewport.dataset["pinchReady"] = "true";
 
     return () => {
+      delete viewport.dataset["pinchReady"];
       viewport.removeEventListener("touchstart", touchStart);
       viewport.removeEventListener("touchmove", touchMove);
       viewport.removeEventListener("touchend", touchEnd);
@@ -148,7 +152,7 @@ export function StandPhotoLightbox({
       viewport.removeEventListener("gesturechange", preventNativeGesture);
       viewport.removeEventListener("gestureend", preventNativeGesture);
     };
-  }, [index, photo?.src]);
+  }, [viewportNode, index, photo?.src]);
 
   if (!photo) return null;
   const navigate = (step: number) => onSelect((index + step + photos.length) % photos.length);
@@ -166,7 +170,7 @@ export function StandPhotoLightbox({
           <DialogDescription className="sr-only">Detail ručne vyrábaného stojana.</DialogDescription>
         </div>
         <div
-          ref={viewportRef}
+          ref={setViewportNode}
           data-stand-photo-viewport
           data-pinch-enabled="true"
           data-zoom="1"
