@@ -43,9 +43,6 @@ export function StandVariantCards({ onInterest }: { onInterest: (size: StandSize
               className="h-80 w-full object-cover sm:h-[23rem] lg:h-[24rem]"
               style={{ objectPosition: variant.value === "extra_large" ? "50% 57%" : "50% 52%" }} />
             <div className="pointer-events-none absolute inset-x-2 bottom-2 z-10 sm:inset-x-3 sm:bottom-3">
-              <div aria-hidden="true" className="mb-1 flex w-[33%] justify-center gap-0.5 text-coral-dark drop-shadow-[0_1px_2px_rgba(255,255,255,0.85)]">
-                {Array.from({ length: 5 }, (_, index) => <Star key={index} className="size-3.5 fill-current sm:size-4" strokeWidth={1.5} />)}
-              </div>
               <div aria-label="Vlastnosti stojana" className="flex items-stretch gap-1">
               {FEATURES.map(({ icon: Icon, label }) => (
                 <span key={label} className="flex min-w-0 flex-1 items-center justify-center gap-0.5 whitespace-nowrap rounded-xl border border-white/75 bg-[#fffaf1]/90 px-1 py-2 font-display text-[clamp(8px,2.2vw,11px)] font-semibold leading-none tracking-tight text-coral-dark shadow-[0_3px_12px_rgba(25,46,37,0.12)] backdrop-blur-md sm:gap-1 sm:px-1.5 sm:text-[10px]">
@@ -56,7 +53,18 @@ export function StandVariantCards({ onInterest }: { onInterest: (size: StandSize
             </div>
           </div>
           <div className="flex flex-1 flex-col p-5 sm:p-6">
-            <p className="font-display text-xs font-bold tracking-widest text-coral uppercase">{variant.label}</p>
+            <div className="flex items-center justify-between gap-2" data-stand-card-heading>
+              <p className="min-w-0 font-display text-xs font-bold tracking-wider uppercase">
+                <span className="text-coral">„{variant.label.charAt(0)}“</span>{" "}
+                <span className="text-[#181818]">verzia</span>
+              </p>
+              <span aria-hidden="true" data-stand-decorative-stars
+                className="flex shrink-0 items-center gap-0.5 text-[#e9b600]">
+                {Array.from({ length: 5 }, (_, index) => (
+                  <Star key={index} className="size-3.5 fill-current sm:size-4" strokeWidth={1.5} />
+                ))}
+              </span>
+            </div>
             <h2 className="mt-2 font-display text-2xl font-bold text-forest">{variant.dimension}</h2>
             <p className="mt-3 flex-1 text-sm leading-relaxed text-forest/75">{variant.height}</p>
             <div className="mt-6 flex items-center justify-between gap-2">
