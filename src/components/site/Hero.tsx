@@ -90,7 +90,7 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
         </div>
 
         {/* Desktop layout */}
-        <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
+        <div className="hidden lg:grid lg:min-h-[700px] lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
           <div className="flex min-w-0 flex-col lg:py-2">
             <p className="order-1 mx-0 mb-3 mt-0 font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Denná starostlivosť o stredných a veľkých psíkov
