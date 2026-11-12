@@ -47,7 +47,7 @@ export function StandPhotoLightbox({
       transform.x = nextScale === 1 ? 0 : clamp(x, -horizontal, horizontal);
       transform.y = nextScale === 1 ? 0 : clamp(y, -vertical, vertical);
       image.style.transform = `translate3d(${transform.x}px, ${transform.y}px, 0) scale(${transform.scale})`;
-      viewport.dataset.zoom = String(transform.scale);
+      viewport.dataset["zoom"] = String(transform.scale);
     };
 
     const pinchPoints = (touches: TouchList) => {
