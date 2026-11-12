@@ -5,7 +5,7 @@ const path = require('node:path');
 // Run in CI, without submitting forms or emitting analytics traffic.
 const bellaris = process.env.WEB_SITE === 'bellaris';
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
-const urls = (bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/en/dog-daycare-kosice/']).map(route => new URL(route, base));
+const urls = (bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/']).map(route => new URL(route, base));
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -47,6 +47,48 @@ const failures = [];
           await cookieButton.click();
           await page.waitForTimeout(300);
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
+          // Shared Hero CTA visual regression (all four Slovak marketing routes):
+          // 320/375/390px phones + 1440px desktop, Chromium and Safari WebKit.
+          // Read layout only: no live lead submission, modal or conversion event.
+          if (!bellaris && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname)) {
+            for (const width of [320, 375, 390, 1440]) {
+              await page.setViewportSize({ width, height: width >= 1024 ? 900 : 844 });
+              const cta = page.locator('.hero-cta-pair:visible').first();
+              if (!await cta.isVisible()) throw new Error('Hero CTA pair missing at ' + width);
+              const info = await cta.evaluate(el => {
+                const primary = el.querySelector('.hero-cta-primary');
+                const secondary = el.querySelector('.hero-cta-secondary');
+                const label = secondary?.querySelector('span');
+                const icon = secondary?.querySelector('.hero-cta-icon');
+                if (!primary || !secondary || !label || !icon) return null;
+                const b = el.getBoundingClientRect();
+                const p = primary.getBoundingClientRect();
+                const s = secondary.getBoundingClientRect();
+                const t = label.getBoundingClientRect();
+                const i = icon.getBoundingClientRect();
+                return {
+                  pairLeft: b.left, pairRight: b.right,
+                  primaryWidth: p.width, secondaryWidth: s.width,
+                  labelRight: t.right, iconLeft: i.left, iconRight: i.right,
+                  secondaryRight: s.right,
+                  noWrap: getComputedStyle(secondary).whiteSpace === 'nowrap',
+                  glow: getComputedStyle(primary).boxShadow,
+                  text: secondary.textContent?.trim(),
+                  viewportWidth: window.innerWidth,
+                };
+              });
+              if (!info || !info.noWrap || !info.text?.includes('Viac o škôlke'))
+                throw new Error('Hero secondary text must remain a single line: ' + width);
+              if (info.primaryWidth <= info.secondaryWidth * 1.35)
+                throw new Error('Hero primary CTA is not visibly wider: ' + width);
+              if (info.pairLeft < -1 || info.pairRight > info.viewportWidth + 1)
+                throw new Error('Hero CTA pair extends past viewport: ' + width);
+              if (info.labelRight > info.iconLeft + 1 || info.iconRight > info.secondaryRight - 2)
+                throw new Error('Hero secondary label or arrow overflows: ' + width);
+              if (!info.glow || info.glow === 'none') throw new Error('Hero interest CTA glow is missing');
+            }
+            await page.setViewportSize({ width: 390, height: 844 });
+          }
           // New LEAD pilot: one question at a time without any real submission.
           if (!bellaris && !restricted && url.pathname === '/psia-skolka-kosice/') {
             const wizard = page.locator('#lead-form [data-lead-step-form]');

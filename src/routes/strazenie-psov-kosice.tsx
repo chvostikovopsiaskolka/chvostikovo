@@ -92,8 +92,8 @@ function DogSittingPage() {
       <main>
         <section id="top" className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-20">
           <PawTrailBackground landingBottomPaws />
-          <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-5 px-4 py-4 sm:gap-7 sm:py-5 lg:min-h-[510px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-8 lg:py-3">
-            <div className="max-w-2xl text-center lg:text-left">
+          <div className="relative z-10 mx-auto grid min-w-0 grid-cols-[minmax(0,1fr)] max-w-6xl items-center gap-5 px-4 py-4 sm:gap-7 sm:py-5 lg:min-h-[510px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-8 lg:py-3">
+            <div className="min-w-0 max-w-2xl text-center lg:text-left">
               <p className="font-display text-xs font-bold uppercase tracking-[0.1em] text-coral-dark sm:text-sm">
                 Denná starostlivosť o stredných a veľkých psíkov
               </p>
@@ -112,21 +112,22 @@ function DogSittingPage() {
                   <Clock3 className="size-4" aria-hidden="true" /> Po–Pia 7:00–17:00
                 </span>
               </div>
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+              <div className="hero-cta-pair mx-auto mt-5 lg:mx-0">
                 <a
                   href="#informacie"
                   data-marketing-event="inquiry_cta"
                   data-tracking-source="dog_sitting_page_cta"
-                  className="btn-coral"
+                  className="hero-cta-primary"
                 >
-                  Chcem sa informovať
+                  Mám záujem
                 </a>
-                <a href="/#starostlivost" className="inline-flex items-center gap-1.5 font-semibold text-forest underline-offset-4 hover:underline">
-                  Zistiť viac o škôlke <ArrowRight className="size-4" aria-hidden="true" />
+                <a href="/#starostlivost" className="hero-cta-secondary">
+                  <span>Viac o škôlke</span>
+                  <ArrowRight className="hero-cta-icon" aria-hidden="true" />
                 </a>
               </div>
             </div>
-            <div id="informacie" className="mx-auto w-full max-w-md scroll-mt-24 lg:mx-0 lg:self-start">
+            <div id="informacie" className="mx-auto min-w-0 w-full max-w-md scroll-mt-24 lg:mx-0 lg:self-start">
               <SchoolmatesFormCrown compact />
               <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
                 <h2 className="text-center font-display text-xl font-bold text-forest sm:text-2xl">

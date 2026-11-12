@@ -146,21 +146,21 @@ function LeadLandingPage() {
                 ))}
               </div>
 
-              <div className="mx-auto mt-5 flex w-full max-w-[440px] gap-2 sm:mt-6 sm:gap-3">
+              <div className="hero-cta-pair mx-auto mt-5 sm:mt-6 lg:mx-0">
                 <button
                   type="button"
                   onClick={() => scrollToLeadForm("lead_landing_hero_interest")}
-                  className="btn-coral inline-flex min-h-12 min-w-0 flex-1 items-center justify-center px-3 py-3 text-[13px] font-bold sm:px-6 sm:text-base"
+                  className="hero-cta-primary"
                 >
                   Mám záujem
                 </button>
                 <button
                   type="button"
                   onClick={() => scrollToBenefits("lead_landing_hero_more")}
-                  className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border-2 border-coral bg-white/20 px-2 py-3 font-display text-[13px] font-bold text-coral-dark shadow-card backdrop-blur-md transition-colors hover:bg-white/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:gap-2 sm:px-5 sm:text-base"
+                  className="hero-cta-secondary"
                 >
-                  Viac o škôlke
-                  <ArrowDown className="size-4 shrink-0" aria-hidden="true" />
+                  <span>Viac o škôlke</span>
+                  <ArrowDown className="hero-cta-icon" aria-hidden="true" />
                 </button>
               </div>
             </div>

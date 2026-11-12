@@ -195,14 +195,23 @@ function PuppyDaycarePage() {
                 ))}
               </div>
 
-              <button
-                type="button"
-                onClick={scrollToBenefits}
-                className="btn-coral mt-6 mb-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] sm:mt-6 sm:mb-6 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg lg:mb-0 lg:min-w-[360px] lg:px-12 lg:py-4"
-              >
-                Zistiť viac
-                <ArrowDown className="size-5" />
-              </button>
+              <div className="hero-cta-pair mx-auto mt-6 mb-4 sm:mb-6 lg:mx-0 lg:mb-0">
+                <button
+                  type="button"
+                  onClick={() => openForm("puppy_landing_hero_interest")}
+                  className="hero-cta-primary"
+                >
+                  Mám záujem
+                </button>
+                <button
+                  type="button"
+                  onClick={scrollToBenefits}
+                  className="hero-cta-secondary"
+                >
+                  <span>Viac o škôlke</span>
+                  <ArrowDown className="hero-cta-icon" aria-hidden="true" />
+                </button>
+              </div>
               <LandingPracticalInfo />
             </div>
 
