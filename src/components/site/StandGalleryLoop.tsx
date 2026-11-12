@@ -19,6 +19,9 @@ import { EdgePhotoCarousel, type EdgeCarouselPhoto } from "./EdgePhotoCarousel";
 const STANDS: readonly EdgeCarouselPhoto[] = [
   { src: standMia, alt: "Ručne vyrábaný drevený stojan MIA s menom psíka", position: "50% 56%", caption: "MIA" },
   { src: standCori, alt: "Tmavý drevený stojan CORI s nerezovými miskami", position: "50% 56%", caption: "CORI" },
+  { src: standRose, alt: "Biely drevený stojan na misky ROSE pre veľkého psa", position: "50% 53%", caption: "ROSE" },
+  { src: standBuncaLinden, alt: "Drevený stojan na misky s menami BUNCA a LINDEN", position: "50% 55%", caption: "BUNCA & LINDEN" },
+  { src: standArcanaAiden, alt: "Drevený stojan na misky s menami ARCANA a AIDEN pri írskom vlkodavovi", position: "50% 52%", caption: "ARCANA & AIDEN" },
   { src: standWoody, alt: "Biely drevený stojan WOODY s nerezovými miskami", position: "50% 56%", caption: "WOODY" },
   { src: standMlyncek, alt: "Svetlý drevený stojan MLYNČEK s dvoma nerezovými miskami", position: "50% 58%", caption: "MLYNČEK" },
   { src: standAron, alt: "Detail tmavého dreveného stojana ARON s menom psíka", position: "50% 58%", caption: "ARON" },
@@ -30,9 +33,6 @@ const STANDS: readonly EdgeCarouselPhoto[] = [
   { src: standGael, alt: "Svetlý drevený stojan GAEL s dvoma miskami a psom", position: "50% 56%", caption: "GAEL" },
   { src: standLara, alt: "Biely stojan na misky LARA v exteriéri", position: "50% 55%", caption: "LARA" },
   { src: standSafira, alt: "Biely drevený stojan SAFIRA s nerezovými miskami", position: "50% 55%", caption: "SAFIRA" },
-  { src: standRose, alt: "Biely drevený stojan na misky ROSE pre veľkého psa", position: "50% 53%", caption: "ROSE" },
-  { src: standBuncaLinden, alt: "Drevený stojan na misky s menami BUNCA a LINDEN", position: "50% 55%", caption: "BUNCA & LINDEN" },
-  { src: standArcanaAiden, alt: "Drevený stojan na misky s menami ARCANA a AIDEN pri írskom vlkodavovi", position: "50% 52%", caption: "ARCANA & AIDEN" },
 ];
 
 /** One photo per realization, shared between product detail and blog guide. */
