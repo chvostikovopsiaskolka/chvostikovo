@@ -183,7 +183,7 @@ assert(stagedLeadSource.includes('startFormAttempt(trackingSource)') && stagedLe
 assert((stagedLeadLanding.match(/<LeadStepForm /g) || []).length === 5, "LEAD form must be inline mobile/desktop hero, after pricing, footer and modal");
 assert(stagedLeadLanding.indexOf('id="lead-form"') < stagedLeadLanding.indexOf('id="lead-benefits"'), "Mobile form must precede Why Chvostikovo");
 assert(stagedLeadLanding.indexOf('id="lead-pricing"') < stagedLeadLanding.indexOf('id="lead-form-pricing"'), "Pricing form must follow pricing");
-assert(stagedLeadLanding.includes('scrollToLeadForm("lead_landing_hero_interest")') && stagedLeadLanding.includes('scrollToLeadForm("lead_landing_mobile_dock")'), "Hero/dock CTA must scroll, not open a modal");
+assert(stagedLeadLanding.includes('scrollToLeadForm("lead_landing_hero_interest")') && stagedLeadLanding.includes('openLeadModal("lead_landing_mobile_dock")'), "Lead hero CTA must scroll while the mobile dock opens the enquiry modal");
 assert(stagedLeadLanding.includes('openLeadModal("lead_landing_friendship_20261028")'), "Friendship CTA modal must remain");
 assert(!stagedLeadLanding.includes("ContactRevealButton"), "Inline lead forms must not be hidden behind reveal controls");
 
@@ -214,7 +214,7 @@ assert(forms.includes('LeadPhoneReceipt') && englishForm.includes('LeadPhoneRece
 const receiptSource = readFileSync(new URL("../src/components/site/LeadPhoneReceipt.tsx", import.meta.url), "utf8");
 const smsDelayMigration = readFileSync(new URL("../supabase/migrations/20261013_lead_sms_two_minute_delay.sql", import.meta.url), "utf8");
 assert(receiptSource.includes("smsQueued") && receiptSource.includes("SMS bude odoslaná na aktualizované číslo."), "Phone correction must confirm queued SMS or explain a previously sent SMS.");
-assert(forms.includes("približne o 2 minúty") && englishForm.includes("about 2 minutes"), "Receipt copy must describe the deferred SMS.");
+assert(stagedLeadSource.includes("Príde vám SMS potvrdenie o prijatí záujmu") && forms.includes("Príde vám SMS potvrdenie o prijatí záujmu") && englishForm.includes("You will receive an SMS confirmation") && !receiptSource.includes("približne o 2 minúty"), "Success copy must promise SMS receipt without timing.");
 assert(smsDelayMigration.includes("new.created_at + interval '2 minutes'") && smsDelayMigration.includes("greatest(available_at,v_created_at+interval '2 minutes')"), "Queued lead SMS must retain the two-minute delay even after correction.");
 assert(smsDelayMigration.includes("new.form_type='lead'") && smsDelayMigration.includes("ELSE now()"), "Application SMS must not be delayed.");
 
