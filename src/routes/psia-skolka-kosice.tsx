@@ -134,7 +134,7 @@ function LeadLandingPage() {
                 Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
               </p>
 
-              <div className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2 lg:ml-auto lg:mr-0 lg:justify-end">
+              <div className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2 lg:ml-0 lg:mr-auto lg:justify-start">
                 {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
