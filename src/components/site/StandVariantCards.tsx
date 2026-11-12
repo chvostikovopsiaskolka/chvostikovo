@@ -2,7 +2,7 @@ import { ChevronRight, Ruler, Sparkles, Type } from "lucide-react";
 import type { StandSize } from "@/lib/shop";
 import standMia from "@/assets/products/stand-mia.avif";
 import standCori from "@/assets/products/stand-cori.avif";
-import standWhite from "@/assets/products/stand-woody.avif";
+import standRose from "@/assets/products/stand-rose-hq.webp";
 
 const VARIANTS: Array<{
   value: StandSize;
@@ -21,7 +21,7 @@ const VARIANTS: Array<{
     price: "45 €", image: standCori, alt: "Drevený stojan CORI – stredný variant M" },
   { value: "extra_large", label: "L verzia", dimension: "Rozmery na mieru",
     height: "Pre najväčšie plemená. Presné rozmery, výšku a cenu doladíme individuálne.",
-    price: "Na vyžiadanie", image: standWhite, alt: "Biely stojan WOODY – ilustrácia svetlého prevedenia pre variant L" },
+    price: "Na vyžiadanie", image: standRose, alt: "Biely drevený stojan ROSE – veľký variant L" },
 ];
 
 const FEATURES = [
