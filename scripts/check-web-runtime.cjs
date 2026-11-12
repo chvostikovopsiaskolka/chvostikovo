@@ -94,18 +94,6 @@ const failures = [];
                 throw new Error('Primary CTA glow missing: ' + width);
             }
             await page.setViewportSize({ width: 390, height: 844 });
-            if (!restricted) {
-              const entry = url.pathname === '/'
-                ? page.locator('section.hero-safe-top .hero-cta-primary:visible').first()
-                : page.locator('.mobile-dock .mobile-dock-apply').first();
-              await entry.click();
-              const modal = page.getByRole('dialog');
-              await modal.waitFor({state: 'visible'});
-              if (!await modal.locator('[data-lead-step-form]').count())
-                throw new Error('Mobile interest CTA must open the guided enquiry modal');
-              await page.keyboard.press('Escape');
-              await modal.waitFor({state: 'hidden'});
-            }
           }
           // New LEAD pilot: one question at a time without any real submission.
           if (!bellaris && !restricted && url.pathname === '/psia-skolka-kosice/') {
@@ -165,6 +153,20 @@ const failures = [];
                   throw new Error('WebKit page is not vertically scrollable over carousel ' + i);
               }
             }
+          }
+          // Test enquiry modal only AFTER vertical scroll regression: closing Radix
+          // briefly locks background scroll and must not affect carousel checks.
+          if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname)) {
+            const entry = url.pathname === '/'
+              ? page.locator('section.hero-safe-top .hero-cta-primary:visible').first()
+              : page.locator('.mobile-dock .mobile-dock-apply').first();
+            await entry.click();
+            const modal = page.getByRole('dialog');
+            await modal.waitFor({state: 'visible'});
+            if (!await modal.locator('[data-lead-step-form]').count())
+              throw new Error('Mobile interest CTA must open guided enquiry modal');
+            await page.keyboard.press('Escape');
+            await modal.waitFor({state: 'hidden'});
           }
           if (errors.length) throw new Error(errors.join('; '));
           results.push({ engine, restricted, route: url.pathname, status: 'PASS' });
