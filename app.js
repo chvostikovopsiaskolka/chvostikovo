@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v423';
-const APP_VERSION='2.0.96';
+const APP_BUILD='v424';
+const APP_VERSION='2.0.97';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -152,6 +152,7 @@ function customerStartupTimingV423(timing){
   window.__chvoStartupTimingV423=record;
   // Local, bounded and anonymous. Server RUM requires a separately verified collector contract.
   window.__chvoStartupHistoryV423=[...(window.__chvoStartupHistoryV423||[]).slice(-9),record];
+  try{window.ChvoTelemetry?.startup?.(record)}catch(_){}
 }
 // v392: Retry one transient transport failure on authenticated read-only GETs.
 // Never repeat mutations, mask HTTP failures, or cross a logout/account change.

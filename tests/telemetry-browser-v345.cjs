@@ -8,7 +8,7 @@ for(const app of ['customer','admin']){
  const page=await browser.newPage({viewport:{width:390,height:844},serviceWorkers:'block'});
  await page.route('**/*',async route=>{const url=new URL(route.request().url());if(url.hostname!=='fixture.local')return route.fulfill({status:200,contentType:'application/json',body:'[]'});const file=url.pathname==='/admin'?'/tmp/admin-candidate-v345.html':path.join(process.cwd(),url.pathname==='/'?'index.html':url.pathname);if(fs.existsSync(file))await route.fulfill({body:fs.readFileSync(file),contentType:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html'});else await route.fulfill({status:404,body:''});});
  await page.addInitScript(app=>{
-  window.__telemetryPackets=[];window.__normalBodies=[];window.__collectorFail=false;window.__failed=false;
+  window.__telemetryPackets=[];window.__normalBodies=[];window.__collectorFail=false;window.__failed=false;Math.random=()=>0.01;
   if(app==='admin')localStorage.setItem('chvostikovo_supabase_session',JSON.stringify({access_token:'TOKEN_SECRET',refresh_token:'REFRESH_SECRET',expires_at:Math.floor(Date.now()/1000)+3600,user:{id:'synthetic-staff'}}));
   window.fetch=async(input,options={})=>{const u=String(input);
    if(u.includes('portal_telemetry_ingest_v345')){window.__telemetryPackets.push({url:u,body:JSON.parse(options.body)});if(window.__collectorFail)throw new TypeError('COLLECTOR_PRIVATE_SECRET');return new Response('true',{status:200});}
@@ -54,4 +54,27 @@ assert(watchdogs.some(s=>s.attributes.some(a=>a.key==='operation'&&a.value.strin
 assert(watchdogs.some(s=>s.attributes.some(a=>a.key==='operation'&&a.value.stringValue==='rpc/portal_save_vaccinations_v287')),'hung request watchdog');
 assert(watchdogs.every(s=>s.attributes.some(a=>a.key==='exception.type'&&a.value.stringValue==='TimeoutError')));
 console.log('PASS actual SDK watchdogs: 30s unfinished request and blocked startup are reported without cancelling app requests');await browser.close();
+const rumBrowser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true,args:['--no-sandbox']});
+try{for(const sampled of [true,false]){
+ const p=await rumBrowser.newPage();await p.goto('about:blank');
+ await p.evaluate(sampled=>{Math.random=()=>sampled?0.01:0.99;window.__rum=[];window.fetch=async(url,options)=>{window.__rum.push(JSON.parse(options.body));return new Response('true')};},sampled);
+ await p.addScriptTag({content:fs.readFileSync('telemetry-v345.js','utf8')});
+ await p.evaluate(base=>window.ChvoTelemetry.init({app:'customer',build:'20261112-customer-v424',base,key:'public',getToken:()=> 'TOKEN_SECRET'}),base);
+ await p.evaluate(async()=>{ChvoTelemetry.startup({kind:'cold',status:'pending',totalMs:1});await ChvoTelemetry.flush()});
+ assert.equal(await p.evaluate(()=>window.__rum.length),0,'pending startup never exported as successful');
+ await p.evaluate(async()=>{ChvoTelemetry.startup({kind:'cold',status:'complete',totalMs:2500,apiMs:500,dataMs:800,photosMs:400,email:'private@example.test',name:'PRIVATE_NAME',dogId:123,photoUrl:'https://private.invalid/TOKEN_SECRET'});await ChvoTelemetry.flush()});
+ let rum=await p.evaluate(()=>window.__rum.flatMap(p=>p.p_payload.resourceSpans.flatMap(r=>r.scopeSpans.flatMap(s=>s.spans))));
+ assert.equal(rum.length,sampled?4:0,'10% success sampling is decided once per document');
+ assert(rum.every(span=>span.status.code===0),'success is not an error');
+ await p.evaluate(async()=>{ChvoTelemetry.startup({kind:'resume',status:'failed',totalMs:15000});ChvoTelemetry.startup({kind:'recovery',status:'interrupted',totalMs:500});await ChvoTelemetry.flush()});
+ rum=await p.evaluate(()=>window.__rum.flatMap(p=>p.p_payload.resourceSpans.flatMap(r=>r.scopeSpans.flatMap(s=>s.spans))));
+ assert(rum.some(span=>span.name==='startup.failed'));assert(rum.some(span=>span.name==='startup.interrupted'));
+ for(const secret of ['private@example.test','PRIVATE_NAME','private.invalid','TOKEN_SECRET','dogId','photoUrl'])assert(!JSON.stringify(rum).includes(secret),'startup payload whitelist excludes '+secret);
+ await p.evaluate(async()=>{for(const kind of ['cold','reload','resume','refresh','recovery'])ChvoTelemetry.startup({kind,status:'failed',totalMs:100});ChvoTelemetry.capture('javascript.error',{operation:'javascript'});await ChvoTelemetry.flush()});
+ rum=await p.evaluate(()=>window.__rum.flatMap(p=>p.p_payload.resourceSpans.flatMap(r=>r.scopeSpans.flatMap(s=>s.spans))));
+ assert(rum.filter(span=>span.name.startsWith('startup.')).length<=8);assert(rum.some(span=>span.name==='javascript.error'),'startup cap preserves error reporting');
+ await p.close();
+}
+console.log('PASS RUM: controlled success sampling, lifecycle separation, private-field whitelist, eight-span cap and error capacity');
+}finally{await rumBrowser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
