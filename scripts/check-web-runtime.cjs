@@ -458,6 +458,7 @@ const failures = [];
                 await articleLightbox.getByRole('button',{name:'Oddialiť fotografiu'}).count())
               throw new Error('Stand viewer must not show zoom buttons');
             const viewport=articleLightbox.locator('[data-stand-photo-viewport]');
+            await articleLightbox.locator('[data-stand-photo-viewport][data-pinch-ready="true"]').waitFor({state:'attached'});
             if (await viewport.getAttribute('data-pinch-enabled')!=='true')
               throw new Error('Pinch-ready stand image viewport missing');
             if (await viewport.evaluate(el=>getComputedStyle(el).touchAction)!=='none')
