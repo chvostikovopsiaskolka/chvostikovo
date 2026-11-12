@@ -698,7 +698,8 @@
     padding: 16px 5px 2px;
   }
   .mobile-dock-menu-logo img { width: auto; height: auto; max-width: 155px; max-height: 39px; object-fit: contain; }
-  body:has([data-form-dialog]) .mobile-dock {
+  /* Keep the fixed product dock away from the full-screen photo viewer and its controls. */
+  body:has([data-form-dialog], [data-stand-lightbox]) .mobile-dock {
     display: none !important;
     pointer-events: none !important;
     visibility: hidden !important;
