@@ -396,16 +396,21 @@ async function preloadFirstScreenFriendsV404(data=state.data){
 
 async function settleCustomerFirstPhotosV291(limit=850){
  const images=[...($('appView')?.querySelectorAll('img')||[])].filter(img=>img.getAttribute('src')&&!img.closest('.hidden')).slice(0,24);
- if(!images.length)return;
+ if(!images.length)return true;
+ const decoded=new Set();
  const ready=Promise.allSettled(images.map(async img=>{
    if(!img.complete)await new Promise(resolve=>{
      const done=()=>{img.removeEventListener('load',done);img.removeEventListener('error',done);resolve()};
      img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});
      if(img.complete)done();
    });
-   if(img.complete&&img.naturalWidth>0&&typeof img.decode==='function')await img.decode().catch(()=>{});
+   if(img.complete&&img.naturalWidth>0){
+     if(typeof img.decode==='function')try{await img.decode()}catch(_){return}
+     decoded.add(img);
+   }
  }));
  await Promise.race([ready,new Promise(resolve=>setTimeout(resolve,limit))]);
+ return decoded.size===images.length;
 }
 
 function bootstrapCore(showSpinner=true){
@@ -413,7 +418,7 @@ function bootstrapCore(showSpinner=true){
   const bootStartedAtV421=performance.now();
   const first=customerBootAttemptsV423++===0,kind=first?(performance.getEntriesByType?.('navigation')?.[0]?.type==='reload'?'reload':'cold'):window.__chvoStartupTimingV423?.status==='complete'?'refresh':'recovery';
   const started=first?0:bootStartedAtV421,account=state.session?.user?.id;
-  let apiReadyAtV421=bootStartedAtV421,bootCompletedV423=false,dataReadyAtV423=bootStartedAtV421,photosDoneAtV423=0,apiMsV423=0,interruptedV423=document.visibilityState==='hidden';
+  let apiReadyAtV421=bootStartedAtV421,bootCompletedV423=false,dataReadyAtV423=bootStartedAtV421,photosDoneAtV423=0,apiMsV423=0,interruptedV423=document.visibilityState==='hidden',photosReadyV424=false,photosReadyAtV424=0;
   const hidden=()=>{if(document.visibilityState==='hidden')interruptedV423=true};
   const pagehide=()=>{interruptedV423=true;customerStartupTimingV423({kind,status:'interrupted',totalMs:Math.round(performance.now()-started)})};
   document.addEventListener('visibilitychange',hidden);window.addEventListener('pagehide',pagehide);
@@ -439,7 +444,7 @@ function bootstrapCore(showSpinner=true){
     ]);
     if(!state.session||state.session.user?.id!==account)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});
     showApp();renderAll();dataReadyAtV423=performance.now();
-    await settleCustomerFirstPhotosV291(850);
+    photosReadyV424=await settleCustomerFirstPhotosV291(850);photosReadyAtV424=performance.now();
     if(state.session?.user?.id!==account)throw Object.assign(new Error('Účet sa zmenil. Skúste znova.'),{code:'session_changed'});
     bootCompletedV423=true;
     startCustomerLive();
@@ -478,7 +483,7 @@ function bootstrapCore(showSpinner=true){
       // Timings only: no account, dog, photo URL or token leaves the app.
       window.__chvoBootTimingV421={totalMs:Math.round(end-bootStartedAtV421),apiMs:Math.round(apiReadyAtV421-bootStartedAtV421),firstRenderMs:Math.round(end-apiReadyAtV421)};
     }
-    customerStartupTimingV423({kind,status:interruptedV423?'interrupted':bootCompletedV423?'complete':'failed',totalMs:Math.round(performance.now()-started),apiMs:apiMsV423,dataMs:Math.round(dataReadyAtV423-bootStartedAtV421),photosMs:photosDoneAtV423?Math.round(photosDoneAtV423-apiReadyAtV421):null,photosSettled:!!photosDoneAtV423});
+    customerStartupTimingV423({kind,status:interruptedV423?'interrupted':bootCompletedV423?'complete':'failed',totalMs:Math.round(performance.now()-started),apiMs:apiMsV423,dataMs:Math.round(dataReadyAtV423-bootStartedAtV421),photosMs:photosReadyV424?Math.round(photosReadyAtV424-apiReadyAtV421):null,photosReady:photosReadyV424,photosSettled:!!photosDoneAtV423});
     bootstrapInFlight=null;
   });
   return bootstrapInFlight;
