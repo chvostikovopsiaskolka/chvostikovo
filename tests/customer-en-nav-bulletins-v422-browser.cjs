@@ -1,5 +1,6 @@
 const assert=require('node:assert/strict');
 const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwright');
+const {expect}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwright/test');
 const fixture=require('./liquid-v3-fixture.cjs');
 (async()=>{
  const engine=process.env.V3_ENGINE==='webkit'?webkit:chromium;
@@ -19,17 +20,19 @@ const fixture=require('./liquid-v3-fixture.cjs');
     window.ChvostikovoLocale.setLanguage('en');
    });
    await page.waitForFunction(()=>document.querySelector('#navBooking')?.textContent?.includes('Overview'));
-   assert.match(await page.locator('#navBooking').innerText(),/Overview/);
-   assert.match(await page.locator('#navBookAddV220').innerText(),/Book a place/);
-   assert.match(await page.locator('#customerMessagesV363').innerText(),/Messages/);
-   assert.match(await page.locator('#customerShopV414').innerText(),/Shop/);
+   await expect(page.locator('#navBooking')).toHaveText(/Overview/);
+   await expect(page.locator('#navBookAddV220')).toHaveText(/Book a place/);
+   await expect(page.locator('#customerMessagesV363')).toHaveText(/Messages/);
+   await expect(page.locator('#customerShopV414')).toHaveText(/Shop/);
    await page.locator('#navBookAddV220').click();
    await page.waitForFunction(()=>document.querySelector('#bookingPickerV37')&&!document.querySelector('#bookingPickerV37').classList.contains('hidden'));
    await page.waitForFunction(()=>document.querySelector('.booking-picker-week-label-v127')?.textContent?.includes('This week'));
    assert.match(await page.locator('#bookingPickerTitleV37').innerText(),/Bookings|Choose a day/);
    assert.match(await page.locator('.booking-picker-week-label-v127').first().innerText(),/This week/);
    assert.match(await page.locator('.booking-picker-week-label-v127').last().innerText(),/Next week/);
-   const available=page.locator('.booking-day-v37:not(:disabled)').first();
+   // Late-contact days remain clickable but open their own contact flow after
+   // the 19:00 deadline. This test exercises the ordinary booking/taxi form.
+   const available=page.locator('.booking-day-v37:not(:disabled):not([data-contact="true"])').first();
    assert.match(await available.getAttribute('title'),/Occupied:\s*2 of 10 places/);
    assert.match(await available.locator('small').textContent(),/Mon|Tue|Wed|Thu|Fri/);
    await available.click();await page.waitForTimeout(120);
