@@ -71,6 +71,10 @@ assert.equal(legacyImgV425.src,'https://example.invalid/'+legacyPhotoV425,
   'missing optimized preview must fall back to untouched full-resolution original');
 assert.equal(card({...bulletin,image_path:legacyPhotoV425},true,true).querySelector('img').src,
   legacyImgV425.src,'failed preview is not retried on archive re-render');
+const cacheRulesV425=JSON.parse(fs.readFileSync('vercel.json','utf8'));
+const previewHeadersV425=cacheRulesV425.headers.find(x=>x.source==='/notice-previews/zbierka-v425.webp')?.headers;
+assert.equal(previewHeadersV425?.find(x=>x.key==='Cache-Control')?.value,
+  'public, max-age=31536000, immutable','versioned thumbnail must be browser-cacheable');
 const previewBytesV425=fs.readFileSync('notice-previews/zbierka-v425.webp');
 assert.equal(previewBytesV425.subarray(0,4).toString('ascii'),'RIFF','generated preview is RIFF');
 assert.equal(previewBytesV425.subarray(8,12).toString('ascii'),'WEBP','generated preview is WebP');

@@ -140,6 +140,19 @@
       ]
     },
     {
+      "source": "/notice-previews/zbierka-v425.webp",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    },
+    {
       "source": "/email-logo-800-v1.png",
       "headers": [
         {
