@@ -18,7 +18,8 @@ async function fixture(saved,{mode='ok',defer=false,remember=true}={}){
   const path=String(url);calls.push({path,headers:opts.headers||{},method:opts.method||'GET',body:opts.body});
   if(path.includes('grant_type=refresh_token')){await barrier;if(mode==='network')throw new TypeError('offline');if(mode==='503')return response({message:'refresh token temporarily unavailable'},503);if(mode==='revoked')return response({code:'refresh_token_not_found',message:'Invalid refresh token'},400);return response(session('new',3600));}
   if(path.includes('/customer-portal-api')){if(w.bootstrapFailure)return response({error:'Could not query the database for the schema cache. Retrying.'},503);if(mode==='fallback401'&&opts.headers.Authorization!=='Bearer new')return response({error:'Prihlásenie vypršalo.'},401);return response(data);}
-  if(path.includes('/admin-push'))return response({ok:true});
+  if(path.includes('/admin-push')){if(w.pushBarrier)await w.pushBarrier;return response({ok:true});}
+  if(path.includes('portal_sync_owner_terms_v254')){if(w.termsBarrier)await w.termsBarrier;if(w.termsFailure)return response({message:'Synthetic failure'},503);if(w.terms401&&opts.headers.Authorization!=='Bearer new')return response({message:'expired'},401);return response([{dog_id:1,terms_version:'synthetic-terms',accepted_at:'2099-01-01'}]);}
   if(path.includes('portal_terms_documents'))return response([{version:'synthetic-terms',document_hash:'hash'}]);
   return response([]);
  }});
@@ -88,4 +89,41 @@ async function waitBoot(f){await tick(850);assert.deepEqual(f.errors,[]);}
  try{await waitBoot(f);assert.equal(refreshes(f).length,1,'JWT exp fallback only schedules refresh');}finally{f.w.close()}
  f=await fixture(session('almost-expired',30));try{await waitBoot(f);assert.equal(refreshes(f).length,1,'refresh 60 seconds ahead');}finally{f.w.close()}
  console.log('PASS session-only storage, bounded unexpected401 retry, JWT expiry fallback and one-minute safety margin');
+ for(const change of ['logout','newlogin']){
+  f=await fixture(session('valid',3600));try{
+   await waitBoot(f);let release;f.w.pushBarrier=new Promise(r=>release=r);
+   const pending=f.run("syncPushSubscriptionV75({endpoint:'https://push.fixture/delayed',toJSON:()=>({endpoint:'https://push.fixture/delayed',keys:{}})})");
+   const checked=assert.rejects(pending,e=>e.code==='session_changed');await tick(10);
+   f.run(change==='logout'?'clearSession()':"saveSession({access_token:'other',expires_at:9999999999,user:{id:'other-owner'}},false);state.data={push_subscription_active:false}");
+   release();await checked;
+   if(change==='newlogin')assert.equal(f.run('state.data.push_subscription_active'),false,'old push response cannot mark new account active');
+  }finally{f.w.close()}
+ }
+ console.log('PASS delayed push success cannot mutate a new account or resurrect logout');
+ f=await fixture(session('valid',3600));try{
+  await waitBoot(f);const start=f.calls.length;f.run("saveSession({...state.session,expires_at:1},true)");
+  await f.run("syncCustomerOwnerTermsV423('synthetic-terms')");
+  assert.equal(refreshes(f).length,1);
+  assert(f.calls.slice(start).filter(c=>c.path.includes('portal_sync_owner_terms_v254')).every(c=>c.headers.Authorization==='Bearer new'));
+  f.w.termsFailure=true;await assert.rejects(f.run("syncCustomerOwnerTermsV423('synthetic-terms')"),'HTTP failure must not become an empty acceptance list');
+  f.w.termsFailure=false;f.w.terms401=true;f.run("saveSession({...state.session,access_token:'rejected'},true)");
+  const before=f.calls.length;await f.run("syncCustomerOwnerTermsV423('synthetic-terms')");
+  assert.equal(f.calls.slice(before).filter(c=>c.path.includes('portal_sync_owner_terms_v254')).length,2,'one bounded rejected-token recovery');
+  let release;f.w.termsBarrier=new Promise(r=>release=r);
+  const checked=assert.rejects(f.run("syncCustomerOwnerTermsV423('synthetic-terms')"),e=>e.code==='session_changed');await tick(10);
+  f.run("saveSession({access_token:'other',expires_at:9999999999,user:{id:'other-owner'}},false)");release();await checked;
+ }finally{f.w.close()}
+ console.log('PASS terms await session, preserve HTTP errors, bound 401 retry and discard account-changed responses');
+ f=await fixture(session('valid',3600));try{
+  await waitBoot(f);const successful=f.w.__chvoBootTimingV421;assert(successful);
+  assert.equal(f.w.__chvoStartupTimingV423.status,'complete');
+  assert(f.w.__chvoStartupTimingV423.apiMs>=0);
+  assert(!JSON.stringify(f.w.__chvoStartupTimingV423).includes('synthetic-owner'));
+  f.w.bootstrapFailure=true;await f.run('bootstrap(false)');
+  assert.equal(f.w.__chvoBootTimingV421,successful,'failed refresh cannot overwrite the last completed boot measurement');
+  assert.equal(f.w.__chvoStartupTimingV423.status,'failed');
+  f.w.bootstrapFailure=false;await f.run('bootstrap(false)');
+  assert.equal(f.w.__chvoStartupTimingV423.kind,'recovery');assert.equal(f.w.__chvoStartupTimingV423.status,'complete');
+ }finally{f.w.close()}
+ console.log('PASS failed refresh retains last completed boot measurement');
 })().catch(e=>{console.error(e);process.exitCode=1});

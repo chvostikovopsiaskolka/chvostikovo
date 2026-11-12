@@ -6,7 +6,7 @@ import { TracerProvider, BatchSpanProcessor } from '@opentelemetry/sdk-trace';
 const types=new Set(['Error','TypeError','ReferenceError','SyntaxError','RangeError','URIError','EvalError','AggregateError','NetworkError','TimeoutError']);
 const files=new Set(['app.js','customer-design.js','dual-dog-overview-v246.js','back-swipe.js','loading-motion.js','telemetry-v345.js']);
 const surfaces=new Set(['overview','reservations','menu','vaccinations','dog-details','messages','other']);
-const categories=new Set(['javascript.error','promise.error','request.error','request.slow','operation.error']);
+const categories=new Set(['javascript.error','promise.error','request.error','request.slow','operation.error','startup.complete','startup.failed','startup.interrupted']);
 const attr=(key,value)=>({key,value:{stringValue:String(value)}});
 const actions=new Set(['save_profile','save_dog','upload_vaccination_proofs','upload_dog_photo','delete_dog_photo','set_photo_visibility','request_new_pass','request_late_booking','shared_booking_v257','request_dogs_bookings','request_bookings','request_booking','cancel_booking','request_taxi_change','send_message']);
 function environment(){
@@ -33,7 +33,8 @@ function routeName(input,base){
 }
 function init(config){
  if(window.ChvoTelemetry.active||!['customer','admin'].includes(config.app)||typeof config.getToken!=='function')return;
- const nativeFetch=window.fetch.bind(window),env=environment(),seen=new Map();let recorded=0,windowAt=Date.now(),disabled=false;
+ const nativeFetch=window.fetch.bind(window),env=environment(),seen=new Map();let recorded=0,windowAt=Date.now(),disabled=false,startupRecorded=0,startupWindowAt=Date.now();
+ const sampleStartup=Math.random()<0.1;
  const exporter={
   export(spans,done){
    void (async()=>{try{
@@ -49,12 +50,14 @@ function init(config){
   try{
    if(disabled||!categories.has(category))return;
    const now=Date.now();if(now-windowAt>600000){recorded=0;windowAt=now;seen.clear();}if(recorded>=40)return;
-   const operation=actions.has(details.action)?'action/'+details.action:typeof details.operation==='string'&&/^(rpc\/[a-z][a-z0-9_]{0,79}|db\/[a-z][a-z0-9_]{0,79}|edge\/[a-z][a-z0-9-]{0,79}|storage|javascript|customer-operation|app-startup)$/.test(details.operation)?details.operation:'javascript';
+   const startup=category.startsWith('startup.');
+   if(startup){if(config.app!=='customer'||!/^startup\/(cold|reload|resume|refresh|recovery)\/(total|api|data|photos)$/.test(details.operation||''))return;if(now-startupWindowAt>600000){startupRecorded=0;startupWindowAt=now}if(startupRecorded>=8)return;}
+   const operation=startup?details.operation:actions.has(details.action)?'action/'+details.action:typeof details.operation==='string'&&/^(rpc\/[a-z][a-z0-9_]{0,79}|db\/[a-z][a-z0-9_]{0,79}|edge\/[a-z][a-z0-9-]{0,79}|storage|javascript|customer-operation|app-startup)$/.test(details.operation)?details.operation:'javascript';
    const source=sourceLocation(details.error,details.event),status=Math.min(599,Math.max(0,Number(details.status)||0));
-   const key=[category,operation,status,source['code.file'],source['code.line']].join(':');if(now-(seen.get(key)||0)<60000)return;seen.set(key,now);recorded++;
+   const key=[category,operation,status,source['code.file'],source['code.line']].join(':');if(now-(seen.get(key)||0)<60000)return;seen.set(key,now);recorded++;if(startup)startupRecorded++;
    const type=types.has(details.error?.name)?details.error.name:'Error';
    const surface=config.getSurface?.(),attributes={category,operation,surface:surfaces.has(surface)?surface:'other','exception.type':type,'http.status':status,'duration.ms':Math.min(300000,Math.max(0,Math.round(Number(details.duration)||0))),...source};
-   const span=tracer.startSpan(category,{attributes});span.setStatus({code:category==='request.slow'?SpanStatusCode.UNSET:SpanStatusCode.ERROR});span.end();
+   const span=tracer.startSpan(category,{attributes});span.setStatus({code:category==='request.slow'||category==='startup.complete'||category==='startup.interrupted'?SpanStatusCode.UNSET:SpanStatusCode.ERROR});span.end();
   }catch(_){}
  }
  window.addEventListener('error',event=>{if(event instanceof ErrorEvent)capture('javascript.error',{error:event.error,event});});
@@ -70,6 +73,13 @@ function init(config){
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')void flush();});
  window.addEventListener('pagehide',()=>{void flush();});
  setTimeout(()=>{try{if(document.visibilityState!=='hidden'&&navigator.onLine!==false&&typeof config.isReady==='function'&&!config.isReady())capture('request.error',{operation:'app-startup',error:{name:'TimeoutError'},duration:30000});}catch(_){}},30000);
- Object.assign(window.ChvoTelemetry,{active:true,capture,flush,disable(){disabled=true;seen.clear();void provider.shutdown().catch(()=>{});}});
+ function startup(timing){
+  if(!timing||!['complete','failed','interrupted'].includes(timing.status)||!['cold','reload','resume','refresh','recovery'].includes(timing.kind))return;
+  if(timing.status==='complete'&&!sampleStartup)return;
+  const stages=timing.status==='complete'?['total','api','data','photos']:['total'];
+  for(const stage of stages){const duration=timing[stage+'Ms'];if(typeof duration==='number'&&Number.isFinite(duration)&&duration>=0)capture('startup.'+timing.status,{operation:'startup/'+timing.kind+'/'+stage,duration});}
+  if(document.visibilityState==='hidden')void flush();
+ }
+ Object.assign(window.ChvoTelemetry,{active:true,capture,startup,flush,disable(){disabled=true;seen.clear();void provider.shutdown().catch(()=>{});}});
 }
 window.ChvoTelemetry=window.ChvoTelemetry||{init,active:false};
