@@ -180,7 +180,7 @@ try {
   }
 
   // Caught errors, including repeated attempts, must notify without personal data.
-  for (const component of [<ShortForm />, <LongForm />, <EnglishInquiryForm />]) {
+  for (const component of [<ShortForm />, <LongForm />, <EnglishInquiryForm />, <LeadStepForm trackingSource="guided_error_test" />]) {
     dom.happyDOM.setURL("https://chvostikovo.sk/?fbclid=qa-test");
     dom.sessionStorage.clear();
     requests = [];
@@ -193,6 +193,13 @@ try {
     const root = createRoot(container as any);
     await React.act(async () => root.render(component));
     const form = container.querySelector("form")!;
+    if (form.hasAttribute("data-lead-step-form")) {
+      const interest = form.querySelector<HTMLInputElement>('input[type="radio"][name="zaujem"], input[type="radio"][name="interest"]')!;
+      await React.act(async () => interest.click());
+      const next = [...form.querySelectorAll("button")].find(button => /^(Pokračovať|Continue)$/.test(button.textContent?.trim() || ""));
+      assert(next && !next.disabled, "Guided form must enable Continue after choosing an interest");
+      await React.act(async () => next!.click());
+    }
     for (const el of form.querySelectorAll("input, textarea, select")) {
       if (el instanceof dom.HTMLSelectElement) {
         if (!el.hasAttribute("data-phone-prefix")) el.value = el.options[1]!.value;
