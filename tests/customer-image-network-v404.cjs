@@ -59,6 +59,30 @@ assert.equal(image.src,'https://example.invalid/1/example.with-preview-v423.jpg'
 assert.equal(card(optimized,false).querySelector('img').src,image.src,'failed preview is not requested again');
 image.dispatchEvent(new dom.window.Event('error'));assert.equal(fallback.querySelector('img'),null,'failed original keeps existing unavailable state');
 
+const legacyPhotoV425='7d062ba9-eb65-4586-9623-9a67f33a2706/81b2588c-1f51-4e16-9d65-16c288c0b054.png';
+const legacyCardV425=card({...bulletin,image_path:legacyPhotoV425},true,true);
+const legacyImgV425=legacyCardV425.querySelector('img');
+assert.equal(legacyImgV425.getAttribute('src'),'/notice-previews/zbierka-v425.webp',
+  'legacy public bulletin must use small same-origin image in archive');
+assert.equal(card({...bulletin,image_path:legacyPhotoV425},false).querySelector('img').getAttribute('src'),
+  '/notice-previews/zbierka-v425.webp','overview uses the same optimized preview');
+legacyImgV425.dispatchEvent(new dom.window.Event('error'));
+assert.equal(legacyImgV425.src,'https://example.invalid/'+legacyPhotoV425,
+  'missing optimized preview must fall back to untouched full-resolution original');
+assert.equal(card({...bulletin,image_path:legacyPhotoV425},true,true).querySelector('img').src,
+  legacyImgV425.src,'failed preview is not retried on archive re-render');
+const cacheRulesV425=JSON.parse(fs.readFileSync('vercel.json','utf8'));
+const previewHeadersV425=cacheRulesV425.headers.find(x=>x.source==='/notice-previews/zbierka-v425.webp')?.headers;
+assert.equal(previewHeadersV425?.find(x=>x.key==='Cache-Control')?.value,
+  'public, max-age=31536000, immutable','versioned thumbnail must be browser-cacheable');
+const previewBytesV425=fs.readFileSync('notice-previews/zbierka-v425.webp');
+assert.equal(previewBytesV425.subarray(0,4).toString('ascii'),'RIFF','generated preview is RIFF');
+assert.equal(previewBytesV425.subarray(8,12).toString('ascii'),'WEBP','generated preview is WebP');
+assert.equal(previewBytesV425.length,37098,'generated 512×640 optimized asset has expected byte size');
+assert.equal(require('node:crypto').createHash('sha256').update(previewBytesV425).digest('hex'),
+  'bf86d94db11400f3c5f37b3958537dfe72837556809321ab7eda0f5e6ff725ef',
+  'preview bytes must match verified conversion of the unchanged legacy original');
+
 const photoNode=new Function('document','icon',fn+'\nreturn photoNode;')(dom.window.document,()=>'<svg class="paw"></svg>');
 const dog={dog_id:2,name:'Synthetic dog',photo_url:'https://example.invalid/synthetic.jpg',sex:'female'};
 const tile=photoNode(dog,'design-friend-photo');
