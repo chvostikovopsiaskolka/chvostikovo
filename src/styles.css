@@ -341,10 +341,9 @@
   .hero-cta-primary, .hero-cta-secondary { transition: none; }
 }
 
-/* v298: back to one stable form frame and one native inner scroller.
-   The dialog is pinned at a constant position, with a natural (not forced
-   full-screen) height and a single max-height. Browser keyboard events must
-   never change its geometry or synthesize a scroll offset. */
+/* Shared form modal: centered in the available viewport, preserving a
+   natural height and one independently scrollable inner panel for long forms.
+   Keyboard/visualViewport event handlers must not change its geometry. */
 .form-dialog {
   display: flex;
   flex-direction: column;
@@ -365,14 +364,16 @@
   .form-dialog[data-state] {
     position: fixed !important;
     box-sizing: border-box !important;
-    top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+    /* Keep compact dialogs vertically centered, not pinned near the notch.
+       Tall registration forms still scroll *inside* this max-height. */
+    top: 50% !important;
     bottom: auto !important;
-    left: 12px !important;
-    right: 12px !important;
-    width: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    width: calc(100% - 24px) !important;
     max-width: none !important;
     max-height: calc(100svh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
-    transform: none !important;
+    transform: translate(-50%, -50%) !important;
     translate: none !important;
     animation: none !important;
   }
