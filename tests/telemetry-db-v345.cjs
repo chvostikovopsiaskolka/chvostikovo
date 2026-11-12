@@ -15,6 +15,10 @@ async function test(){const db=new PGlite();await db.exec(`create role anon;crea
  `);await db.exec(migration);
  await db.exec(fs.readFileSync('supabase/migrations/20261022151014_telemetry_alerts_v347.sql','utf8').split('select cron.alter_job')[0]);
  await db.exec(fs.readFileSync('supabase/changes/customer-startup-telemetry-v424.sql','utf8'));
+ const alertTrigger=(await db.query("select pg_get_triggerdef(oid) definition from pg_trigger where tgrelid='private.app_telemetry_v345'::regclass and tgname='app_telemetry_alert_v347'")).rows[0].definition;
+ assert.match(alertTrigger,/WHEN/i,'RUM migration must filter the active staff-alert trigger');
+ assert.match(alertTrigger,/request\\.error/,'old error alert remains enabled');
+ assert.doesNotMatch(alertTrigger,/startup\\.complete|startup\\.failed|startup\\.interrupted/,'startup lifecycle never triggers staff push');
  const identity=async(id=customer)=>{await db.exec(`reset role;select set_config('request.jwt.claim.sub','${id}',false),set_config('request.jwt.claim.session','${sid}',false);set role authenticated;`)};
  const ingest=async(p)=>{return(await db.query('select public.portal_telemetry_ingest_v345($1::jsonb) ok',[JSON.stringify(p)])).rows[0].ok};
  await db.exec('set role anon');await assert.rejects(()=>ingest(payload()),/permission denied/);await identity();
