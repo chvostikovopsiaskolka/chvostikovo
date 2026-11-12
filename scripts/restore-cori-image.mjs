@@ -258,6 +258,40 @@ await restoreImage({
   targetDir: siteOutputDir,
 });
 
+// User-supplied stand realization photos, reproducibly restored from checked base64
+// to keep the repo text-only while serving real independent WebP assets at runtime.
+for (const photo of [
+  {
+    label: "ROSE",
+    prefix: "stand-rose-hq",
+    bytes: 181570,
+    sha: "df31a87447f99a17ab3dfeafc6b8d77fd83f6b54bcff0e51031dc9e5187783c1",
+  },
+  {
+    label: "BUNCA A LINDEN",
+    prefix: "stand-bunca-linden-hq",
+    bytes: 73024,
+    sha: "cd89c8220da75c78252553ed2d4e3b5cdd2b25a555dafb823609ab263f9a1b94",
+  },
+  {
+    label: "ARCANA A AIDEN",
+    prefix: "stand-arcana-aiden-hq",
+    bytes: 239642,
+    sha: "2af7fb3b6d39816d9d22ebd0e3a74a577a18cc8d1e1d4b1d5909861a89010d17",
+  },
+]) {
+  await restoreImage({
+    label: photo.label,
+    dataDir: galleryDataDir,
+    prefix: photo.prefix,
+    output: photo.prefix + ".webp",
+    minBytes: 50_000,
+    expectedBytes: photo.bytes,
+    expectedSha256: photo.sha,
+    format: "webp",
+  });
+}
+
 const routePath = path.join(root, "src", "routes", "stojan-na-misky-pre-psa.tsx");
 let routeSource = await readFile(routePath, "utf8");
 
