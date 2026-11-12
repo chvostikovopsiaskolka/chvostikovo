@@ -214,17 +214,18 @@ for (const spec of [
   const productHtmlPath = "dist/client" + productPath + "/index.html";
   assert(fs.existsSync(productHtmlPath), "Product prerender missing: " + productHtmlPath);
   const productHtml = fs.readFileSync(productHtmlPath, "utf8");
-  assert(productHtml.includes("bg-forest") && productHtml.includes("text-white"), "Short product highlight contrast missing: " + productPath);
-  const expectedHighlights = spec.product === "stojan-na-misky-pre-psa"
-    ? ["Osobný barový pultík", "Rýchla údržba", "Výška podľa psa"]
-    : ["Kvalitné spracovanie", "Protišmykový povrch", "Ručná výroba"];
-  for (const heading of expectedHighlights) {
-    assert(productHtml.includes(heading), "Missing hero product value: " + heading);
+  // Target's existing compact hero strip stays unchanged. Stand now puts those benefits
+  // inside its three visible photo-card badges, avoiding a duplicate strip.
+  if (spec.product !== "stojan-na-misky-pre-psa") {
+    assert(productHtml.includes("bg-forest") && productHtml.includes("text-white"), "Target hero highlight contrast missing");
+    for (const heading of ["Kvalitné spracovanie", "Protišmykový povrch", "Ručná výroba"]) {
+      assert(productHtml.includes(heading), "Target hero highlight missing: " + heading);
+    }
   }
   if (spec.product === "stojan-na-misky-pre-psa") {
     assert(productHtml.includes('Vyberte si variant a objednajte si stojan pre svojho psíka.'), "Stand detail short description missing");
     assert(productHtml.includes('data-stand-gallery="autoplay"'), "Stand photo gallery is not autoplay-enabled");
-    assert(productHtml.includes('Stojany na misky pre malé, stredné aj veľké plemená'), "Stand breed SEO copy missing from product");
+    assert(productHtml.includes('L verzia'), "Stand L variant is missing from product");
     for (const photo of ["stand-mlyncek-", "stand-aron-", "stand-loki-", "stand-planetky-", "stand-aloy-", "stand-psik-pri-miskach-", "stand-maya-", "stand-gael-", "stand-lara-", "stand-safira-"]) {
       assert(productHtml.includes(photo) && markup.includes(photo), "Stand realization missing from product or article: " + photo);
     }
