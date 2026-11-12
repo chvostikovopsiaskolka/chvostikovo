@@ -8,15 +8,6 @@ import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
-function scrollToHomeInquiry(source: string) {
-  trackMarketingInteraction("inquiry_cta", source);
-  void trackCookielessInteraction("inquiry_cta", source);
-  const target = document.getElementById(window.innerWidth >= 1024 ? "home-hero-inline-form" : "informujte-sa");
-  if (!target) return;
-  const top = window.scrollY + target.getBoundingClientRect().top - 12;
-  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-}
-
 function scrollToWhyChvostikovo() {
   const target = document.getElementById("preco-chvostikovo");
   if (!target) return;
