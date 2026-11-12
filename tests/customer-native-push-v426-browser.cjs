@@ -13,9 +13,9 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
     active:true,pending:null,
     attach(host){this.host=host;calls.push('attach');},
     prepareLaunch:async()=>{calls.push('launch');return false;},
-    ensurePush:async()=>{calls.push('ensure');this.host.setPush(false);return false;},
-    enablePush:async()=>{calls.push('native-enable');await this.host.completePushPrompt();this.host.setPush(true);return true;},
-    togglePush:async()=>{calls.push('native-toggle');this.host.setPush(!state.pushEnabled);},
+    async ensurePush(){calls.push('ensure');this.host.setPush(false);return false;},
+    async enablePush(){calls.push('native-enable');await this.host.completePushPrompt();this.host.setPush(true);return true;},
+    async togglePush(){calls.push('native-toggle');this.host.setPush(!state.pushEnabled);},
     takeNotification(){const q=this.pending;this.pending=null;return q;},
     logout:async()=>{calls.push('native-logout');}
    };
