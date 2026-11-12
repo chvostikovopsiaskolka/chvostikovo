@@ -362,21 +362,67 @@ const failures = [];
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1) throw new Error('Stand contact step missing');
               } else {
-                const photo = productPage.locator('img[fetchpriority="high"]').first();
-                const label = productPage.getByText('Vyberte veľkosť', { exact: true });
-                const [headingBox, photoBox, sizeBox] = await Promise.all([
-                  heroTitle.boundingBox(),photo.boundingBox(),label.boundingBox()]);
-                if (!headingBox || !photoBox || !sizeBox) throw new Error('Target product regions missing');
-                if (width === 1440 && !(photoBox.x + photoBox.width <= headingBox.x+8 && sizeBox.x >= headingBox.x-8)) throw new Error('Target desktop layout changed');
-                if (width === 390 && !(headingBox.y < photoBox.y && photoBox.y < sizeBox.y)) throw new Error('Target mobile layout changed');
-                await productPage.getByRole('button',{name:action}).first().click();
+                const targetCards=productPage.locator('[data-target-variant-cards]');
+                if (await targetCards.locator('article').count() !== 2)
+                  throw new Error('Target must have exactly two stand-style size cards');
+                if (width===390 && !(await targetCards.evaluate(el=>el.scrollWidth>el.clientWidth+30)))
+                  throw new Error('Target size cards must swipe on mobile');
+                const variants=[
+                  {type:'large',label:'„Veľký“ verzia',size:'40 × 20 cm',photo:'Veľký drevený target'},
+                  {type:'small',label:'„Malý“ verzia',size:'25 × 25 cm',photo:'Malý drevený target'},
+                ];
+                for (const variant of variants){
+                  const card=targetCards.locator('article[data-target-size="'+variant.type+'"]');
+                  const content=await card.textContent();
+                  if (!content?.includes(variant.label) || !content.includes(variant.size)
+                    || !content.includes('20 €')) throw new Error('Target size/card copy wrong: '+variant.type);
+                  if (!(await card.locator('img').getAttribute('alt'))?.includes(variant.photo))
+                    throw new Error('Target photo missing: '+variant.type);
+                  const cardImageHeight=await card.locator('img').evaluate(el=>el.getBoundingClientRect().height);
+                  if (cardImageHeight < 300)throw new Error('Target photo needs tall product style');
+                  const badges=card.locator('[aria-label="Vlastnosti targetu"] span');
+                  if (await badges.count()!==3)throw new Error('Target needs three photo badges');
+                  const stars=card.locator('[data-target-decorative-stars] svg.lucide-star');
+                  if (await stars.count()!==5 ||
+                      !(await stars.first().getAttribute('class'))?.includes('fill-current'))
+                    throw new Error('Target needs five filled decorative stars');
+                  const textColor=await card.locator('[data-target-decorative-stars]').evaluate(el=>getComputedStyle(el).color);
+                  if(textColor!=='rgb(233, 182, 0)')throw new Error('Target stars must be yellow');
+                  const heading=card.locator('[data-target-card-heading]');
+                  const [labelBounds,starBounds]=await Promise.all([heading.locator('p').boundingBox(),
+                    heading.locator('[data-target-decorative-stars]').boundingBox()]);
+                  if(!labelBounds||!starBounds||starBounds.x<=labelBounds.x+labelBounds.width||
+                    Math.abs(starBounds.y-labelBounds.y)>9)
+                    throw new Error('Target stars must align to right of variant label');
+                  const version=heading.locator('p span').nth(1);
+                  if (await version.textContent()!=='verzia' ||
+                      await version.evaluate(el=>getComputedStyle(el).color)!=='rgb(24, 24, 24)')
+                    throw new Error('Target version must be black');
+                }
+                if (width===1440){
+                  const [a,b]=await Promise.all([
+                    targetCards.locator('article').first().boundingBox(),
+                    targetCards.locator('article').nth(1).boundingBox()]);
+                  if(!a||!b||Math.abs(a.y-b.y)>5)
+                    throw new Error('Desktop Target variants must share a horizontal row');
+                }
+                // Select the SMALL card and make sure the original wizard receives that size,
+                // rather than resetting to its former default LARGE.
+                await targetCards.locator('[data-target-size="small"]')
+                  .getByRole('button',{name:/malý target/i}).click();
                 const dlg=productPage.getByRole('dialog',{name:action});
                 await dlg.waitFor({state:'visible'});
-                if (await dlg.locator('[data-product-inquiry-steps][data-step="1"]').count() !== 1) throw new Error('Target step 1 missing');
+                if (await dlg.locator('[data-product-inquiry-steps][data-step="1"]').count() !== 1)
+                  throw new Error('Target step 1 missing');
+                const selected=dlg.locator('button[aria-pressed="true"]');
+                if (!(await selected.innerText()).includes('Malý'))
+                  throw new Error('Target small-card CTA did not select small variant');
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
-                if (await dlg.locator('[data-product-inquiry-steps][data-step="2"]').count() !== 1) throw new Error('Target step 2 missing');
+                if (await dlg.locator('[data-product-inquiry-steps][data-step="2"]').count() !== 1)
+                  throw new Error('Target step 2 missing');
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
-                if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1) throw new Error('Target contact step missing');
+                if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1)
+                  throw new Error('Target contact step missing');
               }
               const formDialog = productPage.getByRole('dialog',{name:action});
               if (!await formDialog.locator('input[name="customer_name"]').count()

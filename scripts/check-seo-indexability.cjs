@@ -214,12 +214,13 @@ for (const spec of [
   const productHtmlPath = "dist/client" + productPath + "/index.html";
   assert(fs.existsSync(productHtmlPath), "Product prerender missing: " + productHtmlPath);
   const productHtml = fs.readFileSync(productHtmlPath, "utf8");
-  // Target's existing compact hero strip stays unchanged. Stand now puts those benefits
-  // inside its three visible photo-card badges, avoiding a duplicate strip.
-  if (spec.product !== "stojan-na-misky-pre-psa") {
-    assert(productHtml.includes("bg-forest") && productHtml.includes("text-white"), "Target hero highlight contrast missing");
-    for (const heading of ["Kvalitné spracovanie", "Protišmykový povrch", "Ručná výroba"]) {
-      assert(productHtml.includes(heading), "Target hero highlight missing: " + heading);
+  // Both product details now use photo-backed variant cards with real size selection.
+  // Decorative stars are intentionally not Product reviews or rating schema.
+  if (spec.product === "target-na-cvicenie-pre-psov") {
+    for (const token of ['data-target-variant-cards', 'data-target-size="large"', 'data-target-size="small"',
+                         'data-target-card-heading', '20 €', '40 × 20 cm', '25 × 25 cm',
+                         'Protišmyk', 'Ručná výroba', 'Výška na mieru']) {
+      assert(productHtml.includes(token), "Target card content missing: " + token);
     }
   }
   if (spec.product === "stojan-na-misky-pre-psa") {
@@ -253,7 +254,11 @@ for (const spec of [
   assert(productHtml.includes('rel="canonical"') && productHtml.includes('href="' + productCanonical + '"'), "Product HTML canonical mismatch: " + productPath);
   assert(productHtml.includes("Product"), "Product structured data missing: " + productPath);
   assert(productHtml.includes('href="' + page + '/"'), "Product must link to guide: " + productPath);
-  assert(productHtml.includes("Tri praktické"), "Product value cards removed: " + productPath);
+  if (spec.product === "stojan-na-misky-pre-psa") {
+    assert(productHtml.includes("Tri praktické"), "Stand value cards removed: " + productPath);
+  } else {
+    assert(productHtml.includes('aria-label="Vlastnosti targetu"'), "Target benefit badges missing: " + productPath);
+  }
 }
 assert(blogIndex.includes("stojan-na-misky-pre-psa-vyhody-a-vyber/"), "Stand guide missing from blog index");
 assert(blogIndex.includes("stand-mia-"), "Stand blog teaser must use restored original MIA AVIF");
