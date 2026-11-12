@@ -192,6 +192,9 @@ jobs:
           V3_ENGINE=webkit node tests/customer-en-nav-bulletins-v422-browser.cjs
           node tests/customer-push-onboarding-v398-browser.cjs
           V3_ENGINE=webkit node tests/customer-push-onboarding-v398-browser.cjs
+          node tests/customer-native-push-v426-browser.cjs
+          V3_ENGINE=webkit node tests/customer-native-push-v426-browser.cjs
+          V3_ENGINE=webkit node tests/customer-ios-menu-v426-browser.cjs
           node tests/customer-polish-v396-browser.cjs
           V3_ENGINE=webkit node tests/customer-polish-v396-browser.cjs
           node tests/customer-mobile-v393-browser.cjs
