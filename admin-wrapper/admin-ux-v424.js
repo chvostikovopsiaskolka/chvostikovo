@@ -84,7 +84,11 @@
     button.setAttribute('aria-expanded', 'false');
     button.textContent = '☰  Menu';
     button.addEventListener('click', openDrawer);
-    header.insertBefore(button, $('logoutBtn') || null);
+    // The logout control can be nested in the existing header actions wrapper.
+    // insertBefore only accepts a direct child of the target parent.
+    const logout = $('logoutBtn');
+    const anchor = logout && [...header.children].find(child => child === logout || child.contains(logout));
+    header.insertBefore(button, anchor || null);
     const drawer = document.createElement('div');
     drawer.id = 'chvoDrawerV424';
     drawer.hidden = true;
