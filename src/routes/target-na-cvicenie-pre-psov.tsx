@@ -9,12 +9,11 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
-import { ProductDeliveryDetails } from "@/components/site/ProductDeliveryDetails";
-import { ProductValueHighlights } from "@/components/site/ProductValueHighlights";
 import { EdgePhotoCarousel } from "@/components/site/EdgePhotoCarousel";
 import { FormDialog } from "@/components/site/FormDialog";
 import { ProductInquirySteps } from "@/components/site/ProductInquirySteps";
 import { ProductInquiryContact } from "@/components/site/ProductInquiryContact";
+import { TargetVariantCards, type TargetSize } from "@/components/site/TargetVariantCards";
 import { phoneFromForm } from "@/lib/phone";
 import { submitProductInquiry } from "@/lib/product-inquiry";
 import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
@@ -33,8 +32,6 @@ const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Target na cvičenie pre psov | Ručná výroba | Chvostíkovo";
 const description =
   "Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho postoja, koordinácie a rovnováhy. Veľký 40 × 20 cm alebo malý 25 × 25 cm, cena 20 €.";
-
-type TargetSize = "large" | "small";
 
 const SIZE_OPTIONS: Array<{ value: TargetSize; label: string; detail: string }> = [
   { value: "large", label: "Veľký", detail: "40 × 20 cm" },
@@ -168,105 +165,31 @@ function TargetPage() {
     }
   }
 
-  const selected = SIZE_OPTIONS.find((option) => option.value === size)!;
-
   return (
     <div className="min-h-screen bg-background">
       <Header homeSectionLinks />
       <main>
-        <section className="relative overflow-hidden pt-8 pb-14 sm:pt-10 sm:pb-20 lg:pt-32">
-          <div
-            className="absolute -top-24 -right-24 size-80 rounded-full bg-coral-soft/40 blur-3xl"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute -bottom-28 -left-20 size-72 rounded-full bg-secondary blur-3xl"
-            aria-hidden="true"
-          />
+        <section data-target-product-intro className="relative overflow-hidden pt-8 pb-10 sm:pt-10 sm:pb-14 lg:pt-32">
+          <div aria-hidden="true" className="absolute -top-24 -right-24 size-80 rounded-full bg-coral-soft/40 blur-3xl" />
           <div className="relative mx-auto max-w-6xl px-4">
-            <a
-              href="/produkty"
-              className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-forest/65 transition-colors hover:text-coral"
-            >
+            <a href="/produkty"
+              className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-forest/65 transition-colors hover:text-coral">
               <ArrowLeft className="size-4" /> Späť na produkty
             </a>
-
-            <div className="mx-auto max-w-xl lg:grid lg:max-w-none lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-start lg:gap-x-10 lg:gap-y-5">
-              <div className="lg:col-start-2 lg:row-start-1">
-                <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
+            <div className="mx-auto max-w-3xl text-center">
+              <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
                 Target na cvičenie <span className="text-coral-dark">pre psov</span>
               </h1>
               <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
                 Vyberte si variant a objednajte si target pre svojho psíka.
               </p>
-              </div>
-
-              <div className="lg:col-start-1 lg:row-span-2 lg:row-start-1">
-              <div className="mt-6 aspect-[3/4] lg:mt-0 overflow-hidden rounded-4xl bg-secondary shadow-soft">
-                <img
-                  src={size === "small" ? targetSmallDog : targetLargeDog}
-                  alt={size === "small" ? "Pes stojaci na malom targete na cvičenie" : "Pes stojaci na veľkom targete na cvičenie"}
-                  className="h-full w-full object-cover"
-                  fetchPriority="high"
-                />
-              </div>
-              </div>
-
-              <div className="mt-5 lg:col-start-2 lg:row-start-2 lg:mt-0">
-                <ProductValueHighlights
-                  label="Tri praktické výhody výrobku"
-                  headings={["Kvalitné spracovanie", "Protišmykový povrch", "Ručná výroba"]}
-                />
-                <div>
-                  <p className="font-display text-sm font-bold text-forest">Vyberte veľkosť</p>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {SIZE_OPTIONS.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setSize(option.value)}
-                        className={`rounded-2xl border-2 p-3 text-left transition-colors duration-75 ${
-                          size === option.value
-                            ? "border-coral bg-coral-soft/25"
-                            : "border-forest/10 bg-card"
-                        }`}
-                      >
-                        <span className="font-display text-sm font-bold text-forest">
-                          {option.label}
-                        </span>
-                        <span className="mt-1 block text-xs text-forest/60">{option.detail}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-5 flex items-end gap-3">
-                  <span className="text-sm text-forest/60">Cena</span>
-                  <span className="font-display text-4xl font-bold text-forest">20 €</span>
-                </div>
-                <ProductDeliveryDetails />
-                <p className="mt-2 text-sm leading-relaxed text-forest/60">
-                  Najbežnejšia výška je približne 5 cm. Na požiadanie vieme výšku upraviť podľa
-                  dohody.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(true)}
-                  className="mt-7 flex w-full items-center justify-between gap-4 rounded-2xl border border-forest/10 bg-card px-5 py-4 text-left shadow-card transition hover:bg-secondary/40"
-                >
-                  <span>
-                    <span className="block font-display font-bold text-forest">
-                      Mám záujem o target
-                    </span>
-                    <span className="mt-0.5 block text-xs text-forest/55">
-                      {selected.label} · {selected.detail} · výška podľa dohody
-                    </span>
-                  </span>
-                  <ChevronRight className="size-5 shrink-0 text-forest/65" />
-                </button>
-              </div>
             </div>
+            <TargetVariantCards onInterest={(nextSize) => {
+              setSize(nextSize);
+              setStep(1);
+              setFormError("");
+              setModalOpen(true);
+            }} />
           </div>
         </section>
 
