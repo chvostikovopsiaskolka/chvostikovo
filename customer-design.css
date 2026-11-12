@@ -1055,3 +1055,18 @@ html.customer-auth-glass-v386.customer-ios-auth-v410 #authView>.auth-card>.lg-v3
 }
 .customer-design #menuDogGroup>summary .customer-dog-unread-v421.hidden{display:none!important}
 .customer-design #menuDogGroup>summary .menu-chevron{margin-inline-start:3px}
+
+/* v426: iOS authenticated wallpaper uses a single viewport-fixed texture.
+   On long/expanded menus the old body wallpaper scrolled while the WebGL
+   surface sampled the viewport, making paws appear to jump between layers. */
+html.customer-ios-v171.customer-liquid-v364 body{background-image:none!important}
+html.customer-ios-v171.customer-liquid-v364 body::before{
+ content:"";position:fixed;inset:0;display:block;pointer-events:none;z-index:0;
+ background-image:var(--liquid-paws-v364);background-size:300px 430px;
+ background-position:0 0;background-repeat:repeat;
+}
+html.customer-ios-v171.customer-liquid-v364 #appView.app{position:relative;z-index:1}
+html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
+ position:fixed!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;
+ transform:none!important;-webkit-transform:none!important;will-change:auto!important;
+}
