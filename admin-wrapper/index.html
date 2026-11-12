@@ -189,14 +189,7 @@
           const withFastBulletin=withPairing.includes(blockingBulletinImage)
             ?withPairing.replace(blockingBulletinImage,nonblockingBulletinImage):withPairing;
           const withPreviews=window.patchBulletinPreviewsV423?.(withFastBulletin)||withFastBulletin;
-          // The fetched app includes a second loader. Keep it full-viewport
-          // during the document handoff instead of exposing a white inset.
-          const bootContinuityStyle='<style id="chvo-boot-continuity-v424">#appBoot.loading-screen.loading-concept{position:fixed!important;inset:0!important;width:100%!important;max-width:none!important;height:100vh!important;height:100dvh!important;min-height:0!important;box-sizing:border-box!important;margin:0!important;transform:none!important}</style>';
-          // UI layer only: native Supabase buttons, events and data writes stay untouched.
-          const withAdminUx=withPreviews
-            .replace(/<\/head>/i,bootContinuityStyle+'<link rel="stylesheet" href="/admin-ux-v424.css?v=20261112-v424"></head>')
-            .replace(/<\/body>/i,'<script src="/admin-ux-v424.js?v=20261112-v424"><\/script></body>');
-          document.open(); document.write(withAdminUx); document.close();
+          document.open(); document.write(withPreviews); document.close();
         } catch (e) {
           started = false;
           boot.classList.add('load-failed');
