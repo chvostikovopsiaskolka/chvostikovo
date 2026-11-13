@@ -12,7 +12,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  assert.equal(await page.locator('#navBookHintV220').count(),0,'booking hint is removed rather than hidden temporarily');
  if(dogs===1){const aligned=await page.evaluate(()=>{const ids=['bookingVaccinationStatus','bookingVisitCount','bookingGradebook'];return ids.map(id=>{const row=document.getElementById(id),icon=row.querySelector('svg').getBoundingClientRect(),label=row.querySelector(':scope>span:last-child').getBoundingClientRect();return{x:icon.x,width:icon.width,height:icon.height,textX:label.x};});});assert(aligned.every(a=>Math.abs(a.x-aligned[0].x)<1&&a.width===24&&a.height===24&&Math.abs(a.textX-aligned[0].textX)<1),'profile icon and text columns align');}
 
- const buttons=await page.locator('.bottom-nav>button').evaluateAll(nodes=>nodes.filter(el=>getComputedStyle(el).display!=='none').map(el=>({id:el.id,w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
+ const buttons=await page.locator('.bottom-nav>button,.bottom-nav>a').evaluateAll(nodes=>nodes.filter(el=>getComputedStyle(el).display!=='none').map(el=>({id:el.id,w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
  assert(await page.locator('.booking-action-label-v369').evaluate(el=>el.scrollWidth<=el.clientWidth&&getComputedStyle(el).whiteSpace==='nowrap'));
  assert.equal(buttons.length,5);assert(buttons.every(b=>b.w>=44&&b.h>=44));const centre=buttons.find(b=>b.id==='navBookAddV220');assert(buttons.filter(b=>b!==centre).every(b=>centre.w>b.w));
  await page.evaluate(()=>window.__passMaterial=document.querySelector('#designTicket>.lg-v3-material'));
@@ -43,7 +43,7 @@ const fixture=require('./liquid-v3-fixture.cjs');
  assert((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts<=2,'inner notice does not allocate extra WebGL contexts');
  const cardStyle=await page.locator('#customerNoticeOverviewV376 [data-announcement-id]').first().evaluate(el=>{const s=getComputedStyle(el);return {background:s.backgroundColor,radius:s.borderRadius,padding:s.padding,columns:s.gridTemplateColumns}});
  assert.equal(await page.evaluate(()=>__noticeReads.length),0,'carousel does not dismiss notices');
- await page.locator('#customerAnnouncementsV363').click();await page.waitForTimeout(100);
+ await page.locator('#navDog').click();await page.locator('#menuDogGroup > summary').click();await page.locator('#menuBulletinV229').click();await page.waitForTimeout(100);
  assert.equal(await page.locator('#customerBulletinHistoryV229 [data-announcement-id]').count(),4);
  await page.locator('#customerBulletinHistoryV229 .customer-notice-panel-v383>.lg-v3-material').first().waitFor({state:'attached'});
  assert.equal(await page.locator('#customerBulletinHistoryV229>.lg-v3-material').count(),0,'notice sheet retains opaque outer material');
@@ -79,8 +79,15 @@ const fixture=require('./liquid-v3-fixture.cjs');
    const previewBrowser=await type.launch(type===chromium?{executablePath:process.env.CHROMIUM_PATH,args:process.env.PACKED_CHROMIUM?require(process.env.PACKED_CHROMIUM).args:['--no-sandbox']}:{});
    try{const white=await fixture(previewBrowser,1,390,type.name(),'?background-preview=white&notice-carousel-preview=1');
    assert.equal(await white.page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
-   assert((await white.page.locator('body').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('chvostikovo-paws-soft-v383.png'));
-   assert.equal(await white.page.locator('body').evaluate(el=>getComputedStyle(el).backgroundSize.split(',')[0].trim()),'300px 430px');
+   const wallpaper=await white.page.locator('body').evaluate(el=>{
+    const body=getComputedStyle(el),fixed=getComputedStyle(el,'::before');
+    return body.backgroundImage.includes('chvostikovo-paws-soft-v383.png')
+      ? {image:body.backgroundImage,size:body.backgroundSize.split(',')[0].trim(),mode:'body'}
+      : {image:fixed.backgroundImage,size:fixed.backgroundSize.split(',')[0].trim(),mode:fixed.position};
+   });
+   assert(wallpaper.image.includes('chvostikovo-paws-soft-v383.png'),'paws visible via document or fixed iOS layer');
+   assert.equal(wallpaper.size,'300px 430px');
+   if(type===webkit)assert.equal(wallpaper.mode,'fixed','iOS viewport wallpaper cannot scroll with expanding menu');
    assert.equal(await white.page.locator('#customerNoticeOverviewV376 [data-announcement-id]').count(),2);
    assert.equal(await white.page.locator('.customer-notice-position-v381').count(),0);
    assert.deepEqual(white.errors,[]);assert((await white.page.evaluate(()=>customerLiquidV3Diagnostics())).contexts<=2);
