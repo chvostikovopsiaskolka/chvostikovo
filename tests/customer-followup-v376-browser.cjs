@@ -79,8 +79,15 @@ const fixture=require('./liquid-v3-fixture.cjs');
    const previewBrowser=await type.launch(type===chromium?{executablePath:process.env.CHROMIUM_PATH,args:process.env.PACKED_CHROMIUM?require(process.env.PACKED_CHROMIUM).args:['--no-sandbox']}:{});
    try{const white=await fixture(previewBrowser,1,390,type.name(),'?background-preview=white&notice-carousel-preview=1');
    assert.equal(await white.page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
-   assert((await white.page.locator('body').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('chvostikovo-paws-soft-v383.png'));
-   assert.equal(await white.page.locator('body').evaluate(el=>getComputedStyle(el).backgroundSize.split(',')[0].trim()),'300px 430px');
+   const wallpaper=await white.page.locator('body').evaluate(el=>{
+    const body=getComputedStyle(el),fixed=getComputedStyle(el,'::before');
+    return body.backgroundImage.includes('chvostikovo-paws-soft-v383.png')
+      ? {image:body.backgroundImage,size:body.backgroundSize.split(',')[0].trim(),mode:'body'}
+      : {image:fixed.backgroundImage,size:fixed.backgroundSize.split(',')[0].trim(),mode:fixed.position};
+   });
+   assert(wallpaper.image.includes('chvostikovo-paws-soft-v383.png'),'paws visible via document or fixed iOS layer');
+   assert.equal(wallpaper.size,'300px 430px');
+   if(type===webkit)assert.equal(wallpaper.mode,'fixed','iOS viewport wallpaper cannot scroll with expanding menu');
    assert.equal(await white.page.locator('#customerNoticeOverviewV376 [data-announcement-id]').count(),2);
    assert.equal(await white.page.locator('.customer-notice-position-v381').count(),0);
    assert.deepEqual(white.errors,[]);assert((await white.page.evaluate(()=>customerLiquidV3Diagnostics())).contexts<=2);

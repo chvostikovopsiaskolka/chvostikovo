@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v425';
-const APP_VERSION='2.0.98';
+const APP_BUILD='v426';
+const APP_VERSION='2.0.99';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -1796,7 +1796,56 @@ async function completePushPromptV75(){
   window.ChvoNative?.markPushPromptAnswered?.(account);
   return at;
 }
+
+/* v426: account-scoped native Capacitor FCM bridge, separate from Web Push. */
+let customerNativeBoundV426=null;
+function openNativeNotificationV426(){
+  const native=window.ChvoNative;
+  if(!native?.active||!state.session?.user?.id||!state.data||window.__customerOnboardingCompleteV75!==true)return;
+  const query=native.takeNotification?.();if(!query)return;
+  const params=new URLSearchParams(query);
+  if(params.get('recipient')!==state.session.user.id){toast('Toto upozornenie patrí inému účtu.');return;}
+  const url=new URL(location.href);
+  ['open','conversation','announcement','recipient'].forEach(key=>url.searchParams.delete(key));
+  for(const [key,value] of params)url.searchParams.set(key,value);
+  history.replaceState(history.state,'',url.pathname+url.search+url.hash);
+  window.dispatchEvent(new Event('chvo-native-notification-v426'));
+}
+function customerAttachNativePushV426(){
+  const native=window.ChvoNative;
+  if(!native?.active||typeof native.attach!=='function')return false;
+  if(customerNativeBoundV426===native)return true;
+  customerNativeBoundV426=native;
+  native.attach({
+    getSession:()=>state.session,
+    ensureSession:()=>ensureCustomerSessionV357(),
+    setPush:on=>{
+      state.pushChecked=true;state.pushEnabled=!!on;
+      localStorage.setItem('chvostikovo_push_enabled',on?'1':'0');
+      applyPushToggle();
+      const settings=$('settingsPushToggleV37');
+      if(settings){settings.classList.toggle('active',!!on);settings.setAttribute('aria-checked',on?'true':'false');settings.classList.remove('syncing');}
+      return !!on;
+    },
+    completePushPrompt:()=>completePushPromptV75(),
+    notify:message=>toast(String(message||'Upozornenia sa nepodarilo nastaviť.')),
+    resume:()=>refreshOnResume(),pause:()=>stopCustomerLive(),
+    flush:()=>window.ChvoTelemetry?.flush?.(),
+    openNotification:()=>openNativeNotificationV426()
+  });
+  void native.prepareLaunch?.().catch(()=>{});
+  return true;
+}
+window.customerAttachNativePushV426=customerAttachNativePushV426;
+document.addEventListener('customer-onboarding-ready-v358',openNativeNotificationV426);
+addCustomerHook('afterBootstrap',()=>setTimeout(openNativeNotificationV426,0));
+
 async function ensurePushState(force=false){
+  if(window.ChvoNative?.active){
+    if(state.pushChecked&&!force)return state.pushEnabled;
+    const on=!!await window.ChvoNative.ensurePush();
+    state.pushChecked=true;state.pushEnabled=on;applyPushToggle();return on;
+  }
   if(customerWebPushMigratedV397()){state.pushChecked=true;state.pushEnabled=false;return false}
   if(state.pushChecked&&!force)return state.pushEnabled;
   let on=false;
@@ -1809,6 +1858,7 @@ async function ensurePushState(force=false){
   state.pushChecked=true;state.pushEnabled=on;localStorage.setItem('chvostikovo_push_enabled',on?'1':'0');return on;
 }
 async function enablePushForCurrentUserV75(){
+  if(window.ChvoNative?.active){await window.ChvoNative.enablePush();return true;}
   if(!('serviceWorker'in navigator)||typeof Notification==='undefined'||!('PushManager'in window))throw new Error('Toto zariadenie nepodporuje push upozornenia.');
   const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();
   if(permission!=='granted')throw new Error('Upozornenia neboli povolené.');
@@ -1820,7 +1870,9 @@ async function enablePushForCurrentUserV75(){
   localStorage.setItem('chvostikovo_push_enabled','1');applyPushToggle();return true;
 }
 async function togglePush(){
-  const b=$('pushToggle');if(!b||b.disabled)return;b.disabled=true;
+  const b=$('pushToggle');if(!b||b.disabled)return;
+  if(window.ChvoNative?.active){await window.ChvoNative.togglePush(b);return;}
+  b.disabled=true;
   try{
     const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
     if(sub&&state.pushEnabled){
@@ -1929,6 +1981,7 @@ $('newPasswordForm').addEventListener('submit',async e=>{e.preventDefault();cons
 $('logoutBtn').addEventListener('click',async()=>{
   ['dogSettingsModalV36','privacyInfoModal','schoolTermsModal','dogDetailsModal','waitingDogAssignmentModalV75','pushOnboardingModalV75','shareOnboardingModalV75','dogDetailsOnboardingModalV75','announcementModalV75','betaVersionModal','customerContactModal','customerGradebookModal'].forEach(id=>$(id)?.classList.add('hidden'));
   document.documentElement.classList.remove('settings-open-v36','customer-modal-open');
+  if(state.session&&window.ChvoNative?.active)try{await window.ChvoNative.logout(state.session)}catch(_){}
   try{if(state.session)await authFetch('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+state.session.access_token}})}catch(_){}
   clearSession();showAuth('login');
   const standalone=window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
@@ -2019,6 +2072,7 @@ setTimeout(scheduleWaitingDogFallbackV101,1500);
   const badge=$('betaVersionBadge'),modal=$('betaVersionModal'),close=$('betaVersionClose'),messages=$('betaVersionMessages');if(!badge||!modal)return;
   badge.addEventListener('click',()=>modal.classList.remove('hidden'));close?.addEventListener('click',()=>modal.classList.add('hidden'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});messages?.addEventListener('click',()=>{modal.classList.add('hidden');switchTab('messages')});
 })();
+customerAttachNativePushV426();
 init().finally(()=>{void checkCustomerRelease()});
 /* consolidated booking layout: section heading + reservation deadline */
 function ensureBookingLayout(){
@@ -3625,7 +3679,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 
 
   async function healPushV71(){
-    if(customerWebPushMigratedV397())return false;
+    if(window.ChvoNative?.active||customerWebPushMigratedV397())return false;
     if(document.visibilityState==='hidden'||!state?.session||!('serviceWorker' in navigator)||typeof Notification==='undefined'||Notification.permission!=='granted')return false;
     try{
       const reg=await navigator.serviceWorker.ready;
@@ -3691,6 +3745,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   }
 
   async function actualPushState(){
+    if(window.ChvoNative?.active)return !!await window.ChvoNative.ensurePush();
     if(customerWebPushMigratedV397())return false;
     if(!('serviceWorker' in navigator)||typeof Notification==='undefined')return false;
     if(Notification.permission!=='granted')return false;
@@ -3704,6 +3759,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
 async function togglePushDirect(btn){
   if(pushBusy)return;pushBusy=true;btn.disabled=true;
   try{
+    if(window.ChvoNative?.active){await window.ChvoNative.togglePush(btn);syncPushButtons(state.pushEnabled);return;}
     if(!('serviceWorker'in navigator)||typeof Notification==='undefined')throw new Error('Tento telefón nepodporuje upozornenia v aplikácii.');
     const existing=await actualPushState();
     if(existing){
@@ -4836,5 +4892,6 @@ function installVaccinationViewerZoomV244(modal){
   addCustomerHook('afterBootstrap',()=>{void openPending();});
   document.addEventListener('customer-onboarding-ready-v358',()=>{void openPending();});
   window.addEventListener('pageshow',()=>{void openPending();});
+  window.addEventListener('chvo-native-notification-v426',()=>{void openPending();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void openPending();});
 })();
