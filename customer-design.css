@@ -1012,3 +1012,61 @@ html.customer-auth-glass-v386.customer-ios-auth-v410 #authView>.auth-card>.lg-v3
 #customerLocaleInMenuV409 [data-customer-locale]{display:grid;place-items:center;line-height:1.2}
 #resendConfirmationV418{min-height:44px;white-space:normal;text-align:center;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 #resendConfirmationV418:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+
+
+/* v420: keep email verification help in one line even on compact Android/iOS auth cards. */
+#resendConfirmationV418{
+  display:block;width:100%;box-sizing:border-box;
+  font-size:clamp(11px,3vw,13px)!important;line-height:1.3!important;
+  white-space:nowrap!important;overflow:visible!important;
+  padding-inline:2px!important;
+}
+
+/* v420: the unread announcement count belongs to the Oznamy row, NOT the accordion corner. */
+.customer-design #menuTab #menuBulletinV229{
+  position:relative;display:flex;align-items:center;min-width:0;
+}
+.customer-design #menuTab #menuBulletinV229 .customer-menu-notice-count-v414:not(.hidden){
+  position:static!important;inset:auto!important;top:auto!important;right:auto!important;
+  flex:0 0 auto!important;display:inline-grid!important;place-items:center!important;
+  width:auto!important;min-width:19px!important;height:19px!important;
+  padding:0 5px!important;box-sizing:border-box;line-height:1!important;
+  margin-inline-start:auto!important;margin-inline-end:5px!important;
+}
+
+/* v420: show all 10/20 pass paws, keep EN validity inside narrow cards. */
+.customer-design .design-ticket-usage{min-width:0;gap:6px}
+.customer-design .design-ticket-usage p{min-width:0;overflow-wrap:anywhere}
+.customer-design .design-ticket-usage .design-validity{max-width:49%;white-space:normal;overflow-wrap:normal}
+@media(max-width:360px){
+  .customer-design .design-ticket-usage p{font-size:11px!important}
+  .customer-design .design-ticket-usage .design-validity{font-size:9px!important;padding:5px!important}
+  .customer-design .design-paws{gap:4px;grid-template-columns:repeat(10,minmax(0,1fr))}
+}
+
+
+/* v421: unread archive bulletin count remains visible next to My dog,
+   independently of whether the bulletin is featured in Overview. */
+.customer-design #menuDogGroup>summary .customer-dog-unread-v421{
+  display:grid;place-items:center;flex:0 0 auto;box-sizing:border-box;
+  min-width:19px;height:19px;padding:0 5px;margin-inline-start:auto;
+  border-radius:999px;background:#ef7516;color:white;
+  font-size:11px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;
+}
+.customer-design #menuDogGroup>summary .customer-dog-unread-v421.hidden{display:none!important}
+.customer-design #menuDogGroup>summary .menu-chevron{margin-inline-start:3px}
+
+/* v426: iOS authenticated wallpaper uses a single viewport-fixed texture.
+   On long/expanded menus the old body wallpaper scrolled while the WebGL
+   surface sampled the viewport, making paws appear to jump between layers. */
+html.customer-ios-v171.customer-liquid-v364 body{background-image:none!important}
+html.customer-ios-v171.customer-liquid-v364 body::before{
+ content:"";position:fixed;inset:0;display:block;pointer-events:none;z-index:0;
+ background-image:var(--liquid-paws-v364);background-size:300px 430px;
+ background-position:0 0;background-repeat:repeat;
+}
+html.customer-ios-v171.customer-liquid-v364 #appView.app{position:relative;z-index:auto}
+html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
+ position:fixed!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;
+ transform:none!important;-webkit-transform:none!important;will-change:auto!important;
+}

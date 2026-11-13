@@ -11,6 +11,9 @@ await mkdir(out, { recursive: true });
 // Strict allowlist: no admin, server code, backups, credentials or customer data.
 const files = (await readdir(root)).filter(name => /\.(js|css|png)$/.test(name) && name !== 'sw.js');
 files.push('index.html', 'email-confirmed.html', 'manifest.webmanifest', 'version.json');
+// Keep the verified immutable legacy Zbierka thumbnail inside the offline native APK/AAB.
+// Otherwise the v425 PWA would request a non-existent /notice-previews/ URL in Android WebView.
+files.push('notice-previews/zbierka-v425.webp');
 // Runtime-only optical assets; never copy vendor source trees or development previews.
 files.push('vendor/liquidlens/liquid-glass.js', 'vendor/simple-liquid-glass/webgl.js',
   'vendor/liquidlens/chvostikovo-paws.png', 'vendor/liquidlens/chvostikovo-paws-soft-v383.png',
