@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v426';
-const APP_VERSION='2.0.99';
+const APP_BUILD='v427';
+const APP_VERSION='2.0.100';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -4068,7 +4068,11 @@ async function togglePushDirect(btn){
   function polishMenuV55(){
     const btn=$('dogSettingsBtnV36');
     if(btn){btn.setAttribute('aria-label','Nastavenia');btn.title='Nastavenia'}
-    const title=$('dogSettingsTitleV36');if(title)title.textContent='Nastavenia';
+    const modal=$('dogSettingsModalV36'),title=$('dogSettingsTitleV36');
+    if(title){
+      const section=modal&&!modal.classList.contains('hidden')?modal.dataset.section:'';
+      title.textContent=section==='legal'?'Súhlasy a podmienky':section==='notifications'?'Upozornenia':'Nastavenia';
+    }
   }
 
   addCustomerHook('afterRenderMessages',()=>{renderSupportThread();if(!$('supportChatModalV52')?.classList.contains('hidden')&&document.visibilityState==='visible')markRead()});
