@@ -43,6 +43,8 @@ jobs:
           node tests/customer-proof-delete-v392.mjs
           node tests/customer-proof-delete-v392.cjs
           node tests/customer-proof-delete-db-v392.cjs
+          node tests/customer-proof-delete-db-v427.cjs
+          node tests/customer-settings-heading-v427.cjs
           node tests/vaccination-first-review-l4-v420.cjs
       - name: Vaccination push grouping v343
         run: node tests/vaccine-push-batch-v343.cjs
