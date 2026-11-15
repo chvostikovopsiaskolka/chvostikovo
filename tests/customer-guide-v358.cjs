@@ -24,7 +24,7 @@ async function ready(f){await f.run('window.runCustomerOnboardingV75()');await t
    click(f,'guideNextV358');await tick(60);
    for(let i=1;i<=6;i++){
     assert.equal(f.w.document.getElementById('guideProgressV358').textContent,i+' z 6');
-    if(i===4){const demo=f.w.document.getElementById('guideDemoReservationV358');assert(demo,'empty account uses isolated demo');assert(demo.querySelector('.reserved-day-card-v37'));assert(demo.querySelector('.booking-taxi-pencil-v201'));}
+    if(i===4){const demo=f.w.document.getElementById('guideDemoReservationV358');assert(demo,'empty account uses isolated Overview demo');assert(demo.querySelector('.design-visit-card'));assert(demo.querySelector('.design-visit-edit'));assert(f.w.document.getElementById('bookingPickerV37').classList.contains('hidden'),'editing tour keeps booking calendar closed');}
     if(i===5){const demo=f.w.document.getElementById('guidePickerPreviewV360');assert.equal(demo.querySelectorAll('.booking-day-v37.selected').length,2);assert.equal(demo.querySelectorAll('.design-selected-day').length,2);assert.equal(demo.querySelectorAll('[data-taxi-mode]').length,3);assert(demo.textContent.includes('Rezervovať 2 dni'));demo.querySelector('.booking-picker-submit-v37').click();click(f,'guideBackV358');await tick(60);assert(!f.w.document.getElementById('guidePickerPreviewV360'));assert(!f.w.document.querySelector('.booking-picker-card-v37[data-guide-stashed-v360]'));click(f,'guideNextV358');await tick(60);assert(f.w.document.getElementById('guidePickerPreviewV360'));}
     click(f,'guideNextV358');await tick(60);
    }

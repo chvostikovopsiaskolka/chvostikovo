@@ -6,7 +6,6 @@
   if(Number(state.selectedDogId)!==id){rememberVaccineDraftV287();clearVaccinationProofStageV104();state.selectedDogId=id;renderDogSelector();renderPassSummary();renderDog();renderUpcoming();renderDays()}
   if(action==='vaccinations')openDogDetails('vaccinations',false);
   else if(action==='visits')window.openDogVisitsV99?.();
-  else if(action==='grades')openCustomerGradebook();
   else openDogDetails('details',false);
  }
  function render(){
@@ -17,7 +16,7 @@
   if(!holder){holder=document.createElement('div');holder.id=rootId;holder.className='dual-dog-choices-v241';holder.setAttribute('aria-label','Moji psíkovia');identity.prepend(holder);holder.addEventListener('click',e=>{const b=e.target.closest('[data-dog-open-v254]');if(b)openDog(Number(b.dataset.dogOpenV254),b.dataset.action||'details')})}
   for(const dog of dogs){
    let panel=holder.querySelector('[data-dog-panel="'+Number(dog.id)+'"]');
-   if(!panel){panel=document.createElement('article');panel.className='dual-dog-panel-v254';panel.dataset.dogPanel=String(dog.id);panel.innerHTML='<button type="button" class="dual-dog-photo-v254" data-action="details"><span class="dual-dog-picture-v241"></span><strong class="dual-dog-name-v241"></strong></button><div class="dual-dog-info-v254"><div class="dual-dog-pass-v254"></div><button type="button" data-action="vaccinations" class="dual-dog-status-v254"></button><button type="button" data-action="visits" class="dual-dog-visits-v254"></button><button type="button" data-action="grades" class="dual-dog-grades-v254"><svg aria-hidden="true"><use href="#ci-book"/></svg>Žiacka knižka</button></div>';holder.append(panel)}
+   if(!panel){panel=document.createElement('article');panel.className='dual-dog-panel-v254';panel.dataset.dogPanel=String(dog.id);panel.innerHTML='<button type="button" class="dual-dog-photo-v254" data-action="details"><span class="dual-dog-picture-v241"></span><strong class="dual-dog-name-v241"></strong></button><div class="dual-dog-info-v254"><div class="dual-dog-pass-v254"></div><button type="button" data-action="vaccinations" class="dual-dog-status-v254"></button><button type="button" data-action="visits" class="dual-dog-visits-v254"></button></div>';holder.append(panel)}
    panel.querySelectorAll('button').forEach(b=>{b.dataset.dogOpenV254=String(dog.id)});
    panel.classList.toggle('male-v241',dog.sex==='male');
    const photo=panel.querySelector('.dual-dog-picture-v241');

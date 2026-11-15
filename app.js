@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v426';
-const APP_VERSION='2.0.99';
+const APP_BUILD='v428';
+const APP_VERSION='2.0.101';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -3286,7 +3286,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const attended=dogs.length>0&&dogs.every(d=>(state.data?.visits||[]).some(v=>Number(v.dog_id)===Number(d.id)&&v.visit_date>=monday&&v.visit_date<=today));
     // Obaja keeps the current week if either dog has not attended yet.
     const offset=attended&&days[0]?.date>=monday&&days[0]?.date<=sunday?5:0;
-    return days.slice(offset,offset+10);
+    return days.slice(offset,offset+15);
   }
   window.customerPickerDaysV393=pickerDaysV393;
   function renderPickerV37(){
@@ -3303,7 +3303,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     updateBookingDeadlineNoticeV127();
     if(pairBookingV254)$('bookingPickerSmartDaysV199').classList.add('hidden');else renderSmartDaysV199(dog,days);
     const groups=[];
-    for(let start=0;start<Math.min(days.length,10);start+=5){
+    for(let start=0;start<Math.min(days.length,15);start+=5){
       const week=days.slice(start,start+5);
       // v232: show the week-specific status ABOVE its days, not beneath them.
       const today=bratislavaClockV95().date,weekEnd=new Date(week[0].date+'T12:00:00Z');weekEnd.setUTCDate(weekEnd.getUTCDate()+6);
@@ -3404,6 +3404,12 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
   window.openBookingPickerV37=openPickerV37;
   window.closeBookingPickerV305=()=>{closePickerV37();window.customerDesignPickerClosed?.();};
   window.customerDesignOpenTaxi=(requestId,reservationId)=>openTaxiEditV201(requestId,reservationId);
+  // Overview modal delegates to the same authenticated cancellation flow as the old booking card.
+  window.customerDesignCancelBookingV428=(requestId,reservationId)=>{
+    const button=document.createElement('button');
+    button.dataset.request=String(requestId||'');button.dataset.reservation=String(reservationId||'');
+    return cancelBooking(button);
+  };
   window.customerDesignRefreshDeadline=()=>updateBookingDeadlineNoticeV127();
   window.customerDesignRefreshCalendarV351=()=>renderPickerV37();
   window.customerDesignCanEditTaxi=row=>allowedTaxiEditV201(row);
@@ -4068,7 +4074,11 @@ async function togglePushDirect(btn){
   function polishMenuV55(){
     const btn=$('dogSettingsBtnV36');
     if(btn){btn.setAttribute('aria-label','Nastavenia');btn.title='Nastavenia'}
-    const title=$('dogSettingsTitleV36');if(title)title.textContent='Nastavenia';
+    const modal=$('dogSettingsModalV36'),title=$('dogSettingsTitleV36');
+    if(title){
+      const section=modal&&!modal.classList.contains('hidden')?modal.dataset.section:'';
+      title.textContent=section==='legal'?'Súhlasy a podmienky':section==='notifications'?'Upozornenia':'Nastavenia';
+    }
   }
 
   addCustomerHook('afterRenderMessages',()=>{renderSupportThread();if(!$('supportChatModalV52')?.classList.contains('hidden')&&document.visibilityState==='visible')markRead()});

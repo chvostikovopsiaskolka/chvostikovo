@@ -50,7 +50,7 @@ const type=process.env.V3_ENGINE==='webkit'?webkit:chromium;
  await page.locator('.design-selected-day').first().waitFor();
  const box=await page.locator('.design-selected-days').evaluate(el=>{const c=el.firstElementChild,r=el.getBoundingClientRect(),b=c.getBoundingClientRect(),s=getComputedStyle(c);return{left:b.left-r.left,top:b.top-r.top,bottom:el.scrollHeight-(c.offsetTop-el.offsetTop+c.offsetHeight),shadow:s.boxShadow};});
  assert(box.left>=9&&box.top>=7,'selected-day scrollport reserves room around rounded corners');assert(box.shadow.includes('16px'));
- assert(await page.locator('#designMyBookings .reserved-day-card-v37').first().evaluate(el=>getComputedStyle(el).boxShadow.includes('14px')),'approved card is separated by shadow');
+ assert(await page.locator('#designNearest .design-visit-card:not(.design-visit-empty)').first().evaluate(el=>getComputedStyle(el).boxShadow!=='none'),'approved Overview reservation remains elevated without duplicate booking-page cards');
  if(width===390)await page.screenshot({path:`/tmp/chvo-v389-screenshots/booking-${type.name()}-${dogs}.png`,fullPage:true});
  assert.deepEqual(errors,[]);console.log('PASS approved reservation/profile scroll/no white bands/selected corners/shadows',type.name(),dogs,width);
  }finally{await browser.close();}
