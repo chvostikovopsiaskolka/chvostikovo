@@ -7,7 +7,7 @@ let today='2026-10-28',dogs=[{id:1}],state={data:{availability:{days},visits:[],
 const c={state,bratislavaClockV95:()=>({date:today}),pickerDogsV254:()=>dogs,window:{}};vm.createContext(c);
 vm.runInContext(source.slice(source.indexOf('  function pickerWeekLabelV393(date){'),source.indexOf('  function renderPickerV37(){')),c);
 const first=()=>c.window.customerPickerDaysV393()[0].date;
-assert.equal(first(),'2026-10-26');state.data.requests=[{dog_id:1,reservation_date:today,status:'approved'}];state.data.booking_history=[{dog_id:1,reservation_date:today,status:'booked'}];assert.equal(first(),'2026-10-26','reservations alone never count as attendance');
+assert.equal(first(),'2026-10-26');assert.equal(c.window.customerPickerDaysV393().length,15,'three weeks are visible when availability returns 15 days');state.data.requests=[{dog_id:1,reservation_date:today,status:'approved'}];state.data.booking_history=[{dog_id:1,reservation_date:today,status:'booked'}];assert.equal(first(),'2026-10-26','reservations alone never count as attendance');
 state.data.visits=[{dog_id:99,visit_date:today},{dog_id:1,visit_date:'2026-10-25'},{dog_id:1,visit_date:'2026-10-29'}];assert.equal(first(),'2026-10-26','foreign, previous-week and future visits excluded');
 state.data.visits.push({dog_id:1,visit_date:today});assert.equal(first(),'2026-11-02');assert.equal(c.window.customerPickerDaysV393().length,10);
 dogs=[{id:2}];assert.equal(first(),'2026-10-26');dogs=[{id:1},{id:2}];assert.equal(first(),'2026-10-26','Obaja preserves the unvisited dog current week');state.data.visits.push({dog_id:2,visit_date:today});assert.equal(first(),'2026-11-02');
