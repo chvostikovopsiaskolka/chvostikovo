@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v428';
-const APP_VERSION='2.0.101';
+const APP_BUILD='v429';
+const APP_VERSION='2.0.102';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -3274,7 +3274,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
     const today=bratislavaClockV95().date,monday=new Date(today+'T12:00:00Z');
     const weekday=monday.getUTCDay();monday.setUTCDate(monday.getUTCDate()-(weekday===0?6:weekday-1));
     const offset=Math.round((new Date(date+'T12:00:00Z')-monday)/86400000);
-    return offset<7?'Tento týždeň':offset<14?'Budúci týždeň':'O dva týždne';
+    return offset<7?'Tento týždeň':offset<14?'Budúci týždeň':offset<21?'O dva týždne':'O tri týždne';
   }
   function pickerDaysV393(){
     const days=state.data?.availability?.days||[],today=bratislavaClockV95().date;
@@ -3316,7 +3316,7 @@ async function evaluate(){if(!state.session||!state.data)return;window.__custome
         : '';
       const futureWeek=start>=10;
       const futureOpen=!futureWeek||futureWeekExpandedV235||week.some(d=>selectedDatesV37.has(d.date));
-      groups.push(`<div class="booking-picker-week-v127 ${futureWeek?'booking-picker-future-v235':''}" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}"><div class="booking-picker-week-label-v127">${futureWeek?`<button type="button" class="booking-picker-future-toggle-v235" data-future-toggle="true" aria-expanded="${futureOpen?'true':'false'}">O dva týždne <span aria-hidden="true">${futureOpen?'⌃':'⌄'}</span></button>`:pickerWeekLabelV393(week[0].date)}</div><div class="booking-picker-future-body-v235 ${futureOpen?'':'hidden'}">${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
+      groups.push(`<div class="booking-picker-week-v127 ${futureWeek?'booking-picker-future-v235':''}" data-week-from="${week[0].date}" data-week-to="${weekEnd.toISOString().slice(0,10)}"><div class="booking-picker-week-label-v127">${futureWeek?`<button type="button" class="booking-picker-future-toggle-v235" data-future-toggle="true" aria-expanded="${futureOpen?'true':'false'}">${pickerWeekLabelV393(week[0].date)} <span aria-hidden="true">${futureOpen?'⌃':'⌄'}</span></button>`:pickerWeekLabelV393(week[0].date)}</div><div class="booking-picker-future-body-v235 ${futureOpen?'':'hidden'}">${weekNotice}<div class="booking-picker-week-days-v127">${week.map(d=>{
         const existing=pickerDogsV254().some(x=>bookingFor(x.id,d.date)),deadlineClosed=pickerDogsV254().some(x=>bookingDeadlineClosedV95(d.date,x)),closed=d.bookings_open===false,full=Number(d.available)<pickerDogsV254().length;
         const past=d.date<=bratislavaClockV95().date;
         const lateContact=(deadlineClosed||full)&&!existing&&!past&&!closed;

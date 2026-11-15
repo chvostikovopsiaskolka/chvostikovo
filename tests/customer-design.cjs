@@ -218,8 +218,14 @@ async function scenario(count){
     assert.equal(w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]').dataset.contact,'true','one remaining place cannot create a partial two-dog reservation');
     run('state.data.availability.days[1].available=0');
   }
-  w.__fixtureNowIso='2099-01-05T18:00:00Z';run('window.openBookingPickerV37()');
-  const contact=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');assert.equal(contact.dataset.contact,'true','19:00 switches to message-only, also when full');contact.click();
+  w.__fixtureNowIso='2099-01-05T18:00:00Z';
+  run('state.data.availability.days[1].available=2;renderDays();window.openBookingPickerV37()');
+  const contact=w.document.querySelector('.booking-day-v37[data-date="2099-01-06"]');
+  assert.equal(contact.dataset.contact,'true','19:00 switches to message-only even with remaining capacity');
+  assert.equal(contact.dataset.capacityLevel,'limited','remaining places retain yellow capacity independently of cutoff');
+  assert(contact.classList.contains('week-closed-v127'),'deadline guard still active after yellow shading');
+  assert(fs.readFileSync('customer-design.css','utf8').includes('.booking-day-v37[data-capacity-level="limited"]:not(.disabled):not(.selected):not(.booked){'),'late-contact yellow CSS must not exclude week-closed');
+  contact.click();
   assert(!w.document.getElementById('supportChatModalV52').classList.contains('hidden'));
   if(count===2)assert.match(w.document.getElementById('supportMessageBodyV52').value,/Bella a Iris/);
   run("api=async(payload)=>{globalThis.afterCutoffPayload=payload;return {data:{message:{id:998,body:payload.message,sender_role:'customer',created_at:'2099-01-05T18:00:00Z'}}}};");

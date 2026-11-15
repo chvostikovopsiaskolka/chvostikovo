@@ -1073,11 +1073,11 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 
 /* v428: capacity means actual remaining places, not whether a day can still be submitted.
    Selected days keep the existing orange state; closed/past/own-booked days stay neutral. */
-.customer-design .design-reservations-page #bookingPickerDaysV37 .booking-day-v37[data-capacity-level="free"]:not(.disabled):not(.selected):not(.booked):not(.week-closed-v127){
+.customer-design .design-reservations-page #bookingPickerDaysV37 .booking-day-v37[data-capacity-level="free"]:not(.disabled):not(.selected):not(.booked){
  background:#dcf5e4!important;border-color:#8ed1a7!important;color:#165c38!important;
  box-shadow:inset 0 0 0 1px #9cdbb4!important;
 }
-.customer-design .design-reservations-page #bookingPickerDaysV37 .booking-day-v37[data-capacity-level="limited"]:not(.disabled):not(.selected):not(.booked):not(.week-closed-v127){
+.customer-design .design-reservations-page #bookingPickerDaysV37 .booking-day-v37[data-capacity-level="limited"]:not(.disabled):not(.selected):not(.booked){
  background:#ffecad!important;border-color:#e6ba43!important;color:#75510b!important;
  box-shadow:inset 0 0 0 1px #ebd078!important;
 }
@@ -1100,3 +1100,9 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .design-edit-dogs button[aria-pressed="true"]{background:#fff0f8;border-color:#d89bbd;color:#813d66}
 .design-edit-hint{color:#756f79;font-size:12px;line-height:1.5;margin:10px 0 0}
 #customerDesignModal .design-edit-actions button:focus-visible,#customerDesignModal .design-edit-dogs button:focus-visible{outline:3px solid #f58b39;outline-offset:3px}
+
+/* v429: late-contact is a booking cutoff, NOT a capacity color. Preserve the
+   message-only behavior; show remaining places even after D-1 19:00. */
+.customer-design .design-reservations-page #bookingPickerDaysV37 .booking-picker-future-v235 .booking-picker-future-body-v235:not(.hidden)>.booking-picker-week-days-v127 {
+ margin-top:11px!important;
+}

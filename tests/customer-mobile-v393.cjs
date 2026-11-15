@@ -12,5 +12,5 @@ state.data.visits=[{dog_id:99,visit_date:today},{dog_id:1,visit_date:'2026-10-25
 state.data.visits.push({dog_id:1,visit_date:today});assert.equal(first(),'2026-11-02');assert.equal(c.window.customerPickerDaysV393().length,10);
 dogs=[{id:2}];assert.equal(first(),'2026-10-26');dogs=[{id:1},{id:2}];assert.equal(first(),'2026-10-26','Obaja preserves the unvisited dog current week');state.data.visits.push({dog_id:2,visit_date:today});assert.equal(first(),'2026-11-02');
 today='2026-11-01';assert.equal(first(),'2026-11-02','Sunday remains in the completed calendar week');today='2026-11-02';assert.equal(first(),'2026-10-26','new week does not inherit attendance');
-today='2026-10-28';assert.equal(c.pickerWeekLabelV393('2026-10-26'),'Tento týždeň');assert.equal(c.pickerWeekLabelV393('2026-11-02'),'Budúci týždeň');assert.equal(c.pickerWeekLabelV393('2026-11-09'),'O dva týždne');
+today='2026-10-28';assert.equal(c.pickerWeekLabelV393('2026-10-26'),'Tento týždeň');assert.equal(c.pickerWeekLabelV393('2026-11-02'),'Budúci týždeň');assert.equal(c.pickerWeekLabelV393('2026-11-09'),'O dva týždne');assert.equal(c.pickerWeekLabelV393('2026-11-16'),'O tri týždne');
 console.log('PASS per-dog actual attendance, Obaja, booked/approved exclusion, Sunday/Monday and month rollover');
