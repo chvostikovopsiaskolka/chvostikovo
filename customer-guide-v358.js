@@ -56,11 +56,16 @@
   }
   function cleanDemo(){ $('guideDemoReservationV358')?.remove();$('guidePickerPreviewV360')?.remove();document.querySelectorAll('[data-guide-stashed-v360]').forEach(n=>n.removeAttribute('data-guide-stashed-v360')); }
   function sample(){
-    const markup=window.customerGuidePreviewV360?.(),host=$('designMyBookings');if(!markup||!host)return null;
-    host.querySelectorAll('.reserved-empty-v37,#bookingPickerSmartDaysV199').forEach(n=>n.setAttribute('data-guide-stashed-v360',''));
+    // v428: teach customers to edit in Overview; the booking calendar has no reservation list.
+    const markup=window.customerGuidePreviewV360?.(),host=$('designNearest');if(!markup||!host)return null;
     const frame=document.createElement('div');frame.id='guideDemoReservationV358';frame.inert=true;
-    frame.innerHTML='<p class="guide-demo-label">Ukážka rezervácie</p>'+markup.reservation;
-    window.customerGuideReservationPresentationV360?.(frame);host.append(frame);return frame;
+    frame.innerHTML='<p class="guide-demo-label">Ukážka rezervácie</p>'
+      +'<article class="design-visit-card"><div class="design-nearest-head">'
+      +'<strong>📅 Plánovaná návšteva</strong><button type="button" class="design-visit-edit">✎ Upraviť</button>'
+      +'<span class="design-approved" aria-label="Schválená">✓</span></div>'
+      +'<div class="design-visit-entries"><div>🎟️ Plánovaný vstup</div></div>'
+      +'<button type="button" class="design-friends-button">Zobraziť kamošov v škôlke</button></article>';
+    host.append(frame);return frame;
   }
   function calendarSample(){
     const markup=window.customerGuidePreviewV360?.(),picker=$('bookingPickerV37');if(!markup||!picker)return null;
@@ -108,14 +113,14 @@
     ];
     const next=$('guideNextV358');next.disabled=true;
     if(index===5)navigation('menu');
-    else if(index===3||index===4){navigation('booking');if((state.data?.dogs||[]).every(d=>window.customerVaccinationsCompleteV96?.(d)))window.openBookingPickerV37?.();}
+    else if(index===4){navigation('booking');if((state.data?.dogs||[]).every(d=>window.customerVaccinationsCompleteV96?.(d)))window.openBookingPickerV37?.();}
     else navigation('booking');
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     if(!tour||current!==epoch)return;
     if(index===0)tour.targets=[$('bookingDogProfile')];
     if(index===1)tour.targets=[$('designTicket'),$('designNearest')];
     if(index===2)tour.targets=[$('navBookAddV220')];
-    if(index===3){const existing=$('designMyBookings')?.querySelector('.reserved-day-card-v37');tour.targets=[existing||sample()];}
+    if(index===3){const existing=$('designNearest')?.querySelector('.design-visit-card:not(.design-visit-empty)');tour.targets=[existing||sample()];}
     if(index===4)tour.targets=[calendarSample()];
     if(index===5)tour.targets=[$('menuDogGroup'),$('menuContact'),$('menuSettingsGroup')];
     const target=tour.targets.find(Boolean);

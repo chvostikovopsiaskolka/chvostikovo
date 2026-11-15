@@ -14,6 +14,11 @@ async function test(){const db=new PGlite();await db.exec(`create role anon;crea
  create function public.portal_customer_access_allowed_v336() returns boolean language sql as $$select current_setting('request.blocked',true) is distinct from 'yes'$$;
  `);await db.exec(migration);
  await db.exec(fs.readFileSync('supabase/migrations/20261022151014_telemetry_alerts_v347.sql','utf8').split('select cron.alter_job')[0]);
+ await db.exec(fs.readFileSync('supabase/changes/customer-startup-telemetry-v424.sql','utf8'));
+ const alertTrigger=(await db.query("select pg_get_triggerdef(oid) definition from pg_trigger where tgrelid='private.app_telemetry_v345'::regclass and tgname='app_telemetry_alert_v347'")).rows[0].definition;
+ assert.match(alertTrigger,/WHEN/i,'RUM migration must filter the active staff-alert trigger');
+ assert.ok(alertTrigger.includes("'request.error'"),'old error alert remains enabled');
+ assert.ok(!alertTrigger.includes('startup.'),'startup lifecycle never triggers staff push');
  const identity=async(id=customer)=>{await db.exec(`reset role;select set_config('request.jwt.claim.sub','${id}',false),set_config('request.jwt.claim.session','${sid}',false);set role authenticated;`)};
  const ingest=async(p)=>{return(await db.query('select public.portal_telemetry_ingest_v345($1::jsonb) ok',[JSON.stringify(p)])).rows[0].ok};
  await db.exec('set role anon');await assert.rejects(()=>ingest(payload()),/permission denied/);await identity();
@@ -25,6 +30,23 @@ async function test(){const db=new PGlite();await db.exec(`create role anon;crea
  versionPacket.resourceSpans[0].resource.attributes.find(a=>a.key==='service.version').value.stringValue=currentBuild?eval(currentBuild[1]):APP_BUILD;
  assert.equal(await ingest(versionPacket),true,'actual app telemetry build accepted by collector');
  await db.exec('rollback');
+ await db.exec('begin');
+ for(let i=0;i<4;i++){
+  const packet=payload(424+i),attributes=packet.resourceSpans[0].scopeSpans[0].spans[0].attributes;
+  attributes.push(attr('category','startup.complete'),attr('operation','startup/cold/total'),attr('duration.ms',(i+1)*1000));
+  assert.equal(await ingest(packet),true);
+ }
+ const failure=payload(430);failure.resourceSpans[0].scopeSpans[0].spans[0].attributes.push(attr('category','startup.failed'),attr('operation','startup/cold/total'),attr('duration.ms',15000));await ingest(failure);
+ const bad=payload(431);bad.resourceSpans[0].scopeSpans[0].spans[0].attributes.push(attr('category','startup.complete'),attr('operation','startup/private@example.test/total'));await ingest(bad);
+ await db.exec('reset role');
+ const startupRows=(await db.query("select category,operation,duration_ms from private.app_telemetry_v345 where category like 'startup.%'")).rows;
+ assert.equal(startupRows.length,5,'new categories accept valid whitelisted lifecycle events only');
+ const startupReport=(await db.query(fs.readFileSync('supabase/changes/customer-startup-percentiles-v424.sql','utf8'))).rows;
+ const successful=startupReport.filter(row=>row.category==='startup.complete');assert.equal(successful.length,2,'7 and30 day windows');
+ for(const row of successful){assert.equal(Number(row.sample_count),4);assert.equal(Number(row.p50_ms),2500);assert.equal(Number(row.p75_ms),3250);assert(Math.abs(Number(row.p95_ms)-3850)<0.000001);}
+ assert(startupReport.filter(row=>row.category==='startup.failed').every(row=>row.p50_ms===null),'failed starts excluded from successful percentiles');
+ assert.equal((await db.query('select count(*)::int n from public.portal_notifications')).rows[0].n,0,'startup events do not generate customer/staff notifications');
+ await db.exec('rollback');await identity();
  for(const p of [null,{}, {resourceSpans:{}},{resourceSpans:[{scopeSpans:{}}]}, {resourceSpans:[{scopeSpans:[{spans:{}}]}]}])assert.equal(await ingest(p),false,'malformed input is harmless');
  assert.equal(await ingest(payload()),true);assert.equal(await ingest(payload()),true);
  await assert.rejects(()=>db.query('select * from private.app_telemetry_v345'),/permission denied/);

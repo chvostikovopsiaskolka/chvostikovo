@@ -4,7 +4,7 @@ on:
   push:
     branches: [feat/capacitor-android-v361]
   pull_request:
-    branches: [customer-portal-production, feat/capacitor-android-v361, codex/android-welcome-v403]
+    branches: [customer-portal-production, feat/capacitor-android-v361, codex/android-welcome-v403, fix/android-v419-password-eye-20261110]
     paths: ['mobile/**', 'app.js', 'back-swipe.js', 'email-confirmed.js', '.github/workflows/android-capacitor.yml']
 permissions:
   contents: read

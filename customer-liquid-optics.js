@@ -42,12 +42,13 @@ function paintWallpaper(){
  if(!source||!sourceImage?.complete||!sourceImage.naturalWidth)return;
  const dpr=Math.min(devicePixelRatio||1,1.5),w=innerWidth,h=innerHeight;
  const panels=[...document.querySelectorAll('#bookingDogProfile:not(.dual-dog-v241),.dual-dog-panel-v254')].filter(visible).map(el=>({r:el.getBoundingClientRect(),color:getComputedStyle(el).backgroundColor,radius:parseFloat(getComputedStyle(el).borderRadius)||19}));
- const key=[w,h,Math.round(scrollY),getComputedStyle(document.body).backgroundColor,...panels.map(p=>[p.r.x,p.r.y,p.r.width,p.r.height,p.color].join(','))].join(':');if(key===sourceKey)return;
+ const pinned=ios&&root.classList.contains('customer-liquid-v364')&&root.classList.contains('customer-ios-v171');
+ const key=[w,h,pinned?'fixed':Math.round(scrollY),getComputedStyle(document.body).backgroundColor,...panels.map(p=>[p.r.x,p.r.y,p.r.width,p.r.height,p.color].join(','))].join(':');if(key===sourceKey)return;
  sourceKey=key;source.width=Math.ceil(w*dpr);source.height=Math.ceil(h*dpr);
  const ctx=source.getContext('2d');ctx.scale(dpr,dpr);ctx.fillStyle=getComputedStyle(document.body).backgroundColor;ctx.fillRect(0,0,w,h);
  // This is the existing 300x430 SVG wallpaper, at its existing document origin.
  // It is an explicit texture source, never a snapshot of private app content.
- ctx.save();ctx.translate(0,-((scrollY%430+430)%430));ctx.fillStyle=ctx.createPattern(sourceImage,'repeat');ctx.fillRect(0,0,w,h+430);ctx.restore();
+ ctx.save();ctx.translate(0,pinned?0:-((scrollY%430+430)%430));ctx.fillStyle=ctx.createPattern(sourceImage,'repeat');ctx.fillRect(0,0,w,h+430);ctx.restore();
  for(const p of panels){ctx.beginPath();ctx.roundRect(p.r.x,p.r.y,p.r.width,p.r.height,p.radius);ctx.fillStyle=p.color;ctx.fill();}
  source.dataset.liquidGlassRevision=String(++revision);
 }
@@ -71,6 +72,8 @@ function profileBackdrop(el,s){
   panel.append(canvas);s.profileSource=canvas;
  }
  const canvas=s.profileSource,r=panel.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,1.5);
+ // Profile texture remains document-anchored to avoid re-rasterizing while
+ // scrolling the booking page; only Menu/dock wallpaper is viewport-fixed.
  const x=Math.round(r.left+scrollX)-32,y=Math.round(r.top+scrollY)-32,color=getComputedStyle(panel).backgroundColor;
  const key=[Math.round(r.width),Math.round(r.height),x,y,color,dpr].join(':');
  if(key!==s.profileSourceKey){
@@ -109,6 +112,11 @@ function sync(){
   if(opaque){stop(s);s.layer.dataset.renderer='fallback';continue;}
   // On long login/signup pages the sampled WebKit wallpaper lags document scroll.
   // Keep the quiet glass fallback, but not a moving refracted paw texture.
+  if(ios&&el.matches('.bottom-nav')&&!document.getElementById('menuTab')?.classList.contains('hidden')){
+   // Prevent Safari's expanding document and visual viewport from resampling
+   // a separate WebGL dock texture while menu accordions are scrolled.
+   stop(s);s.layer.dataset.renderer='fallback';continue;
+  }
   if(authVisible && ios && el.matches('#authView>.auth-card')){
    stop(s);s.layer.dataset.renderer='fallback';stats.mode='fallback';continue;
   }
