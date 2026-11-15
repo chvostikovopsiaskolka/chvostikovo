@@ -1070,3 +1070,33 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
  position:fixed!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;
  transform:none!important;-webkit-transform:none!important;will-change:auto!important;
 }
+
+/* v428: capacity means actual remaining places, not whether a day can still be submitted.
+   Selected days keep the existing orange state; closed/past/own-booked days stay neutral. */
+.customer-design .design-reservations-page #bookingPickerDaysV37 .booking-day-v37[data-capacity-level="free"]:not(.disabled):not(.selected):not(.booked):not(.week-closed-v127){
+ background:#dcf5e4!important;border-color:#8ed1a7!important;color:#165c38!important;
+ box-shadow:inset 0 0 0 1px #9cdbb4!important;
+}
+.customer-design .design-reservations-page #bookingPickerDaysV37 .booking-day-v37[data-capacity-level="limited"]:not(.disabled):not(.selected):not(.booked):not(.week-closed-v127){
+ background:#ffecad!important;border-color:#e6ba43!important;color:#75510b!important;
+ box-shadow:inset 0 0 0 1px #ebd078!important;
+}
+.customer-design .design-reservations-page #bookingPickerDaysV37 .booking-day-v37[data-capacity-level="full"]:not(.disabled):not(.selected):not(.booked){
+ background:#ffe1e1!important;border-color:#ed9696!important;color:#9c2828!important;
+ box-shadow:inset 0 0 0 1px #efa5a5!important;
+}
+.customer-design .design-reservations-page #bookingPickerDaysV37 .booking-day-v37[data-capacity-level="full"]:not(.disabled):not(.selected):not(.booked) :is(small,strong,span){color:#9c2828!important}
+@media(max-width:430px){
+ .customer-design .design-reservations-page #bookingPickerDaysV37 .booking-day-v37 strong{font-size:15px!important;letter-spacing:-.25px!important}
+ .customer-design .design-reservations-page #bookingPickerDaysV37 .booking-day-v37 small{font-size:10px!important}
+}
+.design-edit-actions{display:grid;gap:11px}
+.design-edit-actions button{display:flex;align-items:center;justify-content:flex-start;min-height:52px;padding:13px 15px;text-align:left;font:inherit;font-size:14px;font-weight:750;color:#344052;border:1px solid #e4dbe0;border-radius:13px;background:#fff}
+.design-edit-actions button[data-edit-action="taxi"]{border-color:#f4bd90;background:#fff4eb;color:#995016}
+.design-edit-actions button[data-edit-action="cancel"]{border-color:#f0c2c2;background:#fff4f4;color:#a13c3c}
+.design-edit-actions button:disabled{opacity:.45;cursor:not-allowed}
+.design-edit-dogs{display:flex;gap:8px;margin-bottom:15px}
+.design-edit-dogs button{flex:1;min-height:44px;border:1px solid #ead5de;border-radius:11px;background:#fff;color:#765467;padding:8px;font:inherit;font-size:13px;font-weight:750}
+.design-edit-dogs button[aria-pressed="true"]{background:#fff0f8;border-color:#d89bbd;color:#813d66}
+.design-edit-hint{color:#756f79;font-size:12px;line-height:1.5;margin:10px 0 0}
+#customerDesignModal .design-edit-actions button:focus-visible,#customerDesignModal .design-edit-dogs button:focus-visible{outline:3px solid #f58b39;outline-offset:3px}
