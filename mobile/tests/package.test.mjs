@@ -67,3 +67,18 @@ test('release requires Firebase, signing credentials and verified push/App Links
   assert.match(result.stderr.toString(), /CHVO_KEYSTORE_PATH/);
   assert.match(result.stderr.toString(), /CHVO_NATIVE_PUSH_VERIFIED/);
 });
+
+test('Android v425 includes the exact optimized legacy bulletin WebP locally, not an unreachable web-only URL',async()=>{
+  const {readFile}=await import('node:fs/promises');
+  const {createHash}=await import('node:crypto');
+  const packed=await readFile(new URL('../www/notice-previews/zbierka-v425.webp',import.meta.url));
+  const source=await readFile(new URL('../../notice-previews/zbierka-v425.webp',import.meta.url));
+  const manifest=JSON.parse(await read('www/mobile-build.json'));
+  const app=await read('www/app.js');
+  assert.equal(packed.byteLength,37098,'verified real Zbierka preview should be 37 KB');
+  assert.deepEqual(packed,source,'Capacitor must bundle the actual same-origin preview');
+  assert.equal(createHash('sha256').update(packed).digest('hex'),'bf86d94db11400f3c5f37b3958537dfe72837556809321ab7eda0f5e6ff725ef');
+  assert.equal(manifest.packagedFiles['notice-previews/zbierka-v425.webp'],createHash('sha256').update(packed).digest('hex'));
+  assert(app.includes("'/notice-previews/zbierka-v425.webp'")&&app.includes('legacyZbierkaOriginalV425'),'native UI uses local thumbnail, article still loads original');
+});
+

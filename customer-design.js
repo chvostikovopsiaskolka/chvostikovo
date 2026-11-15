@@ -160,21 +160,27 @@
     const source=byId('passSummary'),dog=selectedDog(); if(!source||!dog)return;
     let root=byId('designTicket');
     const originalTitle=source.querySelector('span')?.textContent||'Vstup',counts=source.querySelector('strong')?.textContent||'';
-    if(counts==='Jednorazový'){root?.remove();return;}
+    if(counts==='Jednorazový'||counts==='Single visit'){root?.remove();return;}
     if(!root){root=document.createElement('section');root.id='designTicket';root.className='design-ticket';root.setAttribute('aria-label','Permanentka a vstupy');(byId('customerInboxV363')||byId('bookingDogProfile')).after(root);}
     root.classList.toggle('male',dog.sex==='male');
     root.classList.toggle('design-ticket-single',counts==='Jednorazový');
-    const match=counts.match(/(\d+)\s+z\s+(\d+)/),small=[...source.querySelectorAll('small')].map(x=>x.textContent).filter(s=>s!=='Použité vstupy').join(' · ');
+    const isEn=window.ChvostikovoLocale?.getLanguage?.()==='en';
+    // Source is translated live (0 z 10 → 0 of 10); neither locale may erase pass paws.
+    const match=counts.match(/(\d+)\s+(?:z|of)\s+(\d+)/i),small=[...source.querySelectorAll('small')].map(x=>x.textContent).filter(s=>s!=='Použité vstupy'&&s!=='Visits used').join(' · ');
     const validity=small.replace(/(\d{2})\.(\d{2})\.(\d{4})/g,(_,d,m,y)=>`${d}. ${m}. ${y.slice(-2)}`).replace(/(\d{4})/g,y=>y.slice(-2));
-    const date=small.match(/(?:do|Platí do)\s+(.*)/)?.[1];
-    const badge=date?'Platnosť do '+date:validity.replace('Platnosť ','');
-    const presentationKey=JSON.stringify([originalTitle,counts,small,dog.sex]);
+    const date=small.match(/(?:Platí do|Valid until|\bdo)\s+(.*)/i)?.[1];
+    const badge=date?(isEn?'Valid until ':'Platnosť do ')+date:validity.replace(/^(?:Platnosť |Validity )/,'');
+    const usage=match?(isEn?`Used <strong>${Number(match[1])} of ${Number(match[2])} visits</strong>`:`Použité <strong>${Number(match[1])} z ${Number(match[2])} vstupov</strong>`):'';
+    root.setAttribute('aria-label',isEn?'Pass and visits':'Permanentka a vstupy');
+    const presentationKey=JSON.stringify([originalTitle,counts,small,dog.sex,isEn]);
     if(root.dataset.presentationKey===presentationKey)return;
     root.dataset.presentationKey=presentationKey;
     const material=root.querySelector(':scope > .lg-v3-material');
-    root.innerHTML=`<div class="design-ticket-head"><h2 aria-label="${esc(originalTitle)}">${icon("ticket")}<span>${esc(originalTitle)}</span></h2></div><div class="design-ticket-usage">${match?`<p>Použité <strong>${Number(match[1])} z ${Number(match[2])} vstupov</strong></p>`:`<p class="design-single-entry"><strong>${esc(counts==='Jednorazový'?'Jednorazový vstup':counts)}</strong></p>`}${badge?`<span class="design-validity" title="${esc(small)}">${esc(badge)}</span>`:''}</div>${match?`<div class="design-paws" aria-hidden="true">${Array.from({length:Number(match[2])},(_,i)=>`<span class="${i<Number(match[1])?'used':''}">${icon('pass-paw')}</span>`).join('')}</div>`:''}`;
+    root.innerHTML=`<div class="design-ticket-head"><h2 aria-label="${esc(originalTitle)}">${icon("ticket")}<span>${esc(originalTitle)}</span></h2></div><div class="design-ticket-usage">${match?`<p>${usage}</p>`:`<p class="design-single-entry"><strong>${esc(counts==='Jednorazový'?'Jednorazový vstup':counts)}</strong></p>`}${badge?`<span class="design-validity" title="${esc(small)}">${esc(badge)}</span>`:''}</div>${match?`<div class="design-paws" aria-hidden="true">${Array.from({length:Number(match[2])},(_,i)=>`<span class="${i<Number(match[1])?'used':''}">${icon('pass-paw')}</span>`).join('')}</div>`:''}`;
     if(material)root.prepend(material);
   }
+  // A locale switch doesn't change the account data; repaint just its pass presentation.
+  window.customerDesignRefreshLocaleV420=()=>{if(state.data)ticket();};
   function nearest() {
     if(!state.data)return;
     if(!selectedDog()){byId('designNearest')?.remove();byId('designTicket')?.remove();byId('designBulletinTitle')?.remove();return;}
@@ -197,7 +203,8 @@
         if(card.dataset.status!==status){
           card.dataset.status=status;
           card.innerHTML=`<div class="design-nearest-head">${icon('calendar')}<strong><span class="design-visit-label"></span>${esc(skDay(date).slice(0,2).toLowerCase())} ${esc(skDate(date).replace(/\s*20\d{2}$/, ''))}</strong><button type="button" class="design-visit-edit" aria-label="Upraviť rezerváciu na ${esc(skDate(date))}"><span aria-hidden="true">✎</span> Upraviť</button>${approved?'<span class="design-approved" aria-label="Schválená">✓</span>':status==='pending'?'<span class="design-visit-status pending" aria-label="Čaká na schválenie" title="Čaká na schválenie">?</span>':'<span class="design-visit-status rejected" aria-label="Zamietnutá" title="Zamietnutá">×</span>'}</div>${approved?'<div class="design-friends-line"><div class="design-friend-strip"></div></div>':`<p class="design-waiting-friends">${status==='pending'?'Čaká na schválenie. Kamarátov uvidíte po schválení rezervácie.':'Rezervácia bola zamietnutá.'}</p>`}<div class="design-visit-footer"><div class="design-visit-entries"></div>${approved?'<button type="button" class="design-friends-button design-friends-inline">Zobraziť kamošov v škôlke <span aria-hidden="true">›</span></button>':''}</div>`;
-          if(approved)card.querySelector('.design-friends-button').addEventListener('click',event=>{void openFriendsPreparedV404(date,event.currentTarget)});card.querySelector('.design-visit-edit').addEventListener('click',()=>window.customerDesignEditReservation(date));
+          if(approved)card.querySelector('.design-friends-button').addEventListener('click',event=>{void openFriendsPreparedV404(date,event.currentTarget)});
+          card.querySelector('.design-visit-edit').addEventListener('click',()=>window.customerDesignEditReservation(date));
         }
         card.setAttribute('aria-label',`${i===0?'Najbližšia návšteva, ':''}${skDay(date)} ${skDate(date)}`);
         card.querySelector('.design-visit-label').textContent='Najbližšia návšteva · ';
@@ -256,13 +263,11 @@
     if(firstDate&&renderedDate&&firstDate!==renderedDate){window.customerDesignRefreshCalendarV351?.();return;}
     picker.classList.add('design-reservations-page');picker.setAttribute('role','region');picker.removeAttribute('aria-modal');
     byId('bookingPickerTitleV37').textContent='Rezervácie';
-    const head=card.querySelector('.booking-picker-head-v37');
     const close=byId('bookingPickerCloseV37');if(!close.querySelector('svg'))close.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-    if(!byId('designMyBookings')){
-      const section=document.createElement('section');section.id='designMyBookings';section.innerHTML='<h2>📅 Moje rezervácie</h2>';head.after(section);section.append(byId('weekDays'));
-    }
-    let carousel=byId('designBookingCarousel');if(!carousel){carousel=document.createElement('div');carousel.id='designBookingCarousel';byId('weekDays').before(carousel);carousel.append(byId('weekDays'));}
-    let hint=byId('designBookingSwipeHint');if(!hint){hint=document.createElement('p');hint.id='designBookingSwipeHint';hint.textContent='Posuňte pre zobrazenie ďalších dní →';carousel.before(hint);}hint.hidden=byId('weekDays').querySelectorAll('.reserved-day-card-v37').length<2;
+    // Reservations live in Overview only; preserve the original hidden #weekDays data source.
+    const legacy=byId('designMyBookings');
+    if(legacy){const weeks=byId('weekDays');if(weeks)byId('bookingTab')?.append(weeks);legacy.remove();}
+    byId('designBookingCarousel')?.remove();byId('designBookingSwipeHint')?.remove();
     const reminder=window.customerDesignRefreshDeadline?.();
     const calendar=byId('bookingPickerDaysV37');
     // Reattach exactly one reminder under the matching next-week heading.
@@ -278,14 +283,11 @@
     const selectedSection=byId('bookingPickerTaxiSectionV91');
     const taxiTitle=byId('designSelectedDaysTitle')||selectedSection?.querySelector('.booking-picker-taxi-title-v37');
     if(taxiTitle){taxiTitle.id='designSelectedDaysTitle';taxiTitle.textContent='Vybraté dni ↓';taxiTitle.hidden=selectedSection.classList.contains('hidden');}
-    picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=Number(day.available)<=0?'full':Number(day.available)<=2?'limited':'free';button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';
+    picker.querySelectorAll('.booking-day-v37').forEach(button=>{const day=state.data?.availability?.days?.find(d=>d.date===button.dataset.date);if(!day)return;button.dataset.capacityLevel=day.bookings_open===false?'closed':button.classList.contains('booked')?'reserved':Number(day.available)<=0?'full':Number(day.available)<=2?'limited':'free';button.title='Obsadené '+Number(day.occupied||0)+' z '+Number(day.capacity||0)+' miest';
       const span=button.querySelector(':scope > span');if(span&&!button.disabled&&button.dataset.full!=='true')span.textContent=Number(day.occupied||0)+'/'+Number(day.capacity||0);
       if(!button.disabled&&!button.classList.contains('booked')&&button.dataset.full!=='true'&&!button.querySelector('.design-capacity-dot')){const dot=document.createElement('i');dot.className='design-capacity-dot';dot.setAttribute('aria-hidden','true');span?.prepend(dot);}
     });
-    const empty=byId('weekDays')?.querySelector('.reserved-empty-v37'),smart=byId('bookingPickerSmartDaysV199');
-    const hasReservations=!!byId('weekDays')?.querySelector('.reserved-day-card-v37');
-    if(smart&&!smart.classList.contains('hidden')){smart.classList.toggle('design-smart-hidden',hasReservations);if(!hasReservations){empty?.classList.add('hidden');carousel.append(smart);}}
-    if(empty&&!hasReservations&&(!smart||smart.classList.contains('hidden'))) {empty.classList.remove('hidden');let text=empty.querySelector('.design-empty-booking-cta');if(!text){text=document.createElement('p');text.className='design-empty-booking-cta';empty.replaceChildren(text);}text.textContent='Rezervujte miesto pre svojho psíka. Vyberte si deň/dni nižšie.';}
+    // Keep repeated-days suggestions ahead of the calendar, without any reservations strip.
     byId('designCapacityLegend')?.remove();
     if(taxiTitle){
       const selected=!selectedSection.classList.contains('hidden');
@@ -295,7 +297,44 @@
     }
 
   };
-  window.customerDesignEditReservation=date=>{window.openBookingPickerV37?.();const carousel=byId('designBookingCarousel'),card=byId('weekDays')?.querySelector('[data-date="'+date+'"]');if(carousel&&card)carousel.scrollLeft=card.offsetLeft-carousel.offsetLeft;};
+  window.customerDesignEditReservation=date=>{
+    const dogIds=new Set((state.data?.dogs||[]).map(d=>Number(d.id)));
+    const rows=futureItems().filter(row=>row.reservation_date===date&&['pending','approved'].includes(row.status)&&dogIds.has(Number(row.dog_id)));
+    if(!rows.length){toast('Táto rezervácia už nie je dostupná.');return;}
+    rosterDate=null;
+    let selected=rows[0];
+    const dogOf=row=>(state.data?.dogs||[]).find(d=>Number(d.id)===Number(row.dog_id));
+    const identifiers=row=>({
+      request:row._legacy||row.can_manage===false?0:Number(row.id)||0,
+      reservation:row._legacy||row.can_manage===false?Number(row.reservation_id)||0:0
+    });
+    const canCancel=row=>row.can_manage!==false||(row.status==='approved'&&Number(row.reservation_id)>0);
+    function redraw(){
+      const body=byId('customerDesignModalBody');
+      const dogPicker=rows.length>1
+        ?'<div class="design-edit-dogs" role="group" aria-label="Vyberte psíka">'+rows.map(row=>'<button type="button" data-edit-dog="'+Number(row.dog_id)+'" aria-pressed="'+String(row===selected)+'">'+esc(dogOf(row)?.name||'Psík')+'</button>').join('')+'</div>'
+        :'';
+      const taxiAllowed=window.customerDesignCanEditTaxi?.(selected)===true;
+      const cancelAllowed=canCancel(selected);
+      body.innerHTML=dogPicker+'<div class="design-edit-actions">'
+        +'<button type="button" data-edit-action="taxi" '+(taxiAllowed?'':'disabled')+'>🚕 '+(taxiLabel(selected.taxi_mode)?'Upraviť taxi':'Pridať taxi')+'</button>'
+        +'<button type="button" data-edit-action="cancel" '+(cancelAllowed?'':'disabled')+'>✕ Zrušiť rezerváciu</button></div>'
+        +(!taxiAllowed?'<p class="design-edit-hint">Taxík pri tejto rezervácii nemožno teraz upraviť.</p>':'');
+      body.querySelectorAll('[data-edit-dog]').forEach(button=>button.addEventListener('click',()=>{
+        selected=rows.find(r=>Number(r.dog_id)===Number(button.dataset.editDog))||selected;redraw();
+      }));
+      body.querySelector('[data-edit-action="taxi"]')?.addEventListener('click',()=>{
+        if(!taxiAllowed)return;const ids=identifiers(selected);closeModal();
+        window.customerDesignOpenTaxi?.(ids.request,ids.reservation);
+      });
+      body.querySelector('[data-edit-action="cancel"]')?.addEventListener('click',()=>{
+        if(!cancelAllowed)return;const ids=identifiers(selected);closeModal();
+        void window.customerDesignCancelBookingV428?.(ids.request,ids.reservation);
+      });
+    }
+    showModal('Upraviť rezerváciu',skDay(date)+' '+skDate(date),dogOf(selected)?.sex!=='male');
+    redraw();
+  };
   let taxiReturnV328=null,taxiPickerInertV328=false;
   window.customerDesignTaxiOpened=()=>{
     const picker=byId('bookingPickerV37'),taxi=byId('bookingTaxiEditV201');if(!taxi)return;
