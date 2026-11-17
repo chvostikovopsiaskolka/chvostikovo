@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const read = (p) => readFile(new URL('../../'+p,import.meta.url),'utf8');
 
-test('Android v429 is the approved customer PWA release and local bundle is byte-identical',async()=>{
+test('Android v430 is the approved customer PWA release and local bundle is byte-identical',async()=>{
  const web=JSON.parse(await read('version.json'));
  const mobile=JSON.parse(await read('mobile/package.json'));
  const lock=JSON.parse(await read('mobile/package-lock.json'));
  const packaged=JSON.parse(await read('mobile/www/mobile-build.json'));
- assert.equal(web.build,'v429');
- assert.equal(web.version,'2.0.102');
+ assert.equal(web.build,'v430');
+ assert.equal(web.version,'2.0.103');
  assert.equal(mobile.version,web.version);
  assert.equal(lock.version,web.version);
  assert.equal(lock.packages[''].version,web.version);
@@ -18,12 +18,13 @@ test('Android v429 is the approved customer PWA release and local bundle is byte
  assert.equal(packaged.packageId,'sk.chvostikovo.app');
  const rootApp=await read('app.js');
  const packedApp=await read('mobile/www/app.js');
- assert.equal(packedApp,rootApp,'Android local WebView uses exact reviewed PWA v429 app.js');
- assert.match(rootApp,/const APP_BUILD='v429'/);
+ assert.equal(packedApp,rootApp,'Android local WebView uses exact reviewed PWA v430 app.js');
+ assert.match(rootApp,/const APP_BUILD='v430'/);
  assert.match(rootApp,/function customerAttachNativePushV426\(\)/);
  assert.match(rootApp,/window\.customerAttachNativePushV426=customerAttachNativePushV426/);
  assert.match(rootApp,/customerAttachNativePushV426\(\);\s*init\(\)/);
  const html=await read('mobile/www/index.html');
+ assert(html.includes('utm_source=chvostikovo_app&amp;utm_medium=referral&amp;utm_campaign=eshop&amp;utm_content=bottom_nav'),'Android webview E-shop link must keep first-party UTM');
  assert(html.indexOf('src="/native-runtime.js"')<html.indexOf('src="/app.js'),'native FCM runtime initialized before customer UI');
  assert(!html.includes('android-install-choice'),'no duplicate PWA install dialog in native app');
 });

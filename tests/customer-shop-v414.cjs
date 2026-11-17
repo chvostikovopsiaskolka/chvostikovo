@@ -8,7 +8,17 @@ assert(Number(ver.build.slice(1))>=414,'shop feature must remain in current or n
 assert(app.includes(`const APP_BUILD='${ver.build}';`),'app and manifest build versions stay synchronized');
 const shop=html.match(/<a id="customerShopV414"[^>]*>[\s\S]*?<\/a>/);
 assert(shop,'customer e-shop dock link exists');
-assert(shop[0].includes('href="https://chvostikovo.sk/produkty/"'));
+const href=shop[0].match(/href="([^"]+)"/)?.[1]?.replaceAll('&amp;','&');
+assert(href,'external E-shop link exists');
+const url=new URL(href);
+assert.equal(url.origin+url.pathname,'https://chvostikovo.sk/produkty/');
+assert.deepEqual(Object.fromEntries(url.searchParams),{
+ utm_source:'chvostikovo_app',
+ utm_medium:'referral',
+ utm_campaign:'eshop',
+ utm_content:'bottom_nav',
+},'attribution is static, no personal or session data');
+assert(!url.searchParams.has('user_id')&&!url.searchParams.has('dog_id'),'no identity in outbound URL');
 assert(shop[0].includes('target="_blank"'));
 assert(shop[0].includes('rel="noopener noreferrer"'));
 assert(shop[0].includes('E-shop'));
