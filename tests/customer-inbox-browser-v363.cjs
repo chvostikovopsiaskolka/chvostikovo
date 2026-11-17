@@ -16,7 +16,9 @@ const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwr
   const a=await page.locator('#customerShopV414').boundingBox(),m=await page.locator('#customerMessagesV363').boundingBox();assert(a.height>=44&&Math.abs(a.width-m.width)<1&&a.height===m.height);assert(a.height<60,'compact actions');
   assert.equal(await page.locator('#customerShopV414').evaluate(el=>getComputedStyle(el).webkitTapHighlightColor),'rgba(0, 0, 0, 0)');
   const nav=await page.locator('.bottom-nav').boundingBox();if(width===390)await page.screenshot({path:'/tmp/inbox-v363-overview-'+dogs+'.png'});
-  assert.equal(await page.locator('#customerShopV414').getAttribute('href'),'https://chvostikovo.sk/produkty/');assert.equal(await page.locator('#customerShopV414').getAttribute('target'),'_blank');
+  const shopUrl=new URL(await page.locator('#customerShopV414').getAttribute('href'));
+  assert.equal(shopUrl.origin+shopUrl.pathname,'https://chvostikovo.sk/produkty/');
+  assert.deepEqual(Object.fromEntries(shopUrl.searchParams),{utm_source:'chvostikovo_app',utm_medium:'referral',utm_campaign:'eshop',utm_content:'bottom_nav'});assert.equal(await page.locator('#customerShopV414').getAttribute('target'),'_blank');
   await page.locator('#navDog').click();await page.locator('#menuDogGroup > summary').click();await page.locator('#menuBulletinV229').click();assert(await page.locator('#customerBulletinHistoryV229').isVisible());assert((await page.locator('#customerBulletinHistoryV229').textContent()).includes('Zatiaľ nemáte žiadne oznamy.'));
   await page.evaluate(()=>{window.__noticeFixture=Array.from({length:10},(_,i)=>({id:i+1,active:true,title:i===0?'Veľmi dlhý názov oznamu '.repeat(7):'Oznam '+(i+1),body:'Úplný text oznamu '.repeat(30),image_path:i===1?'synthetic/photo.png':null,valid_from:'2020-01-01',valid_until:i===0?'2021-01-01':null}));return loadAnnouncements(true);});
   await page.locator('#customerBulletinHistoryV229 .customer-bulletin-dialog-v229').evaluate(el=>Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{}))));
