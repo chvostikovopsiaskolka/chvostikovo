@@ -16,6 +16,17 @@ jobs:
           node-version: '22'
       - name: Preflight customer release version contract
         run: node tests/customer-release-contract.cjs
+      - name: Auth registration, confirmation and errors v418
+        run: node tests/customer-auth-recovery-v418.cjs
+      - name: Bilingual customer UI invariant v409
+        run: node tests/customer-locale-v409.cjs
+      - name: Dog profile and vaccine-only continuation v413
+        run: |
+          node --check app.js
+          node --check customer-locale-v409.js
+          node tests/customer-onboarding-v413.cjs
+      - name: External product catalog dock v414
+        run: node tests/customer-shop-v414.cjs
       - name: Install pinned test runtime outside the app
         run: |
           npm install --prefix "$RUNNER_TEMP/chvo-admin-deps" --no-save --no-package-lock jsdom@26.1.0 typescript@5.8.3 @electric-sql/pglite@0.5.10
@@ -32,6 +43,7 @@ jobs:
           node tests/customer-proof-delete-v392.mjs
           node tests/customer-proof-delete-v392.cjs
           node tests/customer-proof-delete-db-v392.cjs
+          node tests/vaccination-first-review-l4-v420.cjs
       - name: Vaccination push grouping v343
         run: node tests/vaccine-push-batch-v343.cjs
       - name: Private OpenTelemetry ingestion and actual admin v345
@@ -65,6 +77,10 @@ jobs:
           node tests/admin-chat-v325.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v325.html node tests/admin-runtime-v275.cjs
           ADMIN_SOURCE=/tmp/admin-candidate-v325.html node tests/admin-proofs-v321.cjs
+      - name: Customer locale signup, bilingual modal and terms safety v411
+        run: |
+          node tests/customer-locale-v409-browser.cjs
+          node tests/customer-legal-v411.cjs
       - name: Customer loading motion lifecycle
         run: node tests/loading-motion-v317.cjs
       - name: Staff vaccination photo management v321
@@ -98,6 +114,7 @@ jobs:
           node tests/customer-liquid-v3.cjs
           node tests/customer-liquid-v364.cjs
           node tests/customer-inbox-v363.cjs
+          node tests/customer-image-network-v404.cjs
           node tests/customer-push-routing-v363.cjs
           node tests/customer-mobile-v393.cjs
           node tests/customer-design.cjs
@@ -163,12 +180,29 @@ jobs:
           "$RUNNER_TEMP/chvo-v3-browser/node_modules/.bin/playwright" install --with-deps chromium webkit
       - name: Current customer browser regression and pixel proof
         run: |
+          node tools/build-admin-telemetry-v345.cjs
+          node tests/telemetry-browser-v345.cjs
+          node tests/customer-welcome-v403-browser.cjs
+          V3_ENGINE=webkit node tests/customer-welcome-v403-browser.cjs
+          node tests/customer-auth-v418-browser.cjs
+          V3_ENGINE=webkit node tests/customer-auth-v418-browser.cjs
+          node tests/customer-en-ui-v420-browser.cjs
+          V3_ENGINE=webkit node tests/customer-en-ui-v420-browser.cjs
+          node tests/customer-en-nav-bulletins-v422-browser.cjs
+          V3_ENGINE=webkit node tests/customer-en-nav-bulletins-v422-browser.cjs
           node tests/customer-push-onboarding-v398-browser.cjs
           V3_ENGINE=webkit node tests/customer-push-onboarding-v398-browser.cjs
+          node tests/customer-native-push-v426-browser.cjs
+          V3_ENGINE=webkit node tests/customer-native-push-v426-browser.cjs
+          V3_ENGINE=webkit node tests/customer-ios-menu-v426-browser.cjs
           node tests/customer-polish-v396-browser.cjs
           V3_ENGINE=webkit node tests/customer-polish-v396-browser.cjs
           node tests/customer-mobile-v393-browser.cjs
           V3_ENGINE=webkit node tests/customer-mobile-v393-browser.cjs
+          node tests/customer-weight-v415-browser.cjs
+          V3_ENGINE=webkit node tests/customer-weight-v415-browser.cjs
+          node tests/customer-vaccination-actions-v416-browser.cjs
+          V3_ENGINE=webkit node tests/customer-vaccination-actions-v416-browser.cjs
           node tests/customer-proof-delete-v392-browser.cjs
           V3_ENGINE=webkit node tests/customer-proof-delete-v392-browser.cjs
           node tests/customer-android-dock-v389-browser.cjs
@@ -190,6 +224,7 @@ jobs:
         with:
           name: liquid-v3-browser-evidence
           path: |
+            /tmp/chvo-v403-auth/
             /tmp/chvo-v392-proof/
             /tmp/chvo-v389-screenshots/
             /tmp/chvo-v386-auth/

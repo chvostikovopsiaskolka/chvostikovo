@@ -47,6 +47,17 @@ const fixture=require('./liquid-v3-fixture.cjs');
  for(const id of ['signupName','signupEmail','signupPhone','signupDogName','signupPassword']){await page.locator('#'+id).focus();assert.equal(await page.locator('#'+id).evaluate(el=>getComputedStyle(el).filter),'none');assert(await page.locator('#'+id).evaluate(el=>el.getBoundingClientRect().width>100));}
  await page.locator('#showLogin').click();assert(await page.evaluate(()=>document.getElementById('loginEmail')===__loginNode));assert.equal(await page.locator('#loginEmail').inputValue(),'synthetic@example.invalid');
  await page.locator('#loginEmail').focus();await page.keyboard.press('Tab');assert(await page.locator('#loginPassword').evaluate(el=>el===document.activeElement));
+ const recoveryLayout=await page.locator('#loginForm').evaluate(form=>{
+   const recovery=form.querySelector('#forgotPasswordBtn'),login=form.querySelector('button[type=submit]');
+   const a=recovery.getBoundingClientRect(),b=login.getBoundingClientRect();
+   return {before:!!(recovery.compareDocumentPosition(login)&Node.DOCUMENT_POSITION_FOLLOWING),
+     above:a.bottom<=b.top+2,fontSize:parseFloat(getComputedStyle(recovery).fontSize),
+     width:a.width,formWidth:form.getBoundingClientRect().width};
+ });
+ assert(recoveryLayout.before&&recoveryLayout.above,'forgot password is above sign-in CTA');
+ assert(recoveryLayout.fontSize<=13&&recoveryLayout.width<recoveryLayout.formWidth*.75,'small right-aligned recovery link');
+ assert.equal(await page.locator('#installHelpLink').count(),0,'no install guide CTA inside login');
+ assert.equal(await page.locator('#installGuideModal:not(.hidden)').count(),0,'no unsolicited installation dialog');
  await page.locator('#forgotPasswordBtn').click();assert(await page.locator('#forgotForm').isVisible());await page.locator('#backToLogin').click();
  assert(await page.locator('#loginForm').isVisible());assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'))});if(type===webkit)assert.equal((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts,0);
