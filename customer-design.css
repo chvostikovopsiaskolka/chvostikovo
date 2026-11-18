@@ -1106,3 +1106,16 @@ html.customer-ios-v171.customer-liquid-v364 .bottom-nav{
 .customer-design .design-reservations-page #bookingPickerDaysV37 .booking-picker-future-v235 .booking-picker-future-body-v235:not(.hidden)>.booking-picker-week-days-v127 {
  margin-top:11px!important;
 }
+
+/* v431: compact recovery link above the login CTA; keep an accessible tap target. */
+#authView[data-auth-mode="login"] #loginForm #forgotPasswordBtn{
+  justify-self:end;align-self:center;width:auto;max-width:100%;
+  min-height:40px;margin:-5px 0 -3px;padding:8px 2px;
+  font-size:12px;font-weight:650;line-height:1.25;
+  color:#8d607b;text-align:right;letter-spacing:0;
+  border-radius:7px;text-decoration:underline;text-underline-offset:3px;
+  text-decoration-color:#8d607b77;cursor:pointer;
+}
+#authView[data-auth-mode="login"] #loginForm #forgotPasswordBtn:focus-visible{
+  outline:2px solid #a64b0c;outline-offset:2px;
+}

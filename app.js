@@ -83,8 +83,8 @@ function createCompactChatLayout(modal,card,thread,input){
   document.addEventListener('touchend',e=>{const start=tapStart;tapStart=null;if(!start||start.moved){lastTap=null;return}const now=Date.now();if(lastTap&&now-lastTap.at<280&&Math.abs(start.x-lastTap.x)<20&&Math.abs(start.y-lastTap.y)<20&&e.cancelable)e.preventDefault();lastTap={...start,at:now}},{passive:false,capture:true});
   document.addEventListener('touchcancel',()=>{tapStart=null;lastTap=null},{passive:true,capture:true});
 })();
-const APP_BUILD='v430';
-const APP_VERSION='2.0.103';
+const APP_BUILD='v431';
+const APP_VERSION='2.0.104';
 // Keep the collector's dated build contract while the menu displays APP_BUILD.
 const APP_TELEMETRY_BUILD='20261023-customer-'+APP_BUILD;
 const CUSTOMER_IOS_V171=(()=>{
@@ -465,11 +465,7 @@ function bootstrapCore(showSpinner=true){
       clearSession();
       showAuth('login');
       if($('authMessage'))$('authMessage').innerHTML='';
-      const standalone=window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
-      if(!standalone){
-        sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
-        setTimeout(()=>document.getElementById('installHelpLink')?.click(),220);
-      }
+      // v431: expired sessions return to login without an install popup.
     }else if(state.session){
       if($('appView')?.classList.contains('hidden'))showStartupRecoveryV359();
       else toast('Údaje sa nepodarilo obnoviť. Skúste to znova o chvíľu.');
@@ -1983,12 +1979,7 @@ $('logoutBtn').addEventListener('click',async()=>{
   document.documentElement.classList.remove('settings-open-v36','customer-modal-open');
   if(state.session&&window.ChvoNative?.active)try{await window.ChvoNative.logout(state.session)}catch(_){}
   try{if(state.session)await authFetch('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+state.session.access_token}})}catch(_){}
-  clearSession();showAuth('login');
-  const standalone=window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
-  if(!standalone){
-    sessionStorage.removeItem('chvostikovo_install_guide_seen_v1');
-    setTimeout(()=>document.getElementById('installHelpLink')?.click(),180);
-  }
+  clearSession();showAuth('login'); // v431: no installation popup after logout.
 });
 $('navBooking').addEventListener('click',()=>switchTab('booking'));$('navDog').addEventListener('click',()=>switchTab('menu'));$('navMessages').addEventListener('click',()=>switchTab('messages'));$('navStaff').addEventListener('click',()=>switchTab('staff'));
 $('dogSelector').addEventListener('change',e=>{const editing=!$('dogDetailsModal')?.classList.contains('hidden'),mode=dogDetailsModeV96;rememberVaccineDraftV287();clearVaccinationProofStageV104();state.selectedDogId=Number(e.target.value);renderPassSummary();renderDog();if(editing)openDogDetails(mode,false)});['input','change'].forEach(type=>$('dogBirthDate').addEventListener(type,syncDogAgeField));
@@ -2178,7 +2169,7 @@ placeDeadlineV59();
     if(platform()==='android'){const steps=document.querySelector('#installGuideModal .install-steps');if(steps)steps.innerHTML='<div class="install-step"><span>Kliknite na <strong>Nainštalovať aplikáciu</strong> a potvrďte inštaláciu. Android môže aplikáciu bezpečnostne kontrolovať. Ak upozorní na nebezpečnú aplikáciu, prečítajte si podrobnosti a pri bezpečnostnom riziku inštaláciu prerušte. Chvostíkovo možno používať aj v Chrome.</span></div>'}
     const b=document.getElementById('installGuideInstallBtn');
     if(b){b.classList.remove('hidden');b.disabled=false;b.textContent='Nainštalovať aplikáciu'}
-    if(!standalone())setTimeout(openGuide,0);
+    // v431: browser install offers never interrupt authentication.
   });
 
   function ensureGuide(){
@@ -2218,9 +2209,9 @@ placeDeadlineV59();
     });
   }
   function openGuide(){ensureGuide();document.getElementById('installGuideModal')?.classList.remove('hidden')}
-  function mountHelpLink(){const login=document.getElementById('loginForm');if(!login||document.getElementById('installHelpLink')||standalone())return;const b=document.createElement('button');b.id='installHelpLink';b.type='button';b.className='install-help-link';b.textContent='Ako si nainštalovať aplikáciu?';b.addEventListener('click',openGuide);login.appendChild(b)}
-  const start=()=>{mountHelpLink();const emailReturn=/type=signup/i.test(location.hash);if(standalone())installedUi();else if(!emailReturn&&sessionStorage.getItem(KEY)!=='1')setTimeout(()=>{if(sessionStorage.getItem(KEY)!=='1')openGuide()},180)};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+  // v431: do not add install help to the login form or auto-open it on start.
+  // Preserve the optional iOS guide for a future EXPLICIT in-app help action.
+  window.openCustomerInstallGuideV431=openGuide;
 })();
 /* v75: Supabase-backed customer onboarding state machine */
 (function customerOnboardingV75Runtime(){
