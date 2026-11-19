@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowDown, HeartHandshake, PawPrint, Sparkles, type LucideIcon } from "lucide-react";
+import { ArrowDown, HeartHandshake, PawPrint, Play, Sparkles, type LucideIcon } from "lucide-react";
 import skolkariVideo from "@/assets/skolkari.mp4";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -398,27 +398,18 @@ export function Reviews({ reviews = REVIEWS }: { reviews?: typeof REVIEWS } = {}
 
 export function VideoSection({ language = "sk" }: { language?: "sk" | "en" } = {}) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [started, setStarted] = useState(false);
+  const [playbackError, setPlaybackError] = useState(false);
   const isEnglish = language === "en";
 
-  useEffect(() => {
+  // Facebook's in-app browser can reject intersection-triggered autoplay.
+  // A direct user gesture is more reliable; native controls remain available.
+  function startPlayback() {
     const video = videoRef.current;
-    if (!video || typeof IntersectionObserver === "undefined") return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry) return;
-        if (entry.isIntersecting) {
-          void video.play().catch(() => undefined);
-        } else {
-          video.pause();
-        }
-      },
-      { rootMargin: "200px 0px" },
-    );
-
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, []);
+    if (!video) return;
+    setPlaybackError(false);
+    void video.play().catch(() => setPlaybackError(true));
+  }
 
   return (
     <section className="relative scroll-mt-24 overflow-hidden bg-card pt-6 pb-8 sm:pt-10 sm:pb-12">
@@ -428,18 +419,43 @@ export function VideoSection({ language = "sk" }: { language?: "sk" | "en" } = {
           {isEnglish ? "How our dogs look forward to daycare" : "Ako sa naši škôlkári tešia do škôlky"}
         </h3>
         <div className="mt-4 flex justify-center sm:mt-6">
-          <div className="relative w-full max-w-[250px] overflow-hidden rounded-3xl bg-card shadow-card sm:max-w-[300px] lg:max-w-[320px]">
+          <div className="relative w-full max-w-[250px] overflow-hidden rounded-3xl bg-forest/20 shadow-card sm:max-w-[300px] lg:max-w-[320px]">
             <video
               ref={videoRef}
               src={skolkariVideo}
+              poster={schoolmatesLineup}
               className="aspect-[9/16] w-full object-cover"
               muted
               loop
               playsInline
               controls
-              preload="none"
+              preload="metadata"
+              onPlay={() => { setStarted(true); setPlaybackError(false); }}
+              onError={() => setPlaybackError(true)}
               aria-label={isEnglish ? "Video from Chvostíkovo dog daycare – dogs excited to arrive" : "Video zo psiej škôlky Chvostíkovo – škôlkári sa tešia do škôlky"}
             />
+            {!started && !playbackError && (
+              <button type="button" onClick={startPlayback}
+                className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-forest/15 text-white focus-visible:outline-4 focus-visible:outline-coral"
+                aria-label={isEnglish ? "Play daycare video" : "Prehrať video zo škôlky"}
+              >
+                <span className="grid size-16 place-items-center rounded-full bg-forest/85 shadow-card">
+                  <Play className="ml-1 size-7 fill-current" aria-hidden="true" />
+                </span>
+                <span className="rounded-full bg-forest/85 px-4 py-2 font-display text-sm font-semibold">
+                  {isEnglish ? "Play video" : "Prehrať video"}
+                </span>
+              </button>
+            )}
+            {playbackError && (
+              <div role="status" className="absolute inset-x-3 bottom-4 rounded-2xl bg-card/95 p-3 text-sm text-forest shadow-card">
+                <p>{isEnglish ? "Video could not play in this browser." : "Video sa v tomto prehliadači nepodarilo prehrať."}</p>
+                <a href={skolkariVideo} target="_blank" rel="noopener noreferrer"
+                  className="mt-2 inline-block font-display font-bold text-coral-dark underline underline-offset-2">
+                  {isEnglish ? "Open video separately" : "Otvoriť video samostatne"}
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>
