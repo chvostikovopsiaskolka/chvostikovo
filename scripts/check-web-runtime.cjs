@@ -139,6 +139,9 @@ const failures = [];
               throw new Error('Daycare video needs a preview and explicit in-app-browser playback');
             if (!await page.getByRole('button', { name: 'Prehrať video zo škôlky' }).count())
               throw new Error('Daycare video requires a direct user-gesture play control');
+            // Prevent duplicate native Safari and custom play overlays before user interaction.
+            if (await video.getAttribute('controls') !== null)
+              throw new Error('Daycare video must not render native controls beneath the custom play button');
             await page.locator('section.hero-safe-top .hero-cta-primary:visible').first().click();
             await page.waitForTimeout(1100);
             const placement = await page.evaluate(() => ({
