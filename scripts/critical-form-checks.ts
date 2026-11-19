@@ -180,7 +180,10 @@ for (const value of allowedStagedInterests) {
 assert(stagedLeadSource.includes("zaujem: selectedInterest") && stagedLeadSource.includes("name=\"zaujem\"") && stagedLeadSource.includes("PrivacyConsentCheckbox"), "Guided form must preserve interest, consent and submission");
 assert(stagedLeadSource.includes('name="meno"') && stagedLeadSource.includes('name="email"') && stagedLeadSource.includes('<PhoneField'), "Guided form must preserve contact fields and autofill");
 assert(stagedLeadSource.includes('startFormAttempt(trackingSource)') && stagedLeadSource.includes('trackMetaFormConversion("informacie"') && stagedLeadSource.includes('LeadPhoneReceipt'), "Guided form must retain conversion idempotency, receipt and phone correction");
-assert((stagedLeadLanding.match(/<LeadStepForm /g) || []).length === 5, "LEAD form must be inline mobile/desktop hero, after pricing, footer and modal");
+assert((stagedLeadLanding.match(/<LeadStepForm /g) || []).length === 6, "LEAD must reuse the guided form in mobile/desktop hero, benefits, after requirements, footer and modal");
+assert(stagedLeadLanding.indexOf("<Reviews />") < stagedLeadLanding.indexOf('id="lead-form"'), "Reviews must precede the first mobile lead form");
+assert(stagedLeadLanding.indexOf('id="lead-pricing"') < stagedLeadLanding.indexOf('<Requirements id="lead-requirements" />') && stagedLeadLanding.indexOf('<Requirements id="lead-requirements" />') < stagedLeadLanding.indexOf('id="lead-form-pricing"'), "Pricing must go directly to conditions then an open form");
+assert(stagedLeadLanding.includes('trackingSource="lead_landing_benefits_inline"'), "Why Chvostikovo must offer an open guided form");
 assert(stagedLeadLanding.indexOf('id="lead-form"') < stagedLeadLanding.indexOf('id="lead-benefits"'), "Mobile form must precede Why Chvostikovo");
 assert(stagedLeadLanding.indexOf('id="lead-pricing"') < stagedLeadLanding.indexOf('id="lead-form-pricing"'), "Pricing form must follow pricing");
 assert(stagedLeadLanding.includes('scrollToLeadForm("lead_landing_hero_interest")') && stagedLeadLanding.includes('openLeadModal("lead_landing_mobile_dock")'), "Lead hero CTA must scroll while the mobile dock opens the enquiry modal");
