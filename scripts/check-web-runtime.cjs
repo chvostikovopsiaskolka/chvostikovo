@@ -144,7 +144,7 @@ const failures = [];
               throw new Error('Daycare video must not render native controls beneath the custom play button');
             // A real user click must start the clip wherever the browser supports MP4.
             // Some Playwright Linux images lack proprietary codecs; report that limitation.
-            const supportsMp4 = await video.evaluate(el => el.canPlayType('video/mp4'));
+            const supportsMp4 = await video.evaluate(el => el.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"'));
             if (supportsMp4) {
               await page.getByRole('button', { name: 'Prehrať video zo škôlky' }).click();
               try {
