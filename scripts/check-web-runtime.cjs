@@ -142,6 +142,29 @@ const failures = [];
             // Prevent duplicate native Safari and custom play overlays before user interaction.
             if (await video.getAttribute('controls') !== null)
               throw new Error('Daycare video must not render native controls beneath the custom play button');
+            // A real user click must start the clip wherever the browser supports MP4.
+            // Some Playwright Linux images lack proprietary codecs; report that limitation.
+            const supportsMp4 = await video.evaluate(el => el.canPlayType('video/mp4'));
+            if (supportsMp4) {
+              await page.getByRole('button', { name: 'Prehrať video zo škôlky' }).click();
+              try {
+                await page.waitForFunction(() => {
+                  const el = document.querySelector('video[poster]');
+                  return Boolean(el && !el.paused && el.currentTime > 0.05);
+                }, null, { timeout: 10000 });
+              } catch {
+                const state = await video.evaluate(el => ({
+                  currentTime: el.currentTime, paused: el.paused, readyState: el.readyState,
+                  networkState: el.networkState, error: el.error?.code ?? null,
+                }));
+                throw new Error('Daycare video failed to play after explicit tap: ' + JSON.stringify(state));
+              }
+              if (await video.getAttribute('controls') === null)
+                throw new Error('Native video controls must appear only after playback starts');
+              await video.evaluate(el => el.pause());
+            } else {
+              console.log('Video playback codec unavailable in ' + engine + ' CI browser; DOM-only video controls checked');
+            }
             await page.locator('section.hero-safe-top .hero-cta-primary:visible').first().click();
             await page.waitForTimeout(1100);
             const placement = await page.evaluate(() => ({
