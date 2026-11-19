@@ -147,7 +147,7 @@ export function CookieBanner() {
 
   useEffect(() => {
     if (!savedNotice) return;
-    const timeout = window.setTimeout(() => setSavedNotice(false), 5500);
+    const timeout = window.setTimeout(() => setSavedNotice(false), 1600);
     return () => window.clearTimeout(timeout);
   }, [savedNotice]);
 
@@ -186,7 +186,7 @@ export function CookieBanner() {
   if (!open) {
     if (!savedNotice) return null;
     return (
-      <div role="status" className="fixed bottom-[calc(12px+env(safe-area-inset-bottom))] left-3 right-3 z-[110] mx-auto flex max-w-md items-center gap-2 rounded-2xl border border-forest/15 bg-card px-4 py-3 text-sm text-forest shadow-xl">
+      <div role="status" className="fixed bottom-[calc(98px+env(safe-area-inset-bottom))] left-3 right-3 z-[110] mx-auto flex max-w-md items-center gap-2 rounded-2xl border border-forest/15 bg-card px-4 py-3 text-sm text-forest shadow-xl lg:bottom-[calc(12px+env(safe-area-inset-bottom))]">
         <span className="flex-1">{isEnglish ? "Your cookie choices were saved for up to 180 days." : "Vašu voľbu cookies sme uložili na najviac 180 dní."}</span>
         <button type="button" className="shrink-0 font-semibold text-coral underline" onClick={() => window.dispatchEvent(new Event("chvostikovo-open-cookie-settings"))}>
           {isEnglish ? "Settings" : "Nastavenia"}
