@@ -48,17 +48,30 @@ const BENEFITS = [
   {
     icon: PawPrint,
     title: "Spoločnosť namiesto čakania",
-    text: "Váš psík má počas dňa kamošov, pozornosť a príležitosti na hru. Vy sa môžete venovať práci alebo svojim povinnostiam.",
+    content: (
+      <>
+        Váš psík má počas dňa <strong className="font-bold text-forest">kamošov, pozornosť a príležitosti na hru</strong>.
+        <span className="mt-1 block">Vy sa môžete <strong className="font-bold text-forest">venovať práci alebo svojim povinnostiam</strong>.</span>
+      </>
+    ),
   },
   {
     icon: PawPrint,
-    title: "Pohyb aj čas vydýchnuť si",
-    text: "Vo výbehu je priestor na hry a šantenie, vo vnútri na pokoj a oddych. Deň prispôsobujeme aj tomu, koľko aktivity jednotliví psíkovia potrebujú.",
+    title: "Pohyb, aktivity, ale aj oddych",
+    content: (
+      <>
+        Psík má dostatok priestoru na <strong className="font-bold text-forest">fyzické aj mentálne vyžitie</strong>. S kamošmi sa vyšantí vo výbehu aj vo vnútri, no dbáme aj na jeho <strong className="font-bold text-forest">oddych</strong>.
+      </>
+    ),
   },
   {
     icon: ShieldCheck,
     title: "Ľudia, ktorí ho spoznajú",
-    text: "Zaujíma nás jeho povaha, zvyky aj to, čo mu vyhovuje. Počas celého pobytu na psíkov dohliadajú minimálne dvaja opatrovatelia.",
+    content: (
+      <>
+        Zaujíma nás jeho <strong className="font-bold text-forest">povaha, zvyky</strong> aj to, čo mu vyhovuje. Počas celého pobytu na psíkov dohliadajú <strong className="font-bold text-forest">minimálne dvaja opatrovatelia</strong>.
+      </>
+    ),
   },
 ];
 
@@ -87,7 +100,9 @@ function scrollToLeadForm(source: string) {
   void trackCookielessInteraction("inquiry_cta", source);
   const target = document.getElementById(window.innerWidth >= 1024 ? "lead-form-desktop" : "lead-form");
   if (!target) return;
-  window.scrollTo({ top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - 12), behavior: "smooth" });
+  // Keep the end of the review carousel visible above the first mobile inquiry.
+  const offset = window.innerWidth >= 1024 ? 12 : Math.min(300, Math.max(140, window.innerHeight * 0.34));
+  window.scrollTo({ top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset), behavior: "smooth" });
 }
 function scrollToBenefits(source: string) {
   trackMarketingInteraction("explore_daycare", source);
@@ -179,7 +194,9 @@ function LeadLandingPage() {
           </div>
         </section>
 
-        <InfoTicker />
+        <InfoTicker className="relative z-10 -mt-2 sm:-mt-3" />
+
+        <Reviews />
 
         <section id="lead-form" className="bg-card px-4 pb-8 pt-8 sm:pb-12 lg:hidden">
           <div className="mx-auto max-w-xl">
@@ -198,12 +215,12 @@ function LeadLandingPage() {
               Prečo Chvostíkovo
             </p>
             <h2 className="section-title mx-auto mt-2 max-w-3xl text-3xl sm:text-4xl">
-              Pekný deň pre psíka. Pokojnejšia hlava pre vás.
+              Aktívny deň pre psíka. Pokojnejšia hlava pre vás.
             </h2>
 
             {/* Mobile: one real photo paired with each benefit, with no overlapping rows. */}
             <div className="mt-7 space-y-5 sm:hidden">
-              {BENEFITS.map(({ title: benefitTitle, text }, i) => {
+              {BENEFITS.map(({ title: benefitTitle, content }, i) => {
                 const photo = [DAYCARE_GALLERY_EXTRAS[2]!, DAYCARE_GALLERY_EXTRAS[1]!, DAYCARE_GALLERY_EXTRAS[0]!][i]!;
                 return (
                   <div key={benefitTitle} className="grid grid-cols-[minmax(0,0.97fr)_minmax(0,1.03fr)] items-stretch gap-3">
@@ -212,7 +229,7 @@ function LeadLandingPage() {
                     </figure>
                     <article className="min-w-0 py-1 text-left">
                       <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px]">{benefitTitle}</h3>
-                      <p className="mt-2 text-[12px] leading-[1.55] text-forest/80 min-[390px]:text-[13px]">{text}</p>
+                      <p className="mt-2 text-[12px] leading-[1.55] text-forest/80 min-[390px]:text-[13px]">{content}</p>
                     </article>
                   </div>
                 );
@@ -222,27 +239,25 @@ function LeadLandingPage() {
             {/* Desktop/tablet: retain the established editorial composition. */}
             <div className="mt-7 hidden sm:block">
               <EditorialBenefits image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
-                {BENEFITS.map(({ icon: Icon, title: benefitTitle, text }, i) => (
+                {BENEFITS.map(({ icon: Icon, title: benefitTitle, content }, i) => (
                   <article key={benefitTitle} className={`py-3 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-forest/15" : ""}`}>
                     <Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden />
                     <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px] sm:text-xl">{benefitTitle}</h3>
-                    <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{text}</p>
+                    <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{content}</p>
                   </article>
                 ))}
               </EditorialBenefits>
             </div>
 
-            <button
-              type="button"
-              onClick={() => openLeadModal("lead_landing_benefits")}
-              className="btn-coral mt-7 inline-flex min-w-[270px] justify-center px-7 py-3.5 text-[15px] sm:min-w-[330px] sm:text-lg"
-            >
-              Toto hľadám pre svojho psíka
-            </button>
+            <div className="mx-auto mt-8 max-w-xl">
+              <SchoolmatesFormCrown />
+              <div className="rounded-3xl bg-secondary/55 px-4 pb-6 pt-12 text-left shadow-card ring-1 ring-forest/10 sm:px-6 sm:pt-14">
+                <h3 className="mb-5 text-center font-display text-2xl font-bold text-forest">Čo hľadáte pre svojho psíka?</h3>
+                <LeadStepForm questionInHeading trackingSource="lead_landing_benefits_inline" />
+              </div>
+            </div>
           </div>
         </section>
-
-        <Reviews />
 
         <section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
           <SectionAmbientPaws />
@@ -275,8 +290,8 @@ function LeadLandingPage() {
                 Úvodná návšteva zadarmo
               </p>
             </div>
-            <p className="mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-secondary px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-forest sm:rounded-full sm:px-5 sm:text-sm">
-              <Car className="size-4 shrink-0 text-coral-dark sm:size-5" aria-hidden="true" />
+            <p className="mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm">
+              <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
 
@@ -286,14 +301,17 @@ function LeadLandingPage() {
           </div>
         </section>
 
+        <Requirements id="lead-requirements" />
+
         <section id="lead-form-pricing" className="bg-card px-4 py-10 sm:py-14">
-          <div className="mx-auto max-w-xl rounded-3xl bg-secondary/55 p-5 shadow-card ring-1 ring-coral/15 sm:p-8">
-            <h2 className="mb-5 text-center font-display text-2xl font-bold text-forest">Čo hľadáte pre svojho psíka?</h2>
-            <LeadStepForm questionInHeading trackingSource="lead_landing_pricing_inline" />
+          <div className="mx-auto max-w-xl">
+            <SchoolmatesFormCrown />
+            <div className="rounded-3xl bg-secondary/55 px-5 pb-6 pt-12 shadow-card ring-1 ring-coral/15 sm:px-8 sm:pt-14">
+              <h2 className="mb-5 text-center font-display text-2xl font-bold text-forest">Čo hľadáte pre svojho psíka?</h2>
+              <LeadStepForm questionInHeading trackingSource="lead_landing_pricing_inline" />
+            </div>
           </div>
         </section>
-
-        <Requirements id="lead-requirements" />
 
         <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />
 
