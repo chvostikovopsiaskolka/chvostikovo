@@ -119,6 +119,36 @@ const failures = [];
           if (!bellaris && !restricted && url.pathname === '/psia-skolka-kosice/') {
             const wizard = page.locator('#lead-form [data-lead-step-form]');
             if (!await wizard.isVisible()) throw new Error('Missing inline mobile lead wizard');
+            // 19 Nov LEAD funnel: proof before first contact, editable inline entries,
+            // and no regression to the existing wizard/backend contract.
+            const order = await page.evaluate(() => {
+              const ids = ['recenzie', 'lead-form', 'lead-benefits', 'lead-pricing', 'lead-requirements', 'lead-form-pricing'];
+              return ids.map(id => {
+                const el = document.getElementById(id);
+                return el ? { id, top: window.scrollY + el.getBoundingClientRect().top } : null;
+              });
+            });
+            if (order.some((item, index) => !item || (index > 0 && item.top <= order[index - 1].top)))
+              throw new Error('LEAD funnel order must be reviews > first form > benefits > pricing > requirements > follow-up form: ' + JSON.stringify(order));
+            if (!await page.locator('#lead-benefits [data-lead-step-form]').count())
+              throw new Error('Benefits must show the guided form, not only a button');
+            if (!await page.locator('#lead-form-pricing img').count())
+              throw new Error('Requirements follow-up form must retain the four-dog crown');
+            const video = page.locator('video[poster]').last();
+            if (!await video.count() || await video.getAttribute('preload') !== 'metadata')
+              throw new Error('Daycare video needs a preview and explicit in-app-browser playback');
+            if (!await page.getByRole('button', { name: 'Prehrať video zo škôlky' }).count())
+              throw new Error('Daycare video requires a direct user-gesture play control');
+            await page.locator('section.hero-safe-top .hero-cta-primary:visible').first().click();
+            await page.waitForTimeout(1100);
+            const placement = await page.evaluate(() => ({
+              formTop: document.getElementById('lead-form').getBoundingClientRect().top,
+              reviewBottom: document.getElementById('recenzie').getBoundingClientRect().bottom,
+              height: window.innerHeight,
+            }));
+            if (placement.formTop < 115 || placement.formTop > placement.height * 0.5 || placement.reviewBottom < 110)
+              throw new Error('Hero interest CTA must scroll to form with reviews still visible: ' + JSON.stringify(placement));
+
             if (await wizard.locator('input[name="zaujem"]').count() !== 3) throw new Error('Missing 3 interest cards');
             const next = wizard.getByRole('button', { name: 'Pokračovať' });
             if (await next.isEnabled()) throw new Error('Wizard preselected an interest');
