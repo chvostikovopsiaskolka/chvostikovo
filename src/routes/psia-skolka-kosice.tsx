@@ -295,9 +295,6 @@ function LeadLandingPage() {
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
 
-            <a href="#lead-requirements" className="mt-4 block font-display text-sm font-semibold text-forest underline underline-offset-4 hover:text-coral focus-visible:text-coral">
-              Pozrieť podmienky prijatia
-            </a>
           </div>
         </section>
 

@@ -402,8 +402,9 @@ export function VideoSection({ language = "sk" }: { language?: "sk" | "en" } = {
   const [playbackError, setPlaybackError] = useState(false);
   const isEnglish = language === "en";
 
-  // Facebook's in-app browser can reject intersection-triggered autoplay.
-  // A direct user gesture is more reliable; native controls remain available.
+  // Only one play UI at a time: Safari draws its own large Play glyph
+  // over the poster whenever the native controls attribute is present.
+  // Show native controls only after playback actually starts.
   function startPlayback() {
     const video = videoRef.current;
     if (!video) return;
@@ -428,9 +429,9 @@ export function VideoSection({ language = "sk" }: { language?: "sk" | "en" } = {
               muted
               loop
               playsInline
-              controls
+              controls={started}
               preload="metadata"
-              onPlay={() => { setStarted(true); setPlaybackError(false); }}
+              onPlaying={() => { setStarted(true); setPlaybackError(false); }}
               onError={() => setPlaybackError(true)}
               aria-label={isEnglish ? "Video from Chvostíkovo dog daycare – dogs excited to arrive" : "Video zo psiej škôlky Chvostíkovo – škôlkári sa tešia do škôlky"}
             />
