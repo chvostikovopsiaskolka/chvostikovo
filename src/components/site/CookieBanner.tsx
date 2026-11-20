@@ -206,10 +206,10 @@ export function CookieBanner() {
       aria-modal="true"
       aria-labelledby="cookie-consent-title"
     >
-      <div className={"relative w-full " + (showDetails ? "max-w-4xl" : isAriaPreview ? "max-w-xl pt-12" : "max-w-2xl")}>
+      <div className={"relative w-full " + (showDetails ? "max-w-4xl" : isAriaPreview ? "max-w-xl pt-9" : "max-w-2xl")}>
         {isAriaPreview && !showDetails && (
           <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={160} height={160}
-            className="pointer-events-none absolute left-3 top-0 z-20 size-[86px] object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,.35)] sm:size-24" />
+            className="pointer-events-none absolute left-3 top-4 z-20 size-[80px] object-contain drop-shadow-[0_5px_7px_rgba(0,0,0,.32)] sm:left-4 sm:top-3 sm:size-24" />
         )}
         <div data-aria-cookie-bubble={isAriaPreview && !showDetails ? "true" : undefined}
           className={"relative max-h-[calc(100dvh-1rem)] w-full overflow-y-auto rounded-3xl border p-4 text-forest sm:p-6 " +
@@ -218,7 +218,9 @@ export function CookieBanner() {
               : "border-forest/10 bg-card shadow-2xl")}>
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
-            <p id="cookie-consent-title" className={"font-display text-lg font-bold sm:text-xl " + (isAriaPreview && !showDetails ? "min-h-[58px] pl-[88px] leading-tight sm:pl-[100px]" : "")}>
+            <p id="cookie-consent-title" className={isAriaPreview && !showDetails
+                ? "flex min-h-[52px] items-center whitespace-nowrap pl-[78px] font-display text-[clamp(12px,3.7vw,18px)] font-bold leading-tight sm:pl-[100px] sm:text-xl"
+                : "font-display text-lg font-bold sm:text-xl"}>
               {showDetails
                 ? isEnglish ? "Cookie settings" : "Nastavenia cookies"
                 : isEnglish ? "We use cookies" : isAriaPreview ? "Ahoj! Používame cookies 🍪" : "Používame cookies"}
