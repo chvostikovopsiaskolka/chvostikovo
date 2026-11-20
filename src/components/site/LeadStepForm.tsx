@@ -20,7 +20,7 @@ export const LEAD_STEP_INTERESTS = [
   { value: "Mám záujem využívať škôlku občasne", lines: ["Mám záujem", "občasne", "využívať škôlku"] },
 ] as const;
 
-export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, presetInterest }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; presetInterest?: string }) {
+export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, presetInterest }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; presetInterest?: string | undefined }) {
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
   const [selectedInterest, setSelectedInterest] = useState(presetInterest ?? "");
