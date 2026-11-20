@@ -45,7 +45,7 @@ const failures = [];
           const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
           await cookieButton.waitFor({ timeout: 10000 });
           if (!bellaris && url.pathname === '/test-aria/') {
-            if (!await page.getByText(/Ahoj! Používame cookies/).count())
+            if (!await page.getByText(/Ahoj! Používame cookies 🍪/).count())
               throw new Error('Preview cookie greeting missing');
             const bubble = page.locator('[data-aria-cookie-bubble="true"]');
             await bubble.waitFor({ state: 'visible' });
@@ -55,8 +55,10 @@ const failures = [];
               throw new Error('Aria cookie bubble lost equivalent accept, customize or reject options');
             const head = bubble.locator('xpath=..').locator('img[alt*="Aria"]');
             const geometry = await Promise.all([bubble.boundingBox(), head.boundingBox()]);
-            if (!geometry[0] || !geometry[1] || geometry[1].y >= geometry[0].y)
-              throw new Error('Cookie consent should be a full-width speech bubble under Aria head');
+            if (!geometry[0] || !geometry[1] || geometry[1].y >= geometry[0].y || geometry[1].y + geometry[1].height <= geometry[0].y)
+              throw new Error('Cookie portrait must gently overlap the card, not connect via a triangle');
+            if (await bubble.locator('xpath=..').locator('svg[viewBox="0 0 56 32"]').count())
+              throw new Error('Rejected cookie triangle resurfaced');
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
@@ -76,7 +78,7 @@ const failures = [];
               const aria = page.locator('[data-aria-guide]');
               await aria.waitFor({ state: 'visible' });
               await page.locator('[data-aria-guide][data-intro="true"]').waitFor({ state: 'visible' });
-              if (!await aria.locator('[data-aria-message]').getByText(/Ahoj, volám sa Aria!/).count())
+              if (!await aria.locator('[data-aria-message]').getByText(/Ahoj, volám sa Aria\./).count())
                 throw new Error('Aria single-line greeting missing at ' + width);
               const welcome = await aria.locator('[data-aria-message] p').evaluate(el => ({
                 nowrap: getComputedStyle(el).whiteSpace === 'nowrap',
@@ -85,7 +87,7 @@ const failures = [];
               if (!welcome.nowrap || welcome.overflows)
                 throw new Error('Aria greeting must stay in one line without clipping at ' + width);
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
-              if (!dock || dock.x < -1 || dock.x + dock.width > width + 2)
+              if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
                 throw new Error('Aria floating dock overflows mobile viewport ' + width);
 
               await aria.getByRole('button', { name: 'Časté otázky' }).click();
@@ -121,6 +123,10 @@ const failures = [];
               await pricingPanel.waitFor({ state: 'visible' });
               const cards = pricingPanel.locator('[data-aria-pricing] article');
               if (await cards.count() !== 2) throw new Error('Two Aria pricing cards required');
+              if (!await pricingPanel.getByText('Permanentka – 10 vstupov').count() ||
+                  !await pricingPanel.getByText('Platnosť 2 mesiace').count() ||
+                  !await pricingPanel.getByText('Ušetríte 50 €').count())
+                throw new Error('Preview modal pricing copy/layout incomplete');
               const cardBoxes = await Promise.all([cards.nth(0).boundingBox(), cards.nth(1).boundingBox()]);
               if (!cardBoxes[0] || !cardBoxes[1] || cardBoxes.some(box => box && box.height > 160))
                 throw new Error('Aria pricing cards must be compact FAQ-like rows at ' + width);
@@ -133,6 +139,9 @@ const failures = [];
               await aria.getByRole('button', { name: 'Podmienky prijatia' }).click();
               if (await aria.locator('[data-aria-requirements] article').count() !== 4)
                 throw new Error('Aria must list the four conditions');
+              if (!await aria.locator('[data-aria-requirements]').getByText(/Sučky počas hárania/).count() ||
+                  !await aria.locator('[data-aria-requirements] strong').count())
+                throw new Error('Preview-only hygiene/health wording or highlight missing');
               await aria.locator('[data-aria-requirements]').getByRole('button', { name: 'Chcem sa informovať o škôlke' }).click();
               await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
               await page.keyboard.press('Escape');
@@ -147,8 +156,16 @@ const failures = [];
 
               const cols = await page.locator('#lead-pricing .grid').first().evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
               const pageCards = await Promise.all([page.locator('#lead-pricing article').nth(0).boundingBox(), page.locator('#lead-pricing article').nth(1).boundingBox()]);
-              if (cols !== 2 || !pageCards[0] || !pageCards[1] || Math.abs(pageCards[0].height - pageCards[1].height) > 2)
+              if (cols !== 2 || !pageCards[0] || !pageCards[1] || Math.abs(pageCards[0].height - pageCards[1].height) > 2 || Math.max(pageCards[0].height, pageCards[1].height) > 175)
                 throw new Error('Preview webpage pricing must display equal height columns at ' + width);
+              if (!await page.getByRole('heading', { name: 'Takto vyzerá Chvostíkovo' }).count())
+                throw new Error('Preview mosaic title regression');
+              const firstVisitWidthMatches = await page.locator('#lead-pricing details').evaluate(el => {
+                const prev = el.previousElementSibling;
+                if (!prev) return false;
+                return Math.abs(el.getBoundingClientRect().width - prev.getBoundingClientRect().width) <= 2;
+              });
+              if (!firstVisitWidthMatches) throw new Error('First visit and accordion must have matching width');
               if (await page.locator('#aria-mosaic img').count() !== 8)
                 throw new Error('Preview mosaic must retain eight photos');
               // Compare document order rather than screen rects (some sections may be offscreen).
