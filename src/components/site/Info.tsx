@@ -6,13 +6,14 @@ import { LeadStepForm } from "./LeadStepForm";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE } from "@/content/site";
+import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FirstVisitPhoto } from "./FirstVisitPhoto";
 import { ContextFaq, FaqAnswer } from "./ContextFaq";
 
 const reqIcons = [Syringe, PawPrint, Droplets, HeartPulse];
 
-export function Requirements({ id = "podmienky", showContextFaq = false }: { id?: string; showContextFaq?: boolean } = {}) {
+export function Requirements({ id = "podmienky", showContextFaq = false, ariaPreview = false }: { id?: string; showContextFaq?: boolean; ariaPreview?: boolean } = {}) {
   return (
     <section id={id} className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
       <SectionAmbientPaws />
@@ -27,7 +28,7 @@ export function Requirements({ id = "podmienky", showContextFaq = false }: { id?
 
         {/* All conditions remain visible and swipeable on mobile; two-column grid from sm upwards. */}
         <div role="region" aria-label="Podmienky prijatia – posúvajte do strany" tabIndex={0} className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-4 px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:mt-10 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0">
-          {REQUIREMENTS.map((r, i) => {
+          {(ariaPreview ? ARIA_PREVIEW_REQUIREMENTS : REQUIREMENTS).map((r, i) => {
             const Icon = reqIcons[i]!;
             return (
               <article key={r.title} className="w-[86%] shrink-0 snap-start rounded-3xl border border-forest/10 bg-card p-6 shadow-card sm:w-auto sm:shrink sm:p-7">
@@ -37,7 +38,7 @@ export function Requirements({ id = "podmienky", showContextFaq = false }: { id?
                   </span>
                   <h3 className="font-display text-lg font-bold text-forest sm:text-xl">{r.title}</h3>
                 </div>
-                <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80">{r.text}</p>
+                <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80">{ariaPreview ? <AriaHighlightedText text={r.text} /> : r.text}</p>
               </article>
             );
           })}
