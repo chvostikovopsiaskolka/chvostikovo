@@ -40,7 +40,7 @@ export function AriaMosaicGallery() {
     );
   }
   return (
-    <section id="aria-mosaic" className="relative scroll-mt-24 overflow-hidden bg-card py-9 sm:py-14" aria-labelledby="aria-mosaic-heading">
+    <section id="aria-mosaic" className="relative scroll-mt-24 overflow-hidden bg-card pb-9 pt-5 sm:pb-12 sm:pt-7" aria-labelledby="aria-mosaic-heading">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-4xl px-4">
         <p className="text-center font-display text-sm font-bold uppercase tracking-widest text-coral-dark">Nahliadnite k nám</p>
