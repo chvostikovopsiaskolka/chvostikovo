@@ -10,10 +10,11 @@ import { LeadStepForm, LEAD_STEP_INTERESTS } from "@/components/site/LeadStepFor
 import { AriaLeadAssistant } from "@/components/site/AriaLeadAssistant";
 import { FormDialog } from "@/components/site/FormDialog";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Reviews, VideoSection } from "@/components/site/Reviews";
+import { Reviews } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { AriaMosaicGallery } from "@/components/site/AriaMosaicGallery";
 import { AriaPuppyChecker } from "@/components/site/AriaPuppyChecker";
+import { ContextFaq } from "@/components/site/ContextFaq";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
@@ -36,12 +37,16 @@ const description =
 
 const LANDING_FAQ_QUESTIONS = new Set([
   "Ako prebieha prvá návšteva psíka v škôlke?",
-  "Bude môj psík počas dňa niekedy sám bez dozoru?",
   "Čo ak môj psík ešte nikdy nebol v kolektíve psov?",
   "Prijímate aj šteniatka?",
   "Zabezpečujete aj vyzdvihnutie a odvoz psíka?",
   "Aký je cenník služieb?",
 ]);
+
+const EARLY_FAQ = [
+  { q: "Pre koho je škôlka určená?", a: "Najmä pre stredné a veľké psy, spravidla nad 20 kg, a očkované šteniatka podľa veku a individuálnej pripravenosti. Vyžadujeme očkovania, dobrý zdravotný stav a vhodnosť do kolektívu; konečné rozhodnutie padne po úvodnej návšteve." },
+  ...FAQ.filter(({ q }) => q === "Bude môj psík počas dňa niekedy sám bez dozoru?"),
+];
 
 const LANDING_FAQ = [
   { q: "Pre koho je škôlka určená?", a: "Škôlka je zameraná najmä na stredné a veľké psy, spravidla nad 20 kg. Prijímame aj šteniatka po splnení povinných očkovaní proti besnote, infekčným ochoreniam DHPPi+L a kotercovému kašľu. Rozhoduje aj zdravotný stav, povaha, správanie v kolektíve a bezplatná úvodná návšteva. Samotný vek či váha automaticky nezaručujú prijatie." },
@@ -130,7 +135,7 @@ function AriaPreviewPage() {
         <section className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto grid min-h-[425px] max-w-6xl items-center gap-8 px-4 pb-8 pt-0 sm:min-h-[465px] sm:pt-7 sm:pb-10 lg:min-h-[510px] lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:py-10">
+          <div className="relative z-10 mx-auto grid min-h-[350px] max-w-6xl items-start gap-8 px-4 pb-8 pt-0 sm:min-h-[415px] sm:pt-4 sm:pb-8 lg:min-h-[470px] lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:py-10">
             <div className="w-full min-w-0 text-center lg:text-left">
               <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
@@ -139,10 +144,6 @@ function AriaPreviewPage() {
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
-
-              <p className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:mt-5 sm:text-lg">
-                Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
-              </p>
 
               <div data-hero-benefits className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2 lg:ml-0 lg:mr-auto lg:justify-start">
                 {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
@@ -155,6 +156,9 @@ function AriaPreviewPage() {
                   </span>
                 ))}
               </div>
+              <p className="mx-auto mt-5 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg lg:ml-0">
+                Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
+              </p>
             </div>
 
             <div id="lead-form-desktop" className="hidden min-w-0 lg:block">
@@ -165,7 +169,7 @@ function AriaPreviewPage() {
               </div>
             </div>
           </div>
-          <Reviews />
+          <Reviews variant="hero" />
         </section>
 
         <AriaMosaicGallery />
@@ -221,9 +225,9 @@ function AriaPreviewPage() {
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-forest/75 sm:text-base">
               Pohyb, hry, oddych aj celodenný dohľad sú súčasťou každého vstupu. Pri pravidelných návštevách môžete využiť výhodnejšiu permanentku.
             </p>
-            <div className="mx-auto mt-7 grid max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4">
+            <div className="mx-auto mt-5 grid max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4">
               {PRICING.map((item) => (
-                <article key={item.name} className={"flex h-full min-h-[184px] flex-col items-center rounded-3xl p-3 text-center shadow-card sm:min-h-[230px] sm:p-6 " + (item.highlight ? "bg-forest text-cream" : "bg-card text-forest")}>
+                <article key={item.name} className={"flex h-full min-h-[158px] flex-col items-center rounded-3xl p-3 text-center shadow-card sm:min-h-[195px] sm:p-5 " + (item.highlight ? "bg-forest text-cream" : "bg-card text-forest")}>
                   <h3 className="min-h-9 font-display text-[13px] font-bold sm:text-xl">{item.name}</h3>
                   <p className={"mt-1 text-[11px] font-semibold " + (item.highlight ? "text-cream/80" : "text-forest/65")}>{item.highlight ? "10 vstupov" : "1 vstup"}</p>
                   <p className={"mt-2 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
@@ -238,17 +242,26 @@ function AriaPreviewPage() {
                 </article>
               ))}
             </div>
+            <p className="mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm">
+              <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
+              <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
+            </p>
             <div className="mx-auto mt-6 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl border border-coral/50 bg-coral/10 px-5 py-3 text-center shadow-card sm:px-7">
               <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
               <p className="font-display text-base font-bold text-forest sm:text-lg">
                 Úvodná návšteva zadarmo
               </p>
             </div>
-            <a href="#lead-faq" className="mt-3 inline-flex min-h-11 items-center justify-center text-sm font-semibold text-coral-dark underline underline-offset-2">Ako prebieha úvodná návšteva? Pozrieť FAQ</a>
-            <p className="mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm">
-              <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
-              <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
-            </p>
+            <details className="group mx-auto mt-3 max-w-xl rounded-2xl border border-forest/10 bg-card px-4 py-3 text-left">
+              <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-sm font-semibold text-forest">
+                Ako prebieha úvodná návšteva? <span className="text-coral group-open:rotate-45">+</span>
+              </summary>
+              <div className="space-y-2 border-t border-forest/10 pt-3 text-xs leading-relaxed text-forest/80">
+                {(FAQ.find(({ q }) => q === "Ako prebieha prvá návšteva psíka v škôlke?")?.a || "").split(/\n+/).filter(Boolean).map((text, i) => <p key={i}>{text.trim()}</p>)}
+                <a href="#lead-first-visit" className="inline-flex min-h-11 items-center text-sm font-bold text-coral-dark underline">Pozrieť 3 kroky prvej návštevy</a>
+              </div>
+            </details>
+
 
           </div>
         </section>
@@ -302,7 +315,6 @@ function AriaPreviewPage() {
         <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />
 
         <DaycarePhotoCarousel />
-        <VideoSection />
 
         <section id="lead-first-visit" className="relative scroll-mt-24 overflow-hidden bg-forest py-10 text-cream sm:py-14">
           <SectionAmbientPaws tone="dark" />
