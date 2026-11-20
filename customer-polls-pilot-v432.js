@@ -1,193 +1,239 @@
-/* Customer polls owner-only UI pilot v432. Presentation/demo data only: no poll API, no global totals, no push. */
+/* v433: real staff-controlled poll; hard-scoped to the single verified school customer. 
+ * Public client receives only its own votes; staff identities remain server-side under RLS.
+ * The previous localStorage v432 demo is NOT a source of votes.
+ */
 (() => {
-  'use strict';
-  const OWNER_FINGERPRINT = '288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66';
-  const POLL = Object.freeze({
-    id:'calendar-interest-pilot',
-    sk:{
-      tag:'Skúšobné hlasovanie', title:'Škôlkarsky kalendár',
-      question:'Mali by ste záujem o kalendár Chvostíkova?',
-      details:'Pripravujeme nápad na kalendár so škôlkarmi. Chceli by sme ním podporiť OZ.',
-      choices:['Áno, mal/a by som záujem','Nie, nemal/a by som záujem'],
-      vote:'Hlasovať', thanks:'Ďakujeme za váš hlas!', answer:'Vaša odpoveď',
-      info:'Toto je iba súkromný náhľad. Hlasy sa zatiaľ neukladajú do škôlkarskej databázy.',
-      count:'Testovacie hlasy na tomto zariadení: ',
-      open:'Pozrieť oznamy', overview:'Aktuálne hlasovanie',
-      goto:'Prejsť na hlasovanie', menu:'Hlasovanie',
-      reminder:'Kalendár Chvostíkova – záujem'
-    },
-    en:{
-      tag:'Poll preview', title:'Daycare calendar',
-      question:'Would you be interested in a Chvostíkovo calendar?',
-      details:'We are considering a calendar featuring our daycare dogs to support a nonprofit organization.',
-      choices:['Yes, I would be interested','No, not interested'],
-      vote:'Vote', thanks:'Thanks for voting!', answer:'Your answer',
-      info:'Private preview only. Votes are not yet saved in the daycare database.',
-      count:'Demo votes on this device: ',
-      open:'View announcements', overview:'Current poll',
-      goto:'Open poll', menu:'Poll',
-      reminder:'Chvostíkovo calendar – interest'
-    }
+ 'use strict';
+ const OWNER_FINGERPRINT='288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66';
+ const $=id=>document.getElementById(id);
+ const account=()=>state?.session?.user?.id||'';
+ const en=()=>window.ChvostikovoLocale?.getLanguage?.()==='en';
+ const text=(sk,english)=>en()?english:sk;
+ const el=(tag,className,value)=>{
+  const node=document.createElement(tag);
+  if(className)node.className=className;
+  if(value!==undefined)node.textContent=String(value);
+  return node;
+ };
+ let allowed='',sequence=0,loaded='',loading=null,active=null,choices=[],selection=null,
+     quantityValue='1',expanded=false,sending=false,thankYou=false,error='';
+ function clear(){
+  $('customerPollMenuV432')?.remove();
+  $('customerPollOverviewV432')?.remove();
+  $('customerPollNavBadgeV432')?.remove();
+  const group=$('customerMenuPrimaryV432');
+  if(group){for(const child of [...group.children])group.before(child);group.remove()}
+  document.documentElement.classList.remove('customer-polls-owner-v432');
+  allowed='';loaded='';active=null;choices=[];expanded=false;thankYou=false;error='';
+ }
+ async function matchesOwner(id){
+  if(!id||!globalThis.crypto?.subtle)return false;
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(id).toLowerCase()));
+  return [...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('')===OWNER_FINGERPRINT;
+ }
+ function menuLayout(){
+  const menu=$('menuTab'),first=$('menuDogGroup');
+  if(!menu||!first)return false;
+  if(!$('customerMenuPrimaryV432')){
+   const wrap=el('div','customer-menu-primary-v432');
+   wrap.id='customerMenuPrimaryV432';
+   first.before(wrap);
+   for(const id of ['menuDogGroup','menuContact','menuSettingsGroup','menuMessage']){
+    const node=$(id);if(node)wrap.append(node);
+   }
+  }
+  if(!$('customerPollMenuV432')){
+   const box=el('section','customer-poll-v432 customer-poll-menu-v432');
+   box.id='customerPollMenuV432';
+   box.addEventListener('click',click);
+   menu.querySelector('.customer-social-v223')?.before(box);
+   if(!box.isConnected)menu.append(box);
+  }
+  if(!$('customerPollNavBadgeV432')){
+   const nav=$('navDog');
+   if(nav){
+    const badge=el('span','customer-poll-nav-badge-v432','1');
+    badge.id='customerPollNavBadgeV432';badge.setAttribute('aria-hidden','true');
+    nav.append(badge);
+   }
+  }
+  document.documentElement.classList.add('customer-polls-owner-v432');
+  return true;
+ }
+ const safeError=()=>text('Hlasovanie sa nepodarilo načítať. Skúste otvoriť Menu znova.',
+  'Could not load the poll. Please open Menu again.');
+ async function getRows(path,id){
+  const result=await customerReadJsonV391(SUPABASE_URL+'/rest/v1/'+path,id);
+  if(!result.response?.ok)throw new Error('Poll read failed '+result.response?.status);
+  return Array.isArray(result.rows)?result.rows:[];
+ }
+ async function fetchPolls(id){
+  const pollRows=await getRows('portal_polls_v433?status=eq.published&select=id,title,question,description,price_note,created_at&order=created_at.desc&limit=10',id);
+  if(!pollRows.length)return {poll:null,options:[]};
+  const votes=await getRows('portal_poll_votes_v433?user_id=eq.'+encodeURIComponent(id)+'&select=poll_id',id);
+  const done=new Set(votes.map(row=>row.poll_id));
+  const poll=pollRows.find(row=>!done.has(row.id));
+  if(!poll)return {poll:null,options:[]};
+  const options=await getRows('portal_poll_options_v433?poll_id=eq.'+encodeURIComponent(poll.id)+'&select=id,label,position,asks_quantity&order=position.asc',id);
+  return {poll:options.length>=2?poll:null,options};
+ }
+ async function refresh(id,force=false){
+  if(!allowed||allowed!==id)return;
+  if(loading&&!force)return loading;
+  if(loaded===id&&!force)return;
+  const version=++sequence;
+  loading=(async()=>{
+   try{
+    const next=await fetchPolls(id);
+    if(version!==sequence||allowed!==account())return;
+    active=next.poll;choices=next.options;loaded=id;error='';
+   }catch(exc){
+    if(version!==sequence||allowed!==account())return;
+    // Fail closed: no stale poll offered when the server state cannot be confirmed.
+    active=null;choices=[];loaded='';error=safeError();
+   }finally{
+    if(version===sequence&&allowed===account()){render();loading=null}
+   }
+  })();
+  return loading;
+ }
+ function render(){
+  if(!allowed||allowed!==account())return;
+  if(!menuLayout())return;
+  const root=$('customerPollMenuV432'),badge=$('customerPollNavBadgeV432');
+  const show=Boolean(active||thankYou);
+  root.hidden=!show;root.replaceChildren();
+  if(badge)badge.hidden=!active||thankYou;
+  if(!show)return;
+  if(thankYou){
+   const success=el('div','customer-poll-complete-v432');
+   success.setAttribute('role','status');
+   success.append(el('strong','',text('Ďakujeme za váš hlas!','Thank you for voting!')),
+     el('p','',text('Váš záujem sme zaznamenali.','Your response has been recorded.')));
+   const done=el('button','customer-poll-finish-v433',text('Hotovo','Done'));
+   done.type='button';done.dataset.pollDone='true';
+   root.append(success,done);return;
+  }
+  if(!expanded){
+   const marker=el('span','customer-poll-kicker-v432',text('Nové hlasovanie','New poll'));
+   const label=el('strong','customer-poll-invite-v433',text('Je k dispozícii nové hlasovanie.','A new poll is available.'));
+   const btn=el('button','customer-poll-open-v433',text('Chcem hlasovať','I want to vote'));
+   btn.type='button';btn.dataset.pollExpand='true';
+   root.append(marker,label,btn);
+   return;
+  }
+  const h=el('h2','',active.title);h.id='customerPollMenuTitleV432';h.tabIndex=-1;
+  const question=el('p','customer-poll-question-v432',active.question);
+  const details=el('p','customer-poll-desc-v432',active.description);
+  root.append(el('span','customer-poll-kicker-v432',text('Hlasovanie','Poll')),h,question,details);
+  if(active.price_note)root.append(el('p','customer-poll-price-v433',active.price_note));
+  const opts=el('div','customer-poll-options-v432');
+  opts.setAttribute('role','group');opts.setAttribute('aria-label',active.question);
+  choices.slice(0,10).forEach(row=>{
+   const button=el('button','customer-poll-choice-v432'+(selection===row.id?' selected-v433':''),row.label);
+   button.type='button';button.dataset.pollChoice=row.id;
+   button.setAttribute('aria-pressed',String(selection===row.id));
+   button.disabled=sending;
+   opts.append(button);
   });
-  const get = id => document.getElementById(id);
-  const language = () => window.ChvostikovoLocale?.getLanguage?.()==='en'?'en':'sk';
-  const text = () => POLL[language()];
-  const storageKey = account => 'chvo-customer-polls-pilot-v432:'+account+':'+POLL.id;
-  let eligibleAccount=null,serial=0;
-  function readVote(account){
-    try{const selected=Number(localStorage.getItem(storageKey(account)));return [1,2].includes(selected)?selected:null}
-    catch(_){return null}
+  root.append(opts);
+  const selected=choices.find(x=>x.id===selection);
+  if(selected?.asks_quantity){
+   const qty=el('div','customer-poll-quantity-v433');
+   const label=el('label','',text('O koľko kusov máte záujem?','How many copies would you like?'));
+   label.htmlFor='customerPollQuantityV433';
+   const field=el('input','');
+   field.id='customerPollQuantityV433';field.type='number';field.min='1';field.max='999';
+   field.step='1';field.inputMode='numeric';field.required=true;field.value=quantityValue;
+   field.disabled=sending;
+   field.addEventListener('input',()=>{quantityValue=field.value});
+   const send=el('button','customer-poll-submit-v433',sending?text('Ukladám…','Saving…'):text('Potvrdiť hlas','Confirm vote'));
+   send.type='button';send.dataset.pollSubmit='true';send.disabled=sending;
+   qty.append(label,field,send);root.append(qty);
   }
-  async function isOwner(account){
-    if(!account||!crypto?.subtle||typeof TextEncoder==='undefined')return false;
-    const input=new TextEncoder().encode(String(account).toLowerCase());
-    const buffer=await crypto.subtle.digest('SHA-256',input);
-    const hex=Array.from(new Uint8Array(buffer),b=>b.toString(16).padStart(2,'0')).join('');
-    return hex===OWNER_FINGERPRINT;
+  if(error){
+   const msg=el('p','customer-poll-error-v433',error);msg.setAttribute('role','alert');root.append(msg);
   }
-  function element(tag,className,content){
-    const node=document.createElement(tag);
-    if(className)node.className=className;
-    if(content!==undefined)node.textContent=content;
-    return node;
+  const close=el('button','customer-poll-collapse-v433',text('Späť','Back'));
+  close.type='button';close.dataset.pollCollapse='true';root.append(close);
+ }
+ async function submit(choice){
+  if(!allowed||allowed!==account()||!active||sending)return;
+  const target=choices.find(x=>x.id===choice);
+  if(!target)return;
+  const count=Number(quantityValue);
+  if(target.asks_quantity&&(!Number.isInteger(count)||count<1||count>999)){
+   error=text('Zadajte počet kusov od 1 do 999.','Enter a quantity between 1 and 999.');
+   render();return;
   }
-  function unmount(){
-    get('customerPollMenuV432')?.remove();
-    get('customerPollOverviewV432')?.remove();
-    get('customerPollNavBadgeV432')?.remove();
-    const wrapper=get('customerMenuPrimaryV432');
-    if(wrapper){
-      for(const child of Array.from(wrapper.children))wrapper.before(child);
-      wrapper.remove();
-    }
-    document.documentElement.classList.remove('customer-polls-owner-v432');
-    eligibleAccount=null;
+  sending=true;error='';render();
+  const userId=allowed,postPoll=active.id;
+  try{
+   const session=await ensureCustomerSessionV357();
+   if(userId!==account()||session.user?.id!==userId)throw new Error('Účet sa zmenil.');
+   const response=await fetch(SUPABASE_URL+'/rest/v1/portal_poll_votes_v433',{
+    method:'POST',cache:'no-store',
+    headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token,
+     'Content-Type':'application/json',Prefer:'return=minimal'},
+    body:JSON.stringify({poll_id:postPoll,option_id:choice,user_id:userId,
+     quantity:target.asks_quantity?count:null})
+   });
+   if(response.status===409){
+    // A prior tab may have already recorded a vote; server is the source of truth.
+    const rows=await getRows('portal_poll_votes_v433?poll_id=eq.'+encodeURIComponent(postPoll)+
+      '&user_id=eq.'+encodeURIComponent(userId)+'&select=id&limit=1',userId);
+    if(!rows.length)throw new Error('Conflict without existing vote');
+   }else if(!response.ok)throw new Error('Poll write failed '+response.status);
+   if(userId!==account())return;
+   thankYou=true;active=null;choices=[];selection=null;render();
+  }catch(exc){
+   if(userId===account()){
+    error=text('Hlas sa nepodarilo uložiť. Skúste to znova.','Could not save your vote. Please try again.');
+   }
+  }finally{sending=false;if(userId===account())render()}
+ }
+ function click(event){
+  if(!allowed||allowed!==account())return;
+  const button=event.target.closest('button');
+  if(!button)return;
+  if(button.dataset.pollExpand){
+   expanded=true;render();requestAnimationFrame(()=>$('#customerPollMenuTitleV432')?.focus({preventScroll:true}));return;
   }
-  function mount(){
-    const menu=get('menuTab'),booking=get('bookingTab'),upcoming=get('upcomingBookings');
-    if(!menu||!booking||!upcoming)return;
-    if(!get('customerMenuPrimaryV432')){
-      const first=get('menuDogGroup');
-      if(first){
-        const wrapper=element('div','customer-menu-primary-v432');
-        wrapper.id='customerMenuPrimaryV432';
-        first.before(wrapper);
-        for(const id of ['menuDogGroup','menuContact','menuSettingsGroup','menuMessage']){
-          const row=get(id);if(row)wrapper.append(row);
-        }
-      }
-    }
-    if(!get('customerPollMenuV432')){
-      const card=element('section','customer-poll-v432 customer-poll-menu-v432');
-      card.id='customerPollMenuV432';
-      card.setAttribute('aria-live','polite');
-      const social=menu.querySelector('.customer-social-v223');
-      if(social)social.before(card);else menu.append(card);
-      card.addEventListener('click',onCardClick);
-    }
-    if(!get('customerPollOverviewV432')){
-      const preview=element('section','customer-poll-v432 customer-poll-overview-v432');
-      preview.id='customerPollOverviewV432';
-      upcoming.after(preview);
-      preview.addEventListener('click',event=>{
-        if(!event.target.closest('[data-poll-open]'))return;
-        switchTab('menu');
-        requestAnimationFrame(()=>{
-          get('customerPollMenuV432')?.scrollIntoView({block:'center',behavior:'auto'});
-          get('customerPollMenuTitleV432')?.focus({preventScroll:true});
-        });
-      });
-    }
-    if(!get('customerPollNavBadgeV432')){
-      const nav=get('navDog');
-      if(nav){
-        const badge=element('span','customer-poll-nav-badge-v432','1');
-        badge.id='customerPollNavBadgeV432';
-        badge.setAttribute('aria-hidden','true');
-        nav.append(badge);
-      }
-    }
-    document.documentElement.classList.add('customer-polls-owner-v432');
+  if(button.dataset.pollCollapse){expanded=false;selection=null;error='';render();return}
+  if(button.dataset.pollDone){thankYou=false;loaded='';expanded=false;render();void refresh(allowed,true);return}
+  if(button.dataset.pollSubmit){void submit(selection);return}
+  if(button.dataset.pollChoice){
+   const choice=choices.find(v=>v.id===button.dataset.pollChoice);
+   if(!choice||sending)return;
+   selection=choice.id;error='';
+   if(choice.asks_quantity){render();$('#customerPollQuantityV433')?.focus();return}
+   void submit(choice.id);
   }
-  function render(){
-    const sessionAccount=state?.session?.user?.id;
-    if(!eligibleAccount||sessionAccount!==eligibleAccount){unmount();return}
-    const words=text(),vote=readVote(eligibleAccount);
-    const container=get('customerPollMenuV432');
-    const compact=get('customerPollOverviewV432');
-    if(!container||!compact)return;
-    container.replaceChildren();
-    const heading=element('div','customer-poll-heading-v432');
-    const kicker=element('span','customer-poll-kicker-v432',words.tag);
-    const title=element('h2','',words.title);
-    title.id='customerPollMenuTitleV432';title.tabIndex=-1;
-    heading.append(kicker,title);
-    container.append(heading,element('p','customer-poll-question-v432',words.question),
-      element('p','customer-poll-desc-v432',words.details));
-    if(vote){
-      const complete=element('div','customer-poll-complete-v432');
-      complete.append(element('strong','',words.thanks),
-        element('p','',words.answer+': '+words.choices[vote-1]));
-      container.append(complete);
-      const open=element('button','customer-poll-open-notices-v432',words.open);
-      open.type='button';open.dataset.pollNotices='true';
-      container.append(open);
-    }else{
-      const options=element('div','customer-poll-options-v432');
-      options.setAttribute('role','group');options.setAttribute('aria-label',words.question);
-      words.choices.slice(0,10).forEach((choice,index)=>{
-        const button=element('button','customer-poll-choice-v432',choice);
-        button.type='button';button.dataset.pollChoice=String(index+1);
-        options.append(button);
-      });
-      container.append(options);
-    }
-    container.append(element('p','customer-poll-count-v432',words.count+(vote?'1':'0')),
-      element('p','customer-poll-info-v432',words.info));
-    compact.replaceChildren();
-    const subtitle=element('span','customer-poll-kicker-v432',words.overview);
-    const intro=element('strong','',words.reminder);
-    const button=element('button','customer-poll-preview-action-v432',words.goto);
-    button.type='button';button.dataset.pollOpen='true';
-    compact.append(subtitle,intro,button);
-    const badge=get('customerPollNavBadgeV432');
-    if(badge)badge.hidden=Boolean(vote);
-  }
-  function onCardClick(event){
-    if(!eligibleAccount||state?.session?.user?.id!==eligibleAccount)return;
-    const option=event.target.closest('[data-poll-choice]');
-    if(option&&get('customerPollMenuV432')?.contains(option)){
-      if(readVote(eligibleAccount))return;
-      const choice=Number(option.dataset.pollChoice);
-      if(!Number.isInteger(choice)||choice<1||choice>POLL.sk.choices.length)return;
-      try{localStorage.setItem(storageKey(eligibleAccount),String(choice));render()}
-      catch(_){const info=get('customerPollMenuV432')?.querySelector('.customer-poll-info-v432');if(info)info.textContent='Hlas sa nepodarilo uložiť na tomto zariadení.'}
-      return;
-    }
-    if(event.target.closest('[data-poll-notices]')){
-      const group=get('menuDogGroup');if(group)group.open=true;
-      get('menuBulletinV229')?.click();
-    }
-  }
-  async function sync(){
-    const account=state?.session?.user?.id;
-    if(!account||!state?.data){serial++;unmount();return}
-    if(eligibleAccount===account){render();return}
-    serial++;const current=serial;
-    unmount();
-    let allowed=false;
-    try{allowed=await isOwner(account)}catch(_){}
-    if(current!==serial||state?.session?.user?.id!==account||!state?.data)return;
-    if(!allowed)return;
-    eligibleAccount=account;mount();render();
-  }
-  addCustomerHook('afterBootstrap',sync);
-  addCustomerHook('afterRenderDog',sync);
-  addCustomerHook('afterSwitchTab',sync);
-  document.addEventListener('click',event=>{
-    if(event.target.closest?.('[data-customer-locale]'))
-      requestAnimationFrame(()=>{if(eligibleAccount===state?.session?.user?.id)render()});
-  });
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync,{once:true});
-  else void sync();
+ }
+ async function sync(){
+  const id=account();
+  if(!id||!state?.data){sequence++;clear();return}
+  if(allowed===id){render();return}
+  sequence++;clear();
+  const marker=sequence;
+  let accepted=false;
+  try{accepted=await matchesOwner(id)}catch(_){}
+  if(marker!==sequence||id!==account()||!state?.data||!accepted)return;
+  allowed=id;
+  if(!menuLayout())return;
+  render();
+  await refresh(id,true);
+ }
+ addCustomerHook('afterBootstrap',sync);
+ addCustomerHook('afterRenderDog',()=>{if(allowed===account())render();else void sync()});
+ addCustomerHook('afterSwitchTab',()=>{if(allowed===account())render()});
+ document.addEventListener('click',event=>{
+  if(event.target.closest?.('[data-customer-locale]')&&allowed===account())
+   requestAnimationFrame(render);
+ });
+ document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&allowed===account()&&!sending&&loaded===allowed)void refresh(allowed,true);
+ });
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync,{once:true});
+ else void sync();
 })();
