@@ -169,7 +169,7 @@ function AriaPreviewPage() {
           <Reviews variant="hero" />
         </section>
 
-        <section className="relative overflow-hidden bg-card py-10 sm:py-14">
+        <section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto grid max-w-5xl items-center gap-6 px-4 md:grid-cols-2 md:gap-10">
             <img
