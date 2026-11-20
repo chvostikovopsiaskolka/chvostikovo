@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import {
   CONSENT_STORAGE_KEY,
   emptyConsent,
@@ -154,6 +155,7 @@ export function CookieBanner() {
   if (!mounted) return null;
 
   const isEnglish = window.location.pathname.startsWith("/en/");
+  const isAriaPreview = window.location.pathname.replace(/\/$/, "") === "/test-aria";
 
   function save(next: Pick<Consent, "functional" | "analytics" | "marketing">) {
     const stored = writeStoredConsent(next);
@@ -186,7 +188,7 @@ export function CookieBanner() {
   if (!open) {
     if (!savedNotice) return null;
     return (
-      <div role="status" className="fixed bottom-[calc(98px+env(safe-area-inset-bottom))] left-3 right-3 z-[110] mx-auto flex max-w-md items-center gap-2 rounded-2xl border border-forest/15 bg-card px-4 py-3 text-sm text-forest shadow-xl lg:bottom-[calc(12px+env(safe-area-inset-bottom))]">
+      <div role="status" className={`fixed left-3 right-3 z-[110] mx-auto flex max-w-md items-center gap-2 rounded-2xl border border-forest/15 bg-card px-4 py-3 text-sm text-forest shadow-xl ${isAriaPreview ? "bottom-[calc(108px+env(safe-area-inset-bottom))]" : "bottom-[calc(98px+env(safe-area-inset-bottom))] lg:bottom-[calc(12px+env(safe-area-inset-bottom))]"}`}>
         <span className="flex-1">{isEnglish ? "Your cookie choices were saved for up to 180 days." : "Vašu voľbu cookies sme uložili na najviac 180 dní."}</span>
         <button type="button" className="shrink-0 font-semibold text-coral underline" onClick={() => window.dispatchEvent(new Event("chvostikovo-open-cookie-settings"))}>
           {isEnglish ? "Settings" : "Nastavenia"}
@@ -204,20 +206,25 @@ export function CookieBanner() {
       aria-modal="true"
       aria-labelledby="cookie-consent-title"
     >
-      <div className={`${showDetails ? "max-w-4xl" : "max-w-2xl"} max-h-[calc(100vh-1rem)] w-full overflow-y-auto rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:p-6`}>
+      <div className={`${showDetails ? "max-w-4xl" : isAriaPreview ? "max-w-xl" : "max-w-2xl"} relative max-h-[calc(100vh-1rem)] w-full overflow-y-auto rounded-3xl border ${isAriaPreview ? "border-white/80 bg-card/95 shadow-[0_12px_50px_rgba(11,48,30,.32)] ring-1 ring-forest/15 backdrop-blur-xl" : "border-forest/10 bg-card shadow-2xl"} p-4 text-forest sm:p-6`}>
         <div className="flex items-start gap-2">
+          {isAriaPreview && !showDetails && (
+            <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={72} height={72} className="size-[70px] shrink-0 object-contain drop-shadow-[0_5px_6px_rgba(0,0,0,.24)] sm:size-20" />
+          )}
           <div className="min-w-0 flex-1">
             <p id="cookie-consent-title" className="font-display text-lg font-bold sm:text-xl">
               {showDetails
                 ? isEnglish ? "Cookie settings" : "Nastavenia cookies"
-                : isEnglish ? "We use cookies" : "Používame cookies"}
+                : isEnglish ? "We use cookies" : isAriaPreview ? "Ahoj! Používame cookies 🐾" : "Používame cookies"}
             </p>
 
             {!showDetails && (
               <p className="mt-1 max-w-3xl text-sm leading-relaxed text-forest/75 sm:text-base">
                 {isEnglish
                   ? "Necessary cookies keep the website working. With your consent, we also use functional, analytics and marketing cookies to improve the website and measure our advertising. "
-                  : "Nevyhnutné cookies zabezpečujú fungovanie webu. S vaším súhlasom používame aj funkčné, analytické a marketingové cookies na zlepšovanie webu a meranie reklamy. "}
+                  : isAriaPreview
+                    ? "Som Aria a vítam ťa v Chvostíkove! Nevyhnutné cookies pomáhajú webu fungovať. O funkčných, analytických a marketingových cookies rozhoduješ ty. "
+                    : "Nevyhnutné cookies zabezpečujú fungovanie webu. S vaším súhlasom používame aj funkčné, analytické a marketingové cookies na zlepšovanie webu a meranie reklamy. "}
                 <a
                   href={isEnglish ? "/en/cookies" : "/cookies"}
                   target="_blank"
