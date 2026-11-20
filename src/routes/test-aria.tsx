@@ -14,7 +14,6 @@ import { Reviews } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { AriaMosaicGallery } from "@/components/site/AriaMosaicGallery";
 import { AriaPuppyChecker } from "@/components/site/AriaPuppyChecker";
-import { ContextFaq } from "@/components/site/ContextFaq";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
@@ -22,7 +21,6 @@ import { Requirements } from "@/components/site/Info";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
-import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { DAYCARE_GALLERY_EXTRAS, GALLERY, FAQ, PRICING } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
@@ -48,10 +46,7 @@ const EARLY_FAQ = [
   ...FAQ.filter(({ q }) => q === "Bude môj psík počas dňa niekedy sám bez dozoru?"),
 ];
 
-const LANDING_FAQ = [
-  { q: "Pre koho je škôlka určená?", a: "Škôlka je zameraná najmä na stredné a veľké psy, spravidla nad 20 kg. Prijímame aj šteniatka po splnení povinných očkovaní proti besnote, infekčným ochoreniam DHPPi+L a kotercovému kašľu. Rozhoduje aj zdravotný stav, povaha, správanie v kolektíve a bezplatná úvodná návšteva. Samotný vek či váha automaticky nezaručujú prijatie." },
-  ...FAQ.filter((item) => LANDING_FAQ_QUESTIONS.has(item.q)),
-];
+const LANDING_FAQ = FAQ.filter((item) => LANDING_FAQ_QUESTIONS.has(item.q));
 
 const BENEFITS = [
   {
@@ -135,8 +130,8 @@ function AriaPreviewPage() {
         <section className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto grid min-h-[350px] max-w-6xl items-start gap-8 px-4 pb-8 pt-0 sm:min-h-[415px] sm:pt-4 sm:pb-8 lg:min-h-[470px] lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:py-10">
-            <div className="w-full min-w-0 text-center lg:text-left">
+          <div className="relative z-10 mx-auto grid min-h-[320px] max-w-4xl items-start gap-6 px-4 pb-8 pt-0 sm:min-h-[415px] sm:pt-4 sm:pb-8 lg:min-h-[470px] lg:gap-8 lg:py-10">
+            <div className="w-full min-w-0 text-center">
               <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
               </p>
@@ -145,7 +140,7 @@ function AriaPreviewPage() {
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
 
-              <div data-hero-benefits className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2 lg:ml-0 lg:mr-auto lg:justify-start">
+              <div data-hero-benefits className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2 ">
                 {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
@@ -156,24 +151,68 @@ function AriaPreviewPage() {
                   </span>
                 ))}
               </div>
-              <p className="mx-auto mt-5 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg lg:ml-0">
+              <p className="mx-auto mt-5 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg ">
                 Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
               </p>
             </div>
 
-            <div id="lead-form-desktop" className="hidden min-w-0 lg:block">
-              <SchoolmatesFormCrown compact />
-              <div className="rounded-3xl border border-coral/15 bg-secondary/55 px-5 pb-6 pt-8 shadow-soft">
-                <h2 className="mb-5 text-center font-display text-xl font-bold text-forest">Čo hľadáte pre svojho psíka?</h2>
-                <LeadStepForm questionInHeading trackingSource="lead_landing_hero_desktop_inline" />
-              </div>
-            </div>
           </div>
           <Reviews variant="hero" />
         </section>
 
+        <section className="relative overflow-hidden bg-card py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto grid max-w-5xl items-center gap-6 px-4 md:grid-cols-2 md:gap-10">
+            <img
+              src={teamPhoto}
+              alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
+              loading="lazy"
+              className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72"
+            />
+            <div>
+              <h2 className="section-title text-3xl sm:text-4xl">Kto sa bude starať o vášho psíka?</h2>
+              <p className="mt-4 text-sm leading-relaxed text-forest/75 sm:text-base">
+                Aj my sme majitelia veľkých psíkov, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov spoznávame, rešpektujeme ich potreby a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="aria-early-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/30 py-9 sm:py-12">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4">
+            <h2 className="section-title text-center text-2xl sm:text-3xl">Čo je dobré vedieť o škôlke?</h2>
+            <div className="mt-5 space-y-3">
+              {EARLY_FAQ.map((item) => (
+                <details key={item.q} className="group rounded-3xl border border-forest/10 bg-card p-4 shadow-card">
+                  <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-left font-display text-sm font-bold text-forest sm:text-base">
+                    {item.q}<span className="text-lg text-coral group-open:rotate-45">+</span>
+                  </summary>
+                  <div className="mt-2 border-t border-forest/10 pt-3 text-sm leading-relaxed text-forest/80">{item.a}</div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <AriaMosaicGallery />
 
+        <section className="bg-card py-10 sm:py-16">
+          <div className="mx-auto max-w-4xl px-4">
+            <div className="rounded-4xl bg-secondary/55 p-5 shadow-soft sm:p-8">
+              <div className="mx-auto max-w-2xl text-center">
+                <h2 className="section-title text-3xl sm:text-4xl">Chcete to dopriať aj svojmu psíkovi?</h2>
+                <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
+                  Radi vám odpovieme na otázky o škôlke.
+                </p>
+              </div>
+
+              <div className="mx-auto mt-6 max-w-xl rounded-3xl bg-card p-5 shadow-card sm:p-6">
+                <LeadStepForm questionInHeading trackingSource="lead_landing_bottom_inline" />
+              </div>
+            </div>
+          </div>
+        </section>
         <section id="lead-benefits" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
@@ -312,10 +351,6 @@ function AriaPreviewPage() {
 
         <AriaPuppyChecker onInterest={() => openAriaForm(false)} />
 
-        <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />
-
-        <DaycarePhotoCarousel />
-
         <section id="lead-first-visit" className="relative scroll-mt-24 overflow-hidden bg-forest py-10 text-cream sm:py-14">
           <SectionAmbientPaws tone="dark" />
           <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
@@ -346,40 +381,21 @@ function AriaPreviewPage() {
           </div>
         </section>
 
-        <section className="relative overflow-hidden bg-card py-10 sm:py-14">
+        <section id="aria-first-visit-form" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto grid max-w-5xl items-center gap-6 px-4 md:grid-cols-2 md:gap-10">
-            <img
-              src={teamPhoto}
-              alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
-              loading="lazy"
-              className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72"
-            />
-            <div>
-              <h2 className="section-title text-3xl sm:text-4xl">Kto sa bude starať o vášho psíka?</h2>
-              <p className="mt-4 text-sm leading-relaxed text-forest/75 sm:text-base">
-                Aj my sme majitelia veľkých psíkov, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov spoznávame, rešpektujeme ich potreby a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
-              </p>
+          <div className="relative z-10 mx-auto max-w-2xl px-4">
+            <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o prvú návštevu?</h2>
+            <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
+            <div className="mt-5 rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
+              <LeadStepForm questionInHeading trackingSource="aria_preview_first_visit_inline" />
             </div>
           </div>
         </section>
 
-        <section className="bg-card py-10 sm:py-16">
-          <div className="mx-auto max-w-4xl px-4">
-            <div className="rounded-4xl bg-secondary/55 p-5 shadow-soft sm:p-8">
-              <div className="mx-auto max-w-2xl text-center">
-                <h2 className="section-title text-3xl sm:text-4xl">Chcete to dopriať aj svojmu psíkovi?</h2>
-                <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
-                  Radi vám odpovieme na otázky o škôlke.
-                </p>
-              </div>
+        <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />
 
-              <div className="mx-auto mt-6 max-w-xl rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <LeadStepForm questionInHeading trackingSource="lead_landing_bottom_inline" />
-              </div>
-            </div>
-          </div>
-        </section>
+        <DaycarePhotoCarousel />
+
       </main>
 
       <Footer />
