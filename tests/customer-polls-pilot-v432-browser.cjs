@@ -82,6 +82,7 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
    await page.locator('#customerPollMenuV432 .customer-poll-complete-v432').waitFor();
    assert.equal(await page.locator('#customerPollMenuV432 .customer-poll-choice-v432').count(),0);
    await page.evaluate(()=>{window.__lang='en';document.querySelector('[data-customer-locale="en"]').click()});
+   await page.waitForFunction(()=>document.querySelector('#customerPollMenuV432')?.textContent.includes('Thanks for voting!'));
    assert.match(await page.locator('#customerPollMenuV432').textContent(),/Thanks for voting!/);
    await page.evaluate(()=>{window.state.session.user.id='another-synthetic-account';window.__hooks.afterBootstrap.forEach(fn=>fn())});
    await page.locator('#customerPollMenuV432').waitFor({state:'detached'});
