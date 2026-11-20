@@ -120,7 +120,7 @@ export function AriaLeadAssistant({
 
   const optionClass = "flex min-h-11 w-full items-center justify-between gap-2 rounded-2xl border border-forest/10 bg-white/75 px-3 py-2.5 text-left text-sm font-semibold text-forest transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
   const ctaClass = "flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-coral px-4 py-2.5 text-center font-display text-sm font-bold text-white shadow-sm transition hover:bg-coral-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest";
-  const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 text-center text-forest transition hover:bg-white/65 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
+  const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl bg-white/55 px-0.5 text-center text-forest shadow-[0_2px_7px_rgba(18,68,43,.10)] transition hover:bg-white/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
 
   if (hidden) return null;
 
@@ -246,25 +246,31 @@ export function AriaLeadAssistant({
         )}
 
         {!panel && (
-          <div className="mb-2 flex w-full justify-center" data-aria-message>
-            {intro ? (
-              <div className="relative inline-flex min-h-10 max-w-full items-center rounded-[18px] border border-white/85 bg-card/95 px-3 py-2 shadow-md ring-1 ring-forest/10 backdrop-blur-xl">
-                <span aria-hidden="true" className="absolute -bottom-1.5 left-[22px] size-3 rotate-45 border-b border-r border-white/85 bg-card" />
-                <p className="whitespace-nowrap font-display text-[clamp(9px,2.65vw,13px)] font-semibold tracking-tight text-forest">
+          <div className="mb-3 flex w-full justify-start pl-[82px] sm:pl-[104px]" data-aria-message>
+            <div className="relative isolate inline-flex min-h-10 max-w-full items-center rounded-[24px] border border-white/90 bg-card/95 px-3 py-2 text-forest shadow-[0_6px_22px_rgba(17,65,41,.15)] ring-1 ring-forest/10 backdrop-blur-xl">
+              {/* Curved speech tail extends from the bubble towards Aria's head, not the navigation dock. */}
+              <svg aria-hidden="true" viewBox="0 0 96 60"
+                className="pointer-events-none absolute -bottom-[20px] -left-[69px] z-0 h-[56px] w-[91px] overflow-visible drop-shadow-[0_3px_3px_rgba(17,65,41,.13)]">
+                <path d="M94 5 C78 7 63 31 4 56 C44 50 77 38 94 28 Z"
+                  fill="hsl(var(--card))" stroke="rgba(49,94,63,.18)" strokeWidth="1.5" strokeLinejoin="round" />
+              </svg>
+              {intro ? (
+                <p className="relative z-10 whitespace-nowrap font-display text-[clamp(9px,2.65vw,13px)] font-semibold tracking-tight">
                   Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                   <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
                 </p>
-              </div>
-            ) : (
-              <div className="relative inline-flex max-w-full items-center gap-2 rounded-[18px] border border-white/85 bg-card/95 px-3 py-1.5 shadow-md ring-1 ring-forest/10 backdrop-blur-xl">
-                <span aria-hidden="true" className="absolute -bottom-1.5 left-[22px] size-3 rotate-45 border-b border-r border-white/85 bg-card" />
-                <strong className="min-w-0 text-center font-display text-[clamp(10px,2.6vw,13px)] text-forest">Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span></strong>
-                <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
-                  className="min-h-9 shrink-0 rounded-full bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
-                  Overiť
-                </button>
-              </div>
-            )}
+              ) : (
+                <div className="relative z-10 flex min-w-0 items-center gap-2">
+                  <strong className="min-w-0 text-center font-display text-[clamp(9px,2.5vw,13px)] text-forest">
+                    Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span>
+                  </strong>
+                  <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
+                    className="min-h-9 shrink-0 rounded-full bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    Overiť
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -282,7 +288,7 @@ export function AriaLeadAssistant({
             <button type="button" className={itemClass} aria-label="Časté otázky" aria-expanded={panel === "faq"} onClick={() => toggle("faq")}>
               <BookOpen size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">FAQ</span>
             </button>
-            <button type="button" className={itemClass + " bg-coral/15 text-coral-dark ring-1 ring-inset ring-coral/25"} aria-label="Mám záujem o škôlku" onClick={openInterest}>
+            <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={openInterest}>
               <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span>
             </button>
             <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}>
