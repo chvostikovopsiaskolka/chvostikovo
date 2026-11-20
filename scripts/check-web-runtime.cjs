@@ -90,7 +90,8 @@ const failures = [];
 
               await aria.getByRole('button', { name: 'Časté otázky' }).click();
               await aria.locator('[data-aria-panel="faq"]').waitFor({ state: 'visible' });
-              await aria.getByRole('button', { name: 'Prijímate aj šteniatka?' }).click();
+              const puppyQuestion = aria.getByRole('button', { name: 'Prijímate aj šteniatka?' });
+              if (await puppyQuestion.getAttribute('aria-expanded') !== 'true') await puppyQuestion.click();
               await aria.getByRole('button', { name: 'Overiť vhodnosť šteniatka' }).click();
               const wizard = page.locator('[data-aria-puppy-embedded="true"]');
               await wizard.waitFor({ state: 'visible' });
