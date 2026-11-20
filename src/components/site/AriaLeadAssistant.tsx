@@ -252,7 +252,7 @@ export function AriaLeadAssistant({
               <svg aria-hidden="true" viewBox="0 0 96 60"
                 className="pointer-events-none absolute -bottom-[20px] -left-[69px] z-0 h-[56px] w-[91px] overflow-visible drop-shadow-[0_3px_3px_rgba(17,65,41,.13)]">
                 <path d="M94 5 C78 7 63 31 4 56 C44 50 77 38 94 28 Z"
-                  fill="hsl(var(--card))" stroke="rgba(49,94,63,.18)" strokeWidth="1.5" strokeLinejoin="round" />
+                  fill="var(--card)" stroke="rgba(49,94,63,.18)" strokeWidth="1.5" strokeLinejoin="round" />
               </svg>
               {intro ? (
                 <p className="relative z-10 whitespace-nowrap font-display text-[clamp(8px,2.45vw,13px)] font-semibold tracking-tight">
