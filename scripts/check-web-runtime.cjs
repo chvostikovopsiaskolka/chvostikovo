@@ -62,14 +62,17 @@ const failures = [];
           await page.waitForTimeout(300);
           if (!bellaris && url.pathname === '/test-aria/' && !restricted) {
             for (const width of [320, 390]) {
-              // Each size is a fresh navigation: a prior smooth-scroll CTA may still
-              // be animating and must not leak its scroll position into this fixture.
+              // Stop the previous smooth scroll without navigating: this fixture
+              // explicitly clears localStorage on every fresh navigation to
+              // test first-visit consent, so reload would reopen the cookie modal.
               await page.setViewportSize({ width, height: 844 });
-              await page.goto(url.href, { waitUntil: 'domcontentloaded' });
               await page.evaluate(() => {
                 document.documentElement.style.scrollBehavior = 'auto';
+                document.body.style.scrollBehavior = 'auto';
                 window.scrollTo(0, 0);
               });
+              await page.waitForTimeout(160);
+              await page.evaluate(() => window.scrollTo(0, 0));
               const aria = page.locator('[data-aria-guide]');
               await aria.waitFor({ state: 'visible' });
               await page.locator('[data-aria-guide][data-intro="true"]').waitFor({ state: 'visible' });
