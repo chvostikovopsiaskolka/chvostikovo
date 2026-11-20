@@ -104,6 +104,15 @@ const failures = [];
               await ageSlider.press('ArrowRight');
               await wizard.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
               if (!await wizard.locator('[data-aria-puppy-step="vaccines"]').count()) throw new Error('Puppy vaccinations missing');
+              for (let i = 0; i < 3; i++) await wizard.locator('fieldset').nth(i).getByText('Áno', { exact: true }).click();
+              await wizard.getByRole('button', { name: /^Pokračovať$/ }).click();
+              await wizard.locator('[data-aria-puppy-step="dog"]').waitFor({ state: 'visible' });
+              await wizard.getByPlaceholder('Ako sa volá?').fill('Testovací psík');
+              await wizard.getByPlaceholder('Plemeno alebo kríženec').fill('Kríženec');
+              await wizard.getByRole('button', { name: /Zobraziť výsledok/ }).click();
+              await wizard.locator('[data-aria-puppy-step="result"]').waitFor({ state: 'visible' });
+              await wizard.getByRole('button', { name: /Mám záujem – vyplniť kontakt/ }).click();
+              await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
               await page.keyboard.press('Escape');
 
               await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
@@ -140,6 +149,15 @@ const failures = [];
                 throw new Error('Preview webpage pricing must display equal height columns at ' + width);
               if (await page.locator('#aria-mosaic img').count() !== 8)
                 throw new Error('Preview mosaic must retain eight photos');
+              // Compare document order rather than screen rects (some sections may be offscreen).
+              const hasCorrectOrder = await page.evaluate(() => {
+                const ids = ['recenzie', 'aria-caretakers', 'aria-early-faq', 'aria-mosaic', 'lead-benefits', 'lead-pricing', 'lead-requirements', 'aria-puppy-check', 'lead-first-visit'];
+                const elements = ids.map(id => document.getElementById(id));
+                return elements.every((node, idx) => node && (idx === 0 || !!(elements[idx-1] && elements[idx-1].compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)));
+              });
+              if (!hasCorrectOrder) throw new Error('Preview section hierarchy differs from approved mobile layout');
+              if (await page.locator('section video').count()) throw new Error('Video must be omitted from preview');
+
 
               await page.evaluate(() => window.scrollTo(0, 750));
               await page.waitForTimeout(200);
