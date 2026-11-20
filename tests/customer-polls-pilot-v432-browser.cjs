@@ -24,7 +24,7 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
  const source=original.replace('c2a6a40c1905b238cdb5e3cd858a3e8d7e14f5ed2937b90f938bc9ae51a87385',mockHash);
  assert.notEqual(source,original);
  const html=[
-  '<!doctype html><html class="customer-design"><head><meta name="viewport" content="width=device-width,initial-scale=1">',
+  '<!doctype html><html class="customer-design"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
   '<style>body{font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:10px;background:#fcefee}',
   '#menuTab .customer-menu-group{display:block;min-height:55px;margin:0 0 10px;background:#fff;border-radius:16px;padding:8px}',
   '.customer-social-v223{padding:12px;background:#fff}',
@@ -49,8 +49,8 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
   '</script><script src="/pilot.js"></script></body></html>'
  ].join('');
  const server=http.createServer((req,res)=>{
-  if(req.url.startsWith('/pilot.js')){res.writeHead(200,{'Content-Type':'application/javascript'});res.end(source);return}
-  res.writeHead(200,{'Content-Type':'text/html'});res.end(html);
+  if(req.url.startsWith('/pilot.js')){res.writeHead(200,{'Content-Type':'application/javascript; charset=utf-8'});res.end(source);return}
+  res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});res.end(html);
  });
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const url='http://127.0.0.1:'+server.address().port+'/';
