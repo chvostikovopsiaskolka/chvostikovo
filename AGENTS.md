@@ -9,6 +9,17 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
+## Dočasný režim spoločného PR pre drobné úpravy — 20.–30.11.2026
+
+**Výslovne schválená dočasná výnimka z automatického okamžitého release:** platí iba do **30.11.2026 23:59 Europe/Bratislava**. Od **1.12.2026** sa bez ďalšieho zásahu prestáva uplatňovať a opäť platí bežné dokončenie zadania podľa projektových AGENTS. Nemeň kvôli tomu GitHub billing, vypnutie CI ani produkčný deploy mechanizmus.
+
+- **Zlučuj:** súvisiace, nízkorizikové UI, CSS, textové a malé funkčné úpravy **jedného produktu/repozitára** v jednej pracovnej vetve a jednom PR. Ak už existuje vhodný otvorený PR, bezpečne pokračuj v ňom. Počet je počet samostatných používateľských požiadaviek na drobnú zmenu, nie počet súborov, commitov alebo testov. Rozsah a priebežný počet udržuj v popise toho istého PR, bez nového registra.
+- **Pred hranicou:** pri 1–3 drobných zmenách ponechaj spoločný PR pripravený, ale bez merge a bez LIVE deploya; výslovne označ výsledok ako rozpracovaný. Cielené lokálne testy vykonávaj podľa dopadu. Neopakuj celý build/test ani netlač zbytočné priebežné commity na GitHub; na finálnom commite spusti všetky relevantné povinné CI, bezpečnostné regresie a potom skutočné LIVE overenie.
+- **Pri štvrtej a každej ďalšej drobnej zmene v balíku:** ak používateľ ešte neurčil termín nasadenia, opýtaj sa **raz na rozhodnutie o balíku**: „Máme viac ako 3 súvisiace zmeny v jednom PR. Chceš ich teraz finalizovať, otestovať a nasadiť LIVE, alebo zatiaľ zbierať ďalšie?“ Bez odpovede **nemerguj ani nenasadzuj LIVE**; pokračovanie v zbieraní je možné na používateľov pokyn. Vždy rešpektuj výslovné „nasad LIVE“, „finalizuj“, „iba návrh/preview“, „priprav PR“ alebo „nenasadzuj“, aj pri menšom počte.
+- **Výnimky:** urgentné opravy, kritické bugy, Auth/RLS, súkromie, DB/dáta, účtovanie, rezervácie, bezpečnostné kontroly alebo významná integračná závislosť sa nezdržiavajú len kvôli číslu 4. Dodrž platný rizikový schvaľovací proces; neobchádzaj required CI, ochrany vetiev, rollback ani izoláciu projektov.
+- **Dokumentácia:** počas otvoreného balíka eviduj priebežný stav v jeho PR. Po skutočnom release urob jeden súhrnný zápis do existujúcej tematickej stránky wiki a jedného logu. Neoznač otvorený PR za produkčnú verziu. Po 1.12. porovnaj reálny GitHub billing/spotrebu, nie odhad.
+
+
 ## Chvostíkovo PWA icon rule
 
 Before changing the PWA/home-screen icon for either the admin app or customer portal, read `system/PWA_ICON.md`.
