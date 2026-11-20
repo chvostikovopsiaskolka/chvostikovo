@@ -245,16 +245,21 @@ export function AriaLeadAssistant({
         )}
 
         {!panel && (
-          <div data-aria-message className="mb-1.5 flex min-h-9 items-center rounded-[18px] border border-white/80 bg-card/90 px-3 py-1.5 shadow-md ring-1 ring-forest/10 backdrop-blur-xl">
+          <div className="mb-2 flex w-full justify-center" data-aria-message>
             {intro ? (
-              <p className="w-full whitespace-nowrap text-center font-display text-[11px] font-bold tracking-tight text-forest min-[390px]:text-[12px] sm:text-sm">
-                Ahoj! Volám sa Aria! Čo ťa zaujíma o škôlke?
-              </p>
+              <div className="relative inline-flex min-h-10 max-w-full items-center rounded-[18px] border border-white/85 bg-card/95 px-3 py-2 shadow-md ring-1 ring-forest/10 backdrop-blur-xl">
+                <span aria-hidden="true" className="absolute -bottom-1.5 left-[16%] size-3 rotate-45 border-b border-r border-white/85 bg-card" />
+                <p className="whitespace-nowrap font-display text-[clamp(9px,2.65vw,13px)] font-semibold tracking-tight text-forest">
+                  Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria!</strong>{" "}
+                  <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
+                </p>
+              </div>
             ) : (
-              <div className="flex w-full items-center justify-between gap-2">
-                <span className="min-w-0 truncate text-[11px] font-semibold text-forest sm:text-sm">Máte šteniatko? Zistite, či spĺňa podmienky.</span>
+              <div className="relative inline-flex max-w-full items-center gap-2 rounded-[18px] border border-white/85 bg-card/95 px-3 py-1.5 shadow-md ring-1 ring-forest/10 backdrop-blur-xl">
+                <span aria-hidden="true" className="absolute -bottom-1.5 left-[16%] size-3 rotate-45 border-b border-r border-white/85 bg-card" />
+                <strong className="min-w-0 text-center font-display text-[clamp(10px,2.6vw,13px)] text-forest">Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span></strong>
                 <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
-                  className="min-h-9 shrink-0 rounded-full bg-forest px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral">
+                  className="min-h-9 shrink-0 rounded-full bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                   Overiť
                 </button>
               </div>
@@ -262,25 +267,25 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className="relative ml-[44px] rounded-[24px] border border-white/80 bg-card/85 px-1.5 py-1.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[65px] sm:px-3" data-aria-dock>
+        <div className="relative ml-[83px] rounded-[24px] border border-white/80 bg-card/85 px-1.5 py-1.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-3" data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
-            className="pointer-events-none absolute -bottom-1 -left-[46px] h-[77px] w-[77px] max-w-none object-contain drop-shadow-[0_4px_6px_rgba(0,0,0,.22)] sm:-left-[70px] sm:h-[94px] sm:w-[94px]" />
+            className="pointer-events-none absolute -bottom-1 -left-[83px] h-[78px] w-[78px] max-w-none object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,.42)] sm:-left-[104px] sm:h-[95px] sm:w-[95px]" />
           <div className="flex min-h-[57px] items-center gap-0.5">
             <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={panel === "pricing"} onClick={() => toggle("pricing")}>
-              <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[10px] font-semibold sm:text-xs">Cenník</span>
+              <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span>
             </button>
             <button type="button" className={itemClass} aria-label="Podmienky prijatia" aria-expanded={panel === "requirements"} onClick={() => toggle("requirements")}>
-              <ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[10px] font-semibold sm:text-xs">Podmienky</span>
+              <ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span>
             </button>
             <button type="button" className={itemClass} aria-label="Časté otázky" aria-expanded={panel === "faq"} onClick={() => toggle("faq")}>
-              <BookOpen size={20} strokeWidth={1.9} aria-hidden /><span className="text-[10px] font-semibold sm:text-xs">FAQ</span>
+              <BookOpen size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">FAQ</span>
             </button>
             <button type="button" className={itemClass + " text-coral-dark"} aria-label="Mám záujem o škôlku" onClick={openInterest}>
-              <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[10px] font-bold sm:text-xs">Záujem</span>
+              <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span>
             </button>
             <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}>
-              <Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[10px] font-semibold sm:text-xs">Menu</span>
+              <Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span>
             </button>
           </div>
         </div>
