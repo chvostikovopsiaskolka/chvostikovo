@@ -21,7 +21,7 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
  assert.doesNotMatch(original,/rest\/v1\/|service_role|fetch\(/);
  const mockOwner='synthetic-owner-v432';
  const mockHash=createHash('sha256').update(mockOwner).digest('hex');
- const source=original.replace('c2a6a40c1905b238cdb5e3cd858a3e8d7e14f5ed2937b90f938bc9ae51a87385',mockHash);
+ const source=original.replace('288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66',mockHash);
  assert.notEqual(source,original);
  const html=[
   '<!doctype html><html class="customer-design"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
