@@ -1,7 +1,7 @@
 /* Customer polls owner-only UI pilot v432. Presentation/demo data only: no poll API, no global totals, no push. */
 (() => {
   'use strict';
-  const OWNER_FINGERPRINT = 'c2a6a40c1905b238cdb5e3cd858a3e8d7e14f5ed2937b90f938bc9ae51a87385';
+  const OWNER_FINGERPRINT = '288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66';
   const POLL = Object.freeze({
     id:'calendar-interest-pilot',
     sk:{
