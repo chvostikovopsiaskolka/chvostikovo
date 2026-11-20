@@ -5,7 +5,7 @@ const path = require('node:path');
 // Run in CI, without submitting forms or emitting analytics traffic.
 const bellaris = process.env.WEB_SITE === 'bellaris';
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
-const urls = (bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/']).map(route => new URL(route, base));
+const urls = (bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/']).map(route => new URL(route, base));
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -44,8 +44,37 @@ const failures = [];
           // Cookie preferences are installed by a client effect, so this also verifies hydration.
           const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
           await cookieButton.waitFor({ timeout: 10000 });
+          if (!bellaris && url.pathname === '/test-aria/' && !await page.getByText(/Ahoj! Používame cookies/).count())
+            throw new Error('Preview cookie consent lost Aria speech while keeping all three choices');
           await cookieButton.click();
           await page.waitForTimeout(300);
+          if (!bellaris && url.pathname === '/test-aria/' && !restricted) {
+            for (const width of [320, 390]) {
+              await page.setViewportSize({ width, height: 844 });
+              const aria = page.locator('[data-aria-guide]');
+              await aria.waitFor({ state: 'visible' });
+              if (await aria.locator('button').filter({ hasText: 'Cenník' }).count() !== 1)
+                throw new Error('Aria bottom navigation must contain one pricing entry');
+              const bounds = await aria.locator('div.relative.overflow-visible').first().boundingBox();
+              if (!bounds || bounds.x < -2 || bounds.x + bounds.width > width + 2)
+                throw new Error('Aria navigation overflows mobile viewport ' + width);
+              await aria.getByRole('button', { name: 'Časté otázky' }).click();
+              if (!await aria.getByText('Pre koho je škôlka určená?').count())
+                throw new Error('Aria FAQ did not open');
+              await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
+              await aria.getByRole('button', { name: 'Chcem sa informovať' }).click();
+              await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
+              await page.keyboard.press('Escape');
+              await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
+              await page.waitForTimeout(350);
+              const cols = await page.locator('#lead-pricing .grid').first().evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
+              if (cols !== 2) throw new Error('Preview pricing must stay in two columns at ' + width);
+              if (await page.locator('#aria-mosaic img').count() !== 8)
+                throw new Error('Preview mosaic must show eight photos');
+              if (!await page.locator('[data-aria-guide][data-intro="false"]').count())
+                throw new Error('Aria welcome text did not collapse on scroll');
+            }
+          }
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
           // Shared Slovak Hero CTA: mobile pair, desktop single prominent info CTA.
           // Layout regression 320/375/390/1440 in Chromium and Safari WebKit.
