@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
-import { FAQ as SITE_FAQ, PRICING, REQUIREMENTS } from "@/content/site";
+import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
+import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 type Panel = "pricing" | "requirements" | "faq" | "menu" | null;
@@ -119,7 +120,7 @@ export function AriaLeadAssistant({
 
   const optionClass = "flex min-h-11 w-full items-center justify-between gap-2 rounded-2xl border border-forest/10 bg-white/75 px-3 py-2.5 text-left text-sm font-semibold text-forest transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
   const ctaClass = "flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-coral px-4 py-2.5 text-center font-display text-sm font-bold text-white shadow-sm transition hover:bg-coral-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest";
-  const itemClass = "flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 text-center text-forest transition hover:bg-white/65 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
+  const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 text-center text-forest transition hover:bg-white/65 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
 
   if (hidden) return null;
 
@@ -149,27 +150,27 @@ export function AriaLeadAssistant({
                   <article key={item.name} className="rounded-[18px] border border-forest/10 bg-white/85 px-3 py-3 shadow-sm">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <h3 className="font-display text-sm font-bold text-forest">{item.name}</h3>
-                        <p className="mt-0.5 text-xs text-forest/65">{item.highlight ? "10 vstupov" : "1 vstup"}</p>
+                        <h3 className="font-display text-sm font-bold text-forest">{item.highlight ? "Permanentka – 10 vstupov" : item.name}</h3>
+                        <p className="mt-1 text-xs text-forest/65">{item.highlight ? "Platnosť 2 mesiace" : "1 vstup"}</p>
                       </div>
-                      <p className="shrink-0 font-display text-2xl font-bold text-coral-dark">{item.price}</p>
+                      <div className="shrink-0 text-right">
+                        <p className="font-display text-2xl font-bold text-coral-dark">{item.price}</p>
+                        {item.highlight && <p className="mt-1 text-xs font-bold text-forest">Ušetríte 50 €</p>}
+                      </div>
                     </div>
-                    {item.highlight && <div className="mt-2 flex flex-wrap justify-between gap-2 border-t border-forest/10 pt-2 text-xs">
-                      <strong className="text-forest">Ušetríte 50 €</strong><span className="text-forest/70">Platnosť 2 mesiace</span>
-                    </div>}
                   </article>
                 ))}
                 <div className="rounded-[18px] border border-forest/10 bg-secondary/60 p-3">
-                  <p className="font-display text-sm font-bold text-forest">Úvodná návšteva je zadarmo.</p>
+                  <p className="text-center font-display text-sm font-bold text-forest">Úvodná návšteva je zadarmo.</p>
                   <button type="button" aria-expanded={pricingVisitOpen} onClick={() => setPricingVisitOpen((v) => !v)}
                     className="mt-2 flex min-h-11 w-full items-center justify-between rounded-2xl border border-forest/15 bg-white/80 px-3 text-left text-sm font-semibold">
                     Ako prebieha návšteva? <span className="text-coral">{pricingVisitOpen ? "−" : "+"}</span>
                   </button>
                   {pricingVisitOpen && <div data-aria-first-visit className="mt-2 space-y-2 rounded-2xl bg-white/80 p-3">
                     {FIRST_VISIT_ANSWER.split(/\n+/).filter(Boolean).map((paragraph, i) =>
-                      <p key={i} className="text-xs leading-relaxed text-forest/80">{paragraph.trim()}</p>)}
+                      <p key={i} className="text-xs leading-relaxed text-forest/80"><AriaHighlightedText text={paragraph.trim()} /></p>)}
                     <button type="button" onClick={() => jump("lead-first-visit", "pricing_visit_steps")}
-                      className="mt-2 min-h-11 text-sm font-semibold text-coral-dark underline underline-offset-2">
+                      className="mx-auto mt-3 flex min-h-11 w-fit items-center justify-center rounded-full border border-coral/30 bg-card px-4 text-center text-sm font-bold text-coral-dark shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral">
                       Pozrieť 3 kroky prvej návštevy
                     </button>
                   </div>}
@@ -180,13 +181,13 @@ export function AriaLeadAssistant({
 
             {panel === "requirements" && (
               <div className="mt-3 space-y-2" data-aria-requirements>
-                {REQUIREMENTS.map((item, index) => (
+                {ARIA_PREVIEW_REQUIREMENTS.map((item, index) => (
                   <article key={item.title} className="rounded-2xl border border-forest/10 bg-white/85 px-3 py-3">
                     <div className="flex items-start gap-2">
                       <span className="grid size-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold text-forest">{index + 1}</span>
                       <div className="min-w-0">
                         <h3 className="font-display text-sm font-bold">{item.title}</h3>
-                        <p className="mt-1 text-xs leading-relaxed text-forest/75 sm:text-sm">{item.text}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-forest/75 sm:text-sm"><AriaHighlightedText text={item.text} /></p>
                       </div>
                     </div>
                   </article>
@@ -206,7 +207,7 @@ export function AriaLeadAssistant({
                     </button>
                     {faqOpen === index && (
                       <div className="space-y-3 border-t border-forest/10 px-3 py-3">
-                        {entry.answer.split(/\n+/).map((paragraph, i) => <p key={i} className="text-xs leading-relaxed text-forest/80 sm:text-sm">{paragraph.trim()}</p>)}
+                        {entry.answer.split(/\n+/).map((paragraph, i) => <p key={i} className="text-xs leading-relaxed text-forest/80 sm:text-sm"><AriaHighlightedText text={paragraph.trim()} /></p>)}
                         {index === 1 && (
                           <button type="button" className={ctaClass} onClick={openPuppy}>
                             Overiť vhodnosť šteniatka <ArrowRight size={16} aria-hidden />
@@ -248,15 +249,15 @@ export function AriaLeadAssistant({
           <div className="mb-2 flex w-full justify-center" data-aria-message>
             {intro ? (
               <div className="relative inline-flex min-h-10 max-w-full items-center rounded-[18px] border border-white/85 bg-card/95 px-3 py-2 shadow-md ring-1 ring-forest/10 backdrop-blur-xl">
-                <span aria-hidden="true" className="absolute -bottom-1.5 left-[16%] size-3 rotate-45 border-b border-r border-white/85 bg-card" />
+                <span aria-hidden="true" className="absolute -bottom-1.5 left-[22px] size-3 rotate-45 border-b border-r border-white/85 bg-card" />
                 <p className="whitespace-nowrap font-display text-[clamp(9px,2.65vw,13px)] font-semibold tracking-tight text-forest">
-                  Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria!</strong>{" "}
+                  Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                   <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
                 </p>
               </div>
             ) : (
               <div className="relative inline-flex max-w-full items-center gap-2 rounded-[18px] border border-white/85 bg-card/95 px-3 py-1.5 shadow-md ring-1 ring-forest/10 backdrop-blur-xl">
-                <span aria-hidden="true" className="absolute -bottom-1.5 left-[16%] size-3 rotate-45 border-b border-r border-white/85 bg-card" />
+                <span aria-hidden="true" className="absolute -bottom-1.5 left-[22px] size-3 rotate-45 border-b border-r border-white/85 bg-card" />
                 <strong className="min-w-0 text-center font-display text-[clamp(10px,2.6vw,13px)] text-forest">Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span></strong>
                 <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
                   className="min-h-9 shrink-0 rounded-full bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
@@ -267,11 +268,11 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className="relative ml-[83px] rounded-[24px] border border-white/80 bg-card/85 px-1.5 py-1.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-3" data-aria-dock>
+        <div className="relative ml-[83px] rounded-[24px] border border-white/80 bg-card/85 px-1 py-0.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-2" data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
             className="pointer-events-none absolute -bottom-1 -left-[83px] h-[78px] w-[78px] max-w-none object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,.42)] sm:-left-[104px] sm:h-[95px] sm:w-[95px]" />
-          <div className="flex min-h-[57px] items-center gap-0.5">
+          <div className="flex min-h-[48px] items-center gap-0.5">
             <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={panel === "pricing"} onClick={() => toggle("pricing")}>
               <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span>
             </button>
@@ -281,7 +282,7 @@ export function AriaLeadAssistant({
             <button type="button" className={itemClass} aria-label="Časté otázky" aria-expanded={panel === "faq"} onClick={() => toggle("faq")}>
               <BookOpen size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">FAQ</span>
             </button>
-            <button type="button" className={itemClass + " text-coral-dark"} aria-label="Mám záujem o škôlku" onClick={openInterest}>
+            <button type="button" className={itemClass + " bg-coral/15 text-coral-dark ring-1 ring-inset ring-coral/25"} aria-label="Mám záujem o škôlku" onClick={openInterest}>
               <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span>
             </button>
             <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}>

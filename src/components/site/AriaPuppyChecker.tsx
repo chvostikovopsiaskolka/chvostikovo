@@ -50,7 +50,7 @@ export function AriaPuppyChecker({
           <p className="font-display text-sm font-bold uppercase tracking-wide text-coral-dark">Máte šteniatko?</p>
           <h2 className="section-title mt-1 text-2xl sm:text-3xl">Spĺňa základné podmienky?</h2>
           <p className="mt-2 text-sm leading-relaxed text-forest/70">
-            Rýchle orientačné overenie bez AI. Definitívne prijatie potvrdíme až po kontrole očkovaní a úvodnej návšteve.
+            Rýchle orientačné overenie. Definitívne prijatie potvrdíme až po kontrole očkovania a úvodnej návšteve.
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export function AriaPuppyChecker({
                 Koľko mesiacov má vaše šteniatko?
               </label>
               <output htmlFor={embedded ? "aria-modal-age" : "aria-inline-age"}
-                className={"mx-auto block w-fit rounded-2xl px-7 py-2 font-display text-4xl font-bold " + (mayContinue ? "bg-secondary text-forest" : "bg-red-50 text-red-700")}>
+                className={"mx-auto block w-fit rounded-2xl px-7 py-2 font-display text-2xl font-bold sm:text-3xl " + (mayContinue ? "bg-secondary text-forest" : "bg-red-50 text-red-700")}>
                 {age} {age === 1 ? "mesiac" : age < 5 ? "mesiace" : "mesiacov"}
               </output>
               <input id={embedded ? "aria-modal-age" : "aria-inline-age"} type="range" min="1" max="12" step="1" value={age}

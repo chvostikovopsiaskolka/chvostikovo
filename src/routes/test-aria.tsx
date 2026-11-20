@@ -14,6 +14,7 @@ import { Reviews } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { AriaMosaicGallery } from "@/components/site/AriaMosaicGallery";
 import { AriaPuppyChecker } from "@/components/site/AriaPuppyChecker";
+import { AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
@@ -136,20 +137,20 @@ function AriaPreviewPage() {
       <AriaLeadAssistant onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
-        <section className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
+        <section className="hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-4 sm:pt-6 lg:pt-24">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto grid min-h-[320px] max-w-4xl items-start gap-6 px-4 pb-8 pt-0 sm:min-h-[415px] sm:pt-4 sm:pb-8 lg:min-h-[470px] lg:gap-8 lg:py-10">
+          <div className="relative z-10 mx-auto w-full max-w-4xl px-4 pb-2 pt-0 sm:pb-3 sm:pt-3 lg:pt-6">
             <div className="w-full min-w-0 text-center">
               <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
               </p>
-              <h1 className="mt-3 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
+              <h1 className="mt-6 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
 
-              <div data-hero-benefits className="mx-auto mt-4 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2 ">
+              <div data-hero-benefits className="mx-auto mt-6 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2 ">
                 {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                   <span
                     key={item}
@@ -160,13 +161,14 @@ function AriaPreviewPage() {
                   </span>
                 ))}
               </div>
-              <p className="mx-auto mt-5 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg ">
+              <p className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg ">
                 Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
               </p>
             </div>
 
           </div>
           <Reviews variant="hero" />
+          <div aria-hidden="true" className="min-h-4 flex-1" />
         </section>
 
         <section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-card py-10 sm:py-14">
@@ -181,7 +183,7 @@ function AriaPreviewPage() {
             <div>
               <h2 className="section-title text-3xl sm:text-4xl">Kto sa bude starať o vášho psíka?</h2>
               <p className="mt-4 text-sm leading-relaxed text-forest/75 sm:text-base">
-                Aj my sme majitelia veľkých psíkov, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov spoznávame, rešpektujeme ich potreby a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
+                Aj my sme <strong className="font-bold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov <strong className="font-bold text-forest">spoznávame, rešpektujeme ich potreby</strong> a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
               </p>
             </div>
           </div>
@@ -197,7 +199,7 @@ function AriaPreviewPage() {
                   <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-left font-display text-sm font-bold text-forest sm:text-base">
                     {item.q}<span className="text-lg text-coral group-open:rotate-45">+</span>
                   </summary>
-                  <div className="mt-2 border-t border-forest/10 pt-3 text-sm leading-relaxed text-forest/80">{item.a}</div>
+                  <div className="mt-2 border-t border-forest/10 pt-3 text-sm leading-relaxed text-forest/80"><AriaHighlightedText text={item.a} /></div>
                 </details>
               ))}
             </div>
@@ -275,15 +277,14 @@ function AriaPreviewPage() {
             </p>
             <div className="mx-auto mt-5 grid max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4">
               {PRICING.map((item) => (
-                <article key={item.name} className={"flex h-full min-h-[158px] flex-col items-center rounded-3xl p-3 text-center shadow-card sm:min-h-[195px] sm:p-5 " + (item.highlight ? "bg-forest text-cream" : "bg-card text-forest")}>
-                  <h3 className="min-h-9 font-display text-[13px] font-bold sm:text-xl">{item.name}</h3>
+                <article key={item.name} className={"flex h-full min-h-[126px] flex-col items-center rounded-3xl px-3 py-2 text-center shadow-card sm:min-h-[152px] sm:p-4 " + (item.highlight ? "bg-forest text-cream" : "bg-card text-forest")}>
+                  <h3 className="min-h-[26px] font-display text-[13px] font-bold sm:text-xl">{item.name}</h3>
                   <p className={"mt-1 text-[11px] font-semibold " + (item.highlight ? "text-cream/80" : "text-forest/65")}>{item.highlight ? "10 vstupov" : "1 vstup"}</p>
-                  <p className={"mt-2 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
-                  <div className="mt-auto pt-3 text-[11px] leading-snug sm:text-sm">
+                  <p className={"mt-1 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
+                  <div className="mt-auto pt-2 text-[11px] leading-snug sm:text-sm">
                     {item.highlight ? (
                       <>
                         <strong className="block">Ušetríte 50 €</strong>
-                        <span className="mt-1 block opacity-80">Platnosť 2 mesiace</span>
                       </>
                     ) : <span className="opacity-75">Celodenný pobyt</span>}
                   </div>
@@ -294,18 +295,18 @@ function AriaPreviewPage() {
               <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
-            <div className="mx-auto mt-6 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl border border-coral/50 bg-coral/10 px-5 py-3 text-center shadow-card sm:px-7">
+            <div className="mx-auto mt-6 flex w-full max-w-xl items-center justify-center gap-2 rounded-2xl border border-coral/50 bg-coral/10 px-5 py-3 text-center shadow-card sm:px-7">
               <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
               <p className="font-display text-base font-bold text-forest sm:text-lg">
                 Úvodná návšteva zadarmo
               </p>
             </div>
-            <details className="group mx-auto mt-3 max-w-xl rounded-2xl border border-forest/10 bg-card px-4 py-3 text-left">
+            <details className="group mx-auto mt-3 w-full max-w-xl rounded-2xl border border-forest/10 bg-card px-4 py-3 text-left">
               <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-sm font-semibold text-forest">
                 Ako prebieha úvodná návšteva? <span className="text-coral group-open:rotate-45">+</span>
               </summary>
               <div className="space-y-2 border-t border-forest/10 pt-3 text-xs leading-relaxed text-forest/80">
-                {(FAQ.find(({ q }) => q === "Ako prebieha prvá návšteva psíka v škôlke?")?.a || "").split(/\n+/).filter(Boolean).map((text, i) => <p key={i}>{text.trim()}</p>)}
+                {(FAQ.find(({ q }) => q === "Ako prebieha prvá návšteva psíka v škôlke?")?.a || "").split(/\n+/).filter(Boolean).map((text, i) => <p key={i}><AriaHighlightedText text={text.trim()} /></p>)}
                 <a href="#lead-first-visit" className="inline-flex min-h-11 items-center text-sm font-bold text-coral-dark underline">Pozrieť 3 kroky prvej návštevy</a>
               </div>
             </details>
@@ -314,7 +315,7 @@ function AriaPreviewPage() {
           </div>
         </section>
 
-        <Requirements id="lead-requirements" />
+        <Requirements id="lead-requirements" ariaPreview />
 
         <section id="lead-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
           <SectionAmbientPaws />
@@ -349,7 +350,7 @@ function AriaPreviewPage() {
                         .split(/\n+/)
                         .map((paragraph) => paragraph.trim())
                         .filter(Boolean)
-                        .map((paragraph, index) => <p key={index}>{paragraph}</p>)
+                        .map((paragraph, index) => <p key={index}><AriaHighlightedText text={paragraph} /></p>)
                     )}
                   </div>
                 </details>

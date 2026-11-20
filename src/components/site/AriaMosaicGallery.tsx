@@ -44,7 +44,7 @@ export function AriaMosaicGallery() {
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-4xl px-4">
         <p className="text-center font-display text-sm font-bold uppercase tracking-widest text-coral-dark">Nahliadnite k nám</p>
-        <h2 id="aria-mosaic-heading" className="section-title mt-2 text-center text-3xl sm:text-4xl">Takto vyzerá deň v Chvostíkove</h2>
+        <h2 id="aria-mosaic-heading" className="section-title mt-2 whitespace-nowrap text-center text-[clamp(18px,4.8vw,38px)]">Takto vyzerá Chvostíkovo</h2>
         <div className="mt-6 grid grid-cols-2 gap-2.5 sm:gap-4">
           <div className="grid gap-2.5 sm:gap-4">{left.map((photo, i) => tile(photo, i * 2, i))}</div>
           <div className="grid gap-2.5 pt-5 sm:gap-4 sm:pt-9">{right.map((photo, i) => tile(photo, i * 2 + 1, i))}</div>
