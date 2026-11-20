@@ -44,35 +44,87 @@ const failures = [];
           // Cookie preferences are installed by a client effect, so this also verifies hydration.
           const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
           await cookieButton.waitFor({ timeout: 10000 });
-          if (!bellaris && url.pathname === '/test-aria/' && !await page.getByText(/Ahoj! Používame cookies/).count())
-            throw new Error('Preview cookie consent lost Aria speech while keeping all three choices');
+          if (!bellaris && url.pathname === '/test-aria/') {
+            if (!await page.getByText(/Ahoj! Používame cookies/).count())
+              throw new Error('Preview cookie greeting missing');
+            const bubble = page.locator('[data-aria-cookie-bubble="true"]');
+            await bubble.waitFor({ state: 'visible' });
+            if (!await page.getByRole('button', { name: 'Prijať všetky' }).isVisible() ||
+                !await page.getByRole('button', { name: 'Prispôsobiť' }).isVisible() ||
+                !await cookieButton.isVisible())
+              throw new Error('Aria cookie bubble lost equivalent accept, customize or reject options');
+            const head = bubble.locator('xpath=..').locator('img[alt*="Aria"]');
+            const geometry = await Promise.all([bubble.boundingBox(), head.boundingBox()]);
+            if (!geometry[0] || !geometry[1] || geometry[1].x >= geometry[0].x)
+              throw new Error('Cookie consent should be a speech bubble beside Aria head');
+          }
           await cookieButton.click();
           await page.waitForTimeout(300);
           if (!bellaris && url.pathname === '/test-aria/' && !restricted) {
             for (const width of [320, 390]) {
               await page.setViewportSize({ width, height: 844 });
+              await page.evaluate(() => window.scrollTo(0, 0));
+              await page.waitForTimeout(150);
               const aria = page.locator('[data-aria-guide]');
               await aria.waitFor({ state: 'visible' });
-              if (await aria.locator('button').filter({ hasText: 'Cenník' }).count() !== 1)
-                throw new Error('Aria bottom navigation must contain one pricing entry');
-              const bounds = await aria.locator('div.relative.overflow-visible').first().boundingBox();
-              if (!bounds || bounds.x < -2 || bounds.x + bounds.width > width + 2)
-                throw new Error('Aria navigation overflows mobile viewport ' + width);
+              if (!await aria.locator('[data-aria-message]').getByText('Ahoj! Volám sa Aria! Čo ťa zaujíma o škôlke?').count())
+                throw new Error('Aria single-line greeting missing at ' + width);
+              const welcome = await aria.locator('[data-aria-message] p').evaluate(el => ({
+                nowrap: getComputedStyle(el).whiteSpace === 'nowrap',
+                overflows: el.scrollWidth > el.clientWidth + 2,
+              }));
+              if (!welcome.nowrap || welcome.overflows)
+                throw new Error('Aria greeting must stay in one line without clipping at ' + width);
+              const dock = await aria.locator('[data-aria-dock]').boundingBox();
+              if (!dock || dock.x < -1 || dock.x + dock.width > width + 2)
+                throw new Error('Aria floating dock overflows mobile viewport ' + width);
+
               await aria.getByRole('button', { name: 'Časté otázky' }).click();
-              if (!await aria.getByText('Pre koho je škôlka určená?').count())
-                throw new Error('Aria FAQ did not open');
-              await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
-              await aria.getByRole('button', { name: 'Chcem sa informovať' }).click();
+              await aria.locator('[data-aria-panel="faq"]').waitFor({ state: 'visible' });
+              await aria.getByRole('button', { name: 'Prijímate aj šteniatka?' }).click();
+              await aria.getByRole('button', { name: 'Overiť vhodnosť šteniatka' }).click();
+              await page.locator('[data-aria-puppy-embedded="true"]').waitFor({ state: 'visible' });
+              await page.keyboard.press('Escape');
+
+              await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
+              const pricingPanel = aria.locator('[data-aria-panel="pricing"]');
+              await pricingPanel.waitFor({ state: 'visible' });
+              const cards = pricingPanel.locator('[data-aria-pricing] article');
+              if (await cards.count() !== 2) throw new Error('Two Aria pricing cards required');
+              const cardBoxes = await Promise.all([cards.nth(0).boundingBox(), cards.nth(1).boundingBox()]);
+              if (!cardBoxes[0] || !cardBoxes[1] || Math.abs(cardBoxes[0].height - cardBoxes[1].height) > 2)
+                throw new Error('Aria pricing cards must have equal heights at ' + width);
+              await pricingPanel.getByRole('button', { name: 'Ako prebieha úvodná návšteva?' }).click();
+              await aria.getByRole('button', { name: 'Ako prebieha prvá návšteva?' }).waitFor({ state: 'visible' });
+              await aria.getByRole('button', { name: 'Podmienky prijatia' }).click();
+              if (await aria.locator('[data-aria-requirements] article').count() !== 4)
+                throw new Error('Aria must list the four conditions');
+              await aria.locator('[data-aria-requirements]').getByRole('button', { name: 'Chcem sa informovať o škôlke' }).click();
               await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
               await page.keyboard.press('Escape');
-              await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
-              await page.waitForTimeout(350);
+
+              await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
+              const menu = aria.locator('[data-aria-menu]');
+              if (!await menu.getByText('3 dôvody, prečo si vybrať nás').count() ||
+                  !await menu.getByText('Zistite, či vaše šteniatko spĺňa podmienky').count() ||
+                  await menu.getByText('Nastavenia cookies').count())
+                throw new Error('Aria menu descriptions or cookie removal missing');
+              await aria.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
+
               const cols = await page.locator('#lead-pricing .grid').first().evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
-              if (cols !== 2) throw new Error('Preview pricing must stay in two columns at ' + width);
+              const pageCards = await Promise.all([page.locator('#lead-pricing article').nth(0).boundingBox(), page.locator('#lead-pricing article').nth(1).boundingBox()]);
+              if (cols !== 2 || !pageCards[0] || !pageCards[1] || Math.abs(pageCards[0].height - pageCards[1].height) > 2)
+                throw new Error('Preview webpage pricing must display equal height columns at ' + width);
               if (await page.locator('#aria-mosaic img').count() !== 8)
-                throw new Error('Preview mosaic must show eight photos');
+                throw new Error('Preview mosaic must retain eight photos');
+
+              await page.evaluate(() => window.scrollTo(0, 750));
+              await page.waitForTimeout(200);
               if (!await page.locator('[data-aria-guide][data-intro="false"]').count())
-                throw new Error('Aria welcome text did not collapse on scroll');
+                throw new Error('Aria intro must yield to puppy prompt on scroll');
+              await aria.getByRole('button', { name: 'Overiť', exact: true }).click();
+              await page.waitForTimeout(120);
+              if (!await page.locator('#aria-puppy-check').count()) throw new Error('Scroll CTA must link to the puppy checker');
             }
           }
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
