@@ -13,16 +13,14 @@ import { ContextFaq, FaqAnswer } from "./ContextFaq";
 
 const reqIcons = [Syringe, PawPrint, Droplets, HeartPulse];
 
-export function Requirements({ id = "podmienky", showContextFaq = false, ariaPreview = false }: { id?: string; showContextFaq?: boolean; ariaPreview?: boolean } = {}) {
+export function Requirements({ id = "podmienky", showContextFaq = false, ariaPreview = false, hideEyebrow = false }: { id?: string; showContextFaq?: boolean; ariaPreview?: boolean; hideEyebrow?: boolean } = {}) {
   return (
-    <section id={id} className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
+    <section id={id} className={"relative scroll-mt-24 overflow-hidden " + (ariaPreview ? "py-10 sm:py-12" : "py-16 sm:py-20")}>
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
-          <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
-            Podmienky prijatia
-          </span>
-          <h2 className="section-title mt-2 text-3xl sm:text-4xl">Čo musí psík spĺňať</h2>
+          {!hideEyebrow && <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Podmienky prijatia</span>}
+          <h2 className={"section-title text-3xl sm:text-4xl " + (hideEyebrow ? "" : "mt-2")}>Čo musí psík spĺňať</h2>
           <p className="mt-3 text-sm text-forest/65 sm:hidden">Potiahnite do strany a pozrite si všetky podmienky.</p>
         </div>
 

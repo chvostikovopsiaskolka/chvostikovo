@@ -11,6 +11,13 @@ export const ARIA_PREVIEW_REQUIREMENTS = REQUIREMENTS.map((item) => ({
 }));
 
 const IMPORTANT = [
+  "Nie každý psík si zvykne rovnako rýchlo.",
+  "môžeme odporučiť ešte 2–3 kratšie návštevy",
+  "Veľmi dôležité je, aby nám majiteľ o svojom psíkovi povedal pravdivo všetko – nielen to dobré.",
+  "Čím lepšie psíka poznáme, tým lepšie vieme jeho prvé návštevy prispôsobiť.",
+  "besnote",
+  "infekčným ochoreniam",
+  "kotercovému kašľu",
   "Pred nástupom do škôlky",
   "každý nový psík",
   "vstupnú návštevu",

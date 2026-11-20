@@ -59,6 +59,13 @@ const failures = [];
               throw new Error('Cookie portrait must gently overlap the card, not connect via a triangle');
             if (await bubble.locator('xpath=..').locator('svg[viewBox="0 0 56 32"]').count())
               throw new Error('Rejected cookie triangle resurfaced');
+            const cookieHeader = await bubble.locator('#cookie-consent-title').evaluate(el => ({
+              wraps: el.getBoundingClientRect().height > 62,
+              overflows: el.scrollWidth > el.clientWidth + 2,
+              nowrap: getComputedStyle(el).whiteSpace === 'nowrap',
+            }));
+            if (cookieHeader.wraps || cookieHeader.overflows || !cookieHeader.nowrap)
+              throw new Error('Aria cookie title must fit in one row next to portrait');
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
@@ -86,6 +93,22 @@ const failures = [];
               }));
               if (!welcome.nowrap || welcome.overflows)
                 throw new Error('Aria greeting must stay in one line without clipping at ' + width);
+              const comicBubble = aria.locator('[data-aria-message] > div');
+              const portrait = aria.locator('[data-aria-dock] img[alt^="Aria"]');
+              const tail = comicBubble.locator('svg[viewBox="0 0 96 60"]');
+              const [speechBox, headBox, tailBox] = await Promise.all([
+                comicBubble.boundingBox(), portrait.boundingBox(), tail.boundingBox(),
+              ]);
+              if (!speechBox || !headBox || !tailBox ||
+                  tailBox.x >= speechBox.x ||
+                  tailBox.x > headBox.x + headBox.width ||
+                  tailBox.x + tailBox.width < headBox.x)
+                throw new Error('Aria cartoon speech tail must emerge toward her head at ' + width);
+              if (!await tail.locator('path[fill="var(--card)"]').count())
+                throw new Error('Aria speech tail must match the existing OKLCH card color');
+              const interestButton = aria.getByRole('button', { name: 'Mám záujem o škôlku' });
+              if ((await interestButton.getAttribute('class') || '').includes('bg-coral/15'))
+                throw new Error('Rejected special interest button highlight resurfaced');
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
               if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
                 throw new Error('Aria floating dock overflows mobile viewport ' + width);
@@ -166,9 +189,37 @@ const failures = [];
                 return Math.abs(el.getBoundingClientRect().width - prev.getBoundingClientRect().width) <= 2;
               });
               if (!firstVisitWidthMatches) throw new Error('First visit and accordion must have matching width');
+              if (await page.locator('#lead-pricing article').first().getByText('1 vstup').count())
+                throw new Error('Page one-off card must omit redundant 1 vstup');
+              const visitGroup = page.locator('[data-first-visit-group]');
+              if (await visitGroup.count() !== 1 || !await visitGroup.locator('details summary').getByText('Ako prebieha úvodná návšteva?').count())
+                throw new Error('First-visit intro and accordion must share one orange group');
+              if (await page.locator('#lead-requirements span').getByText('Podmienky prijatia', { exact: true }).count())
+                throw new Error('Redundant preview requirements eyebrow resurfaced');
+              if (!await page.locator('#lead-requirements strong').getByText('besnote', { exact: true }).count() ||
+                  !await page.locator('#lead-requirements strong').getByText('infekčným ochoreniam', { exact: true }).count() ||
+                  !await page.locator('#lead-requirements strong').getByText('kotercovému kašľu', { exact: true }).count())
+                throw new Error('Preview vaccination keywords must be emphasized');
+              const faqDetails = visitGroup.locator('details');
+              await faqDetails.locator('summary').click();
+              if (await faqDetails.locator('strong').count() < 4)
+                throw new Error('Key first-visit explanation sentences must be highlighted');
               if (await page.locator('#aria-mosaic img').count() !== 8)
                 throw new Error('Preview mosaic must retain eight photos');
               // Compare document order rather than screen rects (some sections may be offscreen).
+              const hasHeroFormAndCaretakerOrder = await page.evaluate(() => {
+                const reviews = document.getElementById('recenzie');
+                const form = document.getElementById('aria-hero-form');
+                const team = document.getElementById('aria-caretakers');
+                if (!reviews || !form || !team || !reviews.parentElement || reviews.parentElement !== form.parentElement) return false;
+                const follows = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+                const heading = team.querySelector('h2');
+                const photo = team.querySelector('img');
+                const copy = team.querySelector('p');
+                return follows(reviews, form) && follows(form, team) &&
+                  !!heading && !!photo && !!copy && follows(heading, photo) && follows(photo, copy);
+              });
+              if (!hasHeroFormAndCaretakerOrder) throw new Error('Hero form and caretaker headline/photo/text order changed');
               const hasCorrectOrder = await page.evaluate(() => {
                 const ids = ['recenzie', 'aria-caretakers', 'aria-early-faq', 'aria-mosaic', 'lead-benefits', 'lead-pricing', 'lead-requirements', 'aria-puppy-check', 'lead-first-visit'];
                 const elements = ids.map(id => document.getElementById(id));
