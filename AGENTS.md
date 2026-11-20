@@ -9,6 +9,14 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
+## Modern Web Guidance — project Codex entry (20.11.2026)
+
+**Active repository skill:** `.agents/skills/modern-web-guidance/SKILL.md` (GoogleChrome/modern-web-guidance upstream mirrored with provenance and private-work policy). For **HTML, CSS, responsive UI, animations, forms, accessible interaction, images/performance and browser-side JS** use the skill before designing the technical implementation: search one precise web-platform use case, retrieve the actually matching guide, check Baseline/Safari/WebKit fallbacks, then reuse existing components and relevant browser regression. For a **broad retrospective codebase audit** use the skill's `legacy-scan . --json`, validate every reported finding in source, and remember the scanner covers only a subset of guidance.
+
+**Two complementary layers, not a visual template:** Agency Agents / existing Bellaris UI quality skill and approved project design decide **what** to build, Modern Web Guidance helps **how** to build with modern browser features. Do not invent a fashionable layout or override approved fonts, photos, colors, text or UI contracts. For trivial copy-only tasks / backend / CI / secrets / SQL, do not trigger unnecessary UI research.
+
+**Evidence and boundaries:** Chvostíkovo web only: respect marketing consent, SK/EN, lead forms, tracking, reduced-motion, responsive hero, iOS/Android and existing form/Pages tests. Do not touch customer PWA, admin, Supabase or Android as a consequence of this guidance-only integration. Only run `npx -y modern-web-guidance@latest` after package/network approval where required; set `DISABLE_TELEMETRY=1` for private work; never send project/customer details as a search query. If the CLI is unavailable, mark guidance **NOT RUN** and do not fake retrieved IDs or a completed scan. Do not edit dependencies, browser targets, LIVE URLs or dangerous auth/DB behavior just to satisfy a hint. Always report relevant retrieved IDs, which component/test changed and which mobile/desktop checks remain unverified. This configuration does **not** itself prove local Codex discovery or installation of the npm CLI.
+
 ## Dočasný režim spoločného PR pre drobné úpravy — 20.–30.11.2026
 
 **Výslovne schválená dočasná výnimka z automatického okamžitého release:** platí iba do **30.11.2026 23:59 Europe/Bratislava**. Od **1.12.2026** sa bez ďalšieho zásahu prestáva uplatňovať a opäť platí bežné dokončenie zadania podľa projektových AGENTS. Nemeň kvôli tomu GitHub billing, vypnutie CI ani produkčný deploy mechanizmus.
