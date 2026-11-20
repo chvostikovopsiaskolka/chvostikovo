@@ -121,6 +121,15 @@ function AriaPreviewPage() {
     setLeadModalOpen(true);
   }
 
+  function openPuppyContact() {
+    const source = "aria_puppy_check_eligible";
+    trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
+    setAriaPreset(LEAD_STEP_INTERESTS[0].value);
+    setLeadModalSource(source);
+    setLeadModalOpen(true);
+  }
+
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
       <Header landingMinimal hideMobileDock landingTrackingSource="lead_landing_header_phone" />
@@ -349,7 +358,7 @@ function AriaPreviewPage() {
           </div>
         </section>
 
-        <AriaPuppyChecker onInterest={() => openAriaForm(false)} onInfo={() => openAriaForm(true)} />
+        <AriaPuppyChecker onInterest={openPuppyContact} onInfo={() => openAriaForm(true)} />
 
         <section id="lead-first-visit" className="relative scroll-mt-24 overflow-hidden bg-forest py-10 text-cream sm:py-14">
           <SectionAmbientPaws tone="dark" />
@@ -403,7 +412,7 @@ function AriaPreviewPage() {
       <Dialog open={puppyModalOpen} onOpenChange={setPuppyModalOpen}>
         <DialogContent className="max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6" aria-describedby={undefined}>
           <DialogTitle className="font-display text-lg font-bold text-forest">Kontrola vhodnosti šteniatka</DialogTitle>
-          <AriaPuppyChecker embedded onInterest={() => { setPuppyModalOpen(false); openAriaForm(false); }} onInfo={() => { setPuppyModalOpen(false); openAriaForm(true); }} />
+          <AriaPuppyChecker embedded onInterest={() => { setPuppyModalOpen(false); openPuppyContact(); }} onInfo={() => { setPuppyModalOpen(false); openAriaForm(true); }} />
         </DialogContent>
       </Dialog>
 
