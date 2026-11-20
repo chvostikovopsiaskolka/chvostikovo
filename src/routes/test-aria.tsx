@@ -153,6 +153,7 @@ function AriaPreviewPage() {
                   </span>
                 ))}
               </div>
+            </div>
 
             <div id="lead-form-desktop" className="hidden min-w-0 lg:block">
               <SchoolmatesFormCrown compact />
