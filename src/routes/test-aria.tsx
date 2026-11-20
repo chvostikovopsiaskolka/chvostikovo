@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  ArrowDown,
   Car,
   CheckCircle2,
   PawPrint,
@@ -10,9 +9,10 @@ import {
 import { LeadStepForm, LEAD_STEP_INTERESTS } from "@/components/site/LeadStepForm";
 import { AriaLeadAssistant } from "@/components/site/AriaLeadAssistant";
 import { FormDialog } from "@/components/site/FormDialog";
-import { InfoTicker } from "@/components/site/InfoTicker";
 import { Reviews, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
+import { AriaMosaicGallery } from "@/components/site/AriaMosaicGallery";
+import { AriaPuppyChecker } from "@/components/site/AriaPuppyChecker";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
@@ -42,7 +42,10 @@ const LANDING_FAQ_QUESTIONS = new Set([
   "Aký je cenník služieb?",
 ]);
 
-const LANDING_FAQ = FAQ.filter((item) => LANDING_FAQ_QUESTIONS.has(item.q));
+const LANDING_FAQ = [
+  { q: "Pre koho je škôlka určená?", a: "Škôlka je zameraná najmä na stredné a veľké psy, spravidla nad 20 kg. Prijímame aj šteniatka po splnení povinných očkovaní proti besnote, infekčným ochoreniam DHPPi+L a kotercovému kašľu. Rozhoduje aj zdravotný stav, povaha, správanie v kolektíve a bezplatná úvodná návšteva. Samotný vek či váha automaticky nezaručujú prijatie." },
+  ...FAQ.filter((item) => LANDING_FAQ_QUESTIONS.has(item.q)),
+];
 
 const BENEFITS = [
   {
@@ -94,26 +97,6 @@ export const Route = createFileRoute("/test-aria")({
   }),
   component: AriaPreviewPage,
 });
-
-function scrollToLeadForm(source: string) {
-  trackMarketingInteraction("inquiry_cta", source);
-  void trackCookielessInteraction("inquiry_cta", source);
-  const target = document.getElementById(window.innerWidth >= 1024 ? "lead-form-desktop" : "lead-form");
-  if (!target) return;
-  // Keep the end of the review carousel visible above the first mobile inquiry.
-  const offset = window.innerWidth >= 1024 ? 12 : Math.min(300, Math.max(140, window.innerHeight * 0.34));
-  window.scrollTo({ top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset), behavior: "smooth" });
-}
-function scrollToBenefits(source: string) {
-  trackMarketingInteraction("explore_daycare", source);
-  void trackCookielessInteraction("explore_daycare", source);
-
-  const target = document.getElementById("lead-benefits");
-  if (!target) return;
-
-  const top = window.scrollY + target.getBoundingClientRect().top;
-  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-}
 
 function AriaPreviewPage() {
   const [leadModalOpen, setLeadModalOpen] = useState(false);
@@ -170,30 +153,8 @@ function AriaPreviewPage() {
                   </span>
                 ))}
               </div>
-
-              <div className="hero-cta-pair hero-cta-pair-mobile mx-auto mt-5 sm:mt-6 lg:hidden">
-                <button
-                  type="button"
-                  onClick={() => scrollToLeadForm("lead_landing_hero_interest")}
-                  className="hero-cta-primary"
-                >
-                  Mám záujem
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollToBenefits("lead_landing_hero_more")}
-                  className="hero-cta-secondary"
-                >
-                  <span>Viac o škôlke</span>
-                  <ArrowDown className="hero-cta-icon" aria-hidden="true" />
-                </button>
-              </div>
-              <button type="button" onClick={() => scrollToBenefits("lead_landing_hero_more_desktop")}
-                className="hero-cta-primary hero-cta-desktop-only mt-5 w-full max-w-[440px] gap-2">
-                Viac o škôlke
-                <ArrowDown className="size-4" aria-hidden="true" />
-              </button>
             </div>
+
             <div id="lead-form-desktop" className="hidden min-w-0 lg:block">
               <SchoolmatesFormCrown compact />
               <div className="rounded-3xl border border-coral/15 bg-secondary/55 px-5 pb-6 pt-8 shadow-soft">
@@ -202,21 +163,10 @@ function AriaPreviewPage() {
               </div>
             </div>
           </div>
+          <Reviews />
         </section>
 
-        <InfoTicker className="relative z-10 -mt-2 sm:-mt-3" />
-
-        <Reviews />
-
-        <section id="lead-form" className="bg-card px-4 pb-8 pt-8 sm:pb-12 lg:hidden">
-          <div className="mx-auto max-w-xl">
-            <SchoolmatesFormCrown />
-            <div className="rounded-3xl bg-secondary/55 px-4 pb-6 pt-12 shadow-card ring-1 ring-forest/8 sm:px-6 sm:pt-14">
-              <h2 className="mb-5 text-center font-display text-xl font-bold text-forest sm:text-2xl">Čo hľadáte pre svojho psíka?</h2>
-              <LeadStepForm questionInHeading trackingSource="lead_landing_hero_mobile_inline" />
-            </div>
-          </div>
-        </section>
+        <AriaMosaicGallery />
 
         <section id="lead-benefits" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
@@ -259,13 +209,6 @@ function AriaPreviewPage() {
               </EditorialBenefits>
             </div>
 
-            <div className="mx-auto mt-8 max-w-xl">
-              <SchoolmatesFormCrown />
-              <div className="rounded-3xl bg-secondary/55 px-4 pb-6 pt-12 text-left shadow-card ring-1 ring-forest/10 sm:px-6 sm:pt-14">
-                <h3 className="mb-5 text-center font-display text-2xl font-bold text-forest">Čo hľadáte pre svojho psíka?</h3>
-                <LeadStepForm questionInHeading trackingSource="lead_landing_benefits_inline" />
-              </div>
-            </div>
           </div>
         </section>
 
@@ -276,14 +219,14 @@ function AriaPreviewPage() {
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-forest/75 sm:text-base">
               Pohyb, hry, oddych aj celodenný dohľad sú súčasťou každého vstupu. Pri pravidelných návštevách môžete využiť výhodnejšiu permanentku.
             </p>
-            <div className="mx-auto mt-7 grid max-w-2xl gap-4 sm:grid-cols-2">
+            <div className="mx-auto mt-7 grid max-w-2xl grid-cols-2 gap-2 sm:gap-4">
               {PRICING.map((item) => (
-                <article key={item.name} className={`rounded-3xl p-6 shadow-card ${item.highlight ? "bg-forest text-cream" : "bg-card text-forest"}`}>
-                  <h3 className="font-display text-xl font-bold">{item.name}</h3>
-                  <p className={`mt-3 font-display text-4xl font-bold ${item.highlight ? "text-cream" : "text-coral-dark"}`}>{item.price}</p>
+                <article key={item.name} className={`rounded-3xl p-3 shadow-card sm:p-6 ${item.highlight ? "bg-forest text-cream" : "bg-card text-forest"}`}>
+                  <h3 className="font-display text-[13px] font-bold sm:text-xl">{item.name}</h3>
+                  <p className={`mt-3 font-display text-2xl font-bold sm:text-4xl ${item.highlight ? "text-cream" : "text-coral-dark"}`}>{item.price}</p>
                   {item.highlight && (
                     <>
-                      <p className="mt-3 text-sm leading-relaxed text-cream/85">
+                      <p className="mt-3 text-[11px] leading-relaxed text-cream/85 sm:text-sm">
                         {(item.note?.split("Permanentka platí")[0] ?? "").trim()}
                       </p>
                       <p className="mt-1 text-xs leading-relaxed text-cream/75">
@@ -310,15 +253,49 @@ function AriaPreviewPage() {
 
         <Requirements id="lead-requirements" />
 
-        <section id="lead-form-pricing" className="bg-card px-4 py-10 sm:py-14">
-          <div className="mx-auto max-w-xl">
-            <SchoolmatesFormCrown />
-            <div className="rounded-3xl bg-secondary/55 px-5 pb-6 pt-12 shadow-card ring-1 ring-coral/15 sm:px-8 sm:pt-14">
-              <h2 className="mb-5 text-center font-display text-2xl font-bold text-forest">Čo hľadáte pre svojho psíka?</h2>
-              <LeadStepForm questionInHeading trackingSource="lead_landing_pricing_inline" />
+        <section id="lead-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4">
+            <div className="text-center">
+              <h2 className="section-title text-3xl sm:text-4xl">Najčastejšie otázky</h2>
+              <p className="mt-2 text-sm text-forest/65 sm:text-base">
+                Najdôležitejšie informácie pred prvou návštevou.
+              </p>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              {LANDING_FAQ.map((item) => (
+                <details key={item.q} className="group rounded-3xl bg-card px-5 py-4 shadow-card sm:px-6">
+                  <summary className="cursor-pointer list-none font-display text-base font-bold text-forest marker:hidden">
+                    <span className="flex items-center justify-between gap-3">
+                      {item.q}
+                      <span className="text-xl text-coral transition group-open:rotate-45">+</span>
+                    </span>
+                  </summary>
+                  <div className="mt-4 space-y-3 text-sm leading-relaxed text-forest/75">
+                    {item.q === "Aký je cenník služieb?" ? (
+                      <p>
+                        Aktuálne ceny nájdete vyššie v sekcii{" "}
+                        <a href="#lead-pricing" className="font-semibold text-coral underline underline-offset-2">
+                          Cenník
+                        </a>
+                        {" "}na tejto stránke.
+                      </p>
+                    ) : (
+                      item.a
+                        .split(/\n+/)
+                        .map((paragraph) => paragraph.trim())
+                        .filter(Boolean)
+                        .map((paragraph, index) => <p key={index}>{paragraph}</p>)
+                    )}
+                  </div>
+                </details>
+              ))}
             </div>
           </div>
         </section>
+
+        <AriaPuppyChecker onInterest={() => openAriaForm(false)} />
 
         <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />
 
@@ -369,48 +346,6 @@ function AriaPreviewPage() {
               <p className="mt-4 text-sm leading-relaxed text-forest/75 sm:text-base">
                 Aj my sme majitelia veľkých psíkov, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov spoznávame, rešpektujeme ich potreby a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
               </p>
-            </div>
-          </div>
-        </section>
-
-        <section id="lead-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-4xl px-4">
-            <div className="text-center">
-              <h2 className="section-title text-3xl sm:text-4xl">Najčastejšie otázky</h2>
-              <p className="mt-2 text-sm text-forest/65 sm:text-base">
-                Najdôležitejšie informácie pred prvou návštevou.
-              </p>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              {LANDING_FAQ.map((item) => (
-                <details key={item.q} className="group rounded-3xl bg-card px-5 py-4 shadow-card sm:px-6">
-                  <summary className="cursor-pointer list-none font-display text-base font-bold text-forest marker:hidden">
-                    <span className="flex items-center justify-between gap-3">
-                      {item.q}
-                      <span className="text-xl text-coral transition group-open:rotate-45">+</span>
-                    </span>
-                  </summary>
-                  <div className="mt-4 space-y-3 text-sm leading-relaxed text-forest/75">
-                    {item.q === "Aký je cenník služieb?" ? (
-                      <p>
-                        Aktuálne ceny nájdete vyššie v sekcii{" "}
-                        <a href="#lead-pricing" className="font-semibold text-coral underline underline-offset-2">
-                          Cenník
-                        </a>
-                        {" "}na tejto stránke.
-                      </p>
-                    ) : (
-                      item.a
-                        .split(/\n+/)
-                        .map((paragraph) => paragraph.trim())
-                        .filter(Boolean)
-                        .map((paragraph, index) => <p key={index}>{paragraph}</p>)
-                    )}
-                  </div>
-                </details>
-              ))}
             </div>
           </div>
         </section>
