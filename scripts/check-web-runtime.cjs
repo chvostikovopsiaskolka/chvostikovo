@@ -55,8 +55,8 @@ const failures = [];
               throw new Error('Aria cookie bubble lost equivalent accept, customize or reject options');
             const head = bubble.locator('xpath=..').locator('img[alt*="Aria"]');
             const geometry = await Promise.all([bubble.boundingBox(), head.boundingBox()]);
-            if (!geometry[0] || !geometry[1] || geometry[1].x >= geometry[0].x)
-              throw new Error('Cookie consent should be a speech bubble beside Aria head');
+            if (!geometry[0] || !geometry[1] || geometry[1].y >= geometry[0].y)
+              throw new Error('Cookie consent should be a full-width speech bubble under Aria head');
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
@@ -76,7 +76,7 @@ const failures = [];
               const aria = page.locator('[data-aria-guide]');
               await aria.waitFor({ state: 'visible' });
               await page.locator('[data-aria-guide][data-intro="true"]').waitFor({ state: 'visible' });
-              if (!await aria.locator('[data-aria-message]').getByText('Ahoj! Volám sa Aria! Čo ťa zaujíma o škôlke?').count())
+              if (!await aria.locator('[data-aria-message]').getByText(/Ahoj, volám sa Aria!/).count())
                 throw new Error('Aria single-line greeting missing at ' + width);
               const welcome = await aria.locator('[data-aria-message] p').evaluate(el => ({
                 nowrap: getComputedStyle(el).whiteSpace === 'nowrap',
@@ -90,9 +90,30 @@ const failures = [];
 
               await aria.getByRole('button', { name: 'Časté otázky' }).click();
               await aria.locator('[data-aria-panel="faq"]').waitFor({ state: 'visible' });
-              await aria.getByRole('button', { name: 'Prijímate aj šteniatka?' }).click();
+              const puppyQuestion = aria.getByRole('button', { name: 'Prijímate aj šteniatka?' });
+              if (await puppyQuestion.getAttribute('aria-expanded') !== 'true') await puppyQuestion.click();
               await aria.getByRole('button', { name: 'Overiť vhodnosť šteniatka' }).click();
-              await page.locator('[data-aria-puppy-embedded="true"]').waitFor({ state: 'visible' });
+              const wizard = page.locator('[data-aria-puppy-embedded="true"]');
+              await wizard.waitFor({ state: 'visible' });
+              if (!await wizard.locator('[data-aria-puppy-step="age"]').count()) throw new Error('Puppy wizard age step missing');
+              const ageSlider = wizard.getByRole('slider', { name: 'Vek šteniatka v mesiacoch' });
+              await ageSlider.focus();
+              await ageSlider.press('ArrowLeft');
+              await ageSlider.press('ArrowLeft');
+              if (!await wizard.getByText(/Zatiaľ nespĺňa/).count()) throw new Error('Age 1–3 must be blocked');
+              await ageSlider.press('ArrowRight');
+              await ageSlider.press('ArrowRight');
+              await wizard.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
+              if (!await wizard.locator('[data-aria-puppy-step="vaccines"]').count()) throw new Error('Puppy vaccinations missing');
+              for (let i = 0; i < 3; i++) await wizard.locator('fieldset').nth(i).getByText('Áno', { exact: true }).click();
+              await wizard.getByRole('button', { name: /^Pokračovať$/ }).click();
+              await wizard.locator('[data-aria-puppy-step="dog"]').waitFor({ state: 'visible' });
+              await wizard.getByPlaceholder('Ako sa volá?').fill('Testovací psík');
+              await wizard.getByPlaceholder('Plemeno alebo kríženec').fill('Kríženec');
+              await wizard.getByRole('button', { name: /Zobraziť výsledok/ }).click();
+              await wizard.locator('[data-aria-puppy-step="result"]').waitFor({ state: 'visible' });
+              await wizard.getByRole('button', { name: /Mám záujem – vyplniť kontakt/ }).click();
+              await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
               await page.keyboard.press('Escape');
 
               await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
@@ -101,10 +122,14 @@ const failures = [];
               const cards = pricingPanel.locator('[data-aria-pricing] article');
               if (await cards.count() !== 2) throw new Error('Two Aria pricing cards required');
               const cardBoxes = await Promise.all([cards.nth(0).boundingBox(), cards.nth(1).boundingBox()]);
-              if (!cardBoxes[0] || !cardBoxes[1] || Math.abs(cardBoxes[0].height - cardBoxes[1].height) > 2)
-                throw new Error('Aria pricing cards must have equal heights at ' + width);
-              await pricingPanel.getByRole('button', { name: 'Ako prebieha úvodná návšteva?' }).click();
-              await aria.getByRole('button', { name: 'Ako prebieha prvá návšteva?' }).waitFor({ state: 'visible' });
+              if (!cardBoxes[0] || !cardBoxes[1] || cardBoxes.some(box => box && box.height > 160))
+                throw new Error('Aria pricing cards must be compact FAQ-like rows at ' + width);
+              const backgroundLocked = await page.evaluate(() => getComputedStyle(document.documentElement).overflow === 'hidden');
+              if (!backgroundLocked) throw new Error('Expanded Aria panel must prevent background scrolling');
+              const visitQuestion = pricingPanel.getByRole('button', { name: 'Ako prebieha návšteva?' });
+              if (await visitQuestion.getAttribute('aria-expanded') !== 'true') await visitQuestion.click();
+              await pricingPanel.locator('[data-aria-first-visit]').waitFor({ state: 'visible' });
+              if (!await pricingPanel.isVisible()) throw new Error('First visit explanation must not redirect to FAQ');
               await aria.getByRole('button', { name: 'Podmienky prijatia' }).click();
               if (await aria.locator('[data-aria-requirements] article').count() !== 4)
                 throw new Error('Aria must list the four conditions');
@@ -126,6 +151,15 @@ const failures = [];
                 throw new Error('Preview webpage pricing must display equal height columns at ' + width);
               if (await page.locator('#aria-mosaic img').count() !== 8)
                 throw new Error('Preview mosaic must retain eight photos');
+              // Compare document order rather than screen rects (some sections may be offscreen).
+              const hasCorrectOrder = await page.evaluate(() => {
+                const ids = ['recenzie', 'aria-caretakers', 'aria-early-faq', 'aria-mosaic', 'lead-benefits', 'lead-pricing', 'lead-requirements', 'aria-puppy-check', 'lead-first-visit'];
+                const elements = ids.map(id => document.getElementById(id));
+                return elements.every((node, idx) => node && (idx === 0 || !!(elements[idx-1] && elements[idx-1].compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)));
+              });
+              if (!hasCorrectOrder) throw new Error('Preview section hierarchy differs from approved mobile layout');
+              if (await page.locator('section video').count()) throw new Error('Video must be omitted from preview');
+
 
               await page.evaluate(() => window.scrollTo(0, 750));
               await page.waitForTimeout(200);

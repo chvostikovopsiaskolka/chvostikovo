@@ -382,9 +382,9 @@ export function ReviewReasons({
   );
 }
 
-export function Reviews({ reviews = REVIEWS }: { reviews?: typeof REVIEWS } = {}) {
+export function Reviews({ reviews = REVIEWS, variant = "default" }: { reviews?: typeof REVIEWS; variant?: "default" | "hero" } = {}) {
   return (
-    <section id="recenzie" className="relative scroll-mt-24 overflow-hidden bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14">
+    <section id="recenzie" className={"relative scroll-mt-24 overflow-hidden pt-3 pb-9 sm:pt-8 sm:pb-14 " + (variant === "hero" ? "bg-transparent" : "bg-secondary/50")}>
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
         <h2 className="section-title whitespace-nowrap text-[clamp(14px,4.7vw,36px)] leading-tight">Viac ako 100 spokojných psíkov</h2>

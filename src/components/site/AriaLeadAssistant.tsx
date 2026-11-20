@@ -38,6 +38,7 @@ export function AriaLeadAssistant({
   const [intro, setIntro] = useState(true);
   const [panel, setPanel] = useState<Panel>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
+  const [pricingVisitOpen, setPricingVisitOpen] = useState(false);
 
   useEffect(() => {
     let frame = 0;
@@ -55,6 +56,17 @@ export function AriaLeadAssistant({
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
+
+  useEffect(() => {
+    if (!panel) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => { html.style.overflow = prevHtml; body.style.overflow = prevBody; };
+  }, [panel]);
 
   useEffect(() => {
     if (!panel) return;
@@ -76,7 +88,9 @@ export function AriaLeadAssistant({
     if (!target) return;
     const top = window.scrollY + target.getBoundingClientRect().top - 86;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    window.scrollTo({ top: Math.max(top, 0), behavior: reduceMotion ? "auto" : "smooth" });
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      window.scrollTo({ top: Math.max(top, 0), behavior: reduceMotion ? "auto" : "smooth" });
+    }));
   }
 
   function toggle(next: Exclude<Panel, null>) {
@@ -84,11 +98,6 @@ export function AriaLeadAssistant({
     setPanel(panel === next ? null : next);
   }
 
-  function showFirstVisitFaq() {
-    track("pricing_first_visit_faq");
-    setFaqOpen(2);
-    setPanel("faq");
-  }
 
   function openInfo() {
     track("info");
@@ -135,34 +144,35 @@ export function AriaLeadAssistant({
             </div>
 
             {panel === "pricing" && (
-              <div className="mt-3 space-y-3" data-aria-pricing>
-                <div className="grid grid-cols-2 items-stretch gap-2 sm:gap-3">
-                  {PRICING.map((item) => (
-                    <article key={item.name}
-                      className={"flex min-h-[183px] flex-col items-center rounded-[20px] px-2.5 py-4 text-center shadow-sm sm:min-h-[200px] sm:p-5 " +
-                        (item.highlight ? "bg-forest text-cream" : "bg-white text-forest")}>
-                      <h3 className="min-h-[2rem] font-display text-[12px] font-bold leading-tight sm:text-base">{item.name}</h3>
-                      <p className={"mt-0.5 text-[11px] font-semibold " + (item.highlight ? "text-cream/80" : "text-forest/65")}>
-                        {item.highlight ? "10 vstupov" : "1 vstup"}
-                      </p>
-                      <p className={"mt-2 font-display text-3xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
-                      <div className="mt-auto pt-3 text-[11px] leading-snug sm:text-xs">
-                        {item.highlight ? (
-                          <>
-                            <strong className="block">Ušetríte 50 €</strong>
-                            <span className="mt-1 block opacity-80">Platnosť 2 mesiace</span>
-                          </>
-                        ) : <span className="opacity-75">Celodenný pobyt</span>}
+              <div className="mt-3 space-y-2" data-aria-pricing>
+                {PRICING.map((item) => (
+                  <article key={item.name} className="rounded-[18px] border border-forest/10 bg-white/85 px-3 py-3 shadow-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h3 className="font-display text-sm font-bold text-forest">{item.name}</h3>
+                        <p className="mt-0.5 text-xs text-forest/65">{item.highlight ? "10 vstupov" : "1 vstup"}</p>
                       </div>
-                    </article>
-                  ))}
-                </div>
-                <div className="rounded-2xl border border-coral/30 bg-secondary/60 px-3 py-3 text-center">
-                  <p className="font-display text-sm font-bold">Úvodná návšteva zadarmo</p>
-                  <button type="button" onClick={showFirstVisitFaq}
-                    className="mt-1 min-h-10 text-sm font-semibold text-coral-dark underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral">
-                    Ako prebieha úvodná návšteva?
+                      <p className="shrink-0 font-display text-2xl font-bold text-coral-dark">{item.price}</p>
+                    </div>
+                    {item.highlight && <div className="mt-2 flex flex-wrap justify-between gap-2 border-t border-forest/10 pt-2 text-xs">
+                      <strong className="text-forest">Ušetríte 50 €</strong><span className="text-forest/70">Platnosť 2 mesiace</span>
+                    </div>}
+                  </article>
+                ))}
+                <div className="rounded-[18px] border border-forest/10 bg-secondary/60 p-3">
+                  <p className="font-display text-sm font-bold text-forest">Úvodná návšteva je zadarmo.</p>
+                  <button type="button" aria-expanded={pricingVisitOpen} onClick={() => setPricingVisitOpen((v) => !v)}
+                    className="mt-2 flex min-h-11 w-full items-center justify-between rounded-2xl border border-forest/15 bg-white/80 px-3 text-left text-sm font-semibold">
+                    Ako prebieha návšteva? <span className="text-coral">{pricingVisitOpen ? "−" : "+"}</span>
                   </button>
+                  {pricingVisitOpen && <div data-aria-first-visit className="mt-2 space-y-2 rounded-2xl bg-white/80 p-3">
+                    {FIRST_VISIT_ANSWER.split(/\n+/).filter(Boolean).map((paragraph, i) =>
+                      <p key={i} className="text-xs leading-relaxed text-forest/80">{paragraph.trim()}</p>)}
+                    <button type="button" onClick={() => jump("lead-first-visit", "pricing_visit_steps")}
+                      className="mt-2 min-h-11 text-sm font-semibold text-coral-dark underline underline-offset-2">
+                      Pozrieť 3 kroky prvej návštevy
+                    </button>
+                  </div>}
                 </div>
                 <button type="button" className={ctaClass} onClick={openInterest}>Mám záujem <ArrowRight size={16} aria-hidden /></button>
               </div>
@@ -235,16 +245,21 @@ export function AriaLeadAssistant({
         )}
 
         {!panel && (
-          <div data-aria-message className="mb-1.5 flex min-h-9 items-center rounded-[18px] border border-white/80 bg-card/90 px-3 py-1.5 shadow-md ring-1 ring-forest/10 backdrop-blur-xl">
+          <div className="mb-2 flex w-full justify-center" data-aria-message>
             {intro ? (
-              <p className="w-full whitespace-nowrap text-center font-display text-[11px] font-bold tracking-tight text-forest min-[390px]:text-[12px] sm:text-sm">
-                Ahoj! Volám sa Aria! Čo ťa zaujíma o škôlke?
-              </p>
+              <div className="relative inline-flex min-h-10 max-w-full items-center rounded-[18px] border border-white/85 bg-card/95 px-3 py-2 shadow-md ring-1 ring-forest/10 backdrop-blur-xl">
+                <span aria-hidden="true" className="absolute -bottom-1.5 left-[16%] size-3 rotate-45 border-b border-r border-white/85 bg-card" />
+                <p className="whitespace-nowrap font-display text-[clamp(9px,2.65vw,13px)] font-semibold tracking-tight text-forest">
+                  Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria!</strong>{" "}
+                  <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
+                </p>
+              </div>
             ) : (
-              <div className="flex w-full items-center justify-between gap-2">
-                <span className="min-w-0 truncate text-[11px] font-semibold text-forest sm:text-sm">Máte šteniatko? Zistite, či spĺňa podmienky.</span>
+              <div className="relative inline-flex max-w-full items-center gap-2 rounded-[18px] border border-white/85 bg-card/95 px-3 py-1.5 shadow-md ring-1 ring-forest/10 backdrop-blur-xl">
+                <span aria-hidden="true" className="absolute -bottom-1.5 left-[16%] size-3 rotate-45 border-b border-r border-white/85 bg-card" />
+                <strong className="min-w-0 text-center font-display text-[clamp(10px,2.6vw,13px)] text-forest">Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span></strong>
                 <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
-                  className="min-h-9 shrink-0 rounded-full bg-forest px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral">
+                  className="min-h-9 shrink-0 rounded-full bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                   Overiť
                 </button>
               </div>
@@ -252,25 +267,25 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className="relative ml-[44px] rounded-[24px] border border-white/80 bg-card/85 px-1.5 py-1.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[65px] sm:px-3" data-aria-dock>
+        <div className="relative ml-[83px] rounded-[24px] border border-white/80 bg-card/85 px-1.5 py-1.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-3" data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
-            className="pointer-events-none absolute -bottom-1 -left-[46px] h-[77px] w-[77px] max-w-none object-contain drop-shadow-[0_4px_6px_rgba(0,0,0,.22)] sm:-left-[70px] sm:h-[94px] sm:w-[94px]" />
+            className="pointer-events-none absolute -bottom-1 -left-[83px] h-[78px] w-[78px] max-w-none object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,.42)] sm:-left-[104px] sm:h-[95px] sm:w-[95px]" />
           <div className="flex min-h-[57px] items-center gap-0.5">
             <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={panel === "pricing"} onClick={() => toggle("pricing")}>
-              <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[10px] font-semibold sm:text-xs">Cenník</span>
+              <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span>
             </button>
             <button type="button" className={itemClass} aria-label="Podmienky prijatia" aria-expanded={panel === "requirements"} onClick={() => toggle("requirements")}>
-              <ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[10px] font-semibold sm:text-xs">Podmienky</span>
+              <ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span>
             </button>
             <button type="button" className={itemClass} aria-label="Časté otázky" aria-expanded={panel === "faq"} onClick={() => toggle("faq")}>
-              <BookOpen size={20} strokeWidth={1.9} aria-hidden /><span className="text-[10px] font-semibold sm:text-xs">FAQ</span>
+              <BookOpen size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">FAQ</span>
             </button>
             <button type="button" className={itemClass + " text-coral-dark"} aria-label="Mám záujem o škôlku" onClick={openInterest}>
-              <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[10px] font-bold sm:text-xs">Záujem</span>
+              <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span>
             </button>
             <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}>
-              <Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[10px] font-semibold sm:text-xs">Menu</span>
+              <Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span>
             </button>
           </div>
         </div>

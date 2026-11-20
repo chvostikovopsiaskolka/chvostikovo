@@ -206,12 +206,15 @@ export function CookieBanner() {
       aria-modal="true"
       aria-labelledby="cookie-consent-title"
     >
-      <div className={"relative w-full " + (showDetails ? "max-w-4xl" : isAriaPreview ? "max-w-[calc(100%-64px)] sm:max-w-xl" : "max-w-2xl")}>
+      <div className={"relative w-full " + (showDetails ? "max-w-4xl" : isAriaPreview ? "max-w-xl pt-16" : "max-w-2xl")}>
         {isAriaPreview && !showDetails && (
           <>
-            <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
-              className="pointer-events-none absolute -left-[65px] top-1 z-10 size-[72px] object-contain drop-shadow-[0_5px_6px_rgba(0,0,0,.24)] sm:-left-[88px] sm:size-24" />
-            <span aria-hidden="true" className="pointer-events-none absolute -left-2 top-11 z-[1] size-4 rotate-45 rounded-sm border-b border-l border-white/80 bg-card" />
+            <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={160} height={160}
+              className="pointer-events-none absolute left-3 top-0 z-20 size-[83px] object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,.4)] sm:size-24" />
+            <svg aria-hidden="true" viewBox="0 0 56 32" width="56" height="32"
+              className="pointer-events-none absolute left-[54px] top-[50px] z-10 overflow-visible">
+              <path d="M1 1 L50 30 L25 30 Z" className="fill-card" stroke="rgba(50,96,69,.15)" strokeWidth="1.4" />
+            </svg>
           </>
         )}
         <div data-aria-cookie-bubble={isAriaPreview && !showDetails ? "true" : undefined}
