@@ -201,16 +201,25 @@ export function CookieBanner() {
     <div
       // On slow mobile GPUs, avoid blurring the entire page behind the cookie modal.
       // Consent text is the measured LCP element on first visit; retain the same panel and choices.
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-forest/50 px-2 pb-2 pt-16 sm:items-center sm:p-6 sm:backdrop-blur-[2px]"
+      className={"fixed inset-0 z-[100] flex items-end bg-forest/50 px-2 pb-2 pt-16 sm:items-center sm:p-6 sm:backdrop-blur-[2px] " + (isAriaPreview && !showDetails ? "justify-end sm:justify-center" : "justify-center")}
       role="dialog"
       aria-modal="true"
       aria-labelledby="cookie-consent-title"
     >
-      <div className={`${showDetails ? "max-w-4xl" : isAriaPreview ? "max-w-xl" : "max-w-2xl"} relative max-h-[calc(100vh-1rem)] w-full overflow-y-auto rounded-3xl border ${isAriaPreview ? "border-white/80 bg-card/95 shadow-[0_12px_50px_rgba(11,48,30,.32)] ring-1 ring-forest/15 backdrop-blur-xl" : "border-forest/10 bg-card shadow-2xl"} p-4 text-forest sm:p-6`}>
+      <div className={"relative w-full " + (showDetails ? "max-w-4xl" : isAriaPreview ? "max-w-[calc(100%-64px)] sm:max-w-xl" : "max-w-2xl")}>
+        {isAriaPreview && !showDetails && (
+          <>
+            <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
+              className="pointer-events-none absolute -left-[65px] top-1 z-10 size-[72px] object-contain drop-shadow-[0_5px_6px_rgba(0,0,0,.24)] sm:-left-[88px] sm:size-24" />
+            <span aria-hidden="true" className="pointer-events-none absolute -left-2 top-11 z-[1] size-4 rotate-45 rounded-sm border-b border-l border-white/80 bg-card" />
+          </>
+        )}
+        <div data-aria-cookie-bubble={isAriaPreview && !showDetails ? "true" : undefined}
+          className={"relative max-h-[calc(100dvh-1rem)] w-full overflow-y-auto rounded-3xl border p-4 text-forest sm:p-6 " +
+            (isAriaPreview && !showDetails
+              ? "border-white/80 bg-card/95 shadow-[0_12px_50px_rgba(11,48,30,.32)] ring-1 ring-forest/15 backdrop-blur-xl"
+              : "border-forest/10 bg-card shadow-2xl")}>
         <div className="flex items-start gap-2">
-          {isAriaPreview && !showDetails && (
-            <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={72} height={72} className="size-[70px] shrink-0 object-contain drop-shadow-[0_5px_6px_rgba(0,0,0,.24)] sm:size-20" />
-          )}
           <div className="min-w-0 flex-1">
             <p id="cookie-consent-title" className="font-display text-lg font-bold sm:text-xl">
               {showDetails
@@ -397,6 +406,7 @@ export function CookieBanner() {
               : "Svoju voľbu môžete kedykoľvek zmeniť cez Nastavenia cookies v pätičke."}
           </p>
         )}
+        </div>
       </div>
     </div>
   );

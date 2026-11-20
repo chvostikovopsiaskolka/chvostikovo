@@ -9,6 +9,7 @@ import {
 import { LeadStepForm, LEAD_STEP_INTERESTS } from "@/components/site/LeadStepForm";
 import { AriaLeadAssistant } from "@/components/site/AriaLeadAssistant";
 import { FormDialog } from "@/components/site/FormDialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Reviews, VideoSection } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { AriaMosaicGallery } from "@/components/site/AriaMosaicGallery";
@@ -100,6 +101,7 @@ export const Route = createFileRoute("/test-aria")({
 
 function AriaPreviewPage() {
   const [leadModalOpen, setLeadModalOpen] = useState(false);
+  const [puppyModalOpen, setPuppyModalOpen] = useState(false);
   const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
   const [ariaPreset, setAriaPreset] = useState<string | undefined>(undefined);
 
@@ -122,7 +124,7 @@ function AriaPreviewPage() {
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
       <Header landingMinimal hideMobileDock landingTrackingSource="lead_landing_header_phone" />
-      <AriaLeadAssistant onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} />
+      <AriaLeadAssistant onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
         <section className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
@@ -219,21 +221,20 @@ function AriaPreviewPage() {
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-forest/75 sm:text-base">
               Pohyb, hry, oddych aj celodenný dohľad sú súčasťou každého vstupu. Pri pravidelných návštevách môžete využiť výhodnejšiu permanentku.
             </p>
-            <div className="mx-auto mt-7 grid max-w-2xl grid-cols-2 gap-2 sm:gap-4">
+            <div className="mx-auto mt-7 grid max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4">
               {PRICING.map((item) => (
-                <article key={item.name} className={`rounded-3xl p-3 shadow-card sm:p-6 ${item.highlight ? "bg-forest text-cream" : "bg-card text-forest"}`}>
-                  <h3 className="font-display text-[13px] font-bold sm:text-xl">{item.name}</h3>
-                  <p className={`mt-3 font-display text-2xl font-bold sm:text-4xl ${item.highlight ? "text-cream" : "text-coral-dark"}`}>{item.price}</p>
-                  {item.highlight && (
-                    <>
-                      <p className="mt-3 text-[11px] leading-relaxed text-cream/85 sm:text-sm">
-                        {(item.note?.split("Permanentka platí")[0] ?? "").trim()}
-                      </p>
-                      <p className="mt-1 text-xs leading-relaxed text-cream/75">
-                        Permanentka platí 2 mesiace.
-                      </p>
-                    </>
-                  )}
+                <article key={item.name} className={"flex h-full min-h-[184px] flex-col items-center rounded-3xl p-3 text-center shadow-card sm:min-h-[230px] sm:p-6 " + (item.highlight ? "bg-forest text-cream" : "bg-card text-forest")}>
+                  <h3 className="min-h-9 font-display text-[13px] font-bold sm:text-xl">{item.name}</h3>
+                  <p className={"mt-1 text-[11px] font-semibold " + (item.highlight ? "text-cream/80" : "text-forest/65")}>{item.highlight ? "10 vstupov" : "1 vstup"}</p>
+                  <p className={"mt-2 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
+                  <div className="mt-auto pt-3 text-[11px] leading-snug sm:text-sm">
+                    {item.highlight ? (
+                      <>
+                        <strong className="block">Ušetríte 50 €</strong>
+                        <span className="mt-1 block opacity-80">Platnosť 2 mesiace</span>
+                      </>
+                    ) : <span className="opacity-75">Celodenný pobyt</span>}
+                  </div>
                 </article>
               ))}
             </div>
@@ -243,6 +244,7 @@ function AriaPreviewPage() {
                 Úvodná návšteva zadarmo
               </p>
             </div>
+            <a href="#lead-faq" className="mt-3 inline-flex min-h-11 items-center justify-center text-sm font-semibold text-coral-dark underline underline-offset-2">Ako prebieha úvodná návšteva? Pozrieť FAQ</a>
             <p className="mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm">
               <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
@@ -369,6 +371,13 @@ function AriaPreviewPage() {
       </main>
 
       <Footer />
+
+      <Dialog open={puppyModalOpen} onOpenChange={setPuppyModalOpen}>
+        <DialogContent className="max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6" aria-describedby={undefined}>
+          <DialogTitle className="font-display text-lg font-bold text-forest">Kontrola vhodnosti šteniatka</DialogTitle>
+          <AriaPuppyChecker embedded onInterest={() => { setPuppyModalOpen(false); openAriaForm(false); }} />
+        </DialogContent>
+      </Dialog>
 
       <FormDialog
         open={leadModalOpen}

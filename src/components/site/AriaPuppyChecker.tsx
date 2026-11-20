@@ -11,7 +11,7 @@ const QUESTIONS = [
 ] as const;
 
 /** Local, non-AI eligibility guide. No values are transmitted or saved. */
-export function AriaPuppyChecker({ onInterest }: { onInterest: () => void }) {
+export function AriaPuppyChecker({ onInterest, embedded = false }: { onInterest: () => void; embedded?: boolean }) {
   const [age, setAge] = useState("");
   const [dogName, setDogName] = useState("");
   const [breed, setBreed] = useState("");
@@ -31,11 +31,12 @@ export function AriaPuppyChecker({ onInterest }: { onInterest: () => void }) {
     else if (Object.values(vaccines).includes("unknown")) setOutcome("uncertain");
     else setOutcome("eligible");
   }
+  const Container = embedded ? "div" : "section";
   const field = "w-full min-h-11 rounded-xl border border-forest/15 bg-white px-3 py-2 text-sm text-forest focus:outline-2 focus:outline-coral";
   return (
-    <section id="aria-puppy-check" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
-      <SectionAmbientPaws />
-      <div className="relative z-10 mx-auto max-w-3xl px-4">
+    <Container id={embedded ? undefined : "aria-puppy-check"} data-aria-puppy-embedded={embedded ? "true" : undefined} className={embedded ? "relative bg-transparent pb-4" : "relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14"}>
+      {!embedded && <SectionAmbientPaws />}
+      <div className={embedded ? "relative z-10 mx-auto max-w-3xl" : "relative z-10 mx-auto max-w-3xl px-4"}>
         <div className="mb-5 text-center">
           <p className="font-display text-sm font-bold uppercase tracking-widest text-coral-dark">Máte šteniatko?</p>
           <h2 className="section-title mt-1 text-2xl sm:text-4xl">Zistite, či spĺňa základné podmienky</h2>
@@ -83,6 +84,6 @@ export function AriaPuppyChecker({ onInterest }: { onInterest: () => void }) {
           <p className="mt-3 text-xs leading-relaxed text-forest/60">Údaje sa vyhodnocujú iba v tomto prehliadači, nikam sa neodosielajú. Minimálny orientačný vek je 3 mesiace; platné dokončené očkovania a úvodná návšteva sú nevyhnutné.</p>
         </form>
       </div>
-    </section>
+    </Container>
   );
 }
