@@ -255,7 +255,7 @@ export function AriaLeadAssistant({
                   fill="hsl(var(--card))" stroke="rgba(49,94,63,.18)" strokeWidth="1.5" strokeLinejoin="round" />
               </svg>
               {intro ? (
-                <p className="relative z-10 whitespace-nowrap font-display text-[clamp(9px,2.65vw,13px)] font-semibold tracking-tight">
+                <p className="relative z-10 whitespace-nowrap font-display text-[clamp(8px,2.45vw,13px)] font-semibold tracking-tight">
                   Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                   <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
                 </p>
