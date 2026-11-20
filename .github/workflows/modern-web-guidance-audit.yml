@@ -1,0 +1,44 @@
+name: Modern Web Guidance advisory audit
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.agents/skills/modern-web-guidance/SKILL.md'
+      - '.github/workflows/modern-web-guidance-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read-only Modern Web Guidance 1.0 baseline
+        env:
+          DISABLE_TELEMETRY: '1'
+          NPM_CONFIG_AUDIT: 'false'
+          SCAN_PATHS: 'src/components/site src/routes'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p modern-web-reports
+          for folder in $SCAN_PATHS; do
+            key="${folder//\//-}"
+            echo "Scanning $folder (read only; scanner covers a limited set of patterns)"
+            npx -y modern-web-guidance@1.0.0 legacy-scan "$folder" --json > "modern-web-reports/${key}.json"
+            node -e 'const x=JSON.parse(require("node:fs").readFileSync(process.argv[1],"utf8")); const output=JSON.stringify(x); console.log("MWG-REPORT-START",process.argv[1],"bytes",output.length); console.log(output.slice(0,12000)); console.log("MWG-REPORT-END");' "modern-web-reports/${key}.json"
+            echo "- $folder: report available in GitHub artifact, not a full compliance verdict" >> "$GITHUB_STEP_SUMMARY"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: modern-web-guidance-readonly-report
+          path: modern-web-reports/
+          if-no-files-found: warn
+          retention-days: 7
