@@ -291,7 +291,7 @@ export function AriaPreviewPage() {
               {PRICING.map((item) => (
                 <article key={item.name} className={"flex h-full min-h-[108px] flex-col items-center rounded-3xl px-3 py-2 text-center shadow-card sm:min-h-[136px] sm:p-4 " + (item.highlight ? "bg-forest text-cream" : "bg-card text-forest")}>
                   <h3 className="font-display text-[13px] font-bold leading-snug sm:text-xl">{item.name}</h3>
-                  {item.highlight && <p className="mt-0.5 text-[11px] font-semibold text-cream/85">10 vstupov</p>}
+                  <p aria-hidden={!item.highlight} className={"mt-0.5 text-[11px] font-semibold " + (item.highlight ? "text-cream/85" : "invisible")}>10 vstupov</p>
                   <p className={"mt-1 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
                   <div className="mt-auto pt-1 text-[11px] leading-snug sm:text-sm">
                     {item.highlight ? <strong>Ušetríte 50 €</strong> : <span className="opacity-75">Celodenný pobyt</span>}
