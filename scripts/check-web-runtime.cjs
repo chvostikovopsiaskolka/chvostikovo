@@ -146,12 +146,17 @@ const failures = [];
                 const reviews = document.getElementById('recenzie');
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
                 const hero = document.querySelector('section.hero-safe-top');
+                const content = hero?.querySelector('[data-aria-hero-content]');
+                const topSpacer = hero?.querySelector('[data-aria-intro-top-space]');
                 const headline = hero?.querySelector('h1');
                 const benefits = hero?.querySelector('[data-hero-benefits]');
                 const description = hero?.querySelector('[data-aria-hero-description]');
                 const spacer = hero?.querySelector('[data-aria-intro-space]');
-                if (!form || !reviews || !proof || !hero || !headline || !benefits || !description || !spacer) return { missing: true };
+                if (!form || !reviews || !proof || !hero || !content || !topSpacer ||
+                    !headline || !benefits || !description || !spacer) return { missing: true };
                 const rect = proof.getBoundingClientRect();
+                const contentTop = content.getBoundingClientRect().top;
+                const reviewsBottom = reviews.getBoundingClientRect().bottom;
                 const formTop = form.getBoundingClientRect().top;
                 const reviewBottom = reviews.getBoundingClientRect().bottom;
                 const lineHeight = parseFloat(getComputedStyle(proof).lineHeight);
@@ -159,6 +164,8 @@ const failures = [];
                   missing: false,
                   formTop,
                   reviewGap: formTop - reviewBottom,
+                  contentCenterY: (contentTop + reviewsBottom) / 2,
+                  topSpacerHeight: topSpacer.getBoundingClientRect().height,
                   viewportHeight: window.innerHeight,
                   proofLeft: rect.left,
                   proofRight: rect.right,
@@ -168,6 +175,8 @@ const failures = [];
                 };
               });
               if (firstFold.missing || firstFold.formTop < firstFold.viewportHeight - 2 ||
+                  firstFold.topSpacerHeight < 39 ||
+                  firstFold.contentCenterY < firstFold.viewportHeight * 0.4 ||
                   firstFold.reviewGap < 185 ||
                   firstFold.proofLeft < -1 || firstFold.proofRight > width + 1 ||
                   firstFold.textOverflows || firstFold.proofHeight > firstFold.lineHeight * 1.55)
@@ -452,20 +461,24 @@ const failures = [];
                 const form = document.getElementById('aria-hero-form');
                 const team = document.getElementById('aria-caretakers');
                 const leadHero = document.querySelector('section.hero-safe-top');
-                const heroHeading = leadHero?.querySelector('h1');
-                const benefits = leadHero?.querySelector('[data-hero-benefits]');
-                const leadDescription = leadHero?.querySelector('[data-aria-hero-description]');
+                const content = leadHero?.querySelector('[data-aria-hero-content]');
+                const introTopSpace = leadHero?.querySelector('[data-aria-intro-top-space]');
+                const heroHeading = content?.querySelector('h1');
+                const benefits = content?.querySelector('[data-hero-benefits]');
+                const leadDescription = content?.querySelector('[data-aria-hero-description]');
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
                 const introSpace = leadHero?.querySelector('[data-aria-intro-space]');
-                if (!reviews || !form || !team || !leadHero || !heroHeading || !benefits ||
-                    !leadDescription || !proof || !introSpace ||
-                    reviews.parentElement !== leadHero || form.parentElement !== leadHero.parentElement) return false;
+                if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
+                    !heroHeading || !benefits || !leadDescription || !proof || !introSpace ||
+                    reviews.parentElement !== content || content.parentElement !== leadHero ||
+                    form.parentElement !== leadHero.parentElement) return false;
                 const follows = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
                 const heading = team.querySelector('h2');
                 const photo = team.querySelector('img');
                 const copy = team.querySelector('p');
-                return follows(heroHeading, benefits) && follows(benefits, leadDescription) &&
-                  follows(leadDescription, proof) && follows(reviews, introSpace) &&
+                return follows(introTopSpace, heroHeading) && follows(heroHeading, benefits) &&
+                  follows(benefits, leadDescription) && follows(leadDescription, proof) &&
+                  follows(reviews, introSpace) &&
                   follows(introSpace, form) && follows(form, team) &&
                   !!heading && !!photo && !!copy && follows(heading, photo) && follows(photo, copy);
               });
