@@ -7,6 +7,7 @@ type Photo = { src: string; alt: string; caption?: string; fullSrc?: string };
 type Transform = { scale: number; x: number; y: number };
 type Gesture =
   | { kind: "none" }
+  | { kind: "swipe"; atX: number; atY: number }
   | { kind: "pan"; atX: number; atY: number; x: number; y: number }
   | { kind: "pinch"; distance: number; scale: number; anchorX: number; anchorY: number };
 
@@ -84,6 +85,9 @@ export function StandPhotoLightbox({
         beginPinch(event.touches);
       } else if (event.touches.length === 1 && transform.scale > 1) {
         beginPan(event.touches.item(0)!);
+      } else if (event.touches.length === 1) {
+        const touch = event.touches.item(0)!;
+        gesture = { kind: "swipe", atX: touch.clientX, atY: touch.clientY };
       }
     };
 
@@ -112,7 +116,17 @@ export function StandPhotoLightbox({
     const touchEnd = (event: TouchEvent) => {
       if (event.touches.length >= 2) beginPinch(event.touches);
       else if (event.touches.length === 1 && transform.scale > 1) beginPan(event.touches.item(0)!);
-      else gesture = { kind: "none" };
+      else {
+        const finger = event.changedTouches.item(0);
+        if (gesture.kind === "swipe" && transform.scale === 1 && finger) {
+          const dx = finger.clientX - gesture.atX;
+          const dy = finger.clientY - gesture.atY;
+          if (Math.abs(dx) >= 48 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+            onSelect((index + (dx < 0 ? 1 : photos.length - 1)) % photos.length);
+          }
+        }
+        gesture = { kind: "none" };
+      }
     };
 
     // Trackpads generate ctrl+wheel for pinch; keep zoom centered on the fingers/cursor.
@@ -154,6 +168,17 @@ export function StandPhotoLightbox({
     };
   }, [viewportNode, index, photo?.src]);
 
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        onSelect((index + (event.key === "ArrowLeft" ? photos.length - 1 : 1)) % photos.length);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [index, onSelect, photos.length]);
+
   if (!photo) return null;
   const navigate = (step: number) => onSelect((index + step + photos.length) % photos.length);
 
@@ -161,14 +186,10 @@ export function StandPhotoLightbox({
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent
         data-stand-lightbox
-        className="z-[120] flex max-h-[96dvh] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] flex-col gap-3 overflow-hidden rounded-2xl border-0 bg-forest p-3 text-cream shadow-xl sm:max-w-5xl sm:p-5 [&>button]:right-3 [&>button]:top-3 [&>button]:flex [&>button]:size-10 [&>button]:items-center [&>button]:justify-center [&>button]:rounded-full [&>button]:bg-card [&>button]:text-forest [&>button]:opacity-100"
+        className="z-[120] flex max-h-[96dvh] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] flex-col gap-2 overflow-hidden rounded-2xl border-0 bg-forest p-3 text-cream shadow-xl sm:max-w-5xl sm:p-5 [&>button]:right-5 [&>button]:top-5 [&>button]:z-20 [&>button]:flex [&>button]:size-9 [&>button]:items-center [&>button]:justify-center [&>button]:rounded-full [&>button]:bg-card [&>button]:text-forest [&>button]:opacity-100"
       >
-        <div className="min-w-0 pr-12">
-          <DialogTitle className="font-display text-lg font-bold leading-snug text-cream">
-            Fotografia stojana {photo.caption ?? ""}
-          </DialogTitle>
-          <DialogDescription className="sr-only">Detail ručne vyrábaného stojana.</DialogDescription>
-        </div>
+        <DialogTitle className="sr-only">Fotografia stojana {photo.caption ?? ""}</DialogTitle>
+        <DialogDescription className="sr-only">Detail ručne vyrábaného stojana. Fotografie môžete listovať šípkami alebo potiahnutím.</DialogDescription>
         <div
           ref={setViewportNode}
           data-stand-photo-viewport
@@ -185,18 +206,18 @@ export function StandPhotoLightbox({
             className="block h-full w-full max-w-none select-none object-contain"
             style={{ transformOrigin: "center center", willChange: "transform" }}
           />
-        </div>
-        <div className="flex items-center justify-center gap-3 pb-1">
           <button type="button" onClick={() => navigate(-1)} aria-label="Predchádzajúca fotografia"
-            className="inline-flex size-11 items-center justify-center rounded-xl bg-card/15 text-cream hover:bg-card/25 focus-visible:outline-2 focus-visible:outline-coral">
+            data-stand-photo-previous
+            className="absolute left-2 top-1/2 z-10 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-card/95 text-forest shadow-soft hover:bg-card focus-visible:outline-2 focus-visible:outline-coral sm:left-3 sm:size-10">
             <ChevronLeft aria-hidden="true" className="size-5" />
           </button>
-          <span className="min-w-12 text-center text-xs tabular-nums text-cream/80">{index + 1} / {photos.length}</span>
           <button type="button" onClick={() => navigate(1)} aria-label="Ďalšia fotografia"
-            className="inline-flex size-11 items-center justify-center rounded-xl bg-card/15 text-cream hover:bg-card/25 focus-visible:outline-2 focus-visible:outline-coral">
+            data-stand-photo-next
+            className="absolute right-2 top-1/2 z-10 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-card/95 text-forest shadow-soft hover:bg-card focus-visible:outline-2 focus-visible:outline-coral sm:right-3 sm:size-10">
             <ChevronRight aria-hidden="true" className="size-5" />
           </button>
         </div>
+        <p className="text-center text-xs tabular-nums text-cream/80">{index + 1} / {photos.length}{photo.caption ? ` · ${photo.caption}` : ""}</p>
       </DialogContent>
     </Dialog>
   );
