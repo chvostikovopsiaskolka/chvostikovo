@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
-import { AriaGuidedChat } from "./AriaGuidedChat";
+// Split the preview-only chat from the paid lead bundle and preserve state after first open.
+const AriaGuidedChat = lazy(() => import("./AriaGuidedChat").then((module) => ({ default: module.AriaGuidedChat })));
 import brandWordmark from "@/assets/logo.png";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
@@ -56,6 +57,7 @@ export function AriaLeadAssistant({
   const stageRef = useRef<"intro" | "puppy" | "contact">("intro");
   const [panel, setPanel] = useState<Panel>(null);
   const [chatOpen, setChatOpen] = useState(false);
+  const [chatActivated, setChatActivated] = useState(false);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [pricingVisitOpen, setPricingVisitOpen] = useState(false);
 
@@ -242,6 +244,7 @@ export function AriaLeadAssistant({
   function openChat() {
     if (!guidedChatPreview) return;
     setPanel(null);
+    setChatActivated(true);
     setChatOpen(true);
     void trackCookielessInteraction("explore_daycare", trackingPrefix + "_chat_open", "sk");
   }
@@ -493,7 +496,11 @@ export function AriaLeadAssistant({
             </button>
           </div>
         </div>
-        {guidedChatPreview && <AriaGuidedChat open={chatOpen} onClose={() => setChatOpen(false)} />}
+        {guidedChatPreview && chatActivated && (
+          <Suspense fallback={null}>
+            <AriaGuidedChat open={chatOpen} onClose={() => setChatOpen(false)} />
+          </Suspense>
+        )}
       </div>
     </aside>
   );
