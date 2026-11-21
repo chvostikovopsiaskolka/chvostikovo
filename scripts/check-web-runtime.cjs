@@ -534,17 +534,27 @@ const failures = [];
             await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
             await aria.getByRole('button', { name: /Prvá návšteva zadarmo/ }).click();
 
-            // Simulate a backend error followed by success. Neither attempt
-            // reaches Supabase, SMS, email, Pixel or real CRM data.
+            // Simulate failed lead, separate recover_contact, then accepted
+            // lead. Every POST is fulfilled within Playwright: no Supabase,
+            // SMS, email, CRM or real marketing conversion is sent.
             const syntheticLeads = [];
+            const syntheticRecoveries = [];
             await page.route('**/functions/v1/web-form-submit', async route => {
               const payload = route.request().postDataJSON();
+              if (payload?.action === 'recover_contact') {
+                syntheticRecoveries.push(payload);
+                await route.fulfill({
+                  status: 200, contentType: 'application/json',
+                  body: JSON.stringify({ recovery_saved: true }),
+                });
+                return;
+              }
               syntheticLeads.push(payload);
-              const ok = syntheticLeads.length > 1;
+              const accepted = syntheticLeads.length > 1;
               await route.fulfill({
-                status: ok ? 201 : 503,
+                status: accepted ? 201 : 503,
                 contentType: 'application/json',
-                body: JSON.stringify(ok ? { ok: true } : { ok: false, recovery_saved: false }),
+                body: JSON.stringify(accepted ? { ok: true } : { ok: false, recovery_saved: false }),
               });
             });
             await aria.getByRole('button', { name: 'Mám záujem o škôlku' }).click();
@@ -582,12 +592,12 @@ const failures = [];
                 throw new Error('Missing isolated CTA/funnel event ' + name + ':' + source);
             }
             const submitted = puppyInteractions.filter(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest');
-            if (submitted.length !== 1 || syntheticLeads.length !== 2 ||
+            if (submitted.length !== 1 || syntheticLeads.length !== 2 || syntheticRecoveries.length < 1 ||
                 !syntheticLeads.every(data => data.form_type === 'lead' &&
                   data.cta_source === 'puppy_landing_aria_interest' &&
                   data.interest_reason === 'Chcem sa informovať o škôlke' &&
                   data.dog_breed === 'Kríženec'))
-              throw new Error('Synthetic lead must preserve source/breed, recover from error and convert exactly once');
+              throw new Error('Synthetic lead/recovery separation failed: ' + JSON.stringify({ leads: syntheticLeads.map(v => ({ action: v.action, type: v.form_type, source: v.cta_source, interest: v.interest_reason, breed: v.dog_breed })), recoveries: syntheticRecoveries.length, submitted: submitted.length }));
             const receiptDialog = page.getByRole('dialog').last();
             await receiptDialog.getByRole('button', { name: 'Close' }).click();
             await receiptDialog.waitFor({ state: 'hidden' });
