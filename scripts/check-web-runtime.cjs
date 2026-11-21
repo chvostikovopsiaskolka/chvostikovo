@@ -224,7 +224,7 @@ const failures = [];
                 buttons.every(button => getComputedStyle(button).boxShadow === 'none'));
               if (!navFrames) throw new Error('Only the overall Aria menu frame should be outlined, not each navigation item');
 
-              if (url.pathname === '/test-aria/') {
+              if (url.pathname === '/test-aria/' || url.pathname === '/psia-skolka-kosice/') {
                 // Check that the speech switches to a real modal CTA only after
                 // the requirements section, and that the dock does not jump.
                 const requirementsEnd = await page.evaluate(() => {
@@ -259,19 +259,15 @@ const failures = [];
                 await page.waitForTimeout(190);
               }
 
-              // Four widths receive screenshots and overlay checks. Run the
-              // full wizard/modal journey at the original 320 and 390 widths.
+              // Browser screenshots/checks run at four widths; full modal
+              // journeys run at 320 and 390 to keep the existing CI budget.
               if (![320, 390].includes(width)) {
-                for (const y of [750, 1450, 2100, 2800, 3500]) {
-                  await page.evaluate(y => window.scrollTo(0, y), y);
-                  await page.waitForTimeout(110);
-                  if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') === 'false') break;
-                }
-                if (!await page.locator('[data-aria-guide][data-intro="false"]').count() ||
+                await page.evaluate(y => window.scrollTo(0, y), introBottom + 180);
+                await page.waitForTimeout(180);
+                if (await aria.getAttribute('data-aria-stage') !== 'puppy' ||
                     await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
-                  throw new Error('Aria puppy prompt should be visible away from controls at ' + width);
-                if (url.pathname === '/test-aria/')
-                  await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
+                  throw new Error('Aria puppy speech must persist after form at ' + width);
+                await page.screenshot({ path: path.join(out, snapshotPrefix + '-' + engine + '-' + width + '-puppy-prompt.png') });
                 continue;
               }
               await aria.getByRole('button', { name: 'Časté otázky' }).click();
@@ -452,17 +448,13 @@ const failures = [];
               if (await page.locator('section video').count()) throw new Error('Video must be omitted from preview');
 
 
-              for (const y of [750, 1450, 2100, 2800]) {
-                await page.evaluate(y => window.scrollTo(0, y), y);
-                await page.waitForTimeout(140);
-                if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') === 'false') break;
-              }
-              if (!await page.locator('[data-aria-guide][data-intro="false"]').count())
-                throw new Error('Aria intro must yield to puppy prompt on scroll');
+              await page.evaluate(y => window.scrollTo(0, y), introBottom + 180);
+              await page.waitForTimeout(180);
+              if (await aria.getAttribute('data-aria-stage') !== 'puppy')
+                throw new Error('Aria intro must last through the form, then yield to puppy prompt');
               if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
-                throw new Error('Aria puppy speech should reappear away from important content');
-              if (url.pathname === '/test-aria/')
-                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
+                throw new Error('Aria speech must never disappear while scrolling past FAQ or gallery');
+              await page.screenshot({ path: path.join(out, snapshotPrefix + '-' + engine + '-' + width + '-puppy-prompt.png') });
               const overitRadius = await aria.getByRole('button', { name: 'Overiť', exact: true })
                 .evaluate(button => parseFloat(getComputedStyle(button).borderTopLeftRadius));
               if (overitRadius < 10 || overitRadius > 13)
