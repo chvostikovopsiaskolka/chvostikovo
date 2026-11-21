@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
+import { AriaGuidedChat } from "./AriaGuidedChat";
 import brandWordmark from "@/assets/logo.png";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
@@ -37,6 +38,7 @@ export function AriaLeadAssistant({
   requirementsSectionId = "lead-requirements",
   puppyStartSectionId,
   anchorOverrides,
+  guidedChatPreview = false,
 }: {
   onOpenInfo: () => void;
   onOpenInterest: () => void;
@@ -47,10 +49,13 @@ export function AriaLeadAssistant({
   /** Starts the puppy speech only once the visitor reaches this section. */
   puppyStartSectionId?: string;
   anchorOverrides?: Record<string, string>;
+  /** Enables the messenger-style preview only on /test-aria/. */
+  guidedChatPreview?: boolean;
 }) {
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
   const stageRef = useRef<"intro" | "puppy" | "contact">("intro");
   const [panel, setPanel] = useState<Panel>(null);
+  const [chatOpen, setChatOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [pricingVisitOpen, setPricingVisitOpen] = useState(false);
 
@@ -71,7 +76,7 @@ export function AriaLeadAssistant({
       const next = {
         width: Math.round(bubble.width),
         height: Math.round(bubble.height),
-        tipX: Math.round(head.left + head.width * 0.68 - bubble.left),
+        tipX: Math.round(head.left + head.width * (guidedChatPreview ? 0.32 : 0.68) - bubble.left),
         tipY: Math.round(head.top + head.height * 0.43 - bubble.top),
       };
       setSpeechGeometry(prev =>
@@ -92,7 +97,7 @@ export function AriaLeadAssistant({
       window.visualViewport?.removeEventListener("resize", requestMeasure);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [hidden, stage]);
+  }, [hidden, stage, guidedChatPreview, chatOpen, panel]);
 
   // Stable sections rather than flipping a bubble on every scroll pixel.
   // Hysteresis keeps iOS browser chrome resizing from thrashing the dock.
@@ -197,6 +202,7 @@ export function AriaLeadAssistant({
   }
 
   function toggle(next: Exclude<Panel, null>) {
+    if (guidedChatPreview) setChatOpen(false);
     track(next);
     // Keep the previous dock's GA4 / Meta pricing-view signal, separate from
     // the cookieless nav_click and any later, successful Lead conversion.
@@ -208,18 +214,21 @@ export function AriaLeadAssistant({
 
 
   function openInfo() {
+    setChatOpen(false);
     track("info");
     setPanel(null);
     onOpenInfo();
   }
 
   function openInterest() {
+    setChatOpen(false);
     track("interest");
     setPanel(null);
     onOpenInterest();
   }
 
   function openPuppy() {
+    setChatOpen(false);
     track("puppy_checker_modal");
     setPanel(null);
     onOpenPuppyChecker();
@@ -230,8 +239,24 @@ export function AriaLeadAssistant({
   const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[10px] px-0.5 text-center text-forest transition-colors aria-expanded:bg-secondary/75 hover:bg-white/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
 
 
+  function openChat() {
+    if (!guidedChatPreview) return;
+    setPanel(null);
+    setChatOpen(true);
+    void trackCookielessInteraction("explore_daycare", trackingPrefix + "_chat_open", "sk");
+  }
+
   const { width: sw, height: sh, tipX, tipY } = speechGeometry;
-  const speechPath = [
+  const rightSpeechPath = [
+    "M 16 1",
+    `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
+    `L ${sw - 1} ${sh - 18}`,
+    `C ${sw - 1} ${sh - 8} ${tipX - 16} ${tipY - 15} ${tipX} ${tipY}`,
+    `C ${tipX - 14} ${tipY - 8} ${sw - 32} ${sh - 1} ${sw - 30} ${sh - 1}`,
+    `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
+    "L 1 16 Q 1 1 16 1 Z",
+  ].join(" ");
+  const leftSpeechPath = [
     "M 16 1",
     `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
     `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
@@ -240,6 +265,7 @@ export function AriaLeadAssistant({
     `C ${tipX + 12} ${tipY - 13} 2 ${sh - 11} 1 ${sh - 19}`,
     `L 1 16 Q 1 1 16 1 Z`,
   ].join(" ");
+  const speechPath = guidedChatPreview ? rightSpeechPath : leftSpeechPath;
 
   if (hidden) return null;
 
@@ -384,9 +410,9 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        {!panel && (
+        {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
-            className="pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]">
+            className={guidedChatPreview ? "pointer-events-none mb-2 flex w-full justify-end pr-[90px] sm:pr-[111px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[460px] -rotate-[0.5deg] items-center px-3 py-2 text-forest">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
@@ -395,11 +421,22 @@ export function AriaLeadAssistant({
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>
               {stage === "intro" ? (
-                <p className="relative z-10 font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]">
-                  Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
-                  <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
-                  <span className="mt-1.5 block text-[11px] font-medium leading-[1.35] text-forest/85 sm:text-xs">Zisti viac z našej ponuky nižšie.</span>
-                </p>
+                guidedChatPreview ? (
+                  <button type="button" aria-label="Otvoriť chat s Ariou" onClick={openChat}
+                    className="pointer-events-auto relative z-10 text-left focus-visible:outline-2 focus-visible:outline-coral">
+                    <p className="font-display text-[11px] font-semibold leading-[1.35] tracking-normal sm:text-[13px]">
+                      Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
+                      <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
+                      <span className="mt-1 block text-[10px] font-bold text-coral-dark sm:text-xs">Klikni na mňa a otvorím chat.</span>
+                    </p>
+                  </button>
+                ) : (
+                  <p className="relative z-10 font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]">
+                    Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
+                    <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
+                    <span className="mt-1.5 block text-[11px] font-medium leading-[1.35] text-forest/85 sm:text-xs">Zisti viac z našej ponuky nižšie.</span>
+                  </p>
+                )
               ) : stage === "puppy" ? (
                 <div className="relative z-10 flex min-w-0 items-center justify-between gap-2">
                   <strong className="min-w-0 font-display text-[11px] font-semibold leading-tight text-forest">
@@ -425,10 +462,19 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className="pointer-events-auto relative ml-[83px] rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:ml-[104px] sm:px-2" data-aria-dock>
+        <div className={"pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (guidedChatPreview ? "mr-[83px] sm:mr-[104px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-          <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
-            className="pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]" />
+          {guidedChatPreview ? (
+            <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
+              data-aria-chat-trigger onClick={openChat}
+              className="pointer-events-auto absolute -bottom-1 -right-[86px] h-[95px] w-[95px] max-w-none rounded-[10px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:-right-[108px] sm:h-[108px] sm:w-[108px]">
+              <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
+                className="h-full w-full object-contain contrast-[1.1] saturate-[1.05] drop-shadow-[0_3px_5px_rgba(0,0,0,.23)]" />
+            </button>
+          ) : (
+            <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
+              className="pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]" />
+          )}
           <div className="flex h-[52px] items-center gap-0.5">
             <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={panel === "pricing"} onClick={() => toggle("pricing")}>
               <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span>
@@ -447,6 +493,7 @@ export function AriaLeadAssistant({
             </button>
           </div>
         </div>
+        {guidedChatPreview && <AriaGuidedChat open={chatOpen} onClose={() => setChatOpen(false)} />}
       </div>
     </aside>
   );
