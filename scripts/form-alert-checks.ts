@@ -78,6 +78,7 @@ try {
   // QA conversions are skipped on the server; real conversions keep working.
   const calls: string[] = [];
   const databasePayloads: any[] = [];
+  const leadEmailBodies: any[] = [];
   (globalThis as any).Deno.env.get = (name: string) => ({ SUPABASE_URL: "https://test.invalid", SUPABASE_SERVICE_ROLE_KEY: "test-only", RESEND_API_KEY: "test-only", META_CAPI_ACCESS_TOKEN: "test-only" })[name];
   globalThis.fetch = (async (url: any, init: any) => {
     calls.push(String(url));
@@ -86,6 +87,7 @@ try {
     if (String(url).includes("/rpc/consume_request_limit_v336")) return Response.json(true);
     if (String(url).includes("web_form_submissions?")) return Response.json([]);
     if (String(url).includes("graph.facebook.com")) return Response.json({ events_received: 1 });
+    if (String(url) === "https://api.resend.com/emails") leadEmailBodies.push(JSON.parse(init.body));
     if (String(url).endsWith("/rest/v1/web_form_submissions") && init?.method === "POST") databasePayloads.push(JSON.parse(init.body));
     return Response.json({ id: "test-only", ok: true }, { status: 201 });
   }) as typeof fetch;
@@ -96,6 +98,24 @@ try {
   calls.length = 0;
   assert.equal((await send({ ...lead, source_ref: "/" })).status, 201);
   assert(calls.some((url) => url.includes("graph.facebook.com")), "Real Meta conversions must remain enabled");
+  const puppy = {
+    ...lead, interest_reason: "Mám záujem o škôlku pre šteniatko",
+    marketing_consent: false, source_ref: "/?utm_source=qa",
+    raw_payload: {
+      "Šteniatko – vek": "7 mesiacov", "Šteniatko – meno": "Mia",
+      "Šteniatko – plemeno": "Doga", "Šteniatko – váha": "18.5 kg",
+      "Šteniatko – besnota": "Áno", "Šteniatko – DHPPi+L": "Nie",
+      "Šteniatko – kotercový kašeľ": "Neviem",
+      "Šteniatko – výsledok orientačnej kontroly": "Potrebné individuálne posúdenie",
+    },
+  };
+  assert.equal((await send(puppy)).status, 201, "Puppy inquiry must reuse the live lead endpoint.");
+  assert(databasePayloads.at(-1).raw_payload.raw_payload["Šteniatko – vek"] === "7 mesiacov",
+    "Puppy raw fields must persist in the operator's lead row.");
+  const operatorEmail = String(leadEmailBodies.at(-1)?.text ?? "");
+  for (const line of ["Mia", "7 mesiacov", "DHPPi+L: Nie", "kotercový kašeľ: Neviem", "Potrebné individuálne posúdenie"])
+    assert(operatorEmail.includes(line), "Operator email must show the submitted puppy details: " + line);
+
   const application = { ...lead, form_type: "application", marketing_consent: false, source_ref: "/?utm_source=qa", dog_name: "TEST DOG", dog_sex: "Pes", dog_age_text: "2 roky", dog_neutered: "Nie", interest_reason: "Občas podľa potreby", dog_info: "TEST" };
   for (const details of [{ dog_breed: "Labrador", dog_weight_kg: 25.5 }, { dog_breed: "Labrador", dog_weight_kg: "25,5 kg" }, { dog_breed_weight: "Labrador, cca 25,5 kg" }]) {
     assert.equal((await send({ ...application, ...details })).status, 201);
