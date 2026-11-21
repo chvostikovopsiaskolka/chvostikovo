@@ -632,8 +632,8 @@ const failures = [];
                   });
                   await interest.getByRole('button', { name: 'Odoslať záujem' }).click();
                   await interest.locator('[data-aria-chat-contact-success="true"]').waitFor({ state: 'visible', timeout: 5000 });
-                  if (!posted || !String(posted.zaujem || '').includes('Bella') ||
-                      posted.plemeno !== 'Labrador' ||
+                  if (!posted || !String(posted.interest_reason || '').includes('Bella') ||
+                      posted.dog_breed !== 'Labrador' ||
                       !await interest.getByText(/Príde vám SMS potvrdenie/).count() ||
                       await interest.getByText(/Pozrieť cenník/).count() ||
                       await interest.getByText(/Pozrieť podmienky/).count())
