@@ -82,7 +82,7 @@ export function PhotoLightbox({
         style={{ touchAction: "pan-y" }}>
         <img data-photo-lightbox-image src={photo.fullSrc || photo.src} alt={photo.alt}
           loading="eager" decoding="async" draggable={false}
-          className="block max-h-[calc(100dvh-34px)] max-w-[calc(100vw-20px)] select-none rounded-[22px] object-contain shadow-soft sm:max-h-[85dvh] sm:max-w-[88vw]"
+          className="block min-h-[160px] max-h-[calc(100dvh-34px)] max-w-[calc(100vw-20px)] select-none rounded-[22px] bg-secondary/20 object-contain shadow-soft sm:max-h-[85dvh] sm:max-w-[88vw]"
         />
         <button ref={closeButton} type="button"
           aria-label={en ? "Close gallery" : "Zavrieť galériu"}
