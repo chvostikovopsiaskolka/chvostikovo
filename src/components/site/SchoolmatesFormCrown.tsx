@@ -1,6 +1,6 @@
 import schoolmatesCta from "@/assets/skolkari-web-4.png";
 
-export function SchoolmatesFormCrown({ compact = false }: { compact?: boolean }) {
+export function SchoolmatesFormCrown({ compact = false, groundAccent = false }: { compact?: boolean; groundAccent?: boolean }) {
   if (compact) {
     return (
       <div
@@ -16,6 +16,7 @@ export function SchoolmatesFormCrown({ compact = false }: { compact?: boolean })
           height={630}
           className="absolute inset-x-0 bottom-[-10px] h-[124px] w-full scale-[1.04] object-cover object-bottom"
         />
+        {groundAccent && <span data-crown-ground className="pointer-events-none absolute inset-x-[13%] bottom-[1px] z-20 h-[7px] rounded-full bg-gradient-to-r from-transparent via-coral/45 to-transparent blur-[3px]" />}
       </div>
     );
   }
@@ -34,6 +35,7 @@ export function SchoolmatesFormCrown({ compact = false }: { compact?: boolean })
         height={630}
         className="absolute inset-x-0 bottom-[-14px] h-[185px] w-full scale-[1.07] object-cover object-bottom sm:h-[210px] sm:scale-[1.06]"
       />
+      {groundAccent && <span data-crown-ground className="pointer-events-none absolute inset-x-[13%] bottom-[1px] z-20 h-[8px] rounded-full bg-gradient-to-r from-transparent via-coral/40 to-transparent blur-[4px]" />}
     </div>
   );
 }
