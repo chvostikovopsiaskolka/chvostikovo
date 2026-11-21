@@ -7,6 +7,14 @@
 - **CI vytvára iba debug APK a NEPODPÍSANÝ AAB bez súkromného Firebase JSON; tento AAB nesmieš uploadovať do Google Play.** Na produkčný podpis používaj výhradne nový checkout a originálny lokálny Firebase JSON.
 - Android signing/build-only PR zostáva **DRAFT: NEZLUČOVAŤ do customer-portal-production**. Webová PWA na Verceli a Supabase backend sa tým nemenia.
 
+**Windows PowerShell 5.1 (oprava 21.11):** predchadzajuca verzia `Prepare-Play-v435.ps1` bola UTF-8 bez BOM s diakritikou, co na starsom Windows PowerShell rozbilo parsovanie uvodzoviek. Oprava ponechava obsah ASCII-only; v CI je novy test kodovania a skutocny Windows PowerShell 5.1 parser test. Ak uz je vetva naklonovana, NEKLONUJ znovu, pouzi:
+```powershell
+cd "$HOME\Chvostikovo-Android-v435"
+git pull --ff-only origin release/android-v435-play-signing-20261121
+& ".\mobile\Prepare-Play-v435.ps1"
+```
+Tato oprava nemeni obsah podpisovaneho Androidu, FCM, Firebase, ani podpisovy kluc.
+
 **Na svojom Windows počítači v PowerShell spusti:**
 ```powershell
 git clone --single-branch --branch release/android-v435-play-signing-20261121 https://github.com/chvostikovopsiaskolka/chvostikovo.git "$HOME\Chvostikovo-Android-v435"

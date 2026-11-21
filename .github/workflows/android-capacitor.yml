@@ -59,3 +59,20 @@ jobs:
             mobile/android/app/build/outputs/apk/debug/app-debug.apk
             mobile/android/app/build/outputs/bundle/release/app-release.aab
             mobile/www/mobile-build.json
+
+  signing-script-powershell51:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse signing script with Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          $scriptPath = (Resolve-Path 'mobile/Prepare-Play-v435.ps1').Path
+          [System.Management.Automation.Language.Parser]::ParseFile($scriptPath, [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.ToString() }
+            exit 1
+          }
+          Write-Host 'PowerShell 5.1 parser PASS'

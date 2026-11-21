@@ -7,14 +7,14 @@ Set-StrictMode -Version Latest
 $mobile = Split-Path -Parent $PSCommandPath
 $root = Split-Path -Parent $mobile
 $manifest = Join-Path $root "version.json"
-if (-not (Test-Path -LiteralPath $manifest)) { throw "Chýba version.json. Spusti skript z kompletného checkoutu." }
+if (-not (Test-Path -LiteralPath $manifest)) { throw "Chyba version.json. Spusti skript z kompletneho checkoutu." }
 $release = Get-Content -LiteralPath $manifest -Raw | ConvertFrom-Json
 if ($release.build -ne "v435" -or $release.version -ne "2.0.108") {
-  throw "Toto nie je Android v435/2.0.108. Aktuálne: $($release.build) $($release.version)."
+  throw "Toto nie je Android v435/2.0.108. Aktualne: $($release.build) $($release.version)."
 }
 $keystore = Join-Path $env:USERPROFILE "Documents\Chvostikovo-Keys\chvostikovo-upload.jks"
 if (-not (Test-Path -LiteralPath $keystore -PathType Leaf)) {
-  throw "Nenašiel som pôvodný upload keystore: $keystore. Nevytváraj nový podpisový kľúč."
+  throw "Nenasiel som povodny upload keystore: $keystore. Nevytvaraj novy podpisovy kluc."
 }
 $firebaseTarget = Join-Path $mobile "android\app\google-services.json"
 if (-not (Test-Path -LiteralPath $firebaseTarget -PathType Leaf)) {
@@ -22,22 +22,22 @@ if (-not (Test-Path -LiteralPath $firebaseTarget -PathType Leaf)) {
     try {
       Add-Type -AssemblyName System.Windows.Forms
       $dialog = New-Object System.Windows.Forms.OpenFileDialog
-      $dialog.Title = "Vyber PÔVODNÝ Firebase google-services.json z posledného funkčného Android projektu"
-      $dialog.Filter = "Firebase konfigurácia (google-services.json)|google-services.json|JSON (*.json)|*.json"
+      $dialog.Title = "Vyber POVODNY Firebase google-services.json z posledneho funkcneho Android projektu"
+      $dialog.Filter = "Firebase konfiguracia (google-services.json)|google-services.json|JSON (*.json)|*.json"
       if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
         $FirebaseJson = $dialog.FileName
       }
       $dialog.Dispose()
     } catch {
-      Write-Host "Grafický výber nebol dostupný." -ForegroundColor Yellow
+      Write-Host "Graficky vyber nebol dostupny." -ForegroundColor Yellow
     }
     if (-not $FirebaseJson) {
-      $FirebaseJson = Read-Host "Zadaj lokálnu cestu k pôvodnému google-services.json"
+      $FirebaseJson = Read-Host "Zadaj lokalnu cestu k povodnemu google-services.json"
     }
   }
   $FirebaseJson = $FirebaseJson.Trim('"').Trim("'")
   if (-not (Test-Path -LiteralPath $FirebaseJson -PathType Leaf)) {
-    throw "Pôvodný Firebase JSON neexistuje: $FirebaseJson"
+    throw "Povodny Firebase JSON neexistuje: $FirebaseJson"
   }
   Copy-Item -LiteralPath $FirebaseJson -Destination $firebaseTarget -Force
 }
@@ -46,18 +46,18 @@ $matchingClients = @($config.client | Where-Object {
   $_.client_info.android_client_info.package_name -eq "sk.chvostikovo.app"
 })
 if ($matchingClients.Count -lt 1) {
-  throw "Nesprávny Firebase projekt: google-services.json neobsahuje Android package sk.chvostikovo.app."
+  throw "Nespravny Firebase projekt: google-services.json neobsahuje Android package sk.chvostikovo.app."
 }
 if (-not (Get-Command npm.cmd -ErrorAction SilentlyContinue) -or
     -not (Get-Command npx.cmd -ErrorAction SilentlyContinue)) {
-  throw "Vyžaduje sa Node.js/npm (preferovaný Node 22) a lokálne Android SDK/Android Studio."
+  throw "Vyzaduje sa Node.js/npm (preferovany Node 22) a lokalne Android SDK/Android Studio."
 }
 Write-Host ""
-Write-Host "Chvostíkovo Android v435 / 2.0.108" -ForegroundColor Cyan
-Write-Host "Firebase: pôvodný google-services.json pre sk.chvostikovo.app [overené]" -ForegroundColor Green
+Write-Host "Chvostikovo Android v435 / 2.0.108" -ForegroundColor Cyan
+Write-Host "Firebase: povodny google-services.json pre sk.chvostikovo.app [overene]" -ForegroundColor Green
 Write-Host "Upload keystore: $keystore" -ForegroundColor Cyan
 Write-Host "Key alias: chvostikovo-upload" -ForegroundColor Cyan
-Write-Host "Heslá sem ani do GitHubu nezadávaj. Zadáš ich až v Android Studio." -ForegroundColor Yellow
+Write-Host "Hesla sem ani do GitHubu nezadavaj. Zadas ich az v Android Studio." -ForegroundColor Yellow
 Push-Location $mobile
 try {
   & npm.cmd ci
@@ -65,12 +65,12 @@ try {
   & npm.cmd run sync
   if ($LASTEXITCODE -ne 0) { throw "Capacitor sync zlyhal" }
   & npm.cmd test
-  if ($LASTEXITCODE -ne 0) { throw "Natívne regresné testy zlyhali" }
-  Write-Host "Otváram Android Studio..." -ForegroundColor Green
+  if ($LASTEXITCODE -ne 0) { throw "Nativne regresne testy zlyhali" }
+  Write-Host "Otvaram Android Studio..." -ForegroundColor Green
   & npx.cmd cap open android
-  if ($LASTEXITCODE -ne 0) { throw "Android Studio sa nepodarilo otvoriť" }
+  if ($LASTEXITCODE -ne 0) { throw "Android Studio sa nepodarilo otvorit" }
 } finally { Pop-Location }
 Write-Host ""
 Write-Host "V Android Studio: Build > Generate Signed Bundle / APK > Android App Bundle > release." -ForegroundColor Cyan
-Write-Host "Použi PÔVODNÝ upload keystore a alias uvedené vyššie; neklikaj na Create New." -ForegroundColor Yellow
-Write-Host "Pred uploadom do Play over najvyšší versionCode, certifikát, Firebase FCM a App Links na fyzickom Androide." -ForegroundColor Yellow
+Write-Host "Pouzi POVODNY upload keystore a alias uvedene vyssie; neklikaj na Create New." -ForegroundColor Yellow
+Write-Host "Pred uploadom do Play over najvyssi versionCode, certifikat, Firebase FCM a App Links na fyzickom Androide." -ForegroundColor Yellow
