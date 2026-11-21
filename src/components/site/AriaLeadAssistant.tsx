@@ -38,7 +38,8 @@ export function AriaLeadAssistant({
   hidden?: boolean;
   trackingPrefix?: string;
 }) {
-  const [intro, setIntro] = useState(true);
+  const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
+  const stageRef = useRef<"intro" | "puppy" | "contact">("intro");
   const [panel, setPanel] = useState<Panel>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [pricingVisitOpen, setPricingVisitOpen] = useState(false);
@@ -82,7 +83,7 @@ export function AriaLeadAssistant({
       window.visualViewport?.removeEventListener("resize", requestMeasure);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [hidden, intro]);
+  }, [hidden, stage]);
 
   // Yield to visible headings, form fields and CTAs instead of covering them.
   // Visibility keeps the layout measurable on the next scroll frame.
@@ -99,13 +100,18 @@ export function AriaLeadAssistant({
       const important = document.querySelectorAll<HTMLElement>(
         "main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]"
       );
-      const overlaps = Array.from(important).some(node => {
-        const rect = node.getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0 &&
-          rect.left < bubble.right + 8 && rect.right > bubble.left - 8 &&
-          rect.top < bubble.bottom + 8 && rect.bottom > bubble.top - 8;
+      setSpeechObscured(previous => {
+        // Require a wider clear gap before restoring the speech balloon.
+        // This prevents rapid hide/show at the boundary of a form or heading.
+        const margin = previous ? 30 : 8;
+        const overlaps = Array.from(important).some(node => {
+          const rect = node.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0 &&
+            rect.left < bubble.right + margin && rect.right > bubble.left - margin &&
+            rect.top < bubble.bottom + margin && rect.bottom > bubble.top - margin;
+        });
+        return previous === overlaps ? previous : overlaps;
       });
-      setSpeechObscured(prev => prev === overlaps ? prev : overlaps);
     };
     const requestCheck = () => {
       if (!frame) frame = window.requestAnimationFrame(check);
@@ -121,21 +127,38 @@ export function AriaLeadAssistant({
       window.removeEventListener("resize", requestCheck);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [hidden, intro, panel]);
+  }, [hidden, stage, panel]);
 
+  // Stable sections rather than flipping a bubble on every scroll pixel.
+  // Hysteresis keeps iOS browser chrome resizing from thrashing the dock.
   useEffect(() => {
     let frame = 0;
     const update = () => {
       frame = 0;
-      setIntro(window.scrollY < 125);
+      const previous = stageRef.current;
+      const endOfRequirements = document.getElementById("lead-requirements")?.getBoundingClientRect().bottom ?? Infinity;
+      let next: typeof previous;
+      if (previous === "contact" ? endOfRequirements < 110 : endOfRequirements <= -8) {
+        next = "contact";
+      } else if (previous === "intro" ? window.scrollY < 170 : window.scrollY < 80) {
+        next = "intro";
+      } else {
+        next = "puppy";
+      }
+      if (previous !== next) {
+        stageRef.current = next;
+        setStage(next);
+      }
     };
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(update);
     };
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
@@ -202,7 +225,7 @@ export function AriaLeadAssistant({
 
   const optionClass = "flex min-h-11 w-full items-center justify-between gap-2 rounded-2xl border border-forest/10 bg-white/75 px-3 py-2.5 text-left text-sm font-semibold text-forest transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
   const ctaClass = "flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-coral px-4 py-2.5 text-center font-display text-sm font-bold text-white shadow-sm transition hover:bg-coral-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest";
-  const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[12px] bg-white/55 px-0.5 text-center text-forest shadow-[0_2px_7px_rgba(18,68,43,.10)] transition aria-expanded:bg-secondary/80 aria-expanded:ring-1 aria-expanded:ring-forest/15 hover:bg-white/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
+  const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[10px] px-0.5 text-center text-forest transition-colors aria-expanded:bg-secondary/75 hover:bg-white/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
 
 
   const { width: sw, height: sh, tipX, tipY } = speechGeometry;
@@ -210,16 +233,16 @@ export function AriaLeadAssistant({
     "M 16 1",
     `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
     `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
-    `L 45 ${sh - 1}`,
-    `C 24 ${sh - 1} ${tipX + 17} ${tipY - 7} ${tipX} ${tipY}`,
-    `C ${tipX + 18} ${tipY - 16} 5 ${sh - 9} 14 ${sh - 8}`,
-    `Q 1 ${sh - 8} 1 ${sh - 18} L 1 16 Q 1 1 16 1 Z`,
+    `L 30 ${sh - 1}`,
+    `C 11 ${sh - 1} ${tipX + 15} ${tipY - 15} ${tipX} ${tipY}`,
+    `C ${tipX + 12} ${tipY - 13} 2 ${sh - 11} 1 ${sh - 19}`,
+    `L 1 16 Q 1 1 16 1 Z`,
   ].join(" ");
 
   if (hidden) return null;
 
   return (
-    <aside aria-label="Aria – sprievodkyňa Chvostíkovom" data-aria-guide data-intro={intro ? "true" : "false"}
+    <aside aria-label="Aria – sprievodkyňa Chvostíkovom" data-aria-guide data-intro={stage === "intro" ? "true" : "false"} data-aria-stage={stage}
       className="pointer-events-none fixed inset-x-0 bottom-[max(6px,env(safe-area-inset-bottom))] z-40 px-2 sm:bottom-4 sm:px-4">
       <div className="pointer-events-none relative mx-auto w-full max-w-[690px]">
         {panel && (
@@ -349,12 +372,13 @@ export function AriaLeadAssistant({
                 <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>
-              {intro ? (
+              {stage === "intro" ? (
                 <p className="relative z-10 font-display text-[11px] leading-tight font-semibold tracking-tight">
                   Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                   <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
+                  <span className="mt-1 block text-[10px] font-medium text-forest/85">Zisti viac z našej ponuky nižšie.</span>
                 </p>
-              ) : (
+              ) : stage === "puppy" ? (
                 <div className="relative z-10 flex min-w-0 items-center gap-2">
                   <strong className="min-w-0 text-center font-display text-[clamp(9px,2.5vw,13px)] text-forest">
                     Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span>
@@ -364,16 +388,26 @@ export function AriaLeadAssistant({
                     Overiť
                   </button>
                 </div>
+              ) : (
+                <div className="relative z-10 flex min-w-0 items-center gap-2">
+                  <strong className="min-w-0 font-display text-[11px] leading-tight text-forest">
+                    Chcete sa informovať? <span className="text-coral-dark">Vyplňte nezáväzný formulár.</span>
+                  </strong>
+                  <button type="button" onClick={openInfo}
+                    className="min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    Vyplniť
+                  </button>
+                </div>
               )}
             </div>
           </div>
         )}
 
-        <div className="pointer-events-auto relative ml-[83px] rounded-[16px] border border-white/80 bg-card/85 px-1 py-0.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-2" data-aria-dock>
+        <div className="pointer-events-auto relative ml-[83px] rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:ml-[104px] sm:px-2" data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
-            className="pointer-events-none absolute -bottom-1 -left-[83px] h-[78px] w-[78px] max-w-none object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,.42)] sm:-left-[104px] sm:h-[95px] sm:w-[95px]" />
-          <div className="flex min-h-[48px] items-center gap-0.5">
+            className="pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]" />
+          <div className="flex h-[52px] items-center gap-0.5">
             <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={panel === "pricing"} onClick={() => toggle("pricing")}>
               <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span>
             </button>
