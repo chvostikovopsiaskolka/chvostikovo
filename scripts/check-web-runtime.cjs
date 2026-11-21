@@ -188,8 +188,7 @@ const failures = [];
                   topSpacerHeight: topSpacer.getBoundingClientRect().height,
                   viewportHeight: window.innerHeight,
                   serviceBadgeBelowH1: badgeRect.top >= headlineRect.bottom + 55,
-                  dogsRestOnOrange: serviceGroup.contains(crown) && crownRect.bottom >= badgeRect.top + 14 &&
-                    crownRect.bottom <= badgeRect.top + 25,
+                  dogsRestOnOrange: serviceGroup.contains(crown) && Math.abs(crownRect.bottom - badgeRect.top) <= 2,
                   serviceBadgeFits: badgeRect.left >= -1 && badgeRect.right <= window.innerWidth + 1 &&
                     serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
                   descriptionGap: descriptionRect.top - badgeRect.bottom,
@@ -209,6 +208,7 @@ const failures = [];
                     caretakerHeadingRect.height <= caretakerHeadingLine * 1.55,
                   whiteInfoBackground: getComputedStyle(form).backgroundColor === 'rgb(255, 255, 255)' &&
                     !!form.querySelector('.pointer-events-none.absolute.inset-0'),
+                  groundedFirstVisit: !!document.querySelector('#aria-first-visit-form [data-crown-ground]'),
                   bothDogCrowns: heroDogs.getAttribute('src') === firstVisitDogs.getAttribute('src'),
                   proofLeft: rect.left,
                   proofRight: rect.right,
@@ -229,7 +229,7 @@ const failures = [];
                   !firstFold.naturalReviewBottom ||
                   !firstFold.noBenefitsInHero || firstFold.relocatedBenefitsCount !== 3 ||
                   !firstFold.caretakersHeadingFits || !firstFold.whiteInfoBackground ||
-                  !firstFold.bothDogCrowns ||
+                  !firstFold.groundedFirstVisit || !firstFold.bothDogCrowns ||
                   firstFold.proofLeft < -1 || firstFold.proofRight > width + 1 ||
                   firstFold.textOverflows || firstFold.proofHeight > firstFold.lineHeight * 1.55)
                 throw new Error('Aria first fold form or Google proof layout regressed at ' + width + ': ' + JSON.stringify(firstFold));
