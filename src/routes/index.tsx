@@ -11,6 +11,7 @@ import { ProductSection } from "@/components/site/ProductSection";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
 import { InquirySection } from "@/components/site/InquirySection";
+import { HomePuppyChecker } from "@/components/site/HomePuppyChecker";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FAQ } from "@/content/site";
 
@@ -88,6 +89,7 @@ function Index() {
         <Why />
         <InquirySection />
         <Requirements showContextFaq />
+        <HomePuppyChecker />
         <Faq />
         <ProductSection />
         <About />

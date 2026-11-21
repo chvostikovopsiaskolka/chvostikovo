@@ -67,7 +67,7 @@ assert(css.includes("margin-top: 0;") && css.includes("--hero-safe-inset: env(sa
 assert(root.includes('name="theme-color"') && root.includes("whiteHeroPaths.has(pathname)"), "Match initial Safari top-bar colour to the Hero");
 assert(css.includes("padding-top: calc(var(--hero-content-top) + var(--hero-safe-inset))"), "Hero text must stay below notch");
 assert(hero.includes('className="hero-safe-top hero-safe-top-main'), "Main Hero full-bleed class");
-for (const route of ["src/routes/psia-skolka-kosice.tsx", "src/routes/psia-skolka-pre-steniatka.tsx", "src/routes/strazenie-psov-kosice.tsx", "src/routes/en.dog-daycare-kosice.tsx"]) {
+for (const route of ["src/routes/psia-skolka-pre-steniatka.tsx", "src/routes/strazenie-psov-kosice.tsx", "src/routes/en.dog-daycare-kosice.tsx"]) {
   assert(read(route).includes('className="hero-safe-top relative overflow-hidden'), "Landing full-bleed class missing: " + route);
 }
 assert(pawCss.includes("inset: 0;") && pawCss.includes("position: absolute;"), "Decorative paws must follow Hero bounds");
@@ -134,7 +134,19 @@ assert(puppyAria.includes("<AriaLeadAssistant") &&
   "Approved puppy landing must use Aria navigation and an accessible puppy-check/contact handoff, not two competing mobile docks");
 const liveLead = read("src/routes/psia-skolka-kosice.tsx");
 const ariaLead = read("src/routes/test-aria.tsx");
-assert(liveLead.includes("component: LeadLandingPage") && !liveLead.includes("component: AriaPreviewPage") && ariaLead.includes("<AriaLeadAssistant") && ariaLead.includes("hideMobileDock") && ariaLead.includes("<LeadStepForm"), "Aria stays preview-only until Marek approves the lead launch");
+assert(liveLead.includes("component: AriaPreviewPage") && !liveLead.includes("component: LeadLandingPage") &&
+  liveLead.includes('content: "noindex, follow"') && liveLead.includes('rel: "canonical"') &&
+  ariaLead.includes("<AriaLeadAssistant") && ariaLead.includes("hideMobileDock") &&
+  ariaLead.includes("<LeadStepForm") && ariaLead.includes("<AriaPuppyChecker"),
+  "Approved Aria must render on the paid campaign lead route with preserved canonical/noindex and a single stable dock");
+const homepage = read("src/routes/index.tsx");
+const homeChecker = read("src/components/site/HomePuppyChecker.tsx");
+assert(homepage.includes("<HomePuppyChecker />") &&
+  homeChecker.includes("<AriaPuppyChecker") &&
+  homeChecker.includes("<LeadStepForm") &&
+  homeChecker.includes("home_puppy_checker_eligible") &&
+  homeChecker.includes("home_puppy_checker_info"),
+  "Homepage puppy checker must retain shared contact, sourced submissions and no duplicate dock");
 assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('label: "Interested in daycare"'), "Landing CTA must have full SK/EN label");
 assert(dock.includes("marketingExtra"), "Local first visit menu links required");
 assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");

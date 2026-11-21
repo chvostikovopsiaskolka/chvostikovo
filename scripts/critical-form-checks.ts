@@ -284,7 +284,6 @@ assert(forms.includes("hideInterest = false"), "Critical form check failed: info
 // v303: three visible Slovak ShortForm choices; same required field and CRM contract.
 // Guided LEAD pilot: exact new UI choices must persist as exact CRM interest_reason values.
 const stagedLeadSource = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
-const stagedLeadLanding = readFileSync(new URL("../src/routes/psia-skolka-kosice.tsx", import.meta.url), "utf8");
 const allowedStagedInterests = [
   "Chcem sa informovať o škôlke",
   "Mám záujem využívať škôlku pravidelne",
@@ -302,19 +301,57 @@ assert(stagedLeadSource.includes('const [breed, setBreed] = useState(puppyCheck?
   !stagedLeadSource.includes("showBreed") && !stagedLeadSource.includes("ariaPreview && selectedInterest"),
   "One optional, editable breed field must appear in every SK enquiry including puppy contact, keeping the attached puppy breed in sync.");
 const releasedLeadRoute = readFileSync(new URL("../src/routes/psia-skolka-kosice.tsx", import.meta.url), "utf8");
-assert(!releasedLeadRoute.includes('component: AriaPreviewPage') && releasedLeadRoute.includes('component: LeadLandingPage'), "Unapproved Aria preview must NOT replace the live campaign lead URL");
-assert(stagedLeadSource.includes("zaujem: selectedInterest") && stagedLeadSource.includes("name=\"zaujem\"") && stagedLeadSource.includes("PrivacyConsentCheckbox"), "Guided form must preserve interest, consent and submission");
-assert(stagedLeadSource.includes('name="meno"') && stagedLeadSource.includes('name="email"') && stagedLeadSource.includes('<PhoneField'), "Guided form must preserve contact fields and autofill");
-assert(stagedLeadSource.includes('startFormAttempt(trackingSource)') && stagedLeadSource.includes('trackMetaFormConversion("informacie"') && stagedLeadSource.includes('LeadPhoneReceipt'), "Guided form must retain conversion idempotency, receipt and phone correction");
-assert((stagedLeadLanding.match(/<LeadStepForm /g) || []).length === 6, "LEAD must reuse the guided form in mobile/desktop hero, benefits, after requirements, footer and modal");
-assert(stagedLeadLanding.indexOf("<Reviews />") < stagedLeadLanding.indexOf('id="lead-form"'), "Reviews must precede the first mobile lead form");
-assert(stagedLeadLanding.indexOf('id="lead-pricing"') < stagedLeadLanding.indexOf('<Requirements id="lead-requirements" />') && stagedLeadLanding.indexOf('<Requirements id="lead-requirements" />') < stagedLeadLanding.indexOf('id="lead-form-pricing"'), "Pricing must go directly to conditions then an open form");
-assert(stagedLeadLanding.includes('trackingSource="lead_landing_benefits_inline"'), "Why Chvostikovo must offer an open guided form");
-assert(stagedLeadLanding.indexOf('id="lead-form"') < stagedLeadLanding.indexOf('id="lead-benefits"'), "Mobile form must precede Why Chvostikovo");
-assert(stagedLeadLanding.indexOf('id="lead-pricing"') < stagedLeadLanding.indexOf('id="lead-form-pricing"'), "Pricing form must follow pricing");
-assert(stagedLeadLanding.includes('scrollToLeadForm("lead_landing_hero_interest")') && stagedLeadLanding.includes('openLeadModal("lead_landing_mobile_dock")'), "Lead hero CTA must scroll while the mobile dock opens the enquiry modal");
-assert(stagedLeadLanding.includes('openLeadModal("lead_landing_friendship_20261028")'), "Friendship CTA modal must remain");
-assert(!stagedLeadLanding.includes("ContactRevealButton"), "Inline lead forms must not be hidden behind reveal controls");
+assert(releasedLeadRoute.includes('component: AriaPreviewPage') &&
+  !releasedLeadRoute.includes('component: LeadLandingPage') &&
+  releasedLeadRoute.includes('content: "noindex, follow"') &&
+  releasedLeadRoute.includes('rel: "canonical"'),
+  "Paid campaign route must use the approved Aria page and retain original SEO isolation");
+assert(ariaLandingTracking.includes('const isLiveLead = useRouterState') &&
+  ariaLandingTracking.includes('lead_landing_aria_hero_inline') &&
+  ariaLandingTracking.includes('lead_landing_aria_puppy_check') &&
+  ariaLandingTracking.includes('lead_landing_aria_first_visit_inline') &&
+  ariaLandingTracking.includes('hideMobileDock') &&
+  ariaLandingTracking.includes('setPuppyCheck(details)'),
+  "Approved live Aria must have one dock, shared guided lead and puppy-to-contact attribution");
+assert(stagedLeadSource.includes("zaujem: selectedInterest") &&
+  stagedLeadSource.includes('name="zaujem"') &&
+  stagedLeadSource.includes("PrivacyConsentCheckbox") &&
+  stagedLeadSource.includes("startFormAttempt(trackingSource)") &&
+  stagedLeadSource.includes('trackMetaFormConversion("informacie"') &&
+  stagedLeadSource.includes("LeadPhoneReceipt"),
+  "All lead routes must preserve consent, CRM interest, successful-conversion tracking and receipt");
+assert(stagedLeadSource.includes('name="meno"') &&
+  stagedLeadSource.includes('name="plemeno"') &&
+  stagedLeadSource.includes('name="email"') &&
+  stagedLeadSource.includes("<PhoneField"),
+  "Paid and homepage enquiry must expose required contact and optional breed");
+assert(stagedLeadSource.includes('value={option.value} required={step === 1}') &&
+  !stagedLeadSource.includes('value={option.value} required aria-label'),
+  "When puppy eligibility preselects a fourth allowlisted interest, hidden native radio requirements must not block a valid contact submission");
+
+const homePuppy = readFileSync(new URL("../src/components/site/HomePuppyChecker.tsx", import.meta.url), "utf8");
+const homePage = readFileSync(new URL("../src/routes/index.tsx", import.meta.url), "utf8");
+assert(homePage.includes("<HomePuppyChecker />") &&
+  homePuppy.includes("<AriaPuppyChecker") &&
+  homePuppy.includes("<LeadStepForm") &&
+  homePuppy.includes('trackingSource={source}') &&
+  homePuppy.includes('puppyCheck={answers}') &&
+  homePuppy.includes('home_puppy_checker_eligible') &&
+  homePuppy.includes('home_puppy_checker_info'),
+  "Homepage must pass age/vaccines to the existing consented lead form and retain CTA attribution");
+assert(!releasedLeadRoute.includes("submitInquiry(") &&
+  !homePuppy.includes("submitInquiry("),
+  "Routes/checker must not bypass the single existing backend submission gate");
+assert(stagedLeadSource.includes('dog_breed: breedValue || undefined') &&
+  stagedLeadSource.includes("cta_source: trackingSource") &&
+  stagedLeadSource.includes('trackCookielessInteraction("form_submit"'),
+  "Breed, source and successful conversion must be retained inside shared LeadStepForm");
+assert(backendUsageSrc.includes("if (leadBreed) payload.dog_breed = leadBreed;") &&
+  backendUsageSrc.includes('text(input.dog_breed ?? input.plemeno, 80)') &&
+  backendUsageSrc.includes('Plemeno psíka: ${text(payload.dog_breed, 80)}') &&
+  backendUsageSrc.indexOf("if (!LEAD_INTERESTS.has(rawInterest))") <
+    backendUsageSrc.indexOf("if (leadBreed) payload.dog_breed = leadBreed;"),
+  "Live lead receiver must persist optional breed as a normal CRM column and send it to operator email after allowlist validation");
 
 const shortFormSource = forms.slice(forms.indexOf("export function ShortForm"), forms.indexOf("/** Inline binary choices"));
 assert(shortFormSource.includes("!hideInterest") && shortFormSource.includes('name="zaujem"'), "Hidden-interest variants and the existing zaujem name must remain.");
