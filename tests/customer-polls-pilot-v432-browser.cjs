@@ -1,4 +1,4 @@
-/* v434 poll regression: direct poll UI, inline stepper and RLS-simulated audience. */
+/* v435 poll regression: direct poll UI, inline stepper and RLS-simulated audience. */
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const http=require('node:http');
@@ -11,11 +11,11 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
  const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
  const version=JSON.parse(fs.readFileSync(path.join(root,'version.json'),'utf8'));
- assert.equal(version.build,'v434');
- assert.equal(version.version,'2.0.107');
- assert.match(index,/customer-polls-pilot-v432\.js\?v=v434/);
- assert.match(index,/customer-polls-pilot-v432\.css\?v=v434/);
- assert.match(sw,/portal-shell-v434/);
+ assert.match(version.build,/^v[0-9]+$/);
+ assert.match(version.version,/^[0-9]+\.[0-9]+\.[0-9]+$/);
+ assert.ok(index.includes('/customer-polls-pilot-v432.js?v='+version.build));
+ assert.ok(index.includes('/customer-polls-pilot-v432.css?v='+version.build));
+ assert.ok(sw.includes('portal-shell-'+version.build));
  assert.match(original,/portal_poll_votes_v433/);
  assert.match(original,/ensureCustomerSessionV357/);
  assert.doesNotMatch(original,/localStorage\.setItem|service_role|admin\.rpc/);
@@ -68,7 +68,7 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
  const engine=process.env.V3_ENGINE==='webkit'?webkit:chromium;
  const browser=await engine.launch({headless:true});
  try{
-  for(const width of [320,390,430]){
+  for(const width of [320,360,375,390,430]){
    const context=await browser.newContext({viewport:{width,height:750}});
    const page=await context.newPage();
    await page.goto(url);
@@ -87,6 +87,19 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
    await bubble.locator('[data-poll-choice="yes"]').click();
    const quantity=bubble.locator('#customerPollQuantityV433');
    assert.equal(await quantity.textContent(),'1');
+   const outline=await bubble.locator('.customer-poll-stepper-v434').evaluate(group=>{
+    const [minus,count,plus]=group.children;
+    const rect=node=>node.getBoundingClientRect();
+    const border=node=>Number.parseFloat(getComputedStyle(node).borderLeftWidth)||0;
+    return {frame:border(group),minus:border(minus),count:border(count),plus:border(plus),
+     order:rect(minus).right<rect(count).left&&rect(count).right<rect(plus).left,
+     touch:Math.min(rect(minus).width,rect(minus).height,rect(plus).width,rect(plus).height)};
+   });
+   assert.equal(outline.frame,0);
+   assert.ok(outline.minus>=1&&outline.plus>=1);
+   assert.equal(outline.count,0);
+   assert.equal(outline.order,true);
+   assert.ok(outline.touch>=44);
    assert.equal(await bubble.locator('[data-poll-minus]').isDisabled(),true);
    await bubble.locator('[data-poll-plus]').click();
    await bubble.locator('[data-poll-plus]').click();
@@ -117,7 +130,7 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
    assert.equal(await outsider.locator('#customerPollMenuV432').count(),0);
    assert.equal(await outsider.evaluate(()=>window.__calls.some(c=>c.type==='write')),false);
    await context.close();
-   console.log((process.env.V3_ENGINE||'chromium')+' v434 poll '+width+'px PASS');
+   console.log((process.env.V3_ENGINE||'chromium')+' v435 poll '+width+'px PASS');
   }
   const context=await browser.newContext({viewport:{width:390,height:780}});
   const page=await context.newPage();
