@@ -470,7 +470,7 @@ export function AriaLeadAssistant({
           {guidedChatPreview ? (
             <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
               data-aria-chat-trigger onClick={openChat}
-              className="pointer-events-auto absolute -bottom-1 -right-[86px] h-[95px] w-[95px] max-w-none rounded-[10px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:-right-[108px] sm:h-[108px] sm:w-[108px]">
+              className="pointer-events-auto absolute -bottom-1 -right-[90px] h-[95px] w-[95px] max-w-none rounded-[10px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:-right-[108px] sm:h-[108px] sm:w-[108px]">
               <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
                 className="h-full w-full object-contain contrast-[1.1] saturate-[1.05] drop-shadow-[0_3px_5px_rgba(0,0,0,.23)]" />
             </button>
