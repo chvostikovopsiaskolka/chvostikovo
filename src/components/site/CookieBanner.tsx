@@ -138,11 +138,32 @@ export function CookieBanner() {
   useEffect(() => {
     if (!open || typeof document === "undefined") return;
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // Safari iOS can continue to scroll the page with body overflow hidden alone.
+    // Freeze the underlying document at its current scroll position while allowing
+    // the consent panel itself to scroll when its content exceeds the viewport.
+    const body = document.body;
+    const root = document.documentElement;
+    const y = window.scrollY;
+    const previous = {
+      rootOverflow: root.style.overflow,
+      bodyOverflow: body.style.overflow,
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+    };
+    root.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${y}px`;
+    body.style.width = "100%";
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      root.style.overflow = previous.rootOverflow;
+      body.style.overflow = previous.bodyOverflow;
+      body.style.position = previous.position;
+      body.style.top = previous.top;
+      body.style.width = previous.width;
+      window.scrollTo(0, y);
     };
   }, [open]);
 
@@ -209,7 +230,7 @@ export function CookieBanner() {
       <div className={"relative w-full " + (showDetails ? "max-w-4xl" : isAriaPreview ? "max-w-xl pt-9" : "max-w-2xl")}>
         {isAriaPreview && !showDetails && (
           <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={160} height={160}
-            className="pointer-events-none absolute left-3 top-4 z-20 size-[80px] object-contain drop-shadow-[0_5px_7px_rgba(0,0,0,.32)] sm:left-4 sm:top-3 sm:size-24" />
+            className="pointer-events-none absolute left-3 top-3 z-20 size-[90px] object-contain drop-shadow-[0_5px_7px_rgba(0,0,0,.32)] sm:left-4 sm:top-3 sm:size-[106px]" />
         )}
         <div data-aria-cookie-bubble={isAriaPreview && !showDetails ? "true" : undefined}
           className={"relative max-h-[calc(100dvh-1rem)] w-full overflow-y-auto rounded-3xl border p-4 text-forest sm:p-6 " +
@@ -219,7 +240,7 @@ export function CookieBanner() {
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             <p id="cookie-consent-title" className={isAriaPreview && !showDetails
-                ? "flex min-h-[52px] items-center whitespace-nowrap pl-[78px] font-display text-[clamp(12px,3.7vw,18px)] font-bold leading-tight sm:pl-[100px] sm:text-xl"
+                ? "flex min-h-[56px] items-center whitespace-nowrap pl-[88px] font-display text-[clamp(10px,3.1vw,17px)] font-bold leading-tight sm:pl-[106px] sm:text-xl"
                 : "font-display text-lg font-bold sm:text-xl"}>
               {showDetails
                 ? isEnglish ? "Cookie settings" : "Nastavenia cookies"
