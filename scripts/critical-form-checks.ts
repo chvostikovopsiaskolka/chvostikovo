@@ -53,6 +53,21 @@ assert(!shortSchema.safeParse({
   zaujem: "Mám záujem využívať škôlku občasne", plemeno: "x".repeat(201),
 }).success, "Preview breed must respect the 200-character limit.");
 
+// The approved puppy wizard asks only age and vaccinations; dog breed is
+// collected by the existing shared lead contact (no second dog details step).
+const checkerSource = readFileSync(new URL("../src/components/site/AriaPuppyChecker.tsx", import.meta.url), "utf8");
+assert(checkerSource.includes('onInterest(snapshot())') &&
+  checkerSource.includes('type Step = "age" | "vaccines"') &&
+  !checkerSource.includes('data-aria-puppy-step="dog"') &&
+  !checkerSource.includes('Plemeno (voliteľné)'),
+  "Puppy wizard must pass age and vaccination answers directly to shared contact without duplicate breed collection");
+const puppyLandingSource = readFileSync(new URL("../src/routes/psia-skolka-pre-steniatka.tsx", import.meta.url), "utf8");
+assert(puppyLandingSource.includes("<AriaLeadAssistant") &&
+  puppyLandingSource.includes("<AriaPuppyChecker") &&
+  puppyLandingSource.includes("setPuppyCheck(details)") &&
+  puppyLandingSource.includes("puppy_landing_checker_eligible"),
+  "Puppy landing must track and retain the checker-to-contact handoff");
+
 // Aria puppy checker: transfer the *answers* into the existing allowlisted
 // lead raw_payload, never into the validated interest_reason or ad events.
 const puppyAnswers = {
