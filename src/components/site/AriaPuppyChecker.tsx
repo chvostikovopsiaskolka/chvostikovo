@@ -40,9 +40,9 @@ export function AriaPuppyChecker({
     return {
       age_months: age,
       vaccines: {
-        rabies: vaccines.rabies ?? "unknown",
-        dhppi: vaccines.dhppi ?? "unknown",
-        kennel: vaccines.kennel ?? "unknown",
+        rabies: vaccines["rabies"] ?? "unknown",
+        dhppi: vaccines["dhppi"] ?? "unknown",
+        kennel: vaccines["kennel"] ?? "unknown",
       },
     };
   }
