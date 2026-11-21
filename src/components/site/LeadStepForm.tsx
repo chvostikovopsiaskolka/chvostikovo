@@ -20,10 +20,11 @@ export const LEAD_STEP_INTERESTS = [
   { value: "Mám záujem využívať škôlku občasne", lines: ["Mám záujem", "občasne", "využívať škôlku"] },
 ] as const;
 
-export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, presetInterest }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; presetInterest?: string | undefined }) {
+export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, presetInterest, ariaPreview = false }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean }) {
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
   const [selectedInterest, setSelectedInterest] = useState(presetInterest ?? "");
+  const showBreed = ariaPreview && selectedInterest !== "" && selectedInterest !== LEAD_STEP_INTERESTS[0].value;
   const [sent, setSent] = useState(false);
   const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -66,6 +67,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         telefon: phone,
         email: String(fields.get("email") || "").trim() || undefined,
         zaujem: selectedInterest,
+        ...(showBreed ? { plemeno: String(fields.get("plemeno") || "").trim() || undefined } : {}),
       }, attemptId);
       void trackCookielessInteraction("form_submit", trackingSource, "sk", attemptId);
       runFormTelemetry(() => {
@@ -145,7 +147,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
                   onChange={() => setSelectedInterest(option.value)} className="peer sr-only" />
                 <span className="flex h-full min-h-24 min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 py-3 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:min-h-28 sm:px-3">
                   {option.lines.map((line, i) => (
-                    <span key={line} className={`block max-w-full break-words text-[10.5px] [overflow-wrap:anywhere] sm:text-xs ${i === 0 ? "font-bold" : "font-medium"}`}>
+                    <span key={line} className={`block max-w-full break-words text-[10.5px] [overflow-wrap:anywhere] sm:text-xs ${ariaPreview && (/informovať|pravidelne|občasne/i.test(line)) ? "font-extrabold" : i === 0 ? "font-bold" : "font-medium"}`}>
                       {line}
                     </span>
                   ))}
@@ -169,6 +171,12 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
           <label className="label-sm" htmlFor={`lead-step-${formId}-meno`}>Meno majiteľa *</label>
           <input id={`lead-step-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
         </div>
+        {showBreed && (
+          <div data-aria-breed-field>
+            <label className="label-sm" htmlFor={`lead-step-${formId}-plemeno`}>Plemeno psíka (nepovinné)</label>
+            <input id={`lead-step-${formId}-plemeno`} name="plemeno" type="text" autoComplete="off" maxLength={200} className="field" placeholder="Napr. írsky vlkodav" />
+          </div>
+        )}
         <PhoneField id={`lead-step-${formId}-tel`} name="telefon" />
         <div>
           <label className="label-sm" htmlFor={`lead-step-${formId}-email`}>E-mail (nepovinné)</label>
