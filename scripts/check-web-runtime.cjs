@@ -454,8 +454,16 @@ const failures = [];
               throw new Error('Puppy route must not render the old mobile dock alongside Aria');
             for (const width of [320, 375, 390, 430]) {
               await page.setViewportSize({ width, height: 844 });
-              await page.evaluate(() => window.scrollTo(0, 0));
-              await page.waitForTimeout(150);
+              // CSS scroll-behavior:smooth can leave the previous width's
+              // animation active; deterministic geometry checks require an
+              // immediate scroll, not an uncompleted multi-section animation.
+              await page.evaluate(() => {
+                document.documentElement.style.scrollBehavior = 'auto';
+                document.body.style.scrollBehavior = 'auto';
+                window.scrollTo(0, 0);
+              });
+              await page.waitForFunction(() =>
+                window.scrollY < 2 && document.querySelector('[data-aria-guide]')?.dataset.ariaStage === 'intro');
               const speech = aria.locator('[data-aria-message]');
               if (await aria.getAttribute('data-aria-stage') !== 'intro' ||
                   !await speech.isVisible() || await speech.getAttribute('data-aria-suppressed') !== 'false')
@@ -469,9 +477,10 @@ const failures = [];
               });
               if (boundary == null) throw new Error('Puppy requirements/visit boundary missing');
               await page.evaluate(y => window.scrollTo(0, y), boundary + 36);
-              await page.waitForTimeout(240);
-              if (await aria.getAttribute('data-aria-stage') !== 'contact' ||
-                  !await speech.isVisible() || !await aria.getByRole('button', { name: 'Vyplniť' }).count())
+              await page.waitForFunction(() =>
+                document.querySelector('[data-aria-guide]')?.dataset.ariaStage === 'contact');
+              if (!await speech.isVisible() || await speech.getAttribute('data-aria-suppressed') !== 'false' ||
+                  !await aria.getByRole('button', { name: 'Vyplniť' }).count())
                 throw new Error('Puppy Aria must show persistent contact CTA after conditions at ' + width);
               if (url.pathname === '/psia-skolka-pre-steniatka/' && width === 390)
                 await page.screenshot({ path: path.join(out, 'puppy-aria-' + engine + '-390-contact.png') });
