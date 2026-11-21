@@ -1,0 +1,4 @@
+<!-- Keep the approved artwork centered, with a moderate white margin. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android" android:inset="6dp">
+    <bitmap android:src="@drawable/chvo_app_icon" android:gravity="fill" />
+</inset>
