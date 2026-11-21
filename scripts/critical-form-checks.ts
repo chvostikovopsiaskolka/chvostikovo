@@ -25,6 +25,26 @@ assert(!shortSchema.safeParse({
   email: "nesprávny-adresát", zaujem: "Mám záujem o pravidelné návštevy",
 }).success, "Invalid optional email should be rejected.");
 
+const ariaVisit = shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Mám záujem využívať škôlku pravidelne", plemeno: "Írsky vlkodav",
+});
+const ariaPayload = buildDbPayload(ariaVisit);
+assert(ariaPayload.form_type === "lead" && ariaPayload.interest_reason === ariaVisit.zaujem,
+  "Preview breed must not change the backend-allowlisted lead interest.");
+assert(ariaPayload.raw_payload["Plemeno psíka"] === "Írsky vlkodav" && ariaPayload.dog_breed === "Írsky vlkodav",
+  "Optional breed must survive the existing lead's raw payload.");
+const ariaInfoPayload = buildDbPayload(shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Chcem sa informovať o škôlke",
+}));
+assert(!("dog_breed" in ariaInfoPayload) && !("Plemeno psíka" in ariaInfoPayload.raw_payload),
+  "Information-only enquiry must not fabricate dog breed.");
+assert(!shortSchema.safeParse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Mám záujem využívať škôlku občasne", plemeno: "x".repeat(201),
+}).success, "Preview breed must respect the 200-character limit.");
+
 longSchema.parse({
   typ: "prihlaska",
   consent: true,

@@ -168,18 +168,18 @@ function AriaPreviewPage() {
 
           </div>
           <Reviews variant="hero" />
-        <section id="aria-hero-form" className="relative z-10 bg-transparent pb-12 pt-5 sm:pb-16">
+        <section id="aria-hero-form" className="relative z-10 bg-transparent pb-12 pt-2 sm:pb-16 sm:pt-3">
           <div className="mx-auto max-w-4xl px-4">
             <div className="rounded-4xl bg-secondary/55 p-5 shadow-soft sm:p-8">
               <div className="mx-auto max-w-2xl text-center">
-                <h2 className="section-title text-3xl sm:text-4xl">Chcete to dopriať aj svojmu psíkovi?</h2>
+                <h2 className="section-title text-xl sm:text-2xl">Chceli by ste sa informovať o škôlke?</h2>
                 <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
                   Radi vám odpovieme na otázky o škôlke.
                 </p>
               </div>
 
-              <div className="mx-auto mt-6 max-w-xl rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <LeadStepForm questionInHeading trackingSource="aria_preview_hero_inline" />
+              <div className="mx-auto mt-4 max-w-xl rounded-3xl bg-card p-5 shadow-card sm:p-6">
+                <LeadStepForm questionInHeading ariaPreview trackingSource="aria_preview_hero_inline" />
               </div>
             </div>
           </div>
@@ -422,7 +422,7 @@ function AriaPreviewPage() {
         title="Čo hľadáte pre svojho psíka?"
         subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
       >
-        <LeadStepForm key={leadModalSource} questionInHeading trackingSource={leadModalSource} presetInterest={ariaPreset} />
+        <LeadStepForm key={leadModalSource} questionInHeading ariaPreview trackingSource={leadModalSource} presetInterest={ariaPreset} />
       </FormDialog>
     </div>
   );
