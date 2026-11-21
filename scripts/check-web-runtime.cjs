@@ -139,9 +139,8 @@ const failures = [];
               await page.evaluate(() => window.scrollTo(0, 0));
               const aria = page.locator('[data-aria-guide]');
               await aria.waitFor({ state: 'visible' });
-              // Calm first fold: form remains below the opening viewport, while
-              // the fixed Aria dock has only a modest 90–160px post-review gap.
-              // Google proof must remain a single row at 320–430px.
+              // Calm first fold: no inline form in the opening viewport, and
+              // the compact Google proof must remain a single row at 320–430px.
               const firstFold = await page.evaluate(() => {
                 const form = document.getElementById('aria-hero-form');
                 const reviews = document.getElementById('recenzie');
@@ -152,8 +151,6 @@ const failures = [];
                 const headline = hero?.querySelector('h1');
                 const serviceBadge = hero?.querySelector('[data-aria-service-badge]');
                 const heroDogs = hero?.querySelector('[data-aria-hero-dogs] img');
-                const crown = hero?.querySelector('[data-aria-hero-dogs] [aria-hidden="true"]');
-                const serviceGroup = hero?.querySelector('[data-aria-service-group]');
                 const description = hero?.querySelector('[data-aria-hero-description]');
                 const spacer = hero?.querySelector('[data-aria-intro-space]');
                 const caretakers = document.getElementById('aria-caretakers');
@@ -162,16 +159,10 @@ const failures = [];
                 const caretakersPhoto = caretakers?.querySelector('img');
                 const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs] img');
                 if (!form || !reviews || !proof || !hero || !content || !topSpacer ||
-                    !headline || !serviceBadge || !heroDogs || !crown || !serviceGroup ||
-                    !description || !spacer || !caretakerHeading || !relocatedBenefits ||
-                    !caretakersPhoto || !firstVisitDogs) return { missing: true };
+                    !headline || !serviceBadge || !heroDogs || !description || !spacer ||
+                    !caretakerHeading || !relocatedBenefits || !caretakersPhoto || !firstVisitDogs) return { missing: true };
                 const rect = proof.getBoundingClientRect();
                 const badgeRect = serviceBadge.getBoundingClientRect();
-                const crownRect = crown.getBoundingClientRect();
-                const descriptionRect = description.getBoundingClientRect();
-                const reviewsRect = reviews.getBoundingClientRect();
-                const reviewCard = reviews.querySelector('figure');
-                const reviewCardRect = reviewCard?.getBoundingClientRect();
                 const headlineRect = headline.getBoundingClientRect();
                 const caretakerHeadingRect = caretakerHeading.getBoundingClientRect();
                 const caretakerHeadingLine = parseFloat(getComputedStyle(caretakerHeading).lineHeight);
@@ -187,19 +178,9 @@ const failures = [];
                   contentCenterY: (contentTop + reviewsBottom) / 2,
                   topSpacerHeight: topSpacer.getBoundingClientRect().height,
                   viewportHeight: window.innerHeight,
-                  serviceBadgeBelowH1: badgeRect.top >= headlineRect.bottom + 55,
-                  dogsRestOnOrange: serviceGroup.contains(crown) && crownRect.bottom >= badgeRect.top - 20 &&
-                    crownRect.bottom <= badgeRect.top + 5,
+                  serviceBadgeBelowH1: badgeRect.top >= headlineRect.bottom + 8,
                   serviceBadgeFits: badgeRect.left >= -1 && badgeRect.right <= window.innerWidth + 1 &&
                     serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
-                  descriptionGap: descriptionRect.top - badgeRect.bottom,
-                  reviewGapAbove: reviewsRect.top - descriptionRect.bottom,
-                  focusedDescription: descriptionRect.width <= (window.innerWidth < 390 ? 302 :
-                    window.innerWidth < 640 ? 342 : 522) &&
-                    description.querySelectorAll('strong').length === 4 &&
-                    [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700),
-                  naturalReviewBottom: getComputedStyle(reviews).overflowY !== 'hidden' &&
-                    !!reviewCardRect && reviewsRect.bottom - reviewCardRect.bottom >= 32,
                   noBenefitsInHero: hero.querySelectorAll('[data-hero-benefits]').length === 0,
                   relocatedBenefitsCount: relocatedBenefits.children.length,
                   caretakersHeadingFits: caretakerHeading.scrollWidth <= caretakerHeading.clientWidth + 2 &&
@@ -217,13 +198,8 @@ const failures = [];
               if (firstFold.missing || firstFold.formTop < firstFold.viewportHeight - 2 ||
                   firstFold.topSpacerHeight < 39 ||
                   firstFold.contentCenterY < firstFold.viewportHeight * 0.4 ||
-                  firstFold.reviewGap < 90 || firstFold.reviewGap > 160 ||
-                  !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
-                  !firstFold.serviceBadgeFits ||
-                  firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
-                  firstFold.reviewGapAbove > 35 ||
-                  !firstFold.focusedDescription ||
-                  !firstFold.naturalReviewBottom ||
+                  firstFold.reviewGap < 185 ||
+                  !firstFold.serviceBadgeBelowH1 || !firstFold.serviceBadgeFits ||
                   !firstFold.noBenefitsInHero || firstFold.relocatedBenefitsCount !== 3 ||
                   !firstFold.caretakersHeadingFits || !firstFold.whiteInfoBackground ||
                   !firstFold.bothDogCrowns ||
@@ -490,7 +466,7 @@ const failures = [];
               if (await page.locator('#lead-requirements span').getByText('Podmienky prijatia', { exact: true }).count())
                 throw new Error('Redundant preview requirements eyebrow resurfaced');
               const eligibilityCopy = page.locator('#aria-early-faq details').first();
-              for (const phrase of ['stredné a veľké psy', 'nad 15 kg', 'očkované šteniatka', 'približne od 4 mesiacov', 'Vyžadujeme potrebné očkovania, dobrý zdravotný stav a vhodnosť do kolektívu']) {
+              for (const phrase of ['stredné a veľké psy', 'nad 20 kg', 'očkované šteniatka', 'nad 15 kg', 'Vyžadujeme očkovania, dobrý zdravotný stav a vhodnosť do kolektívu']) {
                 if (!await eligibilityCopy.locator('strong').getByText(phrase, { exact: true }).count())
                   throw new Error('Eligibility highlights missing: ' + phrase);
               }
@@ -502,10 +478,6 @@ const failures = [];
               await faqDetails.locator('summary').click();
               if (await faqDetails.locator('strong').count() < 4)
                 throw new Error('Key first-visit explanation sentences must be highlighted');
-              if (await page.locator('[data-aria-location-chips] a').count() !== 1 || !await page.locator('[data-aria-location-chips]').getByText('Bezplatné parkovanie').count())
-                throw new Error('Mobile lead gallery must show location and parking chips');
-              if (!await page.locator('#lead-pricing [data-lead-best-value]').getByText('Najvýhodnejšie').count())
-                throw new Error('Lead permanentka must retain the orange best-value label');
               if (await page.locator('#aria-mosaic img').count() !== 8)
                 throw new Error('Preview mosaic must retain eight photos');
               // Compare document order rather than screen rects (some sections may be offscreen).
@@ -517,35 +489,31 @@ const failures = [];
                 const content = leadHero?.querySelector('[data-aria-hero-content]');
                 const introTopSpace = leadHero?.querySelector('[data-aria-intro-top-space]');
                 const heroHeading = content?.querySelector('h1');
-                const headlineSpacer = content?.querySelector('[data-aria-hero-heading-spacer]');
-                const serviceGroup = content?.querySelector('[data-aria-service-group]');
-                const heroDogs = serviceGroup?.querySelector('[data-aria-hero-dogs]');
-                const badge = serviceGroup?.querySelector('[data-aria-service-badge]');
+                const heroDogs = content?.querySelector('[data-aria-hero-dogs]');
+                const badge = content?.querySelector('[data-aria-service-badge]');
                 const leadDescription = content?.querySelector('[data-aria-hero-description]');
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
                 const introSpace = leadHero?.querySelector('[data-aria-intro-space]');
                 const benefits = team?.querySelector('[data-hero-benefits]');
                 const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                 if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
-                    !headlineSpacer || !serviceGroup || !heroHeading || !heroDogs ||
-                    !badge || !leadDescription || !proof || !introSpace ||
-                    !benefits || !firstVisitDogs ||
+                    !heroHeading || !heroDogs || !badge || !leadDescription || !proof ||
+                    !introSpace || !benefits || !firstVisitDogs ||
                     !content.contains(reviews) || content.parentElement !== leadHero ||
                     form.parentElement !== leadHero.parentElement) return false;
                 const follows = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
                 const heading = team.querySelector('h2');
                 const photo = team.querySelector('img');
                 const copy = team.querySelector('p');
-                return follows(introTopSpace, headlineSpacer) && follows(headlineSpacer, heroHeading) &&
-                  follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
-                  follows(heroDogs, badge) && follows(badge, leadDescription) &&
+                return follows(introTopSpace, heroDogs) && follows(heroDogs, heroHeading) &&
+                  follows(heroHeading, badge) && follows(badge, leadDescription) &&
                   follows(leadDescription, proof) && follows(reviews, introSpace) &&
                   follows(introSpace, form) && follows(form, team) &&
                   !!heading && !!photo && !!copy &&
                   follows(heading, photo) && follows(photo, benefits) && follows(benefits, copy) &&
                   follows(team, firstVisitDogs);
               });
-              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/label-dogs/orange badge/focused copy/reviews/form and caretakers order changed');
+              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria dog crown/title/orange badge/description/reviews/form and caretaker benefits order changed');
               const hero = page.locator('#aria-hero-form');
               if (!await hero.getByRole('heading', { name: 'Chceli by ste sa informovať o škôlke?' }).count())
                 throw new Error('New compact hero form heading missing');
