@@ -22,7 +22,7 @@ async function fixture(query='',dogs=1){
 (async()=>{
  for(const dogs of [1,2]){
   const f=await fixture('',dogs);try{
-   f.login();await f.run('loadAnnouncements(true)');f.click('customerAnnouncementsV363');await tick();
+   f.login();await f.run('loadAnnouncements(true)');f.click('menuBulletinV229');await tick();
    assert.match(f.w.document.getElementById('customerBulletinHistoryV229').textContent,/Zatiaľ nemáte žiadne oznamy/);
    f.setNotices(Array.from({length:10},(_,i)=>row(i+1)).concat(row(11,{active:false}),row(12,{valid_from:'2099-01-01'})));
    await f.run('loadAnnouncements(true)');assert.equal(f.w.document.getElementById('customerAnnouncementsCountV363').textContent,'10');

@@ -1,0 +1,162 @@
+/* Customer poll v433: separate white-liquid menu invitation; owner-account scope only. */
+.customer-polls-owner-v432 #menuTab .customer-menu-primary-v432{
+ display:grid;gap:10px;min-width:0;margin:0 0 14px;padding:11px;
+ border:1px solid rgba(255,255,255,.80)!important;border-radius:23px;
+ background:rgba(255,255,255,.42)!important;
+ box-shadow:0 14px 36px rgba(99,49,55,.19),inset 0 1px 1px #ffffffec!important;
+}
+.customer-polls-owner-v432 #menuTab .customer-menu-primary-v432 >.customer-menu-group,
+.customer-polls-owner-v432 #menuTab .customer-menu-primary-v432 >.customer-menu-group.lg-v3-host{
+ margin:0!important;border:1px solid rgba(255,255,255,.94)!important;
+ border-radius:16px!important;background:rgba(255,255,255,.74)!important;
+ box-shadow:0 5px 14px rgba(109,57,73,.17),inset 0 1px 2px rgba(255,255,255,.98)!important;
+}
+.customer-polls-owner-v432 #menuTab .customer-menu-primary-v432 .customer-menu-rows{
+ background:rgba(255,255,255,.15)!important;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432,
+.customer-polls-owner-v432 #menuTab .customer-poll-v432.lg-v3-host{
+ box-sizing:border-box;min-width:0;margin:0 0 15px;padding:17px;
+ border:1px solid rgba(255,255,255,.90)!important;border-radius:23px;
+ background:rgba(255,255,255,.73)!important;
+ box-shadow:0 14px 30px rgba(112,51,67,.17),inset 0 1px 1px #ffffff!important;
+ color:#563849;
+ -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432[hidden]{display:none!important}
+.customer-poll-v432 .customer-poll-heading-v432{display:grid;gap:5px;margin-bottom:10px}
+.customer-poll-v432 .customer-poll-kicker-v432{
+ display:block;color:#e06919;font-size:11px;font-weight:850;letter-spacing:.055em;
+ line-height:1.4;text-transform:uppercase;
+}
+.customer-poll-v432 .customer-poll-invite-v433{
+ display:block;font-size:15px;color:#4b3244;font-weight:780;line-height:1.45;margin:5px 0 13px;
+}
+.customer-poll-v432 h2{margin:6px 0 11px;font-size:20px;font-weight:850;line-height:1.22;color:#5e3550}
+.customer-poll-v432 .customer-poll-question-v432{margin:0 0 8px;font-size:15px;font-weight:750;line-height:1.45;color:#4a3244}
+.customer-poll-v432 .customer-poll-desc-v432{margin:0 0 10px;font-size:13px;line-height:1.52;color:#654c5d}
+.customer-poll-v432 .customer-poll-price-v433{
+ padding:12px;margin:0 0 15px;color:#60455b;font-size:12px;line-height:1.55;
+ border:1px solid #f1d4bc;background:#fffbf5c9;border-radius:13px;
+}
+.customer-poll-v432 button{
+ -webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;touch-action:manipulation;
+ font:inherit;cursor:pointer;
+}
+.customer-poll-v432 button:focus-visible{outline:3px solid #e77620;outline-offset:3px}
+.customer-poll-v432 .customer-poll-open-v433,.customer-poll-v432 .customer-poll-submit-v433,
+.customer-poll-v432 .customer-poll-finish-v433{
+ display:block;width:100%;min-height:48px;padding:11px 16px;
+ border:1px solid rgba(255,173,75,.87);border-radius:14px;
+ background:linear-gradient(145deg,#ff9128,#ef7114);
+ color:white;font-size:13px;font-weight:800;line-height:1.25;
+ box-shadow:0 7px 18px rgba(234,113,16,.34),inset 0 1px 1px #ffffff69;
+}
+.customer-poll-v432 .customer-poll-open-v433:hover,
+.customer-poll-v432 .customer-poll-submit-v433:hover{background:linear-gradient(145deg,#ffa342,#e96808)}
+.customer-poll-v432 button:disabled{opacity:.6;cursor:wait}
+.customer-poll-v432 .customer-poll-options-v432{display:grid;gap:9px}
+.customer-poll-v432 .customer-poll-choice-v432{
+ width:100%;min-height:49px;padding:11px 13px;text-align:left;
+ background:rgba(255,255,255,.92);border:1px solid #f0d7d8;
+ border-radius:14px;color:#593747;font-size:13px;font-weight:750;
+ box-shadow:0 3px 9px rgba(103,51,72,.09);
+}
+.customer-poll-v432 .customer-poll-choice-v432.selected-v433{
+ border-color:#ff8e31;background:#fff3e8;box-shadow:0 0 0 2px #ffbf8f66;
+}
+.customer-poll-v432 .customer-poll-quantity-v433{
+ display:grid;gap:9px;margin-top:13px;padding:13px;border:1px solid #f1dbc9;
+ background:#fffdfacb;border-radius:15px;
+}
+.customer-poll-v432 .customer-poll-quantity-v433 label{font-size:13px;font-weight:750;color:#58384d}
+.customer-poll-v432 #customerPollQuantityV433{
+ width:100%;max-width:100%;box-sizing:border-box;min-height:46px;
+ padding:9px 13px;border-radius:12px;border:1px solid #ddbbca;background:white;
+ color:#493444;font-size:16px;
+}
+.customer-poll-v432 .customer-poll-error-v433{
+ font-size:12px;line-height:1.4;font-weight:650;color:#ac203f;margin:10px 0;
+}
+.customer-poll-v432 .customer-poll-collapse-v433{
+ margin-top:12px;min-height:44px;width:100%;border:0;background:transparent;
+ color:#795266;font-size:13px;font-weight:700;
+}
+.customer-poll-v432 .customer-poll-complete-v432{
+ padding:15px;border:1px solid #bee4c8;border-radius:15px;
+ background:#effbf3de;color:#265e40;line-height:1.5;font-size:13px;
+}
+.customer-poll-v432 .customer-poll-complete-v432 strong{font-size:15px}
+.customer-poll-v432 .customer-poll-complete-v432 p{margin:6px 0 0}
+.customer-poll-v432 .customer-poll-finish-v433{margin-top:12px}
+.customer-design .bottom-nav #navDog{position:relative}
+.customer-poll-nav-badge-v432:not([hidden]){
+ display:grid;place-items:center;position:absolute;top:2px;right:calc(50% - 29px);
+ min-width:17px;height:17px;box-sizing:border-box;border-radius:10px;padding:0 4px;
+ background:#f47b19;color:white;font-size:10px;font-weight:850;line-height:1;
+ box-shadow:0 1px 3px #7e3a2444;pointer-events:none;
+}
+.customer-poll-nav-badge-v432[hidden]{display:none!important}
+@media(max-width:360px){
+ .customer-polls-owner-v432 #menuTab .customer-poll-v432{padding:13px}
+ .customer-polls-owner-v432 #menuTab .customer-menu-primary-v432{padding:8px;gap:8px}
+}
+@media(prefers-reduced-transparency:reduce){
+ .customer-polls-owner-v432 #menuTab .customer-poll-v432{background:#fff!important;backdrop-filter:none}
+}
+
+/* v434: direct visible vote, black title, +/- control in the same quantity row. */
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 h2{
+ color:#111111!important;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-option-row-v434{
+ display:grid;grid-template-columns:minmax(0,1fr);gap:0;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-v433{
+ margin:0 0 9px;padding:12px 11px 13px;
+ border-radius:0 0 14px 14px;border-top:none;
+ background:rgba(255,251,246,.92);
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-option-row-v434:has(.customer-poll-quantity-v433) > .customer-poll-choice-v432{
+ border-radius:14px 14px 0 0;border-bottom-color:transparent;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-controls-v434{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:8px;min-width:0;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-label-v434{
+ flex:1;min-width:0;color:#473747;font-size:11.5px;font-weight:750;
+ line-height:1.26;letter-spacing:-.015em;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434{
+ display:grid;grid-template-columns:44px minmax(34px,38px) 44px;align-items:center;
+ flex:none;border:1px solid #e8c6b2;border-radius:14px;
+ background:#fff;box-shadow:0 3px 9px rgba(105,46,44,.09);overflow:hidden;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434 button{
+ width:44px;height:44px;min-height:44px;display:grid;place-items:center;
+ padding:0!important;border:none!important;box-shadow:none!important;
+ background:transparent;color:#ed7116;font-size:23px;font-weight:800;
+ line-height:1;transform:none!important;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434 button:disabled{
+ color:#bdafb0;opacity:.65;cursor:default;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-value-v434{
+ display:grid;place-items:center;min-width:34px;height:44px;
+ color:#111;font-size:15px;font-weight:850;font-variant-numeric:tabular-nums;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-submit-v433{
+ margin-top:11px;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-option-row-v434 >.customer-poll-choice-v432{
+ -webkit-tap-highlight-color:transparent;
+}
+@media(max-width:360px){
+ .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-v433{padding-inline:8px}
+ .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-controls-v434{gap:5px}
+ .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-label-v434{font-size:10.5px}
+ .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434{
+  grid-template-columns:44px 34px 44px;
+ }
+}

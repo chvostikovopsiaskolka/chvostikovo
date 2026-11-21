@@ -1,5 +1,5 @@
 
-const CACHE='chvostikovo-portal-shell-v431';
+const CACHE='chvostikovo-portal-shell-v434';
 const APP_ICON='/icon-192.png';
 const NOTIFICATION_BADGE='/notification-badge-v64.png?v=20260918-v64';
 const BADGE_STATE_CACHE='chvostikovo-customer-badge-state-v1';
@@ -43,7 +43,7 @@ function writeCustomerBadgeCountV186(count,updatedAt=Date.now()){
 }
 
 const PORTAL_CSP="default-src 'self'; img-src 'self' data: https://tlhcqwsluyqpywymjoxn.supabase.co; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://tlhcqwsluyqpywymjoxn.supabase.co wss://tlhcqwsluyqpywymjoxn.supabase.co; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
-const SHELL=['/vendor/liquidlens/reels-noise-v385.png','/customer-liquid-optics.js?v=v431','/vendor/liquidlens/liquid-glass.js','/vendor/simple-liquid-glass/webgl.js','/vendor/liquidlens/chvostikovo-paws.png','/vendor/liquidlens/chvostikovo-paws-soft-v383.png','/customer-guide-v358.js?v=v431','/customer-guide-v358.css?v=v431','/telemetry-v345.js?v=v431','/loading-motion.js?v=v431','/loading-design.css?v=v431','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v431','/customer-design.css?v=v431','/dog-choice-fab-v276.css?v=v431','/dual-dog-overview-v246.js?v=v431','/dual-dog-overview-v246.css?v=v431','/','/terms-pdf.js?v=v431','/terms-pdf-font.js?v=v431','/styles.css?v=v431','/bulletin-photo-v243.css?v=v431','/app.js?v=v431','/back-swipe.js?v=v431'];
+const SHELL=['/vendor/liquidlens/reels-noise-v385.png','/customer-liquid-optics.js?v=v434','/vendor/liquidlens/liquid-glass.js','/vendor/simple-liquid-glass/webgl.js','/vendor/liquidlens/chvostikovo-paws.png','/vendor/liquidlens/chvostikovo-paws-soft-v383.png','/customer-guide-v358.js?v=v434','/customer-guide-v358.css?v=v434','/telemetry-v345.js?v=v434','/loading-motion.js?v=v434','/loading-design.css?v=v434','/loading-brand.png','/android-install-choice-v308.js?v=20261019-android-choice-v308','/customer-design.js?v=v434','/customer-polls-pilot-v432.js?v=v434','/customer-polls-pilot-v432.css?v=v434','/customer-design.css?v=v434','/dog-choice-fab-v276.css?v=v434','/dual-dog-overview-v246.js?v=v434','/dual-dog-overview-v246.css?v=v434','/','/terms-pdf.js?v=v434','/terms-pdf-font.js?v=v434','/styles.css?v=v434','/bulletin-photo-v243.css?v=v434','/app.js?v=v434','/back-swipe.js?v=v434'];
 
 function withPortalCsp(response){
   if(!response)return response;
@@ -94,7 +94,7 @@ self.addEventListener('fetch',event=>{
     );
     return;
   }
-  if(['/dual-dog-overview-v246.js','/dual-dog-overview-v246.css','/app.js','/styles.css','/bulletin-photo-v243.css','/back-swipe.js','/terms-pdf.js','/terms-pdf-font.js'].includes(url.pathname)){
+  if(['/dual-dog-overview-v246.js','/dual-dog-overview-v246.css','/app.js','/styles.css','/bulletin-photo-v243.css','/back-swipe.js','/terms-pdf.js','/terms-pdf-font.js','/customer-polls-pilot-v432.js','/customer-polls-pilot-v432.css'].includes(url.pathname)){
     event.respondWith((async()=>{
       // Build-stamped assets are immutable: reuse only this release's cache.
       const cache=await caches.open(CACHE);
