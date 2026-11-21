@@ -66,7 +66,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   );
 }
 
-function ReviewCarousel({ reviews }: { reviews: typeof REVIEWS }) {
+function ReviewCarousel({ reviews, hero = false }: { reviews: typeof REVIEWS; hero?: boolean }) {
   const track = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
   const resumeTimer = useRef<number | null>(null);
@@ -202,7 +202,7 @@ function ReviewCarousel({ reviews }: { reviews: typeof REVIEWS }) {
       onTouchCancel={() => onTouchFinish(true)}
       onFocusCapture={pause}
       onBlurCapture={resume}
-      className="relative left-1/2 mt-3 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:auto] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+      className={"relative left-1/2 mt-3 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [touch-action:auto] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden " + (hero ? "pb-6 sm:pb-7" : "pb-2")}
     >
       {[...reviews, ...reviews].map((r, i) => (
         <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
@@ -400,7 +400,7 @@ export function Reviews({ reviews = REVIEWS, variant = "default" }: { reviews?: 
           </>
         )}
 
-        <ReviewCarousel reviews={reviews} />
+        <ReviewCarousel reviews={reviews} hero={variant === "hero"} />
       </div>
     </section>
   );
