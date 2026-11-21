@@ -1151,6 +1151,49 @@ const failures = [];
                 throw new Error('Full dog registration modal must stay centered with inner scrolling: ' + JSON.stringify(applicationFrame));
               await page.keyboard.press('Escape');
               await application.waitFor({ state: 'hidden' });
+
+              // The main website now has its own mobile-only Aria dock. Keep
+              // the paid lead's dock, form and tracking independent.
+              const homeAria = page.locator('[data-home-aria-guide]');
+              await homeAria.waitFor({ state: 'visible' });
+              const homeDock = homeAria.locator('[data-home-aria-dock]');
+              if (await page.locator('#priestory [data-home-mosaic] button').count() < 8)
+                throw new Error('Homepage mobile hygiene mosaic must contain all daycare photos');
+              if (!await page.locator('#home-care-faq').getByText('Pre koho je škôlka určená?').count() ||
+                  !await page.locator('#home-care-faq').getByText(/spravidla nad 15 kg/).count())
+                throw new Error('Homepage early care FAQ lost approved eligibility');
+              if (!await page.locator('#recenzie [data-aria-review-proof]').isVisible())
+                throw new Error('Homepage one-row Google review proof missing');
+              const homeOrder = await page.evaluate(() => {
+                const ids = ['preco-chvostikovo', 'o-nas', 'starostlivost', 'home-care-faq',
+                  'cennik', 'podmienky', 'priestory', 'prva-navsteva', 'home-puppy-section',
+                  'preco', 'faq', 'produkty'];
+                const positions = ids.map(id => document.getElementById(id)?.getBoundingClientRect().top);
+                return positions.every((pos, i) => pos !== undefined &&
+                  (i === 0 || pos >= positions[i - 1] - 4));
+              });
+              if (!homeOrder) throw new Error('Homepage approved mobile section order regressed');
+              await homeDock.getByRole('button', { name: 'Cenník' }).click();
+              const pricingPopup = homeAria.locator('[data-home-aria-panel="pricing"]');
+              await pricingPopup.waitFor({ state: 'visible' });
+              if (await pricingPopup.locator('article').count() !== 2 ||
+                  !await pricingPopup.getByText('Najvýhodnejšie').count())
+                throw new Error('Homepage Aria pricing popup lost original permanentka');
+              await pricingPopup.getByRole('button', { name: 'Zavrieť okno' }).click();
+              await homeDock.getByRole('button', { name: 'Produkty' }).click();
+              const productPopup = homeAria.locator('[data-home-aria-panel="products"]');
+              await productPopup.waitFor({ state: 'visible' });
+              if (await productPopup.locator('a[href^="/"]').count() !== 3)
+                throw new Error('Homepage Aria products popup missing product links');
+              await productPopup.getByRole('button', { name: 'Zavrieť okno' }).click();
+              await homeDock.getByRole('button', { name: 'Prihláška' }).click();
+              const homeApplication = page.getByRole('dialog');
+              await homeApplication.waitFor({ state: 'visible' });
+              if (!await homeApplication.locator('input[name="pes"]').count() ||
+                  await homeApplication.locator('[data-lead-step-form]').count())
+                throw new Error('Home Aria orange application must open the full long form');
+              await page.keyboard.press('Escape');
+              await homeApplication.waitFor({ state: 'hidden' });
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
