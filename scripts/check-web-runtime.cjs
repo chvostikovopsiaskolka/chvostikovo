@@ -1595,9 +1595,12 @@ const failures = [];
             const repeatedTitle = careFaq.getByRole('heading', { name: 'Ako zabezpečujete bezpečnosť psíkov v škôlke?' });
             if (await repeatedTitle.count()) throw new Error('Care FAQ repeats a second heading inside its answer');
             const careAnswer = careToggle.locator('xpath=..').locator('div[id]').first();
-            if (!await careAnswer.getByText('Bezpečnosť začína už vstupnou návštevou.', { exact: false }).count()) {
-              throw new Error('Care FAQ answer missing after removing duplicated heading');
-            }
+            // WebKit may paint this React-expanded answer after the click handler returns.
+            // Wait for the actual answer (not an arbitrary timeout or a suppressed check).
+            await careAnswer.getByText('Bezpečnosť začína už vstupnou návštevou.', { exact: false })
+              .waitFor({ state: 'visible', timeout: 3000 }).catch(() => {
+                throw new Error('Care FAQ answer missing after removing duplicated heading');
+              });
             const whyArticle = productPage.locator('#preco a[href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"]');
             if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
             const whyCta = productPage.locator('#preco').getByRole('button', { name: 'Chcem prihlásiť psíka' });
