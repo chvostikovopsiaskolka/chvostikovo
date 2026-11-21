@@ -421,14 +421,17 @@ const failures = [];
               // Four widths receive screenshots and overlay checks. Run the
               // full wizard/modal journey at the original 320 and 390 widths.
               if (![320, 390].includes(width)) {
-                for (const y of [750, 1450, 2100, 2800, 3500]) {
-                  await page.evaluate(y => window.scrollTo(0, y), y);
-                  await page.waitForTimeout(110);
-                  if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') === 'false') break;
-                }
+                const caretakerPromptY = await page.evaluate(() => {
+                  const section = document.getElementById('aria-caretakers');
+                  if (!section) return -1;
+                  return window.scrollY + section.getBoundingClientRect().top - window.innerHeight * 0.44;
+                });
+                if (caretakerPromptY < 0) throw new Error('Caretakers section missing for Aria puppy prompt');
+                await page.evaluate(y => window.scrollTo(0, y), caretakerPromptY);
+                await page.waitForFunction(() => document.querySelector('[data-aria-guide]')?.getAttribute('data-aria-stage') === 'puppy', null, {timeout:3000});
                 if (!await page.locator('[data-aria-guide][data-intro="false"]').count() ||
                     await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
-                  throw new Error('Aria puppy prompt should be visible away from controls at ' + width);
+                  throw new Error('Aria puppy prompt should be visible at caretaker section at ' + width);
                 if (url.pathname === '/test-aria/')
                   await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
                 continue;
@@ -631,13 +634,16 @@ const failures = [];
               if (await page.locator('section video').count()) throw new Error('Video must be omitted from preview');
 
 
-              for (const y of [750, 1450, 2100, 2800]) {
-                await page.evaluate(y => window.scrollTo(0, y), y);
-                await page.waitForTimeout(140);
-                if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') === 'false') break;
-              }
+              const caretakerPromptY = await page.evaluate(() => {
+                const section = document.getElementById('aria-caretakers');
+                if (!section) return -1;
+                return window.scrollY + section.getBoundingClientRect().top - window.innerHeight * 0.44;
+              });
+              if (caretakerPromptY < 0) throw new Error('Caretakers section not found before Aria prompt');
+              await page.evaluate(y => window.scrollTo(0, y), caretakerPromptY);
+              await page.waitForFunction(() => document.querySelector('[data-aria-guide]')?.getAttribute('data-aria-stage') === 'puppy', null, {timeout:3000});
               if (!await page.locator('[data-aria-guide][data-intro="false"]').count())
-                throw new Error('Aria intro must yield to puppy prompt on scroll');
+                throw new Error('Aria intro must yield to puppy prompt at caretaker section');
               if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
                 throw new Error('Aria puppy speech should reappear away from important content');
               if (url.pathname === '/test-aria/')
