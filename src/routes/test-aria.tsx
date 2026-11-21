@@ -26,6 +26,7 @@ import { Header } from "@/components/site/Header";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { DAYCARE_GALLERY_EXTRAS, GALLERY, FAQ, PRICING } from "@/content/site";
+import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -45,7 +46,7 @@ const LANDING_FAQ_QUESTIONS = new Set([
 ]);
 
 const EARLY_FAQ = [
-  { q: "Pre koho je škôlka určená?", a: "Najmä pre stredné a veľké psy, spravidla nad 20 kg, a očkované šteniatka, spravidla nad 15 kg, podľa veku a individuálnej pripravenosti. Vyžadujeme očkovania, dobrý zdravotný stav a vhodnosť do kolektívu; konečné rozhodnutie padne po úvodnej návšteve." },
+  { q: "Pre koho je škôlka určená?", a: DAYCARE_ELIGIBILITY_ANSWER },
   ...FAQ.filter(({ q }) => q === "Bude môj psík počas dňa niekedy sám bez dozoru?"),
 ];
 
@@ -168,7 +169,7 @@ export function AriaPreviewPage() {
 
               <div data-aria-service-group className="relative mx-auto mt-[80px] w-fit max-w-full sm:mt-[88px]">
                 {/* The existing four schoolmates now rest on the orange label, not above the H1. */}
-                <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-[calc(100%+12px)] z-10">
+                <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-[calc(100%-5px)] z-10 lg:bottom-[calc(100%+12px)]">
                   <SchoolmatesFormCrown compact />
                 </div>
                 <p data-aria-service-badge className="inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2.5 py-2 text-center font-display text-[8px] font-bold uppercase leading-tight tracking-[0.015em] text-white shadow-card min-[390px]:px-3 min-[390px]:text-[9.5px] sm:px-5 sm:py-2.5 sm:text-sm">
@@ -177,7 +178,7 @@ export function AriaPreviewPage() {
               </div>
 
               <p data-aria-hero-description className="mx-auto mt-4 max-w-[300px] text-[15px] font-medium leading-[1.55] text-forest/85 min-[390px]:max-w-[340px] sm:mt-5 sm:max-w-[520px] sm:text-lg">
-                <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
+                <strong className="inline-block rounded-lg bg-coral/15 px-2 py-0.5 font-extrabold text-coral-dark lg:rounded-none lg:bg-transparent lg:px-0 lg:py-0 lg:text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
               </p>
             </div>
           </div>
@@ -195,7 +196,7 @@ export function AriaPreviewPage() {
           <div className="relative z-10 mx-auto max-w-4xl px-4">
             <div className="rounded-4xl bg-white p-5 sm:p-8">
               <div className="mx-auto max-w-2xl text-center">
-                <h2 className="section-title text-xl sm:text-2xl">Chceli by ste sa informovať o škôlke?</h2>
+                <h2 className="section-title mt-2 text-xl sm:text-2xl lg:mt-0">Chceli by ste sa informovať o škôlke?</h2>
                 <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
                   Radi vám odpovieme na otázky o škôlke.
                 </p>
@@ -311,7 +312,8 @@ export function AriaPreviewPage() {
             </p>
             <div className="mx-auto mt-5 grid max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4">
               {PRICING.map((item) => (
-                <article key={item.name} className={"flex h-full min-h-[108px] flex-col items-center rounded-3xl px-3 py-2 text-center shadow-card sm:min-h-[136px] sm:p-4 " + (item.highlight ? "bg-forest text-cream" : "bg-card text-forest")}>
+                <article key={item.name} className={"relative flex h-full min-h-[108px] flex-col items-center rounded-3xl px-3 py-3 text-center shadow-card sm:min-h-[136px] sm:p-4 " + (item.highlight ? "bg-forest text-cream ring-2 ring-coral sm:ring-0" : "bg-card text-forest")}>
+                  {item.highlight && <span data-lead-best-value className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-3 py-1 font-display text-[10px] font-bold whitespace-nowrap text-white shadow-sm sm:hidden">Najvýhodnejšie</span>}
                   <h3 className="font-display text-[13px] font-bold leading-snug sm:text-xl">{item.name}</h3>
                   <p aria-hidden={!item.highlight} className={"mt-0.5 text-[11px] font-semibold " + (item.highlight ? "text-cream/85" : "invisible")}>10 vstupov</p>
                   <p className={"mt-1 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>

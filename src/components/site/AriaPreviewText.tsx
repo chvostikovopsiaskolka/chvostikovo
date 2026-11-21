@@ -12,10 +12,10 @@ export const ARIA_PREVIEW_REQUIREMENTS = REQUIREMENTS.map((item) => ({
 
 const IMPORTANT = [
   "stredné a veľké psy",
-  "nad 20 kg",
+  "približne od 4 mesiacov",
   "očkované šteniatka",
   "nad 15 kg",
-  "Vyžadujeme očkovania, dobrý zdravotný stav a vhodnosť do kolektívu",
+  "Vyžadujeme potrebné očkovania, dobrý zdravotný stav a vhodnosť do kolektívu",
   "Nie každý psík si zvykne rovnako rýchlo.",
   "môžeme odporučiť ešte 2–3 kratšie návštevy",
   "Veľmi dôležité je, aby nám majiteľ o svojom psíkovi povedal pravdivo všetko – nielen to dobré.",

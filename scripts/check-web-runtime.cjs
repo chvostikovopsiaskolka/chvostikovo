@@ -490,7 +490,7 @@ const failures = [];
               if (await page.locator('#lead-requirements span').getByText('Podmienky prijatia', { exact: true }).count())
                 throw new Error('Redundant preview requirements eyebrow resurfaced');
               const eligibilityCopy = page.locator('#aria-early-faq details').first();
-              for (const phrase of ['stredné a veľké psy', 'nad 20 kg', 'očkované šteniatka', 'nad 15 kg', 'Vyžadujeme očkovania, dobrý zdravotný stav a vhodnosť do kolektívu']) {
+              for (const phrase of ['stredné a veľké psy', 'nad 15 kg', 'očkované šteniatka', 'približne od 4 mesiacov', 'Vyžadujeme potrebné očkovania, dobrý zdravotný stav a vhodnosť do kolektívu']) {
                 if (!await eligibilityCopy.locator('strong').getByText(phrase, { exact: true }).count())
                   throw new Error('Eligibility highlights missing: ' + phrase);
               }
@@ -502,6 +502,10 @@ const failures = [];
               await faqDetails.locator('summary').click();
               if (await faqDetails.locator('strong').count() < 4)
                 throw new Error('Key first-visit explanation sentences must be highlighted');
+              if (await page.locator('[data-aria-location-chips] a').count() !== 1 || !await page.locator('[data-aria-location-chips]').getByText('Bezplatné parkovanie').count())
+                throw new Error('Mobile lead gallery must show location and parking chips');
+              if (!await page.locator('#lead-pricing [data-lead-best-value]').getByText('Najvýhodnejšie').count())
+                throw new Error('Lead permanentka must retain the orange best-value label');
               if (await page.locator('#aria-mosaic img').count() !== 8)
                 throw new Error('Preview mosaic must retain eight photos');
               // Compare document order rather than screen rects (some sections may be offscreen).
