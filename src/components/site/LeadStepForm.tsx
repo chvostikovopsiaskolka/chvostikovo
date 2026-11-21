@@ -25,7 +25,9 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
   const [selectedInterest, setSelectedInterest] = useState(presetInterest ?? "");
-  const showBreed = selectedInterest !== "" && selectedInterest !== LEAD_STEP_INTERESTS[0].value && !puppyCheck?.dog_breed;
+  // Shared optional field for information, regular, occasional and puppy leads.
+  // Carry the puppy breed into contact, where owners may correct it.
+  const [breed, setBreed] = useState(puppyCheck?.dog_breed ?? "");
   const [sent, setSent] = useState(false);
   const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -42,6 +44,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading || step !== 2 || !selectedInterest) return;
+    const breedValue = breed.trim();
     const form = event.currentTarget;
     const attemptId = startFormAttempt(trackingSource);
     progress.markAttempt();
@@ -68,8 +71,8 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         telefon: phone,
         email: String(fields.get("email") || "").trim() || undefined,
         zaujem: selectedInterest,
-        ...(showBreed ? { plemeno: String(fields.get("plemeno") || "").trim() || undefined } : {}),
-        ...(puppyCheck ? { puppy_check: puppyCheck } : {}),
+        ...(breedValue ? { plemeno: breedValue } : {}),
+        ...(puppyCheck ? { puppy_check: { ...puppyCheck, dog_breed: breedValue || undefined } } : {}),
       }, attemptId);
       void trackCookielessInteraction("form_submit", trackingSource, "sk", attemptId);
       runFormTelemetry(() => {
@@ -169,7 +172,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         {puppyCheck && (
           <div data-puppy-check-summary className="rounded-2xl border border-forest/15 bg-secondary/50 p-3 text-xs leading-relaxed text-forest">
             <p className="font-display font-bold">K záujmu pripojíme aj vyplnenú kontrolu šteniatka:</p>
-            <p className="mt-1">{puppyCheck.dog_name ? puppyCheck.dog_name + " · " : ""}{puppyCheck.age_months} mesiacov{puppyCheck.dog_breed ? " · " + puppyCheck.dog_breed : ""}{puppyCheck.dog_weight_kg ? " · " + puppyCheck.dog_weight_kg + " kg" : ""}</p>
+            <p className="mt-1">{puppyCheck.dog_name ? puppyCheck.dog_name + " · " : ""}{puppyCheck.age_months} mesiacov{breed.trim() ? " · " + breed.trim() : ""}{puppyCheck.dog_weight_kg ? " · " + puppyCheck.dog_weight_kg + " kg" : ""}</p>
             <p className="mt-1">Očkovania – besnota: {puppyCheck.vaccines.rabies === "yes" ? "áno" : puppyCheck.vaccines.rabies === "no" ? "nie" : "neviem"}; DHPPi+L: {puppyCheck.vaccines.dhppi === "yes" ? "áno" : puppyCheck.vaccines.dhppi === "no" ? "nie" : "neviem"}; kotercový kašeľ: {puppyCheck.vaccines.kennel === "yes" ? "áno" : puppyCheck.vaccines.kennel === "no" ? "nie" : "neviem"}.</p>
             <p className="mt-1 text-forest/70">Údaje odošleme spolu s kontaktom až po vašom potvrdení formulára.</p>
           </div>
@@ -181,12 +184,11 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
           <label className="label-sm" htmlFor={`lead-step-${formId}-meno`}>Meno majiteľa *</label>
           <input id={`lead-step-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
         </div>
-        {showBreed && (
-          <div data-aria-breed-field>
-            <label className="label-sm" htmlFor={`lead-step-${formId}-plemeno`}>Plemeno psíka (nepovinné)</label>
-            <input id={`lead-step-${formId}-plemeno`} name="plemeno" type="text" autoComplete="off" maxLength={200} className="field" placeholder="Napr. írsky vlkodav" />
-          </div>
-        )}
+        <div data-aria-breed-field>
+          <label className="label-sm" htmlFor={`lead-step-${formId}-plemeno`}>Plemeno psíka (nepovinné)</label>
+          <input id={`lead-step-${formId}-plemeno`} name="plemeno" type="text" autoComplete="off" maxLength={80} className="field"
+            value={breed} onChange={(event) => setBreed(event.target.value)} placeholder="Napr. írsky vlkodav" />
+        </div>
         <PhoneField id={`lead-step-${formId}-tel`} name="telefon" />
         <div>
           <label className="label-sm" htmlFor={`lead-step-${formId}-email`}>E-mail (nepovinné)</label>
