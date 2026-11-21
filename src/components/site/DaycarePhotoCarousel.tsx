@@ -34,6 +34,10 @@ const PHOTOS = [
   ...DAYCARE_GALLERY_EXTRAS,
 ];
 
+// The mobile Košice lead uses exactly two images from this existing moving gallery.
+// Reuse the same imported assets, rather than adding another independent photo source.
+export const LEAD_REVIEW_GAP_PHOTOS = PHOTOS.slice(0, 2);
+
 const RESUME_DELAY = 2800;
 
 export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "en" }) {
