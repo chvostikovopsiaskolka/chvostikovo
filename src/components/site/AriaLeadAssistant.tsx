@@ -4,6 +4,7 @@ import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
+import { trackMarketingInteraction } from "@/lib/analytics";
 
 type Panel = "pricing" | "requirements" | "faq" | "menu" | null;
 
@@ -28,6 +29,7 @@ const QUESTIONS = [
 export function AriaLeadAssistant({
   onOpenInfo,
   onOpenInterest,
+  onOpenDockInterest,
   onOpenPuppyChecker,
   hidden = false,
   trackingPrefix = "aria_preview_v3",
@@ -36,6 +38,7 @@ export function AriaLeadAssistant({
 }: {
   onOpenInfo: () => void;
   onOpenInterest: () => void;
+  onOpenDockInterest?: () => void;
   onOpenPuppyChecker: () => void;
   hidden?: boolean;
   trackingPrefix?: string;
@@ -150,7 +153,16 @@ export function AriaLeadAssistant({
   }, [panel]);
 
   function track(action: string) {
-    void trackCookielessInteraction("nav_click", trackingPrefix + "_" + action, "sk");
+    // Keep the historic paid LEAD dock sources for continuity in reports.
+    const legacySources: Record<string, string> = {
+      pricing: "mobile_dock_lead_lead-pricing",
+      menu: "mobile_dock_lead_menu_open",
+      first_visit: "mobile_menu_lead_lead-first-visit",
+    };
+    const source = trackingPrefix === "lead_landing_aria" && legacySources[action]
+      ? legacySources[action] : trackingPrefix + "_" + action;
+    void trackCookielessInteraction("nav_click", source, "sk");
+    return source;
   }
 
   function jump(id: string, action: string) {
@@ -166,8 +178,12 @@ export function AriaLeadAssistant({
   }
 
   function toggle(next: Exclude<Panel, null>) {
-    track(next);
-    setPanel(panel === next ? null : next);
+    const opening = panel !== next;
+    const source = track(next);
+    // Preserve the historic consented GA4 ViewPricing / Meta ViewPricing,
+    // distinct from nav_click and from actual successful Lead submissions.
+    if (opening && next === "pricing") trackMarketingInteraction("view_pricing", source);
+    setPanel(opening ? next : null);
   }
 
 
@@ -181,6 +197,12 @@ export function AriaLeadAssistant({
     track("interest");
     setPanel(null);
     onOpenInterest();
+  }
+
+  function openDockInterest() {
+    track("interest");
+    setPanel(null);
+    (onOpenDockInterest ?? onOpenInterest)();
   }
 
   function openPuppy() {
@@ -382,7 +404,7 @@ export function AriaLeadAssistant({
             <button type="button" className={itemClass} aria-label="Časté otázky" aria-expanded={panel === "faq"} onClick={() => toggle("faq")}>
               <BookOpen size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">FAQ</span>
             </button>
-            <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={openInterest}>
+            <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={openDockInterest}>
               <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span>
             </button>
             <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}>
