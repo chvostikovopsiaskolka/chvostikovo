@@ -44,7 +44,10 @@ const failures = [];
           // Cookie preferences are installed by a client effect, so this also verifies hydration.
           const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
           await cookieButton.waitFor({ timeout: 10000 });
-          if (!bellaris && url.pathname === '/test-aria/') {
+          // The released lead URL and the noindex preview share Aria UI. The
+          // production baseline may still show its pre-release landing.
+          const isAriaPage = !bellaris && (url.pathname === '/test-aria/' || url.pathname === '/psia-skolka-kosice/') && await page.locator('[data-aria-guide]').count() > 0;
+          if (!bellaris && isAriaPage) {
             if (!await page.getByText(/Ahoj! Používame cookies 🍪/).count())
               throw new Error('Preview cookie greeting missing');
             const bubble = page.locator('[data-aria-cookie-bubble="true"]');
@@ -86,7 +89,7 @@ const failures = [];
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
-          if (!bellaris && url.pathname === '/test-aria/') {
+          if (!bellaris && isAriaPage) {
             const restoredScroll = await page.evaluate(() => ({
               rootOverflow: document.documentElement.style.overflow,
               bodyPosition: document.body.style.position,
@@ -94,7 +97,7 @@ const failures = [];
             if (restoredScroll.rootOverflow === 'hidden' || restoredScroll.bodyPosition === 'fixed')
               throw new Error('Cookie scroll lock was not restored after saving preferences');
           }
-          if (!bellaris && url.pathname === '/test-aria/' && !restricted) {
+          if (!bellaris && isAriaPage && !restricted) {
             for (const width of [320, 390]) {
               // Stop the previous smooth scroll without navigating: this fixture
               // explicitly clears localStorage on every fresh navigation to
@@ -131,6 +134,9 @@ const failures = [];
                 throw new Error('Aria cartoon speech tail must emerge toward her head at ' + width);
               if (!await tail.locator('path[fill="var(--card)"]').count())
                 throw new Error('Aria speech tail must match the existing OKLCH card color');
+              const speechStyle = await comicBubble.evaluate(el => ({ radius: getComputedStyle(el).borderTopLeftRadius, height: el.getBoundingClientRect().height }));
+              if (!speechStyle.radius.includes('%') || speechStyle.height < 50 || tailBox.y > headBox.y + headBox.height || tailBox.y + tailBox.height < headBox.y)
+                throw new Error('Speech must be an organic oval with a tail physically meeting Aria at ' + width);
               const interestButton = aria.getByRole('button', { name: 'Mám záujem o škôlku' });
               if ((await interestButton.getAttribute('class') || '').includes('bg-coral/15'))
                 throw new Error('Rejected special interest button highlight resurfaced');
@@ -139,6 +145,9 @@ const failures = [];
                 if (!Number.isFinite(radius) || radius > 15)
                   throw new Error('Dock choices must be rounded rectangles, never circles');
               }
+              const dockRadius = await aria.locator('[data-aria-dock]').evaluate(el => parseFloat(getComputedStyle(el).borderTopLeftRadius));
+              if (dockRadius < 13 || dockRadius > 18)
+                throw new Error('Dock frame and buttons need consistent rounded rectangles');
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
               if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
                 throw new Error('Aria floating dock overflows mobile viewport ' + width);
@@ -169,7 +178,23 @@ const failures = [];
               await wizard.locator('[data-aria-puppy-step="result"]').waitFor({ state: 'visible' });
               await wizard.getByRole('button', { name: /Mám záujem – vyplniť kontakt/ }).click();
               await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
-              await page.keyboard.press('Escape');
+              // Nested puppy -> contact modal handoff: use the actual iPhone
+              // close button, not an ambiguous synthetic Escape targeting the
+              // previous Radix layer in WebKit. Keyboard Escape remains covered
+              // later for the normal single-dialog requirements flow.
+              const contactDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+              const puppySummary = contactDialog.locator('[data-puppy-check-summary]');
+              await puppySummary.waitFor({ state: 'visible' });
+              const puppySummaryText = await puppySummary.innerText();
+              if (!puppySummaryText.includes('Testovací psík') || !puppySummaryText.includes('Kríženec') ||
+                  !puppySummaryText.includes('4 mesiacov') ||
+                  !/besnota:\s*áno/i.test(puppySummaryText) ||
+                  !/DHPPi\+L:\s*áno/i.test(puppySummaryText) ||
+                  !/kotercový kašeľ:\s*áno/i.test(puppySummaryText))
+                throw new Error('Puppy wizard details were lost during contact handoff: ' + puppySummaryText);
+              await contactDialog.getByRole('button', { name: 'Close' }).click();
+              await contactDialog.waitFor({ state: 'hidden' });
+              await aria.waitFor({ state: 'visible' });
 
               await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
               const pricingPanel = aria.locator('[data-aria-panel="pricing"]');
@@ -201,10 +226,13 @@ const failures = [];
 
               await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
               const menu = aria.locator('[data-aria-menu]');
+              const puppyMenuLine = menu.getByText('Zistite, či vaše šteniatko spĺňa podmienky');
               if (!await menu.getByText('3 dôvody, prečo si vybrať nás').count() ||
-                  !await menu.getByText('Zistite, či vaše šteniatko spĺňa podmienky').count() ||
+                  !await puppyMenuLine.count() ||
                   await menu.getByText('Nastavenia cookies').count())
                 throw new Error('Aria menu descriptions or cookie removal missing');
+              if (await puppyMenuLine.evaluate(el => el.scrollWidth > el.clientWidth + 1 || getComputedStyle(el).whiteSpace !== 'nowrap'))
+                throw new Error('Puppy menu subtitle must fit on a single unclipped row at ' + width);
               await aria.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
 
               const cols = await page.locator('#lead-pricing .grid').first().evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
@@ -213,12 +241,15 @@ const failures = [];
                 throw new Error('Preview webpage pricing must display equal height columns at ' + width);
               if (!await page.getByRole('heading', { name: 'Takto vyzerá Chvostíkovo' }).count())
                 throw new Error('Preview mosaic title regression');
-              const firstVisitWidthMatches = await page.locator('#lead-pricing details').evaluate(el => {
-                const prev = el.previousElementSibling;
-                if (!prev) return false;
-                return Math.abs(el.getBoundingClientRect().width - prev.getBoundingClientRect().width) <= 2;
+              const firstVisitCompact = await page.locator('#lead-pricing details').evaluate(el => {
+                const wrapper = el.parentElement;
+                if (!wrapper) return false;
+                const box = el.getBoundingClientRect();
+                const outer = wrapper.getBoundingClientRect();
+                return box.width <= Math.min(outer.width, 340) + 2 &&
+                  Math.abs((box.left + box.width / 2) - (outer.left + outer.width / 2)) <= 3;
               });
-              if (!firstVisitWidthMatches) throw new Error('First visit and accordion must have matching width');
+              if (!firstVisitCompact) throw new Error('First-visit accordion must be compact and centered under its heading');
               if (await page.locator('#lead-pricing article').first().getByText('1 vstup').count())
                 throw new Error('Page one-off card must omit redundant 1 vstup');
               const visitGroup = page.locator('[data-first-visit-group]');
@@ -226,6 +257,11 @@ const failures = [];
                 throw new Error('First-visit intro and accordion must share one orange group');
               if (await page.locator('#lead-requirements span').getByText('Podmienky prijatia', { exact: true }).count())
                 throw new Error('Redundant preview requirements eyebrow resurfaced');
+              const eligibilityCopy = page.locator('#aria-early-faq details').first();
+              for (const phrase of ['stredné a veľké psy', 'nad 20 kg', 'očkované šteniatka', 'nad 15 kg', 'Vyžadujeme očkovania, dobrý zdravotný stav a vhodnosť do kolektívu']) {
+                if (!await eligibilityCopy.locator('strong').getByText(phrase, { exact: true }).count())
+                  throw new Error('Eligibility highlights missing: ' + phrase);
+              }
               if (!await page.locator('#lead-requirements strong').getByText('besnote', { exact: true }).count() ||
                   !await page.locator('#lead-requirements strong').getByText('infekčným ochoreniam', { exact: true }).count() ||
                   !await page.locator('#lead-requirements strong').getByText('kotercovému kašľu', { exact: true }).count())
@@ -297,7 +333,7 @@ const failures = [];
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
           // Shared Slovak Hero CTA: mobile pair, desktop single prominent info CTA.
           // Layout regression 320/375/390/1440 in Chromium and Safari WebKit.
-          if (!bellaris && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname)) {
+          if (!bellaris && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname) && !isAriaPage) {
             for (const width of [320, 375, 390, 1440]) {
               await page.setViewportSize({ width, height: width >= 1024 ? 900 : 844 });
               const hero = page.locator('section.hero-safe-top').first();
@@ -364,7 +400,7 @@ const failures = [];
             await page.setViewportSize({ width: 390, height: 844 });
           }
           // New LEAD pilot: one question at a time without any real submission.
-          if (!bellaris && !restricted && url.pathname === '/psia-skolka-kosice/') {
+          if (!bellaris && !restricted && url.pathname === '/psia-skolka-kosice/' && !isAriaPage) {
             const wizard = page.locator('#lead-form [data-lead-step-form]');
             if (!await wizard.isVisible()) throw new Error('Missing inline mobile lead wizard');
             // 19 Nov LEAD funnel: proof before first contact, editable inline entries,
@@ -499,12 +535,22 @@ const failures = [];
           if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/'].includes(url.pathname)) {
             const entry = url.pathname === '/'
               ? page.locator('section.hero-safe-top .hero-cta-primary:visible').first()
+              : isAriaPage ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })
               : page.locator('.mobile-dock .mobile-dock-apply').first();
             await entry.click();
             const modal = page.getByRole('dialog');
             await modal.waitFor({ state: 'visible' });
             if (!await modal.locator('[data-lead-step-form]').count())
               throw new Error('Mobile interest CTA must open guided enquiry modal');
+            if (!url.pathname.startsWith('/en/')) {
+              const leadForm = modal.locator('[data-lead-step-form]');
+              const cards = leadForm.locator('label:has(input[name="zaujem"])');
+              if (await cards.count() !== 3) throw new Error('Every normal SK inquiry must retain exactly three interest choices');
+              await cards.nth(1).click();
+              await leadForm.getByRole('button', { name: 'Pokračovať' }).click();
+              if (!await leadForm.locator('[data-aria-breed-field]').isVisible())
+                throw new Error('Regular SK interest must show optional breed on this page: ' + url.pathname);
+            }
             const modalFrame = await modal.evaluate(el => {
               const rect = el.getBoundingClientRect();
               const inner = el.querySelector('.form-dialog-scroll');

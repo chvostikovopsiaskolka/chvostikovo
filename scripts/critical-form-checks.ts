@@ -45,6 +45,43 @@ assert(!shortSchema.safeParse({
   zaujem: "Mám záujem využívať škôlku občasne", plemeno: "x".repeat(201),
 }).success, "Preview breed must respect the 200-character limit.");
 
+// Aria puppy checker: transfer the *answers* into the existing allowlisted
+// lead raw_payload, never into the validated interest_reason or ad events.
+const puppyAnswers = {
+  age_months: 7, dog_name: "Mia", dog_breed: "Doga", dog_weight_kg: 18.5,
+  vaccines: { rabies: "yes", dhppi: "no", kennel: "unknown" },
+};
+const puppyLead = shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Mám záujem o škôlku pre šteniatko", puppy_check: puppyAnswers,
+});
+const puppyPayload = buildDbPayload(puppyLead);
+assert(puppyPayload.form_type === "lead" && puppyPayload.interest_reason === "Mám záujem o škôlku pre šteniatko",
+  "Puppy checker must preserve the Edge allowlist interest.");
+for (const [key, value] of [
+  ["Šteniatko – vek", "7 mesiacov"], ["Šteniatko – meno", "Mia"],
+  ["Šteniatko – plemeno", "Doga"], ["Šteniatko – váha", "18.5 kg"],
+  ["Šteniatko – besnota", "Áno"], ["Šteniatko – DHPPi+L", "Nie"],
+  ["Šteniatko – kotercový kašeľ", "Neviem"],
+  ["Šteniatko – výsledok orientačnej kontroly", "Potrebné individuálne posúdenie"],
+] as const) assert(puppyPayload.raw_payload[key] === value, "Puppy payload dropped field: " + key);
+const eligiblePuppy = buildDbPayload(shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Mám záujem o škôlku pre šteniatko",
+  puppy_check: { age_months: 5, vaccines: { rabies: "yes", dhppi: "yes", kennel: "yes" } },
+}));
+assert(eligiblePuppy.raw_payload["Šteniatko – výsledok orientačnej kontroly"] === "Predbežne splnené",
+  "Fully vaccinated puppy must still get an orientational, never final, result.");
+assert(!("Šteniatko – vek" in ariaPayload.raw_payload),
+  "Normal regular lead must not invent puppy assessment data.");
+assert(!shortSchema.safeParse({ ...puppyLead, puppy_check: { ...puppyAnswers, age_months: 30 } }).success,
+  "Puppy age must be within the actual checker range.");
+assert(!shortSchema.safeParse({ ...puppyLead, puppy_check: { ...puppyAnswers, dog_weight_kg: 400 } }).success,
+  "Puppy weight cannot exceed 150 kg.");
+assert(!shortSchema.safeParse({ ...puppyLead, puppy_check: { ...puppyAnswers, vaccines: { ...puppyAnswers.vaccines, rabies: "unconfirmed" } } }).success,
+  "Puppy vaccine state must be an explicit yes/no/unknown.");
+
+
 longSchema.parse({
   typ: "prihlaska",
   consent: true,
@@ -197,6 +234,9 @@ for (const value of allowedStagedInterests) {
   const payload = buildDbPayload(shortSchema.parse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: value }));
   assert(payload.interest_reason === value, "New interest must be stored verbatim");
 }
+assert(stagedLeadSource.includes('const showBreed = selectedInterest !== ""') && !stagedLeadSource.includes("ariaPreview && selectedInterest"), "Optional breed must be shared across SK lead forms, not preview-only");
+const releasedLeadRoute = readFileSync(new URL("../src/routes/psia-skolka-kosice.tsx", import.meta.url), "utf8");
+assert(!releasedLeadRoute.includes('component: AriaPreviewPage') && releasedLeadRoute.includes('component: LeadLandingPage'), "Unapproved Aria preview must NOT replace the live campaign lead URL");
 assert(stagedLeadSource.includes("zaujem: selectedInterest") && stagedLeadSource.includes("name=\"zaujem\"") && stagedLeadSource.includes("PrivacyConsentCheckbox"), "Guided form must preserve interest, consent and submission");
 assert(stagedLeadSource.includes('name="meno"') && stagedLeadSource.includes('name="email"') && stagedLeadSource.includes('<PhoneField'), "Guided form must preserve contact fields and autofill");
 assert(stagedLeadSource.includes('startFormAttempt(trackingSource)') && stagedLeadSource.includes('trackMetaFormConversion("informacie"') && stagedLeadSource.includes('LeadPhoneReceipt'), "Guided form must retain conversion idempotency, receipt and phone correction");
@@ -242,6 +282,11 @@ assert(smsDelayMigration.includes("new.created_at + interval '2 minutes'") && sm
 assert(smsDelayMigration.includes("new.form_type='lead'") && smsDelayMigration.includes("ELSE now()"), "Application SMS must not be delayed.");
 
 const backend = readFileSync(new URL("../supabase/functions/web-form-submit/index.ts", import.meta.url), "utf8");
+assert(backend.includes('securityLimitV336') && backend.includes('securityAccessV336'),
+  "Production Edge security additions must be retained when adding puppy notification fields.");
+assert(backend.includes('--- KONTROLA ŠTENIATKA (ÚDAJE OD MAJITEĽA) ---') &&
+  backend.includes("input.raw_payload") && backend.includes("'Šteniatko – kotercový kašeľ'"),
+  "Operator notification must include the submitted puppy-check fields, not just the lead interest.");
 assert(backend.includes("/^\\+\\d{7,15}$/"), "Critical form check failed: web-form-submit phone regex is not the expected E.164 validation.");
 assert(backend.includes("input.dry_run === true"), "Critical form check failed: backend dry-run smoke-test support is missing.");
 assert(backend.includes("correct_web_lead_phone_once") && backend.includes("phone_edit_token"), "Backend must implement the one-time phone correction.");

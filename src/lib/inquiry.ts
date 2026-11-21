@@ -19,6 +19,21 @@ const attributionSchema = z.object({
   cta_source: z.string().max(TRACKING_LIMITS.cta_source).optional(),
 });
 
+// Optional answers from Aria's puppy eligibility checker. These are recorded
+// only when the owner explicitly submits the subsequent contact form.
+export const puppyCheckSchema = z.object({
+  age_months: z.number().int().min(1).max(12),
+  dog_name: z.string().trim().max(70).optional(),
+  dog_breed: z.string().trim().max(80).optional(),
+  dog_weight_kg: z.number().min(0.1).max(150).optional(),
+  vaccines: z.object({
+    rabies: z.enum(["yes", "no", "unknown"]),
+    dhppi: z.enum(["yes", "no", "unknown"]),
+    kennel: z.enum(["yes", "no", "unknown"]),
+  }),
+});
+export type PuppyCheckInput = z.infer<typeof puppyCheckSchema>;
+
 export const shortSchema = z.object({
   typ: z.literal("informacie"),
   consent: z.literal(true),
@@ -27,6 +42,7 @@ export const shortSchema = z.object({
   telefon: z.string().regex(/^\+\d{7,15}$/),
   zaujem: z.string().min(1).max(300),
   plemeno: z.string().trim().max(200).optional(),
+  puppy_check: puppyCheckSchema.optional(),
   email: z.string().trim().email().max(254).optional(),
 }).merge(attributionSchema);
 
@@ -104,12 +120,24 @@ export function buildFields(data: InquiryData): Array<{ label: string; value: st
   const attribution = attributionFields(data);
 
   if (data.typ === "informacie") {
+    const vaccineText = { yes: "Áno", no: "Nie", unknown: "Neviem" } as const;
+    const puppy = data.puppy_check;
     return [
       { label: "Meno majiteľa", value: data.meno },
       { label: "Telefón", value: data.telefon },
       ...(data.email ? [{ label: "E-mail", value: data.email }] : []),
       { label: "O čo máte záujem?", value: data.zaujem },
       ...(data.plemeno ? [{ label: "Plemeno psíka", value: data.plemeno }] : []),
+      ...(puppy ? [
+        { label: "Šteniatko – vek", value: `${puppy.age_months} mesiacov` },
+        ...(puppy.dog_name ? [{ label: "Šteniatko – meno", value: puppy.dog_name }] : []),
+        ...(puppy.dog_breed ? [{ label: "Šteniatko – plemeno", value: puppy.dog_breed }] : []),
+        ...(puppy.dog_weight_kg ? [{ label: "Šteniatko – váha", value: `${puppy.dog_weight_kg} kg` }] : []),
+        { label: "Šteniatko – besnota", value: vaccineText[puppy.vaccines.rabies] },
+        { label: "Šteniatko – DHPPi+L", value: vaccineText[puppy.vaccines.dhppi] },
+        { label: "Šteniatko – kotercový kašeľ", value: vaccineText[puppy.vaccines.kennel] },
+        { label: "Šteniatko – výsledok orientačnej kontroly", value: puppy.age_months >= 4 && Object.values(puppy.vaccines).every(v => v === "yes") ? "Predbežne splnené" : "Potrebné individuálne posúdenie" },
+      ] : []),
       { label: "Súhlas so spracovaním osobných údajov", value: "Áno" },
       ...attribution,
     ];
@@ -156,6 +184,10 @@ export function buildDbPayload(data: InquiryData) {
       ...(data.email ? { email: data.email } : {}),
       interest_reason: data.zaujem,
       ...(data.plemeno ? { dog_breed: data.plemeno } : {}),
+      // Existing Edge persists non-column fields only in its raw_payload JSONB.
+      // Keep the validated puppy answers structured for CRM/email, never append
+      // them to the allowlisted interest_reason or create a second lead.
+      ...(data.puppy_check ? { puppy_check: data.puppy_check } : {}),
       consent: true,
       source_ref,
       landing_page: data.landing_page || "",

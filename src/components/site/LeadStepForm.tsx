@@ -1,4 +1,5 @@
 import { useId, useRef, useState, type FormEvent } from "react";
+import type { PuppyCheckInput } from "@/lib/inquiry";
 import { Check } from "lucide-react";
 import { currentSourceRef } from "@/lib/tracking-sanitization";
 import { useFormProgress } from "@/lib/form-progress";
@@ -20,11 +21,11 @@ export const LEAD_STEP_INTERESTS = [
   { value: "Mám záujem využívať škôlku občasne", lines: ["Mám záujem", "občasne", "využívať škôlku"] },
 ] as const;
 
-export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, presetInterest, ariaPreview = false }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean }) {
+export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, presetInterest, ariaPreview = false, puppyCheck }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined }) {
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
   const [selectedInterest, setSelectedInterest] = useState(presetInterest ?? "");
-  const showBreed = ariaPreview && selectedInterest !== "" && selectedInterest !== LEAD_STEP_INTERESTS[0].value;
+  const showBreed = selectedInterest !== "" && selectedInterest !== LEAD_STEP_INTERESTS[0].value && !puppyCheck?.dog_breed;
   const [sent, setSent] = useState(false);
   const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -68,6 +69,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         email: String(fields.get("email") || "").trim() || undefined,
         zaujem: selectedInterest,
         ...(showBreed ? { plemeno: String(fields.get("plemeno") || "").trim() || undefined } : {}),
+        ...(puppyCheck ? { puppy_check: puppyCheck } : {}),
       }, attemptId);
       void trackCookielessInteraction("form_submit", trackingSource, "sk", attemptId);
       runFormTelemetry(() => {
@@ -164,6 +166,14 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
 
       <div className={step === 2 ? "space-y-3.5" : "hidden"} aria-hidden={step !== 2}>
         <h3 className="font-display text-lg font-bold leading-snug text-forest sm:text-xl">Kam sa vám môžeme ozvať?</h3>
+        {puppyCheck && (
+          <div data-puppy-check-summary className="rounded-2xl border border-forest/15 bg-secondary/50 p-3 text-xs leading-relaxed text-forest">
+            <p className="font-display font-bold">K záujmu pripojíme aj vyplnenú kontrolu šteniatka:</p>
+            <p className="mt-1">{puppyCheck.dog_name ? puppyCheck.dog_name + " · " : ""}{puppyCheck.age_months} mesiacov{puppyCheck.dog_breed ? " · " + puppyCheck.dog_breed : ""}{puppyCheck.dog_weight_kg ? " · " + puppyCheck.dog_weight_kg + " kg" : ""}</p>
+            <p className="mt-1">Očkovania – besnota: {puppyCheck.vaccines.rabies === "yes" ? "áno" : puppyCheck.vaccines.rabies === "no" ? "nie" : "neviem"}; DHPPi+L: {puppyCheck.vaccines.dhppi === "yes" ? "áno" : puppyCheck.vaccines.dhppi === "no" ? "nie" : "neviem"}; kotercový kašeľ: {puppyCheck.vaccines.kennel === "yes" ? "áno" : puppyCheck.vaccines.kennel === "no" ? "nie" : "neviem"}.</p>
+            <p className="mt-1 text-forest/70">Údaje odošleme spolu s kontaktom až po vašom potvrdení formulára.</p>
+          </div>
+        )}
         <p className="text-sm leading-relaxed text-forest/70">
           Nechajte nám kontakt a ozveme sa vám ohľadom vášho záujmu.
         </p>
@@ -185,11 +195,11 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         </div>
         <PrivacyConsentCheckbox />
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
-          <button type="button" onClick={() => setStep(1)} disabled={loading}
+        <div className={puppyCheck ? "grid grid-cols-1 gap-2" : "grid grid-cols-[auto_minmax(0,1fr)] gap-2"}>
+          {!puppyCheck && <button type="button" onClick={() => setStep(1)} disabled={loading}
             className="min-h-12 rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral">
             Späť
-          </button>
+          </button>}
           <button type="submit" disabled={loading} className="btn-coral min-h-12 min-w-0 px-4 py-3 font-bold disabled:opacity-60">
             {loading ? "Odosielam…" : "Odoslať záujem"}
           </button>
