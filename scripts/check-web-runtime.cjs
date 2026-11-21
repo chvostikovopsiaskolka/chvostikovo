@@ -108,6 +108,8 @@ const failures = [];
               throw new Error('Cookie scroll lock was not restored after saving preferences');
           }
           if (!bellaris && isAriaPage && !restricted) {
+            if (url.pathname === '/test-aria/')
+              await page.waitForTimeout(1650); // Let short-lived consent-saved notice clear before visual snapshots.
             for (const width of [320, 375, 390, 430]) {
               // Stop the previous smooth scroll without navigating: this fixture
               // explicitly clears localStorage on every fresh navigation to
@@ -190,16 +192,32 @@ const failures = [];
                       a.left < b.right + 8 && a.right > b.left - 8 &&
                       a.top < b.bottom + 8 && a.bottom > b.top - 8;
                   });
+                  const guide = document.querySelector('[data-aria-guide]');
+                  const stage = guide.dataset.ariaStage;
+                  const introBlockers = [...document.querySelectorAll(
+                    'main h1, main h2, main input:not([type=radio]), main select, main textarea, main button'
+                  )].some(node => {
+                    const b = node.getBoundingClientRect();
+                    return b.width > 0 && b.height > 0 &&
+                      a.left < b.right + 8 && a.right > b.left - 8 &&
+                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
+                  });
                   return {
                     overlap: overlaps.length > 0,
                     colliding: overlaps.slice(0, 3).map(node => node.tagName),
+                    stage, introBlockers,
+                    pointerEvents: getComputedStyle(document.querySelector('[data-aria-message]')).pointerEvents,
                     suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed,
                     speechTop: Math.round(a.top)
                   };
                 });
                 if (!clearance.overlap) throw new Error('No real content overlap to test clearance: ' + JSON.stringify(clearance));
-                if (clearance.suppressed !== 'true')
-                  throw new Error('Aria must hide speech over contact form controls: ' + JSON.stringify(clearance));
+                if (clearance.stage === 'intro' && !clearance.introBlockers) {
+                  if (clearance.suppressed !== 'false' || clearance.pointerEvents !== 'none')
+                    throw new Error('Intro greeting must be visible but click-through over radio choices: ' + JSON.stringify(clearance));
+                } else if (clearance.suppressed !== 'true') {
+                  throw new Error('Interactive speech must hide over form controls: ' + JSON.stringify(clearance));
+                }
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-clear.png') });
                 await page.evaluate(() => window.scrollTo(0, 0));
                 await page.waitForTimeout(170);
@@ -207,9 +225,11 @@ const failures = [];
                 // scrollY=0. In that case keeping speech hidden is correct.
                 const restored = await page.evaluate(() => {
                   const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
-                  const overlapping = [...document.querySelectorAll(
-                    'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]'
-                  )].some(node => {
+                  const stage = document.querySelector('[data-aria-guide]').dataset.ariaStage;
+                  const selector = stage === 'intro'
+                    ? 'main h1, main h2, main input:not([type=radio]), main select, main textarea, main button'
+                    : 'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]';
+                  const overlapping = [...document.querySelectorAll(selector)].some(node => {
                     const b = node.getBoundingClientRect();
                     return b.width > 0 && b.height > 0 &&
                       a.left < b.right + 8 && a.right > b.left - 8 &&
