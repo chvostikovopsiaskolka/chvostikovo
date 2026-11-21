@@ -184,6 +184,11 @@ const failures = [];
               const cards=page.locator('[data-aria-review-photo]');
               if (await cards.count()!==2) throw new Error('Paid lead requires two clickable owner photos');
               await cards.first().scrollIntoViewIfNeeded();
+              // User-reported pixelation: two card images must be retina-ready,
+              // not the previous ~6KB 320px previews. Keep big files lazy in modal.
+              await page.waitForFunction(() => [...document.querySelectorAll('[data-aria-review-photo] img')]
+                .every(img => img.complete && img.naturalWidth >= 640 && img.naturalHeight >= 850),
+                null, {timeout:5000});
               await cards.first().click();
               await verifyLightbox(true);
               const mosaic=page.locator('#aria-mosaic button[aria-label^="Otvoriť fotografiu"]');
