@@ -284,7 +284,6 @@ assert(forms.includes("hideInterest = false"), "Critical form check failed: info
 // v303: three visible Slovak ShortForm choices; same required field and CRM contract.
 // Guided LEAD pilot: exact new UI choices must persist as exact CRM interest_reason values.
 const stagedLeadSource = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
-const stagedLeadLanding = readFileSync(new URL("../src/routes/psia-skolka-kosice.tsx", import.meta.url), "utf8");
 const allowedStagedInterests = [
   "Chcem sa informovať o škôlke",
   "Mám záujem využívať škôlku pravidelne",
