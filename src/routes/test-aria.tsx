@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Car,
@@ -43,7 +43,7 @@ const LANDING_FAQ_QUESTIONS = new Set([
 ]);
 
 const EARLY_FAQ = [
-  { q: "Pre koho je škôlka určená?", a: "Najmä pre stredné a veľké psy, spravidla nad 20 kg, a očkované šteniatka podľa veku a individuálnej pripravenosti. Vyžadujeme očkovania, dobrý zdravotný stav a vhodnosť do kolektívu; konečné rozhodnutie padne po úvodnej návšteve." },
+  { q: "Pre koho je škôlka určená?", a: "Najmä pre stredné a veľké psy, spravidla nad 20 kg, a očkované šteniatka, spravidla nad 15 kg, podľa veku a individuálnej pripravenosti. Vyžadujeme očkovania, dobrý zdravotný stav a vhodnosť do kolektívu; konečné rozhodnutie padne po úvodnej návšteve." },
   ...FAQ.filter(({ q }) => q === "Bude môj psík počas dňa niekedy sám bez dozoru?"),
 ];
 
@@ -100,7 +100,8 @@ export const Route = createFileRoute("/test-aria")({
   component: AriaPreviewPage,
 });
 
-function AriaPreviewPage() {
+export function AriaPreviewPage() {
+  const isLiveLead = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, "") === "/psia-skolka-kosice" });
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [puppyModalOpen, setPuppyModalOpen] = useState(false);
   const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
@@ -115,10 +116,11 @@ function AriaPreviewPage() {
   }
 
   function openAriaForm(infoOnly: boolean) {
-    trackMarketingInteraction("inquiry_cta", infoOnly ? "aria_preview_more_info" : "aria_preview_interest");
-    void trackCookielessInteraction("inquiry_cta", infoOnly ? "aria_preview_more_info" : "aria_preview_interest");
+    const source = isLiveLead ? (infoOnly ? "lead_landing_aria_info" : "lead_landing_aria_interest") : (infoOnly ? "aria_preview_more_info" : "aria_preview_interest");
+    trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
     setAriaPreset(infoOnly ? LEAD_STEP_INTERESTS[0].value : undefined);
-    setLeadModalSource(infoOnly ? "aria_preview_more_info" : "aria_preview_interest");
+    setLeadModalSource(source);
     setLeadModalOpen(true);
   }
 
@@ -134,7 +136,7 @@ function AriaPreviewPage() {
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
       <Header landingMinimal hideMobileDock landingTrackingSource="lead_landing_header_phone" />
-      <AriaLeadAssistant onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} hidden={leadModalOpen || puppyModalOpen} />
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
         <section className="hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-8 sm:pt-10 lg:pt-24">
@@ -179,7 +181,7 @@ function AriaPreviewPage() {
               </div>
 
               <div className="mx-auto mt-4 max-w-xl rounded-3xl bg-card p-5 shadow-card sm:p-6">
-                <LeadStepForm questionInHeading ariaPreview trackingSource="aria_preview_hero_inline" />
+                <LeadStepForm questionInHeading ariaPreview trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
               </div>
             </div>
           </div>
@@ -296,13 +298,13 @@ function AriaPreviewPage() {
                 <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
                 <p className="font-display text-base font-bold text-forest sm:text-lg">Úvodná návšteva zadarmo</p>
               </div>
-              <details className="group mt-2 w-full rounded-2xl border border-coral/20 bg-card/65 px-3 py-2 text-left">
+              <details data-aria-visit-details className="group mx-auto mt-2 w-fit max-w-full rounded-2xl border border-coral/20 bg-card/65 px-3 py-2 text-left">
                 <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 font-display text-sm font-bold text-forest">
                   Ako prebieha úvodná návšteva? <span className="text-coral group-open:rotate-45">+</span>
                 </summary>
                 <div className="space-y-3 border-t border-coral/15 pt-3 text-xs leading-relaxed text-forest/80">
                   {(FAQ.find(({ q }) => q === "Ako prebieha prvá návšteva psíka v škôlke?")?.a || "").split(/\n+/).filter(Boolean).map((text, i) => <p key={i}><AriaHighlightedText text={text.trim()} /></p>)}
-                  <div className="flex justify-end">
+                  <div className="flex justify-center">
                     <a href="#lead-first-visit" className="inline-flex min-h-11 items-center justify-center rounded-full border border-coral/25 bg-card px-4 text-right text-sm font-bold text-coral-dark shadow-sm">
                       Pozrieť 3 kroky prvej návštevy
                     </a>
@@ -396,7 +398,7 @@ function AriaPreviewPage() {
             <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o prvú návštevu?</h2>
             <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
             <div className="mt-5 rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
-              <LeadStepForm questionInHeading trackingSource="aria_preview_first_visit_inline" />
+              <LeadStepForm questionInHeading trackingSource={isLiveLead ? "lead_landing_aria_first_visit_inline" : "aria_preview_first_visit_inline"} />
             </div>
           </div>
         </section>
