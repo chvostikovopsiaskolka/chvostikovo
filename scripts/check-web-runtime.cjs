@@ -209,6 +209,38 @@ const failures = [];
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
               if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
                 throw new Error('Aria floating dock overflows mobile viewport ' + width);
+              // The paid landing must never blink its Aria speech/dock
+              // while moving between the form, requirements and contact.
+              if (url.pathname === '/psia-skolka-kosice/') {
+                const stability = await page.evaluate(async () => {
+                  const guide = document.querySelector('[data-aria-guide]');
+                  const dock = guide?.querySelector('[data-aria-dock]');
+                  const message = guide?.querySelector('[data-aria-message]');
+                  if (!guide || !dock || !message) return ['missing Aria'];
+                  const baseline = dock.getBoundingClientRect();
+                  const failures = [];
+                  for (const y of [150, 950, 2200, 3100, 1700, 3600, 110, 0]) {
+                    window.scrollTo(0, y);
+                    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                    const box = dock.getBoundingClientRect();
+                    const guideStyle = getComputedStyle(guide);
+                    if (document.querySelector('[data-aria-dock]') !== dock ||
+                        guideStyle.position !== 'fixed' || guideStyle.visibility !== 'visible' ||
+                        guideStyle.opacity !== '1' ||
+                        getComputedStyle(message).visibility !== 'visible' ||
+                        message.dataset.ariaSuppressed !== 'false' ||
+                        Math.abs(baseline.y - box.y) > 3 ||
+                        Math.abs(baseline.height - box.height) > 2) {
+                      failures.push({ y, stage: guide.dataset.ariaStage, dockY: box.y,
+                        baselineY: baseline.y, message: getComputedStyle(message).visibility });
+                    }
+                  }
+                  window.scrollTo(0, 0);
+                  return failures;
+                });
+                if (stability.length) throw new Error('Paid Aria flicker/dock instability at ' + width + ': ' + JSON.stringify(stability));
+                await page.screenshot({ path: path.join(out, 'lead-aria-' + engine + '-' + width + '-stable.png') });
+              }
               const navFrames = await aria.locator('[data-aria-dock] button').evaluateAll(buttons =>
                 buttons.every(button => getComputedStyle(button).boxShadow === 'none'));
               if (!navFrames) throw new Error('Only the overall Aria menu frame should be outlined, not each navigation item');
