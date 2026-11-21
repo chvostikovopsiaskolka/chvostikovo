@@ -79,6 +79,10 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
    assert.equal(await bubble.locator('h2').evaluate(el=>getComputedStyle(el).color),'rgb(17, 17, 17)');
    assert.equal(await page.locator('#customerPollOverviewV432').count(),0);
    assert.equal(await page.locator('#customerMenuPrimaryV432>.customer-menu-group').count(),4);
+   assert.equal(await page.locator('#customerPollMenuV432').evaluate(el=>Boolean(document.querySelector('#customerMenuPrimaryV432').compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING)),true,
+     'poll invitation must follow the compact menu group');
+   assert.equal(await page.locator('#customerPollMenuV432').evaluate(el=>Boolean(el.compareDocumentPosition(document.querySelector('.customer-social-v223'))&Node.DOCUMENT_POSITION_FOLLOWING)),true,
+     'poll invitation must appear before social links');
    assert.equal(await page.locator('#customerPollNavBadgeV432').isVisible(),true);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
    assert.equal(await bubble.locator('[data-poll-expand]').count(),0);
@@ -116,8 +120,8 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
    await bubble.locator('[data-poll-done]').click();
    await page.waitForFunction(()=>!document.querySelector('#customerPollMenuV432'));
    assert.equal(await page.locator('#customerMenuPrimaryV432>.customer-menu-group').count(),4,
-     'compact Menu must remain after the owner already voted');
-   assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('customer-polls-owner-v432')),true);
+     'standard compact Menu must remain after an owner votes');
+   assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('customer-menu-compact-v436')),true);
    assert.equal(await page.locator('#customerPollNavBadgeV432').count(),0,
      'already-voted owner must not have an unread poll badge');
 
@@ -126,18 +130,24 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
 
    assert.equal(await page.locator('#customerPollMenuV432').count(),0);
    assert.equal(await page.locator('#customerMenuPrimaryV432>.customer-menu-group').count(),4,
-     'compact layout remains after native WebView relaunch / page reload');
-   assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('customer-polls-owner-v432')),true);
+     'compact Menu remains after native WebView relaunch / page reload');
+   assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('customer-menu-compact-v436')),true);
    await page.evaluate(()=>{window.state.session.user.id="outsider-v433";window.__hooks.afterBootstrap.forEach(fn=>fn())});
    await bubble.waitFor({state:'detached'});
-   assert.equal(await page.locator('#customerMenuPrimaryV432').count(),0);
+   await page.locator('#customerMenuPrimaryV432').waitFor();
+   assert.equal(await page.locator('#customerMenuPrimaryV432>.customer-menu-group').count(),4,
+     'switching to a non-targeted account must retain standard compact Menu');
    assert.equal(await page.locator('#customerPollNavBadgeV432').count(),0);
    const outsider=await context.newPage();
    await outsider.goto(url+'?account=outsider-v433');
    await outsider.waitForTimeout(60);
    assert.equal(await outsider.locator('#customerPollMenuV432').count(),0);
-   assert.equal(await outsider.locator('#customerMenuPrimaryV432').count(),0,
-     'customers outside the poll audience do not get owner-specific compact Menu');
+   await outsider.locator('#customerMenuPrimaryV432').waitFor();
+   assert.equal(await outsider.locator('#customerMenuPrimaryV432>.customer-menu-group').count(),4,
+     'all logged-in customers must receive the new compact Menu even with no polls');
+   assert.equal(await outsider.locator('.customer-social-v223').evaluate(el=>Boolean(document.querySelector('#customerMenuPrimaryV432').compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING)),true);
+   assert.equal(await outsider.evaluate(()=>document.documentElement.classList.contains('customer-menu-compact-v436')),true);
+   assert.equal(await outsider.locator('#customerPollNavBadgeV432').count(),0);
    assert.equal(await outsider.evaluate(()=>window.__calls.some(c=>c.type==='write')),false);
    await context.close();
    console.log((process.env.V3_ENGINE||'chromium')+' v436 poll '+width+'px PASS');

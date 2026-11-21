@@ -13,7 +13,7 @@
   if(value!==undefined)node.textContent=String(value);
   return node;
  };
- let allowed='',sequence=0,loaded='',loading=null,active=null,choices=[],selection=null,publishedForAccount=false,
+ let allowed='',sequence=0,loaded='',loading=null,active=null,choices=[],selection=null,
      quantityValue='1',sending=false,thankYou=false,error='';
  function unmountUi(){
   $('customerPollMenuV432')?.remove();
@@ -21,9 +21,9 @@
   $('customerPollNavBadgeV432')?.remove();
   const group=$('customerMenuPrimaryV432');
   if(group){for(const child of [...group.children])group.before(child);group.remove()}
-  document.documentElement.classList.remove('customer-polls-owner-v432');
+  document.documentElement.classList.remove('customer-menu-compact-v436');
  }
- function clear(){unmountUi();allowed='';loaded='';active=null;choices=[];selection=null;publishedForAccount=false;quantityValue='1';thankYou=false;error=''}
+ function clear(){unmountUi();allowed='';loaded='';active=null;choices=[];selection=null;quantityValue='1';thankYou=false;error=''}
  function menuLayout(showPoll){
   const menu=$('menuTab'),first=$('menuDogGroup');
   if(!menu||!first)return false;
@@ -51,7 +51,7 @@
    }
   }
   if(!showPoll){$('customerPollMenuV432')?.remove();$('customerPollNavBadgeV432')?.remove()}
-  document.documentElement.classList.add('customer-polls-owner-v432');
+  document.documentElement.classList.add('customer-menu-compact-v436');
   return true;
  }
  const safeError=()=>text('Hlasovanie sa nepodarilo načítať. Skúste otvoriť Menu znova.',
@@ -63,13 +63,13 @@
  }
  async function fetchPolls(id){
   const pollRows=await getRows('portal_polls_v433?status=eq.published&select=id,title,question,description,price_note,created_at&order=created_at.desc&limit=10',id);
-  if(!pollRows.length)return {poll:null,options:[],publishedForAccount:false};
+  if(!pollRows.length)return {poll:null,options:[]};
   const votes=await getRows('portal_poll_votes_v433?user_id=eq.'+encodeURIComponent(id)+'&select=poll_id',id);
   const done=new Set(votes.map(row=>row.poll_id));
   const poll=pollRows.find(row=>!done.has(row.id));
-  if(!poll)return {poll:null,options:[],publishedForAccount:true};
+  if(!poll)return {poll:null,options:[]};
   const options=await getRows('portal_poll_options_v433?poll_id=eq.'+encodeURIComponent(poll.id)+'&select=id,label,position,asks_quantity&order=position.asc',id);
-  return {poll:options.length>=2?poll:null,options,publishedForAccount:true};
+  return {poll:options.length>=2?poll:null,options};
  }
  async function refresh(id,force=false){
   if(!allowed||allowed!==id)return;
@@ -80,11 +80,11 @@
    try{
     const next=await fetchPolls(id);
     if(version!==sequence||allowed!==account())return;
-    active=next.poll;choices=next.options;publishedForAccount=next.publishedForAccount;loaded=id;error='';
+    active=next.poll;choices=next.options;loaded=id;error='';
    }catch(exc){
     if(version!==sequence||allowed!==account())return;
     // Fail closed: no stale poll offered when the server state cannot be confirmed.
-    active=null;choices=[];publishedForAccount=false;loaded='';error=safeError();
+    active=null;choices=[];loaded='';error=safeError();
    }finally{
     if(version===sequence&&allowed===account()){render();loading=null}
    }
@@ -94,9 +94,8 @@
  function render(){
   if(!allowed||allowed!==account())return;
   const show=Boolean(active||thankYou);
-  // A completed poll hides its vote card, but the owner's compact Menu must persist.
-  // It is tied to the server-visible poll audience, not to the ability to vote again.
-  if(!show&&!publishedForAccount){unmountUi();return}
+  // The compact Menu is the standard design for all signed-in customers.
+  // Published, unvoted polls render below Menu; completed/out-of-scope polls stay hidden.
   if(!menuLayout(show))return;
   if(!show)return;
   const root=$('customerPollMenuV432'),badge=$('customerPollNavBadgeV432');
