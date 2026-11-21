@@ -118,7 +118,6 @@ assert(forms.includes("typ: \"prihlaska\"") && forms.includes("typ: \"informacie
 console.log("Mobile dock structural regression guards: PASS");
 
 for (const [route, variant, marker] of [
-  ["src/routes/psia-skolka-kosice.tsx", "lead", "openLeadModal"],
   ["src/routes/psia-skolka-pre-steniatka.tsx", "puppy", "openForm"],
   ["src/routes/strazenie-psov-kosice.tsx", "dog-sitting", "openInterest"],
 ]) {
@@ -127,6 +126,9 @@ for (const [route, variant, marker] of [
   assert(source.includes('variant="' + variant + '" onInterestOpen='), route + " must use route-local interest CTA");
   assert(source.includes(marker), route + " must call existing interest form logic");
 }
+const liveLead = read("src/routes/psia-skolka-kosice.tsx");
+const ariaLead = read("src/routes/test-aria.tsx");
+assert(liveLead.includes("component: AriaPreviewPage") && ariaLead.includes("<AriaLeadAssistant") && ariaLead.includes("hideMobileDock") && ariaLead.includes("<LeadStepForm"), "Campaign lead route must activate the reviewed Aria assistant and shared enquiry instead of the legacy dock");
 assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('label: "Interested in daycare"'), "Landing CTA must have full SK/EN label");
 assert(dock.includes("marketingExtra"), "Local first visit menu links required");
 assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");
