@@ -168,7 +168,7 @@ export function AriaPreviewPage() {
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
 
-              <div data-aria-service-group className="relative mx-auto mt-[80px] w-fit max-w-full sm:mt-[88px] lg:mt-[112px]">
+              <div data-aria-service-group className="relative mx-auto mt-[80px] w-fit max-w-full sm:mt-[88px] lg:mt-[112px] lg:min-w-[460px]">
                 {/* The existing four schoolmates now rest on the orange label, not above the H1. */}
                 <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10">
                   <SchoolmatesFormCrown compact desktopWide />
