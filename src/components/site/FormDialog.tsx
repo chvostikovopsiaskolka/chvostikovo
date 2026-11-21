@@ -37,6 +37,7 @@ export function FormDialog({
   title,
   subtitle,
   hideHeader = false,
+  previewBrand = false,
   children,
 }: {
   open: boolean;
@@ -45,6 +46,8 @@ export function FormDialog({
   subtitle?: string;
   /** Keep an accessible dialog title, hide the pre-submission intro on success. */
   hideHeader?: boolean;
+  /** Test Aria only: carry its palette through the Radix portal. */
+  previewBrand?: boolean;
   children: ReactNode;
 }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -143,7 +146,7 @@ export function FormDialog({
           event.preventDefault();
           titleRef.current?.focus({ preventScroll: true });
         }}
-        className="form-dialog left-3 right-3 top-3 w-auto max-w-none max-h-[88svh] gap-4 overflow-hidden rounded-3xl border-none bg-card p-4 sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-1.5rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-7"
+        className={"form-dialog left-3 right-3 top-3 w-auto max-w-none max-h-[88svh] gap-4 overflow-hidden rounded-3xl border-none bg-card p-4 sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-1.5rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-7" + (previewBrand ? " aria-preview-modal" : "")}
       >
         {hideHeader ? (
           <DialogTitle ref={titleRef} tabIndex={-1} className="sr-only">{title}</DialogTitle>
