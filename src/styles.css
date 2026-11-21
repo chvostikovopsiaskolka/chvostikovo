@@ -843,6 +843,48 @@
   .footer-bellaris-liquid::after { transition: none; }
 }
 
+
+/* The age slider is light and readable on every engine, including Windows Chrome. */
+.aria-puppy-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 30px;
+  background: transparent;
+  color-scheme: light;
+}
+.aria-puppy-range::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #e0e5e0;
+  border: 1px solid rgb(23 75 48 / 12%);
+}
+.aria-puppy-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -8px;
+  height: 22px;
+  width: 22px;
+  border-radius: 50%;
+  border: 3px solid white;
+  background: var(--color-coral);
+  box-shadow: 0 1px 5px rgb(20 50 30 / 24%);
+}
+.aria-puppy-range::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #e0e5e0;
+  border: 1px solid rgb(23 75 48 / 12%);
+}
+.aria-puppy-range::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  border: 3px solid white;
+  background: var(--color-coral);
+  box-shadow: 0 1px 5px rgb(20 50 30 / 24%);
+}
+.aria-puppy-range:focus-visible { outline: 2px solid var(--color-coral); outline-offset: 3px; }
+
 /*
  * TEST ONLY: Sage / logo orange / logo rose functional color system.
  * Preview is the only owner via .aria-brand-experiment on /test-aria/.

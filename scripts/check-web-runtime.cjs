@@ -144,6 +144,103 @@ const failures = [];
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
+          // Candidate-only regression for the three unified Chvostíkovo galleries.
+          // Production-baseline CI keeps testing its already published version.
+          if (!bellaris && !restricted && new URL(base).hostname === '127.0.0.1') {
+            const verifyLightbox = async (fullResolution = false) => {
+              const modal = page.locator('[data-photo-lightbox]');
+              await modal.waitFor({state:'visible'});
+              if (fullResolution) {
+                await page.waitForFunction(() => {
+                  const image=document.querySelector('[data-photo-lightbox-image]');
+                  return image && image.complete && image.naturalWidth >= 1100 && image.naturalHeight >= 1500;
+                },null,{timeout:5000});
+              }
+              const measured = await modal.evaluate(node => {
+                const photo = node.querySelector('[data-photo-lightbox-image]');
+                const close = node.querySelector('[data-photo-lightbox-close]');
+                const left = node.querySelector('[data-photo-lightbox-prev]');
+                const right = node.querySelector('[data-photo-lightbox-next]');
+                if (!photo || !close || !left || !right) return {missing:true};
+                const img=photo.getBoundingClientRect(), x=close.getBoundingClientRect();
+                const prev=left.getBoundingClientRect(), next=right.getBoundingClientRect();
+                return {
+                  src:photo.getAttribute('src'),
+                  w:img.width,h:img.height,naturalWidth:photo.naturalWidth,naturalHeight:photo.naturalHeight,
+                  dx:Math.abs(img.right-x.right),dy:x.top-img.top,
+                  arrows:[prev.width,next.width],
+                  centers:[Math.abs(prev.top+prev.height/2-img.top-img.height/2),Math.abs(next.top+next.height/2-img.top-img.height/2)],
+                  gesture:getComputedStyle(node.querySelector('[data-photo-lightbox-frame]')).touchAction,
+                  lock:document.body.style.overflow==='hidden'
+                };
+              });
+              if (measured.missing || !measured.lock || measured.w < 100 ||
+                  (fullResolution && (measured.h < 100 || measured.naturalWidth < 1100 || measured.naturalHeight < 1500)) ||
+                  measured.gesture!=='pan-y' || measured.dx>18 ||
+                  measured.dy<0 || measured.dy>50 ||
+                  measured.arrows.some(w=>w>42) ||
+                  (measured.naturalWidth > 0 && measured.centers.some(y=>y>14)))
+                throw new Error('Photo controls must be small and anchored to photo: '+JSON.stringify(measured));
+              if (fullResolution && !measured.src.includes('-full'))
+                throw new Error('User photo modal must load full resolution, not thumbnail: '+measured.src);
+              await modal.locator('[data-photo-lightbox-next]').click();
+              const next=await modal.locator('[data-photo-lightbox-image]').getAttribute('src');
+              if (next===measured.src) throw new Error('Next photo arrow did not advance gallery');
+              await page.keyboard.press('ArrowLeft');
+              await page.waitForFunction(initial=>document.querySelector('[data-photo-lightbox-image]')?.getAttribute('src')===initial,measured.src,{timeout:2500});
+              // Dispatch an actual TouchEvent sequence in both Chromium and WebKit:
+              // horizontal swipe must advance, vertical scrolling must not be hijacked.
+              await modal.locator('[data-photo-lightbox-frame]').evaluate(frame => {
+                // WebKit's desktop Playwright driver rejects the native Touch
+                // constructor. Dispatch touch event types with array-shaped
+                // TouchLists, matching the successful stand pinch regression.
+                const emit=(name,touches,changed)=>{
+                  const event=new Event(name,{bubbles:true,cancelable:true});
+                  Object.defineProperty(event,'touches',{value:touches});
+                  Object.defineProperty(event,'changedTouches',{value:changed});
+                  frame.dispatchEvent(event);
+                };
+                const before={clientX:260,clientY:360},after={clientX:80,clientY:364};
+                emit('touchstart',[before],[before]);
+                emit('touchend',[],[after]);
+              });
+              await page.waitForFunction(initial=>document.querySelector('[data-photo-lightbox-image]')?.getAttribute('src')!==initial,measured.src,{timeout:2500});
+              await modal.locator('[data-photo-lightbox-close]').click();
+              await modal.waitFor({state:'hidden'});
+              if (await page.evaluate(()=>document.body.style.overflow==='hidden'))
+                throw new Error('Photo modal leaked body scroll lock');
+            };
+            if (isAriaPage) {
+              const cards=page.locator('[data-aria-review-photo]');
+              if (await cards.count()!==2) throw new Error('Paid lead requires two clickable owner photos');
+              await cards.first().scrollIntoViewIfNeeded();
+              // User-reported pixelation: two card images must be retina-ready,
+              // not the previous ~6KB 320px previews. Keep big files lazy in modal.
+              await page.waitForFunction(() => [...document.querySelectorAll('[data-aria-review-photo] img')]
+                .every(img => img.complete && img.naturalWidth >= 640 && img.naturalHeight >= 850),
+                null, {timeout:5000});
+              await cards.first().click();
+              await verifyLightbox(true);
+              const mosaic=page.locator('#aria-mosaic button[aria-label^="Otvoriť fotografiu"]');
+              await mosaic.first().scrollIntoViewIfNeeded();
+              await mosaic.first().click();
+              await verifyLightbox();
+            }
+            if (url.pathname==='/' || isAriaPage) {
+              const moving=page.locator('[data-gesture-track="photos"] button[aria-label^="Otvoriť fotografiu"]');
+              await moving.first().scrollIntoViewIfNeeded();
+              await moving.first().click();
+              await verifyLightbox();
+            }
+            if (url.pathname==='/') {
+              const gallery=page.locator('#priestory button').first();
+              await gallery.scrollIntoViewIfNeeded();
+              await gallery.click();
+              await verifyLightbox();
+            }
+            await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
+          }
+
           if (!bellaris && (isAriaPage || isPuppyAria)) {
             const restoredScroll = await page.evaluate(() => ({
               rootOverflow: document.documentElement.style.overflow,
@@ -153,6 +250,63 @@ const failures = [];
               throw new Error('Cookie scroll lock was not restored after saving preferences');
           }
           if (!bellaris && isAriaPage && !restricted) {
+            // Desktop release regression: phone and desktop must share the same
+            // approved liquid copy, paired photographs and stable Aria panels.
+            await page.setViewportSize({ width: 1280, height: 900 });
+            await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; window.scrollTo(0, 420); });
+            await page.waitForTimeout(140);
+            const desktop = await page.evaluate(() => {
+              const rect = selector => document.querySelector(selector)?.getBoundingClientRect();
+              const photos = [...document.querySelectorAll('[data-aria-review-gap-photos] [data-aria-review-photo]')];
+              const badge = rect('[data-aria-service-badge]');
+              const crown = rect('[data-aria-hero-dogs] [aria-hidden="true"]');
+              const text = document.querySelector('[data-aria-hero-description]');
+              const team = document.querySelector('[data-hero-benefits]');
+              const teamBounds = team?.getBoundingClientRect();
+              return {
+                heroHeader: !!document.querySelector('header.fixed'),
+                photos: photos.length,
+                visiblePhotos: photos.filter(photo => {
+                  const bounds = photo.getBoundingClientRect();
+                  return bounds.width >= 140 && bounds.height >= 110 && getComputedStyle(photo).display !== 'none';
+                }).length,
+                dogsWidth: crown?.width ?? 0,
+                dogsTouchBadge: !!badge && !!crown && Math.abs(crown.bottom - badge.top) <= 3,
+                liquid: !!text && getComputedStyle(text).backgroundImage.includes('radial-gradient') &&
+                  parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
+                about: !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
+                teamPills: team?.children.length ?? 0,
+                teamContained: !!teamBounds && [...team.children].every(pill => {
+                  const bounds = pill.getBoundingClientRect();
+                  return bounds.left >= teamBounds.left - 2 && bounds.right <= teamBounds.right + 2 &&
+                    bounds.bottom <= teamBounds.bottom + 2;
+                }),
+                sliderStyle: getComputedStyle(document.querySelector('.aria-puppy-range')).appearance,
+              };
+            });
+            if (desktop.heroHeader || desktop.photos !== 2 || desktop.visiblePhotos !== 2 ||
+                desktop.dogsWidth < 390 || !desktop.dogsTouchBadge || !desktop.liquid ||
+                !desktop.about || desktop.teamPills !== 3 || !desktop.teamContained ||
+                desktop.sliderStyle !== 'none')
+              throw new Error('Desktop lead diverges from responsive contract: ' + JSON.stringify(desktop));
+            const ariaDesktop = page.locator('[data-aria-guide]');
+            const beforeOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
+            for (const [name, panel] of [['Otvoriť menu', 'menu'], ['Cenník škôlky', 'pricing'], ['Podmienky prijatia', 'requirements']]) {
+              await ariaDesktop.getByRole('button', { name }).click();
+              await ariaDesktop.locator('[data-aria-panel="' + panel + '"]').waitFor({ state: 'visible' });
+              const afterOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
+              if (Math.abs(beforeOpen - afterOpen) > 1)
+                throw new Error('Aria ' + panel + ' shifted the desktop document by ' + (afterOpen - beforeOpen) + 'px');
+              if (panel === 'menu') {
+                const wordmark = ariaDesktop.locator('[data-aria-menu-logo]');
+                if (!await wordmark.isVisible())
+                  throw new Error('Lead menu missing Chvostikovo wordmark');
+              }
+              await ariaDesktop.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
+              if (await page.evaluate(() => document.documentElement.style.overflow === 'hidden'))
+                throw new Error('Aria panel did not restore page scrolling');
+            }
+            await page.evaluate(() => window.scrollTo(0, 0));
             if (url.pathname === '/test-aria/')
               await page.waitForTimeout(1650); // Let short-lived consent-saved notice clear before visual snapshots.
             for (const width of [320, 375, 390, 430]) {
@@ -210,9 +364,8 @@ const failures = [];
                 const formTop = form.getBoundingClientRect().top;
                 const reviewBottom = reviews.getBoundingClientRect().bottom;
                 const newPhotos = hero.querySelector('[data-aria-review-gap-photos]');
-                const photoCards = [...(newPhotos?.querySelectorAll('figure') ?? [])];
+                const photoCards = [...(newPhotos?.querySelectorAll('[data-aria-review-photo]') ?? [])];
                 const photoImages = photoCards.map(card => card.querySelector('img'));
-                const movingGalleryImages = [...document.querySelectorAll('[data-gesture-track="photos"] img')];
                 const photoRects = photoCards.map(card => card.getBoundingClientRect());
                 const photoFrame = newPhotos?.getBoundingClientRect();
                 const lineHeight = parseFloat(getComputedStyle(proof).lineHeight);
@@ -221,8 +374,11 @@ const failures = [];
                   formTop,
                   reviewGap: formTop - reviewBottom,
                   photoCount: photoCards.length,
-                  photoSourceReused: photoImages.length === 2 && photoImages.every((img, i) => !!img?.getAttribute('src') &&
-                    img.getAttribute('src') === movingGalleryImages[i]?.getAttribute('src')),
+                  photoApprovedAssets: photoImages.length === 2 &&
+                    !!photoImages[0]?.getAttribute('src')?.includes('lead-review-border-collies') &&
+                    !!photoImages[1]?.getAttribute('src')?.includes('lead-review-retrievers-aussie') &&
+                    photoImages.every(img => !!img?.getAttribute('alt')?.trim()) &&
+                    photoImages[0]?.getAttribute('src') !== photoImages[1]?.getAttribute('src'),
                   photoGeometry: photoRects.length === 2 && !!photoFrame &&
                     photoRects.every((rect, i) => rect.width > 80 && rect.height >= 110 &&
                       rect.left >= -1 && rect.right <= window.innerWidth + 1 &&
@@ -267,7 +423,7 @@ const failures = [];
                   firstFold.topSpacerHeight < 39 ||
                   firstFold.contentCenterY < firstFold.viewportHeight * 0.4 ||
                   firstFold.reviewGap < 90 || firstFold.reviewGap > 195 ||
-                  firstFold.photoCount !== 2 || !firstFold.photoSourceReused || !firstFold.photoGeometry ||
+                  firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || !firstFold.photoGeometry ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
@@ -412,22 +568,6 @@ const failures = [];
               const navFrames = await aria.locator('[data-aria-dock] button').evaluateAll(buttons =>
                 buttons.every(button => getComputedStyle(button).boxShadow === 'none'));
               if (!navFrames) throw new Error('Only the overall Aria menu frame should be outlined, not each navigation item');
-              if (brandPreviewCandidate && url.pathname === '/test-aria/' && width < 1024) {
-                await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
-                await aria.locator('[data-aria-panel="menu"]').waitFor({ state: 'visible' });
-                const previewLogo = aria.locator('[data-aria-preview-wordmark]');
-                await previewLogo.waitFor({ state: 'visible' });
-                const logoFit = await previewLogo.evaluate(img => {
-                  const bounds = img.getBoundingClientRect();
-                  const parent = img.closest('[data-aria-panel="menu"]')?.getBoundingClientRect();
-                  return img.complete && img.naturalWidth > 0 && bounds.width <= 105 &&
-                    bounds.height <= 22 && !!parent && bounds.right <= parent.right - 12;
-                });
-                if (!logoFit) throw new Error('Full Chvostíkovo logo must fit alongside compact preview menu heading');
-                await aria.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
-                await aria.locator('[data-aria-panel="menu"]').waitFor({ state: 'hidden' });
-              }
-
 
               if (url.pathname === '/test-aria/') {
                 // Check that the speech switches to a real modal CTA only after
@@ -566,6 +706,15 @@ const failures = [];
               const pageCards = await Promise.all([page.locator('#lead-pricing article').nth(0).boundingBox(), page.locator('#lead-pricing article').nth(1).boundingBox()]);
               if (cols !== 2 || !pageCards[0] || !pageCards[1] || Math.abs(pageCards[0].height - pageCards[1].height) > 2 || Math.max(pageCards[0].height, pageCards[1].height) > 175)
                 throw new Error('Preview webpage pricing must display equal height columns at ' + width);
+              const valuePill = page.locator('#lead-pricing [data-lead-best-value]');
+              const labelShape = await valuePill.evaluate(el => {
+                const r = el.getBoundingClientRect(), card = el.closest('article')?.getBoundingClientRect();
+                return { text: el.textContent.trim(), fits: el.scrollWidth <= el.clientWidth + 2,
+                  row: r.height <= parseFloat(getComputedStyle(el).lineHeight) * 1.8,
+                  inside: !!card && r.bottom <= card.bottom + 2 && r.top >= card.top };
+              });
+              if (labelShape.text !== 'Najvýhodnejšie. Ušetríte 50 €' || !labelShape.fits || !labelShape.row || !labelShape.inside)
+                throw new Error('Permanentka value label must fit on one bottom line at ' + width + ': ' + JSON.stringify(labelShape));
               if (!await page.getByRole('heading', { name: 'Takto vyzerá Chvostíkovo' }).count())
                 throw new Error('Preview mosaic title regression');
               const firstVisitCompact = await page.locator('#lead-pricing details').evaluate(el => {
@@ -1542,6 +1691,36 @@ const failures = [];
               throw new Error('Pinch-ready stand image viewport missing');
             if (await viewport.evaluate(el=>getComputedStyle(el).touchAction)!=='none')
               throw new Error('Touch viewport must allow custom pinch/pan');
+            const tinyNav = await articleLightbox.evaluate(el => {
+              const photo=el.querySelector('[data-stand-photo-viewport]')?.getBoundingClientRect();
+              const prev=el.querySelector('[data-stand-photo-previous]')?.getBoundingClientRect();
+              const next=el.querySelector('[data-stand-photo-next]')?.getBoundingClientRect();
+              const close=[...el.children].find(node => node.tagName==='BUTTON')?.getBoundingClientRect();
+              return photo && prev && next ? {
+                arrows:[prev.width,next.width],centers:[prev.top+prev.height/2,next.top+next.height/2],
+                center:photo.top+photo.height/2,closeTop:close?.top,photoTop:photo.top
+              } : null;
+            });
+            if (!tinyNav || tinyNav.arrows.some(w=>w>42) ||
+                tinyNav.centers.some(y=>Math.abs(y-tinyNav.center)>14) ||
+                (tinyNav.closeTop!==undefined && Math.abs(tinyNav.closeTop-tinyNav.photoTop)>26))
+              throw new Error('Stand photo must keep compact navigation at picture edges: '+JSON.stringify(tinyNav));
+            if (width===390) {
+              const startingSrc=await viewport.locator('img').getAttribute('src');
+              await viewport.evaluate(el => {
+                const emit=(name,touches,changed)=>{
+                  const event=new Event(name,{bubbles:true,cancelable:true});
+                  Object.defineProperty(event,'touches',{value:{length:touches.length,item:i=>touches[i]??null}});
+                  Object.defineProperty(event,'changedTouches',{value:{length:changed.length,item:i=>changed[i]??null}});
+                  el.dispatchEvent(event);
+                };
+                emit('touchstart',[{clientX:240,clientY:300}],[{clientX:240,clientY:300}]);
+                emit('touchend',[],[{clientX:80,clientY:306}]);
+              });
+              await productPage.waitForFunction(src => document.querySelector('[data-stand-photo-viewport] img')?.getAttribute('src')!==src,startingSrc,{timeout:2500});
+              await articleLightbox.locator('[data-stand-photo-previous]').click();
+              await productPage.waitForFunction(src => document.querySelector('[data-stand-photo-viewport] img')?.getAttribute('src')===src,startingSrc,{timeout:2500});
+            }
             if (width===390) {
               const pinch=await viewport.evaluate(el=>{
                 // Browser-independent synthetic touch-list input: WebKit desktop

@@ -136,7 +136,7 @@ const liveLead = read("src/routes/psia-skolka-kosice.tsx");
 const ariaLead = read("src/routes/test-aria.tsx");
 assert(liveLead.includes("component: AriaPreviewPage") && !liveLead.includes("component: LeadLandingPage") &&
   liveLead.includes('content: "noindex, follow"') && liveLead.includes('rel: "canonical"') &&
-  ariaLead.includes("<AriaLeadAssistant") && ariaLead.includes("hideMobileDock") &&
+  ariaLead.includes("<AriaLeadAssistant") && !ariaLead.includes("<Header landingMinimal") &&
   ariaLead.includes("<LeadStepForm") && ariaLead.includes("<AriaPuppyChecker"),
   "Approved Aria must render on the paid campaign lead route with preserved canonical/noindex and a single stable dock");
 const homepage = read("src/routes/index.tsx");

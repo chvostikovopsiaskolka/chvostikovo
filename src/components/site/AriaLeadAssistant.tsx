@@ -36,7 +36,6 @@ export function AriaLeadAssistant({
   trackingPrefix = "aria_preview_v3",
   requirementsSectionId = "lead-requirements",
   puppyStartSectionId,
-  showBrandLogo = false,
   anchorOverrides,
 }: {
   onOpenInfo: () => void;
@@ -47,8 +46,6 @@ export function AriaLeadAssistant({
   requirementsSectionId?: string;
   /** Starts the puppy speech only once the visitor reaches this section. */
   puppyStartSectionId?: string;
-  /** Preview-only brand wordmark, never changes the campaign menu. */
-  showBrandLogo?: boolean;
   anchorOverrides?: Record<string, string>;
 }) {
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
@@ -145,14 +142,33 @@ export function AriaLeadAssistant({
   }, [requirementsSectionId, puppyStartSectionId]);
 
   useEffect(() => {
+    // Reserve the desktop scrollbar gutter while this assistant is mounted.
+    const html = document.documentElement;
+    const previous = html.style.scrollbarGutter;
+    html.style.scrollbarGutter = "stable";
+    return () => { html.style.scrollbarGutter = previous; };
+  }, []);
+
+  useEffect(() => {
     if (!panel) return;
     const html = document.documentElement;
     const body = document.body;
     const prevHtml = html.style.overflow;
     const prevBody = body.style.overflow;
+    const prevBodyPadding = body.style.paddingRight;
+    // Fallback for Safari versions that do not support scrollbar-gutter.
+    const supportsGutter = CSS.supports("scrollbar-gutter", "stable");
+    const scrollbarWidth = window.innerWidth - html.clientWidth;
+    if (!supportsGutter && scrollbarWidth > 0) {
+      body.style.paddingRight = (parseFloat(getComputedStyle(body).paddingRight) + scrollbarWidth) + "px";
+    }
     html.style.overflow = "hidden";
     body.style.overflow = "hidden";
-    return () => { html.style.overflow = prevHtml; body.style.overflow = prevBody; };
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+      body.style.paddingRight = prevBodyPadding;
+    };
   }, [panel]);
 
   useEffect(() => {
@@ -236,13 +252,19 @@ export function AriaLeadAssistant({
             className="pointer-events-auto absolute bottom-[calc(100%+9px)] left-0 right-0 max-h-[min(63dvh,500px)] overflow-y-auto overscroll-contain rounded-[26px] border border-white/75 bg-card/95 p-3 text-forest shadow-[0_14px_45px_rgba(17,65,41,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:p-4">
             <div className="flex items-center justify-between gap-2">
               <div className="flex min-w-0 items-center gap-2">
-                <img src={ARIA_HEAD_DATA_URI} alt="" width={48} height={48} className="size-11 shrink-0 object-contain drop-shadow-md" />
-                <h2 className="font-display text-base font-bold">
-                  {panel === "pricing" ? "Cenník škôlky" : panel === "requirements" ? "Podmienky prijatia" : panel === "faq" ? "Aria odpovedá" : showBrandLogo ? "Menu" : "Menu Chvostíkova"}
-                </h2>
-                {panel === "menu" && showBrandLogo && (
-                  <img data-aria-preview-wordmark src={brandWordmark} alt="Chvostíkovo" width={120} height={24}
-                    className="h-4 w-auto max-w-[102px] min-w-0 shrink object-contain" />
+                {panel === "menu" ? (
+                  <>
+                    <h2 className="shrink-0 font-display text-base font-bold">Menu</h2>
+                    <img data-aria-menu-logo src={brandWordmark} alt="Chvostíkovo" width={120} height={24}
+                      className="h-4 w-auto max-w-[104px] min-w-0 object-contain" />
+                  </>
+                ) : (
+                  <>
+                    <img src={ARIA_HEAD_DATA_URI} alt="" width={48} height={48} className="size-11 shrink-0 object-contain drop-shadow-md" />
+                    <h2 className="font-display text-base font-bold">
+                      {panel === "pricing" ? "Cenník škôlky" : panel === "requirements" ? "Podmienky prijatia" : "Aria odpovedá"}
+                    </h2>
+                  </>
                 )}
               </div>
               <button type="button" aria-label="Zavrieť panel Arie" onClick={() => setPanel(null)}
@@ -364,7 +386,7 @@ export function AriaLeadAssistant({
         {!panel && (
           <div data-aria-message data-aria-suppressed="false"
             className="pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]">
-            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-full max-w-[460px] -rotate-[0.5deg] items-center px-3 py-2 text-forest">
+            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[460px] -rotate-[0.5deg] items-center px-3 py-2 text-forest">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
@@ -378,22 +400,22 @@ export function AriaLeadAssistant({
                   <span className="mt-1.5 block text-[11px] font-medium leading-[1.35] text-forest/85 sm:text-xs">Zisti viac z našej ponuky nižšie.</span>
                 </p>
               ) : stage === "puppy" ? (
-                <div className="relative z-10 flex min-w-0 items-center gap-2">
-                  <strong className="min-w-0 text-center font-display text-[clamp(9px,2.5vw,13px)] text-forest">
-                    Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span>
+                <div className="relative z-10 flex min-w-0 items-center justify-between gap-2">
+                  <strong className="min-w-0 font-display text-[11px] font-semibold leading-tight text-forest">
+                    Máte šteniatko? <span className="font-bold text-coral-dark">Zistite, či spĺňa podmienky.</span>
                   </strong>
                   <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
-                    className="pointer-events-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    className="pointer-events-auto ml-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Overiť
                   </button>
                 </div>
               ) : (
-                <div className="relative z-10 flex min-w-0 items-center gap-2">
-                  <strong className="min-w-0 font-display text-[11px] leading-tight text-forest">
+                <div className="relative z-10 flex min-w-0 items-center justify-between gap-2">
+                  <strong className="min-w-0 font-display text-[11px] font-semibold leading-tight text-forest">
                     Chcete sa informovať? <span className="text-coral-dark">Vyplňte nezáväzný formulár.</span>
                   </strong>
                   <button type="button" onClick={openInfo}
-                    className="pointer-events-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    className="pointer-events-auto ml-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Vyplniť
                   </button>
                 </div>

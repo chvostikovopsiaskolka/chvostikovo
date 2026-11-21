@@ -1,5 +1,6 @@
 import { Fragment, useRef, useState } from "react";
-import { Car, MapPin, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Car, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
+import { PhotoLightbox } from "./PhotoLightbox";
 import { GALLERY, MAP_LINK } from "@/content/site";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
@@ -52,7 +53,6 @@ const GALLERY_EN = [
 
 export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
   const [active, setActive] = useState<number | null>(null);
-  const img = active === null ? null : GALLERY[active];
   const track = useRef<HTMLDivElement>(null);
   const isEnglish = language === "en";
   const hygiene = isEnglish ? HYGIENE_EN : HYGIENE_SK;
@@ -175,54 +175,14 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
         </div>
       </div>
 
-      {img && (
-        <div
-          className="fixed inset-0 z-60 flex items-center justify-center bg-forest-deep/90 p-4"
-          onClick={() => setActive(null)}
-        >
-          <button
-            type="button"
-            aria-label={isEnglish ? "Close" : "Zavrieť"}
-            className="absolute top-5 right-5 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest"
-            onClick={() => setActive(null)}
-          >
-            <X />
-          </button>
-          <button
-            type="button"
-            aria-label={isEnglish ? "Previous photo" : "Predchádzajúca fotka"}
-            className="absolute left-3 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest sm:left-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              setActive(((active as number) - 1 + GALLERY.length) % GALLERY.length);
-            }}
-          >
-            <ChevronLeft />
-          </button>
-          <figure onClick={(e) => e.stopPropagation()} className="text-center">
-            <img
-              src={img.src}
-              alt={isEnglish ? `Chvostíkovo dog daycare in Košice – photo ${(active as number) + 1}` : img.alt}
-              decoding="async"
-              className="max-h-[80vh] rounded-3xl object-contain shadow-soft"
-            />
-            <figcaption className="mt-3 font-display text-sm font-semibold text-cream">
-              {isEnglish ? GALLERY_EN[active as number] : img.caption}
-            </figcaption>
-          </figure>
-          <button
-            type="button"
-            aria-label={isEnglish ? "Next photo" : "Nasledujúca fotka"}
-            className="absolute right-3 flex size-11 items-center justify-center rounded-full bg-cream/90 text-forest sm:right-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              setActive(((active as number) + 1) % GALLERY.length);
-            }}
-          >
-            <ChevronRight />
-          </button>
-        </div>
-      )}
+      <PhotoLightbox
+        photos={GALLERY.map((photo, index) => ({
+          src: photo.src,
+          alt: isEnglish ? `Chvostíkovo dog daycare in Košice – photo ${index + 1}` : photo.alt,
+          caption: isEnglish ? GALLERY_EN[index] : photo.caption,
+        }))}
+        active={active} onChange={setActive} onClose={() => setActive(null)} language={language}
+      />
     </section>
   );
 }
