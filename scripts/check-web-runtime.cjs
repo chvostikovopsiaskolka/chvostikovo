@@ -561,7 +561,10 @@ const failures = [];
             if (puppyInteractions.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'))
               throw new Error('Failed synthetic lead must not count as conversion');
             await conversionDialog.getByRole('button', { name: 'Odoslať záujem' }).click();
-            await conversionDialog.locator('[data-lead-step-success]').waitFor({ state: 'visible' });
+            // On success the shared LeadStepForm intentionally replaces its
+            // form node with a receipt. Keep the dialog selector independent
+            // of the removed [data-lead-step-form] element.
+            await page.locator('[role="dialog"] [data-lead-step-success]').last().waitFor({ state: 'visible' });
             for (let i = 0; i < 12 && !puppyInteractions.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'); i++)
               await page.waitForTimeout(100);
             const has = (name, source) => puppyInteractions.some(e => e.name === name && e.source === source);
@@ -585,8 +588,9 @@ const failures = [];
                   data.interest_reason === 'Chcem sa informovať o škôlke' &&
                   data.dog_breed === 'Kríženec'))
               throw new Error('Synthetic lead must preserve source/breed, recover from error and convert exactly once');
-            await conversionDialog.getByRole('button', { name: 'Close' }).click();
-            await conversionDialog.waitFor({ state: 'hidden' });
+            const receiptDialog = page.getByRole('dialog').last();
+            await receiptDialog.getByRole('button', { name: 'Close' }).click();
+            await receiptDialog.waitFor({ state: 'hidden' });
             await page.evaluate(() => window.scrollTo(0, 0));
             await page.waitForTimeout(120);
           }
