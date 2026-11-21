@@ -99,11 +99,11 @@ console.log("[seo] PASS: sitemap + prerender + title + description + canonical +
 
 // Puppy organic page keeps its own indexable search intent, structured FAQ,
 // prerendered content and canonical even when the Aria UI is integrated.
-const puppyUrl = "https://chvostikovo.sk/psia-skolka-pre-steniatka/";
-assert(sitemap.includes("<loc>" + puppyUrl + "</loc>"), "Puppy SEO URL missing from sitemap");
+const puppySeoUrl = "https://chvostikovo.sk/psia-skolka-pre-steniatka/";
+assert(sitemap.includes("<loc>" + puppySeoUrl + "</loc>"), "Puppy SEO URL missing from sitemap");
 assert(pagesConfig.includes('{ path: "/psia-skolka-pre-steniatka" }'),
   "Puppy page must remain prerendered on Pages");
-const puppyHtml = fs.readFileSync("dist/client/psia-skolka-pre-steniatka/index.html", "utf8");
+const puppySeoHtml = fs.readFileSync("dist/client/psia-skolka-pre-steniatka/index.html", "utf8");
 for (const term of [
   "Psia škôlka pre šteniatka v Košiciach",
   "Noví kamoši.",
@@ -111,8 +111,8 @@ for (const term of [
   "FAQPage",
   "index, follow",
   "sk_SK",
-]) assert(puppyHtml.includes(term), "Puppy prerendered SEO content missing: " + term);
-assert(!puppyHtml.includes('content="noindex'),
+]) assert(puppySeoHtml.includes(term), "Puppy prerendered SEO content missing: " + term);
+assert(!puppySeoHtml.includes('content="noindex'),
   "Puppy landing must remain indexable, unlike the paid lead route");
 console.log("[seo] PASS: puppy sitemap, prerender, canonical, indexability and FAQ schema");
 
