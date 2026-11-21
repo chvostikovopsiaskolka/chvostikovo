@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { LeadStepForm, LEAD_STEP_INTERESTS } from "@/components/site/LeadStepForm";
 import { AriaLeadAssistant } from "@/components/site/AriaLeadAssistant";
+import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { FormDialog } from "@/components/site/FormDialog";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Reviews } from "@/components/site/Reviews";
@@ -158,41 +159,40 @@ export function AriaPreviewPage() {
           <div data-aria-hero-content className="relative z-10 w-full shrink-0">
             <div className="mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7">
             <div className="w-full min-w-0 text-center">
-              <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
-                Denné stráženie stredných a veľkých psíkov
-              </p>
+              {/* Replace the eyebrow with the existing four-schoolmates crown.
+                  The small slot preserves the approved position of the H1. */}
+              <div data-aria-hero-dogs className="relative h-[14px] sm:h-5">
+                <div className="pointer-events-none absolute inset-x-0 bottom-[calc(100%+4px)]">
+                  <SchoolmatesFormCrown compact />
+                </div>
+              </div>
               <h1 className="mt-7 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
 
-              <div data-hero-benefits className="mx-auto mt-6 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2">
-                {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
-                  <span
-                    key={item}
-                    className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px] lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-xs"
-                  >
-                    <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5 lg:size-4" />
-                    {item}
-                  </span>
-                ))}
-              </div>
+              <p data-aria-service-badge className="mx-auto mt-7 inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2.5 py-2 text-center font-display text-[8px] font-bold uppercase leading-tight tracking-[0.015em] text-white shadow-card min-[390px]:px-3 min-[390px]:text-[9.5px] sm:mt-7 sm:px-5 sm:py-2.5 sm:text-sm">
+                Denné stráženie stredných a veľkých psíkov
+              </p>
 
-              <p data-aria-hero-description className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg">
+              <p data-aria-hero-description className="mx-auto mt-6 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg">
                 Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
               </p>
             </div>
           </div>
-            <Reviews variant="hero" />
+            <div className="mt-5 sm:mt-7">
+              <Reviews variant="hero" />
+            </div>
           </div>
           {/* A separate flexible quiet zone for the fixed Aria and dock.
               The enquiry must still start below the initial viewport. */}
           <div aria-hidden="true" data-aria-intro-space className="min-h-[190px] flex-[1.15] sm:min-h-[160px]" />
         </section>
 
-        <section id="aria-hero-form" className="relative z-10 bg-transparent pb-12 pt-6 sm:pb-16 sm:pt-8">
-          <div className="mx-auto max-w-4xl px-4">
-            <div className="rounded-4xl bg-secondary/55 p-5 shadow-soft sm:p-8">
+        <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4">
+            <div className="rounded-4xl bg-white p-5 sm:p-8">
               <div className="mx-auto max-w-2xl text-center">
                 <h2 className="section-title text-xl sm:text-2xl">Chceli by ste sa informovať o škôlke?</h2>
                 <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
@@ -200,24 +200,37 @@ export function AriaPreviewPage() {
                 </p>
               </div>
 
-              <div className="mx-auto mt-4 max-w-xl rounded-3xl bg-card p-5 shadow-card sm:p-6">
+              <div className="mx-auto mt-4 max-w-xl rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
                 <LeadStepForm questionInHeading ariaPreview trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
               </div>
             </div>
           </div>
         </section>
 
-        <section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-card py-9 sm:py-12">
+        <section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-white py-9 sm:py-12">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-5xl px-4">
-            <h2 className="section-title mb-5 text-center text-3xl sm:text-4xl">Kto sa bude starať o vášho psíka?</h2>
+            <h2 className="section-title mb-5 whitespace-nowrap text-center text-[clamp(12px,3.65vw,34px)] leading-tight tracking-[-0.025em]">Kto sa bude starať o vášho psíka?</h2>
             <div className="grid items-center gap-5 md:grid-cols-2 md:gap-10">
-              <img
-                src={teamPhoto}
-                alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
-                loading="lazy"
-                className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72"
-              />
+              <div className="min-w-0">
+                <img
+                  src={teamPhoto}
+                  alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
+                  loading="lazy"
+                  className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72"
+                />
+                <div data-hero-benefits className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:gap-2">
+                  {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
+                    <span
+                      key={item}
+                      className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px] lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-xs"
+                    >
+                      <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5 lg:size-4" />
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
               <p className="text-sm leading-relaxed text-forest/75 sm:text-base">
                 Aj my sme <strong className="font-bold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov <strong className="font-bold text-forest">spoznávame, rešpektujeme ich potreby</strong> a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
               </p>
@@ -423,6 +436,9 @@ export function AriaPreviewPage() {
         <section id="aria-first-visit-form" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-2xl px-4">
+            <div data-aria-first-visit-dogs className="mx-auto mb-3 w-full max-w-sm">
+              <SchoolmatesFormCrown compact />
+            </div>
             <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o prvú návštevu?</h2>
             <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
             <div className="mt-5 rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
