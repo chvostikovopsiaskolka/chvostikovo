@@ -7,48 +7,6 @@ const title = "Psia škôlka Košice | Aktívny deň pre vášho psíka | Chvost
 const description =
   "Kým ste v práci, váš psík môže mať aktívny deň plný pohybu, hier, kamarátov a oddychu. Chvostíkovo – psia škôlka v Košiciach s celodenným dohľadom.";
 
-const LANDING_FAQ_QUESTIONS = new Set([
-  "Ako prebieha prvá návšteva psíka v škôlke?",
-  "Bude môj psík počas dňa niekedy sám bez dozoru?",
-  "Čo ak môj psík ešte nikdy nebol v kolektíve psov?",
-  "Prijímate aj šteniatka?",
-  "Zabezpečujete aj vyzdvihnutie a odvoz psíka?",
-  "Aký je cenník služieb?",
-]);
-
-const LANDING_FAQ = FAQ.filter((item) => LANDING_FAQ_QUESTIONS.has(item.q));
-
-const BENEFITS = [
-  {
-    icon: PawPrint,
-    title: "Spoločnosť namiesto čakania",
-    content: (
-      <>
-        Váš psík má počas dňa <strong className="font-bold text-forest">kamošov, pozornosť a príležitosti na hru</strong>.
-        <span className="mt-1 block">Vy sa môžete <strong className="font-bold text-forest">venovať práci alebo svojim povinnostiam</strong>.</span>
-      </>
-    ),
-  },
-  {
-    icon: PawPrint,
-    title: "Pohyb, aktivity, ale aj oddych",
-    content: (
-      <>
-        Psík má dostatok priestoru na <strong className="font-bold text-forest">fyzické aj mentálne vyžitie</strong>. S kamošmi sa vyšantí vo výbehu aj vo vnútri, no dbáme aj na jeho <strong className="font-bold text-forest">oddych</strong>.
-      </>
-    ),
-  },
-  {
-    icon: ShieldCheck,
-    title: "Ľudia, ktorí ho spoznajú",
-    content: (
-      <>
-        Zaujíma nás jeho <strong className="font-bold text-forest">povaha, zvyky</strong> aj to, čo mu vyhovuje. Počas celého pobytu na psíkov dohliadajú <strong className="font-bold text-forest">minimálne dvaja opatrovatelia</strong>.
-      </>
-    ),
-  },
-];
-
 export const Route = createFileRoute("/psia-skolka-kosice")({
   head: () => ({
     meta: [
