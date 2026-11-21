@@ -253,6 +253,63 @@ const failures = [];
           }
 
           if (!bellaris && isAriaPage && !restricted) {
+            // Desktop release regression: phone and desktop must share the same
+            // approved liquid copy, paired photographs and stable Aria panels.
+            await page.setViewportSize({ width: 1280, height: 900 });
+            await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; window.scrollTo(0, 420); });
+            await page.waitForTimeout(140);
+            const desktop = await page.evaluate(() => {
+              const rect = selector => document.querySelector(selector)?.getBoundingClientRect();
+              const photos = [...document.querySelectorAll('[data-aria-review-gap-photos] [data-aria-review-photo]')];
+              const badge = rect('[data-aria-service-badge]');
+              const crown = rect('[data-aria-hero-dogs] [aria-hidden="true"]');
+              const text = document.querySelector('[data-aria-hero-description]');
+              const team = document.querySelector('[data-hero-benefits]');
+              const teamBounds = team?.getBoundingClientRect();
+              return {
+                heroHeader: !!document.querySelector('header.fixed'),
+                photos: photos.length,
+                visiblePhotos: photos.filter(photo => {
+                  const bounds = photo.getBoundingClientRect();
+                  return bounds.width >= 140 && bounds.height >= 110 && getComputedStyle(photo).display !== 'none';
+                }).length,
+                dogsWidth: crown?.width ?? 0,
+                dogsTouchBadge: !!badge && !!crown && Math.abs(crown.bottom - badge.top) <= 3,
+                liquid: !!text && getComputedStyle(text).backgroundImage.includes('radial-gradient') &&
+                  parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
+                about: !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
+                teamPills: team?.children.length ?? 0,
+                teamContained: !!teamBounds && [...team.children].every(pill => {
+                  const bounds = pill.getBoundingClientRect();
+                  return bounds.left >= teamBounds.left - 2 && bounds.right <= teamBounds.right + 2 &&
+                    bounds.bottom <= teamBounds.bottom + 2;
+                }),
+                sliderStyle: getComputedStyle(document.querySelector('.aria-puppy-range')).appearance,
+              };
+            });
+            if (desktop.heroHeader || desktop.photos !== 2 || desktop.visiblePhotos !== 2 ||
+                desktop.dogsWidth < 390 || !desktop.dogsTouchBadge || !desktop.liquid ||
+                !desktop.about || desktop.teamPills !== 3 || !desktop.teamContained ||
+                desktop.sliderStyle !== 'none')
+              throw new Error('Desktop lead diverges from responsive contract: ' + JSON.stringify(desktop));
+            const ariaDesktop = page.locator('[data-aria-guide]');
+            const beforeOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
+            for (const [name, panel] of [['Otvoriť menu', 'menu'], ['Cenník škôlky', 'pricing'], ['Podmienky prijatia', 'requirements']]) {
+              await ariaDesktop.getByRole('button', { name }).click();
+              await ariaDesktop.locator('[data-aria-panel="' + panel + '"]').waitFor({ state: 'visible' });
+              const afterOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
+              if (Math.abs(beforeOpen - afterOpen) > 1)
+                throw new Error('Aria ' + panel + ' shifted the desktop document by ' + (afterOpen - beforeOpen) + 'px');
+              if (panel === 'menu') {
+                const wordmark = ariaDesktop.locator('[data-aria-menu-logo]');
+                if (!await wordmark.isVisible())
+                  throw new Error('Lead menu missing Chvostikovo wordmark');
+              }
+              await ariaDesktop.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
+              if (await page.evaluate(() => document.documentElement.style.overflow === 'hidden'))
+                throw new Error('Aria panel did not restore page scrolling');
+            }
+            await page.evaluate(() => window.scrollTo(0, 0));
             if (url.pathname === '/test-aria/')
               await page.waitForTimeout(1650); // Let short-lived consent-saved notice clear before visual snapshots.
             for (const width of [320, 375, 390, 430]) {
@@ -652,6 +709,15 @@ const failures = [];
               const pageCards = await Promise.all([page.locator('#lead-pricing article').nth(0).boundingBox(), page.locator('#lead-pricing article').nth(1).boundingBox()]);
               if (cols !== 2 || !pageCards[0] || !pageCards[1] || Math.abs(pageCards[0].height - pageCards[1].height) > 2 || Math.max(pageCards[0].height, pageCards[1].height) > 175)
                 throw new Error('Preview webpage pricing must display equal height columns at ' + width);
+              const valuePill = page.locator('#lead-pricing [data-lead-best-value]');
+              const labelShape = await valuePill.evaluate(el => {
+                const r = el.getBoundingClientRect(), card = el.closest('article')?.getBoundingClientRect();
+                return { text: el.textContent.trim(), fits: el.scrollWidth <= el.clientWidth + 2,
+                  row: r.height <= parseFloat(getComputedStyle(el).lineHeight) * 1.8,
+                  inside: !!card && r.bottom <= card.bottom + 2 && r.top >= card.top };
+              });
+              if (labelShape.text !== 'Najvýhodnejšie. Ušetríte 50 €' || !labelShape.fits || !labelShape.row || !labelShape.inside)
+                throw new Error('Permanentka value label must fit on one bottom line at ' + width + ': ' + JSON.stringify(labelShape));
               if (!await page.getByRole('heading', { name: 'Takto vyzerá Chvostíkovo' }).count())
                 throw new Error('Preview mosaic title regression');
               const firstVisitCompact = await page.locator('#lead-pricing details').evaluate(el => {
