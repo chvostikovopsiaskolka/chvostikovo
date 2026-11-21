@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
-import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -15,7 +14,7 @@ const FIRST_VISIT_ANSWER = SITE_FAQ.find((entry) => entry.q === "Ako prebieha pr
 const QUESTIONS = [
   {
     title: "Pre koho je škôlka určená?",
-    answer: DAYCARE_ELIGIBILITY_ANSWER,
+    answer: "Najmä pre stredné a veľké psy, spravidla nad 20 kg. Prijímame aj očkované šteniatka, spravidla nad 15 kg, podľa veku a individuálnej pripravenosti. Vyžadujeme očkovania, dobrý zdravotný stav a vhodnosť do kolektívu. Rozhodujeme po bezplatnej úvodnej návšteve.",
   },
   {
     title: "Prijímate aj šteniatka?",
