@@ -195,11 +195,11 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         </div>
         <PrivacyConsentCheckbox />
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
-          <button type="button" onClick={() => setStep(1)} disabled={loading}
+        <div className={puppyCheck ? "grid grid-cols-1 gap-2" : "grid grid-cols-[auto_minmax(0,1fr)] gap-2"}>
+          {!puppyCheck && <button type="button" onClick={() => setStep(1)} disabled={loading}
             className="min-h-12 rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral">
             Späť
-          </button>
+          </button>}
           <button type="submit" disabled={loading} className="btn-coral min-h-12 min-w-0 px-4 py-3 font-bold disabled:opacity-60">
             {loading ? "Odosielam…" : "Odoslať záujem"}
           </button>
