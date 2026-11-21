@@ -133,6 +133,9 @@ const failures = [];
                 throw new Error('Aria greeting must remain readable without clipping at ' + width);
               if (!await aria.getByText('Zisti viac z našej ponuky nižšie.').count())
                 throw new Error('Aria introduction must show the offer guidance at ' + width);
+              if (url.pathname === '/test-aria/' &&
+                  await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
+                throw new Error('Aria intro must actually be visible, not merely present in the DOM, at ' + width);
               const comicBubble = aria.locator('[data-aria-speech]');
               const portrait = aria.locator('[data-aria-dock] img[alt^="Aria"]');
               const tail = comicBubble.locator('svg[data-aria-tail]');
