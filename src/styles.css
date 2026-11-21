@@ -842,3 +842,86 @@
   .footer-bellaris-liquid,
   .footer-bellaris-liquid::after { transition: none; }
 }
+
+/*
+ * TEST ONLY: Chvostíkovo logo-informed rose / orange palette.
+ * Activated by the preview route wrapper (.aria-brand-experiment) only.
+ * Never place these values in :root, Tailwind @theme or the live lead route.
+ */
+.aria-brand-experiment {
+  --preview-logo-rose: #cc66a7;
+  --preview-cta-rose: #ad3d7d;
+  --preview-cta-rose-hover: #922b68;
+  --preview-charcoal: #28252d;
+  --preview-logo-orange: #ffa414;
+  --forest: var(--preview-charcoal);
+  --forest-deep: #211f27;
+  --coral: var(--preview-logo-orange);
+  --coral-dark: #b15b00;
+  --coral-soft: #ffe0ad;
+  --cream: #fff9fb;
+  --peach: #f8e8f1;
+  --sand: #fdf0f6;
+  --background: var(--cream);
+  --foreground: var(--forest-deep);
+  --card-foreground: var(--forest-deep);
+  --secondary: var(--peach);
+  --secondary-foreground: var(--forest-deep);
+  --muted: var(--sand);
+  --muted-foreground: #605664;
+  --primary: var(--preview-cta-rose);
+  --accent: var(--preview-logo-rose);
+  --ring: var(--preview-cta-rose);
+  background-color: var(--cream);
+  color: var(--preview-charcoal);
+}
+
+.aria-brand-experiment .section-title,
+.aria-brand-experiment [data-aria-hero-content] h1 {
+  color: var(--preview-charcoal);
+}
+.aria-brand-experiment [data-aria-hero-content] h1 span {
+  color: var(--preview-logo-rose);
+}
+
+/* Contrast-safe rose panels replace the default green background cards. */
+.aria-brand-experiment .bg-forest {
+  background-color: #9a3974;
+}
+.aria-brand-experiment .btn-coral,
+.aria-brand-experiment button.bg-coral,
+.aria-brand-experiment a.bg-coral {
+  background-color: var(--preview-cta-rose);
+  color: #fff;
+}
+.aria-brand-experiment .btn-coral:hover,
+.aria-brand-experiment button.bg-coral:hover,
+.aria-brand-experiment a.bg-coral:hover {
+  background-color: var(--preview-cta-rose-hover);
+}
+.aria-brand-experiment [data-aria-hero-content] [data-aria-service-badge],
+.aria-brand-experiment [data-lead-best-value] {
+  background-color: var(--preview-logo-orange);
+  color: var(--preview-charcoal);
+}
+.aria-brand-experiment [data-aria-guide] .text-coral-dark {
+  color: var(--preview-cta-rose);
+}
+.aria-brand-experiment [data-first-visit-group] {
+  background-color: #fbe5f1;
+  border-color: #da92bd;
+}
+.aria-brand-experiment [data-aria-hero-description] {
+  border-color: #e5b0d2;
+  background-image: radial-gradient(ellipse at 12% 6%, #fae4f1, transparent 66%),
+    radial-gradient(ellipse at 91% 92%, #f7d2e8, transparent 70%);
+  box-shadow: inset 0 1px 0 #fff, 0 8px 24px -12px #dba0c6;
+}
+.aria-brand-experiment [data-aria-dock] {
+  border-color: #e3c0d5;
+  box-shadow: 0 4px 18px #9e4b7f1f;
+}
+.aria-brand-experiment [data-aria-dock] button[aria-expanded="true"] {
+  background-color: #f3d9e9;
+  color: var(--preview-cta-rose);
+}
