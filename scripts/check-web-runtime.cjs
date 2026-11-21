@@ -139,8 +139,9 @@ const failures = [];
               await page.evaluate(() => window.scrollTo(0, 0));
               const aria = page.locator('[data-aria-guide]');
               await aria.waitFor({ state: 'visible' });
-              // Calm first fold: no inline form in the opening viewport, and
-              // the compact Google proof must remain a single row at 320–430px.
+              // Calm first fold: form remains below the opening viewport, while
+              // the fixed Aria dock has only a modest 90–160px post-review gap.
+              // Google proof must remain a single row at 320–430px.
               const firstFold = await page.evaluate(() => {
                 const form = document.getElementById('aria-hero-form');
                 const reviews = document.getElementById('recenzie');
@@ -216,7 +217,7 @@ const failures = [];
               if (firstFold.missing || firstFold.formTop < firstFold.viewportHeight - 2 ||
                   firstFold.topSpacerHeight < 39 ||
                   firstFold.contentCenterY < firstFold.viewportHeight * 0.4 ||
-                  firstFold.reviewGap < 185 ||
+                  firstFold.reviewGap < 90 || firstFold.reviewGap > 160 ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
