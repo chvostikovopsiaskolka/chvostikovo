@@ -24,7 +24,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
   const [selectedInterest, setSelectedInterest] = useState(presetInterest ?? "");
-  const showBreed = ariaPreview && selectedInterest !== "" && selectedInterest !== LEAD_STEP_INTERESTS[0].value;
+  const showBreed = selectedInterest !== "" && selectedInterest !== LEAD_STEP_INTERESTS[0].value;
   const [sent, setSent] = useState(false);
   const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
