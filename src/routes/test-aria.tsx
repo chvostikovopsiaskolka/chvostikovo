@@ -308,7 +308,7 @@ export function AriaPreviewPage() {
                 <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
                 <p className="font-display text-base font-bold text-forest sm:text-lg">Úvodná návšteva zadarmo</p>
               </div>
-              <details data-aria-visit-details className="group mx-auto mt-2 w-fit max-w-full rounded-2xl border border-coral/20 bg-card/65 px-3 py-2 text-left">
+              <details data-aria-visit-details className="group mx-auto mt-2 w-full max-w-[320px] rounded-2xl border border-coral/20 bg-card/65 px-3 py-2 text-left">
                 <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 font-display text-sm font-bold text-forest">
                   Ako prebieha úvodná návšteva? <span className="text-coral group-open:rotate-45">+</span>
                 </summary>
