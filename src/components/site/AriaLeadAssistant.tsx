@@ -97,7 +97,7 @@ export function AriaLeadAssistant({
         return;
       }
       const important = document.querySelectorAll<HTMLElement>(
-        "main h1, main h2, main input, main select, main textarea, main button, main a[href]"
+        "main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]"
       );
       const overlaps = Array.from(important).some(node => {
         const rect = node.getBoundingClientRect();
