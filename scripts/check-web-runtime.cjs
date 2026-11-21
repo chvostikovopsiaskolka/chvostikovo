@@ -69,6 +69,16 @@ const failures = [];
             }));
             if (cookieHeader.wraps || cookieHeader.overflows || !cookieHeader.nowrap)
               throw new Error('Aria cookie title must fit in one row next to portrait');
+            if (url.pathname === '/test-aria/') {
+              const cookieGap = await bubble.evaluate(el => {
+                const title = el.querySelector('#cookie-consent-title');
+                const paragraph = title?.nextElementSibling;
+                if (!title || !paragraph) return Infinity;
+                return paragraph.getBoundingClientRect().top - title.getBoundingClientRect().bottom;
+              });
+              if (cookieGap > 6 || cookieGap < -1)
+                throw new Error('Aria cookie heading needs a compact gap before the description: ' + cookieGap);
+            }
             const cookieLock = await page.evaluate(() => ({
               rootOverflow: document.documentElement.style.overflow,
               bodyPosition: document.body.style.position,
@@ -98,6 +108,8 @@ const failures = [];
               throw new Error('Cookie scroll lock was not restored after saving preferences');
           }
           if (!bellaris && isAriaPage && !restricted) {
+            if (url.pathname === '/test-aria/')
+              await page.waitForTimeout(1650); // Let short-lived consent-saved notice clear before visual snapshots.
             for (const width of [320, 375, 390, 430]) {
               // Stop the previous smooth scroll without navigating: this fixture
               // explicitly clears localStorage on every fresh navigation to
@@ -121,6 +133,11 @@ const failures = [];
               }));
               if (welcome.fontSize < 10.5 || welcome.overflows)
                 throw new Error('Aria greeting must remain readable without clipping at ' + width);
+              if (!await aria.getByText('Zisti viac z našej ponuky nižšie.').count())
+                throw new Error('Aria introduction must show the offer guidance at ' + width);
+              if (url.pathname === '/test-aria/' &&
+                  await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
+                throw new Error('Aria intro must actually be visible, not merely present in the DOM, at ' + width);
               const comicBubble = aria.locator('[data-aria-speech]');
               const portrait = aria.locator('[data-aria-dock] img[alt^="Aria"]');
               const tail = comicBubble.locator('svg[data-aria-tail]');
@@ -175,16 +192,32 @@ const failures = [];
                       a.left < b.right + 8 && a.right > b.left - 8 &&
                       a.top < b.bottom + 8 && a.bottom > b.top - 8;
                   });
+                  const guide = document.querySelector('[data-aria-guide]');
+                  const stage = guide.dataset.ariaStage;
+                  const introBlockers = [...document.querySelectorAll(
+                    'main h1, main h2, main input:not([type=radio]), main select, main textarea, main button'
+                  )].some(node => {
+                    const b = node.getBoundingClientRect();
+                    return b.width > 0 && b.height > 0 &&
+                      a.left < b.right + 8 && a.right > b.left - 8 &&
+                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
+                  });
                   return {
                     overlap: overlaps.length > 0,
                     colliding: overlaps.slice(0, 3).map(node => node.tagName),
+                    stage, introBlockers,
+                    pointerEvents: getComputedStyle(document.querySelector('[data-aria-message]')).pointerEvents,
                     suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed,
                     speechTop: Math.round(a.top)
                   };
                 });
                 if (!clearance.overlap) throw new Error('No real content overlap to test clearance: ' + JSON.stringify(clearance));
-                if (clearance.suppressed !== 'true')
-                  throw new Error('Aria must hide speech over contact form controls: ' + JSON.stringify(clearance));
+                if (clearance.stage === 'intro' && !clearance.introBlockers) {
+                  if (clearance.suppressed !== 'false' || clearance.pointerEvents !== 'none')
+                    throw new Error('Intro greeting must be visible but click-through over radio choices: ' + JSON.stringify(clearance));
+                } else if (clearance.suppressed !== 'true') {
+                  throw new Error('Interactive speech must hide over form controls: ' + JSON.stringify(clearance));
+                }
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-clear.png') });
                 await page.evaluate(() => window.scrollTo(0, 0));
                 await page.waitForTimeout(170);
@@ -192,9 +225,11 @@ const failures = [];
                 // scrollY=0. In that case keeping speech hidden is correct.
                 const restored = await page.evaluate(() => {
                   const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
-                  const overlapping = [...document.querySelectorAll(
-                    'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]'
-                  )].some(node => {
+                  const stage = document.querySelector('[data-aria-guide]').dataset.ariaStage;
+                  const selector = stage === 'intro'
+                    ? 'main h1, main h2, main input:not([type=radio]), main select, main textarea, main button'
+                    : 'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]';
+                  const overlapping = [...document.querySelectorAll(selector)].some(node => {
                     const b = node.getBoundingClientRect();
                     return b.width > 0 && b.height > 0 &&
                       a.left < b.right + 8 && a.right > b.left - 8 &&
@@ -220,6 +255,44 @@ const failures = [];
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
               if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
                 throw new Error('Aria floating dock overflows mobile viewport ' + width);
+              const navFrames = await aria.locator('[data-aria-dock] button').evaluateAll(buttons =>
+                buttons.every(button => getComputedStyle(button).boxShadow === 'none'));
+              if (!navFrames) throw new Error('Only the overall Aria menu frame should be outlined, not each navigation item');
+
+              if (url.pathname === '/test-aria/') {
+                // Check that the speech switches to a real modal CTA only after
+                // the requirements section, and that the dock does not jump.
+                const requirementsEnd = await page.evaluate(() => {
+                  const target = document.getElementById('lead-requirements');
+                  if (!target) return -1;
+                  return window.scrollY + target.getBoundingClientRect().bottom;
+                });
+                if (requirementsEnd < 0) throw new Error('Aria requirements boundary missing');
+                await page.evaluate(y => window.scrollTo(0, y), requirementsEnd + 20);
+                await page.waitForTimeout(220);
+                if (await aria.getAttribute('data-aria-stage') !== 'contact' ||
+                    !await aria.getByText(/Vyplňte nezáväzný formulár/).count())
+                  throw new Error('Contact offer should replace puppy text after requirements at ' + width);
+                const contactDock = await aria.locator('[data-aria-dock]').boundingBox();
+                if (!contactDock || Math.abs(contactDock.y - dock.y) > 3)
+                  throw new Error('Aria fixed navigation jumped vertically on section change at ' + width);
+                const contactCta = aria.getByRole('button', { name: 'Vyplniť', exact: true });
+                for (const offset of [20, 200, 400, 650, 950, 1250, 1600]) {
+                  if (await contactCta.isVisible()) break;
+                  await page.evaluate(y => window.scrollTo(0, y), requirementsEnd + offset);
+                  await page.waitForTimeout(140);
+                }
+                if (!await contactCta.isVisible())
+                  throw new Error('Post-requirements modal CTA never becomes visible at ' + width);
+                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-contact.png') });
+                await contactCta.click();
+                const contact = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+                await contact.waitFor({ state: 'visible' });
+                await contact.getByRole('button', { name: 'Close' }).click();
+                await contact.waitFor({ state: 'hidden' });
+                await page.evaluate(() => window.scrollTo(0, 0));
+                await page.waitForTimeout(190);
+              }
 
               // Four widths receive screenshots and overlay checks. Run the
               // full wizard/modal journey at the original 320 and 390 widths.
