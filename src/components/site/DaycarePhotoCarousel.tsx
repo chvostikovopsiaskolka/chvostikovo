@@ -15,6 +15,8 @@ import photo19 from "@/assets/daycare-carousel-19.avif";
 import photo20 from "@/assets/daycare-carousel-20.avif";
 import photo21 from "@/assets/daycare-carousel-21.avif";
 import photo22 from "@/assets/daycare-carousel-22.avif";
+import leadBorderCollies from "@/assets/lead-review-border-collies.webp";
+import leadRetrieversAussie from "@/assets/lead-review-retrievers-aussie.webp";
 
 const PHOTOS = [
   { src: newPhoto01, alt: "Usmiaty husky a chrtík v psiej škôlke Chvostíkovo" },
@@ -34,9 +36,12 @@ const PHOTOS = [
   ...DAYCARE_GALLERY_EXTRAS,
 ];
 
-// The mobile Košice lead uses exactly two images from this existing moving gallery.
-// Reuse the same imported assets, rather than adding another independent photo source.
-export const LEAD_REVIEW_GAP_PHOTOS = PHOTOS.slice(0, 2);
+// Approved user photos for the two compact cards between reviews and the
+// first lead form. Keep the moving carousel's PHOTOS collection unchanged.
+export const LEAD_REVIEW_GAP_PHOTOS = [
+  { src: leadBorderCollies, alt: "Dvaja usmiati čiernobieli psíkovia v oddychovej časti Chvostíkova" },
+  { src: leadRetrieversAussie, alt: "Zlatý a svetlý retriever s austrálskym ovčiakom v škôlke Chvostíkovo" },
+];
 
 const RESUME_DELAY = 2800;
 

@@ -182,7 +182,6 @@ const failures = [];
                 const newPhotos = hero.querySelector('[data-aria-review-gap-photos]');
                 const photoCards = [...(newPhotos?.querySelectorAll('figure') ?? [])];
                 const photoImages = photoCards.map(card => card.querySelector('img'));
-                const movingGalleryImages = [...document.querySelectorAll('[data-gesture-track="photos"] img')];
                 const photoRects = photoCards.map(card => card.getBoundingClientRect());
                 const photoFrame = newPhotos?.getBoundingClientRect();
                 const lineHeight = parseFloat(getComputedStyle(proof).lineHeight);
@@ -191,8 +190,11 @@ const failures = [];
                   formTop,
                   reviewGap: formTop - reviewBottom,
                   photoCount: photoCards.length,
-                  photoSourceReused: photoImages.length === 2 && photoImages.every((img, i) => !!img?.getAttribute('src') &&
-                    img.getAttribute('src') === movingGalleryImages[i]?.getAttribute('src')),
+                  photoApprovedAssets: photoImages.length === 2 &&
+                    !!photoImages[0]?.getAttribute('src')?.includes('lead-review-border-collies') &&
+                    !!photoImages[1]?.getAttribute('src')?.includes('lead-review-retrievers-aussie') &&
+                    photoImages.every(img => !!img?.getAttribute('alt')?.trim()) &&
+                    photoImages[0]?.getAttribute('src') !== photoImages[1]?.getAttribute('src'),
                   photoGeometry: photoRects.length === 2 && !!photoFrame &&
                     photoRects.every((rect, i) => rect.width > 80 && rect.height >= 110 &&
                       rect.left >= -1 && rect.right <= window.innerWidth + 1 &&
@@ -237,7 +239,7 @@ const failures = [];
                   firstFold.topSpacerHeight < 39 ||
                   firstFold.contentCenterY < firstFold.viewportHeight * 0.4 ||
                   firstFold.reviewGap < 90 || firstFold.reviewGap > 195 ||
-                  firstFold.photoCount !== 2 || !firstFold.photoSourceReused || !firstFold.photoGeometry ||
+                  firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || !firstFold.photoGeometry ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
