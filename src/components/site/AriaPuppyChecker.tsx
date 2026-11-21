@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { PuppyCheckInput } from "@/lib/inquiry";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { ArrowLeft, ArrowRight, Phone, ShieldCheck } from "lucide-react";
@@ -89,7 +89,7 @@ export function AriaPuppyChecker({
               </output>
               <input id={embedded ? "aria-modal-age" : "aria-inline-age"} type="range" min="1" max="12" step="1" value={age}
                 onChange={(event) => setAge(Number(event.target.value))}
-                className="aria-puppy-range w-full cursor-pointer" aria-label="Vek šteniatka v mesiacoch" />
+                className="aria-puppy-range w-full cursor-pointer" style={{ "--aria-puppy-progress": `${((age - 1) / 11) * 100}%` } as CSSProperties} aria-label="Vek šteniatka v mesiacoch" />
               <div className="flex justify-between text-xs text-forest/60"><span>1 mesiac</span><span>12 mesiacov</span></div>
               <p role="status" className={"rounded-2xl p-3 text-sm leading-relaxed " + (mayContinue ? "bg-secondary/60 text-forest" : "bg-red-50 text-red-700")}>
                 {mayContinue

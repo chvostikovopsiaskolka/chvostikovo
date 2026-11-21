@@ -254,9 +254,10 @@ export function AriaLeadAssistant({
               <div className="flex min-w-0 items-center gap-2">
                 {panel === "menu" ? (
                   <>
-                    <h2 className="shrink-0 font-display text-base font-bold">Menu</h2>
+                    <img data-aria-menu-head src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
+                    <h2 className="shrink-0 font-display text-xs font-bold min-[390px]:text-sm sm:text-base">Menu Chvostíkova</h2>
                     <img data-aria-menu-logo src={brandWordmark} alt="Chvostíkovo" width={120} height={24}
-                      className="h-4 w-auto max-w-[104px] min-w-0 object-contain" />
+                      className="ml-1 h-4 w-auto max-w-[72px] min-w-0 object-contain sm:max-w-[104px]" />
                   </>
                 ) : (
                   <>
