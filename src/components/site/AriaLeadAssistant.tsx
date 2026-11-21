@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
+import brandWordmark from "@/assets/logo.png";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
@@ -35,6 +36,7 @@ export function AriaLeadAssistant({
   trackingPrefix = "aria_preview_v3",
   requirementsSectionId = "lead-requirements",
   puppyStartSectionId,
+  showBrandLogo = false,
   anchorOverrides,
 }: {
   onOpenInfo: () => void;
@@ -45,6 +47,8 @@ export function AriaLeadAssistant({
   requirementsSectionId?: string;
   /** Starts the puppy speech only once the visitor reaches this section. */
   puppyStartSectionId?: string;
+  /** Preview-only brand wordmark, never changes the campaign menu. */
+  showBrandLogo?: boolean;
   anchorOverrides?: Record<string, string>;
 }) {
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
@@ -234,8 +238,12 @@ export function AriaLeadAssistant({
               <div className="flex min-w-0 items-center gap-2">
                 <img src={ARIA_HEAD_DATA_URI} alt="" width={48} height={48} className="size-11 shrink-0 object-contain drop-shadow-md" />
                 <h2 className="font-display text-base font-bold">
-                  {panel === "pricing" ? "Cenník škôlky" : panel === "requirements" ? "Podmienky prijatia" : panel === "faq" ? "Aria odpovedá" : "Menu Chvostíkova"}
+                  {panel === "pricing" ? "Cenník škôlky" : panel === "requirements" ? "Podmienky prijatia" : panel === "faq" ? "Aria odpovedá" : showBrandLogo ? "Menu" : "Menu Chvostíkova"}
                 </h2>
+                {panel === "menu" && showBrandLogo && (
+                  <img data-aria-preview-wordmark src={brandWordmark} alt="Chvostíkovo" width={120} height={24}
+                    className="h-4 w-auto max-w-[102px] min-w-0 shrink object-contain" />
+                )}
               </div>
               <button type="button" aria-label="Zavrieť panel Arie" onClick={() => setPanel(null)}
                 className="grid size-11 shrink-0 place-items-center rounded-full bg-secondary/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral">
