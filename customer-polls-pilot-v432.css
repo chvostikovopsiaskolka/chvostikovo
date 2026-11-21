@@ -1,21 +1,28 @@
-/* Customer poll v433: separate white-liquid menu invitation; owner-account scope only. */
-.customer-polls-owner-v432 #menuTab .customer-menu-primary-v432{
+/* Customer Menu v436: compact liquid grouping for every customer; poll card below Menu only when eligible. */
+.customer-menu-compact-v436 #menuTab .customer-menu-primary-v432{
  display:grid;gap:10px;min-width:0;margin:0 0 14px;padding:11px;
  border:1px solid rgba(255,255,255,.80)!important;border-radius:23px;
- background:rgba(255,255,255,.42)!important;
+ background:rgba(255,255,255,.12)!important;
  box-shadow:0 14px 36px rgba(99,49,55,.19),inset 0 1px 1px #ffffffec!important;
 }
-.customer-polls-owner-v432 #menuTab .customer-menu-primary-v432 >.customer-menu-group,
-.customer-polls-owner-v432 #menuTab .customer-menu-primary-v432 >.customer-menu-group.lg-v3-host{
+.customer-menu-compact-v436 #menuTab .customer-menu-primary-v432 >.customer-menu-group,
+.customer-menu-compact-v436 #menuTab .customer-menu-primary-v432 >.customer-menu-group.lg-v3-host{
  margin:0!important;border:1px solid rgba(255,255,255,.94)!important;
  border-radius:16px!important;background:rgba(255,255,255,.74)!important;
  box-shadow:0 5px 14px rgba(109,57,73,.17),inset 0 1px 2px rgba(255,255,255,.98)!important;
 }
-.customer-polls-owner-v432 #menuTab .customer-menu-primary-v432 .customer-menu-rows{
+/* Native liquid renderer needs real backdrop pixels under the material.
+ * Keep an opaque fallback for regular details, but never block optical refraction
+ * with a second semi-opaque layer on lg-v3-host details.
+ */
+.customer-menu-compact-v436 #menuTab .customer-menu-primary-v432 >.customer-menu-group.lg-v3-host{
+ background:transparent!important;
+}
+.customer-menu-compact-v436 #menuTab .customer-menu-primary-v432 .customer-menu-rows{
  background:rgba(255,255,255,.15)!important;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432,
-.customer-polls-owner-v432 #menuTab .customer-poll-v432.lg-v3-host{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432,
+.customer-menu-compact-v436 #menuTab .customer-poll-v432.lg-v3-host{
  box-sizing:border-box;min-width:0;margin:0 0 15px;padding:17px;
  border:1px solid rgba(255,255,255,.90)!important;border-radius:23px;
  background:rgba(255,255,255,.73)!important;
@@ -23,7 +30,7 @@
  color:#563849;
  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432[hidden]{display:none!important}
+.customer-menu-compact-v436 #menuTab .customer-poll-v432[hidden]{display:none!important}
 .customer-poll-v432 .customer-poll-heading-v432{display:grid;gap:5px;margin-bottom:10px}
 .customer-poll-v432 .customer-poll-kicker-v432{
  display:block;color:#e06919;font-size:11px;font-weight:850;letter-spacing:.055em;
@@ -98,68 +105,68 @@
 }
 .customer-poll-nav-badge-v432[hidden]{display:none!important}
 @media(max-width:360px){
- .customer-polls-owner-v432 #menuTab .customer-poll-v432{padding:13px}
- .customer-polls-owner-v432 #menuTab .customer-menu-primary-v432{padding:8px;gap:8px}
+ .customer-menu-compact-v436 #menuTab .customer-poll-v432{padding:13px}
+ .customer-menu-compact-v436 #menuTab .customer-menu-primary-v432{padding:8px;gap:8px}
 }
 @media(prefers-reduced-transparency:reduce){
- .customer-polls-owner-v432 #menuTab .customer-poll-v432{background:#fff!important;backdrop-filter:none}
+ .customer-menu-compact-v436 #menuTab .customer-poll-v432{background:#fff!important;backdrop-filter:none}
 }
 
 /* v434/v435: direct vote; v435 outlines the +/- buttons, not the number. */
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 h2{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 h2{
  color:#111111!important;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-option-row-v434{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-option-row-v434{
  display:grid;grid-template-columns:minmax(0,1fr);gap:0;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-v433{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-quantity-v433{
  margin:0 0 9px;padding:12px 11px 13px;
  border-radius:0 0 14px 14px;border-top:none;
  background:rgba(255,251,246,.92);
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-option-row-v434:has(.customer-poll-quantity-v433) > .customer-poll-choice-v432{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-option-row-v434:has(.customer-poll-quantity-v433) > .customer-poll-choice-v432{
  border-radius:14px 14px 0 0;border-bottom-color:transparent;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-controls-v434{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-quantity-controls-v434{
  display:flex;align-items:center;justify-content:space-between;
  gap:8px;min-width:0;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-label-v434{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-quantity-label-v434{
  flex:1;min-width:0;color:#473747;font-size:11.5px;font-weight:750;
  line-height:1.26;letter-spacing:-.015em;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-stepper-v434{
  display:grid;grid-template-columns:44px minmax(34px,38px) 44px;align-items:center;
  flex:none;gap:6px;border:0!important;border-radius:0;
  background:transparent;box-shadow:none!important;overflow:visible;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434 button{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-stepper-v434 button{
  width:44px;height:44px;min-height:44px;display:grid;place-items:center;
  padding:0!important;border:1px solid #e8c6b2!important;border-radius:12px!important;
  box-shadow:0 3px 9px rgba(105,46,44,.09)!important;
  background:#fff!important;color:#ed7116;font-size:23px;font-weight:800;
  line-height:1;transform:none!important;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434 button:disabled{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-stepper-v434 button:disabled{
  color:#bdafb0;opacity:.65;cursor:default;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-value-v434{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-quantity-value-v434{
  display:grid;place-items:center;min-width:34px;height:44px;
  padding:0!important;border:0!important;border-radius:0!important;
  background:transparent!important;box-shadow:none!important;
  color:#111;font-size:15px;font-weight:850;font-variant-numeric:tabular-nums;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-submit-v433{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-submit-v433{
  margin-top:11px;
 }
-.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-option-row-v434 >.customer-poll-choice-v432{
+.customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-option-row-v434 >.customer-poll-choice-v432{
  -webkit-tap-highlight-color:transparent;
 }
 @media(max-width:360px){
- .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-v433{padding-inline:8px}
- .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-controls-v434{gap:5px}
- .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-label-v434{font-size:10.5px}
- .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434{
+ .customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-quantity-v433{padding-inline:8px}
+ .customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-quantity-controls-v434{gap:5px}
+ .customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-quantity-label-v434{font-size:10.5px}
+ .customer-menu-compact-v436 #menuTab .customer-poll-v432 .customer-poll-stepper-v434{
   grid-template-columns:44px 34px 44px;gap:4px;
  }
 }

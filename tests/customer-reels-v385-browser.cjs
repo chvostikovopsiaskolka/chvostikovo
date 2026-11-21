@@ -10,7 +10,23 @@ const fixture=require('./liquid-v3-fixture.cjs');
  const nav=await page.locator('.bottom-nav').boundingBox();await page.locator('#navDog').click();
  const material=page.locator('#menuDogGroup>summary>.lg-v3-material');await material.waitFor({state:'attached'});
  assert.equal(await page.locator('#menuTab').evaluate(el=>getComputedStyle(el,'::before').display),'none');
- assert(await page.locator('#menuDogGroup').evaluate(el=>getComputedStyle(el).boxShadow.includes('24px')));
+ const grouping=await page.locator('#menuDogGroup').evaluate(el=>{
+   const parent=el.closest('#customerMenuPrimaryV432');
+   return {
+     compact:document.documentElement.classList.contains('customer-menu-compact-v436'),
+     grouped:Boolean(parent),
+     itemShadow:getComputedStyle(el).boxShadow,
+     groupShadow:parent?getComputedStyle(parent).boxShadow:'',
+     radius:getComputedStyle(el).borderRadius
+   };
+ });
+ assert.equal(grouping.compact,true,'standard compact Menu should be active with no poll');
+ assert.equal(grouping.grouped,true,'Menu items are in one liquid group');
+ assert(grouping.itemShadow.includes('14px'),'approved compact item shadow');
+ assert(grouping.groupShadow.includes('36px'),'approved grouped outer liquid shadow');
+ assert.equal(grouping.radius,'16px','compact Menu items keep rounded corners');
+ assert.equal(await page.locator('#menuDogGroup').evaluate(el=>getComputedStyle(el).backgroundColor),
+   'rgba(0, 0, 0, 0)','liquid Menu card must preserve real backdrop for turbulence');
  if(type===webkit&&mode==='reels')await page.waitForFunction(()=>document.querySelector('#menuDogGroup>summary>.lg-v3-material')?.dataset.renderer==='webgl',null,{timeout:15000});
  assert((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts<=2);
  assert.equal(await page.locator('.bottom-nav').evaluate(el=>getComputedStyle(el).filter),'none');

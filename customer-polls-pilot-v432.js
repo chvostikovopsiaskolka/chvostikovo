@@ -21,10 +21,10 @@
   $('customerPollNavBadgeV432')?.remove();
   const group=$('customerMenuPrimaryV432');
   if(group){for(const child of [...group.children])group.before(child);group.remove()}
-  document.documentElement.classList.remove('customer-polls-owner-v432');
+  document.documentElement.classList.remove('customer-menu-compact-v436');
  }
  function clear(){unmountUi();allowed='';loaded='';active=null;choices=[];selection=null;quantityValue='1';thankYou=false;error=''}
- function menuLayout(){
+ function menuLayout(showPoll){
   const menu=$('menuTab'),first=$('menuDogGroup');
   if(!menu||!first)return false;
   if(!$('customerMenuPrimaryV432')){
@@ -35,14 +35,14 @@
     const node=$(id);if(node)wrap.append(node);
    }
   }
-  if(!$('customerPollMenuV432')){
+  if(showPoll&&!$('customerPollMenuV432')){
    const box=el('section','customer-poll-v432 customer-poll-menu-v432');
    box.id='customerPollMenuV432';
    box.addEventListener('click',click);
    menu.querySelector('.customer-social-v223')?.before(box);
    if(!box.isConnected)menu.append(box);
   }
-  if(!$('customerPollNavBadgeV432')){
+  if(showPoll&&!$('customerPollNavBadgeV432')){
    const nav=$('navDog');
    if(nav){
     const badge=el('span','customer-poll-nav-badge-v432','1');
@@ -50,7 +50,8 @@
     nav.append(badge);
    }
   }
-  document.documentElement.classList.add('customer-polls-owner-v432');
+  if(!showPoll){$('customerPollMenuV432')?.remove();$('customerPollNavBadgeV432')?.remove()}
+  document.documentElement.classList.add('customer-menu-compact-v436');
   return true;
  }
  const safeError=()=>text('Hlasovanie sa nepodarilo načítať. Skúste otvoriť Menu znova.',
@@ -93,8 +94,10 @@
  function render(){
   if(!allowed||allowed!==account())return;
   const show=Boolean(active||thankYou);
-  if(!show){unmountUi();return}
-  if(!menuLayout())return;
+  // The compact Menu is the standard design for all signed-in customers.
+  // Published, unvoted polls render below Menu; completed/out-of-scope polls stay hidden.
+  if(!menuLayout(show))return;
+  if(!show)return;
   const root=$('customerPollMenuV432'),badge=$('customerPollNavBadgeV432');
   root.hidden=false;root.replaceChildren();
   if(badge)badge.hidden=!active||thankYou;
@@ -216,7 +219,7 @@
  }
  addCustomerHook('afterBootstrap',sync);
  addCustomerHook('afterRenderDog',()=>{if(allowed===account())render();else void sync()});
- addCustomerHook('afterSwitchTab',()=>{if(allowed===account())render()});
+ addCustomerHook('afterSwitchTab',tab=>{if(allowed===account()){render();if(tab==='menu'&&!sending)void refresh(allowed,true)}});
  document.addEventListener('click',event=>{
   if(event.target.closest?.('[data-customer-locale]')&&allowed===account())
    requestAnimationFrame(render);
