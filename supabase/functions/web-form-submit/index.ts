@@ -263,7 +263,7 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
         'Šteniatko – kotercový kašeľ', 'Šteniatko – výsledok orientačnej kontroly',
       ]) {
         const answer = typeof puppyRaw[label] === 'string'
-          ? text(puppyRaw[label], 120).replace(/[\\r\\n]+/g, ' ')
+          ? text(puppyRaw[label], 120).replace(/[\r\n]+/g, ' ')
           : '';
         if (answer) lines.push(`${label}: ${answer}`);
       }
