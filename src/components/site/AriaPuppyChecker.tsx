@@ -45,7 +45,7 @@ export function AriaPuppyChecker({
       ...(name.trim() ? { dog_name: name.trim() } : {}),
       ...(breed.trim() ? { dog_breed: breed.trim() } : {}),
       ...(weight.trim() && Number.isFinite(numericWeight) && numericWeight > 0 ? { dog_weight_kg: numericWeight } : {}),
-      vaccines: { rabies: vaccines.rabies ?? "unknown", dhppi: vaccines.dhppi ?? "unknown", kennel: vaccines.kennel ?? "unknown" },
+      vaccines: { rabies: vaccines["rabies"] ?? "unknown", dhppi: vaccines["dhppi"] ?? "unknown", kennel: vaccines["kennel"] ?? "unknown" },
     };
   }
 
