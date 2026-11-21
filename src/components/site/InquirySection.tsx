@@ -40,7 +40,7 @@ export function InquirySection() {
   return (
     <section id="informujte-sa" className="scroll-mt-24 bg-card pt-0 pb-10 lg:hidden">
       <div className="mx-auto max-w-2xl px-4">
-        <SchoolmatesFormCrown />
+        <SchoolmatesFormCrown groundAccent />
 
         <div className="relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8">
           <h3 className="text-center text-2xl text-forest">Čo hľadáte pre svojho psíka?</h3>
