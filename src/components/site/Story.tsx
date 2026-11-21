@@ -297,7 +297,7 @@ export function Why() {
   );
 }
 
-export function About({ language = "sk" }: { language?: "sk" | "en" }) {
+export function About({ language = "sk", homeMobile = false }: { language?: "sk" | "en"; homeMobile?: boolean }) {
   const isEnglish = language === "en";
 
   return (
@@ -308,8 +308,13 @@ export function About({ language = "sk" }: { language?: "sk" | "en" }) {
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             {isEnglish ? "About us" : "O nás"}
           </span>
-          <h2 className="section-title mt-2 text-3xl sm:text-4xl">
-            {isEnglish ? "Who is behind Chvostíkovo?" : "Kto stojí za Chvostíkovom?"}
+          <h2 className={homeMobile ? "section-title mt-2 text-[clamp(12px,3.65vw,22px)] whitespace-nowrap lg:whitespace-normal lg:text-3xl" : "section-title mt-2 text-3xl sm:text-4xl"}>
+            {homeMobile && !isEnglish ? (
+              <>
+                <span className="lg:hidden">Kto sa postará o vášho psíka?</span>
+                <span className="hidden lg:inline">Kto stojí za Chvostíkovom?</span>
+              </>
+            ) : isEnglish ? "Who is behind Chvostíkovo?" : "Kto stojí za Chvostíkovom?"}
           </h2>
           <div className="mt-5 space-y-4 text-forest/85">
             <p>
@@ -378,6 +383,16 @@ export function About({ language = "sk" }: { language?: "sk" | "en" }) {
           </div>
         </div>
       </div>
+
+      {homeMobile && !isEnglish && (
+        <div className="relative z-10 mx-auto mt-5 flex max-w-md flex-wrap items-center justify-center gap-1.5 px-2 lg:hidden">
+          {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((benefit) => (
+            <span key={benefit} className="inline-flex items-center gap-1 rounded-full bg-forest px-2.5 py-1.5 font-display text-[10px] font-bold text-white">
+              <Check className="size-3 shrink-0" aria-hidden />{benefit}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="relative z-10 mx-auto mt-8 max-w-6xl px-4">
         <div className="grid items-center gap-8 rounded-4xl bg-secondary p-7 sm:p-10 md:text-center lg:grid-cols-[1fr_auto] lg:text-left">
