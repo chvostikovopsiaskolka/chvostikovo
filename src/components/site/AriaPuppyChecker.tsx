@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { PuppyCheckInput } from "@/lib/inquiry";
+import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { ArrowLeft, ArrowRight, Phone, ShieldCheck } from "lucide-react";
 import { PHONE, PHONE_PRETTY } from "@/content/site";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
@@ -17,10 +18,12 @@ export function AriaPuppyChecker({
   onInterest,
   onInfo,
   embedded = false,
+  trackingSource,
 }: {
   onInterest: (details: PuppyCheckInput) => void;
   onInfo?: (details: PuppyCheckInput) => void;
   embedded?: boolean;
+  trackingSource?: string;
 }) {
   const [step, setStep] = useState<Step>("age");
   const [age, setAge] = useState(4);
@@ -94,7 +97,10 @@ export function AriaPuppyChecker({
                   : "Zatiaľ nespĺňa orientačnú vekovú podmienku 4 mesiacov. Radi vám poradíme, kedy bude vhodné prísť."}
               </p>
               {mayContinue ? (
-                <button type="button" onClick={() => setStep("vaccines")} className={primaryClass + " w-full"}>
+                <button type="button" onClick={() => {
+                  if (trackingSource) void trackCookielessInteraction("explore_daycare", trackingSource + "_age_complete");
+                  setStep("vaccines");
+                }} className={primaryClass + " w-full"}>
                   Pokračovať na očkovania <ArrowRight size={17} aria-hidden />
                 </button>
               ) : <ContactFallback onInfo={moreInfo} />}
