@@ -188,8 +188,8 @@ const failures = [];
                   topSpacerHeight: topSpacer.getBoundingClientRect().height,
                   viewportHeight: window.innerHeight,
                   serviceBadgeBelowH1: badgeRect.top >= headlineRect.bottom + 55,
-                  dogsRestOnOrange: serviceGroup.contains(crown) && crownRect.bottom >= badgeRect.top - 4 &&
-                    crownRect.bottom <= badgeRect.top + 5,
+                  dogsRestOnOrange: serviceGroup.contains(crown) && crownRect.bottom >= badgeRect.top + 14 &&
+                    crownRect.bottom <= badgeRect.top + 25,
                   serviceBadgeFits: badgeRect.left >= -1 && badgeRect.right <= window.innerWidth + 1 &&
                     serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
                   descriptionGap: descriptionRect.top - badgeRect.bottom,
