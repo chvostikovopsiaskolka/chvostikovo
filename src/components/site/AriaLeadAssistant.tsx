@@ -323,9 +323,9 @@ export function AriaLeadAssistant({
         )}
 
         {!panel && (
-          <div data-aria-message data-aria-suppressed={speechObscured ? "true" : "false"} aria-hidden={speechObscured}
-            className={`mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px] ${speechObscured ? "invisible pointer-events-none" : stage === "intro" ? "pointer-events-none" : "pointer-events-auto"}`}>
-            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[42px] max-w-full -rotate-[0.5deg] items-center px-2.5 py-1.5 text-forest">
+          <div data-aria-message data-aria-suppressed="false"
+            className="pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]">
+            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-full max-w-[460px] -rotate-[0.5deg] items-center px-3 py-2 text-forest">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
@@ -333,10 +333,10 @@ export function AriaLeadAssistant({
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>
               {stage === "intro" ? (
-                <p className="relative z-10 font-display text-[11px] leading-tight font-semibold tracking-tight">
+                <p className="relative z-10 font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]">
                   Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                   <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
-                  <span className="mt-1 block text-[10px] font-medium text-forest/85">Zisti viac z našej ponuky nižšie.</span>
+                  <span className="mt-1.5 block text-[11px] font-medium leading-[1.35] text-forest/85 sm:text-xs">Zisti viac z našej ponuky nižšie.</span>
                 </p>
               ) : stage === "puppy" ? (
                 <div className="relative z-10 flex min-w-0 items-center gap-2">
@@ -344,7 +344,7 @@ export function AriaLeadAssistant({
                     Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span>
                   </strong>
                   <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
-                    className="min-h-9 shrink-0 rounded-[11px] bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    className="pointer-events-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Overiť
                   </button>
                 </div>
@@ -354,7 +354,7 @@ export function AriaLeadAssistant({
                     Chcete sa informovať? <span className="text-coral-dark">Vyplňte nezáväzný formulár.</span>
                   </strong>
                   <button type="button" onClick={openInfo}
-                    className="min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    className="pointer-events-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Vyplniť
                   </button>
                 </div>
