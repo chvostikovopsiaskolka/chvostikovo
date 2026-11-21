@@ -185,9 +185,9 @@ export function AriaPreviewPage() {
               <Reviews variant="hero" />
             </div>
           </div>
-          {/* A separate flexible quiet zone for the fixed Aria and dock.
-              The enquiry must still start below the initial viewport. */}
-          <div aria-hidden="true" data-aria-intro-space className="min-h-[190px] flex-[1.15] sm:min-h-[160px]" />
+          {/* Keep a soft, bounded gap for fixed Aria + dock. The hero's 100svh
+              minimum still holds the enquiry below the initial viewport. */}
+          <div aria-hidden="true" data-aria-intro-space className="min-h-[96px] max-h-[136px] flex-[0.45] sm:min-h-[110px] sm:max-h-[150px]" />
         </section>
 
         <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
