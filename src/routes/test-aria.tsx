@@ -146,7 +146,7 @@ export function AriaPreviewPage() {
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
       <Header landingMinimal hideMobileDock landingTrackingSource="lead_landing_header_phone" />
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} hidden={leadModalOpen || puppyModalOpen} />
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenDockInterest={() => isLiveLead ? openLeadModal("lead_landing_mobile_dock") : openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
         <section className="hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-8 sm:pt-10 lg:pt-24">

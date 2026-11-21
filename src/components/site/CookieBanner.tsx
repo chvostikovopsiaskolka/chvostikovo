@@ -176,7 +176,7 @@ export function CookieBanner() {
   if (!mounted) return null;
 
   const isEnglish = window.location.pathname.startsWith("/en/");
-  const isAriaPreview = ["/test-aria", "/psia-skolka-pre-steniatka"].includes(window.location.pathname.replace(/\/$/, ""));
+  const isAriaPreview = ["/test-aria", "/psia-skolka-pre-steniatka", "/psia-skolka-kosice"].includes(window.location.pathname.replace(/\/$/, ""));
 
   function save(next: Pick<Consent, "functional" | "analytics" | "marketing">) {
     const stored = writeStoredConsent(next);

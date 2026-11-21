@@ -134,7 +134,24 @@ assert(puppyAria.includes("<AriaLeadAssistant") &&
   "Approved puppy landing must use Aria navigation and an accessible puppy-check/contact handoff, not two competing mobile docks");
 const liveLead = read("src/routes/psia-skolka-kosice.tsx");
 const ariaLead = read("src/routes/test-aria.tsx");
-assert(liveLead.includes("component: LeadLandingPage") && !liveLead.includes("component: AriaPreviewPage") && ariaLead.includes("<AriaLeadAssistant") && ariaLead.includes("hideMobileDock") && ariaLead.includes("<LeadStepForm"), "Aria stays preview-only until Marek approves the lead launch");
+assert(liveLead.includes("component: AriaPreviewPage") &&
+  liveLead.includes('content: "noindex, follow"') &&
+  ariaLead.includes("<AriaLeadAssistant") &&
+  ariaLead.includes("hideMobileDock") &&
+  ariaLead.includes("<LeadStepForm") &&
+  ariaLead.includes("lead_landing_aria_info") &&
+  ariaLead.includes("lead_landing_aria_hero_inline") &&
+  ariaLead.includes('onOpenDockInterest={() => isLiveLead ? openLeadModal("lead_landing_mobile_dock")'),
+  "Approved Aria paid lead launch must preserve noindex SEO and current CTA/form measurement");
+const guide = read("src/components/site/AriaLeadAssistant.tsx");
+assert(guide.includes('data-aria-suppressed="false"') &&
+  guide.includes('introSectionId = "aria-hero-form"') &&
+  guide.includes('requirementsSectionId = "lead-requirements"') &&
+  guide.includes('trackMarketingInteraction("view_pricing", source)') &&
+  guide.includes('mobile_dock_lead_lead-pricing') &&
+  guide.includes('mobile_menu_lead_lead-first-visit') &&
+  !guide.includes("speechObscured"),
+  "Aria speech must stay visible, CTA sources preserve reporting continuity and pricing remain a distinct GA4/Meta action");
 assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('label: "Interested in daycare"'), "Landing CTA must have full SK/EN label");
 assert(dock.includes("marketingExtra"), "Local first visit menu links required");
 assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");

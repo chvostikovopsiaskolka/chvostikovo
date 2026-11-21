@@ -4,6 +4,7 @@ import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
+import { trackMarketingInteraction } from "@/lib/analytics";
 
 type Panel = "pricing" | "requirements" | "faq" | "menu" | null;
 
@@ -28,17 +29,21 @@ const QUESTIONS = [
 export function AriaLeadAssistant({
   onOpenInfo,
   onOpenInterest,
+  onOpenDockInterest,
   onOpenPuppyChecker,
   hidden = false,
   trackingPrefix = "aria_preview_v3",
+  introSectionId = "aria-hero-form",
   requirementsSectionId = "lead-requirements",
   anchorOverrides,
 }: {
   onOpenInfo: () => void;
   onOpenInterest: () => void;
+  onOpenDockInterest?: () => void;
   onOpenPuppyChecker: () => void;
   hidden?: boolean;
   trackingPrefix?: string;
+  introSectionId?: string;
   requirementsSectionId?: string;
   anchorOverrides?: Record<string, string>;
 }) {
@@ -88,23 +93,22 @@ export function AriaLeadAssistant({
     };
   }, [hidden, stage]);
 
-  // Stable sections rather than flipping a bubble on every scroll pixel.
-  // Hysteresis keeps iOS browser chrome resizing from thrashing the dock.
+  // Stage transitions follow DOM sections, not arbitrary scrollY pixels.
+  // Hysteresis avoids Safari chrome/resizing flicker while the intro remains
+  // visible through the complete contact form and the puppy callout persists
+  // through FAQ and gallery without covering any interactive controls.
   useEffect(() => {
     let frame = 0;
     const update = () => {
       frame = 0;
       const previous = stageRef.current;
+      const endOfForm = document.getElementById(introSectionId)?.getBoundingClientRect().bottom ?? Infinity;
       const endOfRequirements = document.getElementById(requirementsSectionId)?.getBoundingClientRect().bottom ?? Infinity;
-      const transition = Math.round(window.innerHeight * 0.4);
-      let next: typeof previous;
-      if (previous === "contact" ? endOfRequirements < transition + 36 : endOfRequirements < transition - 18) {
-        next = "contact";
-      } else if (previous === "intro" ? window.scrollY < 170 : window.scrollY < 80) {
-        next = "intro";
-      } else {
-        next = "puppy";
-      }
+      const contactTransition = Math.round(window.innerHeight * 0.4);
+      const contactReached = previous === "contact"
+        ? endOfRequirements < contactTransition + 36 : endOfRequirements < contactTransition - 18;
+      const introVisible = previous === "intro" ? endOfForm > 65 : endOfForm > 155;
+      const next: typeof previous = contactReached ? "contact" : introVisible ? "intro" : "puppy";
       if (previous !== next) {
         stageRef.current = next;
         setStage(next);
@@ -113,15 +117,23 @@ export function AriaLeadAssistant({
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(update);
     };
+    const resizeObserver = new ResizeObserver(onScroll);
+    const intro = document.getElementById(introSectionId);
+    const requirements = document.getElementById(requirementsSectionId);
+    if (intro) resizeObserver.observe(intro);
+    if (requirements) resizeObserver.observe(requirements);
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    window.visualViewport?.addEventListener("resize", onScroll);
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      window.visualViewport?.removeEventListener("resize", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [requirementsSectionId]);
+  }, [introSectionId, requirementsSectionId]);
 
   useEffect(() => {
     if (!panel) return;
@@ -144,7 +156,16 @@ export function AriaLeadAssistant({
   }, [panel]);
 
   function track(action: string) {
-    void trackCookielessInteraction("nav_click", trackingPrefix + "_" + action, "sk");
+    // Historic paid dock sources remain stable across the design migration.
+    const historical: Record<string, string> = {
+      pricing: "mobile_dock_lead_lead-pricing",
+      menu: "mobile_dock_lead_menu_open",
+      first_visit: "mobile_menu_lead_lead-first-visit",
+    };
+    const source = trackingPrefix === "lead_landing_aria" && historical[action]
+      ? historical[action] : trackingPrefix + "_" + action;
+    void trackCookielessInteraction("nav_click", source, "sk");
+    return source;
   }
 
   function jump(id: string, action: string) {
@@ -160,8 +181,10 @@ export function AriaLeadAssistant({
   }
 
   function toggle(next: Exclude<Panel, null>) {
-    track(next);
-    setPanel(panel === next ? null : next);
+    const opening = panel !== next;
+    const source = track(next);
+    if (opening && next === "pricing") trackMarketingInteraction("view_pricing", source);
+    setPanel(opening ? next : null);
   }
 
 
@@ -175,6 +198,12 @@ export function AriaLeadAssistant({
     track("interest");
     setPanel(null);
     onOpenInterest();
+  }
+
+  function openDockInterest() {
+    track("interest");
+    setPanel(null);
+    (onOpenDockInterest ?? onOpenInterest)();
   }
 
   function openPuppy() {
@@ -325,7 +354,7 @@ export function AriaLeadAssistant({
         {!panel && (
           <div data-aria-message data-aria-suppressed="false"
             className="pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]">
-            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-full max-w-[460px] -rotate-[0.5deg] items-center px-3 py-2 text-forest">
+            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[50px] w-full max-w-[480px] -rotate-[0.5deg] items-center px-3 py-2 text-forest">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
@@ -333,10 +362,10 @@ export function AriaLeadAssistant({
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>
               {stage === "intro" ? (
-                <p className="relative z-10 font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]">
+                <p className="relative z-10 w-full font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]">
                   Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                   <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
-                  <span className="mt-1.5 block text-[11px] font-medium leading-[1.35] text-forest/85 sm:text-xs">Zisti viac z našej ponuky nižšie.</span>
+                  <span className="mt-1.5 block text-[11px] font-medium leading-[1.4] text-forest/85 sm:text-xs">Zisti viac z našej ponuky nižšie.</span>
                 </p>
               ) : stage === "puppy" ? (
                 <div className="relative z-10 flex min-w-0 items-center gap-2">
@@ -377,7 +406,7 @@ export function AriaLeadAssistant({
             <button type="button" className={itemClass} aria-label="Časté otázky" aria-expanded={panel === "faq"} onClick={() => toggle("faq")}>
               <BookOpen size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">FAQ</span>
             </button>
-            <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={openInterest}>
+            <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={openDockInterest}>
               <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span>
             </button>
             <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}>
