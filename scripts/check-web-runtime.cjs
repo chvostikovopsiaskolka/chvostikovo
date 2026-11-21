@@ -266,35 +266,25 @@ const failures = [];
               await wizard.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
               if (!await wizard.locator('[data-aria-puppy-step="vaccines"]').count()) throw new Error('Puppy vaccinations missing');
               for (let i = 0; i < 3; i++) await wizard.locator('fieldset').nth(i).getByText('Áno', { exact: true }).click();
-              await wizard.getByRole('button', { name: /^Pokračovať$/ }).click();
-              await wizard.locator('[data-aria-puppy-step="dog"]').waitFor({ state: 'visible' });
-              await wizard.getByPlaceholder('Ako sa volá?').fill('Testovací psík');
-              await wizard.getByPlaceholder('Plemeno alebo kríženec').fill('Kríženec');
-              await wizard.getByRole('button', { name: /Zobraziť výsledok/ }).click();
-              await wizard.locator('[data-aria-puppy-step="result"]').waitFor({ state: 'visible' });
-              await wizard.getByRole('button', { name: /Mám záujem – vyplniť kontakt/ }).click();
+              if (await wizard.getByText(/Plemeno \(voliteľné\)/).count() ||
+                  await wizard.getByPlaceholder('Plemeno alebo kríženec').count())
+                throw new Error('Puppy checker must collect only age and vaccines, not breed');
+              await wizard.getByRole('button', { name: /Pokračovať na kontakt/ }).click();
               await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
-              // Nested puppy -> contact modal handoff: use the actual iPhone
-              // close button, not an ambiguous synthetic Escape targeting the
-              // previous Radix layer in WebKit. Keyboard Escape remains covered
-              // later for the normal single-dialog requirements flow.
+              // No dog/result intermediate step: the existing contact owns breed.
               const contactDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
               const puppySummary = contactDialog.locator('[data-puppy-check-summary]');
               await puppySummary.waitFor({ state: 'visible' });
-              const puppySummaryText = await puppySummary.innerText();
-              if (!puppySummaryText.includes('Testovací psík') || !puppySummaryText.includes('Kríženec') ||
-                  !puppySummaryText.includes('4 mesiacov') ||
-                  !/besnota:\s*áno/i.test(puppySummaryText) ||
-                  !/DHPPi\+L:\s*áno/i.test(puppySummaryText) ||
-                  !/kotercový kašeľ:\s*áno/i.test(puppySummaryText))
-                throw new Error('Puppy wizard details were lost during contact handoff: ' + puppySummaryText);
-              const puppyBreedField = contactDialog.locator('[data-aria-breed-field]');
-              const puppyBreedInput = puppyBreedField.getByLabel('Plemeno psíka (nepovinné)');
-              if (!await puppyBreedField.isVisible() || await puppyBreedInput.inputValue() !== 'Kríženec')
-                throw new Error('Puppy breed must be prefilled but editable at contact handoff');
-              await puppyBreedInput.fill('Írsky vlkodav');
+              const summary = await puppySummary.innerText();
+              if (!summary.includes('4 mesiacov') || !/besnota:\s*áno/i.test(summary) ||
+                  !/DHPPi\+L:\s*áno/i.test(summary) || !/kotercový kašeľ:\s*áno/i.test(summary))
+                throw new Error('Age/vaccine answers were lost in contact: ' + summary);
+              const breedInput = contactDialog.getByLabel('Plemeno psíka (nepovinné)');
+              if (!await breedInput.isVisible() || await breedInput.inputValue() !== '')
+                throw new Error('Puppy breed must be entered exactly once, at contact');
+              await breedInput.fill('Írsky vlkodav');
               if (!await puppySummary.getByText(/Írsky vlkodav/).count())
-                throw new Error('Corrected contact breed must also update the carried puppy summary');
+                throw new Error('Contact breed must update the carried puppy summary');
               await contactDialog.getByRole('button', { name: 'Close' }).click();
               await contactDialog.waitFor({ state: 'hidden' });
               await aria.waitFor({ state: 'visible' });
