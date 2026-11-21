@@ -152,7 +152,11 @@ export function AriaPreviewPage() {
         <section className="hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-28">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7">
+          {/* Balance the first fold around the whole content group; Aria owns
+              the lower viewport and must never cover the reviews. */}
+          <div aria-hidden="true" data-aria-intro-top-space className="min-h-[clamp(20px,5svh,54px)] flex-[0.85] sm:min-h-14" />
+          <div data-aria-hero-content className="relative z-10 w-full shrink-0">
+            <div className="mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7">
             <div className="w-full min-w-0 text-center">
               <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
@@ -179,11 +183,11 @@ export function AriaPreviewPage() {
               </p>
             </div>
           </div>
-
-          <Reviews variant="hero" />
-          {/* Keep the fixed Aria introduction and dock in a quiet visual zone
-              after reviews; the enquiry starts only on the next scroll. */}
-          <div aria-hidden="true" data-aria-intro-space className="min-h-[190px] flex-1 sm:min-h-[160px]" />
+            <Reviews variant="hero" />
+          </div>
+          {/* A separate flexible quiet zone for the fixed Aria and dock.
+              The enquiry must still start below the initial viewport. */}
+          <div aria-hidden="true" data-aria-intro-space className="min-h-[190px] flex-[1.15] sm:min-h-[160px]" />
         </section>
 
         <section id="aria-hero-form" className="relative z-10 bg-transparent pb-12 pt-6 sm:pb-16 sm:pt-8">
