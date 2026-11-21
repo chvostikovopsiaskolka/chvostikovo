@@ -186,12 +186,15 @@ const failures = [];
                   contentCenterY: (contentTop + reviewsBottom) / 2,
                   topSpacerHeight: topSpacer.getBoundingClientRect().height,
                   viewportHeight: window.innerHeight,
-                  serviceBadgeBelowH1: badgeRect.top >= headlineRect.bottom + 65,
-                  dogsRestOnOrange: serviceGroup.contains(crown) && crownRect.bottom >= badgeRect.top - 8 &&
-                    crownRect.bottom <= badgeRect.bottom + 16,
+                  serviceBadgeBelowH1: badgeRect.top >= headlineRect.bottom + 55,
+                  dogsRestOnOrange: serviceGroup.contains(crown) && crownRect.bottom >= badgeRect.top - 20 &&
+                    crownRect.bottom <= badgeRect.top + 5,
                   serviceBadgeFits: badgeRect.left >= -1 && badgeRect.right <= window.innerWidth + 1 &&
                     serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
-                  focusedDescription: descriptionRect.width <= (window.innerWidth < 640 ? 452 : 522) &&
+                  descriptionGap: descriptionRect.top - badgeRect.bottom,
+                  reviewGapAbove: reviewsRect.top - descriptionRect.bottom,
+                  focusedDescription: descriptionRect.width <= (window.innerWidth < 390 ? 302 :
+                    window.innerWidth < 640 ? 342 : 522) &&
                     description.querySelectorAll('strong').length === 4 &&
                     [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700),
                   naturalReviewBottom: getComputedStyle(reviews).overflowY !== 'hidden' &&
@@ -215,7 +218,10 @@ const failures = [];
                   firstFold.contentCenterY < firstFold.viewportHeight * 0.4 ||
                   firstFold.reviewGap < 185 ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
-                  !firstFold.serviceBadgeFits || !firstFold.focusedDescription ||
+                  !firstFold.serviceBadgeFits ||
+                  firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
+                  firstFold.reviewGapAbove > 35 ||
+                  !firstFold.focusedDescription ||
                   !firstFold.naturalReviewBottom ||
                   !firstFold.noBenefitsInHero || firstFold.relocatedBenefitsCount !== 3 ||
                   !firstFold.caretakersHeadingFits || !firstFold.whiteInfoBackground ||
