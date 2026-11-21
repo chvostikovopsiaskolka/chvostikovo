@@ -33,6 +33,17 @@ const failures = [];
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
         const label = `${engine}-${restricted ? 'blocked-storage' : 'fresh'}-${url.pathname.replaceAll('/', '_')}`;
+        // Record only synthetic events from this browser fixture. Prevent
+        // automated interactions from polluting production campaign analytics.
+        const puppyInteractions = [];
+        if (!bellaris && !restricted && url.pathname === '/psia-skolka-pre-steniatka/') {
+          await page.route('**/functions/v1/website-landing-event', async route => {
+            const request = route.request();
+            const data = request.method() === 'POST' ? request.postDataJSON() : {};
+            if (data?.event_name) puppyInteractions.push({ name: data.event_name, source: data.event_source, attemptId: data.attempt_id });
+            await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+          });
+        }
         try {
           const response = await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 40000 });
           if (response?.status() !== 200) throw new Error(`HTTP ${response?.status()}`);
@@ -511,6 +522,73 @@ const failures = [];
             await leadDialog.waitFor({ state: 'hidden' });
             await page.evaluate(() => window.scrollTo(0, 0));
             await page.waitForTimeout(190);
+
+            // The old mobile dock emitted both nav_click and a consent-gated
+            // view_pricing. Aria additionally needs first-visit/FAQ reads.
+            await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
+            await aria.getByRole('button', { name: 'Ako prebieha návšteva?' }).click();
+            if (!await aria.locator('[data-aria-first-visit]').isVisible())
+              throw new Error('First-visit pricing details did not open');
+            await aria.getByRole('button', { name: 'Časté otázky' }).click();
+            await aria.getByRole('button', { name: 'Ako prebieha prvá návšteva?' }).click();
+            await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
+            await aria.getByRole('button', { name: /Prvá návšteva zadarmo/ }).click();
+
+            // Simulate a backend error followed by success. Neither attempt
+            // reaches Supabase, SMS, email, Pixel or real CRM data.
+            const syntheticLeads = [];
+            await page.route('**/functions/v1/web-form-submit', async route => {
+              const payload = route.request().postDataJSON();
+              syntheticLeads.push(payload);
+              const ok = syntheticLeads.length > 1;
+              await route.fulfill({
+                status: ok ? 201 : 503,
+                contentType: 'application/json',
+                body: JSON.stringify(ok ? { ok: true } : { ok: false, recovery_saved: false }),
+              });
+            });
+            await aria.getByRole('button', { name: 'Mám záujem o škôlku' }).click();
+            const conversionDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+            await conversionDialog.waitFor({ state: 'visible' });
+            await conversionDialog.locator('label:has(input[name="zaujem"])').first().click();
+            await conversionDialog.getByRole('button', { name: 'Pokračovať' }).click();
+            await conversionDialog.locator('input[name="meno"]').fill('Test návštevníka');
+            await conversionDialog.locator('input[name="telefon"]').fill('912345678');
+            await conversionDialog.locator('input[name="plemeno"]').fill('Kríženec');
+            await conversionDialog.locator('input[type="checkbox"][required]').check();
+            await conversionDialog.getByRole('button', { name: 'Odoslať záujem' }).click();
+            await conversionDialog.getByRole('alert').waitFor({ state: 'visible' });
+            if (puppyInteractions.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'))
+              throw new Error('Failed synthetic lead must not count as conversion');
+            await conversionDialog.getByRole('button', { name: 'Odoslať záujem' }).click();
+            await conversionDialog.locator('[data-lead-step-success]').waitFor({ state: 'visible' });
+            for (let i = 0; i < 12 && !puppyInteractions.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'); i++)
+              await page.waitForTimeout(100);
+            const has = (name, source) => puppyInteractions.some(e => e.name === name && e.source === source);
+            for (const [name, source] of [
+              ['nav_click', 'puppy_landing_aria_pricing'],
+              ['nav_click', 'puppy_landing_aria_faq'],
+              ['nav_click', 'puppy_landing_aria_first_visit'],
+              ['nav_click', 'puppy_landing_aria_interest'],
+              ['explore_daycare', 'puppy_landing_aria_first_visit_pricing_details'],
+              ['explore_daycare', 'puppy_landing_aria_faq_first_visit'],
+              ['inquiry_cta', 'puppy_landing_aria_interest'],
+              ['form_submit', 'puppy_landing_aria_interest'],
+            ]) {
+              if (!has(name, source))
+                throw new Error('Missing isolated CTA/funnel event ' + name + ':' + source);
+            }
+            const submitted = puppyInteractions.filter(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest');
+            if (submitted.length !== 1 || syntheticLeads.length !== 2 ||
+                !syntheticLeads.every(data => data.form_type === 'lead' &&
+                  data.cta_source === 'puppy_landing_aria_interest' &&
+                  data.interest_reason === 'Chcem sa informovať o škôlke' &&
+                  data.dog_breed === 'Kríženec'))
+              throw new Error('Synthetic lead must preserve source/breed, recover from error and convert exactly once');
+            await conversionDialog.getByRole('button', { name: 'Close' }).click();
+            await conversionDialog.waitFor({ state: 'hidden' });
+            await page.evaluate(() => window.scrollTo(0, 0));
+            await page.waitForTimeout(120);
           }
           // Shared Slovak Hero CTA: mobile pair, desktop single prominent info CTA.
           // Layout regression 320/375/390/1440 in Chromium and Safari WebKit.
