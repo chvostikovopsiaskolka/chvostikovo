@@ -382,24 +382,30 @@ export function ReviewReasons({
   );
 }
 
-export function Reviews({ reviews = REVIEWS, variant = "default" }: { reviews?: typeof REVIEWS; variant?: "default" | "hero" } = {}) {
+export function Reviews({ reviews = REVIEWS, variant = "default" }: { reviews?: typeof REVIEWS; variant?: "default" | "hero" | "home" } = {}) {
+  const socialProof = (
+    <h2 data-aria-review-proof className="mx-auto flex w-fit max-w-full items-center justify-center gap-1 whitespace-nowrap font-display text-[clamp(9px,2.8vw,16px)] font-bold leading-tight tracking-[-0.02em] text-forest sm:gap-2 sm:text-base">
+      <span>Viac ako 100 spokojných psíkov</span>
+      <span aria-hidden="true" className="text-forest/55">·</span>
+      <span className="font-semibold text-forest/80">⭐ 5 z 5 na Google</span>
+    </h2>
+  );
+  const defaultProof = (
+    <>
+      <h2 className="section-title whitespace-nowrap text-[clamp(14px,4.7vw,36px)] leading-tight">Viac ako 100 spokojných psíkov</h2>
+      <p className="mt-2.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 z 5 na Google</p>
+    </>
+  );
   return (
-    <section id="recenzie" className={"relative scroll-mt-24 " + (variant === "hero" ? "overflow-visible bg-transparent pt-1 pb-12 sm:pt-2 sm:pb-14" : "overflow-hidden bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14")}>
+    <section id="recenzie" className={"relative scroll-mt-24 " + (variant === "hero" ? "overflow-visible bg-transparent pt-1 pb-12 sm:pt-2 sm:pb-14" : variant === "home" ? "overflow-hidden bg-white pt-2 pb-4 lg:bg-secondary/50 lg:pt-8 lg:pb-14" : "overflow-hidden bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14")}>
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
-        {variant === "hero" ? (
-          <h2 data-aria-review-proof className="mx-auto flex w-fit max-w-full items-center justify-center gap-1 whitespace-nowrap font-display text-[clamp(9px,2.8vw,16px)] font-bold leading-tight tracking-[-0.02em] text-forest sm:gap-2 sm:text-base">
-            <span>Viac ako 100 spokojných psíkov</span>
-            <span aria-hidden="true" className="text-forest/55">·</span>
-            <span className="font-semibold text-forest/80">⭐ 5 z 5 na Google</span>
-          </h2>
-        ) : (
+        {variant === "home" ? (
           <>
-            <h2 className="section-title whitespace-nowrap text-[clamp(14px,4.7vw,36px)] leading-tight">Viac ako 100 spokojných psíkov</h2>
-            <p className="mt-2.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 z 5 na Google</p>
+            <div className="lg:hidden">{socialProof}</div>
+            <div className="hidden lg:block">{defaultProof}</div>
           </>
-        )}
-
+        ) : variant === "hero" ? socialProof : defaultProof}
         <ReviewCarousel reviews={reviews} hero={variant === "hero"} />
       </div>
     </section>

@@ -912,6 +912,17 @@ const failures = [];
                 throw new Error('Hero must display exactly one prominent CTA at ' + width);
               const ctaPair = hero.locator('.hero-cta-pair:visible');
               if (width < 1024) {
+                if (url.pathname === '/') {
+                  // Marek approved one centered, glowing CTA; the old CTA pair
+                  // is intentionally removed only from the mobile homepage.
+                  if (await ctaPair.count() || await hero.locator('.hero-cta-secondary:visible').count())
+                    throw new Error('Main mobile Hero must not restore the second CTA');
+                  if (!(await primary.innerText()).includes('Mám záujem'))
+                    throw new Error('Main mobile Hero must offer the centered interest CTA');
+                  const mainCta = await primary.boundingBox();
+                  if (!mainCta || Math.abs(mainCta.x + mainCta.width / 2 - width / 2) > 12)
+                    throw new Error('Main mobile Hero CTA is not centered at ' + width);
+                } else {
                 if (!await ctaPair.isVisible()) throw new Error('Mobile Hero CTA pair missing at ' + width);
                 const shape = await ctaPair.evaluate(el => {
                   const primary = el.querySelector('.hero-cta-primary');
@@ -938,6 +949,8 @@ const failures = [];
                   throw new Error('CTA pair extends past viewport: ' + width);
                 if (shape.labelRight > shape.iconLeft + 1 || shape.iconRight > shape.secondaryRight - 2)
                   throw new Error('CTA label or arrow overlaps: ' + width);
+
+                }
               } else {
                 if (await ctaPair.count() !== 0) throw new Error('Desktop must hide the interest CTA pair');
                 if (!(await primary.innerText()).includes('Viac o škôlke'))
@@ -1160,6 +1173,49 @@ const failures = [];
                 throw new Error('Full dog registration modal must stay centered with inner scrolling: ' + JSON.stringify(applicationFrame));
               await page.keyboard.press('Escape');
               await application.waitFor({ state: 'hidden' });
+
+              // The main website now has its own mobile-only Aria dock. Keep
+              // the paid lead's dock, form and tracking independent.
+              const homeAria = page.locator('[data-home-aria-guide]');
+              await homeAria.waitFor({ state: 'visible' });
+              const homeDock = homeAria.locator('[data-home-aria-dock]');
+              if (await page.locator('#priestory [data-home-mosaic] button').count() < 8)
+                throw new Error('Homepage mobile hygiene mosaic must contain all daycare photos');
+              if (!await page.locator('#home-care-faq').getByText('Pre koho je škôlka určená?').count() ||
+                  !await page.locator('#home-care-faq').getByText(/spravidla nad 15 kg/).count())
+                throw new Error('Homepage early care FAQ lost approved eligibility');
+              if (!await page.locator('#recenzie [data-aria-review-proof]').isVisible())
+                throw new Error('Homepage one-row Google review proof missing');
+              const homeOrder = await page.evaluate(() => {
+                const ids = ['preco-chvostikovo', 'o-nas', 'starostlivost', 'home-care-faq',
+                  'cennik', 'podmienky', 'priestory', 'prva-navsteva', 'home-puppy-section',
+                  'preco', 'faq', 'produkty'];
+                const positions = ids.map(id => document.getElementById(id)?.getBoundingClientRect().top);
+                return positions.every((pos, i) => pos !== undefined &&
+                  (i === 0 || pos >= positions[i - 1] - 4));
+              });
+              if (!homeOrder) throw new Error('Homepage approved mobile section order regressed');
+              await homeDock.getByRole('button', { name: 'Cenník' }).click();
+              const pricingPopup = homeAria.locator('[data-home-aria-panel="pricing"]');
+              await pricingPopup.waitFor({ state: 'visible' });
+              if (await pricingPopup.locator('article').count() !== 2 ||
+                  !await pricingPopup.getByText('Najvýhodnejšie').count())
+                throw new Error('Homepage Aria pricing popup lost original permanentka');
+              await pricingPopup.getByRole('button', { name: 'Zavrieť okno' }).click();
+              await homeDock.getByRole('button', { name: 'Produkty' }).click();
+              const productPopup = homeAria.locator('[data-home-aria-panel="products"]');
+              await productPopup.waitFor({ state: 'visible' });
+              if (await productPopup.locator('a[href^="/"]').count() !== 3)
+                throw new Error('Homepage Aria products popup missing product links');
+              await productPopup.getByRole('button', { name: 'Zavrieť okno' }).click();
+              await homeDock.getByRole('button', { name: 'Prihláška' }).click();
+              const homeApplication = page.getByRole('dialog');
+              await homeApplication.waitFor({ state: 'visible' });
+              if (!await homeApplication.locator('input[name="pes"]').count() ||
+                  await homeApplication.locator('[data-lead-step-form]').count())
+                throw new Error('Home Aria orange application must open the full long form');
+              await page.keyboard.press('Escape');
+              await homeApplication.waitFor({ state: 'hidden' });
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
@@ -1522,7 +1578,8 @@ const failures = [];
               throw new Error('Dog-sitting desktop hero is too tall: ' + dogHeroBox.height);
             }
             await productPage.goto(new URL('/', base).href);
-            await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
+            await productPage.locator('#top h1:visible').first().waitFor({ state: 'visible' });
+            if (width === 390) await productPage.locator('[data-home-aria-dock]').waitFor({ state: 'visible' });
             const homeConsent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
             if (await homeConsent.isVisible()) await homeConsent.click();
             // Contextual FAQ, article CTA and visibly readable hygiene cards.
@@ -1534,9 +1591,25 @@ const failures = [];
             }
             const careToggle = productPage.locator('#starostlivost').getByRole('button', { name: 'Ako dbáme na bezpečnosť psíkov?' });
             await careToggle.click();
-            if (await careToggle.getAttribute('aria-expanded') !== 'true' ||
-                !(await productPage.locator('#starostlivost').getByText('neustálym dohľadom', { exact: false }).count())) {
-              throw new Error('Care safety FAQ must open with its detailed answer');
+            // React expands the answer asynchronously in mobile Safari. Validate
+            // the visible panel and its real content together, not an immediate
+            // getByText count that can race the WebKit render.
+            try {
+              await productPage.waitForFunction(() => {
+                const section = document.getElementById('starostlivost');
+                const button = [...(section?.querySelectorAll('button') ?? [])].find(
+                  el => el.textContent?.includes('Ako dbáme na bezpečnosť psíkov?'));
+                const answer = button?.parentElement?.querySelector('div[id]');
+                return button?.getAttribute('aria-expanded') === 'true' &&
+                  !!answer && answer.getBoundingClientRect().height > 0 &&
+                  !!answer.textContent?.includes('neustálym dohľadom');
+              }, null, { timeout: 5000 });
+            } catch {
+              const detail = await careToggle.evaluate(button => ({
+                expanded: button.getAttribute('aria-expanded'),
+                answer: button.parentElement?.querySelector('div[id]')?.textContent?.slice(0, 230) ?? 'no answer node',
+              }));
+              throw new Error('Care safety FAQ must open with its detailed answer: ' + JSON.stringify(detail));
             }
             const careFaq = careToggle.locator('xpath=../..');
             const careLayout = productPage.locator('#starostlivost > .relative.z-10');
@@ -1547,9 +1620,12 @@ const failures = [];
             const repeatedTitle = careFaq.getByRole('heading', { name: 'Ako zabezpečujete bezpečnosť psíkov v škôlke?' });
             if (await repeatedTitle.count()) throw new Error('Care FAQ repeats a second heading inside its answer');
             const careAnswer = careToggle.locator('xpath=..').locator('div[id]').first();
-            if (!await careAnswer.getByText('Bezpečnosť začína už vstupnou návštevou.', { exact: false }).count()) {
-              throw new Error('Care FAQ answer missing after removing duplicated heading');
-            }
+            // WebKit may paint this React-expanded answer after the click handler returns.
+            // Wait for the actual answer (not an arbitrary timeout or a suppressed check).
+            await careAnswer.getByText('Bezpečnosť začína už vstupnou návštevou.', { exact: false })
+              .waitFor({ state: 'visible', timeout: 3000 }).catch(() => {
+                throw new Error('Care FAQ answer missing after removing duplicated heading');
+              });
             const whyArticle = productPage.locator('#preco a[href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"]');
             if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
             const whyCta = productPage.locator('#preco').getByRole('button', { name: 'Chcem prihlásiť psíka' });
@@ -1558,37 +1634,26 @@ const failures = [];
             if (!ctaBox || !phoneBox || Math.abs(ctaBox.y + ctaBox.height / 2 - phoneBox.y - phoneBox.height / 2) > 5) {
               throw new Error('Interest CTA and round phone action must sit in the same row');
             }
-            const mobileHygiene = productPage.locator('#priestory article[aria-label^="Čistota priestorov"]');
-            const desktopHygiene = productPage.locator('#priestory article:not([aria-label])');
-            if (await mobileHygiene.count() !== 3 || await desktopHygiene.count() !== 3) {
-              throw new Error('The hygiene section needs three carousel slides and three desktop cards');
-            }
+            const mobileHygiene = productPage.locator('#priestory [data-home-mosaic] article');
+            const desktopHygiene = productPage.locator('#priestory .mt-10 .grid article');
+            if (await mobileHygiene.count() !== 3 || await desktopHygiene.count() !== 3)
+              throw new Error('The homepage must keep three mobile mosaic and three desktop hygiene cards');
             for (let card = 0; card < 3; card++) {
               if (await mobileHygiene.nth(card).isVisible() !== (width === 390) ||
-                  await desktopHygiene.nth(card).isVisible() !== (width === 1440)) {
-                throw new Error('Hygiene information is not openly readable at viewport ' + width);
-              }
-              const visibleCard = (width === 390 ? mobileHygiene : desktopHygiene).nth(card);
-              const titleLayout = await visibleCard.evaluate(node => {
-                const title = node.querySelector('h3, h4');
-                const icon = title?.previousElementSibling;
-                const row = title?.parentElement;
-                const titleBox = title?.getBoundingClientRect();
-                const iconBox = icon?.getBoundingClientRect();
-                return {
-                  flexRow: Boolean(row && icon && icon.parentElement === row && getComputedStyle(row).display === 'flex'),
-                  centerDiff: titleBox && iconBox
-                    ? Math.abs((titleBox.top + titleBox.height / 2) - (iconBox.top + iconBox.height / 2)) : 999,
-                };
-              });
-              if (!titleLayout.flexRow || titleLayout.centerDiff > 9) {
-                throw new Error('Hygiene emoji and heading must share one aligned row: ' + width + ' ' + card);
-              }
+                  await desktopHygiene.nth(card).isVisible() !== (width === 1440))
+                throw new Error('Hygiene information is not readable on the correct viewport: ' + width);
               if (width === 390) {
-                const label = await mobileHygiene.nth(card).locator('p').first().innerText();
-                if (label.includes((card + 1) + '/3')) {
-                  throw new Error('Hygiene mobile card must not display a slide counter: ' + label);
-                }
+                const title = ['Germicídna lampa s ozónom', 'Každodenná čistota', 'Pravidelná dezinfekcia'][card];
+                if (!(await mobileHygiene.nth(card).getByRole('heading', { name: title }).count()))
+                  throw new Error('Mobile hygiene mosaic order changed at card ' + card);
+              } else {
+                const layout = await desktopHygiene.nth(card).evaluate(node => {
+                  const title = node.querySelector('h3, h4'), icon = title?.previousElementSibling;
+                  const row = title?.parentElement, a = title?.getBoundingClientRect(), b = icon?.getBoundingClientRect();
+                  return { flex: Boolean(row && icon && icon.parentElement === row && getComputedStyle(row).display === 'flex'),
+                    centerDiff: a && b ? Math.abs((a.top+a.height/2)-(b.top+b.height/2)) : 999 };
+                });
+                if (!layout.flex || layout.centerDiff > 9) throw new Error('Desktop hygiene emoji alignment changed');
               }
             }
             if (!(await productPage.locator('#priestory').getByText('Germicídna lampa s ozónom').count())) {
@@ -1634,33 +1699,18 @@ const failures = [];
               if (instagramBox.y <= dayBox.y) throw new Error('Desktop footer socials must be below opening hours');
             }
             if (width === 390) {
-              await productPage.locator('.mobile-dock').getByRole('button', { name: 'Otvoriť menu' }).click();
-              const menu = productPage.locator('.mobile-dock-menu');
-              await menu.waitFor({ state: 'visible' });
-              const actions = menu.locator('.mobile-dock-menu-actions a');
-              if (await actions.count() !== 4) throw new Error('Mobile menu must have exactly four icon actions');
-              const hrefs = await Promise.all([0, 1, 2, 3].map(index => actions.nth(index).getAttribute('href')));
-              if (!hrefs[0]?.startsWith('tel:') || hrefs[1] !== '/en/dog-daycare-kosice' ||
-                !hrefs[2]?.startsWith('https://www.instagram.com/') || !hrefs[3]?.startsWith('https://www.facebook.com/')) {
-                throw new Error('Mobile menu phone, EN, Instagram and Facebook destinations incorrect');
-              }
-              if (!await actions.nth(0).getAttribute('aria-label') || !await actions.nth(2).getAttribute('aria-label')) {
-                throw new Error('Mobile icon links require accessible names');
-              }
-              const actionBoxes = await Promise.all([0, 1, 2, 3].map(index => actions.nth(index).boundingBox()));
-              if (actionBoxes.some(box => !box || box.width < 40 || box.height < 44) ||
-                actionBoxes.some(box => Math.abs(box.y - actionBoxes[0].y) > 5)) {
-                throw new Error('Mobile menu four icon actions must fit in one tappable row');
-              }
-              await menu.getByRole('button', { name: 'Zavrieť menu' }).click();
-              await menu.waitFor({ state: 'hidden' });
+              const homeDock = productPage.locator('[data-home-aria-dock]');
+              if (await homeDock.locator('nav button').count() !== 5 ||
+                  !await homeDock.getByRole('button', { name: 'Prihláška' }).count())
+                throw new Error('Homepage Aria dock must have five accessible actions');
             }
             const sectionOrder = await productPage.evaluate(() => {
               const faq = document.querySelector('main #faq');
               const products = document.querySelector('main #produkty');
               const cards = [...(products?.querySelectorAll('article a[href]') ?? [])].map(el => el.getAttribute('href'));
+              const sections = [...document.querySelectorAll('main section[id]')];
               return {
-                directlyAfterFaq: Boolean(faq && products && faq.nextElementSibling === products),
+                directlyAfterFaq: Boolean(faq && products && sections.indexOf(products) === sections.indexOf(faq) + 1),
                 heading: products?.querySelector('h2')?.textContent?.trim(),
                 count: document.querySelectorAll('main #produkty').length,
                 cards,
@@ -1680,14 +1730,13 @@ const failures = [];
               throw new Error('Homepage must preserve both existing product detail links');
             }
             if (width === 390) {
-              const dock = productPage.locator('.mobile-dock[data-variant="main"]');
-              const productsLink = dock.getByRole('link', { name: 'Produkty', exact: true });
-              if (await productsLink.count() !== 1 || await productsLink.getAttribute('href') !== '/produkty') {
-                throw new Error('Main mobile dock Products link must go to /produkty');
-              }
-              if (await dock.getByText('Priestory', { exact: true }).count()) {
-                throw new Error('Retired Spaces shortcut should not occupy mobile dock');
-              }
+              const homeDock = productPage.locator('[data-home-aria-dock]');
+              await homeDock.getByRole('button', { name: 'Produkty' }).click();
+              const productsPanel = productPage.locator('[data-home-aria-panel="products"]');
+              await productsPanel.waitFor({ state: 'visible' });
+              if (await productsPanel.locator('a[href^="/"]').count() !== 3)
+                throw new Error('Homepage Aria product panel must offer two products and catalogue');
+              await productsPanel.getByRole('button', { name: 'Zavrieť okno' }).click();
             }
             for (const route of ['/stojan-na-misky-pre-psa', '/target-na-cvicenie-pre-psov']) {
               const card = productPage.locator('#produkty article a').filter({ has: productPage.locator('h3') }).filter({ has: productPage.locator('img') }).filter({ hasText: route.includes('stojan') ? 'Drevený stojan' : 'Target na cvičenie' }).first();
@@ -1695,7 +1744,8 @@ const failures = [];
               if (!box || Math.abs(box.width - box.height) > 3) throw new Error('Homepage product card must be square: ' + route);
             }
             if (width === 390) {
-              await productPage.locator('.mobile-dock[data-variant="main"]').getByRole('link', { name: 'Produkty', exact: true }).click();
+              await productPage.locator('[data-home-aria-dock]').getByRole('button', { name: 'Produkty' }).click();
+              await productPage.locator('[data-home-aria-panel="products"]').getByRole('link', { name: 'Všetky produkty' }).click();
               await productPage.waitForURL(/\/produkty\/?$/);
               // Consent is a real blocking dialog; accept only the necessary cookies
               // before interacting, never force-click through the overlay.

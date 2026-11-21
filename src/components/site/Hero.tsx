@@ -17,7 +17,7 @@ function scrollToWhyChvostikovo() {
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
 }
 
-export function Hero({ background, learnMoreHref }: { background?: ReactNode; learnMoreHref?: string }) {
+export function Hero({ background, learnMoreHref, homepageMobile = false }: { background?: ReactNode; learnMoreHref?: string; homepageMobile?: boolean }) {
   const [interestOpen, setInterestOpen] = useState(false);
   const [interestSource, setInterestSource] = useState("home_hero_interest_mobile");
   function openInterest(source: string) {
@@ -31,7 +31,40 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
       {background ?? <PawTrailBackground />}
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
-        {/* Mobile layout */}
+        {/* Other routes keep their previously approved mobile hero. */}
+        {homepageMobile ? (
+
+        <div className="lg:hidden">
+          <p className="mx-auto mt-1 font-display text-[9px] font-bold uppercase tracking-[0.1em] text-coral-dark min-[390px]:text-[10px]">
+            Denná starostlivosť o stredných a veľkých psíkov
+          </p>
+
+          <h1 className="mx-auto mt-4 max-w-[370px] font-display text-[clamp(23px,6.2vw,32px)] leading-[1.08] tracking-[-0.035em] text-forest">
+            Psia škôlka v Košiciach
+          </h1>
+
+          <div className="mx-auto mt-4 max-w-xl text-forest">
+            <p className="font-display text-[14px] font-bold tracking-[-0.02em] min-[390px]:text-[15px]">
+              Váš psík už nemusí tráviť deň sám doma.
+            </p>
+            <p className="mx-auto mt-1 max-w-[34rem] text-[14px] font-medium leading-[1.5] text-forest/90 min-[390px]:text-[15px]">
+              Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným dohľadom.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-6 flex justify-center pb-4">
+            <button
+              type="button"
+              onClick={() => openInterest("home_hero_interest_mobile")}
+              className="hero-cta-primary shadow-[0_0_24px_rgba(238,119,61,0.32)]"
+            >
+              Mám záujem
+            </button>
+          </div>
+        </div>
+
+        ) : (
+
         <div className="lg:hidden">
           <p className="mx-auto mt-1 min-[360px]:whitespace-nowrap font-display text-[8.5px] font-bold uppercase tracking-[0.12em] text-coral-dark min-[390px]:mt-2 min-[390px]:text-[9px] min-[430px]:text-[10px] sm:text-sm sm:tracking-[0.16em]">
             Denná starostlivosť o stredných a veľkých psíkov
@@ -88,6 +121,8 @@ export function Hero({ background, learnMoreHref }: { background?: ReactNode; le
 
           <InfoTicker className="mt-4 mb-0 w-screen mx-[calc((100%-100vw)/2)] min-[390px]:mt-5" compact />
         </div>
+
+        )}
 
         {/* Desktop layout */}
         <div className="hidden lg:grid lg:min-h-[700px] lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">

@@ -122,7 +122,7 @@ export function FirstVisit() {
   );
 }
 
-export function Pricing({ interestMode = false }: { interestMode?: boolean } = {}) {
+export function Pricing({ interestMode = false, homeMobile = false }: { interestMode?: boolean; homeMobile?: boolean } = {}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -139,11 +139,11 @@ export function Pricing({ interestMode = false }: { interestMode?: boolean } = {
           </p>
         </div>
 
-        <div className="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2">
+        <div className={homeMobile ? "mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-3 sm:gap-5" : "mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2"}>
           {PRICING.map((p) => (
             <article
               key={p.name}
-              className={`relative flex flex-col items-center rounded-3xl p-6 text-center shadow-card ${
+              className={`relative flex flex-col items-center rounded-3xl ${homeMobile ? "px-2.5 py-5 sm:p-6" : "p-6"} text-center shadow-card ${
                 p.highlight ? "bg-forest text-cream ring-2 ring-coral" : "bg-card"
               }`}
             >
@@ -156,7 +156,7 @@ export function Pricing({ interestMode = false }: { interestMode?: boolean } = {
                 {p.name}
               </h3>
               <p
-                className={`mt-3 font-display text-4xl font-bold ${
+                className={`mt-3 font-display ${homeMobile ? "text-[clamp(23px,6.5vw,36px)] sm:text-4xl" : "text-4xl"} font-bold ${
                   p.highlight ? "text-cream" : "text-coral"
                 }`}
               >
