@@ -139,6 +139,35 @@ const failures = [];
               await page.evaluate(() => window.scrollTo(0, 0));
               const aria = page.locator('[data-aria-guide]');
               await aria.waitFor({ state: 'visible' });
+              // Calm first fold: no inline form in the opening viewport, and
+              // the compact Google proof must remain a single row at 320–430px.
+              const firstFold = await page.evaluate(() => {
+                const form = document.getElementById('aria-hero-form');
+                const reviews = document.getElementById('recenzie');
+                const summary = document.querySelector('[data-aria-hero-summary]');
+                const proof = reviews?.querySelector('[data-aria-review-proof]');
+                const hero = document.querySelector('section.hero-safe-top');
+                const headline = hero?.querySelector('h1');
+                if (!form || !reviews || !summary || !proof || !hero || !headline) return { missing: true };
+                const rect = proof.getBoundingClientRect();
+                const formTop = form.getBoundingClientRect().top;
+                const lineHeight = parseFloat(getComputedStyle(proof).lineHeight);
+                return {
+                  missing: false,
+                  formTop,
+                  viewportHeight: window.innerHeight,
+                  proofLeft: rect.left,
+                  proofRight: rect.right,
+                  proofHeight: rect.height,
+                  lineHeight,
+                  textOverflows: proof.scrollWidth > proof.clientWidth + 2,
+                };
+              });
+              if (firstFold.missing || firstFold.formTop < firstFold.viewportHeight - 2 ||
+                  firstFold.proofLeft < -1 || firstFold.proofRight > width + 1 ||
+                  firstFold.textOverflows || firstFold.proofHeight > firstFold.lineHeight * 1.55)
+                throw new Error('Aria first fold form or Google proof layout regressed at ' + width + ': ' + JSON.stringify(firstFold));
+
               await page.locator('[data-aria-guide][data-intro="true"]').waitFor({ state: 'visible' });
               if (!await aria.locator('[data-aria-message]').getByText(/Ahoj, volám sa Aria\./).count())
                 throw new Error('Aria single-line greeting missing at ' + width);
@@ -417,15 +446,23 @@ const failures = [];
                 const reviews = document.getElementById('recenzie');
                 const form = document.getElementById('aria-hero-form');
                 const team = document.getElementById('aria-caretakers');
-                if (!reviews || !form || !team || !reviews.parentElement || reviews.parentElement !== form.parentElement) return false;
+                const leadHero = document.querySelector('section.hero-safe-top');
+                const heroHeading = leadHero?.querySelector('h1');
+                const summary = document.querySelector('[data-aria-hero-summary]');
+                const benefits = summary?.querySelector('[data-hero-benefits]');
+                const proof = reviews?.querySelector('[data-aria-review-proof]');
+                if (!reviews || !form || !team || !leadHero || !heroHeading || !summary || !benefits || !proof ||
+                    reviews.parentElement !== leadHero || summary.parentElement !== leadHero.parentElement ||
+                    form.parentElement !== summary.parentElement) return false;
                 const follows = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
                 const heading = team.querySelector('h2');
                 const photo = team.querySelector('img');
                 const copy = team.querySelector('p');
-                return follows(reviews, form) && follows(form, team) &&
-                  !!heading && !!photo && !!copy && follows(heading, photo) && follows(photo, copy);
+                return follows(heroHeading, reviews) && follows(reviews, summary) && follows(benefits, form) &&
+                  follows(form, team) && !!heading && !!photo && !!copy &&
+                  follows(heading, photo) && follows(photo, copy);
               });
-              if (!hasHeroFormAndCaretakerOrder) throw new Error('Hero form and caretaker headline/photo/text order changed');
+              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria hero/reviews/benefits/form and caretaker section order changed');
               const hero = page.locator('#aria-hero-form');
               if (!await hero.getByRole('heading', { name: 'Chceli by ste sa informovať o škôlke?' }).count())
                 throw new Error('New compact hero form heading missing');
