@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
+import { HomeAriaDock } from "@/components/site/HomeAriaDock";
+import { HomeCareFaq } from "@/components/site/HomeCareFaq";
 import { Hero } from "@/components/site/Hero";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
@@ -72,31 +74,33 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      <main>
-        <Hero />
-        <div className="hidden lg:block">
-          <InfoTicker />
-        </div>
-        <Reviews />
-        <ReviewReasons variant="home" withVideo />
-        <DaycarePhotoCarousel />
-        <Care showEmbeddedFriendship={false} showInterest={false} />
-        <Pricing interestMode />
-        <FriendshipInterest />
-        <Gallery />
-        <FirstVisit />
-        <Why />
-        <InquirySection />
-        <Requirements showContextFaq />
-        <HomePuppyChecker />
-        <Faq />
-        <ProductSection />
-        <About />
-        <Partners />
-        <UsefulInfo />
-        <PhotoStrip />
-        <Contact />
+      <Header hideMobileDock />
+      <HomeAriaDock />
+      {/* A single copy of every section: mobile order is CSS-only, desktop order
+          and desktop section markup remain the original published sequence. */}
+      <main className="flex flex-col lg:block">
+        <div className="order-0 lg:contents"><Hero homepageMobile /></div>
+        <div className="hidden lg:block"><InfoTicker /></div>
+        <div className="order-1 lg:contents"><Reviews variant="home" /></div>
+        <div className="order-2 lg:contents"><ReviewReasons variant="home" withVideo /></div>
+        <div className="order-4 lg:contents"><DaycarePhotoCarousel /></div>
+        <div className="order-5 lg:contents"><Care showEmbeddedFriendship={false} showInterest={false} /></div>
+        <div className="order-6 lg:hidden"><HomeCareFaq /></div>
+        <div className="order-7 lg:contents"><Pricing interestMode homeMobile /></div>
+        <div className="order-9 lg:contents"><FriendshipInterest /></div>
+        <div className="order-11 lg:contents"><Gallery mobileMosaic /></div>
+        <div className="order-12 lg:contents"><FirstVisit /></div>
+        <div className="order-14 lg:contents"><Why /></div>
+        <div className="order-10 lg:contents"><InquirySection /></div>
+        <div className="order-8 lg:contents"><Requirements showContextFaq /></div>
+        <div id="home-puppy-section" className="order-13 lg:contents"><HomePuppyChecker /></div>
+        <div className="order-15 lg:contents"><Faq /></div>
+        <div className="order-16 lg:contents"><ProductSection /></div>
+        <div className="order-3 lg:contents"><About homeMobile /></div>
+        <div className="order-17 lg:contents"><Partners /></div>
+        <div className="order-18 lg:contents"><UsefulInfo /></div>
+        <div className="order-19 lg:contents"><PhotoStrip /></div>
+        <div className="order-20 lg:contents"><Contact /></div>
       </main>
       <Footer />
     </div>
