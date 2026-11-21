@@ -18,3 +18,13 @@ test('Windows PowerShell 5.1 signing handoff stays strictly ASCII-safe', () => {
   assert.match(script, /npx\.cmd cap open android/);
   assert.doesNotMatch(script, /Create New.*&/);
 });
+
+test('Firebase handoff automatically reuses verified older Android configuration', () => {
+  assert.match(script, /Test-ExistingFirebase/);
+  assert.match(script, /"v431", "v412", "v418", "v407"/);
+  assert.match(script, /chvostikovo-android-v403/);
+  assert.match(script, /package_name -eq "sk\.chvostikovo\.app"/);
+  assert.match(script, /Copy-Item -LiteralPath \$firebaseSource -Destination \$firebaseTarget/);
+  assert.match(script, /PreflightOnly/);
+  assert.doesNotMatch(script, /OpenFileDialog|Read-Host/);
+});

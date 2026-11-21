@@ -76,3 +76,28 @@ jobs:
             exit 1
           }
           Write-Host 'PowerShell 5.1 parser PASS'
+      - name: Reuse historical Firebase config on Windows PowerShell 5.1 (no real credentials)
+        shell: powershell
+        run: |
+          $originalProfile = $env:USERPROFILE
+          $fixtureHome = Join-Path $env:RUNNER_TEMP ('chvo-firebase-fixture-' + [guid]::NewGuid().ToString('N'))
+          $target = 'mobile/android/app/google-services.json'
+          try {
+            if (Test-Path -LiteralPath $target) { throw 'CI must not contain an existing Firebase file' }
+            $env:USERPROFILE = $fixtureHome
+            $key = Join-Path $fixtureHome 'Documents/Chvostikovo-Keys/chvostikovo-upload.jks'
+            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $key) | Out-Null
+            Set-Content -LiteralPath $key -Encoding Ascii -Value 'CI fixture, not a real keystore'
+            $older = Join-Path $fixtureHome 'Chvostikovo-Android-v412/mobile/android/app/google-services.json'
+            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $older) | Out-Null
+            Set-Content -LiteralPath $older -Encoding Ascii -Value '{"client":[{"client_info":{"android_client_info":{"package_name":"sk.chvostikovo.app"}}}]}'
+            & '.\mobile\Prepare-Play-v435.ps1' -PreflightOnly
+            if (-not (Test-Path -LiteralPath $target)) { throw 'Historical Firebase copy failed' }
+            $copied = Get-Content -LiteralPath $target -Raw | ConvertFrom-Json
+            if ($copied.client[0].client_info.android_client_info.package_name -ne 'sk.chvostikovo.app') { throw 'Firebase package differs' }
+            Write-Host 'PASS: known prior Firebase v412 reused without file dialog or new setup'
+          } finally {
+            $env:USERPROFILE = $originalProfile
+            if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Force }
+            if (Test-Path -LiteralPath $fixtureHome) { Remove-Item -LiteralPath $fixtureHome -Recurse -Force }
+          }

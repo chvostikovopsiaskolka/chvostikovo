@@ -1,6 +1,6 @@
 # Chvostikovo Android v435: reproducible local Firebase + Android Studio handoff.
 # This script NEVER signs, uploads or changes Google Play, and it never reads passwords.
-param([string]$FirebaseJson = "")
+param([string]$FirebaseJson = "", [switch]$PreflightOnly)
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
@@ -16,37 +16,51 @@ $keystore = Join-Path $env:USERPROFILE "Documents\Chvostikovo-Keys\chvostikovo-u
 if (-not (Test-Path -LiteralPath $keystore -PathType Leaf)) {
   throw "Nenasiel som povodny upload keystore: $keystore. Nevytvaraj novy podpisovy kluc."
 }
+# Private Firebase config is never in git; reuse the same previously working local file.
+# Only named historical Chvostikovo checkouts are consulted (never scan all drives).
+function Test-ExistingFirebase {
+  param([string]$Candidate)
+  if (-not (Test-Path -LiteralPath $Candidate -PathType Leaf)) { return $false }
+  try {
+    $candidateConfig = Get-Content -LiteralPath $Candidate -Raw | ConvertFrom-Json
+    $matching = @($candidateConfig.client | Where-Object {
+      $_.client_info.android_client_info.package_name -eq "sk.chvostikovo.app"
+    })
+    return ($matching.Count -gt 0)
+  } catch { return $false }
+}
+
 $firebaseTarget = Join-Path $mobile "android\app\google-services.json"
 if (-not (Test-Path -LiteralPath $firebaseTarget -PathType Leaf)) {
-  if (-not $FirebaseJson) {
-    try {
-      Add-Type -AssemblyName System.Windows.Forms
-      $dialog = New-Object System.Windows.Forms.OpenFileDialog
-      $dialog.Title = "Vyber POVODNY Firebase google-services.json z posledneho funkcneho Android projektu"
-      $dialog.Filter = "Firebase konfiguracia (google-services.json)|google-services.json|JSON (*.json)|*.json"
-      if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-        $FirebaseJson = $dialog.FileName
-      }
-      $dialog.Dispose()
-    } catch {
-      Write-Host "Graficky vyber nebol dostupny." -ForegroundColor Yellow
+  $candidates = @()
+  if ($FirebaseJson) {
+    $candidates += $FirebaseJson.Trim('"').Trim("'")
+  } else {
+    foreach ($oldVersion in @("v431", "v412", "v418", "v407")) {
+      $candidates += Join-Path $env:USERPROFILE "Chvostikovo-Android-$oldVersion\mobile\android\app\google-services.json"
     }
-    if (-not $FirebaseJson) {
-      $FirebaseJson = Read-Host "Zadaj lokalnu cestu k povodnemu google-services.json"
+    $candidates += Join-Path $env:USERPROFILE ".codex\visualizations\2026\10\28\01a182ee-0d2d-74a3-b1d6-12d8193cbac2\chvostikovo-android-v403\mobile\android\app\google-services.json"
+  }
+  $firebaseSource = $null
+  foreach ($candidate in $candidates) {
+    if (Test-ExistingFirebase -Candidate $candidate) {
+      $firebaseSource = $candidate
+      break
     }
   }
-  $FirebaseJson = $FirebaseJson.Trim('"').Trim("'")
-  if (-not (Test-Path -LiteralPath $FirebaseJson -PathType Leaf)) {
-    throw "Povodny Firebase JSON neexistuje: $FirebaseJson"
+  if (-not $firebaseSource) {
+    if ($FirebaseJson) { throw "Zadany Firebase subor neexistuje alebo nepatri k sk.chvostikovo.app: $FirebaseJson" }
+    throw "Povodny Firebase google-services.json sa nenasiel v znamych Android v431/v412/v418/v407/v403 priecinkoch. Nespustaj novy Firebase setup."
   }
-  Copy-Item -LiteralPath $FirebaseJson -Destination $firebaseTarget -Force
+  Copy-Item -LiteralPath $firebaseSource -Destination $firebaseTarget
+  Write-Host "Firebase: povodny konfiguracny subor prevzaty automaticky z lokalneho Android projektu." -ForegroundColor Green
 }
-$config = Get-Content -LiteralPath $firebaseTarget -Raw | ConvertFrom-Json
-$matchingClients = @($config.client | Where-Object {
-  $_.client_info.android_client_info.package_name -eq "sk.chvostikovo.app"
-})
-if ($matchingClients.Count -lt 1) {
-  throw "Nespravny Firebase projekt: google-services.json neobsahuje Android package sk.chvostikovo.app."
+if (-not (Test-ExistingFirebase -Candidate $firebaseTarget)) {
+  throw "Nespravny Firebase google-services.json: neobsahuje package sk.chvostikovo.app."
+}
+if ($PreflightOnly) {
+  Write-Host "Firebase a povodny keystore: lokalny preflight PASS (bez buildu a podpisu)." -ForegroundColor Green
+  return
 }
 if (-not (Get-Command npm.cmd -ErrorAction SilentlyContinue) -or
     -not (Get-Command npx.cmd -ErrorAction SilentlyContinue)) {

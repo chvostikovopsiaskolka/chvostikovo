@@ -7,6 +7,8 @@
 - **CI vytvára iba debug APK a NEPODPÍSANÝ AAB bez súkromného Firebase JSON; tento AAB nesmieš uploadovať do Google Play.** Na produkčný podpis používaj výhradne nový checkout a originálny lokálny Firebase JSON.
 - Android signing/build-only PR zostáva **DRAFT: NEZLUČOVAŤ do customer-portal-production**. Webová PWA na Verceli a Supabase backend sa tým nemenia.
 
+**Firebase z uz pouziteho Android projektu (opravene 21.11):** podpisovy skript teraz najprv skontroluje existujuci `mobile/android/app/google-services.json`, potom automaticky hladá v znamych lokalnych checkoutoch `$HOME\Chvostikovo-Android-v431`, `$HOME\Chvostikovo-Android-v412`, `$HOME\Chvostikovo-Android-v418`, `$HOME\Chvostikovo-Android-v407` a v povodnom `v403` pod `$HOME\.codex\visualizations`. Pred kopirovanim vzdy overi `sk.chvostikovo.app`. **Ziadny dalsi vyber okna, novy Firebase projekt ani novy JSON**; ak neexistuje ziadny overeny stary subor, skonci bez podpisu s jasnou chybou. `-FirebaseJson` zostava mozny len pre explicitne zadanu lokalnu cestu. CI navyse overuje automaticke prevzatie z fiktivneho v412 checkoutu na Windows PowerShell 5.1 bez realneho Firebase suboru, hesiel alebo podpisu.
+
 **Windows PowerShell 5.1 (oprava 21.11):** predchadzajuca verzia `Prepare-Play-v435.ps1` bola UTF-8 bez BOM s diakritikou, co na starsom Windows PowerShell rozbilo parsovanie uvodzoviek. Oprava ponechava obsah ASCII-only; v CI je novy test kodovania a skutocny Windows PowerShell 5.1 parser test. Ak uz je vetva naklonovana, NEKLONUJ znovu, pouzi:
 ```powershell
 cd "$HOME\Chvostikovo-Android-v435"
