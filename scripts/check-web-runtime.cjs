@@ -147,15 +147,37 @@ const failures = [];
 
               if (url.pathname === '/test-aria/') {
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-welcome.png') });
-                const heading = page.locator('#aria-hero-form h2');
-                const bubbleTop = await comicBubble.evaluate(el => el.getBoundingClientRect().top);
-                await heading.evaluate((el, targetTop) =>
-                  window.scrollTo(0, window.scrollY + el.getBoundingClientRect().top - (targetTop + 12)),
-                  bubbleTop);
+                // On short pages the heading may already sit safely above
+                // the dock. Align the next visible form control with the
+                // bubble to exercise a *real* collision, never a negative
+                // scroll position that the browser silently clamps to zero.
+                const selected = await page.evaluate(() => {
+                  const speech = document.querySelector('[data-aria-speech]').getBoundingClientRect();
+                  const targets = [...document.querySelectorAll(
+                    '#aria-hero-form h2, #aria-hero-form label, #aria-hero-form button, #aria-hero-form input'
+                  )].filter(el => el.getBoundingClientRect().width > 0 &&
+                    el.getBoundingClientRect().top > speech.top + 20);
+                  const target = targets[0];
+                  if (!target) return false;
+                  target.setAttribute('data-aria-overlap-target', 'true');
+                  window.scrollTo(0, window.scrollY + target.getBoundingClientRect().top - (speech.top + 12));
+                  return true;
+                });
+                if (!selected) throw new Error('Cannot find a visible form control to test speech clearance');
                 await page.waitForTimeout(230);
-                if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'true')
-                  throw new Error('Aria must hide speech when the contact heading would be covered at ' + width);
-                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-heading-clear.png') });
+                const clearance = await page.evaluate(() => {
+                  const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
+                  const b = document.querySelector('[data-aria-overlap-target]').getBoundingClientRect();
+                  return {
+                    overlap: a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top,
+                    suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed,
+                    targetTop: Math.round(b.top), speechTop: Math.round(a.top)
+                  };
+                });
+                if (!clearance.overlap) throw new Error('Clearance setup did not overlap a real form control: ' + JSON.stringify(clearance));
+                if (clearance.suppressed !== 'true')
+                  throw new Error('Aria must hide speech over contact form controls: ' + JSON.stringify(clearance));
+                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-clear.png') });
                 await page.evaluate(() => window.scrollTo(0, 0));
                 await page.waitForTimeout(170);
                 if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
