@@ -190,13 +190,13 @@ export function AriaPreviewPage() {
           {/* Fill the former empty Aria breathing room with two real photos from
               the moving gallery. Keep the enquiry below the initial viewport,
               while leaving Aria fixed above the bottom dock. Desktop now also shows the photos. */}
-          <div data-aria-intro-space className="relative z-10 mx-auto flex min-h-[148px] max-h-[166px] w-full max-w-3xl flex-[0.45] items-center px-4 py-2 sm:min-h-[110px] sm:max-h-[150px] sm:px-0 sm:py-0 lg:max-w-4xl lg:min-h-[148px] lg:max-h-[166px] lg:flex-[0.3]">
+          <div data-aria-intro-space className="relative z-10 mx-auto flex min-h-[148px] max-h-[166px] w-full max-w-3xl flex-[0.45] items-center px-4 py-2 sm:min-h-[110px] sm:max-h-[150px] sm:px-0 sm:py-0 lg:max-w-4xl lg:min-h-[268px] lg:max-h-[286px] lg:flex-[0.3]">
             <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:gap-4">
               {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
                 <button type="button" key={photo.src} data-aria-review-photo={index + 1}
                   aria-label={`Zobraziť fotografiu: ${photo.alt}`}
                   onClick={() => setReviewPhotoOpen(index)}
-                  className="group relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[138px] lg:h-[156px]">
+                  className="group relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[138px] lg:h-[260px]">
                   <img src={photo.src} alt={photo.alt} width={672} height={896} loading="lazy" decoding="async"
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
                 </button>
@@ -227,13 +227,13 @@ export function AriaPreviewPage() {
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-5xl px-4">
             <h2 className="section-title mb-5 whitespace-nowrap text-center text-[clamp(12px,3.65vw,34px)] leading-tight tracking-[-0.025em]">Kto sa bude starať o vášho psíka?</h2>
-            <div className="grid items-center gap-5 md:grid-cols-2 md:gap-10">
-              <div className="min-w-0">
+            <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 sm:gap-6">
+              <div className="w-full max-w-[440px]">
                 <img
                   src={teamPhoto}
                   alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
                   loading="lazy"
-                  className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72"
+                  className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72 lg:h-[310px]"
                 />
                 <div data-hero-benefits className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:gap-2 lg:max-w-none lg:flex-wrap lg:gap-2">
                   {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
@@ -247,7 +247,7 @@ export function AriaPreviewPage() {
                   ))}
                 </div>
               </div>
-              <p className="text-sm leading-relaxed text-forest/75 sm:text-base">
+              <p className="mx-auto max-w-[680px] text-center text-sm leading-relaxed text-forest/75 sm:text-base">
                 Aj my sme <strong className="font-bold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov <strong className="font-bold text-forest">spoznávame, rešpektujeme ich potreby</strong> a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
               </p>
             </div>
@@ -256,8 +256,8 @@ export function AriaPreviewPage() {
 
         <section id="aria-about" className="relative bg-card py-9 sm:py-12">
           <div className="mx-auto max-w-4xl px-4">
-            <h2 className="section-title text-center text-2xl sm:text-3xl">Viac o nás a našej škôlke</h2>
-            <div className="mx-auto mt-5 max-w-3xl space-y-4 text-sm leading-relaxed text-forest/80 sm:text-base">
+            <h2 className="section-title text-center text-lg sm:text-xl">Viac o nás a našej škôlke</h2>
+            <div className="mx-auto mt-5 max-w-3xl space-y-4 text-center text-sm leading-relaxed text-forest/80 sm:text-base">
               {ABOUT_MORE.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>
           </div>
@@ -350,7 +350,7 @@ export function AriaPreviewPage() {
               <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
-            <div data-first-visit-group className="mx-auto mt-5 w-full max-w-xl rounded-3xl border border-coral/50 bg-coral/10 px-3 py-3 shadow-card sm:px-5">
+            <div data-first-visit-group className="mx-auto mt-5 w-full max-w-2xl rounded-3xl border border-coral/50 bg-coral/10 px-3 py-3 shadow-card sm:px-5">
               <div className="flex items-center justify-center gap-2 text-center">
                 <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
                 <p className="font-display text-base font-bold text-forest sm:text-lg">Úvodná návšteva zadarmo</p>
@@ -362,7 +362,7 @@ export function AriaPreviewPage() {
                       isLiveLead ? "lead_landing_first_visit_details" : "aria_preview_first_visit_details");
                   }
                 }}
-                className="group mx-auto mt-2 w-full max-w-[320px] rounded-2xl border border-coral/20 bg-card/65 px-3 py-2 text-left">
+                className="group mx-auto mt-2 w-full max-w-[560px] rounded-2xl border border-coral/20 bg-card/65 px-3 py-2 text-left">
                 <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 font-display text-sm font-bold text-forest">
                   Ako prebieha úvodná návšteva? <span className="text-coral group-open:rotate-45">+</span>
                 </summary>
@@ -401,7 +401,7 @@ export function AriaPreviewPage() {
                   <summary className="cursor-pointer list-none font-display text-base font-bold text-forest marker:hidden">
                     <span className="flex items-center justify-between gap-3">
                       {item.q}
-                      <span className="text-xl text-coral transition group-open:rotate-45">+</span>
+                      <span data-aria-faq-icon className="text-xl text-coral transition group-open:rotate-45">+</span>
                     </span>
                   </summary>
                   <div className="mt-4 space-y-3 text-sm leading-relaxed text-forest/75">

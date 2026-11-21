@@ -69,15 +69,31 @@ const failures = [];
                 sage: info?.getPropertyValue('--preview-sage').trim() || '',
                 actionBg: action ? getComputedStyle(action).backgroundColor : '',
                 badgeBg: badge ? getComputedStyle(badge).backgroundColor : '',
+                badgeFg: badge ? getComputedStyle(badge).color : '',
                 headline: headline ? getComputedStyle(headline).color : '',
+                heroCopyBg: document.querySelector('[data-aria-hero-description]') ? getComputedStyle(document.querySelector('[data-aria-hero-description]')).backgroundColor : '',
+                heroCopyFg: document.querySelector('[data-aria-hero-description]') ? getComputedStyle(document.querySelector('[data-aria-hero-description]')).color : '',
+                earlyFaqBg: document.querySelector('#aria-early-faq details') ? getComputedStyle(document.querySelector('#aria-early-faq details')).backgroundColor : '',
+                pricingBg: document.querySelector('#lead-pricing') ? getComputedStyle(document.querySelector('#lead-pricing')).backgroundColor : '',
+                footerBg: document.querySelector('footer') ? getComputedStyle(document.querySelector('footer')).backgroundColor : '',
+                benefitHeading: document.querySelector('#lead-benefits h3') ? getComputedStyle(document.querySelector('#lead-benefits h3')).color : '',
+                greenPills: document.querySelector('[data-hero-benefits] .bg-forest') ? getComputedStyle(document.querySelector('[data-hero-benefits] .bg-forest')).backgroundColor : '',
               };
             });
             if (url.pathname === '/test-aria/') {
               if (palette.variant !== 'sage-orange-rose' ||
                   palette.rose !== '#9e336f' || palette.sage !== '#f3f8ef' ||
                   palette.actionBg !== 'rgb(158, 51, 111)' ||
-                  palette.badgeBg !== 'rgb(255, 164, 20)' ||
-                  palette.headline !== 'rgb(38, 50, 43)')
+                  palette.badgeBg !== 'rgb(170, 75, 0)' ||
+                  palette.badgeFg !== 'rgb(255, 255, 255)' ||
+                  palette.headline !== 'rgb(170, 75, 0)' ||
+                  palette.heroCopyBg !== 'rgb(170, 75, 0)' ||
+                  palette.heroCopyFg !== 'rgb(255, 255, 255)' ||
+                  palette.earlyFaqBg !== 'rgb(255, 164, 20)' ||
+                  palette.pricingBg !== 'rgb(255, 164, 20)' ||
+                  palette.footerBg !== 'rgb(255, 164, 20)' ||
+                  palette.benefitHeading !== 'rgb(170, 75, 0)' ||
+                  palette.greenPills !== 'rgb(45, 118, 75)')
                 throw new Error('Preview palette lost sage/orange/charcoal/rose roles: '+JSON.stringify(palette));
             } else if (palette.variant || palette.rose || palette.sage) {
               throw new Error('Paid lead inherited test-only palette: '+JSON.stringify(palette));
@@ -753,10 +769,11 @@ const failures = [];
                 if (!wrapper) return false;
                 const box = el.getBoundingClientRect();
                 const outer = wrapper.getBoundingClientRect();
-                return box.width <= Math.min(outer.width, 340) + 2 &&
+                return box.width <= outer.width + 2 &&
+                  (window.innerWidth < 768 || box.width >= 480) &&
                   Math.abs((box.left + box.width / 2) - (outer.left + outer.width / 2)) <= 3;
               });
-              if (!firstVisitCompact) throw new Error('First-visit accordion must be compact and centered under its heading');
+              if (!firstVisitCompact) throw new Error('First-visit accordion must be wide enough on desktop and centered under its heading');
               if (await page.locator('#lead-pricing article').first().getByText('1 vstup').count())
                 throw new Error('Page one-off card must omit redundant 1 vstup');
               const visitGroup = page.locator('[data-first-visit-group]');
@@ -821,6 +838,18 @@ const failures = [];
                   follows(team, firstVisitDogs);
               });
               if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/label-dogs/orange badge/focused copy/reviews/form and caretakers order changed');
+              if (width >= 768) {
+                const heights = await page.locator('[data-aria-review-photo]').evaluateAll(nodes => nodes.map(n => n.getBoundingClientRect().height));
+                if (heights.length !== 2 || heights.some(h => h < 240)) throw new Error('Desktop owner photos too short: '+JSON.stringify(heights));
+              }
+              const stacked = await page.locator('#aria-caretakers').evaluate(section => {
+                const rect = query => section.querySelector(query)?.getBoundingClientRect();
+                const photo=rect('img'), pills=rect('[data-hero-benefits]'), copy=rect('p');
+                if (!photo || !pills || !copy) return false;
+                const cx=window.innerWidth/2,centered=r=>Math.abs(r.left+r.width/2-cx)<15;
+                return centered(photo)&&centered(pills)&&centered(copy)&&photo.bottom<=pills.top&&pills.bottom<=copy.top;
+              });
+              if (!stacked) throw new Error('Caretaker photo, badges and copy must be stacked and centered');
               if (await page.locator('#lead-first-visit').getByText('Úvodná návšteva zadarmo', { exact: true }).count())
                 throw new Error('Duplicated first-visit ribbon returned to three-step section');
               const hero = page.locator('#aria-hero-form');

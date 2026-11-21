@@ -855,7 +855,7 @@
 .aria-puppy-range::-webkit-slider-runnable-track {
   height: 8px;
   border-radius: 999px;
-  background: #e0e5e0;
+  background: linear-gradient(to right, #e0e5e0 0 var(--aria-puppy-progress, 0%), var(--color-coral) var(--aria-puppy-progress, 0%) 100%);
   border: 1px solid rgb(23 75 48 / 12%);
 }
 .aria-puppy-range::-webkit-slider-thumb {
@@ -872,7 +872,7 @@
 .aria-puppy-range::-moz-range-track {
   height: 8px;
   border-radius: 999px;
-  background: #e0e5e0;
+  background: linear-gradient(to right, #e0e5e0 0 var(--aria-puppy-progress, 0%), var(--color-coral) var(--aria-puppy-progress, 0%) 100%);
   border: 1px solid rgb(23 75 48 / 12%);
 }
 .aria-puppy-range::-moz-range-thumb {
@@ -902,6 +902,7 @@
   --preview-cta-rose: #9e336f;
   --preview-cta-rose-hover: #85275b;
   --preview-charcoal: #26322b;
+  --preview-strong-orange: #aa4b00;
 
   --forest: var(--preview-charcoal);
   --forest-deep: #1c2923;
@@ -926,14 +927,20 @@
 }
 
 .aria-brand-experiment .section-title,
-.aria-brand-experiment [data-aria-hero-content] h1,
-.aria-brand-experiment [data-aria-hero-content] h1 span {
+.aria-brand-experiment [data-aria-hero-content] h1 {
   color: var(--preview-charcoal);
 }
+.aria-brand-experiment [data-aria-hero-content] h1 span {
+  color: var(--preview-strong-orange);
+}
 
-/* Let the restrained rose card anchor the offer without turning all sections pink. */
-.aria-brand-experiment .bg-forest {
+/* Rose for selected offers, not green caretaker trust pills. */
+.aria-brand-experiment #lead-pricing article.bg-forest,
+.aria-brand-experiment #lead-first-visit {
   background-color: #91406b;
+}
+.aria-brand-experiment [data-hero-benefits] .bg-forest {
+  background-color: #2d764b;
 }
 
 /* Primary actions are deep rose; logo-orange stays for information labels,
@@ -949,7 +956,11 @@
 .aria-brand-experiment a.bg-coral:hover {
   background-color: var(--preview-cta-rose-hover);
 }
-.aria-brand-experiment [data-aria-hero-content] [data-aria-service-badge],
+.aria-brand-experiment [data-aria-hero-content] [data-aria-service-badge] {
+  background-color: var(--preview-strong-orange);
+  color: #fff;
+  font-weight: 800;
+}
 .aria-brand-experiment [data-lead-best-value] {
   background-color: var(--preview-logo-orange);
   color: var(--preview-charcoal);
@@ -962,11 +973,46 @@
   border-color: #d9a7c6;
 }
 .aria-brand-experiment [data-aria-hero-description] {
-  border-color: #d9e4d2;
-  background-color: #f3f8ef;
-  background-image: radial-gradient(ellipse at 12% 6%, rgba(255,164,20,0.16), transparent 66%),
-    radial-gradient(ellipse at 91% 92%, rgba(171,206,166,0.25), transparent 70%);
-  box-shadow: inset 0 1px 0 #fff, 0 8px 24px -12px rgba(58,103,74,.18);
+  border-color: rgba(255,255,255,.45);
+  background-color: var(--preview-strong-orange);
+  background-image: radial-gradient(ellipse at 12% 6%, rgba(255,255,255,.16), transparent 66%), linear-gradient(145deg, #ad4c00, #a64800);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.26), 0 8px 24px -12px rgba(104,53,0,.35);
+}
+.aria-brand-experiment [data-aria-hero-description] strong {
+  color: #fff;
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: rgba(255,255,255,.65);
+  text-underline-offset: 3px;
+}
+.aria-brand-experiment #aria-early-faq details {
+  background-color: var(--preview-logo-orange);
+  border-color: rgba(38,50,43,.18);
+}
+.aria-brand-experiment #lead-benefits h3,
+.aria-brand-experiment #lead-benefits > div > p:first-child,
+.aria-brand-experiment #lead-requirements h2,
+.aria-brand-experiment #lead-requirements h3 { color: var(--preview-strong-orange); }
+.aria-brand-experiment #lead-pricing { background-color: var(--preview-logo-orange); }
+.aria-brand-experiment #lead-pricing > div p { color: var(--preview-charcoal); }
+.aria-brand-experiment #lead-pricing article.bg-forest,
+.aria-brand-experiment #lead-pricing article.bg-forest p,
+.aria-brand-experiment #lead-pricing article.bg-forest h3,
+.aria-brand-experiment #lead-pricing article.bg-forest strong { color: #fff; }
+.aria-brand-experiment #lead-faq [data-aria-faq-icon] {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--preview-logo-orange);
+  color: var(--preview-charcoal);
+}
+.aria-brand-experiment footer {
+  background-color: var(--preview-logo-orange);
+  color: var(--preview-charcoal);
 }
 .aria-brand-experiment [data-aria-dock] {
   border-color: #cadac8;
