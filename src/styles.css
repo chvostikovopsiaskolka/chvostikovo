@@ -1012,7 +1012,7 @@
   color: #fff;
   text-shadow: 0 1px 2px rgb(33 28 19 / 65%);
 }
-.aria-brand-experiment [data-aria-taxi] {
+.aria-brand-experiment #lead-pricing [data-aria-taxi] {
   background-color: var(--preview-cta-rose);
   color: #fff;
 }
