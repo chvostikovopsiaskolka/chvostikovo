@@ -45,6 +45,43 @@ assert(!shortSchema.safeParse({
   zaujem: "Mám záujem využívať škôlku občasne", plemeno: "x".repeat(201),
 }).success, "Preview breed must respect the 200-character limit.");
 
+// Aria puppy checker: transfer the *answers* into the existing allowlisted
+// lead raw_payload, never into the validated interest_reason or ad events.
+const puppyAnswers = {
+  age_months: 7, dog_name: "Mia", dog_breed: "Doga", dog_weight_kg: 18.5,
+  vaccines: { rabies: "yes", dhppi: "no", kennel: "unknown" },
+};
+const puppyLead = shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Mám záujem o škôlku pre šteniatko", puppy_check: puppyAnswers,
+});
+const puppyPayload = buildDbPayload(puppyLead);
+assert(puppyPayload.form_type === "lead" && puppyPayload.interest_reason === "Mám záujem o škôlku pre šteniatko",
+  "Puppy checker must preserve the Edge allowlist interest.");
+for (const [key, value] of [
+  ["Šteniatko – vek", "7 mesiacov"], ["Šteniatko – meno", "Mia"],
+  ["Šteniatko – plemeno", "Doga"], ["Šteniatko – váha", "18.5 kg"],
+  ["Šteniatko – besnota", "Áno"], ["Šteniatko – DHPPi+L", "Nie"],
+  ["Šteniatko – kotercový kašeľ", "Neviem"],
+  ["Šteniatko – výsledok orientačnej kontroly", "Potrebné individuálne posúdenie"],
+] as const) assert(puppyPayload.raw_payload[key] === value, "Puppy payload dropped field: " + key);
+const eligiblePuppy = buildDbPayload(shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Mám záujem o škôlku pre šteniatko",
+  puppy_check: { age_months: 5, vaccines: { rabies: "yes", dhppi: "yes", kennel: "yes" } },
+}));
+assert(eligiblePuppy.raw_payload["Šteniatko – výsledok orientačnej kontroly"] === "Predbežne splnené",
+  "Fully vaccinated puppy must still get an orientational, never final, result.");
+assert(!("Šteniatko – vek" in ariaPayload.raw_payload),
+  "Normal regular lead must not invent puppy assessment data.");
+assert(!shortSchema.safeParse({ ...puppyLead, puppy_check: { ...puppyAnswers, age_months: 30 } }).success,
+  "Puppy age must be within the actual checker range.");
+assert(!shortSchema.safeParse({ ...puppyLead, puppy_check: { ...puppyAnswers, dog_weight_kg: 400 } }).success,
+  "Puppy weight cannot exceed 150 kg.");
+assert(!shortSchema.safeParse({ ...puppyLead, puppy_check: { ...puppyAnswers, vaccines: { ...puppyAnswers.vaccines, rabies: "unconfirmed" } } }).success,
+  "Puppy vaccine state must be an explicit yes/no/unknown.");
+
+
 longSchema.parse({
   typ: "prihlaska",
   consent: true,
