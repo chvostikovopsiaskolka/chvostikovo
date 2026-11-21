@@ -117,7 +117,7 @@ export function StandPhotoLightbox({
       if (event.touches.length >= 2) beginPinch(event.touches);
       else if (event.touches.length === 1 && transform.scale > 1) beginPan(event.touches.item(0)!);
       else {
-        const finger = event.changedTouches.item(0);
+        const finger = event.changedTouches?.item(0) ?? null;
         if (gesture.kind === "swipe" && transform.scale === 1 && finger) {
           const dx = finger.clientX - gesture.atX;
           const dy = finger.clientY - gesture.atY;
