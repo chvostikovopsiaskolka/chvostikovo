@@ -148,7 +148,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
             {LEAD_STEP_INTERESTS.map((option) => (
               <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
-                <input type="radio" name="zaujem" value={option.value} required aria-label={option.value} defaultChecked={presetInterest === option.value}
+                <input type="radio" name="zaujem" value={option.value} required={step === 1} aria-label={option.value} defaultChecked={presetInterest === option.value}
                   onChange={() => setSelectedInterest(option.value)} className="peer sr-only" />
                 <span className="flex h-full min-h-24 min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 py-3 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:min-h-28 sm:px-3">
                   {option.lines.map((line, i) => (
