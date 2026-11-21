@@ -147,11 +147,6 @@ export function Pricing({ interestMode = false }: { interestMode?: boolean } = {
                 p.highlight ? "bg-forest text-cream ring-2 ring-coral" : "bg-card"
               }`}
             >
-              {p.highlight && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-4 py-1 font-display text-xs font-semibold whitespace-nowrap text-primary-foreground">
-                  Najvýhodnejšie
-                </span>
-              )}
               <h3 className={`mt-2 text-lg ${p.highlight ? "text-cream" : "text-forest"}`}>
                 {p.name}
               </h3>
@@ -164,10 +159,15 @@ export function Pricing({ interestMode = false }: { interestMode?: boolean } = {
               </p>
               {p.name === "Permanentka" ? (
                 <p className={`mt-2 text-sm ${p.highlight ? "text-cream/85" : "text-forest/70"}`}>
-                  10 vstupov – ušetríte 50 €.
+                  10 vstupov.
                   <strong className="mt-1 block font-bold">Permanentka platí 2 mesiace.</strong>
                 </p>
               ) : null}
+              {p.highlight && (
+                <span data-home-best-value className="mt-auto inline-flex max-w-full items-center justify-center whitespace-nowrap rounded-full bg-coral px-2 py-1.5 font-display text-[clamp(8px,2.2vw,12px)] font-bold tracking-[-0.02em] text-white">
+                  Najvýhodnejšie. Ušetríte 50 €
+                </span>
+              )}
             </article>
           ))}
         </div>
