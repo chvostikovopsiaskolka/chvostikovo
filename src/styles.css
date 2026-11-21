@@ -855,7 +855,7 @@
 .aria-puppy-range::-webkit-slider-runnable-track {
   height: 8px;
   border-radius: 999px;
-  background: linear-gradient(to right, #e0e5e0 0 var(--aria-puppy-progress, 0%), var(--color-coral) var(--aria-puppy-progress, 0%) 100%);
+  background: linear-gradient(to right, var(--color-coral) 0 var(--aria-puppy-progress, 0%), #e0e5e0 var(--aria-puppy-progress, 0%) 100%);
   border: 1px solid rgb(23 75 48 / 12%);
 }
 .aria-puppy-range::-webkit-slider-thumb {
@@ -872,7 +872,7 @@
 .aria-puppy-range::-moz-range-track {
   height: 8px;
   border-radius: 999px;
-  background: linear-gradient(to right, #e0e5e0 0 var(--aria-puppy-progress, 0%), var(--color-coral) var(--aria-puppy-progress, 0%) 100%);
+  background: linear-gradient(to right, var(--color-coral) 0 var(--aria-puppy-progress, 0%), #e0e5e0 var(--aria-puppy-progress, 0%) 100%);
   border: 1px solid rgb(23 75 48 / 12%);
 }
 .aria-puppy-range::-moz-range-thumb {
@@ -886,28 +886,20 @@
 .aria-puppy-range:focus-visible { outline: 2px solid var(--color-coral); outline-offset: 3px; }
 
 /*
- * TEST ONLY: Sage / logo orange / logo rose functional color system.
- * Preview is the only owner via .aria-brand-experiment on /test-aria/.
- * Do not move these into :root, the Tailwind theme, or the campaign route.
- *
- * Color roles:
- *   Canvas = soft warm sage, text = charcoal, guidance = logo orange,
- *   CTA and selected cards = deep accessible rose from the brand wordmark.
+ * TEST ONLY: unified logo orange, vibrant rose CTA, soft orange wash.
+ * All overrides remain on /test-aria/, never paid /psia-skolka-kosice/.
  */
 .aria-brand-experiment {
   --preview-sage: #f3f8ef;
   --preview-sage-soft: #e8f0e4;
   --preview-logo-orange: #ffa414;
-  --preview-logo-rose: #cc66a7;
-  --preview-cta-rose: #9e336f;
-  --preview-cta-rose-hover: #85275b;
+  --preview-cta-rose: #b82e7f;
+  --preview-cta-rose-hover: #982467;
   --preview-charcoal: #26322b;
-  --preview-strong-orange: #aa4b00;
-
   --forest: var(--preview-charcoal);
   --forest-deep: #1c2923;
   --coral: var(--preview-logo-orange);
-  --coral-dark: #ad5800;
+  --coral-dark: var(--preview-logo-orange);
   --coral-soft: #ffe6b7;
   --cream: var(--preview-sage);
   --peach: var(--preview-sage-soft);
@@ -920,105 +912,140 @@
   --muted: var(--sand);
   --muted-foreground: #59675c;
   --primary: var(--preview-cta-rose);
-  --accent: var(--preview-logo-rose);
+  --accent: var(--preview-cta-rose);
   --ring: var(--preview-cta-rose);
   background-color: var(--cream);
   color: var(--preview-charcoal);
 }
-
+/* Radix form dialogs are portaled outside their source section. */
+.aria-preview-modal {
+  --coral: #ffa414;
+  --coral-dark: #ffa414;
+  --primary: #b82e7f;
+  --ring: #b82e7f;
+}
 .aria-brand-experiment .section-title,
 .aria-brand-experiment [data-aria-hero-content] h1 {
   color: var(--preview-charcoal);
 }
-.aria-brand-experiment [data-aria-hero-content] h1 span {
-  color: var(--preview-strong-orange);
+.aria-brand-experiment [data-aria-hero-content] h1 span,
+.aria-brand-experiment .text-coral-dark,
+.aria-brand-experiment #lead-benefits h3,
+.aria-brand-experiment #lead-requirements h2,
+.aria-brand-experiment #lead-requirements h3 {
+  color: var(--preview-logo-orange);
 }
-
-/* Rose for selected offers, not green caretaker trust pills. */
-.aria-brand-experiment #lead-pricing article.bg-forest,
-.aria-brand-experiment #lead-first-visit {
-  background-color: #91406b;
-}
-.aria-brand-experiment [data-hero-benefits] .bg-forest {
-  background-color: #2d764b;
-}
-
-/* Primary actions are deep rose; logo-orange stays for information labels,
- * navigation details, illustrations and secondary accents. */
+/* Same rose CTA on every inline form, section action and portaled dialog. */
 .aria-brand-experiment .btn-coral,
 .aria-brand-experiment button.bg-coral,
-.aria-brand-experiment a.bg-coral {
-  background-color: var(--preview-cta-rose);
+.aria-brand-experiment a.bg-coral,
+.aria-preview-modal .btn-coral,
+.aria-preview-modal button.bg-coral,
+.aria-preview-modal a.bg-coral {
+  background-color: var(--preview-cta-rose, #b82e7f);
+  background-image: none;
   color: #fff;
 }
 .aria-brand-experiment .btn-coral:hover,
 .aria-brand-experiment button.bg-coral:hover,
-.aria-brand-experiment a.bg-coral:hover {
-  background-color: var(--preview-cta-rose-hover);
+.aria-brand-experiment a.bg-coral:hover,
+.aria-preview-modal .btn-coral:hover,
+.aria-preview-modal button.bg-coral:hover,
+.aria-preview-modal a.bg-coral:hover {
+  background-color: var(--preview-cta-rose-hover, #982467);
 }
-.aria-brand-experiment [data-aria-hero-content] [data-aria-service-badge] {
-  background-color: var(--preview-strong-orange);
-  color: #fff;
-  font-weight: 800;
-}
-.aria-brand-experiment [data-lead-best-value] {
+/* Bright progress-orange, charcoal readable text, preserved liquid effect. */
+.aria-brand-experiment [data-aria-service-badge] {
   background-color: var(--preview-logo-orange);
   color: var(--preview-charcoal);
-}
-.aria-brand-experiment [data-aria-guide] .text-coral-dark {
-  color: var(--preview-cta-rose);
-}
-.aria-brand-experiment [data-first-visit-group] {
-  background-color: #f2e6ed;
-  border-color: #d9a7c6;
+  font-weight: 800;
 }
 .aria-brand-experiment [data-aria-hero-description] {
-  border-color: rgba(255,255,255,.45);
-  background-color: var(--preview-strong-orange);
-  background-image: radial-gradient(ellipse at 12% 6%, rgba(255,255,255,.16), transparent 66%), linear-gradient(145deg, #ad4c00, #a64800);
-  color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.26), 0 8px 24px -12px rgba(104,53,0,.35);
+  border-color: rgb(203 114 7 / 22%);
+  background-color: var(--preview-logo-orange);
+  background-image: radial-gradient(ellipse at 12% 6%, rgb(255 255 255 / 36%), transparent 66%),
+    radial-gradient(ellipse at 90% 93%, rgb(197 97 0 / 20%), transparent 70%);
+  color: var(--preview-charcoal);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 60%), 0 8px 24px -12px rgb(143 83 0 / 25%);
 }
 .aria-brand-experiment [data-aria-hero-description] strong {
-  color: #fff;
+  color: var(--preview-charcoal);
   font-weight: 800;
   text-decoration: underline;
   text-decoration-thickness: 1.5px;
-  text-decoration-color: rgba(255,255,255,.65);
+  text-decoration-color: rgb(38 50 43 / 30%);
   text-underline-offset: 3px;
 }
-.aria-brand-experiment #aria-early-faq details {
-  background-color: var(--preview-logo-orange);
-  border-color: rgba(38,50,43,.18);
+/* Do not recolor the three green caretakers' trust pills. */
+.aria-brand-experiment [data-hero-benefits] .bg-forest {
+  background-color: #2d764b;
 }
-.aria-brand-experiment #lead-benefits h3,
-.aria-brand-experiment #lead-benefits > div > p:first-child,
-.aria-brand-experiment #lead-requirements h2,
-.aria-brand-experiment #lead-requirements h3 { color: var(--preview-strong-orange); }
-.aria-brand-experiment #lead-pricing { background-color: var(--preview-logo-orange); }
-.aria-brand-experiment #lead-pricing > div p { color: var(--preview-charcoal); }
+/* Orange tint outside, original white question cards and orange + inside. */
+.aria-brand-experiment #aria-early-faq { background-color: rgb(255 164 20 / 13%); }
+.aria-brand-experiment #aria-early-faq details {
+  background-color: #fff;
+  border-color: rgb(38 50 43 / 11%);
+}
+.aria-brand-experiment #aria-early-faq summary span { color: var(--preview-logo-orange); }
+.aria-brand-experiment #lead-benefits > div > p:first-child {
+  color: var(--preview-logo-orange);
+}
+.aria-brand-experiment #lead-requirements article > div > span {
+  color: var(--preview-logo-orange);
+  background-color: rgb(255 164 20 / 12%);
+}
+/* Light pricing section, same orange for both prices, rose offer card. */
+.aria-brand-experiment #lead-pricing { background-color: rgb(255 164 20 / 12%); }
+.aria-brand-experiment #lead-pricing > div > p { color: var(--preview-charcoal); }
+.aria-brand-experiment #lead-pricing article.bg-forest,
+.aria-brand-experiment #lead-first-visit { background-color: #91406b; }
 .aria-brand-experiment #lead-pricing article.bg-forest,
 .aria-brand-experiment #lead-pricing article.bg-forest p,
 .aria-brand-experiment #lead-pricing article.bg-forest h3,
 .aria-brand-experiment #lead-pricing article.bg-forest strong { color: #fff; }
+.aria-brand-experiment #lead-pricing [data-lead-price],
+.aria-brand-experiment #lead-pricing article.bg-forest [data-lead-price] {
+  color: var(--preview-logo-orange);
+}
+.aria-brand-experiment [data-lead-best-value] {
+  background-color: var(--preview-logo-orange);
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(33 28 19 / 65%);
+}
+.aria-brand-experiment [data-aria-taxi] {
+  background-color: var(--preview-cta-rose);
+  color: #fff;
+}
+.aria-brand-experiment [data-aria-taxi] svg { color: #fff; }
+.aria-brand-experiment [data-first-visit-group] {
+  background-color: #f2e6ed;
+  border-color: #d9a7c6;
+}
+/* Leave dark FAQ questions and keep orange plus centered in its round spot. */
 .aria-brand-experiment #lead-faq [data-aria-faq-icon] {
   display: inline-grid;
   place-items: center;
   min-width: 30px;
   height: 30px;
   border-radius: 50%;
-  background-color: var(--preview-logo-orange);
+  background-color: rgb(255 164 20 / 19%);
+  color: #c16400;
+}
+/* Calm footer, legible contact details and Bellaris credit. */
+.aria-brand-experiment footer {
+  background-color: #fff0d5;
   color: var(--preview-charcoal);
 }
-.aria-brand-experiment footer {
-  background-color: var(--preview-logo-orange);
-  color: var(--preview-charcoal);
+.aria-brand-experiment footer nav button:hover { color: var(--preview-cta-rose); }
+.aria-brand-experiment footer .footer-bellaris-liquid {
+  background-color: var(--preview-charcoal);
+  color: #fff;
 }
 .aria-brand-experiment [data-aria-dock] {
   border-color: #cadac8;
-  box-shadow: 0 4px 18px rgba(45,77,54,.12);
+  box-shadow: 0 4px 18px rgb(45 77 54 / 12%);
 }
 .aria-brand-experiment [data-aria-dock] button[aria-expanded="true"] {
-  background-color: #eddae7;
+  background-color: #f2d9e8;
   color: var(--preview-cta-rose);
 }
