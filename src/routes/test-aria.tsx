@@ -198,7 +198,7 @@ export function AriaPreviewPage() {
                   aria-label={`Zobraziť fotografiu: ${photo.alt}`}
                   onClick={() => setReviewPhotoOpen(index)}
                   className="group relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[138px]">
-                  <img src={photo.src} alt={photo.alt} width={520} height={400} loading="lazy" decoding="async"
+                  <img src={photo.src} alt={photo.alt} width={672} height={896} loading="lazy" decoding="async"
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
                 </button>
               ))}
