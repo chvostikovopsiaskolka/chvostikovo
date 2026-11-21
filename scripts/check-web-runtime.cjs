@@ -183,6 +183,15 @@ const failures = [];
               // previous Radix layer in WebKit. Keyboard Escape remains covered
               // later for the normal single-dialog requirements flow.
               const contactDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+              const puppySummary = contactDialog.locator('[data-puppy-check-summary]');
+              await puppySummary.waitFor({ state: 'visible' });
+              const puppySummaryText = await puppySummary.innerText();
+              if (!puppySummaryText.includes('Testovací psík') || !puppySummaryText.includes('Kríženec') ||
+                  !puppySummaryText.includes('4 mesiacov') ||
+                  !/besnota:\s*áno/i.test(puppySummaryText) ||
+                  !/DHPPi\+L:\s*áno/i.test(puppySummaryText) ||
+                  !/kotercový kašeľ:\s*áno/i.test(puppySummaryText))
+                throw new Error('Puppy wizard details were lost during contact handoff: ' + puppySummaryText);
               await contactDialog.getByRole('button', { name: 'Close' }).click();
               await contactDialog.waitFor({ state: 'hidden' });
               await aria.waitFor({ state: 'visible' });
@@ -533,6 +542,15 @@ const failures = [];
             await modal.waitFor({ state: 'visible' });
             if (!await modal.locator('[data-lead-step-form]').count())
               throw new Error('Mobile interest CTA must open guided enquiry modal');
+            if (!url.pathname.startsWith('/en/')) {
+              const leadForm = modal.locator('[data-lead-step-form]');
+              const cards = leadForm.locator('label:has(input[name="zaujem"])');
+              if (await cards.count() !== 3) throw new Error('Every normal SK inquiry must retain exactly three interest choices');
+              await cards.nth(1).click();
+              await leadForm.getByRole('button', { name: 'Pokračovať' }).click();
+              if (!await leadForm.locator('[data-aria-breed-field]').isVisible())
+                throw new Error('Regular SK interest must show optional breed on this page: ' + url.pathname);
+            }
             const modalFrame = await modal.evaluate(el => {
               const rect = el.getBoundingClientRect();
               const inner = el.querySelector('.form-dialog-scroll');
