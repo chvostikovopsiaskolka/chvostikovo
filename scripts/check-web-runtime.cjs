@@ -58,16 +58,15 @@ const failures = [];
           await cookieButton.waitFor({ timeout: 10000 });
           if (brandPreviewCandidate && !bellaris && ['/test-aria/', '/psia-skolka-kosice/'].includes(url.pathname)) {
             const palette = await page.evaluate(() => {
-              const surface = document.querySelector('main')?.parentElement;
               const exp = document.querySelector('[data-aria-brand-experiment]');
-              const info = getComputedStyle(exp || surface);
+              const info = exp ? getComputedStyle(exp) : null;
               const headline = document.querySelector('[data-aria-hero-content] h1 span');
               const action = document.querySelector('#aria-hero-form .btn-coral');
               const badge = document.querySelector('[data-aria-service-badge]');
               return {
-                variant: exp?.getAttribute('data-aria-brand-experiment') ?? null,
-                rose: info.getPropertyValue('--preview-cta-rose').trim(),
-                sage: info.getPropertyValue('--preview-sage').trim(),
+                variant: exp?.getAttribute('data-aria-brand-experiment') || null,
+                rose: info?.getPropertyValue('--preview-cta-rose').trim() || '',
+                sage: info?.getPropertyValue('--preview-sage').trim() || '',
                 actionBg: action ? getComputedStyle(action).backgroundColor : '',
                 badgeBg: badge ? getComputedStyle(badge).backgroundColor : '',
                 headline: headline ? getComputedStyle(headline).color : '',
@@ -75,14 +74,13 @@ const failures = [];
             });
             if (url.pathname === '/test-aria/') {
               if (palette.variant !== 'sage-orange-rose' ||
-                  palette.rose !== '#9e336f' ||
-                  palette.sage !== '#f3f8ef' ||
+                  palette.rose !== '#9e336f' || palette.sage !== '#f3f8ef' ||
                   palette.actionBg !== 'rgb(158, 51, 111)' ||
                   palette.badgeBg !== 'rgb(255, 164, 20)' ||
                   palette.headline !== 'rgb(38, 50, 43)')
-                throw new Error('Preview palette does not follow sage / orange / dark / rose roles: ' + JSON.stringify(palette));
+                throw new Error('Preview palette lost sage/orange/charcoal/rose roles: '+JSON.stringify(palette));
             } else if (palette.variant || palette.rose || palette.sage) {
-              throw new Error('Paid lead inherited test-only palette: ' + JSON.stringify(palette));
+              throw new Error('Paid lead inherited test-only palette: '+JSON.stringify(palette));
             }
           }
           // The released lead URL and the noindex preview share Aria UI. The
