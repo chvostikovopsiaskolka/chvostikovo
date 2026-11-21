@@ -114,6 +114,73 @@ const failures = [];
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
+          // Candidate-only regression for the three unified Chvostíkovo galleries.
+          // Production-baseline CI keeps testing its already published version.
+          if (!bellaris && !restricted && new URL(base).hostname === '127.0.0.1') {
+            const verifyLightbox = async (fullResolution = false) => {
+              const modal = page.locator('[data-photo-lightbox]');
+              await modal.waitFor({state:'visible'});
+              const measured = await modal.evaluate(node => {
+                const photo = node.querySelector('[data-photo-lightbox-image]');
+                const close = node.querySelector('[data-photo-lightbox-close]');
+                const left = node.querySelector('[data-photo-lightbox-prev]');
+                const right = node.querySelector('[data-photo-lightbox-next]');
+                if (!photo || !close || !left || !right) return {missing:true};
+                const img=photo.getBoundingClientRect(), x=close.getBoundingClientRect();
+                const prev=left.getBoundingClientRect(), next=right.getBoundingClientRect();
+                return {
+                  src:photo.getAttribute('src'),
+                  w:img.width,h:img.height,
+                  dx:Math.abs(img.right-x.right),dy:x.top-img.top,
+                  arrows:[prev.width,next.width],
+                  centers:[Math.abs(prev.top+prev.height/2-img.top-img.height/2),Math.abs(next.top+next.height/2-img.top-img.height/2)],
+                  gesture:getComputedStyle(node.querySelector('[data-photo-lightbox-frame]')).touchAction,
+                  lock:document.body.style.overflow==='hidden'
+                };
+              });
+              if (measured.missing || !measured.lock || measured.w < 100 || measured.h < 100 ||
+                  measured.gesture!=='pan-y' || measured.dx>18 ||
+                  measured.dy<0 || measured.dy>50 ||
+                  measured.arrows.some(w=>w>42) || measured.centers.some(y=>y>14))
+                throw new Error('Photo controls must be small and anchored to photo: '+JSON.stringify(measured));
+              if (fullResolution && !measured.src.includes('-full'))
+                throw new Error('User photo modal must load full resolution, not thumbnail: '+measured.src);
+              await modal.locator('[data-photo-lightbox-next]').click();
+              const next=await modal.locator('[data-photo-lightbox-image]').getAttribute('src');
+              if (next===measured.src) throw new Error('Next photo arrow did not advance gallery');
+              await page.keyboard.press('ArrowLeft');
+              await page.waitForFunction(initial=>document.querySelector('[data-photo-lightbox-image]')?.getAttribute('src')===initial,measured.src,{timeout:2500});
+              await modal.locator('[data-photo-lightbox-close]').click();
+              await modal.waitFor({state:'hidden'});
+              if (await page.evaluate(()=>document.body.style.overflow==='hidden'))
+                throw new Error('Photo modal leaked body scroll lock');
+            };
+            if (isAriaPage) {
+              const cards=page.locator('[data-aria-review-photo]');
+              if (await cards.count()!==2) throw new Error('Paid lead requires two clickable owner photos');
+              await cards.first().scrollIntoViewIfNeeded();
+              await cards.first().click();
+              await verifyLightbox(true);
+              const mosaic=page.locator('#aria-mosaic button[aria-label^="Otvoriť fotografiu"]');
+              await mosaic.first().scrollIntoViewIfNeeded();
+              await mosaic.first().click();
+              await verifyLightbox();
+            }
+            if (url.pathname==='/' || isAriaPage) {
+              const moving=page.locator('[data-gesture-track="photos"] button[aria-label^="Otvoriť fotografiu"]');
+              await moving.first().scrollIntoViewIfNeeded();
+              await moving.first().click();
+              await verifyLightbox();
+            }
+            if (url.pathname==='/') {
+              const gallery=page.locator('#priestory button').first();
+              await gallery.scrollIntoViewIfNeeded();
+              await gallery.click();
+              await verifyLightbox();
+            }
+            await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
+          }
+
           if (!bellaris && (isAriaPage || isPuppyAria)) {
             const restoredScroll = await page.evaluate(() => ({
               rootOverflow: document.documentElement.style.overflow,
