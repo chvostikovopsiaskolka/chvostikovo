@@ -197,6 +197,9 @@ for (const value of allowedStagedInterests) {
   const payload = buildDbPayload(shortSchema.parse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: value }));
   assert(payload.interest_reason === value, "New interest must be stored verbatim");
 }
+assert(stagedLeadSource.includes('const showBreed = selectedInterest !== ""') && !stagedLeadSource.includes("ariaPreview && selectedInterest"), "Optional breed must be shared across SK lead forms, not preview-only");
+const releasedLeadRoute = readFileSync(new URL("../src/routes/psia-skolka-kosice.tsx", import.meta.url), "utf8");
+assert(releasedLeadRoute.includes('component: AriaPreviewPage') && releasedLeadRoute.includes('import { AriaPreviewPage } from "./test-aria"'), "Campaign lead URL must reuse the approved Aria landing and retain its own SEO head");
 assert(stagedLeadSource.includes("zaujem: selectedInterest") && stagedLeadSource.includes("name=\"zaujem\"") && stagedLeadSource.includes("PrivacyConsentCheckbox"), "Guided form must preserve interest, consent and submission");
 assert(stagedLeadSource.includes('name="meno"') && stagedLeadSource.includes('name="email"') && stagedLeadSource.includes('<PhoneField'), "Guided form must preserve contact fields and autofill");
 assert(stagedLeadSource.includes('startFormAttempt(trackingSource)') && stagedLeadSource.includes('trackMetaFormConversion("informacie"') && stagedLeadSource.includes('LeadPhoneReceipt'), "Guided form must retain conversion idempotency, receipt and phone correction");
