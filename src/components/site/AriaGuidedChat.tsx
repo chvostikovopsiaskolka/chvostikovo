@@ -114,12 +114,27 @@ export function AriaGuidedChat({
   function showInterest() {
     track("interest_open");
     setEngaged(true);
+    const start = nextId.current;
+    nextId.current += 2;
+    setMessages((prior) => prior.concat([
+      { id: start, side: "person", text: "Mám záujem o škôlku." },
+      { id: start + 1, side: "aria", text: "To ma teší! 🐾 Nechaj nám kontakt a paniček sa ti ozve. " +
+        "Môžeš doplniť aj meno svojho psíka." },
+    ]));
     setMode("interest");
   }
 
   function showOther() {
     track("other_open");
     setEngaged(true);
+    const start = nextId.current;
+    nextId.current += 2;
+    setMessages((prior) => prior.concat([
+      { id: start, side: "person", text: "Chcem sa spýtať niečo iné." },
+      { id: start + 1, side: "aria", text: isDaytime
+        ? "Haf! Jasné, zavolám panička k notebooku. Živé správy ešte pripravujeme, ale e-mail mu môžeme pripraviť hneď."
+        : "Haf! Paniček už možno spí. Keď ráno doplní moju misku, rád si prečíta tvoj e-mail. 🐾" },
+    ]));
     setMode("other");
   }
 
@@ -229,6 +244,11 @@ export function AriaGuidedChat({
               </button>
               <h3 className="font-display text-sm font-bold text-forest">Nechaj nám kontakt 🐾</h3>
               <p className="text-xs text-forest/70">Tento formulár skutočne odošle nezáväzný záujem. Nie je to živý chat.</p>
+              <label className="block text-xs font-semibold text-forest">
+                Meno psíka (nepovinné)
+                <input type="text" maxLength={70} value={dogName} onChange={(event) => setDogName(event.target.value)}
+                  placeholder="Napríklad Bella" className="field mt-1.5 h-10 w-full text-sm" />
+              </label>
               <ShortForm hideInterest trackingSource="aria_preview_chat_interest"
                 interestValue={"Záujem cez chat Aria" + (dogName.trim() ? " – psík " + dogName.trim() : "")}
                 onSent={() => track("interest_submitted")} />
@@ -241,11 +261,6 @@ export function AriaGuidedChat({
                 className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
                 <ArrowLeft size={15} aria-hidden /> Späť k otázkam
               </button>
-              <div className="rounded-xl bg-[#f3f8ef] p-3 text-xs leading-relaxed text-forest">
-                {isDaytime
-                  ? "Haf! Jasné, zavolám panička k notebooku. Živé správy ešte pripravujeme, otázku mu zatiaľ môžeš poslať e-mailom."
-                  : "Haf! Paniček už možno spí. Keď ráno doplní moju misku, rád si prečíta tvoj e-mail. 🐾"}
-              </div>
               <label htmlFor={chatId + "-other"} className="block text-xs font-semibold text-forest">Čo by si sa chcel/a spýtať?</label>
               <textarea id={chatId + "-other"} rows={3} maxLength={600}
                 value={otherQuestion} onChange={(event) => setOtherQuestion(event.target.value)}
