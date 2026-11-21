@@ -13,7 +13,7 @@ const FIRST_VISIT_ANSWER = SITE_FAQ.find((entry) => entry.q === "Ako prebieha pr
 const QUESTIONS = [
   {
     title: "Pre koho je škôlka určená?",
-    answer: "Najmä pre stredné a veľké psy, spravidla nad 20 kg. Prijímame aj šteniatka s dokončenými požadovanými očkovaniami. Okrem veku a veľkosti posudzujeme zdravie, povahu a vhodnosť do kolektívu. Rozhodujeme po bezplatnej úvodnej návšteve.",
+    answer: "Najmä pre stredné a veľké psy, spravidla nad 20 kg. Prijímame aj očkované šteniatka, spravidla nad 15 kg, podľa veku a individuálnej pripravenosti. Vyžadujeme očkovania, dobrý zdravotný stav a vhodnosť do kolektívu. Rozhodujeme po bezplatnej úvodnej návšteve.",
   },
   {
     title: "Prijímate aj šteniatka?",
@@ -30,11 +30,13 @@ export function AriaLeadAssistant({
   onOpenInterest,
   onOpenPuppyChecker,
   hidden = false,
+  trackingPrefix = "aria_preview_v3",
 }: {
   onOpenInfo: () => void;
   onOpenInterest: () => void;
   onOpenPuppyChecker: () => void;
   hidden?: boolean;
+  trackingPrefix?: string;
 }) {
   const [intro, setIntro] = useState(true);
   const [panel, setPanel] = useState<Panel>(null);
@@ -79,7 +81,7 @@ export function AriaLeadAssistant({
   }, [panel]);
 
   function track(action: string) {
-    void trackCookielessInteraction("nav_click", "aria_preview_v3_" + action, "sk");
+    void trackCookielessInteraction("nav_click", trackingPrefix + "_" + action, "sk");
   }
 
   function jump(id: string, action: string) {
@@ -120,7 +122,7 @@ export function AriaLeadAssistant({
 
   const optionClass = "flex min-h-11 w-full items-center justify-between gap-2 rounded-2xl border border-forest/10 bg-white/75 px-3 py-2.5 text-left text-sm font-semibold text-forest transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
   const ctaClass = "flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-coral px-4 py-2.5 text-center font-display text-sm font-bold text-white shadow-sm transition hover:bg-coral-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest";
-  const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[11px] bg-white/55 px-0.5 text-center text-forest shadow-[0_2px_7px_rgba(18,68,43,.10)] transition aria-expanded:bg-secondary/80 aria-expanded:ring-1 aria-expanded:ring-forest/15 hover:bg-white/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
+  const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[12px] bg-white/55 px-0.5 text-center text-forest shadow-[0_2px_7px_rgba(18,68,43,.10)] transition aria-expanded:bg-secondary/80 aria-expanded:ring-1 aria-expanded:ring-forest/15 hover:bg-white/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
 
   if (hidden) return null;
 
@@ -234,7 +236,7 @@ export function AriaLeadAssistant({
                   <span><strong className="block text-sm">Prvá návšteva zadarmo</strong><small className="block text-[11px] font-normal text-forest/65">Ako fungujú naše tri kroky</small></span><ArrowRight size={16} aria-hidden />
                 </button>
                 <button type="button" className={optionClass} onClick={() => jump("aria-puppy-check", "puppy_section")}>
-                  <span><strong className="block text-sm">Máte šteniatko?</strong><small className="block whitespace-nowrap text-[clamp(9px,2.65vw,12px)] font-normal text-forest/65">Zistite, či vaše šteniatko spĺňa podmienky</small></span><ArrowRight size={16} aria-hidden />
+                  <span><strong className="block text-sm">Máte šteniatko?</strong><small className="block whitespace-nowrap text-[clamp(8px,2.3vw,10.5px)] font-normal tracking-[-0.02em] text-forest/65">Zistite, či vaše šteniatko spĺňa podmienky</small></span><ArrowRight size={16} aria-hidden />
                 </button>
                 <button type="button" className={optionClass} onClick={openInfo}>
                   <span><strong className="block text-sm">Chcem sa informovať</strong><small className="block text-[11px] font-normal text-forest/65">Nechajte nám kontakt a ozveme sa</small></span><ArrowRight size={16} aria-hidden />
@@ -246,12 +248,12 @@ export function AriaLeadAssistant({
         )}
 
         {!panel && (
-          <div className="mb-3 flex w-full justify-start pl-[82px] sm:pl-[104px]" data-aria-message>
-            <div className="relative isolate inline-flex min-h-10 max-w-full items-center rounded-[999px] border border-white/90 bg-card/95 px-3 py-2 text-forest shadow-[0_6px_22px_rgba(17,65,41,.15)] ring-1 ring-forest/10 backdrop-blur-xl">
+          <div className="mb-3 flex w-full justify-start pl-[75px] sm:pl-[96px]" data-aria-message>
+            <div className="relative isolate inline-flex min-h-[55px] max-w-full -rotate-[1deg] items-center border border-white/90 bg-card/95 px-2.5 py-3 text-forest shadow-[0_6px_22px_rgba(17,65,41,.15)] ring-1 ring-forest/10 backdrop-blur-xl" style={{ borderRadius: "48% 52% 49% 51% / 60% 56% 44% 40%" }}>
               {/* Curved speech tail extends from the bubble towards Aria's head, not the navigation dock. */}
               <svg aria-hidden="true" viewBox="0 0 96 60"
-                className="pointer-events-none absolute -bottom-[20px] -left-[69px] z-0 h-[56px] w-[91px] overflow-visible drop-shadow-[0_3px_3px_rgba(17,65,41,.13)]">
-                <path d="M93 7 C70 8 61 18 56 28 C49 40 32 54 4 59 C31 48 35 27 46 15 C60 2 78 4 93 7 Z"
+                className="pointer-events-none absolute -bottom-[23px] -left-[49px] z-0 h-[56px] w-[91px] overflow-visible drop-shadow-[0_3px_3px_rgba(17,65,41,.13)]">
+                <path d="M91 8 C73 7 58 16 52 29 C44 44 31 53 6 58 C27 45 32 27 44 16 C59 3 77 4 91 8 Z"
                   fill="var(--card)" stroke="rgba(49,94,63,.18)" strokeWidth="1.5" strokeLinejoin="round" />
               </svg>
               {intro ? (
@@ -274,7 +276,7 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className="relative ml-[83px] rounded-[24px] border border-white/80 bg-card/85 px-1 py-0.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-2" data-aria-dock>
+        <div className="relative ml-[83px] rounded-[16px] border border-white/80 bg-card/85 px-1 py-0.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-2" data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
             className="pointer-events-none absolute -bottom-1 -left-[83px] h-[78px] w-[78px] max-w-none object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,.42)] sm:-left-[104px] sm:h-[95px] sm:w-[95px]" />
