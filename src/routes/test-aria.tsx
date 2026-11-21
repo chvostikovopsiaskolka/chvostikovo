@@ -335,7 +335,7 @@ export function AriaPreviewPage() {
             </p>
             <div className="mx-auto mt-5 grid max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4">
               {PRICING.map((item) => (
-                <article key={item.name} className={"relative flex h-full min-h-[108px] flex-col items-center rounded-3xl px-3 py-3 text-center shadow-card sm:min-h-[136px] sm:p-4 " + (item.highlight ? "bg-forest text-cream ring-2 ring-coral sm:ring-0" : "bg-card text-forest")}>
+                <article key={item.name} className={"relative flex h-full min-h-[108px] flex-col items-center rounded-3xl px-3 py-3 text-center shadow-card sm:min-h-[136px] sm:p-4 " + (item.highlight ? "bg-forest text-cream ring-2 ring-coral" : "bg-card text-forest")}>
                   <h3 className="font-display text-[13px] font-bold leading-snug sm:text-xl">{item.name}</h3>
                   <p aria-hidden={!item.highlight} className={"mt-0.5 text-[11px] font-semibold " + (item.highlight ? "text-cream/85" : "invisible")}>10 vstupov</p>
                   <p className={"mt-1 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
