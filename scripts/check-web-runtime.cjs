@@ -35,12 +35,12 @@ const failures = [];
         const label = `${engine}-${restricted ? 'blocked-storage' : 'fresh'}-${url.pathname.replaceAll('/', '_')}`;
         // Record only synthetic events from this browser fixture. Prevent
         // automated interactions from polluting production campaign analytics.
-        const puppyInteractions = [];
-        if (!bellaris && !restricted && url.pathname === '/psia-skolka-pre-steniatka/') {
+        const trackedEvents = [];
+        if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/'].includes(url.pathname)) {
           await page.route('**/functions/v1/website-landing-event', async route => {
             const request = route.request();
             const data = request.method() === 'POST' ? request.postDataJSON() : {};
-            if (data?.event_name) puppyInteractions.push({ name: data.event_name, source: data.event_source, attemptId: data.attempt_id });
+            if (data?.event_name) trackedEvents.push({ name: data.event_name, source: data.event_source, attemptId: data.attempt_id });
             await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
           });
         }
@@ -209,6 +209,38 @@ const failures = [];
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
               if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
                 throw new Error('Aria floating dock overflows mobile viewport ' + width);
+              // The paid landing must never blink its Aria speech/dock
+              // while moving between the form, requirements and contact.
+              if (url.pathname === '/psia-skolka-kosice/') {
+                const stability = await page.evaluate(async () => {
+                  const guide = document.querySelector('[data-aria-guide]');
+                  const dock = guide?.querySelector('[data-aria-dock]');
+                  const message = guide?.querySelector('[data-aria-message]');
+                  if (!guide || !dock || !message) return ['missing Aria'];
+                  const baseline = dock.getBoundingClientRect();
+                  const failures = [];
+                  for (const y of [150, 950, 2200, 3100, 1700, 3600, 110, 0]) {
+                    window.scrollTo(0, y);
+                    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                    const box = dock.getBoundingClientRect();
+                    const guideStyle = getComputedStyle(guide);
+                    if (document.querySelector('[data-aria-dock]') !== dock ||
+                        guideStyle.position !== 'fixed' || guideStyle.visibility !== 'visible' ||
+                        guideStyle.opacity !== '1' ||
+                        getComputedStyle(message).visibility !== 'visible' ||
+                        message.dataset.ariaSuppressed !== 'false' ||
+                        Math.abs(baseline.y - box.y) > 3 ||
+                        Math.abs(baseline.height - box.height) > 2) {
+                      failures.push({ y, stage: guide.dataset.ariaStage, dockY: box.y,
+                        baselineY: baseline.y, message: getComputedStyle(message).visibility });
+                    }
+                  }
+                  window.scrollTo(0, 0);
+                  return failures;
+                });
+                if (stability.length) throw new Error('Paid Aria flicker/dock instability at ' + width + ': ' + JSON.stringify(stability));
+                await page.screenshot({ path: path.join(out, 'lead-aria-' + engine + '-' + width + '-stable.png') });
+              }
               const navFrames = await aria.locator('[data-aria-dock] button').evaluateAll(buttons =>
                 buttons.every(button => getComputedStyle(button).boxShadow === 'none'));
               if (!navFrames) throw new Error('Only the overall Aria menu frame should be outlined, not each navigation item');
@@ -451,6 +483,106 @@ const failures = [];
               if (!await page.locator('#aria-puppy-check').count()) throw new Error('Scroll CTA must link to the puppy checker');
             }
           }
+          if (!restricted && isAriaPage && url.pathname === '/psia-skolka-kosice/') {
+            // Campaign funnel smoke: mock every backend action. Active campaigns
+            // must never receive synthetic web-form submissions or analytics.
+            const submissions = [], recoveries = [];
+            await page.route('**/functions/v1/web-form-submit', async route => {
+              const data = route.request().postDataJSON() || {};
+              if (data.action === 'recover_contact') {
+                recoveries.push(data);
+                await route.fulfill({ status: 200, contentType: 'application/json',
+                  body: '{"recovery_saved":true}' });
+                return;
+              }
+              submissions.push(data);
+              const success = submissions.length === 2;
+              await route.fulfill({ status: success ? 201 : 503,
+                contentType: 'application/json',
+                body: JSON.stringify(success ? { ok: true } : { ok: false, recovery_saved: false }) });
+            });
+            await page.setViewportSize({ width: 390, height: 844 });
+            await page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' }).click();
+            const contact = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+            await contact.waitFor({ state: 'visible' });
+            await contact.locator('label:has(input[name="zaujem"])').first().click();
+            await contact.getByRole('button', { name: 'Pokračovať' }).click();
+            const breedInput = contact.getByLabel('Plemeno psíka (nepovinné)');
+            if (!await breedInput.isVisible()) throw new Error('Active campaign form must ask for breed');
+            await contact.locator('input[name="meno"]').fill('Testovací dopyt');
+            await breedInput.fill('Írsky vlkodav');
+            await contact.locator('input[name="telefon"]').fill('912345678');
+            await contact.locator('input[type="checkbox"][required]').check();
+            await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
+            await contact.getByRole('alert').waitFor({ state: 'visible' });
+            if (trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_interest'))
+              throw new Error('Backend error must NOT emit a paid Lead');
+            await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
+            await page.locator('[role="dialog"] [data-lead-step-success]').last().waitFor({ state: 'visible' });
+            for (let i = 0; i < 15 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_interest'); i++)
+              await page.waitForTimeout(100);
+            const sent = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_interest');
+            const cta = trackedEvents.filter(e => e.name === 'inquiry_cta' && e.source === 'lead_landing_aria_interest');
+            if (submissions.length !== 2 || recoveries.length !== 1 || sent.length !== 1 ||
+                !cta.length || !submissions.every(data => data.form_type === 'lead' &&
+                  data.cta_source === 'lead_landing_aria_interest' &&
+                  data.interest_reason === 'Chcem sa informovať o škôlke' &&
+                  data.dog_breed === 'Írsky vlkodav' &&
+                  data.raw_payload?.['Plemeno psíka'] === 'Írsky vlkodav')) {
+              throw new Error('Campaign lead breed/source/conversion or recovery failed: ' +
+                JSON.stringify({ submissions: submissions.length, recoveries: recoveries.length,
+                  sent: sent.length, cta: cta.length, breeds: submissions.map(x => x.dog_breed) }));
+            }
+            await page.screenshot({ path: path.join(out, 'lead-aria-' + engine + '-390-mocked-success.png') });
+            const receipt = page.getByRole('dialog').last();
+            await receipt.getByRole('button', { name: 'Close' }).click();
+            await receipt.waitFor({ state: 'hidden' });
+          }
+          if (!restricted && !bellaris && url.pathname === '/') {
+            await page.setViewportSize({ width: 390, height: 844 });
+            const checker = page.locator('[data-home-puppy-checker] [data-aria-puppy-step="age"]');
+            await checker.scrollIntoViewIfNeeded();
+            await checker.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
+            const vaccines = page.locator('[data-home-puppy-checker] [data-aria-puppy-step="vaccines"]');
+            await vaccines.waitFor({ state: 'visible' });
+            for (let i = 0; i < 3; i++) await vaccines.locator('fieldset').nth(i).getByText('Áno', { exact: true }).click();
+            if (await vaccines.getByText(/Plemeno \(voliteľné\)/).count())
+              throw new Error('Homepage puppy checker must defer breed until contact');
+            const homeSubmissions = [];
+            await page.route('**/functions/v1/web-form-submit', async route => {
+              const data = route.request().postDataJSON() || {};
+              if (data.action !== 'recover_contact') homeSubmissions.push(data);
+              await route.fulfill({ status: 201, contentType: 'application/json', body: '{"ok":true}' });
+            });
+            await vaccines.getByRole('button', { name: /Pokračovať na kontakt/ }).click();
+            const contact = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+            await contact.waitFor({ state: 'visible' });
+            const summary = await contact.locator('[data-puppy-check-summary]').innerText();
+            if (!summary.includes('4 mesiacov') || !summary.includes('DHPPi+L'))
+              throw new Error('Homepage vaccine answers missing in actual contact');
+            await contact.locator('input[name="meno"]').fill('Testovací dopyt');
+            await contact.getByLabel('Plemeno psíka (nepovinné)').fill('Írsky vlkodav');
+            await contact.locator('input[name="telefon"]').fill('912345678');
+            await contact.locator('input[type="checkbox"][required]').check();
+            await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
+            await page.locator('[role="dialog"] [data-lead-step-success]').last().waitFor({ state: 'visible' });
+            for (let i = 0; i < 12 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'home_puppy_checker_eligible'); i++)
+              await page.waitForTimeout(100);
+            const accepted = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'home_puppy_checker_eligible');
+            const payload = homeSubmissions[0];
+            if (homeSubmissions.length !== 1 || accepted.length !== 1 || !payload ||
+                payload.form_type !== 'lead' || payload.cta_source !== 'home_puppy_checker_eligible' ||
+                payload.dog_breed !== 'Írsky vlkodav' ||
+                payload.puppy_check?.age_months !== 4 ||
+                !['rabies', 'dhppi', 'kennel'].every(k => payload.puppy_check?.vaccines?.[k] === 'yes'))
+              throw new Error('Homepage puppy CRM handoff failed: ' + JSON.stringify({ saved: homeSubmissions.length,
+                eventCount: accepted.length, source: payload?.cta_source, breed: payload?.dog_breed }));
+            await page.screenshot({ path: path.join(out, 'home-puppy-' + engine + '-390-success.png') });
+            const receipt = page.getByRole('dialog').last();
+            await receipt.getByRole('button', { name: 'Close' }).click();
+            await receipt.waitFor({ state: 'hidden' });
+            await page.evaluate(() => window.scrollTo(0, 0));
+          }
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
           if (isPuppyAria && !restricted) {
             const aria = page.locator('[data-aria-guide]');
@@ -607,16 +739,16 @@ const failures = [];
             await conversionDialog.locator('input[type="checkbox"][required]').check();
             await conversionDialog.getByRole('button', { name: 'Odoslať záujem' }).click();
             await conversionDialog.getByRole('alert').waitFor({ state: 'visible' });
-            if (puppyInteractions.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'))
+            if (trackedEvents.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'))
               throw new Error('Failed synthetic lead must not count as conversion');
             await conversionDialog.getByRole('button', { name: 'Odoslať záujem' }).click();
             // On success the shared LeadStepForm intentionally replaces its
             // form node with a receipt. Keep the dialog selector independent
             // of the removed [data-lead-step-form] element.
             await page.locator('[role="dialog"] [data-lead-step-success]').last().waitFor({ state: 'visible' });
-            for (let i = 0; i < 12 && !puppyInteractions.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'); i++)
+            for (let i = 0; i < 12 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'); i++)
               await page.waitForTimeout(100);
-            const has = (name, source) => puppyInteractions.some(e => e.name === name && e.source === source);
+            const has = (name, source) => trackedEvents.some(e => e.name === name && e.source === source);
             for (const [name, source] of [
               ['nav_click', 'puppy_landing_aria_pricing'],
               ['nav_click', 'puppy_landing_aria_faq'],
@@ -630,7 +762,7 @@ const failures = [];
               if (!has(name, source))
                 throw new Error('Missing isolated CTA/funnel event ' + name + ':' + source);
             }
-            const submitted = puppyInteractions.filter(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest');
+            const submitted = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest');
             if (submitted.length !== 1 || syntheticLeads.length !== 2 || syntheticRecoveries.length < 1 ||
                 !syntheticLeads.every(data => data.form_type === 'lead' &&
                   data.cta_source === 'puppy_landing_aria_interest' &&
