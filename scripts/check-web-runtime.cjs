@@ -219,6 +219,39 @@ const failures = [];
             if (restoredScroll.rootOverflow === 'hidden' || restoredScroll.bodyPosition === 'fixed')
               throw new Error('Cookie scroll lock was not restored after saving preferences');
           }
+          if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/test-aria/', '/en/dog-daycare-kosice/'].includes(url.pathname)) {
+            // APP-01: the Google mark, author and five stars must occupy one
+            // compact horizontal row aligned to the quote, in SK and EN.
+            const reviewSelector = url.pathname === '/en/dog-daycare-kosice/' ? '#reviews' : '#recenzie';
+            for (const reviewWidth of [390, 1280]) {
+              await page.setViewportSize({ width: reviewWidth, height: 900 });
+              const byline = await page.locator(reviewSelector + ' figure').first().evaluate(card => {
+                const head = card.querySelector('[data-review-byline]');
+                const logo = head?.querySelector('[data-google-review-logo]');
+                const caption = head?.querySelector('figcaption');
+                const stars = head?.querySelector('[data-review-stars]');
+                const quote = card.querySelector('blockquote');
+                if (!head || !logo || !caption || !stars || !quote) return null;
+                const l = logo.getBoundingClientRect();
+                const n = caption.getBoundingClientRect();
+                const s = stars.getBoundingClientRect();
+                const h = head.getBoundingClientRect();
+                const q = quote.getBoundingClientRect();
+                return {
+                  withinRow: Math.max(l.bottom,n.bottom,s.bottom) - Math.min(l.top,n.top,s.top) <= 32,
+                  order: l.right <= n.left + 2 && n.right <= s.left + 2,
+                  aligns: Math.abs(h.left - q.left) <= 2,
+                  fits: n.right <= h.right + 2 && s.right <= h.right + 2,
+                  height: card.getBoundingClientRect().height,
+                };
+              });
+              if (!byline || !byline.withinRow || !byline.order || !byline.aligns ||
+                  !byline.fits || byline.height > 210)
+                throw new Error('Google review byline no longer compact at '+reviewWidth+': '+JSON.stringify(byline));
+            }
+            await page.setViewportSize({ width: 390, height: 844 });
+          }
+
           if (!bellaris && isAriaPage && !restricted) {
             if (url.pathname === '/test-aria/')
               await page.waitForTimeout(1650); // Let short-lived consent-saved notice clear before visual snapshots.
