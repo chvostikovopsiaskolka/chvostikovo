@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AriaPreviewPage } from "./test-aria";
 import { useState } from "react";
 import {
   ArrowDown,
@@ -92,7 +93,9 @@ export const Route = createFileRoute("/psia-skolka-kosice")({
     ],
     links: [{ rel: "canonical", href: URL }],
   }),
-  component: LeadLandingPage,
+  // Approved Aria preview becomes the actual paid lead experience. The
+  // route-specific noindex/canonical head remains owned by this route.
+  component: AriaPreviewPage,
 });
 
 function scrollToLeadForm(source: string) {
