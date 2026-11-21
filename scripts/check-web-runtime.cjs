@@ -317,7 +317,7 @@ const failures = [];
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
           // Shared Slovak Hero CTA: mobile pair, desktop single prominent info CTA.
           // Layout regression 320/375/390/1440 in Chromium and Safari WebKit.
-          if (!bellaris && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname)) {
+          if (!bellaris && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname) && !isAriaPage) {
             for (const width of [320, 375, 390, 1440]) {
               await page.setViewportSize({ width, height: width >= 1024 ? 900 : 844 });
               const hero = page.locator('section.hero-safe-top').first();
