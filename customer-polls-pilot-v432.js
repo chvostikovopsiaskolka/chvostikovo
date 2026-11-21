@@ -219,7 +219,7 @@
  }
  addCustomerHook('afterBootstrap',sync);
  addCustomerHook('afterRenderDog',()=>{if(allowed===account())render();else void sync()});
- addCustomerHook('afterSwitchTab',()=>{if(allowed===account())render()});
+ addCustomerHook('afterSwitchTab',tab=>{if(allowed===account()){render();if(tab==='menu'&&!sending)void refresh(allowed,true)}});
  document.addEventListener('click',event=>{
   if(event.target.closest?.('[data-customer-locale]')&&allowed===account())
    requestAnimationFrame(render);
