@@ -5,7 +5,7 @@ export type LightboxPhoto = {
   src: string;
   fullSrc?: string;
   alt: string;
-  caption?: string;
+  caption?: string | undefined;
 };
 
 /** Shared public-web photo viewer: controls stay beside the image, never at viewport edges. */
