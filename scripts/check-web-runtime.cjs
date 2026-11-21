@@ -441,6 +441,68 @@ const failures = [];
             }
           }
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
+          if (isPuppyAria && !restricted) {
+            const aria = page.locator('[data-aria-guide]');
+            const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+            const robots = await page.locator('meta[name="robots"]').getAttribute('content');
+            const schema = await page.locator('script[type="application/ld+json"]').allTextContents();
+            if (canonical !== 'https://chvostikovo.sk/psia-skolka-pre-steniatka/' ||
+                robots !== 'index, follow' || !schema.some(value => value.includes('FAQPage')) ||
+                !(await page.title()).includes('šteniatka'))
+              throw new Error('Puppy organic SEO canonical, indexing or FAQ contract missing');
+            if (await page.locator('.mobile-dock').count())
+              throw new Error('Puppy route must not render the old mobile dock alongside Aria');
+            for (const width of [320, 375, 390, 430]) {
+              await page.setViewportSize({ width, height: 844 });
+              await page.evaluate(() => window.scrollTo(0, 0));
+              await page.waitForTimeout(150);
+              const speech = aria.locator('[data-aria-message]');
+              if (await aria.getAttribute('data-aria-stage') !== 'intro' ||
+                  !await speech.isVisible() || await speech.getAttribute('data-aria-suppressed') !== 'false')
+                throw new Error('Puppy Aria introduction must remain visible at ' + width);
+              const geometry = await aria.locator('[data-aria-dock]').boundingBox();
+              if (!geometry || geometry.x < 0 || geometry.x + geometry.width > width + 2)
+                throw new Error('Puppy Aria dock clipped on mobile at ' + width);
+              const boundary = await page.evaluate(() => {
+                const el = document.getElementById('puppy-first-visit');
+                return el ? window.scrollY + el.getBoundingClientRect().bottom : null;
+              });
+              if (boundary == null) throw new Error('Puppy requirements/visit boundary missing');
+              await page.evaluate(y => window.scrollTo(0, y), boundary + 36);
+              await page.waitForTimeout(240);
+              if (await aria.getAttribute('data-aria-stage') !== 'contact' ||
+                  !await speech.isVisible() || !await aria.getByRole('button', { name: 'Vyplniť' }).count())
+                throw new Error('Puppy Aria must show persistent contact CTA after conditions at ' + width);
+              if (url.pathname === '/psia-skolka-pre-steniatka/' && width === 390)
+                await page.screenshot({ path: path.join(out, 'puppy-aria-' + engine + '-390-contact.png') });
+            }
+            await page.setViewportSize({ width: 390, height: 844 });
+            const inline = page.locator('#aria-puppy-check');
+            await inline.scrollIntoViewIfNeeded();
+            await inline.locator('[data-aria-puppy-step="age"]').waitFor({ state: 'visible' });
+            if (await inline.getByText(/Plemeno \(voliteľné\)/).count())
+              throw new Error('Breed must not be asked in puppy age step');
+            await inline.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
+            if (!await inline.locator('[data-aria-puppy-step="vaccines"]').count())
+              throw new Error('Vaccination step missing');
+            for (let i = 0; i < 3; i++)
+              await inline.locator('fieldset').nth(i).getByText('Áno', { exact: true }).click();
+            await inline.getByRole('button', { name: /Pokračovať na kontakt/ }).click();
+            const leadDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+            await leadDialog.waitFor({ state: 'visible' });
+            if (!await leadDialog.locator('[data-puppy-check-summary]').getByText(/4 mesiacov/).count())
+              throw new Error('Puppy age did not transfer to actual contact form');
+            if (!await leadDialog.getByLabel('Plemeno psíka (nepovinné)').isVisible())
+              throw new Error('Breed field missing from final contact form');
+            await leadDialog.getByLabel('Plemeno psíka (nepovinné)').fill('Írsky vlkodav');
+            if (!await leadDialog.locator('[data-puppy-check-summary]').getByText(/Írsky vlkodav/).count())
+              throw new Error('Puppy breed correction must update the attached summary');
+            await page.screenshot({ path: path.join(out, 'puppy-aria-' + engine + '-390-contact-form.png') });
+            await leadDialog.getByRole('button', { name: 'Close' }).click();
+            await leadDialog.waitFor({ state: 'hidden' });
+            await page.evaluate(() => window.scrollTo(0, 0));
+            await page.waitForTimeout(190);
+          }
           // Shared Slovak Hero CTA: mobile pair, desktop single prominent info CTA.
           // Layout regression 320/375/390/1440 in Chromium and Safari WebKit.
           if (!bellaris && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname) && !isAriaPage) {
