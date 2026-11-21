@@ -9,7 +9,11 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
-import { MobileDock } from "@/components/site/MobileDock";
+import { AriaLeadAssistant } from "@/components/site/AriaLeadAssistant";
+import { AriaPuppyChecker } from "@/components/site/AriaPuppyChecker";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import type { PuppyCheckInput } from "@/lib/inquiry";
+import { LEAD_STEP_INTERESTS } from "@/components/site/LeadStepForm";
 import { LandingMobilePricing } from "@/components/site/LandingMobilePricing";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
@@ -89,6 +93,9 @@ export const Route = createFileRoute("/psia-skolka-pre-steniatka")({
     meta: [
       { title },
       { name: "description", content: description },
+      { name: "robots", content: "index, follow" },
+      { property: "og:locale", content: "sk_SK" },
+      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
@@ -147,18 +154,57 @@ function PuppyForm({
 function PuppyDaycarePage() {
   const [formOpen, setFormOpen] = useState(false);
   const [formSource, setFormSource] = useState("puppy_landing_modal");
+  const [puppyModalOpen, setPuppyModalOpen] = useState(false);
+  const [puppyCheck, setPuppyCheck] = useState<PuppyCheckInput | undefined>(undefined);
+  const [formPreset, setFormPreset] = useState<string | undefined>(undefined);
 
   function openForm(source: string) {
     trackMarketingInteraction("inquiry_cta", source);
     void trackCookielessInteraction("inquiry_cta", source);
     setFormSource(source);
+    setFormPreset(undefined);
+    setPuppyCheck(undefined);
+    setFormOpen(true);
+  }
+
+  function openAriaInfo() {
+    const source = "puppy_landing_aria_info";
+    trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
+    setFormSource(source);
+    setFormPreset(LEAD_STEP_INTERESTS[0].value);
+    setPuppyCheck(undefined);
+    setFormOpen(true);
+  }
+
+  function openPuppyContact(details: PuppyCheckInput, infoOnly = false) {
+    const source = infoOnly ? "puppy_landing_checker_info" : "puppy_landing_checker_eligible";
+    trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
+    setFormSource(source);
+    setFormPreset(infoOnly ? LEAD_STEP_INTERESTS[0].value : "Mám záujem o škôlku pre šteniatko");
+    setPuppyCheck(details);
+    setPuppyModalOpen(false);
     setFormOpen(true);
   }
 
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
       <Header landingMinimal hideMobileDock landingTrackingSource="puppy_landing_header_phone" />
-      <MobileDock variant="puppy" onInterestOpen={() => openForm("puppy_landing_mobile_dock")} />
+      <AriaLeadAssistant
+        trackingPrefix="puppy_landing_aria"
+        requirementsSectionId="puppy-first-visit"
+        anchorOverrides={{
+          "lead-benefits": "puppy-benefits",
+          "lead-first-visit": "puppy-first-visit",
+          "lead-faq": "puppy-faq",
+          "aria-mosaic": "puppy-gallery",
+        }}
+        onOpenInfo={openAriaInfo}
+        onOpenInterest={() => openForm("puppy_landing_aria_interest")}
+        onOpenPuppyChecker={() => setPuppyModalOpen(true)}
+        hidden={formOpen || puppyModalOpen}
+      />
 
       <main>
         <section className="hero-safe-top relative overflow-hidden pt-4 sm:pt-6 lg:pt-24">
@@ -291,7 +337,7 @@ function PuppyDaycarePage() {
 
         <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openForm("puppy_landing_friendship_20261028")} />
 
-        <DaycarePhotoCarousel />
+        <div id="puppy-gallery"><DaycarePhotoCarousel /></div>
 
         <section id="puppy-first-visit" className="relative scroll-mt-4 overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
@@ -334,7 +380,12 @@ function PuppyDaycarePage() {
         </section>
 
 
-        <section className="relative overflow-hidden bg-secondary/40 py-10 sm:py-14">
+        <AriaPuppyChecker
+          onInterest={(details) => openPuppyContact(details)}
+          onInfo={(details) => openPuppyContact(details, true)}
+        />
+
+        <section id="puppy-faq" className="relative overflow-hidden bg-secondary/40 py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-4xl px-4">
             <div className="text-center">
@@ -387,13 +438,22 @@ function PuppyDaycarePage() {
 
       <Footer />
 
+      <Dialog open={puppyModalOpen} onOpenChange={setPuppyModalOpen}>
+        <DialogContent className="max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6" aria-describedby={undefined}>
+          <DialogTitle className="font-display text-lg font-bold text-forest">Kontrola vhodnosti šteniatka</DialogTitle>
+          <AriaPuppyChecker embedded
+            onInterest={(details) => openPuppyContact(details)}
+            onInfo={(details) => openPuppyContact(details, true)} />
+        </DialogContent>
+      </Dialog>
       <FormDialog
         open={formOpen}
         onOpenChange={setFormOpen}
         title="Čo hľadáte pre svojho psíka?"
         subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
       >
-        <PuppyForm source={formSource} />
+        <LeadStepForm key={formSource} questionInHeading trackingSource={formSource}
+          presetInterest={formPreset} puppyCheck={puppyCheck} />
       </FormDialog>
     </div>
   );

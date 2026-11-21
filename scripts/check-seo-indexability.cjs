@@ -97,6 +97,25 @@ assert(faqHtml.includes("FAQPage"), "FAQ HTML missing structured FAQ data");
 console.log("[seo] PASS: sitemap + prerender + title + description + canonical + FAQPage for " + faqRoute);
 
 
+// Puppy organic page keeps its own indexable search intent, structured FAQ,
+// prerendered content and canonical even when the Aria UI is integrated.
+const puppySeoUrl = "https://chvostikovo.sk/psia-skolka-pre-steniatka/";
+assert(sitemap.includes("<loc>" + puppySeoUrl + "</loc>"), "Puppy SEO URL missing from sitemap");
+assert(pagesConfig.includes('{ path: "/psia-skolka-pre-steniatka" }'),
+  "Puppy page must remain prerendered on Pages");
+const puppySeoHtml = fs.readFileSync("dist/client/psia-skolka-pre-steniatka/index.html", "utf8");
+for (const term of [
+  "Psia škôlka pre šteniatka v Košiciach",
+  "Noví kamoši.",
+  "https://chvostikovo.sk/psia-skolka-pre-steniatka/",
+  "FAQPage",
+  "index, follow",
+  "sk_SK",
+]) assert(puppySeoHtml.includes(term), "Puppy prerendered SEO content missing: " + term);
+assert(!puppySeoHtml.includes('content="noindex'),
+  "Puppy landing must remain indexable, unlike the paid lead route");
+console.log("[seo] PASS: puppy sitemap, prerender, canonical, indexability and FAQ schema");
+
 // Retired shop aliases are static, noindex redirects, not checkout pages.
 for (const legacy of ["kosik", "objednavka"]) {
   assert(!sitemap.includes("/" + legacy), "Retired shop route must stay outside sitemap");

@@ -31,12 +31,16 @@ export function AriaLeadAssistant({
   onOpenPuppyChecker,
   hidden = false,
   trackingPrefix = "aria_preview_v3",
+  requirementsSectionId = "lead-requirements",
+  anchorOverrides,
 }: {
   onOpenInfo: () => void;
   onOpenInterest: () => void;
   onOpenPuppyChecker: () => void;
   hidden?: boolean;
   trackingPrefix?: string;
+  requirementsSectionId?: string;
+  anchorOverrides?: Record<string, string>;
 }) {
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
   const stageRef = useRef<"intro" | "puppy" | "contact">("intro");
@@ -46,7 +50,6 @@ export function AriaLeadAssistant({
 
   const speechRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLImageElement>(null);
-  const [speechObscured, setSpeechObscured] = useState(false);
   const [speechGeometry, setSpeechGeometry] = useState({ width: 280, height: 42, tipX: -42, tipY: 68 });
 
   // One path owns both the speech balloon and its tail. The tip follows
@@ -85,52 +88,6 @@ export function AriaLeadAssistant({
     };
   }, [hidden, stage]);
 
-  // Yield to visible headings, form fields and CTAs instead of covering them.
-  // Visibility keeps the layout measurable on the next scroll frame.
-  useEffect(() => {
-    if (hidden) return;
-    let frame = 0;
-    const check = () => {
-      frame = 0;
-      const bubble = speechRef.current?.getBoundingClientRect();
-      if (!bubble || panel) {
-        setSpeechObscured(false);
-        return;
-      }
-      const important = document.querySelectorAll<HTMLElement>(
-        stage === "intro"
-          ? "main h1, main h2, main input:not([type=radio]), main select, main textarea, main button"
-          : "main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]"
-      );
-      setSpeechObscured(previous => {
-        // Require a wider clear gap before restoring the speech balloon.
-        // This prevents rapid hide/show at the boundary of a form or heading.
-        const margin = previous ? 30 : 8;
-        const overlaps = Array.from(important).some(node => {
-          const rect = node.getBoundingClientRect();
-          return rect.width > 0 && rect.height > 0 &&
-            rect.left < bubble.right + margin && rect.right > bubble.left - margin &&
-            rect.top < bubble.bottom + margin && rect.bottom > bubble.top - margin;
-        });
-        return previous === overlaps ? previous : overlaps;
-      });
-    };
-    const requestCheck = () => {
-      if (!frame) frame = window.requestAnimationFrame(check);
-    };
-    const observer = new ResizeObserver(requestCheck);
-    if (speechRef.current) observer.observe(speechRef.current);
-    window.addEventListener("scroll", requestCheck, { passive: true });
-    window.addEventListener("resize", requestCheck);
-    requestCheck();
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", requestCheck);
-      window.removeEventListener("resize", requestCheck);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, [hidden, stage, panel]);
-
   // Stable sections rather than flipping a bubble on every scroll pixel.
   // Hysteresis keeps iOS browser chrome resizing from thrashing the dock.
   useEffect(() => {
@@ -138,9 +95,10 @@ export function AriaLeadAssistant({
     const update = () => {
       frame = 0;
       const previous = stageRef.current;
-      const endOfRequirements = document.getElementById("lead-requirements")?.getBoundingClientRect().bottom ?? Infinity;
+      const endOfRequirements = document.getElementById(requirementsSectionId)?.getBoundingClientRect().bottom ?? Infinity;
+      const transition = Math.round(window.innerHeight * 0.4);
       let next: typeof previous;
-      if (previous === "contact" ? endOfRequirements < 110 : endOfRequirements <= -8) {
+      if (previous === "contact" ? endOfRequirements < transition + 36 : endOfRequirements < transition - 18) {
         next = "contact";
       } else if (previous === "intro" ? window.scrollY < 170 : window.scrollY < 80) {
         next = "intro";
@@ -163,7 +121,7 @@ export function AriaLeadAssistant({
       window.removeEventListener("resize", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [requirementsSectionId]);
 
   useEffect(() => {
     if (!panel) return;
@@ -192,7 +150,7 @@ export function AriaLeadAssistant({
   function jump(id: string, action: string) {
     track(action);
     setPanel(null);
-    const target = document.getElementById(id);
+    const target = document.getElementById(anchorOverrides?.[id] ?? id);
     if (!target) return;
     const top = window.scrollY + target.getBoundingClientRect().top - 86;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -365,9 +323,9 @@ export function AriaLeadAssistant({
         )}
 
         {!panel && (
-          <div data-aria-message data-aria-suppressed={speechObscured ? "true" : "false"} aria-hidden={speechObscured}
-            className={`mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px] ${speechObscured ? "invisible pointer-events-none" : stage === "intro" ? "pointer-events-none" : "pointer-events-auto"}`}>
-            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[42px] max-w-full -rotate-[0.5deg] items-center px-2.5 py-1.5 text-forest">
+          <div data-aria-message data-aria-suppressed="false"
+            className="pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]">
+            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-full max-w-[460px] -rotate-[0.5deg] items-center px-3 py-2 text-forest">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
@@ -375,10 +333,10 @@ export function AriaLeadAssistant({
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>
               {stage === "intro" ? (
-                <p className="relative z-10 font-display text-[11px] leading-tight font-semibold tracking-tight">
+                <p className="relative z-10 font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]">
                   Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                   <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
-                  <span className="mt-1 block text-[10px] font-medium text-forest/85">Zisti viac z našej ponuky nižšie.</span>
+                  <span className="mt-1.5 block text-[11px] font-medium leading-[1.35] text-forest/85 sm:text-xs">Zisti viac z našej ponuky nižšie.</span>
                 </p>
               ) : stage === "puppy" ? (
                 <div className="relative z-10 flex min-w-0 items-center gap-2">
@@ -386,7 +344,7 @@ export function AriaLeadAssistant({
                     Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span>
                   </strong>
                   <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
-                    className="min-h-9 shrink-0 rounded-[11px] bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    className="pointer-events-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Overiť
                   </button>
                 </div>
@@ -396,7 +354,7 @@ export function AriaLeadAssistant({
                     Chcete sa informovať? <span className="text-coral-dark">Vyplňte nezáväzný formulár.</span>
                   </strong>
                   <button type="button" onClick={openInfo}
-                    className="min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    className="pointer-events-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Vyplniť
                   </button>
                 </div>

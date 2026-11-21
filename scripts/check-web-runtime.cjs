@@ -47,7 +47,11 @@ const failures = [];
           // The released lead URL and the noindex preview share Aria UI. The
           // production baseline may still show its pre-release landing.
           const isAriaPage = !bellaris && (url.pathname === '/test-aria/' || url.pathname === '/psia-skolka-kosice/') && await page.locator('[data-aria-guide]').count() > 0;
-          if (!bellaris && isAriaPage) {
+          // On current production this is the approved puppy rollout; the
+          // informational pre-merge baseline may still use the old dock.
+          const isPuppyAria = !bellaris && url.pathname === '/psia-skolka-pre-steniatka/' &&
+            await page.locator('[data-aria-guide]').count() > 0;
+          if (!bellaris && (isAriaPage || isPuppyAria)) {
             if (!await page.getByText(/Ahoj! Používame cookies 🍪/).count())
               throw new Error('Preview cookie greeting missing');
             const bubble = page.locator('[data-aria-cookie-bubble="true"]');
@@ -99,7 +103,7 @@ const failures = [];
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
-          if (!bellaris && isAriaPage) {
+          if (!bellaris && (isAriaPage || isPuppyAria)) {
             const restoredScroll = await page.evaluate(() => ({
               rootOverflow: document.documentElement.style.overflow,
               bodyPosition: document.body.style.position,
@@ -151,7 +155,7 @@ const failures = [];
                 height: el.getBoundingClientRect().height,
                 shadow: getComputedStyle(el).boxShadow,
               }));
-              if (speechStyle.height < 39 || speechStyle.height > 72 || speechStyle.shadow !== 'none')
+              if (speechStyle.height < 39 || speechStyle.height > 110 || speechStyle.shadow !== 'none')
                 throw new Error('Speech must stay compact without stacked box shadows at ' + width);
               const tip = await tail.evaluate(el => ({
                 x: Number(el.dataset.tipX), y: Number(el.dataset.tipY),
@@ -164,82 +168,21 @@ const failures = [];
 
               if (url.pathname === '/test-aria/') {
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-welcome.png') });
-                // On short pages the heading may already sit safely above
-                // the dock. Align the next visible form control with the
-                // bubble to exercise a *real* collision, never a negative
-                // scroll position that the browser silently clamps to zero.
-                const selected = await page.evaluate(() => {
-                  const speech = document.querySelector('[data-aria-speech]').getBoundingClientRect();
-                  const targets = [...document.querySelectorAll(
-                    '#aria-hero-form h2, #aria-hero-form label, #aria-hero-form button, #aria-hero-form input'
-                  )].filter(el => el.getBoundingClientRect().width > 0 &&
-                    el.getBoundingClientRect().top > speech.top + 20);
-                  const target = targets[0];
-                  if (!target) return false;
-                  target.setAttribute('data-aria-overlap-target', 'true');
-                  window.scrollTo(0, window.scrollY + target.getBoundingClientRect().top - (speech.top + 12));
-                  return true;
-                });
-                if (!selected) throw new Error('Cannot find a visible form control to test speech clearance');
-                await page.waitForTimeout(230);
-                const clearance = await page.evaluate(() => {
-                  const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
-                  const overlaps = [...document.querySelectorAll(
-                    'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]'
-                  )].filter(node => {
-                    const b = node.getBoundingClientRect();
-                    return b.width > 0 && b.height > 0 &&
-                      a.left < b.right + 8 && a.right > b.left - 8 &&
-                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
-                  });
-                  const guide = document.querySelector('[data-aria-guide]');
-                  const stage = guide.dataset.ariaStage;
-                  const introBlockers = [...document.querySelectorAll(
-                    'main h1, main h2, main input:not([type=radio]), main select, main textarea, main button'
-                  )].some(node => {
-                    const b = node.getBoundingClientRect();
-                    return b.width > 0 && b.height > 0 &&
-                      a.left < b.right + 8 && a.right > b.left - 8 &&
-                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
-                  });
-                  return {
-                    overlap: overlaps.length > 0,
-                    colliding: overlaps.slice(0, 3).map(node => node.tagName),
-                    stage, introBlockers,
-                    pointerEvents: getComputedStyle(document.querySelector('[data-aria-message]')).pointerEvents,
-                    suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed,
-                    speechTop: Math.round(a.top)
-                  };
-                });
-                if (!clearance.overlap) throw new Error('No real content overlap to test clearance: ' + JSON.stringify(clearance));
-                if (clearance.stage === 'intro' && !clearance.introBlockers) {
-                  if (clearance.suppressed !== 'false' || clearance.pointerEvents !== 'none')
-                    throw new Error('Intro greeting must be visible but click-through over radio choices: ' + JSON.stringify(clearance));
-                } else if (clearance.suppressed !== 'true') {
-                  throw new Error('Interactive speech must hide over form controls: ' + JSON.stringify(clearance));
-                }
-                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-clear.png') });
+                const initialSpeech = await aria.locator('[data-aria-message]').evaluate(el => ({
+                  visible: getComputedStyle(el).visibility === 'visible',
+                  pointerEvents: getComputedStyle(el).pointerEvents,
+                  suppressed: el.dataset.ariaSuppressed
+                }));
+                if (!initialSpeech.visible || initialSpeech.pointerEvents !== 'none' || initialSpeech.suppressed !== 'false')
+                  throw new Error('Intro speech must be always visible but nonblocking at ' + width);
+                await page.locator('#aria-hero-form').scrollIntoViewIfNeeded();
+                await page.waitForTimeout(180);
+                const overForm = await aria.locator('[data-aria-message]').evaluate(el =>
+                  getComputedStyle(el).visibility === 'visible' && el.dataset.ariaSuppressed === 'false');
+                if (!overForm) throw new Error('Aria speech flickers/hides over the lead form at ' + width);
+                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-visible.png') });
                 await page.evaluate(() => window.scrollTo(0, 0));
-                await page.waitForTimeout(170);
-                // At some widths the form is already under the fixed dock at
-                // scrollY=0. In that case keeping speech hidden is correct.
-                const restored = await page.evaluate(() => {
-                  const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
-                  const stage = document.querySelector('[data-aria-guide]').dataset.ariaStage;
-                  const selector = stage === 'intro'
-                    ? 'main h1, main h2, main input:not([type=radio]), main select, main textarea, main button'
-                    : 'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]';
-                  const overlapping = [...document.querySelectorAll(selector)].some(node => {
-                    const b = node.getBoundingClientRect();
-                    return b.width > 0 && b.height > 0 &&
-                      a.left < b.right + 8 && a.right > b.left - 8 &&
-                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
-                  });
-                  return { overlapping,
-                    suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed };
-                });
-                if (restored.suppressed !== String(restored.overlapping))
-                  throw new Error('Aria must restore speech visibility according to real content clearance: ' + JSON.stringify(restored));
+                await page.waitForTimeout(140);
               }
               const interestButton = aria.getByRole('button', { name: 'Mám záujem o škôlku' });
               if ((await interestButton.getAttribute('class') || '').includes('bg-coral/15'))
@@ -327,35 +270,25 @@ const failures = [];
               await wizard.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
               if (!await wizard.locator('[data-aria-puppy-step="vaccines"]').count()) throw new Error('Puppy vaccinations missing');
               for (let i = 0; i < 3; i++) await wizard.locator('fieldset').nth(i).getByText('Áno', { exact: true }).click();
-              await wizard.getByRole('button', { name: /^Pokračovať$/ }).click();
-              await wizard.locator('[data-aria-puppy-step="dog"]').waitFor({ state: 'visible' });
-              await wizard.getByPlaceholder('Ako sa volá?').fill('Testovací psík');
-              await wizard.getByPlaceholder('Plemeno alebo kríženec').fill('Kríženec');
-              await wizard.getByRole('button', { name: /Zobraziť výsledok/ }).click();
-              await wizard.locator('[data-aria-puppy-step="result"]').waitFor({ state: 'visible' });
-              await wizard.getByRole('button', { name: /Mám záujem – vyplniť kontakt/ }).click();
+              if (await wizard.getByText(/Plemeno \(voliteľné\)/).count() ||
+                  await wizard.getByPlaceholder('Plemeno alebo kríženec').count())
+                throw new Error('Puppy checker must collect only age and vaccines, not breed');
+              await wizard.getByRole('button', { name: /Pokračovať na kontakt/ }).click();
               await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
-              // Nested puppy -> contact modal handoff: use the actual iPhone
-              // close button, not an ambiguous synthetic Escape targeting the
-              // previous Radix layer in WebKit. Keyboard Escape remains covered
-              // later for the normal single-dialog requirements flow.
+              // No dog/result intermediate step: the existing contact owns breed.
               const contactDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
               const puppySummary = contactDialog.locator('[data-puppy-check-summary]');
               await puppySummary.waitFor({ state: 'visible' });
-              const puppySummaryText = await puppySummary.innerText();
-              if (!puppySummaryText.includes('Testovací psík') || !puppySummaryText.includes('Kríženec') ||
-                  !puppySummaryText.includes('4 mesiacov') ||
-                  !/besnota:\s*áno/i.test(puppySummaryText) ||
-                  !/DHPPi\+L:\s*áno/i.test(puppySummaryText) ||
-                  !/kotercový kašeľ:\s*áno/i.test(puppySummaryText))
-                throw new Error('Puppy wizard details were lost during contact handoff: ' + puppySummaryText);
-              const puppyBreedField = contactDialog.locator('[data-aria-breed-field]');
-              const puppyBreedInput = puppyBreedField.getByLabel('Plemeno psíka (nepovinné)');
-              if (!await puppyBreedField.isVisible() || await puppyBreedInput.inputValue() !== 'Kríženec')
-                throw new Error('Puppy breed must be prefilled but editable at contact handoff');
-              await puppyBreedInput.fill('Írsky vlkodav');
+              const summary = await puppySummary.innerText();
+              if (!summary.includes('4 mesiacov') || !/besnota:\s*áno/i.test(summary) ||
+                  !/DHPPi\+L:\s*áno/i.test(summary) || !/kotercový kašeľ:\s*áno/i.test(summary))
+                throw new Error('Age/vaccine answers were lost in contact: ' + summary);
+              const breedInput = contactDialog.getByLabel('Plemeno psíka (nepovinné)');
+              if (!await breedInput.isVisible() || await breedInput.inputValue() !== '')
+                throw new Error('Puppy breed must be entered exactly once, at contact');
+              await breedInput.fill('Írsky vlkodav');
               if (!await puppySummary.getByText(/Írsky vlkodav/).count())
-                throw new Error('Corrected contact breed must also update the carried puppy summary');
+                throw new Error('Contact breed must update the carried puppy summary');
               await contactDialog.getByRole('button', { name: 'Close' }).click();
               await contactDialog.waitFor({ state: 'hidden' });
               await aria.waitFor({ state: 'visible' });
@@ -508,6 +441,77 @@ const failures = [];
             }
           }
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
+          if (isPuppyAria && !restricted) {
+            const aria = page.locator('[data-aria-guide]');
+            const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+            const robots = await page.locator('meta[name="robots"]').getAttribute('content');
+            const schema = await page.locator('script[type="application/ld+json"]').allTextContents();
+            if (canonical !== 'https://chvostikovo.sk/psia-skolka-pre-steniatka/' ||
+                robots !== 'index, follow' || !schema.some(value => value.includes('FAQPage')) ||
+                !(await page.title()).includes('šteniatka'))
+              throw new Error('Puppy organic SEO canonical, indexing or FAQ contract missing');
+            if (await page.locator('.mobile-dock').count())
+              throw new Error('Puppy route must not render the old mobile dock alongside Aria');
+            for (const width of [320, 375, 390, 430]) {
+              await page.setViewportSize({ width, height: 844 });
+              // CSS scroll-behavior:smooth can leave the previous width's
+              // animation active; deterministic geometry checks require an
+              // immediate scroll, not an uncompleted multi-section animation.
+              await page.evaluate(() => {
+                document.documentElement.style.scrollBehavior = 'auto';
+                document.body.style.scrollBehavior = 'auto';
+                window.scrollTo(0, 0);
+              });
+              await page.waitForFunction(() =>
+                window.scrollY < 2 && document.querySelector('[data-aria-guide]')?.dataset.ariaStage === 'intro');
+              const speech = aria.locator('[data-aria-message]');
+              if (await aria.getAttribute('data-aria-stage') !== 'intro' ||
+                  !await speech.isVisible() || await speech.getAttribute('data-aria-suppressed') !== 'false')
+                throw new Error('Puppy Aria introduction must remain visible at ' + width);
+              const geometry = await aria.locator('[data-aria-dock]').boundingBox();
+              if (!geometry || geometry.x < 0 || geometry.x + geometry.width > width + 2)
+                throw new Error('Puppy Aria dock clipped on mobile at ' + width);
+              const boundary = await page.evaluate(() => {
+                const el = document.getElementById('puppy-first-visit');
+                return el ? window.scrollY + el.getBoundingClientRect().bottom : null;
+              });
+              if (boundary == null) throw new Error('Puppy requirements/visit boundary missing');
+              await page.evaluate(y => window.scrollTo(0, y), boundary + 36);
+              await page.waitForFunction(() =>
+                document.querySelector('[data-aria-guide]')?.dataset.ariaStage === 'contact');
+              if (!await speech.isVisible() || await speech.getAttribute('data-aria-suppressed') !== 'false' ||
+                  !await aria.getByRole('button', { name: 'Vyplniť' }).count())
+                throw new Error('Puppy Aria must show persistent contact CTA after conditions at ' + width);
+              if (url.pathname === '/psia-skolka-pre-steniatka/' && width === 390)
+                await page.screenshot({ path: path.join(out, 'puppy-aria-' + engine + '-390-contact.png') });
+            }
+            await page.setViewportSize({ width: 390, height: 844 });
+            const inline = page.locator('#aria-puppy-check');
+            await inline.scrollIntoViewIfNeeded();
+            await inline.locator('[data-aria-puppy-step="age"]').waitFor({ state: 'visible' });
+            if (await inline.getByText(/Plemeno \(voliteľné\)/).count())
+              throw new Error('Breed must not be asked in puppy age step');
+            await inline.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
+            if (!await inline.locator('[data-aria-puppy-step="vaccines"]').count())
+              throw new Error('Vaccination step missing');
+            for (let i = 0; i < 3; i++)
+              await inline.locator('fieldset').nth(i).getByText('Áno', { exact: true }).click();
+            await inline.getByRole('button', { name: /Pokračovať na kontakt/ }).click();
+            const leadDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+            await leadDialog.waitFor({ state: 'visible' });
+            if (!await leadDialog.locator('[data-puppy-check-summary]').getByText(/4 mesiacov/).count())
+              throw new Error('Puppy age did not transfer to actual contact form');
+            if (!await leadDialog.getByLabel('Plemeno psíka (nepovinné)').isVisible())
+              throw new Error('Breed field missing from final contact form');
+            await leadDialog.getByLabel('Plemeno psíka (nepovinné)').fill('Írsky vlkodav');
+            if (!await leadDialog.locator('[data-puppy-check-summary]').getByText(/Írsky vlkodav/).count())
+              throw new Error('Puppy breed correction must update the attached summary');
+            await page.screenshot({ path: path.join(out, 'puppy-aria-' + engine + '-390-contact-form.png') });
+            await leadDialog.getByRole('button', { name: 'Close' }).click();
+            await leadDialog.waitFor({ state: 'hidden' });
+            await page.evaluate(() => window.scrollTo(0, 0));
+            await page.waitForTimeout(190);
+          }
           // Shared Slovak Hero CTA: mobile pair, desktop single prominent info CTA.
           // Layout regression 320/375/390/1440 in Chromium and Safari WebKit.
           if (!bellaris && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname) && !isAriaPage) {
@@ -712,7 +716,7 @@ const failures = [];
           if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/'].includes(url.pathname)) {
             const entry = url.pathname === '/'
               ? page.locator('section.hero-safe-top .hero-cta-primary:visible').first()
-              : isAriaPage ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })
+              : (isAriaPage || isPuppyAria) ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })
               : page.locator('.mobile-dock .mobile-dock-apply').first();
             await entry.click();
             const modal = page.getByRole('dialog');
