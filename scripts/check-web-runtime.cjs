@@ -55,6 +55,35 @@ const failures = [];
           // Cookie preferences are installed by a client effect, so this also verifies hydration.
           const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
           await cookieButton.waitFor({ timeout: 10000 });
+          if (!bellaris && ['/test-aria/', '/psia-skolka-kosice/'].includes(url.pathname)) {
+            const palette = await page.evaluate(() => {
+              const surface = document.querySelector('main')?.parentElement;
+              const exp = document.querySelector('[data-aria-brand-experiment]');
+              const info = getComputedStyle(exp || surface);
+              const headline = document.querySelector('[data-aria-hero-content] h1 span');
+              const action = document.querySelector('#aria-hero-form .btn-coral');
+              const badge = document.querySelector('[data-aria-service-badge]');
+              return {
+                variant: exp?.getAttribute('data-aria-brand-experiment') ?? null,
+                rose: info.getPropertyValue('--preview-cta-rose').trim(),
+                sage: info.getPropertyValue('--preview-sage').trim(),
+                actionBg: action ? getComputedStyle(action).backgroundColor : '',
+                badgeBg: badge ? getComputedStyle(badge).backgroundColor : '',
+                headline: headline ? getComputedStyle(headline).color : '',
+              };
+            });
+            if (url.pathname === '/test-aria/') {
+              if (palette.variant !== 'sage-orange-rose' ||
+                  palette.rose !== '#9e336f' ||
+                  palette.sage !== '#f3f8ef' ||
+                  palette.actionBg !== 'rgb(158, 51, 111)' ||
+                  palette.badgeBg !== 'rgb(255, 164, 20)' ||
+                  palette.headline !== 'rgb(38, 50, 43)')
+                throw new Error('Preview palette does not follow sage / orange / dark / rose roles: ' + JSON.stringify(palette));
+            } else if (palette.variant || palette.rose || palette.sage) {
+              throw new Error('Paid lead inherited test-only palette: ' + JSON.stringify(palette));
+            }
+          }
           // The released lead URL and the noindex preview share Aria UI. The
           // production baseline may still show its pre-release landing.
           const isAriaPage = !bellaris && (url.pathname === '/test-aria/' || url.pathname === '/psia-skolka-kosice/') && await page.locator('[data-aria-guide]').count() > 0;
@@ -382,6 +411,22 @@ const failures = [];
               const navFrames = await aria.locator('[data-aria-dock] button').evaluateAll(buttons =>
                 buttons.every(button => getComputedStyle(button).boxShadow === 'none'));
               if (!navFrames) throw new Error('Only the overall Aria menu frame should be outlined, not each navigation item');
+              if (url.pathname === '/test-aria/' && width < 1024) {
+                await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
+                await aria.locator('[data-aria-panel="menu"]').waitFor({ state: 'visible' });
+                const previewLogo = aria.locator('[data-aria-preview-wordmark]');
+                await previewLogo.waitFor({ state: 'visible' });
+                const logoFit = await previewLogo.evaluate(img => {
+                  const bounds = img.getBoundingClientRect();
+                  const parent = img.closest('[data-aria-panel="menu"]')?.getBoundingClientRect();
+                  return img.complete && img.naturalWidth > 0 && bounds.width <= 105 &&
+                    bounds.height <= 22 && !!parent && bounds.right <= parent.right - 12;
+                });
+                if (!logoFit) throw new Error('Full Chvostíkovo logo must fit alongside compact preview menu heading');
+                await aria.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
+                await aria.locator('[data-aria-panel="menu"]').waitFor({ state: 'hidden' });
+              }
+
 
               if (url.pathname === '/test-aria/') {
                 // Check that the speech switches to a real modal CTA only after
