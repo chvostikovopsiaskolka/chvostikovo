@@ -482,7 +482,7 @@ export function AriaPreviewPage() {
       <Footer />
 
       <Dialog open={puppyModalOpen} onOpenChange={setPuppyModalOpen}>
-        <DialogContent className={(isLiveLead ? "" : "aria-preview-modal ") + "max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6" aria-describedby={undefined}>
+        <DialogContent className={(isLiveLead ? "" : "aria-preview-modal ") + "max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6"} aria-describedby={undefined}>
           <DialogTitle className="font-display text-lg font-bold text-forest">Kontrola vhodnosti šteniatka</DialogTitle>
           <AriaPuppyChecker embedded onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />
         </DialogContent>
