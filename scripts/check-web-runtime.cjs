@@ -219,6 +219,35 @@ const failures = [];
             if (restoredScroll.rootOverflow === 'hidden' || restoredScroll.bodyPosition === 'fixed')
               throw new Error('Cookie scroll lock was not restored after saving preferences');
           }
+          if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/test-aria/', '/en/dog-daycare-kosice/'].includes(url.pathname)) {
+            const section = url.pathname === '/en/dog-daycare-kosice/' ? '#reviews' : '#recenzie';
+            for (const width of [390, 1280]) {
+              await page.setViewportSize({ width, height: 900 });
+              const reviewByline = await page.locator(section + ' figure').first().evaluate(card => {
+                const head = card.querySelector('[data-review-byline]');
+                const logo = head?.querySelector('[data-google-review-logo]');
+                const name = head?.querySelector('figcaption');
+                const stars = head?.querySelector('[data-review-stars]');
+                const quote = card.querySelector('blockquote');
+                if (!head || !logo || !name || !stars || !quote) return null;
+                const a = logo.getBoundingClientRect();
+                const b = name.getBoundingClientRect();
+                const c = stars.getBoundingClientRect();
+                const q = quote.getBoundingClientRect();
+                const h = head.getBoundingClientRect();
+                return { row: Math.max(a.bottom,b.bottom,c.bottom) - Math.min(a.top,b.top,c.top),
+                  maxHeight: Math.max(a.height,b.height,c.height), order: a.right <= b.left + 2 && b.right <= c.left + 2,
+                  sameLeft: Math.abs(h.left - q.left) <= 2,
+                  fits: c.right <= h.right + 2 && b.right <= h.right + 2,
+                  compactHeight: card.getBoundingClientRect().height };
+              });
+              if (!reviewByline || reviewByline.row > 32 || !reviewByline.order ||
+                  !reviewByline.sameLeft || !reviewByline.fits || reviewByline.compactHeight > 210)
+                throw new Error('Google review card is not a compact single-row byline at ' + width + ': ' + JSON.stringify(reviewByline));
+            }
+            await page.setViewportSize({ width: 390, height: 844 });
+          }
+
           if (!bellaris && isAriaPage && !restricted) {
             // Desktop release regression: phone and desktop must share the same
             // approved liquid copy, paired photographs and stable Aria panels.
