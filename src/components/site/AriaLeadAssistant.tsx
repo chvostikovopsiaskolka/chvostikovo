@@ -340,16 +340,17 @@ export function AriaLeadAssistant({
         )}
 
         {!panel && (
-          <div className="mb-3 flex w-full justify-start pl-[75px] sm:pl-[96px]" data-aria-message>
-            <div data-aria-speech className="relative isolate inline-flex min-h-[55px] max-w-full -rotate-[0.5deg] items-center rounded-[16px_18px_15px_17px] border-2 border-forest/70 bg-card px-2.5 py-3 text-forest shadow-[4px_5px_0_rgba(18,68,43,.16),0_7px_17px_rgba(17,65,41,.12)]">
-              {/* Curved speech tail extends from the bubble towards Aria's head, not the navigation dock. */}
-              <svg aria-hidden="true" viewBox="0 0 96 60"
-                className="pointer-events-none absolute -bottom-[23px] -left-[49px] z-0 h-[56px] w-[91px] overflow-visible text-forest/70 drop-shadow-[0_3px_3px_rgba(17,65,41,.13)]">
-                <path d="M91 8 C73 7 58 16 52 29 C44 44 31 53 6 58 C27 45 32 27 44 16 C59 3 77 4 91 8 Z"
-                  fill="var(--card)" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+          <div data-aria-message data-aria-suppressed={speechObscured ? "true" : "false"} aria-hidden={speechObscured}
+            className={`mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px] ${speechObscured ? "invisible pointer-events-none" : "pointer-events-auto"}`}>
+            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[42px] max-w-full -rotate-[0.5deg] items-center px-2.5 py-1.5 text-forest">
+              <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
+                viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
+                className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
+                <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
+                  strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>
               {intro ? (
-                <p className="relative z-10 whitespace-nowrap font-display text-[clamp(8px,2.45vw,13px)] font-semibold tracking-tight">
+                <p className="relative z-10 font-display text-[11px] leading-tight font-semibold tracking-tight">
                   Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                   <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
                 </p>
@@ -368,9 +369,9 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className="relative ml-[83px] rounded-[16px] border border-white/80 bg-card/85 px-1 py-0.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-2" data-aria-dock>
+        <div className="pointer-events-auto relative ml-[83px] rounded-[16px] border border-white/80 bg-card/85 px-1 py-0.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-2" data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-          <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
+          <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
             className="pointer-events-none absolute -bottom-1 -left-[83px] h-[78px] w-[78px] max-w-none object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,.42)] sm:-left-[104px] sm:h-[95px] sm:w-[95px]" />
           <div className="flex min-h-[48px] items-center gap-0.5">
             <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={panel === "pricing"} onClick={() => toggle("pricing")}>
