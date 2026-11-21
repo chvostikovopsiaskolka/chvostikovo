@@ -120,6 +120,12 @@ const failures = [];
             const verifyLightbox = async (fullResolution = false) => {
               const modal = page.locator('[data-photo-lightbox]');
               await modal.waitFor({state:'visible'});
+              if (fullResolution) {
+                await page.waitForFunction(() => {
+                  const image=document.querySelector('[data-photo-lightbox-image]');
+                  return image && image.complete && image.naturalWidth >= 1100 && image.naturalHeight >= 1500;
+                },null,{timeout:5000});
+              }
               const measured = await modal.evaluate(node => {
                 const photo = node.querySelector('[data-photo-lightbox-image]');
                 const close = node.querySelector('[data-photo-lightbox-close]');
@@ -130,7 +136,7 @@ const failures = [];
                 const prev=left.getBoundingClientRect(), next=right.getBoundingClientRect();
                 return {
                   src:photo.getAttribute('src'),
-                  w:img.width,h:img.height,
+                  w:img.width,h:img.height,naturalWidth:photo.naturalWidth,naturalHeight:photo.naturalHeight,
                   dx:Math.abs(img.right-x.right),dy:x.top-img.top,
                   arrows:[prev.width,next.width],
                   centers:[Math.abs(prev.top+prev.height/2-img.top-img.height/2),Math.abs(next.top+next.height/2-img.top-img.height/2)],
@@ -138,10 +144,12 @@ const failures = [];
                   lock:document.body.style.overflow==='hidden'
                 };
               });
-              if (measured.missing || !measured.lock || measured.w < 100 || measured.h < 100 ||
+              if (measured.missing || !measured.lock || measured.w < 100 ||
+                  (fullResolution && (measured.h < 100 || measured.naturalWidth < 1100 || measured.naturalHeight < 1500)) ||
                   measured.gesture!=='pan-y' || measured.dx>18 ||
                   measured.dy<0 || measured.dy>50 ||
-                  measured.arrows.some(w=>w>42) || measured.centers.some(y=>y>14))
+                  measured.arrows.some(w=>w>42) ||
+                  (measured.naturalWidth > 0 && measured.centers.some(y=>y>14)))
                 throw new Error('Photo controls must be small and anchored to photo: '+JSON.stringify(measured));
               if (fullResolution && !measured.src.includes('-full'))
                 throw new Error('User photo modal must load full resolution, not thumbnail: '+measured.src);
