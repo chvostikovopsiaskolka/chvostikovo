@@ -1,3 +1,4 @@
+import {securityLimitV336,securityAccessV336} from "./security-v336.ts";
 // Deno and EdgeRuntime are supplied by the Supabase Edge runtime.
 
 const ALLOWED_ORIGINS = new Set([
@@ -7,7 +8,6 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 
 const LEAD_INTERESTS = new Set([
-  // Additive pilot values for the staged LEAD form; preserve historical and other landing choices.
   'Chcem sa informovať o škôlke',
   'Mám záujem využívať škôlku pravidelne',
   'Mám záujem využívať škôlku občasne',
@@ -247,6 +247,28 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
     lines.push(
       `O čo máte záujem?: ${String(payload.interest_reason ?? '')}`,
     );
+    // Only the explicit puppy-check values are echoed into the operator email.
+    // The backend still stores them in raw_payload and keeps its strict
+    // allowlisted lead interest; no field names or client-provided HTML render.
+    const puppyRaw = input.raw_payload && typeof input.raw_payload === 'object' &&
+      !Array.isArray(input.raw_payload)
+        ? input.raw_payload as Record<string, unknown>
+        : null;
+    if (puppyRaw && typeof puppyRaw['Šteniatko – vek'] === 'string') {
+      lines.push('');
+      lines.push('--- KONTROLA ŠTENIATKA (ÚDAJE OD MAJITEĽA) ---');
+      for (const label of [
+        'Šteniatko – vek', 'Šteniatko – meno', 'Šteniatko – plemeno',
+        'Šteniatko – váha', 'Šteniatko – besnota', 'Šteniatko – DHPPi+L',
+        'Šteniatko – kotercový kašeľ', 'Šteniatko – výsledok orientačnej kontroly',
+      ]) {
+        const answer = typeof puppyRaw[label] === 'string'
+          ? text(puppyRaw[label], 120).replace(/[\\r\\n]+/g, ' ')
+          : '';
+        if (answer) lines.push(`${label}: ${answer}`);
+      }
+      lines.push('Kontrola je orientačná, prijatie vyžaduje overenie očkovacieho preukazu a úvodnú návštevu.');
+    }
   }
 
   lines.push('Súhlas so spracovaním osobných údajov: Áno');
@@ -402,6 +424,7 @@ Deno.serve(async (req: Request) => {
 
     if(input.action==='recover_contact'){
       if(input.dry_run===true)return response(origin,200,{ok:true,dry_run:true});
+      const recoveryLimited=await securityLimitV336(req,'recovery_ip','',Deno.env.get('SUPABASE_URL')||'',Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',{'Access-Control-Allow-Origin':origin,Vary:'Origin'});if(recoveryLimited)return recoveryLimited;
       const saved=await saveFormRecoveryV273(input,null,'client_failure');
       return response(origin,saved?202:503,{ok:saved,recovery_saved:saved});
     }
@@ -415,6 +438,7 @@ Deno.serve(async (req: Request) => {
           !/^\+[1-9]\d{6,14}$/.test(updatedPhone)) {
         return response(origin, 400, { ok: false, error: 'invalid_phone_correction' });
       }
+      const correctionLimited=await securityLimitV336(req,'correction_ip','',Deno.env.get('SUPABASE_URL')||'',Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',{'Access-Control-Allow-Origin':origin,Vary:'Origin'});if(correctionLimited)return correctionLimited;
       const supabaseUrl = Deno.env.get('SUPABASE_URL');
       const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
       if (!supabaseUrl || !serviceKey) throw new Error('Missing Supabase environment');
@@ -584,6 +608,11 @@ Deno.serve(async (req: Request) => {
     }
 
     if (input.dry_run === true) return response(origin, 200, { ok: true, dry_run: true, form_type: formType });
+    const rateBase=Deno.env.get('SUPABASE_URL')||'',rateKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'';
+      const rateCors={'Access-Control-Allow-Origin':origin,Vary:'Origin'};
+      const limited=await securityLimitV336(req,'form_ip','',rateBase,rateKey,rateCors);if(limited)return limited;
+      const globalLimited=await securityLimitV336(req,'form_global','global',rateBase,rateKey,rateCors);if(globalLimited)return globalLimited;
+
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
