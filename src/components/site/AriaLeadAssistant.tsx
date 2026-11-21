@@ -4,6 +4,7 @@ import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
+import { trackMarketingInteraction } from "@/lib/analytics";
 
 type Panel = "pricing" | "requirements" | "faq" | "menu" | null;
 
@@ -161,6 +162,11 @@ export function AriaLeadAssistant({
 
   function toggle(next: Exclude<Panel, null>) {
     track(next);
+    // Keep the previous dock's GA4 / Meta pricing-view signal, separate from
+    // the cookieless nav_click and any later, successful Lead conversion.
+    if (next === "pricing" && panel !== "pricing") {
+      trackMarketingInteraction("view_pricing", trackingPrefix + "_pricing");
+    }
     setPanel(panel === next ? null : next);
   }
 
@@ -239,7 +245,10 @@ export function AriaLeadAssistant({
                 ))}
                 <div className="rounded-[18px] border border-forest/10 bg-secondary/60 p-3">
                   <p className="text-center font-display text-sm font-bold text-forest">Úvodná návšteva je zadarmo.</p>
-                  <button type="button" aria-expanded={pricingVisitOpen} onClick={() => setPricingVisitOpen((v) => !v)}
+                  <button type="button" aria-expanded={pricingVisitOpen} onClick={() => {
+                      if (!pricingVisitOpen) void trackCookielessInteraction("explore_daycare", trackingPrefix + "_first_visit_pricing_details");
+                      setPricingVisitOpen((v) => !v);
+                    }}
                     className="mt-2 flex min-h-11 w-full items-center justify-between rounded-2xl border border-forest/15 bg-white/80 px-3 text-left text-sm font-semibold">
                     Ako prebieha návšteva? <span className="text-coral">{pricingVisitOpen ? "−" : "+"}</span>
                   </button>
@@ -277,7 +286,13 @@ export function AriaLeadAssistant({
               <div className="mt-3 space-y-2" data-aria-faq>
                 {QUESTIONS.map((entry, index) => (
                   <div key={entry.title} className="overflow-hidden rounded-2xl border border-forest/10 bg-white/80">
-                    <button type="button" onClick={() => setFaqOpen(faqOpen === index ? null : index)}
+                    <button type="button" onClick={() => {
+                        if (faqOpen !== index) {
+                          const topic = index === 2 ? "faq_first_visit" : "faq_" + (index + 1);
+                          void trackCookielessInteraction("explore_daycare", trackingPrefix + "_" + topic);
+                        }
+                        setFaqOpen(faqOpen === index ? null : index);
+                      }}
                       aria-expanded={faqOpen === index}
                       className="flex min-h-11 w-full items-center justify-between gap-2 p-3 text-left text-sm font-bold">
                       {entry.title}<span className="text-coral">{faqOpen === index ? "−" : "+"}</span>
