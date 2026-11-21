@@ -263,12 +263,13 @@ const failures = [];
                 return el ? window.scrollY + el.getBoundingClientRect().top : -1;
               });
               if (caretakersTop < 0) throw new Error('Aria caretaker section missing');
+              const caretakerViewportHeight = await page.evaluate(() => window.innerHeight);
               // The caretaker section may first peek at the bottom; Aria
               // must remain in the intro until the heading is central.
-              await page.evaluate((y) => window.scrollTo(0, y), caretakersTop - Math.round(window.innerHeight * 0.68));
+              await page.evaluate((y) => window.scrollTo(0, y), caretakersTop - Math.round(caretakerViewportHeight * 0.68));
               await page.waitForFunction(() => document.querySelector('[data-aria-guide]')?.getAttribute('data-aria-stage') === 'intro',
                 null, {timeout: 2500});
-              await page.evaluate((y) => window.scrollTo(0, y), caretakersTop - Math.round(window.innerHeight * 0.44));
+              await page.evaluate((y) => window.scrollTo(0, y), caretakersTop - Math.round(caretakerViewportHeight * 0.44));
               await page.waitForFunction(() => document.querySelector('[data-aria-guide]')?.getAttribute('data-aria-stage') === 'puppy',
                 null, {timeout: 2500});
               if (!await page.locator('[data-aria-message]').getByText(/Máte šteniatko/).count())
