@@ -128,7 +128,7 @@ for (const [route, variant, marker] of [
 }
 const liveLead = read("src/routes/psia-skolka-kosice.tsx");
 const ariaLead = read("src/routes/test-aria.tsx");
-assert(liveLead.includes("component: AriaPreviewPage") && ariaLead.includes("<AriaLeadAssistant") && ariaLead.includes("hideMobileDock") && ariaLead.includes("<LeadStepForm"), "Campaign lead route must activate the reviewed Aria assistant and shared enquiry instead of the legacy dock");
+assert(liveLead.includes("component: LeadLandingPage") && !liveLead.includes("component: AriaPreviewPage") && ariaLead.includes("<AriaLeadAssistant") && ariaLead.includes("hideMobileDock") && ariaLead.includes("<LeadStepForm"), "Aria stays preview-only until Marek approves the lead launch");
 assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('label: "Interested in daycare"'), "Landing CTA must have full SK/EN label");
 assert(dock.includes("marketingExtra"), "Local first visit menu links required");
 assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");
