@@ -19,6 +19,7 @@ import { Requirements } from "@/components/site/Info";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
 import { MobileDock } from "@/components/site/MobileDock";
+import { AriaPreviewPage } from "@/routes/test-aria";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
@@ -92,7 +93,7 @@ export const Route = createFileRoute("/psia-skolka-kosice")({
     ],
     links: [{ rel: "canonical", href: URL }],
   }),
-  component: LeadLandingPage,
+  component: AriaPreviewPage,
 });
 
 function scrollToLeadForm(source: string) {
@@ -115,7 +116,8 @@ function scrollToBenefits(source: string) {
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
 }
 
-function LeadLandingPage() {
+// Legacy layout retained as a rollback reference until paid Aria rollout is verified.
+export function LeadLandingPage() {
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
 
