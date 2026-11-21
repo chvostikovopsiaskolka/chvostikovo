@@ -1,3 +1,20 @@
+## Android v434 / 2.0.107 — pripravený na podpis pre Google Play (21.11.2026)
+
+**Zatiaľ iba Git kandidát a automatický debug/UNSIGNED bundle. Nie je to podpísané ani odoslané na Play.**
+
+Samostatná vetva `release/android-v434-polls-play-candidate-20261121` vychádza z pôvodného v431 natívneho Capacitor/FCM projektu a prenáša **presné Git blob SHA aktuálneho zákazníckeho v434** (9 dotknutých root runtime/test súborov vrátane serverového hlasovania a +/- kusov). Android Gradle číta root `version.json` a automaticky nastaví **versionCode 434, versionName 2.0.107**, applicationId `sk.chvostikovo.app`. `mobile/package.json` aj lockfile majú rovnakú verziu. Pôvodný `mobile/src/runtime.js`, Firebase native FCM bridge, App Links, Google Play Core update a tlačidlá notifikácií zostávajú nezmenené.
+
+**Jeden overiteľný PowerShell postup na Windows:** urob nový clone tejto vetvy do samostatného priečinka (nemiešaj starý rozpracovaný Android projekt), potom vo Windows PowerShell:
+```powershell
+git clone --single-branch --branch release/android-v434-polls-play-candidate-20261121 https://github.com/chvostikovopsiaskolka/chvostikovo.git "$HOME\Chvostikovo-Android-v434"
+& "$HOME\Chvostikovo-Android-v434\mobile\Prepare-Play-v434.ps1"
+```
+Skript **nepodpisuje a nezverejňuje**: overí pôvodný upload keystore (`%USERPROFILE%\Documents\Chvostikovo-Keys\chvostikovo-upload.jks`, alias `chvostikovo-upload`), súkromný Firebase `google-services.json` s package `sk.chvostikovo.app` (ak v novom checkoute chýba, otvorí bezpečný lokálny výber pôvodného súboru), spustí `npm.cmd ci`, `npm.cmd run sync`, `npm.cmd test`, `npx.cmd cap open android`. Skript nečíta a nikam neposiela heslá. Android Studio: **Build → Generate Signed Bundle / APK → Android App Bundle → release**, vybrať pôvodný keystore a alias, nikdy nevytvárať nový.
+
+**Pred uploadom:** overiť najvyšší Play Console versionCode, že 434 je vyšší a nepoužitý; upload podpis/certifikát oproti Play App Integrity; fyzický in-place upgrade bez uninstall, login/recovery, oboch psíkov, rezervácie/taxi, serverové hlasovanie + počet kusov, klientský badge, natívny FCM token a reálne doručenie klikateľného push, App Links a E-shop. **CI AAB sa nesmie priamo nahrať, lebo neobsahuje súkromný Firebase súbor ani správny upload podpis.** `mobile/scripts/check-release.mjs` pre úplnú Play release bránu požaduje skutočné `CHVO_NATIVE_PUSH_VERIFIED=1` a `CHVO_APP_LINKS_VERIFIED=1`, nie predčasné formálne potvrdenia. Keystore/JSON/heslá sa nikdy nedávajú do GitHubu ani chatu.
+
+**Rollback:** bez Play publikácie vrátiť natívny kandidátsky zdroj na v431 `70b3f94326d2dfba53f331dce1a987b5a8f3886f`; pri už publikovanom Play oprava iba novým **vyšším versionCode**, nikdy downgrade. Produkčná zákaznícka PWA a admin sa tým nemenia.
+
 ## Android v431 / 2.0.104 — pripravený zdroj na podpis (18. november 2026)
 
 **CI testuje iba debug APK a NEPODPÍSANÝ AAB. Nie je to publikované vydanie Google Play.**
