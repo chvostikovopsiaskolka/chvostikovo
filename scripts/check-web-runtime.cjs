@@ -188,8 +188,23 @@ const failures = [];
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-clear.png') });
                 await page.evaluate(() => window.scrollTo(0, 0));
                 await page.waitForTimeout(170);
-                if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
-                  throw new Error('Aria speech must reappear when contact heading is clear');
+                // At some widths the form is already under the fixed dock at
+                // scrollY=0. In that case keeping speech hidden is correct.
+                const restored = await page.evaluate(() => {
+                  const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
+                  const overlapping = [...document.querySelectorAll(
+                    'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]'
+                  )].some(node => {
+                    const b = node.getBoundingClientRect();
+                    return b.width > 0 && b.height > 0 &&
+                      a.left < b.right + 8 && a.right > b.left - 8 &&
+                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
+                  });
+                  return { overlapping,
+                    suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed };
+                });
+                if (restored.suppressed !== String(restored.overlapping))
+                  throw new Error('Aria must restore speech visibility according to real content clearance: ' + JSON.stringify(restored));
               }
               const interestButton = aria.getByRole('button', { name: 'Mám záujem o škôlku' });
               if ((await interestButton.getAttribute('class') || '').includes('bg-coral/15'))
