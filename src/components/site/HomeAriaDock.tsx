@@ -19,7 +19,7 @@ const MAIN_SECTIONS: { tab: Tab; id: string }[] = [
 
 export function HomeAriaDock() {
   const [panel, setPanel] = useState<Panel>(null);
-  const [active, setActive] = useState<Tab>("why");
+  const [active, setActive] = useState<Tab | null>(null);
   const [puppyNear, setPuppyNear] = useState(false);
   const [applicationOpen, setApplicationOpen] = useState(false);
   const [applicationSent, setApplicationSent] = useState(false);
@@ -34,7 +34,7 @@ export function HomeAriaDock() {
         rect: document.getElementById(id)?.getBoundingClientRect(),
       }));
       const selected = visible.find(({ rect }) => rect && rect.top <= checkpoint && rect.bottom >= checkpoint);
-      if (selected) setActive(selected.tab);
+      setActive(selected?.tab ?? null);
       const puppy = document.getElementById("home-puppy-section")?.getBoundingClientRect();
       setPuppyNear(!!puppy && puppy.top < window.innerHeight * 0.8 && puppy.bottom > 0);
     };
