@@ -282,6 +282,11 @@ assert(smsDelayMigration.includes("new.created_at + interval '2 minutes'") && sm
 assert(smsDelayMigration.includes("new.form_type='lead'") && smsDelayMigration.includes("ELSE now()"), "Application SMS must not be delayed.");
 
 const backend = readFileSync(new URL("../supabase/functions/web-form-submit/index.ts", import.meta.url), "utf8");
+assert(backend.includes('securityLimitV336') && backend.includes('securityAccessV336'),
+  "Production Edge security additions must be retained when adding puppy notification fields.");
+assert(backend.includes('--- KONTROLA ŠTENIATKA (ÚDAJE OD MAJITEĽA) ---') &&
+  backend.includes("input.raw_payload") && backend.includes("'Šteniatko – kotercový kašeľ'"),
+  "Operator notification must include the submitted puppy-check fields, not just the lead interest.");
 assert(backend.includes("/^\\+\\d{7,15}$/"), "Critical form check failed: web-form-submit phone regex is not the expected E.164 validation.");
 assert(backend.includes("input.dry_run === true"), "Critical form check failed: backend dry-run smoke-test support is missing.");
 assert(backend.includes("correct_web_lead_phone_once") && backend.includes("phone_edit_token"), "Backend must implement the one-time phone correction.");
