@@ -1582,9 +1582,25 @@ const failures = [];
             }
             const careToggle = productPage.locator('#starostlivost').getByRole('button', { name: 'Ako dbáme na bezpečnosť psíkov?' });
             await careToggle.click();
-            if (await careToggle.getAttribute('aria-expanded') !== 'true' ||
-                !(await productPage.locator('#starostlivost').getByText('neustálym dohľadom', { exact: false }).count())) {
-              throw new Error('Care safety FAQ must open with its detailed answer');
+            // React expands the answer asynchronously in mobile Safari. Validate
+            // the visible panel and its real content together, not an immediate
+            // getByText count that can race the WebKit render.
+            try {
+              await productPage.waitForFunction(() => {
+                const section = document.getElementById('starostlivost');
+                const button = [...(section?.querySelectorAll('button') ?? [])].find(
+                  el => el.textContent?.includes('Ako dbáme na bezpečnosť psíkov?'));
+                const answer = button?.parentElement?.querySelector('div[id]');
+                return button?.getAttribute('aria-expanded') === 'true' &&
+                  !!answer && answer.getBoundingClientRect().height > 0 &&
+                  !!answer.textContent?.includes('neustálym dohľadom');
+              }, null, { timeout: 5000 });
+            } catch {
+              const detail = await careToggle.evaluate(button => ({
+                expanded: button.getAttribute('aria-expanded'),
+                answer: button.parentElement?.querySelector('div[id]')?.textContent?.slice(0, 230) ?? 'no answer node',
+              }));
+              throw new Error('Care safety FAQ must open with its detailed answer: ' + JSON.stringify(detail));
             }
             const careFaq = careToggle.locator('xpath=../..');
             const careLayout = productPage.locator('#starostlivost > .relative.z-10');
