@@ -98,7 +98,9 @@ export function AriaLeadAssistant({
         return;
       }
       const important = document.querySelectorAll<HTMLElement>(
-        "main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]"
+        stage === "intro"
+          ? "main h1, main h2, main input:not([type=radio]), main select, main textarea, main button"
+          : "main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]"
       );
       setSpeechObscured(previous => {
         // Require a wider clear gap before restoring the speech balloon.
@@ -364,7 +366,7 @@ export function AriaLeadAssistant({
 
         {!panel && (
           <div data-aria-message data-aria-suppressed={speechObscured ? "true" : "false"} aria-hidden={speechObscured}
-            className={`mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px] ${speechObscured ? "invisible pointer-events-none" : "pointer-events-auto"}`}>
+            className={`mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px] ${speechObscured ? "invisible pointer-events-none" : stage === "intro" ? "pointer-events-none" : "pointer-events-auto"}`}>
             <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[42px] max-w-full -rotate-[0.5deg] items-center px-2.5 py-1.5 text-forest">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
