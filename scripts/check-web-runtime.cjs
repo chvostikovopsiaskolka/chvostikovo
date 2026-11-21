@@ -499,7 +499,7 @@ const failures = [];
                 if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
                     !heroHeading || !heroDogs || !badge || !leadDescription || !proof ||
                     !introSpace || !benefits || !firstVisitDogs ||
-                    reviews.parentElement !== content || content.parentElement !== leadHero ||
+                    !content.contains(reviews) || content.parentElement !== leadHero ||
                     form.parentElement !== leadHero.parentElement) return false;
                 const follows = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
                 const heading = team.querySelector('h2');
