@@ -33,4 +33,8 @@ test('Firebase handoff automatically reuses verified older Android configuration
 test('ignore generated Android Studio metadata rather than prompting Add File to Git', async () => {
   const ignore = await readFile(new URL('../android/.gitignore', import.meta.url), 'utf8');
   assert.match(ignore, /^\.idea\/$/m, 'generated mobile/android/.idea/migrations.xml must not be added to Git');
+  assert.match(ignore, /^app\/google-services\.json$/m,'private Firebase config must stay outside Git');
+  assert.match(ignore, /^\*\.jks$/m,'upload keystores must stay outside Git');
+  assert.match(ignore, /^\*\.keystore$/m,'keystore files must stay outside Git');
+
 });

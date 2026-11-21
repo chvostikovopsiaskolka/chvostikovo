@@ -95,7 +95,9 @@ jobs:
             if (-not (Test-Path -LiteralPath $target)) { throw 'Historical Firebase copy failed' }
             $copied = Get-Content -LiteralPath $target -Raw | ConvertFrom-Json
             if ($copied.client[0].client_info.android_client_info.package_name -ne 'sk.chvostikovo.app') { throw 'Firebase package differs' }
-            Write-Host 'PASS: known prior Firebase v435 reused without file dialog or new setup'
+            & git check-ignore --quiet mobile/android/app/google-services.json
+            if ($LASTEXITCODE -ne 0) { throw 'Private Firebase JSON is not ignored by Git' }
+            Write-Host 'PASS: private Firebase JSON is ignored and previous v435 was reused without dialog'
           } finally {
             $env:USERPROFILE = $originalProfile
             if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Force }
