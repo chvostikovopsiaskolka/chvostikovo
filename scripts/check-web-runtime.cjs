@@ -277,7 +277,7 @@ const failures = [];
                 const formTop = form.getBoundingClientRect().top;
                 const reviewBottom = reviews.getBoundingClientRect().bottom;
                 const newPhotos = hero.querySelector('[data-aria-review-gap-photos]');
-                const photoCards = [...(newPhotos?.querySelectorAll('figure') ?? [])];
+                const photoCards = [...(newPhotos?.querySelectorAll('[data-aria-review-photo]') ?? [])];
                 const photoImages = photoCards.map(card => card.querySelector('img'));
                 const photoRects = photoCards.map(card => card.getBoundingClientRect());
                 const photoFrame = newPhotos?.getBoundingClientRect();
