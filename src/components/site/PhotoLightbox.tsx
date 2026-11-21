@@ -80,6 +80,7 @@ export function PhotoLightbox({
       <div data-photo-lightbox-frame className="relative inline-flex max-h-[calc(100dvh-20px)] max-w-[calc(100vw-20px)] flex-col items-center justify-center"
         onTouchStart={start} onTouchEnd={end} onTouchCancel={() => { origin.current = null; }}
         style={{ touchAction: "pan-y" }}>
+        <div data-photo-lightbox-media className="relative inline-flex max-w-full items-center justify-center">
         <img data-photo-lightbox-image src={photo.fullSrc || photo.src} alt={photo.alt}
           loading="eager" decoding="async" draggable={false}
           className="block min-h-[160px] max-h-[calc(100dvh-34px)] max-w-[calc(100vw-20px)] select-none rounded-[22px] bg-secondary/20 object-contain shadow-soft sm:max-h-[85dvh] sm:max-w-[88vw]"
@@ -87,7 +88,7 @@ export function PhotoLightbox({
         <button ref={closeButton} type="button"
           aria-label={en ? "Close gallery" : "Zavrieť galériu"}
           data-photo-lightbox-close
-          className="absolute right-2 top-2 z-10 grid size-9 place-items-center rounded-full bg-cream/95 text-forest shadow-soft focus-visible:outline-2 focus-visible:outline-coral sm:right-3 sm:top-3 sm:size-10"
+          className="absolute right-2 top-2 z-30 grid size-9 place-items-center rounded-full bg-cream/95 text-forest shadow-soft focus-visible:outline-2 focus-visible:outline-coral sm:right-3 sm:top-3 sm:size-10"
           onClick={onClose}>
           <X className="size-[18px]" aria-hidden />
         </button>
@@ -107,6 +108,7 @@ export function PhotoLightbox({
             </button>
           </>
         )}
+        </div>
         {photo.caption && <p className="mt-2 max-w-[90vw] px-2 text-center font-display text-xs font-semibold text-cream sm:text-sm">{photo.caption}</p>}
       </div>
     </div>
