@@ -148,7 +148,7 @@ export function AriaPreviewPage() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-background">
+    <div className={isLiveLead ? "min-h-screen overflow-x-clip bg-background" : "aria-brand-experiment min-h-screen overflow-x-clip bg-background"} data-aria-brand-experiment={isLiveLead ? undefined : "sage-orange-rose"}>
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" hidden={leadModalOpen || puppyModalOpen} />
 
       <main>

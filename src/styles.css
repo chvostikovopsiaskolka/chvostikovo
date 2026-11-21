@@ -884,3 +884,95 @@
   box-shadow: 0 1px 5px rgb(20 50 30 / 24%);
 }
 .aria-puppy-range:focus-visible { outline: 2px solid var(--color-coral); outline-offset: 3px; }
+
+/*
+ * TEST ONLY: Sage / logo orange / logo rose functional color system.
+ * Preview is the only owner via .aria-brand-experiment on /test-aria/.
+ * Do not move these into :root, the Tailwind theme, or the campaign route.
+ *
+ * Color roles:
+ *   Canvas = soft warm sage, text = charcoal, guidance = logo orange,
+ *   CTA and selected cards = deep accessible rose from the brand wordmark.
+ */
+.aria-brand-experiment {
+  --preview-sage: #f3f8ef;
+  --preview-sage-soft: #e8f0e4;
+  --preview-logo-orange: #ffa414;
+  --preview-logo-rose: #cc66a7;
+  --preview-cta-rose: #9e336f;
+  --preview-cta-rose-hover: #85275b;
+  --preview-charcoal: #26322b;
+
+  --forest: var(--preview-charcoal);
+  --forest-deep: #1c2923;
+  --coral: var(--preview-logo-orange);
+  --coral-dark: #ad5800;
+  --coral-soft: #ffe6b7;
+  --cream: var(--preview-sage);
+  --peach: var(--preview-sage-soft);
+  --sand: #edf3e9;
+  --background: var(--cream);
+  --foreground: var(--forest-deep);
+  --card-foreground: var(--forest-deep);
+  --secondary: var(--preview-sage-soft);
+  --secondary-foreground: var(--forest-deep);
+  --muted: var(--sand);
+  --muted-foreground: #59675c;
+  --primary: var(--preview-cta-rose);
+  --accent: var(--preview-logo-rose);
+  --ring: var(--preview-cta-rose);
+  background-color: var(--cream);
+  color: var(--preview-charcoal);
+}
+
+.aria-brand-experiment .section-title,
+.aria-brand-experiment [data-aria-hero-content] h1,
+.aria-brand-experiment [data-aria-hero-content] h1 span {
+  color: var(--preview-charcoal);
+}
+
+/* Let the restrained rose card anchor the offer without turning all sections pink. */
+.aria-brand-experiment .bg-forest {
+  background-color: #91406b;
+}
+
+/* Primary actions are deep rose; logo-orange stays for information labels,
+ * navigation details, illustrations and secondary accents. */
+.aria-brand-experiment .btn-coral,
+.aria-brand-experiment button.bg-coral,
+.aria-brand-experiment a.bg-coral {
+  background-color: var(--preview-cta-rose);
+  color: #fff;
+}
+.aria-brand-experiment .btn-coral:hover,
+.aria-brand-experiment button.bg-coral:hover,
+.aria-brand-experiment a.bg-coral:hover {
+  background-color: var(--preview-cta-rose-hover);
+}
+.aria-brand-experiment [data-aria-hero-content] [data-aria-service-badge],
+.aria-brand-experiment [data-lead-best-value] {
+  background-color: var(--preview-logo-orange);
+  color: var(--preview-charcoal);
+}
+.aria-brand-experiment [data-aria-guide] .text-coral-dark {
+  color: var(--preview-cta-rose);
+}
+.aria-brand-experiment [data-first-visit-group] {
+  background-color: #f2e6ed;
+  border-color: #d9a7c6;
+}
+.aria-brand-experiment [data-aria-hero-description] {
+  border-color: #d9e4d2;
+  background-color: #f3f8ef;
+  background-image: radial-gradient(ellipse at 12% 6%, rgba(255,164,20,0.16), transparent 66%),
+    radial-gradient(ellipse at 91% 92%, rgba(171,206,166,0.25), transparent 70%);
+  box-shadow: inset 0 1px 0 #fff, 0 8px 24px -12px rgba(58,103,74,.18);
+}
+.aria-brand-experiment [data-aria-dock] {
+  border-color: #cadac8;
+  box-shadow: 0 4px 18px rgba(45,77,54,.12);
+}
+.aria-brand-experiment [data-aria-dock] button[aria-expanded="true"] {
+  background-color: #eddae7;
+  color: var(--preview-cta-rose);
+}

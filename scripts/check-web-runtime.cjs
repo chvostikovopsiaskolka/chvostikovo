@@ -6,6 +6,7 @@ const path = require('node:path');
 const bellaris = process.env.WEB_SITE === 'bellaris';
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
 const urls = (bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/']).map(route => new URL(route, base));
+const brandPreviewCandidate = new URL(base).hostname === '127.0.0.1';
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -55,6 +56,33 @@ const failures = [];
           // Cookie preferences are installed by a client effect, so this also verifies hydration.
           const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
           await cookieButton.waitFor({ timeout: 10000 });
+          if (brandPreviewCandidate && !bellaris && ['/test-aria/', '/psia-skolka-kosice/'].includes(url.pathname)) {
+            const palette = await page.evaluate(() => {
+              const exp = document.querySelector('[data-aria-brand-experiment]');
+              const info = exp ? getComputedStyle(exp) : null;
+              const headline = document.querySelector('[data-aria-hero-content] h1 span');
+              const action = document.querySelector('#aria-hero-form .btn-coral');
+              const badge = document.querySelector('[data-aria-service-badge]');
+              return {
+                variant: exp?.getAttribute('data-aria-brand-experiment') || null,
+                rose: info?.getPropertyValue('--preview-cta-rose').trim() || '',
+                sage: info?.getPropertyValue('--preview-sage').trim() || '',
+                actionBg: action ? getComputedStyle(action).backgroundColor : '',
+                badgeBg: badge ? getComputedStyle(badge).backgroundColor : '',
+                headline: headline ? getComputedStyle(headline).color : '',
+              };
+            });
+            if (url.pathname === '/test-aria/') {
+              if (palette.variant !== 'sage-orange-rose' ||
+                  palette.rose !== '#9e336f' || palette.sage !== '#f3f8ef' ||
+                  palette.actionBg !== 'rgb(158, 51, 111)' ||
+                  palette.badgeBg !== 'rgb(255, 164, 20)' ||
+                  palette.headline !== 'rgb(38, 50, 43)')
+                throw new Error('Preview palette lost sage/orange/charcoal/rose roles: '+JSON.stringify(palette));
+            } else if (palette.variant || palette.rose || palette.sage) {
+              throw new Error('Paid lead inherited test-only palette: '+JSON.stringify(palette));
+            }
+          }
           // The released lead URL and the noindex preview share Aria UI. The
           // production baseline may still show its pre-release landing.
           const isAriaPage = !bellaris && (url.pathname === '/test-aria/' || url.pathname === '/psia-skolka-kosice/') && await page.locator('[data-aria-guide]').count() > 0;
