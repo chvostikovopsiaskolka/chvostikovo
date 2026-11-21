@@ -81,6 +81,9 @@ try {
   (globalThis as any).Deno.env.get = (name: string) => ({ SUPABASE_URL: "https://test.invalid", SUPABASE_SERVICE_ROLE_KEY: "test-only", RESEND_API_KEY: "test-only", META_CAPI_ACCESS_TOKEN: "test-only" })[name];
   globalThis.fetch = (async (url: any, init: any) => {
     calls.push(String(url));
+    // Keep the deployed security-v336 limiter active. Test RPC explicitly
+    // approves synthetic requests instead of replacing the production module.
+    if (String(url).includes("/rpc/consume_request_limit_v336")) return Response.json(true);
     if (String(url).includes("web_form_submissions?")) return Response.json([]);
     if (String(url).includes("graph.facebook.com")) return Response.json({ events_received: 1 });
     if (String(url).endsWith("/rest/v1/web_form_submissions") && init?.method === "POST") databasePayloads.push(JSON.parse(init.body));
