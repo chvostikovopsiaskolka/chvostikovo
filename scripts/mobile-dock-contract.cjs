@@ -118,7 +118,6 @@ assert(forms.includes("typ: \"prihlaska\"") && forms.includes("typ: \"informacie
 console.log("Mobile dock structural regression guards: PASS");
 
 for (const [route, variant, marker] of [
-  ["src/routes/psia-skolka-pre-steniatka.tsx", "puppy", "openForm"],
   ["src/routes/strazenie-psov-kosice.tsx", "dog-sitting", "openInterest"],
 ]) {
   const source = read(route);
@@ -126,6 +125,13 @@ for (const [route, variant, marker] of [
   assert(source.includes('variant="' + variant + '" onInterestOpen='), route + " must use route-local interest CTA");
   assert(source.includes(marker), route + " must call existing interest form logic");
 }
+const puppyAria = read("src/routes/psia-skolka-pre-steniatka.tsx");
+assert(puppyAria.includes("<AriaLeadAssistant") &&
+  puppyAria.includes('requirementsSectionId="puppy-first-visit"') &&
+  puppyAria.includes("<AriaPuppyChecker") &&
+  puppyAria.includes("puppy_landing_aria_interest") &&
+  !puppyAria.includes("<MobileDock"),
+  "Approved puppy landing must use Aria navigation and an accessible puppy-check/contact handoff, not two competing mobile docks");
 const liveLead = read("src/routes/psia-skolka-kosice.tsx");
 const ariaLead = read("src/routes/test-aria.tsx");
 assert(liveLead.includes("component: LeadLandingPage") && !liveLead.includes("component: AriaPreviewPage") && ariaLead.includes("<AriaLeadAssistant") && ariaLead.includes("hideMobileDock") && ariaLead.includes("<LeadStepForm"), "Aria stays preview-only until Marek approves the lead launch");
