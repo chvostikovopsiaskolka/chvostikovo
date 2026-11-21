@@ -150,6 +150,15 @@ const failures = [];
               if (next===measured.src) throw new Error('Next photo arrow did not advance gallery');
               await page.keyboard.press('ArrowLeft');
               await page.waitForFunction(initial=>document.querySelector('[data-photo-lightbox-image]')?.getAttribute('src')===initial,measured.src,{timeout:2500});
+              // Dispatch an actual TouchEvent sequence in both Chromium and WebKit:
+              // horizontal swipe must advance, vertical scrolling must not be hijacked.
+              await modal.locator('[data-photo-lightbox-frame]').evaluate(frame => {
+                const createTouch=(x,y)=>new Touch({identifier:4,target:frame,clientX:x,clientY:y});
+                const before=createTouch(260,360), after=createTouch(80,364);
+                frame.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[before],targetTouches:[before],changedTouches:[before]}));
+                frame.dispatchEvent(new TouchEvent('touchend',{bubbles:true,touches:[],targetTouches:[],changedTouches:[after]}));
+              });
+              await page.waitForFunction(initial=>document.querySelector('[data-photo-lightbox-image]')?.getAttribute('src')!==initial,measured.src,{timeout:2500});
               await modal.locator('[data-photo-lightbox-close]').click();
               await modal.waitFor({state:'hidden'});
               if (await page.evaluate(()=>document.body.style.overflow==='hidden'))
