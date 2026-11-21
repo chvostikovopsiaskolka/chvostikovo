@@ -493,6 +493,45 @@ const failures = [];
               if (!await speech.isVisible() || await speech.getAttribute('data-aria-suppressed') !== 'false' ||
                   !await aria.getByRole('button', { name: 'Vyplniť' }).count())
                 throw new Error('Puppy Aria must show persistent contact CTA after conditions at ' + width);
+              // Flicker gate: the dock must remain the same fixed-position
+              // node through fast scrolls, section changes and small Safari-
+              // style oscillations around the contact threshold. The speech
+              // is never hidden; only its message may change.
+              const stability = await page.evaluate(async ({boundary}) => {
+                const guide = document.querySelector('[data-aria-guide]');
+                const dock = guide?.querySelector('[data-aria-dock]');
+                const speech = guide?.querySelector('[data-aria-message]');
+                if (!guide || !dock || !speech) return { error: 'missing Aria node' };
+                const start = dock.getBoundingClientRect();
+                const sequences = [
+                  boundary + 20, boundary + 44, boundary + 32,
+                  boundary + 52, boundary + 22, boundary + 35,
+                  Math.max(0, boundary - 800), boundary + 110,
+                  Math.max(0, boundary - 1100), boundary + 180,
+                ];
+                const failures = [];
+                for (const y of sequences) {
+                  window.scrollTo(0, y);
+                  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                  const dockBox = dock.getBoundingClientRect();
+                  const speechBox = speech.getBoundingClientRect();
+                  const style = getComputedStyle(guide);
+                  const speechStyle = getComputedStyle(speech);
+                  if (document.querySelector('[data-aria-dock]') !== dock ||
+                      style.position !== 'fixed' || style.display === 'none' ||
+                      style.visibility !== 'visible' || style.opacity !== '1' ||
+                      speechStyle.visibility !== 'visible' || speechBox.width < 80 ||
+                      speech.dataset.ariaSuppressed !== 'false' ||
+                      Math.abs(start.y - dockBox.y) > 3 ||
+                      Math.abs(start.height - dockBox.height) > 2)
+                    failures.push({ y, stage: guide.dataset.ariaStage,
+                      dockY: Math.round(dockBox.y), baselineY: Math.round(start.y),
+                      visible: speechStyle.visibility, position: style.position });
+                }
+                return { failures };
+              }, { boundary });
+              if (stability.error || stability.failures.length)
+                throw new Error('Aria dock/speech flicker at ' + width + ': ' + JSON.stringify(stability));
               if (url.pathname === '/psia-skolka-pre-steniatka/' && width === 390)
                 await page.screenshot({ path: path.join(out, 'puppy-aria-' + engine + '-390-contact.png') });
             }
