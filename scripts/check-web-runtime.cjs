@@ -149,12 +149,23 @@ const failures = [];
                 const content = hero?.querySelector('[data-aria-hero-content]');
                 const topSpacer = hero?.querySelector('[data-aria-intro-top-space]');
                 const headline = hero?.querySelector('h1');
-                const benefits = hero?.querySelector('[data-hero-benefits]');
+                const serviceBadge = hero?.querySelector('[data-aria-service-badge]');
+                const heroDogs = hero?.querySelector('[data-aria-hero-dogs] img');
                 const description = hero?.querySelector('[data-aria-hero-description]');
                 const spacer = hero?.querySelector('[data-aria-intro-space]');
+                const caretakers = document.getElementById('aria-caretakers');
+                const caretakerHeading = caretakers?.querySelector('h2');
+                const relocatedBenefits = caretakers?.querySelector('[data-hero-benefits]');
+                const caretakersPhoto = caretakers?.querySelector('img');
+                const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs] img');
                 if (!form || !reviews || !proof || !hero || !content || !topSpacer ||
-                    !headline || !benefits || !description || !spacer) return { missing: true };
+                    !headline || !serviceBadge || !heroDogs || !description || !spacer ||
+                    !caretakerHeading || !relocatedBenefits || !caretakersPhoto || !firstVisitDogs) return { missing: true };
                 const rect = proof.getBoundingClientRect();
+                const badgeRect = serviceBadge.getBoundingClientRect();
+                const headlineRect = headline.getBoundingClientRect();
+                const caretakerHeadingRect = caretakerHeading.getBoundingClientRect();
+                const caretakerHeadingLine = parseFloat(getComputedStyle(caretakerHeading).lineHeight);
                 const contentTop = content.getBoundingClientRect().top;
                 const reviewsBottom = reviews.getBoundingClientRect().bottom;
                 const formTop = form.getBoundingClientRect().top;
@@ -167,6 +178,16 @@ const failures = [];
                   contentCenterY: (contentTop + reviewsBottom) / 2,
                   topSpacerHeight: topSpacer.getBoundingClientRect().height,
                   viewportHeight: window.innerHeight,
+                  serviceBadgeBelowH1: badgeRect.top >= headlineRect.bottom + 8,
+                  serviceBadgeFits: badgeRect.left >= -1 && badgeRect.right <= window.innerWidth + 1 &&
+                    serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
+                  noBenefitsInHero: hero.querySelectorAll('[data-hero-benefits]').length === 0,
+                  relocatedBenefitsCount: relocatedBenefits.children.length,
+                  caretakersHeadingFits: caretakerHeading.scrollWidth <= caretakerHeading.clientWidth + 2 &&
+                    caretakerHeadingRect.height <= caretakerHeadingLine * 1.55,
+                  whiteInfoBackground: getComputedStyle(form).backgroundColor === 'rgb(255, 255, 255)' &&
+                    !!form.querySelector('.pointer-events-none.absolute.inset-0'),
+                  bothDogCrowns: heroDogs.getAttribute('src') === firstVisitDogs.getAttribute('src'),
                   proofLeft: rect.left,
                   proofRight: rect.right,
                   proofHeight: rect.height,
@@ -178,6 +199,10 @@ const failures = [];
                   firstFold.topSpacerHeight < 39 ||
                   firstFold.contentCenterY < firstFold.viewportHeight * 0.4 ||
                   firstFold.reviewGap < 185 ||
+                  !firstFold.serviceBadgeBelowH1 || !firstFold.serviceBadgeFits ||
+                  !firstFold.noBenefitsInHero || firstFold.relocatedBenefitsCount !== 3 ||
+                  !firstFold.caretakersHeadingFits || !firstFold.whiteInfoBackground ||
+                  !firstFold.bothDogCrowns ||
                   firstFold.proofLeft < -1 || firstFold.proofRight > width + 1 ||
                   firstFold.textOverflows || firstFold.proofHeight > firstFold.lineHeight * 1.55)
                 throw new Error('Aria first fold form or Google proof layout regressed at ' + width + ': ' + JSON.stringify(firstFold));
@@ -464,25 +489,31 @@ const failures = [];
                 const content = leadHero?.querySelector('[data-aria-hero-content]');
                 const introTopSpace = leadHero?.querySelector('[data-aria-intro-top-space]');
                 const heroHeading = content?.querySelector('h1');
-                const benefits = content?.querySelector('[data-hero-benefits]');
+                const heroDogs = content?.querySelector('[data-aria-hero-dogs]');
+                const badge = content?.querySelector('[data-aria-service-badge]');
                 const leadDescription = content?.querySelector('[data-aria-hero-description]');
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
                 const introSpace = leadHero?.querySelector('[data-aria-intro-space]');
+                const benefits = team?.querySelector('[data-hero-benefits]');
+                const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                 if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
-                    !heroHeading || !benefits || !leadDescription || !proof || !introSpace ||
+                    !heroHeading || !heroDogs || !badge || !leadDescription || !proof ||
+                    !introSpace || !benefits || !firstVisitDogs ||
                     reviews.parentElement !== content || content.parentElement !== leadHero ||
                     form.parentElement !== leadHero.parentElement) return false;
                 const follows = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
                 const heading = team.querySelector('h2');
                 const photo = team.querySelector('img');
                 const copy = team.querySelector('p');
-                return follows(introTopSpace, heroHeading) && follows(heroHeading, benefits) &&
-                  follows(benefits, leadDescription) && follows(leadDescription, proof) &&
-                  follows(reviews, introSpace) &&
+                return follows(introTopSpace, heroDogs) && follows(heroDogs, heroHeading) &&
+                  follows(heroHeading, badge) && follows(badge, leadDescription) &&
+                  follows(leadDescription, proof) && follows(reviews, introSpace) &&
                   follows(introSpace, form) && follows(form, team) &&
-                  !!heading && !!photo && !!copy && follows(heading, photo) && follows(photo, copy);
+                  !!heading && !!photo && !!copy &&
+                  follows(heading, photo) && follows(photo, benefits) && follows(benefits, copy) &&
+                  follows(team, firstVisitDogs);
               });
-              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria eyebrow/title/benefits/description/reviews/intro-space/form order changed');
+              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria dog crown/title/orange badge/description/reviews/form and caretaker benefits order changed');
               const hero = page.locator('#aria-hero-form');
               if (!await hero.getByRole('heading', { name: 'Chceli by ste sa informovať o škôlke?' }).count())
                 throw new Error('New compact hero form heading missing');
