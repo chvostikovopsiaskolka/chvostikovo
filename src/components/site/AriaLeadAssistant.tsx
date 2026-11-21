@@ -107,7 +107,9 @@ export function AriaLeadAssistant({
         next = "contact";
       } else if (puppyStartSectionId) {
         const caretakerTop = document.getElementById(puppyStartSectionId)?.getBoundingClientRect().top;
-        const entryLine = window.innerHeight * 0.76;
+        // Only switch when the caretaker heading has entered the central
+        // part of the screen, not while the first enquiry form is being read.
+        const entryLine = window.innerHeight * 0.5;
         // Enter when the caretakers section actually reaches the viewport,
         // not merely after a few scroll pixels. The small hysteresis avoids
         // oscillating speech during iOS browser chrome resizing.
