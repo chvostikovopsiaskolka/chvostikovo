@@ -104,3 +104,59 @@
 @media(prefers-reduced-transparency:reduce){
  .customer-polls-owner-v432 #menuTab .customer-poll-v432{background:#fff!important;backdrop-filter:none}
 }
+
+/* v434: direct visible vote, black title, +/- control in the same quantity row. */
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 h2{
+ color:#111111!important;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-option-row-v434{
+ display:grid;grid-template-columns:minmax(0,1fr);gap:0;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-v433{
+ margin:0 0 9px;padding:12px 11px 13px;
+ border-radius:0 0 14px 14px;border-top:none;
+ background:rgba(255,251,246,.92);
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-option-row-v434:has(.customer-poll-quantity-v433) > .customer-poll-choice-v432{
+ border-radius:14px 14px 0 0;border-bottom-color:transparent;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-controls-v434{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:8px;min-width:0;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-label-v434{
+ flex:1;min-width:0;color:#473747;font-size:11.5px;font-weight:750;
+ line-height:1.26;letter-spacing:-.015em;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434{
+ display:grid;grid-template-columns:44px minmax(34px,38px) 44px;align-items:center;
+ flex:none;border:1px solid #e8c6b2;border-radius:14px;
+ background:#fff;box-shadow:0 3px 9px rgba(105,46,44,.09);overflow:hidden;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434 button{
+ width:44px;height:44px;min-height:44px;display:grid;place-items:center;
+ padding:0!important;border:none!important;box-shadow:none!important;
+ background:transparent;color:#ed7116;font-size:23px;font-weight:800;
+ line-height:1;transform:none!important;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434 button:disabled{
+ color:#bdafb0;opacity:.65;cursor:default;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-value-v434{
+ display:grid;place-items:center;min-width:34px;height:44px;
+ color:#111;font-size:15px;font-weight:850;font-variant-numeric:tabular-nums;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-submit-v433{
+ margin-top:11px;
+}
+.customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-option-row-v434 >.customer-poll-choice-v432{
+ -webkit-tap-highlight-color:transparent;
+}
+@media(max-width:360px){
+ .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-v433{padding-inline:8px}
+ .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-controls-v434{gap:5px}
+ .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-quantity-label-v434{font-size:10.5px}
+ .customer-polls-owner-v432 #menuTab .customer-poll-v432 .customer-poll-stepper-v434{
+  grid-template-columns:44px 34px 44px;
+ }
+}
