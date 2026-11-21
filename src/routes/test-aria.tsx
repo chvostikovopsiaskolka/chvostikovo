@@ -161,32 +161,29 @@ export function AriaPreviewPage() {
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
+
+              <div data-hero-benefits className="mx-auto mt-6 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2">
+                {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
+                  <span
+                    key={item}
+                    className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px] lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-xs"
+                  >
+                    <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5 lg:size-4" />
+                    {item}
+                  </span>
+                ))}
+              </div>
+
+              <p data-aria-hero-description className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg">
+                Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
+              </p>
             </div>
           </div>
 
-          <div aria-hidden="true" className="min-h-12 flex-1 sm:min-h-16" />
           <Reviews variant="hero" />
-          {/* Leave breathing room above the persistent Aria speech and dock. */}
-          <div aria-hidden="true" className="h-32 shrink-0 sm:h-28" />
-        </section>
-
-        <section data-aria-hero-summary="true" className="relative bg-background px-4 pb-10 pt-6 sm:pb-12 sm:pt-8">
-          <div className="mx-auto w-full max-w-4xl text-center">
-            <div data-hero-benefits className="mx-auto flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:max-w-xl sm:gap-2">
-              {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
-                <span
-                  key={item}
-                  className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px] lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-xs"
-                >
-                  <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5 lg:size-4" />
-                  {item}
-                </span>
-              ))}
-            </div>
-            <p className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg">
-              Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
-            </p>
-          </div>
+          {/* Keep the fixed Aria introduction and dock in a quiet visual zone
+              after reviews; the enquiry starts only on the next scroll. */}
+          <div aria-hidden="true" data-aria-intro-space className="min-h-[190px] flex-1 sm:min-h-[160px]" />
         </section>
 
         <section id="aria-hero-form" className="relative z-10 bg-transparent pb-12 pt-6 sm:pb-16 sm:pt-8">
