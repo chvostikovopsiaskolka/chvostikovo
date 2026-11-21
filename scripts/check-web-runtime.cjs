@@ -12,6 +12,16 @@ fs.mkdirSync(out, { recursive: true });
 const results = [];
 const failures = [];
 
+// APP-01 static regression for the slider fill direction in both engines.
+// Pseudo-element background images are not exposed consistently by getComputedStyle.
+if (!bellaris && brandPreviewCandidate) {
+  const styles = fs.readFileSync(path.join(__dirname, '../src/styles.css'), 'utf8');
+  const correctGradient = 'background: linear-gradient(to right, var(--color-coral) 0 var(--aria-puppy-progress, 0%), #e0e5e0 var(--aria-puppy-progress, 0%) 100%);';
+  if (styles.split(correctGradient).length !== 3) {
+    failures.push('Puppy age range must fill orange from left to thumb, gray from thumb to right in Chromium and Firefox');
+  }
+}
+
 (async () => {
   for (const [engine, browserType] of [['chromium', chromium], ['webkit', webkit]]) {
     const browser = await browserType.launch();
