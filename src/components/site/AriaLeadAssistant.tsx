@@ -249,12 +249,12 @@ export function AriaLeadAssistant({
 
         {!panel && (
           <div className="mb-3 flex w-full justify-start pl-[75px] sm:pl-[96px]" data-aria-message>
-            <div className="relative isolate inline-flex min-h-[55px] max-w-full -rotate-[1deg] items-center border border-white/90 bg-card/95 px-2.5 py-3 text-forest shadow-[0_6px_22px_rgba(17,65,41,.15)] ring-1 ring-forest/10 backdrop-blur-xl" style={{ borderRadius: "48% 52% 49% 51% / 60% 56% 44% 40%" }}>
+            <div data-aria-speech className="relative isolate inline-flex min-h-[55px] max-w-full -rotate-[0.5deg] items-center rounded-[16px_18px_15px_17px] border-2 border-forest/70 bg-card px-2.5 py-3 text-forest shadow-[4px_5px_0_rgba(18,68,43,.16),0_7px_17px_rgba(17,65,41,.12)]">
               {/* Curved speech tail extends from the bubble towards Aria's head, not the navigation dock. */}
               <svg aria-hidden="true" viewBox="0 0 96 60"
-                className="pointer-events-none absolute -bottom-[23px] -left-[49px] z-0 h-[56px] w-[91px] overflow-visible drop-shadow-[0_3px_3px_rgba(17,65,41,.13)]">
+                className="pointer-events-none absolute -bottom-[23px] -left-[49px] z-0 h-[56px] w-[91px] overflow-visible text-forest/70 drop-shadow-[0_3px_3px_rgba(17,65,41,.13)]">
                 <path d="M91 8 C73 7 58 16 52 29 C44 44 31 53 6 58 C27 45 32 27 44 16 C59 3 77 4 91 8 Z"
-                  fill="var(--card)" stroke="rgba(49,94,63,.18)" strokeWidth="1.5" strokeLinejoin="round" />
+                  fill="var(--card)" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
               </svg>
               {intro ? (
                 <p className="relative z-10 whitespace-nowrap font-display text-[clamp(8px,2.45vw,13px)] font-semibold tracking-tight">
@@ -267,7 +267,7 @@ export function AriaLeadAssistant({
                     Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span>
                   </strong>
                   <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
-                    className="min-h-9 shrink-0 rounded-full bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    className="min-h-9 shrink-0 rounded-[11px] bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Overiť
                   </button>
                 </div>
