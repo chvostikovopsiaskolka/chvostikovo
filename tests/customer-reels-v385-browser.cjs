@@ -25,6 +25,8 @@ const fixture=require('./liquid-v3-fixture.cjs');
  assert(grouping.itemShadow.includes('14px'),'approved compact item shadow');
  assert(grouping.groupShadow.includes('36px'),'approved grouped outer liquid shadow');
  assert.equal(grouping.radius,'16px','compact Menu items keep rounded corners');
+ assert.equal(await page.locator('#menuDogGroup').evaluate(el=>getComputedStyle(el).backgroundColor),
+   'rgba(0, 0, 0, 0)','liquid Menu card must preserve real backdrop for turbulence');
  if(type===webkit&&mode==='reels')await page.waitForFunction(()=>document.querySelector('#menuDogGroup>summary>.lg-v3-material')?.dataset.renderer==='webgl',null,{timeout:15000});
  assert((await page.evaluate(()=>customerLiquidV3Diagnostics())).contexts<=2);
  assert.equal(await page.locator('.bottom-nav').evaluate(el=>getComputedStyle(el).filter),'none');

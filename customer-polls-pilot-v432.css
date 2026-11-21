@@ -2,7 +2,7 @@
 .customer-menu-compact-v436 #menuTab .customer-menu-primary-v432{
  display:grid;gap:10px;min-width:0;margin:0 0 14px;padding:11px;
  border:1px solid rgba(255,255,255,.80)!important;border-radius:23px;
- background:rgba(255,255,255,.42)!important;
+ background:rgba(255,255,255,.12)!important;
  box-shadow:0 14px 36px rgba(99,49,55,.19),inset 0 1px 1px #ffffffec!important;
 }
 .customer-menu-compact-v436 #menuTab .customer-menu-primary-v432 >.customer-menu-group,
@@ -10,6 +10,13 @@
  margin:0!important;border:1px solid rgba(255,255,255,.94)!important;
  border-radius:16px!important;background:rgba(255,255,255,.74)!important;
  box-shadow:0 5px 14px rgba(109,57,73,.17),inset 0 1px 2px rgba(255,255,255,.98)!important;
+}
+/* Native liquid renderer needs real backdrop pixels under the material.
+ * Keep an opaque fallback for regular details, but never block optical refraction
+ * with a second semi-opaque layer on lg-v3-host details.
+ */
+.customer-menu-compact-v436 #menuTab .customer-menu-primary-v432 >.customer-menu-group.lg-v3-host{
+ background:transparent!important;
 }
 .customer-menu-compact-v436 #menuTab .customer-menu-primary-v432 .customer-menu-rows{
  background:rgba(255,255,255,.15)!important;
