@@ -114,6 +114,103 @@ const failures = [];
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
+          // Candidate-only regression for the three unified Chvostíkovo galleries.
+          // Production-baseline CI keeps testing its already published version.
+          if (!bellaris && !restricted && new URL(base).hostname === '127.0.0.1') {
+            const verifyLightbox = async (fullResolution = false) => {
+              const modal = page.locator('[data-photo-lightbox]');
+              await modal.waitFor({state:'visible'});
+              if (fullResolution) {
+                await page.waitForFunction(() => {
+                  const image=document.querySelector('[data-photo-lightbox-image]');
+                  return image && image.complete && image.naturalWidth >= 1100 && image.naturalHeight >= 1500;
+                },null,{timeout:5000});
+              }
+              const measured = await modal.evaluate(node => {
+                const photo = node.querySelector('[data-photo-lightbox-image]');
+                const close = node.querySelector('[data-photo-lightbox-close]');
+                const left = node.querySelector('[data-photo-lightbox-prev]');
+                const right = node.querySelector('[data-photo-lightbox-next]');
+                if (!photo || !close || !left || !right) return {missing:true};
+                const img=photo.getBoundingClientRect(), x=close.getBoundingClientRect();
+                const prev=left.getBoundingClientRect(), next=right.getBoundingClientRect();
+                return {
+                  src:photo.getAttribute('src'),
+                  w:img.width,h:img.height,naturalWidth:photo.naturalWidth,naturalHeight:photo.naturalHeight,
+                  dx:Math.abs(img.right-x.right),dy:x.top-img.top,
+                  arrows:[prev.width,next.width],
+                  centers:[Math.abs(prev.top+prev.height/2-img.top-img.height/2),Math.abs(next.top+next.height/2-img.top-img.height/2)],
+                  gesture:getComputedStyle(node.querySelector('[data-photo-lightbox-frame]')).touchAction,
+                  lock:document.body.style.overflow==='hidden'
+                };
+              });
+              if (measured.missing || !measured.lock || measured.w < 100 ||
+                  (fullResolution && (measured.h < 100 || measured.naturalWidth < 1100 || measured.naturalHeight < 1500)) ||
+                  measured.gesture!=='pan-y' || measured.dx>18 ||
+                  measured.dy<0 || measured.dy>50 ||
+                  measured.arrows.some(w=>w>42) ||
+                  (measured.naturalWidth > 0 && measured.centers.some(y=>y>14)))
+                throw new Error('Photo controls must be small and anchored to photo: '+JSON.stringify(measured));
+              if (fullResolution && !measured.src.includes('-full'))
+                throw new Error('User photo modal must load full resolution, not thumbnail: '+measured.src);
+              await modal.locator('[data-photo-lightbox-next]').click();
+              const next=await modal.locator('[data-photo-lightbox-image]').getAttribute('src');
+              if (next===measured.src) throw new Error('Next photo arrow did not advance gallery');
+              await page.keyboard.press('ArrowLeft');
+              await page.waitForFunction(initial=>document.querySelector('[data-photo-lightbox-image]')?.getAttribute('src')===initial,measured.src,{timeout:2500});
+              // Dispatch an actual TouchEvent sequence in both Chromium and WebKit:
+              // horizontal swipe must advance, vertical scrolling must not be hijacked.
+              await modal.locator('[data-photo-lightbox-frame]').evaluate(frame => {
+                // WebKit's desktop Playwright driver rejects the native Touch
+                // constructor. Dispatch touch event types with array-shaped
+                // TouchLists, matching the successful stand pinch regression.
+                const emit=(name,touches,changed)=>{
+                  const event=new Event(name,{bubbles:true,cancelable:true});
+                  Object.defineProperty(event,'touches',{value:touches});
+                  Object.defineProperty(event,'changedTouches',{value:changed});
+                  frame.dispatchEvent(event);
+                };
+                const before={clientX:260,clientY:360},after={clientX:80,clientY:364};
+                emit('touchstart',[before],[before]);
+                emit('touchend',[],[after]);
+              });
+              await page.waitForFunction(initial=>document.querySelector('[data-photo-lightbox-image]')?.getAttribute('src')!==initial,measured.src,{timeout:2500});
+              await modal.locator('[data-photo-lightbox-close]').click();
+              await modal.waitFor({state:'hidden'});
+              if (await page.evaluate(()=>document.body.style.overflow==='hidden'))
+                throw new Error('Photo modal leaked body scroll lock');
+            };
+            if (isAriaPage) {
+              const cards=page.locator('[data-aria-review-photo]');
+              if (await cards.count()!==2) throw new Error('Paid lead requires two clickable owner photos');
+              await cards.first().scrollIntoViewIfNeeded();
+              // User-reported pixelation: two card images must be retina-ready,
+              // not the previous ~6KB 320px previews. Keep big files lazy in modal.
+              await page.waitForFunction(() => [...document.querySelectorAll('[data-aria-review-photo] img')]
+                .every(img => img.complete && img.naturalWidth >= 640 && img.naturalHeight >= 850),
+                null, {timeout:5000});
+              await cards.first().click();
+              await verifyLightbox(true);
+              const mosaic=page.locator('#aria-mosaic button[aria-label^="Otvoriť fotografiu"]');
+              await mosaic.first().scrollIntoViewIfNeeded();
+              await mosaic.first().click();
+              await verifyLightbox();
+            }
+            if (url.pathname==='/' || isAriaPage) {
+              const moving=page.locator('[data-gesture-track="photos"] button[aria-label^="Otvoriť fotografiu"]');
+              await moving.first().scrollIntoViewIfNeeded();
+              await moving.first().click();
+              await verifyLightbox();
+            }
+            if (url.pathname==='/') {
+              const gallery=page.locator('#priestory button').first();
+              await gallery.scrollIntoViewIfNeeded();
+              await gallery.click();
+              await verifyLightbox();
+            }
+            await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
+          }
+
           if (!bellaris && (isAriaPage || isPuppyAria)) {
             const restoredScroll = await page.evaluate(() => ({
               rootOverflow: document.documentElement.style.overflow,
@@ -180,7 +277,7 @@ const failures = [];
                 const formTop = form.getBoundingClientRect().top;
                 const reviewBottom = reviews.getBoundingClientRect().bottom;
                 const newPhotos = hero.querySelector('[data-aria-review-gap-photos]');
-                const photoCards = [...(newPhotos?.querySelectorAll('figure') ?? [])];
+                const photoCards = [...(newPhotos?.querySelectorAll('[data-aria-review-photo]') ?? [])];
                 const photoImages = photoCards.map(card => card.querySelector('img'));
                 const photoRects = photoCards.map(card => card.getBoundingClientRect());
                 const photoFrame = newPhotos?.getBoundingClientRect();
@@ -1498,6 +1595,36 @@ const failures = [];
               throw new Error('Pinch-ready stand image viewport missing');
             if (await viewport.evaluate(el=>getComputedStyle(el).touchAction)!=='none')
               throw new Error('Touch viewport must allow custom pinch/pan');
+            const tinyNav = await articleLightbox.evaluate(el => {
+              const photo=el.querySelector('[data-stand-photo-viewport]')?.getBoundingClientRect();
+              const prev=el.querySelector('[data-stand-photo-previous]')?.getBoundingClientRect();
+              const next=el.querySelector('[data-stand-photo-next]')?.getBoundingClientRect();
+              const close=[...el.children].find(node => node.tagName==='BUTTON')?.getBoundingClientRect();
+              return photo && prev && next ? {
+                arrows:[prev.width,next.width],centers:[prev.top+prev.height/2,next.top+next.height/2],
+                center:photo.top+photo.height/2,closeTop:close?.top,photoTop:photo.top
+              } : null;
+            });
+            if (!tinyNav || tinyNav.arrows.some(w=>w>42) ||
+                tinyNav.centers.some(y=>Math.abs(y-tinyNav.center)>14) ||
+                (tinyNav.closeTop!==undefined && Math.abs(tinyNav.closeTop-tinyNav.photoTop)>26))
+              throw new Error('Stand photo must keep compact navigation at picture edges: '+JSON.stringify(tinyNav));
+            if (width===390) {
+              const startingSrc=await viewport.locator('img').getAttribute('src');
+              await viewport.evaluate(el => {
+                const emit=(name,touches,changed)=>{
+                  const event=new Event(name,{bubbles:true,cancelable:true});
+                  Object.defineProperty(event,'touches',{value:{length:touches.length,item:i=>touches[i]??null}});
+                  Object.defineProperty(event,'changedTouches',{value:{length:changed.length,item:i=>changed[i]??null}});
+                  el.dispatchEvent(event);
+                };
+                emit('touchstart',[{clientX:240,clientY:300}],[{clientX:240,clientY:300}]);
+                emit('touchend',[],[{clientX:80,clientY:306}]);
+              });
+              await productPage.waitForFunction(src => document.querySelector('[data-stand-photo-viewport] img')?.getAttribute('src')!==src,startingSrc,{timeout:2500});
+              await articleLightbox.locator('[data-stand-photo-previous]').click();
+              await productPage.waitForFunction(src => document.querySelector('[data-stand-photo-viewport] img')?.getAttribute('src')===src,startingSrc,{timeout:2500});
+            }
             if (width===390) {
               const pinch=await viewport.evaluate(el=>{
                 // Browser-independent synthetic touch-list input: WebKit desktop
