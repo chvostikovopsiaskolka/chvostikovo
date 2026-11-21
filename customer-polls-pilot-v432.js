@@ -1,10 +1,8 @@
-/* v433: real staff-controlled poll; hard-scoped to the single verified school customer. 
- * Public client receives only its own votes; staff identities remain server-side under RLS.
- * The previous localStorage v432 demo is NOT a source of votes.
+/* v434: server-scoped polls. Published audience is enforced by Supabase RLS;
+ * customer sees only their own vote, and no staff identity is exposed.
  */
 (() => {
  'use strict';
- const OWNER_FINGERPRINT='288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66';
  const $=id=>document.getElementById(id);
  const account=()=>state?.session?.user?.id||'';
  const en=()=>window.ChvostikovoLocale?.getLanguage?.()==='en';
@@ -16,21 +14,16 @@
   return node;
  };
  let allowed='',sequence=0,loaded='',loading=null,active=null,choices=[],selection=null,
-     quantityValue='1',expanded=false,sending=false,thankYou=false,error='';
- function clear(){
+     quantityValue='1',sending=false,thankYou=false,error='';
+ function unmountUi(){
   $('customerPollMenuV432')?.remove();
   $('customerPollOverviewV432')?.remove();
   $('customerPollNavBadgeV432')?.remove();
   const group=$('customerMenuPrimaryV432');
   if(group){for(const child of [...group.children])group.before(child);group.remove()}
   document.documentElement.classList.remove('customer-polls-owner-v432');
-  allowed='';loaded='';active=null;choices=[];expanded=false;thankYou=false;error='';
  }
- async function matchesOwner(id){
-  if(!id||!globalThis.crypto?.subtle)return false;
-  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(id).toLowerCase()));
-  return [...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('')===OWNER_FINGERPRINT;
- }
+ function clear(){unmountUi();allowed='';loaded='';active=null;choices=[];selection=null;quantityValue='1';thankYou=false;error=''}
  function menuLayout(){
   const menu=$('menuTab'),first=$('menuDogGroup');
   if(!menu||!first)return false;
@@ -99,12 +92,12 @@
  }
  function render(){
   if(!allowed||allowed!==account())return;
+  const show=Boolean(active||thankYou);
+  if(!show){unmountUi();return}
   if(!menuLayout())return;
   const root=$('customerPollMenuV432'),badge=$('customerPollNavBadgeV432');
-  const show=Boolean(active||thankYou);
-  root.hidden=!show;root.replaceChildren();
+  root.hidden=false;root.replaceChildren();
   if(badge)badge.hidden=!active||thankYou;
-  if(!show)return;
   if(thankYou){
    const success=el('div','customer-poll-complete-v432');
    success.setAttribute('role','status');
@@ -114,14 +107,6 @@
    done.type='button';done.dataset.pollDone='true';
    root.append(success,done);return;
   }
-  if(!expanded){
-   const marker=el('span','customer-poll-kicker-v432',text('Nové hlasovanie','New poll'));
-   const label=el('strong','customer-poll-invite-v433',text('Je k dispozícii nové hlasovanie.','A new poll is available.'));
-   const btn=el('button','customer-poll-open-v433',text('Chcem hlasovať','I want to vote'));
-   btn.type='button';btn.dataset.pollExpand='true';
-   root.append(marker,label,btn);
-   return;
-  }
   const h=el('h2','',active.title);h.id='customerPollMenuTitleV432';h.tabIndex=-1;
   const question=el('p','customer-poll-question-v432',active.question);
   const details=el('p','customer-poll-desc-v432',active.description);
@@ -130,32 +115,39 @@
   const opts=el('div','customer-poll-options-v432');
   opts.setAttribute('role','group');opts.setAttribute('aria-label',active.question);
   choices.slice(0,10).forEach(row=>{
+   const wrap=el('div','customer-poll-option-row-v434');
    const button=el('button','customer-poll-choice-v432'+(selection===row.id?' selected-v433':''),row.label);
    button.type='button';button.dataset.pollChoice=row.id;
    button.setAttribute('aria-pressed',String(selection===row.id));
    button.disabled=sending;
-   opts.append(button);
+   wrap.append(button);
+   if(selection===row.id&&row.asks_quantity){
+    const qty=el('div','customer-poll-quantity-v433');
+    const label=el('span','customer-poll-quantity-label-v434',text('O koľko kusov máte záujem?','How many copies?'));
+    label.id='customerPollQuantityLabelV434';
+    const stepper=el('div','customer-poll-stepper-v434');
+    stepper.setAttribute('role','group');stepper.setAttribute('aria-labelledby',label.id);
+    const count=Math.max(1,Math.min(999,Number(quantityValue)||1));
+    const minus=el('button','customer-poll-quantity-minus-v434','−');
+    minus.type='button';minus.dataset.pollMinus='true';minus.disabled=sending||count<=1;
+    minus.setAttribute('aria-label',text('Znížiť počet kusov','Decrease quantity'));
+    const value=el('output','customer-poll-quantity-value-v434',String(count));
+    value.id='customerPollQuantityV433';value.setAttribute('aria-live','polite');
+    const plus=el('button','customer-poll-quantity-plus-v434','+');
+    plus.type='button';plus.dataset.pollPlus='true';plus.disabled=sending||count>=999;
+    plus.setAttribute('aria-label',text('Zvýšiť počet kusov','Increase quantity'));
+    stepper.append(minus,value,plus);
+    const controls=el('div','customer-poll-quantity-controls-v434');controls.append(label,stepper);
+    const send=el('button','customer-poll-submit-v433',sending?text('Ukladám…','Saving…'):text('Potvrdiť hlas','Confirm vote'));
+    send.type='button';send.dataset.pollSubmit='true';send.disabled=sending;
+    qty.append(controls,send);wrap.append(qty);
+   }
+   opts.append(wrap);
   });
   root.append(opts);
-  const selected=choices.find(x=>x.id===selection);
-  if(selected?.asks_quantity){
-   const qty=el('div','customer-poll-quantity-v433');
-   const label=el('label','',text('O koľko kusov máte záujem?','How many copies would you like?'));
-   label.htmlFor='customerPollQuantityV433';
-   const field=el('input','');
-   field.id='customerPollQuantityV433';field.type='number';field.min='1';field.max='999';
-   field.step='1';field.inputMode='numeric';field.required=true;field.value=quantityValue;
-   field.disabled=sending;
-   field.addEventListener('input',()=>{quantityValue=field.value});
-   const send=el('button','customer-poll-submit-v433',sending?text('Ukladám…','Saving…'):text('Potvrdiť hlas','Confirm vote'));
-   send.type='button';send.dataset.pollSubmit='true';send.disabled=sending;
-   qty.append(label,field,send);root.append(qty);
-  }
   if(error){
    const msg=el('p','customer-poll-error-v433',error);msg.setAttribute('role','alert');root.append(msg);
   }
-  const close=el('button','customer-poll-collapse-v433',text('Späť','Back'));
-  close.type='button';close.dataset.pollCollapse='true';root.append(close);
  }
  async function submit(choice){
   if(!allowed||allowed!==account()||!active||sending)return;
@@ -196,17 +188,18 @@
   if(!allowed||allowed!==account())return;
   const button=event.target.closest('button');
   if(!button)return;
-  if(button.dataset.pollExpand){
-   expanded=true;render();requestAnimationFrame(()=>$('#customerPollMenuTitleV432')?.focus({preventScroll:true}));return;
-  }
-  if(button.dataset.pollCollapse){expanded=false;selection=null;error='';render();return}
-  if(button.dataset.pollDone){thankYou=false;loaded='';expanded=false;render();void refresh(allowed,true);return}
+  if(button.dataset.pollDone){thankYou=false;loaded='';render();void refresh(allowed,true);return}
   if(button.dataset.pollSubmit){void submit(selection);return}
+  if(button.dataset.pollMinus||button.dataset.pollPlus){
+   const count=Number(quantityValue)||1;
+   quantityValue=String(Math.max(1,Math.min(999,count+(button.dataset.pollPlus?1:-1))));
+   render();return;
+  }
   if(button.dataset.pollChoice){
    const choice=choices.find(v=>v.id===button.dataset.pollChoice);
    if(!choice||sending)return;
    selection=choice.id;error='';
-   if(choice.asks_quantity){render();$('#customerPollQuantityV433')?.focus();return}
+   if(choice.asks_quantity){quantityValue='1';render();return}
    void submit(choice.id);
   }
  }
@@ -216,11 +209,8 @@
   if(allowed===id){render();return}
   sequence++;clear();
   const marker=sequence;
-  let accepted=false;
-  try{accepted=await matchesOwner(id)}catch(_){}
-  if(marker!==sequence||id!==account()||!state?.data||!accepted)return;
+  if(marker!==sequence||id!==account()||!state?.data)return;
   allowed=id;
-  if(!menuLayout())return;
   render();
   await refresh(id,true);
  }
