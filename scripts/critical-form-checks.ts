@@ -343,6 +343,12 @@ assert(stagedLeadSource.includes('dog_breed: breedValue || undefined') &&
   stagedLeadSource.includes("cta_source: trackingSource") &&
   stagedLeadSource.includes('trackCookielessInteraction("form_submit"'),
   "Breed, source and successful conversion must be retained inside shared LeadStepForm");
+assert(backendUsageSrc.includes("if (leadBreed) payload.dog_breed = leadBreed;") &&
+  backendUsageSrc.includes('text(input.dog_breed ?? input.plemeno, 80)') &&
+  backendUsageSrc.includes('Plemeno psíka: ${text(payload.dog_breed, 80)}') &&
+  backendUsageSrc.indexOf("if (!LEAD_INTERESTS.has(rawInterest))") <
+    backendUsageSrc.indexOf("if (leadBreed) payload.dog_breed = leadBreed;"),
+  "Live lead receiver must persist optional breed as a normal CRM column and send it to operator email after allowlist validation");
 
 const shortFormSource = forms.slice(forms.indexOf("export function ShortForm"), forms.indexOf("/** Inline binary choices"));
 assert(shortFormSource.includes("!hideInterest") && shortFormSource.includes('name="zaujem"'), "Hidden-interest variants and the existing zaujem name must remain.");
