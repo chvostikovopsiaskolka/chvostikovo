@@ -111,7 +111,7 @@ export const REVIEWS = [
     text: "Ak hľadáte miesto, kde bude váš psík spokojný, tak určite navštívte túto škôlku. Majitelia sú milí, veľmi ústretoví a naša Eliška sa do škôlky vždy teší. Po škôlke máme doma šťastného a unaveného psíka. Ďakujeme",
   },
   {
-    name: "Richard & Bella",
+    name: "Richard a Bella",
     text: "Výborná škôlka, skvelý prístup majiteľov, pes sa tam nešmýka ako na klzisku, odporúčam určite. Bella sa tam stále teší. ❤️👍",
   },
   {
