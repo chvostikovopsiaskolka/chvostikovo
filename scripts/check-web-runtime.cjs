@@ -151,6 +151,8 @@ const failures = [];
                 const headline = hero?.querySelector('h1');
                 const serviceBadge = hero?.querySelector('[data-aria-service-badge]');
                 const heroDogs = hero?.querySelector('[data-aria-hero-dogs] img');
+                const crown = hero?.querySelector('[data-aria-hero-dogs] [aria-hidden="true"]');
+                const serviceGroup = hero?.querySelector('[data-aria-service-group]');
                 const description = hero?.querySelector('[data-aria-hero-description]');
                 const spacer = hero?.querySelector('[data-aria-intro-space]');
                 const caretakers = document.getElementById('aria-caretakers');
@@ -159,10 +161,16 @@ const failures = [];
                 const caretakersPhoto = caretakers?.querySelector('img');
                 const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs] img');
                 if (!form || !reviews || !proof || !hero || !content || !topSpacer ||
-                    !headline || !serviceBadge || !heroDogs || !description || !spacer ||
-                    !caretakerHeading || !relocatedBenefits || !caretakersPhoto || !firstVisitDogs) return { missing: true };
+                    !headline || !serviceBadge || !heroDogs || !crown || !serviceGroup ||
+                    !description || !spacer || !caretakerHeading || !relocatedBenefits ||
+                    !caretakersPhoto || !firstVisitDogs) return { missing: true };
                 const rect = proof.getBoundingClientRect();
                 const badgeRect = serviceBadge.getBoundingClientRect();
+                const crownRect = crown.getBoundingClientRect();
+                const descriptionRect = description.getBoundingClientRect();
+                const reviewsRect = reviews.getBoundingClientRect();
+                const reviewCard = reviews.querySelector('figure');
+                const reviewCardRect = reviewCard?.getBoundingClientRect();
                 const headlineRect = headline.getBoundingClientRect();
                 const caretakerHeadingRect = caretakerHeading.getBoundingClientRect();
                 const caretakerHeadingLine = parseFloat(getComputedStyle(caretakerHeading).lineHeight);
@@ -178,9 +186,16 @@ const failures = [];
                   contentCenterY: (contentTop + reviewsBottom) / 2,
                   topSpacerHeight: topSpacer.getBoundingClientRect().height,
                   viewportHeight: window.innerHeight,
-                  serviceBadgeBelowH1: badgeRect.top >= headlineRect.bottom + 8,
+                  serviceBadgeBelowH1: badgeRect.top >= headlineRect.bottom + 65,
+                  dogsRestOnOrange: serviceGroup.contains(crown) && crownRect.bottom >= badgeRect.top - 8 &&
+                    crownRect.bottom <= badgeRect.bottom + 16,
                   serviceBadgeFits: badgeRect.left >= -1 && badgeRect.right <= window.innerWidth + 1 &&
                     serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
+                  focusedDescription: descriptionRect.width <= (window.innerWidth < 640 ? 452 : 522) &&
+                    description.querySelectorAll('strong').length === 4 &&
+                    [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700),
+                  naturalReviewBottom: getComputedStyle(reviews).overflowY !== 'hidden' &&
+                    !!reviewCardRect && reviewsRect.bottom - reviewCardRect.bottom >= 32,
                   noBenefitsInHero: hero.querySelectorAll('[data-hero-benefits]').length === 0,
                   relocatedBenefitsCount: relocatedBenefits.children.length,
                   caretakersHeadingFits: caretakerHeading.scrollWidth <= caretakerHeading.clientWidth + 2 &&
@@ -199,7 +214,9 @@ const failures = [];
                   firstFold.topSpacerHeight < 39 ||
                   firstFold.contentCenterY < firstFold.viewportHeight * 0.4 ||
                   firstFold.reviewGap < 185 ||
-                  !firstFold.serviceBadgeBelowH1 || !firstFold.serviceBadgeFits ||
+                  !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
+                  !firstFold.serviceBadgeFits || !firstFold.focusedDescription ||
+                  !firstFold.naturalReviewBottom ||
                   !firstFold.noBenefitsInHero || firstFold.relocatedBenefitsCount !== 3 ||
                   !firstFold.caretakersHeadingFits || !firstFold.whiteInfoBackground ||
                   !firstFold.bothDogCrowns ||
@@ -489,31 +506,35 @@ const failures = [];
                 const content = leadHero?.querySelector('[data-aria-hero-content]');
                 const introTopSpace = leadHero?.querySelector('[data-aria-intro-top-space]');
                 const heroHeading = content?.querySelector('h1');
-                const heroDogs = content?.querySelector('[data-aria-hero-dogs]');
-                const badge = content?.querySelector('[data-aria-service-badge]');
+                const headlineSpacer = content?.querySelector('[data-aria-hero-heading-spacer]');
+                const serviceGroup = content?.querySelector('[data-aria-service-group]');
+                const heroDogs = serviceGroup?.querySelector('[data-aria-hero-dogs]');
+                const badge = serviceGroup?.querySelector('[data-aria-service-badge]');
                 const leadDescription = content?.querySelector('[data-aria-hero-description]');
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
                 const introSpace = leadHero?.querySelector('[data-aria-intro-space]');
                 const benefits = team?.querySelector('[data-hero-benefits]');
                 const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                 if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
-                    !heroHeading || !heroDogs || !badge || !leadDescription || !proof ||
-                    !introSpace || !benefits || !firstVisitDogs ||
+                    !headlineSpacer || !serviceGroup || !heroHeading || !heroDogs ||
+                    !badge || !leadDescription || !proof || !introSpace ||
+                    !benefits || !firstVisitDogs ||
                     !content.contains(reviews) || content.parentElement !== leadHero ||
                     form.parentElement !== leadHero.parentElement) return false;
                 const follows = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
                 const heading = team.querySelector('h2');
                 const photo = team.querySelector('img');
                 const copy = team.querySelector('p');
-                return follows(introTopSpace, heroDogs) && follows(heroDogs, heroHeading) &&
-                  follows(heroHeading, badge) && follows(badge, leadDescription) &&
+                return follows(introTopSpace, headlineSpacer) && follows(headlineSpacer, heroHeading) &&
+                  follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
+                  follows(heroDogs, badge) && follows(badge, leadDescription) &&
                   follows(leadDescription, proof) && follows(reviews, introSpace) &&
                   follows(introSpace, form) && follows(form, team) &&
                   !!heading && !!photo && !!copy &&
                   follows(heading, photo) && follows(photo, benefits) && follows(benefits, copy) &&
                   follows(team, firstVisitDogs);
               });
-              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria dog crown/title/orange badge/description/reviews/form and caretaker benefits order changed');
+              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/label-dogs/orange badge/focused copy/reviews/form and caretakers order changed');
               const hero = page.locator('#aria-hero-form');
               if (!await hero.getByRole('heading', { name: 'Chceli by ste sa informovať o škôlke?' }).count())
                 throw new Error('New compact hero form heading missing');
