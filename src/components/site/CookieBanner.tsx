@@ -176,7 +176,9 @@ export function CookieBanner() {
   if (!mounted) return null;
 
   const isEnglish = window.location.pathname.startsWith("/en/");
-  const isAriaPreview = ["/test-aria", "/psia-skolka-kosice", "/psia-skolka-pre-steniatka"].includes(window.location.pathname.replace(/\/$/, ""));
+  const pathname = window.location.pathname.replace(/\/$/, "");
+  const isAriaPreview = ["/test-aria", "/psia-skolka-kosice", "/psia-skolka-pre-steniatka"].includes(pathname);
+  const isGuidedPreview = pathname === "/test-aria";
 
   function save(next: Pick<Consent, "functional" | "analytics" | "marketing">) {
     const stored = writeStoredConsent(next);
@@ -230,7 +232,8 @@ export function CookieBanner() {
       <div className={"relative w-full " + (showDetails ? "max-w-4xl" : isAriaPreview ? "max-w-xl pt-7" : "max-w-2xl")}>
         {isAriaPreview && !showDetails && (
           <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={160} height={160}
-            className="pointer-events-none absolute left-3 top-2 z-20 size-[90px] object-contain drop-shadow-[0_5px_7px_rgba(0,0,0,.32)] sm:left-4 sm:top-2 sm:size-[106px]" />
+            data-aria-cookie-head
+            className={"pointer-events-none absolute top-2 z-20 size-[90px] object-contain contrast-[1.1] drop-shadow-[0_5px_7px_rgba(0,0,0,.32)] sm:top-2 sm:size-[106px] " + (isGuidedPreview ? "right-3 sm:right-4" : "left-3 sm:left-4")} />
         )}
         <div data-aria-cookie-bubble={isAriaPreview && !showDetails ? "true" : undefined}
           className={"relative max-h-[calc(100dvh-1rem)] w-full overflow-y-auto rounded-3xl border p-4 text-forest sm:p-6 " +
@@ -240,7 +243,7 @@ export function CookieBanner() {
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             <p id="cookie-consent-title" className={isAriaPreview && !showDetails
-                ? "flex min-h-[48px] items-center whitespace-nowrap pl-[88px] font-display text-[clamp(10px,3.1vw,17px)] font-bold leading-tight sm:pl-[106px] sm:text-xl"
+                ? ("flex min-h-[48px] items-center whitespace-nowrap font-display text-[clamp(10px,3.1vw,17px)] font-bold leading-tight sm:text-xl " + (isGuidedPreview ? "pr-[88px] sm:pr-[106px]" : "pl-[88px] sm:pl-[106px]"))
                 : "font-display text-lg font-bold sm:text-xl"}>
               {showDetails
                 ? isEnglish ? "Cookie settings" : "Nastavenia cookies"

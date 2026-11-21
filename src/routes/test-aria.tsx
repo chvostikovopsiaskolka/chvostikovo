@@ -149,7 +149,7 @@ export function AriaPreviewPage() {
 
   return (
     <div className={isLiveLead ? "min-h-screen overflow-x-clip bg-background" : "aria-brand-experiment min-h-screen overflow-x-clip bg-background"} data-aria-brand-experiment={isLiveLead ? undefined : "sage-orange-rose"}>
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" hidden={leadModalOpen || puppyModalOpen} />
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
         <section className="hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8">
