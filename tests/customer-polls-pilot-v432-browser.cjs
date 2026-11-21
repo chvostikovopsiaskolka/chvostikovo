@@ -1,6 +1,5 @@
-/* v433 poll regression: synthetic app/auth/API, owner guard, real-API contract, quantity and browser UI. */
+/* v434 poll regression: direct poll UI, inline stepper and RLS-simulated audience. */
 const assert=require('node:assert/strict');
-const {createHash}=require('node:crypto');
 const fs=require('node:fs');
 const http=require('node:http');
 const path=require('node:path');
@@ -12,18 +11,17 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
  const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
  const version=JSON.parse(fs.readFileSync(path.join(root,'version.json'),'utf8'));
- assert.equal(version.build,'v433');
- assert.equal(version.version,'2.0.106');
- assert.match(index,/customer-polls-pilot-v432\.js\?v=v433/);
- assert.match(index,/customer-polls-pilot-v432\.css\?v=v433/);
- assert.match(sw,/portal-shell-v433/);
+ assert.equal(version.build,'v434');
+ assert.equal(version.version,'2.0.107');
+ assert.match(index,/customer-polls-pilot-v432\.js\?v=v434/);
+ assert.match(index,/customer-polls-pilot-v432\.css\?v=v434/);
+ assert.match(sw,/portal-shell-v434/);
  assert.match(original,/portal_poll_votes_v433/);
  assert.match(original,/ensureCustomerSessionV357/);
  assert.doesNotMatch(original,/localStorage\.setItem|service_role|admin\.rpc/);
- const synthetic='synthetic-customer-school-v433';
- const hash=createHash('sha256').update(synthetic).digest('hex');
- const source=original.replace('288c196a3d8f47da8e96737e2c1753be2db7b1864c406c95e312c7687e0dcd66',hash);
- assert.notEqual(source,original);
+ const source=original;
+ assert.doesNotMatch(source,/data\.pollExpand|matchesOwner/);
+ assert.match(source,/pollPlus|pollMinus/);
  const html=[
   '<!doctype html><html class="customer-design"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
   '<style>body{font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:10px;background:#fcefee}',
@@ -50,7 +48,7 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
   'window.ensureCustomerSessionV357=async()=>window.state.session;',
   'window.customerReadJsonV391=async(url,id)=>{',
   ' let rows=[];const vote=JSON.parse(localStorage.getItem("__synthetic_server_vote_v433")||"null");',
-  ' if(url.includes("/portal_polls_v433?"))rows=[{id:"poll-test",title:"Škôlkarsky kalendár",question:"Mali by ste záujem o kalendár Chvostíkova?",description:"Pripravujeme nápad na kalendár so škôlkarmi. Chceli by sme ním podporiť OZ Zvieratá východu.",price_note:"Predbežná cena je 15 € za kus. Celý výťažok poputuje OZ Zvieratá východu."}];',
+  ' if(url.includes("/portal_polls_v433?")&&id==="synthetic-customer-school-v433")rows=[{id:"poll-test",title:"Škôlkarsky kalendár",question:"Mali by ste záujem o kalendár Chvostíkova?",description:"Pripravujeme nápad na kalendár so škôlkarmi. Chceli by sme ním podporiť OZ Zvieratá východu.",price_note:"Predbežná cena je 15 € za kus. Celý výťažok poputuje OZ Zvieratá východu."}];',
   ' if(url.includes("/portal_poll_votes_v433?"))rows=vote?[{id:"vote1",poll_id:"poll-test"}]:[];',
   ' if(url.includes("/portal_poll_options_v433?"))rows=[{id:"yes",label:"Áno, mám záujem",position:1,asks_quantity:true},{id:"no",label:"Nie, nemám záujem",position:2,asks_quantity:false}];',
   ' window.__calls.push({type:"read",url,id});return {response:{ok:true,status:200},rows};',
@@ -75,18 +73,25 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
    const page=await context.newPage();
    await page.goto(url);
    const bubble=page.locator('#customerPollMenuV432');
-   await bubble.locator('[data-poll-expand]').waitFor();
-   assert.match(await bubble.textContent(),/Nové hlasovanie/);
+   await bubble.locator('[data-poll-choice="yes"]').waitFor();
+   assert.equal(await bubble.locator('[data-poll-expand]').count(),0);
+   assert.match(await bubble.textContent(),/Škôlkarsky kalendár/);
+   assert.equal(await bubble.locator('h2').evaluate(el=>getComputedStyle(el).color),'rgb(17, 17, 17)');
    assert.equal(await page.locator('#customerPollOverviewV432').count(),0);
    assert.equal(await page.locator('#customerMenuPrimaryV432>.customer-menu-group').count(),4);
    assert.equal(await page.locator('#customerPollNavBadgeV432').isVisible(),true);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
-   await bubble.locator('[data-poll-expand]').click();
+   assert.equal(await bubble.locator('[data-poll-expand]').count(),0);
    assert.match(await bubble.textContent(),/Zvieratá východu/);
    assert.match(await bubble.textContent(),/15 € za kus/);
    await bubble.locator('[data-poll-choice="yes"]').click();
    const quantity=bubble.locator('#customerPollQuantityV433');
-   await quantity.fill('3');
+   assert.equal(await quantity.textContent(),'1');
+   assert.equal(await bubble.locator('[data-poll-minus]').isDisabled(),true);
+   await bubble.locator('[data-poll-plus]').click();
+   await bubble.locator('[data-poll-plus]').click();
+   assert.equal(await quantity.textContent(),'3');
+   assert.equal(await bubble.locator('.customer-poll-quantity-controls-v434').evaluate(el=>getComputedStyle(el).display),'flex');
    await bubble.locator('[data-poll-submit]').click();
    await bubble.locator('.customer-poll-complete-v432').waitFor();
    assert.match(await bubble.textContent(),/Ďakujeme za váš hlas!/);
@@ -96,10 +101,12 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
    assert.equal(posted[0].data.option_id,'yes');
    assert.equal(await page.locator('#customerPollNavBadgeV432').isVisible(),false);
    await bubble.locator('[data-poll-done]').click();
-   await page.waitForFunction(()=>document.querySelector('#customerPollMenuV432')?.hidden===true);
+   await page.waitForFunction(()=>!document.querySelector('#customerPollMenuV432'));
+
    await page.reload();
-   await page.waitForFunction(()=>document.querySelector('#customerMenuPrimaryV432')&&document.querySelector('#customerPollMenuV432')?.hidden===true);
-   assert.equal(await bubble.isVisible(),false);
+   await page.waitForFunction(()=>!document.querySelector('#customerMenuPrimaryV432')&&!document.querySelector('#customerPollMenuV432'));
+
+   assert.equal(await page.locator('#customerPollMenuV432').count(),0);
    await page.evaluate(()=>{window.state.session.user.id="outsider-v433";window.__hooks.afterBootstrap.forEach(fn=>fn())});
    await bubble.waitFor({state:'detached'});
    assert.equal(await page.locator('#customerMenuPrimaryV432').count(),0);
@@ -108,17 +115,16 @@ const {chromium,webkit}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'
    await outsider.goto(url+'?account=outsider-v433');
    await outsider.waitForTimeout(60);
    assert.equal(await outsider.locator('#customerPollMenuV432').count(),0);
-   assert.equal(await outsider.evaluate(()=>window.__calls.length),0);
+   assert.equal(await outsider.evaluate(()=>window.__calls.some(c=>c.type==='write')),false);
    await context.close();
-   console.log((process.env.V3_ENGINE||'chromium')+' v433 poll '+width+'px PASS');
+   console.log((process.env.V3_ENGINE||'chromium')+' v434 poll '+width+'px PASS');
   }
   const context=await browser.newContext({viewport:{width:390,height:780}});
   const page=await context.newPage();
   await page.goto(url);
-  await page.locator('[data-poll-expand]').waitFor();
+  await page.locator('[data-poll-choice="no"]').waitFor();
   await page.evaluate(()=>{window.__lang="en";document.querySelector('[data-customer-locale="en"]').click()});
-  await page.waitForFunction(()=>document.querySelector('[data-poll-expand]')?.textContent.includes('I want to vote'));
-  await page.locator('[data-poll-expand]').click();
+  await page.waitForFunction(()=>document.querySelector('#customerPollMenuV432')?.textContent.includes('Poll'));
   await page.locator('[data-poll-choice="no"]').click();
   await page.locator('.customer-poll-complete-v432').waitFor();
   const rows=await page.evaluate(()=>window.__calls.filter(x=>x.type==='write'));
