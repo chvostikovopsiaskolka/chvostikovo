@@ -47,7 +47,11 @@ const failures = [];
           // The released lead URL and the noindex preview share Aria UI. The
           // production baseline may still show its pre-release landing.
           const isAriaPage = !bellaris && (url.pathname === '/test-aria/' || url.pathname === '/psia-skolka-kosice/') && await page.locator('[data-aria-guide]').count() > 0;
-          if (!bellaris && isAriaPage) {
+          // On current production this is the approved puppy rollout; the
+          // informational pre-merge baseline may still use the old dock.
+          const isPuppyAria = !bellaris && url.pathname === '/psia-skolka-pre-steniatka/' &&
+            await page.locator('[data-aria-guide]').count() > 0;
+          if (!bellaris && (isAriaPage || isPuppyAria)) {
             if (!await page.getByText(/Ahoj! Používame cookies 🍪/).count())
               throw new Error('Preview cookie greeting missing');
             const bubble = page.locator('[data-aria-cookie-bubble="true"]');
@@ -99,7 +103,7 @@ const failures = [];
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
-          if (!bellaris && isAriaPage) {
+          if (!bellaris && (isAriaPage || isPuppyAria)) {
             const restoredScroll = await page.evaluate(() => ({
               rootOverflow: document.documentElement.style.overflow,
               bodyPosition: document.body.style.position,
@@ -641,7 +645,7 @@ const failures = [];
           if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/'].includes(url.pathname)) {
             const entry = url.pathname === '/'
               ? page.locator('section.hero-safe-top .hero-cta-primary:visible').first()
-              : isAriaPage ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })
+              : (isAriaPage || isPuppyAria) ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })
               : page.locator('.mobile-dock .mobile-dock-apply').first();
             await entry.click();
             const modal = page.getByRole('dialog');
