@@ -202,6 +202,12 @@ export function AriaGuidedChat({
                   </button>
                 ))}
               </div>
+              {messages.length > 0 && (
+                <button type="button" onClick={() => { track("answer_sufficient"); setEngaged(true); onClose(); }}
+                  className="flex min-h-9 w-full items-center justify-center rounded-xl border border-[#2d764b]/25 bg-[#edf3e9] text-xs font-bold text-[#26322b]">
+                  Odpoveď mi stačí, ďakujem ✓
+                </button>
+              )}
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <button type="button" onClick={showInterest}
                   className="flex min-h-11 items-center justify-center gap-1 rounded-xl bg-[#9e336f] px-2 text-xs font-bold text-white">
