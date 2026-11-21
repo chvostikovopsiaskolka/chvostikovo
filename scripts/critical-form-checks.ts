@@ -39,7 +39,15 @@ const ariaInfoPayload = buildDbPayload(shortSchema.parse({
   zaujem: "Chcem sa informovať o škôlke",
 }));
 assert(!("dog_breed" in ariaInfoPayload) && !("Plemeno psíka" in ariaInfoPayload.raw_payload),
-  "Information-only enquiry must not fabricate dog breed.");
+  "An empty information-only enquiry must not fabricate dog breed.");
+const ariaInfoWithBreed = buildDbPayload(shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Chcem sa informovať o škôlke", plemeno: "Írsky vlkodav",
+}));
+assert(ariaInfoWithBreed.interest_reason === "Chcem sa informovať o škôlke" &&
+  ariaInfoWithBreed.dog_breed === "Írsky vlkodav" &&
+  ariaInfoWithBreed.raw_payload["Plemeno psíka"] === "Írsky vlkodav",
+  "Information-only enquiry must persist an optionally provided breed using the current lead contract.");
 assert(!shortSchema.safeParse({
   typ: "informacie", consent: true, meno: "Test", telefon: phone,
   zaujem: "Mám záujem využívať škôlku občasne", plemeno: "x".repeat(201),
@@ -56,6 +64,15 @@ const puppyLead = shortSchema.parse({
   zaujem: "Mám záujem o škôlku pre šteniatko", puppy_check: puppyAnswers,
 });
 const puppyPayload = buildDbPayload(puppyLead);
+const revisedPuppy = buildDbPayload(shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Mám záujem o škôlku pre šteniatko", plemeno: "Írsky vlkodav",
+  puppy_check: { ...puppyAnswers, dog_breed: "Írsky vlkodav" },
+}));
+assert(revisedPuppy.dog_breed === "Írsky vlkodav" &&
+  revisedPuppy.raw_payload["Plemeno psíka"] === "Írsky vlkodav" &&
+  revisedPuppy.raw_payload["Šteniatko – plemeno"] === "Írsky vlkodav",
+  "An edited puppy breed must be identical in the contact lead and attached puppy-check summary.");
 assert(puppyPayload.form_type === "lead" && puppyPayload.interest_reason === "Mám záujem o škôlku pre šteniatko",
   "Puppy checker must preserve the Edge allowlist interest.");
 for (const [key, value] of [
@@ -234,7 +251,11 @@ for (const value of allowedStagedInterests) {
   const payload = buildDbPayload(shortSchema.parse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: value }));
   assert(payload.interest_reason === value, "New interest must be stored verbatim");
 }
-assert(stagedLeadSource.includes('const showBreed = selectedInterest !== ""') && !stagedLeadSource.includes("ariaPreview && selectedInterest"), "Optional breed must be shared across SK lead forms, not preview-only");
+assert(stagedLeadSource.includes('const [breed, setBreed] = useState(puppyCheck?.dog_breed ?? "")') &&
+  stagedLeadSource.includes('name="plemeno"') &&
+  stagedLeadSource.includes("dog_breed: breedValue || undefined") &&
+  !stagedLeadSource.includes("showBreed") && !stagedLeadSource.includes("ariaPreview && selectedInterest"),
+  "One optional, editable breed field must appear in every SK enquiry including puppy contact, keeping the attached puppy breed in sync.");
 const releasedLeadRoute = readFileSync(new URL("../src/routes/psia-skolka-kosice.tsx", import.meta.url), "utf8");
 assert(!releasedLeadRoute.includes('component: AriaPreviewPage') && releasedLeadRoute.includes('component: LeadLandingPage'), "Unapproved Aria preview must NOT replace the live campaign lead URL");
 assert(stagedLeadSource.includes("zaujem: selectedInterest") && stagedLeadSource.includes("name=\"zaujem\"") && stagedLeadSource.includes("PrivacyConsentCheckbox"), "Guided form must preserve interest, consent and submission");
