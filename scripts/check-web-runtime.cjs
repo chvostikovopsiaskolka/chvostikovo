@@ -74,10 +74,15 @@ const failures = [];
             }));
             if (cookieLock.rootOverflow !== 'hidden' || cookieLock.bodyPosition !== 'fixed')
               throw new Error('First-visit consent must lock iPhone background scrolling');
-            await page.mouse.wheel(0, 460);
-            const scrolledBehindCookie = await page.evaluate(() => window.scrollY);
-            if (Math.abs(scrolledBehindCookie - cookieLock.scrollY) > 1)
-              throw new Error('Cookie overlay allowed the background to scroll');
+            // Playwright mobile WebKit does not support mouse.wheel; verify the
+            // fixed-body/html lock in both engines and the actual wheel effect
+            // in Chromium without disguising a browser driver limitation.
+            if (engine === 'chromium') {
+              await page.mouse.wheel(0, 460);
+              const scrolledBehindCookie = await page.evaluate(() => window.scrollY);
+              if (Math.abs(scrolledBehindCookie - cookieLock.scrollY) > 1)
+                throw new Error('Cookie overlay allowed the background to scroll');
+            }
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
