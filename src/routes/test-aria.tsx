@@ -13,7 +13,7 @@ import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
 import { FormDialog } from "@/components/site/FormDialog";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Reviews } from "@/components/site/Reviews";
-import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
+import { DaycarePhotoCarousel, LEAD_REVIEW_GAP_PHOTOS } from "@/components/site/DaycarePhotoCarousel";
 import { AriaMosaicGallery } from "@/components/site/AriaMosaicGallery";
 import { AriaPuppyChecker } from "@/components/site/AriaPuppyChecker";
 import { AriaHighlightedText } from "@/components/site/AriaPreviewText";
@@ -186,9 +186,19 @@ export function AriaPreviewPage() {
               <Reviews variant="hero" />
             </div>
           </div>
-          {/* Keep a soft, bounded gap for fixed Aria + dock. The hero's 100svh
-              minimum still holds the enquiry below the initial viewport. */}
-          <div aria-hidden="true" data-aria-intro-space className="min-h-[96px] max-h-[136px] flex-[0.45] sm:min-h-[110px] sm:max-h-[150px]" />
+          {/* Fill the former empty Aria breathing room with two real photos from
+              the moving gallery. Keep the enquiry below the initial viewport,
+              while leaving Aria fixed above the bottom dock. Desktop unchanged. */}
+          <div data-aria-intro-space className="relative z-10 mx-auto flex min-h-[148px] max-h-[166px] w-full max-w-3xl flex-[0.45] items-center px-4 py-2 sm:min-h-[110px] sm:max-h-[150px] sm:px-0 sm:py-0">
+            <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:hidden">
+              {LEAD_REVIEW_GAP_PHOTOS.map((photo) => (
+                <figure key={photo.src} className="relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card min-[390px]:h-[138px]">
+                  <img src={photo.src} alt={photo.alt} width={520} height={400} loading="lazy" decoding="async"
+                    className="h-full w-full object-cover" />
+                </figure>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
