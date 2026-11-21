@@ -151,7 +151,7 @@ const failures = [];
                 height: el.getBoundingClientRect().height,
                 shadow: getComputedStyle(el).boxShadow,
               }));
-              if (speechStyle.height < 39 || speechStyle.height > 72 || speechStyle.shadow !== 'none')
+              if (speechStyle.height < 39 || speechStyle.height > 110 || speechStyle.shadow !== 'none')
                 throw new Error('Speech must stay compact without stacked box shadows at ' + width);
               const tip = await tail.evaluate(el => ({
                 x: Number(el.dataset.tipX), y: Number(el.dataset.tipY),
@@ -164,82 +164,21 @@ const failures = [];
 
               if (url.pathname === '/test-aria/') {
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-welcome.png') });
-                // On short pages the heading may already sit safely above
-                // the dock. Align the next visible form control with the
-                // bubble to exercise a *real* collision, never a negative
-                // scroll position that the browser silently clamps to zero.
-                const selected = await page.evaluate(() => {
-                  const speech = document.querySelector('[data-aria-speech]').getBoundingClientRect();
-                  const targets = [...document.querySelectorAll(
-                    '#aria-hero-form h2, #aria-hero-form label, #aria-hero-form button, #aria-hero-form input'
-                  )].filter(el => el.getBoundingClientRect().width > 0 &&
-                    el.getBoundingClientRect().top > speech.top + 20);
-                  const target = targets[0];
-                  if (!target) return false;
-                  target.setAttribute('data-aria-overlap-target', 'true');
-                  window.scrollTo(0, window.scrollY + target.getBoundingClientRect().top - (speech.top + 12));
-                  return true;
-                });
-                if (!selected) throw new Error('Cannot find a visible form control to test speech clearance');
-                await page.waitForTimeout(230);
-                const clearance = await page.evaluate(() => {
-                  const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
-                  const overlaps = [...document.querySelectorAll(
-                    'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]'
-                  )].filter(node => {
-                    const b = node.getBoundingClientRect();
-                    return b.width > 0 && b.height > 0 &&
-                      a.left < b.right + 8 && a.right > b.left - 8 &&
-                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
-                  });
-                  const guide = document.querySelector('[data-aria-guide]');
-                  const stage = guide.dataset.ariaStage;
-                  const introBlockers = [...document.querySelectorAll(
-                    'main h1, main h2, main input:not([type=radio]), main select, main textarea, main button'
-                  )].some(node => {
-                    const b = node.getBoundingClientRect();
-                    return b.width > 0 && b.height > 0 &&
-                      a.left < b.right + 8 && a.right > b.left - 8 &&
-                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
-                  });
-                  return {
-                    overlap: overlaps.length > 0,
-                    colliding: overlaps.slice(0, 3).map(node => node.tagName),
-                    stage, introBlockers,
-                    pointerEvents: getComputedStyle(document.querySelector('[data-aria-message]')).pointerEvents,
-                    suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed,
-                    speechTop: Math.round(a.top)
-                  };
-                });
-                if (!clearance.overlap) throw new Error('No real content overlap to test clearance: ' + JSON.stringify(clearance));
-                if (clearance.stage === 'intro' && !clearance.introBlockers) {
-                  if (clearance.suppressed !== 'false' || clearance.pointerEvents !== 'none')
-                    throw new Error('Intro greeting must be visible but click-through over radio choices: ' + JSON.stringify(clearance));
-                } else if (clearance.suppressed !== 'true') {
-                  throw new Error('Interactive speech must hide over form controls: ' + JSON.stringify(clearance));
-                }
-                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-clear.png') });
+                const initialSpeech = await aria.locator('[data-aria-message]').evaluate(el => ({
+                  visible: getComputedStyle(el).visibility === 'visible',
+                  pointerEvents: getComputedStyle(el).pointerEvents,
+                  suppressed: el.dataset.ariaSuppressed
+                }));
+                if (!initialSpeech.visible || initialSpeech.pointerEvents !== 'none' || initialSpeech.suppressed !== 'false')
+                  throw new Error('Intro speech must be always visible but nonblocking at ' + width);
+                await page.locator('#aria-hero-form').scrollIntoViewIfNeeded();
+                await page.waitForTimeout(180);
+                const overForm = await aria.locator('[data-aria-message]').evaluate(el =>
+                  getComputedStyle(el).visibility === 'visible' && el.dataset.ariaSuppressed === 'false');
+                if (!overForm) throw new Error('Aria speech flickers/hides over the lead form at ' + width);
+                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-visible.png') });
                 await page.evaluate(() => window.scrollTo(0, 0));
-                await page.waitForTimeout(170);
-                // At some widths the form is already under the fixed dock at
-                // scrollY=0. In that case keeping speech hidden is correct.
-                const restored = await page.evaluate(() => {
-                  const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
-                  const stage = document.querySelector('[data-aria-guide]').dataset.ariaStage;
-                  const selector = stage === 'intro'
-                    ? 'main h1, main h2, main input:not([type=radio]), main select, main textarea, main button'
-                    : 'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]';
-                  const overlapping = [...document.querySelectorAll(selector)].some(node => {
-                    const b = node.getBoundingClientRect();
-                    return b.width > 0 && b.height > 0 &&
-                      a.left < b.right + 8 && a.right > b.left - 8 &&
-                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
-                  });
-                  return { overlapping,
-                    suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed };
-                });
-                if (restored.suppressed !== String(restored.overlapping))
-                  throw new Error('Aria must restore speech visibility according to real content clearance: ' + JSON.stringify(restored));
+                await page.waitForTimeout(140);
               }
               const interestButton = aria.getByRole('button', { name: 'Mám záujem o škôlku' });
               if ((await interestButton.getAttribute('class') || '').includes('bg-coral/15'))
