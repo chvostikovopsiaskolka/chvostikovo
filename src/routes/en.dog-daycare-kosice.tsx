@@ -110,17 +110,19 @@ function EnglishReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="relative flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
-      <GoogleReviewMark />
-      <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
-      <span className="text-sm tracking-tight text-[#F5B301]" aria-label="5 out of 5 stars">★★★★★</span>
+    <figure className="relative flex w-[82%] shrink-0 flex-col items-start justify-start rounded-3xl bg-card px-4 py-3 text-left shadow-card sm:w-[46%] sm:px-5 sm:py-3.5 lg:w-[31%]">
+      <div data-review-byline className="flex w-full min-w-0 items-center gap-1.5 whitespace-nowrap">
+        <GoogleReviewMark />
+        <figcaption className="min-w-0 truncate font-display text-[12px] font-bold text-forest sm:text-sm">{name}</figcaption>
+        <span data-review-stars className="ml-auto shrink-0 text-[12px] leading-none tracking-[-0.04em] text-[#F5B301] sm:text-sm" aria-label="5 out of 5 stars">★★★★★</span>
+      </div>
       <blockquote
         ref={body}
-        className={`mt-2 min-h-[3.75rem] text-[0.88rem] leading-[1.4] text-forest/85 sm:min-h-[4rem] sm:text-[0.93rem] ${open ? "" : "line-clamp-3"}`}
+        className={`mt-2 w-full min-h-[3.75rem] text-left text-[0.88rem] leading-[1.4] text-forest/85 sm:min-h-[4rem] sm:text-[0.93rem] ${open ? "" : "line-clamp-3"}`}
       >
         “{text}”
       </blockquote>
-      <div className="min-h-[1.75rem] sm:min-h-[2rem]">
+      <div className="w-full min-h-[1.5rem] sm:min-h-[1.75rem]">
         {(clamped || open) && (
           <button
             type="button"

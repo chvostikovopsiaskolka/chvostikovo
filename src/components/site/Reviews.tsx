@@ -15,7 +15,7 @@ export function GoogleReviewMark() {
       data-google-review-logo
       role="img"
       aria-label="Google"
-      className="pointer-events-none absolute right-3 top-3 inline-flex size-7 items-center justify-center rounded-full bg-white/85 sm:right-4 sm:top-4"
+      className="pointer-events-none inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-white/85"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5">
         <path fill="#4285F4" d="M21.35 11.1H12v3.8h5.35c-.23 1.22-.92 2.25-1.96 2.94v2.46h3.17c1.85-1.7 2.91-4.22 2.91-7.2 0-.68-.06-1.33-.12-2Z" />
@@ -39,19 +39,19 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="relative flex w-[82%] shrink-0 flex-col items-center justify-start rounded-3xl bg-card px-4 py-3.5 text-center shadow-card sm:w-[46%] sm:px-5 sm:py-4 lg:w-[31%]">
-      <GoogleReviewMark />
-      <div className="text-center">
-        <figcaption className="font-display text-sm font-bold text-forest">{name}</figcaption>
-        <span className="text-sm tracking-tight text-[#F5B301]">★★★★★</span>
+    <figure className="relative flex w-[82%] shrink-0 flex-col items-start justify-start rounded-3xl bg-card px-4 py-3 text-left shadow-card sm:w-[46%] sm:px-5 sm:py-3.5 lg:w-[31%]">
+      <div data-review-byline className="flex w-full min-w-0 items-center gap-1.5 whitespace-nowrap">
+        <GoogleReviewMark />
+        <figcaption className="min-w-0 truncate font-display text-[12px] font-bold text-forest sm:text-sm">{name}</figcaption>
+        <span data-review-stars className="ml-auto shrink-0 text-[12px] leading-none tracking-[-0.04em] text-[#F5B301] sm:text-sm" aria-label="5 z 5 hviezdičiek">★★★★★</span>
       </div>
       <blockquote
         ref={body}
-        className={`mt-2 min-h-[3.75rem] text-[0.88rem] leading-[1.4] text-forest/85 sm:min-h-[4rem] sm:text-[0.93rem] ${open ? "" : "line-clamp-3"}`}
+        className={`mt-2 w-full min-h-[3.75rem] text-left text-[0.88rem] leading-[1.4] text-forest/85 sm:min-h-[4rem] sm:text-[0.93rem] ${open ? "" : "line-clamp-3"}`}
       >
         „{text}“
       </blockquote>
-      <div className="min-h-[1.75rem] sm:min-h-[2rem]">
+      <div className="w-full min-h-[1.5rem] sm:min-h-[1.75rem]">
         {(clamped || open) && (
           <button
             type="button"
