@@ -33,6 +33,17 @@ const failures = [];
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
         const label = `${engine}-${restricted ? 'blocked-storage' : 'fresh'}-${url.pathname.replaceAll('/', '_')}`;
+        // Record only synthetic events from this browser fixture. Prevent
+        // automated interactions from polluting production campaign analytics.
+        const puppyInteractions = [];
+        if (!bellaris && !restricted && url.pathname === '/psia-skolka-pre-steniatka/') {
+          await page.route('**/functions/v1/website-landing-event', async route => {
+            const request = route.request();
+            const data = request.method() === 'POST' ? request.postDataJSON() : {};
+            if (data?.event_name) puppyInteractions.push({ name: data.event_name, source: data.event_source, attemptId: data.attempt_id });
+            await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+          });
+        }
         try {
           const response = await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 40000 });
           if (response?.status() !== 200) throw new Error(`HTTP ${response?.status()}`);
@@ -482,6 +493,45 @@ const failures = [];
               if (!await speech.isVisible() || await speech.getAttribute('data-aria-suppressed') !== 'false' ||
                   !await aria.getByRole('button', { name: 'Vyplniť' }).count())
                 throw new Error('Puppy Aria must show persistent contact CTA after conditions at ' + width);
+              // Flicker gate: the dock must remain the same fixed-position
+              // node through fast scrolls, section changes and small Safari-
+              // style oscillations around the contact threshold. The speech
+              // is never hidden; only its message may change.
+              const stability = await page.evaluate(async ({boundary}) => {
+                const guide = document.querySelector('[data-aria-guide]');
+                const dock = guide?.querySelector('[data-aria-dock]');
+                const speech = guide?.querySelector('[data-aria-message]');
+                if (!guide || !dock || !speech) return { error: 'missing Aria node' };
+                const start = dock.getBoundingClientRect();
+                const sequences = [
+                  boundary + 20, boundary + 44, boundary + 32,
+                  boundary + 52, boundary + 22, boundary + 35,
+                  Math.max(0, boundary - 800), boundary + 110,
+                  Math.max(0, boundary - 1100), boundary + 180,
+                ];
+                const failures = [];
+                for (const y of sequences) {
+                  window.scrollTo(0, y);
+                  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                  const dockBox = dock.getBoundingClientRect();
+                  const speechBox = speech.getBoundingClientRect();
+                  const style = getComputedStyle(guide);
+                  const speechStyle = getComputedStyle(speech);
+                  if (document.querySelector('[data-aria-dock]') !== dock ||
+                      style.position !== 'fixed' || style.display === 'none' ||
+                      style.visibility !== 'visible' || style.opacity !== '1' ||
+                      speechStyle.visibility !== 'visible' || speechBox.width < 80 ||
+                      speech.dataset.ariaSuppressed !== 'false' ||
+                      Math.abs(start.y - dockBox.y) > 3 ||
+                      Math.abs(start.height - dockBox.height) > 2)
+                    failures.push({ y, stage: guide.dataset.ariaStage,
+                      dockY: Math.round(dockBox.y), baselineY: Math.round(start.y),
+                      visible: speechStyle.visibility, position: style.position });
+                }
+                return { failures };
+              }, { boundary });
+              if (stability.error || stability.failures.length)
+                throw new Error('Aria dock/speech flicker at ' + width + ': ' + JSON.stringify(stability));
               if (url.pathname === '/psia-skolka-pre-steniatka/' && width === 390)
                 await page.screenshot({ path: path.join(out, 'puppy-aria-' + engine + '-390-contact.png') });
             }
@@ -511,6 +561,87 @@ const failures = [];
             await leadDialog.waitFor({ state: 'hidden' });
             await page.evaluate(() => window.scrollTo(0, 0));
             await page.waitForTimeout(190);
+
+            // The old mobile dock emitted both nav_click and a consent-gated
+            // view_pricing. Aria additionally needs first-visit/FAQ reads.
+            await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
+            await aria.getByRole('button', { name: 'Ako prebieha návšteva?' }).click();
+            if (!await aria.locator('[data-aria-first-visit]').isVisible())
+              throw new Error('First-visit pricing details did not open');
+            await aria.getByRole('button', { name: 'Časté otázky' }).click();
+            await aria.getByRole('button', { name: 'Ako prebieha prvá návšteva?' }).click();
+            await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
+            await aria.getByRole('button', { name: /Prvá návšteva zadarmo/ }).click();
+
+            // Simulate failed lead, separate recover_contact, then accepted
+            // lead. Every POST is fulfilled within Playwright: no Supabase,
+            // SMS, email, CRM or real marketing conversion is sent.
+            const syntheticLeads = [];
+            const syntheticRecoveries = [];
+            await page.route('**/functions/v1/web-form-submit', async route => {
+              const payload = route.request().postDataJSON();
+              if (payload?.action === 'recover_contact') {
+                syntheticRecoveries.push(payload);
+                await route.fulfill({
+                  status: 200, contentType: 'application/json',
+                  body: JSON.stringify({ recovery_saved: true }),
+                });
+                return;
+              }
+              syntheticLeads.push(payload);
+              const accepted = syntheticLeads.length > 1;
+              await route.fulfill({
+                status: accepted ? 201 : 503,
+                contentType: 'application/json',
+                body: JSON.stringify(accepted ? { ok: true } : { ok: false, recovery_saved: false }),
+              });
+            });
+            await aria.getByRole('button', { name: 'Mám záujem o škôlku' }).click();
+            const conversionDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+            await conversionDialog.waitFor({ state: 'visible' });
+            await conversionDialog.locator('label:has(input[name="zaujem"])').first().click();
+            await conversionDialog.getByRole('button', { name: 'Pokračovať' }).click();
+            await conversionDialog.locator('input[name="meno"]').fill('Test návštevníka');
+            await conversionDialog.locator('input[name="telefon"]').fill('912345678');
+            await conversionDialog.locator('input[name="plemeno"]').fill('Kríženec');
+            await conversionDialog.locator('input[type="checkbox"][required]').check();
+            await conversionDialog.getByRole('button', { name: 'Odoslať záujem' }).click();
+            await conversionDialog.getByRole('alert').waitFor({ state: 'visible' });
+            if (puppyInteractions.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'))
+              throw new Error('Failed synthetic lead must not count as conversion');
+            await conversionDialog.getByRole('button', { name: 'Odoslať záujem' }).click();
+            // On success the shared LeadStepForm intentionally replaces its
+            // form node with a receipt. Keep the dialog selector independent
+            // of the removed [data-lead-step-form] element.
+            await page.locator('[role="dialog"] [data-lead-step-success]').last().waitFor({ state: 'visible' });
+            for (let i = 0; i < 12 && !puppyInteractions.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'); i++)
+              await page.waitForTimeout(100);
+            const has = (name, source) => puppyInteractions.some(e => e.name === name && e.source === source);
+            for (const [name, source] of [
+              ['nav_click', 'puppy_landing_aria_pricing'],
+              ['nav_click', 'puppy_landing_aria_faq'],
+              ['nav_click', 'puppy_landing_aria_first_visit'],
+              ['nav_click', 'puppy_landing_aria_interest'],
+              ['explore_daycare', 'puppy_landing_aria_first_visit_pricing_details'],
+              ['explore_daycare', 'puppy_landing_aria_faq_first_visit'],
+              ['inquiry_cta', 'puppy_landing_aria_interest'],
+              ['form_submit', 'puppy_landing_aria_interest'],
+            ]) {
+              if (!has(name, source))
+                throw new Error('Missing isolated CTA/funnel event ' + name + ':' + source);
+            }
+            const submitted = puppyInteractions.filter(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest');
+            if (submitted.length !== 1 || syntheticLeads.length !== 2 || syntheticRecoveries.length < 1 ||
+                !syntheticLeads.every(data => data.form_type === 'lead' &&
+                  data.cta_source === 'puppy_landing_aria_interest' &&
+                  data.interest_reason === 'Chcem sa informovať o škôlke' &&
+                  data.dog_breed === 'Kríženec'))
+              throw new Error('Synthetic lead/recovery separation failed: ' + JSON.stringify({ leads: syntheticLeads.map(v => ({ action: v.action, type: v.form_type, source: v.cta_source, interest: v.interest_reason, breed: v.dog_breed })), recoveries: syntheticRecoveries.length, submitted: submitted.length }));
+            const receiptDialog = page.getByRole('dialog').last();
+            await receiptDialog.getByRole('button', { name: 'Close' }).click();
+            await receiptDialog.waitFor({ state: 'hidden' });
+            await page.evaluate(() => window.scrollTo(0, 0));
+            await page.waitForTimeout(120);
           }
           // Shared Slovak Hero CTA: mobile pair, desktop single prominent info CTA.
           // Layout regression 320/375/390/1440 in Chromium and Safari WebKit.

@@ -308,14 +308,24 @@ export function AriaPreviewPage() {
                 <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
                 <p className="font-display text-base font-bold text-forest sm:text-lg">Úvodná návšteva zadarmo</p>
               </div>
-              <details data-aria-visit-details className="group mx-auto mt-2 w-full max-w-[320px] rounded-2xl border border-coral/20 bg-card/65 px-3 py-2 text-left">
+              <details data-aria-visit-details
+                onToggle={(event) => {
+                  if (event.currentTarget.open) {
+                    void trackCookielessInteraction("explore_daycare",
+                      isLiveLead ? "lead_landing_first_visit_details" : "aria_preview_first_visit_details");
+                  }
+                }}
+                className="group mx-auto mt-2 w-full max-w-[320px] rounded-2xl border border-coral/20 bg-card/65 px-3 py-2 text-left">
                 <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 font-display text-sm font-bold text-forest">
                   Ako prebieha úvodná návšteva? <span className="text-coral group-open:rotate-45">+</span>
                 </summary>
                 <div className="space-y-3 border-t border-coral/15 pt-3 text-xs leading-relaxed text-forest/80">
                   {(FAQ.find(({ q }) => q === "Ako prebieha prvá návšteva psíka v škôlke?")?.a || "").split(/\n+/).filter(Boolean).map((text, i) => <p key={i}><AriaHighlightedText text={text.trim()} /></p>)}
                   <div className="flex justify-center">
-                    <a href="#lead-first-visit" className="inline-flex min-h-11 items-center justify-center rounded-full border border-coral/25 bg-card px-4 text-right text-sm font-bold text-coral-dark shadow-sm">
+                    <a href="#lead-first-visit"
+                      onClick={() => void trackCookielessInteraction("nav_click",
+                        isLiveLead ? "lead_landing_first_visit_steps" : "aria_preview_first_visit_steps")}
+                      className="inline-flex min-h-11 items-center justify-center rounded-full border border-coral/25 bg-card px-4 text-right text-sm font-bold text-coral-dark shadow-sm">
                       Pozrieť 3 kroky prvej návštevy
                     </a>
                   </div>
