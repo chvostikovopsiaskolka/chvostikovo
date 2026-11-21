@@ -240,12 +240,10 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
                   </button>
                 ))}
               </div>
-              {messages.length === 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                   <button type="button" onClick={showInterest} className="min-h-10 rounded-xl bg-[#9e336f] px-4 text-xs font-bold text-white">Mám záujem o škôlku</button>
                   <button type="button" onClick={showOther} className="min-h-10 rounded-xl border border-[#9e336f]/30 px-4 text-xs font-bold text-[#9e336f]">Iná otázka</button>
                 </div>
-              )}
             </div>
           )}
 
