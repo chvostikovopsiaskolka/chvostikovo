@@ -538,6 +538,51 @@ const failures = [];
             await receipt.getByRole('button', { name: 'Close' }).click();
             await receipt.waitFor({ state: 'hidden' });
           }
+          if (!restricted && !bellaris && url.pathname === '/') {
+            await page.setViewportSize({ width: 390, height: 844 });
+            const checker = page.locator('[data-home-puppy-checker] [data-aria-puppy-step="age"]');
+            await checker.scrollIntoViewIfNeeded();
+            await checker.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
+            const vaccines = page.locator('[data-home-puppy-checker] [data-aria-puppy-step="vaccines"]');
+            await vaccines.waitFor({ state: 'visible' });
+            for (let i = 0; i < 3; i++) await vaccines.locator('fieldset').nth(i).getByText('Áno', { exact: true }).click();
+            if (await vaccines.getByText(/Plemeno \(voliteľné\)/).count())
+              throw new Error('Homepage puppy checker must defer breed until contact');
+            const homeSubmissions = [];
+            await page.route('**/functions/v1/web-form-submit', async route => {
+              const data = route.request().postDataJSON() || {};
+              if (data.action !== 'recover_contact') homeSubmissions.push(data);
+              await route.fulfill({ status: 201, contentType: 'application/json', body: '{"ok":true}' });
+            });
+            await vaccines.getByRole('button', { name: /Pokračovať na kontakt/ }).click();
+            const contact = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+            await contact.waitFor({ state: 'visible' });
+            const summary = await contact.locator('[data-puppy-check-summary]').innerText();
+            if (!summary.includes('4 mesiacov') || !summary.includes('DHPPi+L'))
+              throw new Error('Homepage vaccine answers missing in actual contact');
+            await contact.locator('input[name="meno"]').fill('Testovací dopyt');
+            await contact.getByLabel('Plemeno psíka (nepovinné)').fill('Írsky vlkodav');
+            await contact.locator('input[name="telefon"]').fill('912345678');
+            await contact.locator('input[type="checkbox"][required]').check();
+            await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
+            await page.locator('[role="dialog"] [data-lead-step-success]').last().waitFor({ state: 'visible' });
+            for (let i = 0; i < 12 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'home_puppy_checker_eligible'); i++)
+              await page.waitForTimeout(100);
+            const accepted = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'home_puppy_checker_eligible');
+            const payload = homeSubmissions[0];
+            if (homeSubmissions.length !== 1 || accepted.length !== 1 || !payload ||
+                payload.form_type !== 'lead' || payload.cta_source !== 'home_puppy_checker_eligible' ||
+                payload.dog_breed !== 'Írsky vlkodav' ||
+                payload.puppy_check?.age_months !== 4 ||
+                !['rabies', 'dhppi', 'kennel'].every(k => payload.puppy_check?.vaccines?.[k] === 'yes'))
+              throw new Error('Homepage puppy CRM handoff failed: ' + JSON.stringify({ saved: homeSubmissions.length,
+                eventCount: accepted.length, source: payload?.cta_source, breed: payload?.dog_breed }));
+            await page.screenshot({ path: path.join(out, 'home-puppy-' + engine + '-390-success.png') });
+            const receipt = page.getByRole('dialog').last();
+            await receipt.getByRole('button', { name: 'Close' }).click();
+            await receipt.waitFor({ state: 'hidden' });
+            await page.evaluate(() => window.scrollTo(0, 0));
+          }
           if (/This page didn.t load|Stránku sa nepodarilo načítať/i.test(await page.locator('body').innerText())) throw new Error('Cookie selection crashed the page');
           if (isPuppyAria && !restricted) {
             const aria = page.locator('[data-aria-guide]');
