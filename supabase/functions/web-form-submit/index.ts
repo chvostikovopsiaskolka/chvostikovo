@@ -244,6 +244,7 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
 
   } else {
     if (payload.dog_name) lines.push(`Meno psa: ${String(payload.dog_name)}`);
+    if (payload.dog_breed) lines.push(`Plemeno psíka: ${text(payload.dog_breed, 80)}`);
     lines.push(
       `O čo máte záujem?: ${String(payload.interest_reason ?? '')}`,
     );
@@ -519,6 +520,11 @@ Deno.serve(async (req: Request) => {
         if (!LEAD_INTERESTS.has(rawInterest)) return response(origin, 400, { ok: false, error: 'invalid_interest' });
         payload = { ...payload, interest_reason: rawInterest };
       }
+      // A short enquiry is still a single lead, but optional breed must be
+      // available in the normal CRM column and operator notification, not
+      // solely in raw_payload. Preserve the existing interest allowlist.
+      const leadBreed = text(input.dog_breed ?? input.plemeno, 80);
+      if (leadBreed) payload.dog_breed = leadBreed;
     } else {
       const dogName = text(input.dog_name ?? input.pes, 160);
       const dogSex = sex(input.dog_sex ?? input.pohlavie);
