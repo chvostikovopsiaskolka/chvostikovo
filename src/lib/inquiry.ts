@@ -184,6 +184,10 @@ export function buildDbPayload(data: InquiryData) {
       ...(data.email ? { email: data.email } : {}),
       interest_reason: data.zaujem,
       ...(data.plemeno ? { dog_breed: data.plemeno } : {}),
+      // Existing Edge persists non-column fields only in its raw_payload JSONB.
+      // Keep the validated puppy answers structured for CRM/email, never append
+      // them to the allowlisted interest_reason or create a second lead.
+      ...(data.puppy_check ? { puppy_check: data.puppy_check } : {}),
       consent: true,
       source_ref,
       landing_page: data.landing_page || "",
