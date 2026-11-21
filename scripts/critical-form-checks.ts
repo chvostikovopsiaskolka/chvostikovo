@@ -257,7 +257,17 @@ assert(stagedLeadSource.includes('const [breed, setBreed] = useState(puppyCheck?
   !stagedLeadSource.includes("showBreed") && !stagedLeadSource.includes("ariaPreview && selectedInterest"),
   "One optional, editable breed field must appear in every SK enquiry including puppy contact, keeping the attached puppy breed in sync.");
 const releasedLeadRoute = readFileSync(new URL("../src/routes/psia-skolka-kosice.tsx", import.meta.url), "utf8");
-assert(!releasedLeadRoute.includes('component: AriaPreviewPage') && releasedLeadRoute.includes('component: LeadLandingPage'), "Unapproved Aria preview must NOT replace the live campaign lead URL");
+const approvedLeadAria = readFileSync(new URL("../src/routes/test-aria.tsx", import.meta.url), "utf8");
+assert(releasedLeadRoute.includes('component: AriaPreviewPage') &&
+  releasedLeadRoute.includes('content: "noindex, follow"') &&
+  approvedLeadAria.includes('isLiveLead') &&
+  approvedLeadAria.includes('lead_landing_aria_info') &&
+  approvedLeadAria.includes('lead_landing_aria_hero_inline') &&
+  approvedLeadAria.includes("<AriaLeadAssistant") &&
+  approvedLeadAria.includes('<LeadStepForm key={leadModalSource}'),
+  "Approved paid LEAD Aria must preserve campaign SEO, consent-aware analytics, inline and modal form contracts");
+// Legacy LeadLandingPage remains in the module only as a revert fallback;
+// enforce the actual live route separately rather than counting legacy forms.
 assert(stagedLeadSource.includes("zaujem: selectedInterest") && stagedLeadSource.includes("name=\"zaujem\"") && stagedLeadSource.includes("PrivacyConsentCheckbox"), "Guided form must preserve interest, consent and submission");
 assert(stagedLeadSource.includes('name="meno"') && stagedLeadSource.includes('name="email"') && stagedLeadSource.includes('<PhoneField'), "Guided form must preserve contact fields and autofill");
 assert(stagedLeadSource.includes('startFormAttempt(trackingSource)') && stagedLeadSource.includes('trackMetaFormConversion("informacie"') && stagedLeadSource.includes('LeadPhoneReceipt'), "Guided form must retain conversion idempotency, receipt and phone correction");
