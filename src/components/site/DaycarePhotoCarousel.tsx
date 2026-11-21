@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { PhotoLightbox } from "./PhotoLightbox";
 import { DAYCARE_GALLERY_EXTRAS } from "@/content/site";
 import newPhoto01 from "@/assets/skolkari-novi-01.avif";
 import newPhoto02 from "@/assets/skolkari-novi-02.avif";
@@ -172,33 +172,6 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
     };
   }, []);
 
-  useEffect(() => {
-    if (active === null) return;
-
-    pause();
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setActive(null);
-        resumeAfterPause();
-      } else if (event.key === "ArrowLeft") {
-        setActive((current) =>
-          current === null ? null : (current - 1 + PHOTOS.length) % PHOTOS.length,
-        );
-      } else if (event.key === "ArrowRight") {
-        setActive((current) => (current === null ? null : (current + 1) % PHOTOS.length));
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [active]);
-
   const openPhoto = (index: number) => {
     if (dragged.current) {
       dragged.current = false;
@@ -316,59 +289,7 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
         </div>
       </div>
 
-      {active !== null && (
-        <div
-          className="fixed inset-0 z-60 flex items-center justify-center bg-forest-deep/95 p-3 sm:p-6"
-          role="dialog"
-          aria-modal="true"
-          aria-label={isEnglish ? `Photo ${active + 1} of ${PHOTOS.length}` : `Fotografia ${active + 1} z ${PHOTOS.length}`}
-          onClick={closePhoto}
-        >
-          <button
-            type="button"
-            aria-label={isEnglish ? "Close gallery" : "Zavrieť galériu"}
-            className="absolute top-4 right-4 z-10 flex size-12 items-center justify-center rounded-full bg-cream/95 text-forest shadow-soft sm:top-6 sm:right-6"
-            onClick={(event) => {
-              event.stopPropagation();
-              closePhoto();
-            }}
-          >
-            <X className="size-6" />
-          </button>
-
-          <button
-            type="button"
-            aria-label={isEnglish ? "Previous photo" : "Predchádzajúca fotografia"}
-            className="absolute left-2 z-10 flex size-12 items-center justify-center rounded-full bg-cream/95 text-forest shadow-soft sm:left-6"
-            onClick={(event) => {
-              event.stopPropagation();
-              setActive((active - 1 + PHOTOS.length) % PHOTOS.length);
-            }}
-          >
-            <ChevronLeft className="size-7" />
-          </button>
-
-          <img
-            src={PHOTOS[active]!.src}
-            alt={isEnglish ? `Dogs at Chvostíkovo daycare – photo ${active + 1}` : PHOTOS[active]!.alt}
-            decoding="async"
-            className="max-h-[88vh] max-w-[92vw] rounded-3xl object-contain shadow-soft sm:max-w-[86vw]"
-            onClick={(event) => event.stopPropagation()}
-          />
-
-          <button
-            type="button"
-            aria-label={isEnglish ? "Next photo" : "Nasledujúca fotografia"}
-            className="absolute right-2 z-10 flex size-12 items-center justify-center rounded-full bg-cream/95 text-forest shadow-soft sm:right-6"
-            onClick={(event) => {
-              event.stopPropagation();
-              setActive((active + 1) % PHOTOS.length);
-            }}
-          >
-            <ChevronRight className="size-7" />
-          </button>
-        </div>
-      )}
+      <PhotoLightbox photos={PHOTOS} active={active} onChange={setActive} onClose={closePhoto} language={language} />
     </section>
   );
 }
