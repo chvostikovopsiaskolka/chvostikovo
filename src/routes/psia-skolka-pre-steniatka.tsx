@@ -9,7 +9,11 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/site/Contact";
 import { Header } from "@/components/site/Header";
-import { MobileDock } from "@/components/site/MobileDock";
+import { AriaLeadAssistant } from "@/components/site/AriaLeadAssistant";
+import { AriaPuppyChecker } from "@/components/site/AriaPuppyChecker";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import type { PuppyCheckInput } from "@/lib/inquiry";
+import { LEAD_STEP_INTERESTS } from "@/components/site/LeadStepForm";
 import { LandingMobilePricing } from "@/components/site/LandingMobilePricing";
 import { InfoTicker } from "@/components/site/InfoTicker";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
@@ -89,6 +93,9 @@ export const Route = createFileRoute("/psia-skolka-pre-steniatka")({
     meta: [
       { title },
       { name: "description", content: description },
+      { name: "robots", content: "index, follow" },
+      { property: "og:locale", content: "sk_SK" },
+      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
@@ -147,11 +154,37 @@ function PuppyForm({
 function PuppyDaycarePage() {
   const [formOpen, setFormOpen] = useState(false);
   const [formSource, setFormSource] = useState("puppy_landing_modal");
+  const [puppyModalOpen, setPuppyModalOpen] = useState(false);
+  const [puppyCheck, setPuppyCheck] = useState<PuppyCheckInput | undefined>(undefined);
+  const [formPreset, setFormPreset] = useState<string | undefined>(undefined);
 
   function openForm(source: string) {
     trackMarketingInteraction("inquiry_cta", source);
     void trackCookielessInteraction("inquiry_cta", source);
     setFormSource(source);
+    setFormPreset(undefined);
+    setPuppyCheck(undefined);
+    setFormOpen(true);
+  }
+
+  function openAriaInfo() {
+    const source = "puppy_landing_aria_info";
+    trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
+    setFormSource(source);
+    setFormPreset(LEAD_STEP_INTERESTS[0].value);
+    setPuppyCheck(undefined);
+    setFormOpen(true);
+  }
+
+  function openPuppyContact(details: PuppyCheckInput, infoOnly = false) {
+    const source = infoOnly ? "puppy_landing_checker_info" : "puppy_landing_checker_eligible";
+    trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
+    setFormSource(source);
+    setFormPreset(infoOnly ? LEAD_STEP_INTERESTS[0].value : "Mám záujem o škôlku pre šteniatko");
+    setPuppyCheck(details);
+    setPuppyModalOpen(false);
     setFormOpen(true);
   }
 
