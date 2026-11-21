@@ -69,6 +69,16 @@ const failures = [];
             }));
             if (cookieHeader.wraps || cookieHeader.overflows || !cookieHeader.nowrap)
               throw new Error('Aria cookie title must fit in one row next to portrait');
+            if (url.pathname === '/test-aria/') {
+              const cookieGap = await bubble.evaluate(el => {
+                const title = el.querySelector('#cookie-consent-title');
+                const paragraph = title?.nextElementSibling;
+                if (!title || !paragraph) return Infinity;
+                return paragraph.getBoundingClientRect().top - title.getBoundingClientRect().bottom;
+              });
+              if (cookieGap > 6 || cookieGap < -1)
+                throw new Error('Aria cookie heading needs a compact gap before the description: ' + cookieGap);
+            }
             const cookieLock = await page.evaluate(() => ({
               rootOverflow: document.documentElement.style.overflow,
               bodyPosition: document.body.style.position,
@@ -121,6 +131,8 @@ const failures = [];
               }));
               if (welcome.fontSize < 10.5 || welcome.overflows)
                 throw new Error('Aria greeting must remain readable without clipping at ' + width);
+              if (!await aria.getByText('Zisti viac z našej ponuky nižšie.').count())
+                throw new Error('Aria introduction must show the offer guidance at ' + width);
               const comicBubble = aria.locator('[data-aria-speech]');
               const portrait = aria.locator('[data-aria-dock] img[alt^="Aria"]');
               const tail = comicBubble.locator('svg[data-aria-tail]');
@@ -220,6 +232,44 @@ const failures = [];
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
               if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
                 throw new Error('Aria floating dock overflows mobile viewport ' + width);
+              const navFrames = await aria.locator('[data-aria-dock] button').evaluateAll(buttons =>
+                buttons.every(button => getComputedStyle(button).boxShadow === 'none'));
+              if (!navFrames) throw new Error('Only the overall Aria menu frame should be outlined, not each navigation item');
+
+              if (url.pathname === '/test-aria/') {
+                // Check that the speech switches to a real modal CTA only after
+                // the requirements section, and that the dock does not jump.
+                const requirementsEnd = await page.evaluate(() => {
+                  const target = document.getElementById('lead-requirements');
+                  if (!target) return -1;
+                  return window.scrollY + target.getBoundingClientRect().bottom;
+                });
+                if (requirementsEnd < 0) throw new Error('Aria requirements boundary missing');
+                await page.evaluate(y => window.scrollTo(0, y), requirementsEnd + 20);
+                await page.waitForTimeout(220);
+                if (await aria.getAttribute('data-aria-stage') !== 'contact' ||
+                    !await aria.getByText(/Vyplňte nezáväzný formulár/).count())
+                  throw new Error('Contact offer should replace puppy text after requirements at ' + width);
+                const contactDock = await aria.locator('[data-aria-dock]').boundingBox();
+                if (!contactDock || Math.abs(contactDock.y - dock.y) > 3)
+                  throw new Error('Aria fixed navigation jumped vertically on section change at ' + width);
+                const contactCta = aria.getByRole('button', { name: 'Vyplniť', exact: true });
+                for (const offset of [20, 200, 400, 650, 950, 1250, 1600]) {
+                  if (await contactCta.isVisible()) break;
+                  await page.evaluate(y => window.scrollTo(0, y), requirementsEnd + offset);
+                  await page.waitForTimeout(140);
+                }
+                if (!await contactCta.isVisible())
+                  throw new Error('Post-requirements modal CTA never becomes visible at ' + width);
+                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-contact.png') });
+                await contactCta.click();
+                const contact = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+                await contact.waitFor({ state: 'visible' });
+                await contact.getByRole('button', { name: 'Close' }).click();
+                await contact.waitFor({ state: 'hidden' });
+                await page.evaluate(() => window.scrollTo(0, 0));
+                await page.waitForTimeout(190);
+              }
 
               // Four widths receive screenshots and overlay checks. Run the
               // full wizard/modal journey at the original 320 and 390 widths.
