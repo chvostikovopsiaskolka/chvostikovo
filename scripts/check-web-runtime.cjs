@@ -153,10 +153,18 @@ const failures = [];
               // Dispatch an actual TouchEvent sequence in both Chromium and WebKit:
               // horizontal swipe must advance, vertical scrolling must not be hijacked.
               await modal.locator('[data-photo-lightbox-frame]').evaluate(frame => {
-                const createTouch=(x,y)=>new Touch({identifier:4,target:frame,clientX:x,clientY:y});
-                const before=createTouch(260,360), after=createTouch(80,364);
-                frame.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[before],targetTouches:[before],changedTouches:[before]}));
-                frame.dispatchEvent(new TouchEvent('touchend',{bubbles:true,touches:[],targetTouches:[],changedTouches:[after]}));
+                // WebKit's desktop Playwright driver rejects the native Touch
+                // constructor. Dispatch touch event types with array-shaped
+                // TouchLists, matching the successful stand pinch regression.
+                const emit=(name,touches,changed)=>{
+                  const event=new Event(name,{bubbles:true,cancelable:true});
+                  Object.defineProperty(event,'touches',{value:touches});
+                  Object.defineProperty(event,'changedTouches',{value:changed});
+                  frame.dispatchEvent(event);
+                };
+                const before={clientX:260,clientY:360},after={clientX:80,clientY:364};
+                emit('touchstart',[before],[before]);
+                emit('touchend',[],[after]);
               });
               await page.waitForFunction(initial=>document.querySelector('[data-photo-lightbox-image]')?.getAttribute('src')!==initial,measured.src,{timeout:2500});
               await modal.locator('[data-photo-lightbox-close]').click();
@@ -1574,6 +1582,36 @@ const failures = [];
               throw new Error('Pinch-ready stand image viewport missing');
             if (await viewport.evaluate(el=>getComputedStyle(el).touchAction)!=='none')
               throw new Error('Touch viewport must allow custom pinch/pan');
+            const tinyNav = await articleLightbox.evaluate(el => {
+              const photo=el.querySelector('[data-stand-photo-viewport]')?.getBoundingClientRect();
+              const prev=el.querySelector('[data-stand-photo-previous]')?.getBoundingClientRect();
+              const next=el.querySelector('[data-stand-photo-next]')?.getBoundingClientRect();
+              const close=[...el.children].find(node => node.tagName==='BUTTON')?.getBoundingClientRect();
+              return photo && prev && next ? {
+                arrows:[prev.width,next.width],centers:[prev.top+prev.height/2,next.top+next.height/2],
+                center:photo.top+photo.height/2,closeTop:close?.top,photoTop:photo.top
+              } : null;
+            });
+            if (!tinyNav || tinyNav.arrows.some(w=>w>42) ||
+                tinyNav.centers.some(y=>Math.abs(y-tinyNav.center)>14) ||
+                (tinyNav.closeTop!==undefined && Math.abs(tinyNav.closeTop-tinyNav.photoTop)>26))
+              throw new Error('Stand photo must keep compact navigation at picture edges: '+JSON.stringify(tinyNav));
+            if (width===390) {
+              const startingSrc=await viewport.locator('img').getAttribute('src');
+              await viewport.evaluate(el => {
+                const emit=(name,touches,changed)=>{
+                  const event=new Event(name,{bubbles:true,cancelable:true});
+                  Object.defineProperty(event,'touches',{value:{length:touches.length,item:i=>touches[i]??null}});
+                  Object.defineProperty(event,'changedTouches',{value:{length:changed.length,item:i=>changed[i]??null}});
+                  el.dispatchEvent(event);
+                };
+                emit('touchstart',[{clientX:240,clientY:300}],[{clientX:240,clientY:300}]);
+                emit('touchend',[],[{clientX:80,clientY:306}]);
+              });
+              await productPage.waitForFunction(src => document.querySelector('[data-stand-photo-viewport] img')?.getAttribute('src')!==src,startingSrc,{timeout:2500});
+              await articleLightbox.locator('[data-stand-photo-previous]').click();
+              await productPage.waitForFunction(src => document.querySelector('[data-stand-photo-viewport] img')?.getAttribute('src')===src,startingSrc,{timeout:2500});
+            }
             if (width===390) {
               const pinch=await viewport.evaluate(el=>{
                 // Browser-independent synthetic touch-list input: WebKit desktop
