@@ -66,9 +66,29 @@ const failures = [];
             }));
             if (cookieHeader.wraps || cookieHeader.overflows || !cookieHeader.nowrap)
               throw new Error('Aria cookie title must fit in one row next to portrait');
+            const cookieLock = await page.evaluate(() => ({
+              rootOverflow: document.documentElement.style.overflow,
+              bodyPosition: document.body.style.position,
+              bodyTop: document.body.style.top,
+              scrollY: window.scrollY,
+            }));
+            if (cookieLock.rootOverflow !== 'hidden' || cookieLock.bodyPosition !== 'fixed')
+              throw new Error('First-visit consent must lock iPhone background scrolling');
+            await page.mouse.wheel(0, 460);
+            const scrolledBehindCookie = await page.evaluate(() => window.scrollY);
+            if (Math.abs(scrolledBehindCookie - cookieLock.scrollY) > 1)
+              throw new Error('Cookie overlay allowed the background to scroll');
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
+          if (!bellaris && url.pathname === '/test-aria/') {
+            const restoredScroll = await page.evaluate(() => ({
+              rootOverflow: document.documentElement.style.overflow,
+              bodyPosition: document.body.style.position,
+            }));
+            if (restoredScroll.rootOverflow === 'hidden' || restoredScroll.bodyPosition === 'fixed')
+              throw new Error('Cookie scroll lock was not restored after saving preferences');
+          }
           if (!bellaris && url.pathname === '/test-aria/' && !restricted) {
             for (const width of [320, 390]) {
               // Stop the previous smooth scroll without navigating: this fixture
@@ -109,6 +129,11 @@ const failures = [];
               const interestButton = aria.getByRole('button', { name: 'Mám záujem o škôlku' });
               if ((await interestButton.getAttribute('class') || '').includes('bg-coral/15'))
                 throw new Error('Rejected special interest button highlight resurfaced');
+              for (const choice of await aria.locator('[data-aria-dock] button').all()) {
+                const radius = await choice.evaluate(button => parseFloat(getComputedStyle(button).borderTopLeftRadius));
+                if (!Number.isFinite(radius) || radius > 15)
+                  throw new Error('Dock choices must be rounded rectangles, never circles');
+              }
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
               if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
                 throw new Error('Aria floating dock overflows mobile viewport ' + width);
@@ -220,6 +245,32 @@ const failures = [];
                   !!heading && !!photo && !!copy && follows(heading, photo) && follows(photo, copy);
               });
               if (!hasHeroFormAndCaretakerOrder) throw new Error('Hero form and caretaker headline/photo/text order changed');
+              const hero = page.locator('#aria-hero-form');
+              if (!await hero.getByRole('heading', { name: 'Chceli by ste sa informovať o škôlke?' }).count())
+                throw new Error('New compact hero form heading missing');
+              const enquiry = hero.locator('[data-lead-step-form]');
+              const choiceLabels = enquiry.locator('label:has(input[name="zaujem"])');
+              if (await choiceLabels.count() !== 3) throw new Error('Aria enquiry lost its 3 interest choices');
+              await choiceLabels.nth(1).click();
+              await enquiry.getByRole('button', { name: 'Pokračovať' }).click();
+              const breed = enquiry.locator('[data-aria-breed-field]');
+              if (!await breed.isVisible() || !await breed.getByLabel('Plemeno psíka (nepovinné)').count())
+                throw new Error('Regular visit must show optional breed under owner name');
+              const ownerName = await enquiry.locator('input[name="meno"]').boundingBox();
+              const breedBox = await breed.boundingBox();
+              const phoneBox = await enquiry.locator('input[name="telefon"]').boundingBox();
+              if (!ownerName || !breedBox || !phoneBox || !(ownerName.y < breedBox.y && breedBox.y < phoneBox.y))
+                throw new Error('Breed must be directly below owner name and before phone');
+              await breed.getByLabel('Plemeno psíka (nepovinné)').fill('Írsky vlkodav');
+              await enquiry.getByRole('button', { name: 'Späť' }).click();
+              await choiceLabels.nth(2).click();
+              await enquiry.getByRole('button', { name: 'Pokračovať' }).click();
+              if (!await breed.isVisible()) throw new Error('Occasional visit must offer optional breed');
+              await enquiry.getByRole('button', { name: 'Späť' }).click();
+              await choiceLabels.nth(0).click();
+              await enquiry.getByRole('button', { name: 'Pokračovať' }).click();
+              if (await breed.count()) throw new Error('Information-only enquiry must hide breed');
+              await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
                 const ids = ['recenzie', 'aria-caretakers', 'aria-early-faq', 'aria-mosaic', 'lead-benefits', 'lead-pricing', 'lead-requirements', 'aria-puppy-check', 'lead-first-visit'];
                 const elements = ids.map(id => document.getElementById(id));
