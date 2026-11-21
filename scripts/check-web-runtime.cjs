@@ -166,24 +166,50 @@ const failures = [];
                 speechBox.y + tip.y < headBox.y + headBox.height - 4;
               if (!tipOnHead) throw new Error('One-piece speech tail must terminate at Aria portrait at ' + width);
 
-              if (url.pathname === '/test-aria/') {
-                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-welcome.png') });
-                const initialSpeech = await aria.locator('[data-aria-message]').evaluate(el => ({
-                  visible: getComputedStyle(el).visibility === 'visible',
-                  pointerEvents: getComputedStyle(el).pointerEvents,
-                  suppressed: el.dataset.ariaSuppressed
-                }));
-                if (!initialSpeech.visible || initialSpeech.pointerEvents !== 'none' || initialSpeech.suppressed !== 'false')
-                  throw new Error('Intro speech must be always visible but nonblocking at ' + width);
-                await page.locator('#aria-hero-form').scrollIntoViewIfNeeded();
-                await page.waitForTimeout(180);
-                const overForm = await aria.locator('[data-aria-message]').evaluate(el =>
-                  getComputedStyle(el).visibility === 'visible' && el.dataset.ariaSuppressed === 'false');
-                if (!overForm) throw new Error('Aria speech flickers/hides over the lead form at ' + width);
-                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-visible.png') });
-                await page.evaluate(() => window.scrollTo(0, 0));
-                await page.waitForTimeout(140);
-              }
+              // Intro persists until the actual form ends, regardless of
+              // hero height, iOS chrome resize or a form card crossing the dock.
+              // Check the live campaign route as well as the noindex preview.
+              const introBottom = await page.evaluate(() => {
+                const node = document.getElementById('aria-hero-form');
+                if (!node) return null;
+                return window.scrollY + node.getBoundingClientRect().bottom;
+              });
+              if (introBottom == null) throw new Error('Aria lead intro form boundary missing');
+              const snapshotPrefix = url.pathname === '/psia-skolka-kosice/' ? 'lead-live-candidate' : 'aria-preview';
+              await page.screenshot({ path: path.join(out, snapshotPrefix + '-' + engine + '-' + width + '-welcome.png') });
+              await page.evaluate(y => window.scrollTo(0, y), Math.max(0, introBottom - 145));
+              await page.waitForTimeout(185);
+              const formSpeech = await aria.locator('[data-aria-message]').evaluate(el => ({
+                visibility: getComputedStyle(el).visibility,
+                pointerEvents: getComputedStyle(el).pointerEvents,
+                suppressed: el.dataset.ariaSuppressed,
+                width: el.querySelector('[data-aria-speech]').getBoundingClientRect().width,
+                allowed: el.getBoundingClientRect().width,
+              }));
+              if (await aria.getAttribute('data-aria-stage') !== 'intro' ||
+                  formSpeech.visibility !== 'visible' || formSpeech.pointerEvents !== 'none' ||
+                  formSpeech.suppressed !== 'false' || formSpeech.width < formSpeech.allowed * 0.72)
+                throw new Error('Aria greeting must fill available width and remain visible through the form: ' + JSON.stringify(formSpeech));
+              await page.screenshot({ path: path.join(out, snapshotPrefix + '-' + engine + '-' + width + '-form-persistent.png') });
+              await page.evaluate(y => window.scrollTo(0, y), introBottom + 180);
+              await page.waitForTimeout(185);
+              if (await aria.getAttribute('data-aria-stage') !== 'puppy' ||
+                  !await aria.getByRole('button', { name: 'Overiť', exact: true }).isVisible() ||
+                  await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
+                throw new Error('Puppy prompt must start only after the full lead form at ' + width);
+              const galleryY = await page.evaluate(() => {
+                const gallery = document.getElementById('aria-mosaic');
+                return gallery ? window.scrollY + gallery.getBoundingClientRect().top + 60 : null;
+              });
+              if (galleryY == null) throw new Error('Approved gallery anchor missing');
+              await page.evaluate(y => window.scrollTo(0, y), galleryY);
+              await page.waitForTimeout(180);
+              if (await aria.getAttribute('data-aria-stage') !== 'puppy' ||
+                  !await aria.locator('[data-aria-message]').isVisible())
+                throw new Error('Aria speech must persist across FAQ and gallery scroll at ' + width);
+              await page.screenshot({ path: path.join(out, snapshotPrefix + '-' + engine + '-' + width + '-gallery-persistent.png') });
+              await page.evaluate(() => window.scrollTo(0, 0));
+              await page.waitForTimeout(180);
               const interestButton = aria.getByRole('button', { name: 'Mám záujem o škôlku' });
               if ((await interestButton.getAttribute('class') || '').includes('bg-coral/15'))
                 throw new Error('Rejected special interest button highlight resurfaced');
@@ -202,7 +228,7 @@ const failures = [];
                 buttons.every(button => getComputedStyle(button).boxShadow === 'none'));
               if (!navFrames) throw new Error('Only the overall Aria menu frame should be outlined, not each navigation item');
 
-              if (url.pathname === '/test-aria/') {
+              if (url.pathname === '/test-aria/' || url.pathname === '/psia-skolka-kosice/') {
                 // Check that the speech switches to a real modal CTA only after
                 // the requirements section, and that the dock does not jump.
                 const requirementsEnd = await page.evaluate(() => {
@@ -237,19 +263,15 @@ const failures = [];
                 await page.waitForTimeout(190);
               }
 
-              // Four widths receive screenshots and overlay checks. Run the
-              // full wizard/modal journey at the original 320 and 390 widths.
+              // Browser screenshots/checks run at four widths; full modal
+              // journeys run at 320 and 390 to keep the existing CI budget.
               if (![320, 390].includes(width)) {
-                for (const y of [750, 1450, 2100, 2800, 3500]) {
-                  await page.evaluate(y => window.scrollTo(0, y), y);
-                  await page.waitForTimeout(110);
-                  if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') === 'false') break;
-                }
-                if (!await page.locator('[data-aria-guide][data-intro="false"]').count() ||
+                await page.evaluate(y => window.scrollTo(0, y), introBottom + 180);
+                await page.waitForTimeout(180);
+                if (await aria.getAttribute('data-aria-stage') !== 'puppy' ||
                     await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
-                  throw new Error('Aria puppy prompt should be visible away from controls at ' + width);
-                if (url.pathname === '/test-aria/')
-                  await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
+                  throw new Error('Aria puppy speech must persist after form at ' + width);
+                await page.screenshot({ path: path.join(out, snapshotPrefix + '-' + engine + '-' + width + '-puppy-prompt.png') });
                 continue;
               }
               await aria.getByRole('button', { name: 'Časté otázky' }).click();
@@ -420,17 +442,13 @@ const failures = [];
               if (await page.locator('section video').count()) throw new Error('Video must be omitted from preview');
 
 
-              for (const y of [750, 1450, 2100, 2800]) {
-                await page.evaluate(y => window.scrollTo(0, y), y);
-                await page.waitForTimeout(140);
-                if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') === 'false') break;
-              }
-              if (!await page.locator('[data-aria-guide][data-intro="false"]').count())
-                throw new Error('Aria intro must yield to puppy prompt on scroll');
+              await page.evaluate(y => window.scrollTo(0, y), introBottom + 180);
+              await page.waitForTimeout(180);
+              if (await aria.getAttribute('data-aria-stage') !== 'puppy')
+                throw new Error('Aria intro must last through the form, then yield to puppy prompt');
               if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
-                throw new Error('Aria puppy speech should reappear away from important content');
-              if (url.pathname === '/test-aria/')
-                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
+                throw new Error('Aria speech must never disappear while scrolling past FAQ or gallery');
+              await page.screenshot({ path: path.join(out, snapshotPrefix + '-' + engine + '-' + width + '-puppy-prompt.png') });
               const overitRadius = await aria.getByRole('button', { name: 'Overiť', exact: true })
                 .evaluate(button => parseFloat(getComputedStyle(button).borderTopLeftRadius));
               if (overitRadius < 10 || overitRadius > 13)
