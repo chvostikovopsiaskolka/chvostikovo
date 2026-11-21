@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const read = (p) => readFile(new URL('../../'+p,import.meta.url),'utf8');
 
-test('Android v431 is the approved customer PWA release and local bundle is byte-identical',async()=>{
+test('Android v434 bundles current poll UI and native FCM byte-identically',async()=>{
  const web=JSON.parse(await read('version.json'));
  const mobile=JSON.parse(await read('mobile/package.json'));
  const lock=JSON.parse(await read('mobile/package-lock.json'));
  const packaged=JSON.parse(await read('mobile/www/mobile-build.json'));
- assert.equal(web.build,'v431');
- assert.equal(web.version,'2.0.104');
+ assert.equal(web.build,'v434');
+ assert.equal(web.version,'2.0.107');
  assert.equal(mobile.version,web.version);
  assert.equal(lock.version,web.version);
  assert.equal(lock.packages[''].version,web.version);
@@ -18,16 +18,23 @@ test('Android v431 is the approved customer PWA release and local bundle is byte
  assert.equal(packaged.packageId,'sk.chvostikovo.app');
  const rootApp=await read('app.js');
  const packedApp=await read('mobile/www/app.js');
- assert.equal(packedApp,rootApp,'Android local WebView uses exact reviewed PWA v431 app.js');
- assert.match(rootApp,/const APP_BUILD='v431'/);
+ assert.equal(packedApp,rootApp,'Android local WebView uses exact reviewed PWA v434 app.js');
+ assert.match(rootApp,/const APP_BUILD='v434'/);
  assert.match(rootApp,/function customerAttachNativePushV426\(\)/);
  assert.match(rootApp,/window\.customerAttachNativePushV426=customerAttachNativePushV426/);
  assert.match(rootApp,/customerAttachNativePushV426\(\);\s*init\(\)/);
  const html=await read('mobile/www/index.html');
- assert(html.indexOf('id="forgotPasswordBtn"')<html.indexOf('type="submit">Prihlásiť sa'),'signed Android v431 must place small password reset link above login CTA');
+ assert(html.indexOf('id="forgotPasswordBtn"')<html.indexOf('type="submit">Prihlásiť sa'),'signed Android v434 must place small password reset link above login CTA');
  assert(rootApp.includes('window.openCustomerInstallGuideV431=openGuide;'),'no auth install help injection');
  assert(!rootApp.includes('login.appendChild(b)'),'native auth never mounts install CTA');
  assert(html.includes('utm_source=chvostikovo_app&amp;utm_medium=referral&amp;utm_campaign=eshop&amp;utm_content=bottom_nav'),'Android webview E-shop link must keep first-party UTM');
+ const packedPoll=await read('mobile/www/customer-polls-pilot-v432.js');
+ const rootPoll=await read('customer-polls-pilot-v432.js');
+ assert.equal(packedPoll,rootPoll,'Android v434 bundle must include exact server-backed poll JavaScript');
+ assert.match(packedPoll,/pollPlus|data-poll-plus/,'quantity stepper is bundled');
+ assert.match(packedPoll,/portal_poll_votes_v433/,'server-backed voting write is bundled');
+ assert(html.includes('/customer-polls-pilot-v432.js?v=v434'),'WebView loads v434 poll JavaScript');
+ assert(html.includes('/customer-polls-pilot-v432.css?v=v434'),'WebView loads v434 poll styling');
  assert(html.indexOf('src="/native-runtime.js"')<html.indexOf('src="/app.js'),'native FCM runtime initialized before customer UI');
  assert(!html.includes('android-install-choice'),'no duplicate PWA install dialog in native app');
 });
