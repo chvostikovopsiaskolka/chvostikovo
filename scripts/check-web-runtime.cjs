@@ -188,16 +188,19 @@ const failures = [];
                   topSpacerHeight: topSpacer.getBoundingClientRect().height,
                   viewportHeight: window.innerHeight,
                   serviceBadgeBelowH1: badgeRect.top >= headlineRect.bottom + 55,
-                  dogsRestOnOrange: serviceGroup.contains(crown) && crownRect.bottom >= badgeRect.top - 20 &&
-                    crownRect.bottom <= badgeRect.top + 5,
+                  dogsRestOnOrange: serviceGroup.contains(crown) && crownRect.bottom >= badgeRect.top + 14 &&
+                    crownRect.bottom <= badgeRect.top + 25,
                   serviceBadgeFits: badgeRect.left >= -1 && badgeRect.right <= window.innerWidth + 1 &&
                     serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
                   descriptionGap: descriptionRect.top - badgeRect.bottom,
                   reviewGapAbove: reviewsRect.top - descriptionRect.bottom,
-                  focusedDescription: descriptionRect.width <= (window.innerWidth < 390 ? 302 :
-                    window.innerWidth < 640 ? 342 : 522) &&
+                  focusedDescription: descriptionRect.width <= (window.innerWidth < 390 ? 322 :
+                    window.innerWidth < 640 ? 362 : 542) &&
                     description.querySelectorAll('strong').length === 4 &&
                     [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700),
+                  liquidFullDescription: getComputedStyle(description).backgroundImage.includes('radial-gradient') &&
+                    parseFloat(getComputedStyle(description).borderTopLeftRadius) >= 15 &&
+                    parseFloat(getComputedStyle(description).paddingLeft) >= 10,
                   naturalReviewBottom: getComputedStyle(reviews).overflowY !== 'hidden' &&
                     !!reviewCardRect && reviewsRect.bottom - reviewCardRect.bottom >= 32,
                   noBenefitsInHero: hero.querySelectorAll('[data-hero-benefits]').length === 0,
@@ -222,7 +225,7 @@ const failures = [];
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
                   firstFold.reviewGapAbove > 35 ||
-                  !firstFold.focusedDescription ||
+                  !firstFold.focusedDescription || !firstFold.liquidFullDescription ||
                   !firstFold.naturalReviewBottom ||
                   !firstFold.noBenefitsInHero || firstFold.relocatedBenefitsCount !== 3 ||
                   !firstFold.caretakersHeadingFits || !firstFold.whiteInfoBackground ||
@@ -546,6 +549,8 @@ const failures = [];
                   follows(team, firstVisitDogs);
               });
               if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/label-dogs/orange badge/focused copy/reviews/form and caretakers order changed');
+              if (await page.locator('#lead-first-visit').getByText('Úvodná návšteva zadarmo', { exact: true }).count())
+                throw new Error('Duplicated first-visit ribbon returned to three-step section');
               const hero = page.locator('#aria-hero-form');
               if (!await hero.getByRole('heading', { name: 'Chceli by ste sa informovať o škôlke?' }).count())
                 throw new Error('New compact hero form heading missing');

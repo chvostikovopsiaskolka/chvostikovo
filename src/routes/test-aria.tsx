@@ -169,7 +169,7 @@ export function AriaPreviewPage() {
 
               <div data-aria-service-group className="relative mx-auto mt-[80px] w-fit max-w-full sm:mt-[88px]">
                 {/* The existing four schoolmates now rest on the orange label, not above the H1. */}
-                <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-[calc(100%-5px)] z-10 lg:bottom-[calc(100%+12px)]">
+                <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-[calc(100%-22px)] z-10 lg:bottom-[calc(100%+12px)]">
                   <SchoolmatesFormCrown compact />
                 </div>
                 <p data-aria-service-badge className="inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2.5 py-2 text-center font-display text-[8px] font-bold uppercase leading-tight tracking-[0.015em] text-white shadow-card min-[390px]:px-3 min-[390px]:text-[9.5px] sm:px-5 sm:py-2.5 sm:text-sm">
@@ -177,8 +177,8 @@ export function AriaPreviewPage() {
                 </p>
               </div>
 
-              <p data-aria-hero-description className="mx-auto mt-4 max-w-[300px] text-[15px] font-medium leading-[1.55] text-forest/85 min-[390px]:max-w-[340px] sm:mt-5 sm:max-w-[520px] sm:text-lg">
-                <strong className="inline-block rounded-lg bg-coral/15 px-2 py-0.5 font-extrabold text-coral-dark lg:rounded-none lg:bg-transparent lg:px-0 lg:py-0 lg:text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
+              <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[520px] lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:bg-none lg:px-0 lg:py-0 lg:shadow-none lg:backdrop-blur-none">
+                <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
               </p>
             </div>
           </div>
@@ -417,7 +417,7 @@ export function AriaPreviewPage() {
               Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.
             </p>
 
-<p className="mx-auto mt-4 w-fit rounded-full border border-coral-soft/40 bg-cream/15 px-5 py-2 font-display text-base font-bold text-cream shadow-sm sm:text-lg">Úvodná návšteva zadarmo</p>
+
 
                         <div className="mt-10 grid gap-9 text-center md:grid-cols-3 md:gap-8">
               {[
