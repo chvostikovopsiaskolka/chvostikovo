@@ -7,7 +7,7 @@ const script = await readFile(new URL('../Prepare-Play-v436.ps1', import.meta.ur
 test('Windows PowerShell 5.1 signing handoff stays strictly ASCII-safe', () => {
   assert.doesNotMatch(script, /[^\x00-\x7f]/, 'Windows PowerShell 5.1 may interpret UTF-8 without BOM as CP1250 and break parser quotes');
   assert.match(script, /v436/);
-  assert.match(script, /2\.0\.108/);
+  assert.match(script, /2\.0\.109/);
   assert.match(script, /Documents\\Chvostikovo-Keys\\chvostikovo-upload\.jks/);
   assert.match(script, /Key alias: chvostikovo-upload/);
   assert.match(script, /google-services\.json/);
