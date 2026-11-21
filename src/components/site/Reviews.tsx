@@ -384,7 +384,7 @@ export function ReviewReasons({
 
 export function Reviews({ reviews = REVIEWS, variant = "default" }: { reviews?: typeof REVIEWS; variant?: "default" | "hero" } = {}) {
   return (
-    <section id="recenzie" className={"relative scroll-mt-24 overflow-hidden " + (variant === "hero" ? "bg-transparent pt-1 pb-6 sm:pt-2 sm:pb-8" : "bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14")}>
+    <section id="recenzie" className={"relative scroll-mt-24 " + (variant === "hero" ? "overflow-visible bg-transparent pt-1 pb-12 sm:pt-2 sm:pb-14" : "overflow-hidden bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14")}>
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
         {variant === "hero" ? (
