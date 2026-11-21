@@ -1,9 +1,8 @@
 import { useRef, useState, type TouchEvent } from "react";
-import { Car, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
-import { GALLERY, MAP_LINK } from "@/content/site";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { GALLERY } from "@/content/site";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
-import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 /** Preview-only: four visual rows in two columns; lower existing carousel retains other schoolmate photos. */
 export function AriaMosaicGallery() {
@@ -46,16 +45,6 @@ export function AriaMosaicGallery() {
       <div className="relative z-10 mx-auto max-w-4xl px-4">
         <p className="text-center font-display text-sm font-bold uppercase tracking-widest text-coral-dark">Nahliadnite k nám</p>
         <h2 id="aria-mosaic-heading" className="section-title mt-2 whitespace-nowrap text-center text-[clamp(18px,4.8vw,38px)]">Takto vyzerá Chvostíkovo</h2>
-        <div data-aria-location-chips className="mx-auto mt-4 grid max-w-md grid-cols-2 gap-2 sm:hidden">
-          <a href={MAP_LINK} target="_blank" rel="noopener noreferrer"
-            onClick={() => void trackCookielessInteraction("nav_click", "lead_aria_location_poljska6", "sk")}
-            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-secondary px-2 py-2 text-center text-[11px] font-semibold text-forest">
-            <MapPin className="size-4 shrink-0 text-coral" aria-hidden /> Poľská 6, Košice
-          </a>
-          <span className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-secondary px-2 py-2 text-center text-[11px] font-semibold text-forest">
-            <Car className="size-4 shrink-0 text-coral" aria-hidden /> Bezplatné parkovanie
-          </span>
-        </div>
         <div className="mt-6 grid grid-cols-2 gap-2.5 sm:gap-4">
           <div className="grid gap-2.5 sm:gap-4">{left.map((photo, i) => tile(photo, i * 2, i))}</div>
           <div className="grid gap-2.5 pt-5 sm:gap-4 sm:pt-9">{right.map((photo, i) => tile(photo, i * 2 + 1, i))}</div>
