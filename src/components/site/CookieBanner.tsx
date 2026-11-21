@@ -176,7 +176,9 @@ export function CookieBanner() {
   if (!mounted) return null;
 
   const isEnglish = window.location.pathname.startsWith("/en/");
-  const isAriaPreview = ["/", "/test-aria", "/psia-skolka-kosice", "/psia-skolka-pre-steniatka"].includes(window.location.pathname.replace(/\/$/, ""));
+  const pathname = window.location.pathname.replace(/\/$/, "") || "/";
+  const isAriaPreview = (pathname === "/" && window.matchMedia("(max-width: 1023px)").matches) ||
+    ["/test-aria", "/psia-skolka-kosice", "/psia-skolka-pre-steniatka"].includes(pathname);
 
   function save(next: Pick<Consent, "functional" | "analytics" | "marketing">) {
     const stored = writeStoredConsent(next);
