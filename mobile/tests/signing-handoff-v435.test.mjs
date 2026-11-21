@@ -28,3 +28,8 @@ test('Firebase handoff automatically reuses verified older Android configuration
   assert.match(script, /PreflightOnly/);
   assert.doesNotMatch(script, /OpenFileDialog|Read-Host/);
 });
+
+test('ignore generated Android Studio metadata rather than prompting Add File to Git', async () => {
+  const ignore = await readFile(new URL('../android/.gitignore', import.meta.url), 'utf8');
+  assert.match(ignore, /^\.idea\/$/m, 'generated mobile/android/.idea/migrations.xml must not be added to Git');
+});
