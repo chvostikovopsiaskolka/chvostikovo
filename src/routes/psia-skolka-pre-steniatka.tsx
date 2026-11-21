@@ -397,7 +397,12 @@ function PuppyDaycarePage() {
 
             <div className="mt-6 space-y-3">
               {FAQ.map((item) => (
-                <details key={item.q} className="group rounded-3xl bg-card px-5 py-4 shadow-card sm:px-6">
+                <details key={item.q} className="group rounded-3xl bg-card px-5 py-4 shadow-card sm:px-6"
+                  onToggle={(event) => {
+                    if (event.currentTarget.open) {
+                      void trackCookielessInteraction("explore_daycare", "puppy_landing_faq_" + (FAQ.indexOf(item) + 1));
+                    }
+                  }}>
                   <summary className="cursor-pointer list-none font-display text-base font-bold text-forest marker:hidden">
                     <span className="flex items-center justify-between gap-3">
                       {item.q}
