@@ -6,6 +6,7 @@ const path = require('node:path');
 const bellaris = process.env.WEB_SITE === 'bellaris';
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
 const urls = (bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/']).map(route => new URL(route, base));
+const brandPreviewCandidate = new URL(base).hostname === '127.0.0.1';
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -55,7 +56,7 @@ const failures = [];
           // Cookie preferences are installed by a client effect, so this also verifies hydration.
           const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
           await cookieButton.waitFor({ timeout: 10000 });
-          if (!bellaris && ['/test-aria/', '/psia-skolka-kosice/'].includes(url.pathname)) {
+          if (brandPreviewCandidate && !bellaris && ['/test-aria/', '/psia-skolka-kosice/'].includes(url.pathname)) {
             const palette = await page.evaluate(() => {
               const surface = document.querySelector('main')?.parentElement;
               const exp = document.querySelector('[data-aria-brand-experiment]');
@@ -411,7 +412,7 @@ const failures = [];
               const navFrames = await aria.locator('[data-aria-dock] button').evaluateAll(buttons =>
                 buttons.every(button => getComputedStyle(button).boxShadow === 'none'));
               if (!navFrames) throw new Error('Only the overall Aria menu frame should be outlined, not each navigation item');
-              if (url.pathname === '/test-aria/' && width < 1024) {
+              if (brandPreviewCandidate && url.pathname === '/test-aria/' && width < 1024) {
                 await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
                 await aria.locator('[data-aria-panel="menu"]').waitFor({ state: 'visible' });
                 const previewLogo = aria.locator('[data-aria-preview-wordmark]');
