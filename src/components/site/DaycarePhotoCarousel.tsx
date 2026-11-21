@@ -17,6 +17,8 @@ import photo21 from "@/assets/daycare-carousel-21.avif";
 import photo22 from "@/assets/daycare-carousel-22.avif";
 import leadBorderCollies from "@/assets/lead-review-border-collies.webp";
 import leadRetrieversAussie from "@/assets/lead-review-retrievers-aussie.webp";
+import leadBorderColliesFull from "@/assets/lead-review-border-collies-full.webp";
+import leadRetrieversAussieFull from "@/assets/lead-review-retrievers-aussie-full.webp";
 
 const PHOTOS = [
   { src: newPhoto01, alt: "Usmiaty husky a chrtík v psiej škôlke Chvostíkovo" },
@@ -39,8 +41,8 @@ const PHOTOS = [
 // Approved user photos for the two compact cards between reviews and the
 // first lead form. Keep the moving carousel's PHOTOS collection unchanged.
 export const LEAD_REVIEW_GAP_PHOTOS = [
-  { src: leadBorderCollies, alt: "Dvaja usmiati čiernobieli psíkovia v oddychovej časti Chvostíkova" },
-  { src: leadRetrieversAussie, alt: "Zlatý a svetlý retriever s austrálskym ovčiakom v škôlke Chvostíkovo" },
+  { src: leadBorderCollies, fullSrc: leadBorderColliesFull, alt: "Dvaja usmiati čiernobieli psíkovia v oddychovej časti Chvostíkova" },
+  { src: leadRetrieversAussie, fullSrc: leadRetrieversAussieFull, alt: "Zlatý a svetlý retriever s austrálskym ovčiakom v škôlke Chvostíkovo" },
 ];
 
 const RESUME_DELAY = 2800;
