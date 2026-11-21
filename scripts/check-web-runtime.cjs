@@ -627,8 +627,21 @@ const failures = [];
                   await interest.locator('input[type="checkbox"]').check();
                   let posted = null;
                   await page.route('**/functions/v1/web-form-submit', async route => {
-                    posted = route.request().postDataJSON();
-                    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+                    const request = route.request();
+                    const cors = {
+                      'access-control-allow-origin': '*',
+                      'access-control-allow-methods': 'POST, OPTIONS',
+                      'access-control-allow-headers': 'content-type',
+                    };
+                    if (request.method() === 'OPTIONS') {
+                      await route.fulfill({ status: 204, headers: cors });
+                      return;
+                    }
+                    posted = request.postDataJSON();
+                    await route.fulfill({
+                      status: 200, contentType: 'application/json', headers: cors,
+                      body: JSON.stringify({ ok: true }),
+                    });
                   });
                   await interest.getByRole('button', { name: 'Odoslať záujem' }).click();
                   await interest.locator('[data-aria-chat-contact-success="true"]').waitFor({ state: 'visible', timeout: 5000 });
