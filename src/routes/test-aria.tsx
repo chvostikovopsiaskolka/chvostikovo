@@ -14,6 +14,7 @@ import { FormDialog } from "@/components/site/FormDialog";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Reviews } from "@/components/site/Reviews";
 import { DaycarePhotoCarousel, LEAD_REVIEW_GAP_PHOTOS } from "@/components/site/DaycarePhotoCarousel";
+import { PhotoLightbox } from "@/components/site/PhotoLightbox";
 import { AriaMosaicGallery } from "@/components/site/AriaMosaicGallery";
 import { AriaPuppyChecker } from "@/components/site/AriaPuppyChecker";
 import { AriaHighlightedText } from "@/components/site/AriaPreviewText";
@@ -107,6 +108,7 @@ export function AriaPreviewPage() {
   const isLiveLead = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, "") === "/psia-skolka-kosice" });
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [puppyModalOpen, setPuppyModalOpen] = useState(false);
+  const [reviewPhotoOpen, setReviewPhotoOpen] = useState<number | null>(null);
   const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
   const [ariaPreset, setAriaPreset] = useState<string | undefined>(undefined);
   const [puppyCheck, setPuppyCheck] = useState<PuppyCheckInput | undefined>(undefined);
@@ -191,11 +193,14 @@ export function AriaPreviewPage() {
               while leaving Aria fixed above the bottom dock. Desktop unchanged. */}
           <div data-aria-intro-space className="relative z-10 mx-auto flex min-h-[148px] max-h-[166px] w-full max-w-3xl flex-[0.45] items-center px-4 py-2 sm:min-h-[110px] sm:max-h-[150px] sm:px-0 sm:py-0">
             <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:hidden">
-              {LEAD_REVIEW_GAP_PHOTOS.map((photo) => (
-                <figure key={photo.src} className="relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card min-[390px]:h-[138px]">
+              {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
+                <button type="button" key={photo.src} data-aria-review-photo={index + 1}
+                  aria-label={`Zobraziť fotografiu: ${photo.alt}`}
+                  onClick={() => setReviewPhotoOpen(index)}
+                  className="group relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[138px]">
                   <img src={photo.src} alt={photo.alt} width={520} height={400} loading="lazy" decoding="async"
-                    className="h-full w-full object-cover" />
-                </figure>
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+                </button>
               ))}
             </div>
           </div>
@@ -474,6 +479,9 @@ export function AriaPreviewPage() {
           <AriaPuppyChecker embedded onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />
         </DialogContent>
       </Dialog>
+
+      <PhotoLightbox photos={LEAD_REVIEW_GAP_PHOTOS} active={reviewPhotoOpen}
+        onChange={setReviewPhotoOpen} onClose={() => setReviewPhotoOpen(null)} />
 
       <FormDialog
         open={leadModalOpen}
