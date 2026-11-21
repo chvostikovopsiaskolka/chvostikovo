@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { PuppyCheckInput } from "@/lib/inquiry";
 import { ArrowLeft, ArrowRight, Phone, ShieldCheck } from "lucide-react";
 import { PHONE, PHONE_PRETTY } from "@/content/site";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
@@ -17,8 +18,8 @@ export function AriaPuppyChecker({
   onInfo,
   embedded = false,
 }: {
-  onInterest: () => void;
-  onInfo?: () => void;
+  onInterest: (details: PuppyCheckInput) => void;
+  onInfo?: (details: PuppyCheckInput) => void;
   embedded?: boolean;
 }) {
   const [step, setStep] = useState<Step>("age");
@@ -35,9 +36,22 @@ export function AriaPuppyChecker({
   const primaryClass = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coral px-5 py-3 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest";
   const Container = embedded ? "div" : "section";
 
+  // Keep the three separately reported vaccination answers; do not imply an
+  // unselected/unknown vaccine is confirmed. No submission occurs in this checker.
+  function snapshot(): PuppyCheckInput {
+    const numericWeight = Number(weight.replace(",", "."));
+    return {
+      age_months: age,
+      ...(name.trim() ? { dog_name: name.trim() } : {}),
+      ...(breed.trim() ? { dog_breed: breed.trim() } : {}),
+      ...(weight.trim() && Number.isFinite(numericWeight) && numericWeight > 0 ? { dog_weight_kg: numericWeight } : {}),
+      vaccines: { rabies: vaccines.rabies ?? "unknown", dhppi: vaccines.dhppi ?? "unknown", kennel: vaccines.kennel ?? "unknown" },
+    };
+  }
+
   function moreInfo() {
-    if (onInfo) onInfo();
-    else onInterest();
+    if (onInfo) onInfo(snapshot());
+    else onInterest(snapshot());
   }
 
   return (
@@ -155,11 +169,11 @@ export function AriaPuppyChecker({
                 <p className="mt-2">{name} ({age} mesiacov){breed ? ", " + breed : ""} – vek a uvedené očkovania vyhovujú orientačnej kontrole.</p>
                 <p className="mt-2">Prijatie závisí od preverenia očkovacieho preukazu, povahy a úvodnej návštevy zadarmo.</p>
               </div>
-              <button type="button" className={primaryClass + " w-full"} onClick={onInterest}>
+              <button type="button" className={primaryClass + " w-full"} onClick={() => onInterest(snapshot())}>
                 Mám záujem – vyplniť kontakt <ArrowRight size={17} aria-hidden />
               </button>
               <p className="text-xs leading-relaxed text-forest/60">
-                Následne sa otvorí existujúci kontaktný formulár. Údaje o psíkovi sa zatiaľ nikam neodosielajú, kým ich nepodporuje kontaktný backend.
+                Vaše odpovede z kontroly vrátane jednotlivých očkovaní prenesieme do kontaktného formulára. Odošlú sa až po vyplnení kontaktu a vašom súhlase.
               </p>
               <button type="button" className="min-h-11 text-sm font-semibold text-coral-dark underline" onClick={() => setStep("dog")}>Upraviť údaje o psíkovi</button>
             </div>
