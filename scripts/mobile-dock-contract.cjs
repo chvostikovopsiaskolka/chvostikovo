@@ -128,7 +128,17 @@ for (const [route, variant, marker] of [
 }
 const liveLead = read("src/routes/psia-skolka-kosice.tsx");
 const ariaLead = read("src/routes/test-aria.tsx");
-assert(liveLead.includes("component: LeadLandingPage") && !liveLead.includes("component: AriaPreviewPage") && ariaLead.includes("<AriaLeadAssistant") && ariaLead.includes("hideMobileDock") && ariaLead.includes("<LeadStepForm"), "Aria stays preview-only until Marek approves the lead launch");
+assert(liveLead.includes("component: AriaPreviewPage") && !liveLead.includes("component: LeadLandingPage") &&
+  liveLead.includes('content: "noindex, follow"') && ariaLead.includes("<AriaLeadAssistant") &&
+  ariaLead.includes("hideMobileDock") && ariaLead.includes("<LeadStepForm") &&
+  ariaLead.includes("lead_landing_aria_info") && ariaLead.includes("lead_landing_aria_hero_inline"),
+  "Marek-approved Aria lead launch must preserve the paid URL, distinct tracking and non-indexable campaign SEO");
+const ariaComponent = read("src/components/site/AriaLeadAssistant.tsx");
+assert(!ariaComponent.includes("speechObscured") &&
+  ariaComponent.includes('data-aria-suppressed="false"') &&
+  ariaComponent.includes('introSectionId = "aria-hero-form"') &&
+  ariaComponent.includes('requirementsSectionId = "lead-requirements"'),
+  "Persistent Aria speech must not be hidden by an intersection scanner or switch at 170px");
 assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('label: "Interested in daycare"'), "Landing CTA must have full SK/EN label");
 assert(dock.includes("marketingExtra"), "Local first visit menu links required");
 assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");
