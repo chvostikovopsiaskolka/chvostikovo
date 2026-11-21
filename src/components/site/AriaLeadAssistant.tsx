@@ -34,6 +34,7 @@ export function AriaLeadAssistant({
   hidden = false,
   trackingPrefix = "aria_preview_v3",
   requirementsSectionId = "lead-requirements",
+  puppyStartSectionId,
   anchorOverrides,
 }: {
   onOpenInfo: () => void;
@@ -42,6 +43,8 @@ export function AriaLeadAssistant({
   hidden?: boolean;
   trackingPrefix?: string;
   requirementsSectionId?: string;
+  /** Starts the puppy speech only once the visitor reaches this section. */
+  puppyStartSectionId?: string;
   anchorOverrides?: Record<string, string>;
 }) {
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
@@ -102,7 +105,17 @@ export function AriaLeadAssistant({
       let next: typeof previous;
       if (previous === "contact" ? endOfRequirements < transition + 36 : endOfRequirements < transition - 18) {
         next = "contact";
+      } else if (puppyStartSectionId) {
+        const caretakerTop = document.getElementById(puppyStartSectionId)?.getBoundingClientRect().top;
+        const entryLine = window.innerHeight * 0.76;
+        // Enter when the caretakers section actually reaches the viewport,
+        // not merely after a few scroll pixels. The small hysteresis avoids
+        // oscillating speech during iOS browser chrome resizing.
+        const beforeCaretakers = caretakerTop === undefined ||
+          caretakerTop > entryLine + (previous === "intro" ? 0 : 32);
+        next = beforeCaretakers ? "intro" : "puppy";
       } else if (previous === "intro" ? window.scrollY < 170 : window.scrollY < 80) {
+        // Preserve the puppy-focused organic page's existing schedule.
         next = "intro";
       } else {
         next = "puppy";
@@ -123,7 +136,7 @@ export function AriaLeadAssistant({
       window.removeEventListener("resize", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [requirementsSectionId]);
+  }, [requirementsSectionId, puppyStartSectionId]);
 
   useEffect(() => {
     if (!panel) return;
