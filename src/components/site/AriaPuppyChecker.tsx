@@ -5,7 +5,7 @@ import { PHONE, PHONE_PRETTY } from "@/content/site";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
 type Vaccine = "yes" | "no" | "unknown";
-type Step = "age" | "vaccines" | "dog" | "result";
+type Step = "age" | "vaccines";
 const VACCINES = [
   { id: "rabies", label: "Besnota" },
   { id: "dhppi", label: "DHPPi+L – kompletná schéma" },
@@ -24,28 +24,26 @@ export function AriaPuppyChecker({
 }) {
   const [step, setStep] = useState<Step>("age");
   const [age, setAge] = useState(4);
-  const [breed, setBreed] = useState("");
-  const [name, setName] = useState("");
-  const [weight, setWeight] = useState("");
   const [vaccines, setVaccines] = useState<Record<string, Vaccine>>({
     rabies: "unknown", dhppi: "unknown", kennel: "unknown",
   });
   const allVaccinated = VACCINES.every(({ id }) => vaccines[id] === "yes");
   const mayContinue = age >= AGE_MINIMUM;
-  const fieldClass = "mt-1 w-full min-h-11 rounded-xl border border-forest/20 bg-white px-3 py-2 text-sm text-forest focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
   const primaryClass = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coral px-5 py-3 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest";
   const Container = embedded ? "div" : "section";
 
   // Keep the three separately reported vaccination answers; do not imply an
   // unselected/unknown vaccine is confirmed. No submission occurs in this checker.
   function snapshot(): PuppyCheckInput {
-    const numericWeight = Number(weight.replace(",", "."));
+    // Age and three explicit vaccination answers move to the existing contact.
+    // Breed is entered once, in that shared contact form.
     return {
       age_months: age,
-      ...(name.trim() ? { dog_name: name.trim() } : {}),
-      ...(breed.trim() ? { dog_breed: breed.trim() } : {}),
-      ...(weight.trim() && Number.isFinite(numericWeight) && numericWeight > 0 ? { dog_weight_kg: numericWeight } : {}),
-      vaccines: { rabies: vaccines["rabies"] ?? "unknown", dhppi: vaccines["dhppi"] ?? "unknown", kennel: vaccines["kennel"] ?? "unknown" },
+      vaccines: {
+        rabies: vaccines.rabies ?? "unknown",
+        dhppi: vaccines.dhppi ?? "unknown",
+        kennel: vaccines.kennel ?? "unknown",
+      },
     };
   }
 
@@ -70,9 +68,9 @@ export function AriaPuppyChecker({
 
         <div className="rounded-[26px] border border-forest/10 bg-card p-4 shadow-card sm:p-6">
           <div className="mb-5 flex items-center justify-center gap-2" aria-label="Postup overenia">
-            {(["age", "vaccines", "dog", "result"] as const).map((item, i) => (
+            {(["age", "vaccines"] as const).map((item, i) => (
               <span key={item} className={"h-1.5 w-12 rounded-full " + (
-                (["age", "vaccines", "dog", "result"] as const).indexOf(step) >= i ? "bg-coral" : "bg-forest/15"
+                (["age", "vaccines"] as const).indexOf(step) >= i ? "bg-coral" : "bg-forest/15"
               )} />
             ))}
           </div>
@@ -95,12 +93,6 @@ export function AriaPuppyChecker({
                   ? "Vekovo môže pokračovať v predbežnej kontrole. Ďalej preveríme očkovania."
                   : "Zatiaľ nespĺňa orientačnú vekovú podmienku 4 mesiacov. Radi vám poradíme, kedy bude vhodné prísť."}
               </p>
-              {mayContinue && (
-                <label className="block text-sm font-semibold text-forest">
-                  Plemeno (voliteľné)
-                  <input className={fieldClass} maxLength={80} value={breed} onChange={(e) => setBreed(e.target.value)} placeholder="Napr. írsky vlkodav" />
-                </label>
-              )}
               {mayContinue ? (
                 <button type="button" onClick={() => setStep("vaccines")} className={primaryClass + " w-full"}>
                   Pokračovať na očkovania <ArrowRight size={17} aria-hidden />
@@ -136,48 +128,17 @@ export function AriaPuppyChecker({
                   <ArrowLeft size={20} aria-hidden />
                 </button>
                 <button type="button" className={primaryClass + " flex-1 disabled:cursor-not-allowed disabled:opacity-45"}
-                  disabled={!allVaccinated} onClick={() => setStep("dog")}>Pokračovať <ArrowRight size={17} aria-hidden /></button>
+                  disabled={!allVaccinated} onClick={() => onInterest(snapshot())}>Pokračovať na kontakt <ArrowRight size={17} aria-hidden /></button>
               </div>
+              {allVaccinated && (
+                <p role="status" className="text-xs leading-relaxed text-forest/70">
+                  Orientačné overenie je splnené. Finálne prijatie potvrdíme po kontrole očkovacieho preukazu a úvodnej návšteve. Plemeno zadáte až v nasledujúcom kontakte.
+                </p>
+              )}
               {!allVaccinated && <ContactFallback onInfo={moreInfo} />}
             </div>
           )}
 
-          {step === "dog" && (
-            <form data-aria-puppy-step="dog" onSubmit={(event) => { event.preventDefault(); setStep("result"); }} className="space-y-4">
-              <h3 className="font-display text-lg font-bold text-forest">Povedzte nám o šteniatku</h3>
-              <label className="block text-sm font-semibold text-forest">Meno psíka
-                <input className={fieldClass} required maxLength={70} value={name} onChange={(e) => setName(e.target.value)} placeholder="Ako sa volá?" />
-              </label>
-              <label className="block text-sm font-semibold text-forest">Plemeno
-                <input className={fieldClass} required maxLength={80} value={breed} onChange={(e) => setBreed(e.target.value)} placeholder="Plemeno alebo kríženec" />
-              </label>
-              <label className="block text-sm font-semibold text-forest">Váha v kg (nepovinné)
-                <input type="number" min="0.1" max="150" step="0.1" className={fieldClass} value={weight}
-                  onChange={(e) => setWeight(e.target.value)} placeholder="Napr. 12,5" />
-              </label>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setStep("vaccines")} className="grid size-11 shrink-0 place-items-center rounded-full border border-forest/20" aria-label="Späť na očkovania"><ArrowLeft size={20} aria-hidden /></button>
-                <button type="submit" className={primaryClass + " flex-1"}>Zobraziť výsledok <ArrowRight size={17} aria-hidden /></button>
-              </div>
-            </form>
-          )}
-
-          {step === "result" && (
-            <div data-aria-puppy-step="result" className="space-y-4 text-center">
-              <div className="rounded-2xl bg-secondary/60 p-4 text-sm leading-relaxed text-forest">
-                <strong className="block font-display text-lg">Predbežne spĺňate základné podmienky</strong>
-                <p className="mt-2">{name} ({age} mesiacov){breed ? ", " + breed : ""} – vek a uvedené očkovania vyhovujú orientačnej kontrole.</p>
-                <p className="mt-2">Prijatie závisí od preverenia očkovacieho preukazu, povahy a úvodnej návštevy zadarmo.</p>
-              </div>
-              <button type="button" className={primaryClass + " w-full"} onClick={() => onInterest(snapshot())}>
-                Mám záujem – vyplniť kontakt <ArrowRight size={17} aria-hidden />
-              </button>
-              <p className="text-xs leading-relaxed text-forest/60">
-                Vaše odpovede z kontroly vrátane jednotlivých očkovaní prenesieme do kontaktného formulára. Odošlú sa až po vyplnení kontaktu a vašom súhlase.
-              </p>
-              <button type="button" className="min-h-11 text-sm font-semibold text-coral-dark underline" onClick={() => setStep("dog")}>Upraviť údaje o psíkovi</button>
-            </div>
-          )}
         </div>
       </div>
     </Container>
