@@ -266,6 +266,26 @@ assert(releasedLeadRoute.includes('component: AriaPreviewPage') &&
   approvedLeadAria.includes("<AriaLeadAssistant") &&
   approvedLeadAria.includes('<LeadStepForm key={leadModalSource}'),
   "Approved paid LEAD Aria must preserve campaign SEO, consent-aware analytics, inline and modal form contracts");
+const ariaDock = readFileSync(new URL("../src/components/site/AriaLeadAssistant.tsx", import.meta.url), "utf8");
+const liveAnalytics = readFileSync(new URL("../src/lib/analytics.ts", import.meta.url), "utf8");
+assert(approvedLeadAria.includes('onOpenDockInterest={() => isLiveLead ? openLeadModal("lead_landing_mobile_dock")') &&
+  approvedLeadAria.includes('lead_landing_aria_first_visit_inline') &&
+  approvedLeadAria.includes('trackMarketingInteraction("inquiry_cta", source)') &&
+  approvedLeadAria.includes('trackCookielessInteraction("inquiry_cta", source)'),
+  "Live Aria dock, first-visit form and all CTA entry points must retain conversion attribution");
+assert(ariaDock.includes('trackMarketingInteraction("view_pricing", source)') &&
+  ariaDock.includes('mobile_dock_lead_lead-pricing') &&
+  ariaDock.includes('mobile_dock_lead_menu_open') &&
+  ariaDock.includes('mobile_menu_lead_lead-first-visit') &&
+  ariaDock.includes('trackCookielessInteraction("nav_click", source, "sk")'),
+  "Aria navigation, pricing and first-visit actions must retain cookieless plus consented GA4/Meta measurement");
+assert(stagedLeadSource.indexOf('const result = await submitInquiry(') <
+  stagedLeadSource.indexOf('trackMetaFormConversion("informacie"') &&
+  stagedLeadSource.indexOf('const result = await submitInquiry(') <
+  stagedLeadSource.indexOf('trackCookielessInteraction("form_submit"') &&
+  liveAnalytics.includes('pushAnalyticsEvent("generate_lead"') &&
+  liveAnalytics.includes('trackMetaStandard("Lead", params, eventId)'),
+  "Only successful inquiry submission can generate a GA4 generate_lead or Meta Lead conversion");
 // Legacy LeadLandingPage remains in the module only as a revert fallback;
 // enforce the actual live route separately rather than counting legacy forms.
 assert(stagedLeadSource.includes("zaujem: selectedInterest") && stagedLeadSource.includes("name=\"zaujem\"") && stagedLeadSource.includes("PrivacyConsentCheckbox"), "Guided form must preserve interest, consent and submission");
