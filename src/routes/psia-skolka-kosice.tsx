@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AriaPreviewPage } from "./test-aria";
 import { useState } from "react";
 import {
   ArrowDown,
@@ -93,7 +92,7 @@ export const Route = createFileRoute("/psia-skolka-kosice")({
     ],
     links: [{ rel: "canonical", href: URL }],
   }),
-  component: AriaPreviewPage,
+  component: LeadLandingPage,
 });
 
 function scrollToLeadForm(source: string) {
