@@ -167,14 +167,22 @@ const failures = [];
                 await page.waitForTimeout(230);
                 const clearance = await page.evaluate(() => {
                   const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
-                  const b = document.querySelector('[data-aria-overlap-target]').getBoundingClientRect();
+                  const overlaps = [...document.querySelectorAll(
+                    'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]'
+                  )].filter(node => {
+                    const b = node.getBoundingClientRect();
+                    return b.width > 0 && b.height > 0 &&
+                      a.left < b.right + 8 && a.right > b.left - 8 &&
+                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
+                  });
                   return {
-                    overlap: a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top,
+                    overlap: overlaps.length > 0,
+                    colliding: overlaps.slice(0, 3).map(node => node.tagName),
                     suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed,
-                    targetTop: Math.round(b.top), speechTop: Math.round(a.top)
+                    speechTop: Math.round(a.top)
                   };
                 });
-                if (!clearance.overlap) throw new Error('Clearance setup did not overlap a real form control: ' + JSON.stringify(clearance));
+                if (!clearance.overlap) throw new Error('No real content overlap to test clearance: ' + JSON.stringify(clearance));
                 if (clearance.suppressed !== 'true')
                   throw new Error('Aria must hide speech over contact form controls: ' + JSON.stringify(clearance));
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-clear.png') });
@@ -200,7 +208,19 @@ const failures = [];
 
               // Four widths receive screenshots and overlay checks. Run the
               // full wizard/modal journey at the original 320 and 390 widths.
-              if (![320, 390].includes(width)) continue;
+              if (![320, 390].includes(width)) {
+                for (const y of [750, 1450, 2100, 2800, 3500]) {
+                  await page.evaluate(y => window.scrollTo(0, y), y);
+                  await page.waitForTimeout(110);
+                  if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') === 'false') break;
+                }
+                if (!await page.locator('[data-aria-guide][data-intro="false"]').count() ||
+                    await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
+                  throw new Error('Aria puppy prompt should be visible away from controls at ' + width);
+                if (url.pathname === '/test-aria/')
+                  await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
+                continue;
+              }
               await aria.getByRole('button', { name: 'Časté otázky' }).click();
               await aria.locator('[data-aria-panel="faq"]').waitFor({ state: 'visible' });
               const puppyQuestion = aria.getByRole('button', { name: 'Prijímate aj šteniatka?' });
