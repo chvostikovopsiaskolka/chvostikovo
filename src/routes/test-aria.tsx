@@ -169,7 +169,7 @@ export function AriaPreviewPage() {
 
               <div data-aria-service-group className="relative mx-auto mt-[80px] w-fit max-w-full sm:mt-[88px]">
                 {/* The existing four schoolmates now rest on the orange label, not above the H1. */}
-                <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-[calc(100%-22px)] z-10 lg:bottom-[calc(100%+12px)]">
+                <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:bottom-[calc(100%+12px)]">
                   <SchoolmatesFormCrown compact />
                 </div>
                 <p data-aria-service-badge className="inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2.5 py-2 text-center font-display text-[8px] font-bold uppercase leading-tight tracking-[0.015em] text-white shadow-card min-[390px]:px-3 min-[390px]:text-[9.5px] sm:px-5 sm:py-2.5 sm:text-sm">
@@ -440,7 +440,7 @@ export function AriaPreviewPage() {
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-2xl px-4">
             <div data-aria-first-visit-dogs className="mx-auto mb-3 w-full max-w-sm">
-              <SchoolmatesFormCrown compact />
+              <SchoolmatesFormCrown compact groundAccent />
             </div>
             <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o prvú návštevu?</h2>
             <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
