@@ -78,23 +78,40 @@ const failures = [];
                 footerBg: document.querySelector('footer') ? getComputedStyle(document.querySelector('footer')).backgroundColor : '',
                 benefitHeading: document.querySelector('#lead-benefits h3') ? getComputedStyle(document.querySelector('#lead-benefits h3')).color : '',
                 greenPills: document.querySelector('[data-hero-benefits] .bg-forest') ? getComputedStyle(document.querySelector('[data-hero-benefits] .bg-forest')).backgroundColor : '',
+                earlySectionBg: document.querySelector('#aria-early-faq') ? getComputedStyle(document.querySelector('#aria-early-faq')).backgroundColor : '',
+                prices: [...document.querySelectorAll('#lead-pricing [data-lead-price]')].map(el => getComputedStyle(el).color),
+                bestValueBg: document.querySelector('[data-lead-best-value]') ? getComputedStyle(document.querySelector('[data-lead-best-value]')).backgroundColor : '',
+                bestValueFg: document.querySelector('[data-lead-best-value]') ? getComputedStyle(document.querySelector('[data-lead-best-value]')).color : '',
+                taxiBg: document.querySelector('[data-aria-taxi]') ? getComputedStyle(document.querySelector('[data-aria-taxi]')).backgroundColor : '',
+                requirementTitle: document.querySelector('#lead-requirements h3') ? getComputedStyle(document.querySelector('#lead-requirements h3')).color : '',
+                requirementIcon: document.querySelector('#lead-requirements article svg') ? getComputedStyle(document.querySelector('#lead-requirements article svg')).color : '',
+                firstVisitAction: document.querySelector('#aria-first-visit-form .btn-coral') ? getComputedStyle(document.querySelector('#aria-first-visit-form .btn-coral')).backgroundColor : '',
               };
             });
             if (url.pathname === '/test-aria/') {
               if (palette.variant !== 'sage-orange-rose' ||
-                  palette.rose !== '#9e336f' || palette.sage !== '#f3f8ef' ||
-                  palette.actionBg !== 'rgb(158, 51, 111)' ||
-                  palette.badgeBg !== 'rgb(170, 75, 0)' ||
-                  palette.badgeFg !== 'rgb(255, 255, 255)' ||
-                  palette.headline !== 'rgb(170, 75, 0)' ||
-                  palette.heroCopyBg !== 'rgb(170, 75, 0)' ||
-                  palette.heroCopyFg !== 'rgb(255, 255, 255)' ||
-                  palette.earlyFaqBg !== 'rgb(255, 164, 20)' ||
-                  palette.pricingBg !== 'rgb(255, 164, 20)' ||
-                  palette.footerBg !== 'rgb(255, 164, 20)' ||
-                  palette.benefitHeading !== 'rgb(170, 75, 0)' ||
+                  palette.rose !== '#b82e7f' || palette.sage !== '#f3f8ef' ||
+                  palette.actionBg !== 'rgb(184, 46, 127)' ||
+                  palette.firstVisitAction !== 'rgb(184, 46, 127)' ||
+                  palette.badgeBg !== 'rgb(255, 164, 20)' ||
+                  palette.badgeFg !== 'rgb(38, 50, 43)' ||
+                  palette.headline !== 'rgb(255, 164, 20)' ||
+                  palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
+                  palette.heroCopyFg !== 'rgb(38, 50, 43)' ||
+                  palette.earlyFaqBg !== 'rgb(255, 255, 255)' ||
+                  palette.earlySectionBg !== 'rgba(255, 164, 20, 0.13)' ||
+                  palette.pricingBg !== 'rgba(255, 164, 20, 0.12)' ||
+                  palette.footerBg !== 'rgb(255, 240, 213)' ||
+                  palette.benefitHeading !== 'rgb(255, 164, 20)' ||
+                  palette.requirementTitle !== 'rgb(255, 164, 20)' ||
+                  palette.requirementIcon !== 'rgb(255, 164, 20)' ||
+                  palette.prices.length !== 2 ||
+                  palette.prices.some(color => color !== 'rgb(255, 164, 20)') ||
+                  palette.bestValueBg !== 'rgb(255, 164, 20)' ||
+                  palette.bestValueFg !== 'rgb(255, 255, 255)' ||
+                  palette.taxiBg !== 'rgb(184, 46, 127)' ||
                   palette.greenPills !== 'rgb(45, 118, 75)')
-                throw new Error('Preview palette lost sage/orange/charcoal/rose roles: '+JSON.stringify(palette));
+                throw new Error('Preview palette differs from approved orange/rose/soft-background contracts: '+JSON.stringify(palette));
             } else if (palette.variant || palette.rose || palette.sage) {
               throw new Error('Paid lead inherited test-only palette: '+JSON.stringify(palette));
             }
