@@ -1,5 +1,5 @@
 import { Fragment, useRef, useState } from "react";
-import { Car, MapPin } from "lucide-react";
+import { Car, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { GALLERY, MAP_LINK } from "@/content/site";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
