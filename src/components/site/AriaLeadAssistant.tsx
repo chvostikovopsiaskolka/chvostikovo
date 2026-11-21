@@ -31,12 +31,16 @@ export function AriaLeadAssistant({
   onOpenPuppyChecker,
   hidden = false,
   trackingPrefix = "aria_preview_v3",
+  introSectionId = "aria-hero-form",
+  requirementsSectionId = "lead-requirements",
 }: {
   onOpenInfo: () => void;
   onOpenInterest: () => void;
   onOpenPuppyChecker: () => void;
   hidden?: boolean;
   trackingPrefix?: string;
+  introSectionId?: string;
+  requirementsSectionId?: string;
 }) {
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
   const stageRef = useRef<"intro" | "puppy" | "contact">("intro");
@@ -46,7 +50,6 @@ export function AriaLeadAssistant({
 
   const speechRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLImageElement>(null);
-  const [speechObscured, setSpeechObscured] = useState(false);
   const [speechGeometry, setSpeechGeometry] = useState({ width: 280, height: 42, tipX: -42, tipY: 68 });
 
   // One path owns both the speech balloon and its tail. The tip follows
@@ -85,85 +88,46 @@ export function AriaLeadAssistant({
     };
   }, [hidden, stage]);
 
-  // Yield to visible headings, form fields and CTAs instead of covering them.
-  // Visibility keeps the layout measurable on the next scroll frame.
-  useEffect(() => {
-    if (hidden) return;
-    let frame = 0;
-    const check = () => {
-      frame = 0;
-      const bubble = speechRef.current?.getBoundingClientRect();
-      if (!bubble || panel) {
-        setSpeechObscured(false);
-        return;
-      }
-      const important = document.querySelectorAll<HTMLElement>(
-        stage === "intro"
-          ? "main h1, main h2, main input:not([type=radio]), main select, main textarea, main button"
-          : "main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]"
-      );
-      setSpeechObscured(previous => {
-        // Require a wider clear gap before restoring the speech balloon.
-        // This prevents rapid hide/show at the boundary of a form or heading.
-        const margin = previous ? 30 : 8;
-        const overlaps = Array.from(important).some(node => {
-          const rect = node.getBoundingClientRect();
-          return rect.width > 0 && rect.height > 0 &&
-            rect.left < bubble.right + margin && rect.right > bubble.left - margin &&
-            rect.top < bubble.bottom + margin && rect.bottom > bubble.top - margin;
-        });
-        return previous === overlaps ? previous : overlaps;
-      });
-    };
-    const requestCheck = () => {
-      if (!frame) frame = window.requestAnimationFrame(check);
-    };
-    const observer = new ResizeObserver(requestCheck);
-    if (speechRef.current) observer.observe(speechRef.current);
-    window.addEventListener("scroll", requestCheck, { passive: true });
-    window.addEventListener("resize", requestCheck);
-    requestCheck();
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", requestCheck);
-      window.removeEventListener("resize", requestCheck);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, [hidden, stage, panel]);
-
-  // Stable sections rather than flipping a bubble on every scroll pixel.
-  // Hysteresis keeps iOS browser chrome resizing from thrashing the dock.
+  // Use real section boundaries, not an arbitrary scrollY threshold.
+  // The intro stays throughout the complete form; short hysteresis windows
+  // prevent Safari browser chrome/scroll anchoring from changing speech rapidly.
   useEffect(() => {
     let frame = 0;
+    const introSection = document.getElementById(introSectionId);
+    const requirements = document.getElementById(requirementsSectionId);
     const update = () => {
       frame = 0;
       const previous = stageRef.current;
-      const endOfRequirements = document.getElementById("lead-requirements")?.getBoundingClientRect().bottom ?? Infinity;
-      let next: typeof previous;
-      if (previous === "contact" ? endOfRequirements < 110 : endOfRequirements <= -8) {
-        next = "contact";
-      } else if (previous === "intro" ? window.scrollY < 170 : window.scrollY < 80) {
-        next = "intro";
-      } else {
-        next = "puppy";
-      }
+      const formBottom = introSection?.getBoundingClientRect().bottom ?? Infinity;
+      const requirementsBottom = requirements?.getBoundingClientRect().bottom ?? Infinity;
+      const contactReached = previous === "contact"
+        ? requirementsBottom < 150 : requirementsBottom < 80;
+      const introVisible = previous === "intro"
+        ? formBottom > 65 : formBottom > 155;
+      const next: typeof previous = contactReached ? "contact" : introVisible ? "intro" : "puppy";
       if (previous !== next) {
         stageRef.current = next;
         setStage(next);
       }
     };
-    const onScroll = () => {
+    const requestUpdate = () => {
       if (!frame) frame = window.requestAnimationFrame(update);
     };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    const observer = new ResizeObserver(requestUpdate);
+    if (introSection) observer.observe(introSection);
+    if (requirements) observer.observe(requirements);
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    window.visualViewport?.addEventListener("resize", requestUpdate);
+    requestUpdate();
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      observer.disconnect();
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+      window.visualViewport?.removeEventListener("resize", requestUpdate);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [introSectionId, requirementsSectionId]);
 
   useEffect(() => {
     if (!panel) return;
@@ -365,9 +329,8 @@ export function AriaLeadAssistant({
         )}
 
         {!panel && (
-          <div data-aria-message data-aria-suppressed={speechObscured ? "true" : "false"} aria-hidden={speechObscured}
-            className={`mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px] ${speechObscured ? "invisible pointer-events-none" : stage === "intro" ? "pointer-events-none" : "pointer-events-auto"}`}>
-            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[42px] max-w-full -rotate-[0.5deg] items-center px-2.5 py-1.5 text-forest">
+          <div data-aria-message data-aria-suppressed="false" className="pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]">
+            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[50px] w-full max-w-[480px] -rotate-[0.5deg] items-center px-3 py-2 text-forest">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
@@ -375,10 +338,10 @@ export function AriaLeadAssistant({
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>
               {stage === "intro" ? (
-                <p className="relative z-10 font-display text-[11px] leading-tight font-semibold tracking-tight">
+                <p className="relative z-10 w-full font-display text-[12px] font-semibold leading-[1.4] tracking-normal sm:text-[13px]">
                   Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                   <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
-                  <span className="mt-1 block text-[10px] font-medium text-forest/85">Zisti viac z našej ponuky nižšie.</span>
+                  <span className="mt-1.5 block text-[11px] font-medium leading-[1.4] text-forest/85 sm:text-xs">Zisti viac z našej ponuky nižšie.</span>
                 </p>
               ) : stage === "puppy" ? (
                 <div className="relative z-10 flex min-w-0 items-center gap-2">
@@ -386,7 +349,7 @@ export function AriaLeadAssistant({
                     Máte šteniatko? <span className="font-extrabold text-coral-dark">Zistite, či spĺňa podmienky.</span>
                   </strong>
                   <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
-                    className="min-h-9 shrink-0 rounded-[11px] bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    className="pointer-events-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Overiť
                   </button>
                 </div>
@@ -396,7 +359,7 @@ export function AriaLeadAssistant({
                     Chcete sa informovať? <span className="text-coral-dark">Vyplňte nezáväzný formulár.</span>
                   </strong>
                   <button type="button" onClick={openInfo}
-                    className="min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                    className="pointer-events-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Vyplniť
                   </button>
                 </div>
