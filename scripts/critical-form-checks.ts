@@ -68,6 +68,36 @@ assert(puppyLandingSource.includes("<AriaLeadAssistant") &&
   puppyLandingSource.includes("puppy_landing_checker_eligible"),
   "Puppy landing must track and retain the checker-to-contact handoff");
 
+// Replacing the old mobile dock must not remove its distinct funnel metrics.
+const ariaDockTracking = readFileSync(new URL("../src/components/site/AriaLeadAssistant.tsx", import.meta.url), "utf8");
+const ariaLandingTracking = readFileSync(new URL("../src/routes/test-aria.tsx", import.meta.url), "utf8");
+for (const marker of [
+  'trackCookielessInteraction("nav_click", trackingPrefix + "_" + action',
+  'trackMarketingInteraction("view_pricing", trackingPrefix + "_pricing")',
+  'trackingPrefix + "_first_visit_pricing_details"',
+  '"faq_first_visit"',
+  'trackCookielessInteraction("explore_daycare", trackingPrefix + "_" + topic)',
+]) assert(ariaDockTracking.includes(marker), "Aria navigation/FAQ metrics missing: " + marker);
+assert(puppyLandingSource.includes('trackMarketingInteraction("inquiry_cta", source)') &&
+  puppyLandingSource.includes('trackCookielessInteraction("inquiry_cta", source)') &&
+  puppyLandingSource.includes('"puppy_landing_faq_"'),
+  "Puppy CTA/modal and on-page FAQ must retain their distinct click/read events");
+assert(ariaLandingTracking.includes('"lead_landing_first_visit_details"') &&
+  ariaLandingTracking.includes('"lead_landing_first_visit_steps"'),
+  "Campaign first-visit explanation and three-step shortcut must remain tracked");
+const guidedLeadTracking = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
+const successBoundary = guidedLeadTracking.indexOf("const result = await submitInquiry(");
+const conversionBoundaries = [
+  guidedLeadTracking.indexOf('trackCookielessInteraction("form_submit"'),
+  guidedLeadTracking.indexOf('trackFormSubmit({'),
+  guidedLeadTracking.indexOf('trackMetaFormConversion("informacie"'),
+];
+assert(successBoundary > 0 && conversionBoundaries.every(position => position > successBoundary),
+  "Cookieless/GA4/Meta lead conversion must happen only after the backend acknowledges success");
+assert(guidedLeadTracking.includes('cta_source: trackingSource') &&
+  guidedLeadTracking.includes('trackCookielessInteraction("form_error"'),
+  "Lead receipt must preserve CTA attribution and record failures separately from success");
+
 // Aria puppy checker: transfer the *answers* into the existing allowlisted
 // lead raw_payload, never into the validated interest_reason or ad events.
 const puppyAnswers = {
