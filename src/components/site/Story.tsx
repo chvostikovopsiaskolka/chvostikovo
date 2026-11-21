@@ -308,7 +308,7 @@ export function About({ language = "sk", homeMobile = false }: { language?: "sk"
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             {isEnglish ? "About us" : "O nás"}
           </span>
-          <h2 className={homeMobile ? "section-title mt-2 text-[clamp(12px,3.65vw,22px)] whitespace-nowrap lg:whitespace-normal lg:text-3xl" : "section-title mt-2 text-3xl sm:text-4xl"}>
+          <h2 className={homeMobile ? "section-title mt-2 text-[clamp(12px,3.65vw,22px)] whitespace-nowrap lg:whitespace-normal lg:text-4xl" : "section-title mt-2 text-3xl sm:text-4xl"}>
             {homeMobile && !isEnglish ? (
               <>
                 <span className="lg:hidden">Kto sa postará o vášho psíka?</span>
