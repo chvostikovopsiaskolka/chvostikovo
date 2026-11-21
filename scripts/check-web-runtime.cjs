@@ -35,12 +35,12 @@ const failures = [];
         const label = `${engine}-${restricted ? 'blocked-storage' : 'fresh'}-${url.pathname.replaceAll('/', '_')}`;
         // Record only synthetic events from this browser fixture. Prevent
         // automated interactions from polluting production campaign analytics.
-        const puppyInteractions = [];
-        if (!bellaris && !restricted && url.pathname === '/psia-skolka-pre-steniatka/') {
+        const trackedEvents = [];
+        if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/'].includes(url.pathname)) {
           await page.route('**/functions/v1/website-landing-event', async route => {
             const request = route.request();
             const data = request.method() === 'POST' ? request.postDataJSON() : {};
-            if (data?.event_name) puppyInteractions.push({ name: data.event_name, source: data.event_source, attemptId: data.attempt_id });
+            if (data?.event_name) trackedEvents.push({ name: data.event_name, source: data.event_source, attemptId: data.attempt_id });
             await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
           });
         }
@@ -607,16 +607,16 @@ const failures = [];
             await conversionDialog.locator('input[type="checkbox"][required]').check();
             await conversionDialog.getByRole('button', { name: 'Odoslať záujem' }).click();
             await conversionDialog.getByRole('alert').waitFor({ state: 'visible' });
-            if (puppyInteractions.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'))
+            if (trackedEvents.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'))
               throw new Error('Failed synthetic lead must not count as conversion');
             await conversionDialog.getByRole('button', { name: 'Odoslať záujem' }).click();
             // On success the shared LeadStepForm intentionally replaces its
             // form node with a receipt. Keep the dialog selector independent
             // of the removed [data-lead-step-form] element.
             await page.locator('[role="dialog"] [data-lead-step-success]').last().waitFor({ state: 'visible' });
-            for (let i = 0; i < 12 && !puppyInteractions.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'); i++)
+            for (let i = 0; i < 12 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest'); i++)
               await page.waitForTimeout(100);
-            const has = (name, source) => puppyInteractions.some(e => e.name === name && e.source === source);
+            const has = (name, source) => trackedEvents.some(e => e.name === name && e.source === source);
             for (const [name, source] of [
               ['nav_click', 'puppy_landing_aria_pricing'],
               ['nav_click', 'puppy_landing_aria_faq'],
@@ -630,7 +630,7 @@ const failures = [];
               if (!has(name, source))
                 throw new Error('Missing isolated CTA/funnel event ' + name + ':' + source);
             }
-            const submitted = puppyInteractions.filter(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest');
+            const submitted = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'puppy_landing_aria_interest');
             if (submitted.length !== 1 || syntheticLeads.length !== 2 || syntheticRecoveries.length < 1 ||
                 !syntheticLeads.every(data => data.form_type === 'lead' &&
                   data.cta_source === 'puppy_landing_aria_interest' &&
