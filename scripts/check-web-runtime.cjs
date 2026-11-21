@@ -77,6 +77,7 @@ const failures = [];
                 pricingBg: document.querySelector('#lead-pricing') ? getComputedStyle(document.querySelector('#lead-pricing')).backgroundColor : '',
                 footerBg: document.querySelector('footer') ? getComputedStyle(document.querySelector('footer')).backgroundColor : '',
                 benefitHeading: document.querySelector('#lead-benefits h3') ? getComputedStyle(document.querySelector('#lead-benefits h3')).color : '',
+                greenPills: document.querySelector('[data-hero-benefits] .bg-forest') ? getComputedStyle(document.querySelector('[data-hero-benefits] .bg-forest')).backgroundColor : '',
               };
             });
             if (url.pathname === '/test-aria/') {
@@ -91,7 +92,8 @@ const failures = [];
                   palette.earlyFaqBg !== 'rgb(255, 164, 20)' ||
                   palette.pricingBg !== 'rgb(255, 164, 20)' ||
                   palette.footerBg !== 'rgb(255, 164, 20)' ||
-                  palette.benefitHeading !== 'rgb(170, 75, 0)')
+                  palette.benefitHeading !== 'rgb(170, 75, 0)' ||
+                  palette.greenPills !== 'rgb(45, 118, 75)')
                 throw new Error('Preview palette lost sage/orange/charcoal/rose roles: '+JSON.stringify(palette));
             } else if (palette.variant || palette.rose || palette.sage) {
               throw new Error('Paid lead inherited test-only palette: '+JSON.stringify(palette));

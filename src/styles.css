@@ -939,6 +939,9 @@
 .aria-brand-experiment #lead-first-visit {
   background-color: #91406b;
 }
+.aria-brand-experiment [data-hero-benefits] .bg-forest {
+  background-color: #2d764b;
+}
 
 /* Primary actions are deep rose; logo-orange stays for information labels,
  * navigation details, illustrations and secondary accents. */
