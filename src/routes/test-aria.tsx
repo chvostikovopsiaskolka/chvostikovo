@@ -149,38 +149,47 @@ export function AriaPreviewPage() {
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
-        <section className="hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-8 sm:pt-10 lg:pt-24">
+        <section className="hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-28">
           <PawTrailBackground landingBottomPaws />
 
-          <div className="relative z-10 mx-auto w-full max-w-4xl px-4 pb-2 pt-0 sm:pb-3 sm:pt-3 lg:pt-6">
+          <div className="relative z-10 mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7">
             <div className="w-full min-w-0 text-center">
               <p className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-[0.07em] text-coral-dark min-[390px]:text-[11px] min-[390px]:tracking-[0.08em] sm:text-sm sm:tracking-[0.16em]">
                 Denné stráženie stredných a veľkých psíkov
               </p>
-              <h1 className="mt-6 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
+              <h1 className="mt-7 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
-
-              <div data-hero-benefits className="mx-auto mt-6 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:mt-5 sm:max-w-xl sm:gap-2 ">
-                {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
-                  <span
-                    key={item}
-                    className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px] lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-xs"
-                  >
-                    <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5 lg:size-4" />
-                    {item}
-                  </span>
-                ))}
-              </div>
-              <p className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg ">
-                Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
-              </p>
             </div>
-
           </div>
+
+          <div aria-hidden="true" className="min-h-12 flex-1 sm:min-h-16" />
           <Reviews variant="hero" />
-        <section id="aria-hero-form" className="relative z-10 bg-transparent pb-12 pt-2 sm:pb-16 sm:pt-3">
+          {/* Leave breathing room above the persistent Aria speech and dock. */}
+          <div aria-hidden="true" className="h-32 shrink-0 sm:h-28" />
+        </section>
+
+        <section data-aria-hero-summary="true" className="relative bg-background px-4 pb-10 pt-6 sm:pb-12 sm:pt-8">
+          <div className="mx-auto w-full max-w-4xl text-center">
+            <div data-hero-benefits className="mx-auto flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:max-w-xl sm:gap-2">
+              {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
+                <span
+                  key={item}
+                  className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px] lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-xs"
+                >
+                  <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5 lg:size-4" />
+                  {item}
+                </span>
+              ))}
+            </div>
+            <p className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-forest/85 sm:text-lg">
+              Kým vy pracujete, váš psík môže tráviť deň s kamošmi, užije pohyb, hry, oddych aj pozornosť pod celodenným dohľadom.
+            </p>
+          </div>
+        </section>
+
+        <section id="aria-hero-form" className="relative z-10 bg-transparent pb-12 pt-6 sm:pb-16 sm:pt-8">
           <div className="mx-auto max-w-4xl px-4">
             <div className="rounded-4xl bg-secondary/55 p-5 shadow-soft sm:p-8">
               <div className="mx-auto max-w-2xl text-center">
@@ -195,8 +204,6 @@ export function AriaPreviewPage() {
               </div>
             </div>
           </div>
-        </section>
-          <div aria-hidden="true" className="min-h-4 flex-1" />
         </section>
 
         <section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-card py-9 sm:py-12">
