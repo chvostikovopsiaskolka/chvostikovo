@@ -50,7 +50,7 @@ const GALLERY_EN = [
   "Secure outdoor run",
 ];
 
-export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
+export function Gallery({ language = "sk", mobileMosaic = false }: { language?: "sk" | "en"; mobileMosaic?: boolean }) {
   const [active, setActive] = useState<number | null>(null);
   const img = active === null ? null : GALLERY[active];
   const track = useRef<HTMLDivElement>(null);
@@ -93,7 +93,33 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
           </div>
         </div>
 
-        <div className="relative left-1/2 mt-8 w-[calc(100vw-24px)] -translate-x-1/2 sm:w-[calc(100vw-48px)]">
+        {mobileMosaic && !isEnglish && (
+          <div data-home-mosaic className="mt-7 grid grid-cols-2 gap-2.5 sm:hidden">
+            {GALLERY.map((item, i) => (
+              <Fragment key={item.src}>
+                <button type="button" onClick={() => setActive(i)} aria-label={item.alt}
+                  className="relative aspect-square min-w-0 overflow-hidden rounded-[18px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral">
+                  <img src={item.src} alt={item.alt} loading="lazy" decoding="async" className="size-full object-cover" />
+                </button>
+                {i % 2 === 1 && i < 6 && (
+                  <article className="col-span-2 rounded-[20px] border border-forest/10 bg-card p-4 shadow-card">
+                    <p className="mb-1 font-display text-xs font-bold uppercase tracking-wide text-coral">
+                      Ako zabezpečujeme čistotu priestorov
+                    </p>
+                    <h3 className="font-display text-base font-bold text-forest">
+                      {hygiene[[1, 2, 0][Math.floor(i / 2)]!]!.title}
+                    </h3>
+                    <p className="mt-1 text-[13px] leading-relaxed text-forest/80">
+                      {hygiene[[1, 2, 0][Math.floor(i / 2)]!]!.text}
+                    </p>
+                  </article>
+                )}
+              </Fragment>
+            ))}
+          </div>
+        )}
+
+        <div className={mobileMosaic && !isEnglish ? "relative left-1/2 mt-8 hidden w-[calc(100vw-24px)] -translate-x-1/2 sm:block sm:w-[calc(100vw-48px)]" : "relative left-1/2 mt-8 w-[calc(100vw-24px)] -translate-x-1/2 sm:w-[calc(100vw-48px)]"}>
           <div
             ref={track}
             className="flex w-full touch-auto snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
