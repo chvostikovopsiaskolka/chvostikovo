@@ -349,6 +349,13 @@ const failures = [];
                   !/DHPPi\+L:\s*áno/i.test(puppySummaryText) ||
                   !/kotercový kašeľ:\s*áno/i.test(puppySummaryText))
                 throw new Error('Puppy wizard details were lost during contact handoff: ' + puppySummaryText);
+              const puppyBreedField = contactDialog.locator('[data-aria-breed-field]');
+              const puppyBreedInput = puppyBreedField.getByLabel('Plemeno psíka (nepovinné)');
+              if (!await puppyBreedField.isVisible() || await puppyBreedInput.inputValue() !== 'Kríženec')
+                throw new Error('Puppy breed must be prefilled but editable at contact handoff');
+              await puppyBreedInput.fill('Írsky vlkodav');
+              if (!await puppySummary.getByText(/Írsky vlkodav/).count())
+                throw new Error('Corrected contact breed must also update the carried puppy summary');
               await contactDialog.getByRole('button', { name: 'Close' }).click();
               await contactDialog.waitFor({ state: 'hidden' });
               await aria.waitFor({ state: 'visible' });
@@ -463,11 +470,13 @@ const failures = [];
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               await choiceLabels.nth(2).click();
               await enquiry.getByRole('button', { name: 'Pokračovať' }).click();
-              if (!await breed.isVisible()) throw new Error('Occasional visit must offer optional breed');
+              if (!await breed.isVisible() || !await breed.getByLabel('Plemeno psíka (nepovinné)').count())
+                throw new Error('Occasional visit must offer the same optional breed field');
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               await choiceLabels.nth(0).click();
               await enquiry.getByRole('button', { name: 'Pokračovať' }).click();
-              if (await breed.count()) throw new Error('Information-only enquiry must hide breed');
+              if (!await breed.isVisible() || await breed.getByLabel('Plemeno psíka (nepovinné)').inputValue() !== 'Írsky vlkodav')
+                throw new Error('Information-only enquiry must keep the same editable breed field and entered value');
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
                 const ids = ['recenzie', 'aria-caretakers', 'aria-early-faq', 'aria-mosaic', 'lead-benefits', 'lead-pricing', 'lead-requirements', 'aria-puppy-check', 'lead-first-visit'];
