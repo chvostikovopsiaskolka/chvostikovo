@@ -178,7 +178,14 @@ const failures = [];
               await wizard.locator('[data-aria-puppy-step="result"]').waitFor({ state: 'visible' });
               await wizard.getByRole('button', { name: /Mám záujem – vyplniť kontakt/ }).click();
               await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
-              await page.keyboard.press('Escape');
+              // Nested puppy -> contact modal handoff: use the actual iPhone
+              // close button, not an ambiguous synthetic Escape targeting the
+              // previous Radix layer in WebKit. Keyboard Escape remains covered
+              // later for the normal single-dialog requirements flow.
+              const contactDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+              await contactDialog.getByRole('button', { name: 'Close' }).click();
+              await contactDialog.waitFor({ state: 'hidden' });
+              await aria.waitFor({ state: 'visible' });
 
               await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
               const pricingPanel = aria.locator('[data-aria-panel="pricing"]');
