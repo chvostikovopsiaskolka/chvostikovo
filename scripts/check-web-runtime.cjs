@@ -134,9 +134,14 @@ const failures = [];
                 throw new Error('Aria cartoon speech tail must emerge toward her head at ' + width);
               if (!await tail.locator('path[fill="var(--card)"]').count())
                 throw new Error('Aria speech tail must match the existing OKLCH card color');
-              const speechStyle = await comicBubble.evaluate(el => ({ radius: getComputedStyle(el).borderTopLeftRadius, height: el.getBoundingClientRect().height }));
-              if (!speechStyle.radius.includes('%') || speechStyle.height < 50 || tailBox.y > headBox.y + headBox.height || tailBox.y + tailBox.height < headBox.y)
-                throw new Error('Speech must be an organic oval with a tail physically meeting Aria at ' + width);
+              const speechStyle = await comicBubble.evaluate(el => ({
+                radius: parseFloat(getComputedStyle(el).borderTopLeftRadius),
+                outline: parseFloat(getComputedStyle(el).borderTopWidth),
+                height: el.getBoundingClientRect().height,
+              }));
+              if (speechStyle.radius < 15 || speechStyle.radius > 19 || speechStyle.outline < 1.9 ||
+                  speechStyle.height < 50 || tailBox.y > headBox.y + headBox.height || tailBox.y + tailBox.height < headBox.y)
+                throw new Error('Aria speech must be an outlined comic rounded rectangle with a tail meeting her head at ' + width);
               const interestButton = aria.getByRole('button', { name: 'Mám záujem o škôlku' });
               if ((await interestButton.getAttribute('class') || '').includes('bg-coral/15'))
                 throw new Error('Rejected special interest button highlight resurfaced');
@@ -325,6 +330,10 @@ const failures = [];
               await page.waitForTimeout(200);
               if (!await page.locator('[data-aria-guide][data-intro="false"]').count())
                 throw new Error('Aria intro must yield to puppy prompt on scroll');
+              const overitRadius = await aria.getByRole('button', { name: 'Overiť', exact: true })
+                .evaluate(button => parseFloat(getComputedStyle(button).borderTopLeftRadius));
+              if (overitRadius < 10 || overitRadius > 13)
+                throw new Error('Puppy check CTA must match the squared comic bubble shape');
               await aria.getByRole('button', { name: 'Overiť', exact: true }).click();
               await page.waitForTimeout(120);
               if (!await page.locator('#aria-puppy-check').count()) throw new Error('Scroll CTA must link to the puppy checker');
