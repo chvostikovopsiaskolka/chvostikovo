@@ -1,5 +1,6 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import type { PuppyCheckInput } from "@/lib/inquiry";
 import {
   Car,
   CheckCircle2,
@@ -106,11 +107,13 @@ export function AriaPreviewPage() {
   const [puppyModalOpen, setPuppyModalOpen] = useState(false);
   const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
   const [ariaPreset, setAriaPreset] = useState<string | undefined>(undefined);
+  const [puppyCheck, setPuppyCheck] = useState<PuppyCheckInput | undefined>(undefined);
 
   function openLeadModal(source: string) {
     trackMarketingInteraction("inquiry_cta", source);
     void trackCookielessInteraction("inquiry_cta", source);
     setAriaPreset(undefined);
+    setPuppyCheck(undefined);
     setLeadModalSource(source);
     setLeadModalOpen(true);
   }
@@ -120,16 +123,23 @@ export function AriaPreviewPage() {
     trackMarketingInteraction("inquiry_cta", source);
     void trackCookielessInteraction("inquiry_cta", source);
     setAriaPreset(infoOnly ? LEAD_STEP_INTERESTS[0].value : undefined);
+    setPuppyCheck(undefined);
     setLeadModalSource(source);
     setLeadModalOpen(true);
   }
 
-  function openPuppyContact() {
-    const source = "aria_puppy_check_eligible";
+  function openPuppyContact(details: PuppyCheckInput, infoOnly = false) {
+    const source = isLiveLead
+      ? (infoOnly ? "lead_landing_aria_puppy_info" : "lead_landing_aria_puppy_check")
+      : (infoOnly ? "aria_puppy_check_info" : "aria_puppy_check_eligible");
     trackMarketingInteraction("inquiry_cta", source);
     void trackCookielessInteraction("inquiry_cta", source);
-    setAriaPreset(LEAD_STEP_INTERESTS[0].value);
+    setPuppyCheck(details);
+    // Keep the production allowlist value; do not concatenate vaccination details
+    // into interest_reason, because it would be rejected by the existing Edge API.
+    setAriaPreset(infoOnly ? LEAD_STEP_INTERESTS[0].value : "Mám záujem o škôlku pre šteniatko");
     setLeadModalSource(source);
+    setPuppyModalOpen(false);
     setLeadModalOpen(true);
   }
 
@@ -360,7 +370,7 @@ export function AriaPreviewPage() {
           </div>
         </section>
 
-        <AriaPuppyChecker onInterest={openPuppyContact} onInfo={() => openAriaForm(true)} />
+        <AriaPuppyChecker onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />
 
         <section id="lead-first-visit" className="relative scroll-mt-24 overflow-hidden bg-forest py-10 text-cream sm:py-14">
           <SectionAmbientPaws tone="dark" />
@@ -414,7 +424,7 @@ export function AriaPreviewPage() {
       <Dialog open={puppyModalOpen} onOpenChange={setPuppyModalOpen}>
         <DialogContent className="max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6" aria-describedby={undefined}>
           <DialogTitle className="font-display text-lg font-bold text-forest">Kontrola vhodnosti šteniatka</DialogTitle>
-          <AriaPuppyChecker embedded onInterest={() => { setPuppyModalOpen(false); openPuppyContact(); }} onInfo={() => { setPuppyModalOpen(false); openAriaForm(true); }} />
+          <AriaPuppyChecker embedded onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />
         </DialogContent>
       </Dialog>
 
@@ -424,7 +434,7 @@ export function AriaPreviewPage() {
         title="Čo hľadáte pre svojho psíka?"
         subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
       >
-        <LeadStepForm key={leadModalSource} questionInHeading ariaPreview trackingSource={leadModalSource} presetInterest={ariaPreset} />
+        <LeadStepForm key={leadModalSource} questionInHeading ariaPreview trackingSource={leadModalSource} presetInterest={ariaPreset} puppyCheck={puppyCheck} />
       </FormDialog>
     </div>
   );
