@@ -310,7 +310,8 @@ assert(ariaLandingTracking.includes('const isLiveLead = useRouterState') &&
   ariaLandingTracking.includes('lead_landing_aria_hero_inline') &&
   ariaLandingTracking.includes('lead_landing_aria_puppy_check') &&
   ariaLandingTracking.includes('lead_landing_aria_first_visit_inline') &&
-  ariaLandingTracking.includes('hideMobileDock') &&
+  ariaLandingTracking.includes('<AriaLeadAssistant trackingPrefix=') &&
+  !ariaLandingTracking.includes('<Header landingMinimal') &&
   ariaLandingTracking.includes('setPuppyCheck(details)'),
   "Approved live Aria must have one dock, shared guided lead and puppy-to-contact attribution");
 assert(stagedLeadSource.includes("zaujem: selectedInterest") &&

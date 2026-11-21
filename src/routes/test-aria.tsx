@@ -23,7 +23,7 @@ import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
 import { Requirements } from "@/components/site/Info";
 import { Footer } from "@/components/site/Contact";
-import { Header } from "@/components/site/Header";
+import { ABOUT_MORE } from "@/components/site/Story";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { DAYCARE_GALLERY_EXTRAS, GALLERY, FAQ, PRICING } from "@/content/site";
@@ -149,55 +149,54 @@ export function AriaPreviewPage() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
-      <Header landingMinimal hideMobileDock landingTrackingSource="lead_landing_header_phone" />
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
-        <section className="hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-28">
+        <section className="hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8">
           <PawTrailBackground landingBottomPaws />
 
           {/* Balance the first fold around the whole content group; Aria owns
               the lower viewport and must never cover the reviews. */}
-          <div aria-hidden="true" data-aria-intro-top-space className="min-h-[clamp(20px,5svh,54px)] flex-[0.85] sm:min-h-14" />
+          <div aria-hidden="true" data-aria-intro-top-space className="min-h-[clamp(20px,5svh,54px)] flex-[0.85] sm:min-h-14 lg:min-h-3 lg:flex-[0.35]" />
           <div data-aria-hero-content className="relative z-10 w-full shrink-0">
             <div className="mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7">
             <div className="w-full min-w-0 text-center">
               {/* Preserve the approved H1 position while moving the schoolmates onto the orange label. */}
               <div aria-hidden="true" data-aria-hero-heading-spacer className="h-[14px] sm:h-5" />
-              <h1 className="mt-7 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:text-[58px] lg:leading-[1.05]">
+              <h1 className="mt-7 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]">
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
 
-              <div data-aria-service-group className="relative mx-auto mt-[80px] w-fit max-w-full sm:mt-[88px]">
+              <div data-aria-service-group className="relative mx-auto mt-[80px] w-fit max-w-full sm:mt-[88px] lg:mt-[124px]">
                 {/* The existing four schoolmates now rest on the orange label, not above the H1. */}
-                <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:bottom-[calc(100%+12px)]">
-                  <SchoolmatesFormCrown compact />
+                <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
+                  <SchoolmatesFormCrown compact desktopWide />
                 </div>
                 <p data-aria-service-badge className="inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2.5 py-2 text-center font-display text-[8px] font-bold uppercase leading-tight tracking-[0.015em] text-white shadow-card min-[390px]:px-3 min-[390px]:text-[9.5px] sm:px-5 sm:py-2.5 sm:text-sm">
                   Denné stráženie stredných a veľkých psíkov
                 </p>
               </div>
 
-              <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[520px] lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:bg-none lg:px-0 lg:py-0 lg:shadow-none lg:backdrop-blur-none">
+              <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[590px]">
                 <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
               </p>
             </div>
           </div>
-            <div className="mt-2 sm:mt-4">
+            <div className="mt-2 sm:mt-4 lg:mt-2">
               <Reviews variant="hero" />
             </div>
           </div>
           {/* Fill the former empty Aria breathing room with two real photos from
               the moving gallery. Keep the enquiry below the initial viewport,
-              while leaving Aria fixed above the bottom dock. Desktop unchanged. */}
-          <div data-aria-intro-space className="relative z-10 mx-auto flex min-h-[148px] max-h-[166px] w-full max-w-3xl flex-[0.45] items-center px-4 py-2 sm:min-h-[110px] sm:max-h-[150px] sm:px-0 sm:py-0">
-            <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:hidden">
+              while leaving Aria fixed above the bottom dock. Desktop now also shows the photos. */}
+          <div data-aria-intro-space className="relative z-10 mx-auto flex min-h-[148px] max-h-[166px] w-full max-w-3xl flex-[0.45] items-center px-4 py-2 sm:min-h-[110px] sm:max-h-[150px] sm:px-0 sm:py-0 lg:max-w-4xl lg:min-h-[148px] lg:max-h-[166px] lg:flex-[0.3]">
+            <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:gap-4">
               {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
                 <button type="button" key={photo.src} data-aria-review-photo={index + 1}
                   aria-label={`Zobraziť fotografiu: ${photo.alt}`}
                   onClick={() => setReviewPhotoOpen(index)}
-                  className="group relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[138px]">
+                  className="group relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[138px] lg:h-[156px]">
                   <img src={photo.src} alt={photo.alt} width={672} height={896} loading="lazy" decoding="async"
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
                 </button>
@@ -236,7 +235,7 @@ export function AriaPreviewPage() {
                   loading="lazy"
                   className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72"
                 />
-                <div data-hero-benefits className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:gap-2">
+                <div data-hero-benefits className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:gap-2 lg:max-w-none lg:flex-wrap lg:gap-2">
                   {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                     <span
                       key={item}
@@ -251,6 +250,15 @@ export function AriaPreviewPage() {
               <p className="text-sm leading-relaxed text-forest/75 sm:text-base">
                 Aj my sme <strong className="font-bold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov <strong className="font-bold text-forest">spoznávame, rešpektujeme ich potreby</strong> a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
               </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="aria-about" className="relative bg-card py-9 sm:py-12">
+          <div className="mx-auto max-w-4xl px-4">
+            <h2 className="section-title text-center text-2xl sm:text-3xl">Viac o nás a našej škôlke</h2>
+            <div className="mx-auto mt-5 max-w-3xl space-y-4 text-sm leading-relaxed text-forest/80 sm:text-base">
+              {ABOUT_MORE.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>
           </div>
         </section>
@@ -327,14 +335,14 @@ export function AriaPreviewPage() {
             </p>
             <div className="mx-auto mt-5 grid max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4">
               {PRICING.map((item) => (
-                <article key={item.name} className={"relative flex h-full min-h-[108px] flex-col items-center rounded-3xl px-3 py-3 text-center shadow-card sm:min-h-[136px] sm:p-4 " + (item.highlight ? "bg-forest text-cream ring-2 ring-coral sm:ring-0" : "bg-card text-forest")}>
-                  {item.highlight && <span data-lead-best-value className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-3 py-1 font-display text-[10px] font-bold whitespace-nowrap text-white shadow-sm sm:hidden">Najvýhodnejšie</span>}
+                <article key={item.name} className={"relative flex h-full min-h-[108px] flex-col items-center rounded-3xl px-3 py-3 text-center shadow-card sm:min-h-[136px] sm:p-4 " + (item.highlight ? "bg-forest text-cream ring-2 ring-coral" : "bg-card text-forest")}>
                   <h3 className="font-display text-[13px] font-bold leading-snug sm:text-xl">{item.name}</h3>
                   <p aria-hidden={!item.highlight} className={"mt-0.5 text-[11px] font-semibold " + (item.highlight ? "text-cream/85" : "invisible")}>10 vstupov</p>
                   <p className={"mt-1 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
                   <div className="mt-auto pt-1 text-[11px] leading-snug sm:text-sm">
-                    {item.highlight ? <strong>Ušetríte 50 €</strong> : <span className="opacity-75">Celodenný pobyt</span>}
+                    {item.highlight ? <strong>Permanentka platí 2 mesiace.</strong> : <span className="opacity-75">Celodenný pobyt</span>}
                   </div>
+                  {item.highlight && <span data-lead-best-value className="mt-2 inline-flex max-w-full items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold tracking-[-0.025em] text-white shadow-sm">Najvýhodnejšie. Ušetríte 50 €</span>}
                 </article>
               ))}
             </div>

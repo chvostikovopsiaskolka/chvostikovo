@@ -1,4 +1,4 @@
-import { useEffect, useRef, type TouchEvent } from "react";
+import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 export type LightboxPhoto = {
@@ -19,6 +19,7 @@ export function PhotoLightbox({
   language?: "sk" | "en";
 }) {
   const origin = useRef<{ x: number; y: number } | null>(null);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const activeRef = useRef(active);
   const changeRef = useRef(onChange);
@@ -56,6 +57,7 @@ export function PhotoLightbox({
 
   if (active === null || count === 0 || !photos[active]) return null;
   const photo = photos[active]!;
+  const imageSrc = photo.fullSrc || photo.src;
   const step = (direction: -1 | 1) => onChange((active + direction + count) % count);
   const start = (event: TouchEvent<HTMLDivElement>) => {
     const touch = event.touches[0];
@@ -81,9 +83,10 @@ export function PhotoLightbox({
         onTouchStart={start} onTouchEnd={end} onTouchCancel={() => { origin.current = null; }}
         style={{ touchAction: "pan-y" }}>
         <div data-photo-lightbox-media className="relative inline-flex max-w-full items-center justify-center">
-        <img data-photo-lightbox-image src={photo.fullSrc || photo.src} alt={photo.alt}
+        <img data-photo-lightbox-image src={imageSrc} alt={photo.alt}
           loading="eager" decoding="async" draggable={false}
-          className="block min-h-[160px] max-h-[calc(100dvh-34px)] max-w-[calc(100vw-20px)] select-none rounded-[22px] bg-secondary/20 object-contain shadow-soft sm:max-h-[85dvh] sm:max-w-[88vw]"
+          onError={() => setFailedSrc(imageSrc)} onLoad={() => setFailedSrc(null)}
+          className="block min-h-[160px] min-w-[min(70vw,260px)] max-h-[calc(100dvh-34px)] max-w-[calc(100vw-20px)] select-none rounded-[22px] bg-secondary/20 object-contain shadow-soft sm:max-h-[85dvh] sm:max-w-[88vw]"
         />
         <button ref={closeButton} type="button"
           aria-label={en ? "Close gallery" : "Zavrieť galériu"}
@@ -109,7 +112,9 @@ export function PhotoLightbox({
           </>
         )}
         </div>
-        {photo.caption && <p className="mt-2 max-w-[90vw] px-2 text-center font-display text-xs font-semibold text-cream sm:text-sm">{photo.caption}</p>}
+        {failedSrc === imageSrc
+          ? <p role="status" className="mt-2 max-w-[90vw] px-2 text-center text-xs text-cream/90">Fotografiu sa nepodarilo načítať. Skúste ďalšiu.</p>
+          : photo.caption && <p className="mt-2 max-w-[90vw] px-2 text-center font-display text-xs font-semibold text-cream sm:text-sm">{photo.caption}</p>}
       </div>
     </div>
   );
