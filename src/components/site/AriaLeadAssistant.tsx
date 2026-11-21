@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
@@ -42,6 +42,86 @@ export function AriaLeadAssistant({
   const [panel, setPanel] = useState<Panel>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [pricingVisitOpen, setPricingVisitOpen] = useState(false);
+
+  const speechRef = useRef<HTMLDivElement>(null);
+  const portraitRef = useRef<HTMLImageElement>(null);
+  const [speechObscured, setSpeechObscured] = useState(false);
+  const [speechGeometry, setSpeechGeometry] = useState({ width: 280, height: 42, tipX: -42, tipY: 68 });
+
+  // One path owns both the speech balloon and its tail. The tip follows
+  // the portrait itself rather than nominal dock padding.
+  useEffect(() => {
+    if (hidden) return;
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const bubble = speechRef.current?.getBoundingClientRect();
+      const head = portraitRef.current?.getBoundingClientRect();
+      if (!bubble?.width || !bubble.height || !head?.width || !head.height) return;
+      const next = {
+        width: Math.round(bubble.width),
+        height: Math.round(bubble.height),
+        tipX: Math.round(head.left + head.width * 0.68 - bubble.left),
+        tipY: Math.round(head.top + head.height * 0.43 - bubble.top),
+      };
+      setSpeechGeometry(prev =>
+        Object.keys(next).every(key => prev[key as keyof typeof prev] === next[key as keyof typeof next]) ? prev : next);
+    };
+    const requestMeasure = () => {
+      if (!frame) frame = window.requestAnimationFrame(measure);
+    };
+    const observer = new ResizeObserver(requestMeasure);
+    if (speechRef.current) observer.observe(speechRef.current);
+    if (portraitRef.current) observer.observe(portraitRef.current);
+    window.addEventListener("resize", requestMeasure);
+    window.visualViewport?.addEventListener("resize", requestMeasure);
+    requestMeasure();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", requestMeasure);
+      window.visualViewport?.removeEventListener("resize", requestMeasure);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [hidden, intro]);
+
+  // Yield to visible headings, form fields and CTAs instead of covering them.
+  // Visibility keeps the layout measurable on the next scroll frame.
+  useEffect(() => {
+    if (hidden) return;
+    let frame = 0;
+    const check = () => {
+      frame = 0;
+      const bubble = speechRef.current?.getBoundingClientRect();
+      if (!bubble || panel) {
+        setSpeechObscured(false);
+        return;
+      }
+      const important = document.querySelectorAll<HTMLElement>(
+        "main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]"
+      );
+      const overlaps = Array.from(important).some(node => {
+        const rect = node.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 &&
+          rect.left < bubble.right + 8 && rect.right > bubble.left - 8 &&
+          rect.top < bubble.bottom + 8 && rect.bottom > bubble.top - 8;
+      });
+      setSpeechObscured(prev => prev === overlaps ? prev : overlaps);
+    };
+    const requestCheck = () => {
+      if (!frame) frame = window.requestAnimationFrame(check);
+    };
+    const observer = new ResizeObserver(requestCheck);
+    if (speechRef.current) observer.observe(speechRef.current);
+    window.addEventListener("scroll", requestCheck, { passive: true });
+    window.addEventListener("resize", requestCheck);
+    requestCheck();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", requestCheck);
+      window.removeEventListener("resize", requestCheck);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [hidden, intro, panel]);
 
   useEffect(() => {
     let frame = 0;
@@ -124,15 +204,27 @@ export function AriaLeadAssistant({
   const ctaClass = "flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-coral px-4 py-2.5 text-center font-display text-sm font-bold text-white shadow-sm transition hover:bg-coral-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest";
   const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[12px] bg-white/55 px-0.5 text-center text-forest shadow-[0_2px_7px_rgba(18,68,43,.10)] transition aria-expanded:bg-secondary/80 aria-expanded:ring-1 aria-expanded:ring-forest/15 hover:bg-white/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
 
+
+  const { width: sw, height: sh, tipX, tipY } = speechGeometry;
+  const speechPath = [
+    "M 16 1",
+    `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
+    `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
+    `L 45 ${sh - 1}`,
+    `C 24 ${sh - 1} ${tipX + 17} ${tipY - 7} ${tipX} ${tipY}`,
+    `C ${tipX + 18} ${tipY - 16} 5 ${sh - 9} 14 ${sh - 8}`,
+    `Q 1 ${sh - 8} 1 ${sh - 18} L 1 16 Q 1 1 16 1 Z`,
+  ].join(" ");
+
   if (hidden) return null;
 
   return (
     <aside aria-label="Aria – sprievodkyňa Chvostíkovom" data-aria-guide data-intro={intro ? "true" : "false"}
       className="pointer-events-none fixed inset-x-0 bottom-[max(6px,env(safe-area-inset-bottom))] z-40 px-2 sm:bottom-4 sm:px-4">
-      <div className="pointer-events-auto relative mx-auto w-full max-w-[690px]">
+      <div className="pointer-events-none relative mx-auto w-full max-w-[690px]">
         {panel && (
           <div role="region" aria-label={"Aria: " + panel} data-aria-panel={panel}
-            className="absolute bottom-[calc(100%+9px)] left-0 right-0 max-h-[min(63dvh,500px)] overflow-y-auto overscroll-contain rounded-[26px] border border-white/75 bg-card/95 p-3 text-forest shadow-[0_14px_45px_rgba(17,65,41,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:p-4">
+            className="pointer-events-auto absolute bottom-[calc(100%+9px)] left-0 right-0 max-h-[min(63dvh,500px)] overflow-y-auto overscroll-contain rounded-[26px] border border-white/75 bg-card/95 p-3 text-forest shadow-[0_14px_45px_rgba(17,65,41,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:p-4">
             <div className="flex items-center justify-between gap-2">
               <div className="flex min-w-0 items-center gap-2">
                 <img src={ARIA_HEAD_DATA_URI} alt="" width={48} height={48} className="size-11 shrink-0 object-contain drop-shadow-md" />
@@ -248,16 +340,17 @@ export function AriaLeadAssistant({
         )}
 
         {!panel && (
-          <div className="mb-3 flex w-full justify-start pl-[75px] sm:pl-[96px]" data-aria-message>
-            <div data-aria-speech className="relative isolate inline-flex min-h-[55px] max-w-full -rotate-[0.5deg] items-center rounded-[16px_18px_15px_17px] border-2 border-forest/70 bg-card px-2.5 py-3 text-forest shadow-[4px_5px_0_rgba(18,68,43,.16),0_7px_17px_rgba(17,65,41,.12)]">
-              {/* Curved speech tail extends from the bubble towards Aria's head, not the navigation dock. */}
-              <svg aria-hidden="true" viewBox="0 0 96 60"
-                className="pointer-events-none absolute -bottom-[23px] -left-[49px] z-0 h-[56px] w-[91px] overflow-visible text-forest/70 drop-shadow-[0_3px_3px_rgba(17,65,41,.13)]">
-                <path d="M91 8 C73 7 58 16 52 29 C44 44 31 53 6 58 C27 45 32 27 44 16 C59 3 77 4 91 8 Z"
-                  fill="var(--card)" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+          <div data-aria-message data-aria-suppressed={speechObscured ? "true" : "false"} aria-hidden={speechObscured}
+            className={`mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px] ${speechObscured ? "invisible pointer-events-none" : "pointer-events-auto"}`}>
+            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[42px] max-w-full -rotate-[0.5deg] items-center px-2.5 py-1.5 text-forest">
+              <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
+                viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
+                className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
+                <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
+                  strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>
               {intro ? (
-                <p className="relative z-10 whitespace-nowrap font-display text-[clamp(8px,2.45vw,13px)] font-semibold tracking-tight">
+                <p className="relative z-10 font-display text-[11px] leading-tight font-semibold tracking-tight">
                   Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                   <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
                 </p>
@@ -276,9 +369,9 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className="relative ml-[83px] rounded-[16px] border border-white/80 bg-card/85 px-1 py-0.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-2" data-aria-dock>
+        <div className="pointer-events-auto relative ml-[83px] rounded-[16px] border border-white/80 bg-card/85 px-1 py-0.5 text-forest shadow-[0_6px_30px_rgba(18,68,43,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:ml-[104px] sm:px-2" data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-          <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
+          <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
             className="pointer-events-none absolute -bottom-1 -left-[83px] h-[78px] w-[78px] max-w-none object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,.42)] sm:-left-[104px] sm:h-[95px] sm:w-[95px]" />
           <div className="flex min-h-[48px] items-center gap-0.5">
             <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={panel === "pricing"} onClick={() => toggle("pricing")}>

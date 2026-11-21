@@ -98,7 +98,7 @@ const failures = [];
               throw new Error('Cookie scroll lock was not restored after saving preferences');
           }
           if (!bellaris && isAriaPage && !restricted) {
-            for (const width of [320, 390]) {
+            for (const width of [320, 375, 390, 430]) {
               // Stop the previous smooth scroll without navigating: this fixture
               // explicitly clears localStorage on every fresh navigation to
               // test first-visit consent, so reload would reopen the cookie modal.
@@ -116,32 +116,96 @@ const failures = [];
               if (!await aria.locator('[data-aria-message]').getByText(/Ahoj, volám sa Aria\./).count())
                 throw new Error('Aria single-line greeting missing at ' + width);
               const welcome = await aria.locator('[data-aria-message] p').evaluate(el => ({
-                nowrap: getComputedStyle(el).whiteSpace === 'nowrap',
+                fontSize: parseFloat(getComputedStyle(el).fontSize),
                 overflows: el.scrollWidth > el.clientWidth + 2,
               }));
-              if (!welcome.nowrap || welcome.overflows)
-                throw new Error('Aria greeting must stay in one line without clipping at ' + width);
-              const comicBubble = aria.locator('[data-aria-message] > div');
+              if (welcome.fontSize < 10.5 || welcome.overflows)
+                throw new Error('Aria greeting must remain readable without clipping at ' + width);
+              const comicBubble = aria.locator('[data-aria-speech]');
               const portrait = aria.locator('[data-aria-dock] img[alt^="Aria"]');
-              const tail = comicBubble.locator('svg[viewBox="0 0 96 60"]');
-              const [speechBox, headBox, tailBox] = await Promise.all([
-                comicBubble.boundingBox(), portrait.boundingBox(), tail.boundingBox(),
-              ]);
-              if (!speechBox || !headBox || !tailBox ||
-                  tailBox.x >= speechBox.x ||
-                  tailBox.x > headBox.x + headBox.width ||
-                  tailBox.x + tailBox.width < headBox.x)
-                throw new Error('Aria cartoon speech tail must emerge toward her head at ' + width);
-              if (!await tail.locator('path[fill="var(--card)"]').count())
-                throw new Error('Aria speech tail must match the existing OKLCH card color');
+              const tail = comicBubble.locator('svg[data-aria-tail]');
+              const pathElement = tail.locator('path');
+              const [speechBox, headBox] = await Promise.all([comicBubble.boundingBox(), portrait.boundingBox()]);
+              if (!speechBox || !headBox || await comicBubble.locator('svg path').count() !== 1)
+                throw new Error('Aria must render one outlined SVG path for speech and tail at ' + width);
+              if (await pathElement.getAttribute('fill') !== 'var(--card)')
+                throw new Error('Speech and tail must use the original card fill');
               const speechStyle = await comicBubble.evaluate(el => ({
-                radius: parseFloat(getComputedStyle(el).borderTopLeftRadius),
-                outline: parseFloat(getComputedStyle(el).borderTopWidth),
                 height: el.getBoundingClientRect().height,
+                shadow: getComputedStyle(el).boxShadow,
               }));
-              if (speechStyle.radius < 15 || speechStyle.radius > 19 || speechStyle.outline < 1.9 ||
-                  speechStyle.height < 50 || tailBox.y > headBox.y + headBox.height || tailBox.y + tailBox.height < headBox.y)
-                throw new Error('Aria speech must be an outlined comic rounded rectangle with a tail meeting her head at ' + width);
+              if (speechStyle.height < 39 || speechStyle.height > 72 || speechStyle.shadow !== 'none')
+                throw new Error('Speech must stay compact without stacked box shadows at ' + width);
+              const tip = await tail.evaluate(el => ({
+                x: Number(el.dataset.tipX), y: Number(el.dataset.tipY),
+              }));
+              const tipOnHead = speechBox.x + tip.x > headBox.x + 4 &&
+                speechBox.x + tip.x < headBox.x + headBox.width - 4 &&
+                speechBox.y + tip.y > headBox.y + 4 &&
+                speechBox.y + tip.y < headBox.y + headBox.height - 4;
+              if (!tipOnHead) throw new Error('One-piece speech tail must terminate at Aria portrait at ' + width);
+
+              if (url.pathname === '/test-aria/') {
+                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-welcome.png') });
+                // On short pages the heading may already sit safely above
+                // the dock. Align the next visible form control with the
+                // bubble to exercise a *real* collision, never a negative
+                // scroll position that the browser silently clamps to zero.
+                const selected = await page.evaluate(() => {
+                  const speech = document.querySelector('[data-aria-speech]').getBoundingClientRect();
+                  const targets = [...document.querySelectorAll(
+                    '#aria-hero-form h2, #aria-hero-form label, #aria-hero-form button, #aria-hero-form input'
+                  )].filter(el => el.getBoundingClientRect().width > 0 &&
+                    el.getBoundingClientRect().top > speech.top + 20);
+                  const target = targets[0];
+                  if (!target) return false;
+                  target.setAttribute('data-aria-overlap-target', 'true');
+                  window.scrollTo(0, window.scrollY + target.getBoundingClientRect().top - (speech.top + 12));
+                  return true;
+                });
+                if (!selected) throw new Error('Cannot find a visible form control to test speech clearance');
+                await page.waitForTimeout(230);
+                const clearance = await page.evaluate(() => {
+                  const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
+                  const overlaps = [...document.querySelectorAll(
+                    'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]'
+                  )].filter(node => {
+                    const b = node.getBoundingClientRect();
+                    return b.width > 0 && b.height > 0 &&
+                      a.left < b.right + 8 && a.right > b.left - 8 &&
+                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
+                  });
+                  return {
+                    overlap: overlaps.length > 0,
+                    colliding: overlaps.slice(0, 3).map(node => node.tagName),
+                    suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed,
+                    speechTop: Math.round(a.top)
+                  };
+                });
+                if (!clearance.overlap) throw new Error('No real content overlap to test clearance: ' + JSON.stringify(clearance));
+                if (clearance.suppressed !== 'true')
+                  throw new Error('Aria must hide speech over contact form controls: ' + JSON.stringify(clearance));
+                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-form-clear.png') });
+                await page.evaluate(() => window.scrollTo(0, 0));
+                await page.waitForTimeout(170);
+                // At some widths the form is already under the fixed dock at
+                // scrollY=0. In that case keeping speech hidden is correct.
+                const restored = await page.evaluate(() => {
+                  const a = document.querySelector('[data-aria-speech]').getBoundingClientRect();
+                  const overlapping = [...document.querySelectorAll(
+                    'main h1, main h2, main label, main input, main select, main textarea, main button, main a[href]'
+                  )].some(node => {
+                    const b = node.getBoundingClientRect();
+                    return b.width > 0 && b.height > 0 &&
+                      a.left < b.right + 8 && a.right > b.left - 8 &&
+                      a.top < b.bottom + 8 && a.bottom > b.top - 8;
+                  });
+                  return { overlapping,
+                    suppressed: document.querySelector('[data-aria-message]').dataset.ariaSuppressed };
+                });
+                if (restored.suppressed !== String(restored.overlapping))
+                  throw new Error('Aria must restore speech visibility according to real content clearance: ' + JSON.stringify(restored));
+              }
               const interestButton = aria.getByRole('button', { name: 'Mám záujem o škôlku' });
               if ((await interestButton.getAttribute('class') || '').includes('bg-coral/15'))
                 throw new Error('Rejected special interest button highlight resurfaced');
@@ -157,6 +221,21 @@ const failures = [];
               if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
                 throw new Error('Aria floating dock overflows mobile viewport ' + width);
 
+              // Four widths receive screenshots and overlay checks. Run the
+              // full wizard/modal journey at the original 320 and 390 widths.
+              if (![320, 390].includes(width)) {
+                for (const y of [750, 1450, 2100, 2800, 3500]) {
+                  await page.evaluate(y => window.scrollTo(0, y), y);
+                  await page.waitForTimeout(110);
+                  if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') === 'false') break;
+                }
+                if (!await page.locator('[data-aria-guide][data-intro="false"]').count() ||
+                    await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
+                  throw new Error('Aria puppy prompt should be visible away from controls at ' + width);
+                if (url.pathname === '/test-aria/')
+                  await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
+                continue;
+              }
               await aria.getByRole('button', { name: 'Časté otázky' }).click();
               await aria.locator('[data-aria-panel="faq"]').waitFor({ state: 'visible' });
               const puppyQuestion = aria.getByRole('button', { name: 'Prijímate aj šteniatka?' });
@@ -326,10 +405,17 @@ const failures = [];
               if (await page.locator('section video').count()) throw new Error('Video must be omitted from preview');
 
 
-              await page.evaluate(() => window.scrollTo(0, 750));
-              await page.waitForTimeout(200);
+              for (const y of [750, 1450, 2100, 2800]) {
+                await page.evaluate(y => window.scrollTo(0, y), y);
+                await page.waitForTimeout(140);
+                if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') === 'false') break;
+              }
               if (!await page.locator('[data-aria-guide][data-intro="false"]').count())
                 throw new Error('Aria intro must yield to puppy prompt on scroll');
+              if (await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
+                throw new Error('Aria puppy speech should reappear away from important content');
+              if (url.pathname === '/test-aria/')
+                await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
               const overitRadius = await aria.getByRole('button', { name: 'Overiť', exact: true })
                 .evaluate(button => parseFloat(getComputedStyle(button).borderTopLeftRadius));
               if (overitRadius < 10 || overitRadius > 13)
