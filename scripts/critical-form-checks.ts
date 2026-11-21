@@ -325,6 +325,9 @@ assert(stagedLeadSource.includes('name="meno"') &&
   stagedLeadSource.includes('name="email"') &&
   stagedLeadSource.includes("<PhoneField"),
   "Paid and homepage enquiry must expose required contact and optional breed");
+assert(stagedLeadSource.includes('value={option.value} required={step === 1}') &&
+  !stagedLeadSource.includes('value={option.value} required aria-label'),
+  "When puppy eligibility preselects a fourth allowlisted interest, hidden native radio requirements must not block a valid contact submission");
 
 const homePuppy = readFileSync(new URL("../src/components/site/HomePuppyChecker.tsx", import.meta.url), "utf8");
 const homePage = readFileSync(new URL("../src/routes/index.tsx", import.meta.url), "utf8");
