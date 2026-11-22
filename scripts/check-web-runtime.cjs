@@ -1032,6 +1032,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const introSpace = leadHero?.querySelector('[data-aria-intro-space]');
                 const benefits = team?.querySelector('[data-hero-benefits]');
                 const inlineMenu = leadHero?.querySelector('[data-aria-hero-menu]');
+                const floatingMenu = document.querySelector('[data-aria-guide]');
                 const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                 if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
                     !headlineSpacer || !serviceGroup || !heroHeading || !heroDogs ||
@@ -1047,7 +1048,10 @@ if (!bellaris && brandPreviewCandidate) {
                   follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
                   follows(heroDogs, badge) && follows(badge, leadDescription) &&
                   follows(leadDescription, proof) &&
-                  (isPaidLead ? (follows(heroHeading, introSpace) && follows(introSpace, serviceGroup) && !!inlineMenu && follows(reviews, inlineMenu) && follows(inlineMenu, form)) : (follows(reviews, introSpace) && follows(introSpace, form))) &&
+                  (isPaidLead ? (follows(heroHeading, introSpace) && follows(introSpace, serviceGroup) &&
+                    !inlineMenu && !!floatingMenu && !leadHero.contains(floatingMenu) &&
+                    getComputedStyle(floatingMenu).position === 'fixed' && follows(reviews, form))
+                  : (follows(reviews, introSpace) && follows(introSpace, form))) &&
                   follows(form, team) &&
                   !!heading && !!photo && !!copy &&
                   follows(heading, photo) && follows(photo, benefits) && follows(benefits, copy) &&
