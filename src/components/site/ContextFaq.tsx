@@ -56,10 +56,12 @@ export function ContextFaq({
   question,
   source,
   label,
+  children,
 }: {
   question: string;
   source: string;
   label?: string;
+  children?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const answerId = useId();
@@ -86,6 +88,7 @@ export function ContextFaq({
       {open && (
         <div id={answerId} className="px-5 pb-6 text-[0.95rem] leading-relaxed text-forest/95 sm:px-6">
           <FaqAnswer question={item.q} answer={item.a} />
+          {children}
         </div>
       )}
     </div>

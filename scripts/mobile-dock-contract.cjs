@@ -102,12 +102,15 @@ assert(!css.includes("transform: scale("), "CTA must not scale on touch and shif
 const story = read("src/components/site/Story.tsx");
 const info = read("src/components/site/Info.tsx");
 const why = story.slice(story.indexOf("export function Why()"), story.indexOf("export function About("));
-const first = info.slice(info.indexOf("export function FirstVisit()"), info.indexOf("export function Pricing("));
+const first = info.slice(info.indexOf("export function FirstVisit("), info.indexOf("export function Pricing("));
 const pricing = info.slice(info.indexOf("export function Pricing("), info.indexOf("const PRIMARY_FAQ"));
 assert(why.includes("Chcem prihlásiť psíka") && why.includes('<LongForm onSent={() => setApplicationSent(true)} />') && why.includes('title={applicationSent ? "Prihláška odoslaná" : "Prihlás svojho psíka ešte dnes"}'), "Why registration CTA must open full dog application with correct success header");
 assert(!why.includes("<LeadStepForm"), "Why registration CTA must not open short inquiry");
 assert(first.includes("Dohodnúť úvodnú návštevu") && first.includes('trackingSource="home_first_visit_interest"') && !first.includes("hideInterest") && !first.includes("interestValue"), "Intro visit CTA must show the ordinary required interest options");
 assert(!first.includes("<LongForm"), "Intro visit should not present a full application");
+const reviewHomepage = read("src/routes/index.tsx");
+assert(reviewHomepage.includes('<FirstVisit inlineForm leadStyle />') && first.includes('id="prva-navsteva-form"') && first.includes('trackingSource="home_first_visit_interest"'), "Homepage first visit must expose the ordinary inline inquiry with its original tracking source");
+assert(reviewHomepage.includes('<Pricing interestMode homeLayout />') && pricing.includes('data-home-pricing-columns') && pricing.includes('grid-cols-2'), "Homepage pricing must preserve two columns including narrow phones");
 assert(info.includes('flex-nowrap items-center') && info.includes('sm:gap-2') && info.includes('Odvoz / vyzdvihnutie: 5 € / jazda'), "Taxi note must stay one-line and preserve 5 euro fare");
 assert(info.includes('!text-[clamp(10px,2.75vw,14px)] !leading-tight whitespace-nowrap'), "Homepage inquiry CTA must stay one line on narrow phones");
 assert(pricing.includes("Prihláška do škôlky") && pricing.includes("<LongForm />") && pricing.includes("<FormDialog") && pricing.includes('interestMode ? <LeadStepForm questionInHeading trackingSource="home_pricing_interest_20261028" />'), "Pricing must preserve canonical full-form mode and approved homepage short enquiry");

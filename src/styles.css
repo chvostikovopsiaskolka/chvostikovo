@@ -1312,7 +1312,11 @@
 .site-brand .bg-forest > svg { color: rgb(255 164 20 / 30%); }
 .site-brand #preco .bg-forest,
 .site-brand #preco-chvostikovo { background-color: rgb(255 164 20 / 26%); }
-.site-brand #preco-chvostikovo [class*="bg-cream/"] { background-color: #fff; }
+.site-brand #preco-chvostikovo [data-video-reasons-grid],
+.site-brand #preco-chvostikovo [data-video-reasons-copy] { background-color: #fff; }
+@media (min-width: 640px) {
+  .site-brand #preco-chvostikovo [data-video-reasons-grid] { background-color: transparent; }
+}
 .site-brand #preco-chvostikovo [class*="text-cream"] { color: #26322b; }
 .site-brand [data-aria-friendship-card],
 .site-brand #home-hero-inline-form > div { background-color: #fff; }
@@ -1320,13 +1324,22 @@
   border: 1px solid rgb(203 114 7 / 25%);
   border-radius: 1.75rem;
   padding: 1.15rem 1.4rem;
-  color: #171c18;
+  color: #fff;
   background-color: #ffa414;
   background-image: radial-gradient(ellipse at 18% 16%, rgb(255 252 224 / 72%), transparent 56%),
     linear-gradient(130deg, #ffbc4a, #ffa414 62%, #ff9c0b);
   box-shadow: 0 12px 30px -20px rgb(169 84 0 / 45%);
 }
 .site-brand .home-hero-cta { justify-content: center; max-width: 280px; }
+@media (min-width: 1024px) {
+  /* Poppins metrics for the unchanged “ktorú si váš psík” headline line. */
+  .home-hero-column { --home-heading-size: 56px; }
+  .home-hero-column > .home-hero-copy,
+  .home-hero-column > .home-hero-desktop-cta { width: min(100%, calc(var(--home-heading-size) * 7.7)); }
+}
+@media (min-width: 1280px) {
+  .home-hero-column { --home-heading-size: 62px; }
+}
 .site-brand #top #recenzie { padding-bottom: 1.5rem; }
 .site-brand .paw-trail-background .paw-ambient-print,
 .site-brand .paw-trail-background .paw-trail-print {

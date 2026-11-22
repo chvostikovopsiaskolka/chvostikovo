@@ -74,17 +74,17 @@ function Index() {
       <Header />
       <main>
         <Hero />
-        <ReviewReasons variant="home" withVideo />
+        <ReviewReasons variant="home" withVideo showCta={false} />
         <About homeLayout />
         <DaycarePhotoCarousel />
-        <Pricing interestMode />
-        <Requirements showContextFaq />
-        <InquirySection allScreens />
-        <Care showEmbeddedFriendship={false} showInterest={false} />
         <DaycareEarlyFaq />
+        <Pricing interestMode homeLayout />
+        <Requirements showContextFaq />
+        <InquirySection allScreens matchHero />
+        <Care showEmbeddedFriendship={false} showInterest={false} />
         <Gallery />
         <FriendshipInterest inlineForm />
-        <FirstVisit />
+        <FirstVisit inlineForm leadStyle />
         <Why />
         <HomePuppyChecker />
         <Faq />

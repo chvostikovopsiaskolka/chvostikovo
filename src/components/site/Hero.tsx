@@ -51,28 +51,31 @@ export function Hero() {
 
         {/* Desktop layout */}
         <div className="hidden lg:grid lg:min-h-[580px] lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
-          <div className="flex min-w-0 flex-col lg:py-2">
+          <div className="home-hero-column flex min-w-0 flex-col lg:py-2">
             <p className="order-1 mx-0 mb-3 mt-0 font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Denná starostlivosť o stredných a veľkých psíkov
             </p>
 
             <h1 className="order-2 text-[56px] leading-[1.01] tracking-[-0.035em] text-forest xl:text-[62px]">
               <span className="block">Psia škôlka v Košiciach,</span>
-              <span className="block">ktorú si váš psík</span>
+              <span data-home-hero-title-line className="block">ktorú si váš psík</span>
               <span className="block text-coral-dark">zamiluje</span>
             </h1>
 
             <div className="home-hero-copy order-3 mx-0 mt-4 max-w-xl">
-              <p className="font-display text-lg font-bold">
+              <p className="font-display text-base font-bold">
                 Váš psík už nemusí tráviť deň sám doma.
               </p>
               <p className="mt-1.5 max-w-lg text-base font-bold leading-relaxed">
-                Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným dohľadom.
+                Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov<br />pod celodenným dohľadom.
               </p>
             </div>
 
-            <div className="order-5 mt-5 flex justify-center">
-              <button type="button" onClick={() => openInterest("home_hero_interest_desktop")} className="hero-cta-primary w-full max-w-[320px]">Mám záujem</button>
+            <div className="home-hero-desktop-cta order-5 mt-5 flex justify-center">
+              <a id="home-hero-learn-more" href="#preco-chvostikovo" onClick={() => {
+                trackMarketingInteraction("hero_learn_more", "hero_desktop");
+                void trackCookielessInteraction("explore_daycare", "home_hero_desktop_20261028");
+              }} className="hero-cta-primary w-full max-w-[320px]">Chcem zistiť viac</a>
             </div>
           </div>
 
