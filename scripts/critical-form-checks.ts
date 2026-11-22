@@ -77,6 +77,22 @@ assert(ariaBackend.includes("invalid_aria_question") &&
   ariaBackend.includes("lines.push(`Otázka návštevníka: ${question}`)"),
   "Aria question must be validated on the server and delivered in operator email.");
 
+// A plain question remains a contact, NOT a paid marketing conversion,
+// even if the visitor granted GA4/Meta measurement consent.
+const ariaFormsSource = readFileSync(new URL("../src/components/site/Forms.tsx", import.meta.url), "utf8");
+const ariaAnalyticsSource = readFileSync(new URL("../src/lib/analytics.ts", import.meta.url), "utf8");
+assert(ariaAnalyticsSource.includes('pushAnalyticsEvent("aria_question_submit"') &&
+  ariaAnalyticsSource.includes('pushAnalyticsEvent("generate_lead"'),
+  "Custom Aria contact event and primary GA4 interest event must both exist.");
+assert(ariaFormsSource.includes('trackAriaQuestionSubmit(trackingSource') &&
+  ariaFormsSource.includes('if (showQuestionField)') &&
+  ariaFormsSource.includes('trackMetaFormConversion("informacie"'),
+  "An Aria question must not be counted as the normal Meta/GA4 Lead.");
+assert(ariaBackend.includes("lead_landing_aria_chat_other") &&
+  ariaBackend.includes("ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100)) return;"),
+  "Aria questions must not trigger backend Meta CAPI Lead, even with marketing consent.");
+
+
 
 // The approved puppy wizard asks only age and vaccinations; dog breed is
 // collected by the existing shared lead contact (no second dog details step).
