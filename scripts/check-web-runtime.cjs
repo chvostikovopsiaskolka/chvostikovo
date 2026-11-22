@@ -808,23 +808,47 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Interest CTA after pricing must be full-width');
                   if (await chat.getByRole('button', { name: /Odpoveď mi stačí/ }).count())
                     throw new Error('Unnecessary thank-you CTA must not reappear');
-                  if (await followup.locator('[data-aria-chat-question]').count() !== 3 ||
+                  if (await followup.locator('[data-aria-chat-question]').count() !== 5 ||
                       await followup.locator('[data-aria-chat-other-cta]').count() !== 1 ||
                       await followup.locator('[data-aria-chat-question="pricing"]').count())
-                    throw new Error('Show all three unanswered topics and orange Other tile directly after pricing');
+                    throw new Error('Show all five unanswered topics and orange Other tile directly after pricing');
 
                   await followup.locator('[data-aria-chat-question="requirements"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
-                  if (await chat.locator('[data-aria-chat-followup] [data-aria-chat-question]').count() !== 2)
+                  if (await chat.locator('[data-aria-chat-followup] [data-aria-chat-question]').count() !== 4)
                     throw new Error('After two replies the remaining topics must be offered directly');
                   await chat.locator('[data-aria-chat-followup] [data-aria-chat-other-cta]').click();
-                  await chat.locator('[data-aria-chat-other] textarea').fill('Môj psík má špeciálne potreby?');
-                  const email = chat.getByRole('link', { name: /Otvoriť e-mail/ });
-                  if (!(await email.getAttribute('href') || '').startsWith('mailto:chvostikovo.psiaskolka@gmail.com?'))
-                    throw new Error('Until admin inbox integration, the existing custom-question fallback must not fake delivery');
+                  const questionForm = chat.locator('[data-aria-chat-other]');
+                  await questionForm.waitFor({ state: 'visible' });
+                  if (!await questionForm.locator('textarea[name="otazka"]').count() ||
+                      await questionForm.locator('a[href^="mailto:"]').count() ||
+                      !await questionForm.getByLabel('E-mail *').count())
+                    throw new Error('Other question must use a consented form and not a mailto link');
+                  let askedPayload = null;
+                  await page.route('**/functions/v1/web-form-submit', async route => {
+                    if (route.request().method() === 'OPTIONS') {
+                      await route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type' } });
+                      return;
+                    }
+                    askedPayload = route.request().postDataJSON();
+                    await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true }) });
+                  });
+                  await questionForm.locator('input[name="meno"]').fill('Test Otázka');
+                  await questionForm.locator('input[name="telefon"]').fill('+421901234567');
+                  await questionForm.locator('input[name="email"]').fill('test@example.invalid');
+                  await questionForm.locator('textarea[name="otazka"]').fill('Môj psík má špeciálne potreby?');
+                  if (askedPayload) throw new Error('Question must not send before explicit consent');
+                  await questionForm.locator('input[type="checkbox"]').check();
+                  await questionForm.getByRole('button', { name: 'Odoslať otázku' }).click();
+                  await questionForm.getByText('Ďakujeme za otázku.').waitFor({ state: 'visible' });
+                  if (!askedPayload || askedPayload.interest_reason !== 'Chcem sa informovať o škôlke' ||
+                      askedPayload.raw_payload?.['Otázka návštevníka'] !== 'Môj psík má špeciálne potreby?' ||
+                      askedPayload.cta_source !== 'aria_preview_chat_other')
+                    throw new Error('Other question must submit inside an existing consented lead payload');
+                  await page.unroute('**/functions/v1/web-form-submit');
                   await chat.getByRole('button', { name: 'Späť k otázkam' }).click();
                   // APP-01: an embedded puppy checker must remain available.
-                  if (await chat.locator('[data-aria-chat-questions] [data-aria-chat-question]').count() !== 2 ||
+                  if (await chat.locator('[data-aria-chat-questions] [data-aria-chat-question]').count() !== 4 ||
                       await chat.locator('[data-aria-chat-puppy-cta]').count() !== 1)
                     throw new Error('Puppy option must remain available after FAQ replies');
                   await chat.locator('[data-aria-chat-puppy-cta]').click();
@@ -881,54 +905,35 @@ if (!bellaris && brandPreviewCandidate) {
                   await puppyContact.getByRole('button', { name: 'Späť ku kontrole' }).click();
                   await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
                   await chat.locator('[data-aria-chat-puppy-check]').getByRole('button', { name: 'Späť k otázkam' }).click();
-                  await chat.getByRole('button', { name: 'Mám záujem o škôlku' }).click();
-
+                  await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="location"]').click();
+                  await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
+                  await chat.locator('[data-aria-chat-followup] [data-aria-chat-interest-cta]').click();
                   const interest = chat.locator('[data-aria-chat-interest]');
-                  const fieldNames = await interest.locator('form input:not([type="checkbox"])').evaluateAll(inputs =>
-                    inputs.map(input => input.getAttribute('name')).filter(Boolean));
-                  const ownerIndex = fieldNames.indexOf('meno');
-                  const breedIndex = fieldNames.indexOf('plemeno');
-                  const dogIndex = fieldNames.indexOf('pes_meno');
-                  if (ownerIndex < 0 || !(ownerIndex < breedIndex && breedIndex < dogIndex) ||
-                      !fieldNames.includes('telefon') || !fieldNames.includes('email') ||
-                      !await interest.getByLabel('Plemeno psíka (nepovinné)').count() ||
-                      !await interest.getByLabel('Meno psíka (nepovinné)').count())
-                    throw new Error('Chat contact must collect owner, optional breed/name, phone and email in order: ' + fieldNames);
-                  if (await interest.getByText('Kým sa vám ozveme, môžete si pozrieť podmienky').count())
-                    throw new Error('Chat should not append redundant price/conditions links');
-
+                  await interest.locator('[data-lead-step-form]').waitFor({ state: 'visible' });
+                  if (await interest.locator('input[name="zaujem"]').count() !== 3 ||
+                      !await interest.getByText('Krok 1 z 2').count())
+                    throw new Error('Interest must reuse the two-step lead form');
+                  await interest.locator('input[name="zaujem"]').nth(1).check({ force: true });
+                  await interest.getByRole('button', { name: 'Pokračovať' }).click();
+                  await interest.getByText('Krok 2 z 2').waitFor({ state: 'visible' });
                   await interest.locator('input[name="meno"]').fill('Test Aria');
-                  await interest.locator('input[name="plemeno"]').fill('Labrador');
-                  await interest.locator('input[name="pes_meno"]').fill('Bella');
                   await interest.locator('input[name="telefon"]').fill('+421901234567');
                   await interest.locator('input[name="email"]').fill('test@example.invalid');
                   await interest.locator('input[type="checkbox"]').check();
                   let posted = null;
                   await page.route('**/functions/v1/web-form-submit', async route => {
-                    const request = route.request();
-                    const cors = {
-                      'access-control-allow-origin': '*',
-                      'access-control-allow-methods': 'POST, OPTIONS',
-                      'access-control-allow-headers': 'content-type',
-                    };
-                    if (request.method() === 'OPTIONS') {
-                      await route.fulfill({ status: 204, headers: cors });
+                    if (route.request().method() === 'OPTIONS') {
+                      await route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type' } });
                       return;
                     }
-                    posted = request.postDataJSON();
-                    await route.fulfill({
-                      status: 200, contentType: 'application/json', headers: cors,
-                      body: JSON.stringify({ ok: true }),
-                    });
+                    posted = route.request().postDataJSON();
+                    await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true }) });
                   });
                   await interest.getByRole('button', { name: 'Odoslať záujem' }).click();
-                  await interest.locator('[data-aria-chat-contact-success="true"]').waitFor({ state: 'visible', timeout: 5000 });
-                  if (!posted || !String(posted.interest_reason || '').includes('Bella') ||
-                      posted.dog_breed !== 'Labrador' ||
-                      !await interest.getByText(/Príde vám SMS potvrdenie/).count() ||
-                      await interest.getByText(/Pozrieť cenník/).count() ||
-                      await interest.getByText(/Pozrieť podmienky/).count())
-                    throw new Error('Chat interest must reuse consented API, retain optional dog details and show SMS receipt without links');
+                  await interest.locator('[data-lead-step-success]').waitFor({ state: 'visible' });
+                  if (!posted || posted.interest_reason !== 'Mám záujem využívať škôlku pravidelne' ||
+                      posted.cta_source !== 'aria_preview_chat_interest')
+                    throw new Error('Two-step lead form must preserve selection and attribution');
                   await page.unroute('**/functions/v1/web-form-submit');
 
                   await chat.getByRole('button', { name: 'Close' }).click();
