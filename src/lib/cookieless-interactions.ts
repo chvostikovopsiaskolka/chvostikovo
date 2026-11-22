@@ -177,13 +177,18 @@ export async function trackCookielessInteraction(
     "/en/dog-daycare-kosice",
     "/en/dog-daycare-kosice/",
   ]);
-  if (!trackedPaths.has(url.pathname)) return;
+  // Preview chatbot events are measured in the existing interaction log under
+  // /test-aria/, but preview pageviews are NOT inserted into the production
+  // landing funnel. No typed questions or contact details are sent here.
+  const previewChatOnly = ["/test-aria", "/test-aria/"].includes(url.pathname);
+  if (previewChatOnly && (!eventSource.startsWith("aria_preview_v3_chat_") || eventName !== "explore_daycare")) return;
+  if (!previewChatOnly && !trackedPaths.has(url.pathname)) return;
 
   const params = url.searchParams;
   const fbclid = params.get("fbclid") || "";
   const landingMetaClickHash = fbclid ? await sha256Hex(fbclid) : "";
-  // Landing recovery must never delay a form submit or analytics event.
-  void ensureLandingRecorded(url, landingMetaClickHash, language).catch(() => {});
+  // Skip landing recovery on the non-indexable, isolated Aria design preview.
+  if (!previewChatOnly) void ensureLandingRecorded(url, landingMetaClickHash, language).catch(() => {});
 
   const metaClickHash = !attemptId ? landingMetaClickHash : "";
   const source = eventSource.slice(0, 200);

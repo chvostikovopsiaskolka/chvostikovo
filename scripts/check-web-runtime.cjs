@@ -546,7 +546,10 @@ if (!bellaris && brandPreviewCandidate) {
               }));
               if (welcome.fontSize < 10.5 || welcome.overflows)
                 throw new Error('Aria greeting must remain readable without clipping at ' + width);
-              if (!await aria.getByText('Zisti viac z našej ponuky nižšie.').count())
+              const guidance = url.pathname === '/test-aria/'
+                ? 'Klikni na mňa a otvorím chat.'
+                : 'Zisti viac z našej ponuky nižšie.';
+              if (!await aria.getByText(guidance).count())
                 throw new Error('Aria introduction must show the offer guidance at ' + width);
               if (url.pathname === '/test-aria/' &&
                   await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
@@ -574,6 +577,51 @@ if (!bellaris && brandPreviewCandidate) {
                 speechBox.y + tip.y > headBox.y + 4 &&
                 speechBox.y + tip.y < headBox.y + headBox.height - 4;
               if (!tipOnHead) throw new Error('One-piece speech tail must terminate at Aria portrait at ' + width);
+
+              if (url.pathname === '/test-aria/') {
+                const trigger = aria.locator('[data-aria-chat-trigger]');
+                if (!await trigger.isVisible()) throw new Error('Preview must make the Aria portrait a real chat control');
+                const triggerBox = await trigger.boundingBox();
+                const dockBox = await aria.locator('[data-aria-dock]').boundingBox();
+                if (!triggerBox || !dockBox || triggerBox.x < dockBox.x + dockBox.width - 8 ||
+                    triggerBox.x + triggerBox.width > width + 4)
+                  throw new Error('Aria chat portrait must be on the right side of the dock at ' + width);
+                if (width === 390) {
+                  await trigger.click();
+                  const chat = page.locator('[data-aria-chat]');
+                  await chat.waitFor({ state: 'visible' });
+                  if (await chat.locator('[data-aria-chat-questions] button').count() !== 6)
+                    throw new Error('Guided Aria must offer six FAQ choices');
+                  const chatWindow = await chat.boundingBox();
+                  if (!chatWindow || chatWindow.x < -1 || chatWindow.x + chatWindow.width > width + 1)
+                    throw new Error('Guided chat must fit mobile viewport');
+                  await chat.locator('[data-aria-chat-question="pricing"]').click();
+                  if (await chat.locator('[data-aria-chat-turn="person"]').count() !== 1 ||
+                      await chat.locator('[data-aria-chat-turn="aria"]').count() !== 1 ||
+                      !await chat.getByText(/Jednorazový celodenný vstup stojí 25 €./).count() ||
+                      !await chat.getByText(/permanentka za 200 €/).count())
+                    throw new Error('Aria did not answer pricing in real chat bubbles');
+                  await chat.getByRole('button', { name: 'Iná otázka' }).click();
+                  await chat.locator('[data-aria-chat-other] textarea').fill('Môj psík má špeciálne potreby?');
+                  const email = chat.getByRole('link', { name: /Otvoriť e-mail/ });
+                  if (!(await email.getAttribute('href') || '').startsWith('mailto:chvostikovo.psiaskolka@gmail.com?'))
+                    throw new Error('Unscripted question must offer a real mailto, not a fake sent message');
+                  await chat.getByRole('button', { name: 'Späť k otázkam' }).click();
+                  await chat.getByRole('button', { name: /Mám záujem/ }).click();
+                  if (!await chat.locator('[data-aria-chat-interest] input[name="meno"]').count() ||
+                      !await chat.locator('[data-aria-chat-interest] input[name="telefon"]').count() ||
+                      !await chat.getByText(/skutočne odošle nezáväzný záujem/).count())
+                    throw new Error('Chat interest must reuse functional consented contact form');
+                  await chat.getByRole('button', { name: 'Close' }).click();
+                  await chat.waitFor({ state: 'hidden' });
+                  if (await page.locator('html').evaluate(el => getComputedStyle(el).overflow === 'hidden'))
+                    throw new Error('Chat left the page scroll locked');
+                  await aria.getByRole('button', { name: 'Otvoriť chat s Ariou' }).click();
+                  await chat.waitFor({ state: 'visible' });
+                  await chat.getByRole('button', { name: 'Close' }).click();
+                  await chat.waitFor({ state: 'hidden' });
+                }
+              }
 
               if (url.pathname === '/test-aria/') {
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-welcome.png') });

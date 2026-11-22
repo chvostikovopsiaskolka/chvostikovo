@@ -31,11 +31,13 @@ export function ShortForm({
   onSent,
   trackingSource,
   hideInterest = false,
+  showChatDogFields = false,
   interestValue = "Informačný formulár – záujem o psiu škôlku",
 }: {
   onSent?: () => void;
   trackingSource?: string;
   hideInterest?: boolean;
+  showChatDogFields?: boolean;
   interestValue?: string;
 }) {
   const formId = useId();
@@ -69,6 +71,8 @@ export function ShortForm({
       const source_ref = sourceRef();
       const attribution = attributionPayload();
       const submittedPhone = phoneFromForm(form, `s-${formId}-tel`);
+      const dogName = showChatDogFields ? String(fd.get("pes_meno") || "").trim() : "";
+      const breed = showChatDogFields ? String(fd.get("plemeno") || "").trim() : "";
       const submission = await submitInquiry({
         typ: "informacie",
         consent: true,
@@ -78,7 +82,8 @@ export function ShortForm({
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: submittedPhone,
         email: String(fd.get("email") ?? "").trim() || undefined,
-        zaujem: hideInterest ? interestValue : String(fd.get("zaujem") ?? ""),
+        zaujem: hideInterest ? interestValue + (dogName ? " – Meno psíka: " + dogName : "") : String(fd.get("zaujem") ?? ""),
+        ...(breed ? { plemeno: breed } : {}),
       }, attemptId);
       void trackCookielessInteraction("form_submit", trackingSource || "informational_form", "sk", attemptId);
       runFormTelemetry(() => {
@@ -107,7 +112,7 @@ export function ShortForm({
 
   if (sent) {
     return (
-      <div className="flex min-h-75 flex-col items-center justify-center gap-3 text-center">
+      <div data-aria-chat-contact-success={showChatDogFields ? "true" : undefined} className="flex min-h-75 flex-col items-center justify-center gap-3 text-center">
         <div className="flex size-14 items-center justify-center rounded-full bg-secondary text-forest">
           <Check className="size-7" />
         </div>
@@ -116,7 +121,7 @@ export function ShortForm({
           Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu.
         </p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
-        {isTrackedLanding && (
+        {isTrackedLanding && !showChatDogFields && (
           <div className="mt-2 w-full max-w-sm rounded-2xl bg-secondary/55 p-4">
             <p className="text-sm leading-relaxed text-forest/75">
               Kým sa vám ozveme, môžete si pozrieť podmienky prijatia psíka alebo náš cenník.
@@ -151,6 +156,20 @@ export function ShortForm({
         </label>
         <input id={`s-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
       </div>
+      {showChatDogFields && (
+        <>
+          <div>
+            <label className="label-sm" htmlFor={`s-${formId}-plemeno`}>Plemeno psíka (nepovinné)</label>
+            <input id={`s-${formId}-plemeno`} name="plemeno" type="text" maxLength={80}
+              className="field" autoComplete="off" placeholder="Napr. labrador" />
+          </div>
+          <div>
+            <label className="label-sm" htmlFor={`s-${formId}-pes_meno`}>Meno psíka (nepovinné)</label>
+            <input id={`s-${formId}-pes_meno`} name="pes_meno" type="text" maxLength={70}
+              className="field" autoComplete="off" placeholder="Napr. Bella" />
+          </div>
+        </>
+      )}
       <PhoneField id={`s-${formId}-tel`} name="telefon" />
       <div>
         <label className="label-sm" htmlFor={`s-${formId}-email`}>E-mail (nepovinné)</label>
@@ -185,7 +204,7 @@ export function ShortForm({
         disabled={loading}
         className="btn-coral w-full px-4 py-2.5 text-sm disabled:opacity-60"
       >
-        {loading ? "Odosielam…" : "Chcem sa informovať"}
+        {loading ? "Odosielam…" : showChatDogFields ? "Odoslať záujem" : "Chcem sa informovať"}
       </button>
     </form>
   );
