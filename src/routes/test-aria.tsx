@@ -203,7 +203,7 @@ export function AriaPreviewPage() {
               </p>
             </div>
           </div>
-            <div className={isLiveLead ? "mt-2 sm:mt-4 lg:mt-2" : "mt-0 sm:mt-2 lg:mt-2"}>
+            <div className={isLiveLead ? "mt-3 sm:mt-4 lg:mt-2" : "mt-0 sm:mt-2 lg:mt-2"}>
               <Reviews variant="hero" />
             </div>
           </div>
