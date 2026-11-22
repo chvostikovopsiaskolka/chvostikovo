@@ -354,7 +354,24 @@ export function AriaLeadAssistant({
     `C ${tipX + 12} ${tipY - 13} 2 ${sh - 11} 1 ${sh - 19}`,
     `L 1 16 Q 1 1 16 1 Z`,
   ].join(" ");
-  const speechPath = guidedChatPreview ? stablePreviewSpeechPath : rightAlignedBubble ? rightSpeechPath : leftSpeechPath;
+  // Paid navigation keeps Aria on the left. The tip is still measured against
+  // her portrait, but the balloon joins it through two shallow side curves;
+  // neither the top nor the rounded bottom is interrupted.
+  const paidLeftBaseTop = Math.max(16, Math.min(sh - 38, Math.round(sh * 0.26)));
+  const paidLeftBaseBottom = paidLeftBaseTop + 22;
+  const paidLeftSpeechPath = [
+    "M 16 1",
+    `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
+    `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
+    `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
+    `L 1 ${paidLeftBaseBottom}`,
+    `C -5 ${paidLeftBaseBottom} ${tipX + 10} ${tipY + 9} ${tipX} ${tipY}`,
+    `C ${tipX + 10} ${tipY - 9} -5 ${paidLeftBaseTop} 1 ${paidLeftBaseTop}`,
+    "L 1 16 Q 1 1 16 1 Z",
+  ].join(" ");
+  const speechPath = guidedChatPreview ? stablePreviewSpeechPath :
+    sectionNavigation && !portraitOnRight ? paidLeftSpeechPath :
+    rightAlignedBubble ? rightSpeechPath : leftSpeechPath;
 
   if (hidden) return null;
 
@@ -501,13 +518,13 @@ export function AriaLeadAssistant({
 
         {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
-            className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
+            className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : sectionNavigation ? "pointer-events-none mb-3 flex w-full justify-start pl-[78px] sm:pl-[112px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech data-aria-outline-ready={outlineReady}
               className={"relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]" +
                 (outlineReady ? "" : " rounded-[16px] bg-card ring-2 ring-forest/70")}>
               {outlineReady && <svg aria-hidden="true" data-aria-tail data-tip-x={guidedChatPreview ? previewTipX : tipX} data-tip-y={guidedChatPreview ? previewTipY : tipY}
-                data-tail-base-top={rightAlignedBubble ? (guidedChatPreview ? previewBaseTop : tailTopY) : undefined}
-                data-tail-base-bottom={rightAlignedBubble ? (guidedChatPreview ? previewBaseBottom : tailBottomY) : undefined}
+                data-tail-base-top={guidedChatPreview ? previewBaseTop : sectionNavigation && !portraitOnRight ? paidLeftBaseTop : rightAlignedBubble ? tailTopY : undefined}
+                data-tail-base-bottom={guidedChatPreview ? previewBaseBottom : sectionNavigation && !portraitOnRight ? paidLeftBaseBottom : rightAlignedBubble ? tailBottomY : undefined}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
                 <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
@@ -557,7 +574,7 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className={"pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (rightAlignedBubble ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
+        <div className={"pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (rightAlignedBubble || sectionNavigation ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           {guidedChatPreview ? (
             <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
@@ -568,7 +585,7 @@ export function AriaLeadAssistant({
             </button>
           ) : (
             <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
-              className={portraitOnRight ? "pointer-events-none absolute bottom-[calc(100%+12px)] right-1 h-[92px] w-[92px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:right-0 sm:h-[104px] sm:w-[104px]" : "pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]"} />
+              className={portraitOnRight ? "pointer-events-none absolute bottom-[calc(100%+12px)] right-1 h-[92px] w-[92px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:right-0 sm:h-[104px] sm:w-[104px]" : sectionNavigation ? "pointer-events-none absolute bottom-[calc(100%+12px)] left-1 h-[92px] w-[92px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:left-0 sm:h-[104px] sm:w-[104px]" : "pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]"} />
           )}
           <div data-aria-section-navigation={sectionNavigation || undefined} className="flex h-[52px] items-center gap-0.5">
             {sectionNavigation ? (
