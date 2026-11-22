@@ -40,7 +40,9 @@ async function submitInquiryCore(input: InquiryInput, attemptId?: string) {
   const data = parsed.data;
   let marketingConsent = false;
   try {
-    marketingConsent = hasMarketingConsent();
+    // Public /test-aria is QA: accept real form transport but never
+    // send preview enquiries to Meta CAPI as paid Leads.
+    marketingConsent = !(/^\/test-aria\/?$/.test(window.location.pathname)) && hasMarketingConsent();
   } catch {
     // Storage may be unavailable in private/restricted browsers.
   }
