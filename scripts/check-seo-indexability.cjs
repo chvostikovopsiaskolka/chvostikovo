@@ -27,8 +27,8 @@ assert(homeHtml.includes("možnosť vyzdvihnutia a úvodná návšteva zadarmo")
 const faqAnchorIndex = homeHtml.indexOf('id="faq"');
 const productsAnchorIndex = homeHtml.indexOf('id="produkty"');
 const aboutAnchorIndex = homeHtml.indexOf('id="o-nas"');
-assert(faqAnchorIndex >= 0 && productsAnchorIndex > faqAnchorIndex && aboutAnchorIndex > productsAnchorIndex,
-  "Homepage product section must follow FAQ and precede About");
+assert(aboutAnchorIndex >= 0 && faqAnchorIndex > aboutAnchorIndex && productsAnchorIndex > faqAnchorIndex,
+  "Homepage About must precede FAQ, with products directly after FAQ");
 assert(homeHtml.match(/id="produkty"/g)?.length === 1, "Homepage must not duplicate product section");
 assert(homeHtml.includes("Ručne vyrábané pre vašich psíkov") && homeHtml.includes(">Naše produkty</h2>"),
   "Homepage product heading or eyebrow missing from prerender");
@@ -38,7 +38,7 @@ assert(homeHtml.includes('href="/stojan-na-misky-pre-psa"') &&
 assert(homeHtml.includes('href="/produkty"'), "Products listing must be linked from the homepage");
 assert(homeHtml.includes("stand-mia-"), "Homepage product teaser must use restored original stand photo");
 assert(homeHtml.includes("Dve nerezové misky, výška podľa psíka a prevedenie s personalizáciou podľa vášho želania."), "Informative homepage stand description missing");
-console.log("[seo] PASS: homepage FAQ → products → About order and product links");
+console.log("[seo] PASS: homepage About → FAQ → products order and product links");
 assert(homeHtml.includes("utm_source=chvostikovo"), "Bellaris credit missing UTM source");
 assert(homeHtml.includes("utm_medium=referral"), "Bellaris credit missing UTM medium");
 assert(homeHtml.includes("utm_campaign=footer_credit"), "Bellaris credit missing UTM campaign");
@@ -283,4 +283,5 @@ assert(blogIndex.includes("stojan-na-misky-pre-psa-vyhody-a-vyber/"), "Stand gui
 assert(blogIndex.includes("stand-mia-"), "Stand blog teaser must use restored original MIA AVIF");
 assert(blogIndex.includes("target-na-cvicenie-psov-prve-cviky/"), "Target guide missing from blog index");
 console.log("[seo] PASS: product sitemap + canonical + original photos + reciprocal guides + prerendered blog articles");
+
 
