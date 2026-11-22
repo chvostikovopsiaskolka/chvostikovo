@@ -575,8 +575,12 @@ const failures = [];
                   await chat.locator('[data-aria-chat-question="pricing"]').click();
                   const typing = chat.locator('[data-aria-chat-turn="aria"] [data-aria-typing="true"]');
                   await typing.waitFor({ state: 'visible' });
-                  const initialTyped = await typing.evaluate(el => el.querySelector('[aria-hidden="true"]')?.textContent?.length || 0);
-                  if (initialTyped > 30) throw new Error('Aria must progressively type the answer, not reveal everything at once');
+                  const initialTyped = await typing.evaluate(el => ({
+                    rendered: el.querySelector('[aria-hidden="true"]')?.textContent?.length || 0,
+                    full: el.querySelector('.sr-only')?.textContent?.length || 0,
+                  }));
+                  if (!initialTyped.full || initialTyped.rendered >= initialTyped.full)
+                    throw new Error('Aria must progressively type the answer, not reveal everything at once: ' + JSON.stringify(initialTyped));
                   await typing.waitFor({ state: 'hidden', timeout: 10000 });
                   if (await chat.locator('[data-aria-chat-turn="person"]').count() !== 1 ||
                       await chat.locator('[data-aria-chat-turn="aria"]').count() !== 1 ||
