@@ -293,7 +293,8 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId }: { open: boo
             );
           })}
 
-          {mode === "questions" && showChoices && typingId === null && unanswered.length > 0 && (
+          {mode === "questions" && showChoices && typingId === null && unanswered.length > 0 &&
+            !(initialQuestionId === "pricing" && !autoPricingAsked.current && !answered.includes("pricing")) && (
             <div className="pl-11">
               {messages.length > 0 && <p className="mb-2 text-xs font-bold text-[#26322b]">Čo ťa ešte zaujíma?</p>}
               <div data-aria-chat-questions className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
