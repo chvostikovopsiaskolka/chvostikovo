@@ -514,7 +514,7 @@ export function AriaPreviewPage() {
               <h2 id="lead-section-menu-title" className="section-title text-center text-2xl">Prejsť na sekciu</h2>
               <nav aria-label="Sekcie stránky Chvostíkovo" className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {[
-                  ["O nás", "aria-about"], ["Fotografie", "aria-mosaic"],
+                  ["O nás", "aria-about"], ["Fotografie", "lead-photo-carousel"],
                   ["Cenník", "lead-pricing"], ["Podmienky", "lead-requirements"],
                   ["Prečo Chvostíkovo", "lead-benefits"], ["FAQ", "lead-faq"],
                   ["Šteniatka", "aria-puppy-check"], ["Prvá návšteva", "lead-first-visit"],
