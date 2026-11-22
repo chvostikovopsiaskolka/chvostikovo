@@ -177,7 +177,7 @@ export function ShortForm({
           </div>
         </>
       )}
-      <PhoneField id={`s-${formId}-tel`} name="telefon" />
+      {!showQuestionField && <PhoneField id={`s-${formId}-tel`} name="telefon" />}
       <div>
         <label className="label-sm" htmlFor={`s-${formId}-email`}>{showQuestionField ? "E-mail *" : "E-mail (nepovinné)"}</label>
         <input id={`s-${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} className="field" placeholder="vas@email.sk" required={showQuestionField} />
@@ -204,6 +204,7 @@ export function ShortForm({
           </div>
         </fieldset>
       )}
+      {showQuestionField && <PhoneField id={`s-${formId}-tel`} name="telefon" />}
       {showQuestionField && (
         <div data-aria-other-question-field>
           <label className="label-sm" htmlFor={`s-${formId}-otazka`}>Vaša otázka *</label>
