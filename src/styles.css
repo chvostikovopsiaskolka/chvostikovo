@@ -1180,8 +1180,10 @@
    On mobile keep the compact first-fold sizing and the fixed dock intact. */
 @media (min-width: 1024px) {
   .lead-brand-live [data-aria-speech] {
-    width: min(470px, calc(100% - 220px));
-    max-width: min(470px, calc(100% - 220px));
+    /* The flex parent already allocates the left 215px gutter.
+       Subtracting it again collapsed the desktop speech to 255px. */
+    width: min(470px, 100%);
+    max-width: min(470px, 100%);
     min-height: 78px;
     padding: 14px 20px;
   }
