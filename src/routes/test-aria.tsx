@@ -227,7 +227,7 @@ export function AriaPreviewPage() {
           )}
           {isLiveLead && (
             <div data-aria-hero-menu className="relative z-20 mx-auto mt-5 w-full max-w-[690px] pb-3 sm:mt-7 sm:pb-5">
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} inlineDock hidden={leadModalOpen || puppyModalOpen} />
             </div>
           )}
         </section>
