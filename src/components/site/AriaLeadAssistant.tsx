@@ -505,7 +505,7 @@ export function AriaLeadAssistant({
                   <strong className="min-w-0 font-display text-[11px] font-semibold leading-tight text-forest">
                     Chcete sa informovať? <span className="text-coral-dark">Vyplňte nezáväzný formulár.</span>
                   </strong>
-                  <button type="button" onClick={openInfo}
+                  <button type="button" onClick={() => guidedChatPreview ? jump("aria-first-visit-form", "bubble_contact_scroll") : openInfo()}
                     className="pointer-events-auto ml-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Vyplniť
                   </button>
