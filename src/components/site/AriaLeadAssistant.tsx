@@ -101,7 +101,10 @@ export function AriaLeadAssistant({
 
   const speechRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLImageElement>(null);
-  const [speechGeometry, setSpeechGeometry] = useState({ width: 280, height: 42, tipX: -42, tipY: 68 });
+  // Avoid fake SVG tail coordinates in SSR and before the first measurement.
+  const [speechGeometry, setSpeechGeometry] = useState<{
+    width: number; height: number; tipX: number; tipY: number;
+  } | null>(null);
 
   // One path owns both the speech balloon and its tail. The tip follows
   // the portrait itself rather than nominal dock padding.
@@ -120,7 +123,7 @@ export function AriaLeadAssistant({
         tipY: Math.round(head.top + head.height * (rightAlignedBubble ? 0.65 : 0.43) - bubble.top),
       };
       setSpeechGeometry(prev =>
-        Object.keys(next).every(key => prev[key as keyof typeof prev] === next[key as keyof typeof next]) ? prev : next);
+        prev && Object.keys(next).every(key => prev[key as keyof typeof next] === next[key as keyof typeof next]) ? prev : next);
     };
     const requestMeasure = () => {
       if (!frame) frame = window.requestAnimationFrame(measure);
@@ -291,7 +294,9 @@ export function AriaLeadAssistant({
     if (questionId) void trackCookielessInteraction("explore_daycare", trackingPrefix + "_chat_bubble_" + questionId, "sk");
   }
 
-  const { width: sw, height: sh, tipX, tipY } = speechGeometry;
+  const outlineReady = speechGeometry !== null;
+  const { width: sw, height: sh, tipX, tipY } =
+    speechGeometry ?? { width: 0, height: 0, tipX: 0, tipY: 0 };
   // The preview portrait stays ABOVE the centered floating menu.
   // Keep the balloon's full rounded bottom border. Its right edge opens into
   // a short pair of Bezier curves: broad at the balloon, tapering to Aria's face.
@@ -466,15 +471,17 @@ export function AriaLeadAssistant({
         {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
             className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
-            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]">
-              <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
+            <div ref={speechRef} data-aria-speech data-aria-outline-ready={outlineReady}
+              className={"relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]" +
+                (outlineReady ? "" : " rounded-[16px] bg-card ring-2 ring-forest/70")}>
+              {outlineReady && <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 data-tail-base-top={rightAlignedBubble ? tailTopY : undefined}
                 data-tail-base-bottom={rightAlignedBubble ? tailBottomY : undefined}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
                 <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-              </svg>
+              </svg>}
               {stage === "intro" ? (
                 guidedChatPreview ? (
                   <div className="pointer-events-auto relative z-10 min-w-0">
