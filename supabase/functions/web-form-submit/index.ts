@@ -97,7 +97,10 @@ async function sendMetaConversion(
 ) {
   // A free-text contact question is not a conversion-optimized daycare Lead.
   // Keep the normal operator mail/CRM record, but do not send Meta CAPI Lead.
-  if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100)) ||\n      /^\\/test-aria\\/?$/.test(text(input.source_ref, 500)) ||\n      text(input.cta_source, 100).startsWith('aria_preview_')) return;
+  if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100)) ||
+      text(input.source_ref, 500) === '/test-aria/' ||
+      text(input.source_ref, 500) === '/test-aria' ||
+      text(input.cta_source, 100).startsWith('aria_preview_')) return;
   if (input.marketing_consent !== true) return;
 
   const accessToken = Deno.env.get('META_CAPI_ACCESS_TOKEN');
