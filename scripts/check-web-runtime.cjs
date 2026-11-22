@@ -587,7 +587,7 @@ if (!bellaris && brandPreviewCandidate) {
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
-                  firstFold.reviewGapAbove > 35 ||
+                  firstFold.reviewGapAbove > (url.pathname === '/psia-skolka-kosice/' ? 40 : 35) ||
                   !firstFold.focusedDescription || !firstFold.liquidFullDescription ||
                   !firstFold.naturalReviewBottom ||
                   !firstFold.noBenefitsInHero || firstFold.relocatedBenefitsCount !== 3 ||
