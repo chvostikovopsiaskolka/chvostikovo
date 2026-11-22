@@ -16,13 +16,13 @@ class AriaChatBoundary extends Component<
   { open: boolean; onClose: () => void; children: ReactNode },
   { failed: boolean }
 > {
-  state = { failed: false };
+  override state = { failed: false };
 
   static getDerivedStateFromError() {
     return { failed: true };
   }
 
-  render() {
+  override render() {
     if (this.state.failed) {
       if (!this.props.open) return null;
       return (
