@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { ChvostikovoPaw } from "./ChvostikovoPaw";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
-import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
+import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "./AriaPreviewText";
 import { ADDRESS, FAQ, PHONE, PHONE_PRETTY, PRICING } from "@/content/site";
 import { ShortForm } from "./Forms";
 import { LeadStepForm } from "./LeadStepForm";
@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 type ChatMode = "questions" | "interest" | "other" | "puppy" | "puppy_contact";
-type ChatMessage = { id: number; side: "person" | "aria"; text: string };
+type ChatMessage = { id: number; side: "person" | "aria"; text: string; questionId?: string };
 type Question = { id: string; title: string; answer: string };
 
 const findAnswer = (question: string) => FAQ.find((item) => item.q === question)?.a || "";
@@ -31,8 +31,7 @@ const chatQuestions: Question[] = [
   {
     id: "requirements",
     title: "Aké sú podmienky prijatia?",
-    answer: DAYCARE_ELIGIBILITY_ANSWER +
-      "\nKaždý nový psík absolvuje aj bezplatnú úvodnú návštevu. Vhodnosť do kolektívu posudzujeme individuálne.",
+    answer: "Haf! 🐾 Toto sú naše hlavné podmienky prijatia. Každého nového psíka spoznáme aj počas bezplatnej úvodnej návštevy:",
   },
   {
     id: "location",
@@ -53,6 +52,11 @@ const chatQuestions: Question[] = [
     id: "first_visit",
     title: "Ako prebieha prvá návšteva?",
     answer: firstVisit + "\nÚvodná návšteva je zadarmo. Ak psík potrebuje viac času, adaptáciu prispôsobíme jeho tempu.",
+  },
+  {
+    id: "puppy",
+    title: "Prijímate aj šteniatka?",
+    answer: "Haf! 🐾 Áno, prijímame aj očkované šteniatka približne od 4 mesiacov. Záleží na veku, očkovaniach a pripravenosti na kolektív. Poďme si orientačne overiť, či tvoje šteniatko spĺňa základné podmienky. Konečné rozhodnutie urobíme po úvodnej návšteve.",
   },
 ];
 
@@ -164,7 +168,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     setTypedLength(0);
     setMessages(current => [...current,
       { id, side: "person", text: question.title },
-      { id: id + 1, side: "aria", text: question.answer },
+      { id: id + 1, side: "aria", text: question.answer, questionId: question.id },
     ]);
     setTypingId(id + 1);
   }
@@ -197,8 +201,10 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   }
 
   function showPuppy() {
+    track("question_puppy");
     track("puppy_check_open");
     setEngaged(true);
+    setAnswered(current => current.includes("puppy") ? current : [...current, "puppy"]);
     setShowChoices(false);
     setMode("puppy");
     setPuppyCheck(null);
@@ -206,7 +212,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     nextId.current += 2;
     setMessages(current => [...current,
       { id, side: "person", text: "Mám šteniatko. Spĺňa podmienky škôlky?" },
-      { id: id + 1, side: "aria", text: "Pozrieme sa na vek a tri povinné očkovania. Je to orientačná kontrola; konečné prijatie posúdime po úvodnej návšteve. 🐾" },
+      { id: id + 1, side: "aria", text: chatQuestions.find(question => question.id === "puppy")!.answer, questionId: "puppy" },
     ]);
   }
 
@@ -261,7 +267,8 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                 className={"flex items-end gap-2 " + (message.side === "person" ? "justify-end" : "")}>
                 {message.side === "aria" && <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />}
                 <div data-aria-typing={isTyping ? "true" : undefined}
-                  className={"max-w-[85%] whitespace-pre-line px-3 py-3 text-[13px] leading-relaxed shadow-sm sm:text-sm " +
+                  className={"whitespace-pre-line px-3 py-3 text-[13px] leading-relaxed shadow-sm sm:text-sm " +
+                    (message.questionId === "requirements" ? "min-w-0 w-[calc(100%-44px)] max-w-[calc(100%-44px)] " : "max-w-[85%] ") +
                     (message.side === "person" ? "rounded-[20px_20px_6px_20px] bg-[#9e336f] text-white" :
                     "rounded-[20px_20px_20px_6px] bg-white text-[#26322b]")}>
                   {isTyping ? (
@@ -277,6 +284,21 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                       {typedLength > 0 && <span aria-hidden="true" className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-[#9e336f] align-middle" />}
                     </>
                   ) : message.text}
+                  {!isTyping && message.questionId === "requirements" && (
+                    <div data-aria-chat-requirements className="mt-3 space-y-2 whitespace-normal">
+                      {ARIA_PREVIEW_REQUIREMENTS.map((item, index) => (
+                        <article key={item.title} className="rounded-2xl border border-forest/10 bg-[#f9f8f3] px-3 py-3">
+                          <div className="flex items-start gap-2">
+                            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold text-forest">{index + 1}</span>
+                            <div className="min-w-0">
+                              <h3 className="font-display text-xs font-bold text-forest">{item.title}</h3>
+                              <p className="mt-1 text-xs leading-relaxed text-forest/75"><AriaHighlightedText text={item.text} /></p>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {message.side === "person" && (
                   <span aria-label="Návštevník" className="grid size-9 shrink-0 place-items-center rounded-full bg-[#f6d8e9] text-[#9e336f]">
@@ -294,27 +316,26 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
               <div data-aria-chat-questions className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 {unanswered.map(question => (
                   <button key={question.id} type="button" data-aria-chat-question={question.id}
-                    onClick={() => ask(question)}
-                    className="min-h-11 rounded-xl border border-[#e4d9cb] bg-white px-3 py-2.5 text-left text-xs font-semibold leading-snug text-[#26322b] shadow-sm transition hover:border-[#aa4b00] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
+                    onClick={() => question.id === "puppy" ? showPuppy() : ask(question)}
+                    className={"min-h-11 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold leading-snug shadow-sm transition focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
+                      (question.id === "puppy"
+                        ? "border-[#9e336f]/30 bg-[#f9e5ee] font-extrabold text-[#873063] hover:bg-[#f5d6e5]"
+                        : "border-[#e4d9cb] bg-white text-[#26322b] hover:border-[#aa4b00]")}>
                     {question.title}
                   </button>
                 ))}
+                <button type="button" data-aria-chat-other-cta onClick={showOther}
+                  className="col-span-full min-h-12 w-full rounded-xl bg-[#ffa414] px-3 py-2.5 text-xs font-extrabold text-[#26322b]">
+                  Zaujíma ma niečo iné?
+                </button>
               </div>
-              <button type="button" data-aria-chat-other-cta onClick={showOther}
-                className="mt-3 min-h-12 w-full rounded-xl bg-[#ffa414] px-3 py-2.5 text-xs font-extrabold text-[#26322b]">
-                Zaujíma ma niečo iné?
-              </button>
-              <button type="button" data-aria-chat-puppy-cta onClick={showPuppy}
-                className="mt-3 flex min-h-12 w-full items-center justify-center rounded-xl border border-[#9e336f]/25 bg-[#f9e5ee] px-3 py-2.5 text-center text-xs font-bold leading-snug text-[#873063]">
-                Máte šteniatko? Zistite, či spĺňa podmienky prijatia
-              </button>
             </div>
           )}
 
           {mode === "questions" && messages.length > 0 && !showChoices && typingId === null && (
             <div data-aria-chat-followup className="space-y-3 pl-11">
               <p className="text-xs font-semibold leading-relaxed text-[#26322b]">
-                Pomohla ti odpoveď? Ak máš záujem o škôlku pre svojho psíka, môžeš nám nechať kontakt.
+                Pomohla ti odpoveď? Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.
               </p>
               <button ref={actionRef} type="button" data-aria-chat-interest-cta onClick={showInterest}
                 className="min-h-12 w-full rounded-xl bg-[#9e336f] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm">
@@ -326,8 +347,11 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
               <div data-aria-chat-questions className="grid grid-cols-2 gap-2">
                 {unanswered.map(question => (
                   <button key={question.id} type="button" data-aria-chat-question={question.id}
-                    onClick={() => ask(question)}
-                    className="min-h-12 rounded-xl border border-[#e4d9cb] bg-white px-2.5 py-2 text-left text-xs font-semibold leading-snug text-[#26322b] shadow-sm focus-visible:outline-2 focus-visible:outline-[#9e336f]">
+                    onClick={() => question.id === "puppy" ? showPuppy() : ask(question)}
+                    className={"min-h-12 rounded-xl border px-2.5 py-2 text-left text-xs font-semibold leading-snug focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
+                      (question.id === "puppy"
+                        ? "border-[#9e336f]/30 bg-[#f9e5ee] font-extrabold text-[#873063]"
+                        : "border-[#e4d9cb] bg-white text-[#26322b]")}>
                     {question.title}
                   </button>
                 ))}
@@ -336,10 +360,6 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                   Zaujíma ma niečo iné?
                 </button>
               </div>
-              <button type="button" data-aria-chat-puppy-cta onClick={showPuppy}
-                className="min-h-11 w-full rounded-xl border border-[#9e336f]/25 bg-[#f9e5ee] px-3 py-2 text-xs font-bold leading-snug text-[#873063]">
-                Overte si, či váš psík spĺňa podmienky prijatia
-              </button>
             </div>
           )}
 
@@ -347,11 +367,10 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             <div data-aria-chat-followup className="space-y-2 pl-11">
               <p className="text-xs font-semibold text-[#26322b]">Prešli sme všetky pripravené otázky. Chceš nám nechať kontakt?</p>
               <button type="button" onClick={showInterest} className="min-h-11 w-full rounded-xl bg-[#9e336f] text-xs font-bold text-white">Mám záujem</button>
-              <button type="button" onClick={showOther} className="min-h-10 w-full rounded-xl border border-[#9e336f]/25 bg-white text-xs font-bold text-[#9e336f]">Iná otázka</button>
-              <button type="button" data-aria-chat-puppy-cta onClick={showPuppy}
-                className="min-h-11 w-full rounded-xl border border-[#9e336f]/25 bg-[#f9e5ee] px-3 text-xs font-bold text-[#873063]">
-                Máte šteniatko? Overiť prijatie
-              </button>
+              <div data-aria-chat-questions className="grid grid-cols-2 gap-2">
+                <button type="button" data-aria-chat-other-cta onClick={showOther}
+                  className="col-span-full min-h-12 rounded-xl bg-[#ffa414] px-3 text-xs font-extrabold text-[#26322b]">Zaujíma ma niečo iné?</button>
+              </div>
             </div>
           )}
         </div>
@@ -363,9 +382,14 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                 <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
                   <ArrowLeft size={15} aria-hidden /> Späť k otázkam
                 </button>
-                <AriaPuppyChecker embedded trackingSource="aria_preview_v3_chat_puppy" {...(puppyCheck ? { initialAnswers: puppyCheck } : {})}
+                <AriaPuppyChecker embedded trackingSource={trackingPrefix + "_puppy"} {...(puppyCheck ? { initialAnswers: puppyCheck } : {})}
                   onInterest={details => finishPuppyCheck(details, true)}
                   onInfo={details => finishPuppyCheck(details, false)} />
+                <p className="text-xs font-semibold leading-relaxed text-[#26322b]">
+                  Pomohla ti odpoveď? Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.
+                </p>
+                <button type="button" data-aria-chat-interest-cta onClick={showInterest}
+                  className="min-h-12 w-full rounded-xl bg-[#9e336f] px-4 py-2.5 text-sm font-extrabold text-white">Mám záujem</button>
               </section>
             )}
             {mode === "puppy_contact" && puppyCheck && (

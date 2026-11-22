@@ -326,6 +326,25 @@ export function AriaLeadAssistant({
     `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
     "L 1 16 Q 1 1 16 1 Z",
   ].join(" ");
+  // APP-01: the portrait is consistently anchored above/right of the dock.
+  // A tail attached to the measured portrait tip folded into a spike when
+  // the speech height changed. Keep the preview tail short, smooth and
+  // *inside the side contour*, while the entire bottom remains rounded.
+  // This is independent of viewport-induced portrait geometry/tipY.
+  const previewBaseTop = Math.max(16, Math.min(sh - 36, Math.round(sh * 0.3)));
+  const previewBaseBottom = Math.min(sh - 16, previewBaseTop + 20);
+  const previewTipX = sw + 24;
+  const previewTipY = Math.round((previewBaseTop + previewBaseBottom) / 2);
+  const stablePreviewSpeechPath = [
+    "M 16 1",
+    `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
+    `L ${sw - 1} ${previewBaseTop}`,
+    `C ${sw + 5} ${previewBaseTop} ${sw + 16} ${previewTipY - 6} ${previewTipX} ${previewTipY}`,
+    `C ${sw + 16} ${previewTipY + 6} ${sw + 5} ${previewBaseBottom} ${sw - 1} ${previewBaseBottom}`,
+    `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
+    `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
+    "L 1 16 Q 1 1 16 1 Z",
+  ].join(" ");
   const leftSpeechPath = [
     "M 16 1",
     `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
@@ -335,7 +354,7 @@ export function AriaLeadAssistant({
     `C ${tipX + 12} ${tipY - 13} 2 ${sh - 11} 1 ${sh - 19}`,
     `L 1 16 Q 1 1 16 1 Z`,
   ].join(" ");
-  const speechPath = rightAlignedBubble ? rightSpeechPath : leftSpeechPath;
+  const speechPath = guidedChatPreview ? stablePreviewSpeechPath : rightAlignedBubble ? rightSpeechPath : leftSpeechPath;
 
   if (hidden) return null;
 
@@ -486,9 +505,9 @@ export function AriaLeadAssistant({
             <div ref={speechRef} data-aria-speech data-aria-outline-ready={outlineReady}
               className={"relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]" +
                 (outlineReady ? "" : " rounded-[16px] bg-card ring-2 ring-forest/70")}>
-              {outlineReady && <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
-                data-tail-base-top={rightAlignedBubble ? tailTopY : undefined}
-                data-tail-base-bottom={rightAlignedBubble ? tailBottomY : undefined}
+              {outlineReady && <svg aria-hidden="true" data-aria-tail data-tip-x={guidedChatPreview ? previewTipX : tipX} data-tip-y={guidedChatPreview ? previewTipY : tipY}
+                data-tail-base-top={rightAlignedBubble ? (guidedChatPreview ? previewBaseTop : tailTopY) : undefined}
+                data-tail-base-bottom={rightAlignedBubble ? (guidedChatPreview ? previewBaseBottom : tailBottomY) : undefined}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
                 <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
@@ -501,9 +520,9 @@ export function AriaLeadAssistant({
                       Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                       <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
                     </p>
-                    <button type="button" data-aria-bubble-pricing-cta onClick={() => openChat("pricing")}
+                    <button type="button" data-aria-bubble-chat-cta onClick={() => openChat()}
                       className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#ffa414] px-3 py-2 text-center text-[11px] font-extrabold leading-snug text-[#26322b] shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9e336f] sm:text-xs">
-                      Aký je cenník škôlky? <ArrowRight aria-hidden size={15} className="shrink-0" />
+                      Klikni a zisti viac <ArrowRight aria-hidden size={15} className="shrink-0" />
                     </button>
                   </div>
                 ) : (
