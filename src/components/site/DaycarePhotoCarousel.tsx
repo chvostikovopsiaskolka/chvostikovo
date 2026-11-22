@@ -196,7 +196,7 @@ export function DaycarePhotoCarousel({ language = "sk", includeLeadHighlights = 
   };
 
   return (
-    <section className="overflow-x-clip bg-card pt-6 pb-8 sm:pt-8 sm:pb-12" aria-label={isEnglish ? "Photo gallery from Chvostíkovo dog daycare" : "Fotogaléria zo psiej škôlky Chvostíkovo"}>
+    <section data-aria-lead-carousel={includeLeadHighlights || undefined} className="overflow-x-clip bg-card pt-6 pb-8 sm:pt-8 sm:pb-12" aria-label={isEnglish ? "Photo gallery from Chvostíkovo dog daycare" : "Fotogaléria zo psiej škôlky Chvostíkovo"}>
       <div className="w-full">
         <div
           ref={track}
@@ -277,6 +277,7 @@ export function DaycarePhotoCarousel({ language = "sk", includeLeadHighlights = 
               {photos.map((photo, index) => (
                 <button
                   key={`${setIndex}-${photo.src}`}
+                  data-aria-lead-highlight={includeLeadHighlights && index >= PHOTOS.length ? index - PHOTOS.length + 1 : undefined}
                   type="button"
                   tabIndex={setIndex === 1 ? -1 : 0}
                   onClick={() => openPhoto(index)}
