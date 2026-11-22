@@ -32,13 +32,15 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
   /** Opt out of default 50%-translate positioning for independently anchored forms. */
   positioning?: "centered" | "form";
+  /** Optional per-dialog overlay treatment without changing other modals. */
+  overlayClassName?: string;
 };
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, positioning = "centered", ...props }, ref) => (
+>(({ className, children, positioning = "centered", overlayClassName, ...props }, ref) => (
   <DialogPortal>
-    <DialogOverlay />
+    <DialogOverlay className={overlayClassName} />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(

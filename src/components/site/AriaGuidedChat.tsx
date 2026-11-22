@@ -99,16 +99,24 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
       setTypingId(null);
       return;
     }
+    // Aria first pauses as if composing, then reveals the answer gradually.
+    // One timer per active message; cleanup prevents late updates after closing.
     let count = 0;
-    const timer = window.setInterval(() => {
-      count = Math.min(text.length, count + 4);
-      setTypedLength(count);
-      if (count >= text.length) {
-        window.clearInterval(timer);
-        setTypingId(null);
-      }
-    }, 22);
-    return () => window.clearInterval(timer);
+    let interval: number | undefined;
+    const delay = window.setTimeout(() => {
+      interval = window.setInterval(() => {
+        count = Math.min(text.length, count + 2);
+        setTypedLength(count);
+        if (count >= text.length) {
+          window.clearInterval(interval);
+          setTypingId(null);
+        }
+      }, 32);
+    }, 650);
+    return () => {
+      window.clearTimeout(delay);
+      if (interval !== undefined) window.clearInterval(interval);
+    };
   }, [typingId, messages]);
 
   useEffect(() => {
@@ -185,15 +193,15 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
 
   return (
     <Dialog open={open} onOpenChange={value => { if (!value) closeChat(); }}>
-      <DialogContent positioning="form" data-aria-chat aria-describedby={chatId + "-intro"}
-        className="aria-brand-experiment !fixed !flex !gap-0 left-2 right-2 bottom-[max(8px,env(safe-area-inset-bottom))] top-auto z-50 h-[min(90dvh,730px)] min-h-0 w-auto max-w-none flex-col overflow-hidden rounded-[26px] border border-forest/15 bg-card p-0 text-forest shadow-[0_24px_70px_rgba(25,48,37,.3)] sm:left-1/2 sm:right-auto sm:top-1/2 sm:bottom-auto sm:h-[min(85dvh,750px)] sm:w-[min(620px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
-        <header className="flex shrink-0 items-center gap-3 border-b border-forest/10 bg-secondary/50 px-4 py-3 pr-12">
+      <DialogContent positioning="form" data-aria-chat aria-describedby={chatId + "-intro"} overlayClassName="!bg-forest-deep/25 !backdrop-blur-[12px]"
+        className="aria-brand-experiment !fixed !flex !gap-0 left-2 right-2 bottom-[max(0px,env(safe-area-inset-bottom))] top-auto z-50 h-[min(87dvh,710px)] min-h-0 w-auto max-w-none flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white/80 backdrop-blur-3xl p-0 text-forest shadow-[0_24px_70px_rgba(25,48,37,.2)] sm:left-1/2 sm:right-auto sm:top-[54%] sm:bottom-auto sm:h-[min(85dvh,750px)] sm:w-[min(620px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+        <header className="flex shrink-0 items-center gap-3 border-b border-white/60 bg-white/45 backdrop-blur-2xl px-4 py-3 pr-12">
           <img src={ARIA_HEAD_DATA_URI} alt="" width={48} height={48} className="size-12 shrink-0 object-contain drop-shadow-sm" />
           <DialogTitle className="font-display text-base font-extrabold text-forest sm:text-lg">Aria z Chvostíkova</DialogTitle>
         </header>
 
         <div ref={scrollRef} role="log" aria-label="Konverzácia s Ariou" aria-live="polite"
-          data-aria-chat-history className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain bg-[#f3f8ef] px-3 py-4 sm:px-5">
+          data-aria-chat-history className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain bg-[linear-gradient(145deg,rgba(255,240,213,.68),rgba(247,233,241,.55),rgba(237,248,240,.7))] backdrop-blur-xl px-3 py-4 sm:px-5">
           <div className="flex items-end gap-2">
             <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
             <div id={chatId + "-intro"} className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm sm:text-sm">
@@ -213,9 +221,15 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
                     "rounded-[20px_20px_20px_6px] bg-white text-[#26322b]")}>
                   {isTyping ? (
                     <>
-                      <span aria-hidden="true">{message.text.slice(0, typedLength)}</span>
+                      {typedLength === 0 ? (
+                        <span aria-hidden="true" className="inline-flex items-center gap-1" data-aria-composing>
+                          <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f]" />
+                          <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" />
+                          <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" />
+                        </span>
+                      ) : <span aria-hidden="true">{message.text.slice(0, typedLength)}</span>}
                       <span className="sr-only">{message.text}</span>
-                      <span aria-hidden="true" className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-[#9e336f] align-middle" />
+                      {typedLength > 0 && <span aria-hidden="true" className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-[#9e336f] align-middle" />}
                     </>
                   ) : message.text}
                 </div>
@@ -283,7 +297,7 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
         </div>
 
         {mode !== "questions" && (
-          <div className="max-h-[61%] shrink-0 overflow-y-auto overscroll-contain border-t border-forest/10 bg-white p-3 sm:p-4">
+          <div className="max-h-[61%] shrink-0 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/65 backdrop-blur-2xl p-3 sm:p-4">
             {mode === "interest" && (
               <section aria-label="Nezáväzný záujem v chate" data-aria-chat-interest className="space-y-2">
                 <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
