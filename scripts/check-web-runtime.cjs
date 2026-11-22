@@ -788,6 +788,16 @@ if (!bellaris && brandPreviewCandidate) {
                 if (!contour.hasRoundedBottomRight || contour.top < 16 ||
                     contour.bottom <= contour.top || contour.bottom > contour.height - 16)
                   throw new Error('Test Aria tail must widen into the side while preserving the rounded bottom of the bubble at ' + width + ': ' + JSON.stringify(contour));
+                const stableTail = await tail.evaluate(svg => {
+                  const box = svg.viewBox.baseVal;
+                  return { x: Number(svg.dataset.tipX), y: Number(svg.dataset.tipY),
+                    top: Number(svg.dataset.tailBaseTop), bottom: Number(svg.dataset.tailBaseBottom),
+                    width: box.width };
+                });
+                if (Math.abs(stableTail.x - (stableTail.width + 24)) > 1 ||
+                    stableTail.y <= stableTail.top || stableTail.y >= stableTail.bottom ||
+                    stableTail.bottom - stableTail.top < 15)
+                  throw new Error('Preview tail geometry must have a stable outward tip and non-inverted neck: ' + JSON.stringify(stableTail));
                 if (await aria.evaluate(el => getComputedStyle(el).position) !== 'fixed')
                   throw new Error('Test Aria menu must remain floating and fixed at ' + width);
                 const trigger = aria.locator('[data-aria-chat-trigger]');
@@ -823,6 +833,9 @@ if (!bellaris && brandPreviewCandidate) {
                       await questionMenu.locator('[data-aria-chat-other-cta]').count() !== 1 ||
                       await chat.locator('[data-aria-chat-turn="person"]').count())
                     throw new Error('Discover-more must show seven FAQs and Other without preselection');
+                  if (!await questionMenu.evaluate(el =>
+                    el.lastElementChild?.hasAttribute('data-aria-chat-other-cta')))
+                    throw new Error('Other-question CTA must be the final full-width item inside FAQ grid');
                   const pink = await questionMenu.locator('[data-aria-chat-question="puppy"]').evaluate(el => getComputedStyle(el).backgroundColor);
                   if (pink === 'rgb(255, 255, 255)' || pink === 'rgba(0, 0, 0, 0)')
                     throw new Error('Puppy FAQ must be highlighted pink');
@@ -866,6 +879,15 @@ if (!bellaris && brandPreviewCandidate) {
                   if (await requirementCards.count() !== 4 ||
                       !await requirementCards.first().getByText('Očkovanie a prevencia').count())
                     throw new Error('Requirements must reuse four structured cards from existing modal');
+                  const requirementsFit = await chat.locator('[data-aria-chat-requirements]').evaluate(el => {
+                    const bubble = el.closest('[data-aria-chat-turn="aria"] > div');
+                    const viewport = el.closest('[data-aria-chat-history]');
+                    return !bubble || !viewport ? false :
+                      bubble.getBoundingClientRect().right <= viewport.getBoundingClientRect().right + 1 &&
+                      bubble.getBoundingClientRect().left >= viewport.getBoundingClientRect().left - 1;
+                  });
+                  if (!requirementsFit)
+                    throw new Error('Four requirements cards must not overflow the mobile chat viewport');
                   if (await chat.locator('[data-aria-chat-followup] [data-aria-chat-question]').count() !== 5 ||
                       !await chat.locator('[data-aria-chat-followup]').getByText(/vyplň nezáväzný formulár a my sa ti ozveme späť/i).count())
                     throw new Error('After requirements show five remaining FAQs and new interest copy');
