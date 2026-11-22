@@ -112,10 +112,6 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
           Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu.
         </p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
-        <div className="mt-2 flex flex-wrap justify-center gap-3 text-sm font-semibold text-forest">
-          <a href="/#podmienky" onClick={() => void trackCookielessInteraction("success_conditions_click", trackingSource)} className="underline underline-offset-4">Podmienky prijatia</a>
-          <a href="/#cennik" onClick={() => void trackCookielessInteraction("success_pricing_click", trackingSource)} className="underline underline-offset-4">Cenník</a>
-        </div>
       </div>
     );
   }

@@ -264,7 +264,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     nextId.current += 2;
     setMessages(current => [...current,
       { id, side: "person", text: "Chcem sa spýtať niečo iné." },
-      { id: id + 1, side: "aria", text: "Haf! 🐾 Kľudne sa opýtaj môjho panička cez tento krátky formulár. Radi ti odpovieme na e-mail alebo zavoláme." },
+      { id: id + 1, side: "aria", text: "Jasné! 🐾 Cez kontaktný formulár napíš správu mojim majiteľom. Radi sa ti ozvú hneď, ako to bude možné." },
     ]);
     setMode("other");
   }
