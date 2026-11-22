@@ -253,27 +253,37 @@ export function AriaLeadAssistant({
   }
 
   const { width: sw, height: sh, tipX, tipY } = speechGeometry;
-  // Mirror the proven left-side outline, including its tail, rather than
-  // maintaining a second hand-drawn path that can fold over the portrait.
-  const pathTipX = guidedChatPreview ? sw - tipX : tipX;
+  // On the test route Aria stays ABOVE the centered dock.
+  // Attach the tail to the upper-right edge of a regular rounded bubble;
+  // never pull the bottom border towards her portrait (it folds the outline).
+  const upperTailY = Math.max(16, Math.min(sh - 32, tipY + 5));
+  const lowerTailY = Math.max(upperTailY + 10, Math.min(sh - 16, tipY + 28));
+  const rightSpeechPath = [
+    "M 16 1",
+    `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
+    `L ${sw - 1} ${upperTailY}`,
+    `C ${sw + 5} ${upperTailY - 8} ${tipX - 8} ${tipY + 8} ${tipX} ${tipY}`,
+    `C ${tipX - 5} ${tipY + 20} ${sw + 6} ${lowerTailY - 6} ${sw - 1} ${lowerTailY}`,
+    `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
+    `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
+    "L 1 16 Q 1 1 16 1 Z",
+  ].join(" ");
   const leftSpeechPath = [
     "M 16 1",
     `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
     `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
     `L 30 ${sh - 1}`,
-    `C 11 ${sh - 1} ${pathTipX + 15} ${tipY - 15} ${pathTipX} ${tipY}`,
-    `C ${pathTipX + 12} ${tipY - 13} 2 ${sh - 11} 1 ${sh - 19}`,
+    `C 11 ${sh - 1} ${tipX + 15} ${tipY - 15} ${tipX} ${tipY}`,
+    `C ${tipX + 12} ${tipY - 13} 2 ${sh - 11} 1 ${sh - 19}`,
     `L 1 16 Q 1 1 16 1 Z`,
   ].join(" ");
-
+  const speechPath = guidedChatPreview ? rightSpeechPath : leftSpeechPath;
 
   if (hidden) return null;
 
   return (
     <aside aria-label="Aria – sprievodkyňa Chvostíkovom" data-aria-guide data-intro={stage === "intro" ? "true" : "false"} data-aria-stage={stage}
-      className={inlineDock ? "pointer-events-none relative z-40 w-full px-2 sm:px-4" : "pointer-events-none fixed inset-x-0 z-40 px-2 sm:bottom-4 sm:px-4 " + (
-        guidedChatPreview ? "bottom-[max(18px,env(safe-area-inset-bottom))]" : "bottom-[max(94px,calc(env(safe-area-inset-bottom)+78px))]"
-      )}>
+      className={inlineDock ? "pointer-events-none relative z-40 w-full px-2 sm:px-4" : "pointer-events-none fixed inset-x-0 bottom-[max(94px,calc(env(safe-area-inset-bottom)+78px))] z-40 px-2 sm:bottom-4 sm:px-4"}>
       <div className="pointer-events-none relative mx-auto w-full max-w-[690px] pb-0">
         {panel && (
           <div role="region" aria-label={"Aria: " + panel} data-aria-panel={panel}
@@ -414,12 +424,12 @@ export function AriaLeadAssistant({
 
         {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
-            className={guidedChatPreview ? "pointer-events-none mb-2 flex w-full justify-end pr-[75px] sm:pr-[96px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
+            className={guidedChatPreview ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
-                <path d={leftSpeechPath} transform={guidedChatPreview ? `translate(${sw} 0) scale(-1 1)` : undefined} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
+                <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>
               {stage === "intro" ? (
@@ -464,12 +474,12 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className={"pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (guidedChatPreview ? "mr-[83px] sm:mr-[104px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
+        <div className={"pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (guidedChatPreview ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           {guidedChatPreview ? (
             <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
               data-aria-chat-trigger onClick={openChat} style={{ WebkitTapHighlightColor: "transparent" }}
-              className={"aria-chat-portrait pointer-events-auto absolute -bottom-1 -right-[86px] h-[84px] w-[84px] max-w-none rounded-full bg-transparent p-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:-right-[106px] sm:h-[99px] sm:w-[99px] " + (panel ? "z-0" : "z-30")}> 
+              className={"aria-chat-portrait pointer-events-auto absolute bottom-[calc(100%+12px)] -right-1 h-[92px] w-[92px] max-w-none rounded-full bg-transparent p-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:bottom-[calc(100%+12px)] sm:right-0 sm:h-[104px] sm:w-[104px] " + (panel ? "z-0" : "z-30")}> 
               <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
                 className="pointer-events-none h-full w-full object-contain contrast-[1.1] saturate-[1.05] drop-shadow-[0_3px_5px_rgba(0,0,0,.23)]" />
             </button>
