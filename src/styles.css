@@ -1070,3 +1070,7 @@
 .aria-brand-experiment #aria-mosaic [data-aria-parking] { background-color: #f8ddeb; }
 .aria-brand-experiment #aria-hero-form [data-aria-form-choice] { background-color: #ffa414; color: #26322b; }
 .aria-brand-experiment [data-aria-speech] { transform: none; }
+
+/* Preview form's three real radio cards (not the CTA buttons). */
+.aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"] + span { background-color: #ffa414; color: #26322b; border-color: rgb(38 50 43 / 16%); }
+.aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"]:checked + span { background-color: #ffb43b; border-color: #b82e7f; box-shadow: 0 0 0 2px rgb(184 46 127 / 20%); }
