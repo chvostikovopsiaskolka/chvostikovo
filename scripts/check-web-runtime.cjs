@@ -414,7 +414,31 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Desktop lead diverges from responsive contract: ' + JSON.stringify(desktop));
             const ariaDesktop = page.locator('[data-aria-guide]');
             const beforeOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
-            for (const [name, panel] of [['Otvoriť menu', 'menu'], ['Cenník škôlky', 'pricing'], ['Podmienky prijatia', 'requirements']]) {
+            if (url.pathname === '/test-aria/') {
+              // On the preview the dock is navigation, not three stacked
+              // overlays. Each item must scroll to its real site section.
+              for (const [name, id] of [
+                ['Cenník škôlky', 'lead-pricing'],
+                ['Podmienky prijatia', 'lead-requirements'],
+                ['O nás', 'aria-about'],
+                ['Mám záujem o škôlku', 'aria-first-visit-form'],
+              ]) {
+                await ariaDesktop.getByRole('button', { name, exact: true }).click();
+                await page.waitForFunction((targetId) => {
+                  const target = document.getElementById(targetId);
+                  if (!target) return false;
+                  const top = target.getBoundingClientRect().top;
+                  return top > 62 && top < 112;
+                }, id, { timeout: 9000 });
+                if (await ariaDesktop.locator('[data-aria-panel="pricing"], [data-aria-panel="requirements"], [data-aria-panel="faq"]').count())
+                  throw new Error('Preview dock ' + name + ' must scroll to ' + id + ', not open an overlay');
+              }
+              await ariaDesktop.getByRole('button', { name: 'Otvoriť menu' }).click();
+              await ariaDesktop.locator('[data-aria-panel="menu"]').waitFor({ state: 'visible' });
+              if (!await ariaDesktop.locator('[data-aria-menu-logo]').isVisible())
+                throw new Error('Preview hamburger still needs the brand wordmark');
+              await ariaDesktop.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
+            } else for (const [name, panel] of [['Otvoriť menu', 'menu'], ['Cenník škôlky', 'pricing'], ['Podmienky prijatia', 'requirements']]) {
               await ariaDesktop.getByRole('button', { name }).click();
               await ariaDesktop.locator('[data-aria-panel="' + panel + '"]').waitFor({ state: 'visible' });
               const afterOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
