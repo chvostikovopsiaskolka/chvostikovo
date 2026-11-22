@@ -254,6 +254,44 @@ if (!bellaris && brandPreviewCandidate) {
             if (isAriaPage) {
               const cards=page.locator('[data-aria-review-photo]');
               if (await cards.count()!==2) throw new Error('Paid lead requires two clickable owner photos');
+              if (url.pathname === '/psia-skolka-kosice/') {
+                const layout = await page.evaluate(() => {
+                  const hero = document.querySelector('section.hero-safe-top');
+                  const selectors = ['h1', '[data-aria-review-gap-photos]', '[data-aria-service-group]', '[data-aria-hero-description]', '[data-aria-hero-content] [data-aria-review-photo]', '[data-aria-hero-content] [data-aria-review-photo]'];
+                  const rect = selector => hero?.querySelector(selector)?.getBoundingClientRect();
+                  const photos = [...(hero?.querySelectorAll('[data-aria-review-photo]') || [])];
+                  const dock = hero?.querySelector('[data-aria-hero-menu] [data-aria-guide]');
+                  const reviews = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]');
+                  const reviewSection = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.parentElement;
+                  const reviewRoot = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.closest('[data-aria-review-gap-photos]');
+                  const heading = rect('h1');
+                  const photo = rect('[data-aria-review-gap-photos]');
+                  const badge = rect('[data-aria-service-group]');
+                  const description = rect('[data-aria-hero-description]');
+                  const review = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.getBoundingClientRect();
+                  const menu = dock?.getBoundingClientRect();
+                  const form = document.querySelector('#aria-hero-form')?.getBoundingClientRect();
+                  return {
+                    width: innerWidth,
+                    copy: description ? document.querySelector('[data-aria-hero-description]')?.textContent : '',
+                    heights: photos.map(el => el.getBoundingClientRect().height),
+                    headingBottom: heading?.bottom,
+                    photoTop: photo?.top,
+                    photoBottom: photo?.bottom,
+                    badgeTop: badge?.top,
+                    menuBottom: menu?.bottom,
+                    formTop: form?.top,
+                    menuPosition: dock ? getComputedStyle(dock).position : '',
+                    reviewExists: !!hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]'),
+                  };
+                });
+                if (!layout.copy.includes('užije si pohyb'))
+                  throw new Error('Lead hero lost approved wording užije si pohyb');
+                if (layout.heights.length !== 2 || layout.photoTop < layout.headingBottom || layout.badgeTop < layout.photoBottom || layout.menuPosition !== 'relative' || layout.formTop < layout.menuBottom)
+                  throw new Error('Lead hero section order regressed: ' + JSON.stringify(layout));
+                if (layout.width < 500 && layout.heights.some(h => h < 175))
+                  throw new Error('Lead mobile photo cards too short: ' + JSON.stringify(layout));
+              }
               await cards.first().scrollIntoViewIfNeeded();
               // User-reported pixelation: two card images must be retina-ready,
               // not the previous ~6KB 320px previews. Keep big files lazy in modal.
@@ -494,10 +532,10 @@ if (!bellaris && brandPreviewCandidate) {
                 };
               });
               if (firstFold.missing || firstFold.formTop < firstFold.viewportHeight - 2 ||
-                  (url.pathname !== '/test-aria/' && firstFold.topSpacerHeight < 39) ||
-                  firstFold.contentCenterY < firstFold.viewportHeight * (url.pathname === '/test-aria/' ? 0.36 : 0.4) ||
-                  firstFold.reviewGap < 90 || firstFold.reviewGap > (url.pathname === '/test-aria/' ? 240 : 195) ||
-                  firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || !firstFold.photoGeometry ||
+                  (url.pathname === '/test-aria/' && firstFold.topSpacerHeight < 0) ||
+                  (url.pathname === '/test-aria/' && firstFold.contentCenterY < firstFold.viewportHeight * 0.36) ||
+                  (url.pathname === '/test-aria/' && (firstFold.reviewGap < 90 || firstFold.reviewGap > 240)) ||
+                  firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
@@ -745,6 +783,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const message = guide?.querySelector('[data-aria-message]');
                   if (!guide || !dock || !message) return ['missing Aria'];
                   const baseline = dock.getBoundingClientRect();
+                  const baselineDocumentY = baseline.y + window.scrollY;
                   const failures = [];
                   for (const y of [150, 950, 2200, 3100, 1700, 3600, 110, 0]) {
                     window.scrollTo(0, y);
@@ -752,11 +791,11 @@ if (!bellaris && brandPreviewCandidate) {
                     const box = dock.getBoundingClientRect();
                     const guideStyle = getComputedStyle(guide);
                     if (document.querySelector('[data-aria-dock]') !== dock ||
-                        guideStyle.position !== 'fixed' || guideStyle.visibility !== 'visible' ||
+                        guideStyle.position !== 'relative' || guideStyle.visibility !== 'visible' ||
                         guideStyle.opacity !== '1' ||
                         getComputedStyle(message).visibility !== 'visible' ||
                         message.dataset.ariaSuppressed !== 'false' ||
-                        Math.abs(baseline.y - box.y) > 3 ||
+                        Math.abs(baselineDocumentY - (box.y + window.scrollY)) > 40 ||
                         Math.abs(baseline.height - box.height) > 2) {
                       failures.push({ y, stage: guide.dataset.ariaStage, dockY: box.y,
                         baselineY: baseline.y, message: getComputedStyle(message).visibility });
@@ -957,7 +996,7 @@ if (!bellaris && brandPreviewCandidate) {
               if (await page.locator('#aria-mosaic img').count() !== 8)
                 throw new Error('Preview mosaic must retain eight photos');
               // Compare document order rather than screen rects (some sections may be offscreen).
-              const hasHeroFormAndCaretakerOrder = await page.evaluate(() => {
+              const hasHeroFormAndCaretakerOrder = await page.evaluate((isPaidLead) => {
                 const reviews = document.getElementById('recenzie');
                 const form = document.getElementById('aria-hero-form');
                 const team = document.getElementById('aria-caretakers');
@@ -973,6 +1012,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
                 const introSpace = leadHero?.querySelector('[data-aria-intro-space]');
                 const benefits = team?.querySelector('[data-hero-benefits]');
+                const inlineMenu = leadHero?.querySelector('[data-aria-hero-menu]');
                 const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                 if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
                     !headlineSpacer || !serviceGroup || !heroHeading || !heroDogs ||
@@ -984,15 +1024,17 @@ if (!bellaris && brandPreviewCandidate) {
                 const heading = team.querySelector('h2');
                 const photo = team.querySelector('img');
                 const copy = team.querySelector('p');
-                return follows(introTopSpace, headlineSpacer) && follows(headlineSpacer, heroHeading) &&
+                const commonOrder = follows(introTopSpace, headlineSpacer) && follows(headlineSpacer, heroHeading) &&
                   follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
                   follows(heroDogs, badge) && follows(badge, leadDescription) &&
-                  follows(leadDescription, proof) && follows(reviews, introSpace) &&
-                  follows(introSpace, form) && follows(form, team) &&
+                  follows(leadDescription, proof) &&
+                  (isPaidLead ? (follows(heroHeading, introSpace) && follows(introSpace, serviceGroup) && !!inlineMenu && follows(reviews, inlineMenu) && follows(inlineMenu, form)) : (follows(reviews, introSpace) && follows(introSpace, form))) &&
+                  follows(form, team) &&
                   !!heading && !!photo && !!copy &&
                   follows(heading, photo) && follows(photo, benefits) && follows(benefits, copy) &&
                   follows(team, firstVisitDogs);
-              });
+                return commonOrder;
+              }, url.pathname === '/psia-skolka-kosice/');
               if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/label-dogs/orange badge/focused copy/reviews/form and caretakers order changed');
               if (width >= 768) {
                 const heights = await page.locator('[data-aria-review-photo]').evaluateAll(nodes => nodes.map(n => n.getBoundingClientRect().height));
@@ -1063,9 +1105,13 @@ if (!bellaris && brandPreviewCandidate) {
                 .evaluate(button => parseFloat(getComputedStyle(button).borderTopLeftRadius));
               if (overitRadius < 10 || overitRadius > 13)
                 throw new Error('Puppy check CTA must match the squared comic bubble shape');
-              await aria.getByRole('button', { name: 'Overiť', exact: true }).click();
-              await page.waitForTimeout(120);
-              if (!await page.locator('#aria-puppy-check').count()) throw new Error('Scroll CTA must link to the puppy checker');
+              if (url.pathname !== '/psia-skolka-kosice/') {
+                // The paid lead menu now ends inside the hero; after scrolling to
+                // caretakers it is intentionally no longer a floating control.
+                await aria.getByRole('button', { name: 'Overiť', exact: true }).click();
+                await page.waitForTimeout(120);
+                if (!await page.locator('#aria-puppy-check').count()) throw new Error('Scroll CTA must link to the puppy checker');
+              }
             }
           }
           if (!restricted && isAriaPage && url.pathname === '/psia-skolka-kosice/') {

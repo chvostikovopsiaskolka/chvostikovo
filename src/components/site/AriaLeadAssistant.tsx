@@ -40,6 +40,7 @@ export function AriaLeadAssistant({
   puppyStartSectionId,
   anchorOverrides,
   guidedChatPreview = false,
+  inlineDock = false,
 }: {
   onOpenInfo: () => void;
   onOpenInterest: () => void;
@@ -52,6 +53,8 @@ export function AriaLeadAssistant({
   anchorOverrides?: Record<string, string>;
   /** Enables the messenger-style preview only on /test-aria/. */
   guidedChatPreview?: boolean;
+  /** Opt-in inline menu at the end of the paid lead hero; other landings remain fixed. */
+  inlineDock?: boolean;
 }) {
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
   const stageRef = useRef<"intro" | "puppy" | "contact">("intro");
@@ -274,7 +277,7 @@ export function AriaLeadAssistant({
 
   return (
     <aside aria-label="Aria – sprievodkyňa Chvostíkovom" data-aria-guide data-intro={stage === "intro" ? "true" : "false"} data-aria-stage={stage}
-      className="pointer-events-none fixed inset-x-0 bottom-[max(94px,calc(env(safe-area-inset-bottom)+78px))] z-40 px-2 sm:bottom-4 sm:px-4">
+      className={inlineDock ? "pointer-events-none relative z-40 w-full px-2 sm:px-4" : "pointer-events-none fixed inset-x-0 bottom-[max(94px,calc(env(safe-area-inset-bottom)+78px))] z-40 px-2 sm:bottom-4 sm:px-4"}>
       <div className="pointer-events-none relative mx-auto w-full max-w-[690px] pb-0">
         {panel && (
           <div role="region" aria-label={"Aria: " + panel} data-aria-panel={panel}
