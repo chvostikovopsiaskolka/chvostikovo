@@ -171,7 +171,7 @@ export function AriaPreviewPage() {
               </h1>
 
               {isLiveLead && (
-          {{/* The two owner photos sit directly under the lead headline. */}}
+          <>{/* The two owner photos sit directly under the lead headline. */}
           <div data-aria-intro-space className="relative z-10 mx-auto mt-5 w-full max-w-3xl px-0 sm:mt-7 lg:max-w-4xl">
             <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:gap-4">
               {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
@@ -185,6 +185,7 @@ export function AriaPreviewPage() {
               ))}
             </div>
           </div>
+          </>
               )}
               <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-[86px] w-fit max-w-full sm:mt-[96px] lg:mt-[124px]" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
                 {/* The existing four schoolmates now rest on the orange label, not above the H1. */}
