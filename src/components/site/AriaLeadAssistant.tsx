@@ -357,8 +357,8 @@ export function AriaLeadAssistant({
   // Paid navigation keeps Aria on the left. The tip is still measured against
   // her portrait, but the balloon joins it through two shallow side curves;
   // neither the top nor the rounded bottom is interrupted.
-  const paidLeftBaseTop = Math.max(16, Math.min(sh - 38, Math.round(sh * 0.26)));
-  const paidLeftBaseBottom = paidLeftBaseTop + 22;
+  const paidLeftBaseTop = Math.max(16, Math.min(sh - 34, Math.round(sh * 0.26)));
+  const paidLeftBaseBottom = Math.min(sh - 16, paidLeftBaseTop + 20);
   const paidLeftSpeechPath = [
     "M 16 1",
     `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
