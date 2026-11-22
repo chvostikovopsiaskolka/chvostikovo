@@ -23,7 +23,7 @@ import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
 import { Requirements } from "@/components/site/Info";
 import { Footer } from "@/components/site/Contact";
-import { ABOUT_MORE } from "@/components/site/Story";
+import { ABOUT_MORE, SafetyCertificates } from "@/components/site/Story";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { DAYCARE_GALLERY_EXTRAS, GALLERY, FAQ, PRICING } from "@/content/site";
@@ -322,6 +322,7 @@ export function AriaPreviewPage() {
                 </p>
               )}
             </div>
+            {isLiveLead && <SafetyCertificates />}
           </div>
         </section>
 
