@@ -104,19 +104,19 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.actionBg !== 'rgb(184, 46, 127)' ||
                   palette.firstVisitAction !== 'rgb(184, 46, 127)' ||
                   palette.badgeBg !== 'rgb(255, 164, 20)' ||
-                  palette.badgeFg !== 'rgb(38, 50, 43)' ||
+                  palette.badgeFg !== 'rgb(255, 255, 255)' ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyFg !== 'rgb(38, 50, 43)' ||
                   palette.earlyFaqBg !== 'rgb(255, 255, 255)' ||
-                  palette.earlySectionBg !== 'rgba(255, 164, 20, 0.13)' ||
-                  palette.pricingBg !== 'rgba(255, 164, 20, 0.12)' ||
-                  palette.footerBg !== 'rgb(255, 240, 213)' ||
+                  palette.earlySectionBg !== 'rgba(255, 164, 20, 0.19)' ||
+                  palette.pricingBg !== 'rgba(255, 164, 20, 0.19)' ||
+                  palette.footerBg !== 'rgb(255, 255, 255)' ||
                   palette.benefitHeading !== 'rgb(255, 164, 20)' ||
                   palette.requirementTitle !== 'rgb(255, 164, 20)' ||
-                  palette.requirementIcon !== 'rgb(255, 164, 20)' ||
+                  palette.requirementIcon !== 'rgb(38, 50, 43)' ||
                   palette.prices.length !== 2 ||
-                  palette.prices.some(color => color !== 'rgb(255, 164, 20)') ||
+                  palette.prices[0] !== 'rgb(255, 164, 20)' || palette.prices[1] !== 'rgb(184, 46, 127)' ||
                   palette.bestValueBg !== 'rgb(255, 164, 20)' ||
                   palette.bestValueFg !== 'rgb(255, 255, 255)' ||
                   palette.taxiBg !== 'rgb(184, 46, 127)' ||
