@@ -93,6 +93,7 @@ export function AriaLeadAssistant({
   sectionNavigation?: boolean;
 }) {
   const rightAlignedBubble = guidedChatPreview || portraitOnRight;
+  const paidLeadLeft = sectionNavigation && !portraitOnRight;
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
   const stageRef = useRef<"intro" | "puppy" | "contact">("intro");
   const [panel, setPanel] = useState<Panel>(null);
@@ -335,7 +336,21 @@ export function AriaLeadAssistant({
     `C ${tipX + 12} ${tipY - 13} 2 ${sh - 11} 1 ${sh - 19}`,
     `L 1 16 Q 1 1 16 1 Z`,
   ].join(" ");
-  const speechPath = rightAlignedBubble ? rightSpeechPath : leftSpeechPath;
+  // Paid LEAD uses a short side tail, never the old bottom-corner wedge.
+  // The separate preview and all non-lead appearances remain unchanged.
+  const paidTailTopY = Math.max(18, Math.min(sh - 42, tipY - 12));
+  const paidTailBottomY = Math.min(sh - 16, Math.max(paidTailTopY + 14, tipY + 12));
+  const paidLeftSpeechPath = [
+    "M 16 1",
+    `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
+    `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
+    `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
+    `L 1 ${paidTailBottomY}`,
+    `C -7 ${paidTailBottomY - 5} ${tipX + 15} ${tipY + 7} ${tipX} ${tipY}`,
+    `C ${tipX + 15} ${tipY - 7} -7 ${paidTailTopY + 5} 1 ${paidTailTopY}`,
+    "L 1 16 Q 1 1 16 1 Z",
+  ].join(" ");
+  const speechPath = paidLeadLeft ? paidLeftSpeechPath : rightAlignedBubble ? rightSpeechPath : leftSpeechPath;
 
   if (hidden) return null;
 
@@ -482,13 +497,18 @@ export function AriaLeadAssistant({
 
         {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
-            className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
+            className={paidLeadLeft
+              ? "pointer-events-none mb-3 flex w-full justify-start pl-[102px] sm:pl-[215px]"
+              : rightAlignedBubble
+                ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]"
+                : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech data-aria-outline-ready={outlineReady}
               className={"relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]" +
                 (outlineReady ? "" : " rounded-[16px] bg-card ring-2 ring-forest/70")}>
               {outlineReady && <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
-                data-tail-base-top={rightAlignedBubble ? tailTopY : undefined}
-                data-tail-base-bottom={rightAlignedBubble ? tailBottomY : undefined}
+                data-tail-base-top={paidLeadLeft ? paidTailTopY : rightAlignedBubble ? tailTopY : undefined}
+                data-tail-base-bottom={paidLeadLeft ? paidTailBottomY : rightAlignedBubble ? tailBottomY : undefined}
+                data-aria-tail-side={paidLeadLeft ? "left" : rightAlignedBubble ? "right" : "legacy-left"}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
                 <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
@@ -507,15 +527,15 @@ export function AriaLeadAssistant({
                     </button>
                   </div>
                 ) : (
-                  <p className="relative z-10 font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]">
+                  <p className={"relative z-10 font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]" + (paidLeadLeft ? " lg:text-[17px] lg:leading-[1.45]" : "")}>
                     Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                     <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
-                    <span className="mt-1.5 block text-[11px] font-medium leading-[1.35] text-forest/85 sm:text-xs">Zisti viac z našej ponuky nižšie.</span>
+                    <span className={"mt-1.5 block text-[11px] font-medium leading-[1.35] text-forest/85 sm:text-xs" + (paidLeadLeft ? " lg:mt-2 lg:text-[14px] lg:leading-[1.5]" : "")}>Zisti viac z našej ponuky nižšie.</span>
                   </p>
                 )
               ) : stage === "puppy" ? (
                 <div className="relative z-10 flex min-w-0 items-center justify-between gap-2">
-                  <strong className="min-w-0 font-display text-[11px] font-semibold leading-tight text-forest">
+                  <strong className={"min-w-0 font-display text-[11px] font-semibold leading-tight text-forest" + (paidLeadLeft ? " lg:text-[15px] lg:leading-[1.4]" : "")}>
                     Máte šteniatko? <span className="font-bold text-coral-dark">Zistite, či spĺňa podmienky.</span>
                   </strong>
                   <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
@@ -525,7 +545,7 @@ export function AriaLeadAssistant({
                 </div>
               ) : (
                 <div className="relative z-10 flex min-w-0 items-center justify-between gap-2">
-                  <strong className="min-w-0 font-display text-[11px] font-semibold leading-tight text-forest">
+                  <strong className={"min-w-0 font-display text-[11px] font-semibold leading-tight text-forest" + (paidLeadLeft ? " lg:text-[15px] lg:leading-[1.4]" : "")}>
                     Chcete sa informovať? <span className="text-coral-dark">Vyplňte nezáväzný formulár.</span>
                   </strong>
                   <button type="button" onClick={() => guidedChatPreview ? jump("aria-first-visit-form", "bubble_contact_scroll") : openInfo()}
@@ -549,7 +569,11 @@ export function AriaLeadAssistant({
             </button>
           ) : (
             <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
-              className={portraitOnRight ? "pointer-events-none absolute bottom-[calc(100%+12px)] right-1 h-[92px] w-[92px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:right-0 sm:h-[104px] sm:w-[104px]" : "pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]"} />
+              className={portraitOnRight
+                  ? "pointer-events-none absolute bottom-[calc(100%+12px)] right-1 h-[92px] w-[92px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:right-0 sm:h-[104px] sm:w-[104px]"
+                  : paidLeadLeft
+                    ? "pointer-events-none absolute bottom-[calc(100%+12px)] left-1 h-[92px] w-[92px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:left-1 sm:h-[104px] sm:w-[104px]"
+                    : "pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]"} />
           )}
           <div data-aria-section-navigation={sectionNavigation || undefined} className="flex h-[52px] items-center gap-0.5">
             {sectionNavigation ? (
