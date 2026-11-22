@@ -422,13 +422,13 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Desktop lead diverges from responsive contract: ' + JSON.stringify(desktop));
             const ariaDesktop = page.locator('[data-aria-guide]');
             const beforeOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
-            if (url.pathname === '/test-aria/') {
-              // On the preview the dock is navigation, not three stacked
+            if (['/test-aria/', '/psia-skolka-kosice/'].includes(url.pathname)) {
+              // On both Aria lead routes the dock is navigation, not three stacked
               // overlays. Each item must scroll to its real site section.
               for (const [name, id] of [
                 ['Cenník škôlky', 'lead-pricing'],
                 ['Podmienky prijatia', 'lead-requirements'],
-                ['O nás', 'aria-about'],
+                ['O nás', url.pathname === '/psia-skolka-kosice/' ? 'aria-caretakers' : 'aria-about'],
                 ['Mám záujem o škôlku', 'aria-first-visit-form'],
               ]) {
                 await ariaDesktop.getByRole('button', { name, exact: true }).click();
@@ -685,9 +685,7 @@ if (!bellaris && brandPreviewCandidate) {
               }));
               if (welcome.fontSize < 10.5 || welcome.overflows)
                 throw new Error('Aria greeting must remain readable without clipping at ' + width);
-              const guidance = url.pathname === '/test-aria/'
-                ? 'Aký je cenník škôlky?'
-                : 'Zisti viac z našej ponuky nižšie.';
+              const guidance = 'Aký je cenník škôlky?';
               if (!await aria.getByText(guidance).count())
                 throw new Error('Aria introduction must show the offer guidance at ' + width);
               if (url.pathname === '/test-aria/' &&
@@ -742,12 +740,12 @@ if (!bellaris && brandPreviewCandidate) {
                     headBox.x < speechBox.x + speechBox.width - 30 ||
                     headBox.x < width / 2 ||
                     speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
-                    await aria.locator('[data-aria-chat-trigger], [data-aria-chat]').count())
-                  throw new Error('Paid Aria must use the intact right-facing PREVIEW bubble without chatbot: ' +
+                    !await aria.locator('[data-aria-chat-trigger]').isVisible())
+                  throw new Error('Paid Aria must use the right-facing bubble and operable chat portrait: ' +
                     JSON.stringify({ width, contour, speechBox, headBox }));
               }
 
-              if (url.pathname === '/test-aria/') {
+              if (['/test-aria/', '/psia-skolka-kosice/'].includes(url.pathname)) {
                 // APP-01: the right-side bubble must taper gently toward Aria.
                 // Never substitute a triangle cut out of the bottom border.
                 const contour = await tail.evaluate(svg => {
@@ -1180,11 +1178,11 @@ if (!bellaris && brandPreviewCandidate) {
                   await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
                 continue;
               }
-              if (url.pathname === '/test-aria/') {
+              if (['/test-aria/', '/psia-skolka-kosice/'].includes(url.pathname)) {
                 const navItems = [
                   ['Cenník škôlky', 'lead-pricing'],
                   ['Podmienky prijatia', 'lead-requirements'],
-                  ['O nás', 'aria-about'],
+                  ['O nás', url.pathname === '/psia-skolka-kosice/' ? 'aria-caretakers' : 'aria-about'],
                   ['Mám záujem o škôlku', 'aria-first-visit-form'],
                 ];
                 for (const [name, targetId] of navItems) {
