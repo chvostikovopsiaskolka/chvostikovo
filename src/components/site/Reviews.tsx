@@ -4,6 +4,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowDown, HeartHandshake, PawPrint, Play, Sparkles, type LucideIcon } from "lucide-react";
 import skolkariVideo from "@/assets/skolkari.mp4";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
+import schoolmatesCutout from "@/assets/skolkari-lineup-transparent.png";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
@@ -367,7 +368,8 @@ export function ReviewReasons({
 
         <div className="mx-auto -mt-1 h-[138px] w-full max-w-[820px] overflow-hidden sm:mt-2 sm:h-[225px]" aria-hidden="true">
           <img
-            src={schoolmatesLineup}
+            src={variant === "home" ? schoolmatesCutout : schoolmatesLineup}
+            data-schoolmates-cutout={variant === "home" || undefined}
             alt=""
             loading="lazy"
             decoding="async"

@@ -10,6 +10,32 @@ import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/sit
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FirstVisitPhoto } from "./FirstVisitPhoto";
 import { ContextFaq, FaqAnswer } from "./ContextFaq";
+import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
+
+
+/** Reuse the exact approved lead answers, with native keyboard-accessible disclosure. */
+export function DaycareEarlyFaq() {
+  const items = [
+    { q: "Pre koho je škôlka určená?", a: DAYCARE_ELIGIBILITY_ANSWER },
+    ...FAQ.filter(({ q }) => q === "Bude môj psík počas dňa niekedy sám bez dozoru?"),
+  ];
+  return (
+    <section id="home-early-faq" className="relative overflow-hidden bg-secondary py-9 sm:py-12">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-4xl px-4">
+        <h2 className="section-title text-center text-2xl sm:text-3xl">Čo je dobré vedieť o škôlke?</h2>
+        <div className="mt-5 space-y-3">
+          {items.map(item => <details key={item.q} className="group rounded-3xl border border-forest/10 bg-card p-4 shadow-card">
+            <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 font-display text-sm font-bold text-forest sm:text-base">
+              {item.q}<span aria-hidden="true" className="text-lg text-coral group-open:rotate-45">+</span>
+            </summary>
+            <div className="mt-2 border-t border-forest/10 pt-3 text-sm leading-relaxed text-forest/80"><FaqAnswer question={item.q} answer={item.a} /></div>
+          </details>)}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const reqIcons = [Syringe, PawPrint, Droplets, HeartPulse];
 

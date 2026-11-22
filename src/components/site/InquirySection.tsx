@@ -36,9 +36,9 @@ export function InquiryCtaSection() {
   );
 }
 
-export function InquirySection() {
+export function InquirySection({ allScreens = false }: { allScreens?: boolean } = {}) {
   return (
-    <section id="informujte-sa" className="scroll-mt-24 bg-card pt-0 pb-10 lg:hidden">
+    <section id="informujte-sa" className={"scroll-mt-24 bg-card pt-0 pb-10 " + (allScreens ? "" : "lg:hidden")}>
       <div className="mx-auto max-w-2xl px-4">
         <SchoolmatesFormCrown groundAccent />
 

@@ -211,3 +211,10 @@ Toto je **kontrolný postup**, nie tvrdenie, že každý bod webu Chvostíkova p
 - Po `bun run build:pages` vykonaj `node scripts/check-seo-indexability.cjs`. Chybové hlásenie nesmie byť ignorované pred merge/deploy.
 - **Referenčné overenie 01.11.2026:** pri inkognito teste mobilného Cenníka bolo používateľom potvrdené `en=view_pricing`, `ep.cta_source=mobile_dock_lead_lead-pricing`, bez problémového `ep.source`; aktuálny webový kód `src/lib/analytics.ts` oddeľuje `cta_source` od Meta payloadu. GTM `GTM-WDMHSCZD` má podľa používateľa publikovaný prázdny kontajner (12.10.2024), GA4 `G-0VM48RXZV9` je načítaný priamo. Staré/nejasné riadky GA4 session akvizície neoznačovať automaticky ako opravené. Číselné výsledky a otvorené otázky sú **iba v súkromnej wiki**, nie v tomto public checklistu.
 - Priebeh, dátum a agregované výsledky reálneho auditu patria do súkromnej wiki `01-Chvostikovo/06-Web-SEO-tracking-a-suhlas.md`, nie do public repozitára.
+
+
+## Homepage brand and inquiry placement — 22 November 2026
+
+- Homepage hero keeps the original `home_hero_interest_mobile` source (label “Mám záujem”), centered on mobile; the matching desktop button uses `home_hero_interest_desktop`. The existing desktop inline form remains `hero_desktop_inline`.
+- The full-width inquiry under requirements preserves source `care_inline_mobile` for reporting continuity across mobile/desktop. The inline form under dog friendships preserves `home_friendship_interest_20261028`. No conversion on CTA click: only confirmed form success and the existing consent/dedup rules emit a Lead.
+- Keep each form instance’s `useId` fields unique. Extend `scripts/check-web-runtime.cjs` with homepage section order, the sole centered hero CTA, reviews inside hero, benefits under owner photos, both form placements, and scoped product/blog colors. Positive conversion checks use intercepted fixtures only.
