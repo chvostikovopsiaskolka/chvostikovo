@@ -155,7 +155,7 @@ export function AriaPreviewPage() {
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
-        <section className={isLiveLead ? "hero-safe-top relative flex min-h-[100svh] flex-col pt-7 sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
+        <section className={isLiveLead ? "hero-safe-top relative flex min-h-[100svh] flex-col pt-12 sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
           <PawTrailBackground landingBottomPaws />
 
           {/* Balance the first fold around the whole content group; Aria owns
@@ -164,32 +164,15 @@ export function AriaPreviewPage() {
           <div data-aria-hero-content className="relative z-10 w-full shrink-0">
             <div className={isLiveLead ? "mx-auto w-full max-w-4xl px-4 pb-1 pt-1 sm:pb-4 sm:pt-5 lg:pt-7" : "mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7"}>
             <div className="w-full min-w-0 text-center">
-              {/* Preserve the approved H1 position while moving the schoolmates onto the orange label. */}
+              {/* Screenshot hierarchy: H1, four schoolmates, badge, liquid copy, reviews. */}
               <div aria-hidden="true" data-aria-hero-heading-spacer className={isLiveLead ? "h-1 sm:h-5" : "h-[14px] sm:h-5"} />
-              <h1 className={(isLiveLead ? "mt-3 -translate-y-[5px] sm:translate-y-0 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>
+              <h1 className={(isLiveLead ? "mt-3 translate-y-0 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
 
-              {isLiveLead && (
-          <>{/* The two owner photos sit directly under the lead headline. */}
-          <div data-aria-intro-space className="relative z-10 mx-auto mt-2 w-full max-w-3xl px-0 sm:mt-5 lg:max-w-4xl">
-            <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:gap-4">
-              {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
-                <button type="button" key={photo.src} data-aria-review-photo={index + 1}
-                  aria-label={`Zobraziť fotografiu: ${photo.alt}`}
-                  onClick={() => setReviewPhotoOpen(index)}
-                  className="group relative h-[112px] min-w-0 overflow-hidden rounded-[18px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[126px] sm:h-[210px] lg:h-[280px]">
-                  <img src={photo.src} alt={photo.alt} width={672} height={896} loading="lazy" decoding="async"
-                    className={`h-full w-full object-cover saturate-[1.17] contrast-[1.05] transition-transform duration-300 group-hover:scale-[1.03] ${index === 0 ? "object-[50%_36%]" : "object-[50%_50%]"}`} />
-                </button>
-              ))}
-            </div>
-          </div>
-          </>
-              )}
-              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-[67px] w-fit max-w-full min-[390px]:mt-[79px] sm:mt-[96px] lg:mt-[124px]" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
-                {/* The existing four schoolmates now rest on the orange label, not above the H1. */}
+              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-[64px] w-fit max-w-full min-[390px]:mt-[70px] sm:mt-[88px] lg:mt-[116px]" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
+                {/* Four schoolmates rest directly above the badge as in the reference. */}
                 <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
                   <SchoolmatesFormCrown compact desktopWide />
                 </div>
@@ -227,6 +210,25 @@ export function AriaPreviewPage() {
           </>
           )}
         </section>
+
+        {isLiveLead && (
+          <section data-aria-lead-photos data-aria-intro-space aria-label="Fotografie psíkov zo škôlky"
+            className="relative z-10 bg-white px-4 pb-7 pt-4 sm:pb-10 sm:pt-7">
+            {/* Begin after the full-height hero to keep photos below the floating
+                Aria dock on the opening screen, never hidden behind the menu. */}
+            <div data-aria-review-gap-photos className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-2.5 sm:gap-4 lg:max-w-4xl">
+              {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
+                <button type="button" key={photo.src} data-aria-review-photo={index + 1}
+                  aria-label={`Zobraziť fotografiu: ${photo.alt}`}
+                  onClick={() => setReviewPhotoOpen(index)}
+                  className="group relative h-[112px] min-w-0 overflow-hidden rounded-[18px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[126px] sm:h-[210px] lg:h-[280px]">
+                  <img src={photo.src} alt={photo.alt} width={672} height={896} loading="lazy" decoding="async"
+                    className={`h-full w-full object-cover saturate-[1.17] contrast-[1.05] transition-transform duration-300 group-hover:scale-[1.03] ${index === 0 ? "object-[50%_36%]" : "object-[50%_50%]"}`} />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
           <SectionAmbientPaws />
