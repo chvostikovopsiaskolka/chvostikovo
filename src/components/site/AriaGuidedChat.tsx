@@ -99,16 +99,24 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
       setTypingId(null);
       return;
     }
+    // Aria first pauses as if composing, then reveals the answer gradually.
+    // One timer per active message; cleanup prevents late updates after closing.
     let count = 0;
-    const timer = window.setInterval(() => {
-      count = Math.min(text.length, count + 4);
-      setTypedLength(count);
-      if (count >= text.length) {
-        window.clearInterval(timer);
-        setTypingId(null);
-      }
-    }, 22);
-    return () => window.clearInterval(timer);
+    let interval: number | undefined;
+    const delay = window.setTimeout(() => {
+      interval = window.setInterval(() => {
+        count = Math.min(text.length, count + 2);
+        setTypedLength(count);
+        if (count >= text.length) {
+          window.clearInterval(interval);
+          setTypingId(null);
+        }
+      }, 32);
+    }, 650);
+    return () => {
+      window.clearTimeout(delay);
+      if (interval !== undefined) window.clearInterval(interval);
+    };
   }, [typingId, messages]);
 
   useEffect(() => {
@@ -213,9 +221,15 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
                     "rounded-[20px_20px_20px_6px] bg-white text-[#26322b]")}>
                   {isTyping ? (
                     <>
-                      <span aria-hidden="true">{message.text.slice(0, typedLength)}</span>
+                      {typedLength === 0 ? (
+                        <span aria-hidden="true" className="inline-flex items-center gap-1" data-aria-composing>
+                          <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f]" />
+                          <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" />
+                          <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" />
+                        </span>
+                      ) : <span aria-hidden="true">{message.text.slice(0, typedLength)}</span>}
                       <span className="sr-only">{message.text}</span>
-                      <span aria-hidden="true" className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-[#9e336f] align-middle" />
+                      {typedLength > 0 && <span aria-hidden="true" className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-[#9e336f] align-middle" />}
                     </>
                   ) : message.text}
                 </div>
