@@ -91,6 +91,7 @@ export function AriaLeadAssistant({
   const [panel, setPanel] = useState<Panel>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatActivated, setChatActivated] = useState(false);
+  const [requestedChatQuestion, setRequestedChatQuestion] = useState<"pricing" | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [pricingVisitOpen, setPricingVisitOpen] = useState(false);
 
@@ -274,12 +275,14 @@ export function AriaLeadAssistant({
   const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[10px] px-0.5 text-center text-forest transition-colors aria-expanded:bg-secondary/75 hover:bg-white/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
 
 
-  function openChat() {
+  function openChat(questionId?: "pricing") {
     if (!guidedChatPreview) return;
     setPanel(null);
+    setRequestedChatQuestion(questionId ?? null);
     setChatActivated(true);
     setChatOpen(true);
     void trackCookielessInteraction("explore_daycare", trackingPrefix + "_chat_open", "sk");
+    if (questionId) void trackCookielessInteraction("explore_daycare", trackingPrefix + "_chat_bubble_" + questionId, "sk");
   }
 
   const { width: sw, height: sh, tipX, tipY } = speechGeometry;
@@ -468,14 +471,16 @@ export function AriaLeadAssistant({
               </svg>
               {stage === "intro" ? (
                 guidedChatPreview ? (
-                  <button type="button" aria-label="Otvoriť chat s Ariou" onClick={openChat}
-                    className="pointer-events-auto relative z-10 text-left focus-visible:outline-2 focus-visible:outline-coral">
-                    <p className="font-display text-[11px] font-semibold leading-[1.35] tracking-normal sm:text-[13px]">
+                  <div className="pointer-events-auto relative z-10 min-w-0">
+                    <p className="font-display text-[11px] font-semibold leading-[1.4] tracking-normal sm:text-[13px]">
                       Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                       <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
-                      <span className="mt-1 block text-[10px] font-bold text-coral-dark sm:text-xs">Klikni na mňa a otvorím chat.</span>
                     </p>
-                  </button>
+                    <button type="button" data-aria-bubble-pricing-cta onClick={() => openChat("pricing")}
+                      className="mt-2 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#ffa414] px-3 py-2 text-center text-[11px] font-extrabold leading-snug text-[#26322b] shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9e336f] sm:text-xs">
+                      Aký je cenník škôlky? <ArrowRight aria-hidden size={15} className="shrink-0" />
+                    </button>
+                  </div>
                 ) : (
                   <p className="relative z-10 font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]">
                     Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
@@ -512,7 +517,7 @@ export function AriaLeadAssistant({
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           {guidedChatPreview ? (
             <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
-              data-aria-chat-trigger onClick={openChat} style={{ WebkitTapHighlightColor: "transparent" }}
+              data-aria-chat-trigger onClick={() => openChat()} style={{ WebkitTapHighlightColor: "transparent" }}
               className={"aria-chat-portrait pointer-events-auto absolute bottom-[calc(100%+12px)] -right-1 h-[92px] w-[92px] max-w-none rounded-full bg-transparent p-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:bottom-[calc(100%+12px)] sm:right-0 sm:h-[104px] sm:w-[104px] " + (panel ? "z-0" : "z-30")}> 
               <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
                 className="pointer-events-none h-full w-full object-contain contrast-[1.1] saturate-[1.05] drop-shadow-[0_3px_5px_rgba(0,0,0,.23)]" />
@@ -542,7 +547,7 @@ export function AriaLeadAssistant({
         {guidedChatPreview && chatActivated && (
           <AriaChatBoundary open={chatOpen} onClose={() => setChatOpen(false)}>
             <Suspense fallback={null}>
-              <AriaGuidedChat open={chatOpen} onClose={() => setChatOpen(false)} />
+              <AriaGuidedChat open={chatOpen} initialQuestionId={requestedChatQuestion} onClose={() => setChatOpen(false)} />
             </Suspense>
           </AriaChatBoundary>
         )}
