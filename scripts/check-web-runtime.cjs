@@ -704,7 +704,7 @@ if (!bellaris && brandPreviewCandidate) {
               // than asserting on the transient SSR fallback.
               await pathElement.waitFor({ state: 'attached', timeout: 6000 });
               const [speechBox, headBox, paths] = await Promise.all([
-                comicBubble.boundingBox(), portrait.boundingBox(), comicBubble.locator('svg path').count(),
+                comicBubble.boundingBox(), portrait.boundingBox(), comicBubble.locator('svg[data-aria-tail] > path').count(),
               ]);
               if (!speechBox || !headBox || paths !== 1)
                 throw new Error('Aria must render one outlined SVG path for speech and tail at ' + width +
