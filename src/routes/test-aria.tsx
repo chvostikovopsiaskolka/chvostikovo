@@ -149,10 +149,15 @@ export function AriaPreviewPage() {
 
   return (
     <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose">
-      {/* Keep Aria floating in the viewport throughout the lead journey.
-          The paid lead hero stays visually unchanged; the menu no longer
-          participates in the document layout. */}
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
+      {/* The six-FAQ guided assistant runs on the LEAD landing and its QA
+          twin, not on the Chvostikovo home page. Keep the dock floating;
+          on paid lead, "O nás" scrolls to the existing caretakers section. */}
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"}
+        onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)}
+        onOpenPuppyChecker={() => setPuppyModalOpen(true)}
+        puppyStartSectionId="aria-caretakers" guidedChatPreview portraitOnRight={isLiveLead}
+        anchorOverrides={isLiveLead ? { "aria-about": "aria-caretakers" } : undefined}
+        hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
         <section className={isLiveLead ? "hero-safe-top relative flex min-h-[calc(100svh-20px)] flex-col justify-center sm:min-h-[100svh] sm:justify-start sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
