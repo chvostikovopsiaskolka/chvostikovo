@@ -582,8 +582,8 @@ export function AriaLeadAssistant({
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           {guidedChatPreview ? (
             <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
-              data-aria-chat-trigger onClick={() => openChat()} style={{ WebkitTapHighlightColor: "transparent" }}
-              className={"aria-chat-portrait pointer-events-auto absolute bottom-[calc(100%+12px)] -right-1 h-[92px] w-[92px] max-w-none rounded-full bg-transparent p-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:bottom-[calc(100%+12px)] sm:right-0 sm:h-[104px] sm:w-[104px] " + (panel ? "z-0" : "z-30")}> 
+              data-aria-chat-trigger onClick={() => openChat()} style={{ WebkitTapHighlightColor: "transparent", WebkitTouchCallout: "none", userSelect: "none" }}
+              className={"aria-chat-portrait pointer-events-auto absolute bottom-[calc(100%+12px)] -right-1 h-[92px] w-[92px] max-w-none appearance-none rounded-full border-0 bg-transparent p-0 outline-none transition-none hover:bg-transparent active:bg-transparent focus:bg-transparent focus-visible:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest sm:bottom-[calc(100%+12px)] sm:right-0 sm:h-[104px] sm:w-[104px] " + (panel ? "z-0" : "z-30")}> 
               <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
                 className="pointer-events-none h-full w-full object-contain contrast-[1.1] saturate-[1.05] drop-shadow-[0_3px_5px_rgba(0,0,0,.23)]" />
             </button>

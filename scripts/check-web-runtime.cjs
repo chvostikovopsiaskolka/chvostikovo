@@ -914,8 +914,13 @@ if (!bellaris && brandPreviewCandidate) {
                     triggerBox.x + triggerBox.width > width + 4 ||
                     Math.abs((dockBox.x + dockBox.width / 2) - width / 2) > 12)
                   throw new Error('Aria portrait must float above the centered dock at ' + width);
-                if (await trigger.evaluate(el => getComputedStyle(el).webkitTapHighlightColor !== 'rgba(0, 0, 0, 0)'))
-                  throw new Error('Aria portrait must suppress the iOS tap highlight square');
+                if (await trigger.evaluate(el => {
+                  const style = getComputedStyle(el);
+                  return style.webkitTapHighlightColor !== 'rgba(0, 0, 0, 0)' ||
+                    style.backgroundColor !== 'rgba(0, 0, 0, 0)' ||
+                    style.webkitAppearance !== 'none';
+                }))
+                  throw new Error('Preview portrait must suppress the colored tap and click zone');
                 if (width === 390) {
                   const chatCta = page.locator('[data-aria-bubble-chat-cta]');
                   if (!await chatCta.isVisible() ||
@@ -939,9 +944,30 @@ if (!bellaris && brandPreviewCandidate) {
                       await questionMenu.locator('[data-aria-chat-other-cta]').count() !== 1 ||
                       await chat.locator('[data-aria-chat-turn="person"]').count())
                     throw new Error('Discover-more must show seven FAQs and Other without preselection');
-                  if (!await questionMenu.evaluate(el =>
-                    el.lastElementChild?.hasAttribute('data-aria-chat-other-cta')))
-                    throw new Error('Other-question CTA must be the final full-width item inside FAQ grid');
+                  // APP-01: FAQ is a fixed lower panel, never part of scrolling turns.
+                  const composer = chat.locator('[data-aria-chat-composer]');
+                  const disabledEntry = composer.locator('input');
+                  if (await questionMenu.evaluate(el => !!el.closest('[data-aria-chat-history]')) ||
+                      !await disabledEntry.isDisabled() ||
+                      !await composer.locator('svg[viewBox="0 0 33 36"]').count())
+                    throw new Error('Chat must pin FAQ above a pink-paw, read-only message composer');
+                  const [questionsBox, composerBox, historyBox] = await Promise.all([
+                    questionMenu.boundingBox(), composer.boundingBox(),
+                    chat.locator('[data-aria-chat-history]').boundingBox(),
+                  ]);
+                  if (!questionsBox || !composerBox || !historyBox ||
+                      questionsBox.y + questionsBox.height > composerBox.y + 3 ||
+                      historyBox.y + historyBox.height > questionsBox.y + 3)
+                    throw new Error('FAQ must stay below conversation and above the fake composer');
+                  const puppyRow = questionMenu.locator('[data-aria-chat-last-row]');
+                  const [puppyBox, otherBox] = await Promise.all([
+                    puppyRow.locator('[data-aria-chat-question="puppy"]').boundingBox(),
+                    puppyRow.locator('[data-aria-chat-other-cta]').boundingBox(),
+                  ]);
+                  if (!puppyBox || !otherBox || Math.abs(puppyBox.y - otherBox.y) > 5 ||
+                      Math.abs(puppyBox.height - otherBox.height) > 5 ||
+                      otherBox.x <= puppyBox.x)
+                    throw new Error('Pink puppy and Other must share the final two-column FAQ row');
                   const pink = await questionMenu.locator('[data-aria-chat-question="puppy"]').evaluate(el => getComputedStyle(el).backgroundColor);
                   if (pink === 'rgb(255, 255, 255)' || pink === 'rgba(0, 0, 0, 0)')
                     throw new Error('Puppy FAQ must be highlighted pink');
@@ -963,8 +989,10 @@ if (!bellaris && brandPreviewCandidate) {
                       await chat.locator('[data-aria-chat-turn="aria"]').count() !== 1 ||
                       !await chat.getByText(/Jednorazový celodenný vstup stojí 25 €./).count() ||
                       !await chat.getByText(/permanentka za 200 €/).count() ||
+                      !await chat.getByText(/ušetríš 50 €/).count() ||
+                      !await chat.locator('[data-aria-chat-turn="aria"] strong').filter({ hasText: /vyplň nezáväzný formulár/ }).count() ||
                       !await chat.locator('[data-aria-chat-turn="person"] svg[viewBox="0 0 33 36"]').count())
-                    throw new Error('Selected pricing answer or native pink paw missing');
+                    throw new Error('Selected pricing must preserve 25 €/200 €, emphasis and pink profile paw');
                   const followup = chat.locator('[data-aria-chat-followup]');
                   await followup.waitFor({ state: 'visible' });
                   const interestCta = followup.locator('[data-aria-chat-interest-cta]');
@@ -976,7 +1004,7 @@ if (!bellaris && brandPreviewCandidate) {
                   if (await followup.locator('[data-aria-chat-question]').count() !== 6 ||
                       await followup.locator('[data-aria-chat-other-cta]').count() !== 1 ||
                       await followup.locator('[data-aria-chat-question="pricing"]').count())
-                    throw new Error('Show all six unanswered topics and orange Other tile directly after pricing');
+                    throw new Error('Show all six unanswered topics with the Other tile in the dock after pricing');
 
                   await followup.locator('[data-aria-chat-question="requirements"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
@@ -995,8 +1023,19 @@ if (!bellaris && brandPreviewCandidate) {
                   if (!requirementsFit)
                     throw new Error('Four requirements cards must not overflow the mobile chat viewport');
                   if (await chat.locator('[data-aria-chat-followup] [data-aria-chat-question]').count() !== 5 ||
-                      !await chat.locator('[data-aria-chat-followup]').getByText(/vyplň nezáväzný formulár a my sa ti ozveme späť/i).count())
-                    throw new Error('After requirements show five remaining FAQs and new interest copy');
+                      !await chat.locator('[data-aria-chat-followup] [data-aria-chat-interest-cta]').count())
+                    throw new Error('After requirements show five remaining FAQs and working interest CTA');
+                  const firstCardGeometry = await requirementCards.first().evaluate(el => {
+                    const viewport = el.closest('[data-aria-chat-history]');
+                    const card = el.getBoundingClientRect();
+                    const frame = viewport?.getBoundingClientRect();
+                    return frame ? { topGap: card.top - frame.top, bottomGap: frame.bottom - card.bottom,
+                      cardHeight: card.height, viewportHeight: frame.height, scrollTop: viewport.scrollTop } : null;
+                  });
+                  if (!firstCardGeometry || firstCardGeometry.topGap < -2 ||
+                      firstCardGeometry.topGap > 130 || firstCardGeometry.bottomGap < -5)
+                    throw new Error('Finishing requirements must keep the first card visible: ' +
+                      JSON.stringify(firstCardGeometry));
                   await chat.locator('[data-aria-chat-followup] [data-aria-chat-other-cta]').click();
                   const questionForm = chat.locator('[data-aria-chat-other]');
                   await questionForm.waitFor({ state: 'visible' });

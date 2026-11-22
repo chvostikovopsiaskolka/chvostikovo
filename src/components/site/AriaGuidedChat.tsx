@@ -15,6 +15,20 @@ type ChatMode = "questions" | "interest" | "other" | "puppy" | "puppy_contact";
 type ChatMessage = { id: number; side: "person" | "aria"; text: string; questionId?: string };
 type Question = { id: string; title: string; answer: string };
 
+// Display emphasis without showing formatting markers during typewriter animation.
+const plainChatText = (value: string) => value.replace(/\*\*/g, "");
+function renderChatText(value: string, visibleLength = Number.POSITIVE_INFINITY) {
+  let remaining = visibleLength;
+  return value.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+    const bold = part.startsWith("**") && part.endsWith("**");
+    const text = bold ? part.slice(2, -2) : part;
+    const visible = text.slice(0, Math.max(0, remaining));
+    remaining -= visible.length;
+    if (!visible) return null;
+    return bold ? <strong key={index} className="font-extrabold">{visible}</strong> : visible;
+  });
+}
+
 const findAnswer = (question: string) => FAQ.find((item) => item.q === question)?.a || "";
 const priceOne = PRICING.find((item) => !item.highlight)?.price || "25 €";
 const pricePass = PRICING.find((item) => item.highlight)?.price || "200 €";
@@ -23,15 +37,16 @@ const chatQuestions: Question[] = [
   {
     id: "pricing",
     title: "Aký je cenník škôlky?",
-    answer: "Haf! 🐾 Jednorazový celodenný vstup stojí " + priceOne +
-      ". Sme otvorení od 7:00 do 17:00, pondelok až piatok.\n" +
-      "Ak plánuješ pravidelné návštevy, oplatí sa permanentka za " + pricePass +
-      ". Má 10 vstupov, platí 2 mesiace a ušetríš 50 € oproti jednorazovým vstupom.",
+    answer: "Haf! 🐾 **Jednorazový celodenný vstup stojí " + priceOne +
+      ".**\nSme otvorení od 7:00 do 17:00, pondelok až piatok.\n\n" +
+      "Ak plánuješ pravidelné návštevy, oplatí sa **permanentka za " + pricePass +
+      "**. Má **10 vstupov**, platí 2 mesiace a **ušetríš 50 €** oproti jednorazovým vstupom.\n\n" +
+      "**Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.**",
   },
   {
     id: "requirements",
     title: "Aké sú podmienky prijatia?",
-    answer: "Haf! 🐾 Toto sú naše hlavné podmienky prijatia. Každého nového psíka spoznáme aj počas bezplatnej úvodnej návštevy:",
+    answer: "Haf! 🐾 Toto sú naše hlavné podmienky prijatia:",
   },
   {
     id: "location",
@@ -41,12 +56,12 @@ const chatQuestions: Question[] = [
   {
     id: "space",
     title: "Aké priestory má škôlka?",
-    answer: "Máme vyhrievané vnútorné priestory na hru aj oddych a vlastný vonkajší výbeh s rozlohou približne 80 m². 🐾 Striedame aktivity s prestávkami.",
+    answer: "Máme vyhrievané vnútorné priestory na hru aj oddych a vlastný vonkajší výbeh s rozlohou približne 80 m². 🐾",
   },
   {
     id: "caretakers",
     title: "Kto sa postará o psíkov?",
-    answer: "Počas celého pobytu na psíkov dohliadajú minimálne dvaja opatrovatelia. 🐾 Sledujú hru a prispôsobujú aktivity aj oddych potrebám každého psíka.",
+    answer: "Haf! 🐾 Počas celého pobytu sa o psíkov starajú minimálne dvaja skúsení opatrovatelia – Adriana a Marek (moji rodičia). 🐾 Dohliadajú na spoločnú hru a aktivity aj oddych prispôsobujú potrebám každého psíka. Dôležitá je pre nich bezpečnosť, individuálny a láskavý prístup. Obaja absolvovali kurz prvej pomoci pre psov, aby sa vaši štvornohí parťáci cítili bezpečne a príjemne, bez zbytočného stresu.",
   },
   {
     id: "first_visit",
@@ -109,6 +124,9 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   const nextId = useRef(0);
   const chatId = useId();
   const unanswered = chatQuestions.filter(question => !answered.includes(question.id));
+  const introFinished = !introComposing && introLength >= introText.length;
+  const menuReady = introFinished && typingId === null &&
+    !(initialQuestionId === "pricing" && !autoPricingAsked.current && !answered.includes("pricing"));
 
   // Typewriter animation is visual only. Screen readers receive a complete
   // response in a single accessible text node; respect reduced motion.
@@ -116,8 +134,9 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     if (typingId === null) return;
     const text = messages.find(item => item.id === typingId)?.text;
     if (!text) { setTypingId(null); return; }
+    const visibleTextLength = plainChatText(text).length;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setTypedLength(text.length);
+      setTypedLength(visibleTextLength);
       setTypingId(null);
       return;
     }
@@ -128,9 +147,9 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     const mobile = window.matchMedia("(max-width: 639px)").matches;
     const delay = window.setTimeout(() => {
       interval = window.setInterval(() => {
-        count = Math.min(text.length, count + (mobile ? 3 : 2));
+        count = Math.min(visibleTextLength, count + (mobile ? 3 : 2));
         setTypedLength(count);
-        if (count >= text.length) {
+        if (count >= visibleTextLength) {
           window.clearInterval(interval);
           setTypingId(null);
         }
@@ -143,8 +162,23 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   }, [typingId, messages]);
 
   useEffect(() => {
-    if (open && scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [open, messages.length, typedLength, showChoices, mode]);
+    if (!open || !scrollRef.current) return;
+    const history = scrollRef.current;
+    const lastReply = messages[messages.length - 1];
+    if (lastReply?.questionId === "requirements" && typingId === null) {
+      const first = history.querySelector<HTMLElement>("[data-aria-chat-requirements] article");
+      if (first) {
+        // APP-01: never jump past the first requirement when all four cards mount.
+        const offset = first.getBoundingClientRect().top - history.getBoundingClientRect().top;
+        // Keep the first card fully visible even with the compact phone footer.
+        const availableTop = history.clientHeight - first.getBoundingClientRect().height - 12;
+        const topGap = Math.max(8, Math.min(42, availableTop));
+        history.scrollTop += offset - topGap;
+        return;
+      }
+    }
+    history.scrollTop = history.scrollHeight;
+  }, [open, messages.length, typedLength, mode, typingId]);
 
   useEffect(() => {
     if (open && mode === "questions" && messages.length && !showChoices && typingId === null) {
@@ -279,11 +313,11 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                           <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" />
                           <span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" />
                         </span>
-                      ) : <span aria-hidden="true">{message.text.slice(0, typedLength)}</span>}
-                      <span className="sr-only">{message.text}</span>
+                      ) : <span aria-hidden="true">{renderChatText(message.text, typedLength)}</span>}
+                      <span className="sr-only">{plainChatText(message.text)}</span>
                       {typedLength > 0 && <span aria-hidden="true" className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-[#9e336f] align-middle" />}
                     </>
-                  ) : message.text}
+                  ) : renderChatText(message.text)}
                   {!isTyping && message.questionId === "requirements" && (
                     <div data-aria-chat-requirements className="mt-3 space-y-2 whitespace-normal">
                       {ARIA_PREVIEW_REQUIREMENTS.map((item, index) => (
@@ -309,71 +343,59 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             );
           })}
 
-          {mode === "questions" && showChoices && typingId === null && unanswered.length > 0 &&
-            !(initialQuestionId === "pricing" && !autoPricingAsked.current && !answered.includes("pricing")) && (
-            <div className="pl-11">
-              {messages.length > 0 && <p className="mb-2 text-xs font-bold text-[#26322b]">Čo ťa ešte zaujíma?</p>}
-              <div data-aria-chat-questions className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
-                {unanswered.map(question => (
-                  <button key={question.id} type="button" data-aria-chat-question={question.id}
-                    onClick={() => question.id === "puppy" ? showPuppy() : ask(question)}
-                    className={"min-h-11 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold leading-snug shadow-sm transition focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
-                      (question.id === "puppy"
-                        ? "border-[#9e336f]/30 bg-[#f9e5ee] font-extrabold text-[#873063] hover:bg-[#f5d6e5]"
-                        : "border-[#e4d9cb] bg-white text-[#26322b] hover:border-[#aa4b00]")}>
-                    {question.title}
-                  </button>
-                ))}
-                <button type="button" data-aria-chat-other-cta onClick={showOther}
-                  className="col-span-full min-h-12 w-full rounded-xl bg-[#ffa414] px-3 py-2.5 text-xs font-extrabold text-[#26322b]">
-                  Zaujíma ma niečo iné?
-                </button>
-              </div>
-            </div>
-          )}
+        </div>
 
-          {mode === "questions" && messages.length > 0 && !showChoices && typingId === null && (
-            <div data-aria-chat-followup className="space-y-3 pl-11">
-              <p className="text-xs font-semibold leading-relaxed text-[#26322b]">
-                Pomohla ti odpoveď? Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.
-              </p>
+        {mode === "questions" && menuReady && (
+          <section data-aria-chat-action-panel aria-label="Časté otázky"
+            data-aria-chat-followup={messages.length > 0 ? "true" : undefined}
+            className="max-h-[min(42dvh,330px)] shrink-0 space-y-2 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/75 px-3 py-3 backdrop-blur-2xl sm:px-5">
+            {messages.length > 0 && !showChoices && (
               <button ref={actionRef} type="button" data-aria-chat-interest-cta onClick={showInterest}
-                className="min-h-12 w-full rounded-xl bg-[#9e336f] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm">
+                className="min-h-11 w-full rounded-xl bg-[#9e336f] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm">
                 Mám záujem
               </button>
-              <p className="text-xs font-semibold leading-relaxed text-[#26322b]">
-                Ak ťa ešte zaujíma niečo viac, vyber si ďalšiu otázku:
-              </p>
-              <div data-aria-chat-questions className="grid grid-cols-2 gap-2">
-                {unanswered.map(question => (
+            )}
+            <p className="text-xs font-semibold leading-relaxed text-[#26322b]">
+              {messages.length === 0 ? "Čo ťa zaujíma?" :
+                unanswered.length ? "Čo ťa ešte zaujíma?" : "Prešli sme všetky pripravené otázky."}
+            </p>
+            <div data-aria-chat-questions className="grid grid-cols-2 gap-2">
+              {unanswered.filter(question => question.id !== "puppy").map(question => (
+                <button key={question.id} type="button" data-aria-chat-question={question.id}
+                  onClick={() => ask(question)}
+                  className="min-h-11 rounded-xl border border-[#e4d9cb] bg-white px-2.5 py-2.5 text-left text-xs font-semibold leading-snug text-[#26322b] shadow-sm transition hover:border-[#aa4b00] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
+                  {question.title}
+                </button>
+              ))}
+              <div data-aria-chat-last-row className="col-span-2 grid grid-cols-2 gap-2">
+                {unanswered.filter(question => question.id === "puppy").map(question => (
                   <button key={question.id} type="button" data-aria-chat-question={question.id}
-                    onClick={() => question.id === "puppy" ? showPuppy() : ask(question)}
-                    className={"min-h-12 rounded-xl border px-2.5 py-2 text-left text-xs font-semibold leading-snug focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
-                      (question.id === "puppy"
-                        ? "border-[#9e336f]/30 bg-[#f9e5ee] font-extrabold text-[#873063]"
-                        : "border-[#e4d9cb] bg-white text-[#26322b]")}>
+                    onClick={showPuppy}
+                    className="min-h-11 rounded-xl border border-[#9e336f]/30 bg-[#f9e5ee] px-2.5 py-2.5 text-left text-xs font-extrabold leading-snug text-[#873063] shadow-sm transition hover:bg-[#f5d6e5] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
                     {question.title}
                   </button>
                 ))}
                 <button type="button" data-aria-chat-other-cta onClick={showOther}
-                  className="col-span-2 min-h-12 rounded-xl bg-[#ffa414] px-2.5 py-2 text-center text-xs font-extrabold text-[#26322b] shadow-sm focus-visible:outline-2 focus-visible:outline-[#9e336f]">
-                  Zaujíma ma niečo iné?
+                  className={"min-h-11 rounded-xl border border-[#e4d9cb] bg-white px-2.5 py-2.5 text-left text-xs font-semibold leading-snug text-[#26322b] shadow-sm transition hover:border-[#aa4b00] focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
+                    (unanswered.some(question => question.id === "puppy") ? "" : "col-span-2")}>
+                  Mám inú otázku?
                 </button>
               </div>
             </div>
-          )}
+          </section>
+        )}
 
-          {mode === "questions" && showChoices && unanswered.length === 0 && typingId === null && (
-            <div data-aria-chat-followup className="space-y-2 pl-11">
-              <p className="text-xs font-semibold text-[#26322b]">Prešli sme všetky pripravené otázky. Chceš nám nechať kontakt?</p>
-              <button type="button" onClick={showInterest} className="min-h-11 w-full rounded-xl bg-[#9e336f] text-xs font-bold text-white">Mám záujem</button>
-              <div data-aria-chat-questions className="grid grid-cols-2 gap-2">
-                <button type="button" data-aria-chat-other-cta onClick={showOther}
-                  className="col-span-full min-h-12 rounded-xl bg-[#ffa414] px-3 text-xs font-extrabold text-[#26322b]">Zaujíma ma niečo iné?</button>
-              </div>
-            </div>
-          )}
-        </div>
+        {mode === "questions" && (
+          <div data-aria-chat-composer className="flex shrink-0 items-center gap-2 border-t border-white/70 bg-white/85 px-3 py-3 backdrop-blur-2xl sm:px-5">
+            <span aria-label="Profil návštevníka" className="grid size-10 shrink-0 place-items-center rounded-full bg-[#f6d8e9] text-[#9e336f]">
+              <ChvostikovoPaw className="size-5" />
+            </span>
+            <input type="text" disabled readOnly
+              aria-label="Písanie správ zatiaľ nie je dostupné"
+              placeholder="Napísať správu (pripravujeme)"
+              className="min-h-11 min-w-0 flex-1 cursor-not-allowed rounded-2xl border border-[#e4d9cb] bg-white px-4 text-sm text-[#26322b] placeholder:text-[#7f867f] disabled:opacity-100" />
+          </div>
+        )}
 
         {mode !== "questions" && (
           <div className="max-h-[61%] shrink-0 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/65 backdrop-blur-2xl p-3 sm:p-4">
