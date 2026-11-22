@@ -235,7 +235,7 @@ export function DaycarePhotoCarousel({ language = "sk", includeLeadHighlights = 
             const firstCenter = first.getBoundingClientRect().left - el.getBoundingClientRect().left +
               first.getBoundingClientRect().width / 2 + el.scrollLeft;
             const current = Math.round((center - firstCenter) / stride);
-            const next = Math.max(0, Math.min(PHOTOS.length * 2 - 1, current + (dx < 0 ? 1 : -1)));
+            const next = Math.max(0, Math.min(photos.length * 2 - 1, current + (dx < 0 ? 1 : -1)));
             const target = Math.max(0, firstCenter + next * stride - el.clientWidth / 2);
             requestAnimationFrame(() => el.scrollTo({ left: target, behavior: "smooth" }));
             resumeAfterPause();
