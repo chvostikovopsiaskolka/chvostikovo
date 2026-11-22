@@ -85,7 +85,7 @@ export function ShortForm({
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: submittedPhone,
         email: String(fd.get("email") ?? "").trim() || undefined,
-        zaujem: hideInterest ? interestValue + (dogName ? " – Meno psíka: " + dogName : "") : String(fd.get("zaujem") ?? ""),
+        zaujem: hideInterest ? interestValue + (dogName && !puppyCheck ? " – Meno psíka: " + dogName : "") : String(fd.get("zaujem") ?? ""),
         ...(breed ? { plemeno: breed } : {}),
         ...(puppyCheck ? { puppy_check: { ...puppyCheck, ...(dogName ? { dog_name: dogName } : {}), ...(breed ? { dog_breed: breed } : {}) } } : {}),
       }, attemptId);
