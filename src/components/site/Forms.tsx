@@ -93,7 +93,8 @@ export function ShortForm({
         ...(puppyCheck ? { puppy_check: { ...puppyCheck, ...(dogName ? { dog_name: dogName } : {}), ...(breed ? { dog_breed: breed } : {}) } } : {}),
       }, attemptId);
       if (showQuestionField) {
-        void trackCookielessInteraction("explore_daycare", "aria_preview_v3_chat_other_question_submitted", "sk");
+        void trackCookielessInteraction("explore_daycare", trackingSource?.startsWith("lead_landing_")
+          ? "lead_landing_aria_chat_other_question_submitted" : "aria_preview_v3_chat_other_question_submitted", "sk");
       } else {
         void trackCookielessInteraction("form_submit", trackingSource || "informational_form", "sk", attemptId);
       }
