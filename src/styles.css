@@ -1122,7 +1122,7 @@
   /* The browser toolbar is outside the visual viewport. Keep the dock low,
      above the safe-area inset, rather than 94px above it over the reviews. */
   .lead-brand-live [data-aria-guide] {
-    bottom: max(32px, calc(env(safe-area-inset-bottom) + 10px));
+    bottom: max(24px, calc(env(safe-area-inset-bottom) + 4px));
   }
   .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
   /* The horizontal scroll container used to clip the card shadows at 4px.
