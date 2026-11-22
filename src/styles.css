@@ -1176,16 +1176,14 @@
   }
 }
 
-/* Paid LEAD desktop speech: a real, readable card beside left-hand Aria.
-   On mobile keep the compact first-fold sizing and the fixed dock intact. */
+/* Paid LEAD desktop: give Aria her own portrait column, outside the text
+   area. The bubble's width is based on the remaining flex space exactly once. */
 @media (min-width: 1024px) {
   .lead-brand-live [data-aria-speech] {
-    /* The flex parent already allocates the left 215px gutter.
-       Subtracting it again collapsed the desktop speech to 255px. */
-    width: min(470px, 100%);
-    max-width: min(470px, 100%);
+    width: min(440px, 100%);
+    max-width: min(440px, 100%);
     min-height: 78px;
-    padding: 14px 20px;
+    padding: 14px 22px;
   }
 }
 
