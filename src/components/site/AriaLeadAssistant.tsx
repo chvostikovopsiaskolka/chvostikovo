@@ -79,7 +79,7 @@ export function AriaLeadAssistant({
         width: Math.round(bubble.width),
         height: Math.round(bubble.height),
         tipX: Math.round(head.left + head.width * (guidedChatPreview ? 0.32 : 0.68) - bubble.left),
-        tipY: Math.round(head.top + head.height * 0.43 - bubble.top),
+        tipY: Math.round(head.top + head.height * (guidedChatPreview ? 0.65 : 0.43) - bubble.top),
       };
       setSpeechGeometry(prev =>
         Object.keys(next).every(key => prev[key as keyof typeof prev] === next[key as keyof typeof next]) ? prev : next);
@@ -250,12 +250,20 @@ export function AriaLeadAssistant({
   }
 
   const { width: sw, height: sh, tipX, tipY } = speechGeometry;
+  // The preview portrait stays ABOVE the centered floating menu.
+  // Keep the balloon's full rounded bottom border. Its right edge opens into
+  // a short pair of Bezier curves: broad at the balloon, tapering to Aria's face.
+  // Clamping both attachment heights keeps the tail away from the corner even
+  // when the intro copy wraps differently on narrow iPhones.
+  const tailTopY = Math.max(22, Math.min(sh - 40, tipY + 12));
+  const tailBottomY = Math.min(sh - 17, Math.max(tailTopY + 22, tipY + 38));
   const rightSpeechPath = [
     "M 16 1",
     `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
-    `L ${sw - 1} ${sh - 18}`,
-    `C ${sw - 1} ${sh - 8} ${tipX - 16} ${tipY - 15} ${tipX} ${tipY}`,
-    `C ${tipX - 14} ${tipY - 8} ${sw - 32} ${sh - 1} ${sw - 30} ${sh - 1}`,
+    `L ${sw - 1} ${tailTopY}`,
+    `C ${sw + 7} ${tailTopY - 5} ${tipX - 13} ${tipY + 2} ${tipX} ${tipY}`,
+    `C ${tipX - 15} ${tipY + 12} ${sw - 1} ${tailBottomY - 7} ${sw - 1} ${tailBottomY}`,
+    `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
     `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
     "L 1 16 Q 1 1 16 1 Z",
   ].join(" ");
