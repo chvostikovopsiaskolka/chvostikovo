@@ -883,6 +883,15 @@ if (!bellaris && brandPreviewCandidate) {
                   await freshTrigger.click();
                   await page.locator('[data-aria-chat]').waitFor({ state: 'visible' });
                   await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
+                  await page.locator('[data-aria-chat]').waitFor({ state: 'hidden' });
+                  // Browser-specific dialog close animations must finish before
+                  // the next section scroll is tested. This is an app contract:
+                  // closing chat must actually unlock the underlying page.
+                  await page.waitForFunction(() => {
+                    const html = getComputedStyle(document.documentElement);
+                    const body = getComputedStyle(document.body);
+                    return html.overflow !== 'hidden' && body.overflow !== 'hidden' && body.position !== 'fixed';
+                  }, null, { timeout: 7000 });
 
                   // Simulate a stale/lost lazy chunk in a completely isolated
                   // browser context. Never pollute the normal page: its consent,
@@ -995,10 +1004,24 @@ if (!bellaris && brandPreviewCandidate) {
                 });
                 if (requirementsEnd < 0) throw new Error('Aria requirements boundary missing');
                 await page.evaluate(y => window.scrollTo(0, y), requirementsEnd + 20);
-                await page.waitForTimeout(220);
-                if (await aria.getAttribute('data-aria-stage') !== 'contact' ||
-                    !await aria.getByText(/Vyplňte nezáväzný formulár/).count())
-                  throw new Error('Contact offer should replace puppy text after requirements at ' + width);
+                // Do not assume iOS/Chromium scroll + React useEffect settles
+                // within 220ms after the dialog closes. Check the actual state.
+                const contactReady = await page.waitForFunction(() => {
+                  const dock = document.querySelector('[data-aria-guide]');
+                  return dock?.getAttribute('data-aria-stage') === 'contact' &&
+                    (dock.textContent || '').includes('Vyplňte nezáväzný formulár');
+                }, null, { timeout: 7000 }).then(() => true).catch(() => false);
+                if (!contactReady) {
+                  const state = await page.evaluate(() => ({
+                    stage: document.querySelector('[data-aria-guide]')?.getAttribute('data-aria-stage'),
+                    scrollY: window.scrollY,
+                    bodyPosition: getComputedStyle(document.body).position,
+                    rootOverflow: getComputedStyle(document.documentElement).overflow,
+                    targetBottom: document.getElementById('lead-requirements')?.getBoundingClientRect().bottom,
+                    viewportHeight: window.innerHeight,
+                  }));
+                  throw new Error('Contact offer should replace puppy text after requirements at ' + width + ': ' + JSON.stringify(state));
+                }
                 const contactDock = await aria.locator('[data-aria-dock]').boundingBox();
                 if (!contactDock || Math.abs(contactDock.y - dock.y) > 3)
                   throw new Error('Aria fixed navigation jumped vertically on section change at ' + width);
