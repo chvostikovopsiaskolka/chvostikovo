@@ -1098,3 +1098,6 @@
 .aria-brand-experiment [data-aria-speech] { max-width: min(75vw, 390px); }
 .aria-brand-experiment .paw-trail-background .paw-ambient-print,
 .aria-brand-experiment .paw-trail-background .paw-trail-print { fill: none; stroke: #ffa414; stroke-width: 2.2; stroke-linejoin: round; }
+
+.aria-brand-experiment #aria-puppy-check .bg-card { background-color: #fff; }
+.aria-brand-experiment [data-aria-friendship-card] { background-color: #fff; }
