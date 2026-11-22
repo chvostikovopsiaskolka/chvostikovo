@@ -112,7 +112,7 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
           setTypingId(null);
         }
       }, 32);
-    }, 650);
+    }, 1100);
     return () => {
       window.clearTimeout(delay);
       if (interval !== undefined) window.clearInterval(interval);
