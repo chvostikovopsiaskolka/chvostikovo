@@ -1945,8 +1945,13 @@ if (!bellaris && brandPreviewCandidate) {
             if (url.pathname === '/psia-skolka-kosice/') {
               // Approved paid-LEAD section navigation: the bottom interest button
               // scrolls to the existing inline form, never opens an above-dock dialog.
-              const inline = page.locator('#aria-hero-form [data-lead-step-form]');
+              const inline = page.locator('#aria-hero-form');
               await inline.waitFor({ state: 'visible', timeout: 5000 });
+              // An earlier synthetic, consented form submission in this same
+              // browser case may have replaced the form with its success receipt.
+              // Both are legitimate *in-page* states, unlike the retired modal.
+              if (!await inline.locator('[data-lead-step-form], [data-lead-step-success]').count())
+                throw new Error('Paid LEAD interest target is missing form or prior submission receipt');
               await page.waitForFunction(() => {
                 const form = document.querySelector('#aria-hero-form')?.getBoundingClientRect();
                 return Boolean(form && form.top >= -8 && form.top <= window.innerHeight - 32);
