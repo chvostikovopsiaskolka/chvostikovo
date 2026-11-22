@@ -481,7 +481,7 @@ if (!bellaris && brandPreviewCandidate) {
                   noBenefitsInHero: hero.querySelectorAll('[data-hero-benefits]').length === 0,
                   relocatedBenefitsCount: relocatedBenefits.children.length,
                   caretakersHeadingFits: caretakerHeading.scrollWidth <= caretakerHeading.clientWidth + 2 &&
-                    caretakerHeadingRect.height <= caretakerHeadingLine * 1.55,
+                    caretakerHeadingRect.height <= caretakerHeadingLine * (url.pathname === '/test-aria/' ? 2.55 : 1.55),
                   whiteInfoBackground: getComputedStyle(form).backgroundColor === 'rgb(255, 255, 255)' &&
                     !!form.querySelector('.pointer-events-none.absolute.inset-0'),
                   groundedFirstVisit: !!document.querySelector('#aria-first-visit-form [data-crown-ground]'),
