@@ -503,6 +503,15 @@ if (!bellaris && brandPreviewCandidate) {
                   floatingDockFixed: !!floatingGuide && getComputedStyle(floatingGuide).position === 'fixed' && !hero.contains(floatingGuide),
                   floatingDockBottomOffset: floatingGuide ? window.innerHeight - floatingGuide.getBoundingClientRect().bottom : -1,
                   floatingReviewGap: floatingBubble && reviewCardRect ? floatingBubble.getBoundingClientRect().top - reviewCardRect.bottom : -1,
+                  heroTopGap: headlineRect.top,
+                  heroBalancedGaps: window.location.pathname !== '/psia-skolka-kosice/' ||
+                    window.innerWidth < 375 || window.innerWidth > 430 ||
+                    (!!floatingBubble && !!reviewCardRect &&
+                      headlineRect.top >= 40 &&
+                      floatingBubble.getBoundingClientRect().top - reviewCardRect.bottom >= 35 &&
+                      Math.abs(headlineRect.top -
+                        (floatingBubble.getBoundingClientRect().top - reviewCardRect.bottom)) <=
+                        Math.max(56, window.innerHeight * 0.08)),
                   softenedShadowRoom: reviewTrack && reviewCardRect ? reviewTrack.getBoundingClientRect().bottom - reviewCardRect.bottom : -1,
                   reviewLinkSize: parseFloat(getComputedStyle(reviewTrack?.querySelector('figure button') || reviews).fontSize),
                   photoApprovedAssets: photoImages.length === 2 &&
@@ -567,6 +576,7 @@ if (!bellaris && brandPreviewCandidate) {
                      (width <= 430 && (firstFold.floatingDockBottomOffset < 12 || firstFold.floatingDockBottomOffset > 54)) ||
                      (width >= 390 && width <= 430 && firstFold.floatingReviewGap < 8) ||
                      !firstFold.paidPhotosBelowFloatingDock || !firstFold.paidDescriptionBlack ||
+                     !firstFold.heroBalancedGaps ||
                      (width <= 430 && (firstFold.softenedShadowRoom < 16 || firstFold.reviewLinkSize > 13)))) ||
                   firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||

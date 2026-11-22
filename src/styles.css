@@ -1150,6 +1150,15 @@
   .lead-brand-live [data-aria-guide] {
     bottom: max(18px, env(safe-area-inset-bottom));
   }
+  /* Center the whole H1 → dog crown → liquid copy → reviews group in
+     the visual area above the floating Aria bubble. The shared safe-top
+     declaration overrides Tailwind pt-* on mobile, so control its CSS
+     variable here. Reserve the dock footprint at the bottom without
+     making the reviews, photos or menu position: absolute. */
+  .lead-brand-live .hero-safe-top {
+    --hero-content-top: 56px;
+    padding-bottom: 216px;
+  }
   .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
   /* The horizontal scroll container used to clip the card shadows at 4px.
      Leave enough real space for a soft fade before the floating speech. */
