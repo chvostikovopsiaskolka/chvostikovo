@@ -84,7 +84,7 @@ export function AriaLeadAssistant({
   /** Starts the puppy speech only once the visitor reaches this section. */
   puppyStartSectionId?: string;
   anchorOverrides?: Record<string, string>;
-  /** Enables the messenger-style preview only on /test-aria/. */
+  /** Enables the guided Aria on the lead landing and its QA twin. */
   guidedChatPreview?: boolean;
   /** Reuse the preview\'s right-side speech outline without enabling its chatbot. */
   portraitOnRight?: boolean;
@@ -566,7 +566,10 @@ export function AriaLeadAssistant({
         {guidedChatPreview && chatActivated && (
           <AriaChatBoundary open={chatOpen} onClose={() => setChatOpen(false)}>
             <Suspense fallback={null}>
-              <AriaGuidedChat open={chatOpen} initialQuestionId={requestedChatQuestion} onClose={() => setChatOpen(false)} />
+              <AriaGuidedChat open={chatOpen} initialQuestionId={requestedChatQuestion}
+                trackingPrefix={trackingPrefix === "lead_landing_aria" ? "lead_landing_aria_chat" : "aria_preview_v3_chat"}
+                formPrefix={trackingPrefix === "lead_landing_aria" ? "lead_landing_aria_chat" : "aria_preview_chat"}
+                onClose={() => setChatOpen(false)} />
             </Suspense>
           </AriaChatBoundary>
         )}
