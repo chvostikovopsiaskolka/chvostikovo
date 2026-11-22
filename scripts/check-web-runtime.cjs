@@ -257,18 +257,17 @@ if (!bellaris && brandPreviewCandidate) {
               if (url.pathname === '/psia-skolka-kosice/') {
                 const layout = await page.evaluate(() => {
                   const hero = document.querySelector('section.hero-safe-top');
-                  const selectors = ['h1', '[data-aria-review-gap-photos]', '[data-aria-service-group]', '[data-aria-hero-description]', '[data-aria-hero-content] [data-aria-review-photo]', '[data-aria-hero-content] [data-aria-review-photo]'];
+
                   const rect = selector => hero?.querySelector(selector)?.getBoundingClientRect();
                   const photos = [...document.querySelectorAll('[data-aria-review-photo]')];
                   const dock = document.querySelector('[data-aria-guide]');
-                  const reviews = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]');
-                  const reviewSection = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.parentElement;
-                  const reviewRoot = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.closest('[data-aria-review-gap-photos]');
+                  const reviews = document.querySelector('#recenzie')?.getBoundingClientRect();
+
                   const heading = rect('h1');
-                  const photo = rect('[data-aria-review-gap-photos]');
+                  const photo = document.querySelector('[data-aria-lead-photos] [data-aria-review-gap-photos]')?.getBoundingClientRect();
                   const badge = rect('[data-aria-service-group]');
                   const description = rect('[data-aria-hero-description]');
-                  const review = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.getBoundingClientRect();
+
                   const menu = dock?.getBoundingClientRect();
                   const form = document.querySelector('#aria-hero-form')?.getBoundingClientRect();
                   return {
@@ -278,17 +277,23 @@ if (!bellaris && brandPreviewCandidate) {
                     headingBottom: heading?.bottom,
                     photoTop: photo?.top,
                     photoBottom: photo?.bottom,
+                    reviewBottom: reviews?.bottom,
                     badgeTop: badge?.top,
                     menuBottom: menu?.bottom,
                     formTop: form?.top,
                     menuPosition: dock ? getComputedStyle(dock).position : '',
                     menuInline: !!dock && hero?.contains(dock),
-                    reviewExists: !!hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]'),
+                    reviewExists: !!reviews,
                   };
                 });
                 if (!layout.copy.includes('užije si pohyb'))
                   throw new Error('Lead hero lost approved wording užije si pohyb');
-                if (layout.heights.length !== 2 || layout.photoTop < layout.headingBottom || layout.badgeTop < layout.photoBottom || layout.menuPosition !== 'fixed' || layout.menuInline || layout.formTop < layout.menuBottom)
+                if (layout.heights.length !== 2 || !layout.reviewExists ||
+                    layout.badgeTop < layout.headingBottom + 50 ||
+                    layout.photoTop < layout.reviewBottom + 12 ||
+                    layout.photoTop < layout.menuBottom + 8 ||
+                    layout.photoBottom > layout.formTop - 8 ||
+                    layout.menuPosition !== 'fixed' || layout.menuInline || layout.formTop < layout.menuBottom)
                   throw new Error('Lead hero section order regressed: ' + JSON.stringify(layout));
                 if (layout.width < 500 && layout.heights.some(h => h < 110))
                   throw new Error('Lead mobile photo cards too short: ' + JSON.stringify(layout));
