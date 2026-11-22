@@ -436,14 +436,28 @@ if (!bellaris && brandPreviewCandidate) {
               const nav = ariaDesktop.locator('[data-aria-section-navigation="true"]');
               if (await nav.locator('button').count() !== 5 || await ariaDesktop.locator('[data-aria-panel]').count())
                 throw new Error('Paid LEAD should have five in-page shortcuts and no floating panel');
+              if (await page.locator('#lead-section-menu').count() ||
+                  await page.getByRole('heading', { name: 'Prejsť na sekciu', exact: true }).count())
+                throw new Error('Redundant lead section navigation must be removed');
               for (const [label,id] of [['O nás','aria-about'],['Cenník škôlky','lead-pricing'],
-                ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form'],
-                ['Otvoriť menu','lead-section-menu']]) {
+                ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form']]) {
                 if (!await page.locator('#'+id).count()) throw new Error('Missing paid scroll target '+id);
                 await nav.getByRole('button',{name:label,exact:true}).click();
                 if (await ariaDesktop.locator('[data-aria-panel]').count())
-                  throw new Error('Paid dock must not open above-dock panels');
+                  throw new Error('Paid section shortcuts must scroll, not open panels');
               }
+              await nav.getByRole('button', { name: 'Otvoriť menu' }).click();
+              await ariaDesktop.locator('[data-aria-panel="menu"]').waitFor({ state: 'visible' });
+              if (!await ariaDesktop.locator('[data-aria-menu-logo]').isVisible())
+                throw new Error('Paid Menu must use existing dock menu with wordmark');
+              await ariaDesktop.locator('[data-aria-menu]').getByRole('button', { name: /Fotogaléria/ }).click();
+              await page.waitForFunction(() => {
+                const target = document.getElementById('lead-photo-carousel');
+                const y = target?.getBoundingClientRect().top ?? -1000;
+                return y >= 60 && y <= 112;
+              }, null, {timeout: 9000});
+              if (await ariaDesktop.locator('[data-aria-panel]').count())
+                throw new Error('Paid Menu did not close after photo navigation');
               // APP-01: about begins at the actual team photo, not repeated content.
               await nav.getByRole('button',{name:'O nás',exact:true}).click();
               await page.waitForFunction(() => {
@@ -456,6 +470,33 @@ if (!bellaris && brandPreviewCandidate) {
                   await nav.getByRole('button',{name:'O nás'}).locator('svg').count() !== 1)
                 throw new Error('Paid about navigation must lead to the owners photo with outline icon');
               await page.waitForTimeout(1000);
+              // User screenshot was captured at the footer: inspect the
+              // actual desktop contact speech, not just path correctness.
+              await page.evaluate(() => {
+                document.documentElement.style.scrollBehavior = 'auto';
+                window.scrollTo(0, document.documentElement.scrollHeight);
+              });
+              await page.waitForFunction(() => document.querySelector('[data-aria-guide]')?.getAttribute('data-aria-stage') === 'contact');
+              await page.waitForFunction(() => document.querySelector('[data-aria-speech]')?.getAttribute('data-aria-outline-ready') === 'true');
+              const footerBubble = await page.evaluate(() => {
+                const bubble = document.querySelector('[data-aria-speech]').getBoundingClientRect();
+                const head = document.querySelector('[data-aria-dock] img[alt^="Aria"]').getBoundingClientRect();
+                const dock = document.querySelector('[data-aria-dock]').getBoundingClientRect();
+                const svg = document.querySelector('[data-aria-speech] svg[data-aria-tail]');
+                return {
+                  headGap: bubble.left - head.right,
+                  dockGap: dock.top - bubble.bottom,
+                  width: bubble.width,
+                  rightEdge: bubble.right,
+                  tipX: Number(svg.dataset.tipX),
+                  viewport: window.innerWidth,
+                };
+              });
+              if (footerBubble.headGap < 8 || footerBubble.dockGap < 8 ||
+                  footerBubble.width < 455 || footerBubble.rightEdge > footerBubble.viewport - 8 ||
+                  footerBubble.tipX >= -8)
+                throw new Error('Paid desktop contact bubble overlaps head/dock or is too narrow: ' +
+                  JSON.stringify(footerBubble));
             } else if (url.pathname === '/test-aria/') {
               // On the preview the dock is navigation, not three stacked
               // overlays. Each item must scroll to its real site section.
@@ -795,8 +836,11 @@ if (!bellaris && brandPreviewCandidate) {
                 if (!contour.roundedBottomRight || !contour.roundedBottomLeft ||
                     contour.top < 16 || contour.bottom <= contour.top ||
                     contour.bottom > contour.height - 16 ||
-                    headBox.x > speechBox.x || headBox.x + headBox.width < speechBox.x ||
+                    // The actual body must start to the RIGHT of the head.
+                    // Previous checks allowed their boxes to overlap almost fully.
+                    speechBox.x < headBox.x + headBox.width + 8 ||
                     speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
+                    tip.x >= -8 ||
                     (width >= 1024 && (textMetrics.fontSize < 16 || textMetrics.maxWidth < 450)) ||
                     await aria.locator('[data-aria-chat-trigger], [data-aria-chat]').count())
                   throw new Error('Paid Aria must have a readable left-side head and intact right bubble: ' +
@@ -1282,14 +1326,20 @@ if (!bellaris && brandPreviewCandidate) {
                 const dockNav = aria.locator('[data-aria-section-navigation="true"]');
                 if (await dockNav.locator('button').count() !== 5)
                   throw new Error('Paid mobile dock must contain five section shortcuts');
+                if (await page.locator('#lead-section-menu').count())
+                  throw new Error('Redundant paid section list reappeared on mobile');
                 for (const [label,id] of [['O nás','aria-about'],['Cenník škôlky','lead-pricing'],
-                  ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form'],
-                  ['Otvoriť menu','lead-section-menu']]) {
+                  ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form']]) {
                   if (!await page.locator('#'+id).count()) throw new Error('Missing paid nav anchor '+id);
                   await dockNav.getByRole('button',{name:label,exact:true}).click();
                   if (await aria.locator('[data-aria-panel]').count())
-                    throw new Error('Paid dock may not open old floating panels');
+                    throw new Error('Paid shortcut should navigate directly');
                 }
+                await dockNav.getByRole('button', { name: 'Otvoriť menu' }).click();
+                await aria.locator('[data-aria-panel="menu"]').waitFor({ state: 'visible' });
+                await aria.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
+                if (await aria.locator('[data-aria-panel]').count())
+                  throw new Error('Paid mobile Menu remained open');
                 await page.waitForTimeout(950);
               } else if (url.pathname === '/test-aria/') {
                 const navItems = [
@@ -1563,7 +1613,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
                   ? ['recenzie', 'lead-photo-carousel', 'aria-hero-form', 'aria-caretakers', 'aria-about',
                      'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
-                     'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form', 'lead-section-menu']
+                     'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
                      'lead-benefits', 'lead-pricing', 'lead-requirements', 'lead-faq',
                      'aria-puppy-check', 'lead-first-visit'];
