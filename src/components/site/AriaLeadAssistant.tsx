@@ -426,6 +426,8 @@ export function AriaLeadAssistant({
             className={guidedChatPreview ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
+                data-tail-base-top={guidedChatPreview ? tailTopY : undefined}
+                data-tail-base-bottom={guidedChatPreview ? tailBottomY : undefined}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
                 <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
