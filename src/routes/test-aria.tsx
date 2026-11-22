@@ -149,9 +149,10 @@ export function AriaPreviewPage() {
 
   return (
     <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose">
-      {!isLiveLead && (
+      {/* Keep Aria floating in the viewport throughout the lead journey.
+          The paid lead hero stays visually unchanged; the menu no longer
+          participates in the document layout. */}
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
-      )}
 
       <main>
         <section className={isLiveLead ? "hero-safe-top relative flex min-h-[100svh] flex-col pt-10 sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
@@ -187,7 +188,7 @@ export function AriaPreviewPage() {
           </div>
           </>
               )}
-              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-[67px] w-fit max-w-full min-[390px]:mt-[73px] sm:mt-[96px] lg:mt-[124px]" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
+              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-[67px] w-fit max-w-full min-[390px]:mt-[79px] sm:mt-[96px] lg:mt-[124px]" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
                 {/* The existing four schoolmates now rest on the orange label, not above the H1. */}
                 <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
                   <SchoolmatesFormCrown compact desktopWide />
@@ -224,11 +225,6 @@ export function AriaPreviewPage() {
             </div>
           </div>
           </>
-          )}
-          {isLiveLead && (
-            <div data-aria-hero-menu className="relative z-20 mx-auto mt-auto w-full max-w-[690px] px-3 pb-3 pt-3 sm:mt-7 sm:pb-5">
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} inlineDock hidden={leadModalOpen || puppyModalOpen} />
-            </div>
           )}
         </section>
 
