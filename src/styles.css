@@ -1115,10 +1115,3 @@
 .aria-brand-experiment footer { background-image: none; }
 .aria-brand-experiment footer > div > div:first-child { background-color: #fff; }
 
-/* Preserve the approved animated filled paw prints on the live lead hero.
-   Do not remove the dog imagery or recolor static decorative paw outlines. */
-.aria-brand-experiment.lead-brand-live .paw-trail-background .paw-ambient-print,
-.aria-brand-experiment.lead-brand-live .paw-trail-background .paw-trail-print {
-  fill: currentColor;
-  stroke: none;
-}
