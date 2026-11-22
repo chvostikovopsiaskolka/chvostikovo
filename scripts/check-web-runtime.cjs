@@ -512,7 +512,8 @@ if (!bellaris && brandPreviewCandidate) {
                     photoImages[0]?.getAttribute('src') !== photoImages[1]?.getAttribute('src'),
                   paidPhotosBelowFloatingDock: window.location.pathname !== '/psia-skolka-kosice/' ||
                     (!!photoFrame && !!floatingGuide && photoFrame.top >= reviewsBottom + 12 &&
-                     photoFrame.top >= window.innerHeight + 8 &&
+                     photoFrame.top >= window.innerHeight - 24 &&
+                     photoFrame.top - reviewsBottom <= window.innerHeight * 0.44 &&
                      photoFrame.top >= floatingGuide.getBoundingClientRect().bottom + 8 &&
                      !hero.contains(newPhotos) && photoRects.every(rect => rect.bottom <= formTop - 8)),
                   paidDescriptionBlack: window.location.pathname !== '/psia-skolka-kosice/' ||
