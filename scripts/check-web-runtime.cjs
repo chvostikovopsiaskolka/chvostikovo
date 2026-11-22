@@ -703,56 +703,67 @@ if (!bellaris && brandPreviewCandidate) {
                 if (await trigger.evaluate(el => getComputedStyle(el).webkitTapHighlightColor !== 'rgba(0, 0, 0, 0)'))
                   throw new Error('Aria portrait must suppress the iOS tap highlight square');
                 if (width === 390) {
-                  await trigger.click();
+                  const pricingCta = page.locator('[data-aria-bubble-pricing-cta]');
+                  if (!await pricingCta.isVisible())
+                    throw new Error('Test Aria speech must show a direct pricing CTA instead of click-me copy');
+                  const bubbleGeometry = await page.locator('[data-aria-speech]').boundingBox();
+                  const ctaGeometry = await pricingCta.boundingBox();
+                  if (!bubbleGeometry || !ctaGeometry || ctaGeometry.height < 43 ||
+                      ctaGeometry.x < bubbleGeometry.x - 1 ||
+                      ctaGeometry.x + ctaGeometry.width > bubbleGeometry.x + bubbleGeometry.width + 1)
+                    throw new Error('Bubble pricing CTA must fit its speech bubble and have a 44px mobile target');
+                  await pricingCta.click();
                   const chat = page.locator('[data-aria-chat]');
                   await chat.waitFor({ state: 'visible' });
-                  const initialQuestions = chat.locator('[data-aria-chat-history] [data-aria-chat-questions] button');
-                  if (await initialQuestions.count() !== 4 ||
-                      await chat.locator('[data-aria-chat-history] input').count() !== 0 ||
-                      await chat.getByText(/Virtuálna pomocníčka/).count())
-                    throw new Error('Chat greeting must contain four inline choices without an input or header subtitle');
                   const chatWindow = await chat.boundingBox();
                   if (!chatWindow || chatWindow.x < -1 || chatWindow.x + chatWindow.width > width + 1)
                     throw new Error('Guided chat must fit mobile viewport');
-
-                  await chat.locator('[data-aria-chat-question="pricing"]').click();
+                  // Direct bubble CTA must actually choose pricing, without a
+                  // second click inside the dialog. The greeting remains visible.
+                  const pricingPrompt = chat.locator('[data-aria-chat-turn="person"]');
+                  await pricingPrompt.waitFor({ state: 'visible', timeout: 10000 });
+                  if (!await pricingPrompt.getByText('Aký je cenník škôlky?').count())
+                    throw new Error('Bubble CTA must pre-fill the pricing question in chat');
                   const typing = chat.locator('[data-aria-chat-turn="aria"] [data-aria-typing="true"]');
-                  await typing.waitFor({ state: 'visible' });
+                  await typing.waitFor({ state: 'visible', timeout: 10000 });
                   const initialTyped = await typing.evaluate(el => ({
                     rendered: el.querySelector('[aria-hidden="true"]')?.textContent?.length || 0,
                     full: el.querySelector('.sr-only')?.textContent?.length || 0,
                   }));
                   if (!initialTyped.full || initialTyped.rendered >= initialTyped.full)
-                    throw new Error('Aria must progressively type the answer, not reveal everything at once: ' + JSON.stringify(initialTyped));
+                    throw new Error('Mobile Aria reply must visibly type instead of jumping to full text: ' + JSON.stringify(initialTyped));
                   await typing.waitFor({ state: 'hidden', timeout: 10000 });
                   if (await chat.locator('[data-aria-chat-turn="person"]').count() !== 1 ||
                       await chat.locator('[data-aria-chat-turn="aria"]').count() !== 1 ||
                       !await chat.getByText(/Jednorazový celodenný vstup stojí 25 €./).count() ||
                       !await chat.getByText(/permanentka za 200 €/).count() ||
                       !await chat.locator('[data-aria-chat-turn="person"] svg[viewBox="0 0 33 36"]').count())
-                    throw new Error('Typed pricing reply or site-native pink paw missing');
-                  if (!await chat.locator('[data-aria-chat-followup]').getByRole('button', { name: 'Odpoveď mi stačí, ďakujem ✓' }).count())
-                    throw new Error('Each answer must offer a friendly finish');
-                  await chat.getByRole('button', { name: /Ďalšia otázka/ }).click();
-                  if (await chat.locator('[data-aria-chat-questions] button').count() !== 3 ||
-                      await chat.locator('[data-aria-chat-question="pricing"]').count())
-                    throw new Error('Answered pricing question must be removed from remaining topics');
+                    throw new Error('Preselected pricing answer or native pink paw missing');
+                  const followup = chat.locator('[data-aria-chat-followup]');
+                  await followup.waitFor({ state: 'visible' });
+                  const interestCta = followup.locator('[data-aria-chat-interest-cta]');
+                  const [interestBox, followupBox] = await Promise.all([interestCta.boundingBox(), followup.boundingBox()]);
+                  if (!interestBox || !followupBox || interestBox.width < followupBox.width - 52)
+                    throw new Error('Interest CTA after pricing must be full-width');
+                  if (await chat.getByRole('button', { name: /Odpoveď mi stačí/ }).count())
+                    throw new Error('Unnecessary thank-you CTA must not reappear');
+                  if (await followup.locator('[data-aria-chat-question]').count() !== 3 ||
+                      await followup.locator('[data-aria-chat-other-cta]').count() !== 1 ||
+                      await followup.locator('[data-aria-chat-question="pricing"]').count())
+                    throw new Error('Show all three unanswered topics and orange Other tile directly after pricing');
 
-                  await chat.locator('[data-aria-chat-question="requirements"]').click();
+                  await followup.locator('[data-aria-chat-question="requirements"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
-                  await chat.getByRole('button', { name: /Ďalšia otázka/ }).click();
-                  if (await chat.locator('[data-aria-chat-questions] button').count() !== 2 ||
-                      await chat.locator('[data-aria-chat-question="requirements"]').count())
-                    throw new Error('After two answers only two unasked questions should remain');
-                  await chat.getByRole('button', { name: 'Iná otázka', exact: true }).click();
+                  if (await chat.locator('[data-aria-chat-followup] [data-aria-chat-question]').count() !== 2)
+                    throw new Error('After two replies the remaining topics must be offered directly');
+                  await chat.locator('[data-aria-chat-followup] [data-aria-chat-other-cta]').click();
                   await chat.locator('[data-aria-chat-other] textarea').fill('Môj psík má špeciálne potreby?');
                   const email = chat.getByRole('link', { name: /Otvoriť e-mail/ });
                   if (!(await email.getAttribute('href') || '').startsWith('mailto:chvostikovo.psiaskolka@gmail.com?'))
-                    throw new Error('Custom question must offer a real mailto, not a fake sent message');
+                    throw new Error('Until admin inbox integration, the existing custom-question fallback must not fake delivery');
                   await chat.getByRole('button', { name: 'Späť k otázkam' }).click();
-                  // APP-01: the four-topic preview also includes an inline puppy
-                  // checker, without opening the separate site-wide puppy modal.
-                  if (await chat.locator('[data-aria-chat-questions] button').count() !== 2 ||
+                  // APP-01: an embedded puppy checker must remain available.
+                  if (await chat.locator('[data-aria-chat-questions] [data-aria-chat-question]').count() !== 2 ||
                       await chat.locator('[data-aria-chat-puppy-cta]').count() !== 1)
                     throw new Error('Puppy option must remain available after FAQ replies');
                   await chat.locator('[data-aria-chat-puppy-cta]').click();
@@ -809,7 +820,7 @@ if (!bellaris && brandPreviewCandidate) {
                   await puppyContact.getByRole('button', { name: 'Späť ku kontrole' }).click();
                   await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
                   await chat.locator('[data-aria-chat-puppy-check]').getByRole('button', { name: 'Späť k otázkam' }).click();
-                  await chat.getByRole('button', { name: 'Mám záujem o škôlku' }).click();
+                  await chat.getByRole('button', { name: 'Mám záujem', exact: true }).click();
 
                   const interest = chat.locator('[data-aria-chat-interest]');
                   const fieldNames = await interest.locator('form input:not([type="checkbox"])').evaluateAll(inputs =>
@@ -889,6 +900,12 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Preview displayed the root route failure after full reload');
                   await freshTrigger.click();
                   await page.locator('[data-aria-chat]').waitFor({ state: 'visible' });
+                  // A portrait tap, unlike the pricing bubble, still opens the
+                  // normal four-choice introduction.
+                  const normalChoices = page.locator('[data-aria-chat] [data-aria-chat-questions] [data-aria-chat-question]');
+                  await normalChoices.first().waitFor({ state: 'visible' });
+                  if (await normalChoices.count() !== 4)
+                    throw new Error('Direct portrait open must preserve all four introductory FAQ choices');
                   await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
                   await page.locator('[data-aria-chat]').waitFor({ state: 'hidden' });
                   // Browser-specific dialog close animations must finish before
