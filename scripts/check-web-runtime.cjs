@@ -854,7 +854,7 @@ if (!bellaris && brandPreviewCandidate) {
                   dock.width < width - 2 || dock.x + dock.width > width + 2 ||
                   dock.height > 65 || portraitAboveDock.y + portraitAboveDock.height > dock.y - 4 ||
                   portraitAboveDock.x < -1 || portraitAboveDock.x + portraitAboveDock.width > width + 2)
-                throw new Error('Aria full-width mobile dock / portrait above dock regressed at ' + width);
+                throw new Error('Aria full-width mobile dock / portrait above dock regressed at ' + width + ': ' + JSON.stringify({dock, portraitAboveDock}));
               // The paid landing keeps one floating, viewport-anchored Aria dock.
               // Scrolling changes the contextual message, never its fixed
               // position or visibility (the former inline test is obsolete).
