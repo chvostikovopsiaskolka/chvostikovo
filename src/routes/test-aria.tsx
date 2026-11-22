@@ -258,10 +258,14 @@ export function AriaPreviewPage() {
           )}
         </section>
 
-        {/* The existing photo gallery replaces the two standalone teaser cards
-            only on the paid LEAD. The approved teaser images are included
-            inside the mosaic rather than duplicated outside it. */}
-        {isLiveLead && <AriaMosaicGallery includeLeadHighlights />}
+        {/* Move the SAME existing moving gallery here on paid LEAD; keep
+            its swipe/autoscroll/lightbox behavior and append the two unique
+            former hero teaser photos without adding unrelated images. */}
+        {isLiveLead && (
+          <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="scroll-mt-24">
+            <DaycarePhotoCarousel includeLeadHighlights />
+          </div>
+        )}
 
         <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
           <SectionAmbientPaws />
@@ -502,7 +506,7 @@ export function AriaPreviewPage() {
 
         <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />
 
-        <DaycarePhotoCarousel />
+        {!isLiveLead && <DaycarePhotoCarousel />}
 
         {isLiveLead && (
           <section id="lead-section-menu" className="scroll-mt-24 bg-white px-4 pb-28 pt-8 sm:pb-16" aria-labelledby="lead-section-menu-title">
