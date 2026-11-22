@@ -512,28 +512,7 @@ export function AriaPreviewPage() {
 
         {!isLiveLead && <DaycarePhotoCarousel />}
 
-        {isLiveLead && (
-          <section id="lead-section-menu" className="scroll-mt-24 bg-white px-4 pb-28 pt-8 sm:pb-16" aria-labelledby="lead-section-menu-title">
-            <div className="mx-auto max-w-3xl">
-              <h2 id="lead-section-menu-title" className="section-title text-center text-2xl">Prejsť na sekciu</h2>
-              <nav aria-label="Sekcie stránky Chvostíkovo" className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {[
-                  ["O nás", "aria-about"], ["Fotografie", "lead-photo-carousel"],
-                  ["Cenník", "lead-pricing"], ["Podmienky", "lead-requirements"],
-                  ["Prečo Chvostíkovo", "lead-benefits"], ["FAQ", "lead-faq"],
-                  ["Šteniatka", "aria-puppy-check"], ["Prvá návšteva", "lead-first-visit"],
-                  ["Mám záujem", "aria-hero-form"],
-                ].map(([label, id]) => (
-                  <a key={id} href={`#${id}`}
-                    className="flex min-h-12 items-center justify-center rounded-2xl border border-forest/15 bg-secondary/35 px-3 py-3 text-center font-display text-sm font-semibold text-forest shadow-sm transition hover:bg-secondary/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral"
-                    onClick={() => void trackCookielessInteraction("nav_click", "lead_section_menu_" + id, "sk")}>
-                    {label}
-                  </a>
-                ))}
-              </nav>
-            </div>
-          </section>
-        )}
+
 
       </main>
 
