@@ -1118,41 +1118,45 @@
 
 
 
-/* Paid LEAD hero: approved rose contrast for the service badge, without
-   changing the orange editorial copy or the preview's original palette. */
+/* Paid LEAD only: preserve the rose service badge. */
 .lead-brand-live [data-aria-service-badge] {
   background-color: #b82e7f;
   color: #fff;
 }
+
+/* A real raised surface: low-contrast edge, soft depth and enough scroll
+   track padding for the shadow to fade naturally before the clip boundary. */
+.lead-brand-live #recenzie [data-gesture-track="reviews"] {
+  margin-top: 18px;
+  padding-bottom: 2.75rem;
+}
 .lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
-  box-shadow: 0 14px 34px -10px rgb(38 50 43 / 28%),
-              0 22px 42px -18px rgb(38 50 43 / 26%),
-              0 0 0 1px rgb(38 50 43 / 16%);
+  border: 1px solid rgb(38 50 43 / 10%);
+  background: linear-gradient(150deg, #fff 0%, #fff 65%, #fffaf3 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 95%),
+    0 4px 9px -6px rgb(38 50 43 / 20%),
+    0 16px 32px -17px rgb(38 50 43 / 27%),
+    0 26px 42px -25px rgb(38 50 43 / 16%);
 }
 
-/* Paid lead liquid only: dark copy, orange drifting highlights, reduced-motion safe. */
+/* Match the exact solid orange of 'psík zamiluje' and use white text.
+   Broad translucent shadows prevent the abruptly terminated hard band. */
 .lead-brand-live [data-aria-hero-description] {
-  color: #171c18;
-  border-color: rgb(203 114 7 / 25%);
+  color: #fff;
+  border-color: rgb(255 255 255 / 30%);
   background-color: #ffa414;
-  background-image:
-    radial-gradient(ellipse at 18% 16%, rgb(255 252 224 / 72%), transparent 56%),
-    radial-gradient(ellipse at 82% 85%, rgb(255 119 2 / 30%), transparent 62%),
-    linear-gradient(130deg, #ffbc4a, #ffa414 62%, #ff9c0b);
-  background-size: 165% 160%, 170% 170%, 100% 100%;
-  background-position: 0% 0%, 100% 100%, center;
-  animation: lead-liquid-drift 10s ease-in-out infinite alternate;
+  background-image: none;
+  animation: none;
+  text-shadow: 0 1px 2px rgb(105 52 0 / 35%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    0 11px 28px -14px rgb(173 96 5 / 25%),
+    0 24px 46px -26px rgb(173 96 5 / 22%);
 }
 .lead-brand-live [data-aria-hero-description] strong {
-  color: #111;
+  color: inherit;
   text-decoration: none;
-}
-@keyframes lead-liquid-drift {
-  from { background-position: 0% 0%, 100% 100%, center; }
-  to { background-position: 100% 80%, 0% 10%, center; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .lead-brand-live [data-aria-hero-description] { animation: none; }
 }
 
 /* Mobile Aria dock has a small 10px safe gutter, while the portrait and
@@ -1163,11 +1167,23 @@
   .aria-brand-experiment [data-aria-dock] { width: 100%; max-width: none; margin-inline: 0; }
   /* Preview head previously protruded 4px beyond the right edge of its narrow dock. */
   .aria-brand-experiment [data-aria-chat-trigger] { right: 4px; }
-  /* Paid lead reuses the right-facing preview silhouette without opening chat. */
+  /* Paid LEAD only: the real portrait is at the LEFT of the speech,
+     separated from the dock's clickable menu items. */
   .lead-brand-live [data-aria-dock] > img[alt^="Aria"] {
-    left: auto;
-    right: 4px;
+    left: 4px;
+    right: auto;
     bottom: calc(100% + 12px);
+  }
+}
+
+/* Paid LEAD desktop speech: a real, readable card beside left-hand Aria.
+   On mobile keep the compact first-fold sizing and the fixed dock intact. */
+@media (min-width: 1024px) {
+  .lead-brand-live [data-aria-speech] {
+    width: min(470px, calc(100% - 220px));
+    max-width: min(470px, calc(100% - 220px));
+    min-height: 78px;
+    padding: 14px 20px;
   }
 }
 
@@ -1185,23 +1201,20 @@
      variable here. Reserve the dock footprint at the bottom without
      making the reviews, photos or menu position: absolute. */
   .lead-brand-live .hero-safe-top {
-    --hero-content-top: 56px;
+    /* Compensate for the review track's real shadow-clearance space.
+       Keep the first-fold top/bottom visually balanced at 375–430px. */
+    --hero-content-top: 80px;
     padding-bottom: 216px;
   }
   .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
   /* The horizontal scroll container used to clip the card shadows at 4px.
      Leave enough real space for a soft fade before the floating speech. */
-  .lead-brand-live #recenzie [data-gesture-track="reviews"] { padding-bottom: 1.25rem; margin-top: 0; }
+  .lead-brand-live #recenzie [data-gesture-track="reviews"] { padding-bottom: 2.75rem; margin-top: 10px; }
   /* Two preview lines reserve visible room for the floating Aria bubble on
      small iPhone webview heights. The full review remains expandable. */
   .lead-brand-live #recenzie [data-gesture-track="reviews"] figure blockquote.line-clamp-3 {
     min-height: 2.5rem;
     -webkit-line-clamp: 2;
-  }
-  .lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
-    box-shadow: 0 14px 34px -10px rgb(38 50 43 / 28%),
-              0 22px 42px -18px rgb(38 50 43 / 26%),
-              0 0 0 1px rgb(38 50 43 / 16%);
   }
   .lead-brand-live #recenzie [data-gesture-track="reviews"] figure button { font-size: 12px; line-height: 1.4; }
   /* Readable mobile editorial copy: target three natural lines at typical iPhone
