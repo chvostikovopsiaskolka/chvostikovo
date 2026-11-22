@@ -293,6 +293,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const highRes = cards.filter(card => card.hasAttribute('data-aria-lead-highlight'));
                   const gr = gallery?.getBoundingClientRect(), tr = track?.getBoundingClientRect();
                   return {
+                    width: window.innerWidth,
                     cardCount: cards.length, highlightCount: highRes.length,
                     headingBottom: heading?.bottom, badgeTop: badge?.top,
                     reviewBottom: reviews?.bottom, galleryTop: gr?.top, trackTop: tr?.top, trackBottom: tr?.bottom,
@@ -307,7 +308,7 @@ if (!bellaris && brandPreviewCandidate) {
                     layout.trackTop < layout.menuBottom + 8 ||
                     layout.trackBottom > layout.formTop - 8)
                   throw new Error('Paid hero → moving gallery → form layout regressed: ' + JSON.stringify(layout));
-                if (width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
+                if (layout.width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
                   throw new Error('Approved mobile review spacing regressed: ' + JSON.stringify(layout));
                 await highlights.first().scrollIntoViewIfNeeded();
                 await highlights.first().click();
