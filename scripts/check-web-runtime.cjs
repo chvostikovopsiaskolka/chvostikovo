@@ -996,7 +996,7 @@ if (!bellaris && brandPreviewCandidate) {
               if (await page.locator('#aria-mosaic img').count() !== 8)
                 throw new Error('Preview mosaic must retain eight photos');
               // Compare document order rather than screen rects (some sections may be offscreen).
-              const hasHeroFormAndCaretakerOrder = await page.evaluate(() => {
+              const hasHeroFormAndCaretakerOrder = await page.evaluate((isPaidLead) => {
                 const reviews = document.getElementById('recenzie');
                 const form = document.getElementById('aria-hero-form');
                 const team = document.getElementById('aria-caretakers');
@@ -1012,6 +1012,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
                 const introSpace = leadHero?.querySelector('[data-aria-intro-space]');
                 const benefits = team?.querySelector('[data-hero-benefits]');
+                const inlineMenu = leadHero?.querySelector('[data-aria-hero-menu]');
                 const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                 if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
                     !headlineSpacer || !serviceGroup || !heroHeading || !heroDogs ||
@@ -1023,15 +1024,17 @@ if (!bellaris && brandPreviewCandidate) {
                 const heading = team.querySelector('h2');
                 const photo = team.querySelector('img');
                 const copy = team.querySelector('p');
-                return follows(introTopSpace, headlineSpacer) && follows(headlineSpacer, heroHeading) &&
+                const commonOrder = follows(introTopSpace, headlineSpacer) && follows(headlineSpacer, heroHeading) &&
                   follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
                   follows(heroDogs, badge) && follows(badge, leadDescription) &&
-                  follows(leadDescription, proof) && follows(reviews, introSpace) &&
-                  follows(introSpace, form) && follows(form, team) &&
+                  follows(leadDescription, proof) &&
+                  (isPaidLead ? (follows(heroHeading, introSpace) && follows(introSpace, serviceGroup) && !!inlineMenu && follows(reviews, inlineMenu) && follows(inlineMenu, form)) : (follows(reviews, introSpace) && follows(introSpace, form))) &&
+                  follows(form, team) &&
                   !!heading && !!photo && !!copy &&
                   follows(heading, photo) && follows(photo, benefits) && follows(benefits, copy) &&
                   follows(team, firstVisitDogs);
-              });
+                return commonOrder;
+              }, url.pathname === '/psia-skolka-kosice/');
               if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/label-dogs/orange badge/focused copy/reviews/form and caretakers order changed');
               if (width >= 768) {
                 const heights = await page.locator('[data-aria-review-photo]').evaluateAll(nodes => nodes.map(n => n.getBoundingClientRect().height));
