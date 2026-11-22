@@ -1149,6 +1149,8 @@
   .aria-brand-experiment [data-aria-guide] { padding-inline: 0; }
   .aria-brand-experiment [data-aria-guide] > div { max-width: none; }
   .aria-brand-experiment [data-aria-dock] { width: 100%; max-width: none; margin-inline: 0; }
+  /* Preview head previously protruded 4px beyond the right edge of its narrow dock. */
+  .aria-brand-experiment [data-aria-chat-trigger] { right: 4px; }
   /* Paid lead has the classic left speech bubble, not preview's chat-trigger head. */
   .lead-brand-live [data-aria-dock] > img[alt^="Aria"] {
     left: 8px;
