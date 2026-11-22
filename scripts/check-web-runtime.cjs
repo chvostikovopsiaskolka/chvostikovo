@@ -289,7 +289,7 @@ if (!bellaris && brandPreviewCandidate) {
                   throw new Error('Lead hero lost approved wording užije si pohyb');
                 if (layout.heights.length !== 2 || layout.photoTop < layout.headingBottom || layout.badgeTop < layout.photoBottom || layout.menuPosition !== 'relative' || layout.formTop < layout.menuBottom)
                   throw new Error('Lead hero section order regressed: ' + JSON.stringify(layout));
-                if (layout.width < 500 && layout.heights.some(h => h < 175))
+                if (layout.width < 500 && layout.heights.some(h => h < 110))
                   throw new Error('Lead mobile photo cards too short: ' + JSON.stringify(layout));
               }
               await cards.first().scrollIntoViewIfNeeded();
@@ -386,7 +386,7 @@ if (!bellaris && brandPreviewCandidate) {
                 dogsTouchBadge: !!badge && !!crown && Math.abs(crown.bottom - badge.top) <= 3,
                 liquid: !!text && getComputedStyle(text).backgroundImage.includes('radial-gradient') &&
                   parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
-                about: !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
+                about: window.location.pathname === '/psia-skolka-kosice/' ? (!document.querySelector('#aria-about') && document.querySelectorAll('#aria-caretakers p').length >= 4 && document.querySelector('#aria-caretakers')?.textContent?.includes('Je to druhý domov')) : (!!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2),
                 teamPills: team?.children.length ?? 0,
                 teamContained: !!teamBounds && [...team.children].every(pill => {
                   const bounds = pill.getBoundingClientRect();
@@ -480,12 +480,14 @@ if (!bellaris && brandPreviewCandidate) {
                 const photoImages = photoCards.map(card => card.querySelector('img'));
                 const photoRects = photoCards.map(card => card.getBoundingClientRect());
                 const photoFrame = newPhotos?.getBoundingClientRect();
+                const inlineMenuRect = hero.querySelector('[data-aria-hero-menu]')?.getBoundingClientRect();
                 const lineHeight = parseFloat(getComputedStyle(proof).lineHeight);
                 return {
                   missing: false,
                   formTop,
                   reviewGap: formTop - reviewBottom,
                   photoCount: photoCards.length,
+                  inlineMenuVisible: !!inlineMenuRect && inlineMenuRect.top >= 0 && inlineMenuRect.bottom <= window.innerHeight + 12,
                   photoApprovedAssets: photoImages.length === 2 &&
                     !!photoImages[0]?.getAttribute('src')?.includes('lead-review-border-collies') &&
                     !!photoImages[1]?.getAttribute('src')?.includes('lead-review-retrievers-aussie') &&
@@ -515,11 +517,11 @@ if (!bellaris && brandPreviewCandidate) {
                     parseFloat(getComputedStyle(description).borderTopLeftRadius) >= 15 &&
                     parseFloat(getComputedStyle(description).paddingLeft) >= 10,
                   naturalReviewBottom: getComputedStyle(reviews).overflowY !== 'hidden' &&
-                    !!reviewCardRect && reviewsRect.bottom - reviewCardRect.bottom >= 32,
+                    !!reviewCardRect && reviewsRect.bottom - reviewCardRect.bottom >= (window.location.pathname === '/psia-skolka-kosice/' ? 0 : 32),
                   noBenefitsInHero: hero.querySelectorAll('[data-hero-benefits]').length === 0,
                   relocatedBenefitsCount: relocatedBenefits.children.length,
                   caretakersHeadingFits: caretakerHeading.scrollWidth <= caretakerHeading.clientWidth + 2 &&
-                    caretakerHeadingRect.height <= caretakerHeadingLine * (window.location.pathname === '/test-aria/' ? 2.55 : 1.55),
+                    caretakerHeadingRect.height <= caretakerHeadingLine * 2.55,
                   whiteInfoBackground: getComputedStyle(form).backgroundColor === 'rgb(255, 255, 255)' &&
                     !!form.querySelector('.pointer-events-none.absolute.inset-0'),
                   groundedFirstVisit: !!document.querySelector('#aria-first-visit-form [data-crown-ground]'),
@@ -535,6 +537,7 @@ if (!bellaris && brandPreviewCandidate) {
                   (url.pathname === '/test-aria/' && firstFold.topSpacerHeight < 0) ||
                   (url.pathname === '/test-aria/' && firstFold.contentCenterY < firstFold.viewportHeight * 0.36) ||
                   (url.pathname === '/test-aria/' && (firstFold.reviewGap < 90 || firstFold.reviewGap > 240)) ||
+                  (url.pathname === '/psia-skolka-kosice/' && width <= 430 && !firstFold.inlineMenuVisible) ||
                   firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
