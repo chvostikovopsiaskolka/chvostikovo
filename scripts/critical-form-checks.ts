@@ -89,7 +89,8 @@ assert(ariaFormsSource.includes('trackAriaQuestionSubmit(trackingSource') &&
   ariaFormsSource.includes('trackMetaFormConversion("informacie"'),
   "An Aria question must not be counted as the normal Meta/GA4 Lead.");
 assert(ariaBackend.includes("lead_landing_aria_chat_other") &&
-  ariaBackend.includes("if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100))) return;"),
+  ariaBackend.includes("if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100)) ||") &&
+  ariaBackend.includes("text(input.source_ref, 500) === '/test-aria/'"),
   "Aria questions must not trigger backend Meta CAPI Lead, even with marketing consent.");
 
 
