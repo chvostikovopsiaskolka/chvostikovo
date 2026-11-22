@@ -1173,14 +1173,14 @@
   }
 }
 
-/* Paid campaign LEAD only: an actually legible desktop speech bubble.
-   Leave mobile sizing and the separate /test-aria/ chatbot untouched. */
+/* Paid campaign LEAD: leave a dedicated 236px portrait gutter.
+   The parent already subtracts that space; do not subtract it twice. */
 @media (min-width: 1024px) {
   .lead-brand-live [data-aria-speech] {
-    width: min(480px, calc(100% - 130px));
-    max-width: min(480px, calc(100% - 130px));
-    min-height: 72px;
-    padding: 16px 20px;
+    width: min(440px, 100%);
+    max-width: min(440px, 100%);
+    min-height: 78px;
+    padding: 16px 22px;
   }
   .lead-brand-live [data-aria-message] p {
     font-size: 17px;
