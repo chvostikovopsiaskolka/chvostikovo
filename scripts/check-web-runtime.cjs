@@ -725,7 +725,7 @@ if (!bellaris && brandPreviewCandidate) {
               const interestButton = aria.getByRole('button', { name: 'Mám záujem o škôlku' });
               if ((await interestButton.getAttribute('class') || '').includes('bg-coral/15'))
                 throw new Error('Rejected special interest button highlight resurfaced');
-              for (const choice of await aria.locator('[data-aria-dock] button').all()) {
+              for (const choice of await aria.locator('[data-aria-dock] button:not([data-aria-chat-trigger])').all()) {
                 const radius = await choice.evaluate(button => parseFloat(getComputedStyle(button).borderTopLeftRadius));
                 if (!Number.isFinite(radius) || radius > 15)
                   throw new Error('Dock choices must be rounded rectangles, never circles');
