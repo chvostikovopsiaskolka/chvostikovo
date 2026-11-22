@@ -1479,7 +1479,7 @@ if (!bellaris && brandPreviewCandidate) {
             if (trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline'))
               throw new Error('Backend error must NOT emit a paid Lead');
             await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
-            await contact.locator('[data-lead-step-success]').waitFor({ state: 'visible' });
+            await page.locator('#aria-hero-form [data-lead-step-success]').waitFor({ state: 'visible' });
             for (let i = 0; i < 15 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline'); i++)
               await page.waitForTimeout(100);
             const sent = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline');
@@ -1495,7 +1495,7 @@ if (!bellaris && brandPreviewCandidate) {
                   sent: sent.length, cta: cta.length, breeds: submissions.map(x => x.dog_breed) }));
             }
             await page.screenshot({ path: path.join(out, 'lead-aria-' + engine + '-390-mocked-success.png') });
-            if (!await contact.locator('[data-lead-step-success]').isVisible())
+            if (!await page.locator('#aria-hero-form [data-lead-step-success]').isVisible())
               throw new Error('Inline lead success receipt must remain visible');
           }
           if (!restricted && !bellaris && url.pathname === '/') {
