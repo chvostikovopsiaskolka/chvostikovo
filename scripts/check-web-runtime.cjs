@@ -1496,8 +1496,10 @@ if (!bellaris && brandPreviewCandidate) {
             });
             await page.setViewportSize({ width: 390, height: 844 });
             await page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' }).click();
-            const contact = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+            const contact = page.locator('#aria-first-visit-form [data-lead-step-form]');
             await contact.waitFor({ state: 'visible' });
+            if (await page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).count())
+              throw new Error('Paid floating dock interest must scroll to inline form, never launch a modal');
             await contact.locator('label:has(input[name="zaujem"])').first().click();
             await contact.getByRole('button', { name: 'Pokračovať' }).click();
             const breedInput = contact.getByLabel('Plemeno psíka (nepovinné)');
@@ -1508,17 +1510,17 @@ if (!bellaris && brandPreviewCandidate) {
             await contact.locator('input[type="checkbox"][required]').check();
             await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
             await contact.getByRole('alert').waitFor({ state: 'visible' });
-            if (trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_interest'))
+            if (trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_first_visit_inline'))
               throw new Error('Backend error must NOT emit a paid Lead');
             await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
-            await page.locator('[role="dialog"] [data-lead-step-success]').last().waitFor({ state: 'visible' });
-            for (let i = 0; i < 15 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_interest'); i++)
+            await page.locator('#aria-first-visit-form [data-lead-step-success]').waitFor({ state: 'visible' });
+            for (let i = 0; i < 15 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_first_visit_inline'); i++)
               await page.waitForTimeout(100);
-            const sent = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_interest');
-            const cta = trackedEvents.filter(e => e.name === 'inquiry_cta' && e.source === 'lead_landing_aria_interest');
+            const sent = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_first_visit_inline');
+            const cta = trackedEvents.filter(e => e.name === 'nav_click' && e.source === 'lead_landing_aria_interest_scroll');
             if (submissions.length !== 2 || recoveries.length !== 1 || sent.length !== 1 ||
                 !cta.length || !submissions.every(data => data.form_type === 'lead' &&
-                  data.cta_source === 'lead_landing_aria_interest' &&
+                  data.cta_source === 'lead_landing_aria_first_visit_inline' &&
                   data.interest_reason === 'Chcem sa informovať o škôlke' &&
                   data.dog_breed === 'Írsky vlkodav' &&
                   data.raw_payload?.['Plemeno psíka'] === 'Írsky vlkodav')) {
@@ -1527,9 +1529,8 @@ if (!bellaris && brandPreviewCandidate) {
                   sent: sent.length, cta: cta.length, breeds: submissions.map(x => x.dog_breed) }));
             }
             await page.screenshot({ path: path.join(out, 'lead-aria-' + engine + '-390-mocked-success.png') });
-            const receipt = page.getByRole('dialog').last();
-            await receipt.getByRole('button', { name: 'Close' }).click();
-            await receipt.waitFor({ state: 'hidden' });
+            if (!await page.locator('#aria-first-visit-form [data-lead-step-success]').isVisible())
+              throw new Error('Inline paid lead receipt disappeared after successful submission');
           }
           if (!restricted && !bellaris && url.pathname === '/') {
             await page.setViewportSize({ width: 390, height: 844 });
