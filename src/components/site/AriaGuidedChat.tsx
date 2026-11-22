@@ -268,7 +268,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                 {message.side === "aria" && <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />}
                 <div data-aria-typing={isTyping ? "true" : undefined}
                   className={"whitespace-pre-line px-3 py-3 text-[13px] leading-relaxed shadow-sm sm:text-sm " +
-                    (message.questionId === "requirements" ? "max-w-[94%] " : "max-w-[85%] ") +
+                    (message.questionId === "requirements" ? "min-w-0 w-[calc(100%-44px)] max-w-[calc(100%-44px)] " : "max-w-[85%] ") +
                     (message.side === "person" ? "rounded-[20px_20px_6px_20px] bg-[#9e336f] text-white" :
                     "rounded-[20px_20px_20px_6px] bg-white text-[#26322b]")}>
                   {isTyping ? (
