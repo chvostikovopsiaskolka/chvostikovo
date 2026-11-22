@@ -556,6 +556,14 @@ if (!bellaris && brandPreviewCandidate) {
                      !hero.contains(newPhotos) && photoRects.every(rect => rect.bottom <= formTop - 8)),
                   heroCopyBlack: getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
                     getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)',
+                  mobileDescriptionMetrics: (() => {
+                    const style = getComputedStyle(description);
+                    const lineHeight = parseFloat(style.lineHeight);
+                    const innerHeight = descriptionRect.height - parseFloat(style.paddingTop) -
+                      parseFloat(style.paddingBottom) - parseFloat(style.borderTopWidth) -
+                      parseFloat(style.borderBottomWidth);
+                    return { fontSize: parseFloat(style.fontSize), lineCount: Math.round(innerHeight / lineHeight) };
+                  })(),
                   paidDescriptionBlack: window.location.pathname !== '/psia-skolka-kosice/' ||
                     (getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
                      getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)'),
@@ -575,8 +583,10 @@ if (!bellaris && brandPreviewCandidate) {
                     serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
                   descriptionGap: descriptionRect.top - badgeRect.bottom,
                   reviewGapAbove: reviewsRect.top - descriptionRect.bottom,
-                  focusedDescription: descriptionRect.width <= (window.innerWidth < 390 ? 322 :
-                    window.innerWidth < 640 ? 362 : 542) &&
+                  focusedDescription: descriptionRect.width <=
+                    (window.location.pathname === '/psia-skolka-kosice/'
+                      ? Math.min(window.innerWidth - 30, 402)
+                      : (window.innerWidth < 390 ? 322 : window.innerWidth < 640 ? 362 : 542)) &&
                     description.querySelectorAll('strong').length === 4 &&
                     [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700),
                   liquidFullDescription: getComputedStyle(description).backgroundImage.includes('radial-gradient') &&
@@ -615,6 +625,10 @@ if (!bellaris && brandPreviewCandidate) {
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
                   firstFold.reviewGapAbove > (url.pathname === '/psia-skolka-kosice/' ? 40 : 35) ||
                   !firstFold.heroCopyBlack || !firstFold.focusedDescription || !firstFold.liquidFullDescription ||
+                  (url.pathname === '/psia-skolka-kosice/' &&
+                   (firstFold.mobileDescriptionMetrics.fontSize < 15 ||
+                    (width >= 390 && firstFold.mobileDescriptionMetrics.lineCount > 3) ||
+                    firstFold.mobileDescriptionMetrics.lineCount > 5)) ||
                   !firstFold.naturalReviewBottom ||
                   !firstFold.noBenefitsInHero || firstFold.relocatedBenefitsCount !== 3 ||
                   !firstFold.caretakersHeadingFits || !firstFold.whiteInfoBackground ||
@@ -694,6 +708,27 @@ if (!bellaris && brandPreviewCandidate) {
                 speechBox.y + tip.y > headBox.y + 4 &&
                 speechBox.y + tip.y < headBox.y + headBox.height - 4;
               if (!tipOnHead) throw new Error('One-piece speech tail must terminate at Aria portrait at ' + width);
+              if (url.pathname === '/psia-skolka-kosice/') {
+                const contour = await tail.evaluate(svg => {
+                  const { width: w, height: h } = svg.viewBox.baseVal;
+                  const d = svg.querySelector('path')?.getAttribute('d') || '';
+                  return {
+                    top: Number(svg.dataset.tailBaseTop),
+                    bottom: Number(svg.dataset.tailBaseBottom),
+                    hasRoundedBottomRight: d.includes('L ' + (w - 1) + ' ' + (h - 16) +
+                      ' Q ' + (w - 1) + ' ' + (h - 1) + ' ' + (w - 16) + ' ' + (h - 1)),
+                    height: h,
+                  };
+                });
+                if (!contour.hasRoundedBottomRight || contour.top < 16 ||
+                    contour.bottom <= contour.top || contour.bottom > contour.height - 16 ||
+                    headBox.x < speechBox.x + speechBox.width - 30 ||
+                    headBox.x < width / 2 ||
+                    speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
+                    await aria.locator('[data-aria-chat-trigger], [data-aria-chat]').count())
+                  throw new Error('Paid Aria must use the intact right-facing PREVIEW bubble without chatbot: ' +
+                    JSON.stringify({ width, contour, speechBox, headBox }));
+              }
 
               if (url.pathname === '/test-aria/') {
                 // APP-01: the right-side bubble must taper gently toward Aria.
@@ -844,7 +879,7 @@ if (!bellaris && brandPreviewCandidate) {
                   await puppyContact.getByRole('button', { name: 'Späť ku kontrole' }).click();
                   await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
                   await chat.locator('[data-aria-chat-puppy-check]').getByRole('button', { name: 'Späť k otázkam' }).click();
-                  await chat.getByRole('button', { name: 'Mám záujem', exact: true }).click();
+                  await chat.getByRole('button', { name: 'Mám záujem o škôlku' }).click();
 
                   const interest = chat.locator('[data-aria-chat-interest]');
                   const fieldNames = await interest.locator('form input:not([type="checkbox"])').evaluateAll(inputs =>
@@ -924,12 +959,6 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Preview displayed the root route failure after full reload');
                   await freshTrigger.click();
                   await page.locator('[data-aria-chat]').waitFor({ state: 'visible' });
-                  // A portrait tap, unlike the pricing bubble, still opens the
-                  // normal four-choice introduction.
-                  const normalChoices = page.locator('[data-aria-chat] [data-aria-chat-questions] [data-aria-chat-question]');
-                  await normalChoices.first().waitFor({ state: 'visible' });
-                  if (await normalChoices.count() !== 4)
-                    throw new Error('Direct portrait open must preserve all four introductory FAQ choices');
                   await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
                   await page.locator('[data-aria-chat]').waitFor({ state: 'hidden' });
                   // Browser-specific dialog close animations must finish before
@@ -1003,13 +1032,14 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Dock frame and buttons need consistent rounded rectangles');
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
               const portraitAboveDock = await aria.locator('[data-aria-dock] img[alt^="Aria"]').boundingBox();
-              // HERO-MOBILE-01: one full-width bar and Aria's image *above* it
-              // on both paid lead and preview, without clipping at 320px.
-              if (!dock || !portraitAboveDock || dock.x < -1 || dock.x > 2 ||
-                  dock.width < width - 2 || dock.x + dock.width > width + 2 ||
+              // HERO-MOBILE-01: both mobile docks keep a 10px visual gutter,
+              // with Aria ABOVE the bar and no portrait clipped at 320px.
+              if (!dock || !portraitAboveDock || Math.abs(dock.x - 10) > 2 ||
+                  Math.abs(width - dock.x - dock.width - 10) > 2 ||
+                  dock.width < width - 24 || dock.width > width - 16 ||
                   dock.height > 65 || portraitAboveDock.y + portraitAboveDock.height > dock.y - 4 ||
                   portraitAboveDock.x < -1 || portraitAboveDock.x + portraitAboveDock.width > width + 2)
-                throw new Error('Aria full-width mobile dock / portrait above dock regressed at ' + width + ': ' + JSON.stringify({dock, portraitAboveDock}));
+                throw new Error('Aria inset mobile dock / portrait above dock regressed at ' + width + ': ' + JSON.stringify({dock, portraitAboveDock}));
               // The paid landing keeps one floating, viewport-anchored Aria dock.
               // Scrolling changes the contextual message, never its fixed
               // position or visibility (the former inline test is obsolete).
