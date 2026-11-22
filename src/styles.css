@@ -1167,11 +1167,23 @@
   .aria-brand-experiment [data-aria-dock] { width: 100%; max-width: none; margin-inline: 0; }
   /* Preview head previously protruded 4px beyond the right edge of its narrow dock. */
   .aria-brand-experiment [data-aria-chat-trigger] { right: 4px; }
-  /* Paid lead reuses the right-facing preview silhouette without opening chat. */
+  /* Paid LEAD only: the real portrait is at the LEFT of the speech,
+     separated from the dock's clickable menu items. */
   .lead-brand-live [data-aria-dock] > img[alt^="Aria"] {
-    left: auto;
-    right: 4px;
+    left: 4px;
+    right: auto;
     bottom: calc(100% + 12px);
+  }
+}
+
+/* Paid LEAD desktop speech: a real, readable card beside left-hand Aria.
+   On mobile keep the compact first-fold sizing and the fixed dock intact. */
+@media (min-width: 1024px) {
+  .lead-brand-live [data-aria-speech] {
+    width: min(470px, calc(100% - 220px));
+    max-width: min(470px, calc(100% - 220px));
+    min-height: 78px;
+    padding: 14px 20px;
   }
 }
 
