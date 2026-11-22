@@ -1189,7 +1189,9 @@
      variable here. Reserve the dock footprint at the bottom without
      making the reviews, photos or menu position: absolute. */
   .lead-brand-live .hero-safe-top {
-    --hero-content-top: 56px;
+    /* Compensate for the review track's real shadow-clearance space.
+       Keep the first-fold top/bottom visually balanced at 375–430px. */
+    --hero-content-top: 80px;
     padding-bottom: 216px;
   }
   .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
