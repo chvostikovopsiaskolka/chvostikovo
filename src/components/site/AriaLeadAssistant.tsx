@@ -274,7 +274,7 @@ export function AriaLeadAssistant({
 
   return (
     <aside aria-label="Aria – sprievodkyňa Chvostíkovom" data-aria-guide data-intro={stage === "intro" ? "true" : "false"} data-aria-stage={stage}
-      className="pointer-events-none fixed inset-x-0 bottom-[max(94px,calc(env(safe-area-inset-bottom)+78px))] z-40 px-2 sm:bottom-4 sm:px-4">
+      className={"pointer-events-none fixed inset-x-0 z-40 px-2 sm:bottom-4 sm:px-4 " + (guidedChatPreview ? "bottom-[max(94px,calc(env(safe-area-inset-bottom)+78px))]" : "bottom-[max(56px,calc(env(safe-area-inset-bottom)+44px))]")}>
       <div className="pointer-events-none relative mx-auto w-full max-w-[690px] pb-0">
         {panel && (
           <div role="region" aria-label={"Aria: " + panel} data-aria-panel={panel}
