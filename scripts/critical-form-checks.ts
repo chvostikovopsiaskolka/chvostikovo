@@ -424,7 +424,10 @@ assert(shortFormSource.includes("grid-cols-3") && shortFormSource.includes("peer
 assert(!shortFormSource.includes('name="zaujem" required className="field"'), "Remove only the original short-form native dropdown.");
 assert(shortFormSource.includes("Potrebujem škôlku občas") && !shortFormSource.includes("Potrebujem jednorazové stráženie"), "Only the one-off-sitting option must remain hidden in the short-form UI.");
 assert(shortFormSource.includes("Chcem zistiť") && shortFormSource.includes("viac o škôlke"), "First option must show the shortened two-line label.");
-assert(!shortFormSource.includes("defaultChecked") && !shortFormSource.includes('checked={'), "No radio option may start selected.");
+const shortInterestGroupStart = shortFormSource.indexOf('legend className="label-sm">O čo máte záujem?');
+const shortInterestGroup = shortFormSource.slice(shortInterestGroupStart, shortFormSource.indexOf("</fieldset>", shortInterestGroupStart));
+assert(shortInterestGroupStart >= 0 && !shortInterestGroup.includes("defaultChecked") && !shortInterestGroup.includes('checked={'),
+  "Original interest radios must not start selected; contact preference has a separate controlled group.");
 for (const interest of ["Chcem sa dozvedieť viac o psej škôlke", "Mám záujem o pravidelné návštevy", "Potrebujem škôlku občas"]) {
   assert(shortFormSource.includes(interest), "All three original Slovak values must remain unmodified.");
   const parsed = shortSchema.parse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: interest });
