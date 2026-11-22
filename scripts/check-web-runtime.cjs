@@ -259,7 +259,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const hero = document.querySelector('section.hero-safe-top');
                   const selectors = ['h1', '[data-aria-review-gap-photos]', '[data-aria-service-group]', '[data-aria-hero-description]', '[data-aria-hero-content] [data-aria-review-photo]', '[data-aria-hero-content] [data-aria-review-photo]'];
                   const rect = selector => hero?.querySelector(selector)?.getBoundingClientRect();
-                  const photos = [...(hero?.querySelectorAll('[data-aria-review-photo]') || [])];
+                  const photos = [...document.querySelectorAll('[data-aria-review-photo]')];
                   const dock = document.querySelector('[data-aria-guide]');
                   const reviews = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]');
                   const reviewSection = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.parentElement;
@@ -452,7 +452,9 @@ if (!bellaris && brandPreviewCandidate) {
                 const crown = hero?.querySelector('[data-aria-hero-dogs] [aria-hidden="true"]');
                 const serviceGroup = hero?.querySelector('[data-aria-service-group]');
                 const description = hero?.querySelector('[data-aria-hero-description]');
-                const spacer = hero?.querySelector('[data-aria-intro-space]');
+                const spacer = window.location.pathname === '/psia-skolka-kosice/'
+                  ? document.querySelector('[data-aria-lead-photos]')
+                  : hero?.querySelector('[data-aria-intro-space]');
                 const caretakers = document.getElementById('aria-caretakers');
                 const caretakerHeading = caretakers?.querySelector('h2');
                 const relocatedBenefits = caretakers?.querySelector('[data-hero-benefits]');
@@ -476,7 +478,9 @@ if (!bellaris && brandPreviewCandidate) {
                 const reviewsBottom = reviews.getBoundingClientRect().bottom;
                 const formTop = form.getBoundingClientRect().top;
                 const reviewBottom = reviews.getBoundingClientRect().bottom;
-                const newPhotos = hero.querySelector('[data-aria-review-gap-photos]');
+                const newPhotos = window.location.pathname === '/psia-skolka-kosice/'
+                  ? document.querySelector('[data-aria-lead-photos] [data-aria-review-gap-photos]')
+                  : hero.querySelector('[data-aria-review-gap-photos]');
                 const photoCards = [...(newPhotos?.querySelectorAll('[data-aria-review-photo]') ?? [])];
                 const photoImages = photoCards.map(card => card.querySelector('img'));
                 const photoRects = photoCards.map(card => card.getBoundingClientRect());
@@ -501,6 +505,14 @@ if (!bellaris && brandPreviewCandidate) {
                     !!photoImages[1]?.getAttribute('src')?.includes('lead-review-retrievers-aussie') &&
                     photoImages.every(img => !!img?.getAttribute('alt')?.trim()) &&
                     photoImages[0]?.getAttribute('src') !== photoImages[1]?.getAttribute('src'),
+                  paidPhotosBelowFloatingDock: window.location.pathname !== '/psia-skolka-kosice/' ||
+                    (!!photoFrame && !!floatingGuide && photoFrame.top >= reviewsBottom + 12 &&
+                     photoFrame.top >= window.innerHeight + 8 &&
+                     photoFrame.top >= floatingGuide.getBoundingClientRect().bottom + 8 &&
+                     !hero.contains(newPhotos) && photoRects.every(rect => rect.bottom <= formTop - 8)),
+                  paidDescriptionBlack: window.location.pathname !== '/psia-skolka-kosice/' ||
+                    (getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
+                     getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)'),
                   photoGeometry: photoRects.length === 2 && !!photoFrame &&
                     photoRects.every((rect, i) => rect.width > 80 && rect.height >= 110 &&
                       rect.left >= -1 && rect.right <= window.innerWidth + 1 &&
@@ -546,8 +558,9 @@ if (!bellaris && brandPreviewCandidate) {
                   (url.pathname === '/test-aria/' && firstFold.contentCenterY < firstFold.viewportHeight * 0.36) ||
                   (url.pathname === '/test-aria/' && (firstFold.reviewGap < 90 || firstFold.reviewGap > 240)) ||
                   (url.pathname === '/psia-skolka-kosice/' && (!firstFold.floatingDockFixed ||
-                     (width <= 430 && (firstFold.floatingDockBottomOffset < 20 || firstFold.floatingDockBottomOffset > 58)) ||
+                     (width <= 430 && (firstFold.floatingDockBottomOffset < 12 || firstFold.floatingDockBottomOffset > 54)) ||
                      (width >= 390 && width <= 430 && firstFold.floatingReviewGap < 8) ||
+                     !firstFold.paidPhotosBelowFloatingDock || !firstFold.paidDescriptionBlack ||
                      (width <= 430 && (firstFold.softenedShadowRoom < 16 || firstFold.reviewLinkSize > 13)))) ||
                   firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
@@ -1050,7 +1063,8 @@ if (!bellaris && brandPreviewCandidate) {
                 const badge = serviceGroup?.querySelector('[data-aria-service-badge]');
                 const leadDescription = content?.querySelector('[data-aria-hero-description]');
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
-                const introSpace = leadHero?.querySelector('[data-aria-intro-space]');
+                const introSpace = isPaidLead ? document.querySelector('[data-aria-lead-photos]')
+                  : leadHero?.querySelector('[data-aria-intro-space]');
                 const benefits = team?.querySelector('[data-hero-benefits]');
                 const inlineMenu = leadHero?.querySelector('[data-aria-hero-menu]');
                 const floatingMenu = document.querySelector('[data-aria-guide]');
@@ -1069,8 +1083,8 @@ if (!bellaris && brandPreviewCandidate) {
                   follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
                   follows(heroDogs, badge) && follows(badge, leadDescription) &&
                   follows(leadDescription, proof) &&
-                  (isPaidLead ? (follows(heroHeading, introSpace) && follows(introSpace, serviceGroup) &&
-                    !inlineMenu && !!floatingMenu && !leadHero.contains(floatingMenu) &&
+                  (isPaidLead ? (follows(reviews, introSpace) && follows(introSpace, form) &&
+                    !leadHero.contains(introSpace) && !inlineMenu && !!floatingMenu && !leadHero.contains(floatingMenu) &&
                     getComputedStyle(floatingMenu).position === 'fixed' && follows(reviews, form))
                   : (follows(reviews, introSpace) && follows(introSpace, form))) &&
                   follows(form, team) &&
@@ -1079,7 +1093,7 @@ if (!bellaris && brandPreviewCandidate) {
                   follows(team, firstVisitDogs);
                 return commonOrder;
               }, url.pathname === '/psia-skolka-kosice/');
-              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/label-dogs/orange badge/focused copy/reviews/form and caretakers order changed');
+              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/dogs/badge/liquid copy/reviews/lead photos/form or caretakers order changed');
               if (width >= 768) {
                 const heights = await page.locator('[data-aria-review-photo]').evaluateAll(nodes => nodes.map(n => n.getBoundingClientRect().height));
                 if (heights.length !== 2 || heights.some(h => h < 240)) throw new Error('Desktop owner photos too short: '+JSON.stringify(heights));

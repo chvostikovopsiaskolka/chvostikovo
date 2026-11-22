@@ -1116,13 +1116,39 @@
 .aria-brand-experiment footer > div > div:first-child { background-color: #fff; }
 
 
+
+/* Paid lead liquid only: dark copy, orange drifting highlights, reduced-motion safe. */
+.lead-brand-live [data-aria-hero-description] {
+  color: #171c18;
+  border-color: rgb(203 114 7 / 25%);
+  background-color: #ffa414;
+  background-image:
+    radial-gradient(ellipse at 18% 16%, rgb(255 252 224 / 72%), transparent 56%),
+    radial-gradient(ellipse at 82% 85%, rgb(255 119 2 / 30%), transparent 62%),
+    linear-gradient(130deg, #ffbc4a, #ffa414 62%, #ff9c0b);
+  background-size: 165% 160%, 170% 170%, 100% 100%;
+  background-position: 0% 0%, 100% 100%, center;
+  animation: lead-liquid-drift 10s ease-in-out infinite alternate;
+}
+.lead-brand-live [data-aria-hero-description] strong {
+  color: #111;
+  text-decoration: none;
+}
+@keyframes lead-liquid-drift {
+  from { background-position: 0% 0%, 100% 100%, center; }
+  to { background-position: 100% 80%, 0% 10%, center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lead-brand-live [data-aria-hero-description] { animation: none; }
+}
+
 /* Paid lead hotfix: reviews and Aria belong to the first mobile screen.
    Scope to this landing; do not change the preview or organic puppy dock. */
 @media (max-width: 639px) {
   /* The browser toolbar is outside the visual viewport. Keep the dock low,
      above the safe-area inset, rather than 94px above it over the reviews. */
   .lead-brand-live [data-aria-guide] {
-    bottom: max(24px, calc(env(safe-area-inset-bottom) + 4px));
+    bottom: max(18px, env(safe-area-inset-bottom));
   }
   .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
   /* The horizontal scroll container used to clip the card shadows at 4px.
