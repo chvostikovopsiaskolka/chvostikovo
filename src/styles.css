@@ -1177,6 +1177,7 @@
    Leave mobile sizing and the separate /test-aria/ chatbot untouched. */
 @media (min-width: 1024px) {
   .lead-brand-live [data-aria-speech] {
+    width: min(480px, calc(100% - 130px));
     max-width: min(480px, calc(100% - 130px));
     min-height: 72px;
     padding: 16px 20px;
