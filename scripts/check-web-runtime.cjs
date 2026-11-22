@@ -433,17 +433,43 @@ if (!bellaris && brandPreviewCandidate) {
             const ariaDesktop = page.locator('[data-aria-guide]');
             const beforeOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
             if (url.pathname === '/psia-skolka-kosice/') {
+              const bubbleGeometry = await ariaDesktop.locator('[data-aria-speech]').evaluate(el => {
+                const rect = el.getBoundingClientRect();
+                const face = document.querySelector('[data-aria-dock] img[alt^="Aria"]')?.getBoundingClientRect();
+                const textRect = el.querySelector('p')?.getBoundingClientRect();
+                return {
+                  bubbleLeft: rect.left, bubbleRight: rect.right,
+                  width: rect.width, height: rect.height,
+                  faceRight: face?.right ?? -1,
+                  textLeft: textRect?.left ?? -1,
+                  textSize: parseFloat(getComputedStyle(el.querySelector('p') ?? el).fontSize),
+                };
+              });
+              if (bubbleGeometry.width < 420 || bubbleGeometry.height < 68 ||
+                  bubbleGeometry.textSize < 16 ||
+                  bubbleGeometry.faceRight > bubbleGeometry.bubbleLeft - 12 ||
+                  bubbleGeometry.faceRight > bubbleGeometry.textLeft - 26 ||
+                  await page.locator('#lead-section-menu').count())
+                throw new Error('Paid desktop Aria must be large with portrait clear of speech and no page menu: ' +
+                  JSON.stringify(bubbleGeometry));
               const nav = ariaDesktop.locator('[data-aria-section-navigation="true"]');
               if (await nav.locator('button').count() !== 5 || await ariaDesktop.locator('[data-aria-panel]').count())
                 throw new Error('Paid LEAD should have five in-page shortcuts and no floating panel');
               for (const [label,id] of [['O nás','aria-about'],['Cenník škôlky','lead-pricing'],
-                ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form'],
-                ['Otvoriť menu','lead-section-menu']]) {
+                ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form']]) {
                 if (!await page.locator('#'+id).count()) throw new Error('Missing paid scroll target '+id);
                 await nav.getByRole('button',{name:label,exact:true}).click();
                 if (await ariaDesktop.locator('[data-aria-panel]').count())
-                  throw new Error('Paid dock must not open above-dock panels');
+                  throw new Error('Paid section shortcut must not open a floating panel');
               }
+              const menuButton = nav.getByRole('button',{name:'Otvoriť menu',exact:true});
+              await menuButton.click();
+              if (!await ariaDesktop.locator('[data-aria-panel="menu"]').isVisible() ||
+                  await menuButton.getAttribute('aria-expanded') !== 'true')
+                throw new Error('Paid Menu must use existing accessible popover, not added page grid');
+              await menuButton.click();
+              if (await ariaDesktop.locator('[data-aria-panel]').count())
+                throw new Error('Paid Menu must close on the second click');
               // APP-01: about begins at the actual team photo, not repeated content.
               await nav.getByRole('button',{name:'O nás',exact:true}).click();
               await page.waitForFunction(() => {
@@ -1283,13 +1309,27 @@ if (!bellaris && brandPreviewCandidate) {
                 if (await dockNav.locator('button').count() !== 5)
                   throw new Error('Paid mobile dock must contain five section shortcuts');
                 for (const [label,id] of [['O nás','aria-about'],['Cenník škôlky','lead-pricing'],
-                  ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form'],
-                  ['Otvoriť menu','lead-section-menu']]) {
+                  ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form']]) {
                   if (!await page.locator('#'+id).count()) throw new Error('Missing paid nav anchor '+id);
                   await dockNav.getByRole('button',{name:label,exact:true}).click();
                   if (await aria.locator('[data-aria-panel]').count())
-                    throw new Error('Paid dock may not open old floating panels');
+                    throw new Error('Paid section shortcuts may not open floating panels');
                 }
+                if (await page.locator('#lead-section-menu').count() ||
+                    await page.getByRole('heading',{name:'Prejsť na sekciu'}).count())
+                  throw new Error('Removed section grid must not reappear on paid LEAD');
+                await dockNav.getByRole('button',{name:'Otvoriť menu',exact:true}).click();
+                const menu = aria.locator('[data-aria-panel="menu"]');
+                if (!await menu.isVisible())
+                  throw new Error('Paid mobile Menu must open existing floating menu');
+                await menu.getByRole('button',{name:/Fotogaléria/}).click();
+                await page.waitForFunction(() => {
+                  const section = document.querySelector('#lead-photo-carousel');
+                  const top = section?.getBoundingClientRect().top ?? -1;
+                  return top >= 60 && top <= 112;
+                }, null, {timeout:9000});
+                if (await aria.locator('[data-aria-panel]').count())
+                  throw new Error('Paid mobile Menu must close on gallery selection');
                 await page.waitForTimeout(950);
               } else if (url.pathname === '/test-aria/') {
                 const navItems = [
@@ -1563,7 +1603,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
                   ? ['recenzie', 'lead-photo-carousel', 'aria-hero-form', 'aria-caretakers', 'aria-about',
                      'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
-                     'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form', 'lead-section-menu']
+                     'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
                      'lead-benefits', 'lead-pricing', 'lead-requirements', 'lead-faq',
                      'aria-puppy-check', 'lead-first-visit'];
