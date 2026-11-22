@@ -62,6 +62,7 @@ export function DaycarePhotoCarousel({ language = "sk", includeLeadHighlights = 
   const resumeTimer = useRef<number | null>(null);
   const pointerStartX = useRef<number | null>(null);
   const pointerStartY = useRef<number | null>(null);
+  const touchStart = useRef<{ x: number; y: number; scroll: number } | null>(null);
   const holdTimer = useRef<number | null>(null);
   const held = useRef(false);
   const gesturePaused = useRef(false);
@@ -207,6 +208,39 @@ export function DaycarePhotoCarousel({ language = "sk", includeLeadHighlights = 
           onMouseLeave={() => {
             if (active === null && window.matchMedia("(hover: hover) and (pointer: fine)").matches) resume();
           }}
+          onTouchStart={(event) => {
+            const finger = event.touches[0];
+            if (finger) touchStart.current = { x: finger.clientX, y: finger.clientY, scroll: track.current?.scrollLeft ?? 0 };
+          }}
+          onTouchEnd={(event) => {
+            const start = touchStart.current;
+            touchStart.current = null;
+            const end = event.changedTouches[0];
+            if (!start || !end) return;
+            const dx = end.clientX - start.x;
+            const dy = end.clientY - start.y;
+            if (Math.abs(dx) < 36 || Math.abs(dx) <= Math.abs(dy) * 1.2) return;
+            const el = track.current;
+            if (!el) return;
+            // A horizontal swipe chooses the immediately adjacent photo,
+            // not an arbitrary fractional native-scroll offset.
+            pause();
+            dragged.current = true;
+            const first = firstSet.current?.querySelector<HTMLButtonElement>('button');
+            const second = first?.nextElementSibling as HTMLElement | null;
+            if (!first || !second) { resumeAfterPause(); return; }
+            const stride = second.getBoundingClientRect().left - first.getBoundingClientRect().left;
+            if (stride <= 0) { resumeAfterPause(); return; }
+            const center = start.scroll + el.clientWidth / 2;
+            const firstCenter = first.getBoundingClientRect().left - el.getBoundingClientRect().left +
+              first.getBoundingClientRect().width / 2 + el.scrollLeft;
+            const current = Math.round((center - firstCenter) / stride);
+            const next = Math.max(0, Math.min(PHOTOS.length * 2 - 1, current + (dx < 0 ? 1 : -1)));
+            const target = Math.max(0, firstCenter + next * stride - el.clientWidth / 2);
+            requestAnimationFrame(() => el.scrollTo({ left: target, behavior: "smooth" }));
+            resumeAfterPause();
+          }}
+          onTouchCancel={() => { touchStart.current = null; }}
           onPointerDown={(event) => {
             clearHoldTimer();
             pointerStartX.current = event.clientX;
