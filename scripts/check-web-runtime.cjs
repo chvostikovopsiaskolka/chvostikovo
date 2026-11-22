@@ -1115,6 +1115,47 @@ if (!bellaris && brandPreviewCandidate) {
                   await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
                 continue;
               }
+              if (url.pathname === '/test-aria/') {
+                const navItems = [
+                  ['Cenník škôlky', 'lead-pricing'],
+                  ['Podmienky prijatia', 'lead-requirements'],
+                  ['O nás', 'aria-about'],
+                  ['Mám záujem o škôlku', 'aria-first-visit-form'],
+                ];
+                for (const [name, targetId] of navItems) {
+                  await aria.getByRole('button', { name, exact: true }).click();
+                  await page.waitForFunction(id => {
+                    const element = document.getElementById(id);
+                    if (!element) return false;
+                    const top = element.getBoundingClientRect().top;
+                    return top >= 60 && top <= 112;
+                  }, targetId, { timeout: 9000 });
+                  if (await aria.locator('[data-aria-panel="pricing"], [data-aria-panel="requirements"], [data-aria-panel="faq"]').count() ||
+                      await page.evaluate(() => document.documentElement.style.overflow === 'hidden'))
+                    throw new Error('Preview nav must scroll to ' + targetId + ' without opening a modal or locking scroll at ' + width);
+                }
+                // The preview menu stays a compact navigation overlay. Its
+                // "Chcem sa informovať" action now scrolls to the existing
+                // inline form rather than opening another modal.
+                await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
+                const menu = aria.locator('[data-aria-menu]');
+                await menu.waitFor({ state: 'visible' });
+                const puppyMenuLine = menu.getByText('Zistite, či vaše šteniatko spĺňa podmienky');
+                if (!await menu.getByText('3 dôvody, prečo si vybrať nás').count() ||
+                    !await puppyMenuLine.count() ||
+                    await menu.getByText('Nastavenia cookies').count())
+                  throw new Error('Preview menu descriptions or cookie removal regressed');
+                await menu.getByRole('button', { name: /Chcem sa informovať/ }).click();
+                await aria.locator('[data-aria-panel="menu"]').waitFor({ state: 'hidden' });
+                await page.waitForFunction(() => {
+                  const target = document.getElementById('aria-first-visit-form');
+                  if (!target) return false;
+                  const y = target.getBoundingClientRect().top;
+                  return y >= 60 && y <= 112;
+                }, null, { timeout: 9000 });
+                if (await page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).count())
+                  throw new Error('Preview menu enquiry must scroll to the form, not open a dialog');
+              } else {
               await aria.getByRole('button', { name: 'Časté otázky' }).click();
               await aria.locator('[data-aria-panel="faq"]').waitFor({ state: 'visible' });
               const puppyQuestion = aria.getByRole('button', { name: 'Prijímate aj šteniatka?' });
@@ -1194,6 +1235,8 @@ if (!bellaris && brandPreviewCandidate) {
               if (await puppyMenuLine.evaluate(el => el.scrollWidth > el.clientWidth + 1 || getComputedStyle(el).whiteSpace !== 'nowrap'))
                 throw new Error('Puppy menu subtitle must fit on a single unclipped row at ' + width);
               await aria.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
+
+              }
 
               const cols = await page.locator('#lead-pricing .grid').first().evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
               const pageCards = await Promise.all([page.locator('#lead-pricing article').nth(0).boundingBox(), page.locator('#lead-pricing article').nth(1).boundingBox()]);
