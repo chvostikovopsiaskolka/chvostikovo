@@ -274,7 +274,7 @@ export function AriaLeadAssistant({
 
   return (
     <aside aria-label="Aria – sprievodkyňa Chvostíkovom" data-aria-guide data-intro={stage === "intro" ? "true" : "false"} data-aria-stage={stage}
-      className="pointer-events-none fixed inset-x-0 bottom-[max(6px,env(safe-area-inset-bottom))] z-40 px-2 sm:bottom-4 sm:px-4">
+      className="pointer-events-none fixed inset-x-0 bottom-[max(94px,calc(env(safe-area-inset-bottom)+78px))] z-40 px-2 sm:bottom-4 sm:px-4">
       <div className="pointer-events-none relative mx-auto w-full max-w-[690px] pb-0">
         {panel && (
           <div role="region" aria-label={"Aria: " + panel} data-aria-panel={panel}
@@ -415,8 +415,8 @@ export function AriaLeadAssistant({
 
         {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
-            className={guidedChatPreview ? "pointer-events-none mb-2 flex w-full justify-end pr-[100px] sm:pr-[116px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
-            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[min(76vw,300px)] items-center px-3 py-2 text-forest sm:max-w-[390px]">
+            className={guidedChatPreview ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
+            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
