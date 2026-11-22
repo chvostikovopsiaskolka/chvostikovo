@@ -348,7 +348,7 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
                 <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
                   <ArrowLeft size={15} aria-hidden /> Späť k otázkam
                 </button>
-                <AriaPuppyChecker embedded trackingSource="aria_preview_v3_chat_puppy"
+                <AriaPuppyChecker embedded trackingSource="aria_preview_v3_chat_puppy" initialAnswers={puppyCheck ?? undefined}
                   onInterest={details => finishPuppyCheck(details, true)}
                   onInfo={details => finishPuppyCheck(details, false)} />
               </section>
