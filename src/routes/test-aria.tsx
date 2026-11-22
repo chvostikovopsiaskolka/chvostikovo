@@ -147,6 +147,52 @@ export function AriaPreviewPage() {
     setLeadModalOpen(true);
   }
 
+  const benefitsSection = (
+        <section id="lead-benefits" className="relative overflow-hidden bg-card py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
+            <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
+              Prečo Chvostíkovo
+            </p>
+            <h2 className="section-title mx-auto mt-2 max-w-3xl text-3xl sm:text-4xl">
+              Aktívny deň pre psíka. Pokojnejšia hlava pre vás.
+            </h2>
+
+            {/* Mobile: one real photo paired with each benefit, with no overlapping rows. */}
+            <div className="mt-7 space-y-5 sm:hidden">
+              {BENEFITS.map(({ title: benefitTitle, content }, i) => {
+                const photo = [DAYCARE_GALLERY_EXTRAS[2]!, DAYCARE_GALLERY_EXTRAS[1]!, DAYCARE_GALLERY_EXTRAS[0]!][i]!;
+                return (
+                  <div key={benefitTitle} className="grid grid-cols-[minmax(0,0.97fr)_minmax(0,1.03fr)] items-stretch gap-3">
+                    <figure className="relative min-h-40 min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
+                      <img src={photo.src} alt={photo.alt} width={720} height={720} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
+                    </figure>
+                    <article className="min-w-0 py-1 text-left">
+                      <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px]">{benefitTitle}</h3>
+                      <p className="mt-2 text-[12px] leading-[1.55] text-forest/80 min-[390px]:text-[13px]">{content}</p>
+                    </article>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop/tablet: retain the established editorial composition. */}
+            <div className="mt-7 hidden sm:block">
+              <EditorialBenefits image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
+                {BENEFITS.map(({ icon: Icon, title: benefitTitle, content }, i) => (
+                  <article key={benefitTitle} className={`py-3 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-forest/15" : ""}`}>
+                    <Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden />
+                    <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px] sm:text-xl">{benefitTitle}</h3>
+                    <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{content}</p>
+                  </article>
+                ))}
+              </EditorialBenefits>
+            </div>
+
+          </div>
+        </section>
+  );
+
   return (
     <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose">
       {/* Keep Aria floating in the viewport throughout the lead journey.
@@ -303,6 +349,8 @@ export function AriaPreviewPage() {
 
         {!isLiveLead && <AriaMosaicGallery />}
 
+        {!isLiveLead && benefitsSection}
+
         <section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
@@ -362,50 +410,7 @@ export function AriaPreviewPage() {
 
         <Requirements id="lead-requirements" ariaPreview hideEyebrow />
 
-        <section id="lead-benefits" className="relative overflow-hidden bg-card py-10 sm:py-14">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
-            <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
-              Prečo Chvostíkovo
-            </p>
-            <h2 className="section-title mx-auto mt-2 max-w-3xl text-3xl sm:text-4xl">
-              Aktívny deň pre psíka. Pokojnejšia hlava pre vás.
-            </h2>
-
-            {/* Mobile: one real photo paired with each benefit, with no overlapping rows. */}
-            <div className="mt-7 space-y-5 sm:hidden">
-              {BENEFITS.map(({ title: benefitTitle, content }, i) => {
-                const photo = [DAYCARE_GALLERY_EXTRAS[2]!, DAYCARE_GALLERY_EXTRAS[1]!, DAYCARE_GALLERY_EXTRAS[0]!][i]!;
-                return (
-                  <div key={benefitTitle} className="grid grid-cols-[minmax(0,0.97fr)_minmax(0,1.03fr)] items-stretch gap-3">
-                    <figure className="relative min-h-40 min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
-                      <img src={photo.src} alt={photo.alt} width={720} height={720} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
-                    </figure>
-                    <article className="min-w-0 py-1 text-left">
-                      <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px]">{benefitTitle}</h3>
-                      <p className="mt-2 text-[12px] leading-[1.55] text-forest/80 min-[390px]:text-[13px]">{content}</p>
-                    </article>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Desktop/tablet: retain the established editorial composition. */}
-            <div className="mt-7 hidden sm:block">
-              <EditorialBenefits image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
-                {BENEFITS.map(({ icon: Icon, title: benefitTitle, content }, i) => (
-                  <article key={benefitTitle} className={`py-3 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-forest/15" : ""}`}>
-                    <Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden />
-                    <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px] sm:text-xl">{benefitTitle}</h3>
-                    <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{content}</p>
-                  </article>
-                ))}
-              </EditorialBenefits>
-            </div>
-
-          </div>
-        </section>
-
+        {isLiveLead && benefitsSection}
 
         <section id="lead-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
           <SectionAmbientPaws />
