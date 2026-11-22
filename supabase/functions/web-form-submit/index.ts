@@ -203,10 +203,13 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
   }
 
   const isApplication = payload.form_type === 'application';
+  const isAriaQuestion = !isApplication && ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100));
   const isEnglishLead = !isApplication && String(payload.interest_reason ?? '').startsWith('EN ·');
 
   const subject = isApplication
     ? 'Nová prihláška do škôlky (web)'
+    : isAriaQuestion
+      ? 'Nová správa pre Chvostíkovo – Aria (web)'
     : isEnglishLead
       ? 'Nový záujem o škôlku EN (web)'
       : 'Nový záujem o škôlku (web)';
@@ -268,6 +271,11 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
         ? text((input.raw_payload as Record<string, unknown>)['Otázka návštevníka'], 600)
         : '';
       if (question) lines.push(`Otázka návštevníka: ${question}`);
+      const preferred = input.raw_payload && typeof input.raw_payload === 'object'
+        ? text((input.raw_payload as Record<string, unknown>)['Preferovaný kontakt'], 40)
+        : '';
+      if (preferred === 'Telefón' || preferred === 'E-mail')
+        lines.push(`Preferovaný kontakt: ${preferred}`);
     }
     // Only the explicit puppy-check values are echoed into the operator email.
     // The backend still stores them in raw_payload and keeps its strict
@@ -533,6 +541,9 @@ Deno.serve(async (req: Request) => {
           return response(origin, 400, { ok: false, error: 'invalid_aria_question' });
         if (input.interest_reason !== 'Chcem sa informovať o škôlke')
           return response(origin, 400, { ok: false, error: 'invalid_interest' });
+        const preferred = text((input.raw_payload as Record<string, unknown>)['Preferovaný kontakt'], 40);
+        if (preferred && preferred !== 'Telefón' && preferred !== 'E-mail')
+          return response(origin, 400, { ok: false, error: 'invalid_contact_preference' });
       }
       const rawInterest = text(input.interest_reason ?? input.zaujem, 250);
       const enPrefix = 'EN – Dog daycare enquiry | ';
@@ -684,7 +695,10 @@ Deno.serve(async (req: Request) => {
       const submissionId = Number(saved?.[0]?.id);
       if (Number.isSafeInteger(submissionId) && submissionId > 0) {
         savedSubmissionId = submissionId;
-        EdgeRuntime.waitUntil(notifyWebFormSms(submissionId));
+        // Free-form Aria messages are NOT SMS confirmations. The database
+        // SMS outbox trigger uses the same strict allowlist (migration).
+        if (!ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100)))
+          EdgeRuntime.waitUntil(notifyWebFormSms(submissionId));
       }
     } catch (_) {
       console.error('Web SMS dispatch could not start; saved outbox will retry.');
