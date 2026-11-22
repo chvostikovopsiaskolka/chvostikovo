@@ -480,12 +480,14 @@ if (!bellaris && brandPreviewCandidate) {
                 const photoImages = photoCards.map(card => card.querySelector('img'));
                 const photoRects = photoCards.map(card => card.getBoundingClientRect());
                 const photoFrame = newPhotos?.getBoundingClientRect();
+                const inlineMenuRect = hero.querySelector('[data-aria-hero-menu]')?.getBoundingClientRect();
                 const lineHeight = parseFloat(getComputedStyle(proof).lineHeight);
                 return {
                   missing: false,
                   formTop,
                   reviewGap: formTop - reviewBottom,
                   photoCount: photoCards.length,
+                  inlineMenuVisible: !!inlineMenuRect && inlineMenuRect.top >= 0 && inlineMenuRect.bottom <= window.innerHeight + 12,
                   photoApprovedAssets: photoImages.length === 2 &&
                     !!photoImages[0]?.getAttribute('src')?.includes('lead-review-border-collies') &&
                     !!photoImages[1]?.getAttribute('src')?.includes('lead-review-retrievers-aussie') &&
@@ -535,6 +537,7 @@ if (!bellaris && brandPreviewCandidate) {
                   (url.pathname === '/test-aria/' && firstFold.topSpacerHeight < 0) ||
                   (url.pathname === '/test-aria/' && firstFold.contentCenterY < firstFold.viewportHeight * 0.36) ||
                   (url.pathname === '/test-aria/' && (firstFold.reviewGap < 90 || firstFold.reviewGap > 240)) ||
+                  (url.pathname === '/psia-skolka-kosice/' && width <= 430 && !firstFold.inlineMenuVisible) ||
                   firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
