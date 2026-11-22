@@ -883,6 +883,22 @@ if (!bellaris && brandPreviewCandidate) {
                   await freshTrigger.click();
                   await page.locator('[data-aria-chat]').waitFor({ state: 'visible' });
                   await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
+
+                  // When an old iPhone tab references a missing lazy-loaded chat
+                  // chunk after deployment, Aria must fail locally, never replace
+                  // the entire site with the root "This page didn't load".
+                  await page.route(/AriaGuidedChat-[^/]+\\.js(?:\\?.*)?$/, route => route.abort('failed'));
+                  await page.reload({ waitUntil: 'domcontentloaded' });
+                  const cookieAfterChunkFailure = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
+                  await cookieAfterChunkFailure.waitFor({ state: 'visible', timeout: 10000 });
+                  await cookieAfterChunkFailure.click();
+                  await page.locator('[data-aria-chat-trigger]').click();
+                  await page.locator('[data-aria-chat-load-error]').waitFor({ state: 'visible', timeout: 10000 });
+                  if (await page.getByText("This page didn't load").count() > 0 ||
+                      !await page.locator('[data-aria-dock]').isVisible())
+                    throw new Error('A failed lazy-chat chunk must be isolated from the entire website');
+                  await page.getByRole('button', { name: 'Zavrieť' }).click();
+                  await page.unroute(/AriaGuidedChat-[^/]+\\.js(?:\\?.*)?$/);
                 }
               }
 
