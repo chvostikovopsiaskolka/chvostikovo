@@ -1114,10 +1114,6 @@
 .aria-brand-experiment footer { background-color: rgb(255 164 20 / 26%); }
 .aria-brand-experiment footer { background-image: none; }
 .aria-brand-experiment footer > div > div:first-child { background-color: #fff; }
-.aria-brand-experiment.lead-brand-live [data-aria-speech],
-.aria-brand-experiment.lead-brand-live [data-aria-message],
-.aria-brand-experiment.lead-brand-live [data-aria-dock] > img { display: none; }
-.aria-brand-experiment.lead-brand-live [data-aria-dock] { margin-left: auto; margin-right: auto; max-width: 500px; }
 
 /* Preserve the approved animated filled paw prints on the live lead hero.
    Do not remove the dog imagery or recolor static decorative paw outlines. */
