@@ -1347,7 +1347,7 @@ if (!bellaris && brandPreviewCandidate) {
                      'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
                      'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form', 'lead-section-menu']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
-                     'lead-pricing', 'lead-requirements', 'lead-benefits', 'lead-faq',
+                     'lead-benefits', 'lead-pricing', 'lead-requirements', 'lead-faq',
                      'aria-puppy-check', 'lead-first-visit'];
                 const elements = ids.map(id => document.getElementById(id));
                 return elements.every((node, idx) => node && (idx === 0 || !!(elements[idx-1] && elements[idx-1].compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)));
