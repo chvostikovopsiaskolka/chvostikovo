@@ -1125,26 +1125,28 @@
   color: #fff;
 }
 .lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
-  box-shadow: 0 14px 34px -10px rgb(38 50 43 / 28%),
-              0 22px 42px -18px rgb(38 50 43 / 26%),
-              0 0 0 1px rgb(38 50 43 / 16%);
+  border: 1px solid rgb(38 50 43 / 12%);
+  box-shadow:
+    0 3px 7px rgb(38 50 43 / 6%),
+    0 12px 24px -6px rgb(38 50 43 / 15%),
+    0 24px 48px -16px rgb(38 50 43 / 13%);
 }
 
-/* Paid lead liquid only: dark copy, orange drifting highlights, reduced-motion safe. */
+/* Paid LEAD only: use the same orange as the headline and white ink.
+   Layered low-opacity shadows fade without hard rectangular edges. */
 .lead-brand-live [data-aria-hero-description] {
-  color: #171c18;
-  border-color: rgb(203 114 7 / 25%);
+  color: #fff;
+  border-color: rgb(255 255 255 / 22%);
   background-color: #ffa414;
-  background-image:
-    radial-gradient(ellipse at 18% 16%, rgb(255 252 224 / 72%), transparent 56%),
-    radial-gradient(ellipse at 82% 85%, rgb(255 119 2 / 30%), transparent 62%),
-    linear-gradient(130deg, #ffbc4a, #ffa414 62%, #ff9c0b);
-  background-size: 165% 160%, 170% 170%, 100% 100%;
-  background-position: 0% 0%, 100% 100%, center;
-  animation: lead-liquid-drift 10s ease-in-out infinite alternate;
+  background-image: none;
+  animation: none;
+  box-shadow:
+    0 4px 10px rgb(184 100 10 / 11%),
+    0 13px 30px -5px rgb(184 100 10 / 18%),
+    0 28px 58px -18px rgb(184 100 10 / 17%);
 }
 .lead-brand-live [data-aria-hero-description] strong {
-  color: #111;
+  color: #fff;
   text-decoration: none;
 }
 @keyframes lead-liquid-drift {
@@ -1191,18 +1193,14 @@
   .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
   /* The horizontal scroll container used to clip the card shadows at 4px.
      Leave enough real space for a soft fade before the floating speech. */
-  .lead-brand-live #recenzie [data-gesture-track="reviews"] { padding-bottom: 1.25rem; margin-top: 0; }
+  .lead-brand-live #recenzie [data-gesture-track="reviews"] { padding-top: 0.6rem; padding-bottom: 2rem; margin-top: 0.25rem; }
   /* Two preview lines reserve visible room for the floating Aria bubble on
      small iPhone webview heights. The full review remains expandable. */
   .lead-brand-live #recenzie [data-gesture-track="reviews"] figure blockquote.line-clamp-3 {
     min-height: 2.5rem;
     -webkit-line-clamp: 2;
   }
-  .lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
-    box-shadow: 0 14px 34px -10px rgb(38 50 43 / 28%),
-              0 22px 42px -18px rgb(38 50 43 / 26%),
-              0 0 0 1px rgb(38 50 43 / 16%);
-  }
+  /* Review cards use the same soft raised style at every width. */
   .lead-brand-live #recenzie [data-gesture-track="reviews"] figure button { font-size: 12px; line-height: 1.4; }
   /* Readable mobile editorial copy: target three natural lines at typical iPhone
      widths; narrow 320px screens may wrap further rather than shrinking type. */
