@@ -1197,7 +1197,7 @@
     max-width: min(100%, 400px);
     padding-block: 0.75rem;
     padding-inline: 11px;
-    font-size: clamp(15px, 4.1vw, 17px);
+    font-size: clamp(15px, 3.8vw, 16.5px);
     line-height: 1.38;
   }
 }
