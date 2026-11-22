@@ -1105,3 +1105,16 @@
 /* Override the old hero-only always-orange selector: selection, not location, sets orange. */
 .aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"] + span { background-color: #fff0d5; color: #26322b; }
 .aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"]:checked + span { background-color: #ffa414; color: #26322b; }
+
+/* Approved palette transfer to paid lead: stronger translucent logo-orange wash.
+   The guided Aria assistant remains preview-only pending a separate review. */
+.aria-brand-experiment #aria-early-faq,
+.aria-brand-experiment #lead-faq,
+.aria-brand-experiment #lead-pricing,
+.aria-brand-experiment footer { background-color: rgb(255 164 20 / 26%); }
+.aria-brand-experiment footer { background-image: none; }
+.aria-brand-experiment footer > div > div:first-child { background-color: #fff; }
+.aria-brand-experiment.lead-brand-live [data-aria-speech],
+.aria-brand-experiment.lead-brand-live [data-aria-message],
+.aria-brand-experiment.lead-brand-live [data-aria-dock] > img { display: none; }
+.aria-brand-experiment.lead-brand-live [data-aria-dock] { margin-left: auto; margin-right: auto; max-width: 500px; }
