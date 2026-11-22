@@ -376,7 +376,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                   </button>
                 ))}
                 <button type="button" data-aria-chat-other-cta onClick={showOther}
-                  className={"min-h-11 rounded-xl border border-[#e4d9cb] bg-white px-2.5 py-2.5 text-left text-xs font-semibold leading-snug text-[#26322b] shadow-sm transition hover:border-[#aa4b00] focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
+                  className={"min-h-11 rounded-xl border border-[#ffa414]/55 bg-[#fff0d5] px-2.5 py-2.5 text-left text-xs font-extrabold leading-snug text-[#26322b] shadow-sm transition hover:border-[#ffa414] hover:bg-[#ffe3b2] focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
                     (unanswered.some(question => question.id === "puppy") ? "" : "col-span-2")}>
                   Mám inú otázku?
                 </button>
@@ -392,7 +392,6 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             </span>
             <input type="text" disabled readOnly
               aria-label="Písanie správ zatiaľ nie je dostupné"
-              placeholder="Napísať správu (pripravujeme)"
               className="min-h-11 min-w-0 flex-1 cursor-not-allowed rounded-2xl border border-[#e4d9cb] bg-white px-4 text-sm text-[#26322b] placeholder:text-[#7f867f] disabled:opacity-100" />
           </div>
         )}

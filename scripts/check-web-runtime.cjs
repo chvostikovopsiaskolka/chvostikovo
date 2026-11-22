@@ -955,8 +955,13 @@ if (!bellaris && brandPreviewCandidate) {
                   const disabledEntry = composer.locator('input');
                   if (await questionMenu.evaluate(el => !!el.closest('[data-aria-chat-history]')) ||
                       !await disabledEntry.isDisabled() ||
+                      await disabledEntry.getAttribute('placeholder') !== null ||
                       !await composer.locator('svg[viewBox="0 0 33 36"]').count())
-                    throw new Error('Chat must pin FAQ above a pink-paw, read-only message composer');
+                    throw new Error('Chat must pin FAQ above an empty, disabled composer with the pink profile paw');
+                  const otherColor = await questionMenu.locator('[data-aria-chat-other-cta]')
+                    .evaluate(el => getComputedStyle(el).backgroundColor);
+                  if (otherColor !== 'rgb(255, 240, 213)')
+                    throw new Error('Other-question FAQ must have the approved soft orange highlight, got ' + otherColor);
                   const [questionsBox, composerBox, historyBox] = await Promise.all([
                     questionMenu.boundingBox(), composer.boundingBox(),
                     chat.locator('[data-aria-chat-history]').boundingBox(),
