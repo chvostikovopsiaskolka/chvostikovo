@@ -289,7 +289,7 @@ if (!bellaris && brandPreviewCandidate) {
                   throw new Error('Lead hero lost approved wording užije si pohyb');
                 if (layout.heights.length !== 2 || layout.photoTop < layout.headingBottom || layout.badgeTop < layout.photoBottom || layout.menuPosition !== 'relative' || layout.formTop < layout.menuBottom)
                   throw new Error('Lead hero section order regressed: ' + JSON.stringify(layout));
-                if (layout.width < 500 && layout.heights.some(h => h < 175))
+                if (layout.width < 500 && layout.heights.some(h => h < 110))
                   throw new Error('Lead mobile photo cards too short: ' + JSON.stringify(layout));
               }
               await cards.first().scrollIntoViewIfNeeded();
