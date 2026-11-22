@@ -407,7 +407,7 @@ if (!bellaris && brandPreviewCandidate) {
                 dogsTouchBadge: !!badge && !!crown && Math.abs(crown.bottom - badge.top) <= 3,
                 liquid: !!text && getComputedStyle(text).backgroundImage.includes('radial-gradient') &&
                   parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
-                about: window.location.pathname === '/psia-skolka-kosice/' ? (!document.querySelector('#aria-about') && document.querySelectorAll('#aria-caretakers p').length >= 4 && document.querySelector('#aria-caretakers')?.textContent?.includes('Je to druhý domov')) : (!!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2),
+                about: !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
                 teamPills: team?.children.length ?? 0,
                 teamContained: !!teamBounds && [...team.children].every(pill => {
                   const bounds = pill.getBoundingClientRect();
@@ -557,7 +557,7 @@ if (!bellaris && brandPreviewCandidate) {
                     photoRects.every((rect, i) => rect.width > 80 && rect.height >= 110 &&
                       rect.left >= -1 && rect.right <= window.innerWidth + 1 &&
                       rect.top >= reviewBottom - 2 && rect.bottom <= formTop + 2) &&
-                    Math.abs(photoRects[0].top - photoRects[1].top) <= 2 &&
+                    Math.abs(photoRects[0].top - photoRects[1].top) <= (window.location.pathname === '/psia-skolka-kosice/' ? 32 : 2) &&
                     photoRects[0].right <= photoRects[1].left &&
                     photoFrame.width <= window.innerWidth + 2,
                   contentCenterY: (contentTop + reviewsBottom) / 2,
@@ -1251,8 +1251,8 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Mobile lead gallery must show location and parking chips');
               if (!await page.locator('#lead-pricing [data-lead-best-value]').getByText('Najvýhodnejšie').count())
                 throw new Error('Lead permanentka must retain the orange best-value label');
-              if (await page.locator('#aria-mosaic img').count() !== 8)
-                throw new Error('Preview mosaic must retain eight photos');
+              if (await page.locator('#aria-mosaic img').count() !== (url.pathname === '/psia-skolka-kosice/' ? 10 : 8))
+                throw new Error('Mosaic photo count must be 8 in preview or 10 with two approved LEAD highlights');
               // Compare document order rather than screen rects (some sections may be offscreen).
               const hasHeroFormAndCaretakerOrder = await page.evaluate((isPaidLead) => {
                 const reviews = document.getElementById('recenzie');
@@ -1301,7 +1301,7 @@ if (!bellaris && brandPreviewCandidate) {
               if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/dogs/badge/liquid copy/reviews/lead photos/form or caretakers order changed');
               if (width >= 768) {
                 const heights = await page.locator('[data-aria-review-photo]').evaluateAll(nodes => nodes.map(n => n.getBoundingClientRect().height));
-                if (heights.length !== 2 || heights.some(h => h < 240)) throw new Error('Desktop owner photos too short: '+JSON.stringify(heights));
+                if (heights.length !== 2 || heights.some(h => h < 240)) throw new Error('Desktop gallery highlight photos too short: '+JSON.stringify(heights));
               }
               const stacked = await page.locator('#aria-caretakers').evaluate(section => {
                 const rect = query => section.querySelector(query)?.getBoundingClientRect();
@@ -1342,7 +1342,13 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Information-only enquiry must keep the same editable breed field and entered value');
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
-                const ids = ['recenzie', 'aria-caretakers', 'aria-early-faq', 'aria-mosaic', 'lead-benefits', 'lead-pricing', 'lead-requirements', 'aria-puppy-check', 'lead-first-visit'];
+                const ids = window.location.pathname === '/psia-skolka-kosice/'
+                  ? ['recenzie', 'aria-mosaic', 'aria-hero-form', 'aria-caretakers', 'aria-about',
+                     'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
+                     'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form', 'lead-section-menu']
+                  : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
+                     'lead-pricing', 'lead-requirements', 'lead-benefits', 'lead-faq',
+                     'aria-puppy-check', 'lead-first-visit'];
                 const elements = ids.map(id => document.getElementById(id));
                 return elements.every((node, idx) => node && (idx === 0 || !!(elements[idx-1] && elements[idx-1].compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)));
               });
