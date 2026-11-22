@@ -155,7 +155,7 @@ export function AriaPreviewPage() {
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
-        <section className={isLiveLead ? "hero-safe-top relative flex min-h-[calc(100svh-20px)] flex-col pt-[76px] sm:min-h-[100svh] sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
+        <section className={isLiveLead ? "hero-safe-top relative flex min-h-[calc(100svh-20px)] flex-col pt-[112px] sm:min-h-[100svh] sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
           <PawTrailBackground landingBottomPaws />
 
           {/* Balance the first fold around the whole content group; Aria owns
