@@ -884,21 +884,34 @@ if (!bellaris && brandPreviewCandidate) {
                   await page.locator('[data-aria-chat]').waitFor({ state: 'visible' });
                   await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
 
-                  // When an old iPhone tab references a missing lazy-loaded chat
-                  // chunk after deployment, Aria must fail locally, never replace
-                  // the entire site with the root "This page didn't load".
-                  await page.route(/AriaGuidedChat-[^/]+\.js(?:\?.*)?$/, route => route.abort('failed'));
-                  await page.reload({ waitUntil: 'domcontentloaded' });
-                  const cookieAfterChunkFailure = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
-                  await cookieAfterChunkFailure.waitFor({ state: 'visible', timeout: 10000 });
-                  await cookieAfterChunkFailure.click();
-                  await page.locator('[data-aria-chat-trigger]').click();
-                  await page.locator('[data-aria-chat-load-error]').waitFor({ state: 'visible', timeout: 10000 });
-                  if (await page.getByText("This page didn't load").count() > 0 ||
-                      !await page.locator('[data-aria-dock]').isVisible())
-                    throw new Error('A failed lazy-chat chunk must be isolated from the entire website');
-                  await page.getByRole('button', { name: 'Zavrieť' }).click();
-                  await page.unroute(/AriaGuidedChat-[^/]+\.js(?:\?.*)?$/);
+                  // Simulate a stale/lost lazy chunk in a completely isolated
+                  // browser context. Never pollute the normal page: its consent,
+                  // scroll and modal state must remain intact for following tests.
+                  const failureContext = await browser.newContext({
+                    viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+                  });
+                  try {
+                    await failureContext.route('**/*', route => {
+                      const request = route.request();
+                      if (!['GET', 'HEAD'].includes(request.method()) ||
+                          new URL(request.url()).origin !== url.origin) return route.abort();
+                      return route.continue();
+                    });
+                    await failureContext.route(/AriaGuidedChat-[^/]+\.js(?:\?.*)?$/, route => route.abort('failed'));
+                    const failurePage = await failureContext.newPage();
+                    await failurePage.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 40000 });
+                    const failureConsent = failurePage.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
+                    await failureConsent.waitFor({ state: 'visible', timeout: 10000 });
+                    await failureConsent.click();
+                    await failurePage.locator('[data-aria-chat-trigger]').click();
+                    await failurePage.locator('[data-aria-chat-load-error]').waitFor({ state: 'visible', timeout: 12000 });
+                    if (await failurePage.getByText("This page didn't load").count() ||
+                        !await failurePage.locator('[data-aria-dock]').isVisible())
+                      throw new Error('A failed lazy chat import must preserve the landing and dock');
+                    await failurePage.getByRole('button', { name: 'Zavrieť' }).click();
+                  } finally {
+                    await failureContext.close();
+                  }
                 }
               }
 
