@@ -423,22 +423,40 @@ if (!bellaris && brandPreviewCandidate) {
                 desktop.sliderStyle !== 'none')
               throw new Error('Desktop lead diverges from responsive contract: ' + JSON.stringify(desktop));
             const ariaDesktop = page.locator('[data-aria-guide]');
-            const beforeOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
-            for (const [name, panel] of [['Otvoriť menu', 'menu'], ['Cenník škôlky', 'pricing'], ['Podmienky prijatia', 'requirements']]) {
-              await ariaDesktop.getByRole('button', { name }).click();
-              await ariaDesktop.locator('[data-aria-panel="' + panel + '"]').waitFor({ state: 'visible' });
-              const afterOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
-              if (Math.abs(beforeOpen - afterOpen) > 1)
-                throw new Error('Aria ' + panel + ' shifted the desktop document by ' + (afterOpen - beforeOpen) + 'px');
-              if (panel === 'menu') {
-                const wordmark = ariaDesktop.locator('[data-aria-menu-logo]');
-                if (!await wordmark.isVisible())
-                  throw new Error('Lead menu missing Chvostikovo wordmark');
+            if (url.pathname === '/psia-skolka-kosice/') {
+              const nav = ariaDesktop.locator('[data-aria-section-navigation="true"]');
+              if (await nav.locator('button').count() !== 5 ||
+                  await ariaDesktop.locator('[data-aria-panel]').count())
+                throw new Error('Paid LEAD should have five in-page shortcuts and no floating panel');
+              for (const [label, id] of [
+                ['O nás', 'aria-about'], ['Cenník škôlky', 'lead-pricing'],
+                ['Podmienky prijatia', 'lead-requirements'],
+                ['Mám záujem o škôlku', 'aria-hero-form'],
+                ['Otvoriť menu', 'lead-section-menu'],
+              ]) {
+                if (!await page.locator('#' + id).count()) throw new Error('Missing scroll target: ' + id);
+                await nav.getByRole('button', { name: label, exact: true }).click();
+                if (await ariaDesktop.locator('[data-aria-panel]').count())
+                  throw new Error('Paid dock must never open an above-dock window');
               }
-              await ariaDesktop.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
-              if (await page.evaluate(() => document.documentElement.style.overflow === 'hidden'))
-                throw new Error('Aria panel did not restore page scrolling');
-            }
+            } else {
+              const beforeOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
+              for (const [name, panel] of [['Otvoriť menu', 'menu'], ['Cenník škôlky', 'pricing'], ['Podmienky prijatia', 'requirements']]) {
+                await ariaDesktop.getByRole('button', { name }).click();
+                await ariaDesktop.locator('[data-aria-panel="' + panel + '"]').waitFor({ state: 'visible' });
+                const afterOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
+                if (Math.abs(beforeOpen - afterOpen) > 1)
+                  throw new Error('Aria ' + panel + ' shifted the desktop document by ' + (afterOpen - beforeOpen) + 'px');
+                if (panel === 'menu') {
+                  const wordmark = ariaDesktop.locator('[data-aria-menu-logo]');
+                  if (!await wordmark.isVisible())
+                    throw new Error('Lead menu missing Chvostikovo wordmark');
+                }
+                await ariaDesktop.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
+                if (await page.evaluate(() => document.documentElement.style.overflow === 'hidden'))
+                  throw new Error('Aria panel did not restore page scrolling');
+              }
+              }
             await page.evaluate(() => window.scrollTo(0, 0));
             if (url.pathname === '/test-aria/')
               await page.waitForTimeout(1650); // Let short-lived consent-saved notice clear before visual snapshots.
@@ -1122,86 +1140,102 @@ if (!bellaris && brandPreviewCandidate) {
                   await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
                 continue;
               }
-              await aria.getByRole('button', { name: 'Časté otázky' }).click();
-              await aria.locator('[data-aria-panel="faq"]').waitFor({ state: 'visible' });
-              const puppyQuestion = aria.getByRole('button', { name: 'Prijímate aj šteniatka?' });
-              if (await puppyQuestion.getAttribute('aria-expanded') !== 'true') await puppyQuestion.click();
-              await aria.getByRole('button', { name: 'Overiť vhodnosť šteniatka' }).click();
-              const wizard = page.locator('[data-aria-puppy-embedded="true"]');
-              await wizard.waitFor({ state: 'visible' });
-              if (!await wizard.locator('[data-aria-puppy-step="age"]').count()) throw new Error('Puppy wizard age step missing');
-              const ageSlider = wizard.getByRole('slider', { name: 'Vek šteniatka v mesiacoch' });
-              await ageSlider.focus();
-              await ageSlider.press('ArrowLeft');
-              await ageSlider.press('ArrowLeft');
-              if (!await wizard.getByText(/Zatiaľ nespĺňa/).count()) throw new Error('Age 1–3 must be blocked');
-              await ageSlider.press('ArrowRight');
-              await ageSlider.press('ArrowRight');
-              await wizard.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
-              if (!await wizard.locator('[data-aria-puppy-step="vaccines"]').count()) throw new Error('Puppy vaccinations missing');
-              for (let i = 0; i < 3; i++) await wizard.locator('fieldset').nth(i).getByText('Áno', { exact: true }).click();
-              if (await wizard.getByText(/Plemeno \(voliteľné\)/).count() ||
-                  await wizard.getByPlaceholder('Plemeno alebo kríženec').count())
-                throw new Error('Puppy checker must collect only age and vaccines, not breed');
-              await wizard.getByRole('button', { name: /Pokračovať na kontakt/ }).click();
-              await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
-              // No dog/result intermediate step: the existing contact owns breed.
-              const contactDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
-              const puppySummary = contactDialog.locator('[data-puppy-check-summary]');
-              await puppySummary.waitFor({ state: 'visible' });
-              const summary = await puppySummary.innerText();
-              if (!summary.includes('4 mesiacov') || !/besnota:\s*áno/i.test(summary) ||
-                  !/DHPPi\+L:\s*áno/i.test(summary) || !/kotercový kašeľ:\s*áno/i.test(summary))
-                throw new Error('Age/vaccine answers were lost in contact: ' + summary);
-              const breedInput = contactDialog.getByLabel('Plemeno psíka (nepovinné)');
-              if (!await breedInput.isVisible() || await breedInput.inputValue() !== '')
-                throw new Error('Puppy breed must be entered exactly once, at contact');
-              await breedInput.fill('Írsky vlkodav');
-              if (!await puppySummary.getByText(/Írsky vlkodav/).count())
-                throw new Error('Contact breed must update the carried puppy summary');
-              await contactDialog.getByRole('button', { name: 'Close' }).click();
-              await contactDialog.waitFor({ state: 'hidden' });
-              await aria.waitFor({ state: 'visible' });
-
-              await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
-              const pricingPanel = aria.locator('[data-aria-panel="pricing"]');
-              await pricingPanel.waitFor({ state: 'visible' });
-              const cards = pricingPanel.locator('[data-aria-pricing] article');
-              if (await cards.count() !== 2) throw new Error('Two Aria pricing cards required');
-              if (!await pricingPanel.getByText('Permanentka – 10 vstupov').count() ||
-                  !await pricingPanel.getByText('Platnosť 2 mesiace').count() ||
-                  !await pricingPanel.getByText('Ušetríte 50 €').count())
-                throw new Error('Preview modal pricing copy/layout incomplete');
-              const cardBoxes = await Promise.all([cards.nth(0).boundingBox(), cards.nth(1).boundingBox()]);
-              if (!cardBoxes[0] || !cardBoxes[1] || cardBoxes.some(box => box && box.height > 160))
-                throw new Error('Aria pricing cards must be compact FAQ-like rows at ' + width);
-              const backgroundLocked = await page.evaluate(() => getComputedStyle(document.documentElement).overflow === 'hidden');
-              if (!backgroundLocked) throw new Error('Expanded Aria panel must prevent background scrolling');
-              const visitQuestion = pricingPanel.getByRole('button', { name: 'Ako prebieha návšteva?' });
-              if (await visitQuestion.getAttribute('aria-expanded') !== 'true') await visitQuestion.click();
-              await pricingPanel.locator('[data-aria-first-visit]').waitFor({ state: 'visible' });
-              if (!await pricingPanel.isVisible()) throw new Error('First visit explanation must not redirect to FAQ');
-              await aria.getByRole('button', { name: 'Podmienky prijatia' }).click();
-              if (await aria.locator('[data-aria-requirements] article').count() !== 4)
-                throw new Error('Aria must list the four conditions');
-              if (!await aria.locator('[data-aria-requirements]').getByText(/Sučky počas hárania/).count() ||
-                  !await aria.locator('[data-aria-requirements] strong').count())
-                throw new Error('Preview-only hygiene/health wording or highlight missing');
-              await aria.locator('[data-aria-requirements]').getByRole('button', { name: 'Chcem sa informovať o škôlke' }).click();
-              await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
-              await page.keyboard.press('Escape');
-
-              await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
-              const menu = aria.locator('[data-aria-menu]');
-              const puppyMenuLine = menu.getByText('Zistite, či vaše šteniatko spĺňa podmienky');
-              if (!await menu.getByText('3 dôvody, prečo si vybrať nás').count() ||
-                  !await puppyMenuLine.count() ||
-                  await menu.getByText('Nastavenia cookies').count())
-                throw new Error('Aria menu descriptions or cookie removal missing');
-              if (await puppyMenuLine.evaluate(el => el.scrollWidth > el.clientWidth + 1 || getComputedStyle(el).whiteSpace !== 'nowrap'))
-                throw new Error('Puppy menu subtitle must fit on a single unclipped row at ' + width);
-              await aria.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
-
+              if (url.pathname === '/psia-skolka-kosice/') {
+                const dockNav = aria.locator('[data-aria-section-navigation="true"]');
+                if (await dockNav.locator('button').count() !== 5)
+                  throw new Error('Paid mobile dock must contain O nás, Cenník, Podmienky, Záujem, Menu');
+                for (const [label, id] of [
+                  ['O nás', 'aria-about'], ['Cenník škôlky', 'lead-pricing'],
+                  ['Podmienky prijatia', 'lead-requirements'], ['Mám záujem o škôlku', 'aria-hero-form'],
+                  ['Otvoriť menu', 'lead-section-menu'],
+                ]) {
+                  if (!await page.locator('#' + id).count()) throw new Error('Missing paid navigation anchor ' + id);
+                  await dockNav.getByRole('button', { name: label, exact: true }).click();
+                  if (await aria.locator('[data-aria-panel]').count())
+                    throw new Error('Paid dock may not open old floating panels');
+                }
+              } else {
+                await aria.getByRole('button', { name: 'Časté otázky' }).click();
+                await aria.locator('[data-aria-panel="faq"]').waitFor({ state: 'visible' });
+                const puppyQuestion = aria.getByRole('button', { name: 'Prijímate aj šteniatka?' });
+                if (await puppyQuestion.getAttribute('aria-expanded') !== 'true') await puppyQuestion.click();
+                await aria.getByRole('button', { name: 'Overiť vhodnosť šteniatka' }).click();
+                const wizard = page.locator('[data-aria-puppy-embedded="true"]');
+                await wizard.waitFor({ state: 'visible' });
+                if (!await wizard.locator('[data-aria-puppy-step="age"]').count()) throw new Error('Puppy wizard age step missing');
+                const ageSlider = wizard.getByRole('slider', { name: 'Vek šteniatka v mesiacoch' });
+                await ageSlider.focus();
+                await ageSlider.press('ArrowLeft');
+                await ageSlider.press('ArrowLeft');
+                if (!await wizard.getByText(/Zatiaľ nespĺňa/).count()) throw new Error('Age 1–3 must be blocked');
+                await ageSlider.press('ArrowRight');
+                await ageSlider.press('ArrowRight');
+                await wizard.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
+                if (!await wizard.locator('[data-aria-puppy-step="vaccines"]').count()) throw new Error('Puppy vaccinations missing');
+                for (let i = 0; i < 3; i++) await wizard.locator('fieldset').nth(i).getByText('Áno', { exact: true }).click();
+                if (await wizard.getByText(/Plemeno \(voliteľné\)/).count() ||
+                    await wizard.getByPlaceholder('Plemeno alebo kríženec').count())
+                  throw new Error('Puppy checker must collect only age and vaccines, not breed');
+                await wizard.getByRole('button', { name: /Pokračovať na kontakt/ }).click();
+                await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
+                // No dog/result intermediate step: the existing contact owns breed.
+                const contactDialog = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+                const puppySummary = contactDialog.locator('[data-puppy-check-summary]');
+                await puppySummary.waitFor({ state: 'visible' });
+                const summary = await puppySummary.innerText();
+                if (!summary.includes('4 mesiacov') || !/besnota:\s*áno/i.test(summary) ||
+                    !/DHPPi\+L:\s*áno/i.test(summary) || !/kotercový kašeľ:\s*áno/i.test(summary))
+                  throw new Error('Age/vaccine answers were lost in contact: ' + summary);
+                const breedInput = contactDialog.getByLabel('Plemeno psíka (nepovinné)');
+                if (!await breedInput.isVisible() || await breedInput.inputValue() !== '')
+                  throw new Error('Puppy breed must be entered exactly once, at contact');
+                await breedInput.fill('Írsky vlkodav');
+                if (!await puppySummary.getByText(/Írsky vlkodav/).count())
+                  throw new Error('Contact breed must update the carried puppy summary');
+                await contactDialog.getByRole('button', { name: 'Close' }).click();
+                await contactDialog.waitFor({ state: 'hidden' });
+                await aria.waitFor({ state: 'visible' });
+  
+                await aria.getByRole('button', { name: 'Cenník škôlky' }).click();
+                const pricingPanel = aria.locator('[data-aria-panel="pricing"]');
+                await pricingPanel.waitFor({ state: 'visible' });
+                const cards = pricingPanel.locator('[data-aria-pricing] article');
+                if (await cards.count() !== 2) throw new Error('Two Aria pricing cards required');
+                if (!await pricingPanel.getByText('Permanentka – 10 vstupov').count() ||
+                    !await pricingPanel.getByText('Platnosť 2 mesiace').count() ||
+                    !await pricingPanel.getByText('Ušetríte 50 €').count())
+                  throw new Error('Preview modal pricing copy/layout incomplete');
+                const cardBoxes = await Promise.all([cards.nth(0).boundingBox(), cards.nth(1).boundingBox()]);
+                if (!cardBoxes[0] || !cardBoxes[1] || cardBoxes.some(box => box && box.height > 160))
+                  throw new Error('Aria pricing cards must be compact FAQ-like rows at ' + width);
+                const backgroundLocked = await page.evaluate(() => getComputedStyle(document.documentElement).overflow === 'hidden');
+                if (!backgroundLocked) throw new Error('Expanded Aria panel must prevent background scrolling');
+                const visitQuestion = pricingPanel.getByRole('button', { name: 'Ako prebieha návšteva?' });
+                if (await visitQuestion.getAttribute('aria-expanded') !== 'true') await visitQuestion.click();
+                await pricingPanel.locator('[data-aria-first-visit]').waitFor({ state: 'visible' });
+                if (!await pricingPanel.isVisible()) throw new Error('First visit explanation must not redirect to FAQ');
+                await aria.getByRole('button', { name: 'Podmienky prijatia' }).click();
+                if (await aria.locator('[data-aria-requirements] article').count() !== 4)
+                  throw new Error('Aria must list the four conditions');
+                if (!await aria.locator('[data-aria-requirements]').getByText(/Sučky počas hárania/).count() ||
+                    !await aria.locator('[data-aria-requirements] strong').count())
+                  throw new Error('Preview-only hygiene/health wording or highlight missing');
+                await aria.locator('[data-aria-requirements]').getByRole('button', { name: 'Chcem sa informovať o škôlke' }).click();
+                await page.locator('[role="dialog"] [data-lead-step-form]').last().getByText('Krok 2 z 2').waitFor({ state: 'visible' });
+                await page.keyboard.press('Escape');
+  
+                await aria.getByRole('button', { name: 'Otvoriť menu' }).click();
+                const menu = aria.locator('[data-aria-menu]');
+                const puppyMenuLine = menu.getByText('Zistite, či vaše šteniatko spĺňa podmienky');
+                if (!await menu.getByText('3 dôvody, prečo si vybrať nás').count() ||
+                    !await puppyMenuLine.count() ||
+                    await menu.getByText('Nastavenia cookies').count())
+                  throw new Error('Aria menu descriptions or cookie removal missing');
+                if (await puppyMenuLine.evaluate(el => el.scrollWidth > el.clientWidth + 1 || getComputedStyle(el).whiteSpace !== 'nowrap'))
+                  throw new Error('Puppy menu subtitle must fit on a single unclipped row at ' + width);
+                await aria.getByRole('button', { name: 'Zavrieť panel Arie' }).click();
+  
+                }
               const cols = await page.locator('#lead-pricing .grid').first().evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length);
               const pageCards = await Promise.all([page.locator('#lead-pricing article').nth(0).boundingBox(), page.locator('#lead-pricing article').nth(1).boundingBox()]);
               if (cols !== 2 || !pageCards[0] || !pageCards[1] || Math.abs(pageCards[0].height - pageCards[1].height) > 2 || Math.max(pageCards[0].height, pageCards[1].height) > 175)
