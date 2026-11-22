@@ -1118,3 +1118,11 @@
 .aria-brand-experiment.lead-brand-live [data-aria-message],
 .aria-brand-experiment.lead-brand-live [data-aria-dock] > img { display: none; }
 .aria-brand-experiment.lead-brand-live [data-aria-dock] { margin-left: auto; margin-right: auto; max-width: 500px; }
+
+/* Preserve the approved animated filled paw prints on the live lead hero.
+   Do not remove the dog imagery or recolor static decorative paw outlines. */
+.aria-brand-experiment.lead-brand-live .paw-trail-background .paw-ambient-print,
+.aria-brand-experiment.lead-brand-live .paw-trail-background .paw-trail-print {
+  fill: currentColor;
+  stroke: none;
+}
