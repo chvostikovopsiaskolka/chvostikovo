@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 // Split the preview-only chat from the paid lead bundle and preserve state after first open.
@@ -9,6 +9,39 @@ import { FAQ as SITE_FAQ, PRICING } from "@/content/site";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { trackMarketingInteraction } from "@/lib/analytics";
+
+// Isolate a failed lazy chat chunk (e.g. an outdated iOS page after a deploy).
+// The rest of the lead landing and its floating menu must stay usable.
+class AriaChatBoundary extends Component<
+  { open: boolean; onClose: () => void; children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    if (this.state.failed) {
+      if (!this.props.open) return null;
+      return (
+        <section role="alert" data-aria-chat-load-error
+          className="pointer-events-auto fixed inset-x-4 bottom-[max(82px,calc(env(safe-area-inset-bottom)+68px))] z-[120] mx-auto max-w-sm rounded-2xl border border-forest/15 bg-card p-4 text-forest shadow-2xl">
+          <h2 className="font-display text-base font-bold">Chat sa nepodarilo otvoriť</h2>
+          <p className="mt-1 text-sm leading-relaxed">Skúste stránku obnoviť. Ostatné možnosti škôlky zostávajú dostupné.</p>
+          <div className="mt-3 flex gap-2">
+            <button type="button" onClick={() => window.location.reload()}
+              className="min-h-11 flex-1 rounded-xl bg-coral px-3 text-sm font-bold text-white">Obnoviť stránku</button>
+            <button type="button" onClick={this.props.onClose}
+              className="min-h-11 rounded-xl border border-forest/20 px-3 text-sm font-bold">Zavrieť</button>
+          </div>
+        </section>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 type Panel = "pricing" | "requirements" | "faq" | "menu" | null;
 
@@ -507,9 +540,11 @@ export function AriaLeadAssistant({
           </div>
         </div>
         {guidedChatPreview && chatActivated && (
-          <Suspense fallback={null}>
-            <AriaGuidedChat open={chatOpen} onClose={() => setChatOpen(false)} />
-          </Suspense>
+          <AriaChatBoundary open={chatOpen} onClose={() => setChatOpen(false)}>
+            <Suspense fallback={null}>
+              <AriaGuidedChat open={chatOpen} onClose={() => setChatOpen(false)} />
+            </Suspense>
+          </AriaChatBoundary>
         )}
       </div>
     </aside>
