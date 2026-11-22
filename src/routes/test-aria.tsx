@@ -157,18 +157,18 @@ export function AriaPreviewPage() {
 
           {/* Balance the first fold around the whole content group; Aria owns
               the lower viewport and must never cover the reviews. */}
-          <div aria-hidden="true" data-aria-intro-top-space className="min-h-[clamp(20px,5svh,54px)] flex-[0.85] sm:min-h-14 lg:min-h-3 lg:flex-[0.35]" />
+          <div aria-hidden="true" data-aria-intro-top-space className="min-h-2 flex-[0.2] sm:min-h-5 lg:min-h-3 lg:flex-[0.2]" />
           <div data-aria-hero-content className="relative z-10 w-full shrink-0">
             <div className="mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7">
             <div className="w-full min-w-0 text-center">
               {/* Preserve the approved H1 position while moving the schoolmates onto the orange label. */}
               <div aria-hidden="true" data-aria-hero-heading-spacer className="h-[14px] sm:h-5" />
-              <h1 className="mt-7 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]">
+              <h1 className="mt-3 text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]">
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
 
-              <div data-aria-service-group className="relative mx-auto mt-[80px] w-fit max-w-full sm:mt-[88px] lg:mt-[124px]">
+              <div data-aria-service-group className="relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]">
                 {/* The existing four schoolmates now rest on the orange label, not above the H1. */}
                 <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
                   <SchoolmatesFormCrown compact desktopWide />
@@ -183,7 +183,7 @@ export function AriaPreviewPage() {
               </p>
             </div>
           </div>
-            <div className="mt-2 sm:mt-4 lg:mt-2">
+            <div className="mt-0 sm:mt-2 lg:mt-2">
               <Reviews variant="hero" />
             </div>
           </div>

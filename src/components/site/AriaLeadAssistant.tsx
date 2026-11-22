@@ -275,7 +275,7 @@ export function AriaLeadAssistant({
   return (
     <aside aria-label="Aria – sprievodkyňa Chvostíkovom" data-aria-guide data-intro={stage === "intro" ? "true" : "false"} data-aria-stage={stage}
       className="pointer-events-none fixed inset-x-0 bottom-[max(6px,env(safe-area-inset-bottom))] z-40 px-2 sm:bottom-4 sm:px-4">
-      <div className="pointer-events-none relative mx-auto w-full max-w-[690px]">
+      <div className="pointer-events-none relative mx-auto w-full max-w-[690px] pb-0">
         {panel && (
           <div role="region" aria-label={"Aria: " + panel} data-aria-panel={panel}
             className="pointer-events-auto absolute bottom-[calc(100%+9px)] left-0 right-0 max-h-[min(63dvh,500px)] overflow-y-auto overscroll-contain rounded-[26px] border border-white/75 bg-card/95 p-3 text-forest shadow-[0_14px_45px_rgba(17,65,41,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:p-4">
@@ -415,7 +415,7 @@ export function AriaLeadAssistant({
 
         {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
-            className={guidedChatPreview ? "pointer-events-none mb-2 flex w-full justify-end pr-[90px] sm:pr-[111px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
+            className={guidedChatPreview ? "pointer-events-none mb-2 flex w-full justify-end pr-[100px] sm:pr-[116px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[460px] -rotate-[0.5deg] items-center px-3 py-2 text-forest">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
@@ -465,14 +465,14 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className={"pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (guidedChatPreview ? "mr-[83px] sm:mr-[104px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
+        <div className={"pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (guidedChatPreview ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           {guidedChatPreview ? (
             <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
               data-aria-chat-trigger onClick={openChat}
-              className="pointer-events-auto absolute -bottom-1 -right-[90px] h-[95px] w-[95px] max-w-none rounded-[10px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:-right-[108px] sm:h-[108px] sm:w-[108px]">
+              className="aria-chat-portrait pointer-events-auto absolute -bottom-[112px] -right-1 h-[92px] w-[92px] max-w-none rounded-full bg-transparent p-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:-bottom-[126px] sm:right-0 sm:h-[104px] sm:w-[104px]">
               <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
-                className="h-full w-full object-contain contrast-[1.1] saturate-[1.05] drop-shadow-[0_3px_5px_rgba(0,0,0,.23)]" />
+                className="pointer-events-none h-full w-full object-contain contrast-[1.1] saturate-[1.05] drop-shadow-[0_3px_5px_rgba(0,0,0,.23)]" />
             </button>
           ) : (
             <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
