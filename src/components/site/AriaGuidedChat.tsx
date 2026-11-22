@@ -298,13 +298,13 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId }: { open: boo
                   </button>
                 ))}
               </div>
-              <button type="button" data-aria-chat-puppy-cta onClick={showPuppy}
-                className="mt-3 flex min-h-12 w-full items-center justify-center rounded-xl border border-[#9e336f]/25 bg-[#f9e5ee] px-3 py-2.5 text-center text-xs font-bold leading-snug text-[#873063]">
-                Máte šteniatko? Zistite, či spĺňa podmienky prijatia
-              </button>
               <button type="button" data-aria-chat-other-cta onClick={showOther}
                 className="mt-3 min-h-12 w-full rounded-xl bg-[#ffa414] px-3 py-2.5 text-xs font-extrabold text-[#26322b]">
                 Zaujíma ma niečo iné?
+              </button>
+              <button type="button" data-aria-chat-puppy-cta onClick={showPuppy}
+                className="mt-3 flex min-h-12 w-full items-center justify-center rounded-xl border border-[#9e336f]/25 bg-[#f9e5ee] px-3 py-2.5 text-center text-xs font-bold leading-snug text-[#873063]">
+                Máte šteniatko? Zistite, či spĺňa podmienky prijatia
               </button>
             </div>
           )}
