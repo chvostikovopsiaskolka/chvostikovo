@@ -212,9 +212,9 @@ export const blogArticles: BlogArticleData[] = [
   },
   {
     "slug": "target-na-cvicenie-psov-prve-cviky",
-    "title": "Target na cvičenie psa: ako začať s prvými cvikmi?",
-    "seoTitle": "Target na cvičenie psov – prvé cviky a výber veľkosti | Chvostíkovo",
-    "description": "Drevený target pre psov: prvý dotyk labkou, rehabilitačné a fyzioterapeutické cviky podľa odborníka aj nácvik zotrvania na mieste. Ako začať bezpečne?",
+    "title": "Target pre psa: prvé cviky a využitie pri tréningu",
+    "seoTitle": "Target pre psa – prvé cviky, tréning a rehabilitácia | Chvostíkovo",
+    "description": "Target pre psa: prvý dotyk labkou, nácvik zotrvania na mieste aj rehabilitačné a fyzioterapeutické cviky pod vedením odborníka. Ako začať bezpečne?",
     "summary": "Od prvého dotyku labkou cez kontrolované rehabilitačné cviky až po poslušnosť a zotrvanie na mieste. Všetko s ohľadom na potreby psíka.",
     "publishedAt": "2026-11-04",
     "readingMinutes": 4,

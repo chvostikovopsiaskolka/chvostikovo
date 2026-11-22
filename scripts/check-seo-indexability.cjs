@@ -221,6 +221,12 @@ for (const spec of [
   assert(fs.existsSync(htmlPath), "Guide HTML not prerendered: " + htmlPath);
   const markup = fs.readFileSync(htmlPath, "utf8");
   assert(markup.includes(canonical) && markup.includes('rel="canonical"'), "Guide canonical missing: " + page);
+  // Keep an existing, indexed guide URL stable while aligning its visible and SERP titles.
+  if (spec.slug === "target-na-cvicenie-psov-prve-cviky") {
+    assert(markup.includes("Target pre psa: prvé cviky a využitie pri tréningu"), "Target guide H1 must target the measured search phrase");
+    assert(markup.includes("Target pre psa – prvé cviky, tréning a rehabilitácia | Chvostíkovo"), "Target guide SEO title must match the approved phrase");
+    assert(markup.includes("Target pre psa: prvý dotyk labkou"), "Target guide description must describe the real content");
+  }
   assert(markup.includes("BlogPosting"), "Guide article structured data missing: " + page);
   assert(markup.includes('href="' + productPath + '"'), "Guide must link to correct product: " + page);
   assert(!markup.includes('href="#zaujem"'), "Product guide must not advertise daycare inquiry: " + page);
