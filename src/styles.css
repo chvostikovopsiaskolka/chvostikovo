@@ -1076,3 +1076,32 @@
 .aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"]:checked + span { background-color: #ffb43b; border-color: #b82e7f; box-shadow: 0 0 0 2px rgb(184 46 127 / 20%); }
 
 .aria-brand-experiment #aria-mosaic [data-aria-location-chips] > * { background-color: #f8ddeb; color: #26322b; }
+
+/* 22 Nov iPhone feedback: preview-only, orange wash instead of sage/pink section fills. */
+.aria-brand-experiment footer { background: rgb(255 164 20 / 20%); }
+.aria-brand-experiment footer > div > div:first-child { background-color: #fff; }
+.aria-brand-experiment footer [class*="bg-secondary"] { background-color: rgb(255 164 20 / 11%); }
+.aria-brand-experiment #aria-early-faq,
+.aria-brand-experiment #lead-faq,
+.aria-brand-experiment #lead-pricing { background-color: rgb(255 164 20 / 16%); }
+.aria-brand-experiment #aria-puppy-check { background-color: #fff; }
+.aria-brand-experiment #aria-puppy-check [data-aria-puppy-card] { background-color: #fff; }
+.aria-brand-experiment [data-aria-friendship-card] { background-color: #fff; box-shadow: 0 16px 38px rgb(38 50 43 / 13%); }
+.aria-brand-experiment [data-aria-hero-description],
+.aria-brand-experiment [data-aria-hero-description] strong { color: #fff; }
+.aria-brand-experiment [data-aria-hero-description] strong { text-decoration: none; font-weight: 800; }
+.aria-brand-experiment [data-lead-step-form] input[type="radio"] + span,
+.aria-preview-modal [data-lead-step-form] input[type="radio"] + span { background: #fff0d5; color: #26322b; border-color: rgb(255 164 20 / 25%); }
+.aria-brand-experiment [data-lead-step-form] input[type="radio"]:checked + span,
+.aria-preview-modal [data-lead-step-form] input[type="radio"]:checked + span { background: #ffa414; color: #26322b; border-color: #b82e7f; box-shadow: 0 0 0 2px rgb(184 46 127 / 18%); }
+/* Existing speech silhouette: restore natural sizing and readable compact layout. */
+.aria-brand-experiment [data-aria-speech] { max-width: min(75vw, 390px); }
+.aria-brand-experiment .paw-trail-background .paw-ambient-print,
+.aria-brand-experiment .paw-trail-background .paw-trail-print { fill: none; stroke: #ffa414; stroke-width: 2.2; stroke-linejoin: round; }
+
+.aria-brand-experiment #aria-puppy-check .bg-card { background-color: #fff; }
+.aria-brand-experiment [data-aria-friendship-card] { background-color: #fff; }
+
+/* Override the old hero-only always-orange selector: selection, not location, sets orange. */
+.aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"] + span { background-color: #fff0d5; color: #26322b; }
+.aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"]:checked + span { background-color: #ffa414; color: #26322b; }

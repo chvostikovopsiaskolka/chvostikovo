@@ -107,11 +107,11 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.badgeFg !== 'rgb(255, 255, 255)' ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
-                  palette.heroCopyFg !== 'rgb(38, 50, 43)' ||
+                  palette.heroCopyFg !== 'rgb(255, 255, 255)' ||
                   palette.earlyFaqBg !== 'rgb(255, 255, 255)' ||
-                  palette.earlySectionBg !== 'rgba(255, 164, 20, 0.19)' ||
-                  palette.pricingBg !== 'rgba(255, 164, 20, 0.19)' ||
-                  palette.footerBg !== 'rgb(255, 255, 255)' ||
+                  palette.earlySectionBg !== 'rgba(255, 164, 20, 0.16)' ||
+                  palette.pricingBg !== 'rgba(255, 164, 20, 0.16)' ||
+                  palette.footerBg !== 'rgba(255, 164, 20, 0.2)' ||
                   palette.benefitHeading !== 'rgb(255, 164, 20)' ||
                   palette.requirementTitle !== 'rgb(255, 164, 20)' ||
                   palette.requirementIcon !== 'rgb(38, 50, 43)' ||

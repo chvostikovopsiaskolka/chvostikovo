@@ -79,6 +79,25 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
   const [showChoices, setShowChoices] = useState(true);
   const [typingId, setTypingId] = useState<number | null>(null);
   const [typedLength, setTypedLength] = useState(0);
+  const introText = "Haf! 🐾 Ahoj, ja som Aria. Čo ťa zaujíma o našej škôlke?";
+  const [introLength, setIntroLength] = useState(0);
+  const [introComposing, setIntroComposing] = useState(true);
+  useEffect(() => {
+    if (!open) { setIntroLength(0); setIntroComposing(true); return; }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setIntroLength(introText.length); setIntroComposing(false); return;
+    }
+    setIntroLength(0); setIntroComposing(true);
+    let interval: number | undefined;
+    const delay = window.setTimeout(() => {
+      setIntroComposing(false);
+      interval = window.setInterval(() => {
+        setIntroLength(n => { if (n + 2 >= introText.length) { window.clearInterval(interval); return introText.length; } return n + 2; });
+      }, 36);
+    }, 950);
+    return () => { window.clearTimeout(delay); if (interval !== undefined) window.clearInterval(interval); };
+  }, [open]);
+
   const [otherQuestion, setOtherQuestion] = useState("");
   const [engaged, setEngaged] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -194,7 +213,7 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
   return (
     <Dialog open={open} onOpenChange={value => { if (!value) closeChat(); }}>
       <DialogContent positioning="form" data-aria-chat aria-describedby={chatId + "-intro"} overlayClassName="!bg-forest-deep/25 !backdrop-blur-[12px]"
-        className="aria-brand-experiment !fixed !flex !gap-0 left-2 right-2 bottom-[max(0px,env(safe-area-inset-bottom))] top-auto z-50 h-[min(87dvh,710px)] min-h-0 w-auto max-w-none flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white/80 backdrop-blur-3xl p-0 text-forest shadow-[0_24px_70px_rgba(25,48,37,.2)] sm:left-1/2 sm:right-auto sm:top-[54%] sm:bottom-auto sm:h-[min(85dvh,750px)] sm:w-[min(620px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+        className="aria-brand-experiment !fixed !flex !gap-0 left-2 right-2 bottom-[max(70px,calc(env(safe-area-inset-bottom)+60px))] top-auto z-50 h-[min(73dvh,680px)] min-h-0 w-auto max-w-none flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white/80 backdrop-blur-3xl p-0 text-forest shadow-[0_24px_70px_rgba(25,48,37,.2)] sm:left-1/2 sm:right-auto sm:top-[54%] sm:bottom-auto sm:h-[min(85dvh,750px)] sm:w-[min(620px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
         <header className="flex shrink-0 items-center gap-3 border-b border-white/60 bg-white/45 backdrop-blur-2xl px-4 py-3 pr-12">
           <img src={ARIA_HEAD_DATA_URI} alt="" width={48} height={48} className="size-12 shrink-0 object-contain drop-shadow-sm" />
           <DialogTitle className="font-display text-base font-extrabold text-forest sm:text-lg">Aria z Chvostíkova</DialogTitle>
@@ -205,7 +224,8 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
           <div className="flex items-end gap-2">
             <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
             <div id={chatId + "-intro"} className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm sm:text-sm">
-              Haf! 🐾 Ahoj, ja som Aria. Čo ťa zaujíma o našej škôlke?
+              <span className="sr-only">{introText}</span>
+              <span aria-hidden="true">{introComposing ? <span data-aria-intro-composing className="inline-flex items-center gap-1"><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f]" /><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" /><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" /></span> : introText.slice(0, introLength)}</span>
             </div>
           </div>
 
