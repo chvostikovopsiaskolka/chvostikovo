@@ -84,7 +84,7 @@ export function Hero() {
 
           <div id="home-hero-inline-form" className="min-w-0">
             <SchoolmatesFormCrown compact />
-            <div className="rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
+            <div data-home-form-panel className="rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
               <h2 className="text-center text-xl text-forest sm:whitespace-nowrap">
                 Čo hľadáte pre svojho psíka?
               </h2>
