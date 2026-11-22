@@ -7,6 +7,12 @@ const ALLOWED_ORIGINS = new Set([
   'https://chvostikovopsiaskolka.github.io',
 ]);
 
+// Explicitly supported information-only submissions from both lead and QA Aria.
+const ARIA_QUESTION_SOURCES = new Set([
+  'aria_preview_chat_other',
+  'lead_landing_aria_chat_other',
+]);
+
 const LEAD_INTERESTS = new Set([
   'Chcem sa informovať o škôlke',
   'Mám záujem využívať škôlku pravidelne',
@@ -89,6 +95,12 @@ async function sendMetaConversion(
   input: Record<string, unknown>,
   req: Request,
 ) {
+  // A free-text contact question is not a conversion-optimized daycare Lead.
+  // Keep the normal operator mail/CRM record, but do not send Meta CAPI Lead.
+  if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100)) ||
+      text(input.source_ref, 500) === '/test-aria/' ||
+      text(input.source_ref, 500) === '/test-aria' ||
+      text(input.cta_source, 100).startsWith('aria_preview_')) return;
   if (input.marketing_consent !== true) return;
 
   const accessToken = Deno.env.get('META_CAPI_ACCESS_TOKEN');
@@ -248,6 +260,15 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
     lines.push(
       `O čo máte záujem?: ${String(payload.interest_reason ?? '')}`,
     );
+    // Optional Aria question is already validated and stored in raw_payload.
+    // Include it in the existing operator notification, never in marketing
+    // event names or interest_reason (which is tightly allowlisted).
+    if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100))) {
+      const question = input.raw_payload && typeof input.raw_payload === 'object'
+        ? text((input.raw_payload as Record<string, unknown>)['Otázka návštevníka'], 600)
+        : '';
+      if (question) lines.push(`Otázka návštevníka: ${question}`);
+    }
     // Only the explicit puppy-check values are echoed into the operator email.
     // The backend still stores them in raw_payload and keeps its strict
     // allowlisted lead interest; no field names or client-provided HTML render.
@@ -500,6 +521,19 @@ Deno.serve(async (req: Request) => {
     };
 
     if (formType === 'lead') {
+      // Aria's one-off question reuses the existing lead and consent flow.
+      // Reject empty/oversized content before the database write or SMS.
+      if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100))) {
+        const rawQuestion = input.raw_payload && typeof input.raw_payload === 'object' &&
+          !Array.isArray(input.raw_payload)
+            ? (input.raw_payload as Record<string, unknown>)['Otázka návštevníka']
+            : null;
+        if (typeof rawQuestion !== 'string' || rawQuestion.trim().length < 5 ||
+            rawQuestion.trim().length > 600 || !leadEmail)
+          return response(origin, 400, { ok: false, error: 'invalid_aria_question' });
+        if (input.interest_reason !== 'Chcem sa informovať o škôlke')
+          return response(origin, 400, { ok: false, error: 'invalid_interest' });
+      }
       const rawInterest = text(input.interest_reason ?? input.zaujem, 250);
       const enPrefix = 'EN – Dog daycare enquiry | ';
 
