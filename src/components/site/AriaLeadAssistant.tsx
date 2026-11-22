@@ -123,7 +123,7 @@ export function AriaLeadAssistant({
         width: Math.round(bubble.width),
         height: Math.round(bubble.height),
         tipX: Math.round(head.left + head.width * (rightAlignedBubble ? 0.32 : 0.68) - bubble.left),
-        tipY: Math.round(head.top + head.height * (rightAlignedBubble ? 0.65 : 0.43) - bubble.top),
+        tipY: Math.round(head.top + head.height * (rightAlignedBubble ? 0.65 : sectionNavigation ? 0.62 : 0.43) - bubble.top),
       };
       setSpeechGeometry(prev =>
         prev && Object.keys(next).every(key => prev[key as keyof typeof next] === next[key as keyof typeof next]) ? prev : next);
@@ -357,16 +357,20 @@ export function AriaLeadAssistant({
   // Paid navigation keeps Aria on the left. The tip is still measured against
   // her portrait, but the balloon joins it through two shallow side curves;
   // neither the top nor the rounded bottom is interrupted.
-  const paidLeftBaseTop = Math.max(16, Math.min(sh - 34, Math.round(sh * 0.26)));
-  const paidLeftBaseBottom = Math.min(sh - 16, paidLeftBaseTop + 20);
+  // The side tail must land on the LEFT of the balloon, outside its text
+  // surface. Its base follows the head vertically, but stays clear of the
+  // rounded corners for short puppy/contact as well as taller desktop copy.
+  const paidTipY = Math.max(22, Math.min(sh - 22, tipY));
+  const paidLeftBaseTop = Math.max(16, Math.min(sh - 36, paidTipY - 10));
+  const paidLeftBaseBottom = Math.min(sh - 16, paidLeftBaseTop + 22);
   const paidLeftSpeechPath = [
     "M 16 1",
     `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
     `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
     `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
     `L 1 ${paidLeftBaseBottom}`,
-    `C -5 ${paidLeftBaseBottom} ${tipX + 10} ${tipY + 9} ${tipX} ${tipY}`,
-    `C ${tipX + 10} ${tipY - 9} -5 ${paidLeftBaseTop} 1 ${paidLeftBaseTop}`,
+    `C -5 ${paidLeftBaseBottom} ${tipX + 10} ${paidTipY + 9} ${tipX} ${paidTipY}`,
+    `C ${tipX + 10} ${paidTipY - 9} -5 ${paidLeftBaseTop} 1 ${paidLeftBaseTop}`,
     "L 1 16 Q 1 1 16 1 Z",
   ].join(" ");
   const speechPath = guidedChatPreview ? stablePreviewSpeechPath :
@@ -498,7 +502,7 @@ export function AriaLeadAssistant({
                 <button type="button" className={optionClass} onClick={() => jump("lead-benefits", "why")}>
                   <span><strong className="block text-sm">Prečo Chvostíkovo</strong><small className="block text-[11px] font-normal text-forest/65">3 dôvody, prečo si vybrať nás</small></span><ArrowRight size={16} aria-hidden />
                 </button>
-                <button type="button" className={optionClass} onClick={() => jump("aria-mosaic", "gallery")}>
+                <button type="button" className={optionClass} onClick={() => jump(sectionNavigation ? "lead-photo-carousel" : "aria-mosaic", "gallery")}>
                   <span><strong className="block text-sm">Fotogaléria</strong><small className="block text-[11px] font-normal text-forest/65">Nahliadnite do života škôlkarov</small></span><ArrowRight size={16} aria-hidden />
                 </button>
                 <button type="button" className={optionClass} onClick={() => jump("lead-first-visit", "first_visit")}>
@@ -518,11 +522,11 @@ export function AriaLeadAssistant({
 
         {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
-            className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : sectionNavigation ? "pointer-events-none mb-3 flex w-full justify-start pl-[78px] sm:pl-[112px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
+            className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : sectionNavigation ? "pointer-events-none mx-auto mb-3 flex w-[calc(100%-12px)] max-w-[440px] justify-start pl-[106px] sm:max-w-[500px] sm:pl-[120px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech data-aria-outline-ready={outlineReady}
               className={"relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]" +
                 (outlineReady ? "" : " rounded-[16px] bg-card ring-2 ring-forest/70")}>
-              {outlineReady && <svg aria-hidden="true" data-aria-tail data-tip-x={guidedChatPreview ? previewTipX : tipX} data-tip-y={guidedChatPreview ? previewTipY : tipY}
+              {outlineReady && <svg aria-hidden="true" data-aria-tail data-tip-x={guidedChatPreview ? previewTipX : tipX} data-tip-y={guidedChatPreview ? previewTipY : sectionNavigation && !portraitOnRight ? paidTipY : tipY}
                 data-tail-base-top={guidedChatPreview ? previewBaseTop : sectionNavigation && !portraitOnRight ? paidLeftBaseTop : rightAlignedBubble ? tailTopY : undefined}
                 data-tail-base-bottom={guidedChatPreview ? previewBaseBottom : sectionNavigation && !portraitOnRight ? paidLeftBaseBottom : rightAlignedBubble ? tailBottomY : undefined}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
@@ -594,7 +598,7 @@ export function AriaLeadAssistant({
                 <button type="button" className={itemClass} aria-label="Cenník škôlky" onClick={() => goToLeadSection("lead-pricing", "pricing")}><Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span></button>
                 <button type="button" className={itemClass} aria-label="Podmienky prijatia" onClick={() => goToLeadSection("lead-requirements", "requirements")}><ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span></button>
                 <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={() => goToLeadSection("aria-hero-form", "interest")}><PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span></button>
-                <button type="button" className={itemClass} aria-label="Otvoriť menu" onClick={() => goToLeadSection("lead-section-menu", "menu")}><Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span></button>
+                <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}><Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span></button>
               </>
             ) : (
               <>
