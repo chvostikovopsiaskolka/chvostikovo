@@ -1105,9 +1105,13 @@ if (!bellaris && brandPreviewCandidate) {
                 .evaluate(button => parseFloat(getComputedStyle(button).borderTopLeftRadius));
               if (overitRadius < 10 || overitRadius > 13)
                 throw new Error('Puppy check CTA must match the squared comic bubble shape');
-              await aria.getByRole('button', { name: 'Overiť', exact: true }).click();
-              await page.waitForTimeout(120);
-              if (!await page.locator('#aria-puppy-check').count()) throw new Error('Scroll CTA must link to the puppy checker');
+              if (url.pathname !== '/psia-skolka-kosice/') {
+                // The paid lead menu now ends inside the hero; after scrolling to
+                // caretakers it is intentionally no longer a floating control.
+                await aria.getByRole('button', { name: 'Overiť', exact: true }).click();
+                await page.waitForTimeout(120);
+                if (!await page.locator('#aria-puppy-check').count()) throw new Error('Scroll CTA must link to the puppy checker');
+              }
             }
           }
           if (!restricted && isAriaPage && url.pathname === '/psia-skolka-kosice/') {
