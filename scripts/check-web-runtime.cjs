@@ -107,7 +107,7 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.badgeFg !== 'rgb(255, 255, 255)' ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
-                  palette.heroCopyFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(23, 28, 24)' : 'rgb(255, 255, 255)') ||
+                  palette.heroCopyFg !== 'rgb(23, 28, 24)' ||
                   palette.earlyFaqBg !== 'rgb(255, 255, 255)' ||
                   palette.earlySectionBg !== 'rgba(255, 164, 20, 0.26)' ||
                   palette.pricingBg !== 'rgba(255, 164, 20, 0.26)' ||
@@ -530,6 +530,8 @@ if (!bellaris && brandPreviewCandidate) {
                      photoFrame.top - reviewsBottom <= window.innerHeight * 0.44 &&
                      photoFrame.top >= floatingGuide.getBoundingClientRect().bottom + 8 &&
                      !hero.contains(newPhotos) && photoRects.every(rect => rect.bottom <= formTop - 8)),
+                  heroCopyBlack: getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
+                    getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)',
                   paidDescriptionBlack: window.location.pathname !== '/psia-skolka-kosice/' ||
                     (getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
                      getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)'),
@@ -588,7 +590,7 @@ if (!bellaris && brandPreviewCandidate) {
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
                   firstFold.reviewGapAbove > (url.pathname === '/psia-skolka-kosice/' ? 40 : 35) ||
-                  !firstFold.focusedDescription || !firstFold.liquidFullDescription ||
+                  !firstFold.heroCopyBlack || !firstFold.focusedDescription || !firstFold.liquidFullDescription ||
                   !firstFold.naturalReviewBottom ||
                   !firstFold.noBenefitsInHero || firstFold.relocatedBenefitsCount !== 3 ||
                   !firstFold.caretakersHeadingFits || !firstFold.whiteInfoBackground ||
@@ -845,8 +847,14 @@ if (!bellaris && brandPreviewCandidate) {
               if (dockRadius < 13 || dockRadius > 18)
                 throw new Error('Dock frame and buttons need consistent rounded rectangles');
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
-              if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
-                throw new Error('Aria floating dock overflows mobile viewport ' + width);
+              const portraitAboveDock = await aria.locator('[data-aria-dock] img[alt^="Aria"]').boundingBox();
+              // HERO-MOBILE-01: one full-width bar and Aria's image *above* it
+              // on both paid lead and preview, without clipping at 320px.
+              if (!dock || !portraitAboveDock || dock.x < -1 || dock.x > 2 ||
+                  dock.width < width - 2 || dock.x + dock.width > width + 2 ||
+                  dock.height > 65 || portraitAboveDock.y + portraitAboveDock.height > dock.y - 4 ||
+                  portraitAboveDock.x < -1 || portraitAboveDock.x + portraitAboveDock.width > width + 2)
+                throw new Error('Aria full-width mobile dock / portrait above dock regressed at ' + width);
               // The paid landing keeps one floating, viewport-anchored Aria dock.
               // Scrolling changes the contextual message, never its fixed
               // position or visibility (the former inline test is obsolete).
