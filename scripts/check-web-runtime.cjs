@@ -295,7 +295,7 @@ if (!bellaris && brandPreviewCandidate) {
                   return {
                     cardCount: cards.length, highlightCount: highRes.length,
                     headingBottom: heading?.bottom, badgeTop: badge?.top,
-                    reviewBottom: reviews?.bottom, galleryTop: gr?.top, trackBottom: tr?.bottom,
+                    reviewBottom: reviews?.bottom, galleryTop: gr?.top, trackTop: tr?.top, trackBottom: tr?.bottom,
                     menuBottom: dock?.getBoundingClientRect().bottom, formTop: form?.top,
                     fixed: dock ? getComputedStyle(dock).position === 'fixed' && !hero.contains(dock) : false,
                     reviewSpacing: parseFloat(getComputedStyle(hero?.querySelector('[data-aria-lead-review-spacing]')).marginTop),
@@ -304,7 +304,7 @@ if (!bellaris && brandPreviewCandidate) {
                 if (!layout.fixed || layout.cardCount !== 20 || layout.highlightCount !== 2 ||
                     layout.badgeTop < layout.headingBottom + 50 ||
                     layout.galleryTop < layout.reviewBottom + 12 ||
-                    layout.galleryTop < layout.menuBottom + 8 ||
+                    layout.trackTop < layout.menuBottom + 8 ||
                     layout.trackBottom > layout.formTop - 8)
                   throw new Error('Paid hero → moving gallery → form layout regressed: ' + JSON.stringify(layout));
                 if (width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
