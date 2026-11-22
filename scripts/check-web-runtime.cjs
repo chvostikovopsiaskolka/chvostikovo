@@ -412,7 +412,7 @@ if (!bellaris && brandPreviewCandidate) {
                   : getComputedStyle(text).backgroundImage.includes('radial-gradient')) &&
                   parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
                 about: window.location.pathname === '/psia-skolka-kosice/'
-                  ? !!document.querySelector('#aria-about [data-hero-benefits]') &&
+                  ? !!document.querySelector('#aria-about [data-hero-benefits]') && !!document.querySelector('#aria-about [data-safety-certificates]') &&
                     ![...document.querySelectorAll('#aria-about h2')].some(h => h.textContent?.includes('Viac o nás a našej škôlke')) &&
                     !document.body.textContent.includes('Viac o nás a našej škôlke')
                   : !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
@@ -447,7 +447,7 @@ if (!bellaris && brandPreviewCandidate) {
               });
               if (bubbleGeometry.width < 420 || bubbleGeometry.height < 68 ||
                   bubbleGeometry.textSize < 16 ||
-                  (bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight < 4 || bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight > 10) ||
+                  (bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight < 2 || bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight > 5) ||
                   bubbleGeometry.faceRight > bubbleGeometry.textLeft - 26 ||
                   await page.locator('#lead-section-menu').count())
                 throw new Error('Paid desktop Aria must be large with portrait clear of speech and no page menu: ' +
@@ -506,7 +506,7 @@ if (!bellaris && brandPreviewCandidate) {
                   tipX,
                 };
               });
-              if ((footerBubble.headGap < 4 || footerBubble.headGap > 10) || footerBubble.dockGap < 8 ||
+              if ((footerBubble.headGap < 2 || footerBubble.headGap > 5) || footerBubble.dockGap < 8 ||
                   footerBubble.width < 455 || footerBubble.right > footerBubble.viewport - 8 ||
                   footerBubble.tipX >= -8)
                 throw new Error('Paid desktop footer speech overlaps head or dock: '+JSON.stringify(footerBubble));
@@ -522,7 +522,7 @@ if (!bellaris && brandPreviewCandidate) {
                 return {headGap: bubble.left-head.right, dockGap: dock.top-bubble.bottom,
                   left:bubble.left, right:bubble.right,viewport:window.innerWidth};
               });
-              if ((tabletSpeech.headGap < 4 || tabletSpeech.headGap > 10) || tabletSpeech.dockGap < 8 ||
+              if ((tabletSpeech.headGap < 2 || tabletSpeech.headGap > 5) || tabletSpeech.dockGap < 8 ||
                   tabletSpeech.left < 0 || tabletSpeech.right > tabletSpeech.viewport)
                 throw new Error('Paid tablet speech overlaps Aria head or dock: '+JSON.stringify(tabletSpeech));
             } else if (url.pathname === '/test-aria/') {
@@ -870,8 +870,8 @@ if (!bellaris && brandPreviewCandidate) {
                     contour.bottom > contour.height - 16 ||
                     // A pointer landing on the head never guarantees the
                     // rectangular speech body is outside the head image.
-                    speechBox.x < headBox.x + headBox.width + 4 ||
-                    speechBox.x > headBox.x + headBox.width + 10 ||
+                    speechBox.x < headBox.x + headBox.width + 2 ||
+                    speechBox.x > headBox.x + headBox.width + 5 ||
                     tip.x < -25 || contour.bottom - contour.top > 20 ||
                     speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
                     tip.x >= -8 ||
@@ -2060,7 +2060,11 @@ if (!bellaris && brandPreviewCandidate) {
                   const inputs=[...document.querySelectorAll('input[id]')].map(el=>el.id);
                   const included=document.querySelector('[data-home-included]').getBoundingClientRect();
                   const prices=document.querySelector('[data-home-prices]').getBoundingClientRect();
+                  const taxi=document.querySelector('[data-home-taxi]');
                   const cards=[...document.querySelectorAll('[data-home-price-card]')].map(el=>el.getBoundingClientRect());
+                  const benefitPills=[...document.querySelectorAll('#o-nas [data-hero-benefits] > span')].map(el=>el.getBoundingClientRect());
+                  const aboutHeading=document.querySelector('#o-nas h2');
+                  const heroCta=[...document.querySelectorAll('#top .hero-cta-primary')].find(el=>el.getBoundingClientRect().width>0);
                   const videoGrid=document.querySelector('[data-video-reasons-grid]');
                   const dogs=document.querySelector('[data-schoolmates-frame]').getBoundingClientRect();
                   const titleLine=document.querySelector('[data-home-hero-title-line]');
@@ -2079,6 +2083,14 @@ if (!bellaris && brandPreviewCandidate) {
                     desktopCopy:innerWidth<1024 || (Math.abs(copy.right-lineRange.getBoundingClientRect().right)<9 && !!document.querySelector('.home-hero-column .home-hero-copy br')),
                     pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
                     passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
+                    taxiBelowPass:!!taxi && !!taxi.closest('[data-home-prices]') && taxi.getBoundingClientRect().top>=cards[1].bottom &&
+                      getComputedStyle(taxi).backgroundColor==='rgb(248, 221, 235)' && Math.abs(included.bottom-prices.bottom)<3,
+                    compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
+                    aboutExpanded:!document.querySelector('#o-nas summary') && !!document.querySelector('#o-nas [data-about-expanded] strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2,
+                    benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
+                    certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2,
+                    formDepth:getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).boxShadow.includes('rgb'),
+                    heroGlow:!!heroCta && getComputedStyle(heroCta).boxShadow.includes('226, 84, 164'),
                     conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
@@ -2089,6 +2101,16 @@ if (!bellaris && brandPreviewCandidate) {
                   };
                 });
                 if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression: '+JSON.stringify(layout));
+                // ContextFaq mounts its CTA only while the disclosure is open:
+                // verify the actual clickable link after user interaction,
+                // rather than querying a deliberately unmounted child.
+                const puppyToggle=page.locator('#podmienky').getByRole('button',{name:'Čo ak chcete prihlásiť šteniatko?'});
+                await puppyToggle.click();
+                const puppyLink=page.locator('#podmienky a[href="#aria-puppy-check"].btn-coral');
+                if (!await puppyLink.isVisible() ||
+                    !(await page.locator('#aria-puppy-check h2').innerText()).includes('Spĺňa základné podmienky?'))
+                  throw new Error('Expanded puppy FAQ must show a pink CTA linking to the real age/vaccination checker');
+                await puppyToggle.click();
               } else if (width < 1024) {
                 if (!await ctaPair.isVisible()) throw new Error('Mobile Hero CTA pair missing at ' + width);
                 const shape = await ctaPair.evaluate(el => {

@@ -1175,13 +1175,13 @@
 
 /* Paid LEAD: a small clear gap and a short curved pointer to the portrait.
    Preview and organic helpers retain their existing silhouette. */
-.lead-brand-live [data-aria-message] { padding-left: 98px; }
+.lead-brand-live [data-aria-message] { padding-left: 94px; }
 .lead-brand-live [data-aria-tail] {
   color: rgb(38 50 43 / 40%);
   filter: drop-shadow(0 3px 6px rgb(38 50 43 / 9%));
 }
 @media (min-width: 640px) {
-  .lead-brand-live [data-aria-message] { padding-left: 112px; }
+  .lead-brand-live [data-aria-message] { padding-left: 108px; }
 }
 
 /* Paid campaign LEAD only: an actually legible desktop speech bubble.
@@ -1199,7 +1199,9 @@
     width: 480px;
     max-width: 480px;
     min-height: 72px;
-    padding: 16px 20px;
+    /* Keep the desktop portrait 26px clear of the text after the PR476
+       bubble-gap adjustment; the bubble contour itself stays at 3px. */
+    padding: 16px 24px;
   }
   .lead-brand-live [data-aria-message] p {
     font-size: 17px;
@@ -1342,11 +1344,41 @@
   padding: 1.15rem 1.4rem;
   color: #fff;
   background-color: #ffa414;
-  background-image: radial-gradient(ellipse at 18% 16%, rgb(255 252 224 / 72%), transparent 56%),
-    linear-gradient(130deg, #ffbc4a, #ffa414 62%, #ff9c0b);
-  box-shadow: 0 12px 30px -20px rgb(169 84 0 / 45%);
+  /* Calm LEAD-style warm wash, without an oversized radial light effect. */
+  background-image: linear-gradient(115deg, #ffbd4b 0%, #ffaf2a 42%, #ffa414 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 45%), 0 5px 12px -10px rgb(169 84 0 / 30%);
+  text-shadow: 0 1px 2px rgb(94 43 0 / 45%);
 }
 .site-brand .home-hero-cta { justify-content: center; max-width: 280px; }
+/* Home pink hero CTA: built-in 3D bevel, subtle glow and tactile pressed state. */
+.site-brand #top .hero-cta-primary {
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 40%),
+    inset 0 -3px 0 rgb(107 18 70 / 36%),
+    0 7px 0 -3px rgb(132 30 88 / 47%),
+    0 12px 22px -6px rgb(184 46 127 / 40%),
+    0 0 25px 2px rgb(226 84 164 / 32%);
+}
+@media (hover:hover) and (pointer:fine) {
+  .site-brand #top .hero-cta-primary:hover {
+    box-shadow: inset 0 2px 0 rgb(255 255 255 / 50%),
+      inset 0 -3px 0 rgb(107 18 70 / 40%),
+      0 8px 0 -3px rgb(132 30 88 / 48%),
+      0 14px 28px -6px rgb(184 46 127 / 45%),
+      0 0 32px 3px rgb(226 84 164 / 43%);
+  }
+}
+.site-brand #top .hero-cta-primary:active { transform: translateY(2px); }
+.site-brand [data-home-form-panel],
+.site-brand [data-home-inquiry-card] {
+  background-color: #fff;
+  border: 1px solid rgb(255 255 255 / 90%);
+  box-shadow: inset 0 1px 0 #fff, 0 3px 0 rgb(184 46 127 / 8%),
+    0 16px 35px -11px rgb(38 50 43 / 20%), 0 28px 48px -27px rgb(184 46 127 / 21%);
+}
+.site-brand footer .footer-bellaris-liquid [data-bellaris-credit-text] {
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+}
 /* Intrinsic headline sizing also follows fallback fonts and browser zoom.
    The hidden, non-interactive guide has the same font metrics as the H1 line;
    inline containment keeps paragraph content from widening its grid track. */

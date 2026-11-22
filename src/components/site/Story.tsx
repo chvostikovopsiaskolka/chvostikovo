@@ -308,14 +308,29 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
   return (
     <section id={isEnglish ? "about" : "o-nas"} className="relative scroll-mt-24 overflow-hidden py-12 sm:py-16">
       <SectionAmbientPaws />
+      {homeLayout && !isEnglish && (
+        <h2 className="section-title relative z-10 mx-auto mb-7 px-2 text-center text-[clamp(13px,4vw,32px)] leading-tight tracking-[-0.04em] whitespace-nowrap">
+          Kto sa bude starať o vášho psíka?
+        </h2>
+      )}
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
         <div>
+          {(!homeLayout || isEnglish) && <>
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             {isEnglish ? "About us" : "O nás"}
           </span>
           <h2 className="section-title mt-2 text-3xl sm:text-4xl">
-            {isEnglish ? "Who is behind Chvostíkovo?" : homeLayout ? "Kto sa bude starať o vášho psíka?" : "Kto stojí za Chvostíkovom?"}
+            {isEnglish ? "Who is behind Chvostíkovo?" : "Kto stojí za Chvostíkovom?"}
           </h2>
+          </>}
+          {homeLayout && !isEnglish ? (
+            <div data-about-expanded className="space-y-4 text-forest/85">
+              <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
+              <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
+              <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
+              <p>Chvostíkovo nie je len miesto na stráženie psov. <strong className="font-extrabold text-forest">Je to druhý domov</strong>, kde sa o každého člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim vlastným psom.</p>
+            </div>
+          ) : (
           <div className="mt-5 space-y-4 text-forest/85">
             <p>
               {isEnglish
@@ -358,6 +373,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
               </p>
             </div>
           </div>
+          )}
         </div>
 
         <div className="space-y-4">
@@ -381,17 +397,27 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
               className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
             />
           </div>
-          {homeLayout && <div data-hero-benefits className="flex flex-wrap justify-center gap-2 pt-2">
+          {homeLayout && <div data-hero-benefits className="flex w-full flex-nowrap items-center justify-center gap-1 pt-2 sm:gap-2">
             {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map(item => (
-              <span key={item} className="inline-flex items-center gap-1.5 rounded-full bg-[#2d764b] px-3 py-2 text-xs font-bold text-white shadow-card">
-                <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />{item}
+              <span key={item} className="inline-flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full bg-[#2d764b] px-1 py-1.5 text-[clamp(7px,2.2vw,11px)] font-bold leading-tight text-white shadow-card sm:gap-1 sm:px-2.5 sm:py-2">
+                <CheckCircle2 className="size-3 shrink-0 sm:size-4" aria-hidden="true" />{item}
               </span>
             ))}
           </div>}
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto mt-8 max-w-6xl px-4">
+      <SafetyCertificates language={language} />
+    </section>
+  );
+}
+
+
+/** The same certified canine first-aid evidence on homepage and paid LEAD. */
+export function SafetyCertificates({ language = "sk" }: { language?: "sk" | "en" }) {
+  const isEnglish = language === "en";
+  return (
+      <div data-safety-certificates className="relative z-10 mx-auto mt-8 max-w-6xl px-4">
         <div className="grid items-center gap-8 rounded-4xl bg-secondary p-7 sm:p-10 md:text-center lg:grid-cols-[1fr_auto] lg:text-left">
           <div className="md:flex md:flex-col md:items-center lg:items-start">
             <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
@@ -433,7 +459,6 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           </div>
         </div>
       </div>
-    </section>
   );
 }
 

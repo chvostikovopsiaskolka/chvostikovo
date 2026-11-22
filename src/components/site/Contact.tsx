@@ -260,7 +260,7 @@ export function Footer({ language = "sk" }: { language?: "sk" | "en" }) {
               aria-label={isEnglish ? "Website by Bellaris — opens in a new tab" : "Web vytvoril Bellaris — otvorí sa v novej karte"}
               className="footer-bellaris-liquid relative isolate inline-flex min-h-11 items-center justify-center gap-1.5 overflow-hidden rounded-2xl px-3 py-2 text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
             >
-              <span className="relative z-10 shrink-0 whitespace-nowrap text-[10px] font-semibold sm:text-[11px]">{isEnglish ? "Website by" : "Web vytvoril"}</span>
+              <span data-bellaris-credit-text className="relative z-10 shrink-0 whitespace-nowrap text-[10px] font-semibold text-white sm:text-[11px]">{isEnglish ? "Website by" : "Web vytvoril"}</span>
               <img src={bellarisFooterLogo} width={84} height={32} loading="lazy" alt="Bellaris" className="relative z-10 h-5 w-auto max-w-[60px] object-contain sm:h-6 sm:max-w-[68px]" />
             </a>
           </div>

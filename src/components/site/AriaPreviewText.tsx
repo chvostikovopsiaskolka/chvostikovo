@@ -11,6 +11,10 @@ export const ARIA_PREVIEW_REQUIREMENTS = REQUIREMENTS.map((item) => ({
 }));
 
 const IMPORTANT = [
+  "platný očkovací preukaz",
+  "Psík musí mať základné hygienické návyky v interiéri",
+  "Prijímame len klinicky zdravých psíkov bez krátkodobých či prenosných ochorení",
+  "Fenky počas hárania neprijímame",
   "stredné a veľké psy",
   "približne od 4 mesiacov",
   "očkované šteniatka",
