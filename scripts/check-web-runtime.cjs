@@ -447,7 +447,7 @@ if (!bellaris && brandPreviewCandidate) {
               });
               if (bubbleGeometry.width < 420 || bubbleGeometry.height < 68 ||
                   bubbleGeometry.textSize < 16 ||
-                  (bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight < 4 || bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight > 10) ||
+                  (bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight < 2 || bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight > 5) ||
                   bubbleGeometry.faceRight > bubbleGeometry.textLeft - 26 ||
                   await page.locator('#lead-section-menu').count())
                 throw new Error('Paid desktop Aria must be large with portrait clear of speech and no page menu: ' +
@@ -506,7 +506,7 @@ if (!bellaris && brandPreviewCandidate) {
                   tipX,
                 };
               });
-              if ((footerBubble.headGap < 4 || footerBubble.headGap > 10) || footerBubble.dockGap < 8 ||
+              if ((footerBubble.headGap < 2 || footerBubble.headGap > 5) || footerBubble.dockGap < 8 ||
                   footerBubble.width < 455 || footerBubble.right > footerBubble.viewport - 8 ||
                   footerBubble.tipX >= -8)
                 throw new Error('Paid desktop footer speech overlaps head or dock: '+JSON.stringify(footerBubble));
@@ -522,7 +522,7 @@ if (!bellaris && brandPreviewCandidate) {
                 return {headGap: bubble.left-head.right, dockGap: dock.top-bubble.bottom,
                   left:bubble.left, right:bubble.right,viewport:window.innerWidth};
               });
-              if ((tabletSpeech.headGap < 4 || tabletSpeech.headGap > 10) || tabletSpeech.dockGap < 8 ||
+              if ((tabletSpeech.headGap < 2 || tabletSpeech.headGap > 5) || tabletSpeech.dockGap < 8 ||
                   tabletSpeech.left < 0 || tabletSpeech.right > tabletSpeech.viewport)
                 throw new Error('Paid tablet speech overlaps Aria head or dock: '+JSON.stringify(tabletSpeech));
             } else if (url.pathname === '/test-aria/') {
@@ -870,8 +870,8 @@ if (!bellaris && brandPreviewCandidate) {
                     contour.bottom > contour.height - 16 ||
                     // A pointer landing on the head never guarantees the
                     // rectangular speech body is outside the head image.
-                    speechBox.x < headBox.x + headBox.width + 4 ||
-                    speechBox.x > headBox.x + headBox.width + 10 ||
+                    speechBox.x < headBox.x + headBox.width + 2 ||
+                    speechBox.x > headBox.x + headBox.width + 5 ||
                     tip.x < -25 || contour.bottom - contour.top > 20 ||
                     speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
                     tip.x >= -8 ||

@@ -1175,13 +1175,13 @@
 
 /* Paid LEAD: a small clear gap and a short curved pointer to the portrait.
    Preview and organic helpers retain their existing silhouette. */
-.lead-brand-live [data-aria-message] { padding-left: 98px; }
+.lead-brand-live [data-aria-message] { padding-left: 94px; }
 .lead-brand-live [data-aria-tail] {
   color: rgb(38 50 43 / 40%);
   filter: drop-shadow(0 3px 6px rgb(38 50 43 / 9%));
 }
 @media (min-width: 640px) {
-  .lead-brand-live [data-aria-message] { padding-left: 112px; }
+  .lead-brand-live [data-aria-message] { padding-left: 108px; }
 }
 
 /* Paid campaign LEAD only: an actually legible desktop speech bubble.
