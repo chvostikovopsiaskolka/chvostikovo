@@ -1119,8 +1119,13 @@
 /* Paid lead hotfix: reviews and Aria belong to the first mobile screen.
    Scope to this landing; do not change the preview or organic puppy dock. */
 @media (max-width: 639px) {
-  .lead-brand-live #recenzie { padding-bottom: 0.25rem; }
-  .lead-brand-live #recenzie [data-gesture-track="reviews"] { padding-bottom: 0.25rem; margin-top: 0.5rem; }
+  .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
+  /* The horizontal scroll container used to clip the card shadows at 4px.
+     Leave enough real space for a soft fade before the floating speech. */
+  .lead-brand-live #recenzie [data-gesture-track="reviews"] { padding-bottom: 1.25rem; margin-top: 0.5rem; }
+  .lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
+    box-shadow: 0 8px 24px -12px rgb(38 50 43 / 15%), 0 16px 32px -22px rgb(38 50 43 / 10%);
+  }
+  .lead-brand-live #recenzie [data-gesture-track="reviews"] figure button { font-size: 12px; line-height: 1.4; }
   .lead-brand-live [data-aria-hero-description] { margin-top: 0.5rem; padding-block: 0.6rem; font-size: 13px; line-height: 1.4; }
-  .lead-brand-live [data-aria-hero-menu] [data-aria-message] { margin-bottom: 0.2rem; }
 }

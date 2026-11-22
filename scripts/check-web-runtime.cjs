@@ -260,7 +260,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const selectors = ['h1', '[data-aria-review-gap-photos]', '[data-aria-service-group]', '[data-aria-hero-description]', '[data-aria-hero-content] [data-aria-review-photo]', '[data-aria-hero-content] [data-aria-review-photo]'];
                   const rect = selector => hero?.querySelector(selector)?.getBoundingClientRect();
                   const photos = [...(hero?.querySelectorAll('[data-aria-review-photo]') || [])];
-                  const dock = hero?.querySelector('[data-aria-hero-menu] [data-aria-guide]');
+                  const dock = document.querySelector('[data-aria-guide]');
                   const reviews = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]');
                   const reviewSection = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.parentElement;
                   const reviewRoot = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.closest('[data-aria-review-gap-photos]');
@@ -282,12 +282,13 @@ if (!bellaris && brandPreviewCandidate) {
                     menuBottom: menu?.bottom,
                     formTop: form?.top,
                     menuPosition: dock ? getComputedStyle(dock).position : '',
+                    menuInline: !!dock && hero?.contains(dock),
                     reviewExists: !!hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]'),
                   };
                 });
                 if (!layout.copy.includes('užije si pohyb'))
                   throw new Error('Lead hero lost approved wording užije si pohyb');
-                if (layout.heights.length !== 2 || layout.photoTop < layout.headingBottom || layout.badgeTop < layout.photoBottom || layout.menuPosition !== 'relative' || layout.formTop < layout.menuBottom)
+                if (layout.heights.length !== 2 || layout.photoTop < layout.headingBottom || layout.badgeTop < layout.photoBottom || layout.menuPosition !== 'fixed' || layout.menuInline || layout.formTop < layout.menuBottom)
                   throw new Error('Lead hero section order regressed: ' + JSON.stringify(layout));
                 if (layout.width < 500 && layout.heights.some(h => h < 110))
                   throw new Error('Lead mobile photo cards too short: ' + JSON.stringify(layout));
@@ -480,14 +481,21 @@ if (!bellaris && brandPreviewCandidate) {
                 const photoImages = photoCards.map(card => card.querySelector('img'));
                 const photoRects = photoCards.map(card => card.getBoundingClientRect());
                 const photoFrame = newPhotos?.getBoundingClientRect();
-                const inlineMenuRect = hero.querySelector('[data-aria-hero-menu]')?.getBoundingClientRect();
+                const floatingGuide = document.querySelector('[data-aria-guide]');
+                const floatingDock = floatingGuide?.querySelector('[data-aria-dock]');
+                const floatingBubble = floatingGuide?.querySelector('[data-aria-speech]');
+                const reviewTrack = reviews.querySelector('[data-gesture-track="reviews"]');
                 const lineHeight = parseFloat(getComputedStyle(proof).lineHeight);
                 return {
                   missing: false,
                   formTop,
                   reviewGap: formTop - reviewBottom,
                   photoCount: photoCards.length,
-                  inlineMenuVisible: !!inlineMenuRect && inlineMenuRect.top >= 0 && inlineMenuRect.bottom <= window.innerHeight + 12,
+                  floatingDockFixed: !!floatingGuide && getComputedStyle(floatingGuide).position === 'fixed' && !hero.contains(floatingGuide),
+                  floatingDockBottomOffset: floatingGuide ? window.innerHeight - floatingGuide.getBoundingClientRect().bottom : -1,
+                  floatingReviewGap: floatingBubble && reviewCardRect ? floatingBubble.getBoundingClientRect().top - reviewCardRect.bottom : -1,
+                  softenedShadowRoom: reviewTrack && reviewCardRect ? reviewTrack.getBoundingClientRect().bottom - reviewCardRect.bottom : -1,
+                  reviewLinkSize: parseFloat(getComputedStyle(reviewTrack?.querySelector('figure button') || reviews).fontSize),
                   photoApprovedAssets: photoImages.length === 2 &&
                     !!photoImages[0]?.getAttribute('src')?.includes('lead-review-border-collies') &&
                     !!photoImages[1]?.getAttribute('src')?.includes('lead-review-retrievers-aussie') &&
@@ -537,7 +545,9 @@ if (!bellaris && brandPreviewCandidate) {
                   (url.pathname === '/test-aria/' && firstFold.topSpacerHeight < 0) ||
                   (url.pathname === '/test-aria/' && firstFold.contentCenterY < firstFold.viewportHeight * 0.36) ||
                   (url.pathname === '/test-aria/' && (firstFold.reviewGap < 90 || firstFold.reviewGap > 240)) ||
-                  (url.pathname === '/psia-skolka-kosice/' && width <= 430 && !firstFold.inlineMenuVisible) ||
+                  (url.pathname === '/psia-skolka-kosice/' && (!firstFold.floatingDockFixed ||
+                     (width >= 390 && width <= 430 && firstFold.floatingReviewGap < 8) ||
+                     (width <= 430 && (firstFold.softenedShadowRoom < 16 || firstFold.reviewLinkSize > 13)))) ||
                   firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
@@ -557,6 +567,11 @@ if (!bellaris && brandPreviewCandidate) {
               const leadInfoForm = page.locator('#aria-hero-form');
               await leadInfoForm.scrollIntoViewIfNeeded();
               await page.waitForFunction(() => document.getElementById('aria-hero-form')?.getBoundingClientRect().top < window.innerHeight);
+              if (url.pathname === '/psia-skolka-kosice/') {
+                const dockOffsetAfterScroll = await aria.evaluate(el => window.innerHeight - el.getBoundingClientRect().bottom);
+                if (Math.abs(dockOffsetAfterScroll - firstFold.floatingDockBottomOffset) > 4)
+                  throw new Error('Paid lead Aria dock must remain floating at the same viewport offset while scrolling: ' + dockOffsetAfterScroll);
+              }
               if (await page.locator('[data-aria-guide]').getAttribute('data-aria-stage') !== 'intro')
                 throw new Error('Aria puppy speech appeared before caretakers at ' + width);
               const caretakersTop = await page.evaluate(() => {
@@ -777,8 +792,9 @@ if (!bellaris && brandPreviewCandidate) {
               const dock = await aria.locator('[data-aria-dock]').boundingBox();
               if (!dock || dock.x < -1 || dock.x + dock.width > width + 2 || dock.height > 65)
                 throw new Error('Aria floating dock overflows mobile viewport ' + width);
-              // The paid landing must never blink its Aria speech/dock
-              // while moving between the form, requirements and contact.
+              // The paid landing keeps one floating, viewport-anchored Aria dock.
+              // Scrolling changes the contextual message, never its fixed
+              // position or visibility (the former inline test is obsolete).
               if (url.pathname === '/psia-skolka-kosice/') {
                 const stability = await page.evaluate(async () => {
                   const guide = document.querySelector('[data-aria-guide]');
@@ -786,7 +802,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const message = guide?.querySelector('[data-aria-message]');
                   if (!guide || !dock || !message) return ['missing Aria'];
                   const baseline = dock.getBoundingClientRect();
-                  const baselineDocumentY = baseline.y + window.scrollY;
+                  const baselineViewportY = baseline.y;
                   const failures = [];
                   for (const y of [150, 950, 2200, 3100, 1700, 3600, 110, 0]) {
                     window.scrollTo(0, y);
@@ -794,11 +810,11 @@ if (!bellaris && brandPreviewCandidate) {
                     const box = dock.getBoundingClientRect();
                     const guideStyle = getComputedStyle(guide);
                     if (document.querySelector('[data-aria-dock]') !== dock ||
-                        guideStyle.position !== 'relative' || guideStyle.visibility !== 'visible' ||
+                        guideStyle.position !== 'fixed' || guideStyle.visibility !== 'visible' ||
                         guideStyle.opacity !== '1' ||
                         getComputedStyle(message).visibility !== 'visible' ||
                         message.dataset.ariaSuppressed !== 'false' ||
-                        Math.abs(baselineDocumentY - (box.y + window.scrollY)) > 40 ||
+                        Math.abs(baselineViewportY - box.y) > 3 ||
                         Math.abs(baseline.height - box.height) > 2) {
                       failures.push({ y, stage: guide.dataset.ariaStage, dockY: box.y,
                         baselineY: baseline.y, message: getComputedStyle(message).visibility });
@@ -1016,6 +1032,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const introSpace = leadHero?.querySelector('[data-aria-intro-space]');
                 const benefits = team?.querySelector('[data-hero-benefits]');
                 const inlineMenu = leadHero?.querySelector('[data-aria-hero-menu]');
+                const floatingMenu = document.querySelector('[data-aria-guide]');
                 const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                 if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
                     !headlineSpacer || !serviceGroup || !heroHeading || !heroDogs ||
@@ -1031,7 +1048,10 @@ if (!bellaris && brandPreviewCandidate) {
                   follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
                   follows(heroDogs, badge) && follows(badge, leadDescription) &&
                   follows(leadDescription, proof) &&
-                  (isPaidLead ? (follows(heroHeading, introSpace) && follows(introSpace, serviceGroup) && !!inlineMenu && follows(reviews, inlineMenu) && follows(inlineMenu, form)) : (follows(reviews, introSpace) && follows(introSpace, form))) &&
+                  (isPaidLead ? (follows(heroHeading, introSpace) && follows(introSpace, serviceGroup) &&
+                    !inlineMenu && !!floatingMenu && !leadHero.contains(floatingMenu) &&
+                    getComputedStyle(floatingMenu).position === 'fixed' && follows(reviews, form))
+                  : (follows(reviews, introSpace) && follows(introSpace, form))) &&
                   follows(form, team) &&
                   !!heading && !!photo && !!copy &&
                   follows(heading, photo) && follows(photo, benefits) && follows(benefits, copy) &&
