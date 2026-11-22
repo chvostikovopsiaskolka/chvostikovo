@@ -2088,7 +2088,6 @@ if (!bellaris && brandPreviewCandidate) {
                     compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
                     aboutExpanded:!document.querySelector('#o-nas summary') && !!document.querySelector('#o-nas [data-about-expanded] strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2,
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
-                    puppyCta:document.querySelector('#podmienky a[href="#aria-puppy-check"]')?.classList.contains('btn-coral'),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2,
                     formDepth:getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).boxShadow.includes('rgb'),
                     heroGlow:!!heroCta && getComputedStyle(heroCta).boxShadow.includes('226, 84, 164'),
@@ -2102,6 +2101,16 @@ if (!bellaris && brandPreviewCandidate) {
                   };
                 });
                 if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression: '+JSON.stringify(layout));
+                // ContextFaq mounts its CTA only while the disclosure is open:
+                // verify the actual clickable link after user interaction,
+                // rather than querying a deliberately unmounted child.
+                const puppyToggle=page.locator('#podmienky').getByRole('button',{name:'Čo ak chcete prihlásiť šteniatko?'});
+                await puppyToggle.click();
+                const puppyLink=page.locator('#podmienky a[href="#aria-puppy-check"].btn-coral');
+                if (!await puppyLink.isVisible() ||
+                    !(await page.locator('#aria-puppy-check h2').innerText()).includes('Spĺňa základné podmienky?'))
+                  throw new Error('Expanded puppy FAQ must show a pink CTA linking to the real age/vaccination checker');
+                await puppyToggle.click();
               } else if (width < 1024) {
                 if (!await ctaPair.isVisible()) throw new Error('Mobile Hero CTA pair missing at ' + width);
                 const shape = await ctaPair.evaluate(el => {

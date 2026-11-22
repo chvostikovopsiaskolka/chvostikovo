@@ -1199,7 +1199,9 @@
     width: 480px;
     max-width: 480px;
     min-height: 72px;
-    padding: 16px 20px;
+    /* Keep the desktop portrait 26px clear of the text after the PR476
+       bubble-gap adjustment; the bubble contour itself stays at 3px. */
+    padding: 16px 24px;
   }
   .lead-brand-live [data-aria-message] p {
     font-size: 17px;
