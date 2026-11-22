@@ -338,7 +338,7 @@ export function AriaPreviewPage() {
                 <article key={item.name} className={"relative flex h-full min-h-[108px] flex-col items-center rounded-3xl px-3 py-3 text-center shadow-card sm:min-h-[136px] sm:p-4 " + (item.highlight ? "bg-forest text-cream ring-2 ring-coral" : "bg-card text-forest")}>
                   <h3 className="font-display text-[13px] font-bold leading-snug sm:text-xl">{item.name}</h3>
                   <p aria-hidden={!item.highlight} className={"mt-0.5 text-[11px] font-semibold " + (item.highlight ? "text-cream/85" : "invisible")}>10 vstupov</p>
-                  <p className={"mt-1 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
+                  <p data-lead-price className={"mt-1 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
                   <div className="mt-auto pt-1 text-[11px] leading-snug sm:text-sm">
                     {item.highlight ? <strong>Permanentka platí 2 mesiace.</strong> : <span className="opacity-75">Celodenný pobyt</span>}
                   </div>
@@ -346,7 +346,7 @@ export function AriaPreviewPage() {
                 </article>
               ))}
             </div>
-            <p className="mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm">
+            <p data-aria-taxi className="mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm">
               <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
@@ -482,7 +482,7 @@ export function AriaPreviewPage() {
       <Footer />
 
       <Dialog open={puppyModalOpen} onOpenChange={setPuppyModalOpen}>
-        <DialogContent className="max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6" aria-describedby={undefined}>
+        <DialogContent className={(isLiveLead ? "" : "aria-preview-modal ") + "max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6"} aria-describedby={undefined}>
           <DialogTitle className="font-display text-lg font-bold text-forest">Kontrola vhodnosti šteniatka</DialogTitle>
           <AriaPuppyChecker embedded onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />
         </DialogContent>
@@ -492,6 +492,7 @@ export function AriaPreviewPage() {
         onChange={setReviewPhotoOpen} onClose={() => setReviewPhotoOpen(null)} />
 
       <FormDialog
+        previewBrand={!isLiveLead}
         open={leadModalOpen}
         onOpenChange={setLeadModalOpen}
         title="Čo hľadáte pre svojho psíka?"
