@@ -163,7 +163,7 @@ export function AriaPreviewPage() {
             <div className="w-full min-w-0 text-center">
               {/* Preserve the approved H1 position while moving the schoolmates onto the orange label. */}
               <div aria-hidden="true" data-aria-hero-heading-spacer className="h-[14px] sm:h-5" />
-              <h1 className={(isLiveLead ? "mt-7 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]">
+              <h1 className={(isLiveLead ? "mt-7 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
