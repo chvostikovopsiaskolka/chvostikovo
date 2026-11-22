@@ -53,6 +53,31 @@ assert(!shortSchema.safeParse({
   zaujem: "Mám záujem využívať škôlku občasne", plemeno: "x".repeat(201),
 }).success, "Preview breed must respect the 200-character limit.");
 
+// APP-01: a free Aria question is an ordinary consented information lead,
+// never a second chat backend nor an unvalidated ad attribution string.
+const ariaQuestion = buildDbPayload(shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  email: "test@example.com", zaujem: "Chcem sa informovať o škôlke",
+  otazka: "Je škôlka vhodná pre bojazlivejšieho psíka?",
+}));
+assert(ariaQuestion.interest_reason === "Chcem sa informovať o škôlke" &&
+  ariaQuestion.raw_payload["Otázka návštevníka"] === "Je škôlka vhodná pre bojazlivejšieho psíka?",
+  "A free-form question must be retained in existing lead raw_payload.");
+assert(!shortSchema.safeParse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Chcem sa informovať o škôlke", otazka: "x".repeat(601),
+}).success, "An oversized Aria question must never bypass validation.");
+assert(!shortSchema.safeParse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Chcem sa informovať o škôlke", otazka: "x",
+}).success, "An empty or too-short question must not create a lead.");
+const ariaBackend = readFileSync(new URL("../supabase/functions/web-form-submit/index.ts", import.meta.url), "utf8");
+assert(ariaBackend.includes("invalid_aria_question") &&
+  ariaBackend.includes("Otázka návštevníka") &&
+  ariaBackend.includes("lines.push(`Otázka návštevníka: ${question}`)"),
+  "Aria question must be validated on the server and delivered in operator email.");
+
+
 // The approved puppy wizard asks only age and vaccinations; dog breed is
 // collected by the existing shared lead contact (no second dog details step).
 const checkerSource = readFileSync(new URL("../src/components/site/AriaPuppyChecker.tsx", import.meta.url), "utf8");
