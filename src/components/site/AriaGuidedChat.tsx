@@ -56,13 +56,13 @@ function supportHours(): boolean {
     const hour = Number(new Intl.DateTimeFormat("en-GB", {
       hour: "2-digit", hourCycle: "h23", timeZone: "Europe/Bratislava",
     }).format(new Date()));
-    return hour >= 8 && hour < 21;
+    return hour >= 7 && hour < 19;
   } catch {
     return false;
   }
 }
 
-export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function AriaGuidedChat({ open, onClose, initialQuestionId }: { open: boolean; onClose: () => void; initialQuestionId: "pricing" | null }) {
   const [mode, setMode] = useState<ChatMode>("questions");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [answered, setAnswered] = useState<string[]>([]);
@@ -72,6 +72,7 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
   const introText = "Haf! 🐾 Ahoj, ja som Aria. Čo ťa zaujíma o našej škôlke?";
   const [introLength, setIntroLength] = useState(0);
   const [introComposing, setIntroComposing] = useState(true);
+  const autoPricingAsked = useRef(false);
   useEffect(() => {
     if (!open) { setIntroLength(0); setIntroComposing(true); return; }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -79,14 +80,21 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
     }
     setIntroLength(0); setIntroComposing(true);
     let interval: number | undefined;
+    // The direct pricing CTA gives the full greeting briefly before Aria
+    // types the selected answer. Regular portrait-open keeps the original pace.
+    const preselected = initialQuestionId === "pricing";
     const delay = window.setTimeout(() => {
       setIntroComposing(false);
       interval = window.setInterval(() => {
-        setIntroLength(n => { if (n + 2 >= introText.length) { window.clearInterval(interval); return introText.length; } return n + 2; });
-      }, 36);
-    }, 950);
+        setIntroLength(n => {
+          const next = n + (preselected ? 3 : 2);
+          if (next >= introText.length) { window.clearInterval(interval); return introText.length; }
+          return next;
+        });
+      }, preselected ? 18 : 36);
+    }, preselected ? 260 : 950);
     return () => { window.clearTimeout(delay); if (interval !== undefined) window.clearInterval(interval); };
-  }, [open]);
+  }, [open, initialQuestionId]);
 
   const [otherQuestion, setOtherQuestion] = useState("");
   const [puppyCheck, setPuppyCheck] = useState<PuppyCheckInput | null>(null);
@@ -114,16 +122,17 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
     // One timer per active message; cleanup prevents late updates after closing.
     let count = 0;
     let interval: number | undefined;
+    const mobile = window.matchMedia("(max-width: 639px)").matches;
     const delay = window.setTimeout(() => {
       interval = window.setInterval(() => {
-        count = Math.min(text.length, count + 2);
+        count = Math.min(text.length, count + (mobile ? 3 : 2));
         setTypedLength(count);
         if (count >= text.length) {
           window.clearInterval(interval);
           setTypingId(null);
         }
-      }, 32);
-    }, 1100);
+      }, mobile ? 28 : 32);
+    }, mobile ? 600 : 1100);
     return () => {
       window.clearTimeout(delay);
       if (interval !== undefined) window.clearInterval(interval);
@@ -160,6 +169,21 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
     ]);
     setTypingId(id + 1);
   }
+
+  useEffect(() => {
+    if (!open || initialQuestionId !== "pricing" || autoPricingAsked.current ||
+        introComposing || introLength < introText.length ||
+        answered.includes("pricing") || typingId !== null) return;
+    const timer = window.setTimeout(() => {
+      if (autoPricingAsked.current) return;
+      autoPricingAsked.current = true;
+      const question = chatQuestions.find(item => item.id === "pricing");
+      if (question) ask(question);
+    }, 240);
+    return () => window.clearTimeout(timer);
+    // ask() only appends a deterministic catalogue question; the stable state
+    // guards above prevent a second answer on re-open.
+  }, [open, initialQuestionId, introComposing, introLength, answered, typingId]);
 
   function showInterest() {
     track("interest_open");
@@ -202,16 +226,10 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
     setMessages(current => [...current,
       { id, side: "person", text: "Chcem sa spýtať niečo iné." },
       { id: id + 1, side: "aria", text: isDaytime
-        ? "Haf! Jasné, zavolám panička k notebooku. Živé správy ešte pripravujeme, ale e-mail mu môžeš poslať hneď."
-        : "Haf! Paniček už možno spí. Keď ráno doplní moju misku, rád si prečíta tvoj e-mail. 🐾" },
+        ? "Haf! 🐾 Napíš svoju otázku. Pri správach bývame najmä cez deň; odpovieme, keď to bude možné."
+        : "Haf! 🐾 Po 19:00 už správy zvyčajne nevybavujeme. Odpovieme hneď, ako to bude možné, spravidla nasledujúci pracovný deň." },
     ]);
     setMode("other");
-  }
-
-  function finish() {
-    track("answer_sufficient");
-    setEngaged(true);
-    onClose();
   }
 
   function backToQuestions() {
