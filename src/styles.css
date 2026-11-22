@@ -1119,10 +1119,21 @@
 /* Paid lead hotfix: reviews and Aria belong to the first mobile screen.
    Scope to this landing; do not change the preview or organic puppy dock. */
 @media (max-width: 639px) {
+  /* The browser toolbar is outside the visual viewport. Keep the dock low,
+     above the safe-area inset, rather than 94px above it over the reviews. */
+  .lead-brand-live [data-aria-guide] {
+    bottom: max(32px, calc(env(safe-area-inset-bottom) + 10px));
+  }
   .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
   /* The horizontal scroll container used to clip the card shadows at 4px.
      Leave enough real space for a soft fade before the floating speech. */
-  .lead-brand-live #recenzie [data-gesture-track="reviews"] { padding-bottom: 1.25rem; margin-top: 0.5rem; }
+  .lead-brand-live #recenzie [data-gesture-track="reviews"] { padding-bottom: 1.25rem; margin-top: 0; }
+  /* Two preview lines reserve visible room for the floating Aria bubble on
+     small iPhone webview heights. The full review remains expandable. */
+  .lead-brand-live #recenzie [data-gesture-track="reviews"] figure blockquote.line-clamp-3 {
+    min-height: 2.5rem;
+    -webkit-line-clamp: 2;
+  }
   .lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
     box-shadow: 0 8px 24px -12px rgb(38 50 43 / 15%), 0 16px 32px -22px rgb(38 50 43 / 10%);
   }

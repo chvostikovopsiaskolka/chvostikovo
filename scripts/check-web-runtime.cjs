@@ -546,6 +546,7 @@ if (!bellaris && brandPreviewCandidate) {
                   (url.pathname === '/test-aria/' && firstFold.contentCenterY < firstFold.viewportHeight * 0.36) ||
                   (url.pathname === '/test-aria/' && (firstFold.reviewGap < 90 || firstFold.reviewGap > 240)) ||
                   (url.pathname === '/psia-skolka-kosice/' && (!firstFold.floatingDockFixed ||
+                     (width <= 430 && (firstFold.floatingDockBottomOffset < 28 || firstFold.floatingDockBottomOffset > 66)) ||
                      (width >= 390 && width <= 430 && firstFold.floatingReviewGap < 8) ||
                      (width <= 430 && (firstFold.softenedShadowRoom < 16 || firstFold.reviewLinkSize > 13)))) ||
                   firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||

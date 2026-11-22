@@ -155,7 +155,7 @@ export function AriaPreviewPage() {
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
-        <section className={isLiveLead ? "hero-safe-top relative flex min-h-[100svh] flex-col pt-10 sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
+        <section className={isLiveLead ? "hero-safe-top relative flex min-h-[100svh] flex-col pt-7 sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
           <PawTrailBackground landingBottomPaws />
 
           {/* Balance the first fold around the whole content group; Aria owns
@@ -166,7 +166,7 @@ export function AriaPreviewPage() {
             <div className="w-full min-w-0 text-center">
               {/* Preserve the approved H1 position while moving the schoolmates onto the orange label. */}
               <div aria-hidden="true" data-aria-hero-heading-spacer className={isLiveLead ? "h-1 sm:h-5" : "h-[14px] sm:h-5"} />
-              <h1 className={(isLiveLead ? "mt-3 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>
+              <h1 className={(isLiveLead ? "mt-3 -translate-y-[5px] sm:translate-y-0 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
