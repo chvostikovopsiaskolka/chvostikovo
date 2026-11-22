@@ -397,7 +397,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
         )}
 
         {mode !== "questions" && (
-          <div className="max-h-[61%] shrink-0 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/65 backdrop-blur-2xl p-3 sm:p-4">
+          <div data-aria-chat-form-scroll className="max-h-[61%] shrink-0 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/65 backdrop-blur-2xl p-3 sm:p-4">
             {mode === "puppy" && (
               <section data-aria-chat-puppy-check aria-label="Orientačná kontrola šteniatka" className="space-y-3">
                 <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">

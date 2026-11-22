@@ -1,7 +1,7 @@
 import { currentSourceRef } from "@/lib/tracking-sanitization";
 import type { PuppyCheckInput } from "@/lib/inquiry";
 import { useFormProgress } from "@/lib/form-progress";
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
@@ -49,12 +49,20 @@ export function ShortForm({
   const [contactStep, setContactStep] = useState<1 | 2>(1);
   const [contactQuestion, setContactQuestion] = useState("");
   const [preferredContact, setPreferredContact] = useState<"telefon" | "email">("telefon");
+  const contactFormRef = useRef<HTMLFormElement>(null);
   const [sent, setSent] = useState(false);
   const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
   const progress = useFormProgress(trackingSource || "informational_form");
+  // APP-01: step one may be tall on a phone. The contact details must start
+  // at the top of the dialog's INTERNAL scroll area after changing steps.
+  useEffect(() => {
+    if (!showQuestionField) return;
+    const scroller = contactFormRef.current?.closest<HTMLElement>("[data-aria-chat-form-scroll]");
+    if (scroller) scroller.scrollTop = 0;
+  }, [contactStep, showQuestionField]);
   const shouldTrackForm = Boolean(trackingSource);
 
   function onFormChange() {
@@ -155,7 +163,7 @@ export function ShortForm({
   }
 
   if (showQuestionField) return (
-    <form data-aria-contact-wizard onSubmit={onSubmit}
+    <form ref={contactFormRef} data-aria-contact-wizard onSubmit={onSubmit}
       onInputCapture={progress.onInputCapture}
       onBlurCapture={progress.onBlurCapture}
       onInvalidCapture={progress.onInvalidCapture}

@@ -1068,6 +1068,8 @@ if (!bellaris && brandPreviewCandidate) {
                   if (askedPayload) throw new Error('Step one must not send a contact');
                   await questionForm.getByRole('button', { name: 'Pokračovať na kontakt' }).click();
                   await questionForm.locator('[data-aria-contact-details-step]').waitFor({ state: 'visible' });
+                  if (await chat.locator('[data-aria-chat-form-scroll]').evaluate(el => el.scrollTop > 2))
+                    throw new Error('Two-step contact must reset its internal scroll at the top of step two');
                   if (!await questionForm.getByText('Krok 2 z 2').count() ||
                       await questionForm.locator('textarea[name="otazka"]').count() ||
                       !await questionForm.getByText('Môj psík má špeciálne potreby?').count())
