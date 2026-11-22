@@ -198,7 +198,7 @@ export function AriaPreviewPage() {
       {/* Keep Aria floating in the viewport throughout the lead journey.
           The paid lead hero stays visually unchanged; the menu no longer
           participates in the document layout. */}
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={isLiveLead} sectionNavigation={isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={false} sectionNavigation={isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
         <section className={isLiveLead ? "hero-safe-top relative flex min-h-[calc(100svh-20px)] flex-col justify-center sm:min-h-[100svh] sm:justify-start sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
@@ -325,14 +325,18 @@ export function AriaPreviewPage() {
           </div>
         </section>
 
-        <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
-          <div className="mx-auto max-w-4xl px-4">
-            <h2 className="section-title text-center text-lg sm:text-xl">Viac o nás a našej škôlke</h2>
-            <div className="mx-auto mt-5 max-w-3xl space-y-4 text-center text-sm leading-relaxed text-forest/80 sm:text-base">
-              {ABOUT_MORE.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        {/* The paid LEAD already tells the full story beside the team photo.
+            Keep this additional section only on the independent preview. */}
+        {!isLiveLead && (
+          <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
+            <div className="mx-auto max-w-4xl px-4">
+              <h2 className="section-title text-center text-lg sm:text-xl">Viac o nás a našej škôlke</h2>
+              <div className="mx-auto mt-5 max-w-3xl space-y-4 text-center text-sm leading-relaxed text-forest/80 sm:text-base">
+                {ABOUT_MORE.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         <section id="aria-early-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/30 pb-5 pt-8 sm:pb-7 sm:pt-10">
           <SectionAmbientPaws />
