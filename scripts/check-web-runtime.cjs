@@ -262,69 +262,70 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Photo modal leaked body scroll lock');
             };
             if (isAriaPage) {
-              const cards=page.locator('[data-aria-review-photo]');
-              if (await cards.count()!==2) throw new Error('Paid lead requires two clickable owner photos');
-              if (url.pathname === '/psia-skolka-kosice/') {
+              const isPaidCarousel = url.pathname === '/psia-skolka-kosice/';
+              if (isPaidCarousel) {
+                // HERO-MOBILE-01: move the *existing moving carousel* under hero,
+                // not the unrelated static mosaic. The two approved former
+                // teaser photos appear once in the first set, and retain their
+                // original hi-res files in the lightbox.
+                const gallery = page.locator('#lead-photo-carousel [data-gesture-track="photos"]');
+                const highlights = gallery.locator(':scope > div:first-child [data-aria-lead-highlight]');
+                if (await gallery.count() !== 1 ||
+                    await page.locator('[data-aria-review-photo], #aria-mosaic').count() !== 0 ||
+                    await highlights.count() !== 2)
+                  throw new Error('Paid LEAD must have one moved moving carousel and two unique teaser highlights');
+                for (const [n, expected] of [['1', 'lead-review-border-collies'], ['2', 'lead-review-retrievers-aussie']]) {
+                  const photo = highlights.filter({has:page.locator('img')}).filter({has:page.locator('img[src*="' + expected + '"]')});
+                  if (await photo.count() !== 1 ||
+                      await photo.getAttribute('data-aria-lead-highlight') !== n)
+                    throw new Error('Missing or duplicated approved original teaser inside moving carousel: ' + expected);
+                }
                 const layout = await page.evaluate(() => {
                   const hero = document.querySelector('section.hero-safe-top');
-
-                  const rect = selector => hero?.querySelector(selector)?.getBoundingClientRect();
-                  const photos = [...document.querySelectorAll('[data-aria-review-photo]')];
-                  const dock = document.querySelector('[data-aria-guide]');
+                  const heading = hero?.querySelector('h1')?.getBoundingClientRect();
+                  const badge = hero?.querySelector('[data-aria-service-group]')?.getBoundingClientRect();
                   const reviews = document.querySelector('#recenzie')?.getBoundingClientRect();
-
-                  const heading = rect('h1');
-                  const photo = document.querySelector('[data-aria-lead-photos] [data-aria-review-gap-photos]')?.getBoundingClientRect();
-                  const badge = rect('[data-aria-service-group]');
-                  const description = rect('[data-aria-hero-description]');
-
-                  const menu = dock?.getBoundingClientRect();
+                  const gallery = document.querySelector('#lead-photo-carousel');
+                  const track = gallery?.querySelector('[data-gesture-track="photos"]');
                   const form = document.querySelector('#aria-hero-form')?.getBoundingClientRect();
+                  const dock = document.querySelector('[data-aria-guide]');
+                  const cards = [...(track?.querySelectorAll(':scope > div:first-child button') ?? [])];
+                  const highRes = cards.filter(card => card.hasAttribute('data-aria-lead-highlight'));
+                  const gr = gallery?.getBoundingClientRect(), tr = track?.getBoundingClientRect();
                   return {
-                    width: innerWidth,
-                    copy: description ? document.querySelector('[data-aria-hero-description]')?.textContent : '',
-                    heights: photos.map(el => el.getBoundingClientRect().height),
-                    headingBottom: heading?.bottom,
-                    photoTop: photo?.top,
-                    photoBottom: photo?.bottom,
-                    reviewBottom: reviews?.bottom,
-                    reviewSpacing: parseFloat(getComputedStyle(hero?.querySelector("[data-aria-lead-review-spacing]")).marginTop),
-                    badgeTop: badge?.top,
-                    menuBottom: menu?.bottom,
-                    formTop: form?.top,
-                    menuPosition: dock ? getComputedStyle(dock).position : '',
-                    menuInline: !!dock && hero?.contains(dock),
-                    reviewExists: !!reviews,
+                    cardCount: cards.length, highlightCount: highRes.length,
+                    headingBottom: heading?.bottom, badgeTop: badge?.top,
+                    reviewBottom: reviews?.bottom, galleryTop: gr?.top, trackBottom: tr?.bottom,
+                    menuBottom: dock?.getBoundingClientRect().bottom, formTop: form?.top,
+                    fixed: dock ? getComputedStyle(dock).position === 'fixed' && !hero.contains(dock) : false,
+                    reviewSpacing: parseFloat(getComputedStyle(hero?.querySelector('[data-aria-lead-review-spacing]')).marginTop),
                   };
                 });
-                if (!layout.copy.includes('užije si pohyb'))
-                  throw new Error('Lead hero lost approved wording užije si pohyb');
-                if (layout.heights.length !== 2 || !layout.reviewExists ||
+                if (!layout.fixed || layout.cardCount !== 20 || layout.highlightCount !== 2 ||
                     layout.badgeTop < layout.headingBottom + 50 ||
-                    layout.photoTop < layout.reviewBottom + 12 ||
-                    layout.photoTop < layout.menuBottom + 8 ||
-                    layout.photoBottom > layout.formTop - 8 ||
-                    layout.menuPosition !== 'fixed' || layout.menuInline || layout.formTop < layout.menuBottom)
-                  throw new Error('Lead hero section order regressed: ' + JSON.stringify(layout));
-                // Mobile lead: user-approved breathing room above Google reviews.
-                // Keep it scoped to the paid route; avoid reintroducing tall empty hero gaps.
-                if (layout.width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
-                  throw new Error('Paid lead mobile review gap must stay near 32px: ' + JSON.stringify(layout));
-                if (layout.width < 500 && layout.heights.some(h => h < 110))
-                  throw new Error('Lead mobile photo cards too short: ' + JSON.stringify(layout));
+                    layout.galleryTop < layout.reviewBottom + 12 ||
+                    layout.galleryTop < layout.menuBottom + 8 ||
+                    layout.trackBottom > layout.formTop - 8)
+                  throw new Error('Paid hero → moving gallery → form layout regressed: ' + JSON.stringify(layout));
+                if (width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
+                  throw new Error('Approved mobile review spacing regressed: ' + JSON.stringify(layout));
+                await highlights.first().scrollIntoViewIfNeeded();
+                await highlights.first().click();
+                await verifyLightbox(true);
+              } else {
+                const cards = page.locator('[data-aria-review-photo]');
+                if (await cards.count() !== 2) throw new Error('Aria preview must retain two standalone teaser photos');
+                await cards.first().scrollIntoViewIfNeeded();
+                await page.waitForFunction(() => [...document.querySelectorAll('[data-aria-review-photo] img')]
+                  .every(img => img.complete && img.naturalWidth >= 640 && img.naturalHeight >= 850),
+                  null, {timeout:5000});
+                await cards.first().click();
+                await verifyLightbox(true);
+                const mosaic = page.locator('#aria-mosaic button[aria-label^="Otvoriť fotografiu"]');
+                await mosaic.first().scrollIntoViewIfNeeded();
+                await mosaic.first().click();
+                await verifyLightbox();
               }
-              await cards.first().scrollIntoViewIfNeeded();
-              // User-reported pixelation: two card images must be retina-ready,
-              // not the previous ~6KB 320px previews. Keep big files lazy in modal.
-              await page.waitForFunction(() => [...document.querySelectorAll('[data-aria-review-photo] img')]
-                .every(img => img.complete && img.naturalWidth >= 640 && img.naturalHeight >= 850),
-                null, {timeout:5000});
-              await cards.first().click();
-              await verifyLightbox(true);
-              const mosaic=page.locator('#aria-mosaic button[aria-label^="Otvoriť fotografiu"]');
-              await mosaic.first().scrollIntoViewIfNeeded();
-              await mosaic.first().click();
-              await verifyLightbox();
             }
             if (url.pathname==='/' || isAriaPage) {
               const moving=page.locator('[data-gesture-track="photos"] button[aria-label^="Otvoriť fotografiu"]');
@@ -519,11 +520,16 @@ if (!bellaris && brandPreviewCandidate) {
                 const reviewsBottom = reviews.getBoundingClientRect().bottom;
                 const formTop = form.getBoundingClientRect().top;
                 const reviewBottom = reviews.getBoundingClientRect().bottom;
-                const newPhotos = window.location.pathname === '/psia-skolka-kosice/'
-                  ? document.querySelector('[data-aria-lead-photos] [data-aria-review-gap-photos]')
+                const paidCarousel = window.location.pathname === '/psia-skolka-kosice/';
+                const newPhotos = paidCarousel
+                  ? document.querySelector('#lead-photo-carousel [data-gesture-track="photos"]')
                   : hero.querySelector('[data-aria-review-gap-photos]');
-                const photoCards = [...(newPhotos?.querySelectorAll('[data-aria-review-photo]') ?? [])];
-                const photoImages = photoCards.map(card => card.querySelector('img'));
+                const photoCards = paidCarousel
+                  ? [...(newPhotos?.querySelectorAll(':scope > div:first-child button') ?? [])].slice(0, 2)
+                  : [...(newPhotos?.querySelectorAll('[data-aria-review-photo]') ?? [])];
+                const photoImages = paidCarousel
+                  ? [...(newPhotos?.querySelectorAll(':scope > div:first-child [data-aria-lead-highlight] img') ?? [])]
+                  : photoCards.map(card => card.querySelector('img'));
                 const photoRects = photoCards.map(card => card.getBoundingClientRect());
                 const photoFrame = newPhotos?.getBoundingClientRect();
                 const floatingGuide = document.querySelector('[data-aria-guide]');
@@ -1285,12 +1291,14 @@ if (!bellaris && brandPreviewCandidate) {
               await faqDetails.locator('summary').click();
               if (await faqDetails.locator('strong').count() < 4)
                 throw new Error('Key first-visit explanation sentences must be highlighted');
-              if (await page.locator('[data-aria-location-chips] a').count() !== 1 || !await page.locator('[data-aria-location-chips]').getByText('Bezplatné parkovanie').count())
-                throw new Error('Mobile lead gallery must show location and parking chips');
+              if (url.pathname === '/test-aria/' &&
+                  (await page.locator('[data-aria-location-chips] a').count() !== 1 ||
+                   !await page.locator('[data-aria-location-chips]').getByText('Bezplatné parkovanie').count()))
+                throw new Error('Preview static mosaic must preserve location and parking chips');
               if (!await page.locator('#lead-pricing [data-lead-best-value]').getByText('Najvýhodnejšie').count())
                 throw new Error('Lead permanentka must retain the orange best-value label');
-              if (await page.locator('#aria-mosaic img').count() !== (url.pathname === '/psia-skolka-kosice/' ? 10 : 8))
-                throw new Error('Mosaic photo count must be 8 in preview or 10 with two approved LEAD highlights');
+              if (await page.locator('#aria-mosaic img').count() !== (url.pathname === '/psia-skolka-kosice/' ? 0 : 8))
+                throw new Error('Static mosaic must remain preview-only; paid LEAD uses moving carousel');
               // Compare document order rather than screen rects (some sections may be offscreen).
               const hasHeroFormAndCaretakerOrder = await page.evaluate((isPaidLead) => {
                 const reviews = document.getElementById('recenzie');
@@ -1338,8 +1346,12 @@ if (!bellaris && brandPreviewCandidate) {
               }, url.pathname === '/psia-skolka-kosice/');
               if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/dogs/badge/liquid copy/reviews/lead photos/form or caretakers order changed');
               if (width >= 768) {
-                const heights = await page.locator('[data-aria-review-photo]').evaluateAll(nodes => nodes.map(n => n.getBoundingClientRect().height));
-                if (heights.length !== 2 || heights.some(h => h < 240)) throw new Error('Desktop gallery highlight photos too short: '+JSON.stringify(heights));
+                const heights = await page.locator(url.pathname === '/psia-skolka-kosice/'
+                  ? '#lead-photo-carousel [data-gesture-track="photos"] > div:first-child button'
+                  : '[data-aria-review-photo]')
+                  .evaluateAll(nodes => nodes.map(n => n.getBoundingClientRect().height));
+                if (heights.length < 2 || heights.some(h => h < 240))
+                  throw new Error('Desktop photo gallery thumbnails too short: ' + JSON.stringify(heights));
               }
               const stacked = await page.locator('#aria-caretakers').evaluate(section => {
                 const rect = query => section.querySelector(query)?.getBoundingClientRect();
@@ -1381,7 +1393,7 @@ if (!bellaris && brandPreviewCandidate) {
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
-                  ? ['recenzie', 'aria-mosaic', 'aria-hero-form', 'aria-caretakers', 'aria-about',
+                  ? ['recenzie', 'lead-photo-carousel', 'aria-hero-form', 'aria-caretakers', 'aria-about',
                      'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
                      'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form', 'lead-section-menu']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
