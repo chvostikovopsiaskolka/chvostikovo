@@ -447,7 +447,7 @@ if (!bellaris && brandPreviewCandidate) {
               });
               if (bubbleGeometry.width < 420 || bubbleGeometry.height < 68 ||
                   bubbleGeometry.textSize < 16 ||
-                  bubbleGeometry.faceRight > bubbleGeometry.bubbleLeft - 12 ||
+                  (bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight < 4 || bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight > 10) ||
                   bubbleGeometry.faceRight > bubbleGeometry.textLeft - 26 ||
                   await page.locator('#lead-section-menu').count())
                 throw new Error('Paid desktop Aria must be large with portrait clear of speech and no page menu: ' +

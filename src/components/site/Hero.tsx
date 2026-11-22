@@ -62,7 +62,9 @@ export function Hero() {
               <span className="block text-coral-dark">zamiluje</span>
             </h1>
 
-            <div className="home-hero-copy order-3 mx-0 mt-4 max-w-xl">
+            <div className="home-hero-details order-3 mt-4">
+            <span aria-hidden="true" className="home-hero-width-guide font-display text-[56px] font-bold tracking-[-0.035em] xl:text-[62px]">ktorú si váš psík</span>
+            <div className="home-hero-copy mx-0 max-w-xl">
               <p className="font-display text-base font-bold">
                 Váš psík už nemusí tráviť deň sám doma.
               </p>
@@ -71,11 +73,12 @@ export function Hero() {
               </p>
             </div>
 
-            <div className="home-hero-desktop-cta order-5 mt-5 flex justify-center">
+            <div className="home-hero-desktop-cta mt-5 flex justify-center">
               <a id="home-hero-learn-more" href="#preco-chvostikovo" onClick={() => {
                 trackMarketingInteraction("hero_learn_more", "hero_desktop");
                 void trackCookielessInteraction("explore_daycare", "home_hero_desktop_20261028");
               }} className="hero-cta-primary w-full max-w-[320px]">Chcem zistiť viac</a>
+            </div>
             </div>
           </div>
 
