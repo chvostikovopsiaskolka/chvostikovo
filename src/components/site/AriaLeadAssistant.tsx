@@ -73,6 +73,7 @@ export function AriaLeadAssistant({
   puppyStartSectionId,
   anchorOverrides,
   guidedChatPreview = false,
+  portraitOnRight = false,
 }: {
   onOpenInfo: () => void;
   onOpenInterest: () => void;
@@ -85,7 +86,10 @@ export function AriaLeadAssistant({
   anchorOverrides?: Record<string, string>;
   /** Enables the messenger-style preview only on /test-aria/. */
   guidedChatPreview?: boolean;
+  /** Reuse the preview's right-side speech outline without enabling its chatbot. */
+  portraitOnRight?: boolean;
 }) {
+  const rightAlignedBubble = guidedChatPreview || portraitOnRight;
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
   const stageRef = useRef<"intro" | "puppy" | "contact">("intro");
   const [panel, setPanel] = useState<Panel>(null);
@@ -111,8 +115,8 @@ export function AriaLeadAssistant({
       const next = {
         width: Math.round(bubble.width),
         height: Math.round(bubble.height),
-        tipX: Math.round(head.left + head.width * (guidedChatPreview ? 0.32 : 0.68) - bubble.left),
-        tipY: Math.round(head.top + head.height * (guidedChatPreview ? 0.65 : 0.43) - bubble.top),
+        tipX: Math.round(head.left + head.width * (rightAlignedBubble ? 0.32 : 0.68) - bubble.left),
+        tipY: Math.round(head.top + head.height * (rightAlignedBubble ? 0.65 : 0.43) - bubble.top),
       };
       setSpeechGeometry(prev =>
         Object.keys(next).every(key => prev[key as keyof typeof prev] === next[key as keyof typeof next]) ? prev : next);
@@ -132,7 +136,7 @@ export function AriaLeadAssistant({
       window.visualViewport?.removeEventListener("resize", requestMeasure);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [hidden, stage, guidedChatPreview, chatOpen, panel]);
+  }, [hidden, stage, guidedChatPreview, rightAlignedBubble, chatOpen, panel]);
 
   // Stable sections rather than flipping a bubble on every scroll pixel.
   // Hysteresis keeps iOS browser chrome resizing from thrashing the dock.
@@ -309,7 +313,7 @@ export function AriaLeadAssistant({
     `C ${tipX + 12} ${tipY - 13} 2 ${sh - 11} 1 ${sh - 19}`,
     `L 1 16 Q 1 1 16 1 Z`,
   ].join(" ");
-  const speechPath = guidedChatPreview ? rightSpeechPath : leftSpeechPath;
+  const speechPath = rightAlignedBubble ? rightSpeechPath : leftSpeechPath;
 
   if (hidden) return null;
 
@@ -456,11 +460,11 @@ export function AriaLeadAssistant({
 
         {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
-            className={guidedChatPreview ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
+            className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
-                data-tail-base-top={guidedChatPreview ? tailTopY : undefined}
-                data-tail-base-bottom={guidedChatPreview ? tailBottomY : undefined}
+                data-tail-base-top={rightAlignedBubble ? tailTopY : undefined}
+                data-tail-base-bottom={rightAlignedBubble ? tailBottomY : undefined}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
                 <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
@@ -508,7 +512,7 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className={"pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (guidedChatPreview ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
+        <div className={"pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (rightAlignedBubble ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           {guidedChatPreview ? (
             <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
@@ -519,7 +523,7 @@ export function AriaLeadAssistant({
             </button>
           ) : (
             <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
-              className="pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]" />
+              className={portraitOnRight ? "pointer-events-none absolute bottom-[calc(100%+12px)] right-1 h-[92px] w-[92px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:right-0 sm:h-[104px] sm:w-[104px]" : "pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]"} />
           )}
           <div className="flex h-[52px] items-center gap-0.5">
             <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={panel === "pricing"} onClick={() => toggle("pricing")}>

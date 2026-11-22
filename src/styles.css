@@ -1143,18 +1143,19 @@
   .lead-brand-live [data-aria-hero-description] { animation: none; }
 }
 
-/* Mobile Aria navigation is edge-to-edge, with the portrait floating ABOVE it.
-   Desktop keeps the established width and placement; organic/PWA docks untouched. */
+/* Mobile Aria dock has a small 10px safe gutter, while the portrait and
+   speech share the preview's right-facing outline. Organic/PWA docks untouched. */
 @media (max-width: 639px) {
-  .aria-brand-experiment [data-aria-guide] { padding-inline: 0; }
+  .aria-brand-experiment [data-aria-guide] { padding-inline: 10px; }
   .aria-brand-experiment [data-aria-guide] > div { max-width: none; }
   .aria-brand-experiment [data-aria-dock] { width: 100%; max-width: none; margin-inline: 0; }
   /* Preview head previously protruded 4px beyond the right edge of its narrow dock. */
   .aria-brand-experiment [data-aria-chat-trigger] { right: 4px; }
-  /* Paid lead has the classic left speech bubble, not preview's chat-trigger head. */
+  /* Paid lead reuses the right-facing preview silhouette without opening chat. */
   .lead-brand-live [data-aria-dock] > img[alt^="Aria"] {
-    left: 8px;
-    bottom: calc(100% + 8px);
+    left: auto;
+    right: 4px;
+    bottom: calc(100% + 12px);
   }
 }
 
@@ -1189,5 +1190,14 @@
     box-shadow: 0 8px 24px -12px rgb(38 50 43 / 15%), 0 16px 32px -22px rgb(38 50 43 / 10%);
   }
   .lead-brand-live #recenzie [data-gesture-track="reviews"] figure button { font-size: 12px; line-height: 1.4; }
-  .lead-brand-live [data-aria-hero-description] { margin-top: 0.5rem; padding-block: 0.6rem; font-size: 13px; line-height: 1.4; }
+  /* Readable mobile editorial copy: target three natural lines at typical iPhone
+     widths; narrow 320px screens may wrap further rather than shrinking type. */
+  .lead-brand-live [data-aria-hero-description] {
+    margin-top: 0.5rem;
+    max-width: min(100%, 400px);
+    padding-block: 0.75rem;
+    padding-inline: 11px;
+    font-size: clamp(15px, 3.8vw, 16.5px);
+    line-height: 1.38;
+  }
 }
