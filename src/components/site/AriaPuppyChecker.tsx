@@ -27,7 +27,7 @@ export function AriaPuppyChecker({
   trackingSource?: string;
   initialAnswers?: PuppyCheckInput;
 }) {
-  const [step, setStep] = useState<Step>(initialAnswers ? "vaccines" : "age");
+  const [step, setStep] = useState<Step>(initialAnswers && initialAnswers.age_months >= AGE_MINIMUM ? "vaccines" : "age");
   const [age, setAge] = useState(initialAnswers?.age_months ?? 4);
   const [vaccines, setVaccines] = useState<Record<string, Vaccine>>(initialAnswers?.vaccines ?? {
     rabies: "unknown", dhppi: "unknown", kennel: "unknown",
