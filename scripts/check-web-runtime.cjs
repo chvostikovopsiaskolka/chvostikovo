@@ -699,9 +699,16 @@ if (!bellaris && brandPreviewCandidate) {
               const portrait = aria.locator('[data-aria-dock] img[alt^="Aria"]');
               const tail = comicBubble.locator('svg[data-aria-tail]');
               const pathElement = tail.locator('path');
-              const [speechBox, headBox] = await Promise.all([comicBubble.boundingBox(), portrait.boundingBox()]);
-              if (!speechBox || !headBox || await comicBubble.locator('svg path').count() !== 1)
-                throw new Error('Aria must render one outlined SVG path for speech and tail at ' + width);
+              // Changing stage after scroll recreates the bubble. Give
+              // ResizeObserver the next layout frame to measure it, rather
+              // than asserting on the transient SSR fallback.
+              await pathElement.waitFor({ state: 'attached', timeout: 6000 });
+              const [speechBox, headBox, paths] = await Promise.all([
+                comicBubble.boundingBox(), portrait.boundingBox(), comicBubble.locator('svg path').count(),
+              ]);
+              if (!speechBox || !headBox || paths !== 1)
+                throw new Error('Aria must render one outlined SVG path for speech and tail at ' + width +
+                  ': ' + JSON.stringify({ speechBox, headBox, paths }));
               if (await pathElement.getAttribute('fill') !== 'var(--card)')
                 throw new Error('Speech and tail must use the original card fill');
               const speechStyle = await comicBubble.evaluate(el => ({
