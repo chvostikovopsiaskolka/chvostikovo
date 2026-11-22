@@ -278,6 +278,7 @@ if (!bellaris && brandPreviewCandidate) {
                     photoTop: photo?.top,
                     photoBottom: photo?.bottom,
                     reviewBottom: reviews?.bottom,
+                    reviewSpacing: parseFloat(getComputedStyle(hero?.querySelector("[data-aria-lead-review-spacing]")).marginTop),
                     badgeTop: badge?.top,
                     menuBottom: menu?.bottom,
                     formTop: form?.top,
@@ -295,6 +296,10 @@ if (!bellaris && brandPreviewCandidate) {
                     layout.photoBottom > layout.formTop - 8 ||
                     layout.menuPosition !== 'fixed' || layout.menuInline || layout.formTop < layout.menuBottom)
                   throw new Error('Lead hero section order regressed: ' + JSON.stringify(layout));
+                // Mobile lead: user-approved breathing room above Google reviews.
+                // Keep it scoped to the paid route; avoid reintroducing tall empty hero gaps.
+                if (layout.width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
+                  throw new Error('Paid lead mobile review gap must stay near 32px: ' + JSON.stringify(layout));
                 if (layout.width < 500 && layout.heights.some(h => h < 110))
                   throw new Error('Lead mobile photo cards too short: ' + JSON.stringify(layout));
               }
@@ -582,7 +587,7 @@ if (!bellaris && brandPreviewCandidate) {
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
-                  firstFold.reviewGapAbove > 35 ||
+                  firstFold.reviewGapAbove > (url.pathname === '/psia-skolka-kosice/' ? 40 : 35) ||
                   !firstFold.focusedDescription || !firstFold.liquidFullDescription ||
                   !firstFold.naturalReviewBottom ||
                   !firstFold.noBenefitsInHero || firstFold.relocatedBenefitsCount !== 3 ||
