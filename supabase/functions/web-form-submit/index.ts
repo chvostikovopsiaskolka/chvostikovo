@@ -89,6 +89,9 @@ async function sendMetaConversion(
   input: Record<string, unknown>,
   req: Request,
 ) {
+  // A free-text contact question is not a conversion-optimized daycare Lead.
+  // Keep the normal operator mail/CRM record, but do not send Meta CAPI Lead.
+  if (input.cta_source === 'aria_preview_chat_other') return;
   if (input.marketing_consent !== true) return;
 
   const accessToken = Deno.env.get('META_CAPI_ACCESS_TOKEN');
