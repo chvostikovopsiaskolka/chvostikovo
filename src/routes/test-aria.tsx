@@ -148,7 +148,7 @@ export function AriaPreviewPage() {
   }
 
   return (
-    <div className={isLiveLead ? "min-h-screen overflow-x-clip bg-background" : "aria-brand-experiment min-h-screen overflow-x-clip bg-background"} data-aria-brand-experiment={isLiveLead ? undefined : "sage-orange-rose"}>
+    <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose">
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
@@ -492,7 +492,7 @@ export function AriaPreviewPage() {
         onChange={setReviewPhotoOpen} onClose={() => setReviewPhotoOpen(null)} />
 
       <FormDialog
-        previewBrand={!isLiveLead}
+        previewBrand
         open={leadModalOpen}
         onOpenChange={setLeadModalOpen}
         title="Čo hľadáte pre svojho psíka?"

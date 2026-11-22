@@ -98,8 +98,8 @@ if (!bellaris && brandPreviewCandidate) {
                 firstVisitAction: document.querySelector('#aria-first-visit-form .btn-coral') ? getComputedStyle(document.querySelector('#aria-first-visit-form .btn-coral')).backgroundColor : '',
               };
             });
-            if (url.pathname === '/test-aria/') {
-              if (palette.variant !== 'sage-orange-rose' ||
+            if (url.pathname === '/test-aria/' || url.pathname === '/psia-skolka-kosice/') {
+              if (palette.variant !== 'orange-rose' ||
                   palette.rose !== '#b82e7f' || palette.sage !== '#f3f8ef' ||
                   palette.actionBg !== 'rgb(184, 46, 127)' ||
                   palette.firstVisitAction !== 'rgb(184, 46, 127)' ||
@@ -109,9 +109,9 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyFg !== 'rgb(255, 255, 255)' ||
                   palette.earlyFaqBg !== 'rgb(255, 255, 255)' ||
-                  palette.earlySectionBg !== 'rgba(255, 164, 20, 0.16)' ||
-                  palette.pricingBg !== 'rgba(255, 164, 20, 0.16)' ||
-                  palette.footerBg !== 'rgba(255, 164, 20, 0.2)' ||
+                  palette.earlySectionBg !== 'rgba(255, 164, 20, 0.26)' ||
+                  palette.pricingBg !== 'rgba(255, 164, 20, 0.26)' ||
+                  palette.footerBg !== 'rgba(255, 164, 20, 0.26)' ||
                   palette.benefitHeading !== 'rgb(255, 164, 20)' ||
                   palette.requirementTitle !== 'rgb(255, 164, 20)' ||
                   palette.requirementIcon !== 'rgb(38, 50, 43)' ||
@@ -123,7 +123,7 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.greenPills !== 'rgb(45, 118, 75)')
                 throw new Error('Preview palette differs from approved orange/rose/soft-background contracts: '+JSON.stringify(palette));
             } else if (palette.variant || palette.rose || palette.sage) {
-              throw new Error('Paid lead inherited test-only palette: '+JSON.stringify(palette));
+              throw new Error('Unexpected palette on non-lead page: '+JSON.stringify(palette));
             }
           }
           // The released lead URL and the noindex preview share Aria UI. The
