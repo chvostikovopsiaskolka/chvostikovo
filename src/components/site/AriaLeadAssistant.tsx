@@ -124,7 +124,7 @@ export function AriaLeadAssistant({
         width: Math.round(bubble.width),
         height: Math.round(bubble.height),
         tipX: Math.round(head.left + head.width * (rightAlignedBubble ? 0.32 : 0.68) - bubble.left),
-        tipY: Math.round(head.top + head.height * (rightAlignedBubble ? 0.65 : 0.43) - bubble.top),
+        tipY: Math.round(head.top + head.height * (paidLeadLeft ? 0.7 : rightAlignedBubble ? 0.65 : 0.43) - bubble.top),
       };
       setSpeechGeometry(prev =>
         prev && Object.keys(next).every(key => prev[key as keyof typeof next] === next[key as keyof typeof next]) ? prev : next);
@@ -144,7 +144,7 @@ export function AriaLeadAssistant({
       window.visualViewport?.removeEventListener("resize", requestMeasure);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [hidden, stage, guidedChatPreview, rightAlignedBubble, chatOpen, panel]);
+  }, [hidden, stage, guidedChatPreview, rightAlignedBubble, paidLeadLeft, chatOpen, panel]);
 
   // Stable sections rather than flipping a bubble on every scroll pixel.
   // Hysteresis keeps iOS browser chrome resizing from thrashing the dock.
