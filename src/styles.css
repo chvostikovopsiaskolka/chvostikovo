@@ -1118,6 +1118,18 @@
 
 
 
+/* Paid LEAD hero: approved rose contrast for the service badge, without
+   changing the orange editorial copy or the preview's original palette. */
+.lead-brand-live [data-aria-service-badge] {
+  background-color: #b82e7f;
+  color: #fff;
+}
+.lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
+  box-shadow: 0 14px 34px -10px rgb(38 50 43 / 28%),
+              0 22px 42px -18px rgb(38 50 43 / 26%),
+              0 0 0 1px rgb(38 50 43 / 16%);
+}
+
 /* Paid lead liquid only: dark copy, orange drifting highlights, reduced-motion safe. */
 .lead-brand-live [data-aria-hero-description] {
   color: #171c18;
@@ -1187,7 +1199,9 @@
     -webkit-line-clamp: 2;
   }
   .lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
-    box-shadow: 0 8px 24px -12px rgb(38 50 43 / 15%), 0 16px 32px -22px rgb(38 50 43 / 10%);
+    box-shadow: 0 14px 34px -10px rgb(38 50 43 / 28%),
+              0 22px 42px -18px rgb(38 50 43 / 26%),
+              0 0 0 1px rgb(38 50 43 / 16%);
   }
   .lead-brand-live #recenzie [data-gesture-track="reviews"] figure button { font-size: 12px; line-height: 1.4; }
   /* Readable mobile editorial copy: target three natural lines at typical iPhone

@@ -147,12 +147,58 @@ export function AriaPreviewPage() {
     setLeadModalOpen(true);
   }
 
+  const benefitsSection = (
+        <section id="lead-benefits" className="relative overflow-hidden bg-card py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
+            <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
+              Prečo Chvostíkovo
+            </p>
+            <h2 className="section-title mx-auto mt-2 max-w-3xl text-3xl sm:text-4xl">
+              Aktívny deň pre psíka. Pokojnejšia hlava pre vás.
+            </h2>
+
+            {/* Mobile: one real photo paired with each benefit, with no overlapping rows. */}
+            <div className="mt-7 space-y-5 sm:hidden">
+              {BENEFITS.map(({ title: benefitTitle, content }, i) => {
+                const photo = [DAYCARE_GALLERY_EXTRAS[2]!, DAYCARE_GALLERY_EXTRAS[1]!, DAYCARE_GALLERY_EXTRAS[0]!][i]!;
+                return (
+                  <div key={benefitTitle} className="grid grid-cols-[minmax(0,0.97fr)_minmax(0,1.03fr)] items-stretch gap-3">
+                    <figure className="relative min-h-40 min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
+                      <img src={photo.src} alt={photo.alt} width={720} height={720} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
+                    </figure>
+                    <article className="min-w-0 py-1 text-left">
+                      <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px]">{benefitTitle}</h3>
+                      <p className="mt-2 text-[12px] leading-[1.55] text-forest/80 min-[390px]:text-[13px]">{content}</p>
+                    </article>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop/tablet: retain the established editorial composition. */}
+            <div className="mt-7 hidden sm:block">
+              <EditorialBenefits image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
+                {BENEFITS.map(({ icon: Icon, title: benefitTitle, content }, i) => (
+                  <article key={benefitTitle} className={`py-3 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-forest/15" : ""}`}>
+                    <Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden />
+                    <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px] sm:text-xl">{benefitTitle}</h3>
+                    <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{content}</p>
+                  </article>
+                ))}
+              </EditorialBenefits>
+            </div>
+
+          </div>
+        </section>
+  );
+
   return (
     <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose">
       {/* Keep Aria floating in the viewport throughout the lead journey.
           The paid lead hero stays visually unchanged; the menu no longer
           participates in the document layout. */}
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={isLiveLead} sectionNavigation={isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
         <section className={isLiveLead ? "hero-safe-top relative flex min-h-[calc(100svh-20px)] flex-col justify-center sm:min-h-[100svh] sm:justify-start sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
@@ -212,23 +258,13 @@ export function AriaPreviewPage() {
           )}
         </section>
 
+        {/* Move the SAME existing moving gallery here on paid LEAD; keep
+            its swipe/autoscroll/lightbox behavior and append the two unique
+            former hero teaser photos without adding unrelated images. */}
         {isLiveLead && (
-          <section data-aria-lead-photos data-aria-intro-space aria-label="Fotografie psíkov zo škôlky"
-            className="relative z-10 bg-white px-4 pb-7 pt-4 sm:pb-10 sm:pt-7">
-            {/* Shorter paid lead hero closes the empty gap while the photos still
-                begin below the floating Aria dock, never behind it on first fold. */}
-            <div data-aria-review-gap-photos className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-2.5 sm:gap-4 lg:max-w-4xl">
-              {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
-                <button type="button" key={photo.src} data-aria-review-photo={index + 1}
-                  aria-label={`Zobraziť fotografiu: ${photo.alt}`}
-                  onClick={() => setReviewPhotoOpen(index)}
-                  className="group relative h-[112px] min-w-0 overflow-hidden rounded-[18px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[126px] sm:h-[210px] lg:h-[280px]">
-                  <img src={photo.src} alt={photo.alt} width={672} height={896} loading="lazy" decoding="async"
-                    className={`h-full w-full object-cover saturate-[1.17] contrast-[1.05] transition-transform duration-300 group-hover:scale-[1.03] ${index === 0 ? "object-[50%_36%]" : "object-[50%_50%]"}`} />
-                </button>
-              ))}
-            </div>
-          </section>
+          <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="scroll-mt-24">
+            <DaycarePhotoCarousel includeLeadHighlights />
+          </div>
         )}
 
         <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
@@ -289,14 +325,14 @@ export function AriaPreviewPage() {
           </div>
         </section>
 
-        {!isLiveLead && <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
+        <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
           <div className="mx-auto max-w-4xl px-4">
             <h2 className="section-title text-center text-lg sm:text-xl">Viac o nás a našej škôlke</h2>
             <div className="mx-auto mt-5 max-w-3xl space-y-4 text-center text-sm leading-relaxed text-forest/80 sm:text-base">
               {ABOUT_MORE.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>
           </div>
-        </section>}
+        </section>
 
         <section id="aria-early-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/30 pb-5 pt-8 sm:pb-7 sm:pt-10">
           <SectionAmbientPaws />
@@ -315,51 +351,9 @@ export function AriaPreviewPage() {
           </div>
         </section>
 
-        <AriaMosaicGallery />
+        {!isLiveLead && <AriaMosaicGallery />}
 
-        <section id="lead-benefits" className="relative overflow-hidden bg-card py-10 sm:py-14">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
-            <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
-              Prečo Chvostíkovo
-            </p>
-            <h2 className="section-title mx-auto mt-2 max-w-3xl text-3xl sm:text-4xl">
-              Aktívny deň pre psíka. Pokojnejšia hlava pre vás.
-            </h2>
-
-            {/* Mobile: one real photo paired with each benefit, with no overlapping rows. */}
-            <div className="mt-7 space-y-5 sm:hidden">
-              {BENEFITS.map(({ title: benefitTitle, content }, i) => {
-                const photo = [DAYCARE_GALLERY_EXTRAS[2]!, DAYCARE_GALLERY_EXTRAS[1]!, DAYCARE_GALLERY_EXTRAS[0]!][i]!;
-                return (
-                  <div key={benefitTitle} className="grid grid-cols-[minmax(0,0.97fr)_minmax(0,1.03fr)] items-stretch gap-3">
-                    <figure className="relative min-h-40 min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card">
-                      <img src={photo.src} alt={photo.alt} width={720} height={720} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
-                    </figure>
-                    <article className="min-w-0 py-1 text-left">
-                      <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px]">{benefitTitle}</h3>
-                      <p className="mt-2 text-[12px] leading-[1.55] text-forest/80 min-[390px]:text-[13px]">{content}</p>
-                    </article>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Desktop/tablet: retain the established editorial composition. */}
-            <div className="mt-7 hidden sm:block">
-              <EditorialBenefits image={DAYCARE_GALLERY_EXTRAS[2]!.src} alt={DAYCARE_GALLERY_EXTRAS[2]!.alt} secondImage={DAYCARE_GALLERY_EXTRAS[1]!.src} secondAlt={DAYCARE_GALLERY_EXTRAS[1]!.alt}>
-                {BENEFITS.map(({ icon: Icon, title: benefitTitle, content }, i) => (
-                  <article key={benefitTitle} className={`py-3 first:pt-0 last:pb-0 sm:py-5 ${i ? "border-t border-forest/15" : ""}`}>
-                    <Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden />
-                    <h3 className="font-display text-[14px] font-bold leading-snug text-forest min-[390px]:text-[16px] sm:text-xl">{benefitTitle}</h3>
-                    <p className="mt-1 text-[12px] leading-[1.5] text-forest/80 min-[390px]:text-[13px] sm:text-base sm:leading-relaxed">{content}</p>
-                  </article>
-                ))}
-              </EditorialBenefits>
-            </div>
-
-          </div>
-        </section>
+        {!isLiveLead && benefitsSection}
 
         <section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
           <SectionAmbientPaws />
@@ -419,6 +413,8 @@ export function AriaPreviewPage() {
         </section>
 
         <Requirements id="lead-requirements" ariaPreview hideEyebrow />
+
+        {isLiveLead && benefitsSection}
 
         <section id="lead-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
           <SectionAmbientPaws />
@@ -510,7 +506,30 @@ export function AriaPreviewPage() {
 
         <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />
 
-        <DaycarePhotoCarousel />
+        {!isLiveLead && <DaycarePhotoCarousel />}
+
+        {isLiveLead && (
+          <section id="lead-section-menu" className="scroll-mt-24 bg-white px-4 pb-28 pt-8 sm:pb-16" aria-labelledby="lead-section-menu-title">
+            <div className="mx-auto max-w-3xl">
+              <h2 id="lead-section-menu-title" className="section-title text-center text-2xl">Prejsť na sekciu</h2>
+              <nav aria-label="Sekcie stránky Chvostíkovo" className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {[
+                  ["O nás", "aria-about"], ["Fotografie", "lead-photo-carousel"],
+                  ["Cenník", "lead-pricing"], ["Podmienky", "lead-requirements"],
+                  ["Prečo Chvostíkovo", "lead-benefits"], ["FAQ", "lead-faq"],
+                  ["Šteniatka", "aria-puppy-check"], ["Prvá návšteva", "lead-first-visit"],
+                  ["Mám záujem", "aria-hero-form"],
+                ].map(([label, id]) => (
+                  <a key={id} href={`#${id}`}
+                    className="flex min-h-12 items-center justify-center rounded-2xl border border-forest/15 bg-secondary/35 px-3 py-3 text-center font-display text-sm font-semibold text-forest shadow-sm transition hover:bg-secondary/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral"
+                    onClick={() => void trackCookielessInteraction("nav_click", "lead_section_menu_" + id, "sk")}>
+                    {label}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </section>
+        )}
 
       </main>
 

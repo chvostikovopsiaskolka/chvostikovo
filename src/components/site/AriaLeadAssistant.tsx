@@ -74,6 +74,7 @@ export function AriaLeadAssistant({
   anchorOverrides,
   guidedChatPreview = false,
   portraitOnRight = false,
+  sectionNavigation = false,
 }: {
   onOpenInfo: () => void;
   onOpenInterest: () => void;
@@ -88,6 +89,8 @@ export function AriaLeadAssistant({
   guidedChatPreview?: boolean;
   /** Reuse the preview\'s right-side speech outline without enabling its chatbot. */
   portraitOnRight?: boolean;
+  /** Paid LEAD shortcuts stay separate from preview chatbot. */
+  sectionNavigation?: boolean;
 }) {
   const rightAlignedBubble = guidedChatPreview || portraitOnRight;
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
@@ -244,6 +247,15 @@ export function AriaLeadAssistant({
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       window.scrollTo({ top: Math.max(top, 0), behavior: reduceMotion ? "auto" : "smooth" });
     }));
+  }
+
+  function goToLeadSection(id: string, action: string) {
+    // Preserve the existing pricing-view signal while replacing the paid
+    // above-dock pricing popup with navigation to the real pricing section.
+    if (id === "lead-pricing") {
+      trackMarketingInteraction("view_pricing", trackingPrefix + "_pricing");
+    }
+    jump(id, action);
   }
 
   function toggle(next: Exclude<Panel, null>) {
@@ -539,7 +551,17 @@ export function AriaLeadAssistant({
             <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
               className={portraitOnRight ? "pointer-events-none absolute bottom-[calc(100%+12px)] right-1 h-[92px] w-[92px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:right-0 sm:h-[104px] sm:w-[104px]" : "pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]"} />
           )}
-          <div className="flex h-[52px] items-center gap-0.5">
+          <div data-aria-section-navigation={sectionNavigation || undefined} className="flex h-[52px] items-center gap-0.5">
+            {sectionNavigation ? (
+              <>
+                <button type="button" className={itemClass} aria-label="O nás" onClick={() => goToLeadSection("aria-about", "about")}><span aria-hidden="true" className="text-[20px] leading-none">👥</span><span className="text-[9px] font-semibold sm:text-xs">O nás</span></button>
+                <button type="button" className={itemClass} aria-label="Cenník škôlky" onClick={() => goToLeadSection("lead-pricing", "pricing")}><Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span></button>
+                <button type="button" className={itemClass} aria-label="Podmienky prijatia" onClick={() => goToLeadSection("lead-requirements", "requirements")}><ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span></button>
+                <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={() => goToLeadSection("aria-hero-form", "interest")}><PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span></button>
+                <button type="button" className={itemClass} aria-label="Otvoriť menu" onClick={() => goToLeadSection("lead-section-menu", "menu")}><Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span></button>
+              </>
+            ) : (
+              <>
             <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={guidedChatPreview ? undefined : panel === "pricing"} onClick={() => guidedChatPreview ? jump("lead-pricing", "pricing_scroll") : toggle("pricing")}>
               <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span>
             </button>
@@ -561,6 +583,9 @@ export function AriaLeadAssistant({
             <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}>
               <Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span>
             </button>
+
+              </>
+            )}
           </div>
         </div>
         {guidedChatPreview && chatActivated && (

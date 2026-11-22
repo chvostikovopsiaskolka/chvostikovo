@@ -38,8 +38,9 @@ const PHOTOS = [
   ...DAYCARE_GALLERY_EXTRAS,
 ];
 
-// Approved user photos for the two compact cards between reviews and the
-// first lead form. Keep the moving carousel's PHOTOS collection unchanged.
+// Two approved former hero teasers. Include each once only in the moved
+// paid-LEAD moving carousel; keep original carousel collections untouched
+// on home, preview and English routes.
 export const LEAD_REVIEW_GAP_PHOTOS = [
   { src: leadBorderColliesCard, fullSrc: leadBorderColliesFull, alt: "Dvaja usmiati čiernobieli psíkovia v oddychovej časti Chvostíkova" },
   { src: leadRetrieversAussieCard, fullSrc: leadRetrieversAussieFull, alt: "Zlatý a svetlý retriever s austrálskym ovčiakom v škôlke Chvostíkovo" },
@@ -47,8 +48,14 @@ export const LEAD_REVIEW_GAP_PHOTOS = [
 
 const RESUME_DELAY = 2800;
 
-export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "en" }) {
+export function DaycarePhotoCarousel({ language = "sk", includeLeadHighlights = false }: {
+  language?: "sk" | "en";
+  includeLeadHighlights?: boolean;
+}) {
   const isEnglish = language === "en";
+  const photos = includeLeadHighlights
+    ? [...PHOTOS, ...LEAD_REVIEW_GAP_PHOTOS.filter(photo => !PHOTOS.some(existing => existing.src === photo.src))]
+    : PHOTOS;
   const track = useRef<HTMLDivElement>(null);
   const firstSet = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
@@ -189,7 +196,7 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
   };
 
   return (
-    <section className="overflow-x-clip bg-card pt-6 pb-8 sm:pt-8 sm:pb-12" aria-label={isEnglish ? "Photo gallery from Chvostíkovo dog daycare" : "Fotogaléria zo psiej škôlky Chvostíkovo"}>
+    <section data-aria-lead-carousel={includeLeadHighlights || undefined} className="overflow-x-clip bg-card pt-6 pb-8 sm:pt-8 sm:pb-12" aria-label={isEnglish ? "Photo gallery from Chvostíkovo dog daycare" : "Fotogaléria zo psiej škôlky Chvostíkovo"}>
       <div className="w-full">
         <div
           ref={track}
@@ -267,9 +274,10 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
               className="flex shrink-0 gap-4 pr-4 sm:gap-5 sm:pr-5"
               aria-hidden={setIndex === 1}
             >
-              {PHOTOS.map((photo, index) => (
+              {photos.map((photo, index) => (
                 <button
                   key={`${setIndex}-${photo.src}`}
+                  data-aria-lead-highlight={includeLeadHighlights && index >= PHOTOS.length ? index - PHOTOS.length + 1 : undefined}
                   type="button"
                   tabIndex={setIndex === 1 ? -1 : 0}
                   onClick={() => openPhoto(index)}
@@ -291,7 +299,7 @@ export function DaycarePhotoCarousel({ language = "sk" }: { language?: "sk" | "e
         </div>
       </div>
 
-      <PhotoLightbox photos={PHOTOS} active={active} onChange={setActive} onClose={closePhoto} language={language} />
+      <PhotoLightbox photos={photos} active={active} onChange={setActive} onClose={closePhoto} language={language} />
     </section>
   );
 }
