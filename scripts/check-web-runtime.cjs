@@ -439,6 +439,9 @@ if (!bellaris && brandPreviewCandidate) {
                 if (await ariaDesktop.locator('[data-aria-panel]').count())
                   throw new Error('Paid dock must never open an above-dock window');
               }
+              // Settle the last smooth in-page jump before the shared
+              // first-fold test resets the viewport to the top.
+              await page.waitForTimeout(1000);
             } else {
               const beforeOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
               for (const [name, panel] of [['Otvoriť menu', 'menu'], ['Cenník škôlky', 'pricing'], ['Podmienky prijatia', 'requirements']]) {
@@ -1154,6 +1157,7 @@ if (!bellaris && brandPreviewCandidate) {
                   if (await aria.locator('[data-aria-panel]').count())
                     throw new Error('Paid dock may not open old floating panels');
                 }
+                await page.waitForTimeout(950);
               } else {
                 await aria.getByRole('button', { name: 'Časté otázky' }).click();
                 await aria.locator('[data-aria-panel="faq"]').waitFor({ state: 'visible' });
