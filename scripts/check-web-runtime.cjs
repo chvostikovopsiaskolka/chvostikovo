@@ -407,7 +407,9 @@ if (!bellaris && brandPreviewCandidate) {
                 }).length,
                 dogsWidth: crown?.width ?? 0,
                 dogsTouchBadge: !!badge && !!crown && Math.abs(crown.bottom - badge.top) <= 3,
-                liquid: !!text && getComputedStyle(text).backgroundImage.includes('radial-gradient') &&
+                liquid: !!text && (window.location.pathname === '/psia-skolka-kosice/'
+                  ? getComputedStyle(text).backgroundImage === 'none'
+                  : getComputedStyle(text).backgroundImage.includes('radial-gradient')) &&
                   parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
                 about: window.location.pathname === '/psia-skolka-kosice/'
                   ? !!document.querySelector('#aria-about [data-hero-benefits]') &&
@@ -642,7 +644,9 @@ if (!bellaris && brandPreviewCandidate) {
                       : (window.innerWidth < 390 ? 322 : window.innerWidth < 640 ? 362 : 542)) &&
                     description.querySelectorAll('strong').length === 4 &&
                     [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700),
-                  liquidFullDescription: getComputedStyle(description).backgroundImage.includes('radial-gradient') &&
+                  liquidFullDescription: (window.location.pathname === '/psia-skolka-kosice/'
+                     ? getComputedStyle(description).backgroundImage === 'none'
+                     : getComputedStyle(description).backgroundImage.includes('radial-gradient')) &&
                     parseFloat(getComputedStyle(description).borderTopLeftRadius) >= 15 &&
                     parseFloat(getComputedStyle(description).paddingLeft) >= 10,
                   naturalReviewBottom: getComputedStyle(reviews).overflowY !== 'hidden' &&
