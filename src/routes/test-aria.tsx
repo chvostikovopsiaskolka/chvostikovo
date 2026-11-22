@@ -155,7 +155,7 @@ export function AriaPreviewPage() {
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
-        <section className={isLiveLead ? "hero-safe-top relative flex min-h-[100svh] flex-col pt-12 sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
+        <section className={isLiveLead ? "hero-safe-top relative flex min-h-[calc(100svh-20px)] flex-col pt-[76px] sm:min-h-[100svh] sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
           <PawTrailBackground landingBottomPaws />
 
           {/* Balance the first fold around the whole content group; Aria owns
@@ -214,8 +214,8 @@ export function AriaPreviewPage() {
         {isLiveLead && (
           <section data-aria-lead-photos data-aria-intro-space aria-label="Fotografie psíkov zo škôlky"
             className="relative z-10 bg-white px-4 pb-7 pt-4 sm:pb-10 sm:pt-7">
-            {/* Begin after the full-height hero to keep photos below the floating
-                Aria dock on the opening screen, never hidden behind the menu. */}
+            {/* Shorter paid lead hero closes the empty gap while the photos still
+                begin below the floating Aria dock, never behind it on first fold. */}
             <div data-aria-review-gap-photos className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-2.5 sm:gap-4 lg:max-w-4xl">
               {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
                 <button type="button" key={photo.src} data-aria-review-photo={index + 1}
