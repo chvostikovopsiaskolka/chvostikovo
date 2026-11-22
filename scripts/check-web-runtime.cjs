@@ -783,6 +783,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const message = guide?.querySelector('[data-aria-message]');
                   if (!guide || !dock || !message) return ['missing Aria'];
                   const baseline = dock.getBoundingClientRect();
+                  const baselineDocumentY = baseline.y + window.scrollY;
                   const failures = [];
                   for (const y of [150, 950, 2200, 3100, 1700, 3600, 110, 0]) {
                     window.scrollTo(0, y);
@@ -790,11 +791,11 @@ if (!bellaris && brandPreviewCandidate) {
                     const box = dock.getBoundingClientRect();
                     const guideStyle = getComputedStyle(guide);
                     if (document.querySelector('[data-aria-dock]') !== dock ||
-                        guideStyle.position !== 'fixed' || guideStyle.visibility !== 'visible' ||
+                        guideStyle.position !== 'relative' || guideStyle.visibility !== 'visible' ||
                         guideStyle.opacity !== '1' ||
                         getComputedStyle(message).visibility !== 'visible' ||
                         message.dataset.ariaSuppressed !== 'false' ||
-                        Math.abs(baseline.y - box.y) > 3 ||
+                        Math.abs(baselineDocumentY - (box.y + window.scrollY)) > 3 ||
                         Math.abs(baseline.height - box.height) > 2) {
                       failures.push({ y, stage: guide.dataset.ariaStage, dockY: box.y,
                         baselineY: baseline.y, message: getComputedStyle(message).visibility });
