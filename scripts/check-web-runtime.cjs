@@ -1527,7 +1527,7 @@ if (!bellaris && brandPreviewCandidate) {
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
-                  ? ['recenzie', 'lead-photo-carousel', 'aria-hero-form', 'aria-caretakers', 'aria-about',
+                  ? ['recenzie', 'lead-photo-carousel', 'aria-hero-form', 'aria-caretakers',
                      'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
                      'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form', 'lead-section-menu']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
