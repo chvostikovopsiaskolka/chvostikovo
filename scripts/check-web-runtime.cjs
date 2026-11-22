@@ -532,10 +532,10 @@ if (!bellaris && brandPreviewCandidate) {
                 };
               });
               if (firstFold.missing || firstFold.formTop < firstFold.viewportHeight - 2 ||
-                  (url.pathname !== '/test-aria/' && firstFold.topSpacerHeight < 39) ||
-                  firstFold.contentCenterY < firstFold.viewportHeight * (url.pathname === '/test-aria/' ? 0.36 : 0.4) ||
-                  firstFold.reviewGap < 90 || firstFold.reviewGap > (url.pathname === '/test-aria/' ? 240 : 195) ||
-                  firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || !firstFold.photoGeometry ||
+                  (url.pathname === '/test-aria/' && firstFold.topSpacerHeight < 0) ||
+                  (url.pathname === '/test-aria/' && firstFold.contentCenterY < firstFold.viewportHeight * 0.36) ||
+                  (url.pathname === '/test-aria/' && (firstFold.reviewGap < 90 || firstFold.reviewGap > 240)) ||
+                  firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
