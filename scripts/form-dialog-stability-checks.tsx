@@ -124,7 +124,8 @@ try {
   assert.match(css, /max-height:\s*calc\(100svh/, "modal height limited without forced fullscreen");
   assert.doesNotMatch(css, /\.form-dialog\[data-form-keyboard|top:\s*-100vh|(?:^|\n)\s*height:\s*calc\(100svh/m, "no fullscreen or keyboard mask hacks");
   for (const forbidden of ["window.visualViewport", "scrollRef.current", "addEventListener(", "scrollIntoView(", "--form-viewport", "--form-keyboard"]) { assert.equal(component.includes(forbidden), false, `no keyboard logic: ${forbidden}`); }
-  assert.match(primitive, /<DialogOverlay \/>/, "ordinary dark backdrop used for all dialogs");
+  assert.match(primitive, /<DialogOverlay className=\{overlayClassName\} \/>/, "optional overlay class preserves default dark backdrop for ordinary dialogs");
+  assert.match(primitive, /overlayClassName\?: string/, "overlay customization remains opt-in per dialog");
   assert.equal((forms.match(/<DogBinaryChoice /g) || []).length, 4, "dog sex/neuter inline buttons remain");
   assert.match(forms, /name="meno" autoComplete="name"/);
   assert.match(forms, /name="pes2" autoComplete="off"/);
