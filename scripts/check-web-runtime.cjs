@@ -254,6 +254,24 @@ if (!bellaris && brandPreviewCandidate) {
             if (isAriaPage) {
               const cards=page.locator('[data-aria-review-photo]');
               if (await cards.count()!==2) throw new Error('Paid lead requires two clickable owner photos');
+              if (url.pathname === '/psia-skolka-kosice/') {
+                const layout = await page.evaluate(() => {
+                  const photos = [...document.querySelectorAll('[data-aria-review-photo]')];
+                  const dock = document.querySelector('[data-aria-guide]');
+                  const copy = document.querySelector('[data-aria-hero-description]')?.textContent || '';
+                  return {
+                    width: innerWidth,
+                    copy,
+                    heights: photos.map(el => el.getBoundingClientRect().height),
+                    photoGap: photos[0]?.getBoundingClientRect().top - (document.querySelector('[data-aria-hero-content]')?.getBoundingClientRect().bottom || 0),
+                    dockBottom: dock ? innerHeight - dock.getBoundingClientRect().bottom : -1,
+                  };
+                });
+                if (!layout.copy.includes('užije si pohyb'))
+                  throw new Error('Lead hero lost approved wording užije si pohyb');
+                if (layout.width < 500 && (layout.heights.some(h => h < 185) || layout.photoGap < 15 || layout.dockBottom > 90))
+                  throw new Error('Lead mobile photo height, hero gap or lower menu dock regressed: ' + JSON.stringify(layout));
+              }
               await cards.first().scrollIntoViewIfNeeded();
               // User-reported pixelation: two card images must be retina-ready,
               // not the previous ~6KB 320px previews. Keep big files lazy in modal.
