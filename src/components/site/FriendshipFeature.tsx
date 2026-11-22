@@ -11,7 +11,7 @@ type FriendshipFeatureProps = {
 export function FriendshipFeature({ language = "sk", embedded = false, ctaLabel, onCtaClick }: FriendshipFeatureProps) {
   const isEnglish = language === "en";
   const content = (
-    <div className="grid overflow-hidden rounded-4xl bg-secondary/55 shadow-card ring-1 ring-forest/5 md:grid-cols-[1.05fr_0.95fr] md:items-center">
+    <div data-aria-friendship-card className="grid overflow-hidden rounded-4xl bg-secondary/55 shadow-card ring-1 ring-forest/5 md:grid-cols-[1.05fr_0.95fr] md:items-center">
       <img
         src={friendshipPhoto}
         alt={isEnglish ? "Two daycare dogs resting close together on the sofa at Chvostíkovo" : "Dvaja psí kamaráti oddychujú spolu na gauči v Chvostíkove"}
