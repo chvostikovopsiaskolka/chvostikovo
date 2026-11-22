@@ -58,6 +58,16 @@ if (!bellaris && brandPreviewCandidate) {
         try {
           const response = await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 40000 });
           if (response?.status() !== 200) throw new Error(`HTTP ${response?.status()}`);
+          // APP-01 SSR regression: ensure a *clean* rounded fallback before JS
+          // hydrates. The prior hardcoded SVG tip drew long diagonal lines over
+          // the dock for ~1 second, while post-hydration geometry looked fine.
+          if (brandPreviewCandidate && !restricted &&
+              ['/psia-skolka-kosice/', '/test-aria/'].includes(url.pathname)) {
+            const serverHtml = await response.text();
+            if (!serverHtml.includes('data-aria-outline-ready="false"') ||
+                /<svg\b[^>]*\bdata-aria-tail\b/i.test(serverHtml))
+              throw new Error('Aria SSR must show rounded fallback, not an unmeasured SVG tail');
+          }
           // The server HTML is visible before effects run; wait for client hydration.
           await page.waitForTimeout(3000);
           const text = await page.locator('body').innerText();
@@ -662,6 +672,8 @@ if (!bellaris && brandPreviewCandidate) {
                   await aria.locator('[data-aria-message]').getAttribute('data-aria-suppressed') !== 'false')
                 throw new Error('Aria intro must actually be visible, not merely present in the DOM, at ' + width);
               const comicBubble = aria.locator('[data-aria-speech]');
+              if (await comicBubble.getAttribute('data-aria-outline-ready') !== 'true')
+                throw new Error('Aria speech must switch from SSR fallback to measured SVG after hydration');
               const portrait = aria.locator('[data-aria-dock] img[alt^="Aria"]');
               const tail = comicBubble.locator('svg[data-aria-tail]');
               const pathElement = tail.locator('path');
