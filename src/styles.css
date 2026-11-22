@@ -1101,3 +1101,7 @@
 
 .aria-brand-experiment #aria-puppy-check .bg-card { background-color: #fff; }
 .aria-brand-experiment [data-aria-friendship-card] { background-color: #fff; }
+
+/* Override the old hero-only always-orange selector: selection, not location, sets orange. */
+.aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"] + span { background-color: #fff0d5; color: #26322b; }
+.aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"]:checked + span { background-color: #ffa414; color: #26322b; }
