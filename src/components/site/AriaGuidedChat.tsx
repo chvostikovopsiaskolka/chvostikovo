@@ -324,11 +324,11 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                     {question.title}
                   </button>
                 ))}
+                <button type="button" data-aria-chat-other-cta onClick={showOther}
+                  className="col-span-full min-h-12 w-full rounded-xl bg-[#ffa414] px-3 py-2.5 text-xs font-extrabold text-[#26322b]">
+                  Zaujíma ma niečo iné?
+                </button>
               </div>
-              <button type="button" data-aria-chat-other-cta onClick={showOther}
-                className="mt-3 min-h-12 w-full rounded-xl bg-[#ffa414] px-3 py-2.5 text-xs font-extrabold text-[#26322b]">
-                Zaujíma ma niečo iné?
-              </button>
             </div>
           )}
 
@@ -367,7 +367,10 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             <div data-aria-chat-followup className="space-y-2 pl-11">
               <p className="text-xs font-semibold text-[#26322b]">Prešli sme všetky pripravené otázky. Chceš nám nechať kontakt?</p>
               <button type="button" onClick={showInterest} className="min-h-11 w-full rounded-xl bg-[#9e336f] text-xs font-bold text-white">Mám záujem</button>
-              <button type="button" onClick={showOther} className="min-h-10 w-full rounded-xl border border-[#9e336f]/25 bg-white text-xs font-bold text-[#9e336f]">Iná otázka</button>
+              <div data-aria-chat-questions className="grid grid-cols-2 gap-2">
+                <button type="button" data-aria-chat-other-cta onClick={showOther}
+                  className="col-span-full min-h-12 rounded-xl bg-[#ffa414] px-3 text-xs font-extrabold text-[#26322b]">Zaujíma ma niečo iné?</button>
+              </div>
             </div>
           )}
         </div>
