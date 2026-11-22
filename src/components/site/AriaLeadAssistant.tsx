@@ -1,5 +1,5 @@
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, X, ArrowRight } from "lucide-react";
+import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, UsersRound, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 // Split the preview-only chat from the paid lead bundle and preserve state after first open.
 const AriaGuidedChat = lazy(() => import("./AriaGuidedChat").then((module) => ({ default: module.AriaGuidedChat })));
@@ -85,11 +85,11 @@ export function AriaLeadAssistant({
   /** Starts the puppy speech only once the visitor reaches this section. */
   puppyStartSectionId?: string;
   anchorOverrides?: Record<string, string>;
-  /** Enables the messenger-style preview only on /test-aria/. */
+  /** Enables the guided Aria on the lead landing and its QA twin. */
   guidedChatPreview?: boolean;
-  /** Reuse the preview's right-side speech outline without enabling its chatbot. */
+  /** Reuse the preview\'s right-side speech outline without enabling its chatbot. */
   portraitOnRight?: boolean;
-  /** Paid LEAD: five in-page section shortcuts; independent of the preview-only chatbot. */
+  /** Paid LEAD shortcuts stay separate from preview chatbot. */
   sectionNavigation?: boolean;
 }) {
   const rightAlignedBubble = guidedChatPreview || portraitOnRight;
@@ -98,14 +98,13 @@ export function AriaLeadAssistant({
   const [panel, setPanel] = useState<Panel>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatActivated, setChatActivated] = useState(false);
+  const [requestedChatQuestion, setRequestedChatQuestion] = useState<"pricing" | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [pricingVisitOpen, setPricingVisitOpen] = useState(false);
 
   const speechRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLImageElement>(null);
-  // SSR and the first client frame cannot know the bubble's real size. Do not
-  // draw an SVG tail from made-up coordinates: it crosses the dock until
-  // ResizeObserver measures the portrait and speech after hydration.
+  // Avoid fake SVG tail coordinates in SSR and before the first measurement.
   const [speechGeometry, setSpeechGeometry] = useState<{
     width: number; height: number; tipX: number; tipY: number;
   } | null>(null);
@@ -238,6 +237,8 @@ export function AriaLeadAssistant({
 
   function jump(id: string, action: string) {
     track(action);
+    if (guidedChatPreview && id === "lead-pricing")
+      trackMarketingInteraction("view_pricing", trackingPrefix + "_pricing");
     setPanel(null);
     const target = document.getElementById(anchorOverrides?.[id] ?? id);
     if (!target) return;
@@ -295,12 +296,14 @@ export function AriaLeadAssistant({
   const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[10px] px-0.5 text-center text-forest transition-colors aria-expanded:bg-secondary/75 hover:bg-white/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
 
 
-  function openChat() {
+  function openChat(questionId?: "pricing") {
     if (!guidedChatPreview) return;
     setPanel(null);
+    setRequestedChatQuestion(questionId ?? null);
     setChatActivated(true);
     setChatOpen(true);
     void trackCookielessInteraction("explore_daycare", trackingPrefix + "_chat_open", "sk");
+    if (questionId) void trackCookielessInteraction("explore_daycare", trackingPrefix + "_chat_bubble_" + questionId, "sk");
   }
 
   const outlineReady = speechGeometry !== null;
@@ -468,7 +471,7 @@ export function AriaLeadAssistant({
                 <button type="button" className={optionClass} onClick={() => jump("aria-puppy-check", "puppy_section")}>
                   <span><strong className="block text-sm">Máte šteniatko?</strong><small className="block whitespace-nowrap text-[clamp(8px,2.3vw,10.5px)] font-normal tracking-[-0.02em] text-forest/65">Zistite, či vaše šteniatko spĺňa podmienky</small></span><ArrowRight size={16} aria-hidden />
                 </button>
-                <button type="button" className={optionClass} onClick={openInfo}>
+                <button type="button" className={optionClass} onClick={() => guidedChatPreview ? jump("aria-first-visit-form", "menu_interest_scroll") : openInfo()}>
                   <span><strong className="block text-sm">Chcem sa informovať</strong><small className="block text-[11px] font-normal text-forest/65">Nechajte nám kontakt a ozveme sa</small></span><ArrowRight size={16} aria-hidden />
                 </button>
                 <button type="button" className={optionClass} onClick={() => jump("lead-faq", "menu_all_faq")}>Všetky časté otázky <ArrowRight size={16} aria-hidden /></button>
@@ -493,14 +496,16 @@ export function AriaLeadAssistant({
               </svg>}
               {stage === "intro" ? (
                 guidedChatPreview ? (
-                  <button type="button" aria-label="Otvoriť chat s Ariou" onClick={openChat}
-                    className="pointer-events-auto relative z-10 text-left focus-visible:outline-2 focus-visible:outline-coral">
-                    <p className="font-display text-[11px] font-semibold leading-[1.35] tracking-normal sm:text-[13px]">
+                  <div className="pointer-events-auto relative z-10 min-w-0">
+                    <p className="font-display text-[11px] font-semibold leading-[1.4] tracking-normal sm:text-[13px]">
                       Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                       <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
-                      <span className="mt-1 block text-[10px] font-bold text-coral-dark sm:text-xs">Klikni na mňa a otvorím chat.</span>
                     </p>
-                  </button>
+                    <button type="button" data-aria-bubble-pricing-cta onClick={() => openChat("pricing")}
+                      className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#ffa414] px-3 py-2 text-center text-[11px] font-extrabold leading-snug text-[#26322b] shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9e336f] sm:text-xs">
+                      Aký je cenník škôlky? <ArrowRight aria-hidden size={15} className="shrink-0" />
+                    </button>
+                  </div>
                 ) : (
                   <p className="relative z-10 font-display text-[12px] leading-[1.4] font-semibold tracking-normal sm:text-[13px]">
                     Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
@@ -523,7 +528,7 @@ export function AriaLeadAssistant({
                   <strong className="min-w-0 font-display text-[11px] font-semibold leading-tight text-forest">
                     Chcete sa informovať? <span className="text-coral-dark">Vyplňte nezáväzný formulár.</span>
                   </strong>
-                  <button type="button" onClick={openInfo}
+                  <button type="button" onClick={() => guidedChatPreview ? jump("aria-first-visit-form", "bubble_contact_scroll") : openInfo()}
                     className="pointer-events-auto ml-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
                     Vyplniť
                   </button>
@@ -537,7 +542,7 @@ export function AriaLeadAssistant({
           <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
           {guidedChatPreview ? (
             <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
-              data-aria-chat-trigger onClick={openChat} style={{ WebkitTapHighlightColor: "transparent" }}
+              data-aria-chat-trigger onClick={() => openChat()} style={{ WebkitTapHighlightColor: "transparent" }}
               className={"aria-chat-portrait pointer-events-auto absolute bottom-[calc(100%+12px)] -right-1 h-[92px] w-[92px] max-w-none rounded-full bg-transparent p-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:bottom-[calc(100%+12px)] sm:right-0 sm:h-[104px] sm:w-[104px] " + (panel ? "z-0" : "z-30")}> 
               <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
                 className="pointer-events-none h-full w-full object-contain contrast-[1.1] saturate-[1.05] drop-shadow-[0_3px_5px_rgba(0,0,0,.23)]" />
@@ -549,39 +554,36 @@ export function AriaLeadAssistant({
           <div data-aria-section-navigation={sectionNavigation || undefined} className="flex h-[52px] items-center gap-0.5">
             {sectionNavigation ? (
               <>
-                <button type="button" className={itemClass} aria-label="O nás" onClick={() => goToLeadSection("aria-about", "about")}>
-                  <span aria-hidden="true" className="text-[20px] leading-none">👥</span><span className="text-[9px] font-semibold sm:text-xs">O nás</span>
-                </button>
-                <button type="button" className={itemClass} aria-label="Cenník škôlky" onClick={() => goToLeadSection("lead-pricing", "pricing")}>
-                  <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span>
-                </button>
-                <button type="button" className={itemClass} aria-label="Podmienky prijatia" onClick={() => goToLeadSection("lead-requirements", "requirements")}>
-                  <ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span>
-                </button>
-                <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={() => goToLeadSection("aria-hero-form", "interest")}>
-                  <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span>
-                </button>
-                <button type="button" className={itemClass} aria-label="Otvoriť menu" onClick={() => goToLeadSection("lead-section-menu", "menu")}>
-                  <Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span>
-                </button>
+                <button type="button" className={itemClass} aria-label="O nás" onClick={() => goToLeadSection("aria-about", "about")}><span aria-hidden="true" className="text-[20px] leading-none">👥</span><span className="text-[9px] font-semibold sm:text-xs">O nás</span></button>
+                <button type="button" className={itemClass} aria-label="Cenník škôlky" onClick={() => goToLeadSection("lead-pricing", "pricing")}><Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span></button>
+                <button type="button" className={itemClass} aria-label="Podmienky prijatia" onClick={() => goToLeadSection("lead-requirements", "requirements")}><ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span></button>
+                <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={() => goToLeadSection("aria-hero-form", "interest")}><PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span></button>
+                <button type="button" className={itemClass} aria-label="Otvoriť menu" onClick={() => goToLeadSection("lead-section-menu", "menu")}><Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span></button>
               </>
             ) : (
               <>
-                <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={panel === "pricing"} onClick={() => toggle("pricing")}>
-                  <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span>
-                </button>
-                <button type="button" className={itemClass} aria-label="Podmienky prijatia" aria-expanded={panel === "requirements"} onClick={() => toggle("requirements")}>
-                  <ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span>
-                </button>
-                <button type="button" className={itemClass} aria-label="Časté otázky" aria-expanded={panel === "faq"} onClick={() => toggle("faq")}>
-                  <BookOpen size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">FAQ</span>
-                </button>
-                <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={openInterest}>
-                  <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span>
-                </button>
-                <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}>
-                  <Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span>
-                </button>
+            <button type="button" className={itemClass} aria-label="Cenník škôlky" aria-expanded={guidedChatPreview ? undefined : panel === "pricing"} onClick={() => guidedChatPreview ? jump("lead-pricing", "pricing_scroll") : toggle("pricing")}>
+              <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span>
+            </button>
+            <button type="button" className={itemClass} aria-label="Podmienky prijatia" aria-expanded={guidedChatPreview ? undefined : panel === "requirements"} onClick={() => guidedChatPreview ? jump("lead-requirements", "requirements_scroll") : toggle("requirements")}>
+              <ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span>
+            </button>
+            <button type="button" className={itemClass}
+              aria-label={guidedChatPreview ? "O nás" : "Časté otázky"}
+              aria-expanded={guidedChatPreview ? undefined : panel === "faq"}
+              onClick={() => guidedChatPreview ? jump("aria-about", "about_scroll") : toggle("faq")}>
+              {guidedChatPreview
+                ? <UsersRound size={20} strokeWidth={1.9} aria-hidden />
+                : <BookOpen size={20} strokeWidth={1.9} aria-hidden />}
+              <span className="text-[9px] font-semibold sm:text-xs">{guidedChatPreview ? "O nás" : "FAQ"}</span>
+            </button>
+            <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={() => guidedChatPreview ? jump("aria-first-visit-form", "interest_scroll") : openInterest()}>
+              <PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span>
+            </button>
+            <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}>
+              <Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span>
+            </button>
+
               </>
             )}
           </div>
@@ -589,7 +591,10 @@ export function AriaLeadAssistant({
         {guidedChatPreview && chatActivated && (
           <AriaChatBoundary open={chatOpen} onClose={() => setChatOpen(false)}>
             <Suspense fallback={null}>
-              <AriaGuidedChat open={chatOpen} onClose={() => setChatOpen(false)} />
+              <AriaGuidedChat open={chatOpen} initialQuestionId={requestedChatQuestion}
+                trackingPrefix={trackingPrefix === "lead_landing_aria" ? "lead_landing_aria_chat" : "aria_preview_v3_chat"}
+                formPrefix={trackingPrefix === "lead_landing_aria" ? "lead_landing_aria_chat" : "aria_preview_chat"}
+                onClose={() => setChatOpen(false)} />
             </Suspense>
           </AriaChatBoundary>
         )}

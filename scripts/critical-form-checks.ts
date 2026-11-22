@@ -53,6 +53,48 @@ assert(!shortSchema.safeParse({
   zaujem: "Mám záujem využívať škôlku občasne", plemeno: "x".repeat(201),
 }).success, "Preview breed must respect the 200-character limit.");
 
+// APP-01: a free Aria question is an ordinary consented information lead,
+// never a second chat backend nor an unvalidated ad attribution string.
+const ariaQuestion = buildDbPayload(shortSchema.parse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  email: "test@example.com", zaujem: "Chcem sa informovať o škôlke",
+  otazka: "Je škôlka vhodná pre bojazlivejšieho psíka?",
+}));
+assert(ariaQuestion.interest_reason === "Chcem sa informovať o škôlke" &&
+  ariaQuestion.raw_payload["Otázka návštevníka"] === "Je škôlka vhodná pre bojazlivejšieho psíka?",
+  "A free-form question must be retained in existing lead raw_payload.");
+assert(!shortSchema.safeParse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Chcem sa informovať o škôlke", otazka: "x".repeat(601),
+}).success, "An oversized Aria question must never bypass validation.");
+assert(!shortSchema.safeParse({
+  typ: "informacie", consent: true, meno: "Test", telefon: phone,
+  zaujem: "Chcem sa informovať o škôlke", otazka: "x",
+}).success, "An empty or too-short question must not create a lead.");
+const ariaBackend = readFileSync(new URL("../supabase/functions/web-form-submit/index.ts", import.meta.url), "utf8");
+assert(ariaBackend.includes("invalid_aria_question") &&
+  ariaBackend.includes("Otázka návštevníka") &&
+  ariaBackend.includes("lines.push(`Otázka návštevníka: ${question}`)"),
+  "Aria question must be validated on the server and delivered in operator email.");
+
+// A plain question remains a contact, NOT a paid marketing conversion,
+// even if the visitor granted GA4/Meta measurement consent.
+const ariaFormsSource = readFileSync(new URL("../src/components/site/Forms.tsx", import.meta.url), "utf8");
+const ariaAnalyticsSource = readFileSync(new URL("../src/lib/analytics.ts", import.meta.url), "utf8");
+assert(ariaAnalyticsSource.includes('pushAnalyticsEvent("aria_question_submit"') &&
+  ariaAnalyticsSource.includes('pushAnalyticsEvent("generate_lead"'),
+  "Custom Aria contact event and primary GA4 interest event must both exist.");
+assert(ariaFormsSource.includes('trackAriaQuestionSubmit(trackingSource') &&
+  ariaFormsSource.includes('if (showQuestionField)') &&
+  ariaFormsSource.includes('trackMetaFormConversion("informacie"'),
+  "An Aria question must not be counted as the normal Meta/GA4 Lead.");
+assert(ariaBackend.includes("lead_landing_aria_chat_other") &&
+  ariaBackend.includes("if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100)) ||") &&
+  ariaBackend.includes("text(input.source_ref, 500) === '/test-aria/'"),
+  "Aria questions must not trigger backend Meta CAPI Lead, even with marketing consent.");
+
+
+
 // The approved puppy wizard asks only age and vaccinations; dog breed is
 // collected by the existing shared lead contact (no second dog details step).
 const checkerSource = readFileSync(new URL("../src/components/site/AriaPuppyChecker.tsx", import.meta.url), "utf8");

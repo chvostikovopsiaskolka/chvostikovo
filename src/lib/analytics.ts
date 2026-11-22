@@ -134,7 +134,7 @@ export function trackMetaFormConversion(
   source?: string,
   eventId?: string,
 ) {
-  if (typeof window !== "undefined" && new URL(window.location.href).searchParams.get("utm_source") === "qa") return;
+  if (typeof window !== "undefined" && (new URL(window.location.href).searchParams.get("utm_source") === "qa" || /^\/test-aria\/?$/.test(window.location.pathname))) return;
   const params = {
     content_name: formType,
     page_path: pagePath(),
@@ -149,6 +149,16 @@ export function trackMetaFormConversion(
   trackMetaStandard("CompleteRegistration", params, eventId);
 }
 
+/** A submitted free-text question is a contact, not an ad Lead or GA4 generate_lead. */
+export function trackAriaQuestionSubmit(source: string) {
+  if (typeof window === "undefined") return;
+  if (new URL(window.location.href).searchParams.get("utm_source") === "qa") return;
+  pushAnalyticsEvent("aria_question_submit", {
+    cta_source: source,
+    page_path: pagePath(),
+  });
+}
+
 export function trackFormSubmit(params: {
   formType: "informacie" | "prihlaska";
   sourceRef: string;
@@ -159,7 +169,7 @@ export function trackFormSubmit(params: {
 }) {
   if (typeof window === "undefined") return;
 
-  if (new URL(window.location.href).searchParams.get("utm_source") === "qa") return;
+  if (new URL(window.location.href).searchParams.get("utm_source") === "qa" || /^\/test-aria\/?$/.test(window.location.pathname)) return;
 
   const eventParams = {
     form_type: params.formType,
