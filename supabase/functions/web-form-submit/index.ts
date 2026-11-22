@@ -7,6 +7,12 @@ const ALLOWED_ORIGINS = new Set([
   'https://chvostikovopsiaskolka.github.io',
 ]);
 
+// Explicitly supported information-only submissions from both lead and QA Aria.
+const ARIA_QUESTION_SOURCES = new Set([
+  'aria_preview_chat_other',
+  'lead_landing_aria_chat_other',
+]);
+
 const LEAD_INTERESTS = new Set([
   'Chcem sa informovať o škôlke',
   'Mám záujem využívať škôlku pravidelne',
@@ -91,7 +97,7 @@ async function sendMetaConversion(
 ) {
   // A free-text contact question is not a conversion-optimized daycare Lead.
   // Keep the normal operator mail/CRM record, but do not send Meta CAPI Lead.
-  if (input.cta_source === 'aria_preview_chat_other') return;
+  if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100))) return;
   if (input.marketing_consent !== true) return;
 
   const accessToken = Deno.env.get('META_CAPI_ACCESS_TOKEN');
@@ -254,7 +260,7 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
     // Optional Aria question is already validated and stored in raw_payload.
     // Include it in the existing operator notification, never in marketing
     // event names or interest_reason (which is tightly allowlisted).
-    if (input.cta_source === 'aria_preview_chat_other') {
+    if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100))) {
       const question = input.raw_payload && typeof input.raw_payload === 'object'
         ? text((input.raw_payload as Record<string, unknown>)['Otázka návštevníka'], 600)
         : '';
@@ -514,7 +520,7 @@ Deno.serve(async (req: Request) => {
     if (formType === 'lead') {
       // Aria's one-off question reuses the existing lead and consent flow.
       // Reject empty/oversized content before the database write or SMS.
-      if (input.cta_source === 'aria_preview_chat_other') {
+      if (ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100))) {
         const rawQuestion = input.raw_payload && typeof input.raw_payload === 'object' &&
           !Array.isArray(input.raw_payload)
             ? (input.raw_payload as Record<string, unknown>)['Otázka návštevníka']
