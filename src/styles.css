@@ -1165,11 +1165,33 @@
   .aria-brand-experiment [data-aria-dock] { width: 100%; max-width: none; margin-inline: 0; }
   /* Preview head previously protruded 4px beyond the right edge of its narrow dock. */
   .aria-brand-experiment [data-aria-chat-trigger] { right: 4px; }
-  /* Paid lead reuses the right-facing preview silhouette without opening chat. */
+  /* Paid LEAD now places Aria above the left side of the dock. No right override. */
   .lead-brand-live [data-aria-dock] > img[alt^="Aria"] {
-    left: auto;
-    right: 4px;
+    left: 4px;
+    right: auto;
     bottom: calc(100% + 12px);
+  }
+}
+
+/* Paid campaign LEAD only: an actually legible desktop speech bubble.
+   Leave mobile sizing and the separate /test-aria/ chatbot untouched. */
+@media (min-width: 1024px) {
+  .lead-brand-live [data-aria-speech] {
+    max-width: min(480px, calc(100% - 130px));
+    min-height: 72px;
+    padding: 16px 20px;
+  }
+  .lead-brand-live [data-aria-message] p {
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  .lead-brand-live [data-aria-message] p > span {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .lead-brand-live [data-aria-message] strong {
+    font-size: 16px;
+    line-height: 1.45;
   }
 }
 
