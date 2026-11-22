@@ -107,7 +107,7 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.badgeFg !== 'rgb(255, 255, 255)' ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
-                  palette.heroCopyFg !== 'rgb(255, 255, 255)' ||
+                  palette.heroCopyFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(23, 28, 24)' : 'rgb(255, 255, 255)') ||
                   palette.earlyFaqBg !== 'rgb(255, 255, 255)' ||
                   palette.earlySectionBg !== 'rgba(255, 164, 20, 0.26)' ||
                   palette.pricingBg !== 'rgba(255, 164, 20, 0.26)' ||
