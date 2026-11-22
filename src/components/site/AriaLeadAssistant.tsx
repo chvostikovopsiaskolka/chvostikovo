@@ -124,7 +124,7 @@ export function AriaLeadAssistant({
         tipY: Math.round(head.top + head.height * (rightAlignedBubble ? 0.65 : 0.43) - bubble.top),
       };
       setSpeechGeometry(prev =>
-        Object.keys(next).every(key => prev[key as keyof typeof prev] === next[key as keyof typeof next]) ? prev : next);
+        prev && Object.keys(next).every(key => prev[key as keyof typeof next] === next[key as keyof typeof next]) ? prev : next);
     };
     const requestMeasure = () => {
       if (!frame) frame = window.requestAnimationFrame(measure);
