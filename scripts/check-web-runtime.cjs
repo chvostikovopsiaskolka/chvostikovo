@@ -392,7 +392,9 @@ if (!bellaris && brandPreviewCandidate) {
             await page.waitForTimeout(140);
             const desktop = await page.evaluate(() => {
               const rect = selector => document.querySelector(selector)?.getBoundingClientRect();
-              const photos = [...document.querySelectorAll('[data-aria-review-gap-photos] [data-aria-review-photo]')];
+              const photos = window.location.pathname === '/psia-skolka-kosice/'
+                ? [...document.querySelectorAll('#lead-photo-carousel [data-gesture-track="photos"] > div:first-child button')].slice(0, 2)
+                : [...document.querySelectorAll('[data-aria-review-gap-photos] [data-aria-review-photo]')];
               const badge = rect('[data-aria-service-badge]');
               const crown = rect('[data-aria-hero-dogs] [aria-hidden="true"]');
               const text = document.querySelector('[data-aria-hero-description]');
