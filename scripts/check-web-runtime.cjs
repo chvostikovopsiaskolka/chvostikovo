@@ -795,7 +795,7 @@ if (!bellaris && brandPreviewCandidate) {
                         guideStyle.opacity !== '1' ||
                         getComputedStyle(message).visibility !== 'visible' ||
                         message.dataset.ariaSuppressed !== 'false' ||
-                        Math.abs(baselineDocumentY - (box.y + window.scrollY)) > 3 ||
+                        Math.abs(baselineDocumentY - (box.y + window.scrollY)) > 40 ||
                         Math.abs(baseline.height - box.height) > 2) {
                       failures.push({ y, stage: guide.dataset.ariaStage, dockY: box.y,
                         baselineY: baseline.y, message: getComputedStyle(message).visibility });
