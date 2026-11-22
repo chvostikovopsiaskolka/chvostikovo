@@ -1,0 +1,424 @@
+## Android v435 / 2.0.108 — nový kandidát na podpis a Google Play (21.11.2026)
+
+**[PRIPRAVENÝ GIT KANDIDÁT; PODPIS A PLAY UPLOAD OSTÁVAJÚ LOKÁLNE]** Táto izolovaná vetva `release/android-v435-play-signing-20261121` vychádza z aktuálnej zákazníckej produkcie `customer-portal-production@49fb3bd5` (v435/2.0.108, [PR411](https://github.com/chvostikovopsiaskolka/chvostikovo/pull/411)). Preberá iba pôvodný komplet natívnych súborov Capacitor/FCM/App Links a izolované kompatibilné FCM fixture z predchádzajúceho úspešne testovaného [Android PR408](https://github.com/chvostikovopsiaskolka/chvostikovo/pull/408). Posledná zákaznícka oprava rámčekov mínus/plus je tak zabalená tiež, bez obnovovania zastaranej v434 PWA. Native Android **nepridáva** automatický push k publikovaniu ankety.
+
+- `sk.chvostikovo.app`, root `version.json` → **versionCode 435 / versionName 2.0.108**; `mobile/package.json` a lockfile sa musia zhodovať.
+- **Pred použitím kľúča musí vlastník overiť v Google Play Console**, že `435` je doposiaľ nepoužitý a vyšší než každý nahraný versionCode, a originálny upload certifikát zodpovedá Play App Integrity.
+- **CI vytvára iba debug APK a NEPODPÍSANÝ AAB bez súkromného Firebase JSON; tento AAB nesmieš uploadovať do Google Play.** Na produkčný podpis používaj výhradne nový checkout a originálny lokálny Firebase JSON.
+- Android signing/build-only PR zostáva **DRAFT: NEZLUČOVAŤ do customer-portal-production**. Webová PWA na Verceli a Supabase backend sa tým nemenia.
+
+**Firebase z uz pouziteho Android projektu (opravene 21.11):** podpisovy skript teraz najprv skontroluje existujuci `mobile/android/app/google-services.json`, potom automaticky hladá v znamych lokalnych checkoutoch `$HOME\Chvostikovo-Android-v431`, `$HOME\Chvostikovo-Android-v412`, `$HOME\Chvostikovo-Android-v418`, `$HOME\Chvostikovo-Android-v407` a v povodnom `v403` pod `$HOME\.codex\visualizations`. Pred kopirovanim vzdy overi `sk.chvostikovo.app`. **Ziadny dalsi vyber okna, novy Firebase projekt ani novy JSON**; ak neexistuje ziadny overeny stary subor, skonci bez podpisu s jasnou chybou. `-FirebaseJson` zostava mozny len pre explicitne zadanu lokalnu cestu. CI navyse overuje automaticke prevzatie z fiktivneho v412 checkoutu na Windows PowerShell 5.1 bez realneho Firebase suboru, hesiel alebo podpisu.
+
+**Windows PowerShell 5.1 (oprava 21.11):** predchadzajuca verzia `Prepare-Play-v435.ps1` bola UTF-8 bez BOM s diakritikou, co na starsom Windows PowerShell rozbilo parsovanie uvodzoviek. Oprava ponechava obsah ASCII-only; v CI je novy test kodovania a skutocny Windows PowerShell 5.1 parser test. Ak uz je vetva naklonovana, NEKLONUJ znovu, pouzi:
+```powershell
+cd "$HOME\Chvostikovo-Android-v435"
+git pull --ff-only origin release/android-v435-play-signing-20261121
+& ".\mobile\Prepare-Play-v435.ps1"
+```
+Tato oprava nemeni obsah podpisovaneho Androidu, FCM, Firebase, ani podpisovy kluc.
+
+**Na svojom Windows počítači v PowerShell spusti:**
+```powershell
+git clone --single-branch --branch release/android-v435-play-signing-20261121 https://github.com/chvostikovopsiaskolka/chvostikovo.git "$HOME\Chvostikovo-Android-v435"
+& "$HOME\Chvostikovo-Android-v435\mobile\Prepare-Play-v435.ps1"
+```
+Skript používa už existujúci `$HOME\Documents\Chvostikovo-Keys\chvostikovo-upload.jks` s aliasom `chvostikovo-upload`, overuje `google-services.json` pre `sk.chvostikovo.app`, spúšťa `npm.cmd ci`, `npm.cmd run sync`, `npm.cmd test` a otvára Android Studio. **Nečíta ani neposiela podpisové heslá, nepodpisuje a nenahráva balík.** Android Studio: **Build → Generate Signed Bundle / APK → Android App Bundle → release**, zvoliť *pôvodný* kľúč a alias, nikdy `Create New`.
+
+**Po podpise a pred zverejnením:** fyzicky otestovať aktualizáciu staršej Play verzie bez odinštalovania, prihlásenie, 1–2 psov, rezervácie/taxi, hlasovanie Áno→kusy/Nie, natívnu registráciu FCM tokenu a testovací push s otvorením správneho kontextu, App Links. Nezapínať `CHVO_NATIVE_PUSH_VERIFIED=1` ani `CHVO_APP_LINKS_VERIFIED=1` pred skutočným testom. Súkromné certifikáty, JSON, heslá a osobné údaje nevkladať do GitHubu ani chatu. **Rollback pred podpisom:** predchádzajúca pripravená Android v434 v [PR408](https://github.com/chvostikovopsiaskolka/chvostikovo/pull/408); po Play publikovaní len vyšší versionCode, nie downgrade.
+
+---
+
+## [HISTÓRIA] Android v434 / 2.0.107 — starší kandidát (21.11.2026)
+
+**Zatiaľ iba Git kandidát a automatický debug/UNSIGNED bundle. Nie je to podpísané ani odoslané na Play.**
+
+Samostatná vetva `release/android-v434-polls-play-ci-20261121` vychádza z pôvodného v431 natívneho Capacitor/FCM projektu a prenáša **presné Git blob SHA aktuálneho zákazníckeho v434** (9 dotknutých root runtime/test súborov vrátane serverového hlasovania a +/- kusov). Android Gradle číta root `version.json` a automaticky nastaví **versionCode 434, versionName 2.0.107**, applicationId `sk.chvostikovo.app`. `mobile/package.json` aj lockfile majú rovnakú verziu. Pôvodný `mobile/src/runtime.js`, Firebase native FCM bridge, App Links, Google Play Core update a tlačidlá notifikácií zostávajú nezmenené.
+
+**Jeden overiteľný PowerShell postup na Windows:** urob nový clone tejto vetvy do samostatného priečinka (nemiešaj starý rozpracovaný Android projekt), potom vo Windows PowerShell:
+```powershell
+git clone --single-branch --branch release/android-v434-polls-play-ci-20261121 https://github.com/chvostikovopsiaskolka/chvostikovo.git "$HOME\Chvostikovo-Android-v434"
+& "$HOME\Chvostikovo-Android-v434\mobile\Prepare-Play-v434.ps1"
+```
+Skript **nepodpisuje a nezverejňuje**: overí pôvodný upload keystore (`%USERPROFILE%\Documents\Chvostikovo-Keys\chvostikovo-upload.jks`, alias `chvostikovo-upload`), súkromný Firebase `google-services.json` s package `sk.chvostikovo.app` (ak v novom checkoute chýba, otvorí bezpečný lokálny výber pôvodného súboru), spustí `npm.cmd ci`, `npm.cmd run sync`, `npm.cmd test`, `npx.cmd cap open android`. Skript nečíta a nikam neposiela heslá. Android Studio: **Build → Generate Signed Bundle / APK → Android App Bundle → release**, vybrať pôvodný keystore a alias, nikdy nevytvárať nový.
+
+**Pred uploadom:** overiť najvyšší Play Console versionCode, že 434 je vyšší a nepoužitý; upload podpis/certifikát oproti Play App Integrity; fyzický in-place upgrade bez uninstall, login/recovery, oboch psíkov, rezervácie/taxi, serverové hlasovanie + počet kusov, klientský badge, natívny FCM token a reálne doručenie klikateľného push, App Links a E-shop. **CI AAB sa nesmie priamo nahrať, lebo neobsahuje súkromný Firebase súbor ani správny upload podpis.** `mobile/scripts/check-release.mjs` pre úplnú Play release bránu požaduje skutočné `CHVO_NATIVE_PUSH_VERIFIED=1` a `CHVO_APP_LINKS_VERIFIED=1`, nie predčasné formálne potvrdenia. Keystore/JSON/heslá sa nikdy nedávajú do GitHubu ani chatu.
+
+**Rollback:** bez Play publikácie vrátiť natívny kandidátsky zdroj na v431 `70b3f94326d2dfba53f331dce1a987b5a8f3886f`; pri už publikovanom Play oprava iba novým **vyšším versionCode**, nikdy downgrade. Produkčná zákaznícka PWA a admin sa tým nemenia.
+
+## Android v431 / 2.0.104 — pripravený zdroj na podpis (18. november 2026)
+
+**CI testuje iba debug APK a NEPODPÍSANÝ AAB. Nie je to publikované vydanie Google Play.**
+[Android PR](https://github.com/chvostikovopsiaskolka/chvostikovo/pulls) — izolovaná vetva `release/android-v431-auth-compact-play-candidate-20261118`.
+Vychádza z overeného natívneho kandidáta v430 `aac68023358542d0c0db67a828fbeac8b2ae4fd7`, plus iba zákaznícky v431 UI a priamo súvisiace testy. Výhradne vlastné `sk.chvostikovo.app`, nezmenené natívne FCM/App Links a Capacitor 8.5.3. `version.json` určuje Gradle `versionCode=431`, `versionName=2.0.104`. Pre v431: už sa nezobrazuje „Ako si nainštalovať aplikáciu?“ ani automatický install modal na login; „Zabudli ste heslo?“ je malé nad CTA, pôvodný auth handler a EN zachované. Zmeny v430 E-shop UTM a v428–v429 rezervácií zostávajú zabalené.
+
+**Windows / podpis – vždy čerstvý checkout; nespoliehať sa na CI AAB bez súkromného Firebase:**
+```powershell
+git clone --single-branch --branch release/android-v431-auth-compact-play-candidate-20261118 https://github.com/chvostikovopsiaskolka/chvostikovo.git chvo-android-v431
+# Skopíruj existujúci súkromný google-services.json na: chvo-android-v431/mobile/android/app/google-services.json
+cd chvo-android-v431/mobile
+npm.cmd ci
+npm.cmd run sync
+npm.cmd test
+npx.cmd cap open android
+```
+V Android Studio: Generate Signed Bundle → Android App Bundle → **pôvodný upload keystore / alias**. V Play Console najskôr overiť, že versionCode 431 je doposiaľ nepoužitý a vyšší než posledný už prijatý. Pred prípadným uploadom do Internal testing otestovať upgrade bez uninstall, sign in/recovery, 1–2 psy, rezervácie/taxi, natívny FCM token + doručenie, App Links a E-shop UTM na fyzickom zariadení. Pri nesplnených podmienkach podpis/Play blokovať; tajomstvá a súkromné Firebase nesprístupňovať. Po publikácii návrat vyžaduje vyšší versionCode, nie downgrade.
+
+## Android v426 / 2.0.99 — Google Play candidate (13 November 2026)
+
+**SOURCE REVIEW + unsigned CI build candidate; NOT YET a signed Google Play release.** Current approved and owner-observed iOS PWA `v426/2.0.99`, customer production SHA `a9b17d0670605037c84d702ff8955d3c0dddc460`, has been copied as exact Git blobs into this isolated native Android branch. Base is Android v425 candidate `9dcd2b752ba695fa285242bdd4306d38174f8b86`. The existing native code in `mobile/`, Firebase Capacitor bridge `ChvoNative`, existing backend/FCM dispatch, Google Play Core update prompt, Android manifest/App Links, approved applicationId `sk.chvostikovo.app`, icon and pinned dependencies remain unchanged. No web/admin/Supabase/Play Console release from this candidate.
+
+**Native push regression corrected in v426:** the customer app now calls `customerAttachNativePushV426` before init, binds the current signed-in user and session refresh, and routes BOTH notification settings controls through `ChvoNative.enablePush/togglePush/ensurePush` rather than the unavailable Android WebView `ServiceWorker/PushManager` API. On logout it unregisters the owner token; notification deep links are recipient scoped. Browser and iOS PWA Web Push remains unchanged. The deployed Supabase `customer-native-push` v4 is already available, but no registered Android devices were observed before release. End-to-end native FCM token registration and delivery **MUST be tested after a Firebase-configured, correctly signed install**; CI alone cannot prove it. Never claim "push fixed on Android" until a real token row and a delivered test notification have been observed.
+
+**Also included:** iOS viewport-fixed Menu wallpaper / dock UI fix v426 (Android dock behavior unchanged), old startup recovery and v424 RUM, and v425 locally packaged 37 KB genuine WebP photo from Zbierka. `mobile/scripts/build.mjs` still bundles this exact asset in `mobile/www`. Root version authority `version.json`: **v426 / 2.0.99** → Android Gradle **versionCode=426**, **versionName=2.0.99**; `mobile/package.json` and `mobile/package-lock.json` are synchronized. New `mobile/tests/native-customer-bridge-v426.test.mjs` guards the v426 native bridge and packaged exact source.
+
+**Source:** `release/android-v426-play-candidate-20261113`; rebuild in a NEW local Windows checkout rather than overwriting the older signed project. From root:
+```powershell
+git clone --single-branch --branch release/android-v426-play-candidate-20261113 https://github.com/chvostikovopsiaskolka/chvostikovo.git chvo-android-v426
+cd chvo-android-v426
+# Copy the PRIVATE, EXISTING google-services.json from prior locally working Android setup to:
+# mobile/android/app/google-services.json
+cd mobile
+npm.cmd ci
+npm.cmd run sync
+npm.cmd test
+npx.cmd cap open android
+```
+After Android Studio Gradle sync use Build → Generate Signed Bundle / APK → Android App Bundle; sign with the ORIGINAL owner upload key/certificate and compare real Play Console versionCode before uploading to INTERNAL testing. Confirm FCM permission, registered native token in backend, actual delivered notification/tap → correct recipient, real App Links, and in-place update of previous Play installation without uninstalling it. Never upload a CI-generated unsigned AAB or a bundle built without private Firebase config. CI debug APK and unsigned AAB are for build validation only; do not share keys or the private Firebase JSON.
+
+**Rollback:** before Google Play publication, switch native source back to prior candidate v425 `9dcd2b752ba695fa285242bdd4306d38174f8b86`; production customer PWA v426 and Supabase are entirely separate. After an actual Play publication, revert by releasing fixed code under a HIGHER Android versionCode (no downgrade).
+
+## Android v425 / 2.0.98 candidate (12 November 2026)
+
+**SOURCE + unsigned CI preview only. No Play upload and no signed AAB.** This isolated branch is based on the existing Android v419 implementation; it imports only current reviewed PWA v425 runtime assets and customer regression tests. Existing Capacitor 8.5.3 bridge, Google Play update dialog, Android applicationId `sk.chvostikovo.app`, App Links and FCM native code are unchanged. All post-v419 PWA fixes are present: startup recovery, EN/booking, v424 privacy-filtered startup RUM, and v425 real legacy Zbierka thumbnail. The 37 KB 512×640 WebP from `notice-previews/zbierka-v425.webp` is explicitly included in `mobile/www` and Android assets; otherwise it would be missing in offline WebView. Original Supabase PNG is never re-uploaded or altered.
+
+Root `version.json` is the versionCode/versionName authority: **425 / 2.0.98**. `mobile/package.json` and lockfile match. CI can run `npm ci`, `npm run sync`, `npm test`, customer regressions, `assembleDebug bundleRelease`, but the AAB is **UNSIGNED and built WITHOUT private `google-services.json`**. Do not sign or upload this prebuilt CI AAB as a Google Play release: it lacks the owner's native FCM configuration. User must locally check out this exact native branch, copy the existing local `mobile/android/app/google-services.json` into the fresh checkout **before** `npm.cmd run sync`, use the original Google Play upload keystore, and build a fresh signed `release` AAB in Android Studio. Preserve original cert/alias, verify Firebase package name, actual Play Console latest code, actual FCM delivery and verified App Links on a real Android. Publishing to Alpha/Play is a separate step; do not silently publish to all customers.
+
+**Windows sequence (new folder, never overwrite old project):** `git clone --single-branch --branch release/android-v425-play-candidate-20261112 https://github.com/chvostikovopsiaskolka/chvostikovo.git chvo-android-v425`; copy the existing Google services file to `chvo-android-v425/mobile/android/app/google-services.json`; in `chvo-android-v425/mobile`, run `npm.cmd ci`, `npm.cmd run sync`, `npm.cmd test`, `npx.cmd cap open android`; let Android Studio fully sync Gradle, then Build → Generate Signed Bundle / APK → Android App Bundle. Don't share credentials or private Firebase content in chat. Verify signature and installed update without uninstalling.
+
+Android rollback after Play publication uses **higher versionCode** with restored stable native content, not a downgrade; preserve previous v419 native source commit `20fa440578b30655cc46d4fb479a7fbe1ff09dd2`. Website customer v425 Git `76e3295a9d6c46685ffb9b9974d1a2555ae44d73` is deployed separately; this branch never changes web or DB.
+
+# Chvostíkovo Android — Capacitor preparation
+
+## Play update modal — Android v417 / 2.0.90 (9 November 2026)
+
+**Build preview — NOT signed or uploaded to Google Play.** This native-only release starts Google Play Core checks after cold launch and every return to foreground (coalesced/5-minute throttle). Only a Play-owned, eligible install for which Play Core reports a **higher versionCode** shows an accessible SK/EN modal offering `Aktualizovať v Google Play` and `Pripomenúť neskôr`. The CTA opens the existing Play listing via the Android ChvoUpdates plugin; defer applies for 24 hours per offered version. A newer subsequent version may prompt immediately. The modal waits if the user is typing or a customer modal is already open. No forced interruption, APK sideloading, remote code loading, or separate update backend.
+
+The Play SDK requirements: installed app must belong to Play user library, package/signature must match, tester must be eligible for the release (internal-testing channel included), and published versionCode must be higher. **A v417 build cannot show its own update prompt until v418 or higher becomes available to that tester.** An old build without this feature cannot be retroactively patched by a PWA/Vercel deployment. **Google Play automatic updates may already have installed the next version** before Play Core queries; in that case no modal should appear.
+
+The native branch intentionally has root v417/2.0.90 while customer PWA production stays v416/2.0.89, because its only extra code is the native update UI. Build the exact native PR candidate in a separate full local checkout, preserving all existing local work, and use the original owner keystore after verifying Play upload certificate, password and alias. Place your own `mobile/android/app/google-services.json` (never commit it); run `npm.cmd ci`, `npm.cmd run sync`, `npm.cmd test`, `npm.cmd run check:release` and Gradle `bundleRelease` after setting `CHVO_KEYSTORE_PATH`, `CHVO_KEYSTORE_PASSWORD`, `CHVO_KEY_ALIAS`, `CHVO_KEY_PASSWORD` and physically verifying native FCM/App Links. `check:release` intentionally blocks without verified Firebase/signing/native checks. A CI-built `app-release.aab` without the owner keystore is UNSIGNED and must not be uploaded as-is. Confirm Play Console's latest versionCode and matching upload key before publishing to internal testing. Never send or record passwords/JKS in chat, Git or CI logs.
+
+**Regression:** mobile update policy, modal DOM/accessibility/EN, native runtime packaging, customer PWA regressions and Android Gradle build. Real Play eligibility/checks require an actual signed Play-installed older version plus a newer internal-test release and tester account; GitHub Actions cannot verify that end-to-end. Previous candidate v416 remains available as rollback build, but Play cannot downgrade installed versionCode.
+
+---
+
+## Current Play preview – Android v412 / 2.0.85 (6 November 2026)
+
+This branch bundles the exact customer-portal-production source commit `8fb78ab13db9df0c6d9d37e09135f080201a008a`
+(v412/2.0.85), including SK/EN UI, hash-pinned English reading terms (v411)
+and v412 registration/notification styling changes. The Capacitor native runtime,
+Firebase package name `sk.chvostikovo.app`, App Links and icon are unchanged.
+
+The GitHub Actions workflow produces a **debug APK** for device preview
+and an **UNSIGNED AAB** for compilation checks. Neither artifact is signed with
+the owner's private upload key. Only the owner can sign the final AAB using a
+verified keystore/password on their Windows computer, after matching the
+certificate with the Play upload-key reset. Never commit a JKS or secrets.
+
+Preview: install the debug APK on a test device after checking any existing
+installation/signature conflict. Debug APK is not equivalent to a Play-signed
+update; uninstalling an existing app can remove local-only settings and caches.
+Before Play: verify current Console versionCode, real EN/SK flows, 1/2 dog
+bookings, push/FCM and Android App Links on a physical device.
+Production PWA and backend are unaffected by this Android-only candidate.
+
+---
+## Historical setup notes (original baseline)
+
+Status: **prepared for testing; not a signed Google Play release**. Source baseline:
+customer PWA candidate v394 / 2.0.69 (28 October 2026), based on
+production `3159725685584014b50b912e09995b2d68fcebfd`. Earlier v360/v361 APK/AAB files
+are obsolete. Every subsequent Android file must be rebuilt after shared changes.
+The production PWA and database are not changed by building this directory.
+
+## Shared source and repeatable builds
+
+Use Node 22+ and Java 21, Android SDK platform 36 / build tools 36.0.0.
+
+```sh
+cd mobile
+npm ci
+npm run sync
+npm test
+npm run android:debug
+```
+
+`scripts/build.mjs` copies an allowlist of current customer files from the repository
+root. It never copies admin, server code, backups, customer records or signing keys.
+`native-runtime.js` is added only to the mobile HTML. There is no `server.url`: UI
+code is bundled locally, while existing authenticated APIs still use Supabase.
+The PWA service worker and its release-marker reload are skipped only in native
+mode. The PWA continues to use its existing updater. Keep shared changes in the
+root source; never edit generated `www` or Android assets manually.
+
+Android `versionName` and `versionCode` are read directly from root `version.json`
+(v394 -> code 394, name 2.0.69). Use a newer shared build number for each Play
+upload. The build cleans old output, includes the optical engine's runtime assets
+and records shared plus packaged SHA-256 hashes and the Git source commit in
+`mobile-build.json`. Packaging tests verify source parity and vendor references.
+This does not publish or update an already-installed APK automatically: sync this
+branch with the current production source, test, rebuild and distribute each release.
+
+The GitHub Actions workflow produces a **debug APK** and an **unsigned AAB**.
+These are compile artifacts, not evidence of device testing or production readiness.
+Debug sideloading may show Android installation warnings. The intended customer
+distribution route is Google Play internal testing.
+
+## Windows / Android Studio — local build verified 28 October 2026
+
+**[TEST / device observation, not release approval]** On a Windows notebook,
+branch `feat/capacitor-android-v361` at `eb209bc`, the v392/2.0.67 native
+**debug APK** was built, found on disk, installed and opened on a physical
+Android phone. `assembleDebug` reported `BUILD SUCCESSFUL` (156 Gradle
+tasks in 4m35s). This is NOT a signed AAB, successful Google Play upload,
+confirmed FCM delivery or regression pass for all customer flows.
+
+### The actual failure chain and durable prevention
+
+- Android Studio first attempted **Gradle 8.14.3 with JDK 25**; change Gradle
+  JVM to **JDK 21**. A working local JBR 21 was under
+  `$env:USERPROFILE\.jdks\jbr-21.0.11`. PowerShell still required
+  `JAVA_HOME`; Android Studio's own JDK setting did not populate that shell.
+- `npx`/`node` were initially unavailable: install an appropriate Node.js
+  LTS and reopen the terminal/IDE. Tested: Node 24.22.1 / npm 11.19.1.
+  In PowerShell, `npm.cmd` / `npx.cmd` avoid script-execution policy issues.
+- `npm.cmd ci` installed 102 dependencies using the existing lockfile.
+  It also reported three *moderate* advisories, a `uuid` deprecation and an
+  `esbuild` install-scripts warning. These were not resolved/audited by the
+  successful debug build. **Do not run `npm audit fix --force`** as a shortcut;
+  review `npm audit` and build dependencies separately before release.
+- Initial Gradle sync lacked
+  `android/capacitor-cordova-android-plugins/cordova.variables.gradle`:
+  use Capacitor sync, do not create a dummy Gradle script.
+- Direct `cap sync android` failed because `www/index.html` was absent;
+  the canonical build is **`npm run sync`**, which runs the shared asset
+  builder, copies the approved icon, then synchronizes Capacitor.
+- The builder repeatedly failed on `vendor/liquidlens/liquid-glass.js`,
+  `vendor/simple-liquid-glass/webgl.js` and
+  `vendor/liquidlens/chvostikovo-paws.png`. Root cause was **Git sparse
+  checkout** allowing only `.github`, `docs`, `mobile`, `system`, `tests`
+  while omitting tracked `vendor` files. `git ls-files -v -- vendor/...`
+  showed **`S` (skip-worktree)**. After preserving local work and checking
+  Git status, `git sparse-checkout disable` restored the complete checkout.
+  The next build succeeded: **v392; 36 allowlisted shared files**.
+  Do not solve this by downloading missing assets one by one, by generating
+  replacement pictures, or by editing the allowlist to silently omit assets.
+  Sparse checkout may omit other required root files without an immediate
+  error; verify a complete source checkout before every reproducible release.
+
+### Repeatable local Windows path (do not deploy production)
+
+From the root of the Android-source Git checkout, first verify branch, commit,
+dirty state and source parity with the designated production PWA. **Do not
+discard local drafts, untracked files, `google-services.json` or signing
+materials**. A `.codex/visualizations` checkout is temporary; create a
+separate durable checkout before relying on it for future Play builds.
+
+```powershell
+git status --short
+git branch --show-current
+git rev-parse --short HEAD
+git sparse-checkout list
+git ls-files -v -- vendor/liquidlens/chvostikovo-paws.png
+# If vendor is skipped (S), review local changes/backups first:
+# git sparse-checkout disable
+cd mobile
+npm.cmd ci
+npm.cmd run sync
+npm.cmd test
+Test-Path .\www\index.html
+cd android
+$env:JAVA_HOME = "$env:USERPROFILE\.jdks\jbr-21.0.11"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+& "$env:JAVA_HOME\bin\java.exe" -version
+.\gradlew.bat assembleDebug
+Test-Path .\app\build\outputs\apk\debug\app-debug.apk
+```
+
+Required: **Java 21 / compatible Gradle JVM**, Android SDK Platform 36 and
+matching Build-Tools/Platform-Tools; correct existing Firebase
+`google-services.json` in `mobile/android/app` (gitignored). The actual
+test used `npm.cmd run build`, then `npm.cmd run sync`, then Gradle. The
+full `npm.cmd test` suite above is a **future requirement**, not a test
+claimed as completed during this manual session. The debug file is
+`mobile/android/app/build/outputs/apk/debug/app-debug.apk`.
+
+### Physical Android observations — OPEN (28 October 2026)
+
+**[USER-OBSERVED ON DEVICE; NOT FIXED/NOT VERIFIED RESOLVED]** The installed
+v392 debug APK opens, but the following must be reproduced, scoped and tested
+on physical devices before a Play release:
+
+1. Scrolling appears to stretch/overscroll text and allows motion past the
+   actual end of content when notices are below the fold. Inspect WebView
+   scrolling ownership, Android overscroll behavior and native/HTML heights
+   without breaking access to the last announcement or the fixed bottom nav.
+2. Device auto-rotate was enabled, but the app did not rotate to landscape.
+   Check manifest/activity configuration, WebView, device policy and actual
+   rotation behavior; do not assume the manifest is the only cause.
+3. Grey bands cover the top status area (clock/battery) and bottom Android
+   gesture/navigation area. Test edge-to-edge/window insets, SystemBars,
+   theme status/navigation bar colors, icon contrast and background on the
+   same phone. Do not hide OS controls or apply global Web CSS patches blindly.
+4. **Notifications toggle cannot be enabled.** Native runtime calls
+   `customer-native-push` to subscribe its owner-bound FCM token; on
+   28 October 2026 the deployed Supabase Edge Function listing did **not**
+   contain that slug. This is a deployment/configuration *blocker to
+   investigate*, not proof of the sole cause: also verify Firebase project,
+   Google Services package, permissions, registration callbacks, backend
+   secrets, RLS and actual registration/delivery. No production push/schema
+   rollout is implied by the APK build. Test only with a synthetic/authorized
+   device/account; never broadcast test notifications to customers.
+
+**Acceptance before internal Play testing:** no scroll overrun or viewport
+occlusion; portrait and intended landscape policy explicit; visible,
+high-contrast status/navigation controls; toggle can register/unregister
+only its own device; foreground/background FCM delivery, tapping the push,
+logout/account-switch and duplicate PWA/native subscriptions tested;
+authenticated reservation/pass/notice flows regression-tested. Confirm
+`mobile-build.json` source SHA and Android versionCode/versionName against
+the **current** customer production baseline. Verify signing, App Links and
+a signed AAB separately; a debug APK is never production readiness.
+
+**Rollback / scope:** this section records diagnostics and procedures only;
+it does not change deployed PWA, Android code, Supabase, Firebase or Google
+Play. Retain `eb209bc` and the original APK as build references; when
+repairing native code in the future, keep an isolated commit and revert only
+that change if new device regressions occur. No `git reset --hard`,
+`git clean` or forced push on the user's active checkout.
+
+## Native integrations
+
+- App ID: `sk.chvostikovo.app`; display name: `Chvostíkovo – psia škôlka`.
+- Existing maskable icon reused, no new logo. Android backups disabled.
+- System insets handled natively, keeping the existing viewport/nav layout.
+- System back calls the existing guarded close actions; at root it minimizes.
+- Resume uses the shared refresh-before-API path; pause closes Realtime and flushes
+  existing telemetry. No new polling loop.
+- Native notifications use FCM, explicit permission, owner-bound registration,
+  bounded/coalesced synchronization, unsubscribe on logout, and a notification channel.
+- App Links accept only exact HTTPS customer callback paths. Tokens are never put
+  in logs or persisted in callback markers; a SHA-256 marker prevents launch loops.
+- Google Play checks are throttled to five minutes on foreground entry. A notice
+  in Menu opens the app's Google Play update page. Sideloaded debug builds may have
+  no Play update status. This does not force every user to update immediately.
+- Existing JavaScript/request telemetry is retained. Native JVM crashes/ANRs are
+  **not** covered by the browser SDK and still require native monitoring setup.
+
+## Firebase — required before customer distribution
+
+1. In a Firebase project owned by the operator, register Android app
+   `sk.chvostikovo.app`. Download `google-services.json` and place it at
+   `mobile/android/app/google-services.json` (gitignored).
+2. Enable FCM HTTP v1. Create/configure an appropriately scoped service account for
+   sending messages. Store its JSON **only as a Supabase Edge secret** named
+   `FIREBASE_SERVICE_ACCOUNT_JSON`. Never place it in the app, git, chat or Actions logs.
+3. Review and apply `backend/native-push.sql` once. It creates an RLS-enabled,
+   service-only token table, with no anon/authenticated table grants.
+4. Deploy `backend/customer-native-push.ts` as `customer-native-push` with companions
+   `security-v336.ts` and `fcm.ts`; it explicitly validates the Supabase user and
+   existing blocked-account/rate-limit rules. Gateway `verify_jwt=false` is required
+   with the current publishable-key setup; authorization remains enforced in code.
+5. Fetch the **current LIVE** `admin-push` entrypoint and its companion files. Run
+   `node scripts/prepare-push-dispatch.mjs LIVE-index.ts CANDIDATE-index.ts`, review
+   the isolated diff, add `native-dispatch.ts` and `fcm.ts`, then deploy with the
+   usual source/hash backup guard. Existing web push is preserved. Without Firebase
+   configuration this added dispatch returns without new database requests.
+6. Test permission deny/grant, background delivery, token refresh, logout and account
+   switch on physical Android with a synthetic test account. Do not send test pushes
+   to ordinary customers. Watch for duplicate reminders if both PWA and native push
+   remain enabled on the same phone; turning off the old PWA subscription is a
+   separate user-controlled migration step.
+
+Backend files in this directory are **not applied or deployed automatically**.
+No Firebase project/service-account configuration was available in this session.
+
+## Verified e-mail links
+
+The manifest accepts `https://app.chvostikovo.sk/`, `/index.html` and
+`/email-confirmed.html`. After Play App Signing is configured, take the **app signing
+certificate SHA-256 fingerprint** from Play Console (not only the upload certificate).
+
+```sh
+node scripts/assetlinks.mjs AA:BB:... # supply the actual complete fingerprint
+```
+
+Publish the generated JSON as `https://app.chvostikovo.sk/.well-known/assetlinks.json`,
+with HTTP 200, application/json and no redirects. Include any separately used test
+signing certificate only if desired. Confirm Android domain verification and test
+the complete Supabase confirmation/recovery e-mail flow on device. Existing Auth
+redirects use the existing customer HTTPS origin; do not change unrelated redirects.
+A browser-originated redirect does not guarantee automatic handoff on every browser;
+physical testing remains required. Without installed app/verified association the
+web fallback remains available.
+
+## Signed Google Play release
+
+Keep the upload keystore outside the repository and back it up. Set these variables
+in the build environment, never in committed Gradle files:
+
+- `CHVO_KEYSTORE_PATH`, `CHVO_KEYSTORE_PASSWORD`, `CHVO_KEY_ALIAS`, `CHVO_KEY_PASSWORD`
+- `CHVO_NATIVE_PUSH_VERIFIED=1` and `CHVO_APP_LINKS_VERIFIED=1` **only after actual tests**
+
+Then `npm run android:bundle`. The preflight deliberately blocks an unconfigured
+release. The shared build number must increase for each Play upload; Android reads
+it directly as `versionCode`. Current candidate uses code 394 and versionName 2.0.69.
+
+Upload the signed AAB to Google Play internal testing, add testers' Play Google
+accounts and share the opt-in link. They sign in with existing Chvostíkovo credentials;
+Google Play account and Chvostíkovo e-mail need not match. Internal testing is limited
+to 100 testers; it remains a testing distribution channel.
+
+## Rollback
+
+No production change is needed to remove this preparation. Close the draft PR or
+revert only its commit; do not revert later unrelated PWA releases. If native backend
+is subsequently activated, preserve token-table audit/privacy requirements and
+disable native delivery using server configuration; do not restore an old full
+admin-push over newer fixes. Never reset booking, pass, attendance or payment data.
+
+## Mobile refinement v393 — 28 October 2026
+
+- Shared v393 login/registration, loader, selected-day priority and real-visit week selection.
+- Android portrait policy in the manifest; existing Capacitor native system/IME insets retained.
+- WebView overscroll stretch disabled without disabling normal content scrolling or touch handlers.
+- Explicit white window/system background and dark icons; Android 10+ contrast scrims disabled.
+  Android 7 retains a dark navigation strip because that OS cannot display dark navigation icons.
+  The previous DayNight window background was used by Capacitor SystemBars for native inset areas.
+- Smaller system splash uses the approved existing artwork. No artificial loading delay.
+- FCM carries the existing account-scoped message/article URL and notification tag. Native taps use
+  the existing shared recipient/conversation/onboarding guards; arbitrary URL navigation is rejected.
+- Windows tests use fileURLToPath and isolate the missing-configuration preflight from local Firebase files.
+
+Verification: native runtime/backend/policy/package/dispatch tests and isolated PostgreSQL schema checks;
+JDK 21 / SDK 36 debug compilation. No Android device was connected to adb. System-bar appearance,
+keyboard gestures, background/terminated delivery and App Links require a physical test. The server
+FCM secret is being supplied by the operator; missing backend activation is tracked in the release
+wiki. This is a debug candidate, not a Play publication or proof of delivered notifications.
+
+Rollback: retain the previous v392 APK and its source branch. Reinstalling older debug code may need
+an Android-approved version downgrade; do not uninstall or clear customer data as a routine rollback.
+PWA rollback is separate. Native push server rollout must preserve existing web push and token privacy.
+
+### Backend activation — 28 October 2026
+
+Deployed `native_push_devices_v393` (additive, service-only/RLS), `customer-native-push` v1,
+and `admin-push` v42. Deployed files read back identical; missing/invalid bearer both return 401;
+no synthetic device remains (count 0). Firebase server secret is still to be supplied by the operator.
+Full assembled webhook tests preserve web delivery/copy/targets and skip native lookup without FCM.
+
+Fresh LIVE `admin-push` v41 backup: `supabase/backups/admin-push-before-native-v393.ts`,
+SHA256 `521f6d8a3d60e5f103c0f7e9c3bbd977b335331761960ba32e7955ba43196829`, with companion security backup.
+Rollback native dispatch by deploying those exact v41 sources only if v42 has not received newer
+changes. Preserve the device table and existing web subscriptions. Never put tokens or Firebase
+service-account contents into Git. Sending/receiving is unverified until a synthetic device account
+can register with the configured secret and foreground/background/terminated scenarios are observed.
