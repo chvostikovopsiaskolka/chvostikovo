@@ -624,10 +624,35 @@ if (!bellaris && brandPreviewCandidate) {
                 if (!await trigger.isVisible()) throw new Error('Preview must make the Aria portrait a real chat control');
                 const triggerBox = await trigger.boundingBox();
                 const dockBox = await aria.locator('[data-aria-dock]').boundingBox();
-                if (!triggerBox || !dockBox || triggerBox.y + triggerBox.height > dockBox.y - 4 ||
-                    triggerBox.x + triggerBox.width > width + 4 ||
-                    Math.abs((dockBox.x + dockBox.width / 2) - width / 2) > 12)
-                  throw new Error('Aria portrait must float above the centered dock at ' + width);
+                // APP-01: preview must mirror the approved left-side assistant,
+                // not stack an oversized portrait above a full-width navigation.
+                if (!triggerBox || !dockBox || triggerBox.y >= dockBox.y ||
+                    triggerBox.y + triggerBox.height < dockBox.y + 12 ||
+                    triggerBox.x < dockBox.x + dockBox.width - 14 ||
+                    triggerBox.x + triggerBox.width > width + 2 ||
+                    dockBox.x + dockBox.width > width - 24 ||
+                    speechBox.x + speechBox.width >= triggerBox.x + triggerBox.width / 2)
+                  throw new Error('Preview Aria portrait must attach beside a right-gutter floating dock at ' + width);
+                if (!((await pathElement.getAttribute('transform')) || '').includes('scale(-1 1)'))
+                  throw new Error('Preview speech must mirror the proven left-side SVG path at ' + width);
+                const floating = await aria.evaluate(async guide => {
+                  const dock = guide.querySelector('[data-aria-dock]');
+                  const before = dock.getBoundingClientRect();
+                  const initialY = window.scrollY;
+                  window.scrollTo(0, Math.min(700, document.documentElement.scrollHeight - window.innerHeight));
+                  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                  const after = dock.getBoundingClientRect();
+                  window.scrollTo(0, initialY);
+                  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                  return {
+                    position: getComputedStyle(guide).position,
+                    drift: Math.abs(after.y - before.y),
+                    bottomGap: window.innerHeight - before.bottom,
+                  };
+                });
+                if (floating.position !== 'fixed' || floating.drift > 3 ||
+                    floating.bottomGap < 10 || floating.bottomGap > 60)
+                  throw new Error('Aria menu must float near the mobile safe area while scrolling at ' + width + ': ' + JSON.stringify(floating));
                 if (await trigger.evaluate(el => getComputedStyle(el).webkitTapHighlightColor !== 'rgba(0, 0, 0, 0)'))
                   throw new Error('Aria portrait must suppress the iOS tap highlight square');
                 if (width === 390) {
