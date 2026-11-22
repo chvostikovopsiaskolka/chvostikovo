@@ -274,21 +274,30 @@ export function AriaPreviewPage() {
                   ))}
                 </div>
               </div>
-              <p className="mx-auto max-w-[680px] text-center text-sm leading-relaxed text-forest/75 sm:text-base">
-                Aj my sme <strong className="font-bold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov <strong className="font-bold text-forest">spoznávame, rešpektujeme ich potreby</strong> a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
-              </p>
+              {isLiveLead ? (
+                <div className="mx-auto max-w-[680px] space-y-4 text-center text-[15px] leading-[1.7] text-forest/80 sm:text-base">
+                  <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
+                  <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
+                  <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
+                  <p>Chvostíkovo nie je len miesto na stráženie psov. <strong className="font-extrabold text-forest">Je to druhý domov</strong>, kde sa o každého člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim vlastným psom.</p>
+                </div>
+              ) : (
+                <p className="mx-auto max-w-[680px] text-center text-sm leading-relaxed text-forest/75 sm:text-base">
+                  Aj my sme <strong className="font-bold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov <strong className="font-bold text-forest">spoznávame, rešpektujeme ich potreby</strong> a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
+                </p>
+              )}
             </div>
           </div>
         </section>
 
-        <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
+        {!isLiveLead && <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
           <div className="mx-auto max-w-4xl px-4">
             <h2 className="section-title text-center text-lg sm:text-xl">Viac o nás a našej škôlke</h2>
             <div className="mx-auto mt-5 max-w-3xl space-y-4 text-center text-sm leading-relaxed text-forest/80 sm:text-base">
               {ABOUT_MORE.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>
           </div>
-        </section>
+        </section>}
 
         <section id="aria-early-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/30 pb-5 pt-8 sm:pb-7 sm:pt-10">
           <SectionAmbientPaws />
