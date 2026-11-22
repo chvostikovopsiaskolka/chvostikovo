@@ -149,26 +149,44 @@ export function AriaPreviewPage() {
 
   return (
     <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose">
+      {!isLiveLead && (
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
+      )}
 
       <main>
-        <section className="hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8">
+        <section className={isLiveLead ? "hero-safe-top relative flex flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
           <PawTrailBackground landingBottomPaws />
 
           {/* Balance the first fold around the whole content group; Aria owns
               the lower viewport and must never cover the reviews. */}
-          <div aria-hidden="true" data-aria-intro-top-space className={isLiveLead ? "min-h-[clamp(20px,5svh,54px)] flex-[0.85] sm:min-h-14 lg:min-h-3 lg:flex-[0.35]" : "min-h-2 flex-[0.2] sm:min-h-5 lg:min-h-3 lg:flex-[0.2]"} />
+          <div aria-hidden="true" data-aria-intro-top-space className={isLiveLead ? "h-0" : "min-h-2 flex-[0.2] sm:min-h-5 lg:min-h-3 lg:flex-[0.2]"} />
           <div data-aria-hero-content className="relative z-10 w-full shrink-0">
             <div className="mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7">
             <div className="w-full min-w-0 text-center">
               {/* Preserve the approved H1 position while moving the schoolmates onto the orange label. */}
               <div aria-hidden="true" data-aria-hero-heading-spacer className="h-[14px] sm:h-5" />
-              <h1 className={(isLiveLead ? "mt-7 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>
+              <h1 className={(isLiveLead ? "mt-3 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>
                 Miesto, ktoré si váš
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
 
-              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-[80px] w-fit max-w-full sm:mt-[88px] lg:mt-[124px]" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
+              {isLiveLead && (
+          {{/* The two owner photos sit directly under the lead headline. */}}
+          <div data-aria-intro-space className="relative z-10 mx-auto mt-5 w-full max-w-3xl px-0 sm:mt-7 lg:max-w-4xl">
+            <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:gap-4">
+              {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
+                <button type="button" key={photo.src} data-aria-review-photo={index + 1}
+                  aria-label={`Zobraziť fotografiu: ${photo.alt}`}
+                  onClick={() => setReviewPhotoOpen(index)}
+                  className="group relative aspect-[4/5] max-h-[260px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral sm:aspect-[3/4] lg:max-h-[340px]">
+                  <img src={photo.src} alt={photo.alt} width={672} height={896} loading="lazy" decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+                </button>
+              ))}
+            </div>
+          </div>
+              )}
+              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-[86px] w-fit max-w-full sm:mt-[96px] lg:mt-[124px]" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
                 {/* The existing four schoolmates now rest on the orange label, not above the H1. */}
                 <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
                   <SchoolmatesFormCrown compact desktopWide />
@@ -187,6 +205,7 @@ export function AriaPreviewPage() {
               <Reviews variant="hero" />
             </div>
           </div>
+          {!isLiveLead && (
           {/* Fill the former empty Aria breathing room with two real photos from
               the moving gallery. Keep the enquiry below the initial viewport,
               while leaving Aria fixed above the bottom dock. Desktop now also shows the photos. */}
@@ -203,6 +222,12 @@ export function AriaPreviewPage() {
               ))}
             </div>
           </div>
+          )}
+          {isLiveLead && (
+            <div data-aria-hero-menu className="relative z-20 mx-auto mt-5 w-full max-w-[690px] pb-3 sm:mt-7 sm:pb-5">
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
+            </div>
+          )}
         </section>
 
         <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
