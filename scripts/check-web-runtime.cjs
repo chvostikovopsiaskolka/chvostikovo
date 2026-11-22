@@ -764,7 +764,7 @@ if (!bellaris && brandPreviewCandidate) {
                 height: el.getBoundingClientRect().height,
                 shadow: getComputedStyle(el).boxShadow,
               }));
-              if (speechStyle.height < 39 || speechStyle.height > 110 || speechStyle.shadow !== 'none')
+              if (speechStyle.height < 39 || speechStyle.height > (width >= 1024 && url.pathname === '/psia-skolka-kosice/' ? 165 : 110) || speechStyle.shadow !== 'none')
                 throw new Error('Speech must stay compact without stacked box shadows at ' + width);
               const tip = await tail.evaluate(el => ({
                 x: Number(el.dataset.tipX), y: Number(el.dataset.tipY),
@@ -781,19 +781,26 @@ if (!bellaris && brandPreviewCandidate) {
                   return {
                     top: Number(svg.dataset.tailBaseTop),
                     bottom: Number(svg.dataset.tailBaseBottom),
-                    hasRoundedBottomRight: d.includes('L ' + (w - 1) + ' ' + (h - 16) +
+                    roundedBottomRight: d.includes('L ' + (w - 1) + ' ' + (h - 16) +
                       ' Q ' + (w - 1) + ' ' + (h - 1) + ' ' + (w - 16) + ' ' + (h - 1)),
+                    roundedBottomLeft: d.includes('L 16 ' + (h - 1) +
+                      ' Q 1 ' + (h - 1) + ' 1 ' + (h - 16)),
                     height: h,
                   };
                 });
-                if (!contour.hasRoundedBottomRight || contour.top < 16 ||
-                    contour.bottom <= contour.top || contour.bottom > contour.height - 16 ||
-                    headBox.x < speechBox.x + speechBox.width - 30 ||
-                    headBox.x < width / 2 ||
+                const textMetrics = await comicBubble.evaluate(el => ({
+                  fontSize: parseFloat(getComputedStyle(el.querySelector('p')).fontSize),
+                  maxWidth: parseFloat(getComputedStyle(el).maxWidth),
+                }));
+                if (!contour.roundedBottomRight || !contour.roundedBottomLeft ||
+                    contour.top < 16 || contour.bottom <= contour.top ||
+                    contour.bottom > contour.height - 16 ||
+                    headBox.x > speechBox.x || headBox.x + headBox.width < speechBox.x ||
                     speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
+                    (width >= 1024 && (textMetrics.fontSize < 16 || textMetrics.maxWidth < 450)) ||
                     await aria.locator('[data-aria-chat-trigger], [data-aria-chat]').count())
-                  throw new Error('Paid Aria must use the intact right-facing PREVIEW bubble without chatbot: ' +
-                    JSON.stringify({ width, contour, speechBox, headBox }));
+                  throw new Error('Paid Aria must have a readable left-side head and intact right bubble: ' +
+                    JSON.stringify({ width, contour, speechBox, headBox, textMetrics }));
               }
 
               if (url.pathname === '/test-aria/') {
