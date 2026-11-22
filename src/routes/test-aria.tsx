@@ -154,7 +154,7 @@ export function AriaPreviewPage() {
       )}
 
       <main>
-        <section className={isLiveLead ? "hero-safe-top relative flex flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
+        <section className={isLiveLead ? "hero-safe-top relative flex flex-col pt-14 sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
           <PawTrailBackground landingBottomPaws />
 
           {/* Balance the first fold around the whole content group; Aria owns
