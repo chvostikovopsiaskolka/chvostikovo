@@ -1,5 +1,5 @@
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, UsersRound, X, ArrowRight } from "lucide-react";
+import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 // Split the preview-only chat from the paid lead bundle and preserve state after first open.
 const AriaGuidedChat = lazy(() => import("./AriaGuidedChat").then((module) => ({ default: module.AriaGuidedChat })));
@@ -550,7 +550,7 @@ export function AriaLeadAssistant({
             {sectionNavigation ? (
               <>
                 <button type="button" className={itemClass} aria-label="O nás" onClick={() => goToLeadSection("aria-about", "about")}>
-                  <UsersRound size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">O nás</span>
+                  <span aria-hidden="true" className="text-[20px] leading-none">👥</span><span className="text-[9px] font-semibold sm:text-xs">O nás</span>
                 </button>
                 <button type="button" className={itemClass} aria-label="Cenník škôlky" onClick={() => goToLeadSection("lead-pricing", "pricing")}>
                   <Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span>
