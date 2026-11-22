@@ -33,6 +33,7 @@ export function ShortForm({
   trackingSource,
   hideInterest = false,
   showChatDogFields = false,
+  showQuestionField = false,
   puppyCheck,
   interestValue = "Informačný formulár – záujem o psiu škôlku",
 }: {
@@ -40,6 +41,7 @@ export function ShortForm({
   trackingSource?: string;
   hideInterest?: boolean;
   showChatDogFields?: boolean;
+  showQuestionField?: boolean;
   puppyCheck?: PuppyCheckInput;
   interestValue?: string;
 }) {
@@ -85,6 +87,7 @@ export function ShortForm({
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: submittedPhone,
         email: String(fd.get("email") ?? "").trim() || undefined,
+        ...(showQuestionField ? { otazka: String(fd.get("otazka") ?? "").trim() } : {}),
         zaujem: hideInterest ? interestValue + (dogName && !puppyCheck ? " – Meno psíka: " + dogName : "") : String(fd.get("zaujem") ?? ""),
         ...(breed ? { plemeno: breed } : {}),
         ...(puppyCheck ? { puppy_check: { ...puppyCheck, ...(dogName ? { dog_name: dogName } : {}), ...(breed ? { dog_breed: breed } : {}) } } : {}),
@@ -99,7 +102,7 @@ export function ShortForm({
           landingPage: attribution.landing_page,
           ...(trackingSource ? { ctaSource: trackingSource } : {}),
         });
-        trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
+        if (!showQuestionField) trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
       });
       progress.markSuccess();
       setReceipt({ phone: submittedPhone, auth: submission.phoneCorrection });
@@ -120,12 +123,12 @@ export function ShortForm({
         <div className="flex size-14 items-center justify-center rounded-full bg-secondary text-forest">
           <Check className="size-7" />
         </div>
-        <h3 className="text-xl text-forest">Ďakujeme za váš záujem.</h3>
+        <h3 className="text-xl text-forest">{showQuestionField ? "Ďakujeme za otázku." : "Ďakujeme za váš záujem."}</h3>
         <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu.
+          {showQuestionField ? "Otázku sme prijali. Ozveme sa vám na uvedený kontakt, keď to bude možné." : "Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu."}
         </p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
-        {isTrackedLanding && !showChatDogFields && (
+        {isTrackedLanding && !showChatDogFields && !showQuestionField && (
           <div className="mt-2 w-full max-w-sm rounded-2xl bg-secondary/55 p-4">
             <p className="text-sm leading-relaxed text-forest/75">
               Kým sa vám ozveme, môžete si pozrieť podmienky prijatia psíka alebo náš cenník.
@@ -176,9 +179,9 @@ export function ShortForm({
       )}
       <PhoneField id={`s-${formId}-tel`} name="telefon" />
       <div>
-        <label className="label-sm" htmlFor={`s-${formId}-email`}>E-mail (nepovinné)</label>
-        <input id={`s-${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} className="field" placeholder="vas@email.sk" />
-        <p className="mt-1 text-xs text-forest/65">Pre prípad, že sa vám nebudeme vedieť dovolať.</p>
+        <label className="label-sm" htmlFor={`s-${formId}-email`}>{showQuestionField ? "E-mail *" : "E-mail (nepovinné)"}</label>
+        <input id={`s-${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} className="field" placeholder="vas@email.sk" required={showQuestionField} />
+        <p className="mt-1 text-xs text-forest/65">{showQuestionField ? "Na tento e-mail vám odpovieme." : "Pre prípad, že sa vám nebudeme vedieť dovolať."}</p>
       </div>
       {!hideInterest && (
         <fieldset className="min-w-0">
@@ -201,6 +204,14 @@ export function ShortForm({
           </div>
         </fieldset>
       )}
+      {showQuestionField && (
+        <div data-aria-other-question-field>
+          <label className="label-sm" htmlFor={`s-${formId}-otazka`}>Vaša otázka *</label>
+          <textarea id={`s-${formId}-otazka`} name="otazka" rows={4}
+            minLength={5} maxLength={600} required
+            className="field w-full resize-y" placeholder="Napíšte nám, čo vás zaujíma…" />
+        </div>
+      )}
       <PrivacyConsentCheckbox />
       {error && <p className="text-sm text-destructive">{error}</p>}
       <button
@@ -208,7 +219,7 @@ export function ShortForm({
         disabled={loading}
         className="btn-coral w-full px-4 py-2.5 text-sm disabled:opacity-60"
       >
-        {loading ? "Odosielam…" : showChatDogFields ? "Odoslať záujem" : "Chcem sa informovať"}
+        {loading ? "Odosielam…" : showQuestionField ? "Odoslať otázku" : showChatDogFields ? "Odoslať záujem" : "Chcem sa informovať"}
       </button>
     </form>
   );
