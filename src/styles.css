@@ -1125,9 +1125,9 @@
   color: #fff;
 }
 .lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
-  box-shadow: 0 12px 30px -10px rgb(38 50 43 / 25%),
-              0 20px 38px -18px rgb(38 50 43 / 22%),
-              0 0 0 1px rgb(38 50 43 / 10%);
+  box-shadow: 0 14px 34px -10px rgb(38 50 43 / 28%),
+              0 22px 42px -18px rgb(38 50 43 / 26%),
+              0 0 0 1px rgb(38 50 43 / 16%);
 }
 
 /* Paid lead liquid only: dark copy, orange drifting highlights, reduced-motion safe. */
@@ -1199,7 +1199,9 @@
     -webkit-line-clamp: 2;
   }
   .lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
-    box-shadow: 0 12px 30px -10px rgb(38 50 43 / 25%), 0 20px 38px -18px rgb(38 50 43 / 22%), 0 0 0 1px rgb(38 50 43 / 10%);
+    box-shadow: 0 14px 34px -10px rgb(38 50 43 / 28%),
+              0 22px 42px -18px rgb(38 50 43 / 26%),
+              0 0 0 1px rgb(38 50 43 / 16%);
   }
   .lead-brand-live #recenzie [data-gesture-track="reviews"] figure button { font-size: 12px; line-height: 1.4; }
   /* Readable mobile editorial copy: target three natural lines at typical iPhone
