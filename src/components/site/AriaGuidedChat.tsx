@@ -5,10 +5,12 @@ import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 import { EMAIL, FAQ, PRICING } from "@/content/site";
 import { ShortForm } from "./Forms";
+import { AriaPuppyChecker } from "./AriaPuppyChecker";
+import type { PuppyCheckInput } from "@/lib/inquiry";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
-type ChatMode = "questions" | "interest" | "other";
+type ChatMode = "questions" | "interest" | "other" | "puppy" | "puppy_contact";
 type ChatMessage = { id: number; side: "person" | "aria"; text: string };
 type Question = { id: string; title: string; answer: string };
 
@@ -16,7 +18,6 @@ const findAnswer = (question: string) => FAQ.find((item) => item.q === question)
 const priceOne = PRICING.find((item) => !item.highlight)?.price || "25 €";
 const pricePass = PRICING.find((item) => item.highlight)?.price || "200 €";
 const firstVisit = findAnswer("Ako prebieha prvá návšteva psíka v škôlke?").split(/\n+/)[0];
-const safety = findAnswer("Ako zabezpečujete bezpečnosť psíkov v škôlke?").split(/\n+/);
 const chatQuestions: Question[] = [
   {
     id: "pricing",
@@ -31,17 +32,6 @@ const chatQuestions: Question[] = [
     title: "Aké sú podmienky prijatia?",
     answer: DAYCARE_ELIGIBILITY_ANSWER +
       "\nKaždý nový psík absolvuje aj bezplatnú úvodnú návštevu. Vhodnosť do kolektívu posudzujeme individuálne.",
-  },
-  {
-    id: "safety",
-    title: "Ako zabezpečujete bezpečnosť?",
-    answer: (safety[0] || "Bezpečnosť začína vstupnou návštevou.") +
-      "\nPočas pobytu psíkov neustále sledujeme, striedame pohyb s oddychom a aktivity prispôsobujeme ich potrebám.",
-  },
-  {
-    id: "supervision",
-    title: "Bude môj psík niekedy sám?",
-    answer: findAnswer("Bude môj psík počas dňa niekedy sám bez dozoru?"),
   },
   {
     id: "first_visit",
@@ -99,6 +89,8 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
   }, [open]);
 
   const [otherQuestion, setOtherQuestion] = useState("");
+  const [puppyCheck, setPuppyCheck] = useState<PuppyCheckInput | null>(null);
+  const [puppyContactIsEligible, setPuppyContactIsEligible] = useState(false);
   const [engaged, setEngaged] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const actionRef = useRef<HTMLButtonElement>(null);
@@ -179,6 +171,27 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
       { id: id + 1, side: "aria", text: "To ma teší! 🐾 Nechaj nám kontakt a paniček sa ti ozve. Plemeno a meno psíka môžeš doplniť nepovinne." },
     ]);
     setMode("interest");
+  }
+
+  function showPuppy() {
+    track("puppy_check_open");
+    setEngaged(true);
+    setShowChoices(false);
+    setMode("puppy");
+    setPuppyCheck(null);
+    const id = nextId.current;
+    nextId.current += 2;
+    setMessages(current => [...current,
+      { id, side: "person", text: "Mám šteniatko. Spĺňa podmienky škôlky?" },
+      { id: id + 1, side: "aria", text: "Pozrieme sa na vek a tri povinné očkovania. Je to orientačná kontrola; konečné prijatie posúdime po úvodnej návšteve. 🐾" },
+    ]);
+  }
+
+  function finishPuppyCheck(details: PuppyCheckInput, eligible: boolean) {
+    track(eligible ? "puppy_precheck_passed" : "puppy_precheck_info");
+    setPuppyCheck(details);
+    setPuppyContactIsEligible(eligible);
+    setMode("puppy_contact");
   }
 
   function showOther() {
@@ -274,6 +287,10 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
                   </button>
                 ))}
               </div>
+              <button type="button" data-aria-chat-puppy-cta onClick={showPuppy}
+                className="mt-3 flex min-h-12 w-full items-center justify-center rounded-xl border border-[#9e336f]/25 bg-[#f9e5ee] px-3 py-2.5 text-center text-xs font-bold leading-snug text-[#873063]">
+                Máte šteniatko? Zistite, či spĺňa podmienky prijatia
+              </button>
               <div className="mt-3 flex flex-wrap gap-2">
                   <button type="button" onClick={showInterest} className="min-h-10 rounded-xl bg-[#9e336f] px-4 text-xs font-bold text-white">Mám záujem o škôlku</button>
                   <button type="button" onClick={showOther} className="min-h-10 rounded-xl border border-[#9e336f]/30 px-4 text-xs font-bold text-[#9e336f]">Iná otázka</button>
@@ -300,6 +317,10 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
               {unanswered.length > 0 && (
                 <button type="button" onClick={showOther} className="min-h-10 w-full rounded-xl border border-[#9e336f]/20 bg-white text-xs font-semibold text-[#9e336f]">Chcem sa spýtať niečo iné</button>
               )}
+              <button type="button" data-aria-chat-puppy-cta onClick={showPuppy}
+                className="min-h-11 w-full rounded-xl border border-[#9e336f]/25 bg-[#f9e5ee] px-3 text-xs font-bold text-[#873063]">
+                Máte šteniatko? Overiť prijatie
+              </button>
               <button type="button" onClick={finish} className="min-h-10 w-full rounded-xl border border-[#2d764b]/25 bg-[#edf3e9] text-xs font-bold text-[#26322b]">
                 Odpoveď mi stačí, ďakujem ✓
               </button>
@@ -311,6 +332,10 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
               <p className="text-xs font-semibold text-[#26322b]">Prešli sme všetky pripravené otázky. Chceš nám nechať kontakt?</p>
               <button type="button" onClick={showInterest} className="min-h-11 w-full rounded-xl bg-[#9e336f] text-xs font-bold text-white">Mám záujem</button>
               <button type="button" onClick={showOther} className="min-h-10 w-full rounded-xl border border-[#9e336f]/25 bg-white text-xs font-bold text-[#9e336f]">Iná otázka</button>
+              <button type="button" data-aria-chat-puppy-cta onClick={showPuppy}
+                className="min-h-11 w-full rounded-xl border border-[#9e336f]/25 bg-[#f9e5ee] px-3 text-xs font-bold text-[#873063]">
+                Máte šteniatko? Overiť prijatie
+              </button>
               <button type="button" onClick={finish} className="min-h-10 w-full rounded-xl bg-[#edf3e9] text-xs font-bold text-[#26322b]">Odpoveď mi stačí, ďakujem</button>
             </div>
           )}
@@ -318,6 +343,33 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
 
         {mode !== "questions" && (
           <div className="max-h-[61%] shrink-0 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/65 backdrop-blur-2xl p-3 sm:p-4">
+            {mode === "puppy" && (
+              <section data-aria-chat-puppy-check aria-label="Orientačná kontrola šteniatka" className="space-y-3">
+                <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
+                  <ArrowLeft size={15} aria-hidden /> Späť k otázkam
+                </button>
+                <AriaPuppyChecker embedded trackingSource="aria_preview_v3_chat_puppy"
+                  onInterest={details => finishPuppyCheck(details, true)}
+                  onInfo={details => finishPuppyCheck(details, false)} />
+              </section>
+            )}
+            {mode === "puppy_contact" && puppyCheck && (
+              <section data-aria-chat-puppy-contact aria-label="Kontakt po kontrole šteniatka" className="space-y-3">
+                <button type="button" onClick={() => setMode("puppy")} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
+                  <ArrowLeft size={15} aria-hidden /> Späť ku kontrole
+                </button>
+                <p role="status" className="rounded-2xl bg-white p-3 text-xs leading-relaxed text-[#26322b]">
+                  {puppyContactIsEligible
+                    ? "Vek a očkovania orientačne spĺňajú podmienky. Vyplňte kontakt a ozveme sa vám ohľadom bezplatnej úvodnej návštevy."
+                    : "Vaše šteniatko zatiaľ nespĺňa všetky orientačné podmienky alebo si nie ste istí očkovaním. Môžete nám nechať kontakt a individuálne sa poradíme."}
+                  <span className="mt-1 block">Vek: {puppyCheck.age_months} mesiacov · očkovania: besnota, DHPPi+L, kotercový kašeľ – {Object.values(puppyCheck.vaccines).every(value => value === "yes") ? "všetky potvrdené" : "nie všetky potvrdené"}.</span>
+                </p>
+                <ShortForm hideInterest showChatDogFields trackingSource="aria_preview_chat_puppy_contact"
+                  puppyCheck={puppyCheck}
+                  interestValue={puppyContactIsEligible ? "Mám záujem o škôlku pre šteniatko" : "Chcem sa informovať o škôlke"}
+                  onSent={() => track("puppy_contact_submitted")} />
+              </section>
+            )}
             {mode === "interest" && (
               <section aria-label="Nezáväzný záujem v chate" data-aria-chat-interest className="space-y-2">
                 <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
