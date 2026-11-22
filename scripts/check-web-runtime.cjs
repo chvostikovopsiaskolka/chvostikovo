@@ -482,6 +482,49 @@ if (!bellaris && brandPreviewCandidate) {
                   await nav.getByRole('button',{name:'O nás'}).locator('svg').count() !== 1)
                 throw new Error('Paid about navigation must lead to the owners photo with outline icon');
               await page.waitForTimeout(1000);
+              // APP-01: reproduce the exact screenshot scenario at the footer,
+              // after Aria changes from intro to contact. A valid SVG path alone
+              // does not prove the balloon does not cover the portrait.
+              await page.evaluate(() => {
+                document.documentElement.style.scrollBehavior = 'auto';
+                window.scrollTo(0, document.documentElement.scrollHeight);
+              });
+              await page.waitForFunction(() => document.querySelector('[data-aria-guide]')?.getAttribute('data-aria-stage') === 'contact', null, {timeout: 6000});
+              await page.waitForFunction(() => document.querySelector('[data-aria-speech]')?.getAttribute('data-aria-outline-ready') === 'true');
+              const footerBubble = await page.evaluate(() => {
+                const speech = document.querySelector('[data-aria-speech]');
+                const bubble = speech.getBoundingClientRect();
+                const head = document.querySelector('[data-aria-dock] img[alt^="Aria"]').getBoundingClientRect();
+                const dock = document.querySelector('[data-aria-dock]').getBoundingClientRect();
+                const tipX = Number(speech.querySelector('svg[data-aria-tail]')?.dataset.tipX);
+                return {
+                  headGap: bubble.left - head.right,
+                  dockGap: dock.top - bubble.bottom,
+                  width: bubble.width,
+                  right: bubble.right,
+                  viewport: window.innerWidth,
+                  tipX,
+                };
+              });
+              if (footerBubble.headGap < 8 || footerBubble.dockGap < 8 ||
+                  footerBubble.width < 455 || footerBubble.right > footerBubble.viewport - 8 ||
+                  footerBubble.tipX >= -8)
+                throw new Error('Paid desktop footer speech overlaps head or dock: '+JSON.stringify(footerBubble));
+              // Tablet formerly inherited only sm:pl-112px while its portrait
+              // was centered in a much narrower dock. Guard this breakpoint.
+              await page.setViewportSize({width:768, height:900});
+              await page.evaluate(() => window.scrollTo(0,0));
+              await page.waitForFunction(() => document.querySelector('[data-aria-guide]')?.getAttribute('data-aria-stage') === 'intro', null, {timeout:6000});
+              const tabletSpeech = await page.evaluate(() => {
+                const bubble = document.querySelector('[data-aria-speech]').getBoundingClientRect();
+                const head = document.querySelector('[data-aria-dock] img[alt^="Aria"]').getBoundingClientRect();
+                const dock = document.querySelector('[data-aria-dock]').getBoundingClientRect();
+                return {headGap: bubble.left-head.right, dockGap: dock.top-bubble.bottom,
+                  left:bubble.left, right:bubble.right,viewport:window.innerWidth};
+              });
+              if (tabletSpeech.headGap < 8 || tabletSpeech.dockGap < 8 ||
+                  tabletSpeech.left < 0 || tabletSpeech.right > tabletSpeech.viewport)
+                throw new Error('Paid tablet speech overlaps Aria head or dock: '+JSON.stringify(tabletSpeech));
             } else if (url.pathname === '/test-aria/') {
               // On the preview the dock is navigation, not three stacked
               // overlays. Each item must scroll to its real site section.
@@ -821,8 +864,11 @@ if (!bellaris && brandPreviewCandidate) {
                 if (!contour.roundedBottomRight || !contour.roundedBottomLeft ||
                     contour.top < 16 || contour.bottom <= contour.top ||
                     contour.bottom > contour.height - 16 ||
-                    headBox.x > speechBox.x || headBox.x + headBox.width < speechBox.x ||
+                    // A pointer landing on the head never guarantees the
+                    // rectangular speech body is outside the head image.
+                    speechBox.x < headBox.x + headBox.width + 8 ||
                     speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
+                    tip.x >= -8 ||
                     (width >= 1024 && (textMetrics.fontSize < 16 || textMetrics.maxWidth < 450)) ||
                     await aria.locator('[data-aria-chat-trigger], [data-aria-chat]').count())
                   throw new Error('Paid Aria must have a readable left-side head and intact right bubble: ' +
