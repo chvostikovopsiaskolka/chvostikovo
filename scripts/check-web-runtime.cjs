@@ -1942,6 +1942,19 @@ if (!bellaris && brandPreviewCandidate) {
               : (isAriaPage || isPuppyAria) ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })
               : page.locator('.mobile-dock .mobile-dock-apply').first();
             await entry.click();
+            if (url.pathname === '/psia-skolka-kosice/') {
+              // Approved paid-LEAD section navigation: the bottom interest button
+              // scrolls to the existing inline form, never opens an above-dock dialog.
+              const inline = page.locator('#aria-hero-form [data-lead-step-form]');
+              await inline.waitFor({ state: 'visible', timeout: 5000 });
+              await page.waitForFunction(() => {
+                const form = document.querySelector('#aria-hero-form')?.getBoundingClientRect();
+                return Boolean(form && form.top >= -8 && form.top <= window.innerHeight - 32);
+              }, null, {timeout: 4500});
+              if (await page.getByRole('dialog').count() !== 0 ||
+                  await page.locator('[data-aria-panel]').count() !== 0)
+                throw new Error('Paid LEAD interest shortcut must scroll to inline form without a modal');
+            } else {
             const modal = page.getByRole('dialog');
             await modal.waitFor({ state: 'visible' });
             if (!await modal.locator('[data-lead-step-form]').count())
@@ -1968,6 +1981,7 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Mobile FormDialog is not centered/scrollable: ' + JSON.stringify(modalFrame));
             await page.keyboard.press('Escape');
             await modal.waitFor({ state: 'hidden' });
+            }
 
             if (url.pathname === '/') {
               // This CTA says 'register', so it must open the full application,
