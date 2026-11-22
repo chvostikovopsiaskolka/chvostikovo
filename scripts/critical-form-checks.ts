@@ -59,9 +59,11 @@ const ariaQuestion = buildDbPayload(shortSchema.parse({
   typ: "informacie", consent: true, meno: "Test", telefon: phone,
   email: "test@example.com", zaujem: "Chcem sa informovať o škôlke",
   otazka: "Je škôlka vhodná pre bojazlivejšieho psíka?",
+  preferovany_kontakt: "email",
 }));
 assert(ariaQuestion.interest_reason === "Chcem sa informovať o škôlke" &&
-  ariaQuestion.raw_payload["Otázka návštevníka"] === "Je škôlka vhodná pre bojazlivejšieho psíka?",
+  ariaQuestion.raw_payload["Otázka návštevníka"] === "Je škôlka vhodná pre bojazlivejšieho psíka?" &&
+  ariaQuestion.raw_payload["Preferovaný kontakt"] === "E-mail",
   "A free-form question must be retained in existing lead raw_payload.");
 assert(!shortSchema.safeParse({
   typ: "informacie", consent: true, meno: "Test", telefon: phone,
@@ -76,6 +78,17 @@ assert(ariaBackend.includes("invalid_aria_question") &&
   ariaBackend.includes("Otázka návštevníka") &&
   ariaBackend.includes("lines.push(`Otázka návštevníka: ${question}`)"),
   "Aria question must be validated on the server and delivered in operator email.");
+assert(ariaBackend.includes("Preferovaný kontakt:") &&
+  ariaBackend.includes("email_required_for_contact_preference") &&
+  ariaBackend.includes("if (!ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100)))"),
+  "Aria contact must validate preferred reply method, include it in the operator mail, and skip SMS dispatch.");
+const smsException = readFileSync(new URL("../supabase/migrations/20261122_aria_contact_no_sms.sql", import.meta.url), "utf8");
+const smsRollback = readFileSync(new URL("../supabase/rollbacks/20261122_aria_contact_no_sms.sql", import.meta.url), "utf8");
+assert(smsException.includes("new.raw_payload->>'cta_source'") &&
+  smsException.includes("'aria_preview_chat_other','lead_landing_aria_chat_other'") &&
+  smsRollback.includes("INSERT INTO public.web_form_sms_outbox") &&
+  !smsRollback.includes("new.raw_payload->>'cta_source'"),
+  "Existing SMS outbox needs the narrow Aria-source guard and a compatible rollback.");
 
 // A plain question remains a contact, NOT a paid marketing conversion,
 // even if the visitor granted GA4/Meta measurement consent.
@@ -84,6 +97,11 @@ const ariaAnalyticsSource = readFileSync(new URL("../src/lib/analytics.ts", impo
 assert(ariaAnalyticsSource.includes('pushAnalyticsEvent("aria_question_submit"') &&
   ariaAnalyticsSource.includes('pushAnalyticsEvent("generate_lead"'),
   "Custom Aria contact event and primary GA4 interest event must both exist.");
+assert(ariaFormsSource.includes("data-aria-contact-wizard") &&
+  ariaFormsSource.includes("data-aria-contact-question-step") &&
+  ariaFormsSource.includes("data-aria-contact-details-step") &&
+  ariaFormsSource.includes("preferredContact"),
+  "Aria free-text contact must remain an explicit two-step question -> contact wizard.");
 assert(ariaFormsSource.includes('trackAriaQuestionSubmit(trackingSource') &&
   ariaFormsSource.includes('if (showQuestionField)') &&
   ariaFormsSource.includes('trackMetaFormConversion("informacie"'),
@@ -128,6 +146,9 @@ assert(ariaLandingTracking.includes('"lead_landing_first_visit_details"') &&
   ariaLandingTracking.includes('"lead_landing_first_visit_steps"'),
   "Campaign first-visit explanation and three-step shortcut must remain tracked");
 const guidedLeadTracking = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
+assert(!guidedLeadTracking.includes('onClick={() => void trackCookielessInteraction("success_conditions_click"') &&
+  !guidedLeadTracking.includes('onClick={() => void trackCookielessInteraction("success_pricing_click"'),
+  "Successful interest must show only the phone correction receipt.");
 const successBoundary = guidedLeadTracking.indexOf("const result = await submitInquiry(");
 const conversionBoundaries = [
   guidedLeadTracking.indexOf('trackCookielessInteraction("form_submit"'),

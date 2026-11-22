@@ -56,9 +56,6 @@ export function ShortForm({
   const formStarted = useRef(false);
   const progress = useFormProgress(trackingSource || "informational_form");
   const shouldTrackForm = Boolean(trackingSource);
-  const isTrackedLanding =
-    trackingSource?.startsWith("lead_landing_") === true ||
-    trackingSource?.startsWith("puppy_landing_") === true;
 
   function onFormChange() {
     if (!shouldTrackForm || formStarted.current) return;
@@ -153,29 +150,6 @@ export function ShortForm({
           {showQuestionField ? "Otázku sme prijali. Ozveme sa vám na uvedený kontakt, keď to bude možné." : "Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu."}
         </p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
-        {isTrackedLanding && !showChatDogFields && !showQuestionField && (
-          <div className="mt-2 w-full max-w-sm rounded-2xl bg-secondary/55 p-4">
-            <p className="text-sm leading-relaxed text-forest/75">
-              Kým sa vám ozveme, môžete si pozrieť podmienky prijatia psíka alebo náš cenník.
-            </p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-center">
-              <a
-                href="/#podmienky"
-                onClick={() => void trackCookielessInteraction("success_conditions_click", trackingSource || "lead_landing_form")}
-                className="rounded-xl border border-forest/15 bg-card px-3 py-2 text-sm font-bold text-forest transition hover:border-coral/40"
-              >
-                Pozrieť podmienky
-              </a>
-              <a
-                href="/#cennik"
-                onClick={() => void trackCookielessInteraction("success_pricing_click", trackingSource || "lead_landing_form")}
-                className="rounded-xl border border-forest/15 bg-card px-3 py-2 text-sm font-bold text-forest transition hover:border-coral/40"
-              >
-                Pozrieť cenník
-              </a>
-            </div>
-          </div>
-        )}
       </div>
     );
   }

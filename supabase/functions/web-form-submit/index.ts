@@ -537,13 +537,15 @@ Deno.serve(async (req: Request) => {
             ? (input.raw_payload as Record<string, unknown>)['Otázka návštevníka']
             : null;
         if (typeof rawQuestion !== 'string' || rawQuestion.trim().length < 5 ||
-            rawQuestion.trim().length > 600 || !leadEmail)
+            rawQuestion.trim().length > 600)
           return response(origin, 400, { ok: false, error: 'invalid_aria_question' });
         if (input.interest_reason !== 'Chcem sa informovať o škôlke')
           return response(origin, 400, { ok: false, error: 'invalid_interest' });
         const preferred = text((input.raw_payload as Record<string, unknown>)['Preferovaný kontakt'], 40);
         if (preferred && preferred !== 'Telefón' && preferred !== 'E-mail')
           return response(origin, 400, { ok: false, error: 'invalid_contact_preference' });
+        if (preferred === 'E-mail' && !leadEmail)
+          return response(origin, 400, { ok: false, error: 'email_required_for_contact_preference' });
       }
       const rawInterest = text(input.interest_reason ?? input.zaujem, 250);
       const enPrefix = 'EN – Dog daycare enquiry | ';
