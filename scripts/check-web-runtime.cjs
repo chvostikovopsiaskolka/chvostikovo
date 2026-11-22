@@ -559,8 +559,10 @@ if (!bellaris && brandPreviewCandidate) {
                     serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
                   descriptionGap: descriptionRect.top - badgeRect.bottom,
                   reviewGapAbove: reviewsRect.top - descriptionRect.bottom,
-                  focusedDescription: descriptionRect.width <= (window.innerWidth < 390 ? 322 :
-                    window.innerWidth < 640 ? 362 : 542) &&
+                  focusedDescription: descriptionRect.width <=
+                    (window.location.pathname === '/psia-skolka-kosice/'
+                      ? Math.min(window.innerWidth - 30, 402)
+                      : (window.innerWidth < 390 ? 322 : window.innerWidth < 640 ? 362 : 542)) &&
                     description.querySelectorAll('strong').length === 4 &&
                     [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700),
                   liquidFullDescription: getComputedStyle(description).backgroundImage.includes('radial-gradient') &&
