@@ -156,7 +156,7 @@ export function AriaPreviewPage() {
         onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)}
         onOpenPuppyChecker={() => setPuppyModalOpen(true)}
         puppyStartSectionId="aria-caretakers" guidedChatPreview portraitOnRight={isLiveLead}
-        anchorOverrides={isLiveLead ? { "aria-about": "aria-caretakers" } : undefined}
+        {...(isLiveLead ? { anchorOverrides: { "aria-about": "aria-caretakers" } } : {})}
         hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
