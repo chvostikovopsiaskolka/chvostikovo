@@ -224,7 +224,8 @@ export function AriaGuidedChat({ open, onClose }: { open: boolean; onClose: () =
           <div className="flex items-end gap-2">
             <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
             <div id={chatId + "-intro"} className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm sm:text-sm">
-              Haf! 🐾 Ahoj, ja som Aria. Čo ťa zaujíma o našej škôlke?
+              <span className="sr-only">{introText}</span>
+              <span aria-hidden="true">{introComposing ? <span data-aria-intro-composing className="inline-flex items-center gap-1"><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f]" /><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" /><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" /></span> : introText.slice(0, introLength)}</span>
             </div>
           </div>
 
