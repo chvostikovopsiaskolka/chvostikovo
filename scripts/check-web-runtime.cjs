@@ -583,9 +583,12 @@ if (!bellaris && brandPreviewCandidate) {
                 if (!await trigger.isVisible()) throw new Error('Preview must make the Aria portrait a real chat control');
                 const triggerBox = await trigger.boundingBox();
                 const dockBox = await aria.locator('[data-aria-dock]').boundingBox();
-                if (!triggerBox || !dockBox || triggerBox.x < dockBox.x + dockBox.width - 8 ||
-                    triggerBox.x + triggerBox.width > width + 4)
-                  throw new Error('Aria chat portrait must be on the right side of the dock at ' + width);
+                if (!triggerBox || !dockBox || triggerBox.y + triggerBox.height > dockBox.y - 4 ||
+                    triggerBox.x + triggerBox.width > width + 4 ||
+                    Math.abs((dockBox.x + dockBox.width / 2) - width / 2) > 12)
+                  throw new Error('Aria portrait must float above the centered dock at ' + width);
+                if (await trigger.evaluate(el => getComputedStyle(el).webkitTapHighlightColor !== 'rgba(0, 0, 0, 0)'))
+                  throw new Error('Aria portrait must suppress the iOS tap highlight square');
                 if (width === 390) {
                   await trigger.click();
                   const chat = page.locator('[data-aria-chat]');
