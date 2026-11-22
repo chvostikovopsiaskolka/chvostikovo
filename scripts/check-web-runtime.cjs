@@ -115,7 +115,7 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.badgeFg !== 'rgb(255, 255, 255)' ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
-                  palette.heroCopyFg !== 'rgb(23, 28, 24)' ||
+                  palette.heroCopyFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(255, 255, 255)' : 'rgb(23, 28, 24)') ||
                   palette.earlyFaqBg !== 'rgb(255, 255, 255)' ||
                   palette.earlySectionBg !== 'rgba(255, 164, 20, 0.26)' ||
                   palette.pricingBg !== 'rgba(255, 164, 20, 0.26)' ||
@@ -407,9 +407,15 @@ if (!bellaris && brandPreviewCandidate) {
                 }).length,
                 dogsWidth: crown?.width ?? 0,
                 dogsTouchBadge: !!badge && !!crown && Math.abs(crown.bottom - badge.top) <= 3,
-                liquid: !!text && getComputedStyle(text).backgroundImage.includes('radial-gradient') &&
+                liquid: !!text && (window.location.pathname === '/psia-skolka-kosice/'
+                  ? getComputedStyle(text).backgroundImage === 'none'
+                  : getComputedStyle(text).backgroundImage.includes('radial-gradient')) &&
                   parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
-                about: !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
+                about: window.location.pathname === '/psia-skolka-kosice/'
+                  ? !!document.querySelector('#aria-about [data-hero-benefits]') &&
+                    ![...document.querySelectorAll('#aria-about h2')].some(h => h.textContent?.includes('Viac o nás a našej škôlke')) &&
+                    !document.body.textContent.includes('Viac o nás a našej škôlke')
+                  : !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
                 teamPills: team?.children.length ?? 0,
                 teamContained: !!teamBounds && [...team.children].every(pill => {
                   const bounds = pill.getBoundingClientRect();
@@ -438,6 +444,17 @@ if (!bellaris && brandPreviewCandidate) {
                 if (await ariaDesktop.locator('[data-aria-panel]').count())
                   throw new Error('Paid dock must not open above-dock panels');
               }
+              // APP-01: about begins at the actual team photo, not repeated content.
+              await nav.getByRole('button',{name:'O nás',exact:true}).click();
+              await page.waitForFunction(() => {
+                const target = document.getElementById('aria-about');
+                if (!target) return false;
+                const top = target.getBoundingClientRect().top;
+                return top > 62 && top < 112;
+              }, null, {timeout: 9000});
+              if (!await page.locator('#aria-about img[alt*="Majitelia"]').isVisible() ||
+                  await nav.getByRole('button',{name:'O nás'}).locator('svg').count() !== 1)
+                throw new Error('Paid about navigation must lead to the owners photo with outline icon');
               await page.waitForTimeout(1000);
             } else if (url.pathname === '/test-aria/') {
               // On the preview the dock is navigation, not three stacked
@@ -572,6 +589,10 @@ if (!bellaris && brandPreviewCandidate) {
                         (floatingBubble.getBoundingClientRect().top - reviewCardRect.bottom)) <=
                         Math.max(56, window.innerHeight * 0.08)),
                   softenedShadowRoom: reviewTrack && reviewCardRect ? reviewTrack.getBoundingClientRect().bottom - reviewCardRect.bottom : -1,
+                   raisedReview: window.location.pathname !== '/psia-skolka-kosice/' ||
+                     (!!reviewCard && getComputedStyle(reviewCard).borderTopWidth === '1px' &&
+                      getComputedStyle(reviewCard).boxShadow.includes('rgba(') &&
+                      parseFloat(getComputedStyle(reviewTrack).paddingTop) >= 9),
                   reviewLinkSize: parseFloat(getComputedStyle(reviewTrack?.querySelector('figure button') || reviews).fontSize),
                   photoApprovedAssets: photoImages.length === 2 &&
                     !!photoImages[0]?.getAttribute('src')?.includes('lead-review-border-collies') &&
@@ -584,8 +605,11 @@ if (!bellaris && brandPreviewCandidate) {
                      photoFrame.top - reviewsBottom <= window.innerHeight * 0.44 &&
                      photoFrame.top >= floatingGuide.getBoundingClientRect().bottom + 8 &&
                      !hero.contains(newPhotos) && photoRects.every(rect => rect.bottom <= formTop - 8)),
-                  heroCopyBlack: getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
-                    getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)',
+                  heroCopyBlack: window.location.pathname === '/psia-skolka-kosice/'
+                    ? (getComputedStyle(description).color === 'rgb(255, 255, 255)' &&
+                       getComputedStyle(description.querySelector('strong')).color === 'rgb(255, 255, 255)')
+                    : (getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
+                       getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)'),
                   mobileDescriptionMetrics: (() => {
                     const style = getComputedStyle(description);
                     const lineHeight = parseFloat(style.lineHeight);
@@ -594,9 +618,10 @@ if (!bellaris && brandPreviewCandidate) {
                       parseFloat(style.borderBottomWidth);
                     return { fontSize: parseFloat(style.fontSize), lineCount: Math.round(innerHeight / lineHeight) };
                   })(),
-                  paidDescriptionBlack: window.location.pathname !== '/psia-skolka-kosice/' ||
-                    (getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
-                     getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)'),
+                  paidDescriptionWhite: window.location.pathname !== '/psia-skolka-kosice/' ||
+                    (getComputedStyle(description).color === 'rgb(255, 255, 255)' &&
+                     getComputedStyle(description.querySelector('strong')).color === 'rgb(255, 255, 255)' &&
+                     getComputedStyle(description).backgroundColor === 'rgb(255, 164, 20)'),
                   photoGeometry: photoRects.length === 2 && !!photoFrame &&
                     photoRects.every((rect, i) => rect.width > 80 && rect.height >= 110 &&
                       rect.left >= -1 && rect.right <= window.innerWidth + 1 &&
@@ -619,7 +644,9 @@ if (!bellaris && brandPreviewCandidate) {
                       : (window.innerWidth < 390 ? 322 : window.innerWidth < 640 ? 362 : 542)) &&
                     description.querySelectorAll('strong').length === 4 &&
                     [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700),
-                  liquidFullDescription: getComputedStyle(description).backgroundImage.includes('radial-gradient') &&
+                  liquidFullDescription: (window.location.pathname === '/psia-skolka-kosice/'
+                     ? getComputedStyle(description).backgroundImage === 'none'
+                     : getComputedStyle(description).backgroundImage.includes('radial-gradient')) &&
                     parseFloat(getComputedStyle(description).borderTopLeftRadius) >= 15 &&
                     parseFloat(getComputedStyle(description).paddingLeft) >= 10,
                   naturalReviewBottom: getComputedStyle(reviews).overflowY !== 'hidden' &&
@@ -646,9 +673,9 @@ if (!bellaris && brandPreviewCandidate) {
                   (url.pathname === '/psia-skolka-kosice/' && (!firstFold.floatingDockFixed ||
                      (width <= 430 && (firstFold.floatingDockBottomOffset < 12 || firstFold.floatingDockBottomOffset > 54)) ||
                      (width >= 390 && width <= 430 && firstFold.floatingReviewGap < 8) ||
-                     !firstFold.paidPhotosBelowFloatingDock || !firstFold.paidDescriptionBlack ||
-                     !firstFold.heroBalancedGaps ||
-                     (width <= 430 && (firstFold.softenedShadowRoom < 16 || firstFold.reviewLinkSize > 13)))) ||
+                     !firstFold.paidPhotosBelowFloatingDock || !firstFold.paidDescriptionWhite ||
+                     !firstFold.heroBalancedGaps || !firstFold.raisedReview ||
+                     (width <= 430 && (firstFold.softenedShadowRoom < 28 || firstFold.reviewLinkSize > 13)))) ||
                   firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
@@ -737,7 +764,7 @@ if (!bellaris && brandPreviewCandidate) {
                 height: el.getBoundingClientRect().height,
                 shadow: getComputedStyle(el).boxShadow,
               }));
-              if (speechStyle.height < 39 || speechStyle.height > 110 || speechStyle.shadow !== 'none')
+              if (speechStyle.height < 39 || speechStyle.height > (width >= 1024 && url.pathname === '/psia-skolka-kosice/' ? 165 : 110) || speechStyle.shadow !== 'none')
                 throw new Error('Speech must stay compact without stacked box shadows at ' + width);
               const tip = await tail.evaluate(el => ({
                 x: Number(el.dataset.tipX), y: Number(el.dataset.tipY),
@@ -754,19 +781,26 @@ if (!bellaris && brandPreviewCandidate) {
                   return {
                     top: Number(svg.dataset.tailBaseTop),
                     bottom: Number(svg.dataset.tailBaseBottom),
-                    hasRoundedBottomRight: d.includes('L ' + (w - 1) + ' ' + (h - 16) +
+                    roundedBottomRight: d.includes('L ' + (w - 1) + ' ' + (h - 16) +
                       ' Q ' + (w - 1) + ' ' + (h - 1) + ' ' + (w - 16) + ' ' + (h - 1)),
+                    roundedBottomLeft: d.includes('L 16 ' + (h - 1) +
+                      ' Q 1 ' + (h - 1) + ' 1 ' + (h - 16)),
                     height: h,
                   };
                 });
-                if (!contour.hasRoundedBottomRight || contour.top < 16 ||
-                    contour.bottom <= contour.top || contour.bottom > contour.height - 16 ||
-                    headBox.x < speechBox.x + speechBox.width - 30 ||
-                    headBox.x < width / 2 ||
+                const textMetrics = await comicBubble.evaluate(el => ({
+                  fontSize: parseFloat(getComputedStyle(el.querySelector('p')).fontSize),
+                  maxWidth: parseFloat(getComputedStyle(el).maxWidth),
+                }));
+                if (!contour.roundedBottomRight || !contour.roundedBottomLeft ||
+                    contour.top < 16 || contour.bottom <= contour.top ||
+                    contour.bottom > contour.height - 16 ||
+                    headBox.x > speechBox.x || headBox.x + headBox.width < speechBox.x ||
                     speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
+                    (width >= 1024 && (textMetrics.fontSize < 16 || textMetrics.maxWidth < 450)) ||
                     await aria.locator('[data-aria-chat-trigger], [data-aria-chat]').count())
-                  throw new Error('Paid Aria must use the intact right-facing PREVIEW bubble without chatbot: ' +
-                    JSON.stringify({ width, contour, speechBox, headBox }));
+                  throw new Error('Paid Aria must have a readable left-side head and intact right bubble: ' +
+                    JSON.stringify({ width, contour, speechBox, headBox, textMetrics }));
               }
 
               if (url.pathname === '/test-aria/') {
