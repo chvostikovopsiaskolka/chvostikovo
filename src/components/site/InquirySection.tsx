@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, Phone } from "lucide-react";
-import { PHONE } from "@/content/site";
+import { ChevronRight } from "lucide-react";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { LeadStepForm } from "./LeadStepForm";
 import { FormDialog } from "./FormDialog";
@@ -36,26 +35,24 @@ export function InquiryCtaSection() {
   );
 }
 
-export function InquirySection({ allScreens = false }: { allScreens?: boolean } = {}) {
+export function InquirySection({ allScreens = false, matchHero = false, id = "informujte-sa", trackingSource = "care_inline_mobile", title = INFO_TITLE, subtitle = INFO_SUBTITLE }: {
+  allScreens?: boolean; matchHero?: boolean; id?: string; trackingSource?: string; title?: string; subtitle?: string;
+} = {}) {
   return (
-    <section id="informujte-sa" className={"scroll-mt-24 bg-card pt-0 pb-10 " + (allScreens ? "" : "lg:hidden")}>
+    <section id={id} className={"scroll-mt-24 bg-card pt-0 pb-10 " + (allScreens ? "" : "lg:hidden")}>
       <div className="mx-auto max-w-2xl px-4">
-        <SchoolmatesFormCrown groundAccent />
+        <SchoolmatesFormCrown compact={matchHero} groundAccent={!matchHero} />
 
-        <div className="relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8">
-          <h3 className="text-center text-2xl text-forest">Čo hľadáte pre svojho psíka?</h3>
+        <div data-home-inquiry-card={matchHero || undefined} className={matchHero
+          ? "min-w-0 rounded-4xl border border-white/50 bg-card px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8"
+          : "relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8"}>
+          <h3 className={"text-center text-forest " + (matchHero ? "text-xl" : "text-2xl")}>{title}</h3>
           <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
-            {INFO_SUBTITLE}
+            {subtitle}
           </p>
 
-          <LeadStepForm questionInHeading trackingSource="care_inline_mobile" />
+          <LeadStepForm questionInHeading trackingSource={trackingSource} />
 
-          <a
-            href={`tel:${PHONE}`}
-            className="btn-coral mt-5 inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base"
-          >
-            <Phone className="size-4" /> Zavolajte nám
-          </a>
         </div>
       </div>
     </section>
