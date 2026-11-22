@@ -1089,10 +1089,21 @@ if (!bellaris && brandPreviewCandidate) {
                   throw new Error('Post-requirements modal CTA never becomes visible at ' + width);
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-contact.png') });
                 await contactCta.click();
-                const contact = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
-                await contact.waitFor({ state: 'visible' });
-                await contact.getByRole('button', { name: 'Close' }).click();
-                await contact.waitFor({ state: 'hidden' });
+                if (url.pathname === '/test-aria/') {
+                  await page.waitForFunction(() => {
+                    const form = document.getElementById('aria-first-visit-form');
+                    if (!form) return false;
+                    const top = form.getBoundingClientRect().top;
+                    return top >= 60 && top <= 112;
+                  }, null, { timeout: 9000 });
+                  if (await page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).count())
+                    throw new Error('Test Aria contextual contact CTA must scroll to inline form instead of modal at ' + width);
+                } else {
+                  const contact = page.locator('[role="dialog"]').filter({ has: page.locator('[data-lead-step-form]') }).last();
+                  await contact.waitFor({ state: 'visible' });
+                  await contact.getByRole('button', { name: 'Close' }).click();
+                  await contact.waitFor({ state: 'hidden' });
+                }
                 await page.evaluate(() => window.scrollTo(0, 0));
                 await page.waitForTimeout(190);
               }
