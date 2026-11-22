@@ -207,7 +207,7 @@ export function AriaPreviewPage() {
             </div>
           </div>
           {!isLiveLead && (
-          {/* Fill the former empty Aria breathing room with two real photos from
+          <>{/* Fill the former empty Aria breathing room with two real photos from
               the moving gallery. Keep the enquiry below the initial viewport,
               while leaving Aria fixed above the bottom dock. Desktop now also shows the photos. */}
           <div data-aria-intro-space className={isLiveLead ? "relative z-10 mx-auto flex min-h-[245px] w-full max-w-3xl flex-[0.45] items-end px-4 pb-3 pt-12 sm:min-h-[285px] sm:px-0 sm:pb-3 sm:pt-12 lg:max-w-4xl lg:min-h-[385px] lg:flex-[0.3]" : "relative z-10 mx-auto flex min-h-[178px] max-h-[198px] w-full max-w-3xl flex-[0.45] items-end px-4 pb-2 pt-8 sm:min-h-[135px] sm:max-h-[175px] sm:px-0 sm:pb-0 sm:pt-5 lg:max-w-4xl lg:min-h-[268px] lg:max-h-[286px] lg:flex-[0.3]"}>
@@ -223,6 +223,7 @@ export function AriaPreviewPage() {
               ))}
             </div>
           </div>
+          </>
           )}
           {isLiveLead && (
             <div data-aria-hero-menu className="relative z-20 mx-auto mt-5 w-full max-w-[690px] pb-3 sm:mt-7 sm:pb-5">
