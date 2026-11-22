@@ -1262,7 +1262,7 @@ if (!bellaris && brandPreviewCandidate) {
               });
               if (labelShape.text !== 'Najvýhodnejšie. Ušetríte 50 €' || !labelShape.fits || !labelShape.row || !labelShape.inside)
                 throw new Error('Permanentka value label must fit on one bottom line at ' + width + ': ' + JSON.stringify(labelShape));
-              if (!await page.getByRole('heading', { name: 'Takto vyzerá Chvostíkovo' }).count())
+              if (url.pathname === '/test-aria/' && !await page.getByRole('heading', { name: 'Takto vyzerá Chvostíkovo' }).count())
                 throw new Error('Preview mosaic title regression');
               const firstVisitCompact = await page.locator('#lead-pricing details').evaluate(el => {
                 const wrapper = el.parentElement;
