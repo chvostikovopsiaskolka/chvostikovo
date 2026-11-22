@@ -1087,9 +1087,10 @@
 .aria-brand-experiment #aria-puppy-check { background-color: #fff; }
 .aria-brand-experiment #aria-puppy-check [data-aria-puppy-card] { background-color: #fff; }
 .aria-brand-experiment [data-aria-friendship-card] { background-color: #fff; box-shadow: 0 16px 38px rgb(38 50 43 / 13%); }
-.aria-brand-experiment [data-aria-hero-description],
-.aria-brand-experiment [data-aria-hero-description] strong { color: #fff; }
-.aria-brand-experiment [data-aria-hero-description] strong { text-decoration: none; font-weight: 800; }
+/* Keep the approved large orange-panel type; the screenshot correction is ink,
+   not extra copy or a new mobile font size. Readable in preview and paid LEAD. */
+.aria-brand-experiment [data-aria-hero-description] { color: #171c18; }
+.aria-brand-experiment [data-aria-hero-description] strong { color: #111; text-decoration: none; font-weight: 800; }
 .aria-brand-experiment [data-lead-step-form] input[type="radio"] + span,
 .aria-preview-modal [data-lead-step-form] input[type="radio"] + span { background: #fff0d5; color: #26322b; border-color: rgb(255 164 20 / 25%); }
 .aria-brand-experiment [data-lead-step-form] input[type="radio"]:checked + span,
@@ -1140,6 +1141,21 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .lead-brand-live [data-aria-hero-description] { animation: none; }
+}
+
+/* Mobile Aria navigation is edge-to-edge, with the portrait floating ABOVE it.
+   Desktop keeps the established width and placement; organic/PWA docks untouched. */
+@media (max-width: 639px) {
+  .aria-brand-experiment [data-aria-guide] { padding-inline: 0; }
+  .aria-brand-experiment [data-aria-guide] > div { max-width: none; }
+  .aria-brand-experiment [data-aria-dock] { width: 100%; max-width: none; margin-inline: 0; }
+  /* Preview head previously protruded 4px beyond the right edge of its narrow dock. */
+  .aria-brand-experiment [data-aria-chat-trigger] { right: 4px; }
+  /* Paid lead has the classic left speech bubble, not preview's chat-trigger head. */
+  .lead-brand-live [data-aria-dock] > img[alt^="Aria"] {
+    left: 8px;
+    bottom: calc(100% + 8px);
+  }
 }
 
 /* Paid lead hotfix: reviews and Aria belong to the first mobile screen.
