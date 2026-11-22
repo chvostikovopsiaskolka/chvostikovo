@@ -1900,7 +1900,7 @@ if (!bellaris && brandPreviewCandidate) {
             await page.evaluate(() => window.scrollTo(0, 0));
             await page.waitForTimeout(120);
           }
-          // Shared Slovak Hero CTA: mobile pair, desktop single prominent info CTA.
+          // Shared Slovak Hero CTA: approved home single interest CTA; other routes retain their pair.
           // Layout regression 320/375/390/1440 in Chromium and Safari WebKit.
           if (!bellaris && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/'].includes(url.pathname) && !isAriaPage) {
             for (const width of [320, 375, 390, 1440]) {
@@ -1911,7 +1911,37 @@ if (!bellaris && brandPreviewCandidate) {
               if (await hero.locator('.hero-cta-primary:visible').count() !== 1)
                 throw new Error('Hero must display exactly one prominent CTA at ' + width);
               const ctaPair = hero.locator('.hero-cta-pair:visible');
-              if (width < 1024) {
+              if (url.pathname === '/') {
+                if ((await primary.innerText()).trim() !== 'Mám záujem' || await hero.locator('.hero-cta-secondary').count())
+                  throw new Error('Home hero must retain only the interest CTA: ' + width);
+                const centered = await primary.evaluate(el => {
+                  const r=el.getBoundingClientRect(), parent=el.parentElement.getBoundingClientRect();
+                  return Math.abs((r.left+r.right-parent.left-parent.right)/2) <= 2;
+                });
+                if (!centered) throw new Error('Home interest CTA not centered: ' + width);
+                if (width >= 1024 && !await hero.locator('[data-lead-step-form]').first().isVisible())
+                  throw new Error('Desktop home guided form missing');
+                const layout = await page.evaluate(() => {
+                  const ids=['top','preco-chvostikovo','o-nas','cennik','podmienky','informujte-sa','starostlivost','home-early-faq','priestory','psie-priatelstva','prva-navsteva','preco','faq'];
+                  const nodes=ids.map(id=>document.getElementById(id));
+                  const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
+                  const cutout=document.querySelector('[data-schoolmates-cutout]');
+                  const inputs=[...document.querySelectorAll('input[id]')].map(el=>el.id);
+                  return {
+                    ordered:nodes.every((node,i)=>node && (!i || !!(nodes[i-1].compareDocumentPosition(node)&Node.DOCUMENT_POSITION_FOLLOWING))),
+                    reviewsInHero:document.getElementById('top').contains(document.getElementById('recenzie')),
+                    tickerAbsent:!document.querySelector('main .info-ticker-track'),
+                    benefitsMoved:!!photo && !!benefits && benefits.getBoundingClientRect().top>=photo.getBoundingClientRect().bottom && !document.querySelector('#top [data-hero-benefits]'),
+                    forms:['informujte-sa','zaujem-po-priatelstvach'].every(id=>document.getElementById(id)?.querySelector('[data-lead-step-form]')),
+                    uniqueFields:inputs.length===new Set(inputs).size,
+                    cutout:!!cutout && cutout.complete && cutout.naturalWidth>0,
+                    palette:document.body.classList.contains('site-brand') && getComputedStyle(document.querySelector('#top h1')).color==='rgb(184, 46, 127)',
+                    copy:[...document.querySelectorAll('.home-hero-copy')].every(el=>getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'),
+                    paws:!!document.querySelector('#top .paw-trail-background'),
+                  };
+                });
+                if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression: '+JSON.stringify(layout));
+              } else if (width < 1024) {
                 if (!await ctaPair.isVisible()) throw new Error('Mobile Hero CTA pair missing at ' + width);
                 const shape = await ctaPair.evaluate(el => {
                   const primary = el.querySelector('.hero-cta-primary');
@@ -2197,11 +2227,23 @@ if (!bellaris && brandPreviewCandidate) {
           const productPage = await context.newPage();
           await productPage.setViewportSize({ width, height: width === 390 ? 844 : 900 });
           try {
+            for (const route of ['/produkty/', '/blog/', '/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/']) {
+              await productPage.goto(new URL(route, base).href);
+              const brand = await productPage.evaluate(() => ({
+                scoped:document.body.classList.contains('site-brand'),
+                title:getComputedStyle(document.querySelector('h1')).color,
+                text:getComputedStyle(document.body).getPropertyValue('--forest').trim(),
+                overflow:document.documentElement.scrollWidth>innerWidth+1,
+              }));
+              if (!brand.scoped || brand.title!=='rgb(184, 46, 127)' || brand.text!=='#26322b' || brand.overflow)
+                throw new Error('Shared product/blog brand regression: '+route+' '+JSON.stringify(brand));
+            }
             for (const [route, action] of [['/stojan-na-misky-pre-psa', 'Mám záujem o stojan'], ['/target-na-cvicenie-pre-psov', 'Mám záujem o target']]) {
               await productPage.goto(new URL(route, base).href);
               await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
               const consent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
               if (await consent.isVisible()) await consent.click();
+              if (!await productPage.locator('body.site-brand').count()) throw new Error('Product palette scope missing: '+route);
               const heroTitle = productPage.getByRole('heading', { level: 1 });
               if (!await heroTitle.isVisible()) throw new Error('Product hero title missing: ' + route);
               const detailText = route.includes('stojan')

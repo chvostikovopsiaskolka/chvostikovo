@@ -168,7 +168,8 @@ function RootShell({ children }: { children: ReactNode }) {
     "/strazenie-psov-kosice",
     "/en/dog-daycare-kosice",
   ]);
-  const mobileThemeColor = whiteHeroPaths.has(pathname) ? "#ffffff" : "#faf8f0";
+  const branded = ["/", "/stojan-na-misky-pre-psa", "/target-na-cvicenie-pre-psov"].includes(pathname.replace(/\/$/, "") || "/") || /^\/(produkty|blog)(\/|$)/.test(pathname);
+  const mobileThemeColor = branded || whiteHeroPaths.has(pathname) ? "#ffffff" : "#faf8f0";
 
   return (
     <html lang={language}>
@@ -176,7 +177,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <meta name="theme-color" content={mobileThemeColor} media="(max-width: 1023px)" />
         <HeadContent />
       </head>
-      <body>
+      <body className={branded ? "site-brand" : undefined}>
         {children}
         <Scripts />
       </body>

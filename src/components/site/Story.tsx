@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, Check, Phone } from "lucide-react";
+import { BookOpen, Check, CheckCircle2, Phone } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
 import { ContextFaq } from "./ContextFaq";
@@ -193,20 +193,25 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
 }
 
 /** Reuses the established friendship panel with a short, qualified-interest form on the main website. */
-export function FriendshipInterest() {
+export function FriendshipInterest({ inlineForm = false }: { inlineForm?: boolean } = {}) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <section className="relative bg-card pb-10 sm:pb-12">
+      <section id="psie-priatelstva" className="relative bg-card pb-10 sm:pb-12">
         <div className="mx-auto max-w-6xl px-4">
           <FriendshipFeature embedded />
-          <div className="mt-7 flex justify-center">
+          {!inlineForm && <div className="mt-7 flex justify-center">
             <button type="button" className="btn-coral" onClick={() => {
               trackMarketingInteraction("inquiry_cta", "home_friendship_interest_20261028");
               void trackCookielessInteraction("inquiry_cta", "home_friendship_interest_20261028");
               setOpen(true);
             }}>Toto hľadám pre svojho psíka</button>
-          </div>
+          </div>}
+          {inlineForm && <div id="zaujem-po-priatelstvach" className="mx-auto mt-8 max-w-2xl rounded-4xl bg-card p-6 shadow-card sm:p-8">
+            <h3 className="text-center text-2xl text-forest">Čo hľadáte pre svojho psíka?</h3>
+            <p className="mt-2 mb-5 text-center text-sm text-muted-foreground">Vyplňte krátky nezáväzný formulár. Ozveme sa vám.</p>
+            <LeadStepForm questionInHeading trackingSource="home_friendship_interest_20261028" />
+          </div>}
         </div>
       </section>
       <FormDialog open={open} onOpenChange={setOpen} title="Čo hľadáte pre svojho psíka?"
@@ -297,7 +302,7 @@ export function Why() {
   );
 }
 
-export function About({ language = "sk" }: { language?: "sk" | "en" }) {
+export function About({ language = "sk", homeLayout = false }: { language?: "sk" | "en"; homeLayout?: boolean }) {
   const isEnglish = language === "en";
 
   return (
@@ -309,7 +314,7 @@ export function About({ language = "sk" }: { language?: "sk" | "en" }) {
             {isEnglish ? "About us" : "O nás"}
           </span>
           <h2 className="section-title mt-2 text-3xl sm:text-4xl">
-            {isEnglish ? "Who is behind Chvostíkovo?" : "Kto stojí za Chvostíkovom?"}
+            {isEnglish ? "Who is behind Chvostíkovo?" : homeLayout ? "Kto sa bude starať o vášho psíka?" : "Kto stojí za Chvostíkovom?"}
           </h2>
           <div className="mt-5 space-y-4 text-forest/85">
             <p>
@@ -376,6 +381,13 @@ export function About({ language = "sk" }: { language?: "sk" | "en" }) {
               className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
             />
           </div>
+          {homeLayout && <div data-hero-benefits className="flex flex-wrap justify-center gap-2 pt-2">
+            {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map(item => (
+              <span key={item} className="inline-flex items-center gap-1.5 rounded-full bg-[#2d764b] px-3 py-2 text-xs font-bold text-white shadow-card">
+                <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />{item}
+              </span>
+            ))}
+          </div>}
         </div>
       </div>
 

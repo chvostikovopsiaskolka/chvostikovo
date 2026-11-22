@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
-import { InfoTicker } from "@/components/site/InfoTicker";
 import { Gallery } from "@/components/site/Gallery";
-import { ReviewReasons, Reviews } from "@/components/site/Reviews";
+import { ReviewReasons } from "@/components/site/Reviews";
 import { Care, Why, About, Partners, FriendshipInterest } from "@/components/site/Story";
-import { Requirements, FirstVisit, Pricing, Faq } from "@/components/site/Info";
+import { Requirements, FirstVisit, Pricing, Faq, DaycareEarlyFaq } from "@/components/site/Info";
 import { UsefulInfo } from "@/components/site/UsefulInfo";
 import { ProductSection } from "@/components/site/ProductSection";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
@@ -75,24 +74,21 @@ function Index() {
       <Header />
       <main>
         <Hero />
-        <div className="hidden lg:block">
-          <InfoTicker />
-        </div>
-        <Reviews />
         <ReviewReasons variant="home" withVideo />
+        <About homeLayout />
         <DaycarePhotoCarousel />
-        <Care showEmbeddedFriendship={false} showInterest={false} />
         <Pricing interestMode />
-        <FriendshipInterest />
+        <Requirements showContextFaq />
+        <InquirySection allScreens />
+        <Care showEmbeddedFriendship={false} showInterest={false} />
+        <DaycareEarlyFaq />
         <Gallery />
+        <FriendshipInterest inlineForm />
         <FirstVisit />
         <Why />
-        <InquirySection />
-        <Requirements showContextFaq />
         <HomePuppyChecker />
         <Faq />
         <ProductSection />
-        <About />
         <Partners />
         <UsefulInfo />
         <PhotoStrip />
