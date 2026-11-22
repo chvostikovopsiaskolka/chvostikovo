@@ -707,10 +707,10 @@ if (!bellaris && brandPreviewCandidate) {
                   const chat = page.locator('[data-aria-chat]');
                   await chat.waitFor({ state: 'visible' });
                   const initialQuestions = chat.locator('[data-aria-chat-history] [data-aria-chat-questions] button');
-                  if (await initialQuestions.count() !== 6 ||
+                  if (await initialQuestions.count() !== 4 ||
                       await chat.locator('[data-aria-chat-history] input').count() !== 0 ||
                       await chat.getByText(/Virtuálna pomocníčka/).count())
-                    throw new Error('Chat greeting must contain six inline choices without an input or header subtitle');
+                    throw new Error('Chat greeting must contain four inline choices without an input or header subtitle');
                   const chatWindow = await chat.boundingBox();
                   if (!chatWindow || chatWindow.x < -1 || chatWindow.x + chatWindow.width > width + 1)
                     throw new Error('Guided chat must fit mobile viewport');
@@ -734,22 +734,81 @@ if (!bellaris && brandPreviewCandidate) {
                   if (!await chat.locator('[data-aria-chat-followup]').getByRole('button', { name: 'Odpoveď mi stačí, ďakujem ✓' }).count())
                     throw new Error('Each answer must offer a friendly finish');
                   await chat.getByRole('button', { name: /Ďalšia otázka/ }).click();
-                  if (await chat.locator('[data-aria-chat-questions] button').count() !== 5 ||
+                  if (await chat.locator('[data-aria-chat-questions] button').count() !== 3 ||
                       await chat.locator('[data-aria-chat-question="pricing"]').count())
                     throw new Error('Answered pricing question must be removed from remaining topics');
 
                   await chat.locator('[data-aria-chat-question="requirements"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
                   await chat.getByRole('button', { name: /Ďalšia otázka/ }).click();
-                  if (await chat.locator('[data-aria-chat-questions] button').count() !== 4 ||
+                  if (await chat.locator('[data-aria-chat-questions] button').count() !== 2 ||
                       await chat.locator('[data-aria-chat-question="requirements"]').count())
-                    throw new Error('After two answers only four unasked questions should remain');
+                    throw new Error('After two answers only two unasked questions should remain');
                   await chat.getByRole('button', { name: 'Iná otázka', exact: true }).click();
                   await chat.locator('[data-aria-chat-other] textarea').fill('Môj psík má špeciálne potreby?');
                   const email = chat.getByRole('link', { name: /Otvoriť e-mail/ });
                   if (!(await email.getAttribute('href') || '').startsWith('mailto:chvostikovo.psiaskolka@gmail.com?'))
                     throw new Error('Custom question must offer a real mailto, not a fake sent message');
                   await chat.getByRole('button', { name: 'Späť k otázkam' }).click();
+                  // APP-01: the four-topic preview also includes an inline puppy
+                  // checker, without opening the separate site-wide puppy modal.
+                  if (await chat.locator('[data-aria-chat-questions] button').count() !== 2 ||
+                      await chat.locator('[data-aria-chat-puppy-cta]').count() !== 1)
+                    throw new Error('Puppy option must remain available after FAQ replies');
+                  await chat.locator('[data-aria-chat-puppy-cta]').click();
+                  const puppy = chat.locator('[data-aria-chat-puppy-check]');
+                  await puppy.waitFor({ state: 'visible' });
+                  if (await page.getByRole('dialog', { name: 'Kontrola vhodnosti šteniatka' }).count())
+                    throw new Error('Puppy checker must stay inside Aria chat, not open a nested dialog');
+                  await puppy.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
+                  const continueToContact = puppy.getByRole('button', { name: /Pokračovať na kontakt/ });
+                  if (await continueToContact.isEnabled())
+                    throw new Error('Puppy checker must not accept unconfirmed vaccinations');
+                  await puppy.getByRole('button', { name: 'Chcem sa informovať' }).click();
+                  const needsInfo = chat.locator('[data-aria-chat-puppy-contact]');
+                  await needsInfo.waitFor({ state: 'visible' });
+                  if (!await needsInfo.getByText(/zatiaľ nespĺňa všetky orientačné podmienky/).count())
+                    throw new Error('Unconfirmed puppy vaccines must offer individual consultation, not eligibility approval');
+                  await needsInfo.getByRole('button', { name: 'Späť ku kontrole' }).click();
+                  await puppy.locator('[data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
+                  for (const group of await puppy.locator('fieldset').all()) {
+                    await group.getByText('Áno', { exact: true }).click();
+                  }
+                  if (!await continueToContact.isEnabled())
+                    throw new Error('All three confirmed vaccines must permit contact');
+                  let puppyPosted = null;
+                  await page.route('**/functions/v1/web-form-submit', async route => {
+                    const request = route.request();
+                    const cors = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type' };
+                    if (request.method() === 'OPTIONS') {
+                      await route.fulfill({ status: 204, headers: cors });
+                      return;
+                    }
+                    puppyPosted = request.postDataJSON();
+                    await route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ ok: true }) });
+                  });
+                  await continueToContact.click();
+                  const puppyContact = chat.locator('[data-aria-chat-puppy-contact]');
+                  await puppyContact.waitFor({ state: 'visible' });
+                  if (puppyPosted !== null || !await puppyContact.locator('form').count())
+                    throw new Error('Eligibility alone must not send a lead; consented contact is required');
+                  await puppyContact.locator('input[name="meno"]').fill('Test Puppy Aria');
+                  await puppyContact.locator('input[name="plemeno"]').fill('Labrador');
+                  await puppyContact.locator('input[name="pes_meno"]').fill('Bella');
+                  await puppyContact.locator('input[name="telefon"]').fill('+421901234567');
+                  await puppyContact.locator('input[type="checkbox"]').check();
+                  await puppyContact.getByRole('button', { name: 'Odoslať záujem' }).click();
+                  await puppyContact.locator('[data-aria-chat-contact-success="true"]').waitFor({ state: 'visible' });
+                  if (!puppyPosted || puppyPosted.puppy_check?.age_months !== 4 ||
+                      !Object.values(puppyPosted.puppy_check?.vaccines || {}).every(value => value === 'yes') ||
+                      puppyPosted.puppy_check?.dog_name !== 'Bella' ||
+                      puppyPosted.puppy_check?.dog_breed !== 'Labrador' ||
+                      puppyPosted.interest_reason !== 'Mám záujem o škôlku pre šteniatko')
+                    throw new Error('Puppy enquiry must send the existing structured CRM payload after explicit consent');
+                  await page.unroute('**/functions/v1/web-form-submit');
+                  await puppyContact.getByRole('button', { name: 'Späť ku kontrole' }).click();
+                  await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
+                  await chat.locator('[data-aria-chat-puppy-check]').getByRole('button', { name: 'Späť k otázkam' }).click();
                   await chat.getByRole('button', { name: 'Mám záujem o škôlku' }).click();
 
                   const interest = chat.locator('[data-aria-chat-interest]');
@@ -814,6 +873,61 @@ if (!bellaris && brandPreviewCandidate) {
                   await chat.getByRole('button', { name: 'Close' }).click();
                   await chat.waitFor({ state: 'hidden' });
                   await page.setViewportSize({ width: 390, height: 844 });
+                  // After a hard reload, the test route must hydrate and its
+                  // lazy-loaded chat should open again (iOS fresh-document path).
+                  await page.reload({ waitUntil: 'domcontentloaded' });
+                  // Every fresh-document navigation gets a new consent fixture.
+                  // Exercise a real user flow: dismiss cookie modal before
+                  // clicking Aria, never force-click through an overlay.
+                  const reloadedCookie = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
+                  await reloadedCookie.waitFor({ state: 'visible', timeout: 10000 });
+                  await reloadedCookie.click();
+                  await page.locator('[aria-labelledby="cookie-consent-title"]').waitFor({ state: 'hidden' });
+                  const freshTrigger = page.locator('[data-aria-chat-trigger]');
+                  await freshTrigger.waitFor({ state: 'visible', timeout: 15000 });
+                  if (await page.getByText("This page didn't load").count())
+                    throw new Error('Preview displayed the root route failure after full reload');
+                  await freshTrigger.click();
+                  await page.locator('[data-aria-chat]').waitFor({ state: 'visible' });
+                  await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
+                  await page.locator('[data-aria-chat]').waitFor({ state: 'hidden' });
+                  // Browser-specific dialog close animations must finish before
+                  // the next section scroll is tested. This is an app contract:
+                  // closing chat must actually unlock the underlying page.
+                  await page.waitForFunction(() => {
+                    const html = getComputedStyle(document.documentElement);
+                    const body = getComputedStyle(document.body);
+                    return html.overflow !== 'hidden' && body.overflow !== 'hidden' && body.position !== 'fixed';
+                  }, null, { timeout: 7000 });
+
+                  // Simulate a stale/lost lazy chunk in a completely isolated
+                  // browser context. Never pollute the normal page: its consent,
+                  // scroll and modal state must remain intact for following tests.
+                  const failureContext = await browser.newContext({
+                    viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+                  });
+                  try {
+                    await failureContext.route('**/*', route => {
+                      const request = route.request();
+                      if (!['GET', 'HEAD'].includes(request.method()) ||
+                          new URL(request.url()).origin !== url.origin) return route.abort();
+                      return route.continue();
+                    });
+                    await failureContext.route(/AriaGuidedChat-[^/]+\.js(?:\?.*)?$/, route => route.abort('failed'));
+                    const failurePage = await failureContext.newPage();
+                    await failurePage.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 40000 });
+                    const failureConsent = failurePage.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
+                    await failureConsent.waitFor({ state: 'visible', timeout: 10000 });
+                    await failureConsent.click();
+                    await failurePage.locator('[data-aria-chat-trigger]').click();
+                    await failurePage.locator('[data-aria-chat-load-error]').waitFor({ state: 'visible', timeout: 12000 });
+                    if (await failurePage.getByText("This page didn't load").count() ||
+                        !await failurePage.locator('[data-aria-dock]').isVisible())
+                      throw new Error('A failed lazy chat import must preserve the landing and dock');
+                    await failurePage.getByRole('button', { name: 'Zavrieť' }).click();
+                  } finally {
+                    await failureContext.close();
+                  }
                 }
               }
 
@@ -903,10 +1017,24 @@ if (!bellaris && brandPreviewCandidate) {
                 });
                 if (requirementsEnd < 0) throw new Error('Aria requirements boundary missing');
                 await page.evaluate(y => window.scrollTo(0, y), requirementsEnd + 20);
-                await page.waitForTimeout(220);
-                if (await aria.getAttribute('data-aria-stage') !== 'contact' ||
-                    !await aria.getByText(/Vyplňte nezáväzný formulár/).count())
-                  throw new Error('Contact offer should replace puppy text after requirements at ' + width);
+                // Do not assume iOS/Chromium scroll + React useEffect settles
+                // within 220ms after the dialog closes. Check the actual state.
+                const contactReady = await page.waitForFunction(() => {
+                  const dock = document.querySelector('[data-aria-guide]');
+                  return dock?.getAttribute('data-aria-stage') === 'contact' &&
+                    (dock.textContent || '').includes('Vyplňte nezáväzný formulár');
+                }, null, { timeout: 7000 }).then(() => true).catch(() => false);
+                if (!contactReady) {
+                  const state = await page.evaluate(() => ({
+                    stage: document.querySelector('[data-aria-guide]')?.getAttribute('data-aria-stage'),
+                    scrollY: window.scrollY,
+                    bodyPosition: getComputedStyle(document.body).position,
+                    rootOverflow: getComputedStyle(document.documentElement).overflow,
+                    targetBottom: document.getElementById('lead-requirements')?.getBoundingClientRect().bottom,
+                    viewportHeight: window.innerHeight,
+                  }));
+                  throw new Error('Contact offer should replace puppy text after requirements at ' + width + ': ' + JSON.stringify(state));
+                }
                 const contactDock = await aria.locator('[data-aria-dock]').boundingBox();
                 if (!contactDock || Math.abs(contactDock.y - dock.y) > 3)
                   throw new Error('Aria fixed navigation jumped vertically on section change at ' + width);

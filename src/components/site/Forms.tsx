@@ -1,4 +1,5 @@
 import { currentSourceRef } from "@/lib/tracking-sanitization";
+import type { PuppyCheckInput } from "@/lib/inquiry";
 import { useFormProgress } from "@/lib/form-progress";
 import { useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
@@ -32,12 +33,14 @@ export function ShortForm({
   trackingSource,
   hideInterest = false,
   showChatDogFields = false,
+  puppyCheck,
   interestValue = "Informačný formulár – záujem o psiu škôlku",
 }: {
   onSent?: () => void;
   trackingSource?: string;
   hideInterest?: boolean;
   showChatDogFields?: boolean;
+  puppyCheck?: PuppyCheckInput;
   interestValue?: string;
 }) {
   const formId = useId();
@@ -82,8 +85,9 @@ export function ShortForm({
         meno: String(fd.get("meno") ?? "").trim(),
         telefon: submittedPhone,
         email: String(fd.get("email") ?? "").trim() || undefined,
-        zaujem: hideInterest ? interestValue + (dogName ? " – Meno psíka: " + dogName : "") : String(fd.get("zaujem") ?? ""),
+        zaujem: hideInterest ? interestValue + (dogName && !puppyCheck ? " – Meno psíka: " + dogName : "") : String(fd.get("zaujem") ?? ""),
         ...(breed ? { plemeno: breed } : {}),
+        ...(puppyCheck ? { puppy_check: { ...puppyCheck, ...(dogName ? { dog_name: dogName } : {}), ...(breed ? { dog_breed: breed } : {}) } } : {}),
       }, attemptId);
       void trackCookielessInteraction("form_submit", trackingSource || "informational_form", "sk", attemptId);
       runFormTelemetry(() => {
