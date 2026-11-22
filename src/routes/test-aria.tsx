@@ -285,7 +285,7 @@ export function AriaPreviewPage() {
           </div>
         </section>
 
-        <section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-white py-9 sm:py-12">
+        <section id={isLiveLead ? "aria-about" : "aria-caretakers"} className="relative scroll-mt-24 overflow-hidden bg-white py-9 sm:py-12">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-5xl px-4">
             <h2 className={isLiveLead ? "section-title mb-5 text-center text-[clamp(24px,6vw,38px)] leading-tight tracking-[-0.025em]" : "section-title mb-4 text-center text-[clamp(22px,4.5vw,38px)] leading-tight tracking-[-0.025em]"}>Kto sa bude starať o vášho psíka?</h2>
@@ -325,14 +325,14 @@ export function AriaPreviewPage() {
           </div>
         </section>
 
-        <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
+        {!isLiveLead && <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
           <div className="mx-auto max-w-4xl px-4">
             <h2 className="section-title text-center text-lg sm:text-xl">Viac o nás a našej škôlke</h2>
             <div className="mx-auto mt-5 max-w-3xl space-y-4 text-center text-sm leading-relaxed text-forest/80 sm:text-base">
               {ABOUT_MORE.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>
           </div>
-        </section>
+        </section>}
 
         <section id="aria-early-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/30 pb-5 pt-8 sm:pb-7 sm:pt-10">
           <SectionAmbientPaws />
