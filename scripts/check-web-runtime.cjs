@@ -256,21 +256,41 @@ if (!bellaris && brandPreviewCandidate) {
               if (await cards.count()!==2) throw new Error('Paid lead requires two clickable owner photos');
               if (url.pathname === '/psia-skolka-kosice/') {
                 const layout = await page.evaluate(() => {
-                  const photos = [...document.querySelectorAll('[data-aria-review-photo]')];
-                  const dock = document.querySelector('[data-aria-guide]');
-                  const copy = document.querySelector('[data-aria-hero-description]')?.textContent || '';
+                  const hero = document.querySelector('section.hero-safe-top');
+                  const selectors = ['h1', '[data-aria-review-gap-photos]', '[data-aria-service-group]', '[data-aria-hero-description]', '[data-aria-hero-content] [data-aria-review-photo]', '[data-aria-hero-content] [data-aria-review-photo]'];
+                  const rect = selector => hero?.querySelector(selector)?.getBoundingClientRect();
+                  const photos = [...(hero?.querySelectorAll('[data-aria-review-photo]') || [])];
+                  const dock = hero?.querySelector('[data-aria-hero-menu] [data-aria-guide]');
+                  const reviews = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]');
+                  const reviewSection = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.parentElement;
+                  const reviewRoot = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.closest('[data-aria-review-gap-photos]');
+                  const heading = rect('h1');
+                  const photo = rect('[data-aria-review-gap-photos]');
+                  const badge = rect('[data-aria-service-group]');
+                  const description = rect('[data-aria-hero-description]');
+                  const review = hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]')?.getBoundingClientRect();
+                  const menu = dock?.getBoundingClientRect();
+                  const form = document.querySelector('#aria-hero-form')?.getBoundingClientRect();
                   return {
                     width: innerWidth,
-                    copy,
+                    copy: description ? document.querySelector('[data-aria-hero-description]')?.textContent : '',
                     heights: photos.map(el => el.getBoundingClientRect().height),
-                    photoGap: photos[0]?.getBoundingClientRect().top - (document.querySelector('[data-aria-hero-content]')?.getBoundingClientRect().bottom || 0),
-                    dockBottom: dock ? innerHeight - dock.getBoundingClientRect().bottom : -1,
+                    headingBottom: heading?.bottom,
+                    photoTop: photo?.top,
+                    photoBottom: photo?.bottom,
+                    badgeTop: badge?.top,
+                    menuBottom: menu?.bottom,
+                    formTop: form?.top,
+                    menuPosition: dock ? getComputedStyle(dock).position : '',
+                    reviewExists: !!hero?.querySelector('[data-aria-hero-content] [data-aria-review-photo]'),
                   };
                 });
                 if (!layout.copy.includes('užije si pohyb'))
                   throw new Error('Lead hero lost approved wording užije si pohyb');
-                if (layout.width < 500 && (layout.heights.some(h => h < 185) || layout.photoGap < 15 || layout.dockBottom > 90))
-                  throw new Error('Lead mobile photo height, hero gap or lower menu dock regressed: ' + JSON.stringify(layout));
+                if (layout.heights.length !== 2 || layout.photoTop < layout.headingBottom || layout.badgeTop < layout.photoBottom || layout.menuPosition !== 'relative' || layout.formTop < layout.menuBottom)
+                  throw new Error('Lead hero section order regressed: ' + JSON.stringify(layout));
+                if (layout.width < 500 && layout.heights.some(h => h < 175))
+                  throw new Error('Lead mobile photo cards too short: ' + JSON.stringify(layout));
               }
               await cards.first().scrollIntoViewIfNeeded();
               // User-reported pixelation: two card images must be retina-ready,
