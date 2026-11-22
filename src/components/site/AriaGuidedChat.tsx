@@ -170,7 +170,10 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
       if (first) {
         // APP-01: never jump past the first requirement when all four cards mount.
         const offset = first.getBoundingClientRect().top - history.getBoundingClientRect().top;
-        history.scrollTop += offset - 72;
+        // Keep the first card fully visible even with the compact phone footer.
+        const availableTop = history.clientHeight - first.getBoundingClientRect().height - 12;
+        const topGap = Math.max(8, Math.min(42, availableTop));
+        history.scrollTop += offset - topGap;
         return;
       }
     }
