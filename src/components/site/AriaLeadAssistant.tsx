@@ -79,7 +79,7 @@ export function AriaLeadAssistant({
         width: Math.round(bubble.width),
         height: Math.round(bubble.height),
         tipX: Math.round(head.left + head.width * (guidedChatPreview ? 0.32 : 0.68) - bubble.left),
-        tipY: Math.round(head.top + head.height * 0.43 - bubble.top),
+        tipY: Math.round(head.top + head.height * (guidedChatPreview ? 0.65 : 0.43) - bubble.top),
       };
       setSpeechGeometry(prev =>
         Object.keys(next).every(key => prev[key as keyof typeof prev] === next[key as keyof typeof next]) ? prev : next);
@@ -250,12 +250,20 @@ export function AriaLeadAssistant({
   }
 
   const { width: sw, height: sh, tipX, tipY } = speechGeometry;
+  // The preview portrait stays ABOVE the centered floating menu.
+  // Keep the balloon's full rounded bottom border. Its right edge opens into
+  // a short pair of Bezier curves: broad at the balloon, tapering to Aria's face.
+  // Clamping both attachment heights keeps the tail away from the corner even
+  // when the intro copy wraps differently on narrow iPhones.
+  const tailTopY = Math.max(18, Math.min(sh - 37, tipY + 10));
+  const tailBottomY = Math.min(sh - 16, Math.max(tailTopY + 24, tipY + 34));
   const rightSpeechPath = [
     "M 16 1",
     `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
-    `L ${sw - 1} ${sh - 18}`,
-    `C ${sw - 1} ${sh - 8} ${tipX - 16} ${tipY - 15} ${tipX} ${tipY}`,
-    `C ${tipX - 14} ${tipY - 8} ${sw - 32} ${sh - 1} ${sw - 30} ${sh - 1}`,
+    `L ${sw - 1} ${tailTopY}`,
+    `C ${sw + 7} ${tailTopY - 5} ${tipX - 13} ${tipY + 2} ${tipX} ${tipY}`,
+    `C ${tipX - 15} ${tipY + 12} ${sw - 1} ${tailBottomY - 7} ${sw - 1} ${tailBottomY}`,
+    `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
     `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
     "L 1 16 Q 1 1 16 1 Z",
   ].join(" ");
@@ -418,6 +426,8 @@ export function AriaLeadAssistant({
             className={guidedChatPreview ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
+                data-tail-base-top={guidedChatPreview ? tailTopY : undefined}
+                data-tail-base-bottom={guidedChatPreview ? tailBottomY : undefined}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
                 <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"

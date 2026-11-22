@@ -636,6 +636,26 @@ if (!bellaris && brandPreviewCandidate) {
               if (!tipOnHead) throw new Error('One-piece speech tail must terminate at Aria portrait at ' + width);
 
               if (url.pathname === '/test-aria/') {
+                // APP-01: the right-side bubble must taper gently toward Aria.
+                // Never substitute a triangle cut out of the bottom border.
+                const contour = await tail.evaluate(svg => {
+                  const { width: w, height: h } = svg.viewBox.baseVal;
+                  const d = svg.querySelector('path')?.getAttribute('d') || '';
+                  return {
+                    top: Number(svg.dataset.tailBaseTop),
+                    bottom: Number(svg.dataset.tailBaseBottom),
+                    hasRoundedBottomRight: d.includes(
+                      'L ' + (w - 1) + ' ' + (h - 16) +
+                      ' Q ' + (w - 1) + ' ' + (h - 1) +
+                      ' ' + (w - 16) + ' ' + (h - 1)),
+                    height: h,
+                  };
+                });
+                if (!contour.hasRoundedBottomRight || contour.top < 16 ||
+                    contour.bottom <= contour.top || contour.bottom > contour.height - 16)
+                  throw new Error('Test Aria tail must widen into the side while preserving the rounded bottom of the bubble at ' + width + ': ' + JSON.stringify(contour));
+                if (await aria.evaluate(el => getComputedStyle(el).position) !== 'fixed')
+                  throw new Error('Test Aria menu must remain floating and fixed at ' + width);
                 const trigger = aria.locator('[data-aria-chat-trigger]');
                 if (!await trigger.isVisible()) throw new Error('Preview must make the Aria portrait a real chat control');
                 const triggerBox = await trigger.boundingBox();
