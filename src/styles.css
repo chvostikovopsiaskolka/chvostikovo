@@ -1332,8 +1332,8 @@
   stroke-width: 2.2;
   stroke-linejoin: round;
 }
-.site-brand a.text-coral,
-.site-brand button.text-coral { color: #a95400; }
+.site-brand .text-coral { color: #a95400; }
+.site-brand #preco-chvostikovo .bg-coral { color: #26322b; }
 .site-brand [data-lead-step-form] input[type="radio"] + span {
   background-color: #fff0d5;
   color: #26322b;
@@ -1355,4 +1355,3 @@
   }
   .site-brand :focus-visible { outline-color: Highlight; }
 }
-
