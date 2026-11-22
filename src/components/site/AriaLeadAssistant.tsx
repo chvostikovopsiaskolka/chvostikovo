@@ -278,7 +278,7 @@ export function AriaLeadAssistant({
       <div className="pointer-events-none relative mx-auto w-full max-w-[690px] pb-0">
         {panel && (
           <div role="region" aria-label={"Aria: " + panel} data-aria-panel={panel}
-            className="pointer-events-auto absolute bottom-[calc(100%+9px)] left-0 right-0 max-h-[min(63dvh,500px)] overflow-y-auto overscroll-contain rounded-[26px] border border-white/75 bg-card/95 p-3 text-forest shadow-[0_14px_45px_rgba(17,65,41,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:p-4">
+            className="pointer-events-auto absolute bottom-[calc(100%+9px)] left-0 right-0 z-20 max-h-[min(63dvh,500px)] overflow-y-auto overscroll-contain rounded-[26px] border border-white/75 bg-card/95 p-3 text-forest shadow-[0_14px_45px_rgba(17,65,41,.22)] ring-1 ring-forest/10 backdrop-blur-2xl sm:p-4">
             <div className="flex items-center justify-between gap-2">
               <div className="flex min-w-0 items-center gap-2">
                 {panel === "menu" ? (
@@ -416,7 +416,7 @@ export function AriaLeadAssistant({
         {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
             className={guidedChatPreview ? "pointer-events-none mb-2 flex w-full justify-end pr-[100px] sm:pr-[116px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
-            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[460px] -rotate-[0.5deg] items-center px-3 py-2 text-forest">
+            <div ref={speechRef} data-aria-speech className="relative isolate inline-flex min-h-[48px] w-fit max-w-[min(76vw,300px)] items-center px-3 py-2 text-forest sm:max-w-[390px]">
               <svg aria-hidden="true" data-aria-tail data-tip-x={tipX} data-tip-y={tipY}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
@@ -470,7 +470,7 @@ export function AriaLeadAssistant({
           {guidedChatPreview ? (
             <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
               data-aria-chat-trigger onClick={openChat} style={{ WebkitTapHighlightColor: "transparent" }}
-              className="aria-chat-portrait pointer-events-auto absolute bottom-[calc(100%+12px)] -right-1 h-[92px] w-[92px] max-w-none rounded-full bg-transparent p-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:bottom-[calc(100%+12px)] sm:right-0 sm:h-[104px] sm:w-[104px]">
+              className={"aria-chat-portrait pointer-events-auto absolute bottom-[calc(100%+12px)] " + (panel ? "z-0 " : "z-30 ")} -right-1 h-[92px] w-[92px] max-w-none rounded-full bg-transparent p-0 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral sm:bottom-[calc(100%+12px)] sm:right-0 sm:h-[104px] sm:w-[104px]">
               <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
                 className="pointer-events-none h-full w-full object-contain contrast-[1.1] saturate-[1.05] drop-shadow-[0_3px_5px_rgba(0,0,0,.23)]" />
             </button>
