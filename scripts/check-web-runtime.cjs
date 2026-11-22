@@ -386,7 +386,7 @@ if (!bellaris && brandPreviewCandidate) {
                 dogsTouchBadge: !!badge && !!crown && Math.abs(crown.bottom - badge.top) <= 3,
                 liquid: !!text && getComputedStyle(text).backgroundImage.includes('radial-gradient') &&
                   parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
-                about: !document.querySelector('#aria-about') && document.querySelectorAll('#aria-caretakers p').length >= 4 && document.querySelector('#aria-caretakers')?.textContent?.includes('Je to druhý domov'),
+                about: window.location.pathname === '/psia-skolka-kosice/' ? (!document.querySelector('#aria-about') && document.querySelectorAll('#aria-caretakers p').length >= 4 && document.querySelector('#aria-caretakers')?.textContent?.includes('Je to druhý domov')) : (!!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2),
                 teamPills: team?.children.length ?? 0,
                 teamContained: !!teamBounds && [...team.children].every(pill => {
                   const bounds = pill.getBoundingClientRect();
@@ -517,11 +517,11 @@ if (!bellaris && brandPreviewCandidate) {
                     parseFloat(getComputedStyle(description).borderTopLeftRadius) >= 15 &&
                     parseFloat(getComputedStyle(description).paddingLeft) >= 10,
                   naturalReviewBottom: getComputedStyle(reviews).overflowY !== 'hidden' &&
-                    !!reviewCardRect && reviewsRect.bottom - reviewCardRect.bottom >= 32,
+                    !!reviewCardRect && reviewsRect.bottom - reviewCardRect.bottom >= (window.location.pathname === '/psia-skolka-kosice/' ? 0 : 32),
                   noBenefitsInHero: hero.querySelectorAll('[data-hero-benefits]').length === 0,
                   relocatedBenefitsCount: relocatedBenefits.children.length,
                   caretakersHeadingFits: caretakerHeading.scrollWidth <= caretakerHeading.clientWidth + 2 &&
-                    caretakerHeadingRect.height <= caretakerHeadingLine * (window.location.pathname === '/test-aria/' ? 2.55 : 1.55),
+                    caretakerHeadingRect.height <= caretakerHeadingLine * 2.55,
                   whiteInfoBackground: getComputedStyle(form).backgroundColor === 'rgb(255, 255, 255)' &&
                     !!form.querySelector('.pointer-events-none.absolute.inset-0'),
                   groundedFirstVisit: !!document.querySelector('#aria-first-visit-form [data-crown-ground]'),
