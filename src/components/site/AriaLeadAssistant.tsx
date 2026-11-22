@@ -255,8 +255,8 @@ export function AriaLeadAssistant({
   // a short pair of Bezier curves: broad at the balloon, tapering to Aria's face.
   // Clamping both attachment heights keeps the tail away from the corner even
   // when the intro copy wraps differently on narrow iPhones.
-  const tailTopY = Math.max(22, Math.min(sh - 40, tipY + 12));
-  const tailBottomY = Math.min(sh - 17, Math.max(tailTopY + 22, tipY + 38));
+  const tailTopY = Math.max(18, Math.min(sh - 37, tipY + 10));
+  const tailBottomY = Math.min(sh - 16, Math.max(tailTopY + 24, tipY + 34));
   const rightSpeechPath = [
     "M 16 1",
     `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
