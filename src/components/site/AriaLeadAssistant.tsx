@@ -498,7 +498,7 @@ export function AriaLeadAssistant({
                 <button type="button" className={optionClass} onClick={() => jump("lead-benefits", "why")}>
                   <span><strong className="block text-sm">Prečo Chvostíkovo</strong><small className="block text-[11px] font-normal text-forest/65">3 dôvody, prečo si vybrať nás</small></span><ArrowRight size={16} aria-hidden />
                 </button>
-                <button type="button" className={optionClass} onClick={() => jump("aria-mosaic", "gallery")}>
+                <button type="button" className={optionClass} onClick={() => jump(sectionNavigation ? "lead-photo-carousel" : "aria-mosaic", "gallery")}>
                   <span><strong className="block text-sm">Fotogaléria</strong><small className="block text-[11px] font-normal text-forest/65">Nahliadnite do života škôlkarov</small></span><ArrowRight size={16} aria-hidden />
                 </button>
                 <button type="button" className={optionClass} onClick={() => jump("lead-first-visit", "first_visit")}>
@@ -518,7 +518,7 @@ export function AriaLeadAssistant({
 
         {!panel && !chatOpen && (
           <div data-aria-message data-aria-suppressed="false"
-            className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : sectionNavigation ? "pointer-events-none mb-3 flex w-full justify-start pl-[78px] sm:pl-[112px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
+            className={rightAlignedBubble ? "pointer-events-none mb-3 flex w-full justify-end pr-[85px] sm:pr-[110px]" : sectionNavigation ? "pointer-events-none mb-3 flex w-full justify-start pl-[78px] sm:pl-[112px] lg:pl-[236px]" : "pointer-events-none mb-2 flex w-full justify-start pl-[75px] sm:pl-[96px]"}>
             <div ref={speechRef} data-aria-speech data-aria-outline-ready={outlineReady}
               className={"relative isolate inline-flex min-h-[48px] w-fit max-w-[min(75vw,390px)] items-center px-3 py-2 text-forest sm:max-w-[390px]" +
                 (outlineReady ? "" : " rounded-[16px] bg-card ring-2 ring-forest/70")}>
@@ -594,7 +594,7 @@ export function AriaLeadAssistant({
                 <button type="button" className={itemClass} aria-label="Cenník škôlky" onClick={() => goToLeadSection("lead-pricing", "pricing")}><Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span></button>
                 <button type="button" className={itemClass} aria-label="Podmienky prijatia" onClick={() => goToLeadSection("lead-requirements", "requirements")}><ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span></button>
                 <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={() => goToLeadSection("aria-hero-form", "interest")}><PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span></button>
-                <button type="button" className={itemClass} aria-label="Otvoriť menu" onClick={() => goToLeadSection("lead-section-menu", "menu")}><Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span></button>
+                <button type="button" className={itemClass} aria-label="Otvoriť menu" onClick={() => toggle("menu")} aria-expanded={panel === "menu"}><Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span></button>
               </>
             ) : (
               <>
