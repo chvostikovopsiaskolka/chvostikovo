@@ -914,8 +914,13 @@ if (!bellaris && brandPreviewCandidate) {
                     triggerBox.x + triggerBox.width > width + 4 ||
                     Math.abs((dockBox.x + dockBox.width / 2) - width / 2) > 12)
                   throw new Error('Aria portrait must float above the centered dock at ' + width);
-                if (await trigger.evaluate(el => getComputedStyle(el).webkitTapHighlightColor !== 'rgba(0, 0, 0, 0)'))
-                  throw new Error('Aria portrait must suppress the iOS tap highlight square');
+                if (await trigger.evaluate(el => {
+                  const style = getComputedStyle(el);
+                  return style.webkitTapHighlightColor !== 'rgba(0, 0, 0, 0)' ||
+                    style.backgroundColor !== 'rgba(0, 0, 0, 0)' ||
+                    style.webkitAppearance !== 'none';
+                }))
+                  throw new Error('Preview portrait must suppress the colored tap and click zone');
                 if (width === 390) {
                   const chatCta = page.locator('[data-aria-bubble-chat-cta]');
                   if (!await chatCta.isVisible() ||
@@ -1020,15 +1025,17 @@ if (!bellaris && brandPreviewCandidate) {
                   if (await chat.locator('[data-aria-chat-followup] [data-aria-chat-question]').count() !== 5 ||
                       !await chat.locator('[data-aria-chat-followup] [data-aria-chat-interest-cta]').count())
                     throw new Error('After requirements show five remaining FAQs and working interest CTA');
-                  const firstCardInView = await requirementCards.first().evaluate(el => {
+                  const firstCardGeometry = await requirementCards.first().evaluate(el => {
                     const viewport = el.closest('[data-aria-chat-history]');
                     const card = el.getBoundingClientRect();
                     const frame = viewport?.getBoundingClientRect();
-                    return !!frame && card.top >= frame.top - 2 &&
-                      card.top < frame.top + 130 && card.bottom < frame.bottom + 5;
+                    return frame ? { topGap: card.top - frame.top, bottomGap: frame.bottom - card.bottom,
+                      cardHeight: card.height, viewportHeight: frame.height, scrollTop: viewport.scrollTop } : null;
                   });
-                  if (!firstCardInView)
-                    throw new Error('Finishing requirements must keep the first card visible, not jump to the last card');
+                  if (!firstCardGeometry || firstCardGeometry.topGap < -2 ||
+                      firstCardGeometry.topGap > 130 || firstCardGeometry.bottomGap < -5)
+                    throw new Error('Finishing requirements must keep the first card visible: ' +
+                      JSON.stringify(firstCardGeometry));
                   await chat.locator('[data-aria-chat-followup] [data-aria-chat-other-cta]').click();
                   const questionForm = chat.locator('[data-aria-chat-other]');
                   await questionForm.waitFor({ state: 'visible' });
