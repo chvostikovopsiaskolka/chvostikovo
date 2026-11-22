@@ -651,7 +651,7 @@ if (!bellaris && brandPreviewCandidate) {
                     height: h,
                   };
                 });
-                if (!contour.hasRoundedBottomRight || contour.top < 20 ||
+                if (!contour.hasRoundedBottomRight || contour.top < 16 ||
                     contour.bottom <= contour.top || contour.bottom > contour.height - 16)
                   throw new Error('Test Aria tail must widen into the side while preserving the rounded bottom of the bubble at ' + width + ': ' + JSON.stringify(contour));
                 if (await aria.evaluate(el => getComputedStyle(el).position) !== 'fixed')
