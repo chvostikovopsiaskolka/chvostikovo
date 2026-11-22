@@ -413,7 +413,7 @@ if (!bellaris && brandPreviewCandidate) {
                   parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
                 about: window.location.pathname === '/psia-skolka-kosice/'
                   ? !!document.querySelector('#aria-about [data-hero-benefits]') &&
-                    !document.querySelector('#aria-about h2') &&
+                    ![...document.querySelectorAll('#aria-about h2')].some(h => h.textContent?.includes('Viac o nás a našej škôlke')) &&
                     !document.body.textContent.includes('Viac o nás a našej škôlke')
                   : !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
                 teamPills: team?.children.length ?? 0,
