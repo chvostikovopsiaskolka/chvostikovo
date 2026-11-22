@@ -434,6 +434,24 @@ if (!bellaris && brandPreviewCandidate) {
             const ariaDesktop = page.locator('[data-aria-guide]');
             const beforeOpen = await page.locator('[data-aria-service-badge]').evaluate(el => el.getBoundingClientRect().left);
             if (url.pathname === '/psia-skolka-kosice/') {
+              const enlargedSpeech = await ariaDesktop.locator('[data-aria-speech]').evaluate(el => {
+                const bounds = el.getBoundingClientRect();
+                const face = document.querySelector('[data-aria-dock] img[alt^="Aria"]')?.getBoundingClientRect();
+                return {
+                  width: bounds.width, height: bounds.height,
+                  textSize: parseFloat(getComputedStyle(el.querySelector('p, strong') ?? el).fontSize),
+                  side: el.querySelector('[data-aria-tail]')?.getAttribute('data-aria-tail-side'),
+                  faceLeft: face?.left ?? -1,
+                  faceRight: face?.right ?? -1,
+                  bubbleLeft: bounds.left,
+                };
+              });
+              if (enlargedSpeech.width < 410 || enlargedSpeech.height < 68 ||
+                  enlargedSpeech.textSize < 15 || enlargedSpeech.side !== 'left' ||
+                  enlargedSpeech.faceLeft >= enlargedSpeech.bubbleLeft ||
+                  enlargedSpeech.faceRight > enlargedSpeech.bubbleLeft + 30)
+                throw new Error('Paid desktop Aria speech must be larger and to the RIGHT of its portrait: ' +
+                  JSON.stringify(enlargedSpeech));
               const nav = ariaDesktop.locator('[data-aria-section-navigation="true"]');
               if (await nav.locator('button').count() !== 5 || await ariaDesktop.locator('[data-aria-panel]').count())
                 throw new Error('Paid LEAD should have five in-page shortcuts and no floating panel');
@@ -782,21 +800,24 @@ if (!bellaris && brandPreviewCandidate) {
                   const { width: w, height: h } = svg.viewBox.baseVal;
                   const d = svg.querySelector('path')?.getAttribute('d') || '';
                   return {
+                    side: svg.dataset.ariaTailSide,
                     top: Number(svg.dataset.tailBaseTop),
                     bottom: Number(svg.dataset.tailBaseBottom),
                     hasRoundedBottomRight: d.includes('L ' + (w - 1) + ' ' + (h - 16) +
                       ' Q ' + (w - 1) + ' ' + (h - 1) + ' ' + (w - 16) + ' ' + (h - 1)),
+                    hasRoundedBottomLeft: d.includes('L 16 ' + (h - 1) + ' Q 1 ' + (h - 1) + ' 1 ' + (h - 16)),
                     height: h,
                   };
                 });
-                if (!contour.hasRoundedBottomRight || contour.top < 16 ||
+                if (contour.side !== 'left' || !contour.hasRoundedBottomRight ||
+                    !contour.hasRoundedBottomLeft || contour.top < 16 ||
                     contour.bottom <= contour.top || contour.bottom > contour.height - 16 ||
-                    headBox.x < speechBox.x + speechBox.width - 30 ||
-                    headBox.x < width / 2 ||
+                    headBox.x >= speechBox.x || headBox.x > width / 2 ||
+                    headBox.x + headBox.width < speechBox.x - 30 ||
                     speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
-                    await aria.locator('[data-aria-chat-trigger], [data-aria-chat]').count())
-                  throw new Error('Paid Aria must use the intact right-facing PREVIEW bubble without chatbot: ' +
-                    JSON.stringify({ width, contour, speechBox, headBox }));
+                    tip.x >= 0 || await aria.locator('[data-aria-chat-trigger], [data-aria-chat]').count())
+                  throw new Error('Paid Aria must sit to the LEFT with one intact side-anchored rounded bubble: ' +
+                    JSON.stringify({ width, contour, speechBox, headBox, tip }));
               }
 
               if (url.pathname === '/test-aria/') {
