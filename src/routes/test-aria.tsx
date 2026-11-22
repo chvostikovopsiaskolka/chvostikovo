@@ -190,7 +190,7 @@ export function AriaPreviewPage() {
           {/* Fill the former empty Aria breathing room with two real photos from
               the moving gallery. Keep the enquiry below the initial viewport,
               while leaving Aria fixed above the bottom dock. Desktop now also shows the photos. */}
-          <div data-aria-intro-space className="relative z-10 mx-auto flex min-h-[148px] max-h-[166px] w-full max-w-3xl flex-[0.45] items-center px-4 py-2 sm:min-h-[110px] sm:max-h-[150px] sm:px-0 sm:py-0 lg:max-w-4xl lg:min-h-[268px] lg:max-h-[286px] lg:flex-[0.3]">
+          <div data-aria-intro-space className="relative z-10 mx-auto flex min-h-[178px] max-h-[198px] w-full max-w-3xl flex-[0.45] items-end px-4 pb-2 pt-8 sm:min-h-[135px] sm:max-h-[175px] sm:px-0 sm:pb-0 sm:pt-5 lg:max-w-4xl lg:min-h-[268px] lg:max-h-[286px] lg:flex-[0.3]">
             <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:gap-4">
               {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
                 <button type="button" key={photo.src} data-aria-review-photo={index + 1}
@@ -226,7 +226,7 @@ export function AriaPreviewPage() {
         <section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-white py-9 sm:py-12">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-5xl px-4">
-            <h2 className="section-title mb-5 whitespace-nowrap text-center text-[clamp(12px,3.65vw,34px)] leading-tight tracking-[-0.025em]">Kto sa bude starať o vášho psíka?</h2>
+            <h2 className={isLiveLead ? "section-title mb-5 whitespace-nowrap text-center text-[clamp(12px,3.65vw,34px)] leading-tight tracking-[-0.025em]" : "section-title mb-4 text-center text-[clamp(22px,4.5vw,38px)] leading-tight tracking-[-0.025em]"}>Kto sa bude starať o vášho psíka?</h2>
             <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 sm:gap-6">
               <div className="w-full max-w-[440px]">
                 <img
@@ -254,7 +254,7 @@ export function AriaPreviewPage() {
           </div>
         </section>
 
-        <section id="aria-about" className="relative bg-card py-9 sm:py-12">
+        <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
           <div className="mx-auto max-w-4xl px-4">
             <h2 className="section-title text-center text-lg sm:text-xl">Viac o nás a našej škôlke</h2>
             <div className="mx-auto mt-5 max-w-3xl space-y-4 text-center text-sm leading-relaxed text-forest/80 sm:text-base">

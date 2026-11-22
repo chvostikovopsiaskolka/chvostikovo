@@ -1049,3 +1049,30 @@
   background-color: #f2d9e8;
   color: var(--preview-cta-rose);
 }
+
+/* 22 Nov approved Test Aria palette: rose/orange contrast, not generic black/orange. */
+.aria-brand-experiment [data-aria-hero-content] h1 { color: #b82e7f; }
+.aria-brand-experiment [data-aria-service-badge] { color: #fff; }
+.aria-brand-experiment #aria-early-faq,
+.aria-brand-experiment #lead-pricing,
+.aria-brand-experiment #lead-faq { background-color: rgb(255 164 20 / 19%); }
+.aria-brand-experiment #lead-pricing article.bg-forest { background-color: #f8ddeb; color: #26322b; ring-color: #b82e7f; }
+.aria-brand-experiment #lead-pricing article.bg-forest h3,
+.aria-brand-experiment #lead-pricing article.bg-forest p,
+.aria-brand-experiment #lead-pricing article.bg-forest strong { color: #26322b; }
+.aria-brand-experiment #lead-pricing article.bg-forest [data-lead-price] { color: #b82e7f; }
+.aria-brand-experiment #lead-requirements { background: #fff; }
+.aria-brand-experiment #lead-requirements h2 { color: #26322b; }
+.aria-brand-experiment #lead-requirements h3 { color: #ffa414; }
+.aria-brand-experiment #lead-requirements svg { color: #26322b; }
+.aria-brand-experiment footer { background-color: #fff; background-image: radial-gradient(ellipse at 15% 5%,rgb(255 164 20 / 12%),transparent 65%); }
+.aria-brand-experiment #aria-mosaic [data-aria-location],
+.aria-brand-experiment #aria-mosaic [data-aria-parking] { background-color: #f8ddeb; }
+.aria-brand-experiment #aria-hero-form [data-aria-form-choice] { background-color: #ffa414; color: #26322b; }
+.aria-brand-experiment [data-aria-speech] { transform: none; }
+
+/* Preview form's three real radio cards (not the CTA buttons). */
+.aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"] + span { background-color: #ffa414; color: #26322b; border-color: rgb(38 50 43 / 16%); }
+.aria-brand-experiment #aria-hero-form [data-lead-step-form] input[type="radio"]:checked + span { background-color: #ffb43b; border-color: #b82e7f; box-shadow: 0 0 0 2px rgb(184 46 127 / 20%); }
+
+.aria-brand-experiment #aria-mosaic [data-aria-location-chips] > * { background-color: #f8ddeb; color: #26322b; }
