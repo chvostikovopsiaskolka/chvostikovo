@@ -19,15 +19,17 @@ export function AriaPuppyChecker({
   onInfo,
   embedded = false,
   trackingSource,
+  initialAnswers,
 }: {
   onInterest: (details: PuppyCheckInput) => void;
   onInfo?: (details: PuppyCheckInput) => void;
   embedded?: boolean;
   trackingSource?: string;
+  initialAnswers?: PuppyCheckInput;
 }) {
-  const [step, setStep] = useState<Step>("age");
-  const [age, setAge] = useState(4);
-  const [vaccines, setVaccines] = useState<Record<string, Vaccine>>({
+  const [step, setStep] = useState<Step>(initialAnswers ? "vaccines" : "age");
+  const [age, setAge] = useState(initialAnswers?.age_months ?? 4);
+  const [vaccines, setVaccines] = useState<Record<string, Vaccine>>(initialAnswers?.vaccines ?? {
     rabies: "unknown", dhppi: "unknown", kennel: "unknown",
   });
   const allVaccinated = VACCINES.every(({ id }) => vaccines[id] === "yes");
