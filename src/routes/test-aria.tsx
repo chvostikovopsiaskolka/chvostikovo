@@ -179,7 +179,7 @@ export function AriaPreviewPage() {
               </div>
 
               <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[590px]">
-                <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
+                <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije si <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
               </p>
             </div>
           </div>
@@ -190,13 +190,13 @@ export function AriaPreviewPage() {
           {/* Fill the former empty Aria breathing room with two real photos from
               the moving gallery. Keep the enquiry below the initial viewport,
               while leaving Aria fixed above the bottom dock. Desktop now also shows the photos. */}
-          <div data-aria-intro-space className="relative z-10 mx-auto flex min-h-[178px] max-h-[198px] w-full max-w-3xl flex-[0.45] items-end px-4 pb-2 pt-8 sm:min-h-[135px] sm:max-h-[175px] sm:px-0 sm:pb-0 sm:pt-5 lg:max-w-4xl lg:min-h-[268px] lg:max-h-[286px] lg:flex-[0.3]">
+          <div data-aria-intro-space className={isLiveLead ? "relative z-10 mx-auto flex min-h-[245px] w-full max-w-3xl flex-[0.45] items-end px-4 pb-3 pt-12 sm:min-h-[285px] sm:px-0 sm:pb-3 sm:pt-12 lg:max-w-4xl lg:min-h-[385px] lg:flex-[0.3]" : "relative z-10 mx-auto flex min-h-[178px] max-h-[198px] w-full max-w-3xl flex-[0.45] items-end px-4 pb-2 pt-8 sm:min-h-[135px] sm:max-h-[175px] sm:px-0 sm:pb-0 sm:pt-5 lg:max-w-4xl lg:min-h-[268px] lg:max-h-[286px] lg:flex-[0.3]"}>
             <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:gap-4">
               {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
                 <button type="button" key={photo.src} data-aria-review-photo={index + 1}
                   aria-label={`Zobraziť fotografiu: ${photo.alt}`}
                   onClick={() => setReviewPhotoOpen(index)}
-                  className="group relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[138px] lg:h-[260px]">
+                  className={isLiveLead ? "group relative h-[190px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[220px] sm:h-[260px] lg:h-[340px]" : "group relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[138px] lg:h-[260px]"}>
                   <img src={photo.src} alt={photo.alt} width={672} height={896} loading="lazy" decoding="async"
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
                 </button>
