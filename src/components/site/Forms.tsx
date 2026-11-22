@@ -161,7 +161,17 @@ export function ShortForm({
       onInvalidCapture={progress.onInvalidCapture}
       onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }}
       className="space-y-3 text-left sm:space-y-3.5">
-      <p className="text-xs font-bold text-[#9e336f]">Krok {contactStep} z 2</p>
+      <div className="space-y-2">
+        <div className="flex justify-between gap-2 text-xs font-semibold text-forest/75" aria-live="polite">
+          <span>Krátky kontaktný formulár</span>
+          <span>Krok {contactStep} z 2</span>
+        </div>
+        <div role="progressbar" aria-label="Postup kontaktného formulára"
+          aria-valuenow={contactStep} aria-valuemin={1} aria-valuemax={2}
+          className="h-1.5 overflow-hidden rounded-full bg-forest/10">
+          <div className={`h-full rounded-full bg-coral transition-all duration-300 ${contactStep === 1 ? "w-1/2" : "w-full"}`} />
+        </div>
+      </div>
       {contactStep === 1 ? (
         <div data-aria-contact-question-step className="space-y-3">
           <label className="label-sm" htmlFor={`s-${formId}-contact-question`}>Čo by ste sa chceli spýtať? *</label>
@@ -178,6 +188,7 @@ export function ShortForm({
         </div>
       ) : (
         <div data-aria-contact-details-step className="space-y-3">
+          <h3 className="font-display text-lg font-bold leading-snug text-forest sm:text-xl">Kam sa vám môžeme ozvať?</h3>
           <input type="hidden" name="otazka" value={contactQuestion.trim()} />
           <div className="rounded-2xl bg-secondary/55 p-3 text-sm text-forest">
             <p className="text-xs font-semibold text-forest/70">Vaša otázka</p>
