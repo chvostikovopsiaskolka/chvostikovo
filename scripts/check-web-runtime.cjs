@@ -812,6 +812,7 @@ if (!bellaris && brandPreviewCandidate) {
                 if (contour.side !== 'left' || !contour.hasRoundedBottomRight ||
                     !contour.hasRoundedBottomLeft || contour.top < 16 ||
                     contour.bottom <= contour.top || contour.bottom > contour.height - 16 ||
+                    tip.y <= contour.top + 1 || tip.y >= contour.bottom - 1 ||
                     headBox.x >= speechBox.x || headBox.x > width / 2 ||
                     headBox.x + headBox.width < speechBox.x - 30 ||
                     speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
