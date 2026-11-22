@@ -708,7 +708,7 @@ if (!bellaris && brandPreviewCandidate) {
               if (welcome.fontSize < 10.5 || welcome.overflows)
                 throw new Error('Aria greeting must remain readable without clipping at ' + width);
               const guidance = url.pathname === '/test-aria/'
-                ? 'Aký je cenník škôlky?'
+                ? 'Klikni a zisti viac'
                 : 'Zisti viac z našej ponuky nižšie.';
               if (!await aria.getByText(guidance).count())
                 throw new Error('Aria introduction must show the offer guidance at ' + width);
@@ -801,29 +801,36 @@ if (!bellaris && brandPreviewCandidate) {
                 if (await trigger.evaluate(el => getComputedStyle(el).webkitTapHighlightColor !== 'rgba(0, 0, 0, 0)'))
                   throw new Error('Aria portrait must suppress the iOS tap highlight square');
                 if (width === 390) {
-                  const pricingCta = page.locator('[data-aria-bubble-pricing-cta]');
-                  if (!await pricingCta.isVisible())
-                    throw new Error('Test Aria speech must show a direct pricing CTA instead of click-me copy');
+                  const chatCta = page.locator('[data-aria-bubble-chat-cta]');
+                  if (!await chatCta.isVisible() ||
+                      !await chatCta.getByText('Klikni a zisti viac').count())
+                    throw new Error('Bubble must show generic discover-more CTA');
                   const bubbleGeometry = await page.locator('[data-aria-speech]').boundingBox();
-                  const ctaGeometry = await pricingCta.boundingBox();
+                  const ctaGeometry = await chatCta.boundingBox();
                   if (!bubbleGeometry || !ctaGeometry || ctaGeometry.height < 43 ||
                       ctaGeometry.x < bubbleGeometry.x - 1 ||
                       ctaGeometry.x + ctaGeometry.width > bubbleGeometry.x + bubbleGeometry.width + 1)
-                    throw new Error('Bubble pricing CTA must fit its speech bubble and have a 44px mobile target');
-                  await pricingCta.click();
+                    throw new Error('Discover-more CTA must fit the bubble with a 44px touch target');
+                  await chatCta.click();
                   const chat = page.locator('[data-aria-chat]');
                   await chat.waitFor({ state: 'visible' });
-                  if (await chat.locator('[data-aria-chat-questions]').count())
-                    throw new Error('Pricing bubble must not briefly show the four-choice menu before the prepared answer');
                   const chatWindow = await chat.boundingBox();
                   if (!chatWindow || chatWindow.x < -1 || chatWindow.x + chatWindow.width > width + 1)
-                    throw new Error('Guided chat must fit mobile viewport');
-                  // Direct bubble CTA must actually choose pricing, without a
-                  // second click inside the dialog. The greeting remains visible.
+                    throw new Error('Chat must fit mobile viewport');
+                  const questionMenu = chat.locator('[data-aria-chat-questions]');
+                  await questionMenu.waitFor({ state: 'visible', timeout: 10000 });
+                  if (await questionMenu.locator('[data-aria-chat-question]').count() !== 7 ||
+                      await questionMenu.locator('[data-aria-chat-other-cta]').count() !== 1 ||
+                      await chat.locator('[data-aria-chat-turn="person"]').count())
+                    throw new Error('Discover-more must show seven FAQs and Other without preselection');
+                  const pink = await questionMenu.locator('[data-aria-chat-question="puppy"]').evaluate(el => getComputedStyle(el).backgroundColor);
+                  if (pink === 'rgb(255, 255, 255)' || pink === 'rgba(0, 0, 0, 0)')
+                    throw new Error('Puppy FAQ must be highlighted pink');
+                  await questionMenu.locator('[data-aria-chat-question="pricing"]').click();
                   const pricingPrompt = chat.locator('[data-aria-chat-turn="person"]');
                   await pricingPrompt.waitFor({ state: 'visible', timeout: 10000 });
                   if (!await pricingPrompt.getByText('Aký je cenník škôlky?').count())
-                    throw new Error('Bubble CTA must pre-fill the pricing question in chat');
+                    throw new Error('Price answer must only open when FAQ selected');
                   const typing = chat.locator('[data-aria-chat-turn="aria"] [data-aria-typing="true"]');
                   await typing.waitFor({ state: 'visible', timeout: 10000 });
                   const initialTyped = await typing.evaluate(el => ({
@@ -838,7 +845,7 @@ if (!bellaris && brandPreviewCandidate) {
                       !await chat.getByText(/Jednorazový celodenný vstup stojí 25 €./).count() ||
                       !await chat.getByText(/permanentka za 200 €/).count() ||
                       !await chat.locator('[data-aria-chat-turn="person"] svg[viewBox="0 0 33 36"]').count())
-                    throw new Error('Preselected pricing answer or native pink paw missing');
+                    throw new Error('Selected pricing answer or native pink paw missing');
                   const followup = chat.locator('[data-aria-chat-followup]');
                   await followup.waitFor({ state: 'visible' });
                   const interestCta = followup.locator('[data-aria-chat-interest-cta]');
@@ -847,15 +854,21 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Interest CTA after pricing must be full-width');
                   if (await chat.getByRole('button', { name: /Odpoveď mi stačí/ }).count())
                     throw new Error('Unnecessary thank-you CTA must not reappear');
-                  if (await followup.locator('[data-aria-chat-question]').count() !== 5 ||
+                  if (await followup.locator('[data-aria-chat-question]').count() !== 6 ||
                       await followup.locator('[data-aria-chat-other-cta]').count() !== 1 ||
                       await followup.locator('[data-aria-chat-question="pricing"]').count())
-                    throw new Error('Show all five unanswered topics and orange Other tile directly after pricing');
+                    throw new Error('Show all six unanswered topics and orange Other tile directly after pricing');
 
                   await followup.locator('[data-aria-chat-question="requirements"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
-                  if (await chat.locator('[data-aria-chat-followup] [data-aria-chat-question]').count() !== 4)
-                    throw new Error('After two replies the remaining topics must be offered directly');
+                  const requirementCards = chat.locator('[data-aria-chat-requirements] article');
+                  await requirementCards.first().waitFor({ state: 'visible' });
+                  if (await requirementCards.count() !== 4 ||
+                      !await requirementCards.first().getByText('Očkovanie a prevencia').count())
+                    throw new Error('Requirements must reuse four structured cards from existing modal');
+                  if (await chat.locator('[data-aria-chat-followup] [data-aria-chat-question]').count() !== 5 ||
+                      !await chat.locator('[data-aria-chat-followup]').getByText(/vyplň nezáväzný formulár a my sa ti ozveme späť/i).count())
+                    throw new Error('After requirements show five remaining FAQs and new interest copy');
                   await chat.locator('[data-aria-chat-followup] [data-aria-chat-other-cta]').click();
                   const questionForm = chat.locator('[data-aria-chat-other]');
                   await questionForm.waitFor({ state: 'visible' });
@@ -887,12 +900,15 @@ if (!bellaris && brandPreviewCandidate) {
                   await page.unroute('**/functions/v1/web-form-submit');
                   await chat.getByRole('button', { name: 'Späť k otázkam' }).click();
                   // APP-01: an embedded puppy checker must remain available.
-                  if (await chat.locator('[data-aria-chat-questions] [data-aria-chat-question]').count() !== 4 ||
-                      await chat.locator('[data-aria-chat-puppy-cta]').count() !== 1)
-                    throw new Error('Puppy option must remain available after FAQ replies');
-                  await chat.locator('[data-aria-chat-puppy-cta]').click();
+                  if (await chat.locator('[data-aria-chat-questions] [data-aria-chat-question]').count() !== 5 ||
+                      await chat.locator('[data-aria-chat-puppy-cta]').count() !== 0 ||
+                      !await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="puppy"]').isVisible())
+                    throw new Error('Puppy checker must be a pink FAQ, not a duplicate CTA');
+                  await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="puppy"]').click();
                   const puppy = chat.locator('[data-aria-chat-puppy-check]');
                   await puppy.waitFor({ state: 'visible' });
+                  if (!await puppy.getByRole('button', { name: 'Mám záujem' }).count())
+                    throw new Error('Puppy answer must also offer interest CTA');
                   if (await page.getByRole('dialog', { name: 'Kontrola vhodnosti šteniatka' }).count())
                     throw new Error('Puppy checker must stay inside Aria chat, not open a nested dialog');
                   await puppy.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
