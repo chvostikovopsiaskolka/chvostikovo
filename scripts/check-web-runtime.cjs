@@ -447,7 +447,7 @@ if (!bellaris && brandPreviewCandidate) {
               });
               if (bubbleGeometry.width < 420 || bubbleGeometry.height < 68 ||
                   bubbleGeometry.textSize < 16 ||
-                  bubbleGeometry.faceRight > bubbleGeometry.bubbleLeft - 12 ||
+                  (bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight < 4 || bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight > 10) ||
                   bubbleGeometry.faceRight > bubbleGeometry.textLeft - 26 ||
                   await page.locator('#lead-section-menu').count())
                 throw new Error('Paid desktop Aria must be large with portrait clear of speech and no page menu: ' +
@@ -506,7 +506,7 @@ if (!bellaris && brandPreviewCandidate) {
                   tipX,
                 };
               });
-              if (footerBubble.headGap < 8 || footerBubble.dockGap < 8 ||
+              if ((footerBubble.headGap < 4 || footerBubble.headGap > 10) || footerBubble.dockGap < 8 ||
                   footerBubble.width < 455 || footerBubble.right > footerBubble.viewport - 8 ||
                   footerBubble.tipX >= -8)
                 throw new Error('Paid desktop footer speech overlaps head or dock: '+JSON.stringify(footerBubble));
@@ -522,7 +522,7 @@ if (!bellaris && brandPreviewCandidate) {
                 return {headGap: bubble.left-head.right, dockGap: dock.top-bubble.bottom,
                   left:bubble.left, right:bubble.right,viewport:window.innerWidth};
               });
-              if (tabletSpeech.headGap < 8 || tabletSpeech.dockGap < 8 ||
+              if ((tabletSpeech.headGap < 4 || tabletSpeech.headGap > 10) || tabletSpeech.dockGap < 8 ||
                   tabletSpeech.left < 0 || tabletSpeech.right > tabletSpeech.viewport)
                 throw new Error('Paid tablet speech overlaps Aria head or dock: '+JSON.stringify(tabletSpeech));
             } else if (url.pathname === '/test-aria/') {
@@ -857,6 +857,10 @@ if (!bellaris && brandPreviewCandidate) {
                     height: h,
                   };
                 });
+                const dockSize = await aria.locator('[data-aria-dock]').boundingBox();
+                if ((width >= 1024 && (dockSize.width < 550 || dockSize.height < 64)) ||
+                    (width < 640 && Math.abs(dockSize.height - 58) > 1))
+                  throw new Error('Paid dock must grow only on desktop: ' + JSON.stringify({width, dockSize}));
                 const textMetrics = await comicBubble.evaluate(el => ({
                   fontSize: parseFloat(getComputedStyle(el.querySelector('p')).fontSize),
                   maxWidth: parseFloat(getComputedStyle(el).maxWidth),
@@ -866,7 +870,9 @@ if (!bellaris && brandPreviewCandidate) {
                     contour.bottom > contour.height - 16 ||
                     // A pointer landing on the head never guarantees the
                     // rectangular speech body is outside the head image.
-                    speechBox.x < headBox.x + headBox.width + 8 ||
+                    speechBox.x < headBox.x + headBox.width + 4 ||
+                    speechBox.x > headBox.x + headBox.width + 10 ||
+                    tip.x < -25 || contour.bottom - contour.top > 20 ||
                     speechBox.x < -1 || speechBox.x + speechBox.width > width + 2 ||
                     tip.x >= -8 ||
                     (width >= 1024 && (textMetrics.fontSize < 16 || textMetrics.maxWidth < 450)) ||
@@ -2037,8 +2043,8 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Hero must display exactly one prominent CTA at ' + width);
               const ctaPair = hero.locator('.hero-cta-pair:visible');
               if (url.pathname === '/') {
-                if ((await primary.innerText()).trim() !== 'Mám záujem' || await hero.locator('.hero-cta-secondary').count())
-                  throw new Error('Home hero must retain only the interest CTA: ' + width);
+                if ((await primary.innerText()).trim() !== (width >= 1024 ? 'Chcem zistiť viac' : 'Mám záujem') || await hero.locator('.hero-cta-secondary').count())
+                  throw new Error('Home hero must retain the approved mobile interest / desktop information CTA: ' + width);
                 const centered = await primary.evaluate(el => {
                   const r=el.getBoundingClientRect(), parent=el.parentElement.getBoundingClientRect();
                   return Math.abs((r.left+r.right-parent.left-parent.right)/2) <= 2;
@@ -2047,21 +2053,38 @@ if (!bellaris && brandPreviewCandidate) {
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]').first().isVisible())
                   throw new Error('Desktop home guided form missing');
                 const layout = await page.evaluate(() => {
-                  const ids=['top','preco-chvostikovo','o-nas','cennik','podmienky','informujte-sa','starostlivost','home-early-faq','priestory','psie-priatelstva','prva-navsteva','preco','faq'];
+                  const ids=['top','preco-chvostikovo','o-nas','home-early-faq','cennik','podmienky','informujte-sa','starostlivost','priestory','psie-priatelstva','prva-navsteva','prva-navsteva-form','preco','faq'];
                   const nodes=ids.map(id=>document.getElementById(id));
                   const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
                   const cutout=document.querySelector('[data-schoolmates-cutout]');
                   const inputs=[...document.querySelectorAll('input[id]')].map(el=>el.id);
+                  const included=document.querySelector('[data-home-included]').getBoundingClientRect();
+                  const prices=document.querySelector('[data-home-prices]').getBoundingClientRect();
+                  const cards=[...document.querySelectorAll('[data-home-price-card]')].map(el=>el.getBoundingClientRect());
+                  const videoGrid=document.querySelector('[data-video-reasons-grid]');
+                  const dogs=document.querySelector('[data-schoolmates-frame]').getBoundingClientRect();
+                  const titleLine=document.querySelector('[data-home-hero-title-line]');
+                  const lineRange=document.createRange();lineRange.selectNodeContents(titleLine);
+                  const copy=document.querySelector('.home-hero-column .home-hero-copy').getBoundingClientRect();
                   return {
                     ordered:nodes.every((node,i)=>node && (!i || !!(nodes[i-1].compareDocumentPosition(node)&Node.DOCUMENT_POSITION_FOLLOWING))),
                     reviewsInHero:document.getElementById('top').contains(document.getElementById('recenzie')),
                     tickerAbsent:!document.querySelector('main .info-ticker-track'),
                     benefitsMoved:!!photo && !!benefits && benefits.getBoundingClientRect().top>=photo.getBoundingClientRect().bottom && !document.querySelector('#top [data-hero-benefits]'),
-                    forms:['informujte-sa','zaujem-po-priatelstvach'].every(id=>document.getElementById(id)?.querySelector('[data-lead-step-form]')),
+                    forms:['informujte-sa','zaujem-po-priatelstvach','prva-navsteva-form'].every(id=>document.getElementById(id)?.querySelector('[data-lead-step-form]')),
                     uniqueFields:inputs.length===new Set(inputs).size,
                     cutout:!!cutout && cutout.complete && cutout.naturalWidth>0,
                     palette:document.body.classList.contains('site-brand') && getComputedStyle(document.querySelector('#top h1')).color==='rgb(184, 46, 127)',
-                    copy:[...document.querySelectorAll('.home-hero-copy')].every(el=>getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'),
+                    copy:[...document.querySelectorAll('.home-hero-copy')].every(el=>getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)' && getComputedStyle(el).color==='rgb(255, 255, 255)'),
+                    desktopCopy:innerWidth<1024 || (Math.abs(copy.right-lineRange.getBoundingClientRect().right)<9 && !!document.querySelector('.home-hero-column .home-hero-copy br')),
+                    pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
+                    passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
+                    conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
+                    opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
+                    noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
+                    whiteForm:['rgb(255, 255, 255)','oklch(1 0 0)'].includes(getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).backgroundColor) && !document.querySelector('#informujte-sa a[href^="tel:"]'),
+                    firstVisit:getComputedStyle(document.getElementById('prva-navsteva')).backgroundColor==='rgb(145, 64, 107)' && ![...document.querySelectorAll('#prva-navsteva button')].some(el=>el.textContent.includes('Dohodnúť úvodnú návštevu')),
+                    pricingFits:[...document.querySelectorAll('[data-home-pricing-columns] *')].every(el=>el.scrollWidth<=el.clientWidth+2),
                     paws:!!document.querySelector('#top .paw-trail-background'),
                   };
                 });
@@ -2120,6 +2143,24 @@ if (!bellaris && brandPreviewCandidate) {
               }
               if ((await primary.evaluate(el => getComputedStyle(el).boxShadow)) === 'none')
                 throw new Error('Primary CTA glow missing: ' + width);
+            }
+            if(url.pathname==='/' && !restricted) {
+              await page.locator('#home-hero-learn-more').click();
+              await page.waitForFunction(()=>{const y=document.getElementById('preco-chvostikovo').getBoundingClientRect().top;return y>=0&&y<260;});
+              if(await page.getByRole('dialog').count()) throw new Error('Desktop learn-more action opened a dialog');
+              await page.setViewportSize({width:390,height:844});
+              const puppyFaq=page.locator('#podmienky').getByRole('button',{name:'Čo ak chcete prihlásiť šteniatko?'});
+              await puppyFaq.click();
+              await page.locator('#podmienky a[href="#aria-puppy-check"]').click();
+              await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
+              for(const id of ['informujte-sa','zaujem-po-priatelstvach','prva-navsteva-form']) {
+                const inquiry=page.locator('#'+id+' [data-lead-step-form]');
+                await inquiry.locator('label').first().click();
+                await inquiry.getByRole('button',{name:'Pokračovať',exact:true}).click();
+                if(!await inquiry.locator('input[name="meno"]').isVisible()) throw new Error('Inline contact step failed: '+id);
+                await inquiry.getByRole('button',{name:'Späť',exact:true}).click();
+              }
+              await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
             }
             await page.setViewportSize({ width: 390, height: 844 });
           }

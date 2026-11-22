@@ -1173,9 +1173,25 @@
   }
 }
 
+/* Paid LEAD: a small clear gap and a short curved pointer to the portrait.
+   Preview and organic helpers retain their existing silhouette. */
+.lead-brand-live [data-aria-message] { padding-left: 98px; }
+.lead-brand-live [data-aria-tail] {
+  color: rgb(38 50 43 / 40%);
+  filter: drop-shadow(0 3px 6px rgb(38 50 43 / 9%));
+}
+@media (min-width: 640px) {
+  .lead-brand-live [data-aria-message] { padding-left: 112px; }
+}
+
 /* Paid campaign LEAD only: an actually legible desktop speech bubble.
    Leave mobile sizing and the separate /test-aria/ chatbot untouched. */
 @media (min-width: 1024px) {
+  .lead-brand-live [data-aria-dock],
+  .lead-brand-live [data-aria-message] { max-width: 560px; }
+  .lead-brand-live [data-aria-section-navigation] { height: 60px; }
+  .lead-brand-live [data-aria-section-navigation] button span { font-size: 13px; }
+  .lead-brand-live [data-aria-section-navigation] button > svg { width: 22px; height: 22px; }
   .lead-brand-live [data-aria-speech] {
     /* Width is independent of the dock's remaining flex-column space.
        The speech can extend to the right without ever covering Aria's head. */
@@ -1312,7 +1328,11 @@
 .site-brand .bg-forest > svg { color: rgb(255 164 20 / 30%); }
 .site-brand #preco .bg-forest,
 .site-brand #preco-chvostikovo { background-color: rgb(255 164 20 / 26%); }
-.site-brand #preco-chvostikovo [class*="bg-cream/"] { background-color: #fff; }
+.site-brand #preco-chvostikovo [data-video-reasons-grid],
+.site-brand #preco-chvostikovo [data-video-reasons-copy] { background-color: #fff; }
+@media (min-width: 640px) {
+  .site-brand #preco-chvostikovo [data-video-reasons-grid] { background-color: transparent; }
+}
 .site-brand #preco-chvostikovo [class*="text-cream"] { color: #26322b; }
 .site-brand [data-aria-friendship-card],
 .site-brand #home-hero-inline-form > div { background-color: #fff; }
@@ -1320,13 +1340,34 @@
   border: 1px solid rgb(203 114 7 / 25%);
   border-radius: 1.75rem;
   padding: 1.15rem 1.4rem;
-  color: #171c18;
+  color: #fff;
   background-color: #ffa414;
   background-image: radial-gradient(ellipse at 18% 16%, rgb(255 252 224 / 72%), transparent 56%),
     linear-gradient(130deg, #ffbc4a, #ffa414 62%, #ff9c0b);
   box-shadow: 0 12px 30px -20px rgb(169 84 0 / 45%);
 }
 .site-brand .home-hero-cta { justify-content: center; max-width: 280px; }
+/* Intrinsic headline sizing also follows fallback fonts and browser zoom.
+   The hidden, non-interactive guide has the same font metrics as the H1 line;
+   inline containment keeps paragraph content from widening its grid track. */
+.home-hero-details {
+  display: grid;
+  grid-template-columns: minmax(0, max-content);
+  inline-size: max-content;
+  max-inline-size: 100%;
+}
+.home-hero-width-guide {
+  visibility: hidden;
+  block-size: 0;
+  line-height: 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.home-hero-details > .home-hero-copy,
+.home-hero-details > .home-hero-desktop-cta {
+  contain: inline-size;
+  inline-size: 100%;
+}
 .site-brand #top #recenzie { padding-bottom: 1.5rem; }
 .site-brand .paw-trail-background .paw-ambient-print,
 .site-brand .paw-trail-background .paw-trail-print {

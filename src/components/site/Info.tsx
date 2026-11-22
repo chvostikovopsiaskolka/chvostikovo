@@ -9,6 +9,7 @@ import { GALLERY, REQUIREMENTS, PRICING, INCLUDED, FAQ, PHONE } from "@/content/
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FirstVisitPhoto } from "./FirstVisitPhoto";
+import { InquirySection } from "./InquirySection";
 import { ContextFaq, FaqAnswer } from "./ContextFaq";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 
@@ -68,7 +69,10 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
           })}
         </div>
         {showContextFaq && <div className="mx-auto mt-6 max-w-3xl">
-          <ContextFaq question="Prijímate aj šteniatka?" label="Čo ak chcete prihlásiť šteniatko?" source="home_requirements_puppy" />
+          <ContextFaq question="Prijímate aj šteniatka?" label="Čo ak chcete prihlásiť šteniatko?" source="home_requirements_puppy">
+            <a href="#aria-puppy-check" onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker")}
+              className="mt-4 inline-flex min-h-11 items-center font-semibold text-coral-dark underline underline-offset-4">Overiť pripravenosť šteniatka</a>
+          </ContextFaq>
         </div>}
       </div>
     </section>
@@ -91,28 +95,29 @@ const STEPS = [
   },
 ];
 
-export function FirstVisit() {
+export function FirstVisit({ inlineForm = false, leadStyle = false }: { inlineForm?: boolean; leadStyle?: boolean } = {}) {
   const [open, setOpen] = useState(false);
 
   return (
-    <section id="prva-navsteva" className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
-      <SectionAmbientPaws />
+    <>
+    <section id="prva-navsteva" className={"relative scroll-mt-24 overflow-hidden py-10 sm:py-14 " + (leadStyle ? "bg-[#91406b] text-white" : "")}>
+      <SectionAmbientPaws tone={leadStyle ? "dark" : "light"} />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
-          <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
+          <span className={"font-display text-sm font-semibold tracking-wide uppercase " + (leadStyle ? "text-coral-soft" : "text-coral")}>
             Ako to funguje
           </span>
-          <h2 className="section-title mt-2 text-3xl sm:text-4xl">Prvá návšteva v 3 krokoch</h2>
-          <p className="mt-3 text-forest/80">Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.</p>
+          <h2 className={"mt-2 text-3xl sm:text-4xl " + (leadStyle ? "text-white" : "section-title")}>Prvá návšteva v 3 krokoch</h2>
+          <p className={"mt-3 " + (leadStyle ? "text-white/80" : "text-forest/80")}>Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.</p>
         </div>
 
         <ol className="mx-auto mt-10 grid max-w-5xl gap-9 text-center md:grid-cols-3 md:gap-8">
           {STEPS.map((s, i) => (
             <li key={s.title} className="min-w-0">
               <FirstVisitPhoto number={i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
-              <h3 className="font-display text-xl font-bold leading-snug text-forest">{s.title}</h3>
-              <p className="mt-2 text-[0.95rem] leading-relaxed text-forest/80">{s.text}</p>
-              {s.note && <p className="mt-4 flex items-center justify-center gap-2 font-display text-sm font-semibold text-forest"><span className="flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-forest bg-card/80 text-forest"><Check className="size-4" strokeWidth={2.5} aria-hidden="true" /></span> {s.note}</p>}
+              <h3 className={"font-display text-lg font-bold leading-snug " + (leadStyle ? "text-white" : "text-forest")}>{s.title}</h3>
+              <p className={"mt-2 text-sm leading-relaxed " + (leadStyle ? "text-white/85" : "text-forest/80")}>{s.text}</p>
+              {s.note && <p className={"mt-3 text-sm font-bold " + (leadStyle ? "text-white" : "text-forest")}>{s.note}</p>}
             </li>
           ))}
         </ol>
@@ -121,7 +126,7 @@ export function FirstVisit() {
           <ContextFaq question="Ako prebieha prvá návšteva psíka v škôlke?" label="Zistite viac o úvodnej návšteve" source="home_first_visit" />
         </div>
 
-        <div className="mt-8 flex justify-center">
+        {!inlineForm && <div className="mt-8 flex justify-center">
           <button
             type="button"
             onClick={() => {
@@ -133,7 +138,7 @@ export function FirstVisit() {
           >
             Dohodnúť úvodnú návštevu
           </button>
-        </div>
+        </div>}
       </div>
 
       <FormDialog
@@ -145,11 +150,44 @@ export function FirstVisit() {
         <LeadStepForm questionInHeading trackingSource="home_first_visit_interest" />
       </FormDialog>
     </section>
+    {inlineForm && <div className="bg-card pt-8">
+      <InquirySection allScreens matchHero id="prva-navsteva-form" trackingSource="home_first_visit_interest" title="Máte záujem o prvú návštevu?" />
+    </div>}
+    </>
   );
 }
 
-export function Pricing({ interestMode = false }: { interestMode?: boolean } = {}) {
+export function Pricing({ interestMode = false, homeLayout = false }: { interestMode?: boolean; homeLayout?: boolean } = {}) {
   const [open, setOpen] = useState(false);
+
+  if (homeLayout) return (
+    <section id="cennik" data-home-pricing className="relative scroll-mt-24 overflow-hidden bg-secondary py-10 sm:py-14">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-5xl px-4">
+        <h2 className="section-title text-center text-3xl sm:text-4xl">Cenník našich služieb</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je len výhodnejšia.</p>
+        <div data-home-pricing-columns className="mt-7 grid grid-cols-2 items-start gap-3 sm:gap-6">
+          <div data-home-included className="min-w-0 rounded-3xl bg-card p-3 shadow-card sm:p-6 lg:p-8">
+            <h3 className="text-center font-display text-sm font-bold text-forest sm:text-xl">Čo je v cene zahrnuté pri každom vstupe</h3>
+            <ul className="mt-4 space-y-3 text-xs leading-relaxed sm:text-base">
+              {INCLUDED.map(item => <li key={item} className="flex gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-coral-dark sm:size-4" aria-hidden="true" /><span className="min-w-0 text-forest/85">{item}</span></li>)}
+            </ul>
+            <p className="mt-5 flex items-start justify-center gap-1.5 rounded-2xl bg-secondary p-2 text-center text-[11px] font-semibold leading-snug text-forest sm:text-sm"><Car className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" /><span>Odvoz / vyzdvihnutie: 5 € / jazda</span></p>
+          </div>
+          <div data-home-prices className="grid min-w-0 gap-3 sm:gap-5">
+            {PRICING.map(item => <article key={item.name} data-home-price-card={item.highlight ? "pass" : "single"}
+              className={"flex min-w-0 flex-col items-center rounded-3xl px-2.5 py-4 text-center shadow-card sm:p-6 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
+              <h3 className="font-display text-sm font-bold leading-snug text-forest sm:text-xl">{item.name}</h3>
+              {item.highlight && <p className="mt-1 text-[11px] font-semibold text-forest/85 sm:text-sm">10 vstupov</p>}
+              <p data-home-price className={"mt-2 font-display text-3xl font-bold sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-coral-dark")}>{item.price}</p>
+              <p className="mt-2 text-[11px] leading-snug text-forest sm:text-sm">{item.highlight ? <strong>Permanentka platí 2 mesiace.</strong> : "Celodenný pobyt"}</p>
+              {item.highlight && <span data-home-best-value className="mt-3 inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2 py-1.5 text-[10px] font-bold leading-tight text-forest sm:text-xs">Najvýhodnejšie. Ušetríte 50 €</span>}
+            </article>)}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 
   return (
     <section id="cennik" className="relative scroll-mt-24 overflow-hidden py-16 sm:py-20">
