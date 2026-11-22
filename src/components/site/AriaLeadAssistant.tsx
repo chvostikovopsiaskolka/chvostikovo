@@ -554,7 +554,7 @@ export function AriaLeadAssistant({
           <div data-aria-section-navigation={sectionNavigation || undefined} className="flex h-[52px] items-center gap-0.5">
             {sectionNavigation ? (
               <>
-                <button type="button" className={itemClass} aria-label="O nás" onClick={() => goToLeadSection("aria-about", "about")}><span aria-hidden="true" className="text-[20px] leading-none">👥</span><span className="text-[9px] font-semibold sm:text-xs">O nás</span></button>
+                <button type="button" className={itemClass} aria-label="O nás" onClick={() => goToLeadSection("aria-caretakers", "about")}><UsersRound size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">O nás</span></button>
                 <button type="button" className={itemClass} aria-label="Cenník škôlky" onClick={() => goToLeadSection("lead-pricing", "pricing")}><Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span></button>
                 <button type="button" className={itemClass} aria-label="Podmienky prijatia" onClick={() => goToLeadSection("lead-requirements", "requirements")}><ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span></button>
                 <button type="button" className={itemClass} aria-label="Mám záujem o škôlku" onClick={() => goToLeadSection("aria-hero-form", "interest")}><PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span></button>
