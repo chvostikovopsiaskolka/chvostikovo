@@ -774,6 +774,8 @@ if (!bellaris && brandPreviewCandidate) {
                   await pricingCta.click();
                   const chat = page.locator('[data-aria-chat]');
                   await chat.waitFor({ state: 'visible' });
+                  if (await chat.locator('[data-aria-chat-questions]').count())
+                    throw new Error('Pricing bubble must not briefly show the four-choice menu before the prepared answer');
                   const chatWindow = await chat.boundingBox();
                   if (!chatWindow || chatWindow.x < -1 || chatWindow.x + chatWindow.width > width + 1)
                     throw new Error('Guided chat must fit mobile viewport');
