@@ -61,9 +61,9 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
                   <span className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-forest">
                     <Icon className="size-6" aria-hidden />
                   </span>
-                  <h3 className="font-display text-lg font-bold text-forest sm:text-xl">{r.title}</h3>
+                  <h3 className="font-display text-lg font-bold text-coral-dark sm:text-xl">{r.title}</h3>
                 </div>
-                <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80">{ariaPreview ? <AriaHighlightedText text={r.text} /> : r.text}</p>
+                <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80"><AriaHighlightedText text={r.text} /></p>
               </article>
             );
           })}
@@ -71,7 +71,7 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
         {showContextFaq && <div className="mx-auto mt-6 max-w-3xl">
           <ContextFaq question="Prijímate aj šteniatka?" label="Čo ak chcete prihlásiť šteniatko?" source="home_requirements_puppy">
             <a href="#aria-puppy-check" onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker")}
-              className="mt-4 inline-flex min-h-11 items-center font-semibold text-coral-dark underline underline-offset-4">Overiť pripravenosť šteniatka</a>
+              className="btn-coral mt-4 inline-flex min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white shadow-card">Overiť pripravenosť šteniatka</a>
           </ContextFaq>
         </div>}
       </div>
@@ -166,15 +166,16 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
       <div className="relative z-10 mx-auto max-w-5xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Cenník našich služieb</h2>
         <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je len výhodnejšia.</p>
-        <div data-home-pricing-columns className="mt-7 grid grid-cols-2 items-start gap-3 sm:gap-6">
+        <div data-home-pricing-columns className="mt-7 grid grid-cols-2 items-stretch gap-3 sm:gap-6">
           <div data-home-included className="min-w-0 rounded-3xl bg-card p-3 shadow-card sm:p-6 lg:p-8">
-            <h3 className="text-center font-display text-sm font-bold text-forest sm:text-xl">Čo je v cene zahrnuté pri každom vstupe</h3>
+            <h3 className="text-center font-display text-sm font-bold text-forest sm:text-xl">Čo je v cene zahrnuté</h3>
             <ul className="mt-4 space-y-3 text-xs leading-relaxed sm:text-base">
               {INCLUDED.map(item => <li key={item} className="flex gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-coral-dark sm:size-4" aria-hidden="true" /><span className="min-w-0 text-forest/85">{item}</span></li>)}
             </ul>
-            <p className="mt-5 flex items-start justify-center gap-1.5 rounded-2xl bg-secondary p-2 text-center text-[11px] font-semibold leading-snug text-forest sm:text-sm"><Car className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" /><span>Odvoz / vyzdvihnutie: 5 € / jazda</span></p>
+
           </div>
-          <div data-home-prices className="grid min-w-0 gap-3 sm:gap-5">
+          <div data-home-prices className="flex min-w-0 flex-col justify-between gap-3 sm:gap-5">
+            <div data-home-price-cards className="grid min-w-0 gap-3 sm:gap-5">
             {PRICING.map(item => <article key={item.name} data-home-price-card={item.highlight ? "pass" : "single"}
               className={"flex min-w-0 flex-col items-center rounded-3xl px-2.5 py-4 text-center shadow-card sm:p-6 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
               <h3 className="font-display text-sm font-bold leading-snug text-forest sm:text-xl">{item.name}</h3>
@@ -183,6 +184,11 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
               <p className="mt-2 text-[11px] leading-snug text-forest sm:text-sm">{item.highlight ? <strong>Permanentka platí 2 mesiace.</strong> : "Celodenný pobyt"}</p>
               {item.highlight && <span data-home-best-value className="mt-3 inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2 py-1.5 text-[10px] font-bold leading-tight text-forest sm:text-xs">Najvýhodnejšie. Ušetríte 50 €</span>}
             </article>)}
+            </div>
+            <p data-home-taxi className="mt-3 flex min-w-0 items-center justify-center gap-1 rounded-2xl bg-[#f8ddeb] p-2 text-center text-[10px] font-semibold leading-snug text-forest shadow-sm sm:gap-2 sm:p-3 sm:text-sm">
+              <Car className="size-3.5 shrink-0 text-[#b82e7f] sm:size-4" aria-hidden="true" />
+              <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
+            </p>
           </div>
         </div>
       </div>
