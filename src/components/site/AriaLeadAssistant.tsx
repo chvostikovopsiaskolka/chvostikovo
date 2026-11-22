@@ -520,7 +520,7 @@ export function AriaLeadAssistant({
                       Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
                       <strong className="font-extrabold text-forest">Čo ťa zaujíma o škôlke?</strong>
                     </p>
-                    <button type="button" data-aria-bubble-pricing-cta onClick={() => openChat()}
+                    <button type="button" data-aria-bubble-chat-cta onClick={() => openChat()}
                       className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#ffa414] px-3 py-2 text-center text-[11px] font-extrabold leading-snug text-[#26322b] shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9e336f] sm:text-xs">
                       Klikni a zisti viac <ArrowRight aria-hidden size={15} className="shrink-0" />
                     </button>
