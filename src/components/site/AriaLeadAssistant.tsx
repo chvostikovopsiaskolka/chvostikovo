@@ -122,7 +122,7 @@ export function AriaLeadAssistant({
       const next = {
         width: Math.round(bubble.width),
         height: Math.round(bubble.height),
-        tipX: Math.round(head.left + head.width * (rightAlignedBubble ? 0.32 : 0.68) - bubble.left),
+        tipX: Math.round(head.left + head.width * (rightAlignedBubble ? 0.32 : sectionNavigation ? 0.88 : 0.68) - bubble.left),
         tipY: Math.round(head.top + head.height * (rightAlignedBubble ? 0.65 : sectionNavigation ? 0.62 : 0.43) - bubble.top),
       };
       setSpeechGeometry(prev =>
@@ -355,22 +355,22 @@ export function AriaLeadAssistant({
     `L 1 16 Q 1 1 16 1 Z`,
   ].join(" ");
   // Paid navigation keeps Aria on the left. The tip is still measured against
-  // her portrait, but the balloon joins it through two shallow side curves;
+  // her outer cheek, shortening the pointer rather than crossing her face;
   // neither the top nor the rounded bottom is interrupted.
   // The side tail must land on the LEFT of the balloon, outside its text
   // surface. Its base follows the head vertically, but stays clear of the
   // rounded corners for short puppy/contact as well as taller desktop copy.
   const paidTipY = Math.max(22, Math.min(sh - 22, tipY));
-  const paidLeftBaseTop = Math.max(16, Math.min(sh - 36, paidTipY - 10));
-  const paidLeftBaseBottom = Math.min(sh - 16, paidLeftBaseTop + 22);
+  const paidLeftBaseTop = Math.max(16, Math.min(sh - 36, paidTipY - 9));
+  const paidLeftBaseBottom = Math.min(sh - 16, paidLeftBaseTop + 18);
   const paidLeftSpeechPath = [
     "M 16 1",
     `L ${sw - 16} 1 Q ${sw - 1} 1 ${sw - 1} 16`,
     `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
     `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
     `L 1 ${paidLeftBaseBottom}`,
-    `C -5 ${paidLeftBaseBottom} ${tipX + 10} ${paidTipY + 9} ${tipX} ${paidTipY}`,
-    `C ${tipX + 10} ${paidTipY - 9} -5 ${paidLeftBaseTop} 1 ${paidLeftBaseTop}`,
+    `C -6 ${paidLeftBaseBottom} ${tipX + 12} ${paidTipY + 7} ${tipX} ${paidTipY}`,
+    `C ${tipX + 10} ${paidTipY + 1} -4 ${paidLeftBaseTop + 3} 1 ${paidLeftBaseTop}`,
     "L 1 16 Q 1 1 16 1 Z",
   ].join(" ");
   const speechPath = guidedChatPreview ? stablePreviewSpeechPath :
@@ -531,7 +531,7 @@ export function AriaLeadAssistant({
                 data-tail-base-bottom={guidedChatPreview ? previewBaseBottom : sectionNavigation && !portraitOnRight ? paidLeftBaseBottom : rightAlignedBubble ? tailBottomY : undefined}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
-                <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth="1.8"
+                <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth={sectionNavigation && !portraitOnRight ? 1.4 : 1.8}
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>}
               {stage === "intro" ? (
