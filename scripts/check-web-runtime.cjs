@@ -386,7 +386,7 @@ if (!bellaris && brandPreviewCandidate) {
                 dogsTouchBadge: !!badge && !!crown && Math.abs(crown.bottom - badge.top) <= 3,
                 liquid: !!text && getComputedStyle(text).backgroundImage.includes('radial-gradient') &&
                   parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
-                about: !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
+                about: !document.querySelector('#aria-about') && document.querySelectorAll('#aria-caretakers p').length >= 4 && document.querySelector('#aria-caretakers')?.textContent?.includes('Je to druhý domov'),
                 teamPills: team?.children.length ?? 0,
                 teamContained: !!teamBounds && [...team.children].every(pill => {
                   const bounds = pill.getBoundingClientRect();
