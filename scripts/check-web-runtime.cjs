@@ -930,7 +930,11 @@ if (!bellaris && brandPreviewCandidate) {
                   if (await interest.locator('input[name="zaujem"]').count() !== 3 ||
                       !await interest.getByText('Krok 1 z 2').count())
                     throw new Error('Interest must reuse the two-step lead form');
-                  await interest.locator('input[name="zaujem"]').nth(1).check({ force: true });
+                  // iOS/WebKit: the native radio is visually clipped (sr-only).
+                  // Click its visible card, not the hidden input with force.
+                  await interest.locator('label:has(input[name="zaujem"])').nth(1).click();
+                  if (!await interest.locator('input[name="zaujem"]').nth(1).isChecked())
+                    throw new Error('Visible interest card did not select the radio on ' + engine);
                   await interest.getByRole('button', { name: 'Pokračovať' }).click();
                   await interest.getByText('Krok 2 z 2').waitFor({ state: 'visible' });
                   await interest.locator('input[name="meno"]').fill('Test Aria');
