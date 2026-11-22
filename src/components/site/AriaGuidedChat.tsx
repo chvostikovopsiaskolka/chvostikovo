@@ -56,12 +56,14 @@ const chatQuestions: Question[] = [
   },
 ];
 
-function track(action: string) {
-  // No free-text, name, phone or email enters behavioural event_source.
-  void trackCookielessInteraction("explore_daycare", "aria_preview_v3_chat_" + action);
-}
-
-export function AriaGuidedChat({ open, onClose, initialQuestionId }: { open: boolean; onClose: () => void; initialQuestionId: "pricing" | null }) {
+export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefix, formPrefix }: {
+  open: boolean; onClose: () => void; initialQuestionId: "pricing" | null;
+  trackingPrefix: string; formPrefix: string;
+}) {
+  function track(action: string) {
+    // Never send free-text, names, phone numbers or emails in behavioural events.
+    void trackCookielessInteraction("explore_daycare", trackingPrefix + "_" + action);
+  }
   const [mode, setMode] = useState<ChatMode>("questions");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [answered, setAnswered] = useState<string[]>([]);
@@ -377,7 +379,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId }: { open: boo
                     : "Vaše šteniatko zatiaľ nespĺňa všetky orientačné podmienky alebo si nie ste istí očkovaním. Môžete nám nechať kontakt a individuálne sa poradíme."}
                   <span className="mt-1 block">Vek: {puppyCheck.age_months} mesiacov · očkovania: besnota, DHPPi+L, kotercový kašeľ – {Object.values(puppyCheck.vaccines).every(value => value === "yes") ? "všetky potvrdené" : "nie všetky potvrdené"}.</span>
                 </p>
-                <ShortForm hideInterest showChatDogFields trackingSource="aria_preview_chat_puppy_contact"
+                <ShortForm hideInterest showChatDogFields trackingSource={formPrefix + "_puppy_contact"}
                   puppyCheck={puppyCheck}
                   interestValue={puppyContactIsEligible ? "Mám záujem o škôlku pre šteniatko" : "Chcem sa informovať o škôlke"}
                   onSent={() => track("puppy_contact_submitted")} />
@@ -389,7 +391,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId }: { open: boo
                   <ArrowLeft size={15} aria-hidden /> Späť k otázkam
                 </button>
                 <h3 className="font-display text-sm font-bold text-forest">Krátky nezáväzný formulár 🐾</h3>
-                <LeadStepForm trackingSource="aria_preview_chat_interest"
+                <LeadStepForm trackingSource={formPrefix + "_interest"}
                   onSent={() => track("interest_submitted")} />
               </section>
             )}
@@ -399,7 +401,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId }: { open: boo
                   <ArrowLeft size={15} aria-hidden /> Späť k otázkam
                 </button>
                 <h3 className="font-display text-sm font-bold text-forest">Napíš nám svoju otázku 🐾</h3>
-                <ShortForm hideInterest showQuestionField trackingSource="aria_preview_chat_other"
+                <ShortForm hideInterest showQuestionField trackingSource={formPrefix + "_other"}
                   interestValue="Chcem sa informovať o škôlke"
                   onSent={() => track("other_question_submitted")} />
                 <a href={"tel:" + PHONE} className="flex min-h-11 items-center justify-center rounded-xl border border-[#9e336f]/30 px-3 text-xs font-bold text-[#9e336f]">
