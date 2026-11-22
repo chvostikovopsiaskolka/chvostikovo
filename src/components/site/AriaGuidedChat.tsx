@@ -227,7 +227,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId }: { open: boo
       { id, side: "person", text: "Chcem sa spýtať niečo iné." },
       { id: id + 1, side: "aria", text: isDaytime
         ? "Haf! 🐾 Napíš svoju otázku. Pri správach bývame najmä cez deň; odpovieme, keď to bude možné."
-        : "Haf! 🐾 Po 19:00 už správy zvyčajne nevybavujeme. Odpovieme hneď, ako to bude možné, spravidla nasledujúci pracovný deň." },
+        : "Haf! 🐾 Môj paniček už po 19:00 nie je pri telefóne. Otázku mu môžeš poslať e-mailom a odpovie ti, keď to bude možné, spravidla nasledujúci pracovný deň." },
     ]);
     setMode("other");
   }
