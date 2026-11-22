@@ -115,7 +115,7 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.badgeFg !== 'rgb(255, 255, 255)' ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
-                  palette.heroCopyFg !== 'rgb(23, 28, 24)' ||
+                  palette.heroCopyFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(255, 255, 255)' : 'rgb(23, 28, 24)') ||
                   palette.earlyFaqBg !== 'rgb(255, 255, 255)' ||
                   palette.earlySectionBg !== 'rgba(255, 164, 20, 0.26)' ||
                   palette.pricingBg !== 'rgba(255, 164, 20, 0.26)' ||
@@ -407,9 +407,16 @@ if (!bellaris && brandPreviewCandidate) {
                 }).length,
                 dogsWidth: crown?.width ?? 0,
                 dogsTouchBadge: !!badge && !!crown && Math.abs(crown.bottom - badge.top) <= 3,
-                liquid: !!text && getComputedStyle(text).backgroundImage.includes('radial-gradient') &&
+                liquid: !!text && (window.location.pathname === '/psia-skolka-kosice/'
+                    ? getComputedStyle(text).backgroundImage === 'none' &&
+                      getComputedStyle(text).backgroundColor === 'rgb(255, 164, 20)' &&
+                      getComputedStyle(text).color === 'rgb(255, 255, 255)'
+                    : getComputedStyle(text).backgroundImage.includes('radial-gradient')) &&
                   parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
-                about: !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
+                about: window.location.pathname === '/psia-skolka-kosice/'
+                  ? !document.querySelector('#aria-about') &&
+                    !!document.querySelector('#aria-caretakers img[alt^="Majitelia"]')
+                  : !!document.querySelector('#aria-about') && document.querySelectorAll('#aria-about p').length >= 2,
                 teamPills: team?.children.length ?? 0,
                 teamContained: !!teamBounds && [...team.children].every(pill => {
                   const bounds = pill.getBoundingClientRect();
@@ -430,11 +437,20 @@ if (!bellaris && brandPreviewCandidate) {
               const nav = ariaDesktop.locator('[data-aria-section-navigation="true"]');
               if (await nav.locator('button').count() !== 5 || await ariaDesktop.locator('[data-aria-panel]').count())
                 throw new Error('Paid LEAD should have five in-page shortcuts and no floating panel');
-              for (const [label,id] of [['O nás','aria-about'],['Cenník škôlky','lead-pricing'],
+              for (const [label,id] of [['O nás','aria-caretakers'],['Cenník škôlky','lead-pricing'],
                 ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form'],
                 ['Otvoriť menu','lead-section-menu']]) {
                 if (!await page.locator('#'+id).count()) throw new Error('Missing paid scroll target '+id);
                 await nav.getByRole('button',{name:label,exact:true}).click();
+                if (label === 'O nás') {
+                  await page.waitForFunction(() => {
+                    const section = document.querySelector('#aria-caretakers');
+                    const photo = section?.querySelector('img[alt^="Majitelia"]');
+                    const top = section?.getBoundingClientRect().top ?? -1;
+                    return !!photo && top >= 60 && top <= 112 &&
+                      !document.querySelector('#aria-about');
+                  }, null, { timeout: 9000 });
+                }
                 if (await ariaDesktop.locator('[data-aria-panel]').count())
                   throw new Error('Paid dock must not open above-dock panels');
               }
@@ -584,8 +600,12 @@ if (!bellaris && brandPreviewCandidate) {
                      photoFrame.top - reviewsBottom <= window.innerHeight * 0.44 &&
                      photoFrame.top >= floatingGuide.getBoundingClientRect().bottom + 8 &&
                      !hero.contains(newPhotos) && photoRects.every(rect => rect.bottom <= formTop - 8)),
-                  heroCopyBlack: getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
-                    getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)',
+                  heroCopyCorrect: window.location.pathname === '/psia-skolka-kosice/'
+                    ? getComputedStyle(description).color === 'rgb(255, 255, 255)' &&
+                      getComputedStyle(description.querySelector('strong')).color === 'rgb(255, 255, 255)' &&
+                      getComputedStyle(description).backgroundImage === 'none'
+                    : getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
+                      getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)',
                   mobileDescriptionMetrics: (() => {
                     const style = getComputedStyle(description);
                     const lineHeight = parseFloat(style.lineHeight);
@@ -594,9 +614,9 @@ if (!bellaris && brandPreviewCandidate) {
                       parseFloat(style.borderBottomWidth);
                     return { fontSize: parseFloat(style.fontSize), lineCount: Math.round(innerHeight / lineHeight) };
                   })(),
-                  paidDescriptionBlack: window.location.pathname !== '/psia-skolka-kosice/' ||
-                    (getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
-                     getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)'),
+                  paidDescriptionWhite: window.location.pathname !== '/psia-skolka-kosice/' ||
+                    (getComputedStyle(description).color === 'rgb(255, 255, 255)' &&
+                     getComputedStyle(description.querySelector('strong')).color === 'rgb(255, 255, 255)'),
                   photoGeometry: photoRects.length === 2 && !!photoFrame &&
                     photoRects.every((rect, i) => rect.width > 80 && rect.height >= 110 &&
                       rect.left >= -1 && rect.right <= window.innerWidth + 1 &&
@@ -619,9 +639,19 @@ if (!bellaris && brandPreviewCandidate) {
                       : (window.innerWidth < 390 ? 322 : window.innerWidth < 640 ? 362 : 542)) &&
                     description.querySelectorAll('strong').length === 4 &&
                     [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700),
-                  liquidFullDescription: getComputedStyle(description).backgroundImage.includes('radial-gradient') &&
+                  liquidFullDescription: (window.location.pathname === '/psia-skolka-kosice/'
+                      ? getComputedStyle(description).backgroundImage === 'none' &&
+                        getComputedStyle(description).backgroundColor === 'rgb(255, 164, 20)'
+                      : getComputedStyle(description).backgroundImage.includes('radial-gradient')) &&
                     parseFloat(getComputedStyle(description).borderTopLeftRadius) >= 15 &&
                     parseFloat(getComputedStyle(description).paddingLeft) >= 10,
+                  paidReviewDepth: window.location.pathname !== '/psia-skolka-kosice/' ||
+                    (!!reviewCard && !!reviewTrack && !!reviewCardRect &&
+                     parseFloat(getComputedStyle(reviewTrack).marginTop) >= 9 &&
+                     reviewTrack.getBoundingClientRect().bottom - reviewCardRect.bottom >= 36 &&
+                     getComputedStyle(reviewCard).borderTopWidth === '1px' &&
+                     getComputedStyle(reviewCard).backgroundImage.includes('linear-gradient') &&
+                     getComputedStyle(reviewCard).boxShadow.includes('inset')),
                   naturalReviewBottom: getComputedStyle(reviews).overflowY !== 'hidden' &&
                     !!reviewCardRect && reviewsRect.bottom - reviewCardRect.bottom >= (window.location.pathname === '/psia-skolka-kosice/' ? 0 : 32),
                   noBenefitsInHero: hero.querySelectorAll('[data-hero-benefits]').length === 0,
@@ -646,7 +676,7 @@ if (!bellaris && brandPreviewCandidate) {
                   (url.pathname === '/psia-skolka-kosice/' && (!firstFold.floatingDockFixed ||
                      (width <= 430 && (firstFold.floatingDockBottomOffset < 12 || firstFold.floatingDockBottomOffset > 54)) ||
                      (width >= 390 && width <= 430 && firstFold.floatingReviewGap < 8) ||
-                     !firstFold.paidPhotosBelowFloatingDock || !firstFold.paidDescriptionBlack ||
+                     !firstFold.paidPhotosBelowFloatingDock || !firstFold.paidDescriptionWhite ||
                      !firstFold.heroBalancedGaps ||
                      (width <= 430 && (firstFold.softenedShadowRoom < 16 || firstFold.reviewLinkSize > 13)))) ||
                   firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||
@@ -654,7 +684,7 @@ if (!bellaris && brandPreviewCandidate) {
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
                   firstFold.reviewGapAbove > (url.pathname === '/psia-skolka-kosice/' ? 40 : 35) ||
-                  !firstFold.heroCopyBlack || !firstFold.focusedDescription || !firstFold.liquidFullDescription ||
+                  !firstFold.heroCopyCorrect || !firstFold.focusedDescription || !firstFold.liquidFullDescription || !firstFold.paidReviewDepth ||
                   (url.pathname === '/psia-skolka-kosice/' &&
                    (firstFold.mobileDescriptionMetrics.fontSize < 15 ||
                     (width >= 390 && firstFold.mobileDescriptionMetrics.lineCount > 3) ||
@@ -1210,11 +1240,19 @@ if (!bellaris && brandPreviewCandidate) {
                 const dockNav = aria.locator('[data-aria-section-navigation="true"]');
                 if (await dockNav.locator('button').count() !== 5)
                   throw new Error('Paid mobile dock must contain five section shortcuts');
-                for (const [label,id] of [['O nás','aria-about'],['Cenník škôlky','lead-pricing'],
+                for (const [label,id] of [['O nás','aria-caretakers'],['Cenník škôlky','lead-pricing'],
                   ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form'],
                   ['Otvoriť menu','lead-section-menu']]) {
                   if (!await page.locator('#'+id).count()) throw new Error('Missing paid nav anchor '+id);
                   await dockNav.getByRole('button',{name:label,exact:true}).click();
+                  if (label === 'O nás') {
+                    await page.waitForFunction(() => {
+                      const section = document.querySelector('#aria-caretakers');
+                      const top = section?.getBoundingClientRect().top ?? -1;
+                      return !!section?.querySelector('img[alt^="Majitelia"]') &&
+                        top >= 60 && top <= 112 && !document.querySelector('#aria-about');
+                    }, null, { timeout: 9000 });
+                  }
                   if (await aria.locator('[data-aria-panel]').count())
                     throw new Error('Paid dock may not open old floating panels');
                 }
