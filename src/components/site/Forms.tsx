@@ -5,7 +5,7 @@ import { useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
-import { trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
+import { trackAriaQuestionSubmit, trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
 import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
@@ -92,17 +92,27 @@ export function ShortForm({
         ...(breed ? { plemeno: breed } : {}),
         ...(puppyCheck ? { puppy_check: { ...puppyCheck, ...(dogName ? { dog_name: dogName } : {}), ...(breed ? { dog_breed: breed } : {}) } } : {}),
       }, attemptId);
-      void trackCookielessInteraction("form_submit", trackingSource || "informational_form", "sk", attemptId);
+      if (showQuestionField) {
+        void trackCookielessInteraction("explore_daycare", "aria_preview_v3_chat_other_question_submitted", "sk");
+      } else {
+        void trackCookielessInteraction("form_submit", trackingSource || "informational_form", "sk", attemptId);
+      }
       runFormTelemetry(() => {
-        trackFormSubmit({
-          formType: "informacie",
-          sourceRef: source_ref,
-          trafficSource: attribution.traffic_source,
-          trafficMedium: attribution.traffic_medium,
-          landingPage: attribution.landing_page,
-          ...(trackingSource ? { ctaSource: trackingSource } : {}),
-        });
-        if (!showQuestionField) trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
+        if (showQuestionField) {
+          // Contact only: measure separately, never count as GA4 generate_lead
+          // nor Meta Pixel Lead. The backend also excludes Meta CAPI.
+          trackAriaQuestionSubmit(trackingSource || "aria_preview_chat_other");
+        } else {
+          trackFormSubmit({
+            formType: "informacie",
+            sourceRef: source_ref,
+            trafficSource: attribution.traffic_source,
+            trafficMedium: attribution.traffic_medium,
+            landingPage: attribution.landing_page,
+            ...(trackingSource ? { ctaSource: trackingSource } : {}),
+          });
+          trackMetaFormConversion("informacie", trackingSource, submission.metaEventId);
+        }
       });
       progress.markSuccess();
       setReceipt({ phone: submittedPhone, auth: submission.phoneCorrection });
