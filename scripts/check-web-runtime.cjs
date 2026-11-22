@@ -746,6 +746,13 @@ if (!bellaris && brandPreviewCandidate) {
                   const continueToContact = puppy.getByRole('button', { name: /Pokračovať na kontakt/ });
                   if (await continueToContact.isEnabled())
                     throw new Error('Puppy checker must not accept unconfirmed vaccinations');
+                  await puppy.getByRole('button', { name: 'Chcem sa informovať' }).click();
+                  const needsInfo = chat.locator('[data-aria-chat-puppy-contact]');
+                  await needsInfo.waitFor({ state: 'visible' });
+                  if (!await needsInfo.getByText(/zatiaľ nespĺňa všetky orientačné podmienky/).count())
+                    throw new Error('Unconfirmed puppy vaccines must offer individual consultation, not eligibility approval');
+                  await needsInfo.getByRole('button', { name: 'Späť ku kontrole' }).click();
+                  await puppy.locator('[data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
                   for (const group of await puppy.locator('fieldset').all()) {
                     await group.getByText('Áno', { exact: true }).click();
                   }
