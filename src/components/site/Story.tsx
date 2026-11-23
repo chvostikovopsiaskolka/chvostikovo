@@ -202,7 +202,7 @@ export function FriendshipInterest({ inlineForm = false }: { inlineForm?: boolea
         <div className="relative z-10 mx-auto max-w-6xl px-4">
           <FriendshipFeature embedded />
           {!inlineForm && <div className="mt-7 flex justify-center">
-            <button type="button" className="btn-coral" onClick={() => {
+            <button id="home-friendship-interest" type="button" className="btn-coral" onClick={() => {
               trackMarketingInteraction("inquiry_cta", "home_friendship_interest_20261028");
               void trackCookielessInteraction("inquiry_cta", "home_friendship_interest_20261028");
               setOpen(true);
@@ -417,24 +417,23 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
 /** The same certified canine first-aid evidence on homepage and paid LEAD. */
 export function SafetyCertificates({ language = "sk", homeLayout = false }: { language?: "sk" | "en"; homeLayout?: boolean }) {
   const isEnglish = language === "en";
+  const heading = isEnglish ? "Your dog's health and safety come first!" : "Zdravie a bezpečie vášho psíka je pre nás na prvom mieste!";
   return (
-      <div data-safety-certificates className={"relative z-10 mx-auto mt-8 w-full max-w-[760px] " + (homeLayout ? "px-4" : "px-0")}>
-        <div className="grid items-center gap-6 rounded-4xl bg-secondary px-4 py-7 sm:gap-8 sm:p-9 md:text-center lg:grid-cols-[1fr_auto] lg:text-left">
-          <div className="md:flex md:flex-col md:items-center lg:items-start">
-            <p data-safety-heading className="flex w-full items-center gap-2.5 rounded-full bg-card px-3 py-3 font-display text-[12px] font-semibold leading-[1.3] text-forest shadow-card min-[390px]:text-[13px] sm:gap-3 sm:px-5 sm:text-base">
+      <div data-safety-certificates data-home-safety-layout={homeLayout || undefined} className={"relative z-10 mx-auto mt-8 w-full max-w-[760px] " + (homeLayout ? "px-4" : "px-0")}>
+        <div className={"grid items-center gap-6 rounded-4xl bg-secondary px-4 py-7 sm:gap-8 sm:p-9 " + (homeLayout ? "grid-cols-1 text-center" : "md:text-center lg:grid-cols-[1fr_auto] lg:text-left")}>
+          <div className={homeLayout ? "flex w-full flex-col items-center" : "md:flex md:flex-col md:items-center lg:items-start"}>
+            <p data-safety-heading className={"flex w-full items-center gap-2.5 rounded-full bg-card px-3 py-3 font-display font-semibold leading-[1.3] text-forest shadow-card sm:gap-3 sm:px-5 sm:text-base " + (homeLayout ? "text-[13px] min-[390px]:text-[14px]" : "text-[12px] min-[390px]:text-[13px]")}>
               <Check className="size-7 shrink-0 text-[#2d764b] sm:size-8" aria-hidden="true" />
-              {isEnglish
-                ? "Your dog's health and safety come first!"
-                : "Zdravie a bezpečie vášho psíka je pre nás na prvom mieste!"}
+              {homeLayout ? <span data-safety-heading-copy className="min-w-0 flex-1">{heading}</span> : heading}
             </p>
-            <p className="mt-4 max-w-lg text-forest/80 md:mx-auto lg:mx-0">
+            <p data-safety-copy className={"mt-4 max-w-lg text-forest/80 " + (homeLayout ? "mx-auto" : "md:mx-auto lg:mx-0")}>
               {isEnglish
                 ? "We have both completed a canine first-aid workshop, so if needed we know how to respond quickly and appropriately."
                 : "Obaja sme absolvovali workshop prvej pomoci pre psov, takže v prípade potreby vieme zareagovať rýchlo a správne."}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 place-items-center gap-3 sm:gap-5">
+          <div data-safety-diplomas className={"grid grid-cols-2 place-items-center gap-3 sm:gap-5 " + (homeLayout ? "mx-auto w-full max-w-md" : "")}>
             {[
               {
                 src: certAdriana,

@@ -129,7 +129,7 @@ export function FirstVisit({ inlineForm = false, leadStyle = false }: { inlineFo
               <FirstVisitPhoto number={i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
               <h3 className={"font-display text-lg font-bold leading-snug " + (leadStyle ? "text-white" : "text-forest")}>{s.title}</h3>
               <p className={"mt-2 text-sm leading-relaxed " + (leadStyle ? "text-white/85" : "text-forest/80")}>{s.content}</p>
-              {s.note && <p className={"mt-3 text-sm font-bold " + (leadStyle ? "text-white" : "text-forest")}>{s.note}</p>}
+              {s.note && <p data-home-free-visit className={"mt-3 inline-flex items-center justify-center rounded-2xl px-4 py-3 text-sm font-bold shadow-card " + (leadStyle ? "bg-[#ffa414] text-[#26322b]" : "bg-secondary text-forest")}>{s.note}</p>}
             </li>
           ))}
         </ol>
