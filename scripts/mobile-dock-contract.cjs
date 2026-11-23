@@ -224,7 +224,7 @@ const productEdge = read("supabase/functions/product-inquiry-submit/index.ts");
 assert(reviewReasons.includes('data-home-video-layout={homeMobileLayout || undefined}') &&
        reviewReasons.includes('data-video-reasons-copy className="contents sm:flex') &&
        reviewReasons.includes('"grid-cols-2"'),
-       "Mobile video must sit beside first reason only, two other reasons in bottom row");
+       "Mobile video layout must remain responsive and keep the 3 reasons");
 assert(css.includes("real 320–379px Android") &&
        css.includes('min-height: 48px; padding: 3px 0; gap: 2px') &&
        css.includes('#top > div.relative.z-10.mt-11'),
@@ -251,3 +251,24 @@ assert(!productContact.includes('trackMarketingInteraction') &&
        !productContact.includes('MetaPixel') &&
        !productContact.includes('custom_audience'),
        "Product delivery contact information must not be copied to advertising audiences");
+
+/* APP-01 23.11: explicitly test reordered LEAD, mobile inline and narrow widths. */
+const paid = read("src/routes/test-aria.tsx");
+const ariaAssistant = read("src/components/site/AriaLeadAssistant.tsx");
+assert(paid.indexOf('<section id="aria-hero-form"') < paid.indexOf('id="lead-photo-carousel"') &&
+       paid.indexOf('id="lead-photo-carousel"') < paid.indexOf('<section id="aria-caretakers"'),
+       "Paid LEAD must swap existing inline form and moving gallery without duplicates");
+assert(hero.includes('data-home-hero-inline-mobile') &&
+       hero.includes('trackingSource="home_hero_interest_mobile" questionInHeading compact') &&
+       !hero.includes("openInterest("),
+       "Main mobile Hero must have shared 2-step form rather than old CTA/modal");
+assert(leadContact.includes("compact = false") && leadContact.includes('min-h-[72px] py-2 sm:min-h-24'),
+       "Only explicitly compact forms may shorten choices, without changing transport");
+assert(ariaAssistant.includes('data-aria-interest-cta aria-label="Mám záujem o škôlku"') &&
+       css.includes('.lead-brand-live [data-aria-section-navigation] [data-aria-interest-cta]'),
+       "Orange lead dock must open existing inline form, without changing preview docks");
+assert(css.includes('@media (max-width: 359px)') && css.includes('#top h1 span { white-space: normal; }'),
+       "320px Hero must allow title wrapping without horizontal overflow");
+assert(reviewReasons.includes('"row-span-2 min-w-0 sm:row-span-1"') &&
+       reviewReasons.includes('"col-span-2 min-w-0 rounded-2xl'),
+       "First two reasons alongside video, third full width underneath");

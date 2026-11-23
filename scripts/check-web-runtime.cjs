@@ -295,17 +295,18 @@ if (!bellaris && brandPreviewCandidate) {
                     cardCount: cards.length, highlightCount: highRes.length,
                     headingBottom: heading?.bottom, badgeTop: badge?.top,
                     reviewBottom: reviews?.bottom, galleryTop: gr?.top, trackTop: tr?.top, trackBottom: tr?.bottom,
-                    menuBottom: dock?.getBoundingClientRect().bottom, formTop: form?.top,
+                    menuBottom: dock?.getBoundingClientRect().bottom, formTop: form?.top, formBottom: form?.bottom,
                     fixed: dock ? getComputedStyle(dock).position === 'fixed' && !hero.contains(dock) : false,
                     reviewSpacing: parseFloat(getComputedStyle(hero?.querySelector('[data-aria-lead-review-spacing]')).marginTop),
                   };
                 });
                 if (!layout.fixed || layout.cardCount !== 20 || layout.highlightCount !== 2 ||
                     layout.badgeTop < layout.headingBottom + 50 ||
-                    layout.galleryTop < layout.reviewBottom + 12 ||
-                    layout.trackTop < layout.menuBottom + 8 ||
-                    layout.trackBottom > layout.formTop - 8)
-                  throw new Error('Paid hero → moving gallery → form layout regressed: ' + JSON.stringify(layout));
+                    layout.formTop < layout.reviewBottom + 12 ||
+                    layout.formTop < layout.menuBottom + 8 ||
+                    layout.galleryTop < layout.formBottom - 8 ||
+                    layout.trackTop < layout.formBottom - 8)
+                  throw new Error('Paid hero → form → moving gallery layout regressed: ' + JSON.stringify(layout));
                 if (layout.width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
                   throw new Error('Approved mobile review spacing regressed: ' + JSON.stringify(layout));
                 await highlights.first().scrollIntoViewIfNeeded();
@@ -669,20 +670,14 @@ if (!bellaris && brandPreviewCandidate) {
                     photoImages.every(img => !!img?.getAttribute('alt')?.trim()) &&
                     photoImages[0]?.getAttribute('src') !== photoImages[1]?.getAttribute('src'),
                   paidPhotosBelowFloatingDock: window.location.pathname !== '/psia-skolka-kosice/' ||
-                    (!!photoFrame && !!floatingGuide && photoFrame.top >= reviewsBottom + 12 &&
-                     photoFrame.top >= window.innerHeight - 24 &&
-                     photoFrame.top - reviewsBottom <= window.innerHeight * 0.44 &&
-                     photoFrame.top >= floatingGuide.getBoundingClientRect().bottom + 8 &&
-                     // On taller phones the first photo should sit close to (not under)
-                     // the fixed menu, rather than leaving a needless white band.
-                     (window.innerWidth < 390 || window.innerWidth > 430 ||
-                      window.innerHeight < 820 ||
-                      photoFrame.top - floatingGuide.getBoundingClientRect().bottom <= 72) &&
-                     // A hero spacing adjustment must move the gallery AND the form;
-                     // never use a transform that creates a blank hole downstream.
-                     Math.abs(hero.getBoundingClientRect().bottom - spacer.getBoundingClientRect().top) <= 2 &&
-                     Math.abs(spacer.getBoundingClientRect().bottom - formTop) <= 2 &&
-                     !hero.contains(newPhotos) && photoRects.every(rect => rect.bottom <= formTop - 8)),
+                    (!!photoFrame && !!floatingGuide && formTop >= reviewsBottom + 12 &&
+                     formTop >= window.innerHeight - 24 &&
+                     formTop - reviewsBottom <= window.innerHeight * 0.44 &&
+                     formTop >= floatingGuide.getBoundingClientRect().bottom + 8 &&
+                     // The form/gallery swap preserves natural document flow.
+                     Math.abs(hero.getBoundingClientRect().bottom - formTop) <= 2 &&
+                     Math.abs(form.getBoundingClientRect().bottom - spacer.getBoundingClientRect().top) <= 2 &&
+                     !hero.contains(newPhotos) && photoRects.every(rect => rect.top >= form.getBoundingClientRect().bottom - 2)),
                   heroCopyBlack: window.location.pathname === '/psia-skolka-kosice/'
                     ? (getComputedStyle(description).color === 'rgb(255, 255, 255)' &&
                        getComputedStyle(description.querySelector('strong')).color === 'rgb(255, 255, 255)')
@@ -703,7 +698,8 @@ if (!bellaris && brandPreviewCandidate) {
                   photoGeometry: photoRects.length === 2 && !!photoFrame &&
                     photoRects.every((rect, i) => rect.width > 80 && rect.height >= 110 &&
                       rect.left >= -1 && rect.right <= window.innerWidth + 1 &&
-                      rect.top >= reviewBottom - 2 && rect.bottom <= formTop + 2) &&
+                      rect.top >= (paidCarousel ? form.getBoundingClientRect().bottom - 2 : reviewBottom - 2) &&
+                      rect.bottom <= (paidCarousel ? caretakers.getBoundingClientRect().top + 2 : formTop + 2)) &&
                     Math.abs(photoRects[0].top - photoRects[1].top) <= (window.location.pathname === '/psia-skolka-kosice/' ? 32 : 2) &&
                     photoRects[0].right <= photoRects[1].left &&
                     photoFrame.width <= window.innerWidth + 2,
@@ -1673,7 +1669,7 @@ if (!bellaris && brandPreviewCandidate) {
                   follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
                   follows(heroDogs, badge) && follows(badge, leadDescription) &&
                   follows(leadDescription, proof) &&
-                  (isPaidLead ? (follows(reviews, introSpace) && follows(introSpace, form) &&
+                  (isPaidLead ? (follows(reviews, form) && follows(form, introSpace) &&
                     !leadHero.contains(introSpace) && !inlineMenu && !!floatingMenu && !leadHero.contains(floatingMenu) &&
                     getComputedStyle(floatingMenu).position === 'fixed' && follows(reviews, form))
                   : (follows(reviews, introSpace) && follows(introSpace, form))) &&
@@ -1683,7 +1679,7 @@ if (!bellaris && brandPreviewCandidate) {
                   follows(team, firstVisitDogs);
                 return commonOrder;
               }, url.pathname === '/psia-skolka-kosice/');
-              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/dogs/badge/liquid copy/reviews/lead photos/form or caretakers order changed');
+              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/dogs/badge/liquid copy/reviews/lead form/photos or caretakers order changed');
               if (width >= 768) {
                 const heights = await page.locator(url.pathname === '/psia-skolka-kosice/'
                   ? '#lead-photo-carousel [data-gesture-track="photos"] > div:first-child button'
@@ -1732,7 +1728,7 @@ if (!bellaris && brandPreviewCandidate) {
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
-                  ? ['recenzie', 'lead-photo-carousel', 'aria-hero-form', 'aria-caretakers', 'aria-about',
+                  ? ['recenzie', 'aria-hero-form', 'lead-photo-carousel', 'aria-caretakers', 'aria-about',
                      'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
                      'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
@@ -2078,18 +2074,26 @@ if (!bellaris && brandPreviewCandidate) {
               await page.setViewportSize({ width, height: width >= 1024 ? 900 : 844 });
               const hero = page.locator('section.hero-safe-top').first();
               const primary = hero.locator('.hero-cta-primary:visible').first();
-              if (!await primary.isVisible()) throw new Error('Hero prominent CTA missing at ' + width);
-              if (await hero.locator('.hero-cta-primary:visible').count() !== 1)
-                throw new Error('Hero must display exactly one prominent CTA at ' + width);
+              const mainInlineMobile = url.pathname === '/' && width < 1024;
+              if (!mainInlineMobile && !await primary.isVisible()) throw new Error('Hero prominent CTA missing at ' + width);
+              if (await hero.locator('.hero-cta-primary:visible').count() !== (mainInlineMobile ? 0 : 1))
+                throw new Error('Main mobile uses inline form, other Heroes retain primary CTA at ' + width);
               const ctaPair = hero.locator('.hero-cta-pair:visible');
               if (url.pathname === '/') {
-                if ((await primary.innerText()).trim() !== (width >= 1024 ? 'Chcem zistiť viac' : 'Mám záujem') || await hero.locator('.hero-cta-secondary').count())
-                  throw new Error('Home hero must retain the approved mobile interest / desktop information CTA: ' + width);
-                const centered = await primary.evaluate(el => {
-                  const r=el.getBoundingClientRect(), parent=el.parentElement.getBoundingClientRect();
-                  return Math.abs((r.left+r.right-parent.left-parent.right)/2) <= 2;
-                });
-                if (!centered) throw new Error('Home interest CTA not centered: ' + width);
+                if (width < 1024) {
+                  const inline = hero.locator('[data-home-hero-inline-mobile] [data-lead-step-form]');
+                  if (!await inline.isVisible() || await inline.locator('input[name="zaujem"]').count() !== 3 ||
+                      await hero.locator('.hero-cta-pair:visible').count())
+                    throw new Error('Main mobile Hero needs three shared interests directly: ' + width);
+                } else {
+                  if ((await primary.innerText()).trim() !== 'Chcem zistiť viac' || await hero.locator('.hero-cta-secondary').count())
+                    throw new Error('Desktop home learn-more CTA changed: ' + width);
+                  const centered = await primary.evaluate(el => {
+                    const r=el.getBoundingClientRect(), parent=el.parentElement.getBoundingClientRect();
+                    return Math.abs((r.left+r.right-parent.left-parent.right)/2) <= 2;
+                  });
+                  if (!centered) throw new Error('Desktop Home CTA not centered: ' + width);
+                }
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]').first().isVisible())
                   throw new Error('Desktop home guided form missing');
                 const layout = await page.evaluate(() => {
@@ -2152,10 +2156,10 @@ if (!bellaris && brandPreviewCandidate) {
                           Math.abs(box.left-text.left)<=48 && Math.abs(box.right-text.right)<=48;
                       })(),
                     formDepth:getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).boxShadow.includes('rgb'),
-                    heroGlow:!!document.querySelector('#top .home-hero-cta .hero-cta-primary') &&
-                      getComputedStyle(document.querySelector('#top .home-hero-cta .hero-cta-primary')).boxShadow.includes('226, 84, 164') &&
-                      !getComputedStyle(document.querySelector('#top .home-hero-cta .hero-cta-primary')).boxShadow.includes('inset') &&
-                      getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow==='none',
+                    heroFormOrDesktopCta: innerWidth < 1024
+                      ? !!document.querySelector('#top [data-home-hero-inline-mobile] [data-lead-step-form]') &&
+                        !document.querySelector('#top .home-hero-cta')
+                      : getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow==='none',
                     conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
@@ -2165,12 +2169,13 @@ if (!bellaris && brandPreviewCandidate) {
                       if (!video || texts.length!==3 || !document.querySelector('#preco-chvostikovo [data-home-video-layout]')) return false;
                       if (innerWidth>=640) return texts.every(r=>r.left>=video.right-2) &&
                         video.bottom>=texts[2].bottom-5;
-                      // Mobile: short reel beside first benefit; last two
-                      // are a horizontally aligned pair below it.
+                      // Mobile: first two reasons stacked beside video;
+                      // third spans the full box underneath.
                       return texts[0].left>=video.right-2 &&
-                        video.top<=texts[0].top+3 && video.bottom<=texts[1].top+3 &&
-                        Math.abs(texts[1].top-texts[2].top)<=3 &&
-                        texts[1].right<=texts[2].left+2 &&
+                        texts[1].left>=video.right-2 &&
+                        texts[1].top>=texts[0].bottom-2 &&
+                        texts[2].top>=video.bottom-2 &&
+                        texts[2].left<=video.left+3 && texts[2].right>=texts[1].right-3 &&
                         document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] strong').length>=4;
                     })(),
                     homeReviewSoftShadow:(() => {
@@ -2195,6 +2200,7 @@ if (!bellaris && brandPreviewCandidate) {
                   // Narrow Android short viewport: review proof visible above
                   // the dock; controls remain >=44px despite compact mode.
                   await page.setViewportSize({width:320,height:760});
+                  await page.locator('#top #recenzie').scrollIntoViewIfNeeded();
                   const narrow=await page.evaluate(()=>{
                     const review=document.querySelector('#top #recenzie [data-review-card]')?.getBoundingClientRect();
                     const dock=document.querySelector('.mobile-dock[data-variant="main"] .mobile-dock-bar')?.getBoundingClientRect();
@@ -2204,6 +2210,7 @@ if (!bellaris && brandPreviewCandidate) {
                   if (narrow.visible<110 || narrow.buttonHeight<44 || narrow.buttonHeight>55)
                     throw new Error('Narrow Android reviews covered by dock: '+JSON.stringify(narrow));
                   await page.setViewportSize({width:320,height:844});
+                  await page.evaluate(() => window.scrollTo(0, 0));
                 }
                 // ContextFaq mounts its CTA only while the disclosure is open:
                 // verify the actual clickable link after user interaction,

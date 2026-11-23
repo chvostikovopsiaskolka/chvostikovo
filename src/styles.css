@@ -1490,3 +1490,38 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
   }
   .mobile-dock[data-variant="main"] .mobile-dock-item.mobile-dock-apply { min-height: 50px; }
 }
+
+/* 23.11.2026: The same shared 2-step form sits directly in the mobile home Hero.
+   Keep reviews and following sections in natural flow, away from the fixed dock. */
+@media (max-width: 639px) {
+  .site-brand #top { padding-bottom: 3.5rem; }
+  .site-brand #top > div.relative.z-10.mt-11 { margin-top: 1.25rem; }
+  .site-brand #top [data-home-hero-inline-mobile] {
+    max-width: min(100%, 32rem);
+    box-shadow: 0 10px 26px -18px rgb(38 50 43 / 24%);
+  }
+  .site-brand #top [data-home-hero-inline-mobile] [data-lead-step-form] label > span {
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 359px) {
+  .site-brand #top h1 { font-size: clamp(20px, 6.3vw, 24px); }
+  .site-brand #top h1 span { white-space: normal; }
+  .site-brand #top .home-hero-copy { padding: .8rem .95rem; margin-top: .75rem; }
+  .site-brand #top [data-home-hero-inline-mobile] { margin-top: .75rem; padding: .7rem; }
+  .site-brand #top [data-home-hero-inline-mobile] h2 { font-size: 14px; }
+  .site-brand #top [data-home-hero-inline-mobile] [data-lead-step-form] label > span { padding-inline: 3px; }
+}
+/* Paid LEAD Aria dock: orange highlighted Záujem like main Prihláška,
+   excluding the preview and unrelated landing navigation. */
+.lead-brand-live [data-aria-section-navigation] [data-aria-interest-cta] {
+  background: #ffa414;
+  color: #26322b;
+  border-radius: 14px;
+  min-height: 48px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 40%);
+}
+.lead-brand-live [data-aria-section-navigation] [data-aria-interest-cta]:focus-visible {
+  outline: 2px solid #b82e7f;
+  outline-offset: 2px;
+}
