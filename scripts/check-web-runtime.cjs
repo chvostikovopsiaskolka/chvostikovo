@@ -673,6 +673,15 @@ if (!bellaris && brandPreviewCandidate) {
                      photoFrame.top >= window.innerHeight - 24 &&
                      photoFrame.top - reviewsBottom <= window.innerHeight * 0.44 &&
                      photoFrame.top >= floatingGuide.getBoundingClientRect().bottom + 8 &&
+                     // On taller phones the first photo should sit close to (not under)
+                     // the fixed menu, rather than leaving a needless white band.
+                     (window.innerWidth < 390 || window.innerWidth > 430 ||
+                      window.innerHeight < 820 ||
+                      photoFrame.top - floatingGuide.getBoundingClientRect().bottom <= 72) &&
+                     // A hero spacing adjustment must move the gallery AND the form;
+                     // never use a transform that creates a blank hole downstream.
+                     Math.abs(hero.getBoundingClientRect().bottom - spacer.getBoundingClientRect().top) <= 2 &&
+                     Math.abs(spacer.getBoundingClientRect().bottom - formTop) <= 2 &&
                      !hero.contains(newPhotos) && photoRects.every(rect => rect.bottom <= formTop - 8)),
                   heroCopyBlack: window.location.pathname === '/psia-skolka-kosice/'
                     ? (getComputedStyle(description).color === 'rgb(255, 255, 255)' &&
@@ -2053,7 +2062,7 @@ if (!bellaris && brandPreviewCandidate) {
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]').first().isVisible())
                   throw new Error('Desktop home guided form missing');
                 const layout = await page.evaluate(() => {
-                  const ids=['top','preco-chvostikovo','o-nas','home-early-faq','cennik','podmienky','informujte-sa','starostlivost','priestory','psie-priatelstva','prva-navsteva','prva-navsteva-form','preco','faq'];
+                  const ids=['top','preco-chvostikovo','o-nas','cennik','podmienky','home-early-faq','informujte-sa','starostlivost','priestory','psie-priatelstva','prva-navsteva','prva-navsteva-form','preco','faq'];
                   const nodes=ids.map(id=>document.getElementById(id));
                   const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
                   const cutout=document.querySelector('[data-schoolmates-cutout]');
@@ -2064,6 +2073,9 @@ if (!bellaris && brandPreviewCandidate) {
                   const cards=[...document.querySelectorAll('[data-home-price-card]')].map(el=>el.getBoundingClientRect());
                   const benefitPills=[...document.querySelectorAll('#o-nas [data-hero-benefits] > span')].map(el=>el.getBoundingClientRect());
                   const aboutHeading=document.querySelector('#o-nas h2');
+                  const aboutText=document.querySelector('#o-nas [data-about-expanded]');
+                  const faq=document.querySelector('#home-early-faq');
+                  const dock=document.querySelector('.mobile-dock[data-variant="main"]');
                   const heroCta=[...document.querySelectorAll('#top .hero-cta-primary')].find(el=>el.getBoundingClientRect().width>0);
                   const videoGrid=document.querySelector('[data-video-reasons-grid]');
                   const dogs=document.querySelector('[data-schoolmates-frame]').getBoundingClientRect();
@@ -2084,13 +2096,25 @@ if (!bellaris && brandPreviewCandidate) {
                     pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
                     passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
                     taxiBelowPass:!!taxi && !!taxi.closest('[data-home-prices]') && taxi.getBoundingClientRect().top>=cards[1].bottom &&
-                      getComputedStyle(taxi).backgroundColor==='rgb(248, 221, 235)' && Math.abs(included.bottom-prices.bottom)<3,
+                      getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(included.bottom-prices.bottom)<3,
                     compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
-                    aboutExpanded:!document.querySelector('#o-nas summary') && !!document.querySelector('#o-nas [data-about-expanded] strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2,
+                    aboutExpanded:!document.querySelector('#o-nas summary') && !!aboutText?.querySelector('strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2 &&
+                      getComputedStyle(aboutText).textAlign==='justify',
+                    aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
+                      benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
+                    balancedPass:Math.abs((cards[1].top-cards[0].bottom)-(taxi.getBoundingClientRect().top-cards[1].bottom))<5,
+                    faqAfterRequirements:document.getElementById('podmienky').nextElementSibling===faq &&
+                      faq.querySelectorAll('details').length===3 && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
+                    pinkRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(201, 44, 137)'),
+                    flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
+                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty',
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2,
                     formDepth:getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).boxShadow.includes('rgb'),
-                    heroGlow:!!heroCta && getComputedStyle(heroCta).boxShadow.includes('226, 84, 164'),
+                    heroGlow:!!document.querySelector('#top .home-hero-cta .hero-cta-primary') &&
+                      getComputedStyle(document.querySelector('#top .home-hero-cta .hero-cta-primary')).boxShadow.includes('226, 84, 164') &&
+                      !getComputedStyle(document.querySelector('#top .home-hero-cta .hero-cta-primary')).boxShadow.includes('inset') &&
+                      getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow==='none',
                     conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
@@ -2104,9 +2128,9 @@ if (!bellaris && brandPreviewCandidate) {
                 // ContextFaq mounts its CTA only while the disclosure is open:
                 // verify the actual clickable link after user interaction,
                 // rather than querying a deliberately unmounted child.
-                const puppyToggle=page.locator('#podmienky').getByRole('button',{name:'Čo ak chcete prihlásiť šteniatko?'});
+                const puppyToggle=page.locator('#home-early-faq summary').filter({hasText:'Čo ak chcete prihlásiť šteniatko?'});
                 await puppyToggle.click();
-                const puppyLink=page.locator('#podmienky a[href="#aria-puppy-check"].btn-coral');
+                const puppyLink=page.locator('#home-early-faq a[href="#aria-puppy-check"].btn-coral');
                 if (!await puppyLink.isVisible() ||
                     !(await page.locator('#aria-puppy-check h2').innerText()).includes('Spĺňa základné podmienky?'))
                   throw new Error('Expanded puppy FAQ must show a pink CTA linking to the real age/vaccination checker');
@@ -2163,17 +2187,26 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Desktop Hero benefit badges not aligned with text left edge: ' + delta);
                 }
               }
-              if ((await primary.evaluate(el => getComputedStyle(el).boxShadow)) === 'none')
-                throw new Error('Primary CTA glow missing: ' + width);
+              // Main desktop "Chcem zistiť viac" is flat; only mobile
+              // "Mám záujem" keeps the clean glow. Other routes are untouched.
+              const primaryShadow = await primary.evaluate(el => getComputedStyle(el).boxShadow);
+              if (url.pathname === '/' && width >= 1024) {
+                if (primaryShadow !== 'none') throw new Error('Main desktop CTA must be shadow-free: ' + width);
+              } else if (url.pathname === '/') {
+                if (!primaryShadow.includes('226, 84, 164') || primaryShadow.includes('inset'))
+                  throw new Error('Main interest CTA must keep a glow only: ' + width + ' ' + primaryShadow);
+              } else if (primaryShadow === 'none') {
+                throw new Error('Landing primary CTA glow missing: ' + width);
+              }
             }
             if(url.pathname==='/' && !restricted) {
               await page.locator('#home-hero-learn-more').click();
               await page.waitForFunction(()=>{const y=document.getElementById('preco-chvostikovo').getBoundingClientRect().top;return y>=0&&y<260;});
               if(await page.getByRole('dialog').count()) throw new Error('Desktop learn-more action opened a dialog');
               await page.setViewportSize({width:390,height:844});
-              const puppyFaq=page.locator('#podmienky').getByRole('button',{name:'Čo ak chcete prihlásiť šteniatko?'});
-              await puppyFaq.click();
-              await page.locator('#podmienky a[href="#aria-puppy-check"]').click();
+              const puppyFaq=page.locator('#home-early-faq summary').filter({hasText:'Čo ak chcete prihlásiť šteniatko?'});
+               await puppyFaq.click();
+               await page.locator('#home-early-faq a[href="#aria-puppy-check"]').click();
               await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
               for(const id of ['informujte-sa','zaujem-po-priatelstvach','prva-navsteva-form']) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
@@ -3001,13 +3034,13 @@ if (!bellaris && brandPreviewCandidate) {
               }
               // Verify the short dock label on narrow Android-like viewports.
               await productPage.setViewportSize({ width: 320, height: 760 });
-              const careDock = productPage.locator('.mobile-dock a[aria-label="Starostlivosť"]');
-              if (!(await careDock.locator('.mobile-dock-label-short').isVisible())) throw new Error('Narrow dock must use readable care label');
-              const narrowLabel = await careDock.locator('.mobile-dock-label-short').boundingBox();
-              const narrowItem = await careDock.boundingBox();
-              if (!narrowLabel || !narrowItem || narrowLabel.x < narrowItem.x || narrowLabel.x + narrowLabel.width > narrowItem.x + narrowItem.width + 1) {
-                throw new Error('Care label overflows its narrow dock button');
-              }
+              const conditionsDock = productPage.locator('.mobile-dock[data-variant="main"] a[href="/#podmienky"]');
+               if (!await conditionsDock.isVisible()) throw new Error('Narrow dock must expose the new conditions shortcut');
+               const narrowLabel = await conditionsDock.locator('span').last().boundingBox();
+               const narrowItem = await conditionsDock.boundingBox();
+               if (!narrowLabel || !narrowItem || narrowLabel.x < narrowItem.x - 1 || narrowLabel.x + narrowLabel.width > narrowItem.x + narrowItem.width + 1) {
+                 throw new Error('Conditions label overflows its narrow dock button');
+               }
               await productPage.setViewportSize({ width: 390, height: 844 });
               const firstCard = catalog.locator('[data-product-card]').first();
               const cardBox = await firstCard.boundingBox();

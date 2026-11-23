@@ -313,8 +313,8 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           Kto sa bude starať o vášho psíka?
         </h2>
       )}
-      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
-        <div>
+      <div className={"relative z-10 mx-auto max-w-6xl px-4 " + (homeLayout && !isEnglish ? "flex flex-col gap-7" : "grid items-center gap-10 lg:grid-cols-2")}>
+        <div className={homeLayout && !isEnglish ? "order-2 mx-auto w-full max-w-[740px]" : ""}>
           {(!homeLayout || isEnglish) && <>
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             {isEnglish ? "About us" : "O nás"}
@@ -324,7 +324,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           </h2>
           </>}
           {homeLayout && !isEnglish ? (
-            <div data-about-expanded className="space-y-4 text-forest/85">
+            <div data-about-expanded className="space-y-4 text-justify text-forest/85 hyphens-auto [text-wrap:pretty]">
               <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
               <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
               <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
@@ -376,7 +376,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className={homeLayout && !isEnglish ? "order-1 mx-auto w-full max-w-[740px] space-y-4" : "space-y-4"}>
           <img
             src={teamPhoto}
             alt={isEnglish ? "The owners of Chvostíkovo dog daycare with their dogs" : "Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"}
@@ -399,7 +399,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           </div>
           {homeLayout && <div data-hero-benefits className="flex w-full flex-nowrap items-center justify-center gap-1 pt-2 sm:gap-2">
             {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map(item => (
-              <span key={item} className="inline-flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full bg-[#2d764b] px-1 py-1.5 text-[clamp(7px,2.2vw,11px)] font-bold leading-tight text-white shadow-card sm:gap-1 sm:px-2.5 sm:py-2">
+              <span key={item} className="inline-flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full bg-[#2d764b] px-1 py-1.5 text-[clamp(7px,2.2vw,11px)] font-bold leading-tight text-white sm:gap-1 sm:px-2.5 sm:py-2">
                 <CheckCircle2 className="size-3 shrink-0 sm:size-4" aria-hidden="true" />{item}
               </span>
             ))}

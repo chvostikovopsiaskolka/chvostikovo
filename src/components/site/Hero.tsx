@@ -97,7 +97,7 @@ export function Hero() {
           </div>
         </div>
       </div>
-      <div className="relative z-10 mt-7 lg:mt-3"><Reviews variant="hero" /></div>
+      <div className="relative z-10 mt-11 sm:mt-10 lg:mt-5"><Reviews variant="hero" /></div>
       <FormDialog open={interestOpen} onOpenChange={setInterestOpen} title="Čo hľadáte pre svojho psíka?"
         subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám.">
         <LeadStepForm questionInHeading trackingSource={interestSource} />
