@@ -278,10 +278,14 @@ assert(storyCurrent.includes('max-w-[810px]') &&
        storyCurrent.includes('sm:h-72 lg:h-80') &&
        storyCurrent.includes('lg:px-4 lg:text-xs'),
        "Home desktop team image and all three green badges must share a wider row");
-const crownIndex = paidLeadCurrent.indexOf('data-aria-first-visit-dogs');
-const visitHeadingIndex = paidLeadCurrent.indexOf('Máte záujem o návštevu?');
+// Scope this assertion to the BOTTOM visit form: the hero now intentionally
+// uses the SAME form-liquid-surface class before it. A global indexOf would
+// confuse the two approved, independent form sections.
+const lowerVisitForm = paidLeadCurrent.slice(paidLeadCurrent.indexOf('<section id="aria-first-visit-form"'));
+const crownIndex = lowerVisitForm.indexOf('data-aria-first-visit-dogs');
+const visitHeadingIndex = lowerVisitForm.indexOf('Máte záujem o návštevu?');
 assert(visitHeadingIndex >= 0 && crownIndex > visitHeadingIndex &&
-       crownIndex < paidLeadCurrent.indexOf('className="form-liquid-surface relative z-0 mt-0'),
+       crownIndex < lowerVisitForm.indexOf('className="form-liquid-surface relative z-0 mt-0'),
        "Four dogs must sit on the top of the visit form, below its heading");
 
 // APP-01 responsive-mosaic restoration: reuse existing AriaMosaicGallery,
