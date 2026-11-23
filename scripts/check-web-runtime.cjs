@@ -2090,22 +2090,24 @@ if (!bellaris && brandPreviewCandidate) {
               await page.setViewportSize({ width, height: width >= 1024 ? 900 : 844 });
               const hero = page.locator('section.hero-safe-top').first();
               const primary = hero.locator('.hero-cta-primary:visible').first();
-              const mainInlineMobile = url.pathname === '/' && width < 1024;
+              const mainMobilePhotos = url.pathname === '/' && width < 1024;
               // A responsive Hero can settle a frame later after 390→1440
               // resize on Safari with restricted storage; keep a bounded gate.
-              if (!mainInlineMobile) {
-                try { await primary.waitFor({state:'visible',timeout:4500}); }
-                catch (_) { throw new Error('Hero prominent CTA missing at ' + width); }
-              }
-              if (await hero.locator('.hero-cta-primary:visible').count() !== (mainInlineMobile ? 0 : 1))
-                throw new Error('Main mobile uses inline form, other Heroes retain primary CTA at ' + width);
+              try { await primary.waitFor({state:'visible',timeout:4500}); }
+              catch (_) { throw new Error('Hero prominent CTA missing at ' + width); }
+              if (await hero.locator('.hero-cta-primary:visible').count() !== 1)
+                throw new Error('Hero must retain one prominent CTA at ' + width);
               const ctaPair = hero.locator('.hero-cta-pair:visible');
               if (url.pathname === '/') {
                 if (width < 1024) {
-                  const inline = hero.locator('[data-home-hero-inline-mobile] [data-lead-step-form]');
-                  if (!await inline.isVisible() || await inline.locator('input[name="zaujem"]').count() !== 3 ||
+                  const pair = hero.locator('[data-home-hero-photo]');
+                  const button = hero.locator('[data-home-hero-interest-cta]');
+                  if (await pair.count() !== 2 || !await button.isVisible() ||
+                      (await button.innerText()).trim() !== 'Mám záujem' ||
+                      await hero.locator('[data-lead-step-form]').count() !== 0 ||
+                      await page.locator('[data-home-hero-revealed-form]').count() !== 0 ||
                       await hero.locator('.hero-cta-pair:visible').count())
-                    throw new Error('Main mobile Hero needs three shared interests directly: ' + width);
+                    throw new Error('Mobile Hero must show two photos, CTA, then reviews, with form initially closed: ' + width);
                 } else {
                   if ((await primary.innerText()).trim() !== 'Chcem zistiť viac' || await hero.locator('.hero-cta-secondary').count())
                     throw new Error('Desktop home learn-more CTA changed: ' + width);
@@ -2154,26 +2156,18 @@ if (!bellaris && brandPreviewCandidate) {
                       return el?.textContent?.trim()==='váš psík zamiluje' &&
                         getComputedStyle(el).color==='rgb(255, 164, 20)';
                     })(),
-                    heroGlassAndBreathingRoom:innerWidth>639 || (() => {
-                      const panel=document.querySelector('#top [data-home-hero-inline-mobile]');
-                      const heading=document.querySelector('#top h1');
-                      const review=document.querySelector('#top #recenzie');
-                      const paws=panel?.querySelectorAll('[aria-hidden="true"] svg');
-                      if(!panel || !heading || !review || !paws?.length) return false;
-                      const panelBox=panel.getBoundingClientRect(), titleBox=heading.getBoundingClientRect();
-                      const reviewBox=review.getBoundingClientRect();
-                      const style=getComputedStyle(panel);
-                      const colorComponents=style.backgroundColor.match(/[0-9.]+/g) || [];
-                      const alpha=Number(colorComponents[3]);
-                      const headlineGap=panelBox.top-titleBox.bottom;
-                      const reviewGap=reviewBox.top-panelBox.bottom;
-                      return paws.length>=6 && alpha>0 && alpha<0.75 &&
-                        parseFloat(style.borderTopWidth)>=1.25 &&
-                        style.borderTopColor!=='rgba(255, 255, 255, 0.68)' &&
-                        style.backdropFilter.includes('blur') &&
-                        headlineGap>=21 && headlineGap<=54 &&
-                        reviewGap>=19 && reviewGap<=58 &&
-                        panelBox.left>=-1 && panelBox.right<=innerWidth+1;
+                    mobileHeroPhotoOrder:innerWidth>=1024 || (() => {
+                      const images=[...document.querySelectorAll('#top [data-home-hero-photo] img')];
+                      const cta=document.querySelector('#top [data-home-hero-interest-cta]');
+                      const reviews=document.querySelector('#top #recenzie');
+                      if (images.length!==2 || !cta || !reviews) return false;
+                      const a=images[0].getBoundingClientRect(), b=images[1].getBoundingClientRect();
+                      const c=cta.getBoundingClientRect(), d=reviews.getBoundingClientRect();
+                      return images.every(img=>img.complete && img.naturalWidth>0) &&
+                        Math.abs(a.top-b.top)<2 && a.right<=b.left+2 &&
+                        Math.min(a.width,b.width)>80 &&
+                        c.top>=a.bottom+9 && d.top>=c.bottom+15 &&
+                        a.left>=-1 && b.right<=innerWidth+1;
                     })(),
                     reasonThirdNoRule:innerWidth>=640 || (() => {
                       const third=document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] article')[2];
@@ -2209,8 +2203,8 @@ if (!bellaris && brandPreviewCandidate) {
                       })(),
                     formDepth:getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).boxShadow.includes('rgb'),
                     heroFormOrDesktopCta: innerWidth < 1024
-                      ? !!document.querySelector('#top [data-home-hero-inline-mobile] [data-lead-step-form]') &&
-                        !document.querySelector('#top .home-hero-cta')
+                      ? !!document.querySelector('#top [data-home-hero-interest-cta]') &&
+                        !document.querySelector('#top [data-lead-step-form]')
                       : getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow==='none',
                     conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
@@ -2247,6 +2241,7 @@ if (!bellaris && brandPreviewCandidate) {
                       return el.classList.contains('form-liquid-surface') &&
                         style.backdropFilter.includes('blur') &&
                         style.backgroundColor.includes('0.55') &&
+                        parseFloat(style.borderTopWidth)>=1.4 &&
                         !document.querySelector('#informujte-sa a[href^="tel:"]');
                     })(),
                     firstVisit:getComputedStyle(document.getElementById('prva-navsteva')).backgroundColor==='rgb(145, 64, 107)' && ![...document.querySelectorAll('#prva-navsteva button')].some(el=>el.textContent.includes('Dohodnúť úvodnú návštevu')),
@@ -2500,21 +2495,27 @@ if (!bellaris && brandPreviewCandidate) {
           // scroll while open. Keep the actual modal centered and scrollable.
           if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/'].includes(url.pathname)) {
             if (url.pathname === '/') {
-              // The previous mobile CTA/modal was deliberately replaced by a
-              // compact shared two-step form. Exercise both steps, without
-              // submitting a production lead, instead of clicking dead UI.
-              const inline = page.locator('#top [data-home-hero-inline-mobile] [data-lead-step-form]');
-              if (!await inline.isVisible()) throw new Error('Mobile home inquiry form is not visible');
-              const choices = inline.locator('label:has(input[name="zaujem"])');
-              if (await choices.count() !== 3) throw new Error('Mobile home must retain all three interest choices');
+              // CTA reveals a shared inline form AFTER Hero/reviews, without modal.
+              // Validate real iPhone width, all three interests and step 2.
+              await page.setViewportSize({width:390,height:844});
+              await page.locator('#top [data-home-hero-interest-cta]').click();
+              const revealed=page.locator('#home-hero-interest[data-home-hero-revealed-form]');
+              await revealed.waitFor({state:'visible',timeout:5000});
+              const inline=revealed.locator('[data-lead-step-form]');
+              if (!await inline.isVisible() ||
+                  await page.locator('#top [data-lead-step-form]').count() ||
+                  await page.getByRole('dialog').count())
+                throw new Error('Home interest CTA must reveal the in-page form after Hero');
+              const choices=inline.locator('label:has(input[name="zaujem"])');
+              if (await choices.count()!==3) throw new Error('Revealed home form must retain all three interests');
               await choices.nth(1).click();
-              await inline.getByRole('button', { name: 'Pokračovať', exact: true }).click();
+              await inline.getByRole('button', {name:'Pokračovať',exact:true}).click();
               if (!await inline.locator('input[name="meno"]').isVisible() ||
                   !await inline.locator('input[name="telefon"]').isVisible())
-                throw new Error('Mobile hero inline interest did not advance to contact step');
-              await inline.getByRole('button', { name: 'Späť', exact: true }).click();
+                throw new Error('Revealed home form did not advance to contact');
+              await inline.getByRole('button',{name:'Späť',exact:true}).click();
               if (!await choices.nth(1).locator('input[name="zaujem"]').isChecked())
-                throw new Error('Mobile hero interest selection was lost on back');
+                throw new Error('Revealed interest selection was lost on back');
             } else {
               const entry = (isAriaPage || isPuppyAria)
                 ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })

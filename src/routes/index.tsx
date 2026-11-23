@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
 import { Gallery } from "@/components/site/Gallery";
@@ -10,6 +11,8 @@ import { ProductSection } from "@/components/site/ProductSection";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
 import { Contact, Footer } from "@/components/site/Contact";
 import { InquirySection } from "@/components/site/InquirySection";
+import { LeadStepForm } from "@/components/site/LeadStepForm";
+import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { HomePuppyChecker } from "@/components/site/HomePuppyChecker";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
 import { FAQ } from "@/content/site";
@@ -69,11 +72,47 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const [heroInquiryOpen, setHeroInquiryOpen] = useState(false);
+  const heroInquiryRef = useRef<HTMLElement>(null);
+  const isReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  useEffect(() => {
+    if (!heroInquiryOpen) return;
+    const frame = requestAnimationFrame(() => {
+      const panel = heroInquiryRef.current;
+      panel?.scrollIntoView({ behavior: isReducedMotion() ? "auto" : "smooth", block: "start" });
+      panel?.querySelector<HTMLElement>("h2")?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [heroInquiryOpen]);
+
+  function openHeroInquiry() {
+    if (heroInquiryOpen) {
+      heroInquiryRef.current?.scrollIntoView({
+        behavior: isReducedMotion() ? "auto" : "smooth", block: "start",
+      });
+    } else {
+      setHeroInquiryOpen(true);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main>
-        <Hero />
+        <Hero onMobileInquiryOpen={openHeroInquiry} mobileInquiryOpen={heroInquiryOpen} />
+        {heroInquiryOpen && (
+          <section id="home-hero-interest" ref={heroInquiryRef} data-home-hero-revealed-form
+            className="relative scroll-mt-20 overflow-hidden bg-card px-4 pb-11 pt-6 lg:hidden">
+            <SectionAmbientPaws />
+            <div className="form-liquid-surface relative z-10 mx-auto max-w-xl overflow-hidden rounded-[26px] px-4 py-6 min-[390px]:px-6">
+              <h2 tabIndex={-1} className="font-display text-center text-lg font-bold text-forest focus:outline-none">
+                Chceli by ste sa informovať o škôlke?
+              </h2>
+              <LeadStepForm trackingSource="home_hero_interest_mobile" questionInHeading compact />
+            </div>
+          </section>
+        )}
         <ReviewReasons variant="home" withVideo showCta={false} />
         <About homeLayout />
         <Pricing interestMode homeLayout />
