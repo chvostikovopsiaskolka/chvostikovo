@@ -292,3 +292,17 @@ assert(hero.includes('data-home-hero-photo={index + 1}') &&
        css.includes('.site-brand #top [data-home-hero-photos]') &&
        css.includes('border: 2px solid rgb(184 46 127 / 32%)'),
        'Home mobile photo pair, CTA-to-inline-form and liquid border contract');
+
+
+// APP-01 23 Nov: small mobile-only Hero spacing, one thinner CTA, and
+// the existing gallery immediately after Why Chvostikovo + About.
+const homePage = read("src/routes/index.tsx");
+assert(homePage.indexOf('<About homeLayout />') < homePage.indexOf('<DaycarePhotoCarousel />') &&
+       homePage.indexOf('<DaycarePhotoCarousel />') < homePage.indexOf('<Pricing interestMode homeLayout />') &&
+       homePage.split('<DaycarePhotoCarousel />').length === 2,
+       "Existing carousel belongs just below the Home Why/About sequence, once only");
+assert(hero.includes('hero-cta-primary min-h-[46px]') &&
+       css.includes('--hero-content-top: 2.25rem; /* mobile home Hero') &&
+       css.includes('[data-home-hero-interest-cta] { min-height: 46px; padding-block: 0.5rem; }') &&
+       css.includes('margin-top: clamp(1.75rem, 6.5vw, 2.25rem)'),
+       "Mobile Hero needs a smaller CTA and real-flow spacing without changing desktop");
