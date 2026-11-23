@@ -2104,7 +2104,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const button = hero.locator('[data-home-hero-interest-cta]');
                   if (await pair.count() !== 2 || !await button.isVisible() ||
                       (await button.innerText()).trim() !== 'Mám záujem' ||
-                      await hero.locator('[data-lead-step-form]').count() !== 0 ||
+                      await hero.locator('[data-lead-step-form]:visible').count() !== 0 ||
                       await page.locator('[data-home-hero-revealed-form]').count() !== 0 ||
                       await hero.locator('.hero-cta-pair:visible').count())
                     throw new Error('Mobile Hero must show two photos, CTA, then reviews, with form initially closed: ' + width);
@@ -2331,7 +2331,7 @@ if (!bellaris && brandPreviewCandidate) {
               // Mobile home has an inline 2-step form instead of the old CTA.
               // Check its real inputs above; don't wait for an absent button.
               // Preserve desktop and other landing routes' CTA shadow checks.
-              if (!mainInlineMobile) {
+              if (!mainMobilePhotos) {
                 const primaryShadow = await primary.evaluate(el => getComputedStyle(el).boxShadow);
                 if (url.pathname === '/' && width >= 1024) {
                   if (primaryShadow !== 'none') throw new Error('Main desktop CTA must be shadow-free: ' + width);
