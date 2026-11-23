@@ -2187,17 +2187,26 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Desktop Hero benefit badges not aligned with text left edge: ' + delta);
                 }
               }
-              if ((await primary.evaluate(el => getComputedStyle(el).boxShadow)) === 'none')
-                throw new Error('Primary CTA glow missing: ' + width);
+              // Main desktop "Chcem zistiť viac" is flat; only mobile
+              // "Mám záujem" keeps the clean glow. Other routes are untouched.
+              const primaryShadow = await primary.evaluate(el => getComputedStyle(el).boxShadow);
+              if (url.pathname === '/' && width >= 1024) {
+                if (primaryShadow !== 'none') throw new Error('Main desktop CTA must be shadow-free: ' + width);
+              } else if (url.pathname === '/') {
+                if (!primaryShadow.includes('226, 84, 164') || primaryShadow.includes('inset'))
+                  throw new Error('Main interest CTA must keep a glow only: ' + width + ' ' + primaryShadow);
+              } else if (primaryShadow === 'none') {
+                throw new Error('Landing primary CTA glow missing: ' + width);
+              }
             }
             if(url.pathname==='/' && !restricted) {
               await page.locator('#home-hero-learn-more').click();
               await page.waitForFunction(()=>{const y=document.getElementById('preco-chvostikovo').getBoundingClientRect().top;return y>=0&&y<260;});
               if(await page.getByRole('dialog').count()) throw new Error('Desktop learn-more action opened a dialog');
               await page.setViewportSize({width:390,height:844});
-              const puppyFaq=page.locator('#podmienky').getByRole('button',{name:'Čo ak chcete prihlásiť šteniatko?'});
-              await puppyFaq.click();
-              await page.locator('#podmienky a[href="#aria-puppy-check"]').click();
+              const puppyFaq=page.locator('#home-early-faq summary').filter({hasText:'Čo ak chcete prihlásiť šteniatko?'});
+               await puppyFaq.click();
+               await page.locator('#home-early-faq a[href="#aria-puppy-check"]').click();
               await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
               for(const id of ['informujte-sa','zaujem-po-priatelstvach','prva-navsteva-form']) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
@@ -3025,13 +3034,13 @@ if (!bellaris && brandPreviewCandidate) {
               }
               // Verify the short dock label on narrow Android-like viewports.
               await productPage.setViewportSize({ width: 320, height: 760 });
-              const careDock = productPage.locator('.mobile-dock a[aria-label="Starostlivosť"]');
-              if (!(await careDock.locator('.mobile-dock-label-short').isVisible())) throw new Error('Narrow dock must use readable care label');
-              const narrowLabel = await careDock.locator('.mobile-dock-label-short').boundingBox();
-              const narrowItem = await careDock.boundingBox();
-              if (!narrowLabel || !narrowItem || narrowLabel.x < narrowItem.x || narrowLabel.x + narrowLabel.width > narrowItem.x + narrowItem.width + 1) {
-                throw new Error('Care label overflows its narrow dock button');
-              }
+              const conditionsDock = productPage.locator('.mobile-dock[data-variant="main"] a[href="/#podmienky"]');
+               if (!await conditionsDock.isVisible()) throw new Error('Narrow dock must expose the new conditions shortcut');
+               const narrowLabel = await conditionsDock.locator('span').last().boundingBox();
+               const narrowItem = await conditionsDock.boundingBox();
+               if (!narrowLabel || !narrowItem || narrowLabel.x < narrowItem.x - 1 || narrowLabel.x + narrowLabel.width > narrowItem.x + narrowItem.width + 1) {
+                 throw new Error('Conditions label overflows its narrow dock button');
+               }
               await productPage.setViewportSize({ width: 390, height: 844 });
               const firstCard = catalog.locator('[data-product-card]').first();
               const cardBox = await firstCard.boundingBox();
