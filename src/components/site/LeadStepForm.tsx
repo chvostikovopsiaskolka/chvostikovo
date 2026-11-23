@@ -22,11 +22,11 @@ export const LEAD_STEP_INTERESTS = [
   { value: "Mám záujem využívať škôlku občasne", lines: ["Mám záujem", "občasne", "využívať škôlku"] },
 ] as const;
 
-export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, presetInterest, ariaPreview = true, puppyCheck }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined }) {
+export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, compact = false, presetInterest, ariaPreview = true, puppyCheck }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; compact?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined }) {
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
   const [selectedInterest, setSelectedInterest] = useState(presetInterest ?? "");
-  // Shared optional field for information, regular, occasional and puppy leads.
+  // Shared required breed and optional sex for information, regular, occasional and puppy leads.
   // Carry the puppy breed into contact, where owners may correct it.
   const [breed, setBreed] = useState(puppyCheck?.dog_breed ?? "");
   const [sent, setSent] = useState(false);
@@ -46,11 +46,9 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
     event.preventDefault();
     if (loading || step !== 2 || !selectedInterest) return;
     const form = event.currentTarget;
-    // Read the actual form value: iOS/browser autofill can change it without React onChange.
+    // Read the actual form: browser autofill can omit the React onChange event.
     const breedValue = String(new FormData(form).get("plemeno") || "").trim();
     if (!breedValue) { setError("Vyplňte plemeno psíka."); return; }
-    // Reconcile a silent browser autofill once, so error/loading re-renders
-    // cannot erase the breed and block a retry.
     if (breedValue !== breed) setBreed(breedValue);
     const attemptId = startFormAttempt(trackingSource);
     progress.markAttempt();
@@ -135,7 +133,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
       onBlurCapture={progress.onBlurCapture}
       onInvalidCapture={progress.onInvalidCapture}
       onChangeCapture={(event) => { trackStart(); progress.onChangeCapture(event); }}
-      className="space-y-5 text-left"
+      className={(compact ? "space-y-3" : "space-y-5") + " text-left"}
     >
       <div className="space-y-2">
         <div className="flex justify-between gap-2 text-xs font-semibold text-forest/75" aria-live="polite">
@@ -147,7 +145,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         </div>
       </div>
 
-      <div className={step === 1 ? "space-y-5" : "hidden"} aria-hidden={step !== 1}>
+      <div className={step === 1 ? (compact ? "space-y-3" : "space-y-5") : "hidden"} aria-hidden={step !== 1}>
         <fieldset className="min-w-0">
           <legend className={questionInHeading ? "sr-only" : "mb-3 font-display text-lg font-bold leading-snug text-forest sm:text-xl"}>
             Čo hľadáte pre svojho psíka?
@@ -157,7 +155,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
               <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
                 <input type="radio" name="zaujem" value={option.value} required={step === 1} aria-label={option.value} defaultChecked={presetInterest === option.value}
                   onChange={() => setSelectedInterest(option.value)} className="peer sr-only" />
-                <span className="flex h-full min-h-24 min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 py-3 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:min-h-28 sm:px-3">
+                <span className={`flex h-full min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:px-3 ${compact ? "min-h-[72px] py-2 sm:min-h-24" : "min-h-24 py-3 sm:min-h-28"}`}>
                   {option.lines.map((line, i) => (
                     <span key={line} className={`block max-w-full break-words text-[10.5px] [overflow-wrap:anywhere] sm:text-xs ${ariaPreview && (/informovať|pravidelne|občasne/i.test(line)) ? "font-extrabold" : i === 0 ? "font-bold" : "font-medium"}`}>
                       {line}

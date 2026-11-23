@@ -186,7 +186,7 @@ export function StandPhotoLightbox({
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent
         data-stand-lightbox
-        className="z-[120] flex max-h-[96dvh] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] flex-col gap-2 overflow-hidden rounded-2xl border-0 bg-forest p-3 text-cream shadow-xl sm:max-w-5xl sm:p-5 [&>button]:right-5 [&>button]:top-5 [&>button]:z-20 [&>button]:flex [&>button]:size-9 [&>button]:items-center [&>button]:justify-center [&>button]:rounded-full [&>button]:bg-card [&>button]:text-forest [&>button]:opacity-100"
+        className="z-[120] flex max-h-[96dvh] w-max max-w-[calc(100vw-16px)] flex-col items-center gap-2 overflow-hidden rounded-2xl border-0 bg-forest p-2.5 pb-3 text-cream shadow-xl sm:p-3 sm:pb-4 [&>button]:right-2.5 [&>button]:top-2.5 [&>button]:z-20 [&>button]:grid [&>button]:size-11 [&>button]:place-items-center [&>button]:rounded-none [&>button]:border-0 [&>button]:bg-transparent [&>button]:text-orange-400 [&>button]:opacity-100 [&>button]:shadow-none [&>button]:hover:bg-transparent [&>button]:hover:opacity-100 [&>button]:focus-visible:outline-2 [&>button]:focus-visible:outline-orange-500 [&>button>svg]:size-6"
       >
         <DialogTitle className="sr-only">Fotografia stojana {photo.caption ?? ""}</DialogTitle>
         <DialogDescription className="sr-only">Detail ručne vyrábaného stojana. Fotografie môžete listovať šípkami alebo potiahnutím.</DialogDescription>
@@ -195,7 +195,7 @@ export function StandPhotoLightbox({
           data-stand-photo-viewport
           data-pinch-enabled="true"
           data-zoom="1"
-          className="relative h-[min(70dvh,720px)] min-h-0 w-full overflow-hidden overscroll-contain rounded-xl bg-black/25 touch-none"
+          className="relative inline-flex h-auto w-fit max-h-[calc(100dvh-104px)] max-w-full overflow-hidden overscroll-contain rounded-xl bg-black/25 touch-none"
         >
           <img
             ref={imageRef}
@@ -203,21 +203,21 @@ export function StandPhotoLightbox({
             src={photo.fullSrc ?? photo.src}
             alt={photo.alt}
             draggable={false}
-            className="block h-full w-full max-w-none select-none object-contain"
+            className="block h-auto w-auto max-h-[min(76dvh,760px)] max-w-[calc(100vw-36px)] select-none object-contain sm:max-w-[min(1100px,calc(100vw-48px))]"
             style={{ transformOrigin: "center center", willChange: "transform" }}
           />
           <button type="button" onClick={() => navigate(-1)} aria-label="Predchádzajúca fotografia"
             data-stand-photo-previous
-            className="absolute left-2 top-1/2 z-10 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-card/95 text-forest shadow-soft hover:bg-card focus-visible:outline-2 focus-visible:outline-coral sm:left-3 sm:size-10">
-            <ChevronLeft aria-hidden="true" className="size-5" />
+            className="absolute left-0 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-none bg-transparent text-orange-400 shadow-none [filter:drop-shadow(0_1px_2px_rgba(0,0,0,.8))] hover:text-pink-500 focus-visible:outline-2 focus-visible:outline-orange-500 sm:left-1">
+            <ChevronLeft aria-hidden="true" className="size-8 stroke-[3]" />
           </button>
           <button type="button" onClick={() => navigate(1)} aria-label="Ďalšia fotografia"
             data-stand-photo-next
-            className="absolute right-2 top-1/2 z-10 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-card/95 text-forest shadow-soft hover:bg-card focus-visible:outline-2 focus-visible:outline-coral sm:right-3 sm:size-10">
-            <ChevronRight aria-hidden="true" className="size-5" />
+            className="absolute right-0 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-none bg-transparent text-orange-400 shadow-none [filter:drop-shadow(0_1px_2px_rgba(0,0,0,.8))] hover:text-pink-500 focus-visible:outline-2 focus-visible:outline-orange-500 sm:right-1">
+            <ChevronRight aria-hidden="true" className="size-8 stroke-[3]" />
           </button>
         </div>
-        <p className="text-center text-xs tabular-nums text-cream/80">{index + 1} / {photos.length}{photo.caption ? ` · ${photo.caption}` : ""}</p>
+        <p data-stand-photo-caption className="text-center text-xs tabular-nums text-cream/80">{index + 1} / {photos.length}{photo.caption ? ` · ${photo.caption}` : ""}</p>
       </DialogContent>
     </Dialog>
   );

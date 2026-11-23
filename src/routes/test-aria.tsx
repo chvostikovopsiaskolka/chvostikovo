@@ -258,15 +258,6 @@ export function AriaPreviewPage() {
           )}
         </section>
 
-        {/* Move the SAME existing moving gallery here on paid LEAD; keep
-            its swipe/autoscroll/lightbox behavior and append the two unique
-            former hero teaser photos without adding unrelated images. */}
-        {isLiveLead && (
-          <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="scroll-mt-24">
-            <DaycarePhotoCarousel includeLeadHighlights />
-          </div>
-        )}
-
         <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-4xl px-4">
@@ -284,6 +275,15 @@ export function AriaPreviewPage() {
             </div>
           </div>
         </section>
+
+        {/* Keep the SAME existing moving gallery below the inline form on paid LEAD; keep
+            its swipe/autoscroll/lightbox behavior and append the two unique
+            former hero teaser photos without adding unrelated images. */}
+        {isLiveLead && (
+          <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="scroll-mt-24">
+            <DaycarePhotoCarousel includeLeadHighlights />
+          </div>
+        )}
 
         <section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-white py-9 sm:py-12">
           <SectionAmbientPaws />
