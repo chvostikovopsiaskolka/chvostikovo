@@ -313,7 +313,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const liquidGlass = node => {
                     const css = node ? getComputedStyle(node) : null;
                     return !!css && css.backgroundColor.startsWith('rgba(') &&
-                      (css.backdropFilter.includes('blur(') || css.webkitBackdropFilter?.includes('blur('));
+                      ((css.backdropFilter || '').includes('blur(') || (css.webkitBackdropFilter || '').includes('blur('));
                   };
                   const heroDogs = formNode?.querySelector('[data-aria-hero-form-dogs]');
                   const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
