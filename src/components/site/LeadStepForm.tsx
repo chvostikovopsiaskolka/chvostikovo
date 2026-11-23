@@ -49,6 +49,9 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
     // Read the actual form value: iOS/browser autofill can change it without React onChange.
     const breedValue = String(new FormData(form).get("plemeno") || "").trim();
     if (!breedValue) { setError("Vyplňte plemeno psíka."); return; }
+    // Reconcile a silent browser autofill once, so error/loading re-renders
+    // cannot erase the breed and block a retry.
+    if (breedValue !== breed) setBreed(breedValue);
     const attemptId = startFormAttempt(trackingSource);
     progress.markAttempt();
     setLoading(true);
