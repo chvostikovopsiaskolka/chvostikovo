@@ -297,18 +297,17 @@ function ReasonText({ title, text }: { title: string; text: string }) {
   return text;
 }
 
-/** Homepage mobile: portrait video occupies the entire left column; all three
- *  benefits stack in the right column. Other routes keep their layout. */
+/** Homepage mobile: short portrait video beside the first reason, the next two
+ *  form a pair below. Desktop keeps the video left and all three reasons right. */
 export function VideoReasonsGrid({ items, language = "sk", homeMobileLayout = false }: { items: VideoBenefit[]; language?: "sk" | "en"; homeMobileLayout?: boolean }) {
   return (
     <div data-video-reasons-grid data-home-video-layout={homeMobileLayout || undefined}
       className={"mt-7 grid items-stretch gap-3 rounded-3xl bg-cream/10 p-3 shadow-card ring-1 ring-cream/20 backdrop-blur-xl sm:rounded-none sm:bg-transparent sm:p-0 sm:shadow-none sm:ring-0 sm:backdrop-blur-none sm:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] sm:gap-7 lg:gap-10 " +
-        (homeMobileLayout ? "grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] gap-2 p-2 sm:gap-7 sm:p-0" : "grid-cols-2")}>
+        "grid-cols-2"}>
       <div className="min-w-0">
         <InlineDaycareVideo language={language} />
       </div>
-      <div data-video-reasons-copy className={(homeMobileLayout ? "flex min-w-0 flex-col justify-around gap-3" : "contents") +
-        " sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl"}>
+      <div data-video-reasons-copy className="contents sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl">
         {items.map(({ title, text, icon: Icon }) => (
           <article key={title} className={homeMobileLayout ? "min-w-0 py-2 text-cream sm:py-4" : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>
             <h3 className={"flex min-w-0 items-start gap-1.5 font-display font-bold leading-snug text-cream sm:gap-2 sm:text-lg lg:text-xl " +

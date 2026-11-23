@@ -39,12 +39,12 @@ export function ProductInquiryContact({
         </label>
         <div className="sm:col-span-2">
           <label className="block font-display text-sm font-bold text-forest">
-            Odkiaľ ste? (mesto, PSČ) *
+            Odkiaľ ste? (adresa, mesto, PSČ) *
             <input name="customer_location" autoComplete="off"
               {...(setCustomerLocation ? { value: customerLocation ?? "", onChange: (event: React.ChangeEvent<HTMLInputElement>) => setCustomerLocation(event.target.value) } : {})}
-              placeholder="napr. Košice, 040 01"
-              required maxLength={120} pattern="[^,]{2,80},[ ]*.{2,20}"
-              title="Napíšte mesto a PSČ oddelené čiarkou, napr. Košice, 040 01"
+              placeholder="napr. Hlavná 12, Košice, 040 01"
+              required maxLength={120} pattern=".{4,110}[, ] *[0-9]{3} ?[0-9]{2}"
+              title="Zadajte ulicu a číslo, mesto a PSČ, napr. Hlavná 12, Košice, 040 01"
               className={inputClass} />
           </label>
           <ProductDeliveryDetails compact />

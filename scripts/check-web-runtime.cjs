@@ -2160,12 +2160,17 @@ if (!bellaris && brandPreviewCandidate) {
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
                     homeMobileVideoLayout:(() => {
-                      if (innerWidth>=640) return true;
                       const video=document.querySelector('#preco-chvostikovo video')?.getBoundingClientRect();
                       const texts=[...document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] article')].map(el=>el.getBoundingClientRect());
-                      return !!document.querySelector('#preco-chvostikovo [data-home-video-layout]') &&
-                        !!video && texts.length===3 && texts.every(r=>r.left>=video.right-2) &&
-                        video.top<=texts[0].top+3 && video.bottom>=texts[2].bottom-5 &&
+                      if (!video || texts.length!==3 || !document.querySelector('#preco-chvostikovo [data-home-video-layout]')) return false;
+                      if (innerWidth>=640) return texts.every(r=>r.left>=video.right-2) &&
+                        video.bottom>=texts[2].bottom-5;
+                      // Mobile: short reel beside first benefit; last two
+                      // are a horizontally aligned pair below it.
+                      return texts[0].left>=video.right-2 &&
+                        video.top<=texts[0].top+3 && video.bottom<=texts[1].top+3 &&
+                        Math.abs(texts[1].top-texts[2].top)<=3 &&
+                        texts[1].right<=texts[2].left+2 &&
                         document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] strong').length>=4;
                     })(),
                     homeReviewSoftShadow:(() => {
@@ -2186,6 +2191,20 @@ if (!bellaris && brandPreviewCandidate) {
                   };
                 });
                 if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression: '+JSON.stringify(layout));
+                if (width===320) {
+                  // Narrow Android short viewport: review proof visible above
+                  // the dock; controls remain >=44px despite compact mode.
+                  await page.setViewportSize({width:320,height:760});
+                  const narrow=await page.evaluate(()=>{
+                    const review=document.querySelector('#top #recenzie [data-review-card]')?.getBoundingClientRect();
+                    const dock=document.querySelector('.mobile-dock[data-variant="main"] .mobile-dock-bar')?.getBoundingClientRect();
+                    const item=document.querySelector('.mobile-dock[data-variant="main"] .mobile-dock-item')?.getBoundingClientRect();
+                    return {visible:review&&dock?Math.min(review.bottom,dock.top)-review.top:0, buttonHeight:item?.height};
+                  });
+                  if (narrow.visible<110 || narrow.buttonHeight<44 || narrow.buttonHeight>55)
+                    throw new Error('Narrow Android reviews covered by dock: '+JSON.stringify(narrow));
+                  await page.setViewportSize({width:320,height:844});
+                }
                 // ContextFaq mounts its CTA only while the disclosure is open:
                 // verify the actual clickable link after user interaction,
                 // rather than querying a deliberately unmounted child.
@@ -2706,14 +2725,27 @@ if (!bellaris && brandPreviewCandidate) {
                   throw new Error('Target contact step missing');
               }
               const formDialog = productPage.getByRole('dialog',{name:action});
+              const locationInput=formDialog.locator('input[name="customer_location"]:not([type="hidden"])');
               if (!await formDialog.locator('input[name="customer_name"]').count()
                 || !await formDialog.locator('input[name="email"]').count()
-                || !await formDialog.locator('input[name="customer_location"]').count()) {
-                throw new Error('Product contact inputs missing');
-              }
-              if (await formDialog.locator('[type="checkbox"][required]').count() !== 1) throw new Error('Consent checkbox missing');
-              const locationInput=formDialog.locator('input[name="customer_location"]');
-              if (await locationInput.getAttribute('required') === null) throw new Error('City and postal code must remain mandatory');
+                || await locationInput.count()!==1)
+                throw new Error('Original single product location field missing');
+              if (await formDialog.locator('[type="checkbox"][required]').count() !== 1)
+                throw new Error('Shared privacy-policy acknowledgement must remain mandatory');
+              if (await formDialog.locator('input[name="delivery_street"], input[name="delivery_postal"], input[name="delivery_city"], input[name="delivery_mode"]').count())
+                throw new Error('Do not add extra delivery fields or choices');
+              const privacyTrigger=formDialog.getByRole('button',{name:'zásadami ochrany osobných údajov'});
+              if (await privacyTrigger.count()!==1)
+                throw new Error('Product and daycare must reuse same privacy-policy component');
+              await locationInput.fill('Hlavná 12, Košice, 040 01');
+              if (!await locationInput.evaluate(el=>el.checkValidity()) ||
+                  await locationInput.getAttribute('required')===null ||
+                  !(await locationInput.getAttribute('placeholder'))?.includes('Hlavná 12'))
+                throw new Error('Single product address field must accept street, city and postal code');
+              await locationInput.fill('Košice, 040 01');
+              if (!await locationInput.evaluate(el=>el.checkValidity()))
+                throw new Error('Legacy city/postal format must remain valid');
+              await locationInput.fill('Hlavná 12, Košice, 040 01');
               await formDialog.getByRole('button',{name:'Ako je to s doručením?'}).click();
               const deliveryDialog=productPage.getByRole('dialog',{name:'Doprava a doručenie'});
               await deliveryDialog.waitFor({state:'visible'});
@@ -2723,7 +2755,7 @@ if (!bellaris && brandPreviewCandidate) {
               await productPage.keyboard.press('Escape');
               await deliveryDialog.waitFor({state:'hidden'});
               if (width === 390) {
-                for(const field of await formDialog.locator('input:visible:not([type="checkbox"])').all()) {
+                for(const field of await formDialog.locator('input:visible:not([type="checkbox"]):not([type="radio"])').all()) {
                   if (await field.evaluate(el => parseFloat(getComputedStyle(el).fontSize)) < 16) throw new Error('Product input risks Safari zoom');
                 }
               }
@@ -3109,6 +3141,10 @@ if (!bellaris && brandPreviewCandidate) {
                  throw new Error('Conditions label overflows its narrow dock button');
                }
               await productPage.setViewportSize({ width: 390, height: 844 });
+              const actionRows=await catalog.locator('[data-product-actions]').evaluateAll(nodes=>
+                nodes.map(el=>{const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom};}));
+              if (actionRows.length!==2 || Math.abs(actionRows[0].bottom-actionRows[1].bottom)>2)
+                throw new Error('Product target and stand CTA rows must share bottom alignment: '+JSON.stringify(actionRows));
               const firstCard = catalog.locator('[data-product-card]').first();
               const cardBox = await firstCard.boundingBox();
               if (!cardBox || cardBox.height > 540) throw new Error('Mobile catalogue card must remain compact');

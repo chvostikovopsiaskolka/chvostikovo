@@ -92,7 +92,7 @@ export function ProductCatalogCarousel() {
               <p className="font-display text-[10px] font-bold tracking-widest text-coral uppercase sm:text-xs">{product.eyebrow}</p>
               <h3 className="mt-1 font-display text-lg font-bold leading-tight text-forest sm:mt-2 sm:text-2xl">{product.name}</h3>
               <p className="mt-2 line-clamp-2 text-sm leading-snug text-forest/75 sm:line-clamp-3 sm:leading-relaxed">{product.description}</p>
-              <div className="mt-4 flex items-center justify-between gap-2 sm:mt-6">
+              <div data-product-actions className="mt-auto flex items-center justify-between gap-2 pt-4 sm:pt-6">
                 <div className="shrink-0">
                   <span className="block text-[11px] text-forest/60">Cena</span>
                   <span className="font-display text-xl font-bold leading-none text-forest sm:text-2xl">{product.price}</span>
