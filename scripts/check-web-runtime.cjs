@@ -1680,7 +1680,9 @@ if (!bellaris && brandPreviewCandidate) {
                 const serviceGroup = content?.querySelector('[data-aria-service-group]');
                 const heroDogs = serviceGroup?.querySelector('[data-aria-hero-dogs]');
                 const badge = serviceGroup?.querySelector('[data-aria-service-badge]');
-                const leadDescription = content?.querySelector('[data-aria-hero-description]');
+                const leadDescription = content?.querySelector(
+                  isPaidLead ? '[data-aria-lead-hero-photos]' : '[data-aria-hero-description]');
+                const heroCTA = content?.querySelector('[data-aria-lead-hero-cta]');
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
                 const introSpace = isPaidLead ? document.querySelector('[data-aria-lead-photos]')
                   : leadHero?.querySelector('[data-aria-intro-space]');
@@ -1701,18 +1703,19 @@ if (!bellaris && brandPreviewCandidate) {
                 const commonOrder = follows(introTopSpace, headlineSpacer) && follows(headlineSpacer, heroHeading) &&
                   follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
                   follows(heroDogs, badge) && follows(badge, leadDescription) &&
-                  follows(leadDescription, proof) &&
-                  (isPaidLead ? (follows(reviews, form) && follows(form, introSpace) &&
+                  (isPaidLead ? (!!heroCTA && follows(leadDescription, heroCTA) &&
+                    follows(heroCTA, proof) && follows(reviews, form) &&
+                    follows(form, team) && follows(team, introSpace) &&
                     !leadHero.contains(introSpace) && !inlineMenu && !!floatingMenu && !leadHero.contains(floatingMenu) &&
-                    getComputedStyle(floatingMenu).position === 'fixed' && follows(reviews, form))
-                  : (follows(reviews, introSpace) && follows(introSpace, form))) &&
+                    getComputedStyle(floatingMenu).position === 'fixed')
+                  : (follows(leadDescription, proof) && follows(reviews, introSpace) && follows(introSpace, form))) &&
                   follows(form, team) &&
                   !!heading && !!photo && !!copy &&
                   follows(heading, photo) && follows(photo, benefits) && follows(benefits, copy) &&
                   follows(team, firstVisitDogs);
                 return commonOrder;
               }, url.pathname === '/psia-skolka-kosice/');
-              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/dogs/badge/liquid copy/reviews/lead form/photos or caretakers order changed');
+              if (!hasHeroFormAndCaretakerOrder) throw new Error('Aria H1/dogs/badge/photos/CTA/reviews/form/About/carousel hierarchy regressed');
               if (width >= 768) {
                 const heights = await page.locator(url.pathname === '/psia-skolka-kosice/'
                   ? '#lead-photo-carousel [data-gesture-track="photos"] > div:first-child button'
@@ -1761,7 +1764,7 @@ if (!bellaris && brandPreviewCandidate) {
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
-                  ? ['recenzie', 'aria-hero-form', 'lead-photo-carousel', 'aria-caretakers', 'aria-about',
+                  ? ['recenzie', 'aria-hero-form', 'aria-caretakers', 'aria-about', 'lead-photo-carousel',
                      'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
                      'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
