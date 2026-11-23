@@ -2765,7 +2765,7 @@ if (!bellaris && brandPreviewCandidate) {
               await productPage.keyboard.press('Escape');
               await deliveryDialog.waitFor({state:'hidden'});
               if (width === 390) {
-                for(const field of await formDialog.locator('input:visible:not([type="checkbox"])').all()) {
+                for(const field of await formDialog.locator('input:visible:not([type="checkbox"]):not([type="radio"])').all()) {
                   if (await field.evaluate(el => parseFloat(getComputedStyle(el).fontSize)) < 16) throw new Error('Product input risks Safari zoom');
                 }
               }
