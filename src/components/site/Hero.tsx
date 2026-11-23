@@ -1,6 +1,7 @@
 import { LeadStepForm } from "./LeadStepForm";
 import { Reviews } from "./Reviews";
 import { PawTrailBackground } from "./PawTrailBackground";
+import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -23,12 +24,15 @@ export function Hero() {
             <span data-home-mobile-orange-phrase className="block text-coral-dark">váš psík zamiluje</span>
           </h1>
 
-          <div data-home-hero-inline-mobile className="form-liquid-surface mx-auto mt-5 max-w-xl rounded-[24px] border border-forest/10 bg-card px-3 py-3.5 shadow-card">
-            <h2 className="font-display text-[15px] font-extrabold leading-tight text-forest min-[380px]:text-base">
-              Chceli by ste sa informovať o škôlke?
-            </h2>
-            <div className="mt-2.5">
-              <LeadStepForm trackingSource="home_hero_interest_mobile" questionInHeading compact />
+          <div data-home-hero-inline-mobile className="form-liquid-surface relative isolate mx-auto mt-5 max-w-xl overflow-hidden rounded-[24px] border border-forest/10 bg-card px-3 py-3.5 shadow-card">
+            <SectionAmbientPaws />
+            <div className="relative z-10">
+              <h2 className="font-display text-[15px] font-extrabold leading-tight text-forest min-[380px]:text-base">
+                Chceli by ste sa informovať o škôlke?
+              </h2>
+              <div className="mt-2.5">
+                <LeadStepForm trackingSource="home_hero_interest_mobile" questionInHeading compact />
+              </div>
             </div>
           </div>
         </div>

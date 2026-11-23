@@ -2154,6 +2154,26 @@ if (!bellaris && brandPreviewCandidate) {
                       return el?.textContent?.trim()==='váš psík zamiluje' &&
                         getComputedStyle(el).color==='rgb(255, 164, 20)';
                     })(),
+                    heroGlassAndBreathingRoom:innerWidth>=1024 || (() => {
+                      const panel=document.querySelector('#top [data-home-hero-inline-mobile]');
+                      const heading=document.querySelector('#top .lg\\:hidden h1');
+                      const review=document.querySelector('#top #recenzie');
+                      const paws=panel?.querySelectorAll('[aria-hidden="true"] svg');
+                      if(!panel || !heading || !review || !paws?.length) return false;
+                      const panelBox=panel.getBoundingClientRect(), titleBox=heading.getBoundingClientRect();
+                      const reviewBox=review.getBoundingClientRect();
+                      const style=getComputedStyle(panel);
+                      const alpha=Number(style.backgroundColor.match(/[,\\s]([0-9.]+)\\)$/)?.[1]);
+                      const headlineGap=panelBox.top-titleBox.bottom;
+                      const reviewGap=reviewBox.top-panelBox.bottom;
+                      return paws.length>=6 && alpha>0 && alpha<0.75 &&
+                        parseFloat(style.borderTopWidth)>=1.25 &&
+                        style.borderTopColor!=='rgba(255, 255, 255, 0.68)' &&
+                        style.backdropFilter.includes('blur') &&
+                        headlineGap>=21 && headlineGap<=54 &&
+                        reviewGap>=19 && reviewGap<=58 &&
+                        panelBox.left>=-1 && panelBox.right<=innerWidth+1;
+                    })(),
                     reasonThirdNoRule:innerWidth>=640 || (() => {
                       const third=document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] article')[2];
                       return !!third && getComputedStyle(third).borderTopWidth==='0px';
