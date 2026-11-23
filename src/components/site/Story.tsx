@@ -314,7 +314,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
         </h2>
       )}
       <div className={"relative z-10 mx-auto max-w-6xl px-4 " + (homeLayout && !isEnglish ? "flex flex-col gap-7" : "grid items-center gap-10 lg:grid-cols-2")}>
-        <div className={homeLayout && !isEnglish ? "order-2 mx-auto w-full max-w-[740px]" : ""}>
+        <div className={homeLayout && !isEnglish ? "order-2 mx-auto w-full max-w-[680px]" : ""}>
           {(!homeLayout || isEnglish) && <>
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             {isEnglish ? "About us" : "O nás"}
@@ -324,7 +324,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           </h2>
           </>}
           {homeLayout && !isEnglish ? (
-            <div data-about-expanded className="space-y-4 text-justify text-forest/85 hyphens-auto [text-wrap:pretty]">
+            <div data-about-expanded className="space-y-5 text-left leading-[1.7] text-forest/85">
               <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
               <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
               <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
@@ -407,21 +407,21 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
         </div>
       </div>
 
-      <SafetyCertificates language={language} />
+      <SafetyCertificates language={language} homeLayout={homeLayout && !isEnglish} />
     </section>
   );
 }
 
 
 /** The same certified canine first-aid evidence on homepage and paid LEAD. */
-export function SafetyCertificates({ language = "sk" }: { language?: "sk" | "en" }) {
+export function SafetyCertificates({ language = "sk", homeLayout = false }: { language?: "sk" | "en"; homeLayout?: boolean }) {
   const isEnglish = language === "en";
   return (
-      <div data-safety-certificates className="relative z-10 mx-auto mt-8 max-w-6xl px-4">
-        <div className="grid items-center gap-8 rounded-4xl bg-secondary p-7 sm:p-10 md:text-center lg:grid-cols-[1fr_auto] lg:text-left">
+      <div data-safety-certificates className={"relative z-10 mx-auto mt-8 w-full max-w-[760px] " + (homeLayout ? "px-4" : "px-0")}>
+        <div className="grid items-center gap-6 rounded-4xl bg-secondary px-4 py-7 sm:gap-8 sm:p-9 md:text-center lg:grid-cols-[1fr_auto] lg:text-left">
           <div className="md:flex md:flex-col md:items-center lg:items-start">
-            <p className="inline-flex items-center gap-2 rounded-full bg-card px-5 py-3 font-display font-semibold text-forest shadow-card">
-              <Check className="size-5 text-coral" />
+            <p data-safety-heading className="flex w-full items-center gap-2.5 rounded-full bg-card px-3 py-3 font-display text-[12px] font-semibold leading-[1.3] text-forest shadow-card min-[390px]:text-[13px] sm:gap-3 sm:px-5 sm:text-base">
+              <Check className="size-7 shrink-0 text-[#2d764b] sm:size-8" aria-hidden="true" />
               {isEnglish
                 ? "Your dog's health and safety come first!"
                 : "Zdravie a bezpečie vášho psíka je pre nás na prvom mieste!"}

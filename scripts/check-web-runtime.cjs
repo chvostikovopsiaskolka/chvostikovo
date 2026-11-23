@@ -1569,21 +1569,32 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Permanentka value label must fit on one bottom line at ' + width + ': ' + JSON.stringify(labelShape));
               if (url.pathname === '/test-aria/' && !await page.getByRole('heading', { name: 'Takto vyzerá Chvostíkovo' }).count())
                 throw new Error('Preview mosaic title regression');
-              const firstVisitCompact = await page.locator('#lead-pricing details').evaluate(el => {
-                const wrapper = el.parentElement;
-                if (!wrapper) return false;
-                const box = el.getBoundingClientRect();
-                const outer = wrapper.getBoundingClientRect();
-                return box.width <= outer.width + 2 &&
-                  (window.innerWidth < 768 || box.width >= 480) &&
-                  Math.abs((box.left + box.width / 2) - (outer.left + outer.width / 2)) <= 3;
-              });
-              if (!firstVisitCompact) throw new Error('First-visit accordion must be wide enough on desktop and centered under its heading');
+              if (url.pathname === '/psia-skolka-kosice/') {
+                // Paid LEAD has one compact free-visit note here: the factual
+                // adaptation explanation now lives exactly once in 3 steps.
+                const paidVisit = page.locator('#lead-pricing [data-first-visit-group]');
+                if (await paidVisit.count() !== 1 ||
+                    await paidVisit.locator('details').count() !== 0 ||
+                    await paidVisit.getByText('Úvodná návšteva zadarmo', { exact: true }).count() !== 1)
+                  throw new Error('Paid LEAD pricing must keep only free first-visit badge, no duplicated accordion');
+              } else {
+                const firstVisitCompact = await page.locator('#lead-pricing details').evaluate(el => {
+                  const wrapper = el.parentElement;
+                  if (!wrapper) return false;
+                  const box = el.getBoundingClientRect();
+                  const outer = wrapper.getBoundingClientRect();
+                  return box.width <= outer.width + 2 &&
+                    (window.innerWidth < 768 || box.width >= 480) &&
+                    Math.abs((box.left + box.width / 2) - (outer.left + outer.width / 2)) <= 3;
+                });
+                if (!firstVisitCompact) throw new Error('Preview first-visit accordion must fit under its heading');
+              }
               if (await page.locator('#lead-pricing article').first().getByText('1 vstup').count())
                 throw new Error('Page one-off card must omit redundant 1 vstup');
               const visitGroup = page.locator('[data-first-visit-group]');
-              if (await visitGroup.count() !== 1 || !await visitGroup.locator('details summary').getByText('Ako prebieha úvodná návšteva?').count())
-                throw new Error('First-visit intro and accordion must share one orange group');
+              if (await visitGroup.count() !== 1 || (url.pathname === '/test-aria/' &&
+                  !await visitGroup.locator('details summary').getByText('Ako prebieha úvodná návšteva?').count()))
+                throw new Error('First-visit free badge or preview-only accordion missing');
               if (await page.locator('#lead-requirements span').getByText('Podmienky prijatia', { exact: true }).count())
                 throw new Error('Redundant preview requirements eyebrow resurfaced');
               const eligibilityCopy = page.locator('#aria-early-faq details').first();
@@ -1595,10 +1606,30 @@ if (!bellaris && brandPreviewCandidate) {
                   !await page.locator('#lead-requirements strong').getByText('infekčným ochoreniam', { exact: true }).count() ||
                   !await page.locator('#lead-requirements strong').getByText('kotercovému kašľu', { exact: true }).count())
                 throw new Error('Preview vaccination keywords must be emphasized');
-              const faqDetails = visitGroup.locator('details');
-              await faqDetails.locator('summary').click();
-              if (await faqDetails.locator('strong').count() < 4)
-                throw new Error('Key first-visit explanation sentences must be highlighted');
+              if (url.pathname === '/test-aria/') {
+                const faqDetails = visitGroup.locator('details');
+                await faqDetails.locator('summary').click();
+                if (await faqDetails.locator('strong').count() < 4)
+                  throw new Error('Preview-only first-visit explanation must remain highlighted');
+              }
+              const visitSteps = page.locator('#lead-first-visit [data-first-visit-step]');
+              if (await visitSteps.count() !== 3 ||
+                  !await visitSteps.nth(0).locator('strong').getByText('Pred nástupom do škôlky').count() ||
+                  !await visitSteps.nth(1).locator('strong').getByText('Nie každý psík si zvykne rovnako rýchlo.').count() ||
+                  !await visitSteps.nth(2).locator('strong').getByText(/pravdivo všetko/).count())
+                throw new Error('Three first-visit steps must contain the meaningful emphasized adaptation explanation');
+              if (url.pathname === '/psia-skolka-kosice/') {
+                const softness = await page.locator('#recenzie [data-gesture-track="reviews"]').evaluate(track => {
+                  const card = track.querySelector('[data-review-card]');
+                  if (!card) return null;
+                  const style = getComputedStyle(card);
+                  return { border: style.borderTopWidth, shadow: style.boxShadow,
+                    bottom: parseFloat(getComputedStyle(track).paddingBottom) };
+                });
+                if (!softness || softness.border !== '1px' || softness.bottom < 55 ||
+                    softness.shadow === 'none' || softness.shadow.includes('inset'))
+                  throw new Error('Paid review shadow clipped or too harsh: ' + JSON.stringify(softness));
+              }
               if (url.pathname === '/test-aria/' &&
                   (await page.locator('[data-aria-location-chips] a').count() !== 1 ||
                    !await page.locator('[data-aria-location-chips]').getByText('Bezplatné parkovanie').count()))
@@ -2099,17 +2130,27 @@ if (!bellaris && brandPreviewCandidate) {
                       getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(included.bottom-prices.bottom)<3,
                     compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
                     aboutExpanded:!document.querySelector('#o-nas summary') && !!aboutText?.querySelector('strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2 &&
-                      getComputedStyle(aboutText).textAlign==='justify',
+                      getComputedStyle(aboutText).textAlign==='left' && aboutText.getBoundingClientRect().width<=682,
                     aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
                     balancedPass:Math.abs((cards[1].top-cards[0].bottom)-(taxi.getBoundingClientRect().top-cards[1].bottom))<5,
                     faqAfterRequirements:document.getElementById('podmienky').nextElementSibling===faq &&
                       faq.querySelectorAll('details').length===3 && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
-                    pinkRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(201, 44, 137)'),
+                    orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(169, 84, 0)'),
                     flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
                     mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty',
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
-                    certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2,
+                    certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
+                      (() => {
+                        const heading=document.querySelector('#o-nas [data-safety-heading]');
+                        const icon=heading?.querySelector('svg');
+                        const panel=document.querySelector('#o-nas [data-safety-certificates] > div');
+                        const text=aboutText?.getBoundingClientRect(), box=panel?.getBoundingClientRect();
+                        return !!heading && !!icon && !!text && !!box &&
+                          icon.getBoundingClientRect().width>=27 &&
+                          (innerWidth>=640 || parseFloat(getComputedStyle(heading).fontSize)<=14) &&
+                          Math.abs(box.left-text.left)<=48 && Math.abs(box.right-text.right)<=48;
+                      })(),
                     formDepth:getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).boxShadow.includes('rgb'),
                     heroGlow:!!document.querySelector('#top .home-hero-cta .hero-cta-primary') &&
                       getComputedStyle(document.querySelector('#top .home-hero-cta .hero-cta-primary')).boxShadow.includes('226, 84, 164') &&
@@ -2118,6 +2159,26 @@ if (!bellaris && brandPreviewCandidate) {
                     conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
+                    homeMobileVideoLayout:(() => {
+                      if (innerWidth>=640) return true;
+                      const video=document.querySelector('#preco-chvostikovo video')?.getBoundingClientRect();
+                      const texts=[...document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] article')].map(el=>el.getBoundingClientRect());
+                      return !!document.querySelector('#preco-chvostikovo [data-home-video-layout]') &&
+                        !!video && texts.length===3 && texts.every(r=>r.left>=video.right-2) &&
+                        video.top<=texts[0].top+3 && video.bottom>=texts[2].bottom-5 &&
+                        document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] strong').length>=4;
+                    })(),
+                    homeReviewSoftShadow:(() => {
+                      const track=document.querySelector('#recenzie [data-gesture-track="reviews"]');
+                      const card=track?.querySelector('[data-review-card]');
+                      if (!track || !card) return false;
+                      const style=getComputedStyle(card);
+                      return style.borderTopWidth==='1px' && style.boxShadow!=='none' &&
+                        !style.boxShadow.includes('inset') && parseFloat(getComputedStyle(track).paddingBottom)>=55;
+                    })(),
+                    firstVisitNotDuplicated:!document.querySelector('#prva-navsteva [aria-controls]') &&
+                      document.querySelectorAll('#prva-navsteva [data-first-visit-step]').length===3 &&
+                      document.querySelectorAll('#prva-navsteva [data-first-visit-step] strong').length>=5,
                     whiteForm:['rgb(255, 255, 255)','oklch(1 0 0)'].includes(getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).backgroundColor) && !document.querySelector('#informujte-sa a[href^="tel:"]'),
                     firstVisit:getComputedStyle(document.getElementById('prva-navsteva')).backgroundColor==='rgb(145, 64, 107)' && ![...document.querySelectorAll('#prva-navsteva button')].some(el=>el.textContent.includes('Dohodnúť úvodnú návštevu')),
                     pricingFits:[...document.querySelectorAll('[data-home-pricing-columns] *')].every(el=>el.scrollWidth<=el.clientWidth+2),
@@ -2837,12 +2898,18 @@ if (!bellaris && brandPreviewCandidate) {
             await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
             const homeConsent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
             if (await homeConsent.isVisible()) await homeConsent.click();
-            // Contextual FAQ, article CTA and visibly readable hygiene cards.
-            const introToggle = productPage.locator('#prva-navsteva').getByRole('button', { name: 'Zistite viac o úvodnej návšteve' });
-            await introToggle.click();
-            if (await introToggle.getAttribute('aria-expanded') !== 'true' ||
-                !(await productPage.locator('#prva-navsteva').getByText('2–3 kratšie návštevy', { exact: false }).count())) {
-              throw new Error('First-visit FAQ must open and explain the additional adaptation visits');
+            // Canonical first-visit details now live in three always-visible
+            // steps. Verify the adaptation copy, truthful-owner emphasis and
+            // absence of the former duplicate disclosure instead of clicking
+            // a deliberately deleted button.
+            const intro = productPage.locator('#prva-navsteva');
+            const introSteps = intro.locator('[data-first-visit-step]');
+            if (await introSteps.count() !== 3 ||
+                await intro.getByRole('button', { name: 'Zistite viac o úvodnej návšteve' }).count() !== 0 ||
+                !await introSteps.nth(0).locator('strong').getByText('Pred nástupom do škôlky').count() ||
+                !await introSteps.nth(1).locator('strong').getByText('2–3 kratšie návštevy').count() ||
+                !await introSteps.nth(2).locator('strong').getByText(/pravdivo všetko/).count()) {
+              throw new Error('Three first-visit steps must visibly cover adaptation and truthful owner details without duplicate FAQ');
             }
             const careToggle = productPage.locator('#starostlivost').getByRole('button', { name: 'Ako dbáme na bezpečnosť psíkov?' });
             await careToggle.click();

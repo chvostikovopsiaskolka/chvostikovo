@@ -40,7 +40,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   }, [text]);
 
   return (
-    <figure className="relative flex w-[82%] shrink-0 flex-col items-start justify-start rounded-3xl bg-card px-4 py-3 text-left shadow-card sm:w-[46%] sm:px-5 sm:py-3.5 lg:w-[31%]">
+    <figure data-review-card className="relative flex w-[82%] shrink-0 flex-col items-start justify-start rounded-3xl bg-card px-4 py-3 text-left shadow-card sm:w-[46%] sm:px-5 sm:py-3.5 lg:w-[31%]">
       <div data-review-byline className="flex w-full min-w-0 items-center gap-1.5 whitespace-nowrap">
         <GoogleReviewMark />
         <figcaption className="min-w-0 truncate font-display text-[12px] font-bold text-forest sm:text-sm">{name}</figcaption>
@@ -282,23 +282,46 @@ export function InlineDaycareVideo({ language = "sk" }: { language?: "sk" | "en"
 
 type VideoBenefit = { title: string; text: string; icon: LucideIcon };
 
-/** Video beside the first benefit on mobile, with the other two side by side below. */
-export function VideoReasonsGrid({ items, language = "sk" }: { items: VideoBenefit[]; language?: "sk" | "en" }) {
+/** Homepage-specific editorial emphasis; no extra copy or hidden truncation. */
+function ReasonText({ title, text }: { title: string; text: string }) {
+  const emphasis = "font-extrabold text-cream";
+  if (title === "Miesto, kam sa tešia") return <>
+    <strong className={emphasis}>Najviac nám povedia samotní škôlkari</strong> — <strong className={emphasis}>keď nás vítajú pri dverách</strong> a tešia sa na svojich kamošov. Ich radosť môžete vidieť vo videách aj v skúsenostiach majiteľov.
+  </>;
+  if (title === "Pokojnejší deň pre vás") return <>
+    Zveriť niekomu svojho psíka je veľká vec. Chceme, aby ste poznali ľudí, ktorí sa oňho starajú, mohli sa na nás obrátiť a počas svojho dňa mali <strong className={emphasis}>pokojnejšiu hlavu</strong>.
+  </>;
+  if (title === "Pekný deň aj pre vášho psíka") return <>
+    Kým vy máte svoje povinnosti, on má <strong className={emphasis}>spoločnosť, pozornosť a program</strong>. Večer sa opäť stretnete a môžete si užiť spoločný čas po dni, v ktorom mal aj svoje zážitky.
+  </>;
+  return text;
+}
+
+/** Homepage mobile: portrait video occupies the entire left column; all three
+ *  benefits stack in the right column. Other routes keep their layout. */
+export function VideoReasonsGrid({ items, language = "sk", homeMobileLayout = false }: { items: VideoBenefit[]; language?: "sk" | "en"; homeMobileLayout?: boolean }) {
   return (
-    <div data-video-reasons-grid className="mt-7 grid grid-cols-2 items-stretch gap-3 rounded-3xl bg-cream/10 p-3 shadow-card ring-1 ring-cream/20 backdrop-blur-xl sm:rounded-none sm:bg-transparent sm:p-0 sm:shadow-none sm:ring-0 sm:backdrop-blur-none sm:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] sm:gap-7 lg:gap-10">
+    <div data-video-reasons-grid data-home-video-layout={homeMobileLayout || undefined}
+      className={"mt-7 grid items-stretch gap-3 rounded-3xl bg-cream/10 p-3 shadow-card ring-1 ring-cream/20 backdrop-blur-xl sm:rounded-none sm:bg-transparent sm:p-0 sm:shadow-none sm:ring-0 sm:backdrop-blur-none sm:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] sm:gap-7 lg:gap-10 " +
+        (homeMobileLayout ? "grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] gap-2 p-2 sm:gap-7 sm:p-0" : "grid-cols-2")}>
       <div className="min-w-0">
         <InlineDaycareVideo language={language} />
       </div>
-      <div data-video-reasons-copy className="contents sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl">
+      <div data-video-reasons-copy className={(homeMobileLayout ? "flex min-w-0 flex-col justify-around gap-3" : "contents") +
+        " sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl"}>
         {items.map(({ title, text, icon: Icon }) => (
-          <article key={title} className="min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4">
-            <h3 className="flex min-w-0 items-start gap-2 font-display text-[13px] font-bold leading-snug text-cream min-[390px]:text-[15px] sm:text-lg lg:text-xl">
-              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-coral text-primary-foreground sm:size-9">
+          <article key={title} className={homeMobileLayout ? "min-w-0 py-2 text-cream sm:py-4" : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>
+            <h3 className={"flex min-w-0 items-start gap-1.5 font-display font-bold leading-snug text-cream sm:gap-2 sm:text-lg lg:text-xl " +
+              (homeMobileLayout ? "text-[12px] min-[390px]:text-[13px]" : "text-[13px] min-[390px]:text-[15px]")}>
+              <span className={"grid shrink-0 place-items-center rounded-full bg-coral text-primary-foreground sm:size-9 " + (homeMobileLayout ? "size-5" : "size-6")}>
                 <Icon className="size-3.5 sm:size-5" aria-hidden="true" />
               </span>
               <span className="min-w-0 pt-0.5">{title}</span>
             </h3>
-            <p className="mt-2 text-[12px] leading-[1.5] text-cream/90 min-[390px]:text-[13px] sm:text-[15px] sm:leading-relaxed lg:text-base">{text}</p>
+            <p className={"text-cream/90 sm:mt-2 sm:text-[15px] sm:leading-relaxed lg:text-base " +
+              (homeMobileLayout ? "mt-1.5 text-[11px] leading-[1.4] min-[390px]:text-[12px]" : "mt-2 text-[12px] leading-[1.5] min-[390px]:text-[13px]")}>
+              {homeMobileLayout ? <ReasonText title={title} text={text} /> : text}
+            </p>
           </article>
         ))}
       </div>
@@ -331,7 +354,7 @@ export function ReviewReasons({
         </div>
 
         {withVideo ? (
-          <VideoReasonsGrid items={variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS} />
+          <VideoReasonsGrid items={variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS} homeMobileLayout={variant === "home"} />
         ) : (
           <div className="mt-7 overflow-hidden rounded-3xl bg-cream/10 px-5 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl md:grid md:grid-cols-3 md:px-3">
             {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }) => (

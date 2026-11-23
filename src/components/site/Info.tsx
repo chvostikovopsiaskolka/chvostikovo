@@ -71,7 +71,7 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
                   <span className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-forest">
                     <Icon className="size-6" aria-hidden />
                   </span>
-                  <h3 className={"font-display text-lg font-bold sm:text-xl " + (id === "podmienky" && !ariaPreview ? "text-[#c92c89]" : "text-coral-dark")}>{r.title}</h3>
+                  <h3 className={"font-display text-lg font-bold sm:text-xl " + (id === "podmienky" && !ariaPreview ? "text-[#a95400]" : "text-coral-dark")}>{r.title}</h3>
                 </div>
                 <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80"><AriaHighlightedText text={r.text} /></p>
               </article>
@@ -89,19 +89,21 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
   );
 }
 
-const STEPS = [
+/** Canonical first-visit explanation reused on home and paid LEAD.
+ *  The former long expandable duplicate is folded into these three steps. */
+export const FIRST_VISIT_STEPS = [
   {
     title: "Porozprávame sa o vašom psíkovi",
-    text: "Zavolajte nám alebo nechajte kontakt vo formulári. Preberieme jeho povahu, potreby aj vaše otázky a dohodneme termín úvodnej návštevy.",
+    content: <><strong className="font-extrabold">Pred nástupom do škôlky</strong> absolvuje každý nový psík <strong className="font-extrabold">úvodnú návštevu</strong>. Napíšte nám alebo zavolajte, povedzte nám o jeho povahe, potrebách a skúsenostiach a dohodneme si termín.</>,
   },
   {
     title: "Prídete nás spoznať",
-    text: "Ukážeme vám priestory a zoznámime sa s vaším psíkom. Pozrieme sa, ako reaguje na nové prostredie a ostatných psov, a spolu sa dohodneme na ďalšom postupe.",
+    content: <>Počas návštevy sa postupne zoznámime so psíkom a sledujeme jeho reakcie na nové prostredie, ľudí a ostatných psov. <strong className="font-extrabold">Nie každý psík si zvykne rovnako rýchlo.</strong> Šteniatkam a bojazlivejším psíkom môžeme odporučiť ešte <strong className="font-extrabold">2–3 kratšie návštevy</strong> s majiteľom alebo krátky pobyt bez neho.</>,
     note: "Úvodná návšteva je zadarmo",
   },
   {
-    title: "Doprajete mu prvý deň v škôlke",
-    text: "Ak mu kolektív vyhovuje, dohodneme jeho prvý pobyt. Počas dňa sa oňho postaráme a pošleme vám fotky či videá, aby ste videli, ako sa u nás má.",
+    title: "Dohodneme ďalší postup",
+    content: <><strong className="font-extrabold">Dôležité je povedať nám o psíkovi pravdivo všetko – nielen to dobré.</strong> Podľa jeho povahy, správania a priebehu adaptácie určíme vhodný ďalší postup. Ak mu kolektív vyhovuje, dohodneme prvý pobyt a počas dňa vám pošleme fotky či videá.</>,
   },
 ];
 
@@ -122,19 +124,16 @@ export function FirstVisit({ inlineForm = false, leadStyle = false }: { inlineFo
         </div>
 
         <ol className="mx-auto mt-10 grid max-w-5xl gap-9 text-center md:grid-cols-3 md:gap-8">
-          {STEPS.map((s, i) => (
-            <li key={s.title} className="min-w-0">
+          {FIRST_VISIT_STEPS.map((s, i) => (
+            <li key={s.title} data-first-visit-step={i + 1} className="min-w-0">
               <FirstVisitPhoto number={i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
               <h3 className={"font-display text-lg font-bold leading-snug " + (leadStyle ? "text-white" : "text-forest")}>{s.title}</h3>
-              <p className={"mt-2 text-sm leading-relaxed " + (leadStyle ? "text-white/85" : "text-forest/80")}>{s.text}</p>
+              <p className={"mt-2 text-sm leading-relaxed " + (leadStyle ? "text-white/85" : "text-forest/80")}>{s.content}</p>
               {s.note && <p className={"mt-3 text-sm font-bold " + (leadStyle ? "text-white" : "text-forest")}>{s.note}</p>}
             </li>
           ))}
         </ol>
 
-        <div className="mx-auto mt-8 max-w-3xl">
-          <ContextFaq question="Ako prebieha prvá návšteva psíka v škôlke?" label="Zistite viac o úvodnej návšteve" source="home_first_visit" />
-        </div>
 
         {!inlineForm && <div className="mt-8 flex justify-center">
           <button
