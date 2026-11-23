@@ -12,6 +12,7 @@ import { phoneFromForm } from "@/lib/phone";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
+import { InquiryDogFields } from "./InquiryDogFields";
 
 // Shared Slovak two-step enquiry across the public website. The stored interest_reason
 // intentionally matches the existing production Edge allowlist; route context stays in cta_source.
@@ -25,7 +26,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
   const [selectedInterest, setSelectedInterest] = useState(presetInterest ?? "");
-  // Shared optional field for information, regular, occasional and puppy leads.
+  // Shared required breed and optional sex for information, regular, occasional and puppy leads.
   // Carry the puppy breed into contact, where owners may correct it.
   const [breed, setBreed] = useState(puppyCheck?.dog_breed ?? "");
   const [sent, setSent] = useState(false);
@@ -44,8 +45,11 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading || step !== 2 || !selectedInterest) return;
-    const breedValue = breed.trim();
     const form = event.currentTarget;
+    // Read the actual form: browser autofill can omit the React onChange event.
+    const breedValue = String(new FormData(form).get("plemeno") || "").trim();
+    if (!breedValue) { setError("Vyplňte plemeno psíka."); return; }
+    if (breedValue !== breed) setBreed(breedValue);
     const attemptId = startFormAttempt(trackingSource);
     progress.markAttempt();
     setLoading(true);
@@ -71,7 +75,8 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         telefon: phone,
         email: String(fields.get("email") || "").trim() || undefined,
         zaujem: selectedInterest,
-        ...(breedValue ? { plemeno: breedValue } : {}),
+        plemeno: breedValue,
+        ...(String(fields.get("pohlavie") || "") ? { pohlavie: String(fields.get("pohlavie")) as "male" | "female" } : {}),
         ...(puppyCheck ? { puppy_check: { ...puppyCheck, dog_breed: breedValue || undefined } } : {}),
       }, attemptId);
       void trackCookielessInteraction("form_submit", trackingSource, "sk", attemptId);
@@ -184,11 +189,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
           <label className="label-sm" htmlFor={`lead-step-${formId}-meno`}>Meno majiteľa *</label>
           <input id={`lead-step-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
         </div>
-        <div data-aria-breed-field>
-          <label className="label-sm" htmlFor={`lead-step-${formId}-plemeno`}>Plemeno psíka (nepovinné)</label>
-          <input id={`lead-step-${formId}-plemeno`} name="plemeno" type="text" autoComplete="off" maxLength={80} className="field"
-            value={breed} onChange={(event) => setBreed(event.target.value)} placeholder="Napr. írsky vlkodav" />
-        </div>
+        <InquiryDogFields idPrefix={`lead-step-${formId}`} breed={breed} onBreedChange={(event) => setBreed(event.target.value)} />
         <PhoneField id={`lead-step-${formId}-tel`} name="telefon" />
         <div>
           <label className="label-sm" htmlFor={`lead-step-${formId}-email`}>E-mail (nepovinné)</label>

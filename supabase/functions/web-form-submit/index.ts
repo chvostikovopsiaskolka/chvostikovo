@@ -257,6 +257,7 @@ async function sendNotificationEmail(payload: Record<string, unknown>, input: Re
   } else {
     if (payload.dog_name) lines.push(`Meno psa: ${String(payload.dog_name)}`);
     if (payload.dog_breed) lines.push(`Plemeno psíka: ${text(payload.dog_breed, 80)}`);
+    if (payload.dog_sex) lines.push(`Pohlavie psíka: ${payload.dog_sex === 'male' ? 'Pes' : 'Suka'}`);
     lines.push(
       `O čo máte záujem?: ${String(payload.interest_reason ?? '')}`,
     );
@@ -559,6 +560,10 @@ Deno.serve(async (req: Request) => {
       // solely in raw_payload. Preserve the existing interest allowlist.
       const leadBreed = text(input.dog_breed ?? input.plemeno, 80);
       if (leadBreed) payload.dog_breed = leadBreed;
+      // An optional SK/EN enquiry dog sex belongs to the lead's CRM column,
+      // not to interest_reason or a second conversion/record.
+      const leadSex = sex(input.dog_sex ?? input.pohlavie);
+      if (leadSex) payload.dog_sex = leadSex;
     } else {
       const dogName = text(input.dog_name ?? input.pes, 160);
       const dogSex = sex(input.dog_sex ?? input.pohlavie);

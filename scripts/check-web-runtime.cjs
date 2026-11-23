@@ -1075,6 +1075,9 @@ if (!bellaris && brandPreviewCandidate) {
                     await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true }) });
                   });
                   await questionForm.locator('input[name="meno"]').fill('Test Otázka');
+                  await questionForm.locator('input[name="plemeno"]').fill('Kríženec');
+                  // Contact questions are ordinary CRM leads with optional sex, not a new form type.
+                  await questionForm.locator('label:has(input[name="pohlavie"][value="female"])').click();
                   await questionForm.locator('input[name="telefon"]').fill('+421901234567');
                   await questionForm.locator('input[name="email"]').fill('test@example.invalid');
                   await questionForm.locator('textarea[name="otazka"]').fill('Môj psík má špeciálne potreby?');
@@ -1084,6 +1087,7 @@ if (!bellaris && brandPreviewCandidate) {
                   await questionForm.getByText('Ďakujeme za otázku.').waitFor({ state: 'visible' });
                   if (!askedPayload || askedPayload.interest_reason !== 'Chcem sa informovať o škôlke' ||
                       askedPayload.raw_payload?.['Otázka návštevníka'] !== 'Môj psík má špeciálne potreby?' ||
+                      askedPayload.dog_breed !== 'Kríženec' || askedPayload.dog_sex !== 'female' ||
                       askedPayload.cta_source !== 'aria_preview_chat_other')
                     throw new Error('Other question must submit inside an existing consented lead payload');
                   await page.unroute('**/functions/v1/web-form-submit');
@@ -1165,6 +1169,7 @@ if (!bellaris && brandPreviewCandidate) {
                   await interest.getByRole('button', { name: 'Pokračovať' }).click();
                   await interest.getByText('Krok 2 z 2').waitFor({ state: 'visible' });
                   await interest.locator('input[name="meno"]').fill('Test Aria');
+                  await interest.locator('input[name="plemeno"]').fill('Írsky vlkodav');
                   await interest.locator('input[name="telefon"]').fill('+421901234567');
                   await interest.locator('input[name="email"]').fill('test@example.invalid');
                   await interest.locator('input[type="checkbox"]').check();
@@ -1510,7 +1515,7 @@ if (!bellaris && brandPreviewCandidate) {
               if (!summary.includes('4 mesiacov') || !/besnota:\s*áno/i.test(summary) ||
                   !/DHPPi\+L:\s*áno/i.test(summary) || !/kotercový kašeľ:\s*áno/i.test(summary))
                 throw new Error('Age/vaccine answers were lost in contact: ' + summary);
-              const breedInput = contactDialog.getByLabel('Plemeno psíka (nepovinné)');
+              const breedInput = contactDialog.getByLabel('Plemeno psíka *');
               if (!await breedInput.isVisible() || await breedInput.inputValue() !== '')
                 throw new Error('Puppy breed must be entered exactly once, at contact');
               await breedInput.fill('Írsky vlkodav');
@@ -1717,24 +1722,24 @@ if (!bellaris && brandPreviewCandidate) {
               if (await choiceLabels.count() !== 3) throw new Error('Aria enquiry lost its 3 interest choices');
               await choiceLabels.nth(1).click();
               await enquiry.getByRole('button', { name: 'Pokračovať' }).click();
-              const breed = enquiry.locator('[data-aria-breed-field]');
-              if (!await breed.isVisible() || !await breed.getByLabel('Plemeno psíka (nepovinné)').count())
+              const breed = enquiry.locator('[data-inquiry-dog-fields]');
+              if (!await breed.isVisible() || !await breed.getByLabel('Plemeno psíka *').count())
                 throw new Error('Regular visit must show optional breed under owner name');
               const ownerName = await enquiry.locator('input[name="meno"]').boundingBox();
               const breedBox = await breed.boundingBox();
               const phoneBox = await enquiry.locator('input[name="telefon"]').boundingBox();
               if (!ownerName || !breedBox || !phoneBox || !(ownerName.y < breedBox.y && breedBox.y < phoneBox.y))
                 throw new Error('Breed must be directly below owner name and before phone');
-              await breed.getByLabel('Plemeno psíka (nepovinné)').fill('Írsky vlkodav');
+              await breed.getByLabel('Plemeno psíka *').fill('Írsky vlkodav');
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               await choiceLabels.nth(2).click();
               await enquiry.getByRole('button', { name: 'Pokračovať' }).click();
-              if (!await breed.isVisible() || !await breed.getByLabel('Plemeno psíka (nepovinné)').count())
+              if (!await breed.isVisible() || !await breed.getByLabel('Plemeno psíka *').count())
                 throw new Error('Occasional visit must offer the same optional breed field');
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               await choiceLabels.nth(0).click();
               await enquiry.getByRole('button', { name: 'Pokračovať' }).click();
-              if (!await breed.isVisible() || await breed.getByLabel('Plemeno psíka (nepovinné)').inputValue() !== 'Írsky vlkodav')
+              if (!await breed.isVisible() || await breed.getByLabel('Plemeno psíka *').inputValue() !== 'Írsky vlkodav')
                 throw new Error('Information-only enquiry must keep the same editable breed field and entered value');
               await enquiry.getByRole('button', { name: 'Späť' }).click();
               const hasCorrectOrder = await page.evaluate(() => {
@@ -1811,7 +1816,7 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Paid dock must scroll to inline form without opening a modal');
             await contact.locator('label:has(input[name="zaujem"])').first().click();
             await contact.getByRole('button', { name: 'Pokračovať' }).click();
-            const breedInput = contact.getByLabel('Plemeno psíka (nepovinné)');
+            const breedInput = contact.getByLabel('Plemeno psíka *');
             if (!await breedInput.isVisible()) throw new Error('Active campaign form must ask for breed');
             await contact.locator('input[name="meno"]').fill('Testovací dopyt');
             await breedInput.fill('Írsky vlkodav');
@@ -1864,7 +1869,7 @@ if (!bellaris && brandPreviewCandidate) {
             if (!summary.includes('4 mesiacov') || !summary.includes('DHPPi+L'))
               throw new Error('Homepage vaccine answers missing in actual contact');
             await contact.locator('input[name="meno"]').fill('Testovací dopyt');
-            await contact.getByLabel('Plemeno psíka (nepovinné)').fill('Írsky vlkodav');
+            await contact.getByLabel('Plemeno psíka *').fill('Írsky vlkodav');
             await contact.locator('input[name="telefon"]').fill('912345678');
             await contact.locator('input[type="checkbox"][required]').check();
             await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
@@ -1986,9 +1991,9 @@ if (!bellaris && brandPreviewCandidate) {
             await leadDialog.waitFor({ state: 'visible' });
             if (!await leadDialog.locator('[data-puppy-check-summary]').getByText(/4 mesiacov/).count())
               throw new Error('Puppy age did not transfer to actual contact form');
-            if (!await leadDialog.getByLabel('Plemeno psíka (nepovinné)').isVisible())
+            if (!await leadDialog.getByLabel('Plemeno psíka *').isVisible())
               throw new Error('Breed field missing from final contact form');
-            await leadDialog.getByLabel('Plemeno psíka (nepovinné)').fill('Írsky vlkodav');
+            await leadDialog.getByLabel('Plemeno psíka *').fill('Írsky vlkodav');
             if (!await leadDialog.locator('[data-puppy-check-summary]').getByText(/Írsky vlkodav/).count())
               throw new Error('Puppy breed correction must update the attached summary');
             await page.screenshot({ path: path.join(out, 'puppy-aria-' + engine + '-390-contact-form.png') });
@@ -2517,7 +2522,7 @@ if (!bellaris && brandPreviewCandidate) {
               if (await cards.count() !== 3) throw new Error('Every normal SK inquiry must retain exactly three interest choices');
               await cards.nth(1).click();
               await leadForm.getByRole('button', { name: 'Pokračovať' }).click();
-              if (!await leadForm.locator('[data-aria-breed-field]').isVisible())
+              if (!await leadForm.locator('[data-inquiry-dog-fields]').isVisible())
                 throw new Error('Regular SK interest must show optional breed on this page: ' + url.pathname);
             }
             const modalFrame = await modal.evaluate(el => {
@@ -2862,9 +2867,7 @@ if (!bellaris && brandPreviewCandidate) {
             await guideCarousel.locator('button[data-stand-photo-open]').first().click();
             const articleLightbox = productPage.locator('[data-stand-lightbox]');
             await articleLightbox.waitFor({state:'visible'});
-            // On production the Radix shell can become visible before its
-            // nested image hydrates. Test the real image after it appears,
-            // never mistake one intermediate animation frame for a missing photo.
+            // Wait for hydrated image, not only the modal shell.
             const loadedPhoto = articleLightbox.locator('[data-stand-photo-viewport] img');
             await loadedPhoto.waitFor({state:'visible',timeout:7000}).catch(() => {
               throw new Error('Guide lightbox has no visible photo after hydration');
