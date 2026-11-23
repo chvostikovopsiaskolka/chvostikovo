@@ -1075,6 +1075,9 @@ if (!bellaris && brandPreviewCandidate) {
                     await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true }) });
                   });
                   await questionForm.locator('input[name="meno"]').fill('Test Otázka');
+                  await questionForm.locator('input[name="plemeno"]').fill('Kríženec');
+                  // Contact questions are ordinary CRM leads with optional sex, not a new form type.
+                  await questionForm.locator('label:has(input[name="pohlavie"][value="female"])').click();
                   await questionForm.locator('input[name="telefon"]').fill('+421901234567');
                   await questionForm.locator('input[name="email"]').fill('test@example.invalid');
                   await questionForm.locator('textarea[name="otazka"]').fill('Môj psík má špeciálne potreby?');
@@ -1084,6 +1087,7 @@ if (!bellaris && brandPreviewCandidate) {
                   await questionForm.getByText('Ďakujeme za otázku.').waitFor({ state: 'visible' });
                   if (!askedPayload || askedPayload.interest_reason !== 'Chcem sa informovať o škôlke' ||
                       askedPayload.raw_payload?.['Otázka návštevníka'] !== 'Môj psík má špeciálne potreby?' ||
+                      askedPayload.dog_breed !== 'Kríženec' || askedPayload.dog_sex !== 'female' ||
                       askedPayload.cta_source !== 'aria_preview_chat_other')
                     throw new Error('Other question must submit inside an existing consented lead payload');
                   await page.unroute('**/functions/v1/web-form-submit');
