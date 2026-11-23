@@ -2419,7 +2419,7 @@ if (!bellaris && brandPreviewCandidate) {
                 if(!await radio.isChecked()) await radio.check({force:true});
                 await page.waitForFunction(targetId => {
                   const form=document.querySelector('#'+targetId+' [data-lead-step-form]');
-                  const next=[...form?.querySelectorAll('button')??[]].find(x=>x.textContent?.trim()==='Pokračovať');
+                  const next=Array.from(form?.querySelectorAll('button') ?? []).find(x=>x.textContent?.trim()==='Pokračovať');
                   return !!form?.querySelector('input[name="zaujem"]:checked') && !!next && !next.disabled;
                 }, id, {timeout:5000});
                 await inquiry.getByRole('button',{name:'Pokračovať',exact:true}).click();
