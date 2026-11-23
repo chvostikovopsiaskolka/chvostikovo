@@ -1215,6 +1215,13 @@
     font-size: 16px;
     line-height: 1.45;
   }
+  /* Only the shorter desktop greeting contracts; contextual messages and
+     the measured SVG tail keep their existing wider 480px geometry. */
+  .lead-brand-live [data-aria-guide][data-intro="true"] [data-aria-speech] {
+    flex: 0 0 410px;
+    width: 410px;
+    max-width: 410px;
+  }
 }
 
 /* Paid lead hotfix: reviews and Aria belong to the first mobile screen.
