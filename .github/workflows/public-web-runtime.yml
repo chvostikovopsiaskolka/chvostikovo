@@ -46,6 +46,7 @@ jobs:
             mkdir -p /tmp/web-preview-tools
             cat > /tmp/web-preview-tools/unzip <<'PY'
           #!/usr/bin/env python3
+          import os
           import sys
           import zipfile
           args = sys.argv[1:]
@@ -59,6 +60,12 @@ jobs:
               sys.exit("unzip fallback: expected an archive .zip argument")
           with zipfile.ZipFile(archive) as zipped:
               zipped.extractall(destination)
+              # stdlib extraction does not preserve Unix executable bits;
+              # Bun binaries need the original mode from the ZIP metadata.
+              for member in zipped.infolist():
+                  mode = (member.external_attr >> 16) & 0o777
+                  if mode and not member.is_dir():
+                      os.chmod(os.path.join(destination, member.filename), mode)
           PY
             chmod +x /tmp/web-preview-tools/unzip
             echo "/tmp/web-preview-tools" >> "$GITHUB_PATH"
