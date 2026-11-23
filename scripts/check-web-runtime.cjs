@@ -2600,6 +2600,9 @@ if (!bellaris && brandPreviewCandidate) {
               }
               if (route.includes('stojan')) {
                 const cards = productPage.locator('[data-product-stand-cards]');
+                // The mobile dock can hydrate before the product CTA handlers.
+                // Wait for this component's own client-ready marker instead.
+                await productPage.locator('[data-product-stand-cards][data-stand-cards-hydrated="true"]').waitFor({state:'attached',timeout:8000});
                 if (await cards.locator('article').count() !== 3) throw new Error('Exactly three stand variant cards required');
                 if (width === 390 && !(await cards.evaluate(el => el.scrollWidth > el.clientWidth + 30))) {
                   throw new Error('Stand carousel must swipe on mobile');
