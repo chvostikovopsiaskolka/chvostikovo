@@ -673,6 +673,15 @@ if (!bellaris && brandPreviewCandidate) {
                      photoFrame.top >= window.innerHeight - 24 &&
                      photoFrame.top - reviewsBottom <= window.innerHeight * 0.44 &&
                      photoFrame.top >= floatingGuide.getBoundingClientRect().bottom + 8 &&
+                     // On taller phones the first photo should sit close to (not under)
+                     // the fixed menu, rather than leaving a needless white band.
+                     (window.innerWidth < 390 || window.innerWidth > 430 ||
+                      window.innerHeight < 820 ||
+                      photoFrame.top - floatingGuide.getBoundingClientRect().bottom <= 72) &&
+                     // A hero spacing adjustment must move the gallery AND the form;
+                     // never use a transform that creates a blank hole downstream.
+                     Math.abs(hero.getBoundingClientRect().bottom - spacer.getBoundingClientRect().top) <= 2 &&
+                     Math.abs(spacer.getBoundingClientRect().bottom - formTop) <= 2 &&
                      !hero.contains(newPhotos) && photoRects.every(rect => rect.bottom <= formTop - 8)),
                   heroCopyBlack: window.location.pathname === '/psia-skolka-kosice/'
                     ? (getComputedStyle(description).color === 'rgb(255, 255, 255)' &&
