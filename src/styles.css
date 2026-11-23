@@ -1118,11 +1118,17 @@
 
 
 
-/* Paid LEAD hero: approved rose contrast for the service badge, without
-   changing the orange editorial copy or the preview's original palette. */
+/* PAID LEAD / LIQUID-HERO-01: light amber glass over ambient paws.
+   Readable charcoal ink is retained when backdrop-filter is unavailable.
+   The bright orange editorial box below this badge is deliberately unchanged. */
 .lead-brand-live [data-aria-service-badge] {
-  background-color: #b82e7f;
-  color: #fff;
+  color: #26322b;
+  background-color: rgb(255 181 85 / 38%);
+  background-image: linear-gradient(155deg, rgb(255 255 255 / 57%), rgb(255 181 85 / 13%));
+  border: 1px solid rgb(255 255 255 / 74%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 85%), 0 9px 22px -14px rgb(78 45 19 / 24%);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  backdrop-filter: blur(12px) saturate(1.15);
 }
 .lead-brand-live #recenzie [data-gesture-track="reviews"] figure {
   border: 1px solid rgb(38 50 43 / 12%);
@@ -1545,19 +1551,65 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
   .aria-brand-experiment .form-liquid-surface { background-color: rgb(255 248 236 / 86%); }
 }
 
-/* Paid LEAD only: the outer information section stays white; pink belongs
-   to the real form card, not the background box beneath it. No preview spill. */
-.lead-brand-live #aria-hero-form [data-lead-inline-card] {
-  background-color: rgb(255 228 240 / 96%);
-  background-image: linear-gradient(160deg, rgb(255 243 249 / 91%), rgb(255 220 238 / 84%));
-  border-color: rgb(184 46 127 / 27%);
-}
+/* LIQUID-HERO-01: the revealed inline inquiry deliberately reuses
+   FORM-LIQUID-01 verbatim, including the lower visit form's creamy frosted
+   background and subtle pink outline. NO paid-hero-only pink card override. */
+
+/* Understated amber glass CTA: narrower, with a true transparent backdrop.
+   Keep the approved full text, min 44px touch target, and visible focus. */
 .lead-brand-live [data-aria-lead-hero-cta] {
-  background-color: #b82e7f;
-  color: #fff;
+  color: #26322b;
+  background-color: rgb(255 184 92 / 49%);
+  background-image: linear-gradient(145deg, rgb(255 255 255 / 70%), rgb(255 186 96 / 14%));
+  border-color: rgb(190 117 42 / 29%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 86%), 0 9px 22px -14px rgb(79 46 17 / 24%);
+  -webkit-backdrop-filter: blur(14px) saturate(1.16);
+  backdrop-filter: blur(14px) saturate(1.16);
+}
+.lead-brand-live [data-aria-lead-hero-cta]:is(:hover, :active) {
+  color: #26322b;
+  background-color: rgb(255 192 113 / 67%);
+  border-color: rgb(190 117 42 / 42%);
+}
+
+/* Preserve one strong orange dock shortcut while making the NAV shell glass.
+   This rule is scoped ONLY to the paid LEAD dock, not Aria speech or other
+   sites' desktop/homepage docks; frosted tint avoids text loss over photos. */
+.lead-brand-live [data-aria-dock] {
+  background-color: rgb(255 250 239 / 72%);
+  background-image: linear-gradient(155deg, rgb(255 255 255 / 42%), rgb(255 255 255 / 12%));
+  border-color: rgb(255 255 255 / 78%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 88%), 0 10px 28px -12px rgb(31 48 37 / 22%);
+  -webkit-backdrop-filter: blur(18px) saturate(1.28);
+  backdrop-filter: blur(18px) saturate(1.28);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .lead-brand-live [data-aria-service-badge] {
+    background-color: rgb(255 225 181 / 96%);
+    background-image: none;
+  }
+  .lead-brand-live [data-aria-lead-hero-cta] {
+    background-color: rgb(255 231 190 / 96%);
+    background-image: none;
+  }
+  .lead-brand-live [data-aria-dock] {
+    background-color: rgb(255 252 247 / 97%);
+    background-image: none;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .lead-brand-live [data-aria-lead-hero-cta] { transition: none; }
+}
+@media (forced-colors: active) {
+  .lead-brand-live [data-aria-service-badge],
+  .lead-brand-live [data-aria-lead-hero-cta],
+  .lead-brand-live [data-aria-dock] {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
 }
 
 /* Keep shared liquid forms visible in forced-contrast environments. */
