@@ -2858,6 +2858,13 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Pinch-ready stand image viewport missing');
             if (await viewport.evaluate(el=>getComputedStyle(el).touchAction)!=='none')
               throw new Error('Touch viewport must allow custom pinch/pan');
+            // Radix opens the dialog with a short zoom-in animation. Measure
+            // the real 44px touch target only after the transition settles,
+            // not midway while the entire modal is temporarily scaled.
+            await productPage.waitForFunction(() => {
+              const control=document.querySelector('[data-stand-photo-previous]');
+              return !!control && control.getBoundingClientRect().width>=43.9;
+            }, null, {timeout:3000});
             const tinyNav = await articleLightbox.evaluate(el => {
               const photo=el.querySelector('[data-stand-photo-viewport]')?.getBoundingClientRect();
               const prev=el.querySelector('[data-stand-photo-previous]')?.getBoundingClientRect();
