@@ -2204,7 +2204,7 @@ if (!bellaris && brandPreviewCandidate) {
                     formDepth:getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).boxShadow.includes('rgb'),
                     heroFormOrDesktopCta: innerWidth < 1024
                       ? !!document.querySelector('#top [data-home-hero-interest-cta]') &&
-                        !document.querySelector('#top [data-lead-step-form]')
+                        [...document.querySelectorAll('#top [data-lead-step-form]')].every(el=>el.getBoundingClientRect().height===0)
                       : getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow==='none',
                     conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
