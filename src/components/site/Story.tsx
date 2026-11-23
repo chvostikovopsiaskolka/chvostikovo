@@ -400,7 +400,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           </div>
           {homeLayout && <div data-hero-benefits className="flex w-full flex-nowrap items-center justify-center gap-1 pt-2 sm:gap-2">
             {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map(item => (
-              <span key={item} className="inline-flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full bg-[#2d764b] px-1 py-1.5 text-[clamp(7px,2.2vw,11px)] font-bold leading-tight text-white sm:gap-1 sm:px-2.5 sm:py-2">
+              <span key={item} className="inline-flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full bg-[#2d764b] px-1.5 py-1.5 text-[8px] font-bold tracking-[-0.01em] leading-tight text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px] sm:gap-1.5 sm:px-3 sm:py-2 sm:text-xs">
                 <CheckCircle2 className="size-3 shrink-0 sm:size-4" aria-hidden="true" />{item}
               </span>
             ))}
