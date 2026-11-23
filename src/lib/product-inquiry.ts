@@ -3,11 +3,17 @@ import { z } from "zod";
 export const PRODUCT_INQUIRY_ENDPOINT =
   "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/product-inquiry-submit";
 
-// Preserve "Mesto, PSČ" for existing pickup clients. New delivery forms
-// encode "Ulica a číslo, PSČ, Mesto" in the already existing text column.
-const customerLocationSchema = z.string().trim().min(5).max(180).regex(
-  /^(?:[^,]{2,80},\s*[^,]{2,20}|[^,]{2,80},\s*\d{3}\s?\d{2},\s*[^,]{2,70})$/u,
-);
+/** UI accepts address, city, postal code in ONE original field.
+ * The deployed legacy product endpoint accepts exactly one comma:
+ * "street city, postal". Normalize only the payload, not the user's input.
+ * No Supabase schema/function change or marketing processing. */
+export function normalizeProductLocation(input: string): string {
+  const compact = input.trim().replace(/\s+/g, " ");
+  const match = compact.match(/^(.+?)[, ]+([0-9]{3} ?[0-9]{2})$/u);
+  if (!match) return compact;
+  const place = match[1].replace(/\s*,\s*/g, " ").trim();
+  return `${place}, ${match[2]}`;
+}
 
 export const standInquirySchema = z.object({
   client_submission_id: z.string().uuid(),
@@ -15,7 +21,7 @@ export const standInquirySchema = z.object({
   customer_name: z.string().trim().min(2).max(160),
   phone: z.string().trim().regex(/^\+\d{7,15}$/),
   email: z.string().trim().email().max(200),
-  customer_location: customerLocationSchema,
+  customer_location: z.string().trim().max(120).regex(/^[^,]{2,80},\s*.{2,20}$/u),
   source_ref: z.string().max(500),
   consent: z.literal(true),
   company: z.string().max(200).optional(),
@@ -34,7 +40,7 @@ export const targetInquirySchema = z.object({
   customer_name: z.string().trim().min(2).max(160),
   phone: z.string().trim().regex(/^\+\d{7,15}$/),
   email: z.string().trim().email().max(200),
-  customer_location: customerLocationSchema,
+  customer_location: z.string().trim().max(120).regex(/^[^,]{2,80},\s*.{2,20}$/u),
   source_ref: z.string().max(500),
   consent: z.literal(true),
   company: z.string().max(200).optional(),
@@ -55,7 +61,10 @@ export type TargetInquiryInput = z.infer<typeof targetInquirySchema>;
 export type ProductInquiryInput = z.infer<typeof productInquirySchema>;
 
 export async function submitProductInquiry(input: ProductInquiryInput) {
-  const payload = productInquirySchema.parse(input);
+  const payload = productInquirySchema.parse({
+    ...input,
+    customer_location: normalizeProductLocation(input.customer_location),
+  });
   const response = await fetch(PRODUCT_INQUIRY_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

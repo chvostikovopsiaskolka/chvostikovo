@@ -232,19 +232,21 @@ assert(css.includes("real 320–379px Android") &&
 assert(catalog.includes('data-product-actions className="mt-auto') &&
        catalog.includes('pt-4 sm:pt-6'),
        "Product cards must bottom-align target and stand price/CTA rows");
-assert(productContact.includes('name="delivery_street"') &&
-       productContact.includes('name="delivery_postal"') &&
-       productContact.includes('name="delivery_city"') &&
-       productContact.includes('name="customer_location" value={customerLocation}') &&
-       productContact.includes('autoComplete="street-address"') &&
-       productContact.includes('autoComplete="postal-code"') &&
-       productContact.includes('autoComplete="address-level2"') &&
-       productContact.includes('name="delivery_mode"'),
-       "Product inquiry must support full delivery address and privacy-preserving pickup");
-assert(productSchema.includes("const customerLocationSchema") &&
-       productEdge.includes("Ulica a číslo, PSČ, Mesto") &&
-       productEdge.includes("Adresa / miesto odovzdania"),
-       "Frontend validation and existing product Edge Function must agree on structured address format");
+assert(productContact.includes('Odkiaľ ste? (adresa, mesto, PSČ)') &&
+       productContact.includes('name="customer_location"') &&
+       productContact.includes('Hlavná 12, Košice, 040 01') &&
+       !productContact.includes('name="delivery_mode"') &&
+       !productContact.includes('name="delivery_street"'),
+       "Keep one original location input with street, city and postcode; no extra delivery form");
+const leadContact = read("src/components/site/LeadStepForm.tsx");
+assert(productContact.includes('<PrivacyConsentCheckbox />') &&
+       leadContact.includes('<PrivacyConsentCheckbox />'),
+       "Both daycare and product inquiries must reuse exactly the same privacy notice");
+assert(productSchema.includes("normalizeProductLocation(input.customer_location)") &&
+       productSchema.includes('match[1].replace(/\\s*,\\s*/g, " ")') &&
+       productEdge.includes('const customerLocation = text(input.customer_location, 120)') &&
+       !productEdge.includes("Ulica a číslo, PSČ, Mesto"),
+       "Normalize the original field to legacy endpoint format without Supabase changes");
 assert(!productContact.includes('trackMarketingInteraction') &&
        !productContact.includes('MetaPixel') &&
        !productContact.includes('custom_audience'),

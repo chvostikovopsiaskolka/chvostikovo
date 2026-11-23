@@ -2725,37 +2725,27 @@ if (!bellaris && brandPreviewCandidate) {
                   throw new Error('Target contact step missing');
               }
               const formDialog = productPage.getByRole('dialog',{name:action});
-              const locationInput=formDialog.locator('input[name="customer_location"][type="hidden"]');
+              const locationInput=formDialog.locator('input[name="customer_location"]:not([type="hidden"])');
               if (!await formDialog.locator('input[name="customer_name"]').count()
                 || !await formDialog.locator('input[name="email"]').count()
-                || await locationInput.count()!==1) {
-                throw new Error('Product contact inputs missing');
-              }
-              if (await formDialog.locator('[type="checkbox"][required]').count() !== 1) throw new Error('Privacy acknowledgement must remain mandatory');
-              const street=formDialog.locator('input[name="delivery_street"]');
-              const postal=formDialog.locator('input[name="delivery_postal"]');
-              const city=formDialog.locator('input[name="delivery_city"]');
-              if (!await street.isVisible() || !await postal.isVisible() || !await city.isVisible() ||
-                  await street.getAttribute('required')===null || await postal.getAttribute('required')===null ||
-                  await city.getAttribute('required')===null ||
-                  await street.getAttribute('autocomplete')!=='street-address' ||
-                  await postal.getAttribute('autocomplete')!=='postal-code' ||
-                  await city.getAttribute('autocomplete')!=='address-level2')
-                throw new Error('Product delivery must expose complete, required autofill-friendly address');
-              await street.fill('Hlavná 12');
-              await postal.fill('040 01');
-              await city.fill('Košice');
-              if (await locationInput.inputValue()!=='Hlavná 12, 040 01, Košice' ||
-                  !await street.evaluate(el=>el.checkValidity()) ||
-                  !await postal.evaluate(el=>el.checkValidity()) ||
-                  !await city.evaluate(el=>el.checkValidity()))
-                throw new Error('Shipping address must be valid and appear in the existing payload');
-              await formDialog.getByRole('radio',{name:'Osobne / po dohode'}).check();
-              if (await street.count()!==0 || await locationInput.inputValue()!=='Košice, 040 01')
-                throw new Error('Personal pickup must not request or send a private street address');
-              await formDialog.getByRole('radio',{name:'Doručenie na adresu'}).check();
-              if (!await street.isVisible() || await locationInput.inputValue()!=='Hlavná 12, 040 01, Košice')
-                throw new Error('Switching delivery mode must restore full shipping address');
+                || await locationInput.count()!==1)
+                throw new Error('Original single product location field missing');
+              if (await formDialog.locator('[type="checkbox"][required]').count() !== 1)
+                throw new Error('Shared privacy-policy acknowledgement must remain mandatory');
+              if (await formDialog.locator('input[name="delivery_street"], input[name="delivery_postal"], input[name="delivery_city"], input[name="delivery_mode"]').count())
+                throw new Error('Do not add extra delivery fields or choices');
+              const privacyTrigger=formDialog.getByRole('button',{name:'zásadami ochrany osobných údajov'});
+              if (await privacyTrigger.count()!==1)
+                throw new Error('Product and daycare must reuse same privacy-policy component');
+              await locationInput.fill('Hlavná 12, Košice, 040 01');
+              if (!await locationInput.evaluate(el=>el.checkValidity()) ||
+                  await locationInput.getAttribute('required')===null ||
+                  !(await locationInput.getAttribute('placeholder'))?.includes('Hlavná 12'))
+                throw new Error('Single product address field must accept street, city and postal code');
+              await locationInput.fill('Košice, 040 01');
+              if (!await locationInput.evaluate(el=>el.checkValidity()))
+                throw new Error('Legacy city/postal format must remain valid');
+              await locationInput.fill('Hlavná 12, Košice, 040 01');
               await formDialog.getByRole('button',{name:'Ako je to s doručením?'}).click();
               const deliveryDialog=productPage.getByRole('dialog',{name:'Doprava a doručenie'});
               await deliveryDialog.waitFor({state:'visible'});

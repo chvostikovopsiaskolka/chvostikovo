@@ -167,6 +167,7 @@ function BowlStandPage() {
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [customerLocation, setCustomerLocation] = useState("");
   const [company, setCompany] = useState("");
   const [size, setSize] = useState<StandSize>("small");
   const [color, setColor] = useState<StandColor>("dark");
@@ -289,6 +290,7 @@ function BowlStandPage() {
                 customerName={customerName} setCustomerName={setCustomerName}
                 phone={phone} setPhone={setPhone}
                 email={email} setEmail={setEmail}
+                customerLocation={customerLocation} setCustomerLocation={setCustomerLocation}
                 company={company} setCompany={setCompany} />
             )}
             onNext={() => {
