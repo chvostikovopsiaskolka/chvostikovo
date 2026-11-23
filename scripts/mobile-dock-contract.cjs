@@ -252,6 +252,33 @@ assert(!productContact.includes('trackMarketingInteraction') &&
        !productContact.includes('custom_audience'),
        "Product delivery contact information must not be copied to advertising audiences");
 
+// New explicit paid LEAD contract: orange hero stays; pink is inside the
+// originally existing form; a single rose CTA opens the inline section,
+// so the moving gallery follows Hero when the form is not yet opened.
+const paidLeadCurrent = read("src/routes/test-aria.tsx");
+const ariaGuideCurrent = read("src/components/site/AriaLeadAssistant.tsx");
+const storyCurrent = read("src/components/site/Story.tsx");
+assert(paidLeadCurrent.includes('data-aria-lead-hero-cta') &&
+       paidLeadCurrent.includes('aria-expanded={leadHeroFormOpen}') &&
+       paidLeadCurrent.includes('hidden={isLiveLead && !leadHeroFormOpen}') &&
+       paidLeadCurrent.includes('lead_landing_hero_orange_cta') &&
+       paidLeadCurrent.includes('data-lead-inline-card') &&
+       paidLeadCurrent.includes('className="rounded-4xl bg-white px-2 py-3') &&
+       paidLeadCurrent.includes('space-y-4 text-left') &&
+       paidLeadCurrent.includes('<SafetyCertificates homeLayout />') &&
+       ariaGuideCurrent.includes('onRevealInlineForm') &&
+       css.includes('.lead-brand-live #aria-hero-form [data-lead-inline-card]'),
+       "Paid lead must reveal existing form on pink CTA or dock while keeping white outer background and left aligned About");
+assert(storyCurrent.includes('max-w-[810px]') &&
+       storyCurrent.includes('sm:h-72 lg:h-80') &&
+       storyCurrent.includes('lg:px-4 lg:text-xs'),
+       "Home desktop team image and all three green badges must share a wider row");
+const crownIndex = paidLeadCurrent.indexOf('data-aria-first-visit-dogs');
+const visitHeadingIndex = paidLeadCurrent.indexOf('Máte záujem o návštevu?');
+assert(visitHeadingIndex >= 0 && crownIndex > visitHeadingIndex &&
+       crownIndex < paidLeadCurrent.indexOf('className="form-liquid-surface relative z-0 mt-0'),
+       "Four dogs must sit on the top of the visit form, below its heading");
+
 /* APP-01 23.11: explicitly test reordered LEAD, mobile inline and narrow widths. */
 const paid = read("src/routes/test-aria.tsx");
 const ariaAssistant = read("src/components/site/AriaLeadAssistant.tsx");

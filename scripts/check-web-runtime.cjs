@@ -293,23 +293,34 @@ if (!bellaris && brandPreviewCandidate) {
                   const cards = [...(track?.querySelectorAll(':scope > div:first-child button') ?? [])];
                   const highRes = cards.filter(card => card.hasAttribute('data-aria-lead-highlight'));
                   const gr = gallery?.getBoundingClientRect(), tr = track?.getBoundingClientRect();
+                  const formNode = document.querySelector('#aria-hero-form');
+                  const cta = hero?.querySelector('[data-aria-lead-hero-cta]')?.getBoundingClientRect();
+                  const description = hero?.querySelector('[data-aria-hero-description]')?.getBoundingClientRect();
+                  const outer = formNode?.querySelector('div.rounded-4xl');
+                  const inner = formNode?.querySelector('[data-lead-inline-card]');
                   return {
                     width: window.innerWidth,
                     cardCount: cards.length, highlightCount: highRes.length,
                     headingBottom: heading?.bottom, badgeTop: badge?.top,
                     reviewBottom: reviews?.bottom, galleryTop: gr?.top, trackTop: tr?.top, trackBottom: tr?.bottom,
-                    menuBottom: dock?.getBoundingClientRect().bottom, formTop: form?.top, formContentTop: formContent?.top, formBottom: form?.bottom,
+                    heroBottom: hero?.getBoundingClientRect().bottom,
+                    menuBottom: dock?.getBoundingClientRect().bottom,
+                    formHidden: !!formNode?.hidden, formTop: form?.top, formContentTop: formContent?.top, formBottom: form?.bottom,
+                    ctaTop: cta?.top, ctaBottom: cta?.bottom, descBottom: description?.bottom,
+                    outerPink: !!outer && getComputedStyle(outer).borderTopWidth !== '0px',
+                    pinkInner: !!inner && getComputedStyle(inner).backgroundColor.startsWith('rgba(255, 228, 240'),
                     fixed: dock ? getComputedStyle(dock).position === 'fixed' && !hero.contains(dock) : false,
                     reviewSpacing: parseFloat(getComputedStyle(hero?.querySelector('[data-aria-lead-review-spacing]')).marginTop),
                   };
                 });
                 if (!layout.fixed || layout.cardCount !== 20 || layout.highlightCount !== 2 ||
                     layout.badgeTop < layout.headingBottom + 50 ||
-                    layout.formTop < layout.reviewBottom + 12 ||
-                    !Number.isFinite(layout.formContentTop) || layout.formContentTop < layout.menuBottom + 8 ||
-                    layout.galleryTop < layout.formBottom - 8 ||
-                    layout.trackTop < layout.formBottom - 8)
-                  throw new Error('Paid hero → form → moving gallery layout regressed: ' + JSON.stringify(layout));
+                    layout.ctaTop < layout.descBottom - 1 || layout.ctaBottom > layout.reviewBottom ||
+                    layout.outerPink || !layout.pinkInner ||
+                    layout.galleryTop < layout.heroBottom - 8 || layout.trackTop < layout.heroBottom - 8 ||
+                    (!layout.formHidden && (layout.formTop < layout.reviewBottom + 12 ||
+                      layout.galleryTop < layout.formBottom - 8)))
+                  throw new Error('Paid orange hero → rose CTA → conditional form → carousel regressed: ' + JSON.stringify(layout));
                 if (layout.width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
                   throw new Error('Approved mobile review spacing regressed: ' + JSON.stringify(layout));
                 await highlights.first().scrollIntoViewIfNeeded();
@@ -625,10 +636,13 @@ if (!bellaris && brandPreviewCandidate) {
                 const caretakerHeadingLine = parseFloat(getComputedStyle(caretakerHeading).lineHeight);
                 const contentTop = content.getBoundingClientRect().top;
                 const reviewsBottom = reviews.getBoundingClientRect().bottom;
-                const formTop = form.getBoundingClientRect().top;
-                const formContentTop = form.querySelector('[data-lead-step-form]')?.getBoundingClientRect().top;
-                const reviewBottom = reviews.getBoundingClientRect().bottom;
                 const paidCarousel = window.location.pathname === '/psia-skolka-kosice/';
+                const formIsHidden = paidCarousel && form.hidden;
+                const formTop = formIsHidden ? hero.getBoundingClientRect().bottom : form.getBoundingClientRect().top;
+                const formContentTop = formIsHidden
+                  ? window.innerHeight // no interactive form exists in the rendered flow while hidden
+                  : form.querySelector('[data-lead-step-form]')?.getBoundingClientRect().top;
+                const reviewBottom = reviews.getBoundingClientRect().bottom;
                 const newPhotos = paidCarousel
                   ? document.querySelector('#lead-photo-carousel [data-gesture-track="photos"]')
                   : hero.querySelector('[data-aria-review-gap-photos]');
@@ -649,6 +663,7 @@ if (!bellaris && brandPreviewCandidate) {
                   missing: false,
                   formTop,
                   formContentTop,
+                  formIsHidden,
                   reviewGap: formTop - reviewBottom,
                   photoCount: photoCards.length,
                   floatingDockFixed: !!floatingGuide && getComputedStyle(floatingGuide).position === 'fixed' && !hero.contains(floatingGuide),
@@ -674,16 +689,15 @@ if (!bellaris && brandPreviewCandidate) {
                     !!photoImages[1]?.getAttribute('src')?.includes('lead-review-retrievers-aussie') &&
                     photoImages.every(img => !!img?.getAttribute('alt')?.trim()) &&
                     photoImages[0]?.getAttribute('src') !== photoImages[1]?.getAttribute('src'),
-                  paidPhotosBelowFloatingDock: window.location.pathname !== '/psia-skolka-kosice/' ||
-                    (!!photoFrame && !!floatingGuide && formTop >= reviewsBottom + 12 &&
+                  paidPhotosBelowFloatingDock: !paidCarousel ||
+                    (!!photoFrame && !!floatingGuide && formTop >= reviewsBottom + 8 &&
                      formTop >= window.innerHeight - 24 &&
-                     formTop - reviewsBottom <= window.innerHeight * 0.44 &&
                      Number.isFinite(formContentTop) &&
-                     formContentTop >= floatingGuide.getBoundingClientRect().bottom + 8 &&
-                     // The form/gallery swap preserves natural document flow.
-                     Math.abs(hero.getBoundingClientRect().bottom - formTop) <= 2 &&
-                     Math.abs(form.getBoundingClientRect().bottom - spacer.getBoundingClientRect().top) <= 2 &&
-                     !hero.contains(newPhotos) && photoRects.every(rect => rect.top >= form.getBoundingClientRect().bottom - 2)),
+                     (formIsHidden
+                       ? Math.abs(hero.getBoundingClientRect().bottom - spacer.getBoundingClientRect().top) <= 2
+                       : Math.abs(form.getBoundingClientRect().bottom - spacer.getBoundingClientRect().top) <= 2) &&
+                     !hero.contains(newPhotos) &&
+                     photoRects.every(rect => rect.top >= spacer.getBoundingClientRect().top - 2)),
                   heroCopyBlack: window.location.pathname === '/psia-skolka-kosice/'
                     ? (getComputedStyle(description).color === 'rgb(255, 255, 255)' &&
                        getComputedStyle(description.querySelector('strong')).color === 'rgb(255, 255, 255)')
@@ -717,7 +731,9 @@ if (!bellaris && brandPreviewCandidate) {
                   serviceBadgeFits: badgeRect.left >= -1 && badgeRect.right <= window.innerWidth + 1 &&
                     serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
                   descriptionGap: descriptionRect.top - badgeRect.bottom,
-                  reviewGapAbove: reviewsRect.top - descriptionRect.bottom,
+                  reviewGapAbove: reviewsRect.top - (paidCarousel
+                    ? (hero.querySelector('[data-aria-lead-hero-cta]')?.getBoundingClientRect().bottom ?? descriptionRect.bottom)
+                    : descriptionRect.bottom),
                   focusedDescription: descriptionRect.width <=
                     (window.location.pathname === '/psia-skolka-kosice/'
                       ? Math.min(window.innerWidth - 30, 402)
@@ -736,7 +752,10 @@ if (!bellaris && brandPreviewCandidate) {
                   caretakersHeadingFits: caretakerHeading.scrollWidth <= caretakerHeading.clientWidth + 2 &&
                     caretakerHeadingRect.height <= caretakerHeadingLine * 2.55,
                   whiteInfoBackground: getComputedStyle(form).backgroundColor === 'rgb(255, 255, 255)' &&
-                    !!form.querySelector('.pointer-events-none.absolute.inset-0'),
+                    !!form.querySelector('.pointer-events-none.absolute.inset-0') &&
+                    (!paidCarousel ||
+                      (getComputedStyle(form.querySelector('div.rounded-4xl')).borderTopWidth === '0px' &&
+                       !!form.querySelector('[data-lead-inline-card]'))),
                   groundedFirstVisit: !!document.querySelector('#aria-first-visit-form [data-crown-ground]'),
                   bothDogCrowns: heroDogs.getAttribute('src') === firstVisitDogs.getAttribute('src'),
                   proofLeft: rect.left,
@@ -782,6 +801,16 @@ if (!bellaris && brandPreviewCandidate) {
               // The puppy message starts at caretakers, never over the review gap
               // or the first contact form. Check both the live lead and preview.
               const leadInfoForm = page.locator('#aria-hero-form');
+              if (url.pathname === '/psia-skolka-kosice/' &&
+                  !await leadInfoForm.isVisible()) {
+                const heroCta = page.locator('[data-aria-lead-hero-cta]');
+                if (await heroCta.count() !== 1 || await heroCta.getAttribute('aria-expanded') !== 'false')
+                  throw new Error('Paid CTA must initially hide its linked information form');
+                await heroCta.click();
+                await leadInfoForm.waitFor({ state: 'visible' });
+                if (await heroCta.getAttribute('aria-expanded') !== 'true')
+                  throw new Error('Paid CTA failed to reveal the shared 2-step form');
+              }
               await leadInfoForm.scrollIntoViewIfNeeded();
               await page.waitForFunction(() => document.getElementById('aria-hero-form')?.getBoundingClientRect().top < window.innerHeight);
               if (url.pathname === '/psia-skolka-kosice/') {
@@ -2381,9 +2410,23 @@ if (!bellaris && brandPreviewCandidate) {
               await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
               for(const id of ['informujte-sa','prva-navsteva-form']) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
-                await inquiry.locator('label').first().click();
+                // APP-01 WebKit: radio labels and React change handlers may settle on
+                // separate frames after responsive resize + smooth anchor scroll.
+                // Assert the actual radio selection before expecting step 2;
+                // never accept a click alone as evidence of a completed transition.
+                const firstChoice=inquiry.locator('label:has(input[name="zaujem"])').first();
+                await firstChoice.scrollIntoViewIfNeeded();
+                await firstChoice.click();
+                const radio=firstChoice.locator('input[name="zaujem"]');
+                if(!await radio.isChecked()) await radio.check({force:true});
+                await page.waitForFunction(targetId => {
+                  const form=document.querySelector('#'+targetId+' [data-lead-step-form]');
+                  const next=Array.from(form?.querySelectorAll('button') ?? []).find(x=>x.textContent?.trim()==='Pokračovať');
+                  return !!form?.querySelector('input[name="zaujem"]:checked') && !!next && !next.disabled;
+                }, id, {timeout:5000});
                 await inquiry.getByRole('button',{name:'Pokračovať',exact:true}).click();
-                await inquiry.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000}).catch(() => { throw new Error('Inline contact step failed: '+id); });
+                await inquiry.locator('[role="progressbar"][aria-valuenow="2"]').waitFor({state:'attached',timeout:7000}).catch(() => { throw new Error('Inline contact step did not advance: '+id); });
+                await inquiry.locator('input[name="meno"]').waitFor({state:'visible',timeout:7000}).catch(() => { throw new Error('Inline contact step not visible: '+id); });
                 await inquiry.getByRole('button',{name:'Späť',exact:true}).click();
               }
               await page.locator('#home-friendship-interest').click();

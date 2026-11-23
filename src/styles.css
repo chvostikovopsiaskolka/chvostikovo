@@ -1545,6 +1545,21 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
   .aria-brand-experiment .form-liquid-surface { background-color: rgb(255 248 236 / 86%); }
 }
 
+/* Paid LEAD only: the outer information section stays white; pink belongs
+   to the real form card, not the background box beneath it. No preview spill. */
+.lead-brand-live #aria-hero-form [data-lead-inline-card] {
+  background-color: rgb(255 228 240 / 96%);
+  background-image: linear-gradient(160deg, rgb(255 243 249 / 91%), rgb(255 220 238 / 84%));
+  border-color: rgb(184 46 127 / 27%);
+}
+.lead-brand-live [data-aria-lead-hero-cta] {
+  background-color: #b82e7f;
+  color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lead-brand-live [data-aria-lead-hero-cta] { transition: none; }
+}
+
 /* Keep shared liquid forms visible in forced-contrast environments. */
 @media (forced-colors: active) {
   .form-liquid-surface, .site-brand .form-liquid-surface, .aria-brand-experiment .form-liquid-surface {
