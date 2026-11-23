@@ -2169,6 +2169,25 @@ if (!bellaris && brandPreviewCandidate) {
                         c.top>=a.bottom+9 && d.top>=c.bottom+15 &&
                         a.left>=-1 && b.right<=innerWidth+1;
                     })(),
+                    galleryImmediatelyAfterAbout:(() => {
+                      const about=document.getElementById('o-nas');
+                      const gallery=document.querySelector('main > section[aria-label="Fotogaléria zo psiej škôlky Chvostíkovo"]');
+                      return !!about && !!gallery && about.nextElementSibling===gallery && gallery.nextElementSibling?.id==='cennik';
+                    })(),
+                    mobileHeroBreathingAndThinCta:innerWidth>=640 || (() => {
+                      const section=document.getElementById('top');
+                      const title=section?.querySelector('h1')?.getBoundingClientRect();
+                      const photos=section?.querySelector('[data-home-hero-photos]')?.getBoundingClientRect();
+                      const cta=section?.querySelector('[data-home-hero-interest-cta]')?.getBoundingClientRect();
+                      const reviews=section?.querySelector('#recenzie')?.getBoundingClientRect();
+                      if(!section || !title || !photos || !cta || !reviews) return false;
+                      const shortNarrow=innerWidth<380 && innerHeight<=800;
+                      const topSpace=parseFloat(getComputedStyle(section).paddingTop);
+                      return topSpace >= (shortNarrow ? 16 : 30) &&
+                        photos.top>=title.bottom+14 && cta.top>=photos.bottom+12 &&
+                        cta.height>=44 && cta.height<=49 &&
+                        reviews.top>=cta.bottom+(shortNarrow ? 10 : 18);
+                    })(),
                     reasonThirdNoRule:innerWidth>=640 || (() => {
                       const third=document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] article')[2];
                       return !!third && getComputedStyle(third).borderTopWidth==='0px';
