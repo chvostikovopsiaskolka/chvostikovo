@@ -196,8 +196,8 @@ export function AriaPreviewPage() {
   return (
     <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose">
       {/* Keep Aria floating in the viewport throughout the lead journey.
-          The paid lead hero stays visually unchanged; the menu no longer
-          participates in the document layout. */}
+          The paid LEAD hero reuses the homepage photo pair and scrolls to an
+          always-visible form below; the menu stays outside document layout. */}
       <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={false} sectionNavigation={isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
@@ -228,9 +228,38 @@ export function AriaPreviewPage() {
                 </p>
               </div>
 
-              <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[590px]">
-                <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije si <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
-              </p>
+              {isLiveLead ? (
+                <>
+                  {/* The same two approved photos as on the homepage; keep the original lightbox. */}
+                  <div data-aria-lead-hero-photos className="mx-auto mt-4 grid w-full max-w-xl grid-cols-2 gap-2.5 sm:mt-5 sm:gap-4">
+                    {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
+                      <button type="button" key={photo.src} data-aria-lead-hero-photo={index + 1}
+                        aria-label={`Zobraziť fotografiu: ${photo.alt}`}
+                        onClick={() => setReviewPhotoOpen(index)}
+                        className="group relative h-[132px] min-w-0 overflow-hidden rounded-[19px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral min-[390px]:h-[154px] min-[480px]:h-[175px] sm:h-[210px] lg:h-[250px]">
+                        <img src={photo.src} alt={photo.alt} width={672} height={896} loading="eager" decoding="async"
+                          fetchPriority={index === 0 ? "high" : "auto"}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none" />
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mx-auto mt-4 flex w-full max-w-[340px] justify-center">
+                    <button type="button" data-aria-lead-hero-cta aria-controls="aria-hero-form"
+                      onClick={() => {
+                        trackMarketingInteraction("inquiry_cta", "lead_landing_hero_photo_cta");
+                        void trackCookielessInteraction("inquiry_cta", "lead_landing_hero_photo_cta");
+                        document.getElementById("aria-hero-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className="hero-cta-primary min-h-[46px] w-full rounded-full font-display text-base font-bold">
+                      Chcem sa informovať o škôlke
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[590px]">
+                  <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije si <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
+                </p>
+              )}
             </div>
           </div>
             <div data-aria-lead-review-spacing className={isLiveLead ? "mt-8 sm:mt-4 lg:mt-2" : "mt-0 sm:mt-2 lg:mt-2"}>
@@ -258,7 +287,7 @@ export function AriaPreviewPage() {
           )}
         </section>
 
-        <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
+        <section id="aria-hero-form" className="relative z-10 scroll-mt-24 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-4xl px-4">
             <div className="form-liquid-surface rounded-4xl bg-white p-5 sm:p-8">
@@ -270,20 +299,11 @@ export function AriaPreviewPage() {
               </div>
 
               <div className="form-liquid-surface mx-auto mt-4 max-w-xl rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
-                <LeadStepForm questionInHeading ariaPreview trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
+                <LeadStepForm questionInHeading ariaPreview trackingSource={isLiveLead ? "lead_landing_hero_photo_below_inline" : "aria_preview_hero_inline"} />
               </div>
             </div>
           </div>
         </section>
-
-        {/* Keep the SAME existing moving gallery below the inline form on paid LEAD; keep
-            its swipe/autoscroll/lightbox behavior and append the two unique
-            former hero teaser photos without adding unrelated images. */}
-        {isLiveLead && (
-          <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="scroll-mt-24">
-            <DaycarePhotoCarousel includeLeadHighlights />
-          </div>
-        )}
 
         <section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-white py-9 sm:py-12">
           <SectionAmbientPaws />
@@ -325,6 +345,13 @@ export function AriaPreviewPage() {
             {isLiveLead && <SafetyCertificates />}
           </div>
         </section>
+
+        {/* Preserve the existing paid-LEAD carousel, after the complete O nás section. */}
+        {isLiveLead && (
+          <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="scroll-mt-24">
+            <DaycarePhotoCarousel includeLeadHighlights />
+          </div>
+        )}
 
         {!isLiveLead && <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
           <div className="mx-auto max-w-4xl px-4">
