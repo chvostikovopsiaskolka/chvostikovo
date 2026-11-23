@@ -439,7 +439,7 @@ function BowlStandPage() {
                 Vyberte si veľkosť, farbu a personalizáciu. Dopyt je nezáväzný.
               </p>
             </div>
-            <div className="mt-8 rounded-[2rem] border border-forest/10 bg-card p-5 shadow-soft sm:p-9">
+            <div className="form-liquid-surface mt-8 rounded-[2rem] border border-forest/10 bg-card p-5 shadow-soft sm:p-9">
               {isSubmitted ? (
                 <div role="status" className="rounded-3xl bg-secondary/70 px-5 py-8 text-center">
                   <Check className="mx-auto size-7 text-coral" />
