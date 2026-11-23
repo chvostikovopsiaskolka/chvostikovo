@@ -2503,16 +2503,15 @@ if (!bellaris && brandPreviewCandidate) {
               await revealed.waitFor({state:'visible',timeout:5000});
               const inline=revealed.locator('[data-lead-step-form]');
               if (!await inline.isVisible() ||
-                  await page.locator('#top [data-lead-step-form]').count() ||
+                  await page.locator('#top [data-lead-step-form]:visible').count() ||
                   await page.getByRole('dialog').count())
                 throw new Error('Home interest CTA must reveal the in-page form after Hero');
               const choices=inline.locator('label:has(input[name="zaujem"])');
               if (await choices.count()!==3) throw new Error('Revealed home form must retain all three interests');
               await choices.nth(1).click();
               await inline.getByRole('button', {name:'Pokračovať',exact:true}).click();
-              if (!await inline.locator('input[name="meno"]').isVisible() ||
-                  !await inline.locator('input[name="telefon"]').isVisible())
-                throw new Error('Revealed home form did not advance to contact');
+              await inline.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
+              await inline.locator('input[name="telefon"]').waitFor({state:'visible',timeout:5000});
               await inline.getByRole('button',{name:'Späť',exact:true}).click();
               if (!await choices.nth(1).locator('input[name="zaujem"]').isChecked())
                 throw new Error('Revealed interest selection was lost on back');
