@@ -1,5 +1,5 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { PuppyCheckInput } from "@/lib/inquiry";
 import {
   Car,
@@ -107,11 +107,32 @@ export const Route = createFileRoute("/test-aria")({
 export function AriaPreviewPage() {
   const isLiveLead = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, "") === "/psia-skolka-kosice" });
   const [leadModalOpen, setLeadModalOpen] = useState(false);
+  const [leadHeroFormOpen, setLeadHeroFormOpen] = useState(false);
   const [puppyModalOpen, setPuppyModalOpen] = useState(false);
   const [reviewPhotoOpen, setReviewPhotoOpen] = useState<number | null>(null);
   const [leadModalSource, setLeadModalSource] = useState("lead_landing_modal");
   const [ariaPreset, setAriaPreset] = useState<string | undefined>(undefined);
   const [puppyCheck, setPuppyCheck] = useState<PuppyCheckInput | undefined>(undefined);
+
+  // The paid landing keeps the existing two-step form directly below Hero,
+  // but mounts its visual section only after an explicit interest action.
+  // Preserve attribution and the original form submit events.
+  function revealLeadHeroForm(source: string) {
+    trackMarketingInteraction("inquiry_cta", source);
+    void trackCookielessInteraction("inquiry_cta", source);
+    setLeadHeroFormOpen(true);
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      const target = document.getElementById("aria-hero-form");
+      if (!target) return;
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      target.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    }));
+  }
+
+  useEffect(() => {
+    // Keep the revealed form mounted while a visitor continues reading;
+    // navigation or modal toggles must not discard partially entered data.
+  }, [leadHeroFormOpen]);
 
   function openLeadModal(source: string) {
     trackMarketingInteraction("inquiry_cta", source);
@@ -198,7 +219,7 @@ export function AriaPreviewPage() {
       {/* Keep Aria floating in the viewport throughout the lead journey.
           The paid lead hero stays visually unchanged; the menu no longer
           participates in the document layout. */}
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={false} sectionNavigation={isLiveLead} hidden={leadModalOpen || puppyModalOpen} />
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={false} sectionNavigation={isLiveLead} onRevealInlineForm={isLiveLead ? () => revealLeadHeroForm("lead_landing_aria_dock_interest") : undefined} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
         <section className={isLiveLead ? "hero-safe-top relative flex min-h-[calc(100svh-20px)] flex-col justify-center sm:min-h-[100svh] sm:justify-start sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
@@ -231,6 +252,16 @@ export function AriaPreviewPage() {
               <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[590px]">
                 <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije si <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
               </p>
+              {isLiveLead && (
+                <div className="mx-auto mt-4 flex w-full max-w-[360px] justify-center">
+                  <button type="button" data-aria-lead-hero-cta aria-controls="aria-hero-form"
+                    aria-expanded={leadHeroFormOpen}
+                    onClick={() => revealLeadHeroForm("lead_landing_hero_orange_cta")}
+                    className="btn-coral inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full px-2.5 py-2.5 text-center font-display text-[clamp(11px,3.35vw,16px)] font-bold leading-tight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral">
+                    Chcem sa informovať o škôlke
+                  </button>
+                </div>
+              )}
             </div>
           </div>
             <div data-aria-lead-review-spacing className={isLiveLead ? "mt-8 sm:mt-4 lg:mt-2" : "mt-0 sm:mt-2 lg:mt-2"}>
@@ -258,10 +289,10 @@ export function AriaPreviewPage() {
           )}
         </section>
 
-        <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
+        <section id="aria-hero-form" hidden={isLiveLead && !leadHeroFormOpen} className="relative z-10 scroll-mt-24 overflow-hidden bg-white pb-8 pt-4 sm:pb-12 sm:pt-6">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-4xl px-4">
-            <div className="form-liquid-surface rounded-4xl bg-white p-5 sm:p-8">
+            <div className="rounded-4xl bg-white px-2 py-3 sm:px-5 sm:py-5">
               <div className="mx-auto max-w-2xl text-center">
                 <h2 className="section-title mt-2 text-xl sm:text-2xl lg:mt-0">Chceli by ste sa informovať o škôlke?</h2>
                 <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
@@ -269,7 +300,7 @@ export function AriaPreviewPage() {
                 </p>
               </div>
 
-              <div className="form-liquid-surface mx-auto mt-4 max-w-xl rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
+              <div data-lead-inline-card className="form-liquid-surface mx-auto mt-4 max-w-xl rounded-3xl border border-forest/10 p-5 shadow-card sm:p-6">
                 <LeadStepForm questionInHeading ariaPreview trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
               </div>
             </div>
@@ -310,7 +341,7 @@ export function AriaPreviewPage() {
                 </div>
               </div>
               {isLiveLead ? (
-                <div className="mx-auto max-w-[680px] space-y-4 text-center text-[15px] leading-[1.7] text-forest/80 sm:text-base">
+                <div className="mx-auto max-w-[680px] space-y-4 text-left text-[15px] leading-[1.7] text-forest/80 sm:text-base">
                   <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
                   <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
                   <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
@@ -322,7 +353,7 @@ export function AriaPreviewPage() {
                 </p>
               )}
             </div>
-            {isLiveLead && <SafetyCertificates />}
+            {isLiveLead && <SafetyCertificates homeLayout />}
           </div>
         </section>
 
@@ -491,12 +522,12 @@ export function AriaPreviewPage() {
         <section id="aria-first-visit-form" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-2xl px-4">
-            <div data-aria-first-visit-dogs className="mx-auto mb-3 w-full max-w-sm">
+            <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o návštevu?</h2>
+            <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
+            <div data-aria-first-visit-dogs className="relative z-10 mx-auto mt-7 mb-[-18px] w-full max-w-sm">
               <SchoolmatesFormCrown compact groundAccent />
             </div>
-            <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o prvú návštevu?</h2>
-            <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
-            <div className="form-liquid-surface mt-5 rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
+            <div className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
               <LeadStepForm questionInHeading trackingSource={isLiveLead ? "lead_landing_aria_first_visit_inline" : "aria_preview_first_visit_inline"} />
             </div>
           </div>
