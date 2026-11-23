@@ -261,7 +261,7 @@ export function AriaPreviewPage() {
         <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-4xl px-4">
-            <div className="rounded-4xl bg-white p-5 sm:p-8">
+            <div className="form-liquid-surface rounded-4xl bg-white p-5 sm:p-8">
               <div className="mx-auto max-w-2xl text-center">
                 <h2 className="section-title mt-2 text-xl sm:text-2xl lg:mt-0">Chceli by ste sa informovať o škôlke?</h2>
                 <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
@@ -269,7 +269,7 @@ export function AriaPreviewPage() {
                 </p>
               </div>
 
-              <div className="mx-auto mt-4 max-w-xl rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
+              <div className="form-liquid-surface mx-auto mt-4 max-w-xl rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
                 <LeadStepForm questionInHeading ariaPreview trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
               </div>
             </div>
@@ -496,7 +496,7 @@ export function AriaPreviewPage() {
             </div>
             <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o prvú návštevu?</h2>
             <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
-            <div className="mt-5 rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
+            <div className="form-liquid-surface mt-5 rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
               <LeadStepForm questionInHeading trackingSource={isLiveLead ? "lead_landing_aria_first_visit_inline" : "aria_preview_first_visit_inline"} />
             </div>
           </div>
@@ -513,7 +513,7 @@ export function AriaPreviewPage() {
       <Footer />
 
       <Dialog open={puppyModalOpen} onOpenChange={setPuppyModalOpen}>
-        <DialogContent className={(isLiveLead ? "" : "aria-preview-modal ") + "max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6"} aria-describedby={undefined}>
+        <DialogContent className={(isLiveLead ? "" : "aria-preview-modal ") + "form-liquid-surface max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6"} aria-describedby={undefined}>
           <DialogTitle className="font-display text-lg font-bold text-forest">Kontrola vhodnosti šteniatka</DialogTitle>
           <AriaPuppyChecker embedded onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />
         </DialogContent>

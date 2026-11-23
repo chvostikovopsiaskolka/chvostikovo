@@ -207,7 +207,7 @@ assert(firstVisitComponent.includes("export const FIRST_VISIT_STEPS") &&
        "Home/paid first visit must reuse one three-step explanation without duplicate accordion");
 assert(paidLeadRoute.includes("!isLiveLead && <details data-aria-visit-details"),
        "Paid LEAD must show the free-visit note without long duplicate accordion");
-assert(firstVisitComponent.includes('text-[#a95400]'),
+assert(firstVisitComponent.includes('text-[#ffa414]'),
        "Homepage requirements headings must use the approved orange, not the pink taxi accent");
 assert(aboutComponent.includes('max-w-[680px]') &&
        aboutComponent.includes('data-safety-heading') &&
@@ -270,5 +270,13 @@ assert(ariaAssistant.includes('data-aria-interest-cta aria-label="Mám záujem o
 assert(css.includes('@media (max-width: 359px)') && css.includes('#top h1 span { white-space: normal; }'),
        "320px Hero must allow title wrapping without horizontal overflow");
 assert(reviewReasons.includes('"row-span-2 min-w-0 sm:row-span-1"') &&
-       reviewReasons.includes('"col-span-2 min-w-0 rounded-2xl'),
+       reviewReasons.includes('"col-span-2 min-w-0 px-2 pt-2 pb-3') &&
+       !reviewReasons.includes('rounded-2xl border-t border-forest/10'),
        "First two reasons alongside video, third full width underneath");
+
+// 23 Nov mobile simplification: one hero headline, no redundant mobile pitch.
+assert(!hero.includes('home-hero-copy mx-auto mt-5 max-w-xl') && hero.includes('data-home-mobile-orange-phrase'),
+  "Mobile hero must skip sales box and highlight the whole 'váš psík zamiluje' phrase");
+for (const path of ["src/components/site/Hero.tsx","src/components/site/InquirySection.tsx","src/components/site/Contact.tsx","src/components/site/FormDialog.tsx","src/routes/test-aria.tsx"]) {
+  assert(read(path).includes("form-liquid-surface"), path+" must use the liquid form panel");
+}

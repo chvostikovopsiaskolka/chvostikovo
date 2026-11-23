@@ -264,7 +264,7 @@ function PuppyDaycarePage() {
 
             <div className="mx-auto hidden w-full max-w-md lg:mx-0 lg:block">
               <SchoolmatesFormCrown compact />
-              <div className="rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
+              <div className="form-liquid-surface rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
                 <h2 className="text-center font-display text-2xl font-bold text-forest">
                   Čo hľadáte pre svojho psíka?
                 </h2>
@@ -444,7 +444,7 @@ function PuppyDaycarePage() {
       <Footer />
 
       <Dialog open={puppyModalOpen} onOpenChange={setPuppyModalOpen}>
-        <DialogContent className="max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6" aria-describedby={undefined}>
+        <DialogContent className="form-liquid-surface max-h-[min(87dvh,780px)] w-[calc(100%-24px)] overflow-y-auto overscroll-contain rounded-3xl border border-forest/10 bg-card p-4 text-forest shadow-2xl sm:max-w-xl sm:p-6" aria-describedby={undefined}>
           <DialogTitle className="font-display text-lg font-bold text-forest">Kontrola vhodnosti šteniatka</DialogTitle>
           <AriaPuppyChecker embedded
             onInterest={(details) => openPuppyContact(details)}

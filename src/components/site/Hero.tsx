@@ -19,20 +19,11 @@ export function Hero() {
 
           <h1 className="mt-4 text-[clamp(22px,7.2vw,33px)] leading-[1.06] tracking-[-0.035em] text-forest min-[480px]:text-[37px] min-[560px]:text-[43px] sm:text-5xl">
             <span className="block whitespace-nowrap">Psia škôlka v Košiciach,</span>
-            <span className="block whitespace-nowrap">ktorú si váš psík</span>
-            <span className="block text-coral-dark">zamiluje</span>
+            <span className="block whitespace-nowrap">ktorú si</span>
+            <span data-home-mobile-orange-phrase className="block text-coral-dark">váš psík zamiluje</span>
           </h1>
 
-          <div className="home-hero-copy mx-auto mt-5 max-w-xl min-[390px]:mt-5">
-            <p className="font-display text-[13px] font-bold tracking-[-0.02em] min-[350px]:text-[14px] sm:text-base">
-              Váš psík už nemusí tráviť deň sám doma.
-            </p>
-            <p className="mx-auto mt-1.5 max-w-[34rem] text-sm font-bold leading-snug min-[390px]:text-base min-[390px]:leading-relaxed">
-              Počas dňa si užije pohyb, oddych aj spoločnosť psích kamarátov pod celodenným dohľadom.
-            </p>
-          </div>
-
-          <div data-home-hero-inline-mobile className="mx-auto mt-4 max-w-xl rounded-[24px] border border-forest/10 bg-card px-3 py-3.5 shadow-card">
+          <div data-home-hero-inline-mobile className="form-liquid-surface mx-auto mt-5 max-w-xl rounded-[24px] border border-forest/10 bg-card px-3 py-3.5 shadow-card">
             <h2 className="font-display text-[15px] font-extrabold leading-tight text-forest min-[380px]:text-base">
               Chceli by ste sa informovať o škôlke?
             </h2>
@@ -77,7 +68,7 @@ export function Hero() {
 
           <div id="home-hero-inline-form" className="min-w-0">
             <SchoolmatesFormCrown compact />
-            <div data-home-form-panel className="rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
+            <div data-home-form-panel className="form-liquid-surface rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
               <h2 className="text-center text-xl text-forest sm:whitespace-nowrap">
                 Čo hľadáte pre svojho psíka?
               </h2>

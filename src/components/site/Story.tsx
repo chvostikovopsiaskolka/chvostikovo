@@ -198,7 +198,8 @@ export function FriendshipInterest({ inlineForm = false }: { inlineForm?: boolea
   return (
     <>
       <section id="psie-priatelstva" className="relative bg-card pb-10 sm:pb-12">
-        <div className="mx-auto max-w-6xl px-4">
+        <SectionAmbientPaws />
+        <div className="relative z-10 mx-auto max-w-6xl px-4">
           <FriendshipFeature embedded />
           {!inlineForm && <div className="mt-7 flex justify-center">
             <button type="button" className="btn-coral" onClick={() => {
@@ -207,7 +208,7 @@ export function FriendshipInterest({ inlineForm = false }: { inlineForm?: boolea
               setOpen(true);
             }}>Toto hľadám pre svojho psíka</button>
           </div>}
-          {inlineForm && <div id="zaujem-po-priatelstvach" className="mx-auto mt-8 max-w-2xl rounded-4xl bg-card p-6 shadow-card sm:p-8">
+          {inlineForm && <div id="zaujem-po-priatelstvach" className="form-liquid-surface mx-auto mt-8 max-w-2xl rounded-4xl bg-card p-6 shadow-card sm:p-8">
             <h3 className="text-center text-2xl text-forest">Čo hľadáte pre svojho psíka?</h3>
             <p className="mt-2 mb-5 text-center text-sm text-muted-foreground">Vyplňte krátky nezáväzný formulár. Ozveme sa vám.</p>
             <LeadStepForm questionInHeading trackingSource="home_friendship_interest_20261028" />

@@ -24,7 +24,7 @@ export function Contact() {
           </p>
         </div>
 
-        <div className="mt-8 rounded-4xl bg-card p-6 shadow-soft sm:p-9">
+        <div className="form-liquid-surface mt-8 rounded-4xl bg-card p-6 shadow-soft sm:p-9">
           <LongForm />
         </div>
 
@@ -47,7 +47,7 @@ export function EnglishContact({ onEnquire }: { onEnquire?: () => void } = {}) {
           </p>
         </div>
 
-        <div className="mt-8 rounded-4xl bg-card p-6 shadow-soft sm:p-9">
+        <div className="form-liquid-surface mt-8 rounded-4xl bg-card p-6 shadow-soft sm:p-9">
           {onEnquire ? (
             <>
               <div className="lg:hidden">
