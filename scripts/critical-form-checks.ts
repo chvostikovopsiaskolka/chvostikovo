@@ -337,11 +337,14 @@ for (const value of allowedStagedInterests) {
   const payload = buildDbPayload(shortSchema.parse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: value }));
   assert(payload.interest_reason === value, "New interest must be stored verbatim");
 }
+const inquiryDogFields=readFileSync(new URL("../src/components/site/InquiryDogFields.tsx", import.meta.url), "utf8");
 assert(stagedLeadSource.includes('const [breed, setBreed] = useState(puppyCheck?.dog_breed ?? "")') &&
-  stagedLeadSource.includes('name="plemeno"') &&
+  stagedLeadSource.includes('<InquiryDogFields') &&
   stagedLeadSource.includes("dog_breed: breedValue || undefined") &&
+  inquiryDogFields.includes('name="plemeno"') && inquiryDogFields.includes('required className="field') &&
+  inquiryDogFields.includes('name="pohlavie"') && inquiryDogFields.includes('Sex (optional)') &&
   !stagedLeadSource.includes("showBreed") && !stagedLeadSource.includes("ariaPreview && selectedInterest"),
-  "One optional, editable breed field must appear in every SK enquiry including puppy contact, keeping the attached puppy breed in sync.");
+  "The shared SK/EN short enquiry must require breed, keep optional dog sex and retain the puppy breed handoff.");
 const releasedLeadRoute = readFileSync(new URL("../src/routes/psia-skolka-kosice.tsx", import.meta.url), "utf8");
 assert(releasedLeadRoute.includes('component: AriaPreviewPage') &&
   !releasedLeadRoute.includes('component: LeadLandingPage') &&
@@ -364,10 +367,12 @@ assert(stagedLeadSource.includes("zaujem: selectedInterest") &&
   stagedLeadSource.includes("LeadPhoneReceipt"),
   "All lead routes must preserve consent, CRM interest, successful-conversion tracking and receipt");
 assert(stagedLeadSource.includes('name="meno"') &&
-  stagedLeadSource.includes('name="plemeno"') &&
+  stagedLeadSource.includes('<InquiryDogFields') &&
+  inquiryDogFields.includes('name="plemeno"') &&
+  inquiryDogFields.includes('name="pohlavie"') &&
   stagedLeadSource.includes('name="email"') &&
   stagedLeadSource.includes("<PhoneField"),
-  "Paid and homepage enquiry must expose required contact and optional breed");
+  "Paid and homepage enquiry must expose contact, required breed and optional sex");
 assert(stagedLeadSource.includes('value={option.value} required={step === 1}') &&
   !stagedLeadSource.includes('value={option.value} required aria-label'),
   "When puppy eligibility preselects a fourth allowlisted interest, hidden native radio requirements must not block a valid contact submission");
@@ -458,3 +463,16 @@ await import("./application-dog-details-checks");
 await import("./application-health-fields-checks");
 
 console.log("Critical form checks passed.");
+
+const leadWithSex=buildDbPayload(shortSchema.parse({
+ typ:"informacie",consent:true,meno:"Test",telefon:phone,
+ zaujem:"Mám záujem využívať škôlku pravidelne",plemeno:"Labrador",pohlavie:"female",
+}));
+assert(leadWithSex.dog_breed==="Labrador" && leadWithSex.dog_sex==="female" &&
+ leadWithSex.raw_payload["Pohlavie psíka"]==="Suka",
+ "Optional dog sex must be saved as a CRM column and human-readable history.");
+const leadWithoutSex=buildDbPayload(shortSchema.parse({
+ typ:"informacie",consent:true,meno:"Test",telefon:phone,
+ zaujem:"Chcem sa informovať o škôlke",plemeno:"Vlkodav",
+}));
+assert(!("dog_sex" in leadWithoutSex),"Unselected sex must remain optional.");
