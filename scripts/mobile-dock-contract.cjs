@@ -252,9 +252,9 @@ assert(!productContact.includes('trackMarketingInteraction') &&
        !productContact.includes('custom_audience'),
        "Product delivery contact information must not be copied to advertising audiences");
 
-// New explicit paid LEAD contract: orange hero stays; pink is inside the
-// originally existing form; a single rose CTA opens the inline section,
-// so the moving gallery follows Hero when the form is not yet opened.
+// Paid LEAD contract: orange editorial box stays. Muted amber glass CTA
+// reveals the very SAME liquid/crown card as the lower visit form; the
+// gallery stays directly below Hero until the hidden inline form is opened.
 const paidLeadCurrent = read("src/routes/test-aria.tsx");
 const ariaGuideCurrent = read("src/components/site/AriaLeadAssistant.tsx");
 const storyCurrent = read("src/components/site/Story.tsx");
@@ -263,21 +263,47 @@ assert(paidLeadCurrent.includes('data-aria-lead-hero-cta') &&
        paidLeadCurrent.includes('hidden={isLiveLead && !leadHeroFormOpen}') &&
        paidLeadCurrent.includes('lead_landing_hero_orange_cta') &&
        paidLeadCurrent.includes('data-lead-inline-card') &&
-       paidLeadCurrent.includes('className="rounded-4xl bg-white px-2 py-3') &&
+       paidLeadCurrent.includes('data-aria-hero-form-dogs') &&
+       paidLeadCurrent.includes('max-w-[294px]') &&
+       paidLeadCurrent.includes('ariaPreview={!isLiveLead}') &&
        paidLeadCurrent.includes('space-y-4 text-left') &&
        paidLeadCurrent.includes('<SafetyCertificates homeLayout />') &&
        ariaGuideCurrent.includes('onRevealInlineForm') &&
-       css.includes('.lead-brand-live #aria-hero-form [data-lead-inline-card]'),
-       "Paid lead must reveal existing form on pink CTA or dock while keeping white outer background and left aligned About");
+       css.includes('.lead-brand-live [data-aria-lead-hero-cta]') &&
+       css.includes('.lead-brand-live [data-aria-dock]') &&
+       css.includes('.lead-brand-live [data-aria-service-badge]') &&
+       !css.includes('.lead-brand-live #aria-hero-form [data-lead-inline-card]'),
+       "Paid lead must reuse the same lower liquid form and crown, with narrow amber CTA and frosted Aria dock");
 assert(storyCurrent.includes('max-w-[810px]') &&
        storyCurrent.includes('sm:h-72 lg:h-80') &&
        storyCurrent.includes('lg:px-4 lg:text-xs'),
        "Home desktop team image and all three green badges must share a wider row");
-const crownIndex = paidLeadCurrent.indexOf('data-aria-first-visit-dogs');
-const visitHeadingIndex = paidLeadCurrent.indexOf('Máte záujem o návštevu?');
+// Scope this assertion to the BOTTOM visit form: the hero now intentionally
+// uses the SAME form-liquid-surface class before it. A global indexOf would
+// confuse the two approved, independent form sections.
+const lowerVisitForm = paidLeadCurrent.slice(paidLeadCurrent.indexOf('<section id="aria-first-visit-form"'));
+const crownIndex = lowerVisitForm.indexOf('data-aria-first-visit-dogs');
+const visitHeadingIndex = lowerVisitForm.indexOf('Máte záujem o návštevu?');
 assert(visitHeadingIndex >= 0 && crownIndex > visitHeadingIndex &&
-       crownIndex < paidLeadCurrent.indexOf('className="form-liquid-surface relative z-0 mt-0'),
+       crownIndex < lowerVisitForm.indexOf('className="form-liquid-surface relative z-0 mt-0'),
        "Four dogs must sit on the top of the visit form, below its heading");
+
+// APP-01 responsive-mosaic restoration: reuse existing AriaMosaicGallery,
+// the original eight GALLERY Wix asset IDs and matching 1600px/92Q CDN
+// variants; never duplicate the moving carousel or alter preview's order.
+const ariaMosaicCurrent = read("src/components/site/AriaMosaicGallery.tsx");
+assert(paidLeadCurrent.includes('{isLiveLead && <AriaMosaicGallery paidLead />}') &&
+       paidLeadCurrent.indexOf('{isLiveLead && benefitsSection}') <
+         paidLeadCurrent.indexOf('{isLiveLead && <AriaMosaicGallery paidLead />}') &&
+       paidLeadCurrent.indexOf('{isLiveLead && <AriaMosaicGallery paidLead />}') <
+         paidLeadCurrent.indexOf('<section id="lead-faq"') &&
+       ariaMosaicCurrent.includes('GALLERY.slice(0, 8)') &&
+       ariaMosaicCurrent.includes('w_1600,h_1600,al_c,q_92,enc_auto') &&
+       ariaMosaicCurrent.includes('w_900,h_900,al_c,q_85,enc_auto') &&
+       ariaMosaicCurrent.includes('srcSet=') &&
+       ariaMosaicCurrent.includes('Kde bude váš psík počas dňa?') &&
+       ariaMosaicCurrent.includes('<PhotoLightbox photos={photos}'),
+       "Paid LEAD must reuse the approved eight-photo mosaic below reasons, from higher-quality versions of the same originals");
 
 /* APP-01 23.11: explicitly test reordered LEAD, mobile inline and narrow widths. */
 const paid = read("src/routes/test-aria.tsx");

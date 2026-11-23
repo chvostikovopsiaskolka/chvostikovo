@@ -111,8 +111,8 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.rose !== '#b82e7f' || palette.sage !== '#f3f8ef' ||
                   palette.actionBg !== 'rgb(184, 46, 127)' ||
                   palette.firstVisitAction !== 'rgb(184, 46, 127)' ||
-                  palette.badgeBg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(184, 46, 127)' : 'rgb(255, 164, 20)') ||
-                  palette.badgeFg !== 'rgb(255, 255, 255)' ||
+                  palette.badgeBg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgba(255, 181, 85, 0.38)' : 'rgb(255, 164, 20)') ||
+                  palette.badgeFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(38, 50, 43)' : 'rgb(255, 255, 255)') ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(255, 255, 255)' : 'rgb(23, 28, 24)') ||
@@ -269,7 +269,8 @@ if (!bellaris && brandPreviewCandidate) {
                 const gallery = page.locator('#lead-photo-carousel [data-gesture-track="photos"]');
                 const highlights = gallery.locator(':scope > div:first-child [data-aria-lead-highlight]');
                 if (await gallery.count() !== 1 ||
-                    await page.locator('[data-aria-review-photo], #aria-mosaic').count() !== 0 ||
+                    await page.locator('[data-aria-review-photo]').count() !== 0 ||
+                    await page.locator('#aria-mosaic').count() !== 1 ||
                     await highlights.count() !== 2)
                   throw new Error('Paid LEAD must have one moved moving carousel and two unique teaser highlights');
                 for (const [n, expected] of [['1', 'lead-review-border-collies'], ['2', 'lead-review-retrievers-aussie']]) {
@@ -296,8 +297,27 @@ if (!bellaris && brandPreviewCandidate) {
                   const formNode = document.querySelector('#aria-hero-form');
                   const cta = hero?.querySelector('[data-aria-lead-hero-cta]')?.getBoundingClientRect();
                   const description = hero?.querySelector('[data-aria-hero-description]')?.getBoundingClientRect();
-                  const outer = formNode?.querySelector('div.rounded-4xl');
                   const inner = formNode?.querySelector('[data-lead-inline-card]');
+                  const lower = document.querySelector('#aria-first-visit-form .form-liquid-surface');
+                  const ctaNode = hero?.querySelector('[data-aria-lead-hero-cta]');
+                  const badgeNode = hero?.querySelector('[data-aria-service-badge]');
+                  const dockNode = document.querySelector('[data-aria-dock]');
+                  const liquidProperties = (node) => {
+                    if (!node) return null;
+                    const css = getComputedStyle(node);
+                    return { fill: css.backgroundColor, image: css.backgroundImage,
+                      border: css.borderTopColor, borderWidth: css.borderTopWidth,
+                      shadow: css.boxShadow, filter: css.backdropFilter || css.webkitBackdropFilter };
+                  };
+                  const upperStyle = liquidProperties(inner);
+                  const lowerStyle = liquidProperties(lower);
+                  const liquidGlass = node => {
+                    const css = node ? getComputedStyle(node) : null;
+                    return !!css && css.backgroundColor.startsWith('rgba(') &&
+                      ((css.backdropFilter || '').includes('blur(') || (css.webkitBackdropFilter || '').includes('blur('));
+                  };
+                  const heroDogs = formNode?.querySelector('[data-aria-hero-form-dogs]');
+                  const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                   return {
                     width: window.innerWidth,
                     cardCount: cards.length, highlightCount: highRes.length,
@@ -307,8 +327,18 @@ if (!bellaris && brandPreviewCandidate) {
                     menuBottom: dock?.getBoundingClientRect().bottom,
                     formHidden: !!formNode?.hidden, formTop: form?.top, formContentTop: formContent?.top, formBottom: form?.bottom,
                     ctaTop: cta?.top, ctaBottom: cta?.bottom, descBottom: description?.bottom,
-                    outerPink: !!outer && getComputedStyle(outer).borderTopWidth !== '0px',
-                    pinkInner: !!inner && getComputedStyle(inner).backgroundColor.startsWith('rgba(255, 228, 240'),
+                    matchingFormStyles: !!upperStyle && !!lowerStyle &&
+                      Object.keys(upperStyle).every(k => upperStyle[k] === lowerStyle[k]) &&
+                      !formNode.querySelector('div.rounded-4xl'),
+                    dogCrownMatches: !!heroDogs && !!firstVisitDogs &&
+                      heroDogs.querySelector('img')?.getAttribute('src') === firstVisitDogs.querySelector('img')?.getAttribute('src') &&
+                      !!heroDogs.querySelector('[data-crown-ground]'),
+                    liquidBadge: liquidGlass(badgeNode) && getComputedStyle(badgeNode).color === 'rgb(38, 50, 43)',
+                    liquidCta: liquidGlass(ctaNode) && getComputedStyle(ctaNode).color === 'rgb(38, 50, 43)' &&
+                      cta.width >= 225 && cta.width <= 300 &&
+                      ctaNode.getAttribute('aria-controls') === 'aria-hero-form',
+                    liquidDock: liquidGlass(dockNode) &&
+                      !!dockNode.querySelector('[data-aria-interest-cta]'),
                     fixed: dock ? getComputedStyle(dock).position === 'fixed' && !hero.contains(dock) : false,
                     reviewSpacing: parseFloat(getComputedStyle(hero?.querySelector('[data-aria-lead-review-spacing]')).marginTop),
                   };
@@ -316,16 +346,36 @@ if (!bellaris && brandPreviewCandidate) {
                 if (!layout.fixed || layout.cardCount !== 20 || layout.highlightCount !== 2 ||
                     layout.badgeTop < layout.headingBottom + 50 ||
                     layout.ctaTop < layout.descBottom - 1 || layout.ctaBottom > layout.reviewBottom ||
-                    layout.outerPink || !layout.pinkInner ||
+                    !layout.matchingFormStyles || !layout.dogCrownMatches ||
+                    !layout.liquidBadge || !layout.liquidCta || !layout.liquidDock ||
                     layout.galleryTop < layout.heroBottom - 8 || layout.trackTop < layout.heroBottom - 8 ||
                     (!layout.formHidden && (layout.formTop < layout.reviewBottom + 12 ||
                       layout.galleryTop < layout.formBottom - 8)))
-                  throw new Error('Paid orange hero → rose CTA → conditional form → carousel regressed: ' + JSON.stringify(layout));
+                  throw new Error('Paid orange hero → amber liquid CTA → matching visit form + glass dock regressed: ' + JSON.stringify(layout));
                 if (layout.width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
                   throw new Error('Approved mobile review spacing regressed: ' + JSON.stringify(layout));
                 await highlights.first().scrollIntoViewIfNeeded();
                 await highlights.first().click();
                 await verifyLightbox(true);
+                // Paid LEAD has both the original moving carousel AND the restored
+                // two-column mosaic, which must open higher-res copies of the SAME
+                // eight Wix gallery asset IDs. No new photos or static carousel clones.
+                const mosaic = page.locator('#aria-mosaic');
+                const tiles = mosaic.locator('button[aria-label^="Otvoriť fotografiu"]');
+                if (await tiles.count() !== 8 ||
+                    !await mosaic.getByRole('heading', {name:'Kde bude váš psík počas dňa?'}).count())
+                  throw new Error('Paid LEAD mosaic must restore all eight approved photos below Prečo Chvostíkovo');
+                const photoQuality = await mosaic.evaluate(el => {
+                  const images = [...el.querySelectorAll('button img')];
+                  return images.length === 8 && images.every(img =>
+                    img.getAttribute('src')?.includes('/w_1600,h_1600,al_c,q_92,enc_auto/') &&
+                    img.getAttribute('srcset')?.includes('/w_900,h_900,al_c,q_85,enc_auto/') &&
+                    img.getAttribute('srcset')?.includes('/w_1600,h_1600,al_c,q_92,enc_auto/'));
+                });
+                if (!photoQuality) throw new Error('Restored mosaic must retain original photo IDs with 900w/1600w responsive CDN renditions');
+                await tiles.first().scrollIntoViewIfNeeded();
+                await tiles.first().click();
+                await verifyLightbox();
               } else {
                 const cards = page.locator('[data-aria-review-photo]');
                 if (await cards.count() !== 2) throw new Error('Aria preview must retain two standalone teaser photos');
@@ -754,8 +804,9 @@ if (!bellaris && brandPreviewCandidate) {
                   whiteInfoBackground: getComputedStyle(form).backgroundColor === 'rgb(255, 255, 255)' &&
                     !!form.querySelector('.pointer-events-none.absolute.inset-0') &&
                     (!paidCarousel ||
-                      (getComputedStyle(form.querySelector('div.rounded-4xl')).borderTopWidth === '0px' &&
-                       !!form.querySelector('[data-lead-inline-card]'))),
+                      (!!form.querySelector('[data-lead-inline-card]') &&
+                       !!form.querySelector('[data-aria-hero-form-dogs]') &&
+                       !form.querySelector('div.rounded-4xl'))),
                   groundedFirstVisit: !!document.querySelector('#aria-first-visit-form [data-crown-ground]'),
                   bothDogCrowns: heroDogs.getAttribute('src') === firstVisitDogs.getAttribute('src'),
                   proofLeft: rect.left,
@@ -1677,8 +1728,8 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Preview static mosaic must preserve location and parking chips');
               if (!await page.locator('#lead-pricing [data-lead-best-value]').getByText('Najvýhodnejšie').count())
                 throw new Error('Lead permanentka must retain the orange best-value label');
-              if (await page.locator('#aria-mosaic img').count() !== (url.pathname === '/psia-skolka-kosice/' ? 0 : 8))
-                throw new Error('Static mosaic must remain preview-only; paid LEAD uses moving carousel');
+              if (await page.locator('#aria-mosaic img').count() !== 8)
+                throw new Error('Paid LEAD and preview must both reuse the original eight-photo mosaic');
               // Compare document order rather than screen rects (some sections may be offscreen).
               const hasHeroFormAndCaretakerOrder = await page.evaluate((isPaidLead) => {
                 const reviews = document.getElementById('recenzie');
@@ -1775,14 +1826,25 @@ if (!bellaris && brandPreviewCandidate) {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
                   ? ['recenzie', 'aria-hero-form', 'lead-photo-carousel', 'aria-caretakers', 'aria-about',
                      'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
-                     'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
+                     'aria-mosaic', 'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
                      'lead-benefits', 'lead-pricing', 'lead-requirements', 'lead-faq',
                      'aria-puppy-check', 'lead-first-visit'];
                 const elements = ids.map(id => document.getElementById(id));
                 return elements.every((node, idx) => node && (idx === 0 || !!(elements[idx-1] && elements[idx-1].compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)));
               });
-              if (!hasCorrectOrder) throw new Error('Preview section hierarchy differs from approved mobile layout');
+              if (!hasCorrectOrder) throw new Error('LEAD/preview section hierarchy differs from approved mobile layout');
+              if (url.pathname === '/psia-skolka-kosice/') {
+                const adjacent = await page.evaluate(() => {
+                  const benefits = document.getElementById('lead-benefits');
+                  const mosaic = document.getElementById('aria-mosaic');
+                  const faq = document.getElementById('lead-faq');
+                  return !!benefits && !!mosaic && !!faq &&
+                    benefits.nextElementSibling === mosaic && mosaic.nextElementSibling === faq &&
+                    mosaic.scrollWidth <= document.documentElement.clientWidth + 2;
+                });
+                if (!adjacent) throw new Error('Mosaic must directly follow Prečo Chvostíkovo, without horizontal overflow');
+              }
               if (await page.locator('section video').count()) throw new Error('Video must be omitted from preview');
 
 

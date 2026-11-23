@@ -248,11 +248,11 @@ export function AriaPreviewPage() {
                 <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije si <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
               </p>
               {isLiveLead && (
-                <div className="mx-auto mt-4 flex w-full max-w-[360px] justify-center">
+                <div className="mx-auto mt-4 flex w-full max-w-[294px] justify-center">
                   <button type="button" data-aria-lead-hero-cta aria-controls="aria-hero-form"
                     aria-expanded={leadHeroFormOpen}
                     onClick={() => revealLeadHeroForm("lead_landing_hero_orange_cta")}
-                    className="btn-coral inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full px-2.5 py-2.5 text-center font-display text-[clamp(11px,3.35vw,16px)] font-bold leading-tight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral">
+                    className="inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full border px-2.5 py-2 text-center font-display text-[clamp(11px,3.35vw,15px)] font-bold leading-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">
                     Chcem sa informovať o škôlke
                   </button>
                 </div>
@@ -286,18 +286,17 @@ export function AriaPreviewPage() {
 
         <section id="aria-hero-form" hidden={isLiveLead && !leadHeroFormOpen} className="relative z-10 scroll-mt-24 overflow-hidden bg-white pb-8 pt-4 sm:pb-12 sm:pt-6">
           <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-4xl px-4">
-            <div className="rounded-4xl bg-white px-2 py-3 sm:px-5 sm:py-5">
-              <div className="mx-auto max-w-2xl text-center">
-                <h2 className="section-title mt-2 text-xl sm:text-2xl lg:mt-0">Chceli by ste sa informovať o škôlke?</h2>
-                <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
-                  Radi vám odpovieme na otázky o škôlke.
-                </p>
-              </div>
-
-              <div data-lead-inline-card className="form-liquid-surface mx-auto mt-4 max-w-xl rounded-3xl border border-forest/10 p-5 shadow-card sm:p-6">
-                <LeadStepForm questionInHeading ariaPreview trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
-              </div>
+          {/* Same verified title -> dog crown -> liquid form card layout as the lower visit form. */}
+          <div className="relative z-10 mx-auto max-w-2xl px-4">
+            <h2 className="section-title mt-2 text-center text-xl sm:text-2xl">Chceli by ste sa informovať o škôlke?</h2>
+            <p className="mt-2 text-center text-sm leading-relaxed text-forest/70 sm:text-base">
+              Radi vám odpovieme na otázky o škôlke.
+            </p>
+            <div data-aria-hero-form-dogs className="relative z-10 mx-auto mt-7 mb-[-18px] w-full max-w-sm">
+              <SchoolmatesFormCrown compact groundAccent />
+            </div>
+            <div data-lead-inline-card className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+              <LeadStepForm questionInHeading ariaPreview={!isLiveLead} trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
             </div>
           </div>
         </section>
@@ -443,6 +442,9 @@ export function AriaPreviewPage() {
         <Requirements id="lead-requirements" ariaPreview hideEyebrow />
 
         {isLiveLead && benefitsSection}
+        {/* Restored approved two-column photo mosaic directly below Prečo Chvostíkovo,
+            without replacing or duplicating the original moving Hero carousel. */}
+        {isLiveLead && <AriaMosaicGallery paidLead />}
 
         <section id="lead-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
           <SectionAmbientPaws />
