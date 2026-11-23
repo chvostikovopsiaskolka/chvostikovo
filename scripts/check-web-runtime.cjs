@@ -2408,9 +2408,23 @@ if (!bellaris && brandPreviewCandidate) {
               await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
               for(const id of ['informujte-sa','prva-navsteva-form']) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
-                await inquiry.locator('label').first().click();
+                // APP-01 WebKit: radio labels and React change handlers may settle on
+                // separate frames after responsive resize + smooth anchor scroll.
+                // Assert the actual radio selection before expecting step 2;
+                // never accept a click alone as evidence of a completed transition.
+                const firstChoice=inquiry.locator('label:has(input[name="zaujem"])').first();
+                await firstChoice.scrollIntoViewIfNeeded();
+                await firstChoice.click();
+                const radio=firstChoice.locator('input[name="zaujem"]');
+                if(!await radio.isChecked()) await radio.check({force:true});
+                await page.waitForFunction(targetId => {
+                  const form=document.querySelector('#'+targetId+' [data-lead-step-form]');
+                  const next=[...form?.querySelectorAll('button')??[]].find(x=>x.textContent?.trim()==='Pokračovať');
+                  return !!form?.querySelector('input[name="zaujem"]:checked') && !!next && !next.disabled;
+                }, id, {timeout:5000});
                 await inquiry.getByRole('button',{name:'Pokračovať',exact:true}).click();
-                await inquiry.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000}).catch(() => { throw new Error('Inline contact step failed: '+id); });
+                await inquiry.locator('[role="progressbar"][aria-valuenow="2"]').waitFor({state:'attached',timeout:7000}).catch(() => { throw new Error('Inline contact step did not advance: '+id); });
+                await inquiry.locator('input[name="meno"]').waitFor({state:'visible',timeout:7000}).catch(() => { throw new Error('Inline contact step not visible: '+id); });
                 await inquiry.getByRole('button',{name:'Späť',exact:true}).click();
               }
               await page.locator('#home-friendship-interest').click();
