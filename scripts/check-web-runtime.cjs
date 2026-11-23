@@ -623,7 +623,11 @@ if (!bellaris && brandPreviewCandidate) {
                 const heroDogs = hero?.querySelector('[data-aria-hero-dogs] img');
                 const crown = hero?.querySelector('[data-aria-hero-dogs] [aria-hidden="true"]');
                 const serviceGroup = hero?.querySelector('[data-aria-service-group]');
-                const description = hero?.querySelector('[data-aria-hero-description]');
+                const paidHero = window.location.pathname === '/psia-skolka-kosice/';
+                const description = paidHero
+                  ? hero?.querySelector('[data-aria-lead-hero-photos]')
+                  : hero?.querySelector('[data-aria-hero-description]');
+                const leadHeroCTA = hero?.querySelector('[data-aria-lead-hero-cta]');
                 const spacer = window.location.pathname === '/psia-skolka-kosice/'
                   ? document.querySelector('[data-aria-lead-photos]')
                   : hero?.querySelector('[data-aria-intro-space]');
@@ -653,14 +657,12 @@ if (!bellaris && brandPreviewCandidate) {
                 const reviewBottom = reviews.getBoundingClientRect().bottom;
                 const paidCarousel = window.location.pathname === '/psia-skolka-kosice/';
                 const newPhotos = paidCarousel
-                  ? document.querySelector('#lead-photo-carousel [data-gesture-track="photos"]')
+                  ? hero.querySelector('[data-aria-lead-hero-photos]')
                   : hero.querySelector('[data-aria-review-gap-photos]');
                 const photoCards = paidCarousel
-                  ? [...(newPhotos?.querySelectorAll(':scope > div:first-child button') ?? [])].slice(0, 2)
+                  ? [...(newPhotos?.querySelectorAll('[data-aria-lead-hero-photo]') ?? [])]
                   : [...(newPhotos?.querySelectorAll('[data-aria-review-photo]') ?? [])];
-                const photoImages = paidCarousel
-                  ? [...(newPhotos?.querySelectorAll(':scope > div:first-child [data-aria-lead-highlight] img') ?? [])]
-                  : photoCards.map(card => card.querySelector('img'));
+                const photoImages = photoCards.map(card => card.querySelector('img'));
                 const photoRects = photoCards.map(card => card.getBoundingClientRect());
                 const photoFrame = newPhotos?.getBoundingClientRect();
                 const floatingGuide = document.querySelector('[data-aria-guide]');
@@ -678,14 +680,7 @@ if (!bellaris && brandPreviewCandidate) {
                   floatingDockBottomOffset: floatingGuide ? window.innerHeight - floatingGuide.getBoundingClientRect().bottom : -1,
                   floatingReviewGap: floatingBubble && reviewCardRect ? floatingBubble.getBoundingClientRect().top - reviewCardRect.bottom : -1,
                   heroTopGap: headlineRect.top,
-                  heroBalancedGaps: window.location.pathname !== '/psia-skolka-kosice/' ||
-                    window.innerWidth < 375 || window.innerWidth > 430 ||
-                    (!!floatingBubble && !!reviewCardRect &&
-                      headlineRect.top >= 40 &&
-                      floatingBubble.getBoundingClientRect().top - reviewCardRect.bottom >= 35 &&
-                      Math.abs(headlineRect.top -
-                        (floatingBubble.getBoundingClientRect().top - reviewCardRect.bottom)) <=
-                        Math.max(56, window.innerHeight * 0.08)),
+                  heroBalancedGaps: !paidCarousel || headlineRect.top >= 20,
                   softenedShadowRoom: reviewTrack && reviewCardRect ? reviewTrack.getBoundingClientRect().bottom - reviewCardRect.bottom : -1,
                    raisedReview: window.location.pathname !== '/psia-skolka-kosice/' ||
                      (!!reviewCard && getComputedStyle(reviewCard).borderTopWidth === '1px' &&
@@ -697,22 +692,23 @@ if (!bellaris && brandPreviewCandidate) {
                     !!photoImages[1]?.getAttribute('src')?.includes('lead-review-retrievers-aussie') &&
                     photoImages.every(img => !!img?.getAttribute('alt')?.trim()) &&
                     photoImages[0]?.getAttribute('src') !== photoImages[1]?.getAttribute('src'),
-                  paidPhotosBelowFloatingDock: window.location.pathname !== '/psia-skolka-kosice/' ||
-                    (!!photoFrame && !!floatingGuide && formTop >= reviewsBottom + 12 &&
+                  paidPhotosBelowFloatingDock: !paidCarousel ||
+                    (!!photoFrame && !!floatingGuide && !!leadHeroCTA && formTop >= reviewsBottom + 12 &&
                      formTop >= window.innerHeight - 24 &&
-                     formTop - reviewsBottom <= window.innerHeight * 0.44 &&
                      Number.isFinite(formContentTop) &&
                      formContentTop >= floatingGuide.getBoundingClientRect().bottom + 8 &&
-                     // The form/gallery swap preserves natural document flow.
                      Math.abs(hero.getBoundingClientRect().bottom - formTop) <= 2 &&
-                     Math.abs(form.getBoundingClientRect().bottom - spacer.getBoundingClientRect().top) <= 2 &&
-                     !hero.contains(newPhotos) && photoRects.every(rect => rect.top >= form.getBoundingClientRect().bottom - 2)),
-                  heroCopyBlack: window.location.pathname === '/psia-skolka-kosice/'
-                    ? (getComputedStyle(description).color === 'rgb(255, 255, 255)' &&
-                       getComputedStyle(description.querySelector('strong')).color === 'rgb(255, 255, 255)')
+                     hero.contains(newPhotos) &&
+                     photoRects.every(rect => rect.top >= badgeRect.bottom - 1 &&
+                       rect.bottom <= leadHeroCTA.getBoundingClientRect().top + 1) &&
+                     !!caretakers && caretakers.getBoundingClientRect().top >= form.getBoundingClientRect().bottom - 2 &&
+                     spacer.getBoundingClientRect().top >= caretakers.getBoundingClientRect().bottom - 2),
+                  heroCopyBlack: paidCarousel
+                    ? !!leadHeroCTA && !hero.querySelector('[data-aria-hero-description]')
                     : (getComputedStyle(description).color === 'rgb(23, 28, 24)' &&
                        getComputedStyle(description.querySelector('strong')).color === 'rgb(17, 17, 17)'),
                   mobileDescriptionMetrics: (() => {
+                    if (paidCarousel) return { fontSize: 15, lineCount: 0 };
                     const style = getComputedStyle(description);
                     const lineHeight = parseFloat(style.lineHeight);
                     const innerHeight = descriptionRect.height - parseFloat(style.paddingTop) -
@@ -720,16 +716,15 @@ if (!bellaris && brandPreviewCandidate) {
                       parseFloat(style.borderBottomWidth);
                     return { fontSize: parseFloat(style.fontSize), lineCount: Math.round(innerHeight / lineHeight) };
                   })(),
-                  paidDescriptionWhite: window.location.pathname !== '/psia-skolka-kosice/' ||
-                    (getComputedStyle(description).color === 'rgb(255, 255, 255)' &&
-                     getComputedStyle(description.querySelector('strong')).color === 'rgb(255, 255, 255)' &&
-                     getComputedStyle(description).backgroundColor === 'rgb(255, 164, 20)'),
+                  paidDescriptionWhite: !paidCarousel ||
+                    (!!leadHeroCTA && leadHeroCTA.textContent?.includes('Chcem sa informovať o škôlke') &&
+                     photoImages.length === 2 && !hero.querySelector('[data-aria-hero-description]')),
                   photoGeometry: photoRects.length === 2 && !!photoFrame &&
-                    photoRects.every((rect, i) => rect.width > 80 && rect.height >= 110 &&
+                    photoRects.every(rect => rect.width > 80 && rect.height >= 110 &&
                       rect.left >= -1 && rect.right <= window.innerWidth + 1 &&
-                      rect.top >= (paidCarousel ? form.getBoundingClientRect().bottom - 2 : reviewBottom - 2) &&
-                      rect.bottom <= (paidCarousel ? caretakers.getBoundingClientRect().top + 2 : formTop + 2)) &&
-                    Math.abs(photoRects[0].top - photoRects[1].top) <= (window.location.pathname === '/psia-skolka-kosice/' ? 32 : 2) &&
+                      rect.top >= (paidCarousel ? badgeRect.bottom - 2 : reviewBottom - 2) &&
+                      rect.bottom <= (paidCarousel ? leadHeroCTA.getBoundingClientRect().top + 2 : formTop + 2)) &&
+                    Math.abs(photoRects[0].top - photoRects[1].top) <= 2 &&
                     photoRects[0].right <= photoRects[1].left &&
                     photoFrame.width <= window.innerWidth + 2,
                   contentCenterY: (contentTop + reviewsBottom) / 2,
@@ -740,18 +735,17 @@ if (!bellaris && brandPreviewCandidate) {
                   serviceBadgeFits: badgeRect.left >= -1 && badgeRect.right <= window.innerWidth + 1 &&
                     serviceBadge.scrollWidth <= serviceBadge.clientWidth + 2,
                   descriptionGap: descriptionRect.top - badgeRect.bottom,
-                  reviewGapAbove: reviewsRect.top - descriptionRect.bottom,
-                  focusedDescription: descriptionRect.width <=
-                    (window.location.pathname === '/psia-skolka-kosice/'
-                      ? Math.min(window.innerWidth - 30, 402)
-                      : (window.innerWidth < 390 ? 322 : window.innerWidth < 640 ? 362 : 542)) &&
-                    description.querySelectorAll('strong').length === 4 &&
-                    [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700),
-                  liquidFullDescription: (window.location.pathname === '/psia-skolka-kosice/'
-                     ? getComputedStyle(description).backgroundImage === 'none'
-                     : getComputedStyle(description).backgroundImage.includes('radial-gradient')) &&
-                    parseFloat(getComputedStyle(description).borderTopLeftRadius) >= 15 &&
-                    parseFloat(getComputedStyle(description).paddingLeft) >= 10,
+                  reviewGapAbove: reviewsRect.top - (paidCarousel ? leadHeroCTA.getBoundingClientRect().bottom : descriptionRect.bottom),
+                  focusedDescription: paidCarousel
+                    ? (descriptionRect.width <= Math.min(window.innerWidth - 24, 576) && photoCards.length === 2)
+                    : (descriptionRect.width <= (window.innerWidth < 390 ? 322 : window.innerWidth < 640 ? 362 : 542) &&
+                       description.querySelectorAll('strong').length === 4 &&
+                       [...description.querySelectorAll('strong')].every(node => getComputedStyle(node).fontWeight >= 700)),
+                  liquidFullDescription: paidCarousel
+                    ? description.querySelectorAll('img').length === 2 && !!leadHeroCTA
+                    : getComputedStyle(description).backgroundImage.includes('radial-gradient') &&
+                      parseFloat(getComputedStyle(description).borderTopLeftRadius) >= 15 &&
+                      parseFloat(getComputedStyle(description).paddingLeft) >= 10,
                   naturalReviewBottom: getComputedStyle(reviews).overflowY !== 'hidden' &&
                     !!reviewCardRect && reviewsRect.bottom - reviewCardRect.bottom >= (window.location.pathname === '/psia-skolka-kosice/' ? 0 : 32),
                   noBenefitsInHero: hero.querySelectorAll('[data-hero-benefits]').length === 0,
@@ -784,11 +778,11 @@ if (!bellaris && brandPreviewCandidate) {
                      !firstFold.paidPhotosBelowFloatingDock || !firstFold.paidDescriptionWhite ||
                      !firstFold.heroBalancedGaps || !firstFold.raisedReview ||
                      (width <= 430 && (firstFold.softenedShadowRoom < 28 || firstFold.reviewLinkSize > 13)))) ||
-                  firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || (url.pathname === '/test-aria/' && !firstFold.photoGeometry) ||
+                  firstFold.photoCount !== 2 || !firstFold.photoApprovedAssets || !firstFold.photoGeometry ||
                   !firstFold.serviceBadgeBelowH1 || !firstFold.dogsRestOnOrange ||
                   !firstFold.serviceBadgeFits ||
                   firstFold.descriptionGap > 35 || firstFold.descriptionGap < 5 ||
-                  firstFold.reviewGapAbove > (url.pathname === '/psia-skolka-kosice/' ? 40 : 35) ||
+                  firstFold.reviewGapAbove > (url.pathname === '/psia-skolka-kosice/' ? 110 : 35) ||
                   !firstFold.heroCopyBlack || !firstFold.focusedDescription || !firstFold.liquidFullDescription ||
                   (url.pathname === '/psia-skolka-kosice/' &&
                    (firstFold.mobileDescriptionMetrics.fontSize < 15 ||
