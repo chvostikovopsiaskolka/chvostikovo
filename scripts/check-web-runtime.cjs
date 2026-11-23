@@ -111,8 +111,8 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.rose !== '#b82e7f' || palette.sage !== '#f3f8ef' ||
                   palette.actionBg !== 'rgb(184, 46, 127)' ||
                   palette.firstVisitAction !== 'rgb(184, 46, 127)' ||
-                  palette.badgeBg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(184, 46, 127)' : 'rgb(255, 164, 20)') ||
-                  palette.badgeFg !== 'rgb(255, 255, 255)' ||
+                  palette.badgeBg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgba(255, 181, 85, 0.38)' : 'rgb(255, 164, 20)') ||
+                  palette.badgeFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(38, 50, 43)' : 'rgb(255, 255, 255)') ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
                   palette.heroCopyFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(255, 255, 255)' : 'rgb(23, 28, 24)') ||
@@ -296,8 +296,27 @@ if (!bellaris && brandPreviewCandidate) {
                   const formNode = document.querySelector('#aria-hero-form');
                   const cta = hero?.querySelector('[data-aria-lead-hero-cta]')?.getBoundingClientRect();
                   const description = hero?.querySelector('[data-aria-hero-description]')?.getBoundingClientRect();
-                  const outer = formNode?.querySelector('div.rounded-4xl');
                   const inner = formNode?.querySelector('[data-lead-inline-card]');
+                  const lower = document.querySelector('#aria-first-visit-form .form-liquid-surface');
+                  const ctaNode = hero?.querySelector('[data-aria-lead-hero-cta]');
+                  const badgeNode = hero?.querySelector('[data-aria-service-badge]');
+                  const dockNode = document.querySelector('[data-aria-dock]');
+                  const liquidProperties = (node) => {
+                    if (!node) return null;
+                    const css = getComputedStyle(node);
+                    return { fill: css.backgroundColor, image: css.backgroundImage,
+                      border: css.borderTopColor, borderWidth: css.borderTopWidth,
+                      shadow: css.boxShadow, filter: css.backdropFilter || css.webkitBackdropFilter };
+                  };
+                  const upperStyle = liquidProperties(inner);
+                  const lowerStyle = liquidProperties(lower);
+                  const liquidGlass = node => {
+                    const css = node ? getComputedStyle(node) : null;
+                    return !!css && css.backgroundColor.startsWith('rgba(') &&
+                      (css.backdropFilter.includes('blur(') || css.webkitBackdropFilter?.includes('blur('));
+                  };
+                  const heroDogs = formNode?.querySelector('[data-aria-hero-form-dogs]');
+                  const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                   return {
                     width: window.innerWidth,
                     cardCount: cards.length, highlightCount: highRes.length,
@@ -307,8 +326,18 @@ if (!bellaris && brandPreviewCandidate) {
                     menuBottom: dock?.getBoundingClientRect().bottom,
                     formHidden: !!formNode?.hidden, formTop: form?.top, formContentTop: formContent?.top, formBottom: form?.bottom,
                     ctaTop: cta?.top, ctaBottom: cta?.bottom, descBottom: description?.bottom,
-                    outerPink: !!outer && getComputedStyle(outer).borderTopWidth !== '0px',
-                    pinkInner: !!inner && getComputedStyle(inner).backgroundColor.startsWith('rgba(255, 228, 240'),
+                    matchingFormStyles: !!upperStyle && !!lowerStyle &&
+                      Object.keys(upperStyle).every(k => upperStyle[k] === lowerStyle[k]) &&
+                      !formNode.querySelector('div.rounded-4xl'),
+                    dogCrownMatches: !!heroDogs && !!firstVisitDogs &&
+                      heroDogs.querySelector('img')?.getAttribute('src') === firstVisitDogs.querySelector('img')?.getAttribute('src') &&
+                      !!heroDogs.querySelector('[data-crown-ground]'),
+                    liquidBadge: liquidGlass(badgeNode) && getComputedStyle(badgeNode).color === 'rgb(38, 50, 43)',
+                    liquidCta: liquidGlass(ctaNode) && getComputedStyle(ctaNode).color === 'rgb(38, 50, 43)' &&
+                      cta.width >= 225 && cta.width <= 300 &&
+                      ctaNode.getAttribute('aria-controls') === 'aria-hero-form',
+                    liquidDock: liquidGlass(dockNode) &&
+                      !!dockNode.querySelector('[data-aria-interest-cta]'),
                     fixed: dock ? getComputedStyle(dock).position === 'fixed' && !hero.contains(dock) : false,
                     reviewSpacing: parseFloat(getComputedStyle(hero?.querySelector('[data-aria-lead-review-spacing]')).marginTop),
                   };
@@ -316,11 +345,12 @@ if (!bellaris && brandPreviewCandidate) {
                 if (!layout.fixed || layout.cardCount !== 20 || layout.highlightCount !== 2 ||
                     layout.badgeTop < layout.headingBottom + 50 ||
                     layout.ctaTop < layout.descBottom - 1 || layout.ctaBottom > layout.reviewBottom ||
-                    layout.outerPink || !layout.pinkInner ||
+                    !layout.matchingFormStyles || !layout.dogCrownMatches ||
+                    !layout.liquidBadge || !layout.liquidCta || !layout.liquidDock ||
                     layout.galleryTop < layout.heroBottom - 8 || layout.trackTop < layout.heroBottom - 8 ||
                     (!layout.formHidden && (layout.formTop < layout.reviewBottom + 12 ||
                       layout.galleryTop < layout.formBottom - 8)))
-                  throw new Error('Paid orange hero → rose CTA → conditional form → carousel regressed: ' + JSON.stringify(layout));
+                  throw new Error('Paid orange hero → amber liquid CTA → matching visit form + glass dock regressed: ' + JSON.stringify(layout));
                 if (layout.width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
                   throw new Error('Approved mobile review spacing regressed: ' + JSON.stringify(layout));
                 await highlights.first().scrollIntoViewIfNeeded();
@@ -754,8 +784,9 @@ if (!bellaris && brandPreviewCandidate) {
                   whiteInfoBackground: getComputedStyle(form).backgroundColor === 'rgb(255, 255, 255)' &&
                     !!form.querySelector('.pointer-events-none.absolute.inset-0') &&
                     (!paidCarousel ||
-                      (getComputedStyle(form.querySelector('div.rounded-4xl')).borderTopWidth === '0px' &&
-                       !!form.querySelector('[data-lead-inline-card]'))),
+                      (!!form.querySelector('[data-lead-inline-card]') &&
+                       !!form.querySelector('[data-aria-hero-form-dogs]') &&
+                       !form.querySelector('div.rounded-4xl'))),
                   groundedFirstVisit: !!document.querySelector('#aria-first-visit-form [data-crown-ground]'),
                   bothDogCrowns: heroDogs.getAttribute('src') === firstVisitDogs.getAttribute('src'),
                   proofLeft: rect.left,
