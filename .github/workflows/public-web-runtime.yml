@@ -35,10 +35,13 @@ jobs:
         site: ["chvostikovo"]
     steps:
       - uses: actions/checkout@v4
-      - name: Provision minimal utilities in Playwright image
+      - name: Verify preinstalled preview utilities
+        # Official Playwright image already ships browser binaries and Ubuntu tools.
+        # Avoid network-dependent apt update before a UI regression run.
         run: |
-          apt-get update -qq
-          apt-get install -y --no-install-recommends unzip python3 curl
+          command -v python3
+          command -v curl
+          node --version
       - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-node@v4
         with:
