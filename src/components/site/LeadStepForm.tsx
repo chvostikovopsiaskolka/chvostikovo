@@ -45,9 +45,10 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading || step !== 2 || !selectedInterest) return;
-    const breedValue = breed.trim();
-    if (!breedValue) { setError("Vyplňte plemeno psíka."); return; }
     const form = event.currentTarget;
+    // Read the actual form value: iOS/browser autofill can change it without React onChange.
+    const breedValue = String(new FormData(form).get("plemeno") || "").trim();
+    if (!breedValue) { setError("Vyplňte plemeno psíka."); return; }
     const attemptId = startFormAttempt(trackingSource);
     progress.markAttempt();
     setLoading(true);

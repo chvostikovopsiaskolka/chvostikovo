@@ -476,3 +476,9 @@ const leadWithoutSex=buildDbPayload(shortSchema.parse({
  zaujem:"Chcem sa informovať o škôlke",plemeno:"Vlkodav",
 }));
 assert(!("dog_sex" in leadWithoutSex),"Unselected sex must remain optional.");
+
+const currentBackend=readFileSync(new URL("../supabase/functions/web-form-submit/index.ts",import.meta.url),"utf8");
+assert(currentBackend.includes("const leadSex = sex(input.dog_sex ?? input.pohlavie)") &&
+ currentBackend.includes("if (leadSex) payload.dog_sex = leadSex") &&
+ currentBackend.includes("payload.dog_sex === 'male' ? 'Pes' : 'Suka'"),
+ "Backend must normalize and store optional enquiry sex with operator notification without widening interest allowlist.");
