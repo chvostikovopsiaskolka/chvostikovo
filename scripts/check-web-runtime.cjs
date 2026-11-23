@@ -13,6 +13,8 @@ const results = [];
 const failures = [];
 
 async function assertLeadContactIntro(form) {
+  // Wait for the real React/CSS transition, especially on Safari WebKit.
+  await form.getByRole('heading',{name:'Kontaktné údaje',exact:true}).waitFor({state:'visible',timeout:5000});
   if (await form.getAttribute('data-lead-step') !== '2' ||
       !await form.getByRole('heading', {name:'Kontaktné údaje', exact:true}).isVisible())
     throw new Error('Shared contact step must have its concise heading');
@@ -2779,6 +2781,7 @@ if (!bellaris && brandPreviewCandidate) {
               }
               await assertLeadContactIntro(form);
               await form.getByRole('button',{name:'Späť',exact:true}).click();
+              await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible',timeout:5000});
               if(await form.getAttribute('data-lead-step')!=='1')throw new Error('Shared form back failed');
               const restored=await form.evaluate(el=>{const shell=el.closest('[data-lead-form-shell]');return [...shell.querySelectorAll(':scope > [data-lead-form-intro]')].every(node=>getComputedStyle(node).display!=='none');});
               if(!restored)throw new Error('Shared introduction not restored on back');
