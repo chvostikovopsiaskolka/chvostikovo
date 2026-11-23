@@ -258,10 +258,13 @@ const ariaAssistant = read("src/components/site/AriaLeadAssistant.tsx");
 assert(paid.indexOf('<section id="aria-hero-form"') < paid.indexOf('id="lead-photo-carousel"') &&
        paid.indexOf('id="lead-photo-carousel"') < paid.indexOf('<section id="aria-caretakers"'),
        "Paid LEAD must swap existing inline form and moving gallery without duplicates");
-assert(hero.includes('data-home-hero-inline-mobile') &&
-       hero.includes('trackingSource="home_hero_interest_mobile" questionInHeading compact') &&
-       !hero.includes("openInterest("),
-       "Main mobile Hero must have shared 2-step form rather than old CTA/modal");
+assert(hero.includes('data-home-hero-photos') &&
+       hero.includes('data-home-hero-interest-cta') &&
+       hero.includes('LEAD_REVIEW_GAP_PHOTOS') &&
+       !hero.includes('data-home-hero-inline-mobile') &&
+       read('src/routes/index.tsx').includes('data-home-hero-revealed-form') &&
+       read('src/routes/index.tsx').includes('trackingSource="home_hero_interest_mobile" questionInHeading compact'),
+       "Mobile home Hero must show two approved photos and reveal the shared 2-step form after reviews");
 assert(leadContact.includes("compact = false") && leadContact.includes('min-h-[72px] py-2 sm:min-h-24'),
        "Only explicitly compact forms may shorten choices, without changing transport");
 assert(ariaAssistant.includes('data-aria-interest-cta aria-label="Mám záujem o škôlku"') &&
@@ -274,9 +277,18 @@ assert(reviewReasons.includes('"row-span-2 min-w-0 sm:row-span-1"') &&
        !reviewReasons.includes('rounded-2xl border-t border-forest/10'),
        "First two reasons alongside video, third full width underneath");
 
-// 23 Nov mobile simplification: one hero headline, no redundant mobile pitch.
+// 23 Nov refined mobile composition: no marketing box or inline form before CTA.
 assert(!hero.includes('home-hero-copy mx-auto mt-5 max-w-xl') && hero.includes('data-home-mobile-orange-phrase'),
   "Mobile hero must skip sales box and highlight the whole 'váš psík zamiluje' phrase");
 for (const path of ["src/components/site/Hero.tsx","src/components/site/InquirySection.tsx","src/components/site/Contact.tsx","src/components/site/FormDialog.tsx","src/routes/test-aria.tsx"]) {
   assert(read(path).includes("form-liquid-surface"), path+" must use the liquid form panel");
 }
+
+// APP-01 mobile Hero media/CTA/review order + existing liquid panels.
+assert(hero.includes('data-home-hero-photo={index + 1}') &&
+       hero.includes('onMobileInquiryOpen()') &&
+       read('src/routes/index.tsx').indexOf('data-home-hero-revealed-form') <
+       read('src/routes/index.tsx').indexOf('<ReviewReasons variant="home"') &&
+       css.includes('.site-brand #top [data-home-hero-photos]') &&
+       css.includes('border: 2px solid rgb(184 46 127 / 32%)'),
+       'Home mobile photo pair, CTA-to-inline-form and liquid border contract');

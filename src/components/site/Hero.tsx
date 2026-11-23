@@ -1,11 +1,19 @@
+import { useState } from "react";
 import { LeadStepForm } from "./LeadStepForm";
+import { LEAD_REVIEW_GAP_PHOTOS } from "./DaycarePhotoCarousel";
+import { PhotoLightbox } from "./PhotoLightbox";
 import { Reviews } from "./Reviews";
 import { PawTrailBackground } from "./PawTrailBackground";
 import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
-export function Hero() {
+export function Hero({ onMobileInquiryOpen, mobileInquiryOpen }: {
+  onMobileInquiryOpen: () => void;
+  mobileInquiryOpen: boolean;
+}) {
+  const [activePhoto, setActivePhoto] = useState<number | null>(null);
+
   return (
     <section id="top" className="hero-safe-top hero-safe-top-main relative overflow-hidden pt-7 pb-0 sm:pt-9 lg:pt-24 lg:pb-1">
       <PawTrailBackground />
@@ -23,13 +31,29 @@ export function Hero() {
             <span data-home-mobile-orange-phrase className="block text-coral-dark">váš psík zamiluje</span>
           </h1>
 
-          <div data-home-hero-inline-mobile className="form-liquid-surface mx-auto mt-5 max-w-xl rounded-[24px] border border-forest/10 bg-card px-3 py-3.5 shadow-card">
-            <h2 className="font-display text-[15px] font-extrabold leading-tight text-forest min-[380px]:text-base">
-              Chceli by ste sa informovať o škôlke?
-            </h2>
-            <div className="mt-2.5">
-              <LeadStepForm trackingSource="home_hero_interest_mobile" questionInHeading compact />
-            </div>
+          {/* Reuse the exact two approved LEAD photos, without new assets. */}
+          <div data-home-hero-photos className="mx-auto mt-6 grid w-full max-w-xl grid-cols-2 gap-2.5 sm:gap-4">
+            {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
+              <button key={photo.src} data-home-hero-photo={index + 1}
+                type="button" aria-label={`Zobraziť fotografiu: ${photo.alt}`}
+                onClick={() => setActivePhoto(index)}
+                className="group relative h-[132px] min-w-0 overflow-hidden rounded-[19px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral min-[390px]:h-[154px] min-[480px]:h-[175px] sm:h-[210px]">
+                <img src={photo.src} alt={photo.alt} width={672} height={896} loading="eager"
+                  decoding="async" fetchPriority={index === 0 ? "high" : "auto"}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none" />
+              </button>
+            ))}
+          </div>
+          <div className="home-hero-cta mx-auto mt-5 flex w-full max-w-[340px] justify-center">
+            <button type="button" data-home-hero-interest-cta aria-controls="home-hero-interest"
+              aria-expanded={mobileInquiryOpen}
+              onClick={() => {
+                trackMarketingInteraction("inquiry_cta", "home_hero_interest_mobile");
+                onMobileInquiryOpen();
+              }}
+              className="hero-cta-primary min-h-[52px] w-full rounded-full font-display text-base font-bold">
+              Mám záujem
+            </button>
           </div>
         </div>
 
@@ -82,6 +106,8 @@ export function Hero() {
         </div>
       </div>
       <div className="relative z-10 mt-11 sm:mt-10 lg:mt-5"><Reviews variant="hero" /></div>
+      <PhotoLightbox photos={LEAD_REVIEW_GAP_PHOTOS} active={activePhoto}
+        onChange={setActivePhoto} onClose={() => setActivePhoto(null)} />
     </section>
   );
 }
