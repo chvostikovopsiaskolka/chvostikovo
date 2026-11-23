@@ -2111,11 +2111,11 @@ if (!bellaris && brandPreviewCandidate) {
                 } else {
                   if ((await primary.innerText()).trim() !== 'Chcem zistiť viac' || await hero.locator('.hero-cta-secondary').count())
                     throw new Error('Desktop home learn-more CTA changed: ' + width);
-                  const centered = await primary.evaluate(el => {
-                    const r=el.getBoundingClientRect(), parent=el.parentElement.getBoundingClientRect();
-                    return Math.abs((r.left+r.right-parent.left-parent.right)/2) <= 2;
+                  const aligned = await primary.evaluate(el => {
+                    const r=el.getBoundingClientRect(), copy=document.querySelector('.home-hero-column .home-hero-copy').getBoundingClientRect();
+                    return Math.abs(r.left-copy.left)<=2;
                   });
-                  if (!centered) throw new Error('Desktop Home CTA not centered: ' + width);
+                  if (!aligned) throw new Error('Desktop Home CTA must align with the copy left edge: ' + width);
                 }
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]:visible').first().isVisible())
                   throw new Error('Desktop home guided form missing');
@@ -2145,7 +2145,7 @@ if (!bellaris && brandPreviewCandidate) {
                     reviewsInHero:document.getElementById('top').contains(document.getElementById('recenzie')),
                     tickerAbsent:!document.querySelector('main .info-ticker-track'),
                     benefitsMoved:!!photo && !!benefits && benefits.getBoundingClientRect().top>=photo.getBoundingClientRect().bottom && !document.querySelector('#top [data-hero-benefits]'),
-                    forms:['informujte-sa','zaujem-po-priatelstvach','prva-navsteva-form'].every(id=>document.getElementById(id)?.querySelector('[data-lead-step-form]')),
+                    forms:['informujte-sa','prva-navsteva-form'].every(id=>document.getElementById(id)?.querySelector('[data-lead-step-form]')),
                     uniqueFields:inputs.length===new Set(inputs).size,
                     cutout:!!cutout && cutout.complete && cutout.naturalWidth>0,
                     palette:document.body.classList.contains('site-brand') && getComputedStyle(document.querySelector('#top h1')).color==='rgb(184, 46, 127)',
@@ -2193,6 +2193,9 @@ if (!bellaris && brandPreviewCandidate) {
                       return !!third && getComputedStyle(third).borderTopWidth==='0px';
                     })(),
                     desktopCopy:innerWidth<1024 || (Math.abs(copy.right-lineRange.getBoundingClientRect().right)<9 && !!document.querySelector('.home-hero-column .home-hero-copy br')),
+                    desktopPhrase:innerWidth<1024 || (()=>{const el=document.querySelector('[data-home-hero-final-phrase]');if(!el)return false;const r=document.createRange();r.selectNodeContents(el);return r.getClientRects().length===1&&r.getBoundingClientRect().right<=copy.right;})(),
+                    friendshipModal:!!document.getElementById('home-friendship-interest')&&!document.getElementById('zaujem-po-priatelstvach'),
+                    freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
                     pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
                     passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
                     taxiBelowPass:!!taxi && !!taxi.closest('[data-home-prices]') && taxi.getBoundingClientRect().top>=cards[1].bottom &&
@@ -2215,7 +2218,13 @@ if (!bellaris && brandPreviewCandidate) {
                         const icon=heading?.querySelector('svg');
                         const panel=document.querySelector('#o-nas [data-safety-certificates] > div');
                         const text=aboutText?.getBoundingClientRect(), box=panel?.getBoundingClientRect();
-                        return !!heading && !!icon && !!text && !!box &&
+                        const label=heading?.querySelector('[data-safety-heading-copy]');
+                        const explanation=panel?.querySelector('[data-safety-copy]')?.getBoundingClientRect();
+                        const diplomas=panel?.querySelector('[data-safety-diplomas]')?.getBoundingClientRect();
+                        const labelRange=document.createRange();if(label)labelRange.selectNodeContents(label);
+                        return !!label&&new Set([...labelRange.getClientRects()].map(r=>Math.round(r.top))).size<=3&&
+                          !!explanation&&!!diplomas&&explanation.top>=heading.getBoundingClientRect().bottom&&diplomas.top>=explanation.bottom&&
+                          !!heading && !!icon && !!text && !!box &&
                           icon.getBoundingClientRect().width>=27 &&
                           (innerWidth>=640 || parseFloat(getComputedStyle(heading).fontSize)<=14) &&
                           Math.abs(box.left-text.left)<=48 && Math.abs(box.right-text.right)<=48;
@@ -2368,13 +2377,22 @@ if (!bellaris && brandPreviewCandidate) {
                await puppyFaq.click();
                await page.locator('#home-early-faq a[href="#aria-puppy-check"]').click();
               await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
-              for(const id of ['informujte-sa','zaujem-po-priatelstvach','prva-navsteva-form']) {
+              for(const id of ['informujte-sa','prva-navsteva-form']) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
                 await inquiry.locator('label').first().click();
                 await inquiry.getByRole('button',{name:'Pokračovať',exact:true}).click();
                 await inquiry.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000}).catch(() => { throw new Error('Inline contact step failed: '+id); });
                 await inquiry.getByRole('button',{name:'Späť',exact:true}).click();
               }
+              await page.locator('#home-friendship-interest').click();
+              const friendshipDialog=page.getByRole('dialog').last();
+              await friendshipDialog.waitFor({state:'visible'});
+              const friendshipForm=friendshipDialog.locator('[data-lead-step-form]');
+              await friendshipForm.locator('label').first().click();
+              await friendshipForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+              await friendshipForm.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
+              await page.keyboard.press('Escape');
+              await friendshipDialog.waitFor({state:'hidden'});
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
             }
             await page.setViewportSize({ width: 390, height: 844 });

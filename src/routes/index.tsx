@@ -122,7 +122,7 @@ function Index() {
         <InquirySection allScreens matchHero />
         <Care showEmbeddedFriendship={false} showInterest={false} />
         <Gallery />
-        <FriendshipInterest inlineForm />
+        <FriendshipInterest />
         <FirstVisit inlineForm leadStyle />
         <Why />
         <HomePuppyChecker />
