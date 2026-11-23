@@ -2865,6 +2865,9 @@ if (!bellaris && brandPreviewCandidate) {
               const control=document.querySelector('[data-stand-photo-previous]');
               return !!control && control.getBoundingClientRect().width>=43.9;
             }, null, {timeout:3000});
+            // It can cross the 43.9px threshold in the last animation frame.
+            // Wait for the completed 100% transform before the strict 44px check.
+            await productPage.waitForTimeout(350);
             const tinyNav = await articleLightbox.evaluate(el => {
               const photo=el.querySelector('[data-stand-photo-viewport]')?.getBoundingClientRect();
               const prev=el.querySelector('[data-stand-photo-previous]')?.getBoundingClientRect();
