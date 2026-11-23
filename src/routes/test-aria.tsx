@@ -442,6 +442,9 @@ export function AriaPreviewPage() {
         <Requirements id="lead-requirements" ariaPreview hideEyebrow />
 
         {isLiveLead && benefitsSection}
+        {/* Restored approved two-column photo mosaic directly below Prečo Chvostíkovo,
+            without replacing or duplicating the original moving Hero carousel. */}
+        {isLiveLead && <AriaMosaicGallery paidLead />}
 
         <section id="lead-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
           <SectionAmbientPaws />
