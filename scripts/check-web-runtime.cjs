@@ -286,6 +286,9 @@ if (!bellaris && brandPreviewCandidate) {
                   const gallery = document.querySelector('#lead-photo-carousel');
                   const track = gallery?.querySelector('[data-gesture-track="photos"]');
                   const form = document.querySelector('#aria-hero-form')?.getBoundingClientRect();
+                  // The section shell can start near the fixed dock while the
+                  // interactive form inside it must remain below the dock.
+                  const formContent = document.querySelector('#aria-hero-form [data-lead-step-form]')?.getBoundingClientRect();
                   const dock = document.querySelector('[data-aria-guide]');
                   const cards = [...(track?.querySelectorAll(':scope > div:first-child button') ?? [])];
                   const highRes = cards.filter(card => card.hasAttribute('data-aria-lead-highlight'));
@@ -295,7 +298,7 @@ if (!bellaris && brandPreviewCandidate) {
                     cardCount: cards.length, highlightCount: highRes.length,
                     headingBottom: heading?.bottom, badgeTop: badge?.top,
                     reviewBottom: reviews?.bottom, galleryTop: gr?.top, trackTop: tr?.top, trackBottom: tr?.bottom,
-                    menuBottom: dock?.getBoundingClientRect().bottom, formTop: form?.top, formBottom: form?.bottom,
+                    menuBottom: dock?.getBoundingClientRect().bottom, formTop: form?.top, formContentTop: formContent?.top, formBottom: form?.bottom,
                     fixed: dock ? getComputedStyle(dock).position === 'fixed' && !hero.contains(dock) : false,
                     reviewSpacing: parseFloat(getComputedStyle(hero?.querySelector('[data-aria-lead-review-spacing]')).marginTop),
                   };
@@ -303,7 +306,7 @@ if (!bellaris && brandPreviewCandidate) {
                 if (!layout.fixed || layout.cardCount !== 20 || layout.highlightCount !== 2 ||
                     layout.badgeTop < layout.headingBottom + 50 ||
                     layout.formTop < layout.reviewBottom + 12 ||
-                    layout.formTop < layout.menuBottom + 8 ||
+                    !Number.isFinite(layout.formContentTop) || layout.formContentTop < layout.menuBottom + 8 ||
                     layout.galleryTop < layout.formBottom - 8 ||
                     layout.trackTop < layout.formBottom - 8)
                   throw new Error('Paid hero → form → moving gallery layout regressed: ' + JSON.stringify(layout));
@@ -2274,16 +2277,16 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Desktop Hero benefit badges not aligned with text left edge: ' + delta);
                 }
               }
-              // Main desktop "Chcem zistiť viac" is flat; only mobile
-              // "Mám záujem" keeps the clean glow. Other routes are untouched.
-              const primaryShadow = await primary.evaluate(el => getComputedStyle(el).boxShadow);
-              if (url.pathname === '/' && width >= 1024) {
-                if (primaryShadow !== 'none') throw new Error('Main desktop CTA must be shadow-free: ' + width);
-              } else if (url.pathname === '/') {
-                if (!primaryShadow.includes('226, 84, 164') || primaryShadow.includes('inset'))
-                  throw new Error('Main interest CTA must keep a glow only: ' + width + ' ' + primaryShadow);
-              } else if (primaryShadow === 'none') {
-                throw new Error('Landing primary CTA glow missing: ' + width);
+              // Mobile home has an inline 2-step form instead of the old CTA.
+              // Check its real inputs above; don't wait for an absent button.
+              // Preserve desktop and other landing routes' CTA shadow checks.
+              if (!mainInlineMobile) {
+                const primaryShadow = await primary.evaluate(el => getComputedStyle(el).boxShadow);
+                if (url.pathname === '/' && width >= 1024) {
+                  if (primaryShadow !== 'none') throw new Error('Main desktop CTA must be shadow-free: ' + width);
+                } else if (primaryShadow === 'none') {
+                  throw new Error('Landing primary CTA glow missing: ' + width);
+                }
               }
             }
             if(url.pathname==='/' && !restricted) {
