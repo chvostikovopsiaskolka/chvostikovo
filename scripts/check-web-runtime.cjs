@@ -640,7 +640,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const formIsHidden = paidCarousel && form.hidden;
                 const formTop = formIsHidden ? hero.getBoundingClientRect().bottom : form.getBoundingClientRect().top;
                 const formContentTop = formIsHidden
-                  ? formTop + 16
+                  ? window.innerHeight // no interactive form exists in the rendered flow while hidden
                   : form.querySelector('[data-lead-step-form]')?.getBoundingClientRect().top;
                 const reviewBottom = reviews.getBoundingClientRect().bottom;
                 const newPhotos = paidCarousel
