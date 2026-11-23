@@ -296,7 +296,7 @@ export function AriaPreviewPage() {
               <SchoolmatesFormCrown compact groundAccent />
             </div>
             <div data-lead-inline-card className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
-              <LeadStepForm questionInHeading ariaPreview trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
+              <LeadStepForm questionInHeading ariaPreview={!isLiveLead} trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
             </div>
           </div>
         </section>
