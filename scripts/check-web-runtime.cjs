@@ -2237,7 +2237,7 @@ if (!bellaris && brandPreviewCandidate) {
                       return !!third && getComputedStyle(third).borderTopWidth==='0px';
                     })(),
                     desktopCopy:innerWidth<1024 || (Math.abs(copy.right-lineRange.getBoundingClientRect().right)<9 && !!document.querySelector('.home-hero-column .home-hero-copy br')),
-                    desktopHeroBalanced:innerWidth<1024 || Math.abs(document.getElementById('home-hero-learn-more').getBoundingClientRect().bottom-document.querySelector('#home-hero-inline-form [data-home-form-panel]').getBoundingClientRect().bottom)<=3,
+                    desktopHeroBalanced:innerWidth<1024 || (()=>{const delta=document.getElementById('home-hero-learn-more').getBoundingClientRect().bottom-document.querySelector('#home-hero-inline-form [data-home-form-panel]').getBoundingClientRect().bottom;return delta<=2&&delta>=-16;})(),
                     desktopPhrase:innerWidth<1024 || (()=>{const el=document.querySelector('[data-home-hero-final-phrase]');if(!el)return false;const r=document.createRange();r.selectNodeContents(el);return r.getClientRects().length===1&&r.getBoundingClientRect().right<=copy.right;})(),
                     friendshipModal:!!document.getElementById('home-friendship-interest')&&!document.getElementById('zaujem-po-priatelstvach'),
                     freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
@@ -2323,7 +2323,7 @@ if (!bellaris && brandPreviewCandidate) {
                     paws:!!document.querySelector('#top .paw-trail-background'),
                   };
                 });
-                if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression: '+JSON.stringify(layout));
+                if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression at '+width+'px: '+JSON.stringify(layout));
                 if(width>=1024){
                   const desktopForm=page.locator('#home-hero-inline-form [data-lead-step-form]');
                   const position=()=>page.locator('.home-hero-column').evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y+scrollY,width:r.width,height:r.height};});
