@@ -19,6 +19,7 @@ export function DaycareEarlyFaq() {
   const items = [
     { q: "Pre koho je škôlka určená?", a: DAYCARE_ELIGIBILITY_ANSWER },
     ...FAQ.filter(({ q }) => q === "Bude môj psík počas dňa niekedy sám bez dozoru?"),
+    ...FAQ.filter(({ q }) => q === "Prijímate aj šteniatka?"),
   ];
   return (
     <section id="home-early-faq" className="relative overflow-hidden bg-secondary py-9 sm:py-12">
@@ -28,9 +29,18 @@ export function DaycareEarlyFaq() {
         <div className="mt-5 space-y-3">
           {items.map(item => <details key={item.q} className="group rounded-3xl border border-forest/10 bg-card p-4 shadow-card">
             <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 font-display text-sm font-bold text-forest sm:text-base">
-              {item.q}<span aria-hidden="true" className="text-lg text-coral group-open:rotate-45">+</span>
+              {item.q === "Prijímate aj šteniatka?" ? "Čo ak chcete prihlásiť šteniatko?" : item.q}<span aria-hidden="true" className="text-lg text-coral group-open:rotate-45">+</span>
             </summary>
-            <div className="mt-2 border-t border-forest/10 pt-3 text-sm leading-relaxed text-forest/80"><FaqAnswer question={item.q} answer={item.a} /></div>
+            <div className="mt-2 border-t border-forest/10 pt-3 text-sm leading-relaxed text-forest/80">
+              <FaqAnswer question={item.q} answer={item.a} />
+              {item.q === "Prijímate aj šteniatka?" && (
+                <a href="#aria-puppy-check" data-home-faq-puppy-cta
+                  onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker")}
+                  className="btn-coral mt-4 inline-flex min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white">
+                  Overiť pripravenosť šteniatka
+                </a>
+              )}
+            </div>
           </details>)}
         </div>
       </div>
@@ -61,7 +71,7 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
                   <span className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-forest">
                     <Icon className="size-6" aria-hidden />
                   </span>
-                  <h3 className="font-display text-lg font-bold text-coral-dark sm:text-xl">{r.title}</h3>
+                  <h3 className={"font-display text-lg font-bold sm:text-xl " + (id === "podmienky" && !ariaPreview ? "text-[#c92c89]" : "text-coral-dark")}>{r.title}</h3>
                 </div>
                 <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80"><AriaHighlightedText text={r.text} /></p>
               </article>
@@ -174,19 +184,17 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
             </ul>
 
           </div>
-          <div data-home-prices className="flex min-w-0 flex-col justify-between gap-3 sm:gap-5">
-            <div data-home-price-cards className="grid min-w-0 gap-3 sm:gap-5">
+          <div data-home-prices className="grid min-w-0 grid-rows-[auto_1fr_auto] gap-3 sm:gap-5">
             {PRICING.map(item => <article key={item.name} data-home-price-card={item.highlight ? "pass" : "single"}
-              className={"flex min-w-0 flex-col items-center rounded-3xl px-2.5 py-4 text-center shadow-card sm:p-6 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
+              className={"flex min-w-0 flex-col items-center rounded-3xl px-2.5 py-4 text-center shadow-card sm:p-6 " + (item.highlight ? "w-full self-center bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
               <h3 className="font-display text-sm font-bold leading-snug text-forest sm:text-xl">{item.name}</h3>
               {item.highlight && <p className="mt-1 text-[11px] font-semibold text-forest/85 sm:text-sm">10 vstupov</p>}
               <p data-home-price className={"mt-2 font-display text-3xl font-bold sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-coral-dark")}>{item.price}</p>
               <p className="mt-2 text-[11px] leading-snug text-forest sm:text-sm">{item.highlight ? <strong>Permanentka platí 2 mesiace.</strong> : "Celodenný pobyt"}</p>
               {item.highlight && <span data-home-best-value className="mt-3 inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2 py-1.5 text-[10px] font-bold leading-tight text-forest sm:text-xs">Najvýhodnejšie. Ušetríte 50 €</span>}
             </article>)}
-            </div>
-            <p data-home-taxi className="mt-3 flex min-w-0 items-center justify-center gap-1 rounded-2xl bg-[#f8ddeb] p-2 text-center text-[10px] font-semibold leading-snug text-forest shadow-sm sm:gap-2 sm:p-3 sm:text-sm">
-              <Car className="size-3.5 shrink-0 text-[#b82e7f] sm:size-4" aria-hidden="true" />
+            <p data-home-taxi className="flex min-w-0 items-center justify-center gap-1 rounded-2xl bg-[#c92c89] p-2 text-center text-[10px] font-semibold leading-snug text-white sm:gap-2 sm:p-3 sm:text-sm">
+              <Car className="size-3.5 shrink-0 text-white sm:size-4" aria-hidden="true" />
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
           </div>
