@@ -320,7 +320,7 @@ export function ReviewReasons({
   showCta?: boolean;
 } = {}) {
   return (
-    <section id="preco-chvostikovo" className={"relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0 " + (variant === "home" ? "mt-10 sm:mt-0" : "")}>
+    <section id="preco-chvostikovo" className={"relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0 " + (variant === "home" ? "mt-14 sm:mt-0" : "")}>
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-8 left-[6%] size-9 -rotate-12 text-cream/10 sm:size-12" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-[34%] right-[8%] size-7 rotate-[20deg] text-cream/10 sm:size-10" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute bottom-24 left-[14%] size-8 rotate-12 text-cream/10 sm:size-11" />
