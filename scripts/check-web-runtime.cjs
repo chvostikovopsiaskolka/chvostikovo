@@ -269,7 +269,8 @@ if (!bellaris && brandPreviewCandidate) {
                 const gallery = page.locator('#lead-photo-carousel [data-gesture-track="photos"]');
                 const highlights = gallery.locator(':scope > div:first-child [data-aria-lead-highlight]');
                 if (await gallery.count() !== 1 ||
-                    await page.locator('[data-aria-review-photo], #aria-mosaic').count() !== 0 ||
+                    await page.locator('[data-aria-review-photo]').count() !== 0 ||
+                    await page.locator('#aria-mosaic').count() !== 1 ||
                     await highlights.count() !== 2)
                   throw new Error('Paid LEAD must have one moved moving carousel and two unique teaser highlights');
                 for (const [n, expected] of [['1', 'lead-review-border-collies'], ['2', 'lead-review-retrievers-aussie']]) {
@@ -356,6 +357,25 @@ if (!bellaris && brandPreviewCandidate) {
                 await highlights.first().scrollIntoViewIfNeeded();
                 await highlights.first().click();
                 await verifyLightbox(true);
+                // Paid LEAD has both the original moving carousel AND the restored
+                // two-column mosaic, which must open higher-res copies of the SAME
+                // eight Wix gallery asset IDs. No new photos or static carousel clones.
+                const mosaic = page.locator('#aria-mosaic');
+                const tiles = mosaic.locator('button[aria-label^="Otvoriť fotografiu"]');
+                if (await tiles.count() !== 8 ||
+                    !await mosaic.getByRole('heading', {name:'Kde bude váš psík počas dňa?'}).count())
+                  throw new Error('Paid LEAD mosaic must restore all eight approved photos below Prečo Chvostíkovo');
+                const photoQuality = await mosaic.evaluate(el => {
+                  const images = [...el.querySelectorAll('button img')];
+                  return images.length === 8 && images.every(img =>
+                    img.getAttribute('src')?.includes('/w_1600,h_1600,al_c,q_92,enc_auto/') &&
+                    img.getAttribute('srcset')?.includes('/w_900,h_900,al_c,q_85,enc_auto/') &&
+                    img.getAttribute('srcset')?.includes('/w_1600,h_1600,al_c,q_92,enc_auto/'));
+                });
+                if (!photoQuality) throw new Error('Restored mosaic must retain original photo IDs with 900w/1600w responsive CDN renditions');
+                await tiles.first().scrollIntoViewIfNeeded();
+                await tiles.first().click();
+                await verifyLightbox();
               } else {
                 const cards = page.locator('[data-aria-review-photo]');
                 if (await cards.count() !== 2) throw new Error('Aria preview must retain two standalone teaser photos');
@@ -1708,8 +1728,8 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Preview static mosaic must preserve location and parking chips');
               if (!await page.locator('#lead-pricing [data-lead-best-value]').getByText('Najvýhodnejšie').count())
                 throw new Error('Lead permanentka must retain the orange best-value label');
-              if (await page.locator('#aria-mosaic img').count() !== (url.pathname === '/psia-skolka-kosice/' ? 0 : 8))
-                throw new Error('Static mosaic must remain preview-only; paid LEAD uses moving carousel');
+              if (await page.locator('#aria-mosaic img').count() !== 8)
+                throw new Error('Paid LEAD and preview must both reuse the original eight-photo mosaic');
               // Compare document order rather than screen rects (some sections may be offscreen).
               const hasHeroFormAndCaretakerOrder = await page.evaluate((isPaidLead) => {
                 const reviews = document.getElementById('recenzie');
@@ -1806,14 +1826,25 @@ if (!bellaris && brandPreviewCandidate) {
                 const ids = window.location.pathname === '/psia-skolka-kosice/'
                   ? ['recenzie', 'aria-hero-form', 'lead-photo-carousel', 'aria-caretakers', 'aria-about',
                      'aria-early-faq', 'lead-pricing', 'lead-requirements', 'lead-benefits',
-                     'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
+                     'aria-mosaic', 'lead-faq', 'aria-puppy-check', 'lead-first-visit', 'aria-first-visit-form']
                   : ['recenzie', 'aria-caretakers', 'aria-about', 'aria-early-faq', 'aria-mosaic',
                      'lead-benefits', 'lead-pricing', 'lead-requirements', 'lead-faq',
                      'aria-puppy-check', 'lead-first-visit'];
                 const elements = ids.map(id => document.getElementById(id));
                 return elements.every((node, idx) => node && (idx === 0 || !!(elements[idx-1] && elements[idx-1].compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)));
               });
-              if (!hasCorrectOrder) throw new Error('Preview section hierarchy differs from approved mobile layout');
+              if (!hasCorrectOrder) throw new Error('LEAD/preview section hierarchy differs from approved mobile layout');
+              if (url.pathname === '/psia-skolka-kosice/') {
+                const adjacent = await page.evaluate(() => {
+                  const benefits = document.getElementById('lead-benefits');
+                  const mosaic = document.getElementById('aria-mosaic');
+                  const faq = document.getElementById('lead-faq');
+                  return !!benefits && !!mosaic && !!faq &&
+                    benefits.nextElementSibling === mosaic && mosaic.nextElementSibling === faq &&
+                    mosaic.scrollWidth <= document.documentElement.clientWidth + 2;
+                });
+                if (!adjacent) throw new Error('Mosaic must directly follow Prečo Chvostíkovo, without horizontal overflow');
+              }
               if (await page.locator('section video').count()) throw new Error('Video must be omitted from preview');
 
 
