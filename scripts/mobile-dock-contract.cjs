@@ -270,7 +270,8 @@ assert(ariaAssistant.includes('data-aria-interest-cta aria-label="Mám záujem o
 assert(css.includes('@media (max-width: 359px)') && css.includes('#top h1 span { white-space: normal; }'),
        "320px Hero must allow title wrapping without horizontal overflow");
 assert(reviewReasons.includes('"row-span-2 min-w-0 sm:row-span-1"') &&
-       reviewReasons.includes('"col-span-2 min-w-0 rounded-2xl'),
+       reviewReasons.includes('"col-span-2 min-w-0 px-2 pt-2 pb-3') &&
+       !reviewReasons.includes('rounded-2xl border-t border-forest/10'),
        "First two reasons alongside video, third full width underneath");
 
 // 23 Nov mobile simplification: one hero headline, no redundant mobile pitch.
