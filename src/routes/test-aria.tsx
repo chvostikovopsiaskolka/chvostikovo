@@ -1,5 +1,5 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { PuppyCheckInput } from "@/lib/inquiry";
 import {
   Car,
@@ -128,11 +128,6 @@ export function AriaPreviewPage() {
       target.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
     }));
   }
-
-  useEffect(() => {
-    // Keep the revealed form mounted while a visitor continues reading;
-    // navigation or modal toggles must not discard partially entered data.
-  }, [leadHeroFormOpen]);
 
   function openLeadModal(source: string) {
     trackMarketingInteraction("inquiry_cta", source);
