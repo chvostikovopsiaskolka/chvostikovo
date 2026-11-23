@@ -2451,12 +2451,28 @@ if (!bellaris && brandPreviewCandidate) {
           // Check dialogs only after scrolling/carousels: Radix locks background
           // scroll while open. Keep the actual modal centered and scrollable.
           if (!bellaris && !restricted && ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/'].includes(url.pathname)) {
-            const entry = url.pathname === '/'
-              ? page.locator('section.hero-safe-top .hero-cta-primary:visible').first()
-              : (isAriaPage || isPuppyAria) ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })
-              : page.locator('.mobile-dock .mobile-dock-apply').first();
-            await entry.click();
-            if (url.pathname === '/psia-skolka-kosice/') {
+            if (url.pathname === '/') {
+              // The previous mobile CTA/modal was deliberately replaced by a
+              // compact shared two-step form. Exercise both steps, without
+              // submitting a production lead, instead of clicking dead UI.
+              const inline = page.locator('#top [data-home-hero-inline-mobile] [data-lead-step-form]');
+              if (!await inline.isVisible()) throw new Error('Mobile home inquiry form is not visible');
+              const choices = inline.locator('label:has(input[name="zaujem"])');
+              if (await choices.count() !== 3) throw new Error('Mobile home must retain all three interest choices');
+              await choices.nth(1).click();
+              await inline.getByRole('button', { name: 'Pokračovať', exact: true }).click();
+              if (!await inline.locator('input[name="meno"]').isVisible() ||
+                  !await inline.locator('input[name="telefon"]').isVisible())
+                throw new Error('Mobile hero inline interest did not advance to contact step');
+              await inline.getByRole('button', { name: 'Späť', exact: true }).click();
+              if (!await choices.nth(1).locator('input[name="zaujem"]').isChecked())
+                throw new Error('Mobile hero interest selection was lost on back');
+            } else {
+              const entry = (isAriaPage || isPuppyAria)
+                ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })
+                : page.locator('.mobile-dock .mobile-dock-apply').first();
+              await entry.click();
+              if (url.pathname === '/psia-skolka-kosice/') {
               // Approved paid-LEAD section navigation: the bottom interest button
               // scrolls to the existing inline form, never opens an above-dock dialog.
               const inline = page.locator('#aria-hero-form');
@@ -2500,6 +2516,7 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Mobile FormDialog is not centered/scrollable: ' + JSON.stringify(modalFrame));
             await page.keyboard.press('Escape');
             await modal.waitFor({ state: 'hidden' });
+              }
             }
 
             if (url.pathname === '/') {
