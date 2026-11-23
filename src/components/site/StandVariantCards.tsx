@@ -1,4 +1,5 @@
 import { ChevronRight, Ruler, Sparkles, Star, Type } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { StandSize } from "@/lib/shop";
 import standMia from "@/assets/products/stand-mia.avif";
 import standCori from "@/assets/products/stand-cori.avif";
@@ -31,8 +32,12 @@ const FEATURES = [
 ] as const;
 
 export function StandVariantCards({ onInterest }: { onInterest: (size: StandSize) => void }) {
+  // SSR markup is visible before React handlers are attached. Mark only after
+  // hydration so browser tests cannot click an inert pre-hydration CTA.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   return (
-    <div data-stand-sizes="carousel" data-product-stand-cards
+    <div data-stand-sizes="carousel" data-product-stand-cards data-stand-cards-hydrated={hydrated ? "true" : "false"}
       role="region" aria-label="Varianty stojana – na mobile posúvajte do strany" tabIndex={0}
       className="-mx-4 mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-4 touch-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0">
       {VARIANTS.map((variant) => (

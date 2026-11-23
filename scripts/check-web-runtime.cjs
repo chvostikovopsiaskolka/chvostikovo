@@ -2091,7 +2091,12 @@ if (!bellaris && brandPreviewCandidate) {
               const hero = page.locator('section.hero-safe-top').first();
               const primary = hero.locator('.hero-cta-primary:visible').first();
               const mainInlineMobile = url.pathname === '/' && width < 1024;
-              if (!mainInlineMobile && !await primary.isVisible()) throw new Error('Hero prominent CTA missing at ' + width);
+              // A responsive Hero can settle a frame later after 390→1440
+              // resize on Safari with restricted storage; keep a bounded gate.
+              if (!mainInlineMobile) {
+                try { await primary.waitFor({state:'visible',timeout:4500}); }
+                catch (_) { throw new Error('Hero prominent CTA missing at ' + width); }
+              }
               if (await hero.locator('.hero-cta-primary:visible').count() !== (mainInlineMobile ? 0 : 1))
                 throw new Error('Main mobile uses inline form, other Heroes retain primary CTA at ' + width);
               const ctaPair = hero.locator('.hero-cta-pair:visible');
@@ -2612,6 +2617,9 @@ if (!bellaris && brandPreviewCandidate) {
               }
               if (route.includes('stojan')) {
                 const cards = productPage.locator('[data-product-stand-cards]');
+                // The mobile dock can hydrate before the product CTA handlers.
+                // Wait for this component's own client-ready marker instead.
+                await productPage.locator('[data-product-stand-cards][data-stand-cards-hydrated="true"]').waitFor({state:'attached',timeout:8000});
                 if (await cards.locator('article').count() !== 3) throw new Error('Exactly three stand variant cards required');
                 if (width === 390 && !(await cards.evaluate(el => el.scrollWidth > el.clientWidth + 30))) {
                   throw new Error('Stand carousel must swipe on mobile');
@@ -2867,12 +2875,10 @@ if (!bellaris && brandPreviewCandidate) {
             await guideCarousel.locator('button[data-stand-photo-open]').first().click();
             const articleLightbox = productPage.locator('[data-stand-lightbox]');
             await articleLightbox.waitFor({state:'visible'});
-            // Wait for hydrated image, not only the modal shell.
-            const loadedPhoto = articleLightbox.locator('[data-stand-photo-viewport] img');
-            await loadedPhoto.waitFor({state:'visible',timeout:7000}).catch(() => {
-              throw new Error('Guide lightbox has no visible photo after hydration');
-            });
-            await productPage.waitForFunction(() => document.querySelector('[data-stand-photo-viewport] img')?.naturalWidth>0, null, {timeout:7000});
+            // LIVE CDN may deliver the image after the dialog opens. Await
+            // image availability before testing visibility, not vice versa.
+            await productPage.waitForFunction(() => document.querySelector('[data-stand-photo-viewport] img')?.naturalWidth>0, null, {timeout:7500});
+            await articleLightbox.locator('img').first().waitFor({state:'visible',timeout:7500});
             if (await articleLightbox.getByText('Priblížte si fotografiu').count())
               throw new Error('Obsolete zoom instructions visible');
             if (await articleLightbox.getByRole('button',{name:'Priblížiť fotografiu'}).count() ||
