@@ -2104,7 +2104,13 @@ if (!bellaris && brandPreviewCandidate) {
                     mainDockFlat:innerWidth>=1024 || getComputedStyle(document.querySelector('.mobile-dock[data-variant="main"] .mobile-dock-bar')).boxShadow==='none',
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2,
                     formDepth:getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).boxShadow.includes('rgb'),
-                    heroGlow:!!heroCta && getComputedStyle(heroCta).boxShadow.includes('226, 84, 164'),
+                    // Main desktop "Chcem zistiť viac" is now flat. The mobile
+                    // "Mám záujem" alone must have a blur-only glow, no inset bevel.
+                    heroGlow:!!heroCta && (innerWidth>=1024
+                      ? getComputedStyle(heroCta).boxShadow==='none'
+                      : getComputedStyle(heroCta).boxShadow!=='none' &&
+                        !getComputedStyle(heroCta).boxShadow.includes('inset') &&
+                        getComputedStyle(heroCta).boxShadow.includes('25px')),
                     conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
@@ -3013,14 +3019,17 @@ if (!bellaris && brandPreviewCandidate) {
               if (pageColors.meta !== 'only light' || !['only light', 'light only'].includes(pageColors.root)) {
                 throw new Error('Android Auto Dark Theme opt-out is missing: ' + JSON.stringify(pageColors));
               }
-              // Verify the short dock label on narrow Android-like viewports.
+              // At 320px the new "Podmienky" item replaces "Starostlivosť".
+              // Keep the actual readable label inside its touch target.
               await productPage.setViewportSize({ width: 320, height: 760 });
-              const careDock = productPage.locator('.mobile-dock a[aria-label="Starostlivosť"]');
-              if (!(await careDock.locator('.mobile-dock-label-short').isVisible())) throw new Error('Narrow dock must use readable care label');
-              const narrowLabel = await careDock.locator('.mobile-dock-label-short').boundingBox();
-              const narrowItem = await careDock.boundingBox();
-              if (!narrowLabel || !narrowItem || narrowLabel.x < narrowItem.x || narrowLabel.x + narrowLabel.width > narrowItem.x + narrowItem.width + 1) {
-                throw new Error('Care label overflows its narrow dock button');
+              const requirementsDock = productPage.locator('.mobile-dock[data-variant="main"] a[href="/#podmienky"]');
+              const requirementsLabel = requirementsDock.locator('span').first();
+              if (!(await requirementsLabel.isVisible())) throw new Error('Narrow dock must show readable Podmienky label');
+              const narrowLabel = await requirementsLabel.boundingBox();
+              const narrowItem = await requirementsDock.boundingBox();
+              if (!narrowLabel || !narrowItem || narrowLabel.x < narrowItem.x ||
+                  narrowLabel.x + narrowLabel.width > narrowItem.x + narrowItem.width + 1) {
+                throw new Error('Podmienky label overflows its narrow dock button');
               }
               await productPage.setViewportSize({ width: 390, height: 844 });
               const firstCard = catalog.locator('[data-product-card]').first();

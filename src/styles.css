@@ -1447,11 +1447,11 @@
   transform: none;
 }
 .site-brand #top .home-hero-cta .hero-cta-primary {
-  box-shadow: 0 0 25px 4px rgb(226 84 164 / 38%);
+  box-shadow: 0 0 25px 4px rgba(226, 84, 164, 0.38);
 }
 @media (hover: hover) and (pointer: fine) {
   .site-brand #top .home-hero-cta .hero-cta-primary:hover {
-    box-shadow: 0 0 30px 5px rgb(226 84 164 / 45%);
+    box-shadow: 0 0 30px 5px rgba(226, 84, 164, 0.45);
   }
 }
 @media (max-width: 1023px) {
