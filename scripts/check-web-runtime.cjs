@@ -2091,7 +2091,12 @@ if (!bellaris && brandPreviewCandidate) {
               const hero = page.locator('section.hero-safe-top').first();
               const primary = hero.locator('.hero-cta-primary:visible').first();
               const mainInlineMobile = url.pathname === '/' && width < 1024;
-              if (!mainInlineMobile && !await primary.isVisible()) throw new Error('Hero prominent CTA missing at ' + width);
+              // A responsive Hero can settle a frame later after 390→1440
+              // resize on Safari with restricted storage; keep a bounded gate.
+              if (!mainInlineMobile) {
+                try { await primary.waitFor({state:'visible',timeout:4500}); }
+                catch (_) { throw new Error('Hero prominent CTA missing at ' + width); }
+              }
               if (await hero.locator('.hero-cta-primary:visible').count() !== (mainInlineMobile ? 0 : 1))
                 throw new Error('Main mobile uses inline form, other Heroes retain primary CTA at ' + width);
               const ctaPair = hero.locator('.hero-cta-pair:visible');
@@ -2850,8 +2855,10 @@ if (!bellaris && brandPreviewCandidate) {
             await guideCarousel.locator('button[data-stand-photo-open]').first().click();
             const articleLightbox = productPage.locator('[data-stand-lightbox]');
             await articleLightbox.waitFor({state:'visible'});
-            if (!await articleLightbox.locator('img').first().isVisible()) throw new Error('Guide lightbox has no photo');
-            await productPage.waitForFunction(() => document.querySelector('[data-stand-photo-viewport] img')?.naturalWidth>0, null, {timeout:5000});
+            // LIVE CDN may deliver the image after the dialog opens. Await
+            // image availability before testing visibility, not vice versa.
+            await productPage.waitForFunction(() => document.querySelector('[data-stand-photo-viewport] img')?.naturalWidth>0, null, {timeout:7500});
+            await articleLightbox.locator('img').first().waitFor({state:'visible',timeout:7500});
             if (await articleLightbox.getByText('Priblížte si fotografiu').count())
               throw new Error('Obsolete zoom instructions visible');
             if (await articleLightbox.getByRole('button',{name:'Priblížiť fotografiu'}).count() ||
