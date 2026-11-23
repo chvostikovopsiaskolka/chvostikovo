@@ -67,6 +67,7 @@ export function AriaLeadAssistant({
   onOpenInfo,
   onOpenInterest,
   onOpenPuppyChecker,
+  onRevealInlineForm,
   hidden = false,
   trackingPrefix = "aria_preview_v3",
   requirementsSectionId = "lead-requirements",
@@ -79,6 +80,7 @@ export function AriaLeadAssistant({
   onOpenInfo: () => void;
   onOpenInterest: () => void;
   onOpenPuppyChecker: () => void;
+  onRevealInlineForm?: () => void;
   hidden?: boolean;
   trackingPrefix?: string;
   requirementsSectionId?: string;
@@ -237,6 +239,11 @@ export function AriaLeadAssistant({
 
   function jump(id: string, action: string) {
     track(action);
+    if (id === "aria-hero-form" && onRevealInlineForm) {
+      setPanel(null);
+      onRevealInlineForm();
+      return;
+    }
     if (guidedChatPreview && id === "lead-pricing")
       trackMarketingInteraction("view_pricing", trackingPrefix + "_pricing");
     setPanel(null);
