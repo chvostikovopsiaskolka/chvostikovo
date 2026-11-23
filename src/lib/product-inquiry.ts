@@ -10,9 +10,11 @@ export const PRODUCT_INQUIRY_ENDPOINT =
 export function normalizeProductLocation(input: string): string {
   const compact = input.trim().replace(/\s+/g, " ");
   const match = compact.match(/^(.+?)[, ]+([0-9]{3} ?[0-9]{2})$/u);
-  if (!match) return compact;
-  const place = match[1].replace(/\s*,\s*/g, " ").trim();
-  return `${place}, ${match[2]}`;
+  const placePart = match?.[1];
+  const postcode = match?.[2];
+  if (!placePart || !postcode) return compact;
+  const place = placePart.replace(/\s*,\s*/g, " ").trim();
+  return `${place}, ${postcode}`;
 }
 
 export const standInquirySchema = z.object({
