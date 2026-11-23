@@ -5,10 +5,22 @@ import { PhotoLightbox } from "./PhotoLightbox";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
-/** Preview-only: four visual rows in two columns; lower existing carousel retains other schoolmate photos. */
-export function AriaMosaicGallery() {
+/** Reuses the ORIGINAL eight gallery asset IDs in a 2-column mosaic.
+ * Wix CDN delivers a larger, less compressed rendition from the same original,
+ * never stretching the existing 900px thumbnail in CSS. The first 900px source
+ * remains in srcSet for smaller viewports. The lightbox uses the larger file.
+ */
+const highQualityMosaicSrc = (src: string) => src.replace(
+  "/v1/fill/w_900,h_900,al_c,q_85,enc_auto/",
+  "/v1/fill/w_1600,h_1600,al_c,q_92,enc_auto/",
+);
+
+export function AriaMosaicGallery({ paidLead = false }: { paidLead?: boolean }) {
   const [selected, setSelected] = useState<number | null>(null);
-  const photos = GALLERY.slice(0, 8);
+  const photos = GALLERY.slice(0, 8).map(photo => ({
+    ...photo,
+    src: highQualityMosaicSrc(photo.src),
+  }));
   const left = photos.filter((_, i) => i % 2 === 0);
   const right = photos.filter((_, i) => i % 2 === 1);
   const heights = ["h-36 sm:h-52", "h-44 sm:h-60", "h-36 sm:h-52", "h-40 sm:h-52"];
@@ -17,7 +29,9 @@ export function AriaMosaicGallery() {
       <button key={photo.src} type="button" onClick={() => setSelected(index)}
         aria-label={"Otvoriť fotografiu: " + photo.alt}
         className={"group relative block w-full overflow-hidden rounded-[20px] bg-forest/10 shadow-card transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral " + heights[row]}>
-        <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" width={900} height={900}
+        <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" width={1600} height={1600}
+          srcSet={`${GALLERY[index]!.src} 900w, ${photo.src} 1600w`}
+          sizes="(min-width: 1024px) 420px, (min-width: 640px) 44vw, calc((100vw - 45px) / 2)"
           className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
         <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-forest/30 via-transparent to-transparent" />
         {photo.caption && <span className="absolute bottom-2 left-2 rounded-full bg-card/85 px-2 py-1 text-[10px] font-semibold text-forest backdrop-blur-sm">{photo.caption}</span>}
@@ -25,11 +39,16 @@ export function AriaMosaicGallery() {
     );
   }
   return (
-    <section id="aria-mosaic" className="relative scroll-mt-24 overflow-hidden bg-card pb-9 pt-5 sm:pb-12 sm:pt-7" aria-labelledby="aria-mosaic-heading">
+    <section id="aria-mosaic" data-aria-mosaic-high-quality className="relative scroll-mt-24 overflow-hidden bg-card pb-9 pt-5 sm:pb-12 sm:pt-7" aria-labelledby="aria-mosaic-heading">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-4xl px-4">
         <p className="text-center font-display text-sm font-bold uppercase tracking-widest text-coral-dark">Nahliadnite k nám</p>
-        <h2 id="aria-mosaic-heading" className="section-title mt-2 whitespace-nowrap text-center text-[clamp(18px,4.8vw,38px)]">Takto vyzerá Chvostíkovo</h2>
+        <h2 id="aria-mosaic-heading" className="section-title mt-2 text-center text-[clamp(22px,5.2vw,38px)]">{paidLead ? "Kde bude váš psík počas dňa?" : "Takto vyzerá Chvostíkovo"}</h2>
+        {paidLead && (
+          <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-forest/80 sm:text-base">
+            Vykurované vnútorné priestory a bezpečný vonkajší výbeh na pohyb, hry aj oddych.
+          </p>
+        )}
         <div data-aria-location-chips className="mx-auto mt-4 grid max-w-md grid-cols-2 gap-2 sm:hidden">
           <a href={MAP_LINK} target="_blank" rel="noopener noreferrer"
             onClick={() => void trackCookielessInteraction("nav_click", "lead_aria_location_poljska6", "sk")}
