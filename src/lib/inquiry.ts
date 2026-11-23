@@ -42,6 +42,7 @@ export const shortSchema = z.object({
   telefon: z.string().regex(/^\+\d{7,15}$/),
   zaujem: z.string().min(1).max(300),
   plemeno: z.string().trim().max(200).optional(),
+  pohlavie: z.enum(["male", "female"]).optional(),
   puppy_check: puppyCheckSchema.optional(),
   // One optional free-form question stored only with an explicit lead/contact submit.
   otazka: z.string().trim().min(5).max(600).optional(),
@@ -131,6 +132,7 @@ export function buildFields(data: InquiryData): Array<{ label: string; value: st
       { label: "O čo máte záujem?", value: data.zaujem },
       ...(data.otazka ? [{ label: "Otázka návštevníka", value: data.otazka }] : []),
       ...(data.plemeno ? [{ label: "Plemeno psíka", value: data.plemeno }] : []),
+      ...(data.pohlavie ? [{ label: "Pohlavie psíka", value: data.pohlavie === "male" ? "Pes" : "Suka" }] : []),
       ...(puppy ? [
         { label: "Šteniatko – vek", value: `${puppy.age_months} mesiacov` },
         ...(puppy.dog_name ? [{ label: "Šteniatko – meno", value: puppy.dog_name }] : []),
@@ -187,6 +189,7 @@ export function buildDbPayload(data: InquiryData) {
       ...(data.email ? { email: data.email } : {}),
       interest_reason: data.zaujem,
       ...(data.plemeno ? { dog_breed: data.plemeno } : {}),
+      ...(data.pohlavie ? { dog_sex: data.pohlavie } : {}),
       // Existing Edge persists non-column fields only in its raw_payload JSONB.
       // Keep the validated puppy answers structured for CRM/email, never append
       // them to the allowlisted interest_reason or create a second lead.

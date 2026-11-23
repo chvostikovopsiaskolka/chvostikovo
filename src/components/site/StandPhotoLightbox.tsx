@@ -186,7 +186,7 @@ export function StandPhotoLightbox({
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent
         data-stand-lightbox
-        className="z-[120] flex max-h-[96dvh] w-max max-w-[calc(100vw-16px)] flex-col items-center gap-2 overflow-hidden rounded-2xl border-0 bg-forest p-2.5 pb-3 text-cream shadow-xl sm:p-3 sm:pb-4 [&>button]:right-2.5 [&>button]:top-2.5 [&>button]:z-20 [&>button]:grid [&>button]:size-11 [&>button]:place-items-center [&>button]:rounded-none [&>button]:border-0 [&>button]:bg-transparent [&>button]:text-orange-400 [&>button]:opacity-100 [&>button]:shadow-none [&>button]:hover:bg-transparent [&>button]:hover:opacity-100 [&>button]:focus-visible:outline-2 [&>button]:focus-visible:outline-orange-500 [&>button>svg]:size-6"
+        className="z-[120] flex max-h-[96dvh] w-max max-w-[calc(100vw-16px)] flex-col items-center gap-2 overflow-hidden rounded-2xl border-0 bg-forest p-2.5 pb-3 text-cream shadow-xl sm:p-3 sm:pb-4 [&>button]:right-2.5 [&>button]:top-2.5 [&>button]:z-20 [&>button]:grid [&>button]:size-12 [&>button]:place-items-center [&>button]:rounded-none [&>button]:border-0 [&>button]:bg-transparent [&>button]:text-orange-400 [&>button]:opacity-100 [&>button]:shadow-none [&>button]:hover:bg-transparent [&>button]:hover:opacity-100 [&>button]:focus-visible:outline-2 [&>button]:focus-visible:outline-orange-500 [&>button>svg]:size-6"
       >
         <DialogTitle className="sr-only">Fotografia stojana {photo.caption ?? ""}</DialogTitle>
         <DialogDescription className="sr-only">Detail ručne vyrábaného stojana. Fotografie môžete listovať šípkami alebo potiahnutím.</DialogDescription>
@@ -208,12 +208,12 @@ export function StandPhotoLightbox({
           />
           <button type="button" onClick={() => navigate(-1)} aria-label="Predchádzajúca fotografia"
             data-stand-photo-previous
-            className="absolute left-0 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-none bg-transparent text-orange-400 shadow-none [filter:drop-shadow(0_1px_2px_rgba(0,0,0,.8))] hover:text-pink-500 focus-visible:outline-2 focus-visible:outline-orange-500 sm:left-1">
+            className="absolute left-0 top-1/2 z-10 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-none bg-transparent text-orange-400 shadow-none [filter:drop-shadow(0_1px_2px_rgba(0,0,0,.8))] hover:text-pink-500 focus-visible:outline-2 focus-visible:outline-orange-500 sm:left-1">
             <ChevronLeft aria-hidden="true" className="size-8 stroke-[3]" />
           </button>
           <button type="button" onClick={() => navigate(1)} aria-label="Ďalšia fotografia"
             data-stand-photo-next
-            className="absolute right-0 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-none bg-transparent text-orange-400 shadow-none [filter:drop-shadow(0_1px_2px_rgba(0,0,0,.8))] hover:text-pink-500 focus-visible:outline-2 focus-visible:outline-orange-500 sm:right-1">
+            className="absolute right-0 top-1/2 z-10 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-none bg-transparent text-orange-400 shadow-none [filter:drop-shadow(0_1px_2px_rgba(0,0,0,.8))] hover:text-pink-500 focus-visible:outline-2 focus-visible:outline-orange-500 sm:right-1">
             <ChevronRight aria-hidden="true" className="size-8 stroke-[3]" />
           </button>
         </div>
