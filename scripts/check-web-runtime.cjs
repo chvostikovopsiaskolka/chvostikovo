@@ -2154,7 +2154,7 @@ if (!bellaris && brandPreviewCandidate) {
                       return el?.textContent?.trim()==='váš psík zamiluje' &&
                         getComputedStyle(el).color==='rgb(255, 164, 20)';
                     })(),
-                    heroGlassAndBreathingRoom:innerWidth>=1024 || (() => {
+                    heroGlassAndBreathingRoom:innerWidth>639 || (() => {
                       const panel=document.querySelector('#top [data-home-hero-inline-mobile]');
                       const heading=document.querySelector('#top h1');
                       const review=document.querySelector('#top #recenzie');
