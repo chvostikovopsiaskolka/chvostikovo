@@ -280,3 +280,28 @@ assert(!hero.includes('home-hero-copy mx-auto mt-5 max-w-xl') && hero.includes('
 for (const path of ["src/components/site/Hero.tsx","src/components/site/InquirySection.tsx","src/components/site/Contact.tsx","src/components/site/FormDialog.tsx","src/routes/test-aria.tsx"]) {
   assert(read(path).includes("form-liquid-surface"), path+" must use the liquid form panel");
 }
+
+// App-01: design feedback that CSS-only frost on white looked opaque.
+assert(hero.includes('import { SectionAmbientPaws }') &&
+  hero.includes('data-home-hero-inline-mobile className="form-liquid-surface relative isolate') &&
+  hero.includes('<SectionAmbientPaws />') &&
+  css.includes('Physical iPhone feedback 23 Nov') &&
+  css.includes('margin-top: clamp(1.75rem, 7vw, 2.1rem)') &&
+  read('scripts/check-web-runtime.cjs').includes('heroGlassAndBreathingRoom:'),
+  "APP-01 mobile hero must show translucent paw glass, visible border and real flow spacing");
+
+
+// APP-01 Aria desktop greeting width and contextual touch targets: Codex PR476
+// reduced the portrait gap but left the desktop intro at 480px. The shorter
+// greeting uses a narrower SVG bubble, while two real native CTA retain >=44px
+// tap targets with one reusable class instead of inconsistent 36px buttons.
+const ariaLeadAssistant = read("src/components/site/AriaLeadAssistant.tsx");
+assert(ariaLeadAssistant.includes('const contextCtaClass = "aria-context-cta') &&
+       ariaLeadAssistant.includes('min-h-11 min-w-[88px]') &&
+       ariaLeadAssistant.includes('min-[390px]:min-w-[104px]') &&
+       ariaLeadAssistant.includes('lg:min-w-[128px]') &&
+       ariaLeadAssistant.includes('data-aria-context-cta="puppy"') &&
+       ariaLeadAssistant.includes('data-aria-context-cta="contact"') &&
+       css.includes('[data-aria-guide][data-intro="true"] [data-aria-speech]') &&
+       css.includes('width: 410px;'),
+  "Aria desktop intro must be compact and both CTA must keep accessible width and height");

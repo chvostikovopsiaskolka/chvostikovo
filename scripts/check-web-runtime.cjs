@@ -449,7 +449,7 @@ if (!bellaris && brandPreviewCandidate) {
                   textSize: parseFloat(getComputedStyle(el.querySelector('p') ?? el).fontSize),
                 };
               });
-              if (bubbleGeometry.width < 420 || bubbleGeometry.height < 68 ||
+              if (bubbleGeometry.width < 395 || bubbleGeometry.width > 430 || bubbleGeometry.height < 68 ||
                   bubbleGeometry.textSize < 16 ||
                   (bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight < 2 || bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight > 5) ||
                   bubbleGeometry.faceRight > bubbleGeometry.textLeft - 26 ||
@@ -1377,6 +1377,13 @@ if (!bellaris && brandPreviewCandidate) {
                 }
                 if (!await contactCta.isVisible())
                   throw new Error('Post-requirements modal CTA never becomes visible at ' + width);
+                const contactShape = await contactCta.evaluate(btn => {
+                  const r=btn.getBoundingClientRect(), speech=btn.closest('[data-aria-speech]')?.getBoundingClientRect();
+                  return {width:r.width,height:r.height,right:r.right,speechRight:speech?.right};
+                });
+                if (contactShape.width < (width >= 1024 ? 128 : width >= 390 ? 104 : 88) ||
+                    contactShape.height < 44 || contactShape.right > contactShape.speechRight + 1)
+                  throw new Error('Aria contact CTA too small or outside speech at ' + width + ': '+JSON.stringify(contactShape));
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-contact.png') });
                 await contactCta.click();
                 if (url.pathname === '/test-aria/') {
@@ -1771,10 +1778,16 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Aria puppy speech should reappear away from important content');
               if (url.pathname === '/test-aria/')
                 await page.screenshot({ path: path.join(out, 'aria-' + engine + '-' + width + '-puppy-prompt.png') });
-              const overitRadius = await aria.getByRole('button', { name: 'Overiť', exact: true })
-                .evaluate(button => parseFloat(getComputedStyle(button).borderTopLeftRadius));
-              if (overitRadius < 10 || overitRadius > 13)
-                throw new Error('Puppy check CTA must match the squared comic bubble shape');
+              const overitShape = await aria.getByRole('button', { name: 'Overiť', exact: true })
+                .evaluate(btn => {
+                  const r=btn.getBoundingClientRect(), speech=btn.closest('[data-aria-speech]')?.getBoundingClientRect();
+                  return {radius:parseFloat(getComputedStyle(btn).borderTopLeftRadius),
+                    width:r.width,height:r.height,right:r.right,speechRight:speech?.right};
+                });
+              if (overitShape.radius < 10 || overitShape.radius > 13 ||
+                  overitShape.width < (width >= 1024 ? 128 : width >= 390 ? 104 : 88) ||
+                  overitShape.height < 44 || overitShape.right > overitShape.speechRight + 1)
+                throw new Error('Aria puppy CTA size or overflow at ' + width + ': '+JSON.stringify(overitShape));
               if (url.pathname !== '/psia-skolka-kosice/') {
                 // The paid lead menu now ends inside the hero; after scrolling to
                 // caretakers it is intentionally no longer a floating control.
@@ -2153,6 +2166,27 @@ if (!bellaris && brandPreviewCandidate) {
                       const el=document.querySelector('[data-home-mobile-orange-phrase]');
                       return el?.textContent?.trim()==='váš psík zamiluje' &&
                         getComputedStyle(el).color==='rgb(255, 164, 20)';
+                    })(),
+                    heroGlassAndBreathingRoom:innerWidth>639 || (() => {
+                      const panel=document.querySelector('#top [data-home-hero-inline-mobile]');
+                      const heading=document.querySelector('#top h1');
+                      const review=document.querySelector('#top #recenzie');
+                      const paws=panel?.querySelectorAll('[aria-hidden="true"] svg');
+                      if(!panel || !heading || !review || !paws?.length) return false;
+                      const panelBox=panel.getBoundingClientRect(), titleBox=heading.getBoundingClientRect();
+                      const reviewBox=review.getBoundingClientRect();
+                      const style=getComputedStyle(panel);
+                      const colorComponents=style.backgroundColor.match(/[0-9.]+/g) || [];
+                      const alpha=Number(colorComponents[3]);
+                      const headlineGap=panelBox.top-titleBox.bottom;
+                      const reviewGap=reviewBox.top-panelBox.bottom;
+                      return paws.length>=6 && alpha>0 && alpha<0.75 &&
+                        parseFloat(style.borderTopWidth)>=1.25 &&
+                        style.borderTopColor!=='rgba(255, 255, 255, 0.68)' &&
+                        style.backdropFilter.includes('blur') &&
+                        headlineGap>=21 && headlineGap<=54 &&
+                        reviewGap>=19 && reviewGap<=58 &&
+                        panelBox.left>=-1 && panelBox.right<=innerWidth+1;
                     })(),
                     reasonThirdNoRule:innerWidth>=640 || (() => {
                       const third=document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] article')[2];

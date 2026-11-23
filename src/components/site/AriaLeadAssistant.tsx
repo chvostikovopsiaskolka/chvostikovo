@@ -293,6 +293,8 @@ export function AriaLeadAssistant({
 
   const optionClass = "flex min-h-11 w-full items-center justify-between gap-2 rounded-2xl border border-forest/10 bg-white/75 px-3 py-2.5 text-left text-sm font-semibold text-forest transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
   const ctaClass = "flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-coral px-4 py-2.5 text-center font-display text-sm font-bold text-white shadow-sm transition hover:bg-coral-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest";
+  // Both contextual prompts reuse one accessible touch size without changing CTA behavior.
+  const contextCtaClass = "aria-context-cta pointer-events-auto ml-auto flex min-h-11 min-w-[88px] shrink-0 items-center justify-center rounded-[11px] bg-coral px-3 text-center text-xs font-bold leading-tight text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest min-[390px]:min-w-[104px] sm:min-w-[114px] sm:px-4 sm:text-sm lg:min-w-[128px] lg:px-5";
   const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[10px] px-0.5 text-center text-forest transition-colors aria-expanded:bg-secondary/75 hover:bg-white/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral";
 
 
@@ -555,21 +557,21 @@ export function AriaLeadAssistant({
                 )
               ) : stage === "puppy" ? (
                 <div className="relative z-10 flex min-w-0 items-center justify-between gap-2">
-                  <strong className="min-w-0 font-display text-[11px] font-semibold leading-tight text-forest">
+                  <strong className="min-w-0 font-display text-[11px] font-semibold leading-snug text-forest sm:text-[13px]">
                     Máte šteniatko? <span className="font-bold text-coral-dark">Zistite, či spĺňa podmienky.</span>
                   </strong>
-                  <button type="button" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
-                    className="pointer-events-auto ml-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-3 text-xs font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                  <button type="button" data-aria-context-cta="puppy" onClick={() => jump("aria-puppy-check", "scroll_puppy_cta")}
+                    className={contextCtaClass}>
                     Overiť
                   </button>
                 </div>
               ) : (
                 <div className="relative z-10 flex min-w-0 items-center justify-between gap-2">
-                  <strong className="min-w-0 font-display text-[11px] font-semibold leading-tight text-forest">
+                  <strong className="min-w-0 font-display text-[11px] font-semibold leading-snug text-forest sm:text-[13px]">
                     Chcete sa informovať? <span className="text-coral-dark">Vyplňte nezáväzný formulár.</span>
                   </strong>
-                  <button type="button" onClick={() => guidedChatPreview ? jump("aria-first-visit-form", "bubble_contact_scroll") : openInfo()}
-                    className="pointer-events-auto ml-auto min-h-9 shrink-0 rounded-[11px] bg-coral px-2.5 text-[11px] font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest">
+                  <button type="button" data-aria-context-cta="contact" onClick={() => guidedChatPreview ? jump("aria-first-visit-form", "bubble_contact_scroll") : openInfo()}
+                    className={contextCtaClass}>
                     Vyplniť
                   </button>
                 </div>
