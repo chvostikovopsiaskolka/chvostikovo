@@ -10,6 +10,7 @@ import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-i
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
+import { InquiryDogFields } from "./InquiryDogFields";
 import { phoneFromForm } from "@/lib/phone";
 import { InquirySubmissionError, reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
 
@@ -77,7 +78,8 @@ export function ShortForm({
       const attribution = attributionPayload();
       const submittedPhone = phoneFromForm(form, `s-${formId}-tel`);
       const dogName = showChatDogFields ? String(fd.get("pes_meno") || "").trim() : "";
-      const breed = showChatDogFields ? String(fd.get("plemeno") || "").trim() : "";
+      const breed = String(fd.get("plemeno") || "").trim();
+      if (!breed) { setError("Vyplňte plemeno psíka."); setLoading(false); return; }
       const submission = await submitInquiry({
         typ: "informacie",
         consent: true,
@@ -89,7 +91,8 @@ export function ShortForm({
         email: String(fd.get("email") ?? "").trim() || undefined,
         ...(showQuestionField ? { otazka: String(fd.get("otazka") ?? "").trim() } : {}),
         zaujem: hideInterest ? interestValue + (dogName && !puppyCheck ? " – Meno psíka: " + dogName : "") : String(fd.get("zaujem") ?? ""),
-        ...(breed ? { plemeno: breed } : {}),
+        plemeno: breed,
+        ...(String(fd.get("pohlavie") || "") ? { pohlavie: String(fd.get("pohlavie")) as "male" | "female" } : {}),
         ...(puppyCheck ? { puppy_check: { ...puppyCheck, ...(dogName ? { dog_name: dogName } : {}), ...(breed ? { dog_breed: breed } : {}) } } : {}),
       }, attemptId);
       if (showQuestionField) {
@@ -174,13 +177,9 @@ export function ShortForm({
         </label>
         <input id={`s-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
       </div>
+      <InquiryDogFields idPrefix={`s-${formId}`} />
       {showChatDogFields && (
         <>
-          <div>
-            <label className="label-sm" htmlFor={`s-${formId}-plemeno`}>Plemeno psíka (nepovinné)</label>
-            <input id={`s-${formId}-plemeno`} name="plemeno" type="text" maxLength={80}
-              className="field" autoComplete="off" placeholder="Napr. labrador" />
-          </div>
           <div>
             <label className="label-sm" htmlFor={`s-${formId}-pes_meno`}>Meno psíka (nepovinné)</label>
             <input id={`s-${formId}-pes_meno`} name="pes_meno" type="text" maxLength={70}

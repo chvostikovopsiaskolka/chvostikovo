@@ -9,6 +9,7 @@ import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-i
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
+import { InquiryDogFields } from "./InquiryDogFields";
 import { phoneFromForm } from "@/lib/phone";
 import { reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
 
@@ -68,6 +69,8 @@ export function EnglishInquiryForm({
         telefon: submittedPhone,
         email: String(fd.get("email") ?? "").trim() || undefined,
         zaujem: `EN – Dog daycare enquiry | ${interest}`,
+        plemeno: String(fd.get("plemeno") ?? "").trim(),
+        ...(String(fd.get("pohlavie") || "") ? { pohlavie: String(fd.get("pohlavie")) as "male" | "female" } : {}),
       }, attemptId);
 
       void trackCookielessInteraction("form_submit", trackingSource, "en", attemptId);
@@ -161,6 +164,7 @@ export function EnglishInquiryForm({
           <label className="label-sm" htmlFor={`en-${formId}-name`}>Your name *</label>
           <input id={`en-${formId}-name`} name="name" autoComplete="name" required className="field" placeholder="Your name" />
         </div>
+        <InquiryDogFields idPrefix={`en-${formId}`} language="en" />
         <PhoneField id={`en-${formId}-phone`} name="phone" label="Phone / WhatsApp *" language="en" />
         <div>
           <label className="label-sm" htmlFor={`en-${formId}-email`}>Email (optional)</label>
