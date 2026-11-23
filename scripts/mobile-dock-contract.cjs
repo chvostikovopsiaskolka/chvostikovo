@@ -213,3 +213,39 @@ assert(aboutComponent.includes('max-w-[680px]') &&
        aboutComponent.includes('data-safety-heading') &&
        aboutComponent.includes('size-7 shrink-0'),
        "About copy must be narrower and first-aid heading compact with a visible green check");
+
+
+/* APP-01: physical narrow Android + product inquiry delivery after 23 Nov. */
+const reviewReasons = read("src/components/site/Reviews.tsx");
+const catalog = read("src/components/site/ProductCatalogCarousel.tsx");
+const productContact = read("src/components/site/ProductInquiryContact.tsx");
+const productSchema = read("src/lib/product-inquiry.ts");
+const productEdge = read("supabase/functions/product-inquiry-submit/index.ts");
+assert(reviewReasons.includes('data-home-video-layout={homeMobileLayout || undefined}') &&
+       reviewReasons.includes('data-video-reasons-copy className="contents sm:flex') &&
+       reviewReasons.includes('"grid-cols-2"'),
+       "Mobile video must sit beside first reason only, two other reasons in bottom row");
+assert(css.includes("real 320–379px Android") &&
+       css.includes('min-height: 48px; padding: 3px 0; gap: 2px') &&
+       css.includes('#top > div.relative.z-10.mt-11'),
+       "Narrow Android should compress Hero and main dock without moving review carousel out of flow");
+assert(catalog.includes('data-product-actions className="mt-auto') &&
+       catalog.includes('pt-4 sm:pt-6'),
+       "Product cards must bottom-align target and stand price/CTA rows");
+assert(productContact.includes('name="delivery_street"') &&
+       productContact.includes('name="delivery_postal"') &&
+       productContact.includes('name="delivery_city"') &&
+       productContact.includes('name="customer_location" value={customerLocation}') &&
+       productContact.includes('autoComplete="street-address"') &&
+       productContact.includes('autoComplete="postal-code"') &&
+       productContact.includes('autoComplete="address-level2"') &&
+       productContact.includes('name="delivery_mode"'),
+       "Product inquiry must support full delivery address and privacy-preserving pickup");
+assert(productSchema.includes("const customerLocationSchema") &&
+       productEdge.includes("Ulica a číslo, PSČ, Mesto") &&
+       productEdge.includes("Adresa / miesto odovzdania"),
+       "Frontend validation and existing product Edge Function must agree on structured address format");
+assert(!productContact.includes('trackMarketingInteraction') &&
+       !productContact.includes('MetaPixel') &&
+       !productContact.includes('custom_audience'),
+       "Product delivery contact information must not be copied to advertising audiences");

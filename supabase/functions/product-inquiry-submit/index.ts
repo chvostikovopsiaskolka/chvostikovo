@@ -58,12 +58,11 @@ async function sendNotificationEmail(inquiry: Record<string, any>) {
       `Meno zákazníka: ${inquiry.customer_name}`,
       `Telefón: ${inquiry.phone}`,
       `E-mail: ${inquiry.email}`,
-      `Odkiaľ ste: ${inquiry.customer_location || "neuvedené"}`,
+      `Adresa / miesto odovzdania: ${inquiry.customer_location || "neuvedené"}`,
       `Veľkosť: ${LABELS.targetSize[configuration.size] ?? configuration.size}`,
       `Požadovaná výška: ${configuration.height_cm ? `${configuration.height_cm} cm` : "štandardná 5 cm / podľa dohody"}`,
       `Poznámka: ${configuration.note || "bez poznámky"}`,
-      `Súhlas so spracovaním osobných údajov: ${inquiry.consent === true ? "Áno" : "Nie"}`,
-      `Súhlas so spracovaním osobných údajov: ${inquiry.consent === true ? "Áno" : "Nie"}`,
+      `Oboznámenie so zásadami ochrany údajov: ${inquiry.consent === true ? "Áno" : "Nie"}`,
       `Dátum/čas dopytu: ${createdAt}`,
     ];
   } else {
@@ -73,7 +72,7 @@ async function sendNotificationEmail(inquiry: Record<string, any>) {
       `Meno zákazníka: ${inquiry.customer_name}`,
       `Telefón: ${inquiry.phone}`,
       `E-mail: ${inquiry.email}`,
-      `Odkiaľ ste: ${inquiry.customer_location || "neuvedené"}`,
+      `Adresa / miesto odovzdania: ${inquiry.customer_location || "neuvedené"}`,
       `Rozmer: ${LABELS.size[configuration.size]}`,
       `Farba stojana: ${LABELS.color[configuration.color]}`,
       `Výška psíka: ${configuration.dog_height_cm} cm`,
@@ -141,8 +140,10 @@ Deno.serve(async (req: Request) => {
     const phone = text(input.phone, 40);
     const email = text(input.email, 200).toLowerCase();
     // Optional to keep requests from older deployed product forms compatible.
-    const customerLocation = text(input.customer_location, 120);
-    if (customerLocation && !/^[^,]{2,80},\s*.{2,20}$/u.test(customerLocation)) {
+    // Old clients submit "Mesto, PSČ"; new product forms submit
+    // "Ulica a číslo, PSČ, Mesto". Keep the same text DB column.
+    const customerLocation = text(input.customer_location, 180);
+    if (customerLocation && !/^(?:[^,]{2,80},\s*[^,]{2,20}|[^,]{2,80},\s*\d{3}\s?\d{2},\s*[^,]{2,70})$/u.test(customerLocation)) {
       return response(origin, 400, { ok: false, error: "invalid_customer_location" });
     }
     const sourceRef = text(

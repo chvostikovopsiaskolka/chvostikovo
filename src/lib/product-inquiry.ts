@@ -3,13 +3,19 @@ import { z } from "zod";
 export const PRODUCT_INQUIRY_ENDPOINT =
   "https://tlhcqwsluyqpywymjoxn.supabase.co/functions/v1/product-inquiry-submit";
 
+// Preserve "Mesto, PSČ" for existing pickup clients. New delivery forms
+// encode "Ulica a číslo, PSČ, Mesto" in the already existing text column.
+const customerLocationSchema = z.string().trim().min(5).max(180).regex(
+  /^(?:[^,]{2,80},\s*[^,]{2,20}|[^,]{2,80},\s*\d{3}\s?\d{2},\s*[^,]{2,70})$/u,
+);
+
 export const standInquirySchema = z.object({
   client_submission_id: z.string().uuid(),
   product_type: z.literal("stand"),
   customer_name: z.string().trim().min(2).max(160),
   phone: z.string().trim().regex(/^\+\d{7,15}$/),
   email: z.string().trim().email().max(200),
-  customer_location: z.string().trim().max(120).regex(/^[^,]{2,80},\s*.{2,20}$/u),
+  customer_location: customerLocationSchema,
   source_ref: z.string().max(500),
   consent: z.literal(true),
   company: z.string().max(200).optional(),
@@ -28,7 +34,7 @@ export const targetInquirySchema = z.object({
   customer_name: z.string().trim().min(2).max(160),
   phone: z.string().trim().regex(/^\+\d{7,15}$/),
   email: z.string().trim().email().max(200),
-  customer_location: z.string().trim().max(120).regex(/^[^,]{2,80},\s*.{2,20}$/u),
+  customer_location: customerLocationSchema,
   source_ref: z.string().max(500),
   consent: z.literal(true),
   company: z.string().max(200).optional(),
