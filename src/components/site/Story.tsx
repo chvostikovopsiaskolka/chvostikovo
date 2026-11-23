@@ -377,12 +377,12 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           )}
         </div>
 
-        <div className={homeLayout && !isEnglish ? "order-1 mx-auto w-full max-w-[740px] space-y-4" : "space-y-4"}>
+        <div className={homeLayout && !isEnglish ? "order-1 mx-auto w-full max-w-[810px] space-y-4" : "space-y-4"}>
           <img
             src={teamPhoto}
             alt={isEnglish ? "The owners of Chvostíkovo dog daycare with their dogs" : "Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"}
             loading="lazy"
-            className="h-60 w-full rounded-4xl object-cover shadow-card sm:h-72"
+            className="h-60 w-full rounded-4xl object-cover shadow-card sm:h-72 lg:h-80"
           />
           <div className="grid grid-cols-2 gap-3">
             <img
@@ -398,9 +398,9 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
               className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
             />
           </div>
-          {homeLayout && <div data-hero-benefits className="flex w-full flex-nowrap items-center justify-center gap-1 pt-2 sm:gap-2">
+          {homeLayout && <div data-hero-benefits className="flex w-full flex-nowrap items-center justify-center gap-1 pt-2 sm:gap-2 lg:gap-3">
             {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map(item => (
-              <span key={item} className="inline-flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full bg-[#2d764b] px-1 py-1.5 text-[clamp(7px,2.2vw,11px)] font-bold leading-tight text-white sm:gap-1 sm:px-2.5 sm:py-2">
+              <span key={item} className="inline-flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full bg-[#2d764b] px-1.5 py-1.5 text-[clamp(8px,2.1vw,11px)] font-bold leading-tight text-white shadow-card min-[350px]:px-2 min-[390px]:gap-1 min-[390px]:px-2.5 sm:gap-1.5 sm:px-3 sm:py-2 lg:px-4 lg:text-xs">
                 <CheckCircle2 className="size-3 shrink-0 sm:size-4" aria-hidden="true" />{item}
               </span>
             ))}
