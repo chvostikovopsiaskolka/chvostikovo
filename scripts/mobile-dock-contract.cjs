@@ -185,3 +185,31 @@ assert(menuActions.includes('href={"tel:" + PHONE}') && menuActions.includes('hr
 assert(menuActions.includes("href={INSTAGRAM}") && menuActions.includes("href={FACEBOOK}"), "Mobile social icons must use the canonical destinations");
 assert(menuActions.includes("aria-label={english ?") && menuActions.includes("<Phone aria-hidden=") && menuActions.includes("<Instagram aria-hidden=") && menuActions.includes("<Facebook aria-hidden="), "Icon actions need accessible labels");
 assert(css.includes("grid-template-columns: repeat(4, minmax(0, 1fr))") && css.includes("min-height: 50px;") && css.includes("border-radius: 14px;"), "Four equally sized rounded icon actions must fit mobile screens");
+
+
+/* 23 Nov approved web finish gate: reusable soft shadow and unique first visit. */
+const reviewComponent = read("src/components/site/Reviews.tsx");
+const firstVisitComponent = read("src/components/site/Info.tsx");
+const aboutComponent = read("src/components/site/Story.tsx");
+const paidLeadRoute = read("src/routes/test-aria.tsx");
+assert(reviewComponent.includes('data-home-video-layout={homeMobileLayout || undefined}') &&
+       reviewComponent.includes('data-video-reasons-copy') &&
+       reviewComponent.includes('font-extrabold text-cream'),
+       "Homepage Why mobile must use portrait left + emphasized three-point right column");
+assert(reviewComponent.includes('data-review-card') &&
+       css.includes("Soft review card shadow contract") &&
+       css.includes("padding-bottom: 3.75rem"),
+       "Review cards must have a shared soft-edged shadow and enough scrollport room to fade");
+assert(firstVisitComponent.includes("export const FIRST_VISIT_STEPS") &&
+       paidLeadRoute.includes("FIRST_VISIT_STEPS.map") &&
+       firstVisitComponent.includes("FIRST_VISIT_STEPS.map") &&
+       !firstVisitComponent.includes('source="home_first_visit"'),
+       "Home/paid first visit must reuse one three-step explanation without duplicate accordion");
+assert(paidLeadRoute.includes("!isLiveLead && <details data-aria-visit-details"),
+       "Paid LEAD must show the free-visit note without long duplicate accordion");
+assert(firstVisitComponent.includes('text-[#a95400]'),
+       "Homepage requirements headings must use the approved orange, not the pink taxi accent");
+assert(aboutComponent.includes('max-w-[680px]') &&
+       aboutComponent.includes('data-safety-heading') &&
+       aboutComponent.includes('size-7 shrink-0'),
+       "About copy must be narrower and first-aid heading compact with a visible green check");

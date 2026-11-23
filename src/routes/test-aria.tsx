@@ -21,7 +21,7 @@ import { AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
-import { Requirements } from "@/components/site/Info";
+import { Requirements, FIRST_VISIT_STEPS } from "@/components/site/Info";
 import { Footer } from "@/components/site/Contact";
 import { ABOUT_MORE, SafetyCertificates } from "@/components/site/Story";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
@@ -380,12 +380,13 @@ export function AriaPreviewPage() {
               <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
-            <div data-first-visit-group className="mx-auto mt-5 w-full max-w-2xl rounded-3xl border border-coral/50 bg-coral/10 px-3 py-3 shadow-card sm:px-5">
+            <div data-first-visit-group data-lead-visit-compact={isLiveLead || undefined}
+              className="mx-auto mt-5 w-full max-w-2xl rounded-3xl border border-coral/50 bg-coral/10 px-3 py-3 shadow-card sm:px-5">
               <div className="flex items-center justify-center gap-2 text-center">
                 <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
                 <p className="font-display text-base font-bold text-forest sm:text-lg">Úvodná návšteva zadarmo</p>
               </div>
-              <details data-aria-visit-details
+              {!isLiveLead && <details data-aria-visit-details
                 onToggle={(event) => {
                   if (event.currentTarget.open) {
                     void trackCookielessInteraction("explore_daycare",
@@ -407,7 +408,7 @@ export function AriaPreviewPage() {
                     </a>
                   </div>
                 </div>
-              </details>
+              </details>}
             </div>
 
           </div>
@@ -475,16 +476,12 @@ export function AriaPreviewPage() {
 
 
                         <div className="mt-10 grid gap-9 text-center md:grid-cols-3 md:gap-8">
-              {[
-                ["1", "Porozprávame sa o vašom psíkovi", "Zavolajte nám alebo nechajte kontakt vo formulári. Preberieme jeho povahu, potreby aj vaše otázky a dohodneme termín úvodnej návštevy."],
-                ["2", "Prídete nás spoznať", "Ukážeme vám priestory a zoznámime sa s vaším psíkom. Pozrieme sa, ako reaguje na nové prostredie a ostatných psov, a spolu sa dohodneme na ďalšom postupe.", "Úvodná návšteva je zadarmo."],
-                ["3", "Doprajete mu prvý deň v škôlke", "Ak mu kolektív vyhovuje, dohodneme jeho prvý pobyt. Počas dňa sa oňho postaráme a pošleme vám fotky či videá, aby ste videli, ako sa u nás má."],
-              ].map(([number, stepTitle, text, note], i) => (
-                <article key={number} className="min-w-0">
-                  <FirstVisitPhoto number={number ?? i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
-                  <h3 className="font-display text-lg font-bold text-cream">{stepTitle}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-cream/85">{text}</p>
-                  {note && <p className="mt-3 text-sm font-bold text-cream">{note}</p>}
+              {FIRST_VISIT_STEPS.map((step, i) => (
+                <article key={step.title} data-first-visit-step={i + 1} className="min-w-0">
+                  <FirstVisitPhoto number={i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
+                  <h3 className="font-display text-lg font-bold text-cream">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-cream/85">{step.content}</p>
+                  {step.note && <p className="mt-3 text-sm font-bold text-cream">{step.note}</p>}
                 </article>
               ))}
             </div>

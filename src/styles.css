@@ -1452,3 +1452,22 @@ body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary:is(:hover, :acti
 @media (prefers-reduced-motion: reduce) {
   body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary { transition: none; }
 }
+
+/* Soft review card shadow contract — 23.11.2026 (home + paid LEAD).
+   Avoid a visible straight cutoff: a long blurred, low-opacity shadow needs
+   *real scrollport padding* beyond its final fade, not a clipped overflow edge.
+   Keep borders subtle but legible against white backgrounds; no hard outline
+   or inset/dark drop-shadow. The same principle applies to future UI cards. */
+body.site-brand:has(#top) #recenzie figure[data-review-card],
+.lead-brand-live #recenzie [data-gesture-track="reviews"] figure[data-review-card] {
+  border: 1px solid rgb(38 50 43 / 11%);
+  box-shadow:
+    0 6px 20px -12px rgb(38 50 43 / 13%),
+    0 19px 42px -21px rgb(38 50 43 / 11%);
+}
+body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
+.lead-brand-live #recenzie [data-gesture-track="reviews"] {
+  padding-top: 0.65rem;
+  padding-bottom: 3.75rem;
+  margin-top: 0.3rem;
+}
