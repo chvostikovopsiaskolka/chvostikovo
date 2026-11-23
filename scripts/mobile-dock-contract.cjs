@@ -207,7 +207,7 @@ assert(firstVisitComponent.includes("export const FIRST_VISIT_STEPS") &&
        "Home/paid first visit must reuse one three-step explanation without duplicate accordion");
 assert(paidLeadRoute.includes("!isLiveLead && <details data-aria-visit-details"),
        "Paid LEAD must show the free-visit note without long duplicate accordion");
-assert(firstVisitComponent.includes('text-[#a95400]'),
+assert(firstVisitComponent.includes('text-[#ffa414]'),
        "Homepage requirements headings must use the approved orange, not the pink taxi accent");
 assert(aboutComponent.includes('max-w-[680px]') &&
        aboutComponent.includes('data-safety-heading') &&
