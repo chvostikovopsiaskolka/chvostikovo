@@ -76,10 +76,10 @@ function Index() {
         <Hero />
         <ReviewReasons variant="home" withVideo showCta={false} />
         <About homeLayout />
-        <DaycarePhotoCarousel />
-        <DaycareEarlyFaq />
         <Pricing interestMode homeLayout />
-        <Requirements showContextFaq />
+        <Requirements />
+        <DaycareEarlyFaq />
+        <DaycarePhotoCarousel />
         <InquirySection allScreens matchHero />
         <Care showEmbeddedFriendship={false} showInterest={false} />
         <Gallery />
