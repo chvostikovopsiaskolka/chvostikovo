@@ -1232,7 +1232,10 @@
      making the reviews, photos or menu position: absolute. */
   .lead-brand-live .hero-safe-top {
     --hero-content-top: 56px;
-    padding-bottom: 216px;
+    /* Pull the moving gallery and every following section up together.
+       The hero's existing min-height still keeps photos below the fixed dock
+       on short viewports; do not translate the gallery over the form. */
+    padding-bottom: 156px;
   }
   .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
   /* The horizontal scroll container used to clip the card shadows at 4px.
