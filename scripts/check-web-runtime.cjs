@@ -2193,19 +2193,21 @@ if (!bellaris && brandPreviewCandidate) {
                       return !!third && getComputedStyle(third).borderTopWidth==='0px';
                     })(),
                     desktopCopy:innerWidth<1024 || (Math.abs(copy.right-lineRange.getBoundingClientRect().right)<9 && !!document.querySelector('.home-hero-column .home-hero-copy br')),
+                    desktopHeroBalanced:innerWidth<1024 || Math.abs(document.getElementById('home-hero-learn-more').getBoundingClientRect().bottom-document.querySelector('#home-hero-inline-form [data-home-form-panel]').getBoundingClientRect().bottom)<=3,
                     desktopPhrase:innerWidth<1024 || (()=>{const el=document.querySelector('[data-home-hero-final-phrase]');if(!el)return false;const r=document.createRange();r.selectNodeContents(el);return r.getClientRects().length===1&&r.getBoundingClientRect().right<=copy.right;})(),
                     friendshipModal:!!document.getElementById('home-friendship-interest')&&!document.getElementById('zaujem-po-priatelstvach'),
                     freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
                     pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
                     passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
-                    taxiBelowPass:!!taxi && !!taxi.closest('[data-home-prices]') && taxi.getBoundingClientRect().top>=cards[1].bottom &&
+                    taxiInIncluded:!!taxi && !!taxi.closest('[data-home-included]') && Math.abs(included.bottom-cards[1].bottom)<=3 && taxi.getBoundingClientRect().top>=document.querySelector('[data-home-included] ul').getBoundingClientRect().bottom &&
                       getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(included.bottom-prices.bottom)<3,
                     compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
                     aboutExpanded:!document.querySelector('#o-nas summary') && !!aboutText?.querySelector('strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2 &&
-                      getComputedStyle(aboutText).textAlign==='left' && aboutText.getBoundingClientRect().width<=682,
+                      getComputedStyle(aboutText).textAlign==='left' && parseFloat(getComputedStyle(aboutText).fontSize)>=18 && aboutText.getBoundingClientRect().width<=682,
+                    aboutNoOrphan:(()=>{const node=aboutText?.querySelector('p')?.lastChild;if(node?.nodeType!==Node.TEXT_NODE)return false;const words=[...node.textContent.matchAll(/\S+/g)].slice(-2);if(words.length!==2)return false;const tops=words.map(word=>{const range=document.createRange();range.setStart(node,word.index);range.setEnd(node,word.index+word[0].length);return range.getBoundingClientRect().top;});return Math.abs(tops[0]-tops[1])<2;})(),
                     aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
-                    balancedPass:Math.abs((cards[1].top-cards[0].bottom)-(taxi.getBoundingClientRect().top-cards[1].bottom))<5,
+                    centeredIncludedTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-included.right)/2)<3,
                     faqAfterRequirements:document.getElementById('podmienky').nextElementSibling===faq &&
                       faq.querySelectorAll('details').length===3 && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
