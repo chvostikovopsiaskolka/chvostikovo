@@ -2845,8 +2845,14 @@ if (!bellaris && brandPreviewCandidate) {
             await guideCarousel.locator('button[data-stand-photo-open]').first().click();
             const articleLightbox = productPage.locator('[data-stand-lightbox]');
             await articleLightbox.waitFor({state:'visible'});
-            if (!await articleLightbox.locator('img').first().isVisible()) throw new Error('Guide lightbox has no photo');
-            await productPage.waitForFunction(() => document.querySelector('[data-stand-photo-viewport] img')?.naturalWidth>0, null, {timeout:5000});
+            // On production the Radix shell can become visible before its
+            // nested image hydrates. Test the real image after it appears,
+            // never mistake one intermediate animation frame for a missing photo.
+            const loadedPhoto = articleLightbox.locator('[data-stand-photo-viewport] img');
+            await loadedPhoto.waitFor({state:'visible',timeout:7000}).catch(() => {
+              throw new Error('Guide lightbox has no visible photo after hydration');
+            });
+            await productPage.waitForFunction(() => document.querySelector('[data-stand-photo-viewport] img')?.naturalWidth>0, null, {timeout:7000});
             if (await articleLightbox.getByText('Priblížte si fotografiu').count())
               throw new Error('Obsolete zoom instructions visible');
             if (await articleLightbox.getByRole('button',{name:'Priblížiť fotografiu'}).count() ||
