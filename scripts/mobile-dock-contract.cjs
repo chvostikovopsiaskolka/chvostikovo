@@ -284,6 +284,23 @@ assert(visitHeadingIndex >= 0 && crownIndex > visitHeadingIndex &&
        crownIndex < paidLeadCurrent.indexOf('className="form-liquid-surface relative z-0 mt-0'),
        "Four dogs must sit on the top of the visit form, below its heading");
 
+// APP-01 responsive-mosaic restoration: reuse existing AriaMosaicGallery,
+// the original eight GALLERY Wix asset IDs and matching 1600px/92Q CDN
+// variants; never duplicate the moving carousel or alter preview's order.
+const ariaMosaicCurrent = read("src/components/site/AriaMosaicGallery.tsx");
+assert(paidLeadCurrent.includes('{isLiveLead && <AriaMosaicGallery paidLead />}') &&
+       paidLeadCurrent.indexOf('{isLiveLead && benefitsSection}') <
+         paidLeadCurrent.indexOf('{isLiveLead && <AriaMosaicGallery paidLead />}') &&
+       paidLeadCurrent.indexOf('{isLiveLead && <AriaMosaicGallery paidLead />}') <
+         paidLeadCurrent.indexOf('<section id="lead-faq"') &&
+       ariaMosaicCurrent.includes('GALLERY.slice(0, 8)') &&
+       ariaMosaicCurrent.includes('w_1600,h_1600,al_c,q_92,enc_auto') &&
+       ariaMosaicCurrent.includes('w_900,h_900,al_c,q_85,enc_auto') &&
+       ariaMosaicCurrent.includes('srcSet=') &&
+       ariaMosaicCurrent.includes('Kde bude váš psík počas dňa?') &&
+       ariaMosaicCurrent.includes('<PhotoLightbox photos={photos}'),
+       "Paid LEAD must reuse the approved eight-photo mosaic below reasons, from higher-quality versions of the same originals");
+
 /* APP-01 23.11: explicitly test reordered LEAD, mobile inline and narrow widths. */
 const paid = read("src/routes/test-aria.tsx");
 const ariaAssistant = read("src/components/site/AriaLeadAssistant.tsx");
