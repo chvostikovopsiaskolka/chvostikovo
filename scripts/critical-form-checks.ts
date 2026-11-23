@@ -146,6 +146,24 @@ assert(ariaLandingTracking.includes('"lead_landing_first_visit_details"') &&
   ariaLandingTracking.includes('"lead_landing_first_visit_steps"'),
   "Campaign first-visit explanation and three-step shortcut must remain tracked");
 const guidedLeadTracking = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
+const guidedAriaTracking = readFileSync(new URL("../src/components/site/AriaGuidedChat.tsx", import.meta.url), "utf8");
+for (const action of ["form_start_interest", "form_start_other", "form_start_puppy_contact"]) {
+  assert(guidedAriaTracking.includes('track("' + action + '")'),
+    "Aria chat must emit distinct, anonymous start events: " + action);
+}
+assert(guidedLeadTracking.includes("onStarted?.()") && ariaFormsSource.includes("onStarted?.()"),
+  "Only the first form field interaction emits an Aria form start, not a CTA open.");
+const ariaReportMigration = readFileSync(new URL("../supabase/migrations/20261123_admin_aria_chat_analytics_v1.sql", import.meta.url), "utf8");
+assert(ariaReportMigration.includes("auth.uid()") &&
+  ariaReportMigration.includes("public.staff") &&
+  ariaReportMigration.includes("public.website_interaction_events") &&
+  ariaReportMigration.includes("public.web_form_submissions") &&
+  ariaReportMigration.includes("REVOKE ALL ON FUNCTION public.admin_aria_chat_analytics_v1") &&
+  ariaReportMigration.includes("GRANT EXECUTE ON FUNCTION public.admin_aria_chat_analytics_v1") &&
+  ariaReportMigration.includes("form_start_interest") &&
+  ariaReportMigration.includes("form_start_other") &&
+  ariaReportMigration.includes("form_start_puppy_contact"),
+  "Staff-only Aria aggregation must use event counters and canonical real CRM submissions.");
 assert(!guidedLeadTracking.includes('onClick={() => void trackCookielessInteraction("success_conditions_click"') &&
   !guidedLeadTracking.includes('onClick={() => void trackCookielessInteraction("success_pricing_click"'),
   "Successful interest must show only the phone correction receipt.");

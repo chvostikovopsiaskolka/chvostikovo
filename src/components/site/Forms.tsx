@@ -30,6 +30,7 @@ function attributionPayload() {
 
 export function ShortForm({
   onSent,
+  onStarted,
   trackingSource,
   hideInterest = false,
   showChatDogFields = false,
@@ -38,6 +39,7 @@ export function ShortForm({
   interestValue = "Informačný formulár – záujem o psiu škôlku",
 }: {
   onSent?: () => void;
+  onStarted?: () => void;
   trackingSource?: string;
   hideInterest?: boolean;
   showChatDogFields?: boolean;
@@ -68,6 +70,8 @@ export function ShortForm({
   function onFormChange() {
     if (!shouldTrackForm || formStarted.current) return;
     formStarted.current = true;
+    // Consent-free behavioural counters contain no typed text or contact data.
+    onStarted?.();
     void trackCookielessInteraction("form_start", trackingSource || "informational_form");
   }
 
