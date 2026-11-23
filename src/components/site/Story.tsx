@@ -302,17 +302,72 @@ export function Why() {
   );
 }
 
+
+/** Photographs and benefit chips share one source for both About modes. */
+function AboutPhotos({ isEnglish, includeBenefits = false }: { isEnglish: boolean; includeBenefits?: boolean }) {
+  return (
+    <div data-about-photos className="mx-auto w-full max-w-3xl space-y-4">
+          <img
+            src={teamPhoto}
+            alt={isEnglish ? "The owners of Chvostíkovo dog daycare with their dogs" : "Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"}
+            loading="lazy"
+            className="h-60 w-full rounded-4xl object-cover shadow-card sm:h-72"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <img
+              src={dogsPair}
+              alt={isEnglish ? "Our Irish Wolfhounds" : "Naši psíci – írske vlkodavy"}
+              loading="lazy"
+              className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
+            />
+            <img
+              src={GARDEN_PHOTO}
+              alt={isEnglish ? "Our dogs relaxing in the garden" : "Naši psíci oddychujú v záhrade"}
+              loading="lazy"
+              className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
+            />
+          </div>
+          {includeBenefits && <div data-hero-benefits className="flex w-full flex-nowrap items-center justify-center gap-1 pt-2 sm:gap-2">
+            {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map(item => (
+              <span key={item} className="inline-flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full bg-[#2d764b] px-1 py-1.5 text-[clamp(7px,2.2vw,11px)] font-bold leading-tight text-white shadow-card sm:gap-1 sm:px-2.5 sm:py-2">
+                <CheckCircle2 className="size-3 shrink-0 sm:size-4" aria-hidden="true" />{item}
+              </span>
+            ))}
+          </div>}
+        </div>
+  );
+}
+function HomeAboutCopy() {
+  return (
+            <div data-about-expanded lang="sk" className="home-about-copy mx-auto w-full max-w-3xl space-y-4 text-forest/85">
+              <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
+              <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
+              <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
+              <p>Chvostíkovo nie je len miesto na stráženie psov. <strong className="font-extrabold text-forest">Je to druhý domov</strong>, kde sa o každého člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim vlastným psom.</p>
+            </div>
+  );
+}
+
 export function About({ language = "sk", homeLayout = false }: { language?: "sk" | "en"; homeLayout?: boolean }) {
   const isEnglish = language === "en";
+
+  if (homeLayout && !isEnglish) return (
+    <section id="o-nas" className="relative scroll-mt-24 overflow-hidden py-12 sm:py-16">
+      <SectionAmbientPaws />
+      <h2 className="section-title relative z-10 mx-auto mb-7 px-2 text-center text-[clamp(13px,4vw,32px)] leading-tight tracking-[-0.04em] whitespace-nowrap">
+        Kto sa bude starať o vášho psíka?
+      </h2>
+      <div data-home-about-layout className="relative z-10 mx-auto flex max-w-5xl flex-col gap-7 px-4 sm:gap-9">
+        <AboutPhotos isEnglish={false} includeBenefits />
+        <HomeAboutCopy />
+      </div>
+      <SafetyCertificates language="sk" />
+    </section>
+  );
 
   return (
     <section id={isEnglish ? "about" : "o-nas"} className="relative scroll-mt-24 overflow-hidden py-12 sm:py-16">
       <SectionAmbientPaws />
-      {homeLayout && !isEnglish && (
-        <h2 className="section-title relative z-10 mx-auto mb-7 px-2 text-center text-[clamp(13px,4vw,32px)] leading-tight tracking-[-0.04em] whitespace-nowrap">
-          Kto sa bude starať o vášho psíka?
-        </h2>
-      )}
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
         <div>
           {(!homeLayout || isEnglish) && <>
@@ -324,12 +379,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           </h2>
           </>}
           {homeLayout && !isEnglish ? (
-            <div data-about-expanded className="space-y-4 text-forest/85">
-              <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
-              <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
-              <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
-              <p>Chvostíkovo nie je len miesto na stráženie psov. <strong className="font-extrabold text-forest">Je to druhý domov</strong>, kde sa o každého člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim vlastným psom.</p>
-            </div>
+            <HomeAboutCopy />
           ) : (
           <div className="mt-5 space-y-4 text-forest/85">
             <p>
@@ -376,35 +426,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           )}
         </div>
 
-        <div className="space-y-4">
-          <img
-            src={teamPhoto}
-            alt={isEnglish ? "The owners of Chvostíkovo dog daycare with their dogs" : "Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"}
-            loading="lazy"
-            className="h-60 w-full rounded-4xl object-cover shadow-card sm:h-72"
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <img
-              src={dogsPair}
-              alt={isEnglish ? "Our Irish Wolfhounds" : "Naši psíci – írske vlkodavy"}
-              loading="lazy"
-              className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
-            />
-            <img
-              src={GARDEN_PHOTO}
-              alt={isEnglish ? "Our dogs relaxing in the garden" : "Naši psíci oddychujú v záhrade"}
-              loading="lazy"
-              className="h-36 w-full rounded-3xl object-cover shadow-card sm:h-44"
-            />
-          </div>
-          {homeLayout && <div data-hero-benefits className="flex w-full flex-nowrap items-center justify-center gap-1 pt-2 sm:gap-2">
-            {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map(item => (
-              <span key={item} className="inline-flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full bg-[#2d764b] px-1 py-1.5 text-[clamp(7px,2.2vw,11px)] font-bold leading-tight text-white shadow-card sm:gap-1 sm:px-2.5 sm:py-2">
-                <CheckCircle2 className="size-3 shrink-0 sm:size-4" aria-hidden="true" />{item}
-              </span>
-            ))}
-          </div>}
-        </div>
+        <AboutPhotos isEnglish={isEnglish} includeBenefits={homeLayout} />
       </div>
 
       <SafetyCertificates language={language} />

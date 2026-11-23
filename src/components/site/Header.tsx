@@ -28,8 +28,8 @@ const NAV_DESKTOP_BEFORE_ABOUT = [
 ];
 
 const NAV_DESKTOP_AFTER_ABOUT = [
-  { href: "#podmienky", label: "Podmienky" },
   { href: "#cennik", label: "Cenník" },
+  { href: "#podmienky", label: "Podmienky" },
   { href: "/caste-otazky", label: "Časté otázky" },
 ];
 
@@ -172,11 +172,7 @@ export function Header({
         </a>
 
         <nav className="absolute left-[48%] hidden -translate-x-1/2 items-center gap-6 lg:flex">
-          {NAV_DESKTOP_BEFORE_ABOUT.map((item) => (
-            <a key={item.href} href={sectionHref(item.href)} onClick={(event) => { trackDesktopNav(item.href.slice(1)); handleSectionClick(event, item.href); }} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">
-              {item.label}
-            </a>
-          ))}
+
 
           <a
             href={sectionHref("#o-nas")}
@@ -186,15 +182,20 @@ export function Header({
             O nás
           </a>
 
-          <a
-            href="/produkty"
-            onClick={() => trackDesktopNav("produkty")}
-            className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral"
-          >
-            Produkty
-          </a>
+          {NAV_DESKTOP_AFTER_ABOUT.slice(0, 2).map((item) => (
+            <a key={item.href} href={sectionHref(item.href)} onClick={(event) => { trackDesktopNav(item.href.slice(1)); handleSectionClick(event, item.href); }} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">{item.label}</a>
+          ))}
 
-          {NAV_DESKTOP_AFTER_ABOUT.map((item) => (
+          <a href="/produkty" onClick={() => trackDesktopNav("produkty")}
+            className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">Produkty</a>
+
+          {NAV_DESKTOP_BEFORE_ABOUT.map((item) => (
+            <a key={item.href} href={sectionHref(item.href)} onClick={(event) => { trackDesktopNav(item.href.slice(1)); handleSectionClick(event, item.href); }} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">
+              {item.label}
+            </a>
+          ))}
+
+          {NAV_DESKTOP_AFTER_ABOUT.slice(2).map((item) => (
             <a key={item.href} href={sectionHref(item.href)} onClick={(event) => { trackDesktopNav(item.href.slice(1)); handleSectionClick(event, item.href); }} className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">{item.label}</a>
           ))}
         </nav>

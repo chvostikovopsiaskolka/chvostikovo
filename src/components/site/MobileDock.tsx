@@ -53,10 +53,10 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
        { id: "pricing", label: "Prices", icon: Tag },
        { id: "interest", label: "Interested in daycare", icon: FilePenLine },
        { id: "en-first-visit", label: "First visit", icon: House }]
-    : [{ id: "starostlivost", label: "Starostlivosť", icon: Heart },
+    : [{ id: "o-nas", label: "O nás", icon: Users },
        { id: "cennik", label: "Cenník", icon: Tag },
-       { id: "produkty", label: "Produkty", icon: Package },
-       { id: "o-nas", label: "O nás", icon: Users }];
+       { id: "podmienky", label: "Podmienky", icon: Heart },
+       { id: "produkty", label: "Produkty", icon: Package }];
 
   // Return arrow: hide while moving down; show on upward scroll or after stopping.
   // Reuse the existing section listener without adding a second scroll subscription.
@@ -213,12 +213,17 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
         { label: "Puppy daycare", href: "/psia-skolka-pre-steniatka" },
       ]
     : [
+        ...(!marketing ? [
+          { label: "O nás", href: "/#o-nas" },
+          { label: "Cenník", href: "/#cennik" },
+          { label: "Podmienky", href: "/#podmienky" },
+          { label: "Produkty", href: "/produkty" },
+        ] : []),
         ...(marketing ? marketingExtra : [{ label: "Recenzie", href: "/#recenzie" }]),
         ...(!marketing ? [{ label: "Prečo Chvostíkovo", href: "/#preco-chvostikovo" }] : []),
-        { label: "Podmienky", href: variant === "lead" ? homePath + "#lead-requirements" : "/#podmienky" },
+        ...(marketing ? [{ label: "Podmienky", href: variant === "lead" ? homePath + "#lead-requirements" : "/#podmienky" }] : []),
         { label: "Časté otázky", href: "/caste-otazky" },
-        { label: "O nás", href: "/#o-nas" },
-        { label: "Produkty", href: "/produkty" },
+        ...(marketing ? [{ label: "O nás", href: "/#o-nas" }, { label: "Produkty", href: "/produkty" }] : []),
         { label: "Kontakt", href: "/#kontakt" },
         { label: "Škôlka pre šteniatka", href: "/psia-skolka-pre-steniatka" },
       ];

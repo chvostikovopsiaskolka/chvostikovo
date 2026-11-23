@@ -1431,3 +1431,40 @@
   }
   .site-brand :focus-visible { outline-color: Highlight; }
 }
+
+/* 23.11 main-only refinement: no button bevel or dock shadow.
+   Scope by real homepage markup; campaign landing UI is untouched. */
+.site-brand:has(#top .home-hero-copy) :is(.btn-coral, .btn-forest, .btn-outline-forest) {
+  box-shadow: none;
+  background-image: none;
+}
+.site-brand:has(#top .home-hero-copy) :is(.btn-coral, .btn-forest, .btn-outline-forest):is(:hover, :active) {
+  box-shadow: none;
+}
+.site-brand #top .hero-cta-primary,
+.site-brand #top .hero-cta-primary:is(:hover, :active) {
+  box-shadow: none;
+  transform: none;
+}
+.site-brand #top .home-hero-cta .hero-cta-primary {
+  box-shadow: 0 0 25px 4px rgb(226 84 164 / 38%);
+}
+@media (hover: hover) and (pointer: fine) {
+  .site-brand #top .home-hero-cta .hero-cta-primary:hover {
+    box-shadow: 0 0 30px 5px rgb(226 84 164 / 45%);
+  }
+}
+@media (max-width: 1023px) {
+  .mobile-dock[data-variant="main"] :is(.mobile-dock-bar, .mobile-dock-back-top, .mobile-dock-item),
+  .mobile-dock[data-variant="main"] .mobile-dock-item:is(:hover, :active) {
+    box-shadow: none;
+    background-image: none;
+  }
+}
+/* Natural justified prose for longer paragraphs rather than ragged line edges. */
+.site-brand #o-nas .home-about-copy {
+  text-align: justify;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}

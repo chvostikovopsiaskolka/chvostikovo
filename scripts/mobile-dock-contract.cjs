@@ -11,13 +11,13 @@ const hero = read("src/components/site/Hero.tsx");
 const form = read("src/components/site/FormDialog.tsx");
 const forms = read("src/components/site/Forms.tsx");
 
-for (const value of ["Produkty", "Starostlivosť", "Cenník", "O nás", "Prihláška", "Menu"]) {
+for (const value of ["Produkty", "Podmienky", "Cenník", "O nás", "Prihláška", "Menu"]) {
   assert(dock.includes(value), "Missing dock item " + value);
 }
 // The main SK order and route-local landing sequences are intentionally distinct.
-const mainDock = dock.slice(dock.indexOf('    : [{ id: "starostlivost", label: "Starostlivosť"'), dock.indexOf("// Return arrow: hide while moving down; show on upward scroll or after stopping."));
+const mainDock = dock.slice(dock.indexOf('    : [{ id: "o-nas", label: "O nás"'), dock.indexOf("// Return arrow: hide while moving down; show on upward scroll or after stopping."));
 assert(mainDock.includes('{ id: "o-nas", label: "O nás"') && !mainDock.includes('{ id: "top", label: "Domov"'), "Main dock should replace Domov with O nás");
-assert(mainDock.indexOf('id: "starostlivost"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "produkty"') && mainDock.indexOf('id: "produkty"') < mainDock.indexOf('id: "o-nas"'), "Main nav order must be care, prices, products, about");
+assert(mainDock.indexOf('id: "o-nas"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main nav order must be about, prices, requirements, products");
 assert(!dock.includes('{ id: "top", label: "Domov"') && !dock.includes('{ id: "top", label: "Home"'), "Landing docks should use meaningful local sections instead of Domov");
 assert(mainDock.includes('{ id: "produkty", label: "Produkty"') && !mainDock.includes('{ id: "priestory"'), "Main dock must replace Spaces with Products");
 assert(dock.includes('id === "produkty" && !marketing ? "/produkty"'), "Products dock item must navigate to the actual catalogue, not a stale anchor");
@@ -34,7 +34,7 @@ assert(css.includes('bottom: calc(100% + 9px)') && css.includes('border-radius: 
 for (const value of ["First visit", "Why us?", "Interested in daycare", "Prices", "Slovak version"]) {
   assert(dock.includes(value), "Missing EN item " + value);
 }
-for (const anchor of ["produkty", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "en-benefits", "pricing"]) {
+for (const anchor of ["produkty", "podmienky", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "en-benefits", "pricing"]) {
   assert(dock.includes(anchor), "Missing valid anchor " + anchor);
 }
 assert(dock.includes("onApplicationOpen?.()") && dock.includes("onInterestOpen?.()"), "Dock must delegate to existing modal openers");

@@ -2053,7 +2053,7 @@ if (!bellaris && brandPreviewCandidate) {
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]').first().isVisible())
                   throw new Error('Desktop home guided form missing');
                 const layout = await page.evaluate(() => {
-                  const ids=['top','preco-chvostikovo','o-nas','home-early-faq','cennik','podmienky','informujte-sa','starostlivost','priestory','psie-priatelstva','prva-navsteva','prva-navsteva-form','preco','faq'];
+                  const ids=['top','preco-chvostikovo','o-nas','cennik','podmienky','home-early-faq','informujte-sa','starostlivost','priestory','psie-priatelstva','prva-navsteva','prva-navsteva-form','preco','faq'];
                   const nodes=ids.map(id=>document.getElementById(id));
                   const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
                   const cutout=document.querySelector('[data-schoolmates-cutout]');
@@ -2084,10 +2084,24 @@ if (!bellaris && brandPreviewCandidate) {
                     pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
                     passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
                     taxiBelowPass:!!taxi && !!taxi.closest('[data-home-prices]') && taxi.getBoundingClientRect().top>=cards[1].bottom &&
-                      getComputedStyle(taxi).backgroundColor==='rgb(248, 221, 235)' && Math.abs(included.bottom-prices.bottom)<3,
+                      getComputedStyle(taxi).backgroundColor==='rgb(184, 46, 127)' && getComputedStyle(taxi).color==='rgb(255, 255, 255)' && Math.abs(included.bottom-prices.bottom)<3,
                     compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
                     aboutExpanded:!document.querySelector('#o-nas summary') && !!document.querySelector('#o-nas [data-about-expanded] strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2,
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
+                    homeAboutFlow:(() => {const photos=document.querySelector('#o-nas [data-about-photos]');
+                      const aboutCopy=document.querySelector('#o-nas [data-about-expanded]');
+                      return !!photos && !!aboutCopy && photo.getBoundingClientRect().top < benefits.getBoundingClientRect().top &&
+                        benefits.getBoundingClientRect().bottom <= aboutCopy.getBoundingClientRect().top+2 &&
+                        getComputedStyle(aboutCopy).textAlign==='justify';})(),
+                    faqGroup:document.querySelectorAll('#home-early-faq details').length===3 &&
+                      document.getElementById('home-early-faq')?.previousElementSibling?.id==='podmienky' &&
+                      document.querySelector('#home-early-faq details:last-child summary')?.textContent?.includes('Čo ak chcete prihlásiť šteniatko?'),
+                    conditionColor:getComputedStyle(document.querySelector('#podmienky h3')).color==='rgb(169, 84, 0)',
+                    pricingSpacing:(() => {
+                      const taxiRect=taxi.getBoundingClientRect();
+                      const before=cards[1].top-cards[0].bottom, after=taxiRect.top-cards[1].bottom;
+                      return Math.abs(before-after)<3;})(),
+                    mainDockFlat:innerWidth>=1024 || getComputedStyle(document.querySelector('.mobile-dock[data-variant="main"] .mobile-dock-bar')).boxShadow==='none',
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2,
                     formDepth:getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).boxShadow.includes('rgb'),
                     heroGlow:!!heroCta && getComputedStyle(heroCta).boxShadow.includes('226, 84, 164'),
@@ -2104,9 +2118,9 @@ if (!bellaris && brandPreviewCandidate) {
                 // ContextFaq mounts its CTA only while the disclosure is open:
                 // verify the actual clickable link after user interaction,
                 // rather than querying a deliberately unmounted child.
-                const puppyToggle=page.locator('#podmienky').getByRole('button',{name:'Čo ak chcete prihlásiť šteniatko?'});
+                const puppyToggle=page.locator('#home-early-faq details').last().locator('summary');
                 await puppyToggle.click();
-                const puppyLink=page.locator('#podmienky a[href="#aria-puppy-check"].btn-coral');
+                const puppyLink=page.locator('#home-early-faq a[href="#aria-puppy-check"].btn-coral');
                 if (!await puppyLink.isVisible() ||
                     !(await page.locator('#aria-puppy-check h2').innerText()).includes('Spĺňa základné podmienky?'))
                   throw new Error('Expanded puppy FAQ must show a pink CTA linking to the real age/vaccination checker');
