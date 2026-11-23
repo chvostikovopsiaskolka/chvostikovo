@@ -316,14 +316,14 @@ export function AriaPreviewPage() {
           <div id={isLiveLead ? "aria-about" : undefined} className="relative z-10 mx-auto max-w-5xl px-4">
             <h2 className={isLiveLead ? "section-title mb-5 text-center text-[clamp(24px,6vw,38px)] leading-tight tracking-[-0.025em]" : "section-title mb-4 text-center text-[clamp(22px,4.5vw,38px)] leading-tight tracking-[-0.025em]"}>Kto sa bude starať o vášho psíka?</h2>
             <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 sm:gap-6">
-              <div className="w-full max-w-[440px]">
+              <div className="w-full max-w-[440px] lg:max-w-[560px]">
                 <img
                   src={teamPhoto}
                   alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
                   loading="lazy"
-                  className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72 lg:h-[310px]"
+                  className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72 lg:h-[340px]"
                 />
-                <div data-hero-benefits className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:gap-2 lg:max-w-none lg:flex-wrap lg:gap-2">
+                <div data-hero-benefits className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:gap-2 lg:max-w-none lg:flex-nowrap lg:gap-2">
                   {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
                     <span
                       key={item}
