@@ -626,6 +626,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const contentTop = content.getBoundingClientRect().top;
                 const reviewsBottom = reviews.getBoundingClientRect().bottom;
                 const formTop = form.getBoundingClientRect().top;
+                const formContentTop = form.querySelector('[data-lead-step-form]')?.getBoundingClientRect().top;
                 const reviewBottom = reviews.getBoundingClientRect().bottom;
                 const paidCarousel = window.location.pathname === '/psia-skolka-kosice/';
                 const newPhotos = paidCarousel
@@ -647,6 +648,7 @@ if (!bellaris && brandPreviewCandidate) {
                 return {
                   missing: false,
                   formTop,
+                  formContentTop,
                   reviewGap: formTop - reviewBottom,
                   photoCount: photoCards.length,
                   floatingDockFixed: !!floatingGuide && getComputedStyle(floatingGuide).position === 'fixed' && !hero.contains(floatingGuide),
@@ -676,7 +678,8 @@ if (!bellaris && brandPreviewCandidate) {
                     (!!photoFrame && !!floatingGuide && formTop >= reviewsBottom + 12 &&
                      formTop >= window.innerHeight - 24 &&
                      formTop - reviewsBottom <= window.innerHeight * 0.44 &&
-                     formTop >= floatingGuide.getBoundingClientRect().bottom + 8 &&
+                     Number.isFinite(formContentTop) &&
+                     formContentTop >= floatingGuide.getBoundingClientRect().bottom + 8 &&
                      // The form/gallery swap preserves natural document flow.
                      Math.abs(hero.getBoundingClientRect().bottom - formTop) <= 2 &&
                      Math.abs(form.getBoundingClientRect().bottom - spacer.getBoundingClientRect().top) <= 2 &&
@@ -743,7 +746,12 @@ if (!bellaris && brandPreviewCandidate) {
                   textOverflows: proof.scrollWidth > proof.clientWidth + 2,
                 };
               });
-              if (firstFold.missing || firstFold.formTop < firstFold.viewportHeight - 2 ||
+              if (firstFold.missing ||
+                  // After LEAD form/gallery swap only the section shell may peek
+                  // at the fold; actual form fields must stay clear of the dock.
+                  (url.pathname === '/psia-skolka-kosice/'
+                    ? !Number.isFinite(firstFold.formContentTop) || firstFold.formContentTop < firstFold.viewportHeight - 2
+                    : firstFold.formTop < firstFold.viewportHeight - 2) ||
                   (url.pathname === '/test-aria/' && firstFold.topSpacerHeight < 0) ||
                   (url.pathname === '/test-aria/' && firstFold.contentCenterY < firstFold.viewportHeight * 0.36) ||
                   (url.pathname === '/test-aria/' && (firstFold.reviewGap < 90 || firstFold.reviewGap > 240)) ||
