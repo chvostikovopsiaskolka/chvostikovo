@@ -22,14 +22,11 @@ const NAV_MOBILE_AFTER_INFO = [
   { href: "#kontakt", label: "Kontakt" },
 ];
 
-const NAV_DESKTOP_BEFORE_ABOUT = [
-  { href: "#starostlivost", label: "Ako sa postaráme" },
-  { href: "#preco", label: "Prečo škôlka" },
-];
+const NAV_DESKTOP_BEFORE_ABOUT: { href: string; label: string }[] = [];
 
 const NAV_DESKTOP_AFTER_ABOUT = [
-  { href: "#podmienky", label: "Podmienky" },
-  { href: "#cennik", label: "Cenník" },
+  { href: "#starostlivost", label: "Ako sa postaráme" },
+  { href: "#preco", label: "Prečo škôlka" },
   { href: "/caste-otazky", label: "Časté otázky" },
 ];
 
@@ -185,6 +182,17 @@ export function Header({
           >
             O nás
           </a>
+
+          {[
+            { href: "#cennik", label: "Cenník" },
+            { href: "#podmienky", label: "Podmienky" },
+          ].map((item) => (
+            <a key={item.href} href={sectionHref(item.href)}
+              onClick={(event) => { trackDesktopNav(item.href.slice(1)); handleSectionClick(event, item.href); }}
+              className="font-display text-xs font-semibold whitespace-nowrap text-forest/80 transition-colors hover:text-coral">
+              {item.label}
+            </a>
+          ))}
 
           <a
             href="/produkty"
