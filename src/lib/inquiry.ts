@@ -45,6 +45,7 @@ export const shortSchema = z.object({
   puppy_check: puppyCheckSchema.optional(),
   // One optional free-form question stored only with an explicit lead/contact submit.
   otazka: z.string().trim().min(5).max(600).optional(),
+  preferovany_kontakt: z.enum(["telefon", "email"]).optional(),
   email: z.string().trim().email().max(254).optional(),
 }).merge(attributionSchema);
 
@@ -130,6 +131,9 @@ export function buildFields(data: InquiryData): Array<{ label: string; value: st
       ...(data.email ? [{ label: "E-mail", value: data.email }] : []),
       { label: "O čo máte záujem?", value: data.zaujem },
       ...(data.otazka ? [{ label: "Otázka návštevníka", value: data.otazka }] : []),
+      ...(data.otazka && data.preferovany_kontakt ? [{
+        label: "Preferovaný kontakt", value: data.preferovany_kontakt === "email" ? "E-mail" : "Telefón",
+      }] : []),
       ...(data.plemeno ? [{ label: "Plemeno psíka", value: data.plemeno }] : []),
       ...(puppy ? [
         { label: "Šteniatko – vek", value: `${puppy.age_months} mesiacov` },

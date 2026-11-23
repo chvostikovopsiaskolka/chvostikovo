@@ -59,9 +59,11 @@ const ariaQuestion = buildDbPayload(shortSchema.parse({
   typ: "informacie", consent: true, meno: "Test", telefon: phone,
   email: "test@example.com", zaujem: "Chcem sa informovať o škôlke",
   otazka: "Je škôlka vhodná pre bojazlivejšieho psíka?",
+  preferovany_kontakt: "email",
 }));
 assert(ariaQuestion.interest_reason === "Chcem sa informovať o škôlke" &&
-  ariaQuestion.raw_payload["Otázka návštevníka"] === "Je škôlka vhodná pre bojazlivejšieho psíka?",
+  ariaQuestion.raw_payload["Otázka návštevníka"] === "Je škôlka vhodná pre bojazlivejšieho psíka?" &&
+  ariaQuestion.raw_payload["Preferovaný kontakt"] === "E-mail",
   "A free-form question must be retained in existing lead raw_payload.");
 assert(!shortSchema.safeParse({
   typ: "informacie", consent: true, meno: "Test", telefon: phone,
@@ -76,6 +78,17 @@ assert(ariaBackend.includes("invalid_aria_question") &&
   ariaBackend.includes("Otázka návštevníka") &&
   ariaBackend.includes("lines.push(`Otázka návštevníka: ${question}`)"),
   "Aria question must be validated on the server and delivered in operator email.");
+assert(ariaBackend.includes("Preferovaný kontakt:") &&
+  ariaBackend.includes("email_required_for_contact_preference") &&
+  ariaBackend.includes("if (!ARIA_QUESTION_SOURCES.has(text(input.cta_source, 100)))"),
+  "Aria contact must validate preferred reply method, include it in the operator mail, and skip SMS dispatch.");
+const smsException = readFileSync(new URL("../supabase/migrations/20261122_aria_contact_no_sms.sql", import.meta.url), "utf8");
+const smsRollback = readFileSync(new URL("../supabase/rollbacks/20261122_aria_contact_no_sms.sql", import.meta.url), "utf8");
+assert(smsException.includes("new.raw_payload->>'cta_source'") &&
+  smsException.includes("'aria_preview_chat_other','lead_landing_aria_chat_other'") &&
+  smsRollback.includes("INSERT INTO public.web_form_sms_outbox") &&
+  !smsRollback.includes("new.raw_payload->>'cta_source'"),
+  "Existing SMS outbox needs the narrow Aria-source guard and a compatible rollback.");
 
 // A plain question remains a contact, NOT a paid marketing conversion,
 // even if the visitor granted GA4/Meta measurement consent.
@@ -84,6 +97,11 @@ const ariaAnalyticsSource = readFileSync(new URL("../src/lib/analytics.ts", impo
 assert(ariaAnalyticsSource.includes('pushAnalyticsEvent("aria_question_submit"') &&
   ariaAnalyticsSource.includes('pushAnalyticsEvent("generate_lead"'),
   "Custom Aria contact event and primary GA4 interest event must both exist.");
+assert(ariaFormsSource.includes("data-aria-contact-wizard") &&
+  ariaFormsSource.includes("data-aria-contact-question-step") &&
+  ariaFormsSource.includes("data-aria-contact-details-step") &&
+  ariaFormsSource.includes("preferredContact"),
+  "Aria free-text contact must remain an explicit two-step question -> contact wizard.");
 assert(ariaFormsSource.includes('trackAriaQuestionSubmit(trackingSource') &&
   ariaFormsSource.includes('if (showQuestionField)') &&
   ariaFormsSource.includes('trackMetaFormConversion("informacie"'),
@@ -128,6 +146,27 @@ assert(ariaLandingTracking.includes('"lead_landing_first_visit_details"') &&
   ariaLandingTracking.includes('"lead_landing_first_visit_steps"'),
   "Campaign first-visit explanation and three-step shortcut must remain tracked");
 const guidedLeadTracking = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
+const guidedAriaTracking = readFileSync(new URL("../src/components/site/AriaGuidedChat.tsx", import.meta.url), "utf8");
+for (const action of ["form_start_interest", "form_start_other", "form_start_puppy_contact"]) {
+  assert(guidedAriaTracking.includes('track("' + action + '")'),
+    "Aria chat must emit distinct, anonymous start events: " + action);
+}
+assert(guidedLeadTracking.includes("onStarted?.()") && ariaFormsSource.includes("onStarted?.()"),
+  "Only the first form field interaction emits an Aria form start, not a CTA open.");
+const ariaReportMigration = readFileSync(new URL("../supabase/migrations/20261123_admin_aria_chat_analytics_v1.sql", import.meta.url), "utf8");
+assert(ariaReportMigration.includes("auth.uid()") &&
+  ariaReportMigration.includes("public.staff") &&
+  ariaReportMigration.includes("public.website_interaction_events") &&
+  ariaReportMigration.includes("public.web_form_submissions") &&
+  ariaReportMigration.includes("REVOKE ALL ON FUNCTION public.admin_aria_chat_analytics_v1") &&
+  ariaReportMigration.includes("GRANT EXECUTE ON FUNCTION public.admin_aria_chat_analytics_v1") &&
+  ariaReportMigration.includes("form_start_interest") &&
+  ariaReportMigration.includes("form_start_other") &&
+  ariaReportMigration.includes("form_start_puppy_contact"),
+  "Staff-only Aria aggregation must use event counters and canonical real CRM submissions.");
+assert(!guidedLeadTracking.includes('onClick={() => void trackCookielessInteraction("success_conditions_click"') &&
+  !guidedLeadTracking.includes('onClick={() => void trackCookielessInteraction("success_pricing_click"'),
+  "Successful interest must show only the phone correction receipt.");
 const successBoundary = guidedLeadTracking.indexOf("const result = await submitInquiry(");
 const conversionBoundaries = [
   guidedLeadTracking.indexOf('trackCookielessInteraction("form_submit"'),
@@ -403,7 +442,10 @@ assert(shortFormSource.includes("grid-cols-3") && shortFormSource.includes("peer
 assert(!shortFormSource.includes('name="zaujem" required className="field"'), "Remove only the original short-form native dropdown.");
 assert(shortFormSource.includes("Potrebujem škôlku občas") && !shortFormSource.includes("Potrebujem jednorazové stráženie"), "Only the one-off-sitting option must remain hidden in the short-form UI.");
 assert(shortFormSource.includes("Chcem zistiť") && shortFormSource.includes("viac o škôlke"), "First option must show the shortened two-line label.");
-assert(!shortFormSource.includes("defaultChecked") && !shortFormSource.includes('checked={'), "No radio option may start selected.");
+const shortInterestGroupStart = shortFormSource.indexOf('legend className="label-sm">O čo máte záujem?');
+const shortInterestGroup = shortFormSource.slice(shortInterestGroupStart, shortFormSource.indexOf("</fieldset>", shortInterestGroupStart));
+assert(shortInterestGroupStart >= 0 && !shortInterestGroup.includes("defaultChecked") && !shortInterestGroup.includes('checked={'),
+  "Original interest radios must not start selected; contact preference has a separate controlled group.");
 for (const interest of ["Chcem sa dozvedieť viac o psej škôlke", "Mám záujem o pravidelné návštevy", "Potrebujem škôlku občas"]) {
   assert(shortFormSource.includes(interest), "All three original Slovak values must remain unmodified.");
   const parsed = shortSchema.parse({ typ: "informacie", consent: true, meno: "Test", telefon: phone, zaujem: interest });

@@ -955,8 +955,13 @@ if (!bellaris && brandPreviewCandidate) {
                   const disabledEntry = composer.locator('input');
                   if (await questionMenu.evaluate(el => !!el.closest('[data-aria-chat-history]')) ||
                       !await disabledEntry.isDisabled() ||
+                      await disabledEntry.getAttribute('placeholder') !== null ||
                       !await composer.locator('svg[viewBox="0 0 33 36"]').count())
-                    throw new Error('Chat must pin FAQ above a pink-paw, read-only message composer');
+                    throw new Error('Chat must pin FAQ above an empty, disabled composer with the pink profile paw');
+                  const otherColor = await questionMenu.locator('[data-aria-chat-other-cta]')
+                    .evaluate(el => getComputedStyle(el).backgroundColor);
+                  if (otherColor !== 'rgb(255, 240, 213)')
+                    throw new Error('Other-question FAQ must have the approved soft orange highlight, got ' + otherColor);
                   const [questionsBox, composerBox, historyBox] = await Promise.all([
                     questionMenu.boundingBox(), composer.boundingBox(),
                     chat.locator('[data-aria-chat-history]').boundingBox(),
@@ -1045,10 +1050,11 @@ if (!bellaris && brandPreviewCandidate) {
                   await chat.locator('[data-aria-chat-followup] [data-aria-chat-other-cta]').click();
                   const questionForm = chat.locator('[data-aria-chat-other]');
                   await questionForm.waitFor({ state: 'visible' });
-                  if (!await questionForm.locator('textarea[name="otazka"]').count() ||
+                  if (!await questionForm.locator('[data-aria-contact-question-step] textarea[name="otazka"]').count() ||
+                      await questionForm.locator('input[name="meno"]').count() ||
                       await questionForm.locator('a[href^="mailto:"]').count() ||
-                      !await questionForm.getByLabel('E-mail *').count())
-                    throw new Error('Other question must use a consented form and not a mailto link');
+                      !await questionForm.getByText('Krok 1 z 2').count())
+                    throw new Error('Aria contact must start with a question, never with personal details');
                   let askedPayload = null;
                   await page.route('**/functions/v1/web-form-submit', async route => {
                     if (route.request().method() === 'OPTIONS') {
@@ -1058,16 +1064,35 @@ if (!bellaris && brandPreviewCandidate) {
                     askedPayload = route.request().postDataJSON();
                     await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true }) });
                   });
+                  await questionForm.locator('textarea[name="otazka"]').fill('Môj psík má špeciálne potreby?');
+                  if (askedPayload) throw new Error('Step one must not send a contact');
+                  await questionForm.getByRole('button', { name: 'Pokračovať na kontakt' }).click();
+                  await questionForm.locator('[data-aria-contact-details-step]').waitFor({ state: 'visible' });
+                  if (await chat.locator('[data-aria-chat-form-scroll]').evaluate(el => el.scrollTop > 2))
+                    throw new Error('Two-step contact must reset its internal scroll at the top of step two');
+                  if (!await questionForm.getByText('Krok 2 z 2').count() ||
+                      await questionForm.locator('textarea[name="otazka"]').count() ||
+                      !await questionForm.getByText('Môj psík má špeciálne potreby?').count())
+                    throw new Error('Step two must preserve the typed question');
+                  const emailField = questionForm.locator('input[name="email"]');
+                  if (await emailField.evaluate(el => el.required))
+                    throw new Error('Telephone preference should not require email');
+                  await questionForm.locator('label:has(input[value="email"])').click();
+                  if (!await emailField.evaluate(el => el.required))
+                    throw new Error('Email preference must require email');
                   await questionForm.locator('input[name="meno"]').fill('Test Otázka');
                   await questionForm.locator('input[name="telefon"]').fill('+421901234567');
-                  await questionForm.locator('input[name="email"]').fill('test@example.invalid');
-                  await questionForm.locator('textarea[name="otazka"]').fill('Môj psík má špeciálne potreby?');
-                  if (askedPayload) throw new Error('Question must not send before explicit consent');
+                  await emailField.fill('test@example.invalid');
+                  if (askedPayload) throw new Error('Question must not send before consent');
                   await questionForm.locator('input[type="checkbox"]').check();
-                  await questionForm.getByRole('button', { name: 'Odoslať otázku' }).click();
-                  await questionForm.getByText('Ďakujeme za otázku.').waitFor({ state: 'visible' });
+                  await questionForm.getByRole('button', { name: 'Odoslať správu' }).click();
+                  await questionForm.getByText('Ďakujeme, ozveme sa vám čo najskôr.').waitFor({ state: 'visible' });
+                  if (await questionForm.getByText(/SMS potvrdenie/i).count() ||
+                      await questionForm.getByText(/Je toto telefónne číslo správne/i).count())
+                    throw new Error('Contact success must not display SMS text or correction receipt');
                   if (!askedPayload || askedPayload.interest_reason !== 'Chcem sa informovať o škôlke' ||
                       askedPayload.raw_payload?.['Otázka návštevníka'] !== 'Môj psík má špeciálne potreby?' ||
+                      askedPayload.raw_payload?.['Preferovaný kontakt'] !== 'E-mail' ||
                       askedPayload.cta_source !== 'aria_preview_chat_other')
                     throw new Error('Other question must submit inside an existing consented lead payload');
                   await page.unroute('**/functions/v1/web-form-submit');
@@ -1163,6 +1188,9 @@ if (!bellaris && brandPreviewCandidate) {
                   });
                   await interest.getByRole('button', { name: 'Odoslať záujem' }).click();
                   await interest.locator('[data-lead-step-success]').waitFor({ state: 'visible' });
+                  if (await interest.getByRole('link', { name: /Podmienky prijatia|Cenník/ }).count() ||
+                      !await interest.getByText('Je toto telefónne číslo správne?').count())
+                    throw new Error('After successful interest, show only phone confirmation, not other links');
                   if (!posted || posted.interest_reason !== 'Mám záujem využívať škôlku pravidelne' ||
                       posted.cta_source !== 'aria_preview_chat_interest')
                     throw new Error('Two-step lead form must preserve selection and attribution');

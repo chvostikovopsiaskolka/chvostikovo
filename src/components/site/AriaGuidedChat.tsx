@@ -264,7 +264,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     nextId.current += 2;
     setMessages(current => [...current,
       { id, side: "person", text: "Chcem sa spýtať niečo iné." },
-      { id: id + 1, side: "aria", text: "Haf! 🐾 Kľudne sa opýtaj môjho panička cez tento krátky formulár. Radi ti odpovieme na e-mail alebo zavoláme." },
+      { id: id + 1, side: "aria", text: "Jasné! 🐾 Cez kontaktný formulár napíš správu mojim majiteľom. Radi sa ti ozvú hneď, ako to bude možné." },
     ]);
     setMode("other");
   }
@@ -376,7 +376,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                   </button>
                 ))}
                 <button type="button" data-aria-chat-other-cta onClick={showOther}
-                  className={"min-h-11 rounded-xl border border-[#e4d9cb] bg-white px-2.5 py-2.5 text-left text-xs font-semibold leading-snug text-[#26322b] shadow-sm transition hover:border-[#aa4b00] focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
+                  className={"min-h-11 rounded-xl border border-[#ffa414]/55 bg-[#fff0d5] px-2.5 py-2.5 text-left text-xs font-extrabold leading-snug text-[#26322b] shadow-sm transition hover:border-[#ffa414] hover:bg-[#ffe3b2] focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
                     (unanswered.some(question => question.id === "puppy") ? "" : "col-span-2")}>
                   Mám inú otázku?
                 </button>
@@ -392,13 +392,12 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             </span>
             <input type="text" disabled readOnly
               aria-label="Písanie správ zatiaľ nie je dostupné"
-              placeholder="Napísať správu (pripravujeme)"
               className="min-h-11 min-w-0 flex-1 cursor-not-allowed rounded-2xl border border-[#e4d9cb] bg-white px-4 text-sm text-[#26322b] placeholder:text-[#7f867f] disabled:opacity-100" />
           </div>
         )}
 
         {mode !== "questions" && (
-          <div className="max-h-[61%] shrink-0 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/65 backdrop-blur-2xl p-3 sm:p-4">
+          <div data-aria-chat-form-scroll className="max-h-[61%] shrink-0 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/65 backdrop-blur-2xl p-3 sm:p-4">
             {mode === "puppy" && (
               <section data-aria-chat-puppy-check aria-label="Orientačná kontrola šteniatka" className="space-y-3">
                 <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
@@ -426,6 +425,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                   <span className="mt-1 block">Vek: {puppyCheck.age_months} mesiacov · očkovania: besnota, DHPPi+L, kotercový kašeľ – {Object.values(puppyCheck.vaccines).every(value => value === "yes") ? "všetky potvrdené" : "nie všetky potvrdené"}.</span>
                 </p>
                 <ShortForm hideInterest showChatDogFields trackingSource={formPrefix + "_puppy_contact"}
+                  onStarted={() => track("form_start_puppy_contact")}
                   puppyCheck={puppyCheck}
                   interestValue={puppyContactIsEligible ? "Mám záujem o škôlku pre šteniatko" : "Chcem sa informovať o škôlke"}
                   onSent={() => track("puppy_contact_submitted")} />
@@ -438,6 +438,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                 </button>
                 <h3 className="font-display text-sm font-bold text-forest">Krátky nezáväzný formulár 🐾</h3>
                 <LeadStepForm trackingSource={formPrefix + "_interest"}
+                  onStarted={() => track("form_start_interest")}
                   onSent={() => track("interest_submitted")} />
               </section>
             )}
@@ -448,6 +449,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                 </button>
                 <h3 className="font-display text-sm font-bold text-forest">Napíš nám svoju otázku 🐾</h3>
                 <ShortForm hideInterest showQuestionField trackingSource={formPrefix + "_other"}
+                  onStarted={() => track("form_start_other")}
                   interestValue="Chcem sa informovať o škôlke"
                   onSent={() => track("other_question_submitted")} />
                 <a href={"tel:" + PHONE} className="flex min-h-11 items-center justify-center rounded-xl border border-[#9e336f]/30 px-3 text-xs font-bold text-[#9e336f]">

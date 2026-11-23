@@ -21,7 +21,7 @@ export const LEAD_STEP_INTERESTS = [
   { value: "Mám záujem využívať škôlku občasne", lines: ["Mám záujem", "občasne", "využívať škôlku"] },
 ] as const;
 
-export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, presetInterest, ariaPreview = true, puppyCheck }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined }) {
+export function LeadStepForm({ trackingSource, onSent, onStarted, questionInHeading = false, presetInterest, ariaPreview = true, puppyCheck }: { trackingSource: string; onSent?: () => void; onStarted?: () => void; questionInHeading?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined }) {
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
   const [selectedInterest, setSelectedInterest] = useState(presetInterest ?? "");
@@ -38,6 +38,8 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   function trackStart() {
     if (formStarted.current) return;
     formStarted.current = true;
+    // Separate chat-specific start from the shared page-wide form_start guard.
+    onStarted?.();
     void trackCookielessInteraction("form_start", trackingSource);
   }
 
@@ -112,10 +114,6 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
           Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu.
         </p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
-        <div className="mt-2 flex flex-wrap justify-center gap-3 text-sm font-semibold text-forest">
-          <a href="/#podmienky" onClick={() => void trackCookielessInteraction("success_conditions_click", trackingSource)} className="underline underline-offset-4">Podmienky prijatia</a>
-          <a href="/#cennik" onClick={() => void trackCookielessInteraction("success_pricing_click", trackingSource)} className="underline underline-offset-4">Cenník</a>
-        </div>
       </div>
     );
   }
