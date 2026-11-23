@@ -2898,12 +2898,18 @@ if (!bellaris && brandPreviewCandidate) {
             await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
             const homeConsent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
             if (await homeConsent.isVisible()) await homeConsent.click();
-            // Contextual FAQ, article CTA and visibly readable hygiene cards.
-            const introToggle = productPage.locator('#prva-navsteva').getByRole('button', { name: 'Zistite viac o úvodnej návšteve' });
-            await introToggle.click();
-            if (await introToggle.getAttribute('aria-expanded') !== 'true' ||
-                !(await productPage.locator('#prva-navsteva').getByText('2–3 kratšie návštevy', { exact: false }).count())) {
-              throw new Error('First-visit FAQ must open and explain the additional adaptation visits');
+            // Canonical first-visit details now live in three always-visible
+            // steps. Verify the adaptation copy, truthful-owner emphasis and
+            // absence of the former duplicate disclosure instead of clicking
+            // a deliberately deleted button.
+            const intro = productPage.locator('#prva-navsteva');
+            const introSteps = intro.locator('[data-first-visit-step]');
+            if (await introSteps.count() !== 3 ||
+                await intro.getByRole('button', { name: 'Zistite viac o úvodnej návšteve' }).count() !== 0 ||
+                !await introSteps.nth(0).locator('strong').getByText('Pred nástupom do škôlky').count() ||
+                !await introSteps.nth(1).locator('strong').getByText('2–3 kratšie návštevy').count() ||
+                !await introSteps.nth(2).locator('strong').getByText(/pravdivo všetko/).count()) {
+              throw new Error('Three first-visit steps must visibly cover adaptation and truthful owner details without duplicate FAQ');
             }
             const careToggle = productPage.locator('#starostlivost').getByRole('button', { name: 'Ako dbáme na bezpečnosť psíkov?' });
             await careToggle.click();
