@@ -290,5 +290,5 @@ assert(hero.includes('data-home-hero-photo={index + 1}') &&
        read('src/routes/index.tsx').indexOf('data-home-hero-revealed-form') <
        read('src/routes/index.tsx').indexOf('<ReviewReasons variant="home"') &&
        css.includes('.site-brand #top [data-home-hero-photos]') &&
-       css.includes('border: 1.5px solid rgb(184 46 127 / 32%)'),
+       css.includes('border: 2px solid rgb(184 46 127 / 32%)'),
        'Home mobile photo pair, CTA-to-inline-form and liquid border contract');
