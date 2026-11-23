@@ -80,7 +80,7 @@ export function AriaLeadAssistant({
   onOpenInfo: () => void;
   onOpenInterest: () => void;
   onOpenPuppyChecker: () => void;
-  onRevealInlineForm?: () => void;
+  onRevealInlineForm?: (() => void) | undefined;
   hidden?: boolean;
   trackingPrefix?: string;
   requirementsSectionId?: string;
