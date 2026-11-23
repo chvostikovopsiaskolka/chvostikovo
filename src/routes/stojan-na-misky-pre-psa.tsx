@@ -13,6 +13,7 @@ import { StandBenefitSteps } from "@/components/site/StandBenefitSteps";
 import { ProductInquirySteps } from "@/components/site/ProductInquirySteps";
 import { ProductInquiryContact } from "@/components/site/ProductInquiryContact";
 import { FormDialog } from "@/components/site/FormDialog";
+import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { Collapse } from "@/components/site/Collapse";
 import { phoneFromForm } from "@/lib/phone";
 import { submitProductInquiry } from "@/lib/product-inquiry";
@@ -430,8 +431,9 @@ function BowlStandPage() {
             </div>
           </div>
         </section>
-        <section id="objednavka-stojana" data-stand-inline-form className="scroll-mt-20 bg-secondary/60 py-14 sm:py-20">
-          <div className="mx-auto max-w-3xl px-4">
+        <section id="objednavka-stojana" data-stand-inline-form className="relative scroll-mt-20 overflow-hidden bg-secondary/60 py-14 sm:py-20">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-3xl px-4">
             <div className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Váš stojan na mieru</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Máte záujem o stojan?</h2>
