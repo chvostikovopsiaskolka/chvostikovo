@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import type { PuppyCheckInput } from "@/lib/inquiry";
 import { Check } from "lucide-react";
 import { currentSourceRef } from "@/lib/tracking-sanitization";
@@ -24,6 +24,7 @@ export const LEAD_STEP_INTERESTS = [
 
 export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, compact = false, presetInterest, ariaPreview = true, puppyCheck }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; compact?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined }) {
   const formId = useId();
+  const formRef = useRef<HTMLFormElement>(null);
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
   const [selectedInterest, setSelectedInterest] = useState(presetInterest ?? "");
   // Shared required breed and optional sex for information, regular, occasional and puppy leads.
@@ -35,6 +36,15 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
   const progress = useFormProgress(trackingSource);
+
+  // Only older engines need a class fallback for the scoped :has() rules.
+  useEffect(() => {
+    if (typeof CSS !== "undefined" && CSS.supports("selector(:has(*))")) return;
+    const shell = formRef.current?.closest("[data-lead-form-shell]");
+    if (!shell) return;
+    shell.classList.toggle("lead-contact-step", step === 2 && !sent);
+    return () => shell.classList.remove("lead-contact-step");
+  }, [step, sent]);
 
   function trackStart() {
     if (formStarted.current) return;
@@ -127,7 +137,9 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
 
   return (
     <form
+      ref={formRef}
       data-lead-step-form
+      data-lead-step={step}
       onSubmit={onSubmit}
       onInputCapture={progress.onInputCapture}
       onBlurCapture={progress.onBlurCapture}
@@ -173,7 +185,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
       </div>
 
       <div className={step === 2 ? "space-y-3.5" : "hidden"} aria-hidden={step !== 2}>
-        <h3 className="font-display text-lg font-bold leading-snug text-forest sm:text-xl">Kam sa vám môžeme ozvať?</h3>
+        <h3 className="font-display text-lg font-bold leading-snug text-forest sm:text-xl">Kontaktné údaje</h3>
         {puppyCheck && (
           <div data-puppy-check-summary className="rounded-2xl border border-forest/15 bg-secondary/50 p-3 text-xs leading-relaxed text-forest">
             <p className="font-display font-bold">K záujmu pripojíme aj vyplnenú kontrolu šteniatka:</p>

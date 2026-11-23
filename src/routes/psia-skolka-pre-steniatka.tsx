@@ -264,11 +264,11 @@ function PuppyDaycarePage() {
 
             <div className="mx-auto hidden w-full max-w-md lg:mx-0 lg:block">
               <SchoolmatesFormCrown compact />
-              <div className="form-liquid-surface rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
-                <h2 className="text-center font-display text-2xl font-bold text-forest">
+              <div data-lead-form-shell className="form-liquid-surface rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
+                <h2 data-lead-form-intro className="text-center font-display text-2xl font-bold text-forest">
                   Čo hľadáte pre svojho psíka?
                 </h2>
-                <p className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/75">
+                <p data-lead-form-intro className="mx-auto mt-2 mb-4 max-w-sm text-center text-sm leading-relaxed text-forest/75">
                   Vyplňte krátky formulár. Ozveme sa vám.
                 </p>
                 <PuppyForm source="puppy_landing_desktop_inline" />
@@ -418,8 +418,8 @@ function PuppyDaycarePage() {
 
         <section className="bg-card py-10 sm:py-16">
           <div className="mx-auto max-w-4xl px-4">
-            <div className="rounded-4xl bg-secondary/55 p-5 shadow-soft sm:p-8">
-              <div className="mx-auto max-w-2xl text-center">
+            <div data-lead-form-shell className="rounded-4xl bg-secondary/55 p-5 shadow-soft sm:p-8">
+              <div data-lead-form-intro className="mx-auto max-w-2xl text-center">
                 <h2 className="section-title text-3xl sm:text-4xl">
                   Je už vaše šteniatko pripravené na škôlku?
                 </h2>

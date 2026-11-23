@@ -105,8 +105,8 @@ function Index() {
           <section id="home-hero-interest" ref={heroInquiryRef} data-home-hero-revealed-form
             className="relative scroll-mt-20 overflow-hidden bg-card px-4 pb-11 pt-6 lg:hidden">
             <SectionAmbientPaws />
-            <div className="form-liquid-surface relative z-10 mx-auto max-w-xl overflow-hidden rounded-[26px] px-4 py-6 min-[390px]:px-6">
-              <h2 tabIndex={-1} className="font-display text-center text-lg font-bold text-forest focus:outline-none">
+            <div data-lead-form-shell className="form-liquid-surface relative z-10 mx-auto max-w-xl overflow-hidden rounded-[26px] px-4 py-6 min-[390px]:px-6">
+              <h2 data-lead-form-intro tabIndex={-1} className="font-display text-center text-lg font-bold text-forest focus:outline-none">
                 Chceli by ste sa informovať o škôlke?
               </h2>
               <LeadStepForm trackingSource="home_hero_interest_mobile" questionInHeading compact />

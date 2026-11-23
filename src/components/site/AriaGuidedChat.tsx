@@ -432,11 +432,11 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
               </section>
             )}
             {mode === "interest" && (
-              <section aria-label="Nezáväzný záujem v chate" data-aria-chat-interest className="space-y-2">
+              <section data-lead-form-shell aria-label="Nezáväzný záujem v chate" data-aria-chat-interest className="space-y-2">
                 <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
                   <ArrowLeft size={15} aria-hidden /> Späť k otázkam
                 </button>
-                <h3 className="font-display text-sm font-bold text-forest">Krátky nezáväzný formulár 🐾</h3>
+                <h3 data-lead-form-intro className="font-display text-sm font-bold text-forest">Krátky nezáväzný formulár 🐾</h3>
                 <LeadStepForm trackingSource={formPrefix + "_interest"}
                   onSent={() => track("interest_submitted")} />
               </section>

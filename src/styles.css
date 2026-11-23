@@ -1551,3 +1551,18 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
     background: Canvas; border-color: CanvasText;
   }
 }
+
+/* Each shared wizard controls only its explicitly marked local introduction.
+   Keep the modal title available to assistive technology and focus management. */
+[data-lead-form-shell]:has([data-lead-step="2"]) > [data-lead-form-intro] { display: none; }
+[data-lead-form-shell]:has([data-lead-step="2"]) > [data-lead-dialog-intro] {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
+}
+@supports not selector(:has(*)) {
+  [data-lead-form-shell].lead-contact-step > [data-lead-form-intro] { display: none; }
+  [data-lead-form-shell].lead-contact-step > [data-lead-dialog-intro] {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
+  }
+}

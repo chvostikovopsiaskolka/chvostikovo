@@ -12,6 +12,21 @@ fs.mkdirSync(out, { recursive: true });
 const results = [];
 const failures = [];
 
+async function assertLeadContactIntro(form) {
+  if (await form.getAttribute('data-lead-step') !== '2' ||
+      !await form.getByRole('heading', {name:'Kontaktné údaje', exact:true}).isVisible())
+    throw new Error('Shared contact step must have its concise heading');
+  const state=await form.evaluate(el=>{
+    const shell=el.closest('[data-lead-form-shell]');
+    const intro=shell?[...shell.querySelectorAll(':scope > [data-lead-form-intro]')]:[];
+    const modalIntro=shell?.querySelector(':scope > [data-lead-dialog-intro]');
+    const title=shell?.getAttribute('aria-labelledby');
+    return {shell:!!shell, hidden:intro.every(node=>getComputedStyle(node).display==='none'),
+      modal:!modalIntro||(modalIntro.getBoundingClientRect().height<=1&&!!document.getElementById(title)?.textContent)};
+  });
+  if(!state.shell||!state.hidden||!state.modal)throw new Error('Shared form introduction remains in contact layout: '+JSON.stringify(state));
+}
+
 // APP-01 static regression for the slider fill direction in both engines.
 // Pseudo-element background images are not exposed consistently by getComputedStyle.
 if (!bellaris && brandPreviewCandidate) {
@@ -2280,6 +2295,18 @@ if (!bellaris && brandPreviewCandidate) {
                   };
                 });
                 if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression: '+JSON.stringify(layout));
+                if(width>=1024){
+                  const desktopForm=page.locator('#home-hero-inline-form [data-lead-step-form]');
+                  const position=()=>page.locator('.home-hero-column').evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y+scrollY,width:r.width,height:r.height};});
+                  const before=await position();
+                  await desktopForm.locator('label').first().click();
+                  await desktopForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+                  await assertLeadContactIntro(desktopForm);
+                  const after=await position();
+                  if(Object.keys(before).some(key=>Math.abs(before[key]-after[key])>2))throw new Error('Growing contact form moved Home hero: '+JSON.stringify({width,before,after}));
+                  await desktopForm.getByRole('button',{name:'Späť',exact:true}).click();
+                  await page.locator('#home-hero-inline-form [data-lead-form-intro]').first().waitFor({state:'visible'});
+                }
                 if (width===320) {
                   // Narrow Android short viewport: review proof visible above
                   // the dock; controls remain >=44px despite compact mode.
@@ -2393,6 +2420,7 @@ if (!bellaris && brandPreviewCandidate) {
               await friendshipForm.locator('label').first().click();
               await friendshipForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
               await friendshipForm.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
+              await assertLeadContactIntro(friendshipForm);
               await page.keyboard.press('Escape');
               await friendshipDialog.waitFor({state:'hidden'});
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
@@ -2480,7 +2508,7 @@ if (!bellaris && brandPreviewCandidate) {
             if (await next.isEnabled()) throw new Error('Wizard preselected an interest');
             await wizard.getByText('informovať', { exact: true }).first().click();
             await next.click();
-            if (!await wizard.getByRole('heading', { name: 'Kam sa vám môžeme ozvať?' }).isVisible()) throw new Error('Lead wizard did not advance to contact step');
+            if (!await wizard.getByRole('heading', { name: 'Kontaktné údaje' }).isVisible()) throw new Error('Lead wizard did not advance to contact step');
             if (!await wizard.locator('input[name="meno"]').isVisible() || !await wizard.locator('input[name="telefon"]').isVisible())
               throw new Error('Lead contact fields missing');
             await wizard.getByRole('button', { name: 'Späť' }).click();
@@ -2590,6 +2618,7 @@ if (!bellaris && brandPreviewCandidate) {
               if (!await leadForm.locator('[data-inquiry-dog-fields]').isVisible())
                 throw new Error('Regular SK interest must show optional breed on this page: ' + url.pathname);
             }
+            if(brandPreviewCandidate && !url.pathname.startsWith('/en/')) await assertLeadContactIntro(modal.locator('[data-lead-step-form]'));
             const modalFrame = await modal.evaluate(el => {
               const rect = el.getBoundingClientRect();
               const inner = el.querySelector('.form-dialog-scroll');
@@ -2635,6 +2664,21 @@ if (!bellaris && brandPreviewCandidate) {
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
+          if(brandPreviewCandidate&&!bellaris&&!restricted){
+            const forms=page.locator('[data-lead-step-form]:visible');
+            for(let i=0;i<await forms.count();i++){
+              const form=forms.nth(i);
+              if(await form.getAttribute('data-lead-step')==='1'){
+                await form.locator('label').first().click();
+                await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+              }
+              await assertLeadContactIntro(form);
+              await form.getByRole('button',{name:'Späť',exact:true}).click();
+              if(await form.getAttribute('data-lead-step')!=='1')throw new Error('Shared form back failed');
+              const restored=await form.evaluate(el=>{const shell=el.closest('[data-lead-form-shell]');return [...shell.querySelectorAll(':scope > [data-lead-form-intro]')].every(node=>getComputedStyle(node).display!=='none');});
+              if(!restored)throw new Error('Shared introduction not restored on back');
+            }
+          }
           results.push({ engine, restricted, route: url.pathname, status: 'PASS' });
           console.log(`PASS ${label}`);
         } catch (error) {
@@ -3052,6 +3096,17 @@ if (!bellaris && brandPreviewCandidate) {
               if (!photoBox || photoBox.height > 310) throw new Error('Stand article hero photo remains too tall on mobile');
             }
             await productPage.goto(new URL('/blog/kam-so-psom-pocas-pracovneho-dna/', base).href);
+            if(brandPreviewCandidate){
+              await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
+              const consent=productPage.getByRole('button',{name:'Len nevyhnutné',exact:true});
+              if(await consent.isVisible())await consent.click();
+              const blogForm=productPage.locator('#zaujem [data-lead-step-form]');
+              await blogForm.locator('label').first().click();
+              await blogForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+              await assertLeadContactIntro(blogForm);
+              if(await productPage.locator('#zaujem > p').isVisible())throw new Error('Blog contact introduction paragraph remains visible');
+              await blogForm.getByRole('button',{name:'Späť',exact:true}).click();
+            }
             const workdayOptions = productPage.locator('article section.flow-root').nth(1);
             const workdayPhoto = workdayOptions.locator('figure img');
             const workdayBullets = workdayOptions.locator('ul > li');

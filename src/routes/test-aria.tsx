@@ -261,8 +261,8 @@ export function AriaPreviewPage() {
         <section id="aria-hero-form" className="relative z-10 overflow-hidden bg-white pb-12 pt-6 sm:pb-16 sm:pt-8">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-4xl px-4">
-            <div className="form-liquid-surface rounded-4xl bg-white p-5 sm:p-8">
-              <div className="mx-auto max-w-2xl text-center">
+            <div data-lead-form-shell className="form-liquid-surface rounded-4xl bg-white p-5 sm:p-8">
+              <div data-lead-form-intro className="mx-auto max-w-2xl text-center">
                 <h2 className="section-title mt-2 text-xl sm:text-2xl lg:mt-0">Chceli by ste sa informovať o škôlke?</h2>
                 <p className="mt-2 text-sm leading-relaxed text-forest/70 sm:text-base">
                   Radi vám odpovieme na otázky o škôlke.
@@ -490,12 +490,12 @@ export function AriaPreviewPage() {
 
         <section id="aria-first-visit-form" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-2xl px-4">
+          <div data-lead-form-shell className="relative z-10 mx-auto max-w-2xl px-4">
             <div data-aria-first-visit-dogs className="mx-auto mb-3 w-full max-w-sm">
               <SchoolmatesFormCrown compact groundAccent />
             </div>
-            <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o prvú návštevu?</h2>
-            <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
+            <h2 data-lead-form-intro className="section-title text-center text-2xl sm:text-3xl">Máte záujem o prvú návštevu?</h2>
+            <p data-lead-form-intro className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
             <div className="form-liquid-surface mt-5 rounded-3xl border border-forest/10 bg-white p-5 shadow-card sm:p-6">
               <LeadStepForm questionInHeading trackingSource={isLiveLead ? "lead_landing_aria_first_visit_inline" : "aria_preview_first_visit_inline"} />
             </div>
