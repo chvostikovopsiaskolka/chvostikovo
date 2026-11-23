@@ -115,10 +115,10 @@ function Index() {
         )}
         <ReviewReasons variant="home" withVideo showCta={false} />
         <About homeLayout />
+        <DaycarePhotoCarousel />
         <Pricing interestMode homeLayout />
         <Requirements />
         <DaycareEarlyFaq />
-        <DaycarePhotoCarousel />
         <InquirySection allScreens matchHero />
         <Care showEmbeddedFriendship={false} showInterest={false} />
         <Gallery />
