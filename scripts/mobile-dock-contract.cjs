@@ -255,9 +255,16 @@ assert(!productContact.includes('trackMarketingInteraction') &&
 /* APP-01 23.11: explicitly test reordered LEAD, mobile inline and narrow widths. */
 const paid = read("src/routes/test-aria.tsx");
 const ariaAssistant = read("src/components/site/AriaLeadAssistant.tsx");
-assert(paid.indexOf('<section id="aria-hero-form"') < paid.indexOf('id="lead-photo-carousel"') &&
-       paid.indexOf('id="lead-photo-carousel"') < paid.indexOf('<section id="aria-caretakers"'),
-       "Paid LEAD must swap existing inline form and moving gallery without duplicates");
+assert(paid.indexOf('<section id="aria-hero-form"') < paid.indexOf('<section id="aria-caretakers"') &&
+       paid.indexOf('<section id="aria-caretakers"') < paid.indexOf('id="lead-photo-carousel"') &&
+       paid.split('id="lead-photo-carousel"').length === 2 &&
+       paid.includes('data-aria-lead-hero-photos') &&
+       paid.includes('data-aria-lead-hero-cta aria-controls="aria-hero-form"') &&
+       paid.includes('lead_landing_hero_photo_cta') &&
+       paid.includes('lead_landing_hero_photo_below_inline') &&
+       paid.includes('scrollIntoView({ behavior: "smooth", block: "start" })') &&
+       paid.includes('LEAD_REVIEW_GAP_PHOTOS.map((photo, index)'),
+       "Paid LEAD hero photo pair and CTA must scroll to visible shared form, then About, then one carousel");
 assert(hero.includes('data-home-hero-photos') &&
        hero.includes('data-home-hero-interest-cta') &&
        hero.includes('LEAD_REVIEW_GAP_PHOTOS') &&
