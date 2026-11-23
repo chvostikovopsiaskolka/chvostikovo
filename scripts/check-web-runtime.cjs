@@ -2102,8 +2102,9 @@ if (!bellaris && brandPreviewCandidate) {
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2,
                     formDepth:getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).boxShadow.includes('rgb'),
-                    heroGlow:!!heroCta && getComputedStyle(heroCta).boxShadow.includes('226, 84, 164') &&
-                      !getComputedStyle(heroCta).boxShadow.includes('inset') &&
+                    heroGlow:!!document.querySelector('#top .home-hero-cta .hero-cta-primary') &&
+                      getComputedStyle(document.querySelector('#top .home-hero-cta .hero-cta-primary')).boxShadow.includes('226, 84, 164') &&
+                      !getComputedStyle(document.querySelector('#top .home-hero-cta .hero-cta-primary')).boxShadow.includes('inset') &&
                       getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow==='none',
                     conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
