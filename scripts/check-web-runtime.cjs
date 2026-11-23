@@ -2183,17 +2183,21 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Desktop Hero benefit badges not aligned with text left edge: ' + delta);
                 }
               }
-              if ((await primary.evaluate(el => getComputedStyle(el).boxShadow)) === 'none')
-                throw new Error('Primary CTA glow missing: ' + width);
+              const primaryShadow = await primary.evaluate(el => getComputedStyle(el).boxShadow);
+              // Only the homepage mobile "Mám záujem" keeps a soft glow;
+              // the desktop "Chcem zistiť viac" CTA must stay shadow-free.
+              if (url.pathname === '/' && width >= 1024 ? primaryShadow !== 'none' : primaryShadow === 'none')
+                throw new Error('Primary CTA shadow violates route/width-specific design: ' +
+                  JSON.stringify({ path: url.pathname, width, shadow: primaryShadow }));
             }
             if(url.pathname==='/' && !restricted) {
               await page.locator('#home-hero-learn-more').click();
               await page.waitForFunction(()=>{const y=document.getElementById('preco-chvostikovo').getBoundingClientRect().top;return y>=0&&y<260;});
               if(await page.getByRole('dialog').count()) throw new Error('Desktop learn-more action opened a dialog');
               await page.setViewportSize({width:390,height:844});
-              const puppyFaq=page.locator('#podmienky').getByRole('button',{name:'Čo ak chcete prihlásiť šteniatko?'});
+              const puppyFaq=page.locator('#home-early-faq details').last().locator('summary');
               await puppyFaq.click();
-              await page.locator('#podmienky a[href="#aria-puppy-check"]').click();
+              await page.locator('#home-early-faq a[href="#aria-puppy-check"]').click();
               await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
               for(const id of ['informujte-sa','zaujem-po-priatelstvach','prva-navsteva-form']) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
@@ -2681,6 +2685,12 @@ if (!bellaris && brandPreviewCandidate) {
             if (floatStyle.background !== 'rgba(0, 0, 0, 0)') throw new Error('Article photo still has a colored frame');
             if (width === 1440 && floatStyle.float !== 'right') throw new Error('Desktop blog cover must float beside the text');
             if (width === 390 && floatStyle.float !== 'none') throw new Error('Mobile blog cover must remain in reading flow');
+            // Hydration/font-loading is allowed to settle before actual
+            // measured side-by-side geometry is asserted.
+            await productPage.evaluate(async () => {
+              await document.fonts.ready;
+              await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            });
             const relatedGrid = productPage.getByRole('heading', { name: 'Mohlo by vás zaujímať' }).locator('xpath=following-sibling::div[1]');
             const relatedCards = relatedGrid.locator(':scope > a');
             if (await relatedCards.count() !== 3) throw new Error('Three related blog cards expected');
@@ -2689,7 +2699,8 @@ if (!bellaris && brandPreviewCandidate) {
             const thirdCard = await relatedCards.nth(2).boundingBox();
             if (!firstCard || !secondCard || !thirdCard) throw new Error('Missing related blog card geometry');
             if (width === 1440 && (Math.abs(firstCard.y - secondCard.y) > 3 || Math.abs(firstCard.y - thirdCard.y) > 3)) {
-              throw new Error('Desktop related articles must appear side by side');
+              throw new Error('Desktop related articles must appear side by side: ' +
+                JSON.stringify({ first: firstCard, second: secondCard, third: thirdCard, classes: await relatedGrid.getAttribute('class') }));
             }
             if (width === 390 && secondCard.y <= firstCard.y + 10) throw new Error('Mobile blog cards must stack naturally');
             const guideCarousel = productPage.locator('[data-stand-gallery="autoplay"]');
