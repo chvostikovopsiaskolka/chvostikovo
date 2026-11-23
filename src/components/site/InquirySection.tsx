@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { LeadStepForm } from "./LeadStepForm";
+import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FormDialog } from "./FormDialog";
 import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
 
@@ -39,13 +40,14 @@ export function InquirySection({ allScreens = false, matchHero = false, id = "in
   allScreens?: boolean; matchHero?: boolean; id?: string; trackingSource?: string; title?: string; subtitle?: string;
 } = {}) {
   return (
-    <section id={id} className={"scroll-mt-24 bg-card pt-0 pb-10 " + (allScreens ? "" : "lg:hidden")}>
-      <div className="mx-auto max-w-2xl px-4">
+    <section id={id} className={"relative scroll-mt-24 bg-card pt-0 pb-10 " + (allScreens ? "" : "lg:hidden")}>
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-2xl px-4">
         <SchoolmatesFormCrown compact={matchHero} groundAccent={!matchHero} />
 
         <div data-home-inquiry-card={matchHero || undefined} className={matchHero
-          ? "min-w-0 rounded-4xl border border-white/50 bg-card px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8"
-          : "relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8"}>
+          ? "form-liquid-surface min-w-0 rounded-4xl border border-white/50 bg-card px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8"
+          : "form-liquid-surface relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8"}>
           <h3 className={"text-center text-forest " + (matchHero ? "text-xl" : "text-2xl")}>{title}</h3>
           <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
             {subtitle}

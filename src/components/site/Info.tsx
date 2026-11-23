@@ -71,7 +71,7 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
                   <span className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-forest">
                     <Icon className="size-6" aria-hidden />
                   </span>
-                  <h3 className={"font-display text-lg font-bold sm:text-xl " + (id === "podmienky" && !ariaPreview ? "text-[#a95400]" : "text-coral-dark")}>{r.title}</h3>
+                  <h3 className="font-display text-lg font-bold text-[#ffa414] sm:text-xl">{r.title}</h3>
                 </div>
                 <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80"><AriaHighlightedText text={r.text} /></p>
               </article>

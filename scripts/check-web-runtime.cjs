@@ -2138,6 +2138,16 @@ if (!bellaris && brandPreviewCandidate) {
                     cutout:!!cutout && cutout.complete && cutout.naturalWidth>0,
                     palette:document.body.classList.contains('site-brand') && getComputedStyle(document.querySelector('#top h1')).color==='rgb(184, 46, 127)',
                     copy:[...document.querySelectorAll('.home-hero-copy')].every(el=>getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)' && getComputedStyle(el).color==='rgb(255, 255, 255)'),
+                    noMobileSalesBox:innerWidth>=1024 || [...document.querySelectorAll('#top .home-hero-copy')].every(el=>el.getBoundingClientRect().height===0),
+                    mobileOrangePhrase:innerWidth>=1024 || (() => {
+                      const el=document.querySelector('[data-home-mobile-orange-phrase]');
+                      return el?.textContent?.trim()==='váš psík zamiluje' &&
+                        getComputedStyle(el).color==='rgb(255, 164, 20)';
+                    })(),
+                    reasonThirdNoRule:innerWidth>=640 || (() => {
+                      const third=document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] article')[2];
+                      return !!third && getComputedStyle(third).borderTopWidth==='0px';
+                    })(),
                     desktopCopy:innerWidth<1024 || (Math.abs(copy.right-lineRange.getBoundingClientRect().right)<9 && !!document.querySelector('.home-hero-column .home-hero-copy br')),
                     pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
                     passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
@@ -2151,7 +2161,7 @@ if (!bellaris && brandPreviewCandidate) {
                     balancedPass:Math.abs((cards[1].top-cards[0].bottom)-(taxi.getBoundingClientRect().top-cards[1].bottom))<5,
                     faqAfterRequirements:document.getElementById('podmienky').nextElementSibling===faq &&
                       faq.querySelectorAll('details').length===3 && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
-                    orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(169, 84, 0)'),
+                    orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
                     mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty',
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
@@ -2200,7 +2210,14 @@ if (!bellaris && brandPreviewCandidate) {
                     firstVisitNotDuplicated:!document.querySelector('#prva-navsteva [aria-controls]') &&
                       document.querySelectorAll('#prva-navsteva [data-first-visit-step]').length===3 &&
                       document.querySelectorAll('#prva-navsteva [data-first-visit-step] strong').length>=5,
-                    whiteForm:['rgb(255, 255, 255)','oklch(1 0 0)'].includes(getComputedStyle(document.querySelector('#informujte-sa [data-home-inquiry-card]')).backgroundColor) && !document.querySelector('#informujte-sa a[href^="tel:"]'),
+                    frostForm:(() => {
+                      const el=document.querySelector('#informujte-sa [data-home-inquiry-card]');
+                      const style=getComputedStyle(el);
+                      return el.classList.contains('form-liquid-surface') &&
+                        style.backdropFilter.includes('blur') &&
+                        style.backgroundColor.includes('0.55') &&
+                        !document.querySelector('#informujte-sa a[href^="tel:"]');
+                    })(),
                     firstVisit:getComputedStyle(document.getElementById('prva-navsteva')).backgroundColor==='rgb(145, 64, 107)' && ![...document.querySelectorAll('#prva-navsteva button')].some(el=>el.textContent.includes('Dohodnúť úvodnú návštevu')),
                     pricingFits:[...document.querySelectorAll('[data-home-pricing-columns] *')].every(el=>el.scrollWidth<=el.clientWidth+2),
                     paws:!!document.querySelector('#top .paw-trail-background'),

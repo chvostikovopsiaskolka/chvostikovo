@@ -272,3 +272,10 @@ assert(css.includes('@media (max-width: 359px)') && css.includes('#top h1 span {
 assert(reviewReasons.includes('"row-span-2 min-w-0 sm:row-span-1"') &&
        reviewReasons.includes('"col-span-2 min-w-0 rounded-2xl'),
        "First two reasons alongside video, third full width underneath");
+
+// 23 Nov mobile simplification: one hero headline, no redundant mobile pitch.
+assert(!hero.includes('home-hero-copy mx-auto mt-5 max-w-xl') && hero.includes('data-home-mobile-orange-phrase'),
+  "Mobile hero must skip sales box and highlight the whole 'váš psík zamiluje' phrase");
+for (const path of ["src/components/site/Hero.tsx","src/components/site/InquirySection.tsx","src/components/site/Contact.tsx","src/components/site/FormDialog.tsx","src/routes/test-aria.tsx"]) {
+  assert(read(path).includes("form-liquid-surface"), path+" must use the liquid form panel");
+}

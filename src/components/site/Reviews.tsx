@@ -309,7 +309,7 @@ export function VideoReasonsGrid({ items, language = "sk", homeMobileLayout = fa
       </div>
       <div data-video-reasons-copy className="contents sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl">
         {items.map(({ title, text, icon: Icon }) => (
-          <article key={title} className={homeMobileLayout ? (title === "Pekný deň aj pre vášho psíka" ? "col-span-2 min-w-0 rounded-2xl border-t border-forest/10 px-2 py-3 text-cream sm:col-auto sm:rounded-none sm:border-0 sm:px-0 sm:py-4" : "col-start-2 min-w-0 py-2 text-cream sm:col-auto sm:py-4") : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>
+          <article key={title} className={homeMobileLayout ? (title === "Pekný deň aj pre vášho psíka" ? "col-span-2 min-w-0 px-2 pt-2 pb-3 text-cream sm:col-auto sm:rounded-none sm:border-0 sm:px-0 sm:py-4" : "col-start-2 min-w-0 py-2 text-cream sm:col-auto sm:py-4") : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>
             <h3 className={"flex min-w-0 items-start gap-1.5 font-display font-bold leading-snug text-cream sm:gap-2 sm:text-lg lg:text-xl " +
               (homeMobileLayout ? "text-[12px] min-[390px]:text-[13px]" : "text-[13px] min-[390px]:text-[15px]")}>
               <span className={"grid shrink-0 place-items-center rounded-full bg-coral text-primary-foreground sm:size-9 " + (homeMobileLayout ? "size-5" : "size-6")}>
