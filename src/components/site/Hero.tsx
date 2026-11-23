@@ -58,20 +58,20 @@ export function Hero({ onMobileInquiryOpen, mobileInquiryOpen }: {
         </div>
 
         {/* Desktop layout */}
-        <div className="hidden lg:grid lg:min-h-[580px] lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
-          <div className="home-hero-column flex min-w-0 flex-col lg:py-2">
+        <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:gap-10">
+          <div className="home-hero-column flex min-w-0 flex-col lg:pt-2">
             <p className="order-1 mx-0 mb-3 mt-0 font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Denná starostlivosť o stredných a veľkých psíkov
             </p>
 
-            <h1 className="order-2 text-[56px] leading-[1.01] tracking-[-0.035em] text-forest xl:text-[62px]">
+            <h1 className="order-2 text-[3.25rem] leading-[1.01] tracking-[-0.035em] text-forest xl:text-[3.625rem]">
               <span className="block">Psia škôlka v Košiciach,</span>
               <span data-home-hero-title-line className="block">ktorú si váš psík</span>
               <span className="block text-coral-dark">zamiluje</span>
             </h1>
 
             <div className="home-hero-details order-3 mt-4">
-            <span aria-hidden="true" className="home-hero-width-guide font-display text-[56px] font-bold tracking-[-0.035em] xl:text-[62px]">ktorú si váš psík</span>
+            <span aria-hidden="true" className="home-hero-width-guide font-display text-[3.25rem] font-bold tracking-[-0.035em] xl:text-[3.625rem]">ktorú si váš psík</span>
             <div className="home-hero-copy mx-0 max-w-xl">
               <p className="font-display text-base font-bold">
                 Váš psík už nemusí tráviť deň sám doma.
