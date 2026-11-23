@@ -217,7 +217,7 @@ export function StandPhotoLightbox({
             <ChevronRight aria-hidden="true" className="size-8 stroke-[3]" />
           </button>
         </div>
-        <p className="text-center text-xs tabular-nums text-cream/80">{index + 1} / {photos.length}{photo.caption ? ` · ${photo.caption}` : ""}</p>
+        <p data-stand-photo-caption className="text-center text-xs tabular-nums text-cream/80">{index + 1} / {photos.length}{photo.caption ? ` · ${photo.caption}` : ""}</p>
       </DialogContent>
     </Dialog>
   );

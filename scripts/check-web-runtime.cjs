@@ -2310,7 +2310,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
                 await inquiry.locator('label').first().click();
                 await inquiry.getByRole('button',{name:'Pokračovať',exact:true}).click();
-                if(!await inquiry.locator('input[name="meno"]').isVisible()) throw new Error('Inline contact step failed: '+id);
+                await inquiry.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000}).catch(() => { throw new Error('Inline contact step failed: '+id); });
                 await inquiry.getByRole('button',{name:'Späť',exact:true}).click();
               }
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
@@ -2846,6 +2846,7 @@ if (!bellaris && brandPreviewCandidate) {
             const articleLightbox = productPage.locator('[data-stand-lightbox]');
             await articleLightbox.waitFor({state:'visible'});
             if (!await articleLightbox.locator('img').first().isVisible()) throw new Error('Guide lightbox has no photo');
+            await productPage.waitForFunction(() => document.querySelector('[data-stand-photo-viewport] img')?.naturalWidth>0, null, {timeout:5000});
             if (await articleLightbox.getByText('Priblížte si fotografiu').count())
               throw new Error('Obsolete zoom instructions visible');
             if (await articleLightbox.getByRole('button',{name:'Priblížiť fotografiu'}).count() ||
@@ -2875,7 +2876,7 @@ if (!bellaris && brandPreviewCandidate) {
               const vp=el.querySelector('[data-stand-photo-viewport]')?.getBoundingClientRect();
               const image=el.querySelector('[data-stand-photo-viewport] img');
               const im=image?.getBoundingClientRect();
-              const frame=el.getBoundingClientRect(), caption=el.querySelector('p')?.getBoundingClientRect();
+              const frame=el.getBoundingClientRect(), caption=el.querySelector('[data-stand-photo-caption]')?.getBoundingClientRect();
               const buttons=[el.querySelector('[data-stand-photo-previous]'),el.querySelector('[data-stand-photo-next]'),[...el.children].find(b=>b.tagName==='BUTTON')];
               if(!vp || !im || !image || !caption || buttons.some(b=>!b)) return null;
               return {
