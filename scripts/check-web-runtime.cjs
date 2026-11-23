@@ -2105,7 +2105,7 @@ if (!bellaris && brandPreviewCandidate) {
                   });
                   if (!centered) throw new Error('Desktop Home CTA not centered: ' + width);
                 }
-                if (width >= 1024 && !await hero.locator('[data-lead-step-form]').first().isVisible())
+                if (width >= 1024 && !await hero.locator('[data-lead-step-form]:visible').first().isVisible())
                   throw new Error('Desktop home guided form missing');
                 const layout = await page.evaluate(() => {
                   const ids=['top','preco-chvostikovo','o-nas','cennik','podmienky','home-early-faq','informujte-sa','starostlivost','priestory','psie-priatelstva','prva-navsteva','prva-navsteva-form','preco','faq'];
@@ -2264,7 +2264,7 @@ if (!bellaris && brandPreviewCandidate) {
                 if (await ctaPair.count() !== 0) throw new Error('Desktop must hide the interest CTA pair');
                 if (!(await primary.innerText()).includes('Viac o škôlke'))
                   throw new Error('Desktop Hero must only offer the prominent learn-more CTA');
-                if (!await hero.locator('[data-lead-step-form]').first().isVisible())
+                if (!await hero.locator('[data-lead-step-form]:visible').first().isVisible())
                   throw new Error('Desktop guided form missing beside Hero');
                 if (['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/'].includes(url.pathname)) {
                   // Benefit chips should start at the left edge of Hero copy,
