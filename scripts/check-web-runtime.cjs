@@ -114,8 +114,9 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.badgeBg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(184, 46, 127)' : 'rgb(255, 164, 20)') ||
                   palette.badgeFg !== 'rgb(255, 255, 255)' ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
-                  palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
-                  palette.heroCopyFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(255, 255, 255)' : 'rgb(23, 28, 24)') ||
+                  (url.pathname === '/psia-skolka-kosice/'
+                    ? palette.heroCopyBg !== '' || palette.heroCopyFg !== ''
+                    : palette.heroCopyBg !== 'rgb(255, 164, 20)' || palette.heroCopyFg !== 'rgb(23, 28, 24)') ||
                   palette.earlyFaqBg !== 'rgb(255, 255, 255)' ||
                   palette.earlySectionBg !== 'rgba(255, 164, 20, 0.26)' ||
                   palette.pricingBg !== 'rgba(255, 164, 20, 0.26)' ||
@@ -262,16 +263,19 @@ if (!bellaris && brandPreviewCandidate) {
             if (isAriaPage) {
               const isPaidCarousel = url.pathname === '/psia-skolka-kosice/';
               if (isPaidCarousel) {
-                // HERO-MOBILE-01: move the *existing moving carousel* under hero,
-                // not the unrelated static mosaic. The two approved former
-                // teaser photos appear once in the first set, and retain their
-                // original hi-res files in the lightbox.
+                // HERO-MOBILE-01: paid landing uses the approved pair in the
+                // hero; the same moving gallery remains after the About section.
+                // Form stays open below the hero, CTA scrolls to it.
                 const gallery = page.locator('#lead-photo-carousel [data-gesture-track="photos"]');
                 const highlights = gallery.locator(':scope > div:first-child [data-aria-lead-highlight]');
+                const heroPair = page.locator('[data-aria-lead-hero-photos] [data-aria-lead-hero-photo]');
+                const heroCTA = page.locator('[data-aria-lead-hero-cta]');
                 if (await gallery.count() !== 1 ||
-                    await page.locator('[data-aria-review-photo], #aria-mosaic').count() !== 0 ||
-                    await highlights.count() !== 2)
-                  throw new Error('Paid LEAD must have one moved moving carousel and two unique teaser highlights');
+                    await page.locator('[data-aria-review-photo], #aria-mosaic, [data-aria-hero-description]').count() !== 0 ||
+                    await highlights.count() !== 2 || await heroPair.count() !== 2 ||
+                    await heroCTA.count() !== 1 ||
+                    await page.locator('#aria-hero-form [data-lead-step-form]').count() !== 1)
+                  throw new Error('Paid LEAD must have approved hero pair, CTA, visible form and one moving carousel');
                 for (const [n, expected] of [['1', 'lead-review-border-collies'], ['2', 'lead-review-retrievers-aussie']]) {
                   const photo = highlights.filter({has:page.locator('img')}).filter({has:page.locator('img[src*="' + expected + '"]')});
                   if (await photo.count() !== 1 ||
@@ -293,11 +297,16 @@ if (!bellaris && brandPreviewCandidate) {
                   const cards = [...(track?.querySelectorAll(':scope > div:first-child button') ?? [])];
                   const highRes = cards.filter(card => card.hasAttribute('data-aria-lead-highlight'));
                   const gr = gallery?.getBoundingClientRect(), tr = track?.getBoundingClientRect();
+                  const about = document.querySelector('#aria-caretakers')?.getBoundingClientRect();
+                  const heroPhotos = document.querySelector('[data-aria-lead-hero-photos]')?.getBoundingClientRect();
+                  const cta = document.querySelector('[data-aria-lead-hero-cta]')?.getBoundingClientRect();
                   return {
                     width: window.innerWidth,
                     cardCount: cards.length, highlightCount: highRes.length,
                     headingBottom: heading?.bottom, badgeTop: badge?.top,
-                    reviewBottom: reviews?.bottom, galleryTop: gr?.top, trackTop: tr?.top, trackBottom: tr?.bottom,
+                    heroPhotosTop: heroPhotos?.top, heroPhotosBottom: heroPhotos?.bottom, ctaTop: cta?.top, ctaBottom: cta?.bottom,
+                    reviewTop: reviews?.top, reviewBottom: reviews?.bottom, galleryTop: gr?.top, trackTop: tr?.top, trackBottom: tr?.bottom,
+                    aboutTop: about?.top, aboutBottom: about?.bottom,
                     menuBottom: dock?.getBoundingClientRect().bottom, formTop: form?.top, formContentTop: formContent?.top, formBottom: form?.bottom,
                     fixed: dock ? getComputedStyle(dock).position === 'fixed' && !hero.contains(dock) : false,
                     reviewSpacing: parseFloat(getComputedStyle(hero?.querySelector('[data-aria-lead-review-spacing]')).marginTop),
@@ -305,13 +314,26 @@ if (!bellaris && brandPreviewCandidate) {
                 });
                 if (!layout.fixed || layout.cardCount !== 20 || layout.highlightCount !== 2 ||
                     layout.badgeTop < layout.headingBottom + 50 ||
+                    layout.heroPhotosTop < layout.badgeTop ||
+                    layout.ctaTop < layout.heroPhotosBottom - 1 || layout.ctaBottom > layout.reviewTop + 8 ||
                     layout.formTop < layout.reviewBottom + 12 ||
                     !Number.isFinite(layout.formContentTop) || layout.formContentTop < layout.menuBottom + 8 ||
-                    layout.galleryTop < layout.formBottom - 8 ||
-                    layout.trackTop < layout.formBottom - 8)
-                  throw new Error('Paid hero → form → moving gallery layout regressed: ' + JSON.stringify(layout));
+                    layout.aboutTop < layout.formBottom - 8 ||
+                    layout.galleryTop < layout.aboutBottom - 8 ||
+                    layout.trackTop < layout.aboutBottom - 8)
+                  throw new Error('Paid hero photos → CTA → visible form → About → carousel regressed: ' + JSON.stringify(layout));
                 if (layout.width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
                   throw new Error('Approved mobile review spacing regressed: ' + JSON.stringify(layout));
+                await heroPair.first().scrollIntoViewIfNeeded();
+                await heroPair.first().click();
+                await verifyLightbox(true);
+                await heroCTA.scrollIntoViewIfNeeded();
+                await heroCTA.click();
+                await page.waitForFunction(() => {
+                  const form = document.getElementById('aria-hero-form');
+                  const y = form?.getBoundingClientRect().top ?? Infinity;
+                  return y >= 0 && y < 140 && !!form?.querySelector('[data-lead-step-form]');
+                }, null, { timeout: 8000 });
                 await highlights.first().scrollIntoViewIfNeeded();
                 await highlights.first().click();
                 await verifyLightbox(true);
@@ -411,10 +433,11 @@ if (!bellaris && brandPreviewCandidate) {
                 }).length,
                 dogsWidth: crown?.width ?? 0,
                 dogsTouchBadge: !!badge && !!crown && Math.abs(crown.bottom - badge.top) <= 3,
-                liquid: !!text && (window.location.pathname === '/psia-skolka-kosice/'
-                  ? getComputedStyle(text).backgroundImage === 'none'
-                  : getComputedStyle(text).backgroundImage.includes('radial-gradient')) &&
-                  parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
+                liquid: window.location.pathname === '/psia-skolka-kosice/'
+                  ? !text && document.querySelectorAll('[data-aria-lead-hero-photos] img').length === 2 &&
+                    !!document.querySelector('[data-aria-lead-hero-cta]')
+                  : !!text && getComputedStyle(text).backgroundImage.includes('radial-gradient') &&
+                    parseFloat(getComputedStyle(text).borderTopLeftRadius) >= 15,
                 about: window.location.pathname === '/psia-skolka-kosice/'
                   ? !!document.querySelector('#aria-about [data-hero-benefits]') && !!document.querySelector('#aria-about [data-safety-certificates]') &&
                     ![...document.querySelectorAll('#aria-about h2')].some(h => h.textContent?.includes('Viac o nás a našej škôlke')) &&
