@@ -1431,3 +1431,21 @@
   }
   .site-brand :focus-visible { outline-color: Highlight; }
 }
+
+
+/* Main homepage, 23 Nov: deliberately flat actions and glass dock; only
+   "Mám záujem" retains a soft colored glow. LEAD and product pages stay as-is. */
+body.site-brand:has(#top) :is(.btn-coral, .btn-forest, .btn-outline-forest, .hero-cta-primary),
+body.site-brand:has(#top) :is(.btn-coral, .btn-forest, .btn-outline-forest, .hero-cta-primary):is(:hover, :active),
+body.site-brand:has(#top) .mobile-dock[data-variant="main"] :is(.mobile-dock-bar, .mobile-dock-item, .mobile-dock-back-top),
+body.site-brand:has(#top) .mobile-dock[data-variant="main"] :is(.mobile-dock-item, .mobile-dock-back-top):is(:hover, :active) {
+  box-shadow: none;
+  background-image: none;
+}
+body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary,
+body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary:is(:hover, :active) {
+  box-shadow: 0 0 25px 4px rgb(226 84 164 / 38%);
+}
+@media (prefers-reduced-motion: reduce) {
+  body.site-brand:has(#top) #top .home-hero-cta .hero-cta-primary { transition: none; }
+}
