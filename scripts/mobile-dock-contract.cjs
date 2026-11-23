@@ -243,7 +243,7 @@ assert(productContact.includes('<PrivacyConsentCheckbox />') &&
        leadContact.includes('<PrivacyConsentCheckbox />'),
        "Both daycare and product inquiries must reuse exactly the same privacy notice");
 assert(productSchema.includes("normalizeProductLocation(input.customer_location)") &&
-       productSchema.includes('match[1].replace(/\\s*,\\s*/g, " ")') &&
+       productSchema.includes('placePart.replace(/\\s*,\\s*/g, " ")') &&
        productEdge.includes('const customerLocation = text(input.customer_location, 120)') &&
        !productEdge.includes("Ulica a číslo, PSČ, Mesto"),
        "Normalize the original field to legacy endpoint format without Supabase changes");
