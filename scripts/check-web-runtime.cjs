@@ -2156,14 +2156,15 @@ if (!bellaris && brandPreviewCandidate) {
                     })(),
                     heroGlassAndBreathingRoom:innerWidth>=1024 || (() => {
                       const panel=document.querySelector('#top [data-home-hero-inline-mobile]');
-                      const heading=document.querySelector('#top .lg\\:hidden h1');
+                      const heading=document.querySelector('#top h1');
                       const review=document.querySelector('#top #recenzie');
                       const paws=panel?.querySelectorAll('[aria-hidden="true"] svg');
                       if(!panel || !heading || !review || !paws?.length) return false;
                       const panelBox=panel.getBoundingClientRect(), titleBox=heading.getBoundingClientRect();
                       const reviewBox=review.getBoundingClientRect();
                       const style=getComputedStyle(panel);
-                      const alpha=Number(style.backgroundColor.match(/[,\\s]([0-9.]+)\\)$/)?.[1]);
+                      const colorComponents=style.backgroundColor.match(/[0-9.]+/g) || [];
+                      const alpha=Number(colorComponents[3]);
                       const headlineGap=panelBox.top-titleBox.bottom;
                       const reviewGap=reviewBox.top-panelBox.bottom;
                       return paws.length>=6 && alpha>0 && alpha<0.75 &&
