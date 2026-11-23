@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { LeadStepForm } from "./LeadStepForm";
-import { FormDialog } from "./FormDialog";
 import { Reviews } from "./Reviews";
 import { PawTrailBackground } from "./PawTrailBackground";
 import { SchoolmatesFormCrown } from "./SchoolmatesFormCrown";
@@ -8,14 +6,6 @@ import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 export function Hero() {
-  const [interestOpen, setInterestOpen] = useState(false);
-  const [interestSource, setInterestSource] = useState("home_hero_interest_mobile");
-  function openInterest(source: string) {
-    trackMarketingInteraction("inquiry_cta", source);
-    void trackCookielessInteraction("inquiry_cta", source);
-    setInterestSource(source);
-    setInterestOpen(true);
-  }
   return (
     <section id="top" className="hero-safe-top hero-safe-top-main relative overflow-hidden pt-7 pb-0 sm:pt-9 lg:pt-24 lg:pb-1">
       <PawTrailBackground />
@@ -42,10 +32,13 @@ export function Hero() {
             </p>
           </div>
 
-          <div className="hero-cta-pair home-hero-cta mx-auto mt-5">
-            <button type="button" onClick={() => openInterest("home_hero_interest_mobile")} className="hero-cta-primary">
-              Mám záujem
-            </button>
+          <div data-home-hero-inline-mobile className="mx-auto mt-4 max-w-xl rounded-[24px] border border-forest/10 bg-card px-3 py-3.5 shadow-card">
+            <h2 className="font-display text-[15px] font-extrabold leading-tight text-forest min-[380px]:text-base">
+              Chceli by ste sa informovať o škôlke?
+            </h2>
+            <div className="mt-2.5">
+              <LeadStepForm trackingSource="home_hero_interest_mobile" questionInHeading compact />
+            </div>
           </div>
         </div>
 
@@ -98,10 +91,6 @@ export function Hero() {
         </div>
       </div>
       <div className="relative z-10 mt-11 sm:mt-10 lg:mt-5"><Reviews variant="hero" /></div>
-      <FormDialog open={interestOpen} onOpenChange={setInterestOpen} title="Čo hľadáte pre svojho psíka?"
-        subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám.">
-        <LeadStepForm questionInHeading trackingSource={interestSource} />
-      </FormDialog>
     </section>
   );
 }
