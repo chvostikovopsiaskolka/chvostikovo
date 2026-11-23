@@ -252,9 +252,9 @@ assert(!productContact.includes('trackMarketingInteraction') &&
        !productContact.includes('custom_audience'),
        "Product delivery contact information must not be copied to advertising audiences");
 
-// New explicit paid LEAD contract: orange hero stays; pink is inside the
-// originally existing form; a single rose CTA opens the inline section,
-// so the moving gallery follows Hero when the form is not yet opened.
+// Paid LEAD contract: orange editorial box stays. Muted amber glass CTA
+// reveals the very SAME liquid/crown card as the lower visit form; the
+// gallery stays directly below Hero until the hidden inline form is opened.
 const paidLeadCurrent = read("src/routes/test-aria.tsx");
 const ariaGuideCurrent = read("src/components/site/AriaLeadAssistant.tsx");
 const storyCurrent = read("src/components/site/Story.tsx");
@@ -263,12 +263,17 @@ assert(paidLeadCurrent.includes('data-aria-lead-hero-cta') &&
        paidLeadCurrent.includes('hidden={isLiveLead && !leadHeroFormOpen}') &&
        paidLeadCurrent.includes('lead_landing_hero_orange_cta') &&
        paidLeadCurrent.includes('data-lead-inline-card') &&
-       paidLeadCurrent.includes('className="rounded-4xl bg-white px-2 py-3') &&
+       paidLeadCurrent.includes('data-aria-hero-form-dogs') &&
+       paidLeadCurrent.includes('max-w-[294px]') &&
+       paidLeadCurrent.includes('ariaPreview={!isLiveLead}') &&
        paidLeadCurrent.includes('space-y-4 text-left') &&
        paidLeadCurrent.includes('<SafetyCertificates homeLayout />') &&
        ariaGuideCurrent.includes('onRevealInlineForm') &&
-       css.includes('.lead-brand-live #aria-hero-form [data-lead-inline-card]'),
-       "Paid lead must reveal existing form on pink CTA or dock while keeping white outer background and left aligned About");
+       css.includes('.lead-brand-live [data-aria-lead-hero-cta]') &&
+       css.includes('.lead-brand-live [data-aria-dock]') &&
+       css.includes('.lead-brand-live [data-aria-service-badge]') &&
+       !css.includes('.lead-brand-live #aria-hero-form [data-lead-inline-card]'),
+       "Paid lead must reuse the same lower liquid form and crown, with narrow amber CTA and frosted Aria dock");
 assert(storyCurrent.includes('max-w-[810px]') &&
        storyCurrent.includes('sm:h-72 lg:h-80') &&
        storyCurrent.includes('lg:px-4 lg:text-xs'),
