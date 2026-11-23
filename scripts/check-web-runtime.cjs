@@ -2867,10 +2867,31 @@ if (!bellaris && brandPreviewCandidate) {
                 center:photo.top+photo.height/2,closeTop:close?.top,photoTop:photo.top
               } : null;
             });
-            if (!tinyNav || tinyNav.arrows.some(w=>w>42) ||
+            if (!tinyNav || tinyNav.arrows.some(w=>w<44||w>52) ||
                 tinyNav.centers.some(y=>Math.abs(y-tinyNav.center)>14) ||
                 (tinyNav.closeTop!==undefined && Math.abs(tinyNav.closeTop-tinyNav.photoTop)>26))
-              throw new Error('Stand photo must keep compact navigation at picture edges: '+JSON.stringify(tinyNav));
+              throw new Error('Stand photo must keep centered accessible navigation at picture edges: '+JSON.stringify(tinyNav));
+            const fluidPhoto = await articleLightbox.evaluate(el => {
+              const vp=el.querySelector('[data-stand-photo-viewport]')?.getBoundingClientRect();
+              const image=el.querySelector('[data-stand-photo-viewport] img');
+              const im=image?.getBoundingClientRect();
+              const frame=el.getBoundingClientRect(), caption=el.querySelector('p')?.getBoundingClientRect();
+              const buttons=[el.querySelector('[data-stand-photo-previous]'),el.querySelector('[data-stand-photo-next]'),[...el.children].find(b=>b.tagName==='BUTTON')];
+              if(!vp || !im || !image || !caption || buttons.some(b=>!b)) return null;
+              return {
+                natural: image.naturalWidth>0 && image.naturalHeight>0,
+                ratioError: Math.abs(im.width/im.height-image.naturalWidth/image.naturalHeight),
+                emptyWidth: Math.abs(vp.width-im.width),emptyHeight:Math.abs(vp.height-im.height),
+                symmetry:Math.abs(im.left-frame.left-(frame.right-im.right)),
+                captionGap:caption.top-im.bottom,
+                buttons:buttons.map(b=>({width:b.getBoundingClientRect().width,background:getComputedStyle(b).backgroundColor,radius:parseFloat(getComputedStyle(b).borderRadius)}))
+              };
+            });
+            if (!fluidPhoto || !fluidPhoto.natural || fluidPhoto.ratioError>0.03 ||
+                fluidPhoto.emptyWidth>3 || fluidPhoto.emptyHeight>3 || fluidPhoto.symmetry>4 ||
+                fluidPhoto.captionGap<5 || fluidPhoto.captionGap>25 ||
+                fluidPhoto.buttons.some(b=>b.width<44 || b.background!=='rgba(0, 0, 0, 0)' || b.radius>1))
+              throw new Error('Product lightbox must fit image with symmetric padding, caption and bare 44px controls: '+JSON.stringify(fluidPhoto));
             if (width===390) {
               const startingSrc=await viewport.locator('img').getAttribute('src');
               await viewport.evaluate(el => {
