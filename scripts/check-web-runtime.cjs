@@ -2925,14 +2925,21 @@ if (!bellaris && brandPreviewCandidate) {
               const form=forms.nth(i);
               if(await form.getAttribute('data-lead-step')==='1'){
                 if(homeRoute){
+                  // Real touch interaction on the mobile context. Wait for
+                  // React's enabled state, not only the native checked radio.
                   const choice=form.locator('label:has(input[name="zaujem"])').first();
-                  await choice.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
-                  await choice.click();
-                  await form.locator('input[name="zaujem"]').first().evaluate(el=>{if(!el.checked)throw new Error('Shared form interest radio did not select');});
-                  const next=form.getByRole('button',{name:'Pokračovať',exact:true});
-                  await next.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
-                  await next.click();
-                  await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
+                  await centerFixtureControl(choice);
+                  await choice.tap();
+                  const next=form.locator('button:not([disabled])').filter({hasText:/^Pokračovať$/});
+                  await next.waitFor({state:'visible',timeout:5000});
+                  if(!await form.locator('input[name="zaujem"]').first().isChecked())
+                    throw new Error('Shared form interest radio did not select');
+                  await centerFixtureControl(next);
+                  await next.tap();
+                  await form.locator('[role="progressbar"][aria-valuenow="2"]').waitFor({state:'visible',timeout:5000}).catch(async error=>{
+                    const details=await form.evaluate(el=>({step:el.dataset.leadStep,section:el.closest('section')?.id,selected:!!el.querySelector('input[name="zaujem"]:checked'),rect:el.getBoundingClientRect().toJSON()}));
+                    throw new Error('Homepage contact transition failed: '+JSON.stringify(details)+' '+String(error));
+                  });
                 }else if(url.pathname==='/psia-skolka-kosice/'){
                   await advanceLeadContact(form);
                 }else{
@@ -2941,7 +2948,9 @@ if (!bellaris && brandPreviewCandidate) {
                 }
               }
               await assertLeadContactIntro(form);
-              await form.getByRole('button',{name:'Späť',exact:true}).click();
+              const sharedBack=form.getByRole('button',{name:'Späť',exact:true});
+              if(homeRoute){await centerFixtureControl(sharedBack);await sharedBack.tap();}
+              else await sharedBack.click();
               await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible',timeout:5000});
               if(await form.getAttribute('data-lead-step')!=='1')throw new Error('Shared form back failed');
               const restored=await form.evaluate(el=>{const shell=el.closest('[data-lead-form-shell]');return [...shell.querySelectorAll(':scope > [data-lead-form-intro]')].every(node=>getComputedStyle(node).display!=='none');});
