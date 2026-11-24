@@ -75,9 +75,9 @@ const chatQuestions: Question[] = [
   },
 ];
 
-export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefix, formPrefix }: {
+export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefix, formPrefix, dockless = false }: {
   open: boolean; onClose: () => void; initialQuestionId: "pricing" | null;
-  trackingPrefix: string; formPrefix: string;
+  trackingPrefix: string; formPrefix: string; dockless?: boolean;
 }) {
   function track(action: string) {
     // Never send free-text, names, phone numbers or emails in behavioural events.
@@ -124,6 +124,11 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   const nextId = useRef(0);
   const chatId = useId();
   const unanswered = chatQuestions.filter(question => !answered.includes(question.id));
+  // First four high-intent FAQs; reveal remaining catalogue only when all four
+  // have been asked. The final wording and the eighth FAQ are supplied later.
+  const primaryQuestionIds: readonly string[] = ["pricing", "requirements", "first_visit", "puppy"];
+  const primaryUnanswered = unanswered.filter(question => primaryQuestionIds.includes(question.id));
+  const visibleQuestions = primaryUnanswered.length ? primaryUnanswered : unanswered;
   const introFinished = !introComposing && introLength >= introText.length;
   const menuReady = introFinished && typingId === null &&
     !(initialQuestionId === "pricing" && !autoPricingAsked.current && !answered.includes("pricing"));
@@ -162,7 +167,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   }, [typingId, messages]);
 
   useEffect(() => {
-    if (!open || !scrollRef.current) return;
+    if (!open || mode !== "questions" || !scrollRef.current) return;
     const history = scrollRef.current;
     const lastReply = messages[messages.length - 1];
     if (lastReply?.questionId === "requirements" && typingId === null) {
@@ -178,7 +183,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
       }
     }
     history.scrollTop = history.scrollHeight;
-  }, [open, messages.length, typedLength, mode, typingId]);
+  }, [open, messages.length, typedLength, mode, typingId, showChoices]);
 
   useEffect(() => {
     if (open && mode === "questions" && messages.length && !showChoices && typingId === null) {
@@ -278,14 +283,17 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   return (
     <Dialog open={open} onOpenChange={value => { if (!value) closeChat(); }}>
       <DialogContent positioning="form" data-aria-chat aria-describedby={chatId + "-intro"} overlayClassName="!bg-forest-deep/25 !backdrop-blur-[12px]"
-        className="aria-brand-experiment !fixed !flex !gap-0 left-2 right-2 bottom-[max(70px,calc(env(safe-area-inset-bottom)+60px))] top-auto z-50 h-[min(73dvh,680px)] min-h-0 w-auto max-w-none flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white/80 backdrop-blur-3xl p-0 text-forest shadow-[0_24px_70px_rgba(25,48,37,.2)] sm:left-1/2 sm:right-auto sm:top-[54%] sm:bottom-auto sm:h-[min(85dvh,750px)] sm:w-[min(620px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+        className={"aria-brand-experiment !fixed !flex !gap-0 left-2 right-2 top-auto z-50 min-h-0 w-auto max-w-none flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white/80 backdrop-blur-3xl p-0 text-forest shadow-[0_24px_70px_rgba(25,48,37,.2)] sm:left-1/2 sm:right-auto sm:top-[54%] sm:bottom-auto sm:h-[min(85dvh,750px)] sm:w-[min(620px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 " +
+          (dockless ? "bottom-[max(8px,env(safe-area-inset-bottom))] h-[min(94dvh,800px)]" :
+            "bottom-[max(70px,calc(env(safe-area-inset-bottom)+60px))] h-[min(81dvh,720px)]")}>
         <header className="flex shrink-0 items-center gap-3 border-b border-white/60 bg-white/45 backdrop-blur-2xl px-4 py-3 pr-12">
           <img src={ARIA_HEAD_DATA_URI} alt="" width={48} height={48} className="size-12 shrink-0 object-contain drop-shadow-sm" />
           <DialogTitle className="font-display text-base font-extrabold text-forest sm:text-lg">Aria z Chvostíkova</DialogTitle>
         </header>
 
         <div ref={scrollRef} role="log" aria-label="Konverzácia s Ariou" aria-live="polite"
-          data-aria-chat-history className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain bg-[linear-gradient(145deg,rgba(255,240,213,.68),rgba(247,233,241,.55),rgba(237,248,240,.7))] backdrop-blur-xl px-3 py-4 sm:px-5">
+          data-aria-chat-history className={(mode === "questions" ? "min-h-0 flex-1 space-y-3 overflow-y-auto " : "hidden ") +
+            "overscroll-contain bg-[linear-gradient(145deg,rgba(255,240,213,.68),rgba(247,233,241,.55),rgba(237,248,240,.7))] backdrop-blur-xl px-3 py-4 sm:px-5"}>
           <div className="flex items-end gap-2">
             <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
             <div id={chatId + "-intro"} className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm sm:text-sm">
@@ -343,61 +351,49 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             );
           })}
 
-        </div>
-
-        {mode === "questions" && menuReady && (
-          <section data-aria-chat-action-panel aria-label="Časté otázky"
-            data-aria-chat-followup={messages.length > 0 ? "true" : undefined}
-            className="max-h-[min(42dvh,330px)] shrink-0 space-y-2 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/75 px-3 py-3 backdrop-blur-2xl sm:px-5">
-            {messages.length > 0 && !showChoices && (
-              <button ref={actionRef} type="button" data-aria-chat-interest-cta onClick={showInterest}
-                className="min-h-11 w-full rounded-xl bg-[#9e336f] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm">
-                Mám záujem
-              </button>
-            )}
-            <p className="text-xs font-semibold leading-relaxed text-[#26322b]">
-              {messages.length === 0 ? "Čo ťa zaujíma?" :
-                unanswered.length ? "Čo ťa ešte zaujíma?" : "Prešli sme všetky pripravené otázky."}
-            </p>
-            <div data-aria-chat-questions className="grid grid-cols-2 gap-2">
-              {unanswered.filter(question => question.id !== "puppy").map(question => (
+          {mode === "questions" && menuReady && showChoices && visibleQuestions.length > 0 && (
+            <div data-aria-chat-questions aria-label="Vyber si otázku"
+              className="ml-11 grid grid-cols-2 gap-2" role="group">
+              {visibleQuestions.map(question => (
                 <button key={question.id} type="button" data-aria-chat-question={question.id}
-                  onClick={() => ask(question)}
-                  className="min-h-11 rounded-xl border border-[#e4d9cb] bg-white px-2.5 py-2.5 text-left text-xs font-semibold leading-snug text-[#26322b] shadow-sm transition hover:border-[#aa4b00] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
+                  onClick={() => question.id === "puppy" ? showPuppy() : ask(question)}
+                  className={"min-h-11 min-w-0 rounded-xl border px-2.5 py-2.5 text-left text-xs font-semibold leading-snug shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
+                    (question.id === "puppy"
+                      ? "border-[#9e336f]/30 bg-[#f9e5ee] font-extrabold text-[#873063] hover:bg-[#f5d6e5]"
+                      : "border-[#e4d9cb] bg-white text-[#26322b] hover:border-[#aa4b00]")}>
                   {question.title}
                 </button>
               ))}
-              <div data-aria-chat-last-row className="col-span-2 grid grid-cols-2 gap-2">
-                {unanswered.filter(question => question.id === "puppy").map(question => (
-                  <button key={question.id} type="button" data-aria-chat-question={question.id}
-                    onClick={showPuppy}
-                    className="min-h-11 rounded-xl border border-[#9e336f]/30 bg-[#f9e5ee] px-2.5 py-2.5 text-left text-xs font-extrabold leading-snug text-[#873063] shadow-sm transition hover:bg-[#f5d6e5] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
-                    {question.title}
-                  </button>
-                ))}
-                <button type="button" data-aria-chat-other-cta onClick={showOther}
-                  className={"min-h-11 rounded-xl border border-[#ffa414]/55 bg-[#fff0d5] px-2.5 py-2.5 text-left text-xs font-extrabold leading-snug text-[#26322b] shadow-sm transition hover:border-[#ffa414] hover:bg-[#ffe3b2] focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
-                    (unanswered.some(question => question.id === "puppy") ? "" : "col-span-2")}>
-                  Mám inú otázku?
-                </button>
-              </div>
             </div>
-          </section>
-        )}
+          )}
 
-        {mode === "questions" && (
-          <div data-aria-chat-composer className="flex shrink-0 items-center gap-2 border-t border-white/70 bg-white/85 px-3 py-3 backdrop-blur-2xl sm:px-5">
-            <span aria-label="Profil návštevníka" className="grid size-10 shrink-0 place-items-center rounded-full bg-[#f6d8e9] text-[#9e336f]">
-              <ChvostikovoPaw className="size-5" />
-            </span>
-            <input type="text" disabled readOnly
-              aria-label="Písanie správ zatiaľ nie je dostupné"
-              className="min-h-11 min-w-0 flex-1 cursor-not-allowed rounded-2xl border border-[#e4d9cb] bg-white px-4 text-sm text-[#26322b] placeholder:text-[#7f867f] disabled:opacity-100" />
-          </div>
+        </div>
+
+        {mode === "questions" && menuReady && (
+          <nav data-aria-chat-action-panel
+            data-aria-chat-followup={messages.length > 0 ? "true" : undefined}
+            aria-label="Možnosti pokračovania"
+            className="flex shrink-0 items-stretch gap-2 border-t border-white/60 bg-white/80 px-2.5 py-2.5 backdrop-blur-2xl sm:px-5">
+            {messages.length > 0 && visibleQuestions.length > 0 && (
+              <button type="button" ref={actionRef} data-aria-chat-show-questions
+                onClick={() => setShowChoices(current => !current)}
+                className="min-h-11 min-w-0 flex-1 rounded-xl border border-[#9e336f]/25 bg-white px-1.5 py-2 text-[11px] font-bold leading-tight text-[#873063] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
+                {showChoices ? "Skryť otázky" : "Ďalšie otázky"}
+              </button>
+            )}
+            <button type="button" data-aria-chat-interest-cta onClick={showInterest}
+              className="min-h-11 min-w-0 flex-1 rounded-xl bg-[#9e336f] px-1.5 py-2 text-xs font-extrabold leading-tight text-white shadow-sm focus-visible:outline-2 focus-visible:outline-[#9e336f]">
+              Mám záujem
+            </button>
+            <button type="button" data-aria-chat-other-cta onClick={showOther}
+              className="min-h-11 min-w-0 flex-1 rounded-xl border border-[#ffa414]/55 bg-[#fff0d5] px-1.5 py-2 text-[11px] font-extrabold leading-tight text-[#26322b] shadow-sm transition-colors hover:border-[#ffa414] hover:bg-[#ffe3b2] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
+              Mám inú otázku?
+            </button>
+          </nav>
         )}
 
         {mode !== "questions" && (
-          <div data-aria-chat-form-scroll className="max-h-[61%] shrink-0 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/65 backdrop-blur-2xl p-3 sm:p-4">
+          <div data-aria-chat-form-scroll className="min-h-0 flex-1 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/65 backdrop-blur-2xl p-3 sm:p-4">
             {mode === "puppy" && (
               <section data-aria-chat-puppy-check aria-label="Orientačná kontrola šteniatka" className="space-y-3">
                 <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
@@ -436,8 +432,10 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                 <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
                   <ArrowLeft size={15} aria-hidden /> Späť k otázkam
                 </button>
-                <h3 className="font-display text-sm font-bold text-forest">Krátky nezáväzný formulár 🐾</h3>
-                <LeadStepForm trackingSource={formPrefix + "_interest"}
+                <p data-aria-form-prompt className="rounded-xl bg-white/75 px-3 py-2 text-xs leading-relaxed text-forest">
+                  {messages[messages.length - 1]?.text}
+                </p>
+                <LeadStepForm trackingSource={formPrefix + "_interest"} compact
                   onStarted={() => track("form_start_interest")}
                   onSent={() => track("interest_submitted")} />
               </section>
@@ -447,7 +445,9 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                 <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
                   <ArrowLeft size={15} aria-hidden /> Späť k otázkam
                 </button>
-                <h3 className="font-display text-sm font-bold text-forest">Napíš nám svoju otázku 🐾</h3>
+                <p data-aria-form-prompt className="rounded-xl bg-white/75 px-3 py-2 text-xs leading-relaxed text-forest">
+                  {messages[messages.length - 1]?.text}
+                </p>
                 <ShortForm hideInterest showQuestionField trackingSource={formPrefix + "_other"}
                   onStarted={() => track("form_start_other")}
                   interestValue="Chcem sa informovať o škôlke"

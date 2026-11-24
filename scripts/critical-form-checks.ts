@@ -147,6 +147,21 @@ assert(ariaLandingTracking.includes('"lead_landing_first_visit_details"') &&
   "Campaign first-visit explanation and three-step shortcut must remain tracked");
 const guidedLeadTracking = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
 const guidedAriaTracking = readFileSync(new URL("../src/components/site/AriaGuidedChat.tsx", import.meta.url), "utf8");
+assert(guidedAriaTracking.includes('data-aria-chat-questions') &&
+  guidedAriaTracking.includes('mode === "questions" && menuReady && showChoices') &&
+  guidedAriaTracking.includes('data-aria-chat-show-questions') &&
+  guidedAriaTracking.includes('min-h-0 flex-1 overflow-y-auto') &&
+  !guidedAriaTracking.includes('data-aria-chat-composer') &&
+  !guidedAriaTracking.includes('max-h-[61%]') &&
+  guidedAriaTracking.includes('dockless = false'),
+  "APP-01 chat must show 4 progressive FAQs inline, reserve answer height and give forms full scroll space.");
+assert(guidedAriaTracking.includes('primaryQuestionIds') &&
+  guidedAriaTracking.includes('setShowChoices(false)') &&
+  guidedAriaTracking.includes('lastReply?.questionId === "requirements"'),
+  "Progressive FAQ must preserve first requirement card scroll guard.");
+assert(readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8").includes('compact = false'),
+  "Chat compact LeadStepForm must remain opt-in, preserving homepage and LEAD forms.");
+
 for (const action of ["form_start_interest", "form_start_other", "form_start_puppy_contact"]) {
   assert(guidedAriaTracking.includes('track("' + action + '")'),
     "Aria chat must emit distinct, anonymous start events: " + action);

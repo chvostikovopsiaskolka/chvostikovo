@@ -21,7 +21,7 @@ export const LEAD_STEP_INTERESTS = [
   { value: "Mám záujem využívať škôlku občasne", lines: ["Mám záujem", "občasne", "využívať škôlku"] },
 ] as const;
 
-export function LeadStepForm({ trackingSource, onSent, onStarted, questionInHeading = false, presetInterest, ariaPreview = true, puppyCheck }: { trackingSource: string; onSent?: () => void; onStarted?: () => void; questionInHeading?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined }) {
+export function LeadStepForm({ trackingSource, onSent, onStarted, questionInHeading = false, presetInterest, ariaPreview = true, puppyCheck, compact = false }: { trackingSource: string; onSent?: () => void; onStarted?: () => void; questionInHeading?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined; compact?: boolean }) {
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
   const [selectedInterest, setSelectedInterest] = useState(presetInterest ?? "");
@@ -126,7 +126,7 @@ export function LeadStepForm({ trackingSource, onSent, onStarted, questionInHead
       onBlurCapture={progress.onBlurCapture}
       onInvalidCapture={progress.onInvalidCapture}
       onChangeCapture={(event) => { trackStart(); progress.onChangeCapture(event); }}
-      className="space-y-5 text-left"
+      className={compact ? "space-y-3 text-left" : "space-y-5 text-left"}
     >
       <div className="space-y-2">
         <div className="flex justify-between gap-2 text-xs font-semibold text-forest/75" aria-live="polite">
@@ -138,7 +138,7 @@ export function LeadStepForm({ trackingSource, onSent, onStarted, questionInHead
         </div>
       </div>
 
-      <div className={step === 1 ? "space-y-5" : "hidden"} aria-hidden={step !== 1}>
+      <div className={step === 1 ? (compact ? "space-y-3" : "space-y-5") : "hidden"} aria-hidden={step !== 1}>
         <fieldset className="min-w-0">
           <legend className={questionInHeading ? "sr-only" : "mb-3 font-display text-lg font-bold leading-snug text-forest sm:text-xl"}>
             Čo hľadáte pre svojho psíka?
@@ -148,7 +148,8 @@ export function LeadStepForm({ trackingSource, onSent, onStarted, questionInHead
               <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
                 <input type="radio" name="zaujem" value={option.value} required={step === 1} aria-label={option.value} defaultChecked={presetInterest === option.value}
                   onChange={() => setSelectedInterest(option.value)} className="peer sr-only" />
-                <span className="flex h-full min-h-24 min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 py-3 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:min-h-28 sm:px-3">
+                <span className={"flex h-full min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral " +
+                  (compact ? "min-h-[72px] px-1.5 py-2 sm:min-h-20" : "min-h-24 px-1.5 py-3 sm:min-h-28 sm:px-3")}>
                   {option.lines.map((line, i) => (
                     <span key={line} className={`block max-w-full break-words text-[10.5px] [overflow-wrap:anywhere] sm:text-xs ${ariaPreview && (/informovať|pravidelne|občasne/i.test(line)) ? "font-extrabold" : i === 0 ? "font-bold" : "font-medium"}`}>
                       {line}

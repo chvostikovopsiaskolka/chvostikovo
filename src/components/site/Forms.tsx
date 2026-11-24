@@ -188,7 +188,7 @@ export function ShortForm({
         <div data-aria-contact-question-step className="space-y-3">
           <label className="label-sm" htmlFor={`s-${formId}-contact-question`}>Čo by ste sa chceli spýtať? *</label>
           <textarea id={`s-${formId}-contact-question`} name="otazka"
-            rows={5} minLength={5} maxLength={600} required
+            rows={3} minLength={5} maxLength={600} required
             value={contactQuestion} onChange={e => setContactQuestion(e.target.value)}
             className="field w-full resize-y" placeholder="Napíšte nám svoju otázku…" />
           <p className="text-xs text-forest/65">Najprv otázka, potom kontaktné údaje.</p>
