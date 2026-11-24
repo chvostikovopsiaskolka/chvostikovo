@@ -2394,7 +2394,7 @@ if (!bellaris && brandPreviewCandidate) {
                     puppyImmediatelyAfterPricing:document.getElementById('cennik').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
-                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty|/#faq' && !dock.querySelector('.mobile-dock-apply'),
+                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
                       (() => {
@@ -2569,8 +2569,12 @@ if (!bellaris && brandPreviewCandidate) {
               await page.waitForFunction(()=>{const y=document.getElementById('preco-chvostikovo').getBoundingClientRect().top;return y>=0&&y<260;});
               if(await page.getByRole('dialog').count()) throw new Error('Desktop learn-more action opened a dialog');
               await page.setViewportSize({width:390,height:844});
-              await page.locator('.mobile-dock[data-variant="main"] a[href="/#faq"]').click();
-              await page.waitForFunction(()=>{const y=document.getElementById('faq').getBoundingClientRect().top;return y>=-8&&y<200;});
+              await page.locator('.mobile-dock[data-variant="main"] .mobile-dock-apply').click();
+              const dockApplication=page.getByRole('dialog').last();
+              await dockApplication.waitFor({state:'visible'});
+              if(!await dockApplication.locator('input[name="meno"]').isVisible()) throw new Error('Homepage mobile application must open the real form');
+              await dockApplication.getByRole('button',{name:'Close'}).click();
+              await dockApplication.waitFor({state:'hidden'});
               const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
                await puppyFaq.click();
                await page.locator('#faq a[href="#aria-puppy-check"]').click();
