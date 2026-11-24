@@ -34,6 +34,8 @@ export const puppyCheckSchema = z.object({
 });
 export type PuppyCheckInput = z.infer<typeof puppyCheckSchema>;
 
+export const HOME_FAQ_CONTACT_SOURCE = "home_faq_contact";
+
 export const shortSchema = z.object({
   typ: z.literal("informacie"),
   consent: z.literal(true),
@@ -79,6 +81,11 @@ export const longSchema = z.object({
 }).merge(attributionSchema);
 
 export const inquirySchema = z.discriminatedUnion("typ", [shortSchema, longSchema]).superRefine((data, ctx) => {
+  if (data.typ === "informacie" && data.cta_source === HOME_FAQ_CONTACT_SOURCE) {
+    if (!data.meno.trim()) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["meno"], message: "Vyplňte meno." });
+    if (!data.email) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["email"], message: "Vyplňte e-mail." });
+    if (!data.otazka) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["otazka"], message: "Vyplňte otázku." });
+  }
   if (data.typ !== "prihlaska") return;
   if (data.dog_count === "2") {
     const second = [
