@@ -2850,19 +2850,29 @@ if (!bellaris && brandPreviewCandidate) {
           if(brandPreviewCandidate&&!bellaris&&!restricted){
             // Freeze DOM indices instead of re-resolving a changing :visible list
             // while WebKit scrolls/paints the previously revealed homepage forms.
-            const forms=page.locator('[data-lead-step-form]');
-            const visibleIndices=await forms.evaluateAll(nodes=>nodes.flatMap((node,index)=>node.getClientRects().length&&node.getBoundingClientRect().height>0?[index]:[]));
+            const homeRoute=url.pathname==='/';
+            const forms=page.locator(homeRoute?'[data-lead-step-form]':'[data-lead-step-form]:visible');
+            const visibleIndices=homeRoute
+              ? await forms.evaluateAll(nodes=>nodes.flatMap((node,index)=>node.getClientRects().length&&node.getBoundingClientRect().height>0?[index]:[]))
+              : Array.from({length:await forms.count()},(_,index)=>index);
             for(const i of visibleIndices){
               const form=forms.nth(i);
               if(await form.getAttribute('data-lead-step')==='1'){
-                const choice=form.locator('label:has(input[name="zaujem"])').first();
-                await choice.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
-                await choice.click();
-                await form.locator('input[name="zaujem"]').first().evaluate(el=>{if(!el.checked)throw new Error('Shared form interest radio did not select');});
-                const next=form.getByRole('button',{name:'Pokračovať',exact:true});
-                await next.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
-                await next.click();
-                await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
+                if(homeRoute){
+                  const choice=form.locator('label:has(input[name="zaujem"])').first();
+                  await choice.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+                  await choice.click();
+                  await form.locator('input[name="zaujem"]').first().evaluate(el=>{if(!el.checked)throw new Error('Shared form interest radio did not select');});
+                  const next=form.getByRole('button',{name:'Pokračovať',exact:true});
+                  await next.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+                  await next.click();
+                  await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
+                }else{
+                  // Other routes, especially the paid lead page, retain their
+                  // existing interaction sequence without forced scroll positions.
+                  await form.locator('label').first().click();
+                  await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+                }
               }
               await assertLeadContactIntro(form);
               await form.getByRole('button',{name:'Späť',exact:true}).click();
