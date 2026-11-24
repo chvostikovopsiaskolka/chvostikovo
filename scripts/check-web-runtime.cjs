@@ -3389,7 +3389,7 @@ if (!bellaris && brandPreviewCandidate) {
             if (await eligibilityToggle.getAttribute('aria-expanded') !== 'true' || !(await eligibilityToggle.locator('xpath=..').locator('p').count())) throw new Error('Eligibility FAQ must retain its answer');
             await eligibilityToggle.click();
             for (const [name, phrases] of [
-              ['Aký je cenník a treba si rezervovať miesto vopred?', ['25 €','200 €','2 mesiace','do nedele 20:00']],
+              ['Aký je cenník a treba si rezervovať miesto vopred?', ['25 €','200 €','2 mesiace','do nedele 20:00','deň vopred do 19:00']],
               ['Aké sú otváracie hodiny a ponúkate aj odvoz?', ['7:00 do 17:00','5 € za jednu jazdu']],
               ['Zabezpečujete aj stravu?', ['stravu nepodávame']],
             ]) {
