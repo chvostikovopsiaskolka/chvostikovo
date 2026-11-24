@@ -29,6 +29,7 @@ import { ABOUT_MORE, SafetyCertificates } from "@/components/site/Story";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { DAYCARE_GALLERY_EXTRAS, GALLERY, FAQ, PRICING } from "@/content/site";
+import { LEAD_FAQ } from "@/content/lead-faq";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -135,8 +136,8 @@ export function AriaPreviewPage() {
   const [ariaPreset, setAriaPreset] = useState<string | undefined>(undefined);
   const [puppyCheck, setPuppyCheck] = useState<PuppyCheckInput | undefined>(undefined);
 
-  // The paid landing keeps the existing two-step form directly below Hero,
-  // but mounts its visual section only after an explicit interest action.
+  // The paid campaign keeps one existing two-step form after visit steps.
+  // Every interest action retains its attribution and scrolls to that form.
   // Preserve attribution and the original form submit events.
   function revealLeadHeroForm(source: string) {
     trackMarketingInteraction("inquiry_cta", source);
@@ -195,7 +196,21 @@ export function AriaPreviewPage() {
               Aktívny deň pre psíka. Pokojnejšia hlava pre vás.
             </h2>
 
-            {/* Mobile: one real photo paired with each benefit, with no overlapping rows. */}
+            {isLiveLead ? <>
+              <div data-lead-benefits className="mt-7 grid gap-5 sm:grid-cols-3 sm:gap-6">
+                {BENEFITS.map(({ title: benefitTitle, content, icon: Icon }, i) => {
+                  const photo = [DAYCARE_GALLERY_EXTRAS[2]!, DAYCARE_GALLERY_EXTRAS[1]!, DAYCARE_GALLERY_EXTRAS[0]!][i]!;
+                  return <article key={benefitTitle} className="grid grid-cols-2 items-start gap-3 text-left sm:block">
+                    <img src={photo.src} alt={photo.alt} width={720} height={720} loading="lazy" decoding="async" className="aspect-[4/5] w-full rounded-[20px] object-cover shadow-card sm:aspect-[5/4]" />
+                    <div className="min-w-0 sm:mt-4"><Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden="true" />
+                      <h3 className="font-display text-sm font-bold leading-snug text-forest min-[390px]:text-base sm:text-xl">{benefitTitle}</h3>
+                      <p className="mt-2 text-xs leading-relaxed text-forest/80 min-[390px]:text-[13px] sm:text-base">{content}</p>
+                    </div>
+                  </article>;
+                })}
+              </div>
+              <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="mt-8 scroll-mt-24 text-left"><DaycarePhotoCarousel includeLeadHighlights /></div>
+            </> : <>            {/* Mobile: one real photo paired with each benefit, with no overlapping rows. */}
             <div className="mt-7 space-y-5 sm:hidden">
               {BENEFITS.map(({ title: benefitTitle, content }, i) => {
                 const photo = [DAYCARE_GALLERY_EXTRAS[2]!, DAYCARE_GALLERY_EXTRAS[1]!, DAYCARE_GALLERY_EXTRAS[0]!][i]!;
@@ -225,196 +240,12 @@ export function AriaPreviewPage() {
                 ))}
               </EditorialBenefits>
             </div>
-
+</>}
           </div>
         </section>
   );
 
-  return (
-    <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose">
-      {/* Keep Aria floating in the viewport throughout the lead journey.
-          The paid lead hero stays visually unchanged; the menu no longer
-          participates in the document layout. */}
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={false} sectionNavigation={isLiveLead} onRevealInlineForm={isLiveLead ? () => revealLeadHeroForm("lead_landing_aria_dock_interest") : undefined} hidden={leadModalOpen || puppyModalOpen} />
-
-      <main>
-        <section className={isLiveLead ? "hero-safe-top relative flex min-h-[calc(100svh-20px)] flex-col justify-center sm:min-h-[100svh] sm:justify-start sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
-          <PawTrailBackground landingBottomPaws />
-
-          {/* Mobile paid LEAD content is vertically centered in the part of
-              the viewport above floating Aria. Keep the fixed dock out of
-              document flow, with space reserved in scoped CSS below. */}
-          <div aria-hidden="true" data-aria-intro-top-space className={isLiveLead ? "h-0" : "min-h-2 flex-[0.2] sm:min-h-5 lg:min-h-3 lg:flex-[0.2]"} />
-          <div data-aria-hero-content className="relative z-10 w-full shrink-0">
-            <div className={isLiveLead ? "mx-auto w-full max-w-4xl px-4 pb-1 pt-1 sm:pb-4 sm:pt-5 lg:pt-7" : "mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7"}>
-            <div className="w-full min-w-0 text-center">
-              {/* Screenshot hierarchy: H1, four schoolmates, badge, liquid copy, reviews. */}
-              <div aria-hidden="true" data-aria-hero-heading-spacer className={isLiveLead ? "h-1 sm:h-5" : "h-[14px] sm:h-5"} />
-              <h1 className={(isLiveLead ? "mt-3 translate-y-0 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>
-                Miesto, ktoré si váš
-                <span className="block text-coral-dark">psík zamiluje</span>
-              </h1>
-
-              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-4 w-fit max-w-full sm:mt-5" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
-                {/* Four schoolmates rest directly above the badge as in the reference. */}
-                {!isLiveLead && <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
-                  <SchoolmatesFormCrown compact desktopWide />
-                </div>}
-                <p data-aria-service-badge className="inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2.5 py-2 text-center font-display text-[8px] font-bold uppercase leading-tight tracking-[0.015em] text-white shadow-card min-[390px]:px-3 min-[390px]:text-[9.5px] sm:px-5 sm:py-2.5 sm:text-sm">
-                  Denné stráženie stredných a veľkých psíkov
-                </p>
-              </div>
-
-              {isLiveLead ? (
-                <div data-lead-hero-photos className="mx-auto mt-4 grid w-full max-w-2xl grid-cols-2 gap-2.5 sm:mt-5 sm:gap-4">
-                  {LEAD_HERO_PHOTOS.map((photo, index) => (
-                    <button key={photo.src} data-lead-hero-photo={index + 1} type="button"
-                      aria-label={"Zobraziť fotografiu: " + photo.alt} onClick={() => setReviewPhotoOpen(index)}
-                      className="group h-[144px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral min-[390px]:h-40 sm:h-56 lg:h-64">
-                      <img src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} loading="eager"
-                        fetchPriority={index === 0 ? "high" : "auto"} decoding="async"
-                        className="size-full object-cover object-[50%_45%] transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none" />
-                    </button>
-                  ))}
-                </div>
-              ) : (
-              <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[590px]">
-                <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije si <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
-              </p>
-              )}
-              {isLiveLead && (
-                <div className="mx-auto mt-4 flex w-full max-w-[294px] justify-center">
-                  <button type="button" data-aria-lead-hero-cta aria-controls="aria-hero-form"
-                    aria-expanded={leadHeroFormOpen}
-                    onClick={() => revealLeadHeroForm("lead_landing_hero_orange_cta")}
-                    className="inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full border px-2.5 py-2 text-center font-display text-[clamp(11px,3.35vw,15px)] font-bold leading-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">
-                    Chcem sa informovať o škôlke
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-            <div data-aria-lead-review-spacing className={isLiveLead ? "mt-8 sm:mt-4 lg:mt-2" : "mt-0 sm:mt-2 lg:mt-2"}>
-              <Reviews variant="hero" />
-            </div>
-          </div>
-          {!isLiveLead && (
-          <>{/* Fill the former empty Aria breathing room with two real photos from
-              the moving gallery. Keep the enquiry below the initial viewport,
-              while leaving Aria fixed above the bottom dock. Desktop now also shows the photos. */}
-          <div data-aria-intro-space className={isLiveLead ? "relative z-10 mx-auto flex min-h-[245px] w-full max-w-3xl flex-[0.45] items-end px-4 pb-3 pt-12 sm:min-h-[285px] sm:px-0 sm:pb-3 sm:pt-12 lg:max-w-4xl lg:min-h-[385px] lg:flex-[0.3]" : "relative z-10 mx-auto flex min-h-[178px] max-h-[198px] w-full max-w-3xl flex-[0.45] items-end px-4 pb-2 pt-8 sm:min-h-[135px] sm:max-h-[175px] sm:px-0 sm:pb-0 sm:pt-5 lg:max-w-4xl lg:min-h-[268px] lg:max-h-[286px] lg:flex-[0.3]"}>
-            <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:gap-4">
-              {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
-                <button type="button" key={photo.src} data-aria-review-photo={index + 1}
-                  aria-label={`Zobraziť fotografiu: ${photo.alt}`}
-                  onClick={() => setReviewPhotoOpen(index)}
-                  className={isLiveLead ? "group relative h-[190px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[220px] sm:h-[260px] lg:h-[340px]" : "group relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[138px] lg:h-[260px]"}>
-                  <img src={photo.src} alt={photo.alt} width={672} height={896} loading="lazy" decoding="async"
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
-                </button>
-              ))}
-            </div>
-          </div>
-          </>
-          )}
-        </section>
-
-        <section id="aria-hero-form" hidden={isLiveLead && !leadHeroFormOpen} className="relative z-10 scroll-mt-24 overflow-hidden bg-white pb-8 pt-4 sm:pb-12 sm:pt-6">
-          <SectionAmbientPaws />
-          {/* Same verified title -> dog crown -> liquid form card layout as the lower visit form. */}
-          <div data-lead-form-shell={!isLiveLead || undefined} className="relative z-10 mx-auto max-w-2xl px-4">
-            {!isLiveLead && heroFormIntro}
-            <div data-aria-hero-form-dogs className="relative z-10 mx-auto mt-7 mb-[-18px] w-full max-w-sm">
-              <SchoolmatesFormCrown compact groundAccent />
-            </div>
-            <div data-lead-form-shell={isLiveLead || undefined} data-lead-inline-card className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
-              {isLiveLead && heroFormIntro}
-              <LeadStepForm questionInHeading ariaPreview={!isLiveLead} trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
-            </div>
-          </div>
-        </section>
-
-        {/* Keep the SAME existing moving gallery below the inline form on paid LEAD; keep
-            its swipe/autoscroll/lightbox behavior and append the two unique
-            former hero teaser photos without adding unrelated images. */}
-        {isLiveLead && (
-          <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="scroll-mt-24">
-            <DaycarePhotoCarousel includeLeadHighlights />
-          </div>
-        )}
-
-        <section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-white py-9 sm:py-12">
-          <SectionAmbientPaws />
-          <div id={isLiveLead ? "aria-about" : undefined} className="relative z-10 mx-auto max-w-5xl px-4">
-            <h2 className={isLiveLead ? "section-title mb-5 text-center text-[clamp(24px,6vw,38px)] leading-tight tracking-[-0.025em]" : "section-title mb-4 text-center text-[clamp(22px,4.5vw,38px)] leading-tight tracking-[-0.025em]"}>Kto sa bude starať o vášho psíka?</h2>
-            <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 sm:gap-6">
-              <div className="w-full max-w-[440px] lg:max-w-[560px]">
-                <img
-                  src={teamPhoto}
-                  alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
-                  loading="lazy"
-                  className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72 lg:h-[340px]"
-                />
-                <div data-hero-benefits className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:gap-2 lg:max-w-none lg:flex-nowrap lg:gap-2">
-                  {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
-                    <span
-                      key={item}
-                      className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px] lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-xs"
-                    >
-                      <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5 lg:size-4" />
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              {isLiveLead ? (
-                <div className="mx-auto max-w-[680px] space-y-4 text-left text-[15px] leading-[1.7] text-forest/80 sm:text-base">
-                  <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
-                  <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
-                  <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
-                  <p>Chvostíkovo nie je len miesto na stráženie psov. <strong className="font-extrabold text-forest">Je to druhý domov</strong>, kde sa o každého člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim vlastným psom.</p>
-                </div>
-              ) : (
-                <p className="mx-auto max-w-[680px] text-center text-sm leading-relaxed text-forest/75 sm:text-base">
-                  Aj my sme <strong className="font-bold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov <strong className="font-bold text-forest">spoznávame, rešpektujeme ich potreby</strong> a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
-                </p>
-              )}
-            </div>
-            {isLiveLead && <SafetyCertificates homeLayout />}
-          </div>
-        </section>
-
-        {!isLiveLead && <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
-          <div className="mx-auto max-w-4xl px-4">
-            <h2 className="section-title text-center text-lg sm:text-xl">Viac o nás a našej škôlke</h2>
-            <div className="mx-auto mt-5 max-w-3xl space-y-4 text-center text-sm leading-relaxed text-forest/80 sm:text-base">
-              {ABOUT_MORE.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-            </div>
-          </div>
-        </section>}
-
-        <section id="aria-early-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/30 pb-5 pt-8 sm:pb-7 sm:pt-10">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-4xl px-4">
-            <h2 className="section-title text-center text-2xl sm:text-3xl">Čo je dobré vedieť o škôlke?</h2>
-            <div className="mt-5 space-y-3">
-              {EARLY_FAQ.map((item) => (
-                <details key={item.q} className="group rounded-3xl border border-forest/10 bg-card p-4 shadow-card">
-                  <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-left font-display text-sm font-bold text-forest sm:text-base">
-                    {item.q}<span className="text-lg text-coral group-open:rotate-45">+</span>
-                  </summary>
-                  <div className="mt-2 border-t border-forest/10 pt-3 text-sm leading-relaxed text-forest/80"><AriaHighlightedText text={item.a} /></div>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {!isLiveLead && <AriaMosaicGallery />}
-
-        {!isLiveLead && benefitsSection}
-
-        <section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
+  const pricingSection = (<section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
             <h2 className="section-title text-3xl sm:text-4xl">Koľko stojí deň v škôlke?</h2>
@@ -425,10 +256,11 @@ export function AriaPreviewPage() {
               {PRICING.map((item) => (
                 <article key={item.name} className={"relative flex h-full min-h-[108px] flex-col items-center rounded-3xl px-3 py-3 text-center shadow-card sm:min-h-[136px] sm:p-4 " + (item.highlight ? "bg-forest text-cream ring-2 ring-coral" : "bg-card text-forest")}>
                   <h3 className="font-display text-[13px] font-bold leading-snug sm:text-xl">{item.name}</h3>
-                  <p aria-hidden={!item.highlight} className={"mt-0.5 text-[11px] font-semibold " + (item.highlight ? "text-cream/85" : "invisible")}>10 vstupov</p>
+                  <p aria-hidden={!item.highlight && !isLiveLead} className={"mt-0.5 text-[11px] font-semibold " + (item.highlight ? "text-cream/85" : isLiveLead ? "text-forest/75" : "invisible")}>{item.highlight ? "10 vstupov" : isLiveLead ? "Celodenný pobyt" : "10 vstupov"}</p>
                   <p data-lead-price className={"mt-1 font-display text-2xl font-bold sm:text-4xl " + (item.highlight ? "text-cream" : "text-coral-dark")}>{item.price}</p>
+                  {isLiveLead && item.highlight && <p data-lead-price-per-day className="mt-1 text-xs font-semibold text-cream/85">= 20 € / deň</p>}
                   <div className="mt-auto pt-1 text-[11px] leading-snug sm:text-sm">
-                    {item.highlight ? <strong>Permanentka platí 2 mesiace.</strong> : <span className="opacity-75">Celodenný pobyt</span>}
+                    {item.highlight ? <strong>Permanentka platí 2 mesiace.</strong> : !isLiveLead && <span className="opacity-75">Celodenný pobyt</span>}
                   </div>
                   {item.highlight && <span data-lead-best-value className="mt-2 inline-flex max-w-full items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold tracking-[-0.025em] text-white shadow-sm">Najvýhodnejšie. Ušetríte 50 €</span>}
                 </article>
@@ -472,16 +304,117 @@ export function AriaPreviewPage() {
             </div>
 
           </div>
-        </section>
+        </section>);
+  const firstVisitSection = (<section id="lead-first-visit" className="relative scroll-mt-24 overflow-hidden bg-forest py-10 text-cream sm:py-14">
+          <SectionAmbientPaws tone="dark" />
+          <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
+            <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-soft">
+              Ako to funguje
+            </p>
+            <h2 className="mt-2 font-display text-3xl font-bold sm:text-4xl">Prvá návšteva v 3 krokoch</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-cream/80 sm:text-base">
+              Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.
+            </p>
 
-        <Requirements id="lead-requirements" ariaPreview hideEyebrow />
 
-        {isLiveLead && benefitsSection}
-        {/* Restored approved two-column photo mosaic directly below Prečo Chvostíkovo,
-            without replacing or duplicating the original moving Hero carousel. */}
-        {isLiveLead && <AriaMosaicGallery paidLead />}
 
-        <section id="lead-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
+                        <div className="mt-10 grid gap-9 text-center md:grid-cols-3 md:gap-8">
+              {FIRST_VISIT_STEPS.map((step, i) => (
+                <article key={step.title} data-first-visit-step={i + 1} className="min-w-0">
+                  <FirstVisitPhoto number={i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
+                  <h3 className="font-display text-lg font-bold text-cream">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-cream/85">{step.content}</p>
+                  {step.note && <p className="mt-3 text-sm font-bold text-cream">{step.note}</p>}
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>);
+  const heroFormSection = (<section id="aria-hero-form" hidden={false} className="relative z-10 scroll-mt-24 overflow-hidden bg-white pb-8 pt-4 sm:pb-12 sm:pt-6">
+          <div id={isLiveLead ? "aria-first-visit-form" : undefined} />
+          <SectionAmbientPaws />
+          {/* Same verified title -> dog crown -> liquid form card layout as the lower visit form. */}
+          <div data-lead-form-shell={!isLiveLead || undefined} className="relative z-10 mx-auto max-w-2xl px-4">
+            {!isLiveLead && heroFormIntro}
+            <div data-aria-hero-form-dogs className="relative z-10 mx-auto mt-7 mb-[-18px] w-full max-w-sm">
+              <SchoolmatesFormCrown compact groundAccent />
+            </div>
+            <div data-lead-form-shell={isLiveLead || undefined} data-lead-inline-card className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+              {isLiveLead && heroFormIntro}
+              <LeadStepForm questionInHeading ariaPreview={!isLiveLead} trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
+            </div>
+          </div>
+        </section>);
+  const visitFormSection = (<section id="aria-first-visit-form" className="relative overflow-hidden bg-card py-10 sm:py-14">
+          <SectionAmbientPaws />
+          <div data-lead-form-shell={!isLiveLead || undefined} className="relative z-10 mx-auto max-w-2xl px-4">
+            {!isLiveLead && visitFormIntro}
+            <div data-aria-first-visit-dogs className="relative z-10 mx-auto mt-7 mb-[-18px] w-full max-w-sm">
+              <SchoolmatesFormCrown compact groundAccent />
+            </div>
+            <div data-lead-form-shell={isLiveLead || undefined} className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+              {isLiveLead && visitFormIntro}
+              <LeadStepForm questionInHeading trackingSource={isLiveLead ? "lead_landing_aria_first_visit_inline" : "aria_preview_first_visit_inline"} />
+            </div>
+          </div>
+        </section>);
+  const caretakersSection = (<section id="aria-caretakers" className="relative scroll-mt-24 overflow-hidden bg-white py-9 sm:py-12">
+          <SectionAmbientPaws />
+          <div id={isLiveLead ? "aria-about" : undefined} className="relative z-10 mx-auto max-w-5xl px-4">
+            <h2 className={isLiveLead ? "section-title mb-5 text-center text-[clamp(24px,6vw,38px)] leading-tight tracking-[-0.025em]" : "section-title mb-4 text-center text-[clamp(22px,4.5vw,38px)] leading-tight tracking-[-0.025em]"}>Kto sa bude starať o vášho psíka?</h2>
+            <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 sm:gap-6">
+              <div className="w-full max-w-[440px] lg:max-w-[560px]">
+                <img
+                  src={teamPhoto}
+                  alt="Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"
+                  loading="lazy"
+                  className="h-60 w-full rounded-3xl object-cover shadow-card sm:h-72 lg:h-[340px]"
+                />
+                <div data-hero-benefits className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 sm:gap-2 lg:max-w-none lg:flex-nowrap lg:gap-2">
+                  {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map((item) => (
+                    <span
+                      key={item}
+                      className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px] lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-xs"
+                    >
+                      <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5 lg:size-4" />
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {isLiveLead ? (
+                <div className="mx-auto max-w-[680px] space-y-4 text-left text-[15px] leading-[1.7] text-forest/80 sm:text-base">
+                  <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
+                  <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
+                  <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
+                  <p>Chvostíkovo nie je len miesto na stráženie psov. <strong className="font-extrabold text-forest">Je to druhý domov</strong>, kde sa o každého člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim vlastným psom.</p>
+                </div>
+              ) : (
+                <p className="mx-auto max-w-[680px] text-center text-sm leading-relaxed text-forest/75 sm:text-base">
+                  Aj my sme <strong className="font-bold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému. Aj preto vzniklo Chvostíkovo — miesto, kde psíkov <strong className="font-bold text-forest">spoznávame, rešpektujeme ich potreby</strong> a staráme sa o nich tak, ako by sme chceli pre svojich vlastných.
+                </p>
+              )}
+            </div>
+            {isLiveLead && <SafetyCertificates homeLayout />}
+          </div>
+        </section>);
+  const earlyFaqSection = (<section id="aria-early-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/30 pb-5 pt-8 sm:pb-7 sm:pt-10">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4">
+            <h2 className="section-title text-center text-2xl sm:text-3xl">Čo je dobré vedieť o škôlke?</h2>
+            <div className="mt-5 space-y-3">
+              {EARLY_FAQ.map((item) => (
+                <details key={item.q} className="group rounded-3xl border border-forest/10 bg-card p-4 shadow-card">
+                  <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-left font-display text-sm font-bold text-forest sm:text-base">
+                    {item.q}<span className="text-lg text-coral group-open:rotate-45">+</span>
+                  </summary>
+                  <div className="mt-2 border-t border-forest/10 pt-3 text-sm leading-relaxed text-forest/80"><AriaHighlightedText text={item.a} /></div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>);
+  const legacyFaqSection = (<section id="lead-faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-4xl px-4">
             <div className="text-center">
@@ -521,55 +454,161 @@ export function AriaPreviewPage() {
               ))}
             </div>
           </div>
-        </section>
+        </section>);
+  const puppyChecker = <AriaPuppyChecker onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />;
+  const friendshipSection = <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />;
+  const combinedKnowledgeSection = (
+    <section id="lead-knowledge" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
+        <h2 className="section-title text-center text-3xl sm:text-4xl">Čo je dobré vedieť</h2>
+        <Requirements id="lead-requirements" ariaPreview hideEyebrow embedded />
+        <div id="lead-faq" className="mx-auto mt-7 max-w-4xl space-y-3">
+          {LEAD_FAQ.map(item => <details key={item.id} data-lead-faq={item.id} className="group rounded-3xl bg-card px-5 py-4 shadow-card sm:px-6">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-display text-base font-bold text-forest marker:hidden">
+              {item.q}<span aria-hidden="true" data-aria-faq-icon className="text-xl text-coral transition group-open:rotate-45">+</span>
+            </summary>
+            <div className="mt-4 space-y-3 text-sm leading-relaxed text-forest/75">
+              {item.a.split(/\n+/).map(paragraph => <p key={paragraph}><AriaHighlightedText text={paragraph} /></p>)}
+              {item.href && <a href={item.href} className="inline-flex min-h-11 items-center font-semibold text-coral-dark underline underline-offset-2">{item.linkLabel}</a>}
+            </div>
+          </details>)}
+          <div id="aria-puppy-check" className="scroll-mt-24 pt-6">
+            <AriaPuppyChecker embedded onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />
+          </div>
+          <div className="flex justify-center pt-4">
+            <button type="button" id="lead-faq-interest" data-lead-faq-cta onClick={() => revealLeadHeroForm("lead_landing_faq_interest")} className="btn-coral min-h-11 px-5 text-center">Chcem sa informovať o škôlke</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 
-        <AriaPuppyChecker onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />
+  return (
+    <div className={"aria-brand-experiment min-h-screen overflow-x-clip bg-background" + (isLiveLead ? " lead-brand-live" : "")} data-aria-brand-experiment="orange-rose">
+      {/* Keep Aria floating in the viewport throughout the lead journey.
+          The paid lead hero stays visually unchanged; the menu no longer
+          participates in the document layout. */}
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={false} sectionNavigation={isLiveLead} {...(isLiveLead ? { anchorOverrides: { "lead-requirements": "lead-knowledge" } } : {})} onRevealInlineForm={isLiveLead ? () => revealLeadHeroForm("lead_landing_aria_dock_interest") : undefined} hidden={leadModalOpen || puppyModalOpen} />
 
-        <section id="lead-first-visit" className="relative scroll-mt-24 overflow-hidden bg-forest py-10 text-cream sm:py-14">
-          <SectionAmbientPaws tone="dark" />
-          <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
-            <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-soft">
-              Ako to funguje
-            </p>
-            <h2 className="mt-2 font-display text-3xl font-bold sm:text-4xl">Prvá návšteva v 3 krokoch</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-cream/80 sm:text-base">
-              Najprv sa spoznáme a spolu zistíme, či sa váš psík bude u nás cítiť dobre.
-            </p>
+      <main>
+        <section className={isLiveLead ? "hero-safe-top relative flex flex-col sm:min-h-[100svh] sm:justify-start sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
+          <PawTrailBackground landingBottomPaws />
 
+          {/* Mobile paid LEAD content is vertically centered in the part of
+              the viewport above floating Aria. Keep the fixed dock out of
+              document flow, with space reserved in scoped CSS below. */}
+          <div aria-hidden="true" data-aria-intro-top-space className={isLiveLead ? "h-0" : "min-h-2 flex-[0.2] sm:min-h-5 lg:min-h-3 lg:flex-[0.2]"} />
+          <div data-aria-hero-content className="relative z-10 w-full shrink-0">
+            <div className={isLiveLead ? "mx-auto w-full max-w-4xl px-4 pb-1 pt-1 sm:pb-4 sm:pt-5 lg:pt-7" : "mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7"}>
+            <div className="w-full min-w-0 text-center">
+              {/* Screenshot hierarchy: H1, four schoolmates, badge, liquid copy, reviews. */}
+              <div aria-hidden="true" data-aria-hero-heading-spacer className={isLiveLead ? "h-1 sm:h-5" : "h-[14px] sm:h-5"} />
+              <h1 className={(isLiveLead ? "mt-3 translate-y-0 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>
+                Miesto, ktoré si váš
+                <span className="block text-coral-dark">psík zamiluje</span>
+              </h1>
 
+              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-4 w-fit max-w-full sm:mt-5" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
+                {/* Four schoolmates rest directly above the badge as in the reference. */}
+                {!isLiveLead && <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
+                  <SchoolmatesFormCrown compact desktopWide />
+                </div>}
+                <p data-aria-service-badge className="inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2.5 py-2 text-center font-display text-[8px] font-bold uppercase leading-tight tracking-[0.015em] text-white shadow-card min-[390px]:px-3 min-[390px]:text-[9.5px] sm:px-5 sm:py-2.5 sm:text-sm">
+                  {isLiveLead ? "Psia škôlka v Košiciach pre stredné a veľké psy" : "Denné stráženie stredných a veľkých psíkov"}
+                </p>
+              </div>
 
-                        <div className="mt-10 grid gap-9 text-center md:grid-cols-3 md:gap-8">
-              {FIRST_VISIT_STEPS.map((step, i) => (
-                <article key={step.title} data-first-visit-step={i + 1} className="min-w-0">
-                  <FirstVisitPhoto number={i + 1} image={GALLERY[[2, 0, 5][i]!]!.src} alt={GALLERY[[2, 0, 5][i]!]!.alt} />
-                  <h3 className="font-display text-lg font-bold text-cream">{step.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-cream/85">{step.content}</p>
-                  {step.note && <p className="mt-3 text-sm font-bold text-cream">{step.note}</p>}
-                </article>
+              {isLiveLead && <div data-lead-hero-pills className="mx-auto mt-2 flex max-w-md flex-wrap justify-center gap-1">
+                {["Celodenný dohľad", "Vlastný výbeh", "Najprv sa spoznáme · úvodná návšteva zadarmo", "Od 20 € / deň"].map((text,i) => <span key={text} data-lead-hero-pill={i+1} className="rounded-full bg-[#ffe7bd] px-2 py-1 font-display text-[10px] font-semibold leading-tight text-forest">{text}</span>)}
+              </div>}
+              {isLiveLead ? (
+                <div data-lead-hero-photos className="mx-auto mt-4 grid w-full max-w-2xl grid-cols-2 gap-2.5 sm:mt-5 sm:gap-4">
+                  {LEAD_HERO_PHOTOS.map((photo, index) => (
+                    <button key={photo.src} data-lead-hero-photo={index + 1} type="button"
+                      aria-label={"Zobraziť fotografiu: " + photo.alt} onClick={() => setReviewPhotoOpen(index)}
+                      className="group h-[144px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral min-[390px]:h-40 sm:h-56 lg:h-64">
+                      <img src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} loading="eager"
+                        fetchPriority={index === 0 ? "high" : "auto"} decoding="async"
+                        className="size-full object-cover object-[50%_45%] transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none" />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+              <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[590px]">
+                <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije si <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
+              </p>
+              )}
+              {isLiveLead && (
+                <div data-lead-hero-action className="mx-auto mt-4 flex w-full max-w-[294px] flex-col items-center justify-center">
+                  <button type="button" data-aria-lead-hero-cta aria-controls="aria-hero-form"
+                    aria-expanded={isLiveLead ? undefined : leadHeroFormOpen}
+                    onClick={() => revealLeadHeroForm("lead_landing_hero_orange_cta")}
+                    className="inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full border px-2.5 py-2 text-center font-display text-[clamp(11px,3.35vw,15px)] font-bold leading-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">
+                    Chcem sa informovať o škôlke
+                  </button>
+                  <p data-lead-hero-hours className="mt-1 text-[11px] leading-snug text-forest/75">Po–Pi 7:00–17:00 · Poľská 6, Košice</p>
+                </div>
+              )}
+            </div>
+          </div>
+            <div data-aria-lead-review-spacing className={isLiveLead ? "mt-8 sm:mt-4 lg:mt-2" : "mt-0 sm:mt-2 lg:mt-2"}>
+              <Reviews variant="hero" />
+            </div>
+          </div>
+          {!isLiveLead && (
+          <>{/* Fill the former empty Aria breathing room with two real photos from
+              the moving gallery. Keep the enquiry below the initial viewport,
+              while leaving Aria fixed above the bottom dock. Desktop now also shows the photos. */}
+          <div data-aria-intro-space className={isLiveLead ? "relative z-10 mx-auto flex min-h-[245px] w-full max-w-3xl flex-[0.45] items-end px-4 pb-3 pt-12 sm:min-h-[285px] sm:px-0 sm:pb-3 sm:pt-12 lg:max-w-4xl lg:min-h-[385px] lg:flex-[0.3]" : "relative z-10 mx-auto flex min-h-[178px] max-h-[198px] w-full max-w-3xl flex-[0.45] items-end px-4 pb-2 pt-8 sm:min-h-[135px] sm:max-h-[175px] sm:px-0 sm:pb-0 sm:pt-5 lg:max-w-4xl lg:min-h-[268px] lg:max-h-[286px] lg:flex-[0.3]"}>
+            <div data-aria-review-gap-photos className="grid w-full grid-cols-2 gap-2.5 sm:gap-4">
+              {LEAD_REVIEW_GAP_PHOTOS.map((photo, index) => (
+                <button type="button" key={photo.src} data-aria-review-photo={index + 1}
+                  aria-label={`Zobraziť fotografiu: ${photo.alt}`}
+                  onClick={() => setReviewPhotoOpen(index)}
+                  className={isLiveLead ? "group relative h-[190px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[220px] sm:h-[260px] lg:h-[340px]" : "group relative h-[122px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-coral min-[390px]:h-[138px] lg:h-[260px]"}>
+                  <img src={photo.src} alt={photo.alt} width={672} height={896} loading="lazy" decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+                </button>
               ))}
             </div>
           </div>
+          </>
+          )}
         </section>
 
-        <section id="aria-first-visit-form" className="relative overflow-hidden bg-card py-10 sm:py-14">
-          <SectionAmbientPaws />
-          <div data-lead-form-shell={!isLiveLead || undefined} className="relative z-10 mx-auto max-w-2xl px-4">
-            {!isLiveLead && visitFormIntro}
-            <div data-aria-first-visit-dogs className="relative z-10 mx-auto mt-7 mb-[-18px] w-full max-w-sm">
-              <SchoolmatesFormCrown compact groundAccent />
-            </div>
-            <div data-lead-form-shell={isLiveLead || undefined} className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
-              {isLiveLead && visitFormIntro}
-              <LeadStepForm questionInHeading trackingSource={isLiveLead ? "lead_landing_aria_first_visit_inline" : "aria_preview_first_visit_inline"} />
+        {isLiveLead ? <>
+          {pricingSection}
+          {firstVisitSection}
+          {heroFormSection}
+          {caretakersSection}
+          {combinedKnowledgeSection}
+          {benefitsSection}
+          <AriaMosaicGallery paidLead />
+          {friendshipSection}
+        </> : <>
+          {heroFormSection}
+          {caretakersSection}
+          {!isLiveLead && <section id="aria-about" className="relative bg-card pb-9 pt-5 sm:pb-12 sm:pt-6">
+          <div className="mx-auto max-w-4xl px-4">
+            <h2 className="section-title text-center text-lg sm:text-xl">Viac o nás a našej škôlke</h2>
+            <div className="mx-auto mt-5 max-w-3xl space-y-4 text-center text-sm leading-relaxed text-forest/80 sm:text-base">
+              {ABOUT_MORE.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>
           </div>
-        </section>
-
-        <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />
-
-        {!isLiveLead && <DaycarePhotoCarousel />}
-
-
+        </section>}
+          {earlyFaqSection}
+          <AriaMosaicGallery />
+          {benefitsSection}
+          {pricingSection}
+          <Requirements id="lead-requirements" ariaPreview hideEyebrow />
+          {legacyFaqSection}
+          {puppyChecker}
+          {firstVisitSection}
+          {visitFormSection}
+          {friendshipSection}
+          <DaycarePhotoCarousel />
+        </>}
 
       </main>
 

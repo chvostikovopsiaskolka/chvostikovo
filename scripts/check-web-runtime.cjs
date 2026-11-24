@@ -29,6 +29,67 @@ async function assertLeadContactIntro(form) {
   if(!state.shell||!state.hidden||!state.modal)throw new Error('Shared form introduction remains in contact layout: '+JSON.stringify(state));
 }
 
+
+// Campaign content-flow contract: preserve the shared cookie/funnel/widget checks,
+// replace only the superseded section-order and hidden-form assertions below.
+async function assertCampaignContentFlow(page) {
+  const structure=await page.evaluate(()=>({
+    order:[...document.querySelector('main').children].map(el=>el.id),
+    faq:[...document.querySelectorAll('[data-lead-faq]')].map(el=>el.dataset.leadFaq),
+    forms:document.querySelectorAll('main [data-lead-step-form]').length,
+    benefits:document.querySelectorAll('[data-lead-benefits] h3').length,
+    requirements:document.querySelectorAll('#lead-requirements article').length,
+    carousel:document.querySelectorAll('#lead-benefits [data-gesture-track="photos"]').length,
+    checker:!!document.querySelector('[data-lead-faq="puppies"] + #aria-puppy-check'),
+    robots:document.querySelector('meta[name="robots"]')?.content,
+    firstVisitLink:document.querySelector('[data-lead-faq="first-visit"] a')?.getAttribute('href'),
+    daily:document.querySelector('[data-lead-price-per-day]')?.textContent.trim(),
+    single:document.querySelector('#lead-pricing article')?.textContent,
+  }));
+  if(structure.order.slice(1,8).join('|')!=='lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-knowledge|lead-benefits|aria-mosaic'||
+    structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==1||structure.benefits!==3||structure.requirements!==4||
+    structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||structure.firstVisitLink!=='#lead-first-visit'||structure.daily!=='= 20 € / deň'||
+    structure.single.includes('10 vstupov')||!structure.single.includes('Celodenný pobyt'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
+  for(const [width,height] of [[375,667],[390,844],[768,1024],[1440,900]]) {
+    await page.setViewportSize({width,height});
+    await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+    await page.waitForTimeout(160);
+    const fold=await page.evaluate(()=>{
+      const box=s=>document.querySelector(s)?.getBoundingClientRect();
+      const title=box('main h1'),pills=box('[data-lead-hero-pills]'),photos=box('[data-lead-hero-photos]'),cta=box('[data-aria-lead-hero-cta]'),proof=box('#recenzie h2');
+      const aria=box('[data-aria-message]'),dock=box('[data-aria-dock]'),face=box('[data-aria-portrait]');
+      const visiblePills=[...document.querySelectorAll('[data-lead-hero-pill]')].filter(el=>getComputedStyle(el).display!=='none');
+      const elements=[title,pills,photos,cta,proof];
+      return {overflow:document.documentElement.scrollWidth>innerWidth+1,
+        visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,dock.top)+1),
+        pillRows:new Set(visiblePills.map(el=>Math.round(el.getBoundingClientRect().top))).size,
+        actionBg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).backgroundColor,
+        dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
+        ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width};
+    });
+    if(fold.overflow||!fold.dockInside||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
+      (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
+  }
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('[data-aria-lead-hero-cta]').click();
+  await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
+  const nav=page.locator('[data-aria-section-navigation="true"]');
+  for(const [name,target] of [['O nás','aria-about'],['Cenník škôlky','lead-pricing'],['Podmienky prijatia','lead-knowledge']]) {
+    await nav.getByRole('button',{name,exact:true}).click();
+    await page.waitForFunction(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.top>=0&&r.top<130;},target,{timeout:5000});
+  }
+  await page.locator('[data-lead-faq-cta]').click();
+  await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
+  if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
+  const form=page.locator('#aria-hero-form [data-lead-step-form]');
+  await form.locator('label:has(input[name="zaujem"])').first().click();
+  await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+  await assertLeadContactIntro(form);
+  await form.getByRole('button',{name:'Späť',exact:true}).click();
+  await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible'});
+  await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+}
+
 // APP-01 static regression for the slider fill direction in both engines.
 // Pseudo-element background images are not exposed consistently by getComputedStyle.
 if (!bellaris && brandPreviewCandidate) {
@@ -91,7 +152,8 @@ if (!bellaris && brandPreviewCandidate) {
           // Cookie preferences are installed by a client effect, so this also verifies hydration.
           const cookieButton = page.getByRole('button', { name: /Odmietnuť|Reject|Reject all|Len nevyhnutné|Necessary only/i }).first();
           await cookieButton.waitFor({ timeout: 10000 });
-          if (brandPreviewCandidate && !bellaris && ['/test-aria/', '/psia-skolka-kosice/'].includes(url.pathname)) {
+          const revisedLead=url.pathname==='/psia-skolka-kosice/' && await page.locator('[data-lead-hero-pills]').count()>0;
+          if (brandPreviewCandidate && !bellaris && !revisedLead && ['/test-aria/', '/psia-skolka-kosice/'].includes(url.pathname)) {
             const palette = await page.evaluate(() => {
               const exp = document.querySelector('[data-aria-brand-experiment]');
               const info = exp ? getComputedStyle(exp) : null;
@@ -209,9 +271,10 @@ if (!bellaris && brandPreviewCandidate) {
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
+          if(revisedLead) await assertCampaignContentFlow(page);
           // Candidate-only regression for the three unified Chvostíkovo galleries.
           // Production-baseline CI keeps testing its already published version.
-          if (!bellaris && !restricted && new URL(base).hostname === '127.0.0.1') {
+          if (!bellaris && !restricted && !revisedLead && new URL(base).hostname === '127.0.0.1') {
             const verifyLightbox = async (fullResolution = false) => {
               const modal = page.locator('[data-photo-lightbox]');
               await modal.waitFor({state:'visible'});

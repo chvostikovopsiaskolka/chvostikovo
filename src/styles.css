@@ -1225,19 +1225,13 @@
 /* Paid lead hotfix: reviews and Aria belong to the first mobile screen.
    Scope to this landing; do not change the preview or organic puppy dock. */
 @media (max-width: 639px) {
-  /* The browser toolbar is outside the visual viewport. Keep the dock low,
-     above the safe-area inset, rather than 94px above it over the reviews. */
-  /* Center the whole H1 → dog crown → liquid copy → reviews group in
-     the visual area above the floating Aria bubble. The shared safe-top
-     declaration overrides Tailwind pt-* on mobile, so control its CSS
-     variable here. Reserve the dock footprint at the bottom without
-     making the reviews, photos or menu position: absolute. */
+  /* Reserve the existing dock footprint using the small viewport and safe area. */
   .lead-brand-live .hero-safe-top {
-    --hero-content-top: 56px;
-    /* Pull the moving gallery and every following section up together.
-       The hero's existing min-height still keeps photos below the fixed dock
-       on short viewports; do not translate the gallery over the form. */
-    padding-bottom: 156px;
+    --lead-hero-visible: calc(100svh - 50px - max(8px, env(safe-area-inset-bottom, 0px)));
+    --hero-content-top: 12px;
+    min-height: var(--lead-hero-visible);
+    justify-content: flex-start;
+    padding-bottom: calc(50px + max(8px, env(safe-area-inset-bottom, 0px)));
   }
   .lead-brand-live #recenzie { padding-bottom: 0.5rem; }
   /* The horizontal scroll container used to clip the card shadows at 4px.
@@ -1530,12 +1524,11 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
    FORM-LIQUID-01 verbatim, including the lower visit form's creamy frosted
    background and subtle pink outline. NO paid-hero-only pink card override. */
 
-/* Understated amber glass CTA: narrower, with a true transparent backdrop.
-   Keep the approved full text, min 44px touch target, and visible focus. */
+/* Primary campaign orange CTA; keep its text, touch target and focus. */
 .lead-brand-live [data-aria-lead-hero-cta] {
   color: #26322b;
-  background-color: rgb(255 184 92 / 49%);
-  background-image: linear-gradient(145deg, rgb(255 255 255 / 70%), rgb(255 186 96 / 14%));
+  background-color: #ffa414;
+  background-image: none;
   border-color: rgb(190 117 42 / 29%);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 86%), 0 9px 22px -14px rgb(79 46 17 / 24%);
   -webkit-backdrop-filter: blur(14px) saturate(1.16);
@@ -1543,7 +1536,7 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
 }
 .lead-brand-live [data-aria-lead-hero-cta]:is(:hover, :active) {
   color: #26322b;
-  background-color: rgb(255 192 113 / 67%);
+  background-color: #f59a00;
   border-color: rgb(190 117 42 / 42%);
 }
 
@@ -1568,7 +1561,7 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
     background-image: none;
   }
   .lead-brand-live [data-aria-lead-hero-cta] {
-    background-color: rgb(255 231 190 / 96%);
+    background-color: #ffa414;
     background-image: none;
   }
   .lead-brand-live [data-aria-dock] {
@@ -1655,3 +1648,23 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 @media (forced-colors: none) {
   body:has(#top) .form-dialog.form-liquid-surface:not(.aria-preview-modal) { background-color: #fff8ec; }
 }
+
+/* Paid campaign content budget only: keep the existing fixed Aria/dock and motion intact. */
+@media (max-width: 639px) {
+
+  .lead-brand-live [data-aria-hero-heading-spacer] { height: 0; }
+  .lead-brand-live .hero-safe-top h1 { margin-top: 0; }
+  .lead-brand-live [data-aria-service-group] { margin-top: 8px; }
+  .lead-brand-live [data-aria-service-badge] { text-transform: none; font-size: 11px; letter-spacing: 0; padding-block: 6px; }
+  .lead-brand-live [data-lead-hero-pills] { margin-top: 6px; }
+  .lead-brand-live [data-lead-hero-pill="3"] { order: 1; }
+  .lead-brand-live [data-lead-hero-photos] { margin-top: 8px; }
+  .lead-brand-live [data-lead-hero-photo] { height: clamp(120px, calc(0.35 * (var(--lead-hero-visible) - 350px)), 160px); }
+  .lead-brand-live [data-lead-hero-action] { margin-top: 8px; }
+  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 12px; }
+}
+@media (max-width: 389px) {
+  .lead-brand-live [data-lead-hero-pill="4"] { display: none; }
+}
+
+.lead-brand-live [data-lead-faq-cta] { background: #ffa414; color: #26322b; }

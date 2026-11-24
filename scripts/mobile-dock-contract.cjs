@@ -259,8 +259,8 @@ const paidLeadCurrent = read("src/routes/test-aria.tsx");
 const ariaGuideCurrent = read("src/components/site/AriaLeadAssistant.tsx");
 const storyCurrent = read("src/components/site/Story.tsx");
 assert(paidLeadCurrent.includes('data-aria-lead-hero-cta') &&
-       paidLeadCurrent.includes('aria-expanded={leadHeroFormOpen}') &&
-       paidLeadCurrent.includes('hidden={isLiveLead && !leadHeroFormOpen}') &&
+       paidLeadCurrent.includes('LEAD_FAQ.map') &&
+       paidLeadCurrent.includes('const combinedKnowledgeSection') &&
        paidLeadCurrent.includes('lead_landing_hero_orange_cta') &&
        paidLeadCurrent.includes('data-lead-inline-card') &&
        paidLeadCurrent.includes('data-aria-hero-form-dogs') &&
@@ -295,11 +295,9 @@ assert(crownIndex >= 0 && visitCardIndex > crownIndex && visitIntroIndex > visit
 // the original eight GALLERY Wix asset IDs and matching 1600px/92Q CDN
 // variants; never duplicate the moving carousel or alter preview's order.
 const ariaMosaicCurrent = read("src/components/site/AriaMosaicGallery.tsx");
-assert(paidLeadCurrent.includes('{isLiveLead && <AriaMosaicGallery paidLead />}') &&
-       paidLeadCurrent.indexOf('{isLiveLead && benefitsSection}') <
-         paidLeadCurrent.indexOf('{isLiveLead && <AriaMosaicGallery paidLead />}') &&
-       paidLeadCurrent.indexOf('{isLiveLead && <AriaMosaicGallery paidLead />}') <
-         paidLeadCurrent.indexOf('<section id="lead-faq"') &&
+const campaignOrder = paidLeadCurrent.slice(paidLeadCurrent.indexOf('{isLiveLead ? <>\n          {pricingSection}'));
+assert(campaignOrder.includes('<AriaMosaicGallery paidLead />') &&
+       campaignOrder.indexOf('{benefitsSection}') < campaignOrder.indexOf('<AriaMosaicGallery paidLead />') &&
        ariaMosaicCurrent.includes('GALLERY.slice(0, 8)') &&
        ariaMosaicCurrent.includes('w_1600,h_1600,al_c,q_92,enc_auto') &&
        ariaMosaicCurrent.includes('w_900,h_900,al_c,q_85,enc_auto') &&
@@ -311,9 +309,12 @@ assert(paidLeadCurrent.includes('{isLiveLead && <AriaMosaicGallery paidLead />}'
 /* APP-01 23.11: explicitly test reordered LEAD, mobile inline and narrow widths. */
 const paid = read("src/routes/test-aria.tsx");
 const ariaAssistant = read("src/components/site/AriaLeadAssistant.tsx");
-assert(paid.indexOf('<section id="aria-hero-form"') < paid.indexOf('id="lead-photo-carousel"') &&
-       paid.indexOf('id="lead-photo-carousel"') < paid.indexOf('<section id="aria-caretakers"'),
-       "Paid LEAD must swap existing inline form and moving gallery without duplicates");
+assert(campaignOrder.indexOf('{pricingSection}') < campaignOrder.indexOf('{firstVisitSection}') &&
+       campaignOrder.indexOf('{firstVisitSection}') < campaignOrder.indexOf('{heroFormSection}') &&
+       campaignOrder.indexOf('{heroFormSection}') < campaignOrder.indexOf('{caretakersSection}') &&
+       campaignOrder.indexOf('{caretakersSection}') < campaignOrder.indexOf('{combinedKnowledgeSection}') &&
+       paid.includes('data-lead-benefits') && paid.includes('id="lead-photo-carousel"'),
+       "Campaign uses one in-page form after visit steps; carousel belongs in benefits");
 assert(hero.includes('data-home-hero-photos') &&
        hero.includes('data-home-hero-interest-cta') &&
        hero.includes('LEAD_REVIEW_GAP_PHOTOS') &&
