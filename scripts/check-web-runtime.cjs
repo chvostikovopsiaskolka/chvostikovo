@@ -73,7 +73,7 @@ async function assertCampaignContentFlow(page) {
         visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
         cards:(()=>{const cards=[...document.querySelectorAll('[data-lead-price-card]')].map(el=>el.getBoundingClientRect());const taxi=box('#lead-pricing [data-aria-taxi]');return cards.length===2&&Math.abs(cards[0].top-cards[1].top)<2&&Math.abs(cards[0].bottom-cards[1].bottom)<2&&taxi.top>cards[0].bottom&&taxi.width>=cards[1].right-cards[0].left-2;})(),
         cleanSections:getComputedStyle(document.querySelector('#aria-puppy-check')).backgroundColor==='rgb(255, 255, 255)'&&document.querySelector('#lead-faq').parentElement.tagName==='MAIN',
-        certificateWidth:box('[data-safety-certificates]').width>=box('#aria-caretakers > div').width-34,
+        certificateWidth:(()=>{const e=document.querySelector('[data-safety-certificates]');return e.getBoundingClientRect().width>=e.parentElement.clientWidth-34;})(),
         pillCount:visiblePills.length,pillBg:visiblePills.every(el=>getComputedStyle(el).backgroundColor==='rgb(248, 221, 235)'),
         pillRows:new Set(visiblePills.map(el=>Math.round(el.getBoundingClientRect().top))).size,
         actionBg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).backgroundColor,
@@ -2831,7 +2831,10 @@ if (!bellaris && brandPreviewCandidate) {
               const carousel = tracks.nth(i);
               const touchAction = await carousel.evaluate(el => getComputedStyle(el).touchAction);
               if (touchAction !== 'auto') throw new Error('Carousel blocks vertical touch panning: ' + touchAction);
-              await carousel.scrollIntoViewIfNeeded();
+              // Settle setup before measuring a real wheel; a pending smooth
+              // anchor scroll can otherwise cancel the wheel and report 0 -> 0.
+              await carousel.evaluate(el=>el.scrollIntoView({block:"center",behavior:"instant"}));
+              await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
               const box = await carousel.boundingBox();
               if (!box) throw new Error('Invisible carousel track');
               if (engine === 'chromium') {
