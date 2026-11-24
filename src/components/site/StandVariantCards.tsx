@@ -5,23 +5,26 @@ import standMia from "@/assets/products/stand-mia.avif";
 import standCori from "@/assets/products/stand-cori.avif";
 import standRose from "@/assets/products/stand-rose-hq.webp";
 
-const VARIANTS: Array<{
+export const STAND_VARIANTS: Array<{
   value: StandSize;
   label: string;
   dimension: string;
   height: string;
+  breed: string;
+  bowls: string;
+  note: string;
   price: string;
   image: string;
   alt: string;
 }> = [
   { value: "small", label: "S verzia", dimension: "cca 40 × 20 cm",
-    height: "Výšku nôh prispôsobujeme konkrétnemu psíkovi, maximálne do 15 cm.",
+    height: "do 15 cm", breed: "Pre malé plemená", bowls: "Malé nerezové misky.", note: "Výšku nôh prispôsobujeme konkrétnemu psíkovi.",
     price: "40 €", image: standMia, alt: "Drevený stojan MIA – malý variant S" },
   { value: "large", label: "M verzia", dimension: "cca 60 × 30 cm",
-    height: "Väčšie nerezové misky a výška nôh od 20 do 35 cm.",
+    height: "20–35 cm", breed: "Pre stredné plemená", bowls: "Väčšie nerezové misky.", note: "",
     price: "45 €", image: standCori, alt: "Drevený stojan CORI – stredný variant M" },
-  { value: "extra_large", label: "L verzia", dimension: "Rozmery na mieru",
-    height: "Pre veľké plemená. Výška nôh od 40 cm bez horného limitu; rozmer prispôsobíme psíkovi.",
+  { value: "extra_large", label: "L verzia", dimension: "cca 60 × 30 cm",
+    height: "od 40 cm", breed: "Pre veľké plemená", bowls: "Nerezové misky.", note: "Rozmery na mieru podľa psíka.",
     price: "50 €", image: standRose, alt: "Biely drevený stojan ROSE – veľký variant L" },
 ];
 
@@ -40,7 +43,7 @@ export function StandVariantCards({ onInterest }: { onInterest: (size: StandSize
     <div data-stand-sizes="carousel" data-product-stand-cards data-stand-cards-hydrated={hydrated ? "true" : "false"}
       role="region" aria-label="Varianty stojana – na mobile posúvajte do strany" tabIndex={0}
       className="-mx-4 mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-4 touch-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0">
-      {VARIANTS.map((variant) => (
+      {STAND_VARIANTS.map((variant) => (
         <article key={variant.value} data-stand-size={variant.value}
           className="flex w-[87vw] max-w-[420px] min-w-0 shrink-0 snap-start flex-col overflow-hidden rounded-4xl bg-card shadow-soft sm:w-[58vw] md:w-auto md:max-w-none md:shrink">
           <div className="relative isolate overflow-hidden">
@@ -71,7 +74,11 @@ export function StandVariantCards({ onInterest }: { onInterest: (size: StandSize
               </span>
             </div>
             <h2 className="mt-2 font-display text-2xl font-bold text-forest">{variant.dimension}</h2>
-            <p className="mt-3 flex-1 text-sm leading-relaxed text-forest/75">{variant.height}</p>
+            <div className="mt-3 flex-1 space-y-1 text-sm leading-relaxed text-forest/75">
+              <p><strong className="text-forest">{variant.breed}</strong></p>
+              <p className="whitespace-nowrap text-[clamp(11px,3.3vw,14px)]">Výška nôh <strong className="text-forest">{variant.height}</strong></p>
+              <p>{variant.bowls} {variant.note}</p>
+            </div>
             <div className="mt-6 flex items-center justify-between gap-2">
               <button type="button" onClick={() => onInterest(variant.value)}
                 aria-label={`Mám záujem o ${variant.label.toUpperCase()}`}

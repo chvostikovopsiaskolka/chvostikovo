@@ -28,6 +28,21 @@ async function centerFixtureControl(control) {
   await control.page().evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
 }
 
+// Exercise the actual visible radio and next button; settle scrolling before
+// clicking so a moving viewport or fixed mobile dock cannot intercept it.
+async function advanceLeadContact(form) {
+  const choice=form.locator('label:has(input[name="zaujem"])').first();
+  await choice.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+  await choice.click();
+  await form.locator('input[name="zaujem"]').first().evaluate(el=>{
+    if(!el.checked)throw new Error('Lead interest radio did not select');
+  });
+  const next=form.getByRole('button',{name:'Pokračovať',exact:true});
+  await next.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+  await next.click();
+  await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
+}
+
 async function assertLeadContactIntro(form) {
   // Wait for the real React/CSS transition, especially on Safari WebKit.
   await form.getByRole('heading',{name:'Kontaktné údaje',exact:true}).waitFor({state:'visible',timeout:5000});
@@ -126,9 +141,7 @@ async function assertCampaignContentFlow(page) {
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
   const form=page.locator('#aria-hero-form [data-lead-step-form]');
-  await centerFixtureControl(form.locator('label:has(input[name="zaujem"])').first());
-  await form.locator('label:has(input[name="zaujem"])').first().click();
-  await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+  await advanceLeadContact(form);
   await assertLeadContactIntro(form);
   await form.getByRole('button',{name:'Späť',exact:true}).click();
   await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible'});
@@ -2107,8 +2120,7 @@ if (!bellaris && brandPreviewCandidate) {
             });
             if (await page.locator('[role="dialog"] [data-lead-step-form]').count())
               throw new Error('Paid dock must scroll to inline form without opening a modal');
-            await contact.locator('label:has(input[name="zaujem"])').first().click();
-            await contact.getByRole('button', { name: 'Pokračovať' }).click();
+            await advanceLeadContact(contact);
             const breedInput = contact.getByLabel('Plemeno psíka *');
             if (!await breedInput.isVisible()) throw new Error('Active campaign form must ask for breed');
             await contact.locator('input[name="meno"]').fill('Testovací dopyt');
@@ -2158,13 +2170,30 @@ if (!bellaris && brandPreviewCandidate) {
             await faqForm.locator('input[name="email"]').fill('test@example.com');
             await faqForm.getByRole('button',{name:'Späť',exact:true}).click();
             if(await question.inputValue()!=='Ako vyzerá deň v škôlke?') throw new Error('FAQ question lost on Back');
-            await faqForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+            const faqNext=faqForm.getByRole('button',{name:'Pokračovať',exact:true});
+            await centerFixtureControl(faqNext);
+            await faqNext.click();
+            await faqForm.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
             if(await faqForm.locator('input[name="meno"]').inputValue()!=='Testovací kontakt') throw new Error('FAQ contact lost on Back');
-            await faqForm.getByRole('button',{name:'Poslať',exact:true}).click();
-            if(faqPosts.length) throw new Error('FAQ contact accepted without consent');
-            await faqForm.locator('input[type="checkbox"][required]').check();
-            await faqForm.getByRole('button',{name:'Poslať',exact:true}).click();
-            await page.locator('[data-home-faq-contact-success]').waitFor({state:'visible'});
+            const faqSend=faqForm.getByRole('button',{name:'Poslať',exact:true});
+            const faqConsent=faqForm.locator('input[type="checkbox"][required]');
+            await centerFixtureControl(faqSend);
+            await faqSend.click();
+            if(faqPosts.length || await faqConsent.evaluate(el=>!el.validity.valueMissing)) throw new Error('FAQ contact accepted without consent or native required validation missing');
+            await centerFixtureControl(faqConsent);
+            await faqConsent.check();
+            if(!await faqConsent.isChecked()) throw new Error('FAQ consent was not checked');
+            await centerFixtureControl(faqSend);
+            const ready=await faqForm.evaluate(form=>({step:form.dataset.step,valid:form.checkValidity(),invalid:[...form.querySelectorAll(':invalid')].map(el=>el.name||el.tagName)}));
+            if(ready.step!=='2'||!ready.valid) throw new Error('FAQ contact fixture invalid before send: '+JSON.stringify(ready));
+            await faqSend.click();
+            try {
+              await page.locator('[data-home-faq-contact-success]').waitFor({state:'visible',timeout:8000});
+            } catch {
+              const state=await faqForm.evaluate(form=>({step:form.dataset.step,valid:form.checkValidity(),invalid:[...form.querySelectorAll(':invalid')].map(el=>el.name||el.tagName),alert:form.querySelector('[role="alert"]')?.textContent||null,button:form.querySelector('fieldset:not([hidden]) button[type="submit"]')?.textContent||null})).catch(()=>null);
+              throw new Error('FAQ contact did not show receipt after mocked response: '+JSON.stringify({posts:faqPosts.length,state}));
+            }
+            if(!await page.locator('[data-home-faq-contact-success]').getByRole('heading',{name:'Ďakujeme!',exact:true}).isVisible())throw new Error('FAQ receipt must contain the success heading');
             for(let i=0;i<20&&!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='home_faq_contact_submitted');i++) await page.waitForTimeout(100);
             const faqPayload=faqPosts[0];
             if(faqPosts.length!==1||faqPayload.cta_source!=='home_faq_contact'||faqPayload.marketing_consent!==false||faqPayload.email!=='test@example.com'||faqPayload.raw_payload?.['Otázka návštevníka']!=='Ako vyzerá deň v škôlke?'||faqPayload.dog_breed||trackedEvents.filter(e=>e.name==='explore_daycare'&&e.source==='home_faq_contact_submitted').length!==1||trackedEvents.some(e=>e.name==='form_submit'&&e.source==='home_faq_contact')) throw new Error('FAQ contact source, data, consent or non-conversion tracking regression');
@@ -2527,6 +2556,7 @@ if (!bellaris && brandPreviewCandidate) {
                     aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
                     centeredFullWidthTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-prices.right)/2)<3,
+                    faqContactResponsiveWidth:(()=>{const card=faq.querySelector('[data-home-faq-contact]'), question=faq.querySelector('button[aria-expanded]');if(!card||!question)return false;const c=card.getBoundingClientRect(),q=question.getBoundingClientRect();return c.width<=q.width+2 && (innerWidth>=1024?Math.abs(c.width-q.width)<2:c.width<=512+2) && card.scrollWidth<=card.clientWidth+2 && getComputedStyle(card).backgroundColor==='rgba(255, 252, 248, 0.94)';})(),
                     singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     puppyImmediatelyAfterPricing:document.getElementById('cennik').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
@@ -2589,7 +2619,7 @@ if (!bellaris && brandPreviewCandidate) {
                       const style=getComputedStyle(el);
                       return el.classList.contains('form-liquid-surface') &&
                         style.backdropFilter.includes('blur') &&
-                        style.backgroundColor.includes('0.55') &&
+                        style.backgroundColor === 'rgba(255, 252, 248, 0.94)' &&
                         parseFloat(style.borderTopWidth)>=1.4 &&
                         !document.querySelector('#informujte-sa a[href^="tel:"]');
                     })(),
@@ -2859,14 +2889,27 @@ if (!bellaris && brandPreviewCandidate) {
               const box = await carousel.boundingBox();
               if (!box) throw new Error('Invisible carousel track');
               if (engine === 'chromium') {
-                const before = await page.evaluate(() => window.scrollY);
-                // Chromium can simulate wheel input; verify actual scroll chaining.
-                await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-                await page.mouse.wheel(0, 330);
-                await page.waitForTimeout(320);
-                const after = await page.evaluate(() => window.scrollY);
-                if (after <= before + 15)
-                  throw new Error('Vertical page scroll blocked on carousel ' + i + ': ' + before + ' -> ' + after);
+                // Test a genuine wheel at an uncovered point inside the carousel.
+                // A fixed dock or a moving viewport is not evidence of a carousel
+                // scroll lock. Keep touch-action and the actual scroll assertion.
+                const point=await carousel.evaluate(el=>{
+                  const r=el.getBoundingClientRect();
+                  for(const fy of [.5,.35,.65,.2,.8])for(const fx of [.5,.3,.7]){
+                    const x=r.left+r.width*fx,y=r.top+r.height*fy;
+                    if(x>0&&x<innerWidth&&y>0&&y<innerHeight&&el.contains(document.elementFromPoint(x,y)))return {x,y};
+                  }
+                  return null;
+                });
+                if(!point)throw new Error('No uncovered carousel wheel test point '+i);
+                await page.mouse.move(point.x,point.y);
+                const before=await page.evaluate(()=>window.scrollY);
+                await page.mouse.wheel(0,330);
+                try {
+                  await page.waitForFunction(y=>window.scrollY>y+15,before,{timeout:2000});
+                } catch {
+                  const state=await page.evaluate(({x,y})=>({scrollY,hit:document.elementFromPoint(x,y)?.tagName,remaining:document.documentElement.scrollHeight-innerHeight-scrollY}),point);
+                  throw new Error('Vertical page scroll blocked on carousel '+i+': '+JSON.stringify({before,...state}));
+                }
               } else {
                 // Mobile WebKit cannot dispatch an actual mouse wheel. Programmatic
                 // scrollBy in this carousel is altered by scroll anchoring and can
@@ -3014,9 +3057,9 @@ if (!bellaris && brandPreviewCandidate) {
                   await next.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
                   await next.click();
                   await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
+                }else if(url.pathname==='/psia-skolka-kosice/'){
+                  await advanceLeadContact(form);
                 }else{
-                  // Other routes, especially the paid lead page, retain their
-                  // existing interaction sequence without forced scroll positions.
                   await form.locator('label').first().click();
                   await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
                 }
@@ -3174,6 +3217,7 @@ if (!bellaris && brandPreviewCandidate) {
                 await dlg.getByPlaceholder('napr. 58').fill('65');
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="2"]').count() !== 1) throw new Error('Stand personalization step missing');
+                if (await dlg.locator('[data-lead-dialog-intro]').count() || !(await dlg.evaluate(el=>getComputedStyle(el).backgroundColor==='rgba(255, 252, 248, 0.94)'))) throw new Error('Stand step two must hide intro and keep shared light liquid');
                 await dlg.getByPlaceholder('napr. Bella').fill('Rex');
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1) throw new Error('Stand contact step missing');
@@ -3239,6 +3283,7 @@ if (!bellaris && brandPreviewCandidate) {
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="2"]').count() !== 1)
                   throw new Error('Target step 2 missing');
+                if(await dlg.locator('[data-lead-dialog-intro]').count() || !(await dlg.evaluate(el=>getComputedStyle(el).backgroundColor==='rgba(255, 252, 248, 0.94)'))) throw new Error('Target step two must hide intro and keep shared light liquid');
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1)
                   throw new Error('Target contact step missing');
@@ -3284,11 +3329,27 @@ if (!bellaris && brandPreviewCandidate) {
                 const openForm=productPage.locator('[data-stand-inline-form]');
                 if (!await openForm.locator('[data-product-inquiry-steps]').count()) throw new Error('Bottom inline stand form missing');
                 if (await openForm.locator('[data-product-inquiry-steps]').getAttribute('data-step') !== '3') throw new Error('Bottom form and modal must share progress');
+                if(await openForm.getByRole('heading',{name:'Máte záujem o stojan?',exact:true}).isVisible()) throw new Error('Inline stand introduction must be hidden after step one');
                 if (await productPage.locator('section[data-stand-gallery-section] button:has-text("Mám záujem o stojan")').count()) throw new Error('Gallery should precede product explanation without stray CTA');
               }
               const galleryTrack=productPage.locator('[data-photo-carousel="' + (route.includes('stojan')?'stand':'target') + '"]');
               if (await galleryTrack.count() !== 1 || await galleryTrack.locator('figure').count() !== (route.includes('stojan')?16:8)) {
                 throw new Error('Product gallery missing: '+route);
+              }
+              if (!route.includes('stojan')) {
+                if(await galleryTrack.locator('[data-target-photo-open]').count()!==8) throw new Error('All target photos must be openable');
+                await galleryTrack.locator('[data-target-photo-open]').first().click();
+                const targetLightbox=productPage.locator('[data-stand-lightbox]');
+                await targetLightbox.waitFor({state:'visible'});
+                const photo=targetLightbox.locator('[data-stand-photo-viewport] img');
+                await productPage.waitForFunction(()=>document.querySelector('[data-stand-photo-viewport] img')?.naturalWidth>0,null,{timeout:8000});
+                const fits=await photo.evaluate(img=>{const r=img.getBoundingClientRect();return r.width>0 && r.height>0 && Math.abs(r.width/r.height-img.naturalWidth/img.naturalHeight)<0.04 && getComputedStyle(img).objectFit==='contain';});
+                if(!fits || !await targetLightbox.getByRole('heading',{name:/Fotografia targetu/}).count()) throw new Error('Target viewer must fit original aspect ratio with accessible product name');
+                const src=await photo.getAttribute('src');
+                await targetLightbox.getByRole('button',{name:'Ďalšia fotografia'}).click();
+                await productPage.waitForFunction(old=>document.querySelector('[data-stand-photo-viewport] img')?.getAttribute('src')!==old,src,{timeout:5000});
+                await productPage.keyboard.press('Escape');
+                await targetLightbox.waitFor({state:'hidden'});
               }
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product routes to retired checkout');
             }
