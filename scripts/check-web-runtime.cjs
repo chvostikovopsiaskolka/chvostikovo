@@ -1297,7 +1297,6 @@ if (!bellaris && brandPreviewCandidate) {
                   await wizard.locator('textarea[name="otazka"]').fill('Môj psík má špeciálne potreby?');
                   if (askedPayload) throw new Error('Typing step 1 must not submit');
                   await wizard.getByRole('button', { name: 'Pokračovať', exact: true }).click();
-                  await wizard.locator('[data-step="2"]').count();
                   if (await wizard.getAttribute('data-step') !== '2' ||
                       !await wizard.locator('input[name="meno"]').isVisible() ||
                       await wizard.locator('textarea[name="otazka"]').isVisible())
@@ -1335,8 +1334,8 @@ if (!bellaris && brandPreviewCandidate) {
                   if (await page.getByRole('dialog', { name: 'Kontrola vhodnosti šteniatka' }).count())
                     throw new Error('Puppy checker must stay inside Aria chat, not open a nested dialog');
                   const continueToContact = puppy.getByRole('button', { name: /Pokračovať na kontakt/ });
-                  if (await continueToContact.isEnabled())
-                    throw new Error('Puppy checker must not accept unconfirmed vaccinations');
+                  if (await continueToContact.count())
+                    throw new Error('Puppy checker must not offer eligibility contact before all vaccines are confirmed');
                   await puppy.getByRole('button', { name: 'Chcem sa informovať' }).click();
                   const needsInfo = chat.locator('[data-aria-chat-puppy-contact]');
                   await needsInfo.waitFor({ state: 'visible' });

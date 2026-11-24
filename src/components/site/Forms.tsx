@@ -247,8 +247,6 @@ export function HomeFaqContactForm({
 }) {
   const isAria = source !== HOME_FAQ_CONTACT_SOURCE;
   const formRef = useRef<HTMLFormElement>(null);
-  const startPrefix = source === "aria_preview_chat_other" ? "aria_preview_v3_chat"
-    : "lead_landing_aria_chat";
   const id = useId();
   const [step, setStep] = useState<1 | 2>(1);
   const [question, setQuestion] = useState("");
