@@ -35,11 +35,13 @@ export function Header({
   landingMinimal = false,
   landingTrackingSource = "landing_header",
   hideMobileDock = false,
+  homeFaqShortcut = false,
 }: {
   homeSectionLinks?: boolean;
   landingMinimal?: boolean;
   landingTrackingSource?: string;
   hideMobileDock?: boolean;
+  homeFaqShortcut?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [applicationSent, setApplicationSent] = useState(false);
@@ -266,7 +268,7 @@ export function Header({
         <LongForm onSent={() => setApplicationSent(true)} />
       </FormDialog>
     </header>
-    {!hideMobileDock && <MobileDock onApplicationOpen={() => { closeMobileMenu(); setApplicationSent(false); setOpen(true); }} />}
+    {!hideMobileDock && <MobileDock homeFaqShortcut={homeFaqShortcut} onApplicationOpen={() => { closeMobileMenu(); setApplicationSent(false); setOpen(true); }} />}
     </>
   );
 }
