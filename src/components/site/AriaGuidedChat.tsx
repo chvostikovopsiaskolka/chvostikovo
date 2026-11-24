@@ -37,9 +37,9 @@ const chatQuestions: Question[] = [
     id: "pricing",
     title: "Aký je cenník škôlky?",
     answer: "Haf! 🐾 **Jednorazový celodenný vstup stojí " + priceOne +
-      ".**\nSme otvorení od 7:00 do 17:00, pondelok až piatok.\n\n" +
+      ".**\nSme otvorení od **7:00 do 17:00**, pondelok až piatok.\n\n" +
       "Ak plánuješ pravidelné návštevy, oplatí sa **permanentka za " + pricePass +
-      "**. Má **10 vstupov**, platí 2 mesiace a **ušetríš 50 €** oproti jednorazovým vstupom.\n\n" +
+      "**. Má **10 vstupov**, platí **2 mesiace** a **ušetríš 50 €** oproti jednorazovým vstupom.\n\n" +
       "**Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.**",
   },
   {
@@ -55,7 +55,7 @@ const chatQuestions: Question[] = [
   {
     id: "puppy",
     title: "Prijímate aj šteniatka?",
-    answer: "Haf! 🐾 Áno, prijímame aj očkované šteniatka približne od 4 mesiacov. Záleží na veku, očkovaniach a pripravenosti na kolektív. Poďme si orientačne overiť, či tvoje šteniatko spĺňa základné podmienky. Konečné rozhodnutie urobíme po úvodnej návšteve.",
+    answer: "Haf! 🐾 Áno, prijímame aj očkované šteniatka **približne od 4 mesiacov**.\n\nZáleží na ich veku, kompletnom očkovaní a pripravenosti na kolektív.\n\nPoďme si spolu **orientačne overiť, či tvoje šteniatko spĺňa základné podmienky**. Konečné rozhodnutie o prijatí urobíme až po úvodnej návšteve.",
   },
   {
     id: "location",
