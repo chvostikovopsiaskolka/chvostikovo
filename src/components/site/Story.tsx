@@ -41,7 +41,7 @@ function renderText(text: string) {
 
 
 
-export function Care({ language = "sk", showEmbeddedFriendship = true, showInterest = true }: { language?: "sk" | "en"; showEmbeddedFriendship?: boolean; showInterest?: boolean }) {
+export function Care({ language = "sk", showEmbeddedFriendship = true, showInterest = true, showContextFaq = true }: { language?: "sk" | "en"; showEmbeddedFriendship?: boolean; showInterest?: boolean; showContextFaq?: boolean }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const isEnglish = language === "en";
   const careEn = [
@@ -149,7 +149,7 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
           </div>
         </div>
 
-        {!isEnglish && (
+        {!isEnglish && showContextFaq && (
           <div className="mt-7 w-full space-y-3">
             <ContextFaq question="Ako zabezpečujete bezpečnosť psíkov v škôlke?" label="Ako dbáme na bezpečnosť psíkov?" source="home_care_safety" />
             <ContextFaq question="Hrajú sa psíkovia v škôlke celý deň?" source="home_care_daily_rhythm" />
