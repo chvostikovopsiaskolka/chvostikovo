@@ -2055,8 +2055,9 @@ if (!bellaris && brandPreviewCandidate) {
                 body: JSON.stringify(success ? { ok: true } : { ok: false, recovery_saved: false }) });
             });
             await page.setViewportSize({ width: 390, height: 844 });
-            await page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' }).click();
-            // Paid dock now scrolls to the existing inline shared form rather
+            await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
+            await page.locator('[data-aria-lead-hero-cta]').click();
+            // The retained hero CTA scrolls to the existing inline shared form rather
             // than opening the retired modal. Preserve failure/retry tracking.
             const contact = page.locator('#aria-hero-form [data-lead-step-form]');
             await contact.waitFor({ state: 'visible' });
@@ -2065,7 +2066,7 @@ if (!bellaris && brandPreviewCandidate) {
               return !!r && r.top < window.innerHeight && r.bottom > 0;
             });
             if (await page.locator('[role="dialog"] [data-lead-step-form]').count())
-              throw new Error('Paid dock must scroll to inline form without opening a modal');
+              throw new Error('Paid hero CTA must scroll to inline form without opening a modal');
             await advanceLeadContact(contact);
             const breedInput = contact.getByLabel('Plemeno psíka *');
             if (!await breedInput.isVisible()) throw new Error('Active campaign form must ask for breed');
@@ -2083,7 +2084,7 @@ if (!bellaris && brandPreviewCandidate) {
             for (let i = 0; i < 15 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline'); i++)
               await page.waitForTimeout(100);
             const sent = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline');
-            const cta = trackedEvents.filter(e => e.name === 'nav_click' && e.source === 'lead_landing_aria_interest');
+            const cta = trackedEvents.filter(e => e.name === 'inquiry_cta' && e.source === 'lead_landing_hero_orange_cta');
             if (submissions.length !== 2 || recoveries.length !== 1 || sent.length !== 1 ||
                 !cta.length || !submissions.every(data => data.form_type === 'lead' &&
                   data.cta_source === 'lead_landing_aria_hero_inline' &&
@@ -2913,12 +2914,14 @@ if (!bellaris && brandPreviewCandidate) {
               if (!await choices.nth(1).locator('input[name="zaujem"]').isChecked())
                 throw new Error('Revealed interest selection was lost on back');
             } else {
-              const entry = (isAriaPage || isPuppyAria)
+              const entry = url.pathname === '/psia-skolka-kosice/'
+                ? page.locator('[data-aria-lead-hero-cta]')
+                : (isAriaPage || isPuppyAria)
                 ? page.locator('[data-aria-guide]').getByRole('button', { name: 'Mám záujem o škôlku' })
                 : page.locator('.mobile-dock .mobile-dock-apply').first();
               await entry.click();
               if (url.pathname === '/psia-skolka-kosice/') {
-              // Approved paid-LEAD section navigation: the bottom interest button
+              // Approved paid-LEAD hero CTA: the retained interest button
               // scrolls to the existing inline form, never opens an above-dock dialog.
               const inline = page.locator('#aria-hero-form');
               await inline.waitFor({ state: 'visible', timeout: 5000 });
