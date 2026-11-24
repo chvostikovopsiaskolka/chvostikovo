@@ -390,7 +390,7 @@ export function Faq({ homeLayout = false }: { homeLayout?: boolean } = {}) {
             Viac častých otázok
           </a>
         </div>}
-        {homeLayout && <div id="faq-kontakt" data-home-faq-contact className="mx-auto mt-8 max-w-lg rounded-3xl bg-card p-4 shadow-card sm:mt-10 sm:p-6">
+        {homeLayout && <div id="faq-kontakt" data-home-faq-contact className="form-liquid-surface mx-auto mt-8 w-full max-w-lg rounded-3xl bg-card p-4 shadow-card sm:mt-10 sm:p-6 lg:max-w-none lg:p-8">
           <h3 className="mb-4 text-center font-display text-xl font-bold leading-snug text-forest sm:text-2xl">Nenašli ste odpoveď? Opýtajte sa nás.</h3>
           <HomeFaqContactForm />
         </div>}
