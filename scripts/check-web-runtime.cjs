@@ -2495,6 +2495,7 @@ if (!bellaris && brandPreviewCandidate) {
                     aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
                     centeredFullWidthTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-prices.right)/2)<3,
+                    faqContactResponsiveWidth:(()=>{const card=faq.querySelector('[data-home-faq-contact]'), question=faq.querySelector('button[aria-expanded]');if(!card||!question)return false;const c=card.getBoundingClientRect(),q=question.getBoundingClientRect();return c.width<=q.width+2 && (innerWidth>=1024?Math.abs(c.width-q.width)<2:c.width<=512+2) && card.scrollWidth<=card.clientWidth+2 && getComputedStyle(card).backgroundColor==='rgba(255, 252, 248, 0.94)';})(),
                     singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     puppyImmediatelyAfterPricing:document.getElementById('cennik').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
@@ -2557,7 +2558,7 @@ if (!bellaris && brandPreviewCandidate) {
                       const style=getComputedStyle(el);
                       return el.classList.contains('form-liquid-surface') &&
                         style.backdropFilter.includes('blur') &&
-                        style.backgroundColor.includes('0.55') &&
+                        style.backgroundColor === 'rgba(255, 252, 248, 0.94)' &&
                         parseFloat(style.borderTopWidth)>=1.4 &&
                         !document.querySelector('#informujte-sa a[href^="tel:"]');
                     })(),
@@ -3135,6 +3136,7 @@ if (!bellaris && brandPreviewCandidate) {
                 await dlg.getByPlaceholder('napr. 58').fill('65');
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="2"]').count() !== 1) throw new Error('Stand personalization step missing');
+                if (await dlg.locator('[data-lead-dialog-intro]').count() || !(await dlg.evaluate(el=>getComputedStyle(el).backgroundColor==='rgba(255, 252, 248, 0.94)'))) throw new Error('Stand step two must hide intro and keep shared light liquid');
                 await dlg.getByPlaceholder('napr. Bella').fill('Rex');
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1) throw new Error('Stand contact step missing');
@@ -3200,6 +3202,7 @@ if (!bellaris && brandPreviewCandidate) {
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="2"]').count() !== 1)
                   throw new Error('Target step 2 missing');
+                if(await dlg.locator('[data-lead-dialog-intro]').count() || !(await dlg.evaluate(el=>getComputedStyle(el).backgroundColor==='rgba(255, 252, 248, 0.94)'))) throw new Error('Target step two must hide intro and keep shared light liquid');
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1)
                   throw new Error('Target contact step missing');
@@ -3245,11 +3248,27 @@ if (!bellaris && brandPreviewCandidate) {
                 const openForm=productPage.locator('[data-stand-inline-form]');
                 if (!await openForm.locator('[data-product-inquiry-steps]').count()) throw new Error('Bottom inline stand form missing');
                 if (await openForm.locator('[data-product-inquiry-steps]').getAttribute('data-step') !== '3') throw new Error('Bottom form and modal must share progress');
+                if(await openForm.getByRole('heading',{name:'Máte záujem o stojan?',exact:true}).isVisible()) throw new Error('Inline stand introduction must be hidden after step one');
                 if (await productPage.locator('section[data-stand-gallery-section] button:has-text("Mám záujem o stojan")').count()) throw new Error('Gallery should precede product explanation without stray CTA');
               }
               const galleryTrack=productPage.locator('[data-photo-carousel="' + (route.includes('stojan')?'stand':'target') + '"]');
               if (await galleryTrack.count() !== 1 || await galleryTrack.locator('figure').count() !== (route.includes('stojan')?16:8)) {
                 throw new Error('Product gallery missing: '+route);
+              }
+              if (!route.includes('stojan')) {
+                if(await galleryTrack.locator('[data-target-photo-open]').count()!==8) throw new Error('All target photos must be openable');
+                await galleryTrack.locator('[data-target-photo-open]').first().click();
+                const targetLightbox=productPage.locator('[data-stand-lightbox]');
+                await targetLightbox.waitFor({state:'visible'});
+                const photo=targetLightbox.locator('[data-stand-photo-viewport] img');
+                await productPage.waitForFunction(()=>document.querySelector('[data-stand-photo-viewport] img')?.naturalWidth>0,null,{timeout:8000});
+                const fits=await photo.evaluate(img=>{const r=img.getBoundingClientRect();return r.width>0 && r.height>0 && Math.abs(r.width/r.height-img.naturalWidth/img.naturalHeight)<0.04 && getComputedStyle(img).objectFit==='contain';});
+                if(!fits || !await targetLightbox.getByRole('heading',{name:/Fotografia targetu/}).count()) throw new Error('Target viewer must fit original aspect ratio with accessible product name');
+                const src=await photo.getAttribute('src');
+                await targetLightbox.getByRole('button',{name:'Ďalšia fotografia'}).click();
+                await productPage.waitForFunction(old=>document.querySelector('[data-stand-photo-viewport] img')?.getAttribute('src')!==old,src,{timeout:5000});
+                await productPage.keyboard.press('Escape');
+                await targetLightbox.waitFor({state:'hidden'});
               }
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product routes to retired checkout');
             }
