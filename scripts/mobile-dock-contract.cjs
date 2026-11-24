@@ -20,6 +20,7 @@ assert(mainDock.includes('{ id: "o-nas", label: "O nás"') && !mainDock.includes
 assert(mainDock.indexOf('id: "o-nas"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main nav order must be about, prices, requirements, products");
 assert(!dock.includes('{ id: "top", label: "Domov"') && !dock.includes('{ id: "top", label: "Home"'), "Landing docks should use meaningful local sections instead of Domov");
 assert(mainDock.includes('{ id: "produkty", label: "Produkty"') && !mainDock.includes('{ id: "priestory"'), "Main dock must replace Spaces with Products");
+assert(mainDock.includes('id: "faq", label: "Časté otázky"') && dock.includes("!marketing && !homeFaqShortcut") && read("src/routes/index.tsx").includes("<Header homeFaqShortcut />"), "Only homepage must replace application shortcut with local FAQ");
 assert(dock.includes('id === "produkty" && !marketing ? "/produkty"'), "Products dock item must navigate to the actual catalogue, not a stale anchor");
 
 for (const anchor of ["lead-first-visit", "puppy-first-visit", "dog-sitting-first-visit", "en-first-visit"]) assert(dock.includes('id: "' + anchor + '"'), "Missing landing first-visit shortcut: " + anchor);
