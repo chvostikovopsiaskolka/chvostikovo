@@ -29,7 +29,7 @@ const PRODUCTS = [
     features: [
       { icon: ShieldCheck, label: "Protišmyk" },
       { icon: Hammer, label: "Ručná výroba" },
-      { icon: Ruler, label: "2 veľkosti" },
+      { icon: Ruler, label: "3 veľkosti" },
     ],
   },
 ] as const;
@@ -74,7 +74,7 @@ export function ProductCatalogCarousel() {
                 loading="eager"
                 decoding="async"
                 className="h-56 w-full object-cover transition duration-300 group-hover:scale-[1.02] sm:h-72 lg:h-80"
-                style={{ objectPosition: "50% 56%" }}
+                style={{ objectPosition: product.href.includes("target") ? "50% 90%" : "50% 56%" }}
               />
               <div data-product-photo-features aria-label="Vlastnosti produktu"
                 className="pointer-events-none absolute inset-x-2 bottom-2 z-10 flex flex-nowrap items-stretch gap-1.5 sm:inset-x-3 sm:bottom-3 sm:gap-2">

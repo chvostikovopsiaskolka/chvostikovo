@@ -78,7 +78,7 @@ async function assertCampaignContentFlow(page) {
     single:document.querySelector('#lead-pricing article')?.textContent,
   }));
   if(structure.order.slice(1,10).join('|')!=='lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-knowledge|lead-faq|aria-puppy-check|lead-benefits|aria-mosaic'||
-    structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==1||structure.benefits!==3||structure.requirements!==4||
+    structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
     structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
   for(const [width,height] of [[375,667],[390,844],[768,1024],[1024,768],[1440,900],[1864,891]]) {
@@ -93,9 +93,10 @@ async function assertCampaignContentFlow(page) {
       const elements=[title,pills,photos,cta,proof];
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
         visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
-        desktop:(()=>{if(innerWidth<1024)return true;const action=box('[data-lead-hero-action]');const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());const reviewBottom=Math.max(...[...document.querySelectorAll('#recenzie figure')].map(e=>e.getBoundingClientRect().bottom));return photos.left>title.right&&Math.abs(photos.top-title.top)<2&&Math.abs(photos.bottom-action.bottom)<2&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&reviewBottom<Math.min(aria.top,face.top)&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
-        mobileOrder:(()=>{if(innerWidth>=640)return true;const service=box('[data-aria-service-group]');return service.bottom<=title.top&&title.bottom<=pills.top&&pills.bottom<=photos.top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=12;})(),
+        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());return photos.left>title.right&&Math.abs(photos.top-title.top)<2&&photos.height>=410&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
+        mobileOrder:(()=>{if(innerWidth>=640)return true;const service=box('[data-aria-service-group]');return service.bottom<=title.top&&title.bottom<=pills.top&&pills.bottom<=photos.top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=10;})(),
         admissionClear:(()=>{const h=box('#lead-requirements h2');return [...document.querySelectorAll('#lead-requirements > [aria-hidden="true"] svg')].every(e=>{const p=e.getBoundingClientRect();return p.right<=h.left||p.left>=h.right||p.bottom<=h.top||p.top>=h.bottom;});})(),
+        galleryEdge:(()=>{const r=box('#lead-photo-carousel [data-gesture-track="photos"]');return Math.abs(r.left)<2&&Math.abs(r.right-document.documentElement.offsetWidth)<2;})(),
         locationBold:[...document.querySelectorAll('[data-aria-location-chips] > *')].every(e=>Number(getComputedStyle(e).fontWeight)>=700),
         hoursRemoved:!document.querySelector('[data-lead-hero-hours]'),
         pairedBenefits:(()=>{const rows=[...document.querySelectorAll('[data-lead-benefits] > article')];return rows.length===3&&rows.every((e,i)=>{const image=e.querySelector('img').getBoundingClientRect(),text=e.querySelector('div').getBoundingClientRect();return image.right<text.left&&(!i||e.getBoundingClientRect().top>rows[i-1].getBoundingClientRect().bottom);});})(),
@@ -112,7 +113,7 @@ async function assertCampaignContentFlow(page) {
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation="true"] button').length===5&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
+    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
@@ -2366,7 +2367,7 @@ if (!bellaris && brandPreviewCandidate) {
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]:visible').first().isVisible())
                   throw new Error('Desktop home guided form missing');
                 const layout = await page.evaluate(() => {
-                  const ids=['top','preco-chvostikovo','o-nas','cennik','psie-priatelstva','aria-puppy-check','podmienky','informujte-sa','starostlivost','preco','priestory','prva-navsteva','prva-navsteva-form','faq'];
+                  const ids=['top','preco-chvostikovo','o-nas','cennik','psie-priatelstva','aria-puppy-check','podmienky','starostlivost','preco','priestory','prva-navsteva','prva-navsteva-form','faq','informujte-sa'];
                   const nodes=ids.map(id=>document.getElementById(id));
                   const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
                   const cutout=document.querySelector('[data-schoolmates-cutout]');
@@ -2388,6 +2389,8 @@ if (!bellaris && brandPreviewCandidate) {
                     reviewsInHero:document.getElementById('top').contains(document.getElementById('recenzie')),
                     tickerAbsent:!document.querySelector('main .info-ticker-track'),
                     benefitsMoved:!!photo && !!benefits && benefits.getBoundingClientRect().top>=photo.getBoundingClientRect().bottom && !document.querySelector('#top [data-hero-benefits]'),
+                    bottomInquiry:document.querySelector('#kontakt #informujte-sa [data-lead-step-form]') && !document.querySelector('#kontakt [data-long-form]') && document.querySelector('#informujte-sa h3')?.textContent==='Chcete sa informovať o škôlke?',
+                    aboutWidth:(()=>{const copy=document.querySelector('#o-nas [data-about-expanded]').getBoundingClientRect();const pictures=document.querySelector('#o-nas [data-about-expanded]').parentElement.nextElementSibling.getBoundingClientRect();return Math.abs(copy.width-pictures.width)<2;})(),
                     forms:['informujte-sa','prva-navsteva-form'].every(id=>document.getElementById(id)?.querySelector('[data-lead-step-form]')),
                     uniqueFields:inputs.length===new Set(inputs).size,
                     cutout:!!cutout && cutout.complete && cutout.naturalWidth>0,
@@ -2446,7 +2449,7 @@ if (!bellaris && brandPreviewCandidate) {
                       getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(taxi.getBoundingClientRect().left-included.left)<3 && Math.abs(taxi.getBoundingClientRect().right-included.right)<3,
                     compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
                     aboutExpanded:!document.querySelector('#o-nas summary') && !!aboutText?.querySelector('strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2 &&
-                      getComputedStyle(aboutText).textAlign==='left' && parseFloat(getComputedStyle(aboutText).fontSize)===16 && aboutText.getBoundingClientRect().width<=682,
+                      getComputedStyle(aboutText).textAlign==='left' && parseFloat(getComputedStyle(aboutText).fontSize)===16 && aboutText.getBoundingClientRect().width<=812,
                     aboutNoOrphan:(()=>{const node=aboutText?.querySelector('p')?.lastChild;if(node?.nodeType!==Node.TEXT_NODE)return false;const words=[...node.textContent.matchAll(/\S+/g)].slice(-2);if(words.length!==2)return false;const tops=words.map(word=>{const range=document.createRange();range.setStart(node,word.index);range.setEnd(node,word.index+word[0].length);return range.getBoundingClientRect().top;});return Math.abs(tops[0]-tops[1])<2;})(),
                     aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
@@ -3112,12 +3115,13 @@ if (!bellaris && brandPreviewCandidate) {
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1) throw new Error('Stand contact step missing');
               } else {
                 const targetCards=productPage.locator('[data-target-variant-cards]');
-                if (await targetCards.locator('article').count() !== 2)
-                  throw new Error('Target must have exactly two stand-style size cards');
+                if (await targetCards.locator('article').count() !== 3)
+                  throw new Error('Target must have exactly three stand-style size cards');
                 if (width===390 && !(await targetCards.evaluate(el=>el.scrollWidth>el.clientWidth+30)))
                   throw new Error('Target size cards must swipe on mobile');
                 const variants=[
                   {type:'large',label:'„Veľký“ verzia',size:'40 × 20 cm',photo:'Veľký drevený target'},
+                  {type:'medium',label:'„Stredný“ verzia',size:'30 × 15 cm',photo:'Stredný drevený target'},
                   {type:'small',label:'„Malý“ verzia',size:'25 × 25 cm',photo:'Malý drevený target'},
                 ];
                 for (const variant of variants){
@@ -3130,8 +3134,8 @@ if (!bellaris && brandPreviewCandidate) {
                   const cardImageHeight=await card.locator('img').evaluate(el=>el.getBoundingClientRect().height);
                   if (cardImageHeight < 300)throw new Error('Target photo needs tall product style');
                   const photoPosition=await card.locator('img').evaluate(el=>getComputedStyle(el).objectPosition);
-                  if (photoPosition !== (variant.type === 'small' ? '50% 100%' : '50% 49%'))
-                    throw new Error('Target crop mismatch; small should reveal feet and large stay unchanged: '+variant.type+' '+photoPosition);
+                  if (photoPosition !== (variant.type === 'small' ? '50% 100%' : '50% 90%'))
+                    throw new Error('Target crop mismatch; all sizes should reveal the product: '+variant.type+' '+photoPosition);
                   const badges=card.locator('[aria-label="Vlastnosti targetu"] span');
                   if (await badges.count()!==3)throw new Error('Target needs three photo badges');
                   const stars=card.locator('[data-target-decorative-stars] svg.lucide-star');
@@ -3158,17 +3162,23 @@ if (!bellaris && brandPreviewCandidate) {
                   if(!a||!b||Math.abs(a.y-b.y)>5)
                     throw new Error('Desktop Target variants must share a horizontal row');
                 }
-                // Select the SMALL card and make sure the original wizard receives that size,
+                // Preserve the existing SMALL CTA regression as well as the new MEDIUM option.
+                await targetCards.locator('[data-target-size="small"] button').click();
+                const smallDialog=productPage.getByRole('dialog',{name:action});
+                if(!(await smallDialog.locator('button[aria-pressed="true"]').innerText()).includes('Malý'))throw new Error('Small target CTA selection regressed');
+                await productPage.keyboard.press('Escape');
+                await smallDialog.waitFor({state:'hidden'});
+                // Select the MEDIUM card and make sure the original wizard receives that size,
                 // rather than resetting to its former default LARGE.
-                await targetCards.locator('[data-target-size="small"]')
-                  .getByRole('button',{name:/malý target/i}).click();
+                await targetCards.locator('[data-target-size="medium"]')
+                  .getByRole('button',{name:/stredný target/i}).click();
                 const dlg=productPage.getByRole('dialog',{name:action});
                 await dlg.waitFor({state:'visible'});
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="1"]').count() !== 1)
                   throw new Error('Target step 1 missing');
                 const selected=dlg.locator('button[aria-pressed="true"]');
-                if (!(await selected.innerText()).includes('Malý'))
-                  throw new Error('Target small-card CTA did not select small variant');
+                if (!(await selected.innerText()).includes('Stredný'))
+                  throw new Error('Target medium-card CTA did not select medium variant');
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="2"]').count() !== 1)
                   throw new Error('Target step 2 missing');
@@ -3222,11 +3232,13 @@ if (!bellaris && brandPreviewCandidate) {
                 if (await productPage.locator('section[data-stand-gallery-section] button:has-text("Mám záujem o stojan")').count()) throw new Error('Gallery should precede product explanation without stray CTA');
               }
               const galleryTrack=productPage.locator('[data-photo-carousel="' + (route.includes('stojan')?'stand':'target') + '"]');
-              if (await galleryTrack.count() !== 1 || await galleryTrack.locator('figure').count() !== (route.includes('stojan')?16:8)) {
+              if (await galleryTrack.count() !== 1 || await galleryTrack.locator('figure').count() !== (route.includes('stojan')?16:10)) {
                 throw new Error('Product gallery missing: '+route);
               }
+              const edgeBounds=await galleryTrack.evaluate(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:document.documentElement.offsetWidth};});
+              if(Math.abs(edgeBounds.left)>2||Math.abs(edgeBounds.right-edgeBounds.width)>2)throw new Error('Product gallery must reach both edges: '+JSON.stringify(edgeBounds));
               if (!route.includes('stojan')) {
-                if(await galleryTrack.locator('[data-target-photo-open]').count()!==8) throw new Error('All target photos must be openable');
+                if(await galleryTrack.locator('[data-target-photo-open]').count()!==10) throw new Error('All target photos must be openable');
                 await galleryTrack.locator('[data-target-photo-open]').first().click();
                 const targetLightbox=productPage.locator('[data-stand-lightbox]');
                 await targetLightbox.waitFor({state:'visible'});

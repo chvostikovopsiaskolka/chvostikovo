@@ -111,7 +111,7 @@ export function EdgePhotoCarousel({
   }, [photos]);
 
   return (
-    <div className={`relative left-1/2 w-screen -translate-x-1/2 sm:left-auto sm:w-full sm:translate-x-0 ${className}`}>
+    <div className={`relative w-full ${className}`}>
       <div
         ref={track}
         role="region"

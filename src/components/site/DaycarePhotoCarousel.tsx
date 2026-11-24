@@ -299,7 +299,7 @@ export function DaycarePhotoCarousel({ language = "sk", includeLeadHighlights = 
           onBlurCapture={() => {
             if (active === null) resumeAfterPause();
           }}
-          className="flex w-screen max-w-none overflow-x-auto overscroll-x-contain [scrollbar-width:none] [touch-action:auto] [will-change:scroll-position] [&::-webkit-scrollbar]:hidden"
+          className="flex w-full max-w-none overflow-x-auto overscroll-x-contain [scrollbar-width:none] [touch-action:auto] [will-change:scroll-position] [&::-webkit-scrollbar]:hidden"
         >
           {[0, 1].map((setIndex) => (
             <div

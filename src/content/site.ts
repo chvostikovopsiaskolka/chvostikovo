@@ -196,7 +196,7 @@ export const REQUIREMENTS = [
 ];
 
 export const INCLUDED = [
-  "Profesionálne a bezpečné denné stráženie psíka",
+  "Profesionálne a bezpečné denné stráženie",
   "Prechádzky a výbeh s rozlohou až 80 m²",
   "Aktívny deň, hry a šantenie s kamošmi",
   "Rodinné prostredie a celodenný dohľad",

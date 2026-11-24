@@ -1,3 +1,4 @@
+import { LeadFormIntro } from "./LeadFormIntro";
 import { useEffect, useRef, type FocusEvent, type ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -147,14 +148,14 @@ export function FormDialog({
           event.preventDefault();
           titleRef.current?.focus({ preventScroll: true });
         }}
-        className={"form-dialog form-liquid-surface left-3 right-3 top-3 w-auto max-w-none max-h-[88svh] gap-4 overflow-hidden rounded-3xl border-none bg-card p-4 sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-1.5rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-7" + (previewBrand ? " aria-preview-modal" : "")}
+        className={"form-dialog form-liquid-surface left-3 right-3 top-3 w-auto max-w-none max-h-[88svh] gap-4 overflow-hidden rounded-3xl border-none bg-card p-4 sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-1.5rem)] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-7" + (previewBrand ? " aria-preview-modal" : "")}
       >
         {hideHeader ? (
           <DialogTitle ref={titleRef} tabIndex={-1} className="sr-only">{title}</DialogTitle>
         ) : (
           <DialogHeader data-lead-dialog-intro className="shrink-0">
             <DialogTitle ref={titleRef} tabIndex={-1} className="pr-6 text-left font-display text-base leading-snug text-forest outline-none sm:text-xl">{title}</DialogTitle>
-            {subtitle && <p className="pr-6 text-left text-sm text-forest/80">{subtitle}</p>}
+            {subtitle && <p className="pr-6 text-left text-sm text-forest/80">{subtitle && <LeadFormIntro text={subtitle} />}</p>}
           </DialogHeader>
         )}
         <div

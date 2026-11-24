@@ -9,6 +9,7 @@ import {
   PawPrint,
   ShieldCheck,
 } from "lucide-react";
+import { InquirySection } from "@/components/site/InquirySection";
 import { LeadStepForm, LEAD_STEP_INTERESTS } from "@/components/site/LeadStepForm";
 import { AriaLeadAssistant } from "@/components/site/AriaLeadAssistant";
 import { SchoolmatesFormCrown } from "@/components/site/SchoolmatesFormCrown";
@@ -188,7 +189,7 @@ export function AriaPreviewPage() {
   const benefitsSection = (
         <section id="lead-benefits" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
+          <div className={isLiveLead ? "relative z-10 w-full text-center" : "relative z-10 mx-auto max-w-6xl px-4 text-center"}>
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Prečo Chvostíkovo
             </p>
@@ -197,11 +198,11 @@ export function AriaPreviewPage() {
             </h2>
 
             {isLiveLead ? <>
-              <div data-lead-benefits className="mx-auto mt-7 grid max-w-4xl gap-5 sm:gap-6">
+              <div data-lead-benefits className="mx-auto mt-7 grid max-w-4xl gap-5 px-4 sm:gap-6">
                 {BENEFITS.map(({ title: benefitTitle, content, icon: Icon }, i) => {
                   const photo = [DAYCARE_GALLERY_EXTRAS[2]!, DAYCARE_GALLERY_EXTRAS[1]!, DAYCARE_GALLERY_EXTRAS[0]!][i]!;
                   return <article key={benefitTitle} className="grid grid-cols-2 items-center gap-3 text-left sm:gap-8">
-                    <img src={photo.src} alt={photo.alt} width={720} height={720} loading="lazy" decoding="async" className="aspect-[4/5] w-full rounded-[20px] object-cover shadow-card sm:aspect-[5/3]" />
+                    <img src={photo.src} alt={photo.alt} width={720} height={720} loading="lazy" decoding="async" className="aspect-[4/5] w-full rounded-[20px] object-cover shadow-card sm:aspect-[5/3]" style={{ objectPosition: i < 2 ? "50% 20%" : "50% 50%" }} />
                     <div className="min-w-0"><Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden="true" />
                       <h3 className="font-display text-sm font-bold leading-snug text-forest min-[390px]:text-base sm:text-xl">{benefitTitle}</h3>
                       <p className="mt-2 text-xs leading-relaxed text-forest/80 min-[390px]:text-[13px] sm:text-base">{content}</p>
@@ -209,7 +210,7 @@ export function AriaPreviewPage() {
                   </article>;
                 })}
               </div>
-              <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="mt-8 scroll-mt-24 text-left"><DaycarePhotoCarousel includeLeadHighlights /></div>
+              <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="mt-8 w-full scroll-mt-24 text-left"><DaycarePhotoCarousel includeLeadHighlights /></div>
             </> : <>            {/* Mobile: one real photo paired with each benefit, with no overlapping rows. */}
             <div className="mt-7 space-y-5 sm:hidden">
               {BENEFITS.map(({ title: benefitTitle, content }, i) => {
@@ -250,7 +251,7 @@ export function AriaPreviewPage() {
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-5xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Koľko stojí deň v škôlke?</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je len výhodnejšia.</p>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je cenovo výhodnejšia. <strong data-pass-attendance className="mt-2 block font-bold text-forest">Podmienkou kúpy permanentky je pravidelná návšteva škôlky minimálne 2× týždenne.</strong></p>
         <div className="mx-auto mt-7 grid max-w-3xl grid-cols-2 items-stretch gap-3 sm:gap-6"><DaycarePricingCards campaign /><DaycareTaxiNote campaign /></div>
       </div>
     </section>
@@ -465,7 +466,10 @@ export function AriaPreviewPage() {
           </div>
         </section>);
   const puppyChecker = <AriaPuppyChecker onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />;
-  const friendshipSection = <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />;
+  const friendshipSection = <>
+    <FriendshipFeature />
+    <InquirySection allScreens matchHero id="lead-friendship-form" trackingSource="lead_landing_friendship_20261028" title="Chcete sa informovať o škôlke?" />
+  </>;
   const conditionsSection = (
     <section id="lead-knowledge" className="relative scroll-mt-24 bg-white pb-10 sm:pb-14">
       <Requirements id="lead-requirements" ariaPreview hideEyebrow title="Podmienky prijatia psíka" />

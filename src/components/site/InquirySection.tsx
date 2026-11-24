@@ -1,3 +1,4 @@
+import { LeadFormIntro } from "./LeadFormIntro";
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -42,7 +43,7 @@ export function InquirySection({ allScreens = false, matchHero = false, id = "in
   return (
     <section id={id} className={"relative scroll-mt-24 bg-card pt-0 pb-10 " + (allScreens ? "" : "lg:hidden")}>
       <SectionAmbientPaws />
-      <div className="relative z-10 mx-auto max-w-2xl px-4">
+      <div className="relative z-10 mx-auto max-w-4xl px-4">
         <SchoolmatesFormCrown compact={matchHero} groundAccent={!matchHero} />
 
         <div data-lead-form-shell data-home-inquiry-card={matchHero || undefined} className={matchHero
@@ -50,7 +51,7 @@ export function InquirySection({ allScreens = false, matchHero = false, id = "in
           : "form-liquid-surface relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8"}>
           <h3 data-lead-form-intro className={"text-center text-forest " + (matchHero ? "text-xl" : "text-2xl")}>{title}</h3>
           <p data-lead-form-intro className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
-            {subtitle}
+            {subtitle && <LeadFormIntro text={subtitle} />}
           </p>
 
           <LeadStepForm questionInHeading trackingSource={trackingSource} />

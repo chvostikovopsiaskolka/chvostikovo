@@ -8,13 +8,13 @@ const ALLOWED_ORIGINS = new Set([
 const STAND_SIZES = new Set(["small", "large", "extra_large"]);
 const COLORS = new Set(["natural", "dark", "white", "custom"]);
 const LETTER_COLORS = new Set(["light", "dark", "black", "custom"]);
-const TARGET_SIZES = new Set(["small", "large"]);
+const TARGET_SIZES = new Set(["small", "medium", "large"]);
 
 const LABELS: Record<string, Record<string, string>> = {
   size: { small: "S – 40 × 20 cm", large: "M – 60 × 30 cm", extra_large: "L – individuálny rozmer" },
   color: { natural: "Svetlá", dark: "Tmavá", white: "Biela", custom: "Iná" },
   letter: { light: "Svetlé", dark: "Tmavé", black: "Čierne", custom: "Iné" },
-  targetSize: { small: "Malý 25 × 25 cm", large: "Veľký 40 × 20 cm" },
+  targetSize: { small: "Malý 25 × 25 cm", medium: "Stredný 30 × 15 cm", large: "Veľký 40 × 20 cm" },
 };
 
 function text(value: unknown, max = 500) {

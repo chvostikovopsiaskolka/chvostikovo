@@ -149,7 +149,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
     >
       <div className="space-y-2">
         <div className="flex justify-between gap-2 text-xs font-semibold text-forest/75" aria-live="polite">
-          <span>Krátky nezáväzný formulár</span>
+          <span>Krátky <strong>nezáväzný formulár</strong></span>
           <span>Krok {step} z 2</span>
         </div>
         <div role="progressbar" aria-label="Postup formulára" aria-valuenow={step} aria-valuemin={1} aria-valuemax={2} className="h-1.5 overflow-hidden rounded-full bg-forest/10">

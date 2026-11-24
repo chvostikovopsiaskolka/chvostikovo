@@ -26,8 +26,8 @@ const BENEFITS = [
 /** Mobile uses the proven first-visit photo circles, desktop retains the three numbered steps. */
 export function StandBenefitSteps() {
   return (
-    <div data-stand-benefit-steps className="relative mt-8 rounded-[1.75rem] border border-forest/15 bg-[#e2f0eb] px-4 py-7 sm:mt-10 sm:px-8 sm:py-9">
-      <div aria-hidden="true" className="pointer-events-none absolute top-[59px] right-[16%] left-[16%] hidden h-[2px] bg-forest/25 md:block" />
+    <div data-stand-benefit-steps className="relative mt-8 rounded-[1.75rem] border border-coral/20 bg-[#f8ddeb] px-4 py-7 sm:mt-10 sm:px-8 sm:py-9">
+      <div aria-hidden="true" className="pointer-events-none absolute top-[59px] right-[16%] left-[16%] hidden h-[2px] bg-coral/35 md:block" />
       <ol className="relative grid grid-cols-1 gap-9 md:grid-cols-3 md:gap-6">
         {BENEFITS.map((benefit, index) => (
           <li key={benefit.title} data-stand-benefit-step className="min-w-0 text-center">
@@ -36,7 +36,7 @@ export function StandBenefitSteps() {
                 className="size-36 rounded-full object-cover shadow-card ring-4 ring-card sm:size-40 md:hidden"
                 style={{ objectPosition: index === 2 ? "50% 44%" : "50% 52%" }} />
               <span aria-hidden="true"
-                className="absolute -top-3 -left-3 grid size-12 place-items-center rounded-full bg-coral font-display text-lg font-bold text-white shadow-card md:relative md:top-auto md:left-auto md:mx-auto md:size-12 md:border-[3px] md:border-white md:bg-forest md:text-sm md:text-lime-200 sm:size-14">
+                className="absolute -top-3 -left-3 grid size-12 place-items-center rounded-full bg-coral font-display text-lg font-bold text-white shadow-card md:relative md:top-auto md:left-auto md:mx-auto md:size-12 md:border-[3px] md:border-white md:bg-coral md:text-sm md:text-white sm:size-14">
                 {String(index + 1).padStart(2, "0")}
               </span>
             </div>
