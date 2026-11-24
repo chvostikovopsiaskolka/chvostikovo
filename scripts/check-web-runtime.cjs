@@ -2350,13 +2350,14 @@ if (!bellaris && brandPreviewCandidate) {
                     desktopCtaWithinForm:innerWidth<1024||document.getElementById('home-hero-learn-more').getBoundingClientRect().bottom<=document.querySelector('#home-hero-inline-form [data-home-form-panel]').getBoundingClientRect().bottom+2,
                     friendshipModal:!!document.getElementById('home-friendship-interest')&&!document.getElementById('zaujem-po-priatelstvach'),
                     freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
-                    pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
+                    pricing:cards.length===2 && Math.abs(cards[0].top-cards[1].top)<2 && Math.abs(cards[0].bottom-cards[1].bottom)<2 && cards[1].left>=cards[0].right+7 && included.top>=prices.bottom+7 && Math.abs(included.left-prices.left)<3 && Math.abs(included.right-prices.right)<3 && !document.querySelector('#cennik button'),
+                     pricingAmounts:(()=>{const pass=document.querySelector('[data-home-price-card="pass"]');const value=pass?.querySelector('[data-home-price]');return !!value && /20\s*€\s*\/ deň/.test(value.textContent) && /200\s*€/.test(pass.textContent) && /10 vstupov/.test(pass.textContent) && /Platí 2 mesiace/.test(pass.textContent) && /Ušetríte 50\s*€/.test(pass.textContent) && getComputedStyle(value).whiteSpace==='nowrap';})(),
                     passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
-                    taxiAcrossColumns:!!taxi && !taxi.closest('[data-home-included]') && Math.abs(included.bottom-cards[1].bottom)<=3 && taxi.getBoundingClientRect().top>=document.querySelector('[data-home-included] ul').getBoundingClientRect().bottom &&
-                      getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(included.bottom-prices.bottom)<3 && Math.abs(taxi.getBoundingClientRect().left-included.left)<3 && Math.abs(taxi.getBoundingClientRect().right-prices.right)<3,
+                    taxiAcrossColumns:!!taxi && !taxi.closest('[data-home-included]') && taxi.getBoundingClientRect().top>=included.bottom+7 && !!taxi.querySelector('br') && /5\s*€\s*\/ jazda/.test(taxi.textContent) &&
+                      getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(taxi.getBoundingClientRect().left-included.left)<3 && Math.abs(taxi.getBoundingClientRect().right-included.right)<3,
                     compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
                     aboutExpanded:!document.querySelector('#o-nas summary') && !!aboutText?.querySelector('strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2 &&
-                      getComputedStyle(aboutText).textAlign==='left' && parseFloat(getComputedStyle(aboutText).fontSize)>=18 && aboutText.getBoundingClientRect().width<=682,
+                      getComputedStyle(aboutText).textAlign==='left' && parseFloat(getComputedStyle(aboutText).fontSize)===16 && aboutText.getBoundingClientRect().width<=682,
                     aboutNoOrphan:(()=>{const node=aboutText?.querySelector('p')?.lastChild;if(node?.nodeType!==Node.TEXT_NODE)return false;const words=[...node.textContent.matchAll(/\S+/g)].slice(-2);if(words.length!==2)return false;const tops=words.map(word=>{const range=document.createRange();range.setStart(node,word.index);range.setEnd(node,word.index+word[0].length);return range.getBoundingClientRect().top;});return Math.abs(tops[0]-tops[1])<2;})(),
                     aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
@@ -2404,7 +2405,7 @@ if (!bellaris && brandPreviewCandidate) {
                         texts[1].left>=video.right-2 &&
                         texts[1].top>=texts[0].bottom-2 &&
                         texts[2].top>=video.bottom-2 &&
-                        texts[2].left>=video.right-2 && (()=>{const photo=document.querySelector('[data-home-reason-photo]')?.getBoundingClientRect();return !!photo && Math.abs(photo.width-video.width)<3 && photo.right<=texts[2].left+3;})() &&
+                        texts[2].left>=video.right-2 && (()=>{const photo=document.querySelector('[data-home-reason-photo]')?.getBoundingClientRect();return !!photo && Math.abs(photo.width-video.width)<3 && photo.right<=texts[2].left+3 && Math.abs(video.top-texts[0].top)<3 && Math.abs(video.bottom-texts[1].bottom)<3 && Math.abs(photo.top-texts[2].top)<3 && Math.abs(photo.bottom-texts[2].bottom)<3;})() &&
                         document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] strong').length>=4;
                     })(),
                     homeReviewSoftShadow:(() => {
