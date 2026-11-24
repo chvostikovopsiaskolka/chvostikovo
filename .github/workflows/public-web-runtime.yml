@@ -92,14 +92,6 @@ jobs:
           WEB_SITE: ${{ matrix.site }}
           WEB_BASE_URL: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173' || 'https://chvostikovo.sk' }}
         run: node scripts/check-web-runtime.cjs
-      - name: Record current production baseline before release
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        env:
-          NODE_PATH: /tmp/web-runtime/node_modules
-          WEB_BASE_URL: https://chvostikovo.sk
-          RUNTIME_REPORT_DIR: runtime-report/live-baseline
-        run: node scripts/check-web-runtime.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
