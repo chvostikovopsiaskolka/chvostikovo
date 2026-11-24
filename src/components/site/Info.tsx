@@ -179,12 +179,12 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
           <div data-home-prices className="col-span-2 mb-2 grid min-w-0 grid-cols-2 items-stretch gap-3 sm:mb-3 sm:gap-5">
             {PRICING.map(item => <article key={item.name} data-home-price-card={item.highlight ? "pass" : "single"}
               className={"relative grid min-w-0 grid-rows-[auto_auto_auto] content-start items-center justify-items-center gap-1 rounded-3xl px-2 pb-5 pt-3 text-center shadow-card sm:px-4 sm:pb-6 sm:pt-4 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
-              <h3 className="flex min-h-[2.65em] flex-col justify-center font-display text-[13px] font-bold leading-snug text-forest sm:text-xl">{item.highlight ? <>Permanentka<span className="block text-[0.85em] font-semibold">10 vstupov</span></> : <>Jednorazový<br />vstup</>}</h3>
-              <p data-home-price className={"whitespace-nowrap font-display text-[clamp(22px,6vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-[#ffa414]")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€<span className="text-[0.55em]"> / deň</span></> : item.price.replace(" ", "\u00a0")}</p>
+              <h3 className="whitespace-nowrap font-display text-[clamp(11px,3.3vw,15px)] font-bold leading-snug text-forest sm:text-xl">{item.name}</h3>
+              <p data-home-price className={"whitespace-nowrap font-display text-[clamp(22px,6vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-[#ffa414]")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€</> : item.price.replace(" ", "\u00a0")}<span className="text-[0.55em]"> / deň</span></p>
               {item.highlight ? <>
-                <p className="whitespace-nowrap font-display text-sm font-bold text-forest sm:text-lg">{item.price.replace(" ", "\u00a0")}</p>
+                <p data-home-pass-total className="whitespace-nowrap font-display text-[clamp(10px,3vw,14px)] font-semibold leading-snug text-forest sm:text-lg"><strong>{item.price.replace(" ", "\u00a0")}</strong> · 10 vstupov</p>
                 <span data-home-best-value className="absolute bottom-0 left-1/2 inline-flex -translate-x-1/2 translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold leading-tight tracking-[-0.025em] text-white shadow-sm">Najvýhodnejšie. Ušetríte 50&nbsp;€</span>
-              </> : <p className="text-[11px] leading-snug text-forest/75 sm:text-sm">Celodenný pobyt</p>}
+              </> : <p data-home-opening-hours className="text-xs leading-snug text-forest/75 sm:text-sm">Pondelok – piatok<br />od 7:00 do 17:00</p>}
             </article>)}
           </div>
           <div data-home-included className="col-span-2 min-w-0 rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8">
