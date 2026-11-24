@@ -15,6 +15,8 @@ const HIGHLIGHTS: Record<string, string[]> = {
   "Zabezpečujete aj vyzdvihnutie a odvoz psíka?": ["5 € za jednu jazdu", "spolu s rezerváciou"],
   "Zabezpečujete aj stravu?": ["stravu nepodávame", "s dostatočným predstihom", "vlastné maškrty"],
   "Aké sú otváracie hodiny?": ["od 7:00 do 17:00"],
+  "Aký je cenník a treba si rezervovať miesto vopred?": ["25 €", "200 €", "20 € za deň", "do nedele 20:00", "individuálne"],
+  "Aké sú otváracie hodiny a ponúkate aj odvoz?": ["od 7:00 do 17:00", "5 € za jednu jazdu", "spolu s rezerváciou"],
 };
 
 function withHighlights(text: string, words: string[]): ReactNode[] {
