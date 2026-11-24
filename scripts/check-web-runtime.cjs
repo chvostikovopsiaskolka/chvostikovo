@@ -3566,13 +3566,23 @@ if (!bellaris && brandPreviewCandidate) {
                   emailLayout.right > emailLayout.footerRight - 8) {
                 throw new Error('Desktop footer email must remain on one visible line: ' + JSON.stringify(emailLayout));
               }
-              const dayBox = await footer.getByText('Pondelok – piatok', { exact: true }).boundingBox();
-              const timeBox = await footer.getByText('7:00 – 17:00', { exact: true }).boundingBox();
-              if (!dayBox || !timeBox || timeBox.y < dayBox.y + dayBox.height - 1 ||
-                  Math.abs(dayBox.x - timeBox.x) > 2) {
-                throw new Error('Footer hours must render on two aligned lines: day above time');
+              // Measure the related footer elements in one layout snapshot.
+              // Independent boundingBox calls can straddle a late image/font reflow.
+              await footer.getByText('Pondelok – piatok', {exact:true}).waitFor({state:'visible'});
+              await footer.getByText('7:00 – 17:00', {exact:true}).waitFor({state:'visible'});
+              await productPage.evaluate(async()=>{await document.fonts.ready;await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
+              const hours=await footer.evaluate(el=>{
+                const find=text=>[...el.querySelectorAll('span')].find(node=>node.textContent.trim()===text&&node.getClientRects().length);
+                const day=find('Pondelok – piatok'), time=find('7:00 – 17:00');
+                const social=[...el.querySelectorAll('[data-social-links="footer"] a')].find(node=>node.getClientRects().length);
+                return {day:day?.getBoundingClientRect().toJSON(),time:time?.getBoundingClientRect().toJSON(),social:social?.getBoundingClientRect().toJSON(),sameParent:!!day&&!!time&&day.parentElement===time.parentElement};
+              });
+              if (!hours.day || !hours.time || !hours.sameParent || hours.day.width<=0 || hours.time.width<=0 ||
+                  hours.time.y < hours.day.y + hours.day.height - 1 ||
+                  Math.abs(hours.day.x - hours.time.x) > 2) {
+                throw new Error('Footer hours must render on two aligned lines: day above time '+JSON.stringify(hours));
               }
-              if (instagramBox.y <= dayBox.y) throw new Error('Desktop footer socials must be below opening hours');
+              if (!hours.social || hours.social.y <= hours.day.y) throw new Error('Desktop footer socials must be below opening hours '+JSON.stringify(hours));
             }
             if (width === 390) {
               await productPage.locator('.mobile-dock').getByRole('button', { name: 'Otvoriť menu' }).click();
