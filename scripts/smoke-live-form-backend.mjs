@@ -105,4 +105,8 @@ async function postRejected(payload, expectedError) {
 await postRejected({ ...dualDogs, dogs: [dualDogs.dogs[0]] }, "missing_second_dog");
 await postRejected({ ...dualDogs, dogs: [dualDogs.dogs[0], { ...dualDogs.dogs[1], dog_weight_kg: 0 }] }, "invalid_second_dog");
 
+const faqContact = { form_type: "lead", consent: true, owner_name: "QA dry-run", phone, email: "test@example.com", interest_reason: "Chcem sa informovať o škôlke", source_ref: "/", cta_source: "home_faq_contact", marketing_consent: false, raw_payload: { "Otázka návštevníka": "Test otázky bez uloženia" } };
+await post(faqContact);
+await postRejected({ ...faqContact, raw_payload: {} }, "invalid_aria_question");
+await postRejected({ ...faqContact, email: "" }, "invalid_aria_question");
 console.log("Live web-form-submit smoke tests passed.");
