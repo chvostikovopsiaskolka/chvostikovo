@@ -1,5 +1,7 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import leadHeroPhotoOne from "@/assets/lead-hero-user-1.jpg";
+import leadHeroPhotoTwo from "@/assets/lead-hero-user-2.jpg";
 import type { PuppyCheckInput } from "@/lib/inquiry";
 import {
   Car,
@@ -103,6 +105,11 @@ export const Route = createFileRoute("/test-aria")({
   }),
   component: AriaPreviewPage,
 });
+
+const LEAD_HERO_PHOTOS = [
+  { src: leadHeroPhotoOne, alt: "Spokojný psík pri hre v Chvostíkove", width: 1021, height: 1280 },
+  { src: leadHeroPhotoTwo, alt: "Psí kamaráti oddychujú v priestoroch Chvostíkova", width: 959, height: 1280 },
+];
 
 export function AriaPreviewPage() {
   const isLiveLead = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, "") === "/psia-skolka-kosice" });
@@ -248,19 +255,33 @@ export function AriaPreviewPage() {
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
 
-              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-[64px] w-fit max-w-full min-[390px]:mt-[70px] sm:mt-[88px] lg:mt-[116px]" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
+              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-4 w-fit max-w-full sm:mt-5" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
                 {/* Four schoolmates rest directly above the badge as in the reference. */}
-                <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
+                {!isLiveLead && <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
                   <SchoolmatesFormCrown compact desktopWide />
-                </div>
+                </div>}
                 <p data-aria-service-badge className="inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2.5 py-2 text-center font-display text-[8px] font-bold uppercase leading-tight tracking-[0.015em] text-white shadow-card min-[390px]:px-3 min-[390px]:text-[9.5px] sm:px-5 sm:py-2.5 sm:text-sm">
                   Denné stráženie stredných a veľkých psíkov
                 </p>
               </div>
 
+              {isLiveLead ? (
+                <div data-lead-hero-photos className="mx-auto mt-4 grid w-full max-w-2xl grid-cols-2 gap-2.5 sm:mt-5 sm:gap-4">
+                  {LEAD_HERO_PHOTOS.map((photo, index) => (
+                    <button key={photo.src} data-lead-hero-photo={index + 1} type="button"
+                      aria-label={"Zobraziť fotografiu: " + photo.alt} onClick={() => setReviewPhotoOpen(index)}
+                      className="group h-[144px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral min-[390px]:h-40 sm:h-56 lg:h-64">
+                      <img src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} loading="eager"
+                        fetchPriority={index === 0 ? "high" : "auto"} decoding="async"
+                        className="size-full object-cover object-[50%_45%] transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none" />
+                    </button>
+                  ))}
+                </div>
+              ) : (
               <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[590px]">
                 <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije si <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
               </p>
+              )}
               {isLiveLead && (
                 <div className="mx-auto mt-4 flex w-full max-w-[294px] justify-center">
                   <button type="button" data-aria-lead-hero-cta aria-controls="aria-hero-form"
@@ -561,7 +582,7 @@ export function AriaPreviewPage() {
         </DialogContent>
       </Dialog>
 
-      <PhotoLightbox photos={LEAD_REVIEW_GAP_PHOTOS} active={reviewPhotoOpen}
+      <PhotoLightbox photos={isLiveLead ? LEAD_HERO_PHOTOS : LEAD_REVIEW_GAP_PHOTOS} active={reviewPhotoOpen}
         onChange={setReviewPhotoOpen} onClose={() => setReviewPhotoOpen(null)} />
 
       <FormDialog

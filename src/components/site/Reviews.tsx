@@ -57,7 +57,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="mt-1 font-display text-sm font-semibold text-coral underline underline-offset-4"
+            data-review-read-more className="mt-1 font-display text-xs font-semibold text-coral underline underline-offset-4 sm:text-sm"
           >
             {open ? "Zobraziť menej" : "Prečítaj si viac"}
           </button>

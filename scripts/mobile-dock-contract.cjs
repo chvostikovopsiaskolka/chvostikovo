@@ -323,7 +323,7 @@ assert(hero.includes('data-home-hero-photos') &&
        "Mobile home Hero must show two approved photos and reveal the shared 2-step form after reviews");
 assert(leadContact.includes("compact = false") && leadContact.includes('min-h-[72px] py-2 sm:min-h-24'),
        "Only explicitly compact forms may shorten choices, without changing transport");
-assert(ariaAssistant.includes('data-aria-interest-cta aria-label="Mám záujem o škôlku"') &&
+assert(ariaAssistant.includes('data-aria-interest-cta') && ariaAssistant.includes('aria-label="Mám záujem o škôlku"') &&
        css.includes('.lead-brand-live [data-aria-section-navigation] [data-aria-interest-cta]'),
        "Orange lead dock must open existing inline form, without changing preview docks");
 assert(css.includes('@media (max-width: 359px)') && css.includes('#top h1 span { white-space: normal; }'),

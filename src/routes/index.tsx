@@ -121,7 +121,7 @@ function Index() {
         <DaycareEarlyFaq />
         <InquirySection allScreens matchHero />
         <Care showEmbeddedFriendship={false} showInterest={false} />
-        <Gallery />
+        <Gallery homeMosaic />
         <FriendshipInterest />
         <FirstVisit inlineForm leadStyle />
         <Why />

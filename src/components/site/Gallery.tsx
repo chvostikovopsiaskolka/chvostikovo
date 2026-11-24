@@ -2,6 +2,7 @@ import { Fragment, useRef, useState } from "react";
 import { Car, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { GALLERY, MAP_LINK } from "@/content/site";
+import { highQualityMosaicSrc } from "./AriaMosaicGallery";
 import { SectionAmbientPaws } from "./SectionAmbientPaws";
 
 const HYGIENE_SK = [
@@ -51,11 +52,12 @@ const GALLERY_EN = [
   "Secure outdoor run",
 ];
 
-export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
+export function Gallery({ language = "sk", homeMosaic = false }: { language?: "sk" | "en"; homeMosaic?: boolean }) {
   const [active, setActive] = useState<number | null>(null);
   const track = useRef<HTMLDivElement>(null);
   const isEnglish = language === "en";
   const hygiene = isEnglish ? HYGIENE_EN : HYGIENE_SK;
+  const photos = GALLERY.map(photo => ({ ...photo, src: homeMosaic ? highQualityMosaicSrc(photo.src) : photo.src }));
 
   function slide(dir: -1 | 1) {
     const el = track.current;
@@ -93,6 +95,30 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
           </div>
         </div>
 
+        {homeMosaic ? (
+          <div data-home-spaces-mosaic className="mt-8 columns-2 gap-3 lg:columns-3 lg:gap-4">
+            {photos.map((photo, i) => (
+              <Fragment key={photo.src}>
+                <button data-home-space-photo type="button" onClick={() => setActive(i)}
+                  aria-label={"Otvoriť fotografiu: " + photo.alt}
+                  className={"group relative mb-3 block w-full break-inside-avoid overflow-hidden rounded-3xl bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral lg:mb-4 " + (i % 3 === 0 ? "aspect-[4/5]" : "aspect-[5/4]")}>
+                  <img src={photo.src} srcSet={GALLERY[i]!.src + " 900w, " + photo.src + " 1600w"}
+                    sizes="(min-width: 1152px) 362px, (min-width: 1024px) 31vw, 46vw" width={1600} height={1600}
+                    alt={photo.alt} loading="lazy" decoding="async" className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none" />
+                  <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-forest-deep/85 to-transparent p-3 text-left text-xs font-semibold text-cream sm:text-sm">{photo.caption}</span>
+                </button>
+                {i % 2 === 1 && i < 6 && (() => { const h = hygiene[(i - 1) / 2]!; return (
+                  <article data-home-mosaic-hygiene aria-label={"Čistota priestorov – " + h.title}
+                    className="mb-3 break-inside-avoid rounded-3xl border border-forest/10 bg-card p-5 shadow-card [column-span:all] lg:hidden">
+                    <p className="mb-3 font-display text-xs font-bold uppercase tracking-wide text-coral">Ako zabezpečujeme čistotu priestorov</p>
+                    <div className="flex items-center gap-3"><span aria-hidden="true" className="shrink-0 text-2xl">{h.icon}</span><h3 className="font-display text-lg font-bold leading-snug text-forest">{h.title}</h3></div>
+                    <p className="mt-3 text-sm leading-relaxed text-forest/80">{h.text}</p>
+                  </article>
+                ); })()}
+              </Fragment>
+            ))}
+          </div>
+        ) : (
         <div className="relative left-1/2 mt-8 w-[calc(100vw-24px)] -translate-x-1/2 sm:w-[calc(100vw-48px)]">
           <div
             ref={track}
@@ -155,9 +181,10 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
             </button>
           </div>
         </div>
+        )}
 
         {/* On desktop retain the three hygiene cards, now readable without an extra click. */}
-        <div className="mt-10 hidden sm:block">
+        <div data-spaces-hygiene className={homeMosaic ? "mt-10 hidden lg:block" : "mt-10 hidden sm:block"}>
           <h3 className="section-title text-center text-xl sm:text-2xl">
             {isEnglish ? "How do we keep the daycare clean?" : "Ako zabezpečujeme čistotu priestorov?"}
           </h3>
@@ -176,7 +203,7 @@ export function Gallery({ language = "sk" }: { language?: "sk" | "en" }) {
       </div>
 
       <PhotoLightbox
-        photos={GALLERY.map((photo, index) => ({
+        photos={photos.map((photo, index) => ({
           src: photo.src,
           alt: isEnglish ? `Chvostíkovo dog daycare in Košice – photo ${index + 1}` : photo.alt,
           caption: isEnglish ? GALLERY_EN[index] : photo.caption,

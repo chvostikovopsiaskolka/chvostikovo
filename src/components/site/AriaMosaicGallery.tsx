@@ -10,7 +10,7 @@ import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
  * never stretching the existing 900px thumbnail in CSS. The first 900px source
  * remains in srcSet for smaller viewports. The lightbox uses the larger file.
  */
-const highQualityMosaicSrc = (src: string) => src.replace(
+export const highQualityMosaicSrc = (src: string) => src.replace(
   "/v1/fill/w_900,h_900,al_c,q_85,enc_auto/",
   "/v1/fill/w_1600,h_1600,al_c,q_92,enc_auto/",
 );
