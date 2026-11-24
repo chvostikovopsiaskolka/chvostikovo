@@ -2390,7 +2390,7 @@ if (!bellaris && brandPreviewCandidate) {
                       ? !!document.querySelector('#top [data-home-hero-interest-cta]') &&
                         [...document.querySelectorAll('#top [data-lead-step-form]')].every(el=>el.getBoundingClientRect().height===0)
                       : getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow!=='none',
-                    conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
+                    conditionsNext:document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
                     homeMobileVideoLayout:(() => {
@@ -3313,24 +3313,30 @@ if (!bellaris && brandPreviewCandidate) {
                 !await introSteps.nth(2).locator('strong').getByText(/pravdivo všetko/).count()) {
               throw new Error('Three first-visit steps must visibly cover adaptation and truthful owner details without duplicate FAQ');
             }
-            const careToggle = productPage.locator('#starostlivost').getByRole('button', { name: 'Ako dbáme na bezpečnosť psíkov?' });
+            const careToggle = productPage.locator('#faq').getByRole('button', { name: 'Ako zabezpečujete bezpečnosť psíkov v škôlke?', exact: true });
+            if (await careToggle.count() !== 1 || await productPage.locator('#starostlivost').getByRole('button', { name: /Ako dbáme na bezpečnosť|Hrajú sa psíkovia/ }).count()) {
+              throw new Error('Safety and daily-rhythm FAQ must live in the single homepage FAQ, not Care');
+            }
             await careToggle.click();
+            const careFaq = careToggle.locator('xpath=..');
             if (await careToggle.getAttribute('aria-expanded') !== 'true' ||
-                !(await productPage.locator('#starostlivost').getByText('neustálym dohľadom', { exact: false }).count())) {
-              throw new Error('Care safety FAQ must open with its detailed answer');
+                !(await careFaq.getByText('neustálym dohľadom', { exact: false }).count())) {
+              throw new Error('Consolidated safety FAQ must open with its detailed answer');
             }
-            const careFaq = careToggle.locator('xpath=../..');
-            const careLayout = productPage.locator('#starostlivost > .relative.z-10');
-            const [faqBox, layoutBox] = await Promise.all([careFaq.boundingBox(), careLayout.boundingBox()]);
-            if (!faqBox || !layoutBox || Math.abs(faqBox.width - (layoutBox.width - 32)) > 4) {
-              throw new Error('Care FAQ should span the photo and benefit-text content width');
+            const faqBox = await careFaq.boundingBox();
+            const faqLayout = await productPage.locator('#faq > .relative.z-10').boundingBox();
+            if (!faqBox || !faqLayout || Math.abs(faqBox.width - (faqLayout.width - 32)) > 4) {
+              throw new Error('Consolidated FAQ should span its content width');
             }
-            const repeatedTitle = careFaq.getByRole('heading', { name: 'Ako zabezpečujete bezpečnosť psíkov v škôlke?' });
-            if (await repeatedTitle.count()) throw new Error('Care FAQ repeats a second heading inside its answer');
-            const careAnswer = careToggle.locator('xpath=..').locator('div[id]').first();
-            if (!await careAnswer.getByText('Bezpečnosť začína už vstupnou návštevou.', { exact: false }).count()) {
-              throw new Error('Care FAQ answer missing after removing duplicated heading');
+            if (await careFaq.getByRole('heading', { name: 'Ako zabezpečujete bezpečnosť psíkov v škôlke?' }).count()) throw new Error('FAQ repeats a second heading inside its answer');
+            if (!await careFaq.getByText('Bezpečnosť začína už vstupnou návštevou.', { exact: false }).count()) {
+              throw new Error('Safety FAQ answer missing after consolidation');
             }
+            await careToggle.click();
+            const eligibilityToggle = productPage.locator('#faq').getByRole('button', { name: 'Pre koho je škôlka určená?', exact: true });
+            await eligibilityToggle.click();
+            if (await eligibilityToggle.getAttribute('aria-expanded') !== 'true' || !(await eligibilityToggle.locator('xpath=..').locator('p').count())) throw new Error('Eligibility FAQ must retain its answer');
+            await eligibilityToggle.click();
             const whyArticle = productPage.locator('#preco a[href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"]');
             if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
             const whyCta = productPage.locator('#preco').getByRole('button', { name: 'Chcem prihlásiť psíka' });
