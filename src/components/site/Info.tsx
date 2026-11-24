@@ -175,28 +175,28 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
       <div className="relative z-10 mx-auto max-w-5xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Cenník našich služieb</h2>
         <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je len výhodnejšia.</p>
-        <div data-home-pricing-columns className="mt-7 grid grid-cols-2 items-stretch gap-3 sm:gap-6">
-          <div data-home-included className="flex min-w-0 flex-col rounded-3xl bg-card p-3 shadow-card sm:p-6 lg:p-8">
-            <h3 className="text-center font-display text-sm font-bold text-forest sm:text-xl">Čo je v cene zahrnuté</h3>
-            <ul className="mt-4 space-y-3 text-xs leading-relaxed sm:text-base">
-              {INCLUDED.filter(item => item !== "Fotky a videá z priebehu dňa").map(item => <li key={item} className="flex gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-coral-dark sm:size-4" aria-hidden="true" /><span className="min-w-0 text-forest/85">{item}</span></li>)}
-            </ul>
-
-          </div>
-          <div data-home-prices className="grid min-w-0 grid-rows-2 gap-3 sm:gap-5">
+        <div data-home-pricing-columns className="mx-auto mt-7 grid max-w-3xl grid-cols-2 items-stretch gap-3 sm:gap-6">
+          <div data-home-prices className="col-span-2 grid min-w-0 grid-cols-2 items-stretch gap-3 sm:gap-5">
             {PRICING.map(item => <article key={item.name} data-home-price-card={item.highlight ? "pass" : "single"}
-              className={"flex min-w-0 flex-col items-center rounded-3xl px-2.5 py-4 text-center shadow-card sm:p-6 " + (item.highlight ? "w-full bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
+              className={"flex min-w-0 flex-col items-center rounded-3xl px-2.5 py-4 text-center shadow-card sm:p-6 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
               <h3 className="font-display text-sm font-bold leading-snug text-forest sm:text-xl">{item.name}</h3>
-              {item.highlight && <p className="mt-1 text-[11px] font-semibold text-forest/85 sm:text-sm">10 vstupov</p>}
-              <p data-home-price className={"mt-2 font-display text-3xl font-bold sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-coral-dark")}>{item.price}</p>
-              <p className="mt-2 text-[11px] leading-snug text-forest sm:text-sm">{item.highlight ? <strong>Permanentka platí 2 mesiace.</strong> : "Celodenný pobyt"}</p>
-              {item.highlight && <span data-home-best-value className="mt-3 inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2 py-1.5 text-[10px] font-bold leading-tight text-forest sm:text-xs">Najvýhodnejšie. Ušetríte 50 €</span>}
+              <p data-home-price className={"mt-2 whitespace-nowrap font-display text-[clamp(20px,5.7vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-coral-dark")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€<span className="text-[0.55em]"> / deň</span></> : item.price.replace(" ", "\u00a0")}</p>
+              {item.highlight && <p className="mt-1 whitespace-nowrap font-display text-base font-bold text-forest sm:text-xl">{item.price.replace(" ", "\u00a0")}</p>}
+              <p className="mt-2 text-[11px] font-semibold leading-snug text-forest sm:text-sm">{item.highlight ? "10 vstupov" : "Celodenný pobyt"}</p>
+              {item.highlight && <p className="mt-1 text-[11px] leading-snug text-forest sm:text-sm">Platí 2 mesiace</p>}
+              {item.highlight && <span data-home-best-value className="mt-3 inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2 py-1.5 text-[11px] font-bold leading-tight text-forest sm:text-sm">Ušetríte 50&nbsp;€</span>}
             </article>)}
           </div>
-          <p data-home-taxi className="col-span-2 flex min-w-0 items-center justify-center gap-1 rounded-2xl bg-[#c92c89] p-2 text-center text-[10px] font-semibold leading-snug text-white sm:gap-2 sm:p-3 sm:text-sm">
-              <Car className="size-3.5 shrink-0 text-white sm:size-4" aria-hidden="true" />
-              <span>Odvoz / vyzdvihnutie<br /><strong>5 € / jazda</strong></span>
-            </p>
+          <div data-home-included className="col-span-2 min-w-0 rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8">
+            <h3 className="text-center font-display text-base font-bold text-forest sm:text-xl">Čo je v cene zahrnuté</h3>
+            <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs leading-relaxed sm:gap-x-6 sm:text-base">
+              {INCLUDED.filter(item => item !== "Fotky a videá z priebehu dňa").map(item => <li key={item} className="flex min-w-0 gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-coral-dark sm:size-4" aria-hidden="true" /><span className="min-w-0 text-forest/85">{item}</span></li>)}
+            </ul>
+          </div>
+          <p data-home-taxi className="col-span-2 flex min-w-0 items-center justify-center gap-2 rounded-2xl bg-[#c92c89] p-3 text-center text-xs font-semibold leading-snug text-white sm:text-sm">
+            <Car className="size-4 shrink-0 text-white sm:size-5" aria-hidden="true" />
+            <span>Odvoz a vyzdvihnutie<br /><strong className="whitespace-nowrap">5&nbsp;€ / jazda</strong></span>
+          </p>
         </div>
       </div>
     </section>
