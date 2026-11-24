@@ -21,6 +21,21 @@ if (!["all", "chromium", "webkit"].includes(engineSelection)) {
 }
 const selectedEngines = engines.filter(([name]) => engineSelection === "all" || name === engineSelection);
 
+// Exercise the actual visible radio and next button; settle scrolling before
+// clicking so a moving viewport or fixed mobile dock cannot intercept it.
+async function advanceLeadContact(form) {
+  const choice=form.locator('label:has(input[name="zaujem"])').first();
+  await choice.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+  await choice.click();
+  await form.locator('input[name="zaujem"]').first().evaluate(el=>{
+    if(!el.checked)throw new Error('Lead interest radio did not select');
+  });
+  const next=form.getByRole('button',{name:'Pokračovať',exact:true});
+  await next.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+  await next.click();
+  await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
+}
+
 async function assertLeadContactIntro(form) {
   // Wait for the real React/CSS transition, especially on Safari WebKit.
   await form.getByRole('heading',{name:'Kontaktné údaje',exact:true}).waitFor({state:'visible',timeout:5000});
@@ -96,8 +111,7 @@ async function assertCampaignContentFlow(page) {
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
   const form=page.locator('#aria-hero-form [data-lead-step-form]');
-  await form.locator('label:has(input[name="zaujem"])').first().click();
-  await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+  await advanceLeadContact(form);
   await assertLeadContactIntro(form);
   await form.getByRole('button',{name:'Späť',exact:true}).click();
   await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible'});
@@ -2076,8 +2090,7 @@ if (!bellaris && brandPreviewCandidate) {
             });
             if (await page.locator('[role="dialog"] [data-lead-step-form]').count())
               throw new Error('Paid dock must scroll to inline form without opening a modal');
-            await contact.locator('label:has(input[name="zaujem"])').first().click();
-            await contact.getByRole('button', { name: 'Pokračovať' }).click();
+            await advanceLeadContact(contact);
             const breedInput = contact.getByLabel('Plemeno psíka *');
             if (!await breedInput.isVisible()) throw new Error('Active campaign form must ask for breed');
             await contact.locator('input[name="meno"]').fill('Testovací dopyt');
@@ -2976,9 +2989,9 @@ if (!bellaris && brandPreviewCandidate) {
                   await next.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
                   await next.click();
                   await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
+                }else if(url.pathname==='/psia-skolka-kosice/'){
+                  await advanceLeadContact(form);
                 }else{
-                  // Other routes, especially the paid lead page, retain their
-                  // existing interaction sequence without forced scroll positions.
                   await form.locator('label').first().click();
                   await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
                 }
