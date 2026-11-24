@@ -138,6 +138,32 @@ assert(ariaLandingTracking.includes('"lead_landing_first_visit_details"') &&
   ariaLandingTracking.includes('"lead_landing_first_visit_steps"'),
   "Campaign first-visit explanation and three-step shortcut must remain tracked");
 const guidedLeadTracking = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
+const ariaChatSource = readFileSync(new URL("../src/components/site/AriaGuidedChat.tsx", import.meta.url), "utf8");
+const ariaPuppySource = readFileSync(new URL("../src/components/site/AriaPuppyChecker.tsx", import.meta.url), "utf8");
+const sharedFormsSource = readFileSync(new URL("../src/components/site/Forms.tsx", import.meta.url), "utf8");
+const smsGuard = readFileSync(new URL("../supabase/migrations/20261124_aria_contact_question_sms_guard.sql", import.meta.url), "utf8");
+assert(ariaChatSource.includes("Máš inú otázku?") &&
+  ariaChatSource.includes("<HomeFaqContactForm compact") &&
+  ariaChatSource.includes('formPrefix + "_other"') &&
+  !ariaChatSource.includes("Mám inú otázku?"),
+  "APP-01 Aria other CTA must lead to the SAME two-step homepage contact form.");
+assert(sharedFormsSource.includes('source = HOME_FAQ_CONTACT_SOURCE') &&
+  sharedFormsSource.includes('data-aria-contact-wizard') &&
+  sharedFormsSource.includes('if (isAria)') &&
+  sharedFormsSource.includes('trackAriaQuestionSubmit(source)') &&
+  sharedFormsSource.includes('contact') &&
+  sharedFormsSource.includes('container.scrollTop = 0'),
+  "APP-01 reused contact wizard must keep homepage behavior and scoped Aria tracking.");
+assert(ariaPuppySource.includes('data-aria-puppy-step="single"') &&
+  ariaPuppySource.includes('!embedded &&') &&
+  !ariaChatSource.includes('Pomohla ti odpoveď?'),
+  "APP-01 compact embedded puppy check must not repeat CTA or switch to vaccination step.");
+assert(smsGuard.includes("aria_preview_chat_other") &&
+  smsGuard.includes("lead_landing_aria_chat_other") &&
+  smsGuard.includes("RETURN new;") &&
+  smsGuard.includes("web_form_sms_outbox"),
+  "APP-01 secure SQL must preserve regular lead SMS but not contact-only Aria submissions.");
+
 const ariaChatMobile = readFileSync(new URL("../src/components/site/AriaGuidedChat.tsx", import.meta.url), "utf8");
 assert(ariaChatMobile.includes("primaryQuestionIds") &&
   ariaChatMobile.includes('data-aria-chat-questions') &&
