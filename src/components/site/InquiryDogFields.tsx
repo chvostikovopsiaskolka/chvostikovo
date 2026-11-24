@@ -25,7 +25,7 @@ export function InquiryDogFields({
       <fieldset className="min-w-0">
         <legend className="label-sm">{en ? "Sex (optional)" : "Pohlavie (nepovinné)"}</legend>
         <div className="grid grid-cols-2 gap-1">
-          {([["male", en ? "Male" : "Pes"], ["female", en ? "Female" : "Suka"]] as const).map(([value, label]) => (
+          {([["male", en ? "Male" : "Pes"], ["female", en ? "Female" : "Fena"]] as const).map(([value, label]) => (
             <label key={value} className="relative min-w-0 cursor-pointer">
               <input type="radio" name="pohlavie" value={value} className="peer sr-only" aria-label={label} />
               <span className="flex min-h-11 items-center justify-center rounded-xl border border-forest/15 bg-white px-1 text-center text-xs font-semibold text-forest transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-coral">

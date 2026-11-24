@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { BookOpen, Check, CheckCircle2, Phone } from "lucide-react";
+import { BookOpen, Check, CheckCircle2 } from "lucide-react";
 import { FormDialog } from "./FormDialog";
 import { Collapse } from "./Collapse";
 import { ContextFaq } from "./ContextFaq";
 import { LeadStepForm } from "./LeadStepForm";
 import { LongForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
-import { CARE, DAYCARE_GALLERY_EXTRAS, WHY, PHONE, GARDEN_PHOTO } from "@/content/site";
+import { CARE, DAYCARE_GALLERY_EXTRAS, WHY, GARDEN_PHOTO, APPLICATION_TITLE, APPLICATION_SUBTITLE } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import dogsPair from "@/assets/dogs-pair.jpg";
 import certAdriana from "@/assets/cert-adriana.jpg";
@@ -192,41 +192,32 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
   );
 }
 
-/** Reuses the established friendship panel with a short, qualified-interest form on the main website. */
-export function FriendshipInterest({ inlineForm = false }: { inlineForm?: boolean } = {}) {
+/** Existing friendship photo and card now serve the full application, not a second lead form. */
+export function FriendshipApplication() {
   const [open, setOpen] = useState(false);
+  const [applicationSent, setApplicationSent] = useState(false);
   return (
-    <>
-      <section id="psie-priatelstva" className="relative bg-card pb-10 sm:pb-12">
-        <SectionAmbientPaws />
-        <div className="relative z-10 mx-auto max-w-6xl px-4">
-          <FriendshipFeature embedded />
-          {!inlineForm && <div className="mt-7 flex justify-center">
-            <button id="home-friendship-interest" type="button" className="btn-coral" onClick={() => {
-              trackMarketingInteraction("inquiry_cta", "home_friendship_interest_20261028");
-              void trackCookielessInteraction("inquiry_cta", "home_friendship_interest_20261028");
-              setOpen(true);
-            }}>Toto hľadám pre svojho psíka</button>
-          </div>}
-          {inlineForm && <div data-lead-form-shell id="zaujem-po-priatelstvach" className="form-liquid-surface mx-auto mt-8 max-w-2xl rounded-4xl bg-card p-6 shadow-card sm:p-8">
-            <h3 data-lead-form-intro className="text-center text-2xl text-forest">Čo hľadáte pre svojho psíka?</h3>
-            <p data-lead-form-intro className="mt-2 mb-5 text-center text-sm text-muted-foreground">Vyplňte krátky nezáväzný formulár. Ozveme sa vám.</p>
-            <LeadStepForm questionInHeading trackingSource="home_friendship_interest_20261028" />
-          </div>}
+    <section id="psie-priatelstva" className="relative bg-card pb-10 sm:pb-12">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-6xl px-4">
+        <FriendshipFeature embedded applicationMode />
+        <div className="mt-7 flex justify-center">
+          <button id="home-friendship-application" type="button" className="btn-coral" onClick={() => {
+            void trackCookielessInteraction("nav_click", "home_friendship_application");
+            setApplicationSent(false);
+            setOpen(true);
+          }}>{APPLICATION_TITLE}</button>
         </div>
-      </section>
-      <FormDialog open={open} onOpenChange={setOpen} title="Čo hľadáte pre svojho psíka?"
-        subtitle="Nechajte nám kontakt. Ozveme sa vám a odpovieme na otázky o škôlke.">
-        <LeadStepForm questionInHeading trackingSource="home_friendship_interest_20261028" />
+      </div>
+      <FormDialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setApplicationSent(false); }}
+        hideHeader={applicationSent} title={applicationSent ? "Prihláška odoslaná" : APPLICATION_TITLE} subtitle={APPLICATION_SUBTITLE}>
+        <LongForm onSent={() => setApplicationSent(true)} />
       </FormDialog>
-    </>
+    </section>
   );
 }
 
 export function Why() {
-  const [open, setOpen] = useState(false);
-  const [applicationSent, setApplicationSent] = useState(false);
-
   return (
     <section id="preco" className="scroll-mt-24 py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4">
@@ -260,45 +251,10 @@ export function Why() {
               Prečítajte si viac o výhodách a vhodnosti psej škôlky
             </a>
           </div>
-          <div className="mt-5 flex flex-nowrap items-center justify-center gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                // Registration is a full application, not a short inquiry lead.
-                void trackCookielessInteraction("nav_click", "home_why_application");
-                setApplicationSent(false);
-                setOpen(true);
-              }}
-              className="btn-coral min-w-0 whitespace-nowrap !px-3 !py-3 text-xs min-[390px]:text-sm sm:!px-6 sm:!py-4 sm:text-base"
-            >
-              Chcem prihlásiť psíka
-            </button>
-            <a
-              href={`tel:${PHONE}`}
-              aria-label="Zavolajte nám"
-              title="Zavolajte nám"
-              onClick={() => void trackCookielessInteraction("phone_click", "home_why_phone")}
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-cream/60 text-cream transition-colors hover:bg-cream hover:text-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream sm:size-12"
-            >
-              <Phone className="size-5" aria-hidden="true" />
-            </a>
-          </div>
           </div>
         </div>
       </div>
 
-      <FormDialog
-        open={open}
-        onOpenChange={(nextOpen) => {
-          setOpen(nextOpen);
-          if (!nextOpen) setApplicationSent(false);
-        }}
-        hideHeader={applicationSent}
-        title={applicationSent ? "Prihláška odoslaná" : "Prihlás svojho psíka ešte dnes"}
-        subtitle="Vyplňte prihlášku o svojom psíkovi. Po odoslaní sa vám ozveme a dohodneme ďalší postup."
-      >
-        <LongForm onSent={() => setApplicationSent(true)} />
-      </FormDialog>
     </section>
   );
 }

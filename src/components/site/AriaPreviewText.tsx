@@ -6,7 +6,6 @@ export const ARIA_PREVIEW_REQUIREMENTS = REQUIREMENTS.map((item) => ({
   text: item.title === "Zdravotný stav"
     ? item.text
       .replace("klinicky zdravých psíkov bez krátkodobých či prenosných ochorení", "klinicky zdravých psíkov bez prenosných ochorení")
-      .replace("Fenky počas hárania", "Sučky počas hárania")
     : item.text,
 }));
 
@@ -14,7 +13,7 @@ const IMPORTANT = [
   "platný očkovací preukaz",
   "Psík musí mať základné hygienické návyky v interiéri",
   "Prijímame len klinicky zdravých psíkov bez krátkodobých či prenosných ochorení",
-  "Fenky počas hárania neprijímame",
+  "Feny počas hárania neprijímame",
   "stredné a veľké psy",
   "približne od 4 mesiacov",
   "očkované šteniatka",
@@ -39,7 +38,7 @@ const IMPORTANT = [
   "základné hygienické návyky",
   "klinicky zdravých psíkov bez prenosných ochorení",
   "V prípade chronických ochorení nás prosím informujte vopred",
-  "Sučky počas hárania",
+  "Feny počas hárania",
   "celodenným dohľadom",
   "minimálne dvaja skúsení opatrovatelia",
   "úvodná návšteva",

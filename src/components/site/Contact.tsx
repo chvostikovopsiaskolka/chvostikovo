@@ -3,7 +3,7 @@ import { MapPin, Mail, Phone, Clock, Instagram, Facebook } from "lucide-react";
 import logo from "@/assets/logo.png";
 import bellarisFooterLogo from "@/assets/bellaris-footer-credit.svg";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
-import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM, FACEBOOK } from "@/content/site";
+import { PHONE, PHONE_PRETTY, EMAIL, MAP_LINK, INSTAGRAM, FACEBOOK, APPLICATION_TITLE, APPLICATION_SUBTITLE } from "@/content/site";
 import { LongForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { LegalDialog, type LegalDialogType } from "./LegalDialog";
@@ -17,10 +17,10 @@ export function Contact() {
       <div className="relative z-10 mx-auto max-w-4xl px-4">
         <div className="text-center">
           <h2 className="section-title text-3xl leading-tight sm:text-4xl">
-            Prihlás svojho psíka ešte dnes
+            {APPLICATION_TITLE}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-forest/80">
-            Vyplňte formulár, v ktorom nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky.
+            {APPLICATION_SUBTITLE}
           </p>
         </div>
 

@@ -5,9 +5,10 @@ import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
 // Emphasise only verified words from the canonical FAQ; the underlying answer stays unchanged.
 const HIGHLIGHTS: Record<string, string[]> = {
+  "Pre koho je škôlka určená?": ["stredné a veľké psy", "nad 15 kg", "približne od 4 mesiacov", "bezplatnej úvodnej návšteve"],
   "Bude môj psík počas dňa niekedy sám bez dozoru?": ["celodenným dohľadom", "minimálne dvaja skúsení opatrovatelia"],
-  "Ako prebieha prvá návšteva psíka v škôlke?": ["vstupnú návštevu", "2–3 kratšie návštevy", "pravdivo všetko"],
-  "Ako zabezpečujete bezpečnosť psíkov v škôlke?": ["Bezpečnosť začína už vstupnou návštevou.", "nie je výcvikové centrum", "neustálym dohľadom", "pravidelný oddych"],
+  "Ako prebieha prvá návšteva psíka v škôlke?": ["vstupnú návštevu", "2–3 kratšie návštevy", "pravdivo všetko", "zoznamovanie prebieha postupne"],
+  "Ako zabezpečujete bezpečnosť psíkov v škôlke?": ["Bezpečnosť začína už vstupnou návštevou.", "nie je výcvikové centrum", "neustálym dohľadom", "minimálne dvoch skúsených opatrovateľov", "pravidelný oddych", "konzultujeme situáciu s majiteľom"],
   "Čo ak môj psík ešte nikdy nebol v kolektíve psov?": ["vstupná návšteva", "postupne", "individuálne"],
   "Hrajú sa psíkovia v škôlke celý deň?": ["rovnako dôležitý je pre nás oddych", "striedajú aktivity", "prispôsobujeme dĺžku a intenzitu aktivít"],
   "Prijímate aj šteniatka?": ["ukončené kompletné očkovanie", "kotercovému kašľu", "vhodný adaptačný proces"],
@@ -15,6 +16,8 @@ const HIGHLIGHTS: Record<string, string[]> = {
   "Zabezpečujete aj vyzdvihnutie a odvoz psíka?": ["5 € za jednu jazdu", "spolu s rezerváciou"],
   "Zabezpečujete aj stravu?": ["stravu nepodávame", "s dostatočným predstihom", "vlastné maškrty"],
   "Aké sú otváracie hodiny?": ["od 7:00 do 17:00"],
+  "Aký je cenník a treba si rezervovať miesto vopred?": ["25 €", "200 €", "10 vstupov", "20 € za deň", "2 mesiace", "do nedele 20:00", "deň vopred do 19:00", "individuálne"],
+  "Aké sú otváracie hodiny a ponúkate aj odvoz?": ["od 7:00 do 17:00", "5 € za jednu jazdu", "spolu s rezerváciou"],
 };
 
 function withHighlights(text: string, words: string[]): ReactNode[] {

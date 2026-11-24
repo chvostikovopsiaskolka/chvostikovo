@@ -172,6 +172,10 @@ export const WHY = [
   },
 ];
 
+// Shared visible application wording; backend field values remain compatible.
+export const APPLICATION_TITLE = "Prihláška do škôlky";
+export const APPLICATION_SUBTITLE = "Vyplňte prihlášku, ak plánujete so svojím psíkom navštevovať škôlku pravidelne. Povedzte nám viac o ňom a dohodneme s vami ďalší postup.";
+
 export const REQUIREMENTS = [
   {
     title: "Očkovanie a prevencia",
@@ -187,7 +191,7 @@ export const REQUIREMENTS = [
   },
   {
     title: "Zdravotný stav",
-    text: "Prijímame len klinicky zdravých psíkov bez krátkodobých či prenosných ochorení. V prípade chronických ochorení nás prosím informujte vopred, aby sme mohli posúdiť individuálne potreby a bezpečnosť. Fenky počas hárania neprijímame z dôvodu bezpečnosti a pohody ostatných psíkov.",
+    text: "Prijímame len klinicky zdravých psíkov bez krátkodobých či prenosných ochorení. V prípade chronických ochorení nás prosím informujte vopred, aby sme mohli posúdiť individuálne potreby a bezpečnosť. Feny počas hárania neprijímame z dôvodu bezpečnosti a pohody ostatných psíkov.",
   },
 ];
 
