@@ -29,7 +29,7 @@ const PRODUCTS = [
     features: [
       { icon: ShieldCheck, label: "Protišmyk" },
       { icon: Hammer, label: "Ručná výroba" },
-      { icon: Ruler, label: "2 veľkosti" },
+      { icon: Ruler, label: "3 veľkosti" },
     ],
   },
 ] as const;

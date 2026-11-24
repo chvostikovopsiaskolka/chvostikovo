@@ -24,6 +24,8 @@ import targetCustomHeight from "@/assets/products/target-custom-height.jpeg";
 import targetSmallDog from "@/assets/products/target-small-dog.jpeg";
 import targetSmallDetail from "@/assets/products/target-small-detail.jpeg";
 import targetSmallProduct from "@/assets/products/target-small-product.jpeg";
+import targetMediumSide from "@/assets/products/target-medium-side.jpg";
+import targetMediumDetail from "@/assets/products/target-medium-detail.jpg";
 import targetSizes from "@/assets/products/target-sizes.jpeg";
 
 const BASE_URL = "https://chvostikovo.sk";
@@ -31,14 +33,17 @@ const PAGE_URL = `${BASE_URL}/target-na-cvicenie-pre-psov/`;
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Target na cvičenie pre psov | Ručná výroba | Chvostíkovo";
 const description =
-  "Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho postoja, koordinácie a rovnováhy. Veľký 40 × 20 cm alebo malý 25 × 25 cm, cena 20 €.";
+  "Ručne vyrábaný drevený target s protišmykovým povrchom na tréning správneho postoja, koordinácie a rovnováhy. Veľký 40 × 20 cm, stredný 30 × 15 cm alebo malý 25 × 25 cm, cena 20 €.";
 
 const SIZE_OPTIONS: Array<{ value: TargetSize; label: string; detail: string }> = [
   { value: "large", label: "Veľký", detail: "40 × 20 cm" },
+  { value: "medium", label: "Stredný", detail: "30 × 15 cm" },
   { value: "small", label: "Malý", detail: "25 × 25 cm" },
 ];
 
 const INSPIRATION = [
+  { src: targetMediumSide, alt: "Stredný target 30 × 15 cm – protišmykový povrch" },
+  { src: targetMediumDetail, alt: "Detail konštrukcie stredného dreveného targetu" },
   { src: targetSmallDog, alt: "Pes pri tréningu na malom targete" },
   { src: targetSizes, alt: "Veľký a malý target na cvičenie pre psov" },
   { src: targetLargeProduct, alt: "Veľký drevený target s protišmykovým povrchom" },
@@ -183,6 +188,9 @@ function TargetPage() {
               <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
                 Vyberte si variant a objednajte si target pre svojho psíka.
               </p>
+              <p className="mt-3 leading-relaxed text-forest/80">
+                Každý psík má iné potreby. Naše targety vyrábame ručne a po dohode vieme prispôsobiť ich výšku aj rozmery podľa vašich požiadaviek.
+              </p>
             </div>
             <TargetVariantCards onInterest={(nextSize) => {
               setSize(nextSize);
@@ -257,7 +265,7 @@ function TargetPage() {
           <div className="mx-auto max-w-4xl px-4 text-center">
             <h2 className="text-3xl text-cream sm:text-4xl">Máte záujem o target?</h2>
             <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-cream/80">
-              Vyberte si veľký alebo malý variant. Ak potrebujete inú výšku než bežných 5 cm,
+              Vyberte si veľký, stredný alebo malý variant. Ak potrebujete inú výšku než bežných 5 cm,
               uveďte ju do formulára a dohodneme sa podľa možností výroby.
             </p>
             <button
@@ -293,7 +301,7 @@ function TargetPage() {
               <div className="space-y-5">
                 <div>
                   <p className="font-display text-sm font-bold text-forest">Veľkosť targetu *</p>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="mt-3 grid grid-cols-3 gap-2">
                     {SIZE_OPTIONS.map((option) => (
                       <button key={option.value} type="button" onClick={() => setSize(option.value)}
                         aria-pressed={size === option.value}
