@@ -1703,3 +1703,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 /* Keep decoration below the admission heading, and emphasize practical location facts. */
 .lead-brand-live #lead-requirements > [aria-hidden="true"] { inset-block-start: 10rem; }
 .lead-brand-live #aria-mosaic [data-aria-location-chips] > * { font-weight: 700; }
+
+/* Keep guide prose readable while the shared gallery reaches both layout edges. */
+.stand-guide-content > * { width: min(calc(100% - 2rem), 48rem); margin-inline: auto; }
+.stand-guide-content > [data-blog-stand-gallery] { width: 100%; }

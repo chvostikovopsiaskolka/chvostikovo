@@ -2683,7 +2683,9 @@ if (!bellaris && brandPreviewCandidate) {
               await centerFixtureControl(owner);
               await owner.fill('Testovacie meno');
               await centerFixtureControl(toggle);
+              await centerFixtureControl(toggle);
               await toggle.click();
+              await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await owner.inputValue()!=='Testovacie meno' || await page.getByRole('dialog').count()) throw new Error('Inline application did not expand or retain owner data');
               await centerFixtureControl(toggle);
               await toggle.click();
@@ -2912,7 +2914,9 @@ if (!bellaris && brandPreviewCandidate) {
               // Verify the real inline registration, not a second form or modal.
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
+              await centerFixtureControl(toggle);
               await toggle.click();
+              await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || await application.locator('[data-lead-step-form]').count() || await page.getByRole('dialog').count()) throw new Error('Friendship must expand the existing application in-place');
               const fits=await application.evaluate(el=>{const b=el.getBoundingClientRect();return b.width<=innerWidth-16 && el.scrollWidth<=el.clientWidth+2 && (innerWidth<1024 || b.width>=800);});
               if(!fits)throw new Error('Inline application responsive width incorrect');
@@ -3394,10 +3398,10 @@ if (!bellaris && brandPreviewCandidate) {
 
             await productPage.keyboard.press('Escape');
             await articleLightbox.waitFor({state:'hidden'});
-            if (width === 390) {
+            {
               const guideGalleryBox = await guideCarousel.boundingBox();
-              if (!guideGalleryBox || guideGalleryBox.x > 2 || guideGalleryBox.x + guideGalleryBox.width < width - 2) {
-                throw new Error('Stand guide gallery must use full mobile viewport');
+              if (!guideGalleryBox || guideGalleryBox.x > 2 || guideGalleryBox.x + guideGalleryBox.width < await productPage.evaluate(()=>document.documentElement.offsetWidth) - 2) {
+                throw new Error('Stand guide gallery must use full layout width on mobile and desktop');
               }
             }
             if (!(await productPage.getByRole('heading', { name: 'Pozrite si naše vyhotovenia', exact: true }).count())) {
