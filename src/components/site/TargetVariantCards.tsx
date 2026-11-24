@@ -1,9 +1,8 @@
 import { ChevronRight, Hammer, Ruler, ShieldCheck, Star } from "lucide-react";
 import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
-import targetMedium from "@/assets/products/target-medium-preview.jpg";
 import targetSmallDog from "@/assets/products/target-small-dog.jpeg";
 
-export type TargetSize = "large" | "medium" | "small";
+export type TargetSize = "large" | "small";
 
 const VARIANTS: Array<{
   value: TargetSize;
@@ -22,15 +21,6 @@ const VARIANTS: Array<{
     price: "20 €",
     image: targetLargeDog,
     alt: "Veľký drevený target 40 × 20 cm pri tréningu psa",
-  },
-  {
-    value: "medium",
-    label: "Stredný",
-    dimension: "30 × 15 cm",
-    description: "Dlhší target s protišmykovým povrchom na tréning postoja a cieleného dotyku labkou. Bežná výška približne 5 cm, na želanie upravíme.",
-    price: "20 €",
-    image: targetMedium,
-    alt: "Stredný drevený target 30 × 15 cm s protišmykovým povrchom",
   },
   {
     value: "small",
@@ -53,9 +43,9 @@ const FEATURES = [
 export function TargetVariantCards({ onInterest }: { onInterest: (size: TargetSize) => void }) {
   return (
     <div data-target-variant-cards role="region"
-      aria-label="Veľký, stredný a malý drevený target – na mobile posúvajte do strany"
+      aria-label="Veľký a malý drevený target – na mobile posúvajte do strany"
       tabIndex={0}
-      className="-mx-4 mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-4 touch-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-auto md:grid md:max-w-6xl md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0">
+      className="-mx-4 mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-4 touch-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-auto md:grid md:max-w-4xl md:grid-cols-2 md:gap-5 md:overflow-visible md:px-0">
       {VARIANTS.map((variant) => (
         <article key={variant.value} data-target-size={variant.value}
           className="flex w-[87vw] max-w-[420px] min-w-0 shrink-0 snap-start flex-col overflow-hidden rounded-4xl bg-card shadow-soft sm:w-[58vw] md:w-auto md:max-w-none md:shrink">

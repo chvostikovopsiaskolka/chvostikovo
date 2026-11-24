@@ -3119,13 +3119,13 @@ if (!bellaris && brandPreviewCandidate) {
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="3"]').count() !== 1) throw new Error('Stand contact step missing');
               } else {
                 const targetCards=productPage.locator('[data-target-variant-cards]');
-                if (await targetCards.locator('article').count() !== 3)
-                  throw new Error('Target must have exactly three stand-style size cards');
+                if (await targetCards.locator('article').count() !== 2)
+                  throw new Error('Target must have exactly two stand-style size cards');
                 if (width===390 && !(await targetCards.evaluate(el=>el.scrollWidth>el.clientWidth+30)))
                   throw new Error('Target size cards must swipe on mobile');
                 const variants=[
                   {type:'large',label:'„Veľký“ verzia',size:'40 × 20 cm',photo:'Veľký drevený target'},
-                  {type:'medium',label:'„Stredný“ verzia',size:'30 × 15 cm',photo:'Stredný drevený target'},
+
                   {type:'small',label:'„Malý“ verzia',size:'25 × 25 cm',photo:'Malý drevený target'},
                 ];
                 for (const variant of variants){
@@ -3166,23 +3166,17 @@ if (!bellaris && brandPreviewCandidate) {
                   if(!a||!b||Math.abs(a.y-b.y)>5)
                     throw new Error('Desktop Target variants must share a horizontal row');
                 }
-                // Preserve the existing SMALL CTA regression as well as the new MEDIUM option.
-                await targetCards.locator('[data-target-size="small"] button').click();
-                const smallDialog=productPage.getByRole('dialog',{name:action});
-                if(!(await smallDialog.locator('button[aria-pressed="true"]').innerText()).includes('Malý'))throw new Error('Small target CTA selection regressed');
-                await productPage.keyboard.press('Escape');
-                await smallDialog.waitFor({state:'hidden'});
-                // Select the MEDIUM card and make sure the original wizard receives that size,
+                // Select the SMALL card and make sure the original wizard receives that size,
                 // rather than resetting to its former default LARGE.
-                await targetCards.locator('[data-target-size="medium"]')
-                  .getByRole('button',{name:/stredný target/i}).click();
+                await targetCards.locator('[data-target-size="small"]')
+                  .getByRole('button',{name:/malý target/i}).click();
                 const dlg=productPage.getByRole('dialog',{name:action});
                 await dlg.waitFor({state:'visible'});
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="1"]').count() !== 1)
                   throw new Error('Target step 1 missing');
                 const selected=dlg.locator('button[aria-pressed="true"]');
-                if (!(await selected.innerText()).includes('Stredný'))
-                  throw new Error('Target medium-card CTA did not select medium variant');
+                if (!(await selected.innerText()).includes('Malý'))
+                  throw new Error('Target small-card CTA did not select small variant');
                 await dlg.getByRole('button',{name:'Pokračovať'}).click();
                 if (await dlg.locator('[data-product-inquiry-steps][data-step="2"]').count() !== 1)
                   throw new Error('Target step 2 missing');
@@ -3236,13 +3230,13 @@ if (!bellaris && brandPreviewCandidate) {
                 if (await productPage.locator('section[data-stand-gallery-section] button:has-text("Mám záujem o stojan")').count()) throw new Error('Gallery should precede product explanation without stray CTA');
               }
               const galleryTrack=productPage.locator('[data-photo-carousel="' + (route.includes('stojan')?'stand':'target') + '"]');
-              if (await galleryTrack.count() !== 1 || await galleryTrack.locator('figure').count() !== (route.includes('stojan')?16:10)) {
+              if (await galleryTrack.count() !== 1 || await galleryTrack.locator('figure').count() !== (route.includes('stojan')?16:8)) {
                 throw new Error('Product gallery missing: '+route);
               }
               const edgeBounds=await galleryTrack.evaluate(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:document.documentElement.offsetWidth};});
               if(Math.abs(edgeBounds.left)>2||Math.abs(edgeBounds.right-edgeBounds.width)>2)throw new Error('Product gallery must reach both edges: '+JSON.stringify(edgeBounds));
               if (!route.includes('stojan')) {
-                if(await galleryTrack.locator('[data-target-photo-open]').count()!==10) throw new Error('All target photos must be openable');
+                if(await galleryTrack.locator('[data-target-photo-open]').count()!==8) throw new Error('All target photos must be openable');
                 await galleryTrack.locator('[data-target-photo-open]').first().click();
                 const targetLightbox=productPage.locator('[data-stand-lightbox]');
                 await targetLightbox.waitFor({state:'visible'});

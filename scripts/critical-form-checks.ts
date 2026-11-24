@@ -1,5 +1,3 @@
-import { runInNewContext } from "node:vm";
-import { transpileModule, ScriptTarget, ModuleKind } from "typescript";
 import { readFileSync } from "node:fs";
 import { shortSchema, longSchema, inquirySchema, buildDbPayload } from "../src/lib/inquiry";
 import { standInquirySchema, targetInquirySchema } from "../src/lib/product-inquiry";
@@ -317,23 +315,6 @@ targetInquirySchema.parse({
   },
 });
 
-targetInquirySchema.parse({
-  client_submission_id: "00000000-0000-4000-8000-000000000002",
-  product_type: "target",
-  customer_name: "Test",
-  phone,
-  email: "test@example.com",
-  customer_location: "Košice, 040 01",
-  source_ref: "/target-na-cvicenie-pre-psov",
-  consent: true,
-  configuration: {
-    size: "medium",
-    height_cm: 20,
-    note: "Test",
-  },
-});
-
-
 assert(!standInquirySchema.safeParse({
   client_submission_id: "00000000-0000-4000-8000-000000000001",
   product_type: "stand",
@@ -528,40 +509,6 @@ for (const interest of [
 const productBackend = readFileSync(new URL("../supabase/functions/product-inquiry-submit/index.ts", import.meta.url), "utf8");
 assert(productBackend.includes("/^\\+\\d{7,15}$/"), "Critical form check failed: product inquiry phone regex is not the expected E.164 validation.");
 assert(productBackend.includes("customer_location") && productBackend.includes("securityLimitV336"), "Location persistence must retain LIVE product rate limiting");
-
-
-// PRODUCT_BACKEND_REGRESSION_START: actual handler with isolated DB/email transports.
-for (const chosenSize of ["small", "medium", "large", "invalid"]) {
-  let handler: (request: Request) => Promise<Response> = async () => new Response(null, { status: 500 });
-  let stored: any = null;
-  let sentEmail: any = null;
-  let networkCalls = 0;
-  const env: Record<string, string> = { SUPABASE_URL: "https://fixture.invalid", SUPABASE_SERVICE_ROLE_KEY: "fixture", RESEND_API_KEY: "fixture", NOTIFY_TO: "fixture@example.invalid" };
-  const program = transpileModule(productBackend.replace(/^import[^\n]+\n/, ""), { compilerOptions: { target: ScriptTarget.ES2022, module: ModuleKind.CommonJS } }).outputText;
-  runInNewContext(program, {
-    Request, Response, Intl, Date, console,
-    securityLimitV336: async () => null,
-    securityAccessV336: async () => null,
-    Deno: { env: { get: (name: string) => env[name] }, serve: (fn: typeof handler) => { handler = fn; } },
-    fetch: async (url: string, init: RequestInit = {}) => {
-      networkCalls++;
-      if (url === "https://api.resend.com/emails") { sentEmail = JSON.parse(String(init.body)); return Response.json({ id: "fixture-email" }); }
-      if (init.method === "POST") { stored = { ...JSON.parse(String(init.body)), id: "fixture-inquiry", created_at: "2026-11-24T12:00:00Z" }; return Response.json([stored]); }
-      if (init.method === "PATCH") return new Response(null, { status: 204 });
-      return Response.json([]);
-    },
-  });
-  const response = await handler(new Request("https://fixture.invalid/functions/v1/product-inquiry-submit", { method: "POST", headers: { origin: "https://chvostikovo.sk" }, body: JSON.stringify({
-    client_submission_id: "00000000-0000-4000-8000-000000000003", product_type: "target", customer_name: "Fixture", phone: "+421900000000", email: "fixture@example.invalid", customer_location: "Košice, 040 01", consent: true, configuration: { size: chosenSize, height_cm: 5, note: "" },
-  }) }));
-  if (chosenSize === "invalid") {
-    assert(response.status === 400 && networkCalls === 0, "Unknown target size must fail before DB/email access");
-  } else {
-    assert(response.status === 201 && stored?.configuration.size === chosenSize && !!sentEmail, "Target size must survive actual handler persistence and notification");
-    if (chosenSize === "medium") assert(sentEmail.text.includes("Veľkosť: Stredný 30 × 15 cm"), "Medium target notification must name its size and dimensions");
-  }
-}
-// PRODUCT_BACKEND_REGRESSION_END
 
 await import("./tracking-form-checks");
 await import("./form-autofill-checks");

@@ -47,7 +47,7 @@ export const targetInquirySchema = z.object({
   consent: z.literal(true),
   company: z.string().max(200).optional(),
   configuration: z.object({
-    size: z.enum(["small", "medium", "large"]),
+    size: z.enum(["small", "large"]),
     height_cm: z.number().min(3).max(60).nullable(),
     note: z.string().trim().max(1000),
   }),
