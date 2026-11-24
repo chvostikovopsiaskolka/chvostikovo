@@ -18,12 +18,14 @@ export function AriaPuppyChecker({
   onInterest,
   onInfo,
   embedded = false,
+  chatCompact = false,
   trackingSource,
   initialAnswers,
 }: {
   onInterest: (details: PuppyCheckInput) => void;
   onInfo?: (details: PuppyCheckInput) => void;
   embedded?: boolean;
+  chatCompact?: boolean;
   trackingSource?: string;
   initialAnswers?: PuppyCheckInput;
 }) {
@@ -56,6 +58,53 @@ export function AriaPuppyChecker({
     if (onInfo) onInfo(snapshot());
     else onInterest(snapshot());
   }
+
+  // One-screen chat variant uses exactly the same age/vaccine state and
+  // snapshot/contact callbacks as the existing standalone two-step checker.
+  if (chatCompact) return (
+    <div data-aria-puppy-embedded="true" data-aria-puppy-step="single" className="min-w-0 space-y-3">
+      <h3 className="font-display text-base font-bold leading-snug text-forest">
+        Zistite, či vaše šteniatko spĺňa podmienky prijatia
+      </h3>
+      <div className="space-y-1.5">
+        <label htmlFor="aria-chat-puppy-age" className="flex items-center justify-between gap-2 text-sm font-bold text-forest">
+          <span>Vek šteniatka</span>
+          <output htmlFor="aria-chat-puppy-age" className="rounded-xl bg-secondary px-3 py-1.5 font-display text-base font-extrabold">
+            {age} {age === 1 ? "mesiac" : age < 5 ? "mesiace" : "mesiacov"}
+          </output>
+        </label>
+        <input id="aria-chat-puppy-age" type="range" min="1" max="12" step="1"
+          value={age} onChange={event => setAge(Number(event.target.value))}
+          className="aria-puppy-range w-full cursor-pointer"
+          style={{ "--aria-puppy-progress": `${((age - 1) / 11) * 100}%` } as CSSProperties}
+          aria-label="Vek šteniatka v mesiacoch" />
+      </div>
+      <p className="font-display text-sm font-bold text-forest">Má šteniatko platné očkovania?</p>
+      {VACCINES.map(({id,label}) => (
+        <fieldset key={id} className="min-w-0 rounded-xl border border-forest/10 bg-white/80 p-2">
+          <legend className="float-left w-full text-xs font-bold text-forest">{label}</legend>
+          <div className="clear-both grid grid-cols-3 gap-1.5 pt-1.5">
+            {([["yes","Áno"],["no","Nie"],["unknown","Neviem"]] as const).map(([val,text]) => (
+              <label key={val} className={"flex min-h-11 cursor-pointer items-center justify-center rounded-lg border px-1 text-xs font-semibold " +
+                (vaccines[id] === val ? "border-coral bg-secondary text-forest" : "border-forest/15 text-forest/75")}>
+                <input type="radio" className="sr-only" name={"chat-"+id} checked={vaccines[id] === val}
+                  onChange={() => setVaccines(prev => ({...prev,[id]:val}))} />{text}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+      <p role="status" className="rounded-xl bg-secondary/50 p-2 text-xs leading-snug text-forest/80">
+        {!mayContinue ? "Šteniatko zatiaľ nespĺňa orientačnú vekovú podmienku 4 mesiacov."
+          : allVaccinated ? "Orientačná kontrola je splnená. Prijatie potvrdíme až po úvodnej návšteve."
+          : "Ak ešte nemáš všetky očkovania, radi sa s tebou poradíme individuálne."}
+      </p>
+      {mayContinue && allVaccinated ? (
+        <button type="button" onClick={() => onInterest(snapshot())}
+          className={primaryClass + " w-full"}>Pokračovať na kontakt <ArrowRight size={17} aria-hidden /></button>
+      ) : <ContactFallback onInfo={moreInfo} />}
+    </div>
+  );
 
   return (
     <Container id={embedded ? undefined : "aria-puppy-check"}
