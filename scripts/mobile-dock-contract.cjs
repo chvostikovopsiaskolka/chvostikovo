@@ -252,9 +252,8 @@ assert(!productContact.includes('trackMarketingInteraction') &&
        !productContact.includes('custom_audience'),
        "Product delivery contact information must not be copied to advertising audiences");
 
-// Paid LEAD contract: orange editorial box stays. Muted amber glass CTA
-// reveals the very SAME liquid/crown card as the lower visit form; the
-// gallery stays directly below Hero until the hidden inline form is opened.
+// Paid LEAD content flow: one existing liquid/crown form follows visit steps.
+// The primary orange CTA scrolls there; the widget and dock stay unchanged.
 const paidLeadCurrent = read("src/routes/test-aria.tsx");
 const ariaGuideCurrent = read("src/components/site/AriaLeadAssistant.tsx");
 const storyCurrent = read("src/components/site/Story.tsx");
@@ -273,7 +272,7 @@ assert(paidLeadCurrent.includes('data-aria-lead-hero-cta') &&
        css.includes('.lead-brand-live [data-aria-dock]') &&
        css.includes('.lead-brand-live [data-aria-service-badge]') &&
        !css.includes('.lead-brand-live #aria-hero-form [data-lead-inline-card]'),
-       "Paid lead must reuse the same lower liquid form and crown, with narrow amber CTA and frosted Aria dock");
+       "Paid lead keeps its shared form/crown, primary CTA and unchanged dock");
 assert(storyCurrent.includes('max-w-[810px]') &&
        storyCurrent.includes('sm:h-72 lg:h-80') &&
        storyCurrent.includes('lg:px-4 lg:text-xs'),
@@ -289,7 +288,7 @@ assert(crownIndex >= 0 && visitCardIndex > crownIndex && visitIntroIndex > visit
        visitIntroIndex < lowerVisitForm.indexOf('<LeadStepForm') &&
        paidLeadCurrent.includes('{isLiveLead && heroFormIntro}') &&
        paidLeadCurrent.includes('data-lead-pricing-extras={isLiveLead || undefined}'),
-       "Paid lead headings belong inside both form cards below their crowns; pricing extras share a row");
+       "Shared form intros belong inside their cards; pricing extras share a row");
 
 // APP-01 responsive-mosaic restoration: reuse existing AriaMosaicGallery,
 // the original eight GALLERY Wix asset IDs and matching 1600px/92Q CDN

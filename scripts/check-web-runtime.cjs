@@ -57,26 +57,31 @@ async function assertCampaignContentFlow(page) {
     const fold=await page.evaluate(()=>{
       const box=s=>document.querySelector(s)?.getBoundingClientRect();
       const title=box('main h1'),pills=box('[data-lead-hero-pills]'),photos=box('[data-lead-hero-photos]'),cta=box('[data-aria-lead-hero-cta]'),proof=box('#recenzie h2');
-      const aria=box('[data-aria-message]'),dock=box('[data-aria-dock]'),face=box('[data-aria-portrait]');
+      const aria=box('[data-aria-message]'),dock=box('[data-aria-dock]'),face=box('[data-aria-dock] img[alt^="Aria"]');
       const visiblePills=[...document.querySelectorAll('[data-lead-hero-pill]')].filter(el=>getComputedStyle(el).display!=='none');
       const elements=[title,pills,photos,cta,proof];
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
-        visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,dock.top)+1),
+        visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
         pillRows:new Set(visiblePills.map(el=>Math.round(el.getBoundingClientRect().top))).size,
         actionBg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).backgroundColor,
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
-        ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width};
+        ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width,
+        widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return Math.abs(dock.height-50)<2&&Math.abs(face.width-(innerWidth>=640?104:92))<2&&
+          speech.left-face.right>=2&&speech.left-face.right<=5&&dock.top-speech.bottom>=8&&speech.left>=0&&speech.right<=innerWidth&&
+          (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
+          document.querySelectorAll('[data-aria-section-navigation="true"] button').length===5&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(fold.overflow||!fold.dockInside||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
+    if(fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   await page.setViewportSize({width:390,height:844});
   await page.locator('[data-aria-lead-hero-cta]').click();
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   const nav=page.locator('[data-aria-section-navigation="true"]');
-  for(const [name,target] of [['O nás','aria-about'],['Cenník škôlky','lead-pricing'],['Podmienky prijatia','lead-knowledge']]) {
+  for(const [name,target,key] of [['O nás','aria-about','about'],['Cenník škôlky','lead-pricing','pricing'],['Podmienky prijatia','lead-knowledge','requirements']]) {
     await nav.getByRole('button',{name,exact:true}).click();
     await page.waitForFunction(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.top>=0&&r.top<130;},target,{timeout:5000});
+    await page.waitForFunction(key=>document.querySelector('[data-lead-nav-key="'+key+'"]')?.getAttribute('aria-current')==='location',key,{timeout:5000});
   }
   await page.locator('[data-lead-faq-cta]').click();
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
@@ -526,7 +531,7 @@ if (!bellaris && brandPreviewCandidate) {
             await page.setViewportSize({ width: 390, height: 844 });
           }
 
-          if (!bellaris && isAriaPage && !restricted) {
+          if (!bellaris && isAriaPage && !restricted && !revisedLead) {
             // Desktop release regression: phone and desktop must share the same
             // approved liquid copy, paired photographs and stable Aria panels.
             await page.setViewportSize({ width: 1280, height: 900 });
