@@ -21,6 +21,13 @@ if (!["all", "chromium", "webkit"].includes(engineSelection)) {
 }
 const selectedEngines = engines.filter(([name]) => engineSelection === "all" || name === engineSelection);
 
+// Fixed docks can cover WebKit's default nearest scroll target. Center only
+// fixture interactions; keep actual pointer input and native validation.
+async function centerFixtureControl(control) {
+  await control.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+  await control.page().evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+}
+
 async function assertLeadContactIntro(form) {
   // Wait for the real React/CSS transition, especially on Safari WebKit.
   await form.getByRole('heading',{name:'Kontaktné údaje',exact:true}).waitFor({state:'visible',timeout:5000});
@@ -2094,6 +2101,7 @@ if (!bellaris && brandPreviewCandidate) {
             await contact.locator('input[name="meno"]').fill('Testovací dopyt');
             await breedInput.fill('Írsky vlkodav');
             await contact.locator('input[name="telefon"]').fill('912345678');
+            await centerFixtureControl(contact.locator('input[type="checkbox"][required]'));
             await contact.locator('input[type="checkbox"][required]').check();
             await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
             await contact.getByRole('alert').waitFor({ state: 'visible' });
@@ -2880,8 +2888,12 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Home interest CTA must reveal the in-page form after Hero');
               const choices=inline.locator('label:has(input[name="zaujem"])');
               if (await choices.count()!==3) throw new Error('Revealed home form must retain all three interests');
+              await centerFixtureControl(choices.nth(1));
               await choices.nth(1).click();
-              await inline.getByRole('button', {name:'Pokračovať',exact:true}).click();
+              if(!await choices.nth(1).locator('input').isChecked())throw new Error('Fixture failed to select visible interest');
+              const continueButton=inline.getByRole('button', {name:'Pokračovať',exact:true});
+              await centerFixtureControl(continueButton);
+              await continueButton.click();
               await inline.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
               await inline.locator('input[name="telefon"]').waitFor({state:'visible',timeout:5000});
               await inline.getByRole('button',{name:'Späť',exact:true}).click();
