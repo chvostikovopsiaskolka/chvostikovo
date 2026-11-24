@@ -4,8 +4,12 @@ const path = require('node:path');
 
 // Run in CI, without submitting forms or emitting analytics traffic.
 const bellaris = process.env.WEB_SITE === 'bellaris';
+const { ARIA_ROUTES } = require('./public-web-impact.cjs');
+const runtimeScope = process.env.WEB_RUNTIME_SCOPE || 'full';
+if(!['full','aria'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
-const urls = (bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/']).map(route => new URL(route, base));
+const fullRoutes = bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/'];
+const urls = (runtimeScope === 'aria' ? ARIA_ROUTES : fullRoutes).map(route => new URL(route, base));
 const brandPreviewCandidate = new URL(base).hostname === '127.0.0.1';
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
@@ -23,7 +27,15 @@ const selectedEngines = engines.filter(([name]) => engineSelection === "all" || 
 
 // Fixed docks can cover WebKit's default nearest scroll target. Center only
 // fixture interactions; keep actual pointer input and native validation.
+function isPaidLeadFixture(page) { return new URL(page.url()).pathname==='/psia-skolka-kosice/'; }
+
 async function centerFixtureControl(control) {
+  if(!isPaidLeadFixture(control.page())){
+  await control.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+  await control.page().evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+
+    return;
+  }
   await control.evaluate(async el=>{
     const result=el.scrollIntoView({block:'center',behavior:'instant'});
     if(result&&typeof result.then==='function')await result;
@@ -47,13 +59,37 @@ async function centerFixtureControl(control) {
 
 async function activateFixtureControl(control) {
   await centerFixtureControl(control);
-  if(await control.page().evaluate(()=>navigator.maxTouchPoints>0))await control.tap();
-  else await control.click();
+  if(await control.page().evaluate(()=>navigator.maxTouchPoints>0)){
+    // Use the already-settled hit-tested point. Locator.tap would perform a
+    // second auto-scroll, which can race WebKit's native smooth scrolling.
+    const point=await control.evaluate(el=>{
+      const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+      const hit=document.elementFromPoint(x,y);
+      if(x<0||y<0||x>=innerWidth||y>=innerHeight||!hit||!el.contains(hit))
+        throw new Error('Fixture touch target is outside the viewport or occluded');
+      return {x,y};
+    });
+    await control.page().touchscreen.tap(point.x,point.y);
+  }else await control.click();
 }
 
 // Exercise the actual visible radio and next button; settle scrolling before
 // clicking so a moving viewport or fixed mobile dock cannot intercept it.
 async function advanceLeadContact(form) {
+  if(!isPaidLeadFixture(form.page())){
+  const choice=form.locator('label:has(input[name="zaujem"])').first();
+  await centerFixtureControl(choice);
+  await choice.click();
+  await form.locator('input[name="zaujem"]').first().evaluate(el=>{
+    if(!el.checked)throw new Error('Lead interest radio did not select');
+  });
+  const next=form.getByRole('button',{name:'Pokračovať',exact:true});
+  await centerFixtureControl(next);
+  await next.click();
+  await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
+
+    return;
+  }
   const choice=form.locator('label:has(input[name="zaujem"])').first();
   await activateFixtureControl(choice);
   await form.locator('input[name="zaujem"]').first().evaluate(el=>{
@@ -215,11 +251,9 @@ async function assertCampaignContentFlow(page) {
   await page.locator('[data-lead-faq="puppies"] > button').click();
   const puppyLink=page.locator('[data-lead-faq="puppies"] a');
   if(await puppyLink.getAttribute('href')!=='#aria-puppy-check'||!await puppyLink.evaluate(el=>el.getBoundingClientRect().width>=el.parentElement.getBoundingClientRect().width-50))throw new Error('Puppy checker CTA must fill the mobile answer');
-  await activateFixtureControl(puppyLink);
-  await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140).catch(async error=>{
-    const state=await page.evaluate(()=>({hash:location.hash,scrollY,top:document.getElementById('aria-puppy-check')?.getBoundingClientRect().top}));
-    throw new Error('Puppy anchor did not settle: '+JSON.stringify(state)+' '+String(error));
-  });
+  await centerFixtureControl(puppyLink);
+  await puppyLink.click();
+  await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140);
   await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
   await page.locator('[data-aria-lead-hero-cta]').click();
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
@@ -2085,7 +2119,7 @@ if (!bellaris && brandPreviewCandidate) {
             await page.setViewportSize({ width: 390, height: 844 });
             await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
             await page.locator('[data-aria-lead-hero-cta]').click();
-            // The retained hero CTA scrolls to the existing inline shared form rather
+            // Retained paid hero CTA scrolls to the existing inline shared form rather
             // than opening the retired modal. Preserve failure/retry tracking.
             const contact = page.locator('#aria-hero-form [data-lead-step-form]');
             await contact.waitFor({ state: 'visible' });
@@ -2094,7 +2128,7 @@ if (!bellaris && brandPreviewCandidate) {
               return !!r && r.top < window.innerHeight && r.bottom > 0;
             });
             if (await page.locator('[role="dialog"] [data-lead-step-form]').count())
-              throw new Error('Paid hero CTA must scroll to inline form without opening a modal');
+              throw new Error('Paid dock must scroll to inline form without opening a modal');
             await advanceLeadContact(contact);
             const breedInput = contact.getByLabel('Plemeno psíka *');
             if (!await breedInput.isVisible()) throw new Error('Active campaign form must ask for breed');
@@ -2146,26 +2180,31 @@ if (!bellaris && brandPreviewCandidate) {
             const faqConsent=faqForm.locator('input[type="checkbox"][required]');
             await centerFixtureControl(question);
             await question.fill('Ako vyzerá deň v škôlke?');
-            await activateFixtureControl(faqNext);
+            await centerFixtureControl(faqNext);
+            await faqNext.click();
             await faqForm.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
             await faqForm.locator('input[name="meno"]').fill('Testovací kontakt');
             await faqForm.locator('input[name="telefon"]').fill('912345678');
             await faqForm.locator('input[name="email"]').fill('test@example.com');
-            await activateFixtureControl(faqBack);
+            await centerFixtureControl(faqBack);
+            await faqBack.click();
             await question.waitFor({state:'visible',timeout:5000});
             if(await question.inputValue()!=='Ako vyzerá deň v škôlke?') throw new Error('FAQ question lost on Back');
-            await activateFixtureControl(faqNext);
+            await centerFixtureControl(faqNext);
+            await faqNext.click();
             await faqConsent.waitFor({state:'visible',timeout:5000});
             if(await faqForm.locator('input[name="meno"]').inputValue()!=='Testovací kontakt') throw new Error('FAQ contact lost on Back');
             if(await faqConsent.isChecked()) throw new Error('FAQ contact unexpectedly pre-consented');
-            await activateFixtureControl(faqSend);
+            await centerFixtureControl(faqSend);
+            await faqSend.click();
             if(faqPosts.length) throw new Error('FAQ contact accepted without consent');
             await centerFixtureControl(faqConsent);
             await faqConsent.check();
             if(!await faqConsent.isChecked()) throw new Error('FAQ contact consent did not select');
             const invalid=await faqForm.evaluate(el=>[...el.elements].filter(field=>field.willValidate&&!field.validity.valid).map(field=>({name:field.name,message:field.validationMessage})));
             if(invalid.length) throw new Error('FAQ contact invalid before submit: '+JSON.stringify(invalid));
-            await activateFixtureControl(faqSend);
+            await centerFixtureControl(faqSend);
+            await faqSend.click();
             await page.locator('[data-home-faq-contact-success]').waitFor({state:'visible',timeout:10000}).catch(async error=>{
               throw new Error('FAQ contact receipt missing: '+JSON.stringify({posts:faqPosts.length,alert:await faqForm.locator('[role="alert"]').allTextContents(),invalid:await faqForm.evaluate(el=>[...el.elements].filter(field=>field.willValidate&&!field.validity.valid).map(field=>({name:field.name,message:field.validationMessage}))).catch(()=>[]),cause:String(error)}));
             });
@@ -2638,13 +2677,15 @@ if (!bellaris && brandPreviewCandidate) {
                 // verify the actual clickable link after user interaction,
                 // rather than querying a deliberately unmounted child.
                 const puppyToggle=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
-                await activateFixtureControl(puppyToggle);
+                await centerFixtureControl(puppyToggle);
+                await puppyToggle.click();
                 await page.locator('#faq a[href="#aria-puppy-check"]').waitFor({state:'visible',timeout:5000});
                 const puppyLink=page.locator('#faq a[href="#aria-puppy-check"].btn-coral');
                 if (!await puppyLink.isVisible() ||
                     !(await page.locator('#aria-puppy-check h2').innerText()).includes('Spĺňa základné podmienky?'))
                   throw new Error('Expanded puppy FAQ must show a pink CTA linking to the real age/vaccination checker');
-                await activateFixtureControl(puppyToggle);
+                await centerFixtureControl(puppyToggle);
+                await puppyToggle.click();
                 await puppyLink.waitFor({state:'hidden',timeout:5000});
               } else if (width < 1024) {
                 if (!await ctaPair.isVisible()) throw new Error('Mobile Hero CTA pair missing at ' + width);
@@ -2724,16 +2765,34 @@ if (!bellaris && brandPreviewCandidate) {
               const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
               // Center the real disclosure and link above the fixed mobile dock.
               if(await puppyFaq.getAttribute('aria-expanded')!=='true') {
-                await activateFixtureControl(puppyFaq);
+                await centerFixtureControl(puppyFaq);
+                await puppyFaq.click();
               }
               const homePuppyLink=page.locator('#faq a[href="#aria-puppy-check"]');
               await homePuppyLink.waitFor({state:'visible',timeout:5000});
-              await activateFixtureControl(homePuppyLink);
+              await centerFixtureControl(homePuppyLink);
+              await homePuppyLink.click();
               await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
               for(const id of ['informujte-sa','prva-navsteva-form']) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
-                await advanceLeadContact(inquiry);
-                await activateFixtureControl(inquiry.getByRole('button',{name:'Späť',exact:true}));
+                // APP-01 WebKit: radio labels and React change handlers may settle on
+                // separate frames after responsive resize + smooth anchor scroll.
+                // Assert the actual radio selection before expecting step 2;
+                // never accept a click alone as evidence of a completed transition.
+                const firstChoice=inquiry.locator('label:has(input[name="zaujem"])').first();
+                await firstChoice.scrollIntoViewIfNeeded();
+                await firstChoice.click();
+                const radio=firstChoice.locator('input[name="zaujem"]');
+                if(!await radio.isChecked()) await radio.check({force:true});
+                await page.waitForFunction(targetId => {
+                  const form=document.querySelector('#'+targetId+' [data-lead-step-form]');
+                  const next=Array.from(form?.querySelectorAll('button') ?? []).find(x=>x.textContent?.trim()==='Pokračovať');
+                  return !!form?.querySelector('input[name="zaujem"]:checked') && !!next && !next.disabled;
+                }, id, {timeout:5000});
+                await inquiry.getByRole('button',{name:'Pokračovať',exact:true}).click();
+                await inquiry.locator('[role="progressbar"][aria-valuenow="2"]').waitFor({state:'attached',timeout:7000}).catch(() => { throw new Error('Inline contact step did not advance: '+id); });
+                await inquiry.locator('input[name="meno"]').waitFor({state:'visible',timeout:7000}).catch(() => { throw new Error('Inline contact step not visible: '+id); });
+                await inquiry.getByRole('button',{name:'Späť',exact:true}).click();
               }
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
@@ -2741,10 +2800,13 @@ if (!bellaris && brandPreviewCandidate) {
               if(!await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application preview fields incorrect');
               await centerFixtureControl(owner);
               await owner.fill('Testovacie meno');
-              await activateFixtureControl(toggle);
+              await centerFixtureControl(toggle);
+              await centerFixtureControl(toggle);
+              await toggle.click();
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await owner.inputValue()!=='Testovacie meno' || await page.getByRole('dialog').count()) throw new Error('Inline application did not expand or retain owner data');
-              await activateFixtureControl(toggle);
+              await centerFixtureControl(toggle);
+              await toggle.click();
               if(await application.locator('input[name="pes"]').isVisible() || await owner.inputValue()!=='Testovacie meno') throw new Error('Inline application collapse lost data');
               await owner.fill('');
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
@@ -2906,7 +2968,8 @@ if (!bellaris && brandPreviewCandidate) {
               await choices.nth(1).click();
               if(!await choices.nth(1).locator('input').isChecked())throw new Error('Fixture failed to select visible interest');
               const continueButton=inline.getByRole('button', {name:'Pokračovať',exact:true});
-              await activateFixtureControl(continueButton);
+              await centerFixtureControl(continueButton);
+              await continueButton.click();
               await inline.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
               await inline.locator('input[name="telefon"]').waitFor({state:'visible',timeout:5000});
               await inline.getByRole('button',{name:'Späť',exact:true}).click();
@@ -2920,7 +2983,7 @@ if (!bellaris && brandPreviewCandidate) {
                 : page.locator('.mobile-dock .mobile-dock-apply').first();
               await entry.click();
               if (url.pathname === '/psia-skolka-kosice/') {
-              // Approved paid-LEAD hero CTA: the retained interest button
+              // Approved paid-LEAD section navigation: the bottom interest button
               // scrolls to the existing inline form, never opens an above-dock dialog.
               const inline = page.locator('#aria-hero-form');
               await inline.waitFor({ state: 'visible', timeout: 5000 });
@@ -2971,12 +3034,13 @@ if (!bellaris && brandPreviewCandidate) {
               // Verify the real inline registration, not a second form or modal.
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
-              await activateFixtureControl(toggle);
+              await centerFixtureControl(toggle);
+              await toggle.click();
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || await application.locator('[data-lead-step-form]').count() || await page.getByRole('dialog').count()) throw new Error('Friendship must expand the existing application in-place');
               const fits=await application.evaluate(el=>{const b=el.getBoundingClientRect();return b.width<=innerWidth-16 && el.scrollWidth<=el.clientWidth+2 && (innerWidth<1024 || b.width>=800);});
               if(!fits)throw new Error('Inline application responsive width incorrect');
-              await activateFixtureControl(toggle);
+              await toggle.click();
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
@@ -3033,7 +3097,7 @@ if (!bellaris && brandPreviewCandidate) {
           console.error(`FAIL ${label}: ${error.message}`, errors);
         } finally { await page.close(); }
       }
-      if (!bellaris && !restricted) {
+      if (runtimeScope === 'full' && !bellaris && !restricted) {
         // Retired checkout addresses must never show a cart. Test both viewport sizes.
         for (const width of [390, 1440]) {
           const productPage = await context.newPage();

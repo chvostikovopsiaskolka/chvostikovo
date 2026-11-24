@@ -31,6 +31,8 @@ jobs:
         site: ["chvostikovo"]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - name: Verify preview utilities and provide unzip fallback
         # Official image has Python and curl, but Bun setup expects a missing
         # unzip executable. Avoid apt mirrors and use Python's stdlib ZipFile.
@@ -82,6 +84,12 @@ jobs:
           bun run build:pages
           python3 -m http.server 4173 --directory dist/client > /tmp/web-runtime-server.log 2>&1 &
           for attempt in $(seq 1 30); do curl --fail --silent http://127.0.0.1:4173/ > /dev/null && break; sleep 1; done
+      - name: Select affected candidate routes
+        if: github.event_name == 'pull_request'
+        env:
+          IMPACT_BASE: ${{ github.event.pull_request.base.sha }}
+          IMPACT_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/public-web-impact.cjs "$IMPACT_BASE" "$IMPACT_HEAD" >> "$GITHUB_ENV"
       - name: Verify hydrated pages in Chromium and Safari WebKit
         env:
           NODE_PATH: /tmp/web-runtime/node_modules

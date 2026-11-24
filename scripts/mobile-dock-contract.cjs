@@ -370,3 +370,15 @@ assert(hero.includes('hero-cta-primary min-h-[46px]') &&
        css.includes('[data-home-hero-interest-cta] { min-height: 46px; padding-block: 0.5rem; }') &&
        css.includes('margin-top: clamp(1.75rem, 6.5vw, 2.25rem)'),
        "Mobile Hero needs a smaller CTA and real-flow spacing without changing desktop");
+
+// Candidate-only impact selection must expand when a shared/unknown input changes.
+const { selectScope, ARIA_ROUTES } = require('./public-web-impact.cjs');
+const ariaSource='src/components/site/AriaLeadAssistant.tsx';
+assert.strictEqual(selectScope([ariaSource,'scripts/check-web-runtime.cjs']),'aria');
+assert.strictEqual(selectScope([ariaSource,'src/styles.css']),'full');
+assert.strictEqual(selectScope([ariaSource,'src/components/site/Forms.tsx']),'full');
+assert.strictEqual(selectScope([ariaSource,'src/lib/submit-inquiry.ts']),'full');
+assert.strictEqual(selectScope(['scripts/check-web-runtime.cjs']),'full');
+assert.strictEqual(selectScope(['src/routes/index.tsx']),'full');
+assert.strictEqual(selectScope([]),'full');
+assert.deepStrictEqual(ARIA_ROUTES,['/psia-skolka-kosice/','/test-aria/','/psia-skolka-pre-steniatka/']);
