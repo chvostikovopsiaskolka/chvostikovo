@@ -1,11 +1,11 @@
 import { currentSourceRef } from "@/lib/tracking-sanitization";
-import type { PuppyCheckInput } from "@/lib/inquiry";
+import { HOME_FAQ_CONTACT_SOURCE, type PuppyCheckInput } from "@/lib/inquiry";
 import { useFormProgress } from "@/lib/form-progress";
 import { useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
-import { trackAriaQuestionSubmit, trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
+import { trackAriaQuestionSubmit, trackFaqContactSubmit, trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
 import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
@@ -232,6 +232,116 @@ export function ShortForm({
       >
         {loading ? "Odosielam…" : showQuestionField ? "Odoslať otázku" : showChatDogFields ? "Odoslať záujem" : "Chcem sa informovať"}
       </button>
+    </form>
+  );
+}
+
+/** Homepage-only question form; reuse contact transport without paid lead conversion. */
+export function HomeFaqContactForm() {
+  const source = HOME_FAQ_CONTACT_SOURCE;
+  const id = useId();
+  const [step, setStep] = useState<1 | 2>(1);
+  const [question, setQuestion] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inFlight = useRef(false);
+  const started = useRef(false);
+  function trackStart() {
+    if (started.current) return;
+    started.current = true;
+    void trackCookielessInteraction("explore_daycare", source + "_started");
+  }
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (step === 1) {
+      if (question.trim().length < 5 || question.trim().length > 600) {
+        setError("Napíšte otázku v dĺžke 5 až 600 znakov.");
+        return;
+      }
+      trackStart();
+      setError(null);
+      setStep(2);
+      return;
+    }
+    if (inFlight.current) return;
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    const name = String(data.get("meno") ?? "").trim();
+    const email = String(data.get("email") ?? "").trim();
+    if (!name || !email || question.trim().length < 5) {
+      setError("Vyplňte otázku a všetky kontaktné údaje.");
+      return;
+    }
+    inFlight.current = true;
+    setLoading(true);
+    setError(null);
+    let attemptId: string | undefined;
+    try {
+      const phone = phoneFromForm(form, id + "-tel");
+      attemptId = startFormAttempt(source);
+      await submitInquiry({
+        typ: "informacie", consent: true,
+        source_ref: sourceRef(), ...attributionPayload(), cta_source: source,
+        meno: name, telefon: phone, email,
+        zaujem: "Chcem sa informovať o škôlke", otazka: question.trim(),
+      }, attemptId);
+      setSent(true);
+      runFormTelemetry(() => {
+        void trackCookielessInteraction("explore_daycare", source + "_submitted", "sk", attemptId);
+        trackFaqContactSubmit(source);
+      });
+    } catch (cause) {
+      const diagnostic = reportInquiryError(cause);
+      void trackCookielessInteraction("form_error", source + ":" + diagnostic.stage + inquiryDiagnosticSuffix(diagnostic), "sk", attemptId);
+      setError(cause instanceof InquirySubmissionError && cause.stage === "phone_normalization"
+        ? "Skontrolujte telefónne číslo."
+        : "Správu sa nepodarilo odoslať. Skúste to znova alebo nám zavolajte.");
+    } finally {
+      inFlight.current = false;
+      setLoading(false);
+    }
+  }
+  if (sent) return (
+    <div data-home-faq-contact-success role="status" className="py-5 text-center">
+      <Check className="mx-auto mb-3 size-8 text-forest" aria-hidden="true" />
+      <h3 className="font-display text-xl font-bold text-forest">Ďakujeme!</h3>
+      <p className="mt-2 text-sm leading-relaxed text-forest/80">Vašu správu sme prijali a odpovieme vám čo najskôr, ako to bude možné.</p>
+    </div>
+  );
+  return (
+    <form data-home-faq-contact-form data-step={step} onSubmit={submit} className="space-y-4 text-left">
+      <div>
+        <p className="mb-2 text-xs font-semibold text-forest/75">Krok {step} z 2</p>
+        <div role="progressbar" aria-label="Postup kontaktného formulára" aria-valuemin={1} aria-valuemax={2} aria-valuenow={step} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
+          <div className={"h-full rounded-full bg-coral " + (step === 1 ? "w-1/2" : "w-full")} />
+        </div>
+      </div>
+      <fieldset hidden={step !== 1} disabled={step !== 1} className="min-w-0 space-y-3">
+        <label className="label-sm" htmlFor={id + "-question"}>Vaša otázka *</label>
+        <textarea id={id + "-question"} name="otazka" value={question} onChange={event => { setQuestion(event.target.value); trackStart(); }}
+          rows={4} required minLength={5} maxLength={600} className="field w-full resize-y" placeholder="Napíšte nám, čo vás zaujíma…" />
+        <button type="submit" className="btn-coral min-h-12 w-full px-4 py-3 font-bold">Pokračovať</button>
+      </fieldset>
+      <fieldset hidden={step !== 2} disabled={step !== 2 || loading} className="min-w-0 space-y-3">
+        <h4 className="font-display font-bold text-forest">Kontaktné údaje</h4>
+        <div>
+          <label className="label-sm" htmlFor={id + "-name"}>Meno *</label>
+          <input id={id + "-name"} name="meno" required maxLength={200} autoComplete="name" className="field" placeholder="Vaše meno" />
+        </div>
+        <PhoneField id={id + "-tel"} name="telefon" />
+        <div>
+          <label className="label-sm" htmlFor={id + "-email"}>E-mail *</label>
+          <input id={id + "-email"} name="email" type="email" required maxLength={254} autoComplete="email" className="field" placeholder="vas@email.sk" />
+        </div>
+        <PrivacyConsentCheckbox />
+        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+          <button type="button" onClick={() => { setStep(1); setError(null); }} className="min-h-12 rounded-full border border-forest/20 px-4 font-semibold text-forest">Späť</button>
+          <button type="submit" disabled={loading} className="btn-coral min-h-12 min-w-0 px-4 py-3 font-bold disabled:opacity-60">{loading ? "Odosielam…" : "Poslať"}</button>
+        </div>
+      </fieldset>
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     </form>
   );
 }
