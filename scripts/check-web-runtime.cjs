@@ -2352,15 +2352,15 @@ if (!bellaris && brandPreviewCandidate) {
                     freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
                     pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
                     passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
-                    taxiInIncluded:!!taxi && !!taxi.closest('[data-home-included]') && Math.abs(included.bottom-cards[1].bottom)<=3 && taxi.getBoundingClientRect().top>=document.querySelector('[data-home-included] ul').getBoundingClientRect().bottom &&
-                      getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(included.bottom-prices.bottom)<3,
+                    taxiAcrossColumns:!!taxi && !taxi.closest('[data-home-included]') && Math.abs(included.bottom-cards[1].bottom)<=3 && taxi.getBoundingClientRect().top>=document.querySelector('[data-home-included] ul').getBoundingClientRect().bottom &&
+                      getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(included.bottom-prices.bottom)<3 && Math.abs(taxi.getBoundingClientRect().left-included.left)<3 && Math.abs(taxi.getBoundingClientRect().right-prices.right)<3,
                     compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
                     aboutExpanded:!document.querySelector('#o-nas summary') && !!aboutText?.querySelector('strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2 &&
                       getComputedStyle(aboutText).textAlign==='left' && parseFloat(getComputedStyle(aboutText).fontSize)>=18 && aboutText.getBoundingClientRect().width<=682,
                     aboutNoOrphan:(()=>{const node=aboutText?.querySelector('p')?.lastChild;if(node?.nodeType!==Node.TEXT_NODE)return false;const words=[...node.textContent.matchAll(/\S+/g)].slice(-2);if(words.length!==2)return false;const tops=words.map(word=>{const range=document.createRange();range.setStart(node,word.index);range.setEnd(node,word.index+word[0].length);return range.getBoundingClientRect().top;});return Math.abs(tops[0]-tops[1])<2;})(),
                     aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
-                    centeredIncludedTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-included.right)/2)<3,
+                    centeredFullWidthTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-prices.right)/2)<3,
                     faqAfterRequirements:document.getElementById('podmienky').nextElementSibling===faq &&
                       faq.querySelectorAll('details').length===3 && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
@@ -2399,12 +2399,12 @@ if (!bellaris && brandPreviewCandidate) {
                       if (innerWidth>=640) return texts.every(r=>r.left>=video.right-2) &&
                         video.bottom>=texts[2].bottom-5;
                       // Mobile: first two reasons stacked beside video;
-                      // third spans the full box underneath.
+                      // third stays in the same text column beside the matching photo.
                       return texts[0].left>=video.right-2 &&
                         texts[1].left>=video.right-2 &&
                         texts[1].top>=texts[0].bottom-2 &&
                         texts[2].top>=video.bottom-2 &&
-                        texts[2].left<=video.left+3 && texts[2].right>=texts[1].right-3 &&
+                        texts[2].left>=video.right-2 && (()=>{const photo=document.querySelector('[data-home-reason-photo]')?.getBoundingClientRect();return !!photo && Math.abs(photo.width-video.width)<3 && photo.right<=texts[2].left+3;})() &&
                         document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] strong').length>=4;
                     })(),
                     homeReviewSoftShadow:(() => {
@@ -3337,10 +3337,10 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Interest CTA and round phone action must sit in the same row');
             }
             const mosaicShape=await productPage.locator('[data-home-spaces-mosaic]').evaluate(el=>({
-              columns:parseInt(getComputedStyle(el).columnCount),count:el.querySelectorAll('[data-home-space-photo]').length,
-              quality:[...el.querySelectorAll('button img')].every(img=>img.getAttribute('src').includes('/w_1600,h_1600,al_c,q_92,enc_auto/')&&img.getAttribute('srcset').includes('900w'))
+              columns:getComputedStyle(el).gridTemplateColumns.split(' ').length,count:el.querySelectorAll('[data-home-space-photo]').length,
+              paired:innerWidth>=1024||[...el.querySelectorAll('[data-home-mosaic-hygiene]')].every((card,i)=>{const photos=[...el.querySelectorAll('[data-home-space-photo]')].map(p=>p.getBoundingClientRect());const r=card.getBoundingClientRect();return Math.abs(photos[i*2].top-photos[i*2+1].top)<2 && r.top>=photos[i*2].bottom && r.top-photos[i*2].bottom<24 && (i===2||photos[i*2+2].top>=r.bottom && photos[i*2+2].top-r.bottom<24);}),quality:[...el.querySelectorAll('button img')].every(img=>img.getAttribute('src').includes('/w_1600,h_1600,al_c,q_92,enc_auto/')&&img.getAttribute('srcset').includes('900w'))
             }));
-            if(mosaicShape.columns!==(width===390?2:3)||mosaicShape.count!==8||!mosaicShape.quality)throw new Error('Homepage spaces mosaic regression: '+JSON.stringify(mosaicShape));
+            if(mosaicShape.columns!==(width===390?2:3)||mosaicShape.count!==8||!mosaicShape.quality||!mosaicShape.paired)throw new Error('Homepage spaces mosaic regression: '+JSON.stringify(mosaicShape));
             const mobileHygiene = productPage.locator('#priestory article[aria-label^="Čistota priestorov"]');
             const desktopHygiene = productPage.locator('#priestory article:not([aria-label])');
             if (await mobileHygiene.count() !== 3 || await desktopHygiene.count() !== 3) {

@@ -328,10 +328,9 @@ assert(ariaAssistant.includes('data-aria-interest-cta') && ariaAssistant.include
        "Orange lead dock must open existing inline form, without changing preview docks");
 assert(css.includes('@media (max-width: 359px)') && css.includes('#top h1 span { white-space: normal; }'),
        "320px Hero must allow title wrapping without horizontal overflow");
-assert(reviewReasons.includes('"row-span-2 min-w-0 sm:row-span-1"') &&
-       reviewReasons.includes('"col-span-2 min-w-0 px-2 pt-2 pb-3') &&
-       !reviewReasons.includes('rounded-2xl border-t border-forest/10'),
-       "First two reasons alongside video, third full width underneath");
+assert(reviewReasons.includes('row-span-2 min-w-0 self-center') &&
+       reviewReasons.includes('data-home-reason-photo') && reviewReasons.includes('col-start-2 row-start-3'),
+       "Three reasons stay in one column beside natural video and matching happy-dog photo");
 
 // 23 Nov refined mobile composition: no marketing box or inline form before CTA.
 assert(!hero.includes('home-hero-copy mx-auto mt-5 max-w-xl') && hero.includes('data-home-mobile-orange-phrase'),

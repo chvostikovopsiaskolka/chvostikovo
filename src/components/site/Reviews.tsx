@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowDown, HeartHandshake, PawPrint, Play, Sparkles, type LucideIcon } from "lucide-react";
+import happyDog from "@/assets/lead-hero-user-1.jpg";
 import skolkariVideo from "@/assets/skolkari.mp4";
 import schoolmatesLineup from "@/assets/skolkari-lineup.webp";
 import schoolmatesCutout from "@/assets/skolkari-lineup-transparent.png";
@@ -304,12 +305,13 @@ export function VideoReasonsGrid({ items, language = "sk", homeMobileLayout = fa
     <div data-video-reasons-grid data-home-video-layout={homeMobileLayout || undefined}
       className={"mt-7 grid items-stretch gap-3 rounded-3xl bg-cream/10 p-3 shadow-card ring-1 ring-cream/20 backdrop-blur-xl sm:rounded-none sm:bg-transparent sm:p-0 sm:shadow-none sm:ring-0 sm:backdrop-blur-none sm:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] sm:gap-7 lg:gap-10 " +
         "grid-cols-2"}>
-      <div className={homeMobileLayout ? "row-span-2 min-w-0 sm:row-span-1" : "min-w-0"}>
+      <div className={homeMobileLayout ? "row-span-2 min-w-0 self-center [&>div]:aspect-[4/5] [&>div]:h-auto [&>div]:min-h-0 sm:self-stretch sm:[&>div]:aspect-auto sm:[&>div]:h-full sm:[&>div]:min-h-[260px] sm:row-span-1" : "min-w-0"}>
         <InlineDaycareVideo language={language} />
       </div>
+      {homeMobileLayout && <img data-home-reason-photo src={happyDog} alt="Spokojný psík v Chvostíkove" loading="lazy" className="col-start-1 row-start-3 aspect-[4/5] w-full self-center rounded-3xl object-cover sm:hidden" />}
       <div data-video-reasons-copy className="contents sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl">
         {items.map(({ title, text, icon: Icon }) => (
-          <article key={title} className={homeMobileLayout ? (title === "Pekný deň aj pre vášho psíka" ? "col-span-2 min-w-0 px-2 pt-2 pb-3 text-cream sm:col-auto sm:rounded-none sm:border-0 sm:px-0 sm:py-4" : "col-start-2 min-w-0 py-2 text-cream sm:col-auto sm:py-4") : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>
+          <article key={title} className={homeMobileLayout ? (title === "Pekný deň aj pre vášho psíka" ? "col-start-2 row-start-3 min-w-0 py-2 text-cream sm:col-auto sm:rounded-none sm:border-0 sm:px-0 sm:py-4" : "col-start-2 min-w-0 py-2 text-cream sm:col-auto sm:py-4") : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>
             <h3 className={"flex min-w-0 items-start gap-1.5 font-display font-bold leading-snug text-cream sm:gap-2 sm:text-lg lg:text-xl " +
               (homeMobileLayout ? "text-[12px] min-[390px]:text-[13px]" : "text-[13px] min-[390px]:text-[15px]")}>
               <span className={"grid shrink-0 place-items-center rounded-full bg-coral text-primary-foreground sm:size-9 " + (homeMobileLayout ? "size-5" : "size-6")}>
