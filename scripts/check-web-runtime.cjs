@@ -360,14 +360,14 @@ if (!bellaris && brandPreviewCandidate) {
                   };
                 });
                 if (!layout.fixed || layout.cardCount !== 20 || layout.highlightCount !== 2 ||
-                    layout.badgeTop < layout.headingBottom + 50 ||
+                    layout.badgeTop < layout.headingBottom + 8 ||
                     layout.ctaTop < layout.descBottom - 1 || layout.ctaBottom > layout.reviewBottom ||
                     !layout.matchingFormStyles || !layout.dogCrownMatches ||
                     !layout.liquidBadge || !layout.liquidCta || !layout.liquidDock ||
                     layout.galleryTop < layout.heroBottom - 8 || layout.trackTop < layout.heroBottom - 8 ||
                     (!layout.formHidden && (layout.formTop < layout.reviewBottom + 12 ||
                       layout.galleryTop < layout.formBottom - 8)))
-                  throw new Error('Paid orange hero → amber liquid CTA → matching visit form + glass dock regressed: ' + JSON.stringify(layout));
+                  throw new Error('Paid photo hero → amber liquid CTA → matching visit form + glass dock regressed: ' + JSON.stringify(layout));
                 if (layout.width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
                   throw new Error('Approved mobile review spacing regressed: ' + JSON.stringify(layout));
                 await highlights.first().scrollIntoViewIfNeeded();
@@ -1807,6 +1807,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const heroDogs = serviceGroup?.querySelector('[data-aria-hero-dogs]');
                 const badge = serviceGroup?.querySelector('[data-aria-service-badge]');
                 const leadDescription = content?.querySelector('[data-aria-hero-description]');
+                const photoHero = content?.querySelector('[data-lead-hero-photos]');
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
                 const introSpace = isPaidLead ? document.querySelector('[data-aria-lead-photos]')
                   : leadHero?.querySelector('[data-aria-intro-space]');
@@ -1815,8 +1816,10 @@ if (!bellaris && brandPreviewCandidate) {
                 const floatingMenu = document.querySelector('[data-aria-guide]');
                 const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                 if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
-                    !headlineSpacer || !serviceGroup || !heroHeading || !heroDogs ||
-                    !badge || !leadDescription || !proof || !introSpace ||
+                    !headlineSpacer || !serviceGroup || !heroHeading ||
+                    (!isPaidLead && (!heroDogs || !leadDescription)) ||
+                    (isPaidLead && (!photoHero || heroDogs || leadDescription)) ||
+                    !badge || !proof || !introSpace ||
                     !benefits || !firstVisitDogs ||
                     !content.contains(reviews) || content.parentElement !== leadHero ||
                     form.parentElement !== leadHero.parentElement) return false;
@@ -1825,9 +1828,9 @@ if (!bellaris && brandPreviewCandidate) {
                 const photo = team.querySelector('img');
                 const copy = team.querySelector('p');
                 const commonOrder = follows(introTopSpace, headlineSpacer) && follows(headlineSpacer, heroHeading) &&
-                  follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
-                  follows(heroDogs, badge) && follows(badge, leadDescription) &&
-                  follows(leadDescription, proof) &&
+                  follows(heroHeading, serviceGroup) &&
+                  (isPaidLead ? (follows(badge, photoHero) && follows(photoHero, proof)) :
+                    (follows(heroHeading, heroDogs) && follows(heroDogs, badge) && follows(badge, leadDescription) && follows(leadDescription, proof))) &&
                   (isPaidLead ? (follows(reviews, form) && follows(form, introSpace) &&
                     !leadHero.contains(introSpace) && !inlineMenu && !!floatingMenu && !leadHero.contains(floatingMenu) &&
                     getComputedStyle(floatingMenu).position === 'fixed' && follows(reviews, form))
@@ -2526,7 +2529,7 @@ if (!bellaris && brandPreviewCandidate) {
               if (!mainMobilePhotos) {
                 const primaryShadow = await primary.evaluate(el => getComputedStyle(el).boxShadow);
                 if (url.pathname === '/' && width >= 1024) {
-                  if (primaryShadow !== 'none') throw new Error('Main desktop CTA must be shadow-free: ' + width);
+                  if (primaryShadow === 'none') throw new Error('Main desktop amber CTA glow missing: ' + width);
                 } else if (primaryShadow === 'none') {
                   throw new Error('Landing primary CTA glow missing: ' + width);
                 }
