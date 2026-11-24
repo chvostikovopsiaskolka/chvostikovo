@@ -318,7 +318,7 @@ export const HOME_PRIMARY_FAQ = [
   { trackingId: 6, q: "Prijímate aj šteniatka?",
     a: "Áno, približne od 4 mesiacov podľa individuálnej pripravenosti. Podmienkou je ukončené kompletné očkovanie vrátane očkovania proti kotercovému kašľu, dobrý zdravotný stav a vhodný adaptačný proces. Pripravenosť šteniatka si môžete orientačne overiť nižšie; konečné prijatie posúdime na úvodnej návšteve." },
   { trackingId: 8, q: HOME_PRICE_QUESTION,
-    a: `Jednorazový celodenný vstup stojí ${PRICING[0].price}. Permanentka stojí ${PRICING[1].price}, zahŕňa 10 vstupov (20 € za deň) a platí 2 mesiace. Úvodná návšteva je bezplatná.\nMiesto si rezervujte vopred, ideálne na celý nasledujúci týždeň do nedele 20:00. Ak potrebujete rezervovať neskôr, žiadosť cez zákaznícku aplikáciu môžete odoslať najneskôr deň vopred do 19:00 podľa voľnej kapacity. Po tomto čase nám napíšte správu a dohodneme sa individuálne.` },
+    a: `Jednorazový celodenný vstup stojí ${PRICING[0]!.price}. Permanentka stojí ${PRICING[1]!.price}, zahŕňa 10 vstupov (20 € za deň) a platí 2 mesiace. Úvodná návšteva je bezplatná.\nMiesto si rezervujte vopred, ideálne na celý nasledujúci týždeň do nedele 20:00. Ak potrebujete rezervovať neskôr, žiadosť cez zákaznícku aplikáciu môžete odoslať najneskôr deň vopred do 19:00 podľa voľnej kapacity. Po tomto čase nám napíšte správu a dohodneme sa individuálne.` },
   { trackingId: 9, q: "Aké sú otváracie hodiny a ponúkate aj odvoz?",
     a: faqAnswer("Aké sú otváracie hodiny?") + "\n" + faqAnswer("Zabezpečujete aj vyzdvihnutie a odvoz psíka?") },
   { trackingId: 10, q: "Zabezpečujete aj stravu?", a: faqAnswer("Zabezpečujete aj stravu?") },
