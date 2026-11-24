@@ -1277,10 +1277,14 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Contact must occupy the available chat height: '+JSON.stringify(contactLayout));
                   const questionForm = chat.locator('[data-aria-chat-other]');
                   await questionForm.waitFor({ state: 'visible' });
-                  if (!await questionForm.locator('textarea[name="otazka"]').count() ||
-                      await questionForm.locator('a[href^="mailto:"]').count() ||
-                      !await questionForm.getByLabel('E-mail *').count())
-                    throw new Error('Other question must use a consented form and not a mailto link');
+                  const wizard = questionForm.locator('[data-home-faq-contact-form]');
+                  if (await chat.locator('[data-aria-chat-other-cta]').count() !== 0 ||
+                      await wizard.getAttribute('data-aria-contact-wizard') !== 'true' ||
+                      await wizard.getAttribute('data-step') !== '1' ||
+                      !await wizard.locator('textarea[name="otazka"]').isVisible() ||
+                      await wizard.locator('input[name="meno"]').isVisible() ||
+                      await wizard.locator('a[href^="mailto:"]').count())
+                    throw new Error('Other must reuse homepage question-first wizard with no visible personal fields');
                   let askedPayload = null;
                   await page.route('**/functions/v1/web-form-submit', async route => {
                     if (route.request().method() === 'OPTIONS') {
@@ -1290,22 +1294,28 @@ if (!bellaris && brandPreviewCandidate) {
                     askedPayload = route.request().postDataJSON();
                     await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true }) });
                   });
-                  await questionForm.locator('input[name="meno"]').fill('Test Otázka');
-                  await questionForm.locator('input[name="plemeno"]').fill('Kríženec');
-                  // Contact questions are ordinary CRM leads with optional sex, not a new form type.
-                  await questionForm.locator('label:has(input[name="pohlavie"][value="female"])').click();
-                  await questionForm.locator('input[name="telefon"]').fill('+421901234567');
-                  await questionForm.locator('input[name="email"]').fill('test@example.invalid');
-                  await questionForm.locator('textarea[name="otazka"]').fill('Môj psík má špeciálne potreby?');
-                  if (askedPayload) throw new Error('Question must not send before explicit consent');
-                  await questionForm.locator('input[type="checkbox"]').check();
-                  await questionForm.getByRole('button', { name: 'Odoslať otázku' }).click();
-                  await questionForm.getByText('Ďakujeme za otázku.').waitFor({ state: 'visible' });
+                  await wizard.locator('textarea[name="otazka"]').fill('Môj psík má špeciálne potreby?');
+                  if (askedPayload) throw new Error('Typing step 1 must not submit');
+                  await wizard.getByRole('button', { name: 'Pokračovať', exact: true }).click();
+                  if (await wizard.getAttribute('data-step') !== '2' ||
+                      !await wizard.locator('input[name="meno"]').isVisible() ||
+                      await wizard.locator('textarea[name="otazka"]').isVisible())
+                    throw new Error('Second step must show only contact fields');
+                  if (await chat.locator('[data-aria-chat-form-scroll]').evaluate(el => el.scrollTop > 2))
+                    throw new Error('Shared Aria wizard must reset internal scroll at second step');
+                  await wizard.locator('input[name="meno"]').fill('Test Otázka');
+                  await wizard.locator('input[name="telefon"]').fill('+421901234567');
+                  await wizard.locator('input[name="email"]').fill('test@example.invalid');
+                  if (askedPayload) throw new Error('Contact must not send without consent');
+                  await wizard.locator('input[type="checkbox"]').check();
+                  await wizard.getByRole('button', { name: 'Poslať' }).click();
+                  await questionForm.locator('[data-home-faq-contact-success]').waitFor({ state: 'visible' });
                   if (!askedPayload || askedPayload.interest_reason !== 'Chcem sa informovať o škôlke' ||
                       askedPayload.raw_payload?.['Otázka návštevníka'] !== 'Môj psík má špeciálne potreby?' ||
-                      askedPayload.dog_breed !== 'Kríženec' || askedPayload.dog_sex !== 'female' ||
-                      askedPayload.cta_source !== 'aria_preview_chat_other')
-                    throw new Error('Other question must submit inside an existing consented lead payload');
+                      askedPayload.cta_source !== 'aria_preview_chat_other' ||
+                      askedPayload.source_ref.indexOf('/test-aria') !== 0 ||
+                      await questionForm.getByText(/SMS potvrdenie/).count())
+                    throw new Error('Contact question must be one CRM record and never an SMS/Meta lead confirmation');
                   await page.unroute('**/functions/v1/web-form-submit');
                   await chat.getByRole('button', { name: 'Späť k otázkam' }).click();
                   // APP-01: an embedded puppy checker must remain available.
@@ -1316,21 +1326,23 @@ if (!bellaris && brandPreviewCandidate) {
                   await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="puppy"]').click();
                   const puppy = chat.locator('[data-aria-chat-puppy-check]');
                   await puppy.waitFor({ state: 'visible' });
-                  if (!await puppy.getByRole('button', { name: 'Mám záujem' }).count())
-                    throw new Error('Puppy answer must also offer interest CTA');
+                  if (!await puppy.getByText('Spĺňa vaše šteniatko základné podmienky?').count() ||
+                      await puppy.getByText('Máte šteniatko?', { exact: true }).count() ||
+                      await puppy.getByRole('button', { name: /Pokračovať na očkovania/ }).count() ||
+                      !await puppy.locator('[data-aria-puppy-step="single"]').isVisible())
+                    throw new Error('Puppy modal must show one compact age and vaccines screen');
                   if (await page.getByRole('dialog', { name: 'Kontrola vhodnosti šteniatka' }).count())
                     throw new Error('Puppy checker must stay inside Aria chat, not open a nested dialog');
-                  await puppy.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
                   const continueToContact = puppy.getByRole('button', { name: /Pokračovať na kontakt/ });
-                  if (await continueToContact.isEnabled())
-                    throw new Error('Puppy checker must not accept unconfirmed vaccinations');
+                  if (await continueToContact.count())
+                    throw new Error('Puppy checker must not offer eligibility contact before all vaccines are confirmed');
                   await puppy.getByRole('button', { name: 'Chcem sa informovať' }).click();
                   const needsInfo = chat.locator('[data-aria-chat-puppy-contact]');
                   await needsInfo.waitFor({ state: 'visible' });
                   if (!await needsInfo.getByText(/zatiaľ nespĺňa všetky orientačné podmienky/).count())
                     throw new Error('Unconfirmed puppy vaccines must offer individual consultation, not eligibility approval');
                   await needsInfo.getByRole('button', { name: 'Späť ku kontrole' }).click();
-                  await puppy.locator('[data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
+                  await puppy.locator('[data-aria-puppy-step="single"]').waitFor({ state: 'visible' });
                   for (const group of await puppy.locator('fieldset').all()) {
                     await group.getByText('Áno', { exact: true }).click();
                   }
@@ -1367,7 +1379,7 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Puppy enquiry must send the existing structured CRM payload after explicit consent');
                   await page.unroute('**/functions/v1/web-form-submit');
                   await puppyContact.getByRole('button', { name: 'Späť ku kontrole' }).click();
-                  await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
+                  await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="single"]').waitFor({ state: 'visible' });
                   await chat.locator('[data-aria-chat-puppy-check]').getByRole('button', { name: 'Späť k otázkam' }).click();
                   await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="first_visit"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });

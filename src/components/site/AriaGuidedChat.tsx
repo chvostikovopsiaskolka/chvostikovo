@@ -4,7 +4,7 @@ import { ChvostikovoPaw } from "./ChvostikovoPaw";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "./AriaPreviewText";
 import { ADDRESS, FAQ, PHONE, PHONE_PRETTY, PRICING } from "@/content/site";
-import { ShortForm } from "./Forms";
+import { ShortForm, HomeFaqContactForm } from "./Forms";
 import { LeadStepForm } from "./LeadStepForm";
 import { AriaPuppyChecker } from "./AriaPuppyChecker";
 import type { PuppyCheckInput } from "@/lib/inquiry";
@@ -393,7 +393,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             </button>
             <button type="button" data-aria-chat-other-cta onClick={showOther}
               className="min-h-11 min-w-0 flex-1 rounded-xl border border-[#ffa414]/55 bg-[#fff0d5] px-1.5 py-2 text-[11px] font-extrabold leading-tight text-[#26322b] shadow-sm transition-colors hover:border-[#ffa414] hover:bg-[#ffe3b2] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
-              Mám inú otázku?
+              Máš inú otázku?
             </button>
           </nav>
         )}
@@ -408,11 +408,8 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                 <AriaPuppyChecker embedded trackingSource={trackingPrefix + "_puppy"} {...(puppyCheck ? { initialAnswers: puppyCheck } : {})}
                   onInterest={details => finishPuppyCheck(details, true)}
                   onInfo={details => finishPuppyCheck(details, false)} />
-                <p className="text-xs font-semibold leading-relaxed text-[#26322b]">
-                  Pomohla ti odpoveď? Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.
-                </p>
-                <button type="button" data-aria-chat-interest-cta onClick={showInterest}
-                  className="min-h-12 w-full rounded-xl bg-[#9e336f] px-4 py-2.5 text-sm font-extrabold text-white">Mám záujem</button>
+                {/* The compact checker itself routes to consultation/contact;
+                    repeating a full CTA below it forces unnecessary iPhone scrolling. */}
               </section>
             )}
             {mode === "puppy_contact" && puppyCheck && (
@@ -452,8 +449,8 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                 <p data-aria-form-prompt className="rounded-xl bg-white/75 px-3 py-2 text-xs leading-relaxed text-forest">
                   {messages[messages.length - 1]?.text}
                 </p>
-                <ShortForm hideInterest showQuestionField trackingSource={formPrefix + "_other"}
-                  interestValue="Chcem sa informovať o škôlke"
+                <HomeFaqContactForm compact source={formPrefix === "lead_landing_aria_chat" ? "lead_landing_aria_chat_other" : "aria_preview_chat_other"}
+                  onStarted={() => track("form_start_other")}
                   onSent={() => track("other_question_submitted")} />
                 <a href={"tel:" + PHONE} className="flex min-h-11 items-center justify-center rounded-xl border border-[#9e336f]/30 px-3 text-xs font-bold text-[#9e336f]">
                   Alebo nám zavolaj na {PHONE_PRETTY}

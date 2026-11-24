@@ -63,15 +63,62 @@ export function AriaPuppyChecker({
       className={embedded ? "bg-transparent pb-2" : "relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14"}>
       {!embedded && <SectionAmbientPaws />}
       <div className={embedded ? "relative z-10" : "relative z-10 mx-auto max-w-3xl px-4"}>
-        <div className="mb-5 text-center">
-          <p className="font-display text-sm font-bold uppercase tracking-wide text-coral-dark">Máte šteniatko?</p>
-          <h2 className="section-title mt-1 text-2xl sm:text-3xl">Spĺňa základné podmienky?</h2>
-          <p className="mt-2 text-sm leading-relaxed text-forest/70">
+        <div className={embedded ? "mb-3 text-center" : "mb-5 text-center"}>
+          {!embedded && <p className="font-display text-sm font-bold uppercase tracking-wide text-coral-dark">Máte šteniatko?</p>}
+          <h2 className={embedded ? "font-display text-lg font-bold leading-snug text-forest" : "section-title mt-1 text-2xl sm:text-3xl"}>
+            {embedded ? "Spĺňa vaše šteniatko základné podmienky?" : "Spĺňa základné podmienky?"}
+          </h2>
+          <p className={embedded ? "mt-1.5 text-xs leading-snug text-forest/70" : "mt-2 text-sm leading-relaxed text-forest/70"}>
             Rýchle orientačné overenie. Definitívne prijatie potvrdíme až po kontrole očkovania a úvodnej návšteve.
           </p>
         </div>
 
-        <div className="rounded-[26px] border border-forest/10 bg-card p-4 shadow-card sm:p-6">
+        <div className={embedded
+          ? "rounded-2xl border border-forest/10 bg-card p-3 shadow-sm"
+          : "rounded-[26px] border border-forest/10 bg-card p-4 shadow-card sm:p-6"}>
+          {embedded ? (
+            <div data-aria-puppy-step="single" className="space-y-2.5">
+              <div className="space-y-1.5">
+                <label htmlFor="aria-modal-age" className="flex items-center justify-between gap-2 font-display text-sm font-bold text-forest">
+                  <span>Vek šteniatka</span>
+                  <output htmlFor="aria-modal-age" className="rounded-xl bg-secondary px-3 py-1.5 text-base font-extrabold text-forest">
+                    {age} {age === 1 ? "mesiac" : age < 5 ? "mesiace" : "mesiacov"}
+                  </output>
+                </label>
+                <input id="aria-modal-age" type="range" min="1" max="12" step="1" value={age}
+                  onChange={event => setAge(Number(event.target.value))}
+                  className="aria-puppy-range w-full cursor-pointer"
+                  style={{ "--aria-puppy-progress": `${((age - 1) / 11) * 100}%` } as CSSProperties}
+                  aria-label="Vek šteniatka v mesiacoch" />
+              </div>
+              <h3 className="font-display text-sm font-bold text-forest">Má šteniatko platné očkovania?</h3>
+              {VACCINES.map(({ id, label }) => (
+                <fieldset key={id} className="min-w-0 rounded-xl border border-forest/10 bg-white/80 p-2">
+                  <legend className="float-left w-full text-xs font-bold text-forest">{label}</legend>
+                  <div className="clear-both grid grid-cols-3 gap-1.5 pt-1.5">
+                    {([["yes","Áno"],["no","Nie"],["unknown","Neviem"]] as const).map(([value,label]) => (
+                      <label key={value} className={"flex min-h-11 cursor-pointer items-center justify-center rounded-lg border px-1 text-xs font-semibold " +
+                        (vaccines[id] === value ? "border-coral bg-secondary text-forest" : "border-forest/15 text-forest/75")}>
+                        <input type="radio" className="sr-only" name={"modal-"+id}
+                          checked={vaccines[id] === value}
+                          onChange={() => setVaccines(current => ({...current,[id]:value}))} />{label}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              ))}
+              {mayContinue && allVaccinated ? (
+                <button type="button" className={primaryClass + " w-full"}
+                  onClick={() => onInterest(snapshot())}>Pokračovať na kontakt <ArrowRight size={17} aria-hidden /></button>
+              ) : <ContactFallback onInfo={moreInfo} />}
+              <p role="status" className="text-xs leading-snug text-forest/70">
+                {!mayContinue ? "Šteniatko ešte nespĺňa orientačnú vekovú podmienku 4 mesiacov."
+                  : allVaccinated ? "Orientačná kontrola vyšla kladne. Prijatie potvrdíme po úvodnej návšteve."
+                  : "Ak nemáte všetky očkovania potvrdené, poradíme vám individuálne."}
+              </p>
+            </div>
+          ) : (
+          <div>
           <div className="mb-5 flex items-center justify-center gap-2" aria-label="Postup overenia">
             {(["age", "vaccines"] as const).map((item, i) => (
               <span key={item} className={"h-1.5 w-12 rounded-full " + (
@@ -145,6 +192,8 @@ export function AriaPuppyChecker({
               )}
               {!allVaccinated && <ContactFallback onInfo={moreInfo} />}
             </div>
+          )}
+          </div>
           )}
 
         </div>
