@@ -20,7 +20,7 @@ assert(mainDock.includes('{ id: "o-nas", label: "O nás"') && !mainDock.includes
 assert(mainDock.indexOf('id: "o-nas"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main nav order must be about, prices, requirements, products");
 assert(!dock.includes('{ id: "top", label: "Domov"') && !dock.includes('{ id: "top", label: "Home"'), "Landing docks should use meaningful local sections instead of Domov");
 assert(mainDock.includes('{ id: "produkty", label: "Produkty"') && !mainDock.includes('{ id: "priestory"'), "Main dock must replace Spaces with Products");
-assert(mainDock.includes('id: "faq", label: "Časté otázky"') && dock.includes("!marketing && !homeFaqShortcut") && read("src/routes/index.tsx").includes("<Header homeFaqShortcut />"), "Only homepage must replace application shortcut with local FAQ");
+assert(dock.includes('{!marketing && (') && dock.includes('mobile-dock-item mobile-dock-apply') && read("src/routes/index.tsx").includes("<Header />"), "Homepage retains the dedicated application shortcut");
 assert(dock.includes('id === "produkty" && !marketing ? "/produkty"'), "Products dock item must navigate to the actual catalogue, not a stale anchor");
 
 for (const anchor of ["lead-first-visit", "puppy-first-visit", "dog-sitting-first-visit", "en-first-visit"]) assert(dock.includes('id: "' + anchor + '"'), "Missing landing first-visit shortcut: " + anchor);
@@ -156,7 +156,7 @@ assert(dock.includes("marketingExtra"), "Local first visit menu links required")
 assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");
 assert(!dock.includes('{ id: "recenzie", label: "Recenzie", icon: ImageIcon }'), "Reviews must leave marketing docks");
 assert(!dock.includes('{ id: "reviews", label: "Reviews", icon: ImageIcon }'), "Reviews must leave EN dock");
-assert(dock.includes('id === "interest" ? (') && dock.includes('{!marketing && !homeFaqShortcut && ('), "Landing interest CTA is preserved; non-home main navigation retains application CTA");
+assert(dock.includes('id === "interest" ? (') && dock.includes('{!marketing && ('), "Landing interest CTA is preserved; main navigation retains application CTA");
 assert(dock.includes('trackCookielessInteraction("nav_click", source, language)'), "Navigation must use dedicated cookieless events");
 assert(dock.includes('trackCookielessInteraction("inquiry_cta", "en_mobile_dock", "en")'), "EN interest CTA tracking required");
 assert(dock.includes('trackMarketingInteraction("view_pricing", source)'), "Dock pricing should preserve consented Pixel interest");
