@@ -24,22 +24,48 @@ const selectedEngines = engines.filter(([name]) => engineSelection === "all" || 
 // Fixed docks can cover WebKit's default nearest scroll target. Center only
 // fixture interactions; keep actual pointer input and native validation.
 async function centerFixtureControl(control) {
-  await control.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
-  await control.page().evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  await control.evaluate(async el=>{
+    const result=el.scrollIntoView({block:'center',behavior:'instant'});
+    if(result&&typeof result.then==='function')await result;
+    // Safari returns undefined; root-scroll promises can also resolve early.
+    // Wait for measured geometry/scroll stability, not a guessed scroll duration.
+    await new Promise((resolve,reject)=>{
+      const started=performance.now();let stableSince=started,last=null;
+      const settle=now=>{
+        if(!el.isConnected){reject(new Error('Fixture control detached while centering'));return;}
+        const r=el.getBoundingClientRect(),current=[r.left,r.top,r.width,r.height,scrollX,scrollY];
+        if(last&&current.some((value,index)=>Math.abs(value-last[index])>0.5))stableSince=now;
+        last=current;
+        if(now-stableSince>=100){resolve();return;}
+        if(now-started>2500){reject(new Error('Fixture control did not settle before interaction'));return;}
+        requestAnimationFrame(settle);
+      };
+      requestAnimationFrame(settle);
+    });
+  });
+}
+
+async function activateFixtureControl(control) {
+  await centerFixtureControl(control);
+  if(await control.page().evaluate(()=>navigator.maxTouchPoints>0))await control.tap();
+  else await control.click();
 }
 
 // Exercise the actual visible radio and next button; settle scrolling before
 // clicking so a moving viewport or fixed mobile dock cannot intercept it.
 async function advanceLeadContact(form) {
   const choice=form.locator('label:has(input[name="zaujem"])').first();
-  await centerFixtureControl(choice);
-  await choice.click();
+  await activateFixtureControl(choice);
   await form.locator('input[name="zaujem"]').first().evaluate(el=>{
     if(!el.checked)throw new Error('Lead interest radio did not select');
   });
-  const next=form.getByRole('button',{name:'Pokračovať',exact:true});
-  await centerFixtureControl(next);
-  await next.click();
+  const next=form.locator('button:not([disabled])').filter({hasText:/^Pokračovať$/});
+  await next.waitFor({state:'visible',timeout:5000});
+  await activateFixtureControl(next);
+  await form.locator('[role="progressbar"][aria-valuenow="2"]').waitFor({state:'visible',timeout:5000}).catch(async error=>{
+    const state=await form.evaluate(el=>({step:el.dataset.leadStep,section:el.closest('section')?.id,selected:!!el.querySelector('input[name="zaujem"]:checked'),rect:el.getBoundingClientRect().toJSON()}));
+    throw new Error('Shared contact transition failed: '+JSON.stringify(state)+' '+String(error));
+  });
   await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
 }
 
@@ -189,9 +215,11 @@ async function assertCampaignContentFlow(page) {
   await page.locator('[data-lead-faq="puppies"] > button').click();
   const puppyLink=page.locator('[data-lead-faq="puppies"] a');
   if(await puppyLink.getAttribute('href')!=='#aria-puppy-check'||!await puppyLink.evaluate(el=>el.getBoundingClientRect().width>=el.parentElement.getBoundingClientRect().width-50))throw new Error('Puppy checker CTA must fill the mobile answer');
-  await centerFixtureControl(puppyLink);
-  await puppyLink.click();
-  await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140);
+  await activateFixtureControl(puppyLink);
+  await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140).catch(async error=>{
+    const state=await page.evaluate(()=>({hash:location.hash,scrollY,top:document.getElementById('aria-puppy-check')?.getBoundingClientRect().top}));
+    throw new Error('Puppy anchor did not settle: '+JSON.stringify(state)+' '+String(error));
+  });
   await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
   await page.locator('[data-aria-lead-hero-cta]').click();
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
@@ -2118,18 +2146,15 @@ if (!bellaris && brandPreviewCandidate) {
             const faqConsent=faqForm.locator('input[type="checkbox"][required]');
             await centerFixtureControl(question);
             await question.fill('Ako vyzerá deň v škôlke?');
-            await centerFixtureControl(faqNext);
-            await faqNext.click();
+            await activateFixtureControl(faqNext);
             await faqForm.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
             await faqForm.locator('input[name="meno"]').fill('Testovací kontakt');
             await faqForm.locator('input[name="telefon"]').fill('912345678');
             await faqForm.locator('input[name="email"]').fill('test@example.com');
-            await centerFixtureControl(faqBack);
-            await faqBack.click();
+            await activateFixtureControl(faqBack);
             await question.waitFor({state:'visible',timeout:5000});
             if(await question.inputValue()!=='Ako vyzerá deň v škôlke?') throw new Error('FAQ question lost on Back');
-            await centerFixtureControl(faqNext);
-            await faqNext.click();
+            await activateFixtureControl(faqNext);
             await faqConsent.waitFor({state:'visible',timeout:5000});
             if(await faqForm.locator('input[name="meno"]').inputValue()!=='Testovací kontakt') throw new Error('FAQ contact lost on Back');
             if(await faqConsent.isChecked()) throw new Error('FAQ contact unexpectedly pre-consented');
