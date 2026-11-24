@@ -1654,14 +1654,16 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 /* Paid campaign content budget only: keep the existing fixed Aria/dock and motion intact. */
 @media (max-width: 639px) {
 
-  .lead-brand-live [data-aria-hero-heading-spacer] { height: 0; }
-  .lead-brand-live .hero-safe-top h1 { margin-top: 0; }
-  .lead-brand-live [data-aria-service-group] { margin-top: 12px; }
+  .lead-brand-live [data-lead-hero-grid] { display: grid; grid-template-areas: "service" "title" "pills" "photos" "action"; }
+  .lead-brand-live [data-aria-hero-heading-spacer] { display: none; }
+  .lead-brand-live .hero-safe-top h1 { grid-area: title; margin-top: 0; }
+  .lead-brand-live [data-aria-service-group] { grid-area: service; margin-top: 0; margin-bottom: 12px; }
   .lead-brand-live [data-aria-service-badge] { text-transform: none; font-size: 11px; letter-spacing: 0; padding-block: 6px; }
-  .lead-brand-live [data-lead-hero-pills] { margin-top: 10px; }
-  .lead-brand-live [data-lead-hero-photos] { margin-top: 16px; }
+  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin-top: 10px; }
+  .lead-brand-live [data-lead-hero-pill] { font-size: 12px; padding: 6px 10px; }
+  .lead-brand-live [data-lead-hero-photos] { grid-area: photos; margin-top: 16px; }
   .lead-brand-live [data-lead-hero-photo] { height: clamp(120px, calc(0.35 * (var(--lead-hero-visible) - 350px)), 160px); }
-  .lead-brand-live [data-lead-hero-action] { margin-top: 14px; }
+  .lead-brand-live [data-lead-hero-action] { grid-area: action; margin-top: 14px; }
   .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 20px; }
 }
 
@@ -1694,6 +1696,9 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live [data-lead-hero-photo] img { position: absolute; inset: 0; }
   .lead-brand-live [data-lead-hero-action] { grid-area: action; margin: 0; max-width: 26rem; align-items: flex-start; }
   .lead-brand-live [data-aria-lead-hero-cta] { font-size: 1rem; }
-  .lead-brand-live [data-lead-hero-hours] { margin-inline: 0; font-size: 0.875rem; padding: 0.375rem 0.75rem; }
   .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 1.5rem; }
 }
+
+/* Keep decoration below the admission heading, and emphasize practical location facts. */
+.lead-brand-live #lead-requirements > [aria-hidden="true"] { inset-block-start: 10rem; }
+.lead-brand-live #aria-mosaic [data-aria-location-chips] > * { font-weight: 700; }
