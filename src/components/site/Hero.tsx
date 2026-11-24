@@ -59,7 +59,7 @@ export function Hero({ onMobileInquiryOpen, mobileInquiryOpen }: {
 
         {/* Desktop layout */}
         <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:gap-10">
-          <div className="home-hero-column self-start flex min-w-0 flex-col lg:pt-2">
+          <div className="home-hero-column self-start flex min-w-0 flex-col lg:pt-20">
             <p className="order-1 mx-0 mb-3 mt-0 font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Denná starostlivosť o stredných a veľkých psíkov
             </p>

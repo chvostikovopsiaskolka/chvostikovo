@@ -96,12 +96,12 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
         </div>
 
         {homeMosaic ? (
-          <div data-home-spaces-mosaic className="mt-8 columns-2 gap-3 lg:columns-3 lg:gap-4">
+          <div data-home-spaces-mosaic className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
             {photos.map((photo, i) => (
               <Fragment key={photo.src}>
                 <button data-home-space-photo type="button" onClick={() => setActive(i)}
                   aria-label={"Otvoriť fotografiu: " + photo.alt}
-                  className={"group relative mb-3 block w-full break-inside-avoid overflow-hidden rounded-3xl bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral lg:mb-4 " + (i % 3 === 0 ? "aspect-[4/5]" : "aspect-[5/4]")}>
+                  className={"group relative block w-full overflow-hidden rounded-3xl bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral aspect-[5/4]"}>
                   <img src={photo.src} srcSet={GALLERY[i]!.src + " 900w, " + photo.src + " 1600w"}
                     sizes="(min-width: 1152px) 362px, (min-width: 1024px) 31vw, 46vw" width={1600} height={1600}
                     alt={photo.alt} loading="lazy" decoding="async" className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none" />
@@ -109,7 +109,7 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
                 </button>
                 {i % 2 === 1 && i < 6 && (() => { const h = hygiene[(i - 1) / 2]!; return (
                   <article data-home-mosaic-hygiene aria-label={"Čistota priestorov – " + h.title}
-                    className="mb-3 break-inside-avoid rounded-3xl border border-forest/10 bg-card p-5 shadow-card [column-span:all] lg:hidden">
+                    className="col-span-2 rounded-3xl border border-forest/10 bg-card p-5 shadow-card lg:hidden">
                     <p className="mb-3 font-display text-xs font-bold uppercase tracking-wide text-coral">Ako zabezpečujeme čistotu priestorov</p>
                     <div className="flex items-center gap-3"><span aria-hidden="true" className="shrink-0 text-2xl">{h.icon}</span><h3 className="font-display text-lg font-bold leading-snug text-forest">{h.title}</h3></div>
                     <p className="mt-3 text-sm leading-relaxed text-forest/80">{h.text}</p>
