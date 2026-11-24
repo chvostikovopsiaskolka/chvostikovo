@@ -1,5 +1,5 @@
 import { preserveFailedContact, clearRecoveredContact, stageContactDraft } from "./form-recovery";
-import { buildDbPayload, inquirySchema, SUPABASE_ENDPOINT, type InquiryInput } from "./inquiry";
+import { buildDbPayload, inquirySchema, SUPABASE_ENDPOINT, HOME_FAQ_CONTACT_SOURCE, type InquiryInput } from "./inquiry";
 import { hasMarketingConsent } from "./consent";
 import { normalizePhone } from "./phone";
 import { InquirySubmissionError } from "./form-errors";
@@ -42,7 +42,7 @@ async function submitInquiryCore(input: InquiryInput, attemptId?: string) {
   try {
     // Public /test-aria is QA: accept real form transport but never
     // send preview enquiries to Meta CAPI as paid Leads.
-    marketingConsent = !(/^\/test-aria\/?$/.test(window.location.pathname)) && hasMarketingConsent();
+    marketingConsent = data.cta_source !== HOME_FAQ_CONTACT_SOURCE && !(/^\/test-aria\/?$/.test(window.location.pathname)) && hasMarketingConsent();
   } catch {
     // Storage may be unavailable in private/restricted browsers.
   }
