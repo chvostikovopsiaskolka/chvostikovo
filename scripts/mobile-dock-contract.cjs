@@ -261,8 +261,8 @@ const paidLeadCurrent = read("src/routes/test-aria.tsx");
 const ariaGuideCurrent = read("src/components/site/AriaLeadAssistant.tsx");
 const storyCurrent = read("src/components/site/Story.tsx");
 assert(paidLeadCurrent.includes('data-aria-lead-hero-cta') &&
-       paidLeadCurrent.includes('LEAD_FAQ.map') &&
-       paidLeadCurrent.includes('const combinedKnowledgeSection') &&
+       paidLeadCurrent.includes('<FaqList items={LEAD_FAQ}') &&
+       paidLeadCurrent.includes('const conditionsSection') &&
        paidLeadCurrent.includes('lead_landing_hero_orange_cta') &&
        paidLeadCurrent.includes('data-lead-inline-card') &&
        paidLeadCurrent.includes('data-aria-hero-form-dogs') &&
@@ -314,7 +314,9 @@ const ariaAssistant = read("src/components/site/AriaLeadAssistant.tsx");
 assert(campaignOrder.indexOf('{pricingSection}') < campaignOrder.indexOf('{firstVisitSection}') &&
        campaignOrder.indexOf('{firstVisitSection}') < campaignOrder.indexOf('{heroFormSection}') &&
        campaignOrder.indexOf('{heroFormSection}') < campaignOrder.indexOf('{caretakersSection}') &&
-       campaignOrder.indexOf('{caretakersSection}') < campaignOrder.indexOf('{combinedKnowledgeSection}') &&
+       campaignOrder.indexOf('{caretakersSection}') < campaignOrder.indexOf('{conditionsSection}') &&
+       campaignOrder.indexOf('{conditionsSection}') < campaignOrder.indexOf('{campaignFaqSection}') &&
+       campaignOrder.indexOf('{campaignFaqSection}') < campaignOrder.indexOf('{puppyChecker}') &&
        paid.includes('data-lead-benefits') && paid.includes('id="lead-photo-carousel"'),
        "Campaign uses one in-page form after visit steps; carousel belongs in benefits");
 assert(hero.includes('data-home-hero-photos') &&

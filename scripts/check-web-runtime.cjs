@@ -21,6 +21,13 @@ if (!["all", "chromium", "webkit"].includes(engineSelection)) {
 }
 const selectedEngines = engines.filter(([name]) => engineSelection === "all" || name === engineSelection);
 
+// Fixed docks can cover WebKit's default nearest scroll target. Center only
+// fixture interactions; keep actual pointer input and native validation.
+async function centerFixtureControl(control) {
+  await control.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+  await control.page().evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+}
+
 async function assertLeadContactIntro(form) {
   // Wait for the real React/CSS transition, especially on Safari WebKit.
   await form.getByRole('heading',{name:'Kontaktné údaje',exact:true}).waitFor({state:'visible',timeout:5000});
@@ -49,16 +56,16 @@ async function assertCampaignContentFlow(page) {
     benefits:document.querySelectorAll('[data-lead-benefits] h3').length,
     requirements:document.querySelectorAll('#lead-requirements article').length,
     carousel:document.querySelectorAll('#lead-benefits [data-gesture-track="photos"]').length,
-    checker:!!document.querySelector('[data-lead-faq="puppies"] + #aria-puppy-check'),
+    checker:document.querySelector('#lead-faq')?.nextElementSibling?.id === 'aria-puppy-check',
+    separated:!!document.querySelector('#lead-knowledge [data-lead-faq-cta]') && !document.querySelector('#lead-knowledge #lead-faq'),
     robots:document.querySelector('meta[name="robots"]')?.content,
-    firstVisitLink:document.querySelector('[data-lead-faq="first-visit"] a')?.getAttribute('href'),
-    daily:document.querySelector('[data-lead-price-per-day]')?.textContent.trim(),
+    daily:document.querySelector('[data-lead-price-per-day]')?.textContent.replace(/\s+/g,' ').trim(),
     single:document.querySelector('#lead-pricing article')?.textContent,
   }));
-  if(structure.order.slice(1,8).join('|')!=='lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-knowledge|lead-benefits|aria-mosaic'||
+  if(structure.order.slice(1,10).join('|')!=='lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-knowledge|lead-faq|aria-puppy-check|lead-benefits|aria-mosaic'||
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==1||structure.benefits!==3||structure.requirements!==4||
-    structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||structure.firstVisitLink!=='#lead-first-visit'||structure.daily!=='= 20 € / deň'||
-    structure.single.includes('10 vstupov')||!structure.single.includes('Celodenný pobyt'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
+    structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
+    structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
   for(const [width,height] of [[375,667],[390,844],[768,1024],[1440,900]]) {
     await page.setViewportSize({width,height});
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
@@ -71,6 +78,10 @@ async function assertCampaignContentFlow(page) {
       const elements=[title,pills,photos,cta,proof];
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
         visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
+        cards:(()=>{const cards=[...document.querySelectorAll('[data-lead-price-card]')].map(el=>el.getBoundingClientRect());const taxi=box('#lead-pricing [data-aria-taxi]');return cards.length===2&&Math.abs(cards[0].top-cards[1].top)<2&&Math.abs(cards[0].bottom-cards[1].bottom)<2&&taxi.top>cards[0].bottom&&taxi.width>=cards[1].right-cards[0].left-2;})(),
+        cleanSections:getComputedStyle(document.querySelector('#aria-puppy-check')).backgroundColor==='rgb(255, 255, 255)'&&document.querySelector('#lead-faq').parentElement.tagName==='MAIN',
+        certificateWidth:(()=>{const e=document.querySelector('[data-safety-certificates]');return e.getBoundingClientRect().width>=e.parentElement.clientWidth-34;})(),
+        pillCount:visiblePills.length,pillBg:visiblePills.every(el=>getComputedStyle(el).backgroundColor==='rgb(248, 221, 235)'),
         pillRows:new Set(visiblePills.map(el=>Math.round(el.getBoundingClientRect().top))).size,
         actionBg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).backgroundColor,
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
@@ -80,10 +91,21 @@ async function assertCampaignContentFlow(page) {
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation="true"] button').length===5&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
+    if(!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   await page.setViewportSize({width:390,height:844});
+  await centerFixtureControl(page.locator('[data-lead-faq="first-visit"] > button'));
+  await page.locator('[data-lead-faq="first-visit"] > button').click();
+  if(await page.locator('[data-lead-faq="first-visit"] a').getAttribute('href')!=='#lead-first-visit')throw new Error('Missing first visit detail anchor');
+  await centerFixtureControl(page.locator('[data-lead-faq="puppies"] > button'));
+  await page.locator('[data-lead-faq="puppies"] > button').click();
+  const puppyLink=page.locator('[data-lead-faq="puppies"] a');
+  if(await puppyLink.getAttribute('href')!=='#aria-puppy-check'||!await puppyLink.evaluate(el=>el.getBoundingClientRect().width>=el.parentElement.getBoundingClientRect().width-50))throw new Error('Puppy checker CTA must fill the mobile answer');
+  await centerFixtureControl(puppyLink);
+  await puppyLink.click();
+  await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140);
+  await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
   await page.locator('[data-aria-lead-hero-cta]').click();
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   const nav=page.locator('[data-aria-section-navigation="true"]');
@@ -92,10 +114,12 @@ async function assertCampaignContentFlow(page) {
     await page.waitForFunction(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.top>=0&&r.top<130;},target,{timeout:5000});
     await page.waitForFunction(key=>document.querySelector('[data-lead-nav-key="'+key+'"]')?.getAttribute('aria-current')==='location',key,{timeout:5000});
   }
+  await centerFixtureControl(page.locator('[data-lead-faq-cta]'));
   await page.locator('[data-lead-faq-cta]').click();
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
   const form=page.locator('#aria-hero-form [data-lead-step-form]');
+  await centerFixtureControl(form.locator('label:has(input[name="zaujem"])').first());
   await form.locator('label:has(input[name="zaujem"])').first().click();
   await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
   await assertLeadContactIntro(form);
@@ -2083,6 +2107,7 @@ if (!bellaris && brandPreviewCandidate) {
             await contact.locator('input[name="meno"]').fill('Testovací dopyt');
             await breedInput.fill('Írsky vlkodav');
             await contact.locator('input[name="telefon"]').fill('912345678');
+            await centerFixtureControl(contact.locator('input[type="checkbox"][required]'));
             await contact.locator('input[type="checkbox"][required]').check();
             await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
             await contact.getByRole('alert').waitFor({ state: 'visible' });
@@ -2820,7 +2845,10 @@ if (!bellaris && brandPreviewCandidate) {
               const carousel = tracks.nth(i);
               const touchAction = await carousel.evaluate(el => getComputedStyle(el).touchAction);
               if (touchAction !== 'auto') throw new Error('Carousel blocks vertical touch panning: ' + touchAction);
-              await carousel.scrollIntoViewIfNeeded();
+              // Settle setup before measuring a real wheel; a pending smooth
+              // anchor scroll can otherwise cancel the wheel and report 0 -> 0.
+              await carousel.evaluate(el=>el.scrollIntoView({block:"center",behavior:"instant"}));
+              await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
               const box = await carousel.boundingBox();
               if (!box) throw new Error('Invisible carousel track');
               if (engine === 'chromium') {
@@ -2866,8 +2894,12 @@ if (!bellaris && brandPreviewCandidate) {
                 throw new Error('Home interest CTA must reveal the in-page form after Hero');
               const choices=inline.locator('label:has(input[name="zaujem"])');
               if (await choices.count()!==3) throw new Error('Revealed home form must retain all three interests');
+              await centerFixtureControl(choices.nth(1));
               await choices.nth(1).click();
-              await inline.getByRole('button', {name:'Pokračovať',exact:true}).click();
+              if(!await choices.nth(1).locator('input').isChecked())throw new Error('Fixture failed to select visible interest');
+              const continueButton=inline.getByRole('button', {name:'Pokračovať',exact:true});
+              await centerFixtureControl(continueButton);
+              await continueButton.click();
               await inline.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
               await inline.locator('input[name="telefon"]').waitFor({state:'visible',timeout:5000});
               await inline.getByRole('button',{name:'Späť',exact:true}).click();

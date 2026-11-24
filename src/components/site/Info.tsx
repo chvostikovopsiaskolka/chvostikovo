@@ -11,6 +11,8 @@ import { SectionAmbientPaws } from "./SectionAmbientPaws";
 import { FirstVisitPhoto } from "./FirstVisitPhoto";
 import { InquirySection } from "./InquirySection";
 import { ContextFaq, FaqAnswer } from "./ContextFaq";
+import { HOME_PRIMARY_FAQ, HOME_PRICE_QUESTION } from "@/content/home-faq";
+export { HOME_PRIMARY_FAQ } from "@/content/home-faq";
 import { DAYCARE_ELIGIBILITY_ANSWER } from "@/content/daycare-eligibility";
 
 
@@ -50,7 +52,7 @@ export function DaycareEarlyFaq() {
 
 const reqIcons = [Syringe, PawPrint, Droplets, HeartPulse];
 
-export function Requirements({ id = "podmienky", showContextFaq = false, ariaPreview = false, hideEyebrow = false, embedded = false }: { id?: string; showContextFaq?: boolean; ariaPreview?: boolean; hideEyebrow?: boolean; embedded?: boolean } = {}) {
+export function Requirements({ id = "podmienky", showContextFaq = false, ariaPreview = false, hideEyebrow = false, embedded = false, title = "Čo musí psík spĺňať" }: { id?: string; showContextFaq?: boolean; ariaPreview?: boolean; hideEyebrow?: boolean; embedded?: boolean; title?: string } = {}) {
   const Container = embedded ? "div" : "section";
   const Heading = embedded ? "h3" : "h2";
   return (
@@ -59,7 +61,7 @@ export function Requirements({ id = "podmienky", showContextFaq = false, ariaPre
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
           {!hideEyebrow && <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Podmienky prijatia</span>}
-          <Heading className={"section-title text-3xl sm:text-4xl " + (hideEyebrow ? "" : "mt-2")}>Čo musí psík spĺňať</Heading>
+          <Heading className={"section-title text-3xl sm:text-4xl " + (hideEyebrow ? "" : "mt-2")}>{title}</Heading>
           <p className="mt-3 text-sm text-forest/65 sm:hidden">Potiahnite do strany a pozrite si všetky podmienky.</p>
         </div>
 
@@ -168,6 +170,27 @@ export function FirstVisit({ inlineForm = false, leadStyle = false }: { inlineFo
   );
 }
 
+export function DaycarePricingCards({ campaign = false }: { campaign?: boolean }) {
+  return (<div data-home-prices={campaign ? undefined : true} data-lead-prices={campaign || undefined} className="col-span-2 mb-2 grid min-w-0 grid-cols-2 items-stretch gap-3 sm:mb-3 sm:gap-5">
+            {PRICING.map(item => <article key={item.name} data-home-price-card={campaign ? undefined : item.highlight ? "pass" : "single"} data-lead-price-card={campaign ? (item.highlight ? "pass" : "single") : undefined}
+              className={"relative grid min-w-0 grid-rows-[auto_auto_auto] content-start items-center justify-items-center gap-1 rounded-3xl px-2 pb-5 pt-3 text-center shadow-card sm:px-4 sm:pb-6 sm:pt-4 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
+              <h3 className="whitespace-nowrap font-display text-[clamp(11px,3.3vw,15px)] font-bold leading-snug text-forest sm:text-xl">{item.name}</h3>
+              <p data-home-price={campaign ? undefined : true} data-lead-price={campaign || undefined} data-lead-price-per-day={campaign && item.highlight || undefined} className={"whitespace-nowrap font-display text-[clamp(22px,6vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-[#ffa414]")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€</> : item.price.replace(" ", "\u00a0")}<span className="text-[0.55em]"> / deň</span></p>
+              {item.highlight ? <>
+                <p data-home-pass-total={campaign ? undefined : true} data-lead-pass-total={campaign || undefined} className="whitespace-nowrap font-display text-[clamp(10px,3vw,14px)] font-semibold leading-snug text-forest sm:text-lg"><strong>{item.price.replace(" ", "\u00a0")}</strong> · 10 vstupov</p>
+                <span data-home-best-value={campaign ? undefined : true} data-lead-best-value={campaign || undefined} className="absolute bottom-0 left-1/2 inline-flex -translate-x-1/2 translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold leading-tight tracking-[-0.025em] text-white shadow-sm">Najvýhodnejšie. Ušetríte 50&nbsp;€</span>
+              </> : <p data-home-opening-hours className="text-xs leading-snug text-forest/75 sm:text-sm">Pondelok – piatok<br />od 7:00 do 17:00</p>}
+            </article>)}
+          </div>);
+}
+
+export function DaycareTaxiNote({ campaign = false }: { campaign?: boolean }) {
+  return (<p data-home-taxi={campaign ? undefined : true} data-aria-taxi={campaign || undefined} className="col-span-2 flex min-w-0 items-center justify-center gap-1.5 rounded-2xl bg-[#c92c89] px-2 py-3 text-center text-[clamp(10px,3vw,14px)] font-semibold leading-snug text-white sm:gap-2 sm:text-sm">
+            <Car className="size-4 shrink-0 text-white sm:size-5" aria-hidden="true" />
+            <span className="whitespace-nowrap">Odvoz a vyzdvihnutie: <strong>5&nbsp;€ / jazda</strong></span>
+          </p>);
+}
+
 export function Pricing({ interestMode = false, homeLayout = false }: { interestMode?: boolean; homeLayout?: boolean } = {}) {
   const [open, setOpen] = useState(false);
 
@@ -178,27 +201,14 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
         <h2 className="section-title text-center text-3xl sm:text-4xl">Cenník našich služieb</h2>
         <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je len výhodnejšia.</p>
         <div data-home-pricing-columns className="mx-auto mt-7 grid max-w-3xl grid-cols-2 items-stretch gap-3 sm:gap-6">
-          <div data-home-prices className="col-span-2 mb-2 grid min-w-0 grid-cols-2 items-stretch gap-3 sm:mb-3 sm:gap-5">
-            {PRICING.map(item => <article key={item.name} data-home-price-card={item.highlight ? "pass" : "single"}
-              className={"relative grid min-w-0 grid-rows-[auto_auto_auto] content-start items-center justify-items-center gap-1 rounded-3xl px-2 pb-5 pt-3 text-center shadow-card sm:px-4 sm:pb-6 sm:pt-4 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
-              <h3 className="whitespace-nowrap font-display text-[clamp(11px,3.3vw,15px)] font-bold leading-snug text-forest sm:text-xl">{item.name}</h3>
-              <p data-home-price className={"whitespace-nowrap font-display text-[clamp(22px,6vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-[#ffa414]")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€</> : item.price.replace(" ", "\u00a0")}<span className="text-[0.55em]"> / deň</span></p>
-              {item.highlight ? <>
-                <p data-home-pass-total className="whitespace-nowrap font-display text-[clamp(10px,3vw,14px)] font-semibold leading-snug text-forest sm:text-lg"><strong>{item.price.replace(" ", "\u00a0")}</strong> · 10 vstupov</p>
-                <span data-home-best-value className="absolute bottom-0 left-1/2 inline-flex -translate-x-1/2 translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold leading-tight tracking-[-0.025em] text-white shadow-sm">Najvýhodnejšie. Ušetríte 50&nbsp;€</span>
-              </> : <p data-home-opening-hours className="text-xs leading-snug text-forest/75 sm:text-sm">Pondelok – piatok<br />od 7:00 do 17:00</p>}
-            </article>)}
-          </div>
+          <DaycarePricingCards />
           <div data-home-included className="col-span-2 min-w-0 rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8">
             <h3 className="text-center font-display text-base font-bold text-forest sm:text-xl">Čo je v cene zahrnuté</h3>
             <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs leading-relaxed sm:gap-x-6 sm:text-base">
               {INCLUDED.filter(item => item !== "Fotky a videá z priebehu dňa").map(item => <li key={item} className="flex min-w-0 gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-coral-dark sm:size-4" aria-hidden="true" /><span className="min-w-0 text-forest/85">{item}</span></li>)}
             </ul>
           </div>
-          <p data-home-taxi className="col-span-2 flex min-w-0 items-center justify-center gap-1.5 rounded-2xl bg-[#c92c89] px-2 py-3 text-center text-[clamp(10px,3vw,14px)] font-semibold leading-snug text-white sm:gap-2 sm:text-sm">
-            <Car className="size-4 shrink-0 text-white sm:size-5" aria-hidden="true" />
-            <span className="whitespace-nowrap">Odvoz a vyzdvihnutie: <strong>5&nbsp;€ / jazda</strong></span>
-          </p>
+          <DaycareTaxiNote />
         </div>
       </div>
     </section>
@@ -306,39 +316,21 @@ const PRIMARY_FAQ_QUESTIONS = new Set([
 const PRIMARY_FAQ = FAQ.filter((item) => PRIMARY_FAQ_QUESTIONS.has(item.q));
 // Homepage has one canonical presentation. Keep the original FAQ catalogue for
 // campaign/organic routes and preserve historical analytics IDs when merging topics.
-const HOME_PRICE_QUESTION = "Aký je cenník a treba si rezervovať miesto vopred?";
-function faqAnswer(question: string) {
-  return FAQ.find(item => item.q === question)?.a ?? "";
-}
-export const HOME_PRIMARY_FAQ = [
-  { trackingId: 7, q: "Pre koho je škôlka určená?", a: DAYCARE_ELIGIBILITY_ANSWER },
-  { trackingId: 2, q: "Ako prebieha prvá návšteva psíka v škôlke?",
-    a: "Pred nástupom absolvuje každý nový psík bezplatnú vstupnú návštevu. Zoznámime sa s ním a sledujeme jeho reakcie na prostredie, ľudí a ostatných psov. Ak ešte nemá skúsenosti s kolektívom, nemusí to byť problém – zoznamovanie prebieha postupne.\nŠteniatkam, bojazlivejším psíkom a psíkom, ktoré potrebujú viac času, môžeme odporučiť ešte 2–3 kratšie návštevy s majiteľom alebo niekoľkohodinový pobyt bez neho. Adaptáciu prispôsobujeme tempu psíka.\nJe dôležité povedať nám o psíkovi pravdivo všetko vrátane jeho povahy, skúseností, obáv a problémových situácií." },
-  { trackingId: 3, q: "Ako zabezpečujete bezpečnosť psíkov v škôlke?",
-    a: "Bezpečnosť začína už vstupnou návštevou. Agresívne psy alebo psíky nevhodné do kolektívu neprijímame; Chvostíkovo nie je výcvikové centrum.\nPočas celého pobytu sú psíkovia pod neustálym dohľadom minimálne dvoch skúsených opatrovateľov. Sledujeme vzájomné interakcie a včas predchádzame konfliktom.\nAktivitu prispôsobujeme psíkom a počasiu. V horúčavách obmedzujeme intenzívny pohyb, pri nepriaznivom počasí volíme kratšie a podľa potreby častejšie venčenie. Ak sa psík necíti dobre alebo sa zmení jeho zdravotný stav, konzultujeme situáciu s majiteľom a podľa potreby pobyt ukončíme skôr." },
-  { trackingId: 4, q: "Hrajú sa psíkovia v škôlke celý deň?", a: faqAnswer("Hrajú sa psíkovia v škôlke celý deň?") },
-  { trackingId: 6, q: "Prijímate aj šteniatka?",
-    a: "Áno, približne od 4 mesiacov podľa individuálnej pripravenosti. Podmienkou je ukončené kompletné očkovanie vrátane očkovania proti kotercovému kašľu, dobrý zdravotný stav a vhodný adaptačný proces. Pripravenosť šteniatka si môžete orientačne overiť nižšie; konečné prijatie posúdime na úvodnej návšteve." },
-  { trackingId: 8, q: HOME_PRICE_QUESTION,
-    a: `Jednorazový celodenný vstup stojí ${PRICING[0]!.price}. Permanentka stojí ${PRICING[1]!.price}, zahŕňa 10 vstupov (20 € za deň) a platí 2 mesiace. Úvodná návšteva je bezplatná.\nMiesto si rezervujte vopred, ideálne na celý nasledujúci týždeň do nedele 20:00. Ak potrebujete rezervovať neskôr, žiadosť cez zákaznícku aplikáciu môžete odoslať najneskôr deň vopred do 19:00 podľa voľnej kapacity. Po tomto čase nám napíšte správu a dohodneme sa individuálne.` },
-  { trackingId: 9, q: "Aké sú otváracie hodiny a ponúkate aj odvoz?",
-    a: faqAnswer("Aké sú otváracie hodiny?") + "\n" + faqAnswer("Zabezpečujete aj vyzdvihnutie a odvoz psíka?") },
-  { trackingId: 10, q: "Zabezpečujete aj stravu?", a: faqAnswer("Zabezpečujete aj stravu?") },
-];
+
 const PRACTICAL_FAQ = FAQ.filter((item) => !PRIMARY_FAQ_QUESTIONS.has(item.q));
 
-function FaqList({ items, source, homeLayout = false }: { items: Array<(typeof FAQ)[number] & { trackingId?: number }>; source: string; homeLayout?: boolean }) {
+export function FaqList({ items, source, homeLayout = false, campaign = false }: { items: ReadonlyArray<(typeof FAQ)[number] & { trackingId?: number; id?: string; href?: string; linkLabel?: string }>; source: string; homeLayout?: boolean; campaign?: boolean }) {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
     <div className="mt-8 space-y-3">
       {items.map((f, i) => (
-        <div key={f.q} className="overflow-hidden rounded-[2rem] bg-card shadow-card">
+        <div key={f.q} data-lead-faq={campaign ? f.id : undefined} className="overflow-hidden rounded-[2rem] bg-card shadow-card">
           <button
             type="button"
             aria-expanded={open === i}
             onClick={() => {
-              if (open !== i) void trackCookielessInteraction("explore_daycare", `faq_${source}_${f.trackingId ?? i + 1}`);
+              if (!campaign && open !== i) void trackCookielessInteraction("explore_daycare", `faq_${source}_${f.trackingId ?? i + 1}`);
               setOpen(open === i ? null : i);
             }}
             className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left font-display text-[1.05rem] font-bold leading-snug text-forest sm:px-6 sm:py-5 sm:text-lg"
@@ -351,10 +343,11 @@ function FaqList({ items, source, homeLayout = false }: { items: Array<(typeof F
           {open === i && (
             <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80 sm:px-6 sm:pb-6">
               <FaqAnswer question={f.q} answer={f.a} />
+              {campaign && f.href && <a href={f.href} className={"mt-4 inline-flex min-h-11 items-center justify-center text-center font-semibold " + (f.id === "puppies" ? "btn-coral w-full px-4 py-3" : "text-coral-dark underline underline-offset-2")}>{f.linkLabel}</a>}
               {homeLayout && f.q === "Prijímate aj šteniatka?" && (
                 <a href="#aria-puppy-check" onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker")} className="btn-coral mt-4 flex w-fit min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white">Overiť pripravenosť šteniatka</a>
               )}
-              {f.q === "Prijímate aj šteniatka?" && (
+              {!campaign && f.q === "Prijímate aj šteniatka?" && (
                 <a
                   href="/psia-skolka-pre-steniatka"
                   className="mt-4 inline-flex font-display text-sm font-semibold text-coral underline-offset-4 hover:underline"

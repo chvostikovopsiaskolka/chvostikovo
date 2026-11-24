@@ -23,7 +23,7 @@ import { AriaHighlightedText } from "@/components/site/AriaPreviewText";
 import { FriendshipFeature } from "@/components/site/FriendshipFeature";
 import { FirstVisitPhoto } from "@/components/site/FirstVisitPhoto";
 import { EditorialBenefits } from "@/components/site/EditorialBenefits";
-import { Requirements, FIRST_VISIT_STEPS } from "@/components/site/Info";
+import { Requirements, FIRST_VISIT_STEPS, DaycarePricingCards, DaycareTaxiNote, FaqList } from "@/components/site/Info";
 import { Footer } from "@/components/site/Contact";
 import { ABOUT_MORE, SafetyCertificates } from "@/components/site/Story";
 import { PawTrailBackground } from "@/components/site/PawTrailBackground";
@@ -245,7 +245,16 @@ export function AriaPreviewPage() {
         </section>
   );
 
-  const pricingSection = (<section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
+  const pricingSection = isLiveLead ? (
+    <section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-[#ffe7bd] py-10 sm:py-14">
+      <SectionAmbientPaws />
+      <div className="relative z-10 mx-auto max-w-5xl px-4">
+        <h2 className="section-title text-center text-3xl sm:text-4xl">Koľko stojí deň v škôlke?</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je len výhodnejšia.</p>
+        <div className="mx-auto mt-7 grid max-w-3xl grid-cols-2 items-stretch gap-3 sm:gap-6"><DaycarePricingCards campaign /><DaycareTaxiNote campaign /></div>
+      </div>
+    </section>
+  ) : (<section id="lead-pricing" className="relative scroll-mt-24 overflow-hidden bg-secondary/35 py-10 sm:py-14">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
             <h2 className="section-title text-3xl sm:text-4xl">Koľko stojí deň v škôlke?</h2>
@@ -457,29 +466,20 @@ export function AriaPreviewPage() {
         </section>);
   const puppyChecker = <AriaPuppyChecker onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />;
   const friendshipSection = <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />;
-  const combinedKnowledgeSection = (
-    <section id="lead-knowledge" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 py-10 sm:py-14">
+  const conditionsSection = (
+    <section id="lead-knowledge" className="relative scroll-mt-24 bg-white pb-10 sm:pb-14">
+      <Requirements id="lead-requirements" ariaPreview hideEyebrow title="Podmienky" />
+      <div className="mx-auto flex max-w-4xl justify-center px-4">
+        <button type="button" id="lead-faq-interest" data-lead-faq-cta onClick={() => revealLeadHeroForm("lead_landing_faq_interest")} className="btn-coral min-h-11 px-5 text-center">Chcem sa informovať o škôlke</button>
+      </div>
+    </section>
+  );
+  const campaignFaqSection = (
+    <section id="lead-faq" className="relative scroll-mt-24 bg-[#fff4df] py-10 sm:py-14">
       <SectionAmbientPaws />
-      <div className="relative z-10 mx-auto max-w-6xl px-4">
-        <h2 className="section-title text-center text-3xl sm:text-4xl">Čo je dobré vedieť</h2>
-        <Requirements id="lead-requirements" ariaPreview hideEyebrow embedded />
-        <div id="lead-faq" className="mx-auto mt-7 max-w-4xl space-y-3">
-          {LEAD_FAQ.map(item => <details key={item.id} data-lead-faq={item.id} className="group rounded-3xl bg-card px-5 py-4 shadow-card sm:px-6">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-display text-base font-bold text-forest marker:hidden">
-              {item.q}<span aria-hidden="true" data-aria-faq-icon className="text-xl text-coral transition group-open:rotate-45">+</span>
-            </summary>
-            <div className="mt-4 space-y-3 text-sm leading-relaxed text-forest/75">
-              {item.a.split(/\n+/).map(paragraph => <p key={paragraph}><AriaHighlightedText text={paragraph} /></p>)}
-              {item.href && <a href={item.href} className="inline-flex min-h-11 items-center font-semibold text-coral-dark underline underline-offset-2">{item.linkLabel}</a>}
-            </div>
-          </details>)}
-          <div id="aria-puppy-check" className="scroll-mt-24 pt-6">
-            <AriaPuppyChecker embedded onInterest={(details) => openPuppyContact(details)} onInfo={(details) => openPuppyContact(details, true)} />
-          </div>
-          <div className="flex justify-center pt-4">
-            <button type="button" id="lead-faq-interest" data-lead-faq-cta onClick={() => revealLeadHeroForm("lead_landing_faq_interest")} className="btn-coral min-h-11 px-5 text-center">Chcem sa informovať o škôlke</button>
-          </div>
-        </div>
+      <div className="relative z-10 mx-auto max-w-4xl px-4">
+        <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
+        <FaqList items={LEAD_FAQ} source="lead" campaign />
       </div>
     </section>
   );
@@ -520,7 +520,7 @@ export function AriaPreviewPage() {
               </div>
 
               {isLiveLead && <div data-lead-hero-pills className="mx-auto mt-2 flex max-w-md flex-wrap justify-center gap-1">
-                {["Celodenný dohľad", "Vlastný výbeh", "Najprv sa spoznáme · úvodná návšteva zadarmo", "Od 20 € / deň"].map((text,i) => <span key={text} data-lead-hero-pill={i+1} className="rounded-full bg-[#ffe7bd] px-2 py-1 font-display text-[10px] font-semibold leading-tight text-forest">{text}</span>)}
+                {["Celodenný dohľad", "Vlastný výbeh", "Od 20 € / deň"].map((text,i) => <span key={text} data-lead-hero-pill={i+1} className="rounded-full bg-[#f8ddeb] px-2 py-1 font-display text-[10px] font-semibold leading-tight text-forest">{text}</span>)}
               </div>}
               {isLiveLead ? (
                 <div data-lead-hero-photos className="mx-auto mt-4 grid w-full max-w-2xl grid-cols-2 gap-2.5 sm:mt-5 sm:gap-4">
@@ -547,7 +547,7 @@ export function AriaPreviewPage() {
                     className="inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full border px-2.5 py-2 text-center font-display text-[clamp(11px,3.35vw,15px)] font-bold leading-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">
                     Chcem sa informovať o škôlke
                   </button>
-                  <p data-lead-hero-hours className="mt-1 text-[11px] leading-snug text-forest/75">Po–Pi 7:00–17:00 · Poľská 6, Košice</p>
+                  <p data-lead-hero-hours className="mx-auto mt-2 w-fit rounded-full bg-[#ffe7bd] px-3 py-1 text-[11px] leading-snug text-forest/85">Po–Pi 7:00–17:00 · Poľská 6, Košice</p>
                 </div>
               )}
             </div>
@@ -582,7 +582,9 @@ export function AriaPreviewPage() {
           {firstVisitSection}
           {heroFormSection}
           {caretakersSection}
-          {combinedKnowledgeSection}
+          {conditionsSection}
+          {campaignFaqSection}
+          {puppyChecker}
           {benefitsSection}
           <AriaMosaicGallery paidLead />
           {friendshipSection}

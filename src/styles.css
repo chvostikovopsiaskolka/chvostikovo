@@ -995,24 +995,24 @@
   background-color: rgb(255 164 20 / 12%);
 }
 /* Light pricing section, same orange for both prices, rose offer card. */
-.aria-brand-experiment #lead-pricing { background-color: rgb(255 164 20 / 12%); }
-.aria-brand-experiment #lead-pricing > div > p { color: var(--preview-charcoal); }
-.aria-brand-experiment #lead-pricing article.bg-forest,
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing { background-color: rgb(255 164 20 / 12%); }
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing > div > p { color: var(--preview-charcoal); }
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest,
 .aria-brand-experiment #lead-first-visit { background-color: #91406b; }
-.aria-brand-experiment #lead-pricing article.bg-forest,
-.aria-brand-experiment #lead-pricing article.bg-forest p,
-.aria-brand-experiment #lead-pricing article.bg-forest h3,
-.aria-brand-experiment #lead-pricing article.bg-forest strong { color: #fff; }
-.aria-brand-experiment #lead-pricing [data-lead-price],
-.aria-brand-experiment #lead-pricing article.bg-forest [data-lead-price] {
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest,
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest p,
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest h3,
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest strong { color: #fff; }
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing [data-lead-price],
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest [data-lead-price] {
   color: var(--preview-logo-orange);
 }
-.aria-brand-experiment [data-lead-best-value] {
+.aria-brand-experiment:not(.lead-brand-live) [data-lead-best-value] {
   background-color: var(--preview-logo-orange);
   color: #fff;
   text-shadow: 0 1px 2px rgb(33 28 19 / 65%);
 }
-.aria-brand-experiment #lead-pricing [data-aria-taxi] {
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing [data-aria-taxi] {
   background-color: var(--preview-cta-rose);
   color: #fff;
 }
@@ -1022,7 +1022,7 @@
   border-color: #d9a7c6;
 }
 /* Leave dark FAQ questions and keep orange plus centered in its round spot. */
-.aria-brand-experiment #lead-faq [data-aria-faq-icon] {
+.aria-brand-experiment:not(.lead-brand-live) #lead-faq [data-aria-faq-icon] {
   display: inline-grid;
   place-items: center;
   min-width: 30px;
@@ -1054,13 +1054,13 @@
 .aria-brand-experiment [data-aria-hero-content] h1 { color: #b82e7f; }
 .aria-brand-experiment [data-aria-service-badge] { color: #fff; }
 .aria-brand-experiment #aria-early-faq,
-.aria-brand-experiment #lead-pricing,
-.aria-brand-experiment #lead-faq { background-color: rgb(255 164 20 / 19%); }
-.aria-brand-experiment #lead-pricing article.bg-forest { background-color: #f8ddeb; color: #26322b; ring-color: #b82e7f; }
-.aria-brand-experiment #lead-pricing article.bg-forest h3,
-.aria-brand-experiment #lead-pricing article.bg-forest p,
-.aria-brand-experiment #lead-pricing article.bg-forest strong { color: #26322b; }
-.aria-brand-experiment #lead-pricing article.bg-forest [data-lead-price] { color: #b82e7f; }
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing,
+.aria-brand-experiment:not(.lead-brand-live) #lead-faq { background-color: rgb(255 164 20 / 19%); }
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest { background-color: #f8ddeb; color: #26322b; ring-color: #b82e7f; }
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest h3,
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest p,
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest strong { color: #26322b; }
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing article.bg-forest [data-lead-price] { color: #b82e7f; }
 .aria-brand-experiment #lead-requirements { background: #fff; }
 .aria-brand-experiment #lead-requirements h2 { color: #26322b; }
 .aria-brand-experiment #lead-requirements h3 { color: #ffa414; }
@@ -1082,8 +1082,8 @@
 .aria-brand-experiment footer > div > div:first-child { background-color: #fff; }
 .aria-brand-experiment footer [class*="bg-secondary"] { background-color: rgb(255 164 20 / 11%); }
 .aria-brand-experiment #aria-early-faq,
-.aria-brand-experiment #lead-faq,
-.aria-brand-experiment #lead-pricing { background-color: rgb(255 164 20 / 16%); }
+.aria-brand-experiment:not(.lead-brand-live) #lead-faq,
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing { background-color: rgb(255 164 20 / 16%); }
 .aria-brand-experiment #aria-puppy-check { background-color: #fff; }
 .aria-brand-experiment #aria-puppy-check [data-aria-puppy-card] { background-color: #fff; }
 .aria-brand-experiment [data-aria-friendship-card] { background-color: #fff; box-shadow: 0 16px 38px rgb(38 50 43 / 13%); }
@@ -1110,8 +1110,8 @@
 /* Approved palette transfer to paid lead: stronger translucent logo-orange wash.
    The guided Aria assistant remains preview-only pending a separate review. */
 .aria-brand-experiment #aria-early-faq,
-.aria-brand-experiment #lead-faq,
-.aria-brand-experiment #lead-pricing,
+.aria-brand-experiment:not(.lead-brand-live) #lead-faq,
+.aria-brand-experiment:not(.lead-brand-live) #lead-pricing,
 .aria-brand-experiment footer { background-color: rgb(255 164 20 / 26%); }
 .aria-brand-experiment footer { background-image: none; }
 .aria-brand-experiment footer > div > div:first-child { background-color: #fff; }
@@ -1228,7 +1228,7 @@
   /* Reserve the existing dock footprint using the small viewport and safe area. */
   .lead-brand-live .hero-safe-top {
     --lead-hero-visible: calc(100svh - 50px - max(8px, env(safe-area-inset-bottom, 0px)));
-    --hero-content-top: 12px;
+    --hero-content-top: clamp(28px, calc(10svh - 40px), 52px);
     min-height: var(--lead-hero-visible);
     justify-content: flex-start;
     padding-bottom: calc(50px + max(8px, env(safe-area-inset-bottom, 0px)));
@@ -1654,17 +1654,18 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 
   .lead-brand-live [data-aria-hero-heading-spacer] { height: 0; }
   .lead-brand-live .hero-safe-top h1 { margin-top: 0; }
-  .lead-brand-live [data-aria-service-group] { margin-top: 8px; }
+  .lead-brand-live [data-aria-service-group] { margin-top: 12px; }
   .lead-brand-live [data-aria-service-badge] { text-transform: none; font-size: 11px; letter-spacing: 0; padding-block: 6px; }
-  .lead-brand-live [data-lead-hero-pills] { margin-top: 6px; }
-  .lead-brand-live [data-lead-hero-pill="3"] { order: 1; }
-  .lead-brand-live [data-lead-hero-photos] { margin-top: 8px; }
+  .lead-brand-live [data-lead-hero-pills] { margin-top: 10px; }
+  .lead-brand-live [data-lead-hero-photos] { margin-top: 16px; }
   .lead-brand-live [data-lead-hero-photo] { height: clamp(120px, calc(0.35 * (var(--lead-hero-visible) - 350px)), 160px); }
-  .lead-brand-live [data-lead-hero-action] { margin-top: 8px; }
-  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 12px; }
-}
-@media (max-width: 389px) {
-  .lead-brand-live [data-lead-hero-pill="4"] { display: none; }
+  .lead-brand-live [data-lead-hero-action] { margin-top: 14px; }
+  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 20px; }
 }
 
 .lead-brand-live [data-lead-faq-cta] { background: #ffa414; color: #26322b; }
+
+/* Campaign certificates use the available column, preserving the green palette. */
+.lead-brand-live #aria-caretakers [data-safety-certificates] { max-width: none; padding-inline: 0; }
+.lead-brand-live #aria-caretakers [data-safety-diplomas] { max-width: 40rem; }
+.lead-brand-live #aria-caretakers [data-safety-diplomas] img { max-width: 12rem; }
