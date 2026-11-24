@@ -159,6 +159,12 @@ export function trackAriaQuestionSubmit(source: string) {
   });
 }
 
+/** Contact-only event; not a GA4 generate_lead or a Meta conversion. */
+export function trackFaqContactSubmit(source: string) {
+  if (typeof window === "undefined" || new URL(window.location.href).searchParams.get("utm_source") === "qa") return;
+  pushAnalyticsEvent("faq_contact_submit", { cta_source: source, page_path: pagePath() });
+}
+
 export function trackFormSubmit(params: {
   formType: "informacie" | "prihlaska";
   sourceRef: string;
