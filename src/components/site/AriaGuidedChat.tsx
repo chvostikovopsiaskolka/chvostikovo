@@ -38,6 +38,7 @@ const chatQuestions: Question[] = [
       ".**\nSme otvorení od **7:00 do 17:00**, pondelok až piatok.\n\n" +
       "Ak plánuješ pravidelné návštevy, odporúčame **10-vstupovú permanentku**, kde jeden vstup vychádza na **20 €/deň**. " +
       "Oproti jednorazovým vstupom tak **ušetríš 50 €**. Cena permanentky je **" + pricePass + "** a platí **2 mesiace**.\n\n" +
+      "**Podmienkou kúpy permanentky je návšteva škôlky minimálne 2× týždenne.**\n\n" +
       "**Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.**",
   },
   {
@@ -77,9 +78,9 @@ const chatQuestions: Question[] = [
   },
 ];
 
-export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefix, formPrefix, dockless = false }: {
+export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefix, formPrefix, dockless = false, portraitSrc = ARIA_HEAD_DATA_URI }: {
   open: boolean; onClose: () => void; initialQuestionId: "pricing" | null;
-  trackingPrefix: string; formPrefix: string; dockless?: boolean;
+  trackingPrefix: string; formPrefix: string; dockless?: boolean; portraitSrc?: string;
 }) {
   function track(action: string) {
     // Never send free-text, names, phone numbers or emails in behavioural events.
@@ -281,14 +282,14 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
           (dockless ? "bottom-[max(8px,env(safe-area-inset-bottom))] h-[min(94dvh,800px)]" :
             "bottom-[max(70px,calc(env(safe-area-inset-bottom)+60px))] h-[min(81dvh,720px)]")}>
         <header className="flex shrink-0 items-center gap-3 border-b border-white/60 bg-white/45 backdrop-blur-2xl px-4 py-3 pr-12">
-          <img src={ARIA_HEAD_DATA_URI} alt="" width={48} height={48} className="size-12 shrink-0 object-contain drop-shadow-sm" />
+          <img src={portraitSrc} alt="" width={48} height={48} className="size-12 shrink-0 object-contain drop-shadow-sm" />
           <DialogTitle className="font-display text-base font-extrabold text-forest sm:text-lg">Aria z Chvostíkova</DialogTitle>
         </header>
 
         <div ref={scrollRef} role="log" aria-label="Konverzácia s Ariou" aria-live="polite"
           data-aria-chat-history className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[linear-gradient(145deg,rgba(255,240,213,.68),rgba(247,233,241,.55),rgba(237,248,240,.7))] backdrop-blur-xl px-3 py-4 sm:px-5">
           <div className="flex items-end gap-2">
-            <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
+            <img src={portraitSrc} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
             <div id={chatId + "-intro"} className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm sm:text-sm">
               <span className="sr-only">{introText}</span>
               <span aria-hidden="true">{introComposing ? <span data-aria-intro-composing className="inline-flex items-center gap-1"><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f]" /><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:120ms]" /><span className="size-1.5 animate-bounce rounded-full bg-[#9e336f] [animation-delay:240ms]" /></span> : introText.slice(0, introLength)}</span>
@@ -349,7 +350,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             return (
               <div key={message.id} data-aria-chat-turn={message.side} data-aria-chat-message-id={message.id}
                 className={"flex items-end gap-2 " + (message.side === "person" ? "justify-end" : "")}>
-                {message.side === "aria" && <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />}
+                {message.side === "aria" && <img src={portraitSrc} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />}
                 <div data-aria-typing={isTyping ? "true" : undefined}
                   className={"whitespace-pre-line px-3 py-3 text-[13px] leading-relaxed shadow-sm sm:text-sm " +
                     (message.questionId === "requirements" ? "min-w-0 w-[calc(100%-44px)] max-w-[calc(100%-44px)] " : "max-w-[85%] ") +
@@ -395,7 +396,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
 
           {menuReady && messages.length > 0 && (
             <div data-aria-chat-followup-prompt className="flex items-end gap-2">
-              <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
+              <img src={portraitSrc} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
               <p className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm">
                 Chceš sa ma opýtať ešte inú otázku alebo chceš vyplniť nezáväzný formulár a počkať na telefonát od mojich rodičov?
               </p>

@@ -1,5 +1,6 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import leadAriaHead from "@/assets/aria-assistant-head-lead.webp";
 import leadHeroPhotoOne from "@/assets/lead-hero-user-1.jpg";
 import leadHeroPhotoTwo from "@/assets/lead-hero-user-2.jpg";
 import type { PuppyCheckInput } from "@/lib/inquiry";
@@ -186,6 +187,8 @@ export function AriaPreviewPage() {
     setLeadModalOpen(true);
   }
 
+  const leadPhotoGallery = <div id="lead-photo-carousel" data-aria-lead-photos className="w-full scroll-mt-24 text-left"><DaycarePhotoCarousel includeLeadHighlights /></div>;
+
   const benefitsSection = (
         <section id="lead-benefits" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
@@ -210,7 +213,6 @@ export function AriaPreviewPage() {
                   </article>;
                 })}
               </div>
-              <div id="lead-photo-carousel" data-aria-lead-photos data-aria-intro-space className="mt-8 w-full scroll-mt-24 text-left"><DaycarePhotoCarousel includeLeadHighlights /></div>
             </> : <>            {/* Mobile: one real photo paired with each benefit, with no overlapping rows. */}
             <div className="mt-7 space-y-5 sm:hidden">
               {BENEFITS.map(({ title: benefitTitle, content }, i) => {
@@ -493,7 +495,7 @@ export function AriaPreviewPage() {
       {/* Keep Aria floating in the viewport throughout the lead journey.
           The paid lead hero stays visually unchanged; the menu no longer
           participates in the document layout. */}
-      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} portraitOnRight={false} sectionNavigation={isLiveLead} {...(isLiveLead ? { anchorOverrides: { "lead-requirements": "lead-knowledge" } } : {})} onRevealInlineForm={isLiveLead ? () => revealLeadHeroForm("lead_landing_aria_dock_interest") : undefined} hidden={leadModalOpen || puppyModalOpen} />
+      <AriaLeadAssistant trackingPrefix={isLiveLead ? "lead_landing_aria" : "aria_preview_v3"} onOpenInfo={() => openAriaForm(true)} onOpenInterest={() => openAriaForm(false)} onOpenPuppyChecker={() => setPuppyModalOpen(true)} puppyStartSectionId="aria-caretakers" guidedChatPreview={!isLiveLead} leadChat={isLiveLead} {...(isLiveLead ? { portraitSrc: leadAriaHead } : {})} portraitOnRight={false} sectionNavigation={isLiveLead} {...(isLiveLead ? { anchorOverrides: { "lead-requirements": "lead-knowledge" } } : {})} onRevealInlineForm={isLiveLead ? () => revealLeadHeroForm("lead_landing_aria_dock_interest") : undefined} hidden={leadModalOpen || puppyModalOpen} />
 
       <main>
         <section className={isLiveLead ? "hero-safe-top relative flex flex-col sm:min-h-[100svh] sm:justify-start sm:pt-16 lg:pt-8" : "hero-safe-top relative flex min-h-[100svh] flex-col overflow-hidden pt-14 sm:pt-16 lg:pt-8"}>
@@ -581,6 +583,7 @@ export function AriaPreviewPage() {
         </section>
 
         {isLiveLead ? <>
+          {leadPhotoGallery}
           {pricingSection}
           {firstVisitSection}
           {heroFormSection}

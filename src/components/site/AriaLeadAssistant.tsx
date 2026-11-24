@@ -74,6 +74,8 @@ export function AriaLeadAssistant({
   puppyStartSectionId,
   anchorOverrides,
   guidedChatPreview = false,
+  leadChat = false,
+  portraitSrc = ARIA_HEAD_DATA_URI,
   portraitOnRight = false,
   sectionNavigation = false,
 }: {
@@ -89,6 +91,10 @@ export function AriaLeadAssistant({
   anchorOverrides?: Record<string, string>;
   /** Enables the guided Aria on the lead landing and its QA twin. */
   guidedChatPreview?: boolean;
+  /** Existing chat behavior with the approved paid left-side launcher, without its navigation. */
+  leadChat?: boolean;
+  /** Optional approved high-resolution portrait, scoped to this route. */
+  portraitSrc?: string;
   /** Reuse the preview\'s right-side speech outline without enabling its chatbot. */
   portraitOnRight?: boolean;
   /** Paid LEAD shortcuts stay separate from preview chatbot. */
@@ -151,6 +157,7 @@ export function AriaLeadAssistant({
   // Stable sections rather than flipping a bubble on every scroll pixel.
   // Hysteresis keeps iOS browser chrome resizing from thrashing the dock.
   useEffect(() => {
+    if (leadChat) return;
     let frame = 0;
     const update = () => {
       frame = 0;
@@ -206,7 +213,7 @@ export function AriaLeadAssistant({
       window.removeEventListener("resize", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [requirementsSectionId, puppyStartSectionId, sectionNavigation]);
+  }, [requirementsSectionId, puppyStartSectionId, sectionNavigation, leadChat]);
 
   useEffect(() => {
     // Reserve the desktop scrollbar gutter while this assistant is mounted.
@@ -318,7 +325,7 @@ export function AriaLeadAssistant({
 
 
   function openChat(questionId?: "pricing") {
-    if (!guidedChatPreview) return;
+    if (!guidedChatPreview && !leadChat) return;
     setPanel(null);
     setRequestedChatQuestion(questionId ?? null);
     setChatActivated(true);
@@ -401,7 +408,7 @@ export function AriaLeadAssistant({
   if (hidden) return null;
 
   return (
-    <aside aria-label="Aria – sprievodkyňa Chvostíkovom" data-aria-guide data-intro={stage === "intro" ? "true" : "false"} data-aria-stage={stage}
+    <aside aria-label="Aria – sprievodkyňa Chvostíkovom" data-aria-guide data-aria-lead-chat={leadChat || undefined} data-intro={stage === "intro" ? "true" : "false"} data-aria-stage={stage}
       className="pointer-events-none fixed inset-x-0 bottom-[max(94px,calc(env(safe-area-inset-bottom)+78px))] z-40 px-2 sm:bottom-4 sm:px-4">
       <div className="pointer-events-none relative mx-auto w-full max-w-[690px] pb-0">
         {panel && (
@@ -411,14 +418,14 @@ export function AriaLeadAssistant({
               <div className="flex min-w-0 items-center gap-2">
                 {panel === "menu" ? (
                   <>
-                    <img data-aria-menu-head src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-8 shrink-0 object-contain sm:size-9" />
+                    <img data-aria-menu-head src={portraitSrc} alt="" width={36} height={36} className="size-8 shrink-0 object-contain sm:size-9" />
                     <h2 className="shrink-0 font-display text-[11px] font-bold min-[390px]:text-sm sm:text-base">Menu Chvostíkova</h2>
                     <img data-aria-menu-logo src={brandWordmark} alt="Chvostíkovo" width={120} height={24}
                       className="ml-1 h-4 w-auto max-w-[58px] min-w-0 object-contain min-[390px]:max-w-[82px] sm:max-w-[104px]" />
                   </>
                 ) : (
                   <>
-                    <img src={ARIA_HEAD_DATA_URI} alt="" width={48} height={48} className="size-11 shrink-0 object-contain drop-shadow-md" />
+                    <img src={portraitSrc} alt="" width={48} height={48} className="size-11 shrink-0 object-contain drop-shadow-md" />
                     <h2 className="font-display text-base font-bold">
                       {panel === "pricing" ? "Cenník škôlky" : panel === "requirements" ? "Podmienky prijatia" : "Aria odpovedá"}
                     </h2>
@@ -556,7 +563,7 @@ export function AriaLeadAssistant({
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>}
               {stage === "intro" ? (
-                guidedChatPreview ? (
+                (guidedChatPreview || leadChat) ? (
                   <div className="pointer-events-auto relative z-10 min-w-0">
                     <p className="font-display text-[11px] font-semibold leading-[1.4] tracking-normal sm:text-[13px]">
                       Ahoj, volám sa <strong className="font-extrabold text-coral-dark">Aria.</strong>{" "}
@@ -599,20 +606,27 @@ export function AriaLeadAssistant({
           </div>
         )}
 
-        <div className={"pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (rightAlignedBubble || sectionNavigation ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
-          <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-          {guidedChatPreview ? (
+        <div className={leadChat ? "pointer-events-none relative mx-auto h-0 w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "pointer-events-auto relative rounded-[16px] border border-forest/20 bg-card/95 px-1 py-0.5 text-forest shadow-[0_4px_18px_rgba(18,68,43,.13)] sm:px-2 " + (rightAlignedBubble || sectionNavigation ? "mx-auto w-[calc(100%-12px)] max-w-[440px] sm:max-w-[500px]" : "ml-[83px] sm:ml-[104px]")} data-aria-dock>
+          {!leadChat && <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />}
+          {leadChat ? (
+            <button type="button" data-aria-chat-trigger aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
+              onClick={() => openChat()} style={{ WebkitTapHighlightColor: "transparent", WebkitTouchCallout: "none", userSelect: "none" }}
+              className="pointer-events-auto absolute bottom-[calc(100%+12px)] left-1 h-[92px] w-[92px] appearance-none rounded-full border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest sm:left-0 sm:h-[104px] sm:w-[104px]">
+              <img ref={portraitRef} src={portraitSrc} alt="Aria, psia pomocníčka" width={128} height={128}
+                className="pointer-events-none h-full w-full object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)]" />
+            </button>
+          ) : guidedChatPreview ? (
             <button type="button" aria-label="Porozprávať sa s Ariou" aria-expanded={chatOpen}
               data-aria-chat-trigger onClick={() => openChat()} style={{ WebkitTapHighlightColor: "transparent", WebkitTouchCallout: "none", userSelect: "none" }}
               className={"aria-chat-portrait pointer-events-auto absolute bottom-[calc(100%+12px)] -right-1 h-[92px] w-[92px] max-w-none appearance-none rounded-full border-0 bg-transparent p-0 outline-none transition-none hover:bg-transparent active:bg-transparent focus:bg-transparent focus-visible:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest sm:bottom-[calc(100%+12px)] sm:right-0 sm:h-[104px] sm:w-[104px] " + (panel ? "z-0" : "z-30")}> 
-              <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
+              <img ref={portraitRef} src={portraitSrc} alt="Aria, psia pomocníčka" width={128} height={128}
                 className="pointer-events-none h-full w-full object-contain contrast-[1.1] saturate-[1.05] drop-shadow-[0_3px_5px_rgba(0,0,0,.23)]" />
             </button>
           ) : (
-            <img ref={portraitRef} src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={128} height={128}
+            <img ref={portraitRef} src={portraitSrc} alt="Aria, psia pomocníčka" width={128} height={128}
               className={portraitOnRight ? "pointer-events-none absolute bottom-[calc(100%+12px)] right-1 h-[92px] w-[92px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:right-0 sm:h-[104px] sm:w-[104px]" : sectionNavigation ? "pointer-events-none absolute bottom-[calc(100%+12px)] left-1 h-[92px] w-[92px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:left-0 sm:h-[104px] sm:w-[104px]" : "pointer-events-none absolute -bottom-1 -left-[86px] h-[84px] w-[84px] max-w-none object-contain contrast-[1.07] saturate-[1.03] drop-shadow-[0_3px_5px_rgba(0,0,0,.25)] sm:-left-[106px] sm:h-[99px] sm:w-[99px]"} />
           )}
-          <div data-aria-section-navigation={sectionNavigation || undefined} className="flex h-[52px] items-center gap-0.5">
+          {!leadChat && <div data-aria-section-navigation={sectionNavigation || undefined} className="flex h-[52px] items-center gap-0.5">
             {sectionNavigation ? (
               <>
                 <button type="button" className={itemClass} data-lead-nav-key="about" aria-current={activeLeadSection === "about" ? "location" : undefined} aria-label="O nás" onClick={() => goToLeadSection("aria-about", "about")}><UsersRound size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">O nás</span></button>
@@ -647,12 +661,12 @@ export function AriaLeadAssistant({
 
               </>
             )}
-          </div>
+          </div>}
         </div>
-        {guidedChatPreview && chatActivated && (
+        {(guidedChatPreview || leadChat) && chatActivated && (
           <AriaChatBoundary open={chatOpen} onClose={() => setChatOpen(false)}>
             <Suspense fallback={null}>
-              <AriaGuidedChat open={chatOpen} initialQuestionId={requestedChatQuestion}
+              <AriaGuidedChat open={chatOpen} initialQuestionId={requestedChatQuestion} dockless={leadChat} portraitSrc={portraitSrc}
                 trackingPrefix={trackingPrefix === "lead_landing_aria" ? "lead_landing_aria_chat" : "aria_preview_v3_chat"}
                 formPrefix={trackingPrefix === "lead_landing_aria" ? "lead_landing_aria_chat" : "aria_preview_chat"}
                 onClose={() => setChatOpen(false)} />
