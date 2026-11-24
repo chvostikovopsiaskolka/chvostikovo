@@ -134,11 +134,11 @@ export function EdgePhotoCarousel({
             key={photo.src}
             className="relative h-[310px] w-[85vw] shrink-0 overflow-hidden rounded-3xl shadow-card sm:h-96 sm:w-[44vw] sm:max-w-[420px] lg:w-[31vw] lg:max-w-[360px]"
           >
-            {dataName === "stand" ? (
-              <button
+            <button
                 type="button"
-                data-stand-photo-open
-                aria-label={`Otvoriť fotografiu stojana ${photo.caption ?? photo.alt}`}
+                data-stand-photo-open={dataName === "stand" ? true : undefined}
+                data-target-photo-open={dataName === "target" ? true : undefined}
+                aria-label={`Otvoriť fotografiu ${dataName === "stand" ? "stojana" : "targetu"} ${photo.caption ?? photo.alt}`}
                 className="block h-full w-full cursor-zoom-in rounded-3xl focus-visible:outline-4 focus-visible:outline-offset-[-4px] focus-visible:outline-coral"
                 onPointerDown={(event) => { pointerStart.current = { x: event.clientX, y: event.clientY }; }}
                 onClick={(event) => {
@@ -160,17 +160,6 @@ export function EdgePhotoCarousel({
                   style={{ objectPosition: photo.position ?? "50% 54%" } as CSSProperties}
                 />
               </button>
-            ) : (
-              <img
-                src={photo.src}
-                alt={photo.alt}
-                loading="lazy"
-                decoding="async"
-                draggable={false}
-                className="h-full w-full select-none object-cover"
-                style={{ objectPosition: photo.position ?? "50% 54%" } as CSSProperties}
-              />
-            )}
             {dataName === "stand" && photo.caption && (
               <figcaption className="pointer-events-none absolute left-3 top-3 rounded-full bg-card/95 px-3 py-1.5 text-xs font-semibold text-forest shadow-sm backdrop-blur-sm">
                 {photo.caption} · Ručná výroba
@@ -179,9 +168,10 @@ export function EdgePhotoCarousel({
           </figure>
         ))}
       </div>
-      {dataName === "stand" && openedIndex !== null && (
+      {openedIndex !== null && (
         <StandPhotoLightbox
           photos={photos}
+          product={dataName}
           index={openedIndex}
           onSelect={setOpenedIndex}
           onClose={() => { setOpenedIndex(null); resumeAfterInteraction(); }}
