@@ -2072,6 +2072,34 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Inline lead success receipt must remain visible');
           }
           if (!restricted && !bellaris && url.pathname === '/') {
+            await page.setViewportSize({width:390,height:844});
+            const faqForm=page.locator('[data-home-faq-contact-form]');
+            const question=faqForm.locator('textarea[name="otazka"]');
+            const faqPosts=[];
+            const handler=async route=>{
+              const payload=route.request().postDataJSON()||{};
+              faqPosts.push(payload);
+              await route.fulfill({status:201,contentType:'application/json',body:'{"ok":true}'});
+            };
+            await page.route('**/functions/v1/web-form-submit',handler);
+            await question.fill('Ako vyzerá deň v škôlke?');
+            await faqForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+            await faqForm.locator('input[name="meno"]').fill('Testovací kontakt');
+            await faqForm.locator('input[name="telefon"]').fill('912345678');
+            await faqForm.locator('input[name="email"]').fill('test@example.com');
+            await faqForm.getByRole('button',{name:'Späť',exact:true}).click();
+            if(await question.inputValue()!=='Ako vyzerá deň v škôlke?') throw new Error('FAQ question lost on Back');
+            await faqForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+            if(await faqForm.locator('input[name="meno"]').inputValue()!=='Testovací kontakt') throw new Error('FAQ contact lost on Back');
+            await faqForm.getByRole('button',{name:'Poslať',exact:true}).click();
+            if(faqPosts.length) throw new Error('FAQ contact accepted without consent');
+            await faqForm.locator('input[type="checkbox"][required]').check();
+            await faqForm.getByRole('button',{name:'Poslať',exact:true}).click();
+            await page.locator('[data-home-faq-contact-success]').waitFor({state:'visible'});
+            for(let i=0;i<20&&!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='home_faq_contact_submitted');i++) await page.waitForTimeout(100);
+            const faqPayload=faqPosts[0];
+            if(faqPosts.length!==1||faqPayload.cta_source!=='home_faq_contact'||faqPayload.marketing_consent!==false||faqPayload.email!=='test@example.com'||faqPayload.raw_payload?.['Otázka návštevníka']!=='Ako vyzerá deň v škôlke?'||faqPayload.dog_breed||trackedEvents.filter(e=>e.name==='explore_daycare'&&e.source==='home_faq_contact_submitted').length!==1||trackedEvents.some(e=>e.name==='form_submit'&&e.source==='home_faq_contact')) throw new Error('FAQ contact source, data, consent or non-conversion tracking regression');
+            await page.unroute('**/functions/v1/web-form-submit',handler);
             await page.setViewportSize({ width: 390, height: 844 });
             const checker = page.locator('[data-home-puppy-checker] [data-aria-puppy-step="age"]');
             await checker.scrollIntoViewIfNeeded();
@@ -2345,7 +2373,7 @@ if (!bellaris && brandPreviewCandidate) {
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]:visible').first().isVisible())
                   throw new Error('Desktop home guided form missing');
                 const layout = await page.evaluate(() => {
-                  const ids=['top','preco-chvostikovo','o-nas','cennik','podmienky','home-early-faq','informujte-sa','starostlivost','priestory','psie-priatelstva','prva-navsteva','prva-navsteva-form','preco','faq'];
+                  const ids=['top','preco-chvostikovo','o-nas','cennik','aria-puppy-check','podmienky','informujte-sa','starostlivost','priestory','psie-priatelstva','prva-navsteva','prva-navsteva-form','preco','faq'];
                   const nodes=ids.map(id=>document.getElementById(id));
                   const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
                   const cutout=document.querySelector('[data-schoolmates-cutout]');
@@ -2357,7 +2385,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const benefitPills=[...document.querySelectorAll('#o-nas [data-hero-benefits] > span')].map(el=>el.getBoundingClientRect());
                   const aboutHeading=document.querySelector('#o-nas h2');
                   const aboutText=document.querySelector('#o-nas [data-about-expanded]');
-                  const faq=document.querySelector('#home-early-faq');
+                  const faq=document.querySelector('#faq');
                   const dock=document.querySelector('.mobile-dock[data-variant="main"]');
                   const heroCta=[...document.querySelectorAll('#top .hero-cta-primary')].find(el=>el.getBoundingClientRect().width>0);
                   const videoGrid=document.querySelector('[data-video-reasons-grid]');
@@ -2418,22 +2446,23 @@ if (!bellaris && brandPreviewCandidate) {
                     desktopCtaWithinForm:innerWidth<1024||document.getElementById('home-hero-learn-more').getBoundingClientRect().bottom<=document.querySelector('#home-hero-inline-form [data-home-form-panel]').getBoundingClientRect().bottom+2,
                     friendshipModal:!!document.getElementById('home-friendship-interest')&&!document.getElementById('zaujem-po-priatelstvach'),
                     freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
-                    pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
+                    pricing:cards.length===2 && Math.abs(cards[0].top-cards[1].top)<2 && Math.abs(cards[0].bottom-cards[1].bottom)<2 && cards[1].left>=cards[0].right+7 && included.top>=prices.bottom+7 && Math.abs(included.left-prices.left)<3 && Math.abs(included.right-prices.right)<3 && !document.querySelector('#cennik button'),
+                     pricingAmounts:(()=>{const pass=document.querySelector('[data-home-price-card="pass"]');const value=pass?.querySelector('[data-home-price]');return !!value && /20\s*€\s*\/ deň/.test(value.textContent) && /200\s*€/.test(pass.textContent) && /10 vstupov/.test(pass.textContent) && !/Platí 2 mesiace/.test(pass.textContent) && /Ušetríte 50\s*€/.test(pass.textContent) && getComputedStyle(value).whiteSpace==='nowrap' && (()=>{const badge=pass.querySelector('[data-home-best-value]');const title=pass.querySelector('h3');if(!badge||!title)return false;const b=badge.getBoundingClientRect(),p=pass.getBoundingClientRect(),v=value.getBoundingClientRect();const single=document.querySelector('[data-home-price-card="single"]');const sv=single.querySelector('[data-home-price]');return title.textContent.trim()==='Permanentka' && single.querySelector('h3').textContent.trim()==='Jednorazový vstup' && getComputedStyle(title).whiteSpace==='nowrap' && getComputedStyle(single.querySelector('h3')).whiteSpace==='nowrap' && /25\s*€\s*\/ deň/.test(sv.textContent) && getComputedStyle(sv).whiteSpace==='nowrap' && /200\s*€\s*·\s*10 vstupov/.test(pass.querySelector('[data-home-pass-total]')?.textContent||'') && /Pondelok – piatok/.test(single.querySelector('[data-home-opening-hours]')?.textContent||'') && /od 7:00 do 17:00/.test(single.querySelector('[data-home-opening-hours]')?.textContent||'') && Math.abs(single.querySelector('h3').getBoundingClientRect().top-title.getBoundingClientRect().top)<2 && Math.abs(sv.getBoundingClientRect().top-v.top)<2 && getComputedStyle(sv).color==='rgb(255, 164, 20)' && title.getBoundingClientRect().bottom<=v.top+1 && b.top<p.bottom && b.bottom>p.bottom && b.left>=p.left-1 && b.right<=p.right+1 && b.bottom<included.top;})();})(),
                     passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
-                    taxiAcrossColumns:!!taxi && !taxi.closest('[data-home-included]') && Math.abs(included.bottom-cards[1].bottom)<=3 && taxi.getBoundingClientRect().top>=document.querySelector('[data-home-included] ul').getBoundingClientRect().bottom &&
-                      getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(included.bottom-prices.bottom)<3 && Math.abs(taxi.getBoundingClientRect().left-included.left)<3 && Math.abs(taxi.getBoundingClientRect().right-prices.right)<3,
+                    taxiAcrossColumns:!!taxi && !taxi.closest('[data-home-included]') && taxi.getBoundingClientRect().top>=included.bottom+7 && !taxi.querySelector('br') && getComputedStyle(taxi.querySelector('span')).whiteSpace==='nowrap' && /5\s*€\s*\/ jazda/.test(taxi.textContent) &&
+                      getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(taxi.getBoundingClientRect().left-included.left)<3 && Math.abs(taxi.getBoundingClientRect().right-included.right)<3,
                     compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
                     aboutExpanded:!document.querySelector('#o-nas summary') && !!aboutText?.querySelector('strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2 &&
-                      getComputedStyle(aboutText).textAlign==='left' && parseFloat(getComputedStyle(aboutText).fontSize)>=18 && aboutText.getBoundingClientRect().width<=682,
+                      getComputedStyle(aboutText).textAlign==='left' && parseFloat(getComputedStyle(aboutText).fontSize)===16 && aboutText.getBoundingClientRect().width<=682,
                     aboutNoOrphan:(()=>{const node=aboutText?.querySelector('p')?.lastChild;if(node?.nodeType!==Node.TEXT_NODE)return false;const words=[...node.textContent.matchAll(/\S+/g)].slice(-2);if(words.length!==2)return false;const tops=words.map(word=>{const range=document.createRange();range.setStart(node,word.index);range.setEnd(node,word.index+word[0].length);return range.getBoundingClientRect().top;});return Math.abs(tops[0]-tops[1])<2;})(),
                     aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
                     centeredFullWidthTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-prices.right)/2)<3,
-                    faqAfterRequirements:document.getElementById('podmienky').nextElementSibling===faq &&
-                      faq.querySelectorAll('details').length===3 && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
+                    singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===7 && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
+                    puppyImmediatelyAfterPricing:document.getElementById('cennik').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
-                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty',
+                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
                       (() => {
@@ -2457,7 +2486,7 @@ if (!bellaris && brandPreviewCandidate) {
                       ? !!document.querySelector('#top [data-home-hero-interest-cta]') &&
                         [...document.querySelectorAll('#top [data-lead-step-form]')].every(el=>el.getBoundingClientRect().height===0)
                       : getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow!=='none',
-                    conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
+                    conditionsNext:document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
                     homeMobileVideoLayout:(() => {
@@ -2472,7 +2501,7 @@ if (!bellaris && brandPreviewCandidate) {
                         texts[1].left>=video.right-2 &&
                         texts[1].top>=texts[0].bottom-2 &&
                         texts[2].top>=video.bottom-2 &&
-                        texts[2].left>=video.right-2 && (()=>{const photo=document.querySelector('[data-home-reason-photo]')?.getBoundingClientRect();return !!photo && Math.abs(photo.width-video.width)<3 && photo.right<=texts[2].left+3;})() &&
+                        texts[2].left>=video.right-2 && (()=>{const photo=document.querySelector('[data-home-reason-photo]')?.getBoundingClientRect();return !!photo && Math.abs(photo.width-video.width)<3 && photo.right<=texts[2].left+3 && Math.abs(video.top-texts[0].top)<3 && Math.abs(video.bottom-texts[1].bottom)<3 && Math.abs(photo.top-texts[2].top)<3 && Math.abs(photo.bottom-texts[2].bottom)<3;})() &&
                         document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] strong').length>=4;
                     })(),
                     homeReviewSoftShadow:(() => {
@@ -2532,9 +2561,9 @@ if (!bellaris && brandPreviewCandidate) {
                 // ContextFaq mounts its CTA only while the disclosure is open:
                 // verify the actual clickable link after user interaction,
                 // rather than querying a deliberately unmounted child.
-                const puppyToggle=page.locator('#home-early-faq summary').filter({hasText:'Čo ak chcete prihlásiť šteniatko?'});
+                const puppyToggle=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
                 await puppyToggle.click();
-                const puppyLink=page.locator('#home-early-faq a[href="#aria-puppy-check"].btn-coral');
+                const puppyLink=page.locator('#faq a[href="#aria-puppy-check"].btn-coral');
                 if (!await puppyLink.isVisible() ||
                     !(await page.locator('#aria-puppy-check h2').innerText()).includes('Spĺňa základné podmienky?'))
                   throw new Error('Expanded puppy FAQ must show a pink CTA linking to the real age/vaccination checker');
@@ -2608,9 +2637,15 @@ if (!bellaris && brandPreviewCandidate) {
               await page.waitForFunction(()=>{const y=document.getElementById('preco-chvostikovo').getBoundingClientRect().top;return y>=0&&y<260;});
               if(await page.getByRole('dialog').count()) throw new Error('Desktop learn-more action opened a dialog');
               await page.setViewportSize({width:390,height:844});
-              const puppyFaq=page.locator('#home-early-faq summary').filter({hasText:'Čo ak chcete prihlásiť šteniatko?'});
+              await page.locator('.mobile-dock[data-variant="main"] .mobile-dock-apply').click();
+              const dockApplication=page.getByRole('dialog').last();
+              await dockApplication.waitFor({state:'visible'});
+              if(!await dockApplication.locator('input[name="meno"]').isVisible()) throw new Error('Homepage mobile application must open the real form');
+              await dockApplication.getByRole('button',{name:'Close'}).click();
+              await dockApplication.waitFor({state:'hidden'});
+              const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
                await puppyFaq.click();
-               await page.locator('#home-early-faq a[href="#aria-puppy-check"]').click();
+               await page.locator('#faq a[href="#aria-puppy-check"]').click();
               await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
               for(const id of ['informujte-sa','prva-navsteva-form']) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
@@ -2885,12 +2920,31 @@ if (!bellaris && brandPreviewCandidate) {
           }
           if (errors.length) throw new Error(errors.join('; '));
           if(brandPreviewCandidate&&!bellaris&&!restricted){
-            const forms=page.locator('[data-lead-step-form]:visible');
-            for(let i=0;i<await forms.count();i++){
+            // Freeze DOM indices instead of re-resolving a changing :visible list
+            // while WebKit scrolls/paints the previously revealed homepage forms.
+            const homeRoute=url.pathname==='/';
+            const forms=page.locator(homeRoute?'[data-lead-step-form]':'[data-lead-step-form]:visible');
+            const visibleIndices=homeRoute
+              ? await forms.evaluateAll(nodes=>nodes.flatMap((node,index)=>node.getClientRects().length&&node.getBoundingClientRect().height>0?[index]:[]))
+              : Array.from({length:await forms.count()},(_,index)=>index);
+            for(const i of visibleIndices){
               const form=forms.nth(i);
               if(await form.getAttribute('data-lead-step')==='1'){
-                await form.locator('label').first().click();
-                await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+                if(homeRoute){
+                  const choice=form.locator('label:has(input[name="zaujem"])').first();
+                  await choice.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+                  await choice.click();
+                  await form.locator('input[name="zaujem"]').first().evaluate(el=>{if(!el.checked)throw new Error('Shared form interest radio did not select');});
+                  const next=form.getByRole('button',{name:'Pokračovať',exact:true});
+                  await next.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+                  await next.click();
+                  await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
+                }else{
+                  // Other routes, especially the paid lead page, retain their
+                  // existing interaction sequence without forced scroll positions.
+                  await form.locator('label').first().click();
+                  await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+                }
               }
               await assertLeadContactIntro(form);
               await form.getByRole('button',{name:'Späť',exact:true}).click();
@@ -3378,24 +3432,30 @@ if (!bellaris && brandPreviewCandidate) {
                 !await introSteps.nth(2).locator('strong').getByText(/pravdivo všetko/).count()) {
               throw new Error('Three first-visit steps must visibly cover adaptation and truthful owner details without duplicate FAQ');
             }
-            const careToggle = productPage.locator('#starostlivost').getByRole('button', { name: 'Ako dbáme na bezpečnosť psíkov?' });
+            const careToggle = productPage.locator('#faq').getByRole('button', { name: 'Ako zabezpečujete bezpečnosť psíkov v škôlke?', exact: true });
+            if (await careToggle.count() !== 1 || await productPage.locator('#starostlivost').getByRole('button', { name: /Ako dbáme na bezpečnosť|Hrajú sa psíkovia/ }).count()) {
+              throw new Error('Safety and daily-rhythm FAQ must live in the single homepage FAQ, not Care');
+            }
             await careToggle.click();
+            const careFaq = careToggle.locator('xpath=..');
             if (await careToggle.getAttribute('aria-expanded') !== 'true' ||
-                !(await productPage.locator('#starostlivost').getByText('neustálym dohľadom', { exact: false }).count())) {
-              throw new Error('Care safety FAQ must open with its detailed answer');
+                !(await careFaq.getByText('neustálym dohľadom', { exact: false }).count())) {
+              throw new Error('Consolidated safety FAQ must open with its detailed answer');
             }
-            const careFaq = careToggle.locator('xpath=../..');
-            const careLayout = productPage.locator('#starostlivost > .relative.z-10');
-            const [faqBox, layoutBox] = await Promise.all([careFaq.boundingBox(), careLayout.boundingBox()]);
-            if (!faqBox || !layoutBox || Math.abs(faqBox.width - (layoutBox.width - 32)) > 4) {
-              throw new Error('Care FAQ should span the photo and benefit-text content width');
+            const faqBox = await careFaq.boundingBox();
+            const faqLayout = await productPage.locator('#faq > .relative.z-10').boundingBox();
+            if (!faqBox || !faqLayout || Math.abs(faqBox.width - (faqLayout.width - 32)) > 4) {
+              throw new Error('Consolidated FAQ should span its content width');
             }
-            const repeatedTitle = careFaq.getByRole('heading', { name: 'Ako zabezpečujete bezpečnosť psíkov v škôlke?' });
-            if (await repeatedTitle.count()) throw new Error('Care FAQ repeats a second heading inside its answer');
-            const careAnswer = careToggle.locator('xpath=..').locator('div[id]').first();
-            if (!await careAnswer.getByText('Bezpečnosť začína už vstupnou návštevou.', { exact: false }).count()) {
-              throw new Error('Care FAQ answer missing after removing duplicated heading');
+            if (await careFaq.getByRole('heading', { name: 'Ako zabezpečujete bezpečnosť psíkov v škôlke?' }).count()) throw new Error('FAQ repeats a second heading inside its answer');
+            if (!await careFaq.getByText('Bezpečnosť začína už vstupnou návštevou.', { exact: false }).count()) {
+              throw new Error('Safety FAQ answer missing after consolidation');
             }
+            await careToggle.click();
+            const eligibilityToggle = productPage.locator('#faq').getByRole('button', { name: 'Pre koho je škôlka určená?', exact: true });
+            await eligibilityToggle.click();
+            if (await eligibilityToggle.getAttribute('aria-expanded') !== 'true' || !(await eligibilityToggle.locator('xpath=..').locator('p').count())) throw new Error('Eligibility FAQ must retain its answer');
+            await eligibilityToggle.click();
             const whyArticle = productPage.locator('#preco a[href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"]');
             if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
             const whyCta = productPage.locator('#preco').getByRole('button', { name: 'Chcem prihlásiť psíka' });

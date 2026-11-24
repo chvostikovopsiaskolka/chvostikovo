@@ -95,6 +95,16 @@ assert(ariaBackend.includes("lead_landing_aria_chat_other") &&
 
 
 
+// Homepage contact: explicit source, mandatory email and question, no dog details or paid conversion.
+const faqContactInput = { typ: "informacie" as const, consent: true as const, meno: "Test", telefon: phone, email: "test@example.com", zaujem: "Chcem sa informovať o škôlke", otazka: "Aký je priebeh dňa?", cta_source: "home_faq_contact" };
+const faqContact = buildDbPayload(inquirySchema.parse(faqContactInput));
+assert(faqContact.cta_source === "home_faq_contact" && faqContact.raw_payload["Otázka návštevníka"] === faqContactInput.otazka && !("dog_breed" in faqContact), "FAQ contact must retain the question and source without dog details.");
+for (const patch of [{ email: undefined }, { otazka: undefined }, { meno: " " }, { consent: false }]) assert(!inquirySchema.safeParse({ ...faqContactInput, ...patch }).success, "FAQ contact requires the question, identity and consent.");
+const faqFormBlock = ariaFormsSource.slice(ariaFormsSource.indexOf("export function HomeFaqContactForm"), ariaFormsSource.indexOf("/** Inline binary choices"));
+assert(faqFormBlock.includes("await submitInquiry(") && faqFormBlock.includes("trackFaqContactSubmit(source)") && !faqFormBlock.includes("trackMetaFormConversion") && !faqFormBlock.includes("trackFormSubmit") && !faqFormBlock.includes('"form_submit"'), "FAQ contact must emit only its own non-conversion success.");
+assert(ariaAnalyticsSource.includes('pushAnalyticsEvent("faq_contact_submit"') && ariaBackend.includes("'home_faq_contact',"), "FAQ contact source must be isolated on both analytics and server.");
+assert(readFileSync(new URL("../src/lib/submit-inquiry.ts", import.meta.url), "utf8").includes("data.cta_source !== HOME_FAQ_CONTACT_SOURCE"), "Do not attach Meta consent/identifiers to FAQ contact transport.");
+
 // The approved puppy wizard asks only age and vaccinations; dog breed is
 // collected by the existing shared lead contact (no second dog details step).
 const checkerSource = readFileSync(new URL("../src/components/site/AriaPuppyChecker.tsx", import.meta.url), "utf8");

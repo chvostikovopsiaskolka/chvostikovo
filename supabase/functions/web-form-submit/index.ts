@@ -7,10 +7,11 @@ const ALLOWED_ORIGINS = new Set([
   'https://chvostikovopsiaskolka.github.io',
 ]);
 
-// Explicitly supported information-only submissions from both lead and QA Aria.
+// Explicitly supported contact-only questions from Aria and homepage FAQ.
 const ARIA_QUESTION_SOURCES = new Set([
   'aria_preview_chat_other',
   'lead_landing_aria_chat_other',
+  'home_faq_contact',
 ]);
 
 const LEAD_INTERESTS = new Set([
