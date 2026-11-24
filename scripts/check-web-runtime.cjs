@@ -2004,6 +2004,34 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Inline lead success receipt must remain visible');
           }
           if (!restricted && !bellaris && url.pathname === '/') {
+            await page.setViewportSize({width:390,height:844});
+            const faqForm=page.locator('[data-home-faq-contact-form]');
+            const question=faqForm.locator('textarea[name="otazka"]');
+            const faqPosts=[];
+            const handler=async route=>{
+              const payload=route.request().postDataJSON()||{};
+              faqPosts.push(payload);
+              await route.fulfill({status:201,contentType:'application/json',body:'{"ok":true}'});
+            };
+            await page.route('**/functions/v1/web-form-submit',handler);
+            await question.fill('Ako vyzerá deň v škôlke?');
+            await faqForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+            await faqForm.locator('input[name="meno"]').fill('Testovací kontakt');
+            await faqForm.locator('input[name="telefon"]').fill('912345678');
+            await faqForm.locator('input[name="email"]').fill('test@example.com');
+            await faqForm.getByRole('button',{name:'Späť',exact:true}).click();
+            if(await question.inputValue()!=='Ako vyzerá deň v škôlke?') throw new Error('FAQ question lost on Back');
+            await faqForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+            if(await faqForm.locator('input[name="meno"]').inputValue()!=='Testovací kontakt') throw new Error('FAQ contact lost on Back');
+            await faqForm.getByRole('button',{name:'Poslať',exact:true}).click();
+            if(faqPosts.length) throw new Error('FAQ contact accepted without consent');
+            await faqForm.locator('input[type="checkbox"][required]').check();
+            await faqForm.getByRole('button',{name:'Poslať',exact:true}).click();
+            await page.locator('[data-home-faq-contact-success]').waitFor({state:'visible'});
+            for(let i=0;i<20&&!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='home_faq_contact_submitted');i++) await page.waitForTimeout(100);
+            const faqPayload=faqPosts[0];
+            if(faqPosts.length!==1||faqPayload.cta_source!=='home_faq_contact'||faqPayload.marketing_consent!==false||faqPayload.email!=='test@example.com'||faqPayload.raw_payload?.['Otázka návštevníka']!=='Ako vyzerá deň v škôlke?'||faqPayload.dog_breed||trackedEvents.filter(e=>e.name==='explore_daycare'&&e.source==='home_faq_contact_submitted').length!==1||trackedEvents.some(e=>e.name==='form_submit'&&e.source==='home_faq_contact')) throw new Error('FAQ contact source, data, consent or non-conversion tracking regression');
+            await page.unroute('**/functions/v1/web-form-submit',handler);
             await page.setViewportSize({ width: 390, height: 844 });
             const checker = page.locator('[data-home-puppy-checker] [data-aria-puppy-step="age"]');
             await checker.scrollIntoViewIfNeeded();
