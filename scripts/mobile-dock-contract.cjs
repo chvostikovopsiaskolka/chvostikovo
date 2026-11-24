@@ -299,7 +299,7 @@ assert(crownIndex >= 0 && visitCardIndex > crownIndex && visitIntroIndex > visit
 // the original eight GALLERY Wix asset IDs and matching 1600px/92Q CDN
 // variants; never duplicate the moving carousel or alter preview's order.
 const ariaMosaicCurrent = read("src/components/site/AriaMosaicGallery.tsx");
-const campaignOrder = paidLeadCurrent.slice(paidLeadCurrent.indexOf('{isLiveLead ? <>\n          {pricingSection}'));
+const campaignOrder = paidLeadCurrent.slice(paidLeadCurrent.indexOf('{isLiveLead ? <>\n          {leadPhotoGallery}'));
 assert(campaignOrder.includes('<AriaMosaicGallery paidLead />') &&
        campaignOrder.indexOf('{benefitsSection}') < campaignOrder.indexOf('<AriaMosaicGallery paidLead />') &&
        ariaMosaicCurrent.includes('GALLERY.slice(0, 8)') &&
@@ -313,14 +313,16 @@ assert(campaignOrder.includes('<AriaMosaicGallery paidLead />') &&
 /* APP-01 23.11: explicitly test reordered LEAD, mobile inline and narrow widths. */
 const paid = read("src/routes/test-aria.tsx");
 const ariaAssistant = read("src/components/site/AriaLeadAssistant.tsx");
-assert(campaignOrder.indexOf('{pricingSection}') < campaignOrder.indexOf('{firstVisitSection}') &&
+assert(campaignOrder.indexOf('{leadPhotoGallery}') >= 0 &&
+       campaignOrder.indexOf('{leadPhotoGallery}') < campaignOrder.indexOf('{pricingSection}') &&
+       campaignOrder.indexOf('{pricingSection}') < campaignOrder.indexOf('{firstVisitSection}') &&
        campaignOrder.indexOf('{firstVisitSection}') < campaignOrder.indexOf('{heroFormSection}') &&
        campaignOrder.indexOf('{heroFormSection}') < campaignOrder.indexOf('{caretakersSection}') &&
        campaignOrder.indexOf('{caretakersSection}') < campaignOrder.indexOf('{conditionsSection}') &&
        campaignOrder.indexOf('{conditionsSection}') < campaignOrder.indexOf('{campaignFaqSection}') &&
        campaignOrder.indexOf('{campaignFaqSection}') < campaignOrder.indexOf('{puppyChecker}') &&
        paid.includes('data-lead-benefits') && paid.includes('id="lead-photo-carousel"'),
-       "Campaign uses one in-page form after visit steps; carousel belongs in benefits");
+       "Campaign keeps the existing forms and puts the full-width carousel above pricing");
 assert(hero.includes('data-home-hero-photos') &&
        hero.includes('data-home-hero-interest-cta') &&
        hero.includes('LEAD_REVIEW_GAP_PHOTOS') &&
@@ -332,7 +334,7 @@ assert(leadContact.includes("compact = false") && leadContact.includes('min-h-[7
        "Only explicitly compact forms may shorten choices, without changing transport");
 assert(ariaAssistant.includes('data-aria-interest-cta') && ariaAssistant.includes('aria-label="Mám záujem o škôlku"') &&
        css.includes('.lead-brand-live [data-aria-section-navigation] [data-aria-interest-cta]'),
-       "Orange lead dock must open existing inline form, without changing preview docks");
+       "Legacy orange dock actions remain available without changing preview docks");
 assert(css.includes('@media (max-width: 359px)') && css.includes('#top h1 span { white-space: normal; }'),
        "320px Hero must allow title wrapping without horizontal overflow");
 assert(reviewReasons.includes('row-span-2 min-w-0 self-stretch') &&

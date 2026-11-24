@@ -63,21 +63,81 @@ async function assertLeadContactIntro(form) {
 
 // Campaign content-flow contract: preserve the shared cookie/funnel/widget checks,
 // replace only the superseded section-order and hidden-form assertions below.
+// Reuse the TEST chat on paid LEAD; verify only the new route wiring with isolated transports.
+async function assertPaidAriaChat(page) {
+  const posted=[];
+  const handler=async route=>{
+    const headers={'access-control-allow-origin':'*','access-control-allow-methods':'POST, OPTIONS','access-control-allow-headers':'content-type'};
+    if(route.request().method()==='OPTIONS'){await route.fulfill({status:204,headers});return;}
+    posted.push(route.request().postDataJSON());
+    await route.fulfill({status:200,contentType:'application/json',headers,body:'{"ok":true}'});
+  };
+  await page.route('**/functions/v1/web-form-submit',handler);
+  try {
+    const trigger=page.locator('[data-aria-lead-chat] [data-aria-chat-trigger]');
+    await trigger.click();
+    const chat=page.locator('[data-aria-chat]');
+    await chat.waitFor({state:'visible'});
+    await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'visible'});
+    if(await chat.locator('[data-aria-chat-question]').count()!==4)throw new Error('Paid chat must reuse four FAQ choices');
+    await chat.locator('[data-aria-chat-question="pricing"]').click();
+    await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'detached'});
+    await chat.locator('[data-aria-chat-questions]').waitFor({state:'visible',timeout:20000});
+    if(await chat.locator('[data-aria-chat-question]').count()!==4||!(await chat.innerText()).includes('20 €/deň'))throw new Error('Paid chat must reuse pricing answer and refill four FAQ');
+    await chat.locator('[data-aria-chat-other-cta]').click();
+    const other=chat.locator('[data-aria-chat-other]');
+    const question=other.locator('textarea[name="otazka"]');
+    await question.waitFor({state:'visible'});
+    await question.fill('Aké sú možnosti pre dvoch psíkov?');
+    await other.getByRole('button',{name:'Pokračovať',exact:true}).click();
+    await other.locator('input[name="meno"]').fill('Test Otázka');
+    await other.locator('input[name="telefon"]').fill('+421901234567');
+    await other.locator('input[name="email"]').fill('test@example.invalid');
+    await other.locator('input[type="checkbox"]').check();
+    await other.getByRole('button',{name:'Poslať',exact:true}).click();
+    await other.locator('[data-home-faq-contact-success]').waitFor({state:'visible'});
+    if(posted.length!==1||posted[0].cta_source!=='lead_landing_aria_chat_other'||posted[0].raw_payload?.['Otázka návštevníka']!=='Aké sú možnosti pre dvoch psíkov?')throw new Error('Paid question must retain the existing CRM contact source and text');
+    await chat.locator('[data-aria-chat-interest-cta]').click();
+    const interest=chat.locator('[data-aria-chat-interest]');
+    const form=interest.locator('[data-lead-step-form]');
+    await advanceLeadContact(form);
+    await form.locator('input[name="meno"]').fill('Test Záujem');
+    await form.locator('input[name="plemeno"]').fill('Írsky vlkodav');
+    await form.locator('input[name="telefon"]').fill('+421901234567');
+    await form.locator('input[name="email"]').fill('test@example.invalid');
+    await form.locator('input[type="checkbox"]').check();
+    await form.getByRole('button',{name:'Odoslať záujem',exact:true}).click();
+    await interest.locator('[data-lead-step-success]').waitFor({state:'visible'});
+    if(posted.length!==2||posted[1].cta_source!=='lead_landing_aria_chat_interest')throw new Error('Paid chat must submit the existing interest form with its own CRM source');
+    await chat.getByRole('button',{name:'Close',exact:true}).click();
+    await chat.waitFor({state:'hidden'});
+    await trigger.click();
+    await chat.waitFor({state:'visible'});
+    if(await chat.locator('[data-aria-chat-inline]').count()!==2||!(await chat.innerText()).includes('20 €/deň'))throw new Error('Paid chat must preserve conversation history on reopen');
+    await chat.getByRole('button',{name:'Close',exact:true}).click();
+    await chat.waitFor({state:'hidden'});
+  } finally { await page.unroute('**/functions/v1/web-form-submit',handler); }
+}
+
 async function assertCampaignContentFlow(page) {
+  await page.locator('[data-aria-lead-chat] img[alt^="Aria"]').evaluate(async image=>{
+    await image.decode();
+    if(image.naturalWidth<400||image.naturalHeight<400)throw new Error("Paid Aria must use the approved high-resolution head");
+  });
   const structure=await page.evaluate(()=>({
     order:[...document.querySelector('main').children].map(el=>el.id),
     faq:[...document.querySelectorAll('[data-lead-faq]')].map(el=>el.dataset.leadFaq),
     forms:document.querySelectorAll('main [data-lead-step-form]').length,
     benefits:document.querySelectorAll('[data-lead-benefits] h3').length,
     requirements:document.querySelectorAll('#lead-requirements article').length,
-    carousel:document.querySelectorAll('#lead-benefits [data-gesture-track="photos"]').length,
+    carousel:document.querySelectorAll('#lead-photo-carousel [data-gesture-track="photos"]').length,
     checker:document.querySelector('#lead-faq')?.nextElementSibling?.id === 'aria-puppy-check',
     separated:!!document.querySelector('#lead-knowledge [data-lead-faq-cta]') && !document.querySelector('#lead-knowledge #lead-faq'),
     robots:document.querySelector('meta[name="robots"]')?.content,
     daily:document.querySelector('[data-lead-price-per-day]')?.textContent.replace(/\s+/g,' ').trim(),
     single:document.querySelector('#lead-pricing article')?.textContent,
   }));
-  if(structure.order.slice(1,10).join('|')!=='lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-knowledge|lead-faq|aria-puppy-check|lead-benefits|aria-mosaic'||
+  if(structure.order.slice(1,11).join('|')!=='lead-photo-carousel|lead-pricing|lead-first-visit|aria-hero-form|aria-caretakers|lead-knowledge|lead-faq|aria-puppy-check|lead-benefits|aria-mosaic'||
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
     structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
@@ -108,10 +168,10 @@ async function assertCampaignContentFlow(page) {
         actionBg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).backgroundColor,
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
         ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width,
-        widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return Math.abs(dock.height-50)<2&&Math.abs(face.width-(innerWidth>=640?104:92))<2&&
+        widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return dock.height<=1&&Math.abs(face.width-(innerWidth>=640?104:92))<2&&
           speech.left-face.right>=2&&speech.left-face.right<=5&&dock.top-speech.bottom>=8&&speech.left>=0&&speech.right<=innerWidth&&
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
-          document.querySelectorAll('[data-aria-section-navigation="true"] button').length===5&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
+          document.querySelectorAll('[data-aria-section-navigation]').length===0&&document.querySelectorAll('[data-aria-chat-trigger]').length===1&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
     if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
@@ -135,12 +195,6 @@ async function assertCampaignContentFlow(page) {
   await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
   await page.locator('[data-aria-lead-hero-cta]').click();
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
-  const nav=page.locator('[data-aria-section-navigation="true"]');
-  for(const [name,target,key] of [['O nás','aria-about','about'],['Cenník škôlky','lead-pricing','pricing'],['Podmienky prijatia','lead-knowledge','requirements']]) {
-    await nav.getByRole('button',{name,exact:true}).click();
-    await page.waitForFunction(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.top>=0&&r.top<130;},target,{timeout:5000});
-    await page.waitForFunction(key=>document.querySelector('[data-lead-nav-key="'+key+'"]')?.getAttribute('aria-current')==='location',key,{timeout:5000});
-  }
   await centerFixtureControl(page.locator('[data-lead-faq-cta]'));
   await page.locator('[data-lead-faq-cta]').click();
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
@@ -150,6 +204,7 @@ async function assertCampaignContentFlow(page) {
   await assertLeadContactIntro(form);
   await form.getByRole('button',{name:'Späť',exact:true}).click();
   await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible'});
+  await assertPaidAriaChat(page);
   await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
 }
 

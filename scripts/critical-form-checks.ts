@@ -536,3 +536,5 @@ assert(currentBackend.includes("const leadSex = sex(input.dog_sex ?? input.pohla
  currentBackend.includes("if (leadSex) payload.dog_sex = leadSex") &&
  currentBackend.includes("payload.dog_sex === 'male' ? 'Pes' : 'Suka'"),
  "Backend must normalize and store optional enquiry sex with operator notification without widening interest allowlist.");
+
+assert(ariaLandingTracking.includes("leadChat={isLiveLead}") && ariaDockTracking.includes("dockless={leadChat}") && ariaDockTracking.includes("{!leadChat && <div data-aria-section-navigation="), "Paid lead must reuse the existing dockless chat without rendering the old navigation");
