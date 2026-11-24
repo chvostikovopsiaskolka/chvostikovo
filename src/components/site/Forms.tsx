@@ -259,8 +259,11 @@ export function HomeFaqContactForm({
   // their existing page scroll and browser autofill behavior.
   useEffect(() => {
     if (!isAria) return;
-    const container = formRef.current?.closest<HTMLElement>("[data-aria-chat-form-scroll]");
-    if (container) container.scrollTop = 0;
+    const container = formRef.current?.closest<HTMLElement>("[data-aria-chat-history]");
+    if (container && formRef.current) {
+      container.scrollTop += formRef.current.getBoundingClientRect().top -
+        container.getBoundingClientRect().top - 12;
+    }
   }, [step, isAria]);
   function trackStart() {
     if (started.current) return;
