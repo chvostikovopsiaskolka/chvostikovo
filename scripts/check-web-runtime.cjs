@@ -2390,7 +2390,7 @@ if (!bellaris && brandPreviewCandidate) {
                     aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
                     centeredFullWidthTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-prices.right)/2)<3,
-                    singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===7 && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
+                    singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     puppyImmediatelyAfterPricing:document.getElementById('cennik').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
@@ -3388,6 +3388,18 @@ if (!bellaris && brandPreviewCandidate) {
             await eligibilityToggle.click();
             if (await eligibilityToggle.getAttribute('aria-expanded') !== 'true' || !(await eligibilityToggle.locator('xpath=..').locator('p').count())) throw new Error('Eligibility FAQ must retain its answer');
             await eligibilityToggle.click();
+            for (const [name, phrases] of [
+              ['Aký je cenník a treba si rezervovať miesto vopred?', ['25 €','200 €','2 mesiace','do nedele 20:00']],
+              ['Aké sú otváracie hodiny a ponúkate aj odvoz?', ['7:00 do 17:00','5 € za jednu jazdu']],
+              ['Zabezpečujete aj stravu?', ['stravu nepodávame']],
+            ]) {
+              const item=productPage.locator('#faq').getByRole('button',{name,exact:true});
+              await item.click();
+              const answer=await item.locator('xpath=..').innerText();
+              if(!phrases.every(p=>answer.includes(p))) throw new Error('Missing practical FAQ content: '+name);
+              if(name.startsWith('Aký je cenník')&&!await item.locator('xpath=..').locator('a[href="/#cennik"]').isVisible()) throw new Error('Missing pricing link');
+              await item.click();
+            }
             const whyArticle = productPage.locator('#preco a[href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"]');
             if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
             const whyCta = productPage.locator('#preco').getByRole('button', { name: 'Chcem prihlásiť psíka' });
@@ -3666,6 +3678,15 @@ if (!bellaris && brandPreviewCandidate) {
               }
               if (await productPage.getByRole('heading', { name: /Košík|Dokončenie objednávky/ }).count()) throw new Error('Retired cart UI is still exposed');
             }
+            const faqAlias=new URL('/caste-otazky/',base).href;
+            try { await productPage.goto(faqAlias,{waitUntil:'commit'}); }
+            catch(error) {
+              const message=String(error),expected=new URL('/#faq',base).href;
+              if(!message.includes(`Navigation to "${faqAlias}" is interrupted by another navigation to "${expected}"`)) throw error;
+            }
+            await productPage.waitForURL(url=>url.pathname==='/'&&url.hash==='#faq');
+            await productPage.locator('#faq [data-home-faq-contact]').waitFor({state:'visible'});
+            if(await productPage.locator('#faq button[aria-expanded]').count()!==8) throw new Error('FAQ redirect did not land on consolidated home content');
             results.push({engine, restricted:false, route:'product-inquiries-' + width, status:'PASS'});
             console.log('PASS product inquiries and retired shop redirects ' + engine + ' ' + width);
           } catch (error) {
