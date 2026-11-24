@@ -144,7 +144,7 @@ const sharedFormsSource = readFileSync(new URL("../src/components/site/Forms.tsx
 const smsGuard = readFileSync(new URL("../supabase/migrations/20261124_aria_contact_question_sms_guard.sql", import.meta.url), "utf8");
 assert(ariaChatSource.includes("Máš inú otázku?") &&
   ariaChatSource.includes("<HomeFaqContactForm compact") &&
-  ariaChatSource.includes('formPrefix + "_other"') &&
+  ariaChatSource.includes('"lead_landing_aria_chat_other" : "aria_preview_chat_other"') &&
   !ariaChatSource.includes("Mám inú otázku?"),
   "APP-01 Aria other CTA must lead to the SAME two-step homepage contact form.");
 assert(sharedFormsSource.includes('source = HOME_FAQ_CONTACT_SOURCE') &&

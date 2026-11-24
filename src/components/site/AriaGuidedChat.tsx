@@ -449,7 +449,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
                 <p data-aria-form-prompt className="rounded-xl bg-white/75 px-3 py-2 text-xs leading-relaxed text-forest">
                   {messages[messages.length - 1]?.text}
                 </p>
-                <HomeFaqContactForm compact source={formPrefix + "_other"}
+                <HomeFaqContactForm compact source={formPrefix === "lead_landing_aria_chat" ? "lead_landing_aria_chat_other" : "aria_preview_chat_other"}
                   onStarted={() => track("form_start_other")}
                   onSent={() => track("other_question_submitted")} />
                 <a href={"tel:" + PHONE} className="flex min-h-11 items-center justify-center rounded-xl border border-[#9e336f]/30 px-3 text-xs font-bold text-[#9e336f]">
