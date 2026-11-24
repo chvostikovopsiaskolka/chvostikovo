@@ -106,7 +106,9 @@ const why = story.slice(story.indexOf("export function Why()"), story.indexOf("e
 const first = info.slice(info.indexOf("export function FirstVisit("), info.indexOf("export function Pricing("));
 const pricing = info.slice(info.indexOf("export function Pricing("), info.indexOf("const PRIMARY_FAQ"));
 const friendshipApplication = story.slice(story.indexOf("export function FriendshipApplication("), story.indexOf("export function Why()"));
-assert(friendshipApplication.includes('id="home-friendship-application"') && friendshipApplication.includes('<LongForm onSent={() => setApplicationSent(true)} />') && friendshipApplication.includes('title={applicationSent ? "Prihláška odoslaná" : APPLICATION_TITLE}'), "Friendship CTA must open full dog application with correct success header");
+assert(friendshipApplication.includes('data-home-friendship-form') && friendshipApplication.includes('<LongForm collapsible') && !friendshipApplication.includes('<FormDialog'), "Friendship uses a single expandable inline full application");
+assert(read("src/components/site/Forms.tsx").includes('hidden={!expanded} disabled={!expanded}') && read("src/components/site/Forms.tsx").includes('if (!expanded) return;'), "Collapsed registration must not submit");
+assert(read("src/routes/index.tsx").includes('<Pricing interestMode homeLayout />\n        <FriendshipApplication />') && !read("src/routes/index.tsx").includes('<Why />'), "Registration follows pricing; no duplicate Why section");
 assert(!why.includes("<LongForm") && !why.includes("<LeadStepForm") && !why.includes('href={`tel:') && !why.includes("home_why_application"), "Why retains article but not duplicated contact/application actions");
 assert(!friendshipApplication.includes("<LeadStepForm") && read("src/routes/index.tsx").includes("<FriendshipApplication />"), "Homepage friendship must not open a short inquiry");
 assert(first.includes("Dohodnúť úvodnú návštevu") && first.includes('trackingSource="home_first_visit_interest"') && !first.includes("hideInterest") && !first.includes("interestValue"), "Intro visit CTA must show the ordinary required interest options");

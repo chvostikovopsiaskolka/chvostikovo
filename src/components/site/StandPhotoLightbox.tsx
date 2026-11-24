@@ -17,11 +17,13 @@ const MAX_ZOOM = 4;
 /** Genuine two-finger pinch and one-finger pan after zooming, without zoom buttons. */
 export function StandPhotoLightbox({
   photos,
+  product = "stand",
   index,
   onSelect,
   onClose,
 }: {
   photos: readonly Photo[];
+  product?: "stand" | "target";
   index: number;
   onSelect: (index: number) => void;
   onClose: () => void;
@@ -188,8 +190,8 @@ export function StandPhotoLightbox({
         data-stand-lightbox
         className="z-[120] flex max-h-[96dvh] w-max max-w-[calc(100vw-16px)] flex-col items-center gap-2 overflow-hidden rounded-2xl border-0 bg-forest p-2.5 pb-3 text-cream shadow-xl sm:p-3 sm:pb-4 [&>button]:right-2.5 [&>button]:top-2.5 [&>button]:z-20 [&>button]:grid [&>button]:size-12 [&>button]:place-items-center [&>button]:rounded-none [&>button]:border-0 [&>button]:bg-transparent [&>button]:text-orange-400 [&>button]:opacity-100 [&>button]:shadow-none [&>button]:hover:bg-transparent [&>button]:hover:opacity-100 [&>button]:focus-visible:outline-2 [&>button]:focus-visible:outline-orange-500 [&>button>svg]:size-6"
       >
-        <DialogTitle className="sr-only">Fotografia stojana {photo.caption ?? ""}</DialogTitle>
-        <DialogDescription className="sr-only">Detail ručne vyrábaného stojana. Fotografie môžete listovať šípkami alebo potiahnutím.</DialogDescription>
+        <DialogTitle className="sr-only">Fotografia {product === "stand" ? "stojana" : "targetu"} {photo.caption ?? photo.alt}</DialogTitle>
+        <DialogDescription className="sr-only">Detail ručne vyrábaného produktu. Fotografie môžete listovať šípkami alebo potiahnutím.</DialogDescription>
         <div
           ref={setViewportNode}
           data-stand-photo-viewport

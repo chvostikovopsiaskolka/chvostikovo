@@ -177,8 +177,8 @@ function TargetPage() {
               <ArrowLeft className="size-4" /> Späť na produkty
             </a>
             <div className="mx-auto max-w-3xl text-center">
-              <h1 className="text-4xl leading-[1.06] text-forest sm:text-5xl">
-                Target na cvičenie <span className="text-coral-dark">pre psov</span>
+              <h1 className="text-[clamp(1.65rem,8.4vw,2.25rem)] leading-[1.06] text-forest sm:text-5xl">
+                Target na cvičenie <span className="block text-coral-dark sm:inline">pre psov</span>
               </h1>
               <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
                 Vyberte si variant a objednajte si target pre svojho psíka.
@@ -275,6 +275,7 @@ function TargetPage() {
       <FormDialog
         open={modalOpen}
         onOpenChange={setModalOpen}
+        hideHeader={step > 1 || isSubmitted}
         title="Mám záujem o target"
         subtitle="Vyberte veľkosť targetu a pošlite nám kontakt. Ak chcete inú výšku ako približne 5 cm, môžete ju uviesť nižšie."
       >
