@@ -176,15 +176,16 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
         <h2 className="section-title text-center text-3xl sm:text-4xl">Cenník našich služieb</h2>
         <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je len výhodnejšia.</p>
         <div data-home-pricing-columns className="mx-auto mt-7 grid max-w-3xl grid-cols-2 items-stretch gap-3 sm:gap-6">
-          <div data-home-prices className="col-span-2 grid min-w-0 grid-cols-2 items-stretch gap-3 sm:gap-5">
+          <div data-home-prices className="col-span-2 mb-2 grid min-w-0 grid-cols-2 items-stretch gap-3 sm:mb-3 sm:gap-5">
             {PRICING.map(item => <article key={item.name} data-home-price-card={item.highlight ? "pass" : "single"}
-              className={"flex min-w-0 flex-col items-center rounded-3xl px-2.5 py-4 text-center shadow-card sm:p-6 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
-              <h3 className="font-display text-sm font-bold leading-snug text-forest sm:text-xl">{item.name}</h3>
-              <p data-home-price className={"mt-2 whitespace-nowrap font-display text-[clamp(20px,5.7vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-coral-dark")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€<span className="text-[0.55em]"> / deň</span></> : item.price.replace(" ", "\u00a0")}</p>
-              {item.highlight && <p className="mt-1 whitespace-nowrap font-display text-base font-bold text-forest sm:text-xl">{item.price.replace(" ", "\u00a0")}</p>}
-              <p className="mt-2 text-[11px] font-semibold leading-snug text-forest sm:text-sm">{item.highlight ? "10 vstupov" : "Celodenný pobyt"}</p>
-              {item.highlight && <p className="mt-1 text-[11px] leading-snug text-forest sm:text-sm">Platí 2 mesiace</p>}
-              {item.highlight && <span data-home-best-value className="mt-3 inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2 py-1.5 text-[11px] font-bold leading-tight text-forest sm:text-sm">Ušetríte 50&nbsp;€</span>}
+              className={"relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-3xl px-2 py-3 text-center shadow-card sm:px-4 sm:py-4 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
+              <h3 className="font-display text-[13px] font-bold leading-snug text-forest sm:text-xl">{item.name}{item.highlight && <span className="block whitespace-nowrap text-[11px] font-semibold sm:inline sm:text-sm"> · 10 vstupov</span>}</h3>
+              <p data-home-price className={"whitespace-nowrap font-display text-[clamp(22px,6vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-coral-dark")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€<span className="text-[0.55em]"> / deň</span></> : item.price.replace(" ", "\u00a0")}</p>
+              {item.highlight ? <>
+                <p className="whitespace-nowrap font-display text-sm font-bold text-forest sm:text-lg">{item.price.replace(" ", "\u00a0")}</p>
+                <p className="pb-2 text-[11px] leading-snug text-forest sm:text-sm">Platí 2 mesiace</p>
+                <span data-home-best-value className="absolute bottom-0 left-1/2 inline-flex -translate-x-1/2 translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold leading-tight tracking-[-0.025em] text-white shadow-sm">Najvýhodnejšie. Ušetríte 50&nbsp;€</span>
+              </> : <p className="text-[11px] leading-snug text-forest/75 sm:text-sm">Celodenný pobyt</p>}
             </article>)}
           </div>
           <div data-home-included className="col-span-2 min-w-0 rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8">
