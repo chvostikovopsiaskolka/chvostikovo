@@ -380,9 +380,10 @@ function DogBinaryChoice({
   );
 }
 
-export function LongForm({ onSent }: { onSent?: () => void }) {
+export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: () => void; collapsible?: boolean; onExpand?: () => void }) {
   const formId = useId();
   const [sent, setSent] = useState(false);
+  const [expanded, setExpanded] = useState(!collapsible);
   const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [dogCount, setDogCount] = useState<1 | 2>(1);
@@ -399,6 +400,8 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // A collapsed preview must never submit incomplete registration data.
+    if (!expanded) return;
     if (loading) return;
     const form = e.currentTarget;
     progress.markAttempt();
@@ -478,29 +481,8 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
     );
   }
 
-  return (
-    <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="space-y-3 text-left sm:space-y-3.5">
-      <fieldset className="rounded-2xl border border-coral/25 bg-secondary/30 p-3.5">
-        <legend className="px-1 text-sm font-bold text-forest">Koľkých psíkov chcete prihlásiť?</legend>
-        <div className="mt-1 grid grid-cols-2 gap-2">
-          {([1, 2] as const).map((count) => (
-            <label key={count} className={`flex min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-2 py-3 text-xs font-semibold transition sm:px-3 sm:text-sm ${dogCount === count ? "border-coral bg-white text-forest" : "border-forest/15 bg-card text-forest/75"}`}>
-              <input type="radio" name="pocet_psikov" value={count} checked={dogCount === count} onChange={() => setDogCount(count)} aria-label={count === 1 ? "Chcem prihlásiť jedného psíka" : "Chcem prihlásiť dvoch psíkov"} className="shrink-0 accent-orange-500" />
-              <span className="whitespace-nowrap sm:hidden">{count === 1 ? "1 psík" : "2 psíkov"}</span>
-              <span className="hidden whitespace-nowrap sm:inline">{count === 1 ? "Prihlásiť jedného psíka" : "Prihlásiť dvoch psíkov"}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-      <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
-        <div>
-          <label className="label-sm" htmlFor={`l-${formId}-meno`}>
-            Meno a priezvisko majiteľa *
-          </label>
-          <input id={`l-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
-        </div>
-        <PhoneField id={`l-${formId}-tel`} name="telefon" />
-      </div>
+  const details = (
+    <>
       {dogCount === 2 && <h4 className="mt-4 border-b border-coral/20 pb-2 text-base font-bold text-forest">1. psík</h4>}
       <div>
           <label className="label-sm" htmlFor={`l-${formId}-pes`}>
@@ -622,6 +604,47 @@ export function LongForm({ onSent }: { onSent?: () => void }) {
       <button type="submit" disabled={loading} className="btn-coral w-full disabled:opacity-60">
         {loading ? "Odosielam…" : "Prihlásiť psíka"}
       </button>
+    </>
+  );
+
+  return (
+    <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="space-y-3 text-left sm:space-y-3.5">
+      <fieldset className="rounded-2xl border border-coral/25 bg-secondary/30 p-3.5">
+        <legend className="px-1 text-sm font-bold text-forest">Koľkých psíkov chcete prihlásiť?</legend>
+        <div className="mt-1 grid grid-cols-2 gap-2">
+          {([1, 2] as const).map((count) => (
+            <label key={count} className={`flex min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-2 py-3 text-xs font-semibold transition sm:px-3 sm:text-sm ${dogCount === count ? "border-coral bg-white text-forest" : "border-forest/15 bg-card text-forest/75"}`}>
+              <input type="radio" name="pocet_psikov" value={count} checked={dogCount === count} onChange={() => setDogCount(count)} aria-label={count === 1 ? "Chcem prihlásiť jedného psíka" : "Chcem prihlásiť dvoch psíkov"} className="shrink-0 accent-orange-500" />
+              <span className="whitespace-nowrap sm:hidden">{count === 1 ? "1 psík" : "2 psíkov"}</span>
+              <span className="hidden whitespace-nowrap sm:inline">{count === 1 ? "Prihlásiť jedného psíka" : "Prihlásiť dvoch psíkov"}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
+        <div>
+          <label className="label-sm" htmlFor={`l-${formId}-meno`}>
+            Meno a priezvisko majiteľa *
+          </label>
+          <input id={`l-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
+        </div>
+        <PhoneField id={`l-${formId}-tel`} name="telefon" />
+      </div>
+      {collapsible && (
+        <button id="home-friendship-application" type="button"
+          aria-expanded={expanded} aria-controls={`l-${formId}-details`}
+          className="btn-coral w-full" onClick={() => {
+            if (!expanded) onExpand?.();
+            setExpanded(!expanded);
+          }}>
+          {expanded ? "Zobraziť menej" : "Zobraziť celú prihlášku"}
+        </button>
+      )}
+      {collapsible ? (
+        <fieldset id={`l-${formId}-details`} hidden={!expanded} disabled={!expanded} className="min-w-0 space-y-3 border-0 p-0 sm:space-y-3.5">
+          {details}
+        </fieldset>
+      ) : details}
     </form>
   );
 }
