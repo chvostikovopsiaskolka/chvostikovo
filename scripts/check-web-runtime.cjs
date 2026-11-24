@@ -2158,16 +2158,14 @@ if (!bellaris && brandPreviewCandidate) {
             await faqConsent.waitFor({state:'visible',timeout:5000});
             if(await faqForm.locator('input[name="meno"]').inputValue()!=='Testovací kontakt') throw new Error('FAQ contact lost on Back');
             if(await faqConsent.isChecked()) throw new Error('FAQ contact unexpectedly pre-consented');
-            await centerFixtureControl(faqSend);
-            await faqSend.click();
+            await activateFixtureControl(faqSend);
             if(faqPosts.length) throw new Error('FAQ contact accepted without consent');
             await centerFixtureControl(faqConsent);
             await faqConsent.check();
             if(!await faqConsent.isChecked()) throw new Error('FAQ contact consent did not select');
             const invalid=await faqForm.evaluate(el=>[...el.elements].filter(field=>field.willValidate&&!field.validity.valid).map(field=>({name:field.name,message:field.validationMessage})));
             if(invalid.length) throw new Error('FAQ contact invalid before submit: '+JSON.stringify(invalid));
-            await centerFixtureControl(faqSend);
-            await faqSend.click();
+            await activateFixtureControl(faqSend);
             await page.locator('[data-home-faq-contact-success]').waitFor({state:'visible',timeout:10000}).catch(async error=>{
               throw new Error('FAQ contact receipt missing: '+JSON.stringify({posts:faqPosts.length,alert:await faqForm.locator('[role="alert"]').allTextContents(),invalid:await faqForm.evaluate(el=>[...el.elements].filter(field=>field.willValidate&&!field.validity.valid).map(field=>({name:field.name,message:field.validationMessage}))).catch(()=>[]),cause:String(error)}));
             });
@@ -2640,15 +2638,13 @@ if (!bellaris && brandPreviewCandidate) {
                 // verify the actual clickable link after user interaction,
                 // rather than querying a deliberately unmounted child.
                 const puppyToggle=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
-                await centerFixtureControl(puppyToggle);
-                await puppyToggle.click();
+                await activateFixtureControl(puppyToggle);
                 await page.locator('#faq a[href="#aria-puppy-check"]').waitFor({state:'visible',timeout:5000});
                 const puppyLink=page.locator('#faq a[href="#aria-puppy-check"].btn-coral');
                 if (!await puppyLink.isVisible() ||
                     !(await page.locator('#aria-puppy-check h2').innerText()).includes('Spĺňa základné podmienky?'))
                   throw new Error('Expanded puppy FAQ must show a pink CTA linking to the real age/vaccination checker');
-                await centerFixtureControl(puppyToggle);
-                await puppyToggle.click();
+                await activateFixtureControl(puppyToggle);
                 await puppyLink.waitFor({state:'hidden',timeout:5000});
               } else if (width < 1024) {
                 if (!await ctaPair.isVisible()) throw new Error('Mobile Hero CTA pair missing at ' + width);
@@ -2728,34 +2724,16 @@ if (!bellaris && brandPreviewCandidate) {
               const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
               // Center the real disclosure and link above the fixed mobile dock.
               if(await puppyFaq.getAttribute('aria-expanded')!=='true') {
-                await centerFixtureControl(puppyFaq);
-                await puppyFaq.click();
+                await activateFixtureControl(puppyFaq);
               }
               const homePuppyLink=page.locator('#faq a[href="#aria-puppy-check"]');
               await homePuppyLink.waitFor({state:'visible',timeout:5000});
-              await centerFixtureControl(homePuppyLink);
-              await homePuppyLink.click();
+              await activateFixtureControl(homePuppyLink);
               await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
               for(const id of ['informujte-sa','prva-navsteva-form']) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
-                // APP-01 WebKit: radio labels and React change handlers may settle on
-                // separate frames after responsive resize + smooth anchor scroll.
-                // Assert the actual radio selection before expecting step 2;
-                // never accept a click alone as evidence of a completed transition.
-                const firstChoice=inquiry.locator('label:has(input[name="zaujem"])').first();
-                await firstChoice.scrollIntoViewIfNeeded();
-                await firstChoice.click();
-                const radio=firstChoice.locator('input[name="zaujem"]');
-                if(!await radio.isChecked()) await radio.check({force:true});
-                await page.waitForFunction(targetId => {
-                  const form=document.querySelector('#'+targetId+' [data-lead-step-form]');
-                  const next=Array.from(form?.querySelectorAll('button') ?? []).find(x=>x.textContent?.trim()==='Pokračovať');
-                  return !!form?.querySelector('input[name="zaujem"]:checked') && !!next && !next.disabled;
-                }, id, {timeout:5000});
-                await inquiry.getByRole('button',{name:'Pokračovať',exact:true}).click();
-                await inquiry.locator('[role="progressbar"][aria-valuenow="2"]').waitFor({state:'attached',timeout:7000}).catch(() => { throw new Error('Inline contact step did not advance: '+id); });
-                await inquiry.locator('input[name="meno"]').waitFor({state:'visible',timeout:7000}).catch(() => { throw new Error('Inline contact step not visible: '+id); });
-                await inquiry.getByRole('button',{name:'Späť',exact:true}).click();
+                await advanceLeadContact(inquiry);
+                await activateFixtureControl(inquiry.getByRole('button',{name:'Späť',exact:true}));
               }
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
@@ -2763,13 +2741,10 @@ if (!bellaris && brandPreviewCandidate) {
               if(!await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application preview fields incorrect');
               await centerFixtureControl(owner);
               await owner.fill('Testovacie meno');
-              await centerFixtureControl(toggle);
-              await centerFixtureControl(toggle);
-              await toggle.click();
+              await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await owner.inputValue()!=='Testovacie meno' || await page.getByRole('dialog').count()) throw new Error('Inline application did not expand or retain owner data');
-              await centerFixtureControl(toggle);
-              await toggle.click();
+              await activateFixtureControl(toggle);
               if(await application.locator('input[name="pes"]').isVisible() || await owner.inputValue()!=='Testovacie meno') throw new Error('Inline application collapse lost data');
               await owner.fill('');
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
@@ -2931,8 +2906,7 @@ if (!bellaris && brandPreviewCandidate) {
               await choices.nth(1).click();
               if(!await choices.nth(1).locator('input').isChecked())throw new Error('Fixture failed to select visible interest');
               const continueButton=inline.getByRole('button', {name:'Pokračovať',exact:true});
-              await centerFixtureControl(continueButton);
-              await continueButton.click();
+              await activateFixtureControl(continueButton);
               await inline.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
               await inline.locator('input[name="telefon"]').waitFor({state:'visible',timeout:5000});
               await inline.getByRole('button',{name:'Späť',exact:true}).click();
@@ -2997,13 +2971,12 @@ if (!bellaris && brandPreviewCandidate) {
               // Verify the real inline registration, not a second form or modal.
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
-              await centerFixtureControl(toggle);
-              await toggle.click();
+              await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || await application.locator('[data-lead-step-form]').count() || await page.getByRole('dialog').count()) throw new Error('Friendship must expand the existing application in-place');
               const fits=await application.evaluate(el=>{const b=el.getBoundingClientRect();return b.width<=innerWidth-16 && el.scrollWidth<=el.clientWidth+2 && (innerWidth<1024 || b.width>=800);});
               if(!fits)throw new Error('Inline application responsive width incorrect');
-              await toggle.click();
+              await activateFixtureControl(toggle);
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
