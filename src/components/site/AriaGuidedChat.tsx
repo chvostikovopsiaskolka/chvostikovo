@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { ChvostikovoPaw } from "./ChvostikovoPaw";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "./AriaPreviewText";
-import { ADDRESS, FAQ, PHONE, PHONE_PRETTY, PRICING } from "@/content/site";
+import { ADDRESS, PHONE, PHONE_PRETTY, PRICING } from "@/content/site";
 import { ShortForm } from "./Forms";
 import { LeadStepForm } from "./LeadStepForm";
 import { AriaPuppyChecker } from "./AriaPuppyChecker";
@@ -29,18 +29,17 @@ function renderChatText(value: string, visibleLength = Number.POSITIVE_INFINITY)
   });
 }
 
-const findAnswer = (question: string) => FAQ.find((item) => item.q === question)?.a || "";
 const priceOne = PRICING.find((item) => !item.highlight)?.price || "25 €";
 const pricePass = PRICING.find((item) => item.highlight)?.price || "200 €";
-const firstVisit = findAnswer("Ako prebieha prvá návšteva psíka v škôlke?").split(/\n+/)[0];
+// Two approved 4-question waves; keep IDs stable for cookieless analytics.
 const chatQuestions: Question[] = [
   {
     id: "pricing",
     title: "Aký je cenník škôlky?",
     answer: "Haf! 🐾 **Jednorazový celodenný vstup stojí " + priceOne +
-      ".**\nSme otvorení od 7:00 do 17:00, pondelok až piatok.\n\n" +
+      ".**\nSme otvorení od **7:00 do 17:00**, pondelok až piatok.\n\n" +
       "Ak plánuješ pravidelné návštevy, oplatí sa **permanentka za " + pricePass +
-      "**. Má **10 vstupov**, platí 2 mesiace a **ušetríš 50 €** oproti jednorazovým vstupom.\n\n" +
+      "**. Má **10 vstupov**, platí **2 mesiace** a **ušetríš 50 €** oproti jednorazovým vstupom.\n\n" +
       "**Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.**",
   },
   {
@@ -49,29 +48,34 @@ const chatQuestions: Question[] = [
     answer: "Haf! 🐾 Toto sú naše hlavné podmienky prijatia:",
   },
   {
-    id: "location",
-    title: "Kde sa škôlka nachádza?",
-    answer: "Haf! 🐾 Nájdeš nás na adrese " + ADDRESS.street + ", " + ADDRESS.city + ". Na stránke nájdeš aj mapu a kontakt.",
-  },
-  {
-    id: "space",
-    title: "Aké priestory má škôlka?",
-    answer: "Máme vyhrievané vnútorné priestory na hru aj oddych a vlastný vonkajší výbeh s rozlohou približne 80 m². 🐾",
-  },
-  {
     id: "caretakers",
-    title: "Kto sa postará o psíkov?",
-    answer: "Haf! 🐾 Počas celého pobytu sa o psíkov starajú minimálne dvaja skúsení opatrovatelia – Adriana a Marek (moji rodičia). 🐾 Dohliadajú na spoločnú hru a aktivity aj oddych prispôsobujú potrebám každého psíka. Dôležitá je pre nich bezpečnosť, individuálny a láskavý prístup. Obaja absolvovali kurz prvej pomoci pre psov, aby sa vaši štvornohí parťáci cítili bezpečne a príjemne, bez zbytočného stresu.",
-  },
-  {
-    id: "first_visit",
-    title: "Ako prebieha prvá návšteva?",
-    answer: firstVisit + "\nÚvodná návšteva je zadarmo. Ak psík potrebuje viac času, adaptáciu prispôsobíme jeho tempu.",
+    title: "Kto sa postará o psíka?",
+    answer: "Haf! 🐾 O tvojho psíka sa počas celého pobytu postarajú **Adriana a Marek – moji rodičia!** 🐾\n\nSú to skúsení opatrovatelia, ktorí dohliadajú na spoločnú hru, bezpečné interakcie aj oddych. Každému psíkovi prispôsobujú aktivity podľa jeho potrieb a povahy.\n\nObaja absolvovali **kurz prvej pomoci pre psov**. Najdôležitejšia je pre nich bezpečnosť, individuálny prístup a to, aby sa každý škôlkar cítil príjemne a bez zbytočného stresu.",
   },
   {
     id: "puppy",
     title: "Prijímate aj šteniatka?",
-    answer: "Haf! 🐾 Áno, prijímame aj očkované šteniatka približne od 4 mesiacov. Záleží na veku, očkovaniach a pripravenosti na kolektív. Poďme si orientačne overiť, či tvoje šteniatko spĺňa základné podmienky. Konečné rozhodnutie urobíme po úvodnej návšteve.",
+    answer: "Haf! 🐾 Áno, prijímame aj očkované šteniatka **približne od 4 mesiacov**.\n\nZáleží na ich veku, kompletnom očkovaní a pripravenosti na kolektív.\n\nPoďme si spolu **orientačne overiť, či tvoje šteniatko spĺňa základné podmienky**. Konečné rozhodnutie o prijatí urobíme až po úvodnej návšteve.",
+  },
+  {
+    id: "location",
+    title: "Kde sa škôlka nachádza?",
+    answer: "Haf! 🐾 Nájdeš nás v **Košiciach na " + ADDRESS.street + "**.\n\nMáme vlastné vnútorné priestory aj vonkajší výbeh, kde si naši škôlkari môžu užívať deň plný hier, pohybu a oddychu.\n\nNa našej stránke nájdeš aj **mapu a kontakt**, aby si nás jednoducho našiel.",
+  },
+  {
+    id: "space",
+    title: "Aké priestory má škôlka?",
+    answer: "Haf! 🐾 Naši škôlkari majú k dispozícii **vyhrievané vnútorné priestory** na hru aj oddych a vlastný **vonkajší výbeh s rozlohou približne 80 m²**.\n\nPočas dňa sa striedajú spoločné hry, aktivity a čas na odpočinok. Psíkov nenechávame hrať sa bez prestávky – všetko prispôsobujeme ich potrebám, veku aj aktuálnemu počasiu.",
+  },
+  {
+    id: "first_visit",
+    title: "Ako prebieha prvá návšteva?",
+    answer: "Haf! 🐾 Pred nástupom do škôlky absolvuje každý nový psík **bezplatnú úvodnú návštevu**.\n\nPočas nej sa zoznámime so psíkom, sledujeme jeho správanie a reakcie na nové prostredie, ľudí aj ostatných psov. Postupne ho zoznamujeme s kolektívom.\n\n**Nie každý psík si zvykne rovnako rýchlo.** Ak potrebuje viac času, môžeme odporučiť kratšie adaptačné návštevy a postup prispôsobiť jeho tempu.",
+  },
+  {
+    id: "reservation",
+    title: "Ako si rezervujem miesto v škôlke?",
+    answer: "Haf! 🐾 Miesto v škôlke si rezervuješ vopred prostredníctvom našej **zákazníckej aplikácie**.\n\nRezervácie na nasledujúci týždeň je potrebné vytvoriť **do nedele 20:00**, aby sme vedeli naplánovať počet psíkov a zabezpečiť im bezpečný a príjemný pobyt.\n\nAk si však kvôli práci alebo iným povinnostiam nevieš naplánovať návštevy na celý týždeň dopredu, **vieme sa dohodnúť aj individuálne**, podľa voľnej kapacity. Stačí nám napísať alebo zavolať.\n\nAk ešte nie si naším škôlkarom, najprv spolu absolvujeme **bezplatnú úvodnú návštevu**.",
   },
 ];
 
@@ -124,9 +128,9 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   const nextId = useRef(0);
   const chatId = useId();
   const unanswered = chatQuestions.filter(question => !answered.includes(question.id));
-  // First four high-intent FAQs; reveal remaining catalogue only when all four
-  // have been asked. The final wording and the eighth FAQ are supplied later.
-  const primaryQuestionIds: readonly string[] = ["pricing", "requirements", "first_visit", "puppy"];
+  // Approved four + four progressive FAQs; reveal the second wave only
+  // when every first-wave question has been selected.
+  const primaryQuestionIds: readonly string[] = ["pricing", "requirements", "caretakers", "puppy"];
   const primaryUnanswered = unanswered.filter(question => primaryQuestionIds.includes(question.id));
   const visibleQuestions = primaryUnanswered.length ? primaryUnanswered : unanswered;
   const introFinished = !introComposing && introLength >= introText.length;

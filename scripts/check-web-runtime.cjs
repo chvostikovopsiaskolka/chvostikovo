@@ -1196,8 +1196,34 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Chat must fit mobile viewport');
                   const questionMenu = chat.locator('[data-aria-chat-questions]');
                   await questionMenu.waitFor({ state: 'visible', timeout: 10000 });
-                  if (await questionMenu.locator('[data-aria-chat-question]').count() !== 4 ||
-                      !await questionMenu.locator('[data-aria-chat-question="puppy"]').count() ||
+                  // APP-01 narrow viewport regression: all four buttons readable,
+                  // without horizontal clipping at 320px on both browser engines.
+                  await page.setViewportSize({ width: 320, height: 720 });
+                  const narrowChat = await chat.evaluate(dialog => {
+                    const bounds=dialog.getBoundingClientRect();
+                    const history=dialog.querySelector('[data-aria-chat-history]');
+                    const footer=dialog.querySelector('[data-aria-chat-action-panel]');
+                    const buttons=[...dialog.querySelectorAll('[data-aria-chat-questions] button')];
+                    return {
+                      left:bounds.left,right:bounds.right,viewport:window.innerWidth,
+                      historyOverflow:history.scrollWidth-history.clientWidth,
+                      footerOverflow:footer.scrollWidth-footer.clientWidth,
+                      buttons:buttons.map(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height,
+                        left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right}))
+                    };
+                  });
+                  if (narrowChat.left < -1 || narrowChat.right > narrowChat.viewport + 1 ||
+                      narrowChat.historyOverflow > 2 || narrowChat.footerOverflow > 2 ||
+                      narrowChat.buttons.length !== 4 ||
+                      narrowChat.buttons.some(button => button.height < 43 || button.width < 75 ||
+                        button.left < -1 || button.right > narrowChat.viewport + 1))
+                    throw new Error('320px mobile chat must retain four usable FAQ buttons and no horizontal overflow: '+JSON.stringify(narrowChat));
+                  await page.setViewportSize({ width: 390, height: 844 });
+                  const firstWave = await questionMenu.locator('[data-aria-chat-question]').evaluateAll(nodes =>
+                    nodes.map(node => node.getAttribute('data-aria-chat-question')));
+                  if (JSON.stringify(firstWave) !== JSON.stringify(['pricing','requirements','caretakers','puppy']) ||
+                      await questionMenu.locator('[data-aria-chat-question="first_visit"]').count() ||
+                      await questionMenu.locator('[data-aria-chat-question="reservation"]').count() ||
                       await chat.locator('[data-aria-chat-composer]').count() ||
                       await chat.getByText('Čo ťa zaujíma?', { exact: true }).count() ||
                       await chat.locator('[data-aria-chat-turn="person"]').count())
@@ -1400,15 +1426,29 @@ if (!bellaris && brandPreviewCandidate) {
                   await puppyContact.getByRole('button', { name: 'Späť ku kontrole' }).click();
                   await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
                   await chat.locator('[data-aria-chat-puppy-check]').getByRole('button', { name: 'Späť k otázkam' }).click();
-                  await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="first_visit"]').click();
+                  // The caretakers question is now primary; the first visit is secondary.
+                  // Until all first four are answered, neither later questions nor booking appear.
+                  await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="caretakers"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
+                  const caretakersReply = chat.locator('[data-aria-chat-turn="aria"]').last();
+                  if (!await caretakersReply.getByText(/Adriana a Marek/).count() ||
+                      !await caretakersReply.locator('strong').filter({ hasText: 'kurz prvej pomoci pre psov' }).count())
+                    throw new Error('Approved caretakers answer and highlighting must remain intact');
                   await chat.locator('[data-aria-chat-show-questions]').click();
                   const laterQuestions = chat.locator('[data-aria-chat-questions]');
-                  if (await laterQuestions.locator('[data-aria-chat-question]').count() !== 3 ||
-                      !await laterQuestions.locator('[data-aria-chat-question="location"]').count())
-                    throw new Error('Second wave must unlock after all first four FAQs');
-                  await laterQuestions.locator('[data-aria-chat-question="location"]').click();
+                  const secondWave = await laterQuestions.locator('[data-aria-chat-question]').evaluateAll(nodes =>
+                    nodes.map(node => node.getAttribute('data-aria-chat-question')));
+                  if (JSON.stringify(secondWave) !== JSON.stringify(['location','space','first_visit','reservation']) ||
+                      await laterQuestions.locator('[data-aria-chat-question="caretakers"]').count())
+                    throw new Error('Second wave must have four approved choices and no answered first-wave questions');
+                  await laterQuestions.locator('[data-aria-chat-question="reservation"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
+                  const reservationReply = chat.locator('[data-aria-chat-turn="aria"]').last();
+                  if (!await reservationReply.locator('strong').filter({ hasText: 'zákazníckej aplikácie' }).count() ||
+                      !await reservationReply.locator('strong').filter({ hasText: 'do nedele 20:00' }).count() ||
+                      !await reservationReply.locator('strong').filter({ hasText: 'vieme sa dohodnúť aj individuálne' }).count() ||
+                      await reservationReply.getByText(/deň vopred do 19:00/).count())
+                    throw new Error('Booking must keep app + Sunday 20:00 + individual agreement and no next-day hard cutoff');
                   await chat.locator('[data-aria-chat-followup] [data-aria-chat-interest-cta]').click();
                   const interest = chat.locator('[data-aria-chat-interest]');
                   await interest.locator('[data-lead-step-form]').waitFor({ state: 'visible' });
