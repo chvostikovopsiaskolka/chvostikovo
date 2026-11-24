@@ -6,7 +6,7 @@ import { ContextFaq } from "./ContextFaq";
 import { LeadStepForm } from "./LeadStepForm";
 import { LongForm } from "./Forms";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
-import { CARE, DAYCARE_GALLERY_EXTRAS, WHY, GARDEN_PHOTO, APPLICATION_TITLE, APPLICATION_SUBTITLE } from "@/content/site";
+import { CARE, DAYCARE_GALLERY_EXTRAS, WHY, GARDEN_PHOTO, APPLICATION_TITLE } from "@/content/site";
 import teamPhoto from "@/assets/team-dogs.jpg";
 import dogsPair from "@/assets/dogs-pair.jpg";
 import certAdriana from "@/assets/cert-adriana.jpg";
@@ -41,7 +41,7 @@ function renderText(text: string) {
 
 
 
-export function Care({ language = "sk", showEmbeddedFriendship = true, showInterest = true, showContextFaq = true }: { language?: "sk" | "en"; showEmbeddedFriendship?: boolean; showInterest?: boolean; showContextFaq?: boolean }) {
+export function Care({ language = "sk", showEmbeddedFriendship = true, showInterest = true, showContextFaq = true, homeCombined = false }: { language?: "sk" | "en"; showEmbeddedFriendship?: boolean; showInterest?: boolean; showContextFaq?: boolean; homeCombined?: boolean }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const isEnglish = language === "en";
   const careEn = [
@@ -67,7 +67,12 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
       text: "**Every dog is unique**, so we approach each one **individually**, with **patience and respect** for their needs. As dog owners ourselves, we understand the trust you place in us — every daycare dog receives the same care and attention we would want for **our own dogs**.",
     },
   ];
-  const items = isEnglish ? careEn : CARE;
+  const combinedCopy = [
+    { title: "Aktívny deň s kamošmi", text: "Aj keď má váš psík **energie na rozdávanie**, u nás si užije pohyb, hry, nové podnety a spoločnosť ostatných psíkov. Aktivity pravidelne striedame s **oddychom**." },
+    { title: "Celodenná starostlivosť a dohľad", text: "Kým pracujete alebo si vybavujete povinnosti, váš psík nie je sám. Počas celého pobytu naňho dohliadajú **minimálne dvaja opatrovatelia**." },
+    { title: "Individuálny prístup", text: "Každý psík má svoje tempo. Spoznávame jeho **povahu, zvyky a potreby**, aby sme mu dopriali bezpečný a príjemný deň v kolektíve." },
+  ];
+  const items = isEnglish ? careEn : homeCombined ? CARE.map((item, index) => ({ ...item, ...combinedCopy[index]! })) : CARE;
   const mobilePhotos = [
     {
       src: CARE[0]!.img,
@@ -149,6 +154,16 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
           </div>
         </div>
 
+        {homeCombined && !isEnglish && (
+          <div id="preco" className="mt-7 scroll-mt-24 text-center">
+            <a href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"
+              onClick={() => void trackCookielessInteraction("nav_click", "home_why_suitability_article")}
+              className="inline-flex min-h-11 items-center justify-center gap-2 text-center font-display text-sm font-semibold leading-snug text-forest underline underline-offset-4 transition hover:text-coral-dark sm:text-base">
+              <BookOpen className="size-5 shrink-0 text-coral" aria-hidden="true" />
+              Prečítajte si viac o výhodách a vhodnosti psej škôlky
+            </a>
+          </div>
+        )}
         {!isEnglish && showContextFaq && (
           <div className="mt-7 w-full space-y-3">
             <ContextFaq question="Ako zabezpečujete bezpečnosť psíkov v škôlke?" label="Ako dbáme na bezpečnosť psíkov?" source="home_care_safety" />
@@ -194,25 +209,16 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
 
 /** Existing friendship photo and card now serve the full application, not a second lead form. */
 export function FriendshipApplication() {
-  const [open, setOpen] = useState(false);
-  const [applicationSent, setApplicationSent] = useState(false);
   return (
     <section id="psie-priatelstva" className="relative bg-card pb-10 sm:pb-12">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <FriendshipFeature embedded applicationMode />
-        <div className="mt-7 flex justify-center">
-          <button id="home-friendship-application" type="button" className="btn-coral" onClick={() => {
-            void trackCookielessInteraction("nav_click", "home_friendship_application");
-            setApplicationSent(false);
-            setOpen(true);
-          }}>{APPLICATION_TITLE}</button>
+        <div data-home-friendship-form className="form-liquid-surface mx-auto mt-6 w-full max-w-4xl rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8">
+          <h3 className="mb-5 text-center font-display text-xl font-bold text-forest sm:text-2xl">{APPLICATION_TITLE}</h3>
+          <LongForm collapsible onExpand={() => void trackCookielessInteraction("nav_click", "home_friendship_application")} />
         </div>
       </div>
-      <FormDialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setApplicationSent(false); }}
-        hideHeader={applicationSent} title={applicationSent ? "Prihláška odoslaná" : APPLICATION_TITLE} subtitle={APPLICATION_SUBTITLE}>
-        <LongForm onSent={() => setApplicationSent(true)} />
-      </FormDialog>
     </section>
   );
 }
