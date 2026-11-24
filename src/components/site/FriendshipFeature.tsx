@@ -6,9 +6,10 @@ type FriendshipFeatureProps = {
   embedded?: boolean;
   ctaLabel?: string;
   onCtaClick?: () => void;
+  applicationMode?: boolean;
 };
 
-export function FriendshipFeature({ language = "sk", embedded = false, ctaLabel, onCtaClick }: FriendshipFeatureProps) {
+export function FriendshipFeature({ language = "sk", embedded = false, ctaLabel, onCtaClick, applicationMode = false }: FriendshipFeatureProps) {
   const isEnglish = language === "en";
   const content = (
     <div data-aria-friendship-card className="grid overflow-hidden rounded-4xl bg-secondary/55 shadow-card ring-1 ring-forest/5 md:grid-cols-[1.05fr_0.95fr] md:items-center">
@@ -23,13 +24,15 @@ export function FriendshipFeature({ language = "sk", embedded = false, ctaLabel,
       />
       <div className="px-6 py-7 text-center sm:px-9 sm:py-10 md:text-left lg:px-12">
         <p className="font-display text-xs font-bold uppercase tracking-[0.15em] text-coral-dark">
-          {isEnglish ? "More than playtime" : "Viac než len hra"}
+          {applicationMode ? "Prihláška do škôlky" : isEnglish ? "More than playtime" : "Viac než len hra"}
         </p>
         <h2 className="mt-3 font-display text-2xl font-bold leading-tight text-forest sm:text-3xl lg:text-4xl">
           {isEnglish ? "Where dog friendships begin." : "Miesto, kde vznikajú psie priateľstvá."}
         </h2>
         <p className="mt-4 text-[0.95rem] leading-relaxed text-forest/80 sm:text-base">
-          {isEnglish
+          {applicationMode
+            ? <>Plánujete so svojím psíkom navštevovať škôlku <strong>pravidelne</strong>? Vyplňte prihlášku, povedzte nám viac o svojom psíkovi a dohodneme sa na ďalšom postupe.</>
+            : isEnglish
             ? "After playtime with their dog friends, there is also time to rest. At Chvostíkovo, every dog has space to enjoy the day at their own pace."
             : "Po hrách a šantení s kamošmi prichádza aj čas na oddych. V Chvostíkove má každý psík priestor užiť si deň vlastným tempom."}
         </p>

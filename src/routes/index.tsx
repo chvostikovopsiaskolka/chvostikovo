@@ -4,7 +4,7 @@ import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
 import { Gallery } from "@/components/site/Gallery";
 import { ReviewReasons } from "@/components/site/Reviews";
-import { Care, Why, About, Partners, FriendshipInterest } from "@/components/site/Story";
+import { Care, Why, About, Partners, FriendshipApplication } from "@/components/site/Story";
 import { Requirements, FirstVisit, Pricing, Faq, HOME_PRIMARY_FAQ } from "@/components/site/Info";
 import { UsefulInfo } from "@/components/site/UsefulInfo";
 import { ProductSection } from "@/components/site/ProductSection";
@@ -95,8 +95,9 @@ function Index() {
             <SectionAmbientPaws />
             <div data-lead-form-shell className="form-liquid-surface relative z-10 mx-auto max-w-xl overflow-hidden rounded-[26px] px-4 py-6 min-[390px]:px-6">
               <h2 data-lead-form-intro tabIndex={-1} className="font-display text-center text-lg font-bold text-forest focus:outline-none">
-                Chceli by ste sa informovať o škôlke?
+                Čo hľadáte pre svojho psíka?
               </h2>
+              <p data-lead-form-intro className="mt-2 mb-4 text-center text-sm text-muted-foreground">Vyplňte krátky nezáväzný formulár. Ozveme sa vám.</p>
               <LeadStepForm trackingSource="home_hero_interest_mobile" questionInHeading compact />
             </div>
           </section>
@@ -107,10 +108,10 @@ function Index() {
         <Pricing interestMode homeLayout />
         <HomePuppyChecker />
         <Requirements />
-        <InquirySection allScreens matchHero />
+        <InquirySection allScreens matchHero title="Zistite viac o škôlke" />
         <Care showEmbeddedFriendship={false} showInterest={false} showContextFaq={false} />
         <Gallery homeMosaic />
-        <FriendshipInterest />
+        <FriendshipApplication />
         <FirstVisit inlineForm leadStyle />
         <Why />
         <Faq homeLayout />

@@ -81,21 +81,18 @@ assert(footerContent.includes("min-h-11"), "Legal links must be touch accessible
 console.log("[seo] PASS: one-row legal GDPR, centered copyright, Bellaris badge and tracking intact");
 
 
-// FAQ route must be crawlable from initial HTML (not only from the SPA 404 fallback).
-// Keep this isolated from the homepage and conversion/marketing flows.
+// FAQ alias must remain crawlable as a noindex redirect; the home owns the FAQ.
 const faqRoute = "/caste-otazky";
 const faqUrl = "https://chvostikovo.sk/caste-otazky/";
-assert(sitemap.includes("<loc>" + faqUrl + "</loc>"), "FAQ page missing from sitemap");
-assert(pagesConfig.includes('{ path: "' + faqRoute + '" }'), "FAQ page missing from prerender routes");
-const faqOutput = "dist/client/caste-otazky/index.html";
-assert(fs.existsSync(faqOutput), "Pre-rendered FAQ HTML missing: " + faqOutput);
-const faqHtml = fs.readFileSync(faqOutput, "utf8");
-assert(faqHtml.includes("Časté otázky | Psia škôlka"), "FAQ HTML missing its unique SEO title");
-assert(faqHtml.includes("Odpovede na časté otázky"), "FAQ HTML missing its unique description");
-assert(faqHtml.includes('rel="canonical"') && faqHtml.includes(faqUrl), "FAQ HTML missing its canonical URL");
-assert(faqHtml.includes("FAQPage"), "FAQ HTML missing structured FAQ data");
-console.log("[seo] PASS: sitemap + prerender + title + description + canonical + FAQPage for " + faqRoute);
-
+assert(!sitemap.includes("<loc>" + faqUrl + "</loc>"), "Retired FAQ must leave sitemap");
+assert(pagesConfig.includes('{ path: "' + faqRoute + '" }'), "FAQ alias must still be prerendered");
+const faqHtml = fs.readFileSync("dist/client/caste-otazky/index.html", "utf8");
+assert(/http-equiv="refresh"/i.test(faqHtml) && faqHtml.includes("0;url=/#faq"), "FAQ alias must statically redirect to the homepage FAQ");
+assert(faqHtml.includes('content="noindex, follow"') && /<link[^>]*rel="canonical"[^>]*href="https:\/\/chvostikovo\.sk\/"|<link[^>]*href="https:\/\/chvostikovo\.sk\/"[^>]*rel="canonical"/.test(faqHtml), "FAQ alias must be noindex with home canonical");
+assert(!faqHtml.includes('"@type":"FAQPage"'), "Retired alias must not have duplicate FAQ schema");
+assert(homeHtml.includes("FAQPage") && homeHtml.includes("Aký je cenník a treba si rezervovať miesto vopred?") && homeHtml.includes("Aké sú otváracie hodiny a ponúkate aj odvoz?"), "Home must contain the consolidated FAQ");
+assert(!homeHtml.includes('href="/caste-otazky"') && !homeHtml.includes("Viac častých otázok"), "No link to retired FAQ from home");
+console.log("[seo] PASS: consolidated FAQ, old URL noindex + instant redirect and no sitemap entry");
 
 // Puppy organic page keeps its own indexable search intent, structured FAQ,
 // prerendered content and canonical even when the Aria UI is integrated.

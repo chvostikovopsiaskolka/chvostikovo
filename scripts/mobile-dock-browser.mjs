@@ -154,11 +154,11 @@ async function run(engine, width, height, suffix) {
       await page.locator("[data-form-dialog]").waitFor({ state: "hidden" });
       assert(await page.locator(".mobile-dock").isVisible(), suffix + " dock must return after form");
 
-      await page.goto(base + "/caste-otazky", { waitUntil: "domcontentloaded" });
-      await page.locator('.mobile-dock a[href="/#priestory"]').click();
-      // The link can be handled as a client-side navigation; an additional
-      // page 'load' event is not guaranteed. Assert the actual resolved URL.
-      await page.waitForFunction(() => location.pathname === "/" && location.hash === "#priestory", null, { timeout: 15000 });
+      await page.goto(base + "/caste-otazky/", { waitUntil: "commit" }).catch(error => {
+        if (!String(error).includes("interrupted by another navigation to")) throw error;
+      });
+      await page.waitForFunction(() => location.pathname === "/" && location.hash === "#faq", null, { timeout: 15000 });
+      assert(await page.locator("#faq [data-home-faq-contact]").isVisible(), suffix + " FAQ alias must open the real homepage contact section");
     }
     captures.push({ suffix, width, passed: true });
     await context.close();

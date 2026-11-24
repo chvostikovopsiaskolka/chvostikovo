@@ -226,7 +226,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
           { label: "O nás", href: "/#o-nas" },
           { label: "Produkty", href: "/produkty" },
         ] : []),
-        { label: "Časté otázky", href: "/caste-otazky" },
+        { label: "Časté otázky", href: "/#faq" },
         { label: "Kontakt", href: "/#kontakt" },
         { label: "Škôlka pre šteniatka", href: "/psia-skolka-pre-steniatka" },
       ];
