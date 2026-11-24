@@ -325,7 +325,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           </h2>
           </>}
           {homeLayout && !isEnglish ? (
-            <div data-about-expanded className="space-y-5 text-left text-[1.125rem] leading-[1.7] text-forest/85 [text-wrap:pretty]">
+            <div data-about-expanded className="space-y-5 text-left text-base leading-relaxed text-forest/85 [text-wrap:pretty]">
               <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
               <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
               <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
