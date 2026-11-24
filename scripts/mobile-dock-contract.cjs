@@ -1,7 +1,7 @@
 /** Static release guard: run before review. Browser/device E2E is a separate gate. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const read = (path) => fs.readFileSync(path, "utf8");
+const read = (path) => fs.readFileSync(path, "utf8").replace(/\r\n/g, "\n");
 
 const dock = read("src/components/site/MobileDock.tsx");
 const header = read("src/components/site/Header.tsx");
@@ -214,10 +214,10 @@ assert(paidLeadRoute.includes("!isLiveLead && <details data-aria-visit-details")
        "Paid LEAD must show the free-visit note without long duplicate accordion");
 assert(firstVisitComponent.includes('text-[#ffa414]'),
        "Homepage requirements headings must use the approved orange, not the pink taxi accent");
-assert(aboutComponent.includes('max-w-[680px]') &&
+assert(aboutComponent.includes('max-w-[810px]') &&
        aboutComponent.includes('data-safety-heading') &&
        aboutComponent.includes('size-7 shrink-0'),
-       "About copy must be narrower and first-aid heading compact with a visible green check");
+       "About copy must match photo width and first-aid heading stay compact with a visible green check");
 
 
 /* APP-01: physical narrow Android + product inquiry delivery after 23 Nov. */

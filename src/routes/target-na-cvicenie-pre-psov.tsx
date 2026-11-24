@@ -249,8 +249,8 @@ function TargetPage() {
               </h2>
             </div>
 
-            <TargetGalleryLoop />
           </div>
+          <TargetGalleryLoop />
         </section>
 
         <section className="bg-forest py-12 text-cream sm:py-16">

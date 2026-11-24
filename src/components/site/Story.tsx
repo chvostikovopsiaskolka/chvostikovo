@@ -277,7 +277,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
         </h2>
       )}
       <div className={"relative z-10 mx-auto max-w-6xl px-4 " + (homeLayout && !isEnglish ? "flex flex-col gap-7" : "grid items-center gap-10 lg:grid-cols-2")}>
-        <div className={homeLayout && !isEnglish ? "order-2 mx-auto w-full max-w-[680px]" : ""}>
+        <div className={homeLayout && !isEnglish ? "order-2 mx-auto w-full max-w-[810px]" : ""}>
           {(!homeLayout || isEnglish) && <>
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             {isEnglish ? "About us" : "O nás"}

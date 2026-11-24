@@ -85,7 +85,7 @@ export function Hero({ onMobileInquiryOpen, mobileInquiryOpen }: {
                 Čo hľadáte pre svojho psíka?
               </h2>
               <p data-lead-form-intro className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-                Vyplňte krátky nezáväzný formulár. Ozveme sa vám.
+                Vyplňte krátky <strong className="font-bold text-forest">nezáväzný formulár</strong>. Ozveme sa vám.
               </p>
 
               <LeadStepForm questionInHeading trackingSource="hero_desktop_inline" />

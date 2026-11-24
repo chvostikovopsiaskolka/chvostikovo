@@ -199,13 +199,13 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-5xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Cenník našich služieb</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je len výhodnejšia.</p>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-forest/80 sm:text-base">V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je cenovo výhodnejšia. <strong data-pass-attendance className="mt-2 block font-bold text-forest">Podmienkou kúpy permanentky je pravidelná návšteva škôlky minimálne 2× týždenne.</strong></p>
         <div data-home-pricing-columns className="mx-auto mt-7 grid max-w-3xl grid-cols-2 items-stretch gap-3 sm:gap-6">
           <DaycarePricingCards />
           <div data-home-included className="col-span-2 min-w-0 rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8">
             <h3 className="text-center font-display text-base font-bold text-forest sm:text-xl">Čo je v cene zahrnuté</h3>
             <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs leading-relaxed sm:gap-x-6 sm:text-base">
-              {INCLUDED.filter(item => item !== "Fotky a videá z priebehu dňa").map(item => <li key={item} className="flex min-w-0 gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-coral-dark sm:size-4" aria-hidden="true" /><span className="min-w-0 text-forest/85">{item}</span></li>)}
+              {INCLUDED.filter(item => item !== "Fotky a videá z priebehu dňa").map(item => <li key={item} className="flex min-w-0 gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-green-700 sm:size-4" aria-hidden="true" /><strong className="min-w-0 font-bold text-forest/85">{item}</strong></li>)}
             </ul>
           </div>
           <DaycareTaxiNote />
@@ -224,7 +224,7 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
           </span>
           <h2 className="section-title mt-2 text-3xl sm:text-4xl">Cenník našich služieb</h2>
           <p className="mt-3 text-forest/80">
-            V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je len výhodnejšia.
+            V každom vstupe dostane psík to isté – nerobíme rozdiely. Permanentka je cenovo výhodnejšia. <strong data-pass-attendance className="mt-2 block font-bold text-forest">Podmienkou kúpy permanentky je pravidelná návšteva škôlky minimálne 2× týždenne.</strong>
           </p>
         </div>
 

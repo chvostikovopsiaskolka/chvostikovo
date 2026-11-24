@@ -111,8 +111,8 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
           </div>
         </header>
 
-        <article className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
-          <div className="mx-auto max-w-3xl space-y-10">
+        <article className={standGuide ? "w-full py-10 sm:py-14" : "mx-auto max-w-5xl px-4 py-10 sm:py-14"}>
+          <div className={standGuide ? "stand-guide-content space-y-10" : "mx-auto max-w-3xl space-y-10"}>
             {article.sections.map((section, index) => (
               <section key={section.heading} className="flow-root">
                 <h2 className="mb-4 font-display text-2xl leading-tight text-forest sm:text-3xl">{section.heading}</h2>
@@ -163,8 +163,8 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                   </aside>
                 )}
                 {standGuide && (
-                  <section aria-label="Ďalšie ručne vyrábané stojany" className="space-y-4">
-                    <h2 className="font-display text-2xl text-forest sm:text-3xl">Naše realizácie stojanov</h2>
+                  <section data-blog-stand-gallery aria-label="Ďalšie ručne vyrábané stojany" className="space-y-4">
+                    <h2 className="mx-auto w-[calc(100%-2rem)] max-w-3xl font-display text-2xl text-forest sm:text-3xl">Naše realizácie stojanov</h2>
                     <StandGalleryLoop />
                   </section>
                 )}

@@ -9,7 +9,7 @@ import { Requirements, FirstVisit, Pricing, Faq, HOME_PRIMARY_FAQ } from "@/comp
 import { UsefulInfo } from "@/components/site/UsefulInfo";
 import { ProductSection } from "@/components/site/ProductSection";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
-import { Contact, Footer } from "@/components/site/Contact";
+import { Footer } from "@/components/site/Contact";
 import { InquirySection } from "@/components/site/InquirySection";
 import { LeadStepForm } from "@/components/site/LeadStepForm";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
@@ -97,7 +97,7 @@ function Index() {
               <h2 data-lead-form-intro tabIndex={-1} className="font-display text-center text-lg font-bold text-forest focus:outline-none">
                 Čo hľadáte pre svojho psíka?
               </h2>
-              <p data-lead-form-intro className="mt-2 mb-4 text-center text-sm text-muted-foreground">Vyplňte krátky nezáväzný formulár. Ozveme sa vám.</p>
+              <p data-lead-form-intro className="mt-2 mb-4 text-center text-sm text-muted-foreground">Vyplňte krátky <strong className="font-bold text-forest">nezáväzný formulár</strong>. Ozveme sa vám.</p>
               <LeadStepForm trackingSource="home_hero_interest_mobile" questionInHeading compact />
             </div>
           </section>
@@ -109,7 +109,6 @@ function Index() {
         <FriendshipApplication />
         <HomePuppyChecker />
         <Requirements />
-        <InquirySection allScreens matchHero title="Zistite viac o škôlke" />
         <Care showEmbeddedFriendship={false} showInterest={false} showContextFaq={false} homeCombined />
         <Gallery homeMosaic />
         <FirstVisit inlineForm leadStyle />
@@ -118,7 +117,7 @@ function Index() {
         <Partners />
         <UsefulInfo />
         <PhotoStrip />
-        <Contact />
+        <div id="kontakt" className="scroll-mt-24"><InquirySection allScreens matchHero title="Chcete sa informovať o škôlke?" /></div>
       </main>
       <Footer />
     </div>

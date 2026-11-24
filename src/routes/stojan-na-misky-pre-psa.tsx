@@ -333,8 +333,8 @@ function BowlStandPage() {
                 Každý stojan je originál. Pozrite si posledné vyrobené kúsky aj ďalšie prevedenia.
               </p>
             </div>
-            <div className="mt-8"><StandGalleryLoop /></div>
           </div>
+          <div className="mt-8"><StandGalleryLoop /></div>
         </section>
 
         <section data-stand-breeds className="py-14 sm:py-20">
@@ -358,7 +358,7 @@ function BowlStandPage() {
 
         <section data-stand-benefits className="pb-14 sm:pb-20" aria-labelledby="stand-value-heading">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="rounded-[2.25rem] border border-forest/15 bg-[#f0f6f2] px-4 py-8 shadow-soft sm:px-10 sm:py-12">
+            <div className="rounded-[2.25rem] border border-coral/20 bg-[#fff4df] px-4 py-8 shadow-soft sm:px-10 sm:py-12">
               <p className="text-center font-display text-xs font-semibold tracking-[0.2em] text-forest/75 uppercase sm:text-sm">
                 Pre každodenné používanie
               </p>
@@ -411,8 +411,9 @@ function BowlStandPage() {
           </div>
         </section>
 
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto max-w-4xl px-4">
+        <section data-stand-faq className="relative overflow-hidden py-14 sm:py-20">
+          <SectionAmbientPaws />
+          <div className="relative z-10 mx-auto max-w-4xl px-4">
             <div className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
                 Máte otázku?
