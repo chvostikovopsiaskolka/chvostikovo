@@ -4,7 +4,7 @@ import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
 import { Gallery } from "@/components/site/Gallery";
 import { ReviewReasons } from "@/components/site/Reviews";
-import { Care, Why, About, Partners, FriendshipApplication } from "@/components/site/Story";
+import { Care, About, Partners, FriendshipApplication } from "@/components/site/Story";
 import { Requirements, FirstVisit, Pricing, Faq, HOME_PRIMARY_FAQ } from "@/components/site/Info";
 import { UsefulInfo } from "@/components/site/UsefulInfo";
 import { ProductSection } from "@/components/site/ProductSection";
@@ -106,14 +106,13 @@ function Index() {
         <About homeLayout />
         <DaycarePhotoCarousel />
         <Pricing interestMode homeLayout />
+        <FriendshipApplication />
         <HomePuppyChecker />
         <Requirements />
         <InquirySection allScreens matchHero title="Zistite viac o škôlke" />
-        <Care showEmbeddedFriendship={false} showInterest={false} showContextFaq={false} />
+        <Care showEmbeddedFriendship={false} showInterest={false} showContextFaq={false} homeCombined />
         <Gallery homeMosaic />
-        <FriendshipApplication />
         <FirstVisit inlineForm leadStyle />
-        <Why />
         <Faq homeLayout />
         <ProductSection />
         <Partners />
