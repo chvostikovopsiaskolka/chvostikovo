@@ -106,6 +106,20 @@ export const Route = createFileRoute("/test-aria")({
 
 export function AriaPreviewPage() {
   const isLiveLead = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, "") === "/psia-skolka-kosice" });
+  const heroFormIntro = (
+    <div data-lead-form-intro className={isLiveLead ? "mb-5" : undefined}>
+      <h2 className="section-title mt-2 text-center text-xl sm:text-2xl">Chceli by ste sa informovať o škôlke?</h2>
+      <p className="mt-2 text-center text-sm leading-relaxed text-forest/70 sm:text-base">
+        Radi vám odpovieme na otázky o škôlke.
+      </p>
+    </div>
+  );
+  const visitFormIntro = (
+    <div data-lead-form-intro className={isLiveLead ? "mb-5" : undefined}>
+      <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o návštevu?</h2>
+      <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
+    </div>
+  );
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [leadHeroFormOpen, setLeadHeroFormOpen] = useState(false);
   const [puppyModalOpen, setPuppyModalOpen] = useState(false);
@@ -287,15 +301,13 @@ export function AriaPreviewPage() {
         <section id="aria-hero-form" hidden={isLiveLead && !leadHeroFormOpen} className="relative z-10 scroll-mt-24 overflow-hidden bg-white pb-8 pt-4 sm:pb-12 sm:pt-6">
           <SectionAmbientPaws />
           {/* Same verified title -> dog crown -> liquid form card layout as the lower visit form. */}
-          <div data-lead-form-shell className="relative z-10 mx-auto max-w-2xl px-4">
-            <h2 data-lead-form-intro className="section-title mt-2 text-center text-xl sm:text-2xl">Chceli by ste sa informovať o škôlke?</h2>
-            <p data-lead-form-intro className="mt-2 text-center text-sm leading-relaxed text-forest/70 sm:text-base">
-              Radi vám odpovieme na otázky o škôlke.
-            </p>
+          <div data-lead-form-shell={!isLiveLead || undefined} className="relative z-10 mx-auto max-w-2xl px-4">
+            {!isLiveLead && heroFormIntro}
             <div data-aria-hero-form-dogs className="relative z-10 mx-auto mt-7 mb-[-18px] w-full max-w-sm">
               <SchoolmatesFormCrown compact groundAccent />
             </div>
-            <div data-lead-inline-card className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+            <div data-lead-form-shell={isLiveLead || undefined} data-lead-inline-card className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+              {isLiveLead && heroFormIntro}
               <LeadStepForm questionInHeading ariaPreview={!isLiveLead} trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
             </div>
           </div>
@@ -401,15 +413,16 @@ export function AriaPreviewPage() {
                 </article>
               ))}
             </div>
-            <p data-aria-taxi className="mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm">
+            <div data-lead-pricing-extras={isLiveLead || undefined} className={isLiveLead ? "mx-auto mt-5 grid w-full max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4" : undefined}>
+            <p data-aria-taxi className={isLiveLead ? "order-2 flex min-w-0 flex-col items-center justify-center gap-1.5 rounded-3xl bg-forest px-2 py-3 text-center font-display text-xs font-semibold leading-snug text-cream sm:flex-row sm:gap-2 sm:px-4 sm:text-sm" : "mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm"}>
               <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
             <div data-first-visit-group data-lead-visit-compact={isLiveLead || undefined}
-              className="mx-auto mt-5 w-full max-w-2xl rounded-3xl border border-coral/50 bg-coral/10 px-3 py-3 shadow-card sm:px-5">
-              <div className="flex items-center justify-center gap-2 text-center">
+              className={(isLiveLead ? "order-1 flex min-w-0 items-center justify-center " : "mx-auto mt-5 w-full max-w-2xl ")+"rounded-3xl border border-coral/50 bg-coral/10 px-2 py-3 shadow-card sm:px-5"}>
+              <div className={isLiveLead ? "flex min-w-0 flex-col items-center justify-center gap-1.5 text-center sm:flex-row sm:gap-2" : "flex items-center justify-center gap-2 text-center"}>
                 <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
-                <p className="font-display text-base font-bold text-forest sm:text-lg">Úvodná návšteva zadarmo</p>
+                <p className={"font-display font-bold text-forest "+(isLiveLead ? "text-xs leading-snug sm:text-base" : "text-base sm:text-lg")}>Úvodná návšteva zadarmo</p>
               </div>
               {!isLiveLead && <details data-aria-visit-details
                 onToggle={(event) => {
@@ -434,6 +447,7 @@ export function AriaPreviewPage() {
                   </div>
                 </div>
               </details>}
+            </div>
             </div>
 
           </div>
@@ -518,13 +532,13 @@ export function AriaPreviewPage() {
 
         <section id="aria-first-visit-form" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
-          <div data-lead-form-shell className="relative z-10 mx-auto max-w-2xl px-4">
-            <h2 data-lead-form-intro className="section-title text-center text-2xl sm:text-3xl">Máte záujem o návštevu?</h2>
-            <p data-lead-form-intro className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
+          <div data-lead-form-shell={!isLiveLead || undefined} className="relative z-10 mx-auto max-w-2xl px-4">
+            {!isLiveLead && visitFormIntro}
             <div data-aria-first-visit-dogs className="relative z-10 mx-auto mt-7 mb-[-18px] w-full max-w-sm">
               <SchoolmatesFormCrown compact groundAccent />
             </div>
-            <div className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+            <div data-lead-form-shell={isLiveLead || undefined} className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+              {isLiveLead && visitFormIntro}
               <LeadStepForm questionInHeading trackingSource={isLiveLead ? "lead_landing_aria_first_visit_inline" : "aria_preview_first_visit_inline"} />
             </div>
           </div>

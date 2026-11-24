@@ -283,10 +283,13 @@ assert(storyCurrent.includes('max-w-[810px]') &&
 // confuse the two approved, independent form sections.
 const lowerVisitForm = paidLeadCurrent.slice(paidLeadCurrent.indexOf('<section id="aria-first-visit-form"'));
 const crownIndex = lowerVisitForm.indexOf('data-aria-first-visit-dogs');
-const visitHeadingIndex = lowerVisitForm.indexOf('Máte záujem o návštevu?');
-assert(visitHeadingIndex >= 0 && crownIndex > visitHeadingIndex &&
-       crownIndex < lowerVisitForm.indexOf('className="form-liquid-surface relative z-0 mt-0'),
-       "Four dogs must sit on the top of the visit form, below its heading");
+const visitCardIndex = lowerVisitForm.indexOf('<div data-lead-form-shell={isLiveLead || undefined} className="form-liquid-surface');
+const visitIntroIndex = lowerVisitForm.indexOf('{isLiveLead && visitFormIntro}');
+assert(crownIndex >= 0 && visitCardIndex > crownIndex && visitIntroIndex > visitCardIndex &&
+       visitIntroIndex < lowerVisitForm.indexOf('<LeadStepForm') &&
+       paidLeadCurrent.includes('{isLiveLead && heroFormIntro}') &&
+       paidLeadCurrent.includes('data-lead-pricing-extras={isLiveLead || undefined}'),
+       "Paid lead headings belong inside both form cards below their crowns; pricing extras share a row");
 
 // APP-01 responsive-mosaic restoration: reuse existing AriaMosaicGallery,
 // the original eight GALLERY Wix asset IDs and matching 1600px/92Q CDN

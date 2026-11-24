@@ -1682,6 +1682,22 @@ if (!bellaris && brandPreviewCandidate) {
                 // Paid LEAD has one compact free-visit note here: the factual
                 // adaptation explanation now lives exactly once in 3 steps.
                 const paidVisit = page.locator('#lead-pricing [data-first-visit-group]');
+                const extras=await page.locator('[data-lead-pricing-extras]').evaluate(el=>{
+                  const v=el.querySelector('[data-first-visit-group]')?.getBoundingClientRect();
+                  const t=el.querySelector('[data-aria-taxi]')?.getBoundingClientRect();
+                  return !!v&&!!t&&Math.abs(v.width-t.width)<=2&&Math.abs(v.top-t.top)<=2&&
+                    Math.abs(v.height-t.height)<=2&&v.right<=t.left&&
+                    [...el.querySelectorAll('*')].filter(n=>n instanceof HTMLElement).every(n=>n.scrollWidth<=n.clientWidth+2);
+                });
+                if(!extras)throw new Error('Paid LEAD visit/taxi must share equal columns without overflow at '+width);
+                for(const id of ['aria-hero-form','aria-first-visit-form']){
+                  const inside=await page.locator('#'+id+' [data-lead-step-form]').evaluate(el=>{
+                    const shell=el.closest('[data-lead-form-shell]');
+                    return !!shell?.classList.contains('form-liquid-surface')&&
+                      !!shell.querySelector(':scope > [data-lead-form-intro] h2');
+                  });
+                  if(!inside)throw new Error('Paid LEAD introduction must be inside the form card: '+id);
+                }
                 if (await paidVisit.count() !== 1 ||
                     await paidVisit.locator('details').count() !== 0 ||
                     await paidVisit.getByText('Úvodná návšteva zadarmo', { exact: true }).count() !== 1)
