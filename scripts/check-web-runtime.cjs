@@ -2170,13 +2170,30 @@ if (!bellaris && brandPreviewCandidate) {
             await faqForm.locator('input[name="email"]').fill('test@example.com');
             await faqForm.getByRole('button',{name:'Späť',exact:true}).click();
             if(await question.inputValue()!=='Ako vyzerá deň v škôlke?') throw new Error('FAQ question lost on Back');
-            await faqForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+            const faqNext=faqForm.getByRole('button',{name:'Pokračovať',exact:true});
+            await centerFixtureControl(faqNext);
+            await faqNext.click();
+            await faqForm.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
             if(await faqForm.locator('input[name="meno"]').inputValue()!=='Testovací kontakt') throw new Error('FAQ contact lost on Back');
-            await faqForm.getByRole('button',{name:'Poslať',exact:true}).click();
-            if(faqPosts.length) throw new Error('FAQ contact accepted without consent');
-            await faqForm.locator('input[type="checkbox"][required]').check();
-            await faqForm.getByRole('button',{name:'Poslať',exact:true}).click();
-            await page.locator('[data-home-faq-contact-success]').waitFor({state:'visible'});
+            const faqSend=faqForm.getByRole('button',{name:'Poslať',exact:true});
+            const faqConsent=faqForm.locator('input[type="checkbox"][required]');
+            await centerFixtureControl(faqSend);
+            await faqSend.click();
+            if(faqPosts.length || await faqConsent.evaluate(el=>!el.validity.valueMissing)) throw new Error('FAQ contact accepted without consent or native required validation missing');
+            await centerFixtureControl(faqConsent);
+            await faqConsent.check();
+            if(!await faqConsent.isChecked()) throw new Error('FAQ consent was not checked');
+            await centerFixtureControl(faqSend);
+            const ready=await faqForm.evaluate(form=>({step:form.dataset.step,valid:form.checkValidity(),invalid:[...form.querySelectorAll(':invalid')].map(el=>el.name||el.tagName)}));
+            if(ready.step!=='2'||!ready.valid) throw new Error('FAQ contact fixture invalid before send: '+JSON.stringify(ready));
+            await faqSend.click();
+            try {
+              await page.locator('[data-home-faq-contact-success]').waitFor({state:'visible',timeout:8000});
+            } catch {
+              const state=await faqForm.evaluate(form=>({step:form.dataset.step,valid:form.checkValidity(),invalid:[...form.querySelectorAll(':invalid')].map(el=>el.name||el.tagName),alert:form.querySelector('[role="alert"]')?.textContent||null,button:form.querySelector('fieldset:not([hidden]) button[type="submit"]')?.textContent||null})).catch(()=>null);
+              throw new Error('FAQ contact did not show receipt after mocked response: '+JSON.stringify({posts:faqPosts.length,state}));
+            }
+            if(!await page.locator('[data-home-faq-contact-success]').getByRole('heading',{name:'Ďakujeme!',exact:true}).isVisible())throw new Error('FAQ receipt must contain the success heading');
             for(let i=0;i<20&&!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='home_faq_contact_submitted');i++) await page.waitForTimeout(100);
             const faqPayload=faqPosts[0];
             if(faqPosts.length!==1||faqPayload.cta_source!=='home_faq_contact'||faqPayload.marketing_consent!==false||faqPayload.email!=='test@example.com'||faqPayload.raw_payload?.['Otázka návštevníka']!=='Ako vyzerá deň v škôlke?'||faqPayload.dog_breed||trackedEvents.filter(e=>e.name==='explore_daycare'&&e.source==='home_faq_contact_submitted').length!==1||trackedEvents.some(e=>e.name==='form_submit'&&e.source==='home_faq_contact')) throw new Error('FAQ contact source, data, consent or non-conversion tracking regression');
