@@ -86,7 +86,7 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header homeFaqShortcut />
+      <Header />
       <main>
         <Hero onMobileInquiryOpen={openHeroInquiry} mobileInquiryOpen={heroInquiryOpen} />
         {heroInquiryOpen && (
