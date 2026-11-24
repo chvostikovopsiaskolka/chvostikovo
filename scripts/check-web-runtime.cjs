@@ -2848,12 +2848,21 @@ if (!bellaris && brandPreviewCandidate) {
           }
           if (errors.length) throw new Error(errors.join('; '));
           if(brandPreviewCandidate&&!bellaris&&!restricted){
-            const forms=page.locator('[data-lead-step-form]:visible');
-            for(let i=0;i<await forms.count();i++){
+            // Freeze DOM indices instead of re-resolving a changing :visible list
+            // while WebKit scrolls/paints the previously revealed homepage forms.
+            const forms=page.locator('[data-lead-step-form]');
+            const visibleIndices=await forms.evaluateAll(nodes=>nodes.flatMap((node,index)=>node.getClientRects().length&&node.getBoundingClientRect().height>0?[index]:[]));
+            for(const i of visibleIndices){
               const form=forms.nth(i);
               if(await form.getAttribute('data-lead-step')==='1'){
-                await form.locator('label').first().click();
-                await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+                const choice=form.locator('label:has(input[name="zaujem"])').first();
+                await choice.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+                await choice.click();
+                await form.locator('input[name="zaujem"]').first().evaluate(el=>{if(!el.checked)throw new Error('Shared form interest radio did not select');});
+                const next=form.getByRole('button',{name:'Pokračovať',exact:true});
+                await next.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+                await next.click();
+                await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
               }
               await assertLeadContactIntro(form);
               await form.getByRole('button',{name:'Späť',exact:true}).click();
