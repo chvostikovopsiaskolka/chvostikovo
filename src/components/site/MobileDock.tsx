@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ArrowUp, Facebook, FilePenLine, Heart, House, Instagram, Menu, MessageCircleQuestion, Package, Phone, Tag, Users, X } from "lucide-react";
+import { ArrowUp, Facebook, FilePenLine, Heart, House, Instagram, Menu, Package, Phone, Tag, Users, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { PHONE, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -14,10 +14,9 @@ type MobileDockProps = {
   variant?: DockVariant;
   onApplicationOpen?: () => void;
   onInterestOpen?: () => void;
-  homeFaqShortcut?: boolean;
 };
 
-export function MobileDock({ language = "sk", variant = "main", onApplicationOpen, onInterestOpen, homeFaqShortcut = false }: MobileDockProps) {
+export function MobileDock({ language = "sk", variant = "main", onApplicationOpen, onInterestOpen }: MobileDockProps) {
   const english = language === "en";
   const marketing = variant !== "main";
   const homePath = variant === "lead" ? "/psia-skolka-kosice"
@@ -57,8 +56,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     : [{ id: "o-nas", label: "O nás", icon: Users },
        { id: "cennik", label: "Cenník", icon: Tag },
        { id: "podmienky", label: "Podmienky", icon: Heart },
-       { id: "produkty", label: "Produkty", icon: Package },
-       ...(homeFaqShortcut ? [{ id: "faq", label: "Časté otázky", icon: MessageCircleQuestion }] : [])];
+       { id: "produkty", label: "Produkty", icon: Package }];
 
   // Return arrow: hide while moving down; show on upward scroll or after stopping.
   // Reuse the existing section listener without adding a second scroll subscription.
@@ -274,7 +272,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
               </span>
             </a>
           ))}
-          {!marketing && !homeFaqShortcut && (
+          {!marketing && (
             <button type="button" className="mobile-dock-item mobile-dock-apply" onClick={openApplication}>
               <FilePenLine aria-hidden="true" size={19} strokeWidth={2} />
               <span>Prihláška</span>
