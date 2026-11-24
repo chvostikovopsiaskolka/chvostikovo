@@ -60,7 +60,7 @@ const chatQuestions: Question[] = [
   {
     id: "location",
     title: "Kde sa škôlka nachádza?",
-    answer: "Haf! 🐾 Nájdeš nás v **Košiciach na Poľskej 6**.\n\nMáme vlastné vnútorné priestory aj vonkajší výbeh, kde si naši škôlkari môžu užívať deň plný hier, pohybu a oddychu.\n\nNa našej stránke nájdeš aj **mapu a kontakt**, aby si nás jednoducho našiel.",
+    answer: "Haf! 🐾 Nájdeš nás v **Košiciach na " + ADDRESS.street + "**.\n\nMáme vlastné vnútorné priestory aj vonkajší výbeh, kde si naši škôlkari môžu užívať deň plný hier, pohybu a oddychu.\n\nNa našej stránke nájdeš aj **mapu a kontakt**, aby si nás jednoducho našiel.",
   },
   {
     id: "space",

@@ -151,6 +151,24 @@ assert(ariaChatMobile.includes("primaryQuestionIds") &&
   !ariaChatMobile.includes('max-h-[61%]'),
   "APP-01: four progressive FAQ bubbles, readable replies and full-height contact forms must be preserved.");
 
+// Approved 4 + 4 content stays confined to the TEST Aria chatbot. The
+// question IDs are also stable analytics event suffixes.
+const approvedTitles = [
+  "Aký je cenník škôlky?", "Aké sú podmienky prijatia?",
+  "Kto sa postará o psíka?", "Prijímate aj šteniatka?",
+  "Kde sa škôlka nachádza?", "Aké priestory má škôlka?",
+  "Ako prebieha prvá návšteva?", "Ako si rezervujem miesto v škôlke?",
+];
+assert(ariaChatMobile.includes('["pricing", "requirements", "caretakers", "puppy"]') &&
+  approvedTitles.every(title => ariaChatMobile.includes('title: "' + title + '"')) &&
+  ariaChatMobile.includes('id: "reservation"') &&
+  ariaChatMobile.includes("**do nedele 20:00**") &&
+  ariaChatMobile.includes("**vieme sa dohodnúť aj individuálne**") &&
+  !ariaChatMobile.includes("deň vopred do 19:00") &&
+  ariaChatMobile.includes("question.id === \"puppy\" ? showPuppy() : ask(question)") &&
+  ariaChatMobile.includes('track("question_" + question.id)'),
+  "APP-01 TEST Aria content must preserve approved waves, booking rules, puppy flow and analytics.");
+
 const successBoundary = guidedLeadTracking.indexOf("const result = await submitInquiry(");
 const conversionBoundaries = [
   guidedLeadTracking.indexOf('trackCookielessInteraction("form_submit"'),
