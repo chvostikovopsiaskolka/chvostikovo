@@ -3000,6 +3000,19 @@ if (!bellaris && brandPreviewCandidate) {
               const consent = productPage.getByRole('button', { name: 'Len nevyhnutné', exact: true });
               if (await consent.isVisible()) await consent.click();
               if (!await productPage.locator('body.site-brand').count()) throw new Error('Product palette scope missing: '+route);
+              const relatedArticles = productPage.locator('[data-product-related-articles]');
+              const relatedCarousel = relatedArticles.locator('[data-product-article-carousel]');
+              const relatedHref = route.includes('stojan') ? '/blog/stojan-na-misky-pre-psa-vyhody-a-vyber/' : '/blog/target-na-cvicenie-psov-prve-cviky/';
+              if (await relatedArticles.count() !== 1 || await relatedCarousel.locator('a[href="'+relatedHref+'"]').count() !== 1)
+                throw new Error('Product article cards missing: '+route);
+              const relatedLayout = await relatedCarousel.evaluate(el => ({
+                display: getComputedStyle(el).display,
+                snap: getComputedStyle(el).scrollSnapType,
+                width: document.documentElement.scrollWidth,
+                viewport: innerWidth,
+              }));
+              if (relatedLayout.width > relatedLayout.viewport+1 || (width===390 ? relatedLayout.display!=='flex' || !relatedLayout.snap.startsWith('x') : relatedLayout.display!=='grid'))
+                throw new Error('Product related article carousel/grid regression: '+JSON.stringify(relatedLayout));
               const heroTitle = productPage.getByRole('heading', { level: 1 });
               if (!await heroTitle.isVisible()) throw new Error('Product hero title missing: ' + route);
               const detailText = route.includes('stojan')
