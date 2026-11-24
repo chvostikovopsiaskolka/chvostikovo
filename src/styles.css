@@ -1193,11 +1193,10 @@
 /* Paid campaign LEAD only: an actually legible desktop speech bubble.
    Leave mobile sizing and the separate /test-aria/ chatbot untouched. */
 @media (min-width: 1024px) {
-  .lead-brand-live [data-aria-dock],
   .lead-brand-live [data-aria-message] { max-width: 560px; }
-  .lead-brand-live [data-aria-section-navigation] { height: 60px; }
-  .lead-brand-live [data-aria-section-navigation] button span { font-size: 13px; }
-  .lead-brand-live [data-aria-section-navigation] button > svg { width: 22px; height: 22px; }
+  .lead-brand-live [data-aria-section-navigation] { height: 44px; }
+  .lead-brand-live [data-aria-section-navigation] button span { font-size: 11px; }
+  .lead-brand-live [data-aria-section-navigation] button > svg { width: 18px; height: 18px; }
   .lead-brand-live [data-aria-speech] {
     /* Width is independent of the dock's remaining flex-column space.
        The speech can extend to the right without ever covering Aria's head. */
@@ -1228,9 +1227,6 @@
 @media (max-width: 639px) {
   /* The browser toolbar is outside the visual viewport. Keep the dock low,
      above the safe-area inset, rather than 94px above it over the reviews. */
-  .lead-brand-live [data-aria-guide] {
-    bottom: max(18px, env(safe-area-inset-bottom));
-  }
   /* Center the whole H1 → dog crown → liquid copy → reviews group in
      the visual area above the floating Aria bubble. The shared safe-top
      declaration overrides Tailwind pt-* on mobile, so control its CSS
@@ -1388,27 +1384,6 @@
   color: #fff;
   text-shadow: 0 1px 2px rgb(0 0 0 / 20%);
 }
-/* Intrinsic headline sizing also follows fallback fonts and browser zoom.
-   The hidden, non-interactive guide has the same font metrics as the H1 line;
-   inline containment keeps paragraph content from widening its grid track. */
-.home-hero-details {
-  display: grid;
-  grid-template-columns: minmax(0, max-content);
-  inline-size: max-content;
-  max-inline-size: 100%;
-}
-.home-hero-width-guide {
-  visibility: hidden;
-  block-size: 0;
-  line-height: 0;
-  white-space: nowrap;
-  pointer-events: none;
-}
-.home-hero-details > .home-hero-copy,
-.home-hero-details > .home-hero-desktop-cta {
-  contain: inline-size;
-  inline-size: 100%;
-}
 .site-brand #top #recenzie { padding-bottom: 1.5rem; }
 .site-brand .paw-trail-background .paw-ambient-print,
 .site-brand .paw-trail-background .paw-trail-print {
@@ -1518,7 +1493,7 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
   background: #ffa414;
   color: #26322b;
   border-radius: 14px;
-  min-height: 48px;
+  min-height: 44px;
   box-shadow: none;
 }
 .lead-brand-live [data-aria-section-navigation] [data-aria-interest-cta]:focus-visible {
@@ -1576,6 +1551,9 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
    This rule is scoped ONLY to the paid LEAD dock, not Aria speech or other
    sites' desktop/homepage docks; frosted tint avoids text loss over photos. */
 .lead-brand-live [data-aria-dock] {
+  width: calc(100% - 20px);
+  max-width: 424px;
+  margin-inline: auto;
   background-color: rgb(255 250 239 / 72%);
   background-image: linear-gradient(155deg, rgb(255 255 255 / 42%), rgb(255 255 255 / 12%));
   border-color: rgb(255 255 255 / 78%);
@@ -1617,4 +1595,58 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
   .form-liquid-surface, .site-brand .form-liquid-surface, .aria-brand-experiment .form-liquid-surface {
     background: Canvas; border-color: CanvasText;
   }
+}
+
+/* Each shared wizard controls only its explicitly marked local introduction.
+   Keep the modal title available to assistive technology and focus management. */
+[data-lead-form-shell]:has([data-lead-step="2"]) > [data-lead-form-intro] { display: none; }
+[data-lead-form-shell]:has([data-lead-step="2"]) > [data-lead-dialog-intro] {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
+}
+@supports not selector(:has(*)) {
+  [data-lead-form-shell].lead-contact-step > [data-lead-form-intro] { display: none; }
+  [data-lead-form-shell].lead-contact-step > [data-lead-dialog-intro] {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
+  }
+}
+
+/* Main desktop exploration action: warm amber glass, localized soft glow. */
+body.site-brand:has(#top) #home-hero-learn-more,
+body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
+  background-color: #ffe3ae; color: #6f3b10; border: 1px solid #ffc66a;
+  background-image: linear-gradient(135deg, rgb(255 255 255 / 32%), transparent);
+  box-shadow: 0 0 20px 3px rgb(255 176 47 / 24%); transform: none;
+}
+@media (forced-colors: active) {
+  body.site-brand:has(#top) #home-hero-learn-more { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; }
+}
+
+/* Paid navigation only: preserve Aria portrait and speech dimensions. */
+.lead-brand-live [data-aria-guide] { bottom: max(8px, env(safe-area-inset-bottom)); }
+.lead-brand-live [data-aria-section-navigation] { height: 44px; }
+.lead-brand-live [data-aria-section-navigation] button > svg { width: 18px; height: 18px; }
+.lead-brand-live [data-lead-nav-key][aria-current="location"]:not([data-aria-interest-cta]) {
+  background-color: #dce9d9; color: #26322b; box-shadow: inset 0 0 0 1px rgb(45 118 75 / 16%);
+}
+.lead-brand-live [data-lead-nav-key][aria-current="location"] span { font-weight: 800; }
+.lead-brand-live [data-aria-message] .relative.z-10 > strong { flex: 2 1 0%; }
+.lead-brand-live [data-aria-message] .relative.z-10 > button { flex: 1 1 0%; min-width: max-content; margin-left: 0; padding-inline: 0.75rem; }
+@media (hover: hover) and (pointer: fine) {
+  .lead-brand-live :is(.btn-coral, .hero-cta-primary, [data-aria-lead-hero-cta]) { transition: transform 160ms ease, box-shadow 160ms ease; }
+  .lead-brand-live :is(.btn-coral, .hero-cta-primary, [data-aria-lead-hero-cta]):not(:disabled):hover { transform: translateY(-2px) scale(1.025); box-shadow: 0 8px 22px rgb(201 97 30 / 20%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lead-brand-live :is(.btn-coral, .hero-cta-primary, [data-aria-lead-hero-cta]):not(:disabled) { transition: none; transform: none; }
+}
+
+/* Follow the dock's smaller centered frame without resizing Aria or speech. */
+.lead-brand-live [data-aria-message] { position: relative; left: 10px; }
+@media (min-width: 640px) {
+  .lead-brand-live [data-aria-dock] { max-width: 480px; }
+  .lead-brand-live [data-aria-message] { left: 10px; }
+}
+@media (min-width: 1024px) {
+  .lead-brand-live [data-aria-message] { left: 40px; }
 }

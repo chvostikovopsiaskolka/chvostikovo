@@ -12,6 +12,23 @@ fs.mkdirSync(out, { recursive: true });
 const results = [];
 const failures = [];
 
+async function assertLeadContactIntro(form) {
+  // Wait for the real React/CSS transition, especially on Safari WebKit.
+  await form.getByRole('heading',{name:'Kontaktné údaje',exact:true}).waitFor({state:'visible',timeout:5000});
+  if (await form.getAttribute('data-lead-step') !== '2' ||
+      !await form.getByRole('heading', {name:'Kontaktné údaje', exact:true}).isVisible())
+    throw new Error('Shared contact step must have its concise heading');
+  const state=await form.evaluate(el=>{
+    const shell=el.closest('[data-lead-form-shell]');
+    const intro=shell?[...shell.querySelectorAll(':scope > [data-lead-form-intro]')]:[];
+    const modalIntro=shell?.querySelector(':scope > [data-lead-dialog-intro]');
+    const title=shell?.getAttribute('aria-labelledby');
+    return {shell:!!shell, hidden:intro.every(node=>getComputedStyle(node).display==='none'),
+      modal:!modalIntro||(modalIntro.getBoundingClientRect().height<=1&&!!document.getElementById(title)?.textContent)};
+  });
+  if(!state.shell||!state.hidden||!state.modal)throw new Error('Shared form introduction remains in contact layout: '+JSON.stringify(state));
+}
+
 // APP-01 static regression for the slider fill direction in both engines.
 // Pseudo-element background images are not exposed consistently by getComputedStyle.
 if (!bellaris && brandPreviewCandidate) {
@@ -114,8 +131,7 @@ if (!bellaris && brandPreviewCandidate) {
                   palette.badgeBg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgba(255, 181, 85, 0.38)' : 'rgb(255, 164, 20)') ||
                   palette.badgeFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(38, 50, 43)' : 'rgb(255, 255, 255)') ||
                   palette.headline !== 'rgb(255, 164, 20)' ||
-                  palette.heroCopyBg !== 'rgb(255, 164, 20)' ||
-                  palette.heroCopyFg !== (url.pathname === '/psia-skolka-kosice/' ? 'rgb(255, 255, 255)' : 'rgb(23, 28, 24)') ||
+                  (url.pathname === '/test-aria/' && (palette.heroCopyBg !== 'rgb(255, 164, 20)' || palette.heroCopyFg !== 'rgb(23, 28, 24)')) ||
                   palette.earlyFaqBg !== 'rgb(255, 255, 255)' ||
                   palette.earlySectionBg !== 'rgba(255, 164, 20, 0.26)' ||
                   palette.pricingBg !== 'rgba(255, 164, 20, 0.26)' ||
@@ -296,7 +312,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const gr = gallery?.getBoundingClientRect(), tr = track?.getBoundingClientRect();
                   const formNode = document.querySelector('#aria-hero-form');
                   const cta = hero?.querySelector('[data-aria-lead-hero-cta]')?.getBoundingClientRect();
-                  const description = hero?.querySelector('[data-aria-hero-description]')?.getBoundingClientRect();
+                  const description = hero?.querySelector('[data-lead-hero-photos]')?.getBoundingClientRect();
                   const inner = formNode?.querySelector('[data-lead-inline-card]');
                   const lower = document.querySelector('#aria-first-visit-form .form-liquid-surface');
                   const ctaNode = hero?.querySelector('[data-aria-lead-hero-cta]');
@@ -344,14 +360,14 @@ if (!bellaris && brandPreviewCandidate) {
                   };
                 });
                 if (!layout.fixed || layout.cardCount !== 20 || layout.highlightCount !== 2 ||
-                    layout.badgeTop < layout.headingBottom + 50 ||
+                    layout.badgeTop < layout.headingBottom + 8 ||
                     layout.ctaTop < layout.descBottom - 1 || layout.ctaBottom > layout.reviewBottom ||
                     !layout.matchingFormStyles || !layout.dogCrownMatches ||
                     !layout.liquidBadge || !layout.liquidCta || !layout.liquidDock ||
                     layout.galleryTop < layout.heroBottom - 8 || layout.trackTop < layout.heroBottom - 8 ||
                     (!layout.formHidden && (layout.formTop < layout.reviewBottom + 12 ||
                       layout.galleryTop < layout.formBottom - 8)))
-                  throw new Error('Paid orange hero → amber liquid CTA → matching visit form + glass dock regressed: ' + JSON.stringify(layout));
+                  throw new Error('Paid photo hero → amber liquid CTA → matching visit form + glass dock regressed: ' + JSON.stringify(layout));
                 if (layout.width < 640 && (layout.reviewSpacing < 24 || layout.reviewSpacing > 36))
                   throw new Error('Approved mobile review spacing regressed: ' + JSON.stringify(layout));
                 await highlights.first().scrollIntoViewIfNeeded();
@@ -464,6 +480,7 @@ if (!bellaris && brandPreviewCandidate) {
               const team = document.querySelector('[data-hero-benefits]');
               const teamBounds = team?.getBoundingClientRect();
               return {
+                photoHero:document.querySelectorAll('[data-lead-hero-photo]').length===2&&!document.querySelector('.lead-brand-live [data-aria-hero-description],.lead-brand-live [data-aria-hero-dogs]'),
                 heroHeader: !!document.querySelector('header.fixed'),
                 photos: photos.length,
                 visiblePhotos: photos.filter(photo => {
@@ -491,7 +508,7 @@ if (!bellaris && brandPreviewCandidate) {
               };
             });
             if (desktop.heroHeader || desktop.photos !== 2 || desktop.visiblePhotos !== 2 ||
-                desktop.dogsWidth < 390 || !desktop.dogsTouchBadge || !desktop.liquid ||
+                (url.pathname === '/psia-skolka-kosice/' ? !desktop.photoHero : (desktop.dogsWidth < 390 || !desktop.dogsTouchBadge || !desktop.liquid)) ||
                 !desktop.about || desktop.teamPills !== 3 || !desktop.teamContained ||
                 desktop.sliderStyle !== 'none')
               throw new Error('Desktop lead diverges from responsive contract: ' + JSON.stringify(desktop));
@@ -524,6 +541,8 @@ if (!bellaris && brandPreviewCandidate) {
                 ['Podmienky prijatia','lead-requirements'],['Mám záujem o škôlku','aria-hero-form']]) {
                 if (!await page.locator('#'+id).count()) throw new Error('Missing paid scroll target '+id);
                 await nav.getByRole('button',{name:label,exact:true}).click();
+                const activeKey=id==='aria-about'?'about':id==='lead-pricing'?'pricing':id==='lead-requirements'?'requirements':'interest';
+                await page.waitForFunction(key=>document.querySelector('[data-lead-nav-key="'+key+'"]')?.getAttribute('aria-current')==='location',activeKey,{timeout:5000});
                 if (await ariaDesktop.locator('[data-aria-panel]').count())
                   throw new Error('Paid section shortcut must not open a floating panel');
               }
@@ -650,6 +669,31 @@ if (!bellaris && brandPreviewCandidate) {
               // the fixed Aria dock has only a modest 90–160px post-review gap.
               // Google proof must remain a single row at 320–430px.
               const firstFold = await page.evaluate(() => {
+                if(location.pathname==='/psia-skolka-kosice/'){
+                  const hero=document.querySelector('section.hero-safe-top'), title=hero.querySelector('h1'), badge=hero.querySelector('[data-aria-service-badge]');
+                  const frame=hero.querySelector('[data-lead-hero-photos]'), photos=[...hero.querySelectorAll('[data-lead-hero-photo]')], images=photos.map(el=>el.querySelector('img'));
+                  const cta=hero.querySelector('[data-aria-lead-hero-cta]'), reviews=hero.querySelector('#recenzie'), proof=reviews?.querySelector('[data-aria-review-proof]');
+                  const guide=document.querySelector('[data-aria-guide]'), form=document.getElementById('aria-hero-form'), carousel=document.getElementById('lead-photo-carousel');
+                  const about=document.getElementById('aria-caretakers'), aboutHeading=about?.querySelector('h2'), benefits=about?.querySelector('[data-hero-benefits]');
+                  if(!title||!badge||!frame||photos.length!==2||!cta||!reviews||!proof||!guide||!form||!carousel||!aboutHeading||!benefits)return {paidHero:true,checks:{elements:false}};
+                  const t=title.getBoundingClientRect(),b=badge.getBoundingClientRect(),f=frame.getBoundingClientRect(),c=cta.getBoundingClientRect(),v=reviews.getBoundingClientRect(),q=proof.getBoundingClientRect();
+                  const rects=photos.map(el=>el.getBoundingClientRect()), dockOffset=innerHeight-guide.getBoundingClientRect().bottom;
+                  const reviewCard=reviews.querySelector('[data-review-card]'),track=reviews.querySelector('[data-gesture-track="reviews"]');
+                  return {paidHero:true,floatingDockBottomOffset:dockOffset,checks:{
+                    photoAssets:images[0]?.getAttribute('src')?.includes('lead-hero-user-1')&&images[1]?.getAttribute('src')?.includes('lead-hero-user-2')&&images.every(img=>!!img.alt.trim()&&img.complete&&img.naturalWidth>0),
+                    minimalCopy:!hero.querySelector('[data-aria-hero-description],[data-aria-hero-dogs]'),
+                    order:b.top>=t.bottom+8&&f.top>=b.bottom+8&&c.top>=f.bottom+8&&v.top>=c.bottom+8,
+                    paired:Math.abs(rects[0].top-rects[1].top)<=2&&Math.abs(rects[0].width-rects[1].width)<=2&&rects[0].right<=rects[1].left&&rects.every(r=>r.left>=0&&r.right<=innerWidth+1&&r.height>=110),
+                    fitting:title.scrollWidth<=title.clientWidth+2&&badge.scrollWidth<=badge.clientWidth+2&&cta.scrollWidth<=cta.clientWidth+2&&c.height>=44,
+                    proof:q.left>=0&&q.right<=innerWidth+1&&q.height<=parseFloat(getComputedStyle(proof).lineHeight)*1.55&&proof.scrollWidth<=proof.clientWidth+2,
+                    reviews:!!reviewCard&&!!track&&getComputedStyle(reviews).overflowY!=='hidden'&&getComputedStyle(reviewCard).boxShadow!=='none',
+                    fixedDock:getComputedStyle(guide).position==='fixed'&&dockOffset>=6&&dockOffset<=54,
+                    controlledForm:cta.getAttribute('aria-controls')==='aria-hero-form'&&cta.getAttribute('aria-expanded')===String(!form.hidden),
+                    carouselOrder:carousel.getBoundingClientRect().top>=(form.hidden?hero.getBoundingClientRect().bottom:form.getBoundingClientRect().bottom)-8,
+                    caretakers:benefits.children.length===3&&aboutHeading.scrollWidth<=aboutHeading.clientWidth+2,
+                    crownInForm:!!form.querySelector('[data-crown-ground]')&&!!document.querySelector('#aria-first-visit-form [data-crown-ground]')
+                  }};
+                }
                 const form = document.getElementById('aria-hero-form');
                 const reviews = document.getElementById('recenzie');
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
@@ -816,7 +860,9 @@ if (!bellaris && brandPreviewCandidate) {
                   textOverflows: proof.scrollWidth > proof.clientWidth + 2,
                 };
               });
-              if (firstFold.missing ||
+              if(firstFold.paidHero){
+                if(Object.values(firstFold.checks).some(value=>!value))throw new Error('Paid photo Hero regression at '+width+': '+JSON.stringify(firstFold));
+              } else if (firstFold.missing ||
                   // After LEAD form/gallery swap only the section shell may peek
                   // at the fold; actual form fields must stay clear of the dock.
                   (url.pathname === '/psia-skolka-kosice/'
@@ -954,9 +1000,9 @@ if (!bellaris && brandPreviewCandidate) {
                   };
                 });
                 const dockSize = await aria.locator('[data-aria-dock]').boundingBox();
-                if ((width >= 1024 && (dockSize.width < 550 || dockSize.height < 64)) ||
-                    (width < 640 && Math.abs(dockSize.height - 58) > 1))
-                  throw new Error('Paid dock must grow only on desktop: ' + JSON.stringify({width, dockSize}));
+                if ((width >= 1024 && (dockSize.width < 450 || dockSize.width > 482)) ||
+                    Math.abs(dockSize.height - 50) > 2)
+                  throw new Error('Paid dock must stay narrower with 44px hit targets: ' + JSON.stringify({width, dockSize}));
                 const textMetrics = await comicBubble.evaluate(el => ({
                   fontSize: parseFloat(getComputedStyle(el.querySelector('p')).fontSize),
                   maxWidth: parseFloat(getComputedStyle(el).maxWidth),
@@ -1374,9 +1420,10 @@ if (!bellaris && brandPreviewCandidate) {
               const portraitAboveDock = await aria.locator('[data-aria-dock] img[alt^="Aria"]').boundingBox();
               // HERO-MOBILE-01: both mobile docks keep a 10px visual gutter,
               // with Aria ABOVE the bar and no portrait clipped at 320px.
-              if (!dock || !portraitAboveDock || Math.abs(dock.x - 10) > 2 ||
-                  Math.abs(width - dock.x - dock.width - 10) > 2 ||
-                  dock.width < width - 24 || dock.width > width - 16 ||
+              const dockMargin = url.pathname === '/psia-skolka-kosice/' ? 20 : 10;
+              if (!dock || !portraitAboveDock || Math.abs(dock.x - dockMargin) > 2 ||
+                  Math.abs(width - dock.x - dock.width - dockMargin) > 2 ||
+                  dock.width < width - dockMargin*2 - 4 || dock.width > width - dockMargin*2 + 4 ||
                   dock.height > 65 || portraitAboveDock.y + portraitAboveDock.height > dock.y - 4 ||
                   portraitAboveDock.x < -1 || portraitAboveDock.x + portraitAboveDock.width > width + 2)
                 throw new Error('Aria inset mobile dock / portrait above dock regressed at ' + width + ': ' + JSON.stringify({dock, portraitAboveDock}));
@@ -1665,6 +1712,22 @@ if (!bellaris && brandPreviewCandidate) {
                 // Paid LEAD has one compact free-visit note here: the factual
                 // adaptation explanation now lives exactly once in 3 steps.
                 const paidVisit = page.locator('#lead-pricing [data-first-visit-group]');
+                const extras=await page.locator('[data-lead-pricing-extras]').evaluate(el=>{
+                  const v=el.querySelector('[data-first-visit-group]')?.getBoundingClientRect();
+                  const t=el.querySelector('[data-aria-taxi]')?.getBoundingClientRect();
+                  return !!v&&!!t&&Math.abs(v.width-t.width)<=2&&Math.abs(v.top-t.top)<=2&&
+                    Math.abs(v.height-t.height)<=2&&v.right<=t.left&&
+                    [...el.querySelectorAll('*')].filter(n=>n instanceof HTMLElement).every(n=>n.scrollWidth<=n.clientWidth+2);
+                });
+                if(!extras)throw new Error('Paid LEAD visit/taxi must share equal columns without overflow at '+width);
+                for(const id of ['aria-hero-form','aria-first-visit-form']){
+                  const inside=await page.locator('#'+id+' [data-lead-step-form]').evaluate(el=>{
+                    const shell=el.closest('[data-lead-form-shell]');
+                    return !!shell?.classList.contains('form-liquid-surface')&&
+                      !!shell.querySelector(':scope > [data-lead-form-intro] h2');
+                  });
+                  if(!inside)throw new Error('Paid LEAD introduction must be inside the form card: '+id);
+                }
                 if (await paidVisit.count() !== 1 ||
                     await paidVisit.locator('details').count() !== 0 ||
                     await paidVisit.getByText('Úvodná návšteva zadarmo', { exact: true }).count() !== 1)
@@ -1744,6 +1807,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const heroDogs = serviceGroup?.querySelector('[data-aria-hero-dogs]');
                 const badge = serviceGroup?.querySelector('[data-aria-service-badge]');
                 const leadDescription = content?.querySelector('[data-aria-hero-description]');
+                const photoHero = content?.querySelector('[data-lead-hero-photos]');
                 const proof = reviews?.querySelector('[data-aria-review-proof]');
                 const introSpace = isPaidLead ? document.querySelector('[data-aria-lead-photos]')
                   : leadHero?.querySelector('[data-aria-intro-space]');
@@ -1752,8 +1816,10 @@ if (!bellaris && brandPreviewCandidate) {
                 const floatingMenu = document.querySelector('[data-aria-guide]');
                 const firstVisitDogs = document.querySelector('#aria-first-visit-form [data-aria-first-visit-dogs]');
                 if (!reviews || !form || !team || !leadHero || !content || !introTopSpace ||
-                    !headlineSpacer || !serviceGroup || !heroHeading || !heroDogs ||
-                    !badge || !leadDescription || !proof || !introSpace ||
+                    !headlineSpacer || !serviceGroup || !heroHeading ||
+                    (!isPaidLead && (!heroDogs || !leadDescription)) ||
+                    (isPaidLead && (!photoHero || heroDogs || leadDescription)) ||
+                    !badge || !proof || !introSpace ||
                     !benefits || !firstVisitDogs ||
                     !content.contains(reviews) || content.parentElement !== leadHero ||
                     form.parentElement !== leadHero.parentElement) return false;
@@ -1762,9 +1828,9 @@ if (!bellaris && brandPreviewCandidate) {
                 const photo = team.querySelector('img');
                 const copy = team.querySelector('p');
                 const commonOrder = follows(introTopSpace, headlineSpacer) && follows(headlineSpacer, heroHeading) &&
-                  follows(heroHeading, serviceGroup) && follows(heroHeading, heroDogs) &&
-                  follows(heroDogs, badge) && follows(badge, leadDescription) &&
-                  follows(leadDescription, proof) &&
+                  follows(heroHeading, serviceGroup) &&
+                  (isPaidLead ? (follows(badge, photoHero) && follows(photoHero, proof)) :
+                    (follows(heroHeading, heroDogs) && follows(heroDogs, badge) && follows(badge, leadDescription) && follows(leadDescription, proof))) &&
                   (isPaidLead ? (follows(reviews, form) && follows(form, introSpace) &&
                     !leadHero.contains(introSpace) && !inlineMenu && !!floatingMenu && !leadHero.contains(floatingMenu) &&
                     getComputedStyle(floatingMenu).position === 'fixed' && follows(reviews, form))
@@ -2203,7 +2269,7 @@ if (!bellaris && brandPreviewCandidate) {
                   if ((await primary.innerText()).trim() !== 'Chcem zistiť viac' || await hero.locator('.hero-cta-secondary').count())
                     throw new Error('Desktop home learn-more CTA changed: ' + width);
                   const aligned = await primary.evaluate(el => {
-                    const r=el.getBoundingClientRect(), copy=document.querySelector('.home-hero-column .home-hero-copy').getBoundingClientRect();
+                    const r=el.getBoundingClientRect(), copy=document.querySelector('.home-hero-column h1').getBoundingClientRect();
                     return Math.abs(r.left-copy.left)<=2;
                   });
                   if (!aligned) throw new Error('Desktop Home CTA must align with the copy left edge: ' + width);
@@ -2228,9 +2294,6 @@ if (!bellaris && brandPreviewCandidate) {
                   const heroCta=[...document.querySelectorAll('#top .hero-cta-primary')].find(el=>el.getBoundingClientRect().width>0);
                   const videoGrid=document.querySelector('[data-video-reasons-grid]');
                   const dogs=document.querySelector('[data-schoolmates-frame]').getBoundingClientRect();
-                  const titleLine=document.querySelector('[data-home-hero-title-line]');
-                  const lineRange=document.createRange();lineRange.selectNodeContents(titleLine);
-                  const copy=document.querySelector('.home-hero-column .home-hero-copy').getBoundingClientRect();
                   return {
                     ordered:nodes.every((node,i)=>node && (!i || !!(nodes[i-1].compareDocumentPosition(node)&Node.DOCUMENT_POSITION_FOLLOWING))),
                     reviewsInHero:document.getElementById('top').contains(document.getElementById('recenzie')),
@@ -2240,7 +2303,7 @@ if (!bellaris && brandPreviewCandidate) {
                     uniqueFields:inputs.length===new Set(inputs).size,
                     cutout:!!cutout && cutout.complete && cutout.naturalWidth>0,
                     palette:document.body.classList.contains('site-brand') && getComputedStyle(document.querySelector('#top h1')).color==='rgb(184, 46, 127)',
-                    copy:[...document.querySelectorAll('.home-hero-copy')].every(el=>getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)' && getComputedStyle(el).color==='rgb(255, 255, 255)'),
+                    noHomeSalesBox:!document.querySelector('#top .home-hero-copy'),
                     noMobileSalesBox:innerWidth>=1024 || [...document.querySelectorAll('#top .home-hero-copy')].every(el=>el.getBoundingClientRect().height===0),
                     mobileOrangePhrase:innerWidth>=1024 || (() => {
                       const el=document.querySelector('[data-home-mobile-orange-phrase]');
@@ -2283,9 +2346,8 @@ if (!bellaris && brandPreviewCandidate) {
                       const third=document.querySelectorAll('#preco-chvostikovo [data-video-reasons-copy] article')[2];
                       return !!third && getComputedStyle(third).borderTopWidth==='0px';
                     })(),
-                    desktopCopy:innerWidth<1024 || (Math.abs(copy.right-lineRange.getBoundingClientRect().right)<9 && !!document.querySelector('.home-hero-column .home-hero-copy br')),
-                    desktopHeroBalanced:innerWidth<1024 || Math.abs(document.getElementById('home-hero-learn-more').getBoundingClientRect().bottom-document.querySelector('#home-hero-inline-form [data-home-form-panel]').getBoundingClientRect().bottom)<=3,
-                    desktopPhrase:innerWidth<1024 || (()=>{const el=document.querySelector('[data-home-hero-final-phrase]');if(!el)return false;const r=document.createRange();r.selectNodeContents(el);return r.getClientRects().length===1&&r.getBoundingClientRect().right<=copy.right;})(),
+                    warmExplore:innerWidth<1024||(()=>{const style=getComputedStyle(document.getElementById('home-hero-learn-more'));return style.backgroundColor==='rgb(255, 227, 174)'&&style.boxShadow!=='none';})(),
+                    desktopCtaWithinForm:innerWidth<1024||document.getElementById('home-hero-learn-more').getBoundingClientRect().bottom<=document.querySelector('#home-hero-inline-form [data-home-form-panel]').getBoundingClientRect().bottom+2,
                     friendshipModal:!!document.getElementById('home-friendship-interest')&&!document.getElementById('zaujem-po-priatelstvach'),
                     freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
                     pricing:prices.left>=included.right+7 && Math.abs(prices.top-included.top)<2 && cards.length===2 && cards[1].top>=cards[0].bottom+7 && !document.querySelector('#cennik button'),
@@ -2326,7 +2388,7 @@ if (!bellaris && brandPreviewCandidate) {
                     heroFormOrDesktopCta: innerWidth < 1024
                       ? !!document.querySelector('#top [data-home-hero-interest-cta]') &&
                         [...document.querySelectorAll('#top [data-lead-step-form]')].every(el=>el.getBoundingClientRect().height===0)
-                      : getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow==='none',
+                      : getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow!=='none',
                     conditionsNext:document.getElementById('cennik').nextElementSibling.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
@@ -2370,7 +2432,19 @@ if (!bellaris && brandPreviewCandidate) {
                     paws:!!document.querySelector('#top .paw-trail-background'),
                   };
                 });
-                if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression: '+JSON.stringify(layout));
+                if(Object.values(layout).some(value=>!value)) throw new Error('Home brand/layout regression at '+width+'px: '+JSON.stringify(layout));
+                if(width>=1024){
+                  const desktopForm=page.locator('#home-hero-inline-form [data-lead-step-form]');
+                  const position=()=>page.locator('.home-hero-column').evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y+scrollY,width:r.width,height:r.height};});
+                  const before=await position();
+                  await desktopForm.locator('label').first().click();
+                  await desktopForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+                  await assertLeadContactIntro(desktopForm);
+                  const after=await position();
+                  if(Object.keys(before).some(key=>Math.abs(before[key]-after[key])>2))throw new Error('Growing contact form moved Home hero: '+JSON.stringify({width,before,after}));
+                  await desktopForm.getByRole('button',{name:'Späť',exact:true}).click();
+                  await page.locator('#home-hero-inline-form [data-lead-form-intro]').first().waitFor({state:'visible'});
+                }
                 if (width===320) {
                   // Narrow Android short viewport: review proof visible above
                   // the dock; controls remain >=44px despite compact mode.
@@ -2455,7 +2529,7 @@ if (!bellaris && brandPreviewCandidate) {
               if (!mainMobilePhotos) {
                 const primaryShadow = await primary.evaluate(el => getComputedStyle(el).boxShadow);
                 if (url.pathname === '/' && width >= 1024) {
-                  if (primaryShadow !== 'none') throw new Error('Main desktop CTA must be shadow-free: ' + width);
+                  if (primaryShadow === 'none') throw new Error('Main desktop amber CTA glow missing: ' + width);
                 } else if (primaryShadow === 'none') {
                   throw new Error('Landing primary CTA glow missing: ' + width);
                 }
@@ -2498,6 +2572,7 @@ if (!bellaris && brandPreviewCandidate) {
               await friendshipForm.locator('label').first().click();
               await friendshipForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
               await friendshipForm.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
+              await assertLeadContactIntro(friendshipForm);
               await page.keyboard.press('Escape');
               await friendshipDialog.waitFor({state:'hidden'});
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
@@ -2585,7 +2660,7 @@ if (!bellaris && brandPreviewCandidate) {
             if (await next.isEnabled()) throw new Error('Wizard preselected an interest');
             await wizard.getByText('informovať', { exact: true }).first().click();
             await next.click();
-            if (!await wizard.getByRole('heading', { name: 'Kam sa vám môžeme ozvať?' }).isVisible()) throw new Error('Lead wizard did not advance to contact step');
+            if (!await wizard.getByRole('heading', { name: 'Kontaktné údaje' }).isVisible()) throw new Error('Lead wizard did not advance to contact step');
             if (!await wizard.locator('input[name="meno"]').isVisible() || !await wizard.locator('input[name="telefon"]').isVisible())
               throw new Error('Lead contact fields missing');
             await wizard.getByRole('button', { name: 'Späť' }).click();
@@ -2695,6 +2770,7 @@ if (!bellaris && brandPreviewCandidate) {
               if (!await leadForm.locator('[data-inquiry-dog-fields]').isVisible())
                 throw new Error('Regular SK interest must show optional breed on this page: ' + url.pathname);
             }
+            if(brandPreviewCandidate && !url.pathname.startsWith('/en/')) await assertLeadContactIntro(modal.locator('[data-lead-step-form]'));
             const modalFrame = await modal.evaluate(el => {
               const rect = el.getBoundingClientRect();
               const inner = el.querySelector('.form-dialog-scroll');
@@ -2740,6 +2816,22 @@ if (!bellaris && brandPreviewCandidate) {
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
+          if(brandPreviewCandidate&&!bellaris&&!restricted){
+            const forms=page.locator('[data-lead-step-form]:visible');
+            for(let i=0;i<await forms.count();i++){
+              const form=forms.nth(i);
+              if(await form.getAttribute('data-lead-step')==='1'){
+                await form.locator('label').first().click();
+                await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+              }
+              await assertLeadContactIntro(form);
+              await form.getByRole('button',{name:'Späť',exact:true}).click();
+              await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible',timeout:5000});
+              if(await form.getAttribute('data-lead-step')!=='1')throw new Error('Shared form back failed');
+              const restored=await form.evaluate(el=>{const shell=el.closest('[data-lead-form-shell]');return [...shell.querySelectorAll(':scope > [data-lead-form-intro]')].every(node=>getComputedStyle(node).display!=='none');});
+              if(!restored)throw new Error('Shared introduction not restored on back');
+            }
+          }
           results.push({ engine, restricted, route: url.pathname, status: 'PASS' });
           console.log(`PASS ${label}`);
         } catch (error) {
@@ -3157,6 +3249,17 @@ if (!bellaris && brandPreviewCandidate) {
               if (!photoBox || photoBox.height > 310) throw new Error('Stand article hero photo remains too tall on mobile');
             }
             await productPage.goto(new URL('/blog/kam-so-psom-pocas-pracovneho-dna/', base).href);
+            if(brandPreviewCandidate){
+              await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
+              const consent=productPage.getByRole('button',{name:'Len nevyhnutné',exact:true});
+              if(await consent.isVisible())await consent.click();
+              const blogForm=productPage.locator('#zaujem [data-lead-step-form]');
+              await blogForm.locator('label').first().click();
+              await blogForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+              await assertLeadContactIntro(blogForm);
+              if(await productPage.locator('#zaujem > p').isVisible())throw new Error('Blog contact introduction paragraph remains visible');
+              await blogForm.getByRole('button',{name:'Späť',exact:true}).click();
+            }
             const workdayOptions = productPage.locator('article section.flow-root').nth(1);
             const workdayPhoto = workdayOptions.locator('figure img');
             const workdayBullets = workdayOptions.locator('ul > li');
@@ -3233,10 +3336,15 @@ if (!bellaris && brandPreviewCandidate) {
             if (!ctaBox || !phoneBox || Math.abs(ctaBox.y + ctaBox.height / 2 - phoneBox.y - phoneBox.height / 2) > 5) {
               throw new Error('Interest CTA and round phone action must sit in the same row');
             }
+            const mosaicShape=await productPage.locator('[data-home-spaces-mosaic]').evaluate(el=>({
+              columns:parseInt(getComputedStyle(el).columnCount),count:el.querySelectorAll('[data-home-space-photo]').length,
+              quality:[...el.querySelectorAll('button img')].every(img=>img.getAttribute('src').includes('/w_1600,h_1600,al_c,q_92,enc_auto/')&&img.getAttribute('srcset').includes('900w'))
+            }));
+            if(mosaicShape.columns!==(width===390?2:3)||mosaicShape.count!==8||!mosaicShape.quality)throw new Error('Homepage spaces mosaic regression: '+JSON.stringify(mosaicShape));
             const mobileHygiene = productPage.locator('#priestory article[aria-label^="Čistota priestorov"]');
             const desktopHygiene = productPage.locator('#priestory article:not([aria-label])');
             if (await mobileHygiene.count() !== 3 || await desktopHygiene.count() !== 3) {
-              throw new Error('The hygiene section needs three carousel slides and three desktop cards');
+              throw new Error('The hygiene section needs three interleaved mobile cards and three desktop cards');
             }
             for (let card = 0; card < 3; card++) {
               if (await mobileHygiene.nth(card).isVisible() !== (width === 390) ||

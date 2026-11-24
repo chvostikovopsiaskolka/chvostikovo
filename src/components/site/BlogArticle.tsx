@@ -187,10 +187,10 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                 </section>
               </>
             ) : (
-              <section id="zaujem" aria-labelledby="blog-inquiry-heading"
+              <section data-lead-form-shell id="zaujem" aria-labelledby="blog-inquiry-heading"
                 className="scroll-mt-24 rounded-3xl bg-secondary p-6 shadow-soft sm:p-9">
-                <h2 id="blog-inquiry-heading" className="font-display text-2xl text-forest sm:text-3xl">Spoznáme sa aj s vaším psíkom?</h2>
-                <p className="mt-3 max-w-2xl leading-relaxed text-forest/80">
+                <h2 data-lead-form-intro id="blog-inquiry-heading" className="font-display text-2xl text-forest sm:text-3xl">Spoznáme sa aj s vaším psíkom?</h2>
+                <p data-lead-form-intro className="mt-3 max-w-2xl leading-relaxed text-forest/80">
                   Úvodná návšteva je zadarmo. Vyplňte krátky nezáväzný formulár a radi s vami preberieme,
                   či bude skupinová starostlivosť vášmu psíkovi vyhovovať.
                 </p>

@@ -1,5 +1,7 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import leadHeroPhotoOne from "@/assets/lead-hero-user-1.jpg";
+import leadHeroPhotoTwo from "@/assets/lead-hero-user-2.jpg";
 import type { PuppyCheckInput } from "@/lib/inquiry";
 import {
   Car,
@@ -104,8 +106,27 @@ export const Route = createFileRoute("/test-aria")({
   component: AriaPreviewPage,
 });
 
+const LEAD_HERO_PHOTOS = [
+  { src: leadHeroPhotoOne, alt: "Spokojný psík pri hre v Chvostíkove", width: 1021, height: 1280 },
+  { src: leadHeroPhotoTwo, alt: "Psí kamaráti oddychujú v priestoroch Chvostíkova", width: 959, height: 1280 },
+];
+
 export function AriaPreviewPage() {
   const isLiveLead = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, "") === "/psia-skolka-kosice" });
+  const heroFormIntro = (
+    <div data-lead-form-intro className={isLiveLead ? "mb-5" : undefined}>
+      <h2 className="section-title mt-2 text-center text-xl sm:text-2xl">Chceli by ste sa informovať o škôlke?</h2>
+      <p className="mt-2 text-center text-sm leading-relaxed text-forest/70 sm:text-base">
+        Radi vám odpovieme na otázky o škôlke.
+      </p>
+    </div>
+  );
+  const visitFormIntro = (
+    <div data-lead-form-intro className={isLiveLead ? "mb-5" : undefined}>
+      <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o návštevu?</h2>
+      <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
+    </div>
+  );
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [leadHeroFormOpen, setLeadHeroFormOpen] = useState(false);
   const [puppyModalOpen, setPuppyModalOpen] = useState(false);
@@ -234,19 +255,33 @@ export function AriaPreviewPage() {
                 <span className="block text-coral-dark">psík zamiluje</span>
               </h1>
 
-              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-[64px] w-fit max-w-full min-[390px]:mt-[70px] sm:mt-[88px] lg:mt-[116px]" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
+              <div data-aria-service-group className={isLiveLead ? "relative mx-auto mt-4 w-fit max-w-full sm:mt-5" : "relative mx-auto mt-[64px] w-fit max-w-full sm:mt-[72px] lg:mt-[110px]"}>
                 {/* Four schoolmates rest directly above the badge as in the reference. */}
-                <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
+                {!isLiveLead && <div data-aria-hero-dogs className="pointer-events-none absolute inset-x-0 bottom-full z-10 lg:inset-x-auto lg:left-1/2 lg:w-[460px] lg:-translate-x-1/2">
                   <SchoolmatesFormCrown compact desktopWide />
-                </div>
+                </div>}
                 <p data-aria-service-badge className="inline-flex max-w-full items-center justify-center rounded-full bg-coral px-2.5 py-2 text-center font-display text-[8px] font-bold uppercase leading-tight tracking-[0.015em] text-white shadow-card min-[390px]:px-3 min-[390px]:text-[9.5px] sm:px-5 sm:py-2.5 sm:text-sm">
                   Denné stráženie stredných a veľkých psíkov
                 </p>
               </div>
 
+              {isLiveLead ? (
+                <div data-lead-hero-photos className="mx-auto mt-4 grid w-full max-w-2xl grid-cols-2 gap-2.5 sm:mt-5 sm:gap-4">
+                  {LEAD_HERO_PHOTOS.map((photo, index) => (
+                    <button key={photo.src} data-lead-hero-photo={index + 1} type="button"
+                      aria-label={"Zobraziť fotografiu: " + photo.alt} onClick={() => setReviewPhotoOpen(index)}
+                      className="group h-[144px] min-w-0 overflow-hidden rounded-[20px] bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral min-[390px]:h-40 sm:h-56 lg:h-64">
+                      <img src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} loading="eager"
+                        fetchPriority={index === 0 ? "high" : "auto"} decoding="async"
+                        className="size-full object-cover object-[50%_45%] transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none" />
+                    </button>
+                  ))}
+                </div>
+              ) : (
               <p data-aria-hero-description className="relative mx-auto mt-4 max-w-[320px] overflow-hidden rounded-[31px_23px_33px_25px] border border-coral/20 bg-coral/[0.08] bg-[radial-gradient(ellipse_at_12%_6%,rgba(255,171,115,0.25),transparent_66%),radial-gradient(ellipse_at_90%_93%,rgba(237,119,57,0.15),transparent_70%)] px-3.5 py-3 text-[15px] font-medium leading-[1.55] text-forest/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_24px_rgba(238,119,61,0.08)] backdrop-blur-[2px] min-[390px]:max-w-[360px] sm:mt-5 sm:max-w-[540px] sm:px-5 sm:py-4 sm:text-lg lg:max-w-[590px]">
                 <strong className="font-extrabold text-forest">Kým vy pracujete</strong>, váš psík môže <strong className="font-extrabold text-forest">tráviť deň s kamošmi</strong>, užije si <strong className="font-extrabold text-forest">pohyb, hry, oddych</strong> aj pozornosť pod <strong className="font-extrabold text-forest">celodenným dohľadom</strong>.
               </p>
+              )}
               {isLiveLead && (
                 <div className="mx-auto mt-4 flex w-full max-w-[294px] justify-center">
                   <button type="button" data-aria-lead-hero-cta aria-controls="aria-hero-form"
@@ -287,15 +322,13 @@ export function AriaPreviewPage() {
         <section id="aria-hero-form" hidden={isLiveLead && !leadHeroFormOpen} className="relative z-10 scroll-mt-24 overflow-hidden bg-white pb-8 pt-4 sm:pb-12 sm:pt-6">
           <SectionAmbientPaws />
           {/* Same verified title -> dog crown -> liquid form card layout as the lower visit form. */}
-          <div className="relative z-10 mx-auto max-w-2xl px-4">
-            <h2 className="section-title mt-2 text-center text-xl sm:text-2xl">Chceli by ste sa informovať o škôlke?</h2>
-            <p className="mt-2 text-center text-sm leading-relaxed text-forest/70 sm:text-base">
-              Radi vám odpovieme na otázky o škôlke.
-            </p>
+          <div data-lead-form-shell={!isLiveLead || undefined} className="relative z-10 mx-auto max-w-2xl px-4">
+            {!isLiveLead && heroFormIntro}
             <div data-aria-hero-form-dogs className="relative z-10 mx-auto mt-7 mb-[-18px] w-full max-w-sm">
               <SchoolmatesFormCrown compact groundAccent />
             </div>
-            <div data-lead-inline-card className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+            <div data-lead-form-shell={isLiveLead || undefined} data-lead-inline-card className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+              {isLiveLead && heroFormIntro}
               <LeadStepForm questionInHeading ariaPreview={!isLiveLead} trackingSource={isLiveLead ? "lead_landing_aria_hero_inline" : "aria_preview_hero_inline"} />
             </div>
           </div>
@@ -401,15 +434,16 @@ export function AriaPreviewPage() {
                 </article>
               ))}
             </div>
-            <p data-aria-taxi className="mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm">
+            <div data-lead-pricing-extras={isLiveLead || undefined} className={isLiveLead ? "mx-auto mt-5 grid w-full max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4" : undefined}>
+            <p data-aria-taxi className={isLiveLead ? "order-2 flex min-w-0 flex-col items-center justify-center gap-1.5 rounded-3xl bg-forest px-2 py-3 text-center font-display text-xs font-semibold leading-snug text-cream sm:flex-row sm:gap-2 sm:px-4 sm:text-sm" : "mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm"}>
               <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
               <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
             <div data-first-visit-group data-lead-visit-compact={isLiveLead || undefined}
-              className="mx-auto mt-5 w-full max-w-2xl rounded-3xl border border-coral/50 bg-coral/10 px-3 py-3 shadow-card sm:px-5">
-              <div className="flex items-center justify-center gap-2 text-center">
+              className={(isLiveLead ? "order-1 flex min-w-0 items-center justify-center " : "mx-auto mt-5 w-full max-w-2xl ")+"rounded-3xl border border-coral/50 bg-coral/10 px-2 py-3 shadow-card sm:px-5"}>
+              <div className={isLiveLead ? "flex min-w-0 flex-col items-center justify-center gap-1.5 text-center sm:flex-row sm:gap-2" : "flex items-center justify-center gap-2 text-center"}>
                 <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
-                <p className="font-display text-base font-bold text-forest sm:text-lg">Úvodná návšteva zadarmo</p>
+                <p className={"font-display font-bold text-forest "+(isLiveLead ? "text-xs leading-snug sm:text-base" : "text-base sm:text-lg")}>Úvodná návšteva zadarmo</p>
               </div>
               {!isLiveLead && <details data-aria-visit-details
                 onToggle={(event) => {
@@ -434,6 +468,7 @@ export function AriaPreviewPage() {
                   </div>
                 </div>
               </details>}
+            </div>
             </div>
 
           </div>
@@ -518,13 +553,13 @@ export function AriaPreviewPage() {
 
         <section id="aria-first-visit-form" className="relative overflow-hidden bg-card py-10 sm:py-14">
           <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-2xl px-4">
-            <h2 className="section-title text-center text-2xl sm:text-3xl">Máte záujem o návštevu?</h2>
-            <p className="mt-2 text-center text-sm text-forest/70">Vyberte si, čo hľadáte. Ozveme sa vám.</p>
+          <div data-lead-form-shell={!isLiveLead || undefined} className="relative z-10 mx-auto max-w-2xl px-4">
+            {!isLiveLead && visitFormIntro}
             <div data-aria-first-visit-dogs className="relative z-10 mx-auto mt-7 mb-[-18px] w-full max-w-sm">
               <SchoolmatesFormCrown compact groundAccent />
             </div>
-            <div className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+            <div data-lead-form-shell={isLiveLead || undefined} className="form-liquid-surface relative z-0 mt-0 rounded-3xl border border-forest/10 bg-white p-5 pt-8 shadow-card sm:p-6 sm:pt-9">
+              {isLiveLead && visitFormIntro}
               <LeadStepForm questionInHeading trackingSource={isLiveLead ? "lead_landing_aria_first_visit_inline" : "aria_preview_first_visit_inline"} />
             </div>
           </div>
@@ -547,7 +582,7 @@ export function AriaPreviewPage() {
         </DialogContent>
       </Dialog>
 
-      <PhotoLightbox photos={LEAD_REVIEW_GAP_PHOTOS} active={reviewPhotoOpen}
+      <PhotoLightbox photos={isLiveLead ? LEAD_HERO_PHOTOS : LEAD_REVIEW_GAP_PHOTOS} active={reviewPhotoOpen}
         onChange={setReviewPhotoOpen} onClose={() => setReviewPhotoOpen(null)} />
 
       <FormDialog

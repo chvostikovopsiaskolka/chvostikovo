@@ -142,6 +142,7 @@ export function FormDialog({
       <DialogContent
         positioning="form"
         data-form-dialog="simple-v300"
+        data-lead-form-shell
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           titleRef.current?.focus({ preventScroll: true });
@@ -151,7 +152,7 @@ export function FormDialog({
         {hideHeader ? (
           <DialogTitle ref={titleRef} tabIndex={-1} className="sr-only">{title}</DialogTitle>
         ) : (
-          <DialogHeader className="shrink-0">
+          <DialogHeader data-lead-dialog-intro className="shrink-0">
             <DialogTitle ref={titleRef} tabIndex={-1} className="pr-6 text-left font-display text-base leading-snug text-forest outline-none sm:text-xl">{title}</DialogTitle>
             {subtitle && <p className="pr-6 text-left text-sm text-forest/80">{subtitle}</p>}
           </DialogHeader>

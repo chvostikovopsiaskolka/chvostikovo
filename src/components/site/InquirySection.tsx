@@ -45,11 +45,11 @@ export function InquirySection({ allScreens = false, matchHero = false, id = "in
       <div className="relative z-10 mx-auto max-w-2xl px-4">
         <SchoolmatesFormCrown compact={matchHero} groundAccent={!matchHero} />
 
-        <div data-home-inquiry-card={matchHero || undefined} className={matchHero
+        <div data-lead-form-shell data-home-inquiry-card={matchHero || undefined} className={matchHero
           ? "form-liquid-surface min-w-0 rounded-4xl border border-white/50 bg-card px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8"
           : "form-liquid-surface relative z-0 min-w-0 rounded-4xl bg-secondary/70 px-6 pt-12 pb-6 shadow-soft ring-1 ring-coral/15 sm:px-8 sm:pt-14 sm:pb-8"}>
-          <h3 className={"text-center text-forest " + (matchHero ? "text-xl" : "text-2xl")}>{title}</h3>
-          <p className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
+          <h3 data-lead-form-intro className={"text-center text-forest " + (matchHero ? "text-xl" : "text-2xl")}>{title}</h3>
+          <p data-lead-form-intro className="mt-2 mb-5 text-center text-sm leading-relaxed text-muted-foreground">
             {subtitle}
           </p>
 

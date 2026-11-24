@@ -283,10 +283,13 @@ assert(storyCurrent.includes('max-w-[810px]') &&
 // confuse the two approved, independent form sections.
 const lowerVisitForm = paidLeadCurrent.slice(paidLeadCurrent.indexOf('<section id="aria-first-visit-form"'));
 const crownIndex = lowerVisitForm.indexOf('data-aria-first-visit-dogs');
-const visitHeadingIndex = lowerVisitForm.indexOf('Máte záujem o návštevu?');
-assert(visitHeadingIndex >= 0 && crownIndex > visitHeadingIndex &&
-       crownIndex < lowerVisitForm.indexOf('className="form-liquid-surface relative z-0 mt-0'),
-       "Four dogs must sit on the top of the visit form, below its heading");
+const visitCardIndex = lowerVisitForm.indexOf('<div data-lead-form-shell={isLiveLead || undefined} className="form-liquid-surface');
+const visitIntroIndex = lowerVisitForm.indexOf('{isLiveLead && visitFormIntro}');
+assert(crownIndex >= 0 && visitCardIndex > crownIndex && visitIntroIndex > visitCardIndex &&
+       visitIntroIndex < lowerVisitForm.indexOf('<LeadStepForm') &&
+       paidLeadCurrent.includes('{isLiveLead && heroFormIntro}') &&
+       paidLeadCurrent.includes('data-lead-pricing-extras={isLiveLead || undefined}'),
+       "Paid lead headings belong inside both form cards below their crowns; pricing extras share a row");
 
 // APP-01 responsive-mosaic restoration: reuse existing AriaMosaicGallery,
 // the original eight GALLERY Wix asset IDs and matching 1600px/92Q CDN
@@ -320,7 +323,7 @@ assert(hero.includes('data-home-hero-photos') &&
        "Mobile home Hero must show two approved photos and reveal the shared 2-step form after reviews");
 assert(leadContact.includes("compact = false") && leadContact.includes('min-h-[72px] py-2 sm:min-h-24'),
        "Only explicitly compact forms may shorten choices, without changing transport");
-assert(ariaAssistant.includes('data-aria-interest-cta aria-label="Mám záujem o škôlku"') &&
+assert(ariaAssistant.includes('data-aria-interest-cta') && ariaAssistant.includes('aria-label="Mám záujem o škôlku"') &&
        css.includes('.lead-brand-live [data-aria-section-navigation] [data-aria-interest-cta]'),
        "Orange lead dock must open existing inline form, without changing preview docks");
 assert(css.includes('@media (max-width: 359px)') && css.includes('#top h1 span { white-space: normal; }'),

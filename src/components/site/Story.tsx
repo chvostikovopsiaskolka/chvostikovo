@@ -208,9 +208,9 @@ export function FriendshipInterest({ inlineForm = false }: { inlineForm?: boolea
               setOpen(true);
             }}>Toto hľadám pre svojho psíka</button>
           </div>}
-          {inlineForm && <div id="zaujem-po-priatelstvach" className="form-liquid-surface mx-auto mt-8 max-w-2xl rounded-4xl bg-card p-6 shadow-card sm:p-8">
-            <h3 className="text-center text-2xl text-forest">Čo hľadáte pre svojho psíka?</h3>
-            <p className="mt-2 mb-5 text-center text-sm text-muted-foreground">Vyplňte krátky nezáväzný formulár. Ozveme sa vám.</p>
+          {inlineForm && <div data-lead-form-shell id="zaujem-po-priatelstvach" className="form-liquid-surface mx-auto mt-8 max-w-2xl rounded-4xl bg-card p-6 shadow-card sm:p-8">
+            <h3 data-lead-form-intro className="text-center text-2xl text-forest">Čo hľadáte pre svojho psíka?</h3>
+            <p data-lead-form-intro className="mt-2 mb-5 text-center text-sm text-muted-foreground">Vyplňte krátky nezáväzný formulár. Ozveme sa vám.</p>
             <LeadStepForm questionInHeading trackingSource="home_friendship_interest_20261028" />
           </div>}
         </div>

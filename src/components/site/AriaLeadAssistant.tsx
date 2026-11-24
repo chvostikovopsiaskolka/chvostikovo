@@ -103,6 +103,7 @@ export function AriaLeadAssistant({
   const [requestedChatQuestion, setRequestedChatQuestion] = useState<"pricing" | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [pricingVisitOpen, setPricingVisitOpen] = useState(false);
+  const [activeLeadSection, setActiveLeadSection] = useState("");
 
   const speechRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLImageElement>(null);
@@ -153,6 +154,19 @@ export function AriaLeadAssistant({
     let frame = 0;
     const update = () => {
       frame = 0;
+      // Reuse the homepage dock's measured section threshold in this existing RAF.
+      if (sectionNavigation) {
+        let active = "", lastTop = -Infinity;
+        for (const [id, key] of [["aria-hero-form", "interest"], ["aria-caretakers", "about"], ["aria-about", "about"], ["lead-pricing", "pricing"], ["lead-requirements", "requirements"], ["aria-first-visit-form", "interest"]]) {
+          const el = document.getElementById(id!);
+          const top = el?.getBoundingClientRect().top;
+          if (el && !el.hidden && el.getClientRects().length && top !== undefined && top <= window.innerHeight * 0.34 && top >= lastTop) {
+            active = key!;
+            lastTop = top;
+          }
+        }
+        setActiveLeadSection(active);
+      }
       const previous = stageRef.current;
       const endOfRequirements = document.getElementById(requirementsSectionId)?.getBoundingClientRect().bottom ?? Infinity;
       const transition = Math.round(window.innerHeight * 0.4);
@@ -192,7 +206,7 @@ export function AriaLeadAssistant({
       window.removeEventListener("resize", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [requirementsSectionId, puppyStartSectionId]);
+  }, [requirementsSectionId, puppyStartSectionId, sectionNavigation]);
 
   useEffect(() => {
     // Reserve the desktop scrollbar gutter while this assistant is mounted.
@@ -601,10 +615,10 @@ export function AriaLeadAssistant({
           <div data-aria-section-navigation={sectionNavigation || undefined} className="flex h-[52px] items-center gap-0.5">
             {sectionNavigation ? (
               <>
-                <button type="button" className={itemClass} aria-label="O nás" onClick={() => goToLeadSection("aria-about", "about")}><UsersRound size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">O nás</span></button>
-                <button type="button" className={itemClass} aria-label="Cenník škôlky" onClick={() => goToLeadSection("lead-pricing", "pricing")}><Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span></button>
-                <button type="button" className={itemClass} aria-label="Podmienky prijatia" onClick={() => goToLeadSection("lead-requirements", "requirements")}><ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span></button>
-                <button type="button" className={itemClass} data-aria-interest-cta aria-label="Mám záujem o škôlku" onClick={() => goToLeadSection("aria-hero-form", "interest")}><PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span></button>
+                <button type="button" className={itemClass} data-lead-nav-key="about" aria-current={activeLeadSection === "about" ? "location" : undefined} aria-label="O nás" onClick={() => goToLeadSection("aria-about", "about")}><UsersRound size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">O nás</span></button>
+                <button type="button" className={itemClass} data-lead-nav-key="pricing" aria-current={activeLeadSection === "pricing" ? "location" : undefined} aria-label="Cenník škôlky" onClick={() => goToLeadSection("lead-pricing", "pricing")}><Euro size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Cenník</span></button>
+                <button type="button" className={itemClass} data-lead-nav-key="requirements" aria-current={activeLeadSection === "requirements" ? "location" : undefined} aria-label="Podmienky prijatia" onClick={() => goToLeadSection("lead-requirements", "requirements")}><ShieldCheck size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Podmienky</span></button>
+                <button type="button" className={itemClass} data-aria-interest-cta data-lead-nav-key="interest" aria-current={activeLeadSection === "interest" ? "location" : undefined} aria-label="Mám záujem o škôlku" onClick={() => goToLeadSection("aria-hero-form", "interest")}><PawPrint size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-bold sm:text-xs">Záujem</span></button>
                 <button type="button" className={itemClass} aria-label="Otvoriť menu" aria-expanded={panel === "menu"} onClick={() => toggle("menu")}><Menu size={20} strokeWidth={1.9} aria-hidden /><span className="text-[9px] font-semibold sm:text-xs">Menu</span></button>
               </>
             ) : (

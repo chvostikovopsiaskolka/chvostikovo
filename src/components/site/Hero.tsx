@@ -59,7 +59,7 @@ export function Hero({ onMobileInquiryOpen, mobileInquiryOpen }: {
 
         {/* Desktop layout */}
         <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:gap-10">
-          <div className="home-hero-column flex min-w-0 flex-col lg:pt-2">
+          <div className="home-hero-column self-start flex min-w-0 flex-col lg:pt-2">
             <p className="order-1 mx-0 mb-3 mt-0 font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
               Denná starostlivosť o stredných a veľkých psíkov
             </p>
@@ -70,33 +70,21 @@ export function Hero({ onMobileInquiryOpen, mobileInquiryOpen }: {
               <span className="block text-coral-dark">zamiluje</span>
             </h1>
 
-            <div className="home-hero-details order-3 mt-4">
-            <span aria-hidden="true" className="home-hero-width-guide font-display text-[3.25rem] font-bold tracking-[-0.035em] xl:text-[3.625rem]">ktorú si váš psík</span>
-            <div className="home-hero-copy mx-0 max-w-xl">
-              <p className="font-display text-base font-bold">
-                Váš psík už nemusí tráviť deň sám doma.
-              </p>
-              <p className="mt-1.5 max-w-lg text-base font-bold leading-relaxed">
-                Počas dňa si užije pohyb, oddych aj spoločnosť psích<br /><span data-home-hero-final-phrase className="whitespace-nowrap">kamarátov pod celodenným dohľadom.</span>
-              </p>
-            </div>
-
-            <div className="home-hero-desktop-cta mt-5 flex justify-start">
+            <div className="home-hero-desktop-cta order-3 mt-6 flex justify-start">
               <a id="home-hero-learn-more" href="#preco-chvostikovo" onClick={() => {
                 trackMarketingInteraction("hero_learn_more", "hero_desktop");
                 void trackCookielessInteraction("explore_daycare", "home_hero_desktop_20261028");
               }} className="hero-cta-primary w-full max-w-[320px]">Chcem zistiť viac</a>
             </div>
-            </div>
           </div>
 
           <div id="home-hero-inline-form" className="min-w-0">
             <SchoolmatesFormCrown compact />
-            <div data-home-form-panel className="form-liquid-surface rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
-              <h2 className="text-center text-xl text-forest sm:whitespace-nowrap">
+            <div data-lead-form-shell data-home-form-panel className="form-liquid-surface rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
+              <h2 data-lead-form-intro className="text-center text-xl text-forest sm:whitespace-nowrap">
                 Čo hľadáte pre svojho psíka?
               </h2>
-              <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
+              <p data-lead-form-intro className="mt-2 mb-4 text-center text-sm text-muted-foreground">
                 Vyplňte krátky nezáväzný formulár. Ozveme sa vám.
               </p>
 

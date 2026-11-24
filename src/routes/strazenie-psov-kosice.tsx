@@ -133,11 +133,11 @@ function DogSittingPage() {
             </div>
             <div id="informacie" className="mx-auto min-w-0 w-full max-w-md scroll-mt-24 lg:mx-0 lg:self-start">
               <SchoolmatesFormCrown compact />
-              <div className="form-liquid-surface rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
-                <h2 className="text-center font-display text-xl font-bold text-forest sm:text-2xl">
+              <div data-lead-form-shell className="form-liquid-surface rounded-4xl border border-white/50 bg-white/20 px-5 pt-9 pb-5 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px] lg:px-7 lg:pb-7">
+                <h2 data-lead-form-intro className="text-center font-display text-xl font-bold text-forest sm:text-2xl">
                   Čo hľadáte pre svojho psíka?
                 </h2>
-                <p className="mt-2 mb-4 text-center text-sm leading-relaxed text-forest/70">
+                <p data-lead-form-intro className="mt-2 mb-4 text-center text-sm leading-relaxed text-forest/70">
                   Vyplňte krátky formulár. Ozveme sa vám.
                 </p>
                 <LeadStepForm questionInHeading trackingSource="dog_sitting_page_inline" />
