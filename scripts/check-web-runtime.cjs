@@ -1156,37 +1156,32 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Chat must fit mobile viewport');
                   const questionMenu = chat.locator('[data-aria-chat-questions]');
                   await questionMenu.waitFor({ state: 'visible', timeout: 10000 });
-                  if (await questionMenu.locator('[data-aria-chat-question]').count() !== 7 ||
-                      await questionMenu.locator('[data-aria-chat-other-cta]').count() !== 1 ||
+                  if (await questionMenu.locator('[data-aria-chat-question]').count() !== 4 ||
+                      !await questionMenu.locator('[data-aria-chat-question="puppy"]').count() ||
+                      await chat.locator('[data-aria-chat-composer]').count() ||
+                      await chat.getByText('Čo ťa zaujíma?', { exact: true }).count() ||
                       await chat.locator('[data-aria-chat-turn="person"]').count())
-                    throw new Error('Discover-more must show seven FAQs and Other without preselection');
-                  // APP-01: FAQ is a fixed lower panel, never part of scrolling turns.
-                  const composer = chat.locator('[data-aria-chat-composer]');
-                  const disabledEntry = composer.locator('input');
-                  if (await questionMenu.evaluate(el => !!el.closest('[data-aria-chat-history]')) ||
-                      !await disabledEntry.isDisabled() ||
-                      !await composer.locator('svg[viewBox="0 0 33 36"]').count())
-                    throw new Error('Chat must pin FAQ above a pink-paw, read-only message composer');
-                  const [questionsBox, composerBox, historyBox] = await Promise.all([
-                    questionMenu.boundingBox(), composer.boundingBox(),
-                    chat.locator('[data-aria-chat-history]').boundingBox(),
-                  ]);
-                  if (!questionsBox || !composerBox || !historyBox ||
-                      questionsBox.y + questionsBox.height > composerBox.y + 3 ||
-                      historyBox.y + historyBox.height > questionsBox.y + 3)
-                    throw new Error('FAQ must stay below conversation and above the fake composer');
-                  const puppyRow = questionMenu.locator('[data-aria-chat-last-row]');
-                  const [puppyBox, otherBox] = await Promise.all([
-                    puppyRow.locator('[data-aria-chat-question="puppy"]').boundingBox(),
-                    puppyRow.locator('[data-aria-chat-other-cta]').boundingBox(),
-                  ]);
-                  if (!puppyBox || !otherBox || Math.abs(puppyBox.y - otherBox.y) > 5 ||
-                      Math.abs(puppyBox.height - otherBox.height) > 5 ||
-                      otherBox.x <= puppyBox.x)
-                    throw new Error('Pink puppy and Other must share the final two-column FAQ row');
-                  const pink = await questionMenu.locator('[data-aria-chat-question="puppy"]').evaluate(el => getComputedStyle(el).backgroundColor);
-                  if (pink === 'rgb(255, 255, 255)' || pink === 'rgba(0, 0, 0, 0)')
-                    throw new Error('Puppy FAQ must be highlighted pink');
+                    throw new Error('Welcome must show just 4 FAQ bubbles under Aria intro, no duplicate text or fake composer');
+                  const actionPanel = chat.locator('[data-aria-chat-action-panel]');
+                  if (!await questionMenu.evaluate(el => !!el.closest('[data-aria-chat-history]')) ||
+                      !await actionPanel.locator('[data-aria-chat-other-cta]').isVisible() ||
+                      !await actionPanel.locator('[data-aria-chat-interest-cta]').isVisible())
+                    throw new Error('FAQ choices must live in the scrollable history, with two compact actions below');
+                  const welcomeLayout = await chat.evaluate(dialog => {
+                    const history = dialog.querySelector('[data-aria-chat-history]').getBoundingClientRect();
+                    const footer = dialog.querySelector('[data-aria-chat-action-panel]').getBoundingClientRect();
+                    const full = dialog.getBoundingClientRect();
+                    return { historyHeight: history.height, footerHeight: footer.height, footerBottom: footer.bottom, dialogBottom: full.bottom };
+                  });
+                  if (welcomeLayout.footerHeight > 90 || welcomeLayout.historyHeight < 210 ||
+                      Math.abs(welcomeLayout.footerBottom-welcomeLayout.dialogBottom) > 5)
+                    throw new Error('Intro FAQ cannot steal reading room from the conversation: '+JSON.stringify(welcomeLayout));
+                  const otherColor = await actionPanel.locator('[data-aria-chat-other-cta]').evaluate(el => getComputedStyle(el).backgroundColor);
+                  if (otherColor !== 'rgb(255, 240, 213)')
+                    throw new Error('Other CTA must keep approved orange highlighting: '+otherColor);
+                  const puppyPink = await questionMenu.locator('[data-aria-chat-question="puppy"]').evaluate(el => getComputedStyle(el).backgroundColor);
+                  if (puppyPink === 'rgb(255, 255, 255)' || puppyPink === 'rgba(0, 0, 0, 0)')
+                    throw new Error('Puppy FAQ must retain approved pink highlighting');
                   await questionMenu.locator('[data-aria-chat-question="pricing"]').click();
                   const pricingPrompt = chat.locator('[data-aria-chat-turn="person"]');
                   await pricingPrompt.waitFor({ state: 'visible', timeout: 10000 });
@@ -1212,17 +1207,27 @@ if (!bellaris && brandPreviewCandidate) {
                   const followup = chat.locator('[data-aria-chat-followup]');
                   await followup.waitFor({ state: 'visible' });
                   const interestCta = followup.locator('[data-aria-chat-interest-cta]');
-                  const [interestBox, followupBox] = await Promise.all([interestCta.boundingBox(), followup.boundingBox()]);
-                  if (!interestBox || !followupBox || interestBox.width < followupBox.width - 52)
-                    throw new Error('Interest CTA after pricing must be full-width');
-                  if (await chat.getByRole('button', { name: /Odpoveď mi stačí/ }).count())
-                    throw new Error('Unnecessary thank-you CTA must not reappear');
-                  if (await followup.locator('[data-aria-chat-question]').count() !== 6 ||
-                      await followup.locator('[data-aria-chat-other-cta]').count() !== 1 ||
-                      await followup.locator('[data-aria-chat-question="pricing"]').count())
-                    throw new Error('Show all six unanswered topics with the Other tile in the dock after pricing');
-
-                  await followup.locator('[data-aria-chat-question="requirements"]').click();
+                  const viewMetrics = await chat.evaluate(dialog => {
+                    const history = dialog.querySelector('[data-aria-chat-history]').getBoundingClientRect();
+                    const footer = dialog.querySelector('[data-aria-chat-followup]').getBoundingClientRect();
+                    const answer = dialog.querySelector('[data-aria-chat-turn="aria"]');
+                    const reply = answer?.getBoundingClientRect();
+                    return { historyHeight:history.height, footerHeight:footer.height,
+                      answerTop:reply?.top, answerBottom:reply?.bottom, viewportBottom:history.bottom };
+                  });
+                  if (viewMetrics.footerHeight > 90 || viewMetrics.historyHeight < 330 ||
+                      viewMetrics.answerBottom > viewMetrics.viewportBottom + 2 ||
+                      await chat.locator('[data-aria-chat-questions]').count())
+                    throw new Error('Pricing answer needs the readable history, not a giant FAQ dock: '+JSON.stringify(viewMetrics));
+                  if (!await interestCta.isVisible() ||
+                      !await followup.locator('[data-aria-chat-other-cta]').isVisible() ||
+                      !await followup.locator('[data-aria-chat-show-questions]').isVisible())
+                    throw new Error('After pricing, only compact next-actions remain');
+                  await followup.locator('[data-aria-chat-show-questions]').click();
+                  if (await questionMenu.locator('[data-aria-chat-question]').count() !== 3 ||
+                      await questionMenu.locator('[data-aria-chat-question="pricing"]').count())
+                    throw new Error('Only the three unanswered first-wave questions may reappear');
+                  await questionMenu.locator('[data-aria-chat-question="requirements"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
                   const requirementCards = chat.locator('[data-aria-chat-requirements] article');
                   await requirementCards.first().waitFor({ state: 'visible' });
@@ -1238,9 +1243,9 @@ if (!bellaris && brandPreviewCandidate) {
                   });
                   if (!requirementsFit)
                     throw new Error('Four requirements cards must not overflow the mobile chat viewport');
-                  if (await chat.locator('[data-aria-chat-followup] [data-aria-chat-question]').count() !== 5 ||
-                      !await chat.locator('[data-aria-chat-followup] [data-aria-chat-interest-cta]').count())
-                    throw new Error('After requirements show five remaining FAQs and working interest CTA');
+                  if (await chat.locator('[data-aria-chat-questions]').count() ||
+                      !await chat.locator('[data-aria-chat-followup] [data-aria-chat-interest-cta]').isVisible())
+                    throw new Error('After requirements the action bar must stay compact and the history visible');
                   const firstCardGeometry = await requirementCards.first().evaluate(el => {
                     const viewport = el.closest('[data-aria-chat-history]');
                     const card = el.getBoundingClientRect();
@@ -1253,6 +1258,14 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Finishing requirements must keep the first card visible: ' +
                       JSON.stringify(firstCardGeometry));
                   await chat.locator('[data-aria-chat-followup] [data-aria-chat-other-cta]').click();
+                  if (await chat.locator('[data-aria-chat-history]').isVisible())
+                    throw new Error('Contact view must hide the chat log and reserve all body space for the form');
+                  const contactLayout = await chat.locator('[data-aria-chat-form-scroll]').evaluate(el=>({
+                    height:el.getBoundingClientRect().height,
+                    chatHeight:el.closest('[data-aria-chat]').getBoundingClientRect().height
+                  }));
+                  if (contactLayout.height < contactLayout.chatHeight - 115)
+                    throw new Error('Contact must occupy the available chat height: '+JSON.stringify(contactLayout));
                   const questionForm = chat.locator('[data-aria-chat-other]');
                   await questionForm.waitFor({ state: 'visible' });
                   if (!await questionForm.locator('textarea[name="otazka"]').count() ||
@@ -1287,7 +1300,7 @@ if (!bellaris && brandPreviewCandidate) {
                   await page.unroute('**/functions/v1/web-form-submit');
                   await chat.getByRole('button', { name: 'Späť k otázkam' }).click();
                   // APP-01: an embedded puppy checker must remain available.
-                  if (await chat.locator('[data-aria-chat-questions] [data-aria-chat-question]').count() !== 5 ||
+                  if (await chat.locator('[data-aria-chat-questions] [data-aria-chat-question]').count() !== 2 ||
                       await chat.locator('[data-aria-chat-puppy-cta]').count() !== 0 ||
                       !await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="puppy"]').isVisible())
                     throw new Error('Puppy checker must be a pink FAQ, not a duplicate CTA');
@@ -1347,11 +1360,26 @@ if (!bellaris && brandPreviewCandidate) {
                   await puppyContact.getByRole('button', { name: 'Späť ku kontrole' }).click();
                   await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
                   await chat.locator('[data-aria-chat-puppy-check]').getByRole('button', { name: 'Späť k otázkam' }).click();
-                  await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="location"]').click();
+                  await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="first_visit"]').click();
+                  await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
+                  await chat.locator('[data-aria-chat-show-questions]').click();
+                  const laterQuestions = chat.locator('[data-aria-chat-questions]');
+                  if (await laterQuestions.locator('[data-aria-chat-question]').count() !== 3 ||
+                      !await laterQuestions.locator('[data-aria-chat-question="location"]').count())
+                    throw new Error('Second wave must unlock after all first four FAQs');
+                  await laterQuestions.locator('[data-aria-chat-question="location"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
                   await chat.locator('[data-aria-chat-followup] [data-aria-chat-interest-cta]').click();
                   const interest = chat.locator('[data-aria-chat-interest]');
                   await interest.locator('[data-lead-step-form]').waitFor({ state: 'visible' });
+                  if (await chat.locator('[data-aria-chat-history]').isVisible())
+                    throw new Error('Interest form must replace the chat log in the modal');
+                  const interestLayout = await chat.locator('[data-aria-chat-form-scroll]').evaluate(el=>({
+                    height:el.getBoundingClientRect().height,
+                    chatHeight:el.closest('[data-aria-chat]').getBoundingClientRect().height
+                  }));
+                  if (interestLayout.height < interestLayout.chatHeight - 115)
+                    throw new Error('Interest form must use all available body height: '+JSON.stringify(interestLayout));
                   if (await interest.locator('input[name="zaujem"]').count() !== 3 ||
                       !await interest.getByText('Krok 1 z 2').count())
                     throw new Error('Interest must reuse the two-step lead form');

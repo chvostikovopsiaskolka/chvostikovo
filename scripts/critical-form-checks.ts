@@ -138,6 +138,19 @@ assert(ariaLandingTracking.includes('"lead_landing_first_visit_details"') &&
   ariaLandingTracking.includes('"lead_landing_first_visit_steps"'),
   "Campaign first-visit explanation and three-step shortcut must remain tracked");
 const guidedLeadTracking = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
+const ariaChatMobile = readFileSync(new URL("../src/components/site/AriaGuidedChat.tsx", import.meta.url), "utf8");
+assert(ariaChatMobile.includes("primaryQuestionIds") &&
+  ariaChatMobile.includes('data-aria-chat-questions') &&
+  ariaChatMobile.includes('data-aria-chat-show-questions') &&
+  ariaChatMobile.includes('lastReply.questionId === "requirements"') &&
+  ariaChatMobile.includes('min-h-0 flex-1 overflow-y-auto') &&
+  ariaChatMobile.includes('data-lead-form-shell') &&
+  ariaChatMobile.includes('data-lead-form-intro') &&
+  ariaChatMobile.includes('dockless = false') &&
+  !ariaChatMobile.includes('data-aria-chat-composer') &&
+  !ariaChatMobile.includes('max-h-[61%]'),
+  "APP-01: four progressive FAQ bubbles, readable replies and full-height contact forms must be preserved.");
+
 const successBoundary = guidedLeadTracking.indexOf("const result = await submitInquiry(");
 const conversionBoundaries = [
   guidedLeadTracking.indexOf('trackCookielessInteraction("form_submit"'),
