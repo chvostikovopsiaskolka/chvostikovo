@@ -2889,14 +2889,27 @@ if (!bellaris && brandPreviewCandidate) {
               const box = await carousel.boundingBox();
               if (!box) throw new Error('Invisible carousel track');
               if (engine === 'chromium') {
-                const before = await page.evaluate(() => window.scrollY);
-                // Chromium can simulate wheel input; verify actual scroll chaining.
-                await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-                await page.mouse.wheel(0, 330);
-                await page.waitForTimeout(320);
-                const after = await page.evaluate(() => window.scrollY);
-                if (after <= before + 15)
-                  throw new Error('Vertical page scroll blocked on carousel ' + i + ': ' + before + ' -> ' + after);
+                // Test a genuine wheel at an uncovered point inside the carousel.
+                // A fixed dock or a moving viewport is not evidence of a carousel
+                // scroll lock. Keep touch-action and the actual scroll assertion.
+                const point=await carousel.evaluate(el=>{
+                  const r=el.getBoundingClientRect();
+                  for(const fy of [.5,.35,.65,.2,.8])for(const fx of [.5,.3,.7]){
+                    const x=r.left+r.width*fx,y=r.top+r.height*fy;
+                    if(x>0&&x<innerWidth&&y>0&&y<innerHeight&&el.contains(document.elementFromPoint(x,y)))return {x,y};
+                  }
+                  return null;
+                });
+                if(!point)throw new Error('No uncovered carousel wheel test point '+i);
+                await page.mouse.move(point.x,point.y);
+                const before=await page.evaluate(()=>window.scrollY);
+                await page.mouse.wheel(0,330);
+                try {
+                  await page.waitForFunction(y=>window.scrollY>y+15,before,{timeout:2000});
+                } catch {
+                  const state=await page.evaluate(({x,y})=>({scrollY,hit:document.elementFromPoint(x,y)?.tagName,remaining:document.documentElement.scrollHeight-innerHeight-scrollY}),point);
+                  throw new Error('Vertical page scroll blocked on carousel '+i+': '+JSON.stringify({before,...state}));
+                }
               } else {
                 // Mobile WebKit cannot dispatch an actual mouse wheel. Programmatic
                 // scrollBy in this carousel is altered by scroll anchoring and can
