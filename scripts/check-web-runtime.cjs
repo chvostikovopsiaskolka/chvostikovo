@@ -32,13 +32,13 @@ async function centerFixtureControl(control) {
 // clicking so a moving viewport or fixed mobile dock cannot intercept it.
 async function advanceLeadContact(form) {
   const choice=form.locator('label:has(input[name="zaujem"])').first();
-  await choice.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+  await centerFixtureControl(choice);
   await choice.click();
   await form.locator('input[name="zaujem"]').first().evaluate(el=>{
     if(!el.checked)throw new Error('Lead interest radio did not select');
   });
   const next=form.getByRole('button',{name:'Pokračovať',exact:true});
-  await next.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+  await centerFixtureControl(next);
   await next.click();
   await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
 }
@@ -2044,25 +2044,47 @@ if (!bellaris && brandPreviewCandidate) {
             const question=faqForm.locator('textarea[name="otazka"]');
             const faqPosts=[];
             const handler=async route=>{
+              const cors={'access-control-allow-origin':'*','access-control-allow-methods':'POST, OPTIONS','access-control-allow-headers':'content-type'};
+              if(route.request().method()==='OPTIONS'){await route.fulfill({status:204,headers:cors});return;}
               const payload=route.request().postDataJSON()||{};
               faqPosts.push(payload);
-              await route.fulfill({status:201,contentType:'application/json',body:'{"ok":true}'});
+              await route.fulfill({status:201,contentType:'application/json',headers:cors,body:'{"ok":true}'});
             };
             await page.route('**/functions/v1/web-form-submit',handler);
+            const faqNext=faqForm.getByRole('button',{name:'Pokračovať',exact:true});
+            const faqBack=faqForm.getByRole('button',{name:'Späť',exact:true});
+            const faqSend=faqForm.getByRole('button',{name:'Poslať',exact:true});
+            const faqConsent=faqForm.locator('input[type="checkbox"][required]');
+            await centerFixtureControl(question);
             await question.fill('Ako vyzerá deň v škôlke?');
-            await faqForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+            await centerFixtureControl(faqNext);
+            await faqNext.click();
+            await faqForm.locator('input[name="meno"]').waitFor({state:'visible',timeout:5000});
             await faqForm.locator('input[name="meno"]').fill('Testovací kontakt');
             await faqForm.locator('input[name="telefon"]').fill('912345678');
             await faqForm.locator('input[name="email"]').fill('test@example.com');
-            await faqForm.getByRole('button',{name:'Späť',exact:true}).click();
+            await centerFixtureControl(faqBack);
+            await faqBack.click();
+            await question.waitFor({state:'visible',timeout:5000});
             if(await question.inputValue()!=='Ako vyzerá deň v škôlke?') throw new Error('FAQ question lost on Back');
-            await faqForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+            await centerFixtureControl(faqNext);
+            await faqNext.click();
+            await faqConsent.waitFor({state:'visible',timeout:5000});
             if(await faqForm.locator('input[name="meno"]').inputValue()!=='Testovací kontakt') throw new Error('FAQ contact lost on Back');
-            await faqForm.getByRole('button',{name:'Poslať',exact:true}).click();
+            if(await faqConsent.isChecked()) throw new Error('FAQ contact unexpectedly pre-consented');
+            await centerFixtureControl(faqSend);
+            await faqSend.click();
             if(faqPosts.length) throw new Error('FAQ contact accepted without consent');
-            await faqForm.locator('input[type="checkbox"][required]').check();
-            await faqForm.getByRole('button',{name:'Poslať',exact:true}).click();
-            await page.locator('[data-home-faq-contact-success]').waitFor({state:'visible'});
+            await centerFixtureControl(faqConsent);
+            await faqConsent.check();
+            if(!await faqConsent.isChecked()) throw new Error('FAQ contact consent did not select');
+            const invalid=await faqForm.evaluate(el=>[...el.elements].filter(field=>field.willValidate&&!field.validity.valid).map(field=>({name:field.name,message:field.validationMessage})));
+            if(invalid.length) throw new Error('FAQ contact invalid before submit: '+JSON.stringify(invalid));
+            await centerFixtureControl(faqSend);
+            await faqSend.click();
+            await page.locator('[data-home-faq-contact-success]').waitFor({state:'visible',timeout:10000}).catch(async error=>{
+              throw new Error('FAQ contact receipt missing: '+JSON.stringify({posts:faqPosts.length,alert:await faqForm.locator('[role="alert"]').allTextContents(),invalid:await faqForm.evaluate(el=>[...el.elements].filter(field=>field.willValidate&&!field.validity.valid).map(field=>({name:field.name,message:field.validationMessage}))).catch(()=>[]),cause:String(error)}));
+            });
             for(let i=0;i<20&&!trackedEvents.some(e=>e.name==='explore_daycare'&&e.source==='home_faq_contact_submitted');i++) await page.waitForTimeout(100);
             const faqPayload=faqPosts[0];
             if(faqPosts.length!==1||faqPayload.cta_source!=='home_faq_contact'||faqPayload.marketing_consent!==false||faqPayload.email!=='test@example.com'||faqPayload.raw_payload?.['Otázka návštevníka']!=='Ako vyzerá deň v škôlke?'||faqPayload.dog_breed||trackedEvents.filter(e=>e.name==='explore_daycare'&&e.source==='home_faq_contact_submitted').length!==1||trackedEvents.some(e=>e.name==='form_submit'&&e.source==='home_faq_contact')) throw new Error('FAQ contact source, data, consent or non-conversion tracking regression');
@@ -2651,9 +2673,12 @@ if (!bellaris && brandPreviewCandidate) {
               const toggle=application.locator('#home-friendship-application');
               const owner=application.locator('input[name="meno"]');
               if(!await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application preview fields incorrect');
+              await centerFixtureControl(owner);
               await owner.fill('Testovacie meno');
+              await centerFixtureControl(toggle);
               await toggle.click();
               if(!await application.locator('input[name="pes"]').isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await owner.inputValue()!=='Testovacie meno' || await page.getByRole('dialog').count()) throw new Error('Inline application did not expand or retain owner data');
+              await centerFixtureControl(toggle);
               await toggle.click();
               if(await application.locator('input[name="pes"]').isVisible() || await owner.inputValue()!=='Testovacie meno') throw new Error('Inline application collapse lost data');
               await owner.fill('');
