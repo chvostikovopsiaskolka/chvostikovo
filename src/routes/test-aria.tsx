@@ -197,12 +197,12 @@ export function AriaPreviewPage() {
             </h2>
 
             {isLiveLead ? <>
-              <div data-lead-benefits className="mt-7 grid gap-5 sm:grid-cols-3 sm:gap-6">
+              <div data-lead-benefits className="mx-auto mt-7 grid max-w-4xl gap-5 sm:gap-6">
                 {BENEFITS.map(({ title: benefitTitle, content, icon: Icon }, i) => {
                   const photo = [DAYCARE_GALLERY_EXTRAS[2]!, DAYCARE_GALLERY_EXTRAS[1]!, DAYCARE_GALLERY_EXTRAS[0]!][i]!;
-                  return <article key={benefitTitle} className="grid grid-cols-2 items-start gap-3 text-left sm:block">
-                    <img src={photo.src} alt={photo.alt} width={720} height={720} loading="lazy" decoding="async" className="aspect-[4/5] w-full rounded-[20px] object-cover shadow-card sm:aspect-[5/4]" />
-                    <div className="min-w-0 sm:mt-4"><Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden="true" />
+                  return <article key={benefitTitle} className="grid grid-cols-2 items-center gap-3 text-left sm:gap-8">
+                    <img src={photo.src} alt={photo.alt} width={720} height={720} loading="lazy" decoding="async" className="aspect-[4/5] w-full rounded-[20px] object-cover shadow-card sm:aspect-[5/3]" />
+                    <div className="min-w-0"><Icon className="mb-2 hidden size-7 text-coral sm:block" aria-hidden="true" />
                       <h3 className="font-display text-sm font-bold leading-snug text-forest min-[390px]:text-base sm:text-xl">{benefitTitle}</h3>
                       <p className="mt-2 text-xs leading-relaxed text-forest/80 min-[390px]:text-[13px] sm:text-base">{content}</p>
                     </div>
@@ -468,7 +468,7 @@ export function AriaPreviewPage() {
   const friendshipSection = <FriendshipFeature ctaLabel="Toto hľadám pre svojho psíka" onCtaClick={() => openLeadModal("lead_landing_friendship_20261028")} />;
   const conditionsSection = (
     <section id="lead-knowledge" className="relative scroll-mt-24 bg-white pb-10 sm:pb-14">
-      <Requirements id="lead-requirements" ariaPreview hideEyebrow title="Podmienky" />
+      <Requirements id="lead-requirements" ariaPreview hideEyebrow title="Podmienky prijatia psíka" />
       <div className="mx-auto flex max-w-4xl justify-center px-4">
         <button type="button" id="lead-faq-interest" data-lead-faq-cta onClick={() => revealLeadHeroForm("lead_landing_faq_interest")} className="btn-coral min-h-11 px-5 text-center">Chcem sa informovať o škôlke</button>
       </div>
@@ -500,8 +500,8 @@ export function AriaPreviewPage() {
               document flow, with space reserved in scoped CSS below. */}
           <div aria-hidden="true" data-aria-intro-top-space className={isLiveLead ? "h-0" : "min-h-2 flex-[0.2] sm:min-h-5 lg:min-h-3 lg:flex-[0.2]"} />
           <div data-aria-hero-content className="relative z-10 w-full shrink-0">
-            <div className={isLiveLead ? "mx-auto w-full max-w-4xl px-4 pb-1 pt-1 sm:pb-4 sm:pt-5 lg:pt-7" : "mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7"}>
-            <div className="w-full min-w-0 text-center">
+            <div className={isLiveLead ? "mx-auto w-full max-w-4xl px-4 pb-1 pt-1 sm:pb-4 sm:pt-5 lg:max-w-5xl lg:pt-7" : "mx-auto w-full max-w-4xl px-4 pb-3 pt-4 sm:pb-4 sm:pt-5 lg:pt-7"}>
+            <div data-lead-hero-grid={isLiveLead || undefined} className="w-full min-w-0 text-center">
               {/* Screenshot hierarchy: H1, four schoolmates, badge, liquid copy, reviews. */}
               <div aria-hidden="true" data-aria-hero-heading-spacer className={isLiveLead ? "h-1 sm:h-5" : "h-[14px] sm:h-5"} />
               <h1 className={(isLiveLead ? "mt-3 translate-y-0 " : "mt-3 ") + "text-[38px] leading-[1.07] tracking-[-0.03em] text-forest sm:text-5xl sm:leading-[1.06] lg:mt-1 lg:text-[58px] lg:leading-[1.05]"}>

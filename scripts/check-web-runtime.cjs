@@ -66,7 +66,7 @@ async function assertCampaignContentFlow(page) {
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==1||structure.benefits!==3||structure.requirements!==4||
     structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
-  for(const [width,height] of [[375,667],[390,844],[768,1024],[1440,900]]) {
+  for(const [width,height] of [[375,667],[390,844],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
     await page.waitForTimeout(160);
@@ -78,6 +78,8 @@ async function assertCampaignContentFlow(page) {
       const elements=[title,pills,photos,cta,proof];
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
         visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
+        desktop:(()=>{if(innerWidth<1024)return true;const action=box('[data-lead-hero-action]');const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());const reviewBottom=Math.max(...[...document.querySelectorAll('#recenzie figure')].map(e=>e.getBoundingClientRect().bottom));return photos.left>title.right&&Math.abs(photos.top-title.top)<2&&Math.abs(photos.bottom-action.bottom)<2&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&reviewBottom<Math.min(aria.top,face.top)&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-hours]')).fontSize)>=14;})(),
+        pairedBenefits:(()=>{const rows=[...document.querySelectorAll('[data-lead-benefits] > article')];return rows.length===3&&rows.every((e,i)=>{const image=e.querySelector('img').getBoundingClientRect(),text=e.querySelector('div').getBoundingClientRect();return image.right<text.left&&(!i||e.getBoundingClientRect().top>rows[i-1].getBoundingClientRect().bottom);});})(),
         cards:(()=>{const cards=[...document.querySelectorAll('[data-lead-price-card]')].map(el=>el.getBoundingClientRect());const taxi=box('#lead-pricing [data-aria-taxi]');return cards.length===2&&Math.abs(cards[0].top-cards[1].top)<2&&Math.abs(cards[0].bottom-cards[1].bottom)<2&&taxi.top>cards[0].bottom&&taxi.width>=cards[1].right-cards[0].left-2;})(),
         cleanSections:getComputedStyle(document.querySelector('#aria-puppy-check')).backgroundColor==='rgb(255, 255, 255)'&&document.querySelector('#lead-faq').parentElement.tagName==='MAIN',
         certificateWidth:(()=>{const e=document.querySelector('[data-safety-certificates]');return e.getBoundingClientRect().width>=e.parentElement.clientWidth-34;})(),
@@ -91,9 +93,14 @@ async function assertCampaignContentFlow(page) {
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation="true"] button').length===5&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
+    if(!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
+  if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
+  const inquiry=page.locator('[data-lead-faq-cta]');
+  await centerFixtureControl(inquiry);await inquiry.hover();
+  if(await inquiry.evaluate(el=>getComputedStyle(el).color)!=='rgb(255, 255, 255)')throw new Error('Rose inquiry hover needs white text');
+  await page.mouse.move(0,0);
   await page.setViewportSize({width:390,height:844});
   await centerFixtureControl(page.locator('[data-lead-faq="first-visit"] > button'));
   await page.locator('[data-lead-faq="first-visit"] > button').click();
