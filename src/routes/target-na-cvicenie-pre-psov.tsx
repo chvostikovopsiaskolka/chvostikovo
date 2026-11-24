@@ -188,6 +188,9 @@ function TargetPage() {
               <p className="mt-4 leading-relaxed text-forest/80 sm:text-lg">
                 Vyberte si variant a objednajte si target pre svojho psíka.
               </p>
+              <p className="mt-3 leading-relaxed text-forest/80">
+                Každý psík má iné potreby. Naše targety vyrábame ručne a po dohode vieme prispôsobiť ich výšku aj rozmery podľa vašich požiadaviek.
+              </p>
             </div>
             <TargetVariantCards onInterest={(nextSize) => {
               setSize(nextSize);
