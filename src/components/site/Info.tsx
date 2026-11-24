@@ -178,12 +178,11 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
         <div data-home-pricing-columns className="mx-auto mt-7 grid max-w-3xl grid-cols-2 items-stretch gap-3 sm:gap-6">
           <div data-home-prices className="col-span-2 mb-2 grid min-w-0 grid-cols-2 items-stretch gap-3 sm:mb-3 sm:gap-5">
             {PRICING.map(item => <article key={item.name} data-home-price-card={item.highlight ? "pass" : "single"}
-              className={"relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-3xl px-2 py-3 text-center shadow-card sm:px-4 sm:py-4 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
-              <h3 className="font-display text-[13px] font-bold leading-snug text-forest sm:text-xl">{item.name}{item.highlight && <span className="block whitespace-nowrap text-[11px] font-semibold sm:inline sm:text-sm"> · 10 vstupov</span>}</h3>
-              <p data-home-price className={"whitespace-nowrap font-display text-[clamp(22px,6vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-coral-dark")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€<span className="text-[0.55em]"> / deň</span></> : item.price.replace(" ", "\u00a0")}</p>
+              className={"relative grid min-w-0 grid-rows-[auto_auto_auto] content-start items-center justify-items-center gap-1 rounded-3xl px-2 pb-5 pt-3 text-center shadow-card sm:px-4 sm:pb-6 sm:pt-4 " + (item.highlight ? "bg-[#f8ddeb] ring-2 ring-coral" : "bg-card")}>
+              <h3 className="flex min-h-[2.65em] flex-col justify-center font-display text-[13px] font-bold leading-snug text-forest sm:text-xl">{item.highlight ? <>Permanentka<span className="block text-[0.85em] font-semibold">10 vstupov</span></> : <>Jednorazový<br />vstup</>}</h3>
+              <p data-home-price className={"whitespace-nowrap font-display text-[clamp(22px,6vw,30px)] font-bold leading-tight sm:text-4xl " + (item.highlight ? "text-[#b82e7f]" : "text-[#ffa414]")}>{item.highlight ? <>{Number.parseInt(item.price, 10) / 10}&nbsp;€<span className="text-[0.55em]"> / deň</span></> : item.price.replace(" ", "\u00a0")}</p>
               {item.highlight ? <>
                 <p className="whitespace-nowrap font-display text-sm font-bold text-forest sm:text-lg">{item.price.replace(" ", "\u00a0")}</p>
-                <p className="pb-2 text-[11px] leading-snug text-forest sm:text-sm">Platí 2 mesiace</p>
                 <span data-home-best-value className="absolute bottom-0 left-1/2 inline-flex -translate-x-1/2 translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold leading-tight tracking-[-0.025em] text-white shadow-sm">Najvýhodnejšie. Ušetríte 50&nbsp;€</span>
               </> : <p className="text-[11px] leading-snug text-forest/75 sm:text-sm">Celodenný pobyt</p>}
             </article>)}
@@ -194,9 +193,9 @@ export function Pricing({ interestMode = false, homeLayout = false }: { interest
               {INCLUDED.filter(item => item !== "Fotky a videá z priebehu dňa").map(item => <li key={item} className="flex min-w-0 gap-1.5 sm:gap-2.5"><Check className="mt-1 size-3 shrink-0 text-coral-dark sm:size-4" aria-hidden="true" /><span className="min-w-0 text-forest/85">{item}</span></li>)}
             </ul>
           </div>
-          <p data-home-taxi className="col-span-2 flex min-w-0 items-center justify-center gap-2 rounded-2xl bg-[#c92c89] p-3 text-center text-xs font-semibold leading-snug text-white sm:text-sm">
+          <p data-home-taxi className="col-span-2 flex min-w-0 items-center justify-center gap-1.5 rounded-2xl bg-[#c92c89] px-2 py-3 text-center text-[clamp(10px,3vw,14px)] font-semibold leading-snug text-white sm:gap-2 sm:text-sm">
             <Car className="size-4 shrink-0 text-white sm:size-5" aria-hidden="true" />
-            <span>Odvoz a vyzdvihnutie<br /><strong className="whitespace-nowrap">5&nbsp;€ / jazda</strong></span>
+            <span className="whitespace-nowrap">Odvoz a vyzdvihnutie: <strong>5&nbsp;€ / jazda</strong></span>
           </p>
         </div>
       </div>
@@ -303,9 +302,10 @@ const PRIMARY_FAQ_QUESTIONS = new Set([
 ]);
 
 const PRIMARY_FAQ = FAQ.filter((item) => PRIMARY_FAQ_QUESTIONS.has(item.q));
+export const HOME_PRIMARY_FAQ = [...PRIMARY_FAQ, { q: "Pre koho je škôlka určená?", a: DAYCARE_ELIGIBILITY_ANSWER }];
 const PRACTICAL_FAQ = FAQ.filter((item) => !PRIMARY_FAQ_QUESTIONS.has(item.q));
 
-function FaqList({ items, source }: { items: Array<(typeof FAQ)[number]>; source: string }) {
+function FaqList({ items, source, homeLayout = false }: { items: Array<(typeof FAQ)[number]>; source: string; homeLayout?: boolean }) {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
@@ -329,6 +329,9 @@ function FaqList({ items, source }: { items: Array<(typeof FAQ)[number]>; source
           {open === i && (
             <div className="px-5 pb-5 text-left text-[0.95rem] leading-relaxed text-forest/80 sm:px-6 sm:pb-6">
               <FaqAnswer question={f.q} answer={f.a} />
+              {homeLayout && f.q === "Prijímate aj šteniatka?" && (
+                <a href="#aria-puppy-check" onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker")} className="btn-coral mt-4 flex w-fit min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white">Overiť pripravenosť šteniatka</a>
+              )}
               {f.q === "Prijímate aj šteniatka?" && (
                 <a
                   href="/psia-skolka-pre-steniatka"
@@ -353,13 +356,13 @@ function FaqList({ items, source }: { items: Array<(typeof FAQ)[number]>; source
   );
 }
 
-export function Faq() {
+export function Faq({ homeLayout = false }: { homeLayout?: boolean } = {}) {
   return (
     <section id="faq" className="relative scroll-mt-24 overflow-hidden bg-secondary/40 pt-16 pb-12 sm:pt-20 sm:pb-14">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-4xl px-4">
         <h2 className="section-title text-center text-3xl sm:text-4xl">Časté otázky</h2>
-        <FaqList items={PRIMARY_FAQ} source="home" />
+        <FaqList items={homeLayout ? HOME_PRIMARY_FAQ : PRIMARY_FAQ} source="home" homeLayout={homeLayout} />
         <div className="mt-7 flex justify-center">
           <a href="/caste-otazky" className="btn-coral">
             Viac častých otázok
