@@ -36,8 +36,8 @@ const chatQuestions: Question[] = [
     title: "Aký je cenník škôlky?",
     answer: "Haf! 🐾 **Jednorazový celodenný vstup stojí " + priceOne +
       ".**\nSme otvorení od **7:00 do 17:00**, pondelok až piatok.\n\n" +
-      "Ak plánuješ pravidelné návštevy, odporúčame **10-vstupovú permanentku**, kde jeden vstup vychádza na **20 €/deň**. " +
-      "Oproti jednorazovým vstupom tak **ušetríš 50 €**. Cena permanentky je **" + pricePass + "** a platí **2 mesiace**.\n\n" +
+      "Ak plánuješ pravidelné návštevy (minimálne 2x do týždňa), odporúčame **10-vstupovú permanentku**, kde jeden vstup vychádza na **20 €/deň**. " +
+      "Oproti jednorazovým vstupom tak **ušetríš 50 €**. Cena permanentky je **" + pricePass + "**.\n\n" +
       "**Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.**",
   },
   {

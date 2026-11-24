@@ -170,6 +170,20 @@ assert(approvedTitles.every(title => ariaChatMobile.includes('title: "' + title 
   ariaChatMobile.includes('unanswered.slice(0, 4)'),
   "APP-01 TEST Aria must preserve ordered FAQ catalogue, refreshed choices and analytics.");
 
+// Copy-only Aria pricing update: show minimum attendance and hide pass validity
+// in the chatbot response; PRICING remains the single source of prices.
+const pricingBlock = ariaChatMobile.slice(
+  ariaChatMobile.indexOf('id: "pricing"'),
+  ariaChatMobile.indexOf('id: "requirements"')
+);
+assert(pricingBlock.includes("Ak plánuješ pravidelné návštevy (minimálne 2x do týždňa)") &&
+  pricingBlock.includes("**10-vstupovú permanentku**") &&
+  pricingBlock.includes("**20 €/deň**") &&
+  pricingBlock.includes("**ušetríš 50 €**") &&
+  pricingBlock.includes('Cena permanentky je **" + pricePass + "**.') &&
+  !pricingBlock.includes("platí **2 mesiace**"),
+  "APP-01 TEST Aria approved pricing sentence, sum source and other questions must remain stable.");
+
 const puppyChatSource = readFileSync(new URL("../src/components/site/AriaPuppyChecker.tsx", import.meta.url), "utf8");
 assert(puppyChatSource.includes('if (chatCompact) return (') &&
   puppyChatSource.includes('data-aria-puppy-step="single"') &&
