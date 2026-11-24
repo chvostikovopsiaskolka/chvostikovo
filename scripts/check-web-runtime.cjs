@@ -2277,7 +2277,7 @@ if (!bellaris && brandPreviewCandidate) {
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]:visible').first().isVisible())
                   throw new Error('Desktop home guided form missing');
                 const layout = await page.evaluate(() => {
-                  const ids=['top','preco-chvostikovo','o-nas','cennik','podmienky','home-early-faq','informujte-sa','starostlivost','priestory','psie-priatelstva','prva-navsteva','prva-navsteva-form','preco','faq'];
+                  const ids=['top','preco-chvostikovo','o-nas','cennik','aria-puppy-check','podmienky','informujte-sa','starostlivost','priestory','psie-priatelstva','prva-navsteva','prva-navsteva-form','preco','faq'];
                   const nodes=ids.map(id=>document.getElementById(id));
                   const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
                   const cutout=document.querySelector('[data-schoolmates-cutout]');
@@ -2289,7 +2289,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const benefitPills=[...document.querySelectorAll('#o-nas [data-hero-benefits] > span')].map(el=>el.getBoundingClientRect());
                   const aboutHeading=document.querySelector('#o-nas h2');
                   const aboutText=document.querySelector('#o-nas [data-about-expanded]');
-                  const faq=document.querySelector('#home-early-faq');
+                  const faq=document.querySelector('#faq');
                   const dock=document.querySelector('.mobile-dock[data-variant="main"]');
                   const heroCta=[...document.querySelectorAll('#top .hero-cta-primary')].find(el=>el.getBoundingClientRect().width>0);
                   const videoGrid=document.querySelector('[data-video-reasons-grid]');
@@ -2351,9 +2351,9 @@ if (!bellaris && brandPreviewCandidate) {
                     friendshipModal:!!document.getElementById('home-friendship-interest')&&!document.getElementById('zaujem-po-priatelstvach'),
                     freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
                     pricing:cards.length===2 && Math.abs(cards[0].top-cards[1].top)<2 && Math.abs(cards[0].bottom-cards[1].bottom)<2 && cards[1].left>=cards[0].right+7 && included.top>=prices.bottom+7 && Math.abs(included.left-prices.left)<3 && Math.abs(included.right-prices.right)<3 && !document.querySelector('#cennik button'),
-                     pricingAmounts:(()=>{const pass=document.querySelector('[data-home-price-card="pass"]');const value=pass?.querySelector('[data-home-price]');return !!value && /20\s*€\s*\/ deň/.test(value.textContent) && /200\s*€/.test(pass.textContent) && /10 vstupov/.test(pass.textContent) && /Platí 2 mesiace/.test(pass.textContent) && /Ušetríte 50\s*€/.test(pass.textContent) && getComputedStyle(value).whiteSpace==='nowrap' && (()=>{const badge=pass.querySelector('[data-home-best-value]');const title=pass.querySelector('h3');if(!badge||!title)return false;const b=badge.getBoundingClientRect(),p=pass.getBoundingClientRect(),v=value.getBoundingClientRect();return title.textContent.includes('10 vstupov') && title.getBoundingClientRect().bottom<=v.top+1 && b.top<p.bottom && b.bottom>p.bottom && b.left>=p.left-1 && b.right<=p.right+1 && b.bottom<included.top;})();})(),
+                     pricingAmounts:(()=>{const pass=document.querySelector('[data-home-price-card="pass"]');const value=pass?.querySelector('[data-home-price]');return !!value && /20\s*€\s*\/ deň/.test(value.textContent) && /200\s*€/.test(pass.textContent) && /10 vstupov/.test(pass.textContent) && !/Platí 2 mesiace/.test(pass.textContent) && /Ušetríte 50\s*€/.test(pass.textContent) && getComputedStyle(value).whiteSpace==='nowrap' && (()=>{const badge=pass.querySelector('[data-home-best-value]');const title=pass.querySelector('h3');if(!badge||!title)return false;const b=badge.getBoundingClientRect(),p=pass.getBoundingClientRect(),v=value.getBoundingClientRect();const single=document.querySelector('[data-home-price-card="single"]');const sv=single.querySelector('[data-home-price]');return title.textContent.includes('10 vstupov') && Math.abs(single.querySelector('h3').getBoundingClientRect().top-title.getBoundingClientRect().top)<2 && Math.abs(sv.getBoundingClientRect().top-v.top)<2 && getComputedStyle(sv).color==='rgb(255, 164, 20)' && title.getBoundingClientRect().bottom<=v.top+1 && b.top<p.bottom && b.bottom>p.bottom && b.left>=p.left-1 && b.right<=p.right+1 && b.bottom<included.top;})();})(),
                     passPink:getComputedStyle(document.querySelector('[data-home-price-card="pass"]')).backgroundColor==='rgb(248, 221, 235)',
-                    taxiAcrossColumns:!!taxi && !taxi.closest('[data-home-included]') && taxi.getBoundingClientRect().top>=included.bottom+7 && !!taxi.querySelector('br') && /5\s*€\s*\/ jazda/.test(taxi.textContent) &&
+                    taxiAcrossColumns:!!taxi && !taxi.closest('[data-home-included]') && taxi.getBoundingClientRect().top>=included.bottom+7 && !taxi.querySelector('br') && getComputedStyle(taxi.querySelector('span')).whiteSpace==='nowrap' && /5\s*€\s*\/ jazda/.test(taxi.textContent) &&
                       getComputedStyle(taxi).backgroundColor==='rgb(201, 44, 137)' && Math.abs(taxi.getBoundingClientRect().left-included.left)<3 && Math.abs(taxi.getBoundingClientRect().right-included.right)<3,
                     compactIncludedHeading:document.querySelector('[data-home-included] h3')?.textContent?.trim()==='Čo je v cene zahrnuté',
                     aboutExpanded:!document.querySelector('#o-nas summary') && !!aboutText?.querySelector('strong') && aboutHeading.scrollWidth<=aboutHeading.clientWidth+2 &&
@@ -2362,11 +2362,11 @@ if (!bellaris && brandPreviewCandidate) {
                     aboutStack:!!photo && !!benefits && !!aboutText && aboutHeading.getBoundingClientRect().bottom<=photo.getBoundingClientRect().top+2 &&
                       benefits.getBoundingClientRect().bottom<=aboutText.getBoundingClientRect().top+2,
                     centeredFullWidthTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-prices.right)/2)<3,
-                    faqAfterRequirements:document.getElementById('podmienky').nextElementSibling===faq &&
-                      faq.querySelectorAll('details').length===3 && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
+                    singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===7 && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
+                    puppyImmediatelyAfterPricing:document.getElementById('cennik').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
-                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty',
+                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty|/#faq' && !dock.querySelector('.mobile-dock-apply'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
                       (() => {
@@ -2465,9 +2465,9 @@ if (!bellaris && brandPreviewCandidate) {
                 // ContextFaq mounts its CTA only while the disclosure is open:
                 // verify the actual clickable link after user interaction,
                 // rather than querying a deliberately unmounted child.
-                const puppyToggle=page.locator('#home-early-faq summary').filter({hasText:'Čo ak chcete prihlásiť šteniatko?'});
+                const puppyToggle=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
                 await puppyToggle.click();
-                const puppyLink=page.locator('#home-early-faq a[href="#aria-puppy-check"].btn-coral');
+                const puppyLink=page.locator('#faq a[href="#aria-puppy-check"].btn-coral');
                 if (!await puppyLink.isVisible() ||
                     !(await page.locator('#aria-puppy-check h2').innerText()).includes('Spĺňa základné podmienky?'))
                   throw new Error('Expanded puppy FAQ must show a pink CTA linking to the real age/vaccination checker');
@@ -2541,9 +2541,11 @@ if (!bellaris && brandPreviewCandidate) {
               await page.waitForFunction(()=>{const y=document.getElementById('preco-chvostikovo').getBoundingClientRect().top;return y>=0&&y<260;});
               if(await page.getByRole('dialog').count()) throw new Error('Desktop learn-more action opened a dialog');
               await page.setViewportSize({width:390,height:844});
-              const puppyFaq=page.locator('#home-early-faq summary').filter({hasText:'Čo ak chcete prihlásiť šteniatko?'});
+              await page.locator('.mobile-dock[data-variant="main"] a[href="/#faq"]').click();
+              await page.waitForFunction(()=>{const y=document.getElementById('faq').getBoundingClientRect().top;return y>=-8&&y<200;});
+              const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
                await puppyFaq.click();
-               await page.locator('#home-early-faq a[href="#aria-puppy-check"]').click();
+               await page.locator('#faq a[href="#aria-puppy-check"]').click();
               await page.waitForFunction(()=>{const y=document.getElementById('aria-puppy-check').getBoundingClientRect().top;return y>=0&&y<200;});
               for(const id of ['informujte-sa','prva-navsteva-form']) {
                 const inquiry=page.locator('#'+id+' [data-lead-step-form]');
