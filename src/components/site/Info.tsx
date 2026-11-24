@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Syringe, PawPrint, Droplets, HeartPulse, Check, Plus, Minus, Car } from "lucide-react";
 import { FormDialog } from "./FormDialog";
-import { LongForm } from "./Forms";
+import { HomeFaqContactForm, LongForm } from "./Forms";
 import { LeadStepForm } from "./LeadStepForm";
 import { trackMarketingInteraction } from "@/lib/analytics";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
@@ -368,6 +368,10 @@ export function Faq({ homeLayout = false }: { homeLayout?: boolean } = {}) {
             Viac častých otázok
           </a>
         </div>
+        {homeLayout && <div id="faq-kontakt" data-home-faq-contact className="mx-auto mt-8 max-w-lg rounded-3xl bg-card p-4 shadow-card sm:mt-10 sm:p-6">
+          <h3 className="mb-4 text-center font-display text-xl font-bold leading-snug text-forest sm:text-2xl">Nenašli ste odpoveď? Opýtajte sa nás.</h3>
+          <HomeFaqContactForm />
+        </div>}
       </div>
     </section>
   );
