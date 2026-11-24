@@ -156,7 +156,7 @@ assert(dock.includes("marketingExtra"), "Local first visit menu links required")
 assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");
 assert(!dock.includes('{ id: "recenzie", label: "Recenzie", icon: ImageIcon }'), "Reviews must leave marketing docks");
 assert(!dock.includes('{ id: "reviews", label: "Reviews", icon: ImageIcon }'), "Reviews must leave EN dock");
-assert(dock.includes('id === "interest" ? (') && dock.includes('{!marketing && ('), "Interest must sit between Why and Pricing, with main site unchanged");
+assert(dock.includes('id === "interest" ? (') && dock.includes('{!marketing && !homeFaqShortcut && ('), "Landing interest CTA is preserved; non-home main navigation retains application CTA");
 assert(dock.includes('trackCookielessInteraction("nav_click", source, language)'), "Navigation must use dedicated cookieless events");
 assert(dock.includes('trackCookielessInteraction("inquiry_cta", "en_mobile_dock", "en")'), "EN interest CTA tracking required");
 assert(dock.includes('trackMarketingInteraction("view_pricing", source)'), "Dock pricing should preserve consented Pixel interest");
