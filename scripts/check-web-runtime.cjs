@@ -3397,6 +3397,7 @@ if (!bellaris && brandPreviewCandidate) {
               await item.click();
               const answer=await item.locator('xpath=..').innerText();
               if(!phrases.every(p=>answer.includes(p))) throw new Error('Missing practical FAQ content: '+name);
+              if(!await item.locator('xpath=..').locator('p strong').count()) throw new Error('FAQ must highlight essential facts: '+name);
               if(name.startsWith('Aký je cenník')&&!await item.locator('xpath=..').locator('a[href="/#cennik"]').isVisible()) throw new Error('Missing pricing link');
               await item.click();
             }
