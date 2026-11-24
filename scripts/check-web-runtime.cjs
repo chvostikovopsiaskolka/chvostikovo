@@ -2399,7 +2399,7 @@ if (!bellaris && brandPreviewCandidate) {
                       if (innerWidth>=640) return texts.every(r=>r.left>=video.right-2) &&
                         video.bottom>=texts[2].bottom-5;
                       // Mobile: first two reasons stacked beside video;
-                      // third spans the full box underneath.
+                      // third stays in the same text column beside the matching photo.
                       return texts[0].left>=video.right-2 &&
                         texts[1].left>=video.right-2 &&
                         texts[1].top>=texts[0].bottom-2 &&

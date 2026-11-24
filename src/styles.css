@@ -1653,5 +1653,5 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 
 /* Give homepage modal forms a solid base over the dimmed page. */
 @media (forced-colors: none) {
-  .form-dialog.form-liquid-surface:not(.aria-preview-modal) { background-color: #fff8ec; }
+  body:has(#top) .form-dialog.form-liquid-surface:not(.aria-preview-modal) { background-color: #fff8ec; }
 }
