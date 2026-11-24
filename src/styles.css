@@ -1200,13 +1200,13 @@
   .lead-brand-live [data-aria-speech] {
     /* Width is independent of the dock's remaining flex-column space.
        The speech can extend to the right without ever covering Aria's head. */
-    flex: 0 1 400px;
-    width: max-content;
-    max-width: 400px;
-    min-height: 0;
+    flex: 0 0 480px;
+    width: 480px;
+    max-width: 480px;
+    min-height: 72px;
     /* Keep the desktop portrait 26px clear of the text after the PR476
        bubble-gap adjustment; the bubble contour itself stays at 3px. */
-    padding: 10px 16px;
+    padding: 16px 24px;
   }
   .lead-brand-live [data-aria-message] p {
     font-size: 17px;
@@ -1651,7 +1651,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live [data-aria-message] { left: 40px; }
 }
 
-/* Modal portals need their own opaque base above the dimmed page. */
+/* Give homepage modal forms a solid base over the dimmed page. */
 @media (forced-colors: none) {
-  .form-dialog.form-liquid-surface { background-color: #fff8ec; }
+  .form-dialog.form-liquid-surface:not(.aria-preview-modal) { background-color: #fff8ec; }
 }

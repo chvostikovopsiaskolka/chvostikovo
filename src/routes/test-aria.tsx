@@ -319,7 +319,7 @@ export function AriaPreviewPage() {
           )}
         </section>
 
-        <section id="aria-hero-form" hidden={isLiveLead && !leadHeroFormOpen} className={"relative z-10 overflow-hidden bg-white pb-8 pt-4 sm:pb-12 sm:pt-6 " + (isLiveLead ? "scroll-mt-2" : "scroll-mt-24")}>
+        <section id="aria-hero-form" hidden={isLiveLead && !leadHeroFormOpen} className="relative z-10 scroll-mt-24 overflow-hidden bg-white pb-8 pt-4 sm:pb-12 sm:pt-6">
           <SectionAmbientPaws />
           {/* Same verified title -> dog crown -> liquid form card layout as the lower visit form. */}
           <div data-lead-form-shell={!isLiveLead || undefined} className="relative z-10 mx-auto max-w-2xl px-4">
@@ -430,20 +430,20 @@ export function AriaPreviewPage() {
                   <div className="mt-auto pt-1 text-[11px] leading-snug sm:text-sm">
                     {item.highlight ? <strong>Permanentka platí 2 mesiace.</strong> : <span className="opacity-75">Celodenný pobyt</span>}
                   </div>
-                  {item.highlight && <span data-lead-best-value className={(isLiveLead ? "absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 " : "mt-2 ")+"inline-flex max-w-full items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold tracking-[-0.025em] text-white shadow-sm"}>Najvýhodnejšie. Ušetríte 50 €</span>}
+                  {item.highlight && <span data-lead-best-value className="mt-2 inline-flex max-w-full items-center justify-center whitespace-nowrap rounded-full bg-coral px-1.5 py-1 font-display text-[clamp(8px,2.15vw,12px)] font-bold tracking-[-0.025em] text-white shadow-sm">Najvýhodnejšie. Ušetríte 50 €</span>}
                 </article>
               ))}
             </div>
-            <div data-lead-pricing-extras={isLiveLead || undefined} className={isLiveLead ? "mx-auto mt-7 grid w-full max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4" : undefined}>
-            <p data-aria-taxi className={isLiveLead ? "order-2 flex min-w-0 flex-col items-center justify-center gap-1.5 rounded-3xl bg-forest px-2 py-3 text-center font-display text-xs font-semibold leading-snug text-cream sm:gap-2 sm:px-4 sm:text-sm" : "mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm"}>
+            <div data-lead-pricing-extras={isLiveLead || undefined} className={isLiveLead ? "mx-auto mt-5 grid w-full max-w-2xl grid-cols-2 items-stretch gap-2 sm:gap-4" : undefined}>
+            <p data-aria-taxi className={isLiveLead ? "order-2 flex min-w-0 flex-col items-center justify-center gap-1.5 rounded-3xl bg-forest px-2 py-3 text-center font-display text-xs font-semibold leading-snug text-cream sm:flex-row sm:gap-2 sm:px-4 sm:text-sm" : "mx-auto mt-5 flex w-fit max-w-full items-center justify-center gap-2 rounded-2xl bg-forest px-3 py-3 text-center font-display text-xs font-semibold leading-tight text-cream sm:rounded-full sm:px-5 sm:text-sm"}>
               <Car className="size-4 shrink-0 text-cream sm:size-5" aria-hidden="true" />
-              <span>Odvoz / vyzdvihnutie {isLiveLead ? <br /> : ": "}<strong>5 € / jazda</strong></span>
+              <span>Odvoz / vyzdvihnutie: <strong>5 € / jazda</strong></span>
             </p>
             <div data-first-visit-group data-lead-visit-compact={isLiveLead || undefined}
               className={(isLiveLead ? "order-1 flex min-w-0 items-center justify-center " : "mx-auto mt-5 w-full max-w-2xl ")+"rounded-3xl border border-coral/50 bg-coral/10 px-2 py-3 shadow-card sm:px-5"}>
-              <div className={isLiveLead ? "flex min-w-0 flex-col items-center justify-center gap-1.5 text-center sm:gap-2" : "flex items-center justify-center gap-2 text-center"}>
+              <div className={isLiveLead ? "flex min-w-0 flex-col items-center justify-center gap-1.5 text-center sm:flex-row sm:gap-2" : "flex items-center justify-center gap-2 text-center"}>
                 <CheckCircle2 className="size-5 shrink-0 text-coral-dark" aria-hidden="true" />
-                <p className={"font-display font-bold text-forest "+(isLiveLead ? "text-xs leading-snug sm:text-base" : "text-base sm:text-lg")}>{isLiveLead ? <>Úvodná návšteva <br />zadarmo</> : "Úvodná návšteva zadarmo"}</p>
+                <p className={"font-display font-bold text-forest "+(isLiveLead ? "text-xs leading-snug sm:text-base" : "text-base sm:text-lg")}>Úvodná návšteva zadarmo</p>
               </div>
               {!isLiveLead && <details data-aria-visit-details
                 onToggle={(event) => {

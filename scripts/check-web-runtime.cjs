@@ -527,10 +527,10 @@ if (!bellaris && brandPreviewCandidate) {
                   textSize: parseFloat(getComputedStyle(el.querySelector('p') ?? el).fontSize),
                 };
               });
-              if (bubbleGeometry.width < 300 || bubbleGeometry.width > 402 || bubbleGeometry.height < 45 ||
+              if (bubbleGeometry.width < 420 || bubbleGeometry.height < 68 ||
                   bubbleGeometry.textSize < 16 ||
                   (bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight < 2 || bubbleGeometry.bubbleLeft - bubbleGeometry.faceRight > 5) ||
-                  bubbleGeometry.faceRight > bubbleGeometry.textLeft - 16 ||
+                  bubbleGeometry.faceRight > bubbleGeometry.textLeft - 26 ||
                   await page.locator('#lead-section-menu').count())
                 throw new Error('Paid desktop Aria must be large with portrait clear of speech and no page menu: ' +
                   JSON.stringify(bubbleGeometry));
@@ -1702,7 +1702,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const r = el.getBoundingClientRect(), card = el.closest('article')?.getBoundingClientRect();
                 return { text: el.textContent.trim(), fits: el.scrollWidth <= el.clientWidth + 2,
                   row: r.height <= parseFloat(getComputedStyle(el).lineHeight) * 1.8,
-                  inside: !!card && (location.pathname.replace(/\/$/,'')==='/psia-skolka-kosice' ? Math.abs(r.top+r.height/2-card.bottom)<=2 : r.bottom <= card.bottom + 2 && r.top >= card.top) };
+                  inside: !!card && r.bottom <= card.bottom + 2 && r.top >= card.top };
               });
               if (labelShape.text !== 'Najvýhodnejšie. Ušetríte 50 €' || !labelShape.fits || !labelShape.row || !labelShape.inside)
                 throw new Error('Permanentka value label must fit on one bottom line at ' + width + ': ' + JSON.stringify(labelShape));
