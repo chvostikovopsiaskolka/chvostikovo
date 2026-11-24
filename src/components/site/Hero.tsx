@@ -52,7 +52,7 @@ export function Hero({ onMobileInquiryOpen, mobileInquiryOpen }: {
                 onMobileInquiryOpen();
               }}
               className="hero-cta-primary min-h-[46px] w-full rounded-full font-display text-base font-bold">
-              Mám záujem
+              Mám záujem o škôlku
             </button>
           </div>
         </div>
