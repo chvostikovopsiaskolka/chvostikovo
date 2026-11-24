@@ -8,7 +8,7 @@ import {
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Contact";
 import { StandGalleryLoop } from "@/components/site/StandGalleryLoop";
-import { StandVariantCards } from "@/components/site/StandVariantCards";
+import { StandVariantCards, STAND_VARIANTS } from "@/components/site/StandVariantCards";
 import { StandBenefitSteps } from "@/components/site/StandBenefitSteps";
 import { ProductInquirySteps } from "@/components/site/ProductInquirySteps";
 import { ProductInquiryContact } from "@/components/site/ProductInquiryContact";
@@ -56,11 +56,7 @@ const FAQ = [
   },
 ];
 
-const SIZE_OPTIONS: Array<{ value: StandSize; label: string; detail: string }> = [
-  { value: "small", label: "S verzia", detail: "cca 40 × 20 cm · výška nôh do 15 cm · 40 €" },
-  { value: "large", label: "M verzia", detail: "cca 60 × 30 cm · výška nôh 20–35 cm · 45 €" },
-  { value: "extra_large", label: "L verzia", detail: "výška nôh od 40 cm, bez horného limitu · 50 €" },
-];
+
 
 const COLOR_OPTIONS: Array<{ value: StandColor; label: string }> = [
   { value: "natural", label: "Svetlé" },
@@ -237,15 +233,16 @@ function BowlStandPage() {
             titles={["Rozmer stojana", "Personalizácia", "Kontakt"]}
             stepOne={(
               <div>
-                <div data-stand-size-picker="inquiry" className="grid grid-cols-3 gap-2">
-                  {SIZE_OPTIONS.map((option) => (
+                <div data-stand-size-picker="inquiry" className="grid gap-2">
+                  {STAND_VARIANTS.map((option) => (
                     <button key={option.value} type="button" onClick={() => setSize(option.value)}
                       aria-pressed={size === option.value}
                       className={size === option.value
                         ? "min-w-0 rounded-2xl border-2 border-coral bg-coral-soft/25 p-2 text-left"
                         : "min-w-0 rounded-2xl border-2 border-forest/10 bg-background p-2 text-left"}>
-                      <span className="block font-display text-sm font-bold text-forest">{option.label}</span>
-                      <span className="mt-1 block text-[11px] leading-snug text-forest/65">{option.detail}</span>
+                      <span className="flex flex-wrap items-baseline justify-between gap-x-2 font-display text-sm text-forest"><strong>{option.label}</strong><strong>{option.dimension}</strong></span>
+                      <span className="mt-1 block whitespace-nowrap text-xs leading-snug text-forest/75">Výška nôh <strong className="text-forest">{option.height}</strong></span>
+                      <span className="mt-1 block text-xs leading-snug text-forest/75">{option.breed} · {option.bowls} {option.note}</span>
                     </button>
                   ))}
                 </div>
@@ -434,7 +431,7 @@ function BowlStandPage() {
         <section id="objednavka-stojana" data-stand-inline-form className="relative scroll-mt-20 overflow-hidden bg-secondary/60 py-14 sm:py-20">
           <SectionAmbientPaws />
           <div className="relative z-10 mx-auto max-w-3xl px-4">
-            <div className="text-center">
+            <div hidden={step > 1 || isSubmitted} className="text-center">
               <p className="font-display text-sm font-semibold tracking-wide text-coral uppercase">Váš stojan na mieru</p>
               <h2 className="section-title mt-2 text-3xl sm:text-4xl">Máte záujem o stojan?</h2>
               <p className="mx-auto mt-3 max-w-xl leading-relaxed text-forest/75">
@@ -455,6 +452,7 @@ function BowlStandPage() {
         </section>
       </main>
       <FormDialog open={orderOpen} onOpenChange={setOrderOpen}
+        hideHeader={step > 1 || isSubmitted}
         title="Mám záujem o stojan"
         subtitle="V troch krátkych krokoch vyberte stojan, personalizáciu a kontaktné údaje.">
         {isSubmitted ? (
