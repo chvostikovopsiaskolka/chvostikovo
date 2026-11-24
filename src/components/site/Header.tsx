@@ -18,7 +18,7 @@ const NAV_MOBILE_BEFORE_ABOUT = [
 
 const NAV_MOBILE_AFTER_INFO = [
   { href: "#cennik", label: "Cenník" },
-  { href: "/caste-otazky", label: "Časté otázky" },
+  { href: "#faq", label: "Časté otázky" },
   { href: "#kontakt", label: "Kontakt" },
 ];
 
@@ -27,7 +27,7 @@ const NAV_DESKTOP_BEFORE_ABOUT: { href: string; label: string }[] = [];
 const NAV_DESKTOP_AFTER_ABOUT = [
   { href: "#starostlivost", label: "Ako sa postaráme" },
   { href: "#preco", label: "Prečo škôlka" },
-  { href: "/caste-otazky", label: "Časté otázky" },
+  { href: "#faq", label: "Časté otázky" },
 ];
 
 export function Header({
