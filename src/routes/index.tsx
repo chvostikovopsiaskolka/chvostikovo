@@ -5,7 +5,7 @@ import { Hero } from "@/components/site/Hero";
 import { Gallery } from "@/components/site/Gallery";
 import { ReviewReasons } from "@/components/site/Reviews";
 import { Care, Why, About, Partners, FriendshipInterest } from "@/components/site/Story";
-import { Requirements, FirstVisit, Pricing, Faq, DaycareEarlyFaq } from "@/components/site/Info";
+import { Requirements, FirstVisit, Pricing, Faq, HOME_PRIMARY_FAQ } from "@/components/site/Info";
 import { UsefulInfo } from "@/components/site/UsefulInfo";
 import { ProductSection } from "@/components/site/ProductSection";
 import { PhotoStrip } from "@/components/site/PhotoStrip";
@@ -15,24 +15,12 @@ import { LeadStepForm } from "@/components/site/LeadStepForm";
 import { SectionAmbientPaws } from "@/components/site/SectionAmbientPaws";
 import { HomePuppyChecker } from "@/components/site/HomePuppyChecker";
 import { DaycarePhotoCarousel } from "@/components/site/DaycarePhotoCarousel";
-import { FAQ } from "@/content/site";
 
 const BASE_URL = "https://chvostikovo.sk";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Psia škôlka Košice | Denná starostlivosť pre psov – Chvostíkovo";
 const description =
   "Psia škôlka v Košiciach pre stredné a veľké psy. Po–Pi 7:00–17:00. Celodenný dohľad, vlastný výbeh, možnosť vyzdvihnutia a úvodná návšteva zadarmo.";
-
-const HOME_FAQ_QUESTIONS = new Set([
-  "Bude môj psík počas dňa niekedy sám bez dozoru?",
-  "Ako prebieha prvá návšteva psíka v škôlke?",
-  "Ako zabezpečujete bezpečnosť psíkov v škôlke?",
-  "Čo ak môj psík ešte nikdy nebol v kolektíve psov?",
-  "Prijímate aj šteniatka?",
-  "Hrajú sa psíkovia v škôlke celý deň?",
-]);
-
-const HOME_FAQ = FAQ.filter((item) => HOME_FAQ_QUESTIONS.has(item.q));
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -59,7 +47,7 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          mainEntity: HOME_FAQ.map((f) => ({
+          mainEntity: HOME_PRIMARY_FAQ.map((f) => ({
             "@type": "Question",
             name: f.q,
             acceptedAnswer: { "@type": "Answer", text: f.a },
@@ -98,7 +86,7 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header homeFaqShortcut />
       <main>
         <Hero onMobileInquiryOpen={openHeroInquiry} mobileInquiryOpen={heroInquiryOpen} />
         {heroInquiryOpen && (
@@ -117,16 +105,15 @@ function Index() {
         <About homeLayout />
         <DaycarePhotoCarousel />
         <Pricing interestMode homeLayout />
+        <HomePuppyChecker />
         <Requirements />
-        <DaycareEarlyFaq />
         <InquirySection allScreens matchHero />
-        <Care showEmbeddedFriendship={false} showInterest={false} />
+        <Care showEmbeddedFriendship={false} showInterest={false} showContextFaq={false} />
         <Gallery homeMosaic />
         <FriendshipInterest />
         <FirstVisit inlineForm leadStyle />
         <Why />
-        <HomePuppyChecker />
-        <Faq />
+        <Faq homeLayout />
         <ProductSection />
         <Partners />
         <UsefulInfo />
