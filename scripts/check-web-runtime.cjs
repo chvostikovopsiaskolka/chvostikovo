@@ -2494,7 +2494,7 @@ if (!bellaris && brandPreviewCandidate) {
                     })(),
                     warmExplore:innerWidth<1024||(()=>{const style=getComputedStyle(document.getElementById('home-hero-learn-more'));return style.backgroundColor==='rgb(255, 227, 174)'&&style.boxShadow!=='none';})(),
                     desktopCtaWithinForm:innerWidth<1024||document.getElementById('home-hero-learn-more').getBoundingClientRect().bottom<=document.querySelector('#home-hero-inline-form [data-home-form-panel]').getBoundingClientRect().bottom+2,
-                    friendshipModal:!!document.getElementById('home-friendship-application')&&!document.getElementById('zaujem-po-priatelstvach')&&!document.querySelector('#preco button'),
+                    friendshipInline:!!document.querySelector('[data-home-friendship-form] #home-friendship-application')&&!document.getElementById('zaujem-po-priatelstvach')&&!document.querySelector('#preco button')&&!!document.querySelector('#starostlivost #preco'),
                     freeVisitBadge:(()=>{const el=document.querySelector('#prva-navsteva [data-home-free-visit]');return !!el&&getComputedStyle(el).backgroundColor==='rgb(255, 164, 20)'&&parseFloat(getComputedStyle(el).paddingTop)>=10;})(),
                     pricing:cards.length===2 && Math.abs(cards[0].top-cards[1].top)<2 && Math.abs(cards[0].bottom-cards[1].bottom)<2 && cards[1].left>=cards[0].right+7 && included.top>=prices.bottom+7 && Math.abs(included.left-prices.left)<3 && Math.abs(included.right-prices.right)<3 && !document.querySelector('#cennik button'),
                      pricingAmounts:(()=>{const pass=document.querySelector('[data-home-price-card="pass"]');const value=pass?.querySelector('[data-home-price]');return !!value && /20\s*€\s*\/ deň/.test(value.textContent) && /200\s*€/.test(pass.textContent) && /10 vstupov/.test(pass.textContent) && !/Platí 2 mesiace/.test(pass.textContent) && /Ušetríte 50\s*€/.test(pass.textContent) && getComputedStyle(value).whiteSpace==='nowrap' && (()=>{const badge=pass.querySelector('[data-home-best-value]');const title=pass.querySelector('h3');if(!badge||!title)return false;const b=badge.getBoundingClientRect(),p=pass.getBoundingClientRect(),v=value.getBoundingClientRect();const single=document.querySelector('[data-home-price-card="single"]');const sv=single.querySelector('[data-home-price]');return title.textContent.trim()==='Permanentka' && single.querySelector('h3').textContent.trim()==='Jednorazový vstup' && getComputedStyle(title).whiteSpace==='nowrap' && getComputedStyle(single.querySelector('h3')).whiteSpace==='nowrap' && /25\s*€\s*\/ deň/.test(sv.textContent) && getComputedStyle(sv).whiteSpace==='nowrap' && /200\s*€\s*·\s*10 vstupov/.test(pass.querySelector('[data-home-pass-total]')?.textContent||'') && /Pondelok – piatok/.test(single.querySelector('[data-home-opening-hours]')?.textContent||'') && /od 7:00 do 17:00/.test(single.querySelector('[data-home-opening-hours]')?.textContent||'') && Math.abs(single.querySelector('h3').getBoundingClientRect().top-title.getBoundingClientRect().top)<2 && Math.abs(sv.getBoundingClientRect().top-v.top)<2 && getComputedStyle(sv).color==='rgb(255, 164, 20)' && title.getBoundingClientRect().bottom<=v.top+1 && b.top<p.bottom && b.bottom>p.bottom && b.left>=p.left-1 && b.right<=p.right+1 && b.bottom<included.top;})();})(),
@@ -2510,7 +2510,7 @@ if (!bellaris && brandPreviewCandidate) {
                     centeredFullWidthTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-prices.right)/2)<3,
                     faqContactResponsiveWidth:(()=>{const card=faq.querySelector('[data-home-faq-contact]'), question=faq.querySelector('button[aria-expanded]');if(!card||!question)return false;const c=card.getBoundingClientRect(),q=question.getBoundingClientRect();return c.width<=q.width+2 && (innerWidth>=1024?Math.abs(c.width-q.width)<2:c.width<=512+2) && card.scrollWidth<=card.clientWidth+2 && getComputedStyle(card).backgroundColor==='rgba(255, 252, 248, 0.94)';})(),
                     singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
-                    puppyImmediatelyAfterPricing:document.getElementById('cennik').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
+                    applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.getElementById('psie-priatelstva').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
                     mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
@@ -2719,15 +2719,16 @@ if (!bellaris && brandPreviewCandidate) {
                 await inquiry.locator('input[name="meno"]').waitFor({state:'visible',timeout:7000}).catch(() => { throw new Error('Inline contact step not visible: '+id); });
                 await inquiry.getByRole('button',{name:'Späť',exact:true}).click();
               }
-              await page.locator('#home-friendship-application').click();
-              const friendshipDialog=page.getByRole('dialog').last();
-              await friendshipDialog.waitFor({state:'visible'});
-              if(!await friendshipDialog.getByRole('heading',{name:'Prihláška do škôlky',exact:true}).isVisible() ||
-                 !await friendshipDialog.locator('input[name="pes"]').count() ||
-                 !await friendshipDialog.getByRole('radio',{name:'Fena',exact:true}).count() ||
-                 await friendshipDialog.locator('[data-lead-step-form]').count()) throw new Error('Friendship must open the full application with Fena label');
-              await page.keyboard.press('Escape');
-              await friendshipDialog.waitFor({state:'hidden'});
+              const application=page.locator('[data-home-friendship-form]');
+              const toggle=application.locator('#home-friendship-application');
+              const owner=application.locator('input[name="meno"]');
+              if(!await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application preview fields incorrect');
+              await owner.fill('Testovacie meno');
+              await toggle.click();
+              if(!await application.locator('input[name="pes"]').isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await owner.inputValue()!=='Testovacie meno' || await page.getByRole('dialog').count()) throw new Error('Inline application did not expand or retain owner data');
+              await toggle.click();
+              if(await application.locator('input[name="pes"]').isVisible() || await owner.inputValue()!=='Testovacie meno') throw new Error('Inline application collapse lost data');
+              await owner.fill('');
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
             }
             await page.setViewportSize({ width: 390, height: 844 });
@@ -2941,31 +2942,14 @@ if (!bellaris && brandPreviewCandidate) {
             }
 
             if (url.pathname === '/') {
-              // This CTA says 'register', so it must open the full application,
-              // not the two-step enquiry form. Never actually submit customer data.
-              await page.locator('#home-friendship-application').click();
-              const application = page.getByRole('dialog');
-              await application.waitFor({ state: 'visible' });
-              if (!await application.getByRole('heading', { name: 'Prihláška do škôlky' }).isVisible())
-                throw new Error('Friendship application CTA did not open the full application dialog');
-              if (!await application.locator('input[name="pes"]').count() ||
-                  !await application.locator('input[name="meno"]').count() ||
-                  await application.locator('[data-lead-step-form]').count())
-                throw new Error('Friendship application CTA opened an inquiry instead of the full dog application');
-              const applicationFrame = await application.evaluate(el => {
-                const rect = el.getBoundingClientRect();
-                const scroll = el.querySelector('.form-dialog-scroll');
-                return {
-                  midpointOffset: Math.abs((rect.top + rect.bottom) / 2 - window.innerHeight / 2),
-                  top: rect.top, bottom: rect.bottom, viewport: window.innerHeight,
-                  innerScrollable: !!scroll && scroll.scrollHeight > scroll.clientHeight + 25,
-                };
-              });
-              if (applicationFrame.midpointOffset > 20 || applicationFrame.top < -1 ||
-                  applicationFrame.bottom > applicationFrame.viewport + 1 || !applicationFrame.innerScrollable)
-                throw new Error('Full dog registration modal must stay centered with inner scrolling: ' + JSON.stringify(applicationFrame));
-              await page.keyboard.press('Escape');
-              await application.waitFor({ state: 'hidden' });
+              // Verify the real inline registration, not a second form or modal.
+              const application=page.locator('[data-home-friendship-form]');
+              const toggle=application.locator('#home-friendship-application');
+              await toggle.click();
+              if(!await application.locator('input[name="pes"]').isVisible() || await application.locator('[data-lead-step-form]').count() || await page.getByRole('dialog').count()) throw new Error('Friendship must expand the existing application in-place');
+              const fits=await application.evaluate(el=>{const b=el.getBoundingClientRect();return b.width<=innerWidth-16 && el.scrollWidth<=el.clientWidth+2 && (innerWidth<1024 || b.width>=800);});
+              if(!fits)throw new Error('Inline application responsive width incorrect');
+              await toggle.click();
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
@@ -3540,7 +3524,7 @@ if (!bellaris && brandPreviewCandidate) {
             const whyArticle = productPage.locator('#preco a[href="/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/"]');
             if (await whyArticle.count() !== 1) throw new Error('Suitability article missing beside homepage benefits');
             if(await productPage.locator('#preco button, #preco a[href^="tel:"]').count()) throw new Error('Why must not duplicate application or phone CTA');
-            if(!await productPage.locator('#psie-priatelstva').getByRole('button',{name:'Prihláška do škôlky',exact:true}).isVisible() || !await productPage.locator('#psie-priatelstva p strong').getByText('pravidelne',{exact:true}).count()) throw new Error('Friendship application CTA and emphasized regular-visits explanation missing');
+            if(!await productPage.locator('#psie-priatelstva').getByRole('button',{name:'Zobraziť celú prihlášku',exact:true}).isVisible() || !await productPage.locator('#psie-priatelstva p strong').getByText('pravidelne',{exact:true}).count()) throw new Error('Friendship application CTA and emphasized regular-visits explanation missing');
             const mosaicShape=await productPage.locator('[data-home-spaces-mosaic]').evaluate(el=>({
               columns:getComputedStyle(el).gridTemplateColumns.split(' ').length,count:el.querySelectorAll('[data-home-space-photo]').length,
               paired:innerWidth>=1024||[...el.querySelectorAll('[data-home-mosaic-hygiene]')].every((card,i)=>{const photos=[...el.querySelectorAll('[data-home-space-photo]')].map(p=>p.getBoundingClientRect());const r=card.getBoundingClientRect();return Math.abs(photos[i*2].top-photos[i*2+1].top)<2 && r.top>=photos[i*2].bottom && r.top-photos[i*2].bottom<24 && (i===2||photos[i*2+2].top>=r.bottom && photos[i*2+2].top-r.bottom<24);}),quality:[...el.querySelectorAll('button img')].every(img=>img.getAttribute('src').includes('/w_1600,h_1600,al_c,q_92,enc_auto/')&&img.getAttribute('srcset').includes('900w'))
