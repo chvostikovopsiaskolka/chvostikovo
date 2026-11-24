@@ -1379,7 +1379,7 @@ if (!bellaris && brandPreviewCandidate) {
                     throw new Error('Puppy enquiry must send the existing structured CRM payload after explicit consent');
                   await page.unroute('**/functions/v1/web-form-submit');
                   await puppyContact.getByRole('button', { name: 'Späť ku kontrole' }).click();
-                  await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
+                  await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="single"]').waitFor({ state: 'visible' });
                   await chat.locator('[data-aria-chat-puppy-check]').getByRole('button', { name: 'Späť k otázkam' }).click();
                   await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="first_visit"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
