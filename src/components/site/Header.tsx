@@ -1,7 +1,7 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import { ChevronDown, Menu, Package, Phone, X } from "lucide-react";
 import logo from "@/assets/logo.png";
-import { PHONE, PHONE_PRETTY } from "@/content/site";
+import { PHONE, PHONE_PRETTY, APPLICATION_TITLE, APPLICATION_SUBTITLE } from "@/content/site";
 import { FormDialog } from "./FormDialog";
 import { LongForm } from "./Forms";
 import { MobileDock } from "./MobileDock";
@@ -153,7 +153,7 @@ export function Header({
         </div>
       </header>
       {!hideMobileDock && <MobileDock onApplicationOpen={() => { setApplicationSent(false); setOpen(true); }} />}
-      <FormDialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setApplicationSent(false); }} hideHeader={applicationSent} title={applicationSent ? "Prihláška odoslaná" : "Prihlás svojho psíka ešte dnes"} subtitle="Vyplňte prihlášku do škôlky, v ktorej nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky.">
+      <FormDialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setApplicationSent(false); }} hideHeader={applicationSent} title={applicationSent ? "Prihláška odoslaná" : APPLICATION_TITLE} subtitle={APPLICATION_SUBTITLE}>
         <LongForm onSent={() => setApplicationSent(true)} />
       </FormDialog>
     </>
@@ -262,7 +262,7 @@ export function Header({
         </div>
       )}
 
-      <FormDialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setApplicationSent(false); }} hideHeader={applicationSent} title={applicationSent ? "Prihláška odoslaná" : "Prihlás svojho psíka ešte dnes"} subtitle="Vyplňte prihlášku do škôlky, v ktorej nám poviete viac o vašom psíkovi. Následne sa vám ozveme a dohodneme ďalší postup pri jeho prihlásení do škôlky.">
+      <FormDialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setApplicationSent(false); }} hideHeader={applicationSent} title={applicationSent ? "Prihláška odoslaná" : APPLICATION_TITLE} subtitle={APPLICATION_SUBTITLE}>
         <LongForm onSent={() => setApplicationSent(true)} />
       </FormDialog>
     </header>
