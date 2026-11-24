@@ -23,8 +23,8 @@ export function ProductInquirySteps({
     <form onSubmit={onSubmit} data-product-inquiry-steps data-step={step}>
       <div className="mb-6" data-product-step-progress>
         <div className="mb-2 flex items-center justify-between gap-3 font-display text-xs font-medium text-forest/70 sm:text-sm">
-          <span>{step === 1 ? "Krátky nezáväzný formulár" : titles[step - 1]}</span>
-          <span className="shrink-0 tabular-nums">Krok {step} z 3</span>
+          {step === 1 && <span>Krátky nezáväzný formulár</span>}
+          <span className="ml-auto shrink-0 tabular-nums">Krok {step} z 3</span>
         </div>
         <div role="progressbar" aria-label="Priebeh formulára"
           aria-valuemin={0} aria-valuemax={3} aria-valuenow={step}
