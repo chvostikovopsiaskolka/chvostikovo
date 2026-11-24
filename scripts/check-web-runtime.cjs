@@ -95,13 +95,17 @@ async function assertCampaignContentFlow(page) {
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   await page.setViewportSize({width:390,height:844});
+  await centerFixtureControl(page.locator('[data-lead-faq="first-visit"] > button'));
   await page.locator('[data-lead-faq="first-visit"] > button').click();
   if(await page.locator('[data-lead-faq="first-visit"] a').getAttribute('href')!=='#lead-first-visit')throw new Error('Missing first visit detail anchor');
+  await centerFixtureControl(page.locator('[data-lead-faq="puppies"] > button'));
   await page.locator('[data-lead-faq="puppies"] > button').click();
   const puppyLink=page.locator('[data-lead-faq="puppies"] a');
   if(await puppyLink.getAttribute('href')!=='#aria-puppy-check'||!await puppyLink.evaluate(el=>el.getBoundingClientRect().width>=el.parentElement.getBoundingClientRect().width-50))throw new Error('Puppy checker CTA must fill the mobile answer');
+  await centerFixtureControl(puppyLink);
   await puppyLink.click();
   await page.waitForFunction(()=>Math.abs(document.getElementById('aria-puppy-check').getBoundingClientRect().top)<140);
+  await centerFixtureControl(page.locator('[data-aria-lead-hero-cta]'));
   await page.locator('[data-aria-lead-hero-cta]').click();
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   const nav=page.locator('[data-aria-section-navigation="true"]');
@@ -110,10 +114,12 @@ async function assertCampaignContentFlow(page) {
     await page.waitForFunction(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.top>=0&&r.top<130;},target,{timeout:5000});
     await page.waitForFunction(key=>document.querySelector('[data-lead-nav-key="'+key+'"]')?.getAttribute('aria-current')==='location',key,{timeout:5000});
   }
+  await centerFixtureControl(page.locator('[data-lead-faq-cta]'));
   await page.locator('[data-lead-faq-cta]').click();
   await page.waitForFunction(()=>{const r=document.getElementById('aria-hero-form').getBoundingClientRect();return r.top>=0&&r.top<130;},null,{timeout:5000});
   if(await page.getByRole('dialog').count())throw new Error('Campaign CTA must scroll to its in-page form');
   const form=page.locator('#aria-hero-form [data-lead-step-form]');
+  await centerFixtureControl(form.locator('label:has(input[name="zaujem"])').first());
   await form.locator('label:has(input[name="zaujem"])').first().click();
   await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
   await assertLeadContactIntro(form);
