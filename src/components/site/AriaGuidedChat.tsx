@@ -1,18 +1,16 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { ChvostikovoPaw } from "./ChvostikovoPaw";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 import { ARIA_PREVIEW_REQUIREMENTS, AriaHighlightedText } from "./AriaPreviewText";
-import { ADDRESS, FAQ, PHONE, PHONE_PRETTY, PRICING } from "@/content/site";
-import { ShortForm } from "./Forms";
+import { ADDRESS, PHONE, PHONE_PRETTY, PRICING } from "@/content/site";
+import { ShortForm, HomeFaqContactForm } from "./Forms";
 import { LeadStepForm } from "./LeadStepForm";
 import { AriaPuppyChecker } from "./AriaPuppyChecker";
 import type { PuppyCheckInput } from "@/lib/inquiry";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
 
-type ChatMode = "questions" | "interest" | "other" | "puppy" | "puppy_contact";
-type ChatMessage = { id: number; side: "person" | "aria"; text: string; questionId?: string };
+type ChatMessage = { id: number; side: "person" | "aria"; text: string; questionId?: string; widget?: "puppy" | "puppy_contact" | "interest" | "other" };
 type Question = { id: string; title: string; answer: string };
 
 // Display emphasis without showing formatting markers during typewriter animation.
@@ -29,18 +27,17 @@ function renderChatText(value: string, visibleLength = Number.POSITIVE_INFINITY)
   });
 }
 
-const findAnswer = (question: string) => FAQ.find((item) => item.q === question)?.a || "";
 const priceOne = PRICING.find((item) => !item.highlight)?.price || "25 €";
 const pricePass = PRICING.find((item) => item.highlight)?.price || "200 €";
-const firstVisit = findAnswer("Ako prebieha prvá návšteva psíka v škôlke?").split(/\n+/)[0];
+// Two approved 4-question waves; keep IDs stable for cookieless analytics.
 const chatQuestions: Question[] = [
   {
     id: "pricing",
     title: "Aký je cenník škôlky?",
     answer: "Haf! 🐾 **Jednorazový celodenný vstup stojí " + priceOne +
-      ".**\nSme otvorení od 7:00 do 17:00, pondelok až piatok.\n\n" +
-      "Ak plánuješ pravidelné návštevy, oplatí sa **permanentka za " + pricePass +
-      "**. Má **10 vstupov**, platí 2 mesiace a **ušetríš 50 €** oproti jednorazovým vstupom.\n\n" +
+      ".**\nSme otvorení od **7:00 do 17:00**, pondelok až piatok.\n\n" +
+      "Ak plánuješ pravidelné návštevy, odporúčame **10-vstupovú permanentku**, kde jeden vstup vychádza na **20 €/deň**. " +
+      "Oproti jednorazovým vstupom tak **ušetríš 50 €**. Cena permanentky je **" + pricePass + "** a platí **2 mesiace**.\n\n" +
       "**Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.**",
   },
   {
@@ -49,29 +46,34 @@ const chatQuestions: Question[] = [
     answer: "Haf! 🐾 Toto sú naše hlavné podmienky prijatia:",
   },
   {
-    id: "location",
-    title: "Kde sa škôlka nachádza?",
-    answer: "Haf! 🐾 Nájdeš nás na adrese " + ADDRESS.street + ", " + ADDRESS.city + ". Na stránke nájdeš aj mapu a kontakt.",
-  },
-  {
-    id: "space",
-    title: "Aké priestory má škôlka?",
-    answer: "Máme vyhrievané vnútorné priestory na hru aj oddych a vlastný vonkajší výbeh s rozlohou približne 80 m². 🐾",
-  },
-  {
     id: "caretakers",
-    title: "Kto sa postará o psíkov?",
-    answer: "Haf! 🐾 Počas celého pobytu sa o psíkov starajú minimálne dvaja skúsení opatrovatelia – Adriana a Marek (moji rodičia). 🐾 Dohliadajú na spoločnú hru a aktivity aj oddych prispôsobujú potrebám každého psíka. Dôležitá je pre nich bezpečnosť, individuálny a láskavý prístup. Obaja absolvovali kurz prvej pomoci pre psov, aby sa vaši štvornohí parťáci cítili bezpečne a príjemne, bez zbytočného stresu.",
-  },
-  {
-    id: "first_visit",
-    title: "Ako prebieha prvá návšteva?",
-    answer: firstVisit + "\nÚvodná návšteva je zadarmo. Ak psík potrebuje viac času, adaptáciu prispôsobíme jeho tempu.",
+    title: "Kto sa postará o psíka?",
+    answer: "Haf! 🐾 O tvojho psíka sa počas celého pobytu postarajú **Adriana a Marek – moji rodičia!** 🐾\n\nSú to skúsení opatrovatelia, ktorí dohliadajú na spoločnú hru, bezpečné interakcie aj oddych. Každému psíkovi prispôsobujú aktivity podľa jeho potrieb a povahy.\n\nObaja absolvovali **kurz prvej pomoci pre psov**. Najdôležitejšia je pre nich bezpečnosť, individuálny prístup a to, aby sa každý škôlkar cítil príjemne a bez zbytočného stresu.",
   },
   {
     id: "puppy",
     title: "Prijímate aj šteniatka?",
-    answer: "Haf! 🐾 Áno, prijímame aj očkované šteniatka približne od 4 mesiacov. Záleží na veku, očkovaniach a pripravenosti na kolektív. Poďme si orientačne overiť, či tvoje šteniatko spĺňa základné podmienky. Konečné rozhodnutie urobíme po úvodnej návšteve.",
+    answer: "Haf! 🐾 Áno, prijímame aj očkované šteniatka **približne od 4 mesiacov**.\n\nZáleží na ich veku, kompletnom očkovaní a pripravenosti na kolektív.\n\nPoďme si spolu **orientačne overiť, či tvoje šteniatko spĺňa základné podmienky**. Konečné rozhodnutie o prijatí urobíme až po úvodnej návšteve.",
+  },
+  {
+    id: "location",
+    title: "Kde sa škôlka nachádza?",
+    answer: "Haf! 🐾 Nájdeš nás v **Košiciach na " + ADDRESS.street + "**.\n\nMáme vlastné vnútorné priestory aj vonkajší výbeh, kde si naši škôlkari môžu užívať deň plný hier, pohybu a oddychu.\n\nNa našej stránke nájdeš aj **mapu a kontakt**, aby si nás jednoducho našiel.",
+  },
+  {
+    id: "space",
+    title: "Aké priestory má škôlka?",
+    answer: "Haf! 🐾 Naši škôlkari majú k dispozícii **vyhrievané vnútorné priestory** na hru aj oddych a vlastný **vonkajší výbeh s rozlohou približne 80 m²**.\n\nPočas dňa sa striedajú spoločné hry, aktivity a čas na odpočinok. Psíkov nenechávame hrať sa bez prestávky – všetko prispôsobujeme ich potrebám, veku aj aktuálnemu počasiu.",
+  },
+  {
+    id: "first_visit",
+    title: "Ako prebieha prvá návšteva?",
+    answer: "Haf! 🐾 Pred nástupom do škôlky absolvuje každý nový psík **bezplatnú úvodnú návštevu**.\n\nPočas nej sa zoznámime so psíkom, sledujeme jeho správanie a reakcie na nové prostredie, ľudí aj ostatných psov. Postupne ho zoznamujeme s kolektívom.\n\n**Nie každý psík si zvykne rovnako rýchlo.** Ak potrebuje viac času, môžeme odporučiť kratšie adaptačné návštevy a postup prispôsobiť jeho tempu.",
+  },
+  {
+    id: "reservation",
+    title: "Ako si rezervujem miesto v škôlke?",
+    answer: "Haf! 🐾 Miesto v škôlke si rezervuješ vopred prostredníctvom našej **zákazníckej aplikácie**.\n\nRezervácie na nasledujúci týždeň je potrebné vytvoriť **do nedele 20:00**, aby sme vedeli naplánovať počet psíkov a zabezpečiť im bezpečný a príjemný pobyt.\n\nAk si však kvôli práci alebo iným povinnostiam nevieš naplánovať návštevy na celý týždeň dopredu, **vieme sa dohodnúť aj individuálne**, podľa voľnej kapacity. Stačí nám napísať alebo zavolať.\n\nAk ešte nie si naším škôlkarom, najprv spolu absolvujeme **bezplatnú úvodnú návštevu**.",
   },
 ];
 
@@ -83,10 +85,8 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     // Never send free-text, names, phone numbers or emails in behavioural events.
     void trackCookielessInteraction("explore_daycare", trackingPrefix + "_" + action);
   }
-  const [mode, setMode] = useState<ChatMode>("questions");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [answered, setAnswered] = useState<string[]>([]);
-  const [showChoices, setShowChoices] = useState(true);
   const [typingId, setTypingId] = useState<number | null>(null);
   const [typedLength, setTypedLength] = useState(0);
   const introText = "Haf! 🐾 Ahoj, ja som Aria. Čo ťa zaujíma o našej škôlke?";
@@ -120,15 +120,12 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   const [puppyContactIsEligible, setPuppyContactIsEligible] = useState(false);
   const [engaged, setEngaged] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const actionRef = useRef<HTMLButtonElement>(null);
   const nextId = useRef(0);
   const chatId = useId();
   const unanswered = chatQuestions.filter(question => !answered.includes(question.id));
-  // First four high-intent FAQs; reveal remaining catalogue only when all four
-  // have been asked. The final wording and the eighth FAQ are supplied later.
-  const primaryQuestionIds: readonly string[] = ["pricing", "requirements", "first_visit", "puppy"];
-  const primaryUnanswered = unanswered.filter(question => primaryQuestionIds.includes(question.id));
-  const visibleQuestions = primaryUnanswered.length ? primaryUnanswered : unanswered;
+  // Always offer the next four unanswered FAQ choices. The original ordered
+  // 4+4 catalogue stays intact, but later questions refill vacancies immediately.
+  const visibleQuestions = unanswered.slice(0, 4);
   const introFinished = !introComposing && introLength >= introText.length;
   const menuReady = introFinished && typingId === null &&
     !(initialQuestionId === "pricing" && !autoPricingAsked.current && !answered.includes("pricing"));
@@ -166,36 +163,37 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     };
   }, [typingId, messages]);
 
+  // On mobile, never pin the viewport to scrollHeight during each typewriter
+  // tick: that hid the progressively written reply until animation completed.
+  // Pin its TOP near the scrollport top, even if the answer grows downward.
   useEffect(() => {
-    if (!open || mode !== "questions" || !scrollRef.current) return;
+    if (!open || !scrollRef.current) return;
     const history = scrollRef.current;
-    const lastReply = messages[messages.length - 1];
-    if (lastReply?.side === "aria" && typingId === null && !showChoices) {
-      const replies = history.querySelectorAll<HTMLElement>('[data-aria-chat-turn="aria"]');
-      const latestReply = replies[replies.length - 1];
-      const firstCard = lastReply.questionId === "requirements"
-        ? latestReply?.querySelector<HTMLElement>("[data-aria-chat-requirements] article")
-        : null;
-      const target = firstCard || latestReply;
-      if (target) {
-        // APP-01: after the typewriter completes, place the beginning of the
-        // new reply (or the first requirements card) at the TOP, not the bottom.
-        // The compact action row stays outside the history's scroll owner.
-        const offset = target.getBoundingClientRect().top - history.getBoundingClientRect().top;
-        const availableTop = history.clientHeight - target.getBoundingClientRect().height - 12;
-        const topGap = firstCard ? Math.max(8, Math.min(42, availableTop)) : 12;
-        history.scrollTop += offset - topGap;
-        return;
-      }
+    const activeReply = typingId === null ? null
+      : history.querySelector<HTMLElement>('[data-aria-chat-message-id="' + typingId + '"]');
+    if (activeReply) {
+      history.scrollTop += activeReply.getBoundingClientRect().top -
+        history.getBoundingClientRect().top - 12;
+      return;
     }
-    history.scrollTop = history.scrollHeight;
-  }, [open, messages.length, typedLength, mode, typingId, showChoices]);
-
-  useEffect(() => {
-    if (open && mode === "questions" && messages.length && !showChoices && typingId === null) {
-      actionRef.current?.focus({ preventScroll: true });
+    const last = messages[messages.length - 1];
+    if (!last) {
+      history.scrollTop = history.scrollHeight;
+      return;
     }
-  }, [open, mode, messages.length, showChoices, typingId]);
+    const lastReply = [...messages].reverse().find(item => item.side === "aria" && !item.widget);
+    if (!lastReply) return;
+    const element = history.querySelector<HTMLElement>('[data-aria-chat-message-id="' + lastReply.id + '"]');
+    const firstCard = lastReply.questionId === "requirements"
+      ? element?.querySelector<HTMLElement>('[data-aria-chat-requirements] article')
+      : null;
+    const target = firstCard || element;
+    if (!target) return;
+    const availableTop = history.clientHeight - target.getBoundingClientRect().height - 12;
+    const topGap = firstCard ? Math.max(8, Math.min(42, availableTop)) : 12;
+    history.scrollTop += target.getBoundingClientRect().top -
+      history.getBoundingClientRect().top - topGap;
+  }, [open, messages.length, typedLength, typingId]);
 
   function closeChat() {
     if (!engaged && messages.length === 0) track("closed_without_selection");
@@ -205,16 +203,19 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   function ask(question: Question) {
     if (typingId !== null || answered.includes(question.id)) return;
     track("question_" + question.id);
+    if (question.id === "puppy") track("puppy_check_open");
     setEngaged(true);
     setAnswered(current => [...current, question.id]);
-    setShowChoices(false);
     const id = nextId.current;
-    nextId.current += 2;
+    const isPuppy = question.id === "puppy";
+    nextId.current += isPuppy ? 3 : 2;
     setTypedLength(0);
     setMessages(current => [...current,
       { id, side: "person", text: question.title },
       { id: id + 1, side: "aria", text: question.answer, questionId: question.id },
+      ...(isPuppy ? [{ id: id + 2, side: "aria" as const, text: "", widget: "puppy" as const }] : []),
     ]);
+    if (isPuppy) setPuppyCheck(null);
     setTypingId(id + 1);
   }
 
@@ -234,55 +235,42 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   }, [open, initialQuestionId, introComposing, introLength, answered, typingId]);
 
   function showInterest() {
+    if (typingId !== null || messages[messages.length - 1]?.widget === "interest") return;
     track("interest_open");
     setEngaged(true);
     const id = nextId.current;
-    nextId.current += 2;
+    nextId.current += 3;
+    setTypedLength(0);
     setMessages(current => [...current,
       { id, side: "person", text: "Mám záujem o škôlku." },
-      { id: id + 1, side: "aria", text: "Haf, jasné! 🐾 Stačí vyplniť krátky nezáväzný formulár. Príde môjmu paničkovi a radi sa ti ozvú." },
+      { id: id + 1, side: "aria", text: "Haf, jasné! 🐾 Vyplň krátky nezáväzný formulár priamo tu v chate a moji rodičia sa ti ozvú." },
+      { id: id + 2, side: "aria", text: "", widget: "interest" },
     ]);
-    setMode("interest");
-  }
-
-  function showPuppy() {
-    track("question_puppy");
-    track("puppy_check_open");
-    setEngaged(true);
-    setAnswered(current => current.includes("puppy") ? current : [...current, "puppy"]);
-    setShowChoices(false);
-    setMode("puppy");
-    setPuppyCheck(null);
-    const id = nextId.current;
-    nextId.current += 2;
-    setMessages(current => [...current,
-      { id, side: "person", text: "Mám šteniatko. Spĺňa podmienky škôlky?" },
-      { id: id + 1, side: "aria", text: chatQuestions.find(question => question.id === "puppy")!.answer, questionId: "puppy" },
-    ]);
+    setTypingId(id + 1);
   }
 
   function finishPuppyCheck(details: PuppyCheckInput, eligible: boolean) {
+    if (puppyCheck) return;
     track(eligible ? "puppy_precheck_passed" : "puppy_precheck_info");
     setPuppyCheck(details);
     setPuppyContactIsEligible(eligible);
-    setMode("puppy_contact");
+    const id = nextId.current++;
+    setMessages(current => [...current, { id, side: "aria", text: "", widget: "puppy_contact" }]);
   }
 
   function showOther() {
+    if (typingId !== null || messages[messages.length - 1]?.widget === "other") return;
     track("other_open");
     setEngaged(true);
     const id = nextId.current;
-    nextId.current += 2;
+    nextId.current += 3;
+    setTypedLength(0);
     setMessages(current => [...current,
-      { id, side: "person", text: "Chcem sa spýtať niečo iné." },
-      { id: id + 1, side: "aria", text: "Jasné! 🐾 Cez kontaktný formulár napíš správu mojim majiteľom. Radi sa ti ozvú hneď, ako to bude možné." },
+      { id, side: "person", text: "Mám inú otázku." },
+      { id: id + 1, side: "aria", text: "Haf! 🐾 Napíš mi najprv svoju otázku. V druhom kroku necháš kontakt a moji rodičia ti odpovedia." },
+      { id: id + 2, side: "aria", text: "", widget: "other" },
     ]);
-    setMode("other");
-  }
-
-  function backToQuestions() {
-    setMode("questions");
-    setShowChoices(unanswered.length > 0);
+    setTypingId(id + 1);
   }
 
 
@@ -298,8 +286,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
         </header>
 
         <div ref={scrollRef} role="log" aria-label="Konverzácia s Ariou" aria-live="polite"
-          data-aria-chat-history className={(mode === "questions" ? "min-h-0 flex-1 space-y-3 overflow-y-auto " : "hidden ") +
-            "overscroll-contain bg-[linear-gradient(145deg,rgba(255,240,213,.68),rgba(247,233,241,.55),rgba(237,248,240,.7))] backdrop-blur-xl px-3 py-4 sm:px-5"}>
+          data-aria-chat-history className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[linear-gradient(145deg,rgba(255,240,213,.68),rgba(247,233,241,.55),rgba(237,248,240,.7))] backdrop-blur-xl px-3 py-4 sm:px-5">
           <div className="flex items-end gap-2">
             <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
             <div id={chatId + "-intro"} className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm sm:text-sm">
@@ -309,9 +296,58 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
           </div>
 
           {messages.map(message => {
+            if (message.widget) {
+              // Mount inline only AFTER Aria finishes composing its preceding answer.
+              // Keep historical widgets in the log as the conversation grows.
+              if (typingId !== null && message.id > typingId) return null;
+              return (
+                <section key={message.id} data-aria-chat-inline={message.widget}
+                  className="ml-11 min-w-0 space-y-3 rounded-2xl border border-white/70 bg-white/85 p-3 shadow-sm sm:p-4">
+                  {message.widget === "puppy" && (
+                    <div data-aria-chat-puppy-check aria-label="Orientačná kontrola šteniatka">
+                      <AriaPuppyChecker embedded chatCompact trackingSource={trackingPrefix + "_puppy"}
+                        onInterest={details => finishPuppyCheck(details, true)}
+                        onInfo={details => finishPuppyCheck(details, false)} />
+                    </div>
+                  )}
+                  {message.widget === "puppy_contact" && puppyCheck && (
+                    <div data-aria-chat-puppy-contact className="space-y-3">
+                      <p role="status" className="rounded-xl bg-secondary/50 p-2 text-xs leading-relaxed text-forest">
+                        {puppyContactIsEligible
+                          ? "Vek a očkovania orientačne spĺňajú podmienky. Vyplň kontakt a ozveme sa ti ohľadom bezplatnej úvodnej návštevy."
+                          : "Tvoje šteniatko zatiaľ nespĺňa všetky orientačné podmienky alebo si nie si istý očkovaním. Nechaj kontakt a individuálne sa poradíme."}
+                        <span className="mt-1 block">Vek: {puppyCheck.age_months} mesiacov · očkovania: besnota, DHPPi+L, kotercový kašeľ –
+                          {Object.values(puppyCheck.vaccines).every(value => value === "yes") ? " všetky potvrdené" : " nie všetky potvrdené"}.</span>
+                      </p>
+                      <ShortForm hideInterest showChatDogFields trackingSource={formPrefix + "_puppy_contact"}
+                        puppyCheck={puppyCheck}
+                        interestValue={puppyContactIsEligible ? "Mám záujem o škôlku pre šteniatko" : "Chcem sa informovať o škôlke"}
+                        onSent={() => track("puppy_contact_submitted")} />
+                    </div>
+                  )}
+                  {message.widget === "interest" && (
+                    <div data-aria-chat-interest data-lead-form-shell className="space-y-2">
+                      <LeadStepForm trackingSource={formPrefix + "_interest"} compact
+                        onSent={() => track("interest_submitted")} />
+                    </div>
+                  )}
+                  {message.widget === "other" && (
+                    <div data-aria-chat-other className="space-y-2">
+                      <HomeFaqContactForm source={formPrefix === "lead_landing_aria_chat"
+                        ? "lead_landing_aria_chat_other" : "aria_preview_chat_other"} compact
+                        onStarted={() => track("other_question_started")}
+                        onSent={() => track("other_question_submitted")} />
+                      <a href={"tel:" + PHONE} className="flex min-h-11 items-center justify-center rounded-xl border border-[#9e336f]/30 px-3 text-xs font-bold text-[#9e336f]">
+                        Alebo nám zavolaj na {PHONE_PRETTY}
+                      </a>
+                    </div>
+                  )}
+                </section>
+              );
+            }
             const isTyping = message.id === typingId;
             return (
-              <div key={message.id} data-aria-chat-turn={message.side}
+              <div key={message.id} data-aria-chat-turn={message.side} data-aria-chat-message-id={message.id}
                 className={"flex items-end gap-2 " + (message.side === "person" ? "justify-end" : "")}>
                 {message.side === "aria" && <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />}
                 <div data-aria-typing={isTyping ? "true" : undefined}
@@ -357,12 +393,20 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
             );
           })}
 
-          {mode === "questions" && menuReady && showChoices && visibleQuestions.length > 0 && (
+          {menuReady && messages.length > 0 && (
+            <div data-aria-chat-followup-prompt className="flex items-end gap-2">
+              <img src={ARIA_HEAD_DATA_URI} alt="" width={36} height={36} className="size-9 shrink-0 object-contain" />
+              <p className="max-w-[87%] rounded-[20px_20px_20px_6px] bg-white px-3 py-3 text-[13px] leading-relaxed text-[#26322b] shadow-sm">
+                Chceš sa ma opýtať ešte inú otázku alebo chceš vyplniť nezáväzný formulár a počkať na telefonát od mojich rodičov?
+              </p>
+            </div>
+          )}
+          {menuReady && visibleQuestions.length > 0 && (
             <div data-aria-chat-questions aria-label="Vyber si otázku"
               className="ml-11 grid grid-cols-2 gap-2" role="group">
               {visibleQuestions.map(question => (
                 <button key={question.id} type="button" data-aria-chat-question={question.id}
-                  onClick={() => question.id === "puppy" ? showPuppy() : ask(question)}
+                  onClick={() => ask(question)}
                   className={"min-h-11 min-w-0 rounded-xl border px-2.5 py-2.5 text-left text-xs font-semibold leading-snug shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-[#9e336f] " +
                     (question.id === "puppy"
                       ? "border-[#9e336f]/30 bg-[#f9e5ee] font-extrabold text-[#873063] hover:bg-[#f5d6e5]"
@@ -375,92 +419,20 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
 
         </div>
 
-        {mode === "questions" && menuReady && (
+        {menuReady && (
           <nav data-aria-chat-action-panel
             data-aria-chat-followup={messages.length > 0 ? "true" : undefined}
             aria-label="Možnosti pokračovania"
             className="flex shrink-0 items-stretch gap-2 border-t border-white/60 bg-white/80 px-2.5 py-2.5 backdrop-blur-2xl sm:px-5">
-            {messages.length > 0 && visibleQuestions.length > 0 && (
-              <button type="button" ref={actionRef} data-aria-chat-show-questions
-                onClick={() => setShowChoices(current => !current)}
-                className="min-h-11 min-w-0 flex-1 rounded-xl border border-[#9e336f]/25 bg-white px-1.5 py-2 text-[11px] font-bold leading-tight text-[#873063] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
-                {showChoices ? "Skryť otázky" : "Ďalšie otázky"}
-              </button>
-            )}
             <button type="button" data-aria-chat-interest-cta onClick={showInterest}
-              className="min-h-11 min-w-0 flex-1 rounded-xl bg-[#9e336f] px-1.5 py-2 text-xs font-extrabold leading-tight text-white shadow-sm focus-visible:outline-2 focus-visible:outline-[#9e336f]">
-              Mám záujem
+              className="min-h-11 min-w-0 flex-[1.6] rounded-xl bg-[#9e336f] px-2 py-2 text-xs font-extrabold leading-tight text-white shadow-sm focus-visible:outline-2 focus-visible:outline-[#9e336f]">
+              Mám záujem o škôlku
             </button>
             <button type="button" data-aria-chat-other-cta onClick={showOther}
-              className="min-h-11 min-w-0 flex-1 rounded-xl border border-[#ffa414]/55 bg-[#fff0d5] px-1.5 py-2 text-[11px] font-extrabold leading-tight text-[#26322b] shadow-sm transition-colors hover:border-[#ffa414] hover:bg-[#ffe3b2] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
-              Mám inú otázku?
+              className="min-h-11 min-w-0 flex-1 rounded-xl border border-[#ffa414]/55 bg-[#fff0d5] px-2 py-2 text-[11px] font-extrabold leading-tight text-[#26322b] shadow-sm transition-colors hover:border-[#ffa414] hover:bg-[#ffe3b2] focus-visible:outline-2 focus-visible:outline-[#9e336f]">
+              Máš inú otázku?
             </button>
           </nav>
-        )}
-
-        {mode !== "questions" && (
-          <div data-aria-chat-form-scroll className="min-h-0 flex-1 overflow-y-auto overscroll-contain border-t border-white/60 bg-white/65 backdrop-blur-2xl p-3 sm:p-4">
-            {mode === "puppy" && (
-              <section data-aria-chat-puppy-check aria-label="Orientačná kontrola šteniatka" className="space-y-3">
-                <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
-                  <ArrowLeft size={15} aria-hidden /> Späť k otázkam
-                </button>
-                <AriaPuppyChecker embedded trackingSource={trackingPrefix + "_puppy"} {...(puppyCheck ? { initialAnswers: puppyCheck } : {})}
-                  onInterest={details => finishPuppyCheck(details, true)}
-                  onInfo={details => finishPuppyCheck(details, false)} />
-                <p className="text-xs font-semibold leading-relaxed text-[#26322b]">
-                  Pomohla ti odpoveď? Ak máš záujem o škôlku pre svojho psíka, vyplň nezáväzný formulár a my sa ti ozveme späť.
-                </p>
-                <button type="button" data-aria-chat-interest-cta onClick={showInterest}
-                  className="min-h-12 w-full rounded-xl bg-[#9e336f] px-4 py-2.5 text-sm font-extrabold text-white">Mám záujem</button>
-              </section>
-            )}
-            {mode === "puppy_contact" && puppyCheck && (
-              <section data-aria-chat-puppy-contact aria-label="Kontakt po kontrole šteniatka" className="space-y-3">
-                <button type="button" onClick={() => setMode("puppy")} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
-                  <ArrowLeft size={15} aria-hidden /> Späť ku kontrole
-                </button>
-                <p role="status" className="rounded-2xl bg-white p-3 text-xs leading-relaxed text-[#26322b]">
-                  {puppyContactIsEligible
-                    ? "Vek a očkovania orientačne spĺňajú podmienky. Vyplňte kontakt a ozveme sa vám ohľadom bezplatnej úvodnej návštevy."
-                    : "Vaše šteniatko zatiaľ nespĺňa všetky orientačné podmienky alebo si nie ste istí očkovaním. Môžete nám nechať kontakt a individuálne sa poradíme."}
-                  <span className="mt-1 block">Vek: {puppyCheck.age_months} mesiacov · očkovania: besnota, DHPPi+L, kotercový kašeľ – {Object.values(puppyCheck.vaccines).every(value => value === "yes") ? "všetky potvrdené" : "nie všetky potvrdené"}.</span>
-                </p>
-                <ShortForm hideInterest showChatDogFields trackingSource={formPrefix + "_puppy_contact"}
-                  puppyCheck={puppyCheck}
-                  interestValue={puppyContactIsEligible ? "Mám záujem o škôlku pre šteniatko" : "Chcem sa informovať o škôlke"}
-                  onSent={() => track("puppy_contact_submitted")} />
-              </section>
-            )}
-            {mode === "interest" && (
-              <section data-lead-form-shell aria-label="Nezáväzný záujem v chate" data-aria-chat-interest className="space-y-2">
-                <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
-                  <ArrowLeft size={15} aria-hidden /> Späť k otázkam
-                </button>
-                <p data-lead-form-intro data-aria-form-prompt className="rounded-xl bg-white/75 px-3 py-2 text-xs leading-relaxed text-forest">
-                  {messages[messages.length - 1]?.text}
-                </p>
-                <LeadStepForm trackingSource={formPrefix + "_interest"} compact
-                  onSent={() => track("interest_submitted")} />
-              </section>
-            )}
-            {mode === "other" && (
-              <section aria-label="Iná otázka" data-aria-chat-other className="space-y-2">
-                <button type="button" onClick={backToQuestions} className="flex min-h-9 items-center gap-1 text-xs font-semibold text-[#9e336f]">
-                  <ArrowLeft size={15} aria-hidden /> Späť k otázkam
-                </button>
-                <p data-aria-form-prompt className="rounded-xl bg-white/75 px-3 py-2 text-xs leading-relaxed text-forest">
-                  {messages[messages.length - 1]?.text}
-                </p>
-                <ShortForm hideInterest showQuestionField trackingSource={formPrefix + "_other"}
-                  interestValue="Chcem sa informovať o škôlke"
-                  onSent={() => track("other_question_submitted")} />
-                <a href={"tel:" + PHONE} className="flex min-h-11 items-center justify-center rounded-xl border border-[#9e336f]/30 px-3 text-xs font-bold text-[#9e336f]">
-                  Alebo nám zavolaj na {PHONE_PRETTY}
-                </a>
-              </section>
-            )}
-          </div>
         )}
       </DialogContent>
     </Dialog>

@@ -1198,263 +1198,149 @@ if (!bellaris && brandPreviewCandidate) {
                   const chatWindow = await chat.boundingBox();
                   if (!chatWindow || chatWindow.x < -1 || chatWindow.x + chatWindow.width > width + 1)
                     throw new Error('Chat must fit mobile viewport');
-                  const questionMenu = chat.locator('[data-aria-chat-questions]');
-                  await questionMenu.waitFor({ state: 'visible', timeout: 10000 });
-                  if (await questionMenu.locator('[data-aria-chat-question]').count() !== 4 ||
-                      !await questionMenu.locator('[data-aria-chat-question="puppy"]').count() ||
-                      await chat.locator('[data-aria-chat-composer]').count() ||
-                      await chat.getByText('Čo ťa zaujíma?', { exact: true }).count() ||
-                      await chat.locator('[data-aria-chat-turn="person"]').count())
-                    throw new Error('Welcome must show just 4 FAQ bubbles under Aria intro, no duplicate text or fake composer');
-                  const actionPanel = chat.locator('[data-aria-chat-action-panel]');
-                  if (!await questionMenu.evaluate(el => !!el.closest('[data-aria-chat-history]')) ||
-                      !await actionPanel.locator('[data-aria-chat-other-cta]').isVisible() ||
-                      !await actionPanel.locator('[data-aria-chat-interest-cta]').isVisible())
-                    throw new Error('FAQ choices must live in the scrollable history, with two compact actions below');
-                  const welcomeLayout = await chat.evaluate(dialog => {
-                    const history = dialog.querySelector('[data-aria-chat-history]').getBoundingClientRect();
-                    const footer = dialog.querySelector('[data-aria-chat-action-panel]').getBoundingClientRect();
-                    const full = dialog.getBoundingClientRect();
-                    return { historyHeight: history.height, footerHeight: footer.height, footerBottom: footer.bottom, dialogBottom: full.bottom };
+                  const questionMenu=chat.locator('[data-aria-chat-questions]');
+                  await questionMenu.waitFor({state:'visible',timeout:10000});
+                  const ids=async()=>questionMenu.locator('[data-aria-chat-question]').evaluateAll(nodes=>
+                    nodes.map(node=>node.getAttribute('data-aria-chat-question')));
+                  if(JSON.stringify(await ids())!==JSON.stringify(['pricing','requirements','caretakers','puppy'])||
+                     await chat.locator('[data-aria-chat-show-questions]').count()||
+                     await chat.locator('[data-aria-chat-form-scroll]').count())
+                    throw new Error('TEST Aria must start with four questions but no extra toggle or form panel');
+                  const actions=chat.locator('[data-aria-chat-action-panel]');
+                  const interestCta=actions.locator('[data-aria-chat-interest-cta]');
+                  const otherCta=actions.locator('[data-aria-chat-other-cta]');
+                  if(!await otherCta.getByText('Máš inú otázku?').count() ||
+                     await interestCta.evaluate(el=>el.getBoundingClientRect().width<=el.nextElementSibling.getBoundingClientRect().width))
+                    throw new Error('CTA must rename the question and widen Mám záujem o škôlku');
+                  await page.setViewportSize({width:320,height:720});
+                  const size=await chat.evaluate(el=>{
+                    const r=el.getBoundingClientRect(),h=el.querySelector('[data-aria-chat-history]');
+                    const cards=[...el.querySelectorAll('[data-aria-chat-questions] button')].map(x=>x.getBoundingClientRect());
+                    return {left:r.left,right:r.right,width:innerWidth,overflow:h.scrollWidth-h.clientWidth,
+                      cards:cards.map(c=>({left:c.left,right:c.right,height:c.height}))};
                   });
-                  if (welcomeLayout.footerHeight > 90 || welcomeLayout.historyHeight < 210 ||
-                      Math.abs(welcomeLayout.footerBottom-welcomeLayout.dialogBottom) > 5)
-                    throw new Error('Intro FAQ cannot steal reading room from the conversation: '+JSON.stringify(welcomeLayout));
-                  const otherColor = await actionPanel.locator('[data-aria-chat-other-cta]').evaluate(el => getComputedStyle(el).backgroundColor);
-                  if (otherColor !== 'rgb(255, 240, 213)')
-                    throw new Error('Other CTA must keep approved orange highlighting: '+otherColor);
-                  const puppyPink = await questionMenu.locator('[data-aria-chat-question="puppy"]').evaluate(el => getComputedStyle(el).backgroundColor);
-                  if (puppyPink === 'rgb(255, 255, 255)' || puppyPink === 'rgba(0, 0, 0, 0)')
-                    throw new Error('Puppy FAQ must retain approved pink highlighting');
+                  if(size.left< -1||size.right>size.width+1||size.overflow>2||size.cards.length!==4||
+                     size.cards.some(c=>c.left< -1||c.right>size.width+1||c.height<43))
+                    throw new Error('320px TEST Aria must have 4 accessible FAQ bubbles without clipping: '+JSON.stringify(size));
+                  await page.setViewportSize({width:390,height:844});
                   await questionMenu.locator('[data-aria-chat-question="pricing"]').click();
-                  const pricingPrompt = chat.locator('[data-aria-chat-turn="person"]');
-                  await pricingPrompt.waitFor({ state: 'visible', timeout: 10000 });
-                  if (!await pricingPrompt.getByText('Aký je cenník škôlky?').count())
-                    throw new Error('Price answer must only open when FAQ selected');
-                  const typing = chat.locator('[data-aria-chat-turn="aria"] [data-aria-typing="true"]');
-                  await typing.waitFor({ state: 'visible', timeout: 10000 });
-                  const initialTyped = await typing.evaluate(el => ({
-                    rendered: el.querySelector('[aria-hidden="true"]')?.textContent?.length || 0,
-                    full: el.querySelector('.sr-only')?.textContent?.length || 0,
+                  const typing=chat.locator('[data-aria-chat-turn="aria"] [data-aria-typing="true"]');
+                  await typing.waitFor({state:'visible',timeout:10000});
+                  await page.waitForFunction(()=>{
+                    const t=document.querySelector('[data-aria-chat-turn="aria"] [data-aria-typing="true"]');
+                    return (t?.querySelector('[aria-hidden="true"]')?.textContent?.length||0)>12;
+                  },null,{timeout:5000});
+                  const sample=await typing.evaluate(el=>({
+                    shown:el.querySelector('[aria-hidden="true"]')?.textContent?.length||0,
+                    full:el.querySelector('.sr-only')?.textContent?.length||0,
+                    top:el.getBoundingClientRect().top,
+                    viewport:el.closest('[data-aria-chat-history]').getBoundingClientRect(),
                   }));
-                  if (!initialTyped.full || initialTyped.rendered >= initialTyped.full)
-                    throw new Error('Mobile Aria reply must visibly type instead of jumping to full text: ' + JSON.stringify(initialTyped));
-                  await typing.waitFor({ state: 'hidden', timeout: 10000 });
-                  if (await chat.locator('[data-aria-chat-turn="person"]').count() !== 1 ||
-                      await chat.locator('[data-aria-chat-turn="aria"]').count() !== 1 ||
-                      !await chat.getByText(/Jednorazový celodenný vstup stojí 25 €./).count() ||
-                      !await chat.getByText(/permanentka za 200 €/).count() ||
-                      !await chat.getByText(/ušetríš 50 €/).count() ||
-                      !await chat.locator('[data-aria-chat-turn="aria"] strong').filter({ hasText: /vyplň nezáväzný formulár/ }).count() ||
-                      !await chat.locator('[data-aria-chat-turn="person"] svg[viewBox="0 0 33 36"]').count())
-                    throw new Error('Selected pricing must preserve 25 €/200 €, emphasis and pink profile paw');
-                  const followup = chat.locator('[data-aria-chat-followup]');
-                  await followup.waitFor({ state: 'visible' });
-                  const interestCta = followup.locator('[data-aria-chat-interest-cta]');
-                  const viewMetrics = await chat.evaluate(dialog => {
-                    const history = dialog.querySelector('[data-aria-chat-history]').getBoundingClientRect();
-                    const footer = dialog.querySelector('[data-aria-chat-followup]').getBoundingClientRect();
-                    const answer = dialog.querySelector('[data-aria-chat-turn="aria"]');
-                    const reply = answer?.getBoundingClientRect();
-                    return { historyHeight:history.height, footerHeight:footer.height,
-                      answerTop:reply?.top, answerBottom:reply?.bottom, viewportBottom:history.bottom };
-                  });
-                  if (viewMetrics.footerHeight > 90 || viewMetrics.historyHeight < 330 ||
-                      viewMetrics.answerBottom > viewMetrics.viewportBottom + 2 ||
-                      await chat.locator('[data-aria-chat-questions]').count())
-                    throw new Error('Pricing answer needs the readable history, not a giant FAQ dock: '+JSON.stringify(viewMetrics));
-                  if (!await interestCta.isVisible() ||
-                      !await followup.locator('[data-aria-chat-other-cta]').isVisible() ||
-                      !await followup.locator('[data-aria-chat-show-questions]').isVisible())
-                    throw new Error('After pricing, only compact next-actions remain');
-                  await followup.locator('[data-aria-chat-show-questions]').click();
-                  if (await questionMenu.locator('[data-aria-chat-question]').count() !== 3 ||
-                      await questionMenu.locator('[data-aria-chat-question="pricing"]').count())
-                    throw new Error('Only the three unanswered first-wave questions may reappear');
+                  await page.waitForTimeout(230);
+                  const afterSample=await typing.evaluate(el=>el.querySelector('[aria-hidden="true"]')?.textContent?.length||0);
+                  if(sample.shown>=sample.full||afterSample<=sample.shown||
+                    sample.top<sample.viewport.top-2||sample.top>sample.viewport.bottom)
+                    throw new Error('iPhone reply text must progressively animate visibly rather than appear after auto scroll: '+JSON.stringify({sample,afterSample}));
+                  await typing.waitFor({state:'hidden',timeout:20000});
+                  if(!await chat.getByText(/20 €\/deň/).count()||
+                     !await chat.getByText(/ušetríš 50 €/).count()||
+                     !await chat.getByText(/200 €/).count())
+                    throw new Error('Pass must state 20 €/day, saving 50 € and pass price 200 €');
+                  if(JSON.stringify(await ids())!==JSON.stringify(['requirements','caretakers','puppy','location'])||
+                     !await chat.locator('[data-aria-chat-followup-prompt]').getByText(/telefonát od mojich rodičov/).count())
+                    throw new Error('Four next unanswered questions must show below Aria followup immediately');
                   await questionMenu.locator('[data-aria-chat-question="requirements"]').click();
-                  await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
-                  const requirementCards = chat.locator('[data-aria-chat-requirements] article');
-                  await requirementCards.first().waitFor({ state: 'visible' });
-                  if (await requirementCards.count() !== 4 ||
-                      !await requirementCards.first().getByText('Očkovanie a prevencia').count())
-                    throw new Error('Requirements must reuse four structured cards from existing modal');
-                  const requirementsFit = await chat.locator('[data-aria-chat-requirements]').evaluate(el => {
-                    const bubble = el.closest('[data-aria-chat-turn="aria"] > div');
-                    const viewport = el.closest('[data-aria-chat-history]');
-                    return !bubble || !viewport ? false :
-                      bubble.getBoundingClientRect().right <= viewport.getBoundingClientRect().right + 1 &&
-                      bubble.getBoundingClientRect().left >= viewport.getBoundingClientRect().left - 1;
+                  await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
+                  if(await chat.locator('[data-aria-chat-requirements] article').count()!==4||await questionMenu.locator('button').count()!==4)
+                    throw new Error('Existing four requirement cards and four FAQ options must remain visible');
+                  await questionMenu.locator('[data-aria-chat-question="puppy"]').click();
+                  await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
+                  const puppy=chat.locator('[data-aria-chat-puppy-check]');
+                  await puppy.waitFor({state:'visible'});
+                  if(!await puppy.locator('[data-aria-puppy-step="single"]').isVisible()||
+                     !await puppy.getByText('Zistite, či vaše šteniatko spĺňa podmienky prijatia').count()||
+                     await puppy.getByText('Máte šteniatko?',{exact:true}).count()||
+                     await puppy.getByText(/Rýchle orientačné overenie/).count()||
+                     await puppy.getByRole('button',{name:/Pokračovať na očkovania/}).count()||
+                     await chat.locator('[data-aria-chat-form-scroll]').count()||
+                     !await chat.locator('[data-aria-chat-history]').isVisible())
+                    throw new Error('Puppy checker must be one compact inline chat step under the typed answer');
+                  if(await puppy.getByRole('button',{name:/Pokračovať na kontakt/}).count())
+                    throw new Error('Puppy check cannot approve unknown vaccines');
+                  const fields=puppy.locator('fieldset');
+                  if(await fields.count()!==3)throw new Error('Puppy checker must show all three vaccines');
+                  for(const field of await fields.all()) await field.getByText('Áno',{exact:true}).click();
+                  await puppy.getByRole('button',{name:/Pokračovať na kontakt/}).click();
+                  const puppyContact=chat.locator('[data-aria-chat-puppy-contact]');
+                  await puppyContact.waitFor({state:'visible'});
+                  if(!await puppyContact.locator('form').count()||!await questionMenu.isVisible())
+                    throw new Error('Puppy contact must extend the same conversation, not require going back');
+                  await questionMenu.locator('[data-aria-chat-question="caretakers"]').click();
+                  await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
+                  if(JSON.stringify(await ids())!==JSON.stringify(['location','space','first_visit','reservation']))
+                    throw new Error('New questions must fill all 4 available slots after the first four selections');
+                  await questionMenu.locator('[data-aria-chat-question="reservation"]').click();
+                  await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
+                  const booking=chat.locator('[data-aria-chat-turn="aria"]').last();
+                  if(!await booking.locator('strong').filter({hasText:'do nedele 20:00'}).count()||
+                     !await booking.locator('strong').filter({hasText:'vieme sa dohodnúť aj individuálne'}).count())
+                    throw new Error('Booking must preserve approved Sunday deadline and individual agreement');
+                  await otherCta.click();
+                  await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
+                  const other=chat.locator('[data-aria-chat-other]');
+                  await other.waitFor({state:'visible'});
+                  const wizard=other.locator('[data-home-faq-contact-form]');
+                  if(await wizard.getAttribute('data-step')!=='1'||!await wizard.locator('textarea[name="otazka"]').isVisible()||
+                     await wizard.locator('input[name="meno"]').isVisible()||!await chat.locator('[data-aria-chat-history]').isVisible())
+                    throw new Error('Question-first contact must reuse homepage form INLINE and show no contact fields initially');
+                  await wizard.locator('textarea[name="otazka"]').fill('Aké sú možnosti pre dvoch psíkov?');
+                  await wizard.getByRole('button',{name:'Pokračovať'}).click();
+                  if(await wizard.getAttribute('data-step')!=='2'||!await wizard.locator('input[name="meno"]').isVisible())
+                    throw new Error('Contact fields must display in wizard step 2');
+                  let askedPayload=null;
+                  await page.route('**/functions/v1/web-form-submit',async route=>{
+                    const cors={'access-control-allow-origin':'*','access-control-allow-methods':'POST, OPTIONS','access-control-allow-headers':'content-type'};
+                    if(route.request().method()==='OPTIONS'){await route.fulfill({status:204,headers:cors});return;}
+                    askedPayload=route.request().postDataJSON();
+                    await route.fulfill({status:200,contentType:'application/json',headers:cors,body:JSON.stringify({ok:true})});
                   });
-                  if (!requirementsFit)
-                    throw new Error('Four requirements cards must not overflow the mobile chat viewport');
-                  if (await chat.locator('[data-aria-chat-questions]').count() ||
-                      !await chat.locator('[data-aria-chat-followup] [data-aria-chat-interest-cta]').isVisible())
-                    throw new Error('After requirements the action bar must stay compact and the history visible');
-                  const firstCardGeometry = await requirementCards.first().evaluate(el => {
-                    const viewport = el.closest('[data-aria-chat-history]');
-                    const card = el.getBoundingClientRect();
-                    const frame = viewport?.getBoundingClientRect();
-                    return frame ? { topGap: card.top - frame.top, bottomGap: frame.bottom - card.bottom,
-                      cardHeight: card.height, viewportHeight: frame.height, scrollTop: viewport.scrollTop } : null;
-                  });
-                  if (!firstCardGeometry || firstCardGeometry.topGap < -2 ||
-                      firstCardGeometry.topGap > 130 || firstCardGeometry.bottomGap < -5)
-                    throw new Error('Finishing requirements must keep the first card visible: ' +
-                      JSON.stringify(firstCardGeometry));
-                  await chat.locator('[data-aria-chat-followup] [data-aria-chat-other-cta]').click();
-                  if (await chat.locator('[data-aria-chat-history]').isVisible())
-                    throw new Error('Contact view must hide the chat log and reserve all body space for the form');
-                  const contactLayout = await chat.locator('[data-aria-chat-form-scroll]').evaluate(el=>({
-                    height:el.getBoundingClientRect().height,
-                    chatHeight:el.closest('[data-aria-chat]').getBoundingClientRect().height
-                  }));
-                  if (contactLayout.height < contactLayout.chatHeight - 115)
-                    throw new Error('Contact must occupy the available chat height: '+JSON.stringify(contactLayout));
-                  const questionForm = chat.locator('[data-aria-chat-other]');
-                  await questionForm.waitFor({ state: 'visible' });
-                  if (!await questionForm.locator('textarea[name="otazka"]').count() ||
-                      await questionForm.locator('a[href^="mailto:"]').count() ||
-                      !await questionForm.getByLabel('E-mail *').count())
-                    throw new Error('Other question must use a consented form and not a mailto link');
-                  let askedPayload = null;
-                  await page.route('**/functions/v1/web-form-submit', async route => {
-                    if (route.request().method() === 'OPTIONS') {
-                      await route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type' } });
-                      return;
-                    }
-                    askedPayload = route.request().postDataJSON();
-                    await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true }) });
-                  });
-                  await questionForm.locator('input[name="meno"]').fill('Test Otázka');
-                  await questionForm.locator('input[name="plemeno"]').fill('Kríženec');
-                  // Contact questions are ordinary CRM leads with optional sex, not a new form type.
-                  await questionForm.locator('label:has(input[name="pohlavie"][value="female"])').click();
-                  await questionForm.locator('input[name="telefon"]').fill('+421901234567');
-                  await questionForm.locator('input[name="email"]').fill('test@example.invalid');
-                  await questionForm.locator('textarea[name="otazka"]').fill('Môj psík má špeciálne potreby?');
-                  if (askedPayload) throw new Error('Question must not send before explicit consent');
-                  await questionForm.locator('input[type="checkbox"]').check();
-                  await questionForm.getByRole('button', { name: 'Odoslať otázku' }).click();
-                  await questionForm.getByText('Ďakujeme za otázku.').waitFor({ state: 'visible' });
-                  if (!askedPayload || askedPayload.interest_reason !== 'Chcem sa informovať o škôlke' ||
-                      askedPayload.raw_payload?.['Otázka návštevníka'] !== 'Môj psík má špeciálne potreby?' ||
-                      askedPayload.dog_breed !== 'Kríženec' || askedPayload.dog_sex !== 'female' ||
-                      askedPayload.cta_source !== 'aria_preview_chat_other')
-                    throw new Error('Other question must submit inside an existing consented lead payload');
+                  await wizard.locator('input[name="meno"]').fill('Test Otázka');
+                  await wizard.locator('input[name="telefon"]').fill('+421901234567');
+                  await wizard.locator('input[name="email"]').fill('test@example.invalid');
+                  await wizard.locator('input[type="checkbox"]').check();
+                  await wizard.getByRole('button',{name:'Poslať'}).click();
+                  await other.locator('[data-home-faq-contact-success]').waitFor({state:'visible'});
+                  if(!askedPayload||askedPayload.cta_source!=='aria_preview_chat_other'||
+                     askedPayload.raw_payload?.['Otázka návštevníka']!=='Aké sú možnosti pre dvoch psíkov?')
+                    throw new Error('Inline question must preserve CRM contact source after explicit consent');
                   await page.unroute('**/functions/v1/web-form-submit');
-                  await chat.getByRole('button', { name: 'Späť k otázkam' }).click();
-                  // APP-01: an embedded puppy checker must remain available.
-                  if (await chat.locator('[data-aria-chat-questions] [data-aria-chat-question]').count() !== 2 ||
-                      await chat.locator('[data-aria-chat-puppy-cta]').count() !== 0 ||
-                      !await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="puppy"]').isVisible())
-                    throw new Error('Puppy checker must be a pink FAQ, not a duplicate CTA');
-                  await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="puppy"]').click();
-                  const puppy = chat.locator('[data-aria-chat-puppy-check]');
-                  await puppy.waitFor({ state: 'visible' });
-                  if (!await puppy.getByRole('button', { name: 'Mám záujem' }).count())
-                    throw new Error('Puppy answer must also offer interest CTA');
-                  if (await page.getByRole('dialog', { name: 'Kontrola vhodnosti šteniatka' }).count())
-                    throw new Error('Puppy checker must stay inside Aria chat, not open a nested dialog');
-                  await puppy.getByRole('button', { name: /Pokračovať na očkovania/ }).click();
-                  const continueToContact = puppy.getByRole('button', { name: /Pokračovať na kontakt/ });
-                  if (await continueToContact.isEnabled())
-                    throw new Error('Puppy checker must not accept unconfirmed vaccinations');
-                  await puppy.getByRole('button', { name: 'Chcem sa informovať' }).click();
-                  const needsInfo = chat.locator('[data-aria-chat-puppy-contact]');
-                  await needsInfo.waitFor({ state: 'visible' });
-                  if (!await needsInfo.getByText(/zatiaľ nespĺňa všetky orientačné podmienky/).count())
-                    throw new Error('Unconfirmed puppy vaccines must offer individual consultation, not eligibility approval');
-                  await needsInfo.getByRole('button', { name: 'Späť ku kontrole' }).click();
-                  await puppy.locator('[data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
-                  for (const group of await puppy.locator('fieldset').all()) {
-                    await group.getByText('Áno', { exact: true }).click();
-                  }
-                  if (!await continueToContact.isEnabled())
-                    throw new Error('All three confirmed vaccines must permit contact');
-                  let puppyPosted = null;
-                  await page.route('**/functions/v1/web-form-submit', async route => {
-                    const request = route.request();
-                    const cors = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type' };
-                    if (request.method() === 'OPTIONS') {
-                      await route.fulfill({ status: 204, headers: cors });
-                      return;
-                    }
-                    puppyPosted = request.postDataJSON();
-                    await route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ ok: true }) });
-                  });
-                  await continueToContact.click();
-                  const puppyContact = chat.locator('[data-aria-chat-puppy-contact]');
-                  await puppyContact.waitFor({ state: 'visible' });
-                  if (puppyPosted !== null || !await puppyContact.locator('form').count())
-                    throw new Error('Eligibility alone must not send a lead; consented contact is required');
-                  await puppyContact.locator('input[name="meno"]').fill('Test Puppy Aria');
-                  await puppyContact.locator('input[name="plemeno"]').fill('Labrador');
-                  await puppyContact.locator('input[name="pes_meno"]').fill('Bella');
-                  await puppyContact.locator('input[name="telefon"]').fill('+421901234567');
-                  await puppyContact.locator('input[type="checkbox"]').check();
-                  await puppyContact.getByRole('button', { name: 'Odoslať záujem' }).click();
-                  await puppyContact.locator('[data-aria-chat-contact-success="true"]').waitFor({ state: 'visible' });
-                  if (!puppyPosted || puppyPosted.puppy_check?.age_months !== 4 ||
-                      !Object.values(puppyPosted.puppy_check?.vaccines || {}).every(value => value === 'yes') ||
-                      puppyPosted.puppy_check?.dog_name !== 'Bella' ||
-                      puppyPosted.puppy_check?.dog_breed !== 'Labrador' ||
-                      puppyPosted.interest_reason !== 'Mám záujem o škôlku pre šteniatko')
-                    throw new Error('Puppy enquiry must send the existing structured CRM payload after explicit consent');
-                  await page.unroute('**/functions/v1/web-form-submit');
-                  await puppyContact.getByRole('button', { name: 'Späť ku kontrole' }).click();
-                  await chat.locator('[data-aria-chat-puppy-check] [data-aria-puppy-step="vaccines"]').waitFor({ state: 'visible' });
-                  await chat.locator('[data-aria-chat-puppy-check]').getByRole('button', { name: 'Späť k otázkam' }).click();
-                  await chat.locator('[data-aria-chat-questions] [data-aria-chat-question="first_visit"]').click();
-                  await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
-                  await chat.locator('[data-aria-chat-show-questions]').click();
-                  const laterQuestions = chat.locator('[data-aria-chat-questions]');
-                  if (await laterQuestions.locator('[data-aria-chat-question]').count() !== 3 ||
-                      !await laterQuestions.locator('[data-aria-chat-question="location"]').count())
-                    throw new Error('Second wave must unlock after all first four FAQs');
-                  await laterQuestions.locator('[data-aria-chat-question="location"]').click();
-                  await chat.locator('[data-aria-typing="true"]').waitFor({ state: 'hidden', timeout: 10000 });
-                  await chat.locator('[data-aria-chat-followup] [data-aria-chat-interest-cta]').click();
-                  const interest = chat.locator('[data-aria-chat-interest]');
-                  await interest.locator('[data-lead-step-form]').waitFor({ state: 'visible' });
-                  if (await chat.locator('[data-aria-chat-history]').isVisible())
-                    throw new Error('Interest form must replace the chat log in the modal');
-                  const interestLayout = await chat.locator('[data-aria-chat-form-scroll]').evaluate(el=>({
-                    height:el.getBoundingClientRect().height,
-                    chatHeight:el.closest('[data-aria-chat]').getBoundingClientRect().height
-                  }));
-                  if (interestLayout.height < interestLayout.chatHeight - 115)
-                    throw new Error('Interest form must use all available body height: '+JSON.stringify(interestLayout));
-                  if (await interest.locator('input[name="zaujem"]').count() !== 3 ||
-                      !await interest.getByText('Krok 1 z 2').count())
-                    throw new Error('Interest must reuse the two-step lead form');
-                  // iOS/WebKit: the native radio is visually clipped (sr-only).
-                  // Click its visible card, not the hidden input with force.
+                  await interestCta.click();
+                  await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
+                  const interest=chat.locator('[data-aria-chat-interest]').last();
+                  await interest.locator('[data-lead-step-form]').waitFor({state:'visible'});
+                  if(!await chat.locator('[data-aria-chat-history]').isVisible()||
+                     await chat.locator('[data-aria-chat-form-scroll]').count()||
+                     !await interest.getByText('Krok 1 z 2').count())
+                    throw new Error('Interest form must remain in conversation and reuse original 2-step experience');
                   await interest.locator('label:has(input[name="zaujem"])').nth(1).click();
-                  if (!await interest.locator('input[name="zaujem"]').nth(1).isChecked())
-                    throw new Error('Visible interest card did not select the radio on ' + engine);
-                  await interest.getByRole('button', { name: 'Pokračovať' }).click();
-                  await interest.getByText('Krok 2 z 2').waitFor({ state: 'visible' });
+                  await interest.getByRole('button',{name:'Pokračovať'}).click();
+                  await interest.getByText('Krok 2 z 2').waitFor({state:'visible'});
                   await interest.locator('input[name="meno"]').fill('Test Aria');
                   await interest.locator('input[name="plemeno"]').fill('Írsky vlkodav');
                   await interest.locator('input[name="telefon"]').fill('+421901234567');
-                  await interest.locator('input[name="email"]').fill('test@example.invalid');
                   await interest.locator('input[type="checkbox"]').check();
-                  let posted = null;
-                  await page.route('**/functions/v1/web-form-submit', async route => {
-                    if (route.request().method() === 'OPTIONS') {
-                      await route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type' } });
-                      return;
-                    }
-                    posted = route.request().postDataJSON();
-                    await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true }) });
+                  let posted=null;
+                  await page.route('**/functions/v1/web-form-submit',async route=>{
+                    const cors={'access-control-allow-origin':'*','access-control-allow-methods':'POST, OPTIONS','access-control-allow-headers':'content-type'};
+                    if(route.request().method()==='OPTIONS'){await route.fulfill({status:204,headers:cors});return;}
+                    posted=route.request().postDataJSON();
+                    await route.fulfill({status:200,contentType:'application/json',headers:cors,body:JSON.stringify({ok:true})});
                   });
-                  await interest.getByRole('button', { name: 'Odoslať záujem' }).click();
-                  await interest.locator('[data-lead-step-success]').waitFor({ state: 'visible' });
-                  if (!posted || posted.interest_reason !== 'Mám záujem využívať škôlku pravidelne' ||
-                      posted.cta_source !== 'aria_preview_chat_interest')
-                    throw new Error('Two-step lead form must preserve selection and attribution');
+                  await interest.getByRole('button',{name:'Odoslať záujem'}).click();
+                  await interest.locator('[data-lead-step-success]').waitFor({state:'visible'});
+                  if(!posted||posted.cta_source!=='aria_preview_chat_interest')
+                    throw new Error('Inline interest must preserve the original CRM tracking source');
                   await page.unroute('**/functions/v1/web-form-submit');
-
                   await chat.getByRole('button', { name: 'Close' }).click();
                   await chat.waitFor({ state: 'hidden' });
                   if (await page.locator('html').evaluate(el => getComputedStyle(el).overflow === 'hidden'))

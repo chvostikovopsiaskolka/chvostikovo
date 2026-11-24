@@ -1,7 +1,7 @@
 import { currentSourceRef } from "@/lib/tracking-sanitization";
 import { HOME_FAQ_CONTACT_SOURCE, type PuppyCheckInput } from "@/lib/inquiry";
 import { useFormProgress } from "@/lib/form-progress";
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
@@ -236,9 +236,17 @@ export function ShortForm({
   );
 }
 
-/** Homepage-only question form; reuse contact transport without paid lead conversion. */
-export function HomeFaqContactForm() {
-  const source = HOME_FAQ_CONTACT_SOURCE;
+/** Shared two-step contact question for homepage and Aria, never a paid Lead conversion. */
+export function HomeFaqContactForm({
+  source = HOME_FAQ_CONTACT_SOURCE, compact = false, onStarted, onSent,
+}: {
+  source?: typeof HOME_FAQ_CONTACT_SOURCE | "aria_preview_chat_other" | "lead_landing_aria_chat_other";
+  compact?: boolean;
+  onStarted?: () => void;
+  onSent?: () => void;
+}) {
+  const isAria = source !== HOME_FAQ_CONTACT_SOURCE;
+  const formRef = useRef<HTMLFormElement>(null);
   const id = useId();
   const [step, setStep] = useState<1 | 2>(1);
   const [question, setQuestion] = useState("");
@@ -247,10 +255,21 @@ export function HomeFaqContactForm() {
   const [error, setError] = useState<string | null>(null);
   const inFlight = useRef(false);
   const started = useRef(false);
+  // Only the Aria internal scroll owner moves; the homepage/LEAD forms keep
+  // their existing page scroll and browser autofill behavior.
+  useEffect(() => {
+    if (!isAria) return;
+    const container = formRef.current?.closest<HTMLElement>("[data-aria-chat-history]");
+    if (container && formRef.current) {
+      container.scrollTop += formRef.current.getBoundingClientRect().top -
+        container.getBoundingClientRect().top - 12;
+    }
+  }, [step, isAria]);
   function trackStart() {
     if (started.current) return;
     started.current = true;
-    void trackCookielessInteraction("explore_daycare", source + "_started");
+    if (isAria) onStarted?.();
+    else void trackCookielessInteraction("explore_daycare", source + "_started");
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -289,8 +308,13 @@ export function HomeFaqContactForm() {
       }, attemptId);
       setSent(true);
       runFormTelemetry(() => {
-        void trackCookielessInteraction("explore_daycare", source + "_submitted", "sk", attemptId);
-        trackFaqContactSubmit(source);
+        if (isAria) {
+          trackAriaQuestionSubmit(source);
+          onSent?.();
+        } else {
+          void trackCookielessInteraction("explore_daycare", source + "_submitted", "sk", attemptId);
+          trackFaqContactSubmit(source);
+        }
       });
     } catch (cause) {
       const diagnostic = reportInquiryError(cause);
@@ -311,7 +335,9 @@ export function HomeFaqContactForm() {
     </div>
   );
   return (
-    <form data-home-faq-contact-form data-step={step} onSubmit={submit} className="space-y-4 text-left">
+    <form ref={formRef} data-home-faq-contact-form data-aria-contact-wizard={isAria ? "true" : undefined}
+      data-step={step} onSubmit={submit}
+      className={compact ? "space-y-3 text-left" : "space-y-4 text-left"}>
       <div>
         <p className="mb-2 text-xs font-semibold text-forest/75">Krok {step} z 2</p>
         <div role="progressbar" aria-label="Postup kontaktného formulára" aria-valuemin={1} aria-valuemax={2} aria-valuenow={step} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
@@ -321,7 +347,7 @@ export function HomeFaqContactForm() {
       <fieldset hidden={step !== 1} disabled={step !== 1} className="min-w-0 space-y-3">
         <label className="label-sm" htmlFor={id + "-question"}>Vaša otázka *</label>
         <textarea id={id + "-question"} name="otazka" value={question} onChange={event => { setQuestion(event.target.value); trackStart(); }}
-          rows={4} required minLength={5} maxLength={600} className="field w-full resize-y" placeholder="Napíšte nám, čo vás zaujíma…" />
+          rows={compact ? 3 : 4} required minLength={5} maxLength={600} className="field w-full resize-y" placeholder="Napíšte nám, čo vás zaujíma…" />
         <button type="submit" className="btn-coral min-h-12 w-full px-4 py-3 font-bold">Pokračovať</button>
       </fieldset>
       <fieldset hidden={step !== 2} disabled={step !== 2 || loading} className="min-w-0 space-y-3">

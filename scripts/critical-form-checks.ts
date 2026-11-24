@@ -139,17 +139,48 @@ assert(ariaLandingTracking.includes('"lead_landing_first_visit_details"') &&
   "Campaign first-visit explanation and three-step shortcut must remain tracked");
 const guidedLeadTracking = readFileSync(new URL("../src/components/site/LeadStepForm.tsx", import.meta.url), "utf8");
 const ariaChatMobile = readFileSync(new URL("../src/components/site/AriaGuidedChat.tsx", import.meta.url), "utf8");
-assert(ariaChatMobile.includes("primaryQuestionIds") &&
-  ariaChatMobile.includes('data-aria-chat-questions') &&
-  ariaChatMobile.includes('data-aria-chat-show-questions') &&
-  ariaChatMobile.includes('lastReply.questionId === "requirements"') &&
-  ariaChatMobile.includes('min-h-0 flex-1 overflow-y-auto') &&
+assert(ariaChatMobile.includes('const visibleQuestions = unanswered.slice(0, 4)') &&
+  ariaChatMobile.includes('data-aria-chat-followup-prompt') &&
+  ariaChatMobile.includes('data-aria-chat-inline') &&
+  ariaChatMobile.includes('data-aria-chat-message-id') &&
+  ariaChatMobile.includes('chatCompact') &&
   ariaChatMobile.includes('data-lead-form-shell') &&
-  ariaChatMobile.includes('data-lead-form-intro') &&
+  ariaChatMobile.includes('HomeFaqContactForm source=') &&
+  ariaChatMobile.includes('Máš inú otázku?') &&
   ariaChatMobile.includes('dockless = false') &&
-  !ariaChatMobile.includes('data-aria-chat-composer') &&
-  !ariaChatMobile.includes('max-h-[61%]'),
-  "APP-01: four progressive FAQ bubbles, readable replies and full-height contact forms must be preserved.");
+  !ariaChatMobile.includes('data-aria-chat-show-questions') &&
+  !ariaChatMobile.includes('data-aria-chat-form-scroll'),
+  "APP-01: four always-visible choices, inline forms, puppy and mobile typewriter layout must be preserved.");
+
+// Approved 4 + 4 content stays confined to the TEST Aria chatbot. The
+// question IDs are also stable analytics event suffixes.
+const approvedTitles = [
+  "Aký je cenník škôlky?", "Aké sú podmienky prijatia?",
+  "Kto sa postará o psíka?", "Prijímate aj šteniatka?",
+  "Kde sa škôlka nachádza?", "Aké priestory má škôlka?",
+  "Ako prebieha prvá návšteva?", "Ako si rezervujem miesto v škôlke?",
+];
+assert(approvedTitles.every(title => ariaChatMobile.includes('title: "' + title + '"')) &&
+  ariaChatMobile.includes('id: "reservation"') &&
+  ariaChatMobile.includes("**do nedele 20:00**") &&
+  ariaChatMobile.includes("**vieme sa dohodnúť aj individuálne**") &&
+  !ariaChatMobile.includes("deň vopred do 19:00") &&
+  ariaChatMobile.includes('if (question.id === "puppy") track("puppy_check_open")') &&
+  ariaChatMobile.includes('track("question_" + question.id)') &&
+  ariaChatMobile.includes('unanswered.slice(0, 4)'),
+  "APP-01 TEST Aria must preserve ordered FAQ catalogue, refreshed choices and analytics.");
+
+const puppyChatSource = readFileSync(new URL("../src/components/site/AriaPuppyChecker.tsx", import.meta.url), "utf8");
+assert(puppyChatSource.includes('if (chatCompact) return (') &&
+  puppyChatSource.includes('data-aria-puppy-step="single"') &&
+  puppyChatSource.includes('Zistite, či vaše šteniatko spĺňa podmienky prijatia') &&
+  puppyChatSource.includes('onInterest(snapshot())'),
+  "APP-01 chat-only puppy checker must reuse existing age and vaccine snapshot.");
+const sharedFaqForm = readFileSync(new URL("../src/components/site/Forms.tsx", import.meta.url), "utf8");
+assert(sharedFaqForm.includes('source = HOME_FAQ_CONTACT_SOURCE') &&
+  sharedFaqForm.includes('data-aria-contact-wizard') &&
+  sharedFaqForm.includes('trackAriaQuestionSubmit(source)'),
+  "APP-01 Aria contact must reuse homepage question-first form with own analytics.");
 
 const successBoundary = guidedLeadTracking.indexOf("const result = await submitInquiry(");
 const conversionBoundaries = [
