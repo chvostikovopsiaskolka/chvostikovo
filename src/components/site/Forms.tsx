@@ -366,11 +366,12 @@ function DogBinaryChoice({
               type="radio"
               name={name}
               value={option}
+              aria-label={option === "Suka" ? "Fena" : option}
               required
               className="peer sr-only"
             />
             <span className="flex min-h-11 items-center justify-center rounded-[0.85rem] border border-border bg-white px-2 py-2.5 text-center text-base font-semibold text-forest transition-colors peer-checked:border-coral peer-checked:bg-secondary/55">
-              {option}
+              {option === "Suka" ? "Fena" : option}
             </span>
           </label>
         ))}
