@@ -1702,7 +1702,7 @@ if (!bellaris && brandPreviewCandidate) {
                 const r = el.getBoundingClientRect(), card = el.closest('article')?.getBoundingClientRect();
                 return { text: el.textContent.trim(), fits: el.scrollWidth <= el.clientWidth + 2,
                   row: r.height <= parseFloat(getComputedStyle(el).lineHeight) * 1.8,
-                  inside: !!card && r.bottom <= card.bottom + 2 && r.top >= card.top };
+                  inside: !!card && (location.pathname.replace(/\/$/,'')==='/psia-skolka-kosice' ? Math.abs(r.top+r.height/2-card.bottom)<=2 : r.bottom <= card.bottom + 2 && r.top >= card.top) };
               });
               if (labelShape.text !== 'Najvýhodnejšie. Ušetríte 50 €' || !labelShape.fits || !labelShape.row || !labelShape.inside)
                 throw new Error('Permanentka value label must fit on one bottom line at ' + width + ': ' + JSON.stringify(labelShape));
