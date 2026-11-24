@@ -47,6 +47,12 @@ For the customer portal, the production solution confirmed working on 2026-09-15
 - Verify the served artifact and relevant user flow before saying LIVE. Distinguish automated/browser checks from physical-device observations. Finish with outcome, commit/version, tests, deployment, rollback and unverified limits.
 - Update the existing relevant wiki section and log, merge its checked documentation change to wiki `main` and read it back. Obsidian is a synchronized copy, not a competing source. Never copy private wiki contents, credentials or customer data into this repository. A link does not grant access to the private wiki; report missing access.
 
+## Public website release efficiency — owner decision 24 November 2026
+
+- For the public marketing website only, test the final candidate once before checked merge. Do not run the new assertions against the old production version. Both Chromium and WebKit remain required; they may run concurrently in isolated processes/reports, with a failure in either engine failing the job.
+- The owner performs post-publication visual acceptance on his actual device. For ordinary web UI/content releases, the assistant confirms the successful GitHub Pages deployment of the intended commit and reports what the candidate tests actually verified; do not repeat a whole browser suite after publication or claim physical-device visual approval. The scheduled daily and manual technical browser monitoring remain independent. Security-critical changes and explicit incident investigations retain their necessary LIVE verification. This narrower handoff supersedes any general requirement for duplicate post-deploy UI testing, not the requirement to verify successful publication.
+- Responsive form cards: use the available content width at desktop breakpoints, retain sensible mobile insets and test real bounds/no overflow at both desktop and narrow mobile widths. Reuse approved components; do not impose a mobile-only maximum width at desktop.
+
 ## Production paths
 
 - Public website: this repository, `main` -> existing GitHub Pages workflow -> https://chvostikovo.sk.

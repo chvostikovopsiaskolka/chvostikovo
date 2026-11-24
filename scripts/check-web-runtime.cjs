@@ -12,6 +12,15 @@ fs.mkdirSync(out, { recursive: true });
 const results = [];
 const failures = [];
 
+// Optional independent engine runs. Default preserves the complete sequential
+// suite for manual callers; invalid engine selection must fail closed.
+const engineSelection = process.env.RUNTIME_ENGINE || "all";
+const engines = [["chromium", chromium], ["webkit", webkit]];
+if (!["all", "chromium", "webkit"].includes(engineSelection)) {
+  throw new Error("Invalid RUNTIME_ENGINE: " + engineSelection);
+}
+const selectedEngines = engines.filter(([name]) => engineSelection === "all" || name === engineSelection);
+
 async function assertLeadContactIntro(form) {
   // Wait for the real React/CSS transition, especially on Safari WebKit.
   await form.getByRole('heading',{name:'Kontaktné údaje',exact:true}).waitFor({state:'visible',timeout:5000});
@@ -40,7 +49,7 @@ if (!bellaris && brandPreviewCandidate) {
 }
 
 (async () => {
-  for (const [engine, browserType] of [['chromium', chromium], ['webkit', webkit]]) {
+  for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
     for (const restricted of [false, true]) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
