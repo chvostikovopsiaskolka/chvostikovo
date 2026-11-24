@@ -547,7 +547,6 @@ export function AriaPreviewPage() {
                     className="inline-flex min-h-[46px] w-full items-center justify-center whitespace-nowrap rounded-full border px-2.5 py-2 text-center font-display text-[clamp(11px,3.35vw,15px)] font-bold leading-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">
                     Chcem sa informovať o škôlke
                   </button>
-                  <p data-lead-hero-hours className="mx-auto mt-2 w-fit rounded-full bg-[#ffe7bd] px-3 py-1 text-[11px] leading-snug text-forest/85">Po–Pi 7:00–17:00 · Poľská 6, Košice</p>
                 </div>
               )}
             </div>
