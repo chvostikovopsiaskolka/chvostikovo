@@ -643,3 +643,28 @@ assert(ariaLandingTracking.includes("leadChat={isLiveLead}") && ariaDockTracking
   assert(edgeSource.includes("event_source: encodeAriaObservation(aria)"), "Aria uses a versioned event envelope in the existing source column");
   assert(!edgeSource.includes("JSON.stringify({ ...aria, path:"), "Aria must not require new DB columns");
 }
+
+{
+  const source=readFileSync("supabase/functions/website-landing-event/index.ts","utf8");
+  let handler: ((request: Request) => Promise<Response>) | undefined;
+  const records: Record<string, unknown>[]=[];
+  const program=transpileModule(source,{compilerOptions:{target:ScriptTarget.ES2022,module:ModuleKind.CommonJS}}).outputText;
+  runInNewContext(program,{
+    Deno:{env:{get:(key:string)=>key==="SUPABASE_URL"?"https://fixture.invalid":"isolated-fixture"},serve:(fn:typeof handler)=>{handler=fn}},
+    Request,Response,Headers,URL,console,
+    fetch:async (url:string,init:RequestInit)=>{assert(url==="https://fixture.invalid/rest/v1/website_interaction_events","Only existing telemetry table may be written");records.push(JSON.parse(String(init.body)));return new Response(null,{status:201})}
+  });
+  assert(handler,"Aria collector mock registered");
+  const send=(body:unknown)=>handler!(new Request("https://fixture.invalid",{method:"POST",headers:{origin:"https://chvostikovo.sk","user-agent":"Mozilla/5.0","content-type":"application/json"},body:JSON.stringify(body)}));
+  const chat_id="11111111-1111-4111-8111-111111111111",visit_id="22222222-2222-4222-8222-222222222222";
+  const payload={path:"/psia-skolka-kosice/",event_name:"aria_chat_event",event_source:"lead_landing_aria_chat_question_pricing",aria_environment:"qa",aria:{chat_id,visit_id,sequence:2,action:"question",detail:"pricing",form_attempt_id:null},utm_source:"qa"};
+  assert((await send(payload)).status===201,"Validated QA detail accepted by collector");
+  assert((await send({...payload,aria:{...payload.aria,sequence:3}})).status===201,"Repeated FAQ receives new sequence");
+  assert(records.length===2&&records[0]?.event_source!==records[1]?.event_source,"Repeated questions distinct in existing DB source");
+  assert(String(records[0]?.event_source).includes("|q|"),"QA envelope distinct");
+  assert(!("aria_chat_id" in records[0]!) && !("utm_source" in records[0]!),"No schema-dependent or raw UTM fields");
+  assert((await send({...payload,aria:{...payload.aria,detail:"free text"}})).status===400,"Unknown question rejected");
+  assert((await send({...payload,aria:{...payload.aria,phone:"synthetic"}})).status===400,"Unknown payload property rejected");
+  assert((await send({path:"/psia-skolka-kosice/",event_name:"form_submit",event_source:"lead_landing_aria_chat_interest",attempt_id:chat_id})).status===201,"Existing ordinary form event still accepted");
+  assert(records[2]?.event_name==="form_submit" && records[2]?.attempt_id===chat_id,"Ordinary form event preserves attempt ID and type");
+}

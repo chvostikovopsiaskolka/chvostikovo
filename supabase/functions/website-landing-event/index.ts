@@ -289,9 +289,6 @@ function encodeAriaObservation(a: NonNullable<ReturnType<typeof parseAriaEvent>>
     a.aria_chat_id, a.aria_visit_id, a.aria_sequence, a.aria_action,
     a.aria_detail || "-", a.aria_form_attempt_id || "-"].join("|");
 }
-function safeAriaTag(value: unknown) {
-  return typeof value === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(value) && !/\d{7,}/.test(value) ? value : null;
-}
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin") || "";
@@ -368,8 +365,7 @@ Deno.serve(async (req: Request) => {
           headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
           body: JSON.stringify({ path: "/psia-skolka-kosice/", language: "sk", event_name: eventName,
             // Versioned envelope for the new event type only; existing schema and report.
-            event_source: encodeAriaObservation(aria), source_channel: sourceChannel, utm_source: safeAriaTag(input.utm_source),
-            utm_medium: safeAriaTag(input.utm_medium), has_fbclid: input.has_fbclid === true,
+            event_source: encodeAriaObservation(aria), source_channel: sourceChannel, has_fbclid: input.has_fbclid === true,
             browser_context, browser_family, device_type, navigation_type: navigationType }),
         });
         if (!insert.ok && insert.status !== 409) return response(origin, 500, { ok: false, error: "aria_insert_failed" });
