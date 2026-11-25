@@ -129,6 +129,13 @@ export function BlogArticle({ article }: { article: BlogArticleData }) {
                     {section.paragraphs.map((paragraph, paragraphIndex) => (
                       <Fragment key={paragraph}>
                         <p className="text-base leading-8 text-forest/85 sm:text-lg">{rehabGuide && index===5 && article.productPage ? <>{emphasizedText(paragraph.split("Target na cvičenie pre psov")[0] ?? "")}<a href={article.productPage.href} onClick={trackProductClick} className="font-semibold text-coral-dark underline underline-offset-4">Target na cvičenie pre psov</a>{emphasizedText(paragraph.split("Target na cvičenie pre psov")[1] ?? "")}</> : emphasizedText(paragraph)}</p>
+                        {rehabGuide && index===0 && paragraphIndex===section.paragraphs.length-1 && article.trainingGallery && (
+                          <div data-blog-training-gallery className="grid grid-cols-2 gap-2 sm:gap-4">
+                            {article.trainingGallery.map(photo=><figure key={photo.src} className="min-w-0 overflow-hidden rounded-xl">
+                              <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" width={1056} height={1408} className="block aspect-[3/4] h-auto w-full object-contain"/>
+                            </figure>)}
+                          </div>
+                        )}
                         {rehabGuide && index===4 && paragraphIndex===0 && article.variantGallery && (
                           <div data-blog-target-gallery className="grid grid-cols-3 gap-2 sm:gap-4">
                             {article.variantGallery.map(photo=><figure key={photo.label} className="relative min-w-0 overflow-hidden rounded-xl">

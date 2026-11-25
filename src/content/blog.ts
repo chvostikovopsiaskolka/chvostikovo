@@ -5,6 +5,7 @@ import workdayCoverPhoto from "@/assets/blog/blog-workday-cover.webp";
 import standMia from "@/assets/products/stand-mia.avif";
 import standDark from "@/assets/products/stand-cori.avif";
 import targetLargeDog from "@/assets/products/target-large-dog.jpeg";
+import targetSmallDog from "@/assets/products/target-small-dog.jpeg";
 import targetLargeDetail from "@/assets/products/target-large-detail.jpeg";
 import suitabilityCoverPhoto from "@/assets/blog/blog-suitability-cover.webp";
 import puppyPreviewPhoto from "@/assets/blog/blog-puppy-card.webp";
@@ -33,6 +34,7 @@ export type BlogArticleData = {
   imageCaption?: string;
   sources?: Array<{ label: string; href: string }>;
   variantGallery?: Array<{ src: string; alt: string; label: string }>;
+  trainingGallery?: Array<{ src: string; alt: string }>;
 };
 
 export const blogArticles: BlogArticleData[] = [
@@ -365,6 +367,10 @@ export const blogArticles: BlogArticleData[] = [
 ,
   "image": { src: targetLargeProduct, alt: "Drevený target 40 × 20 cm s protišmykovým povrchom", width: 1152, height: 1536 },
   "secondImage": { src: targetSmallProduct, alt: "Štvorcový target 25 × 25 cm", width: 1152, height: 1536 },
+  "trainingGallery": [
+    { src: targetLargeDog, alt: "Psík s prednými labkami na veľkom drevenom targete pri tréningu" },
+    { src: targetSmallDog, alt: "Psík s prednými labkami na malom štvorcovom targete" }
+  ],
   "variantGallery": [
     { src: targetLargeProduct, alt: "Veľký drevený target", label: "40 × 20 cm" },
     { src: targetMediumPreview, alt: "Stredný drevený target", label: "30 × 15 cm" },

@@ -290,7 +290,7 @@ console.log("[seo] PASS: product sitemap + canonical + original photos + recipro
   const html = fs.readFileSync("dist/client"+p+"/index.html","utf8");
   assert(sitemap.includes("<loc>https://chvostikovo.sk"+p+"/</loc>"),"Rehab sitemap missing");
   assert(pagesConfig.includes('{ path: "'+p+'" }'),"Rehab prerender config missing");
-  for (const token of ["BlogPosting","https://chvostikovo.sk"+p+"/","data-blog-target-gallery","data-blog-target-inquiry","40 × 20 cm","30 × 15 cm","25 × 25 cm","data-product-inquiry-steps"]) assert(html.includes(token),"Rehab prerender missing "+token);
+  for (const token of ["BlogPosting","https://chvostikovo.sk"+p+"/","data-blog-target-gallery","data-blog-training-gallery","target-large-dog-","target-small-dog-","data-blog-target-inquiry","40 × 20 cm","30 × 15 cm","25 × 25 cm","data-product-inquiry-steps"]) assert(html.includes(token),"Rehab prerender missing "+token);
   for (const product of ["target-na-cvicenie-pre-psov","stojan-na-misky-pre-psa"]) assert(fs.readFileSync("dist/client/"+product+"/index.html","utf8").includes(p+"/"),"Missing product link to rehab guide");
   assert(blogIndex.includes(p+"/"),"Rehab missing from blog index");
 }
