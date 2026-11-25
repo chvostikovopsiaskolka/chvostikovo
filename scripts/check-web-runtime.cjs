@@ -203,7 +203,7 @@ async function assertCampaignContentFlow(page) {
     structure.faq.join('|')!=='eligibility|supervision|first-visit|first-group|taxi|puppies'||structure.forms!==2||structure.benefits!==3||structure.requirements!==4||
     structure.carousel!==1||!structure.checker||structure.robots!=='noindex, follow'||!structure.separated||structure.daily!=='20 € / deň'||
     structure.single.includes('10 vstupov')||!structure.single.includes('Pondelok – piatok'))throw new Error('Campaign content structure: '+JSON.stringify(structure));
-  for(const [width,height] of [[375,667],[390,844],[768,1024],[1024,768],[1440,900],[1864,891]]) {
+  for(const [width,height] of [[320,720],[375,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1864,891]]) {
     await page.setViewportSize({width,height});
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
     await page.waitForTimeout(160);
@@ -215,7 +215,7 @@ async function assertCampaignContentFlow(page) {
       const elements=[title,pills,photos,cta,proof];
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
         visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
-        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());return photos.left>title.right&&Math.abs(photos.top-title.top)<2&&photos.height>=410&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
+        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());const service=box('[data-aria-service-group]');const seam=(images[0].bottom+images[1].top)/2;return photos.left>title.right&&Math.abs(photos.top-service.top)<2&&Math.abs(images[1].bottom-cta.bottom)<2&&Math.abs((title.top+title.bottom)/2-seam)<=36&&service.bottom<title.top&&title.bottom<=pills.top&&pills.bottom<=cta.top&&photos.height>=448&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
         mobileOrder:(()=>{if(innerWidth>=640)return true;const service=box('[data-aria-service-group]');return service.bottom<=title.top&&title.bottom<=pills.top&&pills.bottom<=photos.top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=10;})(),
         admissionClear:(()=>{const h=box('#lead-requirements h2');return [...document.querySelectorAll('#lead-requirements > [aria-hidden="true"] svg')].every(e=>{const p=e.getBoundingClientRect();return p.right<=h.left||p.left>=h.right||p.bottom<=h.top||p.top>=h.bottom;});})(),
         galleryEdge:(()=>{const r=box('#lead-photo-carousel [data-gesture-track="photos"]');return Math.abs(r.left)<2&&Math.abs(r.right-document.documentElement.offsetWidth)<2;})(),
@@ -228,6 +228,11 @@ async function assertCampaignContentFlow(page) {
         pillCount:visiblePills.length,pillBg:visiblePills.every(el=>getComputedStyle(el).backgroundColor==='rgb(248, 221, 235)'),
         pillRows:new Set(visiblePills.map(el=>Math.round(el.getBoundingClientRect().top))).size,
         actionBg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).backgroundColor,
+        actionFg:getComputedStyle(document.querySelector('[data-aria-lead-hero-cta]')).color,
+        pillBold:visiblePills.every(el=>Number(getComputedStyle(el).fontWeight)>=700),
+        pillGap:parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pills]')).columnGap),
+        photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 0%'),
+        reviewGap:parseFloat(getComputedStyle(document.querySelector('[data-aria-lead-review-spacing]')).marginTop),
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
         ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width,
         widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return dock.height<=1&&Math.abs(face.width-(innerWidth>=640?104:92))<2&&
@@ -235,7 +240,7 @@ async function assertCampaignContentFlow(page) {
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation]').length===0&&document.querySelectorAll('[data-aria-chat-trigger]').length===1&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.ctaHeight<44||
+    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(184, 91, 0)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||fold.reviewGap<24&&width<640||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
