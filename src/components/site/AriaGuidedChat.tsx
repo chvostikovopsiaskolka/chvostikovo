@@ -90,7 +90,7 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
   const [answered, setAnswered] = useState<string[]>([]);
   const [typingId, setTypingId] = useState<number | null>(null);
   const [typedLength, setTypedLength] = useState(0);
-  const introText = "Haf! 🐾 Ahoj, ja som Aria. Čo ťa zaujíma o našej škôlke?";
+  const introText = "Ahoj, volám sa Aria. Čo ťa zaujíma o našej škôlke? Haf! 🐾";
   const [introLength, setIntroLength] = useState(0);
   const [introComposing, setIntroComposing] = useState(true);
   const autoPricingAsked = useRef(false);

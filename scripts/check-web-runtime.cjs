@@ -197,6 +197,10 @@ async function assertPaidAriaChat(page, {visualOnly=false}={}) {
     if(await trigger.evaluate(el=>getComputedStyle(el).backgroundColor)!=='rgba(0, 0, 0, 0)')throw new Error('Expanded portrait inherited a colored navigation background');
     await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'visible'});
     if(await chat.locator('[data-aria-chat-question]').count()!==4)throw new Error('Paid chat must reuse four FAQ choices');
+    if(brandPreviewCandidate){
+      const greeting=(await chat.locator('[id$="-intro"] > [aria-hidden="true"]').innerText()).replace(/\s+/g,' ').trim();
+      if(!greeting.includes('Ahoj, volám sa Aria.')||!greeting.endsWith('Haf! 🐾'))throw new Error('Chat greeting must introduce Aria and finish with Haf and paws');
+    }
     await chat.locator('[data-aria-chat-question="pricing"]').click();
     const typing=chat.locator('[data-aria-typing="true"]');
     await typing.locator('[data-aria-composing]').waitFor({state:'visible',timeout:2500});
@@ -310,7 +314,7 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
       const elements=[title,pills,photos,cta,proof];
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
         visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
-        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());const service=box('[data-aria-service-group]');const seam=(images[0].bottom+images[1].top)/2;return photos.left>title.right&&title.top-service.bottom>=8&&title.top-service.bottom<=20&&Math.abs(images[1].bottom-cta.bottom)<2&&Math.abs((title.top+title.bottom)/2-seam)<=36&&service.bottom<title.top&&title.bottom<=pills.top&&pills.bottom<=cta.top&&photos.height>=448&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
+        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());const service=box('[data-aria-service-group]');const seam=(images[0].bottom+images[1].top)/2;return photos.left>title.right&&title.top-service.bottom>=8&&title.top-service.bottom<=20&&cta.top-pills.bottom>=10&&cta.top-pills.bottom<=24&&Math.abs((title.top+title.bottom)/2-seam)<=36&&service.bottom<title.top&&title.bottom<=pills.top&&pills.bottom<=cta.top&&photos.height>=448&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
         mobileOrder:(()=>{if(innerWidth>=640)return true;const service=box('[data-aria-service-group]');return service.bottom<=title.top&&title.bottom<=pills.top&&pills.bottom<=photos.top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=10;})(),
         admissionClear:(()=>{const h=box('#lead-requirements h2');return [...document.querySelectorAll('#lead-requirements > [aria-hidden="true"] svg')].every(e=>{const p=e.getBoundingClientRect();return p.right<=h.left||p.left>=h.right||p.bottom<=h.top||p.top>=h.bottom;});})(),
         galleryEdge:(()=>{const r=box('#lead-photo-carousel [data-gesture-track="photos"]');return Math.abs(r.left)<2&&Math.abs(r.right-document.documentElement.offsetWidth)<2;})(),

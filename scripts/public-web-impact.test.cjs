@@ -28,3 +28,15 @@ test('CI harness changes exercise the visual branch in both engines without unre
  const files=['scripts/public-web-impact.cjs','scripts/public-web-impact.test.cjs','scripts/check-web-runtime.cjs','.github/workflows/check-form-funnel.yml','.github/workflows/public-web-runtime.yml'];
  assert.equal(selectScope(files),'aria-visual');assert.equal(formChecksRequired(files),false);
 });
+
+test('display greeting literal alone is visual; JS/import/form changes cannot use the exception',()=>{
+ const copyBefore='function Chat(){\n  const introText = "Haf! Old greeting";\n  submitForm();\n}';
+ const copyAfter=copyBefore.replace('Haf! Old greeting','Ahoj, volám sa Aria. Haf! 🐾');
+ const file='src/components/site/AriaGuidedChat.tsx';
+ assert.equal(selectScope([file],{copyBefore,copyAfter}),'aria-visual');
+ assert.equal(formChecksRequired([file],{copyBefore,copyAfter}),false);
+ for(const bad of [copyAfter.replace('submitForm()','otherHandler()'),copyAfter+'\nimport "other";',copyAfter.replace('"Ahoj, volám sa Aria. Haf! 🐾"','sendForm()')]){
+   assert.equal(selectScope([file],{copyBefore,copyAfter:bad}),'aria');
+   assert.equal(formChecksRequired([file],{copyBefore,copyAfter:bad}),true);
+ }
+});
