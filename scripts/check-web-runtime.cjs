@@ -633,7 +633,7 @@ async function assertHomeDockActivePink(page,en,section='top') {
     const expected=section==='top'?(en?'/en/dog-daycare-kosice':'/'):null;
     return !!active&&(expected?href.pathname.replace(/\/$/,'')===expected.replace(/\/$/,'')&&!href.hash:href.hash==='#'+section)
       &&getComputedStyle(active).backgroundColor==='rgb(248, 221, 236)';
-  },{en,section});
+  },{en,section},{timeout:5000});
 }
 async function assertApplicationPreview(page,en) {
   const form=page.locator('[data-home-friendship-form] form[data-application-form]');
@@ -764,6 +764,8 @@ async function assertBilingualNavigation(browser,engine) {
       const priceId=en?'pricing':'cennik';
       await page.locator('[data-desktop-home-dock] .mobile-dock-item[href$="#'+priceId+'"]').click();
       await assertHomeDockActivePink(page,en,priceId);
+      await page.locator('[data-desktop-home-dock] .mobile-dock-item[href$="#'+priceId+'"]').hover();
+      await assertHomeDockActivePink(page,en,priceId);
       const why=page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut]');
       await why.click();
       await page.waitForFunction(id=>Math.abs(document.getElementById(id).getBoundingClientRect().top-8)<16,en?'en-benefits':'preco-chvostikovo');
@@ -775,6 +777,7 @@ async function assertBilingualNavigation(browser,engine) {
 (async () => {
   for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
+    try {
     if (!bellaris && brandPreviewCandidate && runtimeScope==='full') { await assertFooterMapGeometry(browser, engine); await assertBilingualNavigation(browser,engine); }
     for (const restricted of (runtimeScope==='aria-visual'?[false]:[false,true])) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -4444,7 +4447,7 @@ async function assertBilingualNavigation(browser,engine) {
       }
       await context.close();
     }
-    await browser.close();
+    } finally { await browser.close(); }
   }
   fs.writeFileSync(path.join(out, 'results.json'), JSON.stringify({ checkedAt: new Date().toISOString(), base, results }, null, 2));
   if (failures.length) process.exitCode = 1;

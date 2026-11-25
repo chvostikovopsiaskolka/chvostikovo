@@ -1863,7 +1863,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active,
   .mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active:hover { background: #f8ddec; }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-item.mobile-dock-apply { background: #ffa414; color: #fff; font-weight: 750; }
-  .mobile-dock[data-desktop-home-dock] .mobile-dock-item:not(.mobile-dock-apply):hover, .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links a:hover, .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-phone:hover { background: var(--peach); }
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-item:not(.mobile-dock-apply):not(.is-active):hover, .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links a:hover, .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-phone:hover { background: var(--peach); }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-menu { display: flex; grid-column: 1 / -1; grid-row: 1; justify-self: center; justify-content: center; align-items: center; gap: 8px; min-width: 0; width: max-content; }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links { display: flex; align-items: center; gap: 2px; }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links a, .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-phone { display: flex; flex-direction: row; gap: 6px; align-items: center; justify-content: center; min-height: 44px; border-radius: 12px; padding: 3px 6px; color: var(--forest-deep); text-decoration: none; white-space: nowrap; font-family: var(--font-display); font-size: 11px; font-weight: 650; }
