@@ -70,6 +70,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify impact selection guards
+        run: node --test scripts/public-web-impact.test.cjs
       - name: Select affected candidate routes
         if: github.event_name == 'pull_request'
         env:
