@@ -607,7 +607,7 @@ async function assertCompactHomeMenu(page,en) {
   await menu.waitFor({state:'visible'});
   const state=await menu.evaluate(el=>{
     const bar=el.closest('.mobile-dock-bar'),nav=bar.closest('.mobile-dock'),p=el.getBoundingClientRect(),d=bar.getBoundingClientRect();
-    const links=[...el.querySelectorAll('.mobile-dock-compact-links a')];
+    const links=[...el.querySelectorAll('.mobile-dock-compact-links a')].filter(a=>a.getClientRects().length);
     const phone=el.querySelector('[data-home-dock-phone]');
     return {hrefs:links.map(a=>new URL(a.href).hash),labels:links.map(a=>a.textContent.trim()),
       targets:[...links,phone,...el.querySelectorAll('[data-language-switch] a')].every(a=>a&&a.getBoundingClientRect().height>=44&&a.scrollWidth<=a.clientWidth+1),
@@ -617,7 +617,10 @@ async function assertCompactHomeMenu(page,en) {
       dialog:!!nav.querySelector('button[aria-haspopup="dialog"]'),reserve:parseFloat(getComputedStyle(document.body).paddingBottom)};
   });
   const main=en?['Home','About','Prices','Rules','Apply']:['Domov','O nás','Cenník','Podmienky','Produkty','Prihláška'];
-  if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>60||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>46||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  if(await menu.locator('[data-desktop-only-shortcut]').isVisible())throw new Error('Why shortcut must remain desktop-only');
+  const crop=await page.locator('[data-home-hero-photo] img').evaluateAll(imgs=>imgs.map(img=>getComputedStyle(img).objectPosition));
+  if(crop.join('|')!=='50% 0%|50% 50%')throw new Error('Only the collies photo should use the top-biased crop: '+crop.join('|'));
   if(await page.locator('[data-home-hero-phone]').count())throw new Error('Duplicate mobile Hero phone');
   if(!await page.evaluate(()=>!!(document.querySelector('[data-home-puppy-checker]')?.compareDocumentPosition(document.querySelector('[data-home-pricing-columns]'))&Node.DOCUMENT_POSITION_FOLLOWING)))throw new Error('Puppy checker must precede pricing');
 }
@@ -735,14 +738,17 @@ async function assertBilingualNavigation(browser,engine) {
         const geometry=await dock.evaluate(el=>{
           const bar=el.querySelector('.mobile-dock-bar'),r=bar.getBoundingClientRect(),slot=el.getBoundingClientRect(),logo=el.querySelector('[data-desktop-dock-logo]'),links=[...el.querySelectorAll('a,button')].filter(x=>x.getClientRects().length);
           const boxes=links.map(x=>x.getBoundingClientRect()), upper=el.querySelector('[data-home-menu]').getBoundingClientRect(), logoBox=logo.getBoundingClientRect(), lower=[...bar.querySelectorAll('.mobile-dock-item')].map(x=>x.getBoundingClientRect()), hero=el.previousElementSibling?.getBoundingClientRect();
-          return {fits:r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&bar.scrollWidth<=bar.clientWidth+1&&r.bottom<=slot.bottom+1,targets:boxes.every(b=>b.height>=44),separate:boxes.every((b,i)=>boxes.every((a,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1)),header:!!document.querySelector('header.fixed'),logo:logoBox.width>0&&logoBox.right<=upper.left+1&&logoBox.bottom<=lower[0].top+1,rows:lower.length>=5&&lower.every(b=>b.top>=upper.bottom-1&&Math.abs(b.top-lower[0].top)<2),slot:el.previousElementSibling?.id==='top'&&slot.height>=108&&r.top>=hero.bottom-1};
+          return {centered:Math.abs((upper.left+upper.right-r.left-r.right)/2)<2,width:r.width<=980.5,shortcut:el.querySelector('[data-desktop-only-shortcut]')?.getBoundingClientRect().width>0,upperLinks:[...upper.querySelectorAll('.mobile-dock-compact-links a')].map(a=>new URL(a.href).hash),fits:r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&bar.scrollWidth<=bar.clientWidth+1&&r.bottom<=slot.bottom+1,targets:boxes.every(b=>b.height>=44),separate:boxes.every((b,i)=>boxes.every((a,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1)),header:!!document.querySelector('header.fixed'),logo:logoBox.width>0&&logoBox.right<=upper.left+1&&logoBox.bottom<=lower[0].top+1,rows:lower.length>=5&&lower.every(b=>b.top>=upper.bottom-1&&Math.abs(b.top-lower[0].top)<2),slot:el.previousElementSibling?.id==='top'&&slot.height>=108&&r.top>=hero.bottom-1};
         });
-        if(!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
+        if(!geometry.centered||!geometry.width||!geometry.shortcut||geometry.upperLinks.join('|')!==('#aria-puppy-check|'+(en?'#en-benefits':'#preco-chvostikovo')+'|#faq')||!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
         await page.evaluate(()=>window.scrollTo({top:900,behavior:'instant'}));
         await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='true');
         if(!await dock.evaluate(el=>Math.abs(innerHeight-el.querySelector('.mobile-dock-bar').getBoundingClientRect().bottom-12)<2))throw new Error('Desktop dock not floating at bottom');
         await page.screenshot({path:path.join(out,'desktop-home-dock-'+engine+'-'+(en?'en':'sk')+'-'+width+'.png')});
       }
+      const why=page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut]');
+      await why.click();
+      await page.waitForFunction(id=>Math.abs(document.getElementById(id).getBoundingClientRect().top-8)<16,en?'en-benefits':'preco-chvostikovo');
     }
     console.log('PASS bilingual navigation, responsive menu and consented PageView '+engine);
   } finally {await context.close();}
