@@ -215,10 +215,8 @@ export function AriaGuidedChat({ open, onClose, initialQuestionId, trackingPrefi
     if (typingId !== null || answered.includes(question.id)) return;
     if (trackingPrefix === "lead_landing_aria_chat") trackAriaChatAction(origin === "manual" ? "question" : "auto_question", question.id);
     track("question_" + question.id);
-    if (question.id === "puppy") {
-      track("puppy_check_open");
-      if (trackingPrefix === "lead_landing_aria_chat") trackAriaChatAction("puppy_check_open");
-    }
+    if (question.id === "puppy") track("puppy_check_open");
+    if (question.id === "puppy" && trackingPrefix === "lead_landing_aria_chat") trackAriaChatAction("puppy_check_open");
     setEngaged(true);
     setAnswered(current => [...current, question.id]);
     const id = nextId.current;
