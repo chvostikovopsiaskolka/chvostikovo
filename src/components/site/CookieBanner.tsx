@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
-import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
+import ariaHead from "@/assets/aria-assistant-head-lead.webp";
 import {
   CONSENT_STORAGE_KEY,
   emptyConsent,
@@ -178,7 +178,6 @@ export function CookieBanner() {
   const isEnglish = window.location.pathname.startsWith("/en/");
   const pathname = window.location.pathname.replace(/\/$/, "");
   const isAriaPreview = ["/test-aria", "/psia-skolka-kosice", "/psia-skolka-pre-steniatka"].includes(pathname);
-  const isGuidedPreview = pathname === "/test-aria";
 
   function save(next: Pick<Consent, "functional" | "analytics" | "marketing">) {
     const stored = writeStoredConsent(next);
@@ -211,9 +210,9 @@ export function CookieBanner() {
   if (!open) {
     if (!savedNotice) return null;
     return (
-      <div role="status" className={`fixed left-3 right-3 z-[110] mx-auto flex max-w-md items-center gap-2 rounded-2xl border border-forest/15 bg-card px-4 py-3 text-sm text-forest shadow-xl ${isAriaPreview ? "bottom-[calc(108px+env(safe-area-inset-bottom))]" : "bottom-[calc(98px+env(safe-area-inset-bottom))] lg:bottom-[calc(12px+env(safe-area-inset-bottom))]"}`}>
+      <div role="status" data-cookie-consent className={`fixed left-3 right-3 z-[110] mx-auto flex max-w-md items-center gap-2 rounded-2xl border border-forest/15 bg-card px-4 py-3 text-sm text-forest shadow-xl ${isAriaPreview ? "bottom-[calc(108px+env(safe-area-inset-bottom))]" : "bottom-[calc(98px+env(safe-area-inset-bottom))] lg:bottom-[calc(12px+env(safe-area-inset-bottom))]"}`}>
         <span className="flex-1">{isEnglish ? "Your cookie choices were saved for up to 180 days." : "Vašu voľbu cookies sme uložili na najviac 180 dní."}</span>
-        <button type="button" className="shrink-0 font-semibold text-coral underline" onClick={() => window.dispatchEvent(new Event("chvostikovo-open-cookie-settings"))}>
+        <button type="button" className="shrink-0 font-semibold text-coral-dark underline" onClick={() => window.dispatchEvent(new Event("chvostikovo-open-cookie-settings"))}>
           {isEnglish ? "Settings" : "Nastavenia"}
         </button>
       </div>
@@ -224,44 +223,43 @@ export function CookieBanner() {
     <div
       // On slow mobile GPUs, avoid blurring the entire page behind the cookie modal.
       // Consent text is the measured LCP element on first visit; retain the same panel and choices.
-      className={"fixed inset-0 z-[100] flex items-end bg-forest/50 px-2 pb-2 pt-16 sm:items-center sm:p-6 sm:backdrop-blur-[2px] " + (isAriaPreview && !showDetails ? "justify-end sm:justify-center" : "justify-center")}
+      data-cookie-consent
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-[#26322b]/35 px-2 pb-2 pt-16 sm:items-center sm:p-6 sm:backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="cookie-consent-title"
     >
-      <div className={"relative w-full " + (showDetails ? "max-w-4xl" : isAriaPreview ? "max-w-xl pt-7" : "max-w-2xl")}>
-        {isAriaPreview && !showDetails && (
-          <img src={ARIA_HEAD_DATA_URI} alt="Aria, psia pomocníčka" width={160} height={160}
+      <div className={"relative w-full " + (showDetails ? "max-w-4xl" : "max-w-xl pt-7")}>
+        {!showDetails && (
+          <img src={ariaHead} alt="Aria, psia pomocníčka" width={512} height={474}
             data-aria-cookie-head
-            className={"pointer-events-none absolute top-2 z-20 size-[90px] object-contain contrast-[1.1] drop-shadow-[0_5px_7px_rgba(0,0,0,.32)] sm:top-2 sm:size-[106px] " + (isGuidedPreview ? "right-3 sm:right-4" : "left-3 sm:left-4")} />
+            className="pointer-events-none absolute left-3 top-2 z-20 size-[90px] object-contain drop-shadow-[0_5px_7px_rgba(0,0,0,.2)] sm:left-4 sm:size-[106px]" />
         )}
-        <div data-aria-cookie-bubble={isAriaPreview && !showDetails ? "true" : undefined}
+        <div data-cookie-panel data-aria-cookie-bubble={!showDetails ? "true" : undefined}
           className={"relative max-h-[calc(100dvh-1rem)] w-full overflow-y-auto rounded-3xl border p-4 text-forest sm:p-6 " +
-            (isAriaPreview && !showDetails
-              ? "border-white/80 bg-card/95 shadow-[0_12px_50px_rgba(11,48,30,.32)] ring-1 ring-forest/15 backdrop-blur-xl"
+            (!showDetails
+              ? "border-white/80 bg-card/95 shadow-[0_12px_50px_rgba(38,50,43,.22)] ring-1 ring-forest/15 backdrop-blur-xl"
               : "border-forest/10 bg-card shadow-2xl")}>
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
-            <p id="cookie-consent-title" className={isAriaPreview && !showDetails
-                ? ("flex min-h-[48px] items-center whitespace-nowrap font-display text-[clamp(10px,3.1vw,17px)] font-bold leading-tight sm:text-xl " + (isGuidedPreview ? "pr-[88px] sm:pr-[106px]" : "pl-[88px] sm:pl-[106px]"))
+            <p id="cookie-consent-title" className={!showDetails
+                ? "flex min-h-[48px] items-center whitespace-nowrap pl-[88px] font-display text-[clamp(10px,3.1vw,17px)] font-bold leading-tight sm:pl-[106px] sm:text-xl"
                 : "font-display text-lg font-bold sm:text-xl"}>
               {showDetails
                 ? isEnglish ? "Cookie settings" : "Nastavenia cookies"
-                : isEnglish ? "We use cookies" : isAriaPreview ? "Ahoj! Používame cookies 🍪" : "Používame cookies"}
+                : isEnglish ? "We use cookies" : "Ahoj! Používame cookies 🍪"}
             </p>
 
             {!showDetails && (
-              <p className={(isAriaPreview ? "mt-0 " : "mt-1 ") + "max-w-3xl text-sm leading-relaxed text-forest/75 sm:text-base"}>
+              <p className="mt-0 max-w-3xl text-sm leading-relaxed text-forest/75 sm:text-base">
                 {isEnglish
                   ? "Necessary cookies keep the website working. With your consent, we also use functional, analytics and marketing cookies to improve the website and measure our advertising. "
-                  : isAriaPreview
-                    ? "Som Aria a vítam ťa v Chvostíkove! Nevyhnutné cookies pomáhajú webu fungovať. O funkčných, analytických a marketingových cookies rozhoduješ ty. "
-                    : "Nevyhnutné cookies zabezpečujú fungovanie webu. S vaším súhlasom používame aj funkčné, analytické a marketingové cookies na zlepšovanie webu a meranie reklamy. "}
+                  : "Som Aria a vítam ťa v Chvostíkove! Nevyhnutné cookies pomáhajú webu fungovať. O funkčných, analytických a marketingových cookies rozhoduješ ty. "}
                 <a
                   href={isEnglish ? "/en/cookies" : "/cookies"}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
+                  className="font-semibold text-coral-dark underline underline-offset-2 hover:text-forest"
                 >
                   {isEnglish ? "Cookie policy" : "Pravidlá používania cookies"}
                 </a>
@@ -282,7 +280,7 @@ export function CookieBanner() {
               type="button"
               onClick={() => setOpen(false)}
               aria-label={isEnglish ? "Close cookie settings" : "Zavrieť nastavenia cookies"}
-              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition hover:bg-coral hover:text-white sm:size-9"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition hover:bg-coral-dark hover:text-white sm:size-9"
             >
               <X className="size-4" />
             </button>
@@ -391,34 +389,19 @@ export function CookieBanner() {
           </div>
         )}
 
-        <div className="mt-4 grid gap-2 sm:mt-5 sm:grid-cols-3 sm:gap-3">
-          <button
-            type="button"
-            onClick={acceptAll}
-            className="rounded-full bg-coral px-5 py-3 font-display text-sm font-semibold text-primary-foreground shadow-card transition hover:bg-coral-dark sm:text-base"
-          >
+        <div data-cookie-actions className="mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-3">
+          <button type="button" data-cookie-action="accept" onClick={acceptAll}
+            className="col-span-2 min-h-11 rounded-xl bg-coral px-5 py-3 font-display text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-coral-dark hover:text-white sm:text-base">
             {isEnglish ? "Accept all" : "Prijať všetky"}
           </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              if (showDetails) savePreferences();
-              else setShowDetails(true);
-            }}
-            className="rounded-full border border-forest/25 bg-secondary px-4 py-3 font-display text-sm font-semibold text-forest whitespace-nowrap transition hover:bg-coral-soft sm:text-base"
-          >
-            {showDetails
-              ? isEnglish ? "Save settings" : "Uložiť nastavenia"
-              : isEnglish ? "Customize" : "Prispôsobiť"}
-          </button>
-
-          <button
-            type="button"
-            onClick={rejectAll}
-            className="rounded-full border border-forest/25 bg-card px-5 py-3 font-display text-sm font-semibold text-forest transition hover:bg-secondary sm:text-base"
-          >
+          <button type="button" data-cookie-action="necessary" onClick={rejectAll}
+            className="min-h-11 rounded-xl border border-coral-dark/25 bg-card px-2 py-3 font-display text-xs font-semibold text-forest transition hover:bg-secondary sm:px-4 sm:text-sm">
             {isEnglish ? "Necessary only" : "Len nevyhnutné"}
+          </button>
+          <button type="button" data-cookie-action="customize"
+            onClick={() => { if (showDetails) savePreferences(); else setShowDetails(true); }}
+            className="min-h-11 rounded-xl border border-coral-dark/25 bg-secondary px-2 py-3 font-display text-xs font-semibold text-forest transition hover:bg-coral-soft sm:px-4 sm:text-sm">
+            {showDetails ? isEnglish ? "Save settings" : "Uložiť nastavenia" : isEnglish ? "Customize" : "Prispôsobiť"}
           </button>
         </div>
 
@@ -457,11 +440,12 @@ function CategoryToggle({
       <button
         type="button"
         role="switch"
+        aria-label={title}
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={`relative h-7 w-12 shrink-0 rounded-full transition ${
-          checked ? "bg-forest" : "bg-forest/20"
+          checked ? "bg-coral-dark" : "bg-forest/60"
         } ${disabled ? "cursor-not-allowed opacity-70" : ""}`}
       >
         <span

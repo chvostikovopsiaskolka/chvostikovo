@@ -1759,3 +1759,16 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 /* Keep guide prose readable while the shared gallery reaches both layout edges. */
 .stand-guide-content > * { width: min(calc(100% - 2rem), 48rem); margin-inline: auto; }
 .stand-guide-content > [data-blog-stand-gallery] { width: 100%; }
+
+/* Shared public cookie UI sits outside route-level brand wrappers. */
+[data-cookie-consent] {
+  --forest: #26322b;
+  --forest-deep: #1c2923;
+  --coral: #ffa414;
+  --coral-dark: #b82e7f;
+  --coral-soft: #f5c7e0;
+  --secondary: #f8ddeb;
+  --card: #fff;
+  --primary-foreground: #26322b;
+  --ring: #b82e7f;
+}

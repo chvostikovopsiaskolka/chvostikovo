@@ -116,6 +116,46 @@ async function assertLeadContactIntro(form) {
 }
 
 
+// Shared public cookie styling and actual choice callbacks; no external writes.
+async function assertCookieBrandSurface(page) {
+  const dialog=page.locator('[data-cookie-consent][role="dialog"]');
+  await dialog.locator('[data-aria-cookie-head]').evaluate(image=>image.decode());
+  await dialog.locator('[data-cookie-action="accept"]').evaluate(el=>Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{}))));
+  const state=await dialog.evaluate(el=>{
+    const panel=el.querySelector('[data-cookie-panel]'),actions=el.querySelector('[data-cookie-actions]');
+    const accept=actions.querySelector('[data-cookie-action="accept"]'),necessary=actions.querySelector('[data-cookie-action="necessary"]'),customize=actions.querySelector('[data-cookie-action="customize"]');
+    const a=accept.getBoundingClientRect(),n=necessary.getBoundingClientRect(),c=customize.getBoundingClientRect(),p=panel.getBoundingClientRect(),image=el.querySelector('[data-aria-cookie-head]');
+    return {inside:p.left>=0&&p.right<=innerWidth+1&&p.top>=0&&p.bottom<=innerHeight+1,
+      layout:Math.abs(a.left-n.left)<2&&Math.abs(a.right-c.right)<2&&Math.abs(n.top-c.top)<2&&n.top>=a.bottom+5&&n.right<c.left&&Math.abs(n.width-c.width)<2,
+      targets:[a.height,n.height,c.height].every(h=>h>=44),overflow:panel.scrollWidth>panel.clientWidth+1,
+      orange:getComputedStyle(accept).backgroundColor,dark:getComputedStyle(accept).color,pink:getComputedStyle(customize).backgroundColor,
+      portrait:image.naturalWidth>=400&&image.naturalHeight>=400&&image.src.includes('aria-assistant-head-lead-')};
+  });
+  if(!state.inside||!state.layout||!state.targets||state.overflow||!state.portrait||!(state.orange==='rgb(255, 164, 20)'&&state.dark==='rgb(38, 50, 43)'||state.orange==='rgb(184, 46, 127)'&&state.dark==='rgb(255, 255, 255)')||state.pink!=='rgb(248, 221, 235)')throw new Error('Shared cookie brand/layout: '+JSON.stringify(state));
+}
+
+async function assertCookieChoices(page) {
+  const dialog=page.locator('[data-cookie-consent][role="dialog"]');
+  const open=async()=>{await page.evaluate(()=>window.dispatchEvent(new Event('chvostikovo-open-cookie-settings')));await dialog.waitFor({state:'visible'});};
+  const assertChoices=async expected=>{
+    const state=await dialog.getByRole('switch').evaluateAll(es=>es.map(e=>({checked:e.getAttribute('aria-checked')==='true',disabled:e.disabled})));
+    if(state.length!==4||!state[0].checked||!state[0].disabled||state.slice(1).some((s,i)=>s.disabled||s.checked!==expected[i]))throw new Error('Cookie choices changed: '+JSON.stringify(state));
+  };
+  await open();await assertChoices([false,false,false]);
+  await activateFixtureControl(dialog.getByRole('switch',{name:'Funkčné',exact:true}));
+  await activateFixtureControl(dialog.locator('[data-cookie-action="customize"]'));
+  await dialog.waitFor({state:'hidden'});
+  await open();await assertChoices([true,false,false]);
+  await activateFixtureControl(dialog.locator('[data-cookie-action="accept"]'));
+  await dialog.waitFor({state:'hidden'});
+  await open();await assertChoices([true,true,true]);
+  await activateFixtureControl(dialog.locator('[data-cookie-action="necessary"]'));
+  await dialog.waitFor({state:'hidden'});
+  await open();await assertChoices([false,false,false]);
+  await activateFixtureControl(dialog.locator('[data-cookie-action="necessary"]'));
+  await dialog.waitFor({state:'hidden'});
+}
+
 // Campaign content-flow contract: preserve the shared cookie/funnel/widget checks,
 // replace only the superseded section-order and hidden-form assertions below.
 // Reuse the TEST chat on paid LEAD; verify only the new route wiring with isolated transports.
@@ -457,15 +497,17 @@ if (!bellaris && brandPreviewCandidate) {
           // informational pre-merge baseline may still use the old dock.
           const isPuppyAria = !bellaris && url.pathname === '/psia-skolka-pre-steniatka/' &&
             await page.locator('[data-aria-guide]').count() > 0;
-          if (!bellaris && (isAriaPage || isPuppyAria)) {
-            if (!await page.getByText(/Ahoj! Používame cookies 🍪/).count())
+          if (!bellaris && (brandPreviewCandidate || isAriaPage || isPuppyAria)) {
+            const englishCookie=url.pathname.startsWith("/en/");
+            if (!await page.getByText(englishCookie ? "We use cookies" : "Ahoj! Používame cookies 🍪",{exact:true}).count())
               throw new Error('Preview cookie greeting missing');
             const bubble = page.locator('[data-aria-cookie-bubble="true"]');
             await bubble.waitFor({ state: 'visible' });
-            if (!await page.getByRole('button', { name: 'Prijať všetky' }).isVisible() ||
-                !await page.getByRole('button', { name: 'Prispôsobiť' }).isVisible() ||
+            if (!await page.getByRole('button', { name: englishCookie ? 'Accept all' : 'Prijať všetky' }).isVisible() ||
+                !await page.getByRole('button', { name: englishCookie ? 'Customize' : 'Prispôsobiť' }).isVisible() ||
                 !await cookieButton.isVisible())
               throw new Error('Aria cookie bubble lost equivalent accept, customize or reject options');
+            if(brandPreviewCandidate)await assertCookieBrandSurface(page);
             const head = bubble.locator('xpath=..').locator('img[alt*="Aria"]');
             const geometry = await Promise.all([bubble.boundingBox(), head.boundingBox()]);
             if (!geometry[0] || !geometry[1] || geometry[1].y >= geometry[0].y || geometry[1].y + geometry[1].height <= geometry[0].y)
@@ -509,6 +551,7 @@ if (!bellaris && brandPreviewCandidate) {
           }
           await cookieButton.click();
           await page.waitForTimeout(300);
+          if(brandPreviewCandidate&&!bellaris&&url.pathname==='/')await assertCookieChoices(page);
           if(revisedLead) await assertCampaignContentFlow(page);
           // Candidate-only regression for the three unified Chvostíkovo galleries.
           // Production-baseline CI keeps testing its already published version.
