@@ -13,11 +13,12 @@ type DockVariant = "main" | "lead" | "puppy" | "dog-sitting" | "en";
 type MobileDockProps = {
   language?: DockLanguage;
   variant?: DockVariant;
+  desktopHome?: boolean;
   onApplicationOpen?: () => void;
   onInterestOpen?: () => void;
 };
 
-export function MobileDock({ language = "sk", variant = "main", onApplicationOpen, onInterestOpen }: MobileDockProps) {
+export function MobileDock({ language = "sk", variant = "main", desktopHome = false, onApplicationOpen, onInterestOpen }: MobileDockProps) {
   const english = language === "en";
   const homeDock = variant === "main" || variant === "en";
   const marketing = !homeDock;
@@ -29,7 +30,30 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
   const [activeSection, setActiveSection] = useState("top");
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const desktopDockRef = useRef<HTMLElement>(null);
+  const [desktopFloating, setDesktopFloating] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
+  // The desktop slot follows Hero reviews in normal flow. Keep its reserved
+  // height when the bar floats so the next section never jumps.
+  useEffect(() => {
+    if (!desktopHome || !homeDock) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const slot = desktopDockRef.current;
+      if (!slot || window.innerWidth < 1024) { setDesktopFloating(false); return; }
+      const rect = slot.getBoundingClientRect();
+      setDesktopFloating(window.scrollY > 24 || rect.bottom > window.innerHeight - 8);
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : undefined;
+    if (desktopDockRef.current) observer?.observe(desktopDockRef.current);
+    observer?.observe(document.documentElement);
+    update();
+    window.addEventListener("scroll", schedule, {passive:true});
+    window.addEventListener("resize", schedule);
+    return () => { observer?.disconnect(); window.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule); if(frame) cancelAnimationFrame(frame); };
+  }, [desktopHome, homeDock]);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navigatingRef = useRef(false);
 
@@ -139,7 +163,8 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     if (homeDock && samePage && !destination.search) destination.search = window.location.search;
     const targetId = (destination.hash.slice(1) || (destination.pathname.replace(/\/$/, "") === homePath.replace(/\/$/, "") ? "top" : destination.pathname.split("/").filter(Boolean).join("_")))
       .replace(/[^a-z0-9_-]/gi, "").slice(0, 70);
-    const source = `mobile_${fromMenu ? "menu" : "dock"}_${variant}_${targetId}`;
+    const desktop = desktopHome && window.innerWidth >= 1024;
+    const source = desktop ? `desktop_nav_${variant}_${targetId}` : `mobile_${fromMenu ? "menu" : "dock"}_${variant}_${targetId}`;
     void trackCookielessInteraction("nav_click", source, language);
     // Keep Pixel/GA4 interests separate from cookieless navigation and from successful leads.
     // The old header pricing link was measured, but the new dock lives outside <header>.
@@ -189,14 +214,14 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
   const openApplication = () => {
     if (menuOpen) setMenuOpen(false);
     if (english && onApplicationOpen) {
-      void trackCookielessInteraction("nav_click", "mobile_dock_en_application", language);
+      void trackCookielessInteraction("nav_click", desktopHome && window.innerWidth >= 1024 ? "desktop_nav_en_application" : "mobile_dock_en_application", language);
       onApplicationOpen();
     } else if (marketing) {
       // SK landing pages already track enquiries in their route callback.
       if (english) void trackCookielessInteraction("inquiry_cta", "en_mobile_dock", "en");
       onInterestOpen?.();
     } else {
-      void trackCookielessInteraction("nav_click", "mobile_dock_main_application", language);
+      void trackCookielessInteraction("nav_click", desktopHome && window.innerWidth >= 1024 ? "desktop_nav_main_application" : "mobile_dock_main_application", language);
       onApplicationOpen?.();
     }
   };
@@ -228,7 +253,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
 
   return (
     <>
-      <nav className="mobile-dock" data-variant={variant} data-home-dock={homeDock || undefined} data-hydrated={hydrated ? "true" : "false"} aria-label={english ? "Mobile navigation" : "Mobilná navigácia"}>
+      <nav ref={desktopDockRef} className="mobile-dock" data-variant={variant} data-home-dock={homeDock || undefined} data-desktop-home-dock={desktopHome && homeDock || undefined} data-desktop-floating={desktopFloating ? "true" : "false"} data-hydrated={hydrated ? "true" : "false"} aria-label={english ? "Main navigation" : "Hlavná navigácia"}>
         {!homeDock && <button
             type="button"
             className="mobile-dock-back-top"
@@ -241,6 +266,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
             <ArrowUp aria-hidden="true" size={21} strokeWidth={2.1} />
           </button>}
         <div className="mobile-dock-bar">
+          {desktopHome && homeDock && <img data-desktop-dock-logo src={logo} alt="Chvostíkovo" className="hidden lg:block" />}
           {homeDock && <div className="mobile-dock-compact-menu" data-home-menu>
             <div className="mobile-dock-compact-links">
               {homeMenuEntries.map(({href,label,icon:Icon}) => <a key={href} href={href} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden="true" /><span>{label}</span></a>)}
