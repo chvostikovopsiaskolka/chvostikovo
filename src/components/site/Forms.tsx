@@ -670,7 +670,7 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
           {expanded ? "Zobraziť menej" : "Zobraziť celú prihlášku"}
         </button>
       )}
-      <div id={`l-${formId}-details`} hidden={!expanded} className="space-y-3.5">
+      <fieldset id={`l-${formId}-details`} hidden={!expanded} disabled={!expanded} className="min-w-0 space-y-3.5 border-0 p-0">
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-semibold text-forest/75">
             <span>Prihláška do škôlky</span><span>Krok {step} z 2</span>
@@ -712,7 +712,7 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
         {loading ? "Odosielam…" : "Prihlásiť psíka"}
       </button>
           <button type="button" disabled={loading} onClick={() => goToStep(1)} className="min-h-11 w-full rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50">Späť</button>
-        </div>
+        </fieldset>
       </div>
     </form>
   );
