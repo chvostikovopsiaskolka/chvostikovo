@@ -191,9 +191,15 @@ export function AriaLeadAssistant({
       }
     };
     const onScroll = () => { if (!frame) frame = window.requestAnimationFrame(update); };
-    const onResize = () => { window.clearTimeout(timer); setShowBackToTop(false); anchorY = Math.max(0, window.scrollY); };
+    const onResize = () => {
+      window.clearTimeout(timer);
+      anchorY = Math.max(0, window.scrollY);
+      setShowBackToTop(false);
+      if (eligible()) timer = window.setTimeout(() => setShowBackToTop(eligible()), 350);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
+    onResize();
     return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onResize); if (frame) window.cancelAnimationFrame(frame); window.clearTimeout(timer); };
   }, [leadChat, hidden, chatOpen, panel]);
 

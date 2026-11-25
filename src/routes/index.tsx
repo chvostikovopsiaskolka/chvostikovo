@@ -86,9 +86,9 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <main>
         <Hero onMobileInquiryOpen={openHeroInquiry} mobileInquiryOpen={heroInquiryOpen} />
+        <Header desktopHome />
         {heroInquiryOpen && (
           <section id="home-hero-interest" ref={heroInquiryRef} data-home-hero-revealed-form
             className="relative scroll-mt-20 overflow-hidden bg-card px-4 pb-11 pt-6 lg:hidden">
