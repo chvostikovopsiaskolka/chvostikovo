@@ -380,6 +380,58 @@ if (!bellaris && brandPreviewCandidate) {
 
 // Shared footer: test the real responsive wrapper and an isolated interactive
 // iframe fixture. Never contact Google or send real consent/analytics requests.
+// The shared application responds to the available form width, not the
+// viewport alone (modal insets and the second-dog card reduce that width).
+async function assertApplicationDogLayout(surface, engine, label) {
+  const page=surface.page(), original=page.viewportSize();
+  const form=surface.locator('form').filter({has:page.locator('input[name="pes"]')});
+  await form.locator('input[name="pes"]').waitFor({state:'visible'});
+  const two=form.getByRole('radio',{name:'Chcem prihlásiť dvoch psíkov'});
+  const one=form.getByRole('radio',{name:'Chcem prihlásiť jedného psíka'});
+  try {
+    await two.check();
+    await form.locator('input[name="pes2"]').waitFor({state:'visible'});
+    for(const width of [320,375,390,430,1440]) {
+      await page.setViewportSize({width,height:width>=1024?900:844});
+      await page.evaluate(()=>document.fonts.ready);
+      const sample=await form.evaluate(el=>{
+        const expected=['identity','age-weight','sex-neuter'];
+        const pairs=[['pes','plemeno'],['vek','vaha'],['pohlavie','kastrovana']];
+        const rows=[...el.querySelectorAll('[data-application-dog-row]')];
+        const checks=rows.map((row,i)=>{
+          const [left,right]=row.children, a=left.getBoundingClientRect(),b=right.getBoundingClientRect(),r=row.getBoundingClientRect();
+          const container=row.closest('.\\@container');
+          const cs=getComputedStyle(container);
+          const available=container.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+          const side=available>=350;
+          const suffix=i>=3?'2':'';
+          const names=[left,right].map(group=>group.querySelector('input')?.name);
+          const correct=names.every((name,j)=>name===pairs[i%3][j]+suffix);
+          const controls=[...row.querySelectorAll('.form-binary-choice-v292 > span')].map(node=>node.getBoundingClientRect());
+          return {row:row.dataset.applicationDogRow,available,side,correct,
+            geometry:side?Math.abs(a.bottom-b.bottom)<2&&a.right<=b.left+1:a.bottom<=b.top+1&&Math.abs(a.left-b.left)<2,
+            fits:a.left>=r.left-1&&b.right<=r.right+1&&row.scrollWidth<=row.clientWidth+1,
+            binary:controls.every(c=>c.height>=44&&c.width>=44)};
+        });
+        const options=[...el.querySelectorAll('input[name="duvod"]')];
+        const cardRects=options.map(input=>input.parentElement.getBoundingClientRect());
+        return {checks,order:rows.map(row=>row.dataset.applicationDogRow).join(',')===expected.concat(expected).join(','),
+          choices:options.map(input=>input.value),required:options.every(input=>input.required&&!input.checked),
+          usageLayout:cardRects.length===2&&cardRects[0].right<=cardRects[1].left+1&&Math.abs(cardRects[0].top-cardRects[1].top)<2,
+          overflow:el.scrollWidth>el.clientWidth+2};
+      });
+      if(!sample.order||sample.checks.length!==6||sample.checks.some(c=>!c.correct||!c.geometry||!c.fits||!c.binary)||
+          sample.choices.join('|')!=='Pravidelne – 1× alebo viackrát týždenne|Občas podľa potreby'||
+          !sample.required||!sample.usageLayout||sample.overflow)
+        throw new Error('Application layout '+label+' '+width+': '+JSON.stringify(sample));
+      console.log('PASS application '+engine+' '+label+' '+width+' '+JSON.stringify(sample));
+    }
+  } finally {
+    await page.setViewportSize(original);
+    await one.check();
+  }
+}
+
 async function assertFooterMapGeometry(browser, engine) {
   const context = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const origin = new URL(base).origin;
@@ -2980,6 +3032,7 @@ async function assertFooterMapGeometry(browser, engine) {
               const dockApplication=page.getByRole('dialog').last();
               await dockApplication.waitFor({state:'visible'});
               if(!await dockApplication.locator('input[name="meno"]').isVisible()) throw new Error('Homepage mobile application must open the real form');
+              if(brandPreviewCandidate)await assertApplicationDogLayout(dockApplication,engine,'modal');
               await dockApplication.getByRole('button',{name:'Close'}).click();
               await dockApplication.waitFor({state:'hidden'});
               const puppyFaq=page.locator('#faq button').filter({hasText:'Prijímate aj šteniatka?'});
@@ -3026,6 +3079,7 @@ async function assertFooterMapGeometry(browser, engine) {
               await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await owner.inputValue()!=='Testovacie meno' || await page.getByRole('dialog').count()) throw new Error('Inline application did not expand or retain owner data');
+              if(brandPreviewCandidate)await assertApplicationDogLayout(application,engine,'inline');
               await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
               if(await application.locator('input[name="pes"]').isVisible() || await owner.inputValue()!=='Testovacie meno') throw new Error('Inline application collapse lost data');
