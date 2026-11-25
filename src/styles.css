@@ -1667,7 +1667,17 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 .lead-brand-live [data-aria-lead-chat] [data-aria-bubble-chat-cta]::before { content: ""; position: absolute; inset: -4px 0; }
 .lead-brand-live [data-aria-lead-chat] [data-aria-speech] { border-radius: 16px; padding-block: 8px; -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4); }
 .lead-brand-live [data-aria-lead-chat] [data-aria-tail] path { fill: rgb(255 255 255 / 90%); }
-.lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: 13px; line-height: 1.35; }
+.lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: .8125rem; line-height: 1.35; }
+@media (max-width: 639px) {
+  /* Give the greeting real space rather than clipping it with nowrap.
+     Rem limits preserve text resizing; enlarged text may naturally reflow. */
+  .lead-brand-live [data-aria-guide] { padding-inline: 8px; }
+  .lead-brand-live [data-aria-lead-chat] [data-aria-dock] { width: 100%; max-width: none; margin-inline: 0; }
+  .lead-brand-live [data-aria-lead-chat] [data-aria-chat-trigger] { left: 0; width: clamp(64px, 20vw, 84px); height: clamp(64px, 20vw, 84px); }
+  .lead-brand-live [data-aria-lead-chat] [data-aria-message] { left: 0; width: 100%; max-width: none; margin-inline: 0; padding-left: calc(clamp(64px, 20vw, 84px) + 4px); }
+  .lead-brand-live [data-aria-lead-chat] [data-aria-speech] { width: 100%; max-width: none; }
+  .lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: clamp(.625rem, .025rem + 2.8vw, .8125rem); }
+}
 .lead-brand-live [data-aria-lead-chat] [data-aria-message] p strong { font-size: inherit; line-height: inherit; }
 .lead-brand-live [data-aria-chat-trigger] { background: transparent; box-shadow: none; -webkit-tap-highlight-color: transparent; }
 .lead-brand-live [data-lead-hero-pill] { font-weight: 700; border-radius: 8px; background-color: #ffa414; color: #26322b; }
