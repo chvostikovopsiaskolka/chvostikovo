@@ -53,7 +53,35 @@ try {
   await submitInquiry({ ...lead, source_ref: instagram });
   assert(payload.meta_fbc.endsWith("." + "x".repeat(600)), "Original fbclid must remain available to CAPI");
   assert(!payload.source_ref.includes("fbclid"));
+  // Isolated LEAD chat conversion: the browser and server transport must
+  // share one event ID; denial and FAQ questions must never emit a Meta Lead.
+  const metaCalls: unknown[][] = [];
+  (dom as any).fbq = (...args: unknown[]) => metaCalls.push(args);
+  const { trackMetaFormConversion, trackAriaQuestionSubmit } = await import("../src/lib/analytics");
+  dom.happyDOM.setURL("https://chvostikovo.sk/psia-skolka-kosice/");
+  const accepted = await submitInquiry({ ...lead, cta_source: "lead_landing_aria_chat_interest" });
+  assert.equal(payload.marketing_consent, true);
+  assert.equal(payload.meta_event_id, accepted.metaEventId);
+  trackMetaFormConversion("informacie", "lead_landing_aria_chat_interest", accepted.metaEventId);
+  assert.equal(metaCalls.length, 1);
+  assert.deepEqual(metaCalls[0]?.slice(0, 2), ["track", "Lead"]);
+  assert.deepEqual(metaCalls[0]?.[3], { eventID: payload.meta_event_id });
+  trackAriaQuestionSubmit("lead_landing_aria_chat_other");
+  assert.equal(metaCalls.length, 1, "A chat question is not a Meta conversion");
   dom.localStorage.clear();
+  const denied = await submitInquiry({ ...lead, cta_source: "lead_landing_aria_chat_interest" });
+  assert.equal(payload.marketing_consent, false);
+  assert.equal(payload.meta_fbp, "");
+  assert.equal(payload.meta_fbc, "");
+  trackMetaFormConversion("informacie", "lead_landing_aria_chat_interest", denied.metaEventId);
+  assert.equal(metaCalls.length, 1, "Denied marketing consent must suppress Meta Lead");
+  globalThis.fetch = (async () => new Response('{"ok":false}', { status: 500 })) as typeof fetch;
+  await assert.rejects(() => submitInquiry({ ...lead, cta_source: "lead_landing_aria_chat_interest" }));
+  assert.equal(metaCalls.length, 1, "A failed form must not emit a conversion");
+  globalThis.fetch = (async (_url: any, options: any) => {
+    payload = JSON.parse(options.body);
+    return new Response(JSON.stringify({ ok: true }), { status: 201 });
+  }) as typeof fetch;
   const broken = Object.fromEntries(Object.keys(TRACKING_LIMITS).map((key) => [key, { unexpected: true }]));
   await submitInquiry({ ...lead, ...broken } as InquiryInput);
   const huge = Object.fromEntries(Object.keys(TRACKING_LIMITS).map((key) => [key, "x".repeat(5000)]));

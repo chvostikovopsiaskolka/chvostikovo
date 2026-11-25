@@ -12,7 +12,7 @@ export function ariaEventSource(action: AriaAction, detail: string | null) {
   return ARIA_CHAT_PREFIX + action + (detail ? "_" + detail : "");
 }
 export function ariaFormKind(source: string) {
-  const key = source.split(":")[0];
+  const key = source.split(":")[0] ?? "";
   if (!key.startsWith(ARIA_CHAT_PREFIX)) return undefined;
   return ARIA_FORMS.find(kind => key === ARIA_CHAT_PREFIX + kind);
 }
