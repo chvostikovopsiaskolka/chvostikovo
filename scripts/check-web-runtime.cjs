@@ -426,6 +426,33 @@ async function assertApplicationDogLayout(surface, engine, label) {
         throw new Error('Application layout '+label+' '+width+': '+JSON.stringify(sample));
       console.log('PASS application '+engine+' '+label+' '+width+' '+JSON.stringify(sample));
     }
+    await page.setViewportSize(original);
+    const next=form.getByRole('button',{name:'Pokračovať',exact:true});
+    const owner=form.locator('input[name="meno"]');
+    if(await owner.isVisible())throw new Error('Owner step visible before dog details');
+    await next.click();
+    if(await form.getAttribute('data-application-step')!=='1')throw new Error('Incomplete dogs passed step validation');
+    for(const suffix of ['', '2']){
+      for(const [name,value] of [['pes','Fixture dog '+suffix],['plemeno','Labrador'],['vek','2 roky'],['vaha','25 kg'],['povaha','Fixture only']])await form.locator('[name="'+name+suffix+'"]').fill(value);
+      for(const name of ['pohlavie','kastrovana'])await form.locator('label:has(input[name="'+name+suffix+'"])').first().click();
+    }
+    await form.locator('label:has(input[name="duvod"])').first().click();
+    await next.click();
+    await owner.waitFor({state:'visible'});
+    if(await form.locator('input[name="pes"]').isVisible())throw new Error('Both application steps visible');
+    await owner.fill('Fixture owner');
+    await form.locator('input[name="telefon"]').fill('912345678');
+    const payload=await form.evaluate(el=>Object.fromEntries(new FormData(el)));
+    if(payload.pes!=='Fixture dog '||payload.pes2!=='Fixture dog 2'||payload.meno!=='Fixture owner'||payload.duvod!=='Pravidelne – 1× alebo viackrát týždenne')throw new Error('Hidden step fields missing from application payload');
+    await form.getByRole('button',{name:'Späť',exact:true}).click();
+    await form.locator('input[name="pes"]').waitFor({state:'visible'});
+    if(await form.locator('input[name="pes2"]').inputValue()!=='Fixture dog 2'||await owner.inputValue()!=='Fixture owner')throw new Error('Step navigation lost application values');
+    await next.click();
+    await owner.waitFor({state:'visible'});
+    if(await owner.inputValue()!=='Fixture owner')throw new Error('Owner values lost on return');
+    await form.getByRole('button',{name:'Späť',exact:true}).click();
+    await form.locator('input[name="pes"]').waitFor({state:'visible'});
+    console.log('PASS application step navigation and full FormData '+engine+' '+label);
   } finally {
     await page.setViewportSize(original);
     await one.check();
@@ -3031,7 +3058,7 @@ async function assertFooterMapGeometry(browser, engine) {
               await page.locator('.mobile-dock[data-variant="main"] .mobile-dock-apply').click();
               const dockApplication=page.getByRole('dialog').last();
               await dockApplication.waitFor({state:'visible'});
-              if(!await dockApplication.locator('input[name="meno"]').isVisible()) throw new Error('Homepage mobile application must open the real form');
+              if(!await dockApplication.locator('input[name="pes"]').isVisible() || await dockApplication.locator('input[name="meno"]').isVisible()) throw new Error('Homepage mobile application must open dog step first');
               if(brandPreviewCandidate)await assertApplicationDogLayout(dockApplication,engine,'modal');
               await dockApplication.getByRole('button',{name:'Close'}).click();
               await dockApplication.waitFor({state:'hidden'});
@@ -3070,20 +3097,14 @@ async function assertFooterMapGeometry(browser, engine) {
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
               const owner=application.locator('input[name="meno"]');
-              if(!await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application preview fields incorrect');
-              await centerFixtureControl(owner);
-              await owner.fill('Testovacie meno');
-              // Dismiss the focused text input before testing the next touch;
-              // the virtual keyboard/focus scroll can otherwise move the target.
-              await owner.blur();
+              if(await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application must not show either step');
               await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
-              if(!await application.locator('input[name="pes"]').isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await owner.inputValue()!=='Testovacie meno' || await page.getByRole('dialog').count()) throw new Error('Inline application did not expand or retain owner data');
+              if(await owner.isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await page.getByRole('dialog').count()) throw new Error('Inline application did not open dog step');
               if(brandPreviewCandidate)await assertApplicationDogLayout(application,engine,'inline');
               await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
-              if(await application.locator('input[name="pes"]').isVisible() || await owner.inputValue()!=='Testovacie meno') throw new Error('Inline application collapse lost data');
-              await owner.fill('');
+              if(await owner.isVisible()) throw new Error('Inline application collapse exposed owner step');
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
             }
             await page.setViewportSize({ width: 390, height: 844 });
