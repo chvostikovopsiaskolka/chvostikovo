@@ -245,7 +245,7 @@ assert(productContact.includes('Odkiaľ ste? (adresa, mesto, PSČ)') &&
        "Keep one original location input with street, city and postcode; no extra delivery form");
 const leadContact = read("src/components/site/LeadStepForm.tsx");
 assert(productContact.includes('<PrivacyConsentCheckbox />') &&
-       leadContact.includes('<PrivacyConsentCheckbox />'),
+       leadContact.includes('<PrivacyConsentCheckbox language={language} />'),
        "Both daycare and product inquiries must reuse exactly the same privacy notice");
 assert(productSchema.includes("normalizeProductLocation(input.customer_location)") &&
        productSchema.includes('placePart.replace(/\\s*,\\s*/g, " ")') &&

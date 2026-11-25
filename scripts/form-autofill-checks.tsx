@@ -152,6 +152,9 @@ try {
       const conversions=pixelCalls.filter(args=>args[0]==="track" && ["Lead","CompleteRegistration"].includes(args[1]));
       assert.equal(conversions.length,marketing?1:0,"EN Pixel must respect consent and emit exactly one conversion");
       if(marketing) {assert.equal(conversions[0]![1],test.name==="application_form_en"?"CompleteRegistration":"Lead");assert.equal(conversions[0]![3]?.eventID,submission[0]!.body.meta_event_id,"Pixel/CAPI event ID must match");}
+      const gaConversions=gaCalls.filter(args=>args[0]==="event" && ["generate_lead","application_submit"].includes(args[1]));
+      assert.equal(gaConversions.length,1,"EN GA4 must emit exactly one consented form conversion");
+      assert.equal(gaConversions[0]![1],test.name==="application_form_en"?"application_submit":"generate_lead");
       if(test.name==="application_form_en") assert.equal(submission[0]!.body.form_type,"application");
     }
     assert(!container.querySelector("form"), `${test.name}: success UI missing`);
