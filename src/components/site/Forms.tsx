@@ -413,6 +413,8 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
   const [receipt, setReceipt] = useState<{ phone: string; auth: { id: number; token: string } | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [dogCount, setDogCount] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(1);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
   const trackingSource = "application_form";
@@ -424,12 +426,37 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
     void trackCookielessInteraction("form_start", trackingSource);
   }
 
+  function goToStep(next: 1 | 2) {
+    setStep(next);
+    requestAnimationFrame(() => {
+      const heading = stepHeading.current;
+      heading?.focus({ preventScroll: true });
+      heading?.scrollIntoView({ block: "start", behavior: "instant" });
+    });
+  }
+
+  function invalidField(group: Element | null) {
+    return Array.from(group?.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea") ?? [])
+      .find((field) => field.willValidate && !field.validity.valid);
+  }
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     // A collapsed preview must never submit incomplete registration data.
     if (!expanded) return;
     if (loading) return;
     const form = e.currentTarget;
+    const invalidDog = invalidField(form.querySelector("[data-application-dog-step]"));
+    if (invalidDog) {
+      if (step === 2) {
+        setStep(1);
+        requestAnimationFrame(() => invalidDog.reportValidity());
+      } else invalidDog.reportValidity();
+      return;
+    }
+    if (step === 1) { goToStep(2); return; }
+    const invalidOwner = invalidField(form.querySelector("[data-application-owner-step]"));
+    if (invalidOwner) { invalidOwner.reportValidity(); return; }
     progress.markAttempt();
     const attemptId = startFormAttempt(trackingSource);
     setLoading(true);
@@ -628,16 +655,32 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
           </div>
         </section>
       )}
-      <PrivacyConsentCheckbox />
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <button type="submit" disabled={loading} className="btn-coral w-full disabled:opacity-60">
-        {loading ? "Odosielam…" : "Prihlásiť psíka"}
-      </button>
     </>
   );
 
   return (
-    <form onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="@container min-w-0 space-y-3 text-left sm:space-y-3.5">
+    <form noValidate data-application-form data-application-step={step} onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="@container min-w-0 space-y-3 text-left sm:space-y-3.5">
+      {collapsible && (
+        <button id="home-friendship-application" type="button"
+          aria-expanded={expanded} aria-controls={`l-${formId}-details`}
+          className="btn-coral w-full" onClick={() => {
+            if (!expanded) onExpand?.();
+            setExpanded(!expanded);
+          }}>
+          {expanded ? "Zobraziť menej" : "Zobraziť celú prihlášku"}
+        </button>
+      )}
+      <div id={`l-${formId}-details`} hidden={!expanded} className="space-y-3.5">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-semibold text-forest/75">
+            <span>Prihláška do škôlky</span><span>Krok {step} z 2</span>
+          </div>
+          <div role="progressbar" aria-label="Postup prihlášky" aria-valuenow={step} aria-valuemin={1} aria-valuemax={2} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
+            <div className={`h-full rounded-full bg-coral transition-all duration-300 ${step === 1 ? "w-1/2" : "w-full"}`} />
+          </div>
+        </div>
+        <h3 ref={stepHeading} tabIndex={-1} className="font-display text-lg font-bold text-forest outline-none">{step === 1 ? "Údaje o psíkovi" : "Údaje majiteľa"}</h3>
+        <div data-application-dog-step hidden={step !== 1} className="space-y-3.5">
       <fieldset className="rounded-2xl border border-coral/25 bg-secondary/30 p-3.5">
         <legend className="px-1 text-sm font-bold text-forest">Koľkých psíkov chcete prihlásiť?</legend>
         <div className="mt-1 grid grid-cols-2 gap-2">
@@ -650,6 +693,10 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
           ))}
         </div>
       </fieldset>
+          {details}
+          <button type="submit" className="btn-coral w-full">Pokračovať</button>
+        </div>
+        <div data-application-owner-step hidden={step !== 2} className="space-y-3.5">
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
         <div>
           <label className="label-sm" htmlFor={`l-${formId}-meno`}>
@@ -659,21 +706,14 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
         </div>
         <PhoneField id={`l-${formId}-tel`} name="telefon" />
       </div>
-      {collapsible && (
-        <button id="home-friendship-application" type="button"
-          aria-expanded={expanded} aria-controls={`l-${formId}-details`}
-          className="btn-coral w-full" onClick={() => {
-            if (!expanded) onExpand?.();
-            setExpanded(!expanded);
-          }}>
-          {expanded ? "Zobraziť menej" : "Zobraziť celú prihlášku"}
-        </button>
-      )}
-      {collapsible ? (
-        <fieldset id={`l-${formId}-details`} hidden={!expanded} disabled={!expanded} className="min-w-0 space-y-3 border-0 p-0 sm:space-y-3.5">
-          {details}
-        </fieldset>
-      ) : details}
+      <PrivacyConsentCheckbox />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <button type="submit" disabled={loading} className="btn-coral w-full disabled:opacity-60">
+        {loading ? "Odosielam…" : "Prihlásiť psíka"}
+      </button>
+          <button type="button" disabled={loading} onClick={() => goToStep(1)} className="min-h-11 w-full rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50">Späť</button>
+        </div>
+      </div>
     </form>
   );
 }
