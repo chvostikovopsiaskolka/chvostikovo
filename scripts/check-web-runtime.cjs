@@ -143,6 +143,10 @@ async function assertPaidAriaChat(page) {
     await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'visible'});
     if(await chat.locator('[data-aria-chat-question]').count()!==4)throw new Error('Paid chat must reuse four FAQ choices');
     await chat.locator('[data-aria-chat-question="pricing"]').click();
+    const typing=chat.locator('[data-aria-typing="true"]');
+    await typing.locator('[data-aria-composing]').waitFor({state:'visible',timeout:2500});
+    await page.waitForFunction(()=>{const t=document.querySelector('[data-aria-typing="true"]');return (t?.querySelector('[aria-hidden="true"]')?.textContent?.length||0)>12;},null,{timeout:5000});
+    if(await chat.locator('[data-aria-chat-questions]').count())throw new Error('Paid FAQ exposed while typing');
     await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'detached'});
     await chat.locator('[data-aria-chat-questions]').waitFor({state:'visible',timeout:20000});
     if(await chat.locator('[data-aria-chat-question]').count()!==4||!(await chat.innerText()).includes('20 €/deň'))throw new Error('Paid chat must reuse pricing answer and refill four FAQ');
@@ -170,6 +174,7 @@ async function assertPaidAriaChat(page) {
     await form.locator('input[type="checkbox"]').check();
     await form.getByRole('button',{name:'Odoslať záujem',exact:true}).click();
     await interest.locator('[data-lead-step-success]').waitFor({state:'visible'});
+    if(await interest.locator('[data-lead-success-links]').count()||!await interest.getByText('Je toto telefónne číslo správne?').count()||await chat.locator('[data-aria-chat-followup-prompt]').count())throw new Error('Chat receipt must retain phone verification without page links or repeat prompt');
     if(posted.length!==2||posted[1].cta_source!=='lead_landing_aria_chat_interest')throw new Error('Paid chat must submit the existing interest form with its own CRM source');
     await chat.getByRole('button',{name:'Close',exact:true}).click();
     await chat.waitFor({state:'hidden'});
@@ -233,6 +238,8 @@ async function assertCampaignContentFlow(page) {
         pillGap:parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pills]')).columnGap),
         photoCrop:[...document.querySelectorAll('[data-lead-hero-photo] img')].length===2&&[...document.querySelectorAll('[data-lead-hero-photo] img')].every(el=>getComputedStyle(el).objectPosition==='50% 0%'),
         reviewGap:parseFloat(getComputedStyle(document.querySelector('[data-aria-lead-review-spacing]')).marginTop),
+        galleryBelow:box('#lead-photo-carousel').top>=innerHeight-2,
+        compactLauncher:(()=>{const b=box('[data-aria-bubble-chat-cta]'),s=box('[data-aria-speech]');return b.width<s.width-16&&b.height>=43&&b.height<=50;})(),
         dockInside:dock.top>=0&&dock.bottom<=innerHeight+1,
         ctaHeight:cta.height,proofBottom:proof.bottom,ariaTop:aria.top,faceWidth:face?.width,
         widget:(()=>{const speech=box('[data-aria-speech]');const tail=document.querySelector('[data-aria-speech] [data-aria-tail]');return dock.height<=1&&Math.abs(face.width-(innerWidth>=640?104:92))<2&&
@@ -240,7 +247,7 @@ async function assertCampaignContentFlow(page) {
           (innerWidth<1024||speech.width>=455&&speech.width<=482)&&!!tail&&Number(tail.dataset.tipX)<-8&&
           document.querySelectorAll('[data-aria-section-navigation]').length===0&&document.querySelectorAll('[data-aria-chat-trigger]').length===1&&document.querySelectorAll('[data-aria-panel], [data-aria-chat]').length===0;})()};
     });
-    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(184, 91, 0)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||fold.reviewGap<24&&width<640||fold.ctaHeight<44||
+    if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(184, 91, 0)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
@@ -1346,7 +1353,7 @@ if (!bellaris && brandPreviewCandidate) {
                   const interestCta=actions.locator('[data-aria-chat-interest-cta]');
                   const otherCta=actions.locator('[data-aria-chat-other-cta]');
                   if(!await otherCta.getByText('Máš inú otázku?').count() ||
-                     await interestCta.evaluate(el=>el.getBoundingClientRect().width<=el.nextElementSibling.getBoundingClientRect().width))
+                     await interestCta.evaluate(el=>el.getBoundingClientRect().width<=el.previousElementSibling.getBoundingClientRect().width||el.getBoundingClientRect().left<=el.previousElementSibling.getBoundingClientRect().left))
                     throw new Error('CTA must rename the question and widen Mám záujem o škôlku');
                   await page.setViewportSize({width:320,height:720});
                   const size=await chat.evaluate(el=>{
@@ -1362,6 +1369,8 @@ if (!bellaris && brandPreviewCandidate) {
                   await questionMenu.locator('[data-aria-chat-question="pricing"]').click();
                   const typing=chat.locator('[data-aria-chat-turn="aria"] [data-aria-typing="true"]');
                   await typing.waitFor({state:'visible',timeout:10000});
+                  await typing.locator('[data-aria-composing]').waitFor({state:'visible',timeout:2500});
+                  if(await questionMenu.count())throw new Error('FAQ must wait until Aria finishes composing');
                   await page.waitForFunction(()=>{
                     const t=document.querySelector('[data-aria-chat-turn="aria"] [data-aria-typing="true"]');
                     return (t?.querySelector('[aria-hidden="true"]')?.textContent?.length||0)>12;
@@ -1383,8 +1392,8 @@ if (!bellaris && brandPreviewCandidate) {
                      !await chat.getByText(/200 €/).count())
                     throw new Error('Pass must state 20 €/day, saving 50 € and pass price 200 €');
                   if(JSON.stringify(await ids())!==JSON.stringify(['requirements','caretakers','puppy','location'])||
-                     !await chat.locator('[data-aria-chat-followup-prompt]').getByText(/telefonát od mojich rodičov/).count())
-                    throw new Error('Four next unanswered questions must show below Aria followup immediately');
+                     await chat.locator('[data-aria-chat-followup-prompt]').count())
+                    throw new Error('Four next unanswered questions must show without redundant followup');
                   await questionMenu.locator('[data-aria-chat-question="requirements"]').click();
                   await chat.locator('[data-aria-typing="true"]').waitFor({state:'hidden',timeout:20000});
                   if(await chat.locator('[data-aria-chat-requirements] article').count()!==4||await questionMenu.locator('button').count()!==4)
@@ -2148,6 +2157,7 @@ if (!bellaris && brandPreviewCandidate) {
               throw new Error('Backend error must NOT emit a paid Lead');
             await contact.getByRole('button', { name: 'Odoslať záujem' }).click();
             await page.locator('#aria-hero-form [data-lead-step-success]').waitFor({ state: 'visible' });
+            if(await page.locator('#aria-hero-form [data-lead-success-links] a').count()!==2)throw new Error('Public form must keep both success links as button-like anchors');
             for (let i = 0; i < 15 && !trackedEvents.some(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline'); i++)
               await page.waitForTimeout(100);
             const sent = trackedEvents.filter(e => e.name === 'form_submit' && e.source === 'lead_landing_aria_hero_inline');
