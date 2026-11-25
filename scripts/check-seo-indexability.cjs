@@ -141,8 +141,8 @@ for (const slug of [
   assert(markup.includes('og:type') && markup.includes("article"), "Article OG metadata missing");
   assert(markup.includes("BlogPosting"), "BlogPosting JSON-LD missing");
   assert(markup.includes("Chvostíkovo"), "Article author/brand missing");
-  assert(markup.includes("Chcem sa informovať o škôlke"), "Article inquiry CTA missing");
-  assert(markup.includes('href="#zaujem"'), "Inquiry link must target visible inline form");
+  assert(markup.includes("Spoznáme sa aj s vaším psíkom?"), "Article bottom inquiry heading missing");
+  assert(markup.includes("data-blog-article-header"), "Compact article header missing");
   assert(markup.includes('id="zaujem"'), "Visible inline form section is missing");
   assert(markup.includes('name="meno"') && markup.includes('name="telefon"'), "Inline inquiry fields missing from prerender");
   assert(markup.includes('href="/#cennik"'), "Pricing button below inquiry form missing");
@@ -158,6 +158,7 @@ assert(sitemap.includes("<loc>https://chvostikovo.sk/blog/</loc>"), "Blog index 
 assert(pagesConfig.includes('{ path: "/blog" }'), "Blog index missing from prerender config");
 assert(fs.existsSync("dist/client/blog/index.html"), "Blog index prerender missing");
 assert(homeHtml.includes("Kam so psom počas pracovného dňa?"), "Blog carousel absent from homepage");
+assert(homeHtml.includes('href="/blog/stojan-na-misky-pre-psa-vyhody-a-vyber/"') && homeHtml.includes('href="/blog/target-na-cvicenie-psov-prve-cviky/"'), "Homepage must include product articles");
 assert(!homeHtml.includes("Viac o živote v psej škôlke"), "Duplicate information section still visible");
 assert(homeHtml.includes("Psia škôlka pre šteniatka"), "Puppy preview card missing from homepage");
 assert(homeHtml.includes("blog-puppy-card-"), "Owner-provided puppy photo missing from homepage teaser");
