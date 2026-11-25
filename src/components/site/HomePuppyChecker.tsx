@@ -11,7 +11,7 @@ import { trackCookielessInteraction } from "@/lib/cookieless-interactions";
  * Breed is collected once in the shared enquiry; no lead is created until
  * the visitor accepts the privacy terms and submits the actual form.
  */
-export function HomePuppyChecker() {
+export function HomePuppyChecker({ language = "sk" }: { language?: "sk" | "en" } = {}) {
   const [open, setOpen] = useState(false);
   const [source, setSource] = useState("home_puppy_checker_eligible");
   const [answers, setAnswers] = useState<PuppyCheckInput | undefined>(undefined);
@@ -20,7 +20,7 @@ export function HomePuppyChecker() {
   const continueToContact = (details: PuppyCheckInput, informationOnly = false) => {
     const nextSource = informationOnly ? "home_puppy_checker_info" : "home_puppy_checker_eligible";
     trackMarketingInteraction("inquiry_cta", nextSource);
-    void trackCookielessInteraction("inquiry_cta", nextSource);
+    void trackCookielessInteraction("inquiry_cta", nextSource, language);
     setSource(nextSource);
     setAnswers(details);
     // The Edge API requires one of the existing allowlisted interests.
@@ -32,7 +32,7 @@ export function HomePuppyChecker() {
     <>
       <div data-home-puppy-checker>
         <AriaPuppyChecker
-          trackingSource="home_puppy_checker"
+          trackingSource="home_puppy_checker" language={language}
           onInterest={(details) => continueToContact(details)}
           onInfo={(details) => continueToContact(details, true)}
         />
@@ -40,11 +40,11 @@ export function HomePuppyChecker() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Čo hľadáte pre svojho psíka?"
-        subtitle="Vyplňte krátky nezáväzný formulár. Ozveme sa vám."
+        title={language === "en" ? "What are you looking for for your dog?" : "Čo hľadáte pre svojho psíka?"}
+        subtitle={language === "en" ? "Fill in a short, no-obligation enquiry. We will be in touch." : "Vyplňte krátky nezáväzný formulár. Ozveme sa vám."}
       >
         <LeadStepForm
-          key={source}
+          key={source} language={language}
           questionInHeading
           ariaPreview
           trackingSource={source}

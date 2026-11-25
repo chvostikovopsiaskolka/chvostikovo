@@ -1,3 +1,4 @@
+import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { LeadFormIntro } from "./LeadFormIntro";
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
@@ -37,8 +38,8 @@ export function InquiryCtaSection() {
   );
 }
 
-export function InquirySection({ allScreens = false, matchHero = false, id = "informujte-sa", trackingSource = "care_inline_mobile", title = INFO_TITLE, subtitle = INFO_SUBTITLE }: {
-  allScreens?: boolean; matchHero?: boolean; id?: string; trackingSource?: string; title?: string; subtitle?: string;
+export function InquirySection({ allScreens = false, matchHero = false, id = "informujte-sa", trackingSource = "care_inline_mobile", title = INFO_TITLE, subtitle = INFO_SUBTITLE, language = "sk" }: {
+  allScreens?: boolean; matchHero?: boolean; id?: string; trackingSource?: string; title?: string; subtitle?: string; language?: "sk" | "en";
 } = {}) {
   return (
     <section id={id} className={"relative scroll-mt-24 bg-card pt-0 pb-10 " + (allScreens ? "" : "lg:hidden")}>
@@ -54,7 +55,7 @@ export function InquirySection({ allScreens = false, matchHero = false, id = "in
             {subtitle && <LeadFormIntro text={subtitle} />}
           </p>
 
-          <LeadStepForm questionInHeading trackingSource={trackingSource} />
+          {language === "en" ? <EnglishInquiryForm questionInHeading trackingSource={trackingSource} /> : <LeadStepForm questionInHeading trackingSource={trackingSource} />}
 
         </div>
       </div>

@@ -1,6 +1,7 @@
+import { LanguageSwitch } from "./LanguageSwitch";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ArrowUp, Facebook, FilePenLine, Heart, House, Instagram, Menu, Package, Phone, Tag, Users, X } from "lucide-react";
+import { ArrowUp, Dog, Facebook, FilePenLine, Heart, House, Instagram, Menu, MessageCircle, Package, Phone, Tag, Users, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { PHONE, INSTAGRAM, FACEBOOK } from "@/content/site";
 import { trackMarketingInteraction } from "@/lib/analytics";
@@ -18,7 +19,8 @@ type MobileDockProps = {
 
 export function MobileDock({ language = "sk", variant = "main", onApplicationOpen, onInterestOpen }: MobileDockProps) {
   const english = language === "en";
-  const marketing = variant !== "main";
+  const homeDock = variant === "main" || variant === "en";
+  const marketing = !homeDock;
   const homePath = variant === "lead" ? "/psia-skolka-kosice"
     : variant === "puppy" ? "/psia-skolka-pre-steniatka"
     : variant === "dog-sitting" ? "/strazenie-psov-kosice"
@@ -49,11 +51,12 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
        { id: "interest", label: "Mám záujem o škôlku", icon: FilePenLine },
        { id: "dog-sitting-pricing", label: "Cenník", icon: Tag }]
     : english
-    ? [{ id: "en-benefits", label: "Why us?", icon: Heart },
+    ? [{ id: "top", label: "Home", icon: House },
+       { id: "about", label: "About", icon: Users },
        { id: "pricing", label: "Prices", icon: Tag },
-       { id: "interest", label: "Interested in daycare", icon: FilePenLine },
-       { id: "en-first-visit", label: "First visit", icon: House }]
-    : [{ id: "o-nas", label: "O nás", icon: Users },
+       { id: "requirements", label: "Rules", icon: Heart }]
+    : [{ id: "top", label: "Domov", icon: House },
+       { id: "o-nas", label: "O nás", icon: Users },
        { id: "cennik", label: "Cenník", icon: Tag },
        { id: "podmienky", label: "Podmienky", icon: Heart },
        { id: "produkty", label: "Produkty", icon: Package }];
@@ -65,11 +68,11 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     let idleTimer = 0;
     let anchorY = Math.max(0, window.scrollY);
     const updateActiveSection = () => {
-      if (window.location.pathname !== homePath) {
+      if (window.location.pathname.replace(/\/$/, "") !== homePath.replace(/\/$/, "")) {
         setActiveSection("");
         return;
       }
-      let active = variant === "main" ? "" : "top";
+      let active = homeDock ? "" : "top";
       let lastTop = -Infinity;
       for (const section of sections) {
         const el = document.getElementById(section.id);
@@ -85,7 +88,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
       frame = 0;
       const y = Math.max(0, window.scrollY); // iOS overscroll cannot trigger the arrow
       const delta = y - anchorY;
-      const eligible = window.location.pathname === homePath &&
+      const eligible = !homeDock && window.location.pathname.replace(/\/$/, "") === homePath.replace(/\/$/, "") &&
         y > Math.max(420, window.innerHeight * 0.75) &&
         !document.querySelector('[data-form-dialog], [role="dialog"][data-state="open"]');
       if (Math.abs(delta) >= 6) {
@@ -126,13 +129,15 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
       if (frame) window.cancelAnimationFrame(frame);
       window.clearTimeout(idleTimer);
     };
-  }, [homePath, variant]);
+  }, [homePath, variant, homeDock]);
 
   const go = (event: MouseEvent<HTMLAnchorElement>, href: string, fromMenu = false) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     const destination = new URL(href, window.location.href);
-    const targetId = (destination.hash.slice(1) || (destination.pathname === homePath ? "top" : destination.pathname.split("/").filter(Boolean).join("_")))
+    const samePage = destination.pathname.replace(/\/$/, "") === window.location.pathname.replace(/\/$/, "");
+    if (homeDock && samePage && !destination.search) destination.search = window.location.search;
+    const targetId = (destination.hash.slice(1) || (destination.pathname.replace(/\/$/, "") === homePath.replace(/\/$/, "") ? "top" : destination.pathname.split("/").filter(Boolean).join("_")))
       .replace(/[^a-z0-9_-]/gi, "").slice(0, 70);
     const source = `mobile_${fromMenu ? "menu" : "dock"}_${variant}_${targetId}`;
     void trackCookielessInteraction("nav_click", source, language);
@@ -148,18 +153,19 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
       setMenuOpen(false);
     }
     const execute = () => {
-      const destination = new URL(href, window.location.href);
-      if (destination.pathname !== window.location.pathname || destination.search !== window.location.search) {
+      if (destination.pathname.replace(/\/$/, "") !== window.location.pathname.replace(/\/$/, "") || destination.search !== window.location.search) {
         window.location.assign(destination.pathname + destination.search + destination.hash);
         return;
       }
       const target = document.getElementById(destination.hash.slice(1) || "top");
-      window.history.pushState(null, "", destination.pathname + destination.search + destination.hash);
+      if (homeDock && !destination.hash) window.history.replaceState(window.history.state, "", destination.pathname + destination.search);
+      else window.history.pushState(window.history.state, "", destination.pathname + destination.search + destination.hash);
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
       if (target) {
         const top = destination.hash ? window.scrollY + target.getBoundingClientRect().top - 8 : 0;
-        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+        window.scrollTo({ top: Math.max(0, top), behavior });
       } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({ top: 0, behavior });
       }
       navigatingRef.current = false;
     };
@@ -182,7 +188,10 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
 
   const openApplication = () => {
     if (menuOpen) setMenuOpen(false);
-    if (marketing) {
+    if (english && onApplicationOpen) {
+      void trackCookielessInteraction("nav_click", "mobile_dock_en_application", language);
+      onApplicationOpen();
+    } else if (marketing) {
       // SK landing pages already track enquiries in their route callback.
       if (english) void trackCookielessInteraction("inquiry_cta", "en_mobile_dock", "en");
       onInterestOpen?.();
@@ -201,41 +210,26 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     ? [{ label: "Prvá návšteva", href: homePath + "#dog-sitting-first-visit" }]
     : [{ label: "First visit", href: homePath + "#en-first-visit" }];
 
-  const menuEntries = english
-    ? [
-        ...(marketing ? marketingExtra : [{ label: "Reviews", href: homePath + "#reviews" }]),
-        ...(!marketing ? [{ label: "Why Chvostíkovo", href: homePath + "#why-daycare" }] : []),
-        { label: "Requirements", href: homePath + "#requirements" },
-        { label: "FAQ", href: homePath + "#faq" },
-        { label: "About us", href: homePath + "#about" },
-        { label: "Products", href: "/produkty" },
-        { label: "Contact", href: homePath + "#contact" },
-        { label: "Puppy daycare", href: "/psia-skolka-pre-steniatka" },
-      ]
-    : [
-        ...(marketing ? marketingExtra : [
-          { label: "O nás", href: "/#o-nas" },
-          { label: "Cenník", href: "/#cennik" },
-          { label: "Podmienky", href: "/#podmienky" },
-          { label: "Produkty", href: "/produkty" },
-          { label: "Recenzie", href: "/#recenzie" },
-          { label: "Prečo Chvostíkovo", href: "/#preco-chvostikovo" },
-        ]),
-        ...(marketing ? [
-          { label: "Podmienky", href: variant === "lead" ? homePath + "#lead-requirements" : "/#podmienky" },
-          { label: "O nás", href: "/#o-nas" },
-          { label: "Produkty", href: "/produkty" },
-        ] : []),
-        { label: "Časté otázky", href: "/#faq" },
-        { label: "Kontakt", href: "/#kontakt" },
-        { label: "Škôlka pre šteniatka", href: "/psia-skolka-pre-steniatka" },
-      ];
+  // Keep the main menu short; no duplicated dock links or footer actions.
+  const homeMenuEntries = [
+    {label:english ? "Have a puppy?" : "Máte šteniatko?", icon:Dog, href:homePath+"#aria-puppy-check"},
+    {label:english ? "FAQ" : "Časté otázky", icon:MessageCircle, href:homePath+"#faq"},
+  ];
+  const menuEntries = [
+    ...marketingExtra,
+    { label: "Podmienky", href: variant === "lead" ? homePath + "#lead-requirements" : "/#podmienky" },
+    { label: "O nás", href: "/#o-nas" },
+    { label: "Produkty", href: "/produkty" },
+    { label: "Časté otázky", href: "/#faq" },
+    { label: "Kontakt", href: "/#kontakt" },
+    { label: "Škôlka pre šteniatka", href: "/psia-skolka-pre-steniatka" },
+  ];
 
 
   return (
     <>
-      <nav className="mobile-dock" data-variant={variant} data-hydrated={hydrated ? "true" : "false"} aria-label={english ? "Mobile navigation" : "Mobilná navigácia"}>
-        <button
+      <nav className="mobile-dock" data-variant={variant} data-home-dock={homeDock || undefined} data-hydrated={hydrated ? "true" : "false"} aria-label={english ? "Mobile navigation" : "Mobilná navigácia"}>
+        {!homeDock && <button
             type="button"
             className="mobile-dock-back-top"
             data-visible={hydrated && showBackToTop && !menuOpen ? "true" : "false"}
@@ -245,8 +239,15 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
             onClick={backToTop}
           >
             <ArrowUp aria-hidden="true" size={21} strokeWidth={2.1} />
-          </button>
+          </button>}
         <div className="mobile-dock-bar">
+          {homeDock && <div className="mobile-dock-compact-menu" data-home-menu>
+            <div className="mobile-dock-compact-links">
+              {homeMenuEntries.map(({href,label,icon:Icon}) => <a key={href} href={href} onClick={event => go(event, href)}><Icon size={17} strokeWidth={1.9} aria-hidden="true" /><span>{label}</span></a>)}
+            </div>
+            <a data-home-dock-phone className="mobile-dock-compact-phone" href={"tel:" + PHONE} aria-label={english ? "Call Chvostíkovo" : "Zavolať do Chvostíkova"} data-tracking-source={english ? "en_mobile_dock_phone" : "home_mobile_dock_phone"} onClick={() => void trackCookielessInteraction("phone_click", english ? "en_mobile_dock_phone" : "home_mobile_dock_phone", language)}><Phone size={19} strokeWidth={1.9} aria-hidden="true" /></a>
+            <LanguageSwitch language={language} source={"mobile_dock_" + variant + "_language"} />
+          </div>}
           {sections.map(({ id, icon: Icon, label }) => id === "interest" ? (
             <button key={id} type="button" className="mobile-dock-item mobile-dock-apply" onClick={openApplication}>
               <Icon aria-hidden="true" size={19} strokeWidth={2} />
@@ -275,12 +276,12 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
           {!marketing && (
             <button type="button" className="mobile-dock-item mobile-dock-apply" onClick={openApplication}>
               <FilePenLine aria-hidden="true" size={19} strokeWidth={2} />
-              <span>Prihláška</span>
+              <span>{english ? "Apply" : "Prihláška"}</span>
             </button>
           )}
-          <DialogPrimitive.Root open={menuOpen} onOpenChange={setMenuOpen}>
+          {!homeDock && <DialogPrimitive.Root open={menuOpen} onOpenChange={(open) => { if (open) navigatingRef.current = false; setMenuOpen(open); }}>
             <DialogPrimitive.Trigger asChild>
-              <button ref={menuButtonRef} type="button" aria-label={english ? "Open menu" : "Otvoriť menu"} className="mobile-dock-item" aria-expanded={menuOpen}
+              <button ref={menuButtonRef} type="button" aria-label={english ? "Open menu" : "Otvoriť menu"} className={"mobile-dock-item" + (menuOpen ? " is-active" : "")} aria-expanded={menuOpen}
                   onClick={() => {
                     if (!menuOpen) void trackCookielessInteraction("nav_click", `mobile_dock_${variant}_menu_open`, language);
                   }}>
@@ -325,17 +326,7 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                   >
                     <Phone aria-hidden="true" size={20} />
                   </a>
-                  <a
-                    href={english ? "/" : "/en/dog-daycare-kosice"}
-                    lang={english ? "sk" : "en"}
-                    aria-label={english ? "Slovak version" : "English version"}
-                    title={english ? "Slovak version" : "English version"}
-                    onClick={() => {
-                      void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_language", language);
-                    }}
-                  >
-                    <span aria-hidden="true">{english ? "SK" : "EN"}</span>
-                  </a>
+                  <LanguageSwitch language={language} source={"mobile_menu_" + variant + "_language"} onNavigate={() => { navigatingRef.current = true; setMenuOpen(false); }} />
                   <a
                     href={INSTAGRAM}
                     target="_blank"
@@ -361,12 +352,12 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
                     <Facebook aria-hidden="true" size={20} />
                   </a>
                 </div>
-                <a href="/" aria-label="Chvostíkovo" className="mobile-dock-menu-logo" onClick={() => { void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_top", language); }}>
+                <a href={homePath} aria-label="Chvostíkovo" className="mobile-dock-menu-logo" onClick={() => { void trackCookielessInteraction("nav_click", "mobile_menu_" + variant + "_top", language); }}>
                   <img src={logo} alt="Chvostíkovo" />
                 </a>
               </DialogPrimitive.Content>
             </DialogPrimitive.Portal>
-          </DialogPrimitive.Root>
+          </DialogPrimitive.Root>}
         </div>
       </nav>
     </>

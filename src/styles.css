@@ -511,10 +511,10 @@
   }
   /* Landing-page docks have one fewer tab and a wider central interest CTA.
      The six-slot main-page navigation and all desktop CSS stay unchanged. */
-  .mobile-dock:not([data-variant="main"]) .mobile-dock-bar {
+  .mobile-dock:not([data-home-dock]) .mobile-dock-bar {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(100px, 1.9fr) minmax(0, 1fr) minmax(0, 1fr);
   }
-  .mobile-dock:not([data-variant="main"]) .mobile-dock-apply > span {
+  .mobile-dock:not([data-home-dock]) .mobile-dock-apply > span {
     font-size: 9px;
     letter-spacing: -0.025em;
     line-height: 1.12;
@@ -659,14 +659,14 @@
   .mobile-dock-menu-links a:hover { background: var(--peach); }
   .mobile-dock-menu-actions {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     margin-top: 8px;
     padding-top: 9px;
     flex: 0 0 auto;
     border-top: 1px solid rgba(83,127,99,.17);
   }
-  .mobile-dock-menu-actions a {
+  .mobile-dock-menu-actions > a {
     display: inline-flex;
     min-width: 0;
     min-height: 50px;
@@ -684,11 +684,11 @@
     color: var(--forest-deep);
     transition: background .2s ease, border-color .2s ease;
   }
-  .mobile-dock-menu-actions a svg { flex-shrink: 0; width: 20px; height: 20px; }
-  .mobile-dock-menu-actions a:first-child { background: var(--coral); border-color: var(--coral); color: white; }
-  .mobile-dock-menu-actions a:hover { border-color: var(--coral); background: var(--coral-soft); }
-  .mobile-dock-menu-actions a:first-child:hover { background: var(--coral); }
-  .mobile-dock-menu-actions a:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+  .mobile-dock-menu-actions > a svg { flex-shrink: 0; width: 20px; height: 20px; }
+  .mobile-dock-menu-actions > a:first-child { background: var(--coral); border-color: var(--coral); color: white; }
+  .mobile-dock-menu-actions > a:hover { border-color: var(--coral); background: var(--coral-soft); }
+  .mobile-dock-menu-actions > a:first-child:hover { background: var(--coral); }
+  .mobile-dock-menu-actions > a:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
   .mobile-dock-menu-logo {
     display: flex;
     flex: 0 0 auto;
@@ -736,7 +736,7 @@
 .btn-coral,
 .btn-forest,
 .mobile-dock-item.mobile-dock-apply,
-.mobile-dock-menu-actions a:first-child {
+.mobile-dock-menu-actions > a:first-child {
   --cta-drop-shadow: rgba(147, 74, 40, 0.28);
   --cta-lower-edge: rgba(91, 44, 26, 0.17);
   background-image: linear-gradient(
@@ -771,7 +771,7 @@
   .btn-coral:hover,
   .btn-forest:hover,
   .mobile-dock-item.mobile-dock-apply:hover,
-  .mobile-dock-menu-actions a:first-child:hover {
+  .mobile-dock-menu-actions > a:first-child:hover {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.54),
       inset 0 -2px 0 var(--cta-lower-edge),
@@ -784,7 +784,7 @@
 .btn-coral:active:not(:disabled),
 .btn-forest:active:not(:disabled),
 .mobile-dock-item.mobile-dock-apply:active,
-.mobile-dock-menu-actions a:first-child:active {
+.mobile-dock-menu-actions > a:first-child:active {
   transform: translateY(1px);
   box-shadow:
     inset 0 1px 2px rgba(42, 44, 38, 0.13),
@@ -803,7 +803,7 @@
   .btn-coral,
   .btn-forest,
   .mobile-dock-item.mobile-dock-apply,
-  .mobile-dock-menu-actions a:first-child {
+  .mobile-dock-menu-actions > a:first-child {
     transition: none;
   }
 }
@@ -1416,8 +1416,8 @@
    "Mám záujem" retains a soft colored glow. LEAD and product pages stay as-is. */
 body.site-brand:has(#top) :is(.btn-coral, .btn-forest, .btn-outline-forest, .hero-cta-primary),
 body.site-brand:has(#top) :is(.btn-coral, .btn-forest, .btn-outline-forest, .hero-cta-primary):is(:hover, :active),
-body.site-brand:has(#top) .mobile-dock[data-variant="main"] :is(.mobile-dock-bar, .mobile-dock-item, .mobile-dock-back-top),
-body.site-brand:has(#top) .mobile-dock[data-variant="main"] :is(.mobile-dock-item, .mobile-dock-back-top):is(:hover, :active) {
+body.site-brand:has(#top) .mobile-dock[data-home-dock] :is(.mobile-dock-bar, .mobile-dock-item, .mobile-dock-back-top),
+body.site-brand:has(#top) .mobile-dock[data-home-dock] :is(.mobile-dock-item, .mobile-dock-back-top):is(:hover, :active) {
   box-shadow: none;
   background-image: none;
 }
@@ -1460,11 +1460,11 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
   .site-brand #top > div.relative.z-10.mt-11 { margin-top: 0.6rem; }
 }
 @media (max-width: 379px) {
-  .mobile-dock[data-variant="main"] .mobile-dock-bar { padding: 3px 2px; }
-  .mobile-dock[data-variant="main"] .mobile-dock-item {
+  .mobile-dock[data-home-dock] .mobile-dock-bar { padding: 3px 2px; }
+  .mobile-dock[data-home-dock] .mobile-dock-item {
     min-height: 48px; padding: 3px 0; gap: 2px;
   }
-  .mobile-dock[data-variant="main"] .mobile-dock-item.mobile-dock-apply { min-height: 50px; }
+  .mobile-dock[data-home-dock] .mobile-dock-item.mobile-dock-apply { min-height: 50px; }
 }
 
 /* One Hero CTA rather than an always-open form. Use real flow so reviews
@@ -1798,4 +1798,38 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   --card: #fff;
   --primary-foreground: #26322b;
   --ring: #b82e7f;
+}
+
+/* The menu contact row shares the exact desktop language control. */
+.mobile-dock-menu-actions > [data-language-switch] { justify-content: center; min-width: 0; min-height: 50px; }
+.mobile-dock-menu-actions > [data-language-switch] a { flex: 1; min-width: 0; }
+
+/* APP-01: both localized home docks share the same visual treatment. The EN
+   homepage has no untranslated products destination, so it has five slots. */
+@media (max-width: 1023px) {
+  .mobile-dock[data-home-dock][data-variant="en"] .mobile-dock-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(52px, 1.1fr) minmax(0, 1fr);
+  }
+  /* Persistent second row in the same grid, not an overlay or dialog. */
+  body:has(.mobile-dock[data-home-dock]) { padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); }
+  html:has(.mobile-dock[data-home-dock]) { scroll-padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); }
+  .mobile-dock[data-home-dock] .mobile-dock-bar { position: relative; }
+  .mobile-dock .mobile-dock-compact-menu {
+    grid-column: 1 / -1;
+    display: flex; flex-direction: row; align-items: center;
+    padding: 0 2px 3px; gap: 2px; min-width: 0;
+    border-bottom: 1px solid rgb(38 50 43 / 12%);
+    margin-bottom: 3px;
+  }
+  .mobile-dock-compact-links { display: grid; flex: 1; min-width: 0; grid-template-columns: minmax(0,1.18fr) minmax(0,1fr); gap: 2px; }
+  .mobile-dock-compact-links a, .mobile-dock-compact-phone { display: flex; align-items: center; justify-content: center; gap: 3px; min-width: 0; min-height: 44px; border-radius: 14px; padding: 2px; color: var(--forest-deep); text-decoration: none; }
+  .mobile-dock-compact-phone { flex: 0 0 44px; background: transparent; }
+  .mobile-dock-compact-links a span { min-width: 0; font-family: var(--font-display); font-size: clamp(9px,2.8vw,13px); font-weight: 650; line-height: 1.12; overflow-wrap: anywhere; }
+  .mobile-dock-compact-links svg { flex-shrink: 0; width: clamp(13px,3.8vw,17px); height: auto; }
+  .mobile-dock-compact-links a:hover, .mobile-dock-compact-phone:hover { background: var(--peach); }
+  .mobile-dock-compact-menu > [data-language-switch] { padding: 1px; }
+  .mobile-dock-compact-menu > [data-language-switch] a { padding-inline: 0; min-width: 44px; min-height: 44px; }
+  .site-brand #top .home-hero-cta { max-width: 280px; }
+  .site-brand #top [data-home-hero-interest-cta] { font-size: clamp(12px, 3.5vw, 16px); padding-inline: 7px; }
+
 }

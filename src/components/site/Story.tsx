@@ -72,7 +72,7 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
     { title: "Celodenná starostlivosť a dohľad", text: "Kým pracujete alebo si vybavujete povinnosti, váš psík nie je sám. Počas celého pobytu naňho dohliadajú **minimálne dvaja opatrovatelia**." },
     { title: "Individuálny prístup", text: "Každý psík má svoje tempo. Spoznávame jeho **povahu, zvyky a potreby**, aby sme mu dopriali bezpečný a príjemný deň v kolektíve." },
   ];
-  const items = isEnglish ? careEn : homeCombined ? CARE.map((item, index) => ({ ...item, ...combinedCopy[index]! })) : CARE;
+  const items = isEnglish ? (homeCombined ? careEn.map((item,i) => ({ ...item, title:["An active day with friends","All-day care and supervision","Individual care"][i]!, text:["Even if your dog has **energy to spare**, they enjoy movement, games, new experiences and other dogs. We alternate activities with **rest**.","While you work or take care of your responsibilities, your dog is not alone. **At least two caregivers** supervise them throughout the stay.","Every dog has their own pace. We get to know their **temperament, habits and needs** to give them a safe, enjoyable day with the group."][i]! })) : careEn) : homeCombined ? CARE.map((item, index) => ({ ...item, ...combinedCopy[index]! })) : CARE;
   const mobilePhotos = [
     {
       src: CARE[0]!.img,
@@ -208,15 +208,15 @@ export function Care({ language = "sk", showEmbeddedFriendship = true, showInter
 }
 
 /** Existing friendship photo and card now serve the full application, not a second lead form. */
-export function FriendshipApplication() {
+export function FriendshipApplication({ language = "sk" }: { language?: "sk" | "en" } = {}) {
   return (
     <section id="psie-priatelstva" className="relative bg-card pb-10 sm:pb-12">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
-        <FriendshipFeature embedded applicationMode />
+        <FriendshipFeature embedded applicationMode language={language} />
         <div data-home-friendship-form className="form-liquid-surface mx-auto mt-6 w-full max-w-4xl rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8">
-          <h3 className="mb-5 text-center font-display text-xl font-bold text-forest sm:text-2xl">{APPLICATION_TITLE}</h3>
-          <LongForm collapsible onExpand={() => void trackCookielessInteraction("nav_click", "home_friendship_application")} />
+          <h3 className="mb-5 text-center font-display text-xl font-bold text-forest sm:text-2xl">{language === "en" ? "Daycare application" : APPLICATION_TITLE}</h3>
+          <LongForm collapsible language={language} onExpand={() => void trackCookielessInteraction("nav_click", "home_friendship_application", language)} />
         </div>
       </div>
     </section>
@@ -271,14 +271,14 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
   return (
     <section id={isEnglish ? "about" : "o-nas"} className="relative scroll-mt-24 overflow-hidden py-12 sm:py-16">
       <SectionAmbientPaws />
-      {homeLayout && !isEnglish && (
+      {homeLayout && (
         <h2 className="section-title relative z-10 mx-auto mb-7 px-2 text-center text-[clamp(13px,4vw,32px)] leading-tight tracking-[-0.04em] whitespace-nowrap">
-          Kto sa bude starať o vášho psíka?
+          {isEnglish ? "Who will look after your dog?" : "Kto sa bude starať o vášho psíka?"}
         </h2>
       )}
-      <div className={"relative z-10 mx-auto max-w-6xl px-4 " + (homeLayout && !isEnglish ? "flex flex-col gap-7" : "grid items-center gap-10 lg:grid-cols-2")}>
-        <div className={homeLayout && !isEnglish ? "order-2 mx-auto w-full max-w-[810px]" : ""}>
-          {(!homeLayout || isEnglish) && <>
+      <div className={"relative z-10 mx-auto max-w-6xl px-4 " + (homeLayout ? "flex flex-col gap-7" : "grid items-center gap-10 lg:grid-cols-2")}>
+        <div className={homeLayout ? "order-2 mx-auto w-full max-w-[810px]" : ""}>
+          {!homeLayout && <>
           <span className="font-display text-sm font-semibold tracking-wide text-coral uppercase">
             {isEnglish ? "About us" : "O nás"}
           </span>
@@ -286,12 +286,12 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
             {isEnglish ? "Who is behind Chvostíkovo?" : "Kto stojí za Chvostíkovom?"}
           </h2>
           </>}
-          {homeLayout && !isEnglish ? (
+          {homeLayout ? (
             <div data-about-expanded className="space-y-5 text-left text-base leading-relaxed text-forest/85 [text-wrap:pretty]">
-              <p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
+              {isEnglish ? <><p>We are <strong className="font-extrabold text-forest">owners of large dogs ourselves</strong>, so we know what it feels like to entrust them to someone else.</p><p><strong>That is why Chvostíkovo was created</strong> — a dog daycare in Košice for medium and large breeds, putting safety, wellbeing and individual care first.</p><p>We have <strong>years of experience with dogs</strong>, including shelter work, foster care and raising our own dogs. We understand their needs, communication and behaviour in a group.</p><p>Chvostíkovo is more than daytime care. <strong>It is a second home</strong>, where every dog receives the same attention and responsibility we give our own dogs.</p></> : <><p>Aj my sme <strong className="font-extrabold text-forest">majitelia veľkých psíkov</strong>, a preto poznáme ten pocit, keď ich máte zveriť niekomu inému.</p>
               <p><strong className="font-extrabold text-forest">Práve preto vzniklo Chvostíkovo</strong> — psia škôlka v Košiciach zameraná na <strong className="font-extrabold text-forest">stredné a veľké plemená</strong>, kde sú bezpečie, pohoda a individuálny prístup na prvom mieste.</p>
               <p>Máme <strong className="font-extrabold text-forest">dlhoročné skúsenosti</strong> s prácou so psami: <strong className="font-extrabold text-forest">práca v útulku, starostlivosť o psov v dočasnej opatere a výchova vlastných psíkov</strong>. Tieto skúsenosti nás naučili rozumieť ich potrebám, komunikácii aj správaniu v skupine.</p>
-              <p>Chvostíkovo nie je len miesto na stráženie psov. <strong className="font-extrabold text-forest">Je to druhý domov</strong>, kde sa o každého člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim vlastným psom.</p>
+              <p>Chvostíkovo nie je len miesto na stráženie psov. <strong className="font-extrabold text-forest">Je to druhý domov</strong>, kde sa o každého člena svorky staráme s rovnakou zodpovednosťou a pozornosťou, akú venujeme našim vlastným psom.</p></>}
             </div>
           ) : (
           <div className="mt-5 space-y-4 text-forest/85">
@@ -339,7 +339,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
           )}
         </div>
 
-        <div className={homeLayout && !isEnglish ? "order-1 mx-auto w-full max-w-[810px] space-y-4" : "space-y-4"}>
+        <div className={homeLayout ? "order-1 mx-auto w-full max-w-[810px] space-y-4" : "space-y-4"}>
           <img
             src={teamPhoto}
             alt={isEnglish ? "The owners of Chvostíkovo dog daycare with their dogs" : "Majitelia psej škôlky Chvostíkovo so svojimi psíkmi"}
@@ -361,7 +361,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
             />
           </div>
           {homeLayout && <div data-hero-benefits className="flex w-full flex-nowrap items-center justify-center gap-1 pt-2 sm:gap-2 lg:gap-3">
-            {["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"].map(item => (
+            {(isEnglish ? ["All-day care", "Outdoor run", "Free first visit"] : ["Celodenný dohľad", "Vlastný výbeh", "Úvodná návšteva zadarmo"]).map(item => (
               <span key={item} className="inline-flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-full bg-[#2d764b] px-1.5 py-1.5 text-[clamp(8px,2.1vw,11px)] font-bold leading-tight text-white shadow-card min-[350px]:px-2 min-[390px]:gap-1 min-[390px]:px-2.5 sm:gap-1.5 sm:px-3 sm:py-2 lg:px-4 lg:text-xs">
                 <CheckCircle2 className="size-3 shrink-0 sm:size-4" aria-hidden="true" />{item}
               </span>
@@ -370,7 +370,7 @@ export function About({ language = "sk", homeLayout = false }: { language?: "sk"
         </div>
       </div>
 
-      <SafetyCertificates language={language} homeLayout={homeLayout && !isEnglish} />
+      <SafetyCertificates language={language} homeLayout={homeLayout} />
     </section>
   );
 }
@@ -443,13 +443,13 @@ const PARTNERS = [
   { name: "Lolkio – tréner psov", logo: lolkio, href: null },
 ];
 
-export function Partners() {
+export function Partners({ language = "sk" }: { language?: "sk" | "en" } = {}) {
   return (
     <section className="relative overflow-hidden py-10 sm:py-14">
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <h2 className="text-center font-display text-base font-semibold tracking-widest text-forest/60 uppercase sm:text-lg">
-          Spolupracujeme
+          {language === "en" ? "Our partners" : "Spolupracujeme"}
         </h2>
         <div className="mt-6 grid grid-cols-2 gap-4 sm:flex sm:flex-nowrap sm:items-center sm:justify-center sm:gap-4 lg:gap-5">
           {PARTNERS.map((p) => {

@@ -1,3 +1,4 @@
+import { REVIEWS_EN } from "@/content/reviews-en";
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { REVIEWS } from "@/content/site";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -29,7 +30,7 @@ export function GoogleReviewMark() {
   );
 }
 
-function ReviewCard({ name, text }: { name: string; text: string }) {
+function ReviewCard({ name, text, language = "sk" }: { name: string; text: string; language?: "sk" | "en" }) {
   const [open, setOpen] = useState(false);
   const body = useRef<HTMLQuoteElement>(null);
   const [clamped, setClamped] = useState(false);
@@ -45,7 +46,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
       <div data-review-byline className="flex w-full min-w-0 items-center gap-1.5 whitespace-nowrap">
         <GoogleReviewMark />
         <figcaption className="min-w-0 truncate font-display text-[12px] font-bold text-forest sm:text-sm">{name}</figcaption>
-        <span data-review-stars className="ml-auto shrink-0 text-[12px] leading-none tracking-[-0.04em] text-[#F5B301] sm:text-sm" aria-label="5 z 5 hviezdičiek">★★★★★</span>
+        <span data-review-stars className="ml-auto shrink-0 text-[12px] leading-none tracking-[-0.04em] text-[#F5B301] sm:text-sm" aria-label={language === "en" ? "5 out of 5 stars" : "5 z 5 hviezdičiek"}>★★★★★</span>
       </div>
       <blockquote
         ref={body}
@@ -60,7 +61,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
             onClick={() => setOpen((v) => !v)}
             data-review-read-more className="mt-1 font-display text-xs font-semibold text-coral underline underline-offset-4 sm:text-sm"
           >
-            {open ? "Zobraziť menej" : "Prečítaj si viac"}
+            {open ? (language === "en" ? "Show less" : "Zobraziť menej") : (language === "en" ? "Read more" : "Prečítaj si viac")}
           </button>
         )}
       </div>
@@ -68,7 +69,7 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
   );
 }
 
-function ReviewCarousel({ reviews, hero = false }: { reviews: typeof REVIEWS; hero?: boolean }) {
+function ReviewCarousel({ reviews, hero = false, language = "sk" }: { reviews: typeof REVIEWS; hero?: boolean; language?: "sk" | "en" }) {
   const track = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
   const resumeTimer = useRef<number | null>(null);
@@ -207,7 +208,7 @@ function ReviewCarousel({ reviews, hero = false }: { reviews: typeof REVIEWS; he
       className={"relative left-1/2 mt-3 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [touch-action:auto] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden " + (hero ? "pb-6 sm:pb-7" : "pb-2")}
     >
       {[...reviews, ...reviews].map((r, i) => (
-        <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
+        <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} language={language} />
       ))}
     </div>
   );
@@ -308,10 +309,10 @@ export function VideoReasonsGrid({ items, language = "sk", homeMobileLayout = fa
       <div className={homeMobileLayout ? "relative row-span-2 min-w-0 self-stretch [&>div]:absolute [&>div]:inset-0 [&>div]:h-full [&>div]:min-h-0 sm:[&>div]:relative sm:[&>div]:min-h-[260px] sm:row-span-1" : "min-w-0"}>
         <InlineDaycareVideo language={language} />
       </div>
-      {homeMobileLayout && <div className="relative col-start-1 row-start-3 min-w-0 self-stretch sm:hidden"><img data-home-reason-photo src={happyDog} alt="Spokojný psík v Chvostíkove" loading="lazy" className="absolute inset-0 size-full rounded-3xl object-cover" /></div>}
+      {homeMobileLayout && <div className="relative col-start-1 row-start-3 min-w-0 self-stretch sm:hidden"><img data-home-reason-photo src={happyDog} alt={language === "en" ? "Happy dog at Chvostíkovo" : "Spokojný psík v Chvostíkove"} loading="lazy" className="absolute inset-0 size-full rounded-3xl object-cover" /></div>}
       <div data-video-reasons-copy className="contents sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl">
         {items.map(({ title, text, icon: Icon }) => (
-          <article key={title} className={homeMobileLayout ? (title === "Pekný deň aj pre vášho psíka" ? "col-start-2 row-start-3 min-w-0 text-cream sm:col-auto sm:rounded-none sm:border-0 sm:px-0 sm:py-4" : "col-start-2 min-w-0 text-cream sm:col-auto sm:py-4") : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>
+          <article key={title} className={homeMobileLayout ? ((title === "Pekný deň aj pre vášho psíka" || title === "A lovely day for your dog") ? "col-start-2 row-start-3 min-w-0 text-cream sm:col-auto sm:rounded-none sm:border-0 sm:px-0 sm:py-4" : "col-start-2 min-w-0 text-cream sm:col-auto sm:py-4") : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>
             <h3 className={"flex min-w-0 items-start gap-1.5 font-display font-bold leading-snug text-cream sm:gap-2 sm:text-lg lg:text-xl " +
               (homeMobileLayout ? "text-[12px] min-[390px]:text-[13px]" : "text-[13px] min-[390px]:text-[15px]")}>
               <span className={"grid shrink-0 place-items-center rounded-full bg-coral text-primary-foreground sm:size-9 " + (homeMobileLayout ? "size-5" : "size-6")}>
@@ -331,12 +332,14 @@ export function VideoReasonsGrid({ items, language = "sk", homeMobileLayout = fa
 }
 
 export function ReviewReasons({
+  language = "sk",
   ctaLabel = "Ako sa postaráme o vášho psíka",
   onCtaClick,
   variant = "default",
   withVideo = false,
   showCta = true,
 }: {
+  language?: "sk" | "en";
   ctaLabel?: string;
   onCtaClick?: () => void;
   variant?: "default" | "home";
@@ -344,18 +347,18 @@ export function ReviewReasons({
   showCta?: boolean;
 } = {}) {
   return (
-    <section id="preco-chvostikovo" className={"relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0 " + (variant === "home" ? "mt-20 sm:mt-0" : "")}>
+    <section id={language === "en" ? "en-benefits" : "preco-chvostikovo"} className={"relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0 " + (variant === "home" ? "mt-20 sm:mt-0" : "")}>
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-8 left-[6%] size-9 -rotate-12 text-cream/10 sm:size-12" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute top-[34%] right-[8%] size-7 rotate-[20deg] text-cream/10 sm:size-10" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute bottom-24 left-[14%] size-8 rotate-12 text-cream/10 sm:size-11" />
       <PawPrint aria-hidden="true" className="pointer-events-none absolute right-[18%] bottom-8 size-6 -rotate-[18deg] text-cream/10 sm:size-9" />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <div className="text-center">
-          <h2 className="font-display text-3xl text-cream sm:text-4xl">Prečo si vybrať Chvostíkovo?</h2>
+          <h2 className="font-display text-3xl text-cream sm:text-4xl">{language === "en" ? "Why choose Chvostíkovo?" : "Prečo si vybrať Chvostíkovo?"}</h2>
         </div>
 
         {withVideo ? (
-          <VideoReasonsGrid items={variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS} homeMobileLayout={variant === "home"} />
+          <VideoReasonsGrid items={language === "en" ? HOME_REVIEW_REASONS.map((item, i) => ({ ...item, title: ["A place they love", "Peace of mind for you", "A lovely day for your dog"][i]!, text: ["Our daycare dogs tell us the most when they greet us at the door and look forward to seeing their friends. Watch their joy in our videos and read owners’ experiences.", "Entrusting your dog to someone else is a big step. We want you to know the people caring for them and feel at ease throughout your day.", "While you take care of your responsibilities, your dog enjoys company, attention and activities. In the evening, you can enjoy time together after a day full of experiences."][i]! })) : variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS} language={language} homeMobileLayout={variant === "home"} />
         ) : (
           <div className="mt-7 overflow-hidden rounded-3xl bg-cream/10 px-5 text-cream shadow-card ring-1 ring-cream/20 backdrop-blur-xl md:grid md:grid-cols-3 md:px-3">
             {(variant === "home" ? HOME_REVIEW_REASONS : REVIEW_REASONS).map(({ title, text, icon: Icon }) => (
@@ -410,25 +413,26 @@ export function ReviewReasons({
   );
 }
 
-export function Reviews({ reviews = REVIEWS, variant = "default" }: { reviews?: typeof REVIEWS; variant?: "default" | "hero" } = {}) {
+export function Reviews({ reviews, variant = "default", language = "sk" }: { reviews?: typeof REVIEWS; variant?: "default" | "hero"; language?: "sk" | "en" } = {}) {
+  const t = (sk: string, en: string) => language === "en" ? en : sk;
   return (
-    <section id="recenzie" className={"relative scroll-mt-24 " + (variant === "hero" ? "overflow-visible bg-transparent pt-1 pb-12 sm:pt-2 sm:pb-14" : "overflow-hidden bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14")}>
+    <section id={language === "en" ? "reviews" : "recenzie"} className={"relative scroll-mt-24 " + (variant === "hero" ? "overflow-visible bg-transparent pt-1 pb-12 sm:pt-2 sm:pb-14" : "overflow-hidden bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14")}>
       <SectionAmbientPaws />
       <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
         {variant === "hero" ? (
           <h2 data-aria-review-proof className="mx-auto flex w-fit max-w-full items-center justify-center gap-1 whitespace-nowrap font-display text-[clamp(9px,2.8vw,16px)] font-bold leading-tight tracking-[-0.02em] text-forest sm:gap-2 sm:text-base">
-            <span>Viac ako 100 spokojných psíkov</span>
+            <span>{t("Viac ako 100 spokojných psíkov", "Over 100 happy dogs")}</span>
             <span aria-hidden="true" className="text-forest/55">·</span>
-            <span className="font-semibold text-forest/80">⭐ 5 z 5 na Google</span>
+            <span className="font-semibold text-forest/80">{t("⭐ 5 z 5 na Google", "⭐ 5/5 on Google")}</span>
           </h2>
         ) : (
           <>
-            <h2 className="section-title whitespace-nowrap text-[clamp(14px,4.7vw,36px)] leading-tight">Viac ako 100 spokojných psíkov</h2>
-            <p className="mt-2.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 z 5 na Google</p>
+            <h2 className="section-title whitespace-nowrap text-[clamp(14px,4.7vw,36px)] leading-tight">{t("Viac ako 100 spokojných psíkov", "Over 100 happy dogs")}</h2>
+            <p className="mt-2.5 text-sm text-forest/80 sm:text-base">{t("⭐ 5.0 z 5 na Google", "⭐ 5.0/5 on Google")}</p>
           </>
         )}
 
-        <ReviewCarousel reviews={reviews} hero={variant === "hero"} />
+        <ReviewCarousel reviews={reviews ?? (language === "en" ? REVIEWS_EN : REVIEWS)} hero={variant === "hero"} language={language} />
       </div>
     </section>
   );
