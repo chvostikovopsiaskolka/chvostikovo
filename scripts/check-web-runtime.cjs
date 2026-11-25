@@ -378,9 +378,125 @@ if (!bellaris && brandPreviewCandidate) {
   }
 }
 
+// Shared footer: test the real responsive wrapper and an isolated interactive
+// iframe fixture. Never contact Google or send real consent/analytics requests.
+async function assertFooterMapGeometry(browser, engine) {
+  const context = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const origin = new URL(base).origin;
+  const routes = [...fullRoutes, '/produkty/', '/stojan-na-misky-pre-psa/', '/target-na-cvicenie-pre-psov/', '/blog/', '/blog/je-psia-skolka-vhodna-pre-kazdeho-psa/'];
+  try {
+    await context.addInitScript(() => {
+      localStorage.setItem('chvostikovo-cookies', JSON.stringify({
+        version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,
+        functional:false,analytics:false,marketing:false
+      }));
+    });
+    await context.route('**/*', route => {
+      const request = route.request(), url = new URL(request.url());
+      if (request.method()==='GET' && url.origin==='https://www.google.com' &&
+          url.pathname==='/maps' && url.searchParams.get('output')==='embed') {
+        return route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><html><body style="margin:0;background:#dcebd5"><div style="position:fixed;inset:0;background:repeating-linear-gradient(40deg,transparent 0 35px,#fff 36px 43px)"></div><button style="position:fixed;bottom:16px;right:16px;min-height:44px" aria-pressed="false" onclick="this.setAttribute(\'aria-pressed\',this.getAttribute(\'aria-pressed\')===\'false\'?\'true\':\'false\')">Map fixture control</button></body></html>'});
+      }
+      if (!['GET','HEAD'].includes(request.method()) || url.origin!==origin) return route.abort();
+      return route.continue();
+    });
+    for (const route of routes) {
+      const page = await context.newPage();
+      const label = route.replaceAll('/','_');
+      try {
+        await page.goto(new URL(route,base).href,{waitUntil:'domcontentloaded',timeout:40000});
+        const map = page.locator('footer [data-footer-map]');
+        await map.waitFor({state:'visible'});
+        if (await map.count()!==1 || await map.locator('iframe').count()!==0 ||
+            await map.getByRole('button',{name:/Otvoriť nastavenia cookies|Open cookie settings/}).count()!==1)
+          throw new Error('Footer map must preserve the functional-consent placeholder: '+route);
+        const fallbackRadius=await map.evaluate(el=>{
+          const card=el.closest('[data-footer-contact-card]'),style=getComputedStyle(card);
+          return Math.abs(parseFloat(getComputedStyle(el).borderTopLeftRadius)-
+            Math.max(0,parseFloat(style.borderTopLeftRadius)-parseFloat(style.paddingRight)))<1;
+        });
+        if(!fallbackRadius)throw new Error('Consent placeholder corners must match the card inset: '+route);
+        await page.evaluate(()=>{
+          const consent=JSON.parse(localStorage.getItem('chvostikovo-cookies'));
+          consent.functional=true;
+          localStorage.setItem('chvostikovo-cookies',JSON.stringify(consent));
+          window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed',{detail:consent}));
+        });
+        const iframe=map.locator('iframe');
+        await iframe.waitFor({state:'visible',timeout:10000});
+        const src=await iframe.getAttribute('src');
+        if(!src?.startsWith('https://www.google.com/maps?') || !src.includes('output=embed') ||
+            !await iframe.getAttribute('title') || await iframe.getAttribute('loading')!=='lazy')
+          throw new Error('Footer map URL, accessible title or lazy loading changed: '+route);
+        const address=page.locator('footer [data-footer-contact-card] a').filter({hasText:'Poľská 6, 040 01 Košice'});
+        if(await address.count()!==1 || await address.getAttribute('target')!=='_blank' ||
+            !/^https:\/\//.test(await address.getAttribute('href')||''))
+          throw new Error('External map address link missing: '+route);
+        // Main, paid landing and EN get the entire width matrix. Other shared
+        // footer consumers get mobile and desktop geometry/readback.
+        const widths=['/','/psia-skolka-kosice/','/en/dog-daycare-kosice/'].includes(route)
+          ? [320,375,390,430,1440] : [390,1440];
+        for(const width of widths) {
+          await page.setViewportSize({width,height:width>=1024?900:844});
+          await centerFixtureControl(map);
+          const sample=await map.evaluate(el=>{
+            const card=el.closest('[data-footer-contact-card]'),frame=el.querySelector('iframe');
+            const c=card.getBoundingClientRect(),m=el.getBoundingClientRect(),f=frame.getBoundingClientRect();
+            const cs=getComputedStyle(card),ms=getComputedStyle(el),fs=getComputedStyle(frame);
+            const root=parseFloat(getComputedStyle(document.documentElement).fontSize);
+            const pad=parseFloat(cs.paddingRight),outer=parseFloat(cs.borderTopRightRadius);
+            const radius=Math.max(0,outer-pad);
+            const corners=['borderTopLeftRadius','borderTopRightRadius','borderBottomLeftRadius','borderBottomRightRadius'];
+            const near=(a,b)=>Math.abs(a-b)<1.5;
+            return {
+              outer,pad,radius,inner:parseFloat(ms.borderTopRightRadius),
+              preserved:near(outer,root*1.25+12)&&near(pad,root*(innerWidth>=640?1.75:1.25)),
+              concentric:corners.every(key=>near(parseFloat(ms[key]),radius)),
+              insets:near(c.right-m.right,pad)&&(innerWidth>=1024||
+                near(m.left-c.left,pad)&&near(c.bottom-m.bottom,parseFloat(cs.paddingBottom))),
+              frameFits:near(f.width,m.width)&&near(f.height,m.height)&&near(f.height,root*15)&&
+                near(f.left,m.left)&&near(f.top,m.top),
+              clipped:ms.overflowX==='hidden'&&ms.overflowY==='hidden',
+              noOverflow:m.left>=0&&m.right<=innerWidth+1&&document.documentElement.scrollWidth<=innerWidth+1,
+              interactive:fs.pointerEvents!=='none'&&document.elementFromPoint(m.left+m.width/2,m.top+m.height/2)===frame,
+              cornerClipped:radius<8||document.elementFromPoint(m.left+1,m.top+1)!==frame
+            };
+          });
+          if(!sample.preserved||!sample.concentric||!sample.insets||!sample.frameFits||
+              !sample.clipped||!sample.noOverflow||!sample.interactive||!sample.cornerClipped)
+            throw new Error('Footer map geometry '+route+' '+width+': '+JSON.stringify(sample));
+          const control=page.frameLocator('footer [data-footer-map] iframe').getByRole('button',{name:'Map fixture control'});
+          await control.waitFor({state:'visible',timeout:10000});
+          const before=await control.getAttribute('aria-pressed');
+          await control.click({timeout:5000});
+          if(await control.getAttribute('aria-pressed')===before)
+            throw new Error('Footer map iframe is not interactive: '+route+' '+width);
+          await page.screenshot({path:path.join(out,'footer-map-'+engine+'-'+label+'-'+width+'.png')});
+          console.log('PASS footer-map '+engine+' '+route+' '+width+' '+JSON.stringify(sample));
+        }
+        await page.evaluate(()=>{
+          const consent=JSON.parse(localStorage.getItem('chvostikovo-cookies'));
+          consent.functional=false;
+          localStorage.setItem('chvostikovo-cookies',JSON.stringify(consent));
+          window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed',{detail:consent}));
+        });
+        await iframe.waitFor({state:'detached',timeout:5000});
+        await map.getByRole('button',{name:/Otvoriť nastavenia cookies|Open cookie settings/}).waitFor({state:'visible'});
+        results.push({engine,route:'footer-map '+route,status:'PASS',widths});
+      } catch(error) {
+        const failure={engine,route:'footer-map '+route,status:'FAIL',error:error.message};
+        failures.push(failure);results.push(failure);
+        console.error('FAIL '+JSON.stringify(failure));
+        await page.screenshot({path:path.join(out,'footer-map-'+engine+'-'+label+'-failure.png')}).catch(()=>{});
+      } finally {await page.close();}
+    }
+  } finally {await context.close();}
+}
+
 (async () => {
   for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
+    if (!bellaris && brandPreviewCandidate && runtimeScope==='full') await assertFooterMapGeometry(browser, engine);
     for (const restricted of [false, true]) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
       // Each URL must start without a saved choice from the preceding URL.
