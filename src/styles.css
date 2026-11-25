@@ -1045,7 +1045,7 @@
   border-color: #cadac8;
   box-shadow: 0 4px 18px rgb(45 77 54 / 12%);
 }
-.aria-brand-experiment [data-aria-dock] button[aria-expanded="true"] {
+.aria-brand-experiment [data-aria-dock] button[aria-expanded="true"]:not([data-aria-chat-trigger]) {
   background-color: #f2d9e8;
   color: var(--preview-cta-rose);
 }
@@ -1528,7 +1528,7 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
 /* Primary campaign orange CTA; keep its text, touch target and focus. */
 .lead-brand-live [data-aria-lead-hero-cta] {
   color: #fff;
-  background-color: #b85b00;
+  background-color: #ffa414;
   background-image: none;
   border-color: rgb(190 117 42 / 29%);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 86%), 0 9px 22px -14px rgb(79 46 17 / 24%);
@@ -1537,7 +1537,7 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
 }
 .lead-brand-live [data-aria-lead-hero-cta]:is(:hover, :active) {
   color: #fff;
-  background-color: #a64d00;
+  background-color: #f39808;
   border-color: rgb(190 117 42 / 42%);
 }
 
@@ -1618,7 +1618,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 }
 
 /* Paid navigation only: preserve Aria portrait and speech dimensions. */
-.lead-brand-live [data-aria-guide] { bottom: max(8px, env(safe-area-inset-bottom)); }
+.lead-brand-live [data-aria-guide] { bottom: max(0px, calc(env(safe-area-inset-bottom) - 6px)); }
 .lead-brand-live [data-aria-section-navigation] { height: 44px; }
 .lead-brand-live [data-aria-section-navigation] button > svg { width: 18px; height: 18px; }
 .lead-brand-live [data-lead-nav-key][aria-current="location"]:not([data-aria-interest-cta]) {
@@ -1656,13 +1656,34 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
    use the two original photos with a top-biased crop. */
 .lead-brand-live [data-aria-lead-chat] [data-aria-bubble-chat-cta] {
   display: flex;
-  width: min(88%, 15rem);
-  min-height: 44px;
-  margin: 0.375rem auto 0;
-  padding-block: 0.25rem;
+  position: relative;
+  width: 100%;
+  min-height: 36px;
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.2;
 }
-.lead-brand-live [data-lead-hero-pill] { font-weight: 700; }
-.lead-brand-live [data-lead-hero-photo] img { object-position: 50% 0%; }
+.lead-brand-live [data-aria-lead-chat] [data-aria-bubble-chat-cta]::before { content: ""; position: absolute; inset: -4px 0; }
+.lead-brand-live [data-aria-lead-chat] [data-aria-speech] { border-radius: 16px; padding-block: 8px; -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4); }
+.lead-brand-live [data-aria-lead-chat] [data-aria-tail] path { fill: rgb(255 255 255 / 90%); }
+.lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: 13px; line-height: 1.35; }
+.lead-brand-live [data-aria-lead-chat] [data-aria-message] p strong { font-size: inherit; line-height: inherit; }
+.lead-brand-live [data-aria-chat-trigger] { background: transparent; box-shadow: none; -webkit-tap-highlight-color: transparent; }
+.lead-brand-live [data-lead-hero-pill] { font-weight: 700; border-radius: 8px; background-color: #ffa414; color: #26322b; }
+.lead-brand-live [data-aria-lead-hero-cta] { text-shadow: 0 1px 2px rgb(104 51 0 / 40%); }
+[data-aria-chat-lead] { background-color: rgb(255 255 255 / 90%); background-image: radial-gradient(ellipse at 5% 0%, rgb(255 225 181 / 18%), transparent 65%), radial-gradient(ellipse at 95% 100%, rgb(248 221 235 / 18%), transparent 65%); -webkit-backdrop-filter: blur(24px) saturate(1.4); backdrop-filter: blur(24px) saturate(1.4); }
+[data-aria-chat-lead] [data-aria-chat-history] { background: transparent; backdrop-filter: none; }
+@keyframes aria-composing-pulse { 0%, 100% { opacity: .4; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+@keyframes aria-composing-fade { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+[data-aria-chat-lead] .aria-composing-dot { animation: aria-composing-pulse 1.2s ease-in-out infinite; }
+[data-aria-chat-lead] .aria-composing-dot:nth-child(2) { animation-delay: 160ms; }
+[data-aria-chat-lead] .aria-composing-dot:nth-child(3) { animation-delay: 320ms; }
+@media (prefers-reduced-motion: reduce) { [data-aria-chat-lead] .aria-composing-dot { animation-name: aria-composing-fade; animation-duration: 1.8s; } }
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) { [data-aria-chat-lead] { background-color: #fff; } }
+@media (prefers-reduced-transparency: reduce) { [data-aria-chat-lead] { background: #fff; backdrop-filter: none; } .lead-brand-live [data-aria-tail] path { fill: #fff; } }
+@media (min-width: 1024px) { .lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: 18px; } .lead-brand-live [data-aria-lead-chat] [data-aria-bubble-chat-cta] { font-size: 14px; } }
+.lead-brand-live [data-lead-hero-photo] img { object-position: 50% 50%; }
 .lead-brand-live [data-lead-hero-photo]:hover img { transform: none; }
 .lead-brand-live [data-lead-hero-pills] { gap: clamp(5px, 1.6vw, 10px); }
 
@@ -1674,7 +1695,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live [data-aria-service-group] { grid-area: service; margin-top: 0; margin-bottom: 12px; }
   .lead-brand-live [data-aria-service-badge] { text-transform: none; font-size: 11px; letter-spacing: 0; padding-block: 6px; }
   .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin-top: 12px; }
-  .lead-brand-live [data-lead-hero-pill] { font-size: 10px; padding: 4px 7px; }
+  .lead-brand-live [data-lead-hero-pill] { font-size: clamp(11px, 2.9vw, 13px); padding: 5px 8px; }
   .lead-brand-live [data-lead-hero-photos] { grid-area: photos; margin-top: 18px; }
   .lead-brand-live [data-lead-hero-photo] { height: clamp(120px, calc(0.35 * (var(--lead-hero-visible) - 285px)), 175px); }
   .lead-brand-live [data-lead-hero-action] { grid-area: action; margin-top: 16px; }
