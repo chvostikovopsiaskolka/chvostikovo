@@ -1,0 +1,46 @@
+name: Aria live web readback
+on:
+  push:
+    branches: [qa/aria-web-live-readback-20261125]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify published landing assets without executing JS or posting analytics
+        run: |
+          python3 - <<'PY'
+          import urllib.request, urllib.parse, re, time
+          base='https://chvostikovo.sk/psia-skolka-kosice/'
+          def get(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'Chvostikovo-readback-QA','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(req,timeout=15) as r:
+                  assert r.status==200
+                  return r.read().decode('utf-8','replace')
+          for attempt in range(15):
+              try:
+                  html=get(base)
+                  assert 'psia-skolka-kosice' in html
+                  queue=[urllib.parse.urljoin(base,p) for p in re.findall(r'(?:src|href)="([^"]+\.js)"',html)]
+                  seen=set()
+                  found=False
+                  while queue and len(seen)<60:
+                      url=queue.pop(0)
+                      if url in seen or urllib.parse.urlparse(url).netloc!='chvostikovo.sk': continue
+                      seen.add(url)
+                      js=get(url)
+                      if 'aria_chat_event' in js and 'aria_environment' in js and 'lead_landing_aria_chat_' in js:
+                          print('LIVE analytics bundle:',url)
+                          found=True
+                          break
+                      for p in re.findall(r'["\x27]((?:\./|/assets/)[^"\x27]+\.js)["\x27]',js):
+                          queue.append(urllib.parse.urljoin(url,p))
+                  if found:
+                      print('LIVE landing analytics readback PASS')
+                      break
+              except Exception as exc:
+                  print('Readback not ready:',type(exc).__name__)
+              if attempt==14: raise RuntimeError('New analytics bundle not found')
+              time.sleep(10)
+          PY
