@@ -19,6 +19,7 @@ const INTERACTION_EVENTS = new Set([
   "form_abandon",
   "success_conditions_click",
   "success_pricing_click",
+  "aria_chat_event",
 ]);
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
@@ -254,6 +255,39 @@ async function notifyFormError(input: Json, path: string, attemptId: string | nu
   }
 }
 
+
+const ARIA_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ARIA_QUESTION_IDS = new Set(["pricing","requirements","caretakers","puppy","location","space","first_visit","reservation"]);
+const ARIA_FORM_IDS = new Set(["interest","other","puppy_contact"]);
+const ARIA_SIMPLE = new Set(["open","reopen","resume","close","leave","interest_open","other_open","puppy_check_open","puppy_precheck_passed","puppy_precheck_info"]);
+const ARIA_FORM_ACTIONS = new Set(["form_open","form_start","form_attempt","form_error","form_submit"]);
+function parseAriaEvent(input: Json, path: string, origin: string) {
+  if (!["/psia-skolka-kosice","/psia-skolka-kosice/"].includes(path) || input.attempt_id || input.meta_click_hash) return null;
+  const x = input.aria;
+  if (!x || typeof x !== "object" || Array.isArray(x)) return null;
+  const a = x as Json;
+  if (Object.keys(a).some(key => !["chat_id","visit_id","sequence","action","detail","form_attempt_id"].includes(key))) return null;
+  if (typeof a.chat_id !== "string" || !ARIA_UUID.test(a.chat_id) || typeof a.visit_id !== "string" || !ARIA_UUID.test(a.visit_id) ||
+      typeof a.sequence !== "number" || !Number.isInteger(a.sequence) || a.sequence < 1 || a.sequence > 10000 ||
+      typeof a.action !== "string") return null;
+  const question = a.action === "question" || a.action === "auto_question";
+  const form = ARIA_FORM_ACTIONS.has(a.action);
+  if (question ? typeof a.detail !== "string" || !ARIA_QUESTION_IDS.has(a.detail) :
+      form ? typeof a.detail !== "string" || !ARIA_FORM_IDS.has(a.detail) :
+      !ARIA_SIMPLE.has(a.action) || a.detail !== null) return null;
+  if (a.form_attempt_id !== null && (typeof a.form_attempt_id !== "string" || !ARIA_UUID.test(a.form_attempt_id) ||
+      !["form_attempt","form_error","form_submit"].includes(a.action))) return null;
+  if ((a.action === "form_attempt" || a.action === "form_submit") && !a.form_attempt_id) return null;
+  const source = "lead_landing_aria_chat_" + a.action + (a.detail ? "_" + a.detail : "");
+  if (input.event_source !== source || !["production","qa"].includes(String(input.aria_environment))) return null;
+  const qa = input.aria_environment === "qa" || /^(qa|test|demo)$/i.test(String(input.utm_source || "")) || origin === "https://chvostikovopsiaskolka.github.io";
+  return { aria_chat_id: a.chat_id, aria_visit_id: a.visit_id, aria_sequence: a.sequence, aria_action: a.action,
+    aria_detail: a.detail, aria_form_attempt_id: a.form_attempt_id, aria_environment: qa ? "qa" : "production" };
+}
+function safeAriaTag(value: unknown) {
+  return typeof value === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(value) && !/\d{7,}/.test(value) ? value : null;
+}
+
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin") || "";
 
@@ -319,6 +353,21 @@ Deno.serve(async (req: Request) => {
     if (eventName) {
       if (!INTERACTION_EVENTS.has(eventName)) {
         return response(origin, 400, { ok: false, error: "invalid_event_name" });
+      }
+
+      if (eventName === "aria_chat_event") {
+        const aria = parseAriaEvent(input, path, origin);
+        if (!aria) return response(origin, 400, { ok: false, error: "invalid_aria_event" });
+        const insert = await fetch(`${SUPABASE_URL}/rest/v1/website_interaction_events`, {
+          method: "POST",
+          headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+          body: JSON.stringify({ ...aria, path: "/psia-skolka-kosice/", language: "sk", event_name: eventName,
+            event_source: input.event_source, source_channel: sourceChannel, utm_source: safeAriaTag(input.utm_source),
+            utm_medium: safeAriaTag(input.utm_medium), has_fbclid: input.has_fbclid === true,
+            browser_context, browser_family, device_type, navigation_type: navigationType }),
+        });
+        if (!insert.ok && insert.status !== 409) return response(origin, 500, { ok: false, error: "aria_insert_failed" });
+        return response(origin, 201, { ok: true });
       }
 
       // Fine-grained analytics only permits predetermined field identifiers.

@@ -8,6 +8,48 @@ function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
+
+import { createAriaChatAnalytics, ariaEventSource, ariaFormKind, ARIA_IDLE_MS } from "../src/lib/aria-chat-analytics";
+{
+  let now = 1000;
+  let serial = 0;
+  const id = () => "11111111-1111-4111-8111-" + String(++serial).padStart(12,"0");
+  const a = createAriaChatAnalytics(() => now, id);
+  const opened = a.record("open")!;
+  const q1 = a.record("question","pricing")!;
+  const q2 = a.record("question","pricing")!;
+  const q3 = a.record("question","requirements")!;
+  const interest = a.record("interest_open")!;
+  const attempt = id();
+  a.record("form_open","interest");
+  a.record("form_start","interest");
+  a.record("form_attempt","interest",attempt);
+  const failed = a.record("form_error","interest",attempt)!;
+  const retry = id();
+  a.record("form_attempt","interest",retry);
+  a.record("close");
+  now += 100;
+  const reopened = a.record("open")!;
+  assert(reopened.action === "reopen" && reopened.chat_id === opened.chat_id, "Aria reopens within 30 minutes retain chat ID");
+  assert(q1.sequence < q2.sequence && q2.sequence < q3.sequence && q3.sequence < interest.sequence && failed.sequence < reopened.sequence, "All clicks retain order, including repeated FAQ");
+  assert(ariaEventSource(q1.action,q1.detail) === ariaEventSource(q2.action,q2.detail), "Same FAQ uses stable source, sequence handles distinct click");
+  assert(!a.record("question","contact@example.com"), "Aria never records unknown/free-text question IDs");
+  assert(ariaFormKind("lead_landing_aria_chat_interest:backend_http:500") === "interest" && !ariaFormKind("hero_desktop_inline"), "Only explicit Aria forms get conversation attribution");
+  a.record("close");
+  now += ARIA_IDLE_MS + 1;
+  const later = a.record("open")!;
+  assert(later.chat_id !== opened.chat_id && later.visit_id === opened.visit_id && later.sequence === 1, "Expired chat gets fresh ID, visit is in-memory");
+  assert(!a.record("form_submit","interest",retry), "Expired attempt must not attach to a new conversation");
+  const automatic = a.record("auto_question","pricing")!;
+  assert(automatic.action === "auto_question", "Automatic answer distinct from manual click");
+  const laterAttempt = id();
+  a.record("form_attempt","other",laterAttempt);
+  a.record("close");
+  const submitted = a.record("form_submit","other",laterAttempt)!;
+  assert(submitted.chat_id === later.chat_id && submitted.form_attempt_id === laterAttempt, "Confirmed contact outcome retained after close, no contact text");
+  assert(!a.record("form_submit","other",laterAttempt), "Same outcome not emitted twice");
+}
+
 const phone = "+421915349028";
 
 shortSchema.parse({

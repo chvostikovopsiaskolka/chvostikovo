@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 import { submitInquiry } from "@/lib/submit-inquiry";
 import { getTrafficAttribution } from "@/lib/traffic-source";
 import { trackAriaQuestionSubmit, trackFaqContactSubmit, trackFormSubmit, trackMetaFormConversion } from "@/lib/analytics";
-import { startFormAttempt, trackCookielessInteraction } from "@/lib/cookieless-interactions";
+import { startFormAttempt, trackCookielessInteraction, trackAriaChatAction } from "@/lib/cookieless-interactions";
 import { PrivacyConsentCheckbox } from "./PrivacyConsentCheckbox";
 import { PhoneField } from "./PhoneField";
 import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
@@ -79,7 +79,10 @@ export function ShortForm({
       const submittedPhone = phoneFromForm(form, `s-${formId}-tel`);
       const dogName = showChatDogFields ? String(fd.get("pes_meno") || "").trim() : "";
       const breed = String(fd.get("plemeno") || "").trim();
-      if (!breed) { setError("Vyplňte plemeno psíka."); setLoading(false); return; }
+      if (!breed) {
+        if (trackingSource === "lead_landing_aria_chat_puppy_contact") trackAriaChatAction("form_error", "puppy_contact", attemptId);
+        setError("Vyplňte plemeno psíka."); setLoading(false); return;
+      }
       const submission = await submitInquiry({
         typ: "informacie",
         consent: true,
@@ -268,7 +271,10 @@ export function HomeFaqContactForm({
   function trackStart() {
     if (started.current) return;
     started.current = true;
-    if (isAria) onStarted?.();
+    if (isAria) {
+      if (source === "lead_landing_aria_chat_other") trackAriaChatAction("form_start", "other");
+      onStarted?.();
+    }
     else void trackCookielessInteraction("explore_daycare", source + "_started");
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -298,8 +304,9 @@ export function HomeFaqContactForm({
     setError(null);
     let attemptId: string | undefined;
     try {
+      if (source === "lead_landing_aria_chat_other") attemptId = startFormAttempt(source);
       const phone = phoneFromForm(form, id + "-tel");
-      attemptId = startFormAttempt(source);
+      if (source !== "lead_landing_aria_chat_other") attemptId = startFormAttempt(source);
       await submitInquiry({
         typ: "informacie", consent: true,
         source_ref: sourceRef(), ...attributionPayload(), cta_source: source,
@@ -309,6 +316,7 @@ export function HomeFaqContactForm({
       setSent(true);
       runFormTelemetry(() => {
         if (isAria) {
+          if (source === "lead_landing_aria_chat_other") trackAriaChatAction("form_submit", "other", attemptId);
           trackAriaQuestionSubmit(source);
           onSent?.();
         } else {
