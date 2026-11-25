@@ -3472,6 +3472,39 @@ if (!bellaris && brandPreviewCandidate) {
               }
               if (await productPage.locator('a[href="/kosik"], a[href="/objednavka"]').count()) throw new Error('Product routes to retired checkout');
             }
+            // Test the same product wizard inline in the new article without sending real inquiries.
+            await productPage.goto(new URL('/blog/target-pri-rehabilitacii-psa/', base).href);
+            await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
+            const rehabConsent=productPage.getByRole('button',{name:'Len nevyhnutné',exact:true});
+            if(await rehabConsent.isVisible())await rehabConsent.click();
+            const rehabGallery=productPage.locator('[data-blog-target-gallery]');
+            if(await rehabGallery.locator('figure').count()!==3)throw new Error('Rehab article three photos missing');
+            const rehabForm=productPage.locator('[data-blog-target-inquiry]');
+            if(await rehabForm.count()!==1)throw new Error('Rehab inline inquiry missing');
+            const inquiryUrl='**/functions/v1/product-inquiry-submit';
+            let rehabPayloads=[];
+            const rehabMock=async route=>{
+              const headers={'access-control-allow-origin':'*','access-control-allow-methods':'POST, OPTIONS','access-control-allow-headers':'content-type'};
+              if(route.request().method()==='OPTIONS'){await route.fulfill({status:204,headers});return;}
+              rehabPayloads.push(route.request().postDataJSON());
+              await route.fulfill({status:200,headers,contentType:'application/json',body:'{"ok":true,"inquiry_id":1}'});
+            };
+            await productPage.route(inquiryUrl,rehabMock);
+            try{
+              await rehabForm.getByRole('button',{name:/Stredný/}).click();
+              await rehabForm.getByPlaceholder('5',{exact:true}).fill('4');
+              await rehabForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+              await rehabForm.getByRole('button',{name:'Pokračovať',exact:true}).click();
+              await rehabForm.locator('input[name="customer_name"]').fill('TEST Fixture');
+              await rehabForm.locator('input[type="tel"]').fill('901234567');
+              await rehabForm.locator('input[name="email"]').fill('test@example.com');
+              await rehabForm.locator('input[name="customer_location"]').fill('Hlavná 12, Košice, 040 01');
+              await rehabForm.locator('input[type="checkbox"][required]').check();
+              await rehabForm.getByRole('button',{name:'Odoslať záujem',exact:true}).click();
+              await rehabForm.getByRole('status').waitFor({state:'visible'});
+              const payload=rehabPayloads[0];
+              if(rehabPayloads.length!==1||payload?.configuration?.size!=='medium'||payload?.configuration?.height_cm!==4||payload?.source_ref!=='/blog/target-pri-rehabilitacii-psa/'||payload?.product_type!=='target')throw new Error('Rehab inquiry payload mismatch');
+            }finally{await productPage.unroute(inquiryUrl,rehabMock);}
             await productPage.goto(new URL('/blog/stojan-na-misky-pre-psa-vyhody-a-vyber/', base).href);
             await productPage.locator('.mobile-dock[data-hydrated="true"]').waitFor({ state: 'attached' });
             const standFigure = productPage.locator('article section.flow-root figure').first();

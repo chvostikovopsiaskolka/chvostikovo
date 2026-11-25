@@ -1,3 +1,6 @@
+import targetLargeProduct from "@/assets/products/target-large-product.jpeg";
+import targetMediumPreview from "@/assets/products/target-medium-preview.jpg";
+import targetSmallProduct from "@/assets/products/target-small-product.jpeg";
 import workdayCoverPhoto from "@/assets/blog/blog-workday-cover.webp";
 import standMia from "@/assets/products/stand-mia.avif";
 import standDark from "@/assets/products/stand-cori.avif";
@@ -29,6 +32,7 @@ export type BlogArticleData = {
   productPage?: { href: string; label: string; description: string };
   imageCaption?: string;
   sources?: Array<{ label: string; href: string }>;
+  variantGallery?: Array<{ src: string; alt: string; label: string }>;
 };
 
 export const blogArticles: BlogArticleData[] = [
@@ -286,7 +290,87 @@ export const blogArticles: BlogArticleData[] = [
         "href": "https://cattledogpublishing.com/blog/stationing-to-a-platform/"
       }
     ]
-  }
+  },
+  {
+  "slug": "target-pri-rehabilitacii-psa",
+  "title": "Target pri rehabilitácii psa: stabilita, fyzioterapia a posilňovacie cviky",
+  "seoTitle": "Target pri rehabilitácii psa: stabilita a fyzioterapia | Chvostíkovo",
+  "description": "Objavte využitie targetov pri fyzioterapii a kontrolovanom pohybe psa. V Chvostíkove ich vyrábame ručne, s protišmykovým povrchom a na mieru.",
+  "summary": "Objavte využitie targetov pri fyzioterapii a kontrolovanom pohybe psa. V Chvostíkove ich vyrábame ručne, s protišmykovým povrchom a na mieru.",
+  "publishedAt": "2026-11-25",
+  "readingMinutes": 4,
+  "intro": "",
+  "sections": [
+    {
+      "heading": "Target nie je len pomôcka na trik",
+      "paragraphs": [
+        "Keď pes položí labku na označené miesto, začína rozumieť, kam má postaviť svoju labku. Práca s jasným cieľom môže trénerovi alebo fyzioterapeutovi pomáhať viesť pozornosť psa k polohe končatín. Nemusí pritom ísť o náročný trik ani o rýchly pohyb.",
+        "Pevný target je jednoduchá **stabilná platforma s protišmykovým povrchom**. Jeho úloha je odlišná od nestabilných balančných pomôcok: sám sa nemá kývať ani nútiť psa vyrovnávať pohyb podložky. Konkrétne využitie však závisi od zdravotného stavu, skúseností psa a cieľa tréningu."
+      ]
+    },
+    {
+      "heading": "Čo znamená propriocepcia a kontrola pohybu?",
+      "paragraphs": [
+        "**Propriocepcia** sa zjednodušene opisuje ako vnímanie polohy jednotlivých častí tela. Pri vedenom cvičení sa môže pracovať napríklad s vedomým umiestňovaním labiek a kontrolovanými zmenami postoja. Nie každé takéto cvičenie je automaticky rehabilitáciou a **samotná pomôcka nelieči chorobu**.",
+        "Pri zdravom psovi môže byť práca s targetom súčasťou bežného tréningu. Pri psovi po úraze, operácii alebo s pohybovým problémom však výber cvikov, rozsah záťaže a tempo určuje **veterinár alebo kvalifikovaný rehabilitačný odborník**."
+      ]
+    },
+    {
+      "heading": "Pevný target alebo balančná pomôcka?",
+      "paragraphs": [
+        "Pevný target ponúka konkrétne miesto, na ktoré pes kladie labku alebo labky. Dôležitá je stabilita, protišmykovosť a primeraná plocha, aby sa pes nemusel neprirodzene naťahovať.",
+        "Balančné pomôcky majú odlišný mechanický charakter a môžu pridávať náročnosť. Nie sú automaticky vhodnejšie. Pri rehabilitačnom programe musí ich použitie vychádzať z **odborného plánu**, nie z internetového zoznamu cvikov."
+      ]
+    },
+    {
+      "heading": "Kedy sa s targetom môže pracovať?",
+      "paragraphs": [
+        "V primeranom tréningu môže pomôcka poslúžiť na pokojné zoznamovanie s umiestnením labky alebo na krátke zotrvanie v zvolenej polohe. Pri odbornom rehabilitačnom vedení možno podľa stavu psa zvoliť ďalšie kontrolované úlohy, napríklad presnejšie vedenie postoja. Presné rehabilitačné cviky, opakovania a záťaž zámerne neuvádzame ako univerzálny návod.",
+        "Ak pes kríva, prejavuje bolesť, ma neurologické ťažkosti alebo sa zotavuje z operácie, tréning podľa všeobecného článku nie je vhodnou náhradou vyšetrenia. Pri neistote patrí prvé rozhodnutie veterinárovi."
+      ]
+    },
+    {
+      "heading": "Na čom záleží pri výbere platformy?",
+      "paragraphs": [
+        "Pri pevnej podložke sledujte rozmer vzhľadom na psa, protišmykový povrch a stabilnú konštrukciu. V Chvostíkove vyrábame drevené targety v troch veľkostiach – veľký **40 × 20 cm**, stredný **30 × 15 cm** a malý 25 × 25 cm – s bežnou výškou približne 5 cm; ďalšie prevedenie riešime individuálne podľa možností výroby.",
+        "Veľkosť targetu nepredstavuje zdravotné odporúčanie. Vyberá sa podľa použitia konkrétneho psa; pre rehabilitáciu rozhoduje aj odporúčanie odborníka. Každý psík má iné potreby. Naše targety vyrábame **ručne** a po dohode vieme prispôsobiť ich výšku aj rozmery podľa vašich požiadaviek."
+      ]
+    },
+    {
+      "heading": "Chcete si pozrieť naše targety?",
+      "paragraphs": [
+        "Pozrite si skutočné fotografie, rozmery a možnosti výroby na stránke Target na cvičenie pre psov. Záujem o konkrétnu veľkosť nám môžete nezáväzne poslať cez existujúci formulár nižšie."
+      ]
+    }
+  ],
+  "productPage": {
+    "href": "/target-na-cvicenie-pre-psov",
+    "label": "Target na cvičenie pre psov",
+    "description": ""
+  },
+  "sources": [
+    {
+      "label": "VCA Animal Hospitals – Exercises to Improve Proprioception",
+      "href": "https://vcahospitals.com/know-your-pet/exercises-to-improve-proprioception"
+    },
+    {
+      "label": "Veterinary Information Network – rehabilitačné cvičenia",
+      "href": "https://www.vin.com/apputil/content/defaultadv1.aspx?id=7054715&pid=12886"
+    },
+    {
+      "label": "CattleDog Publishing – stationing to a platform",
+      "href": "https://cattledogpublishing.com/blog/stationing-to-a-platform/"
+    }
+  ]
+,
+  "image": { src: targetLargeProduct, alt: "Drevený target 40 × 20 cm s protišmykovým povrchom", width: 1152, height: 1536 },
+  "secondImage": { src: targetSmallProduct, alt: "Štvorcový target 25 × 25 cm", width: 1152, height: 1536 },
+  "variantGallery": [
+    { src: targetLargeProduct, alt: "Veľký drevený target", label: "40 × 20 cm" },
+    { src: targetMediumPreview, alt: "Stredný drevený target", label: "30 × 15 cm" },
+    { src: targetSmallProduct, alt: "Malý drevený target", label: "25 × 25 cm" }
+  ]
+}
 ];
 
 export const blogPath = (slug: string) => "/blog/" + slug + "/";

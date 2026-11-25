@@ -27,6 +27,7 @@ export default defineConfig({
       { path: "/blog/je-psia-skolka-vhodna-pre-kazdeho-psa" },
       { path: "/blog/stojan-na-misky-pre-psa-vyhody-a-vyber" },
       { path: "/blog/target-na-cvicenie-psov-prve-cviky" },
+      { path: "/blog/target-pri-rehabilitacii-psa" },
       { path: "/produkty" },
       { path: "/stojan-na-misky-pre-psa" },
       { path: "/target-na-cvicenie-pre-psov" },
