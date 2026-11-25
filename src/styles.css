@@ -1659,7 +1659,8 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   position: relative;
   width: 100%;
   min-height: 36px;
-  margin: 4px 0 0;
+  margin: 0;
+  margin-block-start: .5rem;
   padding: 6px 10px;
   font-size: 13px;
   line-height: 1.2;
@@ -1704,7 +1705,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live .hero-safe-top h1 { grid-area: title; margin-top: 0; }
   .lead-brand-live [data-aria-service-group] { grid-area: service; margin-top: 0; margin-bottom: 12px; }
   .lead-brand-live [data-aria-service-badge] { text-transform: none; font-size: 11px; letter-spacing: 0; padding-block: 6px; }
-  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin-top: 12px; }
+  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin-block-start: 1.5rem; }
   .lead-brand-live [data-lead-hero-pill] { font-size: clamp(11px, 2.9vw, 13px); padding: 5px 8px; }
   .lead-brand-live [data-lead-hero-photos] { grid-area: photos; margin-top: 18px; }
   .lead-brand-live [data-lead-hero-photo] { height: clamp(120px, calc(0.35 * (var(--lead-hero-visible) - 285px)), 175px); }
