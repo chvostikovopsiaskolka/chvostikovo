@@ -578,6 +578,8 @@
     box-shadow: 0 3px 10px rgba(153,82,37,.17);
   }
   .mobile-dock-item:hover:not(.mobile-dock-apply) { background: color-mix(in srgb, var(--forest) 9%, transparent); }
+  .mobile-dock[data-home-dock] .mobile-dock-item.is-active,
+  .mobile-dock[data-home-dock] .mobile-dock-item.is-active:hover { background: #f8ddec; }
   .mobile-dock-item:focus:not(:focus-visible),
   .mobile-dock-menu a:focus:not(:focus-visible),
   .mobile-dock-menu button:focus:not(:focus-visible) { outline: none; }
@@ -1858,7 +1860,8 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .mobile-dock[data-desktop-home-dock] [data-desktop-dock-logo] { display: block; grid-column: 1 / 3; grid-row: 1; width: 124px; height: auto; margin-inline: 6px; }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-item { display: flex; grid-row: 2; min-width: 0; min-height: 50px; align-items: center; justify-content: center; flex-direction: column; gap: 3px; padding: 3px; border: 0; border-radius: 15px; background: transparent; color: var(--forest-deep); text-decoration: none; font-family: var(--font-display); font-weight: 650; font-size: 12px; line-height: 1.15; white-space: nowrap; cursor: pointer; }
   .mobile-dock[data-desktop-home-dock][data-variant="en"] .mobile-dock-bar { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active { background: color-mix(in srgb, var(--forest) 18%, #f1f8ec); }
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active,
+  .mobile-dock[data-desktop-home-dock] .mobile-dock-item.is-active:hover { background: #f8ddec; }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-item.mobile-dock-apply { background: #ffa414; color: #fff; font-weight: 750; }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-item:not(.mobile-dock-apply):hover, .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-links a:hover, .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-phone:hover { background: var(--peach); }
   .mobile-dock[data-desktop-home-dock] .mobile-dock-compact-menu { display: flex; grid-column: 1 / -1; grid-row: 1; justify-self: center; justify-content: center; align-items: center; gap: 8px; min-width: 0; width: max-content; }

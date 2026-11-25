@@ -625,6 +625,16 @@ async function assertCompactHomeMenu(page,en) {
   if(!await page.evaluate(()=>!!(document.querySelector('[data-home-puppy-checker]')?.compareDocumentPosition(document.querySelector('[data-home-pricing-columns]'))&Node.DOCUMENT_POSITION_FOLLOWING)))throw new Error('Puppy checker must precede pricing');
 }
 
+// Active section color is the same for both home languages and both dock layouts.
+async function assertHomeDockActivePink(page,en,section='top') {
+  await page.waitForFunction(({en,section})=>{
+    const active=document.querySelector('.mobile-dock[data-home-dock] .mobile-dock-item[aria-current="location"]');
+    const href=active&&new URL(active.href,location.href);
+    const expected=section==='top'?(en?'/en/dog-daycare-kosice':'/'):null;
+    return !!active&&(expected?href.pathname.replace(/\/$/,'')===expected.replace(/\/$/,'')&&!href.hash:href.hash==='#'+section)
+      &&getComputedStyle(active).backgroundColor==='rgb(248, 221, 236)';
+  },{en,section});
+}
 async function assertApplicationPreview(page,en) {
   const form=page.locator('[data-home-friendship-form] form[data-application-form]');
   const toggle=form.locator('#home-friendship-application');
@@ -670,6 +680,8 @@ async function assertBilingualNavigation(browser,engine) {
     for(const width of [320,375,390,430]){
       await page.setViewportSize({width,height:844});
       await assertCompactHomeMenu(page,false);
+      await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+      await assertHomeDockActivePink(page,false);
       await page.screenshot({path:path.join(out,'compact-sk-menu-'+engine+'-'+width+'.png')});
     }
     await assertApplicationPreview(page,false);
@@ -701,6 +713,8 @@ async function assertBilingualNavigation(browser,engine) {
         const selected=menu.locator('[data-language-switch] a[lang="en"]');
         if(await selected.getAttribute('aria-current')!=='page')throw new Error('EN active state missing');
         await assertCompactHomeMenu(page,true);
+        await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+        await assertHomeDockActivePink(page,true);
         const buttons=await menu.locator('[data-language-switch] a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
         if(buttons.some(b=>b.width<44||b.height<44))throw new Error('Language target too small');
         await page.screenshot({path:path.join(out,'bilingual-menu-'+engine+'-'+width+'.png')});
@@ -740,12 +754,16 @@ async function assertBilingualNavigation(browser,engine) {
           const boxes=links.map(x=>x.getBoundingClientRect()), upper=el.querySelector('[data-home-menu]').getBoundingClientRect(), logoBox=logo.getBoundingClientRect(), lower=[...bar.querySelectorAll('.mobile-dock-item')].map(x=>x.getBoundingClientRect()), hero=el.previousElementSibling?.getBoundingClientRect();
           return {centered:Math.abs((upper.left+upper.right-r.left-r.right)/2)<2,width:r.width<=980.5,shortcut:el.querySelector('[data-desktop-only-shortcut]')?.getBoundingClientRect().width>0,upperLinks:[...upper.querySelectorAll('.mobile-dock-compact-links a')].map(a=>new URL(a.href).hash),fits:r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&bar.scrollWidth<=bar.clientWidth+1&&r.bottom<=slot.bottom+1,targets:boxes.every(b=>b.height>=44),separate:boxes.every((b,i)=>boxes.every((a,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1)),header:!!document.querySelector('header.fixed'),logo:logoBox.width>0&&logoBox.right<=upper.left+1&&logoBox.bottom<=lower[0].top+1,rows:lower.length>=5&&lower.every(b=>b.top>=upper.bottom-1&&Math.abs(b.top-lower[0].top)<2),slot:el.previousElementSibling?.id==='top'&&slot.height>=108&&r.top>=hero.bottom-1};
         });
+        await assertHomeDockActivePink(page,en);
         if(!geometry.centered||!geometry.width||!geometry.shortcut||geometry.upperLinks.join('|')!==('#aria-puppy-check|'+(en?'#en-benefits':'#preco-chvostikovo')+'|#faq')||!geometry.fits||!geometry.targets||!geometry.separate||geometry.header||!geometry.logo||!geometry.rows||!geometry.slot)throw new Error('Desktop home dock '+width+' '+JSON.stringify(geometry));
         await page.evaluate(()=>window.scrollTo({top:900,behavior:'instant'}));
         await page.waitForFunction(()=>document.querySelector('[data-desktop-home-dock]')?.getAttribute('data-desktop-floating')==='true');
         if(!await dock.evaluate(el=>Math.abs(innerHeight-el.querySelector('.mobile-dock-bar').getBoundingClientRect().bottom-12)<2))throw new Error('Desktop dock not floating at bottom');
         await page.screenshot({path:path.join(out,'desktop-home-dock-'+engine+'-'+(en?'en':'sk')+'-'+width+'.png')});
       }
+      const priceId=en?'pricing':'cennik';
+      await page.locator('[data-desktop-home-dock] .mobile-dock-item[href$="#'+priceId+'"]').click();
+      await assertHomeDockActivePink(page,en,priceId);
       const why=page.locator('[data-desktop-home-dock] [data-desktop-only-shortcut]');
       await why.click();
       await page.waitForFunction(id=>Math.abs(document.getElementById(id).getBoundingClientRect().top-8)<16,en?'en-benefits':'preco-chvostikovo');
