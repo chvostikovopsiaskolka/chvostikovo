@@ -636,3 +636,10 @@ assert(currentBackend.includes("const leadSex = sex(input.dog_sex ?? input.pohla
  "Backend must normalize and store optional enquiry sex with operator notification without widening interest allowlist.");
 
 assert(ariaLandingTracking.includes("leadChat={isLiveLead}") && ariaDockTracking.includes("dockless={leadChat}") && ariaDockTracking.includes("{!leadChat && <div data-aria-section-navigation="), "Paid lead must reuse the existing dockless chat without rendering the old navigation");
+
+// The dedicated envelope uses only existing columns, not the migration candidate.
+{
+  const edgeSource = readFileSync("supabase/functions/website-landing-event/index.ts", "utf8");
+  assert(edgeSource.includes("event_source: encodeAriaObservation(aria)"), "Aria uses a versioned event envelope in the existing source column");
+  assert(!edgeSource.includes("JSON.stringify({ ...aria, path:"), "Aria must not require new DB columns");
+}

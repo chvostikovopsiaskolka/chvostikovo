@@ -284,6 +284,11 @@ function parseAriaEvent(input: Json, path: string, origin: string) {
   return { aria_chat_id: a.chat_id, aria_visit_id: a.visit_id, aria_sequence: a.sequence, aria_action: a.action,
     aria_detail: a.detail, aria_form_attempt_id: a.form_attempt_id, aria_environment: qa ? "qa" : "production" };
 }
+function encodeAriaObservation(a: NonNullable<ReturnType<typeof parseAriaEvent>>) {
+  return ["lead_landing_aria_chat_v2", a.aria_environment === "qa" ? "q" : "p",
+    a.aria_chat_id, a.aria_visit_id, a.aria_sequence, a.aria_action,
+    a.aria_detail || "-", a.aria_form_attempt_id || "-"].join("|");
+}
 function safeAriaTag(value: unknown) {
   return typeof value === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(value) && !/\d{7,}/.test(value) ? value : null;
 }
@@ -361,8 +366,9 @@ Deno.serve(async (req: Request) => {
         const insert = await fetch(`${SUPABASE_URL}/rest/v1/website_interaction_events`, {
           method: "POST",
           headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
-          body: JSON.stringify({ ...aria, path: "/psia-skolka-kosice/", language: "sk", event_name: eventName,
-            event_source: input.event_source, source_channel: sourceChannel, utm_source: safeAriaTag(input.utm_source),
+          body: JSON.stringify({ path: "/psia-skolka-kosice/", language: "sk", event_name: eventName,
+            // Versioned envelope for the new event type only; existing schema and report.
+            event_source: encodeAriaObservation(aria), source_channel: sourceChannel, utm_source: safeAriaTag(input.utm_source),
             utm_medium: safeAriaTag(input.utm_medium), has_fbclid: input.has_fbclid === true,
             browser_context, browser_family, device_type, navigation_type: navigationType }),
         });
