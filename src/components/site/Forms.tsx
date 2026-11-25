@@ -712,8 +712,8 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
         {loading ? "Odosielam…" : "Prihlásiť psíka"}
       </button>
           <button type="button" disabled={loading} onClick={() => goToStep(1)} className="min-h-11 w-full rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50">Späť</button>
-        </fieldset>
-      </div>
+        </div>
+      </fieldset>
     </form>
   );
 }
