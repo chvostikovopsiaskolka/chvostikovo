@@ -16,9 +16,9 @@ import { reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@
 function sourceRef() { return currentSourceRef("/en/dog-daycare-kosice"); }
 
 export function EnglishInquiryForm({
-  trackingSource = "english_page",
+  trackingSource = "english_page", questionInHeading = false, compact = false,
 }: {
-  trackingSource?: string;
+  trackingSource?: string; questionInHeading?: boolean; compact?: boolean;
 }) {
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(1);
@@ -113,12 +113,13 @@ export function EnglishInquiryForm({
   return (
     <form
       data-lead-step-form
+      data-lead-step={step}
       onSubmit={onSubmit}
       onInputCapture={progress.onInputCapture}
       onBlurCapture={progress.onBlurCapture}
       onInvalidCapture={progress.onInvalidCapture}
       onChangeCapture={(event) => { onFormChange(); progress.onChangeCapture(event); }}
-      className="space-y-5 text-left"
+      className={(compact ? "space-y-3" : "space-y-5") + " text-left"}
     >
       <div className="space-y-2">
         <div className="flex justify-between gap-2 text-xs font-semibold text-forest/75" aria-live="polite">
@@ -130,9 +131,9 @@ export function EnglishInquiryForm({
           <div className={`h-full rounded-full bg-coral transition-all duration-300 ${step === 1 ? "w-1/2" : "w-full"}`} />
         </div>
       </div>
-      <div className={step === 1 ? "space-y-5" : "hidden"} aria-hidden={step !== 1}>
+      <div className={step === 1 ? (compact ? "space-y-3" : "space-y-5") : "hidden"} aria-hidden={step !== 1}>
         <fieldset className="min-w-0">
-          <legend className="mb-3 font-display text-lg font-bold leading-snug text-forest sm:text-xl">
+          <legend className={questionInHeading ? "sr-only" : "mb-3 font-display text-lg font-bold leading-snug text-forest sm:text-xl"}>
             What are you looking for for your dog?
           </legend>
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
@@ -144,7 +145,7 @@ export function EnglishInquiryForm({
               <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
                 <input type="radio" name="interest" value={option.value} required aria-label={option.value}
                   onChange={() => setSelectedInterest(option.value)} className="peer sr-only" />
-                <span className="flex h-full min-h-24 min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 py-3 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:min-h-28 sm:px-3">
+                <span className={"flex h-full min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:px-3 " + (compact ? "min-h-[72px] py-2 sm:min-h-24" : "min-h-24 py-3 sm:min-h-28")}>
                   {option.lines.map((line, i) => (
                     <span key={line} className={`block max-w-full break-words text-[10.5px] [overflow-wrap:anywhere] sm:text-xs ${i === 0 ? "font-bold" : "font-medium"}`}>{line}</span>
                   ))}

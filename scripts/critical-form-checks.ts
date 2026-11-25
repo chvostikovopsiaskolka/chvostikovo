@@ -396,7 +396,7 @@ assert(!forms.includes('name="duvod2"'), "Second usage selector must not be rend
 // Shared 1/2-dog application usage is one required radio group with two compact cards.
 // Keep backend compatibility for historical submissions and record the broadened regular choice.
 const applicationSource = forms.slice(forms.indexOf("export function LongForm"));
-assert(applicationSource.includes('name="duvod" value={option.value} aria-label={option.value} required'), "The application requires a native accessible radio choice.");
+assert(applicationSource.includes('name="duvod" value={option.value} aria-label={t(option.value, option.enLabel)} required'), "The application requires a native accessible radio choice.");
 assert(applicationSource.includes("grid grid-cols-2 gap-2") && applicationSource.includes("min-h-20") && applicationSource.includes("peer-checked:border-coral") && applicationSource.includes("peer-focus-visible:outline") && applicationSource.includes("-webkit-tap-highlight-color:transparent"), "Two cards must retain size, selection, focus and mobile touch styling.");
 assert(applicationSource.includes('lines: ["Pravidelne", "1× alebo viackrát", "týždenne"]') && applicationSource.includes('lines: ["Občas", "podľa potreby"]') && !applicationSource.includes('value: "Jednorazové stráženie"'), "Application wording must not limit weekly visits to one or two.");
 assert(!applicationSource.includes('<select id={`l-${formId}-duvod`') && !applicationSource.includes("defaultChecked"), "No application usage dropdown or preselected radio.");

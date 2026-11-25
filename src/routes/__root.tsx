@@ -168,7 +168,7 @@ function RootShell({ children }: { children: ReactNode }) {
     "/strazenie-psov-kosice",
     "/en/dog-daycare-kosice",
   ]);
-  const branded = ["/", "/stojan-na-misky-pre-psa", "/target-na-cvicenie-pre-psov"].includes(pathname.replace(/\/$/, "") || "/") || /^\/(produkty|blog)(\/|$)/.test(pathname);
+  const branded = ["/", "/en/dog-daycare-kosice", "/stojan-na-misky-pre-psa", "/target-na-cvicenie-pre-psov"].includes(pathname.replace(/\/$/, "") || "/") || /^\/(produkty|blog)(\/|$)/.test(pathname);
   const mobileThemeColor = branded || whiteHeroPaths.has(pathname) ? "#ffffff" : "#faf8f0";
 
   return (

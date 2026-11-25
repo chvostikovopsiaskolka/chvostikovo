@@ -1,3 +1,4 @@
+import { MobileLanguageHeader } from "@/components/site/LanguageSwitch";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Header } from "@/components/site/Header";
@@ -87,6 +88,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <MobileLanguageHeader language="sk" />
       <main>
         <Hero onMobileInquiryOpen={openHeroInquiry} mobileInquiryOpen={heroInquiryOpen} />
         {heroInquiryOpen && (

@@ -1,3 +1,6 @@
+import { LanguageSwitch, MobileLanguageHeader } from "@/components/site/LanguageSwitch";
+import { Hero } from "@/components/site/Hero";
+import { LongForm } from "@/components/site/Forms";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 import {
@@ -54,234 +57,6 @@ const OG_IMAGE = `${BASE_URL}/og-image.png`;
 const title = "Dog Daycare Košice | Daytime Dog Sitting | Chvostíkovo";
 const description =
   "Dog daycare in Košice with all-day supervision, safe group care, play and rest. Daytime dog sitting Monday to Friday, 7:00–17:00.";
-
-const REVIEWS_EN = [
-  {
-    name: "Heka & Leraie",
-    text: "I can wholeheartedly recommend Chvostíkovo. My Leraie is always excited to see his friends there, and I am happy knowing he is in the hands of great people. ❤️",
-  },
-  {
-    name: "Ľubka & Aron",
-    text: "Highly recommended ❤️ The owners are wonderful people who truly love dogs, and it shows. If you do not want to leave your dog home alone, you will be hard-pressed to find a better place. Aron is happy there and always has a great time.",
-  },
-  {
-    name: "Erik & Gaston",
-    text: "Great place, great people! Our dog can barely sit still with excitement at the door while waiting for it to open.",
-  },
-  {
-    name: "Dagmar & Merlin",
-    text: "Chvostíkovo is the most wonderful daycare I know. The care for my dog is amazing — he gets to play, enjoy the outdoor run and spend time with his friends. He comes home, has dinner and falls asleep. It helps me enormously to know that while I am at work, he is not home alone and has company. The owners are kind and give the dogs plenty of affection. I am very grateful for everything you do for us. ❤️",
-  },
-  {
-    name: "Alžbeta & Eliška",
-    text: "If you are looking for a place where your dog will be happy, definitely visit this daycare. The owners are kind and very helpful, and our Eliška is always excited to go. She comes home happy and pleasantly tired. Thank you.",
-  },
-  {
-    name: "Richard & Bella",
-    text: "Excellent daycare and a great approach from the owners. The flooring is safe and not slippery, which we really appreciate. Bella is always excited to go. Definitely recommended. ❤️👍",
-  },
-  {
-    name: "Helena & Colin",
-    text: "Colin has been going to Chvostíkovo for several months. He is a Border Collie, so he has more energy than most dogs, but that is never a problem here. He plays with the ball and with the other dogs, and we pick him up after an active, well-spent day — while we get a peaceful evening. The owners are lovely people I feel completely comfortable leaving my dog with.",
-  },
-  {
-    name: "Bianka & Monty",
-    text: "I recommend Chvostíkovo without hesitation. You can really see that the owners genuinely love dogs. My dog is always very excited to go and comes home happy and tired from playing — when we arrive to pick him up, he barely wants to leave. Communication is always easy, and the outdoor run is a great bonus.",
-  },
-  {
-    name: "Martina & Belisha",
-    text: "We are extremely happy with Chvostíkovo. The owners are kind, caring and always willing to help. After moving to the new premises, they even arranged transport to daycare for our dog, which made life much easier for us. Beli is always excited to go and comes home happy and pleasantly tired. We recommend Chvostíkovo to anyone looking for high-quality, loving care for their dog. 🫶",
-  },
-  {
-    name: "Alena & Becky",
-    text: "After a long search, we finally found a daycare and people we truly trust. Our Becky looks forward to every visit and was also very well cared for while we were away on holiday. I would recommend this daycare to anyone. 😍🐕",
-  },
-];
-
-function EnglishReviewCard({ name, text }: { name: string; text: string }) {
-  const [open, setOpen] = useState(false);
-  const body = useRef<HTMLQuoteElement>(null);
-  const [clamped, setClamped] = useState(false);
-
-  useEffect(() => {
-    const el = body.current;
-    if (!el) return;
-    setClamped(el.scrollHeight - el.clientHeight > 2);
-  }, [text]);
-
-  return (
-    <figure className="relative flex w-[82%] shrink-0 flex-col items-start justify-start rounded-3xl bg-card px-4 py-3 text-left shadow-card sm:w-[46%] sm:px-5 sm:py-3.5 lg:w-[31%]">
-      <div data-review-byline className="flex w-full min-w-0 items-center gap-1.5 whitespace-nowrap">
-        <GoogleReviewMark />
-        <figcaption className="min-w-0 truncate font-display text-[12px] font-bold text-forest sm:text-sm">{name}</figcaption>
-        <span data-review-stars className="ml-auto shrink-0 text-[12px] leading-none tracking-[-0.04em] text-[#F5B301] sm:text-sm" aria-label="5 out of 5 stars">★★★★★</span>
-      </div>
-      <blockquote
-        ref={body}
-        className={`mt-2 w-full min-h-[3.75rem] text-left text-[0.88rem] leading-[1.4] text-forest/85 sm:min-h-[4rem] sm:text-[0.93rem] ${open ? "" : "line-clamp-3"}`}
-      >
-        “{text}”
-      </blockquote>
-      <div className="w-full min-h-[1.5rem] sm:min-h-[1.75rem]">
-        {(clamped || open) && (
-          <button
-            type="button"
-            onClick={() => setOpen((value) => !value)}
-            className="mt-1 font-display text-sm font-semibold text-coral underline underline-offset-4"
-          >
-            {open ? "Show less" : "Read more"}
-          </button>
-        )}
-      </div>
-    </figure>
-  );
-}
-
-function EnglishReviewCarousel() {
-  const track = useRef<HTMLDivElement>(null);
-  const paused = useRef(false);
-  const resumeTimer = useRef<number | null>(null);
-  const holdTimer = useRef<number | null>(null);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const touchPaused = useRef(false);
-  const isMobile = useIsMobile();
-
-  useEffect(() => {
-    const el = track.current;
-    if (!el) return;
-
-    const narrowQuery = window.matchMedia("(max-width: 390px)");
-    let speed = narrowQuery.matches ? 32 : isMobile ? 50 : 36;
-    const updateSpeed = () => {
-      speed = narrowQuery.matches ? 32 : isMobile ? 50 : 36;
-    };
-    narrowQuery.addEventListener("change", updateSpeed);
-    window.addEventListener("resize", updateSpeed);
-
-    let raf = 0;
-    let last = performance.now();
-    let carry = 0;
-
-    const step = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 0.1);
-      last = now;
-
-      if (!paused.current) {
-        carry += speed * dt;
-        const delta = Math.floor(carry);
-        if (delta > 0) {
-          carry -= delta;
-          const half = el.scrollWidth / 2;
-          const next = el.scrollLeft + delta;
-          el.scrollLeft = half > 0 && next >= half ? next - half : next;
-        }
-      } else {
-        carry = 0;
-      }
-
-      raf = requestAnimationFrame(step);
-    };
-
-    raf = requestAnimationFrame(step);
-    return () => {
-      cancelAnimationFrame(raf);
-      narrowQuery.removeEventListener("change", updateSpeed);
-      window.removeEventListener("resize", updateSpeed);
-      if (resumeTimer.current !== null) window.clearTimeout(resumeTimer.current);
-      if (holdTimer.current !== null) window.clearTimeout(holdTimer.current);
-    };
-  }, [isMobile]);
-
-  const pause = () => {
-    if (resumeTimer.current !== null) {
-      window.clearTimeout(resumeTimer.current);
-      resumeTimer.current = null;
-    }
-    paused.current = true;
-  };
-
-  const resume = () => {
-    if (resumeTimer.current !== null) {
-      window.clearTimeout(resumeTimer.current);
-      resumeTimer.current = null;
-    }
-    paused.current = false;
-  };
-
-  const pauseForReading = () => {
-    pause();
-    resumeTimer.current = window.setTimeout(() => {
-      paused.current = false;
-      resumeTimer.current = null;
-    }, 8000);
-  };
-
-  // Let the browser handle vertical scrolling; only pause on a deliberate hold
-  // or horizontal swipe. No preventDefault() or programmatic page scrolling.
-  const clearHoldTimer = () => {
-    if (holdTimer.current !== null) window.clearTimeout(holdTimer.current);
-    holdTimer.current = null;
-  };
-  const onTouchStart = (event: TouchEvent<HTMLDivElement>) => {
-    clearHoldTimer();
-    if (event.touches.length !== 1) return;
-    const finger = event.touches[0]!;
-    touchStart.current = { x: finger.clientX, y: finger.clientY };
-    touchPaused.current = false;
-    holdTimer.current = window.setTimeout(() => {
-      holdTimer.current = null;
-      touchPaused.current = true;
-      pause();
-    }, 500);
-  };
-  const onTouchMove = (event: TouchEvent<HTMLDivElement>) => {
-    const origin = touchStart.current;
-    if (!origin || event.touches.length !== 1) return;
-    const finger = event.touches[0]!;
-    const dx = Math.abs(finger.clientX - origin.x);
-    const dy = Math.abs(finger.clientY - origin.y);
-    if (Math.max(dx, dy) <= 8) return;
-    clearHoldTimer();
-    touchStart.current = null;
-    if (dx > dy) {
-      touchPaused.current = true;
-      pause();
-    } else if (!touchPaused.current) {
-      resume();
-    }
-  };
-  const onTouchFinish = (cancelled = false) => {
-    clearHoldTimer();
-    touchStart.current = null;
-    if (!cancelled && touchPaused.current) pauseForReading();
-    else resume();
-    touchPaused.current = false;
-  };
-
-  return (
-    <div
-      ref={track}
-      data-gesture-track="reviews"
-      onMouseEnter={() => {
-        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) pause();
-      }}
-      onMouseLeave={() => {
-        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) resume();
-      }}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={() => onTouchFinish()}
-      onTouchCancel={() => onTouchFinish(true)}
-      onFocusCapture={pause}
-      onBlurCapture={resume}
-      className="relative left-1/2 mt-3 flex w-screen max-w-none -translate-x-1/2 items-stretch gap-4 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-width:none] [touch-action:auto] [will-change:scroll-position] sm:gap-5 [&::-webkit-scrollbar]:hidden"
-    >
-      {[...REVIEWS_EN, ...REVIEWS_EN].map((review, index) => (
-        <EnglishReviewCard key={`${review.name}-${index}`} name={review.name} text={review.text} />
-      ))}
-    </div>
-  );
-}
 
 const FAQ = [
   {
@@ -451,7 +226,7 @@ const INCLUDED_EN = [
   "Drinking water and suitable treats",
 ];
 
-function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
+function EnglishHeader({ onEnquire, onApplication }: { onEnquire: () => void; onApplication: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -497,15 +272,13 @@ function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-3">
-          <a href="/" className="inline-flex rounded-full bg-secondary px-2.5 py-2 font-display text-[0.68rem] font-semibold text-forest transition-colors hover:bg-coral-soft sm:px-3 sm:text-xs">
-            SK
-          </a>
+          <LanguageSwitch language="en" />
           <button
             type="button"
-            onClick={() => openEnquiry("en_header")}
+            onClick={onApplication}
             className="btn-coral px-3 py-2 text-[0.65rem] leading-none whitespace-nowrap sm:px-6 sm:py-3 sm:text-sm"
           >
-            Enquire
+            Daycare application
           </button>
           <button
             type="button"
@@ -558,6 +331,15 @@ function EnglishHeader({ onEnquire }: { onEnquire: () => void }) {
 
 function EnglishDogDaycarePage() {
   const [inquiryOpen, setInquiryOpen] = useState(false);
+  const [applicationOpen, setApplicationOpen] = useState(false);
+  const [applicationSent, setApplicationSent] = useState(false);
+  const [heroInquiryOpen, setHeroInquiryOpen] = useState(false);
+  const heroInquiryRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!heroInquiryOpen) return;
+    const frame = window.requestAnimationFrame(() => { heroInquiryRef.current?.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); heroInquiryRef.current?.querySelector<HTMLElement>("h2")?.focus({ preventScroll: true }); });
+    return () => window.cancelAnimationFrame(frame);
+  }, [heroInquiryOpen]);
 
   const exploreDaycare = (source: string) => {
     trackMarketingInteraction("explore_daycare", source);
@@ -577,129 +359,19 @@ function EnglishDogDaycarePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <EnglishHeader onEnquire={() => setInquiryOpen(true)} />
+      <EnglishHeader onEnquire={() => setInquiryOpen(true)} onApplication={() => { setApplicationSent(false); setApplicationOpen(true); }} />
+      <MobileLanguageHeader language="en" />
 
       <main>
-        <section id="top" className="hero-safe-top relative overflow-hidden pt-4 pb-0 sm:pt-6 lg:pt-24 lg:pb-1">
-          <PawTrailBackground />
-
-          <div className="relative z-10 mx-auto max-w-6xl px-4 pb-0 text-center lg:pb-2 lg:text-left">
-            <div className="lg:hidden">
-              <p className="mx-auto mt-1 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-coral-dark min-[390px]:mt-2 min-[390px]:text-[10px] sm:text-sm sm:tracking-[0.16em]">
-                Daytime care for medium and large dogs
-              </p>
-
-              <h1 className="mt-3 text-[29px] leading-[1.01] tracking-[-0.035em] text-forest min-[350px]:text-[31px] min-[390px]:text-[34px] sm:text-5xl">
-                <span className="block">Dog daycare in Košice</span>
-                <span className="block">your dog will</span>
-                <span className="block text-coral-dark">love</span>
-              </h1>
-
-              <div className="mx-auto mt-3.5 max-w-xl text-forest min-[390px]:mt-4">
-                <p className="font-display text-[13px] font-bold tracking-[-0.02em] min-[350px]:text-[14px] sm:text-base">
-                  Your dog does not have to spend the day home alone.
-                </p>
-                <p className="mx-auto mt-1.5 max-w-[34rem] text-sm font-medium leading-snug text-forest/90 min-[390px]:text-base min-[390px]:leading-relaxed">
-                  Play, movement, rest and dog friends under all-day supervision.
-                </p>
-              </div>
-
-              <div className="mx-auto mt-3 flex w-full max-w-[390px] flex-nowrap justify-center gap-1 min-[390px]:mt-4 min-[390px]:gap-1.5">
-                {["All-day supervision", "Outdoor run", "Free first visit"].map((item) => (
-                  <span
-                    key={item}
-                    className="inline-flex min-w-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-forest px-1.5 py-1 text-[8px] font-bold tracking-[-0.01em] text-white shadow-card min-[350px]:px-2 min-[350px]:text-[8.5px] min-[390px]:gap-1 min-[390px]:px-2.5 min-[390px]:text-[9.5px]"
-                  >
-                    <CheckCircle2 className="size-3 shrink-0 text-white min-[390px]:size-3.5" />
-                    {item}
-                  </span>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => exploreDaycare("en_hero_mobile")}
-                className="btn-coral mt-4 inline-flex min-w-[270px] items-center justify-center gap-2 px-7 py-3 text-[15px] min-[390px]:mt-5 sm:min-w-[330px] sm:px-9 sm:py-3 sm:text-lg"
-              >
-                Learn more
-                <ArrowRight className="size-5" />
-              </button>
-              <LandingPracticalInfo language="en" />
-              <InfoTicker language="en" className="mt-0 mb-0 w-screen mx-[calc((100%-100vw)/2)]" compact />
-            </div>
-
-            <div className="hidden lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
-              <div className="flex min-w-0 flex-col lg:py-2">
-                <p className="order-1 mx-0 mb-3 mt-0 font-display text-sm font-bold uppercase tracking-[0.16em] text-coral-dark">
-                  Daytime care for medium and large dogs
-                </p>
-
-                <h1 className="order-2 text-[56px] leading-[1.01] tracking-[-0.035em] text-forest xl:text-[62px]">
-                  <span className="block">Dog daycare</span>
-                  <span className="block">in Košice your dog</span>
-                  <span className="block text-coral-dark">will love</span>
-                </h1>
-
-                <div className="order-3 mx-0 mt-4 max-w-xl text-forest">
-                  <p className="font-display text-lg font-bold">
-                    Your dog does not have to spend the day home alone.
-                  </p>
-                  <p className="mt-1.5 max-w-lg text-base font-medium leading-relaxed text-forest/90">
-                    Play, movement, rest and dog friends under all-day supervision.
-                  </p>
-                </div>
-
-                <div className="order-4 mt-4 flex flex-wrap gap-2">
-                  {["All-day supervision", "Outdoor run", "Free first visit"].map((item) => (
-                    <span
-                      key={item}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-forest px-3 py-1.5 text-xs font-bold text-white shadow-card"
-                    >
-                      <CheckCircle2 className="size-4 text-white" />
-                      {item}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="order-5 mt-4 flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => exploreDaycare("en_hero_desktop_cta")}
-                    className="btn-coral inline-flex min-w-[310px] items-center justify-center gap-3 px-10 py-4 text-lg"
-                  >
-                    Learn more
-                    <ArrowRight className="size-4" />
-                  </button>
-                </div>
-                <LandingPracticalInfo language="en" className="order-6" />
-              </div>
-
-              <div className="min-w-0">
-                <SchoolmatesFormCrown compact />
-                <div className="rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
-                  <h2 className="text-center text-2xl text-forest">Enquire about daycare</h2>
-                  <p className="mt-2 mb-4 text-center text-sm text-muted-foreground">
-                    Fill in the short form. We will be in touch.
-                  </p>
-                  <EnglishInquiryForm trackingSource="en_hero_desktop_inline" />
-                </div>
-              </div>
-            </div>
+        <Hero language="en" mobileInquiryOpen={heroInquiryOpen} onMobileInquiryOpen={() => { if (heroInquiryOpen) heroInquiryRef.current?.scrollIntoView({block:"start",behavior:"auto"}); else setHeroInquiryOpen(true); }} />
+        {heroInquiryOpen && <section id="home-hero-interest" ref={heroInquiryRef} data-home-hero-revealed-form className="relative scroll-mt-20 overflow-hidden bg-card px-4 pb-11 pt-6 lg:hidden">
+          <SectionAmbientPaws />
+          <div data-lead-form-shell className="form-liquid-surface relative z-10 mx-auto max-w-xl overflow-hidden rounded-[26px] px-4 py-6 min-[390px]:px-6">
+            <h2 data-lead-form-intro tabIndex={-1} className="font-display text-center text-lg font-bold text-forest focus:outline-none">What are you looking for for your dog?</h2>
+            <p data-lead-form-intro className="mt-2 mb-4 text-center text-sm text-muted-foreground">Fill in a short <strong className="font-bold text-forest">no-obligation enquiry</strong>. We will be in touch.</p>
+            <EnglishInquiryForm trackingSource="en_hero_mobile_form" questionInHeading compact />
           </div>
-        </section>
-
-        <section className="bg-card px-4 pt-2 pb-5 lg:hidden">
-          <SchoolmatesFormCrown />
-          <div className="mx-auto max-w-md rounded-3xl bg-secondary/55 px-4 pb-5 pt-12 text-center shadow-card ring-1 ring-forest/8">
-            <h2 className="font-display text-xl font-bold text-forest">Want to know more about daycare?</h2>
-            <p className="mx-auto mb-4 mt-2 text-sm leading-relaxed text-forest/70">We are happy to answer your questions.</p>
-            <ContactRevealButton language="en" onClick={() => openInquiry("en_hero_mobile_form")} />
-          </div>
-        </section>
-
-        <div className="hidden lg:block">
-          <InfoTicker language="en" />
-        </div>
+        </section>}
 
         <section id="en-benefits" className="relative scroll-mt-24 overflow-hidden bg-forest pt-10 pb-0 text-cream sm:pt-12 sm:pb-0">
           <SectionAmbientPaws tone="dark" />
@@ -750,15 +422,6 @@ function EnglishDogDaycarePage() {
                 className="block h-full w-full scale-[1.08] object-cover object-bottom sm:scale-[1.04]"
               />
             </div>
-          </div>
-        </section>
-
-        <section id="reviews" className="relative scroll-mt-24 overflow-x-clip bg-secondary/50 pt-3 pb-9 sm:pt-8 sm:pb-14">
-          <SectionAmbientPaws />
-          <div className="relative z-10 mx-auto max-w-6xl px-4 text-center">
-            <h2 className="section-title whitespace-nowrap text-[clamp(14px,4.7vw,36px)] leading-tight">More than 100 happy dogs</h2>
-            <p className="mt-2.5 text-sm text-forest/80 sm:text-base">⭐ 5.0 on Google</p>
-            <EnglishReviewCarousel />
           </div>
         </section>
 
@@ -818,7 +481,8 @@ function EnglishDogDaycarePage() {
           </div>
         </section>
 
-        <FriendshipFeature language="en" ctaLabel="This is what I’m looking for" onCtaClick={() => openInquiry("en_friendship_20261028")} />
+        <FriendshipFeature language="en" applicationMode />
+        <section id="en-application" className="bg-card px-4 pb-10"><div data-home-friendship-form className="form-liquid-surface mx-auto max-w-4xl rounded-3xl bg-card p-4 shadow-card sm:p-6 lg:p-8"><h3 className="mb-5 text-center font-display text-xl font-bold text-forest sm:text-2xl">Daycare application</h3><LongForm language="en" collapsible onExpand={() => trackMarketingInteraction("inquiry_cta", "en_friendship_20261028")} /></div></section>
 
         <Gallery language="en" />
 
@@ -945,6 +609,7 @@ function EnglishDogDaycarePage() {
       </main>
 
       <Footer language="en" />
+      <FormDialog open={applicationOpen} onOpenChange={setApplicationOpen} hideHeader={applicationSent} title={applicationSent ? "Application submitted" : "Daycare application"} subtitle="Tell us more about your dog. We will get in touch to arrange the next steps."><LongForm language="en" onSent={() => setApplicationSent(true)} /></FormDialog>
 
       <FormDialog
         open={inquiryOpen}
