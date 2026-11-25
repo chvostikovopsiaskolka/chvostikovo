@@ -38,20 +38,30 @@ function scopedLeadCss(before,after) {
       splitSelectors(h).every(selector=>!/[+~]/.test(selector)&&/^(?:\.lead-brand-live(?:[\s.:#\[]|$)|\[data-aria-chat-lead\](?:[\s.:#\[]|$))/.test(selector)));
   });
 }
+// A display-only greeting literal can change without changing any chat handlers,
+// form wiring or imports. Any other TSX difference retains integration checks.
+function introCopyOnly(before,after){
+  if(typeof before!=='string'||typeof after!=='string')return false;
+  const pattern=/^  const introText = ("(?:[^"\\\r\n]|\\.)*");$/gm;
+  const old=[...before.matchAll(pattern)],next=[...after.matchAll(pattern)];
+  if(old.length!==1||next.length!==1)return false;
+  try{if(typeof JSON.parse(old[0][1])!=='string'||typeof JSON.parse(next[0][1])!=='string')return false;}catch{return false;}
+  return before.replace(pattern,'<display greeting>')===after.replace(pattern,'<display greeting>');
+}
 function selectScope(files, css={}) {
   if(!files.length)return 'full';
   const scopedCss=files.includes('src/styles.css')&&scopedLeadCss(css.before,css.after);
-  if(files.every(file=>tooling.has(file)||(file==='src/styles.css'&&scopedCss)) &&
-    (scopedCss||files.every(file=>tooling.has(file))))return 'aria-visual';
+  if(files.every(file=>tooling.has(file)||(file==='src/styles.css'&&scopedCss)||(file==='src/components/site/AriaGuidedChat.tsx'&&introCopyOnly(css.copyBefore,css.copyAfter))) &&
+    (scopedCss||introCopyOnly(css.copyBefore,css.copyAfter)||files.every(file=>tooling.has(file))))return 'aria-visual';
   return files.some(file=>ariaSources.has(file))&&files.every(file=>ariaSources.has(file)||plumbing.has(file)||(file==='src/styles.css'&&scopedCss))?'aria':'full';
 }
 // These changes cannot alter form/consent/attribution implementations. Chat JS
 // retains its browser integration suite; form/lib/route/unknown changes fail closed.
-function formChecksRequired(files) {
+function formChecksRequired(files, css={}) {
   const presentation=new Set([...tooling,'src/styles.css','src/assets/aria-assistant-head-lead.webp']);
-  return !files.length||files.some(file=>!presentation.has(file));
+  return !files.length||files.some(file=>!presentation.has(file)&&!(file==='src/components/site/AriaGuidedChat.tsx'&&introCopyOnly(css.copyBefore,css.copyAfter)));
 }
-module.exports={selectScope,scopedLeadCss,formChecksRequired,ARIA_ROUTES};
+module.exports={selectScope,scopedLeadCss,introCopyOnly,formChecksRequired,ARIA_ROUTES};
 if(require.main===module){
 (async()=>{
   const [base,head]=process.argv.slice(2);
@@ -66,17 +76,19 @@ if(require.main===module){
     const comparison=await response.json();
     if(!Array.isArray(comparison.files))throw new Error('Impact compare omitted changed files');
     files=comparison.files.length>=300?['unknown/truncated-comparison']:comparison.files.flatMap(file=>file.previous_filename?[file.filename,file.previous_filename]:[file.filename]);
-    if(files.includes('src/styles.css')){
-      const read=async ref=>{const r=await fetch('https://api.github.com/repos/'+repo+'/contents/src/styles.css?ref='+ref,{headers:{...headers,Accept:'application/vnd.github.raw+json'}});if(!r.ok)throw new Error('CSS impact HTTP '+r.status);return r.text();};
-      [css.before,css.after]=await Promise.all([read(base),read(head)]);
+    const read=async (path,ref)=>{const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path+'?ref='+ref,{headers:{...headers,Accept:'application/vnd.github.raw+json'}});if(!r.ok)throw new Error('Source impact HTTP '+r.status);return r.text();};
+    for(const [path,beforeKey,afterKey] of [['src/styles.css','before','after'],['src/components/site/AriaGuidedChat.tsx','copyBefore','copyAfter']]){
+      if(files.includes(path))[css[beforeKey],css[afterKey]]=await Promise.all([read(path,base),read(path,head)]);
     }
   }else{
     files=execFileSync('git',['diff','--name-only','--no-renames',base,head,'--'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean);
-    if(files.includes('src/styles.css'))for(const [key,ref]of [['before',base],['after',head]])css[key]=execFileSync('git',['show',ref+':src/styles.css'],{encoding:'utf8'});
+    for(const [path,beforeKey,afterKey] of [['src/styles.css','before','after'],['src/components/site/AriaGuidedChat.tsx','copyBefore','copyAfter']]){
+      if(files.includes(path))for(const [key,ref] of [[beforeKey,base],[afterKey,head]])css[key]=execFileSync('git',['show',ref+':'+path],{encoding:'utf8'});
+    }
   }
   const scope=selectScope(files,css);
   console.error('Candidate runtime scope: '+scope+' ('+files.length+' changed paths)');
   console.log('WEB_RUNTIME_SCOPE='+scope);
-  console.log('FORM_CHECKS_REQUIRED='+formChecksRequired(files));
+  console.log('FORM_CHECKS_REQUIRED='+formChecksRequired(files,css));
 })().catch(error=>{console.error(error.message);process.exitCode=1;});
 }
