@@ -572,10 +572,72 @@ async function assertFooterMapGeometry(browser, engine) {
   } finally {await context.close();}
 }
 
+
+async function assertBilingualNavigation(browser,engine) {
+  const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  const captured=[];
+  try {
+    await context.addInitScript(()=>{
+      window.__bilingualDocument=String(Math.random());
+      window.__bilingualPixel=[];window.fbq=(...args)=>window.__bilingualPixel.push(args);
+      window.__bilingualGa=[];window.gtag=(...args)=>window.__bilingualGa.push(args);
+      localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:false}));
+    });
+    await context.route('**/*',async route=>{
+      const req=route.request(),u=new URL(req.url());
+      if(u.origin===new URL(base).origin&&['GET','HEAD'].includes(req.method()))return route.continue();
+      if(u.pathname.includes('/functions/v1/')) {
+        if(req.method()==='POST')captured.push({path:u.pathname,body:req.postDataJSON()});
+        return route.fulfill({status:200,headers:{'access-control-allow-origin':'*','access-control-allow-methods':'POST, OPTIONS','access-control-allow-headers':'*','content-type':'application/json'},body:'{"ok":true}'});
+      }
+      return route.abort();
+    });
+    const page=await context.newPage();
+    await page.goto(new URL('/?utm_source=fixture&utm_campaign=bilingual',base).href);
+    await page.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
+    const doc=await page.evaluate(()=>window.__bilingualDocument);
+    await page.locator('.mobile-dock').getByRole('button',{name:'Otvoriť menu'}).click();
+    await page.locator('.mobile-dock-menu [data-language-switch] a[lang="en"]').click();
+    await page.waitForURL(/\/en\/dog-daycare-kosice\/?$/);
+    await page.waitForFunction(()=>document.documentElement.lang==='en');
+    if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Language switch reloaded document');
+    if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track')))throw new Error('Pixel fired without consent');
+    for(const width of [320,375,390,430,1440]){
+      await page.setViewportSize({width,height:width===1440?900:844});
+      await page.locator('#top h1:visible').waitFor({state:'visible'});
+      const ok=await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1);
+      if(!ok)throw new Error('EN overflow at '+width);
+      if(width<1024){
+        await page.locator('.mobile-dock').getByRole('button',{name:'Open menu'}).click();
+        const menu=page.locator('.mobile-dock-menu');
+        await menu.waitFor({state:'visible'});
+        const selected=menu.locator('[data-language-switch] a[lang="en"]');
+        if(await selected.getAttribute('aria-current')!=='page')throw new Error('EN active state missing');
+        const buttons=await menu.locator('.mobile-dock-menu-actions [data-language-switch] a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
+        if(buttons.some(b=>b.width<44||b.height<44))throw new Error('Language target too small');
+        await page.screenshot({path:path.join(out,'bilingual-menu-'+engine+'-'+width+'.png')});
+        await menu.getByRole('button',{name:'Close menu'}).click();
+        await menu.waitFor({state:'hidden'});
+      }else{
+        await page.screenshot({path:path.join(out,'bilingual-desktop-'+engine+'.png')});
+      }
+    }
+    await page.evaluate(()=>{const c=JSON.parse(localStorage.getItem('chvostikovo-cookies'));c.marketing=true;c.analytics=true;localStorage.setItem('chvostikovo-cookies',JSON.stringify(c));window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed',{detail:c}));});
+    await page.waitForFunction(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&a[1]==='PageView'));
+    const pv=await page.evaluate(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length);
+    await page.locator('header [data-language-switch] a[lang="sk"]').click();
+    await page.waitForURL(u=>u.pathname==='/');
+    await page.waitForFunction(n=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length===n+1,pv);
+    if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Desktop language switch reloaded document');
+    if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&['Lead','CompleteRegistration'].includes(a[1]))))throw new Error('Language navigation emitted conversion');
+    console.log('PASS bilingual navigation, responsive menu and consented PageView '+engine);
+  } finally {await context.close();}
+}
+
 (async () => {
   for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
-    if (!bellaris && brandPreviewCandidate && runtimeScope==='full') await assertFooterMapGeometry(browser, engine);
+    if (!bellaris && brandPreviewCandidate && runtimeScope==='full') { await assertFooterMapGeometry(browser, engine); await assertBilingualNavigation(browser,engine); }
     for (const restricted of [false, true]) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
       // Each URL must start without a saved choice from the preceding URL.
@@ -3298,8 +3360,8 @@ async function assertFooterMapGeometry(browser, engine) {
             } else {
             const modal = page.getByRole('dialog');
             await modal.waitFor({ state: 'visible' });
-            if (!await modal.locator('[data-lead-step-form]').count())
-              throw new Error('Mobile interest CTA must open guided enquiry modal');
+            if (!await modal.locator(url.pathname.startsWith('/en/') ? '[data-application-form]' : '[data-lead-step-form]').count())
+              throw new Error('Mobile CTA must open the correct shared form');
             if (!url.pathname.startsWith('/en/')) {
               const leadForm = modal.locator('[data-lead-step-form]');
               const cards = leadForm.locator('label:has(input[name="zaujem"])');
@@ -3352,15 +3414,18 @@ async function assertFooterMapGeometry(browser, engine) {
                 if(homeRoute||isPaidLeadFixture(page)){
                   await advanceLeadContact(form);
                 }else{
-                  await form.locator('label').first().click();
-                  await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+                  await activateFixtureControl(form.locator('label:has(input[type="radio"])').first());
+                  await activateFixtureControl(form.getByRole('button',{name:url.pathname.startsWith('/en/')?'Continue':'Pokračovať',exact:true}));
                 }
               }
-              await assertLeadContactIntro(form);
-              const sharedBack=form.getByRole('button',{name:'Späť',exact:true});
+              if(url.pathname.startsWith('/en/')) {
+                await form.getByRole('heading',{name:'Contact details',exact:true}).waitFor({state:'visible'});
+                if(await form.getAttribute('data-lead-step')!=='2')throw new Error('EN contact step missing');
+              } else await assertLeadContactIntro(form);
+              const sharedBack=form.getByRole('button',{name:url.pathname.startsWith('/en/')?'Back':'Späť',exact:true});
               if(homeRoute||isPaidLeadFixture(page))await activateFixtureControl(sharedBack);
               else await sharedBack.click();
-              await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible',timeout:5000});
+              await form.getByRole('button',{name:url.pathname.startsWith('/en/')?'Continue':'Pokračovať',exact:true}).waitFor({state:'visible',timeout:5000});
               if(await form.getAttribute('data-lead-step')!=='1')throw new Error('Shared form back failed');
               const restored=await form.evaluate(el=>{const shell=el.closest('[data-lead-form-shell]');return [...shell.querySelectorAll(':scope > [data-lead-form-intro]')].every(node=>getComputedStyle(node).display!=='none');});
               if(!restored)throw new Error('Shared introduction not restored on back');
@@ -4049,21 +4114,14 @@ async function assertFooterMapGeometry(browser, engine) {
               await productPage.locator('.mobile-dock').getByRole('button', { name: 'Otvoriť menu' }).click();
               const menu = productPage.locator('.mobile-dock-menu');
               await menu.waitFor({ state: 'visible' });
-              const actions = menu.locator('.mobile-dock-menu-actions a');
-              if (await actions.count() !== 4) throw new Error('Mobile menu must have exactly four icon actions');
-              const hrefs = await Promise.all([0, 1, 2, 3].map(index => actions.nth(index).getAttribute('href')));
-              if (!hrefs[0]?.startsWith('tel:') || hrefs[1] !== '/en/dog-daycare-kosice' ||
-                !hrefs[2]?.startsWith('https://www.instagram.com/') || !hrefs[3]?.startsWith('https://www.facebook.com/')) {
-                throw new Error('Mobile menu phone, EN, Instagram and Facebook destinations incorrect');
-              }
-              if (!await actions.nth(0).getAttribute('aria-label') || !await actions.nth(2).getAttribute('aria-label')) {
-                throw new Error('Mobile icon links require accessible names');
-              }
-              const actionBoxes = await Promise.all([0, 1, 2, 3].map(index => actions.nth(index).boundingBox()));
-              if (actionBoxes.some(box => !box || box.width < 40 || box.height < 44) ||
-                actionBoxes.some(box => Math.abs(box.y - actionBoxes[0].y) > 5)) {
-                throw new Error('Mobile menu four icon actions must fit in one tappable row');
-              }
+              const actions = menu.locator('.mobile-dock-menu-actions');
+              const direct=actions.locator(':scope > a');
+              const lang=actions.locator('[data-language-switch]');
+              if(await direct.count()!==3 || await lang.locator('a').count()!==2)throw new Error('Phone, SK/EN and two socials required');
+              const hrefs=await direct.evaluateAll(es=>es.map(e=>e.getAttribute('href')));
+              if(!hrefs[0]?.startsWith('tel:')||!hrefs[1]?.startsWith('https://www.instagram.com/')||!hrefs[2]?.startsWith('https://www.facebook.com/'))throw new Error('Wrong contact destinations');
+              const boxes=await Promise.all([direct.nth(0),lang,direct.nth(1),direct.nth(2)].map(el=>el.boundingBox()));
+              if(boxes.some(b=>!b||b.width<44||b.height<44)||Math.abs(boxes[0].y-boxes[1].y)>5||Math.abs(boxes[2].y-boxes[3].y)>5||boxes[2].y<boxes[0].y+boxes[0].height)throw new Error('Phone and language above social row');
               await menu.getByRole('button', { name: 'Zavrieť menu' }).click();
               await menu.waitFor({ state: 'hidden' });
             }
@@ -4209,10 +4267,10 @@ async function assertFooterMapGeometry(browser, engine) {
               await englishFooterSocial.waitFor({ state: 'visible' });
               if (await englishFooterSocial.locator('a').count() !== 2) throw new Error('English footer social buttons missing');
               await productPage.locator('.mobile-dock').getByRole('button', { name: 'Open menu' }).click();
-              const englishActions = productPage.locator('.mobile-dock-menu-actions a');
-              if (await englishActions.count() !== 4 || await englishActions.nth(1).getAttribute('href') !== '/') {
-                throw new Error('English mobile menu must retain the SK language switch and four icon actions');
-              }
+              const englishActions = productPage.locator('.mobile-dock-menu-actions');
+              if(await englishActions.locator(':scope > a').count()!==3||await englishActions.locator('[data-language-switch] a').count()!==2)throw new Error('EN menu missing shared language switch');
+              if(await productPage.locator('.mobile-dock-menu-links a[href="/produkty"],.mobile-dock-menu-links a[href="/psia-skolka-pre-steniatka"]').count())throw new Error('Untranslated EN menu destinations');
+
             }
             for (const legacy of ['/kosik/', '/objednavka/']) {
               // Meta refresh / location.replace can race with Playwright's navigation
