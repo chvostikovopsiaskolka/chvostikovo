@@ -1,3 +1,4 @@
+import { LanguageSwitch } from "./LanguageSwitch";
 import { useEffect, useState, type MouseEvent } from "react";
 import { ChevronDown, Menu, Package, Phone, X } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -208,7 +209,7 @@ export function Header({
         </nav>
 
         <div className="flex items-center gap-1 min-[390px]:gap-1.5 sm:gap-3">
-          <a href="/en/dog-daycare-kosice" lang="en" onClick={() => trackDesktopNav("en")} aria-label="English information" className="inline-flex rounded-full bg-secondary px-2 py-1.5 font-display text-[0.6rem] font-semibold text-forest transition-colors hover:bg-coral-soft min-[390px]:px-2.5 min-[390px]:py-2 min-[390px]:text-[0.68rem] sm:px-3 sm:text-xs">EN</a>
+          <LanguageSwitch language="sk" />
           <button type="button" onClick={() => { trackDesktopNav("application"); closeMobileMenu(); setOpen(true); }} className="btn-coral px-2.5 py-2 text-[0.58rem] leading-none whitespace-nowrap min-[390px]:px-3 min-[390px]:text-[0.65rem] sm:px-6 sm:py-3 sm:text-sm">Prihláška do škôlky</button>
           <button type="button" aria-label="Otvoriť menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-forest transition-colors hover:bg-coral-soft min-[390px]:size-9 lg:hidden">
             {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}

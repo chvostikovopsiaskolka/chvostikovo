@@ -241,13 +241,15 @@ export function ShortForm({
 
 /** Shared two-step contact question for homepage and Aria, never a paid Lead conversion. */
 export function HomeFaqContactForm({
-  source = HOME_FAQ_CONTACT_SOURCE, compact = false, onStarted, onSent,
+  source = HOME_FAQ_CONTACT_SOURCE, compact = false, onStarted, onSent, language = "sk",
 }: {
   source?: typeof HOME_FAQ_CONTACT_SOURCE | "aria_preview_chat_other" | "lead_landing_aria_chat_other";
   compact?: boolean;
+  language?: "sk" | "en";
   onStarted?: () => void;
   onSent?: () => void;
 }) {
+  const t = (sk: string, en: string) => language === "en" ? en : sk;
   const isAria = source !== HOME_FAQ_CONTACT_SOURCE;
   const formRef = useRef<HTMLFormElement>(null);
   const id = useId();
@@ -275,13 +277,13 @@ export function HomeFaqContactForm({
       if (source === "lead_landing_aria_chat_other") trackAriaChatAction("form_start", "other");
       onStarted?.();
     }
-    else void trackCookielessInteraction("explore_daycare", source + "_started");
+    else void trackCookielessInteraction("explore_daycare", source + "_started", language);
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (step === 1) {
       if (question.trim().length < 5 || question.trim().length > 600) {
-        setError("Napíšte otázku v dĺžke 5 až 600 znakov.");
+        setError(t("Napíšte otázku v dĺžke 5 až 600 znakov.", "Enter a question of 5 to 600 characters."));
         return;
       }
       trackStart();
@@ -296,7 +298,7 @@ export function HomeFaqContactForm({
     const name = String(data.get("meno") ?? "").trim();
     const email = String(data.get("email") ?? "").trim();
     if (!name || !email || question.trim().length < 5) {
-      setError("Vyplňte otázku a všetky kontaktné údaje.");
+      setError(t("Vyplňte otázku a všetky kontaktné údaje.", "Complete the question and all contact details."));
       return;
     }
     inFlight.current = true;
@@ -304,9 +306,9 @@ export function HomeFaqContactForm({
     setError(null);
     let attemptId: string | undefined;
     try {
-      if (source === "lead_landing_aria_chat_other") attemptId = startFormAttempt(source);
+      if (source === "lead_landing_aria_chat_other") attemptId = startFormAttempt(source, language);
       const phone = phoneFromForm(form, id + "-tel");
-      if (source !== "lead_landing_aria_chat_other") attemptId = startFormAttempt(source);
+      if (source !== "lead_landing_aria_chat_other") attemptId = startFormAttempt(source, language);
       await submitInquiry({
         typ: "informacie", consent: true,
         source_ref: sourceRef(), ...attributionPayload(), cta_source: source,
@@ -320,16 +322,16 @@ export function HomeFaqContactForm({
           trackAriaQuestionSubmit(source);
           onSent?.();
         } else {
-          void trackCookielessInteraction("explore_daycare", source + "_submitted", "sk", attemptId);
+          void trackCookielessInteraction("explore_daycare", source + "_submitted", language, attemptId);
           trackFaqContactSubmit(source);
         }
       });
     } catch (cause) {
       const diagnostic = reportInquiryError(cause);
-      void trackCookielessInteraction("form_error", source + ":" + diagnostic.stage + inquiryDiagnosticSuffix(diagnostic), "sk", attemptId);
+      void trackCookielessInteraction("form_error", source + ":" + diagnostic.stage + inquiryDiagnosticSuffix(diagnostic), language, attemptId);
       setError(cause instanceof InquirySubmissionError && cause.stage === "phone_normalization"
-        ? "Skontrolujte telefónne číslo."
-        : "Správu sa nepodarilo odoslať. Skúste to znova alebo nám zavolajte.");
+        ? t("Skontrolujte telefónne číslo.", "Check your phone number.")
+        : t("Správu sa nepodarilo odoslať. Skúste to znova alebo nám zavolajte.", "We couldn’t send your message. Please try again or call us."));
     } finally {
       inFlight.current = false;
       setLoading(false);
@@ -338,8 +340,8 @@ export function HomeFaqContactForm({
   if (sent) return (
     <div data-home-faq-contact-success role="status" className="py-5 text-center">
       <Check className="mx-auto mb-3 size-8 text-forest" aria-hidden="true" />
-      <h3 className="font-display text-xl font-bold text-forest">Ďakujeme!</h3>
-      <p className="mt-2 text-sm leading-relaxed text-forest/80">Vašu správu sme prijali a odpovieme vám čo najskôr, ako to bude možné.</p>
+      <h3 className="font-display text-xl font-bold text-forest">{t("Ďakujeme!", "Thank you!")}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-forest/80">{t("Vašu správu sme prijali a odpovieme vám čo najskôr, ako to bude možné.", "We have received your message and will reply as soon as possible.")}</p>
     </div>
   );
   return (
@@ -347,32 +349,32 @@ export function HomeFaqContactForm({
       data-step={step} onSubmit={submit}
       className={compact ? "space-y-3 text-left" : "space-y-4 text-left"}>
       <div>
-        <p className="mb-2 text-xs font-semibold text-forest/75">Krok {step} z 2</p>
-        <div role="progressbar" aria-label="Postup kontaktného formulára" aria-valuemin={1} aria-valuemax={2} aria-valuenow={step} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
+        <p className="mb-2 text-xs font-semibold text-forest/75">{language === "en" ? `Step ${step} of 2` : `Krok ${step} z 2`}</p>
+        <div role="progressbar" aria-label={t("Postup kontaktného formulára", "Contact form progress")} aria-valuemin={1} aria-valuemax={2} aria-valuenow={step} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
           <div className={"h-full rounded-full bg-coral " + (step === 1 ? "w-1/2" : "w-full")} />
         </div>
       </div>
       <fieldset hidden={step !== 1} disabled={step !== 1} className="min-w-0 space-y-3">
-        <label className="label-sm" htmlFor={id + "-question"}>Vaša otázka *</label>
+        <label className="label-sm" htmlFor={id + "-question"}>{t("Vaša otázka *", "Your question *")}</label>
         <textarea id={id + "-question"} name="otazka" value={question} onChange={event => { setQuestion(event.target.value); trackStart(); }}
-          rows={compact ? 3 : 4} required minLength={5} maxLength={600} className="field w-full resize-y" placeholder="Napíšte nám, čo vás zaujíma…" />
-        <button type="submit" className="btn-coral min-h-12 w-full px-4 py-3 font-bold">Pokračovať</button>
+          rows={compact ? 3 : 4} required minLength={5} maxLength={600} className="field w-full resize-y" placeholder={t("Napíšte nám, čo vás zaujíma…", "Tell us what you would like to know…")} />
+        <button type="submit" className="btn-coral min-h-12 w-full px-4 py-3 font-bold">{t("Pokračovať", "Continue")}</button>
       </fieldset>
       <fieldset hidden={step !== 2} disabled={step !== 2 || loading} className="min-w-0 space-y-3">
-        <h4 className="font-display font-bold text-forest">Kontaktné údaje</h4>
+        <h4 className="font-display font-bold text-forest">{t("Kontaktné údaje", "Contact details")}</h4>
         <div>
-          <label className="label-sm" htmlFor={id + "-name"}>Meno *</label>
-          <input id={id + "-name"} name="meno" required maxLength={200} autoComplete="name" className="field" placeholder="Vaše meno" />
+          <label className="label-sm" htmlFor={id + "-name"}>{t("Meno *", "Name *")}</label>
+          <input id={id + "-name"} name="meno" required maxLength={200} autoComplete="name" className="field" placeholder={t("Vaše meno", "Your name")} />
         </div>
-        <PhoneField id={id + "-tel"} name="telefon" />
+        <PhoneField id={id + "-tel"} name="telefon" language={language} label={t("Telefón *", "Phone *")} />
         <div>
-          <label className="label-sm" htmlFor={id + "-email"}>E-mail *</label>
-          <input id={id + "-email"} name="email" type="email" required maxLength={254} autoComplete="email" className="field" placeholder="vas@email.sk" />
+          <label className="label-sm" htmlFor={id + "-email"}>{t("E-mail *", "Email *")}</label>
+          <input id={id + "-email"} name="email" type="email" required maxLength={254} autoComplete="email" className="field" placeholder={t("vas@email.sk", "you@example.com")} />
         </div>
-        <PrivacyConsentCheckbox />
+        <PrivacyConsentCheckbox language={language} />
         <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
-          <button type="button" onClick={() => { setStep(1); setError(null); }} className="min-h-12 rounded-full border border-forest/20 px-4 font-semibold text-forest">Späť</button>
-          <button type="submit" disabled={loading} className="btn-coral min-h-12 min-w-0 px-4 py-3 font-bold disabled:opacity-60">{loading ? "Odosielam…" : "Poslať"}</button>
+          <button type="button" onClick={() => { setStep(1); setError(null); }} className="min-h-12 rounded-full border border-forest/20 px-4 font-semibold text-forest">{t("Späť", "Back")}</button>
+          <button type="submit" disabled={loading} className="btn-coral min-h-12 min-w-0 px-4 py-3 font-bold disabled:opacity-60">{loading ? t("Odosielam…", "Sending…") : t("Poslať", "Send")}</button>
         </div>
       </fieldset>
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
@@ -385,11 +387,14 @@ function DogBinaryChoice({
   label,
   name,
   options,
+  language = "sk",
 }: {
   label: string;
   name: string;
   options: readonly [string, string];
+  language?: "sk" | "en";
 }) {
+  const display = (option: string) => language === "en" ? ({ Pes: "Male", Suka: "Female", Áno: "Yes", Nie: "No" } as Record<string, string>)[option] ?? option : option === "Suka" ? "Fena" : option;
   return (
     <fieldset className="min-w-0">
       <legend className="label-sm">{label} *</legend>
@@ -400,12 +405,12 @@ function DogBinaryChoice({
               type="radio"
               name={name}
               value={option}
-              aria-label={option === "Suka" ? "Fena" : option}
+              aria-label={display(option)}
               required
               className="peer sr-only"
             />
             <span className="flex min-h-11 items-center justify-center rounded-[0.85rem] border border-border bg-white px-2 py-2.5 text-center text-base font-semibold text-forest transition-colors peer-checked:border-coral peer-checked:bg-secondary/55">
-              {option === "Suka" ? "Fena" : option}
+              {display(option)}
             </span>
           </label>
         ))}
@@ -414,7 +419,8 @@ function DogBinaryChoice({
   );
 }
 
-export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: () => void; collapsible?: boolean; onExpand?: () => void }) {
+export function LongForm({ onSent, collapsible = false, onExpand, language = "sk" }: { onSent?: () => void; collapsible?: boolean; onExpand?: () => void; language?: "sk" | "en" }) {
+  const t = (sk: string, en: string) => language === "en" ? en : sk;
   const formId = useId();
   const [sent, setSent] = useState(false);
   const [expanded, setExpanded] = useState(!collapsible);
@@ -426,12 +432,12 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
   const trackingSource = "application_form";
-  const progress = useFormProgress(trackingSource);
+  const progress = useFormProgress(trackingSource, language);
 
   function onFormChange() {
     if (formStarted.current) return;
     formStarted.current = true;
-    void trackCookielessInteraction("form_start", trackingSource);
+    void trackCookielessInteraction("form_start", trackingSource, language);
   }
 
   function goToStep(next: 1 | 2) {
@@ -466,7 +472,7 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
     const invalidOwner = invalidField(form.querySelector("[data-application-owner-step]"));
     if (invalidOwner) { invalidOwner.reportValidity(); return; }
     progress.markAttempt();
-    const attemptId = startFormAttempt(trackingSource);
+    const attemptId = startFormAttempt(trackingSource, language);
     setLoading(true);
     setError(null);
     try {
@@ -503,7 +509,7 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
         povaha: String(fd.get("povaha") ?? "").trim(),
       }, attemptId);
 
-      void trackCookielessInteraction("form_submit", trackingSource, "sk", attemptId);
+      void trackCookielessInteraction("form_submit", trackingSource, language, attemptId);
       runFormTelemetry(() => {
         trackFormSubmit({
           formType: "prihlaska",
@@ -520,8 +526,8 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
       runFormTelemetry(() => onSent?.());
     } catch (error) {
       const diagnostic = reportInquiryError(error);
-      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, "sk", attemptId);
-      setError(error instanceof InquirySubmissionError && error.recoverySaved ? "Odoslanie formulára zlyhalo, ale váš kontakt sme zachovali. Ozveme sa vám." : "Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
+      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, language, attemptId);
+      setError(error instanceof InquirySubmissionError && error.recoverySaved ? t("Odoslanie formulára zlyhalo, ale váš kontakt sme zachovali. Ozveme sa vám.", "Submission failed, but we have saved your contact details. We will get in touch.") : t("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.", "Submission failed. Please try again or call us."));
     } finally {
       setLoading(false);
     }
@@ -533,28 +539,28 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
         <div className="flex size-14 items-center justify-center rounded-full bg-secondary text-forest">
           <Check className="size-7" />
         </div>
-        <h3 className="text-xl text-forest">Prihláška odoslaná</h3>
+        <h3 className="text-xl text-forest">{t("Prihláška odoslaná", "Application submitted")}</h3>
         <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-          O úspešnom prijatí prihlášky vás budeme informovať SMS.
+          {t("O úspešnom prijatí prihlášky vás budeme informovať SMS.", "You will receive an SMS confirming receipt of your application.")}
         </p>
-        {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
+        {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} language={language} />}
       </div>
     );
   }
 
-  const details = (
+  const identity = (
     <>
-      {dogCount === 2 && <h4 className="mt-4 border-b border-coral/20 pb-2 text-base font-bold text-forest">1. psík</h4>}
+      {dogCount === 2 && <h4 className="mt-4 border-b border-coral/20 pb-2 text-base font-bold text-forest">{t("1. psík", "Dog 1")}</h4>}
       <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="identity">
         <div className="min-w-0">
           <label className="label-sm" htmlFor={`l-${formId}-pes`}>
-            Meno psa *
+            {t("Meno psa *", "Dog's name *")}
           </label>
           <input id={`l-${formId}-pes`} name="pes" autoComplete="off" required className="field" placeholder="Rocky" />
       </div>
         <div className="min-w-0">
           <label className="label-sm" htmlFor={`l-${formId}-plemeno`}>
-            Plemeno *
+            {t("Plemeno *", "Breed *")}
           </label>
           <input
             id={`l-${formId}-plemeno`}
@@ -565,33 +571,37 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
           />
         </div>
       </div>
+    </>
+  );
+  const details = (
+    <>
       <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="age-weight">
         <div className="min-w-0">
           <label className="label-sm" htmlFor={`l-${formId}-vek`}>
-            Vek psa *
+            {t("Vek psa *", "Age *")}
           </label>
-          <input id={`l-${formId}-vek`} name="vek" required className="field" placeholder="2 roky" />
+          <input id={`l-${formId}-vek`} name="vek" required className="field" placeholder={t("2 roky", "2 years")} />
         </div>
         <div className="min-w-0">
-          <label className="label-sm" htmlFor={`l-${formId}-vaha`}>Váha psa *</label>
+          <label className="label-sm" htmlFor={`l-${formId}-vaha`}>{t("Váha psa *", "Weight *")}</label>
           <input id={`l-${formId}-vaha`} name="vaha" inputMode="decimal" required className="field" placeholder="25 kg" />
         </div>
       </div>
       <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="sex-neuter">
-        <DogBinaryChoice label="Pohlavie psa" name="pohlavie" options={["Pes", "Suka"]} />
-        <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana" options={["Áno", "Nie"]} />
+        <DogBinaryChoice language={language} label={t("Pohlavie psa", "Sex")} name="pohlavie" options={["Pes", "Suka"]} />
+        <DogBinaryChoice language={language} label={t("Kastrovaný / sterilizovaná", "Neutered / spayed")} name="kastrovana" options={["Áno", "Nie"]} />
       </div>
       <fieldset className="min-w-0">
-        <legend className="label-sm">Ako plánujete využívať škôlku? *</legend>
+        <legend className="label-sm">{t("Ako plánujete využívať škôlku? *", "How often will your dog attend daycare? *")}</legend>
         <div className="grid grid-cols-2 gap-2">
           {([
-            { value: "Pravidelne – 1× alebo viackrát týždenne", lines: ["Pravidelne", "1× alebo viackrát", "týždenne"] },
-            { value: "Občas podľa potreby", lines: ["Občas", "podľa potreby"] },
+            { value: "Pravidelne – 1× alebo viackrát týždenne", lines: ["Pravidelne", "1× alebo viackrát", "týždenne"], enLines: ["Regularly", "Once or more", "per week"], enLabel: "Regularly – once or more per week" },
+            { value: "Občas podľa potreby", lines: ["Občas", "podľa potreby"], enLines: ["Occasionally", "as needed"], enLabel: "Occasionally as needed" },
           ] as const).map((option) => (
             <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
-              <input type="radio" name="duvod" value={option.value} aria-label={option.value} required className="peer sr-only" />
+              <input type="radio" name="duvod" value={option.value} aria-label={t(option.value, option.enLabel)} required className="peer sr-only" />
               <span className="flex h-full min-h-20 min-w-0 flex-col items-center justify-center rounded-[0.85rem] border border-border bg-white px-1 py-2 text-center text-[11px] leading-[1.25] font-semibold text-forest transition-colors peer-checked:border-coral peer-checked:bg-secondary/55 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:text-xs">
-                {option.lines.map((line, index) => (
+                {(language === "en" ? option.enLines : option.lines).map((line, index) => (
                   <span key={line} className={`block max-w-full break-words [overflow-wrap:anywhere] ${index === 0 || option.value === "Občas podľa potreby" ? "text-xs font-bold sm:text-[13px]" : "text-[10px] font-normal sm:text-[11px]"}`}>{line}</span>
                 ))}
               </span>
@@ -601,7 +611,7 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
       </fieldset>
       <div>
         <label className="label-sm" htmlFor={`l-${formId}-alergie`}>
-          Alergie a zdravotné obmedzenia
+          {t("Alergie a zdravotné obmedzenia", "Allergies and health conditions")}
         </label>
         <textarea
           id={`l-${formId}-alergie`}
@@ -609,12 +619,12 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
           maxLength={3000}
           rows={3}
           className="field resize-none"
-          placeholder="Alergie, lieky alebo zdravotné obmedzenia..."
+          placeholder={t("Alergie, lieky alebo zdravotné obmedzenia...", "Allergies, medication or health conditions...")}
         />
       </div>
       <div>
         <label className="label-sm" htmlFor={`l-${formId}-povaha`}>
-          Povaha a ďalšie informácie *
+          {t("Povaha a ďalšie informácie *", "Temperament and other information *")}
         </label>
         <textarea
           id={`l-${formId}-povaha`}
@@ -623,43 +633,43 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
           maxLength={3000}
           rows={4}
           className="field resize-none"
-          placeholder="Povaha, skúsenosti s inými psami, zvyky a čo by sme ešte mali vedieť..."
+          placeholder={t("Povaha, skúsenosti s inými psami, zvyky a čo by sme ešte mali vedieť...", "Temperament, experience with other dogs, habits and anything else we should know...")}
         />
       </div>
       {dogCount === 2 && (
-        <section aria-label="Údaje druhého psíka" className="@container mt-5 min-w-0 space-y-3.5 rounded-2xl border border-coral/20 bg-card/60 p-3.5 sm:p-4">
-          <h4 className="border-b border-coral/20 pb-2 text-base font-bold text-forest">2. psík</h4>
+        <section aria-label={t("Údaje druhého psíka", "Second dog details")} className="@container mt-5 min-w-0 space-y-3.5 rounded-2xl border border-coral/20 bg-card/60 p-3.5 sm:p-4">
+          <h4 className="border-b border-coral/20 pb-2 text-base font-bold text-forest">{t("2. psík", "Dog 2")}</h4>
           <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="identity">
             <div className="min-w-0">
-            <label className="label-sm" htmlFor={`l-${formId}-pes2`}>Meno druhého psa *</label>
+            <label className="label-sm" htmlFor={`l-${formId}-pes2`}>{t("Meno druhého psa *", "Second dog's name *")}</label>
             <input id={`l-${formId}-pes2`} name="pes2" autoComplete="off" required maxLength={200} className="field" placeholder="Beny" />
           </div>
             <div className="min-w-0">
-              <label className="label-sm" htmlFor={`l-${formId}-plemeno2`}>Plemeno *</label>
-              <input id={`l-${formId}-plemeno2`} name="plemeno2" required maxLength={200} className="field" placeholder="Zlatý retriever" />
+              <label className="label-sm" htmlFor={`l-${formId}-plemeno2`}>{t("Plemeno *", "Breed *")}</label>
+              <input id={`l-${formId}-plemeno2`} name="plemeno2" required maxLength={200} className="field" placeholder={t("Zlatý retriever", "Golden retriever")} />
             </div>
           </div>
           <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="age-weight">
             <div className="min-w-0">
-              <label className="label-sm" htmlFor={`l-${formId}-vek2`}>Vek psa *</label>
-              <input id={`l-${formId}-vek2`} name="vek2" required maxLength={100} className="field" placeholder="3 roky" />
+              <label className="label-sm" htmlFor={`l-${formId}-vek2`}>{t("Vek psa *", "Age *")}</label>
+              <input id={`l-${formId}-vek2`} name="vek2" required maxLength={100} className="field" placeholder={t("3 roky", "3 years")} />
             </div>
             <div className="min-w-0">
-              <label className="label-sm" htmlFor={`l-${formId}-vaha2`}>Váha psa *</label>
+              <label className="label-sm" htmlFor={`l-${formId}-vaha2`}>{t("Váha psa *", "Weight *")}</label>
               <input id={`l-${formId}-vaha2`} name="vaha2" required inputMode="decimal" className="field" placeholder="25 kg" />
             </div>
           </div>
           <div className="grid min-w-0 grid-cols-1 items-end gap-3.5 @min-[350px]:grid-cols-2" data-application-dog-row="sex-neuter">
-            <DogBinaryChoice label="Pohlavie psa" name="pohlavie2" options={["Pes", "Suka"]} />
-            <DogBinaryChoice label="Kastrovaný / sterilizovaná" name="kastrovana2" options={["Áno", "Nie"]} />
+            <DogBinaryChoice language={language} label={t("Pohlavie psa", "Sex")} name="pohlavie2" options={["Pes", "Suka"]} />
+            <DogBinaryChoice language={language} label={t("Kastrovaný / sterilizovaná", "Neutered / spayed")} name="kastrovana2" options={["Áno", "Nie"]} />
           </div>
           <div>
-            <label className="label-sm" htmlFor={`l-${formId}-alergie2`}>Alergie a zdravotné obmedzenia</label>
-            <textarea id={`l-${formId}-alergie2`} name="alergie2" maxLength={3000} rows={3} className="field resize-none" placeholder="Alergie, lieky alebo zdravotné obmedzenia..." />
+            <label className="label-sm" htmlFor={`l-${formId}-alergie2`}>{t("Alergie a zdravotné obmedzenia", "Allergies and health conditions")}</label>
+            <textarea id={`l-${formId}-alergie2`} name="alergie2" maxLength={3000} rows={3} className="field resize-none" placeholder={t("Alergie, lieky alebo zdravotné obmedzenia...", "Allergies, medication or health conditions...")} />
           </div>
           <div>
-            <label className="label-sm" htmlFor={`l-${formId}-povaha2`}>Povaha a ďalšie informácie *</label>
-            <textarea id={`l-${formId}-povaha2`} name="povaha2" required maxLength={3000} rows={4} className="field resize-none" placeholder="Povaha, skúsenosti s inými psami, zvyky..." />
+            <label className="label-sm" htmlFor={`l-${formId}-povaha2`}>{t("Povaha a ďalšie informácie *", "Temperament and other information *")}</label>
+            <textarea id={`l-${formId}-povaha2`} name="povaha2" required maxLength={3000} rows={4} className="field resize-none" placeholder={t("Povaha, skúsenosti s inými psami, zvyky...", "Temperament, experience with other dogs, habits...")} />
           </div>
         </section>
       )}
@@ -668,60 +678,64 @@ export function LongForm({ onSent, collapsible = false, onExpand }: { onSent?: (
 
   return (
     <form noValidate data-application-form data-application-step={step} onSubmit={onSubmit} onInputCapture={progress.onInputCapture} onBlurCapture={progress.onBlurCapture} onInvalidCapture={progress.onInvalidCapture} onChangeCapture={(e) => { onFormChange(); progress.onChangeCapture(e); }} className="@container min-w-0 space-y-3 text-left sm:space-y-3.5">
-      {collapsible && (
-        <button id="home-friendship-application" type="button"
-          aria-expanded={expanded} aria-controls={`l-${formId}-details`}
-          className="btn-coral w-full" onClick={() => {
-            if (!expanded) onExpand?.();
-            setExpanded(!expanded);
-          }}>
-          {expanded ? "Zobraziť menej" : "Zobraziť celú prihlášku"}
-        </button>
-      )}
-      <fieldset id={`l-${formId}-details`} hidden={!expanded} disabled={!expanded} className="min-w-0 space-y-3.5 border-0 p-0">
+      <div id={`l-${formId}-details`} className="min-w-0 space-y-3.5">
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-semibold text-forest/75">
-            <span>Prihláška do škôlky</span><span>Krok {step} z 2</span>
+            <span>{t("Prihláška do škôlky", "Daycare application")}</span><span>{language === "en" ? `Step ${step} of 2` : `Krok ${step} z 2`}</span>
           </div>
-          <div role="progressbar" aria-label="Postup prihlášky" aria-valuenow={step} aria-valuemin={1} aria-valuemax={2} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
+          <div role="progressbar" aria-label={t("Postup prihlášky", "Application progress")} aria-valuenow={step} aria-valuemin={1} aria-valuemax={2} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
             <div className={`h-full rounded-full bg-coral transition-all duration-300 ${step === 1 ? "w-1/2" : "w-full"}`} />
           </div>
         </div>
-        <h3 ref={stepHeading} tabIndex={-1} className="font-display text-lg font-bold text-forest outline-none">{step === 1 ? "Údaje o psíkovi" : "Údaje majiteľa"}</h3>
+        <h3 ref={stepHeading} tabIndex={-1} className="font-display text-lg font-bold text-forest outline-none">{step === 1 ? t("Údaje o psíkovi", "Dog details") : t("Údaje majiteľa", "Owner details")}</h3>
         <div data-application-dog-step hidden={step !== 1} className="space-y-3.5">
       <fieldset className="rounded-2xl border border-coral/25 bg-secondary/30 p-3.5">
-        <legend className="px-1 text-sm font-bold text-forest">Koľkých psíkov chcete prihlásiť?</legend>
+        <legend className="px-1 text-sm font-bold text-forest">{t("Koľkých psíkov chcete prihlásiť?", "How many dogs would you like to register?")}</legend>
         <div className="mt-1 grid grid-cols-2 gap-2">
           {([1, 2] as const).map((count) => (
             <label key={count} className={`flex min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-2 py-3 text-xs font-semibold transition sm:px-3 sm:text-sm ${dogCount === count ? "border-coral bg-white text-forest" : "border-forest/15 bg-card text-forest/75"}`}>
-              <input type="radio" name="pocet_psikov" value={count} checked={dogCount === count} onChange={() => setDogCount(count)} aria-label={count === 1 ? "Chcem prihlásiť jedného psíka" : "Chcem prihlásiť dvoch psíkov"} className="shrink-0 accent-orange-500" />
-              <span className="whitespace-nowrap sm:hidden">{count === 1 ? "1 psík" : "2 psíkov"}</span>
-              <span className="hidden whitespace-nowrap sm:inline">{count === 1 ? "Prihlásiť jedného psíka" : "Prihlásiť dvoch psíkov"}</span>
+              <input type="radio" name="pocet_psikov" value={count} checked={dogCount === count} onChange={() => setDogCount(count)} aria-label={count === 1 ? t("Chcem prihlásiť jedného psíka", "Register one dog") : t("Chcem prihlásiť dvoch psíkov", "Register two dogs")} className="shrink-0 accent-orange-500" />
+              <span className="whitespace-nowrap sm:hidden">{count === 1 ? t("1 psík", "1 dog") : t("2 psíkov", "2 dogs")}</span>
+              <span className="hidden whitespace-nowrap sm:inline">{count === 1 ? t("Prihlásiť jedného psíka", "Register one dog") : t("Prihlásiť dvoch psíkov", "Register two dogs")}</span>
             </label>
           ))}
         </div>
       </fieldset>
-          {details}
-          <button type="submit" className="btn-coral w-full">Pokračovať</button>
+          {identity}
+          <fieldset data-application-expanded-fields hidden={!expanded} disabled={!expanded} className="min-w-0 space-y-3.5 border-0 p-0">
+            {details}
+            <button type="submit" className="btn-coral w-full">{t("Pokračovať", "Continue")}</button>
+          </fieldset>
         </div>
-        <div data-application-owner-step hidden={step !== 2} className="space-y-3.5">
+        <fieldset data-application-owner-step hidden={!expanded || step !== 2} disabled={!expanded} className="min-w-0 space-y-3.5 border-0 p-0">
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-3.5">
         <div>
           <label className="label-sm" htmlFor={`l-${formId}-meno`}>
-            Meno a priezvisko majiteľa *
+            {t("Meno a priezvisko majiteľa *", "Owner's full name *")}
           </label>
-          <input id={`l-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
+          <input id={`l-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder={t("Vaše meno", "Your full name")} />
         </div>
-        <PhoneField id={`l-${formId}-tel`} name="telefon" />
+        <PhoneField id={`l-${formId}-tel`} name="telefon" language={language} label={t("Telefón *", "Phone *")} />
       </div>
-      <PrivacyConsentCheckbox />
+      <PrivacyConsentCheckbox language={language} />
       {error && <p className="text-sm text-destructive">{error}</p>}
       <button type="submit" disabled={loading} className="btn-coral w-full disabled:opacity-60">
-        {loading ? "Odosielam…" : "Prihlásiť psíka"}
+        {loading ? t("Odosielam…", "Sending…") : t("Prihlásiť psíka", "Submit application")}
       </button>
-          <button type="button" disabled={loading} onClick={() => goToStep(1)} className="min-h-11 w-full rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50">Späť</button>
-        </div>
-      </fieldset>
+          <button type="button" disabled={loading} onClick={() => goToStep(1)} className="min-h-11 w-full rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50">{t("Späť", "Back")}</button>
+        </fieldset>
+      </div>
+      {collapsible && (
+        <button id="home-friendship-application" type="button"
+          aria-expanded={expanded} aria-controls={`l-${formId}-details`} disabled={loading}
+          className="btn-coral w-full" onClick={() => {
+            if (!expanded) onExpand?.();
+            if (expanded) setStep(1);
+            setExpanded(!expanded);
+          }}>
+          {expanded ? t("Zobraziť menej", "Show less") : t("Zobraziť celú prihlášku", "Show full application")}
+        </button>
+      )}
     </form>
   );
 }

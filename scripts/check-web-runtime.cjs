@@ -6,11 +6,12 @@ const path = require('node:path');
 const bellaris = process.env.WEB_SITE === 'bellaris';
 const { ARIA_ROUTES } = require('./public-web-impact.cjs');
 const runtimeScope = process.env.WEB_RUNTIME_SCOPE || 'full';
-if(!['full','aria'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
+if(!['full','aria','aria-visual'].includes(runtimeScope)||bellaris&&runtimeScope!=='full')throw new Error('Invalid public web runtime scope');
 const base = process.env.WEB_BASE_URL || (bellaris ? 'https://bellaris.sk' : 'https://chvostikovo.sk');
 const fullRoutes = bellaris ? ['/', '/cennik/', '/postup/'] : ['/', '/psia-skolka-kosice/', '/psia-skolka-pre-steniatka/', '/strazenie-psov-kosice/', '/en/dog-daycare-kosice/', '/test-aria/'];
-const urls = (runtimeScope === 'aria' ? ARIA_ROUTES : fullRoutes).map(route => new URL(route, base));
+const urls = (runtimeScope === 'aria-visual' ? ['/psia-skolka-kosice/'] : runtimeScope === 'aria' ? ARIA_ROUTES : fullRoutes).map(route => new URL(route, base));
 const brandPreviewCandidate = new URL(base).hostname === '127.0.0.1';
+if(runtimeScope==='aria-visual'&&!brandPreviewCandidate)throw new Error('Visual assertions require a freshly built local candidate');
 const out = process.env.RUNTIME_REPORT_DIR || 'runtime-report';
 fs.mkdirSync(out, { recursive: true });
 const results = [];
@@ -159,7 +160,7 @@ async function assertCookieChoices(page) {
 // Campaign content-flow contract: preserve the shared cookie/funnel/widget checks,
 // replace only the superseded section-order and hidden-form assertions below.
 // Reuse the TEST chat on paid LEAD; verify only the new route wiring with isolated transports.
-async function assertPaidAriaChat(page) {
+async function assertPaidAriaChat(page, {visualOnly=false}={}) {
   const posted=[];
   let failNext=false;
   const handler=async route=>{
@@ -170,9 +171,9 @@ async function assertPaidAriaChat(page) {
     if(failNext && data.cta_source){failNext=false;await route.fulfill({status:500,contentType:'application/json',headers,body:'{"ok":false}'});return;}
     await route.fulfill({status:200,contentType:'application/json',headers,body:'{"ok":true}'});
   };
-  await page.route('**/functions/v1/web-form-submit',handler);
+  if(!visualOnly)await page.route('**/functions/v1/web-form-submit',handler);
   try {
-    const marketingAllowed=await page.evaluate(()=>{
+    const marketingAllowed=!visualOnly && await page.evaluate(()=>{
       let consent=null,storageAvailable=false;
       try { consent=localStorage.getItem('chvostikovo-cookies');storageAvailable=true; } catch { /* Preserve the blocked-storage scenario. */ }
       window.__ariaMetaAudit={consent,storageAvailable,fbq:window.fbq,calls:[]};
@@ -196,6 +197,10 @@ async function assertPaidAriaChat(page) {
     if(await trigger.evaluate(el=>getComputedStyle(el).backgroundColor)!=='rgba(0, 0, 0, 0)')throw new Error('Expanded portrait inherited a colored navigation background');
     await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'visible'});
     if(await chat.locator('[data-aria-chat-question]').count()!==4)throw new Error('Paid chat must reuse four FAQ choices');
+    if(brandPreviewCandidate){
+      const greeting=(await chat.locator('[id$="-intro"] > [aria-hidden="true"]').innerText()).replace(/\s+/g,' ').trim();
+      if(!greeting.includes('Ahoj, volám sa Aria.')||!greeting.endsWith('Haf! 🐾'))throw new Error('Chat greeting must introduce Aria and finish with Haf and paws');
+    }
     await chat.locator('[data-aria-chat-question="pricing"]').click();
     const typing=chat.locator('[data-aria-typing="true"]');
     await typing.locator('[data-aria-composing]').waitFor({state:'visible',timeout:2500});
@@ -206,6 +211,10 @@ async function assertPaidAriaChat(page) {
     await chat.locator('[data-aria-chat-question="pricing"]').waitFor({state:'detached'});
     await chat.locator('[data-aria-chat-questions]').waitFor({state:'visible',timeout:20000});
     if(await chat.locator('[data-aria-chat-question]').count()!==4||!(await chat.innerText()).includes('20 €/deň'))throw new Error('Paid chat must reuse pricing answer and refill four FAQ');
+    if(visualOnly){
+      await chat.getByRole('button',{name:'Close',exact:true}).click();
+      await chat.waitFor({state:'hidden'});return;
+    }
     await chat.locator('[data-aria-chat-other-cta]').click();
     const other=chat.locator('[data-aria-chat-other]');
     const question=other.locator('textarea[name="otazka"]');
@@ -259,7 +268,7 @@ async function assertPaidAriaChat(page) {
     await chat.getByRole('button',{name:'Close',exact:true}).click();
     await chat.waitFor({state:'hidden'});
   } finally {
-    await page.unroute('**/functions/v1/web-form-submit',handler);
+    if(!visualOnly)await page.unroute('**/functions/v1/web-form-submit',handler);
     await page.evaluate(()=>{
       const audit=window.__ariaMetaAudit;if(!audit)return;
       if(audit.storageAvailable){
@@ -271,7 +280,7 @@ async function assertPaidAriaChat(page) {
   }
 }
 
-async function assertCampaignContentFlow(page) {
+async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
   await page.locator('[data-aria-lead-chat] img[alt^="Aria"]').evaluate(async image=>{
     await image.decode();
     if(image.naturalWidth<400||image.naturalHeight<400)throw new Error("Paid Aria must use the approved high-resolution head");
@@ -298,14 +307,28 @@ async function assertCampaignContentFlow(page) {
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
     await page.waitForTimeout(160);
     const fold=await page.evaluate(()=>{
-      const box=s=>document.querySelector(s)?.getBoundingClientRect();
+      const box=s=>{
+        const node=document.querySelector(s);if(!node)return;
+        if(getComputedStyle(node).display!=='contents')return node.getBoundingClientRect();
+        const children=[...node.children].map(e=>e.getBoundingClientRect());
+        const left=Math.min(...children.map(r=>r.left)),right=Math.max(...children.map(r=>r.right)),top=Math.min(...children.map(r=>r.top)),bottom=Math.max(...children.map(r=>r.bottom));
+        return {left,right,top,bottom,width:right-left,height:bottom-top};
+      };
       const title=box('main h1'),pills=box('[data-lead-hero-pills]'),photos=box('[data-lead-hero-photos]'),cta=box('[data-aria-lead-hero-cta]'),proof=box('#recenzie h2');
       const aria=box('[data-aria-message]'),dock=box('[data-aria-dock]'),face=box('[data-aria-dock] img[alt^="Aria"]');
       const visiblePills=[...document.querySelectorAll('[data-lead-hero-pill]')].filter(el=>getComputedStyle(el).display!=='none');
       const elements=[title,pills,photos,cta,proof];
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
         visible:elements.every(r=>r&&r.width>0&&r.top>=0&&r.bottom<=Math.min(aria.top,face.top,dock.top)+1),
-        desktop:(()=>{if(innerWidth<1024)return true;const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect());const service=box('[data-aria-service-group]');const seam=(images[0].bottom+images[1].top)/2;return photos.left>title.right&&Math.abs(photos.top-service.top)<2&&Math.abs(images[1].bottom-cta.bottom)<2&&Math.abs((title.top+title.bottom)/2-seam)<=36&&service.bottom<title.top&&title.bottom<=pills.top&&pills.bottom<=cta.top&&photos.height>=448&&Math.abs(images[0].left-images[1].left)<2&&images[0].bottom<images[1].top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;})(),
+        desktop:(()=>{if(innerWidth<1024)return true;
+          const images=[...document.querySelectorAll('[data-lead-hero-photo]')].map(e=>e.getBoundingClientRect()),service=box('[data-aria-service-group]');
+          const headingCenter=(service.top+title.bottom)/2,actionCenter=(pills.top+cta.bottom)/2;
+          return images[0].left>title.right&&images[1].right<pills.left&&images[0].bottom<images[1].top&&
+            Math.abs(headingCenter-(images[0].top+images[0].bottom)/2)<3&&Math.abs(actionCenter-(images[1].top+images[1].bottom)/2)<3&&
+            title.top-service.bottom>=12&&title.top-service.bottom<=20&&cta.top-pills.bottom>=20&&cta.top-pills.bottom<=32&&
+            Math.abs(cta.left-pills.left)<2&&Math.abs(cta.right-pills.right)<2&&Math.abs(cta.right-box('[data-lead-hero-pill="3"]').right)<2&&
+            images.every(r=>r.height>=216)&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=14;
+        })(),
         mobileOrder:(()=>{if(innerWidth>=640)return true;const service=box('[data-aria-service-group]');return service.bottom<=title.top&&title.bottom<=pills.top&&pills.bottom<=photos.top&&parseFloat(getComputedStyle(document.querySelector('[data-lead-hero-pill]')).fontSize)>=10;})(),
         admissionClear:(()=>{const h=box('#lead-requirements h2');return [...document.querySelectorAll('#lead-requirements > [aria-hidden="true"] svg')].every(e=>{const p=e.getBoundingClientRect();return p.right<=h.left||p.left>=h.right||p.bottom<=h.top||p.top>=h.bottom;});})(),
         galleryEdge:(()=>{const r=box('#lead-photo-carousel [data-gesture-track="photos"]');return Math.abs(r.left)<2&&Math.abs(r.right-document.documentElement.offsetWidth)<2;})(),
@@ -337,6 +360,11 @@ async function assertCampaignContentFlow(page) {
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
+  if(visualOnly){
+    await page.setViewportSize({width:390,height:844});
+    await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+    await assertPaidAriaChat(page,{visualOnly:true});return;
+  }
   const inquiry=page.locator('[data-lead-faq-cta]');
   await centerFixtureControl(inquiry);await inquiry.hover();
   if(await inquiry.evaluate(el=>getComputedStyle(el).color)!=='rgb(255, 255, 255)')throw new Error('Rose inquiry hover needs white text');
@@ -572,11 +600,139 @@ async function assertFooterMapGeometry(browser, engine) {
   } finally {await context.close();}
 }
 
+
+
+async function assertCompactHomeMenu(page,en) {
+  const menu=page.locator('[data-home-menu]');
+  await menu.waitFor({state:'visible'});
+  const state=await menu.evaluate(el=>{
+    const bar=el.closest('.mobile-dock-bar'),nav=bar.closest('.mobile-dock'),p=el.getBoundingClientRect(),d=bar.getBoundingClientRect();
+    const links=[...el.querySelectorAll('.mobile-dock-compact-links a')];
+    const phone=el.querySelector('[data-home-dock-phone]');
+    return {hrefs:links.map(a=>new URL(a.href).hash),labels:links.map(a=>a.textContent.trim()),
+      targets:[...links,phone,...el.querySelectorAll('[data-language-switch] a')].every(a=>a&&a.getBoundingClientRect().height>=44&&a.scrollWidth<=a.clientWidth+1),
+      height:p.height,total:d.height,inside:d.left>=0&&d.right<=innerWidth+1&&d.top>=0&&d.bottom<=innerHeight+1,
+      noOverflow:el.scrollWidth<=el.clientWidth+1,arrow:!!nav.querySelector('.mobile-dock-back-top'),phone:phone?.getAttribute('href'),
+      main:[...bar.children].filter(a=>a.matches('a,button')).map(a=>a.textContent.trim()),
+      dialog:!!nav.querySelector('button[aria-haspopup="dialog"]'),reserve:parseFloat(getComputedStyle(document.body).paddingBottom)};
+  });
+  const main=en?['Home','About','Prices','Rules','Apply']:['Domov','O nás','Cenník','Podmienky','Produkty','Prihláška'];
+  if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>60||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  if(await page.locator('[data-home-hero-phone]').count())throw new Error('Duplicate mobile Hero phone');
+  if(!await page.evaluate(()=>!!(document.querySelector('[data-home-puppy-checker]')?.compareDocumentPosition(document.querySelector('[data-home-pricing-columns]'))&Node.DOCUMENT_POSITION_FOLLOWING)))throw new Error('Puppy checker must precede pricing');
+}
+
+async function assertApplicationPreview(page,en) {
+  const form=page.locator('[data-home-friendship-form] form[data-application-form]');
+  const toggle=form.locator('#home-friendship-application');
+  const name=form.locator('[name="pes"]'),breed=form.locator('[name="plemeno"]');
+  if(!await name.isVisible()||!await breed.isVisible()||await form.locator('[name="vek"]').isVisible()||await form.locator('[name="meno"]').isVisible()||await toggle.getAttribute('aria-expanded')!=='false')throw new Error('Application preview is not partial');
+  await name.fill('Fixture');
+  await breed.fill('Labrador');
+  await form.evaluate(el=>el.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
+  if(await form.getAttribute('data-application-step')!=='1')throw new Error('Collapsed form advanced or submitted');
+  await activateFixtureControl(toggle);
+  await form.locator('[name="vek"]').waitFor({state:'visible'});
+  if(await name.inputValue()!=='Fixture'||await breed.inputValue()!=='Labrador'||await form.locator('[name="pes"]').count()!==1)throw new Error('Expanding lost preview data or duplicated fields');
+  await activateFixtureControl(toggle);
+  await form.locator('[name="vek"]').waitFor({state:'hidden'});
+  if(!await name.isVisible()||await name.inputValue()!=='Fixture'||await form.locator('[name="meno"]').isVisible())throw new Error('Collapsing lost preview data or exposed owner step');
+  await name.fill('');await breed.fill('');
+  console.log('PASS application preview '+(en?'EN':'SK'));
+}
+
+async function assertBilingualNavigation(browser,engine) {
+  const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  const captured=[];
+  try {
+    await context.addInitScript(()=>{
+      window.__bilingualDocument=String(Math.random());
+      window.__bilingualPixel=[];window.fbq=(...args)=>window.__bilingualPixel.push(args);
+      window.__bilingualGa=[];window.gtag=(...args)=>window.__bilingualGa.push(args);
+      localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:false}));
+    });
+    await context.route('**/*',async route=>{
+      const req=route.request(),u=new URL(req.url());
+      if(u.origin===new URL(base).origin&&['GET','HEAD'].includes(req.method()))return route.continue();
+      if(u.pathname.includes('/functions/v1/')) {
+        if(req.method()==='POST')captured.push({path:u.pathname,body:req.postDataJSON()});
+        return route.fulfill({status:200,headers:{'access-control-allow-origin':'*','access-control-allow-methods':'POST, OPTIONS','access-control-allow-headers':'*','content-type':'application/json'},body:'{"ok":true}'});
+      }
+      return route.abort();
+    });
+    const page=await context.newPage();
+    await page.goto(new URL('/?utm_source=fixture&utm_campaign=bilingual',base).href);
+    await page.locator('.mobile-dock[data-hydrated="true"]').waitFor({state:'attached'});
+    const doc=await page.evaluate(()=>window.__bilingualDocument);
+    for(const width of [320,375,390,430]){
+      await page.setViewportSize({width,height:844});
+      await assertCompactHomeMenu(page,false);
+      await page.screenshot({path:path.join(out,'compact-sk-menu-'+engine+'-'+width+'.png')});
+    }
+    await assertApplicationPreview(page,false);
+    await page.locator('[data-home-menu] a[href="/#aria-puppy-check"]').click();
+    await page.waitForFunction(()=>location.hash==='#aria-puppy-check');
+    await page.locator('[data-home-menu] a[href="/#faq"]').click();
+    await page.waitForFunction(()=>location.hash==='#faq');
+    await page.locator('.mobile-dock').getByRole('link',{name:'Domov',exact:true}).click();
+    await page.waitForFunction(()=>scrollY<5&&!location.hash&&location.search.includes('utm_campaign=bilingual'));
+    if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Home must scroll without reload or attribution loss');
+    await page.evaluate(()=>document.addEventListener('click',e=>{if(e.target.closest?.('[data-home-dock-phone]'))e.preventDefault();},true));
+    await activateFixtureControl(page.locator('[data-home-dock-phone]'));
+    if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&a[1]==='Contact')))throw new Error('Unconsented phone Pixel');
+    await page.locator('[data-home-menu] [data-language-switch] a[lang="en"]').click();
+    await page.waitForURL(/\/en\/dog-daycare-kosice\/?$/);
+    await page.waitForFunction(()=>document.documentElement.lang==='en');
+    await assertApplicationPreview(page,true);
+    if(captured.some(r=>r.path.endsWith('/web-form-submit')))throw new Error('Collapsed application posted to receiver');
+    if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Language switch reloaded document');
+    if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track')))throw new Error('Pixel fired without consent');
+    for(const width of [320,375,390,430,1440]){
+      await page.setViewportSize({width,height:width===1440?900:844});
+      await page.locator('#top h1:visible').waitFor({state:'visible'});
+      const ok=await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1);
+      if(!ok)throw new Error('EN overflow at '+width);
+      if(width<1024){
+        const menu=page.locator('[data-home-menu]');
+        await menu.waitFor({state:'visible'});
+        const selected=menu.locator('[data-language-switch] a[lang="en"]');
+        if(await selected.getAttribute('aria-current')!=='page')throw new Error('EN active state missing');
+        await assertCompactHomeMenu(page,true);
+        const buttons=await menu.locator('[data-language-switch] a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
+        if(buttons.some(b=>b.width<44||b.height<44))throw new Error('Language target too small');
+        await page.screenshot({path:path.join(out,'bilingual-menu-'+engine+'-'+width+'.png')});
+      }else{
+        const desktopPhone=await page.locator('[data-home-hero-desktop-phone]').evaluate(el=>{
+          const p=el.getBoundingClientRect(),a=el.parentElement.querySelector('#home-hero-learn-more').getBoundingClientRect();
+          return {text:el.textContent.trim(),href:el.getAttribute('href'),aligned:Math.abs((p.top+p.bottom-a.top-a.bottom)/2)<3,fit:p.left>=a.right+4&&p.right<=innerWidth&&p.height>=44};
+        });
+        if(!desktopPhone.aligned||!desktopPhone.fit||desktopPhone.text!=='+421 951 069 395'||desktopPhone.href!=='tel:+421951069395')throw new Error('Desktop Hero phone '+JSON.stringify(desktopPhone));
+        await page.screenshot({path:path.join(out,'bilingual-desktop-'+engine+'.png')});
+      }
+    }
+    await page.evaluate(()=>{const c=JSON.parse(localStorage.getItem('chvostikovo-cookies'));c.marketing=true;c.analytics=true;localStorage.setItem('chvostikovo-cookies',JSON.stringify(c));window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed',{detail:c}));});
+    await page.waitForFunction(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&a[1]==='PageView'));
+    await page.setViewportSize({width:390,height:844});
+    await activateFixtureControl(page.locator('[data-home-dock-phone]'));
+    await page.waitForFunction(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='Contact'&&a[2]?.source==='en_mobile_dock_phone').length===1);
+    if(await page.evaluate(()=>window.__bilingualGa.filter(a=>a[0]==='event'&&a[1]==='phone_click'&&a[2]?.cta_source==='en_mobile_dock_phone').length)!==1)throw new Error('EN phone GA4 must emit once');
+    if(!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='home_mobile_dock_phone')||!captured.some(r=>r.body?.event_name==='phone_click'&&r.body?.event_source==='en_mobile_dock_phone'))throw new Error('Cookieless phone sources missing');
+    await page.setViewportSize({width:1440,height:900});
+    const pv=await page.evaluate(()=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length);
+    await page.locator('header [data-language-switch] a[lang="sk"]').click();
+    await page.waitForURL(u=>u.pathname==='/');
+    await page.waitForFunction(n=>window.__bilingualPixel.filter(a=>a[0]==='track'&&a[1]==='PageView').length===n+1,pv);
+    if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Desktop language switch reloaded document');
+    if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track'&&['Lead','CompleteRegistration'].includes(a[1]))))throw new Error('Language navigation emitted conversion');
+    console.log('PASS bilingual navigation, responsive menu and consented PageView '+engine);
+  } finally {await context.close();}
+}
+
 (async () => {
   for (const [engine, browserType] of selectedEngines) {
     const browser = await browserType.launch();
-    if (!bellaris && brandPreviewCandidate && runtimeScope==='full') await assertFooterMapGeometry(browser, engine);
-    for (const restricted of [false, true]) {
+    if (!bellaris && brandPreviewCandidate && runtimeScope==='full') { await assertFooterMapGeometry(browser, engine); await assertBilingualNavigation(browser,engine); }
+    for (const restricted of (runtimeScope==='aria-visual'?[false]:[false,true])) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
       // Each URL must start without a saved choice from the preceding URL.
       if (!restricted) await context.addInitScript(() => { localStorage.clear(); sessionStorage.clear(); });
@@ -747,6 +903,12 @@ async function assertFooterMapGeometry(browser, engine) {
           await cookieButton.click();
           await page.waitForTimeout(300);
           if(brandPreviewCandidate&&!bellaris&&url.pathname==='/')await assertCookieChoices(page);
+          if(runtimeScope==='aria-visual'){
+            if(!revisedLead)throw new Error('Visual scope requires the current LEAD fixture');
+            await assertCampaignContentFlow(page,{visualOnly:true});
+            results.push({engine,restricted,route:url.pathname,scope:'aria-visual',status:'PASS'});
+            console.log('PASS LEAD visual geometry and chat surface '+engine);continue;
+          }
           if(revisedLead) await assertCampaignContentFlow(page);
           // Candidate-only regression for the three unified Chvostíkovo galleries.
           // Production-baseline CI keeps testing its already published version.
@@ -2784,7 +2946,7 @@ async function assertFooterMapGeometry(browser, engine) {
                 if (width >= 1024 && !await hero.locator('[data-lead-step-form]:visible').first().isVisible())
                   throw new Error('Desktop home guided form missing');
                 const layout = await page.evaluate(() => {
-                  const ids=['top','preco-chvostikovo','o-nas','cennik','psie-priatelstva','aria-puppy-check','podmienky','starostlivost','preco','priestory','prva-navsteva','prva-navsteva-form','faq','informujte-sa'];
+                  const ids=['top','preco-chvostikovo','o-nas','aria-puppy-check','cennik','psie-priatelstva','podmienky','starostlivost','preco','priestory','prva-navsteva','prva-navsteva-form','faq','informujte-sa'];
                   const nodes=ids.map(id=>document.getElementById(id));
                   const photo=document.querySelector('#o-nas img'), benefits=document.querySelector('#o-nas [data-hero-benefits]');
                   const cutout=document.querySelector('[data-schoolmates-cutout]');
@@ -2835,7 +2997,7 @@ async function assertFooterMapGeometry(browser, engine) {
                     galleryImmediatelyAfterAbout:(() => {
                       const about=document.getElementById('o-nas');
                       const gallery=document.querySelector('main > section[aria-label="Fotogaléria zo psiej škôlky Chvostíkovo"]');
-                      return !!about && !!gallery && about.nextElementSibling===gallery && gallery.nextElementSibling?.id==='cennik';
+                      return !!about && !!gallery && about.nextElementSibling===gallery && gallery.nextElementSibling?.matches('[data-home-puppy-checker]') && gallery.nextElementSibling?.nextElementSibling?.id==='cennik';
                     })(),
                     mobileHeroBreathingAndThinCta:innerWidth>=640 || (() => {
                       const section=document.getElementById('top');
@@ -2873,10 +3035,10 @@ async function assertFooterMapGeometry(browser, engine) {
                     centeredFullWidthTaxi:Math.abs((taxi.getBoundingClientRect().left+taxi.getBoundingClientRect().right-included.left-prices.right)/2)<3,
                     faqContactResponsiveWidth:(()=>{const card=faq.querySelector('[data-home-faq-contact]'), question=faq.querySelector('button[aria-expanded]');if(!card||!question)return false;const c=card.getBoundingClientRect(),q=question.getBoundingClientRect();return c.width<=q.width+2 && (innerWidth>=1024?Math.abs(c.width-q.width)<2:c.width<=512+2) && card.scrollWidth<=card.clientWidth+2 && getComputedStyle(card).backgroundColor==='rgba(255, 252, 248, 0.94)';})(),
                     singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
-                    applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.getElementById('psie-priatelstva').nextElementSibling?.matches('[data-home-puppy-checker]') && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
+                    applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='cennik' && document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
                     flatMainDock:getComputedStyle(dock.querySelector('.mobile-dock-bar')).boxShadow==='none',
-                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
+                    mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/|/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
                       (() => {
@@ -2900,7 +3062,7 @@ async function assertFooterMapGeometry(browser, engine) {
                       ? !!document.querySelector('#top [data-home-hero-interest-cta]') &&
                         [...document.querySelectorAll('#top [data-lead-step-form]')].every(el=>el.getBoundingClientRect().height===0)
                       : getComputedStyle(document.querySelector('#top .home-hero-desktop-cta .hero-cta-primary')).boxShadow!=='none',
-                    conditionsNext:document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='podmienky',
+                    conditionsNext:document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky',
                     opaqueCards:innerWidth<640 || getComputedStyle(videoGrid).backgroundColor==='rgba(0, 0, 0, 0)',
                     noCareCta:!document.querySelector('#preco-chvostikovo .relative.z-20 button') && dogs.top-videoGrid.getBoundingClientRect().bottom>=24,
                     homeMobileVideoLayout:(() => {
@@ -2963,7 +3125,7 @@ async function assertFooterMapGeometry(browser, engine) {
                   await page.locator('#top #recenzie').scrollIntoViewIfNeeded();
                   const narrow=await page.evaluate(()=>{
                     const review=document.querySelector('#top #recenzie [data-review-card]')?.getBoundingClientRect();
-                    const dock=document.querySelector('.mobile-dock[data-variant="main"] .mobile-dock-bar')?.getBoundingClientRect();
+                    const dock=document.querySelector('.mobile-dock[data-variant="main"]')?.getBoundingClientRect();
                     const item=document.querySelector('.mobile-dock[data-variant="main"] .mobile-dock-item')?.getBoundingClientRect();
                     return {visible:review&&dock?Math.min(review.bottom,dock.top)-review.top:0, buttonHeight:item?.height};
                   });
@@ -3097,13 +3259,13 @@ async function assertFooterMapGeometry(browser, engine) {
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
               const owner=application.locator('input[name="meno"]');
-              if(await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application must not show either step');
+              if(await owner.isVisible() || !await application.locator('input[name="pes"]').isVisible() || !await application.locator('input[name="plemeno"]').isVisible() || await application.locator('input[name="vek"]').isVisible()) throw new Error('Collapsed application must show only count and first identity fields');
               await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(await owner.isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await page.getByRole('dialog').count()) throw new Error('Inline application did not open dog step');
               if(brandPreviewCandidate)await assertApplicationDogLayout(application,engine,'inline');
               await activateFixtureControl(toggle);
-              await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
+              await application.locator('input[name="vek"]').waitFor({state:'hidden',timeout:5000});
               if(await owner.isVisible()) throw new Error('Inline application collapse exposed owner step');
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
             }
@@ -3298,8 +3460,8 @@ async function assertFooterMapGeometry(browser, engine) {
             } else {
             const modal = page.getByRole('dialog');
             await modal.waitFor({ state: 'visible' });
-            if (!await modal.locator('[data-lead-step-form]').count())
-              throw new Error('Mobile interest CTA must open guided enquiry modal');
+            if (!await modal.locator(url.pathname.startsWith('/en/') ? '[data-application-form]' : '[data-lead-step-form]').count())
+              throw new Error('Mobile CTA must open the correct shared form');
             if (!url.pathname.startsWith('/en/')) {
               const leadForm = modal.locator('[data-lead-step-form]');
               const cards = leadForm.locator('label:has(input[name="zaujem"])');
@@ -3336,7 +3498,7 @@ async function assertFooterMapGeometry(browser, engine) {
               const fits=await application.evaluate(el=>{const b=el.getBoundingClientRect();return b.width<=innerWidth-16 && el.scrollWidth<=el.clientWidth+2 && (innerWidth<1024 || b.width>=800);});
               if(!fits)throw new Error('Inline application responsive width incorrect');
               await activateFixtureControl(toggle);
-              await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
+              await application.locator('input[name="vek"]').waitFor({state:'hidden',timeout:5000});
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
@@ -3352,15 +3514,18 @@ async function assertFooterMapGeometry(browser, engine) {
                 if(homeRoute||isPaidLeadFixture(page)){
                   await advanceLeadContact(form);
                 }else{
-                  await form.locator('label').first().click();
-                  await form.getByRole('button',{name:'Pokračovať',exact:true}).click();
+                  await activateFixtureControl(form.locator('label:has(input[type="radio"])').first());
+                  await activateFixtureControl(form.getByRole('button',{name:url.pathname.startsWith('/en/')?'Continue':'Pokračovať',exact:true}));
                 }
               }
-              await assertLeadContactIntro(form);
-              const sharedBack=form.getByRole('button',{name:'Späť',exact:true});
+              if(url.pathname.startsWith('/en/')) {
+                await form.getByRole('heading',{name:'Contact details',exact:true}).waitFor({state:'visible'});
+                if(await form.getAttribute('data-lead-step')!=='2')throw new Error('EN contact step missing');
+              } else await assertLeadContactIntro(form);
+              const sharedBack=form.getByRole('button',{name:url.pathname.startsWith('/en/')?'Back':'Späť',exact:true});
               if(homeRoute||isPaidLeadFixture(page))await activateFixtureControl(sharedBack);
               else await sharedBack.click();
-              await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible',timeout:5000});
+              await form.getByRole('button',{name:url.pathname.startsWith('/en/')?'Continue':'Pokračovať',exact:true}).waitFor({state:'visible',timeout:5000});
               if(await form.getAttribute('data-lead-step')!=='1')throw new Error('Shared form back failed');
               const restored=await form.evaluate(el=>{const shell=el.closest('[data-lead-form-shell]');return [...shell.querySelectorAll(':scope > [data-lead-form-intro]')].every(node=>getComputedStyle(node).display!=='none');});
               if(!restored)throw new Error('Shared introduction not restored on back');
@@ -4056,26 +4221,7 @@ async function assertFooterMapGeometry(browser, engine) {
               if (!hours.social || hours.social.y <= hours.day.y) throw new Error('Desktop footer socials must be below opening hours '+JSON.stringify(hours));
             }
             if (width === 390) {
-              await productPage.locator('.mobile-dock').getByRole('button', { name: 'Otvoriť menu' }).click();
-              const menu = productPage.locator('.mobile-dock-menu');
-              await menu.waitFor({ state: 'visible' });
-              const actions = menu.locator('.mobile-dock-menu-actions a');
-              if (await actions.count() !== 4) throw new Error('Mobile menu must have exactly four icon actions');
-              const hrefs = await Promise.all([0, 1, 2, 3].map(index => actions.nth(index).getAttribute('href')));
-              if (!hrefs[0]?.startsWith('tel:') || hrefs[1] !== '/en/dog-daycare-kosice' ||
-                !hrefs[2]?.startsWith('https://www.instagram.com/') || !hrefs[3]?.startsWith('https://www.facebook.com/')) {
-                throw new Error('Mobile menu phone, EN, Instagram and Facebook destinations incorrect');
-              }
-              if (!await actions.nth(0).getAttribute('aria-label') || !await actions.nth(2).getAttribute('aria-label')) {
-                throw new Error('Mobile icon links require accessible names');
-              }
-              const actionBoxes = await Promise.all([0, 1, 2, 3].map(index => actions.nth(index).boundingBox()));
-              if (actionBoxes.some(box => !box || box.width < 40 || box.height < 44) ||
-                actionBoxes.some(box => Math.abs(box.y - actionBoxes[0].y) > 5)) {
-                throw new Error('Mobile menu four icon actions must fit in one tappable row');
-              }
-              await menu.getByRole('button', { name: 'Zavrieť menu' }).click();
-              await menu.waitFor({ state: 'hidden' });
+              await assertCompactHomeMenu(productPage,false);
             }
             const sectionOrder = await productPage.evaluate(() => {
               const faq = document.querySelector('main #faq');
@@ -4218,11 +4364,8 @@ async function assertFooterMapGeometry(browser, engine) {
               const englishFooterSocial = productPage.locator('footer [data-social-links="footer"]:visible');
               await englishFooterSocial.waitFor({ state: 'visible' });
               if (await englishFooterSocial.locator('a').count() !== 2) throw new Error('English footer social buttons missing');
-              await productPage.locator('.mobile-dock').getByRole('button', { name: 'Open menu' }).click();
-              const englishActions = productPage.locator('.mobile-dock-menu-actions a');
-              if (await englishActions.count() !== 4 || await englishActions.nth(1).getAttribute('href') !== '/') {
-                throw new Error('English mobile menu must retain the SK language switch and four icon actions');
-              }
+              await assertCompactHomeMenu(productPage,true);
+
             }
             for (const legacy of ['/kosik/', '/objednavka/']) {
               // Meta refresh / location.replace can race with Playwright's navigation

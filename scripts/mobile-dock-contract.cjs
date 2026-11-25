@@ -15,15 +15,14 @@ for (const value of ["Produkty", "Podmienky", "Cenník", "O nás", "Prihláška"
   assert(dock.includes(value), "Missing dock item " + value);
 }
 // The main SK order and route-local landing sequences are intentionally distinct.
-const mainDock = dock.slice(dock.indexOf('    : [{ id: "o-nas", label: "O nás"'), dock.indexOf("// Return arrow: hide while moving down; show on upward scroll or after stopping."));
-assert(mainDock.includes('{ id: "o-nas", label: "O nás"') && !mainDock.includes('{ id: "top", label: "Domov"'), "Main dock should replace Domov with O nás");
-assert(mainDock.indexOf('id: "o-nas"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main nav order must be about, prices, requirements, products");
-assert(!dock.includes('{ id: "top", label: "Domov"') && !dock.includes('{ id: "top", label: "Home"'), "Landing docks should use meaningful local sections instead of Domov");
-assert(mainDock.includes('{ id: "produkty", label: "Produkty"') && !mainDock.includes('{ id: "priestory"'), "Main dock must replace Spaces with Products");
+const mainDock = dock.slice(dock.indexOf('    : [{ id: "top", label: "Domov"'), dock.indexOf("// Return arrow: hide while moving down; show on upward scroll or after stopping."));
+assert(mainDock.includes('{ id: "top", label: "Domov"') && mainDock.includes('id: "o-nas"'), "Main dock retains Home and About");
+assert(mainDock.indexOf('id: "top"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main dock order");
+assert(dock.includes('{!homeDock && <button') && dock.includes('const eligible = !homeDock'), "Return arrow stays on other landing pages only");
 assert(dock.includes('{!marketing && (') && dock.includes('mobile-dock-item mobile-dock-apply') && read("src/routes/index.tsx").includes("<Header />"), "Homepage retains the dedicated application shortcut");
 assert(dock.includes('id === "produkty" && !marketing ? "/produkty"'), "Products dock item must navigate to the actual catalogue, not a stale anchor");
 
-for (const anchor of ["lead-first-visit", "puppy-first-visit", "dog-sitting-first-visit", "en-first-visit"]) assert(dock.includes('id: "' + anchor + '"'), "Missing landing first-visit shortcut: " + anchor);
+for (const anchor of ["lead-first-visit", "puppy-first-visit", "dog-sitting-first-visit"]) assert(dock.includes('id: "' + anchor + '"'), "Missing landing first-visit shortcut: " + anchor);
 
 assert(dock.includes('delta > 0') && dock.includes('setShowBackToTop(false)') && dock.includes('window.setTimeout(() => {') && dock.includes('setShowBackToTop(true)') && dock.includes('}, 350)'), "Back-to-top must hide only during downward scroll and remain available after idle/up");
 assert(dock.includes('className="mobile-dock-back-top"') && dock.includes('`mobile_dock_${variant}_back_to_top`'), "Return arrow must support all public variants with separate tracking");
@@ -32,10 +31,10 @@ assert(dock.includes('english ? "Back to top" : "Späť hore"') && dock.includes
 assert(dock.includes('`mobile_dock_${variant}_back_to_top`'), "Return clicks must be measured separately per variant from old Domov");
 assert(css.includes('bottom: calc(100% + 9px)') && css.includes('border-radius: 999px') && css.includes('border: none;') && css.includes('.mobile-dock-back-top[data-visible="false"]'), "Arrow must be borderless round glass, above dock and hide without shift");
 
-for (const value of ["First visit", "Why us?", "Interested in daycare", "Prices", "Slovak version"]) {
+for (const value of ["First visit", "About", "Apply", "Prices", "Rules"]) {
   assert(dock.includes(value), "Missing EN item " + value);
 }
-for (const anchor of ["produkty", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "en-benefits", "pricing"]) {
+for (const anchor of ["produkty", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "aria-puppy-check", "pricing"]) {
   assert(dock.includes(anchor), "Missing valid anchor " + anchor);
 }
 assert(dock.includes("onApplicationOpen?.()") && dock.includes("onInterestOpen?.()"), "Dock must delegate to existing modal openers");
@@ -43,10 +42,10 @@ assert(!/submitInquiry|fetch\(|createClient|supabase/i.test(dock), "Dock must no
 assert(dock.includes("window.requestAnimationFrame(() => window.requestAnimationFrame(execute))"), "Close sheet before routing");
 assert(dock.includes("DialogPrimitive.Overlay") && dock.includes("DialogPrimitive.Content"), "Accessible menu required");
 assert(dock.includes("menuEntries.map"), "Menu must preserve other links");
-assert(dock.includes("PHONE") && dock.includes('lang={english ? "sk" : "en"}'), "Contacts and language required");
+assert(dock.includes("PHONE") && dock.includes("<LanguageSwitch language={language}"), "Contacts and language required");
 assert(header.includes("<MobileDock onApplicationOpen="), "Common SK header must expose dock");
 assert(header.includes("<LongForm onSent=") && header.includes("<FormDialog open={open}"), "Use existing application form");
-assert(english.includes('language="en" variant="en" onInterestOpen='), "EN uses its existing enquiry");
+assert(english.includes('language="en" variant="en" onApplicationOpen=') && english.includes('<LongForm language="en"'), "EN uses the shared application");
 assert(css.includes("max-width: 1023px") && css.includes("min-width: 1024px"), "Mobile/desktop separation");
 assert(css.includes("env(safe-area-inset-bottom") && css.includes("grid-template-columns: repeat(4"), "Safe area and six columns");
 assert(css.includes("body:has([data-form-dialog]) .mobile-dock"), "Hide dock for every existing FormDialog");
@@ -68,7 +67,7 @@ assert(css.includes("margin-top: 0;") && css.includes("--hero-safe-inset: env(sa
 assert(root.includes('name="theme-color"') && root.includes("whiteHeroPaths.has(pathname)"), "Match initial Safari top-bar colour to the Hero");
 assert(css.includes("padding-top: calc(var(--hero-content-top) + var(--hero-safe-inset))"), "Hero text must stay below notch");
 assert(hero.includes('className="hero-safe-top hero-safe-top-main'), "Main Hero full-bleed class");
-for (const route of ["src/routes/psia-skolka-pre-steniatka.tsx", "src/routes/strazenie-psov-kosice.tsx", "src/routes/en.dog-daycare-kosice.tsx"]) {
+for (const route of ["src/routes/psia-skolka-pre-steniatka.tsx", "src/routes/strazenie-psov-kosice.tsx"]) {
   assert(read(route).includes('className="hero-safe-top relative overflow-hidden'), "Landing full-bleed class missing: " + route);
 }
 assert(pawCss.includes("inset: 0;") && pawCss.includes("position: absolute;"), "Decorative paws must follow Hero bounds");
@@ -86,7 +85,7 @@ for (const selector of [
   ".btn-coral,",
   ".btn-forest,",
   ".mobile-dock-item.mobile-dock-apply,",
-  ".mobile-dock-menu-actions a:first-child {",
+  ".mobile-dock-menu-actions > a:first-child {",
 ]) {
   assert(css.includes(selector), "Premium lighting selector missing: " + selector);
 }
@@ -155,9 +154,9 @@ assert(homepage.includes("<HomePuppyChecker />") &&
   homeChecker.includes("home_puppy_checker_eligible") &&
   homeChecker.includes("home_puppy_checker_info"),
   "Homepage puppy checker must retain shared contact, sourced submissions and no duplicate dock");
-assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('label: "Interested in daycare"'), "Landing CTA must have full SK/EN label");
+assert(dock.includes('label: "Mám záujem o škôlku"') && dock.includes('english ? "Apply" : "Prihláška"'), "SK interest and EN application labels");
 assert(dock.includes("marketingExtra"), "Local first visit menu links required");
-assert((dock.match(/id: "interest", label:/g) || []).length === 4, "Four marketing routes must have one prominent interest CTA");
+assert((dock.match(/id: "interest", label:/g) || []).length === 3, "Three marketing variants retain one prominent interest CTA");
 assert(!dock.includes('{ id: "recenzie", label: "Recenzie", icon: ImageIcon }'), "Reviews must leave marketing docks");
 assert(!dock.includes('{ id: "reviews", label: "Reviews", icon: ImageIcon }'), "Reviews must leave EN dock");
 assert(dock.includes('id === "interest" ? (') && dock.includes('{!marketing && ('), "Landing interest CTA is preserved; main navigation retains application CTA");
@@ -180,16 +179,16 @@ assert(dock.includes("homePath + \"#dog-sitting-first-visit\""), "Local dog visi
 assert(read("src/components/site/LandingMobilePricing.tsx").includes("PRICING"), "Reuse current prices");
 
 assert(dock.includes('className="mobile-dock-menu-title'), "Menu title must be visible");
-assert(dock.includes('English version') && dock.includes('Slovak version'), "Menu languages must be spelled out");
+assert(read("src/components/site/LanguageSwitch.tsx").includes('label:"English"') && read("src/components/site/LanguageSwitch.tsx").includes('label:"Slovenčina"'), "Menu languages must be spelled out");
 assert(!dock.includes('{ label: "Stráženie psov"') && !dock.includes('{ label: "Dog sitting"'), "Dog-sitting link removed from menu");
 assert(css.includes("min-height: 61px") && css.includes("padding: 16px 5px 2px"), "Logo needs separation from footer actions");
 // Menu now exposes four compact icon-only actions, with localized accessible
 // names and full-size touch targets (the visible language icon is EN/SK).
 const menuActions = dock.slice(dock.indexOf('className="mobile-dock-menu-actions"'), dock.indexOf('className="mobile-dock-menu-logo"'));
-assert(menuActions.includes('href={"tel:" + PHONE}') && menuActions.includes('href={english ? "/" : "/en/dog-daycare-kosice"}'), "Mobile phone and language actions required");
+assert(menuActions.includes('href={"tel:" + PHONE}') && menuActions.includes("<LanguageSwitch language={language}"), "Mobile phone and language actions required");
 assert(menuActions.includes("href={INSTAGRAM}") && menuActions.includes("href={FACEBOOK}"), "Mobile social icons must use the canonical destinations");
 assert(menuActions.includes("aria-label={english ?") && menuActions.includes("<Phone aria-hidden=") && menuActions.includes("<Instagram aria-hidden=") && menuActions.includes("<Facebook aria-hidden="), "Icon actions need accessible labels");
-assert(css.includes("grid-template-columns: repeat(4, minmax(0, 1fr))") && css.includes("min-height: 50px;") && css.includes("border-radius: 14px;"), "Four equally sized rounded icon actions must fit mobile screens");
+assert(css.includes(".mobile-dock-menu-actions {\n    display: grid;\n    grid-template-columns: repeat(2, minmax(0, 1fr))") && css.includes("min-height: 50px;") && css.includes("border-radius: 14px;"), "Four equally sized rounded icon actions must fit mobile screens");
 
 
 /* 23 Nov approved web finish gate: reusable soft shadow and unique first visit. */
@@ -207,7 +206,7 @@ assert(reviewComponent.includes('data-review-card') &&
        "Review cards must have a shared soft-edged shadow and enough scrollport room to fade");
 assert(firstVisitComponent.includes("export const FIRST_VISIT_STEPS") &&
        paidLeadRoute.includes("FIRST_VISIT_STEPS.map") &&
-       firstVisitComponent.includes("FIRST_VISIT_STEPS.map") &&
+       firstVisitComponent.includes(":FIRST_VISIT_STEPS).map") &&
        !firstVisitComponent.includes('source="home_first_visit"'),
        "Home/paid first visit must reuse one three-step explanation without duplicate accordion");
 assert(paidLeadRoute.includes("!isLiveLead && <details data-aria-visit-details"),
@@ -245,7 +244,7 @@ assert(productContact.includes('Odkiaľ ste? (adresa, mesto, PSČ)') &&
        "Keep one original location input with street, city and postcode; no extra delivery form");
 const leadContact = read("src/components/site/LeadStepForm.tsx");
 assert(productContact.includes('<PrivacyConsentCheckbox />') &&
-       leadContact.includes('<PrivacyConsentCheckbox />'),
+       leadContact.includes('<PrivacyConsentCheckbox language={language} />'),
        "Both daycare and product inquiries must reuse exactly the same privacy notice");
 assert(productSchema.includes("normalizeProductLocation(input.customer_location)") &&
        productSchema.includes('placePart.replace(/\\s*,\\s*/g, " ")') &&
@@ -378,7 +377,21 @@ assert.strictEqual(selectScope([ariaSource,'scripts/check-web-runtime.cjs']),'ar
 assert.strictEqual(selectScope([ariaSource,'src/styles.css']),'full');
 assert.strictEqual(selectScope([ariaSource,'src/components/site/Forms.tsx']),'full');
 assert.strictEqual(selectScope([ariaSource,'src/lib/submit-inquiry.ts']),'full');
-assert.strictEqual(selectScope(['scripts/check-web-runtime.cjs']),'full');
+assert.strictEqual(selectScope(['scripts/check-web-runtime.cjs']),'aria-visual');
+assert.strictEqual(selectScope(['scripts/check-web-runtime.cjs','src/components/site/MobileDock.tsx']),'full');
 assert.strictEqual(selectScope(['src/routes/index.tsx']),'full');
 assert.strictEqual(selectScope([]),'full');
 assert.deepStrictEqual(ARIA_ROUTES,['/psia-skolka-kosice/','/test-aria/','/psia-skolka-pre-steniatka/']);
+
+assert(english.includes('<Hero language="en"') && english.includes('<FirstVisit inlineForm leadStyle language="en"') && english.includes('<Pricing interestMode homeLayout language="en"') && english.includes('<HomePuppyChecker language="en"') && english.includes('<Faq homeLayout language="en"'), "EN must reuse homepage components");
+assert(!english.includes('/produkty') && !english.includes('/psia-skolka-pre-steniatka') && !english.includes('MobileLanguageHeader'), "Untranslated destinations and standalone mobile header must not return");
+const compactEntries=dock.slice(dock.indexOf("const homeMenuEntries"),dock.indexOf("const menuEntries ="));
+assert(compactEntries.includes('icon:Dog') && compactEntries.includes('#aria-puppy-check') && compactEntries.includes('Časté otázky') && !compactEntries.includes('Prečo Chvostíkovo'), "Puppy shortcut and localized FAQ");
+const compactPanel=dock.slice(dock.indexOf('{homeDock && <div className="mobile-dock-compact-menu"'),dock.indexOf('{sections.map'));
+assert(compactPanel.includes('data-home-menu') && compactPanel.includes('homeMenuEntries.map') && compactPanel.includes('<LanguageSwitch') && compactPanel.includes('data-home-dock-phone'), "Permanent top row includes call and language");
+assert(dock.includes('{!homeDock && <DialogPrimitive.Root') && css.includes('grid-column: 1 / -1') && css.includes('padding-bottom: calc(136px'), "Home dock has no menu dialog and reserves its height");
+assert(!hero.includes('data-home-hero-phone') && dock.includes('trackCookielessInteraction("phone_click", english ? "en_mobile_dock_phone" : "home_mobile_dock_phone", language)') && !hero.includes('trackMarketingInteraction("phone_click"'), "Mobile call moved to dock, delegated Pixel remains single");
+const switchSource = read("src/components/site/LanguageSwitch.tsx");
+assert(switchSource.includes('Link') && switchSource.includes('preload="intent"') && switchSource.includes('hrefLang={code}'), "Language switch must preserve accessible router links");
+
+assert(hero.includes("data-home-hero-desktop-phone") && hero.includes("PHONE_PRETTY") && hero.includes("home_hero_phone_desktop") && hero.includes("en_hero_phone_desktop"), "Desktop Hero phone must show canonical number and separate tracking source");

@@ -11,14 +11,14 @@ import { PhoneField } from "./PhoneField";
 import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
 import { InquiryDogFields } from "./InquiryDogFields";
 import { phoneFromForm } from "@/lib/phone";
-import { reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
+import { InquirySubmissionError, reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
 
 function sourceRef() { return currentSourceRef("/en/dog-daycare-kosice"); }
 
 export function EnglishInquiryForm({
-  trackingSource = "english_page",
+  trackingSource = "english_page", questionInHeading = false, compact = false,
 }: {
-  trackingSource?: string;
+  trackingSource?: string; questionInHeading?: boolean; compact?: boolean;
 }) {
   const formId = useId();
   const [step, setStep] = useState<1 | 2>(1);
@@ -91,7 +91,7 @@ export function EnglishInquiryForm({
     } catch (error) {
       const diagnostic = reportInquiryError(error);
       void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, "en", attemptId);
-      setError("Something went wrong. Please try again or call us.");
+      setError(error instanceof InquirySubmissionError && error.recoverySaved ? "Submission failed, but we saved your contact details. We will get in touch." : "Something went wrong. Please try again or call us.");
     } finally {
       setLoading(false);
     }
@@ -99,13 +99,14 @@ export function EnglishInquiryForm({
 
   if (sent) {
     return (
-      <div className="flex min-h-72 flex-col items-center justify-center gap-3 text-center">
+      <div data-lead-step-success className="flex min-h-75 flex-col items-center justify-center gap-3 text-center">
         <div className="flex size-14 items-center justify-center rounded-full bg-secondary text-forest">
           <Check className="size-7" />
         </div>
-        <h3 className="text-xl text-forest">Thank you!</h3>
+        <h3 className="font-display text-xl font-bold text-forest">Thank you for your enquiry.</h3>
         <p className="text-sm text-muted-foreground">We have received your enquiry. You will receive an SMS confirmation.</p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} language="en" />}
+        <div data-lead-success-links className="mt-2 flex flex-wrap justify-center gap-3 text-sm font-semibold text-forest"><a href="#requirements" onClick={()=>void trackCookielessInteraction("success_conditions_click",trackingSource,"en")} className="inline-flex min-h-11 items-center rounded-xl border border-forest/20 bg-white px-4 py-2">Admission requirements</a><a href="#pricing" onClick={()=>void trackCookielessInteraction("success_pricing_click",trackingSource,"en")} className="inline-flex min-h-11 items-center rounded-xl border border-forest/20 bg-white px-4 py-2">Prices</a></div>
       </div>
     );
   }
@@ -113,12 +114,13 @@ export function EnglishInquiryForm({
   return (
     <form
       data-lead-step-form
+      data-lead-step={step}
       onSubmit={onSubmit}
       onInputCapture={progress.onInputCapture}
       onBlurCapture={progress.onBlurCapture}
       onInvalidCapture={progress.onInvalidCapture}
       onChangeCapture={(event) => { onFormChange(); progress.onChangeCapture(event); }}
-      className="space-y-5 text-left"
+      className={(compact ? "space-y-3" : "space-y-5") + " text-left"}
     >
       <div className="space-y-2">
         <div className="flex justify-between gap-2 text-xs font-semibold text-forest/75" aria-live="polite">
@@ -130,9 +132,9 @@ export function EnglishInquiryForm({
           <div className={`h-full rounded-full bg-coral transition-all duration-300 ${step === 1 ? "w-1/2" : "w-full"}`} />
         </div>
       </div>
-      <div className={step === 1 ? "space-y-5" : "hidden"} aria-hidden={step !== 1}>
+      <div className={step === 1 ? (compact ? "space-y-3" : "space-y-5") : "hidden"} aria-hidden={step !== 1}>
         <fieldset className="min-w-0">
-          <legend className="mb-3 font-display text-lg font-bold leading-snug text-forest sm:text-xl">
+          <legend className={questionInHeading ? "sr-only" : "mb-3 font-display text-lg font-bold leading-snug text-forest sm:text-xl"}>
             What are you looking for for your dog?
           </legend>
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
@@ -144,7 +146,7 @@ export function EnglishInquiryForm({
               <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
                 <input type="radio" name="interest" value={option.value} required aria-label={option.value}
                   onChange={() => setSelectedInterest(option.value)} className="peer sr-only" />
-                <span className="flex h-full min-h-24 min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 py-3 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:min-h-28 sm:px-3">
+                <span className={"flex h-full min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:px-3 " + (compact ? "min-h-[72px] py-2 sm:min-h-24" : "min-h-24 py-3 sm:min-h-28")}>
                   {option.lines.map((line, i) => (
                     <span key={line} className={`block max-w-full break-words text-[10.5px] [overflow-wrap:anywhere] sm:text-xs ${i === 0 ? "font-bold" : "font-medium"}`}>{line}</span>
                   ))}
@@ -159,7 +161,8 @@ export function EnglishInquiryForm({
         </button>
       </div>
       <div className={step === 2 ? "space-y-3.5" : "hidden"} aria-hidden={step !== 2}>
-        <h3 className="font-display text-lg font-bold text-forest sm:text-xl">How can we contact you?</h3>
+        <h3 className="font-display text-lg font-bold leading-snug text-forest sm:text-xl">Contact details</h3>
+        <p className="text-sm leading-relaxed text-forest/70">Leave your contact details and we will get in touch.</p>
         <div>
           <label className="label-sm" htmlFor={`en-${formId}-name`}>Your name *</label>
           <input id={`en-${formId}-name`} name="name" autoComplete="name" required className="field" placeholder="Your name" />

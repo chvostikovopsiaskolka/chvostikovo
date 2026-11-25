@@ -294,3 +294,13 @@ console.log("[seo] PASS: product sitemap + canonical + original photos + recipro
   for (const product of ["target-na-cvicenie-pre-psov","stojan-na-misky-pre-psa"]) assert(fs.readFileSync("dist/client/"+product+"/index.html","utf8").includes(p+"/"),"Missing product link to rehab guide");
   assert(blogIndex.includes(p+"/"),"Rehab missing from blog index");
 }
+
+const enHome = fs.readFileSync("dist/client/en/dog-daycare-kosice/index.html","utf8");
+assert(/<html[^>]+lang="en"/.test(enHome) && enHome.includes("Dog daycare in Košice"), "English prerender content/language missing");
+assert(!enHome.includes('content="noindex'), "EN must stay indexable");
+for (const html of [homeHtml,enHome]) {
+  const alternatives=[...html.matchAll(/<link\b[^>]*>/g)].map(m=>m[0]).filter(tag=>/rel="alternate"/.test(tag));
+  assert(alternatives.some(tag=>/hreflang="en"/i.test(tag)&&tag.includes("https://chvostikovo.sk/en/dog-daycare-kosice")), "EN alternate missing");
+  assert(alternatives.some(tag=>/hreflang="sk"/i.test(tag)&&/href="https:\/\/chvostikovo\.sk\/"/.test(tag)), "SK alternate missing");
+}
+assert(!/href="\/(produkty|psia-skolka-pre-steniatka|blog)(\/|")/.test(enHome), "No untranslated product, puppy or blog destinations on EN home");

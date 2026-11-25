@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import { Component, lazy, Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { BookOpen, Euro, Menu, PawPrint, ShieldCheck, UsersRound, X, ArrowRight } from "lucide-react";
 import { ARIA_HEAD_DATA_URI } from "@/assets/aria-assistant-head";
 // Keep the chat chunk cached; preload on LEAD for an immediate first open.
@@ -102,6 +102,7 @@ export function AriaLeadAssistant({
   sectionNavigation?: boolean;
 }) {
   const rightAlignedBubble = guidedChatPreview || portraitOnRight;
+  const liquidFillId = "aria-liquid-" + useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [stage, setStage] = useState<"intro" | "puppy" | "contact">("intro");
   const stageRef = useRef<"intro" | "puppy" | "contact">("intro");
   const [panel, setPanel] = useState<Panel>(null);
@@ -420,8 +421,14 @@ export function AriaLeadAssistant({
     `L ${sw - 1} ${sh - 16} Q ${sw - 1} ${sh - 1} ${sw - 16} ${sh - 1}`,
     `L 16 ${sh - 1} Q 1 ${sh - 1} 1 ${sh - 16}`,
     `L 1 ${paidLeftBaseBottom}`,
+    ...(leadChat ? [
+      `C 1 ${paidLeftBaseBottom - 5} ${tipX + 8} ${paidTipY + 5} ${tipX + 1.5} ${paidTipY + 1.5}`,
+      `Q ${tipX - 1.5} ${paidTipY} ${tipX + 1.5} ${paidTipY - 1.5}`,
+      `C ${tipX + 8} ${paidTipY - 5} 1 ${paidLeftBaseTop + 5} 1 ${paidLeftBaseTop}`,
+    ] : [
     `C -6 ${paidLeftBaseBottom} ${tipX + 12} ${paidTipY + 7} ${tipX} ${paidTipY}`,
     `C ${tipX + 10} ${paidTipY + 1} -4 ${paidLeftBaseTop + 3} 1 ${paidLeftBaseTop}`,
+    ]),
     "L 1 16 Q 1 1 16 1 Z",
   ].join(" ");
   const speechPath = guidedChatPreview ? stablePreviewSpeechPath :
@@ -582,7 +589,15 @@ export function AriaLeadAssistant({
                 data-tail-base-bottom={guidedChatPreview ? previewBaseBottom : sectionNavigation && !portraitOnRight ? paidLeftBaseBottom : rightAlignedBubble ? tailBottomY : undefined}
                 viewBox={`0 0 ${sw} ${sh}`} preserveAspectRatio="none"
                 className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-visible text-forest/70">
-                <path d={speechPath} fill="var(--card)" stroke="currentColor" strokeWidth={sectionNavigation && !portraitOnRight ? 1.4 : 1.8}
+                {leadChat && <defs>
+                  <linearGradient id={liquidFillId} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fff" stopOpacity=".96" />
+                    <stop offset="42%" stopColor="#fff" stopOpacity=".88" />
+                    <stop offset="72%" stopColor="var(--aria-liquid-warm)" stopOpacity=".90" />
+                    <stop offset="100%" stopColor="var(--aria-liquid-rose)" stopOpacity=".92" />
+                  </linearGradient>
+                </defs>}
+                <path d={speechPath} fill={leadChat ? "url(#" + liquidFillId + ")" : "var(--card)"} stroke="currentColor" strokeWidth={sectionNavigation && !portraitOnRight ? 1.4 : 1.8}
                   strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
               </svg>}
               {stage === "intro" ? (

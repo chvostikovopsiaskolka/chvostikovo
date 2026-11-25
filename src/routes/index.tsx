@@ -40,7 +40,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:description", content: description },
       { name: "twitter:image", content: OG_IMAGE },
     ],
-    links: [{ rel: "canonical", href: `${BASE_URL}/` }],
+    links: [{ rel: "canonical", href: `${BASE_URL}/` }, { rel: "alternate", hrefLang: "sk", href: `${BASE_URL}/` }, { rel: "alternate", hrefLang: "en", href: `${BASE_URL}/en/dog-daycare-kosice` }, { rel: "alternate", hrefLang: "x-default", href: `${BASE_URL}/` }],
     scripts: [
       {
         type: "application/ld+json",
@@ -105,9 +105,9 @@ function Index() {
         <ReviewReasons variant="home" withVideo showCta={false} />
         <About homeLayout />
         <DaycarePhotoCarousel />
+        <HomePuppyChecker />
         <Pricing interestMode homeLayout />
         <FriendshipApplication />
-        <HomePuppyChecker />
         <Requirements />
         <Care showEmbeddedFriendship={false} showInterest={false} showContextFaq={false} homeCombined />
         <Gallery homeMosaic />

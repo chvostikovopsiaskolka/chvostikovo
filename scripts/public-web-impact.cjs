@@ -1,40 +1,94 @@
 const { execFileSync } = require('node:child_process');
-// Fail closed: only this isolated component family may use its known consumers.
+// Unknown/shared changes retain full regression. The bounded LEAD CSS region is
+// recognized only when its surrounding stylesheet is byte-identical AND every
+// rule stays inside its known route/chat consumers.
 const ARIA_ROUTES = ['/psia-skolka-kosice/', '/test-aria/', '/psia-skolka-pre-steniatka/'];
 const ariaSources = new Set([
   'src/routes/test-aria.tsx', 'src/routes/psia-skolka-kosice.tsx',
   'src/components/site/AriaLeadAssistant.tsx', 'src/components/site/AriaGuidedChat.tsx',
   'src/assets/aria-assistant-head-lead.webp',
 ]);
-const plumbing = new Set([
-  'scripts/check-web-runtime.cjs', 'scripts/critical-form-checks.ts',
-  'scripts/mobile-dock-contract.cjs', 'scripts/public-web-impact.cjs',
-  '.github/workflows/public-web-runtime.yml', 'AGENTS.md',
+const tooling = new Set([
+  'scripts/check-web-runtime.cjs', 'scripts/public-web-impact.cjs', 'scripts/public-web-impact.test.cjs',
+  '.github/workflows/public-web-runtime.yml', '.github/workflows/check-form-funnel.yml',
 ]);
-function selectScope(files) {
-  return files.some(file=>ariaSources.has(file)) &&
-    files.every(file=>ariaSources.has(file)||plumbing.has(file)) ? 'aria' : 'full';
+const plumbing = new Set([...tooling, 'scripts/critical-form-checks.ts', 'scripts/mobile-dock-contract.cjs', 'AGENTS.md']);
+const cssStart = '/* Paid campaign content only:';
+const cssEnd = '/* Keep decoration below the admission heading';
+function splitSelectors(header) {
+  let depth=0, part='', result=[];
+  for(const char of header){
+    if(char==='('||char==='[')depth++;
+    if(char===')'||char===']')depth--;
+    if(char===','&&depth===0){result.push(part.trim());part='';}else part+=char;
+  }
+  result.push(part.trim());return result;
 }
-module.exports = { selectScope, ARIA_ROUTES };
-if(require.main === module){
+function scopedLeadCss(before,after) {
+  if(typeof before!=='string'||typeof after!=='string')return false;
+  const section=source=>{const a=source.indexOf(cssStart),b=source.indexOf(cssEnd);return a>=0&&b>a&&source.indexOf(cssStart,a+1)<0&&source.indexOf(cssEnd,b+1)<0?{prefix:source.slice(0,a),body:source.slice(a,b),suffix:source.slice(b)}:null;};
+  const old=section(before),next=section(after);
+  if(!old||!next||old.prefix!==next.prefix||old.suffix!==next.suffix)return false;
+  return [old.body,next.body].every(body=>{
+    const css=body.replace(/\/\*[\s\S]*?\*\//g,'');
+    if(/@(?!media\b|supports\b|keyframes\b)/i.test(css))return false;
+    const headers=[...css.matchAll(/([^{}]+)\{/g)].map(m=>m[1].trim());
+    return headers.length>0&&headers.every(h=>/^@(media|supports)\b/.test(h)||/^@keyframes aria-composing-(pulse|fade)$/.test(h)||
+      /^(?:\d+(?:\.\d+)?%(?:\s*,\s*)?)+$/.test(h)||
+      splitSelectors(h).every(selector=>!/[+~]/.test(selector)&&/^(?:\.lead-brand-live(?:[\s.:#\[]|$)|\[data-aria-chat-lead\](?:[\s.:#\[]|$))/.test(selector)));
+  });
+}
+// A display-only greeting literal can change without changing any chat handlers,
+// form wiring or imports. Any other TSX difference retains integration checks.
+function introCopyOnly(before,after){
+  if(typeof before!=='string'||typeof after!=='string')return false;
+  const pattern=/^  const introText = ("(?:[^"\\\r\n]|\\.)*");$/gm;
+  const old=[...before.matchAll(pattern)],next=[...after.matchAll(pattern)];
+  if(old.length!==1||next.length!==1)return false;
+  try{if(typeof JSON.parse(old[0][1])!=='string'||typeof JSON.parse(next[0][1])!=='string')return false;}catch{return false;}
+  return before.replace(pattern,'<display greeting>')===after.replace(pattern,'<display greeting>');
+}
+function selectScope(files, css={}) {
+  if(!files.length)return 'full';
+  const scopedCss=files.includes('src/styles.css')&&scopedLeadCss(css.before,css.after);
+  if(files.every(file=>tooling.has(file)||(file==='src/styles.css'&&scopedCss)||(file==='src/components/site/AriaGuidedChat.tsx'&&introCopyOnly(css.copyBefore,css.copyAfter))) &&
+    (scopedCss||introCopyOnly(css.copyBefore,css.copyAfter)||files.every(file=>tooling.has(file))))return 'aria-visual';
+  return files.some(file=>ariaSources.has(file))&&files.every(file=>ariaSources.has(file)||plumbing.has(file)||(file==='src/styles.css'&&scopedCss))?'aria':'full';
+}
+// These changes cannot alter form/consent/attribution implementations. Chat JS
+// retains its browser integration suite; form/lib/route/unknown changes fail closed.
+function formChecksRequired(files, css={}) {
+  const presentation=new Set([...tooling,'src/styles.css','src/assets/aria-assistant-head-lead.webp']);
+  return !files.length||files.some(file=>!presentation.has(file)&&!(file==='src/components/site/AriaGuidedChat.tsx'&&introCopyOnly(css.copyBefore,css.copyAfter)));
+}
+module.exports={selectScope,scopedLeadCss,introCopyOnly,formChecksRequired,ARIA_ROUTES};
+if(require.main===module){
 (async()=>{
   const [base,head]=process.argv.slice(2);
   if(![base,head].every(sha=>/^[a-f0-9]{40}$/.test(sha||'')))throw new Error('Expected exact base/head commit SHAs');
-  let files,scope;
+  let files, css={};
   if(process.env.GITHUB_TOKEN&&process.env.GITHUB_REPOSITORY){
     const repo=process.env.GITHUB_REPOSITORY;
     if(!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo))throw new Error('Invalid repository');
-    const response=await fetch('https://api.github.com/repos/'+repo+'/compare/'+base+'...'+head,{headers:{Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json'}});
+    const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json'};
+    const response=await fetch('https://api.github.com/repos/'+repo+'/compare/'+base+'...'+head,{headers});
     if(!response.ok)throw new Error('Impact compare HTTP '+response.status);
     const comparison=await response.json();
     if(!Array.isArray(comparison.files))throw new Error('Impact compare omitted changed files');
-    files=comparison.files.map(file=>file.filename);
-    scope=files.length>=300?'full':selectScope(files);
+    files=comparison.files.length>=300?['unknown/truncated-comparison']:comparison.files.flatMap(file=>file.previous_filename?[file.filename,file.previous_filename]:[file.filename]);
+    const read=async (path,ref)=>{const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path+'?ref='+ref,{headers:{...headers,Accept:'application/vnd.github.raw+json'}});if(!r.ok)throw new Error('Source impact HTTP '+r.status);return r.text();};
+    for(const [path,beforeKey,afterKey] of [['src/styles.css','before','after'],['src/components/site/AriaGuidedChat.tsx','copyBefore','copyAfter']]){
+      if(files.includes(path))[css[beforeKey],css[afterKey]]=await Promise.all([read(path,base),read(path,head)]);
+    }
   }else{
-    files=execFileSync('git',['diff','--name-only',base,head,'--'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean);
-    scope=selectScope(files);
+    files=execFileSync('git',['diff','--name-only','--no-renames',base,head,'--'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean);
+    for(const [path,beforeKey,afterKey] of [['src/styles.css','before','after'],['src/components/site/AriaGuidedChat.tsx','copyBefore','copyAfter']]){
+      if(files.includes(path))for(const [key,ref] of [[beforeKey,base],[afterKey,head]])css[key]=execFileSync('git',['show',ref+':'+path],{encoding:'utf8'});
+    }
   }
+  const scope=selectScope(files,css);
   console.error('Candidate runtime scope: '+scope+' ('+files.length+' changed paths)');
   console.log('WEB_RUNTIME_SCOPE='+scope);
+  console.log('FORM_CHECKS_REQUIRED='+formChecksRequired(files,css));
 })().catch(error=>{console.error(error.message);process.exitCode=1;});
 }

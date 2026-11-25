@@ -511,10 +511,10 @@
   }
   /* Landing-page docks have one fewer tab and a wider central interest CTA.
      The six-slot main-page navigation and all desktop CSS stay unchanged. */
-  .mobile-dock:not([data-variant="main"]) .mobile-dock-bar {
+  .mobile-dock:not([data-home-dock]) .mobile-dock-bar {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(100px, 1.9fr) minmax(0, 1fr) minmax(0, 1fr);
   }
-  .mobile-dock:not([data-variant="main"]) .mobile-dock-apply > span {
+  .mobile-dock:not([data-home-dock]) .mobile-dock-apply > span {
     font-size: 9px;
     letter-spacing: -0.025em;
     line-height: 1.12;
@@ -659,14 +659,14 @@
   .mobile-dock-menu-links a:hover { background: var(--peach); }
   .mobile-dock-menu-actions {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     margin-top: 8px;
     padding-top: 9px;
     flex: 0 0 auto;
     border-top: 1px solid rgba(83,127,99,.17);
   }
-  .mobile-dock-menu-actions a {
+  .mobile-dock-menu-actions > a {
     display: inline-flex;
     min-width: 0;
     min-height: 50px;
@@ -684,11 +684,11 @@
     color: var(--forest-deep);
     transition: background .2s ease, border-color .2s ease;
   }
-  .mobile-dock-menu-actions a svg { flex-shrink: 0; width: 20px; height: 20px; }
-  .mobile-dock-menu-actions a:first-child { background: var(--coral); border-color: var(--coral); color: white; }
-  .mobile-dock-menu-actions a:hover { border-color: var(--coral); background: var(--coral-soft); }
-  .mobile-dock-menu-actions a:first-child:hover { background: var(--coral); }
-  .mobile-dock-menu-actions a:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+  .mobile-dock-menu-actions > a svg { flex-shrink: 0; width: 20px; height: 20px; }
+  .mobile-dock-menu-actions > a:first-child { background: var(--coral); border-color: var(--coral); color: white; }
+  .mobile-dock-menu-actions > a:hover { border-color: var(--coral); background: var(--coral-soft); }
+  .mobile-dock-menu-actions > a:first-child:hover { background: var(--coral); }
+  .mobile-dock-menu-actions > a:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
   .mobile-dock-menu-logo {
     display: flex;
     flex: 0 0 auto;
@@ -736,7 +736,7 @@
 .btn-coral,
 .btn-forest,
 .mobile-dock-item.mobile-dock-apply,
-.mobile-dock-menu-actions a:first-child {
+.mobile-dock-menu-actions > a:first-child {
   --cta-drop-shadow: rgba(147, 74, 40, 0.28);
   --cta-lower-edge: rgba(91, 44, 26, 0.17);
   background-image: linear-gradient(
@@ -771,7 +771,7 @@
   .btn-coral:hover,
   .btn-forest:hover,
   .mobile-dock-item.mobile-dock-apply:hover,
-  .mobile-dock-menu-actions a:first-child:hover {
+  .mobile-dock-menu-actions > a:first-child:hover {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.54),
       inset 0 -2px 0 var(--cta-lower-edge),
@@ -784,7 +784,7 @@
 .btn-coral:active:not(:disabled),
 .btn-forest:active:not(:disabled),
 .mobile-dock-item.mobile-dock-apply:active,
-.mobile-dock-menu-actions a:first-child:active {
+.mobile-dock-menu-actions > a:first-child:active {
   transform: translateY(1px);
   box-shadow:
     inset 0 1px 2px rgba(42, 44, 38, 0.13),
@@ -803,7 +803,7 @@
   .btn-coral,
   .btn-forest,
   .mobile-dock-item.mobile-dock-apply,
-  .mobile-dock-menu-actions a:first-child {
+  .mobile-dock-menu-actions > a:first-child {
     transition: none;
   }
 }
@@ -1416,8 +1416,8 @@
    "Mám záujem" retains a soft colored glow. LEAD and product pages stay as-is. */
 body.site-brand:has(#top) :is(.btn-coral, .btn-forest, .btn-outline-forest, .hero-cta-primary),
 body.site-brand:has(#top) :is(.btn-coral, .btn-forest, .btn-outline-forest, .hero-cta-primary):is(:hover, :active),
-body.site-brand:has(#top) .mobile-dock[data-variant="main"] :is(.mobile-dock-bar, .mobile-dock-item, .mobile-dock-back-top),
-body.site-brand:has(#top) .mobile-dock[data-variant="main"] :is(.mobile-dock-item, .mobile-dock-back-top):is(:hover, :active) {
+body.site-brand:has(#top) .mobile-dock[data-home-dock] :is(.mobile-dock-bar, .mobile-dock-item, .mobile-dock-back-top),
+body.site-brand:has(#top) .mobile-dock[data-home-dock] :is(.mobile-dock-item, .mobile-dock-back-top):is(:hover, :active) {
   box-shadow: none;
   background-image: none;
 }
@@ -1460,11 +1460,11 @@ body.site-brand:has(#top) #recenzie [data-gesture-track="reviews"],
   .site-brand #top > div.relative.z-10.mt-11 { margin-top: 0.6rem; }
 }
 @media (max-width: 379px) {
-  .mobile-dock[data-variant="main"] .mobile-dock-bar { padding: 3px 2px; }
-  .mobile-dock[data-variant="main"] .mobile-dock-item {
+  .mobile-dock[data-home-dock] .mobile-dock-bar { padding: 3px 2px; }
+  .mobile-dock[data-home-dock] .mobile-dock-item {
     min-height: 48px; padding: 3px 0; gap: 2px;
   }
-  .mobile-dock[data-variant="main"] .mobile-dock-item.mobile-dock-apply { min-height: 50px; }
+  .mobile-dock[data-home-dock] .mobile-dock-item.mobile-dock-apply { min-height: 50px; }
 }
 
 /* One Hero CTA rather than an always-open form. Use real flow so reviews
@@ -1659,16 +1659,23 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   position: relative;
   width: 100%;
   min-height: 36px;
-  margin: 4px 0 0;
+  margin: 0;
+  margin-block-start: .5rem;
   padding: 6px 10px;
   font-size: 13px;
   line-height: 1.2;
 }
 .lead-brand-live [data-aria-lead-chat] [data-aria-bubble-chat-cta]::before { content: ""; position: absolute; inset: -4px 0; }
-.lead-brand-live [data-aria-lead-chat] [data-aria-speech] { border-radius: 16px; padding-block: 8px; -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4); }
-.lead-brand-live [data-aria-lead-chat] [data-aria-tail] path { fill: rgb(255 255 255 / 90%); }
+/* One SVG gradient fills both the balloon and its rounded tail. */
+[data-aria-chat-lead] { --aria-glass-space: ; --aria-chat-warm-alpha: 36%; --aria-chat-rose-alpha: 34%; }
+@supports (background: linear-gradient(145deg in oklab, white, black)) {
+  [data-aria-chat-lead] { --aria-glass-space: in oklab; }
+}
+.lead-brand-live [data-aria-lead-chat] [data-aria-speech] { --aria-liquid-warm: #fff1df; --aria-liquid-rose: #fbe4f0; border-radius: 16px; padding-block: 8px; -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4); }
 .lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: .8125rem; line-height: 1.35; }
 @media (max-width: 639px) {
+  .lead-brand-live [data-aria-lead-chat] [data-aria-speech] { --aria-liquid-warm: #ffeccf; --aria-liquid-rose: #f9d8e9; }
+  [data-aria-chat-lead] { --aria-chat-warm-alpha: 46%; --aria-chat-rose-alpha: 42%; }
   /* Give the greeting real space rather than clipping it with nowrap.
      Rem limits preserve text resizing; enlarged text may naturally reflow. */
   .lead-brand-live [data-aria-guide] { padding-inline: 8px; }
@@ -1681,17 +1688,28 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 .lead-brand-live [data-aria-lead-chat] [data-aria-message] p strong { font-size: inherit; line-height: inherit; }
 .lead-brand-live [data-aria-chat-trigger] { background: transparent; box-shadow: none; -webkit-tap-highlight-color: transparent; }
 .lead-brand-live [data-lead-hero-pill] { font-weight: 700; border-radius: 8px; background-color: #ffa414; color: #26322b; }
-.lead-brand-live [data-aria-lead-hero-cta] { text-shadow: 0 1px 2px rgb(104 51 0 / 40%); }
-[data-aria-chat-lead] { background-color: rgb(255 255 255 / 90%); background-image: radial-gradient(ellipse at 5% 0%, rgb(255 225 181 / 18%), transparent 65%), radial-gradient(ellipse at 95% 100%, rgb(248 221 235 / 18%), transparent 65%); -webkit-backdrop-filter: blur(24px) saturate(1.4); backdrop-filter: blur(24px) saturate(1.4); }
-[data-aria-chat-lead] [data-aria-chat-history] { background: transparent; backdrop-filter: none; }
+.lead-brand-live [data-aria-lead-hero-cta] { text-shadow: 0 1px 2px rgb(104 51 0 / 40%); box-shadow: 0 4px 12px rgb(138 80 0 / 7%), 0 8px 28px rgb(255 164 20 / 15%); }
+[data-aria-chat-lead] {
+  background-color: rgb(255 255 255 / 90%);
+  background-image: linear-gradient(145deg var(--aria-glass-space), rgb(255 255 255 / 55%), rgb(255 255 255 / 5%) 48%, rgb(255 255 255 / 25%)), radial-gradient(ellipse at 5% 0% var(--aria-glass-space), rgb(255 225 181 / var(--aria-chat-warm-alpha)), transparent 58%), radial-gradient(ellipse at 95% 100% var(--aria-glass-space), rgb(248 221 235 / var(--aria-chat-rose-alpha)), transparent 60%);
+  border-color: rgb(255 255 255 / 85%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 95%), inset 0 0 0 1px rgb(255 255 255 / 40%), 0 24px 70px rgb(25 48 37 / 18%);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(24px) saturate(1.4);
+}
+[data-aria-chat-lead] [data-aria-chat-history] { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
 @keyframes aria-composing-pulse { 0%, 100% { opacity: .4; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
 @keyframes aria-composing-fade { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
 [data-aria-chat-lead] .aria-composing-dot { animation: aria-composing-pulse 1.2s ease-in-out infinite; }
 [data-aria-chat-lead] .aria-composing-dot:nth-child(2) { animation-delay: 160ms; }
 [data-aria-chat-lead] .aria-composing-dot:nth-child(3) { animation-delay: 320ms; }
 @media (prefers-reduced-motion: reduce) { [data-aria-chat-lead] .aria-composing-dot { animation-name: aria-composing-fade; animation-duration: 1.8s; } }
-@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) { [data-aria-chat-lead] { background-color: #fff; } }
-@media (prefers-reduced-transparency: reduce) { [data-aria-chat-lead] { background: #fff; backdrop-filter: none; } .lead-brand-live [data-aria-tail] path { fill: #fff; } }
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) { [data-aria-chat-lead] { background-color: #fff; } .lead-brand-live [data-aria-lead-chat] [data-aria-tail] path { fill: #fff; } }
+@media (prefers-reduced-transparency: reduce) {
+  [data-aria-chat-lead] { background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .lead-brand-live [data-aria-tail] path { fill: #fff; }
+  .lead-brand-live [data-aria-lead-chat] [data-aria-speech] { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
 @media (min-width: 1024px) { .lead-brand-live [data-aria-lead-chat] [data-aria-message] p { font-size: 18px; } .lead-brand-live [data-aria-lead-chat] [data-aria-bubble-chat-cta] { font-size: 14px; } }
 .lead-brand-live [data-lead-hero-photo] img { object-position: 50% 50%; }
 .lead-brand-live [data-lead-hero-photo]:hover img { transform: none; }
@@ -1704,7 +1722,7 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .lead-brand-live .hero-safe-top h1 { grid-area: title; margin-top: 0; }
   .lead-brand-live [data-aria-service-group] { grid-area: service; margin-top: 0; margin-bottom: 12px; }
   .lead-brand-live [data-aria-service-badge] { text-transform: none; font-size: 11px; letter-spacing: 0; padding-block: 6px; }
-  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin-top: 12px; }
+  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin-block-start: 1.5rem; }
   .lead-brand-live [data-lead-hero-pill] { font-size: clamp(11px, 2.9vw, 13px); padding: 5px 8px; }
   .lead-brand-live [data-lead-hero-photos] { grid-area: photos; margin-top: 18px; }
   .lead-brand-live [data-lead-hero-photo] { height: clamp(120px, calc(0.35 * (var(--lead-hero-visible) - 285px)), 175px); }
@@ -1720,36 +1738,45 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
 .lead-brand-live #aria-caretakers [data-safety-diplomas] { max-width: 40rem; }
 .lead-brand-live #aria-caretakers [data-safety-diplomas] img { max-width: 12rem; }
 
-/* Paid desktop hero: badge and action align to the outer photo edges;
-   the title and pills belong together in the central part of the column. */
+/* Paid desktop hero: two alternating text/photo pairs; preserve mobile order. */
 @media (min-width: 1024px) {
   .lead-brand-live .hero-safe-top {
     min-height: 100svh;
     justify-content: center;
-    padding-bottom: 1rem;
+    padding-block-start: .5rem;
+    padding-block-end: 1rem;
   }
+  .lead-brand-live [data-aria-hero-content] > div:first-child { padding-block-start: .5rem; }
   .lead-brand-live [data-lead-hero-grid] {
     display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    grid-template-rows: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto auto auto;
     align-items: start;
-    grid-template-areas: "service photos" ". photos" "title photos" "pills photos" "action photos";
+    grid-template-areas: "service photo-first" "title photo-first" "photo-second pills" "photo-second action";
     column-gap: 3rem;
-    row-gap: 0.75rem;
+    row-gap: 1rem;
     text-align: left;
   }
   .lead-brand-live [data-aria-hero-heading-spacer] { display: none; }
-  .lead-brand-live [data-lead-hero-grid] h1 { grid-area: title; margin: 0; font-size: clamp(2.25rem, calc(7svh - 12px), 3.25rem); }
-  .lead-brand-live [data-aria-service-group] { grid-area: service; margin: 0; }
+  .lead-brand-live [data-lead-hero-grid] h1 { grid-area: title; align-self: start; margin: 0; font-size: clamp(2.25rem, calc(7svh - 12px), 3.25rem); }
+  .lead-brand-live [data-aria-service-group] { grid-area: service; align-self: end; margin: 0; }
   .lead-brand-live [data-aria-service-badge] { font-size: 0.875rem; text-align: left; }
-  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; margin: 0; max-width: none; justify-content: flex-start; gap: 0.75rem; }
-  .lead-brand-live [data-lead-hero-pill] { font-size: 0.875rem; padding: 0.5rem 0.75rem; }
-  .lead-brand-live [data-lead-hero-photos] { grid-area: photos; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); margin: 0; min-height: clamp(28rem, 58svh, 34rem); align-self: stretch; }
-  .lead-brand-live [data-lead-hero-photo] { position: relative; height: auto; min-height: 0; }
+  .lead-brand-live [data-lead-hero-pills] { grid-area: pills; align-self: end; width: 100%; margin: 0; max-width: none; flex-wrap: nowrap; justify-content: space-between; gap: 0.75rem; }
+  .lead-brand-live [data-lead-hero-pill] { flex: 1 1 auto; white-space: nowrap; text-align: center; font-size: 0.875rem; padding: 0.5rem 0.75rem; }
+  .lead-brand-live [data-lead-hero-photos] { display: contents; }
+  .lead-brand-live [data-lead-hero-photo] { position: relative; height: clamp(216px, calc(29svh - 8px), 264px); min-height: 0; }
+  .lead-brand-live [data-lead-hero-photo="1"] { grid-area: photo-first; }
+  .lead-brand-live [data-lead-hero-photo="2"] { grid-area: photo-second; }
   .lead-brand-live [data-lead-hero-photo] img { position: absolute; inset: 0; }
-  .lead-brand-live [data-lead-hero-action] { grid-area: action; margin: 0; max-width: 26rem; align-items: flex-start; align-self: end; }
+  .lead-brand-live [data-lead-hero-action] { grid-area: action; width: 100%; margin: 0; margin-block-start: .5rem; max-width: none; align-items: stretch; align-self: start; }
   .lead-brand-live [data-aria-lead-hero-cta] { font-size: 1rem; }
-  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 2rem; }
+  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: .75rem; }
+}
+
+@media (min-width: 1024px) and (max-height: 800px) {
+  .lead-brand-live .hero-safe-top { padding-block-start: 4px; }
+  .lead-brand-live [data-aria-hero-content] > div:first-child { padding-block: 0; }
+  .lead-brand-live [data-aria-lead-review-spacing] { margin-top: 0; }
 }
 
 /* Keep decoration below the admission heading, and emphasize practical location facts. */
@@ -1771,4 +1798,38 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   --card: #fff;
   --primary-foreground: #26322b;
   --ring: #b82e7f;
+}
+
+/* The menu contact row shares the exact desktop language control. */
+.mobile-dock-menu-actions > [data-language-switch] { justify-content: center; min-width: 0; min-height: 50px; }
+.mobile-dock-menu-actions > [data-language-switch] a { flex: 1; min-width: 0; }
+
+/* APP-01: both localized home docks share the same visual treatment. The EN
+   homepage has no untranslated products destination, so it has five slots. */
+@media (max-width: 1023px) {
+  .mobile-dock[data-home-dock][data-variant="en"] .mobile-dock-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(52px, 1.1fr) minmax(0, 1fr);
+  }
+  /* Persistent second row in the same grid, not an overlay or dialog. */
+  body:has(.mobile-dock[data-home-dock]) { padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); }
+  html:has(.mobile-dock[data-home-dock]) { scroll-padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); }
+  .mobile-dock[data-home-dock] .mobile-dock-bar { position: relative; }
+  .mobile-dock .mobile-dock-compact-menu {
+    grid-column: 1 / -1;
+    display: flex; flex-direction: row; align-items: center;
+    padding: 0 2px 3px; gap: 2px; min-width: 0;
+    border-bottom: 1px solid rgb(38 50 43 / 12%);
+    margin-bottom: 3px;
+  }
+  .mobile-dock-compact-links { display: grid; flex: 1; min-width: 0; grid-template-columns: minmax(0,1.18fr) minmax(0,1fr); gap: 2px; }
+  .mobile-dock-compact-links a, .mobile-dock-compact-phone { display: flex; align-items: center; justify-content: center; gap: 3px; min-width: 0; min-height: 44px; border-radius: 14px; padding: 2px; color: var(--forest-deep); text-decoration: none; }
+  .mobile-dock-compact-phone { flex: 0 0 44px; background: transparent; }
+  .mobile-dock-compact-links a span { min-width: 0; font-family: var(--font-display); font-size: clamp(9px,2.8vw,13px); font-weight: 650; line-height: 1.12; overflow-wrap: anywhere; }
+  .mobile-dock-compact-links svg { flex-shrink: 0; width: clamp(13px,3.8vw,17px); height: auto; }
+  .mobile-dock-compact-links a:hover, .mobile-dock-compact-phone:hover { background: var(--peach); }
+  .mobile-dock-compact-menu > [data-language-switch] { padding: 1px; }
+  .mobile-dock-compact-menu > [data-language-switch] a { padding-inline: 0; min-width: 44px; min-height: 44px; }
+  .site-brand #top .home-hero-cta { max-width: 280px; }
+  .site-brand #top [data-home-hero-interest-cta] { font-size: clamp(12px, 3.5vw, 16px); padding-inline: 7px; }
+
 }

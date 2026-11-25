@@ -100,7 +100,7 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
             {photos.map((photo, i) => (
               <Fragment key={photo.src}>
                 <button data-home-space-photo type="button" onClick={() => setActive(i)}
-                  aria-label={"Otvoriť fotografiu: " + photo.alt}
+                  aria-label={isEnglish ? "Open daycare photo" : "Otvoriť fotografiu: " + photo.alt}
                   className={"group relative block w-full overflow-hidden rounded-3xl bg-secondary shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral aspect-[5/4]"}>
                   <img src={photo.src} srcSet={GALLERY[i]!.src + " 900w, " + photo.src + " 1600w"}
                     sizes="(min-width: 1152px) 362px, (min-width: 1024px) 31vw, 46vw" width={1600} height={1600}
@@ -108,9 +108,9 @@ export function Gallery({ language = "sk", homeMosaic = false }: { language?: "s
                   <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-forest-deep/85 to-transparent p-3 text-left text-xs font-semibold text-cream sm:text-sm">{photo.caption}</span>
                 </button>
                 {i % 2 === 1 && i < 6 && (() => { const h = hygiene[(i - 1) / 2]!; return (
-                  <article data-home-mosaic-hygiene aria-label={"Čistota priestorov – " + h.title}
+                  <article data-home-mosaic-hygiene aria-label={(isEnglish ? "Daycare cleaning – " : "Čistota priestorov – ") + h.title}
                     className="col-span-2 rounded-3xl border border-forest/10 bg-card p-5 shadow-card lg:hidden">
-                    <p className="mb-3 font-display text-xs font-bold uppercase tracking-wide text-coral">Ako zabezpečujeme čistotu priestorov</p>
+                    <p className="mb-3 font-display text-xs font-bold uppercase tracking-wide text-coral">{isEnglish ? "How we keep the daycare clean" : "Ako zabezpečujeme čistotu priestorov"}</p>
                     <div className="flex items-center gap-3"><span aria-hidden="true" className="shrink-0 text-2xl">{h.icon}</span><h3 className="font-display text-lg font-bold leading-snug text-forest">{h.title}</h3></div>
                     <p className="mt-3 text-sm leading-relaxed text-forest/80">{h.text}</p>
                   </article>

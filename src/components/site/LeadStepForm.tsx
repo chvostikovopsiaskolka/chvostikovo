@@ -22,7 +22,8 @@ export const LEAD_STEP_INTERESTS = [
   { value: "Mám záujem využívať škôlku občasne", lines: ["Mám záujem", "občasne", "využívať škôlku"] },
 ] as const;
 
-export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, compact = false, chatReceipt = false, presetInterest, ariaPreview = true, puppyCheck }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; compact?: boolean; chatReceipt?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined }) {
+export function LeadStepForm({ trackingSource, onSent, questionInHeading = false, compact = false, chatReceipt = false, presetInterest, ariaPreview = true, puppyCheck, language = "sk" }: { trackingSource: string; onSent?: () => void; questionInHeading?: boolean; compact?: boolean; chatReceipt?: boolean; presetInterest?: string | undefined; ariaPreview?: boolean; puppyCheck?: PuppyCheckInput | undefined; language?: "sk" | "en" }) {
+  const t = (sk:string,en:string) => language === "en" ? en : sk;
   const formId = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const [step, setStep] = useState<1 | 2>(presetInterest ? 2 : 1);
@@ -35,7 +36,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formStarted = useRef(false);
-  const progress = useFormProgress(trackingSource);
+  const progress = useFormProgress(trackingSource, language);
 
   // Only older engines need a class fallback for the scoped :has() rules.
   useEffect(() => {
@@ -49,7 +50,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   function trackStart() {
     if (formStarted.current) return;
     formStarted.current = true;
-    void trackCookielessInteraction("form_start", trackingSource);
+    void trackCookielessInteraction("form_start", trackingSource, language);
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -58,9 +59,9 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
     const form = event.currentTarget;
     // Read the actual form: browser autofill can omit the React onChange event.
     const breedValue = String(new FormData(form).get("plemeno") || "").trim();
-    if (!breedValue) { setError("Vyplňte plemeno psíka."); return; }
+    if (!breedValue) { setError(t("Vyplňte plemeno psíka.", "Enter your dog’s breed.")); return; }
     if (breedValue !== breed) setBreed(breedValue);
-    const attemptId = startFormAttempt(trackingSource);
+    const attemptId = language === "en" ? startFormAttempt(trackingSource, language) : startFormAttempt(trackingSource);
     progress.markAttempt();
     setLoading(true);
     setError(null);
@@ -89,7 +90,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         ...(String(fields.get("pohlavie") || "") ? { pohlavie: String(fields.get("pohlavie")) as "male" | "female" } : {}),
         ...(puppyCheck ? { puppy_check: { ...puppyCheck, dog_breed: breedValue || undefined } } : {}),
       }, attemptId);
-      void trackCookielessInteraction("form_submit", trackingSource, "sk", attemptId);
+      void trackCookielessInteraction("form_submit", trackingSource, language, attemptId);
       runFormTelemetry(() => {
         trackFormSubmit({
           formType: "informacie",
@@ -107,10 +108,10 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
       runFormTelemetry(() => onSent?.());
     } catch (cause) {
       const diagnostic = reportInquiryError(cause);
-      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, "sk", attemptId);
+      void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, language, attemptId);
       setError(cause instanceof InquirySubmissionError && cause.recoverySaved
-        ? "Odoslanie formulára zlyhalo, ale váš kontakt sme zachovali. Ozveme sa vám."
-        : "Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.");
+        ? t("Odoslanie formulára zlyhalo, ale váš kontakt sme zachovali. Ozveme sa vám.","Submission failed, but we saved your contact details. We will get in touch.")
+        : t("Odoslanie zlyhalo. Skúste to znova alebo nám zavolajte.","Submission failed. Try again or call us."));
     } finally {
       setLoading(false);
     }
@@ -119,19 +120,19 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
   if (sent) {
     return (
       <div className={(chatReceipt ? "flex flex-col items-center gap-2" : "flex min-h-75 flex-col items-center justify-center gap-3") + " text-center"} data-lead-step-success>
-        {chatReceipt ? <p role="status" className="sr-only">Ďakujeme za váš záujem.</p> : <>
+        {chatReceipt ? <p role="status" className="sr-only">{t("Ďakujeme za váš záujem.","Thank you for your enquiry.")}</p> : <>
         <div className="flex size-14 items-center justify-center rounded-full bg-secondary text-forest">
           <Check className="size-7" aria-hidden="true" />
         </div>
-        <h3 className="font-display text-xl font-bold text-forest">Ďakujeme za váš záujem.</h3>
+        <h3 className="font-display text-xl font-bold text-forest">{t("Ďakujeme za váš záujem.","Thank you for your enquiry.")}</h3>
         <p className="max-w-sm text-sm leading-relaxed text-forest/75">
-          Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu.
+          {t("Váš záujem sme prijali. Príde vám SMS potvrdenie o prijatí záujmu.","We received your enquiry. You will receive an SMS confirmation.")}
         </p>
         </>}
-        {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} />}
+        {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} language={language} />}
         {!chatReceipt && <div data-lead-success-links className="mt-2 flex flex-wrap justify-center gap-3 text-sm font-semibold text-forest">
-          <a href="/#podmienky" onClick={() => void trackCookielessInteraction("success_conditions_click", trackingSource)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-forest/20 bg-white px-4 py-2 text-forest shadow-sm hover:bg-secondary/55 focus-visible:outline-2 focus-visible:outline-coral">Podmienky prijatia</a>
-          <a href="/#cennik" onClick={() => void trackCookielessInteraction("success_pricing_click", trackingSource)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-forest/20 bg-white px-4 py-2 text-forest shadow-sm hover:bg-secondary/55 focus-visible:outline-2 focus-visible:outline-coral">Cenník</a>
+          <a href={t("/#podmienky","/en/dog-daycare-kosice#requirements")} onClick={() => void trackCookielessInteraction("success_conditions_click", trackingSource, language)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-forest/20 bg-white px-4 py-2 text-forest shadow-sm hover:bg-secondary/55 focus-visible:outline-2 focus-visible:outline-coral">{t("Podmienky prijatia","Admission requirements")}</a>
+          <a href={t("/#cennik","/en/dog-daycare-kosice#pricing")} onClick={() => void trackCookielessInteraction("success_pricing_click", trackingSource, language)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-forest/20 bg-white px-4 py-2 text-forest shadow-sm hover:bg-secondary/55 focus-visible:outline-2 focus-visible:outline-coral">{t("Cenník","Prices")}</a>
         </div>}
       </div>
     );
@@ -151,10 +152,10 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
     >
       <div className="space-y-2">
         <div className="flex justify-between gap-2 text-xs font-semibold text-forest/75" aria-live="polite">
-          <span>Krátky <strong>nezáväzný formulár</strong></span>
-          <span>Krok {step} z 2</span>
+          <span>{t("Krátky","Short")} <strong>{t("nezáväzný formulár","no-obligation enquiry")}</strong></span>
+          <span>{language === "en" ? `Step ${step} of 2` : `Krok ${step} z 2`}</span>
         </div>
-        <div role="progressbar" aria-label="Postup formulára" aria-valuenow={step} aria-valuemin={1} aria-valuemax={2} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
+        <div role="progressbar" aria-label={t("Postup formulára","Enquiry progress")} aria-valuenow={step} aria-valuemin={1} aria-valuemax={2} className="h-1.5 overflow-hidden rounded-full bg-forest/10">
           <div className={`h-full rounded-full bg-coral transition-all duration-300 ${step === 1 ? "w-1/2" : "w-full"}`} />
         </div>
       </div>
@@ -162,15 +163,15 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
       <div className={step === 1 ? (compact ? "space-y-3" : "space-y-5") : "hidden"} aria-hidden={step !== 1}>
         <fieldset className="min-w-0">
           <legend className={questionInHeading ? "sr-only" : "mb-3 font-display text-lg font-bold leading-snug text-forest sm:text-xl"}>
-            Čo hľadáte pre svojho psíka?
+            {t("Čo hľadáte pre svojho psíka?","What are you looking for for your dog?")}
           </legend>
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
             {LEAD_STEP_INTERESTS.map((option) => (
               <label key={option.value} className="relative min-w-0 cursor-pointer [-webkit-tap-highlight-color:transparent]">
-                <input type="radio" name="zaujem" value={option.value} required={step === 1} aria-label={option.value} defaultChecked={presetInterest === option.value}
+                <input type="radio" name="zaujem" value={option.value} required={step === 1} aria-label={language === "en" ? (["Learn more","Regular visits","Occasional visits"][LEAD_STEP_INTERESTS.indexOf(option)] ?? option.value) : option.value} defaultChecked={presetInterest === option.value}
                   onChange={() => setSelectedInterest(option.value)} className="peer sr-only" />
                 <span className={`flex h-full min-w-0 flex-col items-center justify-center rounded-2xl border border-forest/15 bg-white px-1.5 text-center leading-[1.3] text-forest shadow-sm transition peer-checked:border-coral peer-checked:bg-secondary/55 peer-checked:ring-1 peer-checked:ring-coral/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral sm:px-3 ${compact ? "min-h-[72px] py-2 sm:min-h-24" : "min-h-24 py-3 sm:min-h-28"}`}>
-                  {option.lines.map((line, i) => (
+                  {(language === "en" ? [["Learn more","about daycare"],["Regular","visits"],["Occasional","visits"]][LEAD_STEP_INTERESTS.indexOf(option)]! : option.lines).map((line, i) => (
                     <span key={line} className={`block max-w-full break-words text-[10.5px] [overflow-wrap:anywhere] sm:text-xs ${ariaPreview && (/informovať|pravidelne|občasne/i.test(line)) ? "font-extrabold" : i === 0 ? "font-bold" : "font-medium"}`}>
                       {line}
                     </span>
@@ -182,43 +183,43 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         </fieldset>
         <button type="button" disabled={!selectedInterest} onClick={() => setStep(2)}
           className="btn-coral min-h-12 w-full px-4 py-3 font-bold disabled:cursor-not-allowed disabled:opacity-50">
-          Pokračovať
+          {t("Pokračovať","Continue")}
         </button>
       </div>
 
       <div className={step === 2 ? "space-y-3.5" : "hidden"} aria-hidden={step !== 2}>
-        <h3 className="font-display text-lg font-bold leading-snug text-forest sm:text-xl">Kontaktné údaje</h3>
+        <h3 className="font-display text-lg font-bold leading-snug text-forest sm:text-xl">{t("Kontaktné údaje","Contact details")}</h3>
         {puppyCheck && (
           <div data-puppy-check-summary className="rounded-2xl border border-forest/15 bg-secondary/50 p-3 text-xs leading-relaxed text-forest">
-            <p className="font-display font-bold">K záujmu pripojíme aj vyplnenú kontrolu šteniatka:</p>
-            <p className="mt-1">{puppyCheck.dog_name ? puppyCheck.dog_name + " · " : ""}{puppyCheck.age_months} mesiacov{breed.trim() ? " · " + breed.trim() : ""}{puppyCheck.dog_weight_kg ? " · " + puppyCheck.dog_weight_kg + " kg" : ""}</p>
-            <p className="mt-1">Očkovania – besnota: {puppyCheck.vaccines.rabies === "yes" ? "áno" : puppyCheck.vaccines.rabies === "no" ? "nie" : "neviem"}; DHPPi+L: {puppyCheck.vaccines.dhppi === "yes" ? "áno" : puppyCheck.vaccines.dhppi === "no" ? "nie" : "neviem"}; kotercový kašeľ: {puppyCheck.vaccines.kennel === "yes" ? "áno" : puppyCheck.vaccines.kennel === "no" ? "nie" : "neviem"}.</p>
-            <p className="mt-1 text-forest/70">Údaje odošleme spolu s kontaktom až po vašom potvrdení formulára.</p>
+            <p className="font-display font-bold">{t("K záujmu pripojíme aj vyplnenú kontrolu šteniatka:","We will include your puppy readiness check:")}</p>
+            <p className="mt-1">{puppyCheck.dog_name ? puppyCheck.dog_name + " · " : ""}{puppyCheck.age_months} {t("mesiacov","months")}{breed.trim() ? " · " + breed.trim() : ""}{puppyCheck.dog_weight_kg ? " · " + puppyCheck.dog_weight_kg + " kg" : ""}</p>
+            <p className="mt-1">{t("Očkovania – besnota:","Vaccinations – rabies:")} {puppyCheck.vaccines.rabies === "yes" ? t("áno","yes") : puppyCheck.vaccines.rabies === "no" ? t("nie","no") : t("neviem","not sure")}; DHPPi+L: {puppyCheck.vaccines.dhppi === "yes" ? t("áno","yes") : puppyCheck.vaccines.dhppi === "no" ? t("nie","no") : t("neviem","not sure")}; {t("kotercový kašeľ:","kennel cough:")} {puppyCheck.vaccines.kennel === "yes" ? t("áno","yes") : puppyCheck.vaccines.kennel === "no" ? t("nie","no") : t("neviem","not sure")}.</p>
+            <p className="mt-1 text-forest/70">{t("Údaje odošleme spolu s kontaktom až po vašom potvrdení formulára.","We send these details with your contact only when you confirm the form.")}</p>
           </div>
         )}
         <p className="text-sm leading-relaxed text-forest/70">
-          Nechajte nám kontakt a ozveme sa vám ohľadom vášho záujmu.
+          {t("Nechajte nám kontakt a ozveme sa vám ohľadom vášho záujmu.","Leave your contact details and we will get in touch.")}
         </p>
         <div>
-          <label className="label-sm" htmlFor={`lead-step-${formId}-meno`}>Meno majiteľa *</label>
-          <input id={`lead-step-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder="Vaše meno" />
+          <label className="label-sm" htmlFor={`lead-step-${formId}-meno`}>{t("Meno majiteľa *","Owner’s name *")}</label>
+          <input id={`lead-step-${formId}-meno`} name="meno" autoComplete="name" required className="field" placeholder={t("Vaše meno","Your name")} />
         </div>
-        <InquiryDogFields idPrefix={`lead-step-${formId}`} breed={breed} onBreedChange={(event) => setBreed(event.target.value)} />
-        <PhoneField id={`lead-step-${formId}-tel`} name="telefon" />
+        <InquiryDogFields language={language} idPrefix={`lead-step-${formId}`} breed={breed} onBreedChange={(event) => setBreed(event.target.value)} />
+        <PhoneField id={`lead-step-${formId}-tel`} name="telefon" language={language} label={t("Telefón *","Phone *")} />
         <div>
-          <label className="label-sm" htmlFor={`lead-step-${formId}-email`}>E-mail (nepovinné)</label>
-          <input id={`lead-step-${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} className="field" placeholder="vas@email.sk" />
-          <p className="mt-1 text-xs text-forest/65">Pre prípad, že sa vám nebudeme vedieť dovolať.</p>
+          <label className="label-sm" htmlFor={`lead-step-${formId}-email`}>{t("E-mail (nepovinné)","Email (optional)")}</label>
+          <input id={`lead-step-${formId}-email`} name="email" type="email" autoComplete="email" maxLength={254} className="field" placeholder={t("vas@email.sk","you@example.com")} />
+          <p className="mt-1 text-xs text-forest/65">{t("Pre prípad, že sa vám nebudeme vedieť dovolať.","In case we cannot reach you by phone.")}</p>
         </div>
-        <PrivacyConsentCheckbox />
+        <PrivacyConsentCheckbox language={language} />
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <div className={puppyCheck ? "grid grid-cols-1 gap-2" : "grid grid-cols-[auto_minmax(0,1fr)] gap-2"}>
           {!puppyCheck && <button type="button" onClick={() => setStep(1)} disabled={loading}
             className="min-h-12 rounded-full border border-forest/20 px-4 font-semibold text-forest hover:bg-secondary/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral">
-            Späť
+            {t("Späť","Back")}
           </button>}
           <button type="submit" disabled={loading} className="btn-coral min-h-12 min-w-0 px-4 py-3 font-bold disabled:opacity-60">
-            {loading ? "Odosielam…" : "Odoslať záujem"}
+            {loading ? t("Odosielam…","Sending…") : t("Odoslať záujem","Send enquiry")}
           </button>
         </div>
       </div>
