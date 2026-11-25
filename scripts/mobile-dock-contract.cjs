@@ -385,10 +385,12 @@ assert.deepStrictEqual(ARIA_ROUTES,['/psia-skolka-kosice/','/test-aria/','/psia-
 assert(english.includes('<Hero language="en"') && english.includes('<FirstVisit inlineForm leadStyle language="en"') && english.includes('<Pricing interestMode homeLayout language="en"') && english.includes('<HomePuppyChecker language="en"') && english.includes('<Faq homeLayout language="en"'), "EN must reuse homepage components");
 assert(!english.includes('/produkty') && !english.includes('/psia-skolka-pre-steniatka') && !english.includes('MobileLanguageHeader'), "Untranslated destinations and standalone mobile header must not return");
 const compactEntries=dock.slice(dock.indexOf("const homeMenuEntries"),dock.indexOf("const menuEntries ="));
-assert((compactEntries.match(/description:/g)||[]).length===8 && !compactEntries.includes('/produkty') && !compactEntries.includes('/psia-skolka-pre-steniatka'), "Four localized compact links, no duplicate product or puppy links");
+assert((compactEntries.match(/icon:/g)||[]).length===6 && !compactEntries.includes("description:") && !compactEntries.includes("#kontakt") && !compactEntries.includes("#contact") && !compactEntries.includes('/produkty') && !compactEntries.includes('/psia-skolka-pre-steniatka'), "Three localized icon links without descriptions or contact");
 const compactPanel=dock.slice(dock.indexOf('{homeDock ? ('),dock.indexOf(') : <DialogPrimitive.Portal>'));
 assert(compactPanel.includes('data-home-menu') && compactPanel.includes('homeMenuEntries.map') && compactPanel.includes('<LanguageSwitch') && !/href=\{"tel:|INSTAGRAM|FACEBOOK|<img/.test(compactPanel), "Compact home panel contains only secondary links, language and close");
-assert(dock.includes('modal={!homeDock}') && css.includes('bottom: calc(100% + 8px)') && css.includes('background: transparent; color: var(--forest-deep)'), "Compact nonmodal panel anchored above dock");
+assert(dock.includes('modal={!homeDock}') && css.includes('bottom: calc(100% + 5px)') && css.includes('flex-direction: row; align-items: center'), "Compact nonmodal panel anchored above dock");
 assert(hero.includes('data-home-hero-phone') && hero.includes('href={"tel:" + PHONE}') && hero.includes('trackCookielessInteraction("phone_click", t("home_hero_phone", "en_hero_phone"), language)') && !hero.includes('trackMarketingInteraction("phone_click"'), "Hero phone uses existing delegated consented Pixel handler once");
 const switchSource = read("src/components/site/LanguageSwitch.tsx");
 assert(switchSource.includes('Link') && switchSource.includes('preload="intent"') && switchSource.includes('hrefLang={code}'), "Language switch must preserve accessible router links");
+
+assert(hero.includes("data-home-hero-desktop-phone") && hero.includes("PHONE_PRETTY") && hero.includes("home_hero_phone_desktop") && hero.includes("en_hero_phone_desktop"), "Desktop Hero phone must show canonical number and separate tracking source");

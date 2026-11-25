@@ -580,17 +580,17 @@ async function assertCompactHomeMenu(page,en) {
   const state=await menu.evaluate(el=>{
     const bar=el.closest('.mobile-dock-bar'),nav=bar.closest('.mobile-dock'),p=el.getBoundingClientRect(),d=bar.getBoundingClientRect();
     const links=[...el.querySelectorAll('.mobile-dock-compact-links a')];
-    const close=el.querySelector('.mobile-dock-compact-close');
-    return {hrefs:links.map(a=>new URL(a.href).hash),desc:links.every(a=>a.querySelector('small')?.textContent.trim()),
+    const close=bar.querySelector('button[aria-expanded="true"]');
+    return {hrefs:links.map(a=>new URL(a.href).hash),inline:links.every(a=>{const i=a.querySelector('svg').getBoundingClientRect(),s=a.querySelector('span').getBoundingClientRect();return s.left>=i.right-1 && Math.abs((i.top+i.bottom-s.top-s.bottom)/2)<3;}),
       targets:links.every(a=>a.getBoundingClientRect().height>=44&&a.scrollWidth<=a.clientWidth+1),
       height:p.height,gap:d.top-p.bottom,inside:p.left>=0&&p.right<=innerWidth+1&&p.top>=0,
       noOverflow:el.scrollWidth<=el.clientWidth+1,arrow:!!nav.querySelector('.mobile-dock-back-top'),
-      closeBg:getComputedStyle(close).backgroundColor,extra:el.querySelectorAll('img,a[href^="tel:"],a[href*="instagram.com"],a[href*="facebook.com"]').length,
+      toggleClose:!!close?.querySelector('svg.lucide-x'),extra:el.querySelectorAll('img,a[href^="tel:"],a[href*="instagram.com"],a[href*="facebook.com"]').length,
       labels:[...bar.children].filter(a=>a.matches('a,button')).map(a=>a.textContent.trim())};
   });
-  const expected=en?['#about','#en-benefits','#faq','#contact']:['#o-nas','#preco-chvostikovo','#faq','#kontakt'];
+  const expected=en?['#about','#faq','#en-benefits']:['#o-nas','#faq','#preco-chvostikovo'];
   const labels=en?['Home','Prices','Rules','Apply','Menu']:['Domov','Cenník','Podmienky','Produkty','Prihláška','Menu'];
-  if(JSON.stringify(state.hrefs)!==JSON.stringify(expected)||JSON.stringify(state.labels)!==JSON.stringify(labels)||!state.desc||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.extra||state.gap<5||state.gap>12||state.height>250||state.closeBg!=='rgba(0, 0, 0, 0)')throw new Error('Compact home navigation '+JSON.stringify(state));
+  if(JSON.stringify(state.hrefs)!==JSON.stringify(expected)||JSON.stringify(state.labels)!==JSON.stringify(labels)||!state.inline||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.extra||state.gap<5||state.gap>12||state.height>68||!state.toggleClose)throw new Error('Compact home navigation '+JSON.stringify(state));
   const phone=await page.locator('[data-home-hero-phone]').evaluate(el=>{
     const a=el.getBoundingClientRect(),b=el.parentElement.querySelector('[data-home-hero-interest-cta]').getBoundingClientRect();
     return {href:el.getAttribute('href'),sameRow:Math.abs((a.top+a.bottom-b.top-b.bottom)/2)<3,separate:a.left>=b.right+4,width:a.width,height:a.height,inside:a.right<=innerWidth&&b.left>=0};
@@ -659,9 +659,14 @@ async function assertBilingualNavigation(browser,engine) {
         const buttons=await menu.locator('[data-language-switch] a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
         if(buttons.some(b=>b.width<44||b.height<44))throw new Error('Language target too small');
         await page.screenshot({path:path.join(out,'bilingual-menu-'+engine+'-'+width+'.png')});
-        await menu.getByRole('button',{name:'Close menu'}).click();
+        await page.getByRole('button',{name:'Close menu'}).click();
         await menu.waitFor({state:'hidden'});
       }else{
+        const desktopPhone=await page.locator('[data-home-hero-desktop-phone]').evaluate(el=>{
+          const p=el.getBoundingClientRect(),a=el.parentElement.querySelector('#home-hero-learn-more').getBoundingClientRect();
+          return {text:el.textContent.trim(),href:el.getAttribute('href'),aligned:Math.abs((p.top+p.bottom-a.top-a.bottom)/2)<3,fit:p.left>=a.right+4&&p.right<=innerWidth&&p.height>=44};
+        });
+        if(!desktopPhone.aligned||!desktopPhone.fit||desktopPhone.text!=='+421 951 069 395'||desktopPhone.href!=='tel:+421951069395')throw new Error('Desktop Hero phone '+JSON.stringify(desktopPhone));
         await page.screenshot({path:path.join(out,'bilingual-desktop-'+engine+'.png')});
       }
     }
@@ -4164,7 +4169,7 @@ async function assertBilingualNavigation(browser,engine) {
               const menu = productPage.locator('.mobile-dock-menu');
               await menu.waitFor({ state: 'visible' });
               await assertCompactHomeMenu(productPage,false);
-              await menu.getByRole('button', { name: 'Zavrieť menu' }).click();
+              await productPage.getByRole('button', { name: 'Zavrieť menu' }).click();
               await menu.waitFor({ state: 'hidden' });
             }
             const sectionOrder = await productPage.evaluate(() => {

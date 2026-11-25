@@ -1,5 +1,5 @@
 import { Phone } from "lucide-react";
-import { PHONE } from "@/content/site";
+import { PHONE, PHONE_PRETTY } from "@/content/site";
 import { EnglishInquiryForm } from "./EnglishInquiryForm";
 import { useState } from "react";
 import { LeadStepForm } from "./LeadStepForm";
@@ -76,11 +76,12 @@ export function Hero({ onMobileInquiryOpen, mobileInquiryOpen, language = "sk" }
               <span className="block text-coral-dark">{t("zamiluje", "will love")}</span>
             </h1>
 
-            <div className="home-hero-desktop-cta order-3 mt-6 flex justify-start">
+            <div className="home-hero-desktop-cta order-3 mt-6 flex items-center justify-start gap-3">
               <a id="home-hero-learn-more" href={t("#preco-chvostikovo", "#en-benefits")} onClick={() => {
                 trackMarketingInteraction("hero_learn_more", t("hero_desktop", "en_hero_desktop_cta"));
                 void trackCookielessInteraction("explore_daycare", t("home_hero_desktop_20261028", "en_hero_desktop_cta"), language);
-              }} className="hero-cta-primary w-full max-w-[320px]">{t("Chcem zistiť viac", "Learn more")}</a>
+              }} className="hero-cta-primary min-w-0 flex-1 max-w-[320px]">{t("Chcem zistiť viac", "Learn more")}</a>
+              <a data-home-hero-desktop-phone href={"tel:" + PHONE} data-tracking-source={t("home_hero_phone_desktop", "en_hero_phone_desktop")} aria-label={t("Zavolať do Chvostíkova", "Call Chvostíkovo") + ": " + PHONE_PRETTY} onClick={() => void trackCookielessInteraction("phone_click", t("home_hero_phone_desktop", "en_hero_phone_desktop"), language)} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-full border border-[#ffa414] bg-[#ffe3ae] px-3 text-xs font-semibold whitespace-nowrap text-[#26322b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral xl:px-4 xl:text-sm"><Phone size={16} aria-hidden="true" />{PHONE_PRETTY}</a>
             </div>
           </div>
 
