@@ -132,11 +132,16 @@ async function assertPaidAriaChat(page) {
   };
   await page.route('**/functions/v1/web-form-submit',handler);
   try {
-    await page.evaluate(()=>{
-      window.__ariaMetaAudit={consent:localStorage.getItem('chvostikovo-cookies'),fbq:window.fbq,calls:[]};
+    const marketingAllowed=await page.evaluate(()=>{
+      let consent=null,storageAvailable=false;
+      try { consent=localStorage.getItem('chvostikovo-cookies');storageAvailable=true; } catch { /* Preserve the blocked-storage scenario. */ }
+      window.__ariaMetaAudit={consent,storageAvailable,fbq:window.fbq,calls:[]};
       window.fbq=(...args)=>window.__ariaMetaAudit.calls.push(args);
-      localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:true}));
-      window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed'));
+      if(storageAvailable){
+        localStorage.setItem('chvostikovo-cookies',JSON.stringify({version:'2026-10-03-v2',savedAt:new Date().toISOString(),necessary:true,functional:false,analytics:false,marketing:true}));
+        window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed'));
+      }
+      return storageAvailable;
     });
     const trigger=page.locator('[data-aria-lead-chat] [data-aria-chat-trigger]');
     // Verify the 44px hit area beyond the visibly shorter orange surface.
@@ -191,9 +196,9 @@ async function assertPaidAriaChat(page) {
     await form.getByRole('button',{name:'Odoslať záujem',exact:true}).click();
     await interest.locator('[data-lead-step-success]').waitFor({state:'visible'});
     if(await interest.locator('[data-lead-success-links]').count()||!await interest.getByText('Je toto telefónne číslo správne?').count()||await chat.locator('[data-aria-chat-followup-prompt]').count())throw new Error('Chat receipt must retain phone verification without page links or repeat prompt');
-    if(posted.length!==3||posted[2].cta_source!=='lead_landing_aria_chat_interest'||posted[2].marketing_consent!==true)throw new Error('Paid chat source/consent: '+JSON.stringify(posted.map(p=>({source:p.cta_source,marketing:p.marketing_consent}))));
+    if(posted.length!==3||posted[2].cta_source!=='lead_landing_aria_chat_interest'||posted[2].marketing_consent!==marketingAllowed)throw new Error('Paid chat source/consent: '+JSON.stringify(posted.map(p=>({source:p.cta_source,marketing:p.marketing_consent}))));
     const meta=await page.evaluate(()=>window.__ariaMetaAudit.calls.filter(call=>call[0]==='track'&&call[1]==='Lead'));
-    if(meta.length!==1||meta[0][3]?.eventID!==posted[2].meta_event_id)throw new Error('Chat must emit exactly one confirmed Meta Lead with the server deduplication ID');
+    if(marketingAllowed ? meta.length!==1||meta[0][3]?.eventID!==posted[2].meta_event_id : meta.length!==0)throw new Error('Chat Meta success must preserve consent and the server deduplication ID');
     await chat.getByRole('button',{name:'Close',exact:true}).click();
     await chat.waitFor({state:'hidden'});
     await trigger.click();
@@ -217,8 +222,10 @@ async function assertPaidAriaChat(page) {
     await page.unroute('**/functions/v1/web-form-submit',handler);
     await page.evaluate(()=>{
       const audit=window.__ariaMetaAudit;if(!audit)return;
-      if(audit.consent===null)localStorage.removeItem('chvostikovo-cookies');else localStorage.setItem('chvostikovo-cookies',audit.consent);
-      window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed'));
+      if(audit.storageAvailable){
+        if(audit.consent===null)localStorage.removeItem('chvostikovo-cookies');else localStorage.setItem('chvostikovo-cookies',audit.consent);
+        window.dispatchEvent(new CustomEvent('chvostikovo-consent-changed'));
+      }
       window.fbq=audit.fbq;delete window.__ariaMetaAudit;
     });
   }
