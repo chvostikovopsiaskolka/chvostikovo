@@ -6,6 +6,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
+import { ProductRelatedArticles } from "@/components/site/ProductRelatedArticles";
 import { Footer } from "@/components/site/Contact";
 import { StandGalleryLoop } from "@/components/site/StandGalleryLoop";
 import { StandVariantCards, STAND_VARIANTS } from "@/components/site/StandVariantCards";
@@ -336,6 +337,8 @@ function BowlStandPage() {
           </div>
           <div className="mt-8"><StandGalleryLoop /></div>
         </section>
+
+        <ProductRelatedArticles />
 
         <section data-stand-breeds className="py-14 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 text-center">

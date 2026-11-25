@@ -8,6 +8,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
+import { ProductRelatedArticles } from "@/components/site/ProductRelatedArticles";
 import { Footer } from "@/components/site/Contact";
 import { EdgePhotoCarousel } from "@/components/site/EdgePhotoCarousel";
 import { FormDialog } from "@/components/site/FormDialog";
@@ -260,6 +261,8 @@ function TargetPage() {
           </div>
           <TargetGalleryLoop />
         </section>
+
+        <ProductRelatedArticles />
 
         <section className="bg-forest py-12 text-cream sm:py-16">
           <div className="mx-auto max-w-4xl px-4 text-center">
