@@ -727,7 +727,7 @@ export function LongForm({ onSent, collapsible = false, onExpand, language = "sk
       </div>
       {collapsible && (
         <button id="home-friendship-application" type="button"
-          aria-expanded={expanded} aria-controls={`l-${formId}-details`}
+          aria-expanded={expanded} aria-controls={`l-${formId}-details`} disabled={loading}
           className="btn-coral w-full" onClick={() => {
             if (!expanded) onExpand?.();
             if (expanded) setStep(1);

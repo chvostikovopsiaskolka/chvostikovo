@@ -594,6 +594,25 @@ async function assertCompactHomeMenu(page,en) {
   if(!await page.evaluate(()=>!!(document.querySelector('[data-home-puppy-checker]')?.compareDocumentPosition(document.querySelector('[data-home-pricing-columns]'))&Node.DOCUMENT_POSITION_FOLLOWING)))throw new Error('Puppy checker must precede pricing');
 }
 
+async function assertApplicationPreview(page,en) {
+  const form=page.locator('[data-home-friendship-form] form[data-application-form]');
+  const toggle=form.locator('#home-friendship-application');
+  const name=form.locator('[name="pes"]'),breed=form.locator('[name="plemeno"]');
+  if(!await name.isVisible()||!await breed.isVisible()||await form.locator('[name="vek"]').isVisible()||await form.locator('[name="meno"]').isVisible()||await toggle.getAttribute('aria-expanded')!=='false')throw new Error('Application preview is not partial');
+  await name.fill('Fixture');
+  await breed.fill('Labrador');
+  await form.evaluate(el=>el.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
+  if(await form.getAttribute('data-application-step')!=='1')throw new Error('Collapsed form advanced or submitted');
+  await activateFixtureControl(toggle);
+  await form.locator('[name="vek"]').waitFor({state:'visible'});
+  if(await name.inputValue()!=='Fixture'||await breed.inputValue()!=='Labrador'||await form.locator('[name="pes"]').count()!==1)throw new Error('Expanding lost preview data or duplicated fields');
+  await activateFixtureControl(toggle);
+  await form.locator('[name="vek"]').waitFor({state:'hidden'});
+  if(!await name.isVisible()||await name.inputValue()!=='Fixture'||await form.locator('[name="meno"]').isVisible())throw new Error('Collapsing lost preview data or exposed owner step');
+  await name.fill('');await breed.fill('');
+  console.log('PASS application preview '+(en?'EN':'SK'));
+}
+
 async function assertBilingualNavigation(browser,engine) {
   const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   const captured=[];
@@ -622,6 +641,7 @@ async function assertBilingualNavigation(browser,engine) {
       await assertCompactHomeMenu(page,false);
       await page.screenshot({path:path.join(out,'compact-sk-menu-'+engine+'-'+width+'.png')});
     }
+    await assertApplicationPreview(page,false);
     await page.locator('[data-home-menu] a[href="/#aria-puppy-check"]').click();
     await page.waitForFunction(()=>location.hash==='#aria-puppy-check');
     await page.locator('[data-home-menu] a[href="/#faq"]').click();
@@ -635,6 +655,8 @@ async function assertBilingualNavigation(browser,engine) {
     await page.locator('[data-home-menu] [data-language-switch] a[lang="en"]').click();
     await page.waitForURL(/\/en\/dog-daycare-kosice\/?$/);
     await page.waitForFunction(()=>document.documentElement.lang==='en');
+    await assertApplicationPreview(page,true);
+    if(captured.some(r=>r.path.endsWith('/web-form-submit')))throw new Error('Collapsed application posted to receiver');
     if(await page.evaluate(()=>window.__bilingualDocument)!==doc)throw new Error('Language switch reloaded document');
     if(await page.evaluate(()=>window.__bilingualPixel.some(a=>a[0]==='track')))throw new Error('Pixel fired without consent');
     for(const width of [320,375,390,430,1440]){
