@@ -11,7 +11,7 @@ import { PhoneField } from "./PhoneField";
 import { LeadPhoneReceipt } from "./LeadPhoneReceipt";
 import { InquiryDogFields } from "./InquiryDogFields";
 import { phoneFromForm } from "@/lib/phone";
-import { reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
+import { InquirySubmissionError, reportInquiryError, runFormTelemetry, inquiryDiagnosticSuffix } from "@/lib/form-errors";
 
 function sourceRef() { return currentSourceRef("/en/dog-daycare-kosice"); }
 
@@ -91,7 +91,7 @@ export function EnglishInquiryForm({
     } catch (error) {
       const diagnostic = reportInquiryError(error);
       void trackCookielessInteraction("form_error", `${trackingSource}:${diagnostic.stage}${inquiryDiagnosticSuffix(diagnostic)}`, "en", attemptId);
-      setError("Something went wrong. Please try again or call us.");
+      setError(error instanceof InquirySubmissionError && error.recoverySaved ? "Submission failed, but we saved your contact details. We will get in touch." : "Something went wrong. Please try again or call us.");
     } finally {
       setLoading(false);
     }
@@ -99,13 +99,14 @@ export function EnglishInquiryForm({
 
   if (sent) {
     return (
-      <div className="flex min-h-72 flex-col items-center justify-center gap-3 text-center">
+      <div data-lead-step-success className="flex min-h-75 flex-col items-center justify-center gap-3 text-center">
         <div className="flex size-14 items-center justify-center rounded-full bg-secondary text-forest">
           <Check className="size-7" />
         </div>
-        <h3 className="text-xl text-forest">Thank you!</h3>
+        <h3 className="font-display text-xl font-bold text-forest">Thank you for your enquiry.</h3>
         <p className="text-sm text-muted-foreground">We have received your enquiry. You will receive an SMS confirmation.</p>
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} language="en" />}
+        <div data-lead-success-links className="mt-2 flex flex-wrap justify-center gap-3 text-sm font-semibold text-forest"><a href="#requirements" onClick={()=>void trackCookielessInteraction("success_conditions_click",trackingSource,"en")} className="inline-flex min-h-11 items-center rounded-xl border border-forest/20 bg-white px-4 py-2">Admission requirements</a><a href="#pricing" onClick={()=>void trackCookielessInteraction("success_pricing_click",trackingSource,"en")} className="inline-flex min-h-11 items-center rounded-xl border border-forest/20 bg-white px-4 py-2">Prices</a></div>
       </div>
     );
   }

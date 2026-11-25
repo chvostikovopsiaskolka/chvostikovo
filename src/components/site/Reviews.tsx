@@ -309,7 +309,7 @@ export function VideoReasonsGrid({ items, language = "sk", homeMobileLayout = fa
       <div className={homeMobileLayout ? "relative row-span-2 min-w-0 self-stretch [&>div]:absolute [&>div]:inset-0 [&>div]:h-full [&>div]:min-h-0 sm:[&>div]:relative sm:[&>div]:min-h-[260px] sm:row-span-1" : "min-w-0"}>
         <InlineDaycareVideo language={language} />
       </div>
-      {homeMobileLayout && <div className="relative col-start-1 row-start-3 min-w-0 self-stretch sm:hidden"><img data-home-reason-photo src={happyDog} alt="Spokojný psík v Chvostíkove" loading="lazy" className="absolute inset-0 size-full rounded-3xl object-cover" /></div>}
+      {homeMobileLayout && <div className="relative col-start-1 row-start-3 min-w-0 self-stretch sm:hidden"><img data-home-reason-photo src={happyDog} alt={language === "en" ? "Happy dog at Chvostíkovo" : "Spokojný psík v Chvostíkove"} loading="lazy" className="absolute inset-0 size-full rounded-3xl object-cover" /></div>}
       <div data-video-reasons-copy className="contents sm:flex sm:min-w-0 sm:flex-col sm:justify-around sm:rounded-3xl sm:bg-cream/10 sm:px-5 sm:shadow-card sm:ring-1 sm:ring-cream/20 sm:backdrop-blur-xl">
         {items.map(({ title, text, icon: Icon }) => (
           <article key={title} className={homeMobileLayout ? ((title === "Pekný deň aj pre vášho psíka" || title === "A lovely day for your dog") ? "col-start-2 row-start-3 min-w-0 text-cream sm:col-auto sm:rounded-none sm:border-0 sm:px-0 sm:py-4" : "col-start-2 min-w-0 text-cream sm:col-auto sm:py-4") : "min-w-0 px-1 py-3 text-cream sm:px-0 sm:py-4"}>

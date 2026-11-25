@@ -1,3 +1,4 @@
+import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
 import ariaHead from "@/assets/aria-assistant-head-lead.webp";
@@ -100,6 +101,7 @@ const CATEGORY_TEXT: Record<Category, { sk: string; en: string }> = {
 };
 
 export function CookieBanner() {
+  const routePath = useRouterState({select:state=>state.location.pathname});
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -175,8 +177,8 @@ export function CookieBanner() {
 
   if (!mounted) return null;
 
-  const isEnglish = window.location.pathname.startsWith("/en/");
-  const pathname = window.location.pathname.replace(/\/$/, "");
+  const isEnglish = routePath.startsWith("/en/");
+  const pathname = routePath.replace(/\/$/, "");
   const isAriaPreview = ["/test-aria", "/psia-skolka-kosice", "/psia-skolka-pre-steniatka"].includes(pathname);
 
   function save(next: Pick<Consent, "functional" | "analytics" | "marketing">) {

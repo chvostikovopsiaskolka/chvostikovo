@@ -347,7 +347,7 @@ export function FaqList({ items, source, homeLayout = false, campaign = false, l
               <FaqAnswer question={f.q} answer={f.a} />
               {campaign && f.href && <a href={f.href} className={"mt-4 inline-flex min-h-11 items-center justify-center text-center font-semibold " + (f.id === "puppies" ? "btn-coral w-full px-4 py-3" : "text-coral-dark underline underline-offset-2")}>{f.linkLabel}</a>}
               {homeLayout && (f.q === "Prijímate aj šteniatka?" || language === "en" && f.trackingId === 6) && (
-                <a href="#aria-puppy-check" onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker", language)} className="btn-coral mt-4 flex w-fit min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white">Overiť pripravenosť šteniatka</a>
+                <a href="#aria-puppy-check" onClick={() => void trackCookielessInteraction("explore_daycare", "home_requirements_puppy_checker", language)} className="btn-coral mt-4 flex w-fit min-h-11 items-center justify-center px-5 py-3 text-center text-sm font-bold text-white">{language === "en" ? "Check puppy readiness" : "Overiť pripravenosť šteniatka"}</a>
               )}
               {!campaign && language === "sk" && f.q === "Prijímate aj šteniatka?" && (
                 <a
