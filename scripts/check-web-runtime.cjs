@@ -30,17 +30,9 @@ const selectedEngines = engines.filter(([name]) => engineSelection === "all" || 
 function isPaidLeadFixture(page) { return new URL(page.url()).pathname==='/psia-skolka-kosice/'; }
 
 async function centerFixtureControl(control) {
-  if(!isPaidLeadFixture(control.page())){
-  await control.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
-  await control.page().evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
-
-    return;
-  }
   await control.evaluate(async el=>{
     const result=el.scrollIntoView({block:'center',behavior:'instant'});
     if(result&&typeof result.then==='function')await result;
-    // Safari returns undefined; root-scroll promises can also resolve early.
-    // Wait for measured geometry/scroll stability, not a guessed scroll duration.
     await new Promise((resolve,reject)=>{
       const started=performance.now();let stableSince=started,last=null;
       const settle=now=>{
@@ -48,8 +40,8 @@ async function centerFixtureControl(control) {
         const r=el.getBoundingClientRect(),current=[r.left,r.top,r.width,r.height,scrollX,scrollY];
         if(last&&current.some((value,index)=>Math.abs(value-last[index])>0.5))stableSince=now;
         last=current;
-        if(now-stableSince>=100){resolve();return;}
-        if(now-started>2500){reject(new Error('Fixture control did not settle before interaction'));return;}
+        if(now-stableSince>=150){resolve();return;}
+        if(now-started>3000){reject(new Error('Fixture control did not settle before interaction'));return;}
         requestAnimationFrame(settle);
       };
       requestAnimationFrame(settle);
@@ -58,38 +50,39 @@ async function centerFixtureControl(control) {
 }
 
 async function activateFixtureControl(control) {
-  await centerFixtureControl(control);
-  if(await control.page().evaluate(()=>navigator.maxTouchPoints>0)){
-    // Use the already-settled hit-tested point. Locator.tap would perform a
-    // second auto-scroll, which can race WebKit's native smooth scrolling.
-    const point=await control.evaluate(el=>{
+  const page=control.page();
+  // Native scroll triggered by Playwright's actionability check must not
+  // race the site's smooth anchor scrolling. Scope the override to fixture
+  // interaction only; keep real pointer input and native hit testing.
+  const prior=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const prior=[root.style.getPropertyValue('scroll-behavior'),root.style.getPropertyPriority('scroll-behavior')];
+    root.style.setProperty('scroll-behavior','auto','important');
+    return prior;
+  });
+  try {
+    await centerFixtureControl(control);
+    await control.evaluate(el=>{
       const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
       const hit=document.elementFromPoint(x,y);
       if(x<0||y<0||x>=innerWidth||y>=innerHeight||!hit||!el.contains(hit))
-        throw new Error('Fixture touch target is outside the viewport or occluded');
-      return {x,y};
+        throw new Error('Fixture touch target is outside the viewport or occluded: '+JSON.stringify({rect:r.toJSON(),hit:hit?.outerHTML?.slice(0,180)}));
     });
-    await control.page().touchscreen.tap(point.x,point.y);
-  }else await control.click();
+    // Let Playwright dispatch an actual touch action to the locator, not
+    // stale viewport coordinates. Its actionability check must pass.
+    if(await page.evaluate(()=>navigator.maxTouchPoints>0))await control.tap({timeout:5000});
+    else await control.click({timeout:5000});
+  }finally{
+    await page.evaluate(([value,priority])=>{
+      if(value)document.documentElement.style.setProperty('scroll-behavior',value,priority);
+      else document.documentElement.style.removeProperty('scroll-behavior');
+    },prior);
+  }
 }
 
 // Exercise the actual visible radio and next button; settle scrolling before
 // clicking so a moving viewport or fixed mobile dock cannot intercept it.
 async function advanceLeadContact(form) {
-  if(!isPaidLeadFixture(form.page())){
-  const choice=form.locator('label:has(input[name="zaujem"])').first();
-  await centerFixtureControl(choice);
-  await choice.click();
-  await form.locator('input[name="zaujem"]').first().evaluate(el=>{
-    if(!el.checked)throw new Error('Lead interest radio did not select');
-  });
-  const next=form.getByRole('button',{name:'Pokračovať',exact:true});
-  await centerFixtureControl(next);
-  await next.click();
-  await form.locator('h3').filter({hasText:'Kontaktné údaje'}).waitFor({state:'visible',timeout:5000});
-
-    return;
-  }
   const choice=form.locator('label:has(input[name="zaujem"])').first();
   await activateFixtureControl(choice);
   await form.locator('input[name="zaujem"]').first().evaluate(el=>{
@@ -2815,13 +2808,14 @@ if (!bellaris && brandPreviewCandidate) {
               if(!await owner.isVisible() || await application.locator('input[name="pes"]').isVisible()) throw new Error('Collapsed application preview fields incorrect');
               await centerFixtureControl(owner);
               await owner.fill('Testovacie meno');
-              await centerFixtureControl(toggle);
-              await centerFixtureControl(toggle);
-              await toggle.click();
+              // Dismiss the focused text input before testing the next touch;
+              // the virtual keyboard/focus scroll can otherwise move the target.
+              await owner.blur();
+              await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || !await application.getByRole('radio',{name:'Fena',exact:true}).count() || await owner.inputValue()!=='Testovacie meno' || await page.getByRole('dialog').count()) throw new Error('Inline application did not expand or retain owner data');
-              await centerFixtureControl(toggle);
-              await toggle.click();
+              await activateFixtureControl(toggle);
+              await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
               if(await application.locator('input[name="pes"]').isVisible() || await owner.inputValue()!=='Testovacie meno') throw new Error('Inline application collapse lost data');
               await owner.fill('');
               await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
@@ -3049,13 +3043,13 @@ if (!bellaris && brandPreviewCandidate) {
               // Verify the real inline registration, not a second form or modal.
               const application=page.locator('[data-home-friendship-form]');
               const toggle=application.locator('#home-friendship-application');
-              await centerFixtureControl(toggle);
-              await toggle.click();
+              await activateFixtureControl(toggle);
               await application.locator('input[name="pes"]').waitFor({state:'visible',timeout:5000});
               if(!await application.locator('input[name="pes"]').isVisible() || await application.locator('[data-lead-step-form]').count() || await page.getByRole('dialog').count()) throw new Error('Friendship must expand the existing application in-place');
               const fits=await application.evaluate(el=>{const b=el.getBoundingClientRect();return b.width<=innerWidth-16 && el.scrollWidth<=el.clientWidth+2 && (innerWidth<1024 || b.width>=800);});
               if(!fits)throw new Error('Inline application responsive width incorrect');
-              await toggle.click();
+              await activateFixtureControl(toggle);
+              await application.locator('input[name="pes"]').waitFor({state:'hidden',timeout:5000});
             }
           }
           if (errors.length) throw new Error(errors.join('; '));
@@ -3063,30 +3057,12 @@ if (!bellaris && brandPreviewCandidate) {
             // Freeze DOM indices instead of re-resolving a changing :visible list
             // while WebKit scrolls/paints the previously revealed homepage forms.
             const homeRoute=url.pathname==='/';
-            const forms=page.locator(homeRoute?'[data-lead-step-form]':'[data-lead-step-form]:visible');
-            const visibleIndices=homeRoute
-              ? await forms.evaluateAll(nodes=>nodes.flatMap((node,index)=>node.getClientRects().length&&node.getBoundingClientRect().height>0?[index]:[]))
-              : Array.from({length:await forms.count()},(_,index)=>index);
+            const forms=page.locator('[data-lead-step-form]');
+            const visibleIndices=await forms.evaluateAll(nodes=>nodes.flatMap((node,index)=>node.getClientRects().length&&node.getBoundingClientRect().height>0?[index]:[]));
             for(const i of visibleIndices){
               const form=forms.nth(i);
               if(await form.getAttribute('data-lead-step')==='1'){
-                if(homeRoute){
-                  // Real touch interaction on the mobile context. Wait for
-                  // React's enabled state, not only the native checked radio.
-                  const choice=form.locator('label:has(input[name="zaujem"])').first();
-                  await centerFixtureControl(choice);
-                  await choice.tap();
-                  const next=form.locator('button:not([disabled])').filter({hasText:/^Pokračovať$/});
-                  await next.waitFor({state:'visible',timeout:5000});
-                  if(!await form.locator('input[name="zaujem"]').first().isChecked())
-                    throw new Error('Shared form interest radio did not select');
-                  await centerFixtureControl(next);
-                  await next.tap();
-                  await form.locator('[role="progressbar"][aria-valuenow="2"]').waitFor({state:'visible',timeout:5000}).catch(async error=>{
-                    const details=await form.evaluate(el=>({step:el.dataset.leadStep,section:el.closest('section')?.id,selected:!!el.querySelector('input[name="zaujem"]:checked'),rect:el.getBoundingClientRect().toJSON()}));
-                    throw new Error('Homepage contact transition failed: '+JSON.stringify(details)+' '+String(error));
-                  });
-                }else if(url.pathname==='/psia-skolka-kosice/'){
+                if(homeRoute||isPaidLeadFixture(page)){
                   await advanceLeadContact(form);
                 }else{
                   await form.locator('label').first().click();
@@ -3095,7 +3071,7 @@ if (!bellaris && brandPreviewCandidate) {
               }
               await assertLeadContactIntro(form);
               const sharedBack=form.getByRole('button',{name:'Späť',exact:true});
-              if(homeRoute){await centerFixtureControl(sharedBack);await sharedBack.tap();}
+              if(homeRoute||isPaidLeadFixture(page))await activateFixtureControl(sharedBack);
               else await sharedBack.click();
               await form.getByRole('button',{name:'Pokračovať',exact:true}).waitFor({state:'visible',timeout:5000});
               if(await form.getAttribute('data-lead-step')!=='1')throw new Error('Shared form back failed');
