@@ -161,7 +161,8 @@ export function EnglishInquiryForm({
         </button>
       </div>
       <div className={step === 2 ? "space-y-3.5" : "hidden"} aria-hidden={step !== 2}>
-        <h3 className="font-display text-lg font-bold text-forest sm:text-xl">How can we contact you?</h3>
+        <h3 className="font-display text-lg font-bold leading-snug text-forest sm:text-xl">Contact details</h3>
+        <p className="text-sm leading-relaxed text-forest/70">Leave your contact details and we will get in touch.</p>
         <div>
           <label className="label-sm" htmlFor={`en-${formId}-name`}>Your name *</label>
           <input id={`en-${formId}-name`} name="name" autoComplete="name" required className="field" placeholder="Your name" />

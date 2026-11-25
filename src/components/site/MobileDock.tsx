@@ -52,8 +52,8 @@ export function MobileDock({ language = "sk", variant = "main", onApplicationOpe
     : english
     ? [{ id: "about", label: "About", icon: Users },
        { id: "pricing", label: "Prices", icon: Tag },
-       { id: "requirements", label: "Rules", icon: Heart },
-       { id: "interest", label: "Apply", icon: FilePenLine }]
+       { id: "interest", label: "Apply", icon: FilePenLine },
+       { id: "requirements", label: "Rules", icon: Heart }]
     : [{ id: "o-nas", label: "O nás", icon: Users },
        { id: "cennik", label: "Cenník", icon: Tag },
        { id: "podmienky", label: "Podmienky", icon: Heart },

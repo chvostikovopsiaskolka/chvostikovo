@@ -36,6 +36,7 @@ for (const raw of ["", "+421", "abc", "++421915349028", "+000000000", "+42191534
 
 const cases = [
   { name: "application_form", component: <LongForm />, path: "/", phoneId: "l-tel" },
+  { name: "application_form_en", component: <LongForm language="en" />, path: "/en/dog-daycare-kosice", phoneId: "l-tel" },
   ...["hero_desktop_inline", "care_inline_mobile", "care_modal", "story_modal", "informational_form"].map((name) => ({ name, component: <ShortForm trackingSource={name} />, path: "/", phoneId: "s-tel" })),
   ...["lead_landing_top", "lead_landing_mobile_below_hero", "lead_landing_bottom", "lead_landing_modal"].map((name) => ({ name, component: <ShortForm trackingSource={name} />, path: "/psia-skolka-kosice", phoneId: "s-tel" })),
   { name: "puppy_landing_form", component: <ShortForm trackingSource="puppy_landing_form" hideInterest interestValue="Mám záujem o škôlku pre šteniatko" />, path: "/psia-skolka-pre-steniatka", phoneId: "s-tel" },
@@ -47,6 +48,8 @@ const cases = [
     ["guided_dog_sitting", "dog_sitting_page_inline", "/strazenie-psov-kosice"],
   ].map(([name, source, path]) => ({ name, component: <LeadStepForm trackingSource={source} />, path, phoneId: "lead-step-tel" })),
   { name: "english_page", component: <EnglishInquiryForm />, path: "/en/dog-daycare-kosice", phoneId: "en-phone" },
+  ...["en_hero_mobile_form","en_hero_desktop_inline","en_first_visit","en_contact"].map(name=>({name,component:<EnglishInquiryForm trackingSource={name} />,path:"/en/dog-daycare-kosice",phoneId:"en-phone"})),
+  { name: "guided_puppy_en", component: <LeadStepForm language="en" trackingSource="home_puppy_checker_eligible" />, path: "/en/dog-daycare-kosice", phoneId: "lead-step-tel" },
 ];
 let requests: Array<{ url: string; body: any }> = [];
 const originalFetch = globalThis.fetch;
@@ -66,6 +69,9 @@ try {
     dom.sessionStorage.clear();
     consent(marketing);
     requests = [];
+    const pixelCalls: any[][] = []; const gaCalls: any[][] = [];
+    (dom as any).fbq = (...args:any[]) => pixelCalls.push(args);
+    (dom as any).gtag = (...args:any[]) => gaCalls.push(args);
     const container = dom.document.createElement("div");
     dom.document.body.append(container);
     const root = createRoot(container as any);
@@ -140,6 +146,14 @@ try {
     assert(events.some((r) => r.body.event_name === "form_submit"), `${test.name}: form_submit missing`);
     assert.equal(events.find((r) => r.body.event_name === "form_submit")!.body.attempt_id, attempt.body.attempt_id);
     assert(!events.some((r) => r.body.event_name === "form_error"));
+    if(test.path.startsWith("/en/")) {
+      assert.equal(attempt.body.language,"en", "EN attempt language");
+      assert.equal(events.find(r=>r.body.event_name==="form_submit")?.body.language,"en");
+      const conversions=pixelCalls.filter(args=>args[0]==="track" && ["Lead","CompleteRegistration"].includes(args[1]));
+      assert.equal(conversions.length,marketing?1:0,"EN Pixel must respect consent and emit exactly one conversion");
+      if(marketing) {assert.equal(conversions[0]![1],test.name==="application_form_en"?"CompleteRegistration":"Lead");assert.equal(conversions[0]![3]?.eventID,submission[0]!.body.meta_event_id,"Pixel/CAPI event ID must match");}
+      if(test.name==="application_form_en") assert.equal(submission[0]!.body.form_type,"application");
+    }
     assert(!container.querySelector("form"), `${test.name}: success UI missing`);
     if(test.name === "application_form") assert(container.textContent?.includes("Je toto telefónne číslo správne?"), "Application must display the same phone confirmation");
 

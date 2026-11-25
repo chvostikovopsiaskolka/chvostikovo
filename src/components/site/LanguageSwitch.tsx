@@ -9,8 +9,8 @@ export function LanguageSwitch({ language, onNavigate, source = "language_switch
         <Link key={code} to={to} preload="intent" lang={code} hrefLang={code}
           aria-label={label} aria-current={code === language ? "page" : undefined}
           onClick={(event) => { if (code !== language && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { void trackCookielessInteraction("nav_click", source + "_" + code, language); onNavigate?.(); } }}
-          className={"inline-flex min-h-11 lg:min-h-9 min-w-10 items-center justify-center rounded-full px-2.5 font-display text-xs font-bold transition-colors motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral " +
-            (code === language ? "bg-coral text-white shadow-sm" : "text-forest/80 hover:text-forest")}>
+          className={"inline-flex min-h-11 lg:min-h-9 min-w-11 lg:min-w-10 items-center justify-center rounded-full px-2.5 font-display text-xs font-bold transition-colors motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral " +
+            (code === language ? "bg-[#ffa414] text-[#26322b] shadow-sm" : "text-forest/80 hover:text-forest")}>
           {code.toUpperCase()}
         </Link>
       ))}

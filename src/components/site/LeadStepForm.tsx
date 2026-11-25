@@ -132,7 +132,7 @@ export function LeadStepForm({ trackingSource, onSent, questionInHeading = false
         {receipt && <LeadPhoneReceipt initialPhone={receipt.phone} correctionAuth={receipt.auth} language={language} />}
         {!chatReceipt && <div data-lead-success-links className="mt-2 flex flex-wrap justify-center gap-3 text-sm font-semibold text-forest">
           <a href={t("/#podmienky","/en/dog-daycare-kosice#requirements")} onClick={() => void trackCookielessInteraction("success_conditions_click", trackingSource, language)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-forest/20 bg-white px-4 py-2 text-forest shadow-sm hover:bg-secondary/55 focus-visible:outline-2 focus-visible:outline-coral">{t("Podmienky prijatia","Admission requirements")}</a>
-          <a href={t("/#cennik","/en/dog-daycare-kosice#pricing")} onClick={() => void trackCookielessInteraction("success_pricing_click", trackingSource)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-forest/20 bg-white px-4 py-2 text-forest shadow-sm hover:bg-secondary/55 focus-visible:outline-2 focus-visible:outline-coral">{t("Cenník","Prices")}</a>
+          <a href={t("/#cennik","/en/dog-daycare-kosice#pricing")} onClick={() => void trackCookielessInteraction("success_pricing_click", trackingSource, language)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-forest/20 bg-white px-4 py-2 text-forest shadow-sm hover:bg-secondary/55 focus-visible:outline-2 focus-visible:outline-coral">{t("Cenník","Prices")}</a>
         </div>}
       </div>
     );

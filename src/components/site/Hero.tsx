@@ -84,7 +84,7 @@ export function Hero({ onMobileInquiryOpen, mobileInquiryOpen, language = "sk" }
           <div id="home-hero-inline-form" className="min-w-0">
             <SchoolmatesFormCrown compact />
             <div data-lead-form-shell data-home-form-panel className="form-liquid-surface rounded-4xl border border-white/50 bg-card/20 px-8 pt-9 pb-8 shadow-soft ring-1 ring-forest/8 backdrop-blur-[1px]">
-              <h2 data-lead-form-intro className="text-center text-xl text-forest sm:whitespace-nowrap">
+              <h2 data-lead-form-intro className={"text-center text-xl text-forest " + (language === "sk" ? "sm:whitespace-nowrap" : "")}>
                 {t("Čo hľadáte pre svojho psíka?", "What are you looking for for your dog?")}
               </h2>
               <p data-lead-form-intro className="mt-2 mb-4 text-center text-sm text-muted-foreground">
