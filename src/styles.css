@@ -1329,13 +1329,15 @@
 .site-brand .bg-forest [class*="border-cream"] { border-color: rgb(38 50 43 / 25%); }
 .site-brand .bg-forest > svg { color: rgb(255 164 20 / 30%); }
 .site-brand #preco .bg-forest,
-.site-brand #preco-chvostikovo { background-color: rgb(255 164 20 / 26%); }
-.site-brand #preco-chvostikovo [data-video-reasons-grid],
-.site-brand #preco-chvostikovo [data-video-reasons-copy] { background-color: #fff; }
+.site-brand :is(#preco-chvostikovo,#en-benefits) { background-color: rgb(255 164 20 / 26%); }
+.site-brand :is(#preco-chvostikovo,#en-benefits) [data-video-reasons-grid],
+.site-brand :is(#preco-chvostikovo,#en-benefits) [data-video-reasons-copy] { background-color: #fff; }
 @media (min-width: 640px) {
-  .site-brand #preco-chvostikovo [data-video-reasons-grid] { background-color: transparent; }
+  .site-brand :is(#preco-chvostikovo,#en-benefits) [data-video-reasons-grid] { background-color: transparent; }
 }
-.site-brand #preco-chvostikovo [class*="text-cream"] { color: #26322b; }
+.site-brand :is(#preco-chvostikovo,#en-benefits) [class*="text-cream"] { color: #26322b; }
+/* Decorations stay outside the heading and retain their ambient tint in both languages. */
+.site-brand :is(#preco-chvostikovo,#en-benefits) > svg[aria-hidden="true"] { color: rgb(255 164 20 / 25%); }
 .site-brand [data-aria-friendship-card],
 .site-brand #home-hero-inline-form > div { background-color: #fff; }
 .site-brand .home-hero-copy {
@@ -1388,7 +1390,7 @@
   stroke-linejoin: round;
 }
 .site-brand .text-coral { color: #a95400; }
-.site-brand #preco-chvostikovo .bg-coral { color: #26322b; }
+.site-brand :is(#preco-chvostikovo,#en-benefits) .bg-coral { color: #26322b; }
 .site-brand [data-lead-step-form] input[type="radio"] + span {
   background-color: #fff0d5;
   color: #26322b;
@@ -1817,9 +1819,9 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .mobile-dock .mobile-dock-compact-menu {
     grid-column: 1 / -1;
     display: flex; flex-direction: row; align-items: center;
-    padding: 0 2px 3px; gap: 2px; min-width: 0;
+    padding: 0 2px; gap: 2px; min-width: 0;
     border-bottom: 1px solid rgb(38 50 43 / 12%);
-    margin-bottom: 3px;
+    margin-bottom: 1px;
   }
   .mobile-dock-compact-links { display: grid; flex: 1; min-width: 0; grid-template-columns: minmax(0,1.18fr) minmax(0,1fr); gap: 2px; }
   .mobile-dock-compact-links a, .mobile-dock-compact-phone { display: flex; align-items: center; justify-content: center; gap: 3px; min-width: 0; min-height: 44px; border-radius: 14px; padding: 2px; color: var(--forest-deep); text-decoration: none; }
@@ -1827,11 +1829,57 @@ body.site-brand:has(#top) #home-hero-learn-more:is(:hover, :active) {
   .mobile-dock-compact-links a span { min-width: 0; font-family: var(--font-display); font-size: clamp(9px,2.8vw,13px); font-weight: 650; line-height: 1.12; overflow-wrap: anywhere; }
   .mobile-dock-compact-links svg { flex-shrink: 0; width: clamp(13px,3.8vw,17px); height: auto; }
   .mobile-dock-compact-links a:hover, .mobile-dock-compact-phone:hover { background: var(--peach); }
-  .mobile-dock-compact-menu > [data-language-switch] { padding: 1px; }
+  .mobile-dock-compact-menu > [data-language-switch] { padding: 0; }
   .mobile-dock-compact-menu > [data-language-switch] a { padding-inline: 0; min-width: 44px; min-height: 44px; }
   .site-brand #top .home-hero-cta { max-width: 280px; }
   .site-brand #top [data-home-hero-interest-cta] { font-size: clamp(12px, 3.5vw, 16px); padding-inline: 7px; }
 
+}
+
+/* A top-biased crop moves the collies down inside the existing frame.
+   The full-resolution lightbox and all other images retain their framing. */
+.site-brand #top [data-home-hero-photo="1"] img,
+.lead-brand-live [data-aria-lead-highlight="1"] img { object-position: 50% 20%; }
+
+/* Subtle static liquid surface, secondary row stays compact and usable. */
+@media (max-width: 1023px) {
+  body.site-brand:has(#top) .mobile-dock[data-home-dock] .mobile-dock-bar {
+    background-color: rgb(255 252 241 / 91%);
+    background-image: linear-gradient(155deg, rgb(255 255 255 / 62%), transparent 55%), radial-gradient(ellipse at 100% 0%, rgb(255 164 20 / 9%), transparent 65%);
+    -webkit-backdrop-filter: blur(18px) saturate(1.28);
+    backdrop-filter: blur(18px) saturate(1.28);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 85%);
+  }
+  .mobile-dock[data-home-dock] .mobile-dock-compact-links a,
+  .mobile-dock[data-home-dock] .mobile-dock-compact-phone { padding-block: 0; }
+  @media (prefers-reduced-transparency: reduce) {
+    body.site-brand:has(#top) .mobile-dock[data-home-dock] .mobile-dock-bar { background: #fffcf1; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  }
+  @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    body.site-brand:has(#top) .mobile-dock[data-home-dock] .mobile-dock-bar { background: #fffcf1; }
+  }
+}
+.lead-brand-live [data-aria-back-top] { display: none; }
+@media (max-width: 1023px) {
+  .lead-brand-live [data-aria-back-top] {
+    display: grid; position: absolute; left: 0; bottom: calc(12px + 104px + 6px);
+    width: 44px; height: 44px; padding: 0; place-items: center;
+    border: 0; border-radius: 999px; background: rgb(255 252 241 / 82%); color: #26322b;
+    box-shadow: 0 4px 13px rgb(30 65 49 / 14%);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    pointer-events: auto; touch-action: manipulation;
+    transition: opacity 150ms ease, transform 150ms ease, visibility 150ms;
+  }
+  .lead-brand-live [data-aria-back-top][data-visible="false"],
+  body:has([data-form-dialog], [role="dialog"][data-state="open"]) [data-aria-back-top] {
+    visibility: hidden; opacity: 0; pointer-events: none; transform: translateY(5px);
+  }
+  .lead-brand-live [data-aria-back-top]:focus-visible { outline: 2px solid #26322b; outline-offset: 2px; }
+  @media (max-width: 639px) {
+    .lead-brand-live [data-aria-back-top] { bottom: calc(12px + clamp(60px, calc(20vw - 4px), 84px) + 6px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .lead-brand-live [data-aria-back-top] { transition: none; } }
+  @media (prefers-reduced-transparency: reduce) { .lead-brand-live [data-aria-back-top] { background: #fffcf1; -webkit-backdrop-filter: none; backdrop-filter: none; } }
 }
 
 /* HOME desktop dock: shared SK/EN controls, two rows, no duplicate header.

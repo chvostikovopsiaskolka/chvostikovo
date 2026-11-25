@@ -359,6 +359,25 @@ async function assertCampaignContentFlow(page, {visualOnly=false}={}) {
     if(!fold.galleryEdge||!fold.mobileOrder||!fold.admissionClear||!fold.locationBold||!fold.hoursRemoved||!fold.desktop||!fold.pairedBenefits||!fold.cards||!fold.cleanSections||!fold.certificateWidth||fold.pillCount!==3||!fold.pillBg||fold.overflow||!fold.dockInside||!fold.widget||fold.actionBg!=='rgb(255, 164, 20)'||fold.actionFg!=='rgb(255, 255, 255)'||!fold.pillBold||fold.pillGap<5||!fold.photoCrop||!fold.greetingFit||!fold.compactLauncher||width<640&&(!fold.galleryBelow||fold.reviewGap<24)||fold.ctaHeight<44||
       (width<640&&(!fold.visible||fold.pillRows>2)))throw new Error('Campaign first fold '+width+'x'+height+': '+JSON.stringify(fold));
   }
+  // Paid-only scroll shortcut: same-document scroll, no chat open or CTA conversion.
+  await page.setViewportSize({width:390,height:844});
+  const back=page.locator('[data-aria-back-top]');
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await back.waitFor({state:'hidden'});
+  await page.waitForFunction(()=>window.scrollY<5);
+  await page.evaluate(()=>window.scrollTo({top:650,behavior:'instant'}));
+  await page.waitForFunction(()=>window.scrollY>160);
+  await back.waitFor({state:'visible',timeout:4000});
+  const arrowGeometry=await back.evaluate(el=>{const a=el.getBoundingClientRect(),p=document.querySelector('[data-aria-chat-trigger]').getBoundingClientRect();return a.height>=44&&a.width>=44&&a.bottom<=p.top-4&&Math.abs(a.left-p.left)<=2&&a.top>=0;});
+  if(!arrowGeometry)throw new Error('Return arrow must sit above Aria without covering her');
+  await page.evaluate(()=>window.scrollTo({top:450,behavior:'instant'}));
+  await back.waitFor({state:'visible'});
+  // Fixed shortcut must be hit directly without centering/scrolling the document.
+  await back.evaluate(el=>{const r=el.getBoundingClientRect();if(!el.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)))throw new Error('Aria return arrow is occluded');});
+  if(await page.evaluate(()=>navigator.maxTouchPoints>0))await back.tap({timeout:5000});else await back.click({timeout:5000});
+  await page.waitForFunction(()=>window.scrollY<5);
+  await back.waitFor({state:'hidden'});
+  if(await page.locator('[data-aria-chat-trigger]').getAttribute('aria-expanded')!=='false')throw new Error('Return arrow must not open chat');
   if(await page.locator('#lead-requirements h2').innerText()!=='Podmienky prijatia psíka')throw new Error('Campaign conditions heading differs');
   if(visualOnly){
     await page.setViewportSize({width:390,height:844});
@@ -617,7 +636,9 @@ async function assertCompactHomeMenu(page,en) {
       dialog:!!nav.querySelector('button[aria-haspopup="dialog"]'),reserve:parseFloat(getComputedStyle(document.body).paddingBottom)};
   });
   const main=en?['Home','About','Prices','Rules','Apply']:['Domov','O nás','Cenník','Podmienky','Produkty','Prihláška'];
-  if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>60||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  if(JSON.stringify(state.hrefs)!==JSON.stringify(['#aria-puppy-check','#faq'])||JSON.stringify(state.labels)!==JSON.stringify(en?['Have a puppy?','FAQ']:['Máte šteniatko?','Časté otázky'])||JSON.stringify(state.main)!==JSON.stringify(main)||!state.targets||!state.inside||!state.noOverflow||state.arrow||state.dialog||state.height>46||state.total>130||state.reserve<state.total||!state.phone?.startsWith('tel:'))throw new Error('Permanent home navigation '+JSON.stringify(state));
+  const details=await page.evaluate(()=>{const section=document.querySelector('#preco-chvostikovo,#en-benefits');const title=section.querySelector('h2');const heading=title.getBoundingClientRect();const paws=[...section.querySelectorAll(':scope > svg[aria-hidden="true"]')];const crop=[...document.querySelectorAll('[data-home-hero-photo] img')].map(img=>getComputedStyle(img).objectPosition);return {clear:paws.length===4&&paws.every(el=>{const p=el.getBoundingClientRect();return p.right<=heading.left||p.left>=heading.right||p.bottom<=heading.top||p.top>=heading.bottom;}),crop,glass:getComputedStyle(document.querySelector('.mobile-dock[data-home-dock] .mobile-dock-bar')).backgroundImage};});
+  if(!details.clear||details.crop[0]!=='50% 20%'||details.crop[1]!=='50% 50%'||!details.glass.includes('gradient'))throw new Error('Localized heading / image / liquid regression '+JSON.stringify(details));
   if(await page.locator('[data-home-hero-phone]').count())throw new Error('Duplicate mobile Hero phone');
   if(!await page.evaluate(()=>!!(document.querySelector('[data-home-puppy-checker]')?.compareDocumentPosition(document.querySelector('[data-home-pricing-columns]'))&Node.DOCUMENT_POSITION_FOLLOWING)))throw new Error('Puppy checker must precede pricing');
 }
@@ -3057,7 +3078,7 @@ async function assertBilingualNavigation(browser,engine) {
                     singleHomeFaq:!document.getElementById('home-early-faq') && faq.querySelectorAll('button[aria-expanded]').length===8 && !faq.querySelector('a[href="/caste-otazky"]') && !!faq.querySelector('[data-home-faq-contact]') && [...faq.querySelectorAll('button')].some(b=>b.textContent.includes('Pre koho je škôlka určená?')) && !document.querySelector('#starostlivost button[aria-expanded]') && !document.querySelector('#podmienky a[href="#aria-puppy-check"]'),
                     applicationAfterPricing:document.getElementById('cennik').nextElementSibling?.id==='psie-priatelstva' && document.querySelector('[data-home-puppy-checker]').nextElementSibling?.id==='cennik' && document.getElementById('psie-priatelstva').nextElementSibling?.id==='podmienky' && document.querySelectorAll('#aria-puppy-check').length===1,
                     orangeRequirementHeadings:[...document.querySelectorAll('#podmienky article h3')].every(el=>getComputedStyle(el).color==='rgb(255, 164, 20)'),
-                    approvedMainDock:(()=>{const style=getComputedStyle(dock.querySelector('.mobile-dock-bar'));return innerWidth<1024?style.boxShadow==='none':style.boxShadow.includes('inset');})(),
+                    liquidMainDock:(()=>{const style=getComputedStyle(dock.querySelector('.mobile-dock-bar'));const mobile=innerWidth<1024;const fallback=matchMedia('(prefers-reduced-transparency: reduce)').matches||!(CSS.supports('backdrop-filter','blur(1px)')||CSS.supports('-webkit-backdrop-filter','blur(1px)'));return mobile&&!fallback?style.backgroundImage.includes('gradient')&&/blur\(/.test(style.backdropFilter||style.webkitBackdropFilter||'')&&style.boxShadow.includes('inset'):style.boxShadow==='none'||style.boxShadow.includes('inset');})(),
                     mainMenuOrder:[...dock.querySelectorAll('.mobile-dock-bar > a')].map(el=>el.getAttribute('href')).join('|')==='/|/#o-nas|/#cennik|/#podmienky|/produkty' && dock.querySelector('.mobile-dock-apply')?.textContent.includes('Prihláška'),
                     benefitChipsSingleRow:benefitPills.length===3 && benefitPills.every(r=>Math.abs(r.top-benefitPills[0].top)<2),
                     certs:document.querySelectorAll('#o-nas [data-safety-certificates] img').length===2 &&
