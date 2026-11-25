@@ -59,7 +59,7 @@ export const blogArticles: BlogArticleData[] = [
         heading: "Aké možnosti máte, keď ste v práci?",
         paragraphs: [
           "Najjednoduchšou pomocou môže byť člen rodiny alebo známy, ktorého pes pozná. Pri pravidelnom režime môže stačiť aj dohodnuté venčenie v priebehu dňa. Individuálne opatrovanie poskytuje pokojnejšie prostredie, keď psovi veľká skupina nevyhovuje.",
-          "Psia škôlka je iná možnosť: pes trávi čas pod dohľadom ľudí a, ak mu to vyhovuje, aj v spoločnosti ďalších psov. Nemá to však byť nepretržitá hra. Dobrý denný program počíta aj s prestávkami a oddychom."
+          "Psia škôlka je iná možnosť: pes trávi čas pod dohľadom ľudí a, ak mu to vyhovuje, aj v spoločnosti ďalších psov. Nemá to však byť nepretržitá hra. Dobrý denný program počíta aj s **prestávkami a oddychom**."
         ],
         points: [
           "Rodina alebo známy: známe prostredie a človek, ktorému pes dôveruje.",
@@ -128,7 +128,7 @@ export const blogArticles: BlogArticleData[] = [
         heading: "Ako spoznáte, že mu režim vyhovuje?",
         paragraphs: [
           "Zaujímajte sa o to, ako psík počas dňa odpočíva, či sa dokáže upokojiť a ako reaguje na ostatných. Aj unavený pes môže mať za sebou priveľa podnetov; samotné vyčerpanie nie je meradlom dobrého dňa. Dôležitejší je celkový komfort a ochota opäť prísť.",
-          "Ak premýšľate, či by bola psia škôlka vhodná aj pre vášho psa, ozvite sa nám. Počas úvodnej návštevy sa spolu rozhodneme, či je Chvostíkovo správna voľba."
+          "Ak premýšľate, či by bola psia škôlka **vhodná aj pre vášho psa**, ozvite sa nám. Počas úvodnej návštevy sa spolu rozhodneme, či je Chvostíkovo správna voľba."
         ]
       }
     ]
@@ -157,36 +157,36 @@ export const blogArticles: BlogArticleData[] = [
       {
         "heading": "Misky na jednom mieste – osobný barový pultík",
         "paragraphs": [
-          "Keď má každá miska vlastné miesto v jednom pevnom podstavci, pri bežnom jedení a pití sa neposúva samostatne po podlahe. Pre domácnosť je to jednoduchšia organizácia: jedlo aj voda sú na známom mieste a okolie misiek sa ľahšie udržiava.",
+          "Keď má každá miska vlastné miesto v jednom pevnom podstavci, pri bežnom jedení a pití sa neposúva samostatne po podlahe. Pre domácnosť je to **jednoduchšia organizácia**: jedlo aj voda sú na známom mieste a okolie misiek sa ľahšie udržiava.",
           "Pes môže pri pití stále kvapkať vodu alebo vysypať pár granúl. Stojan však pomáha obmedziť posúvanie samotných misiek a udržiavať kŕmne miesto prehľadnejšie — bez sľubov, že okolo neho nikdy nebude ani kvapka."
         ]
       },
       {
         "heading": "Jednoduché čistenie bez zložitého rozoberania",
         "paragraphs": [
-          "Dve nerezové misky sa dajú vybrať a umyť samostatne. Drevený stojan má vodeodolne ošetrený povrch, ktorý lepšie znáša bežné kvapky a vlhkosť pri pití; na každodenné čistenie ho stačí utrieť vlhkou handričkou. Vodeodolná povrchová úprava však neznamená, že drevo je určené na dlhodobé máčanie alebo umývanie pod tečúcou vodou.",
-          "Vyberateľné misky zjednodušujú hygienu pri každodennom kŕmení. Misky odporúčame pravidelne čistiť a rozliatu vodu zo stojana zotrieť, aby si drevo zachovalo pekný vzhľad."
+          "**Dve nerezové misky** sa dajú vybrať a umyť samostatne. Drevený stojan má **vodeodolne ošetrený povrch**, ktorý lepšie znáša bežné kvapky a vlhkosť pri pití; na každodenné čistenie ho stačí utrieť vlhkou handričkou. Vodeodolná povrchová úprava však neznamená, že drevo je určené na dlhodobé máčanie alebo umývanie pod tečúcou vodou.",
+          "**Vyberateľné misky** zjednodušujú hygienu pri každodennom kŕmení. Misky odporúčame pravidelne čistiť a rozliatu vodu zo stojana zotrieť, aby si drevo zachovalo pekný vzhľad."
         ]
       },
       {
         "heading": "Pre menších aj veľkých psov – poznáme vlkodava aj barzoja",
         "paragraphs": [
-          "V Chvostíkove máme skúsenosti aj s vlkodavom a barzojom. Pri takýchto psoch si človek uvedomí, že malá miska a univerzálny rozmer nemusia stačiť. Preto ponúkame menší i väčší pôdorys stojana a pri výrobe sa zaujímame o konkrétneho psíka, jeho veľkosť a spôsob kŕmenia.",
-          "Veľkosť psa sama osebe nie je dôvod zdvihnúť misky čo najvyššie. Pri veľkých a hlbokohruďových plemenách môže byť zvýšené kŕmenie dokonca rizikovým faktorom torzie žalúdka. Preto netvrdíme, že vyšší stojan je automaticky zdravší: výška má rešpektovať individuálne potreby psa a prípadné veterinárne odporúčanie."
+          "V Chvostíkove máme skúsenosti aj s vlkodavom a barzojom. Pri takýchto psoch si človek uvedomí, že malá miska a univerzálny rozmer nemusia stačiť. Preto ponúkame menší i väčší pôdorys stojana a pri výrobe sa zaujímame o **konkrétneho psíka**, jeho veľkosť a spôsob kŕmenia.",
+          "Veľkosť psa sama osebe nie je dôvod zdvihnúť misky čo najvyššie. Pri veľkých a hlbokohruďových plemenách môže byť zvýšené kŕmenie dokonca rizikovým faktorom torzie žalúdka. Preto netvrdíme, že vyšší stojan je automaticky zdravší: výška má rešpektovať **individuálne potreby psa** a prípadné **veterinárne odporúčanie**."
         ]
       },
       {
         "heading": "Kedy môže byť vyvýšené kŕmenie individuálne potrebné?",
         "paragraphs": [
           "Poznáme aj prípad psíka, ktorý po operácii spojenej s refluxom potrebuje jesť z vyvýšenej misky. To je úplne iná situácia než preventívne zvyšovanie misiek každému veľkému psovi. Pri niektorých ochoreniach pažeráka alebo po konkrétnych zákrokoch môže veterinár predpísať presnú polohu pri kŕmení — a vtedy je dôležité prispôsobiť sa jeho pokynom.",
-          "Samotný drevený stojan nie je liečba refluxu a nenahrádza špeciálne pomôcky na kŕmenie vo vzpriamenej polohe. Ak sa psíkovi vracia jedlo späť, opakovane vracia alebo má iné ťažkosti, vhodný spôsob a výšku kŕmenia musí určiť veterinár. Ak ide o individuálne odporúčanie po operácii, pri dopyte nám môžete povedať požadovaný rozmer a spolu preveríme možnosti výroby."
+          "Samotný drevený stojan nie je liečba refluxu a **nenahrádza špeciálne pomôcky** na kŕmenie vo vzpriamenej polohe. Ak sa psíkovi vracia jedlo späť, opakovane vracia alebo má iné ťažkosti, vhodný spôsob a výšku kŕmenia musí určiť veterinár. Ak ide o individuálne odporúčanie po operácii, pri dopyte nám môžete povedať požadovaný rozmer a spolu preveríme možnosti výroby."
         ]
       },
       {
         "heading": "Poctivá výroba, osobné detaily a vianočný darček",
         "paragraphs": [
-          "Naše stojany nie sú výsledkom pásovej výroby. Každý kus skladáme a dokončujeme ručne, s dôrazom na pevné spracovanie, ošetrený drevený povrch a jednoduchú údržbu. Môžete si zvoliť farebné prevedenie, meno psíka aj farbu písmen. Výška a rozmery sa riešia podľa konkrétnej objednávky a možností výroby.",
-          "Personalizovaný stojan môže byť praktický darček pre psa aj jeho majiteľa, napríklad pod vianočný stromček. Ručná výroba však vyžaduje čas, preto si dostupnosť vybraného prevedenia a termín doručenia overte vopred. Objednávku vybavujeme nezáväzným dopytom, nie automatickou platbou v košíku."
+          "Naše stojany nie sú výsledkom pásovej výroby. **Každý kus skladáme a dokončujeme ručne**, s dôrazom na pevné spracovanie, ošetrený drevený povrch a jednoduchú údržbu. Môžete si zvoliť **farebné prevedenie, meno psíka aj farbu písmen**. Výška a rozmery sa riešia podľa konkrétnej objednávky a možností výroby.",
+          "**Personalizovaný stojan** môže byť praktický darček pre psa aj jeho majiteľa, napríklad pod vianočný stromček. Ručná výroba však vyžaduje čas, preto si dostupnosť vybraného prevedenia a termín doručenia overte vopred. Objednávku vybavujeme **nezáväzným dopytom**, nie automatickou platbou v košíku."
         ]
       }
     ],
@@ -238,36 +238,36 @@ export const blogArticles: BlogArticleData[] = [
       {
         "heading": "1. Najskôr jeden dobrovoľný dotyk labkou",
         "paragraphs": [
-          "Target položte na stabilný nešmykľavý povrch. Nechajte psa, aby si pomôcku očuchal, a odmeňte záujem. Keď sa labkou dotkne plochy, označte správny okamih a odmeňte ho. Cieľom nie je psa nasilu postaviť na podložku, ale naučiť ho samostatne ponúknuť jednoduchý pohyb.",
-          "Začínajte s krátkymi sériami a pokojne sa vráťte o krok späť, ak pes zaváha. Nech je učenie zrozumiteľné a dobrovoľné."
+          "Target položte na **stabilný nešmykľavý povrch**. Nechajte psa, aby si pomôcku očuchal, a **odmeňte záujem**. Keď sa labkou dotkne plochy, označte správny okamih a odmeňte ho. Cieľom nie je psa nasilu postaviť na podložku, ale naučiť ho samostatne ponúknuť jednoduchý pohyb.",
+          "Začínajte s **krátkymi sériami** a pokojne sa vráťte o krok späť, ak pes zaváha. Nech je učenie zrozumiteľné a dobrovoľné."
         ]
       },
       {
         "heading": "2. Rehabilitácia, fyzioterapia a držanie tela",
         "paragraphs": [
-          "Pri niektorých veterinárnych rehabilitačných a fyzioterapeutických plánoch sa používajú pevné plošiny na presné umiestnenie labiek. Odborník môže s ich pomocou viesť kontrolované prenášanie váhy, stabilitu postoja a vhodné posilňovacie cviky. Konkrétna poloha labiek, výška a počet opakovaní závisia od diagnózy a možností psa.",
-          "Náš pevný target nie je zdravotnícka pomôcka s preukázaným liečebným účinkom a nezaručuje spevnenie svalstva ani správny postoj sám osebe. Po operácii, pri bolesti či problémoch s pohybom vyberajte cvičenia výhradne podľa veterinára alebo kvalifikovaného fyzioterapeuta pre zvieratá."
+          "Pri niektorých veterinárnych rehabilitačných a fyzioterapeutických plánoch sa používajú pevné plošiny na **presné umiestnenie labiek**. Odborník môže s ich pomocou viesť kontrolované prenášanie váhy, stabilitu postoja a vhodné posilňovacie cviky. Konkrétna poloha labiek, výška a počet opakovaní závisia od diagnózy a možností psa.",
+          "Náš pevný target nie je zdravotnícka pomôcka s preukázaným liečebným účinkom a nezaručuje spevnenie svalstva ani správny postoj sám osebe. Po operácii, pri bolesti či problémoch s pohybom vyberajte cvičenia **výhradne podľa veterinára alebo kvalifikovaného fyzioterapeuta** pre zvieratá."
         ]
       },
       {
         "heading": "3. Poslušnosť a zotrvanie na mieste",
         "paragraphs": [
-          "V každodennom tréningu môže target slúžiť ako jasne označené miesto pre jednu alebo dve labky. Najskôr odmeňte dobrovoľný dotyk, potom pridajte jednoduchý povel a pomaly predlžujte čas, počas ktorého psík labku na mieste ponechá. Na konci ho zreteľným slovom uvoľnite.",
-          "Takto môžete trénovať pokoj, sústredenie a zotrvanie na určenom mieste. Náš nízky target však nie je plošina na státie celým telom pre každého psa: rozsah cviku vždy prispôsobte rozmerom pomôcky a veľkosti labiek."
+          "V každodennom tréningu môže target slúžiť ako jasne označené miesto pre jednu alebo dve labky. Najskôr odmeňte **dobrovoľný dotyk**, potom pridajte jednoduchý povel a pomaly predlžujte čas, počas ktorého psík labku na mieste ponechá. Na konci ho zreteľným slovom uvoľnite.",
+          "Takto môžete trénovať **pokoj, sústredenie a zotrvanie na určenom mieste**. Náš nízky target však nie je plošina na státie celým telom pre každého psa: rozsah cviku vždy prispôsobte rozmerom pomôcky a veľkosti labiek."
         ]
       },
       {
         "heading": "Ktorú veľkosť si vybrať?",
         "paragraphs": [
-          "Veľký obdĺžnikový target má rozmery približne 40 × 20 cm, stredný 30 × 15 cm a malý štvorcový približne 25 × 25 cm. Výber závisí od veľkosti labiek a konkrétneho cviku, nie iba od hmotnosti psa. Protišmyková plocha pomáha s kontaktom labky, ale podložka musí stáť na stabilnej podlahe.",
-          "Štandardná výška je približne 5 cm; po dohode vieme prispôsobiť výšku aj rozmery podľa vašich požiadaviek. Pokiaľ s targetom len začínate, zvyčajne je rozumnejší jednoduchý nízky cvik než vysoké zdvíhanie labiek."
+          "Veľký obdĺžnikový target má rozmery približne **40 × 20 cm**, stredný **30 × 15 cm** a malý štvorcový približne 25 × 25 cm. Výber závisí od veľkosti labiek a konkrétneho cviku, nie iba od hmotnosti psa. Protišmyková plocha pomáha s kontaktom labky, ale podložka musí stáť na stabilnej podlahe.",
+          "**Štandardná výška je približne 5 cm**; po dohode vieme **prispôsobiť výšku aj rozmery** podľa vašich požiadaviek. Pokiaľ s targetom len začínate, zvyčajne je rozumnejší jednoduchý nízky cvik než vysoké zdvíhanie labiek."
         ]
       },
       {
         "heading": "Praktický darček pre ľudí, ktorí so psom radi pracujú",
         "paragraphs": [
-          "Ak poznáte niekoho, kto sa venuje tréningu, target môže byť užitočnejší než ďalšia hračka do poličky. Najviac ho ocení človek, ktorý vie začať od jednoduchých cvikov a rešpektuje tempo svojho psa.",
-          "Pred Vianocami sa nám môžete ozvať s výberom veľkosti alebo otázkou k vyhotoveniu. Aktuálne možnosti ručnej výroby a doručenia potvrdíme pri dopyte individuálne."
+          "Ak poznáte niekoho, kto sa venuje tréningu, target môže byť užitočnejší než ďalšia hračka do poličky. Najviac ho ocení človek, ktorý vie začať od **jednoduchých cvikov** a rešpektuje tempo svojho psa.",
+          "Pred Vianocami sa nám môžete ozvať s výberom veľkosti alebo otázkou k vyhotoveniu. **Aktuálne možnosti **ručne**j výroby** a doručenia potvrdíme pri dopyte individuálne."
         ]
       }
     ],
@@ -305,21 +305,21 @@ export const blogArticles: BlogArticleData[] = [
       "heading": "Target nie je len pomôcka na trik",
       "paragraphs": [
         "Keď pes položí labku na označené miesto, začína rozumieť, kam má postaviť svoju labku. Práca s jasným cieľom môže trénerovi alebo fyzioterapeutovi pomáhať viesť pozornosť psa k polohe končatín. Nemusí pritom ísť o náročný trik ani o rýchly pohyb.",
-        "Pevný target je jednoduchá stabilná platforma s protišmykovým povrchom. Jeho úloha je odlišná od nestabilných balančných pomôcok: sám sa nemá kývať ani nútiť psa vyrovnávať pohyb podložky. Konkrétne využitie však závisi od zdravotného stavu, skúseností psa a cieľa tréningu."
+        "Pevný target je jednoduchá **stabilná platforma s protišmykovým povrchom**. Jeho úloha je odlišná od nestabilných balančných pomôcok: sám sa nemá kývať ani nútiť psa vyrovnávať pohyb podložky. Konkrétne využitie však závisi od zdravotného stavu, skúseností psa a cieľa tréningu."
       ]
     },
     {
       "heading": "Čo znamená propriocepcia a kontrola pohybu?",
       "paragraphs": [
-        "Propriocepcia sa zjednodušene opisuje ako vnímanie polohy jednotlivých častí tela. Pri vedenom cvičení sa môže pracovať napríklad s vedomým umiestňovaním labiek a kontrolovanými zmenami postoja. Nie každé takéto cvičenie je automaticky rehabilitáciou a samotná pomôcka nelieči chorobu.",
-        "Pri zdravom psovi môže byť práca s targetom súčasťou bežného tréningu. Pri psovi po úraze, operácii alebo s pohybovým problémom však výber cvikov, rozsah záťaže a tempo určuje veterinár alebo kvalifikovaný rehabilitačný odborník."
+        "**Propriocepcia** sa zjednodušene opisuje ako vnímanie polohy jednotlivých častí tela. Pri vedenom cvičení sa môže pracovať napríklad s vedomým umiestňovaním labiek a kontrolovanými zmenami postoja. Nie každé takéto cvičenie je automaticky rehabilitáciou a **samotná pomôcka nelieči chorobu**.",
+        "Pri zdravom psovi môže byť práca s targetom súčasťou bežného tréningu. Pri psovi po úraze, operácii alebo s pohybovým problémom však výber cvikov, rozsah záťaže a tempo určuje **veterinár alebo kvalifikovaný rehabilitačný odborník**."
       ]
     },
     {
       "heading": "Pevný target alebo balančná pomôcka?",
       "paragraphs": [
         "Pevný target ponúka konkrétne miesto, na ktoré pes kladie labku alebo labky. Dôležitá je stabilita, protišmykovosť a primeraná plocha, aby sa pes nemusel neprirodzene naťahovať.",
-        "Balančné pomôcky majú odlišný mechanický charakter a môžu pridávať náročnosť. Nie sú automaticky vhodnejšie. Pri rehabilitačnom programe musí ich použitie vychádzať z odborného plánu, nie z internetového zoznamu cvikov."
+        "Balančné pomôcky majú odlišný mechanický charakter a môžu pridávať náročnosť. Nie sú automaticky vhodnejšie. Pri rehabilitačnom programe musí ich použitie vychádzať z **odborného plánu**, nie z internetového zoznamu cvikov."
       ]
     },
     {
@@ -332,8 +332,8 @@ export const blogArticles: BlogArticleData[] = [
     {
       "heading": "Na čom záleží pri výbere platformy?",
       "paragraphs": [
-        "Pri pevnej podložke sledujte rozmer vzhľadom na psa, protišmykový povrch a stabilnú konštrukciu. V Chvostíkove vyrábame drevené targety v troch veľkostiach – veľký 40 × 20 cm, stredný 30 × 15 cm a malý 25 × 25 cm – s bežnou výškou približne 5 cm; ďalšie prevedenie riešime individuálne podľa možností výroby.",
-        "Veľkosť targetu nepredstavuje zdravotné odporúčanie. Vyberá sa podľa použitia konkrétneho psa; pre rehabilitáciu rozhoduje aj odporúčanie odborníka. Každý psík má iné potreby. Naše targety vyrábame ručne a po dohode vieme prispôsobiť ich výšku aj rozmery podľa vašich požiadaviek."
+        "Pri pevnej podložke sledujte rozmer vzhľadom na psa, protišmykový povrch a stabilnú konštrukciu. V Chvostíkove vyrábame drevené targety v troch veľkostiach – veľký **40 × 20 cm**, stredný **30 × 15 cm** a malý 25 × 25 cm – s bežnou výškou približne 5 cm; ďalšie prevedenie riešime individuálne podľa možností výroby.",
+        "Veľkosť targetu nepredstavuje zdravotné odporúčanie. Vyberá sa podľa použitia konkrétneho psa; pre rehabilitáciu rozhoduje aj odporúčanie odborníka. Každý psík má iné potreby. Naše targety vyrábame **ručne** a po dohode vieme prispôsobiť ich výšku aj rozmery podľa vašich požiadaviek."
       ]
     },
     {

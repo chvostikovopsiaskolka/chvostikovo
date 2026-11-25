@@ -3400,16 +3400,19 @@ if (!bellaris && brandPreviewCandidate) {
             if (width === 1440 && floatStyle.float !== 'right') throw new Error('Desktop blog cover must float beside the text');
             if (width === 390 && floatStyle.float !== 'none') throw new Error('Mobile blog cover must remain in reading flow');
             const relatedGrid = productPage.getByRole('heading', { name: 'Mohlo by vás zaujímať' }).locator('xpath=following-sibling::div[1]');
-            const relatedCards = relatedGrid.locator(':scope > a');
-            if (await relatedCards.count() !== 3) throw new Error('Three related blog cards expected');
+            const relatedCards = relatedGrid.locator(':scope > div > a');
+            if (await relatedCards.count() < 3) throw new Error('Related blog cards missing');
             const firstCard = await relatedCards.nth(0).boundingBox();
             const secondCard = await relatedCards.nth(1).boundingBox();
             const thirdCard = await relatedCards.nth(2).boundingBox();
             if (!firstCard || !secondCard || !thirdCard) throw new Error('Missing related blog card geometry');
-            if (width === 1440 && (Math.abs(firstCard.y - secondCard.y) > 3 || Math.abs(firstCard.y - thirdCard.y) > 3)) {
-              throw new Error('Desktop related articles must appear side by side');
-            }
-            if (width === 390 && secondCard.y <= firstCard.y + 10) throw new Error('Mobile blog cards must stack naturally');
+            if (width === 1440 && (Math.abs(firstCard.y - secondCard.y) > 3 || Math.abs(firstCard.y - thirdCard.y) > 3)) throw new Error('Desktop related cards must appear side by side');
+            if (width === 390 && (Math.abs(firstCard.y-secondCard.y)>3 || secondCard.x<=firstCard.x || !(await relatedGrid.evaluate(el=>el.scrollWidth>el.clientWidth && getComputedStyle(el).scrollSnapType.startsWith('x'))))) throw new Error('Mobile related cards must swipe horizontally');
+            if (await productPage.locator('[data-blog-article-header] a[href="/stojan-na-misky-pre-psa"], [data-blog-article-header] p').count()) throw new Error('Blog header must not contain product CTA or long intro');
+            if (!(await productPage.locator('article section.flow-root p strong').count())) throw new Error('Blog editorial emphasis missing');
+            const pair=productPage.locator('[data-blog-cta-pair]').first();
+            const [ctaOne,ctaTwo]=await Promise.all([pair.locator('a').nth(0).boundingBox(),pair.locator('a').nth(1).boundingBox()]);
+            if (!ctaOne||!ctaTwo||Math.abs(ctaOne.y-ctaTwo.y)>3||ctaTwo.x<=ctaOne.x) throw new Error('Article product CTA pair must be side by side');
             const guideCarousel = productPage.locator('[data-stand-gallery="autoplay"]');
             if (await guideCarousel.count() !== 1) throw new Error('Stand guide carousel missing above product CTA');
             if (await guideCarousel.locator('figure').count() !== 16) throw new Error('Stand guide must show sixteen distinct realizations');
