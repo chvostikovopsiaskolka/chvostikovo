@@ -19,7 +19,7 @@ const mainDock = dock.slice(dock.indexOf('    : [{ id: "top", label: "Domov"'), 
 assert(mainDock.includes('{ id: "top", label: "Domov"') && mainDock.includes('id: "o-nas"'), "Main dock retains Home and About");
 assert(mainDock.indexOf('id: "top"') < mainDock.indexOf('id: "cennik"') && mainDock.indexOf('id: "cennik"') < mainDock.indexOf('id: "podmienky"') && mainDock.indexOf('id: "podmienky"') < mainDock.indexOf('id: "produkty"'), "Main dock order");
 assert(dock.includes('{!homeDock && <button') && dock.includes('const eligible = !homeDock'), "Return arrow stays on other landing pages only");
-assert(dock.includes('{!marketing && (') && dock.includes('mobile-dock-item mobile-dock-apply') && read("src/routes/index.tsx").includes("<Header />"), "Homepage retains the dedicated application shortcut");
+assert(dock.includes('{!marketing && (') && dock.includes('mobile-dock-item mobile-dock-apply') && read("src/routes/index.tsx").includes("<Header desktopHome />"), "Homepage retains the dedicated application shortcut");
 assert(dock.includes('id === "produkty" && !marketing ? "/produkty"'), "Products dock item must navigate to the actual catalogue, not a stale anchor");
 
 for (const anchor of ["lead-first-visit", "puppy-first-visit", "dog-sitting-first-visit"]) assert(dock.includes('id: "' + anchor + '"'), "Missing landing first-visit shortcut: " + anchor);
@@ -398,3 +398,5 @@ assert(hero.includes("data-home-hero-desktop-phone") && hero.includes("PHONE_PRE
 
 assert(header.includes('<MobileDock desktopHome onApplicationOpen=') && english.includes('variant="en" desktopHome'),"SK/EN home reuses one desktop dock");
 assert(css.includes('body:has([data-desktop-home-dock])') && css.includes('data-desktop-floating="true"'),"Desktop dock reserves a real slot and floats only on home");
+
+assert(css.includes("grid-template-columns: repeat(6, minmax(0, 1fr))") && css.includes("grid-column: 3 / -1; grid-row: 1") && css.includes("grid-row: 2; min-width: 0"), "Desktop home dock has separate upper shortcuts and lower main links");

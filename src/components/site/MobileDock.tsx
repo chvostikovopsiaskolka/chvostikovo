@@ -43,7 +43,7 @@ export function MobileDock({ language = "sk", variant = "main", desktopHome = fa
       const slot = desktopDockRef.current;
       if (!slot || window.innerWidth < 1024) { setDesktopFloating(false); return; }
       const rect = slot.getBoundingClientRect();
-      setDesktopFloating(window.scrollY > 24 || rect.bottom > window.innerHeight - 8);
+      setDesktopFloating(window.scrollY > 24 && rect.bottom <= window.innerHeight - 8);
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
     const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : undefined;
