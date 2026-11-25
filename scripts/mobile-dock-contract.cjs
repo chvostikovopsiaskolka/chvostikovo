@@ -34,7 +34,7 @@ assert(css.includes('bottom: calc(100% + 9px)') && css.includes('border-radius: 
 for (const value of ["First visit", "About", "Apply", "Prices", "Rules"]) {
   assert(dock.includes(value), "Missing EN item " + value);
 }
-for (const anchor of ["produkty", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "en-benefits", "pricing"]) {
+for (const anchor of ["produkty", "starostlivost", "cennik", "lead-benefits", "lead-pricing", "puppy-benefits", "puppy-pricing", "dog-sitting-why", "dog-sitting-pricing", "aria-puppy-check", "pricing"]) {
   assert(dock.includes(anchor), "Missing valid anchor " + anchor);
 }
 assert(dock.includes("onApplicationOpen?.()") && dock.includes("onInterestOpen?.()"), "Dock must delegate to existing modal openers");
