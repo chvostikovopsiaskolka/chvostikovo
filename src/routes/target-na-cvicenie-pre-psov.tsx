@@ -262,7 +262,7 @@ function TargetPage() {
           <TargetGalleryLoop />
         </section>
 
-        <ProductRelatedArticles productPath="/target-na-cvicenie-pre-psov" />
+        <ProductRelatedArticles />
 
         <section className="bg-forest py-12 text-cream sm:py-16">
           <div className="mx-auto max-w-4xl px-4 text-center">

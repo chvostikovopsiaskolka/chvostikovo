@@ -214,7 +214,7 @@ export const blogArticles: BlogArticleData[] = [
     "slug": "target-na-cvicenie-psov-prve-cviky",
     "title": "Target na cvičenie psa: ako začať s prvými cvikmi?",
     "seoTitle": "Target na cvičenie psov – prvé cviky a výber veľkosti | Chvostíkovo",
-    "description": "Drevený target pre psov: prvý dotyk labkou, rehabilitačné a fyzioterapeutické cviky podľa odborníka aj nácvik zotrvania na mieste. Ako začať bezpečne?",
+    "description": "Ručne vyrábané targety na cvičenie psov: 40 × 20 × 5, 25 × 25 × 5 aj 30 × 15 × 5 cm. Kvalitné materiály, protišmykový povrch a rozmery na mieru.",
     "summary": "Od prvého dotyku labkou cez kontrolované rehabilitačné cviky až po poslušnosť a zotrvanie na mieste. Všetko s ohľadom na potreby psíka.",
     "publishedAt": "2026-11-04",
     "readingMinutes": 4,
@@ -255,8 +255,8 @@ export const blogArticles: BlogArticleData[] = [
       {
         "heading": "Ktorú veľkosť si vybrať?",
         "paragraphs": [
-          "Veľký obdĺžnikový target má rozmery približne 40 × 20 cm, menší štvorcový približne 25 × 25 cm. Výber závisí od veľkosti labiek a konkrétneho cviku, nie iba od hmotnosti psa. Protišmyková plocha pomáha s kontaktom labky, ale podložka musí stáť na stabilnej podlahe.",
-          "Štandardná výška je približne 5 cm; inú výšku riešime individuálne. Pokiaľ s targetom len začínate, zvyčajne je rozumnejší jednoduchý nízky cvik než vysoké zdvíhanie labiek."
+          "Veľký obdĺžnikový target má rozmery približne 40 × 20 cm, stredný 30 × 15 cm a malý štvorcový približne 25 × 25 cm. Výber závisí od veľkosti labiek a konkrétneho cviku, nie iba od hmotnosti psa. Protišmyková plocha pomáha s kontaktom labky, ale podložka musí stáť na stabilnej podlahe.",
+          "Štandardná výška je približne 5 cm; po dohode vieme prispôsobiť výšku aj rozmery podľa vašich požiadaviek. Pokiaľ s targetom len začínate, zvyčajne je rozumnejší jednoduchý nízky cvik než vysoké zdvíhanie labiek."
         ]
       },
       {
@@ -270,7 +270,7 @@ export const blogArticles: BlogArticleData[] = [
     "productPage": {
       "href": "/target-na-cvicenie-pre-psov",
       "label": "Pozrieť drevený target",
-      "description": "Porovnajte veľký a malý target, pozrite si skutočné fotografie a pošlite nezáväzný dopyt."
+      "description": "Porovnajte všetky tri veľkosti targetov, pozrite si skutočné fotografie a pošlite nezáväzný dopyt."
     },
     "sources": [
       {

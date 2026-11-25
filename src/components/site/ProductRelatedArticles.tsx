@@ -2,11 +2,8 @@ import { ArrowRight } from "lucide-react";
 import { BlogCard } from "./BlogCard";
 import { blogArticles, blogCards } from "@/content/blog";
 
-export function ProductRelatedArticles({ productPath }: { productPath: string }) {
-  const normalize = (path: string) => path.replace(/\/$/, "");
-  const slugs = new Set(blogArticles.filter(article =>
-    article.productPage && normalize(article.productPage.href) === normalize(productPath)
-  ).map(article => article.slug));
+export function ProductRelatedArticles() {
+  const slugs = new Set(blogArticles.filter(article => article.productPage).map(article => article.slug));
   const cards = blogCards.filter(card => slugs.has(card.id));
   if (!cards.length) return null;
 

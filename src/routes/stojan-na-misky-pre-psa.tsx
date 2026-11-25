@@ -338,7 +338,7 @@ function BowlStandPage() {
           <div className="mt-8"><StandGalleryLoop /></div>
         </section>
 
-        <ProductRelatedArticles productPath="/stojan-na-misky-pre-psa" />
+        <ProductRelatedArticles />
 
         <section data-stand-breeds className="py-14 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 text-center">

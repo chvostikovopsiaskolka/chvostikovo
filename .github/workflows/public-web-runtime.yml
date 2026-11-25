@@ -70,6 +70,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Select affected candidate routes
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          IMPACT_BASE: ${{ github.event.pull_request.base.sha }}
+          IMPACT_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/public-web-impact.cjs "$IMPACT_BASE" "$IMPACT_HEAD" >> "$GITHUB_ENV"
       - name: Install isolated browser test runtime
         run: |
           npm install --prefix /tmp/web-runtime --no-package-lock --no-audit --no-fund playwright@1.56.1
