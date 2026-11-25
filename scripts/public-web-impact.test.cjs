@@ -9,7 +9,7 @@ test('isolated LEAD CSS and its browser fixture select visual checks, not forms'
  assert.equal(formChecksRequired(['src/styles.css','scripts/check-web-runtime.cjs']),false);
 });
 test('global CSS, escaped selectors, unknown rules or missing source fail closed',()=>{
- for(const changed of [after.replace('.shared {display:flex;}','.shared {display:none;}'),css('.lead-brand-live .x, body{display:none;}'),css('@import "global.css";'),css('@font-face{font-family:bad;}'),css('.lead-brand-live-other{color:red;}')]){
+ for(const changed of [after.replace('.shared {display:flex;}','.shared {display:none;}'),css('.lead-brand-live .x, body{display:none;}'),css('@import "global.css";'),css('@font-face{font-family:bad;}'),css('.lead-brand-live-other{color:red;}'),css('.lead-brand-live + body{display:none;}'),css('[data-aria-chat-lead] ~ .outside{display:none;}')]){
   assert.equal(scopedLeadCss(before,changed),false);assert.equal(selectScope(['src/styles.css'],{before,after:changed}),'full');
  }
  assert.equal(selectScope(['src/styles.css']),'full');

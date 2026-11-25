@@ -35,7 +35,7 @@ function scopedLeadCss(before,after) {
     const headers=[...css.matchAll(/([^{}]+)\{/g)].map(m=>m[1].trim());
     return headers.length>0&&headers.every(h=>/^@(media|supports)\b/.test(h)||/^@keyframes aria-composing-(pulse|fade)$/.test(h)||
       /^(?:\d+(?:\.\d+)?%(?:\s*,\s*)?)+$/.test(h)||
-      splitSelectors(h).every(selector=>/^(?:\.lead-brand-live(?:[\s.:#\[]|$)|\[data-aria-chat-lead\](?:[\s.:#\[]|$))/.test(selector)));
+      splitSelectors(h).every(selector=>!/[+~]/.test(selector)&&/^(?:\.lead-brand-live(?:[\s.:#\[]|$)|\[data-aria-chat-lead\](?:[\s.:#\[]|$))/.test(selector)));
   });
 }
 function selectScope(files, css={}) {
