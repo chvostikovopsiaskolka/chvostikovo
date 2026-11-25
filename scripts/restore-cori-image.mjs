@@ -384,24 +384,11 @@ for (const item of listingReplacements) {
   }
 }
 
-const englishReviewsPath = path.join(root, "src", "routes", "en.dog-daycare-kosice.tsx");
-let englishReviewsSource = await readFile(englishReviewsPath, "utf8");
-const oldEnglishReviewsCopy =
-  '<p className="mx-auto mt-3 max-w-2xl text-sm text-forest/65">Selected reviews translated from Slovak.</p>';
-const newEnglishReviewsCopy = `<p className="mx-auto mt-3 flex max-w-2xl flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-forest/65">\n                <span className="tracking-[0.12em] text-coral" aria-hidden="true">★★★★★</span>\n                <span>5.0 · 5-star reviews from 41 customers on Google</span>\n              </p>`;
-
-if (englishReviewsSource.includes(oldEnglishReviewsCopy)) {
-  englishReviewsSource = englishReviewsSource.replace(oldEnglishReviewsCopy, newEnglishReviewsCopy);
-  await writeFile(englishReviewsPath, englishReviewsSource);
-} else if (
-  englishReviewsSource.includes("5.0 on Google") ||
-  englishReviewsSource.includes("5-star reviews")
-) {
-  console.log("English Google review summary is already current.");
-} else {
-  throw new Error("Expected English reviews summary was not found");
+// Both homepages use the shared Hero/Reviews; validate without rewriting JSX.
+const englishRouteSource = await readFile(path.join(root, "src", "routes", "en.dog-daycare-kosice.tsx"), "utf8");
+const heroSource = await readFile(path.join(root, "src", "components", "site", "Hero.tsx"), "utf8");
+const reviewsSource = await readFile(path.join(root, "src", "components", "site", "Reviews.tsx"), "utf8");
+if (!englishRouteSource.includes('<Hero language="en"') || !heroSource.includes('<Reviews variant="hero" language={language}') || !reviewsSource.includes("Over 100 happy dogs")) {
+  throw new Error("Shared English review summary is missing");
 }
-
-console.log(
-  "Product images restored; realizations extended; stand inquiry moved to modal; English Google review summary updated.",
-);
+console.log("Product images restored; shared bilingual reviews verified.");
